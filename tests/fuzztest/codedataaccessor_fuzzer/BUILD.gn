@@ -15,12 +15,13 @@ import("//build/ohos.gni")
 
 #####################hydra-fuzz###################
 import("//build/test.gni")
-module_output_path = "ark/runtime_core"
+module_output_path = "arkcompiler/runtime_core"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("CodeDataAccessorFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//ark/runtime_core/tests/fuzztest/codedataaccessor_fuzzer"
+  fuzz_config_file =
+      "//arkcompiler/runtime_core/tests/fuzztest/codedataaccessor_fuzzer"
   include_dirs = []
   cflags = [
     "-g",
@@ -29,7 +30,7 @@ ohos_fuzztest("CodeDataAccessorFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "codedataaccessor_fuzzer.cpp" ]
-  deps = [ "//ark/runtime_core/libpandafile:libarkfile_static" ]
+  deps = [ "//arkcompiler/runtime_core/libpandafile:libarkfile_static" ]
 }
 
 ###############################################################################

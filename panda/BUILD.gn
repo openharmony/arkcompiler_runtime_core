@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//ark/runtime_core/ark_config.gni")
+import("//arkcompiler/runtime_core/ark_config.gni")
 import("//build/ohos.gni")
 
 ohos_executable("ark_bin") {
@@ -32,8 +32,8 @@ ohos_executable("ark_bin") {
   ]
 
   if (!ark_standalone_build) {
-    deps += [ "//ark/js_runtime:libark_jsruntime" ]
-    configs += [ "//ark/js_runtime:ark_jsruntime_public_config" ]
+    deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
+    configs += [ "//arkcompiler/ets_runtime:ark_jsruntime_public_config" ]
   }
 
   output_name = "ark"

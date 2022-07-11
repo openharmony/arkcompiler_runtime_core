@@ -17,7 +17,7 @@ For more information, see: [ARK Runtime Subsystem](https://gitee.com/openharmony
 ## Directory Structure<a name="section161941989596"></a>
 
 ```
-/ark/runtime_core
+/arkcompiler/runtime_core
 ├── assembler             # Assembler that converts an ARK bytecode file (*.pa) in text format into a bytecode file (*.abc) in binary format. For details about the format, see docs/assembly_format.md and docs/file_format.md.
 ├── cmake                 # cmake script that contains the toolchain files and common cmake functions used to define the build and test targets.
 ├── CMakeLists.txt        # cmake main entry file.
@@ -141,12 +141,12 @@ Input file: ARK bytecodes in binary format
 Output file: ARK bytecodes in text format
 
 
-For more information, please see: [ARK Runtime Usage Guide](https://gitee.com/openharmony/ark_js_runtime/blob/master/docs/ARK-Runtime-Usage-Guide.md).
+For more information, please see: [ARK Runtime Usage Guide](https://gitee.com/openharmony/arkcompiler_ets_runtime/blob/master/docs/ARK-Runtime-Usage-Guide.md).
 
 ## Repositories Involved<a name="section1371113476307"></a>
 
-**[ark\_runtime\_core](https://gitee.com/openharmony/ark_runtime_core)**
+**[arkcompiler\_runtime\_core](https://gitee.com/openharmony/arkcompiler_runtime_core)**
 
-[ark\_js\_runtime](https://gitee.com/openharmony/ark_js_runtime)
+[arkcompiler\_ets\_runtime](https://gitee.com/openharmony/arkcompiler_ets_runtime)
 
-[ark\_ts2abc](https://gitee.com/openharmony/ark_ts2abc)
+[arkcompiler\_ets\_frontend](https://gitee.com/openharmony/arkcompiler_ets_frontend)
