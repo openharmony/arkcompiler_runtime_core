@@ -150,7 +150,7 @@ private:
 
     bool concurrent_marking_flag_ {false};  // flag indicates if we are currently in concurrent marking phase
     PandaUniquePtr<CardTable> card_table_ {nullptr};
-    std::function<void(const void *, const void *)> post_queue_func_ {nullptr};  //! funciton called in the post WRB
+    std::function<void(const void *, const void *)> post_queue_func_ {nullptr};  //! function called in the post WRB
     PandaVector<RefUpdateInfo> updated_refs_queue_ {};                           //! queue with updated refs info
     os::memory::Mutex queue_lock_;
 };

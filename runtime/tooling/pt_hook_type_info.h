@@ -22,10 +22,10 @@
 namespace panda::tooling {
 class PtHookTypeInfo {
 public:
-    explicit PtHookTypeInfo(bool defalutValue)
+    explicit PtHookTypeInfo(bool defaultValue)
     {
         for (auto &v : is_enabled_) {
-            v = defalutValue;
+            v = defaultValue;
         }
     }
 
