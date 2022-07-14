@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//ark/runtime_core/ark_config.gni")
+import("//arkcompiler/runtime_core/ark_config.gni")
 import("//build/ohos.gni")
 
 config("arkassembler_public_config") {

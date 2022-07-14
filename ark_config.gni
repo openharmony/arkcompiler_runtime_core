@@ -21,7 +21,7 @@ if (ark_standalone_build) {
   with_ecmascript = true
   use_pbqp = true
 } else {
-  ark_root = "//ark/runtime_core"
+  ark_root = "//arkcompiler/runtime_core"
   ark_third_party_root = "//third_party"
   with_ecmascript = false
   use_pbqp = false

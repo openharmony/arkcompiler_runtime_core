@@ -1,5 +1,5 @@
 {
-    "name": "@ohos/ark_runtime_core",
+    "name": "@ohos/arkcompiler_runtime_core",
     "version": "",
     "description": "方舟运行时的公共组件",
     "homePage": "https://gitee.com/openharmony",
@@ -8,7 +8,7 @@
     "scripts": {},
     "dirs": [],
     "segment": {
-        "destPath": "ark/runtime_core"
+        "destPath": "arkcompiler/runtime_core"
     },
     "component": {
         "name": "ark",
@@ -26,11 +26,11 @@
         },
         "build": {
             "sub_component": [
-                "//ark/runtime_core:ark_packages"
+                "//arkcompiler/runtime_core:ark_packages"
             ],
             "inner_kits": [],
             "test": [
-                "//ark/runtime_core/tests/fuzztest:fuzztest"
+                "//arkcompiler/runtime_core/tests/fuzztest:fuzztest"
             ]
         }
     }

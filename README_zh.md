@@ -17,7 +17,7 @@ Runtime Core组件是方舟运行时的公共组件，主要包括一些语言�
 ## 目录<a name="section161941989596"></a>
 
 ```
-/ark/runtime_core
+/arkcompiler/runtime_core
 ├── assembler             # 汇编器，将文本格式的方舟字节码文件(*.pa)转换为二进制格式的字节码文件(*.abc)，具体格式见：docs/assembly_format.md和docs/file_format.md
 ├── cmake                 # cmake脚本，包含工具链文件和用于定义构建和测试目标的常用cmake函数
 ├── CMakeLists.txt        # cmake主入口文件
@@ -141,12 +141,12 @@ ark_disasm [选项] 输入文件 输出文件
 输出文件：文本格式的方舟字节码
 
 
-更多使用说明请参考：[方舟运行时使用指南](https://gitee.com/openharmony/ark_js_runtime/blob/master/docs/ARK-Runtime-Usage-Guide-zh.md)
+更多使用说明请参考：[方舟运行时使用指南](https://gitee.com/openharmony/arkcompiler_ets_runtime/blob/master/docs/ARK-Runtime-Usage-Guide-zh.md)
 
 ## 相关仓<a name="section1371113476307"></a>
 
-**[ark\_runtime\_core](https://gitee.com/openharmony/ark_runtime_core)**
+**[arkcompiler\_runtime\_core](https://gitee.com/openharmony/arkcompiler_runtime_core)**
 
-[ark\_js\_runtime](https://gitee.com/openharmony/ark_js_runtime)
+[arkcompiler\_ets\_runtime](https://gitee.com/openharmony/arkcompiler_ets_runtime)
 
-[ark\_ts2abc](https://gitee.com/openharmony/ark_ts2abc)
+[arkcompiler\_ets\_frontend](https://gitee.com/openharmony/arkcompiler_ets_frontend)

@@ -11,13 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//ark/runtime_core/ark_config.gni")
+import("//arkcompiler/runtime_core/ark_config.gni")
 
 action("isa_combine") {
   script = "$ark_root/isa/combine.rb"
   inputs = [
     "$ark_root/isa/isa.yaml",
-    "$ark_root/../js_runtime/ecmascript/ecma_isa.yaml",
+    "$ark_root/../ets_runtime/ecmascript/ecma_isa.yaml",
   ]
   input0 = rebase_path(inputs[0], root_build_dir)
   input1 = rebase_path(inputs[1], root_build_dir)
