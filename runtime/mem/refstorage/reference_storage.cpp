@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,12 @@
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/mem/gc/gc_root.h"
+#include "runtime/include/stack_walker-inl.h"
+#include "libpandabase/utils/bit_utils.h"
 
 namespace panda::mem {
 
+// TODO(alovkov): remove check for null, create managed thread in test instead of std::thread
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_THREAD_STATE() \
     ASSERT(MTManagedThread::GetCurrent() == nullptr || !MTManagedThread::GetCurrent()->IsInNativeCode())
@@ -75,12 +78,13 @@ bool ReferenceStorage::IsValidRef(const Reference *ref)
 
     bool res = false;
     if (type == mem::Reference::ObjectType::STACK) {
-        res = true;
+        res = StackReferenceCheck(ref);
     } else if (type == mem::Reference::ObjectType::GLOBAL || type == mem::Reference::ObjectType::WEAK) {
         // global-storage should accept ref with type
         res = global_storage_->IsValidGlobalRef(ref);
     } else {
         auto ref_without_type = Reference::GetRefWithoutType(ref);
+        // TODO(alovkov): can be optimized with mmap + make additional checks that we really have ref in slots,
         // Issue 3645
         res = frame_allocator_->Contains(reinterpret_cast<void *>(ref_without_type));
     }
@@ -100,7 +104,7 @@ Reference *ReferenceStorage::NewRef(const ObjectHeader *object, Reference::Objec
     if (object == nullptr) {
         return nullptr;
     }
-
+    ValidateObject(nullptr, object);
     Reference *ref = nullptr;
     if (type == Reference::ObjectType::GLOBAL || type == Reference::ObjectType::WEAK) {
         ref = static_cast<Reference *>(global_storage_->Add(object, type));
@@ -112,9 +116,10 @@ Reference *ReferenceStorage::NewRef(const ObjectHeader *object, Reference::Objec
         if (last_block->IsFull()) {
             cur_block = CreateBlock();
             if (cur_block == nullptr) {
-                LOG(ERROR, RUNTIME) << "Can't allocate local ref for object: " << object
-                                    << ", cls: " << object->ClassAddr<panda::Class>()->GetName()
-                                    << " with type: " << static_cast<int>(type);
+                // TODO(alovkov): make free-list of holes in all blocks. O(n) operations, but it will be done only once
+                LOG(ERROR, GC) << "Can't allocate local ref for object: " << object
+                               << ", cls: " << object->ClassAddr<panda::Class>()->GetName()
+                               << " with type: " << static_cast<int>(type);
                 DumpLocalRef();
                 return nullptr;
             }
@@ -125,14 +130,12 @@ Reference *ReferenceStorage::NewRef(const ObjectHeader *object, Reference::Objec
         }
         ref = cur_block->AddRef(object, type);
     }
-    LOG(DEBUG, RUNTIME) << "Add reference to object: " << std::hex << object << " type: " << static_cast<int>(type)
-                        << " ref: " << ref;
+    LOG(DEBUG, GC) << "Add reference to object: " << object << " type: " << static_cast<int>(type) << " ref: " << ref;
     return ref;
 }
 
 void ReferenceStorage::RemoveRef(const Reference *ref)
 {
-    ASSERT_THREAD_STATE();
     if (ref == nullptr) {
         return;
     }
@@ -140,24 +143,28 @@ void ReferenceStorage::RemoveRef(const Reference *ref)
     if (ref_check_validate_) {
         if (UNLIKELY(!IsValidRef(ref))) {
             // Undefined behavior, we just print warning here.
-            LOG(WARNING, RUNTIME) << "Try to remove not existed ref: " << std::hex << ref;
+            LOG(WARNING, GC) << "Try to remove not existed ref: " << ref;
             return;
         }
     }
     Reference::ObjectType object_type = ref->GetType();
     if (object_type == Reference::ObjectType::GLOBAL || object_type == Reference::ObjectType::WEAK) {
+        // When the global or weak global ref is created by another thread, we can't suppose current thread is in
+        // MANAGED_CODE state.
+        LOG(DEBUG, GC) << "Remove global reference: " << ref << " obj: " << global_storage_->Get(ref);
         global_storage_->Remove(ref);
     } else if (object_type == Reference::ObjectType::LOCAL) {
+        ASSERT_THREAD_STATE();
         auto addr = ToUintPtr(ref);
         auto block_addr = (addr >> BLOCK_ALIGNMENT) << BLOCK_ALIGNMENT;
         auto *block = reinterpret_cast<RefBlock *>(block_addr);
 
+        LOG(DEBUG, GC) << "Remove local reference: " << ref << " obj: " << FindLocalObject(ref);
         block->Remove(ref);
-        LOG(DEBUG, RUNTIME) << "Remove local reference: " << std::hex << ref;
     } else if (object_type == Reference::ObjectType::STACK) {
-        LOG(ERROR, RUNTIME) << "Cannot remove stack type: " << ref;
+        LOG(ERROR, GC) << "Cannot remove stack type: " << ref;
     } else {
-        LOG(FATAL, RUNTIME) << "Unknown reference type: " << ref;
+        LOG(FATAL, GC) << "Unknown reference type: " << ref;
     }
 }
 
@@ -170,7 +177,7 @@ ObjectHeader *ReferenceStorage::GetObject(const Reference *ref)
     if (ref_check_validate_) {
         if (UNLIKELY(!IsValidRef(ref))) {
             // Undefined behavior, we just print warning here.
-            LOG(WARNING, RUNTIME) << "Try to GetObject from a not existed ref: " << std::hex << ref;
+            LOG(WARNING, GC) << "Try to GetObject from a not existed ref: " << ref;
             return nullptr;
         }
     }
@@ -225,14 +232,14 @@ bool ReferenceStorage::PushLocalFrame(uint32_t capacity)
     size_t need_blocks = (capacity + RefBlock::REFS_IN_BLOCK - 1) / RefBlock::REFS_IN_BLOCK;
     size_t blocks_free = MAX_STORAGE_BLOCK_COUNT - blocks_count_;
     if (need_blocks > blocks_free) {
-        LOG(ERROR, RUNTIME) << "Free size of local reference storage is less than capacity: " << capacity
-                            << " blocks_count_: " << blocks_count_ << " need_blocks: " << need_blocks
-                            << " blocks_free: " << blocks_free;
+        LOG(ERROR, GC) << "Free size of local reference storage is less than capacity: " << capacity
+                       << " blocks_count_: " << blocks_count_ << " need_blocks: " << need_blocks
+                       << " blocks_free: " << blocks_free;
         return false;
     }
     auto *new_block = CreateBlock();
     if (new_block == nullptr) {
-        LOG(FATAL, RUNTIME) << "Can't allocate new frame";
+        LOG(FATAL, GC) << "Can't allocate new frame";
         UNREACHABLE();
     }
     new_block->Reset();
@@ -240,7 +247,7 @@ bool ReferenceStorage::PushLocalFrame(uint32_t capacity)
     return true;
 }
 
-Reference *ReferenceStorage::PopLocalFrame(Reference *result)
+Reference *ReferenceStorage::PopLocalFrame(const Reference *result)
 {
     ASSERT_THREAD_STATE();
 
@@ -256,6 +263,7 @@ Reference *ReferenceStorage::PopLocalFrame(Reference *result)
         cached_block_ = nullptr;
     }
 
+    // We should add a log which refs are deleted under debug
     auto *last_block = local_storage_->back();
     auto is_first = local_storage_->size() == 1;
     while (last_block != nullptr) {
@@ -275,16 +283,14 @@ Reference *ReferenceStorage::PopLocalFrame(Reference *result)
         last_block = prev;
     }
 
-    Reference *res = nullptr;
     if (obj == nullptr) {
         local_storage_->pop_back();
-        res = nullptr;
-    } else {
-        Reference::ObjectType type = result->GetType();
-        local_storage_->pop_back();
-        res = NewRef(obj, type);
+        return nullptr;
     }
-    return res;
+
+    Reference::ObjectType type = result->GetType();
+    local_storage_->pop_back();
+    return NewRef(obj, type);
 }
 
 bool ReferenceStorage::EnsureLocalCapacity(size_t capacity)
@@ -292,7 +298,7 @@ bool ReferenceStorage::EnsureLocalCapacity(size_t capacity)
     size_t need_blocks = (capacity + RefBlock::REFS_IN_BLOCK - 1) / RefBlock::REFS_IN_BLOCK;
     size_t blocks_freed = MAX_STORAGE_BLOCK_COUNT - blocks_count_;
     if (need_blocks > blocks_freed) {
-        LOG(ERROR, RUNTIME) << "Can't store size: " << capacity << " in local references";
+        LOG(ERROR, GC) << "Can't store size: " << capacity << " in local references";
         return false;
     }
     return true;
@@ -351,9 +357,9 @@ void ReferenceStorage::DumpLocalRefClasses()
     size_t size = std::min(MAX_DUMP_LOCAL_NUMS, info_vec.size());
     std::partial_sort(info_vec.begin(), info_vec.begin() + size, info_vec.end(),
                       [](const InfoPair &lhs, const InfoPair &rhs) { return lhs.second < rhs.second; });
-    LOG(ERROR, RUNTIME) << "The top " << size << " classes of local references are:";
+    LOG(ERROR, GC) << "The top " << size << " classes of local references are:";
     for (size_t i = 0; i < size; i++) {
-        LOG(ERROR, RUNTIME) << "\t" << info_vec[i].first << ": " << info_vec[i].second;
+        LOG(ERROR, GC) << "\t" << info_vec[i].first << ": " << info_vec[i].second;
     }
 }
 
@@ -362,9 +368,9 @@ void ReferenceStorage::DumpLocalRef()
     if (DfxController::IsInitialized() && DfxController::GetOptionValue(DfxOptionHandler::REFERENCE_DUMP) != 1) {
         return;
     }
-    LOG(ERROR, RUNTIME) << "--- local reference storage dump ---";
-    LOG(ERROR, RUNTIME) << "Local reference storage addr: " << &local_storage_;
-    LOG(ERROR, RUNTIME) << "Dump the last several local references info(max " << MAX_DUMP_LOCAL_NUMS << "):";
+    LOG(ERROR, GC) << "--- local reference storage dump ---";
+    LOG(ERROR, GC) << "Local reference storage addr: " << &local_storage_;
+    LOG(ERROR, GC) << "Dump the last several local references info(max " << MAX_DUMP_LOCAL_NUMS << "):";
     size_t n_dump = 0;
 
     for (auto it = local_storage_->rbegin(); it != local_storage_->rend(); ++it) {
@@ -373,13 +379,12 @@ void ReferenceStorage::DumpLocalRef()
         for (const auto &ref : refs) {
             ObjectHeader *res = FindLocalObject(ref);
             PandaString cls_name = ConvertToString(res->ClassAddr<panda::Class>()->GetName());
-            LOG(ERROR, RUNTIME) << "\t local reference: " << std::hex << ref << ", object: " << res
-                                << ", cls: " << cls_name;
+            LOG(ERROR, GC) << "\t local reference: " << ref << ", object: " << res << ", cls: " << cls_name;
             n_dump++;
             if (n_dump == MAX_DUMP_LOCAL_NUMS) {
                 DumpLocalRefClasses();
-                LOG(ERROR, RUNTIME) << "---";
-                LOG(ERROR, RUNTIME) << "JNI ERROR (app bug): local reference storage overflow ";
+                LOG(ERROR, GC) << "---";
+                LOG(ERROR, GC) << "Storage dumped maximum number of references";
                 return;
             }
         }
@@ -392,15 +397,14 @@ RefBlock *ReferenceStorage::CreateBlock()
         return nullptr;
     }
 
-    RefBlock *new_block = nullptr;
     if (cached_block_ != nullptr) {
-        new_block = cached_block_;
+        RefBlock *new_block = cached_block_;
         cached_block_ = nullptr;
-    } else {
-        new_block = static_cast<RefBlock *>(frame_allocator_->Alloc(BLOCK_SIZE));
-        blocks_count_++;
+        return new_block;
     }
-    return new_block;
+
+    blocks_count_++;
+    return static_cast<RefBlock *>(frame_allocator_->Alloc(BLOCK_SIZE));
 }
 
 void ReferenceStorage::RemoveBlock(RefBlock *block)
@@ -441,4 +445,40 @@ void ReferenceStorage::SetRefCheckValidate(bool ref_check_validate)
 {
     ref_check_validate_ = ref_check_validate;
 }
+
+bool ReferenceStorage::StackReferenceCheck(const Reference *stack_ref_input)
+{
+    ASSERT(stack_ref_input->IsStack());
+    ManagedThread *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+
+    for (auto pframe = StackWalker::Create(thread); pframe.HasFrame(); pframe.NextFrame()) {
+        if (!pframe.IsCFrame()) {
+            return false;
+        }
+
+        auto cframe = pframe.GetCFrame();
+        if (!cframe.IsNative()) {
+            return false;
+        }
+
+        bool res = false;
+        pframe.IterateObjectsWithInfo([&cframe, &stack_ref_input, &res](auto &reg_info, [[maybe_unused]] auto &vreg) {
+            auto slot_type_ref = cframe.GetValuePtrFromSlot(reg_info.GetValue());
+            auto object_header = bit_cast<ObjectHeader **, const panda::CFrame::SlotType *>(slot_type_ref);
+            auto stack_ref = NewStackRef(object_header);
+            if (stack_ref == stack_ref_input) {
+                res = true;
+                return false;
+            }
+            return true;
+        });
+
+        if (res) {
+            return true;
+        }
+    }
+    return false;
+}
+
 }  // namespace panda::mem

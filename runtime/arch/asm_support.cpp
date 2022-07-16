@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,28 @@
 
 #include "runtime/arch/asm_support.h"
 #include "libpandabase/utils/arch.h"
-#include "runtime/include/method.h"
-#include "runtime/include/thread.h"
 #include "runtime/include/coretypes/array.h"
+#include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/include/coretypes/string.h"
+#include "runtime/include/method.h"
+#include "runtime/include/mtmanaged_thread.h"
+#include "runtime/include/thread.h"
+#include "plugins_defines.h"
 
 namespace panda {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFINE_VALUE(name, value) static_assert((name) == (value));
+#define DEFINE_VALUE(name, value) static_assert(name == value);
 #include "asm_defines/asm_defines.def"
 
 // Frame doesn't have aligned storage, so check its offset manually
 #ifdef PANDA_TARGET_64
 // NOLINTNEXTLINE(readability-magic-numbers)
-static_assert(FRAME_METHOD_OFFSET == 8U);
+static_assert(FRAME_METHOD_OFFSET == 8);
 // NOLINTNEXTLINE(readability-magic-numbers)
-static_assert(FRAME_PREV_FRAME_OFFSET == 0U);
+static_assert(FRAME_PREV_FRAME_OFFSET == 0);
 // NOLINTNEXTLINE(readability-magic-numbers)
-static_assert(FRAME_SLOT_OFFSET == 80U);
-// NOLINTNEXTLINE(readability-magic-numbers)
-static_assert(FRAME_TAG_OFFSET == 88U);
+static_assert(FRAME_SLOT_OFFSET == 80);
 #endif
 
 extern "C" ManagedThread *GetCurrentManagedThread()

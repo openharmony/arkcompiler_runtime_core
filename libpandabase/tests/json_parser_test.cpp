@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,8 @@ TEST(JsonParser, ParsePrimitive)
 {
     auto str = R"(
     {
-        "key_0" : "key_0.value"
+        "key_0" : "key_0.value",
+        "key_1" : "\"key_1\"\\.\u0020value\n"
     }
     )";
 
@@ -54,6 +55,9 @@ TEST(JsonParser, ParsePrimitive)
 
     ASSERT_NE(obj.GetValue<JsonObject::StringT>("key_0"), nullptr);
     ASSERT_EQ(*obj.GetValue<JsonObject::StringT>("key_0"), "key_0.value");
+
+    ASSERT_NE(obj.GetValue<JsonObject::StringT>("key_1"), nullptr);
+    ASSERT_EQ(*obj.GetValue<JsonObject::StringT>("key_1"), "\"key_1\"\\. value\n");
 }
 
 TEST(JsonParser, Arrays)
@@ -65,7 +69,8 @@ TEST(JsonParser, Arrays)
             "elem0",
             [ "elem1.0", "elem1.1" ],
             "elem2"
-        ]
+        ],
+        "key_1": []
     }
     )";
 
@@ -92,6 +97,12 @@ TEST(JsonParser, Arrays)
     // Check [2]:
     ASSERT_NE(main_array[2].Get<JsonObject::StringT>(), nullptr);
     ASSERT_EQ(*main_array[2].Get<JsonObject::StringT>(), "elem2");
+
+    ASSERT_NE(obj.GetValue<JsonObject::ArrayT>("key_1"), nullptr);
+    auto &empty_array = *obj.GetValue<JsonObject::ArrayT>("key_1");
+
+    // Check [3]:
+    ASSERT_EQ(empty_array.size(), 0);
 }
 
 TEST(JsonParser, NestedObject)
@@ -106,7 +117,8 @@ TEST(JsonParser, NestedObject)
             "repeated_key_1" : "repeated_key_1.value1",
             "repeated_key_2" : "repeated_key_2.value0"
         },
-        "repeated_key_2" : "repeated_key_2.value1"
+        "repeated_key_2" : "repeated_key_2.value1",
+        "key_2" : {}
     }
     )";
 
@@ -142,6 +154,13 @@ TEST(JsonParser, NestedObject)
     // Check repeated_key_2 (in main obj):
     ASSERT_NE(obj.GetValue<JsonObject::StringT>("repeated_key_2"), nullptr);
     ASSERT_EQ(*obj.GetValue<JsonObject::StringT>("repeated_key_2"), "repeated_key_2.value1");
+
+    // Check empty inner object (key_2):
+    ASSERT_NE(obj.GetValue<JsonObject::JsonObjPointer>("key_2"), nullptr);
+    const auto *empty_obj = obj.GetValue<JsonObject::JsonObjPointer>("key_2")->get();
+    ASSERT_NE(empty_obj, nullptr);
+    ASSERT_TRUE(empty_obj->IsValid());
+    ASSERT_EQ(empty_obj->GetSize(), 0);
 }
 
 TEST(JsonParser, Numbers)
@@ -210,5 +229,4 @@ TEST(JsonParser, InvalidJson)
     JsonObject obj(repeated_keys);
     ASSERT_FALSE(obj.IsValid());
 }
-
 }  // namespace panda::json_parser::test

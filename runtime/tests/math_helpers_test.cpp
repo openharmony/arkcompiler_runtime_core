@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +51,9 @@ void TestBitShl()
 
     {
         T v = 1;
-        size_t shift = std::numeric_limits<unsigned_type>::digits + 2U;
+        size_t shift = std::numeric_limits<unsigned_type>::digits + 2;
         T res = bit_shl<T>()(v, shift);
-        EXPECT_EQ(res, v << 2U) << ss.str();
+        EXPECT_EQ(res, v << 2) << ss.str();
     }
 }
 
@@ -89,9 +89,9 @@ void TestBitShr()
 
     {
         T v = 20;
-        T shift = std::numeric_limits<unsigned_type>::digits + 2U;
+        T shift = std::numeric_limits<unsigned_type>::digits + 2;
         T res = bit_shr<T>()(v, shift);
-        EXPECT_EQ(res, v >> 2U) << ss.str();
+        EXPECT_EQ(res, v >> 2) << ss.str();
     }
 }
 
@@ -127,9 +127,9 @@ void TestBitAshr()
 
     {
         T v = 20;
-        T shift = std::numeric_limits<unsigned_type>::digits + 2U;
+        T shift = std::numeric_limits<unsigned_type>::digits + 2;
         T res = bit_ashr<T>()(v, shift);
-        EXPECT_EQ(res, v >> 2U) << ss.str();
+        EXPECT_EQ(res, v >> 2) << ss.str();
     }
 }
 

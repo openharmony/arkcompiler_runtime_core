@@ -25,7 +25,7 @@
     return.void
 }
 
-.function u1 main() {
+.function i32 main() {
     lda.type R1
     ldstatic R2.s_f
     movi v0, 0

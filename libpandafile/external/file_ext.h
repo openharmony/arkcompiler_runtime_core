@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_LIBPANDAFILE_EXTERNAL_FILE_EXT_H_
-#define PANDA_LIBPANDAFILE_EXTERNAL_FILE_EXT_H_
+//
+#ifndef LIBPANDAFILE_EXTERNAL_FILE_EXT_H
+#define LIBPANDAFILE_EXTERNAL_FILE_EXT_H
 
 #include <string>
 #include <vector>
@@ -39,6 +39,8 @@ bool OpenPandafileFromFdExt([[maybe_unused]] int fd, [[maybe_unused]] uint64_t o
 
 bool QueryMethodSymByOffsetExt(struct PandaFileExt *pf, uint64_t offset, struct MethodSymInfoExt *method_info);
 
+bool QueryMethodSymAndLineByOffsetExt(struct PandaFileExt *pf, uint64_t offset, struct MethodSymInfoExt *method_info);
+
 using MethodSymInfoExtCallBack = void(struct MethodSymInfoExt *, void *);
 
 void QueryAllMethodSymsExt(PandaFileExt *pf, MethodSymInfoExtCallBack callback, void *user_data);
@@ -47,4 +49,4 @@ void QueryAllMethodSymsExt(PandaFileExt *pf, MethodSymInfoExtCallBack callback, 
 }  // extern "C"
 #endif
 
-#endif  // PANDA_LIBPANDAFILE_EXTERNAL_FILE_EXT_H_
+#endif  // LIBPANDAFILE_EXTERNAL_FILE_EXT_H

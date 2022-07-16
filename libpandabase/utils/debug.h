@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_DEBUG_H_
-#define PANDA_LIBPANDABASE_UTILS_DEBUG_H_
+#ifndef PANDA_DEBUG_H
+#define PANDA_DEBUG_H
 
 namespace panda::debug {
 
@@ -28,4 +28,4 @@ void PrintStackTrace(int skip = 1);
 
 }  // namespace panda::debug
 
-#endif  // PANDA_LIBPANDABASE_UTILS_DEBUG_H_
+#endif  // PANDA_DEBUG_H

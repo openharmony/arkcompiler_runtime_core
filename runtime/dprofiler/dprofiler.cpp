@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@
 #include "libpandabase/serializer/serializer.h"
 #include "libpandabase/utils/logger.h"
 #include "runtime/include/class.h"
-#include "runtime/include/class_linker.h"
 #include "runtime/include/method.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"

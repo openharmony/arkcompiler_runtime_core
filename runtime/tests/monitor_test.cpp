@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,7 @@
 #include <ctime>
 
 #include "gtest/gtest.h"
-#include "runtime/include/class_linker.h"
 #include "runtime/include/runtime.h"
-#include "runtime/include/thread.h"
-#include "runtime/include/thread_scopes.h"
-#include "runtime/include/panda_vm.h"
-#include "runtime/mem/vm_handle.h"
-#include "runtime/mark_word.h"
-#include "runtime/monitor.h"
 #include "runtime/handle_base-inl.h"
 
 namespace panda::concurrency::test {
@@ -32,6 +25,7 @@ class MonitorTest : public testing::Test {
 public:
     MonitorTest()
     {
+        // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
 #ifdef PANDA_NIGHTLY_TEST_ON
         seed_ = std::time(NULL);
 #else
@@ -50,11 +44,12 @@ public:
     {
         thread_->ManagedCodeEnd();
         Runtime::Destroy();
+        // Logger::Destroy();
     }
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
-    unsigned seed_ {0};
+    panda::MTManagedThread *thread_;
+    unsigned seed_;
     RuntimeOptions options_;
 };
 
@@ -203,13 +198,13 @@ TEST_F(MonitorTest, MonitorGenerateHashAndEnterTest)
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
     Class *cls = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::OBJECT);
     auto header = ObjectHeader::Create(cls);
-    auto hash = header->GetHashCode();
+    auto hash = header->GetHashCode<PandaAssemblyLanguageConfig::MT_MODE>();
     Monitor::MonitorEnter(header);
     ASSERT_TRUE(header->AtomicGetMark().GetState() == MarkWord::STATE_HEAVY_LOCKED);
     Monitor::MonitorExit(header);
     // We unlock the monitor, but keep the pointer to it
     ASSERT_TRUE(header->AtomicGetMark().GetState() == MarkWord::STATE_HEAVY_LOCKED);
-    ASSERT_TRUE(header->GetHashCode() == hash);
+    ASSERT_TRUE(header->GetHashCode<PandaAssemblyLanguageConfig::MT_MODE>() == hash);
     ASSERT_FALSE(Monitor::HoldsLock(header));
 }
 
@@ -220,12 +215,12 @@ TEST_F(MonitorTest, MonitorEnterAndGenerateHashTest)
     auto header = ObjectHeader::Create(cls);
     Monitor::MonitorEnter(header);
     ASSERT_TRUE(header->AtomicGetMark().GetState() == MarkWord::STATE_LIGHT_LOCKED);
-    auto hash = header->GetHashCode();
+    auto hash = header->GetHashCode<PandaAssemblyLanguageConfig::MT_MODE>();
     ASSERT_TRUE(header->AtomicGetMark().GetState() == MarkWord::STATE_HEAVY_LOCKED);
-    ASSERT_TRUE(header->GetHashCode() == hash);
+    ASSERT_TRUE(header->GetHashCode<PandaAssemblyLanguageConfig::MT_MODE>() == hash);
     Monitor::MonitorExit(header);
     ASSERT_TRUE(header->AtomicGetMark().GetState() == MarkWord::STATE_HEAVY_LOCKED);
-    ASSERT_TRUE(header->GetHashCode() == hash);
+    ASSERT_TRUE(header->GetHashCode<PandaAssemblyLanguageConfig::MT_MODE>() == hash);
     ASSERT_FALSE(Monitor::HoldsLock(header));
 }
 

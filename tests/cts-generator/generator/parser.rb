@@ -20,6 +20,8 @@ module Generator
       @output = output
       @src_dir = src_dir
 
+      # TODO: add validation of input YAML to avoid additional checking in code
+
       LOG.info 'Generator created'
       LOG.debug "@data first 3 keys are: '#{data.keys.first(3)}'"
 

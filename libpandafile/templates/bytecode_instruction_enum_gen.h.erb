@@ -31,3 +31,9 @@ enum Flags : uint32_t {
     <%= f.tag.upcase %> = <%= format("0x%x", 1 << i) %>,
 % end
 };
+
+enum Exceptions : uint32_t {
+% Panda::exceptions.each_with_index do |f, i|
+    <%= f.tag.upcase %> = <%= format("0x%x", 1 << i) %>,
+% end
+};

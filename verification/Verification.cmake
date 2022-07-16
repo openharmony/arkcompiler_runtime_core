@@ -18,9 +18,8 @@ include(${VERIFICATION_SOURCES_DIR}/value/Value.cmake)
 include(${VERIFICATION_SOURCES_DIR}/cflow/Cflow.cmake)
 include(${VERIFICATION_SOURCES_DIR}/util/Util.cmake)
 include(${VERIFICATION_SOURCES_DIR}/absint/AbsInt.cmake)
-include(${VERIFICATION_SOURCES_DIR}/debug/Debug.cmake)
-include(${VERIFICATION_SOURCES_DIR}/job_queue/JobQueue.cmake)
-include(${VERIFICATION_SOURCES_DIR}/thread/VerifierThread.cmake)
+include(${VERIFICATION_SOURCES_DIR}/config/Config.cmake)
+include(${VERIFICATION_SOURCES_DIR}/jobs/Jobs.cmake)
 include(${VERIFICATION_SOURCES_DIR}/cache/Cache.cmake)
 
 set(VERIFIER_SOURCES
@@ -30,9 +29,8 @@ set(VERIFIER_SOURCES
     ${CFLOW_SOURCES}
     ${UTIL_SOURCES}
     ${ABSINT_SOURCES}
-    ${DEBUG_SOURCES}
-    ${JOB_QUEUE_SOURCES}
-    ${VERIFIER_THREAD_SOURCES}
+    ${CONFIG_SOURCES}
+    ${JOBS_SOURCES}
     ${VERIFIER_CACHE_SOURCES}
 )
 
@@ -42,16 +40,15 @@ set(VERIFIER_TESTS_SOURCES
     ${CFLOW_TESTS_SOURCES}
     ${UTIL_TESTS_SOURCES}
     ${ABSINT_TESTS_SOURCES}
-    ${JOB_QUEUE_TESTS_SOURCES}
+    ${JOBS_TESTS_SOURCES}
 )
 
 set(VERIFIER_RAPIDCHECK_TESTS_SOURCES
     ${UTIL_RAPIDCHECK_TESTS_SOURCES}
 )
 
-set(VERIFIER_GEN_INCLUDE_DIR ${PANDA_BINARY_ROOT}/verification/gen/include)
-
-set(VERIFIER_INCLUDE_DIR ${VERIFICATION_SOURCES_DIR})
+set(VERIFIER_INCLUDE_DIR ${VERIFICATION_SOURCES_DIR}
+                         ${PANDA_BINARY_ROOT}/verification/gen/include)
 
 function(add_verification_includes)
     set(prefix ARG)
@@ -68,7 +65,7 @@ function(add_verification_includes)
         message(FATAL_ERROR "Mandatory TARGET argument is not defined.")
     endif()
 
-    add_dependencies(${ARG_TARGET} isa_gen_pandaverification_gen)
+    add_dependencies(${ARG_TARGET} isa_gen_pandaverification)
 
     target_include_directories(${ARG_TARGET}
         PUBLIC ${VERIFIER_INCLUDE_DIR}

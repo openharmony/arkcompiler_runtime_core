@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_ABSINT_PANDA_TYPES_H_
-#define PANDA_VERIFICATION_ABSINT_PANDA_TYPES_H_
+#ifndef _PANDA_VERIFIER_PANDA_TYPES_HPP
+#define _PANDA_VERIFIER_PANDA_TYPES_HPP
 
 #include "runtime/include/method.h"
 #include "runtime/include/class.h"
@@ -22,25 +22,28 @@
 #include "verification/type/type_systems.h"
 #include "verification/type/type_system.h"
 #include "verification/type/type_sort.h"
+#include "verification/type/type_tags.h"
 #include "verification/type/type_type_inl.h"
 
 #include "verification/util/synchronized.h"
 #include "verification/util/callable.h"
-#include "verification/job_queue/cache.h"
+#include "verification/jobs/cache.h"
 
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
 
 #include "libpandabase/os/mutex.h"
+#include "plugins.h"
 
 namespace panda::verifier {
 class PandaTypes {
 public:
-    using Id = CacheOfRuntimeThings::Id;
+    // TODO(vdyadov): change Id to hash from filename_id and entity id
+    using Id = LibCache::Id;
     using TypeId = panda_file::Type::TypeId;
 
-    using CachedMethod = CacheOfRuntimeThings::CachedMethod;
-    using CachedClass = CacheOfRuntimeThings::CachedClass;
+    // TODO(vdyadov): solve problem with cycles
+    //       (todo: mutual recursive types)
 
     const PandaString &ClassNameOfId(Id id)
     {
@@ -66,10 +69,8 @@ public:
 
     Type TypeOf(const TypeParamIdx &idx) const
     {
-        return {kind_, idx};
+        return {TypeSystemKind::JAVA, threadnum_, idx};
     }
-
-    void Init();
 
     void CloseAccumulatedSubtypingRelation()
     {
@@ -78,68 +79,22 @@ public:
 
     SortIdx GetSort(const PandaString &name) const
     {
-        return TypeSystems::GetSort(kind_, name);
+        return TypeSystems::GetSort(TypeSystemKind::JAVA, threadnum_, name);
     }
 
     TypeSystemKind GetKind() const
     {
-        return kind_;
+        return TypeSystemKind::JAVA;
     }
 
-    explicit PandaTypes(size_t N)
-        : kind_ {static_cast<TypeSystemKind>(static_cast<size_t>(TypeSystemKind::JAVA_0) + N)},
-          TypeSystem_ {TypeSystems::Get(kind_)},
-          Array_ {TypeSystem_.Parametric(GetSort("Array"))},
-          Method_ {TypeSystem_.Parametric(GetSort("Method"))},
-          NormalizedMethod_ {TypeSystem_.Parametric(GetSort("NormalizedMethod"))},
-          Normalize_ {TypeSystem_.Parametric(GetSort("Normalize"))},
-          Abstract_ {TypeSystem_.Parametric(GetSort("Abstract"))},
-          Interface_ {TypeSystem_.Parametric(GetSort("Interface"))},
-          TypeClass_ {TypeSystem_.Parametric(GetSort("TypeClass"))},
-
-          U1_ {TypeSystem_.Parametric(GetSort("u1"))()},
-          I8_ {TypeSystem_.Parametric(GetSort("i8"))()},
-          U8_ {TypeSystem_.Parametric(GetSort("u8"))()},
-          I16_ {TypeSystem_.Parametric(GetSort("i16"))()},
-          U16_ {TypeSystem_.Parametric(GetSort("u16"))()},
-          I32_ {TypeSystem_.Parametric(GetSort("i32"))()},
-          U32_ {TypeSystem_.Parametric(GetSort("u32"))()},
-          I64_ {TypeSystem_.Parametric(GetSort("i64"))()},
-          U64_ {TypeSystem_.Parametric(GetSort("u64"))()},
-          F32_ {TypeSystem_.Parametric(GetSort("f32"))()},
-          F64_ {TypeSystem_.Parametric(GetSort("f64"))()},
-
-          RefType_ {TypeSystem_.Parametric(GetSort("RefType"))()},
-          ObjectType_ {TypeSystem_.Parametric(GetSort("ObjectType"))()},
-          StringType_ {TypeSystem_.Parametric(GetSort("StringType"))()},
-          PrimitiveType_ {TypeSystem_.Parametric(GetSort("PrimitiveType"))()},
-          AbstractType_ {TypeSystem_.Parametric(GetSort("AbstractType"))()},
-          InterfaceType_ {TypeSystem_.Parametric(GetSort("InterfaceType"))()},
-          TypeClassType_ {TypeSystem_.Parametric(GetSort("TypeClassType"))()},
-          InstantiableType_ {TypeSystem_.Parametric(GetSort("InstantiableType"))()},
-          ArrayType_ {TypeSystem_.Parametric(GetSort("ArrayType"))()},
-          ObjectArrayType_ {TypeSystem_.Parametric(GetSort("ObjectArrayType"))()},
-          MethodType_ {TypeSystem_.Parametric(GetSort("MethodType"))()},
-          StaticMethodType_ {TypeSystem_.Parametric(GetSort("StaticMethodType"))()},
-          NonStaticMethodType_ {TypeSystem_.Parametric(GetSort("NonStaticMethodType"))()},
-          VirtualMethodType_ {TypeSystem_.Parametric(GetSort("VirtualMethodType"))()},
-          NullRefType_ {TypeSystem_.Parametric(GetSort("NullRefType"))()},
-          Bits32Type_ {TypeSystem_.Parametric(GetSort("32Bits"))()},
-          Bits64Type_ {TypeSystem_.Parametric(GetSort("64Bits"))()},
-          Integral8Type_ {TypeSystem_.Parametric(GetSort("Integral8Bits"))()},
-          Integral16Type_ {TypeSystem_.Parametric(GetSort("Integral16Bits"))()},
-          Integral32Type_ {TypeSystem_.Parametric(GetSort("Integral32Bits"))()},
-          Integral64Type_ {TypeSystem_.Parametric(GetSort("Integral64Bits"))()},
-          Float32Type_ {TypeSystem_.Parametric(GetSort("Float32Bits"))()},
-          Float64Type_ {TypeSystem_.Parametric(GetSort("Float64Bits"))()},
-          // NB: next types should be in sync with runtime and libraries
-          PandaObject_ {TypeSystem_.Parametric(GetSort("panda.Object"))()},
-          PandaClass_ {TypeSystem_.Parametric(GetSort("panda.Class"))()},
-          JavaObject_ {TypeSystem_.Parametric(GetSort("java.lang.Object"))()},
-          JavaClass_ {TypeSystem_.Parametric(GetSort("java.lang.Class"))()},
-          JavaThrowable_ {TypeSystem_.Parametric(GetSort("java.lang.Throwable"))()}
+    ThreadNum GetThreadNum() const
     {
+        return threadnum_;
     }
+
+    explicit PandaTypes(ThreadNum threadnum);
+    NO_COPY_SEMANTIC(PandaTypes);
+
     ~PandaTypes() = default;
     Type Bot() const
     {
@@ -315,26 +270,19 @@ public:
     {
         return Float64Type_;
     }
-    const Type &PandaObject() const
+    const Type &Object(panda::panda_file::SourceLang lang) const
     {
-        return PandaObject_;
+        return LangContextTypesObjects_.at(lang);
     }
-    const Type &PandaClass() const
+    const Type &Class(panda::panda_file::SourceLang lang) const
     {
-        return PandaClass_;
+        return LangContextTypesClass_.at(lang);
     }
-    const Type &JavaObject() const
+    const Type &Throwable(panda::panda_file::SourceLang lang) const
     {
-        return JavaObject_;
+        return LangContextTypesThrowables_.at(lang);
     }
-    const Type &JavaClass() const
-    {
-        return JavaClass_;
-    }
-    const Type &JavaThrowable() const
-    {
-        return JavaThrowable_;
-    }
+
     const PandaString &ImageOf(const Type &type)
     {
         return TypeSystems::ImageOfType(type);
@@ -346,12 +294,12 @@ public:
     template <typename Handler>
     void ForSubtypesOf(const Type &type, Handler &&handler) const
     {
-        type.ForAllSubtypes(std::move(handler));
+        type.ForAllSubtypes(std::forward<Handler>(handler));
     }
     template <typename Handler>
     void ForSupertypesOf(const Type &type, Handler &&handler) const
     {
-        type.ForAllSupertypes(std::move(handler));
+        type.ForAllSupertypes(std::forward<Handler>(handler));
     }
     PandaVector<Type> SubtypesOf(const Type &type) const
     {
@@ -418,8 +366,13 @@ public:
         return DoNotCalculateMethodType_;
     }
 
+    Variables::Var NewVar()
+    {
+        return Variables_.NewVar();
+    }
+
 private:
-    TypeSystemKind kind_;
+    ThreadNum threadnum_;
     PandaUnorderedMap<Id, Type> TypeOfClass_;
     PandaUnorderedMap<Id, Type> TypeOfMethod_;
     PandaUnorderedMap<Id, TypeParams> SigOfMethod_;
@@ -428,6 +381,7 @@ private:
     PandaUnorderedMap<Id, PandaString> MethodNameOfId_;
     PandaUnorderedMap<Type, Type> NormalizedTypeOf_;
     TypeSystem &TypeSystem_;
+    Variables Variables_;
 
     // base sorts
     const ParametricType Array_;
@@ -473,18 +427,27 @@ private:
     const Type Integral64Type_;
     const Type Float32Type_;
     const Type Float64Type_;
-    const Type PandaObject_;
-    const Type PandaClass_;
-    const Type JavaObject_;
-    const Type JavaClass_;
-    const Type JavaThrowable_;
+
+    std::map<panda::panda_file::SourceLang, const Type> LangContextTypesClass_;
+    std::map<panda::panda_file::SourceLang, const Type> LangContextTypesObjects_;
+    std::map<panda::panda_file::SourceLang, const Type> LangContextTypesThrowables_;
+
+    bool DoNotCalculateMethodType_ {true};
 
     void SetArraySubtyping(const Type &t);
 
-    Type TypeOfArray(const PandaTypes::CachedClass &klass);
+    Type TypeOfArray(const CachedClass &klass);
 
-    bool DoNotCalculateMethodType_ {true};
+    ParametricType ParametricTypeForName(const PandaString &name)
+    {
+        return TypeSystem_.Parametric(GetSort(name));
+    }
+
+    Type TypeForName(const PandaString &name)
+    {
+        return ParametricTypeForName(name)();
+    }
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_ABSINT_PANDA_TYPES_H_
+#endif  // !_PANDA_VERIFIER_PANDA_TYPES_HPP

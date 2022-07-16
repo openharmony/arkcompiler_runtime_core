@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,35 @@
 #include <algorithm>
 #include <cstdlib>
 #include "include/method.h"
-#include <sys/ucontext.h>
+#include "include/runtime.h"
 #include "include/panda_vm.h"
-#include "include/thread.h"
+#include <sys/ucontext.h>
+#include "compiler_options.h"
+#include "code_info/code_info.h"
 #include "include/stack_walker.h"
+
+#ifdef PANDA_TARGET_AMD64
+extern "C" void StackOverflowExceptionEntrypointTrampoline();
+#endif
 
 namespace panda {
 
 #ifdef PANDA_TARGET_ARM32
 #define CONTEXT_PC uc_->uc_mcontext.arm_pc  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_SP uc_->uc_mcontext.arm_sp  // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_FP uc_->uc_mcontext.arm_fp  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_LR uc_->uc_mcontext.arm_lr  // NOLINT(cppcoreguidelines-macro-usage)
 #elif defined(PANDA_TARGET_ARM64)
 #define CONTEXT_PC uc_->uc_mcontext.pc        // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_FP uc_->uc_mcontext.regs[29]  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_LR uc_->uc_mcontext.regs[30]  // NOLINT(cppcoreguidelines-macro-usage)
 #elif defined(PANDA_TARGET_AMD64)
 #define CONTEXT_PC uc_->uc_mcontext.gregs[REG_RIP]  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_SP uc_->uc_mcontext.gregs[REG_RSP]  // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_FP uc_->uc_mcontext.gregs[REG_RBP]  // NOLINT(cppcoreguidelines-macro-usage)
 #elif defined(PANDA_TARGET_X86)
 #define CONTEXT_PC uc_->uc_mcontext.gregs[REG_EIP]  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_SP uc_->uc_mcontext.gregs[REG_ESP]  // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_FP uc_->uc_mcontext.gregs[REG_EBP]  // NOLINT(cppcoreguidelines-macro-usage)
 #endif
 
@@ -53,24 +64,51 @@ public:
     {
         CONTEXT_PC = pc;
     }
+    uintptr_t GetSP()
+    {
+#if defined(PANDA_TARGET_ARM64)
+        auto sc = reinterpret_cast<struct sigcontext *>(&uc_->uc_mcontext);
+        return sc->sp;
+#else
+        return CONTEXT_SP;
+#endif
+    }
     uintptr_t *GetFP()
     {
         return reinterpret_cast<uintptr_t *>(CONTEXT_FP);
     }
+#if (defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_ARM32))
+    uintptr_t GetLR()
+    {
+        return CONTEXT_LR;
+    }
+    void SetLR(uintptr_t lr)
+    {
+        CONTEXT_LR = lr;
+    }
+#elif defined(PANDA_TARGET_AMD64)
+    void SetSP(uintptr_t sp)
+    {
+        CONTEXT_SP = sp;
+    }
+
+#endif
 
 private:
     ucontext_t *uc_;
 };
 
-static bool IsValidStack([[maybe_unused]] ManagedThread *thread)
+static bool IsValidStack([[maybe_unused]] const ManagedThread *thread)
 {
-    // Issue #3649 CFrame::Initialize fires an ASSERT fail.
+    // #3649 CFrame::Initialize fires an ASSERT fail.
     // The issue is that ManagedStack is not always in a consistent state.
+    // TODO(bulasevich): implement ManagedStack state check before the printout. For now, disable the output.
     return false;
 }
 
 // Something goes really wrong. Dump info and exit.
-static void DumpStackTrace([[maybe_unused]] int signo, [[maybe_unused]] siginfo_t *info, [[maybe_unused]] void *context)
+static void DumpStackTrace([[maybe_unused]] int signo, [[maybe_unused]] const siginfo_t *info,
+                           [[maybe_unused]] const void *context)
 {
     auto thread = ManagedThread::GetCurrent();
     if (thread == nullptr) {
@@ -82,7 +120,7 @@ static void DumpStackTrace([[maybe_unused]] int signo, [[maybe_unused]] siginfo_
     }
 
     LOG(ERROR, RUNTIME) << "Managed thread segmentation fault";
-    for (StackWalker stack(thread); stack.HasFrame(); stack.NextFrame()) {
+    for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
         Method *method = stack.GetMethod();
         auto *source = method->GetClassSourceFile().data;
         auto line_num = method->GetLineNumFromBytecodeOffset(stack.GetBytecodePc());
@@ -106,6 +144,7 @@ static bool CallSignalActionHandler(int sig, siginfo_t *info, void *context)
 
 bool SignalManager::SignalActionHandler(int sig, siginfo_t *info, void *context)
 {
+    panda::Logger::Sync();
     if (InOatCode(info, context, true)) {
         for (const auto &handler : oat_code_handler_) {
             if (handler->Action(sig, info, context)) {
@@ -125,13 +164,14 @@ bool SignalManager::SignalActionHandler(int sig, siginfo_t *info, void *context)
 }
 
 bool SignalManager::InOatCode([[maybe_unused]] const siginfo_t *siginfo, [[maybe_unused]] const void *context,
-                              [[maybe_unused]] bool check_bytecode_pc)
+                              [[maybe_unused]] bool check_bytecode_pc) const
 {
+    // TODO: leak judge GetMethodAndReturnPcAndSp
     return true;
 }
 
-bool SignalManager::InOtherCode([[maybe_unused]] int sig, [[maybe_unused]] siginfo_t *info,
-                                [[maybe_unused]] void *context)
+bool SignalManager::InOtherCode([[maybe_unused]] int sig, [[maybe_unused]] const siginfo_t *info,
+                                [[maybe_unused]] const void *context) const
 {
     return false;
 }
@@ -165,7 +205,7 @@ void SignalManager::InitSignals()
     if (is_init_) {
         return;
     }
-#if defined(PANDA_TARGET_UNIX)
+
     sigset_t mask;
     sigfillset(&mask);
     sigdelset(&mask, SIGABRT);
@@ -176,7 +216,7 @@ void SignalManager::InitSignals()
 
     ClearSignalHooksHandlersArray();
 
-    // If running on device, sigchain will work and AddSpecialSignalHandlerFn in sighook will not be used
+    // if running in phone,Sigchain will work,AddSpecialSignalHandlerFn in sighook will not be used
     SigchainAction sigchain_action = {
         CallSignalActionHandler,
         mask,
@@ -194,13 +234,6 @@ void SignalManager::InitSignals()
         allocator_->Delete(tmp);
     }
     other_handlers_.clear();
-#else
-    struct sigaction act1 = {};
-    sigfillset(&act1.sa_mask);
-    act1.sa_sigaction = RuntimeSEGVHandler;
-    act1.sa_flags = SA_RESTART | SA_SIGINFO | SA_NODEFER;
-    sigaction(SIGSEGV, &act1, nullptr);
-#endif  // PANDA_TARGET_UNIX
 }
 
 void SignalManager::GetMethodAndReturnPcAndSp([[maybe_unused]] const siginfo_t *siginfo,
@@ -228,59 +261,271 @@ void SignalManager::DeleteHandlersArray()
     }
 }
 
-#if defined(PANDA_TARGET_UNIX)
-bool DetectSEGVFromMemory([[maybe_unused]] int sig, [[maybe_unused]] siginfo_t *siginfo,
-#else
-void DetectSEGVFromMemory([[maybe_unused]] int sig, [[maybe_unused]] siginfo_t *siginfo,
-#endif                                    // PANDA_TARGET_UNIX
-                          void *context)  // CODECHECK-NOLINT(C_RULE_ID_INDENT_CHECK)
+static bool InAllocatedCodeRange(uintptr_t pc)
+{
+    Thread *thread = Thread::GetCurrent();
+    if (thread == nullptr) {
+        // Current thread is not attatched to any of the VMs
+        return false;
+    }
+
+    if (Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->InAotFileRange(pc)) {
+        return true;
+    }
+
+    auto heap_manager = thread->GetVM()->GetHeapManager();
+    if (heap_manager == nullptr) {
+        return false;
+    }
+    auto code_allocator = heap_manager->GetCodeAllocator();
+    if (code_allocator == nullptr) {
+        return false;
+    }
+    return code_allocator->InAllocatedCodeRange(ToVoidPtr(pc));
+}
+
+static bool isInvalidPointer(uintptr_t addr)
+{
+    if (addr == 0) {
+        return true;
+    }
+    // address is at least 8-byte aligned
+    uintptr_t mask = 0x7;
+    return ((addr & mask) != 0);
+}
+
+// This is the way to get compiled method entry point
+// FP regsiter -> stack -> method -> compilerEntryPoint
+static uintptr_t FindCompilerEntrypoint(const uintptr_t *fp)
+{
+    // Compiled code stack frame:
+    // +----------------+
+    // | Return address |
+    // +----------------+ <- Frame pointer
+    // | Frame pointer  |
+    // +----------------+
+    // | panda::Method* |
+    // +----------------+
+    const int COMPILED_FRAME_METHOD_OFFSET = BoundaryFrame<FrameKind::COMPILER>::METHOD_OFFSET;
+
+    if (isInvalidPointer(reinterpret_cast<uintptr_t>(fp))) {
+        return 0;
+    }
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    uintptr_t pmethod = fp[COMPILED_FRAME_METHOD_OFFSET];
+    if (isInvalidPointer(pmethod)) {
+        return 0;
+    }
+
+    // it is important for GetCompiledEntryPoint method to have a lock-free implementation
+    auto entrypoint = reinterpret_cast<uintptr_t>((reinterpret_cast<Method *>(pmethod))->GetCompiledEntryPoint());
+    if (isInvalidPointer(entrypoint)) {
+        return 0;
+    }
+
+    if (!InAllocatedCodeRange(entrypoint)) {
+        LOG(INFO, RUNTIME) << "Runtime SEGV handler: the entrypoint is not from JIT code";
+        return 0;
+    }
+
+    if (!compiler::CodeInfo::VerifyCompiledEntry(entrypoint)) {
+        // what we have found is not a compiled method
+        return 0;
+    }
+
+    return entrypoint;
+}
+
+bool DetectSEGVFromCompiledCode(int sig, siginfo_t *siginfo, void *context)
+{
+    SignalContext signal_context(context);
+    uintptr_t pc = signal_context.GetPC();
+    LOG(DEBUG, RUNTIME) << "Handling SIGSEGV signal. PC:" << std::hex << pc;
+    if (!InAllocatedCodeRange(pc)) {
+        DumpStackTrace(sig, siginfo, context);
+        return true;
+    }
+    return false;
+}
+
+bool DetectSEGVFromHandler(int sig, siginfo_t *siginfo, void *context)
+{
+    SignalContext signal_context(context);
+    uintptr_t pc = signal_context.GetPC();
+    auto func = ToUintPtr(&FindCompilerEntrypoint);
+    const unsigned THIS_METHOD_SIZE_ESTIMATION = 0x1000;  // there is no way to find exact compiled method size
+    if (func < pc && pc < func + THIS_METHOD_SIZE_ESTIMATION) {
+        // We have got SEGV from the signal handler itself!
+        // The links must have led us to wrong memory: FP regsiter -> stack -> method -> compilerEntryPoint
+        DumpStackTrace(sig, siginfo, context);
+        return true;
+    }
+    return false;
+}
+
+bool DetectSEGVFromMemory(int sig, siginfo_t *siginfo, void *context)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
     auto mem_fault_location = ToUintPtr(siginfo->si_addr);
     const uintptr_t MAX_OBJECT_SIZE = 1U << 30U;
-    // The expected fault address is nullptr and offset is within the object
+    // the expected fault address is nullptr + offset within the object
     if (mem_fault_location > MAX_OBJECT_SIZE) {
         DumpStackTrace(sig, siginfo, context);
-#if defined(PANDA_TARGET_UNIX)
         return true;
-#else
-        LOG(FATAL, RUNTIME) << "Memory location which caused fault:" << std::hex << mem_fault_location;
-#endif
     }
-#if defined(PANDA_TARGET_UNIX)
     return false;
+}
+
+bool DetectSEGVFromCode(int sig, siginfo_t *siginfo, void *context)
+{
+    SignalContext signal_context(context);
+    uintptr_t pc = signal_context.GetPC();
+    uintptr_t entrypoint = FindCompilerEntrypoint(signal_context.GetFP());
+    if (entrypoint == 0) {
+        DumpStackTrace(sig, siginfo, context);
+        return true;
+    }
+    compiler::CodeInfo codeinfo(compiler::CodeInfo::GetCodeOriginFromEntryPoint(ToVoidPtr(entrypoint)));
+
+    auto code_size = codeinfo.GetCodeSize();
+    if ((pc < entrypoint) || (pc > entrypoint + code_size)) {
+        // we are not in a compiled method
+        DumpStackTrace(sig, siginfo, context);
+        return true;
+    }
+    return false;
+}
+
+void UpdateReturnAddress(SignalContext &signal_context, uintptr_t new_address)
+{
+#if (defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_ARM32))
+    signal_context.SetLR(new_address);
+#elif defined(PANDA_TARGET_AMD64)
+    auto *sp = reinterpret_cast<uintptr_t *>(signal_context.GetSP() - sizeof(uintptr_t));
+    *sp = new_address;
+    signal_context.SetSP(reinterpret_cast<uintptr_t>(sp));
 #endif
 }
 
-#if defined(PANDA_TARGET_UNIX)
-bool RuntimeSEGVHandler([[maybe_unused]] int sig, [[maybe_unused]] siginfo_t *siginfo, void *context)
+bool DetectSEGVFromNullCheck(int sig, siginfo_t *siginfo, void *context)
 {
-    return !DetectSEGVFromMemory(sig, siginfo, context);
-}
-#else
-void RuntimeSEGVHandler([[maybe_unused]] int sig, [[maybe_unused]] siginfo_t *siginfo, void *context)
-{
-    DetectSEGVFromMemory(sig, siginfo, context);
-}
-#endif  // PANDA_TARGET_UNIX
+    SignalContext signal_context(context);
+    uintptr_t pc = signal_context.GetPC();
+    uintptr_t entrypoint = FindCompilerEntrypoint(signal_context.GetFP());
+    compiler::CodeInfo codeinfo(compiler::CodeInfo::GetCodeOriginFromEntryPoint(ToVoidPtr(entrypoint)));
+    uintptr_t new_pc = 0;
+    for (auto icheck : codeinfo.GetImplicitNullChecksTable()) {
+        uintptr_t null_check_addr = entrypoint + icheck.GetInstNativePc();
+        auto offset = icheck.GetOffset();
+        // We inserts information about implicit nullcheck after mem instruction,
+        // because encoder can insert emory calculation before the instruction and we don't know real address:
+        //   addr |               |
+        //    |   +---------------+  <--- null_check_addr - offset
+        //    |   | address calc  |
+        //    |   | memory inst   |  <--- pc
+        //    V   +---------------+  <--- null_check_addr
+        //        |               |
+        if (pc < null_check_addr && pc + offset >= null_check_addr) {
+            new_pc = null_check_addr;
+            break;
+        }
+    }
 
-bool NullPointerHandler::Action(int sig, [[maybe_unused]] siginfo_t *siginfo, [[maybe_unused]] void *context)
+    if (new_pc == 0) {
+        LOG(INFO, RUNTIME) << "SEGV can't be handled. No matching entry found in the NullCheck table.\n"
+                           << "PC: " << std::hex << pc;
+        for (auto icheck : codeinfo.GetImplicitNullChecksTable()) {
+            LOG(INFO, RUNTIME) << "nullcheck: " << std::hex << (entrypoint + icheck.GetInstNativePc());
+        }
+        DumpStackTrace(sig, siginfo, context);
+        return true;
+    }
+    LOG(DEBUG, RUNTIME) << "PC fixup: " << std::hex << new_pc;
+
+    UpdateReturnAddress(signal_context, new_pc);
+    signal_context.SetPC(reinterpret_cast<uintptr_t>(NullPointerExceptionBridge));
+    EVENT_IMPLICIT_NULLCHECK(new_pc);
+
+    return false;
+}
+
+bool RuntimeSEGVHandler(int sig, siginfo_t *siginfo, void *context)
+{
+    if (DetectSEGVFromCompiledCode(sig, siginfo, context)) {
+        return false;
+    }
+
+    if (DetectSEGVFromHandler(sig, siginfo, context)) {
+        return false;
+    }
+
+    if (DetectSEGVFromMemory(sig, siginfo, context)) {
+        return false;
+    }
+
+    if (DetectSEGVFromCode(sig, siginfo, context)) {
+        return false;
+    }
+
+    if (DetectSEGVFromNullCheck(sig, siginfo, context)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool NullPointerHandler::Action(int sig, siginfo_t *siginfo, void *context)
 {
     if (sig != SIGSEGV) {
         return false;
     }
-#if defined(PANDA_TARGET_UNIX)
     if (!RuntimeSEGVHandler(sig, siginfo, context)) {
         return false;
     }
-#endif  // PANDA_TARGET_UNIX
-    LOG(DEBUG, RUNTIME) << "NullPointerHandler happen, Throw NullPointerHandler Exception, signal:" << sig;
-    // Issues 1437, NullPointer has been checked here or in aot,
-    // so let's return to interpreter, and exception is not built here.
-    // panda::ThrowNullPointerException()
+    LOG(DEBUG, RUNTIME) << "NullPointerHandler happen,Throw NullPointerHandler Exception, signal:" << sig;
+    /* NullPointer has been check in aot or here now,then return to interpreter, so exception not build here
+     * issue #1437
+     * panda::ThrowNullPointerException();
+     */
     return true;
 }
 
 NullPointerHandler::~NullPointerHandler() = default;
 
+bool StackOverflowHandler::Action(int sig, [[maybe_unused]] siginfo_t *siginfo, [[maybe_unused]] void *context)
+{
+    if (sig != SIGSEGV) {
+        return false;
+    }
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    SignalContext signal_context(context);
+    auto mem_check_location = signal_context.GetSP() - ManagedThread::GetStackOverflowCheckOffset();
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+    auto mem_fault_location = ToUintPtr(siginfo->si_addr);
+
+    if (mem_check_location != mem_fault_location) {
+        return false;
+    }
+
+    LOG(DEBUG, RUNTIME) << "Stack overflow occurred";
+
+    // StackOverflow stackmap has zero address
+    thread->SetNativePc(0);
+    // Set compiler Frame in Thread
+    thread->SetCurrentFrame(reinterpret_cast<Frame *>(signal_context.GetFP()));
+#ifdef PANDA_TARGET_AMD64
+    signal_context.SetPC(reinterpret_cast<uintptr_t>(StackOverflowExceptionEntrypointTrampoline));
+#else
+    /* To save/restore callee-saved regs we get into StackOverflowExceptionEntrypoint
+     * by means of StackOverflowExceptionBridge.
+     * The bridge stores LR to ManagedThread.npc, which is used by StackWalker::CreateCFrame,
+     * and it must be 0 in case of StackOverflow.
+     */
+    signal_context.SetLR(0);
+    signal_context.SetPC(reinterpret_cast<uintptr_t>(StackOverflowExceptionBridge));
+#endif
+
+    return true;
+}
 }  // namespace panda

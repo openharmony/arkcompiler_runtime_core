@@ -36,7 +36,7 @@ tests:
               movi v0, %s
               ucmp v0
         description: Check u64tou32 with various values.
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         cases:
           - values:
               - "0"
@@ -65,7 +65,7 @@ tests:
           Check `u64tou32` with incorrect accumulator type.
           Load different values (objects, strings, types, 64-bit floating point values, 64-bit integer values) and invokes `u64tou32`.
           Return 0 to indicate that negative test failed, because this line is unreachable and code will not be executed after verification error.
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
             #
@@ -79,6 +79,8 @@ tests:
         cases:
             - values:
                 - ldai 0
+            - values:
+                - fldai 0
             - values:
                 - fldai.64 0
             - values:
@@ -107,12 +109,10 @@ tests:
               acc: inout:u64->u32
               prefix: cast
               format: [pref_op_none]
-        description: Check u64tou32 with uninitialized accumulator.
+        description: Check 'u64tou32' with uninitialized accumulator.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        header-template: []
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
             #
-            .function i32 main() {
                 u64tou32
         check-type: exit-positive

@@ -27,7 +27,7 @@
     return
 }
 
-.function u1 main() {
+.function i32 main() {
     initobj.short B.constructor
     sta.obj v0
     call.virt.short A.foo, v0

@@ -11,14 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Assembler-specific extension of ISAPI
+# Assembler specific extension of ISAPI
 Instruction.class_eval do
   def asm_token
     mnemonic.tr('.', '_').upcase
   end
 
   def call?
-    properties.include?('call') || stripped_mnemonic == 'initobj'
+    properties.include?('call')
   end
 
   def range?
@@ -26,7 +26,7 @@ Instruction.class_eval do
   end
 
   def simple_call?
-    call? && !range?
+    call? && !range? && !properties.include?('dynamic')
   end
 
   def return?
@@ -76,8 +76,8 @@ module Panda
     insns << IR.new('INITOBJX',   ['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_WRITE'], 'INVALID_REG_IDX', [])
     insns << IR.new('CALLX',      ['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_WRITE'], 'INVALID_REG_IDX', [])
     insns << IR.new('CALLX_VIRT', ['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_WRITE'], 'INVALID_REG_IDX', [])
-    insns << IR.new('B_P_CALLIX', ['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_READ'], 'INVALID_REG_IDX', [])
-    insns << IR.new('B_P_CALLIEX',['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_READ'], 'INVALID_REG_IDX', [])
+    insns << IR.new('B_P_CALLIX', ['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_WRITE'], 'INVALID_REG_IDX', [])
+    insns << IR.new('B_P_CALLIEX',['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_WRITE'], 'INVALID_REG_IDX', [])
     insns
   end
 end
@@ -87,18 +87,17 @@ end
 # type - type of variable in emitter code
 def assembler_signature(group, is_jump)
   insn = group.first
-  sig = format_ops(insn.format)
-  sig.each do |o|
+  format_ops(insn.format).each do |o|
     if o.name.start_with?('imm')
       if insn.asm_token.start_with?('F')
-        o.type, o.name = is_jump ? ['const std::string &', 'label'] : ["double", o.name]
+        o.type, o.name = is_jump ? ['const std::string &', 'label'] : ['double', o.name]
       else
-        o.type, o.name = is_jump ? ['const std::string &', 'label'] : ["int64_t", o.name]
+        o.type, o.name = is_jump ? ['const std::string &', 'label'] : ['int64_t', o.name]
       end
     elsif o.name.start_with?('id')
       o.type, o.name = ['const std::string &', 'id']
     else
-      o.type = "uint16_t"
+      o.type = 'uint16_t'
     end
   end
 end

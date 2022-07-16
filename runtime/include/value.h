@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_VALUE_H_
-#define PANDA_RUNTIME_INCLUDE_VALUE_H_
+#ifndef PANDA_RUNTIME_VALUE_H_
+#define PANDA_RUNTIME_VALUE_H_
 
 #include <cstdarg>
 #include <cstdint>
@@ -22,6 +21,7 @@
 #include <variant>
 
 #include "libpandafile/file_items.h"
+#include "runtime/bridge/bridge.h"
 
 namespace panda {
 
@@ -29,6 +29,11 @@ class ObjectHeader;
 
 class Value {
 public:
+    explicit Value() : value_(DecodedTaggedValue(0, 0)) {}
+    DEFAULT_COPY_SEMANTIC(Value);
+    DEFAULT_MOVE_SEMANTIC(Value);
+    ~Value() = default;
+
     template <class T>
     explicit Value(T value)
     {
@@ -57,11 +62,11 @@ public:
         return static_cast<T>(std::get<0>(value_));
     }
 
-    int64_t GetAsLong();
+    int64_t GetAsLong() const;
 
     DecodedTaggedValue GetDecodedTaggedValue() const
     {
-        return IsDecodedTaggedValue() ? std::get<2>(value_) : DecodedTaggedValue(0, 0);
+        return IsDecodedTaggedValue() ? (std::get<2>(value_)) : DecodedTaggedValue(0, 0);
     }
 
     bool IsReference() const
@@ -91,4 +96,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_VALUE_H_
+#endif  // PANDA_RUNTIME_VALUE_H_

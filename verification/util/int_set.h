@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,13 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_VERIFICATION_UTIL_INT_SET_H_
-#define PANDA_VERIFICATION_UTIL_INT_SET_H_
+#ifndef PANDA_VERIFICATION_UTIL_INT_SET_H
+#define PANDA_VERIFICATION_UTIL_INT_SET_H
 
 #include "bit_vector.h"
-
-#include <iterator>
 
 namespace panda::verifier {
 
@@ -31,18 +28,8 @@ namespace panda::verifier {
  */
 template <typename T, size_t THRESHOLD = 256>
 class IntSet {
-    // need forward references to allow use of private classes in public method implementations
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_CLASSSCOPE_ORDER)
-private:
-    class ConstIterRepr;
-    class SmallConstIterRepr;
-    template <typename Stream>
-    class LargeConstIterRepr;
-
 public:
     IntSet() : repr_ {MMakePandaUnique<SmallRepr>()} {};
-    ~IntSet() = default;
-    DEFAULT_MOVE_SEMANTIC(IntSet);
 
     IntSet(const IntSet &other) : repr_ {other.repr_->Clone()} {};
     IntSet &operator=(const IntSet &other)
@@ -50,6 +37,11 @@ public:
         repr_ = other.repr_->Clone();
         return *this;
     }
+
+    IntSet(IntSet &&) noexcept = default;
+    IntSet &operator=(IntSet &&) noexcept = default;
+
+    ~IntSet() = default;
 
     bool Contains(T x) const
     {
@@ -64,7 +56,7 @@ public:
     void Insert(T x)
     {
         repr_->Insert(x);
-        if (UNLIKELY(Size() == THRESHOLD && repr_->Type() == ReprType::SMALL)) {
+        if (UNLIKELY(repr_->Type() == ReprType::SMALL && Size() >= THRESHOLD)) {
             MoveToLargeRepr();
         }
     }
@@ -74,24 +66,33 @@ public:
     {
         switch (repr_->Type()) {
             case ReprType::SMALL:
-                // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
                 AsSmallRepr().template InsertManyImpl<known_to_be_sorted>(begin, end);
                 if (UNLIKELY(Size() >= THRESHOLD)) {
                     MoveToLargeRepr();
                     if (begin != end) {
                         // if we get here, repr is large now and there are remaining elements
-                        // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
                         AsLargeRepr().template InsertManyImpl<known_to_be_sorted>(std::move(begin), std::move(end));
                     }
                 }
                 return;
             case ReprType::LARGE:
-                // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
                 AsLargeRepr().template InsertManyImpl<known_to_be_sorted>(std::move(begin), std::move(end));
                 return;
             default:
                 UNREACHABLE();
         }
+    }
+
+    Index<T> TheOnlyElement() const
+    {
+        return SwitchOnRepr(
+            [](const SmallRepr &repr) -> Index<T> {
+                if (repr.Size() == 1) {
+                    return repr.repr_[0];
+                }
+                return {};
+            },
+            []([[maybe_unused]] const LargeRepr &repr) { return Index<T> {}; });
     }
 
     template <size_t THRESHOLD2>
@@ -103,6 +104,7 @@ public:
     template <size_t THRESHOLD2>
     IntSet<T, THRESHOLD> &operator&=(const IntSet<T, THRESHOLD2> &other)
     {
+        // TODO if this case is checked separately, consider switching on all 4 options
         if (repr_->Type() == ReprType::LARGE && other.repr_->Type() == ReprType::SMALL) {
             *this = other & *this;
         } else {
@@ -137,7 +139,7 @@ public:
         return *this;
     }
 
-    // Returns a lambda repeated calls to which return ordered values of the intersection
+    /// Returns a lambda repeated calls to which return ordered values of the intersection
     template <size_t THRESHOLD2>
     auto LazyIntersect(const IntSet<T, THRESHOLD2> &other) const
     {
@@ -164,106 +166,13 @@ public:
     template <typename Handler>
     bool ForAll(Handler &&handler) const
     {
-        return SwitchOnRepr([handler = std::move(handler)](const auto &repr) { return repr.ForAll(handler); });
+        return SwitchOnRepr(
+            [handler = std::forward<Handler>(handler)](const auto &repr) { return repr.ForAll(handler); });
     }
 
     std::function<Index<T>()> AsStream() const
     {
         return SwitchOnRepr([](const auto &repr) { return std::function<Index<T>()>(repr.AsStream()); });
-    }
-
-    class const_iterator {
-    public:
-        using iterator_category = std::input_iterator_tag;
-        using value_type = T;
-        using reference = T;
-        using pointer = T *;
-        using difference_type = void;
-
-        const_iterator(typename MPandaVector<T>::const_iterator i) : repr_ {MMakePandaUnique<SmallConstIterRepr>(i)} {};
-        ~const_iterator() = default;
-        // should be a constructor, but GCC can't handle it properly
-        template <typename Stream>
-        static const_iterator make(Stream &&stream, Index<T> index)
-        {
-            return {MMakePandaUnique<LargeConstIterRepr<Stream>>(std::move(stream), index)};
-        }
-
-        const_iterator(const const_iterator &other) : repr_ {other.repr_->Clone()} {};
-        const_iterator &operator=(const const_iterator &other)
-        {
-            repr_ = other.repr_->Clone();
-            return *this;
-        }
-
-        T operator*() const
-        {
-            return repr_->Deref();
-        }
-
-        const_iterator &operator++()
-        {
-            repr_->Increment();
-            return *this;
-        }
-
-        const_iterator operator++(int)
-        {
-            const_iterator tmp(repr_->Clone());
-            this->operator++();
-            return tmp;
-        }
-
-        friend bool operator==(const const_iterator &a, const const_iterator &b)
-        {
-            const auto &a_repr = *(a.repr_.get());
-            const auto &b_repr = *(b.repr_.get());
-            return a_repr.Type() == b_repr.Type() && a_repr.Equals(b_repr);
-        };
-
-        friend bool operator!=(const const_iterator &a, const const_iterator &b)
-        {
-            return !(a == b);
-        };
-
-    private:
-        MPandaUniquePtr<ConstIterRepr> repr_;
-
-        const_iterator(MPandaUniquePtr<ConstIterRepr> &&repr) : repr_ {std::move(repr)} {};
-
-        friend class IntSet;
-    };
-
-    using iterator = const_iterator;
-
-    iterator begin()
-    {
-        return const_cast<const IntSet<T, THRESHOLD> *>(this)->cbegin();
-    }
-
-    iterator end()
-    {
-        return const_cast<const IntSet<T, THRESHOLD> *>(this)->cend();
-    }
-
-    const_iterator begin() const
-    {
-        return cbegin();
-    }
-
-    const_iterator end() const
-    {
-        return cend();
-    }
-
-    const_iterator cbegin() const
-    {
-        return repr_->cbegin();
-    }
-
-    const_iterator cend() const
-    {
-        return repr_->cend();
     }
 
     template <size_t THRESHOLD2>
@@ -320,36 +229,13 @@ private:
         virtual IntSet<T, THRESHOLD> Union(const SmallRepr &other) const = 0;
         virtual IntSet<T, THRESHOLD> Union(const LargeRepr &other) const = 0;
         virtual MPandaUniquePtr<Repr> Clone() const = 0;
-        virtual const_iterator cbegin() const = 0;
-        virtual const_iterator cend() const = 0;
         virtual ~Repr() = default;
-
-        iterator begin()
-        {
-            return const_cast<const Repr *>(this)->cbegin();
-        }
-
-        iterator end()
-        {
-            return const_cast<const Repr *>(this)->cend();
-        }
-
-        const_iterator begin() const
-        {
-            return cbegin();
-        }
-
-        const_iterator end() const
-        {
-            return cend();
-        }
     };
 
     class SmallRepr final : public Repr {
     public:
         SmallRepr() = default;
         SmallRepr(MPandaVector<T> set) : repr_ {set} {};
-        ~SmallRepr() = default;
 
         ReprType Type() const override
         {
@@ -435,16 +321,6 @@ private:
             return MMakePandaUnique<SmallRepr>(repr_);
         }
 
-        const_iterator cbegin() const override
-        {
-            return {repr_.cbegin()};
-        }
-
-        const_iterator cend() const override
-        {
-            return {repr_.cend()};
-        }
-
         T MaxElem() const
         {
             return *repr_.rbegin();
@@ -513,7 +389,6 @@ private:
     class LargeRepr final : public Repr {
     public:
         LargeRepr(BitVector set) : repr_ {set} {};
-        ~LargeRepr() = default;
 
         ReprType Type() const override
         {
@@ -528,7 +403,8 @@ private:
         void Insert(T x) override
         {
             if (x >= repr_.size()) {
-                repr_.resize(x * 3U / 2U);
+                // clang-tidy under GCC bug, static_cast<size_t>(x) * 3U / 2U is enough
+                repr_.resize(std::max(static_cast<size_t>(x) * 3U / 2U, THRESHOLD));
             }
             repr_.Set(x);
         }
@@ -599,18 +475,6 @@ private:
             return MMakePandaUnique<LargeRepr>(repr_);
         }
 
-        const_iterator cbegin() const override
-        {
-            auto stream = repr_.LazyIndicesOf<1>();
-            Index<T> start_idx = stream();
-            return const_iterator::make(std::move(stream), start_idx);
-        }
-
-        const_iterator cend() const override
-        {
-            return const_iterator::make(repr_.LazyIndicesOf<1>(), Index<T>());
-        }
-
         template <bool known_to_be_sorted, typename Iter>
         void InsertManyImpl(Iter begin, Iter end)
         {
@@ -623,7 +487,7 @@ private:
         template <typename Handler>
         bool ForAll(Handler &&handler) const
         {
-            return repr_.for_all_idx_of<1>(std::move(handler));
+            return repr_.for_all_idx_of<1>(std::forward<Handler>(handler));
         }
 
         auto AsStream() const
@@ -651,100 +515,6 @@ private:
         friend class IntSet;
     };
 
-    class ConstIterRepr {
-    public:
-        // or return Repr?
-        virtual ReprType Type() const = 0;
-        virtual void Increment() = 0;
-        // for non-const iterator needs to return a proxy reference similar to vector<bool>::reference
-        virtual T Deref() const = 0;
-        // just for the same type
-        virtual bool Equals(const ConstIterRepr &other) const = 0;
-        // for postfix increment
-        virtual MPandaUniquePtr<ConstIterRepr> Clone() const = 0;
-        virtual ~ConstIterRepr() = default;
-    };
-
-    class SmallConstIterRepr final : public ConstIterRepr {
-    public:
-        SmallConstIterRepr(typename MPandaVector<T>::const_iterator repr) : repr_ {repr} {};
-        ~SmallConstIterRepr() = default;
-
-        ReprType Type() const override
-        {
-            return ReprType::SMALL;
-        }
-
-        void Increment() override
-        {
-            ++repr_;
-        }
-
-        T Deref() const override
-        {
-            return *repr_;
-        }
-
-        bool Equals(const ConstIterRepr &other) const override
-        {
-            return static_cast<const SmallConstIterRepr &>(other).repr_ == repr_;
-        }
-
-        MPandaUniquePtr<ConstIterRepr> Clone() const override
-        {
-            return MMakePandaUnique<SmallConstIterRepr>(repr_);
-        }
-
-    private:
-        typename MPandaVector<T>::const_iterator repr_;
-    };
-
-    template <typename Stream>
-    class LargeConstIterRepr final : public ConstIterRepr {
-    public:
-        LargeConstIterRepr(Stream &&stream, Index<T> index) : stream_ {std::move(stream)}, index_ {index} {};
-        ~LargeConstIterRepr() = default;
-
-        ReprType Type() const override
-        {
-            return ReprType::LARGE;
-        }
-
-        void Increment() override
-        {
-            if (index_.IsValid()) {
-                index_ = stream_();
-            }
-        }
-
-        T Deref() const override
-        {
-            if (index_.IsValid()) {
-                return index_;
-            } else {
-                // or should this throw?
-                UNREACHABLE();
-            }
-        }
-
-        bool Equals(const ConstIterRepr &other) const override
-        {
-            // not really safe, but we shouldn't be comparing iterators of different bitvectors anywhere
-            auto other1 = static_cast<const LargeConstIterRepr &>(other);
-            return other1.index_ == index_;
-        }
-
-        MPandaUniquePtr<ConstIterRepr> Clone() const override
-        {
-            return MMakePandaUnique<LargeConstIterRepr>(Stream {stream_}, index_);
-        }
-
-    private:
-        Stream stream_;
-        Index<T> index_;
-    };
-
-    friend class const_iterator;
     friend class SmallRepr;
     friend class LargeRepr;
 
@@ -816,7 +586,7 @@ private:
 
     static BitVector VectorToBitVector(const MPandaVector<T> &vec)
     {
-        BitVector bv(*vec.rbegin() * 3U / 2U);
+        BitVector bv(*vec.rbegin() * 3 / 2);
         for (T y : vec) {
             bv.Set(y);
         }
@@ -844,4 +614,4 @@ std::ostream &operator<<(std::ostream &os, const IntSet<T, THRESHOLD> &set)
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_UTIL_INT_SET_H_
+#endif  // PANDA_VERIFICATION_UTIL_INT_SET_H

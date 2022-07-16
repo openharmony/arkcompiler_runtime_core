@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_HUMONGOUS_OBJ_ALLOCATOR_H_
-#define PANDA_RUNTIME_MEM_HUMONGOUS_OBJ_ALLOCATOR_H_
+#ifndef PANDA_MEM_HUMONGOUS_OBJ_ALLOCATOR_H
+#define PANDA_MEM_HUMONGOUS_OBJ_ALLOCATOR_H
 
 #include <limits>
 
@@ -31,6 +30,7 @@ namespace panda::mem {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_HUMONGOUS_OBJ_ALLOCATOR(level) LOG(level, ALLOC) << "HumongousObjAllocator: "
 
+// TODO(aemelenko): Move this constants to compile options
 static constexpr size_t PANDA_HUMONGOUS_OBJ_ALLOCATOR_RESERVED_MEM_MAX_POOLS_AMOUNT = 0;
 static constexpr size_t PANDA_HUMONGOUS_OBJ_ALLOCATOR_RESERVED_MEM_MAX_POOL_SIZE = 8_MB;
 
@@ -73,6 +73,7 @@ public:
     template <typename T>
     [[nodiscard]] T *AllocArray(size_t arr_length);
 
+    template <bool need_lock = true>
     [[nodiscard]] void *Alloc(size_t size, Alignment align = DEFAULT_ALIGNMENT);
 
     void Free(void *mem);
@@ -137,7 +138,7 @@ public:
      */
     static constexpr size_t GetMinPoolSize(size_t obj_size)
     {
-        // Note: It is not the smallest size of the pool
+        // To note: It is not the smallest size of the pool
         // because we don't make a real object alignment value into account
         return AlignUp(obj_size + sizeof(MemoryPoolHeader) + GetAlignmentInBytes(LOG_ALIGN_MAX),
                        PANDA_POOL_ALIGNMENT_IN_BYTES);
@@ -320,4 +321,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_HUMONGOUS_OBJ_ALLOCATOR_H_
+#endif  // PANDA_MEM_HUMONGOUS_OBJ_ALLOCATOR_H

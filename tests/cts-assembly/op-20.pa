@@ -14,7 +14,7 @@
 #Assert that operation lda.str works fine
 .record panda.String <external>
 
-.function u1 main(){
+.function i32 main(){
     lda.str "asd\n"
     sta.obj v0
     ldai 0

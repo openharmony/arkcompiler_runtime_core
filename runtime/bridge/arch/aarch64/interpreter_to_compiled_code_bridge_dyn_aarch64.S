@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,13 @@ InterpreterToCompiledCodeBridgeDyn:
     mov THREAD_REG, x3
 
     // According to the current frame kind set the bridge type
-    ldrb w3, [THREAD_REG, #THREAD_FRAME_KIND]
+    ldrb w3, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     tst w3, #0x1
     mov w4, #BYPASS_BRIDGE
     mov w5, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
     csel w3, w4, w5, ne
     str x3, [sp, #24]
-    // sp should be 16 bytes aligned.
+    // sp should be 16 byte aligned.
 
     // setup regs as follow
     // x9 - frame.vregs, x10 - insn_ptr, x12 - method,
@@ -57,8 +57,15 @@ InterpreterToCompiledCodeBridgeDyn:
     mov x19, x1 // save frame to survive the call
 
     // the following dispatch code expects opcode in w5
-    ldrb w5, [x10], 1 // read opcode and advance insn_ptr
+    ldrb w5, [x10] // read opcode and advance insn_ptr
+    cmp w5, #MIN_PREFIX_OPCODE_INDEX
+    blt .Lnonprefixed
+    ldrh w5, [x10], #2
+    b .Ldispatch
+.Lnonprefixed:
+    add x10, x10, #1
 
+.Ldispatch:
     // The file contains code which checks opcode and jumps
     // to the corresponding handler.
     // At the end each handler jumps to .Lload_reg_args label.
@@ -76,9 +83,9 @@ InterpreterToCompiledCodeBridgeDyn:
 
     // handle the result
     // setup regs as follow:
-    // x0 - result value, x1 - result tag, x19 - frame.acc
+    // x0 - result value, x19 - frame.acc
     add x19, x19, FRAME_ACC_OFFSET
-    stp x0, x1, [x19]
+    str x0, [x19]
 
     sub sp, fp, 32
     ldp x19, THREAD_REG, [sp], 48
@@ -118,42 +125,67 @@ InvokeCompiledCodeWithArgArrayDyn:
     mov THREAD_REG, x4
 
     // According to the current frame kind set the bridge type
-    ldrb w4, [THREAD_REG, #THREAD_FRAME_KIND]
+    ldrb w4, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     tst w4, #0x1
     mov w5, #BYPASS_BRIDGE
     mov w6, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
     csel w4, w5, w6, ne
     str x4, [sp, 24]
-    // sp should be 16 bytes aligned.
+    // sp should be 16 byte aligned.
 
     // setup regs as follow
-    // x0 - method, x1 - num_args, x2..x7 - args,
-    // x9 - values, w10 - num_args, x11, x12 - temp
-    // lr - entrypoint
+    // x0       <- panda::Method*
+    // x1       <- num_args (already on the relevant reg, no moves required)
+    // x2..x7   <- user's code arguments, in boxed form
+    // x9, w10  <- temps for moving user's args to ABI regs
+    // x11,     <- temp for moving user's args to stack
+    // lr       <- entrypoint
     ldr lr, [x3, #METHOD_COMPILED_ENTRY_POINT_OFFSET]
     mov x9, x0
     mov x0, x3
+
+    // No arguments passed to the callee
+    cbz w1, .Linvoke_
     mov w10, w1
 
-    // setup function object
-    ldp x2, x3, [x9], FRAME_VREGISTER_SIZE
-    // load arg regs
-    cbz w10, .Linvoke_
-    ldp x4, x5, [x9], FRAME_VREGISTER_SIZE
+    // ABI arg reg 2 <- boxed arg0 from user's code
+    ldr x2, [x9], FRAME_VREGISTER_SIZE
     sub w10, w10, 1
     cbz w10, .Linvoke_
-    ldp x6, x7, [x9], FRAME_VREGISTER_SIZE
-    sub w10, w10, 1
 
+    // ABI arg reg 3 <- boxed arg1 from user's code
+    ldr x3, [x9], FRAME_VREGISTER_SIZE
+    sub w10, w10, 1
     cbz w10, .Linvoke_
+
+    // ABI arg reg 4 <- boxed arg2 from user's code
+    ldr x4, [x9], FRAME_VREGISTER_SIZE
+    sub w10, w10, 1
+    cbz w10, .Linvoke_
+
+    // ABI arg reg 5 <- boxed arg3 from user's code
+    ldr x5, [x9], FRAME_VREGISTER_SIZE
+    sub w10, w10, 1
+    cbz w10, .Linvoke_
+
+    // ABI arg reg 6 <- boxed arg4 from user's code
+    ldr x6, [x9], FRAME_VREGISTER_SIZE
+    sub w10, w10, 1
+    cbz w10, .Linvoke_
+
+    // ABI arg reg 7 <- boxed arg5 from user's code
+    ldr x7, [x9], FRAME_VREGISTER_SIZE
+    sub w10, w10, 1
+    cbz w10, .Linvoke_
+
     // setup stack args
     // reserve stack space
-    // x13 - stack poionter
-    sub x13, sp, x10, lsl 4
+    // x13 - stack pointer
+    sub x13, sp, x10, lsl 3
     mov sp, x13
     // copy arguments to the stack
-1:  ldp x11, x12, [x9], FRAME_VREGISTER_SIZE
-    stp x11, x12, [x13], FRAME_VREGISTER_SIZE
+1:  ldr x11, [x9], FRAME_VREGISTER_SIZE
+    str x11, [x13], FRAME_VREGISTER_SIZE
     sub w10, w10, 1
     cbnz w10, 1b
 

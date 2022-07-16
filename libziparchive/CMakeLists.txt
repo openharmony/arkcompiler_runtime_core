@@ -40,9 +40,4 @@ panda_add_gtest(
 panda_add_to_clang_tidy(TARGET arkziparchive)
 panda_add_sanitizers(TARGET arkziparchive SANITIZERS ${PANDA_SANITIZERS_LIST})
 
-if (PANDA_ENABLE_AFL)
-    include("${PANDA_ROOT}/fuzzing/Fuzzing.cmake")
-    panda_substitute_libs(TARGET arkziparchive LIBS arkbase zlib)
-endif()
-
 add_check_style(".")

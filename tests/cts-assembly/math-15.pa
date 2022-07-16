@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(7 xor 5 == 2) operation --> xor
-.function u1 main(){
+.function i32 main(){
     movi v0, 7
     movi v1, 5
     xor v0, v1

@@ -12,21 +12,21 @@
 # limitations under the License.
 
 definitions:
-  - name: java
+  - name: PandaAssembly
     template: |
-      .language Java
+      .language PandaAssembly
   - name: aoobe_p
     template: |
       .record panda.ArrayIndexOutOfBoundsException<external>
   - name: aoobe_j
     template: |
-      .record java.lang.ArrayIndexOutOfBoundsException<external>
+      .record panda.ArrayIndexOutOfBoundsException<external>
   - name: npe_p
     template: |
       .record panda.NullPointerException <external>
   - name: npe_j
     template: |
-      .record java.lang.NullPointerException <external>
+      .record panda.NullPointerException <external>
 tests:
   - file-name: "ldarr.64"
     isa:
@@ -57,54 +57,126 @@ tests:
             tags: ['tsan']
           - values: ['65536']
 
-      - file-name: "acceptable_primitive_types_p"
+      - file-name: "read_arr_j"
         isa:
           instructions:
             - sig: ldarr.64 v:in:i64[]
               acc: inout:i32->i64
+              format: [op_v_8]
+        description: Check ldarr.64 reads items from array of different size and type in PandaAssembly context.
+        header-template: [PandaAssembly, main]
+        code-template: |
+          #
+              movi v0, %s
+              newarr v0, v0, i64[]
+              ldai 0
+              ldarr.64 v0
+        check-type: exit-positive
+        runner-options: ['use-pa']
+        cases:
+          - values: ['1']
+          - values: ['255']
+            tags: ['tsan']
+          - values: ['65536']
+
+      - file-name: "primitive_types_p"
+        isa:
+          instructions:
+            - sig: ldarr.64 v:in:i64[]
+              acc: inout:i32
               format: [op_v_8]
         tags: ['tsan', 'verifier']
         bugid: ['3052']
-        description: Check acceptable array of primitive types for ldarr.64 instruction in Panda Assembly context.
+        description: Check array of primitive types for 'ldarr.64' instruction in Panda Assembly context.
+        header-template: []
         code-template: |
-          #
-              movi v0, 1
-              newarr v0, v0, %s
+          .array arr_u1 u1 1 { 1 }
+          .array arr_i8 i8 1 { 1 }
+          .array arr_u8 u8 1 { 1 }
+          .array arr_i16 i16 1 { 1 }
+          .array arr_u16 u16 1 { 1 }
+          .array arr_i32 i32 1 { 1 }
+          .array arr_u32 u32 1 { 1 }
+          .array arr_i64 i64 1 { 1 }
+          .array arr_u64 u64 1 { 1 }
+          .array arr_f32 f32 1 { 1 }
+          .array arr_f64 f64 1 { 1 }
+          .function i32 main() {
+              %s
               ldai 0
               ldarr.64 v0
         check-type: exit-positive
-        runner-options: ['verifier-only', 'verifier-debug-config']
+        runner-options: [verifier-failure, verifier-config]
+        template-cases:
+          - values:
+            - |
+              #
+                  movi v0, 1
+                  newarr v0, v0, %s[]
+          - values:
+            - |
+              #
+                  lda.const v0, arr_%s
         cases:
-          - values: ['u64[]']
-          - values: ['i64[]']
+          - values: [u1]
+          - values: [i8]
+          - values: [u8]
+          - values: [i16]
+          - values: [u16]
+          - values: [i32]
+          - values: [u32]
+          - values: [i64]
+            runner-options: [verifier-only, verifier-config]
+          - values: [u64]
+            runner-options: [verifier-only, verifier-config]
+          - values: [f32]
+          - values: [f64]
 
-      - file-name: "rejectable_primitive_types_p"
+      - file-name: "primitive_types_j"
         isa:
           instructions:
             - sig: ldarr.64 v:in:i64[]
-              acc: inout:i32->i64
+              acc: inout:i32
               format: [op_v_8]
-        description: Check rejectable array of primitive types for ldarr.64 instruction in Panda Assembly context.
+        tags: ['tsan', 'verifier', 'pa-verifier']
+        bugid: ['3052']
+        description: Check array of primitive types for 'ldarr.64' instruction in PandaAssembly context.
+        header-template: [PandaAssembly]
         code-template: |
-          #
-              movi v0, 1
-              newarr v0, v0, %s
+          .array arr_u1 u1 1 { 1 }
+          .array arr_i8 i8 1 { 1 }
+          .array arr_i16 i16 1 { 1 }
+          .array arr_u16 u16 1 { 1 }
+          .array arr_i32 i32 1 { 1 }
+          .array arr_i64 i64 1 { 1 }
+          .array arr_f32 f32 1 { 1 }
+          .array arr_f64 f64 1 { 1 }
+          .function i32 main() {
+              %s
               ldai 0
               ldarr.64 v0
-
         check-type: exit-positive
-        tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: [verifier-failure, verifier-config, use-pa]
+        template-cases:
+          - values:
+            - |
+              #
+                  movi v0, 1
+                  newarr v0, v0, %s[]
+          - values:
+            - |
+              #
+                  lda.const v0, arr_%s
         cases:
-          - values: ['u1[]']
-          - values: ['i8[]']
-          - values: ['u8[]']
-          - values: ['i16[]']
-          - values: ['u16[]']
-          - values: ['i32[]']
-          - values: ['u32[]']
-          - values: ['f32[]']
-          - values: ['f64[]']
+          - values: [u1]
+          - values: [i8]
+          - values: [i16]
+          - values: [u16]
+          - values: [i32]
+          - values: [i64]
+            runner-options: [verifier-only, verifier-config, use-pa]
+          - values: [f32]
+          - values: [f64]
 
       - file-name: "read_values"
         isa:
@@ -255,7 +327,7 @@ tests:
             runner-options: [compile-failure]
           - values: [a255]
             runner-options: [compile-failure]
-          - values: [null]
+          - values: ['null']
             runner-options: [compile-failure]
           - values: [0]
             runner-options: [compile-failure]
@@ -274,7 +346,7 @@ tests:
             - v1_array_type
         tags: ['verifier']
         bugid: ['2816']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -292,6 +364,8 @@ tests:
               - movi v0, 0
           - values:
               - movi.64 v0, 0
+          - values:
+              - fmovi v0, 0
           - values:
               - fmovi.64 v0, 0
           - values:
@@ -350,7 +424,7 @@ tests:
             - acc_i32
         tags: ['verifier']
         bugid: ['2817']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -368,7 +442,11 @@ tests:
           - values:
               - ldai.64 0
           - values:
+              - fldai 0
+          - values:
               - fldai.64 0
+          - values:
+              - lda.null
           - values:
               - |
                 #
@@ -421,7 +499,7 @@ tests:
             - v1_array_type
         tags: ['verifier']
         bugid: ['2816', '2817']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -439,6 +517,8 @@ tests:
               - movi v0, 0
           - values:
               - movi.64 v0, 0
+          - values:
+              - fmovi v0, 0
           - values:
               - fmovi.64 v0, 0
           - values:
@@ -492,7 +572,11 @@ tests:
           - values:
               - ldai.64 0
           - values:
+              - fldai 0
+          - values:
               - fldai.64 0
+          - values:
+              - lda.null
           - values:
               - |
                 #
@@ -543,16 +627,19 @@ tests:
         description: Check 'ldarr.64' with uninitialized register and accumulator.
         tags: ['verifier']
         bugid: ['2818']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        header-template: []
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
             #
-            .function i32 main() {
                 %s
                 ldarr.64 v0
         check-type: exit-positive
         cases:
           - values: ['ldai 0']
+          - values:
+            - |
+              #
+                  movi v0, 1
+                  newarr v0, v0, i64[]
           - values: ['']
 
       - file-name: array_out_of_bound_exception_p
@@ -564,6 +651,7 @@ tests:
           exceptions:
             - x_bounds
         description: Check 'ldarr.64' behavior when index is out of array bounds.
+        tags: ['irtoc_ignore']
         header-template: [aoobe_p, main]
         code-template: |
           #
@@ -612,6 +700,62 @@ tests:
             tags: ['tsan']
           - values: [0x100000, 0x80000003]
 
+      - file-name: array_out_of_bound_exception_j
+        isa:
+          instructions:
+            - sig: ldarr.64 v:in:i64[]
+              acc: inout:i32->i64
+              format: [op_v_8]
+          exceptions:
+            - x_bounds
+        description: Check 'ldarr.64' behavior when index is out of array bounds.
+        tags: ['irtoc_ignore']
+        runner-options: [use-pa]
+        header-template: [PandaAssembly, aoobe_j, main]
+        code-template: |
+          #
+              movi v0, %s
+              newarr v0, v0, i64[]
+              ldai %s
+          begin:
+              ldarr.64 v0
+          end:
+              ldai 1 # Should not reach this line
+              return
+
+          catch_AOOBE:
+              ldai 0 # Expected panda.ArrayIndexOutOfBoundsException
+              return
+
+          catch_all:
+              ldai 2 # Unexpected exception, test failed
+              return
+
+          .catch panda.ArrayIndexOutOfBoundsException, begin, end, catch_AOOBE
+          .catchall begin, end, catch_all
+        check-type: none
+        cases:
+          - values: [0, 0]
+            tags: ['tsan']
+          - values: [0, 1]
+          - values: [10, 10]
+          - values: [10, 128]
+          - values: [255, 255]
+          - values: [254, 255]
+          - values: [65535, 65535]
+            tags: ['tsan']
+          - values: [65535, 65536]
+          - values: [10, 0xFFFFFFFF]
+          - values: [256, 0xFFFFFFFE]
+          - values: [65536, 0xFFFFFFFD]
+            tags: ['tsan']
+          - values: [0x100000, 0xFFFFFFFC]
+          - values: [10, 0x80000000]
+          - values: [256, 0x80000001]
+          - values: [65536, 0x80000002]
+            tags: ['tsan']
+          - values: [0x100000, 0x80000003]
+
       - file-name: null_pointer_p
         isa:
           instructions:
@@ -621,6 +765,7 @@ tests:
           exceptions:
             - x_null
         description: Check 'ldarr.64' behavior when array is null reference.
+        tags: ['irtoc_ignore']
         header-template: [npe_p]
         code-template: |
           .function %s get_null() {
@@ -665,3 +810,55 @@ tests:
           - values: [0xFFFFFFFF]
           - values: [0x80000000]
 
+      - file-name: null_pointer_j
+        isa:
+          instructions:
+            - sig: ldarr.64 v:in:i64[]
+              acc: inout:i32->i64
+              format: [op_v_8]
+          exceptions:
+            - x_null
+        description: Check 'ldarr.64' behavior when array is null reference.
+        tags: ['irtoc_ignore']
+        header-template: [PandaAssembly, npe_j]
+        runner-options: [use-pa]
+        bugid: ['3047']
+        code-template: |
+          .function i64[] get_null() {
+              lda.null
+              return.obj
+          }
+
+          .function i32 main() {
+              call.short get_null
+              sta.obj v0
+              ldai %s
+          begin:
+              ldarr.64 v0
+          end:
+              ldai 1 # Should not reach this line
+              return
+
+          catch_NPE:
+              ldai 0 # Expected panda.NullPointerException
+              return
+
+          catch_all:
+              ldai 2 # Unexpected exception, test failed
+              return
+
+          .catch panda.NullPointerException, begin, end, catch_NPE
+          .catchall begin, end, catch_all
+        check-type: none
+        cases:
+          - values: [0]
+            tags: ['tsan']
+          - values: [1]
+          - values: [10]
+          - values: [128]
+          - values: [255]
+          - values: [65535]
+            tags: ['tsan']
+          - values: [0x7FFFFFFF]
+          - values: [0xFFFFFFFF]
+          - values: [0x80000000]

@@ -15,7 +15,7 @@
 
 // NOLINTNEXTLINE(readability-function-size)
 
-VerificationStatus AbstractInterpret([[maybe_unused]] VerificationLevel v_level, VerificationContext* v_ctx, const uint8_t* pc, EntryPointType code_type) {
+VerificationStatus AbstractInterpret(VerificationContext& verif_ctx, const uint8_t* pc, EntryPointType code_type) {
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wvoid-ptr-dereference"
@@ -30,7 +30,7 @@ VerificationStatus AbstractInterpret([[maybe_unused]] VerificationLevel v_level,
 % end
     };
 
-    AbsIntInstructionHandler handler(v_ctx, pc, code_type);
+    AbsIntInstructionHandler handler(verif_ctx, pc, code_type);
     uint8_t secondary_opcode;
 
     if (!handler.IsPrimaryOpcodeValid()) {
@@ -45,9 +45,11 @@ HANDLE_<%= i.handler_name %>:
 % if i.namespace != 'core'
 #ifdef PANDA_WITH_<%= i.namespace.upcase %>
 % end
+% unless i.namespace == 'ecmascript'
     if (!handler.template Handle<%= mnemonic %><BytecodeInstructionSafe::Format::<%= i.format.pretty.upcase %>>()) {
         return handler.GetStatus();
     }
+% end
 
     if (!handler.IsPrimaryOpcodeValid()) {
         LOG(ERROR, VERIFIER) << "Incorrect opcode";
@@ -64,7 +66,7 @@ HANDLE_INVALID:
 % Panda::prefixes.each do |p|
 HANDLE_<%= p.handler_name %>:
     secondary_opcode = handler.GetSecondaryOpcode();
-    LOG(DEBUG, VERIFIER) << "CFLOW: Prefix subdispatch: " << "<%= p.name %>, " << secondary_opcode;
+    LOG(DEBUG, VERIFIER) << "CFLOW: Prefix subdispatch: " << "<%= p.name %>, " << static_cast<int32_t>(secondary_opcode);
 
     if (secondary_opcode > <%= Panda::dispatch_table.secondary_opcode_bound(p) %> ) {
         LOG(ERROR, VERIFIER) << "Incorrect opcode";

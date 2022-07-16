@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_CODE_ALLOCATOR_H_
-#define PANDA_LIBPANDABASE_MEM_CODE_ALLOCATOR_H_
+#ifndef PANDA_CODEALLOCATOR_H
+#define PANDA_CODEALLOCATOR_H
 
 #include "utils/arena_containers.h"
 #include "os/mem.h"
@@ -32,7 +32,7 @@ public:
     NO_MOVE_SEMANTIC(CodeAllocator);
 
     /**
-     * \brief Allocates \param size bytes, copies \param codeBuff to allocated memory and makes this memory executable
+     * \brief Allocates \param size bytes, copies \param codeBuff to allocated memory and make this memory executable
      * @param size
      * @param codeBuff
      * @return
@@ -53,7 +53,7 @@ public:
     static void ProtectCode(os::mem::MapRange<std::byte> mem_range);
 
     /**
-     * Fast checks if the given program counter belongs to JIT code
+     * Fast check if the given program counter belongs to JIT code
      */
     bool InAllocatedCodeRange(const void *pc);
 
@@ -63,6 +63,7 @@ private:
 private:
     static const Alignment PAGE_LOG_ALIGN;
 
+    // TODO(dtrubenkov): Remove when some CodeCache space will be implemented, currently used for avoid memleak noise
     ArenaAllocator arenaAllocator_;
     BaseMemStats *memStats_;
     os::memory::RWLock code_range_lock_;
@@ -72,4 +73,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_CODE_ALLOCATOR_H_
+#endif  // PANDA_CODEALLOCATOR_H

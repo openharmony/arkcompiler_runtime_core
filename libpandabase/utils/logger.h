@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,16 @@
 #include "macros.h"
 #include "os/error.h"
 #include "os/mutex.h"
+#include "os/thread.h"
 #include "utils/dfx.h"
 
 #include <cstdint>
 
+#include <bitset>
 #include <fstream>
+#include <map>
 #include <string>
 #include <sstream>
-#include <bitset>
 
 #include <atomic>
 
@@ -39,76 +41,15 @@ using FUNC_MOBILE_LOG_PRINT = int (*)(int, int, const char *, const char *, cons
 static constexpr int LOG_ID_MAIN = 0;
 extern FUNC_MOBILE_LOG_PRINT mlog_buf_print;
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG_COMPONENT_LIST(D)                              \
-    LOG_COMPONENT_ELEM(D, ALLOC, "alloc")                  \
-    LOG_COMPONENT_ELEM(D, ALLOC_OBJECT, "alloc-obj")       \
-    LOG_COMPONENT_ELEM(D, ASSEMBLER, "assembler")          \
-    LOG_COMPONENT_ELEM(D, CLASS_LINKER, "classlinker")     \
-    LOG_COMPONENT_ELEM(D, COMMON, "common")                \
-    LOG_COMPONENT_ELEM(D, GC, "gc")                        \
-    LOG_COMPONENT_ELEM(D, GC_TRIGGER, "gc_trigger")        \
-    LOG_COMPONENT_ELEM(D, REF_PROC, "reference_processor") \
-    LOG_COMPONENT_ELEM(D, INTERPRETER, "interpreter")      \
-    LOG_COMPONENT_ELEM(D, FUZZER, "fuzzer")                \
-    LOG_COMPONENT_ELEM(D, PANDAFILE, "pandafile")          \
-    LOG_COMPONENT_ELEM(D, MEMORYPOOL, "memorypool")        \
-    LOG_COMPONENT_ELEM(D, RUNTIME, "runtime")              \
-    LOG_COMPONENT_ELEM(D, TRACE, "trace")                  \
-    LOG_COMPONENT_ELEM(D, DPROF, "dprof")                  \
-    LOG_COMPONENT_ELEM(D, ECMASCRIPT, "ecmascript")        \
-    LOG_COMPONENT_ELEM(D, DEBUGGER, "debugger")            \
-    LOG_COMPONENT_ELEM(D, TOOLING, "tooling")              \
-    LOG_COMPONENT_ELEM(D, INTEROP, "interop")              \
-    LOG_COMPONENT_ELEM(D, VERIFIER, "verifier")            \
-    LOG_COMPONENT_ELEM(D, DISASSEMBLER, "disassembler")    \
-    LOG_COMPONENT_ELEM(D, ZIPARCHIVE, "ziparchive")        \
-    LOG_COMPONENT_ELEM(D, EVENTS, "events")                \
-    LOG_COMPONENT_ELEM(D, DFX, "dfx")                      \
-    LOG_COMPONENT_ELEM(D, SCHEDULER, "scheduler")
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG_LEVEL_LIST(D)            \
-    D(FATAL, 0x00, "F", "fatal")     \
-    D(ERROR, 0x01, "E", "error")     \
-    D(WARNING, 0x02, "W", "warning") \
-    D(INFO, 0x03, "I", "info")       \
-    D(DEBUG, 0x04, "D", "debug")
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG_DFX_COMPONENT_LIST(D) \
-    D(COMMON, 0x00, "common")     \
-    D(SIGNAL, 0x01, "signal")
-
 namespace base_options {
 class Options;
 }  // namespace base_options
 
 class Logger {
 public:
-    enum Component : uint32_t {
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, str) e,
-        LOG_COMPONENT_LIST(D)
-#undef D
-            LAST
-    };
+#include <logger_enum_gen.h>
 
     using ComponentMask = std::bitset<Component::LAST>;
-
-    enum class Level : uint8_t {
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, short_str, str) e = v,
-        LOG_LEVEL_LIST(D)
-#undef D
-    };
-
-    enum class LogDfxComponent : uint8_t {
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, str) e = v,
-        LOG_DFX_COMPONENT_LIST(D)
-#undef D
-    };
 
     enum PandaLog2MobileLog : int {
         UNKNOWN = 0,
@@ -122,11 +63,51 @@ public:
         SILENT,
     };
 
+    class Buffer {
+    public:
+        constexpr static size_t BUFFER_SIZE = 4096;
+
+    public:
+        Buffer() : buffer {} {}
+
+    public:
+        const char *data() const noexcept
+        {
+            return buffer.data();
+        }
+        char *data() noexcept
+        {
+            return buffer.data();
+        }
+
+    public:
+        constexpr size_t size() const noexcept
+        {
+            return BUFFER_SIZE;
+        }
+
+    public:
+        // always overwrites buffer data
+        Buffer &printf(const char *format, ...);
+
+    public:
+        friend std::ostream &operator<<(std::ostream &os, const Buffer &b)
+        {
+            return os << b.data();
+        }
+
+    private:
+        std::array<char, BUFFER_SIZE> buffer;
+    };
+
     class Message {
     public:
         Message(Level level, Component component, bool print_system_error)
             : level_(level), component_(component), print_system_error_(print_system_error)
         {
+#ifndef NDEBUG
+            Logger::LogNestingInc();
+#endif
         }
 
         ~Message();
@@ -148,7 +129,8 @@ public:
 
     static void Initialize(const base_options::Options &options);
 
-    static void InitializeFileLogging(const std::string &log_file, Level level, ComponentMask component_mask);
+    static void InitializeFileLogging(const std::string &log_file, Level level, ComponentMask component_mask,
+                                      bool is_fast_logging = false);
 
     static void InitializeStdLogging(Level level, ComponentMask component_mask);
 
@@ -161,22 +143,7 @@ public:
         mlog_buf_print = reinterpret_cast<FUNC_MOBILE_LOG_PRINT>(mlog_buf_print_ptr);
     }
 
-    static uint32_t GetLevelNumber(Logger::Level level)
-    {
-        switch (level) {
-            // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, short_str, str) \
-    case Logger::Level::e:      \
-        return v;
-            LOG_LEVEL_LIST(D)
-#undef D
-            default:
-                break;
-        }
-
-        UNREACHABLE();
-        return 0;
-    }
+    static uint32_t GetLevelNumber(Logger::Level level);
 
     void WriteMobileLog(Level level, const char *component, const char *message)
     {
@@ -209,7 +176,8 @@ public:
 
     static bool IsLoggingOn(Level level, Component component)
     {
-        return IsInitialized() && level <= logger->level_ && (logger->component_mask_.test(component));
+        return IsInitialized() && level <= logger->level_ &&
+               (logger->component_mask_.test(component) || level == Level::FATAL);
     }
 
     static bool IsLoggingOnOrAbort(Level level, Component component)
@@ -225,6 +193,12 @@ public:
         return false;
     }
 
+#ifndef NDEBUG
+    static void LogNestingInc();
+    static void LogNestingDec();
+    static bool IsMessageSuppressed([[maybe_unused]] Level level, [[maybe_unused]] Component component);
+#endif
+
     static bool IsLoggingDfxOn()
     {
         if (!DfxController::IsInitialized() || !IsInitialized()) {
@@ -234,6 +208,13 @@ public:
     }
 
     static void Log(Level level, Component component, const std::string &str);
+
+    static void Sync()
+    {
+        if (IsInitialized()) {
+            logger->SyncOutputResource();
+        }
+    }
 
     static Level LevelFromString(std::string_view s);
 
@@ -297,9 +278,34 @@ public:
     }
 
 protected:
-    Logger(Level level, ComponentMask component_mask) : level_(level), component_mask_(component_mask) {}
+    Logger(Level level, ComponentMask component_mask)
+        : level_(level),
+          component_mask_(component_mask)
+#ifndef NDEBUG
+          ,
+          // Means all the LOGs are allowed just as usual
+          nested_allowed_level_(Level::LAST)
+#endif
+    {
+    }
+
+    Logger(Level level, ComponentMask component_mask, [[maybe_unused]] Level nested_allowed_level)
+        : level_(level),
+          component_mask_(component_mask)
+#ifndef NDEBUG
+          ,
+          nested_allowed_level_(nested_allowed_level)
+#endif
+    {
+    }
 
     virtual void LogLineInternal(Level level, Component component, const std::string &str) = 0;
+
+    /**
+     * Flushes all the output buffers of LogLineInternal to the output resources
+     * Sometimes nothinig shall be done, if LogLineInternal flushes everything by itself statelessl
+     */
+    virtual void SyncOutputResource() = 0;
 
     virtual ~Logger() = default;
 
@@ -307,9 +313,19 @@ protected:
 
     static os::memory::Mutex mutex;
 
+    static thread_local int nesting;
+
 private:
     Level level_;
     ComponentMask component_mask_;
+#ifndef NDEBUG
+    // These are utilized by Fast* logger types.
+    // For every thread, we trace events of staring shifting to a log (<<) and finishing doing it,
+    // incrementing a log invocation depth variable bound to a thread, or decrementing it correspondingly.
+    // Such variables we're doing as thread-local.
+    // All the LOGs with levels < nested_allowed_level_ are only allowed to have depth of log == 1
+    Level nested_allowed_level_;  // Log level to suppress LOG triggering within << to another LOG
+#endif
     bool is_mlog_opened_ {true};
 
     NO_COPY_SEMANTIC(Logger);
@@ -326,6 +342,7 @@ protected:
     }
 
     void LogLineInternal(Level level, Component component, const std::string &str) override;
+    void SyncOutputResource() override {}
 
     ~FileLogger() override = default;
 
@@ -338,11 +355,34 @@ private:
     friend Logger;
 };
 
+class FastFileLogger : public Logger {
+protected:
+    // Uses advanced Logger constructor, so we tell to suppress all nested messages below WARNING severity
+    FastFileLogger(std::ofstream &&stream, Level level, ComponentMask component_mask)
+        : Logger(level, component_mask, Logger::Level::WARNING), stream_(std::forward<std::ofstream>(stream))
+    {
+    }
+
+    void LogLineInternal(Level level, Component component, const std::string &str) override;
+    void SyncOutputResource() override;
+
+    ~FastFileLogger() override = default;
+
+    NO_COPY_SEMANTIC(FastFileLogger);
+    NO_MOVE_SEMANTIC(FastFileLogger);
+
+private:
+    std::ofstream stream_;
+
+    friend Logger;
+};
+
 class StderrLogger : public Logger {
 private:
     StderrLogger(Level level, ComponentMask component_mask) : Logger(level, component_mask) {}
 
     void LogLineInternal(Level level, Component component, const std::string &str) override;
+    void SyncOutputResource() override {}
 
     friend Logger;
 
@@ -360,6 +400,8 @@ private:
                          [[maybe_unused]] const std::string &str) override
     {
     }
+
+    void SyncOutputResource() override {}
 
     friend Logger;
 
@@ -403,11 +445,21 @@ private:
     LOG_ONCE_HELPER()              \
     MERGE_WORDS(log_once_helper, __LINE__).IsFirstCall() && LOG(level, component)
 
+#ifndef NDEBUG
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define _LOG_SUPPRESSION_CHECK(level, component) \
+    !panda::Logger::IsMessageSuppressed(panda::Logger::Level::level, panda::Logger::Component::component)
+#else
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define _LOG_SUPPRESSION_CHECK(level, component) true
+#endif
+
 // Explicit namespace is specified to allow using the logger out of panda namespace.
 // For example, in the main function.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define _LOG(level, component, p)                                                                          \
     panda::Logger::IsLoggingOnOrAbort(panda::Logger::Level::level, panda::Logger::Component::component) && \
+        _LOG_SUPPRESSION_CHECK(level, component) &&                                                        \
         panda::Logger::Message(panda::Logger::Level::level, panda::Logger::Component::component, p).GetStream()
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

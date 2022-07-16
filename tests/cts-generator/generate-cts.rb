@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Huawei Technologies Co.,Ltd.
+
 # frozen_string_literal: true
 
 require 'yaml'
@@ -21,7 +23,6 @@ require 'ostruct'
 
 require_relative 'generator/generator'
 
-
 def check_option(optparser, options, key)
   return if options[key]
 
@@ -30,7 +31,25 @@ def check_option(optparser, options, key)
   exit false
 end
 
+def get_chunk(tests, chunk, chunks)
+  chunk_size = tests.length / chunks
+  if chunk_size > tests.length || chunk_size < 1 || chunk.negative?
+    raise "Chunk arguments are not valid: #{chunk} of #{chunks}"
+  end
+
+  result = []
+  last_idx = chunk >= chunks - 1 ? tests.length : (chunk + 1) * chunk_size
+  i = chunk * chunk_size
+  while i < last_idx
+    result.push(tests[i])
+    i += 1
+  end
+  result
+end
+
 options = OpenStruct.new
+options[:chunk] = 0
+options[:chunks] = 1
 
 optparser = OptionParser.new do |opts|
   opts.banner = 'Usage: generate-cts.rb [options]'
@@ -39,6 +58,9 @@ optparser = OptionParser.new do |opts|
   opts.on('-k', '--skip', 'Skip yaml schema validation')
   opts.on('-o', '--output DIR', 'Path to directory where tests will be generated (required)')
   opts.on('--skip-header', 'Do not generate test headers')
+  opts.on('-f', '--file FILE', 'Generate tests from the specified yaml file only, for example: fmod2.64.yaml')
+  opts.on('--chunk INTEGER', Integer, 'Chunk to process, starting from 0 (0 by default)')
+  opts.on('--chunks INTEGER', Integer, 'Number of chunks (1 by default)')
   opts.on('-h', '--help', 'Prints this help') do
     puts opts
     exit
@@ -49,11 +71,14 @@ optparser.parse!(into: options)
 check_option(optparser, options, 'template')
 check_option(optparser, options, 'schema')
 check_option(optparser, options, 'output')
-template_path=options['template']
-schema_path=options['schema']
-output=options['output']
-skip=options['skip']
-skip_header=options['skip-header']
+template_path = options['template']
+schema_path = options['schema']
+output = options['output']
+skip = options['skip']
+skip_header = options['skip-header']
+chunk = options['chunk']
+chunks = options['chunks']
+file = options['file']
 
 LOG = Logger.new(STDOUT)
 LOG.level = Logger::DEBUG
@@ -62,11 +87,15 @@ LOG.info "Loading '#{template_path}'"
 
 data = YAML.load_file(template_path)
 
+data['tests'] = get_chunk data['tests'], chunk, chunks
+
+data['tests'] = [{"include" => "#{file}"}] if file
+
 generator = Generator::Parser.new data, output, File.dirname(template_path), skip_header
 
 # Validate test template
 
-if !skip
+unless skip
   require 'json-schema'
   res = JSON::Validator.fully_validate(schema_path, data)
   unless res.empty?

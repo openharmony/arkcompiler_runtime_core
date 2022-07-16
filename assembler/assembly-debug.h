@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ASSEMBLY_DEBUG_H_
-#define PANDA_ASSEMBLER_ASSEMBLY_DEBUG_H_
+#ifndef _PANDA_ASSEMBLY_DEBUG_H
+#define _PANDA_ASSEMBLY_DEBUG_H
 
 #include <string>
 
@@ -22,8 +22,8 @@ namespace panda::pandasm::debuginfo {
 
 struct Ins {
     size_t line_number = 0;
-    size_t column_number = 0;
-    std::string whole_line = "";
+    uint32_t column_number = 0;
+    std::string whole_line = "";  // TODO(mbolshov): redundant given file and line_number
     size_t bound_left = 0;
     size_t bound_right = 0;
 
@@ -55,4 +55,4 @@ struct LocalVariable {
 
 }  // namespace panda::pandasm::debuginfo
 
-#endif  // PANDA_ASSEMBLER_ASSEMBLY_DEBUG_H_
+#endif  // !_PANDA_ASSEMBLY_DEBUG_H

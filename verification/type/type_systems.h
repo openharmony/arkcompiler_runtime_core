@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_TYPE_TYPE_SYSTEMS_H_
-#define PANDA_VERIFICATION_TYPE_TYPE_SYSTEMS_H_
+#ifndef PANDA_TYPE_SYSTEMS_H__
+#define PANDA_TYPE_SYSTEMS_H__
 
 #include "type_sort.h"
-#include "type_system_kind.h"
+#include "type_tags.h"
 
 #include "verification/value/variables.h"
 
@@ -32,17 +32,16 @@ class TypeSystems {
 public:
     static const PandaString &ImageOfType(const Type &type);
     static PandaString ImageOfTypeParams(const TypeParams &type_params);
-    static SortIdx GetSort(TypeSystemKind kind, const PandaString &name);
-    static TypeSystem &Get(TypeSystemKind kind);
-    static Variables::Var GetVar(TypeSystemKind kind);
+    static SortIdx GetSort(TypeSystemKind kind, ThreadNum threadnum, const PandaString &name);
+    static TypeSystem &Get(TypeSystemKind kind, ThreadNum threadnum);
 
-    static void Initialize() NO_THREAD_SANITIZE;
-    static void Destroy() NO_THREAD_SANITIZE;
+    static void Initialize(size_t numThreads);
+    static void Destroy();
 
 private:
     struct Impl;
-    static Impl *impl;
+    inline static Impl *impl {nullptr};
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_TYPE_TYPE_SYSTEMS_H_
+#endif  // !PANDA_TYPE_SYSTEMS_H__

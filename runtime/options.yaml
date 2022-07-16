@@ -35,7 +35,6 @@ options:
     - core
   possible_values:
     - core
-    - ecmascript
   description: Load specified intrinsic spaces
   delimiter: ":"
 
@@ -45,7 +44,6 @@ options:
     - core
   possible_values:
     - core
-    - ecmascript
   description: Load specified class spaces
   delimiter: ":"
 
@@ -54,8 +52,16 @@ options:
   default: core
   possible_values:
     - core
-    - ecmascript
   description: Runtime type
+
+- name: load-runtimes
+  type: arg_list_t
+  default:
+    - core
+  possible_values:
+    - core
+  description: Load specified class and intrinsic spaces and define runtime type
+  delimiter: ":"
 
 - name: runtime-compressed-strings-enabled
   type: bool
@@ -63,7 +69,6 @@ options:
   description: Enable/disable compressed strings
 
 - name: run-gc-in-place
-
   type: bool
   default: false
   description: Enable/disable running GC only in place
@@ -73,39 +78,35 @@ options:
   default: true
   description: Enables/disables JIT compiler
 
-- name: ecma-enable-jit
-  type: bool
-  default: false
-  description: Enables/disables JIT compiler for Ecmascript
-
 - name: compiler-hotness-threshold
   type: uint32_t
   default: 3000
   description: Threshold for "hotness" counter of the method after that it will be compiled
+
+- name: compiler-profiling-threshold
+  type: uint32_t
+  default: 1500
+  description: Threshold to start method profiling.
+
+- name: compiler-enable-osr
+  type: bool
+  default: true
+  description: Enables/disables OSR compilation
 
 - name: debugger-library-path
   type: std::string
   default: ""
   description: Path to debugger library
 
+- name: debugger-enable
+  type: bool
+  default: false
+  description: Is debugger enabled on runtime create
+
 - name: debugger-port
   type: uint32_t
   default: 19015
   description: Port for serving debugger clients via socket
-
-- name: agent-lib
-  type: std::string
-  default: jdwp=transport=dt_socket,address=19015,server=y,suspend=n
-  description: arguments for jvmti agent
-
-- name: jdwp-provider
-  type: std::string
-  default: default
-  possible_values:
-    - default
-    - hdcconnection
-    - dt-socket
-  description: The provider for choosing jdwp transport protocol.
 
 - name: log-components
   type: arg_list_t
@@ -114,13 +115,15 @@ options:
   possible_values:
     - all
     - alloc
-    - alloc-obj
+    - mm-obj-events
     - classlinker
     - common
+    - core
     - gc
     - gc_trigger
     - reference_processor
     - interpreter
+    - compiler
     - pandafile
     - memorypool
     - runtime
@@ -128,12 +131,21 @@ options:
     - debugger
     - interop
     - verifier
+    - compilation_queue
+    - aot
     - events
-    - ecmascript
     - scheduler
   description: '[DEPRECATED] Option was moved to libpandabase/options.yaml, use base_options::Options instead of runtime options.'
   delimiter: ":"
   deprecated: true
+
+- name: compiler-nullcheck
+  type: uint64_t
+  default: 1
+  possible_values:
+    - 0
+    - 1
+  description: Dfx option for compiler-nullcheck
 
 - name: reference-dump
   type: uint64_t
@@ -200,9 +212,8 @@ options:
   description: Dfx option for dfx log
 
 - name: gc-type
-
   type: std::string
-  default: gen-gc
+  default: g1-gc
   possible_values:
     - epsilon
     - stw
@@ -216,21 +227,47 @@ options:
   description: switch of inline cache
 
 - name: gc-trigger-type
-
   type: std::string
   default: heap-trigger-test
   possible_values:
     - heap-trigger-test
     - heap-trigger
+    - adaptive-heap-trigger
+    - trigger-heap-occupancy
     - no-gc-for-start-up
     - debug
+    - debug-never
   description: Type of used GC trigger
 
-- name: skip-startup-gc-count
+- name: log-detailed-gc-info-enabled
+  type: bool
+  default: false
+  description: If print INFO log to get more detailed information in GC.
 
+- name: gc-trigger-percent-threshold
+  type: uint32_t
+  default: 20
+  description: Percent of heap for threshold increasing
+
+- name: gc-trigger-adaptive-multiplier
+  type: uint32_t
+  default: 3
+  description: Adjust jump from too frequent gc. New jump calculate as gc-trigger-adaptive-multiplier * max-max-extra-heap-size
+
+- name: max-trigger-percent
+  type: uint32_t
+  default: 45
+  description: Percent of maximum heap size is used as threshold for trigger-heap-occupancy
+
+- name: skip-startup-gc-count
   type: uint32_t
   default: 10
   description: No stw gc count for no-gc-for-start-up
+
+- name: init-young-space-size
+  type: uint64_t
+  default: 4194304
+  description: Initial young space size gen-gc
 
 - name: young-space-size
   type: uint64_t
@@ -253,25 +290,68 @@ options:
   description: Maximum extra heap size for trigger gc
 
 - name: gc-debug-trigger-start
-
   type: uint64_t
   default: 0
   description: First iteration to start returning true in debug trigger
 
 - name: gc-dump-heap
-
   type: bool
   default: false
   description: Dump heap before and after GC
+
+- name: gc-workers-count
+  type: uint32_t
+  default: 2
+  description: Set number of additional GC helper threads. GC uses these threads to speed up collection doing work in parallel.
+
+- name: g1-region-garbage-rate-threshold
+  type: uint32_t
+  default: 70
+  description: Specify garbage rate threshold of a tenured region to be included into a mixed collection. 
+
+- name: g1-track-freed-objects
+  type: std::string
+  default: 'true'
+  possible_values:
+  - default
+  - 'true'
+  - 'false'
+  description: Specify if we need to track removing objects (i.e. update objects count in memstats and log removed objects) during the G1GC collection or not. Default means true on the Release and false otherwise.
+
+- name: gc-root-marking-stack-max-size
+  type: uint32_t
+  default: 10
+  description: The max stack size for root marking in main thread, if it exceeded, we will send a new task to workers. 0 means unlimited.
+
+- name: gc-workers-marking-stack-max-size
+  type: uint32_t
+  default: 200
+  description: The max stack size for marking stage proceed in workers threads, if it exceeded, we will send a new task to other workers. 0 means unlimited.
+
+- name: gc-parallel-marking-enabled
+  type: bool
+  default: true
+  description: Enable parallel marking in GC if it is supported (now it is G1 and STW). If we don't have gc workers, this options will be ignored.
+
+- name: gc-parallel-compacting-enabled
+  type: bool
+  default: true
+  description: Enable parallel compacting in GC if it is supported (now it is G1). If we don't have gc workers, this options will be ignored.
+
+- name: reference-processor-enable
+  type: bool
+  default: true
+  description: Enables/disables ReferenceProcessor
 
 - name: log-level
   type: std::string
   default: error
   possible_values:
-    - debug
-    - info
-    - error
-    - fatal
+  - debug
+  - info
+  - warning
+  - error
+  - fatal
   description: '[DEPRECATED] Option was moved to libpandabase/options.yaml, use base_options::Options instead of runtime options.'
   deprecated: true
 
@@ -279,9 +359,10 @@ options:
   type: std::string
   default: std
   possible_values:
-    - std
-    - file
-    - dummy
+  - std
+  - file
+  - fast-file
+  - dummy
   description: '[DEPRECATED] Option was moved to libpandabase/options.yaml, use base_options::Options instead of runtime options.'
   deprecated: true
 
@@ -292,10 +373,24 @@ options:
   deprecated: true
 
 - name: gc-enable-tracing
-
   type: bool
   default: false
   description: enables/disables tracing gc
+
+- name: g1-enable-concurrent-update-remset
+  type: bool
+  default: true
+  description: enables/disables concurrent update remset thread
+
+- name: g1-min-concurrent-cards-to-process
+  type: uint32_t
+  default: 2
+  description: Minimum number of cards to process from queue in update-remset-thread. Higher number consumes less CPU, but can cause higher pause.
+
+- name: g1-promotion-region-alive-rate
+  type: uint32_t
+  default: 70
+  description: Minimum percentage of alive bytes in young region to promote it into tenured without moving. 100 value means never.
 
 - name: distributed-profiling
   type: bool
@@ -318,6 +413,11 @@ options:
   default: true
   description: Enable/disable TLAB using for object allocations. Now, it is ignored for all GCs except GenGC. Temporary option for quick switch between modes.
 
+- name: init-heap-size-limit
+  type: uint64_t
+  default: 536870912
+  description: Initial size of pool used for objects (Xms). If it was not set explicitly then it set as heap-size-limit
+
 - name: heap-size-limit
   type: uint32_t
   default: 536870912
@@ -327,6 +427,16 @@ options:
   type: uint64_t
   default: 2147483648
   description: Max internal memory used by the VM
+
+- name: min-heap-free-percentage
+  type: uint32_t
+  default: 30
+  description: Minimum percentage of free space in heap. Must be 0 <= min-heap-free-percentage <= max-heap-free-percentage <= 100
+
+- name: max-heap-free-percentage
+  type: uint32_t
+  default: 70
+  description: Maximum percentage of free space in heap. Must be 0 <= min-heap-free-percentage <= max-heap-free-percentage <= 100
 
 - name: code-cache-size-limit
   type: uint64_t
@@ -344,7 +454,6 @@ options:
   description: Enable/disable printing memory statistics in the end of the program
 
 - name: print-gc-statistics
-
   type: bool
   default: false
   description: Enable/disable printing gc statistics in the end of the program
@@ -353,6 +462,35 @@ options:
   type: bool
   default: false
   description: Perform compilation in the main thread or in parallel worker
+
+- name: compiler-queue-type
+  type: std::string
+  default: counter-priority
+  possible_values:
+    - simple
+    - counter-priority
+    - aged-counter-priority
+  description: Type of compiler queue
+
+- name: compiler-task-life-span
+  type: uint32_t
+  default: 500
+  description: A time in milliseconds of task life span in compiler counter priority queue
+
+- name: compiler-queue-max-length
+  type: uint32_t
+  default: 100
+  description: Max length of compiler queue
+
+- name: compiler-epoch-duration
+  type: uint32_t
+  default: 500
+  description: Duration in milliseconds of an epoch in compiler aged counter priority queue
+
+- name: compiler-death-counter-value
+  type: uint32_t
+  default: 500
+  description: Minimum value of aged counter, which will be still considered
 
 - name: limit-standard-alloc
   type: bool
@@ -405,7 +543,6 @@ options:
   description: Trigger native memory recycling watermark, default 8 M
 
 - name: native-gc-trigger-type
-
   type: std::string
   default: simple-strategy
   possible_values:
@@ -436,39 +573,24 @@ options:
 - name: verification-enabled
   type: bool
   default: false
-  description: enable verification
+  description: Whether to enable verification
 
-- name: verification-options
-  type: arg_list_t
-  default:
-    - show-status
-    - update-cache
-    - debug-enable
-  possible_values:
-    - show-status
-    - cflow-allow-jumps-body-to-handler
-    - cflow-allow-jumps-body-into-handler
-    - cflow-allow-jumps-handler-into-body
-    - cflow-allow-jumps-handler-to-handler
-    - cflow-allow-jumpe-handler-into-handler
-    - only-build-typesystem
-    - verify-all-runtime-library-methods
-    - verify-only-entry-point
-    - verifier-does-not-fail
-    - only-verify
-    - debug-enable
-    - do-not-assume-library-methods-verified
-    - sync-on-class-initialization
-    - update-cache
-  description: verification options
-  delimiter: ","
+- name: verification-sync-on-class-initialization
+  type: bool
+  default: false
+  description: Whether class initialization should wait until class verification is complete
+
+- name: verification-update-cache
+  type: bool
+  default: true
+  description: Whether to update verification result cache
 
 - name: verification-threads
   type: uint32_t
   default: 1
   description: number of verification threads
 
-- name: verification-debug-config-file
+- name: verification-config-file
   type: std::string
   default: "default"
   description: filename with debug config for verifier
@@ -478,19 +600,27 @@ options:
   default: ""
   description: verifier cache filename
 
+- name: enable-fast-heap-verifier
+  type: bool
+  default: true
+  description: Enable fast heap verifier, which is faster than ordinary heap verifier but uses more internal memory
+
 - name: fail-on-heap-verification
   type: bool
   default: false
   description: if enabled then fail execution if heap verifier found heap corruption
 
 - name: pre-gc-heap-verify-enabled
-
   type: bool
   default: false
   description: whether verify heap before GC
 
-- name: post-gc-heap-verify-enabled
+- name: into-gc-heap-verify-enabled
+  type: bool
+  default: false
+  description: whether verify heap during GC
 
+- name: post-gc-heap-verify-enabled
   type: bool
   default: false
   description: whether verify heap after GC
@@ -506,7 +636,6 @@ options:
   description: whether open the global reference size check
 
 - name: concurrent-gc-enabled
-
   type: bool
   default: true
   description: whether concurrent GC is enabled
@@ -541,18 +670,54 @@ options:
   default: false
   description: Verify call stack before using of the StackWalker
 
-- name: enable-paralled-young-gc
-
-  type: bool
-  default: true
-  description: enable-paralled-young-gc
-
 - name: safepoint-backtrace
   type: bool
   default: false
   description: Print backtrace each time a thread gets suspended
 
+- name: aot-string-gc-roots-limit
+  type: uint64_t
+  default: 1000
+  description: Maximum amount of AOT string PLT-slots registered as GC roots
+
+- name: resolve-string-aot-threshold
+  type: uint32_t
+  default: 1
+  description: Minimum amount of ResolveStringAot calls before storing string pointer into PLT-slot
+
 - name: icu-data-path
   type: std::string
   default: "default"
   description: Path to generated icu data file
+
+- name: ark-aot
+  type: bool
+  default: false
+  description: check if runtime start by ark_aot
+
+- name: intrinsics-blacklist
+  type: arg_list_t
+  default: []
+  description: List of methods for which intrinsics should not be linked
+  delimiter: ","
+
+- name: verify-entrypoints
+  type: bool
+  default: false
+  description: Verify compiler entrypoints
+
+- name: ignore-daemon-memory-leaks-threshold
+  type: uint32_t
+  default: 0
+  description: Ignore daemon memory leaks during runtime destruction with the specified threshold
+
+- name: interpreter-type
+  type: std::string
+  default: cpp
+  possible_values: [cpp, irtoc]
+  description: Interpreter implementation type
+
+- name: abc-layout-profile-location
+  type: std::string
+  default: "/data/profile/"
+  description: Specify the location of abc layout profile

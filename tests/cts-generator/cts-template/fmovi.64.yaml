@@ -30,13 +30,14 @@ tests:
               acc: none
               format: [op_v_8_imm_64]
               properties: [acc_none, float]
+        check-type: no-check
         code-template: |
           #
               fldai.64 %s
               fmovi.64 v0, %s
               fcmpg.64 v0
         description: Check fmovi.64 with various positive values (f64 values, HEX literals).
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         cases:
           - values:
               - "0.0"
@@ -75,17 +76,12 @@ tests:
               - "1"
               - "0x3ff0000000000000"
           - values:
-              - "0"
-              - "0x0000000000000000"
-          - values:
-              - "1"
-              - "0x3ff0000000000000"
-          - values:
               - "9223372036854775807"
               - "0x43e0000000000000"
           - values:
               - "0.55"
               - "0x3fe199999999999a"
+
 
       - file-name: "imm_64_n"
         isa:
@@ -94,6 +90,8 @@ tests:
               acc: none
               format: [op_v_8_imm_64]
               properties: [acc_none, float]
+        check-type: no-check
+        tags: ['irtoc_ignore']
         code-template: |
           #   test - check binary representation of FP literals
               fmovi.64 v0, %s
@@ -141,6 +139,7 @@ tests:
               - "-0.55"
               - "0xbfe199999999999a"
 
+
       - file-name: "err"
         isa:
           instructions:
@@ -149,25 +148,39 @@ tests:
               format: [op_v_8_imm_64]
               properties: [acc_none, float]
         code-template: |
-          #
+          .record panda.Object <external>
+          .function i32 main() {
               fmovi.64 %s
-        check-type: none
+        check-type: exit-positive
+        header-template: []
         runner-options: [compile-failure]
         description: Check fmovi.64 with various incorrect f64 literals.
         cases:
+          - values:
+              - ''
+          - values:
+              - a0, 0.1
+          - values:
+              - v0, 1e
+          - values:
+              - v0, -1e
+          - values:
+              - v0, 1e1e1
+          - values:
+              - v0, -1e1e1
+          - values:
+              - v0, "1.0"
+          - values:
+              - v0, panda.Object
+          - values:
+              - v0, 1.1, v2
+          - values:
+              - v256, 1.1
+          - values:
+              - v32767, 0.0
+          - values:
+              - v65535, 0.0
 
-          - values:
-              - "1e"
-          - values:
-              - "e1"
-          - values:
-              - "-1e"
-          - values:
-              - "-e1"
-          - values:
-              - "1e1e1"
-          - values:
-              - "-1e1e1"
 
       - file-name: "range"
         isa:
@@ -179,7 +192,7 @@ tests:
         code-template: |
           #
               fmovi.64 v0, %s
-        check-type: none
+        check-type: exit-positive
         runner-options: [compile-only]
         cases:
           - values:
@@ -189,11 +202,10 @@ tests:
           - values:
               - "1.8e328"
             bugid: ["1132"]
-            tags: ["clang_release_sanitizer"]
           - values:
               - "-1.8e328"
             bugid: ["1132"]
-            tags: ["clang_release_sanitizer"]
+
 
       - file-name: "range_val"
         isa:
@@ -202,11 +214,13 @@ tests:
               acc: none
               format: [op_v_8_imm_64]
               properties: [acc_none, float]
+        tags: ['irtoc_ignore']
         code-template: |
           #   test - check binary representation of FP literals
               fmovi.64 v0, %s
               fldai.64 %s
               fcmpg.64 v0
+        check-type: no-check
         cases:
           - values:
               - "+2e-325"
@@ -218,12 +232,11 @@ tests:
               - "1.8e328"
               - "0x7ff0000000000000"
             bugid: ["1132"]
-            tags: ["clang_release_sanitizer"]
           - values:
               - "-1.8e328"
               - "0xfff0000000000000"
             bugid: ["1132"]
-            tags: ["clang_release_sanitizer"]
+
 
       - file-name: "vd_8"
         isa:
@@ -232,16 +245,15 @@ tests:
               acc: none
               format: [op_v_8_imm_64]
               properties: [acc_none, float]
+        tags: ['irtoc_ignore']
         code-template: |
           #
               fldai.64 1
               fmovi.64 %s, 1
               fcmpl.64 %s
+        check-type: no-check
         cases:
           - values:
-              - v0
-              - v0
-          - values:
               - v1
               - v1
           - values:
@@ -253,8 +265,3 @@ tests:
           - values:
               - v255
               - v255
-          - values:
-              - v256
-              - v0
-            runner-options: [compile-failure]
-            case-check-type: no-check

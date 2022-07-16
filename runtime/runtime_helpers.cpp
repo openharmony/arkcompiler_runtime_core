@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "runtime/runtime_helpers.h"
 #include "runtime/include/object_header-inl.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/stack_walker.h"
@@ -22,12 +23,12 @@
 
 namespace panda {
 
-static void PrintStackTrace()
+void PrintStackTrace()
 {
     auto thread = ManagedThread::GetCurrent();
-    StackWalker walker(thread);
+    auto walker = StackWalker::Create(thread);
     LOG(ERROR, RUNTIME) << "====================== Stack trace begin ======================";
-    for (StackWalker stack(thread); stack.HasFrame(); stack.NextFrame()) {
+    for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
         Method *method = stack.GetMethod();
         auto *source = method->GetClassSourceFile().data;
         auto line_num = method->GetLineNumFromBytecodeOffset(stack.GetBytecodePc());
@@ -43,8 +44,3 @@ static void PrintStackTrace()
 }
 
 }  // namespace panda
-
-void PrintStackTrace()
-{
-    panda::PrintStackTrace();
-}

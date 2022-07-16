@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 namespace panda::pandasm {
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
 std::unique_ptr<ScalarValue> InitScalarValue(const ScalarValue &sc_val)
 {
     std::unique_ptr<ScalarValue> copy_val;

@@ -59,7 +59,7 @@
   return.64
 }
 
-.function u1 main() {
+.function i32 main() {
   movi v0, -1
   call.short neg_shl_i32, v0, v0
   movi v0, 0x200000

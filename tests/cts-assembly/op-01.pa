@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #Assert that operation mov.64 works fine
-.function u1 main(){
+.function i32 main(){
     movi.64 v0, 1
     mov.64 v1, v0
     ldai.64 1

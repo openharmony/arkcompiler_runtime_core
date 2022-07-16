@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_CFRAME_H_
-#define PANDA_RUNTIME_INCLUDE_CFRAME_H_
-
+#ifndef PANDA_CFRAME_H
+#define PANDA_CFRAME_H
 #include <array>
 
+#include "compiler/code_info/code_info.h"
 #include "libpandabase/utils/cframe_layout.h"
 #include "runtime/interpreter/frame.h"
-#include "runtime/vreg_info.h"
 #include "libpandabase/macros.h"
-#include "libpandabase/utils/bit_field.h"
 namespace panda {
+
+namespace compiler {
+class CodeInfo;
+}  // namespace compiler
 
 class Method;
 
@@ -39,7 +41,7 @@ struct alignas(2U * alignof(uintptr_t)) C2IBridge {
  *    PREV_FRAME   <-- `fp_` points here
  *    METHOD
  *    PROPERTIES: [0]: Should deoptimize (1 - deoptimize)
- *                [1..2]: Frame type - JNI, OSR or DEFAULT
+ *                [1..2]: Frame type - NATIVE, OSR or DEFAULT
  * -----------------
  *   LOCALS     several slots used for internal needs
  * -----------------
@@ -59,21 +61,28 @@ struct alignas(2U * alignof(uintptr_t)) C2IBridge {
  *    ...
  *    VR_0
  * -----------------
- *    SLOT_0    = SPILL/FILLS
+ *    SLOT_N    = REGALLOC SPILL/FILLS
  *    ...
- *    SLOT_N
+ *    SLOT_0
+ * -----------------
+ *    SLOT_M    = LANGUAGE EXTENSION SPLILL SLOTS
+ *    ...
+ *    SLOT_0
+ * -----------------
+ *    SLOT_P    = PARAMETERS SLOTS
+ *    ...
+ *    SLOT_0
  * -----------------
  */
 class CFrame final {
 public:
-    enum FrameKind : uint8_t { DEFAULT = 0, OSR = 1, JNI = 2, LAST = JNI };
     static constexpr Arch ARCH = RUNTIME_ARCH;
 
     using SlotType = std::conditional_t<ArchTraits<ARCH>::IS_64_BITS, uint64_t, uint32_t>;
 
-    using ShouldDeoptimizeFlag = BitField<bool, 0, 1>;
-    using FrameKindField =
-        ShouldDeoptimizeFlag::NextField<FrameKind, MinimumBitsToStore(static_cast<unsigned>(FrameKind::LAST))>;
+    using CodeInfo = compiler::CodeInfo;
+    using VRegInfo = compiler::VRegInfo;
+    using StackMap = compiler::StackMap;
 
 public:
     explicit CFrame(void *frame_data) : fp_(reinterpret_cast<SlotType *>(frame_data)) {}
@@ -84,24 +93,36 @@ public:
 
     bool IsOsr() const
     {
-        return FrameKindField::Get(*GetPtr<SlotType>(CFrameLayout::FlagsSlot::Start())) == FrameKind::OSR;
+        return CFrameLayout::FrameKindField::Get(*GetPtr<SlotType>(CFrameLayout::FlagsSlot::Start())) ==
+               CFrameLayout::FrameKind::OSR;
     }
 
-    bool IsJni() const
+    bool IsNative() const
     {
-        return FrameKindField::Get(*GetPtr<SlotType>(CFrameLayout::FlagsSlot::Start())) == FrameKind::JNI;
+        return CFrameLayout::FrameKindField::Get(*GetPtr<SlotType>(CFrameLayout::FlagsSlot::Start())) ==
+               CFrameLayout::FrameKind::NATIVE;
+    }
+
+    void SetFrameKind(CFrameLayout::FrameKind kind)
+    {
+        CFrameLayout::FrameKindField::Set(kind, GetPtr<SlotType>(CFrameLayout::FlagsSlot::Start()));
     }
 
     bool IsNativeMethod() const;
 
     bool ShouldDeoptimize() const
     {
-        return ShouldDeoptimizeFlag::Get(*GetPtr<SlotType>(CFrameLayout::FlagsSlot::Start()));
+        return CFrameLayout::ShouldDeoptimizeFlag::Get(*GetPtr<SlotType>(CFrameLayout::FlagsSlot::Start()));
     }
 
     void SetShouldDeoptimize(bool v)
     {
-        ShouldDeoptimizeFlag::Set(v, GetPtr<SlotType>(CFrameLayout::FlagsSlot::Start()));
+        CFrameLayout::ShouldDeoptimizeFlag::Set(v, GetPtr<SlotType>(CFrameLayout::FlagsSlot::Start()));
+    }
+
+    void SetHasFloatRegs(bool has)
+    {
+        CFrameLayout::HasFloatRegsFlag::Set(has, GetPtr<SlotType>(CFrameLayout::FlagsSlot::Start()));
     }
 
     SlotType *GetPrevFrame()
@@ -149,6 +170,27 @@ public:
         *GetPtr<const void *>(CFrameData::Start()) = value;
     }
 
+    template <typename RegRef>
+    inline void GetVRegValue(const VRegInfo &vreg, const compiler::CodeInfo &code_info, SlotType **callee_stack,
+                             RegRef &&reg)
+    {
+        auto val = GetVRegValueInternal<false>(vreg, code_info, callee_stack).GetValue();
+        if (vreg.IsObject()) {
+            reg.SetReference(reinterpret_cast<ObjectHeader *>(static_cast<object_pointer_type>(val)));
+        } else {
+            reg.SetPrimitive(val);
+        }
+    }
+
+    template <typename RegRef>
+    inline void GetPackVRegValue(const VRegInfo &vreg, const compiler::CodeInfo &code_info, SlotType **callee_stack,
+                                 RegRef &&reg)
+    {
+        auto val = GetVRegValueInternal<true>(vreg, code_info, callee_stack).GetValue();
+        reg.SetPrimitive(val);
+    }
+
+    template <bool need_pack = false>
     void SetVRegValue(const VRegInfo &vreg, uint64_t value, SlotType **callee_stack);
 
     uintptr_t GetLr() const
@@ -187,8 +229,13 @@ public:
 
     SlotType GetValueFromSlot(int slot) const
     {
+        return *GetValuePtrFromSlot(slot);
+    }
+
+    const SlotType *GetValuePtrFromSlot(int slot) const
+    {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return *(reinterpret_cast<const SlotType *>(GetStackOrigin()) - slot);
+        return reinterpret_cast<const SlotType *>(GetStackOrigin()) - slot;
     }
 
     void SetValueToSlot(int slot, SlotType value)
@@ -196,6 +243,8 @@ public:
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         *(reinterpret_cast<SlotType *>(GetStackOrigin()) - slot) = value;
     }
+
+    void Dump(const CodeInfo &code_info, std::ostream &os);
 
     void Dump(std::ostream &os, uint32_t max_slot = 0);
 
@@ -205,7 +254,7 @@ private:
         ASSERT(reg >= GetFirstCalleeReg(ARCH, is_fp));
         ASSERT(reg <= GetLastCalleeReg(ARCH, is_fp));
         ASSERT(GetCalleeRegsCount(ARCH, is_fp) != 0);
-        size_t start_slot = reg - GetFirstCalleeReg(ARCH, is_fp);
+        size_t start_slot = GetCalleeRegsMask(ARCH, is_fp).GetDistanceFromTail(reg);
         if (is_fp) {
             start_slot += GetCalleeRegsCount(ARCH, false);
         }
@@ -243,6 +292,18 @@ private:
         return reinterpret_cast<const T *>(GetFrameOrigin() - slot);
     }
 
+    template <bool need_pack>
+    interpreter::VRegister GetVRegValueInternal(const VRegInfo &vreg, const compiler::CodeInfo &code_info,
+                                                SlotType **callee_stack) const;
+    template <bool need_pack>
+    interpreter::VRegister GetVRegValueSlot(const VRegInfo &vreg) const;
+    template <bool need_pack>
+    interpreter::VRegister GetVRegValueRegister(const VRegInfo &vreg, SlotType **callee_stack) const;
+    template <bool need_pack>
+    interpreter::VRegister GetVRegValueConstant(const VRegInfo &vreg, const compiler::CodeInfo &code_info) const;
+
+    uint64_t GetPackValue(VRegInfo::Type type, uint64_t val) const;
+
     using MemPrinter = void (*)(std::ostream &, void *, std::string_view, uintptr_t);
     void DumpCalleeRegs(std::ostream &os, MemPrinter print_mem, PandaString *dscr, size_t *slot);
     void DumpCalleeFPRegs(std::ostream &os, MemPrinter print_mem, PandaString *dscr, size_t *slot);
@@ -256,4 +317,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_CFRAME_H_
+#endif  // PANDA_CFRAME_H

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,18 @@
     stp d12, d13, [\base_reg, #-16]!
     stp d10, d11, [\base_reg, #-16]!
     stp d8, d9, [\base_reg, #-16]!
+.endm
+
+.macro POP_CALLEE_REGS base_reg
+    ldp d8, d9, [\base_reg], #16
+    ldp d10, d11, [\base_reg], #16
+    ldp d12, d13, [\base_reg], #16
+    ldp d14, d15, [\base_reg], #16
+    ldp x19, x20, [\base_reg], #16
+    ldp x21, x22, [\base_reg], #16
+    ldp x23, x24, [\base_reg], #16
+    ldp x25, x26, [\base_reg], #16
+    ldp x27, x28, [\base_reg], #16
 .endm
 
 .macro BEGIN_CALL

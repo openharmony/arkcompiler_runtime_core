@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,16 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef PANDA_RUNTIME_CLASS_INITIALIZER_H_
 #define PANDA_RUNTIME_CLASS_INITIALIZER_H_
 
 #include "runtime/include/class-inl.h"
+#include "runtime/include/language_config.h"
 
 namespace panda {
 
 class ClassLinker;
 
+template <MTModeT mode>
 class ClassInitializer {
 public:
     static bool Initialize(ClassLinker *class_linker, ManagedThread *thread, Class *klass);
@@ -29,7 +30,10 @@ public:
     static bool InitializeFields(Class *klass);
 
 private:
-    static bool InitializeInterface(ClassLinker *class_linker, ManagedThread *thread, Class *iface);
+    static bool InitializeClass(ClassLinker *class_linker, ManagedThread *thread, Class *klass,
+                                const VMHandle<ObjectHeader> &managed_class_obj_handle);
+
+    static bool InitializeInterface(ClassLinker *class_linker, ManagedThread *thread, Class *iface, Class *klass);
 
     static bool VerifyClass(Class *klass);
 };

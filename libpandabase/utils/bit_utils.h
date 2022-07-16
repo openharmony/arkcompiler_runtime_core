@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_BIT_UTILS_H_
-#define PANDA_LIBPANDABASE_UTILS_BIT_UTILS_H_
+#ifndef LIBPANDABASE_UTILS_BIT_UTILS_H_
+#define LIBPANDABASE_UTILS_BIT_UTILS_H_
 
 #include "globals.h"
 #include "macros.h"
 
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 
@@ -91,15 +92,24 @@ constexpr int Popcount(T x)
 template <typename T>
 constexpr size_t MinimumBitsToStore(T value)
 {
-    constexpr size_t RADIX = 2;
-    static_assert(std::is_integral<T>::value, "T must be integral");
-    static_assert(std::is_unsigned<T>::value, "T must be unsigned");
-    static_assert(std::numeric_limits<T>::radix == RADIX, "Unexpected radix!");
     static_assert(sizeof(T) == sizeof(uint64_t) || sizeof(T) <= sizeof(uint32_t), "Unsupported sizeof(T)");
-    if (value == 0) {
-        return 0;
+    if constexpr (std::is_enum_v<T>) {  // NOLINT
+        using UnderlyingType = std::make_unsigned_t<std::underlying_type_t<T>>;
+        auto uvalue = static_cast<UnderlyingType>(value);
+        if (uvalue == 0) {
+            uvalue = 1;
+        }
+        return std::numeric_limits<UnderlyingType>::digits - Clz(static_cast<UnderlyingType>(uvalue));
+    } else {  // NOLINT
+        constexpr size_t RADIX = 2;
+        static_assert(std::is_integral_v<T>, "T must be integral");
+        static_assert(std::is_unsigned_v<T>, "T must be unsigned");
+        static_assert(std::numeric_limits<T>::radix == RADIX, "Unexpected radix!");
+        if (value == 0) {
+            return 0;
+        }
+        return std::numeric_limits<T>::digits - Clz(value);
     }
-    return std::numeric_limits<T>::digits - Clz(value);
 }
 
 template <typename T>
@@ -121,7 +131,6 @@ template <size_t n, typename T>
 constexpr bool IsAligned(T value)
 {
     static_assert(std::is_integral<T>::value, "T must be integral");
-    static_assert(n != 0);
     return value % n == 0;
 }
 
@@ -129,7 +138,6 @@ template <typename T>
 constexpr bool IsAligned(T value, size_t n)
 {
     static_assert(std::is_integral<T>::value, "T must be integral");
-    ASSERT(n != 0);
     return value % n == 0;
 }
 
@@ -155,7 +163,6 @@ constexpr T RoundDown(T x, size_t n)
 template <typename T>
 constexpr T SwapBits(T value, T mask, uint32_t offset)
 {
-    static_assert(std::is_unsigned<T>::value, "T must be unsigned");
     return ((value >> offset) & mask) | ((value & mask) << offset);
 }
 
@@ -285,8 +292,6 @@ inline constexpr uint32_t High32Bits(T value)
     return static_cast<uint32_t>(reinterpret_cast<uint64_t>(value) >> BITS_PER_UINT32);
 }
 
-}  // namespace panda
-
 template <class To, class From>
 inline To bit_cast(const From &src) noexcept  // NOLINT(readability-identifier-naming)
 {
@@ -317,4 +322,31 @@ inline constexpr uint32_t BitsNumInType()
     return sizeof(T) * panda::BITS_PER_BYTE;
 }
 
-#endif  // PANDA_LIBPANDABASE_UTILS_BIT_UTILS_H_
+template <typename From, typename To>
+inline constexpr To CastFloatToInt(From value)
+{
+    static_assert(std::is_floating_point_v<From>);
+    static_assert(std::is_integral_v<To>);
+    To res;
+    constexpr To MIN_INT = std::numeric_limits<To>::min();
+    constexpr To MAX_INT = std::numeric_limits<To>::max();
+    constexpr auto FLOAT_MIN_INT = static_cast<From>(MIN_INT);
+    constexpr auto FLOAT_MAX_INT = static_cast<From>(MAX_INT);
+
+    if (value > FLOAT_MIN_INT) {
+        if (value < FLOAT_MAX_INT) {
+            res = static_cast<To>(value);
+        } else {
+            res = MAX_INT;
+        }
+    } else if (std::isnan(value)) {
+        res = 0;
+    } else {
+        res = MIN_INT;
+    }
+    return res;
+}
+
+}  // namespace panda
+
+#endif  // LIBPANDABASE_UTILS_BIT_UTILS_H_

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@
 #include <gtest/gtest.h>
 #include "../define.h"
 #include "../lexer.h"
-
-namespace panda::test {
 
 using namespace panda::pandasm;
 
@@ -144,6 +142,7 @@ TEST(lexertests, test12)
     Lexer l;
     std::string s = ".function asd(u32){}";
     Tokens tok = l.TokenizeString(s);
+
     ASSERT_EQ(TokenTypeWhat(tok.first[0].type), "KEYWORD") << "KEYWORD expected";
     ASSERT_EQ(TokenTypeWhat(tok.first[1].type), "ID") << "ID expected";
     ASSERT_EQ(tok.second.err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
@@ -213,5 +212,3 @@ TEST(lexertests, array_type)
     ASSERT_EQ(tok.first[1].type, Token::Type::DEL_SQUARE_BRACKET_L);
     ASSERT_EQ(tok.first[2].type, Token::Type::DEL_SQUARE_BRACKET_R);
 }
-
-}  // namespace panda::test

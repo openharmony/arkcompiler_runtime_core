@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_VTABLE_BUILDER_INL_H_
-#define PANDA_RUNTIME_INCLUDE_VTABLE_BUILDER_INL_H_
+#ifndef PANDA_RUNTIME_VTABLE_BUILDER_INL_H_
+#define PANDA_RUNTIME_VTABLE_BUILDER_INL_H_
 
 #include "runtime/include/vtable_builder.h"
 
@@ -74,8 +73,8 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::AddClassMethods(panda_f
             return;
         }
 
-        MethodInfo method_info(mda.GetPandaFile(), mda.GetMethodId(), num_vmethods_, ctx);
-        if (!vtable_.AddMethod(method_info)) {
+        MethodInfo method_info(mda, num_vmethods_, ctx);
+        if (!vtable_.AddMethod(method_info).first) {
             vtable_.AddBaseMethod(method_info);
         }
 
@@ -92,7 +91,7 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::AddClassMethods(Span<Me
         }
 
         MethodInfo method_info(&method, num_vmethods_);
-        if (!vtable_.AddMethod(method_info)) {
+        if (!vtable_.AddMethod(method_info).first) {
             vtable_.AddBaseMethod(method_info);
         }
 
@@ -116,9 +115,39 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::AddDefaultInterfaceMeth
                 continue;
             }
 
-            if (vtable_.AddMethod(MethodInfo(&method, copied_methods_.size(), false, true))) {
-                copied_methods_.push_back(&method);
+            auto [flag, idx] = vtable_.AddMethod(MethodInfo(&method, copied_methods_.size(), false, true));
+            if (!flag) {
+                continue;
             }
+            // if the default method is added for the first time, just add it.
+            if (idx == MethodInfo::INVALID_METHOD_IDX) {
+                CopiedMethod cmethod(&method, false, false);
+                if (!IsMaxSpecificMethod(iface, method, i, itable)) {
+                    cmethod.default_abstract_ = true;
+                }
+                copied_methods_.push_back(cmethod);
+                continue;
+            }
+            // use the following algorithm to judge whether we have to replace existing DEFAULT METHOD.
+            // 1. if existing default method is ICCE, just skip.
+            // 2. if this new method is not max-specific method, just skip.
+            //    existing default method can be AME or not, has no effect on final result. its okay.
+            // 3. if this new method is max-specific method, check whether existing default method is AME
+            //   3.1  if no, set ICCE flag for exist method
+            //   3.2  if yes, replace exist method with new method(new method becomes a candidate)
+            if (copied_methods_[idx].default_conflict_) {
+                continue;
+            }
+            if (!IsMaxSpecificMethod(iface, method, i, itable)) {
+                continue;
+            }
+
+            if (!copied_methods_[idx].default_abstract_) {
+                copied_methods_[idx].default_conflict_ = true;
+                continue;
+            }
+            CopiedMethod cmethod(&method, false, false);
+            copied_methods_[idx] = cmethod;
         }
     }
 }
@@ -168,4 +197,4 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::UpdateClass(Class *klas
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_VTABLE_BUILDER_INL_H_
+#endif  // PANDA_RUNTIME_VTABLE_BUILDER_H_

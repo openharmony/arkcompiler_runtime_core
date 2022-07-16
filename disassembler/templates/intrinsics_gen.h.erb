@@ -39,7 +39,7 @@ bool Initialize() {
     Runtime *runtime = Runtime::GetCurrent();
     ClassLinker *class_linker = runtime->GetClassLinker();
 
-    auto spaces = runtime->GetOptions().GetBootIntrinsicSpaces();
+    auto spaces = runtime->GetOptions().GetLoadRuntimes();
 
     std::string_view space;
 
@@ -54,18 +54,17 @@ bool Initialize() {
         }
         mutf8_name = reinterpret_cast<const uint8_t *>("<%= intrinsic.method_name %>");
 
-        PandaVector<panda_file::Type> shorty;
-        PandaVector<std::string_view> ref_types;
+        Method::Proto proto;
+        auto &shorty = proto.GetShorty();
 
 %   types = [intrinsic.signature.ret] + intrinsic.signature.args
 %   types.each do |t|
         shorty.emplace_back(panda_file::Type::TypeId::<%= get_shorty_type(t) %>);
 %     if object_type?(t)
-        ref_types.emplace_back("<%= get_object_descriptor(t) %>");
+        proto.GetRefTypes().emplace_back("<%= get_object_descriptor(t) %>");
 %     end
 %   end
 
-        auto proto = Method::Proto(shorty, ref_types);
         auto method = klass->GetDirectMethod(mutf8_name, proto);
         if (method == nullptr) {
             LOG(ERROR, RUNTIME) << "Cannot find method '<%= intrinsic.class_name %>.<%= intrinsic.method_name %>'";

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,14 @@ struct FreeInfo {
     uint32_t alloc_id = 0;
 };
 
-static void SkipString(std::istream *in)
+static void SkipString(std::istream &in)
 {
     uint32_t len = 0;
-    in->read(reinterpret_cast<char *>(&len), sizeof(len));
-    if (!(*in)) {
+    in.read(reinterpret_cast<char *>(&len), sizeof(len));
+    if (!in) {
         return;
     }
-    in->seekg(len, std::ios_base::cur);
+    in.seekg(len, std::ios_base::cur);
 }
 
 TEST(DetailAllocTrackerTest, NoAllocs)
@@ -77,7 +77,7 @@ TEST(DetailAllocTrackerTest, OneAlloc)
     ASSERT_EQ(1, hdr.num_stacktraces);
 
     // skip stacktrace
-    SkipString(&out);
+    SkipString(out);
     ASSERT_FALSE(out.eof());
     AllocInfo info;
     out.read(reinterpret_cast<char *>(&info), sizeof(info));
@@ -105,7 +105,7 @@ TEST(DetailAllocTrackerTest, AllocAndFree)
     ASSERT_EQ(1, hdr.num_stacktraces);
 
     // skip stacktrace
-    SkipString(&out);
+    SkipString(out);
     ASSERT_FALSE(out.eof());
     AllocInfo alloc;
     FreeInfo free;

@@ -20,18 +20,29 @@ set(PANDA_SYSROOT ${TOOLCHAIN_SYSROOT})
 set(CMAKE_SYSTEM_NAME OHOS)
 set(CMAKE_SYSTEM_PROCESSOR aarch64)
 set(CMAKE_PREFIX_PATH ${TOOLCHAIN_SYSROOT})
-set(CMAKE_SYSROOT ${TOOLCHAIN_SYSROOT})
 set(CMAKE_C_COMPILER_TARGET ${PANDA_TRIPLET})
 set(CMAKE_CXX_COMPILER_TARGET ${PANDA_TRIPLET})
 set(CMAKE_ASM_COMPILER_TARGET ${PANDA_TRIPLET})
 
-# Select lld early so enable_language() can detect compilers
-add_link_options(
-  -fuse-ld=lld
-  --rtlib=compiler-rt
-)
 link_libraries(unwind)
 
-include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
-set_c_compiler("${TOOLCHAIN_CLANG_ROOT}/bin/clang")
-set_cxx_compiler("${TOOLCHAIN_CLANG_ROOT}/bin/clang++")
+if(NOT PANDA_TOOLCHAIN_INITIALIZED)
+    # Toolchain file can be sourced multiple times with different sets of variables.
+    # Prevent failures if TOOLCHAIN_CLANG_ROOT is not set this time but still fail
+    # if TOOLCHAIN_CLANG_ROOT is not specified at all.
+    if(NOT TOOLCHAIN_CLANG_ROOT)
+        set(CMAKE_AR           "/bin/false" CACHE FILEPATH "")
+        set(CMAKE_RANLIB       "/bin/false" CACHE FILEPATH "")
+        set(CMAKE_C_COMPILER   "/bin/false" CACHE FILEPATH "")
+        set(CMAKE_CXX_COMPILER "/bin/false" CACHE FILEPATH "")
+    else()
+        set(CMAKE_AR           "${TOOLCHAIN_CLANG_ROOT}/bin/llvm-ar" CACHE FILEPATH "" FORCE)
+        set(CMAKE_RANLIB       "${TOOLCHAIN_CLANG_ROOT}/bin/llvm-ranlib" CACHE FILEPATH "" FORCE)
+        set(CMAKE_C_COMPILER   "${TOOLCHAIN_CLANG_ROOT}/bin/clang"   CACHE FILEPATH "" FORCE)
+        set(CMAKE_CXX_COMPILER "${TOOLCHAIN_CLANG_ROOT}/bin/clang++" CACHE FILEPATH "" FORCE)
+    endif()
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --rtlib=compiler-rt -fuse-ld=lld" CACHE STRING "" FORCE)
+    set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} --rtlib=compiler-rt -fuse-ld=lld"    CACHE STRING "" FORCE)
+    # Do not add linker flags multiple times when variables persist across toolchain file invocation.
+    set(PANDA_TOOLCHAIN_INITIALIZED ON CACHE STRING "" FORCE)
+endif()

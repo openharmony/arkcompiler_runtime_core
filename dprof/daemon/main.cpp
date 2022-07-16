@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ static std::unique_ptr<AppData> ProcessingConnect(const os::unique_fd::UniqueFd 
             return nullptr;
         }
         if (!serializer::BufferToStruct<ipc::protocol::APP_INFO_FCOUNT>(msg.GetData(), msg.GetSize(), ipcAppInfo)) {
-            LOG(ERROR, DPROF) << "Cannot convert data to an app info message";
+            LOG(ERROR, DPROF) << "Cannot convert data to a app info message";
             return nullptr;
         }
     }
@@ -146,7 +146,7 @@ public:
 
             auto appData = ProcessingConnect(clientSock);
             if (!appData) {
-                LOG(ERROR, DPROF) << "Cannot process connection";
+                LOG(ERROR, DPROF) << "Connection cannot be processed";
                 continue;
             }
 
@@ -214,7 +214,7 @@ static void SetupSignals()
 {
     struct sigaction sa {
     };
-    PLOG_IF(::memset_s(&sa, sizeof(sa), 0, sizeof(sa)) != EOK, FATAL, DPROF) << "memset_s failed";
+    PLOG_IF(::memset_s(&sa, sizeof(sa), 0, sizeof(sa)) != 0, FATAL, DPROF) << "memset_s failed";
     sa.sa_handler = SignalHandler;  // NOLINT(cppcoreguidelines-pro-type-union-access)
     PLOG_IF(::sigemptyset(&sa.sa_mask) == -1, FATAL, DPROF) << "sigemptyset() failed";
 

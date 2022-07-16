@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #Assert that operation jgtz works fine
-.function u1 main(){
+.function i32 main(){
     ldai 2
     jgtz label
     ldai 1

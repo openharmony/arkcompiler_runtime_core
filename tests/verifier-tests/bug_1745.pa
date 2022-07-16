@@ -14,7 +14,7 @@
 .function void f1(i32 a0) {
     return.void
 }
-.function u1 main() {
+.function i32 main() {
     movi v7, 0
     call.short f1, v7
 #

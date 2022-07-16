@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,23 +30,23 @@ constexpr uint64_t NUM_RANDOM_TESTS = 100;
 constexpr uint64_t NUM_ITER_PER_TEST = 1000;
 constexpr uintptr_t RANDOM_AREA_SIZE = 100000;
 
-std::default_random_engine g_generator;
-std::uniform_int_distribution<uintptr_t> g_distribution(0, MAX_PTR);
+std::default_random_engine generator;
+std::uniform_int_distribution<uintptr_t> distribution(0, MAX_PTR);
 
-// function to generate random uintptr_t
-static uintptr_t random_uintptr()
+// support function to generate random uintptr_t
+static uintptr_t RandomUintptr()
 {
-    return g_distribution(g_generator);
+    return distribution(generator);
 }
 
 // function to generate MemRange randomly from given range
-static panda::mem::MemRange randomMemRange(uintptr_t min_start, uintptr_t max_end)
+static panda::mem::MemRange RandomMemRange(uintptr_t min_start, uintptr_t max_end)
 {
     ASSERT(max_end > min_start);
 
     uintptr_t rand_1, rand_2;
-    rand_1 = min_start + random_uintptr() % (max_end - min_start + 1);
-    rand_2 = min_start + random_uintptr() % (max_end - min_start + 1);
+    rand_1 = min_start + RandomUintptr() % (max_end - min_start + 1);
+    rand_2 = min_start + RandomUintptr() % (max_end - min_start + 1);
 
     if (rand_1 < rand_2) {
         return panda::mem::MemRange(rand_1, rand_2);
@@ -83,6 +83,9 @@ TEST(MemRangeTest, BasicTest)
     ASSERT_FALSE(mem_range.IsAddressInRange(START - 1));
     ASSERT_FALSE(mem_range.IsAddressInRange(END + 1));
     ASSERT_FALSE(mem_range.IsAddressInRange(HIGHER_THAN_END));
+
+    // test mem_range with the same start and end
+    auto mem_range_with_one_element = panda::mem::MemRange(START, START);
 }
 
 // test constructor with incorrect args
@@ -90,7 +93,6 @@ TEST(MemRangeTest, AssertTest)
 {
     constexpr uintptr_t MIN = 10000, MAX = 50000;
 
-    ASSERT_DEBUG_DEATH(panda::mem::MemRange(MIN, MIN), "");
     ASSERT_DEBUG_DEATH(panda::mem::MemRange(MAX, MIN), "");
 }
 
@@ -133,15 +135,15 @@ TEST(MemRangeTest, IntersectTest)
 }
 
 // function to conduct num_iter random tests with addresses in given bounds
-static void randomTestInBounds(uintptr_t from, uintptr_t to, uint64_t num_iter = NUM_ITER_PER_TEST)
+static void RandomTestInBounds(uintptr_t from, uintptr_t to, uint64_t num_iter = NUM_ITER_PER_TEST)
 {
     ASSERT(from < to);
 
     panda::mem::MemRange mem_range_1(0, 1), mem_range_2(0, 1);
     // check intersection via cycle
     for (uint64_t iter = 0; iter < num_iter; iter++) {
-        mem_range_1 = randomMemRange(from, to);
-        mem_range_2 = randomMemRange(from, to);
+        mem_range_1 = RandomMemRange(from, to);
+        mem_range_2 = RandomMemRange(from, to);
 
         if (mem_range_1.GetStartAddress() < mem_range_2.GetStartAddress()) {
             for (uintptr_t i = mem_range_1.GetStartAddress(); i < MAX_PTR; i++) {
@@ -188,20 +190,20 @@ TEST(MemRangeTest, RandomIntersectTest)
     seed_ = 0xDEADBEEF;
 #endif
     srand(seed_);
-    g_generator.seed(seed_);
+    generator.seed(seed_);
 
-    // random tests in specified ranges
-    randomTestInBounds(0, RANDOM_AREA_SIZE);
-    randomTestInBounds(MAX_PTR - RANDOM_AREA_SIZE, MAX_PTR);
+    // random tests in interesting ranges
+    RandomTestInBounds(0, RANDOM_AREA_SIZE);
+    RandomTestInBounds(MAX_PTR - RANDOM_AREA_SIZE, MAX_PTR);
 
     // tests in random ranges
     uintptr_t position;
     for (uint64_t i = 0; i < NUM_RANDOM_TESTS; i++) {
-        position = random_uintptr();
+        position = RandomUintptr();
         if (position > RANDOM_AREA_SIZE) {
-            randomTestInBounds(position - RANDOM_AREA_SIZE, position);
+            RandomTestInBounds(position - RANDOM_AREA_SIZE, position);
         } else {
-            randomTestInBounds(position, position + RANDOM_AREA_SIZE);
+            RandomTestInBounds(position, position + RANDOM_AREA_SIZE);
         }
     }
 }

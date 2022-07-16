@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_REGION_SPACE_INL_H_
-#define PANDA_RUNTIME_MEM_REGION_SPACE_INL_H_
+#ifndef PANDA_RUNTIME_MEM_REGION_SPACE_INL_H
+#define PANDA_RUNTIME_MEM_REGION_SPACE_INL_H
 
 #include "runtime/mem/region_space.h"
+#include "libpandabase/utils/asan_interface.h"
 
 namespace panda::mem {
 
@@ -55,14 +55,17 @@ private:
 };
 
 template <bool atomic>
-void *Region::Alloc(size_t size, Alignment align)
+void *Region::Alloc(size_t aligned_size)
 {
     RegionAllocCheck alloc(this);
+    ASSERT(AlignUp(aligned_size, DEFAULT_ALIGNMENT_IN_BYTES) == aligned_size);
+    ASSERT(!IsTLAB());
     uintptr_t old_top;
     uintptr_t new_top;
-    size_t aligned_size = AlignUp(size, GetAlignmentInBytes(align));
     if (atomic) {
         auto atomic_top = reinterpret_cast<std::atomic<uintptr_t> *>(&top_);
+        // Atomic with relaxed order reason: data race with top_ with no synchronization or ordering constraints imposed
+        // on other reads or writes
         old_top = atomic_top->load(std::memory_order_relaxed);
         do {
             new_top = old_top + aligned_size;
@@ -70,6 +73,7 @@ void *Region::Alloc(size_t size, Alignment align)
                 return nullptr;
             }
         } while (!atomic_top->compare_exchange_weak(old_top, new_top, std::memory_order_relaxed));
+        ASAN_UNPOISON_MEMORY_REGION(ToVoidPtr(old_top), aligned_size);
         return ToVoidPtr(old_top);
     }
     new_top = top_ + aligned_size;
@@ -78,24 +82,31 @@ void *Region::Alloc(size_t size, Alignment align)
     }
     old_top = top_;
     top_ = new_top;
+
+    ASAN_UNPOISON_MEMORY_REGION(ToVoidPtr(old_top), aligned_size);
     return ToVoidPtr(old_top);
 }
 
 template <typename ObjectVisitor>
 void Region::IterateOverObjects(const ObjectVisitor &visitor)
 {
+    // This method doesn't work for nonmovable regions
+    ASSERT(!HasFlag(RegionFlag::IS_NONMOVABLE));
     // currently just for gc stw phase, so check it is not in allocating state
     RegionIterateCheck iterate(this);
-    auto cur_ptr = Begin();
-    auto end_ptr = Top();
-    while (cur_ptr < end_ptr) {
-        auto object_header = reinterpret_cast<ObjectHeader *>(cur_ptr);
-        size_t object_size = GetObjectSize(object_header);
-        visitor(object_header);
-        cur_ptr = AlignUp(cur_ptr + object_size, DEFAULT_ALIGNMENT_IN_BYTES);
-    }
-    if (tlab_ != nullptr) {
-        tlab_->IterateOverObjects(visitor);
+    if (!IsTLAB()) {
+        auto cur_ptr = Begin();
+        auto end_ptr = Top();
+        while (cur_ptr < end_ptr) {
+            auto object_header = reinterpret_cast<ObjectHeader *>(cur_ptr);
+            size_t object_size = GetObjectSize(object_header);
+            visitor(object_header);
+            cur_ptr = AlignUp(cur_ptr + object_size, DEFAULT_ALIGNMENT_IN_BYTES);
+        }
+    } else {
+        for (auto i : *tlab_vector_) {
+            i->IterateOverObjects(visitor);
+        }
     }
 }
 
@@ -110,6 +121,21 @@ void RegionSpace::IterateRegions(RegionVisitor visitor)
     }
 }
 
+template <bool cross_region>
+bool RegionSpace::ContainObject(const ObjectHeader *object) const
+{
+    return GetRegion<cross_region>(object) != nullptr;
+}
+
+template <bool cross_region>
+bool RegionSpace::IsLive(const ObjectHeader *object) const
+{
+    auto *region = GetRegion<cross_region>(object);
+
+    // check if the object is live in the range
+    return region != nullptr && region->IsInAllocRange(object);
+}
+
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_REGION_SPACE_INL_H_
+#endif  // PANDA_RUNTIME_MEM_REGION_SPACE_INL_H

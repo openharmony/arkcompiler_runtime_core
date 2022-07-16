@@ -52,9 +52,11 @@ set(SOURCES
     debug_data_accessor.cpp
     field_data_accessor.cpp
     file.cpp
+    file_reader.cpp
     file_writer.cpp
     file_items.cpp
     file_item_container.cpp
+    pgo.cpp
     class_data_accessor.cpp
     code_data_accessor.cpp
     method_data_accessor.cpp
@@ -72,6 +74,13 @@ target_include_directories(arkfile
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/include
 )
+
+# Disable warning about offsetof usage for non-standard layout types.
+# In C++17 offsetof is conditionally implemented for such types, so
+# compiler should issue error if it doesn't implemented offsetof for
+# them. Also we use static asserts to ensure that offsetof works correctly
+# for non-standard layout types.
+target_compile_options(arkfile PUBLIC -Wno-invalid-offsetof)
 
 set(LINK_LIBRARIES arkbase arkziparchive c_secshared)
 if (NOT (PANDA_TARGET_MACOS OR PANDA_TARGET_OHOS))
@@ -109,9 +118,13 @@ endif()
 
 panda_add_sanitizers(TARGET arkfile SANITIZERS ${PANDA_SANITIZERS_LIST})
 
-if (PANDA_ENABLE_AFL)
-    include("${PANDA_ROOT}/fuzzing/Fuzzing.cmake")
-    panda_substitute_libs(TARGET arkfile LIBS arkbase c_secshared arkziparchive)
+add_check_style(".")
+
+if (TARGET host_tools_depends)
+    add_dependencies(host_tools_depends arkfile)
 endif()
 
-add_check_style(".")
+if (DEFINED PANDA_ROOT_BINARY_DIR)
+    # Special case for host tool build.
+    target_include_directories(arkfile PUBLIC ${PANDA_ROOT_BINARY_DIR}/libpandafile/include)
+endif()

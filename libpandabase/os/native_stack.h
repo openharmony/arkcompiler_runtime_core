@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_NATIVE_STACK_H_
-#define PANDA_LIBPANDABASE_OS_NATIVE_STACK_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H_
+#define PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H_
 
 #include "os/thread.h"
 #if defined(PANDA_TARGET_UNIX)
-#include "os/unix/native_stack.h"
+#include "platforms/unix/libpandabase/native_stack.h"
 #endif  // PANDA_TARGET_UNIX
 
 #include <string>
@@ -57,5 +57,4 @@ std::string ChangeJaveStackFormat(const char *descriptor);
 #endif  // PANDA_TARGET_UNIX
 
 }  // namespace panda::os::native_stack
-
-#endif  // PANDA_LIBPANDABASE_OS_NATIVE_STACK_H_
+#endif  // PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H_

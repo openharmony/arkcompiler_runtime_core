@@ -13,7 +13,6 @@
 # limitations under the License.
 
 set -e
-
 TOP=$(pwd)
 CMD=${TOP}/panda/isa/gen.rb
 ISA_DATA=${TOP}/panda/isa/isa.yaml
@@ -44,7 +43,7 @@ do
             HAS_ISA=true
             ;;
         *)
-            echo "unknown argument"
+            echo "unkonw argument"
             exit 1
             ;;
     esac

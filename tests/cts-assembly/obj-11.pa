@@ -25,7 +25,7 @@
     return.void
 }
 
-.function u1 main(){
+.function i32 main(){
     movi v0, 7
     movi v3, 2
     newarr v1, v0, Asm[]

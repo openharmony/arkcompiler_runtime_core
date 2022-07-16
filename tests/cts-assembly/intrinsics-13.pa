@@ -14,7 +14,7 @@
 .record IO <external>
 .function void IO.printI32(i32 a0) <external>
 
-.function u1 main(){
+.function i32 main(){
     movi v0, 23
     call.short IO.printI32, v0, v0
     ldai 0

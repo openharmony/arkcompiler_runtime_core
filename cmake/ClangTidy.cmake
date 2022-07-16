@@ -14,10 +14,16 @@
 option(PANDA_ENABLE_CLANG_TIDY "Enable clang-tidy checks during compilation" true)
 
 # There seems to be a bug in either clang-tidy or CMake:
-# When clang/gcc is used for cross-compilation, it is ran on host and use definitions and options for host
+# When clang/gcc is used for cross-compilation, it is ran on host and use defines and options for host
 # For example for arm32 cross-compilation Clang-Tidy:
 #   - don't know about -march=armv7-a
 #   - believes that size of pointer is 64 instead of 32 for aarch32
+# TODO: Retry once we upgrade the checker.
+if(CMAKE_CROSSCOMPILING AND PANDA_TARGET_ARM32)
+    set(PANDA_ENABLE_CLANG_TIDY false)
+endif()
+
+# TODO (runtime): Remove this when enable tidy on qemu builds.
 if(CMAKE_CROSSCOMPILING)
     set(PANDA_ENABLE_CLANG_TIDY false)
 endif()
@@ -111,7 +117,7 @@ function(panda_add_to_clang_tidy)
         "${CLANG_TIDY}"
         "-config="
         "-format-style=file"
-        "-header-filter='^(${CMAKE_SOURCE_DIR}|${CMAKE_BINARY_DIR}).*/(assembler|compiler|debugger|libpandabase|libpandafile|runtime|class2panda)/.*'"
+        #"-header-filter='^(${CMAKE_CURRENT_SOURCE_DIR}|${CMAKE_CURRENT_BINARY_DIR}).*'"
         "-p='${PANDA_BINARY_ROOT}'"
     )
 
@@ -133,30 +139,32 @@ function(panda_add_to_clang_tidy)
         "-hicpp-vararg"  # alias for cppcoreguidelines-pro-type-vararg
         "-hicpp-member-init" # alias for cppcoreguidelines-pro-type-member-init
         "-hicpp-move-const-arg" # alias for performance-move-const-arg
+        "-cert-oop54-cpp" # alias for bugprone-unhandled-self-assignment
         # explicitly disabled checks
         "-bugprone-macro-parentheses"  # disabled because it is hard to write macros with types with it
         "-llvm-header-guard"  # disabled because of incorrect root prefix
         "-llvm-include-order"  # disabled because conflicts with the clang-format
         "-readability-identifier-naming" # disabled because we will use little-hump-style
-        "google-runtime-references" # disabled to use non-const references
+        "-google-runtime-references" # disabled to use non-const references
         "-fuchsia-trailing-return"  # disabled because we have a lot of false positives and it is stylistic check
         "-fuchsia-default-arguments-calls" # disabled because we use functions with default arguments a lot
         "-fuchsia-default-arguments-declarations" # disabled because we use functions with default arguments a lot
         "-modernize-use-trailing-return-type" # disabled as a stylistic check
         "-clang-analyzer-optin.cplusplus.UninitializedObject" # disabled due to instability on clang-9 and clang-10
-        "-readability-static-accessed-through-instance"
-        "-readability-convert-member-functions-to-static"
-        "-bugprone-sizeof-expression"
-        "-bugprone-branch-clone"
-        "-cppcoreguidelines-owning-memory"
-        "-cppcoreguidelines-pro-bounds-array-to-pointer-decay"
-        "-cppcoreguidelines-pro-bounds-constant-array-index"
-        "-cppcoreguidelines-pro-type-const-cast"
-        "-cppcoreguidelines-pro-type-reinterpret-cast"
-        "-cppcoreguidelines-pro-type-static-cast-downcast"
-        "-fuchsia-default-arguments"
-        "-fuchsia-overloaded-operator"
-        "-modernize-use-nodiscard"
+        "-readability-static-accessed-through-instance" # TODO(knazarov) fix all occurences
+        "-readability-convert-member-functions-to-static" # TODO(knazarov) fix all occurences
+        "-bugprone-sizeof-expression" # TODO(knazarov) fix all occurences
+        "-bugprone-branch-clone" # TODO(knazarov) fix all occurences
+        # TODOs
+        "-cppcoreguidelines-owning-memory"  # TODO(dtrubenkov): look if we want to use GSL or gsl-lite
+        "-cppcoreguidelines-pro-bounds-array-to-pointer-decay"  # TODO(dtrubenkov): look into issue with ASSERT
+        "-cppcoreguidelines-pro-bounds-constant-array-index"  # TODO(dtrubenkov): look if we want to use GSL or gsl-lite
+        "-cppcoreguidelines-pro-type-const-cast"  # TODO(dtrubenkov): consider to remove from global list
+        "-cppcoreguidelines-pro-type-reinterpret-cast"  # TODO(dtrubenkov): consider to remove from global list
+        "-cppcoreguidelines-pro-type-static-cast-downcast"  # TODO(dtrubenkov): look into it
+        "-fuchsia-default-arguments"  # TODO(dtrubenkov): look into it
+        "-fuchsia-overloaded-operator"  # TODO(dtrubenkov): consider to remove from global list
+        "-modernize-use-nodiscard"   # TODO(dtrubenkov): look into it
         "-cert-dcl50-cpp"  # ailas for cppcoreguidelines-pro-type-vararg
         # candidates for removal:
         "-hicpp-noexcept-move"  # For some reason become failed in DEFAULT_MOVE_SEMANTIC

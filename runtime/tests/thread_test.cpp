@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
 
 #include "gtest/gtest.h"
 #include "runtime/include/runtime.h"
-#include "runtime/include/thread.h"
 
 namespace panda::test {
 
 class ThreadTest : public testing::Test {
 public:
     MTManagedThread *thread;
-    ThreadTest() : thread(nullptr)
+    ThreadTest()
     {
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(false);
@@ -34,6 +33,7 @@ public:
          */
         options.SetCompilerEnableJit(false);
         options.SetGcType("epsilon");
+        Logger::InitializeStdLogging(Logger::Level::ERROR, 0);
         Runtime::Create(options);
         thread = MTManagedThread::GetCurrent();
     }

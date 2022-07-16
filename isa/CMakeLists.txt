@@ -14,21 +14,17 @@
 project(isa)
 
 set(ISA_FILE "${CMAKE_BINARY_DIR}/isa/isa.yaml")
-set(ISA_CORE_FILE "${PROJECT_SOURCE_DIR}/isa.yaml")
 set(ISA_ASSERTS "${PROJECT_SOURCE_DIR}/asserts.rb")
-set(ISA_COMBINE "${PROJECT_SOURCE_DIR}/combine.rb")
 set(ISAPI "${PROJECT_SOURCE_DIR}/isapi.rb")
-set(ISA_PLUGIN_FILES "")
 
-string(REPLACE ";" "," ISA_PLUGIN_FILES_STR "${ISA_PLUGIN_FILES}")
+add_custom_target(isa_combine)
+set_target_properties(isa_combine PROPERTIES ISA_PLUGIN_FILES "")
 
-# ISA combine
-add_custom_command(OUTPUT ${ISA_FILE}
-    COMMENT "Combine ISA files"
-    COMMAND ${ISA_COMBINE} -d "${ISA_CORE_FILE},${ISA_PLUGIN_FILES_STR}" -o ${ISA_FILE}
-    DEPENDS ${ISA_COMBINE} ${ISA_CORE_FILE} ${ISA_PLUGIN_FILES}
-)
-add_custom_target(isa_combine DEPENDS ${ISA_FILE})
+function(add_isa_plugin YAML_FILE_PATH)
+    get_target_property(YAML_FILES isa_combine ISA_PLUGIN_FILES)
+    list(APPEND YAML_FILES ${YAML_FILE_PATH})
+    set_target_properties(isa_combine PROPERTIES ISA_PLUGIN_FILES "${YAML_FILES}")
+endfunction()
 
 # Check ISA_FILE content
 
@@ -45,7 +41,6 @@ add_dependencies(isa_assert isa_combine)
 
 # Template generation
 set(TEMPLATES
-    instructions.txt.erb
     isa.md.erb
 )
 panda_isa_gen(TEMPLATES ${TEMPLATES})

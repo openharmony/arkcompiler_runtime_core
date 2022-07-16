@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ bool Parser::ParseRecordFields()
     if (!open_ && *context_ == Token::Type::DEL_BRACE_L) {
         curr_record_->body_location.begin = GetCurrentPosition(false);
         open_ = true;
+
         ++context_;
     }
 
@@ -49,7 +50,9 @@ bool Parser::ParseRecordFields()
     if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
         curr_record_->body_location.end = GetCurrentPosition(true);
         ++context_;
+
         open_ = false;
+
         return true;
     }
 
@@ -84,10 +87,12 @@ bool Parser::ParseFieldName()
 
         auto match_names = [&field_name](const pandasm::Field &f) { return field_name == f.name; };
         const auto iter = std::find_if(curr_record_->field_list.begin(), curr_record_->field_list.end(), match_names);
+
         if (iter != curr_record_->field_list.end()) {
             if (iter->is_defined) {
                 context_.err =
-                    GetError("Repeated field names in the same record.", Error::ErrorType::ERR_REPEATING_FIELD_NAME);
+                    GetError("Repeating field names in the same record.", Error::ErrorType::ERR_REPEATING_FIELD_NAME);
+
                 return false;
             }
 
@@ -95,13 +100,15 @@ bool Parser::ParseFieldName()
         }
 
         curr_fld_ = &(curr_record_->field_list[curr_record_->field_list.size() - 1]);
+
         curr_fld_->name = field_name;
 
         ++context_;
+
         return true;
     }
 
-    context_.err = GetError("Invalid field name.", Error::ErrorType::ERR_BAD_OPERATION_NAME);
+    context_.err = GetError("Invalid name of field.", Error::ErrorType::ERR_BAD_OPERATION_NAME);
 
     return false;
 }
@@ -126,6 +133,7 @@ bool Parser::ParseType(Type *type)
     }
 
     *type = Type(component_name, rank);
+
     if (type->IsArray()) {
         program_.array_types.insert(*type);
     }
@@ -135,7 +143,7 @@ bool Parser::ParseType(Type *type)
 
 bool Parser::ParseFieldType()
 {
-    LOG(DEBUG, ASSEMBLER) << "started searching for field type value (line " << line_stric_
+    LOG(DEBUG, ASSEMBLER) << "started searching field type value (line " << line_stric_
                           << "): " << context_.tokens[context_.number - 1].whole_line;
 
     if (!TypeValidName()) {
@@ -180,6 +188,307 @@ bool Parser::ParseRecordField()
     ParseMetaDef();
 
     return context_.Mask();
+}
+
+bool Parser::IsConstArray()
+{
+    if ((curr_array_->literals_.size() >= INTRO_CONST_ARRAY_LITERALS_NUMBER) &&
+        (curr_array_->literals_[0].tag_ == panda_file::LiteralTag::TAGVALUE)) {
+        return true;
+    }
+    return false;
+}
+
+bool Parser::ArrayElementsValidNumber()
+{
+    if (!IsConstArray()) {
+        return true;
+    }
+
+    ASSERT(curr_array_->literals_.size() > 1);
+
+    auto init_size = std::get<uint32_t>(curr_array_->literals_[1].value_);
+    if (init_size < 1) {
+        return false;
+    }
+    if (curr_array_->literals_.size() != init_size + INTRO_CONST_ARRAY_LITERALS_NUMBER) {
+        return false;
+    }
+
+    return true;
+}
+
+void Parser::ParseAsArray(const std::vector<Token> &tokens)
+{
+    LOG(DEBUG, ASSEMBLER) << "started parsing of array (line " << line_stric_ << "): " << tokens[0].whole_line;
+    func_def_ = false;
+    record_def_ = false;
+    array_def_ = true;
+
+    if (!open_) {
+        ++context_;
+    } else {
+        context_.err =
+            GetError("No one array can be defined inside another array.", Error::ErrorType::ERR_BAD_DEFINITION);
+        return;
+    }
+
+    if (ParseArrayFullSign()) {
+        if (!open_ && *context_ == Token::Type::DEL_BRACE_L) {
+            ++context_;
+
+            LOG(DEBUG, ASSEMBLER) << "array body is open, line " << line_stric_ << ": " << tokens[0].whole_line;
+
+            open_ = true;
+        }
+
+        uint32_t iter_number = 1;
+        if (IsConstArray()) {
+            iter_number = std::get<uint32_t>(curr_array_->literals_[1].value_);
+        }
+
+        if (iter_number < 1) {
+            context_.err =
+                GetError("Сonstant array must contain at least one element.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
+            return;
+        }
+
+        for (uint32_t i = 0; i < iter_number; i++) {
+            if (open_ && !context_.Mask() && *context_ != Token::Type::DEL_BRACE_R) {
+                ParseArrayElements();
+            } else {
+                break;
+            }
+        }
+
+        if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
+            if (!ArrayElementsValidNumber()) {
+                context_.err =
+                    GetError("Constant array must contain at least one element.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
+                return;
+            }
+            LOG(DEBUG, ASSEMBLER) << "array body is closed, line " << line_stric_ << ": " << tokens[0].whole_line;
+
+            ++context_;
+
+            open_ = false;
+        }
+    }
+}
+
+bool Parser::ParseArrayElements()
+{
+    if (!open_ && *context_ == Token::Type::DEL_BRACE_L) {
+        open_ = true;
+
+        ++context_;
+    }
+
+    if (!open_) {
+        context_.err = GetError("Expected keyword.", Error::ErrorType::ERR_BAD_KEYWORD);
+        return false;
+    }
+
+    if (context_.Mask()) {
+        return true;
+    }
+
+    if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
+        if (!ArrayElementsValidNumber()) {
+            context_.err =
+                GetError("Constant array must contain at least one element.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
+            return false;
+        }
+        ++context_;
+
+        open_ = false;
+
+        return true;
+    }
+
+    curr_array_->literals_.push_back(panda::pandasm::LiteralArray::Literal());
+    curr_array_elem_ = &(curr_array_->literals_[curr_array_->literals_.size() - 1]);
+
+    LOG(DEBUG, ASSEMBLER) << "parse line " << line_stric_ << " as array elem (.array_elem value)";
+    if (!ParseArrayElement()) {
+        if (context_.err.err != Error::ErrorType::ERR_NONE) {
+            return false;
+        }
+
+        if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
+            ++context_;
+            open_ = false;
+
+            if (!ArrayElementsValidNumber()) {
+                context_.err =
+                    GetError("Constant array must contain at least one element.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
+                return false;
+            }
+        } else {
+            context_.err =
+                GetError("Expected a new array element on the next line.", Error::ErrorType::ERR_BAD_KEYWORD);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Parser::ParseArrayElement()
+{
+    if (IsConstArray()) {
+        curr_array_elem_->tag_ =
+            static_cast<panda_file::LiteralTag>(std::get<uint8_t>(curr_array_->literals_[0].value_));
+    } else {
+        if (!ParseArrayElementType()) {
+            return false;
+        }
+    }
+
+    if (context_.Mask()) {
+        context_.err =
+            GetError("Expected array element value.", Error::ErrorType::ERR_BAD_ARRAY_ELEMENT_MISSING_VALUE, +1);
+        return false;
+    }
+
+    if (!ParseArrayElementValue()) {
+        return false;
+    }
+
+    if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
+        ++context_;
+        open_ = false;
+
+        if (!ArrayElementsValidNumber()) {
+            context_.err =
+                GetError("Constant array must contain at least one element.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
+            return false;
+        }
+        return true;
+    }
+
+    return IsConstArray() ? true : context_.Mask();
+}
+
+bool Parser::ParseArrayElementType()
+{
+    LOG(DEBUG, ASSEMBLER) << "started searching array element type value (line " << line_stric_
+                          << "): " << context_.tokens[context_.number - 1].whole_line;
+
+    if (!TypeValidName()) {
+        context_.err = GetError("Not a correct type.", Error::ErrorType::ERR_BAD_ARRAY_ELEMENT_VALUE_TYPE);
+        return false;
+    }
+
+    Type type;
+    if (!ParseType(&type)) {
+        return false;
+    }
+
+    // workaround until #5776 is done
+    auto type_name = type.GetName();
+    std::replace(type_name.begin(), type_name.end(), '.', '/');
+    auto type_with_slash = Type(type_name, 0);
+
+    if (panda::pandasm::Type::IsPandaPrimitiveType(type.GetName())) {
+        curr_array_elem_->tag_ = panda::pandasm::LiteralArray::GetArrayTagFromComponentType(type.GetId());
+        if (program_.array_types.find(type) == program_.array_types.end()) {
+            program_.array_types.emplace(type, 1);
+        }
+    } else if (panda::pandasm::Type::IsStringType(type_with_slash.GetName(), program_.lang)) {
+        curr_array_elem_->tag_ = panda_file::LiteralTag::ARRAY_STRING;
+        if (program_.array_types.find(type_with_slash) == program_.array_types.end()) {
+            program_.array_types.emplace(type_with_slash, 1);
+        }
+    } else {
+        return false;
+    }
+
+    LOG(DEBUG, ASSEMBLER) << "array element type found (line " << line_stric_ << "): " << context_.GiveToken();
+
+    return true;
+}
+
+bool Parser::ParseArrayElementValueInteger()
+{
+    int64_t n;
+    if (!ParseInteger(&n)) {
+        context_.err =
+            GetError("Invalid value of array integer element.", Error::ErrorType::ERR_BAD_ARRAY_ELEMENT_VALUE_INTEGER);
+        return false;
+    }
+    if (curr_array_elem_->IsBoolValue()) {
+        curr_array_elem_->value_ = static_cast<bool>(n);
+    }
+    if (curr_array_elem_->IsByteValue()) {
+        curr_array_elem_->value_ = static_cast<uint8_t>(n);
+    }
+    if (curr_array_elem_->IsShortValue()) {
+        curr_array_elem_->value_ = static_cast<uint16_t>(n);
+    }
+    if (curr_array_elem_->IsIntegerValue()) {
+        curr_array_elem_->value_ = static_cast<uint32_t>(n);
+    }
+    if (curr_array_elem_->IsLongValue()) {
+        curr_array_elem_->value_ = static_cast<uint64_t>(n);
+    }
+    return true;
+}
+
+bool Parser::ParseArrayElementValueFloat()
+{
+    double n;
+    if (!ParseFloat(&n, !curr_array_elem_->IsFloatValue())) {
+        context_.err =
+            GetError("Invalid value of array float element.", Error::ErrorType::ERR_BAD_ARRAY_ELEMENT_VALUE_FLOAT);
+        return false;
+    }
+    if (curr_array_elem_->IsFloatValue()) {
+        curr_array_elem_->value_ = static_cast<float>(n);
+    } else {
+        curr_array_elem_->value_ = static_cast<double>(n);
+    }
+    return true;
+}
+
+bool Parser::ParseArrayElementValueString()
+{
+    if (context_.err.err != Error::ErrorType::ERR_NONE) {
+        return false;
+    }
+
+    auto res = ParseStringLiteral();
+    if (!res) {
+        context_.err =
+            GetError("Invalid value of array string element.", Error::ErrorType::ERR_BAD_ARRAY_ELEMENT_VALUE_STRING);
+        return false;
+    }
+    curr_array_elem_->value_ = res.value();
+    return true;
+}
+
+bool Parser::ParseArrayElementValue()
+{
+    if (curr_array_elem_->IsBoolValue() || curr_array_elem_->IsByteValue() || curr_array_elem_->IsShortValue() ||
+        curr_array_elem_->IsIntegerValue() || curr_array_elem_->IsLongValue()) {
+        if (!ParseArrayElementValueInteger()) {
+            return false;
+        }
+    }
+    if (curr_array_elem_->IsFloatValue() || curr_array_elem_->IsDoubleValue()) {
+        if (!ParseArrayElementValueFloat()) {
+            return false;
+        }
+    }
+    if (curr_array_elem_->IsStringValue()) {
+        if (!ParseArrayElementValueString()) {
+            return false;
+        }
+    }
+
+    ++context_;
+
+    return true;
 }
 
 bool Parser::ParseFunctionCode()
@@ -229,12 +538,13 @@ void Parser::ParseAsRecord(const std::vector<Token> &tokens)
     LOG(DEBUG, ASSEMBLER) << "started parsing of record (line " << line_stric_ << "): " << tokens[0].whole_line;
     func_def_ = false;
     record_def_ = true;
+    array_def_ = false;
 
     if (!open_) {
         ++context_;
     } else {
         context_.err =
-            GetError("No record can be defined inside another record.", Error::ErrorType::ERR_BAD_DEFINITION);
+            GetError("No one record can be defined inside another record.", Error::ErrorType::ERR_BAD_DEFINITION);
         return;
     }
 
@@ -244,9 +554,10 @@ void Parser::ParseAsRecord(const std::vector<Token> &tokens)
             if (!open_ && *context_ == Token::Type::DEL_BRACE_L) {
                 curr_record_->body_location.begin = GetCurrentPosition(false);
                 ++context_;
-                open_ = true;
 
                 LOG(DEBUG, ASSEMBLER) << "record body is open, line " << line_stric_ << ": " << tokens[0].whole_line;
+
+                open_ = true;
             }
 
             if (open_ && !context_.Mask() && *context_ != Token::Type::DEL_BRACE_R) {
@@ -260,6 +571,7 @@ void Parser::ParseAsRecord(const std::vector<Token> &tokens)
 
                 curr_record_->body_location.end = GetCurrentPosition(true);
                 ++context_;
+
                 open_ = false;
             }
         }
@@ -271,6 +583,7 @@ void Parser::ParseAsFunction(const std::vector<Token> &tokens)
     LOG(DEBUG, ASSEMBLER) << "started parsing of function (line " << line_stric_ << "): " << tokens[0].whole_line;
     record_def_ = false;
     func_def_ = true;
+    array_def_ = false;
 
     if (!open_) {
         ++context_;
@@ -286,9 +599,10 @@ void Parser::ParseAsFunction(const std::vector<Token> &tokens)
             if (!open_ && *context_ == Token::Type::DEL_BRACE_L) {
                 curr_func_->body_location.begin = GetCurrentPosition(false);
                 ++context_;
-                open_ = true;
 
                 LOG(DEBUG, ASSEMBLER) << "function body is open, line " << line_stric_ << ": " << tokens[0].whole_line;
+
+                open_ = true;
             }
 
             if (open_ && !context_.Mask() && *context_ != Token::Type::DEL_BRACE_R) {
@@ -324,6 +638,12 @@ void Parser::ParseAsBraceRight(const std::vector<Token> &tokens)
         curr_func_->body_location.end = GetCurrentPosition(true);
     } else if (record_def_) {
         curr_record_->body_location.end = GetCurrentPosition(true);
+    } else if (array_def_) {
+        if (!ArrayElementsValidNumber()) {
+            context_.err =
+                GetError("Constant array must contain at least one element.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
+            return;
+        }
     } else {
         LOG(FATAL, ASSEMBLER) << "Internal error: either function or record must be parsed here";
     }
@@ -372,32 +692,54 @@ void Parser::ParseResetFunctionLabelsAndParams()
 
 void Parser::ParseResetFunctionTable()
 {
-    for (const auto &k : program_.function_table) {
+    for (auto &k : program_.function_table) {
         if (!k.second.file_location->is_defined) {
             context_.err = Error("This function does not exist.", k.second.file_location->line_number,
                                  Error::ErrorType::ERR_BAD_ID_FUNCTION, "", k.second.file_location->bound_left,
                                  k.second.file_location->bound_right, k.second.file_location->whole_line);
             SetError();
         } else if (k.second.HasImplementation() != k.second.body_presence) {
-            context_.err =
-                Error("Inconsistent definition of the function and its metadata.", k.second.file_location->line_number,
-                      Error::ErrorType::ERR_BAD_DEFINITION_FUNCTION, "", k.second.file_location->bound_left,
-                      k.second.file_location->bound_right, k.second.file_location->whole_line);
+            context_.err = Error("Inconsistency of the definition of the function and its metadata.",
+                                 k.second.file_location->line_number, Error::ErrorType::ERR_BAD_DEFINITION_FUNCTION, "",
+                                 k.second.file_location->bound_left, k.second.file_location->bound_right,
+                                 k.second.file_location->whole_line);
             SetError();
         } else {
             for (auto insn_it = k.second.ins.begin(); insn_it != k.second.ins.end(); ++insn_it) {
                 bool is_calli = insn_it->opcode == Opcode::CALLI_DYN || insn_it->opcode == Opcode::CALLI_DYN_SHORT ||
                                 insn_it->opcode == Opcode::CALLI_DYN_RANGE;
-                if (is_calli || !insn_it->IsCall()) {
+                if (is_calli || !(insn_it->IsCall() || insn_it->IsCallRange())) {
                     continue;
                 }
 
                 bool is_initobj = insn_it->opcode == Opcode::INITOBJ || insn_it->opcode == Opcode::INITOBJ_SHORT ||
                                   insn_it->opcode == Opcode::INITOBJ_RANGE;
                 size_t diff = is_initobj ? 0 : 1;
+                auto func_name = insn_it->ids[0];
+
+                if (!IsSignatureOrMangled(func_name)) {
+                    const auto it_synonym = program_.function_synonyms.find(func_name);
+                    if (it_synonym == program_.function_synonyms.end()) {
+                        continue;
+                    } else if (it_synonym->second.size() > 1) {
+                        const auto &debug = insn_it->ins_debug;
+                        context_.err = Error("Unable to resolve ambiguous function call", debug.line_number,
+                                             Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES, "", debug.bound_left,
+                                             debug.bound_right, debug.whole_line);
+                        SetError();
+                        break;
+                    } else {
+                        insn_it->ids[0] = program_.function_synonyms.at(func_name)[0];
+                    }
+                }
+
                 if (insn_it->OperandListLength() - diff < program_.function_table.at(insn_it->ids[0]).GetParamsNum()) {
-                    auto insn_idx = std::distance(k.second.ins.begin(), insn_it);
-                    const auto &debug = curr_func_->ins[insn_idx].ins_debug;
+                    if (insn_it->IsCallRange() &&
+                        (static_cast<int>(insn_it->regs.size()) - static_cast<int>(diff) >= 0)) {
+                        continue;
+                    }
+
+                    const auto &debug = insn_it->ins_debug;
                     context_.err = Error("Function argument mismatch.", debug.line_number,
                                          Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH, "", debug.bound_left,
                                          debug.bound_right, debug.whole_line);
@@ -434,7 +776,6 @@ void Parser::ParseResetRecordTable()
         }
     }
 }
-
 void Parser::ParseResetTables()
 {
     if (err_.err != Error::ErrorType::ERR_NONE) {
@@ -461,7 +802,7 @@ void Parser::ParseAsLanguageDirective()
     }
 
     auto lang = context_.GiveToken();
-    auto res = extensions::LanguageFromString(lang);
+    auto res = panda::panda_file::LanguageFromString(lang);
     if (!res) {
         context_.err =
             GetError("Incorrect .language directive: Unknown language", Error::ErrorType::ERR_UNKNOWN_LANGUAGE);
@@ -528,7 +869,6 @@ Function::CatchBlock Parser::PrepareCatchBlock(bool is_catchall, size_t size, si
     } else {
         catch_block.catch_end_label = labels[CATCH_BEGIN];
     }
-
     return catch_block;
 }
 
@@ -576,7 +916,7 @@ void Parser::ParseAsCatchall(const std::vector<Token> &tokens)
 {
     std::string directive_name = *context_ == Token::Type::ID_CATCH ? ".catch" : ".catchall";
     if (!func_def_) {
-        context_.err = GetError(directive_name + " directive is outside a function body.",
+        context_.err = GetError(directive_name + " directive is located outside of a function body.",
                                 Error::ErrorType::ERR_INCORRECT_DIRECTIVE_LOCATION);
         return;
     }
@@ -613,7 +953,7 @@ bool Parser::ParseAfterLine(bool &is_first_statement)
     SetError();
 
     if (!context_.Mask() && err_.err == Error::ErrorType::ERR_NONE) {
-        context_.err = GetError("There should be nothing after.", Error::ErrorType::ERR_BAD_END);
+        context_.err = GetError("There can be nothing after.", Error::ErrorType::ERR_BAD_END);
     }
 
     if (err_.err != Error::ErrorType::ERR_NONE) {
@@ -676,6 +1016,7 @@ Expected<Program, Error> Parser::Parse(TokenSet &vectors_tokens, const std::stri
         LOG(DEBUG, ASSEMBLER) << "started parsing of line " << line_stric_ << ": " << tokens[0].whole_line;
 
         context_.Make(tokens);
+
         switch (*context_) {
             case Token::Type::ID_CATCH:
             case Token::Type::ID_CATCHALL: {
@@ -694,6 +1035,10 @@ Expected<Program, Error> Parser::Parse(TokenSet &vectors_tokens, const std::stri
                 ParseAsFunction(tokens);
                 break;
             }
+            case Token::Type::ID_ARR: {
+                ParseAsArray(tokens);
+                break;
+            }
             case Token::Type::DEL_BRACE_R: {
                 ParseAsBraceRight(tokens);
                 break;
@@ -703,6 +1048,8 @@ Expected<Program, Error> Parser::Parse(TokenSet &vectors_tokens, const std::stri
                     ParseFunctionCode();
                 } else if (record_def_) {
                     ParseRecordFields();
+                } else if (array_def_) {
+                    ParseArrayElements();
                 }
             }
         }
@@ -770,11 +1117,13 @@ bool IsNonDigit(char c)
 bool Parser::PrefixedValidName()
 {
     auto s = context_.GiveToken();
+
     if (!IsNonDigit(s[0])) {
         return false;
     }
 
     size_t i = 1;
+
     while (i < s.size()) {
         if (s[i] == '.') {
             ++i;
@@ -801,9 +1150,15 @@ bool Parser::FunctionValidName()
     return PrefixedValidName();
 }
 
+bool Parser::ArrayValidName()
+{
+    return PrefixedValidName();
+}
+
 bool Parser::LabelValidName()
 {
     auto token = context_.GiveToken();
+
     if (!IsNonDigit(token[0])) {
         return false;
     }
@@ -821,8 +1176,7 @@ bool Parser::LabelValidName()
 
 bool Parser::ParseLabel()
 {
-    LOG(DEBUG, ASSEMBLER) << "started searching for label (line " << line_stric_
-                          << "): " << context_.tokens[0].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "label search started (line " << line_stric_ << "): " << context_.tokens[0].whole_line;
 
     context_++;
 
@@ -847,11 +1201,11 @@ bool Parser::ParseLabel()
 
         } else {
             LOG(DEBUG, ASSEMBLER) << "label with non-standard character is detected, attempt to create a label is "
-                                     "supported, but this cannot be any label name (line "
+                                     "supposed, but this cannot be any label name (line "
                                   << line_stric_ << "): " << context_.GiveToken();
 
             context_.err = GetError(
-                "Invalid name of label. Label can only contain characters: '_', '0' - '9', 'a' - 'z', 'A' - 'Z'; and "
+                "Invalid name of label. Label contains only characters: '_', '0' - '9', 'a' - 'z', 'A' - 'Z'; and "
                 "starts with any letter or with '_'.",
                 Error::ErrorType::ERR_BAD_LABEL);
         }
@@ -868,8 +1222,7 @@ bool Parser::ParseLabel()
 
 static Opcode TokenToOpcode(Token::Type id)
 {
-    ASSERT(id > Token::Type::OPERATION);
-    ASSERT(id < Token::Type::KEYWORD);
+    ASSERT(id > Token::Type::OPERATION && id < Token::Type::KEYWORD);
     using utype = std::underlying_type_t<Token::Type>;
     return static_cast<Opcode>(static_cast<utype>(id) - static_cast<utype>(Token::Type::OPERATION) - 1);
 }
@@ -886,8 +1239,7 @@ bool Parser::ParseOperation()
         return false;
     }
 
-    LOG(DEBUG, ASSEMBLER) << "started searching for operation (line " << line_stric_
-                          << "): " << context_.tokens[0].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "operaion search started (line " << line_stric_ << "): " << context_.tokens[0].whole_line;
 
     if (*context_ > Token::Type::OPERATION && *context_ < Token::Type::KEYWORD) {
         SetOperationInformation();
@@ -895,7 +1247,7 @@ bool Parser::ParseOperation()
         context_.UpSignOperation();
         curr_ins_->opcode = TokenToOpcode(context_.id);
 
-        LOG(DEBUG, ASSEMBLER) << "operation is detected (line " << line_stric_ << "): " << context_.GiveToken()
+        LOG(DEBUG, ASSEMBLER) << "operatiuon is detected (line " << line_stric_ << "): " << context_.GiveToken()
                               << " (operand type: " << OperandTypePrint(curr_ins_->opcode) << ")";
 
         context_++;
@@ -905,7 +1257,7 @@ bool Parser::ParseOperation()
     LOG(DEBUG, ASSEMBLER) << "founded " << context_.GiveToken() << ", it is not an operation (line " << line_stric_
                           << ")";
 
-    context_.err = GetError("Invalid operation name.", Error::ErrorType::ERR_BAD_OPERATION_NAME);
+    context_.err = GetError("Invalid operation.", Error::ErrorType::ERR_BAD_OPERATION_NAME);
 
     return false;
 }
@@ -939,7 +1291,6 @@ bool Parser::ParseOperandVreg()
     }
 
     ++context_;
-
     return true;
 }
 
@@ -954,11 +1305,119 @@ bool Parser::ParseOperandCall()
         return false;
     }
 
-    std::string_view p = context_.GiveToken();
-    curr_ins_->ids.emplace_back(p.data(), p.length());
+    const auto p = std::string(context_.GiveToken().data(), context_.GiveToken().length());
+    curr_ins_->ids.emplace_back(p);
+
     AddObjectInTable(false, program_.function_table);
 
     ++context_;
+
+    std::string func_signature {};
+
+    if (!ParseOperandSignature(&func_signature)) {
+        return false;
+    }
+
+    if (func_signature.empty()) {
+        const auto it_synonym = program_.function_synonyms.find(curr_ins_->ids.back());
+        if (it_synonym == program_.function_synonyms.end()) {
+            return true;
+        }
+
+        if (it_synonym->second.size() > 1) {
+            context_.err = GetError("Unable to resolve ambiguous function call",
+                                    Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES);
+            return false;
+        }
+
+        program_.function_table.erase(p);
+    } else {
+        curr_ins_->ids.back() += func_signature;
+
+        if (program_.function_table.find(curr_ins_->ids.back()) == program_.function_table.end()) {
+            auto node_handle = program_.function_table.extract(p);
+            node_handle.key() = curr_ins_->ids.back();
+            program_.function_table.insert(std::move(node_handle));
+        } else {
+            program_.function_table.erase(p);
+        }
+    }
+
+    return true;
+}
+
+bool Parser::ParseOperandSignature(std::string *sign)
+{
+    if (*context_ != Token::Type::DEL_COLON) {
+        // no signature provided
+        return true;
+    }
+
+    ++context_;
+
+    if (*context_ != Token::Type::DEL_BRACKET_L) {
+        context_.err = GetError("Expected \'(\' before signature", Error::ErrorType::ERR_BAD_SIGNATURE);
+        return false;
+    }
+
+    ++context_;
+
+    *sign += ":(";
+
+    if (!ParseOperandSignatureTypesList(sign)) {
+        return false;
+    }
+
+    if (*context_ != Token::Type::DEL_BRACKET_R) {
+        context_.err = GetError("Expected \')\' at the end of the signature", Error::ErrorType::ERR_BAD_SIGNATURE);
+        return false;
+    }
+
+    *sign += ")";
+
+    ++context_;
+
+    return true;
+}
+
+bool Parser::ParseOperandSignatureTypesList(std::string *sign)
+{
+    bool comma = false;
+
+    while (true) {
+        if (context_.Mask()) {
+            return true;
+        }
+
+        if (*context_ != Token::Type::DEL_COMMA && *context_ != Token::Type::ID) {
+            break;
+        }
+
+        if (comma) {
+            *sign += ",";
+        }
+
+        if (!ParseFunctionArgComma(comma)) {
+            return false;
+        }
+
+        if (*context_ != Token::Type::ID) {
+            context_.err = GetError("Expected signature arguments", Error::ErrorType::ERR_BAD_SIGNATURE_PARAMETERS);
+            return false;
+        }
+
+        if (!TypeValidName()) {
+            context_.err = GetError("Expected valid type", Error::ErrorType::ERR_BAD_TYPE);
+            return false;
+        }
+
+        Type type;
+        if (!ParseType(&type)) {
+            return false;
+        }
+
+        *sign += type.GetName();
+    }
 
     return true;
 }
@@ -1022,8 +1481,9 @@ Expected<char, Error> Parser::ParseHexEscapeSequence(std::string_view s, size_t 
 
     for (size_t j = 0; j < HEX_SHIFT; j++) {
         char v = s[(*i)++];
+
         if (!IsHex(v)) {
-            return Unexpected(GetError("Invalid hexadecimal escape sequence",
+            return Unexpected(GetError("Invalid \\x escape sequence",
                                        Error::ErrorType::ERR_BAD_STRING_INVALID_HEX_ESCAPE_SEQUENCE, idx - HEX_SHIFT));
         }
 
@@ -1039,7 +1499,9 @@ Expected<char, Error> Parser::ParseHexEscapeSequence(std::string_view s, size_t 
 Expected<char, Error> Parser::ParseEscapeSequence(std::string_view s, size_t *i)
 {
     size_t idx = *i;
+
     char c = s[idx];
+
     if (IsOctal(c)) {
         return ParseOctalEscapeSequence(s, i);
     }
@@ -1079,19 +1541,20 @@ Expected<char, Error> Parser::ParseEscapeSequence(std::string_view s, size_t *i)
 
 std::optional<std::string> Parser::ParseStringLiteral()
 {
+    auto token = context_.GiveToken();
     if (*context_ != Token::Type::ID_STRING) {
         context_.err = GetError("Expected string literal", Error::ErrorType::ERR_BAD_OPERAND);
         return {};
     }
 
-    auto token = context_.GiveToken();
-
     size_t i = 1; /* skip leading quote */
     size_t len = token.length();
 
     std::string s;
+
     while (i < len - 1) {
         char c = token[i++];
+
         if (c != '\\') {
             s.append(1, c);
             continue;
@@ -1123,6 +1586,7 @@ bool Parser::ParseOperandString()
     }
 
     curr_ins_->ids.push_back(res.value());
+
     ++context_;
 
     return true;
@@ -1146,7 +1610,7 @@ bool Parser::ParseOperandComma()
     return true;
 }
 
-bool Parser::ParseOperandInteger()
+bool Parser::ParseInteger(int64_t *value)
 {
     if (context_.err.err != Error::ErrorType::ERR_NONE) {
         return false;
@@ -1166,20 +1630,17 @@ bool Parser::ParseOperandInteger()
         return false;
     }
 
-    int64_t n = IntegerNumber(p);
+    *value = IntegerNumber(p);
     if (errno == ERANGE) {
         context_.err =
             GetError("Too large immediate (length is more than 64 bit).", Error::ErrorType::ERR_BAD_INTEGER_WIDTH);
         return false;
     }
 
-    curr_ins_->imms.push_back(n);
-    ++context_;
-
     return true;
 }
 
-bool Parser::ParseOperandFloat(bool is_64bit)
+bool Parser::ParseFloat(double *value, bool is_64bit)
 {
     if (context_.err.err != Error::ErrorType::ERR_NONE) {
         return false;
@@ -1199,16 +1660,37 @@ bool Parser::ParseOperandFloat(bool is_64bit)
         return false;
     }
 
-    double n = FloatNumber(p, is_64bit);
+    *value = FloatNumber(p, is_64bit);
     if (errno == ERANGE) {
         context_.err =
             GetError("Too large immediate (length is more than 64 bit).", Error::ErrorType::ERR_BAD_FLOAT_WIDTH);
         return false;
     }
 
+    return true;
+}
+
+bool Parser::ParseOperandInteger()
+{
+    int64_t n;
+    if (!ParseInteger(&n)) {
+        return false;
+    }
+
     curr_ins_->imms.push_back(n);
     ++context_;
+    return true;
+}
 
+bool Parser::ParseOperandFloat(bool is_64bit)
+{
+    double n;
+    if (!ParseFloat(&n, is_64bit)) {
+        return false;
+    }
+
+    curr_ins_->imms.push_back(n);
+    ++context_;
     return true;
 }
 
@@ -1219,7 +1701,7 @@ bool Parser::ParseOperandLabel()
     }
 
     if (!LabelValidName()) {
-        context_.err = GetError("Invalid name of label.", Error::ErrorType::ERR_BAD_NAME_ID);
+        context_.err = GetError("Invalid name of Label.", Error::ErrorType::ERR_BAD_NAME_ID);
         return false;
     }
 
@@ -1239,12 +1721,11 @@ bool Parser::ParseOperandId()
     }
 
     if (*context_ != Token::Type::ID) {
-        context_.err = GetError("Expected label.", Error::ErrorType::ERR_BAD_OPERAND);
+        context_.err = GetError("Expected Label.", Error::ErrorType::ERR_BAD_OPERAND);
         return false;
     }
-
     if (!LabelValidName()) {
-        context_.err = GetError("Invalid name of label.", Error::ErrorType::ERR_BAD_NAME_ID);
+        context_.err = GetError("Invalid name of Label.", Error::ErrorType::ERR_BAD_NAME_ID);
         return false;
     }
 
@@ -1267,7 +1748,6 @@ bool Parser::ParseOperandType(Type::VerificationType ver_type)
         context_.err = GetError("Expected type.", Error::ErrorType::ERR_BAD_OPERAND);
         return false;
     }
-
     if (!TypeValidName()) {
         context_.err = GetError("Invalid name of type.", Error::ErrorType::ERR_BAD_NAME_ID);
         return false;
@@ -1279,11 +1759,12 @@ bool Parser::ParseOperandType(Type::VerificationType ver_type)
     }
 
     bool is_object = (context_.GiveToken() == "]") ? (false) : (true);
+
     if (is_object) {
         AddObjectInTable(false, program_.record_table);
 
         if (ver_type == Type::VerificationType::TYPE_ID_ARRAY) {
-            GetWarning("Unexpected type_id received! Expected array, but object given",
+            GetWarning("Unexpected type_id recieved! Expected array, but object given",
                        Error::ErrorType::WAR_UNEXPECTED_TYPE_ID);
         }
     } else {
@@ -1295,12 +1776,42 @@ bool Parser::ParseOperandType(Type::VerificationType ver_type)
         }
 
         if (ver_type == Type::VerificationType::TYPE_ID_OBJECT) {
-            GetWarning("Unexpected type_id received! Expected object, but array given",
+            GetWarning("Unexpected type_id recieved! Expected object, but array given",
                        Error::ErrorType::WAR_UNEXPECTED_TYPE_ID);
         }
     }
 
     curr_ins_->ids.push_back(type.GetName());
+
+    return true;
+}
+
+bool Parser::ParseOperandLiteralArray()
+{
+    if (context_.err.err != Error::ErrorType::ERR_NONE) {
+        return false;
+    }
+
+    if (*context_ != Token::Type::ID) {
+        context_.err = GetError("Expected array id.", Error::ErrorType::ERR_BAD_OPERAND);
+        return false;
+    }
+    if (!ArrayValidName()) {
+        context_.err = GetError("Invalid name of array.", Error::ErrorType::ERR_BAD_NAME_ID);
+        return false;
+    }
+
+    std::string_view p = context_.GiveToken();
+    auto array_id = std::string(p.data(), p.length());
+
+    if (program_.literalarray_table.find(array_id) == program_.literalarray_table.end()) {
+        context_.err = GetError("No array was found for this array id", Error::ErrorType::ERR_BAD_ID_ARRAY);
+        return false;
+    }
+
+    curr_ins_->ids.emplace_back(p.data(), p.length());
+
+    ++context_;
 
     return true;
 }
@@ -1316,14 +1827,14 @@ bool Parser::ParseOperandField()
         return false;
     }
     if (!PrefixedValidName()) {
-        context_.err = GetError("Invalid field name.", Error::ErrorType::ERR_BAD_NAME_ID);
+        context_.err = GetError("Invalid name of field.", Error::ErrorType::ERR_BAD_NAME_ID);
         return false;
     }
 
     std::string_view p = context_.GiveToken();
     std::string record_full_name = std::string(p);
-    // Some names of records in pandastdlib starts with 'panda.', and therefore,
-    // the record name is before the second dot, and the field name is after the second dot.
+    // Some names of records in pandastdlib starts with 'panda.', therefore,
+    // the record name is before the second dot, and the field name is after the second dot
     auto pos_point = record_full_name.find_last_of('.');
     std::string record_name = record_full_name.substr(0, pos_point);
     std::string field_name = record_full_name.substr(pos_point + 1);
@@ -1350,6 +1861,7 @@ bool Parser::ParseOperandField()
     }
 
     curr_ins_->ids.emplace_back(p.data(), p.length());
+
     ++context_;
 
     return true;
@@ -1370,7 +1882,6 @@ bool Parser::ParseOperandNone()
         --context_;
         return false;
     }
-
     return true;
 }
 
@@ -1395,7 +1906,8 @@ bool Parser::ParseFunctionFullSign()
         if (ParseFunctionArgs()) {
             if (*context_ == Token::Type::DEL_BRACKET_R) {
                 ++context_;
-                return true;
+
+                return UpdateFunctionName();
             }
             context_.err = GetError("Expected ')'.", Error::ErrorType::ERR_BAD_ARGS_BOUND);
         }
@@ -1404,6 +1916,70 @@ bool Parser::ParseFunctionFullSign()
     }
 
     return false;
+}
+
+bool Parser::UpdateFunctionName()
+{
+    auto signature = GetFunctionSignatureFromName(curr_func_->name, curr_func_->params);
+    auto iter = program_.function_table.find(signature);
+
+    if (iter == program_.function_table.end() || !iter->second.file_location->is_defined) {
+        program_.function_synonyms[curr_func_->name].push_back(signature);
+        program_.function_table.erase(signature);
+        auto node_handle = program_.function_table.extract(curr_func_->name);
+        node_handle.key() = signature;
+        program_.function_table.insert(std::move(node_handle));
+        curr_func_->name = signature;
+        context_.max_value_of_reg = &(curr_func_->value_of_first_param);
+        context_.function_arguments_list = &(context_.function_arguments_lists[curr_func_->name]);
+
+        return true;
+    }
+
+    context_.err = GetError("This function already exists.", Error::ErrorType::ERR_BAD_ID_FUNCTION);
+
+    return false;
+}
+
+bool Parser::ParseArrayFullSign()
+{
+    if (!ParseArrayName()) {
+        return false;
+    }
+
+    if (*context_ == Token::Type::DEL_BRACE_L) {
+        return true;
+    }
+
+    curr_array_->literals_.push_back(panda::pandasm::LiteralArray::Literal());
+    curr_array_elem_ = &(curr_array_->literals_[curr_array_->literals_.size() - 1]);
+
+    if (!ParseArrayElementType()) {
+        context_.err = GetError("Invalid array type for static array.", Error::ErrorType::ERR_BAD_ARRAY_TYPE);
+        return false;
+    }
+
+    curr_array_elem_->value_ = static_cast<uint8_t>(curr_array_elem_->tag_);
+    curr_array_elem_->tag_ = panda_file::LiteralTag::TAGVALUE;
+
+    if (*context_ == Token::Type::DEL_BRACE_L) {
+        context_.err = GetError("No array size for static array.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
+        return false;
+    }
+
+    curr_array_->literals_.push_back(panda::pandasm::LiteralArray::Literal());
+    curr_array_elem_ = &(curr_array_->literals_[curr_array_->literals_.size() - 1]);
+    curr_array_elem_->tag_ = panda_file::LiteralTag::INTEGER;
+
+    if (!ParseArrayElementValueInteger()) {
+        context_.err =
+            GetError("Invalid value for static array size value.", Error::ErrorType::ERR_BAD_ARRAY_SIZE_VALUE);
+        return false;
+    }
+
+    ++context_;
+
+    return true;
 }
 
 bool Parser::ParseRecordName()
@@ -1421,6 +1997,7 @@ bool Parser::ParseRecordName()
     }
 
     auto iter = program_.record_table.find(std::string(context_.GiveToken().data(), context_.GiveToken().length()));
+
     if (iter == program_.record_table.end() || !iter->second.file_location->is_defined) {
         SetRecordInformation();
     } else {
@@ -1455,14 +2032,8 @@ bool Parser::ParseFunctionName()
         return false;
     }
 
-    auto iter = program_.function_table.find(std::string(context_.GiveToken().data(), context_.GiveToken().length()));
-
-    if (iter == program_.function_table.end() || !iter->second.file_location->is_defined) {
-        SetFunctionInformation();
-    } else {
-        context_.err = GetError("This function already exists.", Error::ErrorType::ERR_BAD_ID_FUNCTION);
-        return false;
-    }
+    // names are mangled, so no need to check for same names here
+    SetFunctionInformation();
 
     LOG(DEBUG, ASSEMBLER) << "function name found (line " << line_stric_ << "): " << context_.GiveToken();
 
@@ -1478,8 +2049,46 @@ void Parser::SetFunctionInformation()
     curr_func_ = &(program_.function_table.at(p));
     label_table_ = &(curr_func_->label_table);
     curr_func_->return_type = context_.curr_func_return_type;
-    context_.max_value_of_reg = &(curr_func_->value_of_first_param);
-    context_.function_arguments_list = &(context_.function_arguments_lists[curr_func_->name]);
+}
+
+bool Parser::ParseArrayName()
+{
+    LOG(DEBUG, ASSEMBLER) << "started searching for array name (line " << line_stric_
+                          << "): " << context_.tokens[context_.number - 1].whole_line;
+
+    if (!ArrayValidName()) {
+        if (*context_ == Token::Type::DEL_BRACKET_L) {
+            context_.err = GetError("No array name.", Error::ErrorType::ERR_BAD_ARRAY_NAME);
+            return false;
+        }
+        context_.err = GetError("Invalid name of the array.", Error::ErrorType::ERR_BAD_ARRAY_NAME);
+        return false;
+    }
+
+    auto iter =
+        program_.literalarray_table.find(std::string(context_.GiveToken().data(), context_.GiveToken().length()));
+
+    if (iter == program_.literalarray_table.end()) {
+        SetArrayInformation();
+    } else {
+        context_.err = GetError("This array already exists.", Error::ErrorType::ERR_BAD_ID_ARRAY);
+        return false;
+    }
+
+    LOG(DEBUG, ASSEMBLER) << "array id found (line " << line_stric_ << "): " << context_.GiveToken();
+
+    ++context_;
+
+    return true;
+}
+
+void Parser::SetArrayInformation()
+{
+    program_.literalarray_table.try_emplace(std::string(context_.GiveToken().data(), context_.GiveToken().length()),
+                                            panda::pandasm::LiteralArray());
+
+    curr_array_ =
+        &(program_.literalarray_table.at(std::string(context_.GiveToken().data(), context_.GiveToken().length())));
 }
 
 void Parser::SetOperationInformation()
@@ -1502,7 +2111,7 @@ bool Parser::ParseFunctionReturn()
             context_.err = GetError("No return type.", Error::ErrorType::ERR_BAD_FUNCTION_RETURN_VALUE);
             return false;
         }
-        context_.err = GetError("Invalid return type.", Error::ErrorType::ERR_BAD_FUNCTION_RETURN_VALUE);
+        context_.err = GetError("Not a return type.", Error::ErrorType::ERR_BAD_FUNCTION_RETURN_VALUE);
         return false;
     }
 
@@ -1532,7 +2141,7 @@ bool Parser::ParseFunctionArg()
     }
 
     if (!TypeValidName()) {
-        context_.err = GetError("Invalid parameter type.", Error::ErrorType::ERR_BAD_TYPE);
+        context_.err = GetError("Expected parameter type.", Error::ErrorType::ERR_BAD_TYPE);
         return false;
     }
 
@@ -1551,7 +2160,7 @@ bool Parser::ParseFunctionArg()
     }
 
     if (!ParamValidName()) {
-        context_.err = GetError("Invalid parameter name.", Error::ErrorType::ERR_BAD_PARAM_NAME);
+        context_.err = GetError("Incorrect name of parameter.", Error::ErrorType::ERR_BAD_PARAM_NAME);
         return false;
     }
 
@@ -1620,11 +2229,11 @@ bool Parser::ParseMetaDef()
     LOG(DEBUG, ASSEMBLER) << "started searching for meta information (line " << line_stric_
                           << "): " << context_.tokens[context_.number - 1].whole_line;
 
+    bool flag = false;
+
     if (context_.Mask()) {
         return false;
     }
-
-    bool flag = false;
 
     if (*context_ == Token::Type::DEL_LT) {
         flag = true;
@@ -1742,7 +2351,16 @@ bool Parser::BuildMetaListAttr(bool &eq, std::string &attribute_name, std::strin
 
         attribute_value = res.value();
     } else if (eq) {
+        std::string sign {};
         attribute_value = context_.GiveToken();
+        ++context_;
+
+        if (!ParseOperandSignature(&sign)) {
+            return false;
+        }
+
+        --context_;
+        attribute_value += sign;
     } else {
         attribute_name = context_.GiveToken();
     }
@@ -1755,7 +2373,7 @@ bool Parser::BuildMetaListAttr(bool &eq, std::string &attribute_name, std::strin
 
     if (*context_ == Token::Type::DEL_EQ) {
         if (eq) {
-            context_.err = GetError("Unexpected '='.", Error::ErrorType::ERR_BAD_NOEXP_DELIM);
+            context_.err = GetError("'=' was not expected.", Error::ErrorType::ERR_BAD_NOEXP_DELIM);
             return false;
         }
 

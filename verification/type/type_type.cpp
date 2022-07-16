@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "type_type.h"
 
 #include "type_system.h"
 
@@ -22,6 +21,7 @@
 
 #include "type_set.h"
 #include "type_param.h"
+#include "type_type.h"
 
 namespace panda::verifier {
 
@@ -34,31 +34,31 @@ TypeSet Type::operator|(const Type &t) const
 template <>
 TypeParam Type::operator+() const
 {
-    return {*this, TypeVariance::COVARIANT};
+    return {TypeVariance::COVARIANT, *this};
 }
 
 template <>
 TypeParam Type::operator-() const
 {
-    return {*this, TypeVariance::CONTRVARIANT};
+    return {TypeVariance::CONTRVARIANT, *this};
 }
 
 template <>
 TypeParam Type::operator~() const
 {
-    return {*this, TypeVariance::INVARIANT};
+    return {TypeVariance::INVARIANT, *this};
 }
 
 template <>
 TypeParams Type::Params() const
 {
-    return TypeParams {GetTypeSystemKind(), GetTypeSystem().GetParamsIdx(Idx_)};
+    return {GetTypeSystemKind(), GetThreadNum(), GetTypeSystem().GetParamsIdx(Idx_)};
 }
 
 template <>
 TypeParam Type::operator*(TypeVariance variance) const
 {
-    return {*this, variance};
+    return {variance, *this};
 }
 
 bool Type::operator==(const Type &t) const
@@ -74,6 +74,7 @@ bool Type::operator!=(const Type &t) const
 const Type &Type::operator<<(const Type &t) const
 {
     ASSERT(GetTypeSystemKind() == t.GetTypeSystemKind());
+    ASSERT(GetThreadNum() == t.GetThreadNum());
     GetTypeSystem().Relate(Idx_, t.Idx_);
     return t;
 }
@@ -94,7 +95,7 @@ bool Type::operator<=(const Type &rhs) const
 
 bool Type::operator<=(const TypeParams &rhs) const
 {
-    return TypeParams {GetTypeSystemKind()} <= rhs;
+    return TypeParams {GetTypeSystemKind(), GetThreadNum()} <= rhs;
 }
 
 SortIdx Type::Sort() const
@@ -114,12 +115,17 @@ size_t Type::ParamsSize() const
 
 TypeSystem &Type::GetTypeSystem() const
 {
-    return TypeSystems::Get(GetTypeSystemKind());
+    return TypeSystems::Get(GetTypeSystemKind(), GetThreadNum());
 }
 
 TypeSystemKind Type::GetTypeSystemKind() const
 {
-    return Idx_.GetTag();
+    return Idx_.GetTag<0>();
+}
+
+ThreadNum Type::GetThreadNum() const
+{
+    return Idx_.GetTag<1>();
 }
 
 bool Type::IsValid() const
@@ -141,7 +147,7 @@ TypeSet Type::operator&(const Type &rhs) const
 {
     ASSERT(GetTypeSystemKind() == rhs.GetTypeSystemKind());
     const TypeSystem &type_system = GetTypeSystem();
-    return TypeSet {GetTypeSystemKind(),
+    return TypeSet {GetTypeSystemKind(), GetThreadNum(),
                     type_system.GetDirectlyRelated(Idx_) & type_system.GetDirectlyRelated(rhs.Idx_)};
 }
 
@@ -150,7 +156,7 @@ TypeSet Type::operator&(const TypeSet &rhs) const
     return rhs & *this;
 }
 
-TypeIdx Type::Index() const
+TypeNum Type::Number() const
 {
     return Idx_;
 }

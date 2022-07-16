@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_CLASS_DATA_ACCESSOR_H_
-#define PANDA_LIBPANDAFILE_CLASS_DATA_ACCESSOR_H_
+#ifndef LIBPANDAFILE_CLASS_DATA_ACCESSOR_H_
+#define LIBPANDAFILE_CLASS_DATA_ACCESSOR_H_
 
 #include "file.h"
 #include "file_items.h"
@@ -75,6 +75,18 @@ public:
     template <class Callback>
     void EnumerateAnnotations(const Callback &cb);
 
+    template <class Callback>
+    void EnumerateTypeAnnotations(const Callback &cb);
+
+    template <class Callback>
+    void EnumerateRuntimeTypeAnnotations(const Callback &cb);
+
+    template <class Callback>
+    bool EnumerateRuntimeAnnotationsWithEarlyStop(const Callback &cb);
+
+    template <class Callback>
+    bool EnumerateAnnotationsWithEarlyStop(const Callback &cb);
+
     std::optional<SourceLang> GetSourceLang();
 
     std::optional<File::EntityId> GetSourceFileId();
@@ -122,6 +134,10 @@ private:
 
     void SkipMethods();
 
+    void SkipRuntimeTypeAnnotations();
+
+    void SkipTypeAnnotations();
+
     const File &panda_file_;
     File::EntityId class_id_;
 
@@ -136,6 +152,8 @@ private:
     Span<const uint8_t> source_lang_sp_ {nullptr, nullptr};
     Span<const uint8_t> runtime_annotations_sp_ {nullptr, nullptr};
     Span<const uint8_t> annotations_sp_ {nullptr, nullptr};
+    Span<const uint8_t> runtime_type_annotation_sp_ {nullptr, nullptr};
+    Span<const uint8_t> type_annotation_sp_ {nullptr, nullptr};
     Span<const uint8_t> source_file_sp_ {nullptr, nullptr};
     Span<const uint8_t> fields_sp_ {nullptr, nullptr};
     Span<const uint8_t> methods_sp_ {nullptr, nullptr};
@@ -145,4 +163,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_CLASS_DATA_ACCESSOR_H_
+#endif  // LIBPANDAFILE_CLASS_DATA_ACCESSOR_H_

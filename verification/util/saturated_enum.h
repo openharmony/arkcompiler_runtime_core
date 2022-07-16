@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_SATURATED_ENUM_H_
-#define PANDA_VERIFICATION_UTIL_SATURATED_ENUM_H_
+#ifndef PANDA_VERIFIER_UTIL_SATURATED_ENUM_H__
+#define PANDA_VERIFIER_UTIL_SATURATED_ENUM_H__
 
 #include "macros.h"
 
@@ -23,6 +23,7 @@
 namespace panda::verifier {
 
 /*
+ TODO: default value?
  possible options:
   1. initial value UNDEFINED and any op will lead to fatal error, add constructors etc for proper initialization
     pros: more safety and robustness to programmer errors, cons: more code, more complexity, etc
@@ -162,4 +163,4 @@ protected:
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_UTIL_SATURATED_ENUM_H_
+#endif  //! PANDA_VERIFIER_UTIL_SATURATED_ENUM_H__

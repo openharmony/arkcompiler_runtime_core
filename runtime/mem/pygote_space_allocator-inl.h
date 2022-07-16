@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_PYGOTE_SPACE_ALLOCATOR_INL_H_
-#define PANDA_RUNTIME_MEM_PYGOTE_SPACE_ALLOCATOR_INL_H_
+#ifndef RUNTIME_MEM_PANDA_PYGOTE_SPACE_ALLOCATOR_INL_H
+#define RUNTIME_MEM_PANDA_PYGOTE_SPACE_ALLOCATOR_INL_H
 
 #include "libpandabase/utils/logger.h"
 #include "runtime/include/mem/allocator.h"
@@ -32,7 +31,7 @@ template <typename AllocConfigT>
 PygoteSpaceAllocator<AllocConfigT>::PygoteSpaceAllocator(MemStatsType *mem_stats)
     : runslots_alloc_(mem_stats), mem_stats_(mem_stats)
 {
-    LOG_PYGOTE_SPACE_ALLOCATOR(INFO) << "Initializing of PygoteSpaceAllocator";
+    LOG_PYGOTE_SPACE_ALLOCATOR(DEBUG) << "Initializing of PygoteSpaceAllocator";
 }
 
 template <typename AllocConfigT>
@@ -49,7 +48,7 @@ PygoteSpaceAllocator<AllocConfigT>::~PygoteSpaceAllocator()
         allocator->Delete(bitmap->GetBitMap().data());
         allocator->Delete(bitmap);
     }
-    LOG_PYGOTE_SPACE_ALLOCATOR(INFO) << "Destroying of PygoteSpaceAllocator";
+    LOG_PYGOTE_SPACE_ALLOCATOR(DEBUG) << "Destroying of PygoteSpaceAllocator";
 }
 
 template <typename AllocConfigT>
@@ -92,50 +91,49 @@ inline void *PygoteSpaceAllocator<AllocConfigT>::Alloc(size_t size, Alignment al
     ASSERT(state_ == STATE_PYGOTE_INIT || state_ == STATE_PYGOTE_FORKING);
 
     // alloc from runslots firstly, if failed, try to alloc from new arena
+    // TODO(yxr) : will optimzie this later, currently we use runslots as much as possible before we have crossing map
     // or mark card table with object header, also it will reduce the bitmap count which will reduce the gc mark time.
-    void *obj = runslots_alloc_.template Alloc<false>(size, align);
-    if (obj != nullptr) {
-        return obj;
-    }
+    void *obj = runslots_alloc_.template Alloc<true, false>(size, align);
+    if (obj == nullptr) {
+        if (state_ == STATE_PYGOTE_INIT) {
+            // try again in lock
+            static os::memory::Mutex pool_lock;
+            os::memory::LockHolder lock(pool_lock);
+            obj = runslots_alloc_.Alloc(size, align);
+            if (obj != nullptr) {
+                return obj;
+            }
 
-    if (state_ == STATE_PYGOTE_INIT) {
-        // try again in lock
-        static os::memory::Mutex pool_lock;
-        os::memory::LockHolder lock(pool_lock);
-        obj = runslots_alloc_.Alloc(size, align);
-        if (obj != nullptr) {
-            return obj;
-        }
-        auto pool = PoolManager::GetMmapMemPool()->AllocPool(RunSlotsAllocator<AllocConfigT>::GetMinPoolSize(),
-                                                             space_type_, AllocatorType::RUNSLOTS_ALLOCATOR, this);
-        if (UNLIKELY(pool.GetMem() == nullptr)) {
-            return nullptr;
-        }
-        if (!runslots_alloc_.AddMemoryPool(pool.GetMem(), pool.GetSize())) {
-            LOG(FATAL, ALLOC) << "PygoteSpaceAllocator: couldn't add memory pool to object allocator";
-        }
-        // alloc object again
-        obj = runslots_alloc_.Alloc(size, align);
-    } else {
-        if (arena_ != nullptr) {
-            obj = arena_->Alloc(size, align);
-        }
-        if (obj == nullptr) {
-            auto new_arena =
-                PoolManager::AllocArena(DEFAULT_ARENA_SIZE, space_type_, AllocatorType::ARENA_ALLOCATOR, this);
-            if (new_arena == nullptr) {
+            auto pool = heap_space_->TryAllocPool(RunSlotsAllocator<AllocConfigT>::GetMinPoolSize(), space_type_,
+                                                  AllocatorType::RUNSLOTS_ALLOCATOR, this);
+            if (UNLIKELY(pool.GetMem() == nullptr)) {
                 return nullptr;
             }
-            CreateLiveBitmap(new_arena, DEFAULT_ARENA_SIZE);
-            new_arena->LinkTo(arena_);
-            arena_ = new_arena;
-            obj = arena_->Alloc(size, align);
+            if (!runslots_alloc_.AddMemoryPool(pool.GetMem(), pool.GetSize())) {
+                LOG(FATAL, ALLOC) << "PygoteSpaceAllocator: couldn't add memory pool to object allocator";
+            }
+            // alloc object again
+            obj = runslots_alloc_.Alloc(size, align);
+        } else {
+            if (arena_ != nullptr) {
+                obj = arena_->Alloc(size, align);
+            }
+            if (obj == nullptr) {
+                auto new_arena =
+                    heap_space_->TryAllocArena(DEFAULT_ARENA_SIZE, space_type_, AllocatorType::ARENA_ALLOCATOR, this);
+                if (new_arena == nullptr) {
+                    return nullptr;
+                }
+                CreateLiveBitmap(new_arena, DEFAULT_ARENA_SIZE);
+                new_arena->LinkTo(arena_);
+                arena_ = new_arena;
+                obj = arena_->Alloc(size, align);
+            }
+            live_bitmaps_.back()->Set(obj);  // mark live in bitmap
+            AllocConfigT::OnAlloc(size, space_type_, mem_stats_);
+            AllocConfigT::MemoryInit(obj, size);
         }
-        live_bitmaps_.back()->Set(obj);  // mark live in bitmap
-        AllocConfigT::OnAlloc(size, space_type_, mem_stats_);
-        AllocConfigT::MemoryInit(obj, size);
     }
-
     return obj;
 }
 
@@ -265,7 +263,7 @@ inline void PygoteSpaceAllocator<AllocConfigT>::VisitAndRemoveAllPools(const Mem
     auto cur = arena_;
     while (cur != nullptr) {
         auto tmp = cur->GetNextArena();
-        PoolManager::FreeArena(cur);
+        heap_space_->FreeArena(cur);
         cur = tmp;
     }
     arena_ = nullptr;  // avoid to duplicated free
@@ -300,4 +298,4 @@ inline void PygoteSpaceAllocator<AllocConfigT>::Collect(const GCObjectVisitor &g
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_PYGOTE_SPACE_ALLOCATOR_INL_H_
+#endif  // RUNTIME_MEM_PANDA_PYGOTE_SPACE_ALLOCATOR_INL_H

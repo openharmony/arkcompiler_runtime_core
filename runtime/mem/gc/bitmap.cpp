@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,9 @@ bool Bitmap::AtomicTestAndSetBit(size_t bit_offset)
     auto mask = GetBitMask(bit_offset);
     BitmapWordType old_word;
     do {
-        old_word = word_addr->load(std::memory_order_seq_cst);
+        // Atomic with acquire order reason: data race with word_addr with dependecies on reads after the load which
+        // should become visible
+        old_word = word_addr->load(std::memory_order_acquire);
         if ((old_word & mask) != 0) {
             return true;
         }
@@ -62,7 +64,9 @@ bool Bitmap::AtomicTestAndClearBit(size_t bit_offset)
     auto mask = GetBitMask(bit_offset);
     BitmapWordType old_word;
     do {
-        old_word = word_addr->load(std::memory_order_seq_cst);
+        // Atomic with acquire order reason: data race with word_addr with dependecies on reads after the load which
+        // should become visible
+        old_word = word_addr->load(std::memory_order_acquire);
         if ((old_word & mask) == 0) {
             return false;
         }
@@ -76,7 +80,9 @@ bool Bitmap::AtomicTestBit(size_t bit_offset)
     auto word_idx = GetWordIdx(bit_offset);
     auto *word_addr = reinterpret_cast<std::atomic<BitmapWordType> *>(&bitmap_[word_idx]);
     auto mask = GetBitMask(bit_offset);
-    BitmapWordType word = word_addr->load(std::memory_order_seq_cst);
+    // Atomic with acquire order reason: data race with word_addr with dependecies on reads after the load which should
+    // become visible
+    BitmapWordType word = word_addr->load(std::memory_order_acquire);
     return (word & mask) != 0;
 }
 

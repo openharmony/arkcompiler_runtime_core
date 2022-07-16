@@ -28,9 +28,10 @@ struct CoreVTableSearchBySignature {
 };
 
 struct CoreVTableOverridePred {
-    bool operator()([[maybe_unused]] const MethodInfo &info1, [[maybe_unused]] const MethodInfo &info2) const
+    std::pair<bool, size_t> operator()([[maybe_unused]] const MethodInfo &info1,
+                                       [[maybe_unused]] const MethodInfo &info2) const
     {
-        return true;
+        return std::pair<bool, size_t>(true, MethodInfo::INVALID_METHOD_IDX);
     }
 };
 

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_EXCEPTIONS_H_
-#define PANDA_RUNTIME_INCLUDE_EXCEPTIONS_H_
+#ifndef PANDA_RUNTIME_EXCEPTIONS_H_
+#define PANDA_RUNTIME_EXCEPTIONS_H_
 
 #include "runtime/include/class-inl.h"
 #include "runtime/include/coretypes/array.h"
@@ -23,18 +22,21 @@
 
 namespace panda {
 
-void ThrowException(LanguageContext ctx, ManagedThread *thread, const uint8_t *mutf8_name, const uint8_t *mutf8_msg);
+void ThrowException(const LanguageContext &ctx, ManagedThread *thread, const uint8_t *mutf8_name,
+                    const uint8_t *mutf8_msg);
 
 void ThrowNullPointerException();
 // This function could be used in case there are no managed stack frames.
 // For example when the main thread creates an instance of VM and calls
-// a JNI function which throws an exception. In this case there is no need to
+// a native function which throws an exception. In this case there is no need to
 // get current executing method from the managed stack.
-void ThrowNullPointerException(LanguageContext ctx, ManagedThread *thread);
+void ThrowNullPointerException(const LanguageContext &ctx, ManagedThread *thread);
+
+void ThrowStackOverflowException(ManagedThread *thread);
 
 void ThrowArrayIndexOutOfBoundsException(coretypes::array_ssize_t idx, coretypes::array_size_t length);
 void ThrowArrayIndexOutOfBoundsException(coretypes::array_ssize_t idx, coretypes::array_size_t length,
-                                         LanguageContext ctx, ManagedThread *thread);
+                                         const LanguageContext &ctx, ManagedThread *thread);
 
 void ThrowIndexOutOfBoundsException(coretypes::array_ssize_t idx, coretypes::array_ssize_t length);
 
@@ -48,11 +50,13 @@ void ThrowNegativeArraySizeException(const PandaString &msg);
 
 void ThrowArithmeticException();
 
-void ThrowClassCastException(Class *dst_type, Class *src_type);
+void ThrowClassCastException(const Class *dst_type, const Class *src_type);
 
-void ThrowAbstractMethodError(Method *method);
+void ThrowAbstractMethodError(const Method *method);
 
-void ThrowArrayStoreException(Class *array_class, Class *element_class);
+void ThrowIncompatibleClassChangeErrorForMethodConflict(const Method *method);
+
+void ThrowArrayStoreException(const Class *array_class, const Class *element_class);
 
 void ThrowArrayStoreException(const PandaString &msg);
 
@@ -64,15 +68,15 @@ void ThrowIOException(const PandaString &msg);
 
 void ThrowIllegalArgumentException(const PandaString &msg);
 
-void ThrowClassCircularityError(const PandaString &class_name, LanguageContext ctx);
+void ThrowClassCircularityError(const PandaString &class_name, const LanguageContext &ctx);
 
 void ThrowOutOfMemoryError(ManagedThread *thread, const PandaString &msg);
 
 void ThrowOutOfMemoryError(const PandaString &msg);
 
-void FindCatchBlockInCallStack(ObjectHeader *exception);
+void FindCatchBlockInCallStack(ManagedThread *thread);
 
-void FindCatchBlockInCFrames(ObjectHeader *exception, StackWalker *stack, Frame *orig_frame);
+void FindCatchBlockInCFrames(ManagedThread *thread, StackWalker *stack, Frame *orig_frame);
 
 void ThrowIllegalAccessException(const PandaString &msg);
 
@@ -80,7 +84,7 @@ void ThrowUnsupportedOperationException();
 
 void ThrowVerificationException(const PandaString &msg);
 
-void ThrowVerificationException(LanguageContext ctx, const PandaString &msg);
+void ThrowVerificationException(const LanguageContext &ctx, const PandaString &msg);
 
 void ThrowInstantiationError(const PandaString &msg);
 
@@ -92,6 +96,8 @@ void ThrowReferenceErrorDyn(const std::string &msg);
 
 void ThrowIllegalMonitorStateException(const PandaString &msg);
 
+void ThrowCloneNotSupportedException();
+
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_EXCEPTIONS_H_
+#endif  // PANDA_RUNTIME_EXCEPTIONS_H_

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_GC_GC_BARRIER_SET_H_
-#define PANDA_RUNTIME_MEM_GC_GC_BARRIER_SET_H_
+#ifndef PANDA_GC_BARRIER_H
+#define PANDA_GC_BARRIER_H
 
 #include "libpandabase/mem/gc_barrier.h"
+#include "libpandabase/mem/ringbuf/lock_free_ring_buffer.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
+#include "runtime/mem/gc/card_table.h"
 
 namespace panda::mem {
 
@@ -52,12 +53,16 @@ public:
         return post_type_;
     }
 
+    virtual bool IsPreBarrierEnabled()
+    {
+        return !mem::IsEmptyBarrier(pre_type_);
+    }
+
     /**
      * Pre barrier. Used by interpreter.
-     * @param obj_field_addr - address of field where we store. It can be unused in most cases
      * @param pre_val_addr - reference currently(before store/load happened) stored in the field
      */
-    virtual void PreBarrier(const void *obj_field_addr, void *pre_val_addr) = 0;
+    virtual void PreBarrier(void *pre_val_addr) = 0;
 
     /**
      * Post barrier. Used by interpeter.
@@ -87,6 +92,8 @@ public:
      * @return barrier operand (value is address or literal)
      */
     BarrierOperand GetBarrierOperand(BarrierPosition barrier_position, std::string_view name);
+
+    BarrierOperand GetPostBarrierOperand(std::string_view name);
 
 protected:
     /**
@@ -129,7 +136,7 @@ public:
     NO_MOVE_SEMANTIC(GCDummyBarrierSet);
     ~GCDummyBarrierSet() override = default;
 
-    void PreBarrier([[maybe_unused]] const void *obj_field_addr, [[maybe_unused]] void *pre_val_addr) override {}
+    void PreBarrier([[maybe_unused]] void *pre_val_addr) override {}
 
     void PostBarrier([[maybe_unused]] const void *obj_addr, [[maybe_unused]] void *stored_val_addr) override {}
 
@@ -142,36 +149,28 @@ public:
 
 class GCGenBarrierSet : public GCBarrierSet {
 public:
-    GCGenBarrierSet(mem::InternalAllocatorPtr allocator, /* PRE ARGS: */ bool *concurrent_marking_flag,
-                    objRefProcessFunc pre_store_func, /* POST ARGS: */
-                    void *min_addr, uint8_t *card_table_addr, uint8_t card_bits, uint8_t dirty_card_value)
-        : GCBarrierSet(allocator, BarrierType::PRE_SATB_BARRIER, BarrierType::POST_INTERGENERATIONAL_BARRIER),
-          concurrent_marking_flag_(concurrent_marking_flag),
-          pre_store_func_(pre_store_func),
+    GCGenBarrierSet(mem::InternalAllocatorPtr allocator,
+                    /* POST ARGS: */
+                    void *min_addr, CardTable *card_table, uint8_t card_bits, uint8_t dirty_card_value)
+        : GCBarrierSet(allocator, BarrierType::PRE_WRB_NONE, BarrierType::POST_INTERGENERATIONAL_BARRIER),
           min_addr_(min_addr),
-          card_table_addr_(card_table_addr),
+          card_table_addr_(reinterpret_cast<uint8_t *>(*card_table->begin())),
           card_bits_(card_bits),
-          dirty_card_value_(dirty_card_value)
+          dirty_card_value_(dirty_card_value),
+          card_table_(card_table)
     {
-        // PRE
-        AddBarrierOperand(
-            BarrierPosition::BARRIER_POSITION_PRE, "CONCURRENT_MARKING_ADDR",
-            BarrierOperand(BarrierOperandType::BOOL_ADDRESS, BarrierOperandValue(concurrent_marking_flag)));
-        AddBarrierOperand(
-            BarrierPosition::BARRIER_POSITION_PRE, "STORE_IN_BUFF_TO_MARK_FUNC",
-            BarrierOperand(BarrierOperandType::FUNC_WITH_OBJ_REF_ADDRESS, BarrierOperandValue(pre_store_func)));
         // POST
         AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "MIN_ADDR",
                           BarrierOperand(BarrierOperandType::ADDRESS, BarrierOperandValue(min_addr)));
         AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "CARD_TABLE_ADDR",
-                          BarrierOperand(BarrierOperandType::UINT8_ADDRESS, BarrierOperandValue(card_table_addr)));
+                          BarrierOperand(BarrierOperandType::UINT8_ADDRESS, BarrierOperandValue(card_table_addr_)));
         AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "CARD_BITS",
                           BarrierOperand(BarrierOperandType::UINT8_LITERAL, BarrierOperandValue(card_bits)));
         AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "DIRTY_VAL",
                           BarrierOperand(BarrierOperandType::UINT8_LITERAL, BarrierOperandValue(dirty_card_value)));
     }
 
-    void PreBarrier(const void *obj_field_addr, void *pre_val_addr) override;
+    void PreBarrier(void *pre_val_addr) override;
 
     void PostBarrier(const void *obj_addr, void *stored_val_addr) override;
 
@@ -186,51 +185,62 @@ public:
 
 private:
     // Store operands explicitly for interpreter perf
-    // PRE BARRIER
-    bool *concurrent_marking_flag_ {nullptr};
-    objRefProcessFunc pre_store_func_ {nullptr};
     // POST BARRIER
     void *min_addr_ {nullptr};            //! Minimal address used by VM. Used as a base for card index calculation
     uint8_t *card_table_addr_ {nullptr};  //! Address of card table
     uint8_t card_bits_ {0};               //! how many bits encoded by card (i.e. size covered by card = 2^card_bits_)
     uint8_t dirty_card_value_ {0};        //! value of dirty card
+    FIELD_UNUSED CardTable *card_table_ {nullptr};
 };
 
 class GCG1BarrierSet : public GCBarrierSet {
 public:
-    GCG1BarrierSet(mem::InternalAllocatorPtr allocator, /* PRE ARGS: */ bool *concurrent_marking_flag,
-                   objRefProcessFunc pre_store_func, /* POST ARGS: */
-                   void *min_addr, uint8_t *card_table_addr, uint8_t card_bits, uint8_t dirty_card_value,
-                   std::function<void(const void *, const void *)> post_func, size_t region_size_bits_count)
-        : GCBarrierSet(allocator, BarrierType::PRE_SATB_BARRIER, BarrierType::POST_INTERGENERATIONAL_BARRIER),
+    using ThreadLocalCardQueues = PandaVector<CardTable::CardPtr>;
+    static constexpr size_t G1_POST_BARRIER_RING_BUFFER_SIZE = 1024 * 8;
+    using G1PostBarrierRingBufferType = mem::LockFreeBuffer<mem::CardTable::CardPtr, G1_POST_BARRIER_RING_BUFFER_SIZE>;
+
+    GCG1BarrierSet(mem::InternalAllocatorPtr allocator,
+                   // PRE ARGS:
+                   std::atomic<bool> *concurrent_marking_flag, objRefProcessFunc pre_store_func,
+                   // POST ARGS:
+                   objTwoRefProcessFunc post_func, uint8_t region_size_bits_count, CardTable *card_table,
+                   ThreadLocalCardQueues *updated_refs_queue, os::memory::Mutex *queue_lock)
+        : GCBarrierSet(allocator, BarrierType::PRE_SATB_BARRIER, BarrierType::POST_INTERREGION_BARRIER),
           concurrent_marking_flag_(concurrent_marking_flag),
           pre_store_func_(pre_store_func),
-          min_addr_(min_addr),
-          card_table_addr_(card_table_addr),
-          card_bits_(card_bits),
-          dirty_card_value_(dirty_card_value),
-          post_func_(std::move(post_func)),
-          region_size_bits_count_(region_size_bits_count)
+          post_func_(post_func),
+          region_size_bits_count_(region_size_bits_count),
+          card_table_(card_table),
+          min_addr_(ToVoidPtr(card_table->GetMinAddress())),
+          updated_refs_queue_(updated_refs_queue),
+          queue_lock_(queue_lock)
     {
+        ASSERT(pre_store_func_ != nullptr);
+        ASSERT(post_func_ != nullptr);
         // PRE
         AddBarrierOperand(
             BarrierPosition::BARRIER_POSITION_PRE, "CONCURRENT_MARKING_ADDR",
             BarrierOperand(BarrierOperandType::BOOL_ADDRESS, BarrierOperandValue(concurrent_marking_flag)));
         AddBarrierOperand(
             BarrierPosition::BARRIER_POSITION_PRE, "STORE_IN_BUFF_TO_MARK_FUNC",
-            BarrierOperand(BarrierOperandType::FUNC_WITH_OBJ_REF_ADDRESS, BarrierOperandValue(pre_store_func)));
+            BarrierOperand(BarrierOperandType::FUNC_WITH_OBJ_REF_ADDRESS, BarrierOperandValue(pre_store_func_)));
         // POST
-        AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "MIN_ADDR",
-                          BarrierOperand(BarrierOperandType::ADDRESS, BarrierOperandValue(min_addr)));
+        AddBarrierOperand(
+            BarrierPosition::BARRIER_POSITION_POST, "REGION_SIZE_BITS",
+            BarrierOperand(BarrierOperandType::UINT8_LITERAL, BarrierOperandValue(region_size_bits_count_)));
+        AddBarrierOperand(
+            BarrierPosition::BARRIER_POSITION_POST, "UPDATE_CARD_FUNC",
+            BarrierOperand(BarrierOperandType::FUNC_WITH_TWO_OBJ_REF_ADDRESSES, BarrierOperandValue(post_func_)));
         AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "CARD_TABLE_ADDR",
-                          BarrierOperand(BarrierOperandType::UINT8_ADDRESS, BarrierOperandValue(card_table_addr)));
-        AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "CARD_BITS",
-                          BarrierOperand(BarrierOperandType::UINT8_LITERAL, BarrierOperandValue(card_bits)));
-        AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "DIRTY_VAL",
-                          BarrierOperand(BarrierOperandType::UINT8_LITERAL, BarrierOperandValue(dirty_card_value)));
+                          BarrierOperand(BarrierOperandType::UINT8_ADDRESS,
+                                         BarrierOperandValue(reinterpret_cast<uint8_t *>(*card_table->begin()))));
+        AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "MIN_ADDR",
+                          BarrierOperand(BarrierOperandType::ADDRESS, BarrierOperandValue(min_addr_)));
     }
 
-    void PreBarrier(const void *obj_field_addr, void *pre_val_addr) override;
+    bool IsPreBarrierEnabled() override;
+
+    void PreBarrier(void *pre_val_addr) override;
 
     void PostBarrier(const void *obj_addr, void *stored_val_addr) override;
 
@@ -240,24 +250,39 @@ public:
 
     ~GCG1BarrierSet() override = default;
 
+    CardTable *GetCardTable() const
+    {
+        return card_table_;
+    }
+
+    ThreadLocalCardQueues *GetUpdatedRefsQueue() const
+    {
+        return updated_refs_queue_;
+    }
+
+    os::memory::Mutex *GetQueueLock() const
+    {
+        return queue_lock_;
+    }
+
     NO_COPY_SEMANTIC(GCG1BarrierSet);
     NO_MOVE_SEMANTIC(GCG1BarrierSet);
 
 private:
-    using PostFuncT = std::function<void(const void *, const void *)>;
+    using PostFuncT = std::function<void(const void *, const void *)> *;
     // Store operands explicitly for interpreter perf
     // PRE BARRIER
-    bool *concurrent_marking_flag_ {nullptr};
+    std::atomic<bool> *concurrent_marking_flag_ {nullptr};
     objRefProcessFunc pre_store_func_ {nullptr};
     // POST BARRIER
+    objTwoRefProcessFunc post_func_;      //! function which is called for the post barrier if all conditions
+    uint8_t region_size_bits_count_ {0};  //! how much bits needed for the region
+    CardTable *card_table_ {nullptr};     //!
     void *min_addr_ {nullptr};            //! Minimal address used by VM. Used as a base for card index calculation
-    uint8_t *card_table_addr_ {nullptr};  //! Address of card table
-    uint8_t card_bits_ {0};               //! how many bits encoded by card (i.e. size covered by card = 2^card_bits_)
-    uint8_t dirty_card_value_ {0};        //! value of dirty card
-    PostFuncT post_func_;                 //! function which is called for the post barrier if all conditions
-    size_t region_size_bits_count_ {0};   //! how much bits needed for the region
+    ThreadLocalCardQueues *updated_refs_queue_;
+    os::memory::Mutex *queue_lock_;
 };
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_GC_GC_BARRIER_SET_H_
+#endif  // PANDA_GC_BARRIER_H

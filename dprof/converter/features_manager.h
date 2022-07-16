@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_DPROF_CONVERTER_FEATURES_MANAGER_H_
-#define PANDA_DPROF_CONVERTER_FEATURES_MANAGER_H_
+#ifndef DPROF_CONVERTER_FEATURES_MANAGER_H
+#define DPROF_CONVERTER_FEATURES_MANAGER_H
 
 #include "dprof/storage.h"
 #include "utils/logger.h"
@@ -79,4 +79,4 @@ private:
 };
 }  // namespace panda::dprof
 
-#endif  // PANDA_DPROF_CONVERTER_FEATURES_MANAGER_H_
+#endif  // DPROF_CONVERTER_FEATURES_MANAGER_H

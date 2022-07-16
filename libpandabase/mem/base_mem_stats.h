@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_BASE_MEM_STATS_H_
-#define PANDA_LIBPANDABASE_MEM_BASE_MEM_STATS_H_
+#ifndef PANDA_BASE_MEM_STATS_H
+#define PANDA_BASE_MEM_STATS_H
 
 #include "os/mutex.h"
 #include <cstdio>
@@ -23,6 +23,9 @@
 
 #include <array>
 #include <atomic>
+
+WEAK_FOR_LTO_START
+
 namespace panda {
 
 class BaseMemStats {
@@ -35,6 +38,8 @@ public:
 
     void RecordAllocateRaw(size_t size, SpaceType type_mem);
 
+    // TODO(alovkov): call RecordFreeRaw when CodeAllocator supports deallocate
+    // TODO: call RecordFreeRaw when ArenaAllocator supports deallocate
     void RecordFreeRaw(size_t size, SpaceType type_mem);
 
     // getters
@@ -59,4 +64,6 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_BASE_MEM_STATS_H_
+WEAK_FOR_LTO_END
+
+#endif  // PANDA_BASE_MEM_STATS_H

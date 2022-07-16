@@ -67,7 +67,7 @@ tests:
         check-type: exit-positive
         tags: ['verifier']
         bugid: ['1324']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
 
           %s
@@ -97,6 +97,7 @@ tests:
             - v1
             bugid: ['1324']
 
+
       - file-name: "with_null_ref"
         description: Check that NullPointerException is thrown if object ref is null
         isa:
@@ -104,7 +105,7 @@ tests:
             - x_null
         header-template: ['pandasm_header']
         check-type: empty
-        tags: ['arm64-jit']
+        tags: ['irtoc_ignore']
         bugid: ['3047']
         code-template: |
           .record panda.NullPointerException <external>
@@ -154,6 +155,7 @@ tests:
             - R.ff32
             bugid: ['1882']
 
+
       - file-name: "with_non_object_ref"
         description: Check that verifier reports error when the 1st operand is not a ref to an object (other than array)
         isa:
@@ -163,7 +165,7 @@ tests:
         check-type: empty
         tags: ['verifier']
         bugid: ['1324', '1826', '1827']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
 
           .function i32 main() {
@@ -203,7 +205,7 @@ tests:
         header-template: []
         check-type: exit-positive
         bugid: ['1324', '1828', '1833']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         tags: ['verifier']
         code-template: |
           .record W {
@@ -239,7 +241,6 @@ tests:
           - values:
             - random_record_name.random_field_name
             bugid: ['3536']
-            ignore: true
           - values:
             - 0
             runner-options: ['compile-failure']
@@ -262,29 +263,76 @@ tests:
         header-template: ['pandasm_header']
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         bugid: ['1834']
         code-template: |
           .function i32 main() {
             initobj R.ctor
             sta.obj v0
-            ldai 0
+            %s
             stobj v0, %s
         cases:
           - values:
+            - ldai 0
             - R.fi64
           - values:
+            - ldai 0
             - R.fu64
           - values:
+            - fldai 0.0
             - R.ff64
           - values:
-            - R.ff32
-          - values:
+            - ldai 1
             - R.fObj
           - values:
+            - ldai 2
             - R.fObjArray
           - values:
+            - ldai 3
             - R.fi32Array
+
+
+      - file-name: "with_correct_field_size_or_type"
+        description: Check that verifier does not report any error when the field has size or type corresponding to bytecode
+        isa:
+          verification:
+            - field_id_size
+        header-template: ['pandasm_header']
+        check-type: exit-positive
+        tags: ['verifier']
+        runner-options: ['verifier-only', 'verifier-config']
+        code-template: |
+          .function i32 main() {
+            initobj R.ctor
+            sta.obj v0
+            %s
+            stobj v0, %s
+        cases:
+          - values:
+            - ldai 0
+            - R.fu1
+          - values:
+            - ldai 1
+            - R.fu8
+          - values:
+            - ldai 2
+            - R.fi8
+          - values:
+            - ldai 3
+            - R.fu16
+          - values:
+            - ldai 4
+            - R.fi16
+          - values:
+            - ldai 5
+            - R.fu32
+          - values:
+            - ldai 6
+            - R.fi32
+          - values:
+            - fldai 0.0
+            - R.ff32
+
 
       - file-name: "with_wrong_acc_type"
         description: Check that verifier reports error when the accumulator contains a value of type not corresponding to the bytecode
@@ -294,7 +342,7 @@ tests:
         header-template: ['pandasm_header']
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
           .function i32 main() {
             initobj R.ctor
@@ -305,32 +353,26 @@ tests:
           - values:
             - ldai.64 0xF000F000F000F000
             - R.fu1
-            ignore: true
             bugid: ['4166']
           - values:
             - ldai.64 0
             - R.fi8
-            ignore: true
             bugid: ['4166']
           - values:
             - ldai.64 0xCAFECAFECAFECAFE
             - R.fu8
-            ignore: true
             bugid: ['4166']
           - values:
             - ldai.64 0
             - R.fi16
-            ignore: true
             bugid: ['4166']
           - values:
             - ldai.64 0x5A5A5A5A5A5A5A5A
             - R.fi32
-            ignore: true
             bugid: ['1834']
           - values:
             - ldai.64 1234567890
             - R.fu32
-            ignore: true
             bugid: ['1834']
           - values:
             - fldai.64 0x7FFFFFFFFFFFFFFF
@@ -354,6 +396,13 @@ tests:
             - fldai.64 123456.0
             - R.fi32
           - values:
+            - ldai.64 0
+            - R.ff32
+          - values:
+            - fldai.64 7890.0
+            - R.ff32
+            bugid: ['4166']
+          - values:
             - lda.null
             - R.fu32
           - values:
@@ -364,7 +413,7 @@ tests:
               movi v1, 10
                 newarr v1, v1, i32[]
                 lda.obj v1
-            - R.fi32
+            - R.ff32
 
 
       - file-name: "op_v_8_id_16"
@@ -395,7 +444,7 @@ tests:
           description: If field type size is less than 32, accumulator content will be truncated to storage size before storing.
         header-template: ['pandasm_header']
         check-type: exit-positive
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         code-template: |
 
           .function i32 main() {
@@ -465,7 +514,7 @@ tests:
           description: If field type size is less than 32, accumulator content will be truncated to storage size before storing.
         header-template: ['pandasm_header']
         check-type: exit-positive
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         code-template: |
 
           .function i32 main() {

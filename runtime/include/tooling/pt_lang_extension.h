@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,18 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PANDA_TOOLING_PT_LANG_EXTENSION_H
+#define PANDA_TOOLING_PT_LANG_EXTENSION_H
 
-#ifndef PANDA_RUNTIME_INCLUDE_TOOLING_PT_LANG_EXTENSION_H_
-#define PANDA_RUNTIME_INCLUDE_TOOLING_PT_LANG_EXTENSION_H_
-
-#include "libpandabase/macros.h"
-#include "runtime/include/mem/panda_containers.h"
-#include "runtime/include/tooling/pt_class.h"
 #include "runtime/include/tooling/pt_object.h"
 #include "runtime/include/tooling/pt_property.h"
 #include "runtime/include/tooling/pt_value.h"
 
+// TODO(maksenov): remove this file after refactoring ets_runtime
 namespace panda::tooling {
+class PtMethod {
+public:
+    PtMethod() = default;
+    explicit PtMethod(void * /* unused */) {}
+};
+
+class PtClass {
+public:
+    PtClass() = default;
+    explicit PtClass(void * /* unused */) {}
+};
+
 class PtLangExt {
 public:
     PtLangExt() = default;
@@ -45,7 +54,7 @@ public:
     virtual bool RemoveProperty(PtObject object, const char *propertyName) const = 0;
 
     // PtProperty API
-    virtual const char *GetPropertyName(PtProperty property) const = 0;
+    virtual const char *GetPropertyName(PtProperty propery) const = 0;
     virtual PtValue GetPropertyValue(PtProperty property) const = 0;
     virtual void SetPropertyPtValue(PtProperty property, PtValue value) const = 0;
     virtual void ReleasePtValue(const PtValue *value) const = 0;
@@ -53,28 +62,6 @@ public:
     NO_COPY_SEMANTIC(PtLangExt);
     NO_MOVE_SEMANTIC(PtLangExt);
 };
-
-class PtScopedValue {
-public:
-    PtScopedValue(PtLangExt *ext, PtValue value) : ext_(ext), value_(value) {}
-    ~PtScopedValue()
-    {
-        ext_->ReleasePtValue(&value_);
-    }
-
-    PtValue &GetValue()
-    {
-        return value_;
-    }
-
-    NO_COPY_SEMANTIC(PtScopedValue);
-    NO_MOVE_SEMANTIC(PtScopedValue);
-
-private:
-    PtLangExt *ext_;
-    PtValue value_;
-};
-
 }  // namespace panda::tooling
 
-#endif  // PANDA_RUNTIME_INCLUDE_TOOLING_PT_LANG_EXTENSION_H_
+#endif  // PANDA_TOOLING_PT_LANG_EXTENSION_H

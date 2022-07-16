@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(28 shri 2 == 7) operation --> shri
-.function u1 main(){
+.function i32 main(){
     ldai 28
     shri 2
     movi v0, 7

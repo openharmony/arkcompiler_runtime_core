@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,11 @@
 #include "runtime/include/runtime.h"
 
 #include "utils/span.h"
+#include "verification/type/type_params.h"
 #include "verification/type/type_system.h"
 #include "verification/type/type_sort.h"
 #include "verification/type/type_image.h"
-#include "verification/job_queue/cache.h"
-
-#include "verification/type/type_params_inl.h"
+#include "verification/jobs/cache.h"
 
 #include "verifier_messages.h"
 
@@ -59,7 +58,7 @@ Type PandaTypes::NormalizedTypeOf(Type type)
         NormalizedTypeOf_[type] = result;
         // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (type <= F32()) {
-        result = Normalize()(~F64());
+        result = Normalize()(~F32());
         NormalizedTypeOf_[type] = result;
     } else if (type <= F64()) {
         result = Normalize()(~F64());
@@ -73,7 +72,7 @@ Type PandaTypes::NormalizedTypeOf(Type type)
 
 TypeParams PandaTypes::NormalizeMethodSignature(const TypeParams &sig)
 {
-    TypeParams result {kind_};
+    TypeParams result {TypeSystemKind::JAVA, threadnum_};
     sig.ForEach([&result, this](const auto &param) {
         const Type &type = param;
         result >> (NormalizedTypeOf(type) * param.Variance());
@@ -81,7 +80,7 @@ TypeParams PandaTypes::NormalizeMethodSignature(const TypeParams &sig)
     return result;
 }
 
-const TypeParams &PandaTypes::NormalizedMethodSignature(const PandaTypes::CachedMethod &method)
+const TypeParams &PandaTypes::NormalizedMethodSignature(const CachedMethod &method)
 {
     auto &&method_id = method.id;
     auto it = NormalizedSigOfMethod_.find(method_id);
@@ -94,32 +93,27 @@ const TypeParams &PandaTypes::NormalizedMethodSignature(const PandaTypes::Cached
     return NormalizedSigOfMethod_[method_id];
 }
 
-const TypeParams &PandaTypes::MethodSignature(const PandaTypes::CachedMethod &method)
+const TypeParams &PandaTypes::MethodSignature(const CachedMethod &method)
 {
     auto &&method_id = method.id;
     auto it = SigOfMethod_.find(method_id);
     if (it != SigOfMethod_.end()) {
         return it->second;
     }
-    TypeParams params {kind_};
+    TypeParams params {TypeSystemKind::JAVA, threadnum_};
     Type return_type;
     bool return_is_processed = false;
     for (const auto &arg : method.signature) {
-        Type t;
-        if (CacheOfRuntimeThings::IsRef(arg)) {
-            const auto &cached_class = CacheOfRuntimeThings::GetRef(arg);
-            if (cached_class.type_id == TypeId::VOID) {
-                t = Top();
-            } else {
-                t = TypeOf(cached_class);
-            }
-        } else if (CacheOfRuntimeThings::IsDescriptor(arg)) {
-            LOG_VERIFIER_JAVA_TYPES_METHOD_ARG_WAS_NOT_RESOLVED(method.GetName());
-            t = Top();
-        } else {
-            LOG_VERIFIER_JAVA_TYPES_METHOD_ARG_CANNOT_BE_PROCESSED(method.GetName());
-            t = Top();
-        }
+        Type t = LibCache::Visit(
+            arg,
+            [this](const LibCache::CachedClass &cached_class) {
+                return cached_class.type_id == TypeId::VOID ? Top() : TypeOf(cached_class);
+            },
+            [&]([[maybe_unused]] const LibCache::DescriptorString &descriptor) {
+                LOG_VERIFIER_JAVA_TYPES_METHOD_ARG_WAS_NOT_RESOLVED(method.GetName());
+                return Top();
+            });
+
         if (!t.IsValid()) {
             LOG_VERIFIER_JAVA_TYPES_METHOD_ARG_CANNOT_BE_CONVERTED_TO_TYPE(method.GetName());
         }
@@ -137,17 +131,39 @@ const TypeParams &PandaTypes::MethodSignature(const PandaTypes::CachedMethod &me
 
 PandaTypes::TypeId PandaTypes::TypeIdOf(const Type &type) const
 {
-    std::vector<std::pair<Type, PandaTypes::TypeId>> types_table = {
-        {U1_, TypeId::U1},   {U8_, TypeId::U8},   {U16_, TypeId::U16}, {U32_, TypeId::U32},
-        {U64_, TypeId::U64}, {I8_, TypeId::I8},   {I16_, TypeId::I16}, {I32_, TypeId::I32},
-        {I64_, TypeId::I64}, {F32_, TypeId::F32}, {F64_, TypeId::F64}, {RefType_, TypeId::REFERENCE}};
-
-    for (const auto &val : types_table) {
-        if (val.first == type) {
-            return val.second;
-        }
+    if (type == U1()) {
+        return TypeId::U1;
     }
-
+    if (type == U8()) {
+        return TypeId::U8;
+    }
+    if (type == U16()) {
+        return TypeId::U16;
+    }
+    if (type == U32()) {
+        return TypeId::U32;
+    }
+    if (type == U64()) {
+        return TypeId::U64;
+    }
+    if (type == I8()) {
+        return TypeId::I8;
+    }
+    if (type == I16()) {
+        return TypeId::I16;
+    }
+    if (type == I32()) {
+        return TypeId::I32;
+    }
+    if (type == I64()) {
+        return TypeId::I64;
+    }
+    if (type == F32()) {
+        return TypeId::F32;
+    }
+    if (type == F64()) {
+        return TypeId::F64;
+    }
     if (type.IsTop()) {
         return TypeId::VOID;
     }
@@ -155,7 +171,7 @@ PandaTypes::TypeId PandaTypes::TypeIdOf(const Type &type) const
     return TypeId::INVALID;
 }
 
-Type PandaTypes::TypeOf(const PandaTypes::CachedMethod &method)
+Type PandaTypes::TypeOf(const CachedMethod &method)
 {
     auto id = method.id;
     auto k = TypeOfMethod_.find(id);
@@ -200,19 +216,19 @@ void PandaTypes::SetArraySubtyping(const Type &t)
     }
 }
 
-Type PandaTypes::TypeOfArray(const PandaTypes::CachedClass &klass)
+Type PandaTypes::TypeOfArray(const CachedClass &klass)
 {
     ASSERT(klass.flags[CachedClass::Flag::ARRAY_CLASS]);
 
     Type type;
-    const auto &component = klass.GetArrayComponent();
-    if (!Valid(component)) {
-        type = Array()(+Top());
-        LOG_VERIFIER_JAVA_TYPES_ARRAY_COMPONENT_TYPE_IS_UNDEFINED();
-    } else {
-        auto component_type = TypeOf(component);
+    auto component = klass.GetArrayComponent();
+    if (component.HasRef()) {
+        auto component_type = TypeOf(component.Get());
         type = Array()(+component_type);
         SetArraySubtyping(component_type);
+    } else {
+        type = Array()(+Top());
+        LOG_VERIFIER_JAVA_TYPES_ARRAY_COMPONENT_TYPE_IS_UNDEFINED();
     }
     type << ArrayType();
     if (klass.flags[CachedClass::Flag::OBJECT_ARRAY_CLASS]) {
@@ -222,7 +238,7 @@ Type PandaTypes::TypeOfArray(const PandaTypes::CachedClass &klass)
     return type;
 }
 
-Type PandaTypes::TypeOf(const PandaTypes::CachedClass &klass)
+Type PandaTypes::TypeOf(const CachedClass &klass)
 {
     auto id = klass.id;
     auto k = TypeOfClass_.find(id);
@@ -233,29 +249,29 @@ Type PandaTypes::TypeOf(const PandaTypes::CachedClass &klass)
     PandaVector<Type> supertypes;
     for (const auto &ancestor : klass.ancestors) {
         // ancestor here cannot be unresolved descriptor
-        ASSERT(CacheOfRuntimeThings::IsRef(ancestor));
-        supertypes.emplace_back(TypeOf(CacheOfRuntimeThings::GetRef(ancestor)));
+        ASSERT(LibCache::IsRef(ancestor));
+        supertypes.emplace_back(TypeOf(LibCache::GetRef(ancestor)));
     }
 
     Type type;
     bool is_primitive = klass.flags[CachedClass::Flag::PRIMITIVE];
-    bool is_string = klass.flags[CachedClass::Flag::STRING_CLASS];
 
     auto class_name = klass.GetName();
 
     if (klass.flags[CachedClass::Flag::ARRAY_CLASS]) {
         type = TypeOfArray(klass);
-    } else if (!is_primitive) {
-        type = TypeSystem_.Parametric(GetSort(class_name))();
-    } else {
+    } else if (is_primitive) {
         type = TypeOf(klass.type_id);
+    } else {
+        type = TypeForName(class_name);
     }
 
     if (!is_primitive) {
-        if (!is_string) {
-            type << ObjectType();
-        } else {
+        bool is_string = klass.flags[CachedClass::Flag::STRING_CLASS];
+        if (is_string) {
             type << StringType();
+        } else {
+            type << ObjectType();
         }
         NullRefType() << type << RefType();
         TypeClass()(~type) << TypeClassType() << RefType();
@@ -274,50 +290,156 @@ Type PandaTypes::TypeOf(const PandaTypes::CachedClass &klass)
 
 Type PandaTypes::TypeOf(PandaTypes::TypeId id) const
 {
-    if (id == TypeId::VOID) {
-        return Top();
+    Type type;
+    switch (id) {
+        case TypeId::VOID:
+            type = Top();
+            break;
+        case TypeId::U1:
+            type = U1();
+            break;
+        case TypeId::I8:
+            type = I8();
+            break;
+        case TypeId::U8:
+            type = U8();
+            break;
+        case TypeId::I16:
+            type = I16();
+            break;
+        case TypeId::U16:
+            type = U16();
+            break;
+        case TypeId::I32:
+            type = I32();
+            break;
+        case TypeId::U32:
+            type = U32();
+            break;
+        case TypeId::I64:
+            type = I64();
+            break;
+        case TypeId::U64:
+            type = U64();
+            break;
+        case TypeId::F32:
+            type = F32();
+            break;
+        case TypeId::F64:
+            type = F64();
+            break;
+        case TypeId::REFERENCE:
+            type = RefType();
+            break;
+        default:
+            LOG_VERIFIER_JAVA_TYPES_CANNOT_CONVERT_TYPE_ID_TO_TYPE(id);
+            type = Top();
     }
-
-    std::vector<std::pair<Type, PandaTypes::TypeId>> types_table = {
-        {U1_, TypeId::U1},   {U8_, TypeId::U8},   {U16_, TypeId::U16}, {U32_, TypeId::U32},
-        {U64_, TypeId::U64}, {I8_, TypeId::I8},   {I16_, TypeId::I16}, {I32_, TypeId::I32},
-        {I64_, TypeId::I64}, {F32_, TypeId::F32}, {F64_, TypeId::F64}, {RefType_, TypeId::REFERENCE}};
-
-    for (const auto &val : types_table) {
-        if (val.second == id) {
-            return val.first;
-        }
-    }
-
-    LOG_VERIFIER_JAVA_TYPES_CANNOT_CONVERT_TYPE_ID_TO_TYPE(id);
-    return Top();
+    return type;
 }
 
-void PandaTypes::Init()
+PandaTypes::PandaTypes(ThreadNum threadnum)
+    : threadnum_ {threadnum},
+      TypeSystem_ {TypeSystems::Get(TypeSystemKind::JAVA, threadnum_)},
+      Array_ {ParametricTypeForName("Array")},
+      Method_ {ParametricTypeForName("Method")},
+      NormalizedMethod_ {ParametricTypeForName("NormalizedMethod")},
+      Normalize_ {ParametricTypeForName("Normalize")},
+      Abstract_ {ParametricTypeForName("Abstract")},
+      Interface_ {ParametricTypeForName("Interface")},
+      TypeClass_ {ParametricTypeForName("TypeClass")},
+
+      U1_ {TypeForName("u1")},
+      I8_ {TypeForName("i8")},
+      U8_ {TypeForName("u8")},
+      I16_ {TypeForName("i16")},
+      U16_ {TypeForName("u16")},
+      I32_ {TypeForName("i32")},
+      U32_ {TypeForName("u32")},
+      I64_ {TypeForName("i64")},
+      U64_ {TypeForName("u64")},
+      F32_ {TypeForName("f32")},
+      F64_ {TypeForName("f64")},
+
+      RefType_ {TypeForName("RefType")},
+      ObjectType_ {TypeForName("ObjectType")},
+      StringType_ {TypeForName("StringType")},
+      PrimitiveType_ {TypeForName("PrimitiveType")},
+      AbstractType_ {TypeForName("AbstractType")},
+      InterfaceType_ {TypeForName("InterfaceType")},
+      TypeClassType_ {TypeForName("TypeClassType")},
+      InstantiableType_ {TypeForName("InstantiableType")},
+      ArrayType_ {TypeForName("ArrayType")},
+      ObjectArrayType_ {TypeForName("ObjectArrayType")},
+      MethodType_ {TypeForName("MethodType")},
+      StaticMethodType_ {TypeForName("StaticMethodType")},
+      NonStaticMethodType_ {TypeForName("NonStaticMethodType")},
+      VirtualMethodType_ {TypeForName("VirtualMethodType")},
+      NullRefType_ {TypeForName("NullRefType")},
+      Bits32Type_ {TypeForName("32Bits")},
+      Bits64Type_ {TypeForName("64Bits")},
+      Integral8Type_ {TypeForName("Integral8Bits")},
+      Integral16Type_ {TypeForName("Integral16Bits")},
+      Integral32Type_ {TypeForName("Integral32Bits")},
+      Integral64Type_ {TypeForName("Integral64Bits")},
+      Float32Type_ {TypeForName("Float32Bits")},
+      Float64Type_ {TypeForName("Float64Bits")}
 {
+    for (panda::panda_file::SourceLang lang : panda::panda_file::LANG_ITERATOR) {
+        LanguageContextBase *ctx = panda::plugins::GetLanguageContextBase(lang);
+
+        auto emplace = [&](auto &types, const char *name) {
+            if (name != nullptr) {
+                types.emplace(lang, TypeForName(name));
+            }
+        };
+
+        emplace(LangContextTypesClass_, ctx->GetVerificationTypeClass());
+        emplace(LangContextTypesObjects_, ctx->GetVerificationTypeObject());
+        emplace(LangContextTypesThrowables_, ctx->GetVerificationTypeThrowable());
+    }
+
     TypeSystem_.SetIncrementalRelationClosureMode(false);
 
     // base subtyping of primitive types
     I8() << I16() << I32();
     U1() << U8() << U16() << U32();
-    F32() << F64();
     // integral
-    (U1() | I8() | U8()) << Integral8Type();
-    (Integral8Type() | I16() | U16()) << Integral16Type();
-    (Integral16Type() | I32() | U32()) << Integral32Type();
-    (I64() | U64()) << Integral64Type();
+    TypeSet(U1(), I8(), U8()) << Integral8Type();
+    TypeSet(Integral8Type(), I16(), U16()) << Integral16Type();
+    TypeSet(Integral16Type(), I32(), U32()) << Integral32Type();
+    TypeSet(I64(), U64()) << Integral64Type();
     // sizes
-    F32() << (Float32Type() | F64()) << Float64Type();
-    (Integral32Type() | Float32Type()) << Bits32Type();
-    (Integral64Type() | Float64Type()) << Bits64Type();
-    (Bits32Type() | Bits64Type()) << PrimitiveType();
+    F32() << Float32Type();
+    F64() << Float64Type();
+    TypeSet(Integral32Type(), Float32Type()) << Bits32Type();
+    TypeSet(Integral64Type(), Float64Type()) << Bits64Type();
+    TypeSet(Bits32Type(), Bits64Type()) << PrimitiveType();
 
     TypeClassType() << RefType();
-    NullRefType() << (PandaClass() | PandaObject() | JavaObject() | JavaClass() | JavaThrowable())
-                  << (ObjectType() | RefType());
+
+    TypeSet object_or_ref(ObjectType(), RefType());
+    for (const auto &[lang, type] : LangContextTypesClass_) {
+        NullRefType() << type << object_or_ref;
+        (void)lang;
+    }
+
+    for (const auto &[lang, type] : LangContextTypesObjects_) {
+        NullRefType() << type << object_or_ref;
+        (void)lang;
+    }
+
+    for (const auto &[lang, type] : LangContextTypesThrowables_) {
+        NullRefType() << type << object_or_ref;
+        (void)lang;
+    }
+
     NullRefType() << (ArrayType() | ObjectArrayType()) << RefType();
-    TypeClass()(~PandaObject()) << TypeClassType();
-    TypeClass()(~JavaObject()) << TypeClassType();
+
+    for (const auto &[lang, type] : LangContextTypesObjects_) {
+        TypeClass()(~Object(lang)) << TypeClassType();
+        (void)type;
+    }
 
     TypeSystem_.CloseSubtypingRelation();
 

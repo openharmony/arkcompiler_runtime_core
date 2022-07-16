@@ -23,7 +23,6 @@
 # - EventsMemory: store events in the heap memory, useful for tests.
 # - EventsCsv: dump events to the csv file, useful for statistics gathering.
 #
-
 events:
 - name: osr_entry
   fields:
@@ -51,14 +50,14 @@ events:
     enum: [static, virtual, virtual_cha, virtual_monomorphic, virtual_polymorphic]
   - name: result
     type: enum
-    enum: [success, fail, fail_resolve, fail_megamorphic, unsuitable, noinline, lost_single_impl, limit, devirtualized]
+    enum: [success, fail, fail_resolve, fail_megamorphic, unsuitable, noinline, lost_single_impl, limit, devirtualized, inf_loop, skip_external]
 
 - name: deoptimization
   fields:
   - name: method_name
     type: std::string
   - name: pc
-    type: const void*
+    type: uintptr_t
   - name: after
     type: enum
     enum: [cframe, iframe, top]
@@ -73,7 +72,8 @@ events:
     type: size_t
   - name: type
     type: enum
-    enum: [null_check, bound_check, negative_size, native, throw, abstract_method, arithmetic, instantiation_error, cast_check]
+    enum: [null_check, bound_check, negative_size, native, throw, abstract_method, arithmetic, instantiation_error,
+           cast_check, stack_overflow, icce_method_conflict]
 
 - name: compilation
   fields:
@@ -101,6 +101,14 @@ events:
   fields:
   - name: description
     type: std::string
+
+- name: intrinsic_compilation
+  fields:
+  - name: name
+    type: std::string
+  - name: result
+    type: enum
+    enum: [inlined, inline_failed]
 
 - name: cha_invalidate
   fields:
@@ -161,6 +169,11 @@ events:
   - name: size
     type: int
 
+- name: slowpath_alloc
+  fields:
+  - name: thread_id
+    type: size_t
+
 - name: aot_resolve_string
   fields:
   - name: value
@@ -184,3 +197,25 @@ events:
     type: std::string
   - name: string_id
     type: int
+
+- name: implicit_nullcheck
+  fields:
+  - name: pc
+    type: uintptr_t
+
+- name: aot_manager
+  fields:
+  - name: aot_file
+    type: std::string
+  - name: action
+    type: enum
+    enum: [added, open_failed, verified, cha_verify_failed, file_verify_failed]
+
+- name: codegen_simplification
+  fields:
+  - name: inst
+    type: enum
+    enum: [checkcast, isinstance]
+  - name: reason
+    type: enum
+    enum: [final_class, skip_nullcheck]

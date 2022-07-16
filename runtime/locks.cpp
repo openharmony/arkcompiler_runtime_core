@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 
 #include "runtime/include/locks.h"
 #include "libpandabase/utils/logger.h"
+#include "include/thread.h"
 
 #include <memory>
 
@@ -29,25 +30,21 @@ os::memory::Mutex *Locks::user_suspension_lock = nullptr;
 void Locks::Initialize()
 {
     if (!is_initialized) {
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         Locks::mutator_lock = new MutatorLock();
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         Locks::custom_tls_lock = new os::memory::Mutex();
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         Locks::user_suspension_lock = new os::memory::Mutex();
         is_initialized = true;
     }
 }
 
 #ifndef NDEBUG
-thread_local MutatorLock::MutatorLockState lock_state = MutatorLock::UNLOCKED;
 
 void MutatorLock::ReadLock()
 {
     ASSERT(!HasLock());
     os::memory::RWLock::ReadLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::ReadLock";
-    lock_state = RDLOCK;
+    Thread::GetCurrent()->SetLockState(RDLOCK);
 }
 
 void MutatorLock::WriteLock()
@@ -55,7 +52,7 @@ void MutatorLock::WriteLock()
     ASSERT(!HasLock());
     os::memory::RWLock::WriteLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::WriteLock";
-    lock_state = WRLOCK;
+    Thread::GetCurrent()->SetLockState(WRLOCK);
 }
 
 bool MutatorLock::TryReadLock()
@@ -63,7 +60,7 @@ bool MutatorLock::TryReadLock()
     bool ret = os::memory::RWLock::TryReadLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::TryReadLock";
     if (ret) {
-        lock_state = RDLOCK;
+        Thread::GetCurrent()->SetLockState(RDLOCK);
     }
     return ret;
 }
@@ -73,7 +70,7 @@ bool MutatorLock::TryWriteLock()
     bool ret = os::memory::RWLock::TryWriteLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::TryWriteLock";
     if (ret) {
-        lock_state = WRLOCK;
+        Thread::GetCurrent()->SetLockState(WRLOCK);
     }
     return ret;
 }
@@ -83,17 +80,18 @@ void MutatorLock::Unlock()
     ASSERT(HasLock());
     os::memory::RWLock::Unlock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::Unlock";
-    lock_state = UNLOCKED;
+    Thread::GetCurrent()->SetLockState(UNLOCKED);
 }
 
 MutatorLock::MutatorLockState MutatorLock::GetState()
 {
-    return lock_state;
+    return Thread::GetCurrent()->GetLockState();
 }
 
 bool MutatorLock::HasLock()
 {
-    return lock_state == RDLOCK || lock_state == WRLOCK;
+    auto state = Thread::GetCurrent()->GetLockState();
+    return state == RDLOCK || state == WRLOCK;
 }
 #endif  // !NDEBUG
 

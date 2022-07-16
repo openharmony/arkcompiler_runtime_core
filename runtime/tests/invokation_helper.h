@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TESTS_INVOKATION_HELPER_H_
-#define PANDA_RUNTIME_TESTS_INVOKATION_HELPER_H_
+#ifndef PANDA_RUNTIME_TESTS_INVOCATION_HELPER_H_
+#define PANDA_RUNTIME_TESTS_INVOCATION_HELPER_H_
 
 #include <cstdint>
 #include <type_traits>
@@ -84,9 +84,9 @@ inline void WriteArg(arch::ArgWriter<RUNTIME_ARCH> *writer, T arg, Args... args)
 template <typename T>
 inline T InvokeEntryPoint(Method *method)
 {
-    PandaVector<uint8_t> gpr_data(arch::ExtArchTraits<RUNTIME_ARCH>::NUM_GP_ARG_REGS);
+    PandaVector<uint8_t> gpr_data(arch::ExtArchTraits<RUNTIME_ARCH>::GP_ARG_NUM_BYTES);
     Span<uint8_t> gprs(gpr_data.data(), gpr_data.size());
-    PandaVector<uint8_t> fpr_data(arch::ExtArchTraits<RUNTIME_ARCH>::NUM_FP_ARG_REGS);
+    PandaVector<uint8_t> fpr_data(arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
     Span<uint8_t> fprs(fpr_data.data(), fpr_data.size());
     PandaVector<uint8_t> stack;
     arch::ArgWriter<RUNTIME_ARCH> writer(&gprs, &fprs, stack.data());
@@ -179,4 +179,4 @@ DecodedTaggedValue InvokeDynEntryPoint(Method *method, uint32_t num_args, Args..
 
 }  // namespace panda::test
 
-#endif  // PANDA_RUNTIME_TESTS_INVOKATION_HELPER_H_
+#endif  // PANDA_RUNTIME_TESTS_INVOCATION_HELPER_H_

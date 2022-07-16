@@ -46,3 +46,11 @@ ark_gen_file("verification_verifier_messages_h") {
   requires = [ "$ark_root/templates/messages.rb" ]
   output_file = "$target_gen_dir/include/verifier_messages.h"
 }
+
+ark_gen_file("lang_specifics_h") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "$ark_root/verification/gen/templates/lang_specifics.h.erb"
+  data_file = "$target_gen_dir/../../plugin_options.yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/include/lang_specifics.h"
+}

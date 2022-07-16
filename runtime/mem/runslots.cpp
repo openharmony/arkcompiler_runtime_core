@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ template <typename LockTypeT>
 void RunSlots<LockTypeT>::Initialize(size_t slot_size, uintptr_t pool_pointer, bool initialize_lock)
 {
     ASAN_UNPOISON_MEMORY_REGION(this, RUNSLOTS_SIZE);
-    LOG_RUNSLOTS(INFO) << "Initializing RunSlots:";
+    LOG_RUNSLOTS(DEBUG) << "Initializing RunSlots:";
     ASSERT_PRINT((slot_size >= SlotToSize(SlotsSizes::SLOT_MIN_SIZE_BYTES)), "Size of slot in RunSlots is too small");
     ASSERT_PRINT((slot_size <= SlotToSize(SlotsSizes::SLOT_MAX_SIZE_BYTES)), "Size of slot in RunSlots is too big");
     ASSERT(pool_pointer != 0);
@@ -45,7 +45,7 @@ void RunSlots<LockTypeT>::Initialize(size_t slot_size, uintptr_t pool_pointer, b
     if (initialize_lock) {
         new (&lock_) LockTypeT();
     }
-    (void)memset_s(bitmap_.data(), BITMAP_ARRAY_SIZE, 0x0, BITMAP_ARRAY_SIZE);
+    memset_s(bitmap_.data(), BITMAP_ARRAY_SIZE, 0x0, BITMAP_ARRAY_SIZE);
     LOG_RUNSLOTS(DEBUG) << "- Memory started from = 0x" << std::hex << ToUintPtr(this);
     LOG_RUNSLOTS(DEBUG) << "- Pool size = " << RUNSLOTS_SIZE << " bytes";
     LOG_RUNSLOTS(DEBUG) << "- Slots size = " << slot_size_ << " bytes";
@@ -53,7 +53,7 @@ void RunSlots<LockTypeT>::Initialize(size_t slot_size, uintptr_t pool_pointer, b
     LOG_RUNSLOTS(DEBUG) << "- First uninitialized slot offset = " << std::hex
                         << static_cast<void *>(ToVoidPtr(first_uninitialized_slot_offset_));
     LOG_RUNSLOTS(DEBUG) << "- Pool pointer = " << std::hex << static_cast<void *>(ToVoidPtr(pool_pointer_));
-    LOG_RUNSLOTS(DEBUG) << "Successfully finished RunSlots init";
+    LOG_RUNSLOTS(DEBUG) << "Successful finished RunSlots init";
     ASAN_POISON_MEMORY_REGION(this, RUNSLOTS_SIZE);
 }
 
@@ -89,7 +89,7 @@ void RunSlots<LockTypeT>::PushFreeSlot(FreeSlot *mem_slot)
 {
     ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
     LOG_RUNSLOTS(DEBUG) << "Free slot in RunSlots at addr " << std::hex << static_cast<void *>(mem_slot);
-    // We need to poison/unpoison mem_slot here cause we could allocate an object with size less than FreeSlot size
+    // We need to poison/unpoison mem_slot here because we could allocate an object with size less than FreeSlot size
     ASAN_UNPOISON_MEMORY_REGION(mem_slot, sizeof(FreeSlot));
     mem_slot->SetNext(next_free_);
     ASAN_POISON_MEMORY_REGION(mem_slot, sizeof(FreeSlot));

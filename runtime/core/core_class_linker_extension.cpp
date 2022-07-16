@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,13 +47,16 @@ void CoreClassLinkerExtension::ErrorHandler::OnError(ClassLinker::Error error, c
             ThrowException(ctx, thread, ctx.GetNoClassDefFoundErrorDescriptor(), utf::CStringAsMutf8(message.c_str()));
             break;
         }
+        case ClassLinker::Error::CLASS_CIRCULARITY: {
+            ThrowException(ctx, thread, ctx.GetClassCircularityErrorDescriptor(), utf::CStringAsMutf8(message.c_str()));
+            break;
+        }
         default:
             LOG(FATAL, CLASS_LINKER) << "Unhandled error (" << static_cast<size_t>(error) << "): " << message;
             break;
     }
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
 bool CoreClassLinkerExtension::InitializeImpl(bool compressed_string_enabled)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(GetLanguage());
@@ -76,7 +79,7 @@ bool CoreClassLinkerExtension::InitializeImpl(bool compressed_string_enabled)
     auto *string_class = CreateClass(ctx.GetStringClassDescriptor(), GetClassVTableSize(ClassRoot::STRING),
                                      GetClassIMTSize(ClassRoot::STRING), GetClassSize(ClassRoot::STRING));
     string_class->SetBase(obj_class);
-    string_class->SetFlags(Class::STRING_CLASS);
+    string_class->SetStringClass();
     coretypes::String::SetCompressedStringsEnabled(compressed_string_enabled);
     string_class->SetState(Class::State::LOADED);
     string_class->SetLoadContext(GetBootContext());
@@ -181,7 +184,6 @@ size_t CoreClassLinkerExtension::GetClassVTableSize(ClassRoot root)
     }
 
     UNREACHABLE();
-    return 0;
 }
 
 size_t CoreClassLinkerExtension::GetClassIMTSize(ClassRoot root)
@@ -227,7 +229,6 @@ size_t CoreClassLinkerExtension::GetClassIMTSize(ClassRoot root)
     }
 
     UNREACHABLE();
-    return 0;
 }
 
 size_t CoreClassLinkerExtension::GetClassSize(ClassRoot root)
@@ -247,7 +248,7 @@ size_t CoreClassLinkerExtension::GetClassSize(ClassRoot root)
         case ClassRoot::F32:
         case ClassRoot::F64:
         case ClassRoot::TAGGED:
-            return ClassHelper::ComputeClassSize(GetClassVTableSize(root), GetClassIMTSize(root), 0, 0, 0, 0, 0, 0);
+            return Class::ComputeClassSize(GetClassVTableSize(root), GetClassIMTSize(root), 0, 0, 0, 0, 0, 0);
         case ClassRoot::ARRAY_U1:
         case ClassRoot::ARRAY_I8:
         case ClassRoot::ARRAY_U8:
@@ -266,14 +267,13 @@ size_t CoreClassLinkerExtension::GetClassSize(ClassRoot root)
         case ClassRoot::OBJECT:
         case ClassRoot::CLASS:
         case ClassRoot::STRING:
-            return ClassHelper::ComputeClassSize(GetClassVTableSize(root), GetClassIMTSize(root), 0, 0, 0, 0, 0, 0);
+            return Class::ComputeClassSize(GetClassVTableSize(root), GetClassIMTSize(root), 0, 0, 0, 0, 0, 0);
         default: {
             break;
         }
     }
 
     UNREACHABLE();
-    return 0;
 }
 
 size_t CoreClassLinkerExtension::GetArrayClassVTableSize()
@@ -312,7 +312,11 @@ Class *CoreClassLinkerExtension::CreateClass(const uint8_t *descriptor, size_t v
     } else {
         object_header = heap_manager->AllocateNonMovableObject<false>(class_root, coretypes::Class::GetSize(size));
     }
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
+
+    if (UNLIKELY(object_header == nullptr)) {
+        return nullptr;
+    }
+
     auto *res = reinterpret_cast<coretypes::Class *>(object_header);
     res->InitClass(descriptor, vtable_size, imt_size, size);
     auto *klass = res->GetRuntimeClass();

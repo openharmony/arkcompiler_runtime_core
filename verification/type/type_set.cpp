@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,12 +39,12 @@ const TypeSet &TypeSet::operator<<(const TypeSet &st) const
 
 TypeSet TypeSet::operator&(const Type &rhs) const
 {
-    return TypeSet {Kind_, Indices_ & TypeSystems::Get(Kind_).GetDirectlyRelated(rhs.Index())};
+    return TypeSet {kind_, threadnum_, Numbers_ & TypeSystems::Get(kind_, threadnum_).GetDirectlyRelated(rhs.Number())};
 }
 
 TypeSet TypeSet::operator&(const TypeSet &rhs) const
 {
-    return TypeSet {Kind_, Indices_ & rhs.Indices_};
+    return TypeSet {kind_, threadnum_, Numbers_ & rhs.Numbers_};
 }
 
 }  // namespace panda::verifier

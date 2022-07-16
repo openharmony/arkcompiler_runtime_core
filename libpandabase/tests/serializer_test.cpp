@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,15 @@ protected:
 };
 
 template <typename T>
-void SerializerTypeToBuffer(const T &type, std::vector<uint8_t> *buffer, size_t ret_val)
+void SerializerTypeToBuffer(const T &type, /* out */ std::vector<uint8_t> &buffer, size_t ret_val)
 {
-    auto ret = serializer::TypeToBuffer(type, *buffer);
+    auto ret = serializer::TypeToBuffer(type, buffer);
     ASSERT_TRUE(ret);
     ASSERT_EQ(ret.Value(), ret_val);
 }
 
 template <typename T>
-void SerializerBufferToType(const std::vector<uint8_t> &buffer, T &type, size_t ret_val)
+void SerializerBufferToType(const std::vector<uint8_t> &buffer, /* out */ T &type, size_t ret_val)
 {
     auto ret = serializer::BufferToType(buffer.data(), buffer.size(), type);
     ASSERT_TRUE(ret);
@@ -46,11 +46,12 @@ void SerializerBufferToType(const std::vector<uint8_t> &buffer, T &type, size_t 
 template <typename T>
 void DoTest(T value, int ret_val)
 {
+    constexpr const int64_t IMM_FOUR = 4;
     T a = value;
     T b;
     std::vector<uint8_t> buffer;
-    SerializerTypeToBuffer(a, &buffer, ret_val);
-    buffer.resize(4U * buffer.size());
+    SerializerTypeToBuffer(a, buffer, ret_val);
+    buffer.resize(IMM_FOUR * buffer.size());
     SerializerBufferToType(buffer, b, ret_val);
     ASSERT_EQ(a, value);
     ASSERT_EQ(b, value);
@@ -73,7 +74,6 @@ struct PodStruct {
     float e;
     long double f;
 };
-
 bool operator==(const PodStruct &lhs, const PodStruct &rhs)
 {
     return lhs.a == rhs.a && lhs.b == rhs.b && lhs.c == rhs.c && lhs.d == rhs.d && lhs.e == rhs.e && lhs.f == rhs.f;
@@ -162,7 +162,6 @@ struct TestStruct {
     std::string e;
     std::vector<int> f;
 };
-
 bool operator==(const TestStruct &lhs, const TestStruct &rhs)
 {
     return lhs.a == rhs.a && lhs.b == rhs.b && lhs.c == rhs.c && lhs.d == rhs.d && lhs.e == rhs.e && lhs.f == rhs.f;

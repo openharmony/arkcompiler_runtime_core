@@ -15,7 +15,7 @@
 
 .record E1 {}
 
-.function u1 f1() {
+.function i32 f1() {
     newobj v0, E1
 try_begin:
     throw v0
@@ -35,7 +35,7 @@ catch_block2_begin:
 .catch E1, try_begin, try_end, catch_block2_begin
 }
 
-.function u1 main() {
+.function i32 main() {
     call f1
     return
 }

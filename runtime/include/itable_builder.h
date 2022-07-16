@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_ITABLE_BUILDER_H_
-#define PANDA_RUNTIME_INCLUDE_ITABLE_BUILDER_H_
+#ifndef PANDA_RUNTIME_ITABLE_BUILDER_H_
+#define PANDA_RUNTIME_ITABLE_BUILDER_H_
 
 #include "libpandabase/macros.h"
 #include "libpandafile/class_data_accessor-inl.h"
@@ -45,6 +44,25 @@ public:
     NO_MOVE_SEMANTIC(ITableBuilder);
 };
 
+class DummyITableBuilder final : public ITableBuilder {
+public:
+    void Build([[maybe_unused]] ClassLinker *class_linker, [[maybe_unused]] Class *base,
+               [[maybe_unused]] Span<Class *> class_interfaces, [[maybe_unused]] bool is_interface) override
+    {
+    }
+
+    void Resolve([[maybe_unused]] Class *klass) override {}
+
+    void UpdateClass([[maybe_unused]] Class *klass) override {}
+
+    void DumpITable([[maybe_unused]] Class *klass) override {}
+
+    ITable GetITable() const override
+    {
+        return ITable();
+    }
+};
+
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_ITABLE_BUILDER_H_
+#endif  // PANDA_RUNTIME_ITABLE_BUILDER_H_

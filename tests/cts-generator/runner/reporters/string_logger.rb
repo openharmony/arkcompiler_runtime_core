@@ -13,7 +13,6 @@
 
 module TestRunner
   module Reporters
-
     # StringLogger is intended to keep all single test output.
     class StringLogger
       def initialize
@@ -21,7 +20,11 @@ module TestRunner
       end
 
       def log(level, *args)
-        raise IOError, "#{self.class} is closed for writing. It is possible that epilogue() is called." if @content.closed_write?
+        if @content.closed_write?
+          raise IOError,
+                "#{self.class} is closed for writing. It is possible that epilogue() is called."
+        end
+
         @content.puts(args) if level <= $VERBOSITY
       end
 
@@ -36,16 +39,15 @@ module TestRunner
 
     class SeparateFileLogger
       def initialize(log_file)
-        @file = File.new(log_file, "w")
+        @file = File.new(log_file, 'w')
       end
 
-      def log(level, *args)
+      def log(_level, *args)
         @file.write(*args, "\n")
-
       end
 
       def string
-        ""
+        ''
       end
 
       def close

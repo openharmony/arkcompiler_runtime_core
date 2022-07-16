@@ -36,11 +36,11 @@ definitions:
         panda.Object[] fObjArray <static>
       }
 
-  - name: java_header
+  - name: PandaAssembly_header
     template: |
-      .language Java
+      .language PandaAssembly
 
-      .record java.lang.Object <external>
+      .record panda.Object <external>
 
       .record R {
         u1             fu1       <static>
@@ -53,8 +53,8 @@ definitions:
         f64            ff64      <static>
         # objects:
         i32[]          fi32Array <static>
-        java.lang.Object   fObj      <static>
-        java.lang.Object[] fObjArray <static>
+        panda.Object   fObj      <static>
+        panda.Object[] fObjArray <static>
       }
 
 tests:
@@ -103,57 +103,57 @@ tests:
           - values:
             - W.fu1
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fi8
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fu16
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fi16
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fi32
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fi64
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.ff32
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.ff64
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fW
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fi32Array
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fWArray
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W
@@ -189,7 +189,7 @@ tests:
         header-template: [pandasm_header]
         check-type: exit-positive
         tags: [verifier]
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         bugid: ['1834', '2088']
         code-template: |
 
@@ -210,6 +210,45 @@ tests:
             - R.fu32
           - values:
             - R.fi32
+          - values:
+            - R.ff32
+            bugid: ['6094']
+          - values:
+            - R.fObj
+          - values:
+            - R.fObjArray
+          - values:
+            - R.fi32Array
+
+
+      - file-name: "with_wrong_field_size_j"
+        description: Check that verifier reports an error when the field resolves to a field with size that is not corresponding to bytecode in PandaAssembly context.
+        isa:
+          verification:
+            - field_id_size
+        header-template: [PandaAssembly_header]
+        check-type: exit-positive
+        tags: [verifier, pa-verifier]
+        runner-options: [verifier-failure, use-pa, verifier-config]
+        bugid: ["5271"]
+        code-template: |
+
+          .function i32 main() {
+            ldstatic.64 %s
+        cases:
+          - values:
+            - R.fu1
+          - values:
+            - R.fi8
+          - values:
+            - R.fu16
+          - values:
+            - R.fi16
+          - values:
+            - R.fi32
+          - values:
+            - R.ff32
+            bugid: ['6094']
           - values:
             - R.fObj
           - values:
@@ -248,14 +287,75 @@ tests:
           - values: [-6510615555426900571, 'i64', -6510615555426900571, 'i64', 'cmp.64']
 
 
-      - file-name: "from_all_float_field_types_p"
+      - file-name: "from_all_int_field_types_j"
+        description: Check that accumulator value is loaded from field into accumulator in PandaAssembly context. More tests on ldstatic.64 can be found in ststatic.64 tests.
+        isa:
+          description: Get static field value by field_id and put it into accumulator.
+        header-template: [PandaAssembly_header]
+        runner-options: [use-pa]
+        check-type: exit-positive
+        tags: ['tsan']
+        code-template: |
+
+          .function i32 main() {
+            ldai.64 %s
+            ststatic.64 R.f%s
+            movi.64 v15, %s
+            ldstatic.64 R.f%s
+            %s v15
+            jeqz success
+            ldai 1
+            return
+          success:
+        cases:
+          # i64
+          - values: [0, 'i64', 0, 'i64', 'cmp.64']
+          - values: [-1, 'i64', -1, 'i64', 'cmp.64']
+          - values: [-6510615555426900571, 'i64', -6510615555426900571, 'i64', 'cmp.64']
+
+
+      - file-name: "from_float_field_type_p"
         description: Check that accumulator value is loaded from field into accumulator in PandaAssembly context. More tests on ldstatic.64 can be found in ststatic.64 tests.
         isa:
           instructions:
             - sig: ldstatic.64 field_id
               acc: out:b64
               format: [op_id_16]
+        tags: ['irtoc_ignore']
         header-template: [pandasm_header]
+        check-type: exit-positive
+        code-template: |
+
+          .function i32 main() {
+            fldai.64 %s
+            ststatic.64 R.ff64
+            lda.null
+            fmovi.64 v15, %s
+            ldstatic.64 R.ff64
+            fcmpg.64 v15
+            %s
+            jeqz success
+            ldai 1
+            return
+          success:
+        cases:
+          # f64
+          - values: ['0.0', '0.0', '']
+          - values: ['-6510615555426900571.0', '-6510615555426900571.0', '']
+          - values: ['0x7FFFFFFFFFFFFFFF', '0x7FFFFFFFFFFFFFFF', 'subi 1']    # NaN
+          - values: ['0x7ff0000000000000', '0x7ff0000000000000', '']    # + Inf
+          - values: ['0xfff0000000000000', '0xfff0000000000000', '']    # - Inf
+
+      - file-name: "from_float_field_type_j"
+        description: Check that accumulator value is loaded from field into accumulator in PandaAssembly context. More tests on ldstatic.64 can be found in ststatic.64 tests.
+        isa:
+          instructions:
+            - sig: ldstatic.64 field_id
+              acc: out:b64
+              format: [op_id_16]
+        header-template: [PandaAssembly_header]
+        tags: ['irtoc_ignore']
+        runner-options: [use-pa]
         check-type: exit-positive
         code-template: |
 
@@ -286,9 +386,8 @@ tests:
             - x_init
         header-template: []
         check-type: empty
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         bugid: ['5330']
-        ignore: true
         code-template: |
 
           .language PandaAssembly
@@ -345,3 +444,69 @@ tests:
                   ldai 10
                   ldarr v1    # get ArrayIndexOutOfBoundsException
 
+      - file-name: "x_init_j"
+        description: Check that ExceptionInInitializerError is thrown if an unexpected exception occurs in static initializer.
+        isa:
+          exceptions:
+            - x_init
+        header-template: []
+        check-type: empty
+        tags: ['tsan', 'irtoc_ignore']
+        runner-options: ['use-pa']
+        code-template: |
+
+          .language PandaAssembly
+
+          .record panda.ExceptionInInitializerError <external>
+          .record panda.NullPointerException <external>
+          .record E1 {}
+          .record R {
+              f64     ff64    <static>
+          }
+          .record Q <panda.extends=R> {
+              f64     ff64    <static>
+          }
+          .function void R.func() <cctor> {
+              %s
+              return.void
+          }
+
+          .function i32 main() {
+          begin:
+              ldstatic.64 Q.ff64
+              ldai 2
+              return
+          end:
+          catch:
+              ldai 0
+              return
+          catch_all:
+              ldai 1
+              return
+          .catch panda.ExceptionInInitializerError, begin, end, catch
+          .catchall begin, end, catch_all
+          }
+        cases:
+          - values:
+            - |
+              #
+                  newobj v0, E1
+                  throw v0
+          - values:
+            - |
+              #
+                  newobj v0, panda.NullPointerException
+                  throw v0
+          - values:
+            - |
+              #
+                  movi v1, 0
+                  ldai 1
+                  div2 v1     # divide by zero
+          - values:
+            - |
+              #
+                  movi v1, 10
+                  newarr v1, v1, i32[]
+                  ldai 10
+                  ldarr v1    # get ArrayIndexOutOfBoundsException

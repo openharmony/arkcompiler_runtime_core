@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,12 @@
 #include "assembly-function.h"
 #include "extensions/extensions.h"
 
-namespace panda::test {
-
 using namespace panda::pandasm;
 
 TEST(mangling_tests, MangleFunctionName)
 {
     std::vector<Function::Parameter> params;
-    extensions::Language language {extensions::Language::PANDA_ASSEMBLY};
+    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"type1", 0}, language);
     params.emplace_back(Type {"type2", 0}, language);
     params.emplace_back(Type {"type3", 0}, language);
@@ -42,4 +40,20 @@ TEST(mangling_tests, DeMangleFunctionName)
     ASSERT_EQ(DeMangleName(name), "Asm.main");
 }
 
-}  // namespace panda::test
+TEST(mangling_tests, GetFunctionSignatureFromName)
+{
+    std::vector<Function::Parameter> params;
+    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    params.emplace_back(Type {"type1", 0}, language);
+    params.emplace_back(Type {"type2", 0}, language);
+    params.emplace_back(Type {"type3", 0}, language);
+
+    std::string name = "Asm.main";
+    ASSERT_EQ(GetFunctionSignatureFromName(name, std::move(params)), "Asm.main:(type1,type2,type3)");
+}
+
+TEST(mangling_tests, GetFunctionNameFromSignature)
+{
+    std::string name = "Asm.main:(type1,type2,type3,type4)";
+    ASSERT_EQ(GetFunctionNameFromSignature(name), "Asm.main");
+}

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H_
-#define PANDA_LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H_
+#ifndef LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H_
+#define LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H_
 
 #include "file.h"
 
@@ -77,8 +77,8 @@ private:
     const File &panda_file_;
     File::EntityId debug_info_id_;
 
-    uint32_t line_start_ {0};
-    uint32_t num_params_ {0};
+    uint32_t line_start_;
+    uint32_t num_params_;
     Span<const uint8_t> parameters_sp_ {nullptr, nullptr};
     Span<const uint8_t> constant_pool_size_sp_ {nullptr, nullptr};
     Span<const uint8_t> line_num_program_off_sp_ {nullptr, nullptr};
@@ -88,4 +88,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H_
+#endif  // LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H_

@@ -11,24 +11,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+def check_N_v8_format(insn)
+  insn.operands.each do |op|
+    raise "Instruction " + insn.mnemonic + " has unexpected format " + insn.format.pretty if ! op.reg? || op.width != 8
+  end
+end
+
 def get_format_for(insn)
   fmt = insn.format.pretty
   if fmt == "imm4_v4_v4_v4_v4_v4"
     # Merge imm4_v4_v4_v4_v4_v4 and imm4_v4_v4_v4 since they haave the same handling code
     fmt = "imm4_v4_v4_v4"
   end
+
+  if insn.prefix
+    if fmt == "pref_imm16_v8"
+      # This format requires specific handler for each call instruction
+      fmt = insn.opcode
+    else
+      # All other instructions accept N v8
+      check_N_v8_format(insn)
+      prefix_name = insn.prefix.name
+      fmt = prefix_name + "_N_v8"
+    end
+  end
   return "call_#{fmt}"
 end
 
-def get_call_insns()
-  insns = Panda::instructions.select {|insn| (insn.properties.include? "call" and insn.properties.include? "dynamic")}
-  # The following instructions are js specific call instructions
-  insns = insns.concat(Panda::instructions.select {|insn|
-    insn.mnemonic == "builtin.bin2" ||
-    insn.mnemonic == "builtin.tern3" ||
-    insn.mnemonic == "builtin.quatern4" ||
-    insn.mnemonic == "builtin.quin5" ||
-    insn.mnemonic == "builtin.r2i"
-  })
-  return insns
+def get_call_insns
+  Panda.instructions.select { |insn| insn.properties.include?('call') && insn.properties.include?('dynamic') }
 end

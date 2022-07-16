@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_ABSINT_REG_CONTEXT_H_
-#define PANDA_VERIFICATION_ABSINT_REG_CONTEXT_H_
+#ifndef PANDA_VERIFIER_ABSINT_REG_CONTEXT_HPP_
+#define PANDA_VERIFIER_ABSINT_REG_CONTEXT_HPP_
 
 #include "value/abstract_typed_value.h"
 
@@ -34,13 +34,16 @@ Design decisions:
    after implementing sparse vectors - rebase on them (taking into consideration immutability, see immer)
 */
 
+// TODO(vdyadov): correct handling of values origins during LUB operation
+
 class RegContext {
 public:
     RegContext() = default;
     explicit RegContext(size_t size) : Regs_(size) {}
     ~RegContext() = default;
-    DEFAULT_COPY_SEMANTIC(RegContext);
+
     DEFAULT_MOVE_SEMANTIC(RegContext);
+    DEFAULT_COPY_SEMANTIC(RegContext);
 
     RegContext operator&(const RegContext &rhs) const
     {
@@ -203,9 +206,9 @@ public:
         PandaString log_string {""};
         bool comma = false;
         EnumerateAllRegs([&comma, &log_string, &img](int num, const auto &abs_type_val) {
-            PandaString result {num == -1 ? "acc" : "v" + NumToStr<PandaString>(num)};
+            PandaString result {num == -1 ? "acc" : "v" + NumToStr(num)};
             result += " : ";
-            result += abs_type_val.template Image<PandaString>(img);
+            result += abs_type_val.Image(img);
             if (comma) {
                 log_string += ", ";
             }
@@ -219,8 +222,9 @@ public:
 private:
     ShiftedVector<1, AbstractTypedValue> Regs_;
 
+    // TODO(vdyadov): After introducing sparse bit-vectors, change ConflictingRegs_ type.
     PandaUnorderedSet<int> ConflictingRegs_;
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_ABSINT_REG_CONTEXT_H_
+#endif  // !PANDA_VERIFIER_ABSINT_REG_CONTEXT_HPP_

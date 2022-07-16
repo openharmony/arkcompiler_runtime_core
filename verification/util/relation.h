@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_RELATION_H_
-#define PANDA_VERIFICATION_UTIL_RELATION_H_
+#ifndef _PANDA_TYPE_SYSTEM_RELATION_HPP
+#define _PANDA_TYPE_SYSTEM_RELATION_HPP
 
 #include "lazy.h"
 #include "index.h"
@@ -44,14 +44,16 @@ public:
         Direct_[from].Insert(to);
         Direct_[from] |= Direct_[to];
         // flatten relation
-        for (RelIndex dst : Direct_[to]) {
+        Direct_[to].ForAll([&](RelIndex dst) {
             Inverse_[dst].Insert(from);
             Inverse_[dst] |= Inverse_[from];
-        }
-        for (RelIndex src : Inverse_[from]) {
+            return true;
+        });
+        Inverse_[from].ForAll([&](RelIndex src) {
             Direct_[src].Insert(to);
             Direct_[src] |= Direct_[to];
-        }
+            return true;
+        });
     }
 
     void SymmRelate(RelIndex lhs, RelIndex rhs)
@@ -150,4 +152,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_UTIL_RELATION_H_
+#endif  // !_PANDA_TYPE_SYSTEM_RELATION_HPP

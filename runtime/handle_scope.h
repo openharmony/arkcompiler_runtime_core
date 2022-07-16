@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_HANDLE_SCOPE_H_
-#define PANDA_RUNTIME_HANDLE_SCOPE_H_
+#ifndef PANDA_RUNTIME_HANDLE_SCOPE_H
+#define PANDA_RUNTIME_HANDLE_SCOPE_H
 
 #include "runtime/handle_base.h"
 #include "runtime/include/coretypes/tagged_value.h"
@@ -86,7 +86,5 @@ private:
     bool alreadyEscape_ = false;
     HandleBase escapeHandle_;
 };
-
 }  // namespace panda
-
-#endif  // PANDA_RUNTIME_HANDLE_SCOPE_H_
+#endif  // PANDA_RUNTIME_HANDLE_SCOPE_H

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_GLOBAL_HANDLE_STORAGE_INL_H_
-#define PANDA_RUNTIME_GLOBAL_HANDLE_STORAGE_INL_H_
+#ifndef PANDA_RUNTIME_GLOABL_HANDLE_STORAGE_INL_H
+#define PANDA_RUNTIME_GLOABL_HANDLE_STORAGE_INL_H
 
 #include "runtime/global_handle_storage.h"
 #include "libpandabase/trace/trace.h"
@@ -143,7 +142,5 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unu
 }
 
 template class GlobalHandleStorage<coretypes::TaggedType>;
-
 }  // namespace panda
-
-#endif  // PANDA_RUNTIME_GLOBAL_HANDLE_STORAGE_INL_H_
+#endif  // PANDA_RUNTIME_GLOABL_HANDLE_STORAGE_INL_H

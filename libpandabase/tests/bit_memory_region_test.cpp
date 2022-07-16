@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 namespace panda::test {
 
-static void CompareData(const uint8_t *data, size_t offset, size_t length, uint32_t value, uint8_t fill_value)
+static void CompareData(uint8_t *data, size_t offset, size_t length, uint32_t value, uint8_t fill_value)
 {
     for (size_t i = 0; i < length; i++) {
         uint8_t expected = (offset <= i && i < offset + length) ? value >> (i - offset) : fill_value;

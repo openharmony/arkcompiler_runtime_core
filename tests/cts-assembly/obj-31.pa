@@ -25,7 +25,7 @@
 
 # check cctor
 
-.function u1 main() {
+.function i32 main() {
     ldstatic R.s_f
     movi v0, 10
     jne v0, exit_failure

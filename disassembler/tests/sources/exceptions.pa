@@ -24,7 +24,7 @@ try_begin:
     return
 try_end:
     ldai 3
-    ldai 4
+    ldai 4 
     ldai 5
 catch_block1_begin:
     call.virt A_exception.getMessage, v0

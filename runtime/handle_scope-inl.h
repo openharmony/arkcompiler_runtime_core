@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_HANDLE_SCOPE_INL_H_
-#define PANDA_RUNTIME_HANDLE_SCOPE_INL_H_
+#ifndef PANDA_RUNTIME_HANDLE_SCOPE_INL_H
+#define PANDA_RUNTIME_HANDLE_SCOPE_INL_H
 
+#include "include/mtmanaged_thread.h"
 #include "runtime/handle_scope.h"
 #include "runtime/include/thread-inl.h"
 
@@ -23,6 +24,9 @@ namespace panda {
 template <typename T>
 inline HandleScope<T>::HandleScope(ManagedThread *thread) : thread_(thread)
 {
+    ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
+           !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || Locks::mutator_lock->HasLock());
+
     HandleScope<T> *topScope = thread->GetTopScope<T>();
     if (topScope != nullptr) {
         beginIndex_ = topScope->GetBeginIndex() + topScope->GetHandleCount();
@@ -33,6 +37,9 @@ inline HandleScope<T>::HandleScope(ManagedThread *thread) : thread_(thread)
 template <typename T>
 inline HandleScope<T>::HandleScope(ManagedThread *thread, T value) : thread_(thread)
 {
+    ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
+           !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || Locks::mutator_lock->HasLock());
+
     HandleScope<T> *topScope = thread->GetTopScope<T>();
     ASSERT(topScope != nullptr);
     topScope->NewHandle(value);
@@ -43,6 +50,9 @@ inline HandleScope<T>::HandleScope(ManagedThread *thread, T value) : thread_(thr
 template <typename T>
 inline HandleScope<T>::~HandleScope()
 {
+    ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
+           !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || Locks::mutator_lock->HasLock());
+
     thread_->PopHandleScope<T>();
     thread_->GetHandleStorage<T>()->FreeHandles(beginIndex_);
 }
@@ -59,7 +69,5 @@ inline EscapeHandleScope<T>::EscapeHandleScope(ManagedThread *thread)
       escapeHandle_(thread->GetHandleStorage<T>()->GetNodeAddress(thread->GetTopScope<T>()->GetBeginIndex() - 1))
 {
 }
-
 }  // namespace panda
-
-#endif  // PANDA_RUNTIME_HANDLE_SCOPE_INL_H_
+#endif  // PANDA_RUNTIME_HANDLE_SCOPE_INL_H

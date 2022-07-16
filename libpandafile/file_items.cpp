@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@
 #include <iomanip>
 
 namespace panda::panda_file {
+
+#include "file_items_gen.inc"
 
 template <class Tag, class Val>
 static bool WriteUlebTaggedValue(Writer *writer, Tag tag, Val v)
@@ -72,6 +74,75 @@ static bool WriteIdTaggedValue(Writer *writer, Tag tag, BaseItem *item)
     return WriteTaggedValue(writer, tag, item->GetOffset());
 }
 
+std::string ItemTypeToString(ItemTypes type)
+{
+    switch (type) {
+        case ItemTypes::ANNOTATION_ITEM:
+            return "annotation_item";
+        case ItemTypes::CATCH_BLOCK_ITEM:
+            return "catch_block_item";
+        case ItemTypes::CLASS_INDEX_ITEM:
+            return "class_index_item";
+        case ItemTypes::CLASS_ITEM:
+            return "class_item";
+        case ItemTypes::CODE_ITEM:
+            return "code_item";
+        case ItemTypes::DEBUG_INFO_ITEM:
+            return "debug_info_item";
+        case ItemTypes::END_ITEM:
+            return "end_item";
+        case ItemTypes::FIELD_INDEX_ITEM:
+            return "field_index_item";
+        case ItemTypes::FIELD_ITEM:
+            return "field_item";
+        case ItemTypes::FOREIGN_CLASS_ITEM:
+            return "foreign_class_item";
+        case ItemTypes::FOREIGN_FIELD_ITEM:
+            return "foreign_field_item";
+        case ItemTypes::FOREIGN_METHOD_ITEM:
+            return "foreign_method_item";
+        case ItemTypes::INDEX_HEADER:
+            return "index_header";
+        case ItemTypes::INDEX_SECTION:
+            return "index_section";
+        case ItemTypes::LINE_NUMBER_PROGRAM_INDEX_ITEM:
+            return "line_number_program_index_item";
+        case ItemTypes::LINE_NUMBER_PROGRAM_ITEM:
+            return "line_number_program_item";
+        case ItemTypes::LITERAL_ARRAY_ITEM:
+            return "literal_array_item";
+        case ItemTypes::LITERAL_ITEM:
+            return "literal_item";
+        case ItemTypes::METHOD_HANDLE_ITEM:
+            return "method_handle_item";
+        case ItemTypes::METHOD_INDEX_ITEM:
+            return "method_index_item";
+        case ItemTypes::METHOD_ITEM:
+            return "method_item";
+        case ItemTypes::PARAM_ANNOTATIONS_ITEM:
+            return "param_annotations_item";
+        case ItemTypes::PRIMITIVE_TYPE_ITEM:
+            return "primitive_type_item";
+        case ItemTypes::PROTO_INDEX_ITEM:
+            return "proto_index_item";
+        case ItemTypes::PROTO_ITEM:
+            return "proto_item";
+        case ItemTypes::STRING_ITEM:
+            return "string_item";
+        case ItemTypes::TRY_BLOCK_ITEM:
+            return "try_block_item";
+        case ItemTypes::VALUE_ITEM:
+            return "value_item";
+        default:
+            return "";
+    }
+}
+
+std::string BaseItem::GetName() const
+{
+    return ItemTypeToString(GetItemType());
+}
+
 StringItem::StringItem(std::string str) : str_(std::move(str))
 {
     str_.push_back(0);
@@ -86,17 +157,22 @@ StringItem::StringItem(std::string str) : str_(std::move(str))
     }
 }
 
+StringItem::StringItem(File::StringData data)
+    : str_(reinterpret_cast<const char *>(data.data)), utf16_length_(data.utf16_length)
+{
+}
+
 size_t StringItem::CalculateSize() const
 {
-    return leb128::UnsignedEncodingSize((utf16_length_ << 1U) | is_ascii_) + str_.size();
+    size_t n = str_.size();
+    return leb128::UnsignedEncodingSize((utf16_length_ << 1U) | is_ascii_) + n;
 }
 
 bool StringItem::Write(Writer *writer)
 {
     ASSERT(GetOffset() == writer->GetOffset());
-
-    constexpr size_t max_string_length = 0x7fffffffU;
-    if (utf16_length_ > max_string_length) {
+    constexpr size_t MAX_LENGTH = 0x7fffffffU;
+    if (utf16_length_ > MAX_LENGTH) {
         LOG(ERROR, PANDAFILE) << "Writing StringItem with size greater than 0x7fffffffU is not supported!";
         return false;
     }
@@ -748,16 +824,16 @@ bool CodeItem::Write(Writer *writer)
     return true;
 }
 
-const ScalarValueItem *ValueItem::GetAsScalar() const
+ScalarValueItem *ValueItem::GetAsScalar()
 {
     ASSERT(!IsArray());
-    return static_cast<const ScalarValueItem *>(this);
+    return static_cast<ScalarValueItem *>(this);
 }
 
-const ArrayValueItem *ValueItem::GetAsArray() const
+ArrayValueItem *ValueItem::GetAsArray()
 {
     ASSERT(IsArray());
-    return static_cast<const ArrayValueItem *>(this);
+    return static_cast<ArrayValueItem *>(this);
 }
 
 size_t ScalarValueItem::GetULeb128EncodedSize()
@@ -777,7 +853,7 @@ size_t ScalarValueItem::GetULeb128EncodedSize()
     }
 }
 
-size_t ScalarValueItem::GetSLeb128EncodedSize() const
+size_t ScalarValueItem::GetSLeb128EncodedSize()
 {
     switch (GetType()) {
         case Type::INTEGER:
@@ -885,7 +961,8 @@ bool ScalarValueItem::WriteAsUleb128(Writer *writer)
 
 size_t ArrayValueItem::CalculateSize() const
 {
-    return leb128::UnsignedEncodingSize(items_.size()) + items_.size() * GetComponentSize();
+    size_t size = leb128::UnsignedEncodingSize(items_.size()) + items_.size() * GetComponentSize();
+    return size;
 }
 
 void ArrayValueItem::ComputeLayout()
@@ -969,6 +1046,7 @@ size_t ArrayValueItem::GetComponentSize() const
             return 0;
         default: {
             UNREACHABLE();
+            // Avoid cpp warning
             return 0;
         }
     }
@@ -1251,7 +1329,9 @@ bool FieldItem::Write(Writer *writer)
 size_t AnnotationItem::CalculateSize() const
 {
     // class id + count + (name id + value id) * count + tag size * count
-    return IDX_SIZE + sizeof(uint16_t) + (ID_SIZE + ID_SIZE) * elements_.size() + sizeof(uint8_t) * tags_.size();
+    size_t size = IDX_SIZE + sizeof(uint16_t) + (ID_SIZE + ID_SIZE) * elements_.size() + sizeof(uint8_t) * tags_.size();
+
+    return size;
 }
 
 bool AnnotationItem::Write(Writer *writer)
@@ -1330,6 +1410,15 @@ void LineNumberProgramItem::EmitAdvanceLine(std::vector<uint8_t> *constant_pool,
     EmitSleb128(constant_pool, value);
 }
 
+void LineNumberProgramItem::EmitColumn(std::vector<uint8_t> *constant_pool, uint32_t pc_inc, uint32_t column)
+{
+    if (pc_inc != 0U) {
+        EmitAdvancePc(constant_pool, pc_inc);
+    }
+    EmitOpcode(Opcode::SET_COLUMN);
+    EmitUleb128(constant_pool, column);
+}
+
 void LineNumberProgramItem::EmitStartLocal(std::vector<uint8_t> *constant_pool, int32_t register_number,
                                            StringItem *name, StringItem *type)
 {
@@ -1339,12 +1428,12 @@ void LineNumberProgramItem::EmitStartLocal(std::vector<uint8_t> *constant_pool, 
 void LineNumberProgramItem::EmitStartLocalExtended(std::vector<uint8_t> *constant_pool, int32_t register_number,
                                                    StringItem *name, StringItem *type, StringItem *type_signature)
 {
+    ASSERT(name->GetOffset() != 0);
+    ASSERT(type->GetOffset() != 0);
+
     if (type == nullptr) {
         return;
     }
-
-    ASSERT(name->GetOffset() != 0);
-    ASSERT(type->GetOffset() != 0);
 
     EmitOpcode(type_signature == nullptr ? Opcode::START_LOCAL : Opcode::START_LOCAL_EXTENDED);
     EmitRegister(register_number);
@@ -1384,15 +1473,6 @@ bool LineNumberProgramItem::EmitSpecialOpcode(uint32_t pc_inc, int32_t line_inc)
     return true;
 }
 
-void LineNumberProgramItem::EmitColumn(std::vector<uint8_t> *constant_pool, uint32_t pc_inc, int32_t column)
-{
-    if (pc_inc != 0U) {
-        EmitAdvancePc(constant_pool, pc_inc);
-    }
-    EmitOpcode(Opcode::SET_COLUMN);
-    EmitUleb128(constant_pool, column);
-}
-
 void LineNumberProgramItem::EmitPrologEnd()
 {
     EmitOpcode(Opcode::SET_PROLOGUE_END);
@@ -1407,11 +1487,11 @@ void LineNumberProgramItem::EmitSetFile(std::vector<uint8_t> *constant_pool, Str
 {
     EmitOpcode(Opcode::SET_FILE);
 
+    ASSERT(source_file->GetOffset() != 0);
+
     if (source_file == nullptr) {
         return;
     }
-
-    ASSERT(source_file->GetOffset() != 0);
     EmitUleb128(constant_pool, source_file->GetOffset());
 }
 
@@ -1470,6 +1550,11 @@ bool LineNumberProgramItem::Write(Writer *writer)
     ASSERT(GetOffset() == writer->GetOffset());
 
     return writer->WriteBytes(data_);
+}
+
+void LineNumberProgramItem::SetData(std::vector<uint8_t> &&data)
+{
+    data_ = std::move(data);
 }
 
 size_t DebugInfoItem::CalculateSize() const

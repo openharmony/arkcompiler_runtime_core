@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_CORETYPES_DYN_OBJECTS_H_
-#define PANDA_RUNTIME_INCLUDE_CORETYPES_DYN_OBJECTS_H_
+#ifndef PANDA_RUNTIME_CORETYPES_DYNOBJECTS_H_
+#define PANDA_RUNTIME_CORETYPES_DYNOBJECTS_H_
 
 #include "runtime/include/hclass.h"
 #include "runtime/include/coretypes/array.h"
@@ -39,11 +39,13 @@ public:
         return reinterpret_cast<HClass *>(klass_);
     }
 
+    static constexpr size_t GetHClassOffset()
+    {
+        return MEMBER_OFFSET(DynClass, klass_);
+    }
+
 private:
     DynClass() : ObjectHeader() {}
-    ~DynClass() = default;
-    DEFAULT_COPY_SEMANTIC(DynClass);
-    DEFAULT_MOVE_SEMANTIC(DynClass);
 
     // Actually HClass is located here.
     __extension__ uint8_t klass_[0];  // NOLINT(modernize-avoid-c-arrays)
@@ -57,19 +59,9 @@ public:
         return reinterpret_cast<DynObject *>(object);
     }
 
-    void SetBuiltinsCtorMode()
-    {
-        ClassAddr<HClass>()->SetBuiltinsCtorMode();
-    }
-
     bool IsBuiltinsConstructor()
     {
         return ClassAddr<HClass>()->IsBuiltinsConstructor();
-    }
-
-    void SetCallable(bool flag)
-    {
-        ClassAddr<HClass>()->SetCallable(flag);
     }
 
     bool IsCallable()
@@ -80,4 +72,4 @@ public:
 
 }  // namespace panda::coretypes
 
-#endif  // PANDA_RUNTIME_INCLUDE_CORETYPES_DYN_OBJECTS_H_
+#endif  // PANDA_RUNTIME_CORETYPES_DYNOBJECTS_H_

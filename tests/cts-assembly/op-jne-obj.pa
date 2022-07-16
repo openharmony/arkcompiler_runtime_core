@@ -16,7 +16,7 @@
     i32 a1
 }
 
-.function u1 main() {
+.function i32 main() {
     mov.null v0
     newobj v1, A
     lda.obj v1

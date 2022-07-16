@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #Assert that operation jmp works fine
-.function u1 main(){
+.function i32 main(){
     jmp label
     ldai 1
     return

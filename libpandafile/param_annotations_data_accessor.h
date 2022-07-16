@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_PARAM_ANNOTATIONS_DATA_ACCESSOR_H_
-#define PANDA_LIBPANDAFILE_PARAM_ANNOTATIONS_DATA_ACCESSOR_H_
+#ifndef LIBPANDAFILE_PARAM_ANNOTATIONS_DATA_ACCESSOR_H_
+#define LIBPANDAFILE_PARAM_ANNOTATIONS_DATA_ACCESSOR_H_
 
 #include "file.h"
 #include "file_items.h"
@@ -138,4 +138,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_PARAM_ANNOTATIONS_DATA_ACCESSOR_H_
+#endif  // LIBPANDAFILE_PARAM_ANNOTATIONS_DATA_ACCESSOR_H_

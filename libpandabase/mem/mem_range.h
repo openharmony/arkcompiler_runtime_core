@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_MEM_RANGE_H_
-#define PANDA_LIBPANDABASE_MEM_MEM_RANGE_H_
+#ifndef PANDA_LIBPANDABASE_MEM_MEM_RANGE_H
+#define PANDA_LIBPANDABASE_MEM_MEM_RANGE_H
 
 #include <ostream>
 
@@ -27,7 +27,7 @@ class MemRange {
 public:
     MemRange(uintptr_t start_address, uintptr_t end_address) : start_address_(start_address), end_address_(end_address)
     {
-        ASSERT(end_address_ > start_address_);
+        ASSERT(end_address_ >= start_address_);
     }
 
     bool IsAddressInRange(uintptr_t addr) const
@@ -45,7 +45,7 @@ public:
         return end_address_;
     }
 
-    bool IsIntersect(const MemRange &other)
+    bool IsIntersect(const MemRange &other) const
     {
         return ((end_address_ >= other.start_address_) && (end_address_ <= other.end_address_)) ||
                ((start_address_ >= other.start_address_) && (start_address_ <= other.end_address_)) ||
@@ -57,10 +57,14 @@ public:
         return start_address_ <= other.start_address_ && end_address_ >= other.end_address_;
     }
 
+    bool Contains(uintptr_t addr) const
+    {
+        return start_address_ <= addr && addr < end_address_;
+    }
+
     friend std::ostream &operator<<(std::ostream &os, MemRange const &mem_range)
     {
-        return os << std::hex << "[ 0x" << mem_range.GetStartAddress() << " : 0x" << mem_range.GetEndAddress() << "]"
-                  << std::endl;
+        return os << std::hex << "[ 0x" << mem_range.GetStartAddress() << " : 0x" << mem_range.GetEndAddress() << "]";
     }
 
     virtual ~MemRange() = default;
@@ -75,4 +79,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_LIBPANDABASE_MEM_MEM_RANGE_H_
+#endif  // PANDA_LIBPANDABASE_MEM_MEM_RANGE_H

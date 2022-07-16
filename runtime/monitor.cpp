@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/thread_scopes.h"
-#include "runtime/include/panda_vm.h"
+#include "runtime/include/thread-inl.h"
 #include "runtime/mark_word.h"
 #include "runtime/monitor_pool.h"
 #include "runtime/handle_base-inl.h"
+#include "runtime/mem/vm_handle.h"
 
 #include <cinttypes>
 #include <string>
@@ -86,16 +87,45 @@ void ThreadList<T>::PushFront(T &thread)
     head_ = &thread;
 }
 
-Monitor::State Monitor::JniMonitorEnter(ObjectHeader *obj)
+void Monitor::InflateThinLock(MTManagedThread *thread, [[maybe_unused]] const VMHandle<ObjectHeader> &obj_handle)
 {
-    ASSERT(MTManagedThread::GetCurrent()->IsManagedCode());
-    return Monitor::MonitorEnter(obj);
-}
-
-Monitor::State Monitor::JniMonitorExit(ObjectHeader *obj)
-{
-    ASSERT(MTManagedThread::GetCurrent()->IsManagedCode());
-    return Monitor::MonitorExit(obj);
+#if defined(PANDA_USE_FUTEX)
+    // Futex inflation policy: suspend target thread, wait until it actually gets suspended
+    // and try inflating light monitor (`Inflate` expects lock to still be acquired by target;
+    // otherwise markword CAS fails). If it fails (i.e. thread got suspended when this monitor is
+    // no longer taken), we restart lightlock acquisition policy again.
+    // Compared to forced inflation (actively retry inflation once MAX_TRYLOCK_RETRY is reached
+    // or inflate monitor once this thread acquires light lock), this policy yields much better
+    // performance for short running synchronized blocks or functions, and is still expected to
+    // succeeed on longer blocks which should have safepoints and suspend successfully with
+    // monitor still acquired.
+    // We are trying to inflate light lock acquired by other thread, suspend it first
+    MTManagedThread *owner = nullptr;
+    ASSERT(obj_handle.GetPtr() != nullptr);
+    MarkWord mark = obj_handle.GetPtr()->AtomicGetMark();
+    os::thread::ThreadId owner_thread_id = mark.GetThreadId();
+    {
+        ScopedChangeThreadStatus sts(thread, ThreadStatus::IS_WAITING_INFLATION);
+        owner = thread->GetVM()->GetThreadManager()->SuspendAndWaitThreadByInternalThreadId(owner_thread_id);
+    }
+    thread->SetEnterMonitorObject(nullptr);
+    thread->SetWaitingMonitorOldStatus(ThreadStatus::FINISHED);
+    // Thread could have finished by the time we tried stopping it
+    if (owner != nullptr) {
+        // NB! Inflate can do nothing if monitor is already unlocked or acquired by other thread.
+        Inflate<true>(obj_handle.GetPtr(), owner);
+        owner->ResumeImpl(true);
+    }
+#else
+    // Non-futex inflation policy: Wait until light lock is released, acquire it and inflate
+    // to heavy monitor
+    {
+        static constexpr uint64_t SLEEP_MS = 10;
+        thread->TimedWait(ThreadStatus::IS_WAITING_INFLATION, SLEEP_MS, 0);
+    }
+    thread->SetEnterMonitorObject(nullptr);
+    thread->SetWaitingMonitorOldStatus(ThreadStatus::FINISHED);
+#endif
 }
 
 /**
@@ -106,11 +136,10 @@ Monitor::State Monitor::JniMonitorExit(ObjectHeader *obj)
  * @param  trylock is true if the function should fail in case of lock was already acquired by other thread
  * @return      state of function execution (ok, illegal)
  */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
 Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
 {
-    auto thread = MTManagedThread::GetCurrent();
-    PandaVM *vm = thread->GetVM();
+    auto *thread = MTManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     // This function can unlock MutatorLock, so GC can run during lock acquire waiting
     // so we need to use handle to get updated header pointer
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
@@ -128,12 +157,12 @@ Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
 
         switch (state) {
             case MarkWord::STATE_HEAVY_LOCKED: {
-                auto monitor = MonitorPool::LookupMonitor(vm, mark.GetMonitorId());
+                auto monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
                 if (monitor == nullptr) {
                     // Not sure if it is possible
                     return State::ILLEGAL;
                 }
-                ret = monitor->Acquire(thread, obj_handle.GetPtr(), trylock);
+                ret = monitor->Acquire(thread, obj_handle, trylock);
                 if (ret) {
                     thread->PushLocalObjectLocked(obj_handle.GetPtr());
                 }
@@ -143,9 +172,9 @@ Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
                 os::thread::ThreadId owner_thread_id = mark.GetThreadId();
                 if (owner_thread_id == thread->GetInternalId()) {
                     uint32_t new_count = mark.GetLockCount() + 1;
-                    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
                     if (new_count < MarkWord::LIGHT_LOCK_LOCK_MAX_COUNT) {
                         new_mark = mark.DecodeFromLightLock(thread->GetInternalId(), new_count);
+                        // Strong CAS as the loop iteration is large
                         ret = obj_handle.GetPtr()->AtomicSetMark(mark, new_mark);
                         if (ret) {
                             LOG(DEBUG, RUNTIME) << "The lightweight monitor was successfully recursively acquired";
@@ -159,7 +188,6 @@ Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
                     }
                 } else {
                     // Lock acquired by other thread.
-                    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
                     if (trylock) {
                         return State::ILLEGAL;
                     }
@@ -176,43 +204,13 @@ Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
                     } else {
                         // Retried acquiring light lock for too long, do inflation
 
+                        thread->SetEnterMonitorObject(obj_handle.GetPtr());
+                        thread->SetWaitingMonitorOldStatus(ThreadStatus::IS_WAITING_INFLATION);
+                        InflateThinLock(thread, obj_handle);
 #if defined(PANDA_USE_FUTEX)
-                        // Futex inflation policy: suspend target thread, wait until it actually gets suspended
-                        // and try inflating light monitor (`Inflate` expects lock to still be acquired by target;
-                        // otherwise markword CAS fails). If it fails (i.e. thread got suspended when this monitor is
-                        // no longer taken), we restart lightlock acquisition policy again.
-                        // Compared to forced inflation (actively retry inflation once MAX_TRYLOCK_RETRY is reached
-                        // or inflate monitor once this thread acquires light lock), this policy yields much better
-                        // performance for short running synchronized blocks or functions, and is still expected to
-                        // succeeed on longer blocks which should have safepoints and suspend successfully with
-                        // monitor still acquired.
                         lightlock_retry_count = 0;
-                        // We are trying to inflate light lock acquired by other thread, suspend it first
-                        MTManagedThread *owner = nullptr;
-                        thread->SetWaitingMonitorOldStatus(IS_WAITING_INFLATION);
-                        {
-                            ScopedNativeCodeThread snt(thread);
-                            ScopedChangeThreadStatus sts(thread, ThreadStatus::IS_WAITING_INFLATION);
-                            owner = thread->GetVM()->GetThreadManager()->SuspendAndWaitThreadByInternalThreadId(
-                                owner_thread_id);
-                        }
-                        thread->SetWaitingMonitorOldStatus(FINISHED);
-                        // Thread could have finished by the time we tried stopping it
-                        if (owner != nullptr) {
-                            // NB! Inflate can do nothing if monitor is already unlocked or acquired by other thread.
-                            Inflate<true>(obj_handle.GetPtr(), owner);
-                            owner->ResumeImpl(true);
-                        }
 #else
-                        // Non-futex inflation policy: Wait until light lock is released, acquire it and inflate
-                        // to heavy monitor
-                        thread->SetWaitingMonitorOldStatus(IS_WAITING_INFLATION);
-                        {
-                            should_inflate = true;
-                            static constexpr uint64_t SLEEP_MS = 10;
-                            thread->TimedWait(ThreadStatus::IS_WAITING_INFLATION, SLEEP_MS, 0);
-                        }
-                        thread->SetWaitingMonitorOldStatus(FINISHED);
+                        should_inflate = true;
 #endif
                     }
                 }
@@ -236,13 +234,11 @@ Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
                 continue;
             case MarkWord::STATE_UNLOCKED:
                 if (should_inflate) {
-                    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
                     if (Inflate(obj_handle.GetPtr(), thread)) {
                         thread->PushLocalObjectLocked(obj_handle.GetPtr());
                         return State::OK;
                     }
                     // Couldn't inflate.
-                    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
                     if (trylock) {
                         return State::ILLEGAL;
                     }
@@ -252,6 +248,7 @@ Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
 
                 ASSERT(thread->GetInternalId() <= MarkWord::LIGHT_LOCK_THREADID_MAX_COUNT);
                 new_mark = mark.DecodeFromLightLock(thread->GetInternalId(), 1);
+                // Strong CAS as the loop iteration is large
                 ret = obj_handle.GetPtr()->AtomicSetMark(mark, new_mark);
                 if (ret) {
                     LOG(DEBUG, RUNTIME) << "The lightweight monitor was successfully acquired for the first time";
@@ -278,7 +275,6 @@ Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
 Monitor::State Monitor::MonitorExit(ObjectHeader *obj)
 {
     auto thread = MTManagedThread::GetCurrent();
-    PandaVM *vm = thread->GetVM();
     bool ret = false;
 
     while (true) {
@@ -288,7 +284,7 @@ Monitor::State Monitor::MonitorExit(ObjectHeader *obj)
         LOG(DEBUG, RUNTIME) << "Try to exit monitor " << std::hex << obj << "  with state " << std::dec << state;
         switch (state) {
             case MarkWord::STATE_HEAVY_LOCKED: {
-                auto monitor = MonitorPool::LookupMonitor(vm, mark.GetMonitorId());
+                auto monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
                 ret = monitor->Release(thread);
                 if (ret) {
                     thread->PopLocalObjectLocked(obj);
@@ -297,7 +293,7 @@ Monitor::State Monitor::MonitorExit(ObjectHeader *obj)
             }
             case MarkWord::STATE_LIGHT_LOCKED: {
                 if (mark.GetThreadId() != thread->GetInternalId()) {
-                    LOG(DEBUG, RUNTIME) << "Calling MonitorEnter on object which isn't owned by this thread";
+                    LOG(DEBUG, RUNTIME) << "Caling MonitorEnter on object which isn't owned by this thread";
                     return State::ILLEGAL;
                 }
                 uint32_t new_count = mark.GetLockCount() - 1;
@@ -306,6 +302,7 @@ Monitor::State Monitor::MonitorExit(ObjectHeader *obj)
                 } else {
                     new_mark = mark.DecodeFromUnlocked();
                 }
+                // Strong CAS as the loop iteration is large
                 ret = obj->AtomicSetMark(mark, new_mark);
                 if (ret) {
                     LOG(DEBUG, RUNTIME) << "Exited lightweight lock";
@@ -313,7 +310,7 @@ Monitor::State Monitor::MonitorExit(ObjectHeader *obj)
                     thread->PopLocalObjectLocked(obj);
                     return State::OK;
                 }
-                // CAS failed, must have been heavily locked by other thread. Retry unlock.
+                // CAS failed, must have been heavy locked by other thread. Retry unlock.
                 continue;
             }
             case MarkWord::STATE_HASHED:
@@ -332,12 +329,12 @@ Monitor::State Monitor::MonitorExit(ObjectHeader *obj)
 
 /** Zero timeout is used as infinite wait (see docs)
  */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
 Monitor::State Monitor::Wait(ObjectHeader *obj, ThreadStatus status, uint64_t timeout, uint64_t nanos,
                              bool ignore_interruption)
 {
-    auto thread = MTManagedThread::GetCurrent();
-    PandaVM *vm = thread->GetVM();
+    ASSERT(obj != nullptr);
+    auto *thread = MTManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     State result_state = State::OK;
 
     // This function can unlock MutatorLock, so GC can run during wait
@@ -353,7 +350,7 @@ Monitor::State Monitor::Wait(ObjectHeader *obj, ThreadStatus status, uint64_t ti
         LOG(DEBUG, RUNTIME) << "Try to wait with state " << state;
         switch (state) {
             case MarkWord::STATE_HEAVY_LOCKED: {
-                auto monitor = MonitorPool::LookupMonitor(vm, mark.GetMonitorId());
+                auto monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
 
                 if (monitor->GetOwner() != thread) {
                     // The monitor is acquired by other thread
@@ -378,6 +375,7 @@ Monitor::State Monitor::Wait(ObjectHeader *obj, ThreadStatus status, uint64_t ti
                 thread->SetWaitingMonitorOldStatus(status);
 
                 monitor->recursive_counter_ = 1;
+                // Atomic with relaxed order reason: memory access in monitor
                 monitor->waiters_counter_.fetch_add(1, std::memory_order_relaxed);
                 monitor->Release(thread);
 
@@ -395,12 +393,14 @@ Monitor::State Monitor::Wait(ObjectHeader *obj, ThreadStatus status, uint64_t ti
                 // Nothing happen, if the thread is rescheduled between,
                 // As the monitor was already released for external users
                 thread->GetWaitingMutex()->Unlock();
-                [[maybe_unused]] bool ret = monitor->Acquire(thread, obj_handle.GetPtr(), false);
+                [[maybe_unused]] bool ret = monitor->Acquire(thread, obj_handle, false);
                 ASSERT(ret);
+                // Atomic with relaxed order reason: memory access in monitor
                 monitor->waiters_counter_.fetch_sub(1, std::memory_order_relaxed);
                 monitor->recursive_counter_ = counter;
 
                 if (thread->IsInterrupted()) {
+                    // TODO(dtrubenkov): call panda::ThrowException when it will be imlemented
                     result_state = State::INTERRUPTED;
                 }
 
@@ -415,7 +415,7 @@ Monitor::State Monitor::Wait(ObjectHeader *obj, ThreadStatus status, uint64_t ti
                 }
 
                 thread->SetWaitingMonitor(nullptr);
-                thread->SetWaitingMonitorOldStatus(FINISHED);
+                thread->SetWaitingMonitorOldStatus(ThreadStatus::FINISHED);
                 Runtime::GetCurrent()->GetNotificationManager()->MonitorWaitedEvent(obj_handle.GetPtr(), is_timeout);
 
                 return result_state;
@@ -442,6 +442,7 @@ Monitor::State Monitor::Wait(ObjectHeader *obj, ThreadStatus status, uint64_t ti
 
 Monitor::State Monitor::Notify(ObjectHeader *obj)
 {
+    ASSERT(obj != nullptr);
     MarkWord mark = obj->AtomicGetMark();
     MarkWord::ObjectState state = mark.GetState();
     auto thread = MTManagedThread::GetCurrent();
@@ -449,7 +450,7 @@ Monitor::State Monitor::Notify(ObjectHeader *obj)
 
     switch (state) {
         case MarkWord::STATE_HEAVY_LOCKED: {
-            auto monitor = MonitorPool::LookupMonitor(thread->GetVM(), mark.GetMonitorId());
+            auto monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
 
             if (monitor->GetOwner() != thread) {
                 // The monitor is acquired by other thread
@@ -490,6 +491,7 @@ Monitor::State Monitor::Notify(ObjectHeader *obj)
 
 Monitor::State Monitor::NotifyAll(ObjectHeader *obj)
 {
+    ASSERT(obj != nullptr);
     MarkWord mark = obj->AtomicGetMark();
     MarkWord::ObjectState state = mark.GetState();
     auto thread = MTManagedThread::GetCurrent();
@@ -497,7 +499,7 @@ Monitor::State Monitor::NotifyAll(ObjectHeader *obj)
 
     switch (state) {
         case MarkWord::STATE_HEAVY_LOCKED: {
-            auto monitor = MonitorPool::LookupMonitor(thread->GetVM(), mark.GetMonitorId());
+            auto monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
 
             if (monitor->GetOwner() != thread) {
                 // The monitor is acquired by other thread
@@ -537,14 +539,16 @@ Monitor::State Monitor::NotifyAll(ObjectHeader *obj)
     }
 }
 
-bool Monitor::Acquire(MTManagedThread *thread, ObjectHeader *obj, bool trylock)
+bool Monitor::Acquire(MTManagedThread *thread, const VMHandle<ObjectHeader> &obj_handle, bool trylock)
 {
+    ASSERT_MANAGED_CODE();
+
     MTManagedThread *owner = this->GetOwner();
     if (owner == thread) {
         // Do we need to hold a lock here?
         this->recursive_counter_++;
         LOG(DEBUG, RUNTIME) << "The fat monitor was successfully recursively acquired";
-        TraceMonitorLock(obj, false);
+        TraceMonitorLock(obj_handle.GetPtr(), false);
         return true;
     }
 
@@ -559,14 +563,21 @@ bool Monitor::Acquire(MTManagedThread *thread, ObjectHeader *obj, bool trylock)
 #else
         if (!lock_.TryLock()) {
 #endif  // PANDA_USE_FUTEX
-            Runtime::GetCurrent()->GetNotificationManager()->MonitorContendedEnterEvent(obj);
+            Runtime::GetCurrent()->GetNotificationManager()->MonitorContendedEnterEvent(obj_handle.GetPtr());
             // If not trylock...
             // Do atomic add out of scope to prevent GC getting old waiters_counter_
+            // Atomic with relaxed order reason: memory access in monitor
             waiters_counter_.fetch_add(1, std::memory_order_relaxed);
-            thread->SetWaitingMonitorOldStatus(IS_BLOCKED);
+            thread->SetEnterMonitorObject(obj_handle.GetPtr());
+            thread->SetWaitingMonitorOldStatus(ThreadStatus::IS_BLOCKED);
             {
                 ScopedChangeThreadStatus sts(thread, ThreadStatus::IS_BLOCKED);
+                // Save current monitor, on which the given thread is blocked.
+                // It can be used to detect potential deadlock with daemon threds.
+                thread->SetEnteringMonitor(this);
                 lock_.Lock();
+                // Deadlock is no longer possible with the given thread.
+                thread->SetEnteringMonitor(nullptr);
                 // Do this inside scope for thread to release this monitor during runtime destroy
                 if (!this->SetOwner(nullptr, thread)) {
                     LOG(FATAL, RUNTIME) << "Set monitor owner failed in Acquire";
@@ -574,11 +585,18 @@ bool Monitor::Acquire(MTManagedThread *thread, ObjectHeader *obj, bool trylock)
                 thread->AddMonitor(this);
                 this->recursive_counter_++;
             }
-            thread->SetWaitingMonitorOldStatus(FINISHED);
+            thread->SetEnterMonitorObject(nullptr);
+            thread->SetWaitingMonitorOldStatus(ThreadStatus::FINISHED);
+            // Atomic with relaxed order reason: memory access in monitor
             waiters_counter_.fetch_sub(1, std::memory_order_relaxed);
-            Runtime::GetCurrent()->GetNotificationManager()->MonitorContendedEnteredEvent(obj);
+            // Even thout these 2 warnings are valid, We suppress them. Reason is to have consistent logging
+            // Otherwise we would see that lock was done on one monitor address,
+            // and unlock (after GC) - ona different one
+            // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+            Runtime::GetCurrent()->GetNotificationManager()->MonitorContendedEnteredEvent(obj_handle.GetPtr());
             LOG(DEBUG, RUNTIME) << "The fat monitor was successfully acquired for the first time";
-            TraceMonitorLock(obj, false);
+            // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+            TraceMonitorLock(obj_handle.GetPtr(), false);
             return true;
         }
     }
@@ -589,7 +607,7 @@ bool Monitor::Acquire(MTManagedThread *thread, ObjectHeader *obj, bool trylock)
     thread->AddMonitor(this);
     this->recursive_counter_++;
     LOG(DEBUG, RUNTIME) << "The fat monitor was successfully acquired for the first time";
-    TraceMonitorLock(obj, false);
+    TraceMonitorLock(obj_handle.GetPtr(), false);
     return true;
 }
 
@@ -672,9 +690,9 @@ bool Monitor::Release(MTManagedThread *thread)
 template <bool for_other_thread>
 bool Monitor::Inflate(ObjectHeader *obj, MTManagedThread *thread)
 {
+    ASSERT(obj != nullptr);
     Monitor *monitor = nullptr;
     MarkWord old_mark = obj->AtomicGetMark();
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_REDUNDANT_INIT)
     MarkWord new_mark = old_mark;
     MarkWord::ObjectState state = old_mark.GetState();
     bool ret = false;
@@ -691,7 +709,8 @@ bool Monitor::Inflate(ObjectHeader *obj, MTManagedThread *thread)
         }
     }
 
-    monitor = MonitorPool::CreateMonitor(thread->GetVM(), obj);
+    auto *monitor_pool = thread->GetMonitorPool();
+    monitor = monitor_pool->CreateMonitor(obj);
     if (monitor == nullptr) {
         LOG(FATAL, RUNTIME) << "Couldn't create new monitor. Out of memory?";
         return false;
@@ -702,7 +721,7 @@ bool Monitor::Inflate(ObjectHeader *obj, MTManagedThread *thread)
         case MarkWord::STATE_LIGHT_LOCKED:
             if (old_mark.GetThreadId() != thread->GetInternalId()) {
                 monitor->ReleaseOnFailedInflate(thread);
-                MonitorPool::FreeMonitor(thread->GetVM(), monitor->GetId());
+                monitor_pool->FreeMonitor(monitor->GetId());
                 return false;
             }
             monitor->recursive_counter_ = old_mark.GetLockCount();
@@ -735,7 +754,7 @@ bool Monitor::Inflate(ObjectHeader *obj, MTManagedThread *thread)
         // Means, someone changed the mark
         monitor->recursive_counter_ = 1;
         monitor->ReleaseOnFailedInflate(thread);
-        MonitorPool::FreeMonitor(thread->GetVM(), monitor->GetId());
+        monitor_pool->FreeMonitor(monitor->GetId());
     } else {
         // Unlike normal Acquire, AddMonitor should be done not in InitWithOwner but after successful inflation to avoid
         // data race
@@ -749,22 +768,23 @@ bool Monitor::Deflate(ObjectHeader *obj)
     Monitor *monitor = nullptr;
     MarkWord old_mark = obj->AtomicGetMark();
     MarkWord::ObjectState state = old_mark.GetState();
+    bool ret = false;
 
     if (state != MarkWord::STATE_HEAVY_LOCKED) {
         LOG(DEBUG, RUNTIME) << "Trying to deflate non-heavy locked object";
         return false;
     }
 
-    PandaVM *vm = Thread::GetCurrent()->GetVM();
-    monitor = MonitorPool::LookupMonitor(vm, old_mark.GetMonitorId());
+    auto *monitor_pool = MTManagedThread::GetCurrent()->GetMonitorPool();
+    monitor = monitor_pool->LookupMonitor(old_mark.GetMonitorId());
     if (monitor == nullptr) {
         LOG(DEBUG, RUNTIME) << "Monitor was already destroyed by someone else.";
         return false;
     }
 
-    bool ret = monitor->DeflateInternal();
+    ret = monitor->DeflateInternal();
     if (ret) {
-        MonitorPool::FreeMonitor(vm, monitor->GetId());
+        monitor_pool->FreeMonitor(monitor->GetId());
     }
     return ret;
 }
@@ -775,6 +795,7 @@ bool Monitor::DeflateInternal()
         LOG(DEBUG, RUNTIME) << "Trying to deflate monitor which already has owner";
         return false;
     }
+    // Atomic with relaxed order reason: memory access in monitor
     if (waiters_counter_.load(std::memory_order_relaxed) > 0) {
         LOG(DEBUG, RUNTIME) << "Trying to deflate monitor which is trying to be acquired by other threads";
         return false;
@@ -789,7 +810,6 @@ bool Monitor::DeflateInternal()
     ASSERT(to_wakeup_.Empty());
     ASSERT(GetOwner() == static_cast<MTManagedThread *>(nullptr));
     MarkWord old_mark = obj_->AtomicGetMark();
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_REDUNDANT_INIT)
     MarkWord new_mark = old_mark;
     if (HasHashCode()) {
         new_mark = old_mark.DecodeFromHash(GetHashCode());
@@ -800,7 +820,7 @@ bool Monitor::DeflateInternal()
     }
 
     // Warning: AtomicSetMark is weak, retry
-    while (!obj_->AtomicSetMark(old_mark, new_mark)) {
+    while (!obj_->AtomicSetMark<false>(old_mark, new_mark)) {
         MarkWord cur_mark = obj_->AtomicGetMark();
         if (old_mark.GetValue() != cur_mark.GetValue()) {
             old_mark = cur_mark;
@@ -819,12 +839,12 @@ uint8_t Monitor::HoldsLock(ObjectHeader *obj)
 
     switch (state) {
         case MarkWord::STATE_HEAVY_LOCKED: {
-            Monitor *monitor = MonitorPool::LookupMonitor(thread->GetVM(), mark.GetMonitorId());
+            Monitor *monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
             // asm has no boolean type
-            return monitor->GetOwner() == thread ? 1 : 0;
+            return (monitor->GetOwner() == thread) ? 1 : 0;
         }
         case MarkWord::STATE_LIGHT_LOCKED:
-            return mark.GetThreadId() == thread->GetInternalId() ? 1 : 0;
+            return (mark.GetThreadId() == thread->GetInternalId()) ? 1 : 0;
         case MarkWord::STATE_UNLOCKED:
         case MarkWord::STATE_HASHED:
         case MarkWord::STATE_GC:
@@ -845,7 +865,7 @@ uint32_t Monitor::GetLockOwnerOsThreadID(ObjectHeader *obj)
 
     switch (state) {
         case MarkWord::STATE_HEAVY_LOCKED: {
-            Monitor *monitor = MonitorPool::LookupMonitor(Thread::GetCurrent()->GetVM(), mark.GetMonitorId());
+            Monitor *monitor = MTManagedThread::GetCurrent()->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
             MTManagedThread *owner = monitor->GetOwner();
             if (owner == nullptr) {
                 return MTManagedThread::NON_INITIALIZED_THREAD_ID;
@@ -867,21 +887,20 @@ uint32_t Monitor::GetLockOwnerOsThreadID(ObjectHeader *obj)
 
 Monitor *Monitor::GetMonitorFromObject(ObjectHeader *obj)
 {
-    if (obj == nullptr) {
-        return nullptr;
+    if (obj != nullptr) {
+        MarkWord mark = obj->AtomicGetMark();
+        MarkWord::ObjectState state = mark.GetState();
+        switch (state) {
+            case MarkWord::STATE_HEAVY_LOCKED:
+                return MTManagedThread::GetCurrent()->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
+            case MarkWord::STATE_LIGHT_LOCKED:
+                return nullptr;
+            default:
+                // Shouldn't happen, return nullptr
+                LOG(WARNING, RUNTIME) << "obj:" << obj << " not locked by heavy or light locked";
+        }
     }
-
-    MarkWord mark = obj->AtomicGetMark();
-    MarkWord::ObjectState state = mark.GetState();
-    switch (state) {
-        case MarkWord::STATE_HEAVY_LOCKED:
-            return MonitorPool::LookupMonitor(Thread::GetCurrent()->GetVM(), mark.GetMonitorId());
-        case MarkWord::STATE_LIGHT_LOCKED:
-            return nullptr;
-        default:
-            LOG(WARNING, RUNTIME) << "obj:" << obj << " not locked by heavy or light locked";
-            return nullptr;
-    }
+    return nullptr;
 }
 
 inline void Monitor::TraceMonitorLock(ObjectHeader *obj, bool is_wait)
@@ -891,8 +910,8 @@ inline void Monitor::TraceMonitorLock(ObjectHeader *obj, bool is_wait)
         constexpr int BUF_SIZE = 32;
         std::array<char, BUF_SIZE> buf = {};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        int ret = sprintf_s(buf.data(), BUF_SIZE, (is_wait ? "Waiting on 0x%" PRIxPTR : "Locking 0x%" PRIxPTR),
-                            ToUintPtr(obj));
+        int ret = snprintf_s(buf.data(), BUF_SIZE, BUF_SIZE - 1,
+                             (is_wait ? "Waiting on 0x%" PRIxPTR : "Locking 0x%" PRIxPTR), ToUintPtr(obj));
         if (ret < 0) {
             UNREACHABLE();
         }
@@ -909,11 +928,21 @@ inline void Monitor::TraceMonitorUnLock()
 
 uint32_t Monitor::GetHashCode()
 {
+    while (!HasHashCode()) {
+        uint32_t expected = 0;
+        uint32_t newHash = ObjectHeader::GenerateHashCode();
+        if (hash_code_.compare_exchange_weak(expected, newHash)) {
+            return newHash;
+        }
+    }
+    ASSERT(HasHashCode());
+    // Atomic with relaxed order reason: memory access in monitor
     return hash_code_.load(std::memory_order_relaxed);
 }
 
 bool Monitor::HasHashCode() const
 {
+    // Atomic with relaxed order reason: memory access in monitor
     return hash_code_.load(std::memory_order_relaxed) != 0;
 }
 
@@ -921,6 +950,7 @@ void Monitor::SetHashCode(uint32_t hash)
 {
     ASSERT(GetOwner() == MTManagedThread::GetCurrent());
     if (!HasHashCode()) {
+        // Atomic with relaxed order reason: memory access in monitor
         hash_code_.store(hash, std::memory_order_relaxed);
     } else {
         LOG(FATAL, RUNTIME) << "Attempt to rewrite hash in monitor";

@@ -11,12 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Assert that operations with i64 arrays work properly.
+#assert that operations with array of i64 works fine
 #i64 i;
 #for(i=0; i<5; i++) array[i]=i;
 #for(i=4; i>=0; i--) assert_eq(i, array[i]);
 
-.function u1 main(){
+.function i32 main(){
     movi v0, 5    #sizeof(array)
     newarr v1, v0, i64[]
     movi v2, 0

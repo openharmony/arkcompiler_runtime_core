@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(2 * 3 == 6) operation --> muli
-.function u1 main(){
+.function i32 main(){
     ldai 2
     muli 3
     movi v0, 6

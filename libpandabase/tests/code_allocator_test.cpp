@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,10 @@ class CodeAllocatorTest : public testing::Test {
 public:
     CodeAllocatorTest() {}
 
-    ~CodeAllocatorTest() {}
+    ~CodeAllocatorTest()
+    {
+        Logger::Destroy();
+    }
 
 protected:
     static constexpr size_t k1K = 1024;
@@ -55,7 +58,8 @@ TEST_F(CodeAllocatorTest, AllocateBuffTest)
     BaseMemStats stats;
     CodeAllocator ca(&stats);
     uint8_t buff[] = {0xCC, 0xCC};
-    void *code_buff = ca.AllocateCode(sizeof(buff), static_cast<void *>(&buff[0]));
+    void *code_buff;
+    code_buff = ca.AllocateCode(sizeof(buff), static_cast<void *>(&buff[0]));
     for (size_t i = 0; i < sizeof(buff); i++) {
         ASSERT_EQ(static_cast<uint8_t *>(code_buff)[i], 0xCC);
     }

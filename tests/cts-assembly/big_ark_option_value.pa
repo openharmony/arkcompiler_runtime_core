@@ -26,7 +26,7 @@ exit_failure:
     return
 }
 
-.function u1 main() {
+.function i32 main() {
     fmovi v1, 1.0
     call.short foo, v1, v1
     fcmpg v1

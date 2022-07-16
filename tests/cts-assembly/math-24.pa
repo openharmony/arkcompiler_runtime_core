@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(5 * 7 == 35) operation --> mul2.64
-.function u1 main(){
+.function i32 main(){
     ldai.64 5
     movi.64 v0, 7
     mul2.64 v0

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,34 +42,49 @@ GCLang<LanguageConfig>::~GCLang()
 }
 
 template <class LanguageConfig>
+void GCLang<LanguageConfig>::ClearLocalInternalAllocatorPools()
+{
+    auto cleaner = [](ManagedThread *thread) {
+        InternalAllocator<>::RemoveFreePoolsForLocalInternalAllocator(thread->GetLocalInternalAllocator());
+        return true;
+    };
+    // NOLINTNEXTLINE(readability-braces-around-statements)
+    if constexpr (LanguageConfig::MT_MODE == MT_MODE_MULTI) {
+        GetPandaVm()->GetThreadManager()->EnumerateThreads(cleaner);
+    } else {  // NOLINT(readability-misleading-indentation)
+        cleaner(GetPandaVm()->GetAssociatedThread());
+    }
+}
+
+template <class LanguageConfig>
 size_t GCLang<LanguageConfig>::VerifyHeap()
 {
+    if (GetSettings()->EnableFastHeapVerifier()) {
+        return FastHeapVerifier<LanguageConfig>(GetPandaVm()->GetHeapManager()).VerifyAll();
+    }
     return HeapVerifier<LanguageConfig>(GetPandaVm()->GetHeapManager()).VerifyAll();
 }
 
 template <class LanguageConfig>
-void GCLang<LanguageConfig>::CommonUpdateRefsToMovedObjects(const UpdateRefInAllocator &update_allocator)
+void GCLang<LanguageConfig>::UpdateRefsToMovedObjectsInPygoteSpace()
+{
+    GetObjectAllocator()->IterateNonRegularSizeObjects(
+        [](ObjectHeader *obj) { ObjectHelpers<LanguageConfig::LANG_TYPE>::UpdateRefsToMovedObjects(obj); });
+}
+
+template <class LanguageConfig>
+void GCLang<LanguageConfig>::CommonUpdateRefsToMovedObjects()
 {
     trace::ScopedTrace scoped_trace(__FUNCTION__);
-
-    UpdateRefInObject update_refs_in_object([this](ObjectHeader *obj) {
-        auto base_cls = obj->ClassAddr<BaseClass>();
-        ObjectHelpers<LanguageConfig::LANG_TYPE>::UpdateRefsToMovedObjects(GetPandaVm(), obj, base_cls);
-    });
-
-    // Update objects in allocator
-    update_allocator(update_refs_in_object);
 
     // Update refs in vregs
     if constexpr (LanguageConfig::MT_MODE == MT_MODE_SINGLE) {  // NOLINT
         UpdateRefsInVRegs(GetPandaVm()->GetAssociatedThread());
     } else {  // NOLINT
-        GetPandaVm()->GetThreadManager()->EnumerateThreads(
-            [this](ManagedThread *thread) {
-                UpdateRefsInVRegs(thread);
-                return true;
-            },  // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
-            static_cast<unsigned int>(EnumerationFlag::ALL));
+        GetPandaVm()->GetThreadManager()->EnumerateThreads([this](ManagedThread *thread) {
+            UpdateRefsInVRegs(thread);
+            return true;
+        });
         // Update refs inside monitors
         GetPandaVm()->GetMonitorPool()->EnumerateMonitors([this](Monitor *monitor) {
             ObjectHeader *object_header = monitor->GetObject();
@@ -86,7 +101,11 @@ void GCLang<LanguageConfig>::CommonUpdateRefsToMovedObjects(const UpdateRefInAll
         });
     }
     // Update string table
-    GetPandaVm()->GetStringTable()->UpdateMoved();
+    if (GetPandaVm()->UpdateMovedStrings()) {
+        // AOT string slots are pointing to strings from the StringTable,
+        // so we should update it only if StringTable's pointers were updated.
+        root_manager_.UpdateAotStringRoots();
+    }
 
     // Update thread locals
     UpdateThreadLocals();
@@ -105,11 +124,10 @@ void GCLang<LanguageConfig>::PreRunPhasesImpl()
     if constexpr (LanguageConfig::MT_MODE == MT_MODE_MULTI) {
         // Run monitor deflation first
         GetPandaVm()->GetMonitorPool()->DeflateMonitors();
-        // Delete unused thread structures
-        GetPandaVm()->GetThreadManager()->DeleteFinishedThreads();
     }
 }
 
-template class GCLang<PandaAssemblyLanguageConfig>;
+TEMPLATE_GC_IS_MUTATOR_ALLOWED()
+TEMPLATE_CLASS_LANGUAGE_CONFIG(GCLang);
 
 }  // namespace panda::mem

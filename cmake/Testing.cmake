@@ -29,8 +29,7 @@ if(PANDA_WITH_TESTS)
     # Use a custom target instead of `test` to ensure that running
     # Googletest-based tests depends on building them:
     add_custom_target(gtests
-                      COMMENT "Running gtests after building them"
-                      DEPENDS gtests_build)
+                      COMMENT "Running gtests after building them")
 
     if(NOT PANDA_SKIP_GTESTS)
         add_dependencies(tests gtests)
@@ -72,7 +71,7 @@ endif()
 # Additional actions on test_name include:
 #    * Target-specific definition PANDA_GTEST is added.
 #    * Googletest-specific libraries are linked to test_name by default,
-#      and there's no need to set them explicitly.
+#      no need to set them explicitly.
 
 function(panda_add_gtest)
     if(NOT PANDA_WITH_TESTS)
@@ -81,5 +80,5 @@ function(panda_add_gtest)
     if(NOT "OUTPUT_DIRECTORY" IN_LIST ARGV)
         list(APPEND ARGV "OUTPUT_DIRECTORY" "${PANDA_BINARY_ROOT}/bin-gtests")
     endif()
-    common_add_gtest(ENCLOSING_TARGET gtests_build ${ARGV})
+    common_add_gtest(${ARGV})
 endfunction()

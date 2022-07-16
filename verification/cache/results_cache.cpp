@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,7 @@ void VerificationResultCache::Initialize(const std::string &filename)
     Data data;
 
     auto elements = *size / sizeof(Data::value_type);
+
     if (elements > 0) {
         data.resize(elements, 0);
         if (!file.ReadAll(data.data(), *size)) {
@@ -94,9 +95,9 @@ void VerificationResultCache::Destroy(bool update_file)
     }
     if (update_file) {
         PandaVector<uint64_t> data;
-        impl->verified_ok([&data](auto set) {
-            data.reserve(set->size());
-            data.insert(data.begin(), set->cbegin(), set->cend());
+        impl->verified_ok.Apply([&data](const auto &set) {
+            data.reserve(set.size());
+            data.insert(data.begin(), set.cbegin(), set.cend());
         });
         using panda::os::file::Mode;
         using panda::os::file::Open;
@@ -127,13 +128,12 @@ void VerificationResultCache::Destroy(bool update_file)
 
 void VerificationResultCache::CacheResult(uint64_t method_id, bool result)
 {
-    if (!Enabled()) {
-        return;
-    }
-    if (result) {
-        impl->verified_ok->insert(method_id);
-    } else {
-        impl->verified_fail->insert(method_id);
+    if (Enabled()) {
+        if (result) {
+            impl->verified_ok->insert(method_id);
+        } else {
+            impl->verified_fail->insert(method_id);
+        }
     }
 }
 

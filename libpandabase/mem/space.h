@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_SPACE_H_
-#define PANDA_LIBPANDABASE_MEM_SPACE_H_
+#ifndef LIBPANDABASE_MEM_SPACE_H
+#define LIBPANDABASE_MEM_SPACE_H
 
 #include "utils/type_helpers.h"
 
 namespace panda {
 
 /**
- * SpaceType and GCCollectMode provide information that needs to be collected from some allocators
+ * SpaceType and GCCollectMode provide info when we should collect from some allocator or not
  */
 enum class SpaceType : size_t {
     SPACE_TYPE_UNDEFINED = 0,
@@ -52,24 +52,24 @@ inline const char *SpaceTypeToString(SpaceType type)
 {
     switch (type) {
         case SpaceType::SPACE_TYPE_UNDEFINED:
-            return "Undefined Space";
+            return "ark-Undefined Space";
         case SpaceType::SPACE_TYPE_OBJECT:
-            return "Object Space";
+            return "ark-Object Space";
         case SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT:
-            return "Humongous Object Space";
+            return "ark-Humongous Object Space";
         case SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT:
-            return "Non Movable Space";
+            return "ark-Non Movable Space";
         case SpaceType::SPACE_TYPE_INTERNAL:
-            return "Internal Space";
+            return "ark-Internal Space";
         case SpaceType::SPACE_TYPE_CODE:
-            return "Code Space";
+            return "ark-Code Space";
         case SpaceType::SPACE_TYPE_COMPILER:
-            return "Compiler Space";
+            return "ark-Compiler Space";
         default:
-            return "Unknown Space";
+            return "ark-Unknown Space";
     }
 }
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_SPACE_H_
+#endif  // LIBPANDABASE_MEM_SPACE_H

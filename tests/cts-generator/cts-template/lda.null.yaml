@@ -22,7 +22,7 @@ tests:
       verification:
         - none
     commands:
-      - file-name: "op_none"
+      - file-name: "eq"
         isa:
           instructions:
             - sig: lda.null
@@ -40,3 +40,4 @@ tests:
           return_ne_num:
               ldai 1
               return
+        check-type: none

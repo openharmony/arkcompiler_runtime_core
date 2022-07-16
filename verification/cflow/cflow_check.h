@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_CFLOW_CFLOW_CHECK_H_
-#define PANDA_VERIFICATION_CFLOW_CFLOW_CHECK_H_
+#ifndef PANDA_VERIFICATION_CFLOW_CHECK_HPP_
+#define PANDA_VERIFICATION_CFLOW_CHECK_HPP_
 
 #include "cflow_info.h"
 #include "cflow_check_options.h"
@@ -24,7 +24,8 @@
 #include <optional>
 
 namespace panda::verifier {
-PandaUniquePtr<CflowMethodInfo> CheckCflow(CflowCheckFlags options, const CacheOfRuntimeThings::CachedMethod &method);
+PandaUniquePtr<CflowMethodInfo> CheckCflow(const LibCache::CachedMethod &method, const MethodOptions &options,
+                                           LibCache &cache);
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_CFLOW_CFLOW_CHECK_H_
+#endif  // !PANDA_VERIFICATION_CFLOW_CHECK_HPP_

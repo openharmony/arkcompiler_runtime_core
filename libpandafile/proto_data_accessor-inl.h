@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H_
-#define PANDA_LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H_
+#ifndef LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H_
+#define LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H_
 
 #include "helpers.h"
 
@@ -44,12 +44,14 @@ inline void ProtoDataAccessor::EnumerateTypes(const Callback &c)
     while (v != 0) {
         size_t shift = (elem_num_ % SHORTY_ELEM_PER16) * SHORTY_ELEM_WIDTH;
         uint8_t elem = (v >> shift) & SHORTY_ELEM_MASK;
+
         if (elem == 0) {
             break;
         }
 
         Type t(static_cast<Type::TypeId>(elem));
         c(t);
+
         if (!t.IsPrimitive()) {
             ++num_ref;
         }
@@ -63,8 +65,48 @@ inline void ProtoDataAccessor::EnumerateTypes(const Callback &c)
     }
 
     size_ += num_ref * IDX_SIZE;
-
+    ref_types_num_ = num_ref;
     ref_types_sp_ = sp;
+}
+
+inline bool ProtoDataAccessor::IsEqual(ProtoDataAccessor *other)
+{
+    size_t ref_num = 0;
+    size_t shorty_idx = 0;
+    auto sp1 = panda_file_.GetSpanFromId(proto_id_);
+    auto sp2 = other->panda_file_.GetSpanFromId(other->proto_id_);
+    auto v1 = helpers::Read<SHORTY_ELEM_SIZE>(&sp1);
+    auto v2 = helpers::Read<SHORTY_ELEM_SIZE>(&sp2);
+    while (true) {
+        size_t shift = (shorty_idx % SHORTY_ELEM_PER16) * SHORTY_ELEM_WIDTH;
+        uint8_t s1 = (v1 >> shift) & SHORTY_ELEM_MASK;  // NOLINT(hicpp-signed-bitwise)
+        uint8_t s2 = (v2 >> shift) & SHORTY_ELEM_MASK;  // NOLINT(hicpp-signed-bitwise)
+        if (s1 != s2) {
+            return false;
+        }
+        if (s1 == 0) {
+            break;
+        }
+        panda_file::Type t(static_cast<panda_file::Type::TypeId>(s1));
+        if (!t.IsPrimitive()) {
+            ++ref_num;
+        }
+        if ((++shorty_idx % SHORTY_ELEM_PER16) == 0) {
+            v1 = helpers::Read<SHORTY_ELEM_SIZE>(&sp1);
+            v2 = helpers::Read<SHORTY_ELEM_SIZE>(&sp2);
+        }
+    }
+
+    // compare ref types
+    for (size_t ref_idx = 0; ref_idx < ref_num; ++ref_idx) {
+        auto id1 = panda_file_.ResolveClassIndex(proto_id_, helpers::Read<IDX_SIZE>(&sp1));
+        auto id2 = other->panda_file_.ResolveClassIndex(other->proto_id_, helpers::Read<IDX_SIZE>(&sp2));
+        if (panda_file_.GetStringData(id1) != other->panda_file_.GetStringData(id2)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 inline uint32_t ProtoDataAccessor::GetNumArgs()
@@ -93,6 +135,7 @@ inline Type ProtoDataAccessor::GetType(size_t idx) const
     size_t elem_shift = (idx % SHORTY_ELEM_PER16) * SHORTY_ELEM_WIDTH;
 
     auto sp = panda_file_.GetSpanFromId(proto_id_);
+
     sp = sp.SubSpan(SHORTY_ELEM_SIZE * block_idx);
 
     uint32_t v = helpers::Read<SHORTY_ELEM_SIZE>(&sp);
@@ -111,4 +154,4 @@ inline Type ProtoDataAccessor::GetArgType(size_t idx) const
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H_
+#endif  // LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H_

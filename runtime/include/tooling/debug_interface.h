@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_TOOLING_DEBUG_INTERFACE_H_
-#define PANDA_RUNTIME_INCLUDE_TOOLING_DEBUG_INTERFACE_H_
+#ifndef PANDA_RUNTIME_DEBUG_DEBUG_INTERFACE_H
+#define PANDA_RUNTIME_DEBUG_DEBUG_INTERFACE_H
 
 #include <cstdint>
 #include <list>
@@ -28,14 +27,15 @@
 #include "libpandafile/file.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/thread.h"
-#include "runtime/include/tooling/pt_class.h"
 #include "runtime/include/tooling/pt_location.h"
-#include "runtime/include/tooling/pt_method.h"
+#include "runtime/include/tooling/pt_macros.h"
 #include "runtime/include/tooling/pt_object.h"
 #include "runtime/include/tooling/pt_property.h"
 #include "runtime/include/tooling/pt_thread.h"
 #include "runtime/include/tooling/pt_value.h"
+#include "runtime/include/tooling/vreg_value.h"
 #include "runtime/interpreter/frame.h"
+#include "runtime/include/tooling/pt_lang_extension.h"
 
 namespace panda::tooling {
 class PtLangExt;
@@ -61,7 +61,8 @@ public:
         PROPERTY_ACCESS_WATCH_NOT_FOUND,
         INVALID_PROPERTY_ACCESS_WATCH,
         PROPERTY_MODIFY_WATCH_NOT_FOUND,
-        INVALID_PROPERTY_MODIFY_WATCH
+        INVALID_PROPERTY_MODIFY_WATCH,
+        DEPRECATED,
     };
 
     Error(Type type, std::string msg) : type_(type), msg_(std::move(msg)) {}
@@ -92,7 +93,7 @@ public:
 
     virtual bool IsInterpreterFrame() const = 0;
 
-    virtual PtMethod GetPtMethod() const = 0;
+    virtual Method *GetMethod() const = 0;
 
     virtual uint64_t GetVReg(size_t i) const = 0;
 
@@ -126,6 +127,7 @@ struct PtStepRange {
 
 // * * * * *
 // Mock API helpers
+// TODO(maksenov): cleanup
 // * * * * *
 
 using ExceptionID = panda_file::File::EntityId;
@@ -142,7 +144,6 @@ struct ThreadInfo {
     int32_t priority;
     bool is_daemon;
     threadGroup thread_group;
-    PtObject context_class_loader;
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
@@ -221,57 +222,58 @@ public:
      * continue or step event will be received
      * @param thread Identifier of the thread where breakpoint hits. Now the callback is called in the same
      * thread
+     * @param method Method
      * @param location Breakpoint location
      */
-    virtual void Breakpoint(PtThread thread, const PtLocation &location) = 0;
+    virtual void Breakpoint(PtThread /* thread */, Method * /* method */, const PtLocation & /* location */) {}
 
     /**
      * \brief Method is called by the runtime when panda file is loaded
      * @param pandaFileName Path to panda file that is loaded
      */
-    virtual void LoadModule(std::string_view pandaFileName) = 0;
+    virtual void LoadModule(std::string_view /* pandaFileName */) {}
 
     /**
      * \brief Method is called by the runtime when managed thread is attached to it
      * @param thread The attached thread
      */
-    virtual void ThreadStart(PtThread thread) = 0;
+    virtual void ThreadStart(PtThread /* thread */) {}
 
     /**
      * \brief Method is called by the runtime when managed thread is detached
      * @param thread The detached thread
      */
-    virtual void ThreadEnd(PtThread thread) = 0;
+    virtual void ThreadEnd(PtThread /* thread */) {}
 
     /**
      * \brief Method is called by the runtime when virtual machine start initialization
      */
-    virtual void VmStart() = 0;
+    virtual void VmStart() {}
 
     /**
      * \brief Method is called by the runtime when virtual machine finish initialization
      * @param thread The initial thread
      */
-    virtual void VmInitialization(PtThread thread) = 0;
+    virtual void VmInitialization(PtThread /* thread */) {}
 
     /**
      * \brief Method is called by the runtime when virtual machine death
      */
-    virtual void VmDeath() = 0;
+    virtual void VmDeath() {}
 
     /**
      * \brief Method is called by the runtime when a class is first loaded
      * @param thread Thread loading the class
      * @param klass Class being loaded
      */
-    virtual void ClassLoad(PtThread thread, PtClass klass) = 0;
+    virtual void ClassLoad(PtThread /* thread */, BaseClass * /* klass */) {}
 
     /**
      * \brief Method is called by the runtime when class preparation is complete
      * @param thread Thread generating the class prepare
      * @param klass Class being prepared
      */
-    virtual void ClassPrepare(PtThread thread, PtClass klass) = 0;
+    virtual void ClassPrepare(PtThread /* thread */, BaseClass * /* klass */) {}
 
     /**
      * \brief Method is called by the runtime when a thread is about to wait on an object
@@ -279,7 +281,7 @@ public:
      * @param object Reference to the monitor
      * @param timeout The number of milliseconds the thread will wait
      */
-    virtual void MonitorWait(PtThread thread, PtObject object, int64_t timeout) = 0;
+    virtual void MonitorWait(PtThread /* thread */, ObjectHeader * /* object */, int64_t /* timeout */) {}
 
     /**
      * \brief Method is called by the runtime when a thread finishes waiting on an object
@@ -287,7 +289,7 @@ public:
      * @param object Reference to the monitor
      * @param timedOut True if the monitor timed out
      */
-    virtual void MonitorWaited(PtThread thread, PtObject object, bool timedOut) = 0;
+    virtual void MonitorWaited(PtThread /* thread */, ObjectHeader * /* object */, bool /* timedOut */) {}
 
     /**
      * \brief Method is called by the runtime when a thread is attempting to enter a monitor already acquired by another
@@ -295,7 +297,7 @@ public:
      * @param thread The thread about to wait
      * @param object Reference to the monitor
      */
-    virtual void MonitorContendedEnter(PtThread thread, PtObject object) = 0;
+    virtual void MonitorContendedEnter(PtThread /* thread */, ObjectHeader * /* object */) {}
 
     /**
      * \brief Method is called by the runtime when a thread enters a monitor after waiting for it to be released by
@@ -303,50 +305,102 @@ public:
      * @param thread The thread about to wait
      * @param object Reference to the monitor
      */
-    virtual void MonitorContendedEntered(PtThread thread, PtObject object) = 0;
+    virtual void MonitorContendedEntered(PtThread /* thread */, ObjectHeader * /* object */) {}
+
+    virtual void Exception(PtThread /* thread */, Method * /* method */, const PtLocation & /* location */,
+                           ObjectHeader * /* exceptionObject */, Method * /* catchMethod */,
+                           const PtLocation & /* catchLocation */)
+    {
+    }
+
+    virtual void ExceptionCatch(PtThread /* thread */, Method * /* catchMethod */, const PtLocation & /* location */,
+                                ObjectHeader * /* exceptionObject */)
+    {
+    }
+
+    virtual void PropertyAccess(PtThread /* thread */, Method * /* catchMethod */, const PtLocation & /* location */,
+                                ObjectHeader * /* object */, PtProperty /* property */)
+    {
+    }
+
+    virtual void PropertyModification(PtThread /* thread */, Method * /* method */, const PtLocation & /* location */,
+                                      ObjectHeader * /* object */, PtProperty /* property */, VRegValue /* newValue */)
+    {
+    }
+
+    virtual void FramePop(PtThread /* thread */, Method * /* method */, bool /* wasPoppedByException */) {}
+
+    virtual void GarbageCollectionFinish() {}
+
+    virtual void GarbageCollectionStart() {}
+
+    virtual void ObjectAlloc(BaseClass * /* klass */, ObjectHeader * /* object */, PtThread /* thread */,
+                             size_t /* size */)
+    {
+    }
+
+    virtual void MethodEntry(PtThread /* thread */, Method * /* method */) {}
+
+    virtual void MethodExit(PtThread /* thread */, Method * /* method */, bool /* wasPoppedByException */,
+                            VRegValue /* returnValue */)
+    {
+    }
+
+    virtual void SingleStep(PtThread /* thread */, Method * /* method */, const PtLocation & /* location */) {}
 
     // * * * * *
-    // mock API for panda debugger events
+    // Deprecated hooks
     // * * * * *
 
-    virtual void Paused(PauseReason reason) = 0;
+    virtual void Paused(PauseReason /* reason */) {}
+    virtual void Breakpoint(PtThread /* thread */, const PtLocation & /* location */) {}
+    virtual void Exception(PtThread /* thread */, const PtLocation & /* location */, PtObject /* exceptionObject */,
+                           const PtLocation & /* catchLocation */)
+    {
+    }
+    virtual void ExceptionCatch(PtThread /* thread */, const PtLocation & /* location */,
+                                PtObject /* exceptionObject */)
+    {
+    }
+    virtual void FramePop(PtThread /* thread */, PtMethod /* method */, bool /* wasPoppedByException */) {}
+    virtual void MethodEntry(PtThread /* thread */, PtMethod /* method */) {}
 
-    virtual void Exception(PtThread thread, const PtLocation &location, PtObject exceptionObject,
-                           const PtLocation &catchLocation) = 0;
+    virtual void MethodExit(PtThread /* thread */, PtMethod /* method */, bool /* wasPoppedByException */,
+                            PtValue /* returnValue */)
+    {
+    }
+    virtual void PropertyAccess(PtThread /* thread */, const PtLocation & /* location */, PtObject /* object */,
+                                PtProperty /* property */)
+    {
+    }
+    virtual void PropertyModification(PtThread /* thread */, const PtLocation & /* location */, PtObject /* object */,
+                                      PtProperty /* property */, PtValue /* newValue */)
+    {
+    }
+    virtual void MonitorWait(PtThread /* thread */, PtObject /* object */, int64_t /* timeout */) {}
+    virtual void MonitorWaited(PtThread /* thread */, PtObject /* object */, bool /* timedOut */) {}
+    virtual void MonitorContendedEnter(PtThread /* thread */, PtObject /* object */) {}
+    virtual void MonitorContendedEntered(PtThread /* thread */, PtObject /* object */) {}
+    virtual void ObjectAlloc(PtClass /* klass */, PtObject /* object */, PtThread /* thread */, size_t /* size */) {}
+    virtual void SingleStep(PtThread /* thread */, const PtLocation & /* location */) {}
+    virtual void ClassLoad(PtThread /* thread */, PtClass /* klass */) {}
+    virtual void ClassPrepare(PtThread /* thread */, PtClass /* klass */) {}
 
-    virtual void ExceptionCatch(PtThread thread, const PtLocation &location, PtObject exceptionObject) = 0;
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
+    virtual void ExceptionRevoked(ExceptionWrapper /* reason */, ExceptionID /* exceptionId */) {}
 
-    virtual void PropertyAccess(PtThread thread, const PtLocation &location, PtObject object, PtProperty property) = 0;
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
+    virtual void ExecutionContextCreated(ExecutionContextWrapper /* context */) {}
 
-    virtual void PropertyModification(PtThread thread, const PtLocation &location, PtObject object, PtProperty property,
-                                      PtValue newValue) = 0;
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
+    virtual void ExecutionContextDestroyed(ExecutionContextWrapper /* context */) {}
 
-    virtual void FramePop(PtThread thread, PtMethod method, bool wasPoppedByException) = 0;
+    virtual void ExecutionContextsCleared() {}
 
-    virtual void GarbageCollectionFinish() = 0;
-
-    virtual void GarbageCollectionStart() = 0;
-
-    virtual void ObjectAlloc(PtClass klass, PtObject object, PtThread thread, size_t size) = 0;
-
-    virtual void MethodEntry(PtThread thread, PtMethod method) = 0;
-
-    virtual void MethodExit(PtThread thread, PtMethod method, bool wasPoppedByException, PtValue returnValue) = 0;
-
-    virtual void SingleStep(PtThread thread, const PtLocation &location) = 0;
-
-    virtual void ExceptionRevoked(ExceptionWrapper reason, ExceptionID exceptionId) = 0;
-
-    virtual void ExecutionContextCreated(ExecutionContextWrapper context) = 0;
-
-    virtual void ExecutionContextDestroyed(ExecutionContextWrapper context) = 0;
-
-    virtual void ExecutionContextsCleared() = 0;
-
-    virtual void InspectRequested(PtObject object, PtObject hints) = 0;
+    virtual void InspectRequested(PtObject /* object */, PtObject /* hints */) {}
 
     // * * * * *
-    // mock API ends
+    // Deprecated hooks end
     // * * * * *
 
     virtual ~PtHooks() = default;
@@ -444,19 +498,19 @@ public:
 
     virtual Expected<PtMethod, Error> GetPtMethod(const PtLocation &location) const = 0;
 
-    /*
-     * Mock API for debug interphase starts:
-     *
-     * add get_thread_list
-     * what variables and IDs we can't get
-     */
     virtual std::optional<Error> GetThreadList(PandaVector<PtThread> *threadList) const = 0;
 
-    virtual std::optional<Error> SetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
-                                             const PtValue &value) const = 0;
+    virtual std::optional<Error> SetVariable(PtThread /* thread */, uint32_t /* frameDepth */, int32_t /* regNumber */,
+                                             const VRegValue & /* value */) const
+    {
+        return {};
+    }
 
-    virtual std::optional<Error> GetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
-                                             PtValue *value) const = 0;
+    virtual std::optional<Error> GetVariable(PtThread /* thread */, uint32_t /* frameDepth */, int32_t /* regNumber */,
+                                             VRegValue * /* value */) const
+    {
+        return {};
+    }
 
     virtual std::optional<Error> GetProperty(PtObject thisObject, PtProperty property, PtValue *value) const = 0;
 
@@ -464,10 +518,6 @@ public:
 
     virtual std::optional<Error> EvaluateExpression(PtThread thread, uint32_t frameNumber, ExpressionWrapper expr,
                                                     PtValue *result) const = 0;
-
-    virtual std::optional<Error> RetransformClasses(int classCount, const PtClass *classes) const = 0;
-
-    virtual std::optional<Error> RedefineClasses(int classCount, const PandaClassDefinition *classes) const = 0;
 
     virtual std::optional<Error> GetThreadInfo(PtThread thread, ThreadInfo *infoPtr) const = 0;
 
@@ -484,24 +534,54 @@ public:
 
     virtual std::optional<Error> NotifyFramePop(PtThread thread, uint32_t depth) const = 0;
 
-    virtual std::optional<Error> SetPropertyAccessWatch(PtClass klass, PtProperty property) = 0;
+    virtual std::optional<Error> GetThisVariableByFrame(PtThread /* thread */, uint32_t /* frameDepth */,
+                                                        ObjectHeader ** /* this_ptr */)
+    {
+        return {};
+    }
 
-    virtual std::optional<Error> ClearPropertyAccessWatch(PtClass klass, PtProperty property) = 0;
+    virtual std::optional<Error> SetPropertyAccessWatch(BaseClass * /* klass */, PtProperty /* property */)
+    {
+        return {};
+    }
 
-    virtual std::optional<Error> SetPropertyModificationWatch(PtClass klass, PtProperty property) = 0;
+    virtual std::optional<Error> ClearPropertyAccessWatch(BaseClass * /* klass */, PtProperty /* property */)
+    {
+        return {};
+    }
 
-    virtual std::optional<Error> GetThisVariableByFrame(PtThread thread, uint32_t frameDepth, PtValue *value) = 0;
+    virtual std::optional<Error> SetPropertyModificationWatch(BaseClass * /* klass */, PtProperty /* property */)
+    {
+        return {};
+    }
 
-    virtual std::optional<Error> ClearPropertyModificationWatch(PtClass klass, PtProperty property) = 0;
+    virtual std::optional<Error> ClearPropertyModificationWatch(BaseClass * /* klass */, PtProperty /* property */)
+    {
+        return {};
+    }
 
     // * * * * *
-    // Mock API ends
+    // Deprecated API
+    // * * * * *
+    virtual std::optional<Error> GetThisVariableByFrame(PtThread thread, uint32_t frameDepth, PtValue *value) = 0;
+    virtual std::optional<Error> SetPropertyAccessWatch(PtClass klass, PtProperty property) = 0;
+    virtual std::optional<Error> ClearPropertyAccessWatch(PtClass klass, PtProperty property) = 0;
+    virtual std::optional<Error> SetPropertyModificationWatch(PtClass klass, PtProperty property) = 0;
+    virtual std::optional<Error> ClearPropertyModificationWatch(PtClass klass, PtProperty property) = 0;
+    virtual std::optional<Error> RetransformClasses(int classCount, const PtClass *classes) const = 0;
+    virtual std::optional<Error> RedefineClasses(int classCount, const PandaClassDefinition *classes) const = 0;
+    virtual std::optional<Error> SetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
+                                             const PtValue &value) const = 0;
+    virtual std::optional<Error> GetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
+                                             PtValue *value) const = 0;
+
+    // * * * * *
+    // Deprecated API ends
     // * * * * *
 
     NO_COPY_SEMANTIC(DebugInterface);
     NO_MOVE_SEMANTIC(DebugInterface);
 };
-
 }  // namespace panda::tooling
 
-#endif  // PANDA_RUNTIME_INCLUDE_TOOLING_DEBUG_INTERFACE_H_
+#endif  // PANDA_RUNTIME_DEBUG_DEBUG_INTERFACE_H

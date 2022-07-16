@@ -35,6 +35,7 @@ tests:
               movi.64 v0, %s
               cmp.64 v0
         description: Check movi.64 with various values.
+        check-type: no-check
         tags: ['tsan']
         cases:
           - values:
@@ -118,24 +119,7 @@ tests:
           - values:
               - -0xFEDCBA9876543210
               - -0xFEDCBA9876543210
-          - values:
-              - 0
-              - 0.1
-            runner-options: [compile-failure]
-            case-check-type: no-check
-            description: Check movi.64 with incorrect value (f64 value).
-          - values:
-              - 0
-              - 1e1
-            runner-options: [compile-failure]
-            case-check-type: no-check
-            description: Check movi.64 with incorrect value (f64 value).
-          - values:
-              - 0
-              - e1
-            runner-options: [compile-failure]
-            case-check-type: no-check
-            description: Check movi.64 with incorrect value.
+
 
       - file-name: "vd_8"
         isa:
@@ -143,6 +127,7 @@ tests:
             - sig: movi.64 v:out:i64, imm:i64
               acc: none
               format: [op_v_8_imm_64]
+        check-type: no-check
         code-template: |
           #
               ldai.64 1
@@ -165,9 +150,53 @@ tests:
           - values:
               - v255
               - v255
+
+
+      - file-name: "err"
+        isa:
+          instructions:
+            - sig: movi.64 v:out:i64, imm:i64
+              acc: none
+              format: [op_v_8_imm_64]
+        runner-options: [compile-failure]
+        check-type: exit-positive
+        header-template: []
+        code-template: |
+          .record E {}
+          .function i32 main() {
+              movi.64 %s
+        description: Check mov.64 instruction with syntax errors.
+        cases:
           - values:
-              - v256
-              - v0
-            runner-options: [compile-failure]
-            case-check-type: no-check
+              - v0, v0
+          - values:
+              - v0, "foo"
+          - values:
+              - v0, E
+          - values:
+              - v0, null
+          - values:
+              - v0, 0xAABBCCDDEEFFEEFF00
+          - values:
+              - a0, 1
+          - values:
+              - v256, 1
             description: Check movi.64 instruction with out-of-range register number.
+          - values:
+              - v257, 1
+            description: Check movi.64 instruction with out-of-range register number.
+          - values:
+              - v65536, 1
+            description: Check movi.64 instruction with out-of-range register number.
+          - values:
+              - v32768, 1
+            description: Check movi.64 instruction with out-of-range register number.
+          - values:
+              - v1, 0.1
+            description: Check movi.64 with incorrect value (float value).
+          - values:
+              - v1, 1e1
+            description: Check movi.64 with incorrect value (float value).
+          - values:
+              - v0, e1
+            description: Check movi.64 with incorrect value.

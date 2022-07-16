@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,17 @@ using RunSlotsType = RunSlots<>;
 
 class RunSlotsAllocatorTest : public AllocatorTest<NonObjectAllocator> {
 public:
-    RunSlotsAllocatorTest() = default;
+    RunSlotsAllocatorTest()
+    {
+        // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
+    }
 
     ~RunSlotsAllocatorTest()
     {
         for (auto i : allocated_mem_mmap_) {
             panda::os::mem::UnmapRaw(std::get<0>(i), std::get<1>(i));
         }
+        // Logger::Destroy();
     }
 
 protected:
@@ -172,7 +176,9 @@ TEST_F(RunSlotsAllocatorTest, AllocateWriteFreeTest)
 TEST_F(RunSlotsAllocatorTest, AllocateRandomFreeTest)
 {
     static constexpr size_t ALLOC_SIZE = sizeof(uint64_t);
-    AllocateFreeDifferentSizesTest<ALLOC_SIZE / 2U, 2 * ALLOC_SIZE>(512);
+    static constexpr size_t ELEMENTS_COUNT = 512;
+    static constexpr size_t POOLS_COUNT = 1;
+    AllocateFreeDifferentSizesTest<ALLOC_SIZE / 2, 2 * ALLOC_SIZE>(ELEMENTS_COUNT, POOLS_COUNT);
 }
 
 TEST_F(RunSlotsAllocatorTest, CheckReuseOfRunSlotsTest)

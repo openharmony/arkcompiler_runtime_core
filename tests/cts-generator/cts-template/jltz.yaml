@@ -193,7 +193,7 @@ tests:
         description: >
           Check `jltz` with invalid types in acc.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -211,6 +211,8 @@ tests:
               - lda.null
           - values:
               - ldai.64 0
+          - values:
+              - fldai 0
           - values:
               - fldai.64 0
           - values:
@@ -290,6 +292,38 @@ tests:
           outside:
         check-type: exit-positive
 
+      - file-name: "outside_try_catch_j"
+        isa:
+          instructions:
+            - sig: jltz imm:i32
+              acc: in:i32
+              format: [op_imm_8, op_imm_16]
+        description: Jump outside try/catch block.
+        bugid: ['3425']
+        header-template: []
+        tags: ['irtoc_ignore']
+        runner-options: ['use-pa']
+        code-template: |
+          .language PandaAssembly
+          .record panda.NullPointerException <external>
+          .function i32 main() {
+          begin:
+              ldai -1
+              jltz outside
+              mov.null v0
+              throw v0
+          end:
+              ldai 1
+              return
+          catch_npe:
+              ldai 2
+              return
+          .catch panda.NullPointerException, begin, end, catch_npe
+              ldai 3
+              return
+          outside:
+        check-type: exit-positive
+
       - file-name: uninitialized_regs
         isa:
           instructions:
@@ -298,7 +332,7 @@ tests:
               format: [op_imm_8, op_imm_16]
         description: Check `jltz` with uninitialized acc.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
           #
           label:
@@ -359,7 +393,7 @@ tests:
         isa:
           verification:
             - branch_target
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         tags: [verifier]
         description: Check 'jltz' instruction with prohibited branch target.
         header-template: []
@@ -409,19 +443,19 @@ tests:
         check-type: none
         cases:
           - values: ["begin"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["mid"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["end"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["quit"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["catch_E1_begin"]
           - values: ["catch_E1_mid"]
           - values: ["catch_E1_end"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["catch_E2_begin"]
           - values: ["catch_E2_mid"]
           - values: ["catch_E2_end"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["outside"]

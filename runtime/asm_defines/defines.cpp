@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,22 @@
  */
 
 #include <cstdint>
-#include "runtime/include/method.h"
-#include "runtime/include/thread.h"
-#include "utils/cframe_layout.h"
+#include "libpandafile/file.h"
+#include "runtime/include/class.h"
 #include "runtime/include/coretypes/array.h"
+#include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/include/coretypes/string.h"
+#include "runtime/include/field.h"
+#include "runtime/include/hclass.h"
+#include "runtime/include/method.h"
+#include "runtime/include/mtmanaged_thread.h"
+#include "runtime/mem/tlab.h"
+#include "utils/cframe_layout.h"
+
+#include "plugins_defines.h"
 
 namespace panda {
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_DEFINE_MULTILINE)
 #define DEFINE_VALUE(name, value)                                                         \
     void AsmDefinition_##name()                                                           \
     {                                                                                     \

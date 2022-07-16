@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_IDE_HELPERS_H_
-#define PANDA_ASSEMBLER_IDE_HELPERS_H_
+#ifndef PANDA_ASSEMBLER_IDE_HELPERS_H
+#define PANDA_ASSEMBLER_IDE_HELPERS_H
 
 #include <sstream>
 
@@ -83,4 +83,4 @@ std::string JsonSerializeProgramItems(const T &item_table)
 }
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_IDE_HELPERS_H_
+#endif  // PANDA_ASSEMBLER_IDE_HELPERS_H

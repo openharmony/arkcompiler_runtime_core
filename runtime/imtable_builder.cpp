@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ void IMTableBuilder::Build(const panda_file::ClassDataAccessor *cda, ITable itab
     // (2) as IMTABLE_SIZE when it's in [IMTABLE_SIZE, IMTABLE_SIZE * OVERSIZE_MULTIPLE], eg. [32,64]
     // (3) as 0 when it's much more bigger than fixed IMTABLE_SIZE, since conflict probability is high and IMTable will
     // be almost empty
-    SetIMTSize(ifm_num <= Class::IMTABLE_SIZE
+    SetIMTSize((ifm_num <= Class::IMTABLE_SIZE)
                    ? ifm_num
-                   : (ifm_num <= Class::IMTABLE_SIZE * OVERSIZE_MULTIPLE ? Class::IMTABLE_SIZE : 0));
+                   : ((ifm_num <= Class::IMTABLE_SIZE * OVERSIZE_MULTIPLE) ? Class::IMTABLE_SIZE : 0));
 }
 
 void IMTableBuilder::Build(ITable itable, bool is_interface)
@@ -55,9 +55,9 @@ void IMTableBuilder::Build(ITable itable, bool is_interface)
     }
 
     // set imtable size rules: the same as function above
-    SetIMTSize(ifm_num <= Class::IMTABLE_SIZE
+    SetIMTSize((ifm_num <= Class::IMTABLE_SIZE)
                    ? ifm_num
-                   : (ifm_num <= Class::IMTABLE_SIZE * OVERSIZE_MULTIPLE ? Class::IMTABLE_SIZE : 0));
+                   : ((ifm_num <= Class::IMTABLE_SIZE * OVERSIZE_MULTIPLE) ? Class::IMTABLE_SIZE : 0));
 }
 
 void IMTableBuilder::UpdateClass(Class *klass)

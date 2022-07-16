@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_VERIFICATION_OPTIONS_H_
-#define PANDA_VERIFICATION_VERIFICATION_OPTIONS_H_
+#ifndef PANDA_VERIFICATION_OPTIONS_H__
+#define PANDA_VERIFICATION_OPTIONS_H__
 
 #include "utils/pandargs.h"
 #include "runtime/include/runtime_options.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
 #include "verification/cflow/cflow_check_options.h"
-#include "verification/debug/options/method_options_config.h"
-#include "verifier_messages.h"
+#include "verification/config/options/method_options_config.h"
 
 #include <string>
 #include <unordered_map>
@@ -30,30 +29,20 @@
 namespace panda::verifier {
 
 struct VerificationOptions {
-    using MethodOptionsConfig =
-        VerifierMethodOptionsConfig<PandaString, VerifierMessage, PandaUnorderedMap, PandaVector>;
-    bool Enable = true;
+    std::string ConfigFile = "default";
+    VerificationMode Mode = VerificationMode::DISABLED;
     struct {
-        bool Status = true;
+        bool Status = false;
     } Show;
-    CflowCheckFlags Cflow;
-    struct {
-        bool OnlyBuildTypeSystem = false;
-        bool VerifyAllRuntimeLibraryMethods = false;
-        bool VerifyOnlyEntryPoint = false;
-        bool VerifierDoesNotFail = false;
-        bool OnlyVerify = false;
-        bool DebugEnable = true;
-        bool DoNotAssumeLibraryMethodsVerified = false;
-        bool SyncOnClassInitialization = false;
-        size_t VerificationThreads = 1;
-    } Mode;
+    CflowOptions Cflow;
+    bool VerifyRuntimeLibraries = false;
+    bool SyncOnClassInitialization = false;
+    size_t VerificationThreads = 1;
     struct {
         std::string File;
         bool UpdateOnExit = false;
     } Cache;
     struct {
-        std::string ConfigFile = "default";
         struct {
             bool RegChanges = false;
             bool Context = false;
@@ -83,8 +72,18 @@ struct VerificationOptions {
     } Debug;
     void Initialize(const panda::RuntimeOptions &runtime_options);
     void Destroy();
+
+    bool IsEnabled() const
+    {
+        return Mode != VerificationMode::DISABLED;
+    }
+
+    bool IsOnlyVerify() const
+    {
+        return Mode == VerificationMode::AHEAD_OF_TIME || Mode == VerificationMode::DEBUG;
+    }
 };
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_VERIFICATION_OPTIONS_H_
+#endif  // !PANDA_VERIFICATION_OPTIONS_H__

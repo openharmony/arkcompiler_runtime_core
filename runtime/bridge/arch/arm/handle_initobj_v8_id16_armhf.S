@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
     // r4 - gpr and fpr base ptr, r5 - gpr arg ptr, r6 - fpr arg ptr,
     // r7 - stack arg ptr, r8 - frame.vregs + arg_idx, ip - thread, lr - method
     ldrb r8, [r8]
-    add r8, r9, r8, lsl #4
+    add r8, r9, r8, lsl #3
 
     NEXT_SHORTY r2
     cmp r2, #0

@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_INTERPRETER_INL_GEN_H_
-#define PANDA_RUNTIME_INCLUDE_INTERPRETER_INL_GEN_H_
-
 #include <isa_constants_gen.h>
+#include "plugins_interpreters-inl.h"
 
-template <class RuntimeIfaceT, bool enable_instrumentation, bool jump_to_eh>
+namespace panda::interpreter {
+
+template <class RuntimeIfaceT, bool jump_to_eh, bool is_dynamic>
 // NOLINTNEXTLINE(readability-function-size)
-void ExecuteImpl(ManagedThread* thread, const uint8_t *pc, Frame* frame) {
+void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame) {
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wvoid-ptr-dereference"
@@ -31,7 +31,14 @@ void ExecuteImpl(ManagedThread* thread, const uint8_t *pc, Frame* frame) {
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
+
+#define INSTRUMENT_FRAME() do { if (handler.GetFrame()->IsForcePop() || handler.GetFrame()->IsRetryInstruction()) { goto INSTRUMENT_FRAME_HANDLER; } } while (0)
+
     ASSERT(!thread->IsCurrentFrameCompiled());
+
+    if (!thread->template StackOverflowCheck<true, true>()) {
+        return;
+    }
 
     EVENT_METHOD_ENTER(frame->GetMethod()->GetFullName(), events::MethodEnterKind::INTERP, thread->RecordMethodEnter());
 
@@ -42,41 +49,51 @@ void ExecuteImpl(ManagedThread* thread, const uint8_t *pc, Frame* frame) {
     PandaUniquePtr<void, decltype(method_exit_event)> method_exit(&method_exit_event, method_exit_event);
 #endif
 
-    static std::array<const void*, 256 + NUM_PREFIXED + 1> dispatch_table{
+    static constexpr uint32_t DISPATCH_TABLE_LEN = 256 + NUM_PREFIXED + 1;
+
+    static std::array<const void*, DISPATCH_TABLE_LEN> inst_dispatch_table {
 % Panda::dispatch_table.handler_names.each do |name|
         &&HANDLE_<%= name %>,
 % end
         &&EXCEPTION_HANDLER,
     };
 
+    static std::array<const void*, DISPATCH_TABLE_LEN> debug_dispatch_table {
+% Panda::dispatch_table.handler_names.each do |name|
+        &&DEBUG_HANDLE_<%= name %>,
+% end
+        &&DEBUG_EXCEPTION_HANDLER,
+    };
+
+    auto *dispatch_table = inst_dispatch_table.data();
+    if (UNLIKELY(Runtime::GetCurrent()->IsDebugMode())) {
+        dispatch_table = debug_dispatch_table.data();
+    }
     SetDispatchTable(dispatch_table);
+    thread->SetCurrentDispatchTable(dispatch_table);
+    thread->SetDebugDispatchTable(debug_dispatch_table.data());
 
     InstructionHandlerState state(thread, pc, frame);
     if constexpr (jump_to_eh) {
-        goto EXCEPTION_HANDLER;
+        goto* dispatch_table[DISPATCH_TABLE_LEN - 1];
     }
     ASSERT(state.IsPrimaryOpcodeValid());
 
     const void *label;
     DISPATCH(GetDispatchTable(dispatch_table), state.GetPrimaryOpcode(), label);
 
+% [[:nodebug, 'HANDLE_'], [:debug, 'DEBUG_HANDLE_']].each do |mode, prefix|
 % Panda::instructions.each do |i|
 %   mnemonic = i.mnemonic.split('.').map { |p| p == '64' ? 'Wide' : p.capitalize }.join
-HANDLE_<%= i.handler_name %>: {
+<%= prefix %><%= i.handler_name %>: {
 % namespace = i.namespace == 'core' ? '' : "#{i.namespace}::"
 % if i.namespace != 'core'
 #ifdef PANDA_WITH_<%= i.namespace.upcase %>
 % end
-    <%= namespace %>InstructionHandler<RuntimeIfaceT, enable_instrumentation> handler(&state);
-    if (enable_instrumentation && (handler.GetFrame()->IsForcePop() || handler.GetFrame()->IsRetryInstruction())) {
-        goto INSTRUMENT_FRAME_HANDLER; 
-    }
+    <%= namespace %>InstructionHandler<RuntimeIfaceT, is_dynamic> handler(&state);
+% if mode == :nodebug
     handler.DumpVRegs();
-    handler.InstrumentInstruction();
     handler.template Handle<%= mnemonic %><BytecodeInstruction::Format::<%= i.format.pretty.upcase %>>();
-    if (enable_instrumentation) {
-        handler.GetFrame()->GetAcc() = handler.GetAcc();
-    }
 %   if i.properties.include?('return')
     if (handler.GetFrame()->IsStackless()) {
         handler.HandleReturnStackless();
@@ -86,37 +103,86 @@ HANDLE_<%= i.handler_name %>: {
         return;
     }
 %   else
-% if !i.exceptions.include?('x_none') || i.properties.include?("call") || ['ststatic', 'ldstatic', 'throw', 'lda'].include?(i.stripped_mnemonic)
+%     if !i.exceptions.include?('x_none')
     ASSERT(handler.IsPrimaryOpcodeValid() || (handler.GetExceptionOpcode() == UINT8_MAX + NUM_PREFIXED + 1));
     DISPATCH(GetDispatchTable(dispatch_table), handler.GetExceptionOpcode(), label);
-% else
+%     else
     ASSERT(handler.IsPrimaryOpcodeValid());
     DISPATCH(GetDispatchTable(dispatch_table), handler.GetPrimaryOpcode(), label);
-% end
+%     end
 %   end
+% else
+    if (handler.GetFrame()->IsForcePop() || handler.GetFrame()->IsRetryInstruction()) {
+        goto INSTRUMENT_FRAME_HANDLER;
+    }
+    handler.InstrumentInstruction();
+    handler.GetFrame()->GetAcc() = handler.GetAcc();
+    goto HANDLE_<%= i.handler_name %>;
+% end
 % if i.namespace != 'core'
 #endif // PANDA_WITH_<%= i.namespace.upcase %>
 % end
 }
 % end
-HANDLE_INVALID: {
+<%= prefix %>INVALID: {
     LOG(FATAL,INTERPRETER) << "Incorrect opcode";
 }
 % Panda::prefixes.each do |p|
-HANDLE_<%= p.handler_name %>: {
+<%= prefix %><%= p.handler_name %>: {
     const auto secondary_opcode = state.GetSecondaryOpcode();
 
-    LOG(DEBUG, INTERPRETER) << "Prefix subdispatch: " << "<%= p.name %>, " << secondary_opcode;
+    LOG(DEBUG, INTERPRETER) << "Prefix subdispatch: " << "<%= p.name %>, " << static_cast<int32_t>(secondary_opcode);
 
     ASSERT(secondary_opcode <= <%= Panda::dispatch_table.secondary_opcode_bound(p) %>);
     const size_t dispatch_idx = <%= Panda::dispatch_table.secondary_opcode_offset(p) %> + secondary_opcode;
-    ASSERT(dispatch_idx < dispatch_table.size());
+    ASSERT(dispatch_idx < DISPATCH_TABLE_LEN);
     DISPATCH(GetDispatchTable(dispatch_table), dispatch_idx, label);
 }
 % end
 
+% if mode == :debug
+DEBUG_EXCEPTION_HANDLER: {
+% else
+EXCEPTION_HANDLER: {
+% end
+    ASSERT(thread->HasPendingException());
+
+    InstructionHandler<RuntimeIfaceT, is_dynamic> handler(&state);
+    uint32_t pc_offset = panda_file::INVALID_OFFSET;
+
+% if mode == :debug
+    RuntimeIfaceT::GetNotificationManager()->ExceptionThrowEvent(thread, handler.GetFrame()->GetMethod(), thread->GetException(), pc_offset);
+% end
+    pc_offset = handler.FindCatchBlockStackless();
+    if (pc_offset == panda_file::INVALID_OFFSET) {
+        if constexpr (RUNTIME_ARCH == Arch::AARCH64 || RUNTIME_ARCH == Arch::AARCH32 || RUNTIME_ARCH == Arch::X86_64) {
+            return FindCatchBlockInCallStack(thread);
+        } else {
+            return;
+        }
+    }
+
+    auto *method = handler.GetFrame()->GetMethod();
+    ASSERT(method != nullptr);
+    LanguageContext ctx = RuntimeIfaceT::GetLanguageContext(*method);
+    ObjectHeader *exception_object = thread->GetException();
+    ctx.SetExceptionToVReg(handler.GetFrame()->GetAcc(), exception_object);
+
+    thread->ClearException();
+% if mode == :debug
+    RuntimeIfaceT::GetNotificationManager()->ExceptionCatchEvent(thread, handler.GetFrame()->GetMethod(), exception_object, pc_offset);
+% end
+
+    Span<const uint8_t> sp(handler.GetFrame()->GetMethod()->GetInstructions(), pc_offset);
+    state = InstructionHandlerState(thread, sp.cend(), handler.GetFrame());
+
+    ASSERT(state.IsPrimaryOpcodeValid());
+    goto* dispatch_table[state.GetPrimaryOpcode()];
+}
+% end
+
 INSTRUMENT_FRAME_HANDLER: {
-    InstructionHandler<RuntimeIfaceT, enable_instrumentation> handler(&state);
+    InstructionHandler<RuntimeIfaceT, is_dynamic> handler(&state);
 
     ASSERT(handler.GetFrame()->IsForcePop() || handler.GetFrame()->IsRetryInstruction());
 
@@ -139,39 +205,6 @@ INSTRUMENT_FRAME_HANDLER: {
     goto* dispatch_table[state.GetPrimaryOpcode()];
 }
 
-EXCEPTION_HANDLER: {
-    ASSERT(thread->HasPendingException());
-
-    InstructionHandler<RuntimeIfaceT, enable_instrumentation> handler(&state);
-
-    uint32_t pc_offset = panda_file::INVALID_OFFSET;
-    pc_offset = handler.FindCatchBlockStackless();
-
-    if (pc_offset == panda_file::INVALID_OFFSET) {
-        if constexpr (RUNTIME_ARCH == Arch::AARCH64 || RUNTIME_ARCH == Arch::AARCH32 || RUNTIME_ARCH == Arch::X86_64) {
-            return FindCatchBlockInCallStack(thread->GetException());
-        } else {
-            return;
-        }
-    }
-
-    auto *method = handler.GetFrame()->GetMethod();
-    ASSERT(method != nullptr);
-    LanguageContext ctx = RuntimeIfaceT::GetLanguageContext(*method);
-    ctx.SetExceptionToVReg(handler.GetFrame()->GetAcc(), thread->GetException());
-
-    thread->ClearException();
-    if (enable_instrumentation) {
-        RuntimeIfaceT::GetNotificationManager()->ExceptionCatchEvent(thread, handler.GetFrame()->GetMethod(), pc_offset);
-    }
-
-    Span<const uint8_t> sp(handler.GetFrame()->GetMethod()->GetInstructions(), pc_offset);
-    state = InstructionHandlerState(thread, sp.cend(), handler.GetFrame());
-
-    ASSERT(state.IsPrimaryOpcodeValid());
-    goto* dispatch_table[state.GetPrimaryOpcode()];
-}
-
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #elif defined(__GNUC__)
@@ -179,4 +212,4 @@ EXCEPTION_HANDLER: {
 #endif
 }
 
-#endif  // PANDA_RUNTIME_INCLUDE_INTERPRETER_INL_GEN_H_
+}  // namespace panda::interpreter

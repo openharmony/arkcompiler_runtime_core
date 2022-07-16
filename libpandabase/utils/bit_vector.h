@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_BIT_VECTOR_H_
-#define PANDA_LIBPANDABASE_UTILS_BIT_VECTOR_H_
+#ifndef PANDA_BIT_VECTOR_H
+#define PANDA_BIT_VECTOR_H
 
 #include "globals.h"
 #include "mem/arena_allocator.h"
@@ -59,7 +59,6 @@ public:
         }
         return *this;
     }
-
     BitReference &operator=(const BitReference &other)
     {
         if (&other != this) {
@@ -68,24 +67,20 @@ public:
 
         return *this;
     }
-
     BitReference &operator=(BitReference &&other) noexcept
     {
         *this = bool(other);
         return *this;
     }
-
     // NOLINTNEXTLINE(google-explicit-constructor)
     operator bool() const
     {
         return (*data_ & mask_) != 0;
     }
-
     bool operator==(const BitReference &other) const
     {
         return bool(*this) == bool(other);
     }
-
     bool operator<(const BitReference &other) const
     {
         return !bool(*this) && bool(other);
@@ -116,31 +111,26 @@ public:
     {
         return data_ == other.data_ && offset_ == other.offset_;
     }
-
     template <bool _IsConst>
     bool operator<(const BitVectorIterator<_IsConst> &other) const
     {
         return data_ < other.data_ || (data_ == other.data_ && offset_ < other.offset_);
     }
-
     template <bool _IsConst>
     bool operator!=(const BitVectorIterator<_IsConst> &other) const
     {
         return !(*this == other);
     }
-
     template <bool _IsConst>
     bool operator>(const BitVectorIterator<_IsConst> &other) const
     {
         return other < *this;
     }
-
     template <bool _IsConst>
     bool operator<=(const BitVectorIterator<_IsConst> &other) const
     {
         return !(other < *this);
     }
-
     template <bool _IsConst>
     bool operator>=(const BitVectorIterator<_IsConst> &other) const
     {
@@ -156,57 +146,48 @@ public:
             return BitReference(data_, 1U << helpers::ToUnsigned(offset_));
         }
     }
-
     BitVectorIterator &operator++()
     {
         BumpUp();
         return *this;
     }
-
     BitVectorIterator operator++(int)  // NOLINT(cert-dcl21-cpp)
     {
         BitVectorIterator tmp = *this;
         BumpUp();
         return tmp;
     }
-
     BitVectorIterator &operator--()
     {
         BumpDown();
         return *this;
     }
-
     BitVectorIterator operator--(int)  // NOLINT(cert-dcl21-cpp)
     {
         BitVectorIterator tmp = *this;
         BumpDown();
         return tmp;
     }
-
     BitVectorIterator &operator+=(difference_type v)
     {
         Increase(v);
         return *this;
     }
-
     BitVectorIterator &operator-=(difference_type v)
     {
         Increase(-v);
         return *this;
     }
-
     BitVectorIterator operator+(difference_type v) const
     {
         auto tmp = *this;
         return tmp += v;
     }
-
     BitVectorIterator operator-(difference_type v) const
     {
         auto tmp = *this;
         return tmp -= v;
     }
-
     difference_type operator-(BitVectorIterator other) const
     {
         return (data_ - other.data_) * WORD_BITS + (offset_ - other.offset_);
@@ -226,7 +207,6 @@ private:
             ++data_;
         }
     }
-
     void BumpDown()
     {
         if (offset_-- == 0) {
@@ -234,14 +214,15 @@ private:
             --data_;
         }
     }
-
     void Increase(ptrdiff_t n)
     {
         difference_type diff = offset_ + n;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         data_ += diff / helpers::ToSigned(WORD_BITS);
         diff = diff % helpers::ToSigned(WORD_BITS);
         if (diff < 0) {
             diff += helpers::ToSigned(WORD_BITS);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             --data_;
         }
         offset_ = diff;
@@ -326,28 +307,23 @@ public:
     {
         return const_iterator(storage_.data(), 0);
     }
-
     iterator begin()
     {
         return iterator(storage_.data(), 0);
     }
-
     const_iterator cbegin() const
     {
         return const_iterator(storage_.data(), 0);
     }
-
     const_iterator end() const
     {
         return const_iterator(storage_.data() + GetWordIndex(size_), size_ % WORD_BITS);
     }
-
     iterator end()
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return iterator(storage_.data() + GetWordIndex(size_), size_ % WORD_BITS);
     }
-
     const_iterator cend() const
     {
         return const_iterator(storage_.data() + GetWordIndex(size_), size_ % WORD_BITS);
@@ -408,7 +384,6 @@ public:
     {
         return storage_.data();
     }
-
     const void *data() const
     {
         return storage_.data();
@@ -539,12 +514,10 @@ public:
     private:
         const BitVectorBase &vector_;
     };
-
     auto GetSetBitsIndices() const
     {
         return BitsIndicesRange<true>(*this);
     }
-
     auto GetZeroBitsIndices() const
     {
         return BitsIndicesRange<false>(*this);
@@ -636,7 +609,7 @@ private:
     void Next(uint32_t val)
     {
         ASSERT(val != 0);
-        int step = val > 0 ? 1 : -1;
+        int step = (val > 0) ? 1 : -1;
         for (; val != 0; val--) {
             if ((offset_ + 1) == helpers::ToSigned(data_.size())) {
                 offset_ = INVAILD_OFFSET;
@@ -692,4 +665,4 @@ inline void fill(panda::BitVectorIterator<IsConst> first, panda::BitVectorIterat
 
 }  // namespace std
 
-#endif  // PANDA_LIBPANDABASE_UTILS_BIT_VECTOR_H_
+#endif  // PANDA_BIT_VECTOR_H

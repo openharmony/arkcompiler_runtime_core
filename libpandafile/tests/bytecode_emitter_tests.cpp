@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,32 @@
 #include <tuple>
 #include <vector>
 
-namespace panda {
+using namespace panda;
 using Opcode = BytecodeInstruction::Opcode;
 
-using Tuple16 = std::tuple<uint8_t, uint8_t>;
-using Tuple32 = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>;
-using Tuple64 = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t>;
+typedef std::tuple<uint8_t, uint8_t> Tuple16;
+typedef std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> Tuple32;
+typedef std::tuple<uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t> Tuple64;
+
+namespace globals {
+constexpr static const int64_t IMM_2 = 2;
+constexpr static const int64_t IMM_3 = 3;
+constexpr static const int64_t IMM_4 = 4;
+constexpr static const int64_t IMM_5 = 5;
+constexpr static const int64_t IMM_6 = 6;
+constexpr static const int64_t IMM_7 = 7;
+constexpr static const int64_t IMM_8 = 8;
+constexpr static const int64_t IMM_9 = 9;
+constexpr static const int64_t IMM_11 = 11;
+constexpr static const int64_t IMM_12 = 12;
+constexpr static const int64_t IMM_15 = 15;
+constexpr static const int64_t IMM_16 = 16;
+constexpr static const int64_t IMM_24 = 24;
+constexpr static const int64_t IMM_32 = 32;
+constexpr static const int64_t IMM_40 = 40;
+constexpr static const int64_t IMM_48 = 48;
+constexpr static const int64_t IMM_56 = 56;
+}  // namespace globals
 
 static std::vector<uint8_t> &operator<<(std::vector<uint8_t> &out, uint8_t val)
 {
@@ -44,29 +64,38 @@ static std::vector<uint8_t> &operator<<(std::vector<uint8_t> &out, Tuple16 val)
 
 static std::vector<uint8_t> &operator<<(std::vector<uint8_t> &out, Tuple32 val)
 {
-    return out << std::get<0>(val) << std::get<1>(val) << std::get<2U>(val) << std::get<3U>(val);
+    return out << std::get<0>(val) << std::get<1>(val) << std::get<globals::IMM_2>(val)
+               << std::get<globals::IMM_3>(val);
 }
 
 static std::vector<uint8_t> &operator<<(std::vector<uint8_t> &out, Tuple64 val)
 {
-    return out << std::get<0>(val) << std::get<1U>(val) << std::get<2U>(val) << std::get<3U>(val) << std::get<4U>(val)
-               << std::get<5U>(val) << std::get<6U>(val) << std::get<7U>(val);
+    return out << std::get<0>(val) << std::get<1>(val) << std::get<globals::IMM_2>(val) << std::get<globals::IMM_3>(val)
+               << std::get<globals::IMM_4>(val) << std::get<globals::IMM_5>(val) << std::get<globals::IMM_6>(val)
+               << std::get<globals::IMM_7>(val);
 }
 
 static Tuple16 Split16(uint16_t val)
 {
-    return Tuple16 {val & 0xFF, val >> 8U};
+    return Tuple16 {val & 0xFF, val >> 8};
 }
 
 static Tuple32 Split32(uint32_t val)
 {
-    return Tuple32 {val & 0xFF, (val >> 8U) & 0xFF, (val >> 16U) & 0xFF, (val >> 24U) & 0xFF};
+    return Tuple32 {val & 0xFF, (val >> globals::IMM_8) & 0xFF, (val >> globals::IMM_16) & 0xFF,
+                    (val >> globals::IMM_24) & 0xFF};
 }
 
 static Tuple64 Split64(uint64_t val)
 {
-    return Tuple64 {val & 0xFF,          (val >> 8U) & 0xFF,  (val >> 16U) & 0xFF, (val >> 24U) & 0xFF,
-                    (val >> 32U) & 0xFF, (val >> 40U) & 0xFF, (val >> 48U) & 0xFF, (val >> 56U) & 0xFF};
+    return Tuple64 {val & 0xFF,
+                    (val >> globals::IMM_8) & 0xFF,
+                    (val >> globals::IMM_16) & 0xFF,
+                    (val >> globals::IMM_24) & 0xFF,
+                    (val >> globals::IMM_32) & 0xFF,
+                    (val >> globals::IMM_40) & 0xFF,
+                    (val >> globals::IMM_48) & 0xFF,
+                    (val >> globals::IMM_56) & 0xFF};
 }
 
 TEST(BytecodeEmitter, JmpBwd_IMM8)
@@ -95,8 +124,8 @@ TEST(BytecodeEmitter, JmpFwd_IMM8)
     Label label = emitter.CreateLabel();
     emitter.Jmp(label);
     // -5 because 2 bytes takes jmp itself and
-    // emitter estimate length of jmp is 3 greater than what it actually is
-    int num_ret = std::numeric_limits<int8_t>::max() - 5;
+    // emitter estimate length of jmp by 3 greater the it is actually
+    int num_ret = std::numeric_limits<int8_t>::max() - globals::IMM_5;
     for (int i = 0; i < num_ret; ++i) {
         emitter.ReturnVoid();
     }
@@ -105,7 +134,7 @@ TEST(BytecodeEmitter, JmpFwd_IMM8)
     std::vector<uint8_t> out;
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
     std::vector<uint8_t> expected;
-    expected << Opcode::JMP_IMM8 << num_ret + 2;
+    expected << Opcode::JMP_IMM8 << num_ret + globals::IMM_2;
     for (int i = 0; i < num_ret + 1; ++i) {
         expected << Opcode::RETURN_VOID;
     }
@@ -161,7 +190,7 @@ TEST(BytecodeEmitter, JmpFwd_IMM16)
         // -4 because 2 bytes takes jmp itself and
         // emitter estimate length of jmp by 3 greater the it is actually
         // and plus one byte to make 8bit overflow
-        int num_ret = std::numeric_limits<int8_t>::max() - 4;
+        int num_ret = std::numeric_limits<int8_t>::max() - globals::IMM_4;
         for (int i = 0; i < num_ret; ++i) {
             emitter.ReturnVoid();
         }
@@ -170,7 +199,7 @@ TEST(BytecodeEmitter, JmpFwd_IMM16)
         std::vector<uint8_t> out;
         ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
         std::vector<uint8_t> expected;
-        expected << Opcode::JMP_IMM16 << Split16(num_ret + 3);
+        expected << Opcode::JMP_IMM16 << Split16(num_ret + globals::IMM_3);
         for (int i = 0; i < num_ret + 1; ++i) {
             expected << Opcode::RETURN_VOID;
         }
@@ -182,7 +211,7 @@ TEST(BytecodeEmitter, JmpFwd_IMM16)
         emitter.Jmp(label);
         // -5 because 2 bytes takes jmp itself and
         // emitter estimate length of jmp by 3 greater the it is actually
-        int num_ret = std::numeric_limits<int16_t>::max() - 5;
+        int num_ret = std::numeric_limits<int16_t>::max() - globals::IMM_5;
         for (int i = 0; i < num_ret; ++i) {
             emitter.ReturnVoid();
         }
@@ -191,7 +220,7 @@ TEST(BytecodeEmitter, JmpFwd_IMM16)
         std::vector<uint8_t> out;
         ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
         std::vector<uint8_t> expected;
-        expected << Opcode::JMP_IMM16 << Split16(num_ret + 3);
+        expected << Opcode::JMP_IMM16 << Split16(num_ret + globals::IMM_3);
         for (int i = 0; i < num_ret + 1; ++i) {
             expected << Opcode::RETURN_VOID;
         }
@@ -218,9 +247,9 @@ static void EmitJmp(Opcode op, int32_t imm, std::vector<uint8_t> *out)
 static Opcode GetOpcode(size_t inst_size)
 {
     switch (inst_size) {
-        case 2:  // 2 -- opcode + imm8
+        case globals::IMM_2:
             return Opcode::JMP_IMM8;
-        case 3:  // 3 -- opcode + imm16
+        case globals::IMM_3:
             return Opcode::JMP_IMM16;
         default:
             return Opcode::JMP_IMM32;
@@ -240,10 +269,10 @@ static Opcode GetOpcode(size_t inst_size)
  */
 static std::vector<uint8_t> EmitJmpFwdBwd(size_t n1, size_t n2)
 {
-    std::array<std::tuple<size_t, int32_t, int32_t>, 3U> jmps {
-        std::tuple {2, std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()},
-        std::tuple {3, std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()},
-        std::tuple {5, std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()}};
+    std::array<std::tuple<size_t, int32_t, int32_t>, 3> jmps {
+        std::tuple {globals::IMM_2, std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()},
+        std::tuple {globals::IMM_3, std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()},
+        std::tuple {globals::IMM_5, std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()}};
 
     std::vector<uint8_t> out;
 
@@ -368,7 +397,7 @@ TEST(BytecodeEmitter, JmpFwd_IMM32)
     // -4 because 2 bytes takes jmp itself and
     // emitter estimate length of jmp by 3 greater the it is actually
     // and plus one byte to make 16bit overflow
-    int num_ret = std::numeric_limits<int16_t>::max() - 4;
+    int num_ret = std::numeric_limits<int16_t>::max() - globals::IMM_4;
     for (int i = 0; i < num_ret; ++i) {
         emitter.ReturnVoid();
     }
@@ -377,7 +406,7 @@ TEST(BytecodeEmitter, JmpFwd_IMM32)
     std::vector<uint8_t> out;
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
     std::vector<uint8_t> expected;
-    expected << Opcode::JMP_IMM32 << Split32(num_ret + 5);
+    expected << Opcode::JMP_IMM32 << Split32(num_ret + globals::IMM_5);
     for (int i = 0; i < num_ret + 1; ++i) {
         expected << Opcode::RETURN_VOID;
     }
@@ -389,11 +418,11 @@ void JcmpBwd_V8_IMM8(Opcode opcode, std::function<void(BytecodeEmitter *, uint8_
     BytecodeEmitter emitter;
     Label label = emitter.CreateLabel();
     emitter.Bind(label);
-    int num_ret = 15;
+    int num_ret = globals::IMM_15;
     for (int i = 0; i < num_ret; ++i) {
         emitter.ReturnVoid();
     }
-    emit_jcmp(&emitter, 15U, label);
+    emit_jcmp(&emitter, globals::IMM_15, label);
     std::vector<uint8_t> out;
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
     std::vector<uint8_t> expected;
@@ -409,8 +438,8 @@ void JcmpFwd_V8_IMM8(Opcode opcode, std::function<void(BytecodeEmitter *, uint8_
 {
     BytecodeEmitter emitter;
     Label label = emitter.CreateLabel();
-    emit_jcmp(&emitter, 15U, label);
-    int num_ret = 12;
+    emit_jcmp(&emitter, globals::IMM_15, label);
+    int num_ret = globals::IMM_12;
     for (int i = 0; i < num_ret; ++i) {
         emitter.ReturnVoid();
     }
@@ -420,7 +449,7 @@ void JcmpFwd_V8_IMM8(Opcode opcode, std::function<void(BytecodeEmitter *, uint8_
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
     std::vector<uint8_t> expected;
     // 2 bytes takes jmp itself and plus one byte to make.
-    expected << opcode << 15u << static_cast<uint8_t>(num_ret + 2 + 1);
+    expected << opcode << 15u << static_cast<uint8_t>(num_ret + globals::IMM_3);
 
     for (int i = 0; i < num_ret + 1; ++i) {
         expected << Opcode::RETURN_VOID;
@@ -481,7 +510,7 @@ void JcmpFwd_V8_IMM16(Opcode opcode, std::function<void(BytecodeEmitter *, uint8
         emit_jcmp(&emitter, 0, label);
         // -3 because 4 bytes takes jmp itself
         // plus one to make 8bit overflow
-        int num_ret = std::numeric_limits<int8_t>::max() - 3U;
+        int num_ret = std::numeric_limits<int8_t>::max() - globals::IMM_3;
         for (int i = 0; i < num_ret; ++i) {
             emitter.ReturnVoid();
         }
@@ -490,7 +519,7 @@ void JcmpFwd_V8_IMM16(Opcode opcode, std::function<void(BytecodeEmitter *, uint8
         std::vector<uint8_t> out;
         ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
         std::vector<uint8_t> expected;
-        expected << opcode << 0u << Split16(num_ret + 4U);
+        expected << opcode << 0u << Split16(num_ret + globals::IMM_4);
         for (int i = 0; i < num_ret + 1; ++i) {
             expected << Opcode::RETURN_VOID;
         }
@@ -502,7 +531,7 @@ void JcmpFwd_V8_IMM16(Opcode opcode, std::function<void(BytecodeEmitter *, uint8
         Label label = emitter.CreateLabel();
         emit_jcmp(&emitter, 0, label);
         // -4 because 4 bytes takes jmp itself
-        int num_ret = std::numeric_limits<int16_t>::max() - 4;
+        int num_ret = std::numeric_limits<int16_t>::max() - globals::IMM_4;
         for (int i = 0; i < num_ret; ++i) {
             emitter.ReturnVoid();
         }
@@ -511,7 +540,7 @@ void JcmpFwd_V8_IMM16(Opcode opcode, std::function<void(BytecodeEmitter *, uint8
         std::vector<uint8_t> out;
         ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
         std::vector<uint8_t> expected;
-        expected << opcode << 0u << Split16(num_ret + 4U);
+        expected << opcode << 0u << Split16(num_ret + globals::IMM_4);
         for (int i = 0; i < num_ret + 1; ++i) {
             expected << Opcode::RETURN_VOID;
         }
@@ -529,7 +558,7 @@ TEST(BytecodeEmitter, Jne_V8_IMM8)
     std::vector<uint8_t> out;
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
     std::vector<uint8_t> expected;
-    expected << Opcode::JNE_V8_IMM8 << 0 << 3 << Opcode::RETURN_VOID;
+    expected << Opcode::JNE_V8_IMM8 << 0 << globals::IMM_3 << Opcode::RETURN_VOID;
     ASSERT_EQ(expected, out);
 }
 
@@ -537,13 +566,23 @@ TEST(BytecodeEmitter, Jne_V8_IMM16)
 {
     BytecodeEmitter emitter;
     Label label = emitter.CreateLabel();
-    emitter.Jcmp(Opcode::JNE_V8_IMM16, Opcode::JNE_V8_IMM16, 16, label);
+    static constexpr uint8_t JNE_REG = 16;
+    static constexpr size_t N_NOPS = 256;
+    static constexpr size_t INSN_SZ = 4;
+    emitter.Jne(JNE_REG, label);
+    for (size_t i = 0; i < N_NOPS; ++i) {
+        emitter.Nop();
+    }
     emitter.Bind(label);
     emitter.ReturnVoid();
     std::vector<uint8_t> out;
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
     std::vector<uint8_t> expected;
-    expected << Opcode::JNE_V8_IMM16 << 16 << Split16(4) << Opcode::RETURN_VOID;
+    expected << Opcode::JNE_V8_IMM16 << JNE_REG << Split16(INSN_SZ + N_NOPS);
+    for (size_t i = 0; i < N_NOPS; ++i) {
+        expected << Opcode::NOP;
+    }
+    expected << Opcode::RETURN_VOID;
     ASSERT_EQ(expected, out);
 }
 
@@ -557,7 +596,7 @@ void Jcmpz_IMM8(Opcode opcode, std::function<void(BytecodeEmitter *, const Label
     std::vector<uint8_t> out;
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
     std::vector<uint8_t> expected;
-    expected << opcode << 2U << Opcode::RETURN_VOID;
+    expected << opcode << globals::IMM_2 << Opcode::RETURN_VOID;
     ASSERT_EQ(expected, out);
 }
 
@@ -566,7 +605,7 @@ void Jcmpz_IMM16(Opcode opcode, std::function<void(BytecodeEmitter *, const Labe
     BytecodeEmitter emitter;
     Label label = emitter.CreateLabel();
     emit_jcmp(&emitter, label);
-    for (size_t i = 0; i < std::numeric_limits<uint8_t>::max() - 2U; ++i) {
+    for (int i = 0; i < std::numeric_limits<uint8_t>::max() - globals::IMM_2; ++i) {
         emitter.ReturnVoid();
     }
     emitter.Bind(label);
@@ -598,7 +637,7 @@ TEST(BytecodeEmitter, JmpFwdCrossRef)
     emitter.ReturnVoid();
     emitter.Bind(lbl1);
     emitter.ReturnVoid();
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < globals::IMM_6; ++i) {
         emitter.ReturnVoid();
     }
     emitter.Bind(lbl2);
@@ -607,8 +646,8 @@ TEST(BytecodeEmitter, JmpFwdCrossRef)
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
 
     std::vector<uint8_t> expected;
-    expected << Opcode::JEQ_V8_IMM8 << 0u << (9 - 2) << Opcode::JEQ_V8_IMM8 << 0u << (12 - 1);
-    for (int i = 0; i < 9; ++i) {
+    expected << Opcode::JEQ_V8_IMM8 << 0u << globals::IMM_7 << Opcode::JEQ_V8_IMM8 << 0u << globals::IMM_11;
+    for (int i = 0; i < globals::IMM_9; ++i) {
         expected << Opcode::RETURN_VOID;
     }
     ASSERT_EQ(expected, out);
@@ -630,7 +669,7 @@ TEST(BytecodeEmitter, JmpBwdCrossRef)
     emitter.Bind(lbl1);
     emitter.ReturnVoid();
     emitter.Jeq(0, lbl2);
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < globals::IMM_5; ++i) {
         emitter.ReturnVoid();
     }
     emitter.Jeq(0, lbl1);
@@ -641,11 +680,11 @@ TEST(BytecodeEmitter, JmpBwdCrossRef)
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
 
     std::vector<uint8_t> expected;
-    expected << Opcode::RETURN_VOID << Opcode::JEQ_V8_IMM8 << 0u << (13 - 2);
-    for (int i = 0; i < 5; ++i) {
+    expected << Opcode::RETURN_VOID << Opcode::JEQ_V8_IMM8 << 0u << globals::IMM_11;
+    for (int i = 0; i < globals::IMM_5; ++i) {
         expected << Opcode::RETURN_VOID;
     }
-    expected << Opcode::JEQ_V8_IMM8 << 0u << static_cast<uint8_t>(-9) << Opcode::RETURN_VOID;
+    expected << Opcode::JEQ_V8_IMM8 << 0u << static_cast<uint8_t>(-globals::IMM_9) << Opcode::RETURN_VOID;
     ASSERT_EQ(expected, out);
 }
 
@@ -668,7 +707,7 @@ TEST(BytecodeEmitter, Jmp3FwdCrossRefs)
 
     constexpr int32_t INT8T_MAX = std::numeric_limits<int8_t>::max();
 
-    size_t n = INT8T_MAX - 4;
+    size_t n = INT8T_MAX - globals::IMM_4;
     for (size_t i = 0; i < n; i++) {
         emitter.ReturnVoid();
     }
@@ -682,10 +721,10 @@ TEST(BytecodeEmitter, Jmp3FwdCrossRefs)
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
 
     std::vector<uint8_t> expected;
-    expected << Opcode::JMP_IMM16 << Split16(INT8T_MAX + 5);
-    expected << Opcode::JMP_IMM16 << Split16(INT8T_MAX + 2);
+    expected << Opcode::JMP_IMM16 << Split16(INT8T_MAX + globals::IMM_5);
+    expected << Opcode::JMP_IMM16 << Split16(INT8T_MAX + globals::IMM_2);
     expected << Opcode::JMP_IMM16 << Split16(INT8T_MAX + 1);
-    for (size_t i = 0; i < n + 2; i++) {
+    for (size_t i = 0; i < n + globals::IMM_2; i++) {
         expected << Opcode::RETURN_VOID;
     }
     ASSERT_EQ(expected, out);
@@ -745,5 +784,3 @@ void TestNoneFormat(Opcode opcode, std::function<void(BytecodeEmitter *)> emit)
 }
 
 #include <bytecode_emitter_tests_gen.h>
-
-}  // namespace panda

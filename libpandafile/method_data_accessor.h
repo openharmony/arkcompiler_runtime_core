@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_METHOD_DATA_ACCESSOR_H_
-#define PANDA_LIBPANDAFILE_METHOD_DATA_ACCESSOR_H_
+#ifndef LIBPANDAFILE_METHOD_DATA_ACCESSOR_H_
+#define LIBPANDAFILE_METHOD_DATA_ACCESSOR_H_
 
 #include "file.h"
 #include "file_items.h"
@@ -28,6 +28,18 @@ public:
     MethodDataAccessor(const File &panda_file, File::EntityId method_id);
 
     ~MethodDataAccessor() = default;
+
+    // quick way to get name id
+    static File::EntityId GetNameId(const File &panda_file, File::EntityId method_id);
+
+    // quick way to get method name
+    static panda_file::File::StringData GetName(const File &panda_file, File::EntityId method_id);
+
+    // quick way to get proto id
+    static File::EntityId GetProtoId(const File &panda_file, File::EntityId method_id);
+
+    // quick way to get class id
+    static File::EntityId GetClassId(const File &panda_file, File::EntityId method_id);
 
     bool IsExternal() const
     {
@@ -89,6 +101,8 @@ public:
         return File::EntityId(name_off_);
     };
 
+    panda_file::File::StringData GetName() const;
+
     File::EntityId GetProtoId() const
     {
         return File::EntityId(proto_off_);
@@ -107,7 +121,7 @@ public:
     void EnumerateRuntimeAnnotations(Callback cb);
 
     template <typename Callback>
-    void EnumerateTypesInProto(Callback cb);
+    void EnumerateTypesInProto(Callback cb, bool skip_this = false);
 
     std::optional<File::EntityId> GetRuntimeParamAnnotationId();
 
@@ -116,12 +130,24 @@ public:
     template <class Callback>
     void EnumerateAnnotations(Callback cb);
 
+    template <class Callback>
+    bool EnumerateRuntimeAnnotationsWithEarlyStop(Callback cb);
+
+    template <class Callback>
+    bool EnumerateAnnotationsWithEarlyStop(Callback cb);
+
+    template <class Callback>
+    void EnumerateTypeAnnotations(Callback cb);
+
+    template <class Callback>
+    void EnumerateRuntimeTypeAnnotations(Callback cb);
+
     std::optional<File::EntityId> GetParamAnnotationId();
 
     size_t GetSize()
     {
         if (size_ == 0) {
-            SkipParamAnnotation();
+            SkipRuntimeTypeAnnotation();
         }
 
         return size_;
@@ -139,6 +165,8 @@ public:
 
     uint32_t GetAnnotationsNumber();
     uint32_t GetRuntimeAnnotationsNumber();
+    uint32_t GetTypeAnnotationsNumber();
+    uint32_t GetRuntimeTypeAnnotationsNumber();
 
     uint32_t GetNumericalAnnotation(uint32_t field_id);
 
@@ -157,17 +185,21 @@ private:
 
     void SkipParamAnnotation();
 
+    void SkipTypeAnnotation();
+
+    void SkipRuntimeTypeAnnotation();
+
     const File &panda_file_;
     File::EntityId method_id_;
 
-    bool is_external_ {false};
+    bool is_external_;
 
-    uint16_t class_idx_ {0};
-    uint16_t proto_idx_ {0};
-    uint32_t class_off_ {0};
-    uint32_t proto_off_ {0};
-    uint32_t name_off_ {0};
-    uint32_t access_flags_ {0};
+    uint16_t class_idx_;
+    uint16_t proto_idx_;
+    uint32_t class_off_;
+    uint32_t proto_off_;
+    uint32_t name_off_;
+    uint32_t access_flags_;
 
     Span<const uint8_t> tagged_values_sp_ {nullptr, nullptr};
     Span<const uint8_t> source_lang_sp_ {nullptr, nullptr};
@@ -176,10 +208,12 @@ private:
     Span<const uint8_t> debug_sp_ {nullptr, nullptr};
     Span<const uint8_t> annotations_sp_ {nullptr, nullptr};
     Span<const uint8_t> param_annotation_sp_ {nullptr, nullptr};
+    Span<const uint8_t> type_annotation_sp_ {nullptr, nullptr};
+    Span<const uint8_t> runtime_type_annotation_sp_ {nullptr, nullptr};
 
-    size_t size_ {0};
+    size_t size_;
 };
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_METHOD_DATA_ACCESSOR_H_
+#endif  // LIBPANDAFILE_METHOD_DATA_ACCESSOR_H_

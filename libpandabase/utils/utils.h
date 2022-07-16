@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
 
 #ifndef PANDA_LIBPANDABASE_UTILS_UTILS_H_
 #define PANDA_LIBPANDABASE_UTILS_UTILS_H_
-
 namespace panda {
 // ----------------------------------------------------------------------------
 // General helper functions
 
 // Returns the value (0 .. 15) of a hexadecimal character c.
 // If c is not a legal hexadecimal character, returns a value < 0.
-inline int32_t HexValue(uint32_t c)
+inline uint32_t HexValue(uint32_t c)
 {
     constexpr uint32_t BASE16 = 16;
     constexpr uint32_t BASE10 = 10;
@@ -41,5 +40,4 @@ inline int32_t HexValue(uint32_t c)
 }
 
 }  // namespace panda
-
-#endif  // PANDA_LIBPANDABASE_UTILS_UTILS_H_
+#endif

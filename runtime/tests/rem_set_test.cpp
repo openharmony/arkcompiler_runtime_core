@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 #include "libpandabase/utils/asan_interface.h"
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/math_helpers.h"
-#include "runtime/include/class_linker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/alloc_config.h"
 #include "runtime/mem/region_allocator-inl.h"
@@ -43,6 +42,12 @@ public:
         options_.SetShouldLoadBootPandaFiles(false);
         options_.SetShouldInitializeIntrinsics(false);
         Runtime::Create(options_);
+        // For tests we don't limit spaces
+        size_t space_size = options_.GetHeapSizeLimit();
+        spaces_.young_space_.Initialize(space_size, space_size);
+        spaces_.mem_space_.Initialize(space_size, space_size);
+        spaces_.InitializePercentages(0, 100);
+        spaces_.is_initialized_ = true;
         thread_ = panda::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
         Init();
@@ -65,34 +70,41 @@ public:
         card_table_->Initialize();
     }
 
+    static void SetCardTable(RemSetT *rset, CardTable *card_table)
+    {
+        rset->SetCardTable(card_table);
+    }
+
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
     RuntimeOptions options_;
-    ClassLinkerExtension *ext_ {nullptr};
+    ClassLinkerExtension *ext_;
+    GenerationalSpaces spaces_;
     PandaUniquePtr<CardTable> card_table_ {nullptr};
 };
 
 TEST_F(RemSetTest, AddRefTest)
 {
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
-    NonObjectRegionAllocator allocator(mem_stats);
+    NonObjectRegionAllocator allocator(mem_stats, &spaces_);
     auto cls = ext_->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
     cls->SetObjectSize(allocator.GetMaxRegularObjectSize());
 
-    auto obj1 = allocator.Alloc(allocator.GetMaxRegularObjectSize());
-    static_cast<ObjectHeader *>(obj1)->SetClass(cls);
-    auto region1 = Region::AddrToRegion(obj1);
+    auto obj1 = static_cast<ObjectHeader *>(allocator.Alloc(allocator.GetMaxRegularObjectSize()));
+    obj1->SetClass(cls);
+    auto region1 = ObjectToRegion(obj1);
 
-    auto obj2 = allocator.Alloc(allocator.GetMaxRegularObjectSize());
-    static_cast<ObjectHeader *>(obj2)->SetClass(cls);
-    auto region2 = Region::AddrToRegion(obj2);
+    auto obj2 = static_cast<ObjectHeader *>(allocator.Alloc(allocator.GetMaxRegularObjectSize()));
+    obj2->SetClass(cls);
+    auto region2 = ObjectToRegion(obj2);
 
     // simulate gc process: mark obj2 and update live bitmap with mark bitmap
     region2->GetMarkBitmap()->Set(obj2);
+    region2->CreateLiveBitmap();
     region2->SwapMarkBitmap();
 
     auto remset1 = region1->GetRemSet();
-    remset1->SetCardTable(card_table_.get());
+    SetCardTable(remset1, card_table_.get());
     remset1->AddRef(obj2);
 
     PandaVector<void *> test_list;
@@ -109,36 +121,27 @@ TEST_F(RemSetTest, AddRefTest)
 TEST_F(RemSetTest, AddRefWithAddrTest)
 {
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
-    NonObjectRegionAllocator allocator(mem_stats);
+    NonObjectRegionAllocator allocator(mem_stats, &spaces_);
     auto cls = ext_->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
     cls->SetObjectSize(allocator.GetMaxRegularObjectSize());
 
-    auto obj1 = allocator.Alloc(allocator.GetMaxRegularObjectSize());
-    static_cast<ObjectHeader *>(obj1)->SetClass(cls);
-    auto region1 = Region::AddrToRegion(obj1);
+    auto obj1 = static_cast<ObjectHeader *>(allocator.Alloc(allocator.GetMaxRegularObjectSize()));
+    obj1->SetClass(cls);
+    auto region1 = ObjectToRegion(obj1);
 
-    auto obj2 = allocator.Alloc(allocator.GetMaxRegularObjectSize());
-    static_cast<ObjectHeader *>(obj2)->SetClass(cls);
-    auto region2 = Region::AddrToRegion(obj2);
+    auto obj2 = static_cast<ObjectHeader *>(allocator.Alloc(allocator.GetMaxRegularObjectSize()));
+    obj2->SetClass(cls);
+    auto region2 = ObjectToRegion(obj2);
 
-    // simulate gc process: mark obj2 and update live bitmap with mark bitmap
-    region1->GetMarkBitmap()->Set(obj1);
-    region1->SwapMarkBitmap();
+    region1->CreateLiveBitmap()->Set(obj1);
 
     RemSetWithCommonLock::AddRefWithAddr(obj1, obj2);
     auto remset2 = region2->GetRemSet();
-    remset2->SetCardTable(card_table_.get());
 
     PandaVector<void *> test_list;
     auto visitor = [&test_list](void *obj) { test_list.push_back(obj); };
     remset2->VisitMarkedCards(visitor);
-    ASSERT_EQ(test_list.size(), 0);
-
-    region1->AddFlag(panda::mem::RegionFlag::IS_OLD);
-    region1->RmvFlag(panda::mem::RegionFlag::IS_EDEN);
-    RemSetWithCommonLock::AddRefWithAddr(obj1, obj2);
-    remset2->VisitMarkedCards(visitor);
-    ASSERT_EQ(test_list.size(), 1);
+    ASSERT_EQ(1, test_list.size());
 
     auto first = test_list.front();
     ASSERT_EQ(first, obj1);
@@ -150,41 +153,33 @@ TEST_F(RemSetTest, AddRefWithAddrTest)
 TEST_F(RemSetTest, TravelObjectToAddRefTest)
 {
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
-    NonObjectRegionAllocator allocator(mem_stats);
+    NonObjectRegionAllocator allocator(mem_stats, &spaces_);
     auto cls = ext_->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
     cls->SetObjectSize(allocator.GetMaxRegularObjectSize());
     cls->SetRefFieldsNum(1, false);
     auto offset = ObjectHeader::ObjectHeaderSize();
     cls->SetRefFieldsOffset(offset, false);
 
-    auto obj1 = allocator.Alloc(allocator.GetMaxRegularObjectSize());
-    static_cast<ObjectHeader *>(obj1)->SetClass(cls);
-    auto region1 = Region::AddrToRegion(obj1);
+    auto obj1 = static_cast<ObjectHeader *>(allocator.Alloc(allocator.GetMaxRegularObjectSize()));
+    obj1->SetClass(cls);
+    auto region1 = ObjectToRegion(obj1);
 
-    auto obj2 = allocator.Alloc(allocator.GetMaxRegularObjectSize());
-    static_cast<ObjectHeader *>(obj2)->SetClass(cls);
-    auto region2 = Region::AddrToRegion(obj2);
+    auto obj2 = static_cast<ObjectHeader *>(allocator.Alloc(allocator.GetMaxRegularObjectSize()));
+    obj2->SetClass(cls);
+    auto region2 = ObjectToRegion(obj2);
 
     // simulate gc process: mark obj2 and update live bitmap with mark bitmap
-    region1->GetMarkBitmap()->Set(obj1);
-    region1->SwapMarkBitmap();
+    region1->CreateLiveBitmap()->Set(obj1);
 
     static_cast<ObjectHeader *>(obj1)->SetFieldObject<false, false>(offset, static_cast<ObjectHeader *>(obj2));
 
     RemSetWithCommonLock::TraverseObjectToAddRef(obj1);
     auto remset2 = region2->GetRemSet();
-    remset2->SetCardTable(card_table_.get());
 
     PandaVector<void *> test_list;
     auto visitor = [&test_list](void *obj) { test_list.push_back(obj); };
     remset2->VisitMarkedCards(visitor);
-    ASSERT_EQ(test_list.size(), 0);
-
-    region1->AddFlag(panda::mem::RegionFlag::IS_OLD);
-    region1->RmvFlag(panda::mem::RegionFlag::IS_EDEN);
-    RemSetWithCommonLock::TraverseObjectToAddRef(obj1);
-    remset2->VisitMarkedCards(visitor);
-    ASSERT_EQ(test_list.size(), 1);
+    ASSERT_EQ(1, test_list.size());
 
     auto first = test_list.front();
     ASSERT_EQ(first, obj1);

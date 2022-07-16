@@ -15,38 +15,23 @@ cmake_minimum_required(VERSION 3.10)
 
 project(verifier)
 
-set(SOURCES
-    verifier.cpp
-)
-
-#add_library(verifier ${PANDA_DEFAULT_LIB_TYPE} ${SOURCES})
+set(SOURCES verifier.cpp)
 
 panda_add_executable(verifier ${SOURCES})
 
-panda_add_to_clang_tidy(TARGET verifier CHECKS
-    "-cppcoreguidelines-macro-usage"
-    "-cppcoreguidelines-non-private-member-variables-in-classes"
-    "-cppcoreguidelines-pro-bounds-pointer-arithmetic"
-    "-google-explicit-constructor"
-    "-hicpp-explicit-conversions"
-    "-misc-non-private-member-variables-in-classes"
-    "-readability-identifier-naming"
-    "-readability-named-parameter"
-)
+panda_add_to_clang_tidy(TARGET verifier)
 
-include_directories(${PANDA_ROOT}/libpandabase/)
-
-target_include_directories(verifier
-    PUBLIC ../runtime
+target_include_directories(verifier PUBLIC ${PANDA_ROOT}/libpandabase/
+                                           ${PANDA_ROOT}/runtime/
+                                           ${PANDA_BINARY_ROOT}
+                                           ${VERIFIER_INCLUDE_DIR}
 )
 
 target_link_libraries(verifier arkruntime arkbase)
 
 panda_add_sanitizers(TARGET verifier SANITIZERS ${PANDA_SANITIZERS_LIST})
 
-#add_custom_target(panda ALL
-#                  COMMAND cd $<TARGET_FILE_DIR:ark> && ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_NAME:ark> panda)
-
-#add_dependencies(verifier ark)
+panda_gen_options(TARGET verifier YAML_FILE options.yaml GENERATED_HEADER
+                  verifier_options_gen.h)
 
 add_check_style(".")

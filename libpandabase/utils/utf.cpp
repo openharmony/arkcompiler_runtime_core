@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ struct MUtf8Char {
  */
 std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t max_bytes)
 {
+    // TODO(d.kovalneko): make the function safe
     Span<const uint8_t> sp(data, max_bytes);
     uint8_t d0 = sp[0];
     if ((d0 & MASK1) == 0) {
@@ -105,8 +106,8 @@ static constexpr uint32_t CombineTwoU16(uint16_t d0, uint16_t d1)
 
 constexpr MUtf8Char ConvertUtf16ToMUtf8(uint16_t d0, uint16_t d1)
 {
-    // When the first utf16 code is in 0xd800-0xdfff and the second utf16 code is 0,
-    // it is a single code point, and it needs to be represented by three MUTF8 code.
+    // when first utf16 code is in 0xd800-0xdfff and second utf16 code is 0,
+    // means that is a single code point, it needs to be represented by three MUTF8 code.
     if (d1 == 0 && d0 >= HI_SURROGATE_MIN && d0 <= LO_SURROGATE_MAX) {
         auto ch0 = static_cast<uint8_t>(MUTF8_3B_FIRST | static_cast<uint8_t>(d0 >> CONST_12));
         auto ch1 = static_cast<uint8_t>(MUTF8_3B_SECOND | (static_cast<uint8_t>(d0 >> CONST_6) & MASK_6BIT));
@@ -269,7 +270,7 @@ int CompareMUtf8ToMUtf8(const uint8_t *mutf8_1, const uint8_t *mutf8_2)
     return c1p2 - c2p2;
 }
 
-// Compare plain utf8, which allows 0 inside a string
+// compare plain utf8, which allows 0 inside a string
 int CompareUtf8ToUtf8(const uint8_t *utf8_1, size_t utf8_1_length, const uint8_t *utf8_2, size_t utf8_2_length)
 {
     uint32_t c1;
@@ -323,6 +324,7 @@ size_t Mutf8Size(const uint8_t *mutf8)
 
 size_t MUtf8ToUtf16Size(const uint8_t *mutf8)
 {
+    // TODO(d.kovalenko): make it faster
     size_t res = 0;
     while (*mutf8 != '\0') {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8);
@@ -351,8 +353,8 @@ size_t MUtf8ToUtf16Size(const uint8_t *mutf8, size_t mutf8_len)
 size_t Utf16ToMUtf8Size(const uint16_t *mutf16, uint32_t length)
 {
     size_t res = 1;  // zero byte
-    // When the utf16 data length is only 1 and the code is in 0xd800-0xdfff,
-    // it is a single code point, and it needs to be represented by three MUTF8 code.
+    // when utf16 data length is only 1 and code in 0xd800-0xdfff,
+    // means that is a single code point, it needs to be represented by three MUTF8 code.
     if (length == 1 && mutf16[0] >= HI_SURROGATE_MIN &&  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         mutf16[0] <= LO_SURROGATE_MAX) {                 // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         res += CONST_3;
@@ -390,6 +392,71 @@ bool IsEqual(Span<const uint8_t> utf8_1, Span<const uint8_t> utf8_2)
 bool IsEqual(const uint8_t *mutf8_1, const uint8_t *mutf8_2)
 {
     return strcmp(Mutf8AsCString(mutf8_1), Mutf8AsCString(mutf8_2)) == 0;
+}
+
+bool IsValidModifiedUTF8(const uint8_t *elems)
+{
+    ASSERT(elems);
+
+    while (*elems != '\0') {
+        // NOLINTNEXTLINE(hicpp-signed-bitwise, readability-magic-numbers)
+        switch (*elems & 0xf0) {
+            case 0x00:
+            case 0x10:  // NOLINT(readability-magic-numbers)
+            case 0x20:  // NOLINT(readability-magic-numbers)
+            case 0x30:  // NOLINT(readability-magic-numbers)
+            case 0x40:  // NOLINT(readability-magic-numbers)
+            case 0x50:  // NOLINT(readability-magic-numbers)
+            case 0x60:  // NOLINT(readability-magic-numbers)
+            case 0x70:  // NOLINT(readability-magic-numbers)
+                // pattern 0xxx
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                ++elems;
+                break;
+            case 0x80:  // NOLINT(readability-magic-numbers)
+            case 0x90:  // NOLINT(readability-magic-numbers)
+            case 0xa0:  // NOLINT(readability-magic-numbers)
+            case 0xb0:  // NOLINT(readability-magic-numbers)
+                // pattern 10xx is illegal start
+                return false;
+
+            case 0xf0:  // NOLINT(readability-magic-numbers)
+                // pattern 1111 0xxx starts four byte section
+                if ((*elems & 0x08) == 0) {  // NOLINT(hicpp-signed-bitwise)
+                    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    ++elems;
+                    if ((*elems & 0xc0) != 0x80) {  // NOLINT(hicpp-signed-bitwise, readability-magic-numbers)
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+                // no need break
+                [[fallthrough]];
+
+            case 0xe0:  // NOLINT(readability-magic-numbers)
+                // pattern 1110
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                ++elems;
+                if ((*elems & 0xc0) != 0x80) {  // NOLINT(hicpp-signed-bitwise, readability-magic-numbers)
+                    return false;
+                }
+                // no need break
+                [[fallthrough]];
+
+            case 0xc0:  // NOLINT(readability-magic-numbers)
+            case 0xd0:  // NOLINT(readability-magic-numbers)
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                ++elems;
+                if ((*elems & 0xc0) != 0x80) {  // NOLINT(hicpp-signed-bitwise, readability-magic-numbers)
+                    return false;
+                }
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                ++elems;
+                break;
+        }
+    }
+    return true;
 }
 
 }  // namespace panda::utf

@@ -26,14 +26,15 @@
 %   flags << "InstFlags::JUMP" if insn.jump?
 %   flags << "InstFlags::COND" if insn.conditional?
 %   flags << "InstFlags::RETURN" if insn.return?
-%   flags << "InstFlags::ACC_READ" if insn.properties.include? 'acc_read'
-%   flags << "InstFlags::ACC_WRITE" if insn.properties.include? 'acc_write'
+%   flags << "InstFlags::ACC_READ" if insn.acc_read?
+%   flags << "InstFlags::ACC_WRITE" if insn.acc_write?
 %   flags << "InstFlags::THROWING" if insn.throwing?
 %   flags << "InstFlags::METHOD_ID" if insn.properties.include? 'method_id'
 %   flags << "InstFlags::FIELD_ID" if insn.properties.include? 'field_id'
 %   flags << "InstFlags::TYPE_ID" if insn.properties.include? 'type_id'
 %   flags << "InstFlags::STRING_ID" if insn.properties.include? 'string_id'
 %   flags << "InstFlags::LITERALARRAY_ID" if insn.properties.include? 'literalarray_id'
+%   flags << "InstFlags::CALL_RANGE" if (insn.properties.include?('call') || insn.stripped_mnemonic == 'initobj') && insn.range?
 %   flags = "(#{flags.join(" | ")})"
 %
 %   max_width = group.map do |i|

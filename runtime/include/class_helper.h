@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_CLASS_HELPER_H_
-#define PANDA_RUNTIME_INCLUDE_CLASS_HELPER_H_
+#ifndef PANDA_RUNTIME_KLASS_HELPER_H_
+#define PANDA_RUNTIME_KLASS_HELPER_H_
 
 #include <cstdint>
 
 #include "libpandabase/utils/span.h"
 #include "libpandafile/file_items.h"
+#include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/object_header_config.h"
 
@@ -39,10 +39,6 @@ public:
     static constexpr size_t OBJECT_POINTER_SIZE = sizeof(classWordSize);
     // In general for any T: sizeof(T*) != OBJECT_POINTER_SIZE
     static constexpr size_t POINTER_SIZE = sizeof(uintptr_t);
-
-    static size_t ComputeClassSize(size_t vtable_size, size_t imt_size, size_t num_8bit_sfields,
-                                   size_t num_16bit_sfields, size_t num_32bit_sfields, size_t num_64bit_sfields,
-                                   size_t num_ref_sfields, size_t num_tagged_sfields);
 
     static const uint8_t *GetDescriptor(const uint8_t *name, PandaString *storage);
 
@@ -142,4 +138,4 @@ Str ClassHelper::GetName(const uint8_t *descriptor)
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_CLASS_HELPER_H_
+#endif  // PANDA_RUNTIME_KLASS_HELPER_H_

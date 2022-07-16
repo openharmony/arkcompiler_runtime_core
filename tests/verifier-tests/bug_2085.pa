@@ -70,9 +70,13 @@
   movi v0, 0
 try_begin:  
   ldobj.64 v0, R.fi64
-try_end:  
+try_end:
+  jmp ret
+catch_begin:
+  jmp ret
+ret:
   ldai 0
   return
-.catchall try_begin, try_end, try_end  
+#.catchall try_begin, try_end, catch_begin
 }  
 

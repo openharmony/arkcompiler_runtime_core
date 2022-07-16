@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_ARENA_H_
-#define PANDA_LIBPANDABASE_MEM_ARENA_H_
+#ifndef LIBPANDABASE_MEM_ARENA_H
+#define LIBPANDABASE_MEM_ARENA_H
 
 #include "mem.h"
+
+WEAK_FOR_LTO_START
 
 namespace panda {
 
@@ -31,7 +33,7 @@ public:
     DEFAULT_COPY_SEMANTIC(Arena);
 
     /**
-     * \brief Allocate memory with size \param size and aligned with \param alignment
+     * \brief Allocates memory with size \param size and aligned with \param alignment
      * @param size - size of the allocated memory
      * @param alignment - alignment of the allocated memory
      * @return pointer to the allocated memory on success, or nullptr on fail
@@ -39,7 +41,7 @@ public:
     void *Alloc(size_t size, Alignment alignment = ARENA_DEFAULT_ALIGNMENT);
 
     /**
-     * \brief Link this Arena to the \param arena
+     * \brief Links this Arena to the \param arena
      * @param arena - Arena which will be linked as next to the current
      */
     void LinkTo(Arena *arena);
@@ -50,7 +52,7 @@ public:
     void ClearNextLink();
 
     /**
-     * \brief Get next linked Arena
+     * \brief Returns next linked Arena
      * @return next linked Arena or nullptr
      */
     Arena *GetNextArena() const;
@@ -88,6 +90,11 @@ public:
         return buff_;
     }
 
+    void *GetTop() const
+    {
+        return curPos_;
+    }
+
     size_t GetSize() const
     {
         return size_;
@@ -110,7 +117,7 @@ public:
     void Resize(size_t new_size);
 
     /*
-     * \brief Empty arena
+     * \brief empties arena
      */
     void Reset();
 
@@ -151,9 +158,8 @@ public:
 
     ~AlignedArena() override = default;
 
-    void *Alloc(size_t size, [[maybe_unused]] Alignment alignment = AlignmentT)
+    void *Alloc(size_t size)
     {
-        ASSERT(alignment == AlignmentT);
         return Arena::AlignedAlloc(size, AlignmentT);
     }
 
@@ -168,7 +174,7 @@ public:
     DoubleLinkedAlignedArena(size_t buff_size, void *buff) : AlignedArena<AlignmentT>(buff_size, buff) {}
 
     /**
-     * \brief Link this Arena to the next \param arena
+     * \brief Links this Arena to the next \param arena
      * @param arena - Arena which will be linked as next to the current
      */
     void LinkNext(DoubleLinkedAlignedArena *arena)
@@ -177,7 +183,7 @@ public:
     }
 
     /**
-     * \brief Link this Arena to the prev \param arena
+     * \brief Links this Arena to the prev \param arena
      * @param arena - Arena which will be linked as prev to the current
      */
     void LinkPrev(DoubleLinkedAlignedArena *arena)
@@ -187,7 +193,7 @@ public:
     }
 
     /**
-     * \brief Return next linked Arena
+     * \brief Returns next linked Arena
      * @return next linked Arena or nullptr
      */
     DoubleLinkedAlignedArena *GetNextArena() const
@@ -196,7 +202,7 @@ public:
     }
 
     /**
-     * \brief Return prev linked Arena
+     * \brief Returns prev linked Arena
      * @return prev linked Arena or nullptr
      */
     DoubleLinkedAlignedArena *GetPrevArena() const
@@ -205,7 +211,7 @@ public:
     }
 
     /**
-     * \brief Clears link to the prev arena
+     * \brief Clear link to the prev arena
      */
     void ClearPrevLink()
     {
@@ -223,4 +229,6 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_ARENA_H_
+WEAK_FOR_LTO_END
+
+#endif  // LIBPANDABASE_MEM_ARENA_H

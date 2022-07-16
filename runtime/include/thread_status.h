@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_THREAD_STATUS_H_
-#define PANDA_RUNTIME_INCLUDE_THREAD_STATUS_H_
+#ifndef PANDA_RUNTIME_THREAD_STATUS_H_
+#define PANDA_RUNTIME_THREAD_STATUS_H_
 
 namespace panda {
 
-enum ThreadStatus : uint16_t {
+enum class ThreadStatus : uint16_t {
     CREATED,
     RUNNING,
     IS_BLOCKED,
@@ -36,4 +36,4 @@ enum ThreadStatus : uint16_t {
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_THREAD_STATUS_H_
+#endif  // PANDA_RUNTIME_THREAD_H_

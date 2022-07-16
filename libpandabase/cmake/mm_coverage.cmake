@@ -32,7 +32,7 @@ endif()
 if(ENABLE_MM_COVERAGE)
     # Set coverage options
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-    add_custom_target(mm_coverage DEPENDS arkbase_tests)
+    add_custom_target(mm_coverage DEPENDS arkbase_tests arkbase_mem_range_tests)
     set(ADD_COV_FLAGS --quiet --rc lcov_branch_coverage=1)
     add_custom_command(TARGET mm_coverage POST_BUILD
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -40,6 +40,7 @@ if(ENABLE_MM_COVERAGE)
         COMMAND find ${CMAKE_CURRENT_BINARY_DIR}/* -iname "*.gcda" -delete
         # run tests
         COMMAND arkbase_tests
+        COMMAND arkbase_mem_range_tests
         # coverage
         COMMAND lcov --no-external -b ${PANDA_ROOT}/libpandabase -d ${CMAKE_CURRENT_BINARY_DIR} -c -o mm_coverage.info ${ADD_COV_FLAGS}
         # html-file generation

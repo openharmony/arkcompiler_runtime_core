@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ void *TLAB::Alloc(size_t size)
 
 void TLAB::IterateOverObjects(const std::function<void(ObjectHeader *object_header)> &object_visitor)
 {
-    LOG_TLAB_ALLOCATOR(DEBUG) << __func__ << " started";
+    LOG_TLAB_ALLOCATOR(DEBUG) << "IterateOverObjects started";
     auto *cur_ptr = memory_start_addr_;
     void *end_ptr = cur_free_position_;
     while (cur_ptr < end_ptr) {
@@ -81,13 +81,13 @@ void TLAB::IterateOverObjects(const std::function<void(ObjectHeader *object_head
         object_visitor(object_header);
         cur_ptr = ToVoidPtr(AlignUp(ToUintPtr(cur_ptr) + object_size, DEFAULT_ALIGNMENT_IN_BYTES));
     }
-    LOG_TLAB_ALLOCATOR(DEBUG) << __func__ << " finished";
+    LOG_TLAB_ALLOCATOR(DEBUG) << "IterateOverObjects finished";
 }
 
 void TLAB::IterateOverObjectsInRange(const std::function<void(ObjectHeader *object_header)> &mem_visitor,
                                      const MemRange &mem_range)
 {
-    LOG_TLAB_ALLOCATOR(DEBUG) << __func__ << " started";
+    LOG_TLAB_ALLOCATOR(DEBUG) << "IterateOverObjectsInRange started";
     if (!GetMemRangeForOccupiedMemory().IsIntersect(mem_range)) {
         return;
     }
@@ -104,7 +104,7 @@ void TLAB::IterateOverObjectsInRange(const std::function<void(ObjectHeader *obje
         mem_visitor(object_header);
         current_ptr = ToVoidPtr(AlignUp(ToUintPtr(current_ptr) + object_size, DEFAULT_ALIGNMENT_IN_BYTES));
     }
-    LOG_TLAB_ALLOCATOR(DEBUG) << __func__ << " finished";
+    LOG_TLAB_ALLOCATOR(DEBUG) << "IterateOverObjects finished";
 }
 
 bool TLAB::ContainObject(const ObjectHeader *obj)

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_SIGNAL_HANDLER_H_
-#define PANDA_RUNTIME_SIGNAL_HANDLER_H_
+#ifndef PANDA_RUNTIME_SIGNAL_HANDLER_H
+#define PANDA_RUNTIME_SIGNAL_HANDLER_H
 
 #include <signal.h>  // NOLINTNEXTLINE(modernize-deprecated-headers)
 #include <cstdint>
@@ -39,8 +39,8 @@ public:
     }
 
     bool SignalActionHandler(int sig, siginfo_t *info, void *context);
-    bool InOatCode(const siginfo_t *siginfo, const void *context, bool check_bytecode_pc);
-    bool InOtherCode(int sig, siginfo_t *info, void *context);
+    bool InOatCode(const siginfo_t *siginfo, const void *context, bool check_bytecode_pc) const;
+    bool InOtherCode(int sig, const siginfo_t *info, const void *context) const;
 
     void AddHandler(SignalHandler *handler, bool oat_code);
 
@@ -96,6 +96,17 @@ private:
     NO_COPY_SEMANTIC(NullPointerHandler);
 };
 
+class StackOverflowHandler final : public SignalHandler {
+public:
+    StackOverflowHandler() = default;
+    ~StackOverflowHandler() override = default;
+
+    NO_COPY_SEMANTIC(StackOverflowHandler);
+    NO_MOVE_SEMANTIC(StackOverflowHandler);
+
+    bool Action(int sig, siginfo_t *siginfo, void *context) override;
+};
+
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_SIGNAL_HANDLER_H_
+#endif  // PANDA_RUNTIME_SIGNAL_HANDLER_H

@@ -14,7 +14,20 @@
 add_library(asm_defines defines.cpp)
 
 add_dependencies(asm_defines
-        intrinsics_gen_arkruntime)
+    type_gen_arkfile
+    isa_gen_arkfile
+    arkfile_gen
+    events_gen
+    logger_gen
+    intrinsics_gen_arkruntime
+    entrypoints_gen
+    runtime_language_context
+    shorty_values_gen_arkruntime
+    plugins_defines_h
+    plugins_asm_defines_def
+)
+
+set(GEN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/../include")
 
 set(ASM_DIR ${CMAKE_CURRENT_BINARY_DIR})
 set(ASM_FILE libasm_defines.S)
@@ -29,8 +42,16 @@ set_target_properties(asm_defines
 )
 
 target_include_directories(asm_defines
-    PUBLIC "$<TARGET_PROPERTY:arkruntime,INTERFACE_INCLUDE_DIRECTORIES>"
-    PUBLIC "$<TARGET_PROPERTY:arkruntime_test_interpreter_impl,INTERFACE_INCLUDE_DIRECTORIES>"
+    PUBLIC ${PANDA_ROOT}/runtime
+    PUBLIC ${PANDA_ROOT}
+    PUBLIC ${CMAKE_BINARY_DIR}/runtime/include
+    PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
+    PUBLIC ${PANDA_BINARY_ROOT}/verification/gen/include
+    PUBLIC ${PANDA_ROOT}/libpandabase
+    PUBLIC ${PANDA_ROOT}/libpandafile
+    PUBLIC "$<TARGET_PROPERTY:c_secshared,INCLUDE_DIRECTORIES>"
+    PUBLIC ${PANDA_BINARY_ROOT}/libpandafile/include
+    PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
 )
 
 # We have to disable LTO, because it generates llvm IR instead of assembly for '-S' option.
@@ -43,8 +64,13 @@ target_include_directories(asm_defines
 # (-fno-lto doesn't work because compilation fails with inappropriate regalloc)
 string(REPLACE "-mllvm -regalloc=${PANDA_LLVM_REGALLOC}" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 string(REPLACE "-flto=thin" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+target_compile_options(asm_defines PUBLIC "-Wno-attributes")
 target_compile_options(asm_defines PUBLIC "-Wno-invalid-offsetof")
 target_compile_options(asm_defines PUBLIC "-S")
+
+if (PANDA_TARGET_WINDOWS)
+    target_compile_options(asm_defines PUBLIC "-Wno-inconsistent-dllimport")
+endif()
 
 add_custom_command(OUTPUT ${OUTPUT_DIR}/${OUTPUT_FILE}
     COMMAND ruby ${CMAKE_CURRENT_SOURCE_DIR}/defines_generator.rb "${ASM_DIR}/${ASM_FILE}" ${OUTPUT_DIR}/${OUTPUT_FILE}

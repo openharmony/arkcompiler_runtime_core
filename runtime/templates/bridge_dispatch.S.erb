@@ -13,20 +13,6 @@
  * limitations under the License.
  */
 
-% def classify_calls(calls)
-%   format2insns = {}
-%   calls.each do |insn|
-%     format = get_format_for(insn)
-%     insns = format2insns[format]
-%     if insns == nil
-%       format2insns[format] = [insn]
-%     else
-%       insns = insns.push(insn)
-%     end
-%   end
-%   return format2insns
-% end
-%
 % calls = get_call_insns()
 % classified_calls = classify_calls(calls)
 % formats = classified_calls.keys
@@ -43,4 +29,3 @@
 .Lhandle_<%= fmt %>:
 #include "<%= handler_path(fmt) %>"
 % end
-

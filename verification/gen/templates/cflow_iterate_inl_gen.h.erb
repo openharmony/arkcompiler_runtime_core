@@ -71,7 +71,7 @@ public:
 %   if i.properties.include?('jump')
         auto imm = inst_.GetImm<format>();
         if (!inst_.IsValid()) {
-            LOG(DEBUG, VERIFIER) << "Jump instruction imm field is out of bounds of method body. "
+            LOG(ERROR, VERIFIER) << "Jump instruction imm field is out of bounds of method body. "
                                  << "Jump instruction offset: " << std::hex << static_cast<uint32_t>(reinterpret_cast<uintptr_t>(pc) - reinterpret_cast<uintptr_t>(inst_.GetFrom()));
             return CflowStatus::ERROR;
         }
@@ -79,13 +79,13 @@ public:
         const uint8_t* jump_pc = target_inst.GetAddress();
         if (!target_inst.IsValid()) {
             auto offset = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(pc) - reinterpret_cast<uintptr_t>(inst_.GetFrom()));
-            LOG(DEBUG, VERIFIER) << "Jump offset is out of bounds of method body. "
+            LOG(ERROR, VERIFIER) << "Jump offset is out of bounds of method body. "
                                  << "Jump instruction offset: 0x" << std::hex << offset
                                  << ". Jump target offset: 0x" << std::hex << (imm + offset);
             return CflowStatus::ERROR;
         }
 %   else
-        const uint8_t *jump_pc = nullptr;
+        const uint8_t* jump_pc = nullptr;
 %   end
         inst_ = inst_.GetNext<format>();
         return handler_(inst_type, pc, sz, EXC_SRC, jump_pc);
@@ -119,7 +119,10 @@ CflowStatus IterateOverInstructions(const uint8_t* pc, const uint8_t* from, cons
     std::optional<CflowStatus> status;
     uint8_t secondary_opcode;
 
-    ASSERT(handler.IsPrimaryOpcodeValid());
+    if (!handler.IsPrimaryOpcodeValid()) {
+        LOG(ERROR, VERIFIER) << "Incorrect opcode";
+        return CflowStatus::ERROR;
+    }
     goto* dispatch_table[handler.GetPrimaryOpcode()];
 
 % Panda::instructions.each do |i|
@@ -147,7 +150,7 @@ HANDLE_INVALID:
 % Panda::prefixes.each do |p|
 HANDLE_<%= p.handler_name %>:
     secondary_opcode = handler.GetSecondaryOpcode();
-    LOG(DEBUG, VERIFIER) << "CFLOW: Prefix subdispatch: " << "<%= p.name %>, " << secondary_opcode;
+    LOG(DEBUG, VERIFIER) << "CFLOW: Prefix subdispatch: " << "<%= p.name %>, " << static_cast<int32_t>(secondary_opcode);
 
     if (secondary_opcode > <%= Panda::dispatch_table.secondary_opcode_bound(p) %> ) {
         LOG(ERROR, VERIFIER) << "Incorrect opcode";

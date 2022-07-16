@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,6 +126,7 @@ TEST(File, GetClassByName)
     ASSERT_TRUE(container.Write(&mem_writer));
 
     // Read panda file from memory
+
     auto data = mem_writer.GetData();
     auto panda_file = GetPandaFile(&data);
     ASSERT_NE(panda_file, nullptr);

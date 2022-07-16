@@ -37,13 +37,13 @@ definitions:
         panda.Object[] fObjArray
       }
 
-  - name: java_header
+  - name: PandaAssembly_header
     template: |
-      .language Java
-      .record java.lang.Object <external>
-      .record I <java.interface> {}
-      .record Q <java.implements=I> {}
-      .record R <java.extends=Q> {
+      .language PandaAssembly
+      .record panda.Object <external>
+      .record I <panda.interface> {}
+      .record Q <panda.implements=I> {}
+      .record R <panda.extends=Q> {
         u1                 fu1
         i8                 fi8
         u16                fu16
@@ -60,8 +60,8 @@ definitions:
         R[]                fRArray
         I                  fI
         I[]                fIArray
-        java.lang.Object   fObj
-        java.lang.Object[] fObjArray
+        panda.Object   fObj
+        panda.Object[] fObjArray
       }
 
 
@@ -73,7 +73,7 @@ tests:
         Store register content into object field by field_id. For non-object variant the size of actually stored
         value is determined by field_id, other register bits are discarded.
       instructions:
-        - sig: stobj.v v1:in:i32, v2:in:ref, field_id
+        - sig: stobj.v v1:in:b32, v2:in:ref, field_id
           acc: none
           format: [op_v1_4_v2_4_id_16]
     commands:
@@ -85,7 +85,7 @@ tests:
         header-template: ['pandasm_header']
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
 
           %s
@@ -120,13 +120,13 @@ tests:
 
 
       - file-name: "check_if_regs_initialized_j"
-        description: Check that verifier reports error if a register is not initialized in Java context
+        description: Check that verifier reports error if a register is not initialized in PandaAssembly context
         isa:
           description: Store register content into object field by field_id.
-        header-template: ['java_header']
+        header-template: ['PandaAssembly_header']
         check-type: exit-positive
-        tags: ['verifier']
-        runner-options: ['use-java', 'verifier-failure', 'verifier-debug-config']
+        tags: [verifier, pa-verifier]
+        runner-options: ['use-pa', 'verifier-failure', 'verifier-config']
         code-template: |
 
           %s
@@ -167,6 +167,7 @@ tests:
             - x_null
         header-template: ['pandasm_header']
         check-type: empty
+        tags: ['irtoc_ignore']
         code-template: |
           .record panda.NullPointerException <external>
 
@@ -216,15 +217,16 @@ tests:
 
 
       - file-name: "with_null_ref_j"
-        description: Check that NullPointerException is thrown if object ref is null in Java context
+        description: Check that NullPointerException is thrown if object ref is null in PandaAssembly context
         isa:
           exceptions:
             - x_null
-        header-template: ['java_header']
-        runner-options: ['use-java']
+        header-template: ['PandaAssembly_header']
+        runner-options: ['use-pa']
         check-type: empty
+        tags: ['irtoc_ignore']
         code-template: |
-          .record java.lang.NullPointerException <external>
+          .record panda.NullPointerException <external>
 
           .function R get_null() {
             lda.null
@@ -242,7 +244,7 @@ tests:
           try_end:
             ldai 0
             return
-          .catch java.lang.NullPointerException, try_begin, try_end, try_end
+          .catch panda.NullPointerException, try_begin, try_end, try_end
           }
         cases:
           - values:
@@ -261,7 +263,7 @@ tests:
             - movi v1, 1
             - R.fi32
           - values:
-            - fmovi v1, -1.1
+            - fmovi v1, 1.1
             - R.ff32
 
 
@@ -273,7 +275,7 @@ tests:
         header-template: ['pandasm_header']
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
 
           .function i32 main() {
@@ -283,7 +285,6 @@ tests:
         template-cases:
           - values: ['R.fu1']
             bugid: ['5502']
-            ignore: true
           - values: ['R.fi8']
             bugid: ['5502']
             ignore: true
@@ -321,14 +322,14 @@ tests:
 
 
       - file-name: "with_non_object_ref_j"
-        description: Check that verifier reports error when the 2nd register is not a ref to an object (other than array) in Java context
+        description: Check that verifier reports error when the 2nd register is not a ref to an object (other than array) in PandaAssembly context
         isa:
           verification:
             - v2_object
-        header-template: ['java_header']
+        header-template: ['PandaAssembly_header']
         check-type: exit-positive
-        tags: ['verifier']
-        runner-options: ['use-java', 'verifier-failure', 'verifier-debug-config']
+        tags: [verifier, pa-verifier]
+        runner-options: ['use-pa', 'verifier-failure', 'verifier-config']
         code-template: |
 
           .function i32 main() {
@@ -338,7 +339,6 @@ tests:
         template-cases:
           - values: ['R.fu1']
             bugid: ['5502']
-            ignore: true
           - values: ['R.fi8']
             bugid: ['5502']
             ignore: true
@@ -366,7 +366,7 @@ tests:
             - |
               #
                 movi v1, 10
-                newarr v0, v1, java.lang.Object[]
+                newarr v0, v1, panda.Object[]
 
 
       - file-name: "with_static_field_id_p"
@@ -398,7 +398,7 @@ tests:
         cases:
           - values:
             - W.static_field
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             tags: ['verifier']
           - values:
             - random_record
@@ -408,11 +408,11 @@ tests:
             - W.field_not_exists
           - values:
             - random_record.random_field
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             tags: ['verifier']
           - values:
             - random_record.random_static_field
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             tags: ['verifier']
           - values:
             - 0
@@ -427,23 +427,23 @@ tests:
       - file-name: "with_static_field_id_j"
         description: >
           Check that verifier reports error if the field doesn't resolve to
-          a non-static valid object field in Java context
+          a non-static valid object field in PandaAssembly context
         isa:
           verification:
             - field_id_non_static
         header-template: []
         check-type: exit-positive
-        runner-options: ['use-java', 'verifier-failure', 'verifier-debug-config']
-        tags: ['verifier']
+        runner-options: ['use-pa', 'verifier-failure', 'verifier-config']
+        tags: [verifier, pa-verifier]
         code-template: |
-          .language Java
+          .language PandaAssembly
           .record A {
             i32   a_field  <static>
           }
-          .record B <java.extends=A> {
+          .record B <panda.extends=A> {
             i32   b_field  <static>
           }
-          .record C <java.extends=B> {
+          .record C <panda.extends=B> {
             i32   c_field  <static>
           }
 
@@ -481,60 +481,110 @@ tests:
         header-template: ['pandasm_header']
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
           .function i32 main() {
             newobj v0, R
-            movi v2, 0
+            %s
             stobj.v v2, v0, %s
         cases:
           - values:
+            - movi v2, 0
             - R.fi64
           - values:
+            - movi v2, 0
             - R.fu64
           - values:
+            - fmovi v2, 0.0
             - R.ff64
           - values:
-            - R.ff32
-          - values:
+            - movi v2, 0
             - R.fObj
           - values:
+            - movi v2, 0
             - R.fObjArray
           - values:
+            - movi v2, 0
             - R.fi32Array
 
 
       - file-name: "with_wrong_field_size_j"
-        description: Check that verifier reports error when the field resolves to a field with size that is not corresponding to bytecode in Java context.
+        description: Check that verifier reports error when the field resolves to a field with size that is not corresponding to bytecode in PandaAssembly context.
         isa:
           verification:
             - field_id_size
-        header-template: ['java_header']
+        header-template: ['PandaAssembly_header']
         check-type: exit-positive
-        tags: ['verifier']
-        runner-options: ['use-java', 'verifier-failure', 'verifier-debug-config']
+        tags: [verifier, pa-verifier]
+        runner-options: ['use-pa', 'verifier-failure', 'verifier-config']
         code-template: |
           .function i32 main() {
             newobj v0, R
-            movi v2, 0
+            %s
             stobj.v v2, v0, %s
         cases:
           - values:
+            - movi v2, 0
             - R.fi64
           - values:
+            - fmovi v2, 0.0
             - R.ff64
           - values:
-            - R.ff32
-          - values:
+            - fmovi v2, 0.1
             - R.fObj
           - values:
+            - movi v2, 0
             - R.fObjArray
           - values:
+            - movi v2, 0
             - R.fi32Array
           - values:
+            - fmovi v2, 0.2
             - R.fI
           - values:
+            - movi v2, 0
             - R.fIArray
+
+
+      - file-name: "with_correct_field_size_or_type"
+        description: Check that verifier does not report any error when the field has size or type corresponding to bytecode
+        isa:
+          verification:
+            - field_id_size
+        header-template: ['pandasm_header']
+        check-type: exit-positive
+        tags: ['verifier']
+        runner-options: ['verifier-only', 'verifier-config']
+        code-template: |
+          .function i32 main() {
+            newobj v0, R
+            %s
+            stobj.v v2, v0, %s
+        cases:
+          - values:
+            - movi v2, 1
+            - R.fu1
+          - values:
+            - movi v2, 1
+            - R.fu8
+          - values:
+            - movi v2, -1
+            - R.fi8
+          - values:
+            - movi v2, 1
+            - R.fu16
+          - values:
+            - movi v2, -1
+            - R.fi16
+          - values:
+            - movi v2, 1
+            - R.fu32
+          - values:
+            - movi v2, -1
+            - R.fi32
+          - values:
+            - fmovi v2, -0.1
+            - R.ff32
 
 
       - file-name: "with_wrong_reg_type_p"
@@ -545,7 +595,7 @@ tests:
         header-template: ['pandasm_header']
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
           .function i32 main() {
             newobj v0, R
@@ -555,32 +605,26 @@ tests:
           - values:
             - movi.64 v1, 0xF000F000F000F000
             - R.fu1
-            ignore: true
             bugid: ['4166']
           - values:
             - movi.64 v1, 0
             - R.fi8
-            ignore: true
             bugid: ['4166']
           - values:
             - movi.64 v1, 0xCAFECAFECAFECAFE
             - R.fu8
-            ignore: true
             bugid: ['4166']
           - values:
             - movi.64 v1, 0
             - R.fi16
-            ignore: true
             bugid: ['4166']
           - values:
             - movi.64 v1, 0x5A5A5A5A5A5A5A5A
             - R.fi32
-            ignore: true
             bugid: ['4166']
           - values:
             - movi.64 v1, 1234567890
             - R.fu32
-            ignore: true
             bugid: ['4166']
           - values:
             - fmovi.64 v1, 0x7FFFFFFFFFFFFFFF
@@ -604,6 +648,13 @@ tests:
             - fmovi.64 v1, 123456.0
             - R.fi32
           - values:
+            - movi.64 v1, 7890
+            - R.ff32
+          - values:
+            - fmovi.64 v1, 7890.0
+            - R.ff32
+            bugid: ['4166']
+          - values:
             - mov.null v1
             - R.fu32
           - values:
@@ -620,14 +671,14 @@ tests:
       - file-name: "with_wrong_reg_type_j"
         description: >
           Check that verifier reports error when the register contains
-          a value of type not corresponding to the bytecode in Java context.
+          a value of type not corresponding to the bytecode in PandaAssembly context.
         isa:
           verification:
             - v1_type
-        header-template: ['java_header']
+        header-template: ['PandaAssembly_header']
         check-type: exit-positive
-        tags: ['verifier']
-        runner-options: ['use-java', 'verifier-failure', 'verifier-debug-config']
+        tags: [verifier, pa-verifier]
+        runner-options: ['use-pa', 'verifier-failure', 'verifier-config']
         code-template: |
           .function i32 main() {
             newobj v0, R
@@ -637,22 +688,18 @@ tests:
           - values:
             - movi.64 v1, 0xF000F000F000F000
             - R.fu1
-            ignore: true
             bugid: ['4166']
           - values:
             - movi.64 v1, 0
             - R.fi8
-            ignore: true
             bugid: ['4166']
           - values:
             - movi.64 v1, 0
             - R.fi16
-            ignore: true
             bugid: ['4166']
           - values:
             - movi.64 v1, 0x5A5A5A5A5A5A5A5A
             - R.fi32
-            ignore: true
             bugid: ['4166']
           - values:
             - fmovi.64 v1, 0x7FFFFFFFFFFFFFFF
@@ -670,6 +717,13 @@ tests:
             - fmovi.64 v1, 123456.0
             - R.fi32
           - values:
+            - movi.64 v1, 7890
+            - R.ff32
+          - values:
+            - fmovi.64 v1, 7890.0
+            - R.ff32
+            bugid: ['4166']
+          - values:
             - mov.null v1
             - R.fi32
           - values:
@@ -685,7 +739,7 @@ tests:
             - |
               #
                 movi v1, 10
-                newarr v1, v1, java.lang.Object[][]
+                newarr v1, v1, panda.Object[][]
             - R.fi8
 
 
@@ -693,7 +747,7 @@ tests:
         description: Check that compiler reports error when the register number is out of 4 bit size
         isa:
           instructions:
-            - sig: stobj.v v1:in:i32, v2:in:ref, field_id
+            - sig: stobj.v v1:in:b32, v2:in:ref, field_id
               acc: none
               format: [op_v1_4_v2_4_id_16]
         header-template: ['pandasm_header']
@@ -720,7 +774,7 @@ tests:
           description: If field type size is less than 32, register content will be truncated to storage size before storing.
         header-template: ['pandasm_header']
         check-type: exit-positive
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         code-template: |
 
           .function i32 main() {
@@ -777,16 +831,17 @@ tests:
           - values: ['movi v1, 0x11111111', 'fu32', 'fu32', 286331153]
           - values: ['movi v1, 0x88888888', 'fu32', 'fu32', 2290649224]
 
+
       - file-name: "into_float_field_type"
         description: Check that register value is stored in field.
         isa:
           instructions:
-            - sig: stobj v:in:ref, field_id
-              acc: in:b32
-              format: [op_v_8_id_16]
+            - sig: stobj.v v1:in:b32, v2:in:ref, field_id
+              acc: none
+              format: [op_v1_4_v2_4_id_16]
         header-template: ['pandasm_header']
         check-type: exit-positive
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         code-template: |
           .function i32 main() {
             movi v7, 5151515
@@ -849,13 +904,14 @@ tests:
                 fmovi v1, 0xff800000
                 fcmpg v1
 
+
       - file-name: "into_all_field_types_int"
         description: Check that register value is stored in field. Version for signed types.
         isa:
           description: If field type size is less than 32, register content will be truncated to storage size before storing.
         header-template: ['pandasm_header']
         check-type: exit-positive
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         code-template: |
 
           .function i32 main() {

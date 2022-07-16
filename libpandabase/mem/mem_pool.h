@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_MEM_POOL_H_
-#define PANDA_LIBPANDABASE_MEM_MEM_POOL_H_
+#ifndef LIBPANDABASE_MEM_MEM_POOL_H
+#define LIBPANDABASE_MEM_MEM_POOL_H
 
 #include <cstddef>
 #include "macros.h"
@@ -34,7 +34,7 @@ public:
         return size_;
     }
 
-    void *GetMem() const
+    void *GetMem()
     {
         return mem_;
     }
@@ -42,6 +42,11 @@ public:
     bool operator==(const Pool &other) const
     {
         return (this->size_ == other.size_) && (this->mem_ == other.mem_);
+    }
+
+    bool operator!=(const Pool &other) const
+    {
+        return !(*this == other);
     }
 
     ~Pool() = default;
@@ -54,7 +59,7 @@ private:
     void *mem_;
 };
 
-static constexpr Pool NULLPOOL {0, nullptr};
+constexpr Pool NULLPOOL {0, nullptr};
 
 template <class MemPoolImplT>
 class MemPool {
@@ -68,16 +73,17 @@ public:
      * Allocates arena with size bytes
      * @tparam ArenaT - type of Arena
      * @param size - size of buffer in arena in bytes
-     * @param space_type - type of the space for which Arena is allocated
-     * @param allocator_type - type of the allocator for which Arena is allocated
-     * @param allocator_addr - address of the allocator header
+     * @param space_type - type of the space which arena allocated for
+     * @param allocator_type - type of the allocator which arena allocated for
+     * @param allocator_addr - address of the allocator header.
      * @return pointer to allocated arena
      */
+    // TODO(aemelenko): We must always define allocator_addr for AllocArena
+    // because we set up arena at the first bytes of the pool
     template <class ArenaT = Arena>
     inline ArenaT *AllocArena(size_t size, SpaceType space_type, AllocatorType allocator_type,
-                              void *allocator_addr = nullptr)
+                              const void *allocator_addr = nullptr)
     {
-        // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
         return static_cast<MemPoolImplT *>(this)->template AllocArenaImpl<ArenaT>(size, space_type, allocator_type,
                                                                                   allocator_addr);
     }
@@ -90,20 +96,20 @@ public:
     template <class ArenaT = Arena>
     inline void FreeArena(ArenaT *arena)
     {
-        // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
         static_cast<MemPoolImplT *>(this)->template FreeArenaImpl<ArenaT>(arena);
     }
 
     /**
-     * Allocates pool with minimal size in bytes.
+     * Allocates pool with at least size bytes
      * @param size - minimal size of a pool in bytes
-     * @param space_type - type of the space for which Arena is allocated
-     * @param allocator_type - type of the allocator for which Arena is allocated
-     * @param allocator_addr - address of the allocator header
-     *  If it is not defined, it means that allocator header will be located at the first byte of the returned pool.
+     * @param space_type - type of the space which pool allocated for
+     * @param allocator_type - type of the allocator which arena allocated for
+     * @param allocator_addr - address of the allocator header.
+     *  If it is not defined, it means that allocator header will be located at the first bytes of the returned pool.
      * @return pool info with the size and a pointer
      */
-    Pool AllocPool(size_t size, SpaceType space_type, AllocatorType allocator_type, void *allocator_addr = nullptr)
+    Pool AllocPool(size_t size, SpaceType space_type, AllocatorType allocator_type,
+                   const void *allocator_addr = nullptr)
     {
         return static_cast<MemPoolImplT *>(this)->AllocPoolImpl(size, space_type, allocator_type, allocator_addr);
     }
@@ -119,33 +125,33 @@ public:
     }
 
     /**
-     * Gets info about the allocator in which this address is used
+     * Get info about the allocator in which this address is used
      * @param addr
      * @return Allocator info with a type and pointer to the allocator header
      */
-    AllocatorInfo GetAllocatorInfoForAddr(void *addr)
+    AllocatorInfo GetAllocatorInfoForAddr(const void *addr) const
     {
-        return static_cast<MemPoolImplT *>(this)->GetAllocatorInfoForAddrImpl(addr);
+        return static_cast<const MemPoolImplT *>(this)->GetAllocatorInfoForAddrImpl(addr);
     }
 
     /**
-     * Gets space type which this address used for
+     * Get space type which this address used for
      * @param addr
      * @return space type
      */
-    SpaceType GetSpaceTypeForAddr(void *addr)
+    SpaceType GetSpaceTypeForAddr(const void *addr) const
     {
-        return static_cast<MemPoolImplT *>(this)->GetSpaceTypeForAddrImpl(addr);
+        return static_cast<const MemPoolImplT *>(this)->GetSpaceTypeForAddrImpl(addr);
     }
 
     /**
-     * Gets address of pool start for input address
+     * Get address of pool start for input address
      * @param addr address in pool
      * @return address of pool start
      */
-    const void *GetStartAddrPoolForAddr(void *addr) const
+    void *GetStartAddrPoolForAddr(const void *addr) const
     {
-        return static_cast<MemPoolImplT *>(this)->GetStartAddrPoolForAddrImpl(addr);
+        return static_cast<const MemPoolImplT *>(this)->GetStartAddrPoolForAddrImpl(addr);
     }
 
 private:
@@ -154,4 +160,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_MEM_POOL_H_
+#endif  // LIBPANDABASE_MEM_MEM_POOL_H

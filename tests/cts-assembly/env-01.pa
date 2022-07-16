@@ -17,7 +17,7 @@
 
 # Check that arguments are passed correctly to entry point
 
-.function u1 main(panda.String[] a0) {
+.function i32 main(panda.String[] a0) {
     lenarr a0
     subi 2
     jnez exit_failure

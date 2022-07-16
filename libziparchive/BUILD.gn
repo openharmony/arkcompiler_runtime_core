@@ -26,7 +26,10 @@ config("arkziparchive_config") {
       "//third_party/zlib/contrib/minizip",
     ]
   } else {
-    include_dirs += [ "$ark_third_party_root/miniz" ]
+    include_dirs += [
+      "$ark_third_party_root/zlib",
+      "$ark_third_party_root/zlib/contrib/minizip",
+    ]
   }
 }
 
@@ -36,6 +39,7 @@ source_set("libarkziparchive_static") {
   public_configs = [
     ":arkziparchive_config",
     "$ark_root:ark_config",
+    "$ark_root/libpandabase:arkbase_public_config",
     sdk_libc_secshared_config,
   ]
 
@@ -47,7 +51,7 @@ source_set("libarkziparchive_static") {
   if (!ark_standalone_build) {
     deps += [ "//third_party/zlib:libz" ]
   } else {
-    deps += [ "$ark_third_party_root/miniz:libminiz" ]
+    deps += [ "$ark_third_party_root/zlib:libz" ]
   }
 }
 
@@ -60,6 +64,7 @@ ohos_shared_library("libarkziparchive") {
   if (!is_mingw && !is_mac) {
     output_extension = "so"
   }
+
   subsystem_name = "ark"
   part_name = "ark"
 }
@@ -70,6 +75,7 @@ source_set("libarkziparchive_frontend_set_static") {
   public_configs = [
     ":arkziparchive_config",
     "$ark_root:ark_config",
+    "$ark_root/libpandabase:arkbase_public_config",
     sdk_libc_secshared_config,
   ]
 
@@ -81,7 +87,7 @@ source_set("libarkziparchive_frontend_set_static") {
   if (!ark_standalone_build) {
     deps += [ "//third_party/zlib:libz" ]
   } else {
-    deps += [ "$ark_third_party_root/miniz:libminiz" ]
+    deps += [ "$ark_third_party_root/zlib:libz" ]
   }
 }
 

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,12 @@
 
 namespace panda::pandasm {
 
+/*-------------------------------*/
+
+/* Is this a delimiter ? */
 Token::Type FindDelim(char c)
 {
-    // The map of delimiters
+    /* The map of delimiters */
     static const std::unordered_map<char, Token::Type> DELIM = {{',', Token::Type::DEL_COMMA},
                                                                 {':', Token::Type::DEL_COLON},
                                                                 {'{', Token::Type::DEL_BRACE_L},
@@ -33,6 +36,7 @@ Token::Type FindDelim(char c)
                                                                 {']', Token::Type::DEL_SQUARE_BRACKET_R}};
 
     auto iter = DELIM.find(c);
+
     if (iter == DELIM.end()) {
         return Token::Type::ID_BAD;
     }
@@ -42,7 +46,7 @@ Token::Type FindDelim(char c)
 
 Token::Type FindOperation(std::string_view s)
 {
-    // Generate the map of OPERATIONS from ISA
+    /* Generate the map of OPERATIONS from ISA: */
     static const std::unordered_map<std::string_view, Token::Type> OPERATIONS = {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define OPLIST(inst_code, name, optype, width, flags, dst_idx, use_idxs) \
@@ -52,6 +56,7 @@ Token::Type FindOperation(std::string_view s)
     };
 
     auto iter = OPERATIONS.find(s);
+
     if (iter == OPERATIONS.end()) {
         return Token::Type::ID_BAD;
     }
@@ -61,7 +66,7 @@ Token::Type FindOperation(std::string_view s)
 
 Token::Type Findkeyword(std::string_view s)
 {
-    // Generate the map of KEYWORDS
+    /* Generate the map of KEYWORDS: */
     static const std::unordered_map<std::string_view, Token::Type> KEYWORDS = {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define KEYWORDS(name, inst_code) {std::string_view(name), Token::Type::ID_##inst_code},
@@ -70,6 +75,7 @@ Token::Type Findkeyword(std::string_view s)
     };
 
     auto iter = KEYWORDS.find(s);
+
     if (iter == KEYWORDS.end()) {
         return Token::Type::ID_BAD;
     }
@@ -77,7 +83,6 @@ Token::Type Findkeyword(std::string_view s)
     return KEYWORDS.at(s);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
 std::string_view TokenTypeWhat(Token::Type t)
 {
     if (t >= Token::Type::OPERATION && t < Token::Type::KEYWORD) {
@@ -182,13 +187,13 @@ Tokens Lexer::TokenizeString(const std::string &source_str)
     return std::pair<std::vector<Token>, Error>(lines_.back().tokens, err_);
 }
 
-// End of line
+/* End of line? */
 bool Lexer::Eol() const
 {
     return curr_line_->pos == curr_line_->end;
 }
 
-// Return the type of token
+/* Return the type of token */
 Token::Type Lexer::LexGetType(size_t beg, size_t end) const
 {
     if (FindDelim(curr_line_->buffer[beg]) != Token::Type::ID_BAD) { /* delimiter */
@@ -196,12 +201,15 @@ Token::Type Lexer::LexGetType(size_t beg, size_t end) const
     }
 
     std::string_view p(&*(curr_line_->buffer.begin() + beg), end - beg);
+
     Token::Type type = Findkeyword(p);
+
     if (type != Token::Type::ID_BAD) {
         return type;
     }
 
     type = FindOperation(p);
+
     if (type != Token::Type::ID_BAD) {
         return type;
     }
@@ -210,10 +218,10 @@ Token::Type Lexer::LexGetType(size_t beg, size_t end) const
         return Token::Type::ID_STRING;
     }
 
-    return Token::Type::ID;  // other
+    return Token::Type::ID; /* other */
 }
 
-// Handle string literal
+/* Handle string literal */
 bool Lexer::LexString()
 {
     bool is_escape_seq = false;
@@ -251,7 +259,7 @@ bool Lexer::LexString()
 }
 
 /*
- * Tokens handling: set the corresponding
+ * Tokens handling: set a corresponding
  * elements bound_left and bound_right of the array tokens
  * to the first and last characters of a corresponding token.
  *
@@ -283,6 +291,7 @@ void Lexer::LexTokens()
     }
 
     size_t bound_right;
+
     size_t bound_left;
 
     for (int i = 0; !Eol(); ++i) {
@@ -322,9 +331,10 @@ void Lexer::LexTokens()
 
 /*
  * Ignore comments:
- * find PARSE_COMMENT_MARKER and move line->end to another position
- * next after the last character of the last significant (not a comment)
- * element in a current line: line->buffer.
+ * find PARSE_COMMENT_MARKER and move line->end
+ * to another position (next after the last character of the last
+ * significant (this is no a comment) element in a current
+ * line: line->buffer).
  *
  * Ex:
  *   [Label:] operation operand[,operand] [# comment]
@@ -340,7 +350,7 @@ void Lexer::LexPreprocess()
                           << std::string_view(&*(curr_line_->buffer.begin() + curr_line_->pos),
                                               curr_line_->end - curr_line_->pos);
 
-    // Searching for comment marker located outside of the string literals.
+    // Searching for comment marker located outside of string literals.
     bool inside_str_lit = curr_line_->buffer.size() > 0 && curr_line_->buffer[0] == '\"';
     size_t cmt_pos = curr_line_->buffer.find_first_of("\"#", 0);
     if (cmt_pos != std::string::npos) {
@@ -381,5 +391,7 @@ void Lexer::AnalyzeLine()
 
     LexTokens();
 }
+
+/*-------------------------------*/
 
 }  // namespace panda::pandasm

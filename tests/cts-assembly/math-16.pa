@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(7 << 2 == 28) operation --> shl
-.function u1 main(){
+.function i32 main(){
     movi v0, 7
     movi v1, 2
     shl v0, v1

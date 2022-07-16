@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_ASAN_INTERFACE_H_
-#define PANDA_LIBPANDABASE_UTILS_ASAN_INTERFACE_H_
+#ifndef LIBPANDABASE_UTILS_ASAN_INTERFACE_H_
+#define LIBPANDABASE_UTILS_ASAN_INTERFACE_H_
 
 #if defined(__has_feature)
 // for clang
@@ -42,7 +42,7 @@ void __asan_unpoison_memory_region(void const volatile *addr, size_t size) __att
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASAN_UNPOISON_MEMORY_REGION(addr, size) __asan_unpoison_memory_region((addr), (size))
 
-// Uses attribute ATTRIBUTE_NO_SANITIZE_ADDRESS to fix an issue with concurrent POISON/UNPOISON
+// Use attribute ATTRIBUTE_NO_SANITIZE_ADDRESS to fix an issue with concurrent POISON/UNPOISON
 // during accessing class fields from the class methods during MT ASAN runs.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ATTRIBUTE_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
@@ -55,4 +55,4 @@ void __asan_unpoison_memory_region(void const volatile *addr, size_t size) __att
 #define ATTRIBUTE_NO_SANITIZE_ADDRESS
 #endif
 
-#endif  // PANDA_LIBPANDABASE_UTILS_ASAN_INTERFACE_H_
+#endif  // LIBPANDABASE_UTILS_ASAN_INTERFACE_H_

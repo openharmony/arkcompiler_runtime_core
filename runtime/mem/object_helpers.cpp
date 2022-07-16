@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 #include <algorithm>
+#include <cstdio>
+#include <cstdint>
+#include <cinttypes>
 
 #include "runtime/mem/object_helpers-inl.h"
-#include "runtime/include/coretypes/dyn_objects.h"
-#include "runtime/include/hclass.h"
-#include "runtime/include/class.h"
-#include "runtime/include/coretypes/array-inl.h"
-#include "runtime/include/coretypes/string.h"
 
-#include "runtime/include/coretypes/class.h"
+#include "libpandabase/utils/utf.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/panda_vm.h"
+#include "runtime/mem/free_object.h"
 #include "runtime/mem/gc/dynamic/gc_dynamic_data.h"
 
 namespace panda::mem {
@@ -32,40 +31,30 @@ using DynClass = coretypes::DynClass;
 using TaggedValue = coretypes::TaggedValue;
 using TaggedType = coretypes::TaggedType;
 
-size_t GetObjectSize(const void *mem)
+Logger::Buffer GetDebugInfoAboutObject(const ObjectHeader *header)
 {
-    ASSERT(mem != nullptr);
-    auto *obj_header = static_cast<const ObjectHeader *>(mem);
-    auto base_cls = obj_header->ClassAddr<BaseClass>();
+    ValidateObject(nullptr, header);
 
-    size_t object_size;
-    if (base_cls->IsDynamicClass()) {
-        auto *klass = static_cast<HClass *>(base_cls);
-        if (klass->IsString()) {
-            auto *string_object = static_cast<const coretypes::String *>(obj_header);
-            object_size = string_object->ObjectSize();
-        } else if (klass->IsArray()) {
-            auto *array_object = static_cast<const coretypes::Array *>(obj_header);
-            object_size = sizeof(coretypes::Array) + array_object->GetLength() * TaggedValue::TaggedTypeSize();
-        } else {
-            object_size = base_cls->GetObjectSize();
-        }
+    auto *base_class = header->ClassAddr<BaseClass>();
+    const uint8_t *descriptor = nullptr;
+    if (base_class->IsDynamicClass()) {
+        descriptor = utf::CStringAsMutf8("Dynamic");
     } else {
-        object_size = obj_header->ObjectSize();
+        descriptor = static_cast<Class *>(base_class)->GetDescriptor();
     }
-    return object_size;
+
+    const void *rawptr = static_cast<const void *>(header);
+    uintmax_t mark = header->AtomicGetMark().GetValue();
+    size_t size = header->ObjectSize();
+
+    Logger::Buffer buffer;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    buffer.printf("(\"%s\" %p %zu bytes) mword = %" PRIuMAX, descriptor, rawptr, size, mark);
+
+    return buffer;
 }
 
-PandaString GetDebugInfoAboutObject(const ObjectHeader *header)
-{
-    PandaStringStream ss;
-    ss << "( " << header->ClassAddr<Class>()->GetDescriptor() << " " << std::hex << header << " " << std::dec
-       << GetObjectSize(header) << " bytes) mword = " << std::hex << header->AtomicGetMark().GetValue();
-    return ss.str();
-}
-
-void DumpObject([[maybe_unused]] ObjectHeader *object_header,
-                std::basic_ostream<char, std::char_traits<char>> *o_stream)
+void DumpObject(ObjectHeader *object_header, std::basic_ostream<char, std::char_traits<char>> *o_stream)
 {
     auto *cls = object_header->ClassAddr<Class>();
     ASSERT(cls != nullptr);
@@ -76,101 +65,131 @@ void DumpObject([[maybe_unused]] ObjectHeader *object_header,
         auto array = static_cast<coretypes::Array *>(object_header);
         *o_stream << "Array " << std::hex << object_header << " " << cls->GetComponentType()->GetName()
                   << " length = " << std::dec << array->GetLength() << std::endl;
-        return;
-    }
-
-    while (cls != nullptr) {
-        Span<Field> fields = cls->GetInstanceFields();
-        *o_stream << "Dump object: " << std::hex << object_header << std::endl;
-        if (cls->GetName() == "java.lang.String") {
-            auto *str_object = static_cast<panda::coretypes::String *>(object_header);
-            if (str_object->GetLength() > 0 && !str_object->IsUtf16()) {
-                *o_stream << "length = " << std::dec << str_object->GetLength() << std::endl;
-                constexpr size_t BUFF_SIZE = 256;
-                std::array<char, BUFF_SIZE> buff {0};
-                auto str_res =
-                    strncpy_s(&buff[0], BUFF_SIZE, reinterpret_cast<const char *>(str_object->GetDataMUtf8()),
-                              static_cast<size_t>(str_object->GetLength()));
-                if (UNLIKELY(str_res != EOK)) {
-                    LOG(ERROR, RUNTIME) << "Couldn't copy string by strncpy_s, error code: " << str_res;
-                }
-                *o_stream << "String data: " << &buff[0] << std::endl;
-            }
-        }
-        for (Field &field : fields) {
-            *o_stream << "\tfield \"" << GetFieldName(field) << "\" ";
-            size_t offset = field.GetOffset();
-            panda_file::Type::TypeId type_id = field.GetType().GetId();
-            if (type_id == panda_file::Type::TypeId::REFERENCE) {
-                ObjectHeader *field_object = object_header->GetFieldObject(offset);
-                if (field_object != nullptr) {
-                    *o_stream << std::hex << field_object << std::endl;
-                } else {
-                    *o_stream << "NULL" << std::endl;
-                }
-            } else if (type_id != panda_file::Type::TypeId::VOID) {
-                *o_stream << std::dec;
-                switch (type_id) {
-                    case panda_file::Type::TypeId::U1: {
-                        auto val = object_header->GetFieldPrimitive<bool>(offset);
-                        *o_stream << val << std::endl;
-                    } break;
-                    case panda_file::Type::TypeId::I8: {
-                        auto val = object_header->GetFieldPrimitive<int8_t>(offset);
-                        *o_stream << val << std::endl;
-                    } break;
-                    case panda_file::Type::TypeId::U8: {
-                        auto val = object_header->GetFieldPrimitive<uint8_t>(offset);
-                        *o_stream << val << std::endl;
-                    } break;
-                    case panda_file::Type::TypeId::I16: {
-                        auto val = object_header->GetFieldPrimitive<int16_t>(offset);
-                        *o_stream << val << std::endl;
-                    } break;
-                    case panda_file::Type::TypeId::U16: {
-                        auto val = object_header->GetFieldPrimitive<uint16_t>(offset);
-                        *o_stream << val << std::endl;
-                    } break;
-                    case panda_file::Type::TypeId::I32: {
-                        auto val = object_header->GetFieldPrimitive<int32_t>(offset);
-                        *o_stream << val << std::endl;
-                    } break;
-                    case panda_file::Type::TypeId::U32: {
-                        auto val = object_header->GetFieldPrimitive<uint32_t>(offset);
-                        *o_stream << val << std::endl;
-                    } break;
-                    case panda_file::Type::TypeId::F32: {
-                        auto val = object_header->GetFieldPrimitive<float>(offset);
-                        *o_stream << val << std::endl;
-                    } break;
-                    case panda_file::Type::TypeId::F64: {
-                        auto val = object_header->GetFieldPrimitive<double>(offset);
-                        *o_stream << val << std::endl;
-                    } break;
-                    case panda_file::Type::TypeId::I64: {
-                        auto val = object_header->GetFieldPrimitive<int64_t>(offset);
-                        *o_stream << val << std::endl;
-                    } break;
-                    case panda_file::Type::TypeId::U64: {
-                        auto val = object_header->GetFieldPrimitive<uint64_t>(offset);
-                        *o_stream << val << std::endl;
-                    } break;
-                    default:
-                        LOG(FATAL, COMMON) << "Error at object dump - wrong type id";
+    } else {
+        while (cls != nullptr) {
+            Span<Field> fields = cls->GetInstanceFields();
+            *o_stream << "Dump object: " << std::hex << object_header << std::endl;
+            if (cls->IsStringClass()) {
+                auto *str_object = static_cast<panda::coretypes::String *>(object_header);
+                if (str_object->GetLength() > 0 && !str_object->IsUtf16()) {
+                    *o_stream << "length = " << std::dec << str_object->GetLength() << std::endl;
+                    constexpr size_t BUFF_SIZE = 256;
+                    std::array<char, BUFF_SIZE> buff {0};
+                    auto str_res =
+                        strncpy_s(&buff[0], BUFF_SIZE, reinterpret_cast<const char *>(str_object->GetDataMUtf8()),
+                                  std::min(BUFF_SIZE - 1, static_cast<size_t>(str_object->GetLength())));
+                    if (UNLIKELY(str_res != EOK)) {
+                        LOG(ERROR, RUNTIME) << "Couldn't copy string by strncpy_s, error code: " << str_res;
+                    }
+                    *o_stream << "String data: " << &buff[0] << std::endl;
                 }
             }
+            for (Field &field : fields) {
+                *o_stream << "\tfield \"" << GetFieldName(field) << "\" ";
+                size_t offset = field.GetOffset();
+                panda_file::Type::TypeId type_id = field.GetTypeId();
+                if (type_id == panda_file::Type::TypeId::REFERENCE) {
+                    ObjectHeader *field_object = object_header->GetFieldObject(offset);
+                    if (field_object != nullptr) {
+                        *o_stream << std::hex << field_object << std::endl;
+                    } else {
+                        *o_stream << "NULL" << std::endl;
+                    }
+                } else if (type_id != panda_file::Type::TypeId::VOID) {
+                    *o_stream << std::dec;
+                    switch (type_id) {
+                        case panda_file::Type::TypeId::U1: {
+                            auto val = object_header->GetFieldPrimitive<bool>(offset);
+                            *o_stream << val << std::endl;
+                            break;
+                        }
+                        case panda_file::Type::TypeId::I8: {
+                            auto val = object_header->GetFieldPrimitive<int8_t>(offset);
+                            *o_stream << val << std::endl;
+                            break;
+                        }
+                        case panda_file::Type::TypeId::U8: {
+                            auto val = object_header->GetFieldPrimitive<uint8_t>(offset);
+                            *o_stream << val << std::endl;
+                            break;
+                        }
+                        case panda_file::Type::TypeId::I16: {
+                            auto val = object_header->GetFieldPrimitive<int16_t>(offset);
+                            *o_stream << val << std::endl;
+                            break;
+                        }
+                        case panda_file::Type::TypeId::U16: {
+                            auto val = object_header->GetFieldPrimitive<uint16_t>(offset);
+                            *o_stream << val << std::endl;
+                            break;
+                        }
+                        case panda_file::Type::TypeId::I32: {
+                            auto val = object_header->GetFieldPrimitive<int32_t>(offset);
+                            *o_stream << val << std::endl;
+                            break;
+                        }
+                        case panda_file::Type::TypeId::U32: {
+                            auto val = object_header->GetFieldPrimitive<uint32_t>(offset);
+                            *o_stream << val << std::endl;
+                            break;
+                        }
+                        case panda_file::Type::TypeId::F32: {
+                            auto val = object_header->GetFieldPrimitive<float>(offset);
+                            *o_stream << val << std::endl;
+                            break;
+                        }
+                        case panda_file::Type::TypeId::F64: {
+                            auto val = object_header->GetFieldPrimitive<double>(offset);
+                            *o_stream << val << std::endl;
+                            break;
+                        }
+                        case panda_file::Type::TypeId::I64: {
+                            auto val = object_header->GetFieldPrimitive<int64_t>(offset);
+                            *o_stream << val << std::endl;
+                            break;
+                        }
+                        case panda_file::Type::TypeId::U64: {
+                            auto val = object_header->GetFieldPrimitive<uint64_t>(offset);
+                            *o_stream << val << std::endl;
+                            break;
+                        }
+                        default:
+                            LOG(FATAL, COMMON) << "Error at object dump - wrong type id";
+                    }
+                }
+            }
+            cls = cls->GetBase();
         }
-        cls = cls->GetBase();
     }
 }
 
-void DumpClass(Class *cls, std::basic_ostream<char, std::char_traits<char>> *o_stream)
+template <typename FieldVisitor>
+void TraverseFields(const Span<Field> &fields, const Class *cls, const ObjectHeader *object_header,
+                    const FieldVisitor &field_visitor)
+{
+    for (const Field &field : fields) {
+        LOG(DEBUG, GC) << " current field \"" << GetFieldName(field) << "\"";
+        size_t offset = field.GetOffset();
+        panda_file::Type::TypeId type_id = field.GetTypeId();
+        if (type_id == panda_file::Type::TypeId::REFERENCE) {
+            ObjectHeader *field_object = object_header->GetFieldObject(offset);
+            if (field_object != nullptr) {
+                LOG(DEBUG, GC) << " field val = " << std::hex << field_object;
+                field_visitor(cls, object_header, &field, field_object);
+            } else {
+                LOG(DEBUG, GC) << " field val = nullptr";
+            }
+        }
+    }
+}
+
+void DumpClass(const Class *cls, std::basic_ostream<char, std::char_traits<char>> *o_stream)
 {
     if (UNLIKELY(cls == nullptr)) {
         return;
     }
-    std::function<void(Class *, ObjectHeader *, const Field *, ObjectHeader *)> field_dump(
-        [o_stream]([[maybe_unused]] Class *kls, [[maybe_unused]] ObjectHeader *obj, const Field *field,
+    std::function<void(const Class *, const ObjectHeader *, const Field *, ObjectHeader *)> field_dump(
+        [o_stream]([[maybe_unused]] const Class *kls, [[maybe_unused]] const ObjectHeader *obj, const Field *field,
                    ObjectHeader *field_object) {
             *o_stream << "field = " << GetFieldName(*field) << std::hex << " " << field_object << std::endl;
         });
@@ -195,33 +214,38 @@ ObjectHeader *GetForwardAddress(ObjectHeader *object_header)
 const char *GetFieldName(const Field &field)
 {
     static const char *empty_string = "";
+    const char *ret = empty_string;
     bool is_proxy = field.GetClass()->IsProxy();
     // For proxy class it is impossible to get field name in standard manner
     if (!is_proxy) {
-        return reinterpret_cast<const char *>(field.GetName().data);
+        ret = reinterpret_cast<const char *>(field.GetName().data);
     }
-    return empty_string;
+    return ret;
 }
+
+class StdFunctionAdapter {
+public:
+    explicit StdFunctionAdapter(const std::function<void(ObjectHeader *, ObjectHeader *)> &callback)
+        : callback_(callback)
+    {
+    }
+
+    bool operator()(ObjectHeader *obj, ObjectHeader *field, [[maybe_unused]] uint32_t offset,
+                    [[maybe_unused]] bool is_volatile)
+    {
+        callback_(obj, field);
+        return true;
+    }
+
+private:
+    const std::function<void(ObjectHeader *, ObjectHeader *)> &callback_;
+};
 
 void GCDynamicObjectHelpers::TraverseAllObjects(ObjectHeader *object_header,
                                                 const std::function<void(ObjectHeader *, ObjectHeader *)> &obj_visitor)
 {
-    auto *cls = object_header->ClassAddr<HClass>();
-    ASSERT(cls != nullptr);
-    if (cls->IsString() || cls->IsNativePointer()) {
-        return;
-    }
-    if (cls->IsArray()) {
-        std::function<void(ObjectHeader *, const array_size_t, ObjectHeader *)> arr_fn(
-            [&obj_visitor]([[maybe_unused]] ObjectHeader *arr_object_header, [[maybe_unused]] const array_size_t INDEX,
-                           ObjectHeader *object_reference) { obj_visitor(arr_object_header, object_reference); });
-        TraverseArray(object_header, cls, arr_fn);
-    } else {
-        std::function<void(ObjectHeader *, size_t, ObjectHeader *, bool)> dyn_obj_proxy(
-            [&obj_visitor](ObjectHeader *obj_header, [[maybe_unused]] size_t offset, ObjectHeader *obj_reference,
-                           [[maybe_unused]] bool is_update_classword) { obj_visitor(obj_header, obj_reference); });
-        TraverseObject(object_header, cls, dyn_obj_proxy);
-    }
+    StdFunctionAdapter handler(obj_visitor);
+    TraverseAllObjectsWithInfo(object_header, handler);
 }
 
 void GCDynamicObjectHelpers::RecordDynWeakReference(GC *gc, coretypes::TaggedType *value)
@@ -249,7 +273,7 @@ void GCDynamicObjectHelpers::HandleDynWeakReferences(GC *gc)
         ObjectHeader *object = value.GetWeakReferent();
         /* Note: If it is in young GC, the weak reference whose referent is in tenured space will not be marked. The */
         /*       weak reference whose referent is in young space will be moved into the tenured space or reset in    */
-        /*       CollecYoungAndMove. If the weak referent here is not moved in young GC, it should be cleared.       */
+        /*       CollecYoungAndMove. If the weak referent here is not moved in young GC, it shoule be cleared.       */
         if (gc->GetGCPhase() == GCPhase::GC_PHASE_MARK_YOUNG) {
             if (gc->GetObjectAllocator()->IsAddressInYoungSpace(ToUintPtr(object)) && !gc->IsMarked(object)) {
                 *object_pointer = TaggedValue::Undefined().GetRawData();
@@ -266,154 +290,76 @@ void GCDynamicObjectHelpers::HandleDynWeakReferences(GC *gc)
 void GCStaticObjectHelpers::TraverseAllObjects(ObjectHeader *object_header,
                                                const std::function<void(ObjectHeader *, ObjectHeader *)> &obj_visitor)
 {
-    auto *cls = object_header->ClassAddr<Class>();
-    // If create new object when visiting card table, the ClassAddr of the new object may be null
-    if (cls == nullptr) {
-        return;
-    }
+    StdFunctionAdapter handler(obj_visitor);
+    TraverseAllObjectsWithInfo(object_header, handler);
+}
 
-    if (cls->IsObjectArrayClass()) {
-        TraverseArray(object_header, cls, ArrayElementVisitor(obj_visitor));
+class StaticUpdateHandler {
+public:
+    bool operator()(ObjectHeader *object, ObjectHeader *field, uint32_t offset, bool is_volatile)
+    {
+        GCStaticObjectHelpers::UpdateRefToMovedObject(object, field, offset, is_volatile);
+        return true;
+    }
+};
+
+void GCStaticObjectHelpers::UpdateRefsToMovedObjects(ObjectHeader *object)
+{
+    StaticUpdateHandler handler;
+    TraverseAllObjectsWithInfo(object, handler);
+}
+
+ObjectHeader *GCStaticObjectHelpers::UpdateRefToMovedObject(ObjectHeader *object, ObjectHeader *ref, uint32_t offset,
+                                                            bool is_volatile)
+{
+    MarkWord mark_word = ref->GetMark();  // no need atomic because stw
+    if (mark_word.GetState() != MarkWord::ObjectState::STATE_GC) {
+        return ref;
+    }
+    // update instance field without write barrier
+    MarkWord::markWordSize addr = mark_word.GetForwardingAddress();
+    LOG(DEBUG, GC) << "update obj ref of object " << object << " from " << ref << " to " << ToVoidPtr(addr);
+    auto forwarded_object = reinterpret_cast<ObjectHeader *>(addr);
+    if (is_volatile) {
+        object->SetFieldObject<true, false>(offset, forwarded_object);
     } else {
-        if (cls->IsClassClass()) {
-            auto object_cls = panda::Class::FromClassObject(object_header);
-            if (object_cls->IsInitializing() || object_cls->IsInitialized()) {
-                TraverseClass(object_cls, ClassFieldVisitor(obj_visitor));
-            }
-        }
-        TraverseObject(object_header, cls, ObjectFieldVisitor(obj_visitor));
+        object->SetFieldObject<false, false>(offset, forwarded_object);
     }
+    return forwarded_object;
 }
 
-void GCStaticObjectHelpers::UpdateRefsToMovedObjects(PandaVM *vm, ObjectHeader *object, BaseClass *base_cls)
-{
-    ASSERT(!base_cls->IsDynamicClass());
-    auto *cls = static_cast<Class *>(base_cls);
-    if (cls->IsObjectArrayClass()) {
-        LOG_DEBUG_OBJ_HELPERS << " IsObjArrayClass";
-        TraverseArray(object, cls, [vm](ObjectHeader *obj, array_size_t index, ObjectHeader *element) {
-            MarkWord mark_word = element->GetMark();  // no need atomic because stw
-            if (mark_word.GetState() == MarkWord::ObjectState::STATE_GC) {
-                // update element without write barrier
-                auto array_object = static_cast<coretypes::Array *>(obj);
-                MarkWord::markWordSize addr = mark_word.GetForwardingAddress();
-                LOG_DEBUG_OBJ_HELPERS << "  update obj ref for array  " << std::hex << obj << " index =  " << index
-                                      << " from " << array_object->Get<ObjectHeader *>(index) << " to " << addr;
-                array_object->Set<ObjectHeader *, false>(index, reinterpret_cast<ObjectHeader *>(addr));
-            }
-        });
-    } else {
-        LOG_DEBUG_OBJ_HELPERS << " IsObject";
-        TraverseObject(
-            object, cls, [vm](ObjectHeader *obj, ObjectHeader *field_object, uint32_t field_offset, bool is_volatile) {
-                MarkWord mark_word = field_object->GetMark();  // no need atomic because stw
-                if (mark_word.GetState() == MarkWord::ObjectState::STATE_GC) {
-                    // update instance field without write barrier
-                    MarkWord::markWordSize addr = mark_word.GetForwardingAddress();
-                    LOG_DEBUG_OBJ_HELPERS << "  update obj ref for object " << std::hex << obj << " from "
-                                          << field_object << " to " << addr;
-                    if (is_volatile) {
-                        obj->SetFieldObject<true, false>(field_offset, reinterpret_cast<ObjectHeader *>(addr));
-                    } else {
-                        obj->SetFieldObject<false, false>(field_offset, reinterpret_cast<ObjectHeader *>(addr));
-                    }
-                }
-            });
-        if (!cls->IsClassClass()) {
-            return;
-        }
-
-        auto object_cls = panda::Class::FromClassObject(object);
-        if (!object_cls->IsInitializing() && !object_cls->IsInitialized()) {
-            return;
-        }
-
-        TraverseClass(
-            object_cls, [](Class *object_kls, ObjectHeader *field_object, uint32_t field_offset, bool is_volatile) {
-                MarkWord mark_word = field_object->GetMark();  // no need atomic because stw
-                if (mark_word.GetState() == MarkWord::ObjectState::STATE_GC) {
-                    // update static field without write barrier
-                    MarkWord::markWordSize addr = mark_word.GetForwardingAddress();
-                    if (is_volatile) {
-                        object_kls->SetFieldObject<true, false>(field_offset, reinterpret_cast<ObjectHeader *>(addr));
-                    } else {
-                        object_kls->SetFieldObject<false, false>(field_offset, reinterpret_cast<ObjectHeader *>(addr));
-                    }
-                }
-            });
+class DynamicUpdateHandler {
+public:
+    bool operator()(ObjectHeader *object, ObjectHeader *field, uint32_t offset, bool is_volatile)
+    {
+        GCDynamicObjectHelpers::UpdateRefToMovedObject(object, field, offset, is_volatile);
+        return true;
     }
+};
+
+void GCDynamicObjectHelpers::UpdateRefsToMovedObjects(ObjectHeader *object)
+{
+    ASSERT(object->ClassAddr<HClass>()->IsDynamicClass());
+    DynamicUpdateHandler handler;
+    TraverseAllObjectsWithInfo(object, handler);
 }
 
-void GCDynamicObjectHelpers::UpdateRefsToMovedObjects(PandaVM *vm, ObjectHeader *object, BaseClass *base_cls)
+ObjectHeader *GCDynamicObjectHelpers::UpdateRefToMovedObject(ObjectHeader *object, ObjectHeader *ref, uint32_t offset,
+                                                             [[maybe_unused]] bool is_volatile)
 {
-    ASSERT(base_cls->IsDynamicClass());
-    auto *cls = static_cast<HClass *>(base_cls);
-    if (cls->IsNativePointer() || cls->IsString()) {
-        return;
+    MarkWord mark_word = ref->AtomicGetMark();
+    if (mark_word.GetState() != MarkWord::ObjectState::STATE_GC) {
+        return ref;
     }
-    if (cls->IsArray()) {
-        LOG_DEBUG_OBJ_HELPERS << " IsDynamicArrayClass";
-        auto update_array_callback = [vm](ObjectHeader *obj, array_size_t index, ObjectHeader *obj_ref) {
-            UpdateDynArray(vm, obj, index, obj_ref);
-        };
-        TraverseArray(object, cls, update_array_callback);
-    } else {
-        LOG_DEBUG_OBJ_HELPERS << " IsDynamicObject";
-        auto update_object_callback = [vm](ObjectHeader *obj, size_t offset, ObjectHeader *field_obj_ref,
-                                           bool is_update_classword) {
-            UpdateDynObjectRef(vm, obj, offset, field_obj_ref, is_update_classword);
-        };
-        TraverseObject(object, cls, update_object_callback);
+    MarkWord::markWordSize addr = mark_word.GetForwardingAddress();
+    LOG(DEBUG, GC) << "update obj ref for object " << object << " from "
+                   << ObjectAccessor::GetDynValue<ObjectHeader *>(object, offset) << " to " << ToVoidPtr(addr);
+    auto *forwarded_object = reinterpret_cast<ObjectHeader *>(addr);
+    if (ObjectAccessor::GetDynValue<TaggedValue>(object, offset).IsWeak()) {
+        forwarded_object = TaggedValue(forwarded_object).CreateAndGetWeakRef().GetRawHeapObject();
     }
-}
-
-void GCDynamicObjectHelpers::UpdateDynArray(PandaVM *vm, ObjectHeader *object, array_size_t index,
-                                            ObjectHeader *obj_ref)
-{
-    TaggedValue value(obj_ref);
-    bool is_dyn_weak = value.IsWeak();
-    if (is_dyn_weak) {
-        obj_ref = value.GetWeakReferent();
-    }
-
-    MarkWord mark_word = obj_ref->AtomicGetMark();
-    if (mark_word.GetState() == MarkWord::ObjectState::STATE_GC) {
-        auto arr = static_cast<coretypes::Array *>(object);
-        MarkWord::markWordSize addr = mark_word.GetForwardingAddress();
-        LOG_DEBUG_OBJ_HELPERS << "  update obj ref for array  " << std::hex << object << " index =  " << index
-                              << " from " << std::hex << arr->Get<ObjectHeader *>(index) << " to " << addr;
-        auto *field_object = reinterpret_cast<ObjectHeader *>(addr);
-        if (is_dyn_weak) {
-            field_object = TaggedValue(field_object).CreateAndGetWeakRef().GetRawHeapObject();
-        }
-        size_t offset = TaggedValue::TaggedTypeSize() * index;
-        ObjectAccessor::SetDynObject<true>(vm->GetAssociatedThread(), arr->GetData(), offset, field_object);
-    }
-}
-
-void GCDynamicObjectHelpers::UpdateDynObjectRef(PandaVM *vm, ObjectHeader *object, size_t offset,
-                                                ObjectHeader *field_obj_ref, bool is_update_classword)
-{
-    TaggedValue value(field_obj_ref);
-    bool is_dyn_weak = value.IsWeak();
-    if (is_dyn_weak) {
-        field_obj_ref = value.GetWeakReferent();
-    }
-    MarkWord mark_word = field_obj_ref->AtomicGetMark();
-    if (mark_word.GetState() == MarkWord::ObjectState::STATE_GC) {
-        MarkWord::markWordSize addr = mark_word.GetForwardingAddress();
-        LOG_DEBUG_OBJ_HELPERS << "  update obj ref for object " << std::hex << object << " from "
-                              << ObjectAccessor::GetDynValue<ObjectHeader *>(object, offset) << " to " << addr;
-        auto *h_class = field_obj_ref->ClassAddr<HClass>();
-        if (is_update_classword && h_class->IsHClass()) {
-            addr += static_cast<MarkWord::markWordSize>(ObjectHeader::ObjectHeaderSize());
-        }
-        auto *field_object = reinterpret_cast<ObjectHeader *>(addr);
-        if (is_dyn_weak) {
-            field_object = TaggedValue(field_object).CreateAndGetWeakRef().GetRawHeapObject();
-        }
-        ObjectAccessor::SetDynObject(vm->GetAssociatedThread(), object, offset, field_object);
-    }
+    ObjectAccessor::SetDynValueWithoutBarrier(object, offset, TaggedValue(forwarded_object).GetRawData());
+    return forwarded_object;
 }
 
 }  // namespace panda::mem

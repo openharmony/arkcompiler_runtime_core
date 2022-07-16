@@ -24,7 +24,7 @@
     return.void
 }
 
-.function u1 main() {
+.function i32 main() {
     movi v2, 7
     initobj.short Asm.Construct
     sta.obj v0

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_CLASS_LINKER_EXTENSION_H_
-#define PANDA_RUNTIME_INCLUDE_CLASS_LINKER_EXTENSION_H_
+#ifndef PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H_
+#define PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H_
 
 #include "libpandabase/os/mutex.h"
 #include "libpandafile/file.h"
@@ -118,6 +117,8 @@ public:
     template <class Callback>
     bool EnumerateClasses(const Callback &cb, mem::VisitGCRootFlags flags = mem::VisitGCRootFlags::ACCESS_ROOT_ALL)
     {
+        ASSERT(BitCount(flags & (mem::VisitGCRootFlags::ACCESS_ROOT_ALL | mem::VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW |
+                                 mem::VisitGCRootFlags::ACCESS_ROOT_NONE)) == 1);
         if (((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ALL) != 0) ||
             ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW) != 0)) {
             os::memory::LockHolder lock(created_classes_lock_);
@@ -127,18 +128,53 @@ public:
                 }
             }
         }
-        if (!boot_context_.EnumerateClasses(cb, flags)) {
-            return false;
-        }
-
-        {
-            os::memory::LockHolder lock(contexts_lock_);
-            for (auto *ctx : contexts_) {
-                if (!ctx->EnumerateClasses(cb, flags)) {
+        if ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW) != 0) {
+            os::memory::LockHolder lock(new_classes_lock_);
+            for (const auto &cls : new_classes_) {
+                if (!cb(cls)) {
                     return false;
                 }
             }
         }
+
+        if ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ALL) != 0) {
+            if (!boot_context_.EnumerateClasses(cb)) {
+                return false;
+            }
+
+            {
+                os::memory::LockHolder lock(contexts_lock_);
+                for (auto *ctx : contexts_) {
+                    if (!ctx->EnumerateClasses(cb)) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        {
+            os::memory::LockHolder lock(obsolete_classes_lock_);
+            for (const auto &cls : obsolete_classes_) {
+                if (!cb(cls)) {
+                    return false;
+                }
+            }
+        }
+
+        ASSERT(BitCount(flags & (mem::VisitGCRootFlags::START_RECORDING_NEW_ROOT |
+                                 mem::VisitGCRootFlags::END_RECORDING_NEW_ROOT)) <= 1);
+        if ((flags & mem::VisitGCRootFlags::START_RECORDING_NEW_ROOT) != 0) {
+            // Atomic with seq_cst order reason: data race with record_new_class_ with requirement for sequentially
+            // consistent order where threads observe all modifications in the same order
+            record_new_class_.store(true, std::memory_order_seq_cst);
+        } else if ((flags & mem::VisitGCRootFlags::END_RECORDING_NEW_ROOT) != 0) {
+            // Atomic with seq_cst order reason: data race with record_new_class_ with requirement for sequentially
+            // consistent order where threads observe all modifications in the same order
+            record_new_class_.store(false, std::memory_order_seq_cst);
+            os::memory::LockHolder lock(new_classes_lock_);
+            new_classes_.clear();
+        }
+
         return true;
     }
 
@@ -182,6 +218,10 @@ public:
 
     void OnClassPrepared(Class *klass);
 
+    // Saving obsolete data after hotreload to enable it to be executed
+    void AddObsoleteClass(const PandaVector<panda::Class *> &classes);
+    void FreeObsoleteData();
+
     virtual Class *FromClassObject(ObjectHeader *obj);
 
     virtual size_t GetClassObjectSizeFromClassSize(uint32_t size);
@@ -198,7 +238,7 @@ protected:
 
     Class *AddClass(Class *klass);
 
-    // Add the class to the list, when it is just be created and not added to class linker context.
+    // Add the class to the list, when it is just be created and not add to class linker context.
     void AddCreatedClass(Class *klass);
 
     // Remove class in the list, when it has been added to class linker context.
@@ -210,15 +250,10 @@ protected:
 private:
     class BootContext : public ClassLinkerContext {
     public:
-        explicit BootContext(ClassLinkerExtension *extension) : extension_(extension)
+        explicit BootContext(ClassLinkerExtension *extension)
+            : ClassLinkerContext(extension->GetLanguage()), extension_(extension)
         {
-#ifndef NDEBUG
-            lang_ = extension->GetLanguage();
-#endif  // NDEBUG
         }
-        ~BootContext() override = default;
-        NO_COPY_SEMANTIC(BootContext);
-        NO_MOVE_SEMANTIC(BootContext);
 
         bool IsBootContext() const override
         {
@@ -228,6 +263,8 @@ private:
         Class *LoadClass(const uint8_t *descriptor, bool need_copy_descriptor,
                          ClassLinkerErrorHandler *error_handler) override;
 
+        void EnumeratePandaFiles(const std::function<bool(const panda_file::File &)> &cb) const override;
+
     private:
         ClassLinkerExtension *extension_;
     };
@@ -235,18 +272,24 @@ private:
     class AppContext : public ClassLinkerContext {
     public:
         explicit AppContext(ClassLinkerExtension *extension, PandaVector<const panda_file::File *> &&pf_list)
-            : extension_(extension), pfs_(pf_list)
+            : ClassLinkerContext(extension->GetLanguage()), extension_(extension), pfs_(pf_list)
         {
-#ifndef NDEBUG
-            lang_ = extension_->GetLanguage();
-#endif  // NDEBUG
         }
-        ~AppContext() override = default;
-        NO_COPY_SEMANTIC(AppContext);
-        NO_MOVE_SEMANTIC(AppContext);
 
         Class *LoadClass(const uint8_t *descriptor, bool need_copy_descriptor,
                          ClassLinkerErrorHandler *error_handler) override;
+
+        void EnumeratePandaFiles(const std::function<bool(const panda_file::File &)> &cb) const override
+        {
+            for (auto &pf : pfs_) {
+                if (pf == nullptr) {
+                    continue;
+                }
+                if (!cb(*pf)) {
+                    break;
+                }
+            }
+        }
 
         PandaVector<std::string_view> GetPandaFilePaths() const override
         {
@@ -293,9 +336,16 @@ private:
     os::memory::RecursiveMutex created_classes_lock_;
     PandaVector<Class *> created_classes_ GUARDED_BY(created_classes_lock_);
 
+    os::memory::RecursiveMutex new_classes_lock_;
+    std::atomic_bool record_new_class_ {false};
+    PandaVector<Class *> new_classes_ GUARDED_BY(new_classes_lock_);
+
+    os::memory::RecursiveMutex obsolete_classes_lock_;
+    PandaVector<Class *> obsolete_classes_ GUARDED_BY(obsolete_classes_lock_);
+
     bool can_initialize_classes_ {false};
 };
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_CLASS_LINKER_EXTENSION_H_
+#endif  // PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H_

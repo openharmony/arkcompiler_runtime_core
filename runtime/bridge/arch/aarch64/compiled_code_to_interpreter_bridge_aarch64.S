@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 #include "arch/aarch64/helpers_aarch64.S"
 
 // Frame* CreateFrameForMethod(Method* method, Frame* prev);
-.extern CreateFrame
+.extern CreateFrameForMethod
 // void InterpreterEntryPoint(Method *method, Frame* frame);
 .extern InterpreterEntryPoint
 
@@ -76,7 +76,7 @@ CompiledCodeToInterpreterBridge:
     // Before we call IncrementHotnessCounter we should set pointer to C2I frame in the TLS,
     // because compilation may fall into safepoint, so we need to make caller's callee registers
     // visible for the stack walker.
-    str fp, [THREAD_REG, #THREAD_CURRENT_FRAME]
+    str fp, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]
 
     PUSH_CALLER_REGS
     PUSH_ARGS_VREGS
@@ -87,7 +87,7 @@ CompiledCodeToInterpreterBridge:
 
     // Compilation finished, so recover caller's frame in the TLS.
     ldr lr, [fp]
-    str lr, [THREAD_REG, #THREAD_CURRENT_FRAME]
+    str lr, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]
 
     POP_ARGS_VREGS
     POP_CALLER_REGS
@@ -135,17 +135,18 @@ CompiledCodeToInterpreterBridge:
     // setup regs as follow
     // x0 - SHORTY_PTR_REG, x1 - SHORTY_REG, x2 - iframe.vregs_ + num_vregs_,
     // x3 - gpr args, x4 - float args, x5 - stack args, w6 - gpr arg counter,
-    // w7 - float arg counter, x9, x10 - temp, x19 - iframe, x20 - method,
+    // w7 - float arg counter, x9, x10, x11 - temp, x19 - iframe, x20 - method,
     // x21 - method.shorty
     mov x19, x0
     ldr x21, [x20, #METHOD_SHORTY_OFFSET]
     ldr w9, [x19, #FRAME_NUM_VREGS_OFFSET]
+    lsl x11, x9, #3
     ldr w0, [x20, #METHOD_NUM_ARGS_OFFSET]
     sub w9, w9, w0
     mov SHORTY_PTR_REG, x21
     INIT_SHORTY_REG
     add x2, x19, #FRAME_VREGS_OFFSET
-    add x2, x2, x9, lsl 4
+    add x2, x2, x9, lsl 3
     add x3, sp, #8 // skip Method*
     add x4, sp, #64
     add x5, fp, #24
@@ -176,7 +177,7 @@ CompiledCodeToInterpreterBridge:
     // store the tag
     cmp w9, #SHORTY_REFERENCE
     cset w10, eq
-    str x10, [x2, #FRAME_VREGISTER_TAG_OFFSET]
+    str x10, [x2, x11]
 
     sub w9, w9, #SHORTY_FIRST_FLOAT
     cmp w9, #(SHORTY_NUM_FLOAT_TYPES - 1)

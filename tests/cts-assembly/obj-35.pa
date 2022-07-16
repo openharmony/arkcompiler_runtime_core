@@ -29,7 +29,7 @@
     return.void
 }
 
-.function u1 main() {
+.function i32 main() {
     initobj.short R2.ctor
     isinstance R1
     ldstatic R2.s_f

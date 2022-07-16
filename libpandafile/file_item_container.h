@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_FILE_ITEM_CONTAINER_H_
-#define PANDA_LIBPANDAFILE_FILE_ITEM_CONTAINER_H_
+#ifndef LIBPANDAFILE_FILE_ITEM_CONTAINER_H_
+#define LIBPANDAFILE_FILE_ITEM_CONTAINER_H_
 
 #include "file_items.h"
 #include "file_writer.h"
+#include "pgo.h"
 
+#include <list>
 #include <map>
 #include <memory>
 #include <set>
@@ -32,7 +34,7 @@ class ItemDeduper;
 
 class ItemContainer {
 public:
-    ItemContainer() = default;
+    ItemContainer();
     ~ItemContainer() = default;
     NO_COPY_SEMANTIC(ItemContainer);
     NO_MOVE_SEMANTIC(ItemContainer);
@@ -62,6 +64,10 @@ public:
 
     ProtoItem *GetOrCreateProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params);
 
+    PrimitiveTypeItem *GetOrCreatePrimitiveTypeItem(Type type);
+
+    PrimitiveTypeItem *GetOrCreatePrimitiveTypeItem(Type::TypeId type);
+
     LineNumberProgramItem *CreateLineNumberProgramItem();
 
     template <class T, class... Args>
@@ -75,25 +81,121 @@ public:
         static_assert(!std::is_same_v<T, ProtoItem>, "Use GetOrCreateProtoItem to create ValueItem");
         static_assert(!std::is_same_v<T, LineNumberProgramItem>,
                       "Use CreateLineNumberProgramItem to create LineNumberProgramItem");
+        static_assert(!std::is_same_v<T, PrimitiveTypeItem>,
+                      "Use GetOrCreatePrimitiveTypeItem to create PrimitiveTypeItem");
+        static_assert(!std::is_same_v<T, MethodItem>, "Use ClassItem instance to create MethodItem");
+        static_assert(!std::is_same_v<T, FieldItem>, "Use ClassItem instance to create FieldItem");
 
         auto ptr = std::make_unique<T>(std::forward<Args>(args)...);
         auto ret = ptr.get();
         if (ptr->IsForeign()) {
             foreign_items_.emplace_back(std::move(ptr));
         } else {
-            items_.emplace_back(std::move(ptr));
+            items_.insert(GetInsertPosition<T>(), std::move(ptr));
         }
         return ret;
     }
 
     uint32_t ComputeLayout();
-    bool Write(Writer *writer);
+    bool Write(Writer *writer, bool deduplicateItems = true);
 
     std::map<std::string, size_t> GetStat();
 
     void DumpItemsStat(std::ostream &os) const;
 
+    std::unordered_map<std::string, StringItem *> *GetStringMap()
+    {
+        return &string_map_;
+    }
+
+    LiteralArrayItem *GetLiteralArrayItem(const std::string &key)
+    {
+        return literalarray_map_.at(key);
+    }
+
+    std::map<std::string, BaseClassItem *> *GetClassMap()
+    {
+        return &class_map_;
+    }
+
+    std::unordered_map<uint32_t, ValueItem *> *GetIntValueMap()
+    {
+        return &int_value_map_;
+    }
+
+    std::unordered_map<uint64_t, ValueItem *> *GetLongValueMap()
+    {
+        return &long_value_map_;
+    }
+
+    std::unordered_map<uint32_t, ValueItem *> *GetFloatValueMap()
+    {
+        return &float_value_map_;
+    }
+
+    std::unordered_map<uint64_t, ValueItem *> *GetDoubleValueMap()
+    {
+        return &double_value_map_;
+    }
+
+    std::unordered_map<BaseItem *, ValueItem *> *GetScalarValueMap()
+    {
+        return &id_value_map_;
+    }
+
+    ProtoItem *GetProtoItem(TypeItem *retType, const std::vector<MethodParamItem> &params)
+    {
+        return proto_map_.at(ProtoKey {retType, params});
+    }
+
+    std::unordered_map<Type::TypeId, PrimitiveTypeItem *> *GetPrimitiveTypeMap()
+    {
+        return &primitive_type_map_;
+    }
+
+    const std::list<std::unique_ptr<BaseItem>> &GetItems() const
+    {
+        return items_;
+    }
+
+    const std::vector<std::unique_ptr<BaseItem>> &GetForeigtems()
+    {
+        return foreign_items_;
+    }
+
+    BaseItem *GetEndItem()
+    {
+        return end_;
+    }
+
+    void ReorderItems(panda::panda_file::pgo::ProfileOptimizer *profile_opt);
+
+    void DeduplicateItems(bool computeLayout = true);
+
+    void DeduplicateCodeAndDebugInfo();
+
+    void DeduplicateAnnotations();
+
+    void DeduplicateLineNumberProgram(DebugInfoItem *item, ItemDeduper *deduper);
+
+    void DeduplicateDebugInfo(MethodItem *method, ItemDeduper *debug_info_deduper,
+                              ItemDeduper *line_number_program_deduper);
+
 private:
+    template <class T>
+    auto GetInsertPosition()
+    {
+        if (std::is_same_v<T, CodeItem>) {
+            return code_items_end_;
+        }
+
+        if (std::is_same_v<T, DebugInfoItem>) {
+            return debug_items_end_;
+        }
+
+        return items_end_;
+    }
+
     class IndexItem : public BaseItem {
     public:
         IndexItem(IndexType type, size_t max_index) : type_(type), max_index_(max_index)
@@ -113,7 +215,7 @@ private:
 
         bool Write(Writer *writer) override;
 
-        std::string GetName() const override;
+        ItemTypes GetItemType() const override;
 
         bool Add(IndexedItem *item);
 
@@ -232,9 +334,9 @@ private:
 
         bool Write(Writer *writer) override;
 
-        std::string GetName() const override
+        ItemTypes GetItemType() const override
         {
-            return "index_header";
+            return ItemTypes::INDEX_HEADER;
         }
 
         bool Add(const std::list<IndexedItem *> &items);
@@ -285,9 +387,9 @@ private:
 
         bool Write(Writer *writer) override;
 
-        std::string GetName() const override
+        ItemTypes GetItemType() const override
         {
-            return "index_section";
+            return ItemTypes::INDEX_SECTION;
         }
 
         void Reset()
@@ -357,7 +459,7 @@ private:
     private:
         void Add(TypeItem *item);
 
-        size_t hash_ {0};
+        size_t hash_;
         std::string shorty_;
         std::vector<TypeItem *> ref_types_;
     };
@@ -398,9 +500,9 @@ private:
             return true;
         }
 
-        std::string GetName() const override
+        ItemTypes GetItemType() const override
         {
-            return "end_item";
+            return ItemTypes::END_ITEM;
         }
     };
 
@@ -420,17 +522,6 @@ private:
 
     size_t GetForeignSize() const;
 
-    void DeduplicateItems();
-
-    void DeduplicateCodeAndDebugInfo();
-
-    void DeduplicateAnnotations();
-
-    void DeduplicateLineNumberProgram(DebugInfoItem *item, ItemDeduper *deduper);
-
-    void DeduplicateDebugInfo(MethodItem *method, ItemDeduper *debug_info_deduper,
-                              ItemDeduper *line_number_program_deduper);
-
     std::unordered_map<std::string, StringItem *> string_map_;
     std::map<std::string, LiteralArrayItem *, LiteralArrayCompare> literalarray_map_;
 
@@ -445,17 +536,23 @@ private:
     std::unordered_map<uint64_t, ValueItem *> double_value_map_;
     std::unordered_map<BaseItem *, ValueItem *> id_value_map_;
     std::unordered_map<ProtoKey, ProtoItem *, ProtoKeyHash> proto_map_;
+    std::unordered_map<Type::TypeId, PrimitiveTypeItem *> primitive_type_map_;
 
-    std::vector<std::unique_ptr<BaseItem>> items_;
+    std::list<std::unique_ptr<BaseItem>> items_;
+
     std::vector<std::unique_ptr<BaseItem>> foreign_items_;
 
     IndexSectionItem index_section_item_;
 
     LineNumberProgramIndexItem line_number_program_index_item_;
 
-    EndItem end_;
+    std::list<std::unique_ptr<BaseItem>>::iterator items_end_;
+    std::list<std::unique_ptr<BaseItem>>::iterator code_items_end_;
+    std::list<std::unique_ptr<BaseItem>>::iterator debug_items_end_;
+
+    BaseItem *end_;
 };
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_FILE_ITEM_CONTAINER_H_
+#endif  // LIBPANDAFILE_FILE_ITEM_CONTAINER_H_

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_FREELIST_ALLOCATOR_H_
-#define PANDA_RUNTIME_MEM_FREELIST_ALLOCATOR_H_
+#ifndef PANDA_MEM_FREELIST_ALLOCATOR_H
+#define PANDA_MEM_FREELIST_ALLOCATOR_H
 
 #include <array>
 
@@ -27,6 +26,7 @@
 
 namespace panda::mem {
 
+// TODO(aemelenko): Move this constants to compile options
 // Minimal size of this allocator is a max size of RunSlots allocator.
 static constexpr size_t PANDA_FREELIST_ALLOCATOR_MIN_SIZE = RunSlots<>::MaxSlotSize();
 static constexpr size_t PANDA_FREELIST_ALLOCATOR_SEGREGATED_LIST_SIZE = 16;
@@ -53,14 +53,14 @@ enum class InternalAllocatorConfig;
 template <InternalAllocatorConfig Config>
 class InternalAllocator;
 
-//                                                              FreeList Allocator layout:
+//                                             FreeList Allocator layout:
 //
-//     |..........|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|..........|........|0000000000000000|..........|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|..........|........|0000000000000000|
-//     |..........|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|..........|..Links.|0000000000000000|..........|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|..........|..Links.|0000000000000000|
-//     |..Memory..|xxxxxxxxxxOCCUPIEDxxxxxxxxxxxxx|..Memory..|...on...|000000FREE000000|..Memory..|xxxxxxxxxxOCCUPIEDxxxxxxxxxxxxx|..Memory..|...on...|000000FREE000000|
-//     |..Header..|xxxxxxxxxxxMEMORYxxxxxxxxxxxxxx|..Header..|..next/.|00000MEMORY00000|..Header..|xxxxxxxxxxxMEMORYxxxxxxxxxxxxxx|..Header..|..next/.|00000MEMORY00000|
-//     |..........|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|..........|..prev..|0000000000000000|..........|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|..........|..prev..|0000000000000000|
-//     |..........|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|..........|..free..|0000000000000000|..........|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|..........|..free..|0000000000000000|
+//     |..........|xxxxxxxxxx|..........|........|00000000|..........|xxxxxxxxxx|..........|........|0000000000000000|
+//     |..........|xxxxxxxxxx|..........|..Links.|00000000|..........|xxxxxxxxxx|..........|..Links.|0000000000000000|
+//     |..Memory..|xOCCUPIEDx|..Memory..|...on...|00FREE00|..Memory..|xOCCUPIEDx|..Memory..|...on...|000000FREE000000|
+//     |..Header..|xxMEMORYxx|..Header..|..next/.|0MEMORY0|..Header..|xxMEMORYxx|..Header..|..next/.|00000MEMORY00000|
+//     |..........|xxxxxxxxxx|..........|..prev..|00000000|..........|xxxxxxxxxx|..........|..prev..|0000000000000000|
+//     |..........|xxxxxxxxxx|..........|..free..|00000000|..........|xxxxxxxxxx|..........|..free..|0000000000000000|
 //
 //                        Blocks with alignments:
 // 1) Padding header stored just after the main block header:
@@ -98,6 +98,7 @@ public:
     template <typename T>
     [[nodiscard]] T *AllocArray(size_t arr_length);
 
+    template <bool need_lock = true>
     [[nodiscard]] void *Alloc(size_t size, Alignment align = FREELIST_DEFAULT_ALIGNMENT);
 
     void Free(void *mem);
@@ -310,6 +311,7 @@ private:
 
     bool CanCreateNewBlockFromRemainder(MemoryBlockHeader *memory, size_t alloc_size)
     {
+        // TODO(aemelenko): Maybe add some more complex solution for this check
         return (memory->GetSize() - alloc_size) >= (FREELIST_ALLOCATOR_MIN_SIZE + sizeof(FreeListHeader));
     }
 
@@ -337,4 +339,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_FREELIST_ALLOCATOR_H_
+#endif  // PANDA_MEM_FREELIST_ALLOCATOR_H

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_REGION_H_
-#define PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_REGION_H_
+#ifndef PANDA_BIT_MEMORY_REGION_H
+#define PANDA_BIT_MEMORY_REGION_H
 
 #include "globals.h"
 #include "mem/mem.h"
@@ -80,7 +80,6 @@ public:
             it.Next(n);
             return it;
         }
-
         Iterator operator-(int32_t n) const
         {
             ASSERT(helpers::ToUnsigned(n) <= bit_);
@@ -97,7 +96,7 @@ public:
         void Next(uint32_t val)
         {
             ASSERT(val != 0);
-            int step = val > 0 ? 1 : -1;
+            int step = (val > 0) ? 1 : -1;
             for (; val != 0; val--) {
                 for (bit_ += step; bit_ > 0 && bit_ != region_.Size() && !region_.ReadBit(bit_); bit_ += step) {
                 }
@@ -208,7 +207,7 @@ public:
         ASSERT(offset + length <= size_);
         ASSERT(offset < size_);
 
-        uint32_t mask = std::numeric_limits<uint32_t>::max() >> (std::numeric_limits<uint32_t>::digits - length);
+        uint32_t mask = (std::numeric_limits<uint32_t>::max()) >> ((std::numeric_limits<uint32_t>::digits) - length);
         size_t index = (start_ + offset) / BITS_PER_BYTE;
         size_t shift = (start_ + offset) % BITS_PER_BYTE;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -283,4 +282,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_REGION_H_
+#endif  // PANDA_BIT_MEMORY_REGION_H

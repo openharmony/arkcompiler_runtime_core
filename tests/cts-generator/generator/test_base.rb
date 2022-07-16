@@ -30,18 +30,7 @@ module Generator
         # Currently generator supports only single instruction per test. However coverage tool supports array.
         # So convert to yaml as array of single element.
 
-        content.puts '# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.'
+        content.puts '# Huawei Technologies Co.,Ltd.'
         content.puts '#'
         content.puts '# The following comment until the empty line must be a valid YAML document'
         content.puts "# containing exact copies of ISA specification assertions relevant to this test.\n"
@@ -57,6 +46,7 @@ module Generator
         end
         content.puts "## runner-option: ignore" if ignore
         content.puts "## runner-option: bugid: #{bugids.join ', '}" if bugids.length > 0
+        tags.append 'ignore' if ignore
         content.puts "## runner-option: tags: #{tags.join ', '}" if tags.length > 0
         content.puts "## panda-options: #{test_panda_options}" if test_panda_options.length > 0
 

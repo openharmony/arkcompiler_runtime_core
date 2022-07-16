@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public:
     }
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
 };
 
 TEST_F(TimeTest, TimerTest)
@@ -71,8 +71,11 @@ TEST_F(TimeTest, TimerTest)
 
     {
         Timer timer(&duration_, true);
+        ASSERT_EQ(duration_, 0);
     }
-    ASSERT_LT(duration_, last_duration_);
+    // There is some nondeterminism in sleep, moreover with small values
+    // and check (duration_ < last_duration_) may fail
+    ASSERT_GT(duration_, 0);
 }
 
 TEST_F(TimeTest, CurrentTimeStringTest)

@@ -101,7 +101,6 @@ tests:
             - values:
                 - "0x7FFFFFFF"
                 - "0x80000000"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
             - values:
                 - "0x80000000"
@@ -153,7 +152,6 @@ tests:
             - values:
                 - "0x80000000"
                 - "0x7FFFFFFF"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
             - values:
                 - "-0x7FFFFFFF"
@@ -161,7 +159,6 @@ tests:
             - values:
                 - "-0x80000000"
                 - "-0x80000001"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
             - values:
                 - "0xFFFFFFFF"
@@ -195,7 +192,6 @@ tests:
             - values:
                 - "1"
                 - "0x80000000"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
             - values:
                 - "-1"
@@ -203,7 +199,6 @@ tests:
             - values:
                 - "0x7FFFFFFF"
                 - "0xFFFFFFFE"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
             - values:
                 - "0x80000000"
@@ -220,7 +215,6 @@ tests:
             - values:
                 - "-0xFFFFFFFF"
                 - "0x80000000"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
 
       - file-name: "op_vs_8_nmax"
@@ -252,7 +246,6 @@ tests:
             - values:
                 - "-1"
                 - "0x7FFFFFFF"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
             - values:
                 - "0x7FFFFFFF"
@@ -260,22 +253,18 @@ tests:
             - values:
                 - "0x80000000"
                 - "0"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
             - values:
                 - "-0x7FFFFFFF"
                 - "1"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
             - values:
                 - "-0x80000000"
                 - "0"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
             - values:
                 - "0xFFFFFFFF"
                 - "0x7FFFFFFF"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
             - values:
                 - "-0xFFFFFFFF"
@@ -330,7 +319,6 @@ tests:
                 - "0x4bb930e4"
                 - "0x416b3a07"
                 - "0x8d246aeb"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
             - values:
                 - "0x61a80560"
@@ -348,7 +336,7 @@ tests:
       - file-name: "vals_mod32_1"
         bugid: ['1324', '2072']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: add2 v:in:i32
@@ -367,7 +355,6 @@ tests:
               - "0x7FFFFFFF"
               - "0x7FFFFFFF"
               - "0xFFFFFFFFFFFFFFFE"
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - "0x7FFFFFFF"
@@ -377,13 +364,12 @@ tests:
               - "0x80000000"
               - "0x80000000"
               - "0"
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
 
       - file-name: "vals_mod32_2"
         bugid: ['1324']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: add2 v:in:i32
@@ -402,7 +388,6 @@ tests:
                 - "0x17FFFFFFF"
                 - "0x17FFFFFFF"
                 - "0xFFFFFFFFFFFFFFFE"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
             - values:
                 - "0x777777777FFFFFFF"
@@ -412,7 +397,6 @@ tests:
                 - "0x180000000"
                 - "0x180000000"
                 - "0"
-              tags: ["clang_release_sanitizer"]
               bugid: ["966"]
 
       - file-name: "regs"
@@ -436,98 +420,79 @@ tests:
 
       - file-name: "type"
         bugid: ["964", "966"]
-        tags: ['verifier']
+        tags: ["verifier"]
         isa:
-          instructions:
-            - sig: add2 v:in:i32
-              acc: inout:i32
-              format: [op_v_8]
           verification:
             - acc_type
             - v1_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
-            #
-            .record A {}
-            .record B {}
-            .record panda.String <external>
-            .record panda.Object <external>
-            .function i32 main() {
-                %s
-                *s
-                add2 v0
-                ldai 0
-        check-type: no-check
-        description: Check add2 with incorrect register and accumulator type.
-        template-cases:
-          - values:
-              - ldai.64 0
-          - values:
-              - fldai.64 0
-          - values:
-              - |
-                #
-                    lda.type B
-          - values:
-              - |
-                #
-                    lda.type B[]
-          - values:
-              - |
-                #
-                    lda.type panda.String
-          - values:
-              - |
-                #
-                    lda.type panda.Object
-          - values:
-              - |
-                #
-                    movi v0, 10
-                    newarr v0, v0, i32[]
-                    lda.obj v0
-          - values:
-              - lda.null
-          - values:
-              - ldai 0
-            exclude: [val]
+          .record T {}
+          .function i32 main() {
+              %s
+              *s
+              add2 v0
+        check-type: exit-positive
+        description: Check 'add2' with incorrect accumulator and/or register types.
         cases:
           - values:
-              - movi.64 v1, 0
+            - ldai 0
+            id: acc_ok
           - values:
-              - fmovi.64 v1, 0
+            - ldai.64 0
           - values:
-              - |
-                #
-                    lda.type A
-                    sta.obj v1
+            - fldai 0
+            bugid: ['7315']
           - values:
-              - |
-                #
-                    lda.type A[]
-                    sta.obj v1
-
+            - fldai.64 0
           - values:
-              - |
-                #
-                    lda.type panda.String
-                    sta.obj v1
+            - lda.null
           - values:
-              - |
-                #
-                    lda.type panda.Object
-                    sta.obj v1
+            - |
+              #
+                  movi v1, 0
+                  newarr v1, v1, i32[]
+                  lda.obj v1
           - values:
-              - |
-                #
-                    movi v1, 10
-                    newarr v1, v1, f64[]
+            - lda.str "0"
           - values:
-              - mov.null v1
+            - lda.type T
           - values:
-              - movi v1, 0
-            id: val
+            - |
+              #
+                  newobj v1, T
+                  lda.obj v1
+        template-cases:
+          - values:
+            - movi v0, 0
+            exclude: [acc_ok]
+          - values:
+            - movi.64 v0, 0
+          - values:
+            - fmovi v0, 0
+            bugid: ['7315']
+          - values:
+            - fmovi.64 v0, 0
+          - values:
+            - mov.null v0
+          - values:
+            - |
+              #
+                  movi v0, 0
+                  newarr v0, v0, i32[]
+          - values:
+            - |
+              #
+                  lda.str "0"
+                  sta.obj v0
+          - values:
+            - |
+              #
+                  lda.type T
+                  sta.obj v0
+          - values:
+            - newobj v0, T
 
       - file-name: uninitialized_regs
         isa:
@@ -535,25 +500,21 @@ tests:
             - sig: add2 v:in:i32
               acc: inout:i32
               format: [op_v_8]
-        description: Check add2 with uninitialized registers.
+        description: Check 'add2' with uninitialized registers.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        header-template: []
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
           #
-          .function i32 main() {
               %s
               *s
               add2 *s
-              ldai 0
-        check-type: no-check
+        check-type: exit-positive
         template-cases:
           - values:
               - ''
           - values:
               - ldai 0
             exclude: [init]
-
         cases:
           - values:
               - ''

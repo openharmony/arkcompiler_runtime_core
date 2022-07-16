@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public:
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
-        options.SetGcType("stw");
+        options.SetGcType("stw");  // TODO(dtrubenk): fix for gen-gc
         options.SetRunGcInPlace(true);
         Runtime::Create(options);
         thread_ = panda::MTManagedThread::GetCurrent();
@@ -63,7 +63,7 @@ public:
     }
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
 };
 
 using MallocProxyNonObjectAllocator = MallocProxyAllocator<RawMemoryConfig>;
@@ -357,13 +357,20 @@ void FillMemStatsForConcurrency(MemStatsDefault &stats, std::condition_variable 
 {
     {
         std::unique_lock<std::mutex> lock_for_ready_to_start(cv_mutex);
-        threads_ready++;
-        if (threads_ready.load() == NUM_THREADS) {
+        // Atomic with seq_cst order reason: data race with threads_ready with requirement for sequentially consistent
+        // order where threads observe all modifications in the same order
+        threads_ready.fetch_add(1, std::memory_order_seq_cst);
+        // Atomic with seq_cst order reason: data race with threads_ready with requirement for sequentially consistent
+        // order where threads observe all modifications in the same order
+        if (threads_ready.load(std::memory_order_seq_cst) == NUM_THREADS) {
             // Unlock all threads
             ready_to_start.notify_all();
         } else {
-            ready_to_start.wait(lock_for_ready_to_start,
-                                [&threads_ready] { return threads_ready.load() == NUM_THREADS; });
+            // Atomic with seq_cst order reason: data race with threads_ready with requirement for sequentially
+            // consistent order where threads observe all modifications in the same order
+            ready_to_start.wait(lock_for_ready_to_start, [&threads_ready] {
+                return threads_ready.load(std::memory_order_seq_cst) == NUM_THREADS;
+            });
         }
     }
     for (size_t i = 1; i <= ITERATION; i++) {
@@ -411,7 +418,7 @@ TEST_F(MemStatsTest, TestThreadSafety)
         threads[i].join();
     }
 
-    constexpr uint64_t SUM = (ITERATION + 1) * ITERATION / 2U;
+    constexpr uint64_t SUM = (ITERATION + 1) * ITERATION / 2;
     constexpr uint64_t TOTAL_ITERATION_COUNT = NUM_THREADS * ITERATION;
 
     for (size_t index = 0; index < SPACE_TYPE_SIZE; index++) {

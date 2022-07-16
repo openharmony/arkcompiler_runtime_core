@@ -13,44 +13,28 @@
 # limitations under the License.
 
 require 'yaml'
+require 'ostruct'
 
-class String
-  def snakecase
-    self.gsub(/::/, '/').
-    gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
-    gsub(/([a-z\d])([A-Z])/,'\1_\2').
-    tr("-", "_").
-    downcase
-  end
-end
-
-class Entrypoint
+class Entrypoint < OpenStruct
   def initialize(dscr)
-    @dscr = dscr
-  end
-
-  def name
-    @dscr['name']
+    super(dscr)
+    if self.entrypoint.nil? && !self.external?
+      raise "Entrypoint description must contains 'entrypoint' field: #{dscr.marshal_dump}"
+    end
+    abort "ERROR: 'bridge' field must be specified for #{self.entrypoint}" unless dscr['bridge'] # !self.respond_to? 'bridge'
   end
 
   def enum_name
-    @dscr['name'].snakecase.upcase
+    self.name.snakecase.upcase
   end
 
   def bridge_name
-    @dscr.entrypoint.nil? ? "#{name}Bridge" : @dscr.entrypoint
+    return nil unless self.has_bridge?
+    "#{self.name}Bridge"
   end
 
-  def entrypoint_name
-    @dscr.entrypoint.nil? ? "#{name}Entrypoint" : @dscr.entrypoint
-  end
-
-  def get_entry
-    "#{name}Entrypoint"
-  end
-
-  def signature
-    @dscr['signature']
+  def has_bridge?
+    return !self.bridge.nil? && self.bridge != 'none'
   end
 
   def external?
@@ -58,7 +42,7 @@ class Entrypoint
   end
 
   def has_property? prop
-    @dscr['properties']&.include? prop
+    self.properties&.include? prop
   end
 
 end
@@ -73,6 +57,13 @@ module Compiler
   def entrypoints_crc32
     require "zlib"
     Zlib.crc32(entrypoints.map(&:signature).join)
+  end
+
+  def environment_checksum(cross_values_h)
+    require "zlib"
+    cross_values = File.read(cross_values_h)
+    cross_values_crc32 = Zlib.crc32(cross_values)
+    combined_crc32 = Zlib.crc32_combine(Compiler::entrypoints_crc32, cross_values_crc32, cross_values.length)
   end
 
   def wrap_data(data)

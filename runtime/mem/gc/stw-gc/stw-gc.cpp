@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,21 @@
 #include "runtime/include/hclass.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/gc/gc_root-inl.h"
+#include "runtime/mem/gc/gc_workers_thread_pool.h"
 #include "runtime/mem/heap_manager.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/rendezvous.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/include/coretypes/class.h"
+#include "runtime/mem/pygote_space_allocator-inl.h"
+#include "runtime/mem/gc/static/gc_marker_static-inl.h"
+#include "runtime/mem/gc/dynamic/gc_marker_dynamic-inl.h"
 
 namespace panda::mem {
 
 template <class LanguageConfig>
 StwGC<LanguageConfig>::StwGC(ObjectAllocatorBase *object_allocator, const GCSettings &settings)
-    : GCLang<LanguageConfig>(object_allocator, settings)
+    : GCLang<LanguageConfig>(object_allocator, settings), marker_(this)
 {
     this->SetType(GCType::STW_GC);
 }
@@ -46,73 +50,87 @@ void StwGC<LanguageConfig>::InitializeImpl()
     auto barrier_set = allocator->New<GCDummyBarrierSet>(allocator);
     ASSERT(barrier_set != nullptr);
     this->SetGCBarrierSet(barrier_set);
+    if (this->IsWorkerThreadsExist()) {
+        auto thread_pool = allocator->New<GCWorkersThreadPool>(allocator, this, this->GetSettings()->GCWorkersCount());
+        ASSERT(thread_pool != nullptr);
+        this->SetWorkersPool(thread_pool);
+    }
     LOG_DEBUG_GC << "STW GC Initialized";
 }
 
 template <class LanguageConfig>
-void StwGC<LanguageConfig>::RunPhasesImpl(const GCTask &task)
+void StwGC<LanguageConfig>::RunPhasesImpl(GCTask &task)
 {
     trace::ScopedTrace scoped_trace(__FUNCTION__);
     GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats(), this->GetStats());
     [[maybe_unused]] size_t bytes_in_heap_before_gc = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
-    this->BindBitmaps(true);
+    marker_.BindBitmaps(true);
     Mark(task);
     SweepStringTable();
     Sweep();
-    reversed_mark_ = !reversed_mark_;
+    marker_.ReverseMark();
     [[maybe_unused]] size_t bytes_in_heap_after_gc = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
     ASSERT(bytes_in_heap_after_gc <= bytes_in_heap_before_gc);
+    task.collection_type_ = GCCollectionType::FULL;
 }
 
 template <class LanguageConfig>
 void StwGC<LanguageConfig>::Mark(const GCTask &task)
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
-    GCScopedPhase scoped_phase(this->GetPandaVm()->GetMemStats(), this, GCPhase::GC_PHASE_MARK);
+    GCScope<TRACE_PHASE> gc_scope(__FUNCTION__, this, GCPhase::GC_PHASE_MARK);
 
     // Iterate over roots and add other roots
-    PandaStackTL<ObjectHeader *> objects_stack(
-        this->GetInternalAllocator()->template Adapter<mem::AllocScope::LOCAL>());
+    bool use_gc_workers = this->GetSettings()->ParallelMarkingEnabled();
+    GCMarkingStackType objects_stack(this, use_gc_workers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
+                                     use_gc_workers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
+                                     GCWorkersTaskTypes::TASK_MARKING);
 
     this->VisitRoots(
-        [&objects_stack, this](const GCRoot &gc_root) {
+        [&objects_stack, &use_gc_workers, this](const GCRoot &gc_root) {
             LOG_DEBUG_GC << "Handle root " << GetDebugInfoAboutObject(gc_root.GetObjectHeader());
-            if (this->MarkObjectIfNotMarked(gc_root.GetObjectHeader())) {
-                this->AddToStack(&objects_stack, gc_root.GetObjectHeader());
+            if (marker_.MarkIfNotMarked(gc_root.GetObjectHeader())) {
+                objects_stack.PushToStack(gc_root.GetType(), gc_root.GetObjectHeader());
             }
-            MarkStack(&objects_stack);
+            if (!use_gc_workers) {
+                MarkStack(&objects_stack, []([[maybe_unused]] const ObjectHeader *obj) { return true; });
+            }
         },
         VisitGCRootFlags::ACCESS_ROOT_ALL);
 
-    this->GetPandaVm()->GetStringTable()->VisitRoots(
-        [this, &objects_stack](coretypes::String *str) {
-            if (this->MarkObjectIfNotMarked(str)) {
+    this->GetPandaVm()->VisitStringTable(
+        [this, &objects_stack](ObjectHeader *str) {
+            if (this->marker_.MarkIfNotMarked(str)) {
                 ASSERT(str != nullptr);
-                this->AddToStack(&objects_stack, str);
+                objects_stack.PushToStack(RootType::STRING_TABLE, str);
             }
         },
         VisitGCRootFlags::ACCESS_ROOT_ALL);
-    MarkStack(&objects_stack);
+    MarkStack(&objects_stack, []([[maybe_unused]] const ObjectHeader *obj) { return true; });
+    ASSERT(objects_stack.Empty());
+    if (use_gc_workers) {
+        this->GetWorkersPool()->WaitUntilTasksEnd();
+    }
+    auto ref_clear_pred = [this]([[maybe_unused]] const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
-    this->GetPandaVm()->HandleReferences(task);
-    this->GetPandaVm()->HandleBufferData(reversed_mark_);
+    this->GetPandaVm()->HandleReferences(task, ref_clear_pred);
 }
 
 template <class LanguageConfig>
-void StwGC<LanguageConfig>::MarkStack(PandaStackTL<ObjectHeader *> *stack)
+void StwGC<LanguageConfig>::MarkStack(GCMarkingStackType *stack, const GC::MarkPredicate &markPredicate)
 {
     trace::ScopedTrace scoped_trace(__FUNCTION__);
     ASSERT(stack != nullptr);
     size_t objects_count = 0;
-    while (!stack->empty()) {
+    auto ref_pred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
+    while (!stack->Empty()) {
         objects_count++;
         auto *object = this->PopObjectFromStack(stack);
+        ValidateObject(nullptr, object);
         auto *base_class = object->template ClassAddr<BaseClass>();
-        LOG_IF(base_class == nullptr, DEBUG, GC) << " object's class is nullptr: " << std::hex << object;
-        ASSERT(base_class != nullptr);
         LOG_DEBUG_GC << "Current object: " << GetDebugInfoAboutObject(object);
-        this->template MarkInstance<LanguageConfig::LANG_TYPE, LanguageConfig::HAS_VALUE_OBJECT_TYPES>(stack, object,
-                                                                                                       base_class);
+        if (markPredicate) {
+            this->marker_.MarkInstance(stack, ref_pred, object, base_class);
+        }
     }
     LOG_DEBUG_GC << "Iterated over " << objects_count << " objects in the stack";
 }
@@ -120,36 +138,48 @@ void StwGC<LanguageConfig>::MarkStack(PandaStackTL<ObjectHeader *> *stack)
 template <class LanguageConfig>
 void StwGC<LanguageConfig>::SweepStringTable()
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
-    auto string_table = this->GetPandaVm()->GetStringTable();
-    GCScopedPhase scoped_phase(this->GetPandaVm()->GetMemStats(), this, GCPhase::GC_PHASE_SWEEP_STRING_TABLE);
+    GCScope<TRACE_PHASE> gc_scope(__FUNCTION__, this, GCPhase::GC_PHASE_SWEEP_STRING_TABLE);
+    auto vm = this->GetPandaVm();
 
-    if (!reversed_mark_) {
+    if (!marker_.IsReverseMark()) {
         LOG_DEBUG_GC << "SweepStringTable with MarkChecker";
-        string_table->Sweep([this](ObjectHeader *object) { return this->marker_.MarkChecker(object); });
+        vm->SweepStringTable([this](ObjectHeader *object) { return this->marker_.MarkChecker(object); });
     } else {
         LOG_DEBUG_GC << "SweepStringTable with ReverseMarkChecker";
-        string_table->Sweep([this](ObjectHeader *object) { return this->marker_.template MarkChecker<true>(object); });
+        vm->SweepStringTable([this](ObjectHeader *object) { return this->marker_.template MarkChecker<true>(object); });
     }
 }
 
 template <class LanguageConfig>
 void StwGC<LanguageConfig>::Sweep()
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
-    GCScopedPhase scoped_phase(this->GetPandaVm()->GetMemStats(), this, GCPhase::GC_PHASE_SWEEP);
+    GCScope<TRACE_PHASE> gc_scope(__FUNCTION__, this, GCPhase::GC_PHASE_SWEEP);
 
-    if (!reversed_mark_) {
+    // TODO(dtrubenk): add other allocators when they will be used/implemented
+    if (!marker_.IsReverseMark()) {
         LOG_DEBUG_GC << "Sweep with MarkChecker";
-        this->GetObjectAllocator()->Collect([this](ObjectHeader *object) { return this->marker_.MarkChecker(object); },
-                                            GCCollectMode::GC_ALL);
+        this->GetObjectAllocator()->Collect(
+            [this](ObjectHeader *object) {
+                auto status = this->marker_.MarkChecker(object);
+                if (status == ObjectStatus::DEAD_OBJECT) {
+                    LOG_DEBUG_OBJECT_EVENTS << "DELETE OBJECT: " << object;
+                }
+                return status;
+            },
+            GCCollectMode::GC_ALL);
         this->GetObjectAllocator()->VisitAndRemoveFreePools(
             [](void *mem, [[maybe_unused]] size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
 
     } else {
         LOG_DEBUG_GC << "Sweep with ReverseMarkChecker";
         this->GetObjectAllocator()->Collect(
-            [this](ObjectHeader *object) { return this->marker_.template MarkChecker<true>(object); },
+            [this](ObjectHeader *object) {
+                auto status = this->marker_.template MarkChecker<true>(object);
+                if (status == ObjectStatus::DEAD_OBJECT) {
+                    LOG_DEBUG_OBJECT_EVENTS << "DELETE OBJECT: " << object;
+                }
+                return status;
+            },
             GCCollectMode::GC_ALL);
         this->GetObjectAllocator()->VisitAndRemoveFreePools(
             [](void *mem, [[maybe_unused]] size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
@@ -158,20 +188,27 @@ void StwGC<LanguageConfig>::Sweep()
 
 // NOLINTNEXTLINE(misc-unused-parameters)
 template <class LanguageConfig>
-void StwGC<LanguageConfig>::WaitForGC(const GCTask &task)
+void StwGC<LanguageConfig>::WaitForGC(GCTask task)
 {
     trace::ScopedTrace scoped_trace(__FUNCTION__);
     Runtime::GetCurrent()->GetNotificationManager()->GarbageCollectorStartEvent();
+    // Atomic with acquire order reason: data race with gc_counter_ with dependecies on reads after the load which
+    // should become visible
     auto old_counter = this->gc_counter_.load(std::memory_order_acquire);
     this->GetPandaVm()->GetRendezvous()->SafepointBegin();
 
+    // Atomic with acquire order reason: data race with gc_counter_ with dependecies on reads after the load which
+    // should become visible
     auto new_counter = this->gc_counter_.load(std::memory_order_acquire);
-    if (new_counter > old_counter && this->last_cause_.load() >= task.reason_) {
+    // Atomic with acquire order reason: data race with last_cause_ with dependecies on reads after the load which
+    // should become visible
+    if (new_counter > old_counter && this->last_cause_.load(std::memory_order_acquire) >= task.reason_) {
         this->GetPandaVm()->GetRendezvous()->SafepointEnd();
         return;
     }
     auto mem_stats = this->GetPandaVm()->GetMemStats();
     mem_stats->RecordGCPauseStart();
+    // Create a copy of the constant GCTask to be able to change its value
     this->RunPhases(task);
     mem_stats->RecordGCPauseEnd();
     this->GetPandaVm()->GetRendezvous()->SafepointEnd();
@@ -183,7 +220,7 @@ void StwGC<LanguageConfig>::WaitForGC(const GCTask &task)
 template <class LanguageConfig>
 void StwGC<LanguageConfig>::InitGCBits(panda::ObjectHeader *object)
 {
-    if (!reversed_mark_) {
+    if (!marker_.IsReverseMark()) {
         object->SetUnMarkedForGC();
         ASSERT(!object->IsMarkedForGC());
     } else {
@@ -191,7 +228,7 @@ void StwGC<LanguageConfig>::InitGCBits(panda::ObjectHeader *object)
         ASSERT(object->IsMarkedForGC());
     }
     LOG_DEBUG_GC << "Init gc bits for object: " << std::hex << object << " bit: " << object->IsMarkedForGC()
-                 << " reversed_mark: " << reversed_mark_;
+                 << " reversed_mark: " << marker_.IsReverseMark();
 }
 
 template <class LanguageConfig>
@@ -208,15 +245,25 @@ void StwGC<LanguageConfig>::Trigger()
 }
 
 template <class LanguageConfig>
+void StwGC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unused]] void *worker_data)
+{
+    switch (task->GetType()) {
+        case GCWorkersTaskTypes::TASK_MARKING: {
+            auto stack = task->GetMarkingStack();
+            MarkStack(stack, []([[maybe_unused]] const ObjectHeader *obj) { return true; });
+            this->GetInternalAllocator()->Delete(stack);
+            break;
+        }
+        default:
+            LOG(FATAL, GC) << "Unimplemented for " << GCWorkersTaskTypesToString(task->GetType());
+            UNREACHABLE();
+    }
+}
+
+template <class LanguageConfig>
 void StwGC<LanguageConfig>::MarkObject(ObjectHeader *object)
 {
-    if (!reversed_mark_) {
-        LOG_DEBUG_GC << "Set mark for GC " << GetDebugInfoAboutObject(object);
-        this->marker_.template Mark<false>(object);
-    } else {
-        LOG_DEBUG_GC << "Set unmark for GC " << GetDebugInfoAboutObject(object);
-        this->marker_.template Mark<true>(object);
-    }
+    marker_.Mark(object);
 }
 
 template <class LanguageConfig>
@@ -226,28 +273,22 @@ void StwGC<LanguageConfig>::UnMarkObject([[maybe_unused]] ObjectHeader *object_h
 }
 
 template <class LanguageConfig>
-void StwGC<LanguageConfig>::MarkReferences(PandaStackTL<ObjectHeader *> *references, [[maybe_unused]] GCPhase gc_phase)
+void StwGC<LanguageConfig>::MarkReferences(GCMarkingStackType *references, [[maybe_unused]] GCPhase gc_phase)
 {
     trace::ScopedTrace scoped_trace(__FUNCTION__);
     ASSERT(gc_phase == GCPhase::GC_PHASE_MARK);
-    LOG_DEBUG_GC << "Start marking " << references->size() << " references";
-    MarkStack(references);
+    LOG_DEBUG_GC << "Start marking " << references->Size() << " references";
+    MarkStack(references, []([[maybe_unused]] const ObjectHeader *obj) { return true; });
 }
 
 template <class LanguageConfig>
 bool StwGC<LanguageConfig>::IsMarked(const ObjectHeader *object) const
 {
-    bool marked = false;
-    if (!reversed_mark_) {
-        LOG_DEBUG_GC << "Get marked for GC " << GetDebugInfoAboutObject(object);
-        marked = this->marker_.IsMarked(object);
-    } else {
-        LOG_DEBUG_GC << "Get unmarked for GC " << GetDebugInfoAboutObject(object);
-        marked = this->marker_.template IsMarked<true>(object);
-    }
-    return marked;
+    return marker_.IsMarked(object);
 }
 
-template class StwGC<PandaAssemblyLanguageConfig>;
+TEMPLATE_CLASS_LANGUAGE_CONFIG(StwGC);
+template class StwGCMarker<LANG_TYPE_STATIC, false>;
+template class StwGCMarker<LANG_TYPE_DYNAMIC, false>;
 
 }  // namespace panda::mem

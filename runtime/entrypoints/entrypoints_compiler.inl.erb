@@ -56,8 +56,3 @@ size_t GetEntrypointArgsNum(EntrypointId id) {
     }
     UNREACHABLE();
 }
-
-uint32_t GetEntrypointsCrc32() {
-    static constexpr uint32_t ENTRYPOINTS_CRC32 = <%= Compiler::entrypoints_crc32 %>;
-    return ENTRYPOINTS_CRC32;
-}

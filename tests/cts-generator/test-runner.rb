@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Huawei Technologies Co.,Ltd.
+
 require 'optparse'
 require 'fileutils'
 require 'ostruct'
@@ -26,6 +28,7 @@ require_relative 'runner/runner'
 require_relative 'runner/single_test_runner'
 require_relative 'runner/reporters/test_reporter'
 require_relative 'runner/reporters/jtr_reporter'
+require_relative 'runner/reporters/allure_reporter'
 
 def check_option(optparser, options, key)
   return if options[key]
@@ -55,6 +58,8 @@ end
 Encoding.default_external = Encoding::UTF_8
 Encoding.default_internal = Encoding::UTF_8
 
+TestRunner.runner_class = TestRunner::SingleTestRunner
+
 options = OpenStruct.new
 options[:exclude_tag] = []
 options[:include_tag] = []
@@ -65,6 +70,7 @@ optparser = OptionParser.new do |opts|
   opts.banner = 'Usage: test-runner.rb [options]'
   opts.on('-p', '--panda-build DIR', 'Path to panda build directory (required)')
   opts.on('-t', '--test-dir DIR', 'Path to test directory to search tests recursively, or path to single test (required)')
+  opts.on('-x', '--temp-dir DIR', 'Temporary files location, defaults to /tmp')
   opts.on('-v', '--verbose LEVEL', Integer, 'Set verbose level 1..5')
   opts.on('--verbose-verifier', 'Allow verifier to produce extended checking log')
   opts.on('--aot-mode', 'Perform AOT compilation on test sources')
@@ -72,12 +78,13 @@ optparser = OptionParser.new do |opts|
   opts.on('--dump-timeout SECONDS', Integer, 'Set process completion timeout, default is 30 seconds')
   opts.on('--enable-core-dump', 'Enable core dumps')
   opts.on('--verify-tests', 'Run verifier against positive tests (option for test checking)')
+  opts.on('--with-quickener', 'Run quickener tool after assembly')
   opts.on('--global-timeout SECONDS', Integer, 'Set testing timeout, default is 0 (ulimited)')
   opts.on('-a', '--run-all', 'Run all tests, ignore "runner-option: ignore" tag in test definition')
   opts.on('--run-ignored', 'Run ignored tests, which have "runner-option: ignore" tag in test definition')
   opts.on('--reporter TYPE', "Reporter for test results (default 'log', available: 'log', 'jtr', 'allure')")
   opts.on('--report-dir DIR', "Where to put results, applicable for 'jtr' and 'allure' logger")
-  opts.on('--verifier-debug-config PATH', "Path to verifier debug config file")
+  opts.on('--verifier-config PATH', "Path to verifier config file")
   opts.on('-e', '--exclude-tag TAG', Array, 'Exclude tags for tests') do |f|
     options[:exclude_tag] |= [*f]
   end
@@ -92,14 +99,17 @@ optparser = OptionParser.new do |opts|
   end
   opts.on('-j', '--jobs N', 'Amount of concurrent jobs for test execution (default 8)', Integer)
   opts.on('--prlimit OPTS', "Run panda via prlimit with options")
-  # Device-specific options:
-  opts.on('-H', '--host-toolspath PATH', 'directory with host-tools')
+  opts.on('--plugins PLUGINS', Array, 'Paths to runner plugins') do |plugins|
+    plugins.each do |plugin|
+      require plugin
+      TestRunner.plugins.last.add_options(opts, options)
+    end
+  end
   opts.on('-h', '--help', 'Prints this help') do
     puts opts
     exit
   end
 end
-
 
 optparser.parse!(into: options)
 
@@ -111,11 +121,13 @@ check_option_limit(optparser, options, 'jobs', 1, 20)
 check_option_limit(optparser, options, 'timeout', 1, 1000)
 options['verbose'] = 1 unless options['verbose']
 options['timeout'] = 30 unless options['timeout']
+options['temp-dir'] = '/tmp' unless options['temp-dir']
 options['dump-timeout'] = 30 unless options['dump-timeout']
 options['global-timeout'] = 0 unless options['global-timeout']
 options['jobs'] = 8 unless options['jobs']
 options['reporter'] = 'log'  unless options['reporter']
 
+# TODO refactor to avoid global vars
 $VERBOSITY = options['verbose']
 $TIMEOUT = options['timeout']
 $DUMP_TIMEOUT = options['dump-timeout']
@@ -129,30 +141,27 @@ $panda = if options['prlimit']
 else
   "#{$path_to_panda}/bin/ark"
 end
-# Now verifier is integrated to panda!
-$verifier = "#{$panda}"
-$verifier_debug_config = options['verifier-debug-config'] || ''
+$verifier = "#{$path_to_panda}/bin/verifier"
+$verifier_config = options['verifier-config'] || ''
 $paoc = if options['aot-mode']
   # Use paoc on host for x86
   "#{$path_to_panda}/bin/ark_aot"
 else
   false
 end
-
-TestRunner.log 2, "Path to panda: #{$path_to_panda}"
-TestRunner.log 2, "Path to verifier debug config: #{$verifier_debug_config}"
-
-# Check if tests are going to be executed on Device
-if options['host-toolspath']
-  $pandasm = "LD_LIBRARY_PATH=#{options['host-toolspath']}/assembler:" \
-             "#{options['host-toolspath']}/bytecode_optimizer/:" \
-             "#{options['host-toolspath']}/libpandabase/:" \
-             "#{options['host-toolspath']}/compiler/:#{options['host-toolspath']}/libpandafile/:" \
-             "#{options['host-toolspath']}/libziparchive/:" \
-             "#{options['host-toolspath']}/libc_sec/ " \
-             "#{options['host-toolspath']}/assembler/ark_asm"
+$quickener = if options['with-quickener']
+  # Use quickener tool
+  "#{$path_to_panda}/bin/arkquick"
+else
+  false
 end
 
+TestRunner.log 2, "Path to panda: #{$path_to_panda}"
+TestRunner.log 2, "Path to verifier debug config: #{$verifier_config}"
+
+TestRunner::plugins.each { |p| p.process(options) }
+
+# TODO refactor to avoid global vars
 $run_all = options['run-all']
 $run_ignore = options['run-ignored']
 $enable_core = !!options['enable-core-dump']
@@ -174,10 +183,8 @@ TestRunner::log 2, "pandasm: #{$pandasm}"
 TestRunner::log 2, "panda: #{$panda}"
 TestRunner::log 2, "verifier: #{$verifier}"
 
-$tmp_dir  = ".#{File::SEPARATOR}.bin#{File::SEPARATOR}#{SecureRandom.uuid}#{File::SEPARATOR}"
-$tmp_file = "#{$tmp_dir}pa.bin"
+$tmp_dir  = "#{options['temp-dir']}#{File::SEPARATOR}#{SecureRandom.uuid}#{File::SEPARATOR}"
 TestRunner::log 2, "tmp_dir: #{$tmp_dir}"
-TestRunner::log 2, "tmp_file: #{$tmp_file}"
 TestRunner::log 3, "Make dir - #{$tmp_dir}"
 FileUtils.mkdir_p $tmp_dir unless File.exist? $tmp_dir
 
@@ -192,6 +199,7 @@ else
   Dir.glob("#{path_to_tests}/**/*.pa")
 end
 
+# TODO should be configured
 reporter_factory = if $reporter == 'jtr'
     TestRunner::JtrTestReporter
   elsif $reporter == 'allure'
@@ -212,8 +220,7 @@ def create_executor_threads(queue, id, reporter_factory)
   Thread.new do
     begin
       while file = queue.pop(true)
-        runner = TestRunner::SingleTestRunner.new(
-          file, id, reporter_factory, $root_dir, $report_dir)
+        runner = TestRunner.create_runner(file, id, reporter_factory, $root_dir, $report_dir)
         runner.process_single
       end
     rescue ThreadError => e # for queue.pop, suppress
@@ -254,7 +261,7 @@ if $CONCURRENCY > 1
       end
 
       # We have active treads, kill them
-      if has_active_tread
+      if has_active_tread == true
         runner_threads.each do |t|
           status = t.status
           if status != false
@@ -272,8 +279,7 @@ if $CONCURRENCY > 1
 else
   begin
     while file = queue.pop(true)
-      runner = TestRunner::SingleTestRunner.new(
-        file, 1, reporter_factory, $root_dir, $report_dir)
+      runner = TestRunner.create_runner(file, 1, reporter_factory, $root_dir, $report_dir)
       runner.process_single
       if ($GLOBAL_TIMEOUT > 0 && (Time.now - start_time >= $GLOBAL_TIMEOUT))
         puts "Global timeout reached, finish test execution"
@@ -297,8 +303,8 @@ end
 
 TestRunner::log 1, '----------------------------------------'
 TestRunner::log 1, "Testing done in #{Time.now - start_time} sec"
-TestRunner::log 2, "Remove tmp dir:#{$tmp_dir}"
-FileUtils.mkdir_p $tmp_dir unless File.exist? $tmp_dir
+TestRunner::log 2, "Remove tmp dir if empty: #{$tmp_dir}"
+FileUtils.rm_rf $tmp_dir if File.exist?($tmp_dir) && Dir.children($tmp_dir).empty?
 
 TestRunner::Result.write_report
 

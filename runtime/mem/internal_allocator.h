@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_H_
-#define PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_H_
+#ifndef PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_H
+#define PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_H
 
 #include <vector>
 
@@ -55,6 +54,12 @@ class EmptyMemoryConfig;
 
 template <InternalAllocatorConfig Config = InternalAllocatorConfig::PANDA_ALLOCATORS>
 class InternalAllocator {
+#ifdef NDEBUG
+    using InternalAllocConfigT = EmptyMemoryConfig;
+#else
+    using InternalAllocConfigT = RawMemoryConfig;
+#endif
+
 public:
     explicit InternalAllocator(MemStatsType *mem_stats);
 
@@ -71,6 +76,9 @@ public:
 
     template <class T>
     [[nodiscard]] T *AllocArray(size_t size);
+
+    template <class T>
+    [[nodiscard]] T *AllocArrayLocal(size_t size);
 
     template <typename T, typename... Args>
     [[nodiscard]] std::enable_if_t<!std::is_array_v<T>, T *> New(Args &&... args);
@@ -112,11 +120,6 @@ public:
     template <typename MemVisitor>
     void VisitAndRemoveFreePools(MemVisitor mem_visitor);
 
-#ifdef NDEBUG
-    using InternalAllocConfigT = EmptyMemoryConfig;
-#else
-    using InternalAllocConfigT = RawMemoryConfig;
-#endif
     using LocalSmallObjectAllocator = RunSlotsAllocator<InternalAllocConfigT, RunSlotsAllocatorLockConfig::DummyLock>;
 
     /**
@@ -152,7 +155,6 @@ private:
     MemStatsType *mem_stats_;
     AllocTracker *tracker_ = nullptr;
 #endif  // TRACK_INTERNAL_ALLOCATIONS
-
     using RunSlotsAllocatorT = RunSlotsAllocator<InternalAllocConfigT>;
     using FreeListAllocatorT = FreeListAllocator<InternalAllocConfigT>;
     using HumongousObjAllocatorT = HumongousObjAllocator<InternalAllocConfigT>;
@@ -171,4 +173,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_H_
+#endif  // PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_H

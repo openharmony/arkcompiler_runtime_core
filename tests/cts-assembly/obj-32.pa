@@ -27,7 +27,7 @@
     return.void
 }
 
-.function u1 main() {
+.function i32 main() {
     ldai 20
     ststatic R1.s_f
     ldstatic R2.s_f

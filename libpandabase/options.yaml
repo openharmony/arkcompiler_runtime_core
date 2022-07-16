@@ -53,7 +53,7 @@ options:
   possible_values:
   - all
   - alloc
-  - alloc-obj
+  - mm-obj-events
   - classlinker
   - common
   - core
@@ -77,4 +77,44 @@ options:
   - ecmascript
   - scheduler
   description: Enable logs from specified components
+  delimiter: ":"
+
+- name: log-debug
+  type: arg_list_t
+  default:
+  - all
+  possible_values: $log-components
+  description: Enable debug or above logs from specified components
+  delimiter: ":"
+
+- name: log-info
+  type: arg_list_t
+  default:
+  - all
+  possible_values: $log-components
+  description: Enable info or above logs from specified components
+  delimiter: ":"
+
+- name: log-warning
+  type: arg_list_t
+  default:
+  - all
+  possible_values: $log-components
+  description: Enable warning or above logs from specified components
+  delimiter: ":"
+
+- name: log-error
+  type: arg_list_t
+  default:
+  - all
+  possible_values: $log-components
+  description: Enable error or above logs from specified components
+  delimiter: ":"
+
+- name: log-fatal
+  type: arg_list_t
+  default:
+  - all
+  possible_values: $log-components
+  description: Enable fatal logs from specified components
   delimiter: ":"

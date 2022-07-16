@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_TYPE_TYPE_SYSTEM_H_
-#define PANDA_VERIFICATION_TYPE_TYPE_SYSTEM_H_
+#ifndef _PANDA_TYPE_SYSTEM_HPP
+#define _PANDA_TYPE_SYSTEM_HPP
 
 #include "verification/util/lazy.h"
 #include "verification/util/relation.h"
+
+#include "subtyping_closure.h"
 #include "type_sort.h"
 #include "type_index.h"
 #include "type_info.h"
-#include "type_type.h"
-#include "type_set.h"
 #include "type_param.h"
 #include "type_params.h"
 #include "type_parametric.h"
-#include "subtyping_closure.h"
-
+#include "type_set.h"
 #include "type_systems.h"
+#include "type_tags.h"
+#include "type_type.h"
 
 #include "runtime/include/mem/panda_containers.h"
 
@@ -36,115 +37,134 @@
 
 #include "macros.h"
 
-#include "type_system_kind.h"
-
 #include <memory>
 #include <variant>
 #include <functional>
 #include <algorithm>
 
+// TODO(vdyadov): refactor this awful code into more accurate pieces
+
+/*
+todo:
+3. lazy computation of parameters subtyping
+4. unify TypeParam/TypeParams with TypeParamIdx/TypeParamsIdx
+6. TypeParamsIdx - separate Variance from Indices
+7. Check parameters variance of types from type family (same sort + same arity),
+   upon new type addition. Or separate parameters variance from parameters, make
+   it independent entity, which is defined for type family prior any of type addition
+
+Q: mutualy recursive types?
+*/
+
 namespace panda::verifier {
 /*
 Design decisions:
-1. Subtyping relation is kept flat during types construction
-2. Subtyping relation closing may be either incremental/implicit during types construction or explicit
-3. Sorts are abstracted in the form of indices (of type size_t)
-4. Types internally represented as indices (size_t)
-5. There are special initial and final types, named as Bot and Top, and all types are implicitly related
+2. Subtyping relation is kept flat during types construction
+3. Subtyping relation closing may be either incremental/implicit during types construction or explicit.
+4. Sorts are abstracted in the form of indices (of type size_t)
+5. Types internally represented as indices (size_t)
+6. There are special initial and final types, named as Bot and Top, and all types are implicitly related
    as Bot <: type <: Top
 */
 
 class TypeSystem {
 public:
-    TypeSystem(const TypeSystem &) = delete;
-    TypeSystem(TypeSystem &&) = delete;
-    TypeSystem &operator=(const TypeSystem &) = delete;
-    TypeSystem &operator=(TypeSystem &&) = delete;
+    TypeSystem(SortIdx bot, SortIdx top, ThreadNum threadnum = 0, TypeSystemKind kind = TypeSystemKind::PANDA)
+        : kind_ {kind},
+          threadnum_ {threadnum},
+          BotNum_ {FindNumOrCreate({bot, {}})},
+          TopNum_ {FindNumOrCreate({top, {}})}
+    {
+    }
+
+    NO_COPY_SEMANTIC(TypeSystem);
+    DEFAULT_MOVE_SEMANTIC(TypeSystem);
     ~TypeSystem() = default;
 
     using TypeUniverse = PandaVector<TypeInfo>;
-    using MappingToIdx = PandaUnorderedMap<TypeInfo, TypeIdx>;
+    using MappingToNum = PandaUnorderedMap<TypeInfo, TypeNum>;
     // sort -> arity -> types
-    using TypeClasses = PandaVector<PandaUnorderedMap<size_t, VectorIdx>>;
+    using TypeClasses = PandaVector<PandaUnorderedMap<size_t, VectorNum>>;
 
-    Relation TypingRel_;
-    PandaVector<PandaUnorderedSet<TypeIdx>> ParameterOf_;
-    TypeUniverse Universe_;
-    MappingToIdx InfoToIdx_;
-    mutable TypeClasses TypeClasses_;
+    Relation TypingRel_ = {};
+    PandaVector<PandaUnorderedSet<TypeNum>> ParameterOf_ = {};
+    TypeUniverse Universe_ = {};
+    MappingToNum InfoToNum_ = {};
+    mutable TypeClasses TypeClasses_ = {};
     SubtypingClosureInfo SubtypingClosureCurrent_;
     SubtypingClosureInfo SubtypingClosureNext_;
     bool IncrementalSubtypingClosure_ = true;
     bool DeferIncrementalSubtypingClosure_ = false;
 
-    TypeSystemKind kind_;
+    TypeSystemKind kind_ = TypeSystemKind::PANDA;
+    ThreadNum threadnum_ = 0;
 
-    Index<TypeIdx> FindIdx(const TypeInfo &ti)
+    Index<TypeNum> FindNum(const TypeInfo &ti) const
     {
-        auto it = InfoToIdx_.find(ti);
-        if (it != InfoToIdx_.end()) {
+        auto it = InfoToNum_.find(ti);
+        if (it != InfoToNum_.end()) {
             return it->second;
         }
         return {};
     }
 
-    TypeIdx FindIdxOrCreate(const TypeInfo &ti)
+    TypeNum FindNumOrCreate(const TypeInfo &ti)
     {
-        Index<TypeIdx> existing_idx = FindIdx(ti);
-        if (existing_idx.IsValid()) {
-            return existing_idx;
+        Index<TypeNum> existingnum = FindNum(ti);
+        if (existingnum.IsValid()) {
+            return existingnum;
         }
-        size_t idx = Universe_.size();
-        TypingRel_.EnsureMinSize(idx);
+        size_t num = Universe_.size();
+        TypingRel_.EnsureMinSize(num);
         Universe_.push_back(ti);
         ParameterOf_.push_back({});
         const auto &params = ti.ParamsIdx();
         for (const auto &param : params) {
-            ParameterOf_[param].insert(idx);
+            ParameterOf_[param].insert(num);
         }
-        InfoToIdx_[ti] = idx;
+        InfoToNum_[ti] = num;
         SortIdx sort = ti.Sort();
         size_t arity = params.size();
         if (sort >= TypeClasses_.size()) {
             TypeClasses_.resize(sort + 1);
         }
-        TypeClasses_[sort][arity].push_back(idx);
-        Relate(idx, idx);
-        return idx;
+        TypeClasses_[sort][arity].push_back(num);
+        Relate(num, num);
+        return num;
     }
 
-    const VectorIdx &TypeClassIdx(TypeIdx type) const
+    const VectorNum &TypeClassNum(TypeNum type) const
     {
         const auto &info = Universe_[type];
         const auto &params = info.ParamsIdx();
         return TypeClasses_[info.Sort()][params.size()];
     }
 
-    void PerformClosingCurrentRelation() NO_THREAD_SAFETY_ANALYSIS
+    void PerformClosingCurrentRelation()
     {
-        auto add_to_next = [this](TypeIdx type) NO_THREAD_SAFETY_ANALYSIS {
+        auto addToNext = [this](TypeNum type) {
             const auto &info = Universe_[type];
             SubtypingClosureNext_.AddType(info.Sort(), type, info.Arity());
             return true;
         };
         while (!SubtypingClosureCurrent_.Empty()) {
-            SubtypingClosureCurrent_.ForAllTypeClasses([this, &add_to_next](auto &types) {
+            SubtypingClosureCurrent_.ForAllTypeClasses([this, &addToNext](auto &types) {
                 for (auto type_lhs : types) {
                     for (auto type_rhs : types) {
                         bool in_direct_relation = TypingRel_.IsInDirectRelation(type_lhs, type_rhs);
                         if (!in_direct_relation && CheckIfLhsSubtypeOfRhs(type_lhs, type_rhs)) {
-                            add_to_next(type_lhs);
-                            add_to_next(type_rhs);
+                            addToNext(type_lhs);
+                            addToNext(type_rhs);
                             TypingRel_ += {type_lhs, type_rhs};
                             for (const auto &type : ParameterOf_[type_lhs]) {
-                                add_to_next(type);
-                                TypingRel_.ForAllTo(type, add_to_next);
-                                TypingRel_.ForAllFrom(type, add_to_next);
+                                addToNext(type);
+                                TypingRel_.ForAllTo(type, addToNext);
+                                TypingRel_.ForAllFrom(type, addToNext);
                             }
                             for (const auto &type : ParameterOf_[type_rhs]) {
-                                add_to_next(type);
-                                TypingRel_.ForAllTo(type, add_to_next);
-                                TypingRel_.ForAllFrom(type, add_to_next);
+                                addToNext(type);
+                                TypingRel_.ForAllTo(type, addToNext);
+                                TypingRel_.ForAllFrom(type, addToNext);
                             }
                         }
                     }
@@ -155,31 +175,31 @@ public:
         }
     }
 
-    void Relate(TypeIdx lhs, TypeIdx rhs)
+    void Relate(TypeNum lhs, TypeNum rhs)
     {
         if (TypingRel_.IsInDirectRelation(lhs, rhs)) {
             return;
         }
         TypingRel_ += {lhs, rhs};
         if (IncrementalSubtypingClosure_) {
-            auto process_type = [this](TypeIdx type) {
-                auto add_to_current = [this](TypeIdx type_idx) {
-                    const auto &info = Universe_[type_idx];
-                    SubtypingClosureCurrent_.AddType(info.Sort(), type_idx, info.Arity());
+            auto processType = [this](TypeNum type) {
+                auto addToCurrent = [this](TypeNum type1) {
+                    const auto &info = Universe_[type1];
+                    SubtypingClosureCurrent_.AddType(info.Sort(), type1, info.Arity());
                     return true;
                 };
-                for (const auto &type_idx : TypeClassIdx(type)) {
-                    add_to_current(type_idx);
+                for (const auto &typenum : TypeClassNum(type)) {
+                    addToCurrent(typenum);
                 }
                 for (const auto &type_idx : ParameterOf_[type]) {
-                    add_to_current(type_idx);
-                    TypingRel_.ForAllTo(type_idx, add_to_current);
-                    TypingRel_.ForAllFrom(type_idx, add_to_current);
+                    addToCurrent(type_idx);
+                    TypingRel_.ForAllTo(type_idx, addToCurrent);
+                    TypingRel_.ForAllFrom(type_idx, addToCurrent);
                 }
             };
-            process_type(lhs);
+            processType(lhs);
             if (lhs != rhs) {
-                process_type(rhs);
+                processType(rhs);
             }
             if (!DeferIncrementalSubtypingClosure_) {
                 PerformClosingCurrentRelation();
@@ -218,34 +238,34 @@ public:
         return true;
     }
 
-    bool CheckIfLhsSubtypeOfRhs(TypeIdx lhs, TypeIdx rhs) const
+    bool CheckIfLhsSubtypeOfRhs(TypeNum lhs, TypeNum rhs) const
     {
-        const TypeInfo &lhs_info = Universe_[lhs];
-        const TypeInfo &rhs_info = Universe_[rhs];
-        if (lhs_info.Sort() != rhs_info.Sort()) {
+        const TypeInfo &lhsInfo = Universe_[lhs];
+        const TypeInfo &rhsInfo = Universe_[rhs];
+        if (lhsInfo.Sort() != rhsInfo.Sort()) {
             return false;
         }
-        const TypeParamsIdx &lhs_params = lhs_info.ParamsIdx();
-        const TypeParamsIdx &rhs_params = rhs_info.ParamsIdx();
-        return CheckIfLhsParamsSubtypeOfRhs(lhs_params, rhs_params);
+        const TypeParamsIdx &lhsParams = lhsInfo.ParamsIdx();
+        const TypeParamsIdx &rhsParams = rhsInfo.ParamsIdx();
+        return CheckIfLhsParamsSubtypeOfRhs(lhsParams, rhsParams);
     }
 
-    bool IsInDirectRelation(TypeIdx lhs, TypeIdx rhs) const
+    bool IsInDirectRelation(TypeNum lhs, TypeNum rhs) const
     {
         return TypingRel_.IsInDirectRelation(lhs, rhs);
     }
 
-    size_t GetSort(TypeIdx t) const
+    size_t GetSort(TypeNum t) const
     {
         return Universe_[t].Sort();
     }
 
-    size_t GetArity(TypeIdx t) const
+    size_t GetArity(TypeNum t) const
     {
         return Universe_[t].Arity();
     }
 
-    const TypeParamsIdx &GetParamsIdx(TypeIdx t) const
+    const TypeParamsIdx &GetParamsIdx(TypeNum t) const
     {
         return Universe_[t].ParamsIdx();
     }
@@ -267,8 +287,8 @@ public:
     template <typename Handler>
     void ForAllTypes(Handler &&handler) const
     {
-        for (size_t idx = 0; idx < Universe_.size(); ++idx) {
-            if (!handler(Type {kind_, idx})) {
+        for (size_t num = 0; num < Universe_.size(); ++num) {
+            if (!handler(Type {kind_, threadnum_, num})) {
                 return;
             }
         }
@@ -277,31 +297,31 @@ public:
     template <typename Handler>
     void ForAllSubtypesOf(const Type &t, Handler &&handler) const
     {
-        auto idx = t.Index();
-        auto callback = [this, &handler](const TypeIdx &index) {
-            bool result = handler(Type {kind_, index});
+        auto num = t.Number();
+        auto callback = [this, &handler](const TypeNum &t_num) {
+            bool result = handler(Type {kind_, threadnum_, t_num});
             return result;
         };
-        TypingRel_.ForAllTo(idx, callback);
+        TypingRel_.ForAllTo(num, callback);
     }
 
     template <typename Handler>
     void ForAllSupertypesOf(const Type &t, Handler &&handler) const
     {
-        auto idx = t.Index();
-        auto callback = [this, &handler](const TypeIdx &index) {
-            bool result = handler(Type {kind_, index});
+        auto num = t.Number();
+        auto callback = [this, &handler](const TypeNum &t_num) {
+            bool result = handler(Type {kind_, threadnum_, t_num});
             return result;
         };
-        TypingRel_.ForAllFrom(idx, callback);
+        TypingRel_.ForAllFrom(num, callback);
     }
 
-    const IntSet<TypeIdx> &GetDirectlyRelated(TypeIdx from) const
+    const IntSet<TypeNum> &GetDirectlyRelated(TypeNum from) const
     {
         return TypingRel_.GetDirectlyRelated(from);
     }
 
-    const IntSet<TypeIdx> &GetInverselyRelated(TypeIdx to) const
+    const IntSet<TypeNum> &GetInverselyRelated(TypeNum to) const
     {
         return TypingRel_.GetInverselyRelated(to);
     }
@@ -310,9 +330,9 @@ public:
     {
         ForAllTypes([this](const Type &type) {
             auto sort = type.Sort();
-            auto index = type.Index();
+            auto number = type.Number();
             auto arity = type.Arity();
-            SubtypingClosureCurrent_.AddType(sort, index, arity);
+            SubtypingClosureCurrent_.AddType(sort, number, arity);
             return true;
         });
         PerformClosingCurrentRelation();
@@ -331,17 +351,17 @@ public:
 
     ParametricType Parametric(SortIdx sort)
     {
-        return {kind_, sort};
+        return {kind_, threadnum_, sort};
     }
 
     Type Bot() const
     {
-        return {kind_, BotIdx_};
+        return {kind_, threadnum_, BotNum_};
     }
 
     Type Top() const
     {
-        return {kind_, TopIdx_};
+        return {kind_, threadnum_, TopNum_};
     }
 
     TypeSystemKind GetKind() const
@@ -349,15 +369,15 @@ public:
         return kind_;
     }
 
-    TypeSystem(SortIdx bot, SortIdx top, TypeSystemKind kind = TypeSystemKind::PANDA)
-        : kind_ {kind}, BotIdx_ {FindIdxOrCreate({bot, {}})}, TopIdx_ {FindIdxOrCreate({top, {}})}
+    ThreadNum GetThreadNum() const
     {
+        return threadnum_;
     }
 
 private:
-    TypeIdx BotIdx_;
-    TypeIdx TopIdx_;
+    TypeNum BotNum_;
+    TypeNum TopNum_;
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_TYPE_TYPE_SYSTEM_H_
+#endif  // !_PANDA_TYPE_SYSTEM_HPP

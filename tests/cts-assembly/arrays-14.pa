@@ -20,7 +20,7 @@
 
 # check NegativeArraySizeException in case of load from array
 
-.function u1 main() {
+.function i32 main() {
     movi v0, -1
 try_begin:
     newarr v1, v0, i32[]

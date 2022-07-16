@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_CORETYPES_NATIVE_POINTER_H_
-#define PANDA_RUNTIME_INCLUDE_CORETYPES_NATIVE_POINTER_H_
+#ifndef PANDA_RUNTIME_ECMASCRIPT_NATIVEPOINTER_H_
+#define PANDA_RUNTIME_ECMASCRIPT_NATIVEPOINTER_H_
 
 #include "runtime/include/language_context.h"
 #include "runtime/include/object_header.h"
 
 namespace panda::coretypes {
 
-// Used for the requirement of ACE that wants to associated a registered C++ resource with a JSObject.
+// Use for the requirement of ACE that wants to associated a registered C++ resource with a JSObject.
 class NativePointer : public ObjectHeader {
 public:
     inline void *GetExternalPointer() const
@@ -44,10 +44,6 @@ public:
         return MEMBER_OFFSET(NativePointer, external_pointer_);
     }
 
-    ~NativePointer() = default;
-    DEFAULT_COPY_SEMANTIC(NativePointer);
-    DEFAULT_MOVE_SEMANTIC(NativePointer);
-
 private:
     NativePointer() : ObjectHeader() {}
 
@@ -56,4 +52,4 @@ private:
 
 }  // namespace panda::coretypes
 
-#endif  // PANDA_RUNTIME_INCLUDE_CORETYPES_NATIVE_POINTER_H_
+#endif  // PANDA_RUNTIME_ECMASCRIPT_NATIVEPOINTER_H_

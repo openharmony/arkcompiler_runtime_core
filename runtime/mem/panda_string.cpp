@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,19 +59,12 @@ double PandaStringToD(const PandaString &str)
     return result;
 }
 
-template <class T>
-PandaString ConvertToString(T sp)
+PandaString ConvertToString(Span<const uint8_t> sp)
 {
     PandaString res;
     res.reserve(sp.size());
 
-    // Also support ascii that great than 127, so using unsigned char here
-    constexpr size_t MAX_CHAR = std::numeric_limits<unsigned char>::max();
-
     for (auto c : sp) {
-        if (c > MAX_CHAR) {
-            return "";
-        }
         res.push_back(c);
     }
 
@@ -93,7 +86,7 @@ PandaString ConvertToString(coretypes::String *s)
 {
     ASSERT(s != nullptr);
     if (s->IsUtf16()) {
-        // Should convert utf-16 to utf-8, because uint16_t likely greater than MAX_CHAR, will convert fail
+        // Should convert utf-16 to utf-8, because uint16_t likely great than MAX_CHAR, will convert fail
         size_t len = utf::Utf16ToMUtf8Size(s->GetDataUtf16(), s->GetUtf16Length()) - 1;
         PandaVector<uint8_t> buf(len);
         len = utf::ConvertRegionUtf16ToMUtf8(s->GetDataUtf16(), buf.data(), s->GetUtf16Length(), len, 0);

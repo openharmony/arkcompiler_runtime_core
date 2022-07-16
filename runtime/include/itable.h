@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,17 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_ITABLE_H_
-#define PANDA_RUNTIME_INCLUDE_ITABLE_H_
+#ifndef PANDA_RUNTIME_ITABLE_H_
+#define PANDA_RUNTIME_ITABLE_H_
 
 #include "libpandabase/utils/span.h"
 #include "runtime/include/mem/allocator.h"
-#include "runtime/include/method.h"
 
 namespace panda {
 
 class Class;
+class Method;
 
 class ITable {
 public:
@@ -59,6 +58,11 @@ public:
                 }
             }
             return entry;
+        }
+
+        static constexpr uint32_t GetInterfaceOffset()
+        {
+            return MEMBER_OFFSET(Entry, interface_);
         }
 
     private:
@@ -100,10 +104,27 @@ public:
     DEFAULT_COPY_SEMANTIC(ITable);
     DEFAULT_MOVE_SEMANTIC(ITable);
 
+    static constexpr uint32_t GetEntriesDataOffset()
+    {
+        return GetElementsOffset() + decltype(elements_)::GetDataOffset();
+    }
+    static constexpr uint32_t GetEntriesSizeOffset()
+    {
+        return GetElementsOffset() + decltype(elements_)::GetSizeOffset();
+    }
+    static constexpr uint32_t GetEntrySize()
+    {
+        return sizeof(Entry);
+    }
+
 private:
+    static constexpr uint32_t GetElementsOffset()
+    {
+        return MEMBER_OFFSET(ITable, elements_);
+    }
     Span<Entry> elements_ {nullptr, nullptr};
 };
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_ITABLE_H_
+#endif  // PANDA_RUNTIME_ITABLE_H_

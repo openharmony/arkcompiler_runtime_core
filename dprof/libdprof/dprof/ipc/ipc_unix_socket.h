@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_DPROF_LIBDPROF_DPROF_IPC_IPC_UNIX_SOCKET_H_
-#define PANDA_DPROF_LIBDPROF_DPROF_IPC_IPC_UNIX_SOCKET_H_
+#ifndef DPROF_LIBDPROF_DPROF_IPC_IPC_UNIX_SOCKET_H
+#define DPROF_LIBDPROF_DPROF_IPC_IPC_UNIX_SOCKET_H
 
 #include "os/unique_fd.h"
 
@@ -25,7 +25,6 @@ os::unique_fd::UniqueFd CreateUnixClientSocket();
 bool WaitDataTimeout(int fd, int timeoutMs);
 bool SendAll(int fd, const void *buf, int len);
 int RecvTimeout(int fd, void *buf, int len, int timeoutMs);
-
 }  // namespace panda::dprof::ipc
 
-#endif  // PANDA_DPROF_LIBDPROF_DPROF_IPC_IPC_UNIX_SOCKET_H_
+#endif  // DPROF_LIBDPROF_DPROF_IPC_IPC_UNIX_SOCKET_H

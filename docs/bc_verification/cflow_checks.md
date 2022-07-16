@@ -1,4 +1,4 @@
-## Checks for the method layout
+## Current layout model of a method
 
 ```
 =========
@@ -33,9 +33,10 @@ handler
 
 ```
 
-The layout of exception handlers is quite flexible, even nesting of a handler in another handler is allowed.
+I.e. layout of exception handlers is rather flexible, even
+handler in handler is allowed.
 
-## Checks for cflow transitions
+## Cflow transitions, which are subjects for checks
 
 ### Execution beyond method body
 
@@ -74,7 +75,7 @@ handler
        <----/
 ```
 
-Mis-jump or improper termination of cflow at the end of the method body is prohibited.
+Mis-jumps, or improper termination of cflow at the end of the body are prohibited.
 
 ```
 =========
@@ -97,8 +98,9 @@ lbl:  <-----\
        <----/
 ```
 
-Conditional jumps are in grey zone. If they are proven as always jumping into code, then they are considered normal. Currently,
-due to limitations of the verifier, conditional jumps at the end of the method are prohibited.
+Conditional jumps are in grey zone, if they may be proven as always jump
+into code, then they will be considered ok. Currently, due to imprecision
+of verifier, conditional jumps at the end of the method are prohibited.
 
 ### Code to exception handler
 
@@ -139,10 +141,12 @@ handler
    ...
 ```
 
-By default, only `throw` transition is allowed. Neither `jmp` nor fallthrough at the beginning of the exception handler is allowed.
-This behavior can be altered by the option `C-TO-H`.
+By default only `throw` transition is allowed. Neither `jmp`, nor
+fallthrough on beginning of exception handler are allowed.
 
-### Checks for jumps from code to the exception handler
+This behavior may be altered by option `C-TO-H`.
+
+### Code into exception handler
 
 ```
 =========
@@ -164,9 +168,9 @@ handler
    ...
 ```
 
-Jumps into body of exception handler from code are prohibited by default.
+Jumps into body of exception handler from code is prohibited by default.
 
-### Checks for cflow transitions between exception handlers
+### Handler to handler
 
 direct jumps:
 
@@ -217,9 +221,9 @@ handler
    ...
 ```
 
-By default, such cflow transitions are prohibited.
+By default such transition of control flow is prohibited.
 
-### Checks for cflow transitions from an exception handler into the inner handler
+### Handler into handler
 
 direct jumps:
 
@@ -286,7 +290,7 @@ handler
 
 By default such cflow transitions are prohibited.
 
-### Checks for jumps from the exception handler into code
+### Handler into code
 
 ```
 =========
@@ -306,4 +310,4 @@ handler        |
    ...
 ```
 
-By default, such jumps are prohibited.
+By default such jumps are prohibited currently.

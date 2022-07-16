@@ -21,7 +21,7 @@
 namespace panda::pandasm {
 
 % Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
-% insn = group.first
+% insn = group.first 
 % signature = assembler_signature(group, insn.jump?)
 % signature_str = signature.map { |o| "#{o.type} #{o.name}" }.join(', ')
 inline Ins Create_<%= insn.asm_token %>(<%= signature_str %>)

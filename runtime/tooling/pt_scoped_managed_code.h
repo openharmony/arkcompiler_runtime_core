@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TOOLING_PT_SCOPED_MANAGED_CODE_H_
-#define PANDA_RUNTIME_TOOLING_PT_SCOPED_MANAGED_CODE_H_
+#ifndef PANDA_TOOLING_PT_SCOPED_MANAGED_CODE_H
+#define PANDA_TOOLING_PT_SCOPED_MANAGED_CODE_H
 
 #include "runtime/include/mtmanaged_thread.h"
 
@@ -40,7 +40,6 @@ public:
 private:
     MTManagedThread *managed_thread_;
 };
-
 }  // namespace panda::tooling
 
-#endif  // PANDA_RUNTIME_TOOLING_PT_SCOPED_MANAGED_CODE_H_
+#endif  // PANDA_TOOLING_PT_SCOPED_MANAGED_CODE_H

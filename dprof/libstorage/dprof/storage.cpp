@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ std::unique_ptr<AppData> AppData::CreateByBuffer(const std::vector<uint8_t> &buf
     ASSERT(r.Value() <= size);
     size -= r.Value();
     if (size != 0) {
-        LOG(ERROR, DPROF) << "Cannot deserialize all buffers, unused buffer size: " << size;
+        LOG(ERROR, DPROF) << "Cannot deserialize all buffer, unused buffer size: " << size;
         return nullptr;
     }
 
@@ -72,6 +72,7 @@ std::unique_ptr<AppData> AppData::CreateByBuffer(const std::vector<uint8_t> &buf
 
 bool AppData::ToBuffer(std::vector<uint8_t> &buffer) const
 {
+    // 3
     if (!serializer::StructToBuffer<3>(common_info_, buffer)) {
         LOG(ERROR, DPROF) << "Cannot serialize common_info";
         return false;
@@ -179,10 +180,10 @@ void AppDataStorage::ForEachApps(const std::function<bool(std::unique_ptr<AppDat
             PLOG(ERROR, DPROF) << "stat() failed, path=" << path;
             continue;
         }
-
         size_t fileSize = statbuf.st_size;
+
         if (fileSize > MAX_BUFFER_SIZE) {
-            LOG(ERROR, DPROF) << "File is too large: " << path;
+            LOG(ERROR, DPROF) << "File is to large: " << path;
             continue;
         }
 

@@ -32,7 +32,7 @@ tests:
               acc: inout:f64
               format: [op_v_8]
         check-type: empty
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         code-template: |
           #
               fmovi.64 v0, %s
@@ -160,7 +160,7 @@ tests:
             - sig: fmul2.64 v:in:f64
               acc: inout:f64
               format: [op_v_8]
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         check-type: empty
         code-template: |
           #
@@ -269,7 +269,7 @@ tests:
             - sig: fmul2.64 v:in:f64
               acc: inout:f64
               format: [op_v_8]
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         check-type: empty
         code-template: |
           #
@@ -431,7 +431,7 @@ tests:
             - sig: fdiv2.64 v:in:f64
               acc: inout:f64
               format: [op_v_8]
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         check-type: empty
         code-template: |
           #   Calculate sin(x) using Taylor series for small x

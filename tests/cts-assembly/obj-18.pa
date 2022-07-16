@@ -17,7 +17,7 @@
     i32 x
 }
 
-.function u1 main() {
+.function i32 main() {
     newobj v0, Rec
     newobj v1, Rec
     lda.obj v1

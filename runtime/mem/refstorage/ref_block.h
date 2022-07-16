@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_REFSTORAGE_REF_BLOCK_H_
-#define PANDA_RUNTIME_MEM_REFSTORAGE_REF_BLOCK_H_
+#ifndef PANDA_RUNTIME_MEM_REF_BLOCK_H
+#define PANDA_RUNTIME_MEM_REF_BLOCK_H
 
 #include <cstddef>
 #include <limits>
@@ -130,7 +129,7 @@ public:
         return Iterator(this);
     }
 
-    Iterator end() const  // NOLINT(readability-identifier-naming)
+    Iterator end()  // NOLINT(readability-identifier-naming)
     {
         return Iterator(nullptr);
     }
@@ -141,13 +140,13 @@ public:
     DEFAULT_MOVE_SEMANTIC(RefBlock);
 
 private:
-    uint8_t GetFreeIndex() const;
+    uint8_t GetFreeIndex();
 
     void Set(uint8_t index, const ObjectHeader *object);
 
-    bool IsFreeIndex(uint8_t index) const;
+    bool IsFreeIndex(uint8_t index);
 
-    bool IsBusyIndex(uint8_t index) const;
+    bool IsBusyIndex(uint8_t index);
 
     void PrintBlock();
 
@@ -176,4 +175,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_REFSTORAGE_REF_BLOCK_H_
+#endif  // PANDA_RUNTIME_MEM_REF_BLOCK_H

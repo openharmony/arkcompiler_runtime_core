@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Huawei Technologies Co.,Ltd.
+
 require 'optparse'
 require 'yaml'
 require 'json'
@@ -20,12 +22,13 @@ require 'erb'
 # Extend Module to implement a decorator for ISAPI methods
 class Module
   def cached(method_name)
+    definer = instance_methods.include?(method_name) ? :define_method : :define_singleton_method
     noncached_method = instance_method(method_name)
-    define_method(method_name) do
+    send(definer, method_name) do
       unless instance_variable_defined? "@#{method_name}"
         instance_variable_set("@#{method_name}", noncached_method.bind(self).call)
       end
-      instance_variable_get("@#{method_name}")
+      instance_variable_get("@#{method_name}").freeze
     end
   end
 end
@@ -76,7 +79,7 @@ optparser.parse!(into: options)
 
 check_option(optparser, options, :data)
 data = YAML.load_file(File.expand_path(options.data))
-data = JSON.parse(data.to_json, object_class: OpenStruct)
+data = JSON.parse(data.to_json, object_class: OpenStruct).freeze
 
 options&.require&.each { |r| require File.expand_path(r) } if options.require
 Gen.on_require(data)
@@ -88,7 +91,7 @@ end
 
 check_option(optparser, options, :template)
 template = File.read(File.expand_path(options.template))
-output = options.output ? File.open(File.expand_path(options.output), 'w') : STDOUT
+output = options.output ? File.open(File.expand_path(options.output), 'w') : $stdout
 t = ERB.new(template, nil, '%-')
 t.filename = options.template
 output.write(t.result(create_sandbox))

@@ -206,6 +206,7 @@ tests:
           exceptions:
             - x_arith
         header-template: [ArithmeticException, main]
+        tags: ['irtoc_ignore']
         code-template: |
             #
                 movi v0, %s
@@ -262,160 +263,146 @@ tests:
           - values: ["v16", "v16"]
             runner-options: ['compile-failure']
 
-      - file-name: type_v2
-        # These tests will be removed due to verifier tests cover these cases.
-        bugid: ["964", "966"]
-        tags: ["verifier"]
+      - file-name: type
         isa:
-          instructions:
-            - sig: div v1:in:i32, v2:in:i32
-              acc: out:i32
-              format: [op_v1_4_v2_4]
-          verification:
-            - v2_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        code-template: |
-          #
-              movi v0, 1
-              %s
-              sta v1
-              div v0, v1
-              ldai 0
-              return
-        check-type: no-check
-        description: Check div with incorrect second register type.
-        cases:
-          - values: [lda.str ""]
-          - values: [lda.str "some string"]
-          - values: [lda.null]
-          - values: [fldai.64 0.0]
-          - values: [fldai.64 -0.0]
-          - values: [fldai.64 1.0]
-          - values: [fldai.64 -1.0]
-          - values: [fldai.64 0x7FF8000000000000]
-          - values: [fldai.64 0xFFFFFFFFFFFFFFFF]
-          - values: [fldai.64 0x7FF0000000000000]
-          - values: [fldai.64 0xFFF0000000000000]
-          - values: [fldai.64 0xFFEFFFFFFFFFFFFF]
-          - values: [fldai.64 0x7FEFFFFFFFFFFFFF]
-          - values: [fldai.64 0x0000000000000001]
-          - values: [fldai.64 0x8000000000000001]
-          - values: [fldai.64 3.14159265358979323846]
-          - values: [ldai.64 0]
-          - values: [ldai.64 1]
-          - values: [ldai.64 -1]
-          - values: [ldai.64 0x0000000100000000]
-          - values: [ldai.64 0x0000000080000000]
-          - values: [ldai.64 0x8000000000000000]
-          - values: [ldai.64 0xFFFFFFFF00000000]
-          - values: [ldai.64 0xFFFFFFFFFFFFFFFF]
-
-      - file-name: type_v1
-        # These tests will be removed due to verifier tests cover these cases.
-        bugid: ["964", "966"]
-        tags: ["verifier"]
-        isa:
-          instructions:
-            - sig: div v1:in:i32, v2:in:i32
-              acc: out:i32
-              format: [op_v1_4_v2_4]
           verification:
             - v1_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        code-template: |
-          #
-              %s
-              sta v0
-              movi v1, 1
-              div v0, v1
-              ldai 0
-              return
-        check-type: no-check
-        description: Check div with incorrect first register type.
-        cases:
-          - values: [lda.str ""]
-          - values: [lda.str "some string"]
-          - values: [lda.null]
-          - values: [fldai.64 0.0]
-          - values: [fldai.64 -0.0]
-          - values: [fldai.64 1.0]
-          - values: [fldai.64 -1.0]
-          - values: [fldai.64 0x7FF8000000000000]
-          - values: [fldai.64 0xFFFFFFFFFFFFFFFF]
-          - values: [fldai.64 0x7FF0000000000000]
-          - values: [fldai.64 0xFFF0000000000000]
-          - values: [fldai.64 0xFFEFFFFFFFFFFFFF]
-          - values: [fldai.64 0x7FEFFFFFFFFFFFFF]
-          - values: [fldai.64 0x0000000000000001]
-          - values: [fldai.64 0x8000000000000001]
-          - values: [fldai.64 3.14159265358979323846]
-          - values: [ldai.64 0]
-          - values: [ldai.64 1]
-          - values: [ldai.64 -1]
-          - values: [ldai.64 0x0000000100000000]
-          - values: [ldai.64 0x0000000080000000]
-          - values: [ldai.64 0x8000000000000000]
-          - values: [ldai.64 0xFFFFFFFF00000000]
-          - values: [ldai.64 0xFFFFFFFFFFFFFFFF]
-
-      - file-name: type_obj_v1
-        bugid: ["964", "966"]
-        tags: ["verifier"]
-        isa:
-          instructions:
-            - sig: div v1:in:i32, v2:in:i32
-              acc: out:i32
-              format: [op_v1_4_v2_4]
-          verification:
-            - v1_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        description: Check div with incorrect first register type.
-        code-template: |
-          #
-          .record Object {}
-          .function i32 main() {
-              %s
-              movi v1, 1
-              div v0, v1
-              ldai 0
-              return
-        check-type: none
-        header-template: []
-        cases:
-          - values:
-            - |
-              lda.type Object
-              sta.obj v0
-          - values:
-            - newobj v0, Object
-
-      - file-name: type_obj_v2
-        bugid: ["964", "966"]
-        tags: ["verifier"]
-        isa:
-          instructions:
-            - sig: div v1:in:i32, v2:in:i32
-              acc: out:i32
-              format: [op_v1_4_v2_4]
-          verification:
             - v2_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        description: Check div with incorrect second register type.
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
+        header-template: []
         code-template: |
           #
-          .record Object {}
+          .record A {}
+          .record B {}
+          .record panda.String <external>
+          .record panda.Object <external>
           .function i32 main() {
-              movi v0, 1
               %s
+              *s
               div v0, v1
-              ldai 0
-              return
-        check-type: none
-        header-template: []
+        check-type: exit-positive
+        description: Check 'div' with incorrect register types.
+        template-cases:
+          - values:
+              - movi v0, 0
+            exclude: [val]
+          - values:
+              - movi.64 v0, 0
+          - values:
+              - fmovi v0, 0
+          - values:
+              - fmovi.64 v0, 0
+          - values:
+              - |
+                #
+                    lda.type B
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type B[]
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type panda.String
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type panda.Object
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    movi v0, 10
+                    newarr v0, v0, i32[]
+          - values:
+              - mov.null v0
         cases:
           - values:
-            - |
-              lda.type Object
-              sta.obj v1
+              - movi v1, 0
+            id: val
           - values:
-            - newobj v1, Object
+              - movi.64 v1, 0
+          - values:
+              - fmovi v1, 0
+          - values:
+              - fmovi.64 v1, 0
+          - values:
+              - |
+                #
+                    lda.type A
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    lda.type A[]
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    lda.type panda.String
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    lda.type panda.Object
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    movi v1, 10
+                    newarr v1, v1, i32[]
+          - values:
+              - mov.null v1
+
+
+      - file-name: uninitialized_regs
+        isa:
+          instructions:
+            - sig: div v1:in:i32, v2:in:i32
+              acc: out:i32
+              format: [op_v1_4_v2_4]
+        description: Check 'div' with uninitialized registers.
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
+        code-template: |
+            #
+                %s
+                *s
+                div %s, *s
+        check-type: exit-positive
+        template-cases:
+          - values:
+              - ''
+              - v0
+          - values:
+              - movi v0, 0
+              - v0
+            exclude: [init]
+          - values:
+              - ''
+              - v7
+          - values:
+              - ''
+              - v15
+          - values:
+              - 'movi v15, 0'
+              - v15
+            exclude: [init]
+        cases:
+          - values:
+              - ''
+              - v1
+          - values:
+              - movi v1, 0
+              - v1
+            id: init
+          - values:
+              - ''
+              - v8
+          - values:
+              - ''
+              - v14

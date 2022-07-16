@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_VALUE_VAR_BINDING_H_
-#define PANDA_VERIFICATION_VALUE_VAR_BINDING_H_
+#ifndef PANDA_VERIFICATION_VALUE_VAR_BINDING_H
+#define PANDA_VERIFICATION_VALUE_VAR_BINDING_H
 
 #include "verifier/type_system.h"
 #include "verifier/value/variable.h"
@@ -46,4 +46,4 @@ private:
 };
 }  //  namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_VALUE_VAR_BINDING_H_
+#endif  // PANDA_VERIFICATION_VALUE_VAR_BINDING_H

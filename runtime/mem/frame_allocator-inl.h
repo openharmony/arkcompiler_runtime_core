@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_INL_H_
-#define PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_INL_H_
+#ifndef PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_INL_H
+#define PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_INL_H
 
 #include "runtime/mem/frame_allocator.h"
 
@@ -31,16 +30,17 @@ using StackFrameAllocator = FrameAllocator<>;
 #define LOG_FRAME_ALLOCATOR(level) LOG(level, ALLOC) << "FrameAllocator: "
 
 template <Alignment AlignmenT, bool UseMemsetT>
-inline FrameAllocator<AlignmenT, UseMemsetT>::FrameAllocator()
+inline FrameAllocator<AlignmenT, UseMemsetT>::FrameAllocator(bool use_malloc) : use_malloc_(use_malloc)
 {
     LOG_FRAME_ALLOCATOR(DEBUG) << "Initializing of FrameAllocator";
-    mem_pool_alloc_ = PoolManager::GetMmapMemPool();
-    cur_arena_ = mem_pool_alloc_->AllocArena<FramesArena>(FIRST_ARENA_SIZE, SpaceType::SPACE_TYPE_INTERNAL,
-                                                          AllocatorType::FRAME_ALLOCATOR, this);
+    if (!use_malloc_) {
+        mem_pool_alloc_ = PoolManager::GetMmapMemPool();
+    }
+    cur_arena_ = AllocateArenaImpl(FIRST_ARENA_SIZE);
     last_alloc_arena_ = cur_arena_;
     biggest_arena_size_ = FIRST_ARENA_SIZE;
     arena_size_need_to_grow_ = true;
-    LOG_FRAME_ALLOCATOR(INFO) << "Initializing of FrameAllocator finished";
+    LOG_FRAME_ALLOCATOR(DEBUG) << "Initializing of FrameAllocator finished";
 }
 
 template <Alignment AlignmenT, bool UseMemsetT>
@@ -50,11 +50,11 @@ inline FrameAllocator<AlignmenT, UseMemsetT>::~FrameAllocator()
     while (last_alloc_arena_ != nullptr) {
         LOG_FRAME_ALLOCATOR(DEBUG) << "Free arena at addr " << std::hex << last_alloc_arena_;
         FramesArena *prev_arena = last_alloc_arena_->GetPrevArena();
-        mem_pool_alloc_->FreeArena<FramesArena>(last_alloc_arena_);
+        FreeArenaImpl(last_alloc_arena_);
         last_alloc_arena_ = prev_arena;
     }
     cur_arena_ = nullptr;
-    LOG_FRAME_ALLOCATOR(INFO) << "Destroying of FrameAllocator finished";
+    LOG_FRAME_ALLOCATOR(DEBUG) << "Destroying of FrameAllocator finished";
 }
 
 template <Alignment AlignmenT, bool UseMemsetT>
@@ -62,8 +62,7 @@ inline bool FrameAllocator<AlignmenT, UseMemsetT>::TryAllocateNewArena(size_t si
 {
     size_t arena_size = GetNextArenaSize(size);
     LOG_FRAME_ALLOCATOR(DEBUG) << "Try to allocate a new arena with size " << arena_size;
-    auto new_arena = mem_pool_alloc_->AllocArena<FramesArena>(arena_size, SpaceType::SPACE_TYPE_INTERNAL,
-                                                              AllocatorType::FRAME_ALLOCATOR, this);
+    FramesArena *new_arena = AllocateArenaImpl(arena_size);
     if (new_arena == nullptr) {
         LOG_FRAME_ALLOCATOR(DEBUG) << "Couldn't get memory for a new arena";
         arena_size_need_to_grow_ = false;
@@ -78,7 +77,7 @@ inline bool FrameAllocator<AlignmenT, UseMemsetT>::TryAllocateNewArena(size_t si
 }
 
 template <Alignment AlignmenT, bool UseMemsetT>
-inline void *FrameAllocator<AlignmenT, UseMemsetT>::Alloc(size_t size)
+ALWAYS_INLINE inline void *FrameAllocator<AlignmenT, UseMemsetT>::Alloc(size_t size)
 {
     ASSERT(AlignUp(size, GetAlignmentInBytes(AlignmenT)) == size);
     // Try to get free memory from current arenas
@@ -98,20 +97,22 @@ inline void *FrameAllocator<AlignmenT, UseMemsetT>::Alloc(size_t size)
     }
 
     ASSERT(AlignUp(ToUintPtr(mem), GetAlignmentInBytes(AlignmenT)) == ToUintPtr(mem));
-    LOG_FRAME_ALLOCATOR(INFO) << "Allocated memory at addr " << std::hex << mem;
+    LOG_FRAME_ALLOCATOR(DEBUG) << "Allocated memory at addr " << std::hex << mem;
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (UseMemsetT) {
-        (void)memset_s(mem, size, 0x00, size);
+        memset_s(mem, size, 0x00, size);
     }
+    allocated_size_ += size;
     return mem;
 }
 
 template <Alignment AlignmenT, bool UseMemsetT>
-inline void FrameAllocator<AlignmenT, UseMemsetT>::Free(void *mem)
+ALWAYS_INLINE inline void FrameAllocator<AlignmenT, UseMemsetT>::Free(void *mem)
 {
     ASSERT(cur_arena_ != nullptr);  // must has been initialized!
     ASSERT(ToUintPtr(mem) == AlignUp(ToUintPtr(mem), GetAlignmentInBytes(AlignmenT)));
     if (cur_arena_->InArena(mem)) {
+        allocated_size_ -= ToUintPtr(cur_arena_->GetTop()) - ToUintPtr(mem);
         cur_arena_->Free(mem);
     } else {
         ASSERT(cur_arena_->GetOccupiedSize() == 0);
@@ -119,6 +120,7 @@ inline void FrameAllocator<AlignmenT, UseMemsetT>::Free(void *mem)
 
         cur_arena_ = cur_arena_->GetPrevArena();
         ASSERT(cur_arena_->InArena(mem));
+        allocated_size_ -= ToUintPtr(cur_arena_->GetTop()) - ToUintPtr(mem);
         cur_arena_->Free(mem);
         if (UNLIKELY((empty_arenas_count_ + 1) > FRAME_ALLOC_MAX_FREE_ARENAS_THRESHOLD)) {
             FreeLastArena();
@@ -126,7 +128,7 @@ inline void FrameAllocator<AlignmenT, UseMemsetT>::Free(void *mem)
             empty_arenas_count_++;
         }
     }
-    LOG_FRAME_ALLOCATOR(INFO) << "Free memory at addr " << std::hex << mem;
+    LOG_FRAME_ALLOCATOR(DEBUG) << "Free memory at addr " << std::hex << mem;
 }
 
 template <Alignment AlignmenT, bool UseMemsetT>
@@ -159,10 +161,11 @@ inline void *FrameAllocator<AlignmenT, UseMemsetT>::TryToAllocate(size_t size)
 template <Alignment AlignmenT, bool UseMemsetT>
 inline size_t FrameAllocator<AlignmenT, UseMemsetT>::GetNextArenaSize(size_t size)
 {
-    if (arena_size_need_to_grow_) {
+    size_t requested_size = size + sizeof(FramesArena) + GetAlignmentInBytes(AlignmenT);
+    if ((arena_size_need_to_grow_) || (biggest_arena_size_ < requested_size)) {
         biggest_arena_size_ += ARENA_SIZE_GREW_LEVEL;
-        if (biggest_arena_size_ < size) {
-            biggest_arena_size_ = RoundUp(size, ARENA_SIZE_GREW_LEVEL);
+        if (biggest_arena_size_ < requested_size) {
+            biggest_arena_size_ = RoundUp(requested_size, ARENA_SIZE_GREW_LEVEL);
         }
     } else {
         arena_size_need_to_grow_ = true;
@@ -180,19 +183,57 @@ inline void FrameAllocator<AlignmenT, UseMemsetT>::FreeLastArena()
         cur_arena_ = last_alloc_arena_;
     }
     if (last_alloc_arena_ == nullptr) {
+        ASSERT(last_alloc_arena_ == cur_arena_);
+        // To fix clang tidy warning
+        // (it suggests that cur_arena_ can be not nullptr when
+        //  last_alloc_arena_ is equal to nullptr)
+        cur_arena_ = last_alloc_arena_;
         LOG_FRAME_ALLOCATOR(DEBUG) << "Clear the last arena in the list";
     } else {
         last_alloc_arena_->ClearNextLink();
     }
     LOG_FRAME_ALLOCATOR(DEBUG) << "Free the arena at addr " << std::hex << arena_to_free;
-    mem_pool_alloc_->FreeArena<FramesArena>(arena_to_free);
+    FreeArenaImpl(arena_to_free);
     arena_size_need_to_grow_ = false;
+}
+
+template <Alignment AlignmenT, bool UseMemsetT>
+inline typename FrameAllocator<AlignmenT, UseMemsetT>::FramesArena *
+FrameAllocator<AlignmenT, UseMemsetT>::AllocateArenaImpl(size_t size)
+{
+    FramesArena *new_arena = nullptr;
+    if (!use_malloc_) {
+        ASSERT(mem_pool_alloc_ != nullptr);
+        new_arena = mem_pool_alloc_->AllocArena<FramesArena>(size, SpaceType::SPACE_TYPE_INTERNAL,
+                                                             AllocatorType::FRAME_ALLOCATOR, this);
+    } else {
+        auto mem = panda::os::mem::AlignedAlloc(alignof(FramesArena), size);
+        if (mem != nullptr) {
+            size_t arena_storage_size = size - sizeof(FramesArena);
+            void *arena_start_addr = ToVoidPtr(ToUintPtr(mem) + sizeof(FramesArena));
+            new_arena = new (mem) FramesArena(arena_storage_size, arena_start_addr);
+        }
+    }
+    return new_arena;
+}
+
+template <Alignment AlignmenT, bool UseMemsetT>
+inline void FrameAllocator<AlignmenT, UseMemsetT>::FreeArenaImpl(FramesArena *arena)
+{
+    ASSERT(arena != nullptr);
+    if (!use_malloc_) {
+        ASSERT(mem_pool_alloc_ != nullptr);
+        mem_pool_alloc_->FreeArena<FramesArena>(arena);
+    } else {
+        os::mem::AlignedFree(arena);
+    }
 }
 
 template <Alignment AlignmenT, bool UseMemsetT>
 inline bool FrameAllocator<AlignmenT, UseMemsetT>::Contains(void *mem)
 {
     auto cur_arena = cur_arena_;
+
     while (cur_arena != nullptr) {
         LOG_FRAME_ALLOCATOR(DEBUG) << "check InAllocator arena at addr " << std::hex << cur_arena;
         if (cur_arena->InArena(mem)) {
@@ -206,4 +247,4 @@ inline bool FrameAllocator<AlignmenT, UseMemsetT>::Contains(void *mem)
 #undef LOG_FRAME_ALLOCATOR
 
 }  // namespace panda::mem
-#endif  // PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_INL_H_
+#endif  // PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_INL_H

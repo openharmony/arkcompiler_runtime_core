@@ -1,0 +1,107 @@
+/*
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef PANDA_RUNTIME_INCLUDE_LOADABLE_AGENT_H
+#define PANDA_RUNTIME_INCLUDE_LOADABLE_AGENT_H
+
+#include "libpandabase/os/library_loader.h"
+#include "libpandabase/os/mutex.h"
+#include "runtime/include/mem/panda_smart_pointers.h"
+#include "runtime/include/mem/panda_string.h"
+
+namespace panda {
+class LoadableAgent {
+public:
+    LoadableAgent() = default;
+    virtual ~LoadableAgent() = default;
+
+    virtual bool Load() = 0;
+    virtual bool Unload() = 0;
+
+private:
+    NO_COPY_SEMANTIC(LoadableAgent);
+    NO_MOVE_SEMANTIC(LoadableAgent);
+};
+
+using LoadableAgentHandle = std::shared_ptr<LoadableAgent>;
+
+class LibraryAgent : public LoadableAgent {
+public:
+    LibraryAgent(os::memory::Mutex &mutex, PandaString libraryPath, PandaString loadCallbackName,
+                 PandaString unloadCallbackName);
+
+    bool Load() override;
+    bool Unload() override;
+
+private:
+    virtual bool CallLoadCallback(void *resolvedFunction) = 0;
+    virtual bool CallUnloadCallback(void *resolvedFunction) = 0;
+
+    os::memory::LockHolder<os::memory::Mutex> lock_;
+
+    PandaString library_path_;
+    PandaString load_callback_name_;
+    PandaString unload_callback_name_;
+
+    os::library_loader::LibraryHandle handle_ {nullptr};
+    void *unload_callback_ {};
+};
+
+template <typename AgentType, bool Reusable>
+class LibraryAgentLoader {
+public:
+    template <typename... Args>
+    static LoadableAgentHandle LoadInstance(Args &&... args)
+    {
+        // This mutex is needed to be sure that getting / creation of an instance is made atomically
+        // (e.g. there won't be two threads that found no instance and tried to create a new one).
+        static os::memory::Mutex creation_mutex;
+        os::memory::LockHolder<os::memory::Mutex> creation_mutex_lock(creation_mutex);
+
+        static std::weak_ptr<LoadableAgent> instance;
+
+        auto inst = instance.lock();
+        if (inst) {
+            if constexpr (Reusable) {  // NOLINT(readability-braces-around-statements)
+                return inst;
+            } else {  // NOLINT(readability-misleading-indentation)
+                LOG(ERROR, RUNTIME) << "Non-reusable library is already used";
+                return {};
+            }
+        }
+
+        // This mutex is needed to be sure that there is only one library at a given point of time
+        // (e.g. a new instance initialization won't be performed earlier than deinitialization of the old one).
+        static os::memory::Mutex uniqueness_mutex;
+
+        auto lib = MakePandaUnique<AgentType>(uniqueness_mutex, std::forward<Args>(args)...);
+        if (!lib->Load()) {
+            LOG(ERROR, RUNTIME) << "Could not load library";
+            return {};
+        }
+
+        inst = std::shared_ptr<AgentType>(lib.release(), [](AgentType *ptr) {
+            ptr->Unload();
+            mem::InternalAllocator<>::GetInternalAllocatorFromRuntime()->Delete(ptr);
+        });
+
+        instance = inst;
+
+        return inst;
+    }
+};
+}  // namespace panda
+
+#endif  // PANDA_RUNTIME_INCLUDE_LOADABLE_AGENT_H

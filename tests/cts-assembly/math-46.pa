@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #Assert that operation modu2.64 works fine
-.function u1 main(){
+.function i32 main(){
     movi.64 v0, 3
     movi.64 v1, 1
     ldai.64 7

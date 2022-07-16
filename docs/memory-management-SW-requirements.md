@@ -1,24 +1,24 @@
-# Introduction
+# 1. INTRODUCTION
 
 The main components of Panda memory management:
 * Allocators
-* Garbage Collector (GC)
+* GC
 
-Allocators have two purposes:
+Allocators has two purposes:
 1. Allocations for the application
-1. Allocations for the internal usage by Runtime (Allocations for compiler purposes, for GC internal structures etc)
+1. Allocations for the internal usage by Runtime(Allocations for compiler purposes, for GC internal structures etc)
 
 Garbage Collector:
-GC automatically recycles memory that will never be used again.
-GC used to recycle memory allocated as result of application work (objects, compiled code etc).
+Garbage collector(GC) automatically recycles memory that it can prove will never be used again.
+GC used to recycle memory allocated as result of application work(objects, compiled code etc).
 
-# Overall Description
+# 2. OVERALL DESCRIPTION
 
 ## Allocator
 
-### Allocator Types
+### Alocator Types
 - Bump pointer allocator
-- Arena Allocator (objects can be deallocated at once (list of arenas, almost at once - O (number of arenas in the list)))
+- Arena Allocator (objects can be deallocated at once(list of arenas, almost at once - O(number of arenas in the list)))
 - Freelist allocator
 - TLAB
 - Run of slots allocator
@@ -27,46 +27,48 @@ GC used to recycle memory allocated as result of application work (objects, comp
 ### Spaces
 
 - Code space (executable)
-- Compiler Internal Space (linked list of arenas)
+- Compiler Internal Space(linked list of arenas)
 - Internal memory space for non-compiler part of runtime (including GC internals)
 - Object space
-- Non-moving space (space for non-movable objects)
+- Non-moving space(space for non-movable objects)
 
 ## GC
 
 - Concurrent generational GC (optional - we can disable generational mode)
 - GC for classes (optional)
-- GC for code cache (optional)
-- Reference processor
+- GC for code cache(optional)
+
+Reference processor.
 
 High level requirements for GC:
-- Acceptable latency (max pause) for good user experience
-- Acceptable throughput
-- Acceptable footprint size
+- acceptable latency (max pause) for good user experience
+- acceptable throughput
+- acceptable footprint size
 
-# Key Features of the Memory Management System
+# 3. KEY FEATURES OF MEMORY MANAGEMENT SYSTEM
 
-You can flexibly configure the set of allocators and GCs.
-You can choose MM configurations for applications using a profile (for example, you can choose non-compacting GCs with freelist allocators for some applications
-if acceptable metrics is available for the applications).
+Configurable flexible setup "Set of allocators + GC"
+We can use profile to choose MM configuration for application (for example: we can choose non-compacting GC with freelist allocators for some application if we get acceptable metrics for this)
 
-# Interaction with Other Components
+
+# 4. INTERACTION WITH OTHER COMPONENTS
 
 ## Allocator
 
-- Allocator API for runtime
+- allocator API for runtime
 - TLAB API for compiler and interpreter
-- Interfaces for tools
+- interfaces for tools?
 
 ## GC
 
 - Safepoints
 - Reference storage and additional interfaces for MM <-> JNI interaction
-- Barriers APIs for compilers and interpreters
+- Barriers API for compiler and interpreter
 - Possibility to change VRegs for any frame in the stack
-- Interfaces for tools
+- interfaces for tools?
 
-# Additional Requirements
+# 5. ADDITIONAL REQUIREMENTS
 
 - Memory management flexible enough to work with multiple languages.
-- Provide various statistics data
+- provide various statistics data
+

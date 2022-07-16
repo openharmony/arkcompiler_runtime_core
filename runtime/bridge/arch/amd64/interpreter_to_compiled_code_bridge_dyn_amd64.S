@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ InterpreterToCompiledCodeBridgeDyn:
     CFI_DEF_CFA_REGISTER(rax)
 
     // According to the current frame kind set the bridge type
-    movb THREAD_FRAME_KIND(%rcx), %r10b
+    movb MANAGED_THREAD_FRAME_KIND_OFFSET(%rcx), %r10b
     testb %r10b, %r10b
     movq $INTERPRETER_TO_COMPILED_CODE_BRIDGE, %r11
     movq $BYPASS_BRIDGE, %r10
@@ -69,8 +69,15 @@ InterpreterToCompiledCodeBridgeDyn:
 
     // the dispatch routine expects opcode in ecx
     movzbl (%rax), %ecx
+    cmpl $MIN_PREFIX_OPCODE_INDEX, %ecx
+    jl .Lnonprefixed
+    movzwl (%rax), %ecx
+    addq $2, %rax
+    jmp .Ldispatch
+.Lnonprefixed:
     addq $1, %rax // read opcode and advance insn_ptr
 
+.Ldispatch:
     // The file contains code which checks opcode and jumps
     // to the corresponding handler.
     // At the end each handler jumps to .Lload_reg_args label.
@@ -94,9 +101,8 @@ InterpreterToCompiledCodeBridgeDyn:
     movq (%rbp), %r12 // load iframe from the stack
     addq $FRAME_ACC_OFFSET, %r12
 
-    // store value and tag to frame.acc
+    // store value to frame.acc
     movq %rax, (%r12)
-    movq %rdx, FRAME_VREGISTER_TAG_OFFSET(%r12)
 
 .Lreturn:
     leaq -56(%rbp), %rsp
@@ -137,7 +143,7 @@ InvokeCompiledCodeWithArgArrayDyn:
     CFI_DEF_CFA_REGISTER(rax)
 
     // According to the current frame kind set the bridge type
-    movb THREAD_FRAME_KIND(%r8), %r10b
+    movb MANAGED_THREAD_FRAME_KIND_OFFSET(%r8), %r10b
     testb %r10b, %r10b
     movq $INTERPRETER_TO_COMPILED_CODE_BRIDGE, %r11
     movq $BYPASS_BRIDGE, %r10
@@ -166,51 +172,64 @@ InvokeCompiledCodeWithArgArrayDyn:
     //  const Method*,                         %rcx
     //  ManagedThread* thread                  %r8
 
-    // setup regs as follow
-    // %rdi - method, %rsi - num_args,
-    // %rdx - func, %rcx - func_tag,
-    // %r8 - arg0, %r9 - arg0_tag,
-    // %r10/%r11 - temps,
-    // %rax - values, %rbx - num_args counter,
-    // %r15 - thread
+    movq %r8, %THREAD_REG // Properly set thread register
+
+    // rax <- pointer to current arg to copy
     movq %rdi, %rax
-    movl %esi, %ebx
-    movq %r8, %THREAD_REG
+
+    // ABI arg reg 0 (rdi) <- panda::Method*
+    // ABI arg reg 1 (rsi) <- num_args (already on the relevant reg, no moves required)
     movq %rcx, %rdi
 
-    // setup function object
-    movq (%rax), %r10
-    movq FRAME_VREGISTER_TAG_OFFSET(%rax), %r11
+    // No arguments passed to the callee
+    cmpq $0, %rsi
+    je .Linvoke_
+
+    // ebx <- temporary arg counter
+    movl %esi, %ebx
+
+    // ABI arg reg 2 (rdx) <- boxed arg0 from user's code
+    movq (%rax), %rdx
     addq $FRAME_VREGISTER_SIZE, %rax
-    movq %r10, %rdx
-    movq %r11, %rcx
+    subl $1, %ebx
     cmpl $0, %ebx
     je .Linvoke_
 
-    // load arg0 regs
-    movq (%rax), %r10
-    movq FRAME_VREGISTER_TAG_OFFSET(%rax), %r11
+    // ABI arg reg 3 (rcx) <- boxed arg1 from user's code
+    movq (%rax), %rcx
     addq $FRAME_VREGISTER_SIZE, %rax
-    movq %r10, %r8
-    movq %r11, %r9
     subl $1, %ebx
+    cmpl $0, %ebx
+    je .Linvoke_
+
+    // ABI arg reg 4 (r8) <- boxed arg2 from user's code
+    movq (%rax), %r8
+    addq $FRAME_VREGISTER_SIZE, %rax
+    subl $1, %ebx
+    cmpl $0, %ebx
+    je .Linvoke_
+
+    // ABI arg reg 5 (r9) <- boxed arg3 from user's code
+    movq (%rax), %r9
+    addq $FRAME_VREGISTER_SIZE, %rax
+    subl $1, %ebx
+    cmpl $0, %ebx
     je .Linvoke_
 
     // setup stack args
     // reserve stack space
     // %r12 - stack poionter
     movl %ebx, %r12d
-    shll $4, %r12d
+    shll $3, %r12d
     subq %r12, %rsp
+    andq $-16, %rsp
     movq %rsp, %r12
 
-    // copy arguments to the stack
+    // Copy boxed arguments to the stack
 .Lloop_:
     movq (%rax), %r10
-    movq FRAME_VREGISTER_TAG_OFFSET(%rax), %r11
     addq $FRAME_VREGISTER_SIZE, %rax
     movq %r10, (%r12)
-    movq %r11, FRAME_VREGISTER_TAG_OFFSET(%r12)
     addq $FRAME_VREGISTER_SIZE, %r12
     subl $1, %ebx
     ja .Lloop_

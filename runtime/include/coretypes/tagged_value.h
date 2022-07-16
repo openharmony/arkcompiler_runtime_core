@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,12 @@
 #include <climits>
 #include <cstddef>
 #include "macros.h"
+#include "libpandabase/mem/mem.h"
 #include "utils/bit_utils.h"
-#include "include/object_header.h"
+
+namespace panda {
+class ObjectHeader;
+}  // namespace panda
 
 namespace panda::coretypes {
 
@@ -64,8 +68,9 @@ public:
     static constexpr size_t TAG_BITS_SHIFT = BitNumbers<TaggedType>() - TAG_BITS_SIZE;
     static_assert((TAG_BITS_SHIFT + TAG_BITS_SIZE) == sizeof(TaggedType) * CHAR_BIT, "Insufficient bits!");
     static constexpr TaggedType TAG_MASK = ((1ULL << TAG_BITS_SIZE) - 1ULL) << TAG_BITS_SHIFT;
-    static constexpr TaggedType TAG_INT = 0xFFFFULL << TAG_BITS_SHIFT;
+    static constexpr TaggedType TAG_INT = TAG_MASK;
     static constexpr TaggedType TAG_OBJECT = 0x0000ULL << TAG_BITS_SHIFT;
+    static constexpr TaggedType OBJECT_MASK = ~TAG_INT;
 
     static constexpr TaggedType TAG_SPECIAL_MASK = 0xFFULL;
     static constexpr TaggedType TAG_SPECIAL_VALUE = 0x02ULL;
@@ -102,6 +107,31 @@ public:
             return;
         }
         value_ = TaggedValue(static_cast<int32_t>(v)).GetRawData();
+    }
+
+    static uint64_t GetIntTaggedValue(uint64_t v)
+    {
+        ASSERT(INT32_MIN <= static_cast<int32_t>(bit_cast<int64_t>(v)));
+        ASSERT(static_cast<int32_t>(bit_cast<int64_t>(v)) <= INT32_MAX);
+        return static_cast<uint32_t>(v) | TAG_INT;
+    }
+
+    static uint64_t GetDoubleTaggedValue(uint64_t v)
+    {
+        return v + DOUBLE_ENCODE_OFFSET;
+    }
+
+    static uint64_t GetBoolTaggedValue(uint64_t v)
+    {
+        ASSERT(v == 0 || v == 1);
+        return (v == 0) ? static_cast<uint64_t>(coretypes::TaggedValue::False().GetRawData())
+                        : static_cast<uint64_t>(coretypes::TaggedValue::True().GetRawData());
+    }
+
+    static uint64_t GetObjectTaggedValue(uint64_t v)
+    {
+        ASSERT(static_cast<uint32_t>(v) == v);
+        return v;
     }
 
     explicit TaggedValue(int64_t v)
@@ -201,16 +231,18 @@ public:
         return static_cast<int>(value_ & (~TAG_MASK));
     }
 
-    inline TaggedType GetRawData() const
+    inline constexpr TaggedType GetRawData() const
     {
         return value_;
     }
 
     inline ObjectHeader *GetHeapObject() const
     {
-        ASSERT_PRINT(IsHeapObject() && ((value_ & TAG_WEAK_FILTER) == 0U),
-                     "can not convert TaggedValue to HeapObject :" << std::hex << value_);
-        return reinterpret_cast<ObjectHeader *>(value_);
+        ASSERT_PRINT(IsHeapObject(), "can not convert TaggedValue to HeapObject :" << std::hex << value_);
+        // TODO(vpukhov): weakref ignored
+        // ASSERT_PRINT((value_ & TAG_WEAK_FILTER) == 0U,
+        //             "can not convert TaggedValue to HeapObject :" << std::hex << value_);
+        return reinterpret_cast<ObjectHeader *>(value_ & (~TAG_WEAK_MASK));
     }
 
     //  This function returns the heap object pointer which may have the weak tag.
@@ -326,7 +358,5 @@ public:
 private:
     TaggedType value_;
 };
-
 }  // namespace panda::coretypes
-
 #endif  // PANDA_RUNTIME_INCLUDE_CORETYPES_TAGGED_VALUE_H_

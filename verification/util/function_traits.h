@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_FUNCTION_TRAITS_H_
-#define PANDA_VERIFICATION_UTIL_FUNCTION_TRAITS_H_
+#ifndef PANDA_VERIFIER_UTIL_FUNCTION_TRAITS_
+#define PANDA_VERIFIER_UTIL_FUNCTION_TRAITS_
 
 #include <tuple>
 
@@ -98,9 +98,6 @@ public:
     using type = ret_type;
 
     n_ary(BinOp op) : binop {op} {}
-    ~n_ary() = default;
-    DEFAULT_MOVE_SEMANTIC(n_ary);
-    DEFAULT_COPY_SEMANTIC(n_ary);
 
     auto operator()(type lhs, type rhs)
     {
@@ -130,4 +127,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_UTIL_FUNCTION_TRAITS_H_
+#endif  // !PANDA_VERIFIER_UTIL_FUNCTION_TRAITS_

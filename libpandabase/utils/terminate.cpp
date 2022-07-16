@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,12 @@ namespace panda::terminate {
         libs = libsTmp.data();
     }
 
-    char *lib = strtok(libs, ",");
+    char *lib = strtok_s(libs, ",", nullptr);
     while (lib != nullptr) {
         if (filepath.find(lib) != std::string::npos) {
             std::exit(1);
         }
-        lib = strtok(nullptr, ",");
+        lib = strtok_s(nullptr, ",", nullptr);
     }
     std::abort();
 }

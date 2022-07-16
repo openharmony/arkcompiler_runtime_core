@@ -309,104 +309,82 @@ tests:
             runner-options: ['compile-failure']
 
       - file-name: "type"
-        bugid: ["964", "966", '2090', '2107']
+        bugid: ["964", "966"]
+        tags: ["verifier"]
         isa:
-          instructions:
-            - sig: and2.64 v:in:i64
-              acc: inout:i64
-              prefix: bit
-              format: [pref_op_v_8]
           verification:
             - acc_type
             - v1_type
-        tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
-          #
-          .record A {}
-          .record B {}
-          .record panda.String <external>
-          .record panda.Object <external>
+          .record T {}
           .function i32 main() {
               %s
               *s
-              and2.64 v1
-              ldai 0
-        check-type: no-check
-        description: Check and2.64 with incorrect register type.
-        template-cases:
-          - values:
-              - ldai 0
-          - values:
-              - fldai.64 0
-            bugid: ['3930']
-            ignore: true
-          - values:
-              - |
-                #
-                    lda.type B
-          - values:
-              - |
-                #
-                    lda.type B[]
-          - values:
-              - |
-                #
-                    lda.type panda.String
-          - values:
-              - |
-                #
-                    lda.type panda.Object
-          - values:
-              - |
-                #
-                    movi v0, 10
-                    newarr v0, v0, i32[]
-                    lda.obj v0
-          - values:
-              - lda.null
-          - values:
-              - ldai.64 0
-            exclude: [val]
+              and2.64 v0
+        check-type: exit-positive
+        description: Check 'and2.64' with incorrect accumulator and/or register types.
         cases:
           - values:
-              - movi v1, 0
+            - ldai 0
           - values:
-              - fmovi.64 v1, 0
-            bugid: ['3930']
-            ignore: true
+            - ldai.64 0
+            id: acc_ok
           - values:
-              - |
-                #
-                    lda.type A
-                    sta.obj v1
+            - fldai 0
+            bugid: ['7315']
           - values:
-              - |
-                #
-                    lda.type A[]
-                    sta.obj v1
-
+            - fldai.64 0
+            bugid: ['7315']
           - values:
-              - |
-                #
-                    lda.type panda.String
-                    sta.obj v1
+            - lda.null
           - values:
-              - |
-                #
-                    lda.type panda.Object
-                    sta.obj v1
+            - |
+              #
+                  movi v1, 0
+                  newarr v1, v1, i32[]
+                  lda.obj v1
           - values:
-              - |
-                #
-                    movi v1, 10
-                    newarr v1, v1, f64[]
+            - lda.str "0"
           - values:
-              - mov.null v1
+            - lda.type T
           - values:
-              - movi.64 v1, 0
-            id: val
+            - |
+              #
+                  newobj v1, T
+                  lda.obj v1
+        template-cases:
+          - values:
+            - movi v0, 0
+          - values:
+            - movi.64 v0, 0
+            exclude: [acc_ok]
+          - values:
+            - fmovi v0, 0
+            bugid: ['7315']
+          - values:
+            - fmovi.64 v0, 0
+            bugid: ['7315']
+          - values:
+            - mov.null v0
+          - values:
+            - |
+              #
+                  movi v0, 0
+                  newarr v0, v0, i32[]
+          - values:
+            - |
+              #
+                  lda.str "0"
+                  sta.obj v0
+          - values:
+            - |
+              #
+                  lda.type T
+                  sta.obj v0
+          - values:
+            - newobj v0, T
 
       - file-name: uninitialized_regs
         bugid: ['2260']
@@ -416,18 +394,15 @@ tests:
               acc: inout:i64
               prefix: bit
               format: [pref_op_v_8]
-        description: Check and2.64 with uninitialized registers.
+        description: Check 'and2.64' with uninitialized registers.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        header-template: []
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
           #
-          .function i32 main() {
               %s
               *s
               and2.64 *s
-              ldai 0
-        check-type: no-check
+        check-type: exit-positive
         template-cases:
           - values:
               - ''

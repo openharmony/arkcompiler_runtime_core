@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,8 @@
     bls 1f
     // it is an integer arg
     // determine whether there are free gprs
-        sub \tmp_reg, \gpr_ptr, x9
+    // TODO(audovichenko) can we compare with SP? It should simplify code a bit
+    sub \tmp_reg, \gpr_ptr, x9
     cmp \tmp_reg, #64
     bge 2f
     // there are free gprs
@@ -193,7 +194,7 @@ InterpreterToCompiledCodeBridge:
     mov THREAD_REG, x3
 
     // According to the current frame kind set the bridge type
-    ldrb w3, [THREAD_REG, #THREAD_FRAME_KIND]
+    ldrb w3, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     tst w3, #0x1
     mov w4, #BYPASS_BRIDGE
     mov w5, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
@@ -310,7 +311,7 @@ InterpreterToCompiledCodeBridge:
 .LFLOAT:
     // store float value and tag into the acc
     str d0, [x3]
-    str x1, [x3, #FRAME_VREGISTER_TAG_OFFSET]
+    str x1, [x3, #FRAME_ACC_MIRROR_OFFSET]
 
 .Lreturn:
     sub sp, fp, #32
@@ -346,7 +347,7 @@ InvokeCompiledCodeWithArgArray:
     mov THREAD_REG, x3
 
     // According to the current frame kind set the bridge type
-    ldrb w3, [THREAD_REG, #THREAD_FRAME_KIND]
+    ldrb w3, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     tst w3, #0x1
     mov w4, #BYPASS_BRIDGE
     mov w5, #INTERPRETER_TO_COMPILED_CODE_BRIDGE

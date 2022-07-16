@@ -103,12 +103,12 @@ class Mem:
         # This list must be synchronized with panda list in
         # libpandabase/mem/space.h
         self.panda_regions = {
-            "[anon:Object Space]": MemInfo("Object Space"),
-            "[anon:Humongous Space]": MemInfo("Humongous Space"),
-            "[anon:Non Movable Space]": MemInfo("Non Movable Space"),
-            "[anon:Internal Space]": MemInfo("Internal Space"),
-            "[anon:Code Space]": MemInfo("Code Space"),
-            "[anon:Compiler Space]": MemInfo("Compiler Space")
+            "[anon:ark-Object Space]": MemInfo("ark-Object Space"),
+            "[anon:ark-Humongous Space]": MemInfo("ark-Humongous Space"),
+            "[anon:ark-Non Movable Space]": MemInfo("ark-Non Movable Space"),
+            "[anon:ark-Internal Space]": MemInfo("ark-Internal Space"),
+            "[anon:ark-Code Space]": MemInfo("ark-Code Space"),
+            "[anon:ark-Compiler Space]": MemInfo("ark-Compiler Space")
         }
 
     def get_mem_info(self, name, remote):

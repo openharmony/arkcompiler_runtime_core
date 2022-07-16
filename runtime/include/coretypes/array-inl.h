@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,41 +12,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_CORETYPES_ARRAY_INL_H_
-#define PANDA_RUNTIME_INCLUDE_CORETYPES_ARRAY_INL_H_
+#ifndef PANDA_RUNTIME_CORETYPES_ARRAY_INL_H_
+#define PANDA_RUNTIME_CORETYPES_ARRAY_INL_H_
 
 #include <type_traits>
 
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/object_accessor-inl.h"
+#include "runtime/handle_scope.h"
 #include "runtime/mem/vm_handle.h"
 
 namespace panda::coretypes {
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <class T, bool is_volatile /* = false */>
 inline T Array::GetPrimitive(size_t offset) const
 {
     return ObjectAccessor::GetPrimitive<T, is_volatile>(this, GetDataOffset() + offset);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <class T, bool is_volatile /* = false */>
 inline void Array::SetPrimitive(size_t offset, T value)
 {
     ObjectAccessor::SetPrimitive<T, is_volatile>(this, GetDataOffset() + offset, value);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool is_volatile /* = false */, bool need_read_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *Array::GetObject(int offset) const
 {
     return ObjectAccessor::GetObject<is_volatile, need_read_barrier, is_dyn>(this, GetDataOffset() + offset);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool is_volatile /* = false */, bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline void Array::SetObject(size_t offset, ObjectHeader *value)
 {
@@ -65,14 +61,12 @@ inline void Array::SetPrimitive(size_t offset, T value, std::memory_order memory
     ObjectAccessor::SetFieldPrimitive(this, GetDataOffset() + offset, value, memory_order);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_read_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *Array::GetObject(size_t offset, std::memory_order memory_order) const
 {
     return ObjectAccessor::GetFieldObject<need_read_barrier, is_dyn>(this, GetDataOffset() + offset, memory_order);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline void Array::SetObject(size_t offset, ObjectHeader *value, std::memory_order memory_order)
 {
@@ -88,7 +82,6 @@ inline bool Array::CompareAndSetPrimitive(size_t offset, T old_value, T new_valu
         .first;
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline bool Array::CompareAndSetObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
                                        std::memory_order memory_order, bool strong)
@@ -108,7 +101,6 @@ inline T Array::CompareAndExchangePrimitive(size_t offset, T old_value, T new_va
         .second;
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *Array::CompareAndExchangeObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
                                                      std::memory_order memory_order, bool strong)
@@ -125,7 +117,6 @@ inline T Array::GetAndSetPrimitive(size_t offset, T value, std::memory_order mem
     return ObjectAccessor::GetAndSetFieldPrimitive(this, GetDataOffset() + offset, value, memory_order);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *Array::GetAndSetObject(size_t offset, ObjectHeader *value, std::memory_order memory_order)
 {
@@ -157,7 +148,6 @@ inline T Array::GetAndBitwiseXorPrimitive(size_t offset, T value, std::memory_or
     return ObjectAccessor::GetAndBitwiseXorFieldPrimitive(this, GetDataOffset() + offset, value, memory_order);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <class T, bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline void Array::Set(array_size_t idx, T elem)
 {
@@ -178,7 +168,6 @@ inline void Array::Set(array_size_t idx, T elem)
     }
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <class T, bool need_read_barrier /* = true */, bool is_dyn /* = false */>
 inline T Array::Get(array_size_t idx) const
 {
@@ -197,7 +186,6 @@ inline T Array::Get(array_size_t idx) const
     return ObjectAccessor::GetPrimitive<T>(this, GetDataOffset() + offset);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <class T, bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline void Array::Set([[maybe_unused]] const ManagedThread *thread, array_size_t idx, T elem)
 {
@@ -216,7 +204,6 @@ inline void Array::Set([[maybe_unused]] const ManagedThread *thread, array_size_
     }
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <class T, bool need_read_barrier /* = true */, bool is_dyn /* = false */>
 inline T Array::Get([[maybe_unused]] const ManagedThread *thread, array_size_t idx) const
 {
@@ -245,6 +232,8 @@ Array *Array::CreateMultiDimensionalArray(ManagedThread *thread, panda::Class *k
         return nullptr;
     }
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    // Will be added later special rule for CheckObjHeaderTypeRef and VMHandler.
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.CheckObjHeaderTypeRef)
     VMHandle<Array> handle(thread, Array::Create(klass, arr_size));
 
     // avoid recursive OOM.
@@ -256,11 +245,11 @@ Array *Array::CreateMultiDimensionalArray(ManagedThread *thread, panda::Class *k
     if (component->IsArrayClass() && dim_idx + 1 < nargs) {
         for (int32_t idx = 0; idx < arr_size; idx++) {
             auto *array = CreateMultiDimensionalArray(thread, component, nargs, iter, dim_idx + 1);
+
             if (array == nullptr) {
                 return nullptr;
             }
 
-            // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
             handle.GetPtr()->template Set<Array *>(idx, array);
         }
     }
@@ -269,4 +258,4 @@ Array *Array::CreateMultiDimensionalArray(ManagedThread *thread, panda::Class *k
 }
 }  // namespace panda::coretypes
 
-#endif  // PANDA_RUNTIME_INCLUDE_CORETYPES_ARRAY_INL_H_
+#endif  // PANDA_RUNTIME_CORETYPES_ARRAY_INL_H_

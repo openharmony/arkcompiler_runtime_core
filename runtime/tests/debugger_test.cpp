@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/method.h"
 #include "runtime/tooling/debugger.h"
+#include "runtime/tests/test_utils.h"
 
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
@@ -33,6 +34,8 @@ public:
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
+        // this test doesn't check GC logic - just to make test easier without any handles
+        options.SetGcType("epsilon");
         Runtime::Create(options);
         thread_ = panda::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
@@ -45,7 +48,7 @@ public:
     }
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
 };
 
 static ObjectHeader *ToPtr(uint64_t v)
@@ -58,15 +61,17 @@ static uint64_t FromPtr(ObjectHeader *ptr)
     return static_cast<object_pointer_type>(reinterpret_cast<uint64_t>(ptr));
 }
 
+template <bool is_dynamic = false>
 static Frame *CreateFrame(size_t nregs, Method *method, Frame *prev)
 {
-    panda::Frame *mem = static_cast<Frame *>(aligned_alloc(8U, panda::Frame::GetSize(nregs)));
-    return (new (mem) panda::Frame(method, prev, nregs));
+    uint32_t ext_sz = EmptyExtFrameDataSize;
+    void *mem = aligned_alloc(8, Frame::GetAllocSize(Frame::GetActualSize<is_dynamic>(nregs), ext_sz));
+    return new (Frame::FromExt(mem, ext_sz)) Frame(mem, method, prev, nregs);
 }
 
 static void FreeFrame(Frame *frame)
 {
-    std::free(frame);
+    std::free(frame->GetExt());
 }
 
 TEST_F(DebuggerTest, Frame)
@@ -118,21 +123,22 @@ TEST_F(DebuggerTest, Frame)
     };
 
     std::vector<VRegValue> regs {{0x1111111122222222, false},
-                                 {FromPtr(ToPtr(0x33333333)), true},
+                                 {FromPtr(panda::mem::AllocateNullifiedPayloadString(1)), true},
                                  {0x3333333344444444, false},
-                                 {FromPtr(ToPtr(0x55555555)), true}};
+                                 {FromPtr(panda::mem::AllocateNullifiedPayloadString(1)), true}};
 
+    auto frame_handler = StaticFrameHandler(frame);
     for (size_t i = 0; i < regs.size(); i++) {
         if (regs[i].is_ref) {
-            frame->GetVReg(i).SetReference(ToPtr(regs[i].value));
+            frame_handler.GetVReg(i).SetReference(ToPtr(regs[i].value));
         } else {
-            frame->GetVReg(i).SetPrimitive(static_cast<int64_t>(regs[i].value));
+            frame_handler.GetVReg(i).SetPrimitive(static_cast<int64_t>(regs[i].value));
         }
     }
 
     {
         VRegValue acc {0xaaaaaaaabbbbbbbb, false};
-        frame->GetAcc().SetPrimitive(static_cast<int64_t>(acc.value));
+        frame->GetAccAsVReg().SetPrimitive(static_cast<int64_t>(acc.value));
         tooling::PtDebugFrame debug_frame(frame->GetMethod(), frame);
 
         EXPECT_EQ(debug_frame.GetVRegNum(), nregs);
@@ -151,8 +157,8 @@ TEST_F(DebuggerTest, Frame)
     }
 
     {
-        VRegValue acc {FromPtr(ToPtr(0xbbbbbbbb)), true};
-        frame->GetAcc().SetReference(ToPtr(acc.value));
+        VRegValue acc {FromPtr(panda::mem::AllocateNullifiedPayloadString(1)), true};
+        frame->GetAccAsVReg().SetReference(ToPtr(acc.value));
         tooling::PtDebugFrame debug_frame(frame->GetMethod(), frame);
 
         EXPECT_EQ(debug_frame.GetVRegNum(), nregs);

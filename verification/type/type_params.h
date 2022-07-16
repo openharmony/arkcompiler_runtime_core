@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_TYPE_TYPE_PARAMS_H_
-#define PANDA_VERIFICATION_TYPE_TYPE_PARAMS_H_
+#ifndef _PANDA_TYPE_PARAMS_HPP__
+#define _PANDA_TYPE_PARAMS_HPP__
 
-#include "type_index.h"
-
-#include "type_system_kind.h"
+#include "type_param.h"
 
 namespace panda::verifier {
-class TypeParam;
 class TypeSystem;
 
 class TypeParams : public TypeParamsIdx {
@@ -30,7 +27,10 @@ class TypeParams : public TypeParamsIdx {
     friend class ParametricType;
 
 public:
-    explicit TypeParams(TypeSystemKind kind, const TypeParamsIdx &params = {}) : TypeParamsIdx {params}, kind_ {kind} {}
+    TypeParams(TypeSystemKind kind, ThreadNum threadnum, const TypeParamsIdx &params = {})
+        : TypeParamsIdx {params}, kind_ {kind}, threadnum_ {threadnum}
+    {
+    }
 
     TypeParams() = default;
     TypeParams(const TypeParams &) = default;
@@ -44,13 +44,19 @@ public:
     TypeParams &operator>>(const TypeParam &p);
 
     template <typename Handler>
-    void ForEach(Handler &&handler) const;
+    void ForEach(Handler &&handler) const
+    {
+        for (const auto &p : *this) {
+            handler(TypeParam {kind_, threadnum_, p});
+        }
+    }
 
     TypeSystem &GetTypeSystem() const;
 
 private:
     TypeSystemKind kind_;
+    ThreadNum threadnum_;
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_TYPE_TYPE_PARAMS_H_
+#endif  // !_PANDA_TYPE_PARAMS_HPP__

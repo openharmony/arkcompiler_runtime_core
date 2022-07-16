@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_GC_GC_H_
-#define PANDA_RUNTIME_MEM_GC_GC_H_
+#ifndef PANDA_RUNTIME_MEM_GC_GC_H
+#define PANDA_RUNTIME_MEM_GC_GC_H
 
 #include <atomic>
 #include <map>
@@ -26,15 +25,19 @@
 #include "libpandabase/trace/trace.h"
 #include "libpandabase/utils/expected.h"
 #include "runtime/include/gc_task.h"
+#include "runtime/include/object_header.h"
 #include "runtime/include/language_config.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/mem/allocator_adapter.h"
+#include "runtime/mem/gc/gc_settings.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
 #include "runtime/mem/gc/gc_phase.h"
 #include "runtime/mem/gc/gc_root.h"
+#include "runtime/mem/gc/gc_adaptive_stack.h"
+#include "runtime/mem/gc/gc_scope.h"
 #include "runtime/mem/gc/gc_scoped_phase.h"
 #include "runtime/mem/gc/gc_stats.h"
 #include "runtime/mem/gc/gc_types.h"
@@ -42,31 +45,25 @@
 #include "runtime/mem/gc/bitmap.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/timing.h"
+#include "runtime/mem/region_allocator.h"
 
 namespace panda {
 class BaseClass;
-class Class;
 class HClass;
 class PandaVM;
 class Timing;
-namespace java {
-class JClass;
-class JReference;
-}  // namespace java
 namespace mem {
+class G1GCTest;
 class GlobalObjectStorage;
 class ReferenceProcessor;
 namespace test {
+class MemStatsGenGCTest;
 class ReferenceStorageTest;
 class RemSetTest;
 }  // namespace test
-namespace java {
-class ReferenceQueue;
-class JavaReferenceProcessor;
-namespace test {
-class ReferenceProcessorBaseTest;
-}  // namespace test
-}  // namespace java
+namespace ecmascript {
+class EcmaReferenceProcessor;
+}  // namespace ecmascript
 }  // namespace mem
 }  // namespace panda
 
@@ -81,13 +78,18 @@ namespace panda::mem {
 #define LOG_DEBUG_GC LOG(DEBUG, GC) << this->GetLogPrefix()
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_INFO_GC LOG(INFO, GC) << this->GetLogPrefix()
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LOG_DEBUG_OBJECT_EVENTS LOG(DEBUG, MM_OBJECT_EVENTS)
 
 // forward declarations:
 class GCListener;
+class GCScopePhase;
 class HybridObjectAllocator;
 class GCScopedPhase;
 class GCQueueInterface;
 class GCDynamicObjectHelpers;
+class GCWorkersThreadPool;
+class GCWorkersTask;
 
 enum class GCError { GC_ERROR_NO_ROOTS, GC_ERROR_NO_FRAMES, GC_ERROR_LAST = GC_ERROR_NO_FRAMES };
 
@@ -101,236 +103,38 @@ enum CardTableVisitFlag : bool {
     VISIT_DISABLED = false,
 };
 
-enum class NativeGcTriggerType { INVALID_NATIVE_GC_TRIGGER, NO_NATIVE_GC_TRIGGER, SIMPLE_STRATEGY };
-inline NativeGcTriggerType NativeGcTriggerTypeFromString(std::string_view native_gc_trigger_type_str)
-{
-    if (native_gc_trigger_type_str == "no-native-gc-trigger") {
-        return NativeGcTriggerType::NO_NATIVE_GC_TRIGGER;
-    }
-    if (native_gc_trigger_type_str == "simple-strategy") {
-        return NativeGcTriggerType::SIMPLE_STRATEGY;
-    }
-    return NativeGcTriggerType::INVALID_NATIVE_GC_TRIGGER;
-}
-
 class GCListener {
 public:
     GCListener() = default;
     NO_COPY_SEMANTIC(GCListener);
     DEFAULT_MOVE_SEMANTIC(GCListener);
-    virtual ~GCListener() = 0;
-    virtual void GCStarted(size_t heap_size) = 0;
-    virtual void GCFinished(const GCTask &task, size_t heap_size_before_gc, size_t heap_size) = 0;
-};
-
-struct GCSettings {
-    bool is_gc_enable_tracing = false;  /// if true then enable tracing
-    NativeGcTriggerType native_gc_trigger_type = {
-        NativeGcTriggerType::INVALID_NATIVE_GC_TRIGGER};  /// type of native trigger
-    bool is_dump_heap = false;                            /// dump heap at the beginning and the end of GC
-    bool is_concurrency_enabled = true;                   /// true if concurrency enabled
-    bool run_gc_in_place = false;                         /// true if GC should be running in place
-    bool pre_gc_heap_verification = false;                /// true if heap verification before GC enabled
-    bool post_gc_heap_verification = false;               /// true if heap verification after GC enabled
-    bool fail_on_heap_verification = false;  /// if true then fail execution if heap verifier found heap corruption
-    uint64_t young_space_size = 0;           /// size of young-space for gen-gc
+    virtual ~GCListener() = default;
+    virtual void GCStarted([[maybe_unused]] size_t heap_size) {}
+    virtual void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size_before_gc,
+                            [[maybe_unused]] size_t heap_size)
+    {
+    }
+    virtual void GCPhaseStarted([[maybe_unused]] GCPhase phase) {}
+    virtual void GCPhaseFinished([[maybe_unused]] GCPhase phase) {}
 };
 
 class GCExtensionData;
 
 using UpdateRefInObject = std::function<void(ObjectHeader *)>;
-using UpdateRefInAllocator = std::function<void(const UpdateRefInObject &)>;
-
-class GCMarker {
-public:
-    template <bool reversed_mark = false, bool atomic_mark = true>
-    void MarkObjectHeader(ObjectHeader *object) const
-    {
-        // NOLINTNEXTLINE(readability-braces-around-statements)
-        if constexpr (reversed_mark) {  // NOLINT(bugprone-suspicious-semicolon)
-            object->SetUnMarkedForGC<atomic_mark>();
-            return;
-        }
-        object->SetMarkedForGC<atomic_mark>();
-    }
-
-    template <bool reversed_mark = false, bool atomic_mark = true>
-    bool IsObjectHeaderMarked(ObjectHeader *object) const
-    {
-        // NOLINTNEXTLINE(readability-braces-around-statements)
-        if constexpr (reversed_mark) {  // NOLINT(bugprone-suspicious-semicolon)
-            return !object->IsMarkedForGC<atomic_mark>();
-        }
-        return object->IsMarkedForGC<atomic_mark>();
-    }
-
-    template <bool reversed_mark = false>
-    bool MarkIfNotMarked(ObjectHeader *object) const
-    {
-        MarkBitmap *bitmap = GetMarkBitMap(object);
-        if (bitmap != nullptr) {
-            if (bitmap->Test(object)) {
-                return false;
-            }
-            bitmap->Set(object);
-            return true;
-        }
-        if (atomic_mark_flag_) {
-            if (IsObjectHeaderMarked<reversed_mark, true>(object)) {
-                return false;
-            }
-            MarkObjectHeader<reversed_mark, true>(object);
-        } else {
-            if (IsObjectHeaderMarked<reversed_mark, false>(object)) {
-                return false;
-            }
-            MarkObjectHeader<reversed_mark, false>(object);
-        }
-        return true;
-    }
-
-    template <bool reversed_mark = false>
-    void Mark(ObjectHeader *object) const
-    {
-        MarkBitmap *bitmap = GetMarkBitMap(object);
-        if (bitmap != nullptr) {
-            bitmap->Set(object);
-            return;
-        }
-        if constexpr (reversed_mark) {  // NOLINTNEXTLINE(readability-braces-around-statements)
-            if (atomic_mark_flag_) {
-                object->SetUnMarkedForGC<true>();
-            } else {
-                object->SetUnMarkedForGC<false>();
-            }
-            return;
-        }
-        if (atomic_mark_flag_) {
-            object->SetMarkedForGC<true>();
-        } else {
-            object->SetMarkedForGC<false>();
-        }
-    }
-
-    template <bool reversed_mark = false>
-    void UnMark(ObjectHeader *object) const
-    {
-        MarkBitmap *bitmap = GetMarkBitMap(object);
-        if (bitmap != nullptr) {
-            return;  // no need for bitmap
-        }
-        if constexpr (reversed_mark) {  // NOLINTNEXTLINE(readability-braces-around-statements)
-            if (atomic_mark_flag_) {
-                object->SetMarkedForGC<true>();
-            } else {
-                object->SetMarkedForGC<false>();
-            }
-            return;
-        }
-        if (atomic_mark_flag_) {
-            object->SetUnMarkedForGC<true>();
-        } else {
-            object->SetUnMarkedForGC<false>();
-        }
-    }
-
-    template <bool reversed_mark = false>
-    bool IsMarked(const ObjectHeader *object) const
-    {
-        MarkBitmap *bitmap = GetMarkBitMap(object);
-        if (bitmap != nullptr) {
-            return bitmap->Test(object);
-        }
-        bool is_marked = atomic_mark_flag_ ? object->IsMarkedForGC<true>() : object->IsMarkedForGC<false>();
-        if constexpr (reversed_mark) {  // NOLINTNEXTLINE(readability-braces-around-statements)
-            return !is_marked;
-        }
-        return is_marked;
-    }
-
-    template <bool reversed_mark = false>
-    ObjectStatus MarkChecker(const ObjectHeader *object) const
-    {
-        if constexpr (!reversed_mark) {  // NOLINTNEXTLINE(readability-braces-around-statements)
-            // If ClassAddr is not set - it means object header initialization is in progress now
-            if (object->AtomicClassAddr<Class>() == nullptr) {
-                return ObjectStatus::ALIVE_OBJECT;
-            }
-        }
-        ObjectStatus object_status =
-            IsMarked<reversed_mark>(object) ? ObjectStatus::ALIVE_OBJECT : ObjectStatus::DEAD_OBJECT;
-        LOG(DEBUG, GC) << " Mark check for " << std::hex << object << std::dec
-                       << " object is alive: " << static_cast<bool>(object_status);
-        return object_status;
-    }
-
-    MarkBitmap *GetMarkBitMap(const void *object) const
-    {
-        for (auto bitmap : mark_bitmaps_) {
-            if (bitmap->IsAddrInRange(object)) {
-                return bitmap;
-            }
-        }
-        return nullptr;
-    }
-
-    void ClearMarkBitMaps()
-    {
-        mark_bitmaps_.clear();
-    }
-
-    template <typename It>
-    void AddMarkBitMaps(It start, It end)
-    {
-        mark_bitmaps_.insert(mark_bitmaps_.end(), start, end);
-    }
-
-    void SetAtomicMark(bool flag)
-    {
-        atomic_mark_flag_ = flag;
-    }
-
-    bool GetAtomicMark() const
-    {
-        return atomic_mark_flag_;
-    }
-
-private:
-    // Bitmaps for mark object
-    PandaVector<MarkBitmap *> mark_bitmaps_;
-    bool atomic_mark_flag_ = true;
-};
-
-class NoAtomicGCMarkerScope {
-public:
-    explicit NoAtomicGCMarkerScope(GCMarker *marker)
-    {
-        ASSERT(marker != nullptr);
-        gc_marker_ = marker;
-        old_state_ = gc_marker_->GetAtomicMark();
-        if (old_state_) {
-            gc_marker_->SetAtomicMark(false);
-        }
-    }
-
-    NO_COPY_SEMANTIC(NoAtomicGCMarkerScope);
-    NO_MOVE_SEMANTIC(NoAtomicGCMarkerScope);
-
-    ~NoAtomicGCMarkerScope()
-    {
-        if (old_state_) {
-            gc_marker_->SetAtomicMark(old_state_);
-        }
-    }
-
-private:
-    GCMarker *gc_marker_;
-    bool old_state_ = false;
-};
 
 // base class for all GCs
 class GC {
 public:
+    using MarkPredicate = std::function<bool(const ObjectHeader *)>;
+    using ReferenceCheckPredicateT = std::function<bool(const ObjectHeader *)>;
+    using ReferenceClearPredicateT = std::function<bool(const ObjectHeader *)>;
+    using ReferenceProcessPredicateT = std::function<bool(const ObjectHeader *)>;
+
+    static bool EmptyReferenceProcessPredicate([[maybe_unused]] const ObjectHeader *ref)
+    {
+        return true;
+    }
+
     explicit GC(ObjectAllocatorBase *object_allocator, const GCSettings &settings);
     NO_COPY_SEMANTIC(GC);
     NO_MOVE_SEMANTIC(GC);
@@ -341,7 +145,7 @@ public:
     /**
      * \brief Initialize GC
      */
-    void Initialize();
+    void Initialize(PandaVM *vm);
 
     /**
      * \brief Starts GC after initialization
@@ -359,7 +163,7 @@ public:
      * Should be used to wait while GC should work exlusively
      * Note: for non-mt STW GC can be used to run GC
      */
-    virtual void WaitForGC(const GCTask &task) = 0;
+    virtual void WaitForGC(GCTask task) = 0;
 
     /**
      * Should be used to wait while GC should be executed in managed scope
@@ -371,7 +175,7 @@ public:
      */
     void WaitForGCOnPygoteFork(const GCTask &task);
 
-    bool IsOnPygoteFork();
+    bool IsOnPygoteFork() const;
 
     /**
      * Initialize GC bits on object creation.
@@ -394,6 +198,8 @@ public:
      */
     virtual void Trigger() = 0;
 
+    virtual bool IsFullGC() const;
+
     /**
      * Return true if gc has generations, false otherwise
      */
@@ -410,10 +216,23 @@ public:
         gc_listeners_ptr_->push_back(listener);
     }
 
+    void RemoveListener(GCListener *listener)
+    {
+        ASSERT(gc_listeners_ptr_ != nullptr);
+        auto it = std::find(gc_listeners_ptr_->begin(), gc_listeners_ptr_->end(), listener);
+        *it = nullptr;
+    }
+
     GCBarrierSet *GetBarrierSet()
     {
         ASSERT(gc_barrier_set_ != nullptr);
         return gc_barrier_set_;
+    }
+
+    GCWorkersThreadPool *GetWorkersPool()
+    {
+        ASSERT(workers_pool_ != nullptr);
+        return workers_pool_;
     }
 
     // Additional NativeGC
@@ -434,6 +253,11 @@ public:
     // Calling CheckGCForNative immediately if size exceeds the following
     static constexpr size_t CHECK_IMMEDIATELY_THRESHOLD = 300000;
 
+    inline bool IsLogDetailedGcInfoEnabled() const
+    {
+        return gc_settings_.LogDetailedGCInfoEnabled();
+    }
+
     inline GCPhase GetGCPhase() const
     {
         return phase_;
@@ -441,7 +265,9 @@ public:
 
     inline bool IsGCRunning()
     {
-        return gc_running_.load();
+        // Atomic with seq_cst order reason: data race with gc_running_ with requirement for sequentially consistent
+        // order where threads observe all modifications in the same order
+        return gc_running_.load(std::memory_order_seq_cst);
     }
 
     void PreStartup();
@@ -460,10 +286,12 @@ public:
     /**
      * Process all references which GC found in marking phase.
      */
-    void ProcessReferences(GCPhase gc_phase, const GCTask &task);
+    void ProcessReferences(GCPhase gc_phase, const GCTask &task, const ReferenceClearPredicateT &pred);
 
     size_t GetNativeBytesRegistered()
     {
+        // Atomic with relaxed order reason: data race with native_bytes_registered_ with no synchronization or ordering
+        // constraints imposed on other reads or writes
         return native_bytes_registered_.load(std::memory_order_relaxed);
     }
 
@@ -484,14 +312,13 @@ public:
         CreateWorker();
     }
 
+    virtual void OnThreadTerminate([[maybe_unused]] ManagedThread *thread) {}
+
     void SetCanAddGCTask(bool can_add_task)
     {
+        // Atomic with relaxed order reason: data race with can_add_gc_task_ with no synchronization or ordering
+        // constraints imposed on other reads or writes
         can_add_gc_task_.store(can_add_task, std::memory_order_relaxed);
-    }
-
-    void SetGCAtomicFlag(bool atomic_flag)
-    {
-        marker_.SetAtomicMark(atomic_flag);
     }
 
     GCExtensionData *GetExtensionData() const
@@ -506,24 +333,102 @@ public:
 
     virtual void PostForkCallback() {}
 
-    uint64_t GetLastGCReclaimedBytes();
-
     /**
      * Check if the object addr is in the GC sweep range
      */
-    virtual bool InGCSweepRange([[maybe_unused]] uintptr_t addr) const
+    virtual bool InGCSweepRange([[maybe_unused]] const ObjectHeader *obj) const
     {
         return true;
+    }
+
+    virtual CardTable *GetCardTable()
+    {
+        return nullptr;
+    }
+
+    /**
+     * Called from GCWorker thread to assign thread specific data
+     */
+    virtual bool InitWorker(void **worker_data)
+    {
+        *worker_data = nullptr;
+        return true;
+    }
+
+    /**
+     * Called from GCWorker thread to destroy thread specific data
+     */
+    virtual void DestroyWorker([[maybe_unused]] void *worker_data) {}
+
+    /**
+     * Process a task sent to GC workers thread.
+     */
+    virtual void WorkerTaskProcessing([[maybe_unused]] GCWorkersTask *task, [[maybe_unused]] void *worker_data)
+    {
+        LOG(FATAL, GC) << "Unimplemented method";
+    }
+
+    virtual bool IsMutatorAllowed()
+    {
+        return false;
+    }
+
+    /**
+     * Return true of ref is an instance of reference or it's ancestor, false otherwise
+     */
+    bool IsReference(const BaseClass *cls, const ObjectHeader *ref, const ReferenceCheckPredicateT &pred);
+
+    void ProcessReference(GCMarkingStackType *objects_stack, const BaseClass *cls, const ObjectHeader *ref,
+                          const ReferenceProcessPredicateT &pred);
+
+    ALWAYS_INLINE ObjectAllocatorBase *GetObjectAllocator() const
+    {
+        return object_allocator_;
+    }
+
+    // called if we fail change state from idle to running
+    virtual void OnWaitForIdleFail();
+
+    virtual void PendingGC() {}
+
+    /**
+     * Check if the object is marked for GC(alive)
+     * @param object
+     * @return true if object marked for GC
+     */
+    virtual bool IsMarked(const ObjectHeader *object) const = 0;
+
+    /**
+     * Mark object.
+     * Note: for some GCs it is not necessary set GC bit to 1.
+     * @param object_header
+     * @return true if object old state is not marked
+     */
+    virtual bool MarkObjectIfNotMarked(ObjectHeader *object_header);
+
+    /**
+     * Mark object.
+     * Note: for some GCs it is not necessary set GC bit to 1.
+     * @param object_header
+     */
+    virtual void MarkObject(ObjectHeader *object_header) = 0;
+
+    /**
+     * Add reference for later processing in marking phase
+     * @param object - object from which we start to mark
+     */
+    void AddReference(ObjectHeader *from_object, ObjectHeader *object);
+
+    inline void SetGCPhase(GCPhase gc_phase)
+    {
+        phase_ = gc_phase;
     }
 
 protected:
     /**
      * \brief Runs all phases
      */
-    void RunPhases(const GCTask &task);
-
-    template <LangTypeT LANG_TYPE, bool HAS_VALUE_OBJECT_TYPES>
-    void MarkInstance(PandaStackTL<ObjectHeader *> *objects_stack, const ObjectHeader *object, BaseClass *cls);
+    void RunPhases(GCTask &task);
 
     /**
      * Add task to GC Queue to be run by GC thread (or run in place)
@@ -532,14 +437,12 @@ protected:
 
     virtual void InitializeImpl() = 0;
     virtual void PreRunPhasesImpl() = 0;
-    virtual void RunPhasesImpl(const GCTask &task) = 0;
+    virtual void RunPhasesImpl(GCTask &task) = 0;
     virtual void PreStartupImp() {}
-
-    void BindBitmaps(bool clear_pygote_space_bitmaps);
 
     inline bool IsTracingEnabled() const
     {
-        return gc_settings_.is_gc_enable_tracing;
+        return gc_settings_.IsGcEnableTracing();
     }
 
     inline void BeginTracePoint(const PandaString &trace_point_name) const
@@ -561,11 +464,6 @@ protected:
     virtual void VisitCardTableRoots(CardTable *card_table, const GCRootVisitor &gc_root_visitor,
                                      const MemRangeChecker &range_checker, const ObjectChecker &range_object_checker,
                                      const ObjectChecker &from_object_checker, uint32_t processed_flag) = 0;
-
-    inline void SetGCPhase(GCPhase gc_phase)
-    {
-        phase_ = gc_phase;
-    }
 
     inline bool CASGCPhase(GCPhase expected, GCPhase set)
     {
@@ -593,63 +491,29 @@ protected:
         gc_barrier_set_ = barrier_set;
     }
 
-    /**
-     * Mark object.
-     * Note: for some GCs it is not necessary to set GC bit to 1.
-     * @param object_header
-     */
-    virtual void MarkObject(ObjectHeader *object_header);
+    void SetWorkersPool(GCWorkersThreadPool *thread_pool)
+    {
+        ASSERT(workers_pool_ == nullptr);
+        workers_pool_ = thread_pool;
+    }
 
-    /**
-     * Mark object.
-     * Note: for some GCs it is not necessary to set GC bit to 1.
-     * @param object_header
-     * @return true if object old state is not marked
-     */
-    virtual bool MarkObjectIfNotMarked(ObjectHeader *object_header);
-
-    /**
-     * UnMark object
-     * @param object_header
-     */
-    virtual void UnMarkObject(ObjectHeader *object_header);
-
-    /**
-     * Check if the object is marked for GC(alive)
-     * @param object
-     * @return true if object marked for GC
-     */
-    virtual bool IsMarked(const ObjectHeader *object) const;
-
-    /**
-     * Return true of ref is an instance of reference or it's ancestor, false otherwise
-     */
-    bool IsReference(BaseClass *cls, const ObjectHeader *ref);
-
-    void ProcessReference(PandaStackTL<ObjectHeader *> *objects_stack, BaseClass *cls, const ObjectHeader *object);
-
-    /**
-     * Add reference for later processing in marking phase
-     * @param object - object from which we start to mark
-     */
-    void AddReference(ObjectHeader *object);
+    void ClearWorkersPool()
+    {
+        workers_pool_ = nullptr;
+    }
 
     /**
      * Mark all references which we added by AddReference method
      */
-    virtual void MarkReferences(PandaStackTL<ObjectHeader *> *references, GCPhase gc_phase) = 0;
-
-    ObjectAllocatorBase *GetObjectAllocator() const
-    {
-        return object_allocator_;
-    }
+    virtual void MarkReferences(GCMarkingStackType *references, GCPhase gc_phase) = 0;
 
     friend class HeapRootVisitor;
 
+    virtual void UpdateRefsToMovedObjectsInPygoteSpace() = 0;
     /**
      * Update all refs to moved objects
      */
-    virtual void CommonUpdateRefsToMovedObjects(const UpdateRefInAllocator &update_allocator) = 0;
+    virtual void CommonUpdateRefsToMovedObjects() = 0;
 
     virtual void UpdateVmRefs() = 0;
 
@@ -659,14 +523,15 @@ protected:
 
     void UpdateRefsInVRegs(ManagedThread *thread);
 
-    void AddToStack(PandaStackTL<ObjectHeader *> *objects_stack, ObjectHeader *object);
-
-    ObjectHeader *PopObjectFromStack(PandaStackTL<ObjectHeader *> *objects_stack);
+    const ObjectHeader *PopObjectFromStack(GCMarkingStackType *objects_stack);
 
     Timing *GetTiming()
     {
         return &timing_;
     }
+
+    template <GCScopeType gc_scope_type>
+    friend class GCScope;
 
     void SetForwardAddress(ObjectHeader *src, ObjectHeader *dst);
 
@@ -678,35 +543,47 @@ protected:
 
     os::memory::Mutex *cleared_references_lock_ {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
 
-    std::atomic<size_t> gc_counter_ {0};                // NOLINT(misc-non-private-member-variables-in-classes)
-    std::atomic<uint64_t> last_gc_reclaimed_bytes {0};  // NOLINT(misc-non-private-member-variables-in-classes)
+    std::atomic<size_t> gc_counter_ {0};  // NOLINT(misc-non-private-member-variables-in-classes)
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     std::atomic<GCTaskCause> last_cause_ {GCTaskCause::INVALID_CAUSE};
 
-    GCSettings *GetSettings()
+    const GCSettings *GetSettings() const
     {
         return &gc_settings_;
     }
+
+    const ReferenceProcessor *GetReferenceProcessor() const
+    {
+        return reference_processor_;
+    }
+
+    bool IsWorkerThreadsExist() const
+    {
+        return gc_settings_.GCWorkersCount() != 0;
+    }
+
+    void EnableWorkerThreads();
+    void DisableWorkerThreads();
 
     /**
      * @return true if GC can work in concurrent mode
      */
     bool IsConcurrencyAllowed() const
     {
-        return gc_settings_.is_concurrency_enabled;
+        return gc_settings_.IsConcurrencyEnabled();
     }
 
-    PandaString GetLogPrefix() const
-    {
-        PandaOStringStream ss;
-        ss << "[" << gc_counter_.load(std::memory_order_acquire) << ", " << GCScopedPhase::GetPhaseAbbr(GetGCPhase())
-           << "]: ";
-        return ss.str();
-    }
+    Logger::Buffer GetLogPrefix() const;
 
-    GCMarker marker_;  // NOLINT(misc-non-private-member-variables-in-classes)
-    Timing timing_;    // NOLINT(misc-non-private-member-variables-in-classes)
+    void FireGCPhaseStarted(GCPhase phase);
+    void FireGCPhaseFinished(GCPhase phase);
 
+    void SetFullGC(bool value);
+
+    Timing timing_;  // NOLINT(misc-non-private-member-variables-in-classes)
+
+    PandaVector<std::pair<PandaString, uint64_t>>
+        footprint_list_;  // NOLINT(misc-non-private-member-variables-in-classes)
 private:
     /**
      * Entrypoint for GC worker thread
@@ -714,33 +591,6 @@ private:
      * @param vm pointer to VM structure
      */
     static void GCWorkerEntry(GC *gc, PandaVM *vm);
-
-    /**
-     * Iterate over all fields with references of object and add all not null object references to the objects_stack
-     * @param objects_stack - stack with objects
-     * @param object
-     * @param base_cls - class of object(used for perf in case if class for the object already was obtained)
-     */
-    template <LangTypeT LANG_TYPE, bool HAS_VALUE_OBJECT_TYPES>
-    void HandleObject(PandaStackTL<ObjectHeader *> *objects_stack, const ObjectHeader *object, BaseClass *base_cls);
-
-    /**
-     * Iterate over class data and add all found not null object references to the objects_stack
-     * @param objects_stack - stack with objects
-     * @param cls - class
-     */
-    template <LangTypeT LANG_TYPE, bool HAS_VALUE_OBJECT_TYPES, class ClassT>
-    void HandleClass(PandaStackTL<ObjectHeader *> *objects_stack, ClassT *cls);
-
-    /**
-     * For arrays of objects add all not null object references to the objects_stack
-     * @param objects_stack - stack with objects
-     * @param array_object - array object
-     * @param cls - class of array object(used for perf)
-     */
-    template <LangTypeT LANG_TYPE, bool HAS_VALUE_OBJECT_TYPES>
-    void HandleArrayClass(PandaStackTL<ObjectHeader *> *objects_stack, const coretypes::Array *array_object,
-                          const BaseClass *cls);
 
     void JoinWorker();
     void CreateWorker();
@@ -751,6 +601,7 @@ private:
     void MoveObjectsToPygoteSpace();
 
     size_t GetNativeBytesFromMallinfoAndRegister() const;
+    virtual void ClearLocalInternalAllocatorPools() = 0;
     virtual void UpdateThreadLocals() = 0;
     virtual size_t VerifyHeap() = 0;
     NativeGcTriggerType GetNativeGcTriggerType();
@@ -780,17 +631,21 @@ private:
     // Additional data for extensions
     GCExtensionData *extension_data_ {nullptr};
 
+    GCWorkersThreadPool *workers_pool_ {nullptr};
     class PostForkGCTask;
 
-    friend class java::ReferenceQueue;
-    friend class java::JavaReferenceProcessor;
-    friend class java::test::ReferenceProcessorBaseTest;
+    friend class ecmascript::EcmaReferenceProcessor;
+    friend class panda::mem::test::MemStatsGenGCTest;
     friend class panda::mem::test::ReferenceStorageTest;
     friend class panda::mem::test::RemSetTest;
     friend class GCScopedPhase;
     friend class GlobalObjectStorage;
+    // TODO(maksenov): Avoid using specific ObjectHelpers class here
     friend class GCDynamicObjectHelpers;
     friend class GCStaticObjectHelpers;
+    friend class G1GCTest;
+    friend class GCTestLog;
+
     void TriggerGCForNative();
     size_t SimpleNativeAllocationGcWatermark();
     /**
@@ -798,11 +653,14 @@ private:
      */
     void WaitForIdleGC() NO_THREAD_SAFETY_ANALYSIS;
 
+    friend class GCScopedPhase;
     friend class ConcurrentScope;
 
     PandaVM *vm_ {nullptr};
+    std::atomic<bool> is_full_gc_ {false};
 };
 
+// TODO(dtrubenkov): move configs in more appropriate place
 template <MTModeT MTMode>
 class AllocConfig<GCType::STW_GC, MTMode> {
 public:
@@ -857,4 +715,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_GC_GC_H_
+#endif  // PANDA_RUNTIME_MEM_GC_GC_HMA

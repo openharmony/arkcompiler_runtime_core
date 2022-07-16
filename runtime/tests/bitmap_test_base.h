@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TESTS_BITMAP_TEST_BASE_H_
-#define PANDA_RUNTIME_TESTS_BITMAP_TEST_BASE_H_
+#ifndef RUNTIME_TESTS_BITMAP_TEST_BASE_H
+#define RUNTIME_TESTS_BITMAP_TEST_BASE_H
 
 #include <cstdlib>
 #include <memory>
@@ -49,16 +49,17 @@ public:
     static constexpr BitmapWordType ADDRESS_MASK_TO_SET = 0xF;
 };
 
+size_t fn_rounddown(size_t val, size_t alignment)
+{
+    size_t mask = ~((static_cast<size_t>(1) * alignment) - 1);
+    return val & mask;
+}
+
 template <size_t kAlignment, typename TestFn>
 static void RunTest(TestFn &&fn)
 {
     auto heap_begin = BitmapTest::HEAP_STARTING_ADDRESS;
     const size_t heap_capacity = 16_MB;
-
-    auto fn_rounddown = [](size_t val, size_t alignment) -> size_t {
-        size_t mask = ~((static_cast<size_t>(1) * alignment) - 1);
-        return val & mask;
-    };
 
 #ifdef PANDA_NIGHTLY_TEST_ON
     std::srand(time(nullptr));
@@ -74,7 +75,7 @@ static void RunTest(TestFn &&fn)
         constexpr int NUM_BITS_TO_MODIFY = 1000;
         for (int j = 0; j < NUM_BITS_TO_MODIFY; ++j) {
             size_t offset = fn_rounddown(std::rand() % heap_capacity, kAlignment);
-            bool set = std::rand() % 2U == 1;
+            bool set = std::rand() % 2 == 1;
 
             if (set) {
                 bm.Set(ToVoidPtr(heap_begin + offset));
@@ -161,4 +162,4 @@ TEST_F(BitmapTest, AtomicClearSetTest)
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_TESTS_BITMAP_TEST_BASE_H_
+#endif  // RUNTIME_TESTS_BITMAP_TEST_BASE_H

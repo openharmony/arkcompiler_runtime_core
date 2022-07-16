@@ -58,11 +58,6 @@ static size_t Emit(It out, Types... args) { // NOLINT(readability-function-size)
 % Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
 %   emitter_name = group.first.emitter_name
 %   formats = group.map(&:format)
-%
-%   if emitter_name == "Jmp"
-%       next
-%   end
-%
 %   signature = emitter_signature(group, group.first.jump?)
 %   signature_str = signature.map { |o| "#{o.type} #{o.name}" }.join(', ')
 %
@@ -74,18 +69,15 @@ void BytecodeEmitter::<%= emitter_name %>(<%= signature_str %>) {
 %
 %   i = group[0]
 %
-%   if i.jcmpz?
-    Jcmpz(<%= opcodes[0] %>, <%= method_args.join(', ') %>);
-%   elsif i.jcmp?
-    Jcmp(<%= opcodes.join(', ') %>, <%= method_args.join(', ') %>);
-%   elsif group.length() == 1
-%       method_args_str = method_args.join(', ')
-%       if method_args_str != ''
-%           method_args_str = ', ' + method_args_str
-%       end
+%   if i.jump?
+%       jmp_args = [opcode_full_name(i)] + method_args[0..-2] + ["0"]
 %       format = format_full_name(i)
-%       opcode = opcode_full_name(i)
-    pc_ += Emit<<%= format %>>(std::back_inserter(bytecode_), <%= opcode %><%= method_args_str %>);
+    branches_.insert(std::make_pair(pc_, label));
+    pc_ += Emit<<%= format %>>(std::back_inserter(bytecode_), <%= jmp_args.join(', ') %>);
+%   elsif group.length() == 1
+%       jmp_args = [opcode_full_name(i)] + method_args
+%       format = format_full_name(i)
+    pc_ += Emit<<%= format %>>(std::back_inserter(bytecode_), <%= jmp_args.join(', ') %>);
 %   else
 %       bitlen_vars = []
 %       signature.each do |arg|
@@ -130,6 +122,45 @@ size_t BytecodeEmitter::GetSizeByOpcode(<%= OPCODE_TYPE %> opcode) {
     }
 }
 
+template <Format format, typename OffsT>
+static void UpdateBranchByFormat(uint8_t *insn, OffsT offs) { // NOLINT(readability-function-size)
+% uniq_fmt_jmps = Panda.instructions.select { |i| i.jump? }.uniq { |i| i.format.pretty }.sort_by { |insn| insn.format.pretty }
+% uniq_fmt_jmps.each do |i|
+%   fmt = i.format
+%   offsets = [i.operands.map(&:offset).max, fmt.size * 8]
+%
+    // Disable check due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
+    // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
+    if constexpr (format == Format::<%= fmt.pretty.upcase %>) {
+        constexpr size_t SIZE = <%= fmt.size %>;
+        constexpr std::array<uint8_t, <%= offsets.size %>> OFF{<%= offsets.join(', ') %>};
+        Span<const uint8_t> off_sp(OFF);
+        Span<uint8_t> insn_sp(insn, SIZE);
+        EmitImpl(insn_sp, off_sp, offs);
+        return;
+    }
+
+% end
+    UNREACHABLE();
+}
+
+/* static */
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void BytecodeEmitter::UpdateBranchOffs(uint8_t *insn, int32_t offs) {
+    auto opcode = BytecodeInstruction(insn).GetOpcode();
+    switch (opcode) {
+% Panda::instructions.each do |insn|
+%   if insn.jump?
+    case <%= opcode_full_name(insn) %>:
+        UpdateBranchByFormat<<%= format_full_name(insn) %>>(insn, offs);
+        return;
+%   end
+% end
+    default:
+        UNREACHABLE();
+    }
+}
+
 /* static */
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 BytecodeEmitter::BitImmSize BytecodeEmitter::GetBitImmSizeByOpcode(<%= OPCODE_TYPE %> opcode) {
@@ -160,8 +191,11 @@ BytecodeEmitter::BitImmSize BytecodeEmitter::GetBitImmSizeByOpcode(<%= OPCODE_TY
     switch (opcode) {
 % Panda::instructions.each do |insn|
 %   if insn.conditional?
+%     pref = insn.format.prefixed? ? insn.prefix.name.upcase + "_" : ""
+%     op = insn.opcode.upcase.delete_prefix(pref)
+%     op = CC_INVERTER[/^.../.match(op).to_s] ? op.sub(/^.../, CC_INVERTER).prepend(pref) : "LAST"
     case <%= opcode_full_name(insn) %>:
-        return <%= OPCODE_TYPE %>::<%= insn.opcode.upcase.sub(/^.../, CC_INVERTER) %>;
+        return <%= OPCODE_TYPE %>::<%= op %>;
 %   end
 % end
     default:
@@ -172,22 +206,52 @@ BytecodeEmitter::BitImmSize BytecodeEmitter::GetBitImmSizeByOpcode(<%= OPCODE_TY
 
 /* static */
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-<%= OPCODE_TYPE %> BytecodeEmitter::GetLongestConditionalJump(<%= OPCODE_TYPE %> opcode) {
-% JCC_WIDENER = {
-%       "_V8_IMM8" => "_V8_IMM16",
-%       "_V8_IMM16" => "_V8_IMM16",
-%       "_IMM8"     => "_IMM16",
-%       "_IMM16"    => "_IMM16",
-% }
+<%= OPCODE_TYPE %> BytecodeEmitter::GetLongestJump(<%= OPCODE_TYPE %> opcode) {
     switch (opcode) {
-% Panda::instructions.each do |insn|
-%   if insn.conditional?
-    case <%= OPCODE_TYPE %>::<%= insn.opcode.upcase %>:
-        return <%= OPCODE_TYPE %>::<%= insn.opcode.upcase.sub(/(_V4_IMM4|_V8_IMM16|_IMM8|_IMM16)$/, JCC_WIDENER) %>;
+% Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
+%   insn = group[0]
+%   if insn.jump?
+%     group.each do |i|
+    case <%= OPCODE_TYPE %>::<%= i.opcode.upcase %>:
+%     end
+        return <%= OPCODE_TYPE %>::<%= group[-1].opcode.upcase %>;
 %   end
 % end
     default:
         UNREACHABLE();
         return <%= OPCODE_TYPE %>::LAST;  // Any return value will do, we are broken here anyway.
     }
+}
+
+/* static */
+// // NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+<%= OPCODE_TYPE %> BytecodeEmitter::GetSuitableJump(<%= OPCODE_TYPE %> opcode, BytecodeEmitter::BitImmSize width) {
+    switch (opcode) {
+% jmp_w_list = [32, 16, 8, 4]
+% Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
+%   insn = group[0]
+%   if insn.jump?
+    case <%= OPCODE_TYPE %>::<%= insn.opcode.upcase %>:
+        switch (width) {
+%     suit_ind = 0
+%     jmp_w_list.each do |w|
+%       if group[suit_ind - 1] != nil && w == group[suit_ind - 1].operands.select(&:imm?).first.width
+%         if w != jmp_w_list[0]
+            return <%= OPCODE_TYPE %>::<%= (suit_ind == 0) ? "LAST" : group[suit_ind].opcode.upcase %>;
+%         end
+%         suit_ind = suit_ind - 1
+%       end
+        case BytecodeEmitter::BitImmSize::BITSIZE_<%= w %>:
+%     end
+            return <%= OPCODE_TYPE %>::<%= (suit_ind == 0) ? "LAST" : group[suit_ind].opcode.upcase %>;
+        }
+        break;
+%   end
+% end
+    default:
+        UNREACHABLE();
+        return <%= OPCODE_TYPE %>::LAST;  // Any return value will do, we are broken here anyway.
+    }
+    UNREACHABLE();
+    return <%= OPCODE_TYPE %>::LAST;  // Any return value will do, we are broken here anyway.
 }

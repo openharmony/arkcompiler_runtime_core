@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,7 @@ CodeAllocator::CodeAllocator(BaseMemStats *mem_stats)
       codeRangeStart_(nullptr),
       codeRangeEnd_(nullptr)
 {
-    ASSERT(PAGE_LOG_ALIGN >= LOG_ALIGN_MIN);
-    ASSERT(PAGE_LOG_ALIGN <= LOG_ALIGN_MAX);
+    ASSERT(LOG_ALIGN_MIN <= PAGE_LOG_ALIGN && PAGE_LOG_ALIGN <= LOG_ALIGN_MAX);
 }
 
 CodeAllocator::~CodeAllocator()

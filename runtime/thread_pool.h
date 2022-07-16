@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,32 @@ public:
 
     explicit ProcessorInterface(ProcArg args);
     virtual bool Process(Task) = 0;
-    virtual bool Init() = 0;     // before main loop
-    virtual bool Destroy() = 0;  // before thread exit
+    // before main loop
+    virtual bool Init()
+    {
+        return true;
+    }
+    // before thread exit
+    virtual bool Destroy()
+    {
+        return true;
+    }
+};
+
+class WorkerCreationInterface {
+public:
+    NO_COPY_SEMANTIC(WorkerCreationInterface);
+    NO_MOVE_SEMANTIC(WorkerCreationInterface);
+    WorkerCreationInterface() = default;
+    virtual ~WorkerCreationInterface() = default;
+    virtual void AttachWorker([[maybe_unused]] bool helper_thread)
+    {
+        // do nothing here
+    }
+    virtual void DetachWorker([[maybe_unused]] bool helper_thread)
+    {
+        // do nothing here
+    }
 };
 
 template <typename Task, typename Proc, typename ProcArg>
@@ -47,13 +71,15 @@ public:
     NO_MOVE_SEMANTIC(ThreadPool);
 
     explicit ThreadPool(mem::InternalAllocatorPtr allocator, TaskQueueInterface<Task> *queue, ProcArg args,
-                        size_t n_threads = 1, const char *thread_name = nullptr)
+                        size_t n_threads = 1, const char *thread_name = nullptr,
+                        WorkerCreationInterface *worker_creation_interface = nullptr)
         : allocator_(allocator),
           queue_(queue),
           workers_(allocator_->Adapter()),
           procs_(allocator_->Adapter()),
           args_(args),
-          is_thread_active_(allocator_->Adapter())
+          is_thread_active_(allocator_->Adapter()),
+          worker_creation_interface_(worker_creation_interface)
     {
         is_active_ = true;
         thread_name_ = thread_name;
@@ -69,19 +95,19 @@ public:
 
     void Scale(size_t new_n_threads)
     {
-        os::memory::LockHolder lock(scale_lock_);
+        os::memory::LockHolder scale_lock(scale_lock_);
         if (!IsActive()) {
             return;
         }
         LOG(DEBUG, RUNTIME) << "Scale thread pool for " << new_n_threads << " new threads";
-        if (new_n_threads == 0) {
+        if (new_n_threads <= 0) {
             LOG(ERROR, RUNTIME) << "Incorrect number of threads " << new_n_threads << " for thread pool";
             return;
         }
         if (new_n_threads > threads_counter_) {
             // Need to add new threads.
             {
-                os::memory::LockHolder lock2(queue_lock_);
+                os::memory::LockHolder queue_lock(queue_lock_);
                 is_thread_active_.resize(new_n_threads);
             }
             for (size_t i = threads_counter_; i < new_n_threads; i++) {
@@ -96,12 +122,51 @@ public:
                 procs_.pop_back();
             }
             {
-                os::memory::LockHolder lock2(queue_lock_);
+                os::memory::LockHolder queue_lock(queue_lock_);
                 is_thread_active_.resize(new_n_threads);
             }
+        } else {
+            // Same number of threads - do nothing.
         }
         threads_counter_ = new_n_threads;
         LOG(DEBUG, RUNTIME) << "Scale has been completed";
+    }
+
+    void Help()
+    {
+        // Disallow scaling while the main thread processes the queue
+        os::memory::LockHolder scale_lock(scale_lock_);
+        if (!IsActive()) {
+            return;
+        }
+        auto *proc = allocator_->New<Proc>(args_);
+        ASSERT(proc != nullptr);
+        WorkerCreationInterface *iface = GetWorkerCreationInterface();
+        if (iface != nullptr) {
+            iface->AttachWorker(true);
+        }
+        if (!proc->Init()) {
+            LOG(FATAL, RUNTIME) << "Cannot initialize worker thread";
+        }
+        while (true) {
+            Task task;
+            {
+                os::memory::LockHolder lock(queue_lock_);
+                task = queue_->GetTask();
+            }
+            if (task.IsEmpty()) {
+                break;
+            }
+            SignalTask();
+            proc->Process(task);
+        }
+        if (!proc->Destroy()) {
+            LOG(FATAL, RUNTIME) << "Cannot destroy worker thread";
+        }
+        if (iface != nullptr) {
+            iface->DetachWorker(true);
+        }
+        allocator_->Delete(proc);
     }
 
     bool TryPutTask(Task task)
@@ -112,7 +177,7 @@ public:
             if (!is_active_) {
                 return false;
             }
-            res = queue_->TryAddTask(task);
+            res = queue_->TryAddTask(std::move(task));
         }
         if (res) {
             // Task was added.
@@ -131,7 +196,7 @@ public:
             while (queue_->IsFull()) {
                 WaitTask();
             }
-            queue_->AddTask(task);
+            queue_->AddTask(std::move(task));
         }
         SignalTask();
         return true;
@@ -160,6 +225,10 @@ public:
 
     static void WorkerEntry(ThreadPool<Task, Proc, ProcArg> *thread_pool, Proc *proc, int i)
     {
+        WorkerCreationInterface *iface = thread_pool->GetWorkerCreationInterface();
+        if (iface != nullptr) {
+            iface->AttachWorker(false);
+        }
         if (!proc->Init()) {
             LOG(FATAL, RUNTIME) << "Cannot initialize worker thread";
         }
@@ -170,7 +239,7 @@ public:
                 if (!thread_pool->IsActive(i)) {
                     break;
                 }
-                task = thread_pool->queue_->GetTask();
+                task = std::move(thread_pool->queue_->GetTask());
                 if (task.IsEmpty()) {
                     thread_pool->WaitTask();
                     continue;
@@ -182,6 +251,9 @@ public:
         }
         if (!proc->Destroy()) {
             LOG(FATAL, RUNTIME) << "Cannot destroy worker thread";
+        }
+        if (iface != nullptr) {
+            iface->DetachWorker(false);
         }
         LOG(DEBUG, RUNTIME) << "Worker " << i << " is finished";
     }
@@ -249,9 +321,7 @@ private:
             os::memory::LockHolder lock(queue_lock_);
             is_thread_active_.at(i) = true;
         }
-        // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
         auto proc = allocator_->New<Proc>(args_);
-        // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
         auto worker = allocator_->New<std::thread>(WorkerEntry, this, proc, i);
         if (worker == nullptr) {
             LOG(FATAL, RUNTIME) << "Cannot create a worker thread";
@@ -266,29 +336,23 @@ private:
         procs_.emplace_back(proc);
     }
 
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
+    WorkerCreationInterface *GetWorkerCreationInterface()
+    {
+        return worker_creation_interface_;
+    }
+
     mem::InternalAllocatorPtr allocator_;
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
     os::memory::ConditionVariable cond_var_;
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
     TaskQueueInterface<Task> *queue_ GUARDED_BY(queue_lock_);
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
     PandaList<std::thread *> workers_ GUARDED_BY(scale_lock_);
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
     size_t threads_counter_ GUARDED_BY(scale_lock_) = 0;
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
     PandaList<Proc *> procs_ GUARDED_BY(scale_lock_);
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
     ProcArg args_;
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
     bool is_active_ GUARDED_BY(queue_lock_) = false;
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
     os::memory::Mutex queue_lock_;
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
     os::memory::Mutex scale_lock_;
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
     PandaVector<bool> is_thread_active_ GUARDED_BY(queue_lock_);
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_GLOBAL_VAR_AS_INTERFACE)
+    WorkerCreationInterface *worker_creation_interface_;
     const char *thread_name_;
 };
 

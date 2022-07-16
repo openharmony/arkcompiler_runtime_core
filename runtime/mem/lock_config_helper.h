@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,13 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef RUNTIME_MEM_LOCK_CONFIG_HELPER_H
+#define RUNTIME_MEM_LOCK_CONFIG_HELPER_H
 
-#ifndef PANDA_RUNTIME_MEM_LOCK_CONFIG_HELPER_H_
-#define PANDA_RUNTIME_MEM_LOCK_CONFIG_HELPER_H_
+#include "file_items.h"
 
-#include "runtime/include/language_config.h"
+namespace panda {
+enum LangTypeT : bool { LANG_TYPE_STATIC, LANG_TYPE_DYNAMIC };
+enum MTModeT { MT_MODE_SINGLE, MT_MODE_MULTI, MT_MODE_TASK };
 
-namespace panda::mem {
+namespace mem {
 
 template <class LockConfig, MTModeT MTMode>
 class LockConfigHelper {
@@ -35,6 +38,7 @@ class LockConfigHelper<LockConfigT, MT_MODE_SINGLE> {
 public:
     using Value = typename LockConfigT::DummyLock;
 };
-}  // namespace panda::mem
+}  // namespace mem
+}  // namespace panda
 
-#endif  // PANDA_RUNTIME_MEM_LOCK_CONFIG_HELPER_H_
+#endif  // RUNTIME_MEM_LOCK_CONFIG_HELPER_H

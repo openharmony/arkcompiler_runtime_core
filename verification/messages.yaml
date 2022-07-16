@@ -207,7 +207,7 @@ messages:
     number: 11
     args: field
     message: >
-      Cannot resolve field type. Field is '%{field}'
+      Cannot resolve field type. Field is '${field}'
 
   ExpectedStaticOrInstanceField:
     number: 12
@@ -446,10 +446,10 @@ messages:
     message: >
       ${register}: '${src_type}' (source) vs. '${dst_type}' (destination).
 
-  BadArrayConstructorName:
+  InitobjCallsNotConstructor:
     number: 47
     args: name
-    message: Unexpected array ctor name '${name}', expected '<init>'.
+    message: Method '${name}' is not initializer or constructor.
 
   TooFewArrayConstructorArgs:
     number: 48
@@ -488,7 +488,7 @@ messages:
     number: 63
     args: class_id
     message: >
-      Cannot resolve class id 0x${class_id}
+      Cannot resolve class id 0x${std::hex << class_id}
 
   CacheMissForMethodAtOffset:
     number: 54
@@ -499,7 +499,7 @@ messages:
     number: 62
     args: method_id
     message: >
-      Cannot resolve method id 0x${method_id}
+      Cannot resolve method id 0x${std::hex << method_id}
 
   CacheMissForFieldAtOffset:
     number: 55
@@ -510,17 +510,12 @@ messages:
     number: 61
     args: field_id
     message: >
-      Cannot resolve field id 0x${field_id}
+      Cannot resolve field id 0x${std::hex << field_id}
 
   JavaTypesMethodArgWasNotResolved:
     number: 56
     args: method_name
     message: Argument of method '${method_name}' was not resolved at caching stage (class was not found)
-
-  JavaTypesMethodArgCannotBeProcessed:
-    number: 57
-    args: method_name
-    message: Internal error. Cannot process argument of method '${method_name}'
 
   JavaTypesMethodArgCannotBeConvertedToType:
     number: 58
@@ -535,6 +530,17 @@ messages:
     number: 60
     args: type_id
     message: Cannot get type for TypeId 0x${std::hex << static_cast<size_t>(id)}. Unknown primitive type
+
+  ConflictingClassDefinitions:
+    number: 65
+    level: warning
+    args: klass, original_file, new_file
+    message: Class ${klass} is already defined ${original_file}, the new definition ${new_file} will be ignored.
+
+  AccumulatorPositionIsOutOfRange:
+    number: 66
+    level: error
+    message: Wrong call with accumulator instruction, the accumulator position is out of range
 
   CflowInvalidJumpTarget:
     number: 1000
@@ -554,14 +560,13 @@ messages:
       Method: '${method_name}'.
       Instruction offset: ${instruction_offset}.
 
-  CflowInvalidLastInstOfExcHandlerFallIntoOtherExcHandler:
+  CflowInvalidJumpIntoExcHandler:
     number: 1002
-    args: method_name, handler_start_offset, handler_end_offset
+    args: method_name, handler_start_offset
     message: >
-      Invalid last instruction of exception handler.
-      Control flow may go into other exception handler.
+      Invalid jump into the exception handler.
       Method: '${method_name}'.
-      Handler offsets: [ ${handler_start_offset}, ${handler_end_offset} ].
+      Handler offset: ${handler_start_offset}.
 
   CflowInternalError:
     number: 1003
@@ -635,9 +640,9 @@ messages:
   DebugBreakpointSetInfo:
     number: 2000
     level: debug
-    args: hash, id, offset
+    args: method_name, id, offset
     message: >
-      Breakpoint set for method name hash 0x${std::hex << hash}, id 0x${id}, offset 0x${offset}.
+      Breakpoint set for method name ${method_name}, id 0x${std::hex << id}, offset 0x${offset}.
 
   DebugBreakpointWrongCfgLine:
     number: 2001
@@ -648,9 +653,9 @@ messages:
   DebugBreakpointAddedInfo:
     number: 2002
     level: debug
-    args: method_name, hash, offset
+    args: method_name, offset
     message: >
-      Added config for managed breakpoint for '${method_name}' (hash 0x${std::hex << hash}), offset 0x${offset}.
+      Added config for managed breakpoint for ${method_name}, offset 0x${std::hex << offset}.
 
   DebugBreakpointWrongSection:
     number: 2003

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_TYPE_SUBTYPING_CLOSURE_H_
-#define PANDA_VERIFICATION_TYPE_SUBTYPING_CLOSURE_H_
+#ifndef _PANDA_SUBTYPING_CLOSURE_HPP
+#define _PANDA_SUBTYPING_CLOSURE_HPP
 
 #include "type_sort.h"
 #include "type_index.h"
@@ -44,7 +44,7 @@ public:
         }
         Empty_ = true;
     }
-    void AddType(SortIdx sort, TypeIdx type, size_t arity)
+    void AddType(SortIdx sort, TypeNum type, size_t arity)
     {
         if (arity >= ArityToSortToTypes_.size()) {
             ArityToSortToTypes_.resize(arity + 1);
@@ -69,9 +69,9 @@ public:
 
 private:
     // arity -> sort -> instances
-    PandaVector<PandaUnorderedMap<SortIdx, PandaUnorderedSet<TypeIdx>>> ArityToSortToTypes_;
+    PandaVector<PandaUnorderedMap<SortIdx, PandaUnorderedSet<TypeNum>>> ArityToSortToTypes_;
     bool Empty_ = true;
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_TYPE_SUBTYPING_CLOSURE_H_
+#endif  // !_PANDA_SUBTYPING_CLOSURE_HPP

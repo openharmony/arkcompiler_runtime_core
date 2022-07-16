@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_FILE_ITEMS_H_
-#define PANDA_LIBPANDAFILE_FILE_ITEMS_H_
+#ifndef LIBPANDAFILE_FILE_ITEMS_H_
+#define LIBPANDAFILE_FILE_ITEMS_H_
 
 #include "file.h"
-#include "file_format_version.h"
 #include "file_writer.h"
 #include "macros.h"
 #include "modifiers.h"
 #include "type.h"
+#include "file_format_version.h"
+#include "source_lang_enum.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -32,6 +33,7 @@
 #include <variant>
 #include <vector>
 #include <list>
+#include <set>
 
 namespace panda::panda_file {
 
@@ -41,9 +43,9 @@ enum class ClassTag : uint8_t {
     SOURCE_LANG = 0x02,
     RUNTIME_ANNOTATION = 0x03,
     ANNOTATION = 0x04,
-    SOURCE_FILE = 0x05,
-    RUNTIME_TYPE_ANNOTATION = 0x06,
-    TYPE_ANNOTATION = 0x07
+    RUNTIME_TYPE_ANNOTATION = 0x05,
+    TYPE_ANNOTATION = 0x06,
+    SOURCE_FILE = 0x07
 };
 
 enum class MethodTag : uint8_t {
@@ -69,7 +71,12 @@ enum class FieldTag : uint8_t {
     TYPE_ANNOTATION = 0x06
 };
 
-enum class SourceLang : uint8_t { ECMASCRIPT, PANDA_ASSEMBLY, LAST = PANDA_ASSEMBLY };
+bool IsDynamicLanguage(panda::panda_file::SourceLang lang);
+std::optional<panda::panda_file::SourceLang> LanguageFromString(std::string_view lang);
+const char *LanguageToString(panda::panda_file::SourceLang lang);
+const char *GetCtorName(panda::panda_file::SourceLang lang);
+const char *GetCctorName(panda::panda_file::SourceLang lang);
+const char *GetStringClassDescriptor(panda::panda_file::SourceLang lang);
 
 static constexpr size_t ID_SIZE = File::EntityId::GetSize();
 static constexpr size_t IDX_SIZE = sizeof(uint16_t);
@@ -78,6 +85,45 @@ static constexpr uint32_t INVALID_OFFSET = std::numeric_limits<uint32_t>::max();
 static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
 static constexpr uint32_t MAX_INDEX_16 = std::numeric_limits<uint16_t>::max();
 static constexpr uint32_t MAX_INDEX_32 = std::numeric_limits<uint32_t>::max();
+
+constexpr uint32_t PGO_STRING_DEFAULT_COUNT = 5;
+constexpr uint32_t PGO_CLASS_DEFAULT_COUNT = 3;
+constexpr uint32_t PGO_CODE_DEFAULT_COUNT = 1;
+
+enum class ItemTypes {
+    ANNOTATION_ITEM,
+    CATCH_BLOCK_ITEM,
+    CLASS_INDEX_ITEM,
+    CLASS_ITEM,
+    CODE_ITEM,
+    DEBUG_INFO_ITEM,
+    END_ITEM,
+    FIELD_INDEX_ITEM,
+    FIELD_ITEM,
+    FOREIGN_CLASS_ITEM,
+    FOREIGN_FIELD_ITEM,
+    FOREIGN_METHOD_ITEM,
+    INDEX_HEADER,
+    INDEX_SECTION,
+    LINE_NUMBER_PROGRAM_INDEX_ITEM,
+    LINE_NUMBER_PROGRAM_ITEM,
+    LITERAL_ARRAY_ITEM,
+    LITERAL_ITEM,
+    METHOD_HANDLE_ITEM,
+    METHOD_INDEX_ITEM,
+    METHOD_ITEM,
+    PARAM_ANNOTATIONS_ITEM,
+    PRIMITIVE_TYPE_ITEM,
+    PROTO_INDEX_ITEM,
+    PROTO_ITEM,
+    STRING_ITEM,
+    TRY_BLOCK_ITEM,
+    VALUE_ITEM
+};
+
+constexpr std::string_view STRING_ITEM = "string_item";
+constexpr std::string_view CLASS_ITEM = "class_item";
+constexpr std::string_view CODE_ITEM = "code_item";
 
 enum class IndexType {
     // 16-bit indexes
@@ -180,17 +226,41 @@ public:
 
     virtual bool Write(Writer *writer) = 0;
 
-    virtual std::string GetName() const = 0;
+    std::string GetName() const;
+
+    virtual ItemTypes GetItemType() const = 0;
 
     virtual void Dump([[maybe_unused]] std::ostream &os) const {}
 
     virtual void Visit([[maybe_unused]] const VisitorCallBack &cb) {}
+
+    void SetPGORank(uint32_t rank)
+    {
+        pgo_rank_ = rank;
+    }
+
+    uint32_t GetPGORank() const
+    {
+        return pgo_rank_;
+    }
+
+    void SetOriginalRank(uint32_t rank)
+    {
+        original_rank_ = rank;
+    }
+
+    uint32_t GetOriginalRank() const
+    {
+        return original_rank_;
+    }
 
 private:
     bool needs_emit_ {true};
     uint32_t offset_ {0};
     uint32_t order_ {INVALID_INDEX};
     std::list<IndexedItem *> index_deps_;
+    uint32_t pgo_rank_ {0};
+    uint32_t original_rank_ {0};
 };
 
 class IndexedItem : public BaseItem {
@@ -328,9 +398,9 @@ public:
         return true;
     }
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "primitive_type_item";
+        return ItemTypes::PRIMITIVE_TYPE_ITEM;
     }
 
     DEFAULT_MOVE_SEMANTIC(PrimitiveTypeItem);
@@ -341,15 +411,17 @@ class StringItem : public BaseItem {
 public:
     explicit StringItem(std::string str);
 
+    explicit StringItem(File::StringData data);
+
     ~StringItem() override = default;
 
     size_t CalculateSize() const override;
 
     bool Write(Writer *writer) override;
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "string_item";
+        return ItemTypes::STRING_ITEM;
     }
 
     const std::string &GetData() const
@@ -357,13 +429,18 @@ public:
         return str_;
     }
 
+    size_t GetUtf16Len() const
+    {
+        return utf16_length_;
+    }
+
     DEFAULT_MOVE_SEMANTIC(StringItem);
     DEFAULT_COPY_SEMANTIC(StringItem);
 
 private:
     std::string str_;
-    size_t utf16_length_ {0};
-    size_t is_ascii_ {0};
+    size_t utf16_length_;
+    size_t is_ascii_ = 0;
 };
 
 class AnnotationItem;
@@ -379,6 +456,11 @@ public:
         return IndexType::FIELD;
     }
 
+    StringItem *GetNameItem() const
+    {
+        return name_;
+    }
+
     ~BaseFieldItem() override = default;
 
     DEFAULT_MOVE_SEMANTIC(BaseFieldItem);
@@ -392,9 +474,9 @@ protected:
     bool Write(Writer *writer) override;
 
 private:
-    BaseClassItem *class_ {nullptr};
-    StringItem *name_ {nullptr};
-    TypeItem *type_ {nullptr};
+    BaseClassItem *class_;
+    StringItem *name_;
+    TypeItem *type_;
 };
 
 class FieldItem : public BaseFieldItem {
@@ -429,9 +511,9 @@ public:
 
     bool Write(Writer *writer) override;
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "field_item";
+        return ItemTypes::FIELD_ITEM;
     }
 
     std::vector<AnnotationItem *> *GetRuntimeAnnotations()
@@ -464,8 +546,8 @@ private:
 
     bool WriteTaggedData(Writer *writer);
 
-    uint32_t access_flags_ {0};
-    ValueItem *value_ {nullptr};
+    uint32_t access_flags_;
+    ValueItem *value_;
     std::vector<AnnotationItem *> runtime_annotations_;
     std::vector<AnnotationItem *> annotations_;
     std::vector<AnnotationItem *> type_annotations_;
@@ -489,8 +571,7 @@ public:
         SET_EPILOGUE_BEGIN = 0x08,
         SET_FILE = 0x09,
         SET_SOURCE_CODE = 0x0a,
-        SET_COLUMN = 0X0b,  // The SET_COLUMN opcode takes a single unsigned LEB128 operand and
-                            // stores it in the column register of the state machine.
+        SET_COLUMN = 0X0b,
         LAST
     };
 
@@ -504,6 +585,8 @@ public:
 
     void EmitAdvanceLine(std::vector<uint8_t> *constant_pool, int32_t value);
 
+    void EmitColumn(std::vector<uint8_t> *constant_pool, uint32_t pc_inc, uint32_t column);
+
     void EmitStartLocal(std::vector<uint8_t> *constant_pool, int32_t register_number, StringItem *name,
                         StringItem *type);
 
@@ -515,8 +598,6 @@ public:
     void EmitRestartLocal(int32_t register_number);
 
     bool EmitSpecialOpcode(uint32_t pc_inc, int32_t line_inc);
-
-    void EmitColumn(std::vector<uint8_t> *constant_pool, uint32_t pc_inc, int32_t column);
 
     void EmitPrologEnd();
 
@@ -530,9 +611,9 @@ public:
 
     size_t CalculateSize() const override;
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "line_number_program_item";
+        return ItemTypes::LINE_NUMBER_PROGRAM_ITEM;
     }
 
     const std::vector<uint8_t> &GetData() const
@@ -544,6 +625,8 @@ public:
     {
         return IndexType::LINE_NUMBER_PROG;
     }
+
+    void SetData(std::vector<uint8_t> &&data);
 
 private:
     void EmitOpcode(Opcode opcode);
@@ -600,9 +683,9 @@ public:
 
     bool Write(Writer *writer) override;
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "debug_info_item";
+        return ItemTypes::DEBUG_INFO_ITEM;
     }
 
     void Dump(std::ostream &os) const override;
@@ -636,6 +719,11 @@ public:
         return name_;
     }
 
+    BaseClassItem *GetClassItem() const
+    {
+        return class_;
+    }
+
     ~BaseMethodItem() override = default;
 
     DEFAULT_MOVE_SEMANTIC(BaseMethodItem);
@@ -649,16 +737,18 @@ protected:
     bool Write(Writer *writer) override;
 
 private:
-    BaseClassItem *class_ {nullptr};
-    StringItem *name_ {nullptr};
-    ProtoItem *proto_ {nullptr};
-    uint32_t access_flags_ {0};
+    BaseClassItem *class_;
+    StringItem *name_;
+    ProtoItem *proto_;
+    uint32_t access_flags_;
 };
 
 class MethodParamItem {
 public:
     explicit MethodParamItem(TypeItem *type) : type_(type) {}
+
     ~MethodParamItem() = default;
+
     DEFAULT_MOVE_SEMANTIC(MethodParamItem);
     DEFAULT_COPY_SEMANTIC(MethodParamItem);
 
@@ -716,6 +806,7 @@ private:
 };
 
 class ParamAnnotationsItem;
+class BaseClassItem;
 
 class MethodItem : public BaseMethodItem {
 public:
@@ -798,9 +889,9 @@ public:
 
     bool Write(Writer *writer) override;
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "method_item";
+        return ItemTypes::METHOD_ITEM;
     }
 
     std::vector<MethodParamItem> &GetParams()
@@ -937,8 +1028,8 @@ public:
     template <class... Args>
     MethodItem *AddMethod(Args... args)
     {
-        methods_.emplace_back(std::make_unique<MethodItem>(this, std::forward<Args>(args)...));
-        return methods_.back().get();
+        // insert new method to set ordered by method name
+        return methods_.insert(std::make_unique<MethodItem>(this, std::forward<Args>(args)...))->get();
     }
 
     void SetSourceFile(StringItem *item)
@@ -954,22 +1045,26 @@ public:
 
     bool Write(Writer *writer) override;
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "class_item";
+        return ItemTypes::CLASS_ITEM;
     }
 
     void VisitFields(const VisitorCallBack &cb)
     {
         for (auto &field : fields_) {
-            cb(field.get());
+            if (!cb(field.get())) {
+                break;
+            }
         }
     }
 
     void VisitMethods(const VisitorCallBack &cb)
     {
         for (auto &method : methods_) {
-            cb(method.get());
+            if (!cb(method.get())) {
+                break;
+            }
         }
     }
 
@@ -1003,6 +1098,18 @@ public:
     DEFAULT_COPY_SEMANTIC(ClassItem);
 
 private:
+    struct MethodCompByName {
+        bool operator()(const std::unique_ptr<MethodItem> &m1, const std::unique_ptr<MethodItem> &m2) const
+        {
+            auto *str1 = m1->GetNameItem();
+            auto *str2 = m2->GetNameItem();
+            if (str1->GetUtf16Len() == str2->GetUtf16Len()) {
+                return str1->GetData() < str2->GetData();
+            }
+            return str1->GetUtf16Len() < str2->GetUtf16Len();
+        }
+    };
+
     bool WriteIfaces(Writer *writer);
 
     bool WriteAnnotations(Writer *writer);
@@ -1019,7 +1126,7 @@ private:
     std::vector<AnnotationItem *> runtime_type_annotations_;
     StringItem *source_file_;
     std::vector<std::unique_ptr<FieldItem>> fields_;
-    std::vector<std::unique_ptr<MethodItem>> methods_;
+    std::multiset<std::unique_ptr<MethodItem>, MethodCompByName> methods_;
 };
 
 class ForeignClassItem : public BaseClassItem {
@@ -1033,9 +1140,9 @@ public:
         return true;
     }
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "foreign_class_item";
+        return ItemTypes::FOREIGN_CLASS_ITEM;
     }
 
     DEFAULT_MOVE_SEMANTIC(ForeignClassItem);
@@ -1053,9 +1160,9 @@ public:
         return true;
     }
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "foreign_field_item";
+        return ItemTypes::FOREIGN_FIELD_ITEM;
     }
 
     DEFAULT_MOVE_SEMANTIC(ForeignFieldItem);
@@ -1076,9 +1183,9 @@ public:
         return true;
     }
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "foreign_method_item";
+        return ItemTypes::FOREIGN_METHOD_ITEM;
     }
 
     DEFAULT_MOVE_SEMANTIC(ForeignMethodItem);
@@ -1093,9 +1200,9 @@ public:
 
     ~ParamAnnotationsItem() override = default;
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "param_annotations_item";
+        return ItemTypes::PARAM_ANNOTATIONS_ITEM;
     }
 
     size_t CalculateSize() const override;
@@ -1127,9 +1234,9 @@ public:
 
     bool Write(Writer *writer) override;
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "proto_item";
+        return ItemTypes::PROTO_ITEM;
     }
 
     IndexType GetIndexType() const override
@@ -1169,9 +1276,9 @@ public:
 
         bool Write(Writer *writer) override;
 
-        std::string GetName() const override
+        ItemTypes GetItemType() const override
         {
-            return "catch_block_item";
+            return ItemTypes::CATCH_BLOCK_ITEM;
         }
 
     private:
@@ -1201,9 +1308,9 @@ public:
 
         bool Write(Writer *writer) override;
 
-        std::string GetName() const override
+        ItemTypes GetItemType() const override
         {
-            return "try_block_item";
+            return ItemTypes::TRY_BLOCK_ITEM;
         }
 
     private:
@@ -1261,9 +1368,37 @@ public:
 
     bool Write(Writer *writer) override;
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "code_item";
+        return ItemTypes::CODE_ITEM;
+    }
+
+    void AddMethod(BaseMethodItem *method)
+    {
+        methods_.emplace_back(method);
+    }
+
+    std::vector<std::string> GetMethodNames() const
+    {
+        std::vector<std::string> names;
+        for (const auto *method : methods_) {
+            if (method == nullptr) {
+                continue;
+            }
+            std::string class_name;
+            if (method->GetClassItem() != nullptr) {
+                class_name = method->GetClassItem()->GetNameItem()->GetData();
+                class_name.pop_back();          // remove '\0'
+                ASSERT(class_name.size() > 2);  // 2 - L and ;
+                class_name.erase(0, 1);
+                class_name.pop_back();
+                class_name.append("::");
+            }
+            class_name.append(method->GetNameItem()->GetData());
+            class_name.pop_back();  // remove '\0'
+            names.emplace_back(class_name);
+        }
+        return names;
     }
 
     DEFAULT_MOVE_SEMANTIC(CodeItem);
@@ -1275,6 +1410,7 @@ private:
     size_t num_ins_ {0};
     std::vector<uint8_t> instructions_;
     std::vector<TryBlock> try_blocks_;
+    std::vector<BaseMethodItem *> methods_;
 };
 
 class ScalarValueItem;
@@ -1306,14 +1442,14 @@ public:
         return type_ == Type::INTEGER || type_ == Type::FLOAT || type_ == Type::ID;
     }
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "value_item";
+        return ItemTypes::VALUE_ITEM;
     }
 
-    const ScalarValueItem *GetAsScalar() const;
+    ScalarValueItem *GetAsScalar();
 
-    const ArrayValueItem *GetAsArray() const;
+    ArrayValueItem *GetAsArray();
 
 private:
     Type type_;
@@ -1349,7 +1485,7 @@ public:
 
     size_t GetULeb128EncodedSize();
 
-    size_t GetSLeb128EncodedSize() const;
+    size_t GetSLeb128EncodedSize();
 
     size_t CalculateSize() const override;
 
@@ -1417,9 +1553,9 @@ public:
         return type_;
     }
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "literal_item";
+        return ItemTypes::LITERAL_ITEM;
     }
 
     template <class T>
@@ -1466,6 +1602,11 @@ public:
 
     bool Write(Writer *writer) override;
 
+    ItemTypes GetItemType() const override
+    {
+        return ItemTypes::LITERAL_ARRAY_ITEM;
+    }
+
 private:
     std::vector<LiteralItem> items_;
 };
@@ -1484,7 +1625,7 @@ public:
         DEFAULT_MOVE_SEMANTIC(Elem);
         DEFAULT_COPY_SEMANTIC(Elem);
 
-        StringItem *GetName()
+        const StringItem *GetName()
         {
             return name_;
         }
@@ -1537,9 +1678,9 @@ public:
 
     bool Write(Writer *writer) override;
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "annotation_item";
+        return ItemTypes::ANNOTATION_ITEM;
     }
 
     std::vector<Elem> *GetElements()
@@ -1547,9 +1688,19 @@ public:
         return &elements_;
     }
 
+    void SetElements(std::vector<Elem> &&elements)
+    {
+        elements_ = std::move(elements);
+    }
+
     const std::vector<Tag> &GetTags() const
     {
         return tags_;
+    }
+
+    void SetTags(std::vector<Tag> &&tags)
+    {
+        tags_ = std::move(tags);
     }
 
 private:
@@ -1586,9 +1737,9 @@ public:
 
     bool Write(Writer *writer) override;
 
-    std::string GetName() const override
+    ItemTypes GetItemType() const override
     {
-        return "method_handle_item";
+        return ItemTypes::METHOD_HANDLE_ITEM;
     }
 
     MethodHandleType GetType() const
@@ -1614,4 +1765,4 @@ enum class ArgumentType : uint8_t {
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_FILE_ITEMS_H_
+#endif  // LIBPANDAFILE_FILE_ITEMS_H_

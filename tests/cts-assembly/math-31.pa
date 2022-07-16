@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(151 ashr 1 == 75) operation --> ashr2.64
-.function u1 main(){
+.function i32 main(){
     ldai.64 151
     movi.64 v0, 1
     ashr2.64 v0

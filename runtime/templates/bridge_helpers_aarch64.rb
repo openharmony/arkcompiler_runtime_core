@@ -12,11 +12,25 @@
 # limitations under the License.
 
 def cmp_opcode(imm)
-  return "cmp w5, ##{imm}"
+  if imm <= 4095
+    return "cmp w5, ##{imm}"
+  end
+  # We need to save imm to temporary register before cmp,
+  # because it is too large for ARM64 instruction format
+  return "mov w13, ##{imm}
+    cmp w5, w13"
 end
 
 def jump_eq(target)
   return "beq #{target}"
+end
+
+def jump(target)
+  return "b #{target}"
+end
+
+def save_param(value)
+  return "mov x15, #{value}"
 end
 
 def handler_path(name)

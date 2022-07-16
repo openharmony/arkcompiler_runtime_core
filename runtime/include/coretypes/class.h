@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_CORETYPES_CLASS_H_
-#define PANDA_RUNTIME_INCLUDE_CORETYPES_CLASS_H_
+#ifndef PANDA_RUNTIME_CORETYPES_CLASS_H_
+#define PANDA_RUNTIME_CORETYPES_CLASS_H_
 
 #include <cstddef>
 #include <cstdint>
@@ -37,7 +36,6 @@ public:
     // otherwise it may cause data race while visiting object's class concurrently in gc.
     void InitClass(const uint8_t *descriptor, uint32_t vtable_size, uint32_t imt_size, uint32_t klass_size)
     {
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         new (&klass_)
             panda::Class(descriptor, panda_file::SourceLang::PANDA_ASSEMBLY, vtable_size, imt_size, klass_size);
     }
@@ -91,18 +89,13 @@ public:
         return reinterpret_cast<Class *>(reinterpret_cast<uintptr_t>(klass) - GetRuntimeClassOffset());
     }
 
-    ~Class() = default;
-
-    NO_COPY_SEMANTIC(Class);
-    NO_MOVE_SEMANTIC(Class);
-
 private:
     panda::Class klass_;
 };
 
-// Klass field has variable size so it must be the last
+// Klass field has variable size so it must be last
 static_assert(Class::GetRuntimeClassOffset() + sizeof(panda::Class) == sizeof(Class));
 
 }  // namespace panda::coretypes
 
-#endif  // PANDA_RUNTIME_INCLUDE_CORETYPES_CLASS_H_
+#endif  // PANDA_RUNTIME_CORETYPES_CLASS_H_

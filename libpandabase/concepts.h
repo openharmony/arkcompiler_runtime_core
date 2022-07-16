@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 namespace panda {
 
-// Iterable concept
+/// Iterable concept
 
 template <typename T, typename = void>
 struct is_iterable : public std::false_type {};  // NOLINT(readability-identifier-naming)
@@ -34,7 +34,7 @@ template <typename T>
 // NOLINTNEXTLINE(readability-identifier-naming, misc-definitions-in-headers)
 constexpr bool is_iterable_v = is_iterable<T>::value;
 
-// Random access iterable concept
+/// Random access iterable concept
 
 template <typename T>
 struct is_random_access_iterable  // NOLINT(readability-identifier-naming)
@@ -46,7 +46,7 @@ template <typename T>
 // NOLINTNEXTLINE(readability-identifier-naming, misc-definitions-in-headers)
 constexpr bool is_random_access_iterable_v = is_random_access_iterable<T>::value;
 
-// Forward iterable concept
+/// Forward iterable concept
 
 template <typename T>
 struct is_forward_iterable  // NOLINT(readability-identifier-naming)
@@ -58,7 +58,7 @@ template <typename T>
 // NOLINTNEXTLINE(readability-identifier-naming, misc-definitions-in-headers)
 constexpr bool is_forward_iterable_v = is_forward_iterable<T>::value;
 
-// Vectorable concept
+/// Vectorable concept
 
 template <class V, typename = void>
 struct is_vectorable : public std::false_type {};  // NOLINT(readability-identifier-naming)
@@ -72,7 +72,7 @@ template <class V>
 // NOLINTNEXTLINE(readability-identifier-naming, misc-definitions-in-headers)
 constexpr bool is_vectorable_v = is_vectorable<V>::value;
 
-// Stringable concept
+/// Stringable concept
 
 template <class S, typename = void>
 struct is_stringable : public std::false_type {};  // NOLINT(readability-identifier-naming)
@@ -87,7 +87,7 @@ template <class S>
 // NOLINTNEXTLINE(readability-identifier-naming, misc-definitions-in-headers)
 constexpr bool is_stringable_v = is_stringable<S>::value;
 
-// Hash mappable concept
+/// Hash mappable concept
 
 template <class HM, typename = void>
 struct is_hash_mappable : public std::false_type {};  // NOLINT(readability-identifier-naming)
@@ -106,7 +106,7 @@ constexpr bool is_hash_mappable_v = is_hash_mappable<HM>::value;
  *  Added in C++20
  */
 
-// Checks whether T is an array type of unknown bound
+/// Checks whether T is an array type of unknown bound
 
 template <class T>
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -120,7 +120,7 @@ template <class T>
 // NOLINTNEXTLINE(readability-identifier-naming, misc-definitions-in-headers)
 constexpr bool is_unbounded_array_v = is_unbounded_array<T>::value;
 
-// Checks whether T is an array type of known bound
+/// Checks whether T is an array type of known bound
 
 template <class T>
 // NOLINTNEXTLINE(readability-identifier-naming)

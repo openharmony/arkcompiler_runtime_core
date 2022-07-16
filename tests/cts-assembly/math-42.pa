@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #Assert that operation inci works fine
-.function u1 main(){
+.function i32 main(){
     movi v0, 2
     inci v0, 1
     ldai 3

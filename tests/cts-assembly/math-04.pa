@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(6 && 2 == 2) operation --> andi
-.function u1 main(){
+.function i32 main(){
     ldai 6
     andi 2
     movi v0, 2

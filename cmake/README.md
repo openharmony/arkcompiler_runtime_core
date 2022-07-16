@@ -1,4 +1,4 @@
-## Basic build
+## Basic build using CMake
 
 Panda libraries can be built using CMake:
 ```
@@ -8,40 +8,21 @@ $ cmake ${panda_dir}
 $ make
 ```
 
-Here, ${panda_dir} refers to  path to panda dirrectory.
-After this step, create libraries and some debug-targets if you have installed additional libraries, like google-test, clang-format, clang-tidy, etc.
+Where ${panda_dir} is a path to panda dirrectory.
+These steps will create libraries and some debug targets (if you have installed additional libraries, like google-test, clang-format, clang-tidy, etc.).
 
 ## Build directory structure
 
-In the current build, create subdirectories for each project. For example, for the vixl library, create the `third_party/vixl` directory. Add the following command in root CMakeLists.txt:
+In the current build directory structure, each project has its own subdirectory. For example, the vixl library is located inside the `third_party/vixl` folder. The root CMakeLists.txt has an entry for this directory:
 ```
 add_subdirectory(third_party/vixl)
 ```
-You may use built libraries in your component, e.g. target_link_libraries(tests compiler base vixl). However, for getting variables, use INTERFACE includes, e.g. target_include_directories(INTERFACE .) instead.
+You may use built libraries in your component (e.g., `target_link_libraries(tests compiler base vixl)`), but for getting variables please use the INTERFACE includes (e.g. `target_include_directories(INTERFACE .)`).
 
-## Run tests
 
-The tests-binary will also be generated during the build. To run tests, run the following command:
-```
-$ make test
-Running tests...
-Test project /home/igorban/src/panda_build
-    Start 1: compiler_unit_tests
-1/1 Test #1: compiler_unit_tests ...................   Passed    2.74 sec
-..
-```
+## Check style 
 
-## Calculate coverage
-
-To calculate the test code coverage - just execute it:
-```
-$ make coverage
-```
-Location of the code coverage report: BUILD_DIR/compiler/coverage_report
-
-## Check style
-
-To check the style, perform the previous steps and build style-checker targets. Note that you must install clang-format and clang-tidy with libraries. For details, see scripts/bootstrap*.sh.
+To check style, build the project and then also build style-checker targets (you must install clang-format and clang-tidy with libraries - look at scripts/bootstrap*.sh):
 ```
 $ make clang_format
     Built target clang_format_opt_tests_graph_creation_test.cpp
@@ -57,17 +38,18 @@ $ make clang_tidy
     ...
 ```
 
-You may force fix clang-format issues using the `make clang_force_format` command.
+You may force fixes for clang-format issues, with the `make clang_force_format` command.
 Run `make help | grep clang` to see all possible clang-[format|style] targets.
-For issues in opt.cpp, you may check the style through clang-format `make clang_format_opt_opt.cpp`, or through clang-tidy `make clang_tidy_opt_opt.cpp`. For the force clang-format code style, use `make clang_force_format_opt_opt.cpp`.
-For code-style check through one check system, use `make clang_tidy` or `make clang_format`.
+For example, to check style issues in the opt.cpp file, you can use corresponding clang-format target (`make clang_format_opt_opt.cpp`) or the clang-tidy one (`make clang_tidy_opt_opt.cpp`). To force clang-format code style - `make clang_force_format_opt_opt.cpp`.
+To check code-style through just one check-system - use `make clang_tidy` or `make clang_format`.
 
-Generated files:
+Generated files: 
 *  `compile_commands.json` - json nija-commands file to correct execution clang-tidy.
-*  Standard cmake-files: `CMakeCache.txt`, `Makefile`, `cmake_install.cmake`  and folder `CMakeFiles`.
+*  Standard cmake-files: `CMakeCache.txt`, `Makefile`, `cmake_install.cmake`  and `CMakeFiles` folder.
 
+[Coding style](../docs/coding-style.md)
 
-Discussion about format : rus-os-team/virtual-machines-and-tools/vm-investigation-and-design#24
 *  Clang-tidy style file - `.clang-tidy`
 *  Clang-format style file - `.clang-format`
-*  Script to show diff through clang-format execution - `build/run-clang-format.py`
+*  Script to show diff through clang-format execution - `scripts/run-clang-format.py`
+

@@ -1,0 +1,109 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+module:
+  name: paoc
+  namespace: panda::paoc
+  descritpition: Application to compile panda files
+
+options:
+  - name: paoc-panda-files
+    type: arg_list_t
+    default: []
+    description: Set list of panda files to compile
+    delimiter: ","
+
+  - name: paoc-location
+    type: std::string
+    default: ""
+    description: Location path of the input panda file, that will be written into the AOT file.
+
+  - name: paoc-boot-location
+    type: std::string
+    default: ""
+    description: Location path of the boot panda files, that will be written into the AOT file.
+
+  - name: paoc-skip-until
+    type: std::string
+    default: ""
+    description: Set first method to complie and skip all previous
+
+  - name: paoc-compile-until
+    type: std::string
+    default: ""
+    description: Set last method to complie and skip all following
+
+  - name: paoc-mode
+    type: std::string
+    default: aot
+    possible_values:
+      - aot
+      - jit
+      - osr
+    description: Specify compiler mode
+
+  - name: paoc-clusters
+    type: std::string
+    default: none
+    description: Path to `paoc-clusters` file
+
+  - name: paoc-dump-stats-csv
+    type: std::string
+    default: none
+    description: Dump allocator usage statistics, less verbose than `--compiler-dump-stats-csv`
+
+  - name: paoc-output
+    type: std::string
+    default: out.an
+    description: Output file path
+
+  - name: paoc-boot-output
+    type: std::string
+    default: boot.an
+    description: Output boot file path. CHA will not be validated. Incompatible with --paoc-output
+
+  - name: paoc-arch
+    type: std::string
+    default: arm64
+    possible_values:
+      - arm
+      - arm64
+      - x86
+      - x86_64
+    description: Target architecture for output file
+
+  - name: paoc-methods-from-file
+    type: std::string
+    default: ""
+    description: Path to a file which contains methods to compile
+
+  - name: paoc-generate-symbols
+    type: bool
+    default: false
+    description: Generate symbols for compiled methods (always true in debug builds)
+
+  - name: paoc-use-cha
+    type: bool
+    default: true
+    description: Use class hierarchy during compilation
+
+  - name: paoc-verbose
+    type: bool
+    default: false
+    description: Enable all logs, related to the paoc
+
+  - name: paoc-boot-panda-locations
+    type: arg_list_t
+    default: []
+    description: Location paths of the each boot panda file, including file names, that will be written into the AOT file.
+    delimiter: ":"

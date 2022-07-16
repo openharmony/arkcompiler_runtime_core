@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@
 namespace panda::mem {
 
 bool MemConfig::is_initialized = false;
-size_t MemConfig::heap_pool_size = 0;
-size_t MemConfig::internal_pool_size = 0;
-size_t MemConfig::code_pool_size = 0;
-size_t MemConfig::compiler_pool_size = 0;
-
+size_t MemConfig::initial_heap_size_limit = 0;
+size_t MemConfig::heap_size_limit = 0;
+size_t MemConfig::internal_memory_size_limit = 0;
+size_t MemConfig::code_cache_size_limit = 0;
+size_t MemConfig::compiler_memory_size_limit = 0;
 }  // namespace panda::mem

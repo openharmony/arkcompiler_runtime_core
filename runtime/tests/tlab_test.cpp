@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ class TLABTest : public testing::Test {
 public:
     TLABTest()
     {
+        // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
 #ifdef PANDA_NIGHTLY_TEST_ON
         seed_ = time(NULL);
 #else
@@ -41,6 +42,7 @@ public:
         for (auto i : allocated_mem_mmap_) {
             panda::os::mem::UnmapRaw(std::get<0>(i), std::get<1>(i));
         }
+        // Logger::Destroy();
     }
 
 protected:

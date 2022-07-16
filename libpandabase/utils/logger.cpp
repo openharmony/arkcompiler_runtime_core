@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,27 +29,102 @@
 namespace panda {
 
 Logger *Logger::logger = nullptr;
-os::memory::Mutex Logger::mutex;  // NOLINT(fuchsia-statically-constructed-objects)
-FUNC_MOBILE_LOG_PRINT mlog_buf_print = nullptr;
+thread_local int Logger::nesting = 0;
+
+#include <logger_impl_gen.inc>
 
 void Logger::Initialize(const base_options::Options &options)
 {
     panda::Logger::ComponentMask component_mask;
-    for (const auto &s : options.GetLogComponents()) {
-        component_mask |= Logger::ComponentMaskFromString(s);
+    auto load_components = [&component_mask](auto components) {
+        for (const auto &s : components) {
+            component_mask |= Logger::ComponentMaskFromString(s);
+        }
+    };
+    Level level = Level::LAST;
+
+    if (options.WasSetLogFatal()) {
+        ASSERT_PRINT(level == Level::LAST, "There are conflicting logger options");
+        load_components(options.GetLogFatal());
+        level = Level::FATAL;
+    } else if (options.WasSetLogError()) {
+        ASSERT_PRINT(level == Level::LAST, "There are conflicting logger options");
+        load_components(options.GetLogError());
+        level = Level::ERROR;
+    } else if (options.WasSetLogWarning()) {
+        ASSERT_PRINT(level == Level::LAST, "There are conflicting logger options");
+        load_components(options.GetLogWarning());
+        level = Level::WARNING;
+    } else if (options.WasSetLogInfo()) {
+        ASSERT_PRINT(level == Level::LAST, "There are conflicting logger options");
+        load_components(options.GetLogInfo());
+        level = Level::INFO;
+    } else if (options.WasSetLogDebug()) {
+        ASSERT_PRINT(level == Level::LAST, "There are conflicting logger options");
+        load_components(options.GetLogDebug());
+        level = Level::DEBUG;
+    } else {
+        ASSERT_PRINT(level == Level::LAST, "There are conflicting logger options");
+        load_components(options.GetLogComponents());
+        level = Logger::LevelFromString(options.GetLogLevel());
     }
 
     if (options.GetLogStream() == "std") {
-        Logger::InitializeStdLogging(Logger::LevelFromString(options.GetLogLevel()), component_mask);
+        Logger::InitializeStdLogging(level, component_mask);
     } else if (options.GetLogStream() == "file" || options.GetLogStream() == "fast-file") {
         const std::string &file_name = options.GetLogFile();
-        Logger::InitializeFileLogging(file_name, Logger::LevelFromString(options.GetLogLevel()), component_mask);
+        Logger::InitializeFileLogging(file_name, level, component_mask, options.GetLogStream() == "fast-file");
     } else if (options.GetLogStream() == "dummy") {
-        Logger::InitializeDummyLogging(Logger::LevelFromString(options.GetLogLevel()), component_mask);
+        Logger::InitializeDummyLogging(level, component_mask);
     } else {
         UNREACHABLE();
     }
 }
+
+#ifndef NDEBUG
+/**
+ * In debug builds this function allowes or disallowes proceeding with actual logging (i.e. creating Message{})
+ */
+/* static */
+bool Logger::IsMessageSuppressed([[maybe_unused]] Level level, [[maybe_unused]] Component component)
+{
+    // Allowing only to log if it's not a nested log, or it's nested and it's severity is suitable
+    return level >= Logger::logger->nested_allowed_level_ && nesting > 0;
+}
+
+/**
+ * Increases log nesting (i.e. depth, or how many instances of Message{} is active atm) in a given thread
+ */
+/* static */
+void Logger::LogNestingInc()
+{
+    nesting++;
+}
+
+/**
+ * Decreases log nesting (i.e. depth, or how many instances of Message{} is active atm) in a given thread
+ */
+/* static */
+void Logger::LogNestingDec()
+{
+    nesting--;
+}
+#endif  // NDEBUG
+
+auto Logger::Buffer::printf(const char *format, ...) -> Buffer &
+{
+    va_list args;
+    va_start(args, format);  // NOLINT(cppcoreguidelines-pro-type-vararg)
+
+    [[maybe_unused]] int put = vsnprintf_s(this->data(), this->size(), this->size() - 1, format, args);
+    ASSERT(put >= 0 && static_cast<size_t>(put) < BUFFER_SIZE);
+
+    va_end(args);
+    return *this;
+}
+
+os::memory::Mutex Logger::mutex;  // NOLINT(fuchsia-statically-constructed-objects)
+FUNC_MOBILE_LOG_PRINT mlog_buf_print = nullptr;
 
 Logger::Message::~Message()
 {
@@ -58,23 +133,16 @@ Logger::Message::~Message()
     }
 
     Logger::Log(level_, component_, stream_.str());
+#ifndef NDEBUG
+    panda::Logger::LogNestingDec();
+#endif
 
     if (level_ == Level::FATAL) {
+        std::cerr << "FATAL ERROR" << std::endl;
+        std::cerr << "Backtrace [tid=" << os::thread::GetCurrentThreadId() << "]:\n";
+        PrintStack(std::cerr);
         std::abort();
     }
-}
-
-static const char *GetComponentTag(Logger::Component component)
-{
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, str)                         \
-    if (component == Logger::Component::e) { \
-        return str;                          \
-    }
-    LOG_COMPONENT_LIST(D)
-#undef D
-
-    UNREACHABLE();
 }
 
 /* static */
@@ -108,19 +176,6 @@ void Logger::Log(Level level, Component component, const std::string &str)
     }
 }
 
-static const char *GetLevelTag(Logger::Level level)
-{
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, short_str, str)      \
-    if (level == Logger::Level::e) { \
-        return short_str;            \
-    }
-    LOG_LEVEL_LIST(D)
-#undef D
-
-    UNREACHABLE();
-}
-
 /* static */
 std::string GetPrefix(Logger::Level level, Logger::Component component)
 {
@@ -130,7 +185,8 @@ std::string GetPrefix(Logger::Level level, Logger::Component component)
 }
 
 /* static */
-void Logger::InitializeFileLogging(const std::string &log_file, Level level, ComponentMask component_mask)
+void Logger::InitializeFileLogging(const std::string &log_file, Level level, ComponentMask component_mask,
+                                   bool is_fast_logging)
 {
     if (IsInitialized()) {
         return;
@@ -144,10 +200,12 @@ void Logger::InitializeFileLogging(const std::string &log_file, Level level, Com
 
     std::ofstream stream(log_file);
     if (stream) {
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
-        logger = new FileLogger(std::move(stream), level, component_mask);
+        if (is_fast_logging) {
+            logger = new FastFileLogger(std::move(stream), level, component_mask);
+        } else {
+            logger = new FileLogger(std::move(stream), level, component_mask);
+        }
     } else {
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         logger = new StderrLogger(level, component_mask);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         std::string msg = helpers::string::Format("Fallback to stderr logging: cannot open log file '%s': %s",
@@ -175,7 +233,6 @@ void Logger::InitializeStdLogging(Level level, ComponentMask component_mask)
             return;
         }
 
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         logger = new StderrLogger(level, component_mask);
 #ifdef PANDA_TARGET_UNIX
         if (DfxController::IsInitialized() && DfxController::GetOptionValue(DfxOptionHandler::MOBILE_LOG) == 0) {
@@ -199,7 +256,6 @@ void Logger::InitializeDummyLogging(Level level, ComponentMask component_mask)
             return;
         }
 
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         logger = new DummyLogger(level, component_mask);
     }
 }
@@ -225,83 +281,6 @@ void Logger::Destroy()
     }
 
     delete l;
-}
-
-/* static */
-Logger::Level Logger::LevelFromString(std::string_view s)
-{
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, short_str, str)  \
-    if (s == str) {              \
-        return Logger::Level::e; \
-    }
-    LOG_LEVEL_LIST(D)
-#undef D
-
-    UNREACHABLE();
-}
-
-/* static */
-Logger::ComponentMask Logger::ComponentMaskFromString(std::string_view s)
-{
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, str)                                                     \
-    if (s == str) {                                                      \
-        return panda::Logger::ComponentMask().set(Logger::Component::e); \
-    }
-    LOG_COMPONENT_LIST(D)
-#undef D
-
-    if (s == "all") {
-        return panda::LoggerComponentMaskAll;
-    }
-
-    UNREACHABLE();
-}
-
-/* static */
-std::string Logger::StringfromDfxComponent(LogDfxComponent dfx_component)
-{
-    switch (dfx_component) {
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, str)                 \
-    case Logger::LogDfxComponent::e: \
-        return str;
-        LOG_DFX_COMPONENT_LIST(D)  // CODECHECK-NOLINT(C_RULE_ID_SWITCH_INDENTATION)
-#undef D
-        default:
-            break;
-    }
-    UNREACHABLE();
-}
-
-/* static */
-bool Logger::IsInLevelList(std::string_view s)
-{
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, short_str, str) \
-    if (s == str) {             \
-        return true;            \
-    }
-    LOG_LEVEL_LIST(D)
-#undef D
-    return false;
-}
-
-/* static */
-bool Logger::IsInComponentList(std::string_view s)
-{
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, str) \
-    if (s == str) {  \
-        return true; \
-    }
-    LOG_COMPONENT_LIST(D)
-#undef D
-    if (s == "all") {
-        return true;
-    }
-    return false;
 }
 
 /* static */
@@ -338,10 +317,21 @@ void FileLogger::LogLineInternal(Level level, Component component, const std::st
     stream_ << prefix << str << std::endl << std::flush;
 }
 
+void FastFileLogger::LogLineInternal(Level level, Component component, const std::string &str)
+{
+    std::string prefix = GetPrefix(level, component);
+    stream_ << prefix << str << '\n';
+}
+
 void StderrLogger::LogLineInternal(Level level, Component component, const std::string &str)
 {
     std::string prefix = GetPrefix(level, component);
     std::cerr << prefix << str << std::endl << std::flush;
+}
+
+void FastFileLogger::SyncOutputResource()
+{
+    stream_ << std::flush;
 }
 
 }  // namespace panda

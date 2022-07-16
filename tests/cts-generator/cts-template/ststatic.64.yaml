@@ -64,7 +64,7 @@ tests:
         check-type: exit-positive
         tags: ['verifier']
         bugid: ['1324']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
 
           .function i32 main() {
@@ -107,57 +107,57 @@ tests:
           - values:
             - W.fu1
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fi8
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fu16
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fi16
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fi32
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fi64
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.ff32
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.ff64
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fW
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fi32Array
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W.fWArray
             tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828']
           - values:
             - W
@@ -193,13 +193,17 @@ tests:
         header-template: ['pandasm_header']
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         bugid: ['1834']
         code-template: |
-
           .function i32 main() {
-            ldai.64 0x5a5a5a5a5a5a5a5a
-            ststatic.64 %s
+            %s
+            ststatic.64 *s
+        template-cases:
+          - values:
+            - ldai.64 0x5a5a5a5a5a5a5a5a
+          - values:
+            - fldai.64 3.1415926
         cases:
           - values:
             - R.fu1
@@ -217,6 +221,7 @@ tests:
             - R.fi32
           - values:
             - R.ff32
+            bugid: ['6094']
           - values:
             - R.fObj
           - values:
@@ -233,80 +238,45 @@ tests:
         header-template: ['pandasm_header']
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         bugid: ['1834']
         code-template: |
 
           .function i32 main() {
-            %s
+            *s
             ststatic.64 %s
         cases:
-          # u64
           - values:
             - ldai 0
-            - R.fu64
           - values:
-            - ldai 0xCAFECAFE
-            - R.fu64
+            - ldai.64 0
+            id: i64
           - values:
-            - fldai.64 1.1
-            - R.fu64
+            - fldai 0.0
           - values:
-            - lda.null
-            - R.fu64
-          - values:
-            - initobj Q.ctor
-            - R.fu64
-          - values:
-            - |
-              movi v1, 10
-                newarr v1, v1, i32[]
-                lda.obj v1
-            - R.fu64
-          # i64
-          - values:
-            - ldai 0
-            - R.fi64
-          - values:
-            - ldai 0xCAFECAFE
-            - R.fi64
-          - values:
-            - fldai.64 1.1
-            - R.fi64
+            - fldai.64 0.0
+            id: f64
           - values:
             - lda.null
-            - R.fi64
           - values:
-            - initobj Q.ctor
-            - R.fi64
+            - lda.str "abc"
           - values:
             - |
-              movi v1, 10
+              #
+                movi v1, 10
                 newarr v1, v1, i32[]
                 lda.obj v1
+        template-cases:
+          - values:
+            - R.fu64
+            exclude: [i64]
+          - values:
             - R.fi64
-          # f64
+            exclude: [i64]
           - values:
-            - ldai 0
             - R.ff64
-          - values:
-            - ldai 0xCAFECAFE
-            - R.ff64
-          - values:
-            - ldai.64 1
-            - R.ff64
-          - values:
-            - lda.null
-            - R.ff64
-          - values:
-            - initobj Q.ctor
-            - R.ff64
-          - values:
-            - |
-              movi v1, 10
-                newarr v1, v1, i32[]
-                lda.obj v1
-            - R.ff64
+            exclude: [f64]
+            bugid: ['6094']
 
 
       - file-name: "into_all_field_types"
@@ -318,7 +288,7 @@ tests:
               format: [op_id_16]
         header-template: ['pandasm_header']
         check-type: exit-positive
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         code-template: |
 
           .function i32 main() {
@@ -421,9 +391,8 @@ tests:
             - x_init
         header-template: []
         check-type: empty
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         bugid: ['5330']
-        ignore: true
         code-template: |
 
           .language PandaAssembly
@@ -481,3 +450,70 @@ tests:
                   ldai 10
                   ldarr v1    # get ArrayIndexOutOfBoundsException
 
+      - file-name: "x_init_j"
+        description: Check that ExceptionInInitializerError is thrown if an unexpected exception occurs in static initializer.
+        isa:
+          exceptions:
+            - x_init
+        header-template: []
+        check-type: empty
+        tags: ['tsan', 'irtoc_ignore']
+        runner-options: ['use-pa']
+        code-template: |
+
+          .language PandaAssembly
+
+          .record panda.ExceptionInInitializerError <external>
+          .record panda.NullPointerException <external>
+          .record E1 {}
+          .record R {
+              f64     ff64    <static>
+          }
+          .record Q <panda.extends=R> {
+              f64     ff64    <static>
+          }
+          .function void R.func() <cctor> {
+              %s
+              return.void
+          }
+
+          .function i32 main() {
+          begin:
+              fldai.64 3.1415926
+              ststatic.64 Q.ff64
+              ldai 2
+              return
+          end:
+          catch:
+              ldai 0
+              return
+          catch_all:
+              ldai 1
+              return
+          .catch panda.ExceptionInInitializerError, begin, end, catch
+          .catchall begin, end, catch_all
+          }
+        cases:
+          - values:
+            - |
+              #
+                  newobj v0, E1
+                  throw v0
+          - values:
+            - |
+              #
+                  newobj v0, panda.NullPointerException
+                  throw v0
+          - values:
+            - |
+              #
+                  movi v1, 0
+                  ldai 1
+                  div2 v1     # divide by zero
+          - values:
+            - |
+              #
+                  movi v1, 10
+                  newarr v1, v1, i32[]
+                  ldai 10
+                  ldarr v1    # get ArrayIndexOutOfBoundsException

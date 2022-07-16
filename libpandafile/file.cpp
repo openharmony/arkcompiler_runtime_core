@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 #include "file-inl.h"
 #include "os/file.h"
 #include "os/mem.h"
+#include "os/filesystem.h"
 #include "mem/mem.h"
 #include "panda_cache.h"
 
@@ -38,11 +39,6 @@
 #include <cstdio>
 #include <map>
 namespace panda::panda_file {
-
-#ifndef EOK
-constexpr int EOK = 0;
-#endif  // EOK
-
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
 const char *ARCHIVE_FILENAME = "classes.abc";
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
@@ -197,7 +193,6 @@ std::unique_ptr<const panda_file::File> HandleArchive(ZipArchiveHandle &handle, 
     return file;
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
 std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location, std::string_view archive_filename,
                                                       panda_file::File::OpenMode open_mode)
 {
@@ -247,6 +242,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
                 return nullptr;
             }
         }
+
         EntryFileStat entry = EntryFileStat();
         if (GetCurrentFileInfo(zipfile, &entry) != ZIPARCHIVE_OK) {
             OpenPandaFileFromZipErrorHandler(zipfile);
@@ -288,7 +284,7 @@ std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t s
         return nullptr;
     }
 
-    if (memcpy_s(mem, size_to_mmap, buffer, size) != EOK) {
+    if (memcpy_s(mem, size_to_mmap, buffer, size) != 0) {
         PLOG(ERROR, PANDAFILE) << "Failed to copy buffer into mem'";
     }
 
@@ -358,7 +354,7 @@ public:
         return *this;
     }
 
-    difference_type operator-(const ClassIdxIterator &other) const
+    difference_type operator-(const ClassIdxIterator &other)
     {
         return idx_ - other.idx_;
     }
@@ -367,16 +363,6 @@ public:
     {
         uint32_t id = span_[idx_];
         return file_.GetStringData(File::EntityId(id)).data;
-    }
-
-    bool operator==(const ClassIdxIterator &other) const
-    {
-        return span_.cbegin() == other.span_.cbegin() && span_.cend() == other.span_.cend() && idx_ == other.idx_;
-    }
-
-    bool operator!=(const ClassIdxIterator &other) const
-    {
-        return !(*this == other);
     }
 
     bool IsValid() const
@@ -405,22 +391,13 @@ private:
     size_t idx_;
 };
 
-static bool ReadAndCheckMagic(os::file::File file)
-{
-    std::array<uint8_t, File::MAGIC_SIZE> buf {};
-    if (!file.ReadAll(&buf[0], buf.size())) {
-        return false;
-    }
-
-    return buf == File::MAGIC;
-}
-
 File::File(std::string filename, os::mem::ConstBytePtr &&base)
-    : FILENAME(std::move(filename)),
+    : base_(std::forward<os::mem::ConstBytePtr>(base)),
+      FILENAME(std::move(filename)),
       FILENAME_HASH(CalcFilenameHash(FILENAME)),
-      base_(std::forward<os::mem::ConstBytePtr>(base)),
+      FULL_FILENAME(os::GetAbsolutePath(FILENAME)),
       panda_cache_(std::make_unique<PandaCache>()),
-      UNIQ_ID(GetHash32(reinterpret_cast<const uint8_t *>(GetHeader()), sizeof(Header) / 2U))
+      UNIQ_ID(merge_hashes(FILENAME_HASH, GetHash32(reinterpret_cast<const uint8_t *>(GetHeader()), sizeof(Header))))
 {
 }
 
@@ -442,13 +419,38 @@ inline std::string VersionToString(const std::array<uint8_t, File::VERSION_SIZE>
     return ss.str();
 }
 
+// We can't use default std::array's comparision operators and need to implement
+// own ones due to the bug in gcc: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95189
+inline int CompareVersions(const std::array<uint8_t, File::VERSION_SIZE> &lhs,
+                           const std::array<uint8_t, File::VERSION_SIZE> &rhs)
+{
+    for (size_t i = 0; i < File::VERSION_SIZE; i++) {
+        if (lhs[i] == rhs[i]) {
+            continue;
+        }
+        return lhs[i] - rhs[i];
+    }
+    return 0;
+}
+
+inline bool operator<(const std::array<uint8_t, File::VERSION_SIZE> &lhs,
+                      const std::array<uint8_t, File::VERSION_SIZE> &rhs)
+{
+    return CompareVersions(lhs, rhs) < 0;
+}
+
+inline bool operator>(const std::array<uint8_t, File::VERSION_SIZE> &lhs,
+                      const std::array<uint8_t, File::VERSION_SIZE> &rhs)
+{
+    return CompareVersions(lhs, rhs) > 0;
+}
+
 /* static */
 std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode open_mode)
 {
     trace::ScopedTrace scoped_trace("Open panda file " + std::string(filename));
     os::file::Mode mode = GetMode(open_mode);
     os::file::File file = os::file::Open(filename, mode);
-
     if (!file.IsValid()) {
         PLOG(ERROR, PANDAFILE) << "Failed to open panda file '" << filename << "'";
         return nullptr;
@@ -457,42 +459,14 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode open_
     os::file::FileHolder fh_holder(file);
 
     auto res = file.GetFileSize();
-
     if (!res) {
         PLOG(ERROR, PANDAFILE) << "Failed to get size of panda file '" << filename << "'";
         return nullptr;
     }
 
     size_t size = res.Value();
-
-    if (size < sizeof(File::Header) || !ReadAndCheckMagic(file)) {
-        LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "'";
-        return nullptr;
-    }
-
-    uint32_t checksum = 0;
-    if (!file.ReadAll(&checksum, sizeof(uint32_t))) {
-        LOG(ERROR, PANDAFILE) << "Failed to read checksum of panda file '" << filename << "'";
-        return nullptr;
-    }
-
-    std::array<uint8_t, File::VERSION_SIZE> buf {};
-    if (!file.ReadAll(&buf[0], buf.size())) {
-        return nullptr;
-    }
-    if (buf < minVersion || buf > version) {
-        LOG(ERROR, PANDAFILE) << "Unable to open file '" << filename
-                              << "' with bytecode version "  // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_INDENT_CHECK)
-                              << VersionToString(buf);
-        if (buf < minVersion) {
-            LOG(ERROR, PANDAFILE)
-                << "Minimum supported version is "  // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_INDENT_CHECK)
-                << VersionToString(minVersion);
-        } else {
-            LOG(ERROR, PANDAFILE)
-                << "Maximum supported version is "  // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_INDENT_CHECK)
-                << VersionToString(version);
-        }
+    if (size < sizeof(File::Header)) {
+        LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "' - has not header";
         return nullptr;
     }
 
@@ -502,7 +476,10 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode open_
         return nullptr;
     }
 
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER, CPP_RULE_ID_NO_USE_NEW_UNIQUE_PTR)
+    if (!CheckHeader(ptr, filename)) {
+        return nullptr;
+    }
+
     return std::unique_ptr<File>(new File(filename.data(), std::move(ptr)));
 }
 
@@ -532,7 +509,6 @@ std::unique_ptr<const File> File::OpenUncompressedArchive(int fd, const std::str
         return nullptr;
     }
 
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER, CPP_RULE_ID_NO_USE_NEW_UNIQUE_PTR)
     return std::unique_ptr<File>(new File(filename.data(), std::move(ptr)));
 }
 
@@ -544,7 +520,20 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
     }
     auto header = reinterpret_cast<const File::Header *>(reinterpret_cast<uintptr_t>(ptr.Get()));
     if (header->magic != File::MAGIC) {
-        LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "'";
+        LOG(ERROR, PANDAFILE) << "Invalid magic number '";
+        return false;
+    }
+
+    auto file_version = header->version;
+
+    if (file_version < minVersion || file_version > version) {
+        LOG(ERROR, PANDAFILE) << "Unable to open file '" << filename << "' with bytecode version "
+                              << VersionToString(file_version);
+        if (file_version < minVersion) {
+            LOG(ERROR, PANDAFILE) << "Minimum supported version is " << VersionToString(minVersion);
+        } else {
+            LOG(ERROR, PANDAFILE) << "Maximum supported version is " << VersionToString(version);
+        }
         return false;
     }
 
@@ -554,18 +543,10 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
 /* static */
 std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr)
 {
-    auto header = reinterpret_cast<const Header *>(reinterpret_cast<uintptr_t>(ptr.Get()));
-    if (header->magic != File::MAGIC) {
-        LOG(ERROR, PANDAFILE) << "Invalid panda file";
+    if (!CheckHeader(ptr, std::string_view())) {
         return nullptr;
     }
 
-    if (header->file_size < sizeof(File::Header)) {
-        LOG(ERROR, PANDAFILE) << "Invalid panda file";
-        return nullptr;
-    }
-
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER, CPP_RULE_ID_NO_USE_NEW_UNIQUE_PTR)
     return std::unique_ptr<File>(new File("", std::forward<os::mem::ConstBytePtr>(ptr)));
 }
 
@@ -573,29 +554,25 @@ std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr)
 std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr, std::string_view filename)
 {
     trace::ScopedTrace scoped_trace("Open panda file from RAM " + std::string(filename));
-    auto header = reinterpret_cast<const Header *>(ptr.Get());
 
-    if (header->magic != File::MAGIC) {
-        LOG(ERROR, PANDAFILE) << "Invalid panda file";
+    if (!CheckHeader(ptr, filename)) {
         return nullptr;
     }
 
-    if (header->file_size < sizeof(File::Header)) {
-        LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "'";
-        return nullptr;
-    }
-
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER, CPP_RULE_ID_NO_USE_NEW_UNIQUE_PTR)
     return std::unique_ptr<File>(new File(filename.data(), std::forward<os::mem::ConstBytePtr>(ptr)));
 }
 
 File::EntityId File::GetClassId(const uint8_t *mutf8_name) const
 {
+    auto class_hash_table = GetClassHashTable();
+    if (!class_hash_table.empty()) {
+        return GetClassIdFromClassHashTable(mutf8_name);
+    }
+
     auto class_idx = GetClasses();
 
     auto it = std::lower_bound(ClassIdxIterator::Begin(*this, class_idx), ClassIdxIterator::End(*this, class_idx),
                                mutf8_name, utf::Mutf8Less());
-
     if (!it.IsValid()) {
         return EntityId();
     }
@@ -616,6 +593,34 @@ File::EntityId File::GetLiteralArraysId() const
 {
     const Header *header = GetHeader();
     return EntityId(header->literalarray_idx_off);
+}
+
+File::EntityId File::GetClassIdFromClassHashTable(const uint8_t *mutf8_name) const
+{
+    auto class_hash_table = GetClassHashTable();
+    auto hash = GetHash32String(mutf8_name);
+    auto pos = hash & (class_hash_table.size() - 1);
+    auto entity_pair = &class_hash_table[pos];
+
+    if (entity_pair->descriptor_hash % class_hash_table.size() != pos) {
+        return File::EntityId();
+    }
+
+    while (true) {
+        if (hash == entity_pair->descriptor_hash) {
+            auto entity_id = File::EntityId(entity_pair->entity_id_offset);
+            auto descriptor = GetStringData(entity_id).data;
+            if (entity_id.IsValid() && utf::CompareMUtf8ToMUtf8(descriptor, mutf8_name) == 0) {
+                return entity_id;
+            }
+        }
+        if (entity_pair->next_pos == 0) {
+            break;
+        }
+        entity_pair = &class_hash_table[entity_pair->next_pos - 1];
+    }
+
+    return File::EntityId();
 }
 
 }  // namespace panda::panda_file

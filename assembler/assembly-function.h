@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ASSEMBLY_FUNCTION_H_
-#define PANDA_ASSEMBLER_ASSEMBLY_FUNCTION_H_
+#ifndef _PANDA_ASSEMBLER_FUNCTION_HPP
+#define _PANDA_ASSEMBLER_FUNCTION_HPP
 
 #include <memory>
 #include <optional>
@@ -63,14 +63,14 @@ struct Function {
         Type type;
         std::unique_ptr<ParamMetadata> metadata;
 
-        Parameter(Type t, extensions::Language lang)
+        Parameter(Type t, panda::panda_file::SourceLang lang)
             : type(std::move(t)), metadata(extensions::MetadataExtension::CreateParamMetadata(lang))
         {
         }
     };
 
     std::string name = "";
-    extensions::Language language;
+    panda::panda_file::SourceLang language;
     std::unique_ptr<FunctionMetadata> metadata;
 
     std::unordered_map<std::string, panda::pandasm::Label> label_table;
@@ -100,7 +100,8 @@ struct Function {
         ins.emplace_back(instruction);
     }
 
-    Function(std::string s, extensions::Language lang, size_t b_l, size_t b_r, std::string f_c, bool d, size_t l_n)
+    Function(std::string s, panda::panda_file::SourceLang lang, size_t b_l, size_t b_r, std::string f_c, bool d,
+             size_t l_n)
         : name(std::move(s)),
           language(lang),
           metadata(extensions::MetadataExtension::CreateFunctionMetadata(lang)),
@@ -108,7 +109,7 @@ struct Function {
     {
     }
 
-    Function(std::string s, extensions::Language lang)
+    Function(std::string s, panda::panda_file::SourceLang lang)
         : name(std::move(s)), language(lang), metadata(extensions::MetadataExtension::CreateFunctionMetadata(lang))
     {
     }
@@ -116,6 +117,11 @@ struct Function {
     std::size_t GetParamsNum() const
     {
         return params.size();
+    }
+
+    std::size_t GetTotalRegs() const
+    {
+        return regs_num;
     }
 
     bool IsStatic() const
@@ -132,7 +138,7 @@ struct Function {
 
     size_t GetLineNumber(size_t i) const;
 
-    size_t GetColumnNumber(size_t i) const;
+    uint32_t GetColumnNumber(size_t i) const;
 
     void EmitLocalVariable(panda_file::LineNumberProgramItem *program, panda_file::ItemContainer *container,
                            std::vector<uint8_t> *constant_pool, uint32_t &pc_inc, size_t instruction_number) const;
@@ -140,9 +146,10 @@ struct Function {
                     int32_t line_inc) const;
     void EmitLineNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool,
                         int32_t &prev_line_number, uint32_t &pc_inc, size_t instruction_number) const;
-    // column number is only for javascript for now
+
+    // column number is only for dynamic language now
     void EmitColumnNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool,
-                          int32_t &prev_column_number, uint32_t &pc_inc, size_t instruction_number) const;
+                          uint32_t &prev_column_number, uint32_t &pc_inc, size_t instruction_number) const;
 
     void BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, const std::vector<uint8_t> &bytecode,
                                 panda_file::ItemContainer *container, std::vector<uint8_t> *constant_pool,
@@ -179,4 +186,4 @@ struct Function {
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_ASSEMBLY_FUNCTION_H_
+#endif  // !_PANDA_ASSEMBLER_FUNCTION_HPP

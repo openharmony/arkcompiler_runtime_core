@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_UTILS_NUMBER_UTILS_H_
-#define PANDA_ASSEMBLER_UTILS_NUMBER_UTILS_H_
+#ifndef _PANDA_ASSEMBLER_NUMBERS_UTILS_H
+#define _PANDA_ASSEMBLER_NUMBERS_UTILS_H
 
 namespace panda::pandasm {
 
@@ -28,52 +28,10 @@ constexpr size_t BIN_BASE = 2;
 
 constexpr size_t MAX_DWORD = 65536;
 
-inline bool ValidateHexInteger(std::string_view p)
-{
-    std::string_view token = p;
-    token.remove_prefix(2U);
-
-    for (auto i : token) {
-        if (!((i >= '0' && i <= '9') || (i >= 'A' && i <= 'F') || (i >= 'a' && i <= 'f'))) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-inline bool ValidateBinInteger(std::string_view p)
-{
-    std::string_view token = p;
-    token.remove_prefix(2U);
-    if (token.empty()) {
-        return false;
-    }
-    for (auto i : token) {
-        if (!(i == '0' || i == '1')) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-inline bool ValidateOctalInteger(std::string_view p)
-{
-    std::string_view token = p;
-    token.remove_prefix(1);
-
-    for (auto i : token) {
-        if (!(i >= '0' && i <= '7')) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 inline bool ValidateInteger(std::string_view p)
 {
+    constexpr size_t GENERAL_SHIFT = 2;
+
     std::string_view token = p;
 
     if (token.back() == '-' || token.back() == '+' || token.back() == 'x' || token == ".") {
@@ -86,15 +44,41 @@ inline bool ValidateInteger(std::string_view p)
 
     if (token[0] == '0' && token.size() > 1 && token.find('.') == std::string::npos) {
         if (token[1] == 'x') {
-            return ValidateHexInteger(token);
+            token.remove_prefix(GENERAL_SHIFT);
+
+            for (auto i : token) {
+                if (!((i >= '0' && i <= '9') || (i >= 'A' && i <= 'F') || (i >= 'a' && i <= 'f'))) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         if (token[1] == 'b') {
-            return ValidateBinInteger(token);
+            token.remove_prefix(GENERAL_SHIFT);
+            if (token.empty()) {
+                return false;
+            }
+            for (auto i : token) {
+                if (!(i == '0' || i == '1')) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         if (token[1] >= '0' && token[1] <= '9' && token.find('e') == std::string::npos) {
-            return ValidateOctalInteger(token);
+            token.remove_prefix(1);
+
+            for (auto i : token) {
+                if (!(i >= '0' && i <= '7')) {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 
@@ -184,8 +168,9 @@ inline double FloatNumber(std::string_view p, bool is_64bit)
         char *end = nullptr;
         if (is_64bit) {
             return bit_cast<double>(strtoull(p.data(), &end, 0));
+        } else {
+            return bit_cast<float>(static_cast<uint32_t>(strtoull(p.data(), &end, 0)));
         }
-        return bit_cast<float>(static_cast<uint32_t>(strtoull(p.data(), &end, 0)));
     }
     return std::strtold(std::string(p.data(), p.length()).c_str(), nullptr);
 }
@@ -207,4 +192,4 @@ inline size_t ToNumber(std::string_view p)
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_UTILS_NUMBER_UTILS_H_
+#endif  // !_PANDA_ASSEMBLER_NUMBERS_UTILS_H

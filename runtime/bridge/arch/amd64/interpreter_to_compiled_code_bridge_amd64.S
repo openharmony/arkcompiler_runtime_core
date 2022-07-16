@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,7 +273,7 @@ InterpreterToCompiledCodeBridge:
     CFI_DEF_CFA_REGISTER(rax)
 
     // According to the current frame kind set the bridge type
-    movb THREAD_FRAME_KIND(%rcx), %r10b
+    movb MANAGED_THREAD_FRAME_KIND_OFFSET(%rcx), %r10b
     testb %r10b, %r10b
     movq $INTERPRETER_TO_COMPILED_CODE_BRIDGE, %r11
     movq $BYPASS_BRIDGE, %r10
@@ -333,7 +333,7 @@ InterpreterToCompiledCodeBridge:
     // setup regs as follow
     // %rax - SHORTY_PTR_REG, %r10d - SHORTY_REG, %r11d - shorty value, %rsi - stack arg ptr,
     // %rdi - float arg ptr, %rbx - insn_ptr, %r12 - frame.vregs, %r8 - arg base ptr
-    // %rdx - gpr arg ptr, %rcx, %rdi, %r9 - temps, %r14 - method.shorty
+    // %rdx - gpr arg ptr, %rcx, %r9 - temps, %r14 - method.shorty
     movq %rsp, %rsi
     movq %r8, %rdi
     movq %r8, %rdx
@@ -387,7 +387,7 @@ InterpreterToCompiledCodeBridge:
     cmpl $SHORTY_REFERENCE, %r14d
     sete %dl
 1:  // store tag
-    movq %rdx, FRAME_VREGISTER_TAG_OFFSET(%r12)
+    movq %rdx, FRAME_ACC_MIRROR_OFFSET(%r12)
 
     movl %r14d, %esi
     movl %r14d, %edi
@@ -462,7 +462,7 @@ InvokeCompiledCodeWithArgArray:
     CFI_DEF_CFA_REGISTER(rax)
 
     // According to the current frame kind set the bridge type
-    movb THREAD_FRAME_KIND(%rcx), %r10b
+    movb MANAGED_THREAD_FRAME_KIND_OFFSET(%rcx), %r10b
     testb %r10b, %r10b
     movq $INTERPRETER_TO_COMPILED_CODE_BRIDGE, %r11
     movq $BYPASS_BRIDGE, %r10

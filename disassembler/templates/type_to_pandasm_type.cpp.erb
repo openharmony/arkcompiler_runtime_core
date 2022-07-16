@@ -26,7 +26,6 @@ pandasm::Type Disassembler::PFTypeToPandasmType(const panda_file::Type& type, pa
     case panda_file::Type::TypeId::<%= type.name.upcase %>:
 % if (type.name == "reference")
         pandasm_type = pandasm::Type::FromDescriptor(StringDataToString(file_->GetStringData(pda.GetReferenceType(ref_idx++))));
-        pandasm_type = pandasm::Type(MakePandasmFriendly(pandasm_type.GetComponentName()), pandasm_type.GetRank());
 % elsif (type.name == "tagged")
         pandasm_type = pandasm::Type("any", 0);
 % else
@@ -60,7 +59,6 @@ pandasm::Type Disassembler::FieldTypeToPandasmType(const uint32_t& type) const {
         std::string type_name = StringDataToString(file_->GetStringData(field_id));
 
         field_type = pandasm::Type::FromDescriptor(type_name);
-        field_type = pandasm::Type(MakePandasmFriendly(field_type.GetComponentName()), field_type.GetRank());
         break;
     }
 

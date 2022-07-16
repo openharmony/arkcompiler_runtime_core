@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,26 +12,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_TOOLING_PT_THREAD_H_
-#define PANDA_RUNTIME_INCLUDE_TOOLING_PT_THREAD_H_
+#ifndef PANDA_TOOLING_PT_THREAD_H
+#define PANDA_TOOLING_PT_THREAD_H
 
 #include <cstdint>
 #include "libpandabase/macros.h"
+#include "runtime/include/managed_thread.h"
 
 namespace panda::tooling {
 class PtThread {
 public:
-    explicit PtThread(uint32_t id) : id_(id) {}
+    explicit PtThread(ManagedThread *managed_thread) : managed_thread_(managed_thread) {}
+
+    // Deprecated API
+    explicit PtThread(uint32_t /* unused */) : managed_thread_(nullptr) {}
 
     bool operator==(const PtThread &other)
     {
-        return id_ == other.id_;
+        return managed_thread_ == other.managed_thread_;
+    }
+
+    bool operator!=(const PtThread &other)
+    {
+        return !(*this == other);
     }
 
     uint32_t GetId() const
     {
-        return id_;
+        constexpr uint32_t PT_THREAD_NONE_ID = 0xffffffff;
+        return managed_thread_ == nullptr ? PT_THREAD_NONE_ID : managed_thread_->GetId();
+    }
+
+    ManagedThread *GetManagedThread() const
+    {
+        return managed_thread_;
     }
 
     static const PtThread NONE;
@@ -42,9 +56,8 @@ public:
     DEFAULT_MOVE_SEMANTIC(PtThread);
 
 private:
-    uint32_t id_;
+    ManagedThread *managed_thread_ {nullptr};
 };
-
 }  // namespace panda::tooling
 
-#endif  // PANDA_RUNTIME_INCLUDE_TOOLING_PT_THREAD_H_
+#endif  // PANDA_TOOLING_PT_THREAD_H

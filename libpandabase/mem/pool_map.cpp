@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ void PoolMap::AddPoolToMap(const void *pool_addr, size_t pool_size, SpaceType sp
     }
 }
 
-void PoolMap::RemovePoolFromMap(void *pool_addr, size_t pool_size)
+void PoolMap::RemovePoolFromMap(const void *pool_addr, size_t pool_size)
 {
     ASSERT(ToUintPtr(pool_addr) % POOL_MAP_GRANULARITY == 0);
     ASSERT(pool_size % POOL_MAP_GRANULARITY == 0);
@@ -65,12 +65,12 @@ SpaceType PoolMap::GetSpaceType(const void *addr) const
     return space_type;
 }
 
-void *PoolMap::GetFirstByteOfPoolForAddr(const void *addr)
+void *PoolMap::GetFirstByteOfPoolForAddr(const void *addr) const
 {
     return GetFirstByteInSegment(addr);
 }
 
-void *PoolMap::GetFirstByteInSegment(const void *addr)
+void *PoolMap::GetFirstByteInSegment(const void *addr) const
 {
     size_t current_map_num = AddrToMapNum(addr);
     while (!pool_map_[current_map_num].IsFirstByteInSegment()) {
@@ -78,6 +78,16 @@ void *PoolMap::GetFirstByteInSegment(const void *addr)
         current_map_num--;
     }
     return MapNumToAddr(current_map_num);
+}
+
+bool PoolMap::IsEmpty() const
+{
+    for (auto i : pool_map_) {
+        if (!i.IsEmpty()) {
+            return false;
+        }
+    }
+    return true;
 }
 
 }  // namespace panda

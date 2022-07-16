@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,73 +14,83 @@
  */
 
 #include "arch/asm_support.h"
+#include "arch/aarch64/helpers_aarch64.S"
+#include "arch/aarch64/call_runtime.S"
 
-.macro ENTRYPOINT name, entry, paramsnum
+.macro BRIDGE_SELECTOR name, notcompiled_entry, compiled_entry
+.global \name
+.type \name, %function
+\name:
+    ldrb w17, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
+    cbz w17, 1f
+    b \compiled_entry
+    // workround relocation R_AARCH64_CONDBR19 out of range
+1:  b \notcompiled_entry
+.endm
+
+.macro RUNTIME_CALL_CHECKER name, entry
 .global \name
 .type \name, %function
 \name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
-      // Save caller saved regs
-.ifle \paramsnum-2           // parameter holding registers are saved by the caller function
-      stp x2,  x3,  [fp, #-CALLER_REG0_OFFSET+8*2]
-.endif
-.ifle \paramsnum-4
-      stp x4,  x5,  [fp, #-CALLER_REG0_OFFSET+8*4]
-.endif
-      stp x6,  x7,  [fp, #-CALLER_REG0_OFFSET+8*6]
-      stp x8,  x9,  [fp, #-CALLER_REG0_OFFSET+8*8]
-      stp x10, x11, [fp, #-CALLER_REG0_OFFSET+8*10]
-      stp x12, x13, [fp, #-CALLER_REG0_OFFSET+8*12]
-      stp x14, x15, [fp, #-CALLER_REG0_OFFSET+8*14]
-      stp x16, x17, [fp, #-CALLER_REG0_OFFSET+8*16]
-      str x18, [fp, #-CALLER_REG0_OFFSET+8*18]
-      // BoundaryFrame setup
-      str lr, [sp, #-8]    // Bridge frame, slot 1 = npc = LR (the StackMap is just after the bridge call)
-      CFI_REL_OFFSET(lr, -(1 * 8))
-      str lr, [THREAD_REG, #THREAD_NATIVE_PC]   // ManagedThread.npc update
-      mov lr, #COMPILED_CODE_TO_INTERPRETER_BRIDGE
-      str lr, [sp, #-16] // Bridge frame, slot 2 = COMPILED_CODE_TO_INTERPRETER
-      str fp, [sp, #-24] // Bridge frame, slot 3 = parent frame pointer
-      CFI_REL_OFFSET(fp, -(3 * 8))
-      sub lr, sp, #0x18
-      str lr, [THREAD_REG, #THREAD_CURRENT_FRAME]    // ManagedThread._frame = this boundary frame
-      sub sp, sp, #BRIDGE_FRAME_SIZE
-      CFI_ADJUST_CFA_OFFSET(BRIDGE_FRAME_SIZE)
-      // The call
-      bl \entry
-      // Restore previous state
-      add sp, sp, #BRIDGE_FRAME_SIZE
-      CFI_ADJUST_CFA_OFFSET(-BRIDGE_FRAME_SIZE)
-      ldr x17, [sp, #-24]
-      str x17, [THREAD_REG, #THREAD_CURRENT_FRAME]
-      // Restore caller saved regs
-      // do not load x0/x1 here as it can overwrite the result value
-      ldp x2,  x3,  [fp, #-CALLER_REG0_OFFSET+8*2]
-      ldp x4,  x5,  [fp, #-CALLER_REG0_OFFSET+8*4]
-      ldp x6,  x7,  [fp, #-CALLER_REG0_OFFSET+8*6]
-      ldp x8,  x9,  [fp, #-CALLER_REG0_OFFSET+8*8]
-      ldp x10, x11, [fp, #-CALLER_REG0_OFFSET+8*10]
-      ldp x12, x13, [fp, #-CALLER_REG0_OFFSET+8*12]
-      ldp x14, x15, [fp, #-CALLER_REG0_OFFSET+8*14]
-      ldp x16, x17, [fp, #-CALLER_REG0_OFFSET+8*16]
-      ldr x18, [fp, #-CALLER_REG0_OFFSET+8*18]
+    ldr x16, [THREAD_REG, #MANAGED_THREAD_RUNTIME_CALL_ENABLED_OFFSET]
 
-    ldr lr, [sp, #-8]
+    stp lr, x16, [sp, #-16]!
+    CFI_REL_OFFSET(lr, -16)
+    CFI_ADJUST_CFA_OFFSET(16)
+
+    str xzr, [THREAD_REG, #MANAGED_THREAD_RUNTIME_CALL_ENABLED_OFFSET]
+
+    bl \entry
+
+    ldp lr, x16, [sp], #16
+    CFI_ADJUST_CFA_OFFSET(-16)
     CFI_RESTORE(lr)
+
+    str x16, [THREAD_REG, #MANAGED_THREAD_RUNTIME_CALL_ENABLED_OFFSET]
     ret
     CFI_ENDPROC
 .endm
 
-#include "entrypoints_gen.S"
-#include "entrypoints_bridge_asm_macro.inl"
-
-.global AbstractMethodStub
-.type AbstractMethodStub, %function
-AbstractMethodStub:
+.macro ENTRYPOINT name, entry, paramsnum, is_void
+.global \name
+.type \name, %function
+\name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
+
+    CALL_RUNTIME RUNTIME_MODE_DEFAULT, \entry, \paramsnum, \is_void
+    ret
+    CFI_ENDPROC
+.endm
+
+.macro ENTRYPOINT_SLOW_PATH name, entry, paramsnum, is_void
+.global \name
+.type \name, %function
+\name:
+    CFI_STARTPROC
+    CFI_DEF_CFA(sp, 0)
+
+    CALL_RUNTIME RUNTIME_MODE_SLOW_PATH, \entry, \paramsnum, \is_void
+    ret
+    CFI_ENDPROC
+.endm
+
+.macro MethodEntrypointStub name, entry, notcompiled
+.global \name
+.type \name, %function
+\name:
+    CFI_STARTPROC
+    CFI_DEF_CFA(sp, 0)
+
+    // If the caller is not a compiled method, we need to call \entry
+    // and return back after its execution
+    ldrb w17, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
+    tst w17, w17
+    beq .L\notcompiled
+    CFI_REMEMBER_STATE
 
     str lr, [sp, #-8]
     CFI_REL_OFFSET(lr, -(1 * 8))
@@ -88,9 +98,9 @@ AbstractMethodStub:
     str x17, [sp, #-16]
     str fp, [sp, #-24]
     CFI_REL_OFFSET(fp, -(3 * 8))
-    str lr, [THREAD_REG, #THREAD_NATIVE_PC]
+    str lr, [THREAD_REG, #MANAGED_THREAD_NATIVE_PC_OFFSET]
     sub x17, sp, #24
-    str x17, [THREAD_REG, #THREAD_CURRENT_FRAME]
+    str x17, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]
     sub sp, sp, #32
     CFI_ADJUST_CFA_OFFSET(32)
 
@@ -132,6 +142,28 @@ AbstractMethodStub:
     CFI_REL_OFFSET(d9, 8)
     CFI_REL_OFFSET(d8, 0)
 
-    bl AbstractMethodErrorEntrypoint
+    bl \entry
     // we're not going to return back here
+
+.L\notcompiled:
+    CFI_RESTORE_STATE
+    CFI_DEF_CFA(sp, 0)
+    str lr, [sp, #-8]
+    CFI_REL_OFFSET(lr, -(1 * 8))
+    sub sp, sp, #16
+    CFI_ADJUST_CFA_OFFSET(16)
+    bl \entry
+    add sp, sp, #16
+    CFI_ADJUST_CFA_OFFSET(-16)
+    ldr lr, [sp, #-8]
+    CFI_RESTORE(lr)
+    ret
     CFI_ENDPROC
+.endm
+
+#include "entrypoints_gen.S"
+#include "entrypoints_bridge_asm_macro.inl"
+
+MethodEntrypointStub AbstractMethodStub AbstractMethodErrorEntrypoint ame_not_compiled
+
+MethodEntrypointStub DefaultConflictMethodStub IncompatibleClassChangeErrorForMethodConflictEntrypoint icce_not_compiled

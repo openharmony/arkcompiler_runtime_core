@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 
 #include "runtime/include/class-inl.h"
-#include "runtime/include/class_linker.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/runtime.h"
 
@@ -26,6 +25,7 @@ class ArrayTest : public testing::Test {
 public:
     ArrayTest()
     {
+        // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
         // We need to create a runtime instance to be able to create strings.
         options_.SetShouldLoadBootPandaFiles(false);
         options_.SetShouldInitializeIntrinsics(false);
@@ -38,10 +38,11 @@ public:
     {
         thread_->ManagedCodeEnd();
         Runtime::Destroy();
+        // Logger::Destroy();
     }
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
     RuntimeOptions options_;
 };
 
@@ -61,7 +62,7 @@ static void TestArrayObjectSize(ClassRoot class_root, uint32_t n)
     Array *array = Array::Create(klass, n);
     ASSERT_NE(array, nullptr) << msg;
 
-    ASSERT_EQ(array->ObjectSize(), GetArrayObjectSize(klass, n)) << msg;
+    ASSERT_EQ(array->ObjectSize(klass->GetComponentSize()), GetArrayObjectSize(klass, n)) << msg;
 }
 
 TEST_F(ArrayTest, ObjectSize)

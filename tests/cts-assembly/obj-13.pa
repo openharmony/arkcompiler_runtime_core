@@ -63,7 +63,7 @@
     return.void
 }
 
-.function u1 main() {
+.function i32 main() {
     movi v10, 100000
     movi.64 v15, 4999850000
     newobj v0, Obj

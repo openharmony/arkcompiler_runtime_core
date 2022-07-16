@@ -32,7 +32,7 @@
     return.void
 }
 
-.function u1 main() {
+.function i32 main() {
     movi v0, 10
     movi v1, 20
     movi v2, 30

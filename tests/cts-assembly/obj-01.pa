@@ -19,7 +19,7 @@
     f64 asm3 <static>
 }
 
-.function u1 main() {
+.function i32 main() {
     ldai 0xFFFFFFFF
     ststatic Asm.asm1
 

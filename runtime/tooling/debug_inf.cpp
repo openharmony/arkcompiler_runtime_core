@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "include/tooling/debug_inf.h"
 
 //
@@ -46,8 +45,8 @@ struct PCodeMetaInfo {
     std::atomic<PCodeItem *> head_ {nullptr};
 
     // Panda-specific fields
-    static constexpr size_t MAGIC_SIZE = 8;
-    std::array<uint8_t, MAGIC_SIZE> magic_ {'P', 'a', 'n', 'd', 'a', 'r', 't', '1'};
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    uint8_t magic_[8] = {'P', 'a', 'n', 'd', 'a', 'r', 't', '1'};
     uint32_t flags_ = 0;
     uint32_t size_meta_info_ = sizeof(PCodeMetaInfo);
     uint32_t size_codeitem_ = sizeof(PCodeItem);
@@ -101,6 +100,8 @@ void DebugInf::DelCodeMetaInfo(const panda_file::File *file)
 
 void DebugInf::Lock(PCodeMetaInfo *mi)
 {
+    // Atomic with relaxed order reason: data race with update_lock_ with no synchronization or ordering constraints
+    // imposed on other reads or writes
     mi->update_lock_.fetch_add(1, std::memory_order_relaxed);
     std::atomic_thread_fence(std::memory_order_release);
 }
@@ -108,6 +109,8 @@ void DebugInf::Lock(PCodeMetaInfo *mi)
 void DebugInf::UnLock(PCodeMetaInfo *mi)
 {
     std::atomic_thread_fence(std::memory_order_release);
+    // Atomic with relaxed order reason: data race with update_lock_ with no synchronization or ordering constraints
+    // imposed on other reads or writes
     mi->update_lock_.fetch_add(1, std::memory_order_relaxed);
 }
 
@@ -115,13 +118,16 @@ PCodeItem *DebugInf::AddCodeMetaInfoImpl(PCodeMetaInfo *metaInfo, [[maybe_unused
 {
     uint64_t timestamp = std::max(metaInfo->timestamp_ + 1, panda::time::GetCurrentTimeInNanos());
 
+    // Atomic with relaxed order reason: data race with metaInfo with no synchronization or ordering constraints imposed
+    // on other reads or writes
     auto *head = metaInfo->head_.load(std::memory_order_relaxed);
 
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
     auto *codeItem = new PCodeItem;
     codeItem->code_base_ = inss.begin();
     codeItem->code_size_ = inss.Size();
     codeItem->prev_ = nullptr;
+    // Atomic with relaxed order reason: data race with codeItem with no synchronization or ordering constraints imposed
+    // on other reads or writes
     codeItem->next_.store(head, std::memory_order_relaxed);
     codeItem->timestamp_ = timestamp;
 
@@ -131,6 +137,8 @@ PCodeItem *DebugInf::AddCodeMetaInfoImpl(PCodeMetaInfo *metaInfo, [[maybe_unused
         head->prev_ = codeItem;
     }
 
+    // Atomic with relaxed order reason: data race with metaInfo with no synchronization or ordering constraints imposed
+    // on other reads or writes
     metaInfo->head_.store(codeItem, std::memory_order_relaxed);
     metaInfo->relevent_item_ = codeItem;
     metaInfo->action_ = CODE_ADDED;
@@ -149,10 +157,16 @@ void DebugInf::DelCodeMetaInfoImpl(PCodeMetaInfo *metaInfo, const panda_file::Fi
     // lock
     Lock(metaInfo);
 
+    // Atomic with relaxed order reason: data race with codeItem with no synchronization or ordering constraints imposed
+    // on other reads or writes
     auto next = codeItem->next_.load(std::memory_order_relaxed);
     if (codeItem->prev_ != nullptr) {
+        // Atomic with relaxed order reason: data race with codeItem with no synchronization or ordering constraints
+        // imposed on other reads or writes
         codeItem->prev_->next_.store(next, std::memory_order_relaxed);
     } else {
+        // Atomic with relaxed order reason: data race with metaInfo with no synchronization or ordering constraints
+        // imposed on other reads or writes
         metaInfo->head_.store(next, std::memory_order_relaxed);
     }
 

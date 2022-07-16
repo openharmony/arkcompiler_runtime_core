@@ -124,6 +124,18 @@ class Instruction < SimpleDelegator
     opcode.upcase
   end
 
+  def intrinsic_name
+    dig(:intrinsic_name)
+  end
+
+  def compilable?
+    properties.empty? || (!properties.include? 'not_compilable')
+  end
+
+  def inlinable?
+    properties.include? 'inlinable'
+  end
+
   def opcode_idx
     if prefix
       dig(:opcode_idx) << 8 | prefix.opcode_idx
@@ -138,7 +150,7 @@ class Instruction < SimpleDelegator
   end
 
   # Array of explicit operands
-  def operands
+  cached def operands
     return [] unless sig.include? ' '
 
     _, operands = sig.match(/(\S+) (.+)/).captures
@@ -154,7 +166,7 @@ class Instruction < SimpleDelegator
   end
 
   # Used by compiler
-  # Operands array preceded with accumulator as if it was a regular operand
+  # Operands array preceeded with accumulator as if it was a regular operand
   # Registers that are both destination and source are uncoupled
   cached def acc_and_operands
     res = Util.parse_acc_signature(acc)
@@ -166,6 +178,16 @@ class Instruction < SimpleDelegator
         ops << op
       end
     end
+  end
+
+  cached def properties
+    props = dig(:properties) || []
+    # Added for back compatibility:
+    add_props = []
+    add_props << 'acc_write' if acc_write?
+    add_props << 'acc_read' if acc_read?
+    add_props << 'acc_none' if acc_none?
+    props + add_props
   end
 
   def type(index)
@@ -197,23 +219,24 @@ class Instruction < SimpleDelegator
     !exceptions.include? 'x_none'
   end
 
-  def builtin?
-    /^builtin\./.match(mnemonic)
+  def acc_read?
+    !acc_and_operands.select(&:acc?).select(&:src?).empty?
   end
 
-  # Size of source operand
-  cached def op_size
-    type[1..-1].to_i
+  def acc_write?
+    !acc_and_operands.select(&:acc?).select(&:dst?).empty?
   end
 
-  # Size of destination operand
-  cached def dest_op_size
-    dtype[1..-1].to_i
+  def acc_none?
+    acc_and_operands.select(&:acc?).empty?
   end
 
   def namespace
-    dig(:namespace) || "core"
+    dig(:namespace) || 'core'
   end
+
+  include FreezeMixin
+  freeze_defined_methods
 end
 
 class Prefix < SimpleDelegator
@@ -228,9 +251,6 @@ class Invalid
   def handler_name
     'INVALID'
   end
-
-  include FreezeMixin
-  freeze_defined_methods
 end
 
 # Methods over format names
@@ -243,7 +263,7 @@ class Format
   end
 
   cached def pretty
-    pretty_helper.gsub(/imm[0-9]?/, 'imm').gsub(/v[0-9]?/, 'v').gsub(/_([0-9]+)/, '\1')
+    name.sub('op_', '').gsub(/imm[0-9]?/, 'imm').gsub(/v[0-9]?/, 'v').gsub(/_([0-9]+)/, '\1')
   end
 
   def prefixed?
@@ -273,13 +293,6 @@ class Format
       encoding[name] = op
     end
     encoding
-  end
-
-  private
-
-  # pretty but with dst/src info
-  cached def pretty_helper
-    name.sub('op_', '')
   end
 
   include FreezeMixin
@@ -368,19 +381,17 @@ class DispatchTable
 
   # Maximum value for secondary dispatch index for given prefix name
   def secondary_opcode_bound(prefix)
-    @prefix_data ||= prefix_data
-    @prefix_data[prefix.name][:number_of_insns] - 1
+    prefix_data[prefix.name][:number_of_insns] - 1
   end
 
   # Offset in dispatch table for handlers of instructions for given prefix name
   def secondary_opcode_offset(prefix)
-    @prefix_data ||= prefix_data
-    256 + @prefix_data[prefix.name][:delta]
+    256 + prefix_data[prefix.name][:delta]
   end
 
   private
 
-  def prefix_data
+  cached def prefix_data
     cur_delta = 0
     Panda.prefixes.each_with_object({}) do |p, obj|
       prefix_instructions_num = Panda.instructions.select { |i| i.prefix && (i.prefix.name == p.name) }.size
@@ -438,6 +449,13 @@ end
 module Panda
   module_function
 
+  def properties
+    @data.properties +
+      [OpenStruct.new(tag: 'acc_none', description: 'Doesn\'t use accumulator register.'),
+       OpenStruct.new(tag: 'acc_read', description: 'Use accumulator as a first source operand.'),
+       OpenStruct.new(tag: 'acc_write', description: 'Use accumulator as a destination operand.')]
+  end
+
   # Hash with exception tag as a key and exception description as a value
   cached def exceptions_hash
     convert_to_hash(exceptions)
@@ -468,34 +486,28 @@ module Panda
   end
 
   # Array of Instruction instances for every possible instruction
-  def instructions
-    unless defined? @instructions
-      opcodes = OpcodeAssigner.new
-      tmp_public = initialize_instructions(opcodes) { |ins| !ins.opcode_idx.nil? }
-      tmp_private = initialize_instructions(opcodes) { |ins| ins.opcode_idx.nil? }
-      tmp = tmp_public + tmp_private
-      @instructions = tmp.sort_by(&:opcode_idx)
-    end
-    @instructions
+  cached def instructions
+    opcodes = OpcodeAssigner.new
+    tmp_public = initialize_instructions(opcodes) { |ins| !ins.opcode_idx.nil? }
+    tmp_private = initialize_instructions(opcodes) { |ins| ins.opcode_idx.nil? }
+    tmp = tmp_public + tmp_private
+    @instructions = tmp.sort_by(&:opcode_idx)
   end
 
-  def prefixes
-    unless defined? @prefixes
-      opcodes = PrefixOpcodeAssigner.new
-      tmp_public = initialize_prefixes(opcodes) { |p| !p.opcode_idx.nil? }
-      tmp_private = initialize_prefixes(opcodes) { |p| p.opcode_idx.nil? }
-      tmp = tmp_public + tmp_private
-      @prefixes = tmp.sort_by(&:opcode_idx)
-    end
-    @prefixes
+  cached def prefixes
+    opcodes = PrefixOpcodeAssigner.new
+    tmp_public = initialize_prefixes(opcodes) { |p| !p.opcode_idx.nil? }
+    tmp_private = initialize_prefixes(opcodes) { |p| p.opcode_idx.nil? }
+    tmp = tmp_public + tmp_private
+    @prefixes = tmp.sort_by(&:opcode_idx)
   end
 
-  cached def dispatch_table
-    @dispatch_table ||= DispatchTable.new
+  def dispatch_table
+    DispatchTable.new
   end
 
   # Array of all Format instances
-  cached def formats
+  def formats
     format_hash.values.uniq(&:pretty).sort_by(&:pretty)
   end
 
@@ -537,9 +549,9 @@ module Panda
     end
   end
 
-  private_class_method def each_data_instruction
+  private_class_method cached def each_data_instruction
     # create separate instance for every instruction format and inherit group properties
-    @each_data_instruction ||= groups.each_with_object([]) do |g, obj|
+    groups.each_with_object([]) do |g, obj|
       g.instructions.each do |i|
         data_insn = merge_group_and_insn(g, i)
         if data_insn[:opcode_idx] && (data_insn[:opcode_idx].size != data_insn[:format].size)
@@ -558,15 +570,17 @@ module Panda
 
   private_class_method def initialize_instructions(opcodes, &block)
     each_data_instruction.select(&block).each_with_object([]) do |instruction, insns|
-      instruction[:public?] = !instruction.opcode_idx.nil?
-      instruction.opcode_idx = opcodes.yield_opcode(instruction)
-      opcodes.consume(instruction)
-      insns << Instruction.new(instruction)
+      insn = instruction.clone
+      insn[:public?] = !insn.opcode_idx.nil?
+      insn.opcode_idx = opcodes.yield_opcode(insn)
+      opcodes.consume(insn)
+      insns << Instruction.new(insn)
     end
   end
 
   private_class_method def initialize_prefixes(opcodes, &block)
-    dig(:prefixes).select(&block).each_with_object([]) do |p, res|
+    dig(:prefixes).select(&block).each_with_object([]) do |pref, res|
+      p = pref.clone
       p[:public?] = !p.opcode_idx.nil?
       p.opcode_idx = opcodes.yield_opcode(p)
       opcodes.consume(p)

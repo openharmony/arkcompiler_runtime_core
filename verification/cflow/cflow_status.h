@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_CFLOW_CFLOW_STATUS_H_
-#define PANDA_VERIFICATION_CFLOW_CFLOW_STATUS_H_
+#ifndef PANDA_VERIFIER_CFLOW_STATUS_HPP__
+#define PANDA_VERIFIER_CFLOW_STATUS_HPP__
 
 namespace panda::verifier {
 enum class CflowStatus { OK, WARNING, ERROR };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_CFLOW_CFLOW_STATUS_H_
+#endif  // !PANDA_VERIFIER_CFLOW_STATUS_HPP__

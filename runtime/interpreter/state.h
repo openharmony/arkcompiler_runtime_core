@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,11 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INTERPRETER_STATE_H_
-#define PANDA_RUNTIME_INTERPRETER_STATE_H_
+#ifndef PANDA_INTERPRETER_STATE_H_
+#define PANDA_INTERPRETER_STATE_H_
 
 #include "libpandafile/bytecode_instruction-inl.h"
+#include "runtime/interpreter/acc_vregister.h"
+#include "runtime/interpreter/acc_vregister-inl.h"
 #include "runtime/interpreter/frame.h"
 
 #ifdef PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES
@@ -28,7 +29,7 @@ namespace panda::interpreter {
 template <class T>
 class StateIface {
 public:
-    ALWAYS_INLINE inline StateIface(Frame *frame) : acc_(frame->GetAcc()) {}
+    ALWAYS_INLINE inline explicit StateIface(Frame *frame) : acc_(frame->GetAcc()) {}
 
     ALWAYS_INLINE inline BytecodeInstruction GetInst() const
     {
@@ -70,18 +71,18 @@ public:
         static_cast<T *>(this)->RestoreState();
     }
 
-    ALWAYS_INLINE inline AccVRegister &GetAcc()
+    ALWAYS_INLINE inline AccVRegisterT &GetAcc()
     {
         return acc_;
     }
 
-    ALWAYS_INLINE inline const AccVRegister &GetAcc() const
+    ALWAYS_INLINE inline const AccVRegisterT &GetAcc() const
     {
         return acc_;
     }
 
 private:
-    AccVRegister acc_;
+    AccVRegisterT acc_;
 };
 
 #ifdef PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES
@@ -94,9 +95,6 @@ public:
         SetFrame(frame);
         SetThread(thread);
     }
-    ~State() = default;
-    DEFAULT_MOVE_SEMANTIC(State);
-    DEFAULT_COPY_SEMANTIC(State);
 
     ALWAYS_INLINE inline void UpdateState(const uint8_t *pc, Frame *frame)
     {
@@ -122,6 +120,8 @@ public:
     ALWAYS_INLINE inline void SetFrame(Frame *frame)
     {
         arch::regs::SetFrame(frame);
+        arch::regs::SetMirrorFp(
+            reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(frame) + Frame::GetVregsOffset() + frame->GetSize()));
     }
 
     ALWAYS_INLINE inline const void *const *GetDispatchTable() const
@@ -148,7 +148,8 @@ public:
     {
         inst_spill_ = GetInst();
         acc_spill_ = GetAcc();
-        frame_spill_ = GetFrame();
+        fp_spill_ = arch::regs::GetFp();
+        m_fp_spill_ = arch::regs::GetMirrorFp();
         thread_spill_ = GetThread();
     }
 
@@ -156,15 +157,17 @@ public:
     {
         SetInst(inst_spill_);
         GetAcc() = acc_spill_;
-        SetFrame(frame_spill_);
+        arch::regs::SetFp(fp_spill_);
+        arch::regs::SetMirrorFp(m_fp_spill_);
         SetThread(thread_spill_);
     }
 
 private:
     BytecodeInstruction inst_spill_;
-    Frame *frame_spill_ {nullptr};
+    void *fp_spill_ {nullptr};
+    void *m_fp_spill_ {nullptr};
     ManagedThread *thread_spill_ {nullptr};
-    Frame::VRegister acc_spill_;
+    AccVRegister acc_spill_;
 };
 
 #else
@@ -177,9 +180,6 @@ public:
         SetFrame(frame);
         SetThread(thread);
     }
-    ~State() = default;
-    DEFAULT_MOVE_SEMANTIC(State);
-    DEFAULT_COPY_SEMANTIC(State);
 
     ALWAYS_INLINE inline void UpdateState(const uint8_t *pc, Frame *frame)
     {
@@ -238,4 +238,4 @@ private:
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_RUNTIME_INTERPRETER_STATE_H_
+#endif  // PANDA_INTERPRETER_VREGISTER_H_

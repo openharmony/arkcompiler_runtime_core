@@ -14,7 +14,7 @@
 .record System <external>
 .function void System.assert(u1 a0) <external>
 
-.function u1 main(){
+.function i32 main(){
     movi v0, 1
     call.short System.assert, v0, v0
     ldai 0

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_SERIALIZER_SERIALIZER_H_
-#define PANDA_LIBPANDABASE_SERIALIZER_SERIALIZER_H_
+#ifndef PANDA_LIBPANDABASE_UTILS_SERIALIZER_SERIALIZER_H_
+#define PANDA_LIBPANDABASE_UTILS_SERIALIZER_SERIALIZER_H_
 
 #include <securec.h>
 
@@ -86,6 +86,7 @@ inline auto TypeToBuffer(const UnMap &map, /* out */ std::vector<uint8_t> &buffe
     // because clang-format-8 can't correctly detect the source code language.
     // https://bugs.llvm.org/show_bug.cgi?id=37433
     //
+    // TODO(v.cherkashin): Fix this loop when we switch to clang-format-9.
     for (const auto &it : map) {
         // pack key
         auto k = TypeToBuffer(it.first, buffer);
@@ -115,7 +116,7 @@ Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, /*
     }
 
     auto *ptr = reinterpret_cast<uint8_t *>(&value);
-    (void)memcpy_s(ptr, sizeof(value), data, sizeof(value));
+    memcpy_s(ptr, sizeof(value), data, sizeof(value));
     return sizeof(value);
 }
 
@@ -138,7 +139,7 @@ inline Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t s
     }
 
     str.resize(str_size);
-    (void)memcpy_s(str.data(), str_size, data, str_size);
+    memcpy_s(str.data(), str_size, data, str_size);
     return r.Value() + str_size;
 }
 
@@ -163,7 +164,7 @@ Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, /*
     }
 
     vector.resize(vector_size / sizeof(T));
-    (void)memcpy_s(vector.data(), vector_size, data, vector_size);
+    memcpy_s(vector.data(), vector_size, data, vector_size);
 
     return r.Value() + vector_size;
 }
@@ -322,4 +323,4 @@ bool BufferToStruct(const std::vector<uint8_t> &buffer, /* out */ Struct &str)
 
 }  // namespace panda::serializer
 
-#endif  // PANDA_LIBPANDABASE_SERIALIZER_SERIALIZER_H_
+#endif  // PANDA_LIBPANDABASE_UTILS_SERIALIZER_SERIALIZER_H_

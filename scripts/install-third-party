@@ -12,50 +12,157 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# When public OpenHarmony source tree is available:
-# * List all required third party components in a manifest:
-#
-#      library-1      remote-url-1
-#      library-2      remote-url-2
-#      <...>
-#
-# * Clone each component separately, based on the manifest
-# * Enable this script to work with custom manifests to allow
-#   avoid depenencies on OpenHarmony infrastructure
-# * Remove dependency on private GitLab (and, eventually, GITLAB_PULL_TOKEN)
-# * If we need to apply patches to third party libs,
-#   need to support according machinery as well.
-
 MSG_PREFIX="[ARK THIRD PARTY]"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
-PANDA_ROOT=$SCRIPT_DIR/..
-PANDA_THIRD_PARTY_DIR=$PANDA_ROOT/ark-third-party
+ARK_ROOT=$SCRIPT_DIR/..
+ARK_THIRD_PARTY_DIR=$ARK_ROOT/ark-third-party
+ARK_THIRD_PARTY_FORCE_CLONE=no
+ARK_THIRD_PARTY_MANIFEST="$SCRIPT_DIR/third-party-lists/public"
 
-if [[ -d "$PANDA_THIRD_PARTY_DIR" ]] ; then
-    echo "$MSG_PREFIX Third-party dependencies are found in $PANDA_THIRD_PARTY_DIR"
+function print_help
+{
+    HELP_MESSAGE="
+    This script installs build-time third party dependencies for ARK Runtime.
+
+    SYNOPSIS
+
+    $0 [OPTIONS]
+
+    OPTIONS
+
+    --help, -h         Show this message and exit.
+
+    --manifest=FILE    Path to the manifest. Default: $ARK_THIRD_PARTY_MANIFEST
+
+    --force-clone      Remove local repositories and re-clone everything anew
+
+    CAVEAT
+    * Manifest file format is documented in the default manifest.
+    "
+
+    echo "$HELP_MESSAGE"
+}
+
+for opt in "$@"
+do
+    case $opt in
+    -h|--help)
+        print_help
+        exit 0
+        ;;
+    --manifest=*)
+        ARK_THIRD_PARTY_MANIFEST=${opt//[-a-zA-Z0-9]*=/}
+        ;;
+    --force-clone)
+        ARK_THIRD_PARTY_FORCE_CLONE=yes
+        ;;
+    *)
+      echo "Error: Unsupported flag $opt" >&2
+      exit 1
+      ;;
+  esac
+done
+
+function apply_patches
+{
+    local lib_name="$1"
+    local lib_dir="$2"
+
+    local patch_dir="$ARK_ROOT/patches/$lib_name"
+    if [[ ! -d "$patch_dir" ]] ; then
+        echo "$MSG_PREFIX No patch directory $patch_dir for $lib_name"
+        exit 1
+    fi
+
+    pushd "$lib_dir"
+        readarray -t patches <<< "$(find "$patch_dir" -name '*.patch' | sort)"
+        for patch in "${patches[@]}"
+        do
+            git apply --ignore-space-change --check "$patch"
+            git am --ignore-space-change "$patch"
+        done
+    popd
+}
+
+function process_manifest
+{
+    local manifest="$1"
+
+    while read -r component
+    do
+        component=$(echo "$component" | perl -lane 'chomp; s/^\s+//; s/\s+$//; print $_')
+
+        if [[ "$component" == "" || "$component" =~ ^# ]] ; then
+            continue
+        fi
+
+        IFS=',' read -r -a info <<< "$component"
+        local lib_name="${info[0]}"
+        local lib_repo="${info[1]}"
+        local commit_type="${info[2]}"
+        local commit_id="${info[3]}"
+        local patch_mode="${info[4]}"
+        local submodule_mode="${info[5]}"
+
+        local lib_dir="$ARK_THIRD_PARTY_DIR/$lib_name"
+
+        if [[ "$commit_type" == "branch" || "$commit_type" == "tag" ]] ; then
+            GIT_SSL_NO_VERIFY=true git clone --verbose --depth=1 --branch "$commit_id" "$lib_repo" "$lib_dir"
+        elif [[ "$commit_type" == "commit" ]] ; then
+            GIT_SSL_NO_VERIFY=true git clone --verbose "$lib_repo" "$lib_dir"
+            pushd "$lib_dir"
+                git checkout "$commit_id"
+            popd
+        else
+            echo "$MSG_PREFIX Invalid commit type for $lib_name: $commit_type"
+            exit 1
+        fi
+
+        if [[ "$patch_mode" == "with_patches" ]] ; then
+            apply_patches "$lib_name" "$lib_dir"
+        elif [[ "$patch_mode" != "no_patches" ]] ; then
+            echo "$MSG_PREFIX Invalid patch mode for $lib_name: $patch_mode"
+            exit 1
+        fi
+
+        if [[ "$submodule_mode" =~ ^with_submodules: ]] ; then
+            # Split by delimiter and remove "with_submodules" keyword:
+            IFS=':' read -r -a submodules <<< "$submodule_mode"
+            submodules=("${submodules[@]:1}")
+            pushd "$lib_dir"
+                for submodule in "${submodules[@]}"
+                do
+                    git submodule update --init "$submodule"
+                done
+            popd
+        elif [[ "$submodule_mode" != "no_submodules" ]] ; then
+            echo "$MSG_PREFIX Invalid submodule mode for $lib_name: $submodule_mode"
+            exit 1
+        fi
+
+    done < "$manifest"
+}
+
+if [[ "$ARK_THIRD_PARTY_FORCE_CLONE" == "yes" ]] ; then
+    rm -rf "$ARK_THIRD_PARTY_DIR"
+fi
+
+if [[ -d "$ARK_THIRD_PARTY_DIR" ]] ; then
+    echo "$MSG_PREFIX Third-party dependencies are found in $ARK_THIRD_PARTY_DIR, exiting"
+    echo "$MSG_PREFIX If you need to update, restart this script with --force-clone"
     exit 0
 fi
 
-echo "$MSG_PREFIX Third-party dependencies are not found in $PANDA_THIRD_PARTY_DIR"
+echo "$MSG_PREFIX Third-party dependencies are not found in $ARK_THIRD_PARTY_DIR"
 
-SECUREC_URL="https://gitee.com/openharmony/utils_native.git"
-echo "$MSG_PREFIX Cloning securec from $SECUREC_URL"
+if [[ ! -f "$ARK_THIRD_PARTY_MANIFEST" ]] ; then
+    echo "$MSG_PREFIX Invalid manifest file '$ARK_THIRD_PARTY_MANIFEST'"
+    exit 1
+fi
 
-git clone --depth=1 --verbose "$SECUREC_URL" "$PANDA_THIRD_PARTY_DIR/utils_native"
-mkdir "$PANDA_THIRD_PARTY_DIR/securec"
-ln -s "$PANDA_THIRD_PARTY_DIR/utils_native/base/src/securec" "$PANDA_THIRD_PARTY_DIR/securec/src"
-ln -s "$PANDA_THIRD_PARTY_DIR/utils_native/base/include" "$PANDA_THIRD_PARTY_DIR/securec/include"
+echo "$MSG_PREFIX Using manifest $ARK_THIRD_PARTY_MANIFEST"
+process_manifest "$ARK_THIRD_PARTY_MANIFEST"
 
-GOOGLETEST_URL="https://gitee.com/openharmony/third_party_googletest.git"
-echo "$MSG_PREFIX Cloning googletest from $GOOGLETEST_URL"
-
-git clone --depth=1 --verbose "$GOOGLETEST_URL" "$PANDA_THIRD_PARTY_DIR/googletest"
-
-ZLIB_URL="https://gitee.com/openharmony/third_party_zlib.git"
-echo "$MSG_PREFIX Cloning zlib from $ZLIB_URL"
-
-git clone --depth=1 --verbose "$ZLIB_URL" "$PANDA_THIRD_PARTY_DIR/zlib"
-
-echo "$MSG_PREFIX Third-party dependencies cloned"
+echo "$MSG_PREFIX Third-party dependencies installed"
 exit 0
 

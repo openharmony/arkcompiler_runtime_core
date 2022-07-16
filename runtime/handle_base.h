@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_HANDLE_BASE_H_
-#define PANDA_RUNTIME_HANDLE_BASE_H_
+#ifndef PANDA_RUNTIME_HANDLEBASE_H
+#define PANDA_RUNTIME_HANDLEBASE_H
 
 #include "runtime/include/coretypes/tagged_value.h"
 
 namespace panda {
 template <typename T>
 class EscapeHandleScope;
+class ManagedThread;
 
 /*
  * HandleBase: A HandleBase provides a reference to an object that survives relocation by the garbage collector.
@@ -86,7 +87,5 @@ protected:
     template <typename T>
     friend class EscapeHandleScope;
 };
-
 }  // namespace panda
-
-#endif  // PANDA_RUNTIME_HANDLE_BASE_H_
+#endif  // PANDA_RUNTIME_HANDLEBASE_H

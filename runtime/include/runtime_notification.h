@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_RUNTIME_NOTIFICATION_H_
-#define PANDA_RUNTIME_INCLUDE_RUNTIME_NOTIFICATION_H_
+#ifndef PANDA_RUNTIME_RUNTIME_NOTIFICATION_H_
+#define PANDA_RUNTIME_RUNTIME_NOTIFICATION_H_
 
 #include <optional>
 #include <string_view>
@@ -24,7 +23,6 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/runtime.h"
-#include "runtime/include/managed_thread.h"
 
 namespace panda {
 
@@ -41,8 +39,8 @@ public:
 
     virtual void LoadModule([[maybe_unused]] std::string_view name) {}
 
-    virtual void ThreadStart([[maybe_unused]] ManagedThread::ThreadId thread_id) {}
-    virtual void ThreadEnd([[maybe_unused]] ManagedThread::ThreadId thread_id) {}
+    virtual void ThreadStart([[maybe_unused]] ManagedThread *managed_thread) {}
+    virtual void ThreadEnd([[maybe_unused]] ManagedThread *managed_thread) {}
 
     virtual void BytecodePcChanged([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Method *method,
                                    [[maybe_unused]] uint32_t bc_offset)
@@ -52,13 +50,18 @@ public:
     virtual void GarbageCollectorStart() {}
     virtual void GarbageCollectorFinish() {}
 
-    virtual void ExceptionCatch([[maybe_unused]] const ManagedThread *thread, [[maybe_unused]] const Method *method,
-                                [[maybe_unused]] uint32_t bc_offset)
+    virtual void ExceptionThrow([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Method *method,
+                                [[maybe_unused]] ObjectHeader *exception_object, [[maybe_unused]] uint32_t bc_offset)
+    {
+    }
+
+    virtual void ExceptionCatch([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Method *method,
+                                [[maybe_unused]] ObjectHeader *exception_object, [[maybe_unused]] uint32_t bc_offset)
     {
     }
 
     virtual void VmStart() {}
-    virtual void VmInitialization([[maybe_unused]] ManagedThread::ThreadId thread_id) {}
+    virtual void VmInitialization([[maybe_unused]] ManagedThread *managed_thread) {}
     virtual void VmDeath() {}
 
     virtual void MethodEntry([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Method *method) {}
@@ -76,16 +79,15 @@ public:
                              [[maybe_unused]] ManagedThread *thread, [[maybe_unused]] size_t size)
     {
     }
-};
 
-class DdmListener {
-public:
-    DdmListener() = default;
-    virtual ~DdmListener() = default;
-    DEFAULT_COPY_SEMANTIC(DdmListener);
-    DEFAULT_MOVE_SEMANTIC(DdmListener);
-
-    virtual void DdmPublishChunk(uint32_t type, const Span<const uint8_t> &data) = 0;
+    // Deprecated events
+    virtual void ThreadStart([[maybe_unused]] ManagedThread::ThreadId thread_id) {}
+    virtual void ThreadEnd([[maybe_unused]] ManagedThread::ThreadId thread_id) {}
+    virtual void VmInitialization([[maybe_unused]] ManagedThread::ThreadId thread_id) {}
+    virtual void ExceptionCatch([[maybe_unused]] const ManagedThread *thread, [[maybe_unused]] const Method *method,
+                                [[maybe_unused]] uint32_t bc_offset)
+    {
+    }
 };
 
 class DebuggerListener {
@@ -125,13 +127,9 @@ public:
           vm_events_listeners_(allocator->Adapter()),
           method_listeners_(allocator->Adapter()),
           class_listeners_(allocator->Adapter()),
-          monitor_listeners_(allocator->Adapter()),
-          ddm_listeners_(allocator->Adapter())
+          monitor_listeners_(allocator->Adapter())
     {
     }
-    ~RuntimeNotificationManager() = default;
-    NO_COPY_SEMANTIC(RuntimeNotificationManager);
-    NO_MOVE_SEMANTIC(RuntimeNotificationManager);
 
     void AddListener(RuntimeListener *listener, uint32_t event_mask)
     {
@@ -144,9 +142,6 @@ public:
 
         AddListenerIfMatches(listener, event_mask, &thread_events_listeners_, Event::THREAD_EVENTS,
                              &has_thread_events_listeners_);
-
-        AddListenerIfMatches(listener, event_mask, &garbage_collector_listeners_, Event::GARBAGE_COLLECTOR_EVENTS,
-                             &has_garbage_collector_listeners_);
 
         AddListenerIfMatches(listener, event_mask, &exception_listeners_, Event::EXCEPTION_EVENTS,
                              &has_exception_listeners_);
@@ -161,6 +156,13 @@ public:
 
         AddListenerIfMatches(listener, event_mask, &allocation_listeners_, Event::ALLOCATION_EVENTS,
                              &has_allocation_listeners_);
+
+        {
+            // We cannot stop GC thread, so holding lock to avoid data race
+            os::memory::WriteLockHolder rwlock(gc_event_lock_);
+            AddListenerIfMatches(listener, event_mask, &garbage_collector_listeners_, Event::GARBAGE_COLLECTOR_EVENTS,
+                                 &has_garbage_collector_listeners_);
+        }
     }
 
     void RemoveListener(RuntimeListener *listener, uint32_t event_mask)
@@ -174,9 +176,6 @@ public:
 
         RemoveListenerIfMatches(listener, event_mask, &thread_events_listeners_, Event::THREAD_EVENTS,
                                 &has_thread_events_listeners_);
-
-        RemoveListenerIfMatches(listener, event_mask, &garbage_collector_listeners_, Event::GARBAGE_COLLECTOR_EVENTS,
-                                &has_garbage_collector_listeners_);
 
         RemoveListenerIfMatches(listener, event_mask, &exception_listeners_, Event::EXCEPTION_EVENTS,
                                 &has_exception_listeners_);
@@ -193,6 +192,13 @@ public:
 
         RemoveListenerIfMatches(listener, event_mask, &allocation_listeners_, Event::ALLOCATION_EVENTS,
                                 &has_allocation_listeners_);
+
+        {
+            // We cannot stop GC thread, so holding lock to avoid data race
+            os::memory::WriteLockHolder rwlock(gc_event_lock_);
+            RemoveListenerIfMatches(listener, event_mask, &garbage_collector_listeners_,
+                                    Event::GARBAGE_COLLECTOR_EVENTS, &has_garbage_collector_listeners_);
+        }
     }
 
     void LoadModuleEvent(std::string_view name)
@@ -206,23 +212,23 @@ public:
         }
     }
 
-    void ThreadStartEvent(ManagedThread::ThreadId thread_id)
+    void ThreadStartEvent(ManagedThread *managed_thread)
     {
         if (UNLIKELY(has_thread_events_listeners_)) {
             for (auto *listener : thread_events_listeners_) {
                 if (listener != nullptr) {
-                    listener->ThreadStart(thread_id);
+                    listener->ThreadStart(managed_thread);
                 }
             }
         }
     }
 
-    void ThreadEndEvent(ManagedThread::ThreadId thread_id)
+    void ThreadEndEvent(ManagedThread *managed_thread)
     {
         if (UNLIKELY(has_thread_events_listeners_)) {
             for (auto *listener : thread_events_listeners_) {
                 if (listener != nullptr) {
-                    listener->ThreadEnd(thread_id);
+                    listener->ThreadEnd(managed_thread);
                 }
             }
         }
@@ -242,6 +248,7 @@ public:
     void GarbageCollectorStartEvent()
     {
         if (UNLIKELY(has_garbage_collector_listeners_)) {
+            os::memory::ReadLockHolder rwlock(gc_event_lock_);
             for (auto *listener : garbage_collector_listeners_) {
                 if (listener != nullptr) {
                     listener->GarbageCollectorStart();
@@ -253,6 +260,7 @@ public:
     void GarbageCollectorFinishEvent()
     {
         if (UNLIKELY(has_garbage_collector_listeners_)) {
+            os::memory::ReadLockHolder rwlock(gc_event_lock_);
             for (auto *listener : garbage_collector_listeners_) {
                 if (listener != nullptr) {
                     listener->GarbageCollectorFinish();
@@ -261,12 +269,23 @@ public:
         }
     }
 
-    void ExceptionCatchEvent(ManagedThread *thread, Method *method, uint32_t bc_offset)
+    void ExceptionThrowEvent(ManagedThread *thread, Method *method, ObjectHeader *exception_object, uint32_t bc_offset)
     {
         if (UNLIKELY(has_exception_listeners_)) {
             for (auto *listener : exception_listeners_) {
                 if (listener != nullptr) {
-                    listener->ExceptionCatch(thread, method, bc_offset);
+                    listener->ExceptionThrow(thread, method, exception_object, bc_offset);
+                }
+            }
+        }
+    }
+
+    void ExceptionCatchEvent(ManagedThread *thread, Method *method, ObjectHeader *exception_object, uint32_t bc_offset)
+    {
+        if (UNLIKELY(has_exception_listeners_)) {
+            for (auto *listener : exception_listeners_) {
+                if (listener != nullptr) {
+                    listener->ExceptionCatch(thread, method, exception_object, bc_offset);
                 }
             }
         }
@@ -283,6 +302,18 @@ public:
         }
     }
 
+    void VmInitializationEvent(ManagedThread *managed_thread)
+    {
+        if (UNLIKELY(has_vm_events_listeners_)) {
+            for (auto *listener : vm_events_listeners_) {
+                if (listener != nullptr) {
+                    listener->VmInitialization(managed_thread);
+                }
+            }
+        }
+    }
+
+    // Deprecated API
     void VmInitializationEvent(ManagedThread::ThreadId thread_id)
     {
         if (UNLIKELY(has_vm_events_listeners_)) {
@@ -419,14 +450,6 @@ public:
         }
     }
 
-    void DdmPublishChunk(uint32_t type, const Span<const uint8_t> &data)
-    {
-        os::memory::ReadLockHolder holder(ddm_lock_);
-        for (auto *listener : ddm_listeners_) {
-            listener->DdmPublishChunk(type, data);
-        }
-    }
-
     void StartDebugger()
     {
         os::memory::ReadLockHolder holder(debugger_lock_);
@@ -454,21 +477,9 @@ public:
         return true;
     }
 
-    void AddDdmListener(DdmListener *listener)
-    {
-        os::memory::WriteLockHolder holder(ddm_lock_);
-        ddm_listeners_.push_back(listener);
-    }
-
     void SetRendezvous(Rendezvous *rendezvous)
     {
         rendezvous_ = rendezvous;
-    }
-
-    void RemoveDdmListener(DdmListener *listener)
-    {
-        os::memory::WriteLockHolder holder(ddm_lock_);
-        RemoveListener(ddm_listeners_, listener);
     }
 
     void AddDebuggerListener(DebuggerListener *listener)
@@ -484,9 +495,10 @@ public:
     }
 
 private:
+    template <typename FlagType>
     static void AddListenerIfMatches(RuntimeListener *listener, uint32_t event_mask,
                                      PandaList<RuntimeListener *> *listener_group, Event event_modifier,
-                                     bool *event_flag)
+                                     FlagType *event_flag)
     {
         if ((event_mask & event_modifier) != 0) {
             // If a free group item presents, use it, otherwise push back a new item
@@ -506,9 +518,10 @@ private:
         c.erase(std::remove_if(c.begin(), c.end(), [&listener](const T &elem) { return listener == elem; }));
     }
 
+    template <typename FlagType>
     static void RemoveListenerIfMatches(RuntimeListener *listener, uint32_t event_mask,
                                         PandaList<RuntimeListener *> *listener_group, Event event_modifier,
-                                        bool *event_flag)
+                                        FlagType *event_flag)
     {
         if ((event_mask & event_modifier) != 0) {
             auto it = std::find(listener_group->begin(), listener_group->end(), listener);
@@ -516,10 +529,10 @@ private:
                 return;
             }
             // Removing a listener is not safe, because the iteration can not be completed in another thread.
-            // We just set the item to null in the group
+            // We just null the item in the group
             *it = nullptr;
 
-            // Check if any listener presents and updates the flag if not
+            // Check if any listener presents and update the flag if not
             if (std::find_if(listener_group->begin(), listener_group->end(),
                              [](RuntimeListener *item) { return item != nullptr; }) == listener_group->end()) {
                 *event_flag = false;
@@ -538,12 +551,10 @@ private:
     PandaList<RuntimeListener *> monitor_listeners_;
     PandaList<RuntimeListener *> allocation_listeners_;
 
-    PandaList<DdmListener *> ddm_listeners_;
-    os::memory::RWLock ddm_lock_;
     bool has_bytecode_pc_listeners_ = false;
     bool has_load_module_listeners_ = false;
     bool has_thread_events_listeners_ = false;
-    bool has_garbage_collector_listeners_ = false;
+    std::atomic<bool> has_garbage_collector_listeners_ = false;
     bool has_exception_listeners_ = false;
     bool has_vm_events_listeners_ = false;
     bool has_method_listeners_ = false;
@@ -553,9 +564,10 @@ private:
     Rendezvous *rendezvous_ {nullptr};
 
     os::memory::RWLock debugger_lock_;
+    os::memory::RWLock gc_event_lock_;
     PandaList<DebuggerListener *> debugger_listeners_;
 };
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_RUNTIME_NOTIFICATION_H_
+#endif  // PANDA_RUNTIME_RUNTIME_NOTIFICATION_H_

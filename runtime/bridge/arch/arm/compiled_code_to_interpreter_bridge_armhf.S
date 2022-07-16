@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #define SHORTY_REG DEFAULT_SHORTY_REG
 
 // Frame* CreateFrameForMethod(Method* method, Frame* prev);
-.extern CreateFrame
+.extern CreateFrameForMethod
 // void InterpreterEntryPoint(Method *method, Frame* frame);
 .extern InterpreterEntryPoint
 // bool IncrementHotnessCounter(Method *method);
@@ -46,33 +46,35 @@ CompiledCodeToInterpreterBridge:
     CFI_DEF_CFA(fp, 12)
 
     // Save return address to the TLS field
-    str lr, [THREAD_REG, #THREAD_NATIVE_PC]
+    str lr, [THREAD_REG, #MANAGED_THREAD_NATIVE_PC_OFFSET]
 
     // save all the callee saved registers to the stack
     // stack walker will read them during stack unwinding
-    push {r4 - r11}
-    // CFI_REL_OFFSET(r11, -(2 * 4)) - fp already saved on stack
-    CFI_REL_OFFSET(r10, -(3 * 4))
-    CFI_REL_OFFSET(r9,  -(4 * 4))
-    CFI_REL_OFFSET(r8,  -(5 * 4))
-    CFI_REL_OFFSET(r7,  -(6 * 4))
-    CFI_REL_OFFSET(r6,  -(7 * 4))
-    CFI_REL_OFFSET(r5,  -(8 * 4))
-    CFI_REL_OFFSET(r4,  -(9 * 4))
+    push {r4 - r10}
+    CFI_REL_OFFSET(r10, -(2 * 4))
+    CFI_REL_OFFSET(r9,  -(3 * 4))
+    CFI_REL_OFFSET(r8,  -(4 * 4))
+    CFI_REL_OFFSET(r7,  -(5 * 4))
+    CFI_REL_OFFSET(r6,  -(6 * 4))
+    CFI_REL_OFFSET(r5,  -(7 * 4))
+    CFI_REL_OFFSET(r4,  -(8 * 4))
     vpush {d8 - d15}
-    CFI_REL_OFFSET(d15, -(11 * 4))
-    CFI_REL_OFFSET(d14, -(13 * 4))
-    CFI_REL_OFFSET(d13, -(15 * 4))
-    CFI_REL_OFFSET(d12, -(17 * 4))
-    CFI_REL_OFFSET(d11, -(19 * 4))
-    CFI_REL_OFFSET(d10, -(21 * 4))
-    CFI_REL_OFFSET(d9,  -(23 * 4))
-    CFI_REL_OFFSET(d8,  -(25 * 4))
+    CFI_REL_OFFSET(d15, -(10 * 4))
+    CFI_REL_OFFSET(d14, -(12 * 4))
+    CFI_REL_OFFSET(d13, -(14 * 4))
+    CFI_REL_OFFSET(d12, -(16 * 4))
+    CFI_REL_OFFSET(d11, -(18 * 4))
+    CFI_REL_OFFSET(d10, -(20 * 4))
+    CFI_REL_OFFSET(d9,  -(22 * 4))
+    CFI_REL_OFFSET(d8,  -(24 * 4))
+
+    // align to 8
+    sub sp, sp, #4
 
     // Before we call IncrementHotnessCounter we should set pointer to C2I frame in the TLS,
     // because compilation may fall into safepoint, so we need to make caller's callee registers
     // visible for the stack walker.
-    str fp, [THREAD_REG, #THREAD_CURRENT_FRAME]
+    str fp, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]
 
     push {r0 - r3}
     vpush {d0 - d7}
@@ -90,7 +92,7 @@ CompiledCodeToInterpreterBridge:
     CFI_RESTORE(fp)
     CFI_DEF_CFA(sp, 16)
 
-    str fp, [THREAD_REG, #THREAD_CURRENT_FRAME]
+    str fp, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]
     ldr lr, [sp, #12]
     CFI_RESTORE(lr)
     add sp, sp, #16 // c2i
@@ -118,16 +120,17 @@ CompiledCodeToInterpreterBridge:
     // setup regs as follow
     // r0 - SHORTY_PTR_REG, r1 - SHORTY_REG, r2 - iframe.vregs_ + num_vregs_,
     // r3 - gpr args begin, r4 - gpr args end, r5 - fpr args begin, r6 - fpr args end,
-    // r7 - stack args, r8 - iframe, r9, r10 - temps, lr - method
+    // r7 - stack args, r8 - iframe, r9, r10, r12 - temps, lr - method
     mov r8, r0
     ldr r5, [r8, #FRAME_NUM_VREGS_OFFSET]
+    mov r12, r5, lsl #3
     ldr r0, [r4, #METHOD_NUM_ARGS_OFFSET]
     sub r5, r5, r0
     mov lr, r4
     ldr SHORTY_PTR_REG, [lr, #METHOD_SHORTY_OFFSET]
     INIT_SHORTY_REG
     add r2, r8, #FRAME_VREGS_OFFSET
-    add r2, r2, r5, lsl #4
+    add r2, r2, r5, lsl #3
     add r3, sp, #4 // skip Method*
     add r4, sp, #16
     mov r5, r4
@@ -158,7 +161,7 @@ CompiledCodeToInterpreterBridge:
     cmp r9, #SHORTY_REFERENCE
     moveq r10, #1
     movne r10, #0
-    str r10, [r2, #FRAME_VREGISTER_TAG_OFFSET]
+    str r10, [r2, r12]
     cmpne r9, #SHORTY_LAST_INT32
     bhi 1f
     // it is a 32bit int or reference
@@ -248,7 +251,7 @@ CompiledCodeToInterpreterBridge:
     vmov.f64 d0, r4, r5
     blx FreeFrame
 
-4:  sub sp, fp, #(4 + 8 * 4 + 8 * 8)
+4:  sub sp, fp, #(4 + 7 * 4 + 8 * 8)
     vpop {d8 - d15}
     CFI_RESTORE(d15)
     CFI_RESTORE(d14)
@@ -259,8 +262,7 @@ CompiledCodeToInterpreterBridge:
     CFI_RESTORE(d9)
     CFI_RESTORE(d8)
 
-    pop {r4 - r11}
-    // CFI_RESTORE(r11) - fp will be restored after
+    pop {r4 - r10}
     CFI_RESTORE(r10)
     CFI_RESTORE(r9)
     CFI_RESTORE(r8)

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/coretypes/class.h"
-#include "runtime/include/coretypes/string.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
 
@@ -39,6 +38,12 @@ Class *ClassLinkerExtension::BootContext::LoadClass(const uint8_t *descriptor, b
     ASSERT(extension_->IsInitialized());
 
     return extension_->GetClassLinker()->GetClass(descriptor, need_copy_descriptor, this, error_handler);
+}
+
+void ClassLinkerExtension::BootContext::EnumeratePandaFiles(
+    const std::function<bool(const panda_file::File &)> &cb) const
+{
+    extension_->GetClassLinker()->EnumerateBootPandaFiles(cb);
 }
 
 class SuppressErrorHandler : public ClassLinkerErrorHandler {
@@ -150,9 +155,7 @@ Class *ClassLinkerExtension::FindLoadedClass(const uint8_t *descriptor, ClassLin
     return class_linker_->FindLoadedClass(descriptor, ResolveContext(context));
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
 Class *ClassLinkerExtension::GetClass(const uint8_t *descriptor, bool need_copy_descriptor /* = true */,
-                                      // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
                                       ClassLinkerContext *context /* = nullptr */,
                                       ClassLinkerErrorHandler *error_handler /* = nullptr */)
 {
@@ -163,7 +166,7 @@ Class *ClassLinkerExtension::GetClass(const uint8_t *descriptor, bool need_copy_
 }
 
 static void WrapClassNotFoundExceptionIfNeeded(ClassLinker *class_linker, const uint8_t *descriptor,
-                                               LanguageContext ctx)
+                                               const LanguageContext &ctx)
 {
     auto *thread = ManagedThread::GetCurrent();
     if (thread == nullptr || !thread->HasPendingException()) {
@@ -172,6 +175,12 @@ static void WrapClassNotFoundExceptionIfNeeded(ClassLinker *class_linker, const 
 
     auto *class_not_found_exception_class =
         class_linker->GetExtension(ctx)->GetClass(ctx.GetClassNotFoundExceptionDescriptor());
+    if (class_not_found_exception_class == nullptr) {
+        // We've got OOM
+        ASSERT(thread->GetVM()->GetOOMErrorObject() == nullptr ||
+               thread->GetException()->ClassAddr<Class>() == thread->GetVM()->GetOOMErrorObject()->ClassAddr<Class>());
+        return;
+    }
     ASSERT(class_not_found_exception_class != nullptr);
 
     auto *cause = thread->GetException();
@@ -182,13 +191,13 @@ static void WrapClassNotFoundExceptionIfNeeded(ClassLinker *class_linker, const 
 }
 
 Class *ClassLinkerExtension::GetClass(const panda_file::File &pf, panda_file::File::EntityId id,
-                                      // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
                                       ClassLinkerContext *context /* = nullptr */,
                                       ClassLinkerErrorHandler *error_handler /* = nullptr */)
 {
     ASSERT(IsInitialized());
 
     auto *cls = class_linker_->GetClass(pf, id, ResolveContext(context), ResolveErrorHandler(error_handler));
+
     if (UNLIKELY(cls == nullptr)) {
         auto *descriptor = pf.GetStringData(id).data;
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(GetLanguage());
@@ -203,12 +212,13 @@ Class *ClassLinkerExtension::AddClass(Class *klass)
     ASSERT(IsInitialized());
 
     auto *context = klass->GetLoadContext();
+
     auto *other_klass = ResolveContext(context)->InsertClass(klass);
     if (other_klass != nullptr) {
         class_linker_->FreeClass(klass);
         return other_klass;
     }
-    RemoveCreatedClass(klass);
+    OnClassPrepared(klass);
 
     return klass;
 }
@@ -218,6 +228,7 @@ size_t ClassLinkerExtension::NumLoadedClasses()
     ASSERT(IsInitialized());
 
     size_t sum = boot_context_.NumLoadedClasses();
+
     {
         os::memory::LockHolder lock(contexts_lock_);
         for (auto *ctx : contexts_) {
@@ -269,7 +280,8 @@ ClassLinkerContext *ClassLinkerExtension::CreateApplicationClassLinkerContext(co
         }
         app_files.push_back(std::move(pf));
     }
-    return CreateApplicationClassLinkerContext(std::move(app_files));
+    ClassLinkerContext *ctx = CreateApplicationClassLinkerContext(std::move(app_files));
+    return ctx;
 }
 
 ClassLinkerContext *ClassLinkerExtension::CreateApplicationClassLinkerContext(PandaVector<PandaFilePtr> &&app_files)
@@ -306,17 +318,42 @@ void ClassLinkerExtension::RemoveCreatedClass(Class *klass)
 
 void ClassLinkerExtension::OnClassPrepared(Class *klass)
 {
+    // Atomic with seq_cst order reason: data race with record_new_class_ with requirement for sequentially
+    // consistent order where threads observe all modifications in the same order
+    if (record_new_class_.load(std::memory_order_seq_cst)) {
+        os::memory::LockHolder new_classes_lock(new_classes_lock_);
+        new_classes_.push_back(klass);
+    }
+
     RemoveCreatedClass(klass);
 }
 
 Class *ClassLinkerExtension::FromClassObject(ObjectHeader *obj)
 {
-    return obj != nullptr ? (reinterpret_cast<panda::coretypes::Class *>(obj))->GetRuntimeClass() : nullptr;
+    return (obj != nullptr) ? ((reinterpret_cast<panda::coretypes::Class *>(obj))->GetRuntimeClass()) : nullptr;
 }
 
 size_t ClassLinkerExtension::GetClassObjectSizeFromClassSize(uint32_t size)
 {
     return panda::coretypes::Class::GetSize(size);
+}
+
+void ClassLinkerExtension::FreeObsoleteData()
+{
+    os::memory::LockHolder lock(obsolete_classes_lock_);
+    for (auto &cls : obsolete_classes_) {
+        ASSERT(cls != nullptr);
+        GetClassLinker()->FreeClass(cls);
+    }
+}
+
+void ClassLinkerExtension::AddObsoleteClass(const PandaVector<Class *> &classes)
+{
+    if (classes.empty()) {
+        return;
+    }
+    os::memory::LockHolder lock(obsolete_classes_lock_);
+    obsolete_classes_.insert(obsolete_classes_.end(), classes.begin(), classes.end());
 }
 
 }  // namespace panda

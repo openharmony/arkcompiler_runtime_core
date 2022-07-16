@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef PANDA_RUNTIME_MONITOR_POOL_H_
 #define PANDA_RUNTIME_MONITOR_POOL_H_
 
@@ -68,20 +67,37 @@ public:
 
     ~MonitorPool()
     {
+#if defined(PANDA_TSAN_ON)
+        // There is a potential false data race between destroying monitors and daemon threads which are got stuck in a
+        // deadlock. The race is reported for accesses in Mutex::Lock() before going to endless sleep on futex call in
+        // a deadlock. In this case the data race is reported with the main thread, which destroys the mutex.
+        if (os::memory::Mutex::DoNotCheckOnDeadlock()) {
+            TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
+        }
+#endif
         for (auto &iter : monitors_) {
             if (iter.second != nullptr) {
                 allocator_->Delete(iter.second);
             }
         }
+#if defined(PANDA_TSAN_ON)
+        if (os::memory::Mutex::DoNotCheckOnDeadlock()) {
+            TSAN_ANNOTATE_IGNORE_WRITES_END();
+        }
+#endif
     }
 
-    static Monitor *CreateMonitor(PandaVM *vm, ObjectHeader *obj);
+    Monitor *CreateMonitor(ObjectHeader *obj);
 
-    static Monitor *LookupMonitor(PandaVM *vm, Monitor::MonitorId id);
+    Monitor *LookupMonitor(Monitor::MonitorId id);
 
-    static void FreeMonitor(PandaVM *vm, Monitor::MonitorId id);
+    void FreeMonitor(Monitor::MonitorId id);
 
     void DeflateMonitors();
+
+    void ReleaseMonitors(MTManagedThread *thread);
+
+    PandaSet<Monitor::MonitorId> GetEnteredMonitorsIds(MTManagedThread *thread);
 
 private:
     mem::InternalAllocatorPtr allocator_;

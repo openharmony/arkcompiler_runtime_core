@@ -38,7 +38,7 @@
 #for(i=0; i<5; i++) array[i]=i;
 #for(i=4; i>=0; i--) assert_eq(i, array[i]);
 
-.function u1 main(){
+.function i32 main(){
     movi v0, 5
     newarr v1, v0, i32[]
     movi v2, 0

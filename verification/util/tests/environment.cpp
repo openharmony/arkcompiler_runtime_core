@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,12 @@
 
 #include "util/tests/environment.h"
 
-#include "verification/debug/parser/parser.h"
+#include "util/parser/parser.h"
 
 #include <cstring>
 
 namespace panda::verifier::test {
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
 EnvOptions::EnvOptions(const char *env_var_name)
 {
     using panda::parser::action;
@@ -33,10 +32,10 @@ EnvOptions::EnvOptions(const char *env_var_name)
         OptionValue value;
     };
 
-    using p = parser<Context, const char, const char *>::next<EnvOptions>;
+    using par = parser<Context, const char, const char *>::next<EnvOptions>;
 
-    static const auto WS = p::of_charset(" \t\r\n");  // NOLINT(readability-static-accessed-through-instance)
-    static const auto DELIM = p::of_string(";");      // NOLINT(readability-static-accessed-through-instance)
+    static const auto WS = par::of_charset(" \t\r\n");  // NOLINT(readability-static-accessed-through-instance)
+    static const auto DELIM = par::of_string(";");      // NOLINT(readability-static-accessed-through-instance)
     static const auto NAME_HANDLER = [](auto a, Context &c, auto s, auto e, [[maybe_unused]] auto end) {
         if (a == action::PARSED) {
             c.name = std::string {s, e};
@@ -102,7 +101,9 @@ EnvOptions::EnvOptions(const char *env_var_name)
 
     Context c;
 
-    OPTIONS(c, s, s + strlen(s));
+    if (!OPTIONS(c, s, s + strlen(s))) {  // NOLINT
+        // TODO(vdyadov): warning that some options were not parsed
+    }
 }
 
 std::optional<OptionValue> EnvOptions::operator[](const std::string &name) const

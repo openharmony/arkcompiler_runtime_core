@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(5.1 + 7.2 == 12.3) operation --> fadd2.64
-.function u1 main(){
+.function i32 main(){
     fldai.64 5.1
     fmovi.64 v0, 7.2
     fadd2.64 v0

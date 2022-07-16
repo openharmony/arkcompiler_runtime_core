@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,21 @@ namespace panda::verifier {
 
 TypeSystem &ParametricType::GetTypeSystem() const
 {
-    return TypeSystems::Get(kind_);
+    return TypeSystems::Get(kind_, threadnum_);
 }
 
 bool ParametricType::operator[](TypeParamsIdx params) const
 {
-    Index<TypeIdx> idx = GetTypeSystem().FindIdx({Sort_, std::move(params)});
-    return idx.IsValid();
+    Index<TypeNum> num = GetTypeSystem().FindNum({Sort_, std::move(params)});
+    return num.IsValid();
 }
 
 Type ParametricType::operator()(TypeParamsIdx params) const
 {
-    auto idx = GetTypeSystem().FindIdxOrCreate({Sort_, std::move(params)});
-    GetTypeSystem().Relate(GetTypeSystem().BotIdx_, idx);
-    GetTypeSystem().Relate(idx, GetTypeSystem().TopIdx_);
-    return {kind_, idx};
+    auto num = GetTypeSystem().FindNumOrCreate({Sort_, std::move(params)});
+    GetTypeSystem().Relate(GetTypeSystem().BotNum_, num);
+    GetTypeSystem().Relate(num, GetTypeSystem().TopNum_);
+    return {kind_, threadnum_, num};
 }
 
 bool ParametricType::operator[](const TypeParams &params) const

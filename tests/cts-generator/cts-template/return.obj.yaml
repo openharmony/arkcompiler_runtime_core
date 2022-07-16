@@ -12,7 +12,7 @@
 # limitations under the License.
 
 definitions:
-  - name: obj_param_ctor
+  - name: obj-param-ctor
     template: |
         .record Obj {
           i32 fld1
@@ -23,16 +23,16 @@ definitions:
             stobj a0, Obj.fld1
             return.void
         }
-  - name: obj_ctor
+  - name: obj-ctor
     template: |
         .record Obj {}
 
         .function void Obj.ctor(Obj a0) <ctor> {
             return.void
         }
-  - name: java
+  - name: PandaAssembly
     template: >
-      .language Java
+      .language PandaAssembly
 tests:
   - file-name: "return.obj"
     isa:
@@ -43,15 +43,15 @@ tests:
       exceptions:
         - x_none
     commands:
-      - file-name: "op_none"
+      - file-name: "call_s_p"
         isa:
           instructions:
             - sig: return.obj
               acc: in:ref
               format: [op_none]
-        description: Check 'return.obj' returns control flow to caller.
+        description: Check 'return.obj' returns control flow to caller in Pandasm context with static call.
         tags: ['tsan']
-        header-template: [obj_param_ctor]
+        header-template: [obj-param-ctor]
         code-template: |
           .function Obj func(%s) {
               movi v0, 0x12345678
@@ -65,23 +65,20 @@ tests:
               sta.obj v0
               ldobj v0, Obj.fld1
               movi v1, 0x12345678
-              jne v1, set_failure
-              ldai 0
-              jmp fall_through
-          set_failure:
+              jeq v1, ok
               ldai 1
-          fall_through:
+              return
+          ok:
+        check-type: exit-positive
         cases:
           - values:
               - ''
               - ''
               - ''
-
           - values:
               - 'i32 a0'
               - 'movi v0, 0x12345678'
               - ', v0'
-
           - values:
               - 'i32 a0, f64 a1'
               - |
@@ -97,7 +94,6 @@ tests:
                     fmovi.64 v1, 1.2
                     movi.64 v2, 0xFF
               - ', v0, v1, v2'
-
           - values:
               - 'i32 a0, f64 a1, i64 a2, Obj a3'
               - |
@@ -108,6 +104,176 @@ tests:
                     mov.null v3
               - ', v0, v1, v2, v3'
 
+      - file-name: "call_s_j"
+        isa:
+          instructions:
+            - sig: return.obj
+              acc: in:ref
+              format: [op_none]
+        description: Check 'return.obj' returns control flow to caller in PandaAssembly context with static call.
+        runner-options: [use-pa]
+        tags: ['tsan']
+        header-template: [PandaAssembly, obj-param-ctor]
+        code-template: |
+          .function Obj Obj.func(%s) {
+              movi v0, 0x12345678
+              initobj.short Obj.ctor, v0
+              return.obj
+          }
+
+          .function i32 main() {
+              %s
+              call Obj.func%s
+              sta.obj v0
+              ldobj v0, Obj.fld1
+              movi v1, 0x12345678
+              jeq v1, ok
+              ldai 1
+              return
+          ok:
+        check-type: exit-positive
+        cases:
+          - values:
+              - ''
+              - ''
+              - ''
+          - values:
+              - 'i32 a0'
+              - 'movi v0, 0x12345678'
+              - ', v0'
+          - values:
+              - 'i32 a0, f64 a1'
+              - |
+                #
+                    movi v0, 0
+                    fmovi.64 v1, 1.2
+              - ', v0, v1'
+          - values:
+              - 'i32 a0, f64 a1, i64 a2'
+              - |
+                #
+                    movi v0, 0
+                    fmovi.64 v1, 1.2
+                    movi.64 v2, 0xFF
+              - ', v0, v1, v2'
+          - values:
+              - 'i32 a0, f64 a1, i64 a2, Obj a3'
+              - |
+                #
+                    movi v0, 0
+                    fmovi.64 v1, 1.2
+                    movi.64 v2, 0xFF
+                    mov.null v3
+              - ', v0, v1, v2, v3'
+
+      - file-name: "call_v_p"
+        isa:
+          instructions:
+            - sig: return.obj
+              acc: in:ref
+              format: [op_none]
+        description: Check 'return.obj' returns control flow to caller in Pandasm context with virtual call.
+        tags: ['tsan']
+        header-template: [obj-param-ctor]
+        code-template: |
+          .function Obj Obj.func(Obj a0%s) {
+              movi v0, 0x12345678
+              initobj.short Obj.ctor, v0
+              return.obj
+          }
+
+          .function i32 main() {
+              %s
+              newobj v10, Obj
+              call.virt Obj.func, v10%s
+              sta.obj v0
+              ldobj v0, Obj.fld1
+              movi v1, 0x12345678
+              jeq v1, ok
+              ldai 1
+              return
+          ok:
+        check-type: exit-positive
+        cases:
+          - values:
+              - ''
+              - ''
+              - ''
+          - values:
+              - ', i32 a1'
+              - 'movi v0, 0x12345678'
+              - ', v0'
+          - values:
+              - ', i32 a1, f64 a2'
+              - |
+                #
+                    movi v0, 0
+                    fmovi.64 v1, 1.2
+              - ', v0, v1'
+          - values:
+              - ', i32 a1, f64 a2, i64 a3'
+              - |
+                #
+                    movi v0, 0
+                    fmovi.64 v1, 1.2
+                    movi.64 v2, 0xFF
+              - ', v0, v1, v2'
+
+      - file-name: "call_v_j"
+        isa:
+          instructions:
+            - sig: return.obj
+              acc: in:ref
+              format: [op_none]
+        description: Check 'return.obj' returns control flow to caller in PandaAssembly context with virtual call.
+        runner-options: ['use-pa']
+        tags: ['tsan']
+        header-template: [PandaAssembly, obj-param-ctor]
+        code-template: |
+          .function Obj Obj.func(Obj a0%s) {
+              movi v0, 0x12345678
+              initobj.short Obj.ctor, v0
+              return.obj
+          }
+          .record Obj2 <panda.extends=Obj> {}
+
+          .function i32 main() {
+              %s
+              newobj v10, Obj2
+              call.virt Obj.func, v10%s
+              sta.obj v0
+              ldobj v0, Obj.fld1
+              movi v1, 0x12345678
+              jeq v1, ok
+              ldai 1
+              return
+          ok:
+        check-type: exit-positive
+        cases:
+          - values:
+              - ''
+              - ''
+              - ''
+          - values:
+              - ', i32 a1'
+              - 'movi v0, 0x12345678'
+              - ', v0'
+          - values:
+              - ', i32 a1, f64 a2'
+              - |
+                #
+                    movi v0, 0
+                    fmovi.64 v1, 1.2
+              - ', v0, v1'
+          - values:
+              - ', i32 a1, f64 a2, i64 a3'
+              - |
+                #
+                    movi v0, 0
+                    fmovi.64 v1, 1.2
+                    movi.64 v2, 0xFF
+              - ', v0, v1, v2'
+
       - file-name: "op_none_null"
         isa:
           instructions:
@@ -115,7 +281,7 @@ tests:
               acc: in:ref
               format: [op_none]
         description: Check 'return.obj' returns control flow to caller.
-        header-template: [obj_param_ctor]
+        header-template: [obj-param-ctor]
         code-template: |
           .function Obj func(%s) {
               lda.null
@@ -169,10 +335,10 @@ tests:
                     mov.null v3
               - ', v0, v1, v2, v3'
 
-      - file-name: "type_null"
+      - file-name: "type"
         tags: [verifier]
         bugid: ['1324']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: return.obj
@@ -182,58 +348,61 @@ tests:
             - acc_return_type
         header-template: []
         code-template: |
+          .record panda.Object <external>
           .function %s func() {
-              lda.null
+              *s
               return.obj
           }
 
           .function i32 main() {
               call.short func
         check-type: exit-positive
-        description: Check 'return.obj' is used in function with not object return type and null value.
-        cases:
+        description: Check that 'return.obj' is used with correct accumulator value and function return type.
+        template-cases:
           - values: [void]
+          - values: [u1]
+          - values: [i8]
+          - values: [u8]
+          - values: [i16]
+          - values: [u16]
           - values: [i32]
+          - values: [u32]
           - values: [i64]
+          - values: [u64]
+          - values: [f32]
           - values: [f64]
-
-      - file-name: "type"
-        tags: [verifier]
-        bugid: ['1324']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        isa:
-          instructions:
-            - sig: return.obj
-              acc: in:ref
-              format: [op_none]
-          verification:
-            - acc_return_type
-        header-template: [obj_ctor]
-        code-template: |
-          .function %s func() {
-              initobj Obj.ctor
-              return.obj
-          }
-
-          .function i32 main() {
-              call.short func
-        check-type: exit-positive
-        description: Check 'return.obj' is used in function with not object return type.
+          - values: [panda.Object]
+            exclude: [case_obj]
+            bugid: ['7360']
+            ignore: true
         cases:
-          - values: [void]
-          - values: [i32]
-          - values: [i64]
-          - values: [f64]
+          - values: ['']
+          - values: [ldai 0]
+          - values: [ldai.64 0]
+          - values: [fldai 0]
+          - values: [fldai.64 0]
+          - values: [lda.null]
+            id: case_obj
+          - values: [lda.str "some string"]
+            id: case_obj
+          - values:
+              - initobj Obj.ctor
+            case-header-template: [obj-ctor]
+            id: case_obj
+          - values:
+              - lda.type Obj
+            case-header-template: [obj-ctor]
+            id: case_obj
 
       - file-name: "wrong_return"
         tags: [verifier]
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: return.obj
               acc: in:ref
               format: [op_none]
-        header-template: [obj_ctor]
+        header-template: [obj-ctor]
         code-template: |
           .function Obj func() {
               initobj Obj.ctor
@@ -581,3 +750,201 @@ tests:
               - 'panda.Class[]'
           - values: ['A[]', 'A[]', 'A[]', 'A[]']
 
+      - file-name: "j_virt_return_type_arr"
+        isa:
+          instructions:
+            - sig: return.obj
+              acc: in:ref
+              format: [op_none]
+          verification:
+            - acc_return_type
+        header-template: [PandaAssembly]
+        runner-options: [use-pa]
+        code-template: |
+          # Records definition to all tests in group.
+          .record panda.Object <external>
+          .record panda.String <external>
+          .record panda.Class <external>
+          .record A {}
+
+          .record B {}
+          .record C <panda.extends=B> {}
+
+          .function void C.ctor(C a0) <ctor> {
+              return.void
+          }
+
+          .function %s B.func(B a0, %s a1) {
+              %s
+              lda.obj a1
+              return.obj
+          }
+
+          .function i32 main() {
+              movi v0, 123
+              newarr v0, v0, *s
+              initobj C.ctor
+              sta.obj v3
+              call.virt.short B.func, v3, v0
+              %s
+              jne.obj v0, return_ne_num
+              ldai 0
+              return
+          return_ne_num:
+              ldai 1
+              return
+        template-cases:
+          - values:
+              - 'panda.Object'
+              - 'panda.Object'
+              - "##- %s %s - this line will be removed"
+              - |
+                #
+                    sta.obj v2
+                    isinstance %s
+                    movi v1, 1
+                    jeq v1, check_val
+                    ldai 1
+                    return
+                check_val:
+                    lda.obj v2
+            bugid: ['1805']
+
+          - values:
+              - '%s'
+              - '%s'
+              - '##-'
+              - ''
+
+        description: Check 'return.obj' return object from virtual method with different types.
+        cases:
+          - values: ['u1[]', 'u1[]', 'u1[]', 'u1[]']
+          - values: ['i8[]', 'i8[]', 'i8[]', 'i8[]']
+          - values: ['u16[]', 'u16[]', 'u16[]', 'u16[]']
+          - values: ['i16[]', 'i16[]', 'i16[]', 'i16[]']
+          - values: ['i32[]', 'i32[]', 'i32[]', 'i32[]']
+          - values: ['i64[]', 'i64[]', 'i64[]', 'i64[]']
+          - values: ['f64[]', 'f64[]', 'f64[]', 'f64[]']
+          - values:
+              - 'panda.Object[]'
+              - 'panda.Object[]'
+              - 'panda.Object[]'
+              - 'panda.Object[]'
+          - values:
+              - 'panda.String[]'
+              - 'panda.String[]'
+              - 'panda.String[]'
+              - 'panda.String[]'
+          - values:
+              - 'panda.Class[]'
+              - 'panda.Class[]'
+              - 'panda.Class[]'
+              - 'panda.Class[]'
+          - values: ['A[]', 'A[]', 'A[]', 'A[]']
+
+
+      - file-name: "uninitialized_acc_s_p"
+        tags: [verifier]
+        runner-options: ['verifier-failure', 'verifier-config']
+        isa:
+          instructions:
+            - sig: return.obj
+              acc: in:ref
+              format: [op_none]
+        header-template: []
+        code-template: |
+          .record panda.Object <external>
+          .record R {}
+          .function %s func() {
+              return.obj
+          }
+
+          .function i32 main() {
+              call.short func
+        check-type: exit-positive
+        description: Check that verifier reports an error if accumulator is not initialized in Pandasm context with static call.
+        cases:
+          - values:
+            - panda.Object
+          - values:
+            - R
+
+      - file-name: "uninitialized_acc_s_j"
+        tags: [verifier]
+        runner-options: ['verifier-failure', 'verifier-config', 'use-pa']
+        isa:
+          instructions:
+            - sig: return.obj
+              acc: in:ref
+              format: [op_none]
+        header-template: [PandaAssembly]
+        code-template: |
+          .record panda.Object <external>
+          .record R {}
+          .function %s func() {
+              return.obj
+          }
+
+          .function i32 main() {
+              call.short func
+        check-type: exit-positive
+        description: Check that verifier reports an error if accumulator is not initialized in PandaAssembly context with static call.
+        cases:
+          - values:
+            - panda.Object
+          - values:
+            - R
+
+      - file-name: "uninitialized_acc_v_p"
+        tags: [verifier]
+        runner-options: ['verifier-failure', 'verifier-config']
+        isa:
+          instructions:
+            - sig: return.obj
+              acc: in:ref
+              format: [op_none]
+        header-template: []
+        code-template: |
+          .record panda.Object <external>
+          .record R {}
+          .function %s R.func(R a0) {
+              return.obj
+          }
+
+          .function i32 main() {
+              newobj v10, R
+              call.virt.short R.func, v10
+        check-type: exit-positive
+        description: Check that verifier reports an error if accumulator is not initialized in Pandasm context with virtual call.
+        cases:
+          - values:
+            - panda.Object
+          - values:
+            - R
+
+      - file-name: "uninitialized_acc_s_j"
+        tags: [verifier]
+        runner-options: ['verifier-failure', 'verifier-config', 'use-pa']
+        isa:
+          instructions:
+            - sig: return.obj
+              acc: in:ref
+              format: [op_none]
+        header-template: [PandaAssembly]
+        code-template: |
+          .record panda.Object <external>
+          .record R {}
+          .function %s R.func(R a0) {
+              return.obj
+          }
+
+          .function i32 main() {
+              newobj v10, R
+              call.virt.short R.func, v10
+        check-type: exit-positive
+        description: Check that verifier reports an error if accumulator is not initialized in PandaAssembly context with virtual call.
+        cases:
+          - values:
+            - panda.Object
+          - values:
+            - R

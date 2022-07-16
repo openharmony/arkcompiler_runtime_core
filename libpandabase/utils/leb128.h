@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,43 @@ inline std::tuple<T, size_t, bool> DecodeUnsigned(const uint8_t *data)
     return {result, N, false};
 }
 
+template <>
+inline std::tuple<uint32_t, size_t, bool> DecodeUnsigned<uint32_t>(const uint8_t *data)
+{
+    constexpr size_t LEB128_BYTE2_SHIFT = 7U;
+    constexpr size_t LEB128_BYTE3_SHIFT = 14U;
+    constexpr size_t LEB128_BYTE4_SHIFT = 21U;
+    constexpr size_t LEB128_BYTE5_SHIFT = 28U;
+    constexpr size_t LEB128_BYTE5_BIT_SIZE = 4;
+
+    bool valid = true;
+    const uint8_t *p = data;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    uint32_t result = *(p++);
+    if (UNLIKELY(result > PAYLOAD_MASK)) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        uint32_t byte = *(p++);
+        result = (result & PAYLOAD_MASK) | ((byte & PAYLOAD_MASK) << LEB128_BYTE2_SHIFT);
+        if (byte > PAYLOAD_MASK) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            byte = *(p++);
+            result |= (byte & PAYLOAD_MASK) << LEB128_BYTE3_SHIFT;
+            if (byte > PAYLOAD_MASK) {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                byte = *(p++);
+                result |= (byte & PAYLOAD_MASK) << LEB128_BYTE4_SHIFT;
+                if (byte > PAYLOAD_MASK) {
+                    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    byte = *(p++);
+                    valid = byte < (1U << LEB128_BYTE5_BIT_SIZE);
+                    result |= byte << LEB128_BYTE5_SHIFT;
+                }
+            }
+        }
+    }
+    return {result, p - data, valid};
+}
+
 template <class T>
 inline std::tuple<T, size_t, bool> DecodeSigned(const uint8_t *data)
 {
@@ -95,8 +132,6 @@ inline std::tuple<T, size_t, bool> DecodeSigned(const uint8_t *data)
 template <class T>
 inline size_t EncodeUnsigned(T data, uint8_t *out)
 {
-    static_assert(std::is_unsigned_v<T>, "T must be unsigned");
-
     size_t i = 0;
     uint8_t byte = data & PAYLOAD_MASK;
     data >>= PAYLOAD_WIDTH;

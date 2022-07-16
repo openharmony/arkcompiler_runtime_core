@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_GC_HYBRID_GC_HYBRID_OBJECT_ALLOCATOR_H_
-#define PANDA_RUNTIME_MEM_GC_HYBRID_GC_HYBRID_OBJECT_ALLOCATOR_H_
+#ifndef PANDA_OBJECT_ALLOCATOR_HYBRID_H
+#define PANDA_OBJECT_ALLOCATOR_HYBRID_H
 
 #include "runtime/include/mem/allocator.h"
 #include "runtime/mem/region_allocator.h"
@@ -73,6 +72,11 @@ public:
         return false;
     }
 
+    bool IsIntersectedWithYoung([[maybe_unused]] const MemRange &mem_range) final
+    {
+        return false;
+    }
+
     bool IsObjectInNonMovableSpace([[maybe_unused]] const ObjectHeader *obj) final
     {
         return false;
@@ -83,7 +87,12 @@ public:
         return false;
     }
 
-    MemRange GetYoungSpaceMemRange() final
+    const std::vector<MemRange> &GetYoungSpaceMemRanges() final
+    {
+        UNREACHABLE();
+    }
+
+    std::vector<MarkBitmap *> &GetYoungSpaceBitmaps() final
     {
         UNREACHABLE();
     }
@@ -105,6 +114,11 @@ public:
 
     size_t VerifyAllocatorStatus() final;
 
+    HeapSpace *GetHeapSpace() override
+    {
+        return &heap_space_;
+    }
+
     ObjectAllocator *GetRegularObjectAllocator()
     {
         return object_allocator_;
@@ -124,7 +138,6 @@ public:
     {
         return LARGE_OBJECT_THRESHHOLD;
     }
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
     [[nodiscard]] void *AllocateLocal(size_t /* size */, Alignment /* align */,
                                       panda::ManagedThread * /* thread */) final
     {
@@ -137,8 +150,9 @@ private:
     LargeObjectAllocator *large_object_allocator_ = nullptr;
     HumongousObjectAllocator *humongous_object_allocator_ = nullptr;
     size_t static constexpr LARGE_OBJECT_THRESHHOLD = 12_KB;
+    // RegionAllocator use generations
+    GenerationalSpaces heap_space_;
 };
 
 }  // namespace panda::mem
-
-#endif  // PANDA_RUNTIME_MEM_GC_HYBRID_GC_HYBRID_OBJECT_ALLOCATOR_H_
+#endif  // PANDA_OBJECT_ALLOCATOR_HYBRID_H

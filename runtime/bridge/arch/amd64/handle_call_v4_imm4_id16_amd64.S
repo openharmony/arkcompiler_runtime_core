@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  */
 
     // handle call.acc.short || call.virt.acc.short
+
 .Lloop_handle_call_acc_short:
     // read reg and acc_pos
     NEXT_SHORTY %r11d
@@ -24,10 +25,10 @@
     movzbl (%rbx), %ecx
     addq $1, %rbx
 
-    // handle arg index
+    // handle arg index, for tagless the payload vreg offset is index * 8
     movl %ecx, %r15d
     andl $0xF, %r15d
-    shlq $4, %r15
+    shlq $3, %r15
 
     // handle acc position
     shrl $4, %ecx
@@ -36,15 +37,19 @@
     je .Lshort_acc_1
 
     // pass Reg, then Acc
-    movq (%r12,%r15), %r13
-    movq FRAME_VREGISTER_TAG_OFFSET(%r12,%r15), %r15
+    movq (%r12, %r15), %r13
+    // load frame.nregs and then calculate the mirror vreg offset
+    movl (FRAME_NUM_VREGS_OFFSET - FRAME_VREGS_OFFSET)(%r12), %ecx
+    shlq $3, %rcx
+    leaq (%rcx, %r15), %r15
+    movq (%r12, %r15), %r15
     PUSH_ARG %r13, %r15, %rdx, %rdi, %rsi, %r9, .Lshort_acc_2
 .Lshort_acc_2:
     NEXT_SHORTY %r11d
     cmpl $0, %r11d
     je .Lload_reg_args
     leaq (FRAME_ACC_OFFSET - FRAME_VREGS_OFFSET)(%r12), %r13
-    movq FRAME_VREGISTER_TAG_OFFSET(%r13), %r15
+    movq FRAME_ACC_MIRROR_OFFSET(%r13), %r15
     movq (%r13), %r13
     PUSH_ARG %r13, %r15, %rdx, %rdi, %rsi, %r9, .Lshort_acc_3
 .Lshort_acc_3:
@@ -52,15 +57,19 @@
 
 .Lshort_acc_1:  // pass Acc, then Reg
     leaq (FRAME_ACC_OFFSET - FRAME_VREGS_OFFSET)(%r12), %r13
-    movq FRAME_VREGISTER_TAG_OFFSET(%r13), %rcx
+    movq FRAME_ACC_MIRROR_OFFSET(%r13), %rcx
     movq (%r13), %r13
     PUSH_ARG %r13, %rcx, %rdx, %rdi, %rsi, %r9, .Lshort_acc_4
 .Lshort_acc_4:
     NEXT_SHORTY %r11d
     cmpl $0, %r11d
     je .Lload_reg_args
-    movq (%r12,%r15), %r13
-    movq FRAME_VREGISTER_TAG_OFFSET(%r12,%r15), %r15
+    movq (%r12, %r15), %r13
+    // load frame.nregs and then calculate the mirror vreg offset
+    movl (FRAME_NUM_VREGS_OFFSET - FRAME_VREGS_OFFSET)(%r12), %ecx
+    shlq $3, %rcx
+    leaq (%rcx, %r15), %r15
+    movq (%r12, %r15), %r15
     PUSH_ARG %r13, %r15, %rdx, %rdi, %rsi, %r9, .Lshort_acc_5
 .Lshort_acc_5:
     jmp .Lload_reg_args

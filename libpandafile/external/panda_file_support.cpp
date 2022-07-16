@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,15 @@
 #include "panda_file_external.h"
 #include "os/mutex.h"
 #include <dlfcn.h>
+#include "libpandafile/class_data_accessor-inl.h"
+#include "libpandafile/code_data_accessor-inl.h"
 
 namespace panda_api::panda_file {
 
 decltype(OpenPandafileFromFdExt) *PandaFileWrapper::pOpenPandafileFromFdExt = nullptr;
 decltype(OpenPandafileFromMemoryExt) *PandaFileWrapper::pOpenPandafileFromMemoryExt = nullptr;
 decltype(QueryMethodSymByOffsetExt) *PandaFileWrapper::pQueryMethodSymByOffsetExt = nullptr;
+decltype(QueryMethodSymAndLineByOffsetExt) *PandaFileWrapper::pQueryMethodSymAndLineByOffsetExt = nullptr;
 decltype(QueryAllMethodSymsExt) *PandaFileWrapper::pQueryAllMethodSymsExt = nullptr;
 
 using ONCE_CALLBACK = void();
@@ -58,6 +61,7 @@ void LoadPandFileExt()
         LOAD_FUNC(PandaFileWrapper, OpenPandafileFromFdExt);
         LOAD_FUNC(PandaFileWrapper, OpenPandafileFromMemoryExt);
         LOAD_FUNC(PandaFileWrapper, QueryMethodSymByOffsetExt);
+        LOAD_FUNC(PandaFileWrapper, QueryMethodSymAndLineByOffsetExt);
         LOAD_FUNC(PandaFileWrapper, QueryAllMethodSymsExt);
 #undef LOAD_FUNC
     });

@@ -14,7 +14,7 @@
 #Assert that intrinsic Math.absF64 works fine
 .record Math <external>
 .function f32 Math.absF32(f32 a0)<external>
-.function u1 main(){
+.function i32 main(){
     fmovi v0, 2.0
     fmovi v1, 1e-13
     call.short Math.absF32, v0, v0
@@ -45,7 +45,7 @@ exit_failure:
     fneg
     return
 label:
-    lda.64 a0
+    lda a0
     return
 }
 

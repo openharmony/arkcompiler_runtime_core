@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_METHOD_HANDLE_DATA_ACCESSOR_H_
-#define PANDA_LIBPANDAFILE_METHOD_HANDLE_DATA_ACCESSOR_H_
+#ifndef LIBPANDAFILE_METHOD_HANDLE_DATA_ACCESSOR_
+#define LIBPANDAFILE_METHOD_HANDLE_DATA_ACCESSOR_
 
 #include "file.h"
 #include "file_items.h"
@@ -58,11 +58,11 @@ private:
     File::EntityId method_handle_id_;
 
     MethodHandleType type_;
-    uint32_t offset_ {0};
+    uint32_t offset_;
 
     size_t size_ {0};
 };
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_METHOD_HANDLE_DATA_ACCESSOR_H_
+#endif  // LIBPANDAFILE_METHOD_HANDLE_DATA_ACCESSOR_

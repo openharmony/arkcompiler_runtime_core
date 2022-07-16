@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@
 
 namespace panda {
 
+constexpr const int64_t DEFAULT_SEED = 123456;
+
 class ArenaAllocatorTest : public testing::Test {
 public:
     ArenaAllocatorTest()
@@ -40,7 +42,7 @@ public:
 #ifdef PANDA_NIGHTLY_TEST_ON
         seed_ = std::time(NULL);
 #else
-        seed_ = 123456U;
+        seed_ = DEFAULT_SEED;
 #endif
     }
 
@@ -169,21 +171,23 @@ private:
 
 TEST_F(ArenaAllocatorTest, AllocateTest)
 {
+    void *addr;
+    void *tmp;
     ArenaAllocator aa(SpaceType::SPACE_TYPE_INTERNAL);
-    void *addr = aa.Alloc(24);
+
+    addr = aa.Alloc(24);
     ASSERT_NE(addr, nullptr);
     ASSERT_TRUE(IsAligned(addr, GetAlignmentInBytes(DEFAULT_ARENA_ALIGNMENT)));
     addr = aa.Alloc(4);
     ASSERT_NE(addr, nullptr);
     ASSERT_TRUE(IsAligned(addr, GetAlignmentInBytes(DEFAULT_ARENA_ALIGNMENT)));
-
-    void *tmp = aa.AllocArray<int>(1024);
-    // Make sure that we force to use dynamic pool if STACK pool is enabled
+    tmp = aa.AllocArray<int>(1024);
+    // Make sure that we force to using dynamic pool if STACK pool enabled
     for (int i = 0; i < 5; ++i) {
         void *mem = nullptr;
         mem = aa.Alloc(DEFAULT_ARENA_SIZE / 2);
         ASSERT_NE(mem, nullptr);
-        *(static_cast<char *>(mem)) = 33;  // Try to catch segfault in case something went wrong
+        *(static_cast<char *>(mem)) = 33;  // Try to catch segfault just in case something wrong
     }
     ASSERT_NE(tmp = aa.Alloc(DEFAULT_ARENA_SIZE - AlignUp(sizeof(Arena), GetAlignmentInBytes(DEFAULT_ARENA_ALIGNMENT))),
               nullptr);
@@ -301,7 +305,7 @@ TEST_F(ArenaAllocatorTest, AllocateDequeWithComplexTypeTest)
     ArenaAllocator aa(SpaceType::SPACE_TYPE_INTERNAL);
     ArenaDeque<ComplexClass> deq(aa.Adapter());
 
-    // SIZE objects allocating
+    // Allocate SIZE objects
     for (size_t j = 0; j < SIZE; ++j) {
         deq.emplace_back(j * MAGIC_CONSTANT_1 + MAGIC_CONSTANT_2, std::to_string(j));
     }
@@ -332,7 +336,7 @@ TEST_F(ArenaAllocatorTest, AllocateDequeWithComplexTypeTest)
         ASSERT_EQ(it->getString(), "1") << "value of i: " << i;
     }
 
-    // Size increasing
+    // Increasing size
     constexpr size_t SIZE_4 = SIZE_2 << 1;
     deq.resize(SIZE_4, ComplexClass());
 
@@ -350,7 +354,7 @@ TEST_F(ArenaAllocatorTest, AllocateDequeWithComplexTypeTest)
         ASSERT_EQ(it->getString(), "0") << "value of i: " << j;
     }
 
-    // Size decreasing
+    // Decreasing size
     deq.resize(SIZE);
 
     // Size checking

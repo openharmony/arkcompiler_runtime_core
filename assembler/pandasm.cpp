@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,20 @@
 #include <string>
 #include <vector>
 
+#include "ark_version.h"
+
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
+#ifdef PANDA_WITH_BYTECODE_OPTIMIZER
+#include "bytecode_optimizer/optimize_bytecode.h"
+#endif
+#include "file_format_version.h"
 #include "error.h"
 #include "lexer.h"
 #include "utils/expected.h"
 #include "utils/logger.h"
 #include "utils/pandargs.h"
+#include "pandasm.h"
 
 namespace panda::pandasm {
 
@@ -47,17 +54,32 @@ void PrintErrors(const panda::pandasm::ErrorList &warnings, const std::string &m
     }
 }
 
+void PrintHelp(const panda::PandArgParser &pa_parser)
+{
+    std::cerr << "Usage:" << std::endl;
+    std::cerr << "pandasm [OPTIONS] INPUT_FILE OUTPUT_FILE" << std::endl << std::endl;
+    std::cerr << "Supported options:" << std::endl << std::endl;
+    std::cerr << pa_parser.GetHelpString() << std::endl;
+}
+
 bool PrepareArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::string> &input_file,
                  const panda::PandArg<std::string> &output_file, const panda::PandArg<std::string> &log_file,
-                 const panda::PandArg<bool> &help, const panda::PandArg<bool> &verbose, std::ifstream &inputfile,
-                 int argc, char **argv)
+                 const panda::PandArg<bool> &help, const panda::PandArg<bool> &verbose,
+                 const panda::PandArg<bool> &version, std::ifstream &inputfile, int argc, const char **argv)
 {
-    if (!pa_parser.Parse(argc, const_cast<const char **>(argv)) || input_file.GetValue().empty() ||
-        output_file.GetValue().empty() || help.GetValue()) {
-        std::cerr << "Usage:" << std::endl;
-        std::cerr << "ark_asm [OPTIONS] INPUT_FILE OUTPUT_FILE" << std::endl << std::endl;
-        std::cerr << "Supported options:" << std::endl << std::endl;
-        std::cerr << pa_parser.GetHelpString() << std::endl;
+    if (!pa_parser.Parse(argc, argv)) {
+        PrintHelp(pa_parser);
+        return false;
+    }
+
+    if (version.GetValue()) {
+        panda::PrintPandaVersion();
+        panda_file::PrintBytecodeVersion();
+        return false;
+    }
+
+    if (input_file.GetValue().empty() || output_file.GetValue().empty() || help.GetValue()) {
+        PrintHelp(pa_parser);
         return false;
     }
 
@@ -65,10 +87,12 @@ bool PrepareArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::stri
         if (log_file.GetValue().empty()) {
             panda::Logger::ComponentMask component_mask;
             component_mask.set(panda::Logger::Component::ASSEMBLER);
+            component_mask.set(panda::Logger::Component::BYTECODE_OPTIMIZER);
             panda::Logger::InitializeStdLogging(panda::Logger::Level::DEBUG, component_mask);
         } else {
             panda::Logger::ComponentMask component_mask;
             component_mask.set(panda::Logger::Component::ASSEMBLER);
+            component_mask.set(panda::Logger::Component::BYTECODE_OPTIMIZER);
             panda::Logger::InitializeFileLogging(log_file.GetValue(), panda::Logger::Level::DEBUG, component_mask);
         }
     }
@@ -92,6 +116,7 @@ bool Tokenize(panda::pandasm::Lexer &lexer, std::vector<std::vector<panda::panda
         panda::pandasm::Tokens q = lexer.TokenizeString(s);
 
         auto e = q.second;
+
         if (e.err != panda::pandasm::Error::ErrorType::ERR_NONE) {
             e.line_number = tokens.size() + 1;
             PrintError(e, "ERROR");
@@ -109,6 +134,7 @@ bool ParseProgram(panda::pandasm::Parser &parser, std::vector<std::vector<panda:
                   panda::Expected<panda::pandasm::Program, panda::pandasm::Error> &res)
 {
     res = parser.Parse(tokens, input_file.GetValue());
+
     if (!res) {
         PrintError(res.Error(), "ERROR");
         return false;
@@ -124,7 +150,7 @@ bool DumpProgramInJson(panda::pandasm::Program &program, const panda::PandArg<st
         dump_file.open(scopes_file.GetValue());
 
         if (!dump_file) {
-            std::cerr << "Failed to write scopes into the given file." << std::endl;
+            std::cerr << "Cannot write scopes into the given file." << std::endl;
             return false;
         }
         dump_file << program.JsonDump();
@@ -135,7 +161,7 @@ bool DumpProgramInJson(panda::pandasm::Program &program, const panda::PandArg<st
 
 bool EmitProgramInBinary(panda::pandasm::Program &program, panda::PandArgParser &pa_parser,
                          const panda::PandArg<std::string> &output_file, panda::PandArg<bool> &optimize,
-                         const panda::PandArg<bool> &size_stat)
+                         panda::PandArg<bool> &size_stat)
 {
     auto emit_debug_info = !optimize.GetValue();
     std::map<std::string, size_t> stat;
@@ -147,6 +173,20 @@ bool EmitProgramInBinary(panda::pandasm::Program &program, panda::PandArgParser 
         std::cerr << "Failed to emit binary data: " << panda::pandasm::AsmEmitter::GetLastError() << std::endl;
         return false;
     }
+
+#ifdef PANDA_WITH_BYTECODE_OPTIMIZER
+    if (optimize.GetValue()) {
+        bool is_optimized = panda::bytecodeopt::OptimizeBytecode(&program, mapsp, output_file.GetValue());
+        if (!panda::pandasm::AsmEmitter::Emit(output_file.GetValue(), program, statp, mapsp, emit_debug_info)) {
+            std::cerr << "Failed to emit binary data: " << panda::pandasm::AsmEmitter::GetLastError() << std::endl;
+            return false;
+        }
+        if (!is_optimized) {
+            std::cerr << "Bytecode optimizer reported internal errors" << std::endl;
+            return false;
+        }
+    }
+#endif
 
     if (size_stat.GetValue()) {
         size_t total_size = 0;
@@ -182,7 +222,7 @@ bool BuildFiles(panda::pandasm::Program &program, panda::PandArgParser &pa_parse
 
 }  // namespace panda::pandasm
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
     panda::PandArg<bool> verbose("verbose", false, "Enable verbose output (will be printed to standard output)");
     panda::PandArg<std::string> log_file("log-file", "", "(--log-file FILENAME) Set log file name");
@@ -191,6 +231,8 @@ int main(int argc, char *argv[])
     panda::PandArg<bool> help("help", false, "Print this message and exit");
     panda::PandArg<bool> size_stat("size-stat", false, "Print panda file size statistic");
     panda::PandArg<bool> optimize("optimize", false, "Run the bytecode optimization");
+    panda::PandArg<bool> version {"version", false,
+                                  "Ark version, file format version and minimum supported file format version"};
     // tail arguments
     panda::PandArg<std::string> input_file("INPUT_FILE", "", "Path to the source assembly code");
     panda::PandArg<std::string> output_file("OUTPUT_FILE", "", "Path to the generated binary code");
@@ -201,14 +243,15 @@ int main(int argc, char *argv[])
     pa_parser.Add(&scopes_file);
     pa_parser.Add(&size_stat);
     pa_parser.Add(&optimize);
+    pa_parser.Add(&version);
     pa_parser.PushBackTail(&input_file);
     pa_parser.PushBackTail(&output_file);
     pa_parser.EnableTail();
 
     std::ifstream inputfile;
 
-    if (!panda::pandasm::PrepareArgs(pa_parser, input_file, output_file, log_file, help, verbose, inputfile, argc,
-                                     argv)) {
+    if (!panda::pandasm::PrepareArgs(pa_parser, input_file, output_file, log_file, help, verbose, version, inputfile,
+                                     argc, argv)) {
         return 1;
     }
 

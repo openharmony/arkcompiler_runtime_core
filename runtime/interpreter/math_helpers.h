@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INTERPRETER_MATH_HELPERS_H_
-#define PANDA_RUNTIME_INTERPRETER_MATH_HELPERS_H_
+#ifndef PANDA_INTERPRETER_MATH_HELPERS_H_
+#define PANDA_INTERPRETER_MATH_HELPERS_H_
 
 #include <cmath>
 #include <functional>
@@ -54,7 +53,7 @@ struct bit_ashr : public std::binary_function<T, T, T> {  // NOLINT(readability-
         using unsigned_type = std::make_unsigned_t<T>;
         size_t mask = std::numeric_limits<unsigned_type>::digits - 1;
         size_t shift = static_cast<unsigned_type>(y) & mask;
-        return x >> shift; // NOLINT(hicpp-signed-bitwise)
+        return x >> shift;  // NOLINT(hicpp-signed-bitwise)
     }
 };
 
@@ -91,19 +90,15 @@ struct fcmpl : public std::binary_function<T, T, int32_t> {  // NOLINT(readabili
     {
         static_assert(std::is_floating_point_v<T>, "T should be floating point type");
 
-        if (std::isnan(x) || std::isnan(y)) {
-            return -1;  // this is the difference between fcmpl and fcmpg for NAN
-        }
-
-        if (x < y) {
-            return -1;
-        }
-
         if (x > y) {
             return 1;
         }
 
-        return 0;
+        if (x == y) {
+            return 0;
+        }
+
+        return -1;
     }
 };
 
@@ -113,19 +108,15 @@ struct fcmpg : public std::binary_function<T, T, int32_t> {  // NOLINT(readabili
     {
         static_assert(std::is_floating_point_v<T>, "T should be floating point type");
 
-        if (std::isnan(x) || std::isnan(y)) {
-            return 1;  // this is the difference between fcmpl and fcmpg for NAN
-        }
-
         if (x < y) {
             return -1;
         }
 
-        if (x > y) {
-            return 1;
+        if (x == y) {
+            return 0;
         }
 
-        return 0;
+        return 1;
     }
 };
 
@@ -221,4 +212,4 @@ struct dec : public std::unary_function<T, T> {  // NOLINT(readability-identifie
 
 }  // namespace panda::interpreter::math_helpers
 
-#endif  // PANDA_RUNTIME_INTERPRETER_MATH_HELPERS_H_
+#endif  // PANDA_INTERPRETER_FRAME_H_

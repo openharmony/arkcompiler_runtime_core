@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #Assert that operation jeq works fine
-.function u1 main(){
+.function i32 main(){
     ldai 2
     movi v0, 1
     jeq v0, failure

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INTERPRETER_INSTRUCTION_HANDLER_STATE_H_
-#define PANDA_RUNTIME_INTERPRETER_INSTRUCTION_HANDLER_STATE_H_
+#ifndef PANDA_INTERPRETER_INSTRUCTION_HANDLER_STATE_H_
+#define PANDA_INTERPRETER_INSTRUCTION_HANDLER_STATE_H_
 
 #include "runtime/interpreter/state.h"
 #include "runtime/jit/profiling_data.h"
@@ -23,14 +23,12 @@ namespace panda::interpreter {
 
 class InstructionHandlerState {
 public:
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     ALWAYS_INLINE InstructionHandlerState(ManagedThread *thread, const uint8_t *pc, Frame *frame)
         : state_(thread, pc, frame)
     {
         instructions_ = GetFrame()->GetInstruction();
     }
-    ~InstructionHandlerState() = default;
-    DEFAULT_MOVE_SEMANTIC(InstructionHandlerState);
-    DEFAULT_COPY_SEMANTIC(InstructionHandlerState);
 
     ALWAYS_INLINE void UpdateInstructionHandlerState(const uint8_t *pc, Frame *frame)
     {
@@ -95,12 +93,12 @@ public:
 
     ALWAYS_INLINE uint8_t GetPrimaryOpcode() const
     {
-        return static_cast<unsigned>(GetInst().GetOpcode()) & 0xff;
+        return static_cast<unsigned>(GetInst().GetOpcode()) & OPCODE_MASK;
     }
 
     ALWAYS_INLINE uint8_t GetSecondaryOpcode() const
     {
-        return (static_cast<unsigned>(GetInst().GetOpcode()) >> 8) & 0xff;
+        return (static_cast<unsigned>(GetInst().GetOpcode()) >> 8U) & OPCODE_MASK;
     }
 
     ALWAYS_INLINE bool IsPrimaryOpcodeValid() const
@@ -113,12 +111,12 @@ public:
         return state_.GetInst();
     }
 
-    ALWAYS_INLINE const AccVRegister &GetAcc() const
+    ALWAYS_INLINE const AccVRegisterT &GetAcc() const
     {
         return state_.GetAcc();
     }
 
-    ALWAYS_INLINE AccVRegister &GetAcc()
+    ALWAYS_INLINE AccVRegisterT &GetAcc()
     {
         return state_.GetAcc();
     }
@@ -135,6 +133,7 @@ public:
 
 private:
     static constexpr size_t FAKE_INST_BUF_SIZE = 4;
+    static constexpr uint8_t OPCODE_MASK = 0xFFU;
 
     State state_;
     std::array<uint8_t, FAKE_INST_BUF_SIZE> fake_inst_buf_;
@@ -144,4 +143,4 @@ private:
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_RUNTIME_INTERPRETER_INSTRUCTION_HANDLER_STATE_H_
+#endif  // PANDA_INTERPRETER_INSTRUCTION_HANDLER_STATE_H_

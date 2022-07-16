@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,11 @@ PandaString GCStats::GetStatistics()
               << ") LOS objects, ";
 
     constexpr uint16_t MAX_PERCENT = 100;
-    size_t total_heap = mem::MemConfig::GetObjectPoolSize();
+    size_t total_heap = mem::MemConfig::GetHeapSizeLimit();
     size_t allocated_now = mem_stats_->GetFootprintHeap();
+    ASSERT(allocated_now <= total_heap);
     uint16_t percent = round((1 - (allocated_now * 1.0 / total_heap)) * MAX_PERCENT);
+    ASSERT(percent <= MAX_PERCENT);
     statistic << percent << "% free, " << helpers::MemoryConverter(allocated_now) << "/"
               << helpers::MemoryConverter(total_heap) << ", ";
     statistic << "paused " << helpers::TimeConverter(last_pause_) << " total "
@@ -66,6 +68,7 @@ PandaString GCStats::GetFinalStatistics(HeapManager *heap_manager)
     }
     PandaStringStream statistic;
 
+    // TODO: iteration for all GCs when they become multiple
     statistic << heap_manager->GetGC()->DumpStatistics() << "\n";
 
     statistic << "Total time spent in GC: " << total_time_gc << "\n";
@@ -98,6 +101,7 @@ PandaString GCStats::GetFinalStatistics(HeapManager *heap_manager)
     statistic << "Histogram of GC count per 10000 ms: " << duration_info.GetTopDump() << "\n";
     statistic << "Histogram of blocking GC count per 10000 ms: " << duration_info.GetTopDump() << "\n";
 
+    // TODO: add "native bytes total" and "native bytes total at last GC" with malloc function
     statistic << "Native bytes registered: " << heap_manager->GetGC()->GetNativeBytesRegistered() << "\n\n";
 
     statistic << "Max memory " << helpers::MemoryConverter(max_memory) << "\n";
@@ -147,6 +151,7 @@ void GCStats::StopMutatorLock()
 
 void GCStats::StartCollectStats()
 {
+    mem_stats_->ClearLastYoungObjectsMovedBytes();
     objects_freed_ = mem_stats_->GetTotalObjectsFreed();
     objects_freed_bytes_ = mem_stats_->GetFootprintHeap();
     large_objects_freed_ = mem_stats_->GetTotalHumongousObjectsFreed();

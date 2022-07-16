@@ -14,7 +14,7 @@
 .record System <external>
 .function i64 System.nanoTime() <external>
 
-.function u1 main(){
+.function i32 main(){
     call.short System.nanoTime
     sta.64 v0
     movi v1, 0

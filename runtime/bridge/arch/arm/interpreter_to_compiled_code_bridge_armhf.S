@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,6 +273,7 @@ PrepareArgStack:
     bicge sp, sp, #7
     subge sp, sp, #8
     b .Lloop_shorty
+
 .Lexit:
     bic sp, sp, #7 // align sp
     sub r4, sp, r4, lsl #3
@@ -291,7 +292,7 @@ InterpreterToCompiledCodeBridge:
     CFI_ADJUST_CFA_OFFSET(8)
 
     // According to the current frame kind set the bridge type
-    ldrb ip, [r3, #THREAD_FRAME_KIND]
+    ldrb ip, [r3, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     cmp ip, #0
     moveq ip, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
     movne ip, #BYPASS_BRIDGE
@@ -391,7 +392,7 @@ InterpreterToCompiledCodeBridge:
     cmp r2, #SHORTY_REFERENCE
     moveq r4, #1
     movne r4, #0
-    str r4, [r3, #FRAME_VREGISTER_TAG_OFFSET]
+    str r4, [r3, #FRAME_ACC_MIRROR_OFFSET]
     cmpne r2, #SHORTY_LAST_INT32
     // it is a float or 64bit value(i64, u64, f32, f64)
     bhi .L64
@@ -466,7 +467,7 @@ InvokeCompiledCodeWithArgArray:
     ldr THREAD_REG, [fp, #8]
 
     // According to the current frame kind set the bridge type
-    ldrb r2, [THREAD_REG, #THREAD_FRAME_KIND]
+    ldrb r2, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     cmp r2, #0
     moveq r2, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
     movne r2, #BYPASS_BRIDGE

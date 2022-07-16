@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MACROS_H_
-#define PANDA_LIBPANDABASE_MACROS_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_MACROS_H_
+#define PANDA_LIBPANDABASE_PBASE_MACROS_H_
 
 #include <cassert>
 #include <iostream>
@@ -149,6 +149,7 @@
         if (UNLIKELY(!(__lhs op __rhs))) { \
             std::cerr << "CHECK FAILED: " << #lhs << " " #op " " #rhs << std::endl; \
             std::cerr << "      VALUES: " << __lhs << " " #op " " << __rhs << std::endl; \
+            std::cerr << "          IN: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << std::endl; \
             panda::PrintStack(std::cerr); \
             std::abort(); \
         } \
@@ -157,11 +158,11 @@
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHECK_LE(lhs, rhs) ASSERT_OP(lhs, <=, rhs)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECK_LT(lhs, rhs) ASSERT_OP(lhs, <, rhs)  // CODECHECK-NOLINT(C_RULE_ID_HORIZON_SPACE)
+#define CHECK_LT(lhs, rhs) ASSERT_OP(lhs, <, rhs)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHECK_GE(lhs, rhs) ASSERT_OP(lhs, >=, rhs)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECK_GT(lhs, rhs) ASSERT_OP(lhs, >, rhs)  // CODECHECK-NOLINT(C_RULE_ID_HORIZON_SPACE)
+#define CHECK_GT(lhs, rhs) ASSERT_OP(lhs, >, rhs)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHECK_EQ(lhs, rhs) ASSERT_OP(lhs, ==, rhs)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -174,17 +175,21 @@
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_DO(cond, func) \
-    if (auto cond_val = cond; UNLIKELY(!(cond_val))) {  \
-        func;                                           \
-        ASSERT_FAIL(#cond);                      \
-    }
+#define ASSERT_DO(cond, func)                                  \
+    do {                                                       \
+        if (auto cond_val = cond; UNLIKELY(!(cond_val))) {     \
+            func;                                              \
+            ASSERT_FAIL(#cond);                                \
+        }                                                      \
+    } while (0)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_PRINT(cond, message)   \
-    if (auto cond_val = cond; UNLIKELY(!(cond_val))) {  \
-        std::cerr << message << std::endl;              \
-        ASSERT_FAIL(#cond);                      \
-    }
+#define ASSERT_PRINT(cond, message)                         \
+    do {                                                    \
+        if (auto cond_val = cond; UNLIKELY(!(cond_val))) {  \
+            std::cerr << message << std::endl;              \
+            ASSERT_FAIL(#cond);                             \
+        }                                                   \
+    } while (0)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_RETURN(cond) assert(cond)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -210,7 +215,7 @@
 
 // Due to the impossibility of using asserts in constexpr methods
 // we need an extra version of UNREACHABLE macro that can be used in such situations
-#define UNREACHABLE_CONSTEXPR __builtin_unreachable  // NOLINT(cppcoreguidelines-macro-usage)
+#define UNREACHABLE_CONSTEXPR() __builtin_unreachable()  // NOLINT(cppcoreguidelines-macro-usage)
 
 #define MERGE_WORDS_X(A, B) A ## B  // NOLINT(cppcoreguidelines-macro-usage)
 #define MERGE_WORDS(A, B) MERGE_WORDS_X(A, B)  // NOLINT(cppcoreguidelines-macro-usage)
@@ -305,4 +310,13 @@ extern "C" void AnnotateIgnoreWritesEnd(const char* f, int l);
 #endif
 #endif
 
-#endif  // PANDA_LIBPANDABASE_MACROS_H_
+// WEAK_SYMBOLS_FOR_LTO is defined if compiling arkbase_lto and unset otherwise
+#ifdef WEAK_SYMBOLS_FOR_LTO
+#define WEAK_FOR_LTO_START _Pragma("clang attribute push(__attribute__((weak)), apply_to = function)")
+#define WEAK_FOR_LTO_END   _Pragma("clang attribute pop")
+#else
+#define WEAK_FOR_LTO_START
+#define WEAK_FOR_LTO_END
+#endif
+
+#endif  // PANDA_LIBPANDABASE_PBASE_MACROS_H_

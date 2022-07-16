@@ -18,7 +18,7 @@
   return.64
 }
 
-.function u1 main() <static> {
+.function i32 main() <static> {
   ldai.64 -1
   movi.64 v0, 42
   shl2.64 v0

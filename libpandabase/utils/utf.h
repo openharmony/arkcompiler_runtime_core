@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@
 namespace panda::utf {
 
 /*
+ * https://en.wikipedia.org/wiki/UTF-8
+ *
  * N  Bits for     First        Last        Byte 1      Byte 2      Byte 3      Byte 4
  *    code point   code point   code point
  * 1  7            U+0000       U+007F      0xxxxxxx
@@ -67,6 +69,8 @@ constexpr uint8_t MUTF8_3B_THIRD = 0x80;
 
 constexpr uint8_t MUTF8_4B_FIRST = 0xf0;
 
+WEAK_FOR_LTO_START
+
 std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t max_bytes = 4);
 
 bool IsMUtf8OnlySingleBytes(const uint8_t *mutf8_in);
@@ -94,6 +98,10 @@ size_t MUtf8ToUtf16Size(const uint8_t *mutf8, size_t mutf8_len);
 size_t Utf16ToMUtf8Size(const uint16_t *mutf16, uint32_t length);
 
 size_t Mutf8Size(const uint8_t *mutf8);
+
+bool IsValidModifiedUTF8(const uint8_t *elems);
+
+WEAK_FOR_LTO_END
 
 inline const uint8_t *CStringAsMutf8(const char *str)
 {

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_RUNSLOTS_H_
-#define PANDA_RUNTIME_MEM_RUNSLOTS_H_
+#ifndef PANDA_RUNTIME_MEM_RUNSLOTS_H
+#define PANDA_RUNTIME_MEM_RUNSLOTS_H
 
 #include <array>
 #include <cstddef>
@@ -26,6 +25,7 @@
 
 namespace panda::mem {
 
+// If the OS has this macro, do not redefine it.
 #ifndef PAGE_SIZE
 static constexpr size_t PAGE_SIZE = SIZE_1K * 4;
 #endif
@@ -191,6 +191,7 @@ public:
     ATTRIBUTE_NO_SANITIZE_ADDRESS void IterateOverOccupiedSlots(const ObjectVisitor &object_visitor)
     {
         ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
+        // TODO(aemelenko): We can increase execution speed of this loops and do not count BitMapToSlot each time
         for (size_t array_index = 0; array_index < BITMAP_ARRAY_SIZE; array_index++) {
             uint8_t byte = bitmap_[array_index];
             if (byte == 0x0) {
@@ -202,7 +203,7 @@ public:
                 }
                 byte = byte >> 1U;
             }
-            // We must unpoison again, cause we can poison header somewhere inside a visitor
+            // We must unpoison again, because we can poison header somewhere inside a visitor
             ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
         }
         ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
@@ -310,4 +311,4 @@ static_assert(RunSlots<>::MinSlotSize() >= sizeof(uintptr_t));
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_RUNSLOTS_H_
+#endif  // PANDA_RUNTIME_MEM_RUNSLOTS_H

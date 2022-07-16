@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_HELPERS_H_
-#define PANDA_LIBPANDAFILE_HELPERS_H_
+#ifndef LIBPANDAFILE_HELPERS_H_
+#define LIBPANDAFILE_HELPERS_H_
 
 #include "macros.h"
 #include "utils/bit_helpers.h"
@@ -27,6 +27,10 @@
 #include <optional>
 
 namespace panda::panda_file::helpers {
+
+constexpr size_t UINT_BYTE2_SHIFT = 8U;
+constexpr size_t UINT_BYTE3_SHIFT = 16U;
+constexpr size_t UINT_BYTE4_SHIFT = 24U;
 
 template <size_t width>
 inline auto Read(Span<const uint8_t> *sp)
@@ -41,6 +45,34 @@ inline auto Read(Span<const uint8_t> *sp)
         result |= tmp;
     }
     *sp = sp->SubSpan(width);
+    return result;
+}
+
+template <>
+inline auto Read<sizeof(uint16_t)>(Span<const uint8_t> *sp)
+{
+    auto *p = sp->data();
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    uint16_t result = *(p++);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic, hicpp-signed-bitwise)
+    result |= static_cast<uint16_t>(*p) << UINT_BYTE2_SHIFT;
+    *sp = sp->SubSpan(sizeof(uint16_t));
+    return result;
+}
+
+template <>
+inline auto Read<sizeof(uint32_t)>(Span<const uint8_t> *sp)
+{
+    auto *p = sp->data();
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    uint32_t result = *(p++);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    result |= static_cast<uint32_t>(*(p++)) << UINT_BYTE2_SHIFT;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    result |= static_cast<uint32_t>(*(p++)) << UINT_BYTE3_SHIFT;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    result |= static_cast<uint32_t>(*p) << UINT_BYTE4_SHIFT;
+    *sp = sp->SubSpan(sizeof(uint32_t));
     return result;
 }
 
@@ -59,6 +91,27 @@ inline uint32_t ReadULeb128(Span<const uint8_t> *sp)
     ASSERT(is_full);
     *sp = sp->SubSpan(n);
     return result;
+}
+
+inline void SkipULeb128(Span<const uint8_t> *sp)
+{
+    if ((*sp)[0U] <= leb128::PAYLOAD_MASK) {
+        *sp = sp->SubSpan(1U);
+        return;
+    }
+
+    if ((*sp)[1U] <= leb128::PAYLOAD_MASK) {
+        *sp = sp->SubSpan(2U);
+        return;
+    }
+
+    if ((*sp)[2U] <= leb128::PAYLOAD_MASK) {
+        *sp = sp->SubSpan(3U);
+        return;
+    }
+
+    ASSERT((*sp)[3U] <= leb128::PAYLOAD_MASK);
+    *sp = sp->SubSpan(4U);
 }
 
 inline int32_t ReadLeb128(Span<const uint8_t> *sp)
@@ -119,6 +172,20 @@ inline void EnumerateTaggedValues(Span<const uint8_t> sp, E tag, Callback cb, Sp
     *next = sp;
 }
 
+template <class T, class E, class Callback>
+inline bool EnumerateTaggedValuesWithEarlyStop(Span<const uint8_t> sp, E tag, Callback cb)
+{
+    while (sp[0] == static_cast<uint8_t>(tag)) {
+        sp = sp.SubSpan(1);
+        T value(Read<sizeof(T)>(&sp));
+        if (cb(value)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 }  // namespace panda::panda_file::helpers
 
-#endif  // PANDA_LIBPANDAFILE_HELPERS_H_
+#endif  // LIBPANDAFILE_HELPERS_H_

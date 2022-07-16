@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,13 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_LIBPANDABASE_MEM_POOL_MANAGER_H_
-#define PANDA_LIBPANDABASE_MEM_POOL_MANAGER_H_
+#ifndef PANDA_POOL_MANAGER_H
+#define PANDA_POOL_MANAGER_H
 
 #include "malloc_mem_pool.h"
 #include "mmap_mem_pool.h"
-#include "arena.h"
+#include "arena-inl.h"
 
 namespace panda {
 enum class PoolType { MALLOC, MMAP };
@@ -31,7 +30,7 @@ public:
     DEFAULT_COPY_SEMANTIC(PoolManager);
     static void Initialize(PoolType type = PoolType::MMAP);
     static Arena *AllocArena(size_t size, SpaceType space_type, AllocatorType allocator_type,
-                             void *allocator_addr = nullptr);
+                             const void *allocator_addr = nullptr);
     static void FreeArena(Arena *arena);
     static MmapMemPool *GetMmapMemPool();
     static MallocMemPool *GetMallocMemPool();
@@ -47,4 +46,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_POOL_MANAGER_H_
+#endif  // PANDA_POOL_MANAGER_H

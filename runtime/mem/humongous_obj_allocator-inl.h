@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_HUMONGOUS_OBJ_ALLOCATOR_INL_H_
-#define PANDA_RUNTIME_MEM_HUMONGOUS_OBJ_ALLOCATOR_INL_H_
+#ifndef PANDA_MEM_HUMONGOUS_OBJ_ALLOCATOR_INL_H
+#define PANDA_MEM_HUMONGOUS_OBJ_ALLOCATOR_INL_H
 
 #include "runtime/mem/alloc_config.h"
 #include "runtime/mem/humongous_obj_allocator.h"
@@ -31,20 +30,21 @@ HumongousObjAllocator<AllocConfigT, LockConfigT>::HumongousObjAllocator(MemStats
     : type_allocation_(type_allocation), mem_stats_(mem_stats)
 {
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Initializing HumongousObjAllocator";
-    LOG_HUMONGOUS_OBJ_ALLOCATOR(INFO) << "Initializing HumongousObjAllocator finished";
+    LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Initializing HumongousObjAllocator finished";
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 HumongousObjAllocator<AllocConfigT, LockConfigT>::~HumongousObjAllocator()
 {
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Destroying HumongousObjAllocator";
-    LOG_HUMONGOUS_OBJ_ALLOCATOR(INFO) << "Destroying HumongousObjAllocator finished";
+    LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Destroying HumongousObjAllocator finished";
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+template <bool need_lock>
 void *HumongousObjAllocator<AllocConfigT, LockConfigT>::Alloc(const size_t size, const Alignment align)
 {
-    os::memory::WriteLockHolder wlock(alloc_free_lock_);
+    os::memory::WriteLockHolder<LockConfigT, need_lock> wlock(alloc_free_lock_);
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Try to allocate memory with size " << size;
 
     // Check that we can get a memory header for the memory pointer by using PAGE_SIZE_MASK mask
@@ -54,6 +54,7 @@ void *HumongousObjAllocator<AllocConfigT, LockConfigT>::Alloc(const size_t size,
         return nullptr;
     }
 
+    // TODO(aemelenko): this is quite raw approximation.
     // We can save about sizeof(MemoryPoolHeader) / 2 bytes here
     // (BTW, it is not so much for MB allocations)
     size_t aligned_size = size + sizeof(MemoryPoolHeader) + GetAlignmentInBytes(align);
@@ -86,7 +87,7 @@ void *HumongousObjAllocator<AllocConfigT, LockConfigT>::Alloc(const size_t size,
         }
     }
     occupied_pools_list_.Insert(mem_header);
-    LOG_HUMONGOUS_OBJ_ALLOCATOR(INFO) << "Allocated memory at addr " << std::hex << mem;
+    LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Allocated memory at addr " << std::hex << mem;
     AllocConfigT::OnAlloc(mem_header->GetPoolSize(), type_allocation_, mem_stats_);
     ASAN_UNPOISON_MEMORY_REGION(mem, size);
     AllocConfigT::MemoryInit(mem, size);
@@ -124,7 +125,7 @@ void HumongousObjAllocator<AllocConfigT, LockConfigT>::FreeUnsafe(void *mem)
     AllocConfigT::OnFree(mem_header->GetPoolSize(), type_allocation_, mem_stats_);
     ASAN_POISON_MEMORY_REGION(mem_header, mem_header->GetPoolSize());
     InsertPool(mem_header);
-    LOG_HUMONGOUS_OBJ_ALLOCATOR(INFO) << "Freed memory at addr " << std::hex << mem;
+    LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Freed memory at addr " << std::hex << mem;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -240,6 +241,7 @@ void HumongousObjAllocator<AllocConfigT, LockConfigT>::IterateOverObjectsInRange
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "HumongousObjAllocator::IterateOverObjectsInRange for range [" << std::hex
                                        << left_border << ", " << right_border << "]";
     ASSERT(ToUintPtr(right_border) >= ToUintPtr(left_border));
+    // TODO(aemelenko): These are temporary asserts because we can't do anything
     // if the range crosses different allocators memory pools
     ASSERT(ToUintPtr(right_border) - ToUintPtr(left_border) ==
            (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));
@@ -389,6 +391,7 @@ HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolList::FindSuitablePo
 template <typename AllocConfigT, typename LockConfigT>
 bool HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolList::IsInThisList(MemoryPoolHeader *pool)
 {
+    // TODO(aemelenko): Do it only in debug build
     MemoryPoolHeader *cur_pool = head_;
     while (cur_pool != nullptr) {
         if (cur_pool == pool) {
@@ -499,7 +502,6 @@ bool HumongousObjAllocator<AllocConfigT, LockConfigT>::IsLive(const ObjectHeader
     ASSERT(ContainObject(obj));
     auto *mem_header = static_cast<MemoryPoolHeader *>(ToVoidPtr(ToUintPtr(obj) & PAGE_SIZE_MASK));
     ASSERT(PoolManager::GetMmapMemPool()->GetStartAddrPoolForAddr(
-               // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_PARAM_ALIGN)
                static_cast<void *>(const_cast<ObjectHeader *>(obj))) == static_cast<void *>(mem_header));
     return mem_header->GetMemory() == static_cast<void *>(const_cast<ObjectHeader *>(obj));
 }
@@ -508,4 +510,4 @@ bool HumongousObjAllocator<AllocConfigT, LockConfigT>::IsLive(const ObjectHeader
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_HUMONGOUS_OBJ_ALLOCATOR_INL_H_
+#endif  // PANDA_MEM_HUMONGOUS_OBJ_ALLOCATOR_INL_H

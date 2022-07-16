@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ TEST(PandaCache, TestFieldCache)
 {
     PandaCache cache;
     EntityId id1(100);
+    // TODO(yxr) : make sure no conflicts
     EntityId new_id1(id1.GetOffset() << 2U);
     ASSERT_EQ(cache.GetFieldFromCache(new_id1), nullptr);
 
@@ -62,6 +63,7 @@ TEST(PandaCache, TestFieldCache)
     ASSERT_EQ(cache.GetFieldFromCache(new_id1), field1);
 
     EntityId id2(10000);
+    // TODO(yxr) : make sure no conflicts
     EntityId new_id2(id2.GetOffset() << 2U);
     auto *field2 = reinterpret_cast<Field *>(GetNewMockPointer());
     cache.SetFieldCache(new_id2, field2);
@@ -102,8 +104,6 @@ class CacheOps {
 public:
     explicit CacheOps(PandaCache *cache) : cache_(cache) {}
 
-    virtual ~CacheOps() = default;
-
     void runWriter()
     {
         for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
@@ -114,7 +114,7 @@ public:
         }
     }
 
-    void runReader() const
+    void RunReader()
     {
         for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
             EntityId id(i);
@@ -129,7 +129,7 @@ public:
 
 protected:
     PandaCache *cache_;
-    virtual ElementMock *GetElement(EntityId id) const = 0;
+    virtual ElementMock *GetElement(EntityId id) = 0;
     virtual void SetElement(EntityId id, ElementMock *m) = 0;
 };
 
@@ -138,7 +138,7 @@ public:
     explicit MethodCacheOps(PandaCache *cache) : CacheOps(cache) {}
 
 protected:
-    ElementMock *GetElement(EntityId id) const override
+    ElementMock *GetElement(EntityId id) override
     {
         Method *f = cache_->GetMethodFromCache(id);
         if (f == nullptr) {
@@ -159,9 +159,10 @@ public:
     explicit FieldCacheOps(PandaCache *cache) : CacheOps(cache) {}
 
 protected:
-    ElementMock *GetElement(EntityId id) const override
+    ElementMock *GetElement(EntityId id) override
     {
-        // CacheOps.runReader expect no conflicts
+        // TODO(yxr) : make sure no conflicts
+        // CacheOps.RunReader expect no conflicts
         EntityId new_id(id.GetOffset() << 2U);
         Field *f = cache_->GetFieldFromCache(new_id);
         if (f == nullptr) {
@@ -172,7 +173,8 @@ protected:
 
     void SetElement(EntityId id, ElementMock *m) override
     {
-        // CacheOps.runReader expect no conflicts
+        // TODO(yxr) : make sure no conflicts
+        // CacheOps.RunReader expect no conflicts
         EntityId new_id(id.GetOffset() << 2U);
         auto *f = reinterpret_cast<Field *>(m);
         cache_->SetFieldCache(new_id, f);
@@ -184,7 +186,7 @@ public:
     explicit ClassCacheOps(PandaCache *cache) : CacheOps(cache) {}
 
 protected:
-    ElementMock *GetElement(EntityId id) const override
+    ElementMock *GetElement(EntityId id) override
     {
         Class *cl = cache_->GetClassFromCache(id);
         if (cl == nullptr) {
@@ -209,7 +211,7 @@ void MethodWriterThread(PandaCache *cache)
 void MethodReaderThread(PandaCache *cache)
 {
     MethodCacheOps ops(cache);
-    ops.runReader();
+    ops.RunReader();
 }
 
 void FieldWriterThread(PandaCache *cache)
@@ -221,7 +223,7 @@ void FieldWriterThread(PandaCache *cache)
 void FieldReaderThread(PandaCache *cache)
 {
     FieldCacheOps ops(cache);
-    ops.runReader();
+    ops.RunReader();
 }
 
 void ClassWriterThread(PandaCache *cache)
@@ -233,10 +235,10 @@ void ClassWriterThread(PandaCache *cache)
 void ClassReaderThread(PandaCache *cache)
 {
     ClassCacheOps ops(cache);
-    ops.runReader();
+    ops.RunReader();
 }
 
-void cleanMethodMocks(const PandaCache *cache)
+void CleanMethodMocks(const PandaCache *cache)
 {
     for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
         EntityId id(i);
@@ -245,17 +247,18 @@ void cleanMethodMocks(const PandaCache *cache)
     }
 }
 
-void cleanFieldMocks(const PandaCache *cache)
+void CleanFieldMocks(const PandaCache *cache)
 {
     for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
         EntityId id(i);
+        // TODO(yxr) : make sure no conflicts
         EntityId new_id(id.GetOffset() << 2U);
         auto *m = reinterpret_cast<ElementMock *>(cache->GetFieldFromCache(new_id));
         delete m;
     }
 }
 
-void cleanClassMocks(const PandaCache *cache)
+void CleanClassMocks(const PandaCache *cache)
 {
     for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
         EntityId id(i);
@@ -277,7 +280,7 @@ TEST(PandaCache, TestManyThreadsMethodCache)
         threads[i].join();
     }
     writer.join();
-    cleanMethodMocks(&cache);
+    CleanMethodMocks(&cache);
 }
 
 TEST(PandaCache, TestManyThreadsFieldCache)
@@ -293,7 +296,7 @@ TEST(PandaCache, TestManyThreadsFieldCache)
         threads[i].join();
     }
     writer.join();
-    cleanFieldMocks(&cache);
+    CleanFieldMocks(&cache);
 }
 
 TEST(PandaCache, TestManyThreadsClassCache)
@@ -309,7 +312,7 @@ TEST(PandaCache, TestManyThreadsClassCache)
         threads[i].join();
     }
     writer.join();
-    cleanClassMocks(&cache);
+    CleanClassMocks(&cache);
 }
 
 }  // namespace panda_file::test

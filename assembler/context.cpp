@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,13 @@ namespace panda::pandasm {
 void Context::Make(const std::vector<panda::pandasm::Token> &t)
 {
     err = {};
+
     ins_number = 0;
+
     tokens = t;
+
     number = 1;
+
     end = false;
 
     token = std::string_view(&*(tokens[number - 1].whole_line.begin() + tokens[number - 1].bound_left),
@@ -42,7 +46,9 @@ bool Context::ValidateRegisterName(char c, size_t n) const
 {
     if (token[0] == c) {
         std::string_view p = token;
+
         p.remove_prefix(1);
+
         if (p.empty() || (p.size() > 1 && p[0] == '0')) {
             return false;
         }
@@ -73,7 +79,9 @@ bool Context::ValidateParameterName(size_t number_of_params_already_is) const
 
     if (token[0] == 'a') {
         std::string_view p = token;
+
         p.remove_prefix(1);
+
         if (ToNumber(p) == number_of_params_already_is) {
             return true;
         }
@@ -127,6 +135,7 @@ Token::Type Context::operator++(int)
 
     if (this->tokens.size() > number) {
         ++number;
+
         id = this->tokens[number - 1].type;
 
         token = std::string_view(&*(tokens[number - 1].whole_line.begin() + tokens[number - 1].bound_left),
@@ -142,6 +151,7 @@ Token::Type Context::operator++()
 {
     if (this->tokens.size() > number) {
         ++number;
+
         id = this->tokens[number - 1].type;
 
         token = std::string_view(&*(tokens[number - 1].whole_line.begin() + tokens[number - 1].bound_left),
@@ -158,9 +168,11 @@ Token::Type Context::operator--(int)
 {
     Token::Type last_id = id;
 
-    if (number > 1) {
+    if (1 < number) {
         end = false;
+
         --number;
+
         id = this->tokens[number - 1].type;
 
         token = std::string_view(&*(tokens[number - 1].whole_line.begin() + tokens[number - 1].bound_left),
@@ -174,9 +186,11 @@ Token::Type Context::operator--(int)
 
 Token::Type Context::operator--()
 {
-    if (number > 1) {
+    if (1 < number) {
         end = false;
+
         --number;
+
         id = this->tokens[number - 1].type;
 
         token = std::string_view(&*(tokens[number - 1].whole_line.begin() + tokens[number - 1].bound_left),

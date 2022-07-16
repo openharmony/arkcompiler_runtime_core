@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_TERMINATE_H_
-#define PANDA_LIBPANDABASE_UTILS_TERMINATE_H_
+#ifndef PANDA_TERMINATE_H
+#define PANDA_TERMINATE_H
 
 namespace panda::terminate {
 
@@ -22,4 +22,4 @@ namespace panda::terminate {
 
 }  // namespace panda::terminate
 
-#endif  // PANDA_LIBPANDABASE_UTILS_TERMINATE_H_
+#endif  // PANDA_TERMINATE_H

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(5 * 2.5 == 12.5) operation --> fmul2.64
-.function u1 main(){
+.function i32 main(){
     fldai.64 5.0
     fmovi.64 v0, 2.5
     fmul2.64 v0

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_DEFINE_H_
-#define PANDA_ASSEMBLER_DEFINE_H_
+#ifndef _PANDA_ASSEMBLER_DEFINE_HPP
+#define _PANDA_ASSEMBLER_DEFINE_HPP
 
-/* Implementation-specific definitions */
+/* Implementation-specific defines */
 
 constexpr char PARSE_COMMENT_MARKER = '#';
 
@@ -43,6 +43,7 @@ constexpr char PARSE_AREA_MARKER = '.';
     _(".language", LANG)     \
     _(".function", FUN)      \
     _(".record", REC)        \
+    _(".array", ARR)         \
     _(".field", FLD)
 
-#endif  // PANDA_ASSEMBLER_DEFINE_H_
+#endif /* !_PANDA_ASSEMBLER_DEFINE_HPP */

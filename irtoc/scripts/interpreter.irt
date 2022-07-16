@@ -1,0 +1,1829 @@
+#!/usr/bin/env ruby
+
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+include_relative 'common.irt'
+
+fixed_regmap = Regmap.new({
+  arm32: { dispatch: 12, pc: 4, frame: 8 },
+  arm64: { dispatch: 24, pc: 20, frame: 23 },
+  x86_64: { dispatch: 8, pc: 4, frame: 5 },
+})
+handler_regmap = $full_regmap + fixed_regmap
+
+def check_regmap(lhs, rhs, name)
+  regs_intersection = lhs.data.values & rhs.data.values
+  raise "Fixed register numbers should not intersect with '#{name}' regsiters" unless regs_intersection.empty?
+end
+
+if Options.arm64?  # other archs have no enough regs
+  # fixed registers assignment sanity checks:
+  check_regmap(fixed_regmap, $panda_regmap, 'panda')
+  check_regmap(fixed_regmap, $arch_regmap, 'arch')
+  check_regmap(fixed_regmap, $args_regmap, 'args')
+  check_regmap(fixed_regmap, $callers_regmap, 'caller')
+end
+
+InterpreterValidation = {
+  spills_count_max: 12  # should be synced with SPILL_SLOTS in codegen_interpreter.h
+}
+
+# Macros:
+
+# Casts:
+
+['8', '16'].each do |from|
+  ['u32', 'u64'].each do |to|
+    macro(:"u#{from}to#{to}") do |arg|
+      Cast(arg).SrcType("DataType::UINT#{from}").send(:"#{to}")
+    end
+  end
+end
+
+['8', '16'].each do |from|
+  macro(:"i#{from}toi32") do |arg|
+    Cast(arg).SrcType("DataType::INT#{from}").i32
+  end
+end
+
+[['u32', 'UINT32'], ['i32', 'INT32']].each do |from, from_type|
+  ['b', 'i8', 'u8', 'i16', 'u16', 'i64', 'u64'].each do |to|
+    macro(:"#{from}to#{to}") do |arg|
+      Cast(arg).SrcType("DataType::#{from_type}").send(:"#{to}")
+    end
+  end
+end
+
+['b', 'u32', 'i32'].each do |to|
+  macro(:"u64to#{to}") do |arg|
+    Cast(arg).SrcType("DataType::UINT64").send(:"#{to}")
+  end
+end
+
+['b', 'i32'].each do |to|
+  macro(:"i64to#{to}") do |arg|
+    Cast(arg).SrcType("DataType::INT64").send(:"#{to}")
+  end
+end
+
+[['u32', 'UINT32'], ['i32', 'INT32'], ['u64', 'UINT64'], ['i64', 'INT64']].each do |from, from_type|
+  ['f32', 'f64'].each do |to|
+    macro(:"#{from}to#{to}") do |arg|
+      Cast(arg).SrcType("DataType::#{from_type}").send(:"#{to}")
+    end
+  end
+end
+
+['f64', 'i32', 'u32', 'i64', 'u64'].each do |to|
+  macro(:"f32to#{to}") do |arg|
+    Cast(arg).SrcType("DataType::FLOAT32").send(:"#{to}")
+  end
+end
+
+['i32', 'u32', 'i64', 'u64', 'f32'].each do |to|
+  macro(:"f64to#{to}") do |arg|
+    Cast(arg).SrcType("DataType::FLOAT64").send(:"#{to}")
+  end
+end
+
+macro(:u8tou1) do |arg|
+  Cast(arg).SrcType("DataType::UINT8").b
+end
+
+macro(:u32tou1) do |arg|
+  Cast(arg).SrcType("DataType::UINT32").b
+end
+
+macro(:i8tou16) do |arg|
+  Cast(arg).SrcType("DataType::INT8").u16
+end
+
+macro(:i16tou16) do |arg|
+  Cast(arg).SrcType("DataType::INT16").u16
+end
+
+macro(:i16toi32) do |arg|
+  Cast(arg).SrcType("DataType::INT16").i32
+end
+
+macro(:i8tou32) do |arg|
+  Cast(arg).SrcType("DataType::INT8").u32
+end
+
+macro(:i16tou32) do |arg|
+  Cast(arg).SrcType("DataType::INT16").u32
+end
+
+macro(:i32tou32) do |arg|
+  Cast(arg).SrcType("DataType::INT32").u32
+end
+
+['u8', 'u16'].each do |from|
+  macro(:"#{from}toword") do |arg|
+    if Options.arch_64_bits?
+      send(:"#{from}tou64", arg)
+    else
+      send(:"#{from}tou32", arg)
+    end
+  end
+end
+
+macro(:u32toi32) do |arg|
+  Cast(arg).SrcType("DataType::UINT32").i32
+end
+
+macro(:i32tou64) do |arg|
+  Cast(arg).SrcType("DataType::INT32").u64
+end
+
+macro(:u32toword) do |arg|
+  if Options.arch_64_bits?
+    u32tou64(arg)
+  else
+    arg
+  end
+end
+
+macro(:i32tou8) do |arg|
+  Cast(arg).SrcType("DataType::INT32").u8
+end
+
+macro(:i32tou32) do |arg|
+  Cast(arg).SrcType("DataType::INT32").u32
+end
+
+macro(:i32tof64) do |arg|
+  Cast(arg).SrcType("DataType::INT32").f64
+end
+
+macro(:u64tou32) do |arg|
+  Cast(arg).SrcType("DataType::UINT64").u32
+end
+
+macro(:i64tou8) do |arg|
+  Cast(arg).SrcType("DataType::INT64").u8
+end
+
+macro(:i64tou32) do |arg|
+  Cast(arg).SrcType("DataType::INT64").u32
+end
+
+macro(:f64tou32) do |arg|
+  Cast(arg).SrcType("DataType::FLOAT64").u32
+end
+
+macro(:f64toi64) do |arg|
+  Cast(arg).SrcType("DataType::FLOAT64").i64
+end
+
+macro(:i32tou1) do |arg|
+  res := AddI(0).Imm(0).b
+  If(arg, 0).CC(:CC_NE).b {
+    res_1 := AddI(res).Imm(1).b
+  }
+  Phi(res, res_1).b
+end
+
+macro(:i32toany) do |arg|
+  CastValueToAnyType(arg).AnyType(Constants::DYN_INT_TYPE).any
+end
+
+macro(:f64toany) do |arg|
+  CastValueToAnyType(arg).AnyType(Constants::DYN_DOUBLE_TYPE).any
+end
+
+# Decoding
+
+macro(:readbyte) do |pc, offset|
+  LoadI(pc).Imm(offset).u8
+end
+
+macro(:read_lower_4bits) do |offset|
+  if Options.arm64?
+    imm := readbyte(pc, offset).u32
+    AndI(imm).Imm(0xf).u8
+  else
+    imm := readbyte(pc, offset).u8
+    AndI(imm).Imm(0xf).u8
+  end
+end
+
+macro(:signed_read_higher_4bits) do |offset|
+  if Options.arm64?
+    imm:= readbyte(pc, offset).i32
+    shl_imm := ShlI(imm).Imm(24).i32
+    i32toi8(AShrI(shl_imm).Imm(28).i32)
+  else
+    imm:= readbyte(pc, offset).i8
+    AShrI(imm).Imm(4).i8
+  end
+end
+
+macro(:read_higher_4bits) do |offset|
+  if Options.arm64?
+    imm:= readbyte(pc, offset).u32
+    shl_imm := ShlI(imm).Imm(24).u32
+    u32tou8(ShrI(shl_imm).Imm(28).u32)
+  else
+    imm:= readbyte(pc, offset).u8
+    ShrI(imm).Imm(4).u8
+  end
+end
+
+macro(:as_vreg_idx) do |operand|
+  raise 'Register is expected' unless operand.reg?
+
+  offset = operand.offset / 8
+
+  case operand.width
+  when 4
+    u8toword(operand.offset % 8 != 0 ? read_higher_4bits(offset) : read_lower_4bits(offset))
+  when 8
+    u8toword(readbyte(pc, offset))
+  when 16
+    u16toword(readbyte(pc, offset).u16)
+  end
+end
+
+macro(:as_id) do |operand|
+  raise 'ID is expected' unless operand.id?
+
+  offset = operand.offset / 8
+
+  case operand.width
+  when 16
+    readbyte(pc, offset).u16
+  when 32
+    readbyte(pc, offset).u32
+  end
+end
+
+macro(:as_imm) do |operand|
+  raise 'Immediate is expected' unless operand.imm?
+
+  offset = operand.offset / 8
+
+  case operand.width
+  when 4
+    operand.offset % 8 != 0 ? signed_read_higher_4bits(offset) : read_lower_4bits(offset)
+  when 8
+    readbyte(pc, offset).i8
+  when 16
+    readbyte(pc, offset).i16
+  when 32
+    if operand.type == 'f32'
+      readbyte(pc,offset).f32
+    else
+      readbyte(pc, offset).i32
+    end
+  when 64
+    if operand.type == 'f64'
+      readbyte(pc, offset).f64
+    else
+      readbyte(pc, offset).i64
+    end
+  end
+end
+
+macro(:ins_offset) do ||
+  instructions_offset := LoadI(%frame).Imm(Constants::FRAME_INSTRUCTIONS_OFFSET).ptr
+  Sub(pc, instructions_offset).u32
+end
+
+# Register access:
+
+macro(:frame_vreg_ptr) do |frame, vreg_idx|
+  vreg_offset := AddI(Mul(vreg_idx, Constants::VREGISTER_SIZE).word).Imm(Constants::VREGISTERS_OFFSET).word
+  Add(frame, vreg_offset).ptr
+end
+
+macro(:vreg_ptr) do |operand|
+  vreg_idx := as_vreg_idx(operand)
+  frame_vreg_ptr(%frame, vreg_idx)
+end
+
+macro(:acc_ptr_frame) do |frame|
+  Add(frame, Constants::GET_ACC_OFFSET).ptr
+end
+
+macro(:acc_ptr) do
+  acc_ptr_frame(%frame)
+end
+
+macro(:get_value) do |vreg_ptr|
+  LoadI(vreg_ptr).Imm(Constants::VREGISTER_VALUE_OFFSET).u64
+end
+
+macro(:set_value) do |vreg_ptr, val|
+  StoreI(vreg_ptr, val).Imm(Constants::VREGISTER_VALUE_OFFSET).u64
+end
+
+macro(:get_tag) do |vreg_ptr|
+  vreg_num := LoadI(%frame).Imm(Constants::VREGISTERS_NUM_OFFSET).u32
+  vreg_mirror_ptr := Add(vreg_ptr, Mul(u32toword(vreg_num), Constants::VREGISTER_SIZE).word).ptr
+  LoadI(vreg_mirror_ptr).Imm(Constants::VREGISTER_VALUE_OFFSET).i64
+end
+
+macro(:set_tag_frame) do |frame, vreg_ptr, tag|
+  vreg_num := LoadI(frame).Imm(Constants::VREGISTERS_NUM_OFFSET).u32
+  vreg_mirror_ptr := Add(vreg_ptr, Mul(u32toword(vreg_num), Constants::VREGISTER_SIZE).word).ptr
+  StoreI(vreg_mirror_ptr, tag).Imm(Constants::VREGISTER_VALUE_OFFSET).i64
+end
+
+macro(:set_tag) do |vreg_ptr, tag|
+  set_tag_frame(%frame, vreg_ptr, tag)
+end
+
+macro(:get_acc_tag) do |acc_ptr|
+  LoadI(acc_ptr).Imm(Constants::GET_ACC_MIRROR_OFFSET).i64
+end
+
+macro(:set_acc_tag) do |acc_ptr, tag|
+  StoreI(acc_ptr, tag).Imm(Constants::GET_ACC_MIRROR_OFFSET).i64
+end
+
+macro(:vreg_value) do |operand|
+  get_value(vreg_ptr(operand))
+end
+
+macro(:acc_value) do
+  get_value(acc_ptr)
+end
+
+macro(:set_primitive) do |v, value|
+  set_tag(v, 0x0)
+  set_value(v, value)
+end
+
+macro(:set_object) do |v, value|
+  set_tag(v, 0x1)
+  set_value(v, value)
+end
+
+macro(:set_acc_primitive) do |acc_ptr, value|
+  set_acc_tag(acc_ptr, 0x0)
+  set_value(acc_ptr, value)
+end
+
+macro(:set_acc_object) do |acc_ptr, value|
+  set_acc_tag(acc_ptr, 0x1)
+  set_value(acc_ptr, value)
+end
+
+macro(:has_object) do |v|
+  tag := get_tag(v)
+  is_object := AndI(tag).Imm(Constants::OBJECT_MASK).u64
+  IfImm(is_object).Imm(0).CC(:CC_NE).b {
+    has := 1
+  } Else {
+    has_not := 0
+  }
+  Phi(has, has_not).ptr
+end
+
+macro(:copy_acc) do |dst_ptr, src_ptr|
+  set_value(dst_ptr, get_value(src_ptr))
+  set_acc_tag(dst_ptr, get_acc_tag(src_ptr))
+end
+
+macro(:copy_reg) do |new_frame, dst_idx, src_operand|
+  dst_reg_ptr = frame_vreg_ptr(new_frame, dst_idx)
+  src_reg_ptr = vreg_ptr(src_operand)
+  set_value(dst_reg_ptr, get_value(src_reg_ptr))
+  set_tag_frame(new_frame, dst_reg_ptr, get_tag(src_reg_ptr))
+end
+
+# Helper macros:
+
+macro(:dispatch) do |table, pc|
+  opc := readbyte(pc, 0)
+  offset := Mul(u8toword(opc), "WordSize()").word
+  addr := Load(table, offset).ptr
+  LiveOut(pc).DstReg(regmap[:pc]).ptr
+  LiveOut(table).DstReg(regmap[:dispatch]).ptr
+  IndirectJump(addr)
+end
+
+macro(:call_runtime) do |sym, *args|
+  Call(*args).Method(sym)
+end
+
+macro(:advance_pc_imm) do |pc, imm|
+  AddI(pc).Imm(imm).ptr
+end
+
+macro(:advance_pc_var) do |pc, var|
+  Add(pc, var).ptr
+end
+
+macro(:acc_receiver) do |op, imm|
+  If(imm, 0).CC(:CC_EQ).b {
+    res1 := acc_value.ref
+  } Else {
+    res2 := vreg_value(op).ref
+  }
+  Phi(res1, res2).ref
+end
+
+macro(:generic_call) do |id, size, is_initobj, receiver, nargs, copy_lambda|
+  caller := LoadI(%frame).Imm("Frame::GetMethodOffset()").ptr
+  callee := call_runtime("GetCalleeMethodFromBytecodeId", caller, u16toword(id)).ptr
+  if receiver
+    callee := call_runtime("ResolveVirtualMethod", callee, receiver).ptr
+  end
+  if is_initobj
+      # TODO: multiarray for initobj
+      klass := u32toword(LoadI(callee).Imm("Method::GetClassOffset()").u32)
+      # TODO(mbolshov): handle nullptr for returned obj
+      obj := call_runtime("CreateObjectByClassInterpreter", %tr, klass).ptr
+      set_acc_object(acc_ptr, obj)
+  end
+  If(call_runtime("HasCompiledCode", callee).i32, 0).CC(:CC_NE).b {
+    call_runtime("InterpreterToCompiledCodeBridge", %pc, %frame, callee, %tr).void
+    StoreI(%tr, %frame).Imm("ManagedThread::GetFrameOffset()").ptr
+    pc_native := advance_pc_imm(%pc, size)
+  } Else {
+    num_vregs := call_runtime("GetNumVregsByMethod", callee).word
+    num_vregs := AddI(num_vregs).Imm(1).word if is_initobj
+    if nargs
+      num_args := nargs
+    else
+      num_args := call_runtime("GetNumArgsByMethod", callee).word
+    end
+    frame_size := Add(num_vregs, num_args).word
+    actual_size := Add(frame_size, frame_size).word
+    # TODO(mbolshov): Fast path for frame allocation should be done in irtoc
+    new_frame := call_runtime("CreateFrameWithSize", actual_size, frame_size, callee, %frame).ptr
+    StoreI(new_frame, "Frame::IS_STACKLESS").Imm("Frame::GetFlagsOffset()").word
+    if is_initobj
+      obj_vreg_ptr := frame_vreg_ptr(new_frame, SubI(num_vregs).Imm(1).word)
+      set_tag_frame(new_frame, obj_vreg_ptr, 0x1)
+      set_value(obj_vreg_ptr, obj)
+    end
+    copy_lambda.call(new_frame, num_vregs, num_args)
+    StoreI(new_frame, %frame).Imm("Frame::GetPrevFrameOffset()").ptr
+    StoreI(%tr, new_frame).Imm("ManagedThread::GetFrameOffset()").ptr
+    StoreI(%frame, advance_pc_imm(%pc, size)).Imm("Frame::GetNextInstructionOffset()").ptr
+    pc_int := call_runtime("GetInstructionsByMethod", callee).ptr
+  }
+  frame := Phi(%frame, new_frame).ptr
+  pc := Phi(pc_native, pc_int).ptr
+end
+
+macro(:generic_return) do |copy_lambda|
+  If(LoadI(%frame).Imm("Frame::GetFlagsOffset()").word, "Frame::IS_STACKLESS").CC(:CC_EQ).b {
+    prev_frame := LoadI(%frame).Imm("Frame::GetPrevFrameOffset()").ptr
+    next_pc := LoadI(prev_frame).Imm("Frame::GetNextInstructionOffset()").ptr
+    copy_lambda.call(prev_frame)
+    StoreI(%tr, prev_frame).Imm("ManagedThread::GetFrameOffset()").ptr
+    call_runtime("FreeFrame", frame).void
+    frame := prev_frame
+    pc := next_pc
+  } Else {
+    Intrinsic(:INTERPRETER_RETURN).ptr.Terminator
+  }
+end
+
+# Handlers:
+
+macro(:handle_movi) do |vd, imm|
+  set_primitive(vd, imm).i32
+end
+
+macro(:handle_movi_64) do |vd, imm|
+  set_primitive(vd, imm).i64
+end
+
+macro(:handle_mov) do |vd, vs|
+  # TODO(aantipina): add assert(!has_object(vs))
+  set_primitive(vd, vs).u32
+end
+
+macro(:handle_lda) do |vs|
+  set_acc_primitive(acc_ptr, vs).u32
+end
+
+macro(:handle_lda_str_id32) do |id|
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  string := call_runtime("ResolveStringEntrypoint", method_ptr, id).ptr
+  set_acc_object(acc_ptr, string).ref
+end
+
+macro(:handle_lda_type_id16) do |id|
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  # TODO: fix
+  type := call_runtime("ResolveStringEntrypoint", method_ptr, u16tou32(id)).ptr
+  set_acc_object(acc_ptr, type).ref
+end
+
+macro(:handle_lda_const_v8_id32) do |v, id|
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  cnst := call_runtime("ResolveLiteralArrayEntrypoint", method_ptr, id).ptr
+  set_object(v, cnst).ref
+end
+
+macro(:handle_ldai_imm) do |imm|
+  set_acc_primitive(acc_ptr, imm).i32
+end
+
+macro(:handle_ldai_64_imm) do |imm|
+  set_acc_primitive(acc_ptr, imm).i64
+end
+
+macro(:handle_fldai_imm) do |imm|
+  set_acc_primitive(acc_ptr, imm).f32
+end
+
+macro(:handle_fldai_64_imm) do |imm|
+  set_acc_primitive(acc_ptr, imm).f64
+end
+
+macro(:handle_add_v4_v4) do |vs1, vs2|
+  add := Add(vs1, vs2).i32
+  set_value(acc_ptr, add).i32
+end
+
+macro(:handle_fadd2_v8) do |vs|
+  add := Add(acc_value.f32, vs).f32
+  set_value(acc_ptr, add).f32
+end
+
+macro(:handle_sta_v8) do |vd|
+  set_primitive(vd, acc_value.u32).u32
+end
+
+macro(:handle_sta_64_v8) do |vd|
+  set_primitive(vd, acc_value.u64).u64
+end
+
+macro(:handle_jmp_imm) do |pc, imm|
+  advance_pc_var(pc, i32tou64(imm))
+end
+
+macro(:handle_jmp_imm32) do |pc, imm32|
+  advance_pc_var(pc, i32tou64(imm32))
+end
+
+macro(:handle_inci_v4_imm4) do |v, imm|
+  val := get_value(v)
+  add := Add(val.i32, imm).i32
+  set_value(v, add).i32
+end
+
+macro(:handle_cmp) do |acc, vs|
+  If(acc, vs).CC(:CC_LT).b {
+    set_value(acc_ptr, -1).i32
+  } Else {
+    If(acc, vs).CC(:CC_EQ).b {
+      set_value(acc_ptr, 0).i32
+    } Else {
+      set_value(acc_ptr, 1).i32
+    }
+  }
+end
+
+['Add', 'Sub', 'And', 'Mul', 'Or', 'Xor', 'Shl', 'Shr', 'AShr'].each do |op|
+  # v4 v4
+  macro(:"handle_#{op.downcase}_v4_v4") do |vs1, vs2|
+    v_ := send(op, vs1, vs2).i32
+    set_value(acc_ptr, v_).i32
+  end
+  # v8
+  macro(:"handle_#{op.downcase}2_v8") do |vs|
+    v_ := send(op, acc_value.i32, vs).i32
+    set_value(acc_ptr, v_).i32
+  end
+  # 64_v8
+  macro(:"handle_#{op.downcase}2_64_v8") do |vs|
+    v_ := send(op, acc_value.i64, vs).i64
+    set_value(acc_ptr, v_).i64
+  end
+  # imm
+  macro(:"handle_#{op.downcase}i_imm") do |imm|
+    v_ := send(op, acc_value.i32, imm).i32
+    set_value(acc_ptr, v_).i32
+  end
+end
+
+# Unary
+['Not', 'Neg'].each do |op|
+  macro(:"handle_#{op.downcase}") do
+    v_ := send(op, acc_value.i32).i32
+    set_value(acc_ptr, v_).i32
+  end
+  macro(:"handle_#{op.downcase}_64") do
+    v_ := send(op, acc_value.i64).i64
+    set_value(acc_ptr, v_).i64
+  end
+end
+
+['Div', 'Mod'].each do |op|
+  macro(:"handle_#{op.downcase}_v4_v4") do |vs1, vs2|
+    # TODO: exception if vs2 is 0
+    v_ := send(op, vs1, vs2).i32
+    set_value(acc_ptr, v_).i32
+  end
+  macro(:"handle_#{op.downcase}2_v8") do |vs|
+    # TODO: exception if vs is 0
+    v_ := send(op, acc_value.i32, vs).i32
+    set_value(acc_ptr, v_).i32
+  end
+  macro(:"handle_#{op.downcase}2_64_v8") do |vs|
+    # TODO: exception if vs is 0
+    v_ := send(op, acc_value.i64, vs).i64
+    set_value(acc_ptr, v_).i64
+  end
+  macro(:"handle_#{op.downcase}u2_v8") do |vs|
+    # TODO: exception if vs is 0
+    v_ := send(op, acc_value.u32, vs).u32
+    set_value(acc_ptr, v_).u32
+  end
+  macro(:"handle_#{op.downcase}u2_64_v8") do |vs|
+    # TODO: exception if vs is 0
+    v_ := send(op, acc_value.u64, vs).u64
+    set_value(acc_ptr, v_).u64
+  end
+  macro(:"handle_#{op.downcase}i_imm") do |imm|
+    # TODO: exception if imm is 0
+    v_ := send(op, acc_value.i32, imm).i32
+    set_value(acc_ptr, v_).i32
+  end
+end
+
+macro(:handle_newarr_v4_v4_id16) do |vd, vs, id|
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  array := call_runtime("CreateArrayByIdEntrypoint", method_ptr, u16tou32(id), vs.word).ptr
+  set_object(vd, array).ref
+end
+
+macro(:handle_lenarr_v8) do |vs|
+  ss := SaveState()
+  # TODO(aantipina): add assert(has_object(vs))
+  null_check := NullCheck(vs.ref, ss).ref
+  len_array := LoadI(null_check).Imm(Constants::ARRAY_LENGTH_OFFSET).i32
+  set_acc_primitive(acc_ptr, len_array).i32
+end
+
+[['ldarr', :i32], ['ldarr_64', :i64], ['fldarr_64', :f64], ['fldarr_32', :f32]].each do |name, type|
+  macro(:"handle_#{name}_v8") do |vs|
+    ss := SaveState()
+    # TODO(aantipina): add assert(has_object(vs))
+    null_check := NullCheck(vs.ref, ss).ref
+    len_array := LoadI(null_check).Imm(Constants::ARRAY_LENGTH_OFFSET).i32
+    bounds_check := BoundsCheck(len_array, acc_value.i32, ss).i32
+    load_array := LoadArray(null_check, bounds_check).send(type)
+    set_value(acc_ptr, load_array).send(type)
+  end
+end
+
+[8, 16].each do |size|
+  macro(:"handle_ldarr_#{size}_v8") do |vs|
+    ss := SaveState()
+    # TODO(aantipina): add assert(has_object(vs))
+    null_check := NullCheck(vs.ref, ss).ref
+    len_array := LoadI(null_check).Imm(Constants::ARRAY_LENGTH_OFFSET).i32
+    bounds_check := BoundsCheck(len_array, acc_value.i32, ss).i32
+    load_array := LoadArray(null_check, bounds_check).send(:"i#{size}")
+    set_value(acc_ptr, send(:"i#{size}toi32", load_array)).i32
+  end
+end
+
+[8, 16].each do |size|
+  macro(:"handle_ldarru_#{size}_v8") do |vs|
+    ss := SaveState()
+    # TODO(aantipina): add assert(has_object(vs))
+    null_check := NullCheck(vs.ref, ss).ref
+    len_array := LoadI(null_check).Imm(Constants::ARRAY_LENGTH_OFFSET).i32
+    bounds_check := BoundsCheck(len_array, acc_value.i32, ss).i32
+    load_array := LoadArray(null_check, bounds_check).send(:"u#{size}")
+    set_value(acc_ptr, send(:"u#{size}tou32", load_array)).u32
+  end
+end
+
+macro(:handle_ldarr_obj_v8) do |vs|
+  ss := SaveState()
+  # TODO(aantipina): add assert(has_object(vs))
+  null_check := NullCheck(vs.ref, ss).ref
+  len_array := LoadI(null_check).Imm(Constants::ARRAY_LENGTH_OFFSET).i32
+  bounds_check := BoundsCheck(len_array, acc_value.i32, ss).i32
+  load_array := LoadArray(null_check, bounds_check).ref
+  set_acc_object(acc_ptr, load_array).ref
+end
+
+[8, 16].each do |size|
+  macro(:"handle_starr_#{size}_v4_v4") do |vs1, vs2|
+    ss := SaveState()
+    # TODO(aantipina): add assert(has_object(vs1))
+    null_check := NullCheck(vs1.ref, ss).ref
+    len_array := LoadI(null_check).Imm(Constants::ARRAY_LENGTH_OFFSET).i32
+    bounds_check := BoundsCheck(len_array, vs2, ss).i32
+    StoreArray(null_check, bounds_check, acc_value.i32).send(:"i#{size}")
+  end
+end
+
+[['starr', :i32], ['starr_64', :i64], ['starr_obj', :ref], ['fstarr_32', :f32], ['fstarr_64', :f64]].each do |name, type|
+  macro(:"handle_#{name}_v4_v4") do |vs1, vs2|
+    ss := SaveState()
+    # TODO(aantipina): add assert(has_object(vs1))
+    null_check := NullCheck(vs1.ref, ss).ref
+    len_array := LoadI(null_check).Imm(Constants::ARRAY_LENGTH_OFFSET).i32
+    bounds_check := BoundsCheck(len_array, vs2.i32, ss).i32
+    StoreArray(null_check, bounds_check, acc_value.send(type)).send(type)
+  end
+end
+
+macro(:handle_newobj_v8_id16) do |vd, id|
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  # TODO(mbolshov): handle returned nullptr
+  object := call_runtime("CreateObjectByIdEntrypoint", %tr, method_ptr, u16tou32(id)).ptr
+  set_object(vd, object).ref
+end
+
+[['', :u32], ['64_', :u64]].each do |name, type|
+  macro(:"handle_stobj_#{name}v8_id16") do |vs, id|
+    # TODO(aantipina): add assert(has_object(vs))
+    method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+    offset := call_runtime("GetFieldOffsetByIdEntrypoint", method_ptr, u16tou32(id)).word
+    Store(vs, offset, acc_value.send(type)).send(type)
+  end
+end
+
+macro(:handle_stobj_obj_v8_id16) do |vs, id|
+  # TODO(aantipina): add assert(has_object(vs))
+  # TODO(aantipina): add assert(has_object(acc))
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  offset := call_runtime("GetFieldOffsetByIdEntrypoint", method_ptr, u16tou32(id)).word
+  Store(vs, offset, acc_value.ref).SetNeedBarrier(true).ref
+end
+
+[['', :u32], ['64_', :u64]].each do |name, type|
+  macro(:"handle_stobj_v_#{name}v4_v4_id16") do |v1, v2, id|
+    # TODO(aantipina): add assert(has_object(vs))
+    method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+    offset := call_runtime("GetFieldOffsetByIdEntrypoint", method_ptr, u16tou32(id)).word
+    Store(v2.ref, offset, v1.send(type)).send(type)
+  end
+end
+
+macro(:handle_stobj_v_obj_v4_v4_id16) do |v1, v2, id|
+  # TODO(aantipina): add assert(has_object(vs))
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  offset := call_runtime("GetFieldOffsetByIdEntrypoint", method_ptr, u16tou32(id)).word
+  Store(v2.ref, offset, v1.ref).SetNeedBarrier(true).ref
+end
+
+[['', :u32], ['64_', :u64]].each do |name, type|
+  macro(:"handle_ldobj_#{name}v8_id16") do |vs, id|
+    # TODO(aantipina): add assert(has_object(vs))
+    method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+    offset := call_runtime("GetFieldOffsetByIdEntrypoint", method_ptr, u16tou32(id)).word
+    value := Load(vs, offset).send(type)
+    set_acc_primitive(acc_ptr, value).send(type)
+  end
+end
+
+macro(:handle_ldobj_obj_v8_id16) do |vs, id|
+  # TODO(aantipina): add assert(has_object(vs))
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  offset := call_runtime("GetFieldOffsetByIdEntrypoint", method_ptr, u16tou32(id)).word
+  value := Load(vs, offset).ref
+  set_acc_object(acc_ptr, value).ref
+end
+
+[['', :u32], ['64_', :u64]].each do |name, type|
+  macro(:"handle_ldobj_v_#{name}v4_v4_id16") do |vd, vs, id|
+    # TODO(aantipina): add assert(has_object(vs))
+    method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+    offset := call_runtime("GetFieldOffsetByIdEntrypoint", method_ptr, u16tou32(id)).word
+    value := Load(vs, offset).send(type)
+    set_primitive(vd, value).send(type)
+  end
+end
+
+macro(:handle_ldobj_v_obj_v4_v4_id16) do |vd, vs, id|
+  # TODO(aantipina): add assert(has_object(vs))
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  offset := call_runtime("GetFieldOffsetByIdEntrypoint", method_ptr, u16tou32(id)).word
+  value := Load(vs, offset).ref
+  set_object(vd, value).ref
+end
+
+[['', :u32], ['64_', :u64]].each do |name, type|
+  macro(:"handle_ststatic_#{name}id16") do |id|
+    method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+    addr := call_runtime("GetStaticFieldAddressByIdEntrypoint", %tr, method_ptr, u16tou32(id)).ptr
+    # TODO(aantipina): add assert(is_static(field))
+    StoreI(addr, acc_value.send(type)).Imm(0).send(type)
+  end
+end
+
+macro(:handle_ststatic_obj_id16) do |id|
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  addr := call_runtime("GetStaticFieldAddressByIdEntrypoint", %tr, method_ptr, u16tou32(id)).ptr
+  # TODO(aantipina): add assert(is_static(field))
+  StoreI(addr, acc_value.ref).Imm(0).SetNeedBarrier(true).ref
+end
+
+[['', :u32], ['64_', :u64]].each do |name, type|
+  macro(:"handle_ldstatic_#{name}id16") do |id|
+    method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+    addr := call_runtime("GetStaticFieldAddressByIdEntrypoint", %tr, method_ptr, u16tou32(id)).ptr
+    # TODO(aantipina): add assert(is_static(field))
+    value := LoadI(addr).Imm(0).send(type)
+    set_acc_primitive(acc_ptr, value).send(type)
+  end
+end
+
+macro(:handle_ldstatic_obj_id16) do |id|
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  addr := call_runtime("GetStaticFieldAddressByIdEntrypoint", %tr, method_ptr, u16tou32(id)).ptr
+  # TODO(aantipina): add assert(is_static(field))
+  value := LoadI(addr).Imm(0).ref
+  set_acc_object(acc_ptr, value).ref
+end
+
+macro(:handle_isinstance_id16) do |id|
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  # TODO(aantipina): add assert(has_object(acc))
+  res := call_runtime("IsInstanceByBCIDEntrypoint", method_ptr, acc_value.u64, u16tou32(id)).u8
+  set_acc_primitive(acc_ptr, u8tou32(res)).u32
+end
+
+macro(:handle_checkcast_id16) do |id|
+  method_ptr := LoadI(%frame).Imm(Constants::FRAME_METHOD_OFFSET).ptr
+  # TODO(aantipina): add assert(has_object(acc))
+  call_runtime("CheckCastByBCIDEntrypoint", method_ptr, acc_value.u64, u16tou32(id)).void
+end
+
+macro(:handle_sta_obj_v8) do |vd|
+  # TODO(aantipina): add assert(has_object(acc))
+  set_object(vd, acc_value.ref).ref
+end
+
+macro(:handle_lda_obj_v8) do |vs|
+  # TODO(aantipina): add assert(has_object(acc))
+  set_acc_object(acc_ptr, vs).ref
+end
+
+macro(:handle_mov_null_v8) do |vd|
+  set_object(vd, 0).ref
+end
+
+macro(:handle_lda_null) do
+  set_acc_object(acc_ptr, 0).ref
+end
+
+['eq', 'ne', 'lt', 'gt', 'le', 'ge'].each do |cc|
+  ['8', '16'].each do |from|
+    macro(:"handle_j#{cc}_v8_imm#{from}") do |pc, vs, imm, size|
+      acc := acc_value.i32
+      If(acc, vs).CC(:"cc_#{cc}".upcase).b {
+        to_imm = as_imm(imm)
+        imm_casted = Cast(to_imm).SrcType("DataType::INT#{from}").i32
+        pc1 := advance_pc_var(pc, i32tou64(imm_casted))
+      } Else {
+        pc2 := advance_pc_imm(pc, size)
+      }
+      Phi(pc1, pc2).ptr
+    end
+  end
+end
+
+['ne', 'eq', 'lt', 'gt', 'le', 'ge'].each do |cc|
+  ['8', '16'].each do |from|
+    macro(:"handle_j#{cc}z_imm#{from}") do |pc, imm, size|
+      If(acc_value.i32, 0).CC(:"cc_#{cc}".upcase).b {
+        to_imm = as_imm(imm)
+        imm_casted = Cast(to_imm).SrcType("DataType::INT#{from}").i32
+        pc1 := advance_pc_var(pc, i32tou64(imm_casted))
+      } Else {
+        pc2 := advance_pc_imm(pc, size)
+      }
+      Phi(pc1, pc2).ptr
+    end
+  end
+end
+
+# TODO: fix fcmp for nans
+macro(:"handle_fcmpg_v8") do |vs|
+  v_ := Cmp(acc_value.f32, vs).SrcType("DataType::FLOAT32").Fcmpg(true).i32
+  set_acc_primitive(acc_ptr, v_).i32
+end
+
+macro(:"handle_fcmpg_64_v8") do |vs|
+  v_ := Cmp(acc_value.f64, vs).SrcType("DataType::FLOAT64").Fcmpg(true).i32
+  set_acc_primitive(acc_ptr, v_).i32
+end
+
+macro(:"handle_fcmpl_v8") do |vs|
+  v_ := Cmp(acc_value.f32, vs).i32
+  set_acc_primitive(acc_ptr, v_).i32
+end
+
+macro(:"handle_fcmpl_64_v8") do |vs|
+  v_ := Cmp(acc_value.f64, vs).i32
+  set_acc_primitive(acc_ptr, v_).i32
+end
+
+['ne', 'eq'].each do |cc|
+  ['8', '16'].each do |from|
+    macro(:"handle_j#{cc}_obj_v8_imm#{from}") do |pc, vs, imm, size|
+      # TODO(aantipina): add assert(has_object(acc))
+      # TODO(aantipina): add assert(has_object(vs))
+      If(vs, acc_value.ref).CC(:"cc_#{cc}".upcase).b {
+        to_imm = as_imm(imm)
+        imm_casted = Cast(to_imm).SrcType("DataType::INT#{from}").i32
+        pc1 := advance_pc_var(pc, i32tou64(imm_casted))
+      } Else {
+        pc2 := advance_pc_imm(pc, size)
+      }
+      Phi(pc1, pc2).ptr
+    end
+  end
+end
+
+['ne', 'eq'].each do |cc|
+  ['8', '16'].each do |from|
+    macro(:"handle_j#{cc}z_obj_imm#{from}") do |pc, imm, size|
+      If(acc_value.ref, 0).CC(:"cc_#{cc}".upcase).b {
+        to_imm = as_imm(imm)
+        imm_casted = Cast(to_imm).SrcType("DataType::INT#{from}").i32
+        pc1 := advance_pc_var(pc, i32tou64(imm_casted))
+      } Else {
+        pc2 := advance_pc_imm(pc, size)
+      }
+      Phi(pc1, pc2).ptr
+    end
+  end
+end
+
+# Conversions from integer types to u1
+
+['i32', 'i64', 'u32', 'u64'].each do |from|
+  macro(:"handle_#{from}tou1") do
+    value := acc_value.send(:"#{from}")
+    set_value(acc_ptr, 0).send(:"#{from}")
+    If(value, 0).CC(:CC_NE).b {
+      set_value(acc_ptr, 1).u32
+    }
+  end
+end
+
+# Integer truncations and extensions
+
+['i32', 'u32'].each do |from|
+  macro(:"handle_#{from}toi64") do
+    set_value(acc_ptr, send(:"#{from}toi64", acc_value.send(:"#{from}"))).i64
+  end
+end
+
+['i32', 'u32'].each do |from|
+  ['i16', 'u16', 'i8', 'u8'].each do |to|
+    macro(:"handle_#{from}to#{to}") do
+      value := send(:"#{from}to#{to}", acc_value.send(:"#{from}"))
+      to_expanded = to.gsub(/\d+/,"32")
+      value_expanded := send(:"#{to}to#{to_expanded}", value)
+      set_value(acc_ptr, value_expanded).send(:"#{to_expanded}")
+    end
+  end
+end
+
+
+
+macro(:handle_i64toi32) do
+  set_value(acc_ptr, i64toi32(acc_value.i64)).i32
+end
+
+['i32', 'u32'].each do |to|
+  macro(:"handle_u64to#{to}") do
+    set_value(acc_ptr, send(:"u64to#{to}", acc_value.u64)).send(:"#{to}")
+  end
+end
+
+# Conversions between integer and floating point types
+
+['i32', 'u32', 'i64', 'u64'].each do |from|
+  ['f32', 'f64'].each do |to|
+    macro(:"handle_#{from}to#{to}") do
+      set_value(acc_ptr, send(:"#{from}to#{to}", acc_value.send(:"#{from}"))).send("#{to}")
+    end
+  end
+end
+
+['f64', 'i32', 'i64', 'u32', 'u64'].each do |to|
+  macro(:"handle_f32to#{to}") do
+    set_value(acc_ptr, send(:"f32to#{to}", acc_value.f32)).send(:"#{to}")
+  end
+end
+
+['i32', 'i64', 'u32', 'u64', 'f32'].each do |to|
+  macro(:"handle_f64to#{to}") do
+    set_value(acc_ptr, send("f64to#{to}", acc_value.f64)).send("#{to}")
+  end
+end
+
+macro(:handle_mov_64) do |vd, vs|
+  set_primitive(vd, vs).u64
+end
+
+macro(:handle_mov_obj) do |vd, vs|
+  # TODO(mgonopolskiy): add assert(has_object(vs))
+  set_object(vd, vs).ref
+end
+
+macro(:handle_lda_64) do |vs|
+  set_acc_primitive(acc_ptr, vs).u64
+end
+
+macro(:handle_sta_64_v8) do |vd|
+  set_primitive(vd, acc_value.u64).u64
+end
+
+macro(:handle_i32tof64) do
+  set_value(acc_ptr, i32tof64(acc_value.i32)).f64
+end
+
+macro(:handle_fmovi_v8_imm) do |vd, imm|
+  set_primitive(vd, imm).f32
+end
+
+macro(:handle_fmovi_64_v8_imm) do |vd, imm|
+  set_primitive(vd, imm).f64
+end
+
+macro(:handle_fadd2_64_v8) do |vs|
+  v_ := Add(acc_value.f64, vs).f64
+  set_value(acc_ptr, v_).f64
+end
+
+macro(:handle_fsub2_v8) do |vs|
+  v_ := Sub(acc_value.f32, vs).f32
+  set_value(acc_ptr, v_).f32
+end
+
+macro(:handle_fsub2_64_v8) do |vs|
+  v_ := Sub(acc_value.f64, vs).f64
+  set_value(acc_ptr, v_).f64
+end
+
+macro(:handle_fmul2_v8) do |vs|
+  v_ := Mul(acc_value.f32, vs).f32
+  set_value(acc_ptr, v_).f32
+end
+
+macro(:handle_fmul2_64_v8) do |vs|
+  v_ := Mul(acc_value.f64, vs).f64
+  set_value(acc_ptr, v_).f64
+end
+
+macro(:handle_fmod2_v8) do |vs|
+  v_ := call_runtime("fmodf", acc_value.f32, vs).f32
+  set_value(acc_ptr, v_).f32
+end
+
+macro(:handle_fmod2_64_v8) do |vs|
+  v_ := call_runtime("fmod", acc_value.f64, vs).f64
+  set_value(acc_ptr, v_).f64
+end
+
+macro(:handle_fdiv2_v8) do |vs|
+  v_ := Div(acc_value.f32, vs).f32
+  set_value(acc_ptr, v_).f32
+end
+
+macro(:handle_fdiv2_64_v8) do |vs|
+  v_ := Div(acc_value.f64, vs).f64
+  set_value(acc_ptr, v_).f64
+end
+
+[['', :f32], ['_64', :f64]].each do |name, type|
+  macro(:"handle_fneg#{name}") do
+    v_ := Neg(acc_value.send(type)).send(type)
+    set_value(acc_ptr, v_).send(type)
+  end
+end
+
+['initobj', 'call', 'call_virt'].each do |op|
+  macro(:"handle_#{op}_short_v4_v4_id16") do |v1, v2, id, size|
+    receiver = vreg_value(v1).ref if op.include?('virt')
+    generic_call(id, size, op == 'initobj', receiver, 2, lambda do |new_frame, num_vregs, _|
+      copy_reg(new_frame, num_vregs, v1)
+      copy_reg(new_frame, AddI(num_vregs).Imm(1).word, v2)
+    end)
+  end
+end
+
+['call', 'call_virt'].each do |op|
+  macro(:"handle_#{op}_acc_short_v4_imm4_id16") do |v, imm, id, size|
+    receiver = acc_receiver(v, imm).ref if op.include?('virt')
+    generic_call(id, size, false, receiver, 2, lambda do |new_frame, num_vregs, _|
+      If(imm, 0).CC(:CC_EQ).b {
+        copy_acc(frame_vreg_ptr(new_frame, num_vregs), acc_ptr)
+        copy_reg(new_frame, AddI(num_vregs).Imm(1).word, v)
+      } Else {
+        copy_reg(new_frame, num_vregs, v)
+        copy_acc(frame_vreg_ptr(new_frame, AddI(num_vregs).Imm(1).word), acc_ptr)
+      }
+    end)
+  end
+end
+
+['call', 'call_virt'].each do |op|
+  macro(:"handle_#{op}_acc_v4_v4_v4_imm4_id16") do |v1, v2, v3, imm, id, size|
+    receiver = acc_receiver(v1, imm).ref if op.include?('virt')
+    generic_call(id, size, false, receiver, 4, lambda do |new_frame, num_vregs, _|
+      If(imm, 0).CC(:CC_EQ).b {
+        copy_acc(frame_vreg_ptr(new_frame, num_vregs), acc_ptr)
+        copy_reg(new_frame, AddI(num_vregs).Imm(1).word, v1)
+        copy_reg(new_frame, AddI(num_vregs).Imm(2).word, v2)
+        copy_reg(new_frame, AddI(num_vregs).Imm(3).word, v3)
+      } Else {
+        If(imm, 1).CC(:CC_EQ).b {
+          copy_reg(new_frame, num_vregs, v1)
+          copy_acc(frame_vreg_ptr(new_frame, AddI(num_vregs).Imm(1).word), acc_ptr)
+          copy_reg(new_frame, AddI(num_vregs).Imm(2).word, v2)
+          copy_reg(new_frame, AddI(num_vregs).Imm(3).word, v3)
+        } Else {
+          If(imm, 2).CC(:CC_EQ).b {
+            copy_reg(new_frame, num_vregs, v1)
+            copy_reg(new_frame, AddI(num_vregs).Imm(1).word, v2)
+            copy_acc(frame_vreg_ptr(new_frame, AddI(num_vregs).Imm(2).word), acc_ptr)
+            copy_reg(new_frame, AddI(num_vregs).Imm(3).word, v3)
+          } Else {
+            # TODO(mbolshov): assert imm==3
+            copy_reg(new_frame, num_vregs, v1)
+            copy_reg(new_frame, AddI(num_vregs).Imm(1).word, v2)
+            copy_reg(new_frame, AddI(num_vregs).Imm(2).word, v3)
+            copy_acc(frame_vreg_ptr(new_frame, AddI(num_vregs).Imm(3).word), acc_ptr)
+          }
+        }
+      }
+    end)
+  end
+end
+
+['initobj', 'call', 'call_virt'].each do |op|
+  macro(:"handle_#{op}_v4_v4_v4_v4_id16") do |v1, v2, v3, v4, id, size|
+    receiver = vreg_value(v1).ref if op.include?('virt')
+    generic_call(id, size, op == 'initobj', receiver, 4, lambda do |new_frame, num_vregs, _|
+      copy_reg(new_frame, num_vregs, v1)
+      copy_reg(new_frame, AddI(num_vregs).Imm(1).word, v2)
+      copy_reg(new_frame, AddI(num_vregs).Imm(2).word, v3)
+      copy_reg(new_frame, AddI(num_vregs).Imm(3).word, v4)
+    end)
+  end
+end
+
+['initobj', 'call', 'call_virt'].each do |op|
+  macro(:"handle_#{op}_range_v8_id16") do |v, id, size|
+    receiver = vreg_value(v).ref if op.include?('virt')
+    generic_call(id, size, op == 'initobj', receiver, nil, lambda do |new_frame, num_vregs, num_args|
+      dst_ptr_0 := frame_vreg_ptr(new_frame, num_vregs)
+      src_ptr_0 := vreg_ptr(v)
+      i0 := 0
+      Label(:Head)  # TODO(mbolshov): use While loops when they are ready
+      i := Phi(i0, i1).word
+      If(i, num_args).CC(:CC_EQ) do
+        Goto(:Exit)
+      end
+      offset := Mul(i, Constants::VREGISTER_SIZE).word
+      dst_ptr := Add(dst_ptr_0, offset).ptr
+      src_ptr := Add(src_ptr_0, offset).ptr
+      set_value(dst_ptr, get_value(src_ptr))
+      set_tag_frame(new_frame, dst_ptr, get_tag(src_ptr))
+      i1 := Add(i, 1).word
+      Goto(:Head)
+      Label(:Exit)
+    end)
+  end
+end
+
+[:handle_return, :handle_return_64, :handle_return_obj].each do |handler|
+  macro(handler) do
+    generic_return(lambda { |prev_frame| copy_acc(acc_ptr_frame(prev_frame), acc_ptr) })
+  end
+end
+
+macro(:handle_return_void) do
+  generic_return(lambda { |_| })
+end
+
+['enter', 'exit'].each do |op|
+  macro(:"handle_monitor#{op}") do
+    # TODO(mbolshov): ref to c-pointer cast
+    call_runtime("ObjectMonitor#{op.capitalize}", u32toword(acc_value.u32)).void
+  end
+end
+
+include_plugin 'interpreter_handlers'
+
+# Functions:
+
+function(:ExecuteImplFast,
+         params: { 'tr' => 'ptr', 'pc' => 'ptr', 'frame' => 'ptr', 'dispatch_table' => 'ptr' },
+         regmap: handler_regmap,
+         regalloc_set: $panda_mask,
+         mode: [:InterpreterEntry],
+         validate: InterpreterValidation) do
+  # Arm32 is not supported
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).void
+    next
+  end
+
+  # Setup registers according to internal interpreter calling convention:
+  LiveOut(tr).DstReg(regmap[:tr]).ptr
+  LiveOut(frame).DstReg(regmap[:frame]).ptr
+
+  dispatch(dispatch_table, pc)
+  Intrinsic(:UNREACHABLE).void if defines.DEBUG
+  ReturnVoid()
+end
+
+Panda.instructions.each do |i|
+  op = i.operands # alias for brevity
+  mode = [:Interpreter]
+  mode.push(:DynamicMethod) if (i.namespace == "ecmascript" || i.properties.include?("dynamic"))
+  lang =  i.namespace == "core" ? "PANDA_ASSEMBLY" : i.namespace.upcase()
+
+  function("HANDLE_FAST_#{i.handler_name}",
+           regmap: handler_regmap,
+           regalloc_set: $panda_mask,
+           mode: mode,
+           lang: lang,
+           validate: InterpreterValidation) do
+    # Arm32 is not supported
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).void
+      next
+    end
+
+    call_runtime("DebugPrintEntrypoint", %frame, %pc).void if defines.DEBUG
+
+    pc := %pc
+    table := %dispatch
+    frame := %frame
+    tr := %tr
+
+    case i.handler_name
+    when "NOP"
+    # mov
+    when "MOVI_V4_IMM4", "MOVI_V8_IMM8"
+      handle_movi(vreg_ptr(op[0]), i8toi32(as_imm(op[1])))
+    when "MOVI_V8_IMM16"
+      handle_movi(vreg_ptr(op[0]), i16toi32(as_imm(op[1])))
+    when "MOVI_V8_IMM32"
+      handle_movi(vreg_ptr(op[0]), as_imm(op[1]))
+    when "MOVI_64_V8_IMM64"
+      handle_movi_64(vreg_ptr(op[0]), as_imm(op[1]))
+    when "MOV_V4_V4", "MOV_V8_V8", "MOV_V16_V16"
+      handle_mov(vreg_ptr(op[0]), vreg_value(op[1]).u32)
+    when "MOV_64_V4_V4", "MOV_64_V16_V16"
+      handle_mov_64(vreg_ptr(op[0]), vreg_value(op[1]).u64)
+    when "MOV_OBJ_V4_V4", "MOV_OBJ_V8_V8", "MOV_OBJ_V16_V16"
+      handle_mov_obj(vreg_ptr(op[0]), vreg_value(op[1]).ref)
+    when "MOV_NULL_V8"
+      handle_mov_null_v8(vreg_ptr(op[0]))
+    when "FMOVI_PREF_V8_IMM32"
+      handle_fmovi_v8_imm(vreg_ptr(op[0]), as_imm(op[1]))
+    when "FMOVI_64_V8_IMM64"
+      handle_fmovi_64_v8_imm(vreg_ptr(op[0]).ptr, as_imm(op[1]).f64)
+    # lda
+    when "LDA_V8"
+      handle_lda(vreg_value(op[0]).u32)
+    when "LDA_64_V8"
+      handle_lda_64(vreg_value(op[0]).u64)
+    when "LDA_OBJ_V8"
+      handle_lda_obj_v8(vreg_value(op[0]).ref)
+    when "LDA_STR_ID32"
+      handle_lda_str_id32(as_id(op[0]))
+    when "LDA_TYPE_ID16"
+      handle_lda_type_id16(as_id(op[0]))
+    when "LDA_CONST_V8_ID32"
+      handle_lda_const_v8_id32(vreg_ptr(op[0]), as_id(op[1]))
+    when "LDAI_IMM8"
+      handle_ldai_imm(i8toi32(as_imm(op[0])))
+    when "LDAI_IMM16"
+      handle_ldai_imm(i16toi32(as_imm(op[0])))
+    when "LDAI_IMM32"
+      handle_ldai_imm(as_imm(op[0]))
+    when "LDAI_64_IMM64"
+      handle_ldai_64_imm(as_imm(op[0]))
+    when "FLDAI_PREF_IMM32"
+      handle_fldai_imm(as_imm(op[0]))
+    when "FLDAI_64_IMM64"
+      handle_fldai_64_imm(as_imm(op[0]))
+    when "LDA_NULL"
+      handle_lda_null()
+    when "LENARR_V8"
+      handle_lenarr_v8(vreg_value(op[0]))
+    when "LDARR_V8"
+      handle_ldarr_v8(vreg_value(op[0]))
+    when "LDARR_8_V8"
+      handle_ldarr_8_v8(vreg_value(op[0]))
+    when "LDARR_16_V8"
+      handle_ldarr_16_v8(vreg_value(op[0]))
+    when "LDARRU_8_V8"
+      handle_ldarru_8_v8(vreg_value(op[0]))
+    when "LDARRU_16_V8"
+      handle_ldarru_16_v8(vreg_value(op[0]))
+    when "LDARR_64_V8"
+      handle_ldarr_64_v8(vreg_value(op[0]))
+    when "FLDARR_32_V8"
+      handle_fldarr_32_v8(vreg_value(op[0]))
+    when "FLDARR_64_V8"
+      handle_fldarr_64_v8(vreg_value(op[0]))
+    when "LDARR_OBJ_V8"
+      handle_ldarr_obj_v8(vreg_value(op[0]))
+    when "LDOBJ_V8_ID16"
+      handle_ldobj_v8_id16(vreg_value(op[0]).ref, as_id(op[1]))
+    when "LDOBJ_V_V4_V4_ID16"
+      handle_ldobj_v_v4_v4_id16(vreg_ptr(op[0]), vreg_value(op[1]).ref, as_id(op[2]))
+    when "LDOBJ_64_V8_ID16"
+      handle_ldobj_64_v8_id16(vreg_value(op[0]).ref, as_id(op[1]))
+    when "LDOBJ_V_64_V4_V4_ID16"
+      handle_ldobj_v_64_v4_v4_id16(vreg_ptr(op[0]), vreg_value(op[1]).ref, as_id(op[2]))
+    when "LDOBJ_OBJ_V8_ID16"
+      handle_ldobj_obj_v8_id16(vreg_value(op[0]).ref, as_id(op[1]))
+    when "LDOBJ_V_OBJ_V4_V4_ID16"
+      handle_ldobj_v_obj_v4_v4_id16(vreg_ptr(op[0]), vreg_value(op[1]).ref, as_id(op[2]))
+    when "LDSTATIC_ID16"
+      handle_ldstatic_id16(as_id(op[0]))
+    when "LDSTATIC_64_ID16"
+      handle_ldstatic_64_id16(as_id(op[0]))
+    when "LDSTATIC_OBJ_ID16"
+      handle_ldstatic_obj_id16(as_id(op[0]))
+    # sta
+    when "STA_V8"
+      handle_sta_v8(vreg_ptr(op[0]))
+    when "STA_64_V8"
+      handle_sta_64_v8(vreg_ptr(op[0]))
+    when "STA_OBJ_V8"
+      handle_sta_obj_v8(vreg_ptr(op[0]))
+    when "STARR_V4_V4"
+      handle_starr_v4_v4(vreg_value(op[0]), vreg_value(op[1]).i32)
+    when "STARR_8_V4_V4"
+      handle_starr_8_v4_v4(vreg_value(op[0]), vreg_value(op[1]).i32)
+    when "STARR_16_V4_V4"
+      handle_starr_16_v4_v4(vreg_value(op[0]), vreg_value(op[1]).i32)
+    when "STARR_64_V4_V4"
+      handle_starr_64_v4_v4(vreg_value(op[0]), vreg_value(op[1]).i32)
+    when "FSTARR_32_V4_V4"
+      handle_fstarr_32_v4_v4(vreg_value(op[0]), vreg_value(op[1]).i32)
+    when "FSTARR_64_V4_V4"
+      handle_fstarr_64_v4_v4(vreg_value(op[0]), vreg_value(op[1]).i32)
+    when "STARR_OBJ_V4_V4"
+      handle_starr_obj_v4_v4(vreg_value(op[0]), vreg_value(op[1]).i32)
+    when "STOBJ_V8_ID16"
+      handle_stobj_v8_id16(vreg_value(op[0]).ref, as_id(op[1]))
+    when "STOBJ_64_V8_ID16"
+      handle_stobj_64_v8_id16(vreg_value(op[0]).ref, as_id(op[1]))
+    when "STOBJ_OBJ_V8_ID16"
+      handle_stobj_obj_v8_id16(vreg_value(op[0]).ref, as_id(op[1]))
+    when "STOBJ_V_V4_V4_ID16"
+      handle_stobj_v_v4_v4_id16(vreg_value(op[0]), vreg_value(op[1]), as_id(op[2]))
+    when "STOBJ_V_64_V4_V4_ID16"
+      handle_stobj_v_64_v4_v4_id16(vreg_value(op[0]), vreg_value(op[1]), as_id(op[2]))
+    when "STOBJ_V_OBJ_V4_V4_ID16"
+      handle_stobj_v_obj_v4_v4_id16(vreg_value(op[0]), vreg_value(op[1]), as_id(op[2]))
+    when "STSTATIC_ID16"
+      handle_ststatic_id16(as_id(op[0]))
+    when "STSTATIC_64_ID16"
+      handle_ststatic_64_id16(as_id(op[0]))
+    when "STSTATIC_OBJ_ID16"
+      handle_ststatic_obj_id16(as_id(op[0]))
+    # jmp
+    when "JMP_IMM8"
+      pc := handle_jmp_imm(pc, i8toi32(as_imm(op[0])))
+    when "JMP_IMM16"
+      pc := handle_jmp_imm(pc, i16toi32(as_imm(op[0])))
+    when "JMP_IMM32"
+      pc := handle_jmp_imm(pc, as_imm(op[0]))
+    # conditional jumps
+    # NB! Better not to load jump offset when condition is false
+    when "JEQ_V8_IMM8"
+      pc := handle_jeq_v8_imm8(pc, vreg_value(op[0]).i32, op[1], i.format.size)
+    when "JEQ_V8_IMM16"
+      pc := handle_jeq_v8_imm16(pc, vreg_value(op[0]).i32, op[1], i.format.size)
+    when "JNE_V8_IMM8"
+      pc := handle_jne_v8_imm8(pc, vreg_value(op[0]).i32, op[1], i.format.size)
+    when "JNE_V8_IMM16"
+      pc := handle_jne_v8_imm16(pc, vreg_value(op[0]).i32, op[1], i.format.size)
+    when "JLT_V8_IMM8"
+      pc := handle_jlt_v8_imm8(pc, vreg_value(op[0]).i32, op[1], i.format.size)
+    when "JLT_V8_IMM16"
+      pc := handle_jlt_v8_imm16(pc, vreg_value(op[0]).i32, op[1], i.format.size)
+    when "JGT_V8_IMM8"
+      pc := handle_jgt_v8_imm8(pc, vreg_value(op[0]).i32, op[1], i.format.size)
+    when "JGT_V8_IMM16"
+      pc := handle_jgt_v8_imm16(pc, vreg_value(op[0]).i32, op[1], i.format.size)
+    when "JLE_V8_IMM8"
+      pc := handle_jle_v8_imm8(pc, vreg_value(op[0]).i32, op[1], i.format.size)
+    when "JLE_V8_IMM16"
+      pc := handle_jle_v8_imm16(pc, vreg_value(op[0]).i32, op[1], i.format.size)
+    when "JGE_V8_IMM8"
+      pc := handle_jge_v8_imm8(pc, vreg_value(op[0]).i32, op[1], i.format.size)
+    when "JGE_V8_IMM16"
+      pc := handle_jge_v8_imm16(pc, vreg_value(op[0]).i32, op[1], i.format.size)
+    when "JEQZ_IMM8"
+      pc := handle_jeqz_imm8(pc, op[0], i.format.size)
+    when "JEQZ_IMM16"
+      pc := handle_jeqz_imm16(pc, op[0], i.format.size)
+    when "JNEZ_IMM8"
+      pc := handle_jnez_imm8(pc, op[0], i.format.size)
+    when "JNEZ_IMM16"
+      pc := handle_jnez_imm16(pc, op[0], i.format.size)
+    when "JLTZ_IMM8"
+      pc := handle_jltz_imm8(pc, op[0], i.format.size)
+    when "JLTZ_IMM16"
+      pc := handle_jltz_imm16(pc, op[0], i.format.size)
+    when "JGTZ_IMM8"
+      pc := handle_jgtz_imm8(pc, op[0], i.format.size)
+    when "JGTZ_IMM16"
+      pc := handle_jgtz_imm16(pc, op[0], i.format.size)
+    when "JLEZ_IMM8"
+      pc := handle_jlez_imm8(pc, op[0], i.format.size)
+    when "JLEZ_IMM16"
+      pc := handle_jlez_imm16(pc, op[0], i.format.size)
+    when "JGEZ_IMM8"
+      pc := handle_jgez_imm8(pc, op[0], i.format.size)
+    when "JGEZ_IMM16"
+      pc := handle_jgez_imm16(pc, op[0], i.format.size)
+    when "JNEZ_OBJ_IMM8"
+      pc := handle_jnez_obj_imm8(pc, op[0], i.format.size)
+    when "JNEZ_OBJ_IMM16"
+      pc := handle_jnez_obj_imm16(pc, op[0], i.format.size)
+    when "JEQZ_OBJ_IMM8"
+      pc := handle_jeqz_obj_imm8(pc, op[0], i.format.size)
+    when "JEQZ_OBJ_IMM16"
+      pc := handle_jeqz_obj_imm16(pc, op[0], i.format.size)
+    when "JNE_OBJ_V8_IMM8"
+      pc := handle_jne_obj_v8_imm8(pc, vreg_value(op[0]).ref, op[1], i.format.size)
+    when "JNE_OBJ_V8_IMM16"
+      pc := handle_jne_obj_v8_imm16(pc, vreg_value(op[0]).ref, op[1], i.format.size)
+    when "JEQ_OBJ_V8_IMM8"
+      pc := handle_jeq_obj_v8_imm8(pc, vreg_value(op[0]).ref, op[1], i.format.size)
+    when "JEQ_OBJ_V8_IMM16"
+      pc := handle_jeq_obj_v8_imm16(pc, vreg_value(op[0]).ref, op[1], i.format.size)
+    # cmp
+    when "FCMPG_PREF_V8"
+      handle_fcmpg_v8(vreg_value(op[0]).f32)
+    when "FCMPG_64_V8"
+      handle_fcmpg_64_v8(vreg_value(op[0]).f64)
+    when "FCMPL_PREF_V8"
+      handle_fcmpl_v8(vreg_value(op[0]).f32)
+    when "FCMPL_64_V8"
+      handle_fcmpl_64_v8(vreg_value(op[0]).f64)
+    when "UCMP_PREF_V8"
+      handle_cmp(acc_value.u32, vreg_value(op[0]).u32)
+    when "UCMP_64_PREF_V8"
+      handle_cmp(acc_value.u64, vreg_value(op[0]).u64)
+    when "CMP_64_V8"
+      handle_cmp(acc_value.i64, vreg_value(op[0]).i64)
+    # add
+    when "ADD_V4_V4"
+      handle_add_v4_v4(vreg_value(op[0]).i32, vreg_value(op[1]).i32)
+    when "INCI_V4_IMM4"
+      handle_inci_v4_imm4(vreg_ptr(op[0]), i8toi32(as_imm(op[1])))
+    when "ADDI_IMM8"
+      handle_addi_imm(i8toi32(as_imm(op[0])))
+    when "ADD2_V8"
+      handle_add2_v8(vreg_value(op[0]).i32)
+    when "ADD2_64_V8"
+      handle_add2_64_v8(vreg_value(op[0]).i64)
+    when "FADD2_64_V8"
+      handle_fadd2_64_v8(vreg_value(op[0]).f64)
+    when "FADD2_PREF_V8"
+      handle_fadd2_v8(vreg_value(op[0]).f32)
+    # sub
+    when "FSUB2_PREF_V8"
+      handle_fsub2_v8(vreg_value(op[0]).f32)
+    when "SUB_V4_V4"
+      handle_sub_v4_v4(vreg_value(op[0]).i32, vreg_value(op[1]).i32)
+    when "SUB2_V8"
+      handle_sub2_v8(vreg_value(op[0]).i32)
+    when "SUB2_64_V8"
+      handle_sub2_64_v8(vreg_value(op[0]).i64)
+    when "SUBI_IMM8"
+      handle_subi_imm(i8toi32(as_imm(op[0])))
+    when "FSUB2_64_V8"
+      handle_fsub2_64_v8(vreg_value(op[0]).f64)
+    when "SUB2_V8"
+      handle_sub2_v8(vreg_value(op[0]).i32)
+    when "FSUB2_64_V8"
+      handle_fsub2_64_v8(vreg_value(op[0]).f64)
+    # mul
+    when "MUL_V4_V4"
+      handle_mul_v4_v4(vreg_value(op[0]).i32, vreg_value(op[1]).i32)
+    when "MUL2_V8"
+      handle_mul2_v8(vreg_value(op[0]).i32)
+    when "FMUL2_PREF_V8"
+      handle_fmul2_v8(vreg_value(op[0]).f32)
+    when "MUL2_64_V8"
+      handle_mul2_64_v8(vreg_value(op[0]).i64)
+    when "MULI_IMM8"
+      handle_muli_imm(i8toi32(as_imm(op[0])))
+    when "FMUL2_64_V8"
+      handle_fmul2_64_v8(vreg_value(op[0]).f64)
+    # div
+    when "FDIV2_PREF_V8"
+      handle_fdiv2_v8(vreg_value(op[0]).f32)
+    when "FDIV2_64_V8"
+      handle_fdiv2_64_v8(vreg_value(op[0]).f64)
+    when "DIV_V4_V4"
+      handle_div_v4_v4(vreg_value(op[0]).i32, vreg_value(op[1]).i32)
+    when "DIV2_V8"
+      handle_div2_v8(vreg_value(op[0]).i32)
+    when "DIVI_IMM8"
+      handle_divi_imm(i8toi32(as_imm(op[0])))
+    when "DIV2_64_V8"
+      handle_div2_64_v8(vreg_value(op[0]).i64)
+    when "DIVU2_PREF_V8"
+      handle_divu2_v8(vreg_value(op[0]).i32)
+    when "DIVU2_64_PREF_V8"
+      handle_divu2_64_v8(vreg_value(op[0]).i64)
+    # mod
+    when "FMOD2_PREF_V8"
+      handle_fmod2_v8(vreg_value(op[0]).f32)
+    when "FMOD2_64_V8"
+      handle_fmod2_64_v8(vreg_value(op[0]).f64)
+    when "MOD_V4_V4"
+      handle_mod_v4_v4(vreg_value(op[0]).i32, vreg_value(op[1]).i32)
+    when "MOD2_V8"
+      handle_mod2_v8(vreg_value(op[0]).i32)
+    when "MODI_IMM8"
+      handle_modi_imm(i8toi32(as_imm(op[0])))
+    when "MOD2_64_V8"
+      handle_mod2_64_v8(vreg_value(op[0]).i64)
+    when "MODU2_PREF_V8"
+      handle_modu2_v8(vreg_value(op[0]).i32)
+    when "MODU2_64_PREF_V8"
+      handle_modu2_64_v8(vreg_value(op[0]).i64)
+    # neg
+    when "FNEG_64"
+      handle_fneg_64()
+    when "FNEG_PREF_NONE"
+      handle_fneg()
+    # and
+    when "AND2_PREF_V8"
+      handle_and2_v8(vreg_value(op[0]).i64)
+    when "AND2_64_PREF_V8"
+      handle_and2_64_v8(vreg_value(op[0]).i64)
+    when "ANDI_IMM32"
+      handle_andi_imm(as_imm(op[0]))
+    when "AND_PREF_V4_V4"
+      handle_and_v4_v4(vreg_value(op[0]).i32, vreg_value(op[1]).i32)
+    # or
+    when "OR2_PREF_V8"
+      handle_or2_v8(vreg_value(op[0]).i32)
+    when "OR2_64_PREF_V8"
+      handle_or2_64_v8(vreg_value(op[0]).i64)
+    when "ORI_IMM32"
+      handle_ori_imm(as_imm(op[0]))
+    when "OR_PREF_V4_V4"
+      handle_or_v4_v4(vreg_value(op[0]).i32, vreg_value(op[1]).i32)
+    when "ASHR2_PREF_V8"
+      handle_ashr2_v8(vreg_value(op[0]).i32)
+    when "ASHR2_64_PREF_V8"
+      handle_ashr2_64_v8(vreg_value(op[0]).i64)
+    when "ASHRI_IMM8"
+      handle_ashri_imm(as_imm(op[0]))
+    when "ASHR_PREF_V4_V4"
+      handle_ashr_v4_v4(vreg_value(op[0]).i32, vreg_value(op[1]).i32)
+    # shr
+    when "SHRI_IMM8"
+      handle_shri_imm(i8toi32(as_imm(op[0])))
+    when "SHR_PREF_V4_V4"
+      handle_shr_v4_v4(vreg_value(op[0]).i32, vreg_value(op[1]).i32)
+    when "SHR2_PREF_V8"
+      handle_shr2_v8(vreg_value(op[0]).i32)
+    when "SHR2_64_PREF_V8"
+      handle_shr2_64_v8(vreg_value(op[0]).i64)
+    # xor
+    when "XOR2_PREF_V8"
+      handle_xor2_v8(vreg_value(op[0]).i32)
+    when "XOR2_64_PREF_V8"
+      handle_xor2_64_v8(vreg_value(op[0]).i64)
+    when "XORI_PREF_IMM32"
+      handle_xori_imm(as_imm(op[0]))
+    when "XOR_PREF_V4_V4"
+      handle_xor_v4_v4(vreg_value(op[0]).i32, vreg_value(op[1]).i32)
+    # shl
+    when "SHLI_IMM8"
+      handle_shli_imm(i8toi32(as_imm(op[0])))
+    when "SHL_PREF_V4_V4"
+      handle_shl_v4_v4(vreg_value(op[0]).i32, vreg_value(op[1]).i32)
+    when "SHL2_PREF_V8"
+      handle_shl2_v8(vreg_value(op[0]).i32)
+    when "SHL2_64_PREF_V8"
+      handle_shl2_64_v8(vreg_value(op[0]).i64)
+    when "NOT_PREF_NONE"
+      handle_not()
+    when "NOT_64_PREF_NONE"
+      handle_not_64()
+    when "NEG"
+      handle_neg()
+    when "NEG_64"
+      handle_neg_64()
+    # new
+    when "NEWARR_V4_V4_ID16"
+      handle_newarr_v4_v4_id16(vreg_ptr(op[0]), vreg_value(op[1]), as_id(op[2]))
+    when "NEWOBJ_V8_ID16"
+      handle_newobj_v8_id16(vreg_ptr(op[0]), as_id(op[1]))
+    # checks
+    when "ISINSTANCE_ID16"
+      handle_isinstance_id16(as_id(op[0]))
+    when "CHECKCAST_ID16"
+      handle_checkcast_id16(as_id(op[0]))
+    # cast
+    when "I32TOU1_PREF_NONE"
+      handle_i32tou1()
+    when "I64TOU1_PREF_NONE"
+      handle_i64tou1()
+    when "U32TOU1_PREF_NONE"
+      handle_u32tou1()
+    when "U64TOU1_PREF_NONE"
+      handle_u64tou1()
+    when "I32TOI64_PREF_NONE"
+      handle_i32toi64()
+    when "I32TOI16_PREF_NONE"
+      handle_i32toi16()
+    when "I32TOU16_PREF_NONE"
+      handle_i32tou16()
+    when "I32TOI8_PREF_NONE"
+      handle_i32toi8()
+    when "I32TOU8_PREF_NONE"
+      handle_i32tou8()
+    when "I64TOI32_PREF_NONE"
+      handle_i64toi32()
+    when "U32TOI64_PREF_NONE"
+      handle_u32toi64()
+    when "U32TOI16_PREF_NONE"
+      handle_u32toi16()
+    when "U32TOU16_PREF_NONE"
+      handle_u32tou16()
+    when "U32TOI8_PREF_NONE"
+      handle_u32toi8()
+    when "U32TOU8_PREF_NONE"
+      handle_u32tou8()
+    when "U64TOI32_PREF_NONE"
+      handle_u64toi32()
+    when "U64TOU32_PREF_NONE"
+      handle_u64tou32()
+    when "I32TOF32_PREF_NONE"
+      handle_i32tof32()
+    when "I32TOF64_PREF_NONE"
+      handle_i32tof64()
+    when "U32TOF32_PREF_NONE"
+      handle_u32tof32()
+    when "U32TOF64_PREF_NONE"
+      handle_u32tof64()
+    when "I64TOF32_PREF_NONE"
+      handle_i64tof32()
+    when "I64TOF64_PREF_NONE"
+      handle_i64tof64()
+    when "U64TOF32_PREF_NONE"
+      handle_u64tof32()
+    when "U64TOF64_PREF_NONE"
+      handle_u64tof64()
+    when "F32TOF64_PREF_NONE"
+      handle_f32tof64()
+    when "F32TOI32_PREF_NONE"
+      handle_f32toi32()
+    when "F32TOI64_PREF_NONE"
+      handle_f32toi64()
+    when "F32TOU32_PREF_NONE"
+      handle_f32tou32()
+    when "F32TOU64_PREF_NONE"
+      handle_f32tou64()
+    when "F64TOI32_PREF_NONE"
+      handle_f64toi32()
+    when "F64TOI64_PREF_NONE"
+      handle_f64toi64()
+    when "F64TOU32_PREF_NONE"
+      handle_f64tou32()
+    when "F64TOU64_PREF_NONE"
+      handle_f64tou64()
+    when "F64TOF32_PREF_NONE"
+      handle_f64tof32()
+    # call
+    when "CALL_SHORT_V4_V4_ID16"
+      handle_call_short_v4_v4_id16(op[1], op[2], as_id(op[0]), i.format.size)
+    when "CALL_ACC_SHORT_V4_IMM4_ID16"
+      handle_call_acc_short_v4_imm4_id16(op[1], as_imm(op[2]), as_id(op[0]), i.format.size)
+    when "CALL_ACC_V4_V4_V4_IMM4_ID16"
+      handle_call_acc_v4_v4_v4_imm4_id16(op[1], op[2], op[3], as_imm(op[4]), as_id(op[0]), i.format.size)
+    when "CALL_V4_V4_V4_V4_ID16"
+      handle_call_v4_v4_v4_v4_id16(op[1], op[2], op[3], op[4], as_id(op[0]), i.format.size)
+    when "CALL_RANGE_V8_ID16"
+      handle_call_range_v8_id16(op[1], as_id(op[0]), i.format.size)
+    when "CALL_VIRT_SHORT_V4_V4_ID16"
+      handle_call_virt_short_v4_v4_id16(op[1], op[2], as_id(op[0]), i.format.size)
+    when "CALL_VIRT_ACC_SHORT_V4_IMM4_ID16"
+      handle_call_virt_acc_short_v4_imm4_id16(op[1], as_imm(op[2]), as_id(op[0]), i.format.size)
+    when "CALL_VIRT_V4_V4_V4_V4_ID16"
+      handle_call_virt_v4_v4_v4_v4_id16(op[1], op[2], op[3], op[4], as_id(op[0]), i.format.size)
+    when "CALL_VIRT_ACC_V4_V4_V4_IMM4_ID16"
+      handle_call_virt_acc_v4_v4_v4_imm4_id16(op[1], op[2], op[3], as_imm(op[4]), as_id(op[0]), i.format.size)
+    when "CALL_VIRT_RANGE_V8_ID16"
+      handle_call_virt_range_v8_id16(op[1], as_id(op[0]), i.format.size)
+    when "INITOBJ_SHORT_V4_V4_ID16"
+      handle_initobj_short_v4_v4_id16(op[1], op[2], as_id(op[0]), i.format.size)
+    when "INITOBJ_V4_V4_V4_V4_ID16"
+      handle_initobj_v4_v4_v4_v4_id16(op[1], op[2], op[3], op[4], as_id(op[0]), i.format.size)
+    when "INITOBJ_RANGE_V8_ID16"
+      handle_initobj_range_v8_id16(op[1], as_id(op[0]), i.format.size)
+    # return
+    when "RETURN_VOID"
+      handle_return_void()
+    when "RETURN"
+      handle_return()
+    when "RETURN_64"
+      handle_return_64()
+    when "RETURN_OBJ"
+      handle_return_obj()
+    when "MONITORENTER_PREF_NONE"
+      handle_monitorenter()
+    when "MONITOREXIT_PREF_NONE"
+      handle_monitorexit()
+
+    # dyn
+    when "MOV_DYN_V8_V8"
+      set_value(vreg_ptr(op[0]), vreg_value(op[1]).any).any
+    when "STA_DYN_V8"
+      set_value(vreg_ptr(op[0]), acc_value.any).any
+    when "LDA_DYN_V8"
+      set_value(acc_ptr, vreg_value(op[0]).any).any
+    when "LDAI_DYN_IMM32"
+      set_value(acc_ptr, i32toany(as_imm(op[0]).i32)).any
+    when "FLDAI_DYN_IMM64"
+      set_value(acc_ptr, f64toany(as_imm(op[0]).f64)).any
+    when "RETURN_DYN"
+      Intrinsic(:INTERPRETER_RETURN).ptr
+
+include_plugin 'interpreter_main_loop'
+
+    else
+      Intrinsic(:UNREACHABLE).void
+    end
+
+    if (i.properties & ['jump', 'call', 'return']).empty?
+      pc := advance_pc_imm(pc, i.format.size)
+    end
+
+    LiveOut(pc).DstReg(regmap[:pc]).u64
+    LiveOut(table).DstReg(regmap[:dispatch]).u64
+    LiveOut(frame).DstReg(regmap[:frame]).ptr
+    LiveOut(tr).DstReg(regmap[:tr]).ptr
+
+    dispatch(table, pc)
+    Intrinsic(:UNREACHABLE).ptr if defines.DEBUG
+    ReturnVoid()
+  end
+end
+
+Panda.prefixes.each do |p|
+  function("HANDLE_FAST_#{p.handler_name}",
+           regmap: handler_regmap,
+           regalloc_set: $panda_mask,
+           mode: [:Interpreter],
+           validate: InterpreterValidation) do
+    pc := %pc
+    table := %dispatch
+    frame := %frame
+    tr := %tr
+
+    secondary_opcode := readbyte(pc, 1)
+    offset_idx := AddI(u8toword(secondary_opcode)).Imm(Panda.dispatch_table.secondary_opcode_offset(p)).word
+    offset := Mul(offset_idx, "WordSize()").word
+    addr := Load(table, offset).ptr
+
+    LiveOut(pc).DstReg(regmap[:pc]).ptr
+    LiveOut(table).DstReg(regmap[:dispatch]).ptr
+    LiveOut(frame).DstReg(regmap[:frame]).ptr
+    LiveOut(tr).DstReg(regmap[:tr]).ptr
+
+    IndirectJump(addr)
+    Intrinsic(:UNREACHABLE).void if defines.DEBUG
+    ReturnVoid()
+  end
+end
+
+function(:HANDLE_FAST_INVALID,
+         regmap: handler_regmap,
+         regalloc_set: $panda_mask,
+         mode: [:Interpreter],
+         validate: InterpreterValidation) do
+  Intrinsic(:UNREACHABLE).void
+end

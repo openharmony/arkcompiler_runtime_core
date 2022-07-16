@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_ABSTRACT_INDEX_H_
-#define PANDA_VERIFICATION_UTIL_ABSTRACT_INDEX_H_
+#ifndef _PANDA_VERIFIER_ABSTRACT_INDEX_HPP
+#define _PANDA_VERIFIER_ABSTRACT_INDEX_HPP
 
 #include "index.h"
+#include "util/hash.h"
 
 #include <limits>
 
@@ -81,6 +82,7 @@ private:
     friend struct std::hash;
 
     friend Friend;
+    friend struct std::hash<panda::verifier::AbstractIndex<Int, Friend>>;
 };
 }  // namespace panda::verifier
 
@@ -89,9 +91,9 @@ template <typename Int, typename Friend>
 struct hash<panda::verifier::AbstractIndex<Int, Friend>> {
     size_t operator()(const panda::verifier::AbstractIndex<Int, Friend> &i) const noexcept
     {
-        return static_cast<size_t>(i.operator Int());
+        return panda::verifier::StdHash(i.operator Int());
     }
 };
 }  // namespace std
 
-#endif  // PANDA_VERIFICATION_UTIL_ABSTRACT_INDEX_H_
+#endif  // !_PANDA_VERIFIER_ABSTRACT_INDEX_HPP

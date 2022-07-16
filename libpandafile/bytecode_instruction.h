@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_BYTECODE_INSTRUCTION_H_
-#define PANDA_LIBPANDAFILE_BYTECODE_INSTRUCTION_H_
+#ifndef LIBPANDAFILE_BYTECODE_INSTRUCTION_H_
+#define LIBPANDAFILE_BYTECODE_INSTRUCTION_H_
 
 #include "file.h"
 
@@ -23,6 +23,10 @@
 #include <type_traits>
 
 #include "utils/bit_helpers.h"
+
+#if !PANDA_TARGET_WINDOWS
+#include "securec.h"
+#endif
 
 namespace panda {
 
@@ -51,6 +55,11 @@ public:
     panda_file::File::EntityId AsFileId() const
     {
         return panda_file::File::EntityId(id_);
+    }
+
+    uint32_t AsRawValue() const
+    {
+        return id_;
     }
 
     bool IsValid() const
@@ -106,6 +115,14 @@ protected:
         return *reinterpret_cast<unaligned_type *>(GetPointer(offset));
     }
 
+    void Write(uint32_t value, uint32_t offset, uint32_t width)
+    {
+        auto *dst = const_cast<uint8_t *>(GetPointer(offset));
+        if (memcpy_s(dst, width, &value, width) != 0) {
+            LOG(FATAL, PANDAFILE) << "Cannot write value : " << value << "at the dst offset : " << offset;
+        }
+    }
+
     uint8_t ReadByte(size_t offset) const
     {
         return Read<uint8_t>(offset);
@@ -122,9 +139,7 @@ public:
     explicit BytecodeInstBase(const uint8_t *pc, const uint8_t *from, const uint8_t *to)
         : pc_ {pc}, from_ {from}, to_ {to}, valid_ {true}
     {
-        ASSERT(from_ <= to_);
-        ASSERT(pc_ >= from_);
-        ASSERT(pc_ <= to_);
+        ASSERT(from_ <= to_ && pc_ >= from_ && pc_ <= to_);
     }
 
 protected:
@@ -235,26 +250,36 @@ public:
 
     BytecodeId GetId(size_t idx = 0) const;
 
+    void UpdateId(BytecodeId new_id, uint32_t idx = 0);
+
     uint16_t GetVReg(size_t idx = 0) const;
 
     // Read imm and return it as int64_t/uint64_t
     auto GetImm64(size_t idx = 0) const;
 
+    /**
+     * Primary and Secondary Opcodes are used in interpreter/verifier instruction dispatch
+     * while full Opcode is typically used for various instruction property query.
+     *
+     * Implementation note: one can describe Opcode in terms of Primary/Secondary opcodes
+     * or vice versa. The first way is more preferable, because Primary/Secondary opcodes
+     * are more performance critical and compiler is not always clever enough to reduce them
+     * to simple byte reads.
+     */
     BytecodeInst::Opcode GetOpcode() const;
 
     uint8_t GetPrimaryOpcode() const
     {
-        return static_cast<unsigned>(GetOpcode()) & std::numeric_limits<uint8_t>::max();
+        return ReadByte(0);
     }
 
     bool IsPrimaryOpcodeValid() const;
 
-    uint8_t GetSecondaryOpcode() const
-    {
-        // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        return (static_cast<unsigned>(GetOpcode()) >> std::numeric_limits<uint8_t>::digits) &
-               std::numeric_limits<uint8_t>::max();
-    }
+    uint8_t GetSecondaryOpcode() const;
+
+    bool IsPrefixed() const;
+
+    static constexpr uint8_t GetMinPrefixOpcodeIndex();
 
     template <const BytecodeInstMode M = Mode>
     auto JumpTo(int32_t offset) const -> std::enable_if_t<M == BytecodeInstMode::FAST, BytecodeInst>
@@ -346,11 +371,18 @@ public:
 
     bool HasFlag(Flags flag) const;
 
+    bool IsThrow(Exceptions exception) const;
+
     bool CanThrow() const;
 
     bool IsTerminator() const
     {
-        return HasFlag(Flags::RETURN) || HasFlag(Flags::JUMP) || (GetOpcode() == Opcode::THROW_V8);
+        return HasFlag(Flags::RETURN) || HasFlag(Flags::JUMP) || IsThrow(Exceptions::X_THROW);
+    }
+
+    bool IsSuspend() const
+    {
+        return HasFlag(Flags::SUSPEND);
     }
 
     static constexpr bool HasId(Format format, size_t idx);
@@ -370,4 +402,4 @@ using BytecodeInstructionSafe = BytecodeInst<BytecodeInstMode::SAFE>;
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDAFILE_BYTECODE_INSTRUCTION_H_
+#endif  // LIBANDAFILE_BYTECODE_INSTRUCTION_H_

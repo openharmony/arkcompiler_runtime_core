@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_VALUE_ORIGIN_H_
-#define PANDA_VERIFICATION_VALUE_ORIGIN_H_
+#ifndef PANDA_VERIFIER_VALUE_ORIGIN_H__
+#define PANDA_VERIFIER_VALUE_ORIGIN_H__
 
 #include "verification/util/tagged_index.h"
 
@@ -24,21 +24,31 @@
 #include <limits>
 
 namespace panda::verifier {
-enum class OriginType { START, INSTRUCTION, __LAST__ = INSTRUCTION };
+enum class OriginType { START, INSTRUCTION };
+
+using OriginTypeTag = TagForEnum<OriginType, OriginType::START, OriginType::INSTRUCTION>;
 
 template <typename BytecodeInstruction>
-class Origin : public TaggedIndex<OriginType> {
-    using Base = TaggedIndex<OriginType>;
+class Origin : public TaggedIndex<OriginTypeTag> {
+    using Base = TaggedIndex<OriginTypeTag>;
 
 public:
-    Origin(const BytecodeInstruction &inst) : Base {OriginType::INSTRUCTION, inst.GetOffset()} {}
+    Origin(const BytecodeInstruction &inst)
+    {
+        Base::SetTag<0>(OriginType::INSTRUCTION);
+        Base::SetInt(inst.GetOffset());
+    }
 
-    Origin(OriginType t, size_t val) : Base {t, val} {}
+    Origin(OriginType t, size_t val)
+    {
+        Base::SetTag<0>(t);
+        Base::SetInt(val);
+    }
 
     bool AtStart() const
     {
         ASSERT(Base::IsValid());
-        return Base::GetTag() == OriginType::START;
+        return Base::GetTag<0>() == OriginType::START;
     }
 
     uint32_t GetOffset() const
@@ -56,4 +66,4 @@ public:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_VALUE_ORIGIN_H_
+#endif  //! PANDA_VERIFIER_VALUE_ORIGIN_H__

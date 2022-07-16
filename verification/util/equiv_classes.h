@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_EQUIV_CLASSES_H_
-#define PANDA_VERIFICATION_UTIL_EQUIV_CLASSES_H_
+#ifndef _PANDA_VERIFIER_EQ_CLASSES_HPP
+#define _PANDA_VERIFIER_EQ_CLASSES_HPP
 
 #include "lazy.h"
 #include "abstract_index.h"
@@ -25,7 +25,7 @@
 
 namespace panda::verifier {
 /*
-Future improvements:
+todo:
 optimization: tree-organization
 each classentry is either: fixed index, or pointer to other classindex.
 each classentry has refcounter
@@ -286,6 +286,7 @@ public:
 
     void shrink_to_fit()
     {
+        // todo:
         // 1. get tail indices from EqClasses_ & Object_
         // 2. remove them from FreeClassIndices_ & FreeObjIndices_
         // 3. optimize all vectors in capacity
@@ -304,7 +305,7 @@ template <>
 struct hash<panda::verifier::EqClass<size_t>::ObjIndex> {
     size_t operator()(const panda::verifier::EqClass<size_t>::ObjIndex &idx) const
     {
-        return std::hash<panda::verifier::AbstractIndex<size_t, panda::verifier::EqClass<size_t>>> {}(
+        return panda::verifier::StdHash(
             static_cast<panda::verifier::AbstractIndex<size_t, panda::verifier::EqClass<size_t>>>(idx));
     }
 };
@@ -407,4 +408,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_UTIL_EQUIV_CLASSES_H_
+#endif  // !_PANDA_VERIFIER_EQ_CLASSES_HPP

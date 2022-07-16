@@ -12,9 +12,9 @@
 # limitations under the License.
 
 definitions:
-  - name: java
+  - name: PandaAssembly
     template: |
-      .language Java
+      .language PandaAssembly
 
 tests:
   - file-name: "jeqz.obj"
@@ -63,7 +63,7 @@ tests:
         isa:
           verification:
             - acc_obj_or_null
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         tags: [verifier]
         description: Check 'jeqz.obj' instruction with uninitialized accumulator.
         header-template: []
@@ -127,7 +127,7 @@ tests:
         isa:
           verification:
             - branch_target
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         tags: [verifier]
         description: Check 'jeqz.obj' instruction with prohibited branch target in PandaAssembly context.
         header-template: []
@@ -182,21 +182,93 @@ tests:
         check-type: none
         cases:
           - values: ["begin"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["mid"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["end"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["quit"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["catch_E1_begin"]
           - values: ["catch_E1_mid"]
           - values: ["catch_E1_end"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["catch_E2_begin"]
           - values: ["catch_E2_mid"]
           - values: ["catch_E2_end"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
+          - values: ["outside"]
+
+
+      - file-name: "prohibited_branch_target_j"
+        isa:
+          verification:
+            - branch_target
+        runner-options: [verifier-failure, use-pa, verifier-config]
+        tags: [verifier, pa-verifier]
+        description: Check 'jeqz.obj' instruction with prohibited branch target in PandaAssembly context.
+        header-template: [PandaAssembly]
+        code-template: |
+            .record panda.NullPointerException <external>
+            .record panda.Exception <external>
+
+            .function i32 main() {
+                lda.null
+                jeqz.obj %s
+
+            begin:
+                ldai 0
+                return
+            mid:
+                ldai 1
+                return
+            end:
+                ldai 2
+                return
+
+            catch_NPE_begin:
+                ldai 3
+                return
+            catch_NPE_mid:
+                ldai 4
+                return
+            catch_NPE_end:
+                ldai 5
+                return
+
+            catch_E_begin:
+                ldai 6
+                return
+            catch_E_mid:
+                ldai 7
+                return
+            catch_E_end:
+
+            quit:
+                ldai 8
+                return
+
+            .catch panda.NullPointerException, begin, end, catch_NPE_begin, catch_NPE_end
+            .catch panda.Exception, catch_NPE_begin, catch_NPE_end, catch_E_begin, catch_E_end
+            outside:
+        check-type: none
+        cases:
+          - values: ["begin"]
+            runner-options: [verifier-only, use-pa, verifier-config]
+          - values: ["mid"]
+            runner-options: [verifier-only, use-pa, verifier-config]
+          - values: ["end"]
+            runner-options: [verifier-only, use-pa, verifier-config]
+          - values: ["quit"]
+            runner-options: [verifier-only, use-pa, verifier-config]
+          - values: ["catch_NPE_begin"]
+          - values: ["catch_NPE_mid"]
+          - values: ["catch_NPE_end"]
+            runner-options: [verifier-only, use-pa, verifier-config]
+          - values: ["catch_E_begin"]
+          - values: ["catch_E_mid"]
+          - values: ["catch_E_end"]
+            runner-options: [verifier-only, use-pa, verifier-config]
           - values: ["outside"]
 
 
@@ -204,7 +276,7 @@ tests:
         isa:
           verification:
             - acc_obj_or_null
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         tags: [verifier]
         description: Check 'jeqz.obj' instruction with invalid accumulator value
         header-template: []
@@ -237,6 +309,42 @@ tests:
             - ldai.64 0xffffffffffffffff
           - values:
             - ldai.64 0x8000000000000000
+          - values:
+            - |
+              #
+                  fldai 0x00000000 # Positive zero (+0.0)
+          - values:
+            - |
+              #
+                  fldai 0x80000000 # Negative zero (-0.0)
+          - values:
+            - |
+              #
+                  fldai 0x00000001 # Minimal positive value (1.4012985e-45)
+          - values:
+            - |
+              #
+                  fldai 0x80000001 # Maximal negative value (-1.4012985e-45)
+          - values:
+            - |
+              #
+                  fldai 0x7f7fffff # Maximal positive value (3.4028235e38)
+          - values:
+            - |
+              #
+                  fldai 0xff7fffff # Minimal negative value (-3.4028235e38)
+          - values:
+            - |
+              #
+                  fldai 0x7f800000 # Positive infinity
+          - values:
+            - |
+              #
+                  fldai 0xff800000 # Negative infinity
+          - values:
+            - |
+              #
+                  fldai 0x7fc00000 # NaN
           - values:
             - |
               #
@@ -294,6 +402,26 @@ tests:
         check-type: exit-positive
 
 
+      - file-name: "valid_null_value_j"
+        isa:
+          description: >
+            Transfer execution to an instruction at offset bytes from the beginning of the current instruction if
+            object reference in accumulator compares with null as specified. Offset is sign extended to the size of
+            instruction address.
+        description: Check 'jeqz.obj' instruction with valid null value in PandaAssembly context.
+        runner-options: [use-pa]
+        header-template: [PandaAssembly]
+        tags: ['tsan']
+        code-template: |
+            .function i32 main() {
+                lda.null
+                jeqz.obj ok
+                ldai 1
+                return
+            ok:
+        check-type: exit-positive
+
+
       - file-name: "valid_not_null_values_p"
         isa:
           description: >
@@ -340,6 +468,75 @@ tests:
               #
                   movi v2, 10
                   newarr v2, v2, u64[][]
+                  lda.obj v2
+          - values:
+            - |
+              #
+                  movi v2, 10
+                  newarr v2, v2, R[]
+                  lda.obj v2
+          - values:
+            - |
+              #
+                  movi v2, 10
+                  newarr v2, v2, panda.Class[][]
+                  lda.obj v2
+          - values:
+            - |
+              #
+                  movi v2, 10
+                  newarr v2, v2, panda.String[][][]
+                  lda.obj v2
+
+
+      - file-name: "valid_not_null_values_j"
+        isa:
+          description: >
+            Transfer execution to an instruction at offset bytes from the beginning of the current instruction if
+            object reference in accumulator compares with null as specified. Offset is sign extended to the size of
+            instruction address.
+        description: Check 'jeqz.obj' instruction with valid not null values in PandaAssembly context.
+        runner-options: [use-pa]
+        header-template: []
+        tags: ['tsan']
+        code-template: |
+            .language PandaAssembly
+            .record panda.String <external>
+            .record panda.Class <external>
+            .record panda.Object <external>
+            .record R {}
+            .function void R.ctor(R a0) <ctor> {
+                return.void
+            }
+            .function i32 main() {
+                %s
+                jeqz.obj eq
+                ldai 0
+                return
+            eq:
+                ldai 1
+                return
+        check-type: none
+        cases:
+          - values:
+            - initobj R.ctor
+          - values:
+            - lda.str "test1"
+          - values:
+            - lda.type R
+          - values:
+            - lda.type panda.Object
+          - values:
+            - |
+              #
+                  movi v2, 10
+                  newarr v2, v2, i32[]
+                  lda.obj v2
+          - values:
+            - |
+              #
+                  movi v2, 10
+                  newarr v2, v2, f64[][]
                   lda.obj v2
           - values:
             - |

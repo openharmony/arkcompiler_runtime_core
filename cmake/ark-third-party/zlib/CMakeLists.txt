@@ -195,8 +195,3 @@ endif()
 if(NOT PANDA_TARGET_WINDOWS)
     target_compile_options(zlib PRIVATE -fPIC)
 endif()
-
-if (PANDA_ENABLE_AFL)
-    include("${PANDA_ROOT}/fuzzing/Fuzzing.cmake")
-    panda_substitute_libs(TARGET zlib)
-endif()

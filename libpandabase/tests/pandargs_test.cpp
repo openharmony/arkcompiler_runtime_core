@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ TEST(libpandargs, TestAPI)
         EXPECT_FALSE(pa_parser.Add(&pai_dup));
     }
 
-    // add tail argument, expect false on duplicate arguments
+    // add tail argument, expect false on duplicate
     // erase tail, expect 0 tail size
     {
         EXPECT_EQ(pa_parser.GetTailSize(), 0U);
@@ -152,7 +152,7 @@ TEST(libpandargs, TestAPI)
         EXPECT_EQ(pa_parser.GetTailSize(), 0U);
     }
 
-    // expect help string is correct
+    // expect help string formed right
     {
         std::string ref_string = "--" + pab.GetName() + ": " + pab.GetDesc() + "\n";
         ref_string += "--" + pald.GetName() + ": " + pald.GetDesc() + "\n";
@@ -168,7 +168,7 @@ TEST(libpandargs, TestAPI)
         EXPECT_EQ(pa_parser.GetHelpString(), ref_string);
     }
 
-    // expect regular args list is correct
+    // expect regular args list formed right
     {
         arg_list_t ref_arg_dlist = pald.GetValue();
         arg_list_t ref_arg_list = pal.GetValue();
@@ -269,6 +269,23 @@ TEST(libpandargs, TestAPI)
         argv_double_only[2] = "-4242.2424";
         EXPECT_TRUE(pa_parser.Parse(argc_double_only, argv_double_only));
         EXPECT_EQ(pad.GetValue(), ref_double_neg);
+    }
+
+    // expect hex values processed right
+    {
+        static const uint64_t refUint64 = 274877906959;
+        static const int refInt = 64;
+        static const int argcUint64Int = 3;
+        static const char* argvUint64Int[argcUint64Int];
+        argvUint64Int[0] = "gtest_app";
+        std::string s = "--" + pau64.GetName();
+        argvUint64Int[1] = s.c_str();
+        argvUint64Int[2] = "0x400000000f";
+        EXPECT_TRUE(pa_parser.Parse(argcUint64Int, argvUint64Int));
+        EXPECT_EQ(pau64.GetValue(), refUint64);
+        argvUint64Int[2] = "0x40";
+        EXPECT_TRUE(pa_parser.Parse(argcUint64Int, argvUint64Int));
+        EXPECT_EQ(pau64.GetValue(), refInt);
     }
 
     // expect uint32_t values processed right
@@ -606,7 +623,7 @@ TEST(libpandargs, TestAPI)
         EXPECT_EQ(pa_parser.GetTailSize(), 0U);
     }
 
-    // expect right tail argument processing after preceding string arguments
+    // expect right tail argument processing after preceiding string argument
     {
         pa_parser.EnableTail();
         static const char *str_argname = "--string";
@@ -635,7 +652,7 @@ TEST(libpandargs, TestAPI)
         pa_parser.EraseTail();
     }
 
-    // expect right tail argument processing after preceding list argument
+    // expect right tail argument processing after preceiding list argument
     {
         pald.ResetDefaultValue();
         pa_parser.EnableTail();
@@ -670,7 +687,7 @@ TEST(libpandargs, TestAPI)
         pa_parser.EraseTail();
     }
 
-    // expected result: tail arguments are processed properly after noparam boolean arguments
+    // expect right tail argument processing after noparam boolean argument
     {
         pa_parser.EnableTail();
         PandArg<std::string> t_pas0("tail_string0", ref_def_string, "Sample tail string argument 0");
@@ -692,7 +709,7 @@ TEST(libpandargs, TestAPI)
         pa_parser.EraseTail();
     }
 
-    // expect fail on amount of tail arguments more than pa_parser may have
+    // expect fail on amount of tail arguments more then pa_parser may have
     {
         pa_parser.EnableTail();
         static const int argc_tail = 5;
@@ -812,4 +829,109 @@ TEST(libpandargs, TestAPI)
         pa_parser.EraseTail();
     }
 }
+
+TEST(libpandargs, CompoundArgs)
+{
+    PandArg<bool> sub_bool_arg("bool", false, "Sample boolean argument");
+    PandArg<int> sub_int_arg("int", 12, "Sample integer argument");
+    PandArg<double> sub_double_arg("double", 123.45, "Sample rational argument");
+    PandArg<std::string> sub_string_arg("string", "Hello", "Sample string argument");
+    PandArg<int> int_arg("global_int", 123, "Global integer argument");
+    PandArgCompound parent("compound", "Sample boolean argument",
+                           {&sub_bool_arg, &sub_int_arg, &sub_double_arg, &sub_string_arg});
+
+    PandArgParser pa_parser;
+    ASSERT_TRUE(pa_parser.Add(&int_arg));
+    ASSERT_TRUE(pa_parser.Add(&parent));
+
+    /* Should work well with no sub arguments */
+    {
+        parent.ResetDefaultValue();
+        static const char *argv[] = {"gtest_app", "--compound"};
+        ASSERT_TRUE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+        ASSERT_EQ(parent.GetValue(), true);
+        ASSERT_EQ(sub_bool_arg.GetValue(), false);
+        ASSERT_EQ(sub_int_arg.GetValue(), 12);
+        ASSERT_EQ(sub_double_arg.GetValue(), 123.45);
+        ASSERT_EQ(sub_string_arg.GetValue(), "Hello");
+    }
+
+    {
+        parent.ResetDefaultValue();
+        static const char *argv[] = {"gtest_app", "--compound:bool,int=2,double=54.321,string=World"};
+        ASSERT_TRUE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+        ASSERT_EQ(parent.GetValue(), true);
+        ASSERT_EQ(sub_bool_arg.GetValue(), true);
+        ASSERT_EQ(sub_int_arg.GetValue(), 2);
+        ASSERT_EQ(sub_double_arg.GetValue(), 54.321);
+        ASSERT_EQ(sub_string_arg.GetValue(), "World");
+    }
+
+    /* ResetDefaultValue should reset all sub arguments */
+    {
+        parent.ResetDefaultValue();
+        ASSERT_EQ(parent.GetValue(), false);
+        ASSERT_EQ(sub_bool_arg.GetValue(), false);
+        ASSERT_EQ(sub_int_arg.GetValue(), 12);
+        ASSERT_EQ(sub_double_arg.GetValue(), 123.45);
+        ASSERT_EQ(sub_string_arg.GetValue(), "Hello");
+    }
+
+    {
+        static const char *argv[] = {"gtest_app", "--compound:bool=true"};
+        ASSERT_TRUE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+        ASSERT_EQ(parent.GetValue(), true);
+        ASSERT_EQ(sub_bool_arg.GetValue(), true);
+    }
+
+    {
+        parent.ResetDefaultValue();
+        static const char *argv[] = {"gtest_app", "--compound:bool"};
+        ASSERT_TRUE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+        ASSERT_EQ(parent.GetValue(), true);
+        ASSERT_EQ(sub_bool_arg.GetValue(), true);
+    }
+
+    {
+        static const char *argv[] = {"gtest_app", "--compound:bool=false"};
+        ASSERT_TRUE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+        ASSERT_EQ(parent.GetValue(), true);
+        ASSERT_EQ(sub_bool_arg.GetValue(), false);
+    }
+
+    {
+        parent.ResetDefaultValue();
+        static const char *argv[] = {"gtest_app", "--global_int=321"};
+        ASSERT_TRUE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+        ASSERT_EQ(parent.GetValue(), false);
+        ASSERT_EQ(int_arg.GetValue(), 321);
+    }
+
+    {
+        parent.ResetDefaultValue();
+        static const char *argv[] = {"gtest_app", "--compound", "--global_int", "321"};
+        ASSERT_TRUE(pa_parser.Parse(4, argv)) << pa_parser.GetErrorString();
+        ASSERT_EQ(parent.GetValue(), true);
+        ASSERT_EQ(int_arg.GetValue(), 321);
+    }
+
+    /* Test that sub arguments are not visible in the global space */
+    {
+        static const char *argv[] = {"gtest_app", "--bool"};
+        ASSERT_FALSE(pa_parser.Parse(2, argv));
+    }
+    {
+        static const char *argv[] = {"gtest_app", "--int=2"};
+        ASSERT_FALSE(pa_parser.Parse(2, argv));
+    }
+    {
+        static const char *argv[] = {"gtest_app", "--double=54.321"};
+        ASSERT_FALSE(pa_parser.Parse(2, argv));
+    }
+    {
+        static const char *argv[] = {"gtest_app", "--string=World"};
+        ASSERT_FALSE(pa_parser.Parse(2, argv));
+    }
+}
+
 }  // namespace panda::test

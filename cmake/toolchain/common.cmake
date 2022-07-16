@@ -40,6 +40,7 @@ function(set_cross_amd64_x86)
     # * The "if" is needed because the toolchain file is parsed twice.
     # * add_compile_options is not used intentionally as it does not
     #   propagate the options to the linker, which is needed.
+    #   TODO: Use add_compile_options + add_link_options for CMake 3.13+.
     if (NOT PANDA_CROSS_AMD64_X86)
         set(PANDA_CROSS_AMD64_X86 1 CACHE STRING "" FORCE)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32" CACHE STRING "" FORCE)
@@ -47,4 +48,13 @@ function(set_cross_amd64_x86)
         set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -m32" CACHE STRING "" FORCE)
     endif()
 endfunction()
+
+if (NOT DEFINED QEMU_PREFIX)
+    set(QEMU_PREFIX "")
+endif()
+if (NOT "${QEMU_PREFIX}" STREQUAL "")
+    set(QEMU_PREFIX "${QEMU_PREFIX}/")
+endif()
+set(QEMU_ARM64_BIN "${QEMU_PREFIX}qemu-aarch64")
+set(QEMU_ARM32_BIN "${QEMU_PREFIX}qemu-arm")
 

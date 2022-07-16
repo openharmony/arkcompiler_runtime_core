@@ -2,16 +2,16 @@
 
 ## Introduction
 
-This document describes assembly file format for Panda platform. Assembly files are human-readable and human-writable plain text files. These files are supposed to be fed to the Panda assembler, a dedicated tool that translates them to binary files that can be executed by the Panda virtual machine. Please note that this document does not describe the bytecode instructions supported by the Panda virtual machine, refer to the [Bytecode ISA Specification](../isa/isa.yaml) instead. This document does not specify the binary format of executables supported by the Panda virtual machine, please refer to the [Binary Format Specification](file_format.md) instead.
+This document describes assembly file format for Panda platform. Assembly files are human-readable and human-writeable plain text files, they are supposed to be fed to the Panda assembler, a dedicated tool that translates them to binary files that can be executed by the Panda virtual machine. Please note that this document does not describe bytecode instructions supported by the Panda virtual machine, refer to the [Bytecode ISA Specification](isa/isa.yaml) instead. This document does not specify the binary format of executables supported by the Panda virtual machine, please refer to the [Binary Format Specification](file_format.md) instead.
 
 ### Requirements
 
 Panda as a platform is multilingual and flexible by design:
 
-* Panda Assembly should not "favor" by any means any existing programming language that is (or intended to be) supported by the platform. Instead, Panda Assembly can be thought as a separate close-to-byte-code language with a minimal feature set. All language-specific "traits" that should be supported to generate valid executable binaries with respect to the higher-level semantics should be implemented via metadata annotations (see below).
-* Panda Assembly should not focus on a certain programming paradigm. For example, concepts such as "class", "object", and "method" should not be enforced at the assembly language level because a language that does not implement classic OOP might be supported.
-* When Panda assembler generates a binary executable file, it is not expected to check for language semantics. This responsibility is delegated to "source to binaries" compilers and runtime.
-* Panda assembler should not impose any limitations on the quantity and internal structure of source code files written in Panda Assembly language. It should process as many input source code files as the developer specifies.
+* Panda assembly should not "favor" by any means any existing programming language that is (or intended to be) supported by the platform. Instead, Panda assembly can be thought as a separate close-to-byte-code language with a minimal feature set. All language-specific "traits" that should be supported to generate valid executable binaries with respect to the higher-level semantics should be implemented via metadata annotations (see below).
+* Panda assembly should not focus on a certain programming paradigm. E.g. we should not enforce concepts of "class", "object", "method" at the assembly language level because we might support a language which does not implement classic OOP at all.
+* When Panda assembler generates a binary executable file, it is not expected to check for language semantics. This responsibility is delegate to "source to binaries" compilers and runtime.
+* Panda assembler should not impose any limitation of quantity and internal structure of source code files writtebn in Panda assembly language. Assembler should process as many input source code files as the developer specifies.
 * Panda assembler should not follow any implicit conventions about the name of the entry point.
 
 ## Comments
@@ -67,7 +67,7 @@ Prefixed identifiers can be used for naming metadata annotations, aggregate data
 
 ## Metadata Annotations
 
-As stated above, the current version of Panda Assembly does not favor any language as the platform is designed to support many of them. To deal with language-specific metadata, annotations are used, as shown below:
+As stated above, current version of Panda assembly does not favor any language as the platform is designed to support many of them. To deal with language-specific metadata, annotations are used, defined as follows:
 
 ```
 <key1=value1, key2=value2, ...>
@@ -83,8 +83,7 @@ Following constraints apply:
 
 In all cases where annotations can be optionally used, `optional_annotation` marker is used in this document.
 
-There are keys that indicate bool values. For example, whether a function must have an implementation.
-The absence of these keys is treated as false. Metadata containing such keys are called `lonely metadata`.
+There are keys that indicate that a function must not have an implementation. The absence of these keys suggests otherwise. We shall call metadata containing such keys --- `lonely metadata`.
 
 ### Function metadata annotations
 
@@ -105,8 +104,8 @@ A declaration of a function is assumed.
 | `native` | Marks an externally defined function. Does not require value. |
 | `noimpl` | Marks a function without implementation. Does not require value. |
 | `static` | Marks a function as static. Does not require value. |
-| `ctor`   | Marks a function as object constructor. It will be renamed in binary file according to particular language rules (`.ctor` for Panda Assembly and `<init>` for Java). |
-| `cctor`  | Marks a function as static constructor. It will be renamed in binary file according to particular language rules (`.cctor` for Panda Assembly and `<clinit>` for Java). |
+| `ctor`   | Marks a function as object constructor. It will be renamed in binary file according to particular language rules (`.ctor` for Panda Assembly) |
+| `cctor`  | Marks a function as static constructor. It will be renamed in binary file according to particular language rules (`.cctor` for Panda Assembly) |
 
 ### Record metadata annotations
 
@@ -139,17 +138,63 @@ Currently Panda Assembly supports annotations for the following languages:
 - Java
 - PandaAssembly
 
-The language `.language` directive is used to specify the language. It must be declared before any other declarations:
+To specify language `.language` directive is used. It must be declared before any other declarations:
 ```
 .language Java
 
 .function void f() {}
 ```
-By default, PandaAssembly language is assumed.
+By default PandaAssembly language is assumed.
+
+#### Java annotations
+
+Currently Panda Assembly supports following Java annotations
+
+| Key | Description |
+| --- | --- |
+| `java.access` | Used to specify access level of record, field or function. Possible values: `private`, `protected`, `public`. |
+| `java.extends` | Used to specify inheritance between records. Value is the name of the base record. |
+| `java.implements` | Used to specify interface inheritance between records. Value is the name of the interface record. Allowed multiple definition. |
+| `java.interface` | Used to specify that the record represents Java interface. |
+| `java.enum` | Used to specify that the record and its fields represent Java enum. |
+| `java.annotation` | Used to specify that the record represents Java annotation. |
+| `java.annotation.type` | Used to specify type of annotation. Possible values: `class`, `runtime`. |
+| `java.annotation.class` | Used to specify annotation class. Allowed multiple definitions. Value is the name of the record that represent Java annotation |
+| `java.annotation.id` | Used to specify annotation id. Annotations with id are used as values of other annotation elements. `java.annotation.class` must be defined first. Allowed multiple definitions (but only one definition for each annotation). |
+| `java.annotation.element.name` | Used to specify name of the annotation element. `java.annotation.class` must be defined first. Allowed multiple definitions (but only one definition for each annotation element). |
+| `java.annotation.element.type` | Used to specify type of the annotation element. `java.annotation.element.name` must be defined first. Allowed multiple definitions (but only one definition for each annotation element). Possible values: `u1`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `f32`, `f64`, `string`, `class`, `enum`, `annotation`, `array`. |
+| `java.annotation.element.array.component.type` | Used to specify component type of the array annotation element. `java.annotation.element.type` must be defined first and have `array` value. Allowed multiple definitions (but only one definition for each annotation element). Possible values: `u1`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `f32`, `f64`, `string`, `class`, `enum`, `annotation`. |
+| `java.annotation.element.value` | Used to specify value of the annotation element. Allowed multiple definitions (also multiple definitions for one annotation element if it has `array` type). |
+
+
+Example:
+
+```
+.language Java
+
+.record A <java.access=public> {}
+.record B <java.access=public, java.extends=A> {}
+
+.record Iface1 <java.interface>
+.record Iface2 <java.interface>
+
+.record C <java.implements=Iface1, java.implements=Iface2> {}
+
+.record A1 <java.annotation, java.annotation.type=runtime> {}
+.record A2 <java.annotation, java.annotation.type=runtime> {}
+
+# Annotation elements are represented using abstract methods
+
+.function i32[] A1.NameArr() <noimpl>
+.function A1 A2.Name() <noimpl>
+
+# @A2(Name=@A1(NameArr={1,2}))
+.record R <java.annotation.class=A1, java.annotation.id=id1, java.annotation.element.name=NameArr, java.annotation.element.type=array, java.annotation.element.array.component.type=i32, java.annotation.element.value=1, java.annotation.element.value=2, java.annotation.class=A2, java.annotation.element.name=Name, java.annotation.element.type=annotation, java.annotation.element.value=id1>
+```
 
 ## Data Types
 
-Semantics of operations on all data types defined below follow the semantics defined in [Bytecode ISA Specification](../isa/isa.yaml).
+Semantics of operations on all data types defined below follows the semantics defined in [Bytecode ISA Specification](isa/isa.yaml).
 
 ### Primitive Data Types
 
@@ -158,7 +203,7 @@ Following primitive types are supported:
 | Panda Assembler Type | Description |
 | ------ | ------ |
 | `void` | Type for the result of a function that returns normally, but does not provide a result value to its caller |
-| `u1` | Unsigned 1-bit integer number |
+| `u1` | Unsinged 1-bit integer number |
 | `u8` | Unsigned 8-bit integer number |
 | `i8` | Signed 8-bit integer number |
 | `u16` | Unsigned 16-bit integer number |
@@ -178,8 +223,8 @@ Following reference types are supported:
 
 | Panda Assembler Type | Description |
 | ------ | ------ |
-| `cref` | Code reference, represents reference to the bytecode executable by Panda virtual machine. |
-| `dref` | Data reference, represents reference to aggregate data types (see below). |
+| `cref` | code reference, represents references to the bytecode executable by Panda virtual machine |
+| `dref` | data reference, represents references to aggregate data types (see below) |
 
 All identifiers that are used for naming reference data types cannot be used for any other purpose.
 
@@ -219,11 +264,11 @@ Whenever a record should incorporate another record, the name of the nested reco
 
 #### Informal Notice
 
-`.record`s are like `struct`s in C, except for support of "by instance" nesting. This is because the result of a field load should be valid for any member, hence a record member should fit the virtual register. Constraints on register are defined in [Bytecode ISA Specification](isa/isa.yaml).
+`.record`s are like `struct`s in C, but without support for "by instance" nesting. This is because the result of a field load should be valid for any member, hence a record member should fit the virtusal register. Constraints on register are defined in [Bytecode ISA Specification](isa/isa.yaml).
 
 ### Builtin Aggregate Data Types
 
-Platform has following builtin aggregate types.
+Platform has following builtin aggregate types
 
 | Panda Assembler Type | Description |
 | ------ | ------ |
@@ -231,7 +276,7 @@ Platform has following builtin aggregate types.
 
 ### Arrays
 
-Platform supports arrays of primitive and aggregate data types. Array of type `T` has type name `T[]`. Example:
+Platform support arrays of primitive and aggregate data types. Array of type `T` has type name `T[]`. Example:
 ```
 .function void f() {
     ...
@@ -271,7 +316,7 @@ If a function has a body, it consists of optionally labeled sequence of bytecode
 
 ### Static and virtual functions
 
-By default all functions are static except those that are binded to record and accept reference to it as the first parameter:
+By default all function are static except ones that are binded to record and accept reference to it as the first parameter:
 
 ```
 .record R {}
@@ -285,7 +330,7 @@ By default all functions are static except those that are binded to record and a
 
 #### Call instructions
 
-Assembler relaxes the following constraints for call instructions:
+Assembler relaxes constraints for call instructions:
 
 - If number of arguments is less than specified in [Bytecode ISA Specification](isa/isa.yaml) it passes `v0` instead of unspecified ones.
 
@@ -347,16 +392,18 @@ catchall_begin1:
     .catchall try_begin, try_end, catchall_begin1
 }
 ```
-There are also safer directives, which allow you to specify exact bounds of an exception handler for
-more precise verification of control flows in bytecode verifier.
+
+Also there are more safer directives, which allow to specify exact bounds
+of an exceptions handler for more precise verification of control-flow in
+byte-code verifier.
 
 ```
 .catch <exception_record>, <try_begin_label>, <try_end_label>, <catch_begin_label>, <catch_end_label>
 .catchall <try_begin_label>, <try_end_label>, <catch_begin_label>, <catch_end_label>
 ```
 
-They are identical to .catch and .catchall except that the end label of the
-exception handler needs to be specified. An end label is the label that immediately follows the last instruction of the
+They are almost identical to `.catch` and `.catchall` differ only by specifying end label of the
+exception handler. End label is the label that immediately follows last instruction of the
 exception handler.
 
 ## Pseudo-BNF
@@ -444,7 +491,7 @@ field_id             := <an element of the field metadata list>
 
 ## Important notes
 
-Assembler doesn't guarantee that functions, records and their fields will be located in binary file in the same order as they are located in assembly one.
+- Assembler doesn't guarantee that functions, records and their fields will be located in binary file in the same order as they are located in assembly one
 
 ## Appendix A, Informative: Code Layout Sample
 
@@ -487,7 +534,7 @@ Apart from metadata annotations, `Foo.` prefixes (remaining a pure naming conven
 
 **Strings** and **arrays** can be thought as `external` record with some manipulating functions. There is no support for generics due to the low-level nature of the assembler, hence arrays of different types are implemented with different external record.
 
-## Appendix B, Informative: Mapping Panda Assembler Types to JVM Types
+## Appendix B, Informative: Mapping Panda Assembler TYpes to JVM Types
 
 This section serves purely illustrative purposes.
 
@@ -506,3 +553,9 @@ This section serves purely illustrative purposes.
 | `f64` | `double` |
 | `cref` | N/A |
 | `dref` | `reference` |
+
+## Appendix C, TODO List
+
+* Specify `cref` and indirect calls to functions.
+* Elaborate on bytecode definition.
+* Compose formal definitions for literals.

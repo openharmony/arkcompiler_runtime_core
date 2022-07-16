@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_HEAP_MANAGER_H_
-#define PANDA_RUNTIME_MEM_HEAP_MANAGER_H_
+#ifndef PANDA_MEM_HEAP_MANAGER_H
+#define PANDA_MEM_HEAP_MANAGER_H
 
 #include <cstddef>
 #include <memory>
@@ -28,7 +27,7 @@
 #include "runtime/mem/frame_allocator-inl.h"
 #include "runtime/mem/heap_verifier.h"
 #include "runtime/mem/tlab.h"
-#include "runtime/mem/gc/crossing_map_singleton.h"
+#include "runtime/mem/gc/heap-space-misc/crossing_map_singleton.h"
 
 namespace panda {
 // Forward declaration
@@ -47,7 +46,7 @@ public:
     bool Finalize();
 
     [[nodiscard]] ObjectHeader *AllocateObject(BaseClass *cls, size_t size, Alignment align = DEFAULT_ALIGNMENT,
-                                               MTManagedThread *thread = nullptr);
+                                               ManagedThread *thread = nullptr);
 
     template <bool IsFirstClassClass = false>
     [[nodiscard]] ObjectHeader *AllocateNonMovableObject(BaseClass *cls, size_t size,
@@ -55,17 +54,19 @@ public:
                                                          ManagedThread *thread = nullptr);
 
     /**
-     * \brief Allocates memory for Frame, but do not construct it
-     * @param size - size in bytes
-     * @return pointer to allocated memory
+     * \brief Allocates memory for ExtFrame, but do not construct it
+     * @param size - size of allocation (ExtFrame) in bytes
+     * @param ext_sz - size of frame extension in bytes
+     * @return pointer to Frame
      */
-    [[nodiscard]] Frame *AllocateFrame(size_t size);
+    [[nodiscard]] Frame *AllocateExtFrame(size_t size, size_t ext_sz);
 
     /**
-     * \brief Frees memory occupied by Frame
-     * @param frame_ptr - pointer to Frame
+     * \brief Frees memory occupied by ExtFrame
+     * @param frame - pointer to Frame
+     * @param ext_sz - size of frame extension in bytes
      */
-    void FreeFrame(Frame *frame_ptr);
+    void FreeExtFrame(Frame *frame, size_t ext_sz);
 
     CodeAllocator *GetCodeAllocator() const;
 
@@ -73,7 +74,7 @@ public:
 
     ObjectAllocatorPtr GetObjectAllocator();
 
-    bool UseTLABForAllocations() const
+    bool UseTLABForAllocations()
     {
         return use_tlab_for_allocations_;
     }
@@ -82,14 +83,14 @@ public:
 
     size_t GetTLABMaxAllocSize()
     {
-        return objectAllocator_.AsObjectAllocator()->GetTLABMaxAllocSize();
+        return UseTLABForAllocations() ? objectAllocator_.AsObjectAllocator()->GetTLABMaxAllocSize() : 0;
     }
 
     /**
      * Register TLAB information in MemStats during changing TLAB in a thread
      * or during thread destroying.
      */
-    void RegisterTLAB(TLAB *tlab);
+    void RegisterTLAB(const TLAB *tlab);
 
     /**
      * Prepare the heap before the fork process, The main function is to compact zygote space for fork subprocess
@@ -100,6 +101,7 @@ public:
     void PreZygoteFork();
 
     /**
+     *  TODO :  Not yet implemented
      *  To implement the getTargetHeapUtilization and nativeSetTargetHeapUtilization,
      *  I set two functions and a fixed initial value here. They may need to be rewritten
      */
@@ -118,18 +120,15 @@ public:
         return verifier.GetFailCount();
     }
 
-    // Implements java.lang.Runtime.maxMemory.
     // Returns the maximum amount of memory a program can consume.
     size_t GetMaxMemory() const
     {
-        return MemConfig::GetObjectPoolSize();
+        return MemConfig::GetHeapSizeLimit();
     }
 
-    // Implements java.lang.Runtime.totalMemory.
     // Returns approximate amount of memory currently consumed by an application.
     size_t GetTotalMemory() const;
 
-    // Implements java.lang.Runtime.freeMemory.
     // Returns how much free memory we have until we need to grow the heap to perform an allocation.
     size_t GetFreeMemory() const;
 
@@ -181,6 +180,7 @@ private:
         isInitialized_ = true;
 
         codeAllocator_ = new (std::nothrow) CodeAllocator(mem_stats);
+        // For now, crossing map is shared by diffrent VMs.
         if (!CrossingMapSingleton::IsCreated()) {
             CrossingMapSingleton::Create();
         }
@@ -189,7 +189,7 @@ private:
         return (codeAllocator_ != nullptr) && (internalAllocator_ != nullptr) && (objectAllocator_ != nullptr);
     }
 
-    /***
+    /**
      * Initialize GC bits and also zeroing memory for the whole Object memory
      * @param cls - class
      * @param mem - pointer to the ObjectHeader
@@ -197,12 +197,12 @@ private:
      */
     ObjectHeader *InitObjectHeaderAtMem(BaseClass *cls, void *mem);
 
-    /***
+    /**
      * Triggers GC if needed
      */
     void TriggerGCIfNeeded();
 
-    void *TryGCAndAlloc(size_t size, Alignment align, panda::MTManagedThread *thread);
+    void *TryGCAndAlloc(size_t size, Alignment align, ManagedThread *thread);
 
     void *AllocByTLAB(size_t size, ManagedThread *thread);
 
@@ -226,6 +226,7 @@ private:
     friend class ::panda::Runtime;
 
     /**
+     * TODO : Target ideal heap utilization ratio.
      * To implement the getTargetHeapUtilization and nativeSetTargetHeapUtilization, I set a variable here.
      * It may need to be initialized, but now I give it a fixed initial value 0.5
      */
@@ -241,4 +242,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_HEAP_MANAGER_H_
+#endif  // PANDA_MEM_HEAP_MANAGER_H

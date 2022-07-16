@@ -1,0 +1,86 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "runtime/core/core_language_context.h"
+
+% Common::plugins.each_value do |plugin_opts|
+% next unless plugin_opts["lang_context_header_path"]
+#include "<%= plugin_opts["lang_context_header_path"] %>"
+% end
+
+namespace panda::plugins {
+
+LanguageContextBase* GetLanguageContextBase([[maybe_unused]] panda::panda_file::SourceLang lang)
+{
+% Common::plugins.each_value do |plugin_opts|
+% next unless plugin_opts["lang_context_class"]
+if (lang == <%= plugin_opts["lang_enum"] %>)
+    {
+        static <%= plugin_opts["lang_context_class"] %> ctx;
+        return &ctx;
+    }
+% end
+
+   static CoreLanguageContext core_ctx;
+   return &core_ctx;
+}
+
+panda_file::SourceLang RuntimeTypeToLang(const std::string &runtime_type) {
+    if (runtime_type == "core") {
+        return panda_file::SourceLang::PANDA_ASSEMBLY;
+    }
+
+% Common::plugins.each do |plugin_lang, plugin_opts|
+    if (runtime_type == "<%= plugin_lang.downcase %>") {
+        return <%= plugin_opts["lang_enum"] %>;
+    }
+% end
+
+    LOG(FATAL, RUNTIME) << "Incorrect runtime_type: " << runtime_type;
+    UNREACHABLE();
+    return panda::panda_file::SourceLang::PANDA_ASSEMBLY;
+}
+
+std::string_view LangToRuntimeType(panda_file::SourceLang lang) {
+    if (lang == panda_file::SourceLang::PANDA_ASSEMBLY) {
+        return "core";
+    }
+
+% Common::plugins.each do |plugin_lang, plugin_opts|
+    if (lang == <%= plugin_opts["lang_enum"] %>) {
+        return "<%= plugin_lang.downcase %>";
+    }
+% end
+
+    LOG(FATAL, RUNTIME) << "Incorrect lang: " << lang;
+    UNREACHABLE();
+    return "core";
+}
+
+bool HasRuntime(const std::string &runtime_type) {
+    if (runtime_type == "core") {
+        return true; // NOLINT(readability-simplify-boolean-expr)
+    }
+
+% Common::plugins.each_key do |plugin_lang|
+    if (runtime_type == "<%= plugin_lang.downcase %>") {
+        return true; // NOLINT(readability-simplify-boolean-expr)
+    }
+% end
+
+    return false;
+}
+
+}  // namespace panda::plugins

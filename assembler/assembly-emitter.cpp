@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,19 +62,19 @@ using panda::panda_file::Writer;
 std::unordered_map<Type::TypeId, PrimitiveTypeItem *> CreatePrimitiveTypes(ItemContainer *container)
 {
     auto res = std::unordered_map<Type::TypeId, PrimitiveTypeItem *> {};
-    res.insert({Type::TypeId::VOID, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::VOID)});
-    res.insert({Type::TypeId::U1, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::U1)});
-    res.insert({Type::TypeId::I8, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::I8)});
-    res.insert({Type::TypeId::U8, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::U8)});
-    res.insert({Type::TypeId::I16, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::I16)});
-    res.insert({Type::TypeId::U16, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::U16)});
-    res.insert({Type::TypeId::I32, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::I32)});
-    res.insert({Type::TypeId::U32, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::U32)});
-    res.insert({Type::TypeId::I64, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::I64)});
-    res.insert({Type::TypeId::U64, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::U64)});
-    res.insert({Type::TypeId::F32, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::F32)});
-    res.insert({Type::TypeId::F64, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::F64)});
-    res.insert({Type::TypeId::TAGGED, container->CreateItem<PrimitiveTypeItem>(Type::TypeId::TAGGED)});
+    res.insert({Type::TypeId::VOID, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID)});
+    res.insert({Type::TypeId::U1, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::U1)});
+    res.insert({Type::TypeId::I8, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::I8)});
+    res.insert({Type::TypeId::U8, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::U8)});
+    res.insert({Type::TypeId::I16, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::I16)});
+    res.insert({Type::TypeId::U16, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::U16)});
+    res.insert({Type::TypeId::I32, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::I32)});
+    res.insert({Type::TypeId::U32, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::U32)});
+    res.insert({Type::TypeId::I64, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::I64)});
+    res.insert({Type::TypeId::U64, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::U64)});
+    res.insert({Type::TypeId::F32, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::F32)});
+    res.insert({Type::TypeId::F64, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::F64)});
+    res.insert({Type::TypeId::TAGGED, container->GetOrCreatePrimitiveTypeItem(Type::TypeId::TAGGED)});
     return res;
 }
 
@@ -179,11 +179,30 @@ bool AsmEmitter::CheckValueType(Value::Type value_type, Type type, const Program
 }
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
+std::string AsmEmitter::GetMethodSignatureFromProgram(const std::string &name, const Program &program)
+{
+    if (IsSignatureOrMangled(name)) {
+        return name;
+    }
+
+    const auto it_synonym = program.function_synonyms.find(name);
+    const bool is_method_known = (it_synonym != program.function_synonyms.end());
+    const bool is_single_synonym = (is_method_known && (it_synonym->second.size() == 1));
+    if (is_single_synonym) {
+        return it_synonym->second[0];
+    } else {
+        SetLastError("More than one alternative for method " + name);
+        return std::string("");
+    }
+}
+
+/* static */
 panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(
     ItemContainer *container, const Value *value, std::vector<panda_file::LiteralItem> *out,
     const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods)
 {
+    ASSERT(out != nullptr);
+
     auto value_type = value->GetType();
 
     switch (value_type) {
@@ -248,7 +267,7 @@ bool AsmEmitter::CheckValueRecordCase(const Value *value, const Program &program
     }
 
     auto record_name = t.GetName();
-    bool is_found = true;
+    bool is_found;
     if (t.IsArray()) {
         auto it = program.array_types.find(t);
         is_found = it != program.array_types.cend();
@@ -421,10 +440,13 @@ ScalarValueItem *AsmEmitter::CreateScalarRecordValueItem(
 
 /* static */
 ScalarValueItem *AsmEmitter::CreateScalarMethodValueItem(
-    ItemContainer *container, const Value *value, std::vector<ScalarValueItem> *out,
+    ItemContainer *container, const Value *value, std::vector<ScalarValueItem> *out, const Program &program,
     const std::unordered_map<std::string, BaseMethodItem *> &methods)
 {
     auto name = value->GetAsScalar()->GetValue<std::string>();
+
+    name = GetMethodSignatureFromProgram(name, program);
+
     auto it = methods.find(name);
     if (it == methods.cend()) {
         return nullptr;
@@ -488,6 +510,7 @@ ScalarValueItem *AsmEmitter::CreateScalarValueItem(ItemContainer *container, con
                                                    const std::unordered_map<std::string, BaseMethodItem *> &methods)
 {
     auto value_type = value->GetType();
+
     switch (value_type) {
         case Value::Type::U1:
         case Value::Type::I8:
@@ -516,7 +539,7 @@ ScalarValueItem *AsmEmitter::CreateScalarValueItem(ItemContainer *container, con
             return CreateScalarRecordValueItem(container, value, out, classes);
         }
         case Value::Type::METHOD: {
-            return CreateScalarMethodValueItem(container, value, out, methods);
+            return CreateScalarMethodValueItem(container, value, out, program, methods);
         }
         case Value::Type::ENUM: {
             return CreateScalarEnumValueItem(container, value, out, fields);
@@ -600,14 +623,17 @@ AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const
 
         auto function_name = record.name + "." + name;
 
+        function_name = GetMethodSignatureFromProgram(function_name, program);
+
         if (record.HasImplementation()) {
             auto func_it = program.function_table.find(function_name);
             if (func_it == program.function_table.cend()) {
-                // Definitions of the system annotations in the libcore haven't values.
+                // Definitions of the system annotations may be absent.
                 // So print message and continue if corresponding function isn't found.
                 LOG(INFO, ASSEMBLER) << "Function " << function_name << " not found";
             } else {
                 auto &function = func_it->second;
+
                 if (!CheckValue(value, function.return_type, program)) {
                     SetLastError("Incorrect annotation element " + function_name + ": " + GetLastError());
                     return nullptr;
@@ -686,25 +712,6 @@ bool AsmEmitter::AddAnnotations(T *item, ItemContainer *container, const Annotat
 }
 
 template <class T>
-void SetSourceLang(T *item, extensions::Language lang)
-{
-    switch (lang) {
-        case extensions::Language::ECMASCRIPT: {
-            item->SetSourceLang(panda_file::SourceLang::ECMASCRIPT);
-            break;
-        }
-        case extensions::Language::PANDA_ASSEMBLY: {
-            item->SetSourceLang(panda_file::SourceLang::PANDA_ASSEMBLY);
-            break;
-        }
-        default: {
-            UNREACHABLE();
-            break;
-        }
-    }
-}
-
-template <class T>
 static void AddBytecodeIndexDependencies(MethodItem *method, const Ins &insn,
                                          const std::unordered_map<std::string, T *> &items)
 {
@@ -767,64 +774,6 @@ void AsmEmitter::MakeStringItems(ItemContainer *items, const Program &program,
     }
 }
 
-static std::unique_ptr<ScalarValue> CreateValue(const panda::pandasm::LiteralArray::Literal &literal)
-{
-    switch (literal.tag_) {
-        case panda_file::LiteralTag::TAGVALUE:
-            [[fallthrough]];
-        case panda_file::LiteralTag::ACCESSOR:
-            [[fallthrough]];
-        case panda_file::LiteralTag::NULLVALUE:
-            return std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::U8>(std::get<uint8_t>(literal.value_)));
-        case panda_file::LiteralTag::BOOL:
-            return std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::U8>(static_cast<uint8_t>(std::get<bool>(literal.value_))));
-        case panda_file::LiteralTag::ARRAY_I8:
-            return std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::I8>(std::get<uint8_t>(literal.value_)));
-        case panda_file::LiteralTag::METHODAFFILIATE:
-            return std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::U16>(std::get<uint16_t>(literal.value_)));
-        case panda_file::LiteralTag::ARRAY_I16:
-            return std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::I16>(std::get<uint16_t>(literal.value_)));
-        case panda_file::LiteralTag::INTEGER:
-            [[fallthrough]];
-        case panda_file::LiteralTag::ARRAY_I32:
-            return std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::I32>(std::get<uint32_t>(literal.value_)));
-        case panda_file::LiteralTag::ARRAY_I64:
-            return std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::I64>(std::get<uint64_t>(literal.value_)));
-        case panda_file::LiteralTag::FLOAT:
-            [[fallthrough]];
-        case panda_file::LiteralTag::ARRAY_F32:
-            return std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::F32>(std::get<float>(literal.value_)));
-        case panda_file::LiteralTag::DOUBLE:
-            [[fallthrough]];
-        case panda_file::LiteralTag::ARRAY_F64:
-            return std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::F64>(std::get<double>(literal.value_)));
-        case panda_file::LiteralTag::STRING:
-            [[fallthrough]];
-        case panda_file::LiteralTag::ARRAY_STRING:
-            return std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::STRING>(std::string_view(std::get<std::string>(literal.value_))));
-        case panda_file::LiteralTag::METHOD:
-            [[fallthrough]];
-        case panda_file::LiteralTag::GENERATORMETHOD:
-            return std::make_unique<ScalarValue>(
-                ScalarValue::Create<Value::Type::METHOD>(std::string_view(std::get<std::string>(literal.value_))));
-        default:
-            UNREACHABLE();
-            break;
-    }
-
-    return nullptr;
-}
-
 /* static */
 void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                                   AsmEmitter::AsmEntityCollections &entities)
@@ -834,7 +783,122 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
         std::vector<panda_file::LiteralItem> literal_array;
 
         for (auto &literal : l.literals_) {
-            auto value = CreateValue(literal);
+            std::unique_ptr<ScalarValue> value;
+
+            switch (literal.tag_) {
+                case panda_file::LiteralTag::ARRAY_U1: {
+                    ASSERT(program.array_types.find(Type("u1", 1)) != program.array_types.end());
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::U1>(static_cast<bool>(std::get<bool>(literal.value_))));
+                    break;
+                }
+                case panda_file::LiteralTag::ARRAY_U8: {
+                    ASSERT(program.array_types.find(Type("u8", 1)) != program.array_types.end());
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::U8>(std::get<uint8_t>(literal.value_)));
+                    break;
+                }
+                case panda_file::LiteralTag::ARRAY_I8: {
+                    ASSERT(program.array_types.find(Type("i8", 1)) != program.array_types.end());
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::I8>(std::get<uint8_t>(literal.value_)));
+                    break;
+                }
+                case panda_file::LiteralTag::ARRAY_U16: {
+                    ASSERT(program.array_types.find(Type("u16", 1)) != program.array_types.end());
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::U16>(std::get<uint16_t>(literal.value_)));
+                    break;
+                }
+                case panda_file::LiteralTag::ARRAY_I16: {
+                    ASSERT(program.array_types.find(Type("i16", 1)) != program.array_types.end());
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::I16>(std::get<uint16_t>(literal.value_)));
+                    break;
+                }
+                case panda_file::LiteralTag::ARRAY_U32: {
+                    ASSERT(program.array_types.find(Type("u32", 1)) != program.array_types.end());
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::U32>(std::get<uint32_t>(literal.value_)));
+                    break;
+                }
+                case panda_file::LiteralTag::ARRAY_I32: {
+                    ASSERT(program.array_types.find(Type("i32", 1)) != program.array_types.end());
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::I32>(std::get<uint32_t>(literal.value_)));
+                    break;
+                }
+                case panda_file::LiteralTag::ARRAY_U64: {
+                    ASSERT(program.array_types.find(Type("u64", 1)) != program.array_types.end());
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::U64>(std::get<uint64_t>(literal.value_)));
+                    break;
+                }
+                case panda_file::LiteralTag::ARRAY_I64: {
+                    ASSERT(program.array_types.find(Type("i64", 1)) != program.array_types.end());
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::I64>(std::get<uint64_t>(literal.value_)));
+                    break;
+                }
+                case panda_file::LiteralTag::ARRAY_F32: {
+                    ASSERT(program.array_types.find(Type("f32", 1)) != program.array_types.end());
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::F32>(std::get<float>(literal.value_)));
+                    break;
+                }
+                case panda_file::LiteralTag::ARRAY_F64: {
+                    ASSERT(program.array_types.find(Type("f64", 1)) != program.array_types.end());
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::F64>(std::get<double>(literal.value_)));
+                    break;
+                }
+                case panda_file::LiteralTag::ARRAY_STRING:
+                    ASSERT(program.array_types.find(Type(
+                        Type::FromDescriptor(panda::panda_file::GetStringClassDescriptor(program.lang)), 1)) !=
+                           program.array_types.end());
+                    value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::STRING>(
+                        std::string_view(std::get<std::string>(literal.value_))));
+                    break;
+                case panda_file::LiteralTag::TAGVALUE:
+                case panda_file::LiteralTag::ACCESSOR:
+                case panda_file::LiteralTag::NULLVALUE:
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::U8>(static_cast<uint8_t>(std::get<uint8_t>(literal.value_))));
+                    break;
+                case panda_file::LiteralTag::BOOL:
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::U8>(static_cast<uint8_t>(std::get<bool>(literal.value_))));
+                    break;
+                case panda_file::LiteralTag::METHODAFFILIATE:
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::U16>(std::get<uint16_t>(literal.value_)));
+                    break;
+                case panda_file::LiteralTag::INTEGER:
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::I32>(std::get<uint32_t>(literal.value_)));
+                    break;
+                case panda_file::LiteralTag::FLOAT:
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::F32>(std::get<float>(literal.value_)));
+                    break;
+                case panda_file::LiteralTag::DOUBLE:
+                    value = std::make_unique<ScalarValue>(
+                        ScalarValue::Create<Value::Type::F64>(std::get<double>(literal.value_)));
+                    break;
+                case panda_file::LiteralTag::STRING:
+                    value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::STRING>(
+                        std::string_view(std::get<std::string>(literal.value_))));
+                    break;
+                case panda_file::LiteralTag::METHOD:
+                case panda_file::LiteralTag::GENERATORMETHOD:
+                case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
+                    value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::METHOD>(
+                        std::string_view(std::get<std::string>(literal.value_))));
+                    break;
+                default:
+                    UNREACHABLE();
+            }
+
             // the return pointer of vector element should not be rewrited
             CreateLiteralItem(items, value.get(), &literal_array, entities.method_items);
         }
@@ -960,8 +1024,7 @@ bool AsmEmitter::HandleRecord(ItemContainer *items, const Program &program, AsmE
     entities.class_items.insert({name, record});
 
     record->SetAccessFlags(rec.metadata->GetAccessFlags());
-
-    SetSourceLang(record, rec.language);
+    record->SetSourceLang(rec.language);
 
     if (!rec.source_file.empty()) {
         auto *source_file_item = items->GetOrCreateStringItem(rec.source_file);
@@ -1006,14 +1069,12 @@ bool AsmEmitter::MakeRecordItems(
 StringItem *AsmEmitter::GetMethodName(ItemContainer *items, const Function &func, const std::string &name)
 {
     if (func.metadata->IsCtor()) {
-        return items->GetOrCreateStringItem(extensions::GetCtorName(func.language));
+        return items->GetOrCreateStringItem(panda::panda_file::GetCtorName(func.language));
+    } else if (func.metadata->IsCctor()) {
+        return items->GetOrCreateStringItem(panda::panda_file::GetCctorName(func.language));
+    } else {
+        return items->GetOrCreateStringItem(GetItemName(name));
     }
-
-    if (func.metadata->IsCctor()) {
-        return items->GetOrCreateStringItem(extensions::GetCctorName(func.language));
-    }
-
-    return items->GetOrCreateStringItem(GetItemName(name));
 }
 
 /* static */
@@ -1051,7 +1112,7 @@ bool AsmEmitter::HandleRecordOnwer(ItemContainer *items, const Program &program,
     if (record_owner_name.empty()) {
         *area = items->GetOrCreateGlobalClassItem();
         (*area)->SetAccessFlags(ACC_PUBLIC);
-        SetSourceLang(*area, program.lang);
+        (*area)->SetSourceLang(program.lang);
     } else {
         if (!HandleAreaForInner(items, program, area, foreign_area, name, record_owner_name)) {
             return false;
@@ -1147,6 +1208,7 @@ bool AsmEmitter::MakeFunctionItems(
         const auto &[mangled_name, func] = f;
 
         auto name = pandasm::DeMangleName(mangled_name);
+
         StringItem *method_name = GetMethodName(items, func, name);
 
         ClassItem *area = nullptr;
@@ -1158,13 +1220,16 @@ bool AsmEmitter::MakeFunctionItems(
         }
 
         auto params = std::vector<MethodParamItem> {};
+
         uint32_t access_flags = func.metadata->GetAccessFlags();
+
         if (func.params.empty() || func.params[0].type.GetName() != record_owner_name) {
             access_flags |= ACC_STATIC;
         }
 
         bool is_static = (access_flags & ACC_STATIC) != 0;
         size_t idx = is_static ? 0 : 1;
+
         if (!HandleFunctionParams(items, program, idx, name, func, primitive_types, params)) {
             return false;
         }
@@ -1230,6 +1295,7 @@ void AsmEmitter::SetCodeAndDebugInfo(ItemContainer *items, MethodItem *method, c
 {
     auto *code = items->CreateItem<CodeItem>();
     method->SetCode(code);
+    code->AddMethod(method);  // we need it for Profile-Guided optimization
 
     if (!emit_debug_info && !func.CanThrow()) {
         return;
@@ -1258,13 +1324,14 @@ void AsmEmitter::SetMethodSourceLang(const Program &program, MethodItem *method,
                                      const std::string &name)
 {
     std::string record_name = GetOwnerName(name);
-    if (!record_name.empty()) {
-        auto &rec = program.record_table.find(record_name)->second;
-        if (rec.language != func.language) {
-            SetSourceLang(method, func.language);
-        }
-    } else {
-        SetSourceLang(method, func.language);
+    if (record_name.empty()) {
+        method->SetSourceLang(func.language);
+        return;
+    }
+
+    auto &rec = program.record_table.find(record_name)->second;
+    if (rec.language != func.language) {
+        method->SetSourceLang(func.language);
     }
 }
 
@@ -1312,6 +1379,7 @@ bool AsmEmitter::MakeFunctionDebugInfoAndAnnotations(ItemContainer *items, const
         if (func.metadata->IsForeign()) {
             continue;
         }
+
         auto *method = static_cast<MethodItem *>(Find(entities.method_items, name));
 
         if (func.metadata->HasImplementation()) {
@@ -1329,7 +1397,7 @@ bool AsmEmitter::MakeFunctionDebugInfoAndAnnotations(ItemContainer *items, const
 }
 
 /* static */
-void AsmEmitter::FillMap(PandaFileToPandaAsmMaps *maps, const AsmEmitter::AsmEntityCollections &entities)
+void AsmEmitter::FillMap(PandaFileToPandaAsmMaps *maps, AsmEmitter::AsmEntityCollections &entities)
 {
     for (const auto &[name, method] : entities.method_items) {
         maps->methods.insert({method->GetFileId().GetOffset(), std::string(name)});
@@ -1408,7 +1476,7 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
         code->SetNumVregs(func.regs_num);
         code->SetNumArgs(func.GetParamsNum());
 
-        size_t num_ins = static_cast<size_t>(
+        auto num_ins = static_cast<size_t>(
             std::count_if(func.ins.begin(), func.ins.end(), [](auto it) { return it.opcode != Opcode::INVALID; }));
         code->SetNumInstructions(num_ins);
 
@@ -1430,7 +1498,8 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
 }
 
 /* static */
-bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToPandaAsmMaps *maps, bool emit_debug_info)
+bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToPandaAsmMaps *maps, bool emit_debug_info,
+                      panda::panda_file::pgo::ProfileOptimizer *profile_opt)
 {
     auto primitive_types = CreatePrimitiveTypes(items);
 
@@ -1457,9 +1526,13 @@ bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToP
         return false;
     }
 
-    // Add Code and DebugInfo items last due to that they have variable size that depends on bytecode
+    // Add Code and DebugInfo items last due to they have variable size that depends on bytecode
     if (!MakeFunctionDebugInfoAndAnnotations(items, program, entities, emit_debug_info)) {
         return false;
+    }
+
+    if (profile_opt != nullptr) {
+        items->ReorderItems(profile_opt);
     }
 
     items->ComputeLayout();
@@ -1476,10 +1549,11 @@ bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToP
 }
 
 bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::string, size_t> *stat,
-                      PandaFileToPandaAsmMaps *maps, bool debug_info)
+                      PandaFileToPandaAsmMaps *maps, bool debug_info,
+                      panda::panda_file::pgo::ProfileOptimizer *profile_opt)
 {
     auto items = ItemContainer {};
-    if (!Emit(&items, program, maps, debug_info)) {
+    if (!Emit(&items, program, maps, debug_info, profile_opt)) {
         return false;
     }
 
@@ -1491,14 +1565,15 @@ bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::stri
 }
 
 bool AsmEmitter::Emit(const std::string &filename, const Program &program, std::map<std::string, size_t> *stat,
-                      PandaFileToPandaAsmMaps *maps, bool debug_info)
+                      PandaFileToPandaAsmMaps *maps, bool debug_info,
+                      panda::panda_file::pgo::ProfileOptimizer *profile_opt)
 {
     auto writer = FileWriter(filename);
     if (!writer) {
         SetLastError("Unable to open" + filename + " for writing");
         return false;
     }
-    return Emit(&writer, program, stat, maps, debug_info);
+    return Emit(&writer, program, stat, maps, debug_info, profile_opt);
 }
 
 std::unique_ptr<const panda_file::File> AsmEmitter::Emit(const Program &program, PandaFileToPandaAsmMaps *maps)
@@ -1509,12 +1584,7 @@ std::unique_ptr<const panda_file::File> AsmEmitter::Emit(const Program &program,
     }
 
     size_t size = items.ComputeLayout();
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
-    auto *buffer = new (std::nothrow) std::byte[size];
-    if (buffer == nullptr) {
-        LOG(ERROR, ASSEMBLER) << "Invalid items size " << size;
-        return nullptr;
-    }
+    auto *buffer = new std::byte[size];
 
     auto writer = MemoryBufferWriter(reinterpret_cast<uint8_t *>(buffer), size);
     if (!items.Write(&writer)) {
@@ -1545,6 +1615,7 @@ TypeItem *AsmEmitter::GetTypeItem(
     }
 
     auto &rec = iter->second;
+
     if (rec.metadata->IsForeign()) {
         return items->GetOrCreateForeignClassItem(type.GetDescriptor());
     }
@@ -1620,7 +1691,7 @@ size_t Function::GetLineNumber(size_t i) const
     return ins[i].ins_debug.line_number;
 }
 
-size_t Function::GetColumnNumber(size_t i) const
+uint32_t Function::GetColumnNumber(size_t i) const
 {
     return ins[i].ins_debug.column_number;
 }
@@ -1654,9 +1725,9 @@ void Function::EmitLineNumber(panda_file::LineNumberProgramItem *program, std::v
 }
 
 void Function::EmitColumnNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool,
-                                int32_t &prev_column_number, uint32_t &pc_inc, size_t instruction_number) const
+                                uint32_t &prev_column_number, uint32_t &pc_inc, size_t instruction_number) const
 {
-    auto cn = static_cast<int32_t>(GetColumnNumber(instruction_number));
+    auto cn = GetColumnNumber(instruction_number);
     if (cn != prev_column_number) {
         program->EmitColumn(constant_pool, pc_inc, cn);
         pc_inc = 0;
@@ -1677,7 +1748,7 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, con
 
     uint32_t pc_inc = 0;
     auto prev_line_number = static_cast<int32_t>(GetLineNumber(0));
-    auto prev_column_number = -1;
+    uint32_t prev_column_number = std::numeric_limits<uint32_t>::max();
     BytecodeInstruction bi(bytecode.data());
     debug_item->SetLineNumber(static_cast<uint32_t>(prev_line_number));
 
@@ -1693,7 +1764,7 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, con
             EmitLineNumber(program, constant_pool, prev_line_number, pc_inc, i);
         }
 
-        if (language == pandasm::extensions::Language::ECMASCRIPT && emit_debug_info) {
+        if (emit_debug_info) {
             EmitColumnNumber(program, constant_pool, prev_column_number, pc_inc, i);
         }
 
@@ -1799,21 +1870,27 @@ void Function::DebugDump() const
     }
 }
 
-std::string GetOwnerName(const std::string &name)
+std::string GetOwnerName(std::string name)
 {
+    name = DeMangleName(name);
     auto super_pos = name.find_last_of(PARSE_AREA_MARKER);
+
     if (super_pos == std::string::npos) {
         return "";
     }
+
     return name.substr(0, super_pos);
 }
 
-std::string GetItemName(const std::string &name)
+std::string GetItemName(std::string name)
 {
+    name = DeMangleName(name);
     auto super_pos = name.find_last_of(PARSE_AREA_MARKER);
+
     if (super_pos == std::string::npos) {
         return name;
     }
+
     return name.substr(super_pos + 1);
 }
 

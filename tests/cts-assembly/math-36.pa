@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(neg(1) == -1) operation --> neg.64
-.function u1 main(){
+.function i32 main(){
     ldai.64 1
     neg.64
     movi.64 v0, -1

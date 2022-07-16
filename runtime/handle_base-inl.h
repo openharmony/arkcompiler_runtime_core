@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_HANDLE_BASE_INL_H_
-#define PANDA_RUNTIME_HANDLE_BASE_INL_H_
+#ifndef PANDA_RUNTIME_HANDLE_BASE_INL_H
+#define PANDA_RUNTIME_HANDLE_BASE_INL_H
 
 #include "runtime/handle_base.h"
 #include "runtime/handle_scope-inl.h"
@@ -26,7 +26,5 @@ HandleBase::HandleBase(ManagedThread *thread, T value)
 {
     address_ = thread->GetTopScope<T>()->NewHandle(value);
 }
-
 }  // namespace panda
-
-#endif  // PANDA_RUNTIME_HANDLE_BASE_INL_H_
+#endif  // PANDA_RUNTIME_HANDLE_BASE_INL_H

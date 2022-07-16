@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef PANDA_RUNTIME_MONITOR_H_
 #define PANDA_RUNTIME_MONITOR_H_
 
@@ -27,6 +26,8 @@ namespace panda {
 
 class MTManagedThread;
 class ObjectHeader;
+template <class T>
+class VMHandle;
 
 /**
  * To avoid inheritance in the `Thread` class we don't use `List` (it forces list element to inherit `ListNode`).
@@ -69,6 +70,7 @@ private:
     T *head_ {nullptr};
 };
 
+// TODO: open questions for implementation:
 // 1. Should we reset the state to unlocked from heavyweight lock?
 // Potential benefit: less memory consumption and usage of lightweight locks
 // Potential drawback: infrustructure to detect, when the monitor is not acquired by any thread and time for repeated
@@ -96,11 +98,9 @@ public:
 
     static Monitor::State MonitorEnter(ObjectHeader *obj, bool trylock = false);
 
+    static void InflateThinLock(MTManagedThread *thread, const VMHandle<ObjectHeader> &obj);
+
     static Monitor::State MonitorExit(ObjectHeader *obj);
-
-    static Monitor::State JniMonitorEnter(ObjectHeader *obj);
-
-    static Monitor::State JniMonitorExit(ObjectHeader *obj);
 
     /**
      * Static call which attempts to wait until timeout, interrupt, or notification.
@@ -127,7 +127,7 @@ public:
      * @param  thread pointer to thread which will acquire the monitor.
      * @tparam for_other_thread include logic for inflation of monitor owned by other thread. Should be used
      * only in futex build.
-     * @return true if new monitor was successfully created and object's markword updated with monitor's ID;
+     * @return true if new monitor was successfuly created and object's markword updated with monitor's ID;
      * false otherwise
      */
     template <bool for_other_thread = false>
@@ -176,20 +176,17 @@ public:
     explicit Monitor(MonitorId id)
         : id_(id), obj_(), owner_(), recursive_counter_(0), hash_code_(0), waiters_counter_(0)
     {
-        owner_.store(nullptr);
+        // Atomic with relaxed order reason: memory access in monitor
+        owner_.store(nullptr, std::memory_order_relaxed);
     }
-
-    ~Monitor() = default;
-    NO_MOVE_SEMANTIC(Monitor);
-    NO_COPY_SEMANTIC(Monitor);
 
 private:
     MonitorId id_;
     ObjectHeader *obj_;  // Used for GC deflation
     std::atomic<MTManagedThread *> owner_;
     // These are two lists, which are linked with nextThread
-    // Be careful when changind these two lists to other types, or changing List implementation,
-    // current Monitor::Notify implementation relies on the fact that reference to JavaThread is still valid
+    // Be careful when changing these two lists to other types, or changing List implementation,
+    // current Monitor::Notify implementation relies on the fact that reference to MTManagedThread is still valid
     // when PopFront is called.
     ThreadList<MTManagedThread> waiters_;
     ThreadList<MTManagedThread> to_wakeup_;
@@ -200,7 +197,8 @@ private:
 
     // NO_THREAD_SAFETY_ANALYSIS for monitor->lock_
     // Some more information in the issue #1662
-    bool Acquire(MTManagedThread *thread, ObjectHeader *obj, bool trylock) NO_THREAD_SAFETY_ANALYSIS;
+    bool Acquire(MTManagedThread *thread, const VMHandle<ObjectHeader> &obj_handle,
+                 bool trylock) NO_THREAD_SAFETY_ANALYSIS;
 
     void InitWithOwner(MTManagedThread *thread, ObjectHeader *obj) NO_THREAD_SAFETY_ANALYSIS;
 
@@ -213,6 +211,7 @@ private:
 
     MTManagedThread *GetOwner()
     {
+        // Atomic with relaxed order reason: memory access in monitor
         return owner_.load(std::memory_order_relaxed);
     }
 

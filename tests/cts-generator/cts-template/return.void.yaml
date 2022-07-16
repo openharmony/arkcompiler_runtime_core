@@ -11,7 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-definitions: []
+definitions:
+  - name: PandaAssembly
+    template: |
+      .language PandaAssembly
+
 tests:
   - file-name: "return.void"
     isa:
@@ -25,9 +29,8 @@ tests:
       exceptions:
         - x_none
     commands:
-      - file-name: "op_none"
+      - file-name: "call_s_p"
         bugid: ['5271']
-        # ignore: true
         isa:
           instructions:
             - sig: return.void
@@ -35,7 +38,7 @@ tests:
               format: [op_none]
         header-template: []
         code-template: |
-          .function %s func(%s) {
+          .function void func(%s) {
               return.void
           }
 
@@ -43,32 +46,126 @@ tests:
               %s
               call.short func%s
         check-type: exit-positive
-        description: Check 'return.void' returns control flow to caller.
+        description: Check 'return.void' returns control flow to caller in Pandasm context with static call.
         cases:
           - values:
-              - void
               - ''
               - ''
               - ''
-
           - values:
-              - i32
-              - ''
-              - ''
-              - ''
-            tags: [verifier]
-            bugid: ['1324']
-            runner-options: ['verifier-failure', 'verifier-debug-config']
-            description: Return type of function does not match 'void' type.
-          - values:
-              - void
               - 'i32 a0'
               - 'movi v0, 0'
               - ', v0'
-
           - values:
-              - void
               - 'i32 a0, f64 a1'
+              - |
+                #
+                    movi v0, 0
+                    fmovi.64 v1, 1.2
+              - ', v0, v1'
+
+      - file-name: "call_s_j"
+        isa:
+          instructions:
+            - sig: return.void
+              acc: none
+              format: [op_none]
+        header-template: [PandaAssembly]
+        runner-options: [use-pa]
+        code-template: |
+          .function void func(%s) {
+              return.void
+          }
+
+          .function i32 main() {
+              %s
+              call.short func%s
+        check-type: exit-positive
+        description: Check 'return.void' returns control flow to caller in PandaAssembly context with static call.
+        cases:
+          - values:
+              - ''
+              - ''
+              - ''
+          - values:
+              - 'i32 a0'
+              - 'movi v0, 0'
+              - ', v0'
+          - values:
+              - 'i32 a0, f64 a1'
+              - |
+                #
+                    movi v0, 0
+                    fmovi.64 v1, 1.2
+              - ', v0, v1'
+
+      - file-name: "call_v_p"
+        isa:
+          instructions:
+            - sig: return.void
+              acc: none
+              format: [op_none]
+        header-template: []
+        code-template: |
+          .record R {}
+          .function void R.func(R a0%s) {
+              return.void
+          }
+
+          .function i32 main() {
+              %s
+              newobj v10, R
+              call.virt R.func, v10%s
+        check-type: exit-positive
+        description: Check 'return.void' returns control flow to caller in Pandasm context with virtual call.
+        cases:
+          - values:
+              - ''
+              - ''
+              - ''
+          - values:
+              - ', i32 a1'
+              - 'movi v0, 0'
+              - ', v0'
+          - values:
+              - ', i32 a1, f64 a2'
+              - |
+                #
+                    movi v0, 0
+                    fmovi.64 v1, 1.2
+              - ', v0, v1'
+
+      - file-name: "call_v_j"
+        isa:
+          instructions:
+            - sig: return.void
+              acc: none
+              format: [op_none]
+        header-template: [PandaAssembly]
+        runner-options: [use-pa]
+        code-template: |
+          .record R {}
+          .function void R.func(R a0%s) {
+              return.void
+          }
+
+          .function i32 main() {
+              %s
+              newobj v10, R
+              call.virt R.func, v10%s
+        check-type: exit-positive
+        description: Check 'return.void' returns control flow to caller in PandaAssembly context with virtual call.
+        cases:
+          - values:
+              - ''
+              - ''
+              - ''
+          - values:
+              - ', i32 a1'
+              - 'movi v0, 0'
+              - ', v0'
+          - values:
+              - ', i32 a1, f64 a2'
               - |
                 #
                     movi v0, 0
@@ -78,7 +175,7 @@ tests:
       - file-name: "type"
         tags: [verifier]
         bugid: ['1324']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: return.void
@@ -86,26 +183,47 @@ tests:
               format: [op_none]
         header-template: []
         code-template: |
-          %s
+          .record panda.Object <external>
           .function %s func() {
+              *s
               return.void
           }
 
           .function i32 main() {
               call.short func
         check-type: exit-positive
-        description: Check 'return.void' is used in function with not void return type.
+        description: Check that 'return.void' is used with correct function return type.
+        template-cases:
+          - values: [u1]
+          - values: [i8]
+          - values: [u8]
+          - values: [i16]
+          - values: [u16]
+          - values: [i32]
+          - values: [u32]
+          - values: [i64]
+          - values: [u64]
+          - values: [f32]
+          - values: [f64]
+          - values: [panda.Object]
         cases:
-          - values: ['', i32]
-          - values: ['', i64]
-          - values: ['', f64]
+          - values: ['']
+          - values: [ldai 0]
+          - values: [ldai.64 0]
+          - values: [fldai 0]
+          - values: [fldai.64 0]
+          - values: [lda.null]
+          - values: [lda.str "some string"]
           - values:
-              - .record Obj {}
-              - Obj
+              - initobj Obj.ctor
+            case-header-template: [obj_ctor]
+          - values:
+              - lda.type Obj
+            case-header-template: [obj_ctor]
 
       - file-name: "wrong_return"
         tags: [verifier]
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: return.void
@@ -235,7 +353,7 @@ tests:
                     return
             description: "Registers are used in function."
 
-      - file-name: "undef_acc"
+      - file-name: "undef_acc_s_p"
         isa:
           instructions:
             - sig: return.void
@@ -243,8 +361,8 @@ tests:
               format: [op_none]
         tags: [verifier]
         bugid: ['1324']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        description: Check accumulator value if undefined after 'return.void'.
+        runner-options: ['verifier-failure', 'verifier-config']
+        description: Check accumulator value if undefined after 'return.void' in Pandasm context with static call.
         header-template: []
         code-template: |
           .function void func() {
@@ -254,5 +372,75 @@ tests:
           .function i32 main() {
               ldai 0
               call.short func
+              sta v0
+        check-type: exit-positive
+
+      - file-name: "undef_acc_s_j"
+        isa:
+          instructions:
+            - sig: return.void
+              acc: none
+              format: [op_none]
+        tags: [verifier]
+        bugid: ['1324']
+        runner-options: ['verifier-failure', 'verifier-config', 'use-pa']
+        description: Check accumulator value if undefined after 'return.void' in PandaAssembly context with static call.
+        header-template: [PandaAssembly]
+        code-template: |
+          .function void func() {
+              return.void
+          }
+
+          .function i32 main() {
+              ldai 0
+              call.short func
+              sta v0
+        check-type: exit-positive
+
+      - file-name: "undef_acc_v_p"
+        isa:
+          instructions:
+            - sig: return.void
+              acc: none
+              format: [op_none]
+        tags: [verifier]
+        bugid: ['1324']
+        runner-options: ['verifier-failure', 'verifier-config']
+        description: Check accumulator value if undefined after 'return.void' in Pandasm context with virtual call.
+        header-template: []
+        code-template: |
+          .record R {}
+          .function void R.func(R a0) {
+              return.void
+          }
+
+          .function i32 main() {
+              ldai 0
+              newobj v10, R
+              call.virt.short R.func, v10
+              sta v0
+        check-type: exit-positive
+
+      - file-name: "undef_acc_v_j"
+        isa:
+          instructions:
+            - sig: return.void
+              acc: none
+              format: [op_none]
+        tags: [verifier]
+        bugid: ['1324']
+        runner-options: ['verifier-failure', 'verifier-config', 'use-pa']
+        description: Check accumulator value if undefined after 'return.void' in PandaAssembly context with virtual call.
+        header-template: [PandaAssembly]
+        code-template: |
+          .record R {}
+          .function void R.func(R a0) {
+              return.void
+          }
+
+          .function i32 main() {
+              ldai 0
+              newobj v10, R
+              call.virt.short R.func, v10
               sta v0
         check-type: exit-positive

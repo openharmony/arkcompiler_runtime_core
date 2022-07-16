@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 
 #include "core_vm.h"
 #include "utils/expected.h"
+#include "runtime/compiler.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/class_linker.h"
@@ -25,7 +26,7 @@
 namespace panda::core {
 
 // Create MemoryManager by RuntimeOptions
-static mem::MemoryManager *CreateMM(LanguageContext ctx, mem::InternalAllocatorPtr internal_allocator,
+static mem::MemoryManager *CreateMM(const LanguageContext &ctx, mem::InternalAllocatorPtr internal_allocator,
                                     const RuntimeOptions &options)
 {
     mem::MemoryManager::HeapOptions heap_options {
@@ -38,20 +39,11 @@ static mem::MemoryManager *CreateMM(LanguageContext ctx, mem::InternalAllocatorP
         options.IsStartAsZygote(),                    // is_start_as_zygote
     };
 
-    mem::GCTriggerConfig gc_trigger_config(options.GetGcTriggerType(), options.GetGcDebugTriggerStart(),
-                                           options.GetMinExtraHeapSize(), options.GetMaxExtraHeapSize(),
-                                           options.GetSkipStartupGcCount());
+    mem::GCTriggerConfig gc_trigger_config(options, panda_file::SourceLang::PANDA_ASSEMBLY);
 
-    mem::GCSettings gc_settings {options.IsGcEnableTracing(),
-                                 panda::mem::NativeGcTriggerTypeFromString(options.GetNativeGcTriggerType()),
-                                 options.IsGcDumpHeap(),
-                                 options.IsConcurrentGcEnabled(),
-                                 options.IsRunGcInPlace(),
-                                 options.IsPreGcHeapVerifyEnabled(),
-                                 options.IsPostGcHeapVerifyEnabled(),
-                                 options.IsFailOnHeapVerification()};
+    mem::GCSettings gc_settings(options, panda_file::SourceLang::PANDA_ASSEMBLY);
 
-    mem::GCType gc_type = Runtime::GetGCType(options);
+    mem::GCType gc_type = Runtime::GetGCType(options, panda_file::SourceLang::PANDA_ASSEMBLY);
 
     return mem::MemoryManager::Create(ctx, internal_allocator, gc_type, gc_settings, gc_trigger_config, heap_options);
 }
@@ -67,22 +59,32 @@ Expected<PandaCoreVM *, PandaString> PandaCoreVM::Create(Runtime *runtime, const
 
     auto allocator = mm->GetHeapManager()->GetInternalAllocator();
     PandaCoreVM *core_vm = allocator->New<PandaCoreVM>(runtime, options, mm);
+    if (core_vm == nullptr) {
+        return Unexpected(PandaString("Cannot create PandaCoreVM"));
+    }
+
     core_vm->InitializeGC();
 
     // Create Main Thread
     core_vm->main_thread_ = MTManagedThread::Create(runtime, core_vm);
+    core_vm->main_thread_->InitBuffers();
     ASSERT(core_vm->main_thread_ == ManagedThread::GetCurrent());
+    core_vm->main_thread_->InitForStackOverflowCheck(ManagedThread::STACK_OVERFLOW_RESERVED_SIZE,
+                                                     ManagedThread::STACK_OVERFLOW_PROTECTED_SIZE);
 
     core_vm->thread_manager_->SetMainThread(core_vm->main_thread_);
 
     return core_vm;
 }
 
-PandaCoreVM::PandaCoreVM(Runtime *runtime, [[maybe_unused]] const RuntimeOptions &options, mem::MemoryManager *mm)
+PandaCoreVM::PandaCoreVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm)
     : runtime_(runtime), mm_(mm)
 {
     mem::HeapManager *heap_manager = mm_->GetHeapManager();
     mem::InternalAllocatorPtr allocator = heap_manager->GetInternalAllocator();
+    runtime_iface_ = allocator->New<PandaRuntimeInterface>();
+    compiler_ = allocator->New<Compiler>(heap_manager->GetCodeAllocator(), allocator, options,
+                                         heap_manager->GetMemStats(), runtime_iface_);
     string_table_ = allocator->New<StringTable>();
     monitor_pool_ = allocator->New<MonitorPool>(allocator);
     reference_processor_ = allocator->New<mem::EmptyReferenceProcessor>();
@@ -96,21 +98,55 @@ PandaCoreVM::~PandaCoreVM()
 
     mem::InternalAllocatorPtr allocator = mm_->GetHeapManager()->GetInternalAllocator();
     allocator->Delete(rendezvous_);
+    allocator->Delete(runtime_iface_);
     allocator->Delete(thread_manager_);
     allocator->Delete(reference_processor_);
     allocator->Delete(monitor_pool_);
     allocator->Delete(string_table_);
+    allocator->Delete(compiler_);
     mm_->Finalize();
     mem::MemoryManager::Destroy(mm_);
 }
 
 bool PandaCoreVM::Initialize()
 {
+    if (!intrinsics::Initialize(panda::panda_file::SourceLang::PANDA_ASSEMBLY)) {
+        LOG(ERROR, RUNTIME) << "Failed to initialize Core intrinsics";
+        return false;
+    }
+
+    auto runtime = Runtime::GetCurrent();
+    if (runtime->GetOptions().ShouldLoadBootPandaFiles()) {
+        PreAllocOOMErrorObject();
+    }
+
     return true;
+}
+
+void PandaCoreVM::PreAllocOOMErrorObject()
+{
+    auto global_object_storage = GetGlobalObjectStorage();
+    auto runtime = Runtime::GetCurrent();
+    LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *class_linker = runtime->GetClassLinker();
+    auto cls = class_linker->GetExtension(ctx)->GetClass(ctx.GetOutOfMemoryErrorClassDescriptor());
+    auto oom_obj = ObjectHeader::Create(cls);
+    if (oom_obj == nullptr) {
+        LOG(FATAL, RUNTIME) << "Cannot preallocate OOM Error object";
+        return;
+    }
+    oom_obj_ref_ = global_object_storage->Add(oom_obj, panda::mem::Reference::ObjectType::GLOBAL);
 }
 
 bool PandaCoreVM::InitializeFinish()
 {
+    // Preinitialize StackOverflowException so we don't need to do this when stack overflow occurred
+    auto runtime = Runtime::GetCurrent();
+    auto *class_linker = runtime->GetClassLinker();
+    LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *extension = class_linker->GetExtension(ctx);
+    class_linker->GetClass(ctx.GetStackOverflowErrorClassDescriptor(), true, extension->GetBootContext());
+
     return true;
 }
 
@@ -129,16 +165,18 @@ void PandaCoreVM::PreStartup()
 void PandaCoreVM::PreZygoteFork()
 {
     mm_->PreZygoteFork();
+    compiler_->PreZygoteFork();
 }
 
 void PandaCoreVM::PostZygoteFork()
 {
+    compiler_->PostZygoteFork();
     mm_->PostZygoteFork();
 }
 
 void PandaCoreVM::InitializeGC()
 {
-    mm_->InitializeGC();
+    mm_->InitializeGC(this);
 }
 
 void PandaCoreVM::StartGC()
@@ -151,13 +189,14 @@ void PandaCoreVM::StopGC()
     mm_->StopGC();
 }
 
-void PandaCoreVM::HandleReferences(const GCTask &task)
+void PandaCoreVM::HandleReferences(const GCTask &task, const mem::GC::ReferenceClearPredicateT &pred)
 {
     LOG(DEBUG, REF_PROC) << "Start processing cleared references";
     mem::GC *gc = mm_->GetGC();
-    gc->ProcessReferences(gc->GetGCPhase(), task);
+    gc->ProcessReferences(gc->GetGCPhase(), task, pred);
 }
 
+// TODO(alovkov): call ReferenceQueue.add method with cleared references
 void PandaCoreVM::HandleEnqueueReferences()
 {
     LOG(DEBUG, REF_PROC) << "Start HandleEnqueueReferences";
@@ -193,7 +232,7 @@ bool PandaCoreVM::CheckEntrypointSignature(Method *entrypoint)
                         {utf::CStringAsMutf8(class_name), sizeof(class_name) - 1});
 }
 
-static coretypes::Array *CreateArgumentsArray(const std::vector<std::string> &args, LanguageContext ctx,
+static coretypes::Array *CreateArgumentsArray(const std::vector<std::string> &args, const LanguageContext &ctx,
                                               ClassLinker *class_linker, PandaVM *vm)
 {
     const char class_name[] = "[Lpanda/String;";  // NOLINT(modernize-avoid-c-arrays)
@@ -246,18 +285,43 @@ Expected<int, Runtime::Error> PandaCoreVM::InvokeEntrypointImpl(Method *entrypoi
 
 ObjectHeader *PandaCoreVM::GetOOMErrorObject()
 {
-    LOG(FATAL, RUNTIME) << "UNIMPLEMENTED: " << __FUNCTION__ << " +" << __LINE__;
-    return nullptr;
+    auto global_object_storage = GetGlobalObjectStorage();
+    auto obj = global_object_storage->Get(oom_obj_ref_);
+    ASSERT(obj != nullptr);
+    return obj;
 }
 
-void PandaCoreVM::HandleUncaughtException(ObjectHeader * /* exception */)
+void PandaCoreVM::HandleUncaughtException()
 {
-    LOG(FATAL, RUNTIME) << "UNIMPLEMENTED: " << __FUNCTION__ << " +" << __LINE__;
+    ManagedThread *thread = ManagedThread::GetCurrent();
+    LOG(ERROR, RUNTIME) << "Unhandled exception: " << thread->GetException()->ClassAddr<Class>()->GetName();
+    // _exit guarantees a safe completion in case of multi-threading as static destructors aren't called
+    _exit(1);
 }
 
 void PandaCoreVM::VisitVmRoots(const GCRootVisitor &visitor)
 {
-    GetGlobalObjectStorage()->VisitObjects(visitor, mem::RootType::ROOT_RS_GLOBAL);
+    // Visit PT roots
+    GetThreadManager()->EnumerateThreads([visitor](ManagedThread *thread) {
+        ASSERT(MTManagedThread::ThreadIsMTManagedThread(thread));
+        auto mt_thread = MTManagedThread::CastFromThread(thread);
+        auto pt_storage = mt_thread->GetPtReferenceStorage();
+        pt_storage->VisitObjects(visitor, mem::RootType::ROOT_PT_LOCAL);
+        return true;
+    });
+}
+
+void PandaCoreVM::UpdateVmRefs()
+{
+    LOG(DEBUG, GC) << "=== PTRoots Update moved. BEGIN ===";
+    GetThreadManager()->EnumerateThreads([](ManagedThread *thread) {
+        ASSERT(MTManagedThread::ThreadIsMTManagedThread(thread));
+        auto mt_thread = MTManagedThread::CastFromThread(thread);
+        auto pt_storage = mt_thread->GetPtReferenceStorage();
+        pt_storage->UpdateMovedRefs();
+        return true;
+    });
+    LOG(DEBUG, GC) << "=== PTRoots Update moved. END ===";
 }
 
 }  // namespace panda::core

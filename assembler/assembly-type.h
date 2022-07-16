@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ASSEMBLY_TYPE_H_
-#define PANDA_ASSEMBLER_ASSEMBLY_TYPE_H_
+#ifndef _PANDA_ASSEMBLER_TYPE_H
+#define _PANDA_ASSEMBLER_TYPE_H
 
 #include "define.h"
 #include "file_items.h"
@@ -52,6 +52,13 @@ public:
     std::string GetName() const
     {
         return name_;
+    }
+
+    std::string GetPandasmName() const
+    {
+        std::string name_pa {name_};
+        std::replace(name_pa.begin(), name_pa.end(), '/', '.');
+        return name_pa;
     }
 
     std::string GetComponentName() const
@@ -159,6 +166,7 @@ public:
     static Type FromName(std::string_view name, bool ignore_primitive = false);
 
     static bool IsPandaPrimitiveType(const std::string &name);
+    static bool IsStringType(const std::string &name, panda::panda_file::SourceLang lang);
 
 private:
     static std::string GetName(std::string_view component_name, size_t rank);
@@ -184,4 +192,4 @@ public:
 
 }  // namespace std
 
-#endif  // PANDA_ASSEMBLER_ASSEMBLY_TYPE_H_
+#endif  // !_PANDA_ASSEMBLER_TYPE_H

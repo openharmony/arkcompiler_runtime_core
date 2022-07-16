@@ -19,7 +19,14 @@ def jump_eq(target)
   return "je #{target}"
 end
 
+def jump(target)
+  return "jmp #{target}"
+end
+
+def save_param(value)
+  return "movq $#{value}, %r15"
+end
+
 def handler_path(name)
   return "bridge/arch/amd64/handle_#{name}_amd64.S"
 end
-

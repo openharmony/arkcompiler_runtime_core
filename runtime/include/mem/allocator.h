@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_MEM_ALLOCATOR_H_
-#define PANDA_RUNTIME_INCLUDE_MEM_ALLOCATOR_H_
+#ifndef RUNTIME_MEM_ALLOCATOR_H
+#define RUNTIME_MEM_ALLOCATOR_H
 
 #include <functional>
 
@@ -25,11 +24,13 @@
 #include "libpandabase/macros.h"
 #include "runtime/mem/bump-allocator.h"
 #include "runtime/mem/freelist_allocator.h"
+#include "runtime/mem/gc/bitmap.h"
 #include "runtime/mem/gc/gc_types.h"
 #include "runtime/mem/humongous_obj_allocator.h"
 #include "runtime/mem/internal_allocator.h"
 #include "runtime/mem/runslots_allocator.h"
 #include "runtime/mem/pygote_space_allocator.h"
+#include "runtime/mem/heap_space.h"
 
 namespace panda {
 class ObjectHeader;
@@ -98,14 +99,14 @@ public:
         return mem_stats_;
     }
 
-    [[nodiscard]] void *Alloc(size_t size)
+    [[nodiscard]] void *Alloc(size_t size, Alignment align = DEFAULT_ALIGNMENT)
     {
-        return Allocate(size, DEFAULT_ALIGNMENT, nullptr);
+        return Allocate(size, align, nullptr);
     }
 
-    [[nodiscard]] void *AllocLocal(size_t size)
+    [[nodiscard]] void *AllocLocal(size_t size, Alignment align = DEFAULT_ALIGNMENT)
     {
-        return AllocateLocal(size, DEFAULT_ALIGNMENT, nullptr);
+        return AllocateLocal(size, align, nullptr);
     }
 
     [[nodiscard]] virtual void *Allocate(size_t size, Alignment align,
@@ -116,16 +117,16 @@ public:
 
     [[nodiscard]] virtual void *AllocateNonMovable(size_t size, Alignment align, panda::ManagedThread *thread) = 0;
 
-    virtual void *AllocateTenured([[maybe_unused]] size_t size)
-    {
-        LOG(FATAL, ALLOC) << "AllocTenured not implemented";
-        UNREACHABLE();
-    }
-
     template <class T>
     [[nodiscard]] T *AllocArray(size_t size)
     {
-        return static_cast<T *>(this->Allocate(sizeof(T) * size, DEFAULT_ALIGNMENT, nullptr));
+        return static_cast<T *>(this->Allocate(sizeof(T) * size, GetAlignment<T>(), nullptr));
+    }
+
+    template <class T>
+    [[nodiscard]] T *AllocArrayLocal(size_t size)
+    {
+        return static_cast<T *>(this->AllocateLocal(sizeof(T) * size, GetAlignment<T>(), nullptr));
     }
 
     template <class T>
@@ -147,7 +148,8 @@ public:
         if (data == nullptr) {
             return;
         }
-        static constexpr size_t SIZE_BEFORE_DATA_OFFSET = AlignUp(sizeof(size_t), DEFAULT_ALIGNMENT_IN_BYTES);
+        static constexpr size_t SIZE_BEFORE_DATA_OFFSET =
+            AlignUp(sizeof(size_t), GetAlignmentInBytes(GetAlignment<T>()));
         void *p = ToVoidPtr(ToUintPtr(data) - SIZE_BEFORE_DATA_OFFSET);
         size_t size = *static_cast<size_t *>(p);
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
@@ -206,7 +208,7 @@ public:
     template <typename T, typename... Args>
     std::enable_if_t<!std::is_array_v<T>, T *> New(Args &&... args)
     {
-        void *p = Alloc(sizeof(T));
+        void *p = Alloc(sizeof(T), GetAlignment<T>());
         if (UNLIKELY(p == nullptr)) {
             return nullptr;
         }
@@ -217,9 +219,13 @@ public:
     template <typename T>
     std::enable_if_t<is_unbounded_array_v<T>, std::remove_extent_t<T> *> New(size_t size)
     {
-        static constexpr size_t SIZE_BEFORE_DATA_OFFSET = AlignUp(sizeof(size_t), DEFAULT_ALIGNMENT_IN_BYTES);
+        static constexpr size_t SIZE_BEFORE_DATA_OFFSET =
+            AlignUp(sizeof(size_t), GetAlignmentInBytes(GetAlignment<T>()));
         using element_type = std::remove_extent_t<T>;
-        void *p = Alloc(SIZE_BEFORE_DATA_OFFSET + sizeof(element_type) * size);
+        void *p = Alloc(SIZE_BEFORE_DATA_OFFSET + sizeof(element_type) * size, GetAlignment<T>());
+        if (UNLIKELY(p == nullptr)) {
+            return nullptr;
+        }
         *static_cast<size_t *>(p) = size;
         auto *data = ToNativePtr<element_type>(ToUintPtr(p) + SIZE_BEFORE_DATA_OFFSET);
         element_type *current_element = data;
@@ -233,7 +239,7 @@ public:
     template <typename T, typename... Args>
     std::enable_if_t<!std::is_array_v<T>, T *> NewLocal(Args &&... args)
     {
-        void *p = AllocLocal(sizeof(T));
+        void *p = AllocLocal(sizeof(T), GetAlignment<T>());
         if (UNLIKELY(p == nullptr)) {
             return nullptr;
         }
@@ -244,9 +250,10 @@ public:
     template <typename T>
     std::enable_if_t<is_unbounded_array_v<T>, std::remove_extent_t<T> *> NewLocal(size_t size)
     {
-        static constexpr size_t SIZE_BEFORE_DATA_OFFSET = AlignUp(sizeof(size_t), DEFAULT_ALIGNMENT_IN_BYTES);
+        static constexpr size_t SIZE_BEFORE_DATA_OFFSET =
+            AlignUp(sizeof(size_t), GetAlignmentInBytes(GetAlignment<T>()));
         using element_type = std::remove_extent_t<T>;
-        void *p = AllocLocal(SIZE_BEFORE_DATA_OFFSET + sizeof(element_type) * size);
+        void *p = AllocLocal(SIZE_BEFORE_DATA_OFFSET + sizeof(element_type) * size, GetAlignment<T>());
         *static_cast<size_t *>(p) = size;
         auto *data = ToNativePtr<element_type>(ToUintPtr(p) + SIZE_BEFORE_DATA_OFFSET);
         element_type *current_element = data;
@@ -277,6 +284,29 @@ private:
 };
 
 class ObjectAllocatorBase : public Allocator {
+protected:
+    using PygoteAllocator = PygoteSpaceAllocator<ObjectAllocConfig>;  // Allocator for pygote space
+
+    /**
+     * \brief Add new memory pools to object_allocator and allocate memory in them
+     */
+    template <typename AllocT, bool need_lock = true>
+    inline void *AddPoolsAndAlloc(size_t size, Alignment align, AllocT *object_allocator, size_t pool_size,
+                                  SpaceType space_type, HeapSpace *heap_space);
+
+    /**
+     * Try to allocate memory for the object and if failed add new memory pools and allocate again
+     * @param size - size of the object in bytes
+     * @param align - alignment
+     * @param object_allocator - allocator for the object
+     * @param pool_size - size of a memory pool for specified allocator
+     * @param space_type - SpaceType of the object
+     * @return pointer to allocated memory or nullptr if failed
+     */
+    template <typename AllocT, bool need_lock = true>
+    inline void *AllocateSafe(size_t size, Alignment align, AllocT *object_allocator, size_t pool_size,
+                              SpaceType space_type, HeapSpace *heap_space);
+
 public:
     ObjectAllocatorBase() = delete;
     NO_COPY_SEMANTIC(ObjectAllocatorBase);
@@ -314,6 +344,13 @@ public:
     virtual bool IsAddressInYoungSpace(uintptr_t address) = 0;
 
     /**
+     * Checks if \param mem_range intersect young space
+     * @param mem_range
+     * @return true if \param mem_range is intersect young space
+     */
+    virtual bool IsIntersectedWithYoung(const MemRange &mem_range) = 0;
+
+    /**
      * Checks if object in the non-movable space
      * @param obj
      * @return true if \param obj is in non-movable space
@@ -321,15 +358,18 @@ public:
     virtual bool IsObjectInNonMovableSpace(const ObjectHeader *obj) = 0;
 
     /**
-     * @return true if allocator has a young space
+     * @return true if allocator has an young space
      */
     virtual bool HasYoungSpace() = 0;
 
     /**
-     * Get young space memory range
-     * @return young space memory range
+     * Get young space memory ranges
+     * \note PandaVector can't be used here
+     * @return young space memory ranges
      */
-    virtual MemRange GetYoungSpaceMemRange() = 0;
+    virtual const std::vector<MemRange> &GetYoungSpaceMemRanges() = 0;
+
+    virtual std::vector<MarkBitmap *> &GetYoungSpaceBitmaps() = 0;
 
     virtual void ResetYoungAllocator() = 0;
 
@@ -355,7 +395,8 @@ public:
      */
     virtual size_t VerifyAllocatorStatus() = 0;
 
-    using PygoteAllocator = PygoteSpaceAllocator<ObjectAllocConfig>;  // Allocator for pygote space
+    virtual HeapSpace *GetHeapSpace() = 0;
+
     PygoteAllocator *GetPygoteSpaceAllocator()
     {
         return pygote_space_allocator_;
@@ -382,27 +423,9 @@ public:
         return PoolManager::GetMmapMemPool()->GetObjectSpaceFreeBytes();
     }
 
+    bool HaveEnoughPoolsInObjectSpace(size_t pools_num) const;
+
 protected:
-    /**
-     * \brief Add new memory pools to object_allocator and allocate memory in them
-     */
-    template <typename AllocT>
-    inline void *AddPoolsAndAlloc(size_t size, Alignment align, AllocT *object_allocator, size_t pool_size,
-                                  SpaceType space_type);
-
-    /**
-     * Try to allocate memory for the object and if failed add new memory pools and allocate again
-     * @param size - size of the object in bytes
-     * @param align - alignment
-     * @param object_allocator - allocator for the object
-     * @param pool_size - size of a memory pool for specified allocator
-     * @param space_type - SpaceType of the object
-     * @return pointer to allocated memory or nullptr if failed
-     */
-    template <typename AllocT>
-    inline void *AllocateSafe(size_t size, Alignment align, AllocT *object_allocator, size_t pool_size,
-                              SpaceType space_type);
-
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     PygoteAllocator *pygote_space_allocator_ = nullptr;
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
@@ -569,7 +592,7 @@ class ObjectAllocatorNoGen final : public ObjectAllocatorBase {
     using ObjectAllocator = RunSlotsAllocator<ObjectAllocConfig>;       // Allocator used for middle size allocations
     using LargeObjectAllocator = FreeListAllocator<ObjectAllocConfig>;  // Allocator used for large objects
     using HumongousObjectAllocator = HumongousObjAllocator<ObjectAllocConfig>;  // Allocator used for humongous objects
-    
+
 public:
     NO_MOVE_SEMANTIC(ObjectAllocatorNoGen);
     NO_COPY_SEMANTIC(ObjectAllocatorNoGen);
@@ -612,6 +635,12 @@ public:
         return false;
     }
 
+    bool IsIntersectedWithYoung([[maybe_unused]] const MemRange &mem_range) final
+    {
+        LOG(FATAL, ALLOC) << "ObjectAllocatorNoGen: IsIntersectedWithYoung not applicable";
+        return false;
+    }
+
     bool IsObjectInNonMovableSpace([[maybe_unused]] const ObjectHeader *obj) final
     {
         return true;
@@ -622,10 +651,16 @@ public:
         return false;
     }
 
-    MemRange GetYoungSpaceMemRange() final
+    const std::vector<MemRange> &GetYoungSpaceMemRanges() final
     {
-        LOG(FATAL, ALLOC) << "ObjectAllocatorNoGen: GetYoungSpaceMemRange not applicable";
-        return MemRange(0, 0);
+        LOG(FATAL, ALLOC) << "ObjectAllocatorNoGen: GetYoungSpaceMemRanges not applicable";
+        UNREACHABLE();
+    }
+
+    std::vector<MarkBitmap *> &GetYoungSpaceBitmaps() final
+    {
+        LOG(FATAL, ALLOC) << "ObjectAllocatorNoGen: GetYoungBitmaps not applicable";
+        UNREACHABLE();
     }
 
     void ResetYoungAllocator() final
@@ -656,6 +691,7 @@ public:
     {
         size_t fail_count = 0;
         fail_count += object_allocator_->VerifyAllocator();
+        // TODO(yyang): add verify for large/humongous allocator
         return fail_count;
     }
 
@@ -666,32 +702,69 @@ public:
         return nullptr;
     }
 
+    HeapSpace *GetHeapSpace() override
+    {
+        return &heap_space_;
+    }
+
 private:
     ObjectAllocator *object_allocator_ = nullptr;
     LargeObjectAllocator *large_object_allocator_ = nullptr;
     HumongousObjectAllocator *humongous_object_allocator_ = nullptr;
+    HeapSpace heap_space_;
 };
 
 // Base class for all generational GCs
 class ObjectAllocatorGenBase : public ObjectAllocatorBase {
 public:
     explicit ObjectAllocatorGenBase(MemStatsType *mem_stats, GCCollectMode gc_collect_mode,
-                                    bool create_pygote_space_allocator)
-        : ObjectAllocatorBase(mem_stats, gc_collect_mode, create_pygote_space_allocator)
+                                    bool create_pygote_space_allocator);
+
+    HeapSpace *GetHeapSpace() override
     {
+        return &heap_spaces_;
     }
 
     ~ObjectAllocatorGenBase() override = default;
 
+    virtual void *AllocateTenured(size_t size) = 0;
+    virtual void *AllocateTenuredWithoutLocks(size_t size) = 0;
+
     NO_COPY_SEMANTIC(ObjectAllocatorGenBase);
     NO_MOVE_SEMANTIC(ObjectAllocatorGenBase);
 
+    /**
+     * Updates young space mem ranges, bitmaps etc
+     */
+    virtual void UpdateSpaceData() = 0;
+
+    /**
+     * Invalidates space mem ranges, bitmaps etc
+     */
+    virtual void InvalidateSpaceData() final;
+
 protected:
     static constexpr size_t YOUNG_ALLOC_MAX_SIZE = PANDA_TLAB_MAX_ALLOC_SIZE;  // max size of allocation in young space
+
+    ALWAYS_INLINE std::vector<MemRange> &GetYoungRanges()
+    {
+        return ranges_;
+    }
+
+    ALWAYS_INLINE std::vector<MarkBitmap *> &GetYoungBitmaps()
+    {
+        return young_bitmaps_;
+    }
+
+    GenerationalSpaces heap_spaces_;  // NOLINT(misc-non-private-member-variables-in-classes)
+private:
+    std::vector<MemRange> ranges_;             // Ranges for young space
+    std::vector<MarkBitmap *> young_bitmaps_;  // Bitmaps for young regions
 };
 
 template <MTModeT MTMode = MT_MODE_MULTI>
 class ObjectAllocatorGen final : public ObjectAllocatorGenBase {
+    // TODO(dtrubenkov): create a command line argument for this
     static constexpr size_t YOUNG_TLAB_SIZE = 4_KB;  // TLAB size for young gen
 
     using YoungGenAllocator = BumpPointerAllocator<ObjectAllocConfigWithCrossingMap,
@@ -714,6 +787,16 @@ public:
     void *Allocate(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread) final;
 
     void *AllocateNonMovable(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread) final;
+
+    void *AllocateTenured(size_t size) final
+    {
+        return AllocateTenuredImpl<true>(size);
+    }
+
+    void *AllocateTenuredWithoutLocks(size_t size) final
+    {
+        return AllocateTenuredImpl<false>(size);
+    }
 
     void VisitAndRemoveAllPools(const MemVisitor &mem_visitor) final;
 
@@ -745,11 +828,15 @@ public:
 
     bool IsAddressInYoungSpace(uintptr_t address) final;
 
+    bool IsIntersectedWithYoung(const MemRange &mem_range) final;
+
     bool IsObjectInNonMovableSpace(const ObjectHeader *obj) final;
 
     bool HasYoungSpace() final;
 
-    MemRange GetYoungSpaceMemRange() final;
+    const std::vector<MemRange> &GetYoungSpaceMemRanges() final;
+
+    std::vector<MarkBitmap *> &GetYoungSpaceBitmaps() final;
 
     void ResetYoungAllocator() final;
 
@@ -772,6 +859,7 @@ public:
     {
         size_t fail_count = 0;
         fail_count += object_allocator_->VerifyAllocator();
+        // TODO(yyang): add verify for large/humongous allocator
         return fail_count;
     }
 
@@ -787,6 +875,8 @@ public:
         return YOUNG_ALLOC_MAX_SIZE;
     }
 
+    void UpdateSpaceData() final;
+
 private:
     YoungGenAllocator *young_gen_allocator_ = nullptr;
     ObjectAllocator *object_allocator_ = nullptr;
@@ -796,7 +886,8 @@ private:
     ObjectAllocator *non_movable_object_allocator_ = nullptr;
     LargeObjectAllocator *large_non_movable_object_allocator_ = nullptr;
 
-    void *AllocateTenured(size_t size) final;
+    template <bool need_lock = true>
+    void *AllocateTenuredImpl(size_t size);
 };
 
 template <GCType gcType, MTModeT MTMode = MT_MODE_MULTI>
@@ -805,4 +896,4 @@ class AllocConfig {
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_INCLUDE_MEM_ALLOCATOR_H_
+#endif  // RUNTIME_MEM_ALLOCATOR_H

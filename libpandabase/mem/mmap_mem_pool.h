@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_MMAP_MEM_POOL_H_
-#define PANDA_LIBPANDABASE_MEM_MMAP_MEM_POOL_H_
+#ifndef LIBPANDABASE_MEM_MMAP_MEM_POOL_H
+#define LIBPANDABASE_MEM_MMAP_MEM_POOL_H
 
-#include "mem_pool.h"
-#include "mem/mem.h"
-#include "os/mem.h"
-#include "os/mutex.h"
-#include "mem/space.h"
+#include "libpandabase/mem/mem_pool.h"
+#include "libpandabase/mem/mem.h"
+#include "libpandabase/os/mem.h"
+#include "libpandabase/os/mutex.h"
+#include "libpandabase/mem/space.h"
 
 #include <map>
 #include <tuple>
@@ -28,9 +28,7 @@
 namespace panda {
 
 class MMapMemPoolTest;
-
 namespace mem::test {
-
 class InternalAllocatorTest;
 }  // namespace mem::test
 
@@ -44,7 +42,7 @@ public:
     DEFAULT_COPY_SEMANTIC(MmapPool);
     DEFAULT_MOVE_SEMANTIC(MmapPool);
 
-    size_t GetSize() const
+    size_t GetSize()
     {
         return pool_.GetSize();
     }
@@ -54,19 +52,19 @@ public:
         pool_ = Pool(size, GetMem());
     }
 
-    void *GetMem() const
+    void *GetMem()
     {
         return pool_.GetMem();
     }
 
-    // A free pool will be stored in the free_pools_, and it's iterator will be recorded in the free_pools_iter_.
+    // A free pool will be store in the free_pools_, and it's iterator will be recorded in the free_pools_iter_.
     // If the free_pools_iter_ is equal to the end of free_pools_, the pool is used.
-    bool IsUsed(FreePoolsIter end_iter) const
+    bool IsUsed(FreePoolsIter end_iter)
     {
         return free_pools_iter_ == end_iter;
     }
 
-    FreePoolsIter GetFreePoolsIter() const
+    FreePoolsIter GetFreePoolsIter()
     {
         return free_pools_iter_;
     }
@@ -78,7 +76,7 @@ public:
 
 private:
     Pool pool_;
-    // Record the iterator of the pool in the multimap
+    // record the iterator of the pool in the multimap
     FreePoolsIter free_pools_iter_;
 };
 
@@ -99,14 +97,22 @@ public:
     // Find a free pool with enough size in the map. Split the pool, if the pool size is larger than required size.
     Pool PopFreePool(size_t size);
 
-    // Push the unused pool to the map.
+    // push the unused pool to the map.
     void PushFreePool(Pool pool);
 
     // Add a new pool to the map. This pool will be marked as used.
     void AddNewPool(Pool pool);
 
-    // Get the total size of all free pools.
+    // Get the sum of all free pools size.
     size_t GetAllSize() const;
+
+    /**
+     * To check if we can alloc enough pools from free pools
+     * @param pools_num the number of pools we need
+     * @param pool_size the size of the pool we need
+     * @return true if we can make sure that we have enough space in free pools to alloc pools we need
+     */
+    bool HaveEnoughFreePools(size_t pools_num, size_t pool_size) const;
 
 private:
     std::map<void *, MmapPool *> pool_map_;
@@ -152,16 +158,24 @@ public:
      * @param addr address in pool
      * @return start address of pool
      */
-    void *GetStartAddrPoolForAddr(void *addr)
+    void *GetStartAddrPoolForAddr(const void *addr) const
     {
         return GetStartAddrPoolForAddrImpl(addr);
     }
 
-    size_t GetObjectSpaceFreeBytes();
+    size_t GetObjectSpaceFreeBytes() const;
+
+    // To check if we can alloc enough pools in object space
+    bool HaveEnoughPoolsInObjectSpace(size_t pools_num, size_t pool_size) const;
+
+    /**
+     * @return used bytes count in object space (so exclude bytes in free pools)
+     */
+    size_t GetObjectUsedBytes() const;
 
 private:
     template <class ArenaT = Arena>
-    ArenaT *AllocArenaImpl(size_t size, SpaceType space_type, AllocatorType allocator_type, void *allocator_addr);
+    ArenaT *AllocArenaImpl(size_t size, SpaceType space_type, AllocatorType allocator_type, const void *allocator_addr);
     template <class ArenaT = Arena>
     void FreeArenaImpl(ArenaT *arena);
 
@@ -170,21 +184,21 @@ private:
     void *AllocRawMemInternalImpl(size_t size);
     void *AllocRawMemCodeImpl(size_t size);
     void *AllocRawMemObjectImpl(size_t size, SpaceType type);
-    static void FreeRawMemImpl(void *mem, size_t size);
+    void FreeRawMemImpl(void *mem, size_t size);
 
-    Pool AllocPoolImpl(size_t size, SpaceType space_type, AllocatorType allocator_type, void *allocator_addr);
+    Pool AllocPoolImpl(size_t size, SpaceType space_type, AllocatorType allocator_type, const void *allocator_addr);
     void FreePoolImpl(void *mem, size_t size);
 
-    AllocatorInfo GetAllocatorInfoForAddrImpl(void *addr);
-    SpaceType GetSpaceTypeForAddrImpl(void *addr);
-    void *GetStartAddrPoolForAddrImpl(void *addr);
+    AllocatorInfo GetAllocatorInfoForAddrImpl(const void *addr) const;
+    SpaceType GetSpaceTypeForAddrImpl(const void *addr) const;
+    void *GetStartAddrPoolForAddrImpl(const void *addr) const;
 
-    Pool AllocPoolUnsafe(size_t size, SpaceType space_type, AllocatorType allocator_type, void *allocator_addr);
+    Pool AllocPoolUnsafe(size_t size, SpaceType space_type, AllocatorType allocator_type, const void *allocator_addr);
     void FreePoolUnsafe(void *mem, size_t size);
 
     void AddToNonObjectPoolsMap(std::tuple<Pool, AllocatorInfo, SpaceType> pool_info);
     void RemoveFromNonObjectPoolsMap(void *pool_addr);
-    std::tuple<Pool, AllocatorInfo, SpaceType> FindAddrInNonObjectPoolsMap(void *addr);
+    std::tuple<Pool, AllocatorInfo, SpaceType> FindAddrInNonObjectPoolsMap(const void *addr) const;
 
     MmapMemPool();
 
@@ -237,7 +251,7 @@ private:
     };
 
     uintptr_t min_object_memory_addr_ {0U};  // < Minimal address of the mmaped object memory
-    size_t mmaped_object_memory_size_ {0U};  // < Size of the whole mmaped object memory
+    size_t mmaped_object_memory_size_ {0U};  // < Size of whole the mmaped object memory
 
     SpaceMemory common_space_;
 
@@ -254,9 +268,9 @@ private:
     size_t internal_space_max_size_ {0};
 
     // Map for non object pools allocated via mmap
-    std::map<void *, std::tuple<Pool, AllocatorInfo, SpaceType>> non_object_mmaped_pools_;
+    std::map<const void *, std::tuple<Pool, AllocatorInfo, SpaceType>> non_object_mmaped_pools_;
     // AllocRawMem is called both from alloc and externally
-    os::memory::RecursiveMutex lock_;
+    mutable os::memory::RecursiveMutex lock_;
 
     friend class PoolManager;
     friend class MemPool<MmapMemPool>;
@@ -266,4 +280,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_MMAP_MEM_POOL_H_
+#endif  // LIBPANDABASE_MEM_MMAP_MEM_POOL_H

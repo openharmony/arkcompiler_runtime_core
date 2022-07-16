@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
     // x4 - float arg ptr, x6 - arg_ptr, x7 - frame.vregs, x9 - arg base ptr
     // x10 - gpr arg ptr, x11, x12, x13 - temps, x19 - method.shorty, lr - method
     ldrb w6, [x6]
-    add x6, x7, x6, lsl #4
+    add x6, x7, x6, lsl #3
 
 .Lloop_handle_call_range:
     NEXT_SHORTY w2

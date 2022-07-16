@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ class InternalAllocatorTest : public testing::Test {
 public:
     InternalAllocatorTest()
     {
+        // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
         panda::mem::MemConfig::Initialize(0, MEMORY_POOL_SIZE, 0, 0);
         PoolManager::Initialize();
         mem_stats_ = new mem::MemStatsType();
@@ -39,11 +40,12 @@ public:
         PoolManager::Finalize();
         panda::mem::MemConfig::Finalize();
         delete mem_stats_;
+        // Logger::Destroy();
     }
 
 protected:
-    mem::MemStatsType *mem_stats_ {nullptr};
-    InternalAllocatorPtr allocator_ {nullptr};
+    mem::MemStatsType *mem_stats_;
+    InternalAllocatorPtr allocator_;
 
     static constexpr size_t MEMORY_POOL_SIZE = 16_MB;
 
@@ -56,7 +58,7 @@ protected:
     }
 
     // Check that we don't have OOM and there is free space for mem pools
-    bool CheckFreeSpaceForPools() const
+    bool CheckFreeSpaceForPools()
     {
         size_t current_space_size = PoolManager::GetMmapMemPool()->internal_space_current_size_;
         size_t max_space_size = PoolManager::GetMmapMemPool()->internal_space_max_size_;
@@ -127,6 +129,92 @@ TEST_F(InternalAllocatorTest, ZeroSizeTest)
     mem = allocator_->Alloc(FreeListAllocator<EmptyMemoryConfig>::GetMaxSize() + 1);
     ASSERT(mem != nullptr);
     allocator_->Free(mem);
+}
+
+TEST_F(InternalAllocatorTest, AllocAlignmentTest)
+{
+    constexpr size_t ALIGNMENT = DEFAULT_ALIGNMENT_IN_BYTES * 2U;
+    constexpr size_t N = RunSlots<>::MaxSlotSize() + DEFAULT_ALIGNMENT_IN_BYTES;
+
+    struct alignas(ALIGNMENT) S {
+        uint8_t a[N];
+    };
+
+    auto is_aligned = [](void *ptr) { return IsAligned(reinterpret_cast<uintptr_t>(ptr), ALIGNMENT); };
+
+    auto *ptr = allocator_->Alloc(N);
+    if (!is_aligned(ptr)) {
+        allocator_->Free(ptr);
+        ptr = nullptr;
+    }
+
+    {
+        auto *p = allocator_->AllocArray<S>(1);
+        ASSERT_TRUE(is_aligned(p));
+        allocator_->Free(p);
+    }
+
+    {
+        auto *p = allocator_->New<S>();
+        ASSERT_TRUE(is_aligned(p));
+        allocator_->Delete(p);
+    }
+
+    {
+        auto *p = allocator_->New<S[]>(1);
+        ASSERT_TRUE(is_aligned(p));
+        allocator_->DeleteArray(p);
+    }
+
+    if (ptr != nullptr) {
+        allocator_->Free(ptr);
+    }
+}
+
+TEST_F(InternalAllocatorTest, AllocLocalAlignmentTest)
+{
+    constexpr size_t ALIGNMENT = DEFAULT_ALIGNMENT_IN_BYTES * 2U;
+    constexpr size_t N = RunSlots<>::MaxSlotSize() + DEFAULT_ALIGNMENT_IN_BYTES;
+
+    struct alignas(ALIGNMENT) S {
+        uint8_t a[N];
+    };
+
+    auto is_aligned = [](void *ptr) { return IsAligned(reinterpret_cast<uintptr_t>(ptr), ALIGNMENT); };
+
+    auto *ptr = allocator_->AllocLocal(N);
+    if (!is_aligned(ptr)) {
+        allocator_->Free(ptr);
+        ptr = nullptr;
+    }
+
+    {
+        auto *p = allocator_->AllocArrayLocal<S>(1);
+        ASSERT_TRUE(is_aligned(p));
+        allocator_->Free(p);
+    }
+
+    {
+        auto *p = allocator_->AllocArrayLocal<S>(1);
+        ASSERT_TRUE(is_aligned(p));
+        allocator_->Free(p);
+    }
+
+    {
+        auto *p = allocator_->NewLocal<S>();
+        ASSERT_TRUE(is_aligned(p));
+        allocator_->Delete(p);
+    }
+
+    {
+        auto *p = allocator_->NewLocal<S[]>(1);
+        ASSERT_TRUE(is_aligned(p));
+        allocator_->DeleteArray(p);
+    }
+
+    if (ptr != nullptr) {
+        allocator_->Free(ptr);
+    }
 }
 
 }  // namespace panda::mem::test

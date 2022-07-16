@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_ABSINT_ABSINT_H_
-#define PANDA_VERIFICATION_ABSINT_ABSINT_H_
+#ifndef PANDA_VERIFIER_ABSINT_HPP_
+#define PANDA_VERIFIER_ABSINT_HPP_
 
 #include "verification_context.h"
 #include "panda_types.h"
@@ -28,11 +28,11 @@
 #include <optional>
 
 namespace panda::verifier {
-VerificationContext PrepareVerificationContext(PandaTypes *panda_types, const Job &job);
+VerificationContext PrepareVerificationContext(PandaTypes &pandaTypes, const Job &job);
 
-VerificationStatus AbstractInterpret(VerificationLevel v_level, VerificationContext *v_ctx, const uint8_t *pc);
+VerificationStatus AbstractInterpret(VerificationContext &verifCtx, const uint8_t *pc);
 
-VerificationStatus VerifyMethod(VerificationLevel v_level, VerificationContext *v_ctx);
+VerificationStatus VerifyMethod(VerificationContext &verifCtx);
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_ABSINT_ABSINT_H_
+#endif  // !PANDA_VERIFIER_ABSINT_HPP_

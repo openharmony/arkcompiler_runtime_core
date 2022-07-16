@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
 #include "runtime/mem/refstorage/reference_storage.h"
 #include "runtime/mem/gc/card_table-inl.h"
 #include "runtime/mem/gc/gc.h"
+#include "runtime/mem/gc/gc_root_type.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/include/panda_vm.h"
@@ -74,11 +75,11 @@ std::ostream &operator<<(std::ostream &os, const GCRoot &root)
         case RootType::ROOT_TENURED:
             os << "ROOT TENURED";
             break;
-        case RootType::ROOT_JNI_GLOBAL:
-            os << "ROOT JNI GLOBAL";
+        case RootType::ROOT_NATIVE_GLOBAL:
+            os << "ROOT NATIVE_GLOBAL";
             break;
-        case RootType::ROOT_JNI_LOCAL:
-            os << "ROOT JNI_LOCAL";
+        case RootType::ROOT_NATIVE_LOCAL:
+            os << "ROOT NATIVE_LOCAL";
             break;
         case RootType::ROOT_AOT_STRING_SLOT:
             os << "ROOT AOT_STRING_SLOT";
@@ -97,9 +98,13 @@ void RootManager<LanguageConfig>::VisitNonHeapRoots(const GCRootVisitor &gc_root
 {
     VisitLocalRoots(gc_root_visitor);
     VisitClassRoots(gc_root_visitor, flags);
+    VisitAotStringRoots(gc_root_visitor, flags);
     VisitClassLinkerContextRoots(gc_root_visitor);
     VisitVmRoots(gc_root_visitor);
-    vm_->GetGlobalObjectStorage()->VisitObjects(gc_root_visitor, mem::RootType::ROOT_JNI_GLOBAL);
+    auto *storage = vm_->GetGlobalObjectStorage();
+    if (storage != nullptr) {
+        storage->VisitObjects(gc_root_visitor, mem::RootType::ROOT_NATIVE_GLOBAL);
+    }
 }
 
 template <class LanguageConfig>
@@ -124,7 +129,9 @@ void RootManager<LanguageConfig>::VisitCardTableRoots(CardTable *card_table, Obj
                             }
                         }
                     };
-                    if (from_object_checker(object_header)) {
+                    if (object_header->ClassAddr<BaseClass>() != nullptr && from_object_checker(object_header)) {
+                        // The class may be null in the situation when a new objct is allocated in the card
+                        // we are visiting now, but the class is not set yet.
                         ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object_header,
                                                                                      traverse_object_in_range);
                     }
@@ -154,24 +161,25 @@ void RootManager<LanguageConfig>::VisitLocalRoots(const GCRootVisitor &gc_root_v
 {
     auto thread_visitor = [this, &gc_root_visitor](ManagedThread *thread) {
         VisitRootsForThread(thread, gc_root_visitor);
-        for (StackWalker stack(thread); stack.HasFrame(); stack.NextFrame()) {
+        for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
             LOG(DEBUG, GC) << " VisitRoots frame " << std::hex << stack.GetFp();
             stack.IterateObjects([this, &gc_root_visitor](auto &vreg) {
-                VisitRegisterRoot(vreg, gc_root_visitor);
+                this->VisitRegisterRoot(vreg, gc_root_visitor);
                 return true;
             });
         }
         return true;
     };
     if constexpr (LanguageConfig::MT_MODE == MT_MODE_MULTI) {  // NOLINT
-        vm_->GetThreadManager()->EnumerateThreads(thread_visitor, static_cast<unsigned int>(EnumerationFlag::ALL));
+        vm_->GetThreadManager()->EnumerateThreads(thread_visitor);
     } else {  // NOLINT
-        thread_visitor(ManagedThread::GetCurrent());
+        thread_visitor(vm_->GetAssociatedThread());
     }
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::VisitRegisterRoot(const Frame::VRegister &v_register,
+template <class VRegRef>
+void RootManager<LanguageConfig>::VisitRegisterRoot(const VRegRef &v_register,
                                                     const GCRootVisitor &gc_root_visitor) const
 {
     if (UNLIKELY(v_register.HasObject())) {
@@ -190,6 +198,39 @@ void RootManager<LanguageConfig>::VisitVmRoots(const GCRootVisitor &gc_root_visi
 }
 
 template <class LanguageConfig>
+void RootManager<LanguageConfig>::VisitAotStringRoots(const GCRootVisitor &gc_root_visitor,
+                                                      VisitGCRootFlags flags) const
+{
+    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    LOG(DEBUG, GC) << "Start collecting AOT string slot roots";
+    Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->VisitAotStringRoots(
+        [&gc_root_visitor](ObjectHeader **slot) {
+            gc_root_visitor({RootType::ROOT_AOT_STRING_SLOT, *slot});
+        },
+        (flags & VisitGCRootFlags::ACCESS_ROOT_AOT_STRINGS_ONLY_YOUNG) != 0);
+    LOG(DEBUG, GC) << "Finish collecting AOT string slot roots";
+}
+
+template <class LanguageConfig>
+void RootManager<LanguageConfig>::UpdateAotStringRoots()
+{
+    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    LOG(DEBUG, GC) << "=== AOT string slot roots update. BEGIN ===";
+    auto oa = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
+    Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->UpdateAotStringRoots(
+        [](ObjectHeader **root) {
+            auto root_value = *root;
+            if (root_value->IsForwarded()) {
+                *root = ::panda::mem::GetForwardAddress(root_value);
+            }
+        },
+        [&oa](const ObjectHeader *root) {
+            return oa->HasYoungSpace() && oa->IsAddressInYoungSpace(reinterpret_cast<uintptr_t>(root));
+        });
+    LOG(DEBUG, GC) << "=== AOT string slot roots update. END ===";
+}
+
+template <class LanguageConfig>
 void RootManager<LanguageConfig>::UpdateVmRefs()
 {
     vm_->UpdateVmRefs();
@@ -198,17 +239,15 @@ void RootManager<LanguageConfig>::UpdateVmRefs()
 template <class LanguageConfig>
 void RootManager<LanguageConfig>::UpdateGlobalObjectStorage()
 {
-    vm_->GetGlobalObjectStorage()->UpdateMovedRefs();
+    auto global_storage = vm_->GetGlobalObjectStorage();
+    if (global_storage != nullptr) {
+        global_storage->UpdateMovedRefs();
+    }
 }
 
 template <class LanguageConfig>
 void RootManager<LanguageConfig>::VisitClassRoots(const GCRootVisitor &gc_root_visitor, VisitGCRootFlags flags) const
 {
-    if constexpr (LanguageConfig::LANG_TYPE == LANG_TYPE_DYNAMIC) {  // NOLINT
-        // Dynamic languages have not class roots
-        return;
-    }
-
     LOG(DEBUG, GC) << "Start collecting roots for classes";
     auto class_linker = Runtime::GetCurrent()->GetClassLinker();
     auto class_root_visitor = [&gc_root_visitor](Class *cls) {
@@ -218,6 +257,13 @@ void RootManager<LanguageConfig>::VisitClassRoots(const GCRootVisitor &gc_root_v
     };
     auto *extension = class_linker->GetExtension(LanguageConfig::LANG);
     extension->EnumerateClasses(class_root_visitor, flags);
+
+    // TODO(maksenov): Remove after supporting multiple GC instances
+    if (LanguageConfig::LANG != panda_file::SourceLang::PANDA_ASSEMBLY &&
+        class_linker->HasExtension(panda_file::SourceLang::PANDA_ASSEMBLY)) {
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->EnumerateClasses(class_root_visitor, flags);
+    }
+
     LOG(DEBUG, GC) << "Finish collecting roots for classes";
 }
 
@@ -226,12 +272,10 @@ void RootManager<LanguageConfig>::UpdateThreadLocals()
 {
     LOG(DEBUG, GC) << "=== ThreadLocals Update moved. BEGIN ===";
     if constexpr (LanguageConfig::MT_MODE == MT_MODE_MULTI) {  // NOLINT
-        vm_->GetThreadManager()->EnumerateThreads(
-            [](MTManagedThread *thread) {
-                thread->UpdateGCRoots();
-                return true;
-            },
-            static_cast<unsigned int>(EnumerationFlag::ALL));
+        vm_->GetThreadManager()->EnumerateThreads([](MTManagedThread *thread) {
+            thread->UpdateGCRoots();
+            return true;
+        });
     } else {  // NOLINT
         vm_->GetAssociatedThread()->UpdateGCRoots();
     }
@@ -275,6 +319,6 @@ VisitGCRootFlags operator|(VisitGCRootFlags left, VisitGCRootFlags right)
     return static_cast<VisitGCRootFlags>(static_cast<uint32_t>(left) | static_cast<uint32_t>(right));
 }
 
-template class RootManager<PandaAssemblyLanguageConfig>;
+TEMPLATE_CLASS_LANGUAGE_CONFIG(RootManager);
 
 }  // namespace panda::mem

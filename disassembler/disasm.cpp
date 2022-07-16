@@ -17,8 +17,10 @@
 
 #include "utils/logger.h"
 #include "utils/pandargs.h"
+#include "ark_version.h"
+#include "file_format_version.h"
 
-static void PrintHelp(const panda::PandArgParser &pa_parser)
+void PrintHelp(panda::PandArgParser &pa_parser)
 {
     std::cerr << "Usage:" << std::endl;
     std::cerr << "ark_disasm [options] input_file output_file" << std::endl << std::endl;
@@ -26,8 +28,8 @@ static void PrintHelp(const panda::PandArgParser &pa_parser)
     std::cerr << pa_parser.GetHelpString() << std::endl;
 }
 
-static void Disassemble(const std::string &input_file, const std::string &output_file, const bool verbose,
-                        const bool quiet, const bool skip_strings)
+void Disassemble(const std::string &input_file, const std::string &output_file, const bool verbose, const bool quiet,
+                 const bool skip_strings)
 {
     LOG(DEBUG, DISASSEMBLER) << "[initializing disassembler]\nfile: " << input_file << "\n";
 
@@ -45,38 +47,25 @@ static void Disassemble(const std::string &input_file, const std::string &output
     res_pa.close();
 }
 
-int main(int argc, const char **argv)
+bool ProcessArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::string> &input_file,
+                 const panda::PandArg<std::string> &output_file, panda::PandArg<bool> &debug,
+                 const panda::PandArg<std::string> &debug_file, const panda::PandArg<bool> &help,
+                 const panda::PandArg<bool> &version, int argc, const char **argv)
 {
-    panda::PandArg<bool> help("help", false, "Print this message and exit");
-    panda::PandArg<bool> verbose("verbose", false, "Enable informative code output");
-    panda::PandArg<bool> quiet("quiet", false, "Enable all --skip-* flags");
-    panda::PandArg<bool> skip_strings(
-        "skip-string-literals", false,
-        "Replace string literals with their respective IDs, thus reducing the emitted code size");
-    panda::PandArg<bool> debug("debug", false,
-                               "Enable output of debug messages, which will be printed to the standard output if no "
-                               "--debug-file is specified");
-    panda::PandArg<std::string> debug_file(
-        "debug-file", "", "(--debug-file FILENAME) Set the debug file name, which is std::cout by default");
-    panda::PandArg<std::string> input_file("input_file", "", "Path to the source binary code");
-    panda::PandArg<std::string> output_file("output_file", "", "Path to the generated assembly code");
-
-    panda::PandArgParser pa_parser;
-
-    pa_parser.Add(&help);
-    pa_parser.Add(&verbose);
-    pa_parser.Add(&quiet);
-    pa_parser.Add(&skip_strings);
-    pa_parser.Add(&debug);
-    pa_parser.Add(&debug_file);
-    pa_parser.PushBackTail(&input_file);
-    pa_parser.PushBackTail(&output_file);
-    pa_parser.EnableTail();
-
-    if (!pa_parser.Parse(argc, argv) || input_file.GetValue().empty() || output_file.GetValue().empty() ||
-        help.GetValue()) {
+    if (!pa_parser.Parse(argc, argv)) {
         PrintHelp(pa_parser);
-        return 1;
+        return false;
+    }
+
+    if (version.GetValue()) {
+        panda::PrintPandaVersion();
+        panda::panda_file::PrintBytecodeVersion();
+        return false;
+    }
+
+    if (input_file.GetValue().empty() || output_file.GetValue().empty() || help.GetValue()) {
+        PrintHelp(pa_parser);
+        return false;
     }
 
     if (debug.GetValue()) {
@@ -92,6 +81,43 @@ int main(int argc, const char **argv)
     } else {
         panda::Logger::InitializeStdLogging(panda::Logger::Level::ERROR,
                                             panda::Logger::ComponentMask().set(panda::Logger::Component::DISASSEMBLER));
+    }
+
+    return true;
+}
+
+int main(int argc, const char **argv)
+{
+    panda::PandArg<bool> help("help", false, "Print this message and exit");
+    panda::PandArg<bool> verbose("verbose", false, "enable informative code output");
+    panda::PandArg<bool> quiet("quiet", false, "enables all of the --skip-* flags");
+    panda::PandArg<bool> skip_strings(
+        "skip-string-literals", false,
+        "replaces string literals with their respectie id's, thus shortening emitted code size");
+    panda::PandArg<bool> debug(
+        "debug", false, "enable debug messages (will be printed to standard output if no --debug-file was specified) ");
+    panda::PandArg<std::string> debug_file("debug-file", "",
+                                           "(--debug-file FILENAME) set debug file name. default is std::cout");
+    panda::PandArg<std::string> input_file("input_file", "", "Path to the source binary code");
+    panda::PandArg<std::string> output_file("output_file", "", "Path to the generated assembly code");
+    panda::PandArg<bool> version {"version", false,
+                                  "Ark version, file format version and minimum supported file format version"};
+
+    panda::PandArgParser pa_parser;
+
+    pa_parser.Add(&help);
+    pa_parser.Add(&verbose);
+    pa_parser.Add(&quiet);
+    pa_parser.Add(&skip_strings);
+    pa_parser.Add(&debug);
+    pa_parser.Add(&debug_file);
+    pa_parser.Add(&version);
+    pa_parser.PushBackTail(&input_file);
+    pa_parser.PushBackTail(&output_file);
+    pa_parser.EnableTail();
+
+    if (!ProcessArgs(pa_parser, input_file, output_file, debug, debug_file, help, version, argc, argv)) {
+        return 1;
     }
 
     Disassemble(input_file.GetValue(), output_file.GetValue(), verbose.GetValue(), quiet.GetValue(),

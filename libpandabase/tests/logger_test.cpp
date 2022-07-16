@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,70 @@ TEST(Logger, Initialization)
     EXPECT_DEATH_IF_SUPPORTED(LOG(FATAL, COMMON) << "4", "");
 }
 
+TEST(Logger, LoggingExceptionsFatal)
+{
+    testing::FLAGS_gtest_death_test_style = "fast";
+
+    panda::Logger::ComponentMask component_mask;
+    component_mask.set(Logger::Component::COMPILER);
+
+    Logger::InitializeStdLogging(Logger::Level::FATAL, component_mask);
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::COMPILER));
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ASSEMBLER));
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::DISASSEMBLER));
+    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::ERROR, Logger::Component::COMPILER));
+    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::ERROR, Logger::Component::ASSEMBLER));
+    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::ERROR, Logger::Component::DISASSEMBLER));
+
+    EXPECT_DEATH_IF_SUPPORTED(LOG(FATAL, COMPILER) << "d1", "\\[TID [0-9a-f]{6}\\] F/compiler: d1");
+    EXPECT_DEATH_IF_SUPPORTED(LOG(FATAL, ASSEMBLER) << "d2", "\\[TID [0-9a-f]{6}\\] F/assembler: d2");
+    EXPECT_DEATH_IF_SUPPORTED(LOG(FATAL, DISASSEMBLER) << "d3", "\\[TID [0-9a-f]{6}\\] F/disassembler: d3");
+
+    testing::internal::CaptureStderr();
+
+    LOG(ERROR, COMPILER) << "c";
+    LOG(ERROR, ASSEMBLER) << "a";
+    LOG(ERROR, DISASSEMBLER) << "d";
+
+    std::string err = testing::internal::GetCapturedStderr();
+    EXPECT_EQ(err, "");
+
+    Logger::Destroy();
+}
+
+TEST(Logger, LoggingExceptionsError)
+{
+    testing::FLAGS_gtest_death_test_style = "fast";
+
+    panda::Logger::ComponentMask component_mask;
+    component_mask.set(Logger::Component::COMPILER);
+
+    Logger::InitializeStdLogging(Logger::Level::ERROR, component_mask);
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::COMPILER));
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ASSEMBLER));
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::DISASSEMBLER));
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::ERROR, Logger::Component::COMPILER));
+    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::ERROR, Logger::Component::ASSEMBLER));
+    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::ERROR, Logger::Component::DISASSEMBLER));
+
+    EXPECT_DEATH_IF_SUPPORTED(LOG(FATAL, COMPILER) << "d1", "\\[TID [0-9a-f]{6}\\] F/compiler: d1");
+    EXPECT_DEATH_IF_SUPPORTED(LOG(FATAL, ASSEMBLER) << "d2", "\\[TID [0-9a-f]{6}\\] F/assembler: d2");
+    EXPECT_DEATH_IF_SUPPORTED(LOG(FATAL, DISASSEMBLER) << "d3", "\\[TID [0-9a-f]{6}\\] F/disassembler: d3");
+
+    testing::internal::CaptureStderr();
+
+    LOG(ERROR, COMPILER) << "c";
+    LOG(ERROR, ASSEMBLER) << "a";
+    LOG(ERROR, DISASSEMBLER) << "d";
+
+    std::string err = testing::internal::GetCapturedStderr();
+    uint32_t tid = os::thread::GetCurrentThreadId();
+    std::string res = helpers::string::Format("[TID %06x] E/compiler: c\n", tid);
+    EXPECT_EQ(err, res);
+
+    Logger::Destroy();
+}
+
 TEST(Logger, FilterInfo)
 {
     Logger::InitializeStdLogging(Logger::Level::INFO, panda::LoggerComponentMaskAll);
@@ -145,25 +209,25 @@ TEST(Logger, FilterFatal)
 TEST(Logger, ComponentFilter)
 {
     panda::Logger::ComponentMask component_mask;
-    component_mask.set(Logger::Component::CLASS_LINKER);
+    component_mask.set(Logger::Component::COMPILER);
     component_mask.set(Logger::Component::GC);
 
     Logger::InitializeStdLogging(Logger::Level::INFO, component_mask);
-    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
-    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::CLASS_LINKER));
+    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::WARNING, Logger::Component::ALLOC));
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::COMPILER));
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::GC));
 
     testing::internal::CaptureStderr();
 
     LOG(INFO, COMMON) << "a";
-    LOG(INFO, CLASS_LINKER) << "b";
+    LOG(INFO, COMPILER) << "b";
     LOG(INFO, RUNTIME) << "c";
     LOG(INFO, GC) << "d";
 
     std::string err = testing::internal::GetCapturedStderr();
     uint32_t tid = os::thread::GetCurrentThreadId();
     std::string res = helpers::string::Format(
-        "[TID %06x] I/classlinker: b\n"
+        "[TID %06x] I/compiler: b\n"
         "[TID %06x] I/gc: d\n",
         tid, tid);
     EXPECT_EQ(err, res);
@@ -179,12 +243,12 @@ TEST(Logger, FileLogging)
 
     Logger::InitializeFileLogging(log_filename, Logger::Level::INFO,
                                   panda::Logger::ComponentMask().set(Logger::Component::COMMON));
-    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::COMMON));
 
     LOG(DEBUG, COMMON) << "a";
     LOG(INFO, COMMON) << "b";
-    LOG(ERROR, CLASS_LINKER) << "c";
+    LOG(ERROR, COMPILER) << "c";
     LOG(ERROR, COMMON) << "d";
 
 #if GTEST_HAS_DEATH_TEST
@@ -215,7 +279,7 @@ TEST(Logger, FileLogging)
 TEST(Logger, Multiline)
 {
     Logger::InitializeStdLogging(Logger::Level::INFO, panda::Logger::ComponentMask().set(Logger::Component::COMMON));
-    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::COMMON));
 
     testing::internal::CaptureStderr();
@@ -250,14 +314,14 @@ TEST(Logger, PLog)
     errno = EEXIST;
     PLOG(ERROR, COMMON) << "a";
     errno = EACCES;
-    PLOG(INFO, CLASS_LINKER) << "b";
+    PLOG(INFO, COMPILER) << "b";
     errno = errnum;
 
     std::string err = testing::internal::GetCapturedStderr();
     uint32_t tid = os::thread::GetCurrentThreadId();
     std::string res = helpers::string::Format(
         "[TID %06x] E/common: a: File exists\n"
-        "[TID %06x] I/classlinker: b: Permission denied\n",
+        "[TID %06x] I/compiler: b: Permission denied\n",
         tid, tid, tid, tid);
     EXPECT_EQ(err, res);
 

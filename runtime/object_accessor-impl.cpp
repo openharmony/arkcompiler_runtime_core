@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,12 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_IMPL_CPP_
 #define PANDA_RUNTIME_OBJECT_ACCESSOR_IMPL_CPP_
 // This file is included by interpreter to inline methods that defined in it.
 // We don't move them to object_accessor-inl.h because including runtime.h
-// will lead to circular header dependencies.
+// will lead to circular header dependences.
 
 #include "runtime/include/object_accessor-inl.h"
 #include "runtime/include/runtime.h"
@@ -29,29 +28,26 @@ namespace panda {
 #ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
 inline
 #endif
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION__RETURNTYPE_QUALIFIER_NAME_ONELINE)
     mem::GCBarrierSet *
     ObjectAccessor::GetBarrierSet()
 {
-    return Thread::GetCurrent()->GetVM()->GetGC()->GetBarrierSet();
+    return Thread::GetCurrent()->GetBarrierSet();
 }
 
 /* static */
 #ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
 inline
 #endif
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION__RETURNTYPE_QUALIFIER_NAME_ONELINE)
     mem::GCBarrierSet *
     ObjectAccessor::GetBarrierSet(const ManagedThread *thread)
 {
-    return thread->GetVM()->GetGC()->GetBarrierSet();
+    return thread->GetBarrierSet();
 }
 
 /* static */
 #ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
 inline
 #endif
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION__RETURNTYPE_QUALIFIER_NAME_ONELINE)
     mem::BarrierType
     ObjectAccessor::GetPreBarrierType(const ManagedThread *thread)
 {
@@ -62,7 +58,6 @@ inline
 #ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
 inline
 #endif
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION__RETURNTYPE_QUALIFIER_NAME_ONELINE)
     mem::BarrierType
     ObjectAccessor::GetPostBarrierType(const ManagedThread *thread)
 {

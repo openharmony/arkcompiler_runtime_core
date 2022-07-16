@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_MEM_GC_GC_ROOT_INL_H_
-#define PANDA_RUNTIME_MEM_GC_GC_ROOT_INL_H_
+#ifndef PANDA_RUNTIME_MEM_GC_GC_ROOT_INL_H
+#define PANDA_RUNTIME_MEM_GC_GC_ROOT_INL_H
 
 #include "runtime/mem/gc/gc_root.h"
 
@@ -30,4 +30,4 @@ std::ostream &operator<<(std::ostream &os, const RootManager<LanguageConfig> &ro
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_GC_GC_ROOT_INL_H_
+#endif  // PANDA_RUNTIME_MEM_GC_GC_ROOT_INL_H

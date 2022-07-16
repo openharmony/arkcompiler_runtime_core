@@ -54,12 +54,10 @@ tests:
           - values:
               - "0x8000000000000000"
               - "0x8000000000000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0x8000000000000000"
               - "0x8000000000000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0xFFFFFFFFFFFFFFFF"
@@ -98,17 +96,14 @@ tests:
           - values:
               - "-0x7FFFFFFFFFFFFFFF"
               - "0x8000000000000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0x8000000000000000"
               - "0x8000000000000001"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0x8000000000000000"
               - "0x8000000000000001"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0xFFFFFFFFFFFFFFFF"
@@ -182,7 +177,6 @@ tests:
           - values:
               - "-1"
               - "0x8000000000000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0x7FFFFFFFFFFFFFFF"
@@ -190,22 +184,18 @@ tests:
           - values:
               - "-0x7FFFFFFFFFFFFFFF"
               - "0xFFFFFFFFFFFFFFFE"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0x8000000000000000"
               - "0xFFFFFFFFFFFFFFFF"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0x8000000000000000"
               - "0xFFFFFFFFFFFFFFFF"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0xFFFFFFFFFFFFFFFF"
               - "0x8000000000000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0xFFFFFFFFFFFFFFFF"
@@ -232,7 +222,6 @@ tests:
           - values:
               - "1"
               - "0x7FFFFFFFFFFFFFFF"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-1"
@@ -240,7 +229,6 @@ tests:
           - values:
               - "0x7FFFFFFFFFFFFFFF"
               - "1"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0x7FFFFFFFFFFFFFFF"
@@ -257,7 +245,6 @@ tests:
           - values:
               - "-0xFFFFFFFFFFFFFFFF"
               - "0x7FFFFFFFFFFFFFFF"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
 
       - file-name: "vals"
@@ -284,7 +271,6 @@ tests:
               - "0xD5F9EA52A84399E4"
               - "0x6883F597ADDC08E1"
               - "0x6D75F4BAFA679103"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0x2A79F082FFB71130"
@@ -318,7 +304,6 @@ tests:
               - "0x24DDD5A31111F41C"
               - "0x8CCCF02B129681BE"
               - "0x9810E577FE7B725E"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
 
       - file-name: "regs"
@@ -341,32 +326,121 @@ tests:
             runner-options: ['compile-failure']
 
       - file-name: "type"
+        bugid: ["964", "966"]
         tags: ["verifier"]
-        bugid: ['966', '964']
+        isa:
+          verification:
+            - acc_type
+            - v1_type
+        runner-options: ['verifier-failure', 'verifier-config']
+        header-template: []
+        code-template: |
+          .record T {}
+          .function i32 main() {
+              %s
+              *s
+              sub2.64 v0
+              ldai 0
+        check-type: no-check
+        description: Check 'sub2.64' with incorrect accumulator and/or register types.
+        cases:
+          - values:
+            - ldai 0
+          - values:
+            - ldai.64 0
+            id: acc_ok
+          - values:
+            - fldai 0
+            bugid: ['7315']
+          - values:
+            - fldai.64 0
+            bugid: ['7315']
+          - values:
+            - lda.null
+          - values:
+            - |
+              #
+                  movi v1, 0
+                  newarr v1, v1, i32[]
+                  lda.obj v1
+          - values:
+            - lda.str "0"
+          - values:
+            - lda.type T
+          - values:
+            - |
+              #
+                  newobj v1, T
+                  lda.obj v1
+        template-cases:
+          - values:
+            - movi v0, 0
+          - values:
+            - movi.64 v0, 0
+            exclude: [acc_ok]
+          - values:
+            - fmovi v0, 0
+            bugid: ['7315']
+          - values:
+            - fmovi.64 v0, 0
+            bugid: ['7315']
+          - values:
+            - mov.null v0
+          - values:
+            - |
+              #
+                  movi v0, 0
+                  newarr v0, v0, i32[]
+          - values:
+            - |
+              #
+                  lda.str "0"
+                  sta.obj v0
+          - values:
+            - |
+              #
+                  lda.type T
+                  sta.obj v0
+          - values:
+            - newobj v0, T
+
+
+      - file-name: uninitialized_regs
         isa:
           instructions:
             - sig: sub2.64 v:in:i64
               acc: inout:i64
               format: [op_v_8]
-          verification:
-            - acc_type
-            - v1_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        description: Check 'sub2.64' with uninitialized registers.
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
           #
               %s
-              %s
-              sub2.64 v0
-              ldai 0
-        check-type: no-check
-        description: Check sub2.64 with incorrect accumulator and register types.
+              *s
+              sub2.64 *s
+        check-type: exit-positive
+        template-cases:
+          - values:
+              - ''
+          - values:
+              - ldai.64 0
+            exclude: [init]
         cases:
           - values:
-              - "lda.null"
-              - "movi v0, 0"
+              - ''
+              - v0
           - values:
-              - "ldai 0 "
-              - "mov.null v0"
+              - movi.64 v1, 0
+              - v1
+            id: init
           - values:
-              - "lda.null"
-              - "mov.null v0"
+              - ''
+              - v8
+          - values:
+              - ''
+              - v15
+          - values:
+              - movi.64 v15, 0
+              - v15
+            id: init

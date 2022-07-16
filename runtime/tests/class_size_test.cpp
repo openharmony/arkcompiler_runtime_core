@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "libpandabase/mem/mem.h"
+#include "runtime/include/class-inl.h"
 #include "runtime/include/class_helper.h"
 #include "runtime/include/coretypes/class.h"
 #include "runtime/include/coretypes/tagged_value.h"
@@ -31,15 +32,14 @@ static constexpr size_t POINTER_SIZE = ClassHelper::POINTER_SIZE;
 TEST(ClassSizeTest, TestSizeOfEmptyClass)
 {
     const size_t aligned_class_size = AlignUp(sizeof(Class), OBJECT_POINTER_SIZE);
-    ASSERT_EQ(aligned_class_size, ClassHelper::ComputeClassSize(0, 0, 0, 0, 0, 0, 0, 0));
+    ASSERT_EQ(aligned_class_size, Class::ComputeClassSize(0, 0, 0, 0, 0, 0, 0, 0));
 }
 
 TEST(ClassSizeTest, TestSizeOfClassWithVtbl)
 {
     const size_t aligned_class_size = AlignUp(sizeof(Class), OBJECT_POINTER_SIZE);
     const size_t vtbl_size = 5;
-    ASSERT_EQ(aligned_class_size + vtbl_size * POINTER_SIZE,
-              ClassHelper::ComputeClassSize(vtbl_size, 0, 0, 0, 0, 0, 0, 0));
+    ASSERT_EQ(aligned_class_size + vtbl_size * POINTER_SIZE, Class::ComputeClassSize(vtbl_size, 0, 0, 0, 0, 0, 0, 0));
 }
 
 TEST(ClassSizeTest, TestSizeOfClassWith8BitFields)
@@ -47,7 +47,7 @@ TEST(ClassSizeTest, TestSizeOfClassWith8BitFields)
     const size_t aligned_class_size = AlignUp(sizeof(Class), OBJECT_POINTER_SIZE);
     const size_t num_8bit_fields = 1;
     ASSERT_EQ(aligned_class_size + num_8bit_fields * sizeof(int8_t),
-              ClassHelper::ComputeClassSize(0, 0, num_8bit_fields, 0, 0, 0, 0, 0));
+              Class::ComputeClassSize(0, 0, num_8bit_fields, 0, 0, 0, 0, 0));
 }
 
 TEST(ClassSizeTest, TestSizeOfClassWith16BitFields)
@@ -55,7 +55,7 @@ TEST(ClassSizeTest, TestSizeOfClassWith16BitFields)
     const size_t aligned_class_size = AlignUp(sizeof(Class), OBJECT_POINTER_SIZE);
     const size_t num_16bit_fields = 1;
     ASSERT_EQ(aligned_class_size + num_16bit_fields * sizeof(int16_t),
-              ClassHelper::ComputeClassSize(0, 0, 0, num_16bit_fields, 0, 0, 0, 0));
+              Class::ComputeClassSize(0, 0, 0, num_16bit_fields, 0, 0, 0, 0));
 }
 
 TEST(ClassSizeTest, TestSizeOfClassWith32BitFields)
@@ -63,7 +63,7 @@ TEST(ClassSizeTest, TestSizeOfClassWith32BitFields)
     const size_t aligned_class_size = AlignUp(sizeof(Class), OBJECT_POINTER_SIZE);
     const size_t num_32bit_fields = 1;
     ASSERT_EQ(aligned_class_size + num_32bit_fields * sizeof(int32_t),
-              ClassHelper::ComputeClassSize(0, 0, 0, 0, num_32bit_fields, 0, 0, 0));
+              Class::ComputeClassSize(0, 0, 0, 0, num_32bit_fields, 0, 0, 0));
 }
 
 TEST(ClassSizeTest, TestSizeOfClassWith64BitFields)
@@ -72,10 +72,10 @@ TEST(ClassSizeTest, TestSizeOfClassWith64BitFields)
     const size_t num_64bit_fields = 1;
     if (AlignUp(aligned_class_size, sizeof(int64_t)) == aligned_class_size) {
         ASSERT_EQ(aligned_class_size + num_64bit_fields * sizeof(int64_t),
-                  ClassHelper::ComputeClassSize(0, 0, 0, 0, 0, num_64bit_fields, 0, 0));
+                  Class::ComputeClassSize(0, 0, 0, 0, 0, num_64bit_fields, 0, 0));
     } else {
         ASSERT_EQ(AlignUp(aligned_class_size, sizeof(int64_t)) + num_64bit_fields * sizeof(int64_t),
-                  ClassHelper::ComputeClassSize(0, 0, 0, 0, 0, num_64bit_fields, 0, 0));
+                  Class::ComputeClassSize(0, 0, 0, 0, 0, num_64bit_fields, 0, 0));
     }
 }
 
@@ -84,7 +84,7 @@ TEST(ClassSizeTest, TestSizeOfClassWithRefFields)
     const size_t aligned_class_size = AlignUp(sizeof(Class), OBJECT_POINTER_SIZE);
     const size_t num_ref_fields = 1;
     ASSERT_EQ(aligned_class_size + num_ref_fields * OBJECT_POINTER_SIZE,
-              ClassHelper::ComputeClassSize(0, 0, 0, 0, 0, 0, num_ref_fields, 0));
+              Class::ComputeClassSize(0, 0, 0, 0, 0, 0, num_ref_fields, 0));
 }
 
 TEST(ClassSizeTest, TestSizeOfClassWithAnyFields)
@@ -93,11 +93,11 @@ TEST(ClassSizeTest, TestSizeOfClassWithAnyFields)
     const size_t num_any_fields = 1;
     if (AlignUp(aligned_class_size, TaggedValue::TaggedTypeSize()) == aligned_class_size) {
         ASSERT_EQ(aligned_class_size + num_any_fields * TaggedValue::TaggedTypeSize(),
-                  ClassHelper::ComputeClassSize(0, 0, 0, 0, 0, 0, 0, num_any_fields));
+                  Class::ComputeClassSize(0, 0, 0, 0, 0, 0, 0, num_any_fields));
     } else {
         ASSERT_EQ(AlignUp(aligned_class_size, TaggedValue::TaggedTypeSize()) +
                       num_any_fields * TaggedValue::TaggedTypeSize(),
-                  ClassHelper::ComputeClassSize(0, 0, 0, 0, 0, 0, 0, num_any_fields));
+                  Class::ComputeClassSize(0, 0, 0, 0, 0, 0, 0, num_any_fields));
     }
 }
 
@@ -108,15 +108,15 @@ TEST(ClassSizeTest, TestHoleFilling)
     if (AlignUp(aligned_class_size, sizeof(int64_t)) != aligned_class_size) {
         const size_t num_8bit_fields = 1;
         ASSERT_EQ(AlignUp(aligned_class_size, sizeof(int64_t)) + num_64bit_fields * sizeof(int64_t),
-                  ClassHelper::ComputeClassSize(0, 0, num_8bit_fields, 0, 0, num_64bit_fields, 0, 0));
+                  Class::ComputeClassSize(0, 0, num_8bit_fields, 0, 0, num_64bit_fields, 0, 0));
 
         const size_t num_16bit_fields = 1;
         ASSERT_EQ(AlignUp(aligned_class_size, sizeof(int64_t)) + num_64bit_fields * sizeof(int64_t),
-                  ClassHelper::ComputeClassSize(0, 0, 0, num_16bit_fields, 0, num_64bit_fields, 0, 0));
+                  Class::ComputeClassSize(0, 0, 0, num_16bit_fields, 0, num_64bit_fields, 0, 0));
 
         const size_t num_32bit_fields = 1;
         ASSERT_EQ(AlignUp(aligned_class_size, sizeof(int64_t)) + num_64bit_fields * sizeof(int64_t),
-                  ClassHelper::ComputeClassSize(0, 0, 0, 0, num_32bit_fields, num_64bit_fields, 0, 0));
+                  Class::ComputeClassSize(0, 0, 0, 0, num_32bit_fields, num_64bit_fields, 0, 0));
     }
 
     const size_t num_any_fields = 1;
@@ -124,17 +124,17 @@ TEST(ClassSizeTest, TestHoleFilling)
         const size_t num_8bit_fields = 1;
         ASSERT_EQ(AlignUp(aligned_class_size, TaggedValue::TaggedTypeSize()) +
                       num_any_fields * TaggedValue::TaggedTypeSize(),
-                  ClassHelper::ComputeClassSize(0, 0, num_8bit_fields, 0, 0, num_any_fields, 0, 0));
+                  Class::ComputeClassSize(0, 0, num_8bit_fields, 0, 0, num_any_fields, 0, 0));
 
         const size_t num_16bit_fields = 1;
         ASSERT_EQ(AlignUp(aligned_class_size, TaggedValue::TaggedTypeSize()) +
                       num_any_fields * TaggedValue::TaggedTypeSize(),
-                  ClassHelper::ComputeClassSize(0, 0, 0, num_16bit_fields, 0, num_any_fields, 0, 0));
+                  Class::ComputeClassSize(0, 0, 0, num_16bit_fields, 0, num_any_fields, 0, 0));
 
         const size_t num_32bit_fields = 1;
         ASSERT_EQ(AlignUp(aligned_class_size, TaggedValue::TaggedTypeSize()) +
                       num_any_fields * TaggedValue::TaggedTypeSize(),
-                  ClassHelper::ComputeClassSize(0, 0, 0, 0, num_32bit_fields, num_any_fields, 0, 0));
+                  Class::ComputeClassSize(0, 0, 0, 0, num_32bit_fields, num_any_fields, 0, 0));
     }
 }
 

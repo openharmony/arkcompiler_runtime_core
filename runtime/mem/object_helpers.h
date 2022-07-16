@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,29 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_OBJECT_HELPERS_H_
-#define PANDA_RUNTIME_MEM_OBJECT_HELPERS_H_
+#ifndef PANDA_RUNTIME_MEM_OBJECT_HELPERS_H
+#define PANDA_RUNTIME_MEM_OBJECT_HELPERS_H
 
 #include <functional>
 
-#include "runtime/include/coretypes/tagged_value.h"
-#include "libpandafile/file_items.h"
-#include "runtime/include/language_config.h"
-#include "runtime/include/mem/panda_string.h"
-#include "runtime/object_header_config.h"
 #include "libpandabase/utils/logger.h"
+#include "libpandabase/mem/mem.h"
+
+#include "runtime/mem/gc/gc_root_type.h"
+#include "runtime/include/object_header.h"
 
 namespace panda {
 class Class;
+class HClass;
 class Field;
 class ManagedThread;
-class ObjectHeader;
 class PandaVM;
 }  // namespace panda
 
 namespace panda::coretypes {
 class DynClass;
+class Array;
 }  // namespace panda::coretypes
 
 namespace panda::mem {
@@ -44,13 +43,61 @@ namespace panda::mem {
 
 class GC;
 
-size_t GetObjectSize(const void *mem);
+inline size_t GetObjectSize(const void *mem)
+{
+    return static_cast<const ObjectHeader *>(mem)->ObjectSize();
+}
 
-PandaString GetDebugInfoAboutObject(const ObjectHeader *header);
+Logger::Buffer GetDebugInfoAboutObject(const ObjectHeader *header);
+
+constexpr size_t GetMinimalObjectSize()
+{
+    return GetAlignedObjectSize(ObjectHeader::ObjectHeaderSize());
+}
+
+/**
+ * Validate that object is correct from point of view of GC.
+ * For example it checks that class of the object is not nullptr.
+ * @param from_object object from which we found object by reference
+ * @param object object which we want to validate
+ */
+inline void ValidateObject([[maybe_unused]] const ObjectHeader *from_object,
+                           [[maybe_unused]] const ObjectHeader *object)
+{
+#ifndef NDEBUG
+    if (object == nullptr) {
+        return;
+    }
+    // from_object can be null, because sometimes we call Validate when we don't know previous object (for example when
+    // we extract it from stack)
+    if (object->template ClassAddr<BaseClass>() == nullptr) {
+        LOG(ERROR, GC) << " Broken object doesn't have class: " << object << " accessed from object: " << from_object;
+        UNREACHABLE();
+    }
+#endif  // !NDEBUG
+}
+
+/**
+ * Validate that object (which is gc-root) is correct from point of view of GC
+ * See ValidateObject(from_object, object) for further explanation
+ * @param root_type type of the root
+ * @param object object (root) which we want to validate
+ */
+inline void ValidateObject([[maybe_unused]] RootType root_type, [[maybe_unused]] const ObjectHeader *object)
+{
+#ifndef NDEBUG
+    if (object == nullptr) {
+        return;
+    }
+    ASSERT_DO(object->template ClassAddr<BaseClass>() != nullptr, LOG(FATAL, GC)
+                                                                      << " Broken object doesn't have class: " << object
+                                                                      << " accessed from root: " << root_type);
+#endif  // !NDEBUG
+}
 
 void DumpObject(ObjectHeader *object_header, std::basic_ostream<char, std::char_traits<char>> *o_stream = &std::cerr);
 
-void DumpClass(Class *cls, std::basic_ostream<char, std::char_traits<char>> *o_stream = &std::cerr);
+void DumpClass(const Class *cls, std::basic_ostream<char, std::char_traits<char>> *o_stream = &std::cerr);
 
 [[nodiscard]] ObjectHeader *GetForwardAddress(ObjectHeader *object_header);
 
@@ -60,41 +107,78 @@ size_t GetDynClassInstanceSize(coretypes::DynClass *object);
 
 class GCStaticObjectHelpers {
 public:
+    /**
+     * Traverse all kinds of object_header and call obj_visitor for each reference field.
+     */
     static void TraverseAllObjects(ObjectHeader *object_header,
                                    const std::function<void(ObjectHeader *, ObjectHeader *)> &obj_visitor);
 
-    template <typename FieldVisitor>
-    static void TraverseObject(ObjectHeader *object_header, BaseClass *base_cls, const FieldVisitor &field_visitor);
+    /**
+     * Traverse all kinds of object_header and call handler for each reference field.
+     * The handler accepts the object, the reference value, offset to the reference in the object and
+     * the flag whether the field is volatile.
+     */
+    template <typename Handler>
+    static void TraverseAllObjectsWithInfo(ObjectHeader *object, Handler &handler);
 
-    template <typename ElementVisitor>
-    static void TraverseArray(ObjectHeader *object_header, BaseClass *base_cls,
-                              const ElementVisitor &array_element_visitor);
+    static void UpdateRefsToMovedObjects(ObjectHeader *object);
 
-    static void UpdateRefsToMovedObjects(PandaVM *vm, ObjectHeader *object, BaseClass *base_cls);
+    /**
+     * Update a single reference field in the object to the moved value.
+     * Return the moved value.
+     */
+    static ObjectHeader *UpdateRefToMovedObject(ObjectHeader *object, ObjectHeader *ref, uint32_t offset,
+                                                bool is_volatile);
+
+private:
+    template <typename Handler>
+    static void TraverseClass(Class *cls, Handler &handler);
+    template <typename Handler>
+    static void TraverseArray(coretypes::Array *array, Class *cls, Handler &handler);
+    template <typename Handler>
+    static void TraverseObject(ObjectHeader *object_header, Class *cls, Handler &handler);
 };
 
 class GCDynamicObjectHelpers {
 public:
+    /**
+     * Traverse all kinds of object_header and call obj_visitor for each reference field.
+     */
     static void TraverseAllObjects(ObjectHeader *object_header,
                                    const std::function<void(ObjectHeader *, ObjectHeader *)> &obj_visitor);
 
-    template <typename FieldVisitor>
-    static void TraverseObject(ObjectHeader *object_header, BaseClass *base_cls, const FieldVisitor &field_visitor);
+    /**
+     * Traverse all kinds of object_header and call handler for each reference field.
+     * The handler accepts the object, the reference value, offset to the reference in the object and
+     * the flag whether the field is volatile.
+     */
+    template <typename Handler>
+    static void TraverseAllObjectsWithInfo(ObjectHeader *object_header, Handler &handler);
 
-    template <typename ElementVisitor>
-    static void TraverseArray(ObjectHeader *object_header, BaseClass *base_cls,
-                              const ElementVisitor &array_element_visitor);
+    static void UpdateRefsToMovedObjects(ObjectHeader *object);
 
-    static void UpdateRefsToMovedObjects(PandaVM *vm, ObjectHeader *object, BaseClass *base_cls);
+    /**
+     * Update a single reference field in the object to the moved value.
+     * Return the moved value.
+     */
+    static ObjectHeader *UpdateRefToMovedObject(ObjectHeader *object, ObjectHeader *ref, uint32_t offset,
+                                                bool is_volatile);
 
     static void RecordDynWeakReference(GC *gc, coretypes::TaggedType *value);
     static void HandleDynWeakReferences(GC *gc);
 
 private:
-    static void UpdateDynArray(PandaVM *vm, ObjectHeader *object_header, array_size_t index, ObjectHeader *obj_ref);
+    template <typename Handler>
+    static void TraverseArray(coretypes::Array *array, HClass *cls, Handler &handler);
+    template <typename Handler>
+    static void TraverseClass(coretypes::DynClass *dyn_class, Handler &handler);
+    template <typename Handler>
+    static void TraverseObject(ObjectHeader *object_header, HClass *cls, Handler &handler);
 
-    static void UpdateDynObjectRef(PandaVM *vm, ObjectHeader *object_header, size_t offset, ObjectHeader *field_obj_ref,
-                                   bool is_update_classword);
+    static void UpdateDynArray(PandaVM *vm, coretypes::Array *array, array_size_t index, ObjectHeader *obj_ref);
+
+    static void UpdateDynObjectRef(PandaVM *vm, ObjectHeader *object_header, size_t offset,
+                                   ObjectHeader *field_obj_ref);
 };
 
 template <LangTypeT LangType>
@@ -118,4 +202,4 @@ using ObjectHelpers = typename GCObjectHelpers<LangType>::Value;
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_OBJECT_HELPERS_H_
+#endif  // PANDA_OBJECT_HELPERS_H

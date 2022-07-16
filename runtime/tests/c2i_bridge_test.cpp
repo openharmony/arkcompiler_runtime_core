@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@
 #include "runtime/arch/helpers.h"
 #include "runtime/bridge/bridge.h"
 #include "runtime/entrypoints/entrypoints.h"
-#include "runtime/include/class_linker.h"
 #include "runtime/include/method.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
@@ -38,8 +37,6 @@ using TypeId = panda::panda_file::Type::TypeId;
 using BytecodeEmitter = panda::BytecodeEmitter;
 
 namespace panda::test {
-
-#ifndef PANDA_TARGET_ARM32
 
 int32_t CmpDynImpl(Method *, DecodedTaggedValue v1, DecodedTaggedValue v2)
 {
@@ -57,7 +54,7 @@ public:
     {
         // See comment in InvokeEntryPoint function
         if constexpr (RUNTIME_ARCH == Arch::AARCH32) {
-            return;
+            GTEST_SKIP();
         }
 
         RuntimeOptions options;
@@ -97,15 +94,11 @@ public:
         class_linker->AddPandaFile(std::move(pf));
 
         auto descriptor = std::make_unique<PandaString>();
-        panda_file::SourceLang lang;
-        if (language == "ECMAScript") {
-            lang = panda_file::SourceLang::ECMASCRIPT;
-        } else if (language == "PandaAssembly") {
-            lang = panda_file::SourceLang::PANDA_ASSEMBLY;
-        } else {
+        std::optional<panda::panda_file::SourceLang> lang = panda_file::LanguageFromString(language);
+        if (!lang) {
             UNREACHABLE();
         }
-        auto *extension = class_linker->GetExtension(lang);
+        auto *extension = class_linker->GetExtension(lang.value_or(panda_file::SourceLang::PANDA_ASSEMBLY));
         Class *klass =
             extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("TestUtils"), descriptor.get()));
 
@@ -313,7 +306,6 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeTaggedNoArg)
 
     DecodedTaggedValue res = InvokeEntryPoint<DecodedTaggedValue>(method);
     ASSERT_EQ(res.value, coretypes::TaggedValue(1).GetRawData());
-    ASSERT_EQ(res.tag, interpreter::INT);
 }
 
 /// Args tests:
@@ -432,7 +424,5 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke8Int9Double)
 }
 
 // Dynamic functions
-
-#endif  // !PANDA_TARGET_ARM32
 
 }  // namespace panda::test

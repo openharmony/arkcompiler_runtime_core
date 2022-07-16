@@ -75,7 +75,7 @@ TEST(BytecodeEmitter, <%= emitter_name %>) {
     });
 }
 
-%   elsif i.jcmp?
+%   elsif i.jcmp? && !i.format.prefixed?
 %     group.each do |group_insn|
 %       pretty_format = group_insn.format.pretty.upcase
 %       opcode = group_insn.opcode.upcase
@@ -92,6 +92,8 @@ TEST(BytecodeEmitter, <%= emitter_name %>Fwd_<%= pretty_format %>) {
 }
 
 %     end
+%   elsif i.jcmp? && i.format.prefixed?
+%       # nop
 %   elsif i.jcmpz?
 %     group.each do |group_insn|
 %       pretty_format = group_insn.format.pretty.upcase

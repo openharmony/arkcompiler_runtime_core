@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ namespace panda::debug {
 [[noreturn]] void AssertionFail(const char *expr, const char *file, unsigned line, const char *function)
 {
     std::cerr << "ASSERTION FAILED: " << expr << std::endl;
-    std::cerr << "IN " << file << ":" << line << ": " << function << std::endl;
+    std::cerr << "IN " << file << ":" << std::dec << line << ": " << function << std::endl;
     std::cerr << "Backtrace [tid=" << os::thread::GetCurrentThreadId() << "]:\n";
     PrintStack(std::cerr);
 #ifdef FUZZING_EXIT_ON_FAILED_ASSERT

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ namespace panda::verifier {
 PandaString OffsetAsHexStr(const void *base, const void *ptr)
 {
     auto offset = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(ptr) - reinterpret_cast<uintptr_t>(base));
-    const uint32_t BASE = 16U;
-    return PandaString {"0x"} + NumToStr<PandaString>(offset, BASE, sizeof(uint32_t) * 0x2);
+    PandaString result = OffsetToHexStr(offset);
+    result.insert(0, "0x");
+    return result;
 }
 
 }  // namespace panda::verifier

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_CLASS_LINKER_H_
-#define PANDA_RUNTIME_INCLUDE_CLASS_LINKER_H_
+#ifndef PANDA_RUNTIME_CLASS_LINKER_H_
+#define PANDA_RUNTIME_CLASS_LINKER_H_
 
 #include <memory>
 #include <optional>
@@ -22,6 +21,7 @@
 #include <string_view>
 #include <vector>
 
+#include "compiler/aot/aot_manager.h"
 #include "libpandabase/mem/arena_allocator.h"
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/utils/utf.h"
@@ -30,7 +30,6 @@
 #include "libpandafile/file_items.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/class.h"
-#include "runtime/include/class_linker_extension.h"
 #include "runtime/include/field.h"
 #include "runtime/include/itable_builder.h"
 #include "runtime/include/imtable_builder.h"
@@ -43,6 +42,8 @@
 
 namespace panda {
 
+using compiler::AotManager;
+
 class ClassLinkerErrorHandler;
 
 class ClassLinker {
@@ -52,6 +53,7 @@ public:
         FIELD_NOT_FOUND,
         METHOD_NOT_FOUND,
         NO_CLASS_DEF,
+        CLASS_CIRCULARITY,
     };
 
     ClassLinker(mem::InternalAllocatorPtr allocator, std::vector<std::unique_ptr<ClassLinkerExtension>> &&extensions);
@@ -72,9 +74,9 @@ public:
                     ClassLinkerErrorHandler *error_handler = nullptr);
 
     Class *LoadClass(const panda_file::File &pf, panda_file::File::EntityId class_id, ClassLinkerContext *context,
-                     ClassLinkerErrorHandler *error_handler = nullptr)
+                     ClassLinkerErrorHandler *error_handler = nullptr, bool add_to_runtime = true)
     {
-        return LoadClass(&pf, class_id, pf.GetStringData(class_id).data, context, error_handler);
+        return LoadClass(&pf, class_id, pf.GetStringData(class_id).data, context, error_handler, add_to_runtime);
     }
 
     Method *GetMethod(const panda_file::File &pf, panda_file::File::EntityId id, ClassLinkerContext *context = nullptr,
@@ -82,8 +84,6 @@ public:
 
     Method *GetMethod(const Method &caller, panda_file::File::EntityId id,
                       ClassLinkerErrorHandler *error_handler = nullptr);
-
-    Method *GetMethod(std::string_view panda_file, panda_file::File::EntityId id);
 
     Field *GetField(const panda_file::File &pf, panda_file::File::EntityId id, ClassLinkerContext *context = nullptr,
                     ClassLinkerErrorHandler *error_handler = nullptr);
@@ -94,10 +94,14 @@ public:
     void AddPandaFile(std::unique_ptr<const panda_file::File> &&pf, ClassLinkerContext *context = nullptr);
 
     template <typename Callback>
-    void EnumeratePandaFiles(Callback cb) const
+    void EnumeratePandaFiles(Callback cb, bool skip_intrinsics = true) const
     {
         os::memory::LockHolder lock(panda_files_lock_);
         for (const auto &file_data : panda_files_) {
+            if (skip_intrinsics && file_data.pf->GetFilename().empty()) {
+                continue;
+            }
+
             if (!cb(*(file_data.pf.get()))) {
                 break;
             }
@@ -107,6 +111,7 @@ public:
     template <typename Callback>
     void EnumerateBootPandaFiles(Callback cb) const
     {
+        os::memory::LockHolder lock {boot_panda_files_lock_};
         for (const auto &file : boot_panda_files_) {
             if (!cb(*file)) {
                 break;
@@ -117,6 +122,18 @@ public:
     const PandaVector<const panda_file::File *> &GetBootPandaFiles() const
     {
         return boot_panda_files_;
+    }
+
+    AotManager *GetAotManager()
+    {
+        return aot_manager_.get();
+    }
+
+    PandaString GetClassContextForAot()
+    {
+        PandaString aot_ctx;
+        EnumeratePandaFiles(compiler::AotClassContextCollector(&aot_ctx));
+        return aot_ctx;
     }
 
     template <class Callback>
@@ -153,7 +170,6 @@ public:
         auto enum_callback = [&register_index, &parent, &cb, &os, &ext](ClassLinkerContext *ctx) {
             os << "#" << register_index << " ";
             if (!cb(ctx, os, parent)) {
-                // if not a java class loader, break it;
                 return true;
             }
             if (parent != nullptr) {
@@ -191,24 +207,26 @@ public:
 
     bool HasExtension(const LanguageContext &ctx)
     {
-        return extensions_[ToExtensionIndex(ctx.GetLanguage())].get() != nullptr;
+        return extensions_[panda::panda_file::GetLangArrIndex(ctx.GetLanguage())].get() != nullptr;
     }
 
     bool HasExtension(panda_file::SourceLang lang)
     {
-        return extensions_[ToExtensionIndex(lang)].get() != nullptr;
+        return extensions_[panda::panda_file::GetLangArrIndex(lang)].get() != nullptr;
     }
+
+    void ResetExtension(panda_file::SourceLang lang);
 
     ClassLinkerExtension *GetExtension(const LanguageContext &ctx)
     {
-        ClassLinkerExtension *extension = extensions_[ToExtensionIndex(ctx.GetLanguage())].get();
+        ClassLinkerExtension *extension = extensions_[panda::panda_file::GetLangArrIndex(ctx.GetLanguage())].get();
         ASSERT(extension != nullptr);
         return extension;
     };
 
     ClassLinkerExtension *GetExtension(panda_file::SourceLang lang)
     {
-        ClassLinkerExtension *extension = extensions_[ToExtensionIndex(lang)].get();
+        ClassLinkerExtension *extension = extensions_[panda::panda_file::GetLangArrIndex(lang)].get();
         ASSERT(extension != nullptr);
         return extension;
     };
@@ -216,13 +234,13 @@ public:
     Class *ObjectToClass(const ObjectHeader *object)
     {
         ASSERT(object->ClassAddr<Class>()->IsClassClass());
-        return extensions_[ToExtensionIndex(object->ClassAddr<BaseClass>()->GetSourceLang())]->FromClassObject(
-            const_cast<ObjectHeader *>(object));
+        return extensions_[panda::panda_file::GetLangArrIndex(object->ClassAddr<BaseClass>()->GetSourceLang())]
+            ->FromClassObject(const_cast<ObjectHeader *>(object));
     }
 
     size_t GetClassObjectSize(Class *cls)
     {
-        return extensions_[ToExtensionIndex(cls->GetSourceLang())]->GetClassObjectSizeFromClassSize(
+        return extensions_[panda::panda_file::GetLangArrIndex(cls->GetSourceLang())]->GetClassObjectSizeFromClassSize(
             cls->GetClassSize());
     }
 
@@ -255,11 +273,6 @@ public:
                       Span<Field> fields, Class *base_class, Span<Class *> interfaces, ClassLinkerContext *context,
                       bool is_interface);
 
-    static constexpr size_t GetLangCount()
-    {
-        return LANG_EXTENSIONS_COUNT;
-    }
-
     bool IsPandaFileRegistered(const panda_file::File *file)
     {
         os::memory::LockHolder lock(panda_files_lock_);
@@ -290,9 +303,9 @@ public:
 
     void RemoveCreatedClassInExtension(Class *klass);
 
-private:
-    static constexpr size_t LANG_EXTENSIONS_COUNT = static_cast<size_t>(panda_file::SourceLang::LAST) + 1;
+    Class *LoadClass(const panda_file::File *pf, const uint8_t *descriptor, panda_file::SourceLang lang);
 
+private:
     struct ClassInfo {
         size_t size;
         size_t num_sfields;
@@ -316,13 +329,13 @@ private:
                           ClassLinkerErrorHandler *error_handler);
 
     Class *LoadClass(const panda_file::File *pf, panda_file::File::EntityId class_id, const uint8_t *descriptor,
-                     ClassLinkerContext *context, ClassLinkerErrorHandler *error_handler);
+                     ClassLinkerContext *context, ClassLinkerErrorHandler *error_handler, bool add_to_runtime = true);
 
     Class *LoadClass(panda_file::ClassDataAccessor *class_data_accessor, const uint8_t *descriptor, Class *base_class,
                      Span<Class *> interfaces, ClassLinkerContext *context, ClassLinkerExtension *ext,
                      ClassLinkerErrorHandler *error_handler);
 
-    Class *LoadBaseClass(panda_file::ClassDataAccessor *cda, LanguageContext ctx, ClassLinkerContext *context,
+    Class *LoadBaseClass(panda_file::ClassDataAccessor *cda, const LanguageContext &ctx, ClassLinkerContext *context,
                          ClassLinkerErrorHandler *error_handler);
 
     std::optional<Span<Class *>> LoadInterfaces(panda_file::ClassDataAccessor *cda, ClassLinkerContext *context,
@@ -347,14 +360,9 @@ private:
 
     static bool LayoutFields(Class *klass, Span<Field> fields, bool is_static, ClassLinkerErrorHandler *error_handler);
 
-    static constexpr size_t ToExtensionIndex(panda_file::SourceLang lang)
-    {
-        return static_cast<size_t>(lang);
-    }
-
     mem::InternalAllocatorPtr allocator_;
 
-    PandaVector<const panda_file::File *> boot_panda_files_;
+    PandaVector<const panda_file::File *> boot_panda_files_ GUARDED_BY(boot_panda_files_lock_);
 
     struct PandaFileLoadData {
         ClassLinkerContext *context;
@@ -362,13 +370,15 @@ private:
     };
 
     mutable os::memory::Mutex panda_files_lock_;
+    mutable os::memory::Mutex boot_panda_files_lock_;
     PandaVector<PandaFileLoadData> panda_files_ GUARDED_BY(panda_files_lock_);
 
+    PandaUniquePtr<AotManager> aot_manager_;
     // Just to free them at destroy
     os::memory::Mutex copied_names_lock_;
     PandaList<const uint8_t *> copied_names_ GUARDED_BY(copied_names_lock_);
 
-    std::array<std::unique_ptr<ClassLinkerExtension>, LANG_EXTENSIONS_COUNT> extensions_;
+    std::array<std::unique_ptr<ClassLinkerExtension>, panda::panda_file::LANG_COUNT> extensions_;
 
     bool is_initialized_ {false};
 
@@ -390,4 +400,4 @@ public:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_CLASS_LINKER_H_
+#endif  // PANDA_RUNTIME_CLASS_LINKER_H_

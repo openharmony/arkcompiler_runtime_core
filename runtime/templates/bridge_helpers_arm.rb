@@ -12,14 +12,27 @@
 # limitations under the License.
 
 def cmp_opcode(imm)
-  return "cmp r6, ##{imm}"
+  if imm <= 255
+    return "cmp r6, ##{imm}"
+  end
+  # We need to save imm to temporary register before cmp,
+  # because it is too large for ARM instruction format
+  return "mov r9, ##{imm}
+    cmp r6, r9"
 end
 
 def jump_eq(target)
   return "beq #{target}"
 end
 
+def jump(target)
+  return "b #{target}"
+end
+
+def save_param(value)
+  return "mov r9, ##{value}"
+end
+
 def handler_path(name)
   return "bridge/arch/arm/handle_#{name}_arm.S"
 end
-

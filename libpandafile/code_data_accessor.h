@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_CODE_DATA_ACCESSOR_H_
-#define PANDA_LIBPANDAFILE_CODE_DATA_ACCESSOR_H_
+#ifndef LIBPANDAFILE_CODE_DATA_ACCESSOR_H_
+#define LIBPANDAFILE_CODE_DATA_ACCESSOR_H_
 
 #include "file-inl.h"
 
@@ -63,12 +63,12 @@ public:
 
         Span<const uint8_t> data_;
 
-        uint32_t start_pc_ {0};
-        uint32_t length_ {0};
-        uint32_t num_catches_ {0};
+        uint32_t start_pc_;
+        uint32_t length_;
+        uint32_t num_catches_;
         Span<const uint8_t> catch_blocks_sp_ {nullptr, nullptr};
 
-        size_t size_ {0};
+        size_t size_;
     };
 
     class CatchBlock {
@@ -101,11 +101,11 @@ public:
         }
 
     private:
-        uint32_t type_idx_ {0};
-        uint32_t handler_pc_ {0};
-        uint32_t code_size_ {0};
+        uint32_t type_idx_;
+        uint32_t handler_pc_;
+        uint32_t code_size_;
 
-        size_t size_ {0};
+        size_t size_;
     };
 
     CodeDataAccessor(const File &panda_file, File::EntityId code_id);
@@ -114,6 +114,12 @@ public:
 
     NO_COPY_SEMANTIC(CodeDataAccessor);
     NO_MOVE_SEMANTIC(CodeDataAccessor);
+
+    static uint32_t GetNumVregs(const File &pf, File::EntityId code_id);
+
+    static const uint8_t *GetInstructions(const File &pf, File::EntityId code_id, uint32_t *vregs);
+
+    static const uint8_t *GetInstructions(const File &pf, File::EntityId code_id);
 
     uint32_t GetNumVregs() const
     {
@@ -157,7 +163,7 @@ public:
         return panda_file_;
     }
 
-    File::EntityId GetCodeId() const
+    File::EntityId GetCodeId()
     {
         return code_id_;
     }
@@ -168,11 +174,11 @@ private:
     const File &panda_file_;
     File::EntityId code_id_;
 
-    uint32_t num_vregs_ {0};
-    uint32_t num_args_ {0};
-    uint32_t code_size_ {0};
-    uint32_t tries_size_ {0};
-    const uint8_t *instructions_ptr_ {nullptr};
+    uint32_t num_vregs_;
+    uint32_t num_args_;
+    uint32_t code_size_;
+    uint32_t tries_size_;
+    const uint8_t *instructions_ptr_;
     Span<const uint8_t> try_blocks_sp_ {nullptr, nullptr};
 
     size_t size_;
@@ -180,4 +186,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_CODE_DATA_ACCESSOR_H_
+#endif  // LIBPANDAFILE_CODE_DATA_ACCESSOR_H_

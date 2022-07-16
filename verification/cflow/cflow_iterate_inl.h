@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_CFLOW_CFLOW_ITERATE_INL_H_
-#define PANDA_VERIFICATION_CFLOW_CFLOW_ITERATE_INL_H_
+#ifndef PANDA_VERIFIER_CFLOW_ITER_INL_H_
+#define PANDA_VERIFIER_CFLOW_ITER_INL_H_
 
 #include "bytecode_instruction-inl.h"
 #include "file_items.h"
@@ -46,4 +46,4 @@ namespace panda::verifier {
 #include <cflow_iterate_inl_gen.h>
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_CFLOW_CFLOW_ITERATE_INL_H_
+#endif  // PANDA_VERIFIER_CFLOW_ITER_INL_H_

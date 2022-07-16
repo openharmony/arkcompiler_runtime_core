@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H_
-#define PANDA_LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H_
+#ifndef LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H_
+#define LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H_
 
 #include "class_data_accessor.h"
 #include "field_data_accessor-inl.h"
@@ -52,6 +52,16 @@ inline void ClassDataAccessor::SkipFields()
 inline void ClassDataAccessor::SkipMethods()
 {
     EnumerateMethods([](const MethodDataAccessor & /* unused */) {});
+}
+
+inline void ClassDataAccessor::SkipRuntimeTypeAnnotations()
+{
+    EnumerateRuntimeTypeAnnotations([](File::EntityId /* unused */) {});
+}
+
+inline void ClassDataAccessor::SkipTypeAnnotations()
+{
+    EnumerateTypeAnnotations([](File::EntityId /* unused */) {});
 }
 
 template <class Callback>
@@ -98,13 +108,35 @@ inline void ClassDataAccessor::EnumerateAnnotations(const Callback &cb)
     }
 
     helpers::EnumerateTaggedValues<File::EntityId, ClassTag, Callback>(annotations_sp_, ClassTag::ANNOTATION, cb,
-                                                                       &source_file_sp_);
+                                                                       &runtime_type_annotation_sp_);
+}
+
+template <class Callback>
+inline bool ClassDataAccessor::EnumerateRuntimeAnnotationsWithEarlyStop(const Callback &cb)
+{
+    if (runtime_annotations_sp_.data() == nullptr) {
+        SkipSourceLang();
+    }
+
+    return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, ClassTag, Callback>(
+        runtime_annotations_sp_, ClassTag::RUNTIME_ANNOTATION, cb);
+}
+
+template <class Callback>
+inline bool ClassDataAccessor::EnumerateAnnotationsWithEarlyStop(const Callback &cb)
+{
+    if (annotations_sp_.data() == nullptr) {
+        SkipRuntimeAnnotations();
+    }
+
+    return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, ClassTag, Callback>(annotations_sp_,
+                                                                                           ClassTag::ANNOTATION, cb);
 }
 
 inline std::optional<File::EntityId> ClassDataAccessor::GetSourceFileId()
 {
     if (source_file_sp_.data() == nullptr) {
-        SkipAnnotations();
+        SkipTypeAnnotations();
     }
 
     auto v = helpers::GetOptionalTaggedValue<File::EntityId>(source_file_sp_, ClassTag::SOURCE_FILE, &fields_sp_);
@@ -146,9 +178,32 @@ inline void ClassDataAccessor::EnumerateMethods(const Callback &cb)
     }
 
     Span<const uint8_t> sp {nullptr, nullptr};
+
     EnumerateClassElements<Callback, MethodDataAccessor>(panda_file_, methods_sp_, num_methods_, cb, &sp);
 
     size_ = panda_file_.GetIdFromPointer(sp.data()).GetOffset() - class_id_.GetOffset();
+}
+
+template <class Callback>
+inline void ClassDataAccessor::EnumerateRuntimeTypeAnnotations(const Callback &cb)
+{
+    if (runtime_type_annotation_sp_.data() == nullptr) {
+        SkipAnnotations();
+    }
+
+    helpers::EnumerateTaggedValues<File::EntityId, ClassTag, Callback>(
+        runtime_type_annotation_sp_, ClassTag::RUNTIME_TYPE_ANNOTATION, cb, &type_annotation_sp_);
+}
+
+template <class Callback>
+inline void ClassDataAccessor::EnumerateTypeAnnotations(const Callback &cb)
+{
+    if (type_annotation_sp_.data() == nullptr) {
+        SkipRuntimeTypeAnnotations();
+    }
+
+    helpers::EnumerateTaggedValues<File::EntityId, ClassTag, Callback>(type_annotation_sp_, ClassTag::TYPE_ANNOTATION,
+                                                                       cb, &source_file_sp_);
 }
 
 inline uint32_t ClassDataAccessor::GetAnnotationsNumber()
@@ -167,4 +222,4 @@ inline uint32_t ClassDataAccessor::GetRuntimeAnnotationsNumber()
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H_
+#endif  // LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H_

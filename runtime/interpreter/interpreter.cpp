@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 
 #include "runtime/interpreter/interpreter.h"
 
-#include "runtime/include/method.h"
 #include "runtime/interpreter/arch/macros.h"
 #include "runtime/interpreter/interpreter_impl.h"
 

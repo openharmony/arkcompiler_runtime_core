@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_FILE_H_
-#define PANDA_LIBPANDAFILE_FILE_H_
+#ifndef LIBPANDAFILE_FILE_H_
+#define LIBPANDAFILE_FILE_H_
 
+#include <cstdint>
 #include "os/mem.h"
 #include "utils/span.h"
 #include "utils/utf.h"
-
-#include <cstdint>
 
 #include <array>
 #include <iostream>
@@ -35,6 +34,16 @@ struct EntryFileStat;
 namespace panda::panda_file {
 
 class PandaCache;
+
+/*
+ * EntityPairHeader Describes pair for hash value of class's descriptor and its entity id offset,
+ * used to quickly find class by its descriptor.
+ */
+struct EntityPairHeader {
+    uint32_t descriptor_hash;
+    uint32_t entity_id_offset;
+    uint32_t next_pos;
+};
 
 class File {
 public:
@@ -76,11 +85,11 @@ public:
     };
 
     struct StringData {
-        StringData(uint32_t len, const uint8_t *d) : utf16_length(len), data(d), is_ascii(false) {}
+        StringData(uint32_t len, const uint8_t *d) : utf16_length(len), is_ascii(false), data(d) {}
         StringData() = default;
         uint32_t utf16_length;  // NOLINT(misc-non-private-member-variables-in-classes)
-        const uint8_t *data;    // NOLINT(misc-non-private-member-variables-in-classes)
         bool is_ascii;          // NOLINT(misc-non-private-member-variables-in-classes)
+        const uint8_t *data;    // NOLINT(misc-non-private-member-variables-in-classes)
     };
 
     // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
@@ -107,6 +116,11 @@ public:
             return sizeof(uint32_t);
         }
 
+        friend bool operator<(const EntityId &l, const EntityId &r)
+        {
+            return l.offset_ < r.offset_;
+        }
+
         friend bool operator==(const EntityId &l, const EntityId &r)
         {
             return l.offset_ == r.offset_;
@@ -127,6 +141,8 @@ public:
     EntityId GetLiteralArraysId() const;
 
     EntityId GetClassId(const uint8_t *mutf8_name) const;
+
+    EntityId GetClassIdFromClassHashTable(const uint8_t *mutf8_name) const;
 
     const Header *GetHeader() const
     {
@@ -199,44 +215,68 @@ public:
         return nullptr;
     }
 
-    Span<const EntityId> GetClassIndex(EntityId id) const
+    Span<const EntityId> GetClassIndex(const IndexHeader *index_header) const
     {
         auto *header = GetHeader();
-        auto *index_header = GetIndexHeader(id);
-        ASSERT(index_header != nullptr);
         Span file(GetBase(), header->file_size);
+        ASSERT(index_header != nullptr);
         auto sp = file.SubSpan(index_header->class_idx_off, index_header->class_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->class_idx_size);
     }
 
-    Span<const EntityId> GetMethodIndex(EntityId id) const
+    Span<const EntityId> GetClassIndex(EntityId id) const
     {
-        auto *header = GetHeader();
         auto *index_header = GetIndexHeader(id);
         ASSERT(index_header != nullptr);
+        return GetClassIndex(index_header);
+    }
+
+    Span<const EntityId> GetMethodIndex(const IndexHeader *index_header) const
+    {
+        auto *header = GetHeader();
         Span file(GetBase(), header->file_size);
+        ASSERT(index_header != nullptr);
         auto sp = file.SubSpan(index_header->method_idx_off, index_header->method_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->method_idx_size);
     }
 
-    Span<const EntityId> GetFieldIndex(EntityId id) const
+    Span<const EntityId> GetMethodIndex(EntityId id) const
     {
-        auto *header = GetHeader();
         auto *index_header = GetIndexHeader(id);
         ASSERT(index_header != nullptr);
+        return GetMethodIndex(index_header);
+    }
+
+    Span<const EntityId> GetFieldIndex(const IndexHeader *index_header) const
+    {
+        auto *header = GetHeader();
         Span file(GetBase(), header->file_size);
+        ASSERT(index_header != nullptr);
         auto sp = file.SubSpan(index_header->field_idx_off, index_header->field_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->field_idx_size);
     }
 
-    Span<const EntityId> GetProtoIndex(EntityId id) const
+    Span<const EntityId> GetFieldIndex(EntityId id) const
     {
-        auto *header = GetHeader();
         auto *index_header = GetIndexHeader(id);
         ASSERT(index_header != nullptr);
+        return GetFieldIndex(index_header);
+    }
+
+    Span<const EntityId> GetProtoIndex(const IndexHeader *index_header) const
+    {
+        auto *header = GetHeader();
         Span file(GetBase(), header->file_size);
+        ASSERT(index_header != nullptr);
         auto sp = file.SubSpan(index_header->proto_idx_off, index_header->proto_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->proto_idx_size);
+    }
+
+    Span<const EntityId> GetProtoIndex(EntityId id) const
+    {
+        auto *index_header = GetIndexHeader(id);
+        ASSERT(index_header != nullptr);
+        return GetProtoIndex(index_header);
     }
 
     Span<const EntityId> GetLineNumberProgramIndex() const
@@ -292,9 +332,25 @@ public:
         return FILENAME_HASH;
     }
 
+    // note: intentionally returns uint64_t instead of the field type due to usage
     uint64_t GetUniqId() const
     {
         return UNIQ_ID;
+    }
+
+    const std::string &GetFullFileName() const
+    {
+        return FULL_FILENAME;
+    }
+
+    static constexpr uint32_t GetFileBaseOffset()
+    {
+        return MEMBER_OFFSET(File, base_);
+    }
+
+    Span<const panda::panda_file::EntityPairHeader> GetClassHashTable() const
+    {
+        return class_hash_table_;
     }
 
     static uint32_t CalcFilenameHash(const std::string &filename);
@@ -308,6 +364,11 @@ public:
     static std::unique_ptr<const File> OpenUncompressedArchive(int fd, const std::string_view &filename, size_t size,
                                                                uint32_t offset, OpenMode open_mode = READ_ONLY);
 
+    void SetClassHashTable(panda::Span<const panda::panda_file::EntityPairHeader> class_hash_table) const
+    {
+        class_hash_table_ = class_hash_table;
+    }
+
     ~File();
 
     NO_COPY_SEMANTIC(File);
@@ -316,12 +377,16 @@ public:
 private:
     File(std::string filename, os::mem::ConstBytePtr &&base);
 
+    os::mem::ConstBytePtr base_;
     const std::string FILENAME;
     const uint32_t FILENAME_HASH;
-    os::mem::ConstBytePtr base_;
+    const std::string FULL_FILENAME;
     std::unique_ptr<PandaCache> panda_cache_;
-    const uint64_t UNIQ_ID;
+    const uint32_t UNIQ_ID;
+    mutable panda::Span<const panda::panda_file::EntityPairHeader> class_hash_table_;
 };
+
+static_assert(File::GetFileBaseOffset() == 0);
 
 inline bool operator==(const File::StringData &string_data1, const File::StringData &string_data2)
 {
@@ -335,6 +400,15 @@ inline bool operator==(const File::StringData &string_data1, const File::StringD
 inline bool operator!=(const File::StringData &string_data1, const File::StringData &string_data2)
 {
     return !(string_data1 == string_data2);
+}
+
+inline bool operator<(const File::StringData &string_data1, const File::StringData &string_data2)
+{
+    if (string_data1.utf16_length == string_data2.utf16_length) {
+        return utf::CompareMUtf8ToMUtf8(string_data1.data, string_data2.data) < 0;
+    }
+
+    return string_data1.utf16_length < string_data2.utf16_length;
 }
 
 /*
@@ -363,4 +437,15 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
 extern const char *ARCHIVE_FILENAME;
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_FILE_H_
+namespace std {
+template <>
+struct hash<panda::panda_file::File::EntityId> {
+    std::size_t operator()(panda::panda_file::File::EntityId id) const
+    {
+        return std::hash<uint32_t> {}(id.GetOffset());
+    }
+};
+
+}  // namespace std
+
+#endif

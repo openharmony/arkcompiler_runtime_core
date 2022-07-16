@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
 
 #include "arena_allocator.h"
 
-#include "arena.h"
+#include <cstdlib>
+#include <cstring>
+#include "arena-inl.h"
 #include "utils/logger.h"
 #include "pool_manager.h"
 #include "trace/trace.h"
 #include "mem/base_mem_stats.h"
-#include <cstdlib>
-#include <cstring>
 
 namespace panda {
 
@@ -96,7 +96,7 @@ void *ArenaAllocatorT<use_oom_handler>::Alloc(size_t size, Alignment align)
     if (ON_STACK_ALLOCATION_ENABLED && UNLIKELY(!arenas_)) {
         LOG(DEBUG, ALLOC) << "\tTry to allocate from stack";
         ret = buff_.Alloc(size, align);
-        LOG_IF(ret, INFO, ALLOC) << "\tallocate from stack buffer";
+        LOG_IF(ret, DEBUG, ALLOC) << "\tallocate from stack buffer";
         if (ret == nullptr) {
             ret = AllocateAndAddNewPool(size, align);
         }
@@ -109,7 +109,7 @@ void *ArenaAllocatorT<use_oom_handler>::Alloc(size_t size, Alignment align)
             oom_handler_();
         }
     }
-    LOG(INFO, ALLOC) << "ArenaAllocator: allocated " << size << " bytes aligned by " << align;
+    LOG(DEBUG, ALLOC) << "ArenaAllocator: allocated " << size << " bytes aligned by " << align;
     AllocArenaMemStats(size);
     return ret;
 }
@@ -118,6 +118,7 @@ template <bool use_oom_handler>
 void ArenaAllocatorT<use_oom_handler>::Resize(size_t new_size)
 {
     LOG(DEBUG, ALLOC) << "ArenaAllocator: resize to new size " << new_size;
+    // TODO(aemelenko): we have O(2n) here in the worst case
     size_t cur_size = GetAllocatedSize();
     if (cur_size <= new_size) {
         LOG_IF(cur_size < new_size, FATAL, ALLOC) << "ArenaAllocator: resize to bigger size than we have. Do nothing";
@@ -125,6 +126,7 @@ void ArenaAllocatorT<use_oom_handler>::Resize(size_t new_size)
     }
 
     size_t bytes_to_delete = cur_size - new_size;
+
     // Try to delete unused arenas
     while ((arenas_ != nullptr) && (bytes_to_delete != 0)) {
         Arena *next = arenas_->GetNextArena();

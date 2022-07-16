@@ -42,20 +42,26 @@ Usage: test-runner.rb [options]
     -p, --panda-build DIR            Path to panda build directory (required)
     -t, --test-dir DIR               Path to test directory to search tests recursively, or path to single test (required)
     -v, --verbose LEVEL              Set verbose level 1..5
-        --timeout SECONDS            Set process timeout
+        --verbose-verifier           Allow verifier to produce extended checking log
+        --aot-mode                   Perform AOT compilation on test sources
+        --timeout SECONDS            Set process timeout, default is 30 seconds
+        --dump-timeout SECONDS       Set process completion timeout, default is 30 seconds
+        --enable-core-dump           Enable core dumps
+        --verify-tests               Run verifier against positive tests (option for test checking)
+        --with-quickener             Run quickener tool after assembly
         --global-timeout SECONDS     Set testing timeout, default is 0 (ulimited)
     -a, --run-all                    Run all tests, ignore "runner-option: ignore" tag in test definition
         --run-ignored                Run ignored tests, which have "runner-option: ignore" tag in test definition
+        --reporter TYPE              Reporter for test results (default 'log', available: 'log', 'jtr', 'allure')
+        --report-dir DIR             Where to put results, applicable for 'jtr' and 'allure' logger
+        --verifier-config PATH       Path to verifier config file
     -e, --exclude-tag TAG            Exclude tags for tests
     -o, --panda-options OPTION       Panda options
     -i, --include-tag TAG            Include tags for tests
     -b, --bug_id BUGID               Include tests with specified bug ids
     -j, --jobs N                     Amount of concurrent jobs for test execution (default 8)
-    --prlimit='OPTS'                 Run panda via prlimit with options
-    --verifier-debug-config PATH     Path to verifier debug config file. By default, internal embedded verifier debug config is used.
-
-    -H, --host-toolspath PATH        Directory with host-tools
-
+        --prlimit OPTS               Run panda via prlimit with options
+        --plugins PLUGINS            Paths to runner plugins
     -h, --help                       Prints this help
 ```
 
@@ -66,11 +72,11 @@ ${PANDA_SRC_ROOT}/tests/cts-generator/test-runner.rb
    -t cts-generated \
    -p ${PANDA_BUILD_ROOT} \
    -e release -e debug \
-   -i clang_release_sanitizer,wrong-tag
+   -i sanitizer-fail,wrong-tag
 ```
 
 This command will start all tests in `cts-generated` directory. Tests which have runner options `ignore` will be ignored.
-Tests that have `release` and `clang_release_sanitizer` will be excluded.
+Tests that have `release` and `sanitizer-fail` will be excluded.
 
 To run all tests, add `-a` options.
 
@@ -88,7 +94,7 @@ cmake -DCTS_TEST_SELECT_OPTION="-b 1316 -a" ../panda
 
 Run all tests marked with bugid 1316.
 
-### How to generate all test not using cmake/make?
+### How to generate all test not using cmake/make
 
 ```
 cd ${ROOT_PATH}/tests/cts-generator
@@ -98,7 +104,7 @@ cd ${ROOT_PATH}/tests/cts-generator
    -o cts-generated
 ```
 
-### How to run all tests?
+### How to run all tests
 
 All test can be executed using `make cts-generated` command, test with `ignore` runner options will be ignored by test runner.
 If you want to run all tests, you can do the following:
@@ -117,10 +123,10 @@ cd ${BUILD_DIR}/tests/cts-generator
   -t ./cts-generated/ \
   -v 2 -j 8 \
   -i release \
-  -e clang_release_sanitizer
+  -e sanitizer-fail
 ```
 
-Tests with `release` tag will be included to test execution, with `clang_release_sanitizer` will be excluded.
+Tests with `release` tag will be included to test execution, with `sanitizer-fail` will be excluded.
 
 ### How to run test with specified bug id runner-option?
 
@@ -136,7 +142,7 @@ test-runner.rb \
 
 Please note that `-a` options (`--run-all`) is defined, otherwise tests will be excluded, if they have `ignore` runner option.
 
-### How to run panda via prlimit?
+### How run panda via prlimit?
 
 Example:
 ```

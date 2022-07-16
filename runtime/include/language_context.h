@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,32 +12,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PANDA_RUNTIME_LANGUAGE_CONTEXT_H_
+#define PANDA_RUNTIME_LANGUAGE_CONTEXT_H_
 
-#ifndef PANDA_RUNTIME_INCLUDE_LANGUAGE_CONTEXT_H_
-#define PANDA_RUNTIME_INCLUDE_LANGUAGE_CONTEXT_H_
-
+#include "libpandabase/utils/utf.h"
 #include "libpandafile/class_data_accessor-inl.h"
 #include "libpandafile/file_items.h"
-#include "libpandabase/utils/utf.h"
+#include "macros.h"
+#include "runtime/class_initializer.h"
 #include "runtime/include/class-inl.h"
-#include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/class_linker_extension.h"
+#include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/imtable_builder.h"
 #include "runtime/include/itable_builder.h"
-#include "runtime/include/tooling/pt_lang_extension.h"
 #include "runtime/include/vtable_builder.h"
+#include "runtime/include/tooling/pt_lang_extension.h"
 #include "runtime/mem/gc/gc_types.h"
 
 namespace panda {
 class Thread;
+class Trace;
 class Runtime;
 class RuntimeOptions;
 
 namespace mem {
 class GC;
 class ObjectAllocatorBase;
-struct GCSettings;
+class GCSettings;
 }  // namespace mem
+
+struct VerificationInitAPI {
+    std::vector<panda_file::Type::TypeId> primitive_roots_for_verification;
+    std::vector<const uint8_t *> array_elements_for_verification;
+    bool is_need_object_synthetic_class = false;
+    bool is_need_string_synthetic_class = false;
+    bool is_need_class_synthetic_class = false;
+};
 
 class LanguageContextBase {
 public:
@@ -50,7 +60,10 @@ public:
 
     virtual panda_file::SourceLang GetLanguage() const = 0;
 
-    virtual const uint8_t *GetStringClassDescriptor() const = 0;
+    virtual const uint8_t *GetStringClassDescriptor() const
+    {
+        return utf::CStringAsMutf8(panda::panda_file::GetStringClassDescriptor(GetLanguage()));
+    }
 
     virtual const uint8_t *GetObjectClassDescriptor() const = 0;
 
@@ -60,11 +73,23 @@ public:
 
     virtual const uint8_t *GetStringArrayClassDescriptor() const = 0;
 
-    virtual const uint8_t *GetCtorName() const = 0;
+    virtual const uint8_t *GetCtorName() const
+    {
+        return utf::CStringAsMutf8(panda::panda_file::GetCtorName(GetLanguage()));
+    }
 
-    virtual const uint8_t *GetCctorName() const = 0;
+    virtual const uint8_t *GetCctorName() const
+    {
+        return utf::CStringAsMutf8(panda::panda_file::GetCctorName(GetLanguage()));
+    }
 
     virtual const uint8_t *GetNullPointerExceptionClassDescriptor() const = 0;
+
+    virtual const uint8_t *GetStackOverflowErrorClassDescriptor() const
+    {
+        UNREACHABLE();
+        return nullptr;
+    }
 
     virtual const uint8_t *GetArrayIndexOutOfBoundsExceptionClassDescriptor() const = 0;
 
@@ -126,12 +151,12 @@ public:
     virtual void ThrowException(ManagedThread *thread, const uint8_t *mutf8_name, const uint8_t *mutf8_msg) const;
 
     virtual void SetExceptionToVReg(
-        [[maybe_unused]] Frame::VRegister &vreg,  // NOLINTNEXTLINE(google-runtime-references)
+        [[maybe_unused]] interpreter::AccVRegister &vreg,  // NOLINTNEXTLINE(google-runtime-references)
         [[maybe_unused]] ObjectHeader *obj) const;
 
     virtual uint64_t GetTypeTag(interpreter::TypeTag tag) const
     {
-        // return default TypeTag
+        // return TypeTag default
         return tag;
     }
 
@@ -155,19 +180,24 @@ public:
 
     virtual const uint8_t *GetIllegalMonitorStateExceptionDescriptor() const = 0;
 
-    virtual const uint8_t *GetErrorClassDescriptor() const;
-
-    bool IsDynamicLanguage() const
+    virtual void ThrowStackOverflowException([[maybe_unused]] ManagedThread *thread) const
     {
-        switch (GetLanguage()) {
-            case panda_file::SourceLang::PANDA_ASSEMBLY:
-                return false;
-            case panda_file::SourceLang::ECMASCRIPT:
-                return true;
-            default:
-                UNREACHABLE();
-                return false;
-        }
+        UNREACHABLE();
+    }
+
+    virtual const uint8_t *GetCloneNotSupportedExceptionDescriptor() const
+    {
+        UNREACHABLE();
+    }
+
+    virtual uint32_t GetFrameExtSize() const
+    {
+        return 0;
+    }
+
+    virtual const uint8_t *GetIncompatibleClassChangeErrorDescriptor() const
+    {
+        UNREACHABLE();
     }
 
     virtual PandaUniquePtr<IMTableBuilder> CreateIMTableBuilder() const
@@ -175,12 +205,68 @@ public:
         return MakePandaUnique<IMTableBuilder>();
     }
 
-    virtual PandaUniquePtr<ITableBuilder> CreateITableBuilder() const;
+    virtual const uint8_t *GetErrorClassDescriptor() const
+    {
+        return nullptr;
+    }
 
-    virtual PandaUniquePtr<VTableBuilder> CreateVTableBuilder() const;
+    virtual PandaUniquePtr<ITableBuilder> CreateITableBuilder() const
+    {
+        return nullptr;
+    }
+
+    virtual PandaUniquePtr<VTableBuilder> CreateVTableBuilder() const
+    {
+        return nullptr;
+    }
 
     virtual bool InitializeClass([[maybe_unused]] ClassLinker *class_linker, [[maybe_unused]] ManagedThread *thread,
                                  [[maybe_unused]] Class *klass) const
+    {
+        return true;
+    }
+
+    virtual size_t GetStringSize(const ObjectHeader *string_object) const
+    {
+        return string_object->ObjectSize();
+    }
+
+    virtual Trace *CreateTrace([[maybe_unused]] PandaUniquePtr<panda::os::file::File> trace_file,
+                               [[maybe_unused]] size_t buffer_size) const
+    {
+        UNREACHABLE();
+    }
+
+    virtual panda::panda_file::File::OpenMode GetBootPandaFilesOpenMode() const
+    {
+        return panda_file::File::READ_ONLY;
+    }
+
+    virtual VerificationInitAPI GetVerificationInitAPI() const
+    {
+        return VerificationInitAPI();
+    }
+
+    virtual const char *GetVerificationTypeClass() const
+    {
+        return nullptr;
+    }
+
+    virtual const char *GetVerificationTypeObject() const
+    {
+        return nullptr;
+    }
+
+    virtual const char *GetVerificationTypeThrowable() const
+    {
+        return nullptr;
+    }
+
+    virtual void DeoptimizeBegin([[maybe_unused]] Frame *iframe, [[maybe_unused]] int frame_depth) const {}
+
+    virtual void DeoptimizeEnd() const {}
+
+    virtual bool IsEnabledCHA() const
     {
         return true;
     }
@@ -241,18 +327,19 @@ public:
         return base_->CreatePtLangExt();
     }
 
-    void ThrowException(ManagedThread *thread, const uint8_t *mutf8_name, const uint8_t *mutf8_msg)
+    void ThrowException(ManagedThread *thread, const uint8_t *mutf8_name, const uint8_t *mutf8_msg) const
     {
         base_->ThrowException(thread, mutf8_name, mutf8_msg);
     }
 
-    void SetExceptionToVReg([[maybe_unused]] Frame::VRegister &vreg,  // NOLINTNEXTLINE(google-runtime-references)
-                            [[maybe_unused]] ObjectHeader *obj) const
+    void SetExceptionToVReg(
+        [[maybe_unused]] interpreter::AccVRegister &vreg,  // NOLINTNEXTLINE(google-runtime-references)
+        [[maybe_unused]] ObjectHeader *obj) const
     {
         base_->SetExceptionToVReg(vreg, obj);
     }
 
-    DecodedTaggedValue GetInitialDecodedValue() const
+    DecodedTaggedValue GetInitialDecodedValue()
     {
         return base_->GetInitialDecodedValue();
     }
@@ -295,6 +382,16 @@ public:
     const uint8_t *GetNullPointerExceptionClassDescriptor() const
     {
         return base_->GetNullPointerExceptionClassDescriptor();
+    }
+
+    const uint8_t *GetStackOverflowErrorClassDescriptor() const
+    {
+        return base_->GetStackOverflowErrorClassDescriptor();
+    }
+
+    void ThrowStackOverflowException(ManagedThread *thread) const
+    {
+        return base_->ThrowStackOverflowException(thread);
     }
 
     const uint8_t *GetArrayIndexOutOfBoundsExceptionClassDescriptor() const
@@ -422,28 +519,33 @@ public:
         return base_->GetIllegalMonitorStateExceptionDescriptor();
     }
 
+    const uint8_t *GetCloneNotSupportedExceptionDescriptor() const
+    {
+        return base_->GetCloneNotSupportedExceptionDescriptor();
+    }
+
+    const uint8_t *GetErrorClassDescriptor() const
+    {
+        return base_->GetErrorClassDescriptor();
+    }
+
+    const uint8_t *GetIncompatibleClassChangeErrorDescriptor() const
+    {
+        return base_->GetIncompatibleClassChangeErrorDescriptor();
+    }
+
     friend std::ostream &operator<<(std::ostream &stream, const LanguageContext &ctx)
     {
-        switch (ctx.base_->GetLanguage()) {
-            case panda_file::SourceLang::PANDA_ASSEMBLY:
-                return stream << "PandaAssembly";
-            case panda_file::SourceLang::ECMASCRIPT:
-                return stream << "ECMAScript";
-            default: {
-                break;
-            }
-        }
-
-        UNREACHABLE();
-        return stream;
+        return stream << panda::panda_file::LanguageToString(ctx.base_->GetLanguage());
     }
+
     uint64_t GetTypeTag(interpreter::TypeTag tag) const
     {
         // return TypeTag default
         return base_->GetTypeTag(tag);
     }
 
-    bool IsCallableObject([[maybe_unused]] ObjectHeader *obj) const
+    bool IsCallableObject([[maybe_unused]] ObjectHeader *obj)
     {
         return base_->IsCallableObject(obj);
     }
@@ -463,14 +565,9 @@ public:
         return base_->GetTypedErrorDescriptor();
     }
 
-    const uint8_t *GetErrorClassDescriptor() const
+    uint32_t GetFrameExtSize() const
     {
-        return base_->GetErrorClassDescriptor();
-    }
-
-    bool IsDynamicLanguage() const
-    {
-        return base_->IsDynamicLanguage();
+        return base_->GetFrameExtSize();
     }
 
     PandaUniquePtr<IMTableBuilder> CreateIMTableBuilder()
@@ -493,10 +590,60 @@ public:
         return base_->InitializeClass(class_linker, thread, klass);
     }
 
+    Trace *CreateTrace(PandaUniquePtr<panda::os::file::File> trace_file, size_t buffer_size) const
+    {
+        return base_->CreateTrace(std::move(trace_file), buffer_size);
+    }
+
+    size_t GetStringSize(const ObjectHeader *string_object) const
+    {
+        return base_->GetStringSize(string_object);
+    }
+
+    VerificationInitAPI GetVerificationInitAPI() const
+    {
+        return base_->GetVerificationInitAPI();
+    }
+
+    const char *GetVerificationTypeClass() const
+    {
+        return base_->GetVerificationTypeClass();
+    }
+
+    const char *GetVerificationTypeObject() const
+    {
+        return base_->GetVerificationTypeObject();
+    }
+
+    const char *GetVerificationTypeThrowable() const
+    {
+        return base_->GetVerificationTypeThrowable();
+    }
+
+    panda::panda_file::File::OpenMode GetBootPandaFilesOpenMode() const
+    {
+        return base_->GetBootPandaFilesOpenMode();
+    }
+
+    virtual void DeoptimizeBegin(Frame *iframe, int frame_depth) const
+    {
+        return base_->DeoptimizeBegin(iframe, frame_depth);
+    }
+
+    virtual void DeoptimizeEnd() const
+    {
+        return base_->DeoptimizeEnd();
+    }
+
+    virtual bool IsEnabledCHA() const
+    {
+        return base_->IsEnabledCHA();
+    }
+
 private:
     const LanguageContextBase *base_;
 };
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_LANGUAGE_CONTEXT_H_
+#endif  // PANDA_RUNTIME_LANGUAGE_CONTEXT_H_

@@ -14,7 +14,7 @@
 #Assert that intrinsic Math.absF64 works fine
 .record Math <external>
 .function f64 Math.absF64(f64 a0)<external>
-.function u1 main(){
+.function i32 main(){
     fmovi.64 v0, 2.0
     fmovi.64 v1, 1e-13
     call.short Math.absF64, v0, v0

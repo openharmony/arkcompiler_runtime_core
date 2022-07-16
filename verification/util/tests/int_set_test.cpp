@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,146 +13,110 @@
  * limitations under the License.
  */
 
+#include <vector>
+
 #include "util/int_set.h"
 
-#ifdef PANDA_CATCH2
-#include <rapidcheck/catch.h>
-#include "util/tests/environment.h"
-#endif
+#include "util/tests/verifier_test.h"
 
-using namespace panda::verifier;
+#include <gtest/gtest.h>
 
 namespace panda::verifier::test {
 
-#ifdef PANDA_CATCH2
-
-namespace {
-
-const EnvOptions Options {"VERIFIER_TEST"};
-
-using T = size_t;
-// to actually get to the threshold in tests
-constexpr size_t THRESHOLD = 32;
-using StdSetT = std::set<T>;
-using IntSetT = IntSet<T, THRESHOLD>;
-
-void AssertSetsEqual(const StdSetT &model, const IntSetT &sut)
+TEST_F(VerifierTest, IntSetBase)
 {
-    RC_ASSERT(model.size() == sut.Size());
-    for (auto x : model) {
-        RC_ASSERT(sut.Contains(x));
-    }
-    RC_TAG(sut.Size() < THRESHOLD ? "sorted vector" : "bitvector");
+    IntSet<size_t> iset;
+
+    EXPECT_EQ(iset.Size(), 0);
+
+    iset.Insert(5);
+
+    EXPECT_EQ(iset.Size(), 1);
+    EXPECT_TRUE(iset.Contains(5));
+    EXPECT_FALSE(iset.Contains(3));
+
+    std::vector<size_t> v {1, 5, 3};
+    iset.Insert(v.begin(), v.begin() + 2);
+
+    EXPECT_EQ(iset.Size(), 2);
+    EXPECT_TRUE(iset.Contains(1));
+    EXPECT_TRUE(iset.Contains(5));
+    EXPECT_FALSE(iset.Contains(3));
+
+    IntSet<size_t> iset1 = iset;
+    IntSet<size_t> iset2;
+    iset2.Insert(v.begin(), v.end());
+
+    EXPECT_EQ(iset1.Size(), 2);
+    EXPECT_TRUE(iset1.Contains(1));
+    EXPECT_TRUE(iset1.Contains(5));
+    EXPECT_FALSE(iset1.Contains(3));
+
+    EXPECT_EQ(iset2.Size(), 3);
+    EXPECT_TRUE(iset2.Contains(1));
+    EXPECT_TRUE(iset2.Contains(5));
+    EXPECT_TRUE(iset2.Contains(3));
+
+    EXPECT_EQ(iset, iset1);
+    EXPECT_NE(iset, iset2);
 }
 
-template <typename StreamT>
-void AssertLazySetsEqual(const StdSetT &model, StreamT &&sut)
+TEST_F(VerifierTest, IntSetInteraction)
 {
-    Index<size_t> tmp = sut();
-    size_t size = 0;
-    while (tmp.IsValid()) {
-        RC_ASSERT(model.find(tmp) != model.end());
-        size++;
-        tmp = sut();
-    }
-    RC_ASSERT(model.size() == size);
+    std::vector<size_t> v {1, 5, 3};
+
+    IntSet<size_t> iset1;
+    IntSet<size_t> iset2;
+    iset1.Insert(v.begin(), v.begin() + 2);
+    iset1.Insert(8);
+    iset2.Insert(v.begin(), v.end());
+
+    EXPECT_NE(iset1, iset2);
+
+    auto iset3 = iset1 & iset2;
+    auto iset4 = iset1 | iset2;
+    auto iset5 = iset1;
+    auto iset6 = iset2;
+    iset5 &= iset2;
+    iset6 |= iset1;
+
+    EXPECT_EQ(iset3.Size(), 2);
+    EXPECT_TRUE(iset3.Contains(1));
+    EXPECT_TRUE(iset3.Contains(5));
+    EXPECT_FALSE(iset3.Contains(3));
+    EXPECT_FALSE(iset3.Contains(8));
+
+    EXPECT_EQ(iset4.Size(), 4);
+    EXPECT_TRUE(iset4.Contains(1));
+    EXPECT_TRUE(iset4.Contains(5));
+    EXPECT_TRUE(iset4.Contains(3));
+    EXPECT_TRUE(iset4.Contains(8));
+
+    EXPECT_EQ(iset3, iset5);
+    EXPECT_EQ(iset4, iset6);
+
+    auto li = iset1.LazyIntersect(iset2);
+
+    EXPECT_EQ(static_cast<size_t>(li()), 1U);
+    EXPECT_EQ(static_cast<size_t>(li()), 5U);
+    EXPECT_FALSE(static_cast<bool>(li()));
+
+    EXPECT_EQ(iset3, iset5);
+
+    int res = 0;
+    iset1.ForAll([&res](int x) {
+        res += x;
+        return true;
+    });
+
+    EXPECT_EQ(res, 14);
+
+    auto stream = iset1.AsStream();
+
+    EXPECT_EQ(static_cast<size_t>(stream()), 1U);
+    EXPECT_EQ(static_cast<size_t>(stream()), 5U);
+    EXPECT_EQ(static_cast<size_t>(stream()), 8U);
+    EXPECT_FALSE(static_cast<bool>(stream()));
 }
-
-IntSetT MakeIntSet(const StdSetT &model)
-{
-    IntSetT result;
-    for (T x : model) {
-        result.Insert(x);
-    }
-    return result;
-}
-
-}  // namespace
-
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
-TEST_CASE("Test IntSet behaves like std::set", "verifier_IntSetT")
-{
-    T max_value = 2048;
-    auto value_gen = rc::gen::inRange<T>(0, max_value);
-
-    rc::prop("Insert", [&]() {
-        StdSetT set = *rc::gen::container<StdSetT>(value_gen);
-        bool pick_from_set = *rc::gen::arbitrary<bool>();
-        T value = pick_from_set ? *rc::gen::elementOf(set) : *value_gen;
-        RC_PRE(Index(value).IsValid());
-        RC_TAG(set.find(value) == set.end() ? "value not in set" : "value in set");
-        IntSetT int_set {MakeIntSet(set)};
-
-        set.insert(value);
-        int_set.Insert(value);
-
-        AssertSetsEqual(set, int_set);
-    });
-
-    rc::prop("InsertMany", [&]() {
-        StdSetT set = *rc::gen::container<StdSetT>(value_gen);
-        auto values = *rc::gen::container<std::vector<T>>(value_gen);
-        bool sorted = *rc::gen::arbitrary<bool>();
-        IntSetT int_set {MakeIntSet(set)};
-
-        set.insert(values.begin(), values.end());
-        if (sorted) {
-            std::sort(values.begin(), values.end());
-            int_set.Insert<true>(values.begin(), values.end());
-        } else {
-            int_set.Insert(values.begin(), values.end());
-        }
-
-        AssertSetsEqual(set, int_set);
-    });
-
-    rc::prop("Intersect/IntersectionSize", [&]() {
-        StdSetT set1 = *rc::gen::container<StdSetT>(value_gen), set2 = *rc::gen::container<StdSetT>(value_gen);
-        size_t num_common_elems = *rc::gen::inRange<size_t>(0, 2 * THRESHOLD);
-        std::vector<T> common_elems = *rc::gen::unique<std::vector<T>>(num_common_elems, value_gen);
-
-        for (T value : common_elems) {
-            set1.insert(value);
-            set2.insert(value);
-        }
-
-        IntSetT int_set1 {MakeIntSet(set1)}, int_set2 {MakeIntSet(set2)};
-
-        StdSetT std_intersection;
-        std::set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(),
-                              std::inserter(std_intersection, std_intersection.begin()));
-        IntSetT int_set_intersection = int_set1 & int_set2;
-
-        AssertSetsEqual(std_intersection, int_set_intersection);
-
-        AssertLazySetsEqual(std_intersection, int_set1.LazyIntersect(int_set2));
-
-        int_set1 &= int_set2;
-        AssertSetsEqual(std_intersection, int_set1);
-    });
-
-    rc::prop("Union", [&]() {
-        StdSetT set1 = *rc::gen::container<StdSetT>(value_gen), set2 = *rc::gen::container<StdSetT>(value_gen);
-        size_t num_common_elems = *rc::gen::inRange<size_t>(0, 2 * THRESHOLD);
-        std::vector<T> common_elems = *rc::gen::unique<std::vector<T>>(num_common_elems, value_gen);
-        for (T value : common_elems) {
-            set1.insert(value);
-            set2.insert(value);
-        }
-
-        IntSetT int_set1 {MakeIntSet(set1)}, int_set2 {MakeIntSet(set2)};
-
-        StdSetT std_union;
-        std::set_union(set1.begin(), set1.end(), set2.begin(), set2.end(), std::inserter(std_union, std_union.begin()));
-        IntSetT int_set_union = int_set1 | int_set2;
-
-        AssertSetsEqual(std_union, int_set_union);
-
-        int_set1 |= int_set2;
-        AssertSetsEqual(std_union, int_set1);
-    });
-}
-
-#endif  // !PANDA_CATCH2
 
 }  // namespace panda::verifier::test

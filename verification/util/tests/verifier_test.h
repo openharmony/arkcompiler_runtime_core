@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_TESTS_VERIFIER_TEST_H_
-#define PANDA_VERIFICATION_UTIL_TESTS_VERIFIER_TEST_H_
+#ifndef VERIFICATION_UTIL_TESTS_VERIFIER_TEST_H
+#define VERIFICATION_UTIL_TESTS_VERIFIER_TEST_H
 
 #include "include/runtime.h"
 
@@ -30,7 +30,7 @@ public:
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         options.SetHeapSizeLimit(64_MB);
-        options.SetVerificationEnabled(true);
+        options.SetVerificationMode(VerificationMode::ON_THE_FLY);
         Runtime::Create(options);
         thread_ = panda::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
@@ -46,5 +46,4 @@ protected:
     panda::MTManagedThread *thread_;
 };
 }  // namespace panda::verifier::test
-
-#endif  // PANDA_VERIFICATION_UTIL_TESTS_VERIFIER_TEST_H_
+#endif  // !VERIFICATION_UTIL_TESTS_VERIFIER_TEST_H

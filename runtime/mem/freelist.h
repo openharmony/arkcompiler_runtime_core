@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_FREELIST_H_
-#define PANDA_RUNTIME_MEM_FREELIST_H_
+#ifndef PANDA_MEM_FREELIST_H
+#define PANDA_MEM_FREELIST_H
 
 #include <cstddef>
 #include <cstdint>
@@ -136,8 +135,7 @@ public:
         ASSERT(IsPaddingSizeStoredAfterHeader());
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
         ASAN_UNPOISON_MEMORY_REGION(GetRawMemory(), sizeof(size_t));
-        auto size_pointer = static_cast<size_t *>(GetRawMemory());
-        *size_pointer = size;
+        *static_cast<size_t *>(GetRawMemory()) = size;
         ASAN_UNPOISON_MEMORY_REGION(GetRawMemory(), sizeof(size_t));
         ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
     }
@@ -174,6 +172,14 @@ public:
         ASSERT(!IsPaddingHeader());
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
         size_ = SetPaddingStatus(size_, PADDING_STATUS_COMMON_HEADER_WITH_PADDING_HEADER);
+        ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
+    }
+
+    ATTRIBUTE_NO_SANITIZE_ADDRESS
+    void SetCommonHeader()
+    {
+        ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
+        size_ = SetPaddingStatus(size_, PADDING_STATUS_COMMON_HEADER);
         ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
     }
 
@@ -251,6 +257,7 @@ public:
         if (IsLastBlockInPool()) {
             return false;
         }
+        ASSERT(GetNextHeader() != nullptr);
         return !GetNextHeader()->IsUsed();
     }
 
@@ -355,7 +362,10 @@ public:
     {
         ASSERT(!IsUsed());
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(FreeListHeader));
+        // Potentially, TSAN finds false data race (due to full memory barrier in Array::Create)
+        TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
         next_free_ = link;
+        TSAN_ANNOTATE_IGNORE_WRITES_END();
         ASAN_POISON_MEMORY_REGION(this, sizeof(FreeListHeader));
     }
 
@@ -364,7 +374,10 @@ public:
     {
         ASSERT(!IsUsed());
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(FreeListHeader));
+        // TSAN finds false data race (due to full memory barrier in Array::Create
+        TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
         prev_free_ = link;
+        TSAN_ANNOTATE_IGNORE_WRITES_END();
         ASAN_POISON_MEMORY_REGION(this, sizeof(FreeListHeader));
     }
 
@@ -421,4 +434,4 @@ private:
 
 }  // namespace panda::mem::freelist
 
-#endif  // PANDA_RUNTIME_MEM_FREELIST_H_
+#endif  // PANDA_MEM_FREELIST_H

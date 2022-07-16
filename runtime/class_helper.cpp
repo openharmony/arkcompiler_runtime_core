@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,68 +19,9 @@
 
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/utils/bit_utils.h"
-#include "runtime/include/class.h"
-#include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/mem/panda_string.h"
 
 namespace panda {
-
-static void Pad(size_t size, size_t *padding, size_t *n)
-{
-    while (*padding >= size && *n > 0) {
-        *padding -= size;
-        *n -= 1;
-    }
-}
-
-/* static */
-size_t ClassHelper::ComputeClassSize(size_t vtable_size, size_t imt_size, size_t num_8bit_sfields,
-                                     size_t num_16bit_sfields, size_t num_32bit_sfields, size_t num_64bit_sfields,
-                                     size_t num_ref_sfields, size_t num_tagged_sfields)
-{
-    size_t size = sizeof(Class);
-    size = AlignUp(size, OBJECT_POINTER_SIZE);
-    size += vtable_size * POINTER_SIZE;
-    size += imt_size * POINTER_SIZE;
-    size += num_ref_sfields * OBJECT_POINTER_SIZE;
-
-    constexpr size_t SIZE_64 = sizeof(uint64_t);
-    constexpr size_t SIZE_32 = sizeof(uint32_t);
-    constexpr size_t SIZE_16 = sizeof(uint16_t);
-    constexpr size_t SIZE_8 = sizeof(uint8_t);
-
-    // Try to fill alignment gaps with fields that have smaller size from largest to smallests
-    static_assert(coretypes::TaggedValue::TaggedTypeSize() == SIZE_64,
-                  "Please fix alignment of the fields of type \"TaggedValue\"");
-    if (!IsAligned<SIZE_64>(size) && (num_64bit_sfields > 0 || num_tagged_sfields > 0)) {
-        size_t padding = AlignUp(size, SIZE_64) - size;
-        size += padding;
-
-        Pad(SIZE_32, &padding, &num_32bit_sfields);
-        Pad(SIZE_16, &padding, &num_16bit_sfields);
-        Pad(SIZE_8, &padding, &num_8bit_sfields);
-    }
-
-    if (!IsAligned<SIZE_32>(size) && num_32bit_sfields > 0) {
-        size_t padding = AlignUp(size, SIZE_32) - size;
-        size += padding;
-
-        Pad(SIZE_16, &padding, &num_16bit_sfields);
-        Pad(SIZE_8, &padding, &num_8bit_sfields);
-    }
-
-    if (!IsAligned<SIZE_16>(size) && num_16bit_sfields > 0) {
-        size_t padding = AlignUp(size, SIZE_16) - size;
-        size += padding;
-
-        Pad(SIZE_8, &padding, &num_8bit_sfields);
-    }
-
-    size += num_64bit_sfields * SIZE_64 + num_32bit_sfields * SIZE_32 + num_16bit_sfields * SIZE_16 +
-            num_8bit_sfields * SIZE_8 + num_tagged_sfields * coretypes::TaggedValue::TaggedTypeSize();
-
-    return size;
-}
 
 /* static */
 const uint8_t *ClassHelper::GetDescriptor(const uint8_t *name, PandaString *storage)
@@ -146,6 +87,8 @@ const char *ClassHelper::GetPrimitiveTypeStr(panda_file::Type::TypeId type_id)
             return "f32";
         case panda_file::Type::TypeId::F64:
             return "f64";
+        case panda_file::Type::TypeId::TAGGED:
+            return "any";
         default:
             UNREACHABLE();
             break;

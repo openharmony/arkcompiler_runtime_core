@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public:
     }
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
 };
 
 class MockTask : public TaskInterface {
@@ -130,7 +130,7 @@ public:
         task.SetStatus(MockTask::PROCESSING);
         // This is required to distribute tasks between different workers rather than solve it instantly
         // on only one worker.
-        std::this_thread::sleep_for(std::chrono::milliseconds(10U));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         task.SetStatus(MockTask::COMPLETED);
         LOG(DEBUG, RUNTIME) << "Task " << task.GetId() << " has been solved";
         solved_tasks_++;
@@ -156,16 +156,6 @@ public:
             return true;
         }
         return false;
-    }
-
-    bool Init() override
-    {
-        return true;
-    }
-
-    bool Destroy() override
-    {
-        return true;
     }
 
 private:
@@ -199,10 +189,10 @@ void TestThreadPool(size_t initial_number_of_threads, size_t scaled_number_of_th
 
     for (;;) {
         auto solved_tasks = controller->GetSolvedTasks();
-        size_t rate = static_cast<size_t>((static_cast<float>(solved_tasks) / MockThreadPoolTest::TASK_NUMBER) * 100U);
+        size_t rate = static_cast<size_t>((static_cast<float>(solved_tasks) / MockThreadPoolTest::TASK_NUMBER) * 100);
         LOG(DEBUG, RUNTIME) << "Number of solved tasks is " << solved_tasks << " (" << rate << "%)";
         if (scale_threshold == 1.0) {
-            size_t dynamic_scaling = rate / 10U + 1;
+            size_t dynamic_scaling = rate / 10 + 1;
             thread_pool->Scale(dynamic_scaling);
         }
 
@@ -306,12 +296,12 @@ void TestThreadPoolWithControllers(size_t number_of_threads_initial, size_t numb
     // Wait for tasks completion.
     for (;;) {
         auto solved_tasks = controller->GetSolvedTasks();
-        size_t rate = static_cast<size_t>((static_cast<float>(solved_tasks) / MockThreadPoolTest::TASK_NUMBER) * 100U);
+        size_t rate = static_cast<size_t>((static_cast<float>(solved_tasks) / MockThreadPoolTest::TASK_NUMBER) * 100);
         LOG(DEBUG, RUNTIME) << "Number of solved tasks is " << solved_tasks << " (" << rate << "%)";
         if (solved_tasks == MockThreadPoolTest::TASK_NUMBER || !thread_pool->IsActive()) {
             break;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10U));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     controller_thread_put_task_1.join();
     controller_thread_put_task_2.join();

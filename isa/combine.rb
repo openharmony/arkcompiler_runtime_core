@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Huawei Technologies Co.,Ltd.
+
 require 'optparse'
 require 'ostruct'
 require 'yaml'
@@ -37,26 +39,17 @@ optparser.parse!(into: options)
 exit unless options.data
 exit if options.data.empty?
 
-# TODO: Unify check with combining loop when we have assigned opcodes
-options.data.drop(1).each do |path|
-  tmp_data = YAML.load_file(File.expand_path(path))
-  # check that all instructions are prefixed:
-  instructions = data_instructions(tmp_data)
-  raise 'Plugged in instructions must be prefixed' unless instructions.reject { |i| i['prefix'] }.empty?
-end
-
-# TODO: Remove when we have assigned opcodes:
-options.data = options.data.rotate # put plug-in prefixes first
-
 data = YAML.load_file(File.expand_path(options.data.first))
-options.data.drop(1).each do |path|
-  tmp_data = YAML.load_file(File.expand_path(path))
-  %w[prefixes groups properties exceptions verification version min_version chapters].each do |attr|
-    if data[attr]
-      data[attr] += tmp_data[attr] if tmp_data[attr]
-    else
-      data[attr] = tmp_data[attr]
-    end
+options.data.drop(1).each do |plugin_path|
+  plugin_data = YAML.load_file(File.expand_path(plugin_path))
+  # check that all instructions are prefixed:
+  instructions = data_instructions(plugin_data)
+  raise 'Plugged in instructions must be prefixed' unless instructions.reject { |i| i['prefix'] }.empty?
+
+  plugin_data.each_key do |attr|
+    raise "Uknown data property: #{attr}" unless data.key?(attr)
+
+    data[attr] += plugin_data[attr]
   end
 end
 

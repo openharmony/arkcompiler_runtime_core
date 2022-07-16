@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H_
-#define PANDA_LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H_
+#ifndef LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H_
+#define LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H_
 
 #include "bytecode_instruction.h"
 #include "macros.h"
@@ -38,8 +38,8 @@ inline auto BytecodeInst<Mode>::ReadHelper(size_t byteoffset, size_t bytecount, 
     v >>= right_shift;
     size_t left_shift = sizeof(R) * BYTE_WIDTH - width;
 
-    // Do sign extension using arithmetic shift. It's implementation defined,
-    // so we check such behavior using static assert.
+    // Do sign extension using arithmetic shift. It's implementation defined
+    // so we check such behavior using static assert
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
     static_assert((-1 >> 1) == -1);
 
@@ -48,7 +48,6 @@ inline auto BytecodeInst<Mode>::ReadHelper(size_t byteoffset, size_t bytecount, 
 }
 
 template <const BytecodeInstMode Mode>
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_COMMENT_LOCATION)
 template <size_t offset, size_t width, bool is_signed /* = false */>
 inline auto BytecodeInst<Mode>::Read() const
 {
@@ -64,7 +63,6 @@ inline auto BytecodeInst<Mode>::Read() const
 }
 
 template <const BytecodeInstMode Mode>
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_COMMENT_LOCATION)
 template <bool is_signed /* = false */>
 inline auto BytecodeInst<Mode>::Read64(size_t offset, size_t width) const
 {
@@ -93,4 +91,4 @@ inline size_t BytecodeInst<Mode>::GetSize() const
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H_
+#endif  // LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H_

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,27 @@ namespace panda::mem {
 HybridObjectAllocator::HybridObjectAllocator(mem::MemStatsType *mem_stats, bool create_pygote_space_allocator)
     : ObjectAllocatorBase(mem_stats, GCCollectMode::GC_ALL, create_pygote_space_allocator)
 {
-    object_allocator_ = new (std::nothrow) ObjectAllocator(mem_stats);
+    // TODO(ipetrov): Where do we use HybridObjectAllocator? Maybe remove?
+    const auto &options = Runtime::GetOptions();
+    heap_space_.Initialize(options.GetInitYoungSpaceSize(), options.WasSetInitYoungSpaceSize(),
+                           options.GetYoungSpaceSize(), options.WasSetYoungSpaceSize(),
+                           MemConfig::GetInitialHeapSizeLimit(), MemConfig::GetHeapSizeLimit(),
+                           options.GetMinHeapFreePercentage(), options.GetMaxHeapFreePercentage());
+    if (create_pygote_space_allocator) {
+        ASSERT(pygote_space_allocator_ != nullptr);
+        pygote_space_allocator_->SetHeapSpace(&heap_space_);
+    }
+    object_allocator_ = new (std::nothrow) ObjectAllocator(mem_stats, &heap_space_);
     large_object_allocator_ = new (std::nothrow) LargeObjectAllocator(mem_stats);
     humongous_object_allocator_ = new (std::nothrow) HumongousObjectAllocator(mem_stats);
 }
 
 void *HybridObjectAllocator::Allocate(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread)
 {
+    void *mem = nullptr;
     size_t aligned_size = AlignUp(size, GetAlignmentInBytes(align));
-    return object_allocator_->Alloc(aligned_size, align);
+    mem = object_allocator_->Alloc(aligned_size, align);
+    return mem;
 }
 
 void *HybridObjectAllocator::AllocateInLargeAllocator(size_t size, Alignment align, BaseClass *base_cls)
@@ -50,12 +62,12 @@ void *HybridObjectAllocator::AllocateInLargeAllocator(size_t size, Alignment ali
             mem = large_object_allocator_->Alloc(size, align);
             if (UNLIKELY(mem == nullptr)) {
                 size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, LargeObjectAllocator::GetMinPoolSize());
-                auto pool = PoolManager::GetMmapMemPool()->AllocPool(pool_size, SpaceType::SPACE_TYPE_OBJECT,
-                                                                     LargeObjectAllocator::GetAllocatorType(),
-                                                                     large_object_allocator_);
-                bool added_memory_pool = large_object_allocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
-                LOG_IF(!added_memory_pool, FATAL, ALLOC)
-                    << "HybridObjectAllocator: couldn't add memory pool to large object allocator";
+                auto pool = heap_space_.TryAllocPool(pool_size, SpaceType::SPACE_TYPE_OBJECT,
+                                                     LargeObjectAllocator::GetAllocatorType(), large_object_allocator_);
+                if (pool.GetMem() == nullptr ||
+                    !large_object_allocator_->AddMemoryPool(pool.GetMem(), pool.GetSize())) {
+                    LOG(FATAL, ALLOC) << "HybridObjectAllocator: couldn't add memory pool to large object allocator";
+                }
                 mem = large_object_allocator_->Alloc(size, align);
             }
         } else {
@@ -63,12 +75,14 @@ void *HybridObjectAllocator::AllocateInLargeAllocator(size_t size, Alignment ali
             if (UNLIKELY(mem == nullptr)) {
                 size_t pool_size;
                 pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, HumongousObjectAllocator::GetMinPoolSize(size));
-                auto pool = PoolManager::GetMmapMemPool()->AllocPool(pool_size, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT,
-                                                                     HumongousObjectAllocator::GetAllocatorType(),
-                                                                     humongous_object_allocator_);
-                bool added_memory_pool = humongous_object_allocator_->AddMemoryPool(pool.GetMem(), pool_size);
-                LOG_IF(!added_memory_pool, FATAL, ALLOC)
-                    << "HybridObjectAllocator: couldn't add memory pool to humongous object allocator";
+                auto pool =
+                    heap_space_.TryAllocPool(pool_size, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT,
+                                             HumongousObjectAllocator::GetAllocatorType(), humongous_object_allocator_);
+                if (pool.GetMem() == nullptr ||
+                    !humongous_object_allocator_->AddMemoryPool(pool.GetMem(), pool.GetSize())) {
+                    LOG(FATAL, ALLOC)
+                        << "HybridObjectAllocator: couldn't add memory pool to humongous object allocator";
+                }
                 mem = humongous_object_allocator_->Alloc(size, align);
             }
         }
@@ -106,6 +120,7 @@ bool HybridObjectAllocator::IsLive(const ObjectHeader *obj)
 
 size_t HybridObjectAllocator::VerifyAllocatorStatus()
 {
+    // TODO: implement it.
     return 0;
 }
 

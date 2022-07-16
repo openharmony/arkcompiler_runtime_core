@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@
 
 namespace panda::panda_file::test {
 
-static const char G_SOURCE_FILE[] = "asm.pa";
+static const char SOURCE_FILE[] = "asm.pa";
 
 void PreparePandaFile(ItemContainer *container)
 {
@@ -45,18 +45,18 @@ void PreparePandaFile(ItemContainer *container)
 
     StringItem *method_name = container->GetOrCreateStringItem("foo");
 
-    PrimitiveTypeItem *ret_type = container->CreateItem<PrimitiveTypeItem>(Type::TypeId::VOID);
+    PrimitiveTypeItem *ret_type = container->GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
     std::vector<MethodParamItem> params;
-    params.emplace_back(container->CreateItem<PrimitiveTypeItem>(Type::TypeId::I32));
+    params.emplace_back(container->GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
     ProtoItem *proto_item = container->GetOrCreateProtoItem(ret_type, params);
     MethodItem *method_item = class_item->AddMethod(method_name, proto_item, ACC_PUBLIC | ACC_STATIC, params);
 
     std::vector<uint8_t> instructions {1, 2, 3, 4};
-    CodeItem *code_item = container->CreateItem<CodeItem>(4U, 1, instructions);
+    CodeItem *code_item = container->CreateItem<CodeItem>(4, 1, instructions);
 
     method_item->SetCode(code_item);
 
-    StringItem *source_file_item = container->GetOrCreateStringItem(G_SOURCE_FILE);
+    StringItem *source_file_item = container->GetOrCreateStringItem(SOURCE_FILE);
     StringItem *param_string_item = container->GetOrCreateStringItem("arg0");
     StringItem *local_variable_name_0 = container->GetOrCreateStringItem("local_0");
     StringItem *local_variable_name_1 = container->GetOrCreateStringItem("local_1");
@@ -72,15 +72,15 @@ void PreparePandaFile(ItemContainer *container)
 
     StringItem *method_name_bar = container->GetOrCreateStringItem("bar");
 
-    PrimitiveTypeItem *ret_type_bar = container->CreateItem<PrimitiveTypeItem>(Type::TypeId::VOID);
+    PrimitiveTypeItem *ret_type_bar = container->GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
     std::vector<MethodParamItem> params_bar;
-    params_bar.emplace_back(container->CreateItem<PrimitiveTypeItem>(Type::TypeId::I32));
+    params_bar.emplace_back(container->GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
     params_bar.emplace_back(container->GetOrCreateClassItem("RefArg"));
     ProtoItem *proto_item_bar = container->GetOrCreateProtoItem(ret_type_bar, params_bar);
     MethodItem *method_item_bar =
         class_item->AddMethod(method_name_bar, proto_item_bar, ACC_PUBLIC | ACC_STATIC, params_bar);
 
-    CodeItem *code_item_bar = container->CreateItem<CodeItem>(0, 2U, instructions);
+    CodeItem *code_item_bar = container->CreateItem<CodeItem>(0, 2, instructions);
 
     method_item_bar->SetCode(code_item_bar);
 
@@ -95,14 +95,14 @@ void PreparePandaFile(ItemContainer *container)
 
     StringItem *method_name_baz = container->GetOrCreateStringItem("baz");
 
-    PrimitiveTypeItem *ret_type_baz = container->CreateItem<PrimitiveTypeItem>(Type::TypeId::VOID);
+    PrimitiveTypeItem *ret_type_baz = container->GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
     std::vector<MethodParamItem> params_baz;
     params_baz.emplace_back(container->GetOrCreateClassItem("RefArg"));
-    params_baz.emplace_back(container->CreateItem<PrimitiveTypeItem>(Type::TypeId::U1));
+    params_baz.emplace_back(container->GetOrCreatePrimitiveTypeItem(Type::TypeId::U1));
     ProtoItem *proto_item_baz = container->GetOrCreateProtoItem(ret_type_baz, params_baz);
     MethodItem *method_item_baz = class_item->AddMethod(method_name_baz, proto_item_baz, ACC_PUBLIC, params_baz);
 
-    CodeItem *code_item_baz = container->CreateItem<CodeItem>(0, 2U, instructions);
+    CodeItem *code_item_baz = container->CreateItem<CodeItem>(0, 2, instructions);
 
     method_item_baz->SetCode(code_item_baz);
 
@@ -113,7 +113,7 @@ void PreparePandaFile(ItemContainer *container)
     DebugInfoItem *debug_info_item_baz = container->CreateItem<DebugInfoItem>(line_number_program_item_baz);
     method_item_baz->SetDebugInfo(debug_info_item_baz);
 
-    // Add debug info for the following source file:
+    // Add debug info for the following source file;
 
     //  1 # file: asm.pa
     //  2 .function foo(i32 arg0) {
@@ -145,25 +145,25 @@ void PreparePandaFile(ItemContainer *container)
     line_number_program_item->EmitAdvancePc(constant_pool, 1);
     line_number_program_item->EmitAdvanceLine(constant_pool, 1);
     line_number_program_item->EmitSpecialOpcode(0, 0);
-    line_number_program_item->EmitColumn(constant_pool, 0, 5);
+    line_number_program_item->EmitColumn(constant_pool, 0, 7);
     // Line 4
     line_number_program_item->EmitStartLocal(constant_pool, 1, local_variable_name_0, local_variable_type_i32);
     line_number_program_item->EmitSpecialOpcode(1, 1);
-    line_number_program_item->EmitColumn(constant_pool, 0, 6);
+    line_number_program_item->EmitColumn(constant_pool, 0, 8);
     // Line 5
     line_number_program_item->EmitSpecialOpcode(1, 1);
-    line_number_program_item->EmitColumn(constant_pool, 0, 7);
+    line_number_program_item->EmitColumn(constant_pool, 0, 9);
     // Line 6
-    line_number_program_item->EmitStartLocalExtended(constant_pool, 2U, local_variable_name_1, local_variable_type_i32,
+    line_number_program_item->EmitStartLocalExtended(constant_pool, 2, local_variable_name_1, local_variable_type_i32,
                                                      local_variable_sig_type_i32);
     line_number_program_item->EmitEndLocal(1);
-    line_number_program_item->EmitSpecialOpcode(1, 2U);
-    line_number_program_item->EmitColumn(constant_pool, 0, 8);
+    line_number_program_item->EmitSpecialOpcode(1, 2);
+    line_number_program_item->EmitColumn(constant_pool, 0, 10);
     // Line 8
-    line_number_program_item->EmitStartLocal(constant_pool, 3U, local_variable_name_2, local_variable_type_i32);
-    line_number_program_item->EmitAdvanceLine(constant_pool, 2U);
+    line_number_program_item->EmitStartLocal(constant_pool, 3, local_variable_name_2, local_variable_type_i32);
+    line_number_program_item->EmitAdvanceLine(constant_pool, 2);
     line_number_program_item->EmitSpecialOpcode(0, 0);
-    line_number_program_item->EmitColumn(constant_pool, 0, 9);
+    line_number_program_item->EmitColumn(constant_pool, 0, 11);
     // Line 10
     line_number_program_item->EmitEnd();
 
@@ -173,12 +173,12 @@ void PreparePandaFile(ItemContainer *container)
 
     // bar line number program
     auto *constant_pool_bar = debug_info_item_bar->GetConstantPool();
-    debug_info_item_bar->SetLineNumber(13U);
+    debug_info_item_bar->SetLineNumber(13);
     line_number_program_item_bar->EmitSetFile(constant_pool_bar, source_file_item);
     line_number_program_item_bar->EmitAdvancePc(constant_pool_bar, 1);
     line_number_program_item_bar->EmitAdvanceLine(constant_pool_bar, 1);
     line_number_program_item_bar->EmitSpecialOpcode(0, 0);
-    line_number_program_item_bar->EmitColumn(constant_pool_bar, 0, 10);
+    line_number_program_item_bar->EmitColumn(constant_pool_bar, 0, 5);
     line_number_program_item_bar->EmitEnd();
 
     debug_info_item_bar->AddParameter(param_string_item_bar1);
@@ -188,12 +188,12 @@ void PreparePandaFile(ItemContainer *container)
 
     // baz line number program
     auto *constant_pool_baz = debug_info_item_baz->GetConstantPool();
-    debug_info_item_baz->SetLineNumber(15U);
+    debug_info_item_baz->SetLineNumber(15);
     line_number_program_item_baz->EmitSetFile(constant_pool_baz, source_file_item);
     line_number_program_item_baz->EmitAdvancePc(constant_pool_baz, 1);
     line_number_program_item_baz->EmitAdvanceLine(constant_pool_baz, 1);
     line_number_program_item_baz->EmitSpecialOpcode(0, 0);
-    line_number_program_item_baz->EmitColumn(constant_pool_baz, 0, 11);
+    line_number_program_item_baz->EmitColumn(constant_pool_baz, 0, 6);
     line_number_program_item_baz->EmitEnd();
 
     debug_info_item_baz->AddParameter(param_string_item_baz1);
@@ -209,7 +209,7 @@ struct SourcePairLocation {
 
     bool operator==(const SourcePairLocation &other) const
     {
-        return (path == other.path) && (line == other.line);
+        return path == other.path && line == other.line;
     }
 
     bool IsValid() const
@@ -306,7 +306,7 @@ static std::unique_ptr<const File> GetPandaFile(std::vector<uint8_t> &data)
 
 class ExtractorTest : public testing::Test {
 public:
-    static void SetUpTestCase()
+    static void SetUpTestSuite()
     {
         ItemContainer container;
         PreparePandaFile(&container);
@@ -314,30 +314,30 @@ public:
         ASSERT_TRUE(container.Write(&writer));
 
         file_data = writer.GetData();
-        panda_file = GetPandaFile(file_data);
+        u_file = GetPandaFile(file_data);
     }
 
-    static std::unique_ptr<const panda_file::File> panda_file;
+    static std::unique_ptr<const panda_file::File> u_file;
     static std::vector<uint8_t> file_data;
 };
 
-std::unique_ptr<const panda_file::File> ExtractorTest::panda_file {nullptr};
+std::unique_ptr<const panda_file::File> ExtractorTest::u_file {nullptr};
 std::vector<uint8_t> ExtractorTest::file_data;
 
 TEST_F(ExtractorTest, DebugInfoTest)
 {
-    const panda_file::File *pf = panda_file.get();
+    const panda_file::File *pf = u_file.get();
     ASSERT_TRUE(pf != nullptr);
     DebugInfoExtractor extractor(pf);
 
-    auto breakpoint1_address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {G_SOURCE_FILE, 1});
+    auto breakpoint1_address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 1});
     ASSERT_FALSE(breakpoint1_address.first.IsValid());
-    auto [method_id, bytecode_offset] = GetBreakpointAddressWrapper(extractor, SourcePairLocation {G_SOURCE_FILE, 6});
+    auto [method_id, bytecode_offset] = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 6});
     ASSERT_TRUE(method_id.IsValid());
     ASSERT_EQ(bytecode_offset, 3U);
 
     auto source_location = GetSourcePairLocationWrapper(extractor, method_id, 2);
-    ASSERT_EQ(source_location.path, G_SOURCE_FILE);
+    ASSERT_EQ(source_location.path, SOURCE_FILE);
     ASSERT_EQ(source_location.line, 5U);
 
     auto vars = GetLocalVariableInfoWrapper(extractor, method_id, 4);
@@ -350,13 +350,13 @@ TEST_F(ExtractorTest, DebugInfoTest)
 
 TEST_F(ExtractorTest, DebugInfoTestStaticWithRefArg)
 {
-    const panda_file::File *pf = panda_file.get();
+    const panda_file::File *pf = u_file.get();
     ASSERT_TRUE(pf != nullptr);
     DebugInfoExtractor extractor(pf);
 
-    auto breakpoint1_address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {G_SOURCE_FILE, 1});
+    auto breakpoint1_address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 1});
     ASSERT_FALSE(breakpoint1_address.first.IsValid());
-    auto method_id = GetBreakpointAddressWrapper(extractor, SourcePairLocation {G_SOURCE_FILE, 14}).first;
+    auto method_id = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 14}).first;
     ASSERT_TRUE(method_id.IsValid());
 
     auto vars = GetLocalVariableInfoWrapper(extractor, method_id, 14);
@@ -365,13 +365,13 @@ TEST_F(ExtractorTest, DebugInfoTestStaticWithRefArg)
 
 TEST_F(ExtractorTest, DebugInfoTestNonStaticWithRefArg)
 {
-    const panda_file::File *pf = panda_file.get();
+    const panda_file::File *pf = u_file.get();
     ASSERT_TRUE(pf != nullptr);
     DebugInfoExtractor extractor(pf);
 
-    auto breakpoint1_address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {G_SOURCE_FILE, 1});
+    auto breakpoint1_address = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 1});
     ASSERT_FALSE(breakpoint1_address.first.IsValid());
-    auto method_id = GetBreakpointAddressWrapper(extractor, SourcePairLocation {G_SOURCE_FILE, 16}).first;
+    auto method_id = GetBreakpointAddressWrapper(extractor, SourcePairLocation {SOURCE_FILE, 16}).first;
     ASSERT_TRUE(method_id.IsValid());
 
     auto vars = GetLocalVariableInfoWrapper(extractor, method_id, 16);
@@ -380,7 +380,7 @@ TEST_F(ExtractorTest, DebugInfoTestNonStaticWithRefArg)
 
 TEST_F(ExtractorTest, DebugInfoTestColumnNumber)
 {
-    const panda_file::File *pf = panda_file.get();
+    const panda_file::File *pf = u_file.get();
     ASSERT_TRUE(pf != nullptr);
     DebugInfoExtractor extractor(pf);
 

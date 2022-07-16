@@ -37,10 +37,11 @@ tests:
               movi v0, %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `xori` with zero and various values.
         cases:
           - values: ["0", "0x0"]
@@ -52,6 +53,8 @@ tests:
           - values: ["-0x80000000", "0x80000000"]
           - values: ["0xFFFFFFFF", "0xFFFFFFFF"]
           - values: ["-0xFFFFFFFF", "0x1"]
+
+
       - file-name: op_imm_32_pone
         isa:
           instructions:
@@ -66,10 +69,11 @@ tests:
               movi v0, %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `xori` with +1 and various values.
         cases:
           - values: ["0", "0x1"]
@@ -81,6 +85,8 @@ tests:
           - values: ["-0x80000000", "0x80000001"]
           - values: ["0xFFFFFFFF", "0xFFFFFFFE"]
           - values: ["-0xFFFFFFFF", "0x0"]
+
+
       - file-name: op_imm_32_none
         isa:
           instructions:
@@ -95,10 +101,11 @@ tests:
               movi v0, %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `xori` with -1 and various values.
         cases:
           - values: ["0", "0xFFFFFFFF"]
@@ -110,6 +117,8 @@ tests:
           - values: ["-0x80000000", "0x7FFFFFFF"]
           - values: ["0xFFFFFFFF", "0x0"]
           - values: ["-0xFFFFFFFF", "0xFFFFFFFE"]
+
+
       - file-name: op_imm_32_pmax
         isa:
           instructions:
@@ -124,10 +133,11 @@ tests:
               movi v0, %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `xori` with +max and various values.
         cases:
           - values: ["0", "0x7FFFFFFF"]
@@ -139,6 +149,8 @@ tests:
           - values: ["-0x80000000", "0xFFFFFFFF"]
           - values: ["0xFFFFFFFF", "0x80000000"]
           - values: ["-0xFFFFFFFF", "0x7FFFFFFE"]
+
+
       - file-name: op_imm_32_nmax
         isa:
           instructions:
@@ -153,10 +165,11 @@ tests:
               movi v0, %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `xori` with -max and various values.
         cases:
           - values: ["0", "0x80000000"]
@@ -168,6 +181,8 @@ tests:
           - values: ["-0x80000000", "0x0"]
           - values: ["0xFFFFFFFF", "0x7FFFFFFF"]
           - values: ["-0xFFFFFFFF", "0x80000001"]
+
+
       - file-name: vals
         isa:
           instructions:
@@ -182,10 +197,11 @@ tests:
               movi v0, %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `xori` with various values.
         tags: ['tsan']
         cases:
@@ -199,85 +215,56 @@ tests:
           - values: ["0xE361D3E8", "0xDA6BA9E9", "0x390A7A01"]
           - values: ["0xE4F1D3AF", "0x29DA35D8", "0xCD2BE677"]
           - values: ["0xFBFF6F51", "0xBE511BDB", "0x45AE748A"]
+
+
       - file-name: type
-        bugid: ["964", "966"]
-        tags: ["verifier"]
         isa:
-          instructions:
-            - sig: xori imm:i32
-              acc: inout:i32
-              prefix: bit
-              format: [pref_op_imm_32]
           verification:
             - acc_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
+        header-template: []
         code-template: |
           #
-              %s
-              xori 1
-              ldai 0
-        check-type: no-check
-        description: Check `xori` with incorrect accumulator type.
-        cases:
-          - values: [fldai.64 0.0]
-          - values: [fldai.64 -0.0]
-          - values: [fldai.64 1.0]
-          - values: [fldai.64 -1.0]
-          - values: [fldai.64 0x7FF8000000000000]
-          - values: [fldai.64 0xFFFFFFFFFFFFFFFF]
-          - values: [fldai.64 0x7FF0000000000000]
-          - values: [fldai.64 0xFFF0000000000000]
-          - values: [fldai.64 0xFFEFFFFFFFFFFFFF]
-          - values: [fldai.64 0x7FEFFFFFFFFFFFFF]
-          - values: [fldai.64 0x0000000000000001]
-          - values: [fldai.64 0x8000000000000001]
-          - values: [fldai.64 3.14159265358979323846]
-          - values: [lda.str ""]
-          - values: [lda.str "some string"]
-          - values: [lda.null]
-          - values: [ldai.64 0]
-          - values: [ldai.64 1]
-          - values: [ldai.64 -1]
-          - values: [ldai.64 0x0000000100000000]
-          - values: [ldai.64 -0x0000000100000000]
-          - values: [ldai.64 0x0000000080000000]
-          - values: [ldai.64 -0x0000000080000000]
-          - values: [ldai.64 0x1000000000000000]
-          - values: [ldai.64 0x8000000000000000]
-          - values: [ldai.64 0xF000000000000000]
-          - values: [ldai.64 0xFFFFFFFF00000000]
-          - values: [ldai.64 0xFFFFFFFFFFFFFFFF]
-          - values: [ldai.64 -0x1000000000000000]
-          - values: [ldai.64 -0x8000000000000000]
-          - values: [ldai.64 -0xF000000000000000]
-          - values: [ldai.64 -0xFFFFFFFF00000000]
-          - values: [ldai.64 -0xFFFFFFFFFFFFFFFF]
-      - file-name: type_obj
-        bugid: ["964", "966"]
-        tags: ["verifier"]
-        isa:
-          instructions:
-            - sig: xori imm:i32
-              acc: inout:i32
-              prefix: bit
-              format: [pref_op_imm_32]
-          verification:
-            - acc_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        description: Check `xori` with incorrect accumulator type.
-        code-template: |
-          #
-          .record Object {}
+          .record panda.Object <external>
           .function i32 main() {
               %s
-              xori 1
-              ldai 0
-              return
-        check-type: none
-        header-template: []
+              xori 0
+        check-type: exit-positive
+        description: Check 'xori' with incorrect acc type.
         cases:
-          - values: [lda.type Object]
+          - values: [ldai.64 0]
+          - values: [fldai 0]
+            bugid: ['7315']
+          - values: [fldai.64 0]
+          - values: [lda.null]
+          - values: [lda.type panda.Object]
+          - values: ['lda.type i32[]']
+          - values: [lda.str ""]
           - values:
             - |
-              newobj v0, Object
-              lda.obj v0
+              #
+                  newobj v0, panda.Object
+                  lda.obj v0
+          - values:
+            - |
+              #
+                  movi v0, 10
+                  newarr v0, v0, i32[]
+                  lda.obj v0
+
+
+      - file-name: uninitialized_acc
+        isa:
+          instructions:
+            - sig: xori imm:i32
+              acc: inout:i32
+              prefix: bit
+              format: [pref_op_imm_32]
+        description: Check 'xori' with uninitialized accumulator.
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
+        code-template: |
+            #
+                xori 0
+        check-type: exit-positive

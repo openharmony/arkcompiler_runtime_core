@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,6 +118,7 @@ public:
     std::optional<std::string> GetAttributeValue(const std::string &attribute) const
     {
         auto values = GetAttributeValues(attribute);
+
         if (!values.empty()) {
             return values.front();
         }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ int RecvMessage(int fd, Message &message)
     std::vector<uint8_t> data(size);
     if (size != 0) {
         if (RecvTimeout(fd, data.data(), data.size(), DEFAULT_TIMEOUT) <= 0) {
-            LOG(ERROR, DPROF) << "Cannot get message data";
+            LOG(ERROR, DPROF) << "Canot get message data";
             return -1;
         }
     }

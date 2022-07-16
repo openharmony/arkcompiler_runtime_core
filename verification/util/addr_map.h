@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_ADDR_MAP_H_
-#define PANDA_VERIFICATION_UTIL_ADDR_MAP_H_
+#ifndef _PANDA_VERIFIER_ADDR_MAP_HPP_
+#define _PANDA_VERIFIER_ADDR_MAP_HPP_
 
 #include "macros.h"
 #include "range.h"
@@ -92,6 +92,7 @@ public:
 
     bool HasCommonMarks(const AddrMap &rhs) const
     {
+        // todo: work with different addr spaces
         ASSERT(AddrRange_ == rhs.AddrRange_);
         return BitVector::lazy_and_then_indices_of<true>(BitMap_, rhs.BitMap_)().IsValid();
     }
@@ -99,6 +100,7 @@ public:
     template <typename PtrType>
     bool GetFirstCommonMark(const AddrMap &rhs, PtrType *ptr) const
     {
+        // todo: work with different addr spaces
         ASSERT(AddrRange_ == rhs.AddrRange_);
         Index<size_t> idx = BitVector::lazy_and_then_indices_of<true>(BitMap_, rhs.BitMap_)();
         if (idx.IsValid()) {
@@ -109,7 +111,8 @@ public:
         return false;
     }
 
-    // and refactor it to work with words and ctlz like intrinsics
+    // TODO(vdyadov): optimize this function, push blocks enumeration to bit vector level
+    //                and refactor it to work with words and ctlz like intrinsics
     template <typename PtrType, typename Callback>
     void EnumerateMarkedBlocks(Callback cb) const
     {
@@ -213,4 +216,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_UTIL_ADDR_MAP_H_
+#endif  // !_PANDA_VERIFIER_ADDR_MAP_HPP_

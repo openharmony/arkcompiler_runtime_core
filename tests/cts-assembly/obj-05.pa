@@ -34,7 +34,7 @@
     return.void
 }
 
-.function u1 main() {
+.function i32 main() {
     initobj.short Asm.Construct
     sta.obj v0
     ldai 0

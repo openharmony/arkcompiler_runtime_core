@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ASSEMBLY_RECORD_H_
-#define PANDA_ASSEMBLER_ASSEMBLY_RECORD_H_
+#ifndef _PANDA_ASSEMBLER_RECORD_HPP
+#define _PANDA_ASSEMBLER_RECORD_HPP
 
 #include <memory>
 #include <optional>
@@ -29,8 +29,8 @@ namespace panda::pandasm {
 
 struct Record {
     std::string name = "";
-    bool conflict = false; /* Name conflicts with panda primitive types. Need special handle. */
-    extensions::Language language;
+    bool conflict = false; /* Name is conflict with panda primitive types. Need special handle. */
+    panda::panda_file::SourceLang language;
     std::unique_ptr<RecordMetadata> metadata;
     std::vector<Field> field_list; /* class fields list */
     size_t params_num = 0;
@@ -39,7 +39,8 @@ struct Record {
     std::string source_file; /* The file in which the record is defined or empty */
     std::optional<FileLocation> file_location;
 
-    Record(std::string s, extensions::Language lang, size_t b_l, size_t b_r, std::string f_c, bool d, size_t l_n)
+    Record(std::string s, panda::panda_file::SourceLang lang, size_t b_l, size_t b_r, std::string f_c, bool d,
+           size_t l_n)
         : name(std::move(s)),
           language(lang),
           metadata(extensions::MetadataExtension::CreateRecordMetadata(lang)),
@@ -47,7 +48,7 @@ struct Record {
     {
     }
 
-    Record(std::string s, extensions::Language lang)
+    Record(std::string s, panda::panda_file::SourceLang lang)
         : name(std::move(s)), language(lang), metadata(extensions::MetadataExtension::CreateRecordMetadata(lang))
     {
     }
@@ -60,4 +61,4 @@ struct Record {
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_ASSEMBLY_RECORD_H_
+#endif  // !_PANDA_ASSEMBLER_RECORD_HPP

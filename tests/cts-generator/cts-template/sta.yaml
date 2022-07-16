@@ -13,123 +13,74 @@
 
 definitions: []
 tests:
-  - file-name: "sta"
+  - file-name: 'sta'
     isa:
-        title: Store accumulator
-        description: Moves accumulator content into a register.
-        exceptions:
-          - x_none
+      title: Store accumulator
+      description: Moves accumulator content into a register.
+      exceptions:
+        - x_none
     commands:
-      - file-name: "op_vd_8_pos"
+      - file-name: 'op_vd_8'
+        description: Check sta moves accumulator content into a register.
         isa:
           instructions:
-            - sig: sta v:out:i32
-              acc: in:i32
+            - sig: sta v:out:b32
+              acc: in:b32
               format: [op_v_8]
         code-template: |
           #
-              ldai %s
-              sta v0
-              jne v0, set_failure
+          %s
               ldai 0
-              jmp fall_through
-          set_failure:
+              return
+          err:
               ldai 1
-          fall_through:
-        description: Check sta moves accumulator content into a register (positive values).
+              return
+        check-type: none
         tags: ['tsan']
         cases:
           - values:
-              - 0
-          - values:
-              - 1
-          - values:
-              - "0xF"
-          - values:
-              - "0xFF"
-          - values:
-              - "0xFFF"
-          - values:
-              - "0xFFFF"
-          - values:
-              - "0xFFFFF"
-          - values:
-              - "0xFFFFFF"
-          - values:
-              - "0xFFFFFFF"
-          - values:
-              - "0xFFFFFFFF"
-          - values:
-              - "0x7F"
-          - values:
-              - "0x7FF"
-          - values:
-              - "0x7FFF"
-          - values:
-              - "0x7FFFF"
-          - values:
-              - "0x7FFFFF"
-          - values:
-              - "0x7FFFFFF"
-          - values:
-              - "0x7FFFFFFF"
+              - "#{[
+                '0',
+                '1',
+                '0xF',
+                '0xFF',
+                '0xFFF',
+                '0xFFFF',
+                '0xFFFFF',
+                '0xFFFFFF',
+                '0xFFFFFFF',
+                '0xFFFFFFFF',
+                '0x7F',
+                '0x7FF',
+                '0x7FFF',
+                '0x7FFFF',
+                '0x7FFFFF',
+                '0x7FFFFFF',
+                '0x7FFFFFFF',
+                '-1',
+                '-0xF',
+                '-0xFF',
+                '-0xFFF',
+                '-0xFFFF',
+                '-0xFFFFF',
+                '-0xFFFFFF',
+                '-0xFFFFFFF',
+                '-0xFFFFFFFF',
+                '-0x7F',
+                '-0x7FF',
+                '-0x7FFF',
+                '-0x7FFFF',
+                '-0x7FFFFF',
+                '-0x7FFFFFF',
+                '-0x7FFFFFFF'
+                ].map do |s| \"    ldai #{s}\\n    sta v0\\n    jne v0, err\\n\" end .join}"
 
-      - file-name: "op_vd_8_neg"
+      - file-name: 'reg'
+        description: Check sta with various register numbers.
         isa:
           instructions:
-            - sig: sta v:out:i32
-              acc: in:i32
-              format: [op_v_8]
-        code-template: |
-          #
-              ldai %s
-              sta v0
-              jne v0, set_failure
-              ldai 0
-              jmp fall_through
-          set_failure:
-              ldai 1
-          fall_through:
-        description: Check sta moves accumulator content into a register (negative values).
-        cases:
-          - values:
-              - "-1"
-          - values:
-              - "-0xF"
-          - values:
-              - "-0xFF"
-          - values:
-              - "-0xFFF"
-          - values:
-              - "-0xFFFF"
-          - values:
-              - "-0xFFFFF"
-          - values:
-              - "-0xFFFFFF"
-          - values:
-              - "-0xFFFFFFF"
-          - values:
-              - "-0xFFFFFFFF"
-          - values:
-              - "-0x7F"
-          - values:
-              - "-0x7FF"
-          - values:
-              - "-0x7FFF"
-          - values:
-              - "-0x7FFFF"
-          - values:
-              - "-0x7FFFFF"
-          - values:
-              - "-0x7FFFFFF"
-          - values:
-              - "-0x7FFFFFFF"
-
-      - file-name: "reg"
-        isa:
-          instructions:
-            - sig: sta v:out:i32
-              acc: in:i32
+            - sig: sta v:out:b32
+              acc: in:b32
               format: [op_v_8]
         code-template: |
           #
@@ -137,11 +88,11 @@ tests:
               sta %s
               jne %s, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
-        description: Check sta with various register numbers.
+              return
+        check-type: none
         cases:
           - values: [v0, v0]
           - values: [v1, v1]
@@ -154,27 +105,21 @@ tests:
           - values: [v255, v255]
           - values: [v256, v255]
             runner-options: [compile-failure]
-            case-check-type: no-check
             description: Check sta with incorrect register numbers.
           - values: [a0, v255]
             runner-options: [compile-failure]
-            case-check-type: no-check
             description: Check sta with incorrect register numbers.
           - values: [0, v255]
             runner-options: [compile-failure]
-            case-check-type: no-check
             description: Check sta with incorrect register numbers.
 
       - file-name: 'type'
+        description: Check 'sta' with incorrect accumulator type. Register type is not checked.
         isa:
-          instructions:
-            - sig: sta v:out:i32
-              acc: in:i32
-              format: [op_v_8]
           verification:
             - acc_type
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -189,7 +134,6 @@ tests:
               %s
               sta v1
         check-type: exit-positive
-        description: Check 'sta' with incorrect accumulator type. Register type is not checked.
         template-cases:
           - values:
               - ldai.64 0
@@ -256,20 +200,20 @@ tests:
               - mov.null v1
 
       - file-name: uninitialized_regs
+        description: Check 'sta' with uninitialized accumulator. Destination register is not checked.
         isa:
           instructions:
-            - sig: sta v:out:i32
-              acc: in:i32
+            - sig: sta v:out:b32
+              acc: in:b32
               format: [op_v_8]
-        description: Check 'sta' with uninitialized accumulator. Destination register is not checked.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
-            #
-            .function i32 main() {
-                %s
-                sta %s
+          #
+          .function i32 main() {
+              %s
+              sta %s
         check-type: exit-positive
         cases:
           - values:
@@ -297,24 +241,24 @@ tests:
               - 'mov.null v255'
               - v255
 
-      - file-name: "err"
+      - file-name: 'err'
+        description: Check sta.64 with incorrect value.
         isa:
           instructions:
-            - sig: sta v:out:i32
-              acc: in:i32
+            - sig: sta v:out:b32
+              acc: in:b32
               format: [op_v_8]
-        code-template: |
-            # Check sta with wrong arguments
-                %s
-        check-type: none
         runner-options: [compile-failure]
-        description: Check sta.64 with incorrect value.
+        code-template: |
+          # Check sta with wrong arguments
+              %s
+        check-type: exit-positive
         cases:
-            - values:
-                - sta 1
-            - values:
-                - sta 1.1
-            - values:
-                - sta a0
-            - values:
-                - sta ""
+          - values:
+              - sta 1
+          - values:
+              - sta 1.1
+          - values:
+              - sta a0
+          - values:
+              - sta ""

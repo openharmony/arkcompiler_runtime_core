@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,34 @@ public:
         Runtime::Destroy();
     }
 
+    void RemovePools(HybridObjectAllocator *allocator)
+    {
+        auto large_allocator = allocator->GetLargeObjectAllocator();
+        large_allocator->VisitAndRemoveAllPools(
+            [](void *mem, size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
+
+        auto humongous_allocator = allocator->GetHumongousObjectAllocator();
+        humongous_allocator->VisitAndRemoveAllPools(
+            [](void *mem, size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
+    }
+
+    void Free(HybridObjectAllocator *allocator, void *mem)
+    {
+        auto large_allocator = allocator->GetLargeObjectAllocator();
+        if (large_allocator->AllocatedByFreeListAllocator(mem)) {
+            large_allocator->Free(mem);
+            return;
+        }
+
+        auto humongous_allocator = allocator->GetHumongousObjectAllocator();
+        if (humongous_allocator->AllocatedByHumongousObjAllocator(mem)) {
+            humongous_allocator->Free(mem);
+            return;
+        }
+
+        UNREACHABLE();
+    }
+
     bool AllocatedByLargeObjAllocator(FreeListAllocator<ObjectAllocConfig> *allocator, void *mem)
     {
         return allocator->AllocatedByFreeListAllocator(mem);
@@ -54,7 +82,7 @@ public:
     }
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
     RuntimeOptions options_;
 };
 
@@ -66,10 +94,11 @@ TEST_F(HybridObjectAllocatorTest, AllocateInLargeAllocator)
     ASSERT_NE(class_linker, nullptr);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
 
-    auto allocate_helper = [&ctx](HybridObjectAllocator &alloc, ClassRoot class_root, size_t size) -> void * {
+    auto allocate_helper = [&ctx](HybridObjectAllocator &hybrid_object_allocator, ClassRoot class_root,
+                                  size_t size) -> void * {
         Class *klass = nullptr;
         klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(class_root);
-        return alloc.AllocateInLargeAllocator(size, DEFAULT_ALIGNMENT, klass);
+        return hybrid_object_allocator.AllocateInLargeAllocator(size, DEFAULT_ALIGNMENT, klass);
     };
 
     void *mem = nullptr;
@@ -79,20 +108,27 @@ TEST_F(HybridObjectAllocatorTest, AllocateInLargeAllocator)
     mem = allocate_helper(allocator, ClassRoot::ARRAY_I8, HybridObjectAllocator::GetLargeThreshold());
     ASSERT_NE(mem, nullptr);
     ASSERT_TRUE(AllocatedByLargeObjAllocator(allocator.GetLargeObjectAllocator(), mem));
+    Free(&allocator, mem);
 
     size_t size = HybridObjectAllocator::LargeObjectAllocator::GetMaxSize() + 1;
     mem = allocate_helper(allocator, ClassRoot::ARRAY_I8, size);
     ASSERT_NE(mem, nullptr);
     ASSERT_TRUE(AllocatedByHumongousObjAllocator(allocator.GetHumongousObjectAllocator(), mem));
+    Free(&allocator, mem);
 
     mem = allocate_helper(allocator, ClassRoot::STRING, HybridObjectAllocator::GetLargeThreshold());
     ASSERT_NE(mem, nullptr);
     ASSERT_TRUE(AllocatedByLargeObjAllocator(allocator.GetLargeObjectAllocator(), mem));
+    Free(&allocator, mem);
 
     size = HybridObjectAllocator::LargeObjectAllocator::GetMaxSize() + 1;
     mem = allocate_helper(allocator, ClassRoot::STRING, size);
     ASSERT_NE(mem, nullptr);
     ASSERT_TRUE(AllocatedByHumongousObjAllocator(allocator.GetHumongousObjectAllocator(), mem));
+    Free(&allocator, mem);
+
+    RemovePools(&allocator);
+
     delete mem_stats;
 }
 
@@ -100,8 +136,10 @@ TEST_F(HybridObjectAllocatorTest, AllocateInNonLargeAllocator)
 {
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
     HybridObjectAllocator allocator(mem_stats, false);
+
     void *mem = allocator.Allocate(HybridObjectAllocator::GetLargeThreshold(), DEFAULT_ALIGNMENT, nullptr);
     ASSERT_NE(mem, nullptr);
+
     delete mem_stats;
 }
 

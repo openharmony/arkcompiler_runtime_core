@@ -18,9 +18,13 @@ def array_type?(type)
 end
 
 def get_object_type(type)
-  return 'panda::coretypes::Array *' if array_type?(type)
+  if array_type?(type)
+    type = "Array"
+  end
   t = Runtime::coretypes.find { |t| t.managed_class == type }
   return '%s *' % t.mirror_class if t
+  d = Runtime::coretypes.find { |d| d.managed_class == "Default" }
+  return '%s *' % d.mirror_class if d
   'panda::ObjectHeader *'
 end
 
@@ -38,8 +42,8 @@ def get_type(type)
     'u64' => ['uint64_t'],
     'f32' => ['float'],
     'f64' => ['double'],
-    'any' => ['int64_t', 'int64_t'],
-    'acc' => ['int64_t', 'int64_t'],
+    'any' => ['uint64_t'],
+    'acc' => ['uint64_t'],
     'string_id' => ['uint32_t'],
     'method_id' => ['uint32_t'],
   }
@@ -60,7 +64,7 @@ def get_ret_type(type)
     'u64' => 'uint64_t',
     'f32' => 'float',
     'f64' => 'double',
-    'any' => 'DecodedTaggedValue',
+    'any' => 'uint64_t',
     'acc' => 'DecodedTaggedValue',
     'string_id' => 'uint32_t',
     'method_id' => 'uint32_t',
@@ -88,8 +92,13 @@ class Intrinsic < SimpleDelegator
   end
 
   def wrapper_impl
+    return "" unless has_impl?
     return impl + 'AbiWrapper' if need_abi_wrapper?
     impl
+  end
+
+  def has_impl?
+    respond_to?(:impl)
   end
 end
 

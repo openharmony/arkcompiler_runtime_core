@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_GLOBALS_H_
-#define PANDA_LIBPANDABASE_GLOBALS_H_
+#ifndef PANDA_GLOBALS_H
+#define PANDA_GLOBALS_H
 
 #include <cstdint>
 
@@ -28,6 +28,9 @@ static constexpr unsigned BITS_PER_INTPTR = sizeof(intptr_t) * BITS_PER_BYTE;
 
 static constexpr unsigned BITS_PER_BYTE_LOG2 = 3;
 
+static constexpr uint32_t PERCENT_100_U32 = 100U;
+static constexpr double PERCENT_100_D = 100.0;
+
 #ifndef NDEBUG
 static constexpr bool DEBUG_BUILD = true;
 #else
@@ -36,4 +39,4 @@ static constexpr bool DEBUG_BUILD = false;
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_GLOBALS_H_
+#endif  // PANDA_GLOBALS_H

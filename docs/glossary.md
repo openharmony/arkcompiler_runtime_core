@@ -39,43 +39,43 @@ the terms used mean.
 
 ## Memory management terms
 
-* **Allocator** is a part of the system servicing allocation and deallocation requests.
-* **Card** is a division of memory with some fixed size. A card is usually smaller than a page in size.
-* **Card table** is used for marking cards. In general, it has one bit or byte (a byte used to
+* **Allocator** is a part of the system that servicing allocation and deallocation requests.
+* **Card** is a division of memory with some fixed size. Card size usually smaller than a page.
+* **Card table** used for marking cards. In general, it has one bit or byte (a byte used to
   improve performance of GC barrier) for one card.
     It can be used by both generational and concurrent collectors.
-    It can be used for tracking references from the tenured generation to the young generation and
-    for tracking modified references during the concurrent phase of GC.
+    It can be used for tracking references from tenured generation to the young generation and
+    for tracking modified references during concurrent phase of GC.
 * **Compacting GC** is a GC which compacts live objects to reduce fragmentation.
 * **Conservative GC** or non-precise GC works with ambiguous references,
   i.e. it treats anything inside object boundaries like a reference. Opposite term: **Precise GC**.
 * **Full GC** is cleaning the entire Heap.
 * **Garbage collection** is also known as automatic memory management,
-  which means automatic recycling of dynamically allocated memory.
-* **Garbage collector** performs garbage collection. The garbage collector recycles memory
+  is the automatic recycling of dynamically allocated memory.
+* **Garbage collector** performs garbage collection. Garbage collector recycles memory
   that it can prove will never be used again.
 * **GC** stands for Garbage collector or sometimes for Garbage collection.
-* **Minor GC** in general is garbage collection performed over the young generation space
-  (which includes survivor Eden and Survivor spaces).
-* **Major GC** in general is garbage collection performed over the tenured or old generation space.
-  Sometimes it is triggered by Minor GC, so it is impossible to separate them (see **Full GC**).
+* **Minor GC** in general it is garbage collection worked over Young generation space
+  (it includes survivor Eden and Survivor spaces).
+* **Major GC** in general it is garbage collection worked over Tenured/Old generation space.
+  Sometimes it is triggered by Minor GC, so it is impossible to separate them(see Full GC).
 * **Safepoint** is a range of execution where the state of the executing thread is well described.
     Safepoint is used as a point at which we can safely stop the thread, and at this point, all
     references on the stack are mapped (i.e., it is known when we have an object on the stack or not).
     Mutator is at a known point in its interaction with the heap.
-    It means that all objects which are currently in use are known and we know how to get a value
+    It means that all objects which are currently in use are known and we know how to get value
     for each of their fields.
-* **Precise GC** deals only with exact/sure references, i.e. it knows the object layout and can
+* **Precise GC** deals only with exact/sure references, i.e. it knows object layout and can
   extract references to the objects. Opposite term: **Conservative GC**.
 * **Semi-space compaction** is a compaction algorithm when memory is split to the two equal spaces
   (one is empty and one used for allocation) and we just copy objects from one space to another
-  using the bump pointer allocator.
+  using bump pointer allocator.
 * **STW** stands for **stop the world**, used in context of stop the world pauses forced by GC -
-  GC force to stop execution of code (interpreted, AOTed or JITed) to make exclusively some
+  GC force to stop execution of code (interpreted,AOTed or JITed) to make exclusively some
   operations.
 * **TLAB** stands for **Thread Local Allocation Buffer** - buffer used exclusively for allocations
   in the thread (no lock required).
-* **White object** is an object non visited by GC (at the end of GC white objects will be reclaimed).
-* **Gray object** is reachable/alive object, but still should be scanned by GC (to process all fields with reference type).
-* **Black object** is reachable/alive object and scanned by GC.
-* **Throughput** is % of time not spent in GC over a long period of time (sometimes `GC throughput` is used as % time spent in GC over a long period of time).
+* **white object** is an object non visited by GC(at the end of GC white objects will be reclaimed) 
+* **gray object** is reachable/alive object, but still should be scanned by GC (to process all fields with reference type)
+* **black object** is reachable/alive object and scanned by GC
+* **throughput** is % of time not spent in GC over a long period of time(sometimes `GC throughput` uses as % time spent in GC over a long period of time)

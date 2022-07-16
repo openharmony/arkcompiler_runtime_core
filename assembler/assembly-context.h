@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ASSEMBLY_CONTEXT_H_
-#define PANDA_ASSEMBLER_ASSEMBLY_CONTEXT_H_
+#ifndef _PANDA_ASSEMBLER_CONTEXT_HPP
+#define _PANDA_ASSEMBLER_CONTEXT_HPP
 
 #include <string>
 #include <string_view>
@@ -31,7 +31,7 @@ namespace panda::pandasm {
 /*
  * Used to move around tokens.
  * *context :
- * returns current value of a token
+ * Returns current value of a token
  * ++context :
  * sets the next token value
  * returns current value of a token
@@ -75,4 +75,4 @@ struct Context {
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_ASSEMBLY_CONTEXT_H_
+#endif  // !_PANDA_ASSEMBLER_CONTEXT_HPP

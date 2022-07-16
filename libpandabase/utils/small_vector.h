@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_SMALL_VECTOR_H_
-#define PANDA_LIBPANDABASE_UTILS_SMALL_VECTOR_H_
+#ifndef PANDA_SMALL_VECTOR_H
+#define PANDA_SMALL_VECTOR_H
 
 #include "utils/arch.h"
 #include <algorithm>
@@ -44,15 +44,30 @@ public:
     }
 };
 
+template <typename Allocator, typename T, bool use_allocator>
+class AllocatorConfig {
+public:
+    using Adapter = typename Allocator::template AdapterType<T>;
+};
+
+template <typename Allocator, typename T>
+class AllocatorConfig<Allocator, T, false> {
+public:
+    using Adapter = Allocator;
+};
+
 /**
  * SmallVector stores `N` elements statically inside its static buffer. Static buffer shares memory with a std::vector
- * that will be created once the number of elements exceeds size of the static buffer - `N`.
+ * that will be created once number of elements exceed size of the static buffer - `N`.
  *
  * @tparam T Type of elements to store
  * @tparam N Number of elements to be stored statically
  * @tparam Allocator Allocator that will be used to allocate memory for the dynamic storage
+ * @tparam use_allocator indicates type of Allocator:
+ * false - Allocator is adapter(e.g.AllocatorAdapter) for memory allocate/deallocate/construct/destry...
+ * true - Allocator is allocator(e.g.StdAllocatorStub) that implements Adapter() returning a adapter instance
  */
-template <typename T, size_t N, typename Allocator = StdAllocatorStub>
+template <typename T, size_t N, typename Allocator = std::allocator<T>, bool use_allocator = false>
 class SmallVector {
     // Least bit of the pointer should not be used in a memory addressing, because we pack `allocated` flag there
     static_assert(alignof(Allocator *) > 1);
@@ -63,7 +78,8 @@ class SmallVector {
         uint32_t size {0};
         std::array<T, N> data;
     };
-    using VectorType = std::vector<T, typename Allocator::template AdapterType<T>>;
+
+    using VectorType = std::vector<T, typename AllocatorConfig<Allocator, T, use_allocator>::Adapter>;
 
 public:
     using value_type = typename VectorType::value_type;
@@ -86,7 +102,6 @@ public:
                 return pointer_ += v;
             }
         }
-
         IteratorType *Sub(difference_type v)
         {
             if constexpr (reverse) {  // NOLINT
@@ -105,64 +120,54 @@ public:
         {
             return pointer_;
         }
-
         IteratorType &operator*()
         {
             return *pointer_;
         }
-
         Iterator &operator++()
         {
             pointer_ = Add(1);
             return *this;
         }
-
         Iterator operator++(int)  // NOLINT(cert-dcl21-cpp)
         {
             Iterator it(pointer_);
             pointer_ = Add(1);
             return it;
         }
-
         Iterator &operator--()
         {
             pointer_ = Sub(1);
             return *this;
         }
-
         Iterator operator--(int)  // NOLINT(cert-dcl21-cpp)
         {
             Iterator it(pointer_);
             pointer_ = Sub(1);
             return it;
         }
-
         Iterator &operator+=(difference_type n)
         {
             pointer_ = Add(n);
             return *this;
         }
-
         Iterator &operator-=(difference_type n)
         {
             pointer_ = Sub(n);
             return *this;
         }
-
         Iterator operator+(int32_t n) const
         {
             Iterator it(*this);
             it.pointer_ = it.Add(n);
             return it;
         }
-
         Iterator operator-(int32_t n) const
         {
             Iterator it(*this);
             it.pointer_ = it.Sub(n);
             return it;
         }
-
         difference_type operator-(const Iterator &rhs) const
         {
             if constexpr (reverse) {  // NOLINT
@@ -170,12 +175,10 @@ public:
             }
             return pointer_ - rhs.pointer_;
         }
-
         bool operator==(const Iterator &rhs) const
         {
             return pointer_ == rhs.pointer_;
         }
-
         bool operator!=(const Iterator &rhs) const
         {
             return !(*this == rhs);
@@ -195,14 +198,31 @@ public:
     using reverse_iterator = Iterator<T, true>;
     using const_reverse_iterator = Iterator<const T, true>;
 
-    SmallVector() : allocator_(AddStaticFlag(Allocator::GetInstance()))
+    SmallVector()
     {
+        static_assert(!use_allocator);
+
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         buffer_.size = 0;
     }
 
+    SmallVector(std::initializer_list<T> list)
+    {
+        static_assert(!use_allocator);
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        buffer_.size = 0;
+
+        for (auto it = list.begin(); it != list.end(); ++it) {
+            push_back(*it);
+        }
+    }
+
     explicit SmallVector(Allocator *allocator) : allocator_(AddStaticFlag(allocator))
     {
+        static_assert(use_allocator);
+        ASSERT(allocator != nullptr);
+
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         buffer_.size = 0;
     }
@@ -211,7 +231,12 @@ public:
     {
         if (other.IsStatic()) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            new (&buffer_) StaticBuffer(other.buffer_);
+            buffer_.size = other.buffer_.size;
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+            for (uint32_t i = 0; i < buffer_.size; ++i) {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+                new (&buffer_.data[i]) T(other.buffer_.data[i]);
+            }
         } else {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             new (&vector_) VectorType(other.vector_);
@@ -222,7 +247,12 @@ public:
     {
         if (other.IsStatic()) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            new (&buffer_) StaticBuffer(std::move(other.buffer_));
+            buffer_.size = other.buffer_.size;
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+            for (uint32_t i = 0; i < buffer_.size; ++i) {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+                new (&buffer_.data[i]) T(std::move(other.buffer_.data[i]));
+            }
         } else {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             new (&vector_) VectorType(std::move(other.vector_));
@@ -246,7 +276,12 @@ public:
         allocator_ = other.allocator_;
         if (other.IsStatic()) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            buffer_ = other.buffer_;
+            buffer_.size = other.buffer_.size;
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+            for (uint32_t i = 0; i < buffer_.size; ++i) {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+                new (&buffer_.data[i]) T(other.buffer_.data[i]);
+            }
         } else {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             new (&vector_) VectorType(other.vector_);
@@ -261,7 +296,12 @@ public:
         allocator_ = other.allocator_;
         if (other.IsStatic()) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            buffer_ = std::move(other.buffer_);
+            buffer_.size = other.buffer_.size;
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+            for (uint32_t i = 0; i < buffer_.size; ++i) {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+                new (&buffer_.data[i]) T(std::move(other.buffer_.data[i]));
+            }
         } else {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             new (&vector_) VectorType(std::move(other.vector_));
@@ -270,31 +310,51 @@ public:
         return *this;
     }
 
+    bool operator==(const SmallVector &other) const
+    {
+        if (this == &other) {
+            return true;
+        }
+
+        if (size() != other.size()) {
+            return false;
+        }
+
+        auto it1 = begin();
+        auto it2 = other.begin();
+        for (; it1 != end(); ++it1, ++it2) {
+            if (*it1 != *it2) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const SmallVector &other) const
+    {
+        return !operator==(other);
+    }
+
     const_iterator begin() const
     {
         return const_iterator(&operator[](0));
     }
-
     iterator begin()
     {
         return iterator(&operator[](0));
     }
-
     const_iterator cbegin() const
     {
         return const_iterator(&operator[](0));
     }
-
     const_iterator end() const
     {
         return const_iterator(&operator[](size()));
     }
-
     iterator end()
     {
         return iterator(&operator[](size()));
     }
-
     const_iterator cend() const
     {
         return const_iterator(&operator[](size()));
@@ -304,30 +364,36 @@ public:
     {
         return const_reverse_iterator(&operator[](size() - 1));
     }
-
     auto rbegin()
     {
         return reverse_iterator(&operator[](size() - 1));
     }
-
     auto crbegin() const
     {
         return const_reverse_iterator(&operator[](size() - 1));
     }
-
     auto rend() const
     {
         return const_reverse_iterator(&operator[](0) - 1);
     }
-
     auto rend()
     {
         return reverse_iterator(&operator[](0) - 1);
     }
-
     auto crend() const
     {
         return const_reverse_iterator(&operator[](0) - 1);
+    }
+
+    bool empty() const
+    {
+        return size() == 0;
+    }
+
+    const_pointer data() const
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        return IsStatic() ? buffer_.data.data() : vector_.data();
     }
 
     size_t size() const
@@ -373,6 +439,19 @@ public:
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return *(new (&buffer_.data[buffer_.size++]) T(std::move(values)...));
+    }
+
+    void reserve(size_t size)
+    {
+        if (size > capacity()) {
+            if (IsStatic()) {
+                ASSERT(size > N);
+                MoveToVector(size);
+            } else {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+                vector_.reserve(size);
+            }
+        }
     }
 
     void resize(size_t size)
@@ -440,12 +519,19 @@ public:
         }
     }
 
+    reference back()
+    {
+        ASSERT(size() > 0);
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        return IsStatic() ? buffer_.data[buffer_.size - 1] : vector_.back();
+    }
+
     reference operator[](size_t i)
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return IsStatic() ? buffer_.data[i] : vector_[i];
     }
-
     const_reference operator[](size_t i) const
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
@@ -472,16 +558,35 @@ private:
         return true;
     }
 
+    void MoveStaticBufferData(VectorType &tmp_vector)
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        for (uint32_t i = 0; i < buffer_.size; ++i) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+            tmp_vector.emplace_back(std::move(buffer_.data[i]));
+        }
+    }
+
     void MoveToVector(size_t reserved_size)
     {
         ASSERT(IsStatic());
         allocator_ = reinterpret_cast<Allocator *>(bit_cast<uintptr_t>(allocator_) & ~1LLU);
-        VectorType tmp_vector(allocator_->Adapter());
-        tmp_vector.reserve(reserved_size);
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        std::copy(buffer_.data.begin(), buffer_.data.begin() + buffer_.size, std::back_inserter(tmp_vector));
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        new (&vector_) VectorType(std::move(tmp_vector));
+        // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
+        if constexpr (use_allocator) {
+            ASSERT(allocator_ != nullptr);
+            VectorType tmp_vector(allocator_->Adapter());
+            tmp_vector.reserve(reserved_size);
+            MoveStaticBufferData(tmp_vector);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+            new (&vector_) VectorType(std::move(tmp_vector));
+            // NOLINTNEXTLINE(readability-misleading-indentation)
+        } else {
+            VectorType tmp_vector;
+            tmp_vector.reserve(reserved_size);
+            MoveStaticBufferData(tmp_vector);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+            new (&vector_) VectorType(std::move(tmp_vector));
+        }
     }
 
     void Destroy()
@@ -517,4 +622,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_SMALL_VECTOR_H_
+#endif  // PANDA_SMALL_VECTOR_H

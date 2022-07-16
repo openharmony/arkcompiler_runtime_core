@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ ObjectHeader *GlobalObjectStorage::Get(const Reference *reference) const
     return result;
 }
 
-void GlobalObjectStorage::Remove(const Reference *reference) const
+void GlobalObjectStorage::Remove(const Reference *reference)
 {
     if (reference == nullptr) {
         return;
@@ -121,7 +121,7 @@ PandaVector<ObjectHeader *> GlobalObjectStorage::GetAllObjects()
     return objects;
 }
 
-void GlobalObjectStorage::VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType rootType) const
+void GlobalObjectStorage::VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType rootType)
 {
     global_storage_->VisitObjects(gc_root_visitor, rootType);
 }
@@ -134,9 +134,9 @@ void GlobalObjectStorage::UpdateMovedRefs()
     LOG(DEBUG, GC) << "=== GlobalStorage Update moved. END ===";
 }
 
-void GlobalObjectStorage::ClearUnmarkedWeakRefs(const GC *gc)
+void GlobalObjectStorage::ClearUnmarkedWeakRefs(const GC *gc, const mem::GC::ReferenceClearPredicateT &pred)
 {
-    weak_storage_->ClearUnmarkedWeakRefs(gc);
+    weak_storage_->ClearUnmarkedWeakRefs(gc, pred);
 }
 
 size_t GlobalObjectStorage::GetSize()

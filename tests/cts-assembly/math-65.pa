@@ -132,7 +132,7 @@
   return.64
 }
 
-.function u1 main() <static> {
+.function i32 main() <static> {
   movi v0, 21
   ldai 0x200000
   shr2 v0

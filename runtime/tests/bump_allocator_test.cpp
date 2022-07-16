@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ class BumpAllocatorTest : public testing::Test {
 public:
     BumpAllocatorTest()
     {
+        // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
 #ifdef PANDA_NIGHTLY_TEST_ON
         seed_ = std::time(NULL);
 #else
@@ -49,6 +50,7 @@ public:
         }
         PoolManager::Finalize();
         panda::mem::MemConfig::Finalize();
+        // Logger::Destroy();
     }
 
 protected:
@@ -65,7 +67,7 @@ protected:
 
     std::vector<std::pair<void *, size_t>> allocated_mem_mmap_;
     std::vector<Arena *> allocated_arenas;
-    unsigned seed_ {0};
+    unsigned seed_;
 };
 
 TEST_F(BumpAllocatorTest, AlignedAlloc)

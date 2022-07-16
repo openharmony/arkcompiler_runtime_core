@@ -23,7 +23,7 @@ tests:
       - file-name: "op_vs_4_vs_4"
         isa:
           instructions:
-            - sig: mov v1:out:i32, v2:in:i32
+            - sig: mov v1:out:b32, v2:in:b32
               acc: none
               format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
         code-template: |
@@ -58,7 +58,7 @@ tests:
       - file-name: "op_vs_8_vs_8"
         isa:
           instructions:
-            - sig: mov v1:out:i32, v2:in:i32
+            - sig: mov v1:out:b32, v2:in:b32
               acc: none
               format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
         code-template: |
@@ -96,7 +96,7 @@ tests:
       - file-name: "op_vs_16_vs_16"
         isa:
           instructions:
-            - sig: mov v1:out:i32, v2:in:i32
+            - sig: mov v1:out:b32, v2:in:b32
               acc: none
               format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
         code-template: |
@@ -129,7 +129,7 @@ tests:
       - file-name: "err"
         isa:
           instructions:
-            - sig: mov v1:out:i32, v2:in:i32
+            - sig: mov v1:out:b32, v2:in:b32
               acc: none
               format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
         code-template: |
@@ -157,7 +157,7 @@ tests:
       - file-name: "type_1"
         isa:
           instructions:
-            - sig: mov v1:out:i32, v2:in:i32
+            - sig: mov v1:out:b32, v2:in:b32
               acc: none
               format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
         code-template: |
@@ -168,7 +168,7 @@ tests:
               %s
         bugid: ['1324']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         description: |
           Check mov with different type of source register - i64 (failure) values,
           f64 (failure) values, Object (failure).
@@ -196,7 +196,7 @@ tests:
       - file-name: "vals_pos"
         isa:
           instructions:
-            - sig: mov v1:out:i32, v2:in:i32
+            - sig: mov v1:out:b32, v2:in:b32
               acc: none
               format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
         code-template: |
@@ -206,11 +206,12 @@ tests:
               lda v0
               jne v1, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
-        description: Check mov instruction moves value from register to register.
+              return
+        check-type: no-check
+        description: Check mov instruction moves i32 value from register to register.
         cases:
           - values: ['0']
           - values: ['1']
@@ -223,10 +224,34 @@ tests:
           - values: ['0x12345678']
           - values: ['0x87654321']
 
+      - file-name: "vals_pos_f32"
+        isa:
+          instructions:
+            - sig: mov v1:out:b32, v2:in:b32
+              acc: none
+              format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
+        code-template: |
+          #
+              fmovi v0, %s
+              mov v1, v0
+              lda v0
+              fcmpg v1
+              jnez set_failure
+              ldai 0
+              return
+          set_failure:
+              ldai 1
+              return
+        check-type: no-check
+        description: Check mov instruction moves f32 value from register to register.
+        cases:
+          - values: ['1e1']
+          - values: ['0.000314']
+
       - file-name: "vals_neg"
         isa:
           instructions:
-            - sig: mov v1:out:i32, v2:in:i32
+            - sig: mov v1:out:b32, v2:in:b32
               acc: none
               format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
         code-template: |
@@ -236,11 +261,12 @@ tests:
               lda v0
               jne v1, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
-        description: Check mov instruction moves values from register to register
+              return
+        check-type: no-check
+        description: Check mov instruction moves i32 values from register to register
         cases:
           - values: ['-1']
           - values: ['-0x80']
@@ -252,16 +278,40 @@ tests:
           - values: ['-0x12345678']
           - values: ['-0x87654321']
 
+      - file-name: "vals_neg_f32"
+        isa:
+          instructions:
+            - sig: mov v1:out:b32, v2:in:b32
+              acc: none
+              format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
+        code-template: |
+          #
+              fmovi v0, %s
+              mov v1, v0
+              lda v0
+              fcmpg v1
+              jnez set_failure
+              ldai 0
+              return
+          set_failure:
+              ldai 1
+              return
+        check-type: no-check
+        description: Check mov instruction moves f32 values from register to register
+        cases:
+          - values: ['-0.01789']
+          - values: ['-0.2e-2']
+
       - file-name: "type"
         tags: ['verifier']
         isa:
           instructions:
-            - sig: mov v1:out:i32, v2:in:i32
+            - sig: mov v1:out:b32, v2:in:b32
               acc: none
               format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
           verification:
             - v2_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
             #
@@ -351,12 +401,12 @@ tests:
       - file-name: uninitialized_regs
         isa:
           instructions:
-            - sig: mov v1:out:i32, v2:in:i32
+            - sig: mov v1:out:b32, v2:in:b32
               acc: none
               format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
         description: Check mov with uninitialized registers.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #

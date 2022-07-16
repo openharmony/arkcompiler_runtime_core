@@ -26,8 +26,8 @@ StackPrinter -> StackPrinter: For each address, find the corresponding VMA and d
 StackPrinter -> libdwarf: Read debug info from the library file
 libdwarf -> StackPrinter: Debug info
 StackPrinter -> libdwarf: Get function name, source file and line number
-libdwarf -> StackPrinter: Mangled function name (non-human readable), source file and line number
-StackPrinter -> "libstdc++": Demangled function name (Get human readable function name)
+libdwarf -> StackPrinter: mangled function name (non-human readable), source file and line number
+StackPrinter -> "libstdc++": Demangle function name (Get human readable function name)
 "libstdc++" -> StackPrinter: human readable function name
 StackPrinter -> "output stream": Print
 @enduml

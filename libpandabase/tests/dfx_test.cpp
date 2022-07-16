@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ TEST(DfxController, Initialization)
     std::map<DfxOptionHandler::DfxOption, uint8_t> option_map;
     for (auto option = DfxOptionHandler::DfxOption(0); option < DfxOptionHandler::END_FLAG;
         option = DfxOptionHandler::DfxOption(option + 1)) {
-        MapDfxOption(option_map, option);
+            MapDfxOption(option_map, option);
     }
 
     DfxController::Initialize(option_map);
@@ -130,9 +130,10 @@ TEST(DfxController, TestPrintDfxOptionValues)
         "[TID %06x] E/dfx: DFX option: sigusr1, option values: 1\n"
         "[TID %06x] E/dfx: DFX option: sigusr2, option values: 1\n"
         "[TID %06x] E/dfx: DFX option: mobile-log, option values: 1\n"
+        "[TID %06x] E/dfx: DFX option: hung-update, option values: 0\n"
         "[TID %06x] E/dfx: DFX option: reference-dump, option values: 1\n"
         "[TID %06x] E/dfx: DFX option: dfx-log, option values: 0\n",
-        tid, tid, tid, tid, tid, tid, tid, tid, tid, tid);
+        tid, tid, tid, tid, tid, tid, tid, tid, tid, tid, tid);
 #else
     std::string res = helpers::string::Format(
         "[TID %06x] E/dfx: DFX option: dfx-log, option values: 0\n", tid, tid);

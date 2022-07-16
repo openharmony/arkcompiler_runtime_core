@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_INDEX_H_
-#define PANDA_VERIFICATION_UTIL_INDEX_H_
+#ifndef PANDA_VERIFIER_UTIL_INDEX_HPP_
+#define PANDA_VERIFIER_UTIL_INDEX_HPP_
 
-#include "macros.h"
+#include "libpandabase/macros.h"
+#include "verification/util/hash.h"
 
 #include <limits>
 
@@ -52,11 +53,11 @@ public:
     }
     ~Index() = default;
 
-    bool operator==(const Index &other)
+    bool operator==(const Index &other) const
     {
         return Value_ == other.Value_;
     };
-    bool operator!=(const Index &other)
+    bool operator!=(const Index &other) const
     {
         return !(*this == other);
     };
@@ -93,6 +94,7 @@ public:
     explicit operator T() const
     {
         ASSERT(IsValid());
+        // todo: check that T is capable of holding valid range of value
         return static_cast<T>(Value_);
     }
 
@@ -108,9 +110,9 @@ template <typename Int, const Int I>
 struct hash<panda::verifier::Index<Int, I>> {
     size_t operator()(const panda::verifier::Index<Int, I> &i) const noexcept
     {
-        return static_cast<size_t>(i.Value_);
+        return panda::verifier::StdHash(i.Value_);
     }
 };
 }  // namespace std
 
-#endif  // PANDA_VERIFICATION_UTIL_INDEX_H_
+#endif  // !PANDA_VERIFIER_UTIL_INDEX_HPP_

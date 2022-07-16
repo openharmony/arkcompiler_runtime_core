@@ -42,7 +42,7 @@ chapters:
   - name: Calling sequence
     text: >
       On execution of a call bytecode a new function frame is created. All necessary arguments are copied from the
-      caller frame onto the top of the callee frame. For example, the last argument is placed in the register with the largest
+      caller frame onto the top of the callee frame such as the last argument is placed in the register with the largest
       index and the first argument is placed into the register with the index equal to the size of frame subtracted by
       the number of arguments. Accumulator value is considered as undefined and shall not be read in verified bytecode.
       On return, callee frame is destroyed. If function return value is non-void, it is passed to caller via
@@ -100,7 +100,7 @@ chapters:
   - name: Dynamically-typed languages support
     text: >
       Panda VM supports languages with dynamic types. It represents dynamic values through special 'any' values,
-      which wraps a value itself (both primitive and objects) and corresponding type info. VM tracks type of registers
+      which wraps a value itself (both primitive and objects) and corresponding type info. VM tracks type of registers,
       that hold 'any' value, whether they are primitive or not. Virtual registers and accumulator are wide enough
       to hold 'any' value. When VM executes code inside dynamically-typed language context, regular static instructions
       also may be used.
@@ -110,12 +110,6 @@ min_version: 0.0.0.2
 version: 0.0.0.2
 
 properties:
-  - tag: acc_none
-    description: Doesn't use accumulator register.
-  - tag: acc_read
-    description: Use accumulator as a first source operand.
-  - tag: acc_write
-    description: Use accumulator as a destination operand.
   - tag: type_id
     description: Use an id which resolves into a type constant.
   - tag: method_id
@@ -132,6 +126,8 @@ properties:
     description: Pass control to the callee method via virtual call.
   - tag: return
     description: Pass control to the caller method.
+  - tag: suspend
+    description: Suspend current method and pass control to the caller one.
   - tag: jump
     description: Pass control to another bytecode in a current method.
   - tag: conditional
@@ -139,11 +135,13 @@ properties:
   - tag: float
     description: Perform floating point operation.
   - tag: dynamic
-    description: Operate on 'any' values.
+    description: Operates on 'any' values.
   - tag: maybe_dynamic
     description: May operate on 'any' values depending on language context.
   - tag: language_type
-    description: Create objects of type depending on language context.
+    description: Creates objects of type depending on language context.
+  - tag: initialize_type
+    description: May initialize type instance during execution.
 exceptions:
   - tag: x_none
     description: Bytecode doesn't throw exceptions.
@@ -167,6 +165,12 @@ exceptions:
     description: Bytecode throws OutOfMemoryError if failed to allocate object.
   - tag: x_init
     description: Bytecode throws ExceptionInInitializerError if unexpected exception occurred in a static initializer.
+  - tag: x_call
+    description: Bytecode may throw an error if an exception occures in the called bytecode.
+  - tag: x_throw
+    description: Bytecode's primary role is to throw provided exception object.
+  - tag: x_link
+    description: Bytecode may throw NoClassDefFoundError if failed to resolve id.
 verification:
   - tag: none
     description: Instruction is always valid.
@@ -175,6 +179,7 @@ verification:
   - tag: v1_object
     description: First operand contains a reference to an object (other than array).
   - tag: v1_array_type
+    # TODO: specify
     description: First operand contains a reference to an array of elements of type corresponding to bytecode.
   - tag: v1_i32
     description: First operand contains a value of i32 type.
@@ -191,8 +196,9 @@ verification:
   - tag: acc_i32
     description: Accumulator contains a value of i32 type.
   - tag: acc_type
-    description: Accumulator contains a value of type corresponding to bytecode.
+    description: Accumulator contains a value of type corresponding to bytecode.  # TODO: specify
   - tag: acc_return_type
+    # TODO: specify, including assignment compatibility (see Java 'areturn')
     description: Accumulator type is compatible with method return type.
   - tag: v1_throw_type
     description: First operand contains a reference to an instance of class Throwable or of a subclass of Throwable.
@@ -205,7 +211,7 @@ verification:
   - tag: type_id_any_object
     description: Type_id operand must correspond to any object type.
   - tag: method_id_static
-    description: Method_id must resolve to a static method.
+    description: Method_id must resolve to a static method or into initializer for a type other than one-dimensional array.
   - tag: method_id_non_static
     description: Method_id must resolve to a non-static method.
   - tag: method_id_non_abstract
@@ -217,7 +223,7 @@ verification:
   - tag: constant_literalarray_id
     description: Id must resolve into a constant literalarray.
   - tag: compatible_arguments
-    description: Arguments provided to a method must be of compatible types.
+    description: Arguments provided to a method must be of compatible types.  # TODO: specify compatibility
   - tag: method_init_obj
     description: Method_id must resolve into initializer for a type other than one-dimensional array.
   - tag: branch_target
@@ -229,7 +235,7 @@ verification:
   - tag: field_id_size
     description: Field_id must resolve to a field of size corresponding to bytecode.
   - tag: valid_in_dynamic_context
-    description: Instruction is valid only for dynamically-typed language context.
+    description: Instruction valid only for dynamically-typed language context.
 
 prefixes:
   - name: bit
@@ -248,15 +254,11 @@ prefixes:
 groups:
   - title: No operation
     description: Perform an operation without behavior.
-    properties:
-      - acc_none
     exceptions:
       - x_none
     verification:
       - none
     pseudo: |
-      skip
-    semantics: |-
       skip
     instructions:
       - sig: nop
@@ -266,20 +268,12 @@ groups:
 
   - title: Move register-to-register
     description: Move values between registers.
-    properties:
-      - acc_none
     exceptions:
       - x_none
     verification:
       - v2_type
     pseudo: |
       vd = vs
-    semantics: |-
-      raise exception(WrongRegisterValue) if true that Op == "mov" and type_of(@Vs) is not i32;
-      raise exception(WrongRegisterValue) if true that Op == "mov.64" and (type_of(@Vs) is not u64 and type_of(@Vs) is not i64);
-      raise exception(WrongRegisterValue) if true that Op == "mov.obj" and (type_of(@Vs) is not object and type_of(@Vs) is not array);
-      raise exception(UndefinedSemantics) if true that Op not in [[ "mov", "mov.64", "mov.obj" ]];
-      Vd <~ Vs
     instructions:
       - sig: mov v1:out:b32, v2:in:b32
         acc: none
@@ -297,44 +291,17 @@ groups:
   - title: Move immediate-to-register
     description: >
       Move integer immediate into a register. For short formats immediate is sign extended to operand size.
-    properties:
-      - acc_none
     exceptions:
       - x_none
     verification:
       - none
     pseudo: >
       vd = imm
-    semantics: |-
-      cases
-        when Op == "movi" do
-          raise exception(WrongImmediateValue) if undefined int_of(Imm);
-          Vd <~ value_of(signed(32), int_of(Imm))
-        end when;
-        when Op == "movi.64" do
-          raise exception(WrongImmediateValue) if undefined int_of(Imm);
-          Vd <~ value_of(signed(64), int_of(Imm))
-        end when;
-        when Op == "fmovi" do
-          raise exception(WrongImmediateValue) if undefined float_of(Imm);
-          Vd <~ value_of(float, float_of(Imm))
-        end when;
-        when Op == "fmovi.64" do
-          raise exception(WrongImmediateValue) if undefined float_of(Imm);
-          Vd <~ value_of(float, float_of(Imm))
-        end when
-        else raise exception(UndefinedSemantics) // missed opcode
-        undefined raise exception(InternalError) // Op is not string
-      end cases
     instructions:
       - sig: movi v:out:i32, imm:i32
         acc: none
-        format: [op_v_4_imm_4, op_v_8_imm_8, op_v_8_imm_16]
-        opcode_idx: [0x9, 0xa, 0xb]
-      - sig: movi v:out:i32, imm:i32
-        acc: none
-        format: [op_v_8_imm_32]
-        opcode_idx: [0xc]
+        format: [op_v_4_imm_4, op_v_8_imm_8, op_v_8_imm_16, op_v_8_imm_32]
+        opcode_idx: [0x9, 0xa, 0xb, 0xc]
       - sig: movi.64 v:out:i64, imm:i64
         acc: none
         format: [op_v_8_imm_64]
@@ -344,25 +311,21 @@ groups:
         prefix: f32
         format: [pref_op_v_8_imm_32]
         opcode_idx: [0x0]
-        properties: [acc_none, float]
+        properties: [float]
       - sig: fmovi.64 v:out:f64, imm:f64
         acc: none
         format: [op_v_8_imm_64]
         opcode_idx: [0xe]
-        properties: [acc_none, float]
+        properties: [float]
 
   - title: Move null reference into register
     description: Move null reference into a register.
-    properties:
-      - acc_none
     exceptions:
       - x_none
     verification:
       - none
     pseudo: >
       vd = null
-    semantics: |-
-      skip
     instructions:
       - sig: mov.null v:out:ref
         acc: none
@@ -371,34 +334,15 @@ groups:
 
   - title: Load accumulator from register
     description: Moves register content into an accumulator.
-    properties:
-      - acc_write
     exceptions:
       - x_none
     verification:
       - v1_type
     pseudo: |
       acc = vs
-    semantics: |-
-      cases
-        when Op == "lda" do
-          raise exception(WrongRegisterValue) if false that type_of(@Vs) is i32;
-          acc <~ Vs
-        end when;
-        when Op == "lda.64" do
-          raise exception(WrongRegisterValue) if false that type_of(@Vs) is i64 or type_of(@Vs) is u64;
-          acc <~ Vs
-        end when;
-        when Op == "lda.obj" do
-          raise exception(WrongRegisterValue) if false that type_of(@Vs) is object or type_of(@Vs) is array;
-          acc <~ Vs
-        end when
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
     instructions:
-      - sig: lda v:in:i32
-        acc: out:i32
+      - sig: lda v:in:b32
+        acc: out:b32
         format: [op_v_8]
         opcode_idx: [0x10]
       - sig: lda.64 v:in:b64
@@ -413,44 +357,17 @@ groups:
   - title: Load accumulator from immediate
     description: >
       Load immediate into accumulator. For short formats immediate is sign extended to operand size.
-    properties:
-      - acc_write
     exceptions:
       - x_none
     verification:
       - none
     pseudo: |
       acc = imm
-    semantics: |-
-      cases
-        when Op == "ldai" do
-          raise exception(WrongImmediateValue) if undefined int_of(Imm);
-          acc <~ value_of(i32, int_of(Imm))
-        end when;
-        when Op == "ldai.64" do
-          raise exception(WrongImmediateValue) if undefined int_of(Imm);
-          acc <~ value_of(i64, int_of(Imm))
-        end when;
-        when Op == "fldai" do
-          raise exception(WrongImmediateValue) if undefined float_of(Imm);
-          acc <~ value_of(float, float_of(Imm))
-        end when
-        when Op == "fldai.64" do
-          raise exception(WrongImmediateValue) if undefined float_of(Imm);
-          acc <~ value_of(float, float_of(Imm))
-        end when
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
     instructions:
       - sig: ldai imm:i32
         acc: out:i32
-        format: [op_imm_8, op_imm_16]
-        opcode_idx: [0x13, 0x14]
-      - sig: ldai imm:i32
-        acc: out:i32
-        format: [op_imm_32]
-        opcode_idx: [0x15]
+        format: [op_imm_8, op_imm_16, op_imm_32]
+        opcode_idx: [0x13, 0x14, 0x15]
       - sig: ldai.64 imm:i64
         acc: out:i64
         format: [op_imm_64]
@@ -460,30 +377,27 @@ groups:
         prefix: f32
         format: [pref_op_imm_32]
         opcode_idx: [0x1]
-        properties: [acc_write, float]
+        properties: [float]
       - sig: fldai.64 imm:f64
         acc: out:f64
         format: [op_imm_64]
         opcode_idx: [0x17]
-        properties: [acc_write, float]
+        properties: [float]
 
   - title: Load accumulator from string constant pool
     description: >
       Load string specified by id into accumulator. In dynamically-typed language context
       load string as 'any' value.
     properties:
-      - acc_write
       - string_id
       - language_type
       - maybe_dynamic
     exceptions:
-      - x_none
+      - x_oom
     verification:
       - constant_string_id
     pseudo: |
       acc = load(id)
-    semantics: |-
-      acc <~ value_of(string, strOf(StringId))
     instructions:
       - sig: lda.str string_id
         acc: out:ref
@@ -494,16 +408,17 @@ groups:
     description: >
       Create a new single-dimensional constant literal array and put a reference to it into register.
     properties:
-      - acc_none
       - literalarray_id
     exceptions:
-      - x_none
+      - x_oom
     verification:
       - constant_literalarray_id
     pseudo: |
-      v = load(id)
-    semantics: |-
-      skip
+      arr = load(id)
+      if arr == nullptr then
+        throw OutOfMemoryError
+      end
+      v = arr
     instructions:
       - sig: lda.const v:out:ref, literalarray_id
         acc: none
@@ -513,17 +428,18 @@ groups:
   - title: Load accumulator from type constant pool
     description: Load type specified by id into accumulator.
     properties:
-      - acc_write
       - type_id
       - language_type
     exceptions:
-      - x_none
+      - x_link
     verification:
       - type_id_any_object
     pseudo: |
-      acc = load(id)
-    semantics: |-
-      skip
+      type = load(id)
+      if type == nullptr then
+        throw NoClassDefFoundError
+      end
+      acc = type
     instructions:
       - sig: lda.type type_id
         acc: out:ref
@@ -532,16 +448,12 @@ groups:
 
   - title: Load null reference into accumulator
     description: Load null reference into accumulator.
-    properties:
-      - acc_write
     exceptions:
       - x_none
     verification:
       - none
     pseudo: |
       acc = null
-    semantics: |-
-      skip
     instructions:
       - sig: lda.null
         acc: out:ref
@@ -550,24 +462,15 @@ groups:
 
   - title: Store accumulator
     description: Moves accumulator content into a register.
-    properties:
-      - acc_read
     exceptions:
       - x_none
     verification:
       - acc_type
     pseudo: |
       vd = acc
-    semantics: |-
-      raise exception(WrongRegisterValue) if true that Op == "sta" and type_of(@acc) is not i32;
-      raise exception(WrongRegisterValue) if true that Op == "sta.64" and (type_of(@acc) is not i64 and type_of(@acc) is not u64);
-      raise exception(WrongRegisterValue) if true that Op == "sta.obj" and (type_of(@acc) is not object and type_of(@acc) is not array);
-      raise exception(UndefinedSemantics) if true that Op not in [[ "sta", "sta.64", "sta.obj" ]];
-      // raise exception(InternalError) if true that Op is not string // ambig. mixing TypeExp and Exp here... subsort TypeExp < Exp ?
-      Vd <~ acc
     instructions:
-      - sig: sta v:out:i32
-        acc: in:i32
+      - sig: sta v:out:b32
+        acc: in:b32
         format: [op_v_8]
         opcode_idx: [0x1c]
       - sig: sta.64 v:out:b64
@@ -581,9 +484,6 @@ groups:
 
   - title: Integer comparison
     description: Perform specified signed or unsigned integer comparison between register and accumulator.
-    properties:
-      - acc_read
-      - acc_write
     exceptions:
       - x_none
     verification:
@@ -597,18 +497,6 @@ groups:
         else
           acc = 1
         end
-    semantics: |-
-      raise exception(WrongRegisterValue) if false that type_of(@acc) is type_of(@Vs);
-      raise exception(WrongRegisterValue) if true that Op == "cmp.64" and type_of(@acc) is not i64;
-      raise exception(WrongRegisterValue) if true that Op == "ucmp" and type_of(@acc) is not u32;
-      raise exception(WrongRegisterValue) if true that Op == "ucmp.64" and type_of(@acc) is not u64;
-      raise exception(UndefinedSemantics) if true that Op not in [[ "cmp.64", "ucmp", "ucmp.64" ]];
-      cases
-        when @acc < @Vs  do acc <~ value(i32, -1) end when;
-        when @acc == @Vs do acc <~ value(i32, 0)  end when;
-        when @acc > @Vs  do acc <~ value(i32, 1)  end when
-        undefined raise exception(InternalError)
-      end cases
     instructions:
       - sig: cmp.64 v:in:i64
         acc: inout:i64->i32
@@ -628,8 +516,6 @@ groups:
   - title: Floating-point comparison
     description: Perform specified floating point comparison between register and accumulator.
     properties:
-      - acc_read
-      - acc_write
       - float
     exceptions:
       - x_none
@@ -654,24 +540,6 @@ groups:
           acc = 1
         end
       end
-    semantics: |-
-      // strange semantics...
-      if isnan(@acc) or isnan(@Vs) then
-        cases
-          when Op in [[ "fcmpg", "fcmpg.64" ]] do acc <~ value(i32, 1) end when;
-          when Op in [[ "fcmpl", "fcmpl.64" ]] do acc <~ value(i32, -1) end when
-          else raise exception(UndefinedSemantics)
-          undefined raise exception(InternalError)
-        end cases
-      else
-        cases
-          when @acc < @Vs do acc <~ value(i32, -1) end when;
-          when @acc == @Vs do acc <~ value(i32, 0) end when;
-          when @acc > @Vs do acc <~ value(i32, 1) end when
-          undefined raise exception(InternalError)
-        end cases
-      undefined raise exception(WrongRegisterValue)
-      end if
     instructions:
       - sig: fcmpl v:in:f32
         acc: inout:f32->i32
@@ -697,7 +565,6 @@ groups:
       Unconditionally transfer execution to an instruction at offset bytes from the beginning of the current
       instruction. Offset is sign extended to the size of instruction address.
     properties:
-      - acc_none
       - jump
     exceptions:
       - x_none
@@ -705,8 +572,6 @@ groups:
       - branch_target
     pseudo: |
       pc += imm
-    semantics: |-
-      perform_jump(LabelId)
     instructions:
       - sig: jmp imm:i32
         acc: none
@@ -719,7 +584,6 @@ groups:
       object references in accumulator and source register compare as specified. Offset is sign extended to the size of
       instruction address.
     properties:
-      - acc_read
       - jump
       - conditional
     exceptions:
@@ -738,8 +602,6 @@ groups:
         if acc != vs then
           pc += imm
       end
-    semantics:
-      skip
     instructions:
       - sig: jeq.obj v:in:ref, imm:i32
         acc: in:ref
@@ -756,7 +618,6 @@ groups:
       object reference in accumulator compares with null as specified. Offset is sign extended to the size of
       instruction address.
     properties:
-      - acc_read
       - jump
       - conditional
     exceptions:
@@ -774,8 +635,6 @@ groups:
         if acc != null then
           pc += imm
       end
-    semantics:
-      skip
     instructions:
       - sig: jeqz.obj imm:i32
         acc: in:ref
@@ -792,7 +651,6 @@ groups:
       signed 32-bit integer in accumulator compares with 0 as specified. Offset is sign extended to the size
       of instruction address.
     properties:
-      - acc_read
       - jump
       - conditional
     exceptions:
@@ -826,19 +684,6 @@ groups:
         if acc >= 0 then
           pc += imm
         end
-    semantics: |-
-      raise exception(WrongRegisterValue) if false that type_of(@acc) is i32;
-      Acc := int_of(@acc);
-      cases
-        when Op == "jeqz" and Acc == 0 do perform_jump(LabelId) end when;
-        when Op == "jnez" and Acc != 0 do perform_jump(LabelId) end when;
-        when Op == "jltz" and Acc < 0  do perform_jump(LabelId) end when;
-        when Op == "jgtz" and Acc > 0  do perform_jump(LabelId) end when;
-        when Op == "jlez" and Acc <= 0 do perform_jump(LabelId) end when;
-        when Op == "jgez" and Acc >= 0 do perform_jump(LabelId) end when
-        else skip //branch not taken
-        undefined raise exception(InternalError)
-      end cases
     instructions:
       - sig: jeqz imm:i32
         acc: in:i32
@@ -871,7 +716,6 @@ groups:
       32-bit integers in accumulator and register compare as specified. Offset is sign extended to the size of
       instruction address.
     properties:
-      - acc_read
       - jump
       - conditional
     exceptions:
@@ -907,21 +751,6 @@ groups:
         if diff >= 0 then
           pc += imm
         end
-    semantics: |-
-      raise exception(WrongRegisterValue) if false that type_of(@acc) is i32;
-      raise exception(WrongRegisterValue) if false that type_of(@Vs) is i32;
-      Acc := int_of(@acc);
-      Vs  := int_of(@Vs);
-      cases
-        when Op == "jeq" and Acc == Vs do perform_jump(LabelId) end when;
-        when Op == "jne" and Acc != Vs do perform_jump(LabelId) end when;
-        when Op == "jlt" and Acc < Vs  do perform_jump(LabelId) end when;
-        when Op == "jgt" and Acc > Vs  do perform_jump(LabelId) end when;
-        when Op == "jle" and Acc <= Vs do perform_jump(LabelId) end when;
-        when Op == "jge" and Acc >= Vs do perform_jump(LabelId) end when
-        else skip //branch not taken
-        undefined raise exception(InternalError)
-      end cases
     instructions:
       - sig: jeq v:in:i32, imm:i32
         acc: in:i32
@@ -951,8 +780,6 @@ groups:
   - title: Floating-point unary
     description: Perform specified floating-point operation on accumulator
     properties:
-      - acc_read
-      - acc_write
       - float
     exceptions:
       - x_none
@@ -963,9 +790,6 @@ groups:
       case fneg:
       case fneg.64:
         acc = -acc
-    semantics: |-
-      raise exception(WrongRegisterValue) if false that type_of(@acc) is float;
-      acc <~ neg(@acc)
     instructions:
       - sig: fneg
         acc: inout:f32
@@ -979,9 +803,6 @@ groups:
 
   - title: Unary
     description: Perform specified operation on accumulator
-    properties:
-      - acc_read
-      - acc_write
     exceptions:
       - x_none
     verification:
@@ -994,28 +815,6 @@ groups:
       case not:
       case not.64:
         acc = ~acc
-    semantics: |-
-      Acc := @acc;
-      cases
-        when Op == "neg" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i32;
-          acc <~ neg(Acc)
-        end when;
-        when Op == "neg.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i64;
-          acc <~ neg(Acc)
-        end when;
-        when Op == "not" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i32;
-          acc <~ neg(Acc) - value(i32, 1)
-        end when;
-        when Op == "not.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i64;
-          acc <~ neg(Acc) - value(i64, 1)
-        end when;
-        else raise exception (UndefinedSemantics)
-        undefined raise exception (InternalError)
-      end cases
     instructions:
       - sig: neg
         acc: inout:i32
@@ -1038,9 +837,6 @@ groups:
 
   - title: Two address binary operation on accumulator
     description: Perform specified binary operation on accumulator and register and store result into accumulator
-    properties:
-      - acc_read
-      - acc_write
     exceptions:
       - x_none
     verification:
@@ -1073,100 +869,17 @@ groups:
       case xor2.64:
         acc = acc ^ vs
       case shl2:
-        acc = acc << (vs & 0x1f)
+        acc = (acc << (vs & 0x1f)) % 2^32
       case shl2.64:
-        acc = acc << (vs & 0x3f)
+        acc = (acc << (vs & 0x3f)) % 2^64
       case shr2:
         acc = acc >> (vs & 0x1f)
       case shr2.64:
         acc = acc >> (vs & 0x3f)
       case ashr2:
-        acc = arith_shift_right(acc, vs & 0x1f)
+        acc = (acc < 0) ? ~(~acc >> vs & 0x1f) : acc >> vs & 0x1f
       case ashr2.64:
-        acc = arith_shift_right(acc, vs & 0x3f)
-    semantics: |-
-      Acc := @acc;
-      Vs := @Vs;
-      cases
-        when Op == "add2" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i32 and type_of(Vs) is i32;
-          acc <~ truncate_int(Acc + Vs)
-        end when;
-        when Op == "add2.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i64 and type_of(Vs) is i64;
-          acc <~ truncate_int(Acc + Vs)
-        end when;
-
-        when Op == "sub2" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i32 and type_of(Vs) is i32;
-          acc <~ truncate_int(Acc - Vs)
-        end when;
-        when Op == "sub2.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i64 and type_of(Vs) is i64;
-          acc <~ truncate_int(Acc - Vs)
-        end when;
-
-        when Op == "mul2" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i32 and type_of(Vs) is i32;
-          acc <~ truncate_int(Acc * Vs)
-        end when;
-        when Op == "mul2.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i64 and type_of(Vs) is i64;
-          acc <~ truncate_int(Acc * Vs)
-        end when;
-
-        when Op == "and2" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i32 and type_of(Vs) is i32;
-          acc <~ truncate_int(Acc & Vs)
-        end when;
-        when Op == "and2.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i64 and type_of(Vs) is i64;
-          acc <~ truncate_int(Acc & Vs)
-        end when;
-
-        when Op == "or2" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i32 and type_of(Vs) is i32;
-          acc <~ truncate_int(Acc | Vs)
-        end when;
-        when Op == "or2.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i64 and type_of(Vs) is i64;
-          acc <~ truncate_int(Acc | Vs)
-        end when;
-
-        when Op == "xor2" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i32 and type_of(Vs) is i32;
-          acc <~ truncate_int(Acc ^ Vs)
-        end when;
-        when Op == "xor2.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i64 and type_of(Vs) is i64;
-          acc <~ truncate_int(Acc ^ Vs)
-        end when;
-
-        when Op == "shl2" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i32 and type_of(Vs) is i32;
-          acc <~ truncate_int(Acc << Vs)
-        end when;
-        when Op == "shl2.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i64 and type_of(Vs) is i64;
-          acc <~ truncate_int(Acc << Vs)
-        end when;
-
-        when Op == "shr2" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i32 and type_of(Vs) is i32;
-          acc <~ truncate_int(Acc >> Vs)
-        end when;
-        when Op == "shr2.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i64 and type_of(Vs) is i64;
-          acc <~ truncate_int(Acc >> Vs)
-        end when
-
-        //      case ashr2:
-        //        acc = arith_shift_right(acc, vs & 0x1f)
-        //      case ashr2.64:
-        //        acc = arith_shift_right(acc, vs & 0x3f)
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
+        acc = (acc < 0) ? ~(~acc >> vs & 0x3f) : acc >> vs & 0x3f
     instructions:
       - sig: add2 v:in:i32
         acc: inout:i32
@@ -1271,8 +984,6 @@ groups:
       - The sum or the difference of zeros is zero. Exceptions are the sum of two negative zeros and the difference of negative and positive zero - the result is negative zero.
 
     properties:
-      - acc_read
-      - acc_write
       - float
     exceptions:
       - x_none
@@ -1296,20 +1007,6 @@ groups:
       case fmod2:
       case fmod2.64:
         acc = acc % vs
-    semantics: |-
-      raise exception(WrongRegisterValue) if false that type_of(@acc) is float;
-      raise exception(WrongRegisterValue) if false that type_of(@Vs) is float;
-      Acc := float_of(@acc);
-      Vs  := float_of(@Vs);
-      cases
-        when Op == "fadd2" or Op == "fadd2.64" do acc <~ Acc + Vs end when;
-        when Op == "fsub2" or Op == "fsub2.64" do acc <~ Acc - Vs end when;
-        when Op == "fmul2" or Op == "fmul2.64" do acc <~ Acc * Vs end when;
-        when Op == "fdiv2" or Op == "fdiv2.64" do acc <~ Acc / Vs end when;
-        when Op == "fmod2" or Op == "fmod2.64" do acc <~ Acc % Vs end when
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
     instructions:
       - sig: fadd2 v:in:f32
         acc: inout:f32
@@ -1359,9 +1056,6 @@ groups:
 
   - title: Two address integer division and modulo on accumulator
     description: Perform integer division or modulo on accumulator and register and store result into accumulator
-    properties:
-      - acc_read
-      - acc_write
     exceptions:
       - x_arith
     verification:
@@ -1402,45 +1096,6 @@ groups:
       case modu:
       case modu.64:
         acc = acc % vs
-    semantics: |-
-      Acc := @acc;
-      Vs := @Vs;
-      cases
-        when Op == "div2" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i32 and type_of(Vs) is i32;
-          acc <~ truncate_int(Acc / Vs)
-        end when;
-        when Op == "div2.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i64 and type_of(Vs) is i64;
-          acc <~ truncate_int(Acc / Vs)
-        end when;
-        when Op == "mod2" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i32 and type_of(Vs) is i32;
-          acc <~ truncate_int(Acc % Vs)
-        end when;
-        when Op == "mod2.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is i64 and type_of(Vs) is i64;
-          acc <~ truncate_int(Acc % Vs)
-        end when;
-        when Op == "divu2" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is u32 and type_of(Vs) is u32;
-          acc <~ truncate_int(Acc / Vs)
-        end when;
-        when Op == "divu2.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is u64 and type_of(Vs) is u64;
-          acc <~ truncate_int(Acc / Vs)
-        end when;
-        when Op == "modu2" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is u32 and type_of(Vs) is u32;
-          acc <~ truncate_int(Acc % Vs)
-        end when;
-        when Op == "modu2.64" do
-          raise exception(WrongRegisterValue) if false that type_of(Acc) is u64 and type_of(Vs) is u64;
-          acc <~ truncate_int(Acc % Vs)
-        end when
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
     instructions:
       - sig: div2 v:in:i32
         acc: inout:i32
@@ -1483,9 +1138,6 @@ groups:
     description: >
       Perform specified binary operation on accumulator and immediate and store result into accumulator.
       Immediate is sign extended to operand size.
-    properties:
-      - acc_write
-      - acc_read
     exceptions:
       - x_none
     verification:
@@ -1505,47 +1157,11 @@ groups:
       case xori:
         acc = acc ^ imm
       case shli:
-        acc = acc << (imm & 0x1f)
+        acc = (acc << (imm & 0x1f)) % 2^32
       case shri:
         acc = acc >> (imm & 0x1f)
       case ashri:
-        acc = arith_shift_right(acc, imm & 0x1f)
-    semantics: |-
-      Acc := @acc;
-      raise exception(WrongRegisterValue) if false that type_of(Acc) is i32;
-      Imm := value_of(i32, int_of(Imm));
-      raise exception(WrongImmediateValue) if undefined Imm;
-      cases
-        when Op == "addi" do
-          acc <~ truncate_int(Acc + Imm)
-        end when;
-        when Op == "subi" do
-          acc <~ truncate_int(Acc - Imm)
-        end when;
-        when Op == "muli" do
-          acc <~ truncate_int(Acc * Imm)
-        end when;
-        when Op == "andi" do
-          acc <~ Acc & Imm
-        end when;
-        when Op == "ori" do
-          acc <~ Acc | Imm
-        end when;
-        when Op == "xori" do
-          acc <~ Acc ^ Imm
-        end when;
-        when Op == "shli" do
-          acc <~ truncate_int(Acc << Imm)
-        end when;
-        when Op == "shri" do
-          acc <~ Acc >> Imm
-        end when
-        //when Op == "ashri" do
-        //  acc <~
-        //end when
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
+        acc = (acc < 0) ? ~(~acc >> imm & 0x1f) : acc >> imm & 0x1f
     instructions:
       - sig: addi imm:i32
         acc: inout:i32
@@ -1589,9 +1205,6 @@ groups:
     description: >
       Perform two address integer division or modulo on accumulator and immediate and store result into accumulator.
       Immediate is sign extended to operand size.
-    properties:
-      - acc_write
-      - acc_read
     exceptions:
       - x_arith
     verification:
@@ -1613,21 +1226,6 @@ groups:
         else
           acc = acc % imm
         end
-    semantics: |-
-      Vs := @Vs;
-      Imm := value_of(i32, int_of(Imm));
-      raise exception(WrongRegisterValue) if false that type_of(Vs) is i32;
-      raise exception(WrongImmediateValue) if undefined Imm;
-      cases
-        when Op == "div" do
-          acc <~ Vs / Imm
-        end when;
-        when Op == "mod" do
-          acc <~ Vs % Imm
-        end when
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
     instructions:
       - sig: divi imm:i32
         acc: inout:i32
@@ -1640,8 +1238,6 @@ groups:
 
   - title: Three address binary operation
     description: Perform specified binary operation on two registers and store result into accumulator
-    properties:
-      - acc_write
     exceptions:
       - x_none
     verification:
@@ -1662,45 +1258,11 @@ groups:
       case xor:
         acc = vs1 ^ vs2
       case shl:
-        acc = vs1 << (vs2 & 0x1f)
+        acc = (vs1 << (vs2 & 0x1f)) % 2^32
       case shr:
         acc = vs1 >> (vs2 & 0x1f)
       case ashr:
-        acc = arith_shift_right(vs1, vs2 & 0x1f)
-    semantics: |-
-      Vs1 := @Vs1;
-      Vs2 := @Vs2;
-      raise exception(WrongRegisterValue) if false that type_of(Vs1) is i32 and type_of(Vs2) is i32;
-      cases
-        when Op == "add" do
-          acc <~ truncate_int(Vs1 + Vs2)
-        end when;
-        when Op == "sub" do
-          acc <~ truncate_int(Vs1 - Vs2)
-        end when;
-        when Op == "mul" do
-          acc <~ truncate_int(Vs1 * Vs2)
-        end when;
-        when Op == "and" do
-          acc <~ truncate_int(Vs1 & Vs2)
-        end when;
-        when Op == "or" do
-          acc <~ truncate_int(Vs1 | Vs2)
-        end when;
-        when Op == "xor" do
-          acc <~ truncate_int(Vs1 ^ Vs2)
-        end when;
-        when Op == "shl" do
-          acc <~ truncate_int(Vs1 << Vs2)
-        end when;
-        when Op == "shr" do
-          acc <~ truncate_int(Vs1 >> Vs2)
-        end when
-        // when Op == "ashr" do
-        // end when
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
+        acc = (vs1 < 0) ? ~(~vs1 >> vs2 & 0x1f) : vs1 >> vs2 & 0x1f
     instructions:
       - sig: add v1:in:i32, v2:in:i32
         acc: out:i32
@@ -1747,8 +1309,6 @@ groups:
 
   - title: Three address integer division or modulo
     description: Perform integer division or modulo on two registers and store result into accumulator
-    properties:
-      - acc_write
     exceptions:
       - x_arith
     verification:
@@ -1771,20 +1331,6 @@ groups:
         else
           acc = vs1 % vs2
         end
-    semantics: |-
-      Vs1 := @Vs1;
-      Vs2 := @Vs2;
-      raise exception(WrongRegisterValue) if false that type_of(Vs1) is i32 and type_of(Vs2) is i32;
-      cases
-        when Op == "div" do
-          acc <~ Vs1 / Vs2
-        end when;
-        when Op == "mod" do
-          acc <~ Vs1 % Vs2
-        end when
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
     instructions:
       - sig: div v1:in:i32, v2:in:i32
         acc: out:i32
@@ -1798,20 +1344,12 @@ groups:
   - title: Increment register with immediate
     description: >
       Increment virtual register by specified immediate. Immediate is sign extended to operand size.
-    properties:
-      - acc_none
     exceptions:
       - x_none
     verification:
       - v1_i32
     pseudo: |
       vx = (vx + imm) % 2^32
-    semantics: |-
-      V := @Vx;
-      Imm := value_of(i32, int_of(Imm));
-      raise exception(WrongRegisterValue) if false that type_of(V) is i32;
-      raise exception(WrongImmediateValue) if undefined int_of(Imm);
-      Vx <~ V + Imm
     instructions:
       - sig: inci v:inout:i32, imm:i32
         acc: none
@@ -1824,15 +1362,13 @@ groups:
       Conversion from floating-point types to integer one obeys the following rules.
 
       - It is rounding toward zero.
-      - If converted integer is less than minimal value for destination type, the result is minimal value for that type.
+      - If converted value is less than minimal value for destination type, the result is minimal value for that type.
       - If source is negative infinity, the result is minimal value for destination type.
-      - If converted integer is greater than maximum value for destination type, the result is maximum value for that type.
+      - If converted value is greater than maximum value for destination type, the result is maximum value for that type.
       - If source is positive infinity, the result is maximum value for destination type.
       - If source is NaN, the result is equal to 0.
 
     properties:
-      - acc_read
-      - acc_write
       - float
     exceptions:
       - x_none
@@ -1840,79 +1376,6 @@ groups:
       - acc_type
     pseudo: |
       (dest_type) acc = (src_type) acc
-    semantics: |-
-      cases
-        when Op == "i32tof32" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is i32;
-          acc <~ i32tof32(@acc)
-        end when;
-        when Op == "i32tof64" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is i32;
-          acc <~ i32tof64(@acc)
-        end when;
-        when Op == "u32tof32" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u32;
-          acc <~ u32tof32(@acc)
-        end when;
-        when Op == "u32tof64" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u32;
-          acc <~ u32tof64(@acc)
-        end when;
-        when Op == "i64tof32" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is i64;
-          acc <~ i64tof32(@acc)
-        end when;
-        when Op == "i64tof64" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is i64;
-          acc <~ i64tof64(@acc)
-        end when;
-        when Op == "u64tof32" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u64;
-          acc <~ u64tof32(@acc)
-        end when;
-        when Op == "u64tof64" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u64;
-          acc <~ u64tof64(@acc)
-        end when;
-        when Op == "f32toi32" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is f32;
-          acc <~ f32toi32(@acc)
-        end when;
-        when Op == "f32tou32" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is f32;
-          acc <~ f32tou32(@acc)
-        end when;
-        when Op == "f32toi64" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is f32;
-          acc <~ f32toi64(@acc)
-        end when;
-        when Op == "f32tou64" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is f32;
-          acc <~ f32tou64(@acc)
-        end when
-        when Op == "f64toi32" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is f64;
-          acc <~ f64toi32(@acc)
-        end when;
-        when Op == "f64tou32" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is f64;
-          acc <~ f64tou32(@acc)
-        end when;
-        when Op == "f64toi64" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is f64;
-          acc <~ f64toi64(@acc)
-        end when;
-        when Op == "f64tou64" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is f64;
-          acc <~ f64tou64(@acc)
-        end when
-        when Op == "f64tof32" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is f64;
-          acc <~ f64tof32(@acc)
-        end when
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
     instructions:
       - sig: i32tof32
         acc: inout:i32->f32
@@ -2012,36 +1475,12 @@ groups:
       - If converted integer is not equal to zero, the result is 1.
       - Otherwise the result is 0.
 
-    properties:
-      - acc_read
-      - acc_write
     exceptions:
       - x_none
     verification:
       - acc_type
     pseudo: |
       (dest_type) acc = (src_type) acc
-    semantics: |-
-      cases
-        when Op == "i32tou1" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is i32;
-          acc <~ i32tou1(@acc)
-        end when
-        when Op == "i64tou1" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is i64;
-          acc <~ i64tou1(@acc)
-        end when
-        when Op == "u32tou1" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u32;
-          acc <~ u32tou1(@acc)
-        end when
-        when Op == "u64tou1" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u64;
-          acc <~ u64tou1(@acc)
-        end when
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
     instructions:
       - sig: i32tou1
         acc: inout:i32->u1
@@ -2070,72 +1509,12 @@ groups:
       Truncations discard all but N lowest-order bits, where N is the bit size of destination type.
       If extension bytecode treats its source as signed integer, the value is sign-extended to destination type.
       If extension bytecode treats its source as unsigned integer, the value is zero-extended to destination type.
-    properties:
-      - acc_read
-      - acc_write
     exceptions:
       - x_none
     verification:
       - acc_type
     pseudo: |
       (dest_type) acc = (src_type) acc
-    semantics: |-
-      cases
-        when Op == "i32toi64" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is i32;
-          acc <~ i32toi64(@acc)
-        end when;
-        when Op == "i32toi16" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is i32;
-          acc <~ i32toi16(@acc)
-        end when;
-        when Op == "i32tou16" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is i32;
-          acc <~ i32tou16(@acc)
-        end when;
-        when Op == "i32toi8" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is i32;
-          acc <~ i32toi8(@acc)
-        end when;
-        when Op == "i32tou8" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is i32;
-          acc <~ i32tou8(@acc)
-        end when;
-        when Op == "i64toi32" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is i64;
-          acc <~ i64toi32(@acc)
-        end when;
-        when Op == "u32toi64" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u32;
-          acc <~ u32toi64(@acc)
-        end when
-        when Op == "u32toi16" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u32;
-          acc <~ u32toi16(@acc)
-        end when
-        when Op == "u32tou16" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u32;
-          acc <~ u32tou16(@acc)
-        end when
-        when Op == "u32toi8" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u32;
-          acc <~ u32toi8(@acc)
-        end when
-        when Op == "u32tou8" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u32;
-          acc <~ u32tou8(@acc)
-        end when
-        when Op == "u64toi32" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u64;
-          acc <~ u64toi32(@acc)
-        end when
-        when Op == "u64tou32" do
-          raise exception(WrongRegisterValue) if false that type_of(@acc) is u64;
-          acc <~ u64tou32(@acc)
-        end when
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
     instructions:
       - sig: i32toi64
         acc: inout:i32->i64
@@ -2211,9 +1590,6 @@ groups:
     verification:
       - v1_array_type
       - acc_i32
-    properties:
-      - acc_read
-      - acc_write
     exceptions:
       - x_null
       - x_bounds
@@ -2235,8 +1611,6 @@ groups:
       else
         acc = vs[acc]
       end
-    semantics: |-
-      acc <~ (@Vs) [@acc]
     instructions:
       - sig: ldarr.8 v:in:i8[]
         acc: inout:i32
@@ -2266,12 +1640,12 @@ groups:
         acc: inout:i32->f32
         format: [op_v_8]
         opcode_idx: [0x6d]
-        properties: [acc_read, acc_write, float]
+        properties: [float]
       - sig: fldarr.64 v:in:f64[]
         acc: inout:i32->f64
         format: [op_v_8]
         opcode_idx: [0x6e]
-        properties: [acc_read, acc_write, float]
+        properties: [float]
       - sig: ldarr.obj v:in:ref[]
         acc: inout:i32->ref
         format: [op_v_8]
@@ -2286,8 +1660,6 @@ groups:
       - v1_array_type
       - v2_i32
       - acc_type
-    properties:
-      - acc_read
     exceptions:
       - x_null
       - x_bounds
@@ -2309,8 +1681,6 @@ groups:
       else
         vs1[vs2] = acc
       end
-    semantics: |-
-      (@Vs1) <~ (@Vs1) [ (@Vs2) ] <- (@acc)
     instructions:
       - sig: starr.8 v1:in:i8[], v2:in:i32
         acc: in:i8
@@ -2332,12 +1702,12 @@ groups:
         acc: in:f32
         format: [op_v1_4_v2_4]
         opcode_idx: [0x74]
-        properties: [acc_read, float]
+        properties: [float]
       - sig: fstarr.64 v1:in:f64[], v2:in:i32
         acc: in:f64
         format: [op_v1_4_v2_4]
         opcode_idx: [0x75]
-        properties: [acc_read, float]
+        properties: [float]
       - sig: starr.obj v1:in:ref[], v2:in:i32
         acc: in:ref
         format: [op_v1_4_v2_4]
@@ -2345,8 +1715,6 @@ groups:
 
   - title: Array length
     description: Get length of an array and put it into accumulator.
-    properties:
-      - acc_write
     verification:
       - v1_array
     exceptions:
@@ -2356,8 +1724,6 @@ groups:
         throw NullPointerException
       end
       acc = len(vs)
-    semantics: |-
-      acc <~ array_length(@Vs)
     instructions:
       - sig: lenarr v:in:top[]
         acc: out:i32
@@ -2375,20 +1741,21 @@ groups:
       - x_negsize
       - x_oom
     properties:
-      - acc_none
       - type_id
       - language_type
+      - initialize_type
     pseudo: |
       if v2 < 0 then
         throw NegativeArraySizeException
       end
       type = resolve(type_id)
       v1 = new_array(v2, type)
+      if not initialized(type)
+        initialize(type)
+      end
       if v1 == null then
         throw OutOfMemoryError
       end
-    semantics: |-
-      @V1 <~ new_array(TypeId, @V2)
     instructions:
       - sig: newarr v1:out:ref, v2:in:i32, type_id
         acc: none
@@ -2406,16 +1773,17 @@ groups:
     exceptions:
       - x_oom
     properties:
-      - acc_none
       - type_id
+      - initialize_type
     pseudo: |
       type = resolve(type_id)
-      v = new(type)
+      if not initialized(type)
+        initialize(type)
+      end
+      v = new_instance(type)
       if v == null then
         throw OutOfMemoryError
       end
-    semantics: |-
-      skip
     instructions:
       - sig: newobj v:out:ref, type_id
         acc: none
@@ -2428,7 +1796,7 @@ groups:
       default values (i.e. 0 for primitives and null for objects), call specified initializer and put a reference to
       the newly created object into accumulator. method_id should resolve to an initializer.
       Non-range instructions can be used to pass up to 4 arguments.
-      Unused register slot values will be discarded and corresponding registers will not be passed to initializer.
+      Unused register slot values will be discarded and corresponding registers will not be passed to initializer).
       For methods with more arguments range kinds of instruction are to be used, which takes the needed number of
       arguments starting from 'vs' register.
     verification:
@@ -2439,18 +1807,21 @@ groups:
     exceptions:
       - x_abstract
       - x_oom
+      - x_call
     properties:
-      - acc_write
       - method_id
+      - call
+      - initialize_type
     pseudo: |
       init, type = resolve(method_id)
-      acc = new(type)
+      if not initialized(type)
+        initialize(type)
+      end
+      acc = new_instance(type)
       if acc == null then
         throw OutOfMemoryError
       end
       init(acc, args)
-    semantics: |-
-      skip
     instructions:
       - sig: initobj.short method_id, v1:in:none, v2:in:none
         acc: out:ref
@@ -2476,7 +1847,6 @@ groups:
       - field_id_non_static
       - field_id_size
     properties:
-      - acc_write
       - field_id
     exceptions:
       - x_null
@@ -2490,8 +1860,6 @@ groups:
       else
         acc = vs.get(field)
       end
-    semantics: |-
-      skip
     instructions:
       - sig: ldobj v:in:ref, field_id
         acc: out:b32
@@ -2517,7 +1885,6 @@ groups:
       - field_id_size
       - acc_type
     properties:
-      - acc_read
       - field_id
     exceptions:
       - x_null
@@ -2531,8 +1898,6 @@ groups:
       else
         vs.set(field, acc)
       end
-    semantics: |-
-      skip
     instructions:
       - sig: stobj v:in:ref, field_id
         acc: in:b32
@@ -2553,13 +1918,11 @@ groups:
       For non-object variant, the size of the field is determined by the field_id,
       most significant bits are sign or unsigned extended based on the field type to fit register size.
       If field type size is less than 32, then loaded value is sign or zero extended to i32 depending on field type.
-      If field type is f32, load will implicitly convert value into f64 type.
     verification:
       - v2_object
       - field_id_non_static
       - field_id_size
     properties:
-      - acc_none
       - field_id
     exceptions:
       - x_null
@@ -2570,15 +1933,11 @@ groups:
       field = resolve(field_id)
       if op == ldobj and size(field) < 32 then
         v1 = extendto32(v2.get(field))
-      else if type(field) == f32 then
-        v1 = f32tof64(v2.get(field))
       else
         v1 = v2.get(field)
       end
-    semantics: |-
-      skip
     instructions:
-      - sig: ldobj.v v1:out:i32, v2:in:ref, field_id
+      - sig: ldobj.v v1:out:b32, v2:in:ref, field_id
         acc: none
         format: [op_v1_4_v2_4_id_16]
         opcode_idx: [0x83]
@@ -2602,7 +1961,6 @@ groups:
       - field_id_non_static
       - field_id_size
     properties:
-      - acc_none
       - field_id
     exceptions:
       - x_null
@@ -2616,8 +1974,6 @@ groups:
       else
         v2.set(field, v1)
       end
-    semantics: |-
-      skip
     instructions:
       - sig: stobj.v v1:in:b32, v2:in:ref, field_id
         acc: none
@@ -2642,19 +1998,20 @@ groups:
       - field_id_static
       - field_id_size
     properties:
-      - acc_write
       - field_id
+      - initialize_type
     exceptions:
       - x_init
     pseudo: |
-      field = resolve(field_id)
+      field, type = resolve(field_id)
+      if not initialized(type)
+        initialize(type)
+      end
       if op == ldstatic and size(field) < 32 then
         acc = extendto32(get_static(field))
       else
         acc = get_static(field)
       end
-    semantics: |-
-      skip
     instructions:
       - sig: ldstatic field_id
         acc: out:b32
@@ -2679,19 +2036,20 @@ groups:
       - field_id_size
       - acc_type
     properties:
-      - acc_read
       - field_id
+      - initialize_type
     exceptions:
       - x_init
     pseudo: |
-      field = resolve(field_id)
+      field, type = resolve(field_id)
+      if not initialized(type)
+        initialize(type)
+      end
       if op == ststatic and size(field) < 32 then
         set_static(field, truncate(field, acc))
       else
         set_static(field, acc)
       end
-    semantics: |-
-      skip
     instructions:
       - sig: ststatic field_id
         acc: in:b32
@@ -2715,15 +2073,12 @@ groups:
     exceptions:
       - x_none
     properties:
-      - acc_read
       - return
     pseudo: |
       return acc
-    semantics: |-
-      perform_return(@acc)
     instructions:
       - sig: return
-        acc: in:i32
+        acc: in:b32
         format: [op_none]
         opcode_idx: [0x8f]
       - sig: return.64
@@ -2745,12 +2100,9 @@ groups:
     exceptions:
       - x_none
     properties:
-      - acc_none
       - return
     pseudo: |
       return
-    semantics: |-
-      perform_return_void()
     instructions:
       - sig: return.void
         acc: none
@@ -2767,15 +2119,12 @@ groups:
       - v1_throw_type
     exceptions:
       - x_null
-    properties:
-      - acc_none
+      - x_throw
     pseudo: |
       if vs == null then
         throw NullPointerException
       end
       throw vs
-    semantics: |-
-      skip
     instructions:
       - sig: throw v:in:ref
         acc: none
@@ -2796,15 +2145,12 @@ groups:
     exceptions:
       - x_cast
     properties:
-      - acc_read
       - type_id
     pseudo: |
       type = resolve(type_id)
       if acc != null and !has_type(acc, type) then
         throw ClassCastException
       end
-    semantics: |-
-      skip
     instructions:
       - sig: checkcast type_id
         acc: in:ref
@@ -2824,8 +2170,6 @@ groups:
     exceptions:
       - x_classdef
     properties:
-      - acc_read
-      - acc_write
       - type_id
     pseudo: |
       type = resolve(type_id)
@@ -2834,8 +2178,6 @@ groups:
       else
         acc = 1
       end
-    semantics: |-
-      skip
     instructions:
       - sig: isinstance type_id
         acc: inout:ref->i32
@@ -2862,23 +2204,17 @@ groups:
       - method_id_non_abstract
       - compatible_arguments
     properties:
-      - acc_write
       - method_id
       - call
       - maybe_dynamic
+      - initialize_type
     exceptions:
-      - x_none
+      - x_call
     pseudo: |
-      method = resolve(method_id)
+      if not initialized(type)
+        initialize(type)
+      end
       acc = call(method, args)
-    semantics: |-
-      cases
-        when Op == "call.short" do perform_call_fixed_args( MethodId, [[ @Vs1, @Vs2 ]] ) end when;
-        when Op == "call"       do perform_call_fixed_args( MethodId, [[ @Vs1, @Vs2, @Vs3, @Vs4 ]] ) end when;
-        when Op == "call.range" do perform_call_range_fixed_args( MethodId, Vs ) end when
-        else raise exception(UndefinedSemantics)
-        undefined raise exception(InternalError)
-      end cases
     instructions:
       - sig: call.short method_id, v1:in:top, v2:in:top
         acc: out:top
@@ -2912,13 +2248,11 @@ groups:
       - method_id_non_abstract
       - compatible_arguments
     properties:
-      - acc_write
-      - acc_read
       - method_id
       - call
       - maybe_dynamic
     exceptions:
-      - x_none
+      - x_call
     pseudo: |
       args = []
       for (i = 0; i < 4; ++i)
@@ -2932,8 +2266,6 @@ groups:
       end
       method = resolve(method_id)
       acc = call(method, args)
-    semantics: |-
-      skip
     instructions:
       - sig: call.acc.short method_id, v:in:top, imm:u1
         acc: inout:top
@@ -2968,8 +2300,8 @@ groups:
     exceptions:
       - x_null
       - x_abstract
+      - x_call
     properties:
-      - acc_write
       - method_id
       - call
       - call_virt
@@ -2982,8 +2314,6 @@ groups:
         throw AbstractMethodError
       end
       acc = call(method, args)
-    semantics: |-
-      skip
     instructions:
       - sig: call.virt.short method_id, v1:in:top, v2:in:top
         acc: out:top
@@ -3021,9 +2351,8 @@ groups:
     exceptions:
       - x_null
       - x_abstract
+      - x_call
     properties:
-      - acc_write
-      - acc_read
       - method_id
       - call
       - call_virt
@@ -3046,8 +2375,6 @@ groups:
         throw AbstractMethodError
       end
       acc = call(method, args)
-    semantics: |-
-      skip
     instructions:
       - sig: call.virt.acc.short method_id, v:in:top, imm:u1
         acc: inout:top
@@ -3066,12 +2393,9 @@ groups:
     exceptions:
       - x_none
     properties:
-      - acc_none
       - dynamic
     pseudo: |
       vd = vs
-    semantics: |
-      skip
     instructions:
       - sig: mov.dyn v1:out:any, v2:in:any
         acc: none
@@ -3086,12 +2410,9 @@ groups:
     exceptions:
       - x_none
     properties:
-      - acc_write
       - dynamic
     pseudo: |
       acc = v
-    semantics: |
-      skip
     instructions:
       - sig: lda.dyn v:in:any
         acc: out:any
@@ -3106,12 +2427,9 @@ groups:
     exceptions:
       - x_none
     properties:
-      - acc_read
       - dynamic
     pseudo: |
       v = acc
-    semantics: |
-      skip
     instructions:
       - sig: sta.dyn v:out:any
         acc: in:any
@@ -3126,12 +2444,9 @@ groups:
     exceptions:
       - x_none
     properties:
-      - acc_write
       - dynamic
     pseudo: |
       acc = imm
-    semantics: |
-      skip
     instructions:
       - sig: ldai.dyn imm:i32
         acc: out:any
@@ -3141,7 +2456,7 @@ groups:
         acc: out:any
         format: [op_imm_64]
         opcode_idx: [0xa5]
-        properties: [acc_write, float, dynamic]
+        properties: [float, dynamic]
 
   - title: Dynamic return from method
     description: >
@@ -3151,13 +2466,10 @@ groups:
     exceptions:
       - x_none
     properties:
-      - acc_read
       - dynamic
       - return
     pseudo: |
       return acc
-    semantics: |
-      skip
     instructions:
       - sig: return.dyn
         acc: in:any
@@ -3171,7 +2483,7 @@ groups:
       Callee should treat accumulator value as undefined and cannot use it until accumulator
       definition in the new frame.
       The callee must always return the result in the accumulator.
-      First source register contains a function 'any' value, and the other imm source registers contain
+      First source register contains a function 'any' value, other imm source registers contain
       arguments of a function.
       Non-range instructions can be used to pass up to 4 arguments (unused register slot values will
       be discarded and corresponding registers will not be passed to the callee).
@@ -3180,16 +2492,13 @@ groups:
     verification:
       - valid_in_dynamic_context
     exceptions:
-      - x_none
+      - x_call
     properties:
-      - acc_write
       - dynamic
       - call
     pseudo: |
       func, args = source_registers
       acc = func(args)
-    semantics: |
-      skip
     instructions:
       - sig: calli.dyn.short imm, v1:in:any, v2:in:any, v3:in:any
         acc: out:any

@@ -13,14 +13,20 @@
 
 # testing of return instructions with different argument types
 
-.function u1 g() {
+.record A {}
 
+.function u1 g1() {
     return
+}
 
+.function f64 g2() {
     return.64
+}
 
+.function A g3() {
     return.obj
+}
 
+.function void g4() {
     return.void
-
 }

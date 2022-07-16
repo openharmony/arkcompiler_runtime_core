@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,8 +206,9 @@ DebugInfo::ErrorCode DebugInfo::ReadFromFile(const char *filename)
     fd_ = open(filename, O_RDONLY | O_CLOEXEC);
     int res = dwarf_init(fd_, DW_DLC_READ, DwarfErrorHandler, nullptr, &dbg_, &err);
     if (res != DW_DLV_OK) {
-        // In case dwarf_init fails it allocates memory for the error and returns it in 'err' variable.
-        // But since dbg is NULL, dwarf_dealloc just returns in case of dbg == nullptr and doesn't free this memory.
+        // TODO(audovichenko): Libdwarf has a bug (memory leak).
+        // In case dwarf_init fails it allocates memory for the error and  returns it in 'err' variable.
+        // But since dbg is NULL, dwarf_dealloc just returns in case of dbg == nullptr and doesn't free this memory
         // A possible solution is to use 20201201 version and call dwarf_dealloc.
         free(err);  // NOLINT(cppcoreguidelines-no-malloc)
         close(fd_);
@@ -220,7 +221,7 @@ DebugInfo::ErrorCode DebugInfo::ReadFromFile(const char *filename)
     if (res == DW_DLV_NO_ENTRY) {
         return NO_DEBUG_INFO;
     }
-    // Aranges (address ranges, something like index) is an entity which helps us to find the compilation unit quickly.
+    // Aranges (address ranges) is an entity which help us to find the compilation unit quickly (something like index)
     if (dwarf_get_aranges(dbg_, &aranges_, &arange_count_, nullptr) != DW_DLV_OK) {
         aranges_ = nullptr;
         arange_count_ = 0;
@@ -233,14 +234,13 @@ bool DebugInfo::GetSrcLocation(uintptr_t pc, std::string *function, std::string 
     if (dbg_ == nullptr) {
         return false;
     }
-
-    // Debug information has hierarchical structure.
+    // Debug information have hierarchical structure.
     // Each node is represented by DIE (debug information entity).
-    // .debug_info has a list of DIEs which correspond to compilation units (object files).
+    // .debug_info has a list of DIE which corresponds to compilation units (object files).
     // Mapping pc to function is to find the compilation unit DIE and then find the subprogram DIE.
     // From the subprogram DIE we get the function name.
     // Line information is available for compilation unit DIEs. So we decode lines for the whole
-    // compilation unit and find the corresponding line and file which matche the pc.
+    // compilation unit and find the corresponding line and file which matches the pc.
     //
     // You could use objdump --dwarf=info <object file> to view available debug information.
 
@@ -368,7 +368,7 @@ void DebugInfo::AddFunction(CompUnit *cu, Dwarf_Addr low_pc, Dwarf_Addr high_pc,
     }
 }
 
-void DebugInfo::GetFunctionName(Dwarf_Die die, std::string *function) const
+void DebugInfo::GetFunctionName(Dwarf_Die die, std::string *function)
 {
     char *name = nullptr;
 
@@ -411,7 +411,7 @@ void DebugInfo::GetFunctionName(Dwarf_Die die, std::string *function) const
 }
 
 bool DebugInfo::GetSrcFileAndLine(uintptr_t pc, Dwarf_Line_Context line_ctx, std::string *out_src_file,
-                                  uint32_t *out_line) const
+                                  uint32_t *out_line)
 {
     if (line_ctx == nullptr) {
         return false;
@@ -450,7 +450,7 @@ bool DebugInfo::GetSrcFileAndLine(uintptr_t pc, Dwarf_Line_Context line_ctx, std
 }
 
 Dwarf_Line DebugInfo::GetLastLineWithPc(Dwarf_Addr pc, Span<Dwarf_Line>::ConstIterator it,
-                                        Span<Dwarf_Line>::ConstIterator end) const
+                                        Span<Dwarf_Line>::ConstIterator end)
 {
     Dwarf_Addr line_pc = 0;
     auto next = std::next(it);
@@ -465,7 +465,7 @@ Dwarf_Line DebugInfo::GetLastLineWithPc(Dwarf_Addr pc, Span<Dwarf_Line>::ConstIt
     return *it;
 }
 
-void DebugInfo::GetSrcFileAndLine(Dwarf_Line line, std::string *out_src_file, uint32_t *out_line) const
+void DebugInfo::GetSrcFileAndLine(Dwarf_Line line, std::string *out_src_file, uint32_t *out_line)
 {
     Dwarf_Unsigned ln;
     dwarf_lineno(line, &ln, nullptr);
@@ -481,14 +481,14 @@ void DebugInfo::GetSrcFileAndLine(Dwarf_Line line, std::string *out_src_file, ui
     }
 }
 
-bool DebugInfo::PcMatches(uintptr_t pc, Dwarf_Die die) const
+bool DebugInfo::PcMatches(uintptr_t pc, Dwarf_Die die)
 {
     Dwarf_Addr low_pc = DW_DLV_BADADDR;
     Dwarf_Addr high_pc = 0;
     return GetDieRangeForPc(pc, die, &low_pc, &high_pc);
 }
 
-bool DebugInfo::GetDieRange(Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc) const
+bool DebugInfo::GetDieRange(Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc)
 {
     Dwarf_Addr low_pc = DW_DLV_BADADDR;
     Dwarf_Addr high_pc = 0;
@@ -507,7 +507,7 @@ bool DebugInfo::GetDieRange(Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *o
     return true;
 }
 
-bool DebugInfo::GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc) const
+bool DebugInfo::GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc)
 {
     Dwarf_Addr low_pc = DW_DLV_BADADDR;
     Dwarf_Addr high_pc = 0;
@@ -539,7 +539,7 @@ bool DebugInfo::GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *out_lo
 }
 
 bool DebugInfo::FindRangeForPc(uintptr_t pc, const Span<Dwarf_Ranges> &ranges, Dwarf_Addr base_addr,
-                               Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc) const
+                               Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc)
 {
     for (const Dwarf_Ranges &range : ranges) {
         if (range.dwr_type == DW_RANGES_ENTRY) {

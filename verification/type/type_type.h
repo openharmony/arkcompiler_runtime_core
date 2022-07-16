@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_TYPE_TYPE_TYPE_H_
-#define PANDA_VERIFICATION_TYPE_TYPE_TYPE_H_
+#ifndef _PANDA_TYPE_TYPE_HPP__
+#define _PANDA_TYPE_TYPE_HPP__
 
 #include "type_sort.h"
 #include "type_index.h"
 #include "type_info.h"
-
-#include "type_system_kind.h"
+#include "type_tags.h"
 
 namespace panda::verifier {
 class TypeSystem;
@@ -29,6 +28,8 @@ class TypeParam;
 class TypeParams;
 
 class Type {
+    using TypeIndex = TaggedIndex<TypeSystemKindTag, ThreadNumTag, TypeNum>;
+
 public:
     Type() = default;
     Type(const Type &) = default;
@@ -76,6 +77,8 @@ public:
 
     TypeSystemKind GetTypeSystemKind() const;
 
+    ThreadNum GetThreadNum() const;
+
     bool IsValid() const;
 
     bool IsTop() const;
@@ -88,6 +91,8 @@ public:
 
     template <typename...>
     TypeParam operator*(TypeVariance variance) const;
+
+    // TODO(vdyadov): implement
 
     template <typename Handler>
     void ForAllParams(Handler &&handler) const;
@@ -105,11 +110,11 @@ public:
     void ForAllSubtypesOfSort(SortIdx sort, Handler &&handler) const;
 
 private:
-    Type(TypeSystemKind kind, TypeIdx idx) : Idx_ {kind, idx} {}
+    Type(TypeSystemKind kind, ThreadNum threadnum, TypeNum num) : Idx_ {kind, threadnum, num} {};
 
-    TypeIdx Index() const;
+    TypeNum Number() const;
 
-    TaggedIndex<TypeSystemKind> Idx_;
+    TypeIndex Idx_;
 
     friend class TypeSystem;
     friend class TypeParam;
@@ -117,7 +122,6 @@ private:
     friend class PandaTypes;
     friend class TypeSet;
 
-    template <typename SortNames>
     friend class TypeImage;
 
     friend struct std::hash<Type>;
@@ -129,9 +133,9 @@ template <>
 struct hash<panda::verifier::Type> {
     size_t operator()(const panda::verifier::Type &type) const
     {
-        return static_cast<size_t>(type.Index());
+        return static_cast<size_t>(type.Number());
     }
 };
 }  // namespace std
 
-#endif  // PANDA_VERIFICATION_TYPE_TYPE_TYPE_H_
+#endif  // !_PANDA_TYPE_TYPE_HPP__

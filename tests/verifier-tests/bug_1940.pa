@@ -17,7 +17,7 @@
     return
 }
 
-.function u1 main() {
+.function i32 main() {
     mov.null v0
     call.short nextVal, v2
     ldai 0

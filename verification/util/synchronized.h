@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,76 +13,76 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_SYNCHRONIZED_H_
-#define PANDA_VERIFICATION_UTIL_SYNCHRONIZED_H_
-
-#include <utility>
+#ifndef PANDA_VERIFIER_SYNCHRONIZED_HPP_
+#define PANDA_VERIFIER_SYNCHRONIZED_HPP_
 
 #include "verification/util/callable.h"
+
 #include "libpandabase/os/mutex.h"
 
 #include "macros.h"
 
-namespace panda::verifier {
+#include <utility>
 
+namespace panda::verifier {
 template <class C, class Friend1 = C, class Friend2 = C>
 class Synchronized {
     struct ConstProxy {
         ConstProxy() = delete;
         ConstProxy(const ConstProxy &) = delete;
-
         ConstProxy(ConstProxy &&other)
         {
             obj = other.obj;
             other.obj = nullptr;
         }
-
-        ConstProxy(const Synchronized *param_obj) : obj {param_obj} {}
-
-        ~ConstProxy() NO_THREAD_SAFETY_ANALYSIS
+        const Synchronized *obj;
+        ConstProxy(const Synchronized *param_obj) ACQUIRE_SHARED(obj->rw_lock_) : obj {param_obj}
+        {
+            obj->rw_lock_.ReadLock();
+        }
+        const C *operator->() const
+        {
+            ASSERT(obj != nullptr);
+            return &obj->c;
+        }
+        ~ConstProxy() RELEASE_SHARED(obj->rw_lock_)
         {
             if (obj != nullptr) {
                 obj->rw_lock_.Unlock();
             }
         }
-
-        const C *operator->()
-        {
-            ASSERT(obj != nullptr);
-            return &obj->c;
-        }
-
-        const Synchronized *obj;
     };
 
     struct Proxy {
         Proxy() = delete;
         Proxy(const Proxy &) = delete;
-
         Proxy(Proxy &&other)
         {
             obj = other.obj;
             other.obj = nullptr;
         }
-
-        Proxy(Synchronized *param_obj) : obj {param_obj} {}
-
-        ~Proxy() NO_THREAD_SAFETY_ANALYSIS
+        Synchronized *obj;
+        Proxy(Synchronized *param_obj) ACQUIRE(obj->rw_lock_) : obj {param_obj}
         {
-            if (obj != nullptr) {
-                obj->rw_lock_.Unlock();
-            }
+            obj->rw_lock_.WriteLock();
         }
-
         C *operator->()
         {
             ASSERT(obj != nullptr);
             return &obj->c;
         }
-
-        Synchronized *obj;
+        ~Proxy() RELEASE(obj->rw_lock_)
+        {
+            if (obj != nullptr) {
+                obj->rw_lock_.Unlock();
+            }
+        }
     };
 
+    C c;
+
+    // GetObj() should be ideally annotated with REQUIRES/REQUIRES_SHARED and c with GUARDED_BY, but then the current
+    // design of LibCache::FastAPI can't be annotated correctly
     C &GetObj()
     {
         return c;
@@ -93,22 +93,20 @@ class Synchronized {
         return c;
     }
 
-    void WriteLock() NO_THREAD_SAFETY_ANALYSIS
+    void WriteLock() ACQUIRE(rw_lock_)
     {
         rw_lock_.WriteLock();
     }
 
-    void ReadLock() NO_THREAD_SAFETY_ANALYSIS
+    void ReadLock() ACQUIRE_SHARED(rw_lock_)
     {
-        rw_lock_.WriteLock();
+        rw_lock_.ReadLock();
     }
 
-    void Unlock() NO_THREAD_SAFETY_ANALYSIS
+    void Unlock() RELEASE_GENERIC(rw_lock_)
     {
         rw_lock_.Unlock();
     }
-
-    C c;
 
     friend Friend1;
     friend Friend2;
@@ -119,34 +117,28 @@ public:
     {
     }
 
-    ~Synchronized() = default;
-    DEFAULT_MOVE_SEMANTIC(Synchronized);
-    DEFAULT_COPY_SEMANTIC(Synchronized);
-
-    auto operator-> () const NO_THREAD_SAFETY_ANALYSIS
+    ConstProxy operator->() const
     {
-        rw_lock_.ReadLock();
-        return ConstProxy {this};
+        return {this};
     }
 
-    auto operator-> () NO_THREAD_SAFETY_ANALYSIS
+    Proxy operator->()
     {
-        rw_lock_.WriteLock();
-        return Proxy {this};
+        return {this};
     }
 
     template <typename Handler>
-    void operator()(Handler &&handler) NO_THREAD_SAFETY_ANALYSIS
+    auto Apply(Handler &&handler)
     {
-        rw_lock_.WriteLock();
-        handler(Proxy {this});
+        os::memory::WriteLockHolder lock_holder {rw_lock_};
+        return handler(c);
     }
 
     template <typename Handler>
-    void operator()(Handler &&handler) const NO_THREAD_SAFETY_ANALYSIS
+    auto Apply(Handler &&handler) const
     {
-        rw_lock_.ReadLock();
-        handler(ConstProxy {this});
+        os::memory::ReadLockHolder lock_holder {rw_lock_};
+        return handler(c);
     }
 
 private:
@@ -154,4 +146,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_UTIL_SYNCHRONIZED_H_
+#endif  // !PANDA_VERIFIER_SYNCHRONIZED_HPP_

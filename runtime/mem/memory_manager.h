@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_MEM_MEMORY_MANAGER_H_
-#define PANDA_RUNTIME_MEM_MEMORY_MANAGER_H_
+#ifndef PANDA_MEM_MEMORY_MANAGER_H
+#define PANDA_MEM_MEMORY_MANAGER_H
 
 #include <macros.h>
 #include <mem/mem.h>
@@ -22,16 +22,13 @@
 #include <runtime/mem/heap_manager.h>
 
 namespace panda {
-
 class RuntimeOptions;
 }  // namespace panda
-
 namespace panda::mem {
 
-class GC;
 class GCStats;
 class GCTrigger;
-struct GCSettings;
+class GCSettings;
 class GCTriggerConfig;
 class Allocator;
 
@@ -60,7 +57,7 @@ class Allocator;
  */
 
 /**
- * A class that encapsulates componentes for working with memory.
+ * A class that encapsulates components for working with memory.
  * Each VM is allocated its own instance.
  */
 class MemoryManager {
@@ -75,7 +72,7 @@ public:
         bool is_start_as_zygote;
     };
 
-    static MemoryManager *Create(LanguageContext ctx, InternalAllocatorPtr internal_allocator, GCType gc_type,
+    static MemoryManager *Create(const LanguageContext &ctx, InternalAllocatorPtr internal_allocator, GCType gc_type,
                                  const GCSettings &gc_settings, const GCTriggerConfig &gc_trigger_config,
                                  const HeapOptions &heap_options);
     static void Destroy(MemoryManager *mm);
@@ -83,16 +80,16 @@ public:
     NO_COPY_SEMANTIC(MemoryManager);
     NO_MOVE_SEMANTIC(MemoryManager);
 
-    void PreStartup() const;
-    void PreZygoteFork() const;
-    void PostZygoteFork() const;
-    void InitializeGC() const;
-    void StartGC() const;
-    void StopGC() const;
+    void PreStartup();
+    void PreZygoteFork();
+    void PostZygoteFork();
+    void InitializeGC(PandaVM *vm);
+    void StartGC();
+    void StopGC();
 
     void Finalize();
 
-    HeapManager *GetHeapManager() const
+    HeapManager *GetHeapManager()
     {
         ASSERT(heap_manager_ != nullptr);
         return heap_manager_;
@@ -104,13 +101,13 @@ public:
         return gc_;
     }
 
-    GCTrigger *GetGCTrigger() const
+    GCTrigger *GetGCTrigger()
     {
         ASSERT(gc_trigger_ != nullptr);
         return gc_trigger_;
     }
 
-    GCStats *GetGCStats() const
+    GCStats *GetGCStats()
     {
         ASSERT(gc_stats_ != nullptr);
         return gc_stats_;
@@ -122,7 +119,7 @@ public:
         return global_object_storage_;
     }
 
-    MemStatsType *GetMemStats() const
+    MemStatsType *GetMemStats()
     {
         ASSERT(mem_stats_ != nullptr);
         return mem_stats_;
@@ -156,4 +153,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_MEMORY_MANAGER_H_
+#endif  // PANDA_MEM_MEMORY_MANAGER_H

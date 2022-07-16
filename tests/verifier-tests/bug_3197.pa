@@ -39,9 +39,10 @@
 try_begin:
   ldobj.64 v0, R.fi64
   ldai 1
-  return
 try_end:
+  return
+catch_begin:
   ldai 0
   return
-.catch panda.NullPointerException, try_begin, try_end, try_end
+.catch panda.NullPointerException, try_begin, try_end, catch_begin
 }

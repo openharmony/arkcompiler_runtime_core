@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_REFSTORAGE_REFERENCE_H_
-#define PANDA_RUNTIME_MEM_REFSTORAGE_REFERENCE_H_
+#ifndef PANDA_RUNTIME_MEM_REFERENCE_H
+#define PANDA_RUNTIME_MEM_REFERENCE_H
 
 #include "libpandabase/macros.h"
 #include "libpandabase/mem/mem.h"
@@ -39,15 +38,17 @@ public:
          */
         STACK = 0,
         /**
-         * Local references which were created by NewLocalRef JNI method
+         * Local references which can be used inside Frame. If Frame was removed all references inside this Frame can't
+         * be used anymore
          */
         LOCAL = 1,
         /**
-         * Local references which were created by NewGlobalRef JNI method
+         * Global references which can be used without Frames
          */
         GLOBAL = 2,
         /**
-         * Local references which were created by NewWeakGlobalRef JNI method
+         * Weak references which work as Global references, but will be nullified when GC clears the object when the
+         * object becomes unreachable (no guarantees when it will happen)
          */
         WEAK = 3,
         ENUM_SIZE
@@ -132,5 +133,4 @@ private:
     friend class panda::mem::test::ReferenceStorageTest;
 };
 }  // namespace panda::mem
-
-#endif  // PANDA_RUNTIME_MEM_REFSTORAGE_REFERENCE_H_
+#endif  // PANDA_RUNTIME_MEM_REFERENCE_H

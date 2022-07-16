@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,15 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 // This is the murmur3 32 bit hash implementation
 // The main structure and constants were taken from Austin Appleby.
 // From his gitlab (https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp):
 // - MurmurHash3 was written by Austin Appleby, and is placed in the public
 // - domain. The author hereby disclaims copyright to this source code.
-
-#ifndef PANDA_LIBPANDABASE_UTILS_MURMUR3_HASH_H_
-#define PANDA_LIBPANDABASE_UTILS_MURMUR3_HASH_H_
+#ifndef LIBPANDABASE_UTILS_MURMUR3_HASH_H_
+#define LIBPANDABASE_UTILS_MURMUR3_HASH_H_
 
 #include "hash_base.h"
 #include "logger.h"
@@ -54,7 +52,7 @@ public:
 
 private:
     // Here are the main constants for hash counting:
-    // Many of them look like some kinds of magic
+    // Many of them looks like some kind of magic
     static constexpr uint32_t C1 = 0xCC9E2D51U;
     static constexpr uint32_t C2 = 0x1B873593U;
     static constexpr uint32_t MAX_BITS = 32;
@@ -76,7 +74,7 @@ private:
         return (word << shift) | (word >> (MAX_BITS - shift));
     }
 
-    // Finalize the result of the hash function
+    // Finilize the result of the hash function
     static uint32_t Finalize(uint32_t h)
     {
         h ^= h >> FINALIZE_FIRST_SHIFT;
@@ -141,7 +139,7 @@ private:
     {
         // We start hashing from the seed
         uint32_t hash = seed;
-        // We should still compute length of the string, because we will need it later
+        // We should still compute length of the string, we will need it later
         size_t mutf8_length = 0;
         // Do the main part:
         // Iterate for each 32bits
@@ -159,7 +157,7 @@ private:
                 tail_len++;
             }
             if (tail_len != BLOCK_SIZE) {
-                // We couldn't read four bytes value
+                // We couldn't read four 8bytes value
                 break;
             }
             // Do this because we don't want to dispatch Big/Little endianness.
@@ -175,7 +173,8 @@ private:
             mutf8_length += BLOCK_SIZE;
         }
 
-        // Proceed the tail
+        // Proceed the tail:
+
         mutf8_length += tail_len;
         uint32_t k1 = 0;
         for (size_t i = tail_len; i > 0; i--) {
@@ -199,4 +198,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_MURMUR3_HASH_H_
+#endif  // LIBPANDABASE_UTILS_MURMUR3_HASH_H_

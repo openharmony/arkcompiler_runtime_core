@@ -62,7 +62,7 @@
 .record IO <external>
 .function void IO.printI64(i64 a0) <external>
 
-.function u1 main() {
+.function i32 main() {
     movi v0, 0x0000ffff
     movi v1, 0x0
     call.short or_not_i32, v0, v1

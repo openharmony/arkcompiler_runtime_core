@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(6 * 7 == 42) operation --> mul
-.function u1 main(){
+.function i32 main(){
     movi v0, 6
     movi v1, 7
     mul v0, v1

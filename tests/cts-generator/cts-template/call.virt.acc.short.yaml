@@ -12,9 +12,9 @@
 # limitations under the License.
 ---
 definitions:
-  - name: java
+  - name: PandaAssembly
     template: >
-      .language Java
+      .language PandaAssembly
 
 tests:
   - file-name: call.virt.acc.short
@@ -27,7 +27,7 @@ tests:
         definition in the new frame.
         Result (if any) is returned in accumulator (see 'Calling sequence' chapter for more details).
         Method, its class and the number of argument is resolved by given method_id in runtime
-        constant-pool based on object reference using language-specific semantics (currently only Java
+        constant-pool based on object reference using language-specific semantics (currently only PandaAssembly
         virtual methods are supported, further extensions are TBD).
         Object reference is passed in the first source register, arguments are passed starting from
         the second source register in the same order as in method signature.
@@ -90,23 +90,29 @@ tests:
               call.virt.acc.short %s
         cases:
           - values: ['R.f1, v0, 0']
-            runner-options: [verifier-failure, verifier-debug-config]
+            runner-options: [verifier-failure, verifier-config]
+            tags: [verifier]
           - values: ['R.f2, v0, 1']
-            runner-options: [verifier-only, verifier-debug-config]
+            runner-options: [verifier-only, verifier-config]
+            tags: [verifier]
           - values: ['R.f3, v0, 1']
             bugid: ['5593']
             ignore: true
           - values: ['R.sf1, v0, 0']
-            runner-options: [verifier-failure, verifier-debug-config]
+            runner-options: [verifier-failure, verifier-config]
+            tags: [verifier]
           - values: ['R.sf2, v0, 1']
-            runner-options: [verifier-failure, verifier-debug-config]
+            runner-options: [verifier-failure, verifier-config]
+            tags: [verifier]
           - values: ['R.sf3, v0, 1']
             bugid: ['5593']
             ignore: true
           - values: ['sf1, v0, 0']
-            runner-options: [verifier-failure, verifier-debug-config]
+            runner-options: [verifier-failure, verifier-config]
+            tags: [verifier]
           - values: ['sf2, v0, 1']
-            runner-options: [verifier-failure, verifier-debug-config]
+            runner-options: [verifier-failure, verifier-config]
+            tags: [verifier]
           - values: ['sf3, v0, 1']
             bugid: ['5593']
             ignore: true
@@ -132,7 +138,7 @@ tests:
             - sig: call.virt.acc.short method_id, v:in:top, imm:u1
               acc: inout:top
               format: [op_v_4_imm_4_id_16]
-        runner-options: [verifier-only, verifier-debug-config]
+        runner-options: [verifier-only, verifier-config]
         tags: [verifier]
         header-template: []
         check-type: exit-positive
@@ -186,7 +192,7 @@ tests:
             - sig: call.virt.acc.short method_id, v:in:top, imm:u1
               acc: inout:top
               format: [op_v_4_imm_4_id_16]
-        runner-options: [verifier-only, verifier-debug-config]
+        runner-options: [verifier-only, verifier-config]
         tags: [verifier]
         header-template: []
         check-type: exit-positive
@@ -246,7 +252,7 @@ tests:
               acc: inout:top
               format: [op_v_4_imm_4_id_16]
         header-template: []
-        runner-options: [verifier-failure, verifier-debug-config]
+        runner-options: [verifier-failure, verifier-config]
         tags: [verifier]
         check-type: exit-positive
         code-template: |
@@ -283,7 +289,7 @@ tests:
                   newobj v1, R
                   lda.obj v1
             - v0, 0
-            runner-options: [verifier-only, verifier-debug-config]
+            runner-options: [verifier-only, verifier-config]
           - description: Accumulator (obj ref) is not initialized.
             values:
             - R a0, i32 a1
@@ -302,7 +308,7 @@ tests:
             - ldai 0
             - newobj v0, R
             - v0, 1
-            runner-options: [verifier-only, verifier-debug-config]
+            runner-options: [verifier-only, verifier-config]
           - description: Accumulator and v0 are both not initialized.
             values:
             - R a0, i32 a1
@@ -335,7 +341,7 @@ tests:
           verification:
             - method_id_non_static
         header-template: []
-        runner-options: [verifier-failure, verifier-debug-config]
+        runner-options: [verifier-failure, verifier-config]
         tags: [verifier]
         check-type: exit-positive
         code-template: |
@@ -378,7 +384,7 @@ tests:
           verification:
             - method_id_accessible
         header-template: []
-        runner-options: [verifier-failure, verifier-debug-config]
+        runner-options: [verifier-failure, verifier-config]
         tags: [verifier]
         check-type: exit-positive
         code-template: |
@@ -400,9 +406,10 @@ tests:
         isa:
           verification:
             - method_id_accessible
-        header-template: [java]
-        runner-options: [verifier-failure, verifier-debug-config, use-java]
-        tags: [verifier]
+        header-template: [PandaAssembly]
+        runner-options: [verifier-failure, verifier-config, use-pa]
+        tags: [verifier, pa-verifier]
+        bugid: ["6886"]
         check-type: exit-positive
         code-template: |
           %s
@@ -421,7 +428,7 @@ tests:
             - |
               .record R {}
               .function void R.foo(R a0, i32 a1) <external>
-              .record Q <java.extends=R> {}
+              .record Q <panda.extends=R> {}
             - Q
             - R.foo
 
@@ -433,7 +440,7 @@ tests:
             - method_id_non_static
             - method_id_accessible
         header-template: []
-        runner-options: [verifier-failure, verifier-debug-config]
+        runner-options: [verifier-failure, verifier-config]
         tags: [verifier]
         check-type: exit-positive
         code-template: |
@@ -465,7 +472,7 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-failure, verifier-debug-config]
+        runner-options: [verifier-failure, verifier-config]
         tags: [verifier]
         header-template: []
         check-type: exit-positive
@@ -506,6 +513,10 @@ tests:
             exclude: [i64]
           - values:
             - f32
+            exclude: [f32]
+            bugid: ['7445']
+          - values:
+            - f64
             exclude: [f64]
           - values:
             - u32[]
@@ -568,6 +579,10 @@ tests:
           - values:
             - movi.64 v1, 1
             id: i64
+          - values:
+            - fmovi v1, 1.0
+            id: f32
+            bugid: ['7445']
           - values:
             - fmovi.64 v1, 1.0
             id: f64
@@ -677,7 +692,7 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-failure, verifier-debug-config]
+        runner-options: [verifier-failure, verifier-config]
         tags: [verifier]
         header-template: []
         check-type: exit-positive
@@ -717,6 +732,10 @@ tests:
             exclude: [i64]
           - values:
             - f32
+            exclude: [f32]
+            bugid: ['7445']
+          - values:
+            - f64
             exclude: [f64]
           - values:
             - u32[]
@@ -779,6 +798,10 @@ tests:
           - values:
             - ldai.64 1
             id: i64
+          - values:
+            - fldai 1.0
+            id: f32
+            bugid: ['7445']
           - values:
             - fldai.64 1.0
             id: f64
@@ -899,13 +922,14 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-failure, use-java, verifier-debug-config]
-        tags: [verifier]
-        description: Check 'call.virt.acc.short' instruction with incompatible register in Java context.
-        header-template: [java]
+        runner-options: [verifier-failure, use-pa, verifier-config]
+        tags: [verifier, pa-verifier]
+        bugid: ["6886"]
+        description: Check 'call.virt.acc.short' instruction with incompatible register in PandaAssembly context.
+        header-template: [PandaAssembly]
         code-template: |
-          .record java.lang.Object <external>
-          .record java.lang.Class <external>
+          .record panda.Object <external>
+          .record panda.Class <external>
           .record R {}
           .function void R.foo(R a0, %s a1) {
               return.void
@@ -937,6 +961,10 @@ tests:
             exclude: [i64]
           - values:
             - f32
+            exclude: [f32]
+            bugid: ['7445']
+          - values:
+            - f64
             exclude: [f64]
           - values:
             - f64
@@ -975,28 +1003,28 @@ tests:
             - R
             exclude: [nul]
           - values:
-            - java.lang.Class
+            - panda.Class
             exclude: [typ, nul]
           - values:
-            - java.lang.Object
+            - panda.Object
             exclude: [u1a, i8a, u16a, i16a, i32a, i64a, f32a, f64a, i32aa, f64aa, typ, ra, typa, obja, raa, typaa, objaa, nul]
           - values:
             - R[]
             exclude: [ra, nul]
           - values:
-            - java.lang.Class[]
+            - panda.Class[]
             exclude: [typa, nul]
           - values:
-            - java.lang.Object[]
+            - panda.Object[]
             exclude: [obja, i32aa, f64aa, ra, typa, raa, typaa, objaa, nul]
           - values:
             - R[][]
             exclude: [raa, nul]
           - values:
-            - java.lang.Class[][]
+            - panda.Class[][]
             exclude: [typaa, nul]
           - values:
-            - java.lang.Object[][]
+            - panda.Object[][]
             exclude: [objaa, raa, typaa, nul]
         cases:
           - values:
@@ -1005,6 +1033,10 @@ tests:
           - values:
             - movi.64 v1, 1
             id: i64
+          - values:
+            - fmovi v1, 1.0
+            id: f32
+            bugid: ['7445']
           - values:
             - fmovi.64 v1, 1.0
             id: f64
@@ -1084,13 +1116,13 @@ tests:
             - |
               #
                   movi v1, 10
-                  newarr v1, v1, java.lang.Class[]
+                  newarr v1, v1, panda.Class[]
             id: typa
           - values:
             - |
               #
                   movi v1, 10
-                  newarr v1, v1, java.lang.Object[]
+                  newarr v1, v1, panda.Object[]
             id: obja
           - values:
             - |
@@ -1102,13 +1134,13 @@ tests:
             - |
               #
                   movi v1, 10
-                  newarr v1, v1, java.lang.Class[][]
+                  newarr v1, v1, panda.Class[][]
             id: typaa
           - values:
             - |
               #
                   movi v1, 10
-                  newarr v1, v1, java.lang.Object[][]
+                  newarr v1, v1, panda.Object[][]
             id: objaa
           - values:
             - mov.null v1
@@ -1119,14 +1151,15 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-failure, use-java, verifier-debug-config]
-        tags: [verifier]
-        description: Check 'call.virt.acc.short' instruction with incompatible accumulator in Java context.
-        header-template: [java]
+        runner-options: [verifier-failure, use-pa, verifier-config]
+        tags: [verifier, pa-verifier]
+        bugid: ["6886"]
+        description: Check 'call.virt.acc.short' instruction with incompatible accumulator in PandaAssembly context.
+        header-template: [PandaAssembly]
         check-type: exit-positive
         code-template: |
-          .record java.lang.Object <external>
-          .record java.lang.Class <external>
+          .record panda.Object <external>
+          .record panda.Class <external>
           .record R {}
           .function void R.foo(R a0, %s a1) {
               return.void
@@ -1156,6 +1189,10 @@ tests:
             exclude: [i64]
           - values:
             - f32
+            exclude: [f32]
+            bugid: ['7445']
+          - values:
+            - f64
             exclude: [f64]
           - values:
             - f64
@@ -1194,28 +1231,28 @@ tests:
             - R
             exclude: [nul]
           - values:
-            - java.lang.Class
+            - panda.Class
             exclude: [typ, nul]
           - values:
-            - java.lang.Object
+            - panda.Object
             exclude: [u1a, i8a, u16a, i16a, i32a, i64a, f32a, f64a, i32aa, f64aa, typ, ra, typa, obja, raa, typaa, objaa, nul]
           - values:
             - R[]
             exclude: [ra, nul]
           - values:
-            - java.lang.Class[]
+            - panda.Class[]
             exclude: [typa, nul]
           - values:
-            - java.lang.Object[]
+            - panda.Object[]
             exclude: [obja, i32aa, f64aa, ra, typa, raa, typaa, objaa, nul]
           - values:
             - R[][]
             exclude: [raa, nul]
           - values:
-            - java.lang.Class[][]
+            - panda.Class[][]
             exclude: [typaa, nul]
           - values:
-            - java.lang.Object[][]
+            - panda.Object[][]
             exclude: [objaa, raa, typaa, nul]
         cases:
           - values:
@@ -1224,6 +1261,10 @@ tests:
           - values:
             - ldai.64 1
             id: i64
+          - values:
+            - fldai 1.0
+            id: f32
+            bugid: ['7445']
           - values:
             - fldai.64 1.0
             id: f64
@@ -1313,14 +1354,14 @@ tests:
             - |
               #
                   movi v1, 10
-                  newarr v1, v1, java.lang.Class[]
+                  newarr v1, v1, panda.Class[]
                   lda.obj v1
             id: typa
           - values:
             - |
               #
                   movi v1, 10
-                  newarr v1, v1, java.lang.Object[]
+                  newarr v1, v1, panda.Object[]
                   lda.obj v1
             id: obja
           - values:
@@ -1334,14 +1375,14 @@ tests:
             - |
               #
                   movi v1, 10
-                  newarr v1, v1, java.lang.Class[][]
+                  newarr v1, v1, panda.Class[][]
                   lda.obj v1
             id: typaa
           - values:
             - |
               #
                   movi v1, 10
-                  newarr v1, v1, java.lang.Object[][]
+                  newarr v1, v1, panda.Object[][]
                   lda.obj v1
             id: objaa
           - values:
@@ -1353,7 +1394,7 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-only, verifier-debug-config]
+        runner-options: [verifier-only, verifier-config]
         tags: [verifier]
         description: Check 'call.virt.acc.short' instruction with compatible primitive arguments in PandaAssembly context.
         header-template: []
@@ -1398,7 +1439,7 @@ tests:
             - movi.64 v1, 1
           - values:
             - f32
-            - fmovi.64 v1, 1.1
+            - fmovi v1, 1.1
           - values:
             - f64
             - fmovi.64 v1, 1.1
@@ -1408,10 +1449,11 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-only, use-java, verifier-debug-config]
-        tags: [verifier]
-        description: Check 'call.virt.acc.short' instruction with compatible primitive arguments in Java context.
-        header-template: [java]
+        runner-options: [verifier-only, use-pa, verifier-config]
+        tags: [verifier, pa-verifier]
+        bugid: ["6886"]
+        description: Check 'call.virt.acc.short' instruction with compatible primitive arguments in PandaAssembly context.
+        header-template: [PandaAssembly]
         code-template: |
           .record R {}
           .function void R.foo(R a0, %s a1) {
@@ -1443,7 +1485,7 @@ tests:
             - ldai.64 1
           - values:
             - f32
-            - fldai.64 1.1
+            - fldai 1.1
           - values:
             - f64
             - fldai.64 1.1
@@ -1453,7 +1495,7 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-only, verifier-debug-config]
+        runner-options: [verifier-only, verifier-config]
         tags: [verifier]
         description: Check 'call.virt.acc.short' instruction called with compatible primitive array arguments in PandaAssembly context.
         header-template: []
@@ -1542,13 +1584,14 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-only, use-java]
-        tags: [verifier]
-        description: Check 'call.virt.acc.short' instruction called with compatible primitive array arguments in Java context.
-        header-template: [java]
+        runner-options: [verifier-only, use-pa, verifier-config]
+        tags: [verifier, pa-verifier]
+        bugid: ["6886"]
+        description: Check 'call.virt.acc.short' instruction called with compatible primitive array arguments in PandaAssembly context.
+        header-template: [PandaAssembly]
         code-template: |
           .record R {}
-          .function void foo(R a0, %s a1) {
+          .function void R.foo(R a0, %s a1) {
               return.void
           }
           .function i32 main() {
@@ -1556,7 +1599,7 @@ tests:
               newarr v0, v0, %s
               lda.obj v0
               newobj v1, R
-              call.virt.acc.short foo, v1, 1
+              call.virt.acc.short R.foo, v1, 1
         check-type: exit-positive
         cases:
           - values:
@@ -1613,7 +1656,7 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-only, verifier-debug-config]
+        runner-options: [verifier-only, verifier-config]
         tags: [verifier]
         description: Check 'call.virt.acc.short' instruction called with compatible object arguments in PandaAssembly context.
         header-template: []
@@ -1710,19 +1753,20 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-only, use-java, verifier-debug-config]
-        tags: [verifier]
-        description: Check 'call.virt.acc.short' instruction called with compatible object arguments in Java context.
-        header-template: [java]
+        runner-options: [verifier-only, use-pa, verifier-config]
+        tags: [verifier, pa-verifier]
+        bugid: ["6886"]
+        description: Check 'call.virt.acc.short' instruction called with compatible object arguments in PandaAssembly context.
+        header-template: [PandaAssembly]
         check-type: exit-positive
         code-template: |
-          .record java.lang.Object <external>
-          .record java.lang.Class <external>
-          .record java.lang.String <external>
-          .record java.io.Serializable <external>
-          .record I <java.interface> {}
+          .record panda.Object <external>
+          .record panda.Class <external>
+          .record panda.String <external>
+          .record panda.io.Serializable <external>
+          .record I <panda.interface> {}
           .record E {}
-          .record Q <java.extends=E, java.implements=I> {}
+          .record Q <panda.extends=E, panda.implements=I> {}
           .record R {}
           .function void R.foo(R a0, %s a1) {
               return.void
@@ -1740,10 +1784,10 @@ tests:
                   newobj v1, Q
                   lda.obj v1
           - values:
-            - java.lang.String
+            - panda.String
             - lda.str "test"
           - values:
-            - java.lang.Class
+            - panda.Class
             - lda.type Q
           - values:
             - E
@@ -1765,66 +1809,66 @@ tests:
                   newobj v0, Q
                   lda.obj v0
           - values:
-            - java.lang.Object
+            - panda.Object
             - |
               #
                   newobj v0, Q
                   lda.obj v0
           - values:
-            - java.lang.Object
+            - panda.Object
             - lda.str "test"
           - values:
-            - java.lang.Object
-            - lda.type java.lang.String
+            - panda.Object
+            - lda.type panda.String
             bugid: ['3594']
             ignore: true
           - values:
-            - java.io.Serializable
+            - panda.io.Serializable
             - lda.type Q
             bugid: ['3594']
             ignore: true
           # For arrays T should be a root type in type hierarchy ...
           - values:
-            - java.lang.Object
+            - panda.Object
             - |
               #
                   movi v0, 10
                   newarr v1, v0, i32[]
                   lda.obj v1
           - values:
-            - java.lang.Object
+            - panda.Object
             - |
               #
                   movi v0, 10
                   newarr v1, v0, f64[][]
                   lda.obj v1
           - values:
-            - java.lang.Object
+            - panda.Object
             - |
               #
                   movi v0, 10
                   newarr v1, v0, Q[]
                   lda.obj v1
           - values:
-            - java.lang.Object
+            - panda.Object
             - |
               #
                   movi v0, 10
-                  newarr v1, v0, java.lang.Object[]
+                  newarr v1, v0, panda.Object[]
                   lda.obj v1
           - values:
-            - java.lang.Object
+            - panda.Object
             - |
               #
                   movi v0, 10
-                  newarr v1, v0, java.lang.String[]
+                  newarr v1, v0, panda.String[]
                   lda.obj v1
           - values:
-            - java.lang.Object
+            - panda.Object
             - |
               #
                   movi v0, 10
-                  newarr v1, v0, java.lang.Class[]
+                  newarr v1, v0, panda.Class[]
                   lda.obj v1
 
 
@@ -1832,7 +1876,7 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-only, verifier-debug-config]
+        runner-options: [verifier-only, verifier-config]
         tags: [verifier]
         description: Check 'call.virt.acc.short' instruction called with compatible object array arguments in PandaAssembly context.
         header-template: []
@@ -1927,17 +1971,18 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-only, use-java, verifier-debug-config]
-        tags: [verifier]
-        description: Check 'call.virt.acc.short' instruction called with compatible object array arguments in Java context.
-        header-template: [java]
+        runner-options: [verifier-only, use-pa, verifier-config]
+        tags: [verifier, pa-verifier]
+        bugid: ["6886"]
+        description: Check 'call.virt.acc.short' instruction called with compatible object array arguments in PandaAssembly context.
+        header-template: [PandaAssembly]
         code-template: |
-          .record java.lang.Object <external>
-          .record java.lang.Class <external>
-          .record java.lang.String <external>
-          .record I <java.interface> {}
+          .record panda.Object <external>
+          .record panda.Class <external>
+          .record panda.String <external>
+          .record I <panda.interface> {}
           .record E {}
-          .record Q <java.extends=E, java.implements=I> {}
+          .record Q <panda.extends=E, panda.implements=I> {}
           .record R {}
           .function void R.foo(R a0, %s a1) {
               return.void
@@ -1955,75 +2000,75 @@ tests:
             - Q[]
             - Q[]
           - values:
-            - java.lang.String[]
-            - java.lang.String[]
+            - panda.String[]
+            - panda.String[]
           - values:
             - Q[][]
             - Q[][]
           - values:
-            - java.lang.String[][]
-            - java.lang.String[][]
+            - panda.String[][]
+            - panda.String[][]
           - values:
-            - java.lang.Object[]
-            - java.lang.Object[]
+            - panda.Object[]
+            - panda.Object[]
           - values:
-            - java.lang.Class[][]
-            - java.lang.Class[][]
+            - panda.Class[][]
+            - panda.Class[][]
           - values:
-            - java.lang.Class[]
-            - java.lang.Class[]
+            - panda.Class[]
+            - panda.Class[]
           - values:
-            - java.lang.Object[][]
-            - java.lang.Object[][]
+            - panda.Object[][]
+            - panda.Object[][]
           # T is such array that O array elements are subtypes of T array elements
           - values:
             - E[]
             - Q[]
           - values:
-            - java.lang.Object[]
+            - panda.Object[]
             - Q[][]
           - values:
             - I[]
             - Q[]
           - values:
-            - java.lang.Object[]
-            - java.lang.Class[]
+            - panda.Object[]
+            - panda.Class[]
           - values:
-            - java.lang.Object[]
-            - java.lang.Object[][]
+            - panda.Object[]
+            - panda.Object[][]
           - values:
-            - java.lang.Object[]
+            - panda.Object[]
             - Q[]
           - values:
-            - java.lang.Object[]
-            - java.lang.String[]
+            - panda.Object[]
+            - panda.String[]
           - values:
-            - java.lang.Object[]
+            - panda.Object[]
             - f64[][][]
           - values:
-            - java.lang.Object[]
-            - java.lang.String[][]
+            - panda.Object[]
+            - panda.String[][]
           - values:
-            - java.lang.Object[]
+            - panda.Object[]
             - i32[][]
           # inherited types from object[][]
           - values:
             - E[][]
             - Q[][]
           - values:
-            - java.lang.Object[][]
-            - java.lang.Object[][][]
+            - panda.Object[][]
+            - panda.Object[][][]
           - values:
             - I[][]
             - Q[][]
           - values:
-            - java.lang.Object[][]
-            - java.lang.Class[][][]
+            - panda.Object[][]
+            - panda.Class[][][]
           - values:
-            - java.lang.Object[][]
-            - java.lang.Class[][]
+            - panda.Object[][]
+            - panda.Class[][]
           - values:
-            - java.lang.Object[][]
+            - panda.Object[][]
             - i32[][][]
 
 
@@ -2031,7 +2076,7 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-only, verifier-debug-config]
+        runner-options: [verifier-only, verifier-config]
         tags: [verifier]
         description: Check 'call.virt.acc.short' instruction called with null object ref in PandaAssembly context.
         header-template: []
@@ -2067,14 +2112,15 @@ tests:
         isa:
           verification:
             - compatible_arguments
-        runner-options: [verifier-only, use-java, verifier-debug-config]
-        tags: [verifier]
-        description: Check 'call.virt.acc.short' instruction called with null object ref in Java context.
-        header-template: [java]
+        runner-options: [verifier-only, use-pa, verifier-config]
+        tags: [verifier, pa-verifier]
+        bugid: ["6886"]
+        description: Check 'call.virt.acc.short' instruction called with null object ref in PandaAssembly context.
+        header-template: [PandaAssembly]
         code-template: |
-          .record java.lang.Object <external>
-          .record java.lang.Class <external>
-          .record java.lang.String <external>
+          .record panda.Object <external>
+          .record panda.Class <external>
+          .record panda.String <external>
           .record R {}
           .function void R.foo(R a0, %s a1) {
               return.void
@@ -2088,15 +2134,15 @@ tests:
         cases:
           - values: ['i32[]']
           - values: ['f64[][]']
-          - values: ['java.lang.Object']
-          - values: ['java.lang.Object[]']
-          - values: ['java.lang.Object[][]']
+          - values: ['panda.Object']
+          - values: ['panda.Object[]']
+          - values: ['panda.Object[][]']
           - values: ['R']
           - values: ['R[][]']
-          - values: ['java.lang.String']
-          - values: ['java.lang.String[]']
-          - values: ['java.lang.Class']
-          - values: ['java.lang.Class[]']
+          - values: ['panda.String']
+          - values: ['panda.String[]']
+          - values: ['panda.Class']
+          - values: ['panda.Class[]']
           - values: ['u1[][][]']
 
 
@@ -2405,6 +2451,63 @@ tests:
             - jeq.obj v1, ok
 
 
+      - file-name: values_obj_j
+        isa:
+          instructions:
+            - sig: call.virt.acc.short method_id, v:in:top, imm:u1
+              acc: inout:top
+              format: [op_v_4_imm_4_id_16]
+        runner-options: [use-pa]
+        description: Check 'call.virt.acc.short' instruction called with object values in PandaAssembly context.
+        header-template: [PandaAssembly]
+        check-type: exit-positive
+        code-template: |
+          .record panda.Object <external>
+          .record panda.String <external>
+          .record R {}
+          .function panda.Object R.fooobj(R a0, panda.Object a1) {
+              lda.obj a1
+              return.obj
+          }
+          .function i32 main() {
+              %s
+              newobj v0, R
+              lda.obj v0
+              call.virt.acc.short R.fooobj, v1, 0
+              call.virt.acc.short R.fooobj, v0, 1
+              jeq.obj v1, ok
+              ldai 1
+              return
+          ok:
+        cases:
+          - values:
+            - newobj v1, R
+          - values:
+            - newobj v1, panda.Object
+          - values:
+            - |
+              #
+                  lda.str "test"
+                  sta.obj v1
+          - values:
+            - |
+              #
+                  lda.type panda.String
+                  sta.obj v1
+          - values:
+            - mov.null v1
+          - values:
+            - |
+              #
+                  movi v3, 0
+                  newarr v1, v3, panda.String[]
+          - values:
+            - |
+              #
+                  movi v3, 1
+                  newarr v1, v3, R[][]
+
+
       - file-name: regs_restored
         isa:
           description: >
@@ -2545,6 +2648,7 @@ tests:
           exceptions:
             - x_abstract
         description: Check that AbstractMethodError is thrown in PandaAssembly context.
+        tags: ['irtoc_ignore']
         header-template: []
         code-template: |
           .record panda.AbstractMethodError <external>
@@ -2579,11 +2683,77 @@ tests:
             - R.foo2, v0, 0
 
 
+      - file-name: ame_j
+        isa:
+          exceptions:
+            - x_abstract
+        description: Check that AbstractMethodError is thrown in PandaAssembly context.
+        tags: ['irtoc_ignore']
+        header-template: [PandaAssembly]
+        runner-options: [use-pa]
+        code-template: |
+          .record panda.AbstractMethodError <external>
+          .record R {}
+          .record Q <panda.extends=R> {}
+          .function void R.foo(R a0, Q a1) <noimpl>
+          .function void Q.foo(Q a0, Q a1) {
+              return.void
+          }
+          .function i32 main() {
+          begin:
+              %s
+              call.virt.acc.short %s
+          end:
+              ldai 1 # Should not reach this line
+              return
+
+          catch_AME:
+              ldai 0 # Expected panda.AbstractMethodError
+              return
+
+          catch_all:
+              ldai 2 # Unexpected exception, test failed
+              return
+
+          .catch panda.AbstractMethodError, begin, end, catch_AME
+          .catchall begin, end, catch_all
+        check-type: none
+        cases:
+          - values:
+            - |
+              #
+                  newobj v1, R
+                  lda.null
+            - R.foo, v1, 1
+          - values:
+            - |
+              #
+                  newobj v1, R
+                  lda.obj v1
+                  newobj v1, Q
+            - R.foo, v1, 0
+          - values:
+            - |
+              #
+                  newobj v2, Q
+                  lda.null
+            - R.foo, v2, 1
+            runner-options: [use-pa, run-failure]
+          - values:
+            - |
+              #
+                  newobj v2, Q
+                  lda.obj v2
+            - Q.foo, v2, 1
+            runner-options: [use-pa, run-failure]
+
+
       - file-name: npe_p
         isa:
           exceptions:
             - x_null
         description: Check that NullPointerException is thrown in PandaAssembly context.
+        tags: ['irtoc_ignore']
         header-template: []
         code-template: |
           .record panda.NullPointerException <external>
@@ -2636,3 +2806,65 @@ tests:
             - newobj v0, R
             - v0, 1
             runner-options: [run-failure]
+
+
+      - file-name: npe_j
+        isa:
+          exceptions:
+            - x_null
+        description: Check that NullPointerException is thrown in PandaAssembly context.
+        tags: ['irtoc_ignore']
+        header-template: [PandaAssembly]
+        runner-options: [use-pa]
+        code-template: |
+          .record panda.NullPointerException <external>
+          .record R {}
+          .function void R.foo(R a0, R a1) {
+              return.void
+          }
+          .function R get_null() {
+              lda.null
+              return.obj
+          }
+          .function i32 main() {
+              call.short get_null
+              %s
+          begin:
+              call.virt.acc.short R.foo, %s
+          end:
+              ldai 1 # Should not reach this line
+              return
+
+          catch_NPE:
+              ldai 0 # Expected panda.NullPointerException
+              return
+
+          catch_all:
+              ldai 2 # Unexpected exception, test failed
+              return
+
+          .catch panda.NullPointerException, begin, end, catch_NPE
+          .catchall begin, end, catch_all
+        check-type: none
+        cases:
+          - values:
+            - newobj v0, R
+            - v0, 0
+          - values:
+            - |
+              #
+                  sta.obj v0
+                  newobj v1, R
+                  lda.obj v1
+            - v0, 1
+          - values:
+            - sta.obj v0
+            - v0, 1
+          - values:
+            - sta.obj v0
+            - v0, 0
+          - values:
+            - newobj v0, R
+            - v0, 1
+            runner-options: [run-failure, use-pa]
+

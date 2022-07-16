@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,20 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_PYGOTE_SPACE_ALLOCATOR_H_
-#define PANDA_RUNTIME_MEM_PYGOTE_SPACE_ALLOCATOR_H_
+#ifndef RUNTIME_MEM_PANDA_PYGOTE_SPACE_ALLOCATOR_H
+#define RUNTIME_MEM_PANDA_PYGOTE_SPACE_ALLOCATOR_H
 
 #include <functional>
 #include <memory>
 #include <vector>
 
 #include "libpandabase/macros.h"
-#include "libpandabase/mem/arena.h"
+#include "libpandabase/mem/arena-inl.h"
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/mem/mem_range.h"
 #include "runtime/mem/runslots_allocator.h"
 #include "runtime/mem/gc/bitmap.h"
+#include "runtime/mem/heap_space.h"
 
 namespace panda {
 class ObjectHeader;
@@ -92,6 +92,11 @@ public:
 
     void Collect(const GCObjectVisitor &gc_visitor);
 
+    void SetHeapSpace(HeapSpace *heap_space)
+    {
+        heap_space_ = heap_space;
+    }
+
 private:
     void CreateLiveBitmap(void *heap_begin, size_t heap_size);
     RunSlotsAllocator<AllocConfigT> runslots_alloc_;
@@ -100,8 +105,9 @@ private:
     PygoteSpaceState state_ = STATE_PYGOTE_INIT;
     BitmapList live_bitmaps_;
     MemStatsType *mem_stats_;
+    HeapSpace *heap_space_ {nullptr};
 };
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_PYGOTE_SPACE_ALLOCATOR_H_
+#endif  // RUNTIME_MEM_PANDA_PYGOTE_SPACE_ALLOCATOR_H

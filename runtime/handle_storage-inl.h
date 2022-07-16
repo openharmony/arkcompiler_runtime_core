@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_HANDLE_STORAGE_INL_H_
-#define PANDA_RUNTIME_HANDLE_STORAGE_INL_H_
+#ifndef PANDA_RUNTIME_HANDLE_STORAGE_INL_H
+#define PANDA_RUNTIME_HANDLE_STORAGE_INL_H
 
 #include "runtime/handle_storage.h"
 #include "runtime/mem/object_helpers.h"
@@ -40,7 +40,6 @@ inline uintptr_t HandleStorage<T>::NewHandle(T value)
         nodes_.push_back(n);
     }
     auto node = nodes_[nid];
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_REDUNDANT_INIT)
     auto loc = &(*node)[offset];
     *loc = value;
     lastIndex_++;
@@ -169,7 +168,6 @@ inline void HandleStorage<ObjectHeader *>::VisitGCRoots([[maybe_unused]] const O
 }
 
 template class HandleStorage<coretypes::TaggedType>;
-
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_HANDLE_STORAGE_INL_H_
+#endif  // PANDA_RUNTIME_HANDLE_STORAGE_INL_H

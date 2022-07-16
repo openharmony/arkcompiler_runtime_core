@@ -12,11 +12,11 @@
 # limitations under the License.
 
 definitions:
-  - name: java_header
+  - name: PandaAssembly_header
     template: |
-      .language Java
+      .language PandaAssembly
 
-      .record java.lang.Object <external>
+      .record panda.Object <external>
 
       .record Q {}
       .function void Q.ctor(Q a0) <ctor> {
@@ -36,8 +36,8 @@ definitions:
         i32[]          fi32Array
         Q              fQ
         Q[]            fQArray
-        java.lang.Object   fObj
-        java.lang.Object[] fObjArray
+        panda.Object   fObj
+        panda.Object[] fObjArray
       }
       .function void R.ctor(R a0) <ctor> {
         return.void
@@ -105,7 +105,7 @@ tests:
         check-type: exit-positive
         tags: ['verifier']
         bugid: ['1324', '2084', '3257']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
 
           .function i32 main() {
@@ -116,11 +116,33 @@ tests:
           - values:
             - 'ldobj.64 v1, R.fi64'
           - values:
-            - 'ldobj.64 v15, R.ff32'
-          - values:
             - 'ldobj.64 v240, R.ff64'
           - values:
             - 'ldobj.64 v255, R.fu64'
+
+
+      - file-name: "check_if_regs_initialized_j"
+        description: Check that verifier reports error if source registers are not initialized in PandaAssembly context.
+        isa:
+          instructions:
+            - sig: ldobj.64 v:in:ref, field_id
+              acc: out:b64
+              format: [op_v_8_id_16]
+        header-template: ['PandaAssembly_header']
+        check-type: exit-positive
+        tags: [verifier, pa-verifier]
+        bugid: ['1324', '2084', '3257', '3293']
+        runner-options: ['verifier-failure', 'verifier-config', 'use-pa']
+        code-template: |
+
+          .function i32 main() {
+            %s  # verifier error expected, because the register is not initialized
+        cases:
+          - values:
+            - 'ldobj.64 v1, R.fi64'
+          - values:
+            - 'ldobj.64 v240, R.ff64'
+
 
       - file-name: "with_null_ref_p"
         description: Check that NullPointerException is thrown if object ref is null in Panda context.
@@ -129,7 +151,7 @@ tests:
             - x_null
         header-template: ['pandasm_header', 'get_null_R']
         check-type: empty
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         code-template: |
           .record panda.NullPointerException <external>
 
@@ -152,8 +174,38 @@ tests:
             - R.fu64
           - values:
             - R.ff64
+
+
+      - file-name: "with_null_ref_j"
+        description: Check that NullPointerException is thrown if object ref is null in PandaAssembly context.
+        isa:
+          exceptions:
+            - x_null
+        runner-options: [use-pa]
+        header-template: ['PandaAssembly_header', 'get_null_R']
+        check-type: empty
+        tags: ['tsan', 'irtoc_ignore']
+        code-template: |
+          .record panda.NullPointerException <external>
+
+          .function i32 main() {
+            call.short get_null_R
+            sta.obj v0
+          try_begin:
+            ldobj.64 v0, %s
+            ldai 1
+            return
+          try_end:
+            ldai 0
+            return
+          .catch panda.NullPointerException, try_begin, try_end, try_end
+          }
+        cases:
           - values:
-            - R.ff32
+            - R.fi64
+          - values:
+            - R.ff64
+
 
       - file-name: "with_non_object_ref_p"
         description: Check that verifier reports an error when the 1st operand is not a ref to an object (other than array) in Panda context.
@@ -164,7 +216,7 @@ tests:
         check-type: exit-positive
         tags: ['verifier']
         bugid: ['2085']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
           .function i32 main() {
             %s
@@ -172,19 +224,16 @@ tests:
         cases:
           - values:
             - movi v0, 0
-            tags: ['release', 'clang_release_sanitizer']
             bugid: ['1324', '1826']
           - values:
             - movi v0, 1
           - values:
             - movi.64 v0, 0x00
-            tags: ['release', 'clang_release_sanitizer']
             bugid: ['1324', '1826']
           - values:
             - movi.64 v0, 0xCAFECAFECAFECAFE
           - values:
             - fmovi.64 v0, 0.0
-            tags: ['release', 'clang_release_sanitizer']
             bugid: ['1324', '1826']
           - values:
             - fmovi.64 v0, 6.62607015
@@ -193,6 +242,40 @@ tests:
                 movi v1, 10
                   newarr v0, v1, R[]
             bugid: ['1827']
+
+
+      - file-name: "with_non_object_ref_j"
+        description: Check that verifier reports an error when the 1st operand is not a ref to an object (other than array) in PandaAssembly context.
+        isa:
+          verification:
+            - v1_object
+        header-template: ['PandaAssembly_header']
+        check-type: exit-positive
+        tags: [verifier, pa-verifier]
+        bugid: ['3293']
+        runner-options: ['verifier-failure', 'verifier-config', 'use-pa']
+        code-template: |
+          .function i32 main() {
+            %s
+            ldobj.64 v0, R.fi64
+        cases:
+          - values:
+            - movi v0, 0
+          - values:
+            - movi v0, 1
+          - values:
+            - movi.64 v0, 0x00
+          - values:
+            - movi.64 v0, 0xCAFECAFECAFECAFE
+          - values:
+            - fmovi.64 v0, 0.0
+          - values:
+            - fmovi.64 v0, 6.62607015
+          - values:
+            - |
+                movi v1, 10
+                  newarr v0, v1, R[]
+
 
       - file-name: "with_static_field_id_p"
         description: |
@@ -226,7 +309,7 @@ tests:
         cases:
           - values:
             - W.static_field
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             tags: ['verifier']
           - values:
             - random_record_name
@@ -236,10 +319,9 @@ tests:
             - W.field_not_exists
           - values:
             - random_record_name.random_field_name
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             tags: ['verifier']
             bugid: ['3536']
-            ignore: true
           - values:
             - 0
           - values:
@@ -249,6 +331,64 @@ tests:
           - values:
             - "\"abc\""
 
+
+      - file-name: "with_static_field_id_j"
+        description: |
+          Check that verifier reports an error when the field doesn't resolve to a non-static valid object field in PandaAssembly context.
+          Incorrect usage cannot be compiled.
+        isa:
+          verification:
+            - field_id_non_static
+        header-template: []
+        runner-options: ['compile-failure', 'use-pa']
+        tags: [verifier, pa-verifier]
+        bugid: ['1324', '1828', '1833', '2086', '3293']
+        check-type: exit-positive
+        code-template: |
+          .language PandaAssembly
+          .record W {
+            i64   static_field  <static>
+          }
+          .function void W.ctor(W a0) <ctor> {
+            return.void
+          }
+          .record random_record_name {
+            i64 random_field_name
+          }
+          .function void random_function_name() {
+            return.void
+          }
+
+          .function i32 main() {
+            initobj W.ctor
+            sta.obj v0
+            ldobj.64 v0, %s
+        cases:
+          - values:
+            - W.static_field
+            tags: [verifier, pa-verifier]
+            runner-options: ['verifier-failure', 'verifier-config', 'use-pa']
+          - values:
+            - random_record_name
+          - values:
+            - random_function_name
+          - values:
+            - W.field_not_exists
+          - values:
+            - random_record_name.random_field_name
+            tags: [verifier, pa-verifier]
+            runner-options: ['verifier-failure', 'verifier-config', 'use-pa']
+            bugid: ['3536']
+          - values:
+            - 0
+          - values:
+            - -1.1
+          - values:
+            - "null"
+          - values:
+            - "\"abc\""
+
+
       - file-name: "with_wrong_field_size_or_type_p"
         description: Check that verifier reports an error when the field resolves to a field with size or type that is not corresponding to bytecode
         isa:
@@ -257,7 +397,7 @@ tests:
         header-template: ['pandasm_header']
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         bugid: ['1834', '2088']
         code-template: |
 
@@ -281,11 +421,77 @@ tests:
           - values:
             - R.fi32
           - values:
+            - R.ff32
+            bugid: ['6094']
+          - values:
             - R.fObj
           - values:
             - R.fObjArray
           - values:
             - R.fi32Array
+
+
+      - file-name: "with_wrong_field_size_or_type_j"
+        description: Check that verifier reports an error when the field resolves to a field with size or type that is not corresponding to bytecode
+        isa:
+          verification:
+            - field_id_size
+        header-template: ['PandaAssembly_header']
+        check-type: exit-positive
+        tags: [verifier, pa-verifier]
+        bugid: ['1834', '2088', '3293']
+        runner-options: ['verifier-failure', 'verifier-config', 'use-pa']
+        code-template: |
+
+          .function i32 main() {
+            initobj R.ctor
+            sta.obj v0
+            ldobj.64 v0, %s
+        cases:
+          - values:
+            - R.fu1
+          - values:
+            - R.fi8
+          - values:
+            - R.fu16
+          - values:
+            - R.fi16
+          - values:
+            - R.fi32
+          - values:
+            - R.ff32
+            bugid: ['6094']
+          - values:
+            - R.fObj
+          - values:
+            - R.fObjArray
+          - values:
+            - R.fi32Array
+
+
+      - file-name: "with_correct_field_size_or_type_p"
+        description: Check that verifier does not report any error when the field has size or type that is corresponding to bytecode
+        isa:
+          verification:
+            - field_id_size
+        header-template: ['pandasm_header']
+        check-type: exit-positive
+        tags: ['verifier']
+        runner-options: ['verifier-only', 'verifier-config']
+        code-template: |
+
+          .function i32 main() {
+            initobj R.ctor
+            sta.obj v0
+            ldobj.64 v0, %s
+        cases:
+          - values:
+            - R.fu64
+          - values:
+            - R.fi64
+          - values:
+            - R.ff64
+
 
       - file-name: "op_v_8_id_16"
         description: Check that compiler reports an error when the register number is incorrect
@@ -311,6 +517,7 @@ tests:
           - values: ['null']
           - values: ['1']
           - values: ['"0"']
+
 
       - file-name: "from_all_int_field_types"
         description: Check that accumulator value is loaded from field into accumulator. More tests on ldobj.64 can be found in stobj.64 tests
@@ -346,6 +553,7 @@ tests:
           - values: [-1, 'i64', -1, 'i64', 'cmp.64']
           - values: [-6510615555426900571, 'i64', -6510615555426900571, 'i64', 'cmp.64']
 
+
       - file-name: "from_float_field_type"
         description: Check that accumulator value is loaded from field into accumulator. More tests on ldobj.64 can be found in stobj.64 tests
         isa:
@@ -354,6 +562,7 @@ tests:
               acc: out:b64
               format: [op_v_8_id_16]
         header-template: ['pandasm_header']
+        tags: ['irtoc_ignore']
         bugid: ['3292']
         check-type: exit-positive
         code-template: |

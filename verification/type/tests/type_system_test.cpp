@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,33 +30,35 @@
 
 namespace panda::verifier::test {
 
-using SortNames = SortNames<PandaString>;
-
 TEST_F(VerifierTest, TypeSystemIncrementalClosure)
 {
-    auto &&type_system = TypeSystems::Get(TypeSystemKind::PANDA);
-    auto sort = [](const auto &name) { return TypeSystems::GetSort(TypeSystemKind::PANDA, name); };
+    TypeSystems::Destroy();
+    TypeSystems::Initialize(2);
+    auto &&typesystem = TypeSystems::Get(TypeSystemKind::PANDA, static_cast<ThreadNum>(1));
+    auto paramType = [&typesystem](const auto &name) {
+        return typesystem.Parametric(TypeSystems::GetSort(TypeSystemKind::PANDA, static_cast<ThreadNum>(1), name));
+    };
 
-    type_system.SetIncrementalRelationClosureMode(true);
-    type_system.SetDeferIncrementalRelationClosure(false);
+    typesystem.SetIncrementalRelationClosureMode(true);
+    typesystem.SetDeferIncrementalRelationClosure(false);
 
-    auto Bot = type_system.Bot();
-    auto Top = type_system.Top();
+    auto bot = typesystem.Bot();
+    auto top = typesystem.Top();
 
-    auto i8 = type_system.Parametric(sort("i8"))();
-    auto i16 = type_system.Parametric(sort("i16"))();
-    auto i32 = type_system.Parametric(sort("i32"))();
-    auto i64 = type_system.Parametric(sort("i64"))();
+    auto i8 = paramType("i8")();
+    auto i16 = paramType("i16")();
+    auto i32 = paramType("i32")();
+    auto i64 = paramType("i64")();
 
-    auto u8 = type_system.Parametric(sort("u8"))();
-    auto u16 = type_system.Parametric(sort("u16"))();
-    auto u32 = type_system.Parametric(sort("u32"))();
-    auto u64 = type_system.Parametric(sort("u64"))();
+    auto u8 = paramType("u8")();
+    auto u16 = paramType("u16")();
+    auto u32 = paramType("u32")();
+    auto u64 = paramType("u64")();
 
-    auto method = type_system.Parametric(sort("method"));
+    auto method = paramType("method");
 
-    auto top_method_of3args = method(-Bot >> -Bot >> +Top);
-    auto bot_method_of3args = method(-Top >> -Top >> +Bot);
+    auto top_method_of3args = method(-bot >> -bot >> +top);
+    auto bot_method_of3args = method(-top >> -top >> +bot);
 
     auto method1 = method(-i8 >> -i8 >> +i64);
     auto method2 = method(-i32 >> -i16 >> +i32);
@@ -66,11 +68,11 @@ TEST_F(VerifierTest, TypeSystemIncrementalClosure)
     auto method4 = method(-i64 >> -method1 >> +method2);
     // method4 <: method3
 
-    EXPECT_TRUE(Bot <= i8);
-    EXPECT_TRUE(Bot <= u64);
+    EXPECT_TRUE(bot <= i8);
+    EXPECT_TRUE(bot <= u64);
 
-    EXPECT_TRUE(i8 <= Top);
-    EXPECT_TRUE(u64 <= Top);
+    EXPECT_TRUE(i8 <= top);
+    EXPECT_TRUE(u64 <= top);
 
     i8 << (i16 | i32) << i64;
     (u8 | u16) << (u32 | u64);
@@ -96,33 +98,38 @@ TEST_F(VerifierTest, TypeSystemIncrementalClosure)
 
     EXPECT_TRUE(method1 <= top_method_of3args);
     EXPECT_TRUE(method4 <= top_method_of3args);
+    TypeSystems::Destroy();
 }
 
 TEST_F(VerifierTest, TypeSystemClosureAtTheEnd)
 {
-    auto &&type_system = TypeSystems::Get(TypeSystemKind::PANDA);
-    auto sort = [](const auto &name) { return TypeSystems::GetSort(TypeSystemKind::PANDA, name); };
+    TypeSystems::Destroy();
+    TypeSystems::Initialize(1);
+    auto &&typesystem = TypeSystems::Get(TypeSystemKind::PANDA, static_cast<ThreadNum>(0));
+    auto paramType = [&typesystem](const auto &name) {
+        return typesystem.Parametric(TypeSystems::GetSort(TypeSystemKind::PANDA, static_cast<ThreadNum>(0), name));
+    };
 
-    type_system.SetIncrementalRelationClosureMode(false);
-    type_system.SetDeferIncrementalRelationClosure(false);
+    typesystem.SetIncrementalRelationClosureMode(false);
+    typesystem.SetDeferIncrementalRelationClosure(false);
 
-    auto Bot = type_system.Bot();
-    auto Top = type_system.Top();
+    auto bot = typesystem.Bot();
+    auto top = typesystem.Top();
 
-    auto i8 = type_system.Parametric(sort("i8"))();
-    auto i16 = type_system.Parametric(sort("i16"))();
-    auto i32 = type_system.Parametric(sort("i32"))();
-    auto i64 = type_system.Parametric(sort("i64"))();
+    auto i8 = paramType("i8")();
+    auto i16 = paramType("i16")();
+    auto i32 = paramType("i32")();
+    auto i64 = paramType("i64")();
 
-    auto u8 = type_system.Parametric(sort("u8"))();
-    auto u16 = type_system.Parametric(sort("u16"))();
-    auto u32 = type_system.Parametric(sort("u32"))();
-    auto u64 = type_system.Parametric(sort("u64"))();
+    auto u8 = paramType("u8")();
+    auto u16 = paramType("u16")();
+    auto u32 = paramType("u32")();
+    auto u64 = paramType("u64")();
 
-    auto method = type_system.Parametric(sort("method"));
+    auto method = paramType("method");
 
-    auto top_method_of3args = method(-Bot >> -Bot >> +Top);
-    auto bot_method_of3args = method(-Top >> -Top >> +Bot);
+    auto top_method_of3args = method(-bot >> -bot >> +top);
+    auto bot_method_of3args = method(-top >> -top >> +bot);
 
     auto method1 = method(-i8 >> -i8 >> +i64);
     auto method2 = method(-i32 >> -i16 >> +i32);
@@ -148,7 +155,7 @@ TEST_F(VerifierTest, TypeSystemClosureAtTheEnd)
     EXPECT_FALSE(method1 <= top_method_of3args);
     EXPECT_FALSE(method4 <= top_method_of3args);
 
-    type_system.CloseSubtypingRelation();
+    typesystem.CloseSubtypingRelation();
 
     // after closure all realations are correct
     EXPECT_TRUE(method2 <= method1);
@@ -156,12 +163,17 @@ TEST_F(VerifierTest, TypeSystemClosureAtTheEnd)
     EXPECT_TRUE(method4 <= method3);
     EXPECT_TRUE(bot_method_of3args <= method1);
     EXPECT_TRUE(method4 <= top_method_of3args);
+    TypeSystems::Destroy();
 }
 
 TEST_F(VerifierTest, TypeSystemLeastUpperBound)
 {
-    auto &&type_system = TypeSystems::Get(TypeSystemKind::PANDA);
-    auto sort = [](const auto &name) { return TypeSystems::GetSort(TypeSystemKind::PANDA, name); };
+    TypeSystems::Destroy();
+    TypeSystems::Initialize(2);
+    auto &&typesystem = TypeSystems::Get(TypeSystemKind::PANDA, static_cast<ThreadNum>(1));
+    auto paramType = [&typesystem](const auto &name) {
+        return typesystem.Parametric(TypeSystems::GetSort(TypeSystemKind::PANDA, static_cast<ThreadNum>(1), name));
+    };
 
     /*
         G<--
@@ -191,38 +203,39 @@ TEST_F(VerifierTest, TypeSystemLeastUpperBound)
         to do not mislead other developers.
     */
 
-    auto Top = type_system.Top();
+    auto top = typesystem.Top();
 
-    auto A = type_system.Parametric(sort("A"))();
-    auto B = type_system.Parametric(sort("B"))();
-    auto C = type_system.Parametric(sort("C"))();
-    auto D = type_system.Parametric(sort("D"))();
-    auto E = type_system.Parametric(sort("E"))();
-    auto F = type_system.Parametric(sort("F"))();
-    auto G = type_system.Parametric(sort("G"))();
+    auto a = paramType("A")();
+    auto b = paramType("B")();
+    auto c = paramType("C")();
+    auto d = paramType("D")();
+    auto e = paramType("E")();
+    auto f = paramType("F")();
+    auto g = paramType("G")();
 
-    A << D << G;
-    B << E << G;
-    B << F;
-    C << E;
-    C << F;
+    a << d << g;
+    b << e << g;
+    b << f;
+    c << e;
+    c << f;
 
-    auto R = A & B;
-    EXPECT_EQ(R, (TypeSet {G, Top}));
+    auto r = a & b;
+    EXPECT_EQ(r, (TypeSet {g, top}));
 
-    R = E & F;
-    EXPECT_EQ(R, TypeSet {Top});
+    r = e & f;
+    EXPECT_EQ(r, TypeSet {top});
 
-    R = C & D;
-    EXPECT_EQ(R, (TypeSet {G, Top}));
+    r = c & d;
+    EXPECT_EQ(r, (TypeSet {g, top}));
 
-    R = A & B & C;
-    EXPECT_EQ(R, (TypeSet {G, Top}));
+    r = a & b & c;
+    EXPECT_EQ(r, (TypeSet {g, top}));
 
-    R = A & B & C & F;
-    EXPECT_EQ(R, TypeSet {Top});
+    r = a & b & c & f;
+    EXPECT_EQ(r, TypeSet {top});
 
-    EXPECT_TRUE(R.TheOnlyType().IsTop());
+    EXPECT_TRUE(r.TheOnlyType().IsTop());
+    TypeSystems::Destroy();
 }
 
 }  // namespace panda::verifier::test

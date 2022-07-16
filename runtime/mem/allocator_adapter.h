@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_ALLOCATOR_ADAPTER_H_
-#define PANDA_RUNTIME_MEM_ALLOCATOR_ADAPTER_H_
+#ifndef RUNTIME_MEM_ALLOCATOR_ADAPTER_H
+#define RUNTIME_MEM_ALLOCATOR_ADAPTER_H
 
 #include "runtime/include/mem/allocator.h"
 
@@ -121,7 +120,13 @@ public:
     // NOLINTNEXTLINE(readability-identifier-naming)
     pointer allocate(size_type size, [[maybe_unused]] const void *hint = nullptr)
     {
-        return allocator_->AllocArray<T>(size);
+        // NOLINTNEXTLINE(bugprone-suspicious-semicolon, readability-braces-around-statements)
+        if constexpr (AllocScopeT == AllocScope::GLOBAL) {
+            return allocator_->AllocArray<T>(size);
+            // NOLINTNEXTLINE(readability-misleading-indentation)
+        } else {
+            return allocator_->AllocArrayLocal<T>(size);
+        }
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
@@ -169,4 +174,4 @@ inline AllocatorAdapter<void, AllocScopeT> Allocator::Adapter()
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_ALLOCATOR_ADAPTER_H_
+#endif  // RUNTIME_MEM_ALLOCATOR_ADAPTER_H

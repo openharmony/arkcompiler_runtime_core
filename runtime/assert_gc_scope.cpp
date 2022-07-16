@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ std::atomic<int> AssertGCScopeT<true>::gc_flag = 0;
 // static
 bool AssertGCScopeT<true>::IsAllowed()
 {
+    // Atomic with relaxed order reason: data race with gc_flag with no synchronization or ordering constraints imposed
+    // on other reads or writes
     return AssertGCScopeT::gc_flag.load(std::memory_order_relaxed) == 0;
 }
 }  // namespace panda

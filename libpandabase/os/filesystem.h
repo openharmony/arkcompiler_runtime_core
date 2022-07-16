@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_FILESYSTEM_H_
-#define PANDA_LIBPANDABASE_OS_FILESYSTEM_H_
+#ifndef PANDA_FILESYSTEM_H
+#define PANDA_FILESYSTEM_H
 
 #include "macros.h"
 #include <string>
@@ -33,8 +33,8 @@ namespace panda::os {
 
 std::string GetAbsolutePath(std::string_view path);
 
-bool CreateDirectories(const std::string &folder_name);
+void CreateDirectories(const std::string &folder_name);
 
 }  // namespace panda::os
 
-#endif  // PANDA_LIBPANDABASE_OS_FILESYSTEM_H_
+#endif  // PANDA_FILESYSTEM_H

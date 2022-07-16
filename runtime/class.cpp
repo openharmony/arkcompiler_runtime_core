@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 #include "libpandabase/utils/logger.h"
 #include "libpandafile/class_data_accessor.h"
 #include "runtime/include/class-inl.h"
-#include "runtime/include/class_linker.h"
 #include "runtime/include/runtime.h"
 
 namespace panda {
@@ -88,22 +87,24 @@ Class::UniqId Class::CalcUniqId() const
     return CalcUniqId(descriptor_);
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 Class::Class(const uint8_t *descriptor, panda_file::SourceLang lang, uint32_t vtable_size, uint32_t imt_size,
              uint32_t size)
     : BaseClass(lang), descriptor_(descriptor), vtable_size_(vtable_size), imt_size_(imt_size), class_size_(size)
 {
+    state_ = State::INITIAL;
     // Initializa all static fields with 0 value.
     auto statics_offset = GetStaticFieldsOffset();
     auto sp = GetClassSpan();
     ASSERT(sp.size() >= statics_offset);
     auto size_to_set = sp.size() - statics_offset;
     if (size_to_set > 0) {
-        (void)memset_s(&sp[statics_offset], size_to_set, 0, size_to_set);
+        memset_s(&sp[statics_offset], size_to_set, 0, size_to_set);
     }
 }
 void Class::SetState(Class::State state)
 {
-    if (state_ == State::ERRONEOUS || state <= state_) {
+    if ((state_ == State::ERRONEOUS || state <= state_) || (state_ == State::LOADED && state == State::INITIALIZED)) {
         LOG(FATAL, RUNTIME) << "Invalid class state transition " << state_ << " -> " << state;
     }
 

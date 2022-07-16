@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,35 +24,41 @@
 #include <thread>
 #include <pthread.h>
 #ifdef PANDA_TARGET_UNIX
-#include "os/unix/thread.h"
-#elif PANDA_TARGET_WINDOWS
-#include "os/windows/thread.h"
+#include "platforms/unix/libpandabase/thread.h"
+#elif defined PANDA_TARGET_WINDOWS
+#include "platforms/windows/libpandabase/thread.h"
 #else
 #error "Unsupported platform"
 #endif
 
 namespace panda::os::thread {
+
 using ThreadId = uint32_t;
 using native_handle_type = std::thread::native_handle_type;
+
+WEAK_FOR_LTO_START
 
 ThreadId GetCurrentThreadId();
 int GetPid();
 int SetThreadName(native_handle_type pthread_handle, const char *name);
 native_handle_type GetNativeHandle();
-void Yield();
 void NativeSleep(unsigned int ms);
 void ThreadDetach(native_handle_type pthread_handle);
 void ThreadExit(void *ret);
 void ThreadJoin(native_handle_type pthread_handle, void **ret);
+void ThreadSendSignal(native_handle_type pthread_handle, int sig);
+void ThreadYield();
+
+WEAK_FOR_LTO_END
 
 // Templated functions need to be defined here to be accessible everywhere
 
 namespace internal {
+
 template <typename T>
 struct SharedPtrStruct;
 
 template <typename T>
-// CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_NO_USE_SHAREDPTR)
 using SharedPtrToSharedPtrStruct = std::shared_ptr<SharedPtrStruct<T>>;
 
 template <typename T>
@@ -93,7 +99,7 @@ template <typename Func, typename Tuple, size_t N>
 static void *ProxyFunc(void *args)
 {
     // Parse pointer and move args to local tuple.
-    // We need this pointer to be destroyed by the time function starts to avoid memleak on thread termination.
+    // We need this pointer to be destroyed by the time function starts to avoid memleak on thread  termination
     Tuple args_tuple;
     {
         auto args_ptr = static_cast<SharedPtrStruct<Tuple> *>(args);
@@ -107,6 +113,7 @@ static void *ProxyFunc(void *args)
     CallFunc<Func, Tuple, N>(*func, args_tuple);
     return nullptr;
 }
+
 }  // namespace internal
 
 template <typename Func, typename... Args>
@@ -120,14 +127,11 @@ native_handle_type ThreadStart(Func *func, Args... args)
     auto args_tuple = std::make_tuple(func, std::move(args)...);
     internal::SharedPtrStruct<decltype(args_tuple)> *ptr = nullptr;
     {
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_NO_USE_SHAREDPTR)
         auto shared_ptr = std::make_shared<internal::SharedPtrStruct<decltype(args_tuple)>>(nullptr, args_tuple);
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_NO_USE_SHAREDPTR)
         ptr = shared_ptr.get();
-        // Make recursive ref to prevent shared pointer from being destroyed until child thread acquires it.
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_NO_USE_SHAREDPTR)
+        // Make recursive ref to prevent from shared pointer being destroyed until child thread acquires it.
         ptr->this_ptr = shared_ptr;
-        // Leave scope to make sure that local shared_ptr is destroyed before thread creation.
+        // Leave scope to make sure that local shared_ptr was destroyed before thread creation
     }
     pthread_create(&tid, nullptr,
                    &internal::ProxyFunc<Func, decltype(args_tuple), std::tuple_size<decltype(args_tuple)>::value>,
@@ -136,6 +140,19 @@ native_handle_type ThreadStart(Func *func, Args... args)
     return tid;
 #else
     return reinterpret_cast<native_handle_type>(tid);
+#endif
+}
+
+WEAK_FOR_LTO_START
+int ThreadGetStackInfo(native_handle_type thread, void **stack_addr, size_t *stack_size, size_t *guard_size);
+WEAK_FOR_LTO_END
+
+inline bool IsSetPriorityError(int res)
+{
+#ifdef PANDA_TARGET_UNIX
+    return res != 0;
+#elif defined(PANDA_TARGET_WINDOWS)
+    return res == 0;
 #endif
 }
 }  // namespace panda::os::thread

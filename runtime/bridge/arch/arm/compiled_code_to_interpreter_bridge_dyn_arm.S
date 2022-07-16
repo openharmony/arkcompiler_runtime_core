@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 #include "arch/arm/asm_constants.h"
 #include "shorty_values.h"
 
-// Frame* CreateFrame(size_t nregs, Method* method, Frame* prev);
-.extern CreateFrame
+// Frame* CreateFrameForMethodDyn(Method* method, Frame* prev);
+.extern CreateFrameForMethodDyn
 // void FreeFrame(Frame* frame)
 .extern FreeFrame
 // void InterpreterEntryPoint(const uint8_t* pc, Frame* frame);

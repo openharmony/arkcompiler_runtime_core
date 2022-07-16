@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ERROR_H_
-#define PANDA_ASSEMBLER_ERROR_H_
+#ifndef _PANDA_ASSEMBLER_ERROR_HPP
+#define _PANDA_ASSEMBLER_ERROR_HPP
 
 #include <string>
 
@@ -43,9 +43,11 @@ struct Error {
         ERR_BAD_NONEXISTING_OPERATION,
         ERR_BAD_ID_FUNCTION,
         ERR_BAD_ID_RECORD,
+        ERR_BAD_ID_ARRAY,
         ERR_BAD_ID_FIELD,
         ERR_BAD_FUNCTION_NAME,
         ERR_BAD_RECORD_NAME,
+        ERR_BAD_ARRAY_NAME,
         ERR_BAD_DEFINITION_METADATA,
         ERR_BAD_DEFINITION_FUNCTION,
         ERR_BAD_DEFINITION_RECORD,
@@ -62,6 +64,15 @@ struct Error {
         ERR_FUNCTION_ARGUMENT_MISMATCH,
         ERR_BAD_FIELD_MISSING_NAME,
         ERR_BAD_FIELD_VALUE_TYPE,
+        ERR_BAD_ARRAY_TYPE,
+        ERR_BAD_ARRAY_SIZE,
+        ERR_BAD_ARRAY_SIZE_VALUE,
+        ERR_BAD_ARRAY_ELEMENT_MISSING_VALUE,
+        ERR_BAD_ARRAY_ELEMENT_VALUE_TYPE,
+        ERR_BAD_ARRAY_ELEMENT_VALUE,
+        ERR_BAD_ARRAY_ELEMENT_VALUE_INTEGER,
+        ERR_BAD_ARRAY_ELEMENT_VALUE_FLOAT,
+        ERR_BAD_ARRAY_ELEMENT_VALUE_STRING,
         ERR_BAD_CHARACTER,
         ERR_BAD_KEYWORD,
         ERR_BAD_DEFINITION,
@@ -82,6 +93,9 @@ struct Error {
         ERR_UNKNOWN_LANGUAGE,
         ERR_BAD_MNEMONIC_NAME,
         ERR_REPEATING_FIELD_NAME,
+        ERR_FUNCTION_MULTIPLE_ALTERNATIVES,
+        ERR_BAD_SIGNATURE,
+        ERR_BAD_SIGNATURE_PARAMETERS,
 
         // Warnings
         WAR_UNEXPECTED_RETURN_TYPE,
@@ -90,7 +104,7 @@ struct Error {
 
     ErrorClass type;
     std::string whole_line;
-    size_t pos;  // position to highlight the word
+    size_t pos; /* positions to highlight the word */
     size_t end;
     ErrorType err;
     std::string message;
@@ -116,4 +130,4 @@ struct Error {
 using ErrorList = std::vector<Error>;
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_ERROR_H_
+#endif  // !_PANDA_ASSEMBLER_ERROR_HPP

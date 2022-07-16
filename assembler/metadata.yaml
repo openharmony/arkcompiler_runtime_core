@@ -38,6 +38,13 @@ attributes:
     - field
     - function
 
+- name: volatile
+  type: bool
+  flags: [ACC_VOLATILE]
+  multiple: false
+  applicable_to:
+    - field
+
 - name: ctor
   type: bool
   applicable_to:

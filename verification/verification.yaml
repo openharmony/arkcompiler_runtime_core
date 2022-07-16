@@ -16,10 +16,13 @@ compatibility_checks:
     ok:
       ok: ""
     errors:
-      private_field: Access to private object field is prohibited.
-      protected_field: Access to protected object field from non-descendants of object class is prohibited.
+      private_field: Access to the private object field is prohibited.
+      protected_field: Access to the protected object field is prohibited.
+      package_field: Access to the package protected object field is prohibited.
       private_method: Call to a private method is prohibited.
       protected_method: Call to protected methods from non-descendants of object class is prohibited.
+      protected_class: Access to package-private class is prohibited.
+      package_method: Call to protected methods from non-descendants of object class is prohibited.
       unknown: Internal error.
       wrong_acc: Wrong accumulator type.
       wrong_formal_param: Wrong formal parameter type.
@@ -36,6 +39,7 @@ compatibility_checks:
       values:
         - same
         - descendant
+        - neighbour
         - other
 
     access:
@@ -43,6 +47,7 @@ compatibility_checks:
       values:
         - public
         - protected
+        - package
         - private
 
     type:
@@ -71,9 +76,13 @@ compatibility_checks:
       _default: ok
       descendant:
         private_field: private
+        protected_field: package
+      neighbour:
+        private_field: private
       other:
         private_field: private
         protected_field: protected
+        package_field: package
 
     Call:
       _domains:
@@ -82,9 +91,13 @@ compatibility_checks:
       _default: ok
       descendant:
         private_method: private
+        protected_method: package
+      neighbour:
+        private_method: private
       other:
         private_method: private
         protected_method: protected
+        package_method: package
 
     Stobj:
       _domains:

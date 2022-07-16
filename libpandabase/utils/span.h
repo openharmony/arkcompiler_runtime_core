@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_SPAN_H_
-#define PANDA_LIBPANDABASE_UTILS_SPAN_H_
+#ifndef LIBPANDABASE_UTILS_SPAN_H_
+#define LIBPANDABASE_UTILS_SPAN_H_
 
 #include "macros.h"
 
@@ -66,73 +66,61 @@ public:
 
     constexpr Span &operator=(const Span &other) noexcept = default;
     Span &operator=(Span &&other) noexcept = default;
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     Iterator begin()
     {
         return data_;
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstIterator begin() const
     {
         return data_;
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstIterator cbegin() const
     {
         return data_;
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     Iterator end()
     {
         return data_ + size_;  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstIterator end() const
     {
         return data_ + size_;  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstIterator cend() const
     {
         return data_ + size_;  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ReverseIterator rbegin()
     {
         return ReverseIterator(end());
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstReverseIterator rbegin() const
     {
         return ConstReverseIterator(end());
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstReverseIterator crbegin() const
     {
         return ConstReverseIterator(cend());
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ReverseIterator rend()
     {
         return ReverseIterator(begin());
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstReverseIterator rend() const
     {
         return ConstReverseIterator(begin());
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstReverseIterator crend() const
     {
@@ -157,12 +145,10 @@ public:
     {
         return size_;
     }
-
     constexpr size_t SizeBytes() const
     {
         return size_ * sizeof(ElementType);
     }
-
     constexpr bool Empty() const
     {
         return size_ == 0U;
@@ -172,7 +158,6 @@ public:
     {
         return data_;
     }
-
     ConstIterator Data() const
     {
         return data_;
@@ -223,23 +208,28 @@ public:
     {
         return size_;
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
-    size_t empty() const
+    bool empty() const
     {
         return size() == 0;
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     Iterator data()
     {
         return data_;
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstIterator data() const
     {
         return data_;
+    }
+    static constexpr uint32_t GetDataOffset()
+    {
+        return MEMBER_OFFSET(Span<T>, data_);
+    }
+    static constexpr uint32_t GetSizeOffset()
+    {
+        return MEMBER_OFFSET(Span<T>, size_);
     }
 
 private:
@@ -263,7 +253,6 @@ Span<const std::byte> AsBytes(Span<T> s) noexcept
 {
     return {reinterpret_cast<const std::byte *>(s.Data()), s.SizeBytes()};
 }
-
 template <class T, typename = std::enable_if_t<!std::is_const_v<T>>>
 Span<std::byte> AsWritableBytes(Span<T> s) noexcept
 {
@@ -271,5 +260,4 @@ Span<std::byte> AsWritableBytes(Span<T> s) noexcept
 }
 
 }  // namespace panda
-
-#endif  // PANDA_LIBPANDABASE_UTILS_SPAN_H_
+#endif  // LIBPANDABASE_UTILS_SPAN_H_

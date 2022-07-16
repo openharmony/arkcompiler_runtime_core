@@ -145,7 +145,7 @@ For more information, please see: [ARK Runtime Usage Guide](https://gitee.com/op
 
 ## Repositories Involved<a name="section1371113476307"></a>
 
-**[arkcompiler\_runtime\_core](https://gitee.com/openharmony/arkcompiler_runtime_core)**
+**[arkcompiler\_runtime\_core](https://gitee.com/openharmony/ark_runtime_core)**
 
 [arkcompiler\_ets\_runtime](https://gitee.com/openharmony/arkcompiler_ets_runtime)
 

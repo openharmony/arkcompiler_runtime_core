@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public:
     };
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
 };
 
 TEST_F(HistogramTest, SimpleIntTest)
@@ -156,7 +156,7 @@ TEST_F(HistogramTest, CheckGetTopDumpTest)
     std::vector<int> simple_vector = {1, 1, 0, 12, 0, 1, 12};
     Histogram<int> hist(simple_vector.begin(), simple_vector.end());
     ASSERT_EQ(hist.GetTopDump(), "0:2,1:3,12:2");
-    ASSERT_EQ(hist.GetTopDump(2U), "0:2,1:3");
+    ASSERT_EQ(hist.GetTopDump(2), "0:2,1:3");
     ASSERT_EQ(hist.GetTopDump(1), "0:2");
     ASSERT_EQ(hist.GetTopDump(0), "");
 }

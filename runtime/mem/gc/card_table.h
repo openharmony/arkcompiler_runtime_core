@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_MEM_GC_CARD_TABLE_H_
-#define PANDA_RUNTIME_MEM_GC_CARD_TABLE_H_
+#ifndef ACCOUNTING_CARD_TABLE_H
+#define ACCOUNTING_CARD_TABLE_H
 
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
 
-#include "runtime/include/mem/allocator.h"
 #include "runtime/include/mem/panda_containers.h"
 
 namespace panda::mem {
@@ -172,6 +171,8 @@ public:
         void Clear();
         bool IsProcessed() const;
         void SetProcessed();
+        bool IsYoung() const;
+        void SetYoung();
 
         ~Card() = default;
 
@@ -182,6 +183,7 @@ public:
         uint8_t GetCard() const;
         void SetCard(uint8_t new_val);
 
+        static constexpr uint8_t YOUNG_VALUE = 3;
         static constexpr uint8_t PROCESSED_VALUE = 2;
         static constexpr uint8_t MARKED_VALUE = 1;
         static constexpr uint8_t CLEAR_VALUE = 0;
@@ -190,6 +192,13 @@ public:
     };
 
     CardPtr GetCardPtr(uintptr_t addr) const;  // returns card address for the addr
+
+    ALWAYS_INLINE uintptr_t GetMinAddress() const
+    {
+        return min_address_;
+    }
+
+    void MarkCardsAsYoung(const MemRange &mem_range);
 
 private:
     void ClearCards(CardPtr start, size_t card_count);
@@ -206,6 +215,8 @@ private:
     InternalAllocatorPtr internal_allocator_ {nullptr};
 };
 
+using CardVisitor = std::function<void(CardTable::CardPtr)>;
+
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_GC_CARD_TABLE_H_
+#endif  // ACCOUNTING_CARD_TABLE_H
