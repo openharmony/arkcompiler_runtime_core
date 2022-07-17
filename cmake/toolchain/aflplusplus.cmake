@@ -14,7 +14,12 @@
 include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
 
 set(ENV{AFL_CC_COMPILER} "LLVM")
-set(ENV{AFL_LLVM_LAF_ALL} "1")
+if (DEFINED AFL_LLVM_LAF_ALL AND NOT AFL_LLVM_LAF_ALL)
+    unset(ENV{AFL_LLVM_LAF_ALL})
+else()
+    set(ENV{AFL_LLVM_LAF_ALL} "1")
+endif()
+
 set(PANDA_ENABLE_CLANG_TIDY false CACHE BOOL "Enable clang-tidy checks during compilation" FORCE)
 
 set_c_compiler(afl-clang-fast)
@@ -23,6 +28,11 @@ set_cxx_compiler(afl-clang-fast++)
 add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT=1)
 add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT_FOR="/libpandafile/,/libpandabase/")
 
+set(FUZZER_LIB "/usr/lib/afl/libAFLDriver.a")
+set(PANDA_WITH_TESTS false)
+set(PANDA_WITH_BENCHMARKS false)
+set(PANDA_AFL_COVERAGE false)
 set(PANDA_ENABLE_AFL true)
+set(PANDA_BUILD_FUZZ_TARGETS true)
 set(PANDA_FUZZING_SANITIZERS false)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-stack-address")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-stack-address -Wno-unused-variable")

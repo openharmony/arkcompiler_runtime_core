@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_BYTECODE_EMITTER_H_
-#define PANDA_LIBPANDAFILE_BYTECODE_EMITTER_H_
+#ifndef BYTECODE_EMITTER_H
+#define BYTECODE_EMITTER_H
 
 #include <bytecode_instruction.h>
 #include <cstdint>
@@ -38,11 +38,6 @@ class BytecodeEmitter;
  * Lifetime of a label must match lifetime of the emitter.
  **/
 class Label {
-public:
-    ~Label() = default;
-    DEFAULT_MOVE_SEMANTIC(Label);
-    DEFAULT_COPY_SEMANTIC(Label);
-
 private:
     explicit Label(std::list<uint32_t>::iterator pc) : pc_(pc) {}
 
@@ -100,23 +95,22 @@ public:
     ErrorCode Build(std::vector<uint8_t> *output);
 
 #include <bytecode_emitter_def_gen.h>
-    void Jcmp(BytecodeInstruction::Opcode opcode_short, BytecodeInstruction::Opcode opcode_long, uint8_t reg,
-              const Label &label);
 
 private:
-    void Jcmpz(BytecodeInstruction::Opcode opcode, const Label &label);
     ErrorCode ReserveSpaceForOffsets();
-    ErrorCode DoReserveSpaceForOffset(BytecodeInstruction::Opcode opcode, uint32_t insn_pc,
-                                      BitImmSize expected_imm_size, size_t *extra_bytes_ptr, uint32_t *target_ptr);
+    ErrorCode DoReserveSpaceForOffset(const BytecodeInstruction &insn, uint32_t insn_pc, BitImmSize expected_imm_size,
+                                      size_t *extra_bytes_ptr, uint32_t *target_ptr);
     ErrorCode UpdateBranches();
     void UpdateLabelTargets(uint32_t pc, size_t bias);
     int32_t EstimateMaxDistance(uint32_t insn_pc, uint32_t target_pc, uint32_t bias) const;
-    ErrorCode CheckLabels() const;
+    ErrorCode CheckLabels();
 
     static size_t GetSizeByOpcode(BytecodeInstruction::Opcode opcode);
     static BytecodeInstruction::Opcode RevertConditionCode(BytecodeInstruction::Opcode opcode);
+    static void UpdateBranchOffs(uint8_t *insn, int32_t offs);
     static BitImmSize GetBitImmSizeByOpcode(BytecodeInstruction::Opcode opcode);
-    static BytecodeInstruction::Opcode GetLongestConditionalJump(BytecodeInstruction::Opcode opcode);
+    static BytecodeInstruction::Opcode GetLongestJump(BytecodeInstruction::Opcode opcode);
+    BytecodeInstruction::Opcode GetSuitableJump(BytecodeInstruction::Opcode opcode, BytecodeEmitter::BitImmSize width);
 
 private:
     struct LabelCmp {
@@ -133,7 +127,6 @@ private:
     std::list<uint32_t> pc_list_;
     std::vector<uint8_t> bytecode_;
 };
-
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDAFILE_BYTECODE_EMITTER_H_
+#endif  // BYTECODE_EMITTER_H

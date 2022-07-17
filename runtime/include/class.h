@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_CLASS_H_
-#define PANDA_RUNTIME_INCLUDE_CLASS_H_
+#ifndef PANDA_RUNTIME_CLASS_H_
+#define PANDA_RUNTIME_CLASS_H_
 
 #include <securec.h>
 #include <atomic>
@@ -27,18 +26,19 @@
 #include "runtime/include/field.h"
 #include "runtime/include/itable.h"
 #include "runtime/include/method.h"
-#include "runtime/include/object_header.h"
 #include "libpandabase/macros.h"
 
 namespace panda {
 
 class ClassLinkerContext;
-class Field;
 class ManagedThread;
+class ObjectHeader;
 
+// TODO (Artem Udovichenko): move BaseClass to another file but still have Class.h
 class BaseClass {
 public:
     static constexpr uint32_t DYNAMIC_CLASS = 1U;
+    static constexpr uint32_t DYNAMIC_CLASSROOT = DYNAMIC_CLASS << 1U;
 
 public:
     explicit BaseClass(panda_file::SourceLang lang) : lang_(lang) {}
@@ -51,11 +51,6 @@ public:
     uint32_t GetFlags() const
     {
         return flags_;
-    }
-
-    void SetFlags(uint32_t flags)
-    {
-        flags_ = flags;
     }
 
     bool IsDynamicClass() const
@@ -93,9 +88,23 @@ public:
         lang_ = lang;
     }
 
-    static constexpr size_t OffsetOfManageObject()
+    static constexpr uint32_t GetFlagsOffset()
     {
-        return offsetof(BaseClass, managed_object_);
+        return MEMBER_OFFSET(BaseClass, flags_);
+    }
+    static constexpr size_t GetManagedObjectOffset()
+    {
+        return MEMBER_OFFSET(BaseClass, managed_object_);
+    }
+    static constexpr size_t GetObjectSizeOffset()
+    {
+        return MEMBER_OFFSET(BaseClass, object_size_);
+    }
+
+protected:
+    void SetFlags(uint32_t flags)
+    {
+        flags_ = flags;
     }
 
 private:
@@ -111,7 +120,8 @@ private:
 class Class : public BaseClass {
 public:
     using UniqId = uint64_t;
-    static constexpr uint32_t STRING_CLASS = 1U << 1U;
+    static constexpr uint32_t STRING_CLASS = DYNAMIC_CLASSROOT << 1U;
+    static constexpr uint32_t IS_CLONEABLE = STRING_CLASS << 1U;
     static constexpr size_t IMTABLE_SIZE = 32;
 
     enum {
@@ -168,9 +178,19 @@ public:
         num_copied_methods_ = methods.size() - num_methods_;
     }
 
+    Method *GetRawFirstMethodAddr() const
+    {
+        return methods_;
+    }
+
     Span<Method> GetMethods() const
     {
         return {methods_, num_methods_};
+    }
+
+    Span<Method> GetMethodsWithCopied() const
+    {
+        return {methods_, num_methods_ + num_copied_methods_};
     }
 
     Span<Method> GetStaticMethods() const
@@ -211,15 +231,9 @@ public:
         num_sfields_ = num_sfields;
     }
 
-    Span<Method *> GetVTable()
-    {
-        return GetClassSpan().SubSpan<Method *>(GetVTableOffset(), vtable_size_);
-    }
+    Span<Method *> GetVTable();
 
-    Span<Method *const> GetVTable() const
-    {
-        return GetClassSpan().SubSpan<Method *const>(GetVTableOffset(), vtable_size_);
-    }
+    Span<Method *const> GetVTable() const;
 
     Span<Class *> GetInterfaces() const
     {
@@ -333,15 +347,33 @@ public:
         return (GetFlags() & STRING_CLASS) != 0;
     }
 
+    void SetStringClass()
+    {
+        SetFlags(GetFlags() | STRING_CLASS);
+    }
+
+    void SetCloneable()
+    {
+        SetFlags(GetFlags() | IS_CLONEABLE);
+    }
+
+    // TODO(maksenov): remove this method after resolving #7866
+    void SetDynamicClass()
+    {
+        SetFlags(GetFlags() | DYNAMIC_CLASS);
+    }
+
+    void SetDynamicClassRoot()
+    {
+        SetFlags(GetFlags() | DYNAMIC_CLASSROOT);
+    }
+
     bool IsVariableSize() const
     {
         return IsArrayClass() || IsStringClass();
     }
 
-    size_t GetStaticFieldsOffset() const
-    {
-        return ClassHelper::ComputeClassSize(vtable_size_, imt_size_, 0, 0, 0, 0, 0, 0);
-    }
+    size_t GetStaticFieldsOffset() const;
 
     panda_file::Type GetType() const
     {
@@ -382,10 +414,7 @@ public:
      * Check if the object is Class instance
      * @return true if the object is Class instance
      */
-    bool IsClassClass() const
-    {
-        return GetManagedObject()->ClassAddr<Class>() == this;
-    }
+    bool IsClassClass() const;
 
     bool IsSubClassOf(const Class *klass) const;
 
@@ -445,24 +474,25 @@ public:
         return state_ == State::ERRONEOUS;
     }
 
-    static constexpr uint32_t GetStateOffset()
+    static constexpr uint32_t GetBaseOffset()
     {
-        return MEMBER_OFFSET(Class, state_);
+        return MEMBER_OFFSET(Class, base_);
     }
-
     static constexpr uint32_t GetComponentTypeOffset()
     {
         return MEMBER_OFFSET(Class, component_type_);
     }
-
     static constexpr uint32_t GetTypeOffset()
     {
         return MEMBER_OFFSET(Class, type_);
     }
-
-    static constexpr uint32_t GetBaseOffset()
+    static constexpr uint32_t GetStateOffset()
     {
-        return MEMBER_OFFSET(Class, base_);
+        return MEMBER_OFFSET(Class, state_);
+    }
+    static constexpr uint32_t GetITableOffset()
+    {
+        return MEMBER_OFFSET(Class, itable_);
     }
 
     uint8_t GetInitializedValue()
@@ -484,10 +514,7 @@ public:
         return init_tid_;
     }
 
-    static size_t GetVTableOffset()
-    {
-        return ClassHelper::ComputeClassSize(0, 0, 0, 0, 0, 0, 0, 0);
-    }
+    static constexpr size_t GetVTableOffset();
 
     uint32_t GetNumVirtualMethods() const
     {
@@ -529,15 +556,7 @@ public:
         return (access_flags_ & ACC_HAS_DEFAULT_METHODS) != 0;
     }
 
-    size_t GetIMTOffset()
-    {
-        return GetVTableOffset() + vtable_size_ * sizeof(uintptr_t);
-    }
-
-    size_t GetIMTOffset() const
-    {
-        return GetVTableOffset() + vtable_size_ * sizeof(uintptr_t);
-    }
+    size_t GetIMTOffset() const;
 
     std::string GetName() const;
 
@@ -556,8 +575,12 @@ public:
     template <class Pred>
     Field *FindInstanceField(Pred pred) const;
 
+    Field *FindInstanceFieldById(panda_file::File::EntityId id) const;
+
     template <class Pred>
     Field *FindStaticField(Pred pred) const;
+
+    Field *FindStaticFieldById(panda_file::File::EntityId id) const;
 
     template <class Pred>
     Field *FindField(Pred pred) const;
@@ -571,29 +594,31 @@ public:
 
     Field *GetDeclaredFieldByName(const uint8_t *mutf8_name) const;
 
-    template <class Pred>
-    Method *FindVirtualClassMethod(Pred pred) const;
+    Method *GetVirtualInterfaceMethod(panda_file::File::EntityId id) const;
 
-    template <class Pred>
-    Method *FindInterfaceMethod(Pred pred) const;
+    Method *GetStaticInterfaceMethod(panda_file::File::EntityId id) const;
 
-    template <class Pred>
-    Method *FindVirtualInterfaceMethod(Pred pred) const;
+    Method *GetStaticClassMethod(panda_file::File::EntityId id) const;
 
-    template <class Pred>
-    Method *FindStaticInterfaceMethod(Pred pred) const;
-
-    template <class Pred>
-    Method *FindStaticClassMethod(Pred pred) const;
-
-    template <class Pred>
-    Method *FindClassMethod(Pred pred) const;
+    Method *GetVirtualClassMethod(panda_file::File::EntityId id) const;
 
     Method *GetDirectMethod(const uint8_t *mutf8_name, const Method::Proto &proto) const;
 
     Method *GetClassMethod(const uint8_t *mutf8_name, const Method::Proto &proto) const;
 
+    Method *GetClassMethod(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
+
+    Method *GetStaticClassMethodByName(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
+
+    Method *GetVirtualClassMethodByName(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
+
     Method *GetInterfaceMethod(const uint8_t *mutf8_name, const Method::Proto &proto) const;
+
+    Method *GetInterfaceMethod(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
+
+    Method *GetStaticInterfaceMethodByName(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
+
+    Method *GetVirtualInterfaceMethodByName(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
     Method *GetDirectMethod(const uint8_t *mutf8_name) const;
 
@@ -687,10 +712,14 @@ public:
 
     UniqId GetUniqId() const
     {
-        auto id = uniq_id_.load();
+        // Atomic with acquire order reason: data race with uniq_id_ with dependecies on reads after the load which
+        // should become visible
+        auto id = uniq_id_.load(std::memory_order_acquire);
         if (id == 0) {
             id = CalcUniqId();
-            uniq_id_.store(id);
+            // Atomic with release order reason: data race with uniq_id_ with dependecies on writes before the store
+            // which should become visible acquire
+            uniq_id_.store(id, std::memory_order_release);
         }
         return id;
     }
@@ -789,12 +818,24 @@ public:
 
     static size_t GetClassObjectSizeFromClass(Class *cls);
 
+    static inline constexpr size_t GetMethodsOffset()
+    {
+        return MEMBER_OFFSET(Class, methods_);
+    }
+
     ~Class() = default;
 
     NO_COPY_SEMANTIC(Class);
     NO_MOVE_SEMANTIC(Class);
 
+    static constexpr size_t ComputeClassSize(size_t vtable_size, size_t imt_size, size_t num_8bit_sfields,
+                                             size_t num_16bit_sfields, size_t num_32bit_sfields,
+                                             size_t num_64bit_sfields, size_t num_ref_sfields,
+                                             size_t num_tagged_sfields);
+
 private:
+    static constexpr void Pad(size_t size, size_t *padding, size_t *n);
+
     enum class FindFilter { STATIC, INSTANCE, ALL, COPIED };
 
     template <FindFilter filter>
@@ -803,20 +844,23 @@ private:
     template <FindFilter filter, class Pred>
     Field *FindDeclaredField(Pred pred) const;
 
+    template <FindFilter filter>
+    Field *FindDeclaredField(panda_file::File::EntityId id) const;
+
     template <FindFilter filter, class Pred>
     Field *FindField(Pred pred) const;
 
     template <FindFilter filter>
     Span<Method> GetMethods() const;
 
-    template <FindFilter filter, class Pred>
-    Method *FindDirectMethod(Pred pred) const;
+    template <FindFilter filter, typename KeyComp, typename Key, typename... Pred>
+    Method *FindDirectMethod(Key key, const Pred &... preds) const;
 
-    template <FindFilter filter, class Pred>
-    Method *FindClassMethod(Pred pred) const;
+    template <FindFilter filter, typename KeyComp, typename Key, typename... Pred>
+    Method *FindClassMethod(Key key, const Pred &... preds) const;
 
-    template <FindFilter filter, class Pred>
-    Method *FindInterfaceMethod(Pred pred) const;
+    template <Class::FindFilter filter, typename KeyComp, typename Key, typename... Pred>
+    Method *FindInterfaceMethod(Key key, const Pred &... preds) const;
 
     Span<std::byte> GetClassSpan()
     {
@@ -828,6 +872,7 @@ private:
         return Span(reinterpret_cast<const std::byte *>(this), class_size_);
     }
 
+private:
     Class *base_ {nullptr};
     const panda_file::File *panda_file_ {nullptr};
     // Decscriptor is a valid MUTF8 string. See docs/file_format.md#typedescriptor for more information.
@@ -858,7 +903,7 @@ private:
     ClassLinkerContext *load_context_ {nullptr};
 
     panda_file::Type type_ {panda_file::Type::TypeId::REFERENCE};
-    std::atomic<State> state_ {State::INITIAL};
+    std::atomic<State> state_;
 
     UniqId CalcUniqId() const;
     mutable std::atomic<UniqId> uniq_id_ {0};
@@ -877,25 +922,6 @@ private:
 
 std::ostream &operator<<(std::ostream &os, const Class::State &state);
 
-#ifdef PANDA_TARGET_64
-
-constexpr uint32_t CLASS_MANAGE_OBJECT_OFFSET = 8U;
-static_assert(CLASS_MANAGE_OBJECT_OFFSET == Class::OffsetOfManageObject());
-
-constexpr uint32_t CLASS_STATE_OFFSET = 153U;
-static_assert(CLASS_STATE_OFFSET == panda::Class::GetStateOffset());
-
-constexpr uint32_t CLASS_COMPONENT_TYPE_OFFSET = 136U;
-static_assert(CLASS_COMPONENT_TYPE_OFFSET == panda::Class::GetComponentTypeOffset());
-
-constexpr uint32_t CLASS_TYPE_OFFSET = 152U;
-static_assert(CLASS_TYPE_OFFSET == panda::Class::GetTypeOffset());
-
-constexpr uint32_t CLASS_BASE_OFFSET = 24U;
-static_assert(CLASS_BASE_OFFSET == panda::Class::GetBaseOffset());
-
-#endif
-
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_CLASS_H_
+#endif  // PANDA_RUNTIME_CLASS_H_

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_H_
-#define PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_H_
+#ifndef PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_H
+#define PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_H
 
 #include <securec.h>
 #include <array>
 
-#include "libpandabase/mem/arena.h"
+#include "libpandabase/mem/arena-inl.h"
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/mem/mmap_mem_pool-inl.h"
 
@@ -47,7 +46,7 @@ namespace panda::mem {
 template <Alignment AlignmenT = DEFAULT_FRAME_ALIGNMENT, bool UseMemsetT = true>
 class FrameAllocator {
 public:
-    FrameAllocator();
+    explicit FrameAllocator(bool use_malloc = false);
     ~FrameAllocator();
     FrameAllocator(const FrameAllocator &) noexcept = delete;
     FrameAllocator(FrameAllocator &&) noexcept = default;
@@ -67,6 +66,11 @@ public:
     static constexpr AllocatorType GetAllocatorType()
     {
         return AllocatorType::FRAME_ALLOCATOR;
+    }
+
+    size_t GetAllocatedSize() const
+    {
+        return allocated_size_;
     }
 
 private:
@@ -101,6 +105,19 @@ private:
      */
     void FreeLastArena();
 
+    /**
+     * \brief Try to allocate an arena from the memory.
+     * @param size - size of the required arena
+     * @return pointer on success, or nullptr on fail
+     */
+    FramesArena *AllocateArenaImpl(size_t size);
+
+    /**
+     * \brief Free given arena
+     * @param arena - arena to free
+     */
+    void FreeArenaImpl(FramesArena *arena);
+
     // A pointer to the current arena with the last allocated frame
     FramesArena *cur_arena_ {nullptr};
 
@@ -115,10 +132,16 @@ private:
 
     size_t empty_arenas_count_ {0};
 
+    // Total allocated size
+    size_t allocated_size_ {0};
+
     MmapMemPool *mem_pool_alloc_ {nullptr};
+
+    bool use_malloc_ {false};
+
     friend class FrameAllocatorTest;
 };
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_H_
+#endif  // PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_H

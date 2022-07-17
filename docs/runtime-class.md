@@ -1,14 +1,14 @@
 # Runtime class
 
-Panda runtime uses `panda::Class` to store all necessary language independent information about classes. Virtual table and region for static fields are embedded to the `panda::Class` object so it has variable size. To get fast access to them, the `Class Word` field of the object header points to the instance of this class. `ClassLinker::GetClass` also returns an instance of the `panda::Class`.
+Panda runtime uses `panda::Class` to store all necessary language independent information about class. Virtual table and region for static fields are embedded to the `panda::Class` object so it has variable size. To get fast access to them `Class Word` field of the object header points to the instance of this class. `ClassLinker::GetClass` also return an instance of the `panda::Class`.
 
-Pointer to the managed class object (instance of `panda.Class` or `java.lang.Class` in case of Java, for example) can be obtained using `panda::Class::GetManagedObject` method:
+Pointer to the managed class object (instance of `panda.Class` or other in case of plugin-related code) can be obtained using `panda::Class::GetManagedObject` method:
 
 ```cpp
 panda::Class *cls = obj->ClassAddr()->GetManagedObject();
 ```
 
-Storing common runtime information separately from managed objects allows more flexibility for the layout but causes additional dereferences to get panda::Class from mirror classes and vice versa. However, we can use composition to reduce the number of additional dereferences.
+We store common runtime information separately from managed object to give more flexebility for its layout. Disadvantage of this approach is that we need additional dereference to get `panda::Class` from mirror class and vice versa. But we can use composition to reduce number of additional dereferencies. For example:
 
 ```cpp
 namespace panda::coretypes {
@@ -21,7 +21,7 @@ class Class : public ObjectHeader {
 }  // namespace panda::coretypes
 ```
 
-The layout of the `coretypes::Class` is as follows:
+In this case layout of the `coretypes::Class` will be following:
 
 
     mirror class (`coretypes::Class`) --------> +------------------+ <-+
@@ -35,7 +35,7 @@ The layout of the `coretypes::Class` is as follows:
                                                 |      ...         |
                                                 +------------------+
 
-Note: The `panda::Class` object must be the last in the mirror class because it has variable size.
+Note: as `panda::Class` object has variable size it must be last in the mirror class.
 
 Such layout allows to get pointer to the `panda::Class` object from the `coretypes::Class` one and vice versa without dereferencies if we know language context and it's constant (some language specific code):
 
@@ -86,8 +86,8 @@ switch (klass->GetSourceLang()) {
         managed_class_obj = coretypes::Class::FromRuntimeClass(klass);
         break;
     }
-    case JAVA_8: {
-        managed_class_obj = java::JClass::FromRuntimeClass(klass);
+    case PLUGIN_SOURCE_LANG: {
+        managed_class_obj = plugin::JClass::FromRuntimeClass(klass);
         break;
     }
     ...

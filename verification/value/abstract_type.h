@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_VALUE_ABSTRACT_TYPE_H_
-#define PANDA_VERIFICATION_VALUE_ABSTRACT_TYPE_H_
+#ifndef _PANDA_VERIFIER_ABSTRACT_TYPE_HPP
+#define _PANDA_VERIFIER_ABSTRACT_TYPE_HPP
 
 #include "verification/value/variables.h"
 #include "verification/type/type_set.h"
@@ -145,18 +145,18 @@ public:
         }
     }
 
-    template <typename StrT, typename TypeImageFunc>
-    StrT Image(TypeImageFunc type_img_func) const
+    template <typename TypeImageFunc>
+    PandaString Image(TypeImageFunc type_img_func) const
     {
         if (IsNone()) {
             return "<none>";
         } else if (IsVar()) {
-            return GetVar().Image<StrT>("<TypeVar") + ">";
+            return GetVar().Image("<TypeVar") + ">";
         } else if (IsType()) {
-            StrT result = type_img_func(GetType());
+            PandaString result = type_img_func(GetType());
             return result;
         } else if (IsTypeSet()) {
-            return GetTypeSet().Image<StrT>(type_img_func);
+            return GetTypeSet().Image(type_img_func);
         }
         return "<unexpected kind of AbstractType>";
     }
@@ -200,4 +200,4 @@ private:
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_VALUE_ABSTRACT_TYPE_H_
+#endif  // !_PANDA_VERIFIER_ABSTRACT_TYPE_HPP

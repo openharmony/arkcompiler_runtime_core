@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_GC_GC_TYPES_H_
-#define PANDA_RUNTIME_MEM_GC_GC_TYPES_H_
+#ifndef RUNTIME_MEM_GC_GC_TYPES_H
+#define RUNTIME_MEM_GC_GC_TYPES_H
 
 #include <array>
 #include <string_view>
@@ -65,8 +64,8 @@ constexpr size_t ToIndex(GCType type)
 }
 
 constexpr size_t GC_TYPE_SIZE = ToIndex(GCType::GCTYPE_LAST) + 1;
-constexpr std::array<char const *, GC_TYPE_SIZE> GC_NAMES = {"Invalid GC", "Epsilon GC", "Stop-The-World GC",
-                                                             "Hybrid GC", "Generation GC"};
+constexpr std::array<char const *, GC_TYPE_SIZE> GC_NAMES = {"Invalid GC", "Epsilon GC",    "Stop-The-World GC",
+                                                             "Hybrid GC",  "Generation GC", "G1 GC"};
 
 constexpr bool StringsEqual(char const *a, char const *b)
 {
@@ -78,6 +77,7 @@ static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::EPSILON_GC)], "Epsilon GC"))
 static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::STW_GC)], "Stop-The-World GC"));
 static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::HYBRID_GC)], "Hybrid GC"));
 static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::GEN_GC)], "Generation GC"));
+static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::G1_GC)], "G1 GC"));
 
 inline GCType GCTypeFromString(std::string_view gc_type_str)
 {
@@ -113,6 +113,9 @@ inline std::string_view GCStringFromType(GCType gc_type)
     if (gc_type == GCType::HYBRID_GC) {
         return "hybrid-gc";
     }
+    if (gc_type == GCType::G1_GC) {
+        return "g1-gc";
+    }
     return "invalid-gc";
 }
 
@@ -120,11 +123,11 @@ enum GCCollectMode : uint8_t {
     GC_NONE = 0,          // Non collected objects
     GC_MINOR = 1U,        // Objects collected at the minor GC
     GC_MAJOR = 1U << 1U,  // Objects collected at the major GC (MAJOR usually includes MINOR)
-    GC_FULL = 1U << 2U,   // Can collect objects from some spaces which very rarely contains GC candidates
+    GC_FULL = 1U << 2U,   // Can collect objects from some spaces which very rare contains GC candidates
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
     GC_ALL = GC_MINOR | GC_MAJOR | GC_FULL,  // Can collect objects at any phase
 };
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_GC_GC_TYPES_H_
+#endif  // RUNTIME_MEM_GC_GC_TYPES_H

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_DESCRIPTOR_STRING_H_
-#define PANDA_VERIFICATION_UTIL_DESCRIPTOR_STRING_H_
+#ifndef PANDA_VERIFIER_UTIL_DESCRIPTOR_STRING_H__
+#define PANDA_VERIFIER_UTIL_DESCRIPTOR_STRING_H__
 
 #include "libpandabase/utils/hash.h"
 #include "libpandabase/utils/utf.h"
@@ -27,7 +27,6 @@
 namespace panda::verifier {
 
 namespace mode {
-
 struct ExactCmp {
 };
 struct NonExactCmp {
@@ -40,19 +39,18 @@ class DescriptorString {
     static_assert(std::is_same_v<Mode, mode::ExactCmp> || std::is_same_v<Mode, mode::NonExactCmp>);
 
 public:
+    DescriptorString() = default;
     DescriptorString(const uint8_t *mutf8_str)
         : hash_ {PseudoFnvHashString(mutf8_str)},
           mutf8_str_len_ {std::strlen(utf::Mutf8AsCString(mutf8_str))},
           mutf8_str_ {mutf8_str}
     {
     }
-
-    DescriptorString() = default;
+    DescriptorString(const char *str) : DescriptorString {utf::CStringAsMutf8(str)} {}
     DescriptorString(const DescriptorString &other) = default;
     DescriptorString(DescriptorString &&) = default;
     DescriptorString &operator=(const DescriptorString &) = default;
     DescriptorString &operator=(DescriptorString &&) = default;
-
     bool operator==(const DescriptorString &rhs) const
     {
         ASSERT(IsValid());
@@ -75,28 +73,27 @@ public:
         // Use it only if there is the need for speed
         return true;
     }
-
     bool operator!=(const DescriptorString &rhs) const
     {
         return !operator==(rhs);
     }
-
     operator const uint8_t *() const
     {
         return AsMutf8();
     }
-
+    operator const char *() const
+    {
+        return reinterpret_cast<const char *>(AsMutf8());
+    }
     const uint8_t *AsMutf8() const
     {
         ASSERT(IsValid());
         return mutf8_str_;
     }
-
     bool IsValid() const
     {
         return mutf8_str_ != nullptr;
     }
-
     size_t GetLength() const
     {
         return mutf8_str_len_;
@@ -131,4 +128,4 @@ struct hash<panda::verifier::DescriptorString<Mode>> {
 
 }  // namespace std
 
-#endif  // PANDA_VERIFICATION_UTIL_DESCRIPTOR_STRING_H_
+#endif  // !PANDA_VERIFIER_UTIL_DESCRIPTOR_STRING_H__

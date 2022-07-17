@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_FIELD_DATA_ACCESSOR_H_
-#define PANDA_LIBPANDAFILE_FIELD_DATA_ACCESSOR_H_
+#ifndef LIBPANDAFILE_FIELD_DATA_ACCESSOR_H_
+#define LIBPANDAFILE_FIELD_DATA_ACCESSOR_H_
 
 #include "file.h"
 #include "file_items.h"
@@ -35,6 +35,11 @@ public:
 
     NO_COPY_SEMANTIC(FieldDataAccessor);
     NO_MOVE_SEMANTIC(FieldDataAccessor);
+
+    // quick way to get type id
+    static File::EntityId GetTypeId(const File &panda_file, File::EntityId field_id);
+
+    static File::EntityId GetNameId(const File &panda_file, File::EntityId field_id);
 
     bool IsExternal() const
     {
@@ -115,10 +120,22 @@ public:
     template <class Callback>
     void EnumerateAnnotations(const Callback &cb);
 
+    template <class Callback>
+    void EnumerateRuntimeTypeAnnotations(const Callback &cb);
+
+    template <class Callback>
+    void EnumerateTypeAnnotations(const Callback &cb);
+
+    template <class Callback>
+    bool EnumerateRuntimeAnnotationsWithEarlyStop(const Callback &cb);
+
+    template <class Callback>
+    bool EnumerateAnnotationsWithEarlyStop(const Callback &cb);
+
     size_t GetSize()
     {
         if (size_ == 0) {
-            SkipAnnotations();
+            SkipTypeAnnotations();
         }
 
         return size_;
@@ -136,6 +153,8 @@ public:
 
     uint32_t GetAnnotationsNumber();
     uint32_t GetRuntimeAnnotationsNumber();
+    uint32_t GetRuntimeTypeAnnotationsNumber();
+    uint32_t GetTypeAnnotationsNumber();
 
 private:
     using FieldValue = std::variant<uint32_t, uint64_t>;
@@ -148,23 +167,29 @@ private:
 
     void SkipAnnotations();
 
+    void SkipRuntimeTypeAnnotations();
+
+    void SkipTypeAnnotations();
+
     const File &panda_file_;
     File::EntityId field_id_;
 
-    bool is_external_ {false};
+    bool is_external_;
 
-    uint32_t class_off_ {0};
-    uint32_t type_off_ {0};
-    uint32_t name_off_ {0};
-    uint32_t access_flags_ {0};
+    uint32_t class_off_;
+    uint32_t type_off_;
+    uint32_t name_off_;
+    uint32_t access_flags_;
 
     Span<const uint8_t> tagged_values_sp_ {nullptr, nullptr};
     Span<const uint8_t> runtime_annotations_sp_ {nullptr, nullptr};
     Span<const uint8_t> annotations_sp_ {nullptr, nullptr};
+    Span<const uint8_t> runtime_type_annotations_sp_ {nullptr, nullptr};
+    Span<const uint8_t> type_annotations_sp_ {nullptr, nullptr};
 
-    size_t size_ {0};
+    size_t size_;
 };
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_FIELD_DATA_ACCESSOR_H_
+#endif  // LIBPANDAFILE_FIELD_DATA_ACCESSOR_H_

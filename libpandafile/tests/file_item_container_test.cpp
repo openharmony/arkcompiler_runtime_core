@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 #include "debug_data_accessor-inl.h"
 #include "field_data_accessor-inl.h"
 #include "file.h"
-#include "file_format_version.h"
 #include "file_item_container.h"
 #include "file_writer.h"
 #include "helpers.h"
@@ -28,14 +27,15 @@
 #include "modifiers.h"
 #include "os/file.h"
 #include "proto_data_accessor-inl.h"
+#include "pgo.h"
 #include "value.h"
+
+#include "zlib.h"
 
 #include <cstddef>
 
 #include <memory>
 #include <vector>
-
-#include <securec.h>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -95,7 +95,8 @@ TEST(ItemContainer, TestFileFormatVersionTooOld)
         ItemContainer container;
         auto writer = FileWriter(file_name);
 
-        File::Header header = {};
+        File::Header header;
+        memset(&header, 0, sizeof(header));
         header.magic = File::MAGIC;
 
         auto old = std::array<uint8_t, File::VERSION_SIZE>(minVersion);
@@ -119,7 +120,8 @@ TEST(ItemContainer, TestFileFormatVersionTooNew)
         ItemContainer container;
         auto writer = FileWriter(file_name);
 
-        File::Header header = {};
+        File::Header header;
+        memset(&header, 0, sizeof(header));
         header.magic = File::MAGIC;
 
         auto new_ = std::array<uint8_t, File::VERSION_SIZE>(minVersion);
@@ -144,7 +146,7 @@ TEST(ItemContainer, TestFileFormatVersionValid)
         auto writer = FileWriter(file_name);
 
         File::Header header;
-        (void)memset_s(&header, sizeof(header), 0, sizeof(header));
+        memset(&header, 0, sizeof(header));
         header.magic = File::MAGIC;
         header.version = {0, 0, 0, 2};
         header.file_size = sizeof(File::Header);
@@ -177,27 +179,31 @@ TEST(ItemContainer, TestClasses)
     class_item->SetSuperClass(empty_class_item);
 
     // Add interface
+
     ClassItem *iface_item = container.GetOrCreateClassItem("Iface");
     iface_item->SetAccessFlags(ACC_PUBLIC);
 
     class_item->AddInterface(iface_item);
 
     // Add method
+
     StringItem *method_name = container.GetOrCreateStringItem("foo");
 
-    PrimitiveTypeItem *ret_type = container.CreateItem<PrimitiveTypeItem>(Type::TypeId::VOID);
+    PrimitiveTypeItem *ret_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
     std::vector<MethodParamItem> params;
     ProtoItem *proto_item = container.GetOrCreateProtoItem(ret_type, params);
 
     MethodItem *method_item = class_item->AddMethod(method_name, proto_item, ACC_PUBLIC | ACC_STATIC, params);
 
     // Add field
+
     StringItem *field_name = container.GetOrCreateStringItem("field");
-    PrimitiveTypeItem *field_type = container.CreateItem<PrimitiveTypeItem>(Type::TypeId::I32);
+    PrimitiveTypeItem *field_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
 
     FieldItem *field_item = class_item->AddField(field_name, field_type, ACC_PUBLIC);
 
     // Add runtime annotation
+
     std::vector<AnnotationItem::Elem> runtime_elems;
     std::vector<AnnotationItem::Tag> runtime_tags;
     AnnotationItem *runtime_annotation_item =
@@ -206,6 +212,7 @@ TEST(ItemContainer, TestClasses)
     class_item->AddRuntimeAnnotation(runtime_annotation_item);
 
     // Add annotation
+
     std::vector<AnnotationItem::Elem> elems;
     std::vector<AnnotationItem::Tag> tags;
     AnnotationItem *annotation_item = container.CreateItem<AnnotationItem>(class_item, elems, tags);
@@ -213,6 +220,7 @@ TEST(ItemContainer, TestClasses)
     class_item->AddAnnotation(annotation_item);
 
     // Add source file
+
     StringItem *source_file = container.GetOrCreateStringItem("source_file");
 
     class_item->SetSourceFile(source_file);
@@ -222,6 +230,7 @@ TEST(ItemContainer, TestClasses)
     ASSERT_TRUE(container.Write(&mem_writer));
 
     // Read panda file from memory
+
     auto data = mem_writer.GetData();
     auto panda_file = GetPandaFile(data);
 
@@ -331,6 +340,7 @@ TEST(ItemContainer, TestClasses)
 TEST(ItemContainer, TestMethods)
 {
     // Write panda file to memory
+
     ItemContainer container;
 
     ClassItem *class_item = container.GetOrCreateClassItem("A");
@@ -338,7 +348,7 @@ TEST(ItemContainer, TestMethods)
 
     StringItem *method_name = container.GetOrCreateStringItem("foo");
 
-    PrimitiveTypeItem *ret_type = container.CreateItem<PrimitiveTypeItem>(Type::TypeId::VOID);
+    PrimitiveTypeItem *ret_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
     std::vector<MethodParamItem> params;
     ProtoItem *proto_item = container.GetOrCreateProtoItem(ret_type, params);
 
@@ -354,6 +364,7 @@ TEST(ItemContainer, TestMethods)
     ASSERT_TRUE(container.Write(&mem_writer));
 
     // Read panda file from memory
+
     auto data = mem_writer.GetData();
     auto panda_file = GetPandaFile(data);
 
@@ -407,6 +418,7 @@ void TestProtos(size_t n)
     constexpr size_t ELEM_PER16 = 16 / ELEM_WIDTH;
 
     // Write panda file to memory
+
     ItemContainer container;
 
     ClassItem *class_item = container.GetOrCreateClassItem("A");
@@ -417,21 +429,21 @@ void TestProtos(size_t n)
     std::vector<Type::TypeId> types {Type::TypeId::VOID, Type::TypeId::I32};
     std::vector<ClassItem *> ref_types;
 
-    PrimitiveTypeItem *ret_type = container.CreateItem<PrimitiveTypeItem>(Type::TypeId::VOID);
+    PrimitiveTypeItem *ret_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
     std::vector<MethodParamItem> params;
 
-    params.emplace_back(container.CreateItem<PrimitiveTypeItem>(Type::TypeId::I32));
+    params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
 
-    for (size_t i = 0; i < ELEM_PER16 * 2U - 2U; i++) {  // ret, arg1
+    for (size_t i = 0; i < ELEM_PER16 * 2 - 2; i++) {
         params.emplace_back(container.GetOrCreateClassItem("B"));
         types.push_back(Type::TypeId::REFERENCE);
         ref_types.push_back(container.GetOrCreateClassItem("B"));
-        params.emplace_back(container.CreateItem<PrimitiveTypeItem>(Type::TypeId::F64));
+        params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::F64));
         types.push_back(Type::TypeId::F64);
     }
 
     for (size_t i = 0; i < n; i++) {
-        params.emplace_back(container.CreateItem<PrimitiveTypeItem>(Type::TypeId::F32));
+        params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::F32));
         types.push_back(Type::TypeId::F32);
     }
 
@@ -444,6 +456,7 @@ void TestProtos(size_t n)
     ASSERT_TRUE(container.Write(&mem_writer));
 
     // Read panda file from memory
+
     auto data = mem_writer.GetData();
     auto panda_file = GetPandaFile(data);
 
@@ -501,6 +514,7 @@ TEST(ItemContainer, TestProtos)
 TEST(ItemContainer, TestDebugInfo)
 {
     // Write panda file to memory
+
     ItemContainer container;
 
     ClassItem *class_item = container.GetOrCreateClassItem("A");
@@ -508,9 +522,9 @@ TEST(ItemContainer, TestDebugInfo)
 
     StringItem *method_name = container.GetOrCreateStringItem("foo");
 
-    PrimitiveTypeItem *ret_type = container.CreateItem<PrimitiveTypeItem>(Type::TypeId::VOID);
+    PrimitiveTypeItem *ret_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
     std::vector<MethodParamItem> params;
-    params.emplace_back(container.CreateItem<PrimitiveTypeItem>(Type::TypeId::I32));
+    params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
     ProtoItem *proto_item = container.GetOrCreateProtoItem(ret_type, params);
     MethodItem *method_item = class_item->AddMethod(method_name, proto_item, ACC_PUBLIC | ACC_STATIC, params);
 
@@ -523,6 +537,7 @@ TEST(ItemContainer, TestDebugInfo)
     method_item->SetDebugInfo(debug_info_item);
 
     // Add debug info
+
     container.ComputeLayout();
 
     std::vector<uint8_t> opcodes {
@@ -554,6 +569,7 @@ TEST(ItemContainer, TestDebugInfo)
     ASSERT_TRUE(container.Write(&mem_writer));
 
     // Read panda file from memory
+
     auto data = mem_writer.GetData();
     auto panda_file = GetPandaFile(data);
 
@@ -605,14 +621,14 @@ TEST(ItemContainer, ForeignItems)
 
     // Create foreign field
     StringItem *field_name = container.GetOrCreateStringItem("foreign_field");
-    PrimitiveTypeItem *field_type = container.CreateItem<PrimitiveTypeItem>(Type::TypeId::I32);
+    PrimitiveTypeItem *field_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
     ForeignFieldItem *field_item = container.CreateItem<ForeignFieldItem>(class_item, field_name, field_type);
 
     // Create foreign method
     StringItem *method_name = container.GetOrCreateStringItem("ForeignMethod");
-    PrimitiveTypeItem *ret_type = container.CreateItem<PrimitiveTypeItem>(Type::TypeId::VOID);
+    PrimitiveTypeItem *ret_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
     std::vector<MethodParamItem> params;
-    params.emplace_back(container.CreateItem<PrimitiveTypeItem>(Type::TypeId::I32));
+    params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
     ProtoItem *proto_item = container.GetOrCreateProtoItem(ret_type, params);
     ForeignMethodItem *method_item = container.CreateItem<ForeignMethodItem>(class_item, method_name, proto_item, 0);
 
@@ -621,6 +637,7 @@ TEST(ItemContainer, ForeignItems)
     ASSERT_TRUE(container.Write(&mem_writer));
 
     // Read panda file from memory
+
     auto data = mem_writer.GetData();
     auto panda_file = GetPandaFile(data);
 
@@ -673,6 +690,10 @@ TEST(ItemContainer, EmptyContainerChecksum)
     auto file = File::Open(file_name);
     EXPECT_NE(file, nullptr);
     EXPECT_EQ(file->GetHeader()->checksum, container_checksum);
+
+    constexpr size_t DATA_OFFSET = 12U;
+    auto checksum = adler32(1, file->GetBase() + DATA_OFFSET, file->GetHeader()->file_size - DATA_OFFSET);
+    EXPECT_EQ(file->GetHeader()->checksum, checksum);
 }
 
 TEST(ItemContainer, ContainerChecksum)
@@ -707,6 +728,298 @@ TEST(ItemContainer, ContainerChecksum)
     auto file = File::Open(file_name);
     EXPECT_NE(file, nullptr);
     EXPECT_EQ(file->GetHeader()->checksum, container_checksum);
+
+    constexpr size_t DATA_OFFSET = 12U;
+    auto checksum = adler32(1, file->GetBase() + DATA_OFFSET, file->GetHeader()->file_size - DATA_OFFSET);
+    EXPECT_EQ(file->GetHeader()->checksum, checksum);
+}
+
+TEST(ItemContainer, TestProfileGuidedRelayout)
+{
+    ItemContainer container;
+
+    // Add classes
+    ClassItem *empty_class_item = container.GetOrCreateClassItem("LTest;");
+    ClassItem *class_item_a = container.GetOrCreateClassItem("LAA;");
+    class_item_a->SetSuperClass(empty_class_item);
+    ClassItem *class_item_b = container.GetOrCreateClassItem("LBB;");
+
+    // Add method1
+    StringItem *method_name_1 = container.GetOrCreateStringItem("foo1");
+    PrimitiveTypeItem *ret_type_1 = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
+    std::vector<MethodParamItem> params_1;
+    ProtoItem *proto_item_1 = container.GetOrCreateProtoItem(ret_type_1, params_1);
+    MethodItem *method_item_1 = class_item_a->AddMethod(method_name_1, proto_item_1, ACC_PUBLIC | ACC_STATIC, params_1);
+    // Set code_1
+    std::vector<uint8_t> instructions_1 {1, 2, 3, 4};
+    CodeItem *code_item_1 = container.CreateItem<CodeItem>(0, 2, instructions_1);
+    method_item_1->SetCode(code_item_1);
+    code_item_1->AddMethod(method_item_1);
+
+    // Add method2
+    StringItem *method_name_2 = container.GetOrCreateStringItem("foo2");
+    PrimitiveTypeItem *ret_type_2 = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
+    std::vector<MethodParamItem> params_2;
+    ProtoItem *proto_item_2 = container.GetOrCreateProtoItem(ret_type_2, params_2);
+    MethodItem *method_item_2 = class_item_b->AddMethod(method_name_2, proto_item_2, ACC_PUBLIC | ACC_STATIC, params_2);
+    // Set code_2
+    std::vector<uint8_t> instructions_2 {5, 6, 7, 8};
+    CodeItem *code_item_2 = container.CreateItem<CodeItem>(0, 2, instructions_2);
+    method_item_2->SetCode(code_item_2);
+    code_item_2->AddMethod(method_item_2);
+
+    // Add method_3
+    StringItem *method_name_3 = container.GetOrCreateStringItem("foo3");
+    auto *method_item_3 = empty_class_item->AddMethod(method_name_3, proto_item_1, ACC_PUBLIC | ACC_STATIC, params_1);
+    // Set code_3
+    std::vector<uint8_t> instructions_3 {3, 4, 5, 6};
+    CodeItem *code_item_3 = container.CreateItem<CodeItem>(0, 2, instructions_3);
+    method_item_3->SetCode(code_item_3);
+    code_item_3->AddMethod(method_item_3);
+
+    // Add method_4
+    StringItem *method_name_4 = container.GetOrCreateStringItem("foo4");
+    auto *method_item_4 = empty_class_item->AddMethod(method_name_4, proto_item_1, ACC_PUBLIC | ACC_STATIC, params_1);
+    // Set code. method_4 and method_3 share code_item_3
+    method_item_4->SetCode(code_item_3);
+    code_item_3->AddMethod(method_item_4);
+
+    // Add field
+    StringItem *field_name = container.GetOrCreateStringItem("test_field");
+    PrimitiveTypeItem *field_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
+    class_item_a->AddField(field_name, field_type, ACC_PUBLIC);
+
+    // Add source file
+    StringItem *source_file = container.GetOrCreateStringItem("source_file");
+    class_item_a->SetSourceFile(source_file);
+
+    constexpr std::string_view PRIMITIVE_TYPE_ITEM = "primitive_type_item";
+    constexpr std::string_view PROTO_ITEM = "proto_item";
+    constexpr std::string_view END_ITEM = "end_item";
+
+    // Items before PGO
+    const auto &items = container.GetItems();
+    auto item = items.begin();
+    EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "Test");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "AA");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "BB");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo1");
+    item++;
+    EXPECT_EQ((*item)->GetName(), PRIMITIVE_TYPE_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), PROTO_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo2");
+    item++;
+    EXPECT_EQ((*item)->GetName(), PRIMITIVE_TYPE_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), PROTO_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo3");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo4");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "test_field");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "source_file");
+    item++;
+    EXPECT_EQ((*item)->GetName(), END_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), CODE_ITEM);
+    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[0], "AA::foo1");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CODE_ITEM);
+    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[0], "BB::foo2");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CODE_ITEM);
+    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[0], "Test::foo3");
+    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[1], "Test::foo4");
+    item++;
+    EXPECT_EQ((*item)->GetName(), END_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), END_ITEM);
+    item++;
+    EXPECT_EQ(item, items.end());
+
+    // Prepare profile data
+    std::string profile_path = "TestProfileGuidedRelayout_profile_test_data.txt";
+    std::ofstream test_file;
+    test_file.open(profile_path);
+    test_file << "string_item:test_field" << std::endl;
+    test_file << "class_item:BB" << std::endl;
+    test_file << "code_item:BB::foo2" << std::endl;
+    test_file << "code_item:Test::foo4" << std::endl;
+    test_file.close();
+
+    // Run PGO
+    panda::panda_file::pgo::ProfileOptimizer profile_opt;
+    profile_opt.SetProfilePath(profile_path);
+    container.ReorderItems(&profile_opt);
+
+    // Items after PGO
+    item = items.begin();
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "test_field");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo1");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo2");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo3");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo4");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "source_file");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "BB");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "Test");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "AA");
+    item++;
+    EXPECT_EQ((*item)->GetName(), PRIMITIVE_TYPE_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), PROTO_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), PRIMITIVE_TYPE_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), PROTO_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), END_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), END_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), END_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), CODE_ITEM);
+    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[0], "BB::foo2");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CODE_ITEM);
+    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[0], "Test::foo3");
+    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[1], "Test::foo4");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CODE_ITEM);
+    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[0], "AA::foo1");
+    item++;
+    EXPECT_EQ(item, items.end());
+}
+
+TEST(ItemContainer, GettersTest)
+{
+    ItemContainer container;
+
+    ClassItem *empty_class_item = container.GetOrCreateClassItem("Foo");
+
+    ClassItem *class_item = container.GetOrCreateClassItem("Bar");
+    class_item->SetAccessFlags(ACC_PUBLIC);
+    class_item->SetSuperClass(empty_class_item);
+
+    // Add methods
+
+    StringItem *method_name1 = container.GetOrCreateStringItem("foo1");
+
+    PrimitiveTypeItem *ret_type1 = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
+    std::vector<MethodParamItem> params1;
+    params1.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
+    ProtoItem *proto_item1 = container.GetOrCreateProtoItem(ret_type1, params1);
+
+    class_item->AddMethod(method_name1, proto_item1, ACC_PUBLIC | ACC_STATIC, params1);
+
+    StringItem *method_name2 = container.GetOrCreateStringItem("foo2");
+
+    PrimitiveTypeItem *ret_type2 = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
+    std::vector<MethodParamItem> params2;
+    params2.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::F32));
+    ProtoItem *proto_item2 = container.GetOrCreateProtoItem(ret_type2, params2);
+
+    class_item->AddMethod(method_name2, proto_item2, ACC_PUBLIC | ACC_STATIC, params2);
+
+    // Add field
+
+    StringItem *field_name = container.GetOrCreateStringItem("field");
+    PrimitiveTypeItem *field_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
+
+    class_item->AddField(field_name, field_type, ACC_PUBLIC);
+
+    // Add source file
+
+    StringItem *source_file = container.GetOrCreateStringItem("source_file");
+
+    class_item->SetSourceFile(source_file);
+
+    // Read items from container
+
+    ASSERT_TRUE(container.GetItems().size() == 14);
+
+    std::map<std::string, panda_file::BaseClassItem *> *class_map = container.GetClassMap();
+    ASSERT_TRUE(class_map != nullptr && class_map->size() == 2);
+    auto it = class_map->find("Bar");
+    ASSERT_TRUE(it != class_map->end());
+
+    std::unordered_map<std::string, StringItem *> *string_map = container.GetStringMap();
+    ASSERT_TRUE(string_map != nullptr && string_map->size() == 4);
+    auto sit0 = string_map->find("field");
+    auto sit1 = string_map->find("source_file");
+    auto sit2 = string_map->find("foo1");
+    auto sit3 = string_map->find("foo2");
+    ASSERT_TRUE(sit0 != string_map->end() && sit1 != string_map->end() && sit2 != string_map->end() &&
+                sit3 != string_map->end());
+
+    std::unordered_map<Type::TypeId, PrimitiveTypeItem *> *primitive_type_map = container.GetPrimitiveTypeMap();
+    ASSERT_TRUE(primitive_type_map != nullptr && primitive_type_map->size() == 3);
+    auto pit0 = primitive_type_map->find(Type::TypeId::F32);
+    auto pit1 = primitive_type_map->find(Type::TypeId::I32);
+    auto pit2 = primitive_type_map->find(Type::TypeId::VOID);
+    ASSERT_TRUE(pit0 != primitive_type_map->end() && pit1 != primitive_type_map->end() &&
+                pit2 != primitive_type_map->end());
+
+    auto *rclass_item = static_cast<panda_file::ClassItem *>(it->second);
+    std::string method_name;
+    std::function<bool(BaseItem *)> TestMethod = [&](BaseItem *method) {
+        auto *method_item = static_cast<panda_file::MethodItem *>(method);
+        ASSERT(method_item != nullptr && method_item->GetItemType() == ItemTypes::METHOD_ITEM);
+        method_name = method_item->GetNameItem()->GetData();
+        method_name.pop_back();  // remove '\0'
+        ASSERT(method_name == "foo1" || method_name == "foo2");
+        return true;
+    };
+
+    using std::placeholders::_1;
+    panda_file::BaseItem::VisitorCallBack cb_method = TestMethod;
+    rclass_item->VisitMethods(cb_method);
+
+    std::string f_name;
+    std::function<bool(BaseItem *)> TestField = [&](BaseItem *field) {
+        auto *field_item = static_cast<panda_file::FieldItem *>(field);
+        ASSERT(field_item != nullptr && field_item->GetItemType() == ItemTypes::FIELD_ITEM);
+        f_name = field_item->GetNameItem()->GetData();
+        f_name.pop_back();  // remove '\0'
+        ASSERT(f_name == "field");
+        return true;
+    };
+
+    panda_file::BaseItem::VisitorCallBack cb_field = TestField;
+    rclass_item->VisitFields(cb_field);
 }
 
 }  // namespace panda::panda_file::test

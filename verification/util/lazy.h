@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_LAZY_H_
-#define PANDA_VERIFICATION_UTIL_LAZY_H_
+#ifndef _PANDA_LAZY_HPP
+#define _PANDA_LAZY_HPP
 
 #include "callable.h"
-#include "macros.h"
 
 #include <optional>
 #include <functional>
@@ -195,9 +194,6 @@ auto Iterable(F fetcher)
     class SomeClass {
     public:
         explicit SomeClass(F f) : Fetcher_ {f} {};
-        ~SomeClass() = default;
-        DEFAULT_MOVE_SEMANTIC(SomeClass);
-        DEFAULT_COPY_SEMANTIC(SomeClass);
         class Iterator {
         public:
             explicit Iterator(std::optional<F> f) : Fetcher_ {std::move(f)}
@@ -206,9 +202,6 @@ auto Iterable(F fetcher)
                     val_ = (*Fetcher_)();
                 }
             }
-            ~Iterator() = default;
-            DEFAULT_MOVE_SEMANTIC(Iterator);
-            DEFAULT_COPY_SEMANTIC(Iterator);
             Iterator &operator++()
             {
                 val_ = (*Fetcher_)();
@@ -375,4 +368,4 @@ auto JoinStreams(LHS lhs, MHS mhs, RHS rhs)
 }
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_UTIL_LAZY_H_
+#endif  // !_PANDA_LAZY_HPP

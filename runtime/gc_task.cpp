@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,15 @@ void GCTask::Release(mem::InternalAllocatorPtr allocator)
     allocator->Delete(this);
 }
 
+void GCTask::UpdateGCCollectionType(GCCollectionType collection_type)
+{
+    ASSERT(collection_type != GCCollectionType::NONE);
+    if (collection_type <= collection_type_) {
+        return;
+    }
+    collection_type_ = collection_type;
+}
+
 std::ostream &operator<<(std::ostream &os, const GCTaskCause &cause)
 {
     switch (cause) {
@@ -59,6 +68,31 @@ std::ostream &operator<<(std::ostream &os, const GCTaskCause &cause)
             break;
         default:
             LOG(FATAL, GC) << "Unknown gc cause";
+            break;
+    }
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const GCCollectionType &collection_type_)
+{
+    switch (collection_type_) {
+        case GCCollectionType::NONE:
+            os << "NONE";
+            break;
+        case GCCollectionType::YOUNG:
+            os << "YOUNG";
+            break;
+        case GCCollectionType::TENURED:
+            os << "TENURED";
+            break;
+        case GCCollectionType::MIXED:
+            os << "MIXED";
+            break;
+        case GCCollectionType::FULL:
+            os << "FULL";
+            break;
+        default:
+            LOG(FATAL, GC) << "Unknown collection type";
             break;
     }
     return os;

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_TYPE_TYPE_SET_H_
-#define PANDA_VERIFICATION_TYPE_TYPE_SET_H_
+#ifndef _PANDA_TYPE_SET_HPP__
+#define _PANDA_TYPE_SET_HPP__
 
+#include "type_index.h"
 #include "type_type.h"
 
-#include "runtime/include/mem/panda_containers.h"
+#include "runtime/include/mem/panda_string.h"
 
 namespace panda::verifier {
 class TypeSystems;
@@ -28,22 +29,27 @@ public:
     TypeSet() = delete;
 
     template <typename... Types>
-    explicit TypeSet(const Type &t, Types... types) : Kind_ {t.GetTypeSystemKind()}
+    explicit TypeSet(const Type &t, Types... types)
+        : kind_ {t.GetTypeSystemKind()}, threadnum_ {t.GetThreadNum()}, Numbers_ {}
     {
-        Indices_.Insert(t.Index());
-        if constexpr (sizeof...(types) > 0) {
-            (Insert(types), ...);
+        if (sizeof...(types) == 0) {
+            Numbers_.Insert(t.Number());
+        } else {
+            std::array numbers_arr {t.Number(), types.Number()...};
+            Numbers_.Insert(numbers_arr.begin(), numbers_arr.end());
         }
     }
 
-    explicit TypeSet(TypeSystemKind kind, IntSet<TypeIdx> &&indices = {}) : Kind_ {kind}, Indices_ {indices} {};
+    explicit TypeSet(TypeSystemKind kind, ThreadNum threadnum, IntSet<TypeNum> &&numbers = {})
+        : kind_ {kind}, threadnum_ {threadnum}, Numbers_ {numbers} {};
 
     ~TypeSet() = default;
 
     void Insert(const Type &t)
     {
-        ASSERT(t.GetTypeSystemKind() == Kind_);
-        Indices_.Insert(t.Index());
+        ASSERT(t.GetTypeSystemKind() == kind_);
+        ASSERT(t.GetThreadNum() == threadnum_);
+        Numbers_.Insert(t.Number());
     }
 
     TypeSet &operator|(const Type &t)
@@ -54,7 +60,7 @@ public:
 
     bool Contains(const Type &t) const
     {
-        return t.GetTypeSystemKind() == Kind_ && Indices_.Contains(t.Index());
+        return t.GetTypeSystemKind() == kind_ && t.GetThreadNum() == threadnum_ && Numbers_.Contains(t.Number());
     }
 
     const Type &operator<<(const Type &st) const;
@@ -67,7 +73,7 @@ public:
 
     size_t Size() const
     {
-        return Indices_.Size();
+        return Numbers_.Size();
     }
 
     bool IsEmpty() const
@@ -77,22 +83,17 @@ public:
 
     Type TheOnlyType() const
     {
-        if (Size() == 1) {
-            return {Kind_, *(Indices_.begin())};
-        } else {
-            return {};
+        Index<TypeNum> the_only_number = Numbers_.TheOnlyElement();
+        if (the_only_number.IsValid()) {
+            return {kind_, threadnum_, *the_only_number};
         }
+        return {};
     }
 
     template <typename Handler>
     bool ForAll(Handler &&handler) const
     {
-        for (TypeIdx index : Indices_) {
-            if (!handler(Type(Kind_, index))) {
-                return false;
-            }
-        }
-        return true;
+        return Numbers_.ForAll([&](TypeNum num) { return handler(Type(kind_, threadnum_, num)); });
     }
 
     template <typename Handler>
@@ -101,10 +102,10 @@ public:
         return !ForAll([handler {std::move(handler)}](Type t) { return !handler(t); });
     }
 
-    template <typename StrT, typename TypeImageFunc>
-    StrT Image(TypeImageFunc type_img_func) const
+    template <typename TypeImageFunc>
+    PandaString Image(TypeImageFunc type_img_func) const
     {
-        StrT result {"TypeSet{"};
+        PandaString result {"TypeSet{"};
         bool first = true;
         ForAll([&](const Type &type) {
             if (first) {
@@ -121,7 +122,7 @@ public:
 
     bool operator==(const TypeSet &rhs) const
     {
-        return Kind_ == rhs.Kind_ && Indices_ == rhs.Indices_;
+        return kind_ == rhs.kind_ && threadnum_ == rhs.threadnum_ && Numbers_ == rhs.Numbers_;
     }
 
     bool operator!=(const TypeSet &rhs) const
@@ -130,9 +131,10 @@ public:
     }
 
 private:
-    TypeSystemKind Kind_;
-    IntSet<TypeIdx> Indices_;
+    TypeSystemKind kind_;
+    ThreadNum threadnum_;
+    IntSet<TypeNum> Numbers_;
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_TYPE_TYPE_SET_H_
+#endif  // !_PANDA_TYPE_SET_HPP__

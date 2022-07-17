@@ -19,6 +19,7 @@ open ark_typesystem as ts
 
 open util/ordering[Time]
 
+// TODO: consider using Electrum2 for dynamics, instead of classic Alloy analyzer
 
 sig Time {}
 
@@ -86,6 +87,7 @@ let dep_types = {t1, t2: Type | t1 in TypeSystem.position_in_params_of_type.t2.I
 pred allowed_to_be_related[t: Time, t1, t2 : Type] {
  let subtyping = ^(TypeSystem.subtyping.t + t1 -> t2)
  | subtyping in ts/all_subtypeable[TypeSystem.universe, subtyping]
+ // todo: fugure out properties of initial typesystem that won't lead to contradiction
  // for now it is explicetely stated
  no Viz.forbidden.last
 }

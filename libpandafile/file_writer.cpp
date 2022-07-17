@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,6 @@ FileWriter::~FileWriter()
 
 bool FileWriter::WriteByte(uint8_t data)
 {
-    if (count_checksum_) {
-        checksum_ = adler32(checksum_, &data, 1);
-    }
     return WriteBytes({data});
 }
 

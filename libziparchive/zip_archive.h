@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,8 @@ int OpenArchiveFile(ZipArchiveHandle &handle, FILE *fp);
 int CloseArchiveFile(ZipArchiveHandle &handle);
 
 /*
- * Write the info about the ZipFile into *gstat structure.
+ * Write info about the ZipFile in the *gstat structure.
+ * No preparation of the structure is needed
  *
  * Returns 0 on success, and 1 on failure.
  */
@@ -157,7 +158,7 @@ int ExtractToMemory(ZipArchiveHandle &handle, void *buf, size_t buf_size);
 /*
  * Add a new file filename(resident in memory pbuf which has size of size |buf_size|) to the archive zipname,
  * append takes value from APPEND_STATUS_CREATE(which will create the archive zipname for first time) and
- * APPEND_STATUS_ADDINZIP(which willappend filename into exsisted zip archive zipname).
+ * APPEND_STATUS_ADDINZIP(which will append filename into exsisted zip archive zipname).
  * level takes value from Z_BEST_COMPRESSION(which will deflate the pbuf with best compression effect) and
  * Z_NO_COMPRESSION(which will store the pbuf into zipname without compression).
  *

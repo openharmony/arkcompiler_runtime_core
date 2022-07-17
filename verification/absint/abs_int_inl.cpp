@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 
 namespace panda::verifier {
 
-#ifndef NDEBUG
 bool AbsIntInstructionHandler::IsRegDefined(int reg)
 {
     bool is_defined = ExecCtx().CurrentRegContext().IsRegDefined(reg);
+#ifndef NDEBUG
     if (!is_defined) {
         if (!ExecCtx().CurrentRegContext().WasConflictOnReg(reg)) {
             SHOW_MSG(UndefinedRegister)
@@ -32,14 +32,9 @@ bool AbsIntInstructionHandler::IsRegDefined(int reg)
             END_SHOW_MSG();
         }
     }
+#endif
     return is_defined;
 }
-#else
-bool AbsIntInstructionHandler::IsRegDefined(int reg)
-{
-    return ExecCtx().CurrentRegContext().IsRegDefined(reg);
-}
-#endif
 
 const PandaString &AbsIntInstructionHandler::ImageOf(const Type &type)
 {
@@ -48,14 +43,12 @@ const PandaString &AbsIntInstructionHandler::ImageOf(const Type &type)
 
 PandaString AbsIntInstructionHandler::ImageOf(const AbstractType &abstract_type)
 {
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
-    return abstract_type.template Image<PandaString>([this](const Type &type) { return ImageOf(type); });
+    return abstract_type.Image([this](const Type &type) { return ImageOf(type); });
 }
 
 PandaString AbsIntInstructionHandler::ImageOf(const TypeSet &types)
 {
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
-    return types.template Image<PandaString>([this](const Type &type) { return ImageOf(type); });
+    return types.Image([this](const Type &type) { return ImageOf(type); });
 }
 
 PandaVector<Type> AbsIntInstructionHandler::SubtypesOf(const PandaVector<Type> &types)
@@ -132,9 +125,9 @@ void AbsIntInstructionHandler::SetReg(int reg_idx, const AbstractTypedValue &val
         PandaString prev_atv_image {"<none>"};
         auto img_of = [this](const auto &t) { return ImageOf(t); };
         if (ExecCtx().CurrentRegContext().IsRegDefined(reg_idx)) {
-            prev_atv_image = GetReg(reg_idx).Image<PandaString>(img_of);
+            prev_atv_image = GetReg(reg_idx).Image(img_of);
         }
-        auto new_atv_image = val.Image<PandaString>(img_of);
+        auto new_atv_image = val.Image(img_of);
         LOG_VERIFIER_DEBUG_REGISTER_CHANGED(RegisterName(reg_idx), prev_atv_image, new_atv_image);
     }
     context_.ExecCtx().CurrentRegContext()[reg_idx] = val;
@@ -214,6 +207,7 @@ void AbsIntInstructionHandler::Sync()
 {
     auto addr = inst_.GetAddress();
     ExecContext &exec_ctx = ExecCtx();
+    // TODO(vdyadov): add verification options to show current context and contexts diff in case of incompatibility
 #ifndef NDEBUG
     exec_ctx.StoreCurrentRegContextForAddr(
         addr, [this, print_hdr = true](int reg_idx, const auto &src, const auto &dst) mutable {

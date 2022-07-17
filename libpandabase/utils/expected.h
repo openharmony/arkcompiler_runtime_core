@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 #ifndef PANDA_LIBPANDABASE_UTILS_EXPECTED_H_
 #define PANDA_LIBPANDABASE_UTILS_EXPECTED_H_
 
+#include <type_traits>
 #include <variant>
 
 #include "macros.h"
@@ -64,7 +65,10 @@ public:
 template <class T, class E>
 class Expected final {
 public:
-    Expected() noexcept : v_(T()) {}
+    template <typename U = T, typename = std::enable_if_t<std::is_default_constructible_v<U>>>
+    Expected() noexcept : v_(T())
+    {
+    }
     // The following constructors are non-explicit to be aligned with std::expected
     // NOLINTNEXTLINE(google-explicit-constructor)
     Expected(T v) noexcept(std::is_nothrow_move_constructible_v<T>) : v_(std::move(v)) {}
@@ -75,7 +79,6 @@ public:
     {
         return std::holds_alternative<T>(v_);
     }
-
     explicit operator bool() const noexcept
     {
         return HasValue();
@@ -86,13 +89,11 @@ public:
         ASSERT(!HasValue());
         return std::get<E>(v_);
     }
-
     E &Error() & noexcept(ExpectedConfig::RELEASE)
     {
         ASSERT(!HasValue());
         return std::get<E>(v_);
     }
-
     E &&Error() && noexcept(ExpectedConfig::RELEASE)
     {
         ASSERT(!HasValue());
@@ -104,30 +105,26 @@ public:
         ASSERT(HasValue());
         return std::get<T>(v_);
     }
-
+    // TODO(aemelenko): Delete next line when the issue 388 is resolved
     // NOLINTNEXTLINE(bugprone-exception-escape)
     T &Value() & noexcept(ExpectedConfig::RELEASE)
     {
         ASSERT(HasValue());
         return std::get<T>(v_);
     }
-
     T &&Value() && noexcept(ExpectedConfig::RELEASE)
     {
         ASSERT(HasValue());
         return std::move(std::get<T>(v_));
     }
-
     const T &operator*() const &noexcept(ExpectedConfig::RELEASE)
     {
         return Value();
     }
-
     T &operator*() & noexcept(ExpectedConfig::RELEASE)
     {
         return Value();
     }
-
     T &&operator*() && noexcept(ExpectedConfig::RELEASE)
     {
         return std::move(*this).Value();
@@ -141,7 +138,6 @@ public:
         }
         return std::forward<U>(v);
     }
-
     template <class U = T>
     T ValueOr(U &&v) &&
     {

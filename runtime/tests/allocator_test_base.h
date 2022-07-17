@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef PANDA_RUNTIME_TESTS_ALLOCATOR_TEST_BASE_H_
 #define PANDA_RUNTIME_TESTS_ALLOCATOR_TEST_BASE_H_
 
@@ -63,8 +62,7 @@ protected:
     void InitByteArray()
     {
         for (size_t i = 0; i < BYTE_ARRAY_SIZE; ++i) {
-            int random_max_limit = 255;
-            byte_array_[i] = RandFromRange(0, random_max_limit);
+            byte_array_[i] = RandFromRange(0, 255);
         }
     }
 
@@ -125,23 +123,17 @@ protected:
         size_t copied = 0;
         size_t first_copy_size = std::min(size, BYTE_ARRAY_SIZE - start_index);
         // Set head of memory
-        if (memcpy_s(mem, size, &byte_array_[start_index], first_copy_size) != EOK) {
-            LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-            UNREACHABLE();
-        }
+        memcpy_s(mem, first_copy_size, &byte_array_[start_index], first_copy_size);
         size -= first_copy_size;
         copied += first_copy_size;
         // Set middle part of memory
         while (size > BYTE_ARRAY_SIZE) {
-            if (memcpy_s(ToVoidPtr(ToUintPtr(mem) + copied), size, byte_array_.data(), BYTE_ARRAY_SIZE) != EOK) {
-                LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-                UNREACHABLE();
-            }
+            memcpy_s(ToVoidPtr(ToUintPtr(mem) + copied), BYTE_ARRAY_SIZE, byte_array_.data(), BYTE_ARRAY_SIZE);
             size -= BYTE_ARRAY_SIZE;
             copied += BYTE_ARRAY_SIZE;
         }
         // Set tail of memory
-        (void)memcpy_s(ToVoidPtr(ToUintPtr(mem) + copied), size, byte_array_.data(), size);
+        memcpy_s(ToVoidPtr(ToUintPtr(mem) + copied), size, byte_array_.data(), size);
 
         return start_index;
     }
@@ -151,7 +143,7 @@ protected:
      * @param mem - memory for random bytes from byte array writing
      * @param size - size memory in bytes
      * @param start_index_in_byte_array - start index in byte array for comaration with memory
-     * @return boolean value: true if bytes are equal and false if not equal
+     * @return boolean value: true if bytes are equal and fasle if not equal
      */
     bool CompareBytesWithByteArray(void *mem, size_t size, size_t start_index_in_byte_array)
     {
@@ -184,12 +176,14 @@ protected:
      * @tparam MIN_ALLOC_SIZE - minimum possible size for one allocation
      * @tparam MAX_ALLOC_SIZE - maximum possible size for one allocation
      * @tparam ALIGNMENT - enum Alignment value for allocations
+     * @tparam AllocatorArgs - arguments types for allocor creation
      * @param pools_count - count of pools needed by allocation
+     * @param allocator_args - arguments for allocator creation
      *
      * Allocate all possible sizes from [MIN_ALLOC_SIZE, MAX_ALLOC_SIZE] with ALIGNMENT alignment
      */
-    template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment ALIGNMENT>
-    void OneAlignedAllocFreeTest(size_t pools_count = 1);
+    template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment ALIGNMENT, class... AllocatorArgs>
+    void OneAlignedAllocFreeTest(size_t pools_count, AllocatorArgs &&... allocator_args);
 
     /**
      * \brief Allocate with all alignment
@@ -232,15 +226,15 @@ protected:
      * \brief Allocate with different sizes and free in random order
      * @tparam MIN_ALLOC_SIZE - minimum possible size for one allocation
      * @tparam MAX_ALLOC_SIZE - maximum possible size for one allocation
+     * @tparam AllocatorArgs - arguments types for allocor creation
      * @param elements_count - count of elements for allocation
      * @param pools_count - count of pools needed by allocation
-     *
+     * @param allocator_args - arguments for allocator creation
      * Allocate elements with random size and random values setting in random order, check and free memory in random
      * order too
      */
-    template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE>
-    void AllocateFreeDifferentSizesTest(size_t elements_count = MAX_ALLOC_SIZE - MIN_ALLOC_SIZE + 1,
-                                        size_t pools_count = 1);
+    template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, class... AllocatorArgs>
+    void AllocateFreeDifferentSizesTest(size_t elements_count, size_t pools_count, AllocatorArgs &&... allocatorArgs);
 
     /**
      * \brief Try to allocate too big object, must not allocate memory
@@ -481,13 +475,13 @@ template <class Allocator>
 std::unordered_set<void *> AllocatorTest<Allocator>::objects_set_;
 
 template <class Allocator>
-template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment ALIGNMENT>
-inline void AllocatorTest<Allocator>::OneAlignedAllocFreeTest(size_t pools_count)
+template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, Alignment ALIGNMENT, class... AllocatorArgs>
+inline void AllocatorTest<Allocator>::OneAlignedAllocFreeTest(size_t pools_count, AllocatorArgs &&... allocator_args)
 {
     static constexpr size_t ALLOCATIONS_COUNT = MAX_ALLOC_SIZE - MIN_ALLOC_SIZE + 1;
 
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
+    Allocator allocator(mem_stats, std::forward<AllocatorArgs>(allocator_args)...);
     for (size_t i = 0; i < pools_count; ++i) {
         AddMemoryPoolToAllocator(allocator);
     }
@@ -601,7 +595,7 @@ inline void AllocatorTest<Allocator>::VisitAndRemoveFreePools(size_t alloc_size)
             allocated_elements[i].push_back(mem);
         }
     }
-    std::array<size_t, POOLS_TO_FREE> freed_pools_indexes = {0, POOLS_COUNT / 2U, POOLS_COUNT - 1};
+    std::array<size_t, POOLS_TO_FREE> freed_pools_indexes = {0, POOLS_COUNT / 2, POOLS_COUNT - 1};
     // free all elements in pools
     for (auto i : freed_pools_indexes) {
         for (auto j : allocated_elements[i]) {
@@ -646,14 +640,15 @@ inline void AllocatorTest<Allocator>::VisitAndRemoveFreePools(size_t alloc_size)
 }
 
 template <class Allocator>
-template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE>
-inline void AllocatorTest<Allocator>::AllocateFreeDifferentSizesTest(size_t elements_count, size_t pools_count)
+template <size_t MIN_ALLOC_SIZE, size_t MAX_ALLOC_SIZE, class... AllocatorArgs>
+inline void AllocatorTest<Allocator>::AllocateFreeDifferentSizesTest(size_t elements_count, size_t pools_count,
+                                                                     AllocatorArgs &&... allocator_args)
 {
     std::unordered_set<size_t> used_indexes;
-    // (memory, size, start_index_in_byte_array)
+    // {memory, size, start_index_in_byte_array}
     std::vector<std::tuple<void *, size_t, size_t>> allocated_elements(elements_count);
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
-    Allocator allocator(mem_stats);
+    Allocator allocator(mem_stats, std::forward<AllocatorArgs>(allocator_args)...);
     for (size_t i = 0; i < pools_count; i++) {
         AddMemoryPoolToAllocator(allocator);
     }
@@ -682,10 +677,10 @@ inline void AllocatorTest<Allocator>::AllocateFreeDifferentSizesTest(size_t elem
         }
         // Compare
         ASSERT_TRUE(CompareBytesWithByteArray(std::get<0>(allocated_elements[i]), std::get<1>(allocated_elements[i]),
-                                              std::get<2U>(allocated_elements[i])))
+                                              std::get<2>(allocated_elements[i])))
             << "Address: " << std::hex << std::get<0>(allocated_elements[i])
             << ", size: " << std::get<1>(allocated_elements[i])
-            << ", start index in byte array: " << std::get<2U>(allocated_elements[i]) << ", seed: " << seed_;
+            << ", start index in byte array: " << std::get<2>(allocated_elements[i]) << ", seed: " << seed_;
         allocator.Free(std::get<0>(allocated_elements[i]));
     }
     delete mem_stats;
@@ -1037,7 +1032,7 @@ void AllocatorTest<Allocator>::MT_AllocRun(AllocatorTest<Allocator> *allocator_t
 {
     size_t elements_count = allocator_test_instance->RandFromRange(min_elements_count, max_elements_count);
     std::unordered_set<size_t> used_indexes;
-    // (memory, size, start_index_in_byte_array)
+    // {memory, size, start_index_in_byte_array}
     std::vector<std::tuple<void *, size_t, size_t>> allocated_elements(elements_count);
 
     for (size_t i = 0; i < elements_count; ++i) {
@@ -1066,15 +1061,16 @@ void AllocatorTest<Allocator>::MT_AllocRun(AllocatorTest<Allocator> *allocator_t
             used_indexes.erase(used_indexes.begin());
         }
         ASSERT_TRUE(allocator_test_instance->AllocatedByThisAllocator(*allocator, std::get<0>(allocated_elements[i])));
-        ASSERT_TRUE(allocator_test_instance->CompareBytesWithByteArray(std::get<0>(allocated_elements[i]),
-                                                                       std::get<1>(allocated_elements[i]),
-                                                                       std::get<2U>(allocated_elements[i])))
+        ASSERT_TRUE(allocator_test_instance->CompareBytesWithByteArray(
+            std::get<0>(allocated_elements[i]), std::get<1>(allocated_elements[i]), std::get<2>(allocated_elements[i])))
             << "Address: " << std::hex << std::get<0>(allocated_elements[i])
             << ", size: " << std::get<1>(allocated_elements[i])
-            << ", start index in byte array: " << std::get<2U>(allocated_elements[i])
+            << ", start index in byte array: " << std::get<2>(allocated_elements[i])
             << ", seed: " << allocator_test_instance->seed_;
     }
-    num_finished->fetch_add(1);
+    // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent order
+    // where threads observe all modifications in the same order
+    num_finished->fetch_add(1, std::memory_order_seq_cst);
 }
 
 template <class Allocator>
@@ -1085,7 +1081,7 @@ void AllocatorTest<Allocator>::MT_AllocFreeRun(AllocatorTest<Allocator> *allocat
 {
     size_t elements_count = allocator_test_instance->RandFromRange(min_elements_count, max_elements_count);
     std::unordered_set<size_t> used_indexes;
-    // (memory, size, start_index_in_byte_array)
+    // {memory, size, start_index_in_byte_array}
     std::vector<std::tuple<void *, size_t, size_t>> allocated_elements(elements_count);
 
     for (size_t i = 0; i < elements_count; ++i) {
@@ -1118,10 +1114,10 @@ void AllocatorTest<Allocator>::MT_AllocFreeRun(AllocatorTest<Allocator> *allocat
         // Compare
         ASSERT_TRUE(allocator_test_instance->CompareBytesWithByteArray(std::get<0>(allocated_elements[index]),
                                                                        std::get<1>(allocated_elements[index]),
-                                                                       std::get<2U>(allocated_elements[index])))
+                                                                       std::get<2>(allocated_elements[index])))
             << "Address: " << std::hex << std::get<0>(allocated_elements[index])
             << ", size: " << std::get<1>(allocated_elements[index])
-            << ", start index in byte array: " << std::get<2U>(allocated_elements[index])
+            << ", start index in byte array: " << std::get<2>(allocated_elements[index])
             << ", seed: " << allocator_test_instance->seed_;
         allocator->Free(std::get<0>(allocated_elements[index]));
     }
@@ -1137,16 +1133,17 @@ void AllocatorTest<Allocator>::MT_AllocFreeRun(AllocatorTest<Allocator> *allocat
             used_indexes.erase(used_indexes.begin());
         }
         // Compare
-        ASSERT_TRUE(allocator_test_instance->CompareBytesWithByteArray(std::get<0>(allocated_elements[i]),
-                                                                       std::get<1>(allocated_elements[i]),
-                                                                       std::get<2U>(allocated_elements[i])))
+        ASSERT_TRUE(allocator_test_instance->CompareBytesWithByteArray(
+            std::get<0>(allocated_elements[i]), std::get<1>(allocated_elements[i]), std::get<2>(allocated_elements[i])))
             << "Address: " << std::hex << std::get<0>(allocated_elements[i])
             << ", size: " << std::get<1>(allocated_elements[i])
-            << ", start index in byte array: " << std::get<2U>(allocated_elements[i])
+            << ", start index in byte array: " << std::get<2>(allocated_elements[i])
             << ", seed: " << allocator_test_instance->seed_;
         allocator->Free(std::get<0>(allocated_elements[i]));
     }
-    num_finished->fetch_add(1);
+    // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent order
+    // where threads observe all modifications in the same order
+    num_finished->fetch_add(1, std::memory_order_seq_cst);
 }
 
 template <class Allocator>
@@ -1158,7 +1155,7 @@ void AllocatorTest<Allocator>::MT_AllocIterateRun(AllocatorTest<Allocator> *allo
 {
     static constexpr size_t ITERATION_IN_RANGE_COUNT = 100;
     size_t elements_count = allocator_test_instance->RandFromRange(min_elements_count, max_elements_count);
-    // (memory, size, start_index_in_byte_array)
+    // {memory, size, start_index_in_byte_array}
     std::vector<std::tuple<void *, size_t, size_t>> allocated_elements(elements_count);
 
     // Iterate over all object
@@ -1194,15 +1191,16 @@ void AllocatorTest<Allocator>::MT_AllocIterateRun(AllocatorTest<Allocator> *allo
         }
         ASSERT_TRUE(allocator_test_instance->AllocatedByThisAllocator(*allocator, std::get<0>(allocated_elements[i])));
         // Compare
-        ASSERT_TRUE(allocator_test_instance->CompareBytesWithByteArray(std::get<0>(allocated_elements[i]),
-                                                                       std::get<1>(allocated_elements[i]),
-                                                                       std::get<2U>(allocated_elements[i])))
+        ASSERT_TRUE(allocator_test_instance->CompareBytesWithByteArray(
+            std::get<0>(allocated_elements[i]), std::get<1>(allocated_elements[i]), std::get<2>(allocated_elements[i])))
             << "Address: " << std::hex << std::get<0>(allocated_elements[i])
             << ", size: " << std::get<1>(allocated_elements[i])
-            << ", start index in byte array: " << std::get<2U>(allocated_elements[i])
+            << ", start index in byte array: " << std::get<2>(allocated_elements[i])
             << ", seed: " << allocator_test_instance->seed_;
     }
-    num_finished->fetch_add(1);
+    // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent order
+    // where threads observe all modifications in the same order
+    num_finished->fetch_add(1, std::memory_order_seq_cst);
 }
 
 template <class Allocator>
@@ -1231,14 +1229,18 @@ void AllocatorTest<Allocator>::MT_AllocCollectRun(AllocatorTest<Allocator> *allo
     }
 
     // Collect objects
-    if (thread_with_collect->fetch_add(1U) < max_thread_with_collect) {
+    // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent order
+    // where threads observe all modifications in the same order
+    if (thread_with_collect->fetch_add(1U, std::memory_order_seq_cst) < max_thread_with_collect) {
         allocator->Collect([&](ObjectHeader *object) {
             ObjectStatus object_status =
                 object->IsMarkedForGC() ? ObjectStatus::DEAD_OBJECT : ObjectStatus::ALIVE_OBJECT;
             return object_status;
         });
     }
-    num_finished->fetch_add(1);
+    // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent order
+    // where threads observe all modifications in the same order
+    num_finished->fetch_add(1, std::memory_order_seq_cst);
 }
 
 template <class Allocator>
@@ -1284,10 +1286,12 @@ inline void AllocatorTest<Allocator>::MT_AllocTest(Allocator *allocator, size_t 
     }
 
     while (true) {
-        if (num_finished.load() == THREADS_COUNT) {
+        // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent
+        // order where threads observe all modifications in the same order
+        if (num_finished.load(std::memory_order_seq_cst) == THREADS_COUNT) {
             break;
         }
-        os::thread::Yield();
+        os::thread::ThreadYield();
     }
 }
 
@@ -1315,10 +1319,12 @@ inline void AllocatorTest<Allocator>::MT_AllocFreeTest(size_t min_elements_count
     }
 
     while (true) {
-        if (num_finished.load() == THREADS_COUNT) {
+        // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent
+        // order where threads observe all modifications in the same order
+        if (num_finished.load(std::memory_order_seq_cst) == THREADS_COUNT) {
             break;
         }
-        os::thread::Yield();
+        os::thread::ThreadYield();
     }
     delete mem_stats;
 }
@@ -1347,10 +1353,12 @@ inline void AllocatorTest<Allocator>::MT_AllocIterateTest(size_t min_elements_co
     }
 
     while (true) {
-        if (num_finished.load() == THREADS_COUNT) {
+        // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent
+        // order where threads observe all modifications in the same order
+        if (num_finished.load(std::memory_order_seq_cst) == THREADS_COUNT) {
             break;
         }
-        os::thread::Yield();
+        os::thread::ThreadYield();
     }
 
     // Delete all objects in allocator
@@ -1386,10 +1394,12 @@ inline void AllocatorTest<Allocator>::MT_AllocCollectTest(size_t min_elements_co
     }
 
     while (true) {
-        if (num_finished.load() == THREADS_COUNT) {
+        // Atomic with seq_cst order reason: data race with num_finished with requirement for sequentially consistent
+        // order where threads observe all modifications in the same order
+        if (num_finished.load(std::memory_order_seq_cst) == THREADS_COUNT) {
             break;
         }
-        os::thread::Yield();
+        os::thread::ThreadYield();
     }
 
     // Delete all objects in allocator

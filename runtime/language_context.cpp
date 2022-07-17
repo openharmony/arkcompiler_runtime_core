@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,14 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "runtime/include/language_context.h"
 
+#include "macros.h"
+#include "runtime/core/core_itable_builder.h"
+#include "runtime/core/core_vm.h"
+#include "runtime/core/core_vtable_builder.h"
 #include "runtime/handle_scope-inl.h"
+#include "runtime/include/class_linker.h"
+#include "runtime/include/language_config.h"
 #include "runtime/include/method.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/stack_walker.h"
 #include "runtime/include/thread.h"
+#include "runtime/include/vtable_builder-inl.h"
+#include "runtime/mem/gc/gc.h"
 #include "runtime/mem/vm_handle.h"
 
 namespace panda {
@@ -27,7 +34,7 @@ std::pair<Method *, uint32_t> LanguageContextBase::GetCatchMethodAndOffset(Metho
 {
     uint32_t catchOffset = 0;
     Method *catchMethod = method;
-    StackWalker stack(thread);
+    auto stack = StackWalker::Create(thread);
     while (stack.HasFrame()) {
         catchMethod = stack.GetMethod();
         if (catchMethod->GetPandaFile() == nullptr) {
@@ -54,34 +61,19 @@ std::unique_ptr<ClassLinkerExtension> LanguageContextBase::CreateClassLinkerExte
     return nullptr;
 }
 
+PandaUniquePtr<tooling::PtLangExt> LanguageContextBase::CreatePtLangExt() const
+{
+    return nullptr;
+}
+
 void LanguageContextBase::ThrowException([[maybe_unused]] ManagedThread *thread,
                                          [[maybe_unused]] const uint8_t *mutf8_name,
                                          [[maybe_unused]] const uint8_t *mutf8_msg) const
 {
 }
 
-const uint8_t *LanguageContextBase::GetErrorClassDescriptor() const
-{
-    return nullptr;
-}
-
-PandaUniquePtr<ITableBuilder> LanguageContextBase::CreateITableBuilder() const
-{
-    return nullptr;
-}
-
-PandaUniquePtr<VTableBuilder> LanguageContextBase::CreateVTableBuilder() const
-{
-    return nullptr;
-}
-
-PandaUniquePtr<tooling::PtLangExt> LanguageContextBase::CreatePtLangExt() const
-{
-    return nullptr;
-}
-
 void LanguageContextBase::SetExceptionToVReg(
-    [[maybe_unused]] Frame::VRegister &vreg,  // NOLINTNEXTLINE(google-runtime-references)
+    [[maybe_unused]] interpreter::AccVRegister &vreg,  // NOLINTNEXTLINE(google-runtime-references)
     [[maybe_unused]] ObjectHeader *obj) const
 {
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_EXTERNAL_PANDA_FILE_EXTERNAL_H_
-#define PANDA_LIBPANDAFILE_EXTERNAL_PANDA_FILE_EXTERNAL_H_
-
+#ifndef LIBPANDAFILE_PANDA_FILE_SUPPORT_H
+#define LIBPANDAFILE_PANDA_FILE_SUPPORT_H
 #include "file_ext.h"
 #include <vector>
 #include <memory>
@@ -46,7 +45,6 @@ public:
         std::unique_ptr<PandaFileWrapper> pfw;
         auto ret = pOpenPandafileFromMemoryExt(addr, size, file_name, &pf_ext);
         if (ret) {
-            // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
             pfw.reset(new PandaFileWrapper(pf_ext));
         }
         return pfw;
@@ -62,7 +60,6 @@ public:
         std::unique_ptr<PandaFileWrapper> pfw;
         auto ret = pOpenPandafileFromFdExt(fd, offset, file_name, &pf_ext);
         if (ret) {
-            // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
             pfw.reset(new PandaFileWrapper(pf_ext));
         }
         return pfw;
@@ -75,6 +72,19 @@ public:
             return {0, 0, std::string()};
         }
         auto ret = pQueryMethodSymByOffsetExt(pf_ext_, offset, &method_info);
+        if (ret) {
+            return method_info;
+        }
+        return {0, 0, std::string()};
+    }
+
+    MethodSymInfoExt QueryMethodSymAndLineByOffset(uint64_t offset) const
+    {
+        MethodSymInfoExt method_info {0, 0, std::string()};
+        if (pQueryMethodSymAndLineByOffsetExt == nullptr) {
+            return {0, 0, std::string()};
+        }
+        auto ret = pQueryMethodSymAndLineByOffsetExt(pf_ext_, offset, &method_info);
         if (ret) {
             return method_info;
         }
@@ -98,6 +108,8 @@ public:
     // NOLINTNEXTLINE(readability-identifier-naming)
     static decltype(QueryMethodSymByOffsetExt) *pQueryMethodSymByOffsetExt;
     // NOLINTNEXTLINE(readability-identifier-naming)
+    static decltype(QueryMethodSymAndLineByOffsetExt) *pQueryMethodSymAndLineByOffsetExt;
+    // NOLINTNEXTLINE(readability-identifier-naming)
     static decltype(QueryAllMethodSymsExt) *pQueryAllMethodSymsExt;
 
     ~PandaFileWrapper() = default;
@@ -118,4 +130,4 @@ private:
 
 }  // namespace panda_api::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_EXTERNAL_PANDA_FILE_EXTERNAL_H_
+#endif

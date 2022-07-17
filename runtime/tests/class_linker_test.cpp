@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,14 +58,13 @@ public:
     }
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
 };
 
 static std::unique_ptr<ClassLinker> CreateClassLinker(ManagedThread *thread)
 {
     std::vector<std::unique_ptr<ClassLinkerExtension>> extensions;
     extensions.push_back(std::make_unique<CoreClassLinkerExtension>());
-
     auto allocator = thread->GetVM()->GetHeapManager()->GetInternalAllocator();
     auto class_linker = std::make_unique<ClassLinker>(allocator, std::move(extensions));
     if (!class_linker->Initialize()) {
@@ -97,7 +96,7 @@ TEST_F(ClassLinkerTest, TestGetClass)
     auto *pf_ptr = pf.get();
     class_linker->AddPandaFile(std::move(pf));
 
-    Class *klass = nullptr;
+    Class *klass;
 
     {
         // Use temporary string to load class. Class loader shouldn't store it.
@@ -328,7 +327,7 @@ size_t GetSize(const Field &field)
 {
     size_t size = 0;
 
-    switch (field.GetType().GetId()) {
+    switch (field.GetTypeId()) {
         case panda_file::Type::TypeId::U1:
         case panda_file::Type::TypeId::I8:
         case panda_file::Type::TypeId::U8: {
@@ -337,19 +336,19 @@ size_t GetSize(const Field &field)
         }
         case panda_file::Type::TypeId::I16:
         case panda_file::Type::TypeId::U16: {
-            size = 2U;
+            size = 2;
             break;
         }
         case panda_file::Type::TypeId::I32:
         case panda_file::Type::TypeId::U32:
         case panda_file::Type::TypeId::F32: {
-            size = 4U;
+            size = 4;
             break;
         }
         case panda_file::Type::TypeId::I64:
         case panda_file::Type::TypeId::U64:
         case panda_file::Type::TypeId::F64: {
-            size = 8U;
+            size = 8;
             break;
         }
         case panda_file::Type::TypeId::REFERENCE: {
@@ -525,7 +524,7 @@ TEST_F(ClassLinkerTest, ResolveExternalClass)
 
         // 0 - "LExt/R;"
         // 1 - "L_GLOBAL;"
-        // 2U - "[LExt/R;"
+        // 2 - "[LExt/R;"
         offset = pf->GetClasses()[2];
 
         class_linker->AddPandaFile(std::move(pf));
@@ -700,12 +699,9 @@ TEST_F(ClassLinkerTest, PrimitiveClasses)
 class TestClassLinkerContext : public ClassLinkerContext {
 public:
     TestClassLinkerContext(const uint8_t *descriptor, bool need_copy_descriptor, Class *klass,
-                           [[maybe_unused]] panda_file::SourceLang lang)
-        : descriptor_(descriptor), need_copy_descriptor_(need_copy_descriptor), klass_(klass)
+                           panda_file::SourceLang lang)
+        : ClassLinkerContext(lang), descriptor_(descriptor), need_copy_descriptor_(need_copy_descriptor), klass_(klass)
     {
-#ifndef NDEBUG
-        lang_ = lang;
-#endif  // NDEBUG
     }
 
     Class *LoadClass(const uint8_t *descriptor, bool need_copy_descriptor,

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_VALUE_VARIABLES_H_
-#define PANDA_VERIFICATION_VALUE_VARIABLES_H_
-
-#include <memory>
+#ifndef _PANDA_VERIFIER_VARIABLES_HPP
+#define _PANDA_VERIFIER_VARIABLES_HPP
 
 #include "verification/util/lazy.h"
 
 #include "runtime/include/mem/panda_containers.h"
+#include "runtime/include/mem/panda_string.h"
 
 #include "util/str.h"
 #include "verification/util/obj_pool.h"
 
-#include "verification/type/type_system_kind.h"
+#include "verification/type/type_tags.h"
+
+#include <memory>
 
 namespace panda::verifier {
 
@@ -61,10 +62,9 @@ public:
             return (*accessor).Idx_ != (*v.accessor).Idx_;
         }
 
-        template <typename StrT>
-        StrT Image(const char *prefix = "V") const
+        PandaString Image(const PandaString &prefix = "V") const
         {
-            return StrT {prefix} + NumToStr<StrT>((*accessor).Idx_);
+            return prefix + NumToStr((*accessor).Idx_);
         }
 
     private:
@@ -74,11 +74,8 @@ public:
     using VarIdx = size_t;
 
     Variables() = default;
-    Variables(TypeSystemKind) {}
-    Variables(const Variables &) = default;
-    Variables(Variables &&) = default;
-    Variables &operator=(const Variables &) = default;
-    Variables &operator=(Variables &&) = default;
+    NO_COPY_SEMANTIC(Variables);
+    DEFAULT_MOVE_SEMANTIC(Variables);
     ~Variables() = default;
 
     Var NewVar()
@@ -107,4 +104,4 @@ private:
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_VALUE_VARIABLES_H_
+#endif  // !_PANDA_VERIFIER_VARIABLES_HPP

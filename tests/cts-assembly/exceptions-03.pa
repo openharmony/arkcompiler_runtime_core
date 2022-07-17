@@ -18,22 +18,25 @@
 
 # check NullPointerException in case of throw null
 
-.function u1 main() {
+.function i32 main() {
     mov.null v0
 try_begin:
     throw v0
     ldai 2
-    return
 try_end:
-
+    return
 catch_block1_begin:
     sta.obj v0
     call.virt panda.NullPointerException.getMessage, v0
-    jnez.obj catch_block2_begin
+    jnez.obj return_error
     ldai 0
     return
 
 catch_block2_begin:
+    ldai 1
+    return
+
+return_error:
     ldai 1
     return
 

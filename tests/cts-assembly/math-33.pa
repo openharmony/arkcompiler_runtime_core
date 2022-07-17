@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # Assert that fcmpg works fine
-.function u1 main(){
+.function i32 main(){
     fldai.64 2.1
     movi.64 v0, 0x7FFFFFFFFFFFFFFF # One of valid quiet NaN values as per IEEE 754
     fcmpg.64 v0

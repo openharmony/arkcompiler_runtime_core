@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,118 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ASSEMBLY_LITERALS_H_
-#define PANDA_ASSEMBLER_ASSEMBLY_LITERALS_H_
+#ifndef _PANDA_ASSEMBLER_LITERALARRAY_HPP
+#define _PANDA_ASSEMBLER_LITERALARRAY_HPP
 
 #include <string>
 #include <vector>
 
-#include "../libpandafile/literal_data_accessor.h"
+#include "libpandafile/literal_data_accessor-inl.h"
 
 namespace panda::pandasm {
 
 struct LiteralArray {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     struct Literal {
+        // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
         panda_file::LiteralTag tag_;
-        std::variant<uint8_t, uint16_t, uint32_t, uint64_t, float, double, bool, std::string> value_;
+        // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
+        std::variant<bool, uint8_t, uint16_t, uint32_t, uint64_t, float, double, std::string> value_;
+
+        bool IsBoolValue() const
+        {
+            switch (tag_) {
+                case panda_file::LiteralTag::ARRAY_U1:
+                case panda_file::LiteralTag::BOOL:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        bool IsByteValue() const
+        {
+            switch (tag_) {
+                case panda_file::LiteralTag::ARRAY_U8:
+                case panda_file::LiteralTag::ARRAY_I8:
+                case panda_file::LiteralTag::TAGVALUE:
+                case panda_file::LiteralTag::ACCESSOR:
+                case panda_file::LiteralTag::NULLVALUE:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        bool IsShortValue() const
+        {
+            switch (tag_) {
+                case panda_file::LiteralTag::ARRAY_U16:
+                case panda_file::LiteralTag::ARRAY_I16:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        bool IsIntegerValue() const
+        {
+            switch (tag_) {
+                case panda_file::LiteralTag::ARRAY_U32:
+                case panda_file::LiteralTag::ARRAY_I32:
+                case panda_file::LiteralTag::INTEGER:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        bool IsLongValue() const
+        {
+            switch (tag_) {
+                case panda_file::LiteralTag::ARRAY_U64:
+                case panda_file::LiteralTag::ARRAY_I64:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        bool IsFloatValue() const
+        {
+            switch (tag_) {
+                case panda_file::LiteralTag::ARRAY_F32:
+                case panda_file::LiteralTag::FLOAT:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        bool IsDoubleValue() const
+        {
+            switch (tag_) {
+                case panda_file::LiteralTag::ARRAY_F64:
+                case panda_file::LiteralTag::DOUBLE:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        bool IsStringValue() const
+        {
+            switch (tag_) {
+                case panda_file::LiteralTag::ARRAY_STRING:
+                case panda_file::LiteralTag::STRING:
+                case panda_file::LiteralTag::METHOD:
+                case panda_file::LiteralTag::GENERATORMETHOD:
+                case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     };
 
     std::vector<panda::pandasm::LiteralArray::Literal>
@@ -37,8 +134,38 @@ struct LiteralArray {
     {
     }
     explicit LiteralArray() = default;
+
+    static constexpr panda_file::LiteralTag GetArrayTagFromComponentType(panda_file::Type::TypeId type)
+    {
+        switch (type) {
+            case panda_file::Type::TypeId::U1:
+                return panda_file::LiteralTag::ARRAY_U1;
+            case panda_file::Type::TypeId::U8:
+                return panda_file::LiteralTag::ARRAY_U8;
+            case panda_file::Type::TypeId::I8:
+                return panda_file::LiteralTag::ARRAY_I8;
+            case panda_file::Type::TypeId::U16:
+                return panda_file::LiteralTag::ARRAY_U16;
+            case panda_file::Type::TypeId::I16:
+                return panda_file::LiteralTag::ARRAY_I16;
+            case panda_file::Type::TypeId::U32:
+                return panda_file::LiteralTag::ARRAY_U32;
+            case panda_file::Type::TypeId::I32:
+                return panda_file::LiteralTag::ARRAY_I32;
+            case panda_file::Type::TypeId::U64:
+                return panda_file::LiteralTag::ARRAY_U64;
+            case panda_file::Type::TypeId::I64:
+                return panda_file::LiteralTag::ARRAY_I64;
+            case panda_file::Type::TypeId::F32:
+                return panda_file::LiteralTag::ARRAY_F32;
+            case panda_file::Type::TypeId::F64:
+                return panda_file::LiteralTag::ARRAY_F64;
+            default:
+                UNREACHABLE();
+        }
+    }
 };
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_ASSEMBLY_LITERALS_H_
+#endif  // !_PANDA_ASSEMBLER_LITERALARRAY_HPP

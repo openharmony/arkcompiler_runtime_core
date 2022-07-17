@@ -154,7 +154,8 @@
             "type": "string"
           },
           "check-type": {
-            "type": "string"
+            "type": "string",
+            "enum": ["empty", "none", "no-check", "exit-positive", "check-positive", "check-negative", "check-acc-nan-f32", "check-acc-nan-f64", "check-acc-1", "check-acc-minus-1"]
           },
           "header-template": {
             "type": "array",
@@ -187,7 +188,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["compile-failure", "compile-only", "run-failure", "use-java", "verifier-only", "verifier-failure", "verifier-debug-config", "verifier-debug-enable"]
+              "enum": ["compile-failure", "compile-only", "run-failure", "use-pa", "verifier-only", "verifier-failure", "verifier-config", ""]
             }
           },
           "description": {
@@ -218,23 +219,13 @@
                 "values": {
                   "type": "array",
                   "items": {
-                    "type": {
-                      "oneOf": [
-                        "string",
-                        "integer"
-                      ]
-                    }
+                    "type": [ "string","number" ]
                   }
                 },
                 "exclude": {
                   "type": "array",
                   "items": {
-                    "type":  {
-                      "oneOf": [
-                        "string",
-                        "integer"
-                      ]
-                    }
+                    "type": [ "string","integer" ]
                   }
                 }
               }
@@ -258,21 +249,11 @@
                 "values": {
                   "type": "array",
                   "items": {
-                    "type": {
-                      "oneOf": [
-                        "string",
-                        "integer"
-                      ]
-                    }
+                    "type": [ "string","number" ]
                   }
                 },
                 "id": {
-                  "type": {
-                    "oneOf": [
-                      "string",
-                      "integer"
-                    ]
-                  }
+                  "type": [ "string", "integer" ]
                 },
                 "ignore": {
                   "type": "boolean"
@@ -290,13 +271,14 @@
                   }
                 },
                 "case-check-type": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": ["empty", "none", "no-check", "exit-positive", "check-positive", "check-negative", "check-acc-nan-f32", "check-acc-nan-f64", "check-acc-1", "check-acc-minus-1"]
                 },
                 "runner-options" : {
                   "type": "array",
                   "items": {
                     "type": "string",
-                    "enum": ["compile-failure", "compile-only", "run-failure", "use-java", "verifier-only", "verifier-failure", "verifier-debug-config", "verifier-debug-enable"]
+                    "enum": ["compile-failure", "compile-only", "run-failure", "use-pa", "verifier-only", "verifier-failure", "verifier-config", ""]
                   }
                 },
                 "description": {

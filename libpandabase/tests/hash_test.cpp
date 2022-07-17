@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,17 +38,18 @@ public:
 
 protected:
     template <class T>
-    void OneObject32bitsHashTest() const;
+    void OneObject32bitsHashTest();
     template <class T>
-    void OneStringHashTest() const;
+    void OneStringHashTest();
     template <class T>
-    void StringMemHashTest() const;
+    void StringMemHashTest();
     template <class T>
-    void EndOfPageStringHashTest() const;
+    void EndOfPageStringHashTest();
     static constexpr size_t KEY40INBYTES = 5;
     static constexpr size_t KEY32INBYTES = 4;
     static constexpr size_t KEY8INBYTES = 1;
 
+// Some platforms have this macro so do not redefine it.
 #ifndef PAGE_SIZE
     static constexpr size_t PAGE_SIZE = SIZE_1K * 4;
 #endif
@@ -57,7 +58,7 @@ protected:
 };
 
 template <class T>
-void HashTest::OneObject32bitsHashTest() const
+void HashTest::OneObject32bitsHashTest()
 {
     srand(seed_);
 
@@ -77,7 +78,7 @@ void HashTest::OneObject32bitsHashTest() const
     }
     ASSERT_EQ(first_hash, second_hash);
 
-    // Set 64 bits value and use only 40 bits from it
+    // Set up 64 bits value and use only 40 bits from it
     uint64_t object40 = rand();
     first_hash = T::GetHash32(reinterpret_cast<uint8_t *>(&object40), KEY40INBYTES);
     second_hash = T::GetHash32(reinterpret_cast<uint8_t *>(&object40), KEY40INBYTES);
@@ -88,10 +89,10 @@ void HashTest::OneObject32bitsHashTest() const
 }
 
 template <class T>
-void HashTest::OneStringHashTest() const
+void HashTest::OneStringHashTest()
 {
     char string[] = "Over 1000!\0";
-    // Dummy check
+    // Dummy check. Don't ask me why...
     if (sizeof(char) != sizeof(uint8_t)) {
         return;
     }
@@ -102,7 +103,7 @@ void HashTest::OneStringHashTest() const
 }
 
 template <class T>
-void HashTest::StringMemHashTest() const
+void HashTest::StringMemHashTest()
 {
     char string[] = "COULD YOU CREATE MORE COMPLEX TESTS,OK?\0";
     size_t string_size = strlen(string);
@@ -113,19 +114,19 @@ void HashTest::StringMemHashTest() const
 }
 
 template <class T>
-void HashTest::EndOfPageStringHashTest() const
+void HashTest::EndOfPageStringHashTest()
 {
+    constexpr const int64_t immTwo = 2;
     size_t string_size = 3;
     constexpr size_t ALLOC_SIZE = PAGE_SIZE * 2;
     void *mem = panda::os::mem::MapRWAnonymousRaw(ALLOC_SIZE);
     ASAN_UNPOISON_MEMORY_REGION(mem, ALLOC_SIZE);
-    panda::os::mem::MakeMemWithProtFlag(
-        reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(mem) + PAGE_SIZE), PAGE_SIZE, os::mem::MMAP_PROT_NONE);
+    panda::os::mem::MakeMemProtected(reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(mem) + PAGE_SIZE), PAGE_SIZE);
     char *string =
         reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(mem) + PAGE_SIZE) - sizeof(char) * string_size);
     string[0] = 'O';
     string[1] = 'K';
-    string[2U] = '\0';
+    string[immTwo] = '\0';
     uint8_t *mutf8_string = reinterpret_cast<uint8_t *>(string);
     uint32_t second_hash = T::GetHash32(mutf8_string, string_size - 1);
     uint32_t first_hash = T::GetHash32String(mutf8_string);
@@ -135,7 +136,7 @@ void HashTest::EndOfPageStringHashTest() const
 }
 
 // If we hash an object twice, it must return the same value
-// Do it for 8 bits, 32 bits and 40 bits key.
+// Do it for 8 bits key, 32 bits and 40 bits key.
 TEST_F(HashTest, OneObjectHashTest)
 {
     HashTest::OneObject32bitsHashTest<MurmurHash32<DEFAULT_SEED>>();
@@ -147,14 +148,14 @@ TEST_F(HashTest, OneStringHashTest)
     HashTest::OneStringHashTest<MurmurHash32<DEFAULT_SEED>>();
 }
 
-// If we hash a string without string method,
+// If we hash a string with out string method,
 // we should get the same result as we use a pointer to string as a raw memory.
 TEST_F(HashTest, StringMemHashTest)
 {
     HashTest::StringMemHashTest<MurmurHash32<DEFAULT_SEED>>();
 }
 
-// Try to hash the string which is located at the end of allocated page.
+// Try to hash the string which located at the end of allocated page.
 // Check that we will not have SEGERROR here.
 TEST_F(HashTest, EndOfPageStringHashTest)
 {

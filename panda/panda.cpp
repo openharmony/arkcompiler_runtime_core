@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,33 +13,36 @@
  * limitations under the License.
  */
 
-#include <chrono>
-#include <ctime>
-#include <iostream>
-#include <limits>
-#include <signal.h>  // NOLINTNEXTLINE(modernize-deprecated-headers)
-#include <vector>
-
 #include "include/runtime.h"
 #include "include/thread.h"
 #include "include/thread_scopes.h"
-
+#include "runtime/include/locks.h"
+#include "runtime/include/method-inl.h"
+#include "runtime/include/class.h"
+#include "utils/pandargs.h"
+#include "compiler/compiler_options.h"
+#include "compiler/compiler_logger.h"
+#include "compiler_events_gen.h"
+#include "mem/mem_stats.h"
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/os/native_stack.h"
 #include "generated/base_options.h"
 
-#include "mem/mem_stats.h"
+#include "ark_version.h"
 
-#include "runtime/include/locks.h"
-#include "runtime/include/method-inl.h"
-#include "runtime/include/class.h"
+#include "verification/jobs/thread_pool.h"
+#include "verification/jobs/cache.h"
 
-#include "utils/logger.h"
-#include "utils/pandargs.h"
 #include "utils/span.h"
 
-#include "verification/job_queue/job_queue.h"
-#include "verification/job_queue/cache.h"
+#include "utils/logger.h"
+
+#include <limits>
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <ctime>
+#include <signal.h>  // NOLINTNEXTLINE(modernize-deprecated-headers)
 
 namespace panda {
 const panda_file::File *GetPandaFile(const ClassLinker &class_linker, std::string_view file_name)
@@ -55,94 +58,6 @@ const panda_file::File *GetPandaFile(const ClassLinker &class_linker, std::strin
     return res;
 }
 
-bool VerifierProcessFile(const panda::verifier::VerificationOptions &opts, const std::string &file_name,
-                         const std::string &entrypoint)
-{
-    if (!opts.Mode.OnlyVerify) {
-        return true;
-    }
-
-    auto &runtime = *Runtime::GetCurrent();
-    auto &class_linker = *runtime.GetClassLinker();
-
-    bool result = true;
-    if (opts.Mode.VerifyAllRuntimeLibraryMethods) {
-        // We need AccessToManagedObjectsScope for verification since it can allocate objects
-        ScopedManagedCodeThread managed_obj_thread(MTManagedThread::GetCurrent());
-        class_linker.EnumerateClasses([&result](const Class *klass) {
-            for (auto &method : klass->GetMethods()) {
-                result = method.Verify();
-                if (!result) {
-                    return false;
-                }
-            }
-            return true;
-        });
-    }
-    if (!result) {
-        return false;
-    }
-
-    if (opts.Mode.VerifyOnlyEntryPoint) {
-        auto resolved = runtime.ResolveEntryPoint(entrypoint);
-
-        result = static_cast<bool>(resolved);
-
-        if (!result) {
-            LOG(ERROR, VERIFIER) << "Error: Cannot resolve method '" << entrypoint << "'";
-        } else {
-            // We need AccessToManagedObjectsScope for verification since it can allocate objects
-            ScopedManagedCodeThread managed_obj_thread(MTManagedThread::GetCurrent());
-            Method &method = *resolved.Value();
-            result = method.Verify();
-        }
-    } else {
-        auto file = GetPandaFile(*runtime.GetClassLinker(), file_name);
-        ASSERT(file != nullptr);
-
-        auto &klass_linker = *runtime.GetClassLinker();
-
-        auto extracted = Runtime::GetCurrent()->ExtractLanguageContext(file, entrypoint);
-        result = static_cast<bool>(extracted);
-        if (!result) {
-            LOG(ERROR, VERIFIER) << "Error: Cannot extract language context for entry point: " << entrypoint;
-            return false;
-        }
-
-        LanguageContext ctx = extracted.Value();
-        bool is_default_context = true;
-
-        for (auto id : file->GetClasses()) {
-            Class *klass = nullptr;
-            {
-                // We need AccessToManagedObjectsScope for GetClass since it can allocate objects
-                ScopedManagedCodeThread managed_obj_thread(MTManagedThread::GetCurrent());
-                klass = klass_linker.GetExtension(ctx)->GetClass(*file, panda_file::File::EntityId {id});
-            }
-
-            if (klass != nullptr) {
-                if (is_default_context) {
-                    ctx = Runtime::GetCurrent()->GetLanguageContext(*klass);
-                    is_default_context = true;
-                }
-                for (auto &method : klass->GetMethods()) {
-                    // We need AccessToManagedObjectsScope for verify since it can allocate objects
-                    ScopedManagedCodeThread managed_obj_thread(MTManagedThread::GetCurrent());
-                    result = method.Verify();
-                    if (!result) {
-                        break;
-                    }
-                }
-            }
-            if (!result) {
-                break;
-            }
-        }
-    }
-
-    return result;
-}
-
 void BlockSignals()
 {
 #if defined(PANDA_TARGET_UNIX)
@@ -151,65 +66,57 @@ void BlockSignals()
         LOG(ERROR, RUNTIME) << "sigemptyset failed";
         return;
     }
-#ifdef PANDA_TARGET_MOBILE
     int rc = 0;
+#ifdef PANDA_TARGET_MOBILE
     rc += sigaddset(&set, SIGPIPE);
     rc += sigaddset(&set, SIGQUIT);
     rc += sigaddset(&set, SIGUSR1);
     rc += sigaddset(&set, SIGUSR2);
+#endif  // PANDA_TARGET_MOBILE
     if (rc < 0) {
         LOG(ERROR, RUNTIME) << "sigaddset failed";
         return;
     }
-#endif  // PANDA_TARGET_MOBILE
+
     if (os::native_stack::g_PandaThreadSigmask(SIG_BLOCK, &set, nullptr) != 0) {
-        LOG(ERROR, RUNTIME) << "PandaThreadSigmask failed";
+        LOG(ERROR, RUNTIME) << "g_PandaThreadSigmask failed";
     }
 #endif  // PANDA_TARGET_UNIX
 }
 
-int Main(const int argc, const char **argv)
+void PrintHelp(const panda::PandArgParser &pa_parser)
+{
+    std::cerr << pa_parser.GetErrorString() << std::endl;
+    std::cerr << "Usage: "
+              << "panda"
+              << " [OPTIONS] [file] [entrypoint] -- [arguments]" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "optional arguments:" << std::endl;
+    std::cerr << pa_parser.GetHelpString() << std::endl;
+}
+
+bool PrepareArguments(panda::PandArgParser *pa_parser, const RuntimeOptions &runtime_options,
+                      const panda::PandArg<std::string> &file, const panda::PandArg<std::string> &entrypoint,
+                      const panda::PandArg<bool> &help, int argc, const char **argv)
 {
     auto start_time =
         std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch())
             .count();
 
-    BlockSignals();
-    Span<const char *> sp(argv, argc);
-    RuntimeOptions runtime_options(sp[0]);
-    base_options::Options base_options(sp[0]);
-
-    panda::PandArg<bool> help("help", false, "Print this message and exit");
-    panda::PandArg<bool> options("options", false, "Print compiler and runtime options");
-    // Tail arguments
-    panda::PandArg<std::string> file("file", "", "path to pandafile");
-    panda::PandArg<std::string> entrypoint("entrypoint", "", "full name of entrypoint function or method");
-    panda::PandArgParser pa_parser;
-
-    runtime_options.AddOptions(&pa_parser);
-    base_options.AddOptions(&pa_parser);
-
-    pa_parser.Add(&help);
-    pa_parser.Add(&options);
-    pa_parser.PushBackTail(&file);
-    pa_parser.PushBackTail(&entrypoint);
-    pa_parser.EnableTail();
-    pa_parser.EnableRemainder();
-
-    if (!pa_parser.Parse(argc, argv) || file.GetValue().empty() || entrypoint.GetValue().empty() || help.GetValue()) {
-        std::cerr << pa_parser.GetErrorString() << std::endl;
-        std::cerr << "Usage: "
-                  << "panda"
-                  << " [OPTIONS] [file] [entrypoint] -- [arguments]" << std::endl;
-        std::cerr << std::endl;
-        std::cerr << "optional arguments:" << std::endl;
-        std::cerr << pa_parser.GetHelpString() << std::endl;
-        return 1;
+    if (!pa_parser->Parse(argc, argv)) {
+        PrintHelp(*pa_parser);
+        return false;
     }
 
-    Logger::Initialize(base_options);
+    if (runtime_options.IsVersion()) {
+        PrintPandaVersion();
+        return false;
+    }
 
-    arg_list_t arguments = pa_parser.GetRemainder();
+    if (file.GetValue().empty() || entrypoint.GetValue().empty() || help.GetValue()) {
+        PrintHelp(*pa_parser);
+        return false;
+    }
 
     if (runtime_options.IsStartupTime()) {
         std::cout << "\n"
@@ -219,7 +126,59 @@ int Main(const int argc, const char **argv)
     auto runtime_options_err = runtime_options.Validate();
     if (runtime_options_err) {
         std::cerr << "Error: " << runtime_options_err.value().GetMessage() << std::endl;
+        return false;
+    }
+
+    auto compiler_options_err = compiler::options.Validate();
+    if (compiler_options_err) {
+        std::cerr << "Error: " << compiler_options_err.value().GetMessage() << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+int Main(int argc, const char **argv)
+{
+    BlockSignals();
+    Span<const char *> sp(argv, argc);
+    RuntimeOptions runtime_options(sp[0]);
+    base_options::Options base_options(sp[0]);
+    panda::PandArgParser pa_parser;
+
+    panda::PandArg<bool> help("help", false, "Print this message and exit");
+    panda::PandArg<bool> options("options", false, "Print compiler and runtime options");
+    // tail arguments
+    panda::PandArg<std::string> file("file", "", "path to pandafile");
+    panda::PandArg<std::string> entrypoint("entrypoint", "", "full name of entrypoint function or method");
+
+    runtime_options.AddOptions(&pa_parser);
+    base_options.AddOptions(&pa_parser);
+    compiler::options.AddOptions(&pa_parser);
+
+    pa_parser.Add(&help);
+    pa_parser.Add(&options);
+    pa_parser.PushBackTail(&file);
+    pa_parser.PushBackTail(&entrypoint);
+    pa_parser.EnableTail();
+    pa_parser.EnableRemainder();
+
+    if (!panda::PrepareArguments(&pa_parser, runtime_options, file, entrypoint, help, argc, argv)) {
         return 1;
+    }
+
+    compiler::options.AdjustCpuFeatures(false);
+
+    Logger::Initialize(base_options);
+
+    runtime_options.SetVerificationMode(runtime_options.IsVerificationEnabled() ? VerificationMode::ON_THE_FLY
+                                                                                : VerificationMode::DISABLED);
+
+    arg_list_t arguments = pa_parser.GetRemainder();
+
+    panda::compiler::CompilerLogger::SetComponents(panda::compiler::options.GetCompilerLog());
+    if (compiler::options.IsCompilerEnableEvents()) {
+        panda::compiler::EventWriter::Init(panda::compiler::options.GetCompilerEventsPath());
     }
 
     auto boot_panda_files = runtime_options.GetBootPandaFiles();
@@ -243,6 +202,8 @@ int Main(const int argc, const char **argv)
         return -1;
     }
 
+    int ret = 0;
+
     if (options.GetValue()) {
         std::cout << pa_parser.GetRegularArgs() << std::endl;
     }
@@ -252,34 +213,25 @@ int Main(const int argc, const char **argv)
 
     auto &runtime = *Runtime::GetCurrent();
     auto &verif_opts = runtime.GetVerificationOptions();
+    ASSERT(!verif_opts.IsOnlyVerify());
 
-    int ret = 0;
-
-    if (verif_opts.Enable) {
-        runtime.GetClassLinker()->EnumerateBootPandaFiles([](const panda_file::File &pf) {
-            verifier::JobQueue::GetCache().FastAPI().ProcessFile(&pf);
-            return true;
-        });
-        bool result = VerifierProcessFile(verif_opts, file_name, entry);
-        if (!result && !verif_opts.Mode.VerifierDoesNotFail) {
-            ret = -1;
-        }
+    if (verif_opts.IsEnabled()) {
+        verifier::ThreadPool::GetCache()->FastAPI().ProcessFiles(runtime.GetClassLinker()->GetBootPandaFiles());
     }
 
-    if (ret == 0 && (!verif_opts.Enable || !verif_opts.Mode.OnlyVerify)) {
-        auto res = runtime.ExecutePandaFile(file_name, entry, arguments);
-        if (!res) {
-            std::cerr << "Cannot execute panda file '" << file_name << "' with entry '" << entry << "'" << std::endl;
-            ret = -1;
-        } else {
-            ret = res.Value();
-        }
+    auto res = runtime.ExecutePandaFile(file_name, entry, arguments);
+    if (!res) {
+        std::cerr << "Cannot execute panda file '" << file_name << "' with entry '" << entry << "'" << std::endl;
+        ret = -1;
+    } else {
+        ret = res.Value();
     }
+
     if (runtime_options.IsPrintMemoryStatistics()) {
-        std::cout << Runtime::GetCurrent()->GetMemoryStatistics();
+        std::cout << runtime.GetMemoryStatistics();
     }
     if (runtime_options.IsPrintGcStatistics()) {
-        std::cout << Runtime::GetCurrent()->GetFinalStatistics();
+        std::cout << runtime.GetFinalStatistics();
     }
     if (!Runtime::Destroy()) {
         std::cerr << "Error: cannot destroy runtime" << std::endl;

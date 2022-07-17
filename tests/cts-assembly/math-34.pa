@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # Assert that fcmpl works fine
-.function u1 main(){
+.function i32 main(){
     ldai.64 0x7FFFFFFFFFFFFFFF # One of valid quiet NaN values as per IEEE 754
     fmovi.64 v0, 1.1
     fcmpl.64 v0

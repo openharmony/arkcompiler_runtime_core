@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@
     // handle vreg index
     and r6, r3, #0xF
     lsr r3, r3, #0x4  // prepare r3 for next index read
-    add r6, r5, r6, lsl #4
+    add r6, r5, r6, lsl #3
     PUSH_ARG r6, r8, r6, r7, .Lreg_1
 .Lreg_1:
     sub r9, r9, 1

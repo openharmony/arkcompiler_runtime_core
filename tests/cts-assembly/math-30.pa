@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(25 << 2 == 100) operation --> shl2.64
-.function u1 main(){
+.function i32 main(){
     ldai.64 25
     movi.64 v0, 2
     shl2.64 v0

@@ -16,7 +16,7 @@
 .function f64 Math.cos (f64 a0) <external>
 .function f64 Math.absF64 (f64 a0) <external>
 
-.function u1 main(){
+.function i32 main(){
     fmovi.64 v0, 1.0
     fmovi.64 v1, 0.5403023059
     fmovi.64 v2, 1e-6

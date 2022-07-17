@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,66 +12,69 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INTERPRETER_ACC_VREGISTER_H_
-#define PANDA_RUNTIME_INTERPRETER_ACC_VREGISTER_H_
+#ifndef PANDA_INTERPRETER_ACC_VREGISTER_H_
+#define PANDA_INTERPRETER_ACC_VREGISTER_H_
 
 #include <cstddef>
 #include <cstdint>
 
-#include "runtime/interpreter/frame.h"
-
-#ifdef PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES
-#include "arch/global_regs.h"
-#endif
+#include "runtime/interpreter/vregister.h"
 
 namespace panda::interpreter {
 
-#ifdef PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES
-
 class AccVRegister : public VRegisterIface<AccVRegister> {
 public:
-    ALWAYS_INLINE inline AccVRegister(const Frame::VRegister &other)
-    {
-        SetValue(other.GetValue());
-        SetTag(other.GetTag());
-    }
-    ~AccVRegister() = default;
-    DEFAULT_COPY_SEMANTIC(AccVRegister);
-    DEFAULT_MOVE_SEMANTIC(AccVRegister);
+    ALWAYS_INLINE inline AccVRegister() = default;
 
-    ALWAYS_INLINE inline operator panda::Frame::VRegister() const
-    {
-        return Frame::VRegister(GetValue(), GetTag());
-    }
+    ALWAYS_INLINE inline AccVRegister(int64_t payload, int64_t mirror) : payload_(payload), mirror_(mirror) {}
 
     ALWAYS_INLINE inline int64_t GetValue() const
     {
-        return arch::regs::GetAccValue();
+        return payload_.GetValue();
     }
 
     ALWAYS_INLINE inline void SetValue(int64_t value)
     {
-        arch::regs::SetAccValue(value);
+        payload_.SetValue(value);
     }
 
-    ALWAYS_INLINE inline uint64_t GetTag() const
+    ALWAYS_INLINE inline int64_t GetTag() const
     {
-        return arch::regs::GetAccTag();
+        return mirror_.GetValue();
     }
 
-    ALWAYS_INLINE inline void SetTag(uint64_t value)
+    ALWAYS_INLINE inline void SetTag(int64_t value)
     {
-        arch::regs::SetAccTag(value);
+        mirror_.SetValue(value);
     }
+
+    template <bool is_dynamic = false>
+    ALWAYS_INLINE inline typename std::enable_if<is_dynamic, DynamicVRegisterRef>::type AsVRegRef()
+    {
+        return DynamicVRegisterRef(&payload_);
+    }
+
+    template <bool is_dynamic = false>
+    ALWAYS_INLINE inline typename std::enable_if<!is_dynamic, StaticVRegisterRef>::type AsVRegRef()
+    {
+        return StaticVRegisterRef(&payload_, &mirror_);
+    }
+
+    ALWAYS_INLINE static inline constexpr uint32_t GetMirrorOffset()
+    {
+        return MEMBER_OFFSET(AccVRegister, mirror_);
+    }
+
+    ~AccVRegister() = default;
+
+    DEFAULT_COPY_SEMANTIC(AccVRegister);
+    DEFAULT_MOVE_SEMANTIC(AccVRegister);
+
+private:
+    VRegister payload_;
+    VRegister mirror_;
 };
-
-#else
-
-using AccVRegister = Frame::VRegister;
-
-#endif  // PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_RUNTIME_INTERPRETER_ACC_VREGISTER_H_
+#endif  // PANDA_INTERPRETER_ACC_VREGISTER_H_

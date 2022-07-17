@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_MEM_H_
-#define PANDA_LIBPANDABASE_OS_MEM_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_OS_MEM_H_
+#define PANDA_LIBPANDABASE_PBASE_OS_MEM_H_
 
 #include "file.h"
 #include "macros.h"
 #include "utils/expected.h"
 #include "utils/span.h"
-#include "mem/mem.h"
+#include "libpandabase/mem/mem.h"
 
 #include <cstddef>
 #ifdef PANDA_TARGET_UNIX
-#include "unix/unix_mem.h"
+#include "platforms/unix/libpandabase/unix_mem.h"
 #elif PANDA_TARGET_WINDOWS
-#include "windows/windows_mem.h"
+#include "platforms/windows/libpandabase/windows_mem.h"
 #else
 #error "Unsupported target: please provide mmap API"
 #endif
@@ -72,6 +72,14 @@ std::optional<Error> MakeMemReadWrite(void *mem, size_t size);
  * @return Error object if any errors occur
  */
 std::optional<Error> MakeMemReadOnly(void *mem, size_t size);
+
+/**
+ * \brief Make memory region \param mem with size \param size protected
+ * @param mem  Pointer to memory region (should be aligned to page size)
+ * @param size Size of memory region
+ * @return Error object if any errors occur
+ */
+std::optional<Error> MakeMemProtected(void *mem, size_t size);
 
 /**
  * \brief Align addr \param addr to page size to pass it to MakeMem functions
@@ -218,6 +226,11 @@ public:
         return MapRange(ptr_, size_);
     }
 
+    static constexpr uint32_t GetPtrOffset()
+    {
+        return MEMBER_OFFSET(MapPtr, ptr_);
+    }
+
     MapPtr<T, MapPtrType::CONST> ToConst()
     {
         MapPtr<T, MapPtrType::CONST> res(ptr_, size_, page_offset_, deleter_);
@@ -243,7 +256,7 @@ public:
      *
      * S: file start; E: file end
      * Available space: [ptr_...(ptr_ + size_ - 1)]
-     * addr should be page aligned for file map but it is not guaranteed for anonymous map
+     * addr sould be page aligned for file map but it is not guaranteed for anonymous map
      * For anonymous map, page_offset_ = 0
      */
     ~MapPtr()
@@ -269,15 +282,17 @@ private:
 using ByteMapRange = MapRange<std::byte>;
 using BytePtr = MapPtr<std::byte, MapPtrType::NON_CONST>;
 using ConstBytePtr = MapPtr<std::byte, MapPtrType::CONST>;
+static_assert(ConstBytePtr::GetPtrOffset() == 0);
 
 /**
  * Map the specified file into memory.
- * The interface is similar to POSIX mmap.
+ * The interface is similat to POSIX mmap.
+ *
  * @param file - file to map
  * @param prot - memory protection flags, a combination of MMAP_PROT_XXX values.
  * @param flags - memory map flags, a combination of MMAP_FLAG_XXX values.
  * @param file_offset - an offset in the file. If the offset is not multiple of page size
- * the function handles this situation. The resulting BytePtr will point to desired data.
+ * the function handles this situatio. The resulting BytePtr will points to desired data.
  * @param hint - an desired address to map file to.
  */
 BytePtr MapFile(file::File file, uint32_t prot, uint32_t flags, size_t size, size_t file_offset = 0,
@@ -285,7 +300,7 @@ BytePtr MapFile(file::File file, uint32_t prot, uint32_t flags, size_t size, siz
 
 /**
  * \brief allocates executed memory of size \param size
- * @param size Size of memory region
+ * @param size
  * @return
  */
 BytePtr MapExecuted(size_t size);
@@ -312,13 +327,15 @@ void *MapRWAnonymousRaw(size_t size, bool force_poison = true);
  */
 void *MapRWAnonymousWithAlignmentRaw(size_t size, size_t aligment_in_bytes, bool force_poison = true);
 
-// ASAN mapped its structures at this magic address (shadow offset)
+// ASAN mapped its structures at this magic address (shadow offset):
+// see https://github.com/google/sanitizers/wiki/AddressSanitizerAlgorithm
 // Therefore, we can successfully allocate memory at fixed address started somewhere at lower addresses
 // and it can overlap sanitizer address space and mmap with MAP_FIXED flag finished successfully.
 // (one can look at the MAP_FIXED flag description of Linux mmap)
 // However, all load/store from this memory is prohibited.
 // We can get an error during mmap call only if we use MAP_FIXED_NOREPLACE argument,
 // but it is supported only since Linux 4.17 (Ubuntu 18 has 4.15)
+// TODO(aemelenko): Do smth with this constant.
 #ifdef PANDA_TARGET_ARM64
 static constexpr uint64_t MMAP_FIXED_MAGIC_ADDR_FOR_ASAN = 1ULL << 36ULL;
 #else
@@ -346,7 +363,16 @@ void *MapRWAnonymousFixedRaw(void *mem, size_t size, bool force_poison = true);
 std::optional<Error> UnmapRaw(void *mem, size_t size);
 
 /**
- * \brief Get page size for the system
+ * Unmap part of previously mapped memory.
+ * Note: memory will be unpoisoned before unmapping in ASAN targets.
+ * @param mem - pointer to the memory
+ * @param size - size of memory piece which we want to unmap
+ * @return Error object if any error occur
+ */
+std::optional<Error> PartiallyUnmapRaw(void *mem, size_t size);
+
+/**
+ * \brief returns page size for the system
  * @return
  */
 uint32_t GetPageSize();
@@ -357,15 +383,16 @@ uint32_t GetPageSize();
  * @param pages_end - address of pages ending, should be multiple of PAGE_SIZE
  * @return
  */
-inline void ReleasePages([[maybe_unused]] uintptr_t pages_start, [[maybe_unused]] uintptr_t pages_end)
+inline int ReleasePages([[maybe_unused]] uintptr_t pages_start, [[maybe_unused]] uintptr_t pages_end)
 {
     ASSERT(pages_start % os::mem::GetPageSize() == 0);
     ASSERT(pages_end % os::mem::GetPageSize() == 0);
     ASSERT(pages_end >= pages_start);
 #ifdef PANDA_TARGET_UNIX
-    madvise(ToVoidPtr(pages_start), pages_end - pages_start, MADV_DONTNEED);
+    return madvise(ToVoidPtr(pages_start), pages_end - pages_start, MADV_DONTNEED);
 #else
-    // On Windows system we can do nothing
+    // On Windows systems we can do nothing
+    return 0;
 #endif
 }
 
@@ -384,4 +411,4 @@ size_t GetNativeBytesFromMallinfo();
 
 }  // namespace panda::os::mem
 
-#endif  // PANDA_LIBPANDABASE_OS_MEM_H_
+#endif  // PANDA_LIBPANDABASE_PBASE_OS_MEM_H_

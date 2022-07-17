@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,15 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <random>
+#include <climits>
+#include <functional>
 
 namespace panda::mem::test {
 
 static constexpr uint32_t TEST_THREADS = 8;
-static constexpr uint32_t TEST_ITERS = 100;
+static constexpr uint32_t TEST_ITERS = 1000;
+static constexpr uint32_t TEST_ARRAY_SIZE = TEST_THREADS * 1000;
 
 class MultithreadedInternStringTableTest : public testing::Test {
 public:
@@ -70,7 +74,7 @@ public:
         table_ = nullptr;
     }
 
-    StringTable *GetTable() const
+    StringTable *GetTable()
     {
         return table_;
     }
@@ -125,8 +129,10 @@ public:
         }
     }
 
+    std::mutex mutex_;
+
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
 
     std::mutex pre_lock_;
     std::condition_variable pre_cv_;
@@ -134,7 +140,7 @@ protected:
     std::mutex post_lock_;
     std::condition_variable post_cv_;
     int counter_post_ = 0;
-    StringTable *table_ {nullptr};
+    StringTable *table_;
 
     std::atomic_flag lock_ {0};
     coretypes::String *string_ {nullptr};
@@ -150,12 +156,59 @@ void TestThreadEntry(MultithreadedInternStringTableTest *test)
     auto *table = test->GetTable();
     for (uint32_t i = 0; i < TEST_ITERS; i++) {
         test->PreCheck();
-        auto *interned_str = table->GetOrInternString(data.data(), 2U, ctx);
+        auto *interned_str = table->GetOrInternString(data.data(), 2, ctx);
         test->CheckSameString(interned_str);
         test->PostFree();
     }
     this_thread->ManagedCodeEnd();
     this_thread->Destroy();
+}
+
+void TestConcurrentInsertion(const std::array<std::array<uint8_t, 4>, TEST_ARRAY_SIZE> &strings, uint32_t &array_item,
+                             MultithreadedInternStringTableTest *test)
+{
+    auto *this_thread =
+        panda::MTManagedThread::Create(panda::Runtime::GetCurrent(), panda::Runtime::GetCurrent()->GetPandaVM());
+    this_thread->ManagedCodeBegin();
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *table = test->GetTable();
+
+    uint32_t current_array_item = 0;
+    while (true) {
+        {
+            std::lock_guard<std::mutex> lock_guard(test->mutex_);
+            if (array_item >= TEST_ARRAY_SIZE) {
+                break;
+            }
+            current_array_item = array_item++;
+        }
+        table->GetOrInternString(strings[current_array_item].data(), 2, ctx);
+    }
+
+    this_thread->ManagedCodeEnd();
+    this_thread->Destroy();
+}
+
+TEST_F(MultithreadedInternStringTableTest, ConcurrentInsertion)
+{
+    std::array<std::thread, TEST_THREADS> threads;
+    std::array<std::array<uint8_t, 4>, TEST_ARRAY_SIZE> strings;
+    std::random_device random_device;
+    std::mt19937 engine {random_device()};
+    std::uniform_int_distribution<uint8_t> dist(0, 255);
+    uint32_t array_item = 0;
+
+    for (uint32_t i = 0; i < TEST_ARRAY_SIZE; i++) {
+        strings[i] = {0xc2, dist(engine), dist(engine), 0x00};
+    }
+
+    for (uint32_t i = 0; i < TEST_THREADS; i++) {
+        threads[i] = std::thread(TestConcurrentInsertion, std::ref(strings), std::ref(array_item), this);
+    }
+
+    for (uint32_t i = 0; i < TEST_THREADS; i++) {
+        threads[i].join();
+    }
 }
 
 TEST_F(MultithreadedInternStringTableTest, CheckInternReturnsSameString)
@@ -168,5 +221,4 @@ TEST_F(MultithreadedInternStringTableTest, CheckInternReturnsSameString)
         threads[i].join();
     }
 }
-
 }  // namespace panda::mem::test

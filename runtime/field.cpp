@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,27 +18,27 @@
 #include "libpandabase/utils/hash.h"
 #include "libpandafile/field_data_accessor.h"
 #include "libpandafile/file-inl.h"
-#include "runtime/include/class_linker.h"
 #include "runtime/include/runtime.h"
 
 namespace panda {
 
 panda_file::File::StringData Field::GetName() const
 {
-    panda_file::FieldDataAccessor fda(*panda_file_, file_id_);
-    return panda_file_->GetStringData(fda.GetNameId());
+    const auto *panda_file = GetPandaFile();
+    auto name_id = panda_file::FieldDataAccessor::GetNameId(*panda_file, file_id_);
+    return panda_file->GetStringData(name_id);
 }
 
 Class *Field::ResolveTypeClass(ClassLinkerErrorHandler *error_handler) const
 {
-    panda_file::FieldDataAccessor fda(*panda_file_, file_id_);
+    const auto *panda_file = GetPandaFile();
     auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
 
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*class_);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*GetClass());
     auto *ext = class_linker->GetExtension(ctx);
     ASSERT(ext != nullptr);
 
-    switch (type_.GetId()) {
+    switch (GetTypeId()) {
         case panda_file::Type::TypeId::U1:
             return ext->GetClassRoot(ClassRoot::U1);
         case panda_file::Type::TypeId::I8:
@@ -64,11 +64,16 @@ Class *Field::ResolveTypeClass(ClassLinkerErrorHandler *error_handler) const
         case panda_file::Type::TypeId::TAGGED:
             return ext->GetClassRoot(ClassRoot::TAGGED);
         case panda_file::Type::TypeId::REFERENCE:
-            return ext->GetClass(*panda_file_, panda_file::File::EntityId(fda.GetType()), class_->GetLoadContext(),
-                                 error_handler);
+            return ext->GetClass(*panda_file, panda_file::FieldDataAccessor::GetTypeId(*panda_file, file_id_),
+                                 GetClass()->GetLoadContext(), error_handler);
         default:
             UNREACHABLE();
     }
+}
+
+const panda_file::File *Field::GetPandaFile() const
+{
+    return GetClass()->GetPandaFile();
 }
 
 }  // namespace panda

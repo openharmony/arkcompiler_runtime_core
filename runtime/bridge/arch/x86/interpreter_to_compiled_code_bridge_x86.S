@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ InterpreterToCompiledCodeBridge:
 
     // According to the current frame kind set the bridge type
     movl 16(%eax), %ecx
-    movb THREAD_FRAME_KIND(%ecx), %cl
+    movb MANAGED_THREAD_FRAME_KIND_OFFSET(%ecx), %cl
     testb %cl, %cl
     jz 1f
     pushl $BYPASS_BRIDGE
@@ -152,7 +152,7 @@ InterpreterToCompiledCodeBridge:
     PREPARE_ARG_STACK
 
     // setup regs and memory as follow
-    // %eax - SHORTY_PTR_REG, %edx - SHORTY_REG, %ecx - shorty value, (%esp) - insn_ptr,
+    // %eax - SHORTY_PTR_REG, %edx - SHORTY_REG, %ecx - shorty value, (%esp) - insn_ptr, 
     // 8(%ebp) - iframe, 4(%esp) - iframe->vregs[], %edi - pointer to stack
     movl METHOD_SHORTY_OFFSET(%ebx), %SHORTY_PTR_REG // method->shorty*
     INIT_SHORTY_REG
@@ -231,7 +231,7 @@ InterpreterToCompiledCodeBridge:
     xorl %ecx, %ecx
     cmpl $SHORTY_REFERENCE, %esi
     sete %cl
-    movl %ecx, FRAME_VREGISTER_TAG_OFFSET(%edi)
+    movl %ecx, FRAME_ACC_MIRROR_OFFSET(%edi)
     je .L32bit_arg
 
     movl %esi, %ebx
@@ -280,7 +280,7 @@ InterpreterToCompiledCodeBridge:
 
 .Lreturn:
     leal -28(%ebp), %esp
-
+    
     popl %edi
     popl %esi
     popl %ebx
@@ -305,7 +305,7 @@ InvokeCompiledCodeWithArgArray:
 
     // According to the current frame kind set the bridge type
     movl 20(%eax), %ecx
-    movb THREAD_FRAME_KIND(%ecx), %cl
+    movb MANAGED_THREAD_FRAME_KIND_OFFSET(%ecx), %cl
     testb %cl, %cl
     jz 1f
     pushl $BYPASS_BRIDGE
@@ -334,10 +334,10 @@ InvokeCompiledCodeWithArgArray:
     movl METHOD_SHORTY_OFFSET(%ebx), %SHORTY_PTR_REG // method->shorty*
     INIT_SHORTY_REG
 
-    PREPARE_ARG_STACK
+    PREPARE_ARG_STACK  
 
     // setup regs and memory as follow
-    // %eax - SHORTY_PTR_REG, %edx - SHORTY_REG, %ecx - shorty value, %esi - args[],
+    // %eax - SHORTY_PTR_REG, %edx - SHORTY_REG, %ecx - shorty value, %esi - args[], 
     // %edi - pointer to stack
     movl METHOD_SHORTY_OFFSET(%ebx), %SHORTY_PTR_REG // method->shorty*
     INIT_SHORTY_REG
@@ -361,7 +361,7 @@ InvokeCompiledCodeWithArgArray:
 
     // parameter 'this' of instance methods is not encoded in the shorty
     // in case of instance method hack SHORTY_REG by replacing the return type by REF
-    // in another case just skip the return type
+    // in the another case just skip the return type
     // check whether the method is an instance
     movl METHOD_ACCESS_FLAGS_OFFSET(%ebx), %ecx
     testl $ACCESS_STATIC, %ecx
@@ -379,7 +379,7 @@ InvokeCompiledCodeWithArgArray:
     movl %eax, (%esp)
     movl %edx, 4(%esp)
     // handle the first arg index
-    PUSH_ARG %esi, %edi, %eax, %edx
+    PUSH_ARG %esi, %edi, %eax, %edx 
     movl (%esp), %eax
     movl 4(%esp), %edx
 
@@ -468,7 +468,7 @@ InvokeCompiledCodeWithArgArray:
 
 .Lreturn_:
     leal -28(%ebp), %esp
-
+    
     popl %edi
     popl %esi
     popl %ebx

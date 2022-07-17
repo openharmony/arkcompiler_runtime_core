@@ -18,8 +18,7 @@
 namespace panda::disasm {
 
 pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
-                                                                   panda_file::File::EntityId method_id,
-                                                                   pandasm::extensions::Language language) const {
+                                                                   panda_file::File::EntityId method_id) const {
     pandasm::Ins ins{};
 
     ins.opcode = BytecodeOpcodeToPandasmOpcode(bc_ins.GetOpcode());
@@ -46,7 +45,7 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
         ins.regs.push_back(bc_ins.GetVReg(<%=reg_count%>));
 %         reg_count += 1
 %      elsif (i.operands.count(&:id?) != 0)
-        ins.ids.push_back(IDToString(bc_ins, method_id, language));
+        ins.ids.push_back(IDToString(bc_ins, method_id));
 %      end   
 %   end
         break;
@@ -57,7 +56,7 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
 
     if (ins.IsCall()) {
         // clearing excessive arguments if there are any
-        // if format has ID in it - receive it. else instruction is indirect call and id = method_id
+        // if format has ID in it - recieve it. else instruction is indirect call and id = method_id
         panda_file::File::EntityId id;
 
         if (bc_ins.HasId(format, 0)) {
@@ -84,7 +83,7 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
         } else {
             overhead = ins.regs.size() - pda.GetNumArgs() - 1;
         }
-        // call.acc receives fixed amount of registers
+        // call.acc recieves fixed amount of registers
         if (is_acc) {
             return ins;
         }

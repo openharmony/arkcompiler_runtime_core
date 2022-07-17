@@ -12,14 +12,13 @@
 # limitations under the License.
 
 module TestRunner
-
   # Methods should be redefined in derived class
   class BaseTestReporter
-    def prologue()
+    def prologue
       raise NotImplementedError, "#{self.class} does not implement prologue()."
     end
 
-    def epilogue()
+    def epilogue
       raise NotImplementedError, "#{self.class} does not implement epilogue()."
     end
 
@@ -48,7 +47,7 @@ module TestRunner
     end
 
     def log_start_command(cmd)
-     raise NotImplementedError, "#{self.class} does not implement log_start_command()."
+      raise NotImplementedError, "#{self.class} does not implement log_start_command()."
     end
 
     def log_failed_compilation(output)
@@ -99,6 +98,8 @@ module TestRunner
       raise NotImplementedError, "#{self.class} does not implement log_bugids()."
     end
 
+    def log_repro_commands(_cmds)
+      raise NotImplementedError, "#{self.class} does not implement log_repro_commands()."
+    end
   end
-
 end

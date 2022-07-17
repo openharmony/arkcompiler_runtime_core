@@ -14,7 +14,7 @@
 .record IO <external>
 .function void IO.printF64(f64 a0) <external>
 
-.function u1 main(){
+.function i32 main(){
     fmovi.64 v0, 26.6
     call.short IO.printF64, v0, v0
     ldai 0

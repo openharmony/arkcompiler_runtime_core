@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_TYPE_TYPE_PARAMETRIC_H_
-#define PANDA_VERIFICATION_TYPE_TYPE_PARAMETRIC_H_
+#ifndef _PANDA_TYPE_PARAMETRIC_HPP__
+#define _PANDA_TYPE_PARAMETRIC_HPP__
 
-#include "type_system_kind.h"
-#include "type_sort.h"
 #include "type_params.h"
+#include "type_sort.h"
+#include "type_tags.h"
 #include "type_type.h"
 
 namespace panda::verifier {
@@ -28,8 +28,12 @@ class TypeParams;
 class ParametricType {
 public:
     TypeSystemKind kind_;
+    ThreadNum threadnum_;
     SortIdx Sort_;
-    ParametricType(TypeSystemKind kind, SortIdx sort) : kind_ {kind}, Sort_(sort) {}
+    ParametricType(TypeSystemKind kind, ThreadNum threadnum, SortIdx sort)
+        : kind_ {kind}, threadnum_ {threadnum}, Sort_(sort)
+    {
+    }
     friend class TypeSystem;
 
     ParametricType() = delete;
@@ -50,4 +54,4 @@ public:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_TYPE_TYPE_PARAMETRIC_H_
+#endif  // !_PANDA_TYPE_PARAMETRIC_HPP__

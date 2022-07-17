@@ -35,14 +35,36 @@ arkdisassembler_configs = [
   "$ark_root/libpandafile:arkfile_public_config",
 ]
 
+foreach(plugin, enabled_plugins) {
+  print("add disassembler plugin: $plugin")
+  plugin_dir = "$ark_root/plugins/$plugin"
+
+  source_files = read_file("$plugin_dir/subproject_sources.gn", "scope")
+  if (defined(source_files.srcs_disassembler_path)) {
+    source_file = "$plugin_dir/${source_files.srcs_disassembler_path}"
+    src_scope = read_file(source_file, "scope")
+    foreach(src, src_scope.srcs) {
+      arkdisassembler_sources += [ "$plugin_dir/disassembler/$src" ]
+    }
+    src_scope = {
+    }
+  }
+  source_files = []
+}
+
 ohos_shared_library("arkdisassembler") {
   sources = arkdisassembler_sources
 
-  include_dirs = [ "$ark_root/disassembler" ]
+  include_dirs = [
+    "$ark_root/disassembler",
+    "$target_gen_dir",
+  ]
 
   configs = arkdisassembler_configs
 
   deps = [
+    ":disasm_plugins_inc",
+    ":get_language_specific_metadata_inc",
     ":isa_gen_ark_disam_bc_ins_to_pandasm_ins_cpp",
     ":isa_gen_ark_disam_get_ins_info_cpp",
     ":isa_gen_ark_disam_opcode_translator_cpp",
@@ -52,6 +74,7 @@ ohos_shared_library("arkdisassembler") {
     "$ark_root/libpandafile:libarkfile",
     sdk_libc_secshared_dep,
   ]
+
   if (!is_standard_system) {
     relative_install_dir = "ark"
   }
@@ -59,6 +82,7 @@ ohos_shared_library("arkdisassembler") {
   if (is_mingw) {
     output_extension = "dll"
   }
+
   subsystem_name = "ark"
   part_name = "ark"
 }
@@ -66,11 +90,16 @@ ohos_shared_library("arkdisassembler") {
 ohos_static_library("arkdisassembler_frontend_static") {
   sources = arkdisassembler_sources
 
-  include_dirs = [ "$ark_root/disassembler" ]
+  include_dirs = [
+    "$ark_root/disassembler",
+    "$target_gen_dir",
+  ]
 
   configs = arkdisassembler_configs
 
   deps = [
+    ":disasm_plugins_inc",
+    ":get_language_specific_metadata_inc",
     ":isa_gen_ark_disam_bc_ins_to_pandasm_ins_cpp",
     ":isa_gen_ark_disam_get_ins_info_cpp",
     ":isa_gen_ark_disam_opcode_translator_cpp",
@@ -88,7 +117,10 @@ ohos_static_library("arkdisassembler_frontend_static") {
 ohos_executable("ark_disasm") {
   sources = [ "disasm.cpp" ]
 
-  include_dirs = [ "$target_gen_dir" ]
+  include_dirs = [
+    "$target_gen_dir",
+    "$root_gen_dir/libpandabase",
+  ]
 
   configs = [
     sdk_libc_secshared_config,
@@ -105,8 +137,9 @@ ohos_executable("ark_disasm") {
     "$ark_root/libpandafile:libarkfile_frontend_static",
   ]
 
+  libs = platform_libs
   if (!is_mac && !is_mingw && !ark_standalone_build) {
-    ldflags = [ "-static-libstdc++" ]
+    ldflags = platform_ldflags
   }
 
   if (is_standard_system && !is_mac) {
@@ -138,4 +171,20 @@ ark_gen_file("type_to_pandasm_type_cpp") {
   data_file = "$ark_root/libpandafile/types.yaml"
   requires = [ "$ark_root/libpandafile/types.rb" ]
   output_file = "$target_gen_dir/type_to_pandasm_type.cpp"
+}
+
+ark_gen_file("disasm_plugins_inc") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "templates/disasm_plugins.inc.erb"
+  data_file = "$target_gen_dir/../plugin_options.yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/disasm_plugins.inc"
+}
+
+ark_gen_file("get_language_specific_metadata_inc") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "templates/get_language_specific_metadata.inc.erb"
+  data_file = "$target_gen_dir/../plugin_options.yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/get_language_specific_metadata.inc"
 }

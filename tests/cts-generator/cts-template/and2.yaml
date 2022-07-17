@@ -321,7 +321,7 @@ tests:
       - file-name: "vals_mod32_1"
         bugid: ['1324']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: and2 v:in:i32
@@ -372,99 +372,80 @@ tests:
 
       - file-name: "type"
         bugid: ["964", "966"]
-        tags: ['verifier']
+        tags: [verifier]
         isa:
-          instructions:
-            - sig: and2 v:in:i32
-              acc: inout:i32
-              prefix: bit
-              format: [pref_op_v_8]
           verification:
             - acc_type
             - v1_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
-            #
-            .record A {}
-            .record B {}
-            .record panda.String <external>
-            .record panda.Object <external>
-            .function i32 main() {
-                %s
-                *s
-                and2 v0
-                ldai 0
-        check-type: no-check
-        description: Check and2 with incorrect register and accumulator type.
-        template-cases:
-          - values:
-              - ldai.64 0
-          - values:
-              - fldai.64 0
-          - values:
-              - |
-                #
-                    lda.type B
-          - values:
-              - |
-                #
-                    lda.type B[]
-          - values:
-              - |
-                #
-                    lda.type panda.String
-          - values:
-              - |
-                #
-                    lda.type panda.Object
-          - values:
-              - |
-                #
-                    movi v0, 10
-                    newarr v0, v0, i32[]
-                    lda.obj v0
-          - values:
-              - lda.null
-          - values:
-              - ldai 0
-            exclude: [val]
+          .record T {}
+          .function i32 main() {
+              %s
+              *s
+              and2 v0
+        check-type: exit-positive
+        description: Check 'and2' with incorrect accumulator and/or register types.
         cases:
           - values:
-              - movi.64 v1, 0
+            - ldai 0
+            id: acc_ok
           - values:
-              - fmovi.64 v1, 0
+            - ldai.64 0
           - values:
-              - |
-                #
-                    lda.type A
-                    sta.obj v1
+            - fldai 0
+            bugid: ['7315']
           - values:
-              - |
-                #
-                    lda.type A[]
-                    sta.obj v1
+            - fldai.64 0
+          - values:
+            - lda.null
+          - values:
+            - |
+              #
+                  movi v1, 0
+                  newarr v1, v1, i32[]
+                  lda.obj v1
+          - values:
+            - lda.str "0"
+          - values:
+            - lda.type T
+          - values:
+            - |
+              #
+                  newobj v1, T
+                  lda.obj v1
+        template-cases:
+          - values:
+            - movi v0, 0
+            exclude: [acc_ok]
+          - values:
+            - movi.64 v0, 0
+          - values:
+            - fmovi v0, 0
+            bugid: ['7315']
+          - values:
+            - fmovi.64 v0, 0
+          - values:
+            - mov.null v0
+          - values:
+            - |
+              #
+                  movi v0, 0
+                  newarr v0, v0, i32[]
+          - values:
+            - |
+              #
+                  lda.str "0"
+                  sta.obj v0
+          - values:
+            - |
+              #
+                  lda.type T
+                  sta.obj v0
+          - values:
+            - newobj v0, T
 
-          - values:
-              - |
-                #
-                    lda.type panda.String
-                    sta.obj v1
-          - values:
-              - |
-                #
-                    lda.type panda.Object
-                    sta.obj v1
-          - values:
-              - |
-                #
-                    movi v1, 10
-                    newarr v1, v1, f64[]
-          - values:
-              - mov.null v1
-          - values:
-              - movi v1, 0
-            id: val
 
       - file-name: uninitialized_regs
         bugid: ['2260']
@@ -474,18 +455,15 @@ tests:
               acc: inout:i32
               prefix: bit
               format: [pref_op_v_8]
-        description: Check and2 with uninitialized registers.
+        description: Check 'and2' with uninitialized registers.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        header-template: []
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
           #
-          .function i32 main() {
               %s
               *s
               and2 *s
-              ldai 0
-        check-type: no-check
+        check-type: exit-positive
         template-cases:
           - values:
               - ''

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,7 @@ public:
 protected:
     static constexpr size_t MINIMAL_POOL_SIZE = PANDA_POOL_ALIGNMENT_IN_BYTES;
 
-    void AddToPoolMap(Pool pool, SpaceType space_type, AllocatorType allocator_type,
-                      const void *allocator_addr = nullptr)
+    void AddToPoolMap(Pool pool, SpaceType space_type, AllocatorType allocator_type, void *allocator_addr = nullptr)
     {
         if (allocator_addr == nullptr) {
             allocator_addr = pool.GetMem();
@@ -91,8 +90,7 @@ protected:
         return AlignUp(rand() % PANDA_MAX_HEAP_SIZE, DEFAULT_ALIGNMENT_IN_BYTES);
     }
 
-    void CheckRandomPoolAddress(Pool pool, SpaceType space_type, AllocatorType allocator_type,
-                                uintptr_t allocator_addr) const
+    void CheckRandomPoolAddress(Pool pool, SpaceType space_type, AllocatorType allocator_type, uintptr_t allocator_addr)
     {
         void *pool_addr = RandAddrFromPool(pool);
         ASSERT_EQ(GetSpaceTypeForAddr(pool_addr), space_type);
@@ -106,12 +104,12 @@ private:
         return ToVoidPtr(ToUintPtr(pool.GetMem()) + rand() % pool.GetSize());
     }
 
-    AllocatorInfo GetAllocatorInfoForAddr(void *addr) const
+    AllocatorInfo GetAllocatorInfoForAddr(const void *addr) const
     {
         return pool_map_.GetAllocatorInfo(addr);
     }
 
-    SpaceType GetSpaceTypeForAddr(void *addr) const
+    SpaceType GetSpaceTypeForAddr(const void *addr) const
     {
         return pool_map_.GetSpaceType(addr);
     }

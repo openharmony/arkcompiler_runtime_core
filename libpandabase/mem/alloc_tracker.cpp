@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "mem/alloc_tracker.h"
-
 #include <cstring>
 #include <algorithm>
 #include <iterator>
@@ -24,6 +22,7 @@
 #include <unordered_map>
 #include "utils/logger.h"
 #include "os/stacktrace.h"
+#include "mem/alloc_tracker.h"
 
 namespace panda {
 
@@ -61,8 +60,8 @@ static size_t CalcHash(const std::vector<uintptr_t> &st)
     return hash;
 }
 
-// On mobile target getting a stacktrace is expensive operation.
-// An application doesn't launch in timeout and get killed.
+// On a phone getting a stacktrace is expensive operation.
+// An application doesn't launch in timeout and gets killed.
 // This function is aimed to skip getting stacktraces for some allocations.
 #if defined(PANDA_TARGET_MOBILE)
 static bool SkipStacktrace(size_t num)
@@ -94,7 +93,6 @@ void DetailAllocTracker::TrackAlloc(void *addr, size_t size, SpaceType space)
     if (cur_arena_.size() < sizeof(AllocInfo)) {
         AllocArena();
     }
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
     auto info = new (cur_arena_.data()) AllocInfo(cur_id_++, size, static_cast<uint32_t>(space), stacktrace_id);
     cur_arena_ = cur_arena_.SubSpan(sizeof(AllocInfo));
     cur_allocs_.insert({addr, info});
@@ -113,7 +111,6 @@ void DetailAllocTracker::TrackFree(void *addr)
     if (cur_arena_.size() < sizeof(FreeInfo)) {
         AllocArena();
     }
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
     new (cur_arena_.data()) FreeInfo(alloc->GetId());
     cur_arena_ = cur_arena_.SubSpan(sizeof(FreeInfo));
 }
@@ -123,7 +120,6 @@ void DetailAllocTracker::AllocArena()
     if (cur_arena_.size() >= ENTRY_HDR_SIZE) {
         *reinterpret_cast<uint32_t *>(cur_arena_.data()) = 0;
     }
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
     arenas_.emplace_back(new uint8_t[ARENA_SIZE]);
     cur_arena_ = Span<uint8_t>(arenas_.back().get(), arenas_.back().get() + ARENA_SIZE);
 }
@@ -135,7 +131,7 @@ void DetailAllocTracker::Dump()
     if (!out) {
         LOG(ERROR, RUNTIME) << "DetailAllocTracker: Cannot open " << GetDumpFilePath()
                             << " for writing: " << strerror(errno) << "."
-                            << "\nCheck if the directory has write permissions or"
+                            << "\nCheck the directory has write permissions or"
                             << " selinux is disabled.";
     }
     Dump(out);
@@ -146,7 +142,7 @@ void DetailAllocTracker::Dump(std::ostream &out)
 {
     os::memory::LockHolder lock(mutex_);
 
-    Write(0, out);  // nuber of items, will be updated later
+    Write(0, out);  // number of items, will be updated later
     Write(0, out);  // number of stacktraces, will be updated later
 
     std::map<uint32_t, uint32_t> id_map;
@@ -198,6 +194,7 @@ void DetailAllocTracker::DumpMemLeaks(std::ostream &out)
 
     os::memory::LockHolder lock(mutex_);
     size_t num = 0;
+    out << "found " << cur_allocs_.size() << " leaks\n";
     for (auto &entry : cur_allocs_) {
         out << "Allocation of " << entry.second->GetSize() << " is allocated at\n";
         uint32_t stacktrace_id = entry.second->GetStacktraceId();
@@ -215,9 +212,11 @@ uint32_t DetailAllocTracker::WriteStacks(std::ostream &out, std::map<uint32_t, u
     class Key {
     public:
         explicit Key(const Stacktrace *stacktrace) : stacktrace_(stacktrace), hash_(CalcHash(*stacktrace)) {}
-        ~Key() = default;
+
         DEFAULT_COPY_SEMANTIC(Key);
-        DEFAULT_MOVE_SEMANTIC(Key);
+        DEFAULT_NOEXCEPT_MOVE_SEMANTIC(Key);
+
+        ~Key() = default;
 
         bool operator==(const Key &k) const
         {
@@ -230,8 +229,8 @@ uint32_t DetailAllocTracker::WriteStacks(std::ostream &out, std::map<uint32_t, u
         }
 
     private:
-        const Stacktrace *stacktrace_;
-        size_t hash_;
+        const Stacktrace *stacktrace_ = nullptr;
+        size_t hash_ = 0U;
     };
 
     struct KeyHash {

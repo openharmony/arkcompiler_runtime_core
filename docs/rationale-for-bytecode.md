@@ -7,7 +7,8 @@ bytecode design in Panda Runtime.
 
 ## Bytecode basics
 
-Before discussing bytecode, let's take a look at a simplified picture of how a program is running on hardware.
+Before discussing bytecode per se, let's take a look at an over-simplified picture of a real
+hardware running a program.
 
 There is a central processing unit (CPU) that reads commands (or _instructions_) from
 somewhere in memory and executes corresponding _operations_ on operation's arguments,
@@ -33,17 +34,18 @@ frameworks, etc.
 
 Although bytecode represents some abstraction, it mirrors all the mentioned concepts from the
 hardware world: the terms "operations", "operands", "registers" and "stack" have the same meaning.
-To eliminate ambiguity, the terms "virtual registers" and "virtual stack" are used to distinguish
-an abstract system from the hardware.
+In case there is a chance for ambiguity, the terms "virtual registers" and "virtual stack" are used
+to distinguish between an abstract system and the hardware.
 
 Just as real CPUs can expose different instruction set architectures, there is no universal way of
 building bytecode. Following sections explain advantages and disadvantages of various approaches.
 
 ## Encoding operands
 
-One important question is how an operation refers to its operands.
+One very important question is how an operation refers to its operands.
 
-In a _stack-based_ approach, operands are implicitly encoded in the operation. The code is as follows:
+In _stack-based_ approach, operands are implicitly encoded in the operation, which results in
+following code:
 
 ```
 .function foo(arg1, arg2)
@@ -55,7 +57,8 @@ In a _stack-based_ approach, operands are implicitly encoded in the operation. T
 .end
 ```
 
-In a _register-based approach_, operands are explicitly encoded in the operation. The code is as follows:
+In _register-based approach_, operands are explicitly encoded in the operation, which results in
+following code:
 
 ```
 .function foo(arg1, arg2)
@@ -70,25 +73,26 @@ operates with smaller instructions. Indeed, each instruction `push_arg1`, `push_
 can be represented with a single byte, while register-based `add reg_dst, reg_src1, reg_src2` may
 require up to 4 bytes to encode.
 
-In addition, a stack-based addition requires three instructions, while a register-based addition
-requires only one instruction. Since the interpreter has an extra work to do to read each
-bytecode instruction, execute it and move to the next one, running more instructions result in
-more _dispatch overhead_. This means that the stack-based bytecode is slower by nature.
+At the same time, to execute a stack-based addition we need to run 3 instructions compared to
+just a single register-based instruction. Since the interpreter has an extra work to do to read
+each bytecode instruction, execute it and move to the next one, running more instruction results in
+more _dispatch overhead_. Which means that the stack-based bytecode is slower by nature.
 
-According to our experiment, uncompressed register-based Dalvik bytecode can be reduced by ~26%
+According to our experiment, uncompressed register-based bytecode can be reduced by ~26%
 if substituted by a stack-based analogue. At the same time, performance becomes 10%-40% worse
 (depending on the benchmark).
 
-**Panda uses register-based instruction set architecture** because performance of the interpreter
-is very important since bytecode interpretation is a required program execution mode for Panda.
+Since bytecode interpretation is a required program execution mode for Panda, performance of the
+interpreter is very important, that's why
+**Panda uses register-based instruction set architecture**.
 
-To address the issue of compactness, two main tweaks are used:
+However, to address the issue of compactness, two main tweaks are used:
 
 * Implicitly addressed accumulator register.
-* Variable size of instructions in frequently used instructions are encoded to be smaller.
+* Variable size of instructions with frequent instructions are encoded to be smaller.
 
 According to our research, these tweaks will allow to reduce the size of uncompressed bytecode by
-~20% compared to Dalvik bytecode.
+~20% compared to pure register-based bytecode.
 
 ### Implicitly addressed accumulator register
 
@@ -103,12 +107,12 @@ by some bytecodes. With this tweak, our example can be rewritten as follows:
 .end
 ```
 
-With this approach, we are no longer required to encode destination register, which is "hardcoded"
-as an accumulator register. Having an implicitly addressed accumulator register de facto borrows
+With this approach, we are no longer required to encode destination register, it is "hardcoded" to
+be an accumulator register. Having an implicitly addressed accumulator register de facto borrows
 some "stack-based'ness" into an otherwise register-based instruction set in attempt to make the
 encoding more compact.
 
-In an ideal case, accumulator register may save us ~25% of size. But it needs to be used carefully:
+In an ideal case, accumulator register may safe us ~25% of size. But it needs to be used carefully:
 
 * Sometimes you might want to write directly into virtual register. e.g. for register moves (that
   are popular) and for increment/decrement instructions (when loop variable is only read in a loop
@@ -118,8 +122,11 @@ In an ideal case, accumulator register may save us ~25% of size. But it needs to
   accumulator, reducing performance and increasing encoding size).
 * The same goes with object and array loads and stores.
 
-To minimize the risk of generating inefficient bytecode with redundant moves from and to
-the accumulator, a simple optimizer will be introduced as a part of the toolchain.
+To address the risk of producing inefficient bytecode with redundant moves from and to
+accumulator, a simple optimizer will be introduced as a part of the toolchain.
+
+Finally, using accumulator allows getting rid of the instructions for writing the result to the register,
+which also saves us encoding space and improves performance
 
 ### Variable size of instructions
 
@@ -138,15 +145,16 @@ the virtual stack as follows:
 +--------------+----------------------+
 ```
 
-To address virtual registers 4 and 5, we need only 3 bits. The instruction can be encoded as follows:
+It easy to see that to address virtual registers 4 and 5 we need just 3 bits which allows to encode
+the instruction as follows:
 
 ```
 |<-       8 bits       ->|<- 4 bits ->|<- 4 bits ->|
 |     operation code     |   vreg 1   |   vreg 2   |
 ```
 
-This trick gives us just `1 + 0.5 + 0.5 = 2` bytes for a single instruction, which gets us closer
-to the stack-based approach. Of course, if virtual registers have large numbers that do not fit
+This trick gives us just `1 + 0.5 + 0.5 = 2` bytes for a single instructions, which get us closer
+to the stack-based approach. Of course, if virtual registers have large numbers that do no fit
 into 4 bits, we have to use a wider encoding:
 
 ```
@@ -162,36 +170,36 @@ and/or variables.
 
 Please note also that we don't need "full-range" versions for all instructions. In case some
 instruction lacks a wide-range form, we can prepare operands for it with moves that have all
-needed forms. In this way, we save opcode space without compromising encoding size (on average).
+needed forms. Thus we save on opcode space without losing in encoding size (on average).
 
 With such approach, we can carefully introduce various "overloads" for instruction when it could
 be beneficial. For example, we have three types of instructions for integer-sized arithmetic
 (acc-reg-reg, acc-reg, acc-imm) and integer-based jumps, but not for floating-point arithmetic
-(which is rare) and which is supposed to have only acc-reg form. Another good choice for
+(which is rare) and which is supposed to have only acc-reg form. Another good candidates for
 overloads are calls (different number of operands) and calls are the most popular instructions in
 applications (thus we again save encoding space).
 
 ## Handling various data types
 
-Another important question is how various data types are handled in bytecodes. As for the
-adda ... instruction, what are the types of its operands?
+Another important question is how bytecode is supposed to handle various data types. Back to our
+`adda ...` instruction, what are types of its operands?
 
-One option is to make the operation statically typed, that is, specify explicitly that it
-works only with 64-bit integers. If we want to add two double-precision floating point numbers
-and store the result into the accumulator, we need to add a dedicated adda_d ...
+One option is to make the operation _statically typed_, i.e. specify explicitly that it works only
+with say 64-bit integers. In this case, if we want to add two double-precision floating point
+numbers and store the result into accumulator, we will need a dedicated `adda_d ...`, etc.
 
-Another option is to make the operation dynamically typed, that is, specify that `adda ...` handles
-all kinds of additions (for short and long integers, signed and unsigned integers, single- and
-double-precision numbers, etc.).
+Another option is to make the operation _dynamically typed_, i.e. specify that `adda ...` handles
+all kinds of addition (for short and long integers, for signed and unsigned integers, for
+single- and double-precision numbers, etc.).
 
 The first approach bloats the instruction set, but keeps the semantics of each instruction simple
 and compact. The second approach keeps the instruction set small, but bloats the semantics of
 each instruction.
 
-It seems that the dynamically typed approach is better for dynamically typed languages. However, it is
-true only when the platform does **not** support multiple languages.
-Let 's look at a simple example. What is the result of the `4 + "2"` in JavaScript and Python?
-In JavaScript, it evaluates to the string `"42"`, while Python forbids adding a string to
+It may seem that the dynamically typed approach is better for dynamically typed languages, but it
+is true only if the platform is **not** supposed to support multiple languages.
+Consider a simple example: what is the result of the expression `4 + "2"` in JavaScript and, say,
+Python? In JavaScript, it evaluates to the string `"42"`, while Python forbids adding a string to
 a number without an explicit type cast. This means that if we would like to run these two languages
 on the same platform with the same bytecode, we would have to handle both JavaScript-style addition
 and Python-style addition within a single instruction, which would eventually lead us to an
@@ -200,15 +208,16 @@ unmaintainable bytecode.
 Thus, as we are required to support multiple languages (both statically and dynamically typed),
 **Panda uses statically-typed bytecode**.
 
-You may have a concern about whether statically typed bytecodes support a dynamically typed language.
-In practice, it is always possible to compile a dynamically typed language to statically typed instruction
-sets. After all, all native hardware instructions sets are "statically-typed".
+There may be a concern: Does a statically typed bytecode forbid us to support a dynamically typed
+language? No, it does not. In practice, it is always possible to compile a dynamically typed
+language to some statically typed instruction set: after all, all native hardware instructions
+sets are "statically-typed" in our terminology.
 
 There may be another concern: Does a statically-typed bytecode imply statically-typed registers?
 I.e. does it mean that if `adda reg1, reg2` operates only on 64-bit integers, registers `reg1`
 and `reg2` **must** hold only integer values throughout the function? Fortunately, the answer is
 no, they must not, virtual registers may hold value of different types (just as hardware registers,
 which do not distinguish between integers and pointers on many platforms). The key constraint is
-that once a value of a certain type is stored into a virtual register, all operations on that value
+that once a value of a certain type is store into a virtual register, all operations on that value
 must be of this very type, unless the virtual register is redefined. Language compilers and
 bytecode verifiers take the responsibility to control this invariant.

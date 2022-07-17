@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,6 @@ TEST(StringHelpers, ParseInt)
     i = 0;
     ASSERT_TRUE(ParseInt("0x123", &i));
     ASSERT_EQ(0x123, i);
-
     i = 0;
     EXPECT_TRUE(ParseInt("  0x123", &i));
     EXPECT_EQ(0x123, i);

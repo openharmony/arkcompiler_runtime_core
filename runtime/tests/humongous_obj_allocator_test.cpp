@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ class HumongousObjAllocatorTest : public AllocatorTest<NonObjectHumongousObjAllo
 public:
     HumongousObjAllocatorTest()
     {
+        // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
         panda::mem::MemConfig::Initialize(0, 1024_MB, 0, 0);
         PoolManager::Initialize();
     }
@@ -41,6 +42,7 @@ public:
         ClearPoolManager();
         PoolManager::Finalize();
         panda::mem::MemConfig::Finalize();
+        // Logger::Destroy();
     }
 
 protected:
@@ -117,12 +119,11 @@ TEST_F(HumongousObjAllocatorTest, CheckIncorrectMemoryPoolReusageTest)
 
 TEST_F(HumongousObjAllocatorTest, SimpleAllocateDifferentObjSizeTest)
 {
-    static constexpr size_t MAX_ELEMENTS_COUNT = 20;
     LOG(DEBUG, ALLOC) << "SimpleAllocateDifferentObjSizeTest";
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
     NonObjectHumongousObjAllocator allocator(mem_stats);
     std::vector<void *> values;
-    for (size_t i = 0; i < MAX_ELEMENTS_COUNT; i++) {
+    for (size_t i = 0; i < 20; i++) {
         size_t pool_size = DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE * i;
         size_t alloc_size = pool_size - sizeof(POOL_HEADER_SIZE) - GetAlignmentInBytes(LOG_ALIGN_MAX);
         AddMemoryPoolToAllocator(allocator, pool_size);
@@ -134,7 +135,7 @@ TEST_F(HumongousObjAllocatorTest, SimpleAllocateDifferentObjSizeTest)
     for (auto i : values) {
         allocator.Free(i);
     }
-    for (size_t i = 0; i < MAX_ELEMENTS_COUNT; i++) {
+    for (size_t i = 0; i < 20; i++) {
         void *mem = allocator.Alloc(MAX_ALLOC_SIZE);
         ASSERT_TRUE(mem != nullptr);
     }

@@ -28,6 +28,7 @@ tests:
               acc: inout:u64
               prefix: unsigned
               format: [pref_op_v_8]
+        tags: ['irtoc_ignore']
         code-template: |
           #
               ldai.64 0
@@ -65,6 +66,7 @@ tests:
               acc: inout:u64
               prefix: unsigned
               format: [pref_op_v_8]
+        tags: ['irtoc_ignore']
         code-template: |
           #
               ldai.64 1
@@ -111,6 +113,7 @@ tests:
               acc: inout:u64
               prefix: unsigned
               format: [pref_op_v_8]
+        tags: ['irtoc_ignore']
         code-template: |
           #
               ldai.64 -1
@@ -157,6 +160,7 @@ tests:
               acc: inout:u64
               prefix: unsigned
               format: [pref_op_v_8]
+        tags: ['irtoc_ignore']
         code-template: |
           #
               ldai.64 0x7FFFFFFFFFFFFFFF
@@ -203,6 +207,7 @@ tests:
               acc: inout:u64
               prefix: unsigned
               format: [pref_op_v_8]
+        tags: ['irtoc_ignore']
         code-template: |
           #
               ldai.64 -0x8000000000000000
@@ -308,6 +313,7 @@ tests:
               prefix: unsigned
               format: [pref_op_v_8]
         header-template: [ArithmeticException, main]
+        tags: ['irtoc_ignore']
         code-template: |
             #
                 ldai.64 %s
@@ -370,33 +376,116 @@ tests:
             runner-options: ['compile-failure']
 
       - file-name: "type"
+        tags: ["verifier"]
+        isa:
+          verification:
+            - acc_type
+            - v1_type
+        runner-options: ['verifier-failure', 'verifier-config']
+        header-template: []
+        code-template: |
+          .record T {}
+          .function i32 main() {
+              %s
+              *s
+              divu2.64 v0
+        check-type: exit-positive
+        description: Check 'divu2.64' with incorrect accumulator and/or register types.
+        cases:
+          - values:
+            - ldai 0
+          - values:
+            - ldai.64 0
+            id: acc_ok
+          - values:
+            - fldai 0
+          - values:
+            - fldai.64 0
+          - values:
+            - lda.null
+          - values:
+            - |
+              #
+                  movi v1, 0
+                  newarr v1, v1, i32[]
+                  lda.obj v1
+          - values:
+            - lda.str "0"
+          - values:
+            - lda.type T
+          - values:
+            - |
+              #
+                  newobj v1, T
+                  lda.obj v1
+        template-cases:
+          - values:
+            - movi v0, 1
+          - values:
+            - movi.64 v0, 1
+            exclude: [acc_ok]
+          - values:
+            - fmovi v0, 1
+          - values:
+            - fmovi.64 v0, 1
+          - values:
+            - mov.null v0
+          - values:
+            - |
+              #
+                  movi v0, 0
+                  newarr v0, v0, i32[]
+          - values:
+            - |
+              #
+                  lda.str "0"
+                  sta.obj v0
+          - values:
+            - |
+              #
+                  lda.type T
+                  sta.obj v0
+          - values:
+            - newobj v0, T
+
+
+      - file-name: uninitialized_regs
         isa:
           instructions:
             - sig: divu2.64 v:in:u64
               acc: inout:u64
               prefix: unsigned
               format: [pref_op_v_8]
-          verification:
-            - acc_type
-            - v1_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        bugid: ["964"]
+        description: Check 'divu2.64' with uninitialized registers.
         tags: ["verifier"]
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
           #
               %s
-              %s
-              divu2.64 v0
-              ldai.64 0
-        check-type: no-check
-        description: Check divu2.64 with incorrect type of accumulator and register.
+              *s
+              divu2.64 *s
+        check-type: exit-positive
+        template-cases:
+          - values:
+              - ""
+          - values:
+              - ldai.64 0
+            exclude: [init]
         cases:
           - values:
-              - "lda.null"
-              - "movi.64 v0, 0"
+              - ""
+              - v0
           - values:
-              - "ldai.64 0 "
-              - "mov.null v0"
+              - movi.64 v1, 0
+              - v1
+            id: init
           - values:
-              - "lda.null"
-              - "mov.null v0"
+              - ""
+              - v8
+          - values:
+              - ""
+              - v15
+          - values:
+              - movi.64 v15, 0
+              - v15
+            id: init

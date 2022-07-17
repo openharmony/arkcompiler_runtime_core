@@ -53,7 +53,7 @@
     return.64
 }
 
-.function u1 main() {
+.function i32 main() {
     movi v0, 0x00ff00ff
     movi v1, 0x00ff00ff
     call.short xor_not_i32, v0, v1

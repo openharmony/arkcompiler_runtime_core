@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_TYPE_TYPE_INDEX_H_
-#define PANDA_VERIFICATION_TYPE_TYPE_INDEX_H_
+#ifndef _PANDA_TYPE_INDEX_HPP
+#define _PANDA_TYPE_INDEX_HPP
+
+#include "type_tags.h"
 
 #include "verification/util/lazy.h"
 #include "verification/util/relation.h"
@@ -23,39 +25,38 @@
 #include "runtime/include/mem/panda_containers.h"
 
 namespace panda::verifier {
-enum class TypeVariance { INVARIANT, COVARIANT, CONTRVARIANT, __LAST__ = CONTRVARIANT };
-
-using TypeIdx = size_t;
-using VectorIdx = PandaVector<TypeIdx>;
-
-class TypeParamIdx : public TaggedIndex<TypeVariance> {
-    using Base = TaggedIndex<TypeVariance>;
+class TypeParamIdx : public TaggedIndex<TypeVarianceTag, TypeNum> {
+    using Base = TaggedIndex<TypeVarianceTag, TypeNum>;
 
 public:
-    TypeParamIdx(TypeIdx idx, TypeVariance variance) : Base {variance, idx} {}
+    TypeParamIdx(TypeVariance variance, TypeNum num)
+    {
+        Base::SetTag<0>(variance);
+        Base::SetInt(num);
+    }
     ~TypeParamIdx() = default;
     TypeParamIdx &operator+()
     {
-        Base::SetTag(TypeVariance::COVARIANT);
+        Base::SetTag<0>(TypeVariance::COVARIANT);
         return *this;
     }
     TypeParamIdx &operator-()
     {
-        Base::SetTag(TypeVariance::CONTRVARIANT);
+        Base::SetTag<0>(TypeVariance::CONTRVARIANT);
         return *this;
     }
     TypeParamIdx &operator~()
     {
-        Base::SetTag(TypeVariance::INVARIANT);
+        Base::SetTag<0>(TypeVariance::INVARIANT);
         return *this;
     }
     TypeVariance Variance() const
     {
-        return Base::GetTag();
+        return Base::GetTag<0>();
     }
 };
 
 using TypeParamsIdx = PandaVector<TypeParamIdx>;
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_TYPE_TYPE_INDEX_H_
+#endif  // !_PANDA_TYPE_INDEX_HPP

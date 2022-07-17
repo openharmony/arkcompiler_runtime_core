@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_CFLOW_CFLOW_INFO_H_
-#define PANDA_VERIFICATION_CFLOW_CFLOW_INFO_H_
+#ifndef PANDA_VERIFICATION_CFLOW_INFO_HPP_
+#define PANDA_VERIFICATION_CFLOW_INFO_HPP_
 
 #include "instructions_map.h"
 #include "jumps_map.h"
@@ -24,7 +24,7 @@
 
 #include "runtime/include/mem/panda_smart_pointers.h"
 
-#include "verification/job_queue/cache.h"
+#include "verification/jobs/cache.h"
 
 #include <cstdint>
 #include <optional>
@@ -32,7 +32,7 @@
 namespace panda::verifier {
 enum class InstructionType { NORMAL, JUMP, COND_JUMP, RETURN, THROW };
 
-struct CflowCodeBlockInfo {
+struct CflowBlockInfo {
     const uint8_t *Start;
     const uint8_t *End;
     JumpsMap JmpsMap;
@@ -40,10 +40,10 @@ struct CflowCodeBlockInfo {
 };
 
 struct CflowExcHandlerInfo {
-    CflowCodeBlockInfo Info;
-    const uint8_t *ScopeStart;
-    const uint8_t *ScopeEnd;
-    const CacheOfRuntimeThings::CachedClass *CachedException;
+    CflowBlockInfo TryBlock;
+    const uint8_t *Start;
+    size_t Size;  // Note. In Java the catch block size is not defined
+    OptionalConstRef<LibCache::CachedClass> CachedException;
 };
 
 class CflowMethodInfo {
@@ -66,9 +66,13 @@ public:
     {
         return ExcSrcMap_;
     }
-    const PandaVector<CflowCodeBlockInfo> &BodyInfo() const
+    const PandaVector<CflowBlockInfo> &BodyBlocks() const
     {
-        return BodyInfo_;
+        return BodyBlocks_;
+    }
+    const PandaVector<CflowBlockInfo> &ExcTryBlocks() const
+    {
+        return ExcTryBlocks_;
     }
     const PandaVector<CflowExcHandlerInfo> &ExcHandlers() const
     {
@@ -79,14 +83,13 @@ private:
     InstructionsMap InstMap_;
     JumpsMap JmpsMap_;
     ExceptionSourceMap ExcSrcMap_;
-    PandaVector<CflowCodeBlockInfo> BodyInfo_;
+    PandaVector<CflowBlockInfo> BodyBlocks_;
+    PandaVector<CflowBlockInfo> ExcTryBlocks_;
     PandaVector<CflowExcHandlerInfo> ExcHandlers_;
-    friend PandaUniquePtr<CflowMethodInfo> GetCflowMethodInfo(const CacheOfRuntimeThings::CachedMethod &method,
-                                                              bool *sizeless_handlers_present);
+    friend PandaUniquePtr<CflowMethodInfo> GetCflowMethodInfo(const LibCache::CachedMethod &method, LibCache &cache);
 };
 
-PandaUniquePtr<CflowMethodInfo> GetCflowMethodInfo(const CacheOfRuntimeThings::CachedMethod &method,
-                                                   bool *sizeless_handlers_present);
+PandaUniquePtr<CflowMethodInfo> GetCflowMethodInfo(const LibCache::CachedMethod &method, LibCache &cache);
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_CFLOW_CFLOW_INFO_H_
+#endif  // !PANDA_VERIFICATION_CFLOW_INFO_HPP_

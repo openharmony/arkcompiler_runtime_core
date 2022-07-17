@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# dummy test for test flag --verification-options verify-only-entry-point
-.function u1 main() {
+# dummy test for test option --methods=_GLOBAL::main
+.function i32 main() {
     ldai 0
     return
 }

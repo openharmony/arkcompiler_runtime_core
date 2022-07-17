@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_TYPE_TYPE_IMAGE_H_
-#define PANDA_VERIFICATION_TYPE_TYPE_IMAGE_H_
+#ifndef _PANDA_TYPE_IMAGE_HPP
+#define _PANDA_TYPE_IMAGE_HPP
 
 #include "type_type.h"
-#include "type_param.h"
 #include "type_params.h"
 
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
 
-#include "verification/util/synchronized.h"
-
 namespace panda::verifier {
-template <typename SortNames>
 class TypeImage {
 public:
     const SortNames &SNames_;
-    using Map = PandaUnorderedMap<TypeIdx, PandaString>;
-    Map CachedImages_;
+    PandaUnorderedMap<TypeNum, PandaString> CachedImages_;
 
     explicit TypeImage(const SortNames &names) : SNames_ {names} {}
     ~TypeImage() = default;
@@ -73,7 +68,7 @@ public:
 
     const PandaString &ImageOfType(const Type &type)
     {
-        auto cached = CachedImages_.find(type.Index());
+        auto cached = CachedImages_.find(type.Number());
         if (cached != CachedImages_.end()) {
             return cached->second;
         }
@@ -86,9 +81,9 @@ public:
 
         PandaString val = sort_name + params_image;
 
-        CachedImages_[type.Index()] = val;
+        CachedImages_[type.Number()] = val;
 
-        return CachedImages_[type.Index()];
+        return CachedImages_[type.Number()];
     }
 
     const PandaString &operator[](const Type &type)
@@ -98,4 +93,4 @@ public:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_TYPE_TYPE_IMAGE_H_
+#endif  // !_PANDA_TYPE_SYSTEM_HPP

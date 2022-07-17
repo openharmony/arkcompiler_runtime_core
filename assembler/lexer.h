@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_LEXER_H_
-#define PANDA_ASSEMBLER_LEXER_H_
+#ifndef _PANDA_ASSEMBLER_LEXER_HPP
+#define _PANDA_ASSEMBLER_LEXER_HPP
 
 #include <array>
 #include <iostream>
@@ -53,7 +53,7 @@ struct Token {
         PANDA_INSTRUCTION_LIST(OPLIST)
 #undef OPLIST
             KEYWORD,                              /* special */
-#define KEYWORDS(name, inst_code) ID_##inst_code, /* keyword type list */
+#define KEYWORDS(name, inst_code) ID_##inst_code, /* keyword type List */
         KEYWORDS_LIST(KEYWORDS)
 #undef KEYWORDS
     };
@@ -77,7 +77,7 @@ using TokenSet = const std::vector<std::vector<Token>>;
 
 struct Line {
     std::vector<Token> tokens;
-    std::string buffer; /* raw line, as read from the file */
+    std::string buffer; /* Raw line, as read from the file */
     size_t pos;         /* current line position */
     size_t end;
 
@@ -102,7 +102,7 @@ private:
     Line *curr_line_;
     Error err_;
 
-    bool Eol() const; /* end of line */
+    bool Eol() const; /* End of line */
     bool LexString();
     void LexTokens();
     void LexPreprocess();
@@ -118,4 +118,4 @@ std::string_view TokenTypeWhat(Token::Type);
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_LEXER_H_
+#endif  // !_PANDA_ASSEMBLER_LEXER_HPP

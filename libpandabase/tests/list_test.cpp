@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,13 @@ using namespace panda;
 using std::cerr;
 using std::endl;
 
+namespace globals {
+constexpr const int DEFAULT_LIST_CAPACITY = 1000;
+}
+
 struct TestNode : public ListNode {
     TestNode() = default;
-    explicit TestNode(int v) : value(v) {}
+    TestNode(int v) : value(v) {}
     int value {0};
 };
 
@@ -37,9 +41,8 @@ class ListTest : public ::testing::Test {
 public:
     ListTest()
     {
-        nodes_.reserve(1000U);
+        nodes_.reserve(globals::DEFAULT_LIST_CAPACITY);
     }
-
     virtual ~ListTest() = default;
 
     template <typename... Args>
@@ -54,18 +57,16 @@ public:
 
     bool IsEqual(const List<TestNode> &list1, std::initializer_list<TestNode> list2) const
     {
-        if (GetListSize(list1) != list2.size()) {
+        if (GetListSize(list1) != list2.size())
             return false;
-        }
         return std::equal(list1.begin(), list1.end(), list2.begin());
     }
 
     size_t GetListSize(const List<TestNode> &list) const
     {
         size_t size = 0;
-        for (auto it : list) {
+        for (auto it : list)
             size++;
-        }
         return size;
     }
 
@@ -75,13 +76,14 @@ private:
 
 TEST_F(ListTest, Common)
 {
+    TestNode *node;
     ListIterator<TestNode> it;
     List<TestNode> list;
     List<TestNode> list2;
 
     ASSERT_TRUE(list.Empty());
 
-    TestNode *node = NewNode(1);
+    node = NewNode(1);
     list.PushFront(*node);
 
     ASSERT_FALSE(list.Empty());
@@ -89,64 +91,59 @@ TEST_F(ListTest, Common)
     ASSERT_EQ(node, &*list.begin());
     ASSERT_EQ(++list.begin(), list.end());
 
-    ASSERT_TRUE(IsEqual(list, {TestNode(1)}));
+    ASSERT_TRUE(IsEqual(list, {1}));
 
     list.PushFront(*NewNode(2));
 
-    ASSERT_TRUE(IsEqual(list, {TestNode(2), TestNode(1)}));
+    ASSERT_TRUE(IsEqual(list, {2, 1}));
 
     list.PopFront();
-    ASSERT_TRUE(IsEqual(list, {TestNode(1)}));
+    ASSERT_TRUE(IsEqual(list, {1}));
 
     list.InsertAfter(list.begin(), *NewNode(2));
-    ASSERT_TRUE(IsEqual(list, {TestNode(1), TestNode(2)}));
+    ASSERT_TRUE(IsEqual(list, {1, 2}));
 
     list.PushFront(*NewNode(0));
-    ASSERT_TRUE(IsEqual(list, {TestNode(0), TestNode(1), TestNode(2)}));
+    ASSERT_TRUE(IsEqual(list, {0, 1, 2}));
 
     list.EraseAfter(list.begin() + 1);
-    ASSERT_TRUE(IsEqual(list, {TestNode(0), TestNode(1)}));
+    ASSERT_TRUE(IsEqual(list, {0, 1}));
 
     it = list.begin() + 1;
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++)
         it = list.InsertAfter(it, *NewNode(i + 2));
-    }
-    ASSERT_TRUE(IsEqual(list, {TestNode(0), TestNode(1), TestNode(2), TestNode(3), TestNode(4), TestNode(5),
-                               TestNode(6), TestNode(7), TestNode(8), TestNode(9)}));
+    ASSERT_TRUE(IsEqual(list, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}));
 
     list2.Splice(list2.before_begin(), list);
     ASSERT_TRUE(list.Empty());
-    ASSERT_TRUE(IsEqual(list2, {TestNode(0), TestNode(1), TestNode(2), TestNode(3), TestNode(4), TestNode(5),
-                                TestNode(6), TestNode(7), TestNode(8), TestNode(9)}));
+    ASSERT_TRUE(IsEqual(list2, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}));
 
     list.Splice(list.before_begin(), list2, list2.before_begin() + 5, list2.end());
-    ASSERT_TRUE(IsEqual(list, {TestNode(5), TestNode(6), TestNode(7), TestNode(8), TestNode(9)}));
-    ASSERT_TRUE(IsEqual(list2, {TestNode(0), TestNode(1), TestNode(2), TestNode(3), TestNode(4)}));
+    ASSERT_TRUE(IsEqual(list, {5, 6, 7, 8, 9}));
+    ASSERT_TRUE(IsEqual(list2, {0, 1, 2, 3, 4}));
 
     list.Splice(list.before_begin(), list2);
     ASSERT_TRUE(list2.Empty());
-    ASSERT_TRUE(IsEqual(list, {TestNode(0), TestNode(1), TestNode(2), TestNode(3), TestNode(4), TestNode(5),
-                               TestNode(6), TestNode(7), TestNode(8), TestNode(9)}));
+    ASSERT_TRUE(IsEqual(list, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}));
 
     list2.Splice(list2.before_begin(), list, list.begin() + 1, list.begin() + 5);
-    ASSERT_TRUE(
-        IsEqual(list, {TestNode(0), TestNode(1), TestNode(5), TestNode(6), TestNode(7), TestNode(8), TestNode(9)}));
-    ASSERT_TRUE(IsEqual(list2, {TestNode(2), TestNode(3), TestNode(4)}));
+    ASSERT_TRUE(IsEqual(list, {0, 1, 5, 6, 7, 8, 9}));
+    ASSERT_TRUE(IsEqual(list2, {2, 3, 4}));
 
     list2.Splice(list2.begin(), list, list.before_begin());
-    ASSERT_TRUE(IsEqual(list, {TestNode(1), TestNode(5), TestNode(6), TestNode(7), TestNode(8), TestNode(9)}));
-    ASSERT_TRUE(IsEqual(list2, {TestNode(2), TestNode(0), TestNode(3), TestNode(4)}));
+    ASSERT_TRUE(IsEqual(list, {1, 5, 6, 7, 8, 9}));
+    ASSERT_TRUE(IsEqual(list2, {2, 0, 3, 4}));
 
-    list.Remove(TestNode(9));
-    ASSERT_TRUE(IsEqual(list, {TestNode(1), TestNode(5), TestNode(6), TestNode(7), TestNode(8)}));
+    list.Remove(9);
+    ASSERT_TRUE(IsEqual(list, {1, 5, 6, 7, 8}));
 
     list.EraseAfter(list.begin() + 1, list.begin() + 4);
-    ASSERT_TRUE(IsEqual(list, {TestNode(1), TestNode(5), TestNode(8)}));
+    ASSERT_TRUE(IsEqual(list, {1, 5, 8}));
 }
 
 struct DTestNode : public DListNode {
     DTestNode() = default;
-    explicit DTestNode(int v) : value(v) {}
+    DTestNode(int v) : value(v) {}
     int value {0};
 };
 
@@ -154,9 +151,8 @@ class DListTest : public ::testing::Test {
 public:
     DListTest()
     {
-        nodes_.reserve(1000U);
+        nodes_.reserve(globals::DEFAULT_LIST_CAPACITY);
     }
-
     virtual ~DListTest() = default;
 
     template <typename... Args>
@@ -222,7 +218,7 @@ TEST_F(DListTest, Common)
     for (uint32_t i = 0; i < 20; i++) {
         auto *node = NewNode(i);
         list1.push_back(node);
-        list2.push_back(DTestNode(i));
+        list2.push_back(i);
     }
     ASSERT_TRUE(IsEqual(list1, list2));
 
@@ -246,7 +242,7 @@ TEST_F(DListTest, Common)
     for (uint32_t i = 30; i < 50; i++) {
         auto *node = NewNode(i);
         list1.insert(list1.begin(), node);
-        list2.insert(list2.begin(), DTestNode(i));
+        list2.insert(list2.begin(), i);
     }
     ASSERT_TRUE(IsEqual(list1, list2));
 

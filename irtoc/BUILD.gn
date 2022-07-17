@@ -1,0 +1,158 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/runtime_core/ark_config.gni")
+import("//build/ohos.gni")
+
+config("irtoc_public_config") {
+  include_dirs = [
+    "$root_build_dir/generated",
+    "$target_gen_dir",
+    "$ark_root/irtoc",
+    "$ark_third_party_root/elfio",
+  ]
+}
+
+irtoc_scripts = [
+  rebase_path("$ark_root/irtoc/scripts/allocation.irt", root_build_dir),
+  rebase_path("$ark_root/irtoc/scripts/resolvers.irt", root_build_dir),
+  rebase_path("$ark_root/irtoc/scripts/interpreter.irt", root_build_dir),
+  rebase_path("$ark_root/irtoc/scripts/monitors.irt", root_build_dir),
+  rebase_path("$ark_root/irtoc/scripts/check_cast.irt", root_build_dir),
+]
+
+plugin_irts = []
+foreach(plugin, enabled_plugins) {
+  plugin_dir = "$ark_root/plugins/$plugin"
+  source_files = read_file("$plugin_dir/subproject_sources.gn", "scope")
+  if (defined(source_files.irtoc_scripts)) {
+    scripts = read_file("$plugin_dir/${source_files.irtoc_scripts}", "scope")
+    foreach(script, scripts.srcs) {
+      irtoc_scripts +=
+          [ rebase_path("$plugin_dir/irtoc_scripts/$script", root_build_dir) ]
+    }
+  }
+
+  if (defined(source_files.irtoc_plugins)) {
+    irtoc_plugins =
+        read_file("$plugin_dir/${source_files.irtoc_plugins}", "scope")
+    foreach(irtoc_plugin, irtoc_plugins.srcs) {
+      plugin_irts +=
+          [ rebase_path("$plugin_dir/irtoc_scripts/$irtoc_plugin", ark_root) ]
+    }
+  }
+
+  source_files = {
+  }
+}
+
+irtoc_file_plugin = "$root_gen_dir/generated/irtoc_plugin.txt"
+write_file(irtoc_file_plugin, plugin_irts)
+
+action("irtoc_compile") {
+  script = "$ark_root/irtoc/lang/irtoc.rb"
+  outputs = [ "$target_gen_dir/generated/irtoc_code.cpp" ]
+  irt_args = irtoc_scripts
+
+  args = [
+    "--input",
+    string_join(":", irt_args),
+    "--output",
+    rebase_path("$target_gen_dir/generated/irtoc_code.cpp", root_build_dir),
+    "--ark_source_dir",
+    rebase_path("$ark_root", root_build_dir),
+    "--isa",
+    rebase_path("$root_gen_dir/isa/isa.yaml", root_build_dir),
+  ]
+
+  if (!is_debug) {
+    args += [
+      "--definitions",
+      "NDEBUG",
+    ]
+  }
+
+  args += [
+    "--arch",
+    target_cpu,
+    "--ir-api",
+    "ir-constructor",
+    "--plugins",
+    rebase_path(irtoc_file_plugin, root_build_dir),
+  ]
+
+  deps = [ "$ark_root/isa:isa_combine" ]
+}
+
+ark_gen_file("irtoc_options_h") {
+  template_file = "$ark_root/templates/options/options.h.erb"
+  data_file = "backend/options.yaml"
+  requires = [ "$ark_root/templates/common.rb" ]
+  output_file = "$target_gen_dir/generated/irtoc_options_gen.h"
+}
+
+ohos_executable("irtoc") {
+  sources = [
+    "$target_gen_dir/generated/irtoc_code.cpp",
+    "backend/compilation_unit.cpp",
+    "backend/compiler/codegen_boundary.cpp",
+    "backend/compiler/codegen_fastpath.cpp",
+    "backend/irtoc.cpp",
+  ]
+  configs = [
+    ":irtoc_public_config",
+    "$ark_root:ark_config",
+    "$ark_root/libpandabase:arkbase_public_config",
+    "$ark_root/libpandafile:arkfile_public_config",
+    "$ark_root/compiler:arkcompiler_public_config",
+    "$ark_root/compiler/optimizer/code_generator:arkencoder_config",
+    "$ark_root/runtime/asm_defines:asmdefines_public_config",
+    "$ark_root/runtime:arkruntime_public_config",
+    sdk_libc_secshared_config,
+  ]
+
+  deps = [
+    ":irtoc_options_h",
+    "$ark_root/compiler:libarkcompiler_frontend_static",
+    "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
+    "$ark_root/irtoc:irtoc_compile",
+    "$ark_root/libpandabase:libarkbase_frontend_static",
+    "$ark_root/libpandafile:libarkfile_frontend_static",
+    "$ark_root/runtime/asm_defines:asm_defines_generator",
+    sdk_libc_secshared_dep,
+  ]
+
+  libs = platform_libs
+  ldflags = platform_ldflags
+
+  install_enable = true
+  subsystem_name = "ark"
+}
+
+action("irtoc_generate") {
+  script = "irtoc_runner.sh"
+  outputs = [ "$root_gen_dir/generated/irtoc_lib.o" ]
+  if (ark_standalone_build) {
+    irtoc_cmd = "./irtoc"
+  } else {
+    irtoc_cmd = "./clang_x64/ark/ark/irtoc"
+  }
+  args = [
+    "$irtoc_cmd",
+    "--irtoc-output ",
+    rebase_path("$root_gen_dir/generated/irtoc_lib.o", root_build_dir),
+    "--compiler-cross-arch",
+    current_cpu,
+  ]
+  deps = [ "$ark_root/irtoc:irtoc(${host_toolchain})" ]
+}

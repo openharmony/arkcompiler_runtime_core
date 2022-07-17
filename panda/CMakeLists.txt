@@ -32,16 +32,18 @@ panda_add_to_clang_tidy(TARGET ark CHECKS
     "-readability-named-parameter"
 )
 
-include_directories(${PANDA_ROOT}/libpandabase/)
+target_link_libraries(ark arkruntime arkbase)
 
 target_include_directories(ark
     PUBLIC ../runtime
+    PUBLIC ${CMAKE_BINARY_DIR}/libpandabase
 )
 
 target_link_libraries(ark arkruntime arkbase)
 
 panda_add_sanitizers(TARGET ark SANITIZERS ${PANDA_SANITIZERS_LIST})
 
+# TODO: remove after all components will use ark instead of panda
 add_custom_target(panda ALL
                   COMMAND cd $<TARGET_FILE_DIR:ark> && ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_NAME:ark> panda)
 

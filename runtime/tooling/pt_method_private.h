@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2019-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TOOLING_PT_METHOD_PRIVATE_H_
-#define PANDA_RUNTIME_TOOLING_PT_METHOD_PRIVATE_H_
+#ifndef RUNTIME_TOOLING_PT_METHOD_PRIVATE_H
+#define RUNTIME_TOOLING_PT_METHOD_PRIVATE_H
 
-#include "runtime/include/tooling/pt_method.h"
+#include "runtime/include/tooling/debug_interface.h"
 
+// TODO(maksenov): remove this file after refactoring ets_runtime
 namespace panda {
 class Method;
 }  // namespace panda
 
 namespace panda::tooling {
-inline Method *PtMethodToMethod(PtMethod method)
+inline PtMethod MethodToPtMethod([[maybe_unused]] Method *method)
 {
-    return reinterpret_cast<Method *>(method.GetData());
+    return PtMethod();
 }
-
-inline PtMethod MethodToPtMethod(Method *method)
-{
-    return PtMethod(reinterpret_cast<void *>(method));
-}
-
 }  // namespace panda::tooling
 
-#endif  // PANDA_RUNTIME_TOOLING_PT_METHOD_PRIVATE_H_
+#endif  // RUNTIME_TOOLING_PT_METHOD_PRIVATE_H

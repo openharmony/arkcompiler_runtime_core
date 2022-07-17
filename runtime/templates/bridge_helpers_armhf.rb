@@ -19,7 +19,14 @@ def jump_eq(target)
   return "beq #{target}"
 end
 
+def jump(target)
+  return "b #{target}"
+end
+
+def save_param(value)
+  return "mov r10, ##{value}"
+end
+
 def handler_path(name)
   return "bridge/arch/arm/handle_#{name}_armhf.S"
 end
-

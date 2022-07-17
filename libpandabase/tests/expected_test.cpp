@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 #include "utils/expected.h"
 
 #include <gtest/gtest.h>
+
+#include <type_traits>
 
 namespace panda::test::expected {
 
@@ -35,6 +37,10 @@ static Expected<int, ErrorCode> helper(int v)
 
 struct Default {
     int v;
+};
+
+struct NonDefaultConstructible {
+    NonDefaultConstructible() = delete;
 };
 
 TEST(Expected, Unexpected)
@@ -66,6 +72,9 @@ TEST(Expected, Ctor)
     EXPECT_FALSE(e2);
     EXPECT_EQ(e2.Error(), ErrorCode::First);
     EXPECT_EQ(e3.Error(), ErrorCode::Second);
+
+    // Default constructor is only enabled if T is default constructible.
+    EXPECT_FALSE((std::is_default_constructible_v<Expected<NonDefaultConstructible, ErrorCode>>));
 }
 
 TEST(Expected, Access)

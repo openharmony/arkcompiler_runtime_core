@@ -29,25 +29,8 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
         LOG(FATAL, ASSEMBLER);
     }
     switch(opcode) {
-% inst_map = Panda::instructions.collect { |i| [i.mnemonic, i] }.to_h
-% call_map = {
-%   "call.short" => ["call.short"],
-%   "call" => ["call.short", "call"],
-%   "calli.dyn.short" => ["calli.dyn.short"],
-%   "calli.dyn" => ["calli.dyn.short", "calli.dyn"],
-%   "call.acc.short" => ["call.acc.short"],
-%   "call.acc" => ["call.acc.short", "call.acc"],
-%   "call.virt.short" => ["call.virt.short"],
-%   "call.virt" => ["call.virt.short", "call.virt"],
-%   "call.virt.acc.short" => ["call.virt.acc.short"],
-%   "call.virt.acc" => ["call.virt.acc.short", "call.virt.acc"],
-%   "call.dyn.short" => ["call.dyn.short"],
-%   "call.dyn" => ["call.dyn.short", "call.dyn"],
-%   "initobj.short" => ["initobj.short"],
-%   "initobj" => ["initobj"],
-%   "builtin.idr4" => ["builtin.idr4"],
-%   "builtin.idr6" => ["builtin.idr6"]
-%}
+% instruction_hash = Panda::instructions.map { |i| [i.mnemonic, i] }.to_h
+%
 % Panda::instructions.group_by(&:mnemonic).each_pair do |mn, group|
 % insn = group[index_of_max(group.map(&:format).map(&:size))]
 %
@@ -165,7 +148,12 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 % end
 % if insn.simple_call?
         auto registers = regs;
-%   call_map[insn.mnemonic].map { |m| inst_map[m] }.each do |i|
+%   call_mnemonics = if insn.mnemonic.end_with?('.short')
+%     [insn.mnemonic]
+%   else
+%     ["#{insn.mnemonic}.short", insn.mnemonic]
+%   end
+%   call_mnemonics.map { |m| instruction_hash[m] }.each do |i|
 %     registers = i.operands.select(&:reg?)
         if (registers.size() < <%= registers.size + 1 %>) {
             while (registers.size() < <%= registers.size %>) {
@@ -188,4 +176,4 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
     return true;
 }
 
-}  // namespace panda::pandasm
+}

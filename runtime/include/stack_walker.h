@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,47 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_STACK_WALKER_H_
-#define PANDA_RUNTIME_INCLUDE_STACK_WALKER_H_
+#ifndef PANDA_RUNTIME_STACK_WALKER_H
+#define PANDA_RUNTIME_STACK_WALKER_H
 
 #include <variant>
 
-#include "macros.h"
 #include "runtime/include/cframe.h"
 #include "runtime/include/cframe_iterators.h"
+#include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/interpreter/frame.h"
+#include "compiler/code_info/code_info.h"
 
 namespace panda {
-
-enum class FrameKind { NONE, INTERPRETER, COMPILER };
 
 enum class UnwindPolicy {
     ALL,           // unwing all frames including inlined
     SKIP_INLINED,  // unwing all frames excluding inlined
     ONLY_INLINED,  // unwind all inlined frames within single cframe
-};
-
-template <FrameKind kind>
-struct BoundaryFrame;
-
-template <>
-struct BoundaryFrame<FrameKind::INTERPRETER> {
-    static constexpr ssize_t METHOD_OFFSET = 1;
-    static constexpr ssize_t FP_OFFSET = 0;
-    static constexpr ssize_t RETURN_OFFSET = 2;
-    static constexpr ssize_t CALLEES_OFFSET = -1;
-};
-
-static_assert((BoundaryFrame<FrameKind::INTERPRETER>::METHOD_OFFSET) * sizeof(uintptr_t) == Frame::GetMethodOffset());
-static_assert((BoundaryFrame<FrameKind::INTERPRETER>::FP_OFFSET) * sizeof(uintptr_t) == Frame::GetPrevFrameOffset());
-
-template <>
-struct BoundaryFrame<FrameKind::COMPILER> {
-    static constexpr ssize_t METHOD_OFFSET = -1;
-    static constexpr ssize_t FP_OFFSET = 0;
-    static constexpr ssize_t RETURN_OFFSET = 1;
-    static constexpr ssize_t CALLEES_OFFSET = -2;
 };
 
 class FrameAccessor {
@@ -98,22 +74,24 @@ private:
     FrameVariant frame_;
 };
 
-struct CalleeStorage {
-    std::array<uintptr_t *, GetCalleeRegsCount(RUNTIME_ARCH, true) + GetCalleeRegsCount(RUNTIME_ARCH, false)> stack;
-    uint32_t callee_regs_mask;
-    uint32_t callee_fp_regs_mask;
-};
-
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class StackWalker {
 public:
-    static constexpr Arch ARCH = RUNTIME_ARCH;
-    using SlotType = std::conditional_t<ArchTraits<ARCH>::IS_64_BITS, uint64_t, uint32_t>;
+    static constexpr size_t CALLEE_REGS_COUNT =
+        GetCalleeRegsCount(RUNTIME_ARCH, false) + GetCalleeRegsCount(RUNTIME_ARCH, true);
+
+    using SlotType = std::conditional_t<ArchTraits<RUNTIME_ARCH>::IS_64_BITS, uint64_t, uint32_t>;
     using FrameVariant = std::variant<Frame *, CFrame>;
     using CFrameType = CFrame;
+    using CodeInfo = compiler::CodeInfo;
+    using VRegInfo = compiler::VRegInfo;
+    using CalleeRegsBuffer = std::array<SlotType, CALLEE_REGS_COUNT>;
+
+    // Use static method to be able to ASSERT(thread->IsRuntimeCallEnabled()) before StackWalker construction to avoid
+    // crash in constructor, e.g. while GetTopFrameFromFp()
+    static StackWalker Create(const ManagedThread *thread, UnwindPolicy policy = UnwindPolicy::ALL);
 
     StackWalker() = default;
-    explicit StackWalker(ManagedThread *thread, UnwindPolicy policy = UnwindPolicy::ALL);
     StackWalker(void *fp, bool is_frame_compiled, uintptr_t npc, UnwindPolicy policy = UnwindPolicy::ALL);
 
     virtual ~StackWalker() = default;
@@ -121,7 +99,7 @@ public:
     NO_COPY_SEMANTIC(StackWalker);
     NO_MOVE_SEMANTIC(StackWalker);
 
-    void Reset(ManagedThread *thread);
+    void Reset(const ManagedThread *thread);
 
     void Verify();
 
@@ -162,12 +140,6 @@ public:
     }
 
     template <typename Func>
-    bool IterateVRegs(Func func)
-    {
-        return IterateRegs<false, false>(func);
-    }
-
-    template <typename Func>
     bool IterateObjectsWithInfo(Func func)
     {
         return IterateRegs<true, true>(func);
@@ -184,9 +156,9 @@ public:
         return std::holds_alternative<CFrameType>(frame_);
     }
 
-    Frame::VRegister GetVRegValue(size_t vreg_num);
+    interpreter::VRegister GetVRegValue(size_t vreg_num);
 
-    template <typename T>
+    template <bool is_dynamic = false, typename T>
     void SetVRegValue(VRegInfo reg_info, T value);
 
     CFrameType &GetCFrame()
@@ -211,6 +183,12 @@ public:
         return std::get<Frame *>(frame_);
     }
 
+    auto GetCompiledCodeEntry() const
+    {
+        ASSERT(IsCFrame());
+        return code_info_.GetCode();
+    }
+
     Frame *ConvertToIFrame(FrameKind *prev_frame_kind, uint32_t *num_inlined_methods);
 
     bool IsCompilerBoundFrame(SlotType *prev);
@@ -222,11 +200,6 @@ public:
     FrameAccessor GetCurrentFrame()
     {
         return FrameAccessor(frame_);
-    }
-
-    uint32_t GetCalleeRegsMask(bool is_fp) const
-    {
-        return is_fp ? callee_stack_.callee_fp_regs_mask : callee_stack_.callee_regs_mask;
     }
 
     bool IsDynamicMethod() const;
@@ -243,6 +216,13 @@ public:
     }
 
     template <FrameKind kind>
+    static uintptr_t GetBoundaryFrameMethod(const void *ptr)
+    {
+        auto frame_method = reinterpret_cast<uintptr_t>(GetMethodFromBoundary<kind>(ptr));
+        return frame_method;
+    }
+
+    template <FrameKind kind>
     static bool IsBoundaryFrame(const void *ptr)
     {
         if constexpr (kind == FrameKind::INTERPRETER) {  // NOLINT
@@ -252,24 +232,78 @@ public:
         }
     }
 
+    bool IsInlined() const
+    {
+        return inline_depth_ != -1;
+    }
+
     // Dump modify walker state - you must call it only for rvalue object
     void Dump(std::ostream &os, bool print_vregs = false) &&;
 
+    CalleeRegsBuffer &GetCalleeRegsForDeoptimize();
+
 private:
-    CFrameType CreateCFrame(void *ptr, uintptr_t npc, SlotType *callee_stack, CalleeStorage *prev_callees = nullptr);
+    // These are shortenings for General-purpose register bank (scalar integer and pointer arithmetic)
+    inline constexpr size_t FirstCalleeIntReg()
+    {
+        return GetFirstCalleeReg(RUNTIME_ARCH, false);
+    }
+    inline constexpr size_t LastCalleeIntReg()
+    {
+        return GetLastCalleeReg(RUNTIME_ARCH, false);
+    }
+    inline constexpr size_t CalleeIntRegsCount()
+    {
+        return GetCalleeRegsCount(RUNTIME_ARCH, false);
+    }
+
+    // These are shortenings for SIMD and Floating-Point register bank
+    inline constexpr size_t FirstCalleeFpReg()
+    {
+        return GetFirstCalleeReg(RUNTIME_ARCH, true);
+    }
+    inline constexpr size_t LastCalleeFpReg()
+    {
+        return GetLastCalleeReg(RUNTIME_ARCH, true);
+    }
+    inline constexpr size_t CalleeFpRegsCount()
+    {
+        return GetCalleeRegsCount(RUNTIME_ARCH, true);
+    }
+
+    // Struct to keep pointers to stack slots holding callee-saved regs values
+    // and corresponding callee-saved regs masks.
+    struct CalleeStorage {
+        std::array<uintptr_t *, CALLEE_REGS_COUNT> stack = {nullptr};
+        RegMask int_regs_mask {0};
+        RegMask fp_regs_mask {0};
+    };
+
+    void InitCalleeBuffer(SlotType *callee_slots, CalleeStorage *prev_callees);
+    CFrameType CreateCFrame(SlotType *ptr, uintptr_t npc, SlotType *callee_slots,
+                            CalleeStorage *prev_callees = nullptr);
 
     template <bool create>
     CFrameType CreateCFrameForC2IBridge(Frame *frame);
-    void InitCalleeBuffer(SlotType *callee_stack, CalleeStorage *prev_callees);
 
     template <bool objects, bool with_reg_info, typename Func>
     bool IterateRegs(Func func);
 
+    template <bool with_reg_info, typename Func>
+    bool IterateAllRegsForCFrame(Func func);
+
     template <bool objects, bool with_reg_info, typename Func>
-    bool IterateRegsForCFrame(Func func);
+    bool IterateRegsForCFrameStatic(Func func);
+
+    template <bool objects, bool with_reg_info, typename Func>
+    bool IterateRegsForCFrameDynamic(Func func);
 
     template <bool objects, bool with_reg_info, typename Func>
     bool IterateRegsForIFrame(Func func);
+
+    template <bool objects, bool with_reg_info, VRegInfo::Type obj_type, VRegInfo::Type primitive_type, class F,
+              typename Func>
+    bool IterateRegsForIFrameInternal(F frame_handler, Func func);
 
     FrameVariant GetTopFrameFromFp(void *ptr, bool is_frame_compiled, uintptr_t npc);
 
@@ -310,25 +344,20 @@ private:
         return reinterpret_cast<SlotType *>(ptr) + BoundaryFrame<kind>::CALLEES_OFFSET;
     }
 
-    template <FrameKind kind>
-    static uintptr_t GetBoundaryFrameMethod(const void *ptr)
-    {
-        auto frame_method = reinterpret_cast<uintptr_t>(GetMethodFromBoundary<kind>(ptr));
-        return frame_method;
-    }
-
-    bool IsInlined() const
-    {
-        return inline_depth_ != -1;
-    }
-
     uintptr_t GetCFrameBytecodePc() const
     {
-        return 0;
+        if (GetCFrame().IsNative()) {
+            return 0;
+        }
+        if (IsInlined()) {
+            auto ii = code_info_.GetInlineInfo(stackmap_, inline_depth_);
+            return ii.GetBytecodePc();
+        }
+        return stackmap_.GetBytecodePc();
     }
     uintptr_t GetCFrameNativePc() const
     {
-        return 0;
+        return GetCFrame().IsNative() ? 0 : stackmap_.GetNativePcUnpacked();
     }
 
     bool HandleAddingAsCFrame();
@@ -340,11 +369,17 @@ private:
 private:
     FrameVariant frame_ {nullptr};
     UnwindPolicy policy_ {UnwindPolicy::ALL};
+    CodeInfo code_info_;
+    compiler::StackMap stackmap_;
     int inline_depth_ {-1};
     CalleeStorage callee_stack_;
     CalleeStorage prev_callee_stack_;
+    CalleeRegsBuffer deopt_callee_regs_ = {0};
 };
+
+static_assert((BoundaryFrame<FrameKind::INTERPRETER>::METHOD_OFFSET) * sizeof(uintptr_t) == Frame::GetMethodOffset());
+static_assert((BoundaryFrame<FrameKind::INTERPRETER>::FP_OFFSET) * sizeof(uintptr_t) == Frame::GetPrevFrameOffset());
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_STACK_WALKER_H_
+#endif  // PANDA_RUNTIME_STACK_WALKER_H

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef PANDA_RUNTIME_TESTS_CLASS_LINKER_TEST_EXTENSION_H_
 #define PANDA_RUNTIME_TESTS_CLASS_LINKER_TEST_EXTENSION_H_
 
@@ -56,7 +55,7 @@ public:
 
     size_t GetClassSize(ClassRoot root) override
     {
-        return ClassHelper::ComputeClassSize(GetClassVTableSize(root), GetClassIMTSize(root), 0, 0, 0, 0, 0, 0);
+        return Class::ComputeClassSize(GetClassVTableSize(root), GetClassIMTSize(root), 0, 0, 0, 0, 0, 0);
     }
 
     size_t GetArrayClassVTableSize() override
@@ -102,7 +101,7 @@ public:
         return nullptr;
     }
 
-    bool CanThrowException([[maybe_unused]] const Method *method) const override
+    bool CanThrowException(const Method * /* method */) const override
     {
         return true;
     }

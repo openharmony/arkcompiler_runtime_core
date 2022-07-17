@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_LIST_H_
-#define PANDA_LIBPANDABASE_UTILS_LIST_H_
+#ifndef LIBPANDABASE_UTILS_LIST_H_
+#define LIBPANDABASE_UTILS_LIST_H_
 
 #include "macros.h"
 
@@ -156,49 +156,41 @@ public:
     {
         return Iterator(&head_);
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstIterator before_begin() const
     {
         return ConstIterator(&head_);
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     Iterator begin()
     {
         return Iterator(head_.next_);
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstIterator begin() const
     {
         return ConstIterator(head_.next_);
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     Iterator end()
     {
         return Iterator(nullptr);
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstIterator end() const
     {
         return ConstIterator(nullptr);
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstIterator cbefore_begin() const
     {
         return ConstIterator(&head_);
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstIterator cbegin() const
     {
         return ConstIterator(head_.next_);
     }
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     ConstIterator cend() const
     {
@@ -214,7 +206,6 @@ public:
     {
         return *begin();
     }
-
     ConstReference Front() const
     {
         return *begin();
@@ -224,12 +215,10 @@ public:
     {
         InsertAfter(before_begin(), value);
     }
-
     void PushFront(ValueType &&value)
     {
         InsertAfter(before_begin(), value);
     }
-
     void PopFront()
     {
         ASSERT(!Empty());
@@ -243,7 +232,6 @@ public:
         position.node_->next_ = new_node;
         return Iterator(new_node);
     }
-
     template <typename InputIterator>
     Iterator InsertAfter(ConstIterator position, InputIterator first, InputIterator last)
     {
@@ -270,7 +258,6 @@ public:
         position.node_->next_ = last.node_;
         return Iterator(last.node_);
     }
-
     bool Remove(const ValueType &value)
     {
         return RemoveIf([&value](const ValueType &v) { return value == v; });
@@ -297,14 +284,13 @@ public:
     {
         std::swap(head_.next_, other.head_.next_);
     }
-
     void Clear()
     {
         head_.next_ = nullptr;
     }
 
     /**
-     * Transfer all elements from other list into place after position.
+     * Transfers all elements from other list into place after position.
      */
     void Splice(ConstIterator position, List &other)
     {
@@ -312,7 +298,7 @@ public:
     }
 
     /**
-     * Transfer single element first+1 into place after position.
+     * Transfers single element first+1 into place after position.
      */
     void Splice(ConstIterator position, List &other, ConstIterator first)
     {
@@ -321,7 +307,7 @@ public:
     }
 
     /**
-     * Transfer the elements in the range (first,last) into place after position.
+     * Transfers the elements in the range (first,last) into place after position.
      */
     void Splice(ConstIterator position, List &src_list, ConstIterator first, ConstIterator last)
     {
@@ -627,4 +613,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_LIST_H_
+#endif  // LIBPANDABASE_UTILS_LIST_H_

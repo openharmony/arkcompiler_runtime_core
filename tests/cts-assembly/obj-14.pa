@@ -34,7 +34,7 @@
 #   return v1
 #}
 
-.function u1 main(){
+.function i32 main(){
     call.short do
 
     # safe-point for trigger GC in the end

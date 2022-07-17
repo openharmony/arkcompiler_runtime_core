@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_TLAB_H_
-#define PANDA_RUNTIME_MEM_TLAB_H_
+#ifndef PANDA_RUNTIME_MEM_TLAB_H
+#define PANDA_RUNTIME_MEM_TLAB_H
 
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/mem/mem.h"
@@ -63,6 +62,7 @@ static constexpr bool PANDA_TRACK_TLAB_ALLOCATIONS = true;
 //
 // Each TLAB is connected with certain thread:
 // (NOTE: In current implementation, we can reach max one TLAB from a thread metadata)
+// TODO(aemelenko): If we don't use links on next, prev TLABS,
 // it is better to remove these fields.
 // |------------------------|              |---------------|
 // | Thread Metainformation | ---------->  | Current  TLAB |----
@@ -111,7 +111,7 @@ static constexpr bool PANDA_TRACK_TLAB_ALLOCATIONS = true;
 // GC::InitGCBitsForAllocationInTLAB() - method for initialize GC bits inside the object header
 //                                       during allocations through TLAB
 // TLAB::TLABFreePointerOffset() - an offset of a free pointer field inside TLAB.
-// TLAB::TLABEndAddrOffset() - an offset of an end buffer pointer field inside TLAB.
+// TLAB::TLABEndAddrOffset() - an offset of a end buffer pointer field inside TLAB.
 //
 
 class TLAB {
@@ -141,7 +141,7 @@ public:
         Fill(nullptr, 0U);
     }
 
-    bool IsEmpty()
+    bool IsUninitialized()
     {
         return (memory_start_addr_ == nullptr) || (cur_free_position_ == nullptr) || (memory_end_addr_ == nullptr);
     }
@@ -231,17 +231,22 @@ public:
         prev_tlab_ = tlab_pointer;
     }
 
-    void *GetStartAddr()
+    void *GetStartAddr() const
     {
         return memory_start_addr_;
     }
 
-    void *GetCurPos()
+    void *GetEndAddr() const
+    {
+        return memory_end_addr_;
+    }
+
+    void *GetCurPos() const
     {
         return cur_free_position_;
     }
 
-    size_t GetOccupiedSize()
+    size_t GetOccupiedSize() const
     {
         ASSERT(ToUintPtr(cur_free_position_) >= ToUintPtr(memory_start_addr_));
         return ToUintPtr(cur_free_position_) - ToUintPtr(memory_start_addr_);
@@ -272,6 +277,12 @@ public:
         return AllocatorType::TLAB_ALLOCATOR;
     }
 
+    size_t GetSize()
+    {
+        ASSERT(ToUintPtr(memory_end_addr_) >= ToUintPtr(memory_start_addr_));
+        return ToUintPtr(memory_end_addr_) - ToUintPtr(memory_start_addr_);
+    }
+
 private:
     size_t GetFreeSize()
     {
@@ -280,14 +291,9 @@ private:
         return ToUintPtr(memory_end_addr_) - ToUintPtr(cur_free_position_);
     }
 
-    size_t GetSize()
-    {
-        ASSERT(ToUintPtr(memory_end_addr_) >= ToUintPtr(memory_start_addr_));
-        return ToUintPtr(memory_end_addr_) - ToUintPtr(memory_start_addr_);
-    }
-
     TLAB *next_tlab_;
     TLAB *prev_tlab_;
+    // TODO(aemelenko): Maybe use OBJECT_POINTER_SIZE here for heap allocation.
     void *memory_start_addr_ {nullptr};
     void *memory_end_addr_ {nullptr};
     void *cur_free_position_ {nullptr};
@@ -297,4 +303,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_TLAB_H_
+#endif  // PANDA_RUNTIME_MEM_TLAB_H

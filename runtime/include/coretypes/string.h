@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_CORETYPES_STRING_H_
-#define PANDA_RUNTIME_INCLUDE_CORETYPES_STRING_H_
+#ifndef PANDA_RUNTIME_CORETYPES_STRING_H_
+#define PANDA_RUNTIME_CORETYPES_STRING_H_
 
 #include <securec.h>
 #include <cstddef>
@@ -33,41 +32,44 @@ class String : public ObjectHeader {
 public:
     static String *Cast(ObjectHeader *object)
     {
+        // TODO(linxiang) to do assert
         return static_cast<String *>(object);
     }
 
     static String *CreateFromMUtf8(const uint8_t *mutf8_data, size_t mutf8_length, uint32_t utf16_length,
-                                   bool can_be_compressed, LanguageContext ctx, PandaVM *vm, bool movable = true);
+                                   bool can_be_compressed, const LanguageContext &ctx, PandaVM *vm,
+                                   bool movable = true);
 
     static String *CreateFromMUtf8(const uint8_t *mutf8_data, uint32_t utf16_length, bool can_be_compressed,
-                                   LanguageContext ctx, PandaVM *vm, bool movable = true);
+                                   const LanguageContext &ctx, PandaVM *vm, bool movable = true);
 
-    static String *CreateFromMUtf8(const uint8_t *mutf8_data, uint32_t utf16_length, LanguageContext ctx, PandaVM *vm,
+    static String *CreateFromMUtf8(const uint8_t *mutf8_data, uint32_t utf16_length, const LanguageContext &ctx,
+                                   PandaVM *vm, bool movable = true);
+
+    static String *CreateFromMUtf8(const uint8_t *mutf8_data, const LanguageContext &ctx, PandaVM *vm,
                                    bool movable = true);
 
-    static String *CreateFromMUtf8(const uint8_t *mutf8_data, LanguageContext ctx, PandaVM *vm, bool movable = true);
+    static String *CreateFromUtf16(const uint16_t *utf16_data, uint32_t utf16_length, const LanguageContext &ctx,
+                                   PandaVM *vm, bool movable = true);
 
-    static String *CreateFromUtf16(const uint16_t *utf16_data, uint32_t utf16_length, LanguageContext ctx, PandaVM *vm,
-                                   bool movable = true);
+    static String *CreateEmptyString(const LanguageContext &ctx, PandaVM *vm);
 
-    static String *CreateEmptyString(LanguageContext ctx, PandaVM *vm);
+    static String *CreateFromString(String *str, const LanguageContext &ctx, PandaVM *vm);
 
-    static String *CreateFromString(String *str, LanguageContext ctx, PandaVM *vm);
+    static String *Concat(String *jstring1, String *jstring2, const LanguageContext &ctx, PandaVM *vm);
 
-    static String *Concat(String *jstring1, String *jstring2, LanguageContext ctx, PandaVM *vm);
-
-    static String *CreateNewStringFromChars(uint32_t offset, uint32_t length, Array *chararray, LanguageContext ctx,
-                                            PandaVM *vm);
+    static String *CreateNewStringFromChars(uint32_t offset, uint32_t length, Array *chararray,
+                                            const LanguageContext &ctx, PandaVM *vm);
 
     static String *CreateNewStringFromBytes(uint32_t offset, uint32_t length, uint32_t high_byte, Array *bytearray,
-                                            LanguageContext ctx, PandaVM *vm);
+                                            const LanguageContext &ctx, PandaVM *vm);
 
     template <bool verify = true>
     uint16_t At(int32_t index);
 
     int32_t Compare(String *rstr);
 
-    Array *ToCharArray(LanguageContext ctx);
+    Array *ToCharArray(const LanguageContext &ctx);
 
     bool IsUtf16() const
     {
@@ -128,11 +130,16 @@ public:
         return GetLength();
     }
 
-    inline size_t CopyDataMUtf8(uint8_t *buf, size_t max_length)
+    inline size_t CopyDataMUtf8(uint8_t *buf, size_t max_length, bool is_c_string)
     {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        buf[max_length - 1] = '\0';
-        return CopyDataRegionMUtf8(buf, 0, GetLength(), max_length) + 1;  // add place for zero at the end
+        if (is_c_string) {
+            ASSERT(max_length != 0);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            buf[max_length - 1] = '\0';
+            return CopyDataRegionMUtf8(buf, 0, GetLength(), max_length) + 1;  // add place for zero at the end
+        }
+
+        return CopyDataRegionMUtf8(buf, 0, GetLength(), max_length);
     }
 
     size_t CopyDataRegionMUtf8(uint8_t *buf, size_t start, size_t length, size_t max_length)
@@ -150,8 +157,7 @@ public:
                 LOG(FATAL, RUNTIME) << __func__ << " length is higher than half of size_t::max";
             }
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            if (memcpy_s(buf, sizeof(uint8_t) * (max_length + 1), GetDataMUtf8() + start, length) !=
-                EOK) {
+            if (memcpy_s(buf, sizeof(uint8_t) * (max_length + 1), GetDataMUtf8() + start, length) != EOK) {
                 LOG(FATAL, RUNTIME) << __func__ << " length is higher than buf size";
             }
             return length;
@@ -179,9 +185,13 @@ public:
                 EOK) {
                 LOG(FATAL, RUNTIME) << __func__ << " length is higher than buf size";
             }
-            return length;
+        } else {
+            uint8_t *src_8 = GetDataMUtf8() + start;  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            for (uint32_t i = 0; i < length; ++i) {
+                buf[i] = src_8[i];  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            }
         }
-        return panda::utf::ConvertRegionMUtf8ToUtf16(GetDataMUtf8(), buf, len, length, start);
+        return length;
     }
 
     uint32_t GetLength() const
@@ -233,23 +243,23 @@ public:
     }
 
     /**
-     * Compares strings by bytes. It doesn't check canonical unicode equivalence.
+     * Compares strings by bytes, It doesn't check canonical unicode equivalence.
      */
     static bool StringsAreEqual(String *str1, String *str2);
     /**
-     * Compares strings by bytes. It doesn't check canonical unicode equivalence.
+     * Compares strings by bytes, It doesn't check canonical unicode equivalence.
      */
     static bool StringsAreEqualMUtf8(String *str1, const uint8_t *mutf8_data, uint32_t utf16_length);
     static bool StringsAreEqualMUtf8(String *str1, const uint8_t *mutf8_data, uint32_t utf16_length,
                                      bool can_be_compressed);
     /**
-     * Compares strings by bytes. It doesn't check canonical unicode equivalence.
+     * Compares strings by bytes, It doesn't check canonical unicode equivalence.
      */
     static bool StringsAreEqualUtf16(String *str1, const uint16_t *utf16_data, uint32_t utf16_data_length);
-    static String *DoReplace(String *src, uint16_t old_c, uint16_t new_c, LanguageContext ctx, PandaVM *vm);
-    static uint32_t ComputeHashcodeMutf8(const uint8_t *mutf8_data, uint32_t length, bool can_be_compressed);
+    static String *DoReplace(String *src, uint16_t old_c, uint16_t new_c, const LanguageContext &ctx, PandaVM *vm);
     static uint32_t ComputeHashcodeMutf8(const uint8_t *mutf8_data, uint32_t length);
-    static uint32_t ComputeHashcodeUtf16(uint16_t *utf16_data, uint32_t length);
+    static uint32_t ComputeHashcodeMutf8(const uint8_t *mutf8_data, uint32_t utf16_length, bool can_be_compressed);
+    static uint32_t ComputeHashcodeUtf16(const uint16_t *utf16_data, uint32_t length);
 
     static void SetCompressedStringsEnabled(bool val)
     {
@@ -261,7 +271,7 @@ public:
         return compressed_strings_enabled;
     }
 
-    static String *FastSubString(String *src, uint32_t start, uint32_t utf16_length, LanguageContext ctx,
+    static String *FastSubString(String *src, uint32_t start, uint32_t utf16_length, const LanguageContext &ctx,
                                  PandaVM *vm = nullptr);
 
     static bool CanBeCompressedMUtf8(const uint8_t *mutf8_data);
@@ -309,6 +319,7 @@ private:
      * str1 should have the same length as mutf16_data.
      * Converts mutf8_data to mutf16 and compare it with given mutf16_data.
      */
+    // TODO(alovkov): move to utils/utf.h without allocation a temporary buffer
     static bool IsMutf8EqualsUtf16(const uint8_t *utf8_data, uint32_t utf8_data_length, const uint16_t *utf16_data,
                                    uint32_t utf16_data_length);
 
@@ -323,7 +334,7 @@ private:
     template <typename T1, typename T2>
     static int32_t IndexOf(Span<const T1> &lhs_sp, Span<const T2> &rhs_sp, int32_t pos, int32_t max);
 
-    static String *AllocStringObject(size_t length, bool compressed, LanguageContext ctx, PandaVM *vm = nullptr,
+    static String *AllocStringObject(size_t length, bool compressed, const LanguageContext &ctx, PandaVM *vm = nullptr,
                                      bool movable = true);
 
     // In last bit of length_ we store if this string is compressed or not.
@@ -341,4 +352,4 @@ static_assert(STRING_DATA_OFFSET == panda::coretypes::String::GetDataOffset());
 
 }  // namespace panda::coretypes
 
-#endif  // PANDA_RUNTIME_INCLUDE_CORETYPES_STRING_H_
+#endif  // PANDA_RUNTIME_CORETYPES_STRING_H_

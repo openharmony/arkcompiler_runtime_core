@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #Assert that operations u64tof64 and f64tou64 works fine
-.function u1 main(){
+.function i32 main(){
     ldai.64 2
     sta.64 v0
     u64tof64

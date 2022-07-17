@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_GC_LANG_GC_LANG_H_
-#define PANDA_RUNTIME_MEM_GC_LANG_GC_LANG_H_
+#ifndef PANDA_RUNTIME_MEM_GC_LANG_GC_LANG_H
+#define PANDA_RUNTIME_MEM_GC_LANG_GC_LANG_H
 
 #include "runtime/mem/gc/gc.h"
 
@@ -45,9 +44,12 @@ public:
         GC::SetPandaVM(vm);
     }
 
+    bool IsMutatorAllowed() override;
+
 protected:
     ~GCLang() override;
-    void CommonUpdateRefsToMovedObjects(const UpdateRefInAllocator &update_allocator) override;
+    void UpdateRefsToMovedObjectsInPygoteSpace() override;
+    void CommonUpdateRefsToMovedObjects() override;
 
     void VisitRoots(const GCRootVisitor &gc_root_visitor, VisitGCRootFlags flags) override
     {
@@ -92,6 +94,8 @@ private:
         root_manager_.UpdateThreadLocals();
     }
 
+    void ClearLocalInternalAllocatorPools() override;
+
     size_t VerifyHeap() override;
 
     RootManager<LanguageConfig> root_manager_ {};
@@ -100,4 +104,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_GC_LANG_GC_LANG_H_
+#endif  // PANDA_RUNTIME_MEM_GC_LANG_GC_LANG_H

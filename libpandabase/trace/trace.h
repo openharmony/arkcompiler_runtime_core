@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_TRACE_TRACE_H_
-#define PANDA_LIBPANDABASE_TRACE_TRACE_H_
+#ifndef PANDA_TRACE_H_
+#define PANDA_TRACE_H_
 
 #include <string>
 #include <sstream>
@@ -122,4 +122,4 @@ public:
 
 }  // namespace panda::trace
 
-#endif  // PANDA_LIBPANDABASE_TRACE_TRACE_H_
+#endif  // PANDA_TRACE_H_

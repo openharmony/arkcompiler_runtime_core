@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_MUTEX_H_
-#define PANDA_LIBPANDABASE_OS_MUTEX_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_OS_MACROS_H_
+#define PANDA_LIBPANDABASE_PBASE_OS_MACROS_H_
 
 #if defined(PANDA_USE_FUTEX)
-#include "os/unix/futex/mutex.h"
+#include "platforms/unix/libpandabase/futex/mutex.h"
 #elif !defined(PANDA_TARGET_UNIX) && !defined(PANDA_TARGET_WINDOWS)
 #error "Unsupported platform"
 #endif
@@ -25,18 +25,20 @@
 #include "clang.h"
 #include "macros.h"
 
+#include <atomic>
 #include <pthread.h>
 
 namespace panda::os::memory {
+
 // Dummy lock which locks nothing
 // but has the same methods as RWLock and Mutex.
 // Can be used in Locks Holders.
 class DummyLock {
 public:
-    void Lock() {}
-    void Unlock() {}
-    void ReadLock() {}
-    void WriteLock() {}
+    void Lock() const {}
+    void Unlock() const {}
+    void ReadLock() const {}
+    void WriteLock() const {}
 };
 
 #if defined(PANDA_USE_FUTEX)
@@ -59,11 +61,27 @@ public:
 
     void Unlock() RELEASE();
 
+    // TODO: Extract common part as an interface.
+    static bool DoNotCheckOnDeadlock()
+    {
+        return no_check_for_deadlock_;
+    }
+
+    static void IgnoreChecksOnDeadlock()
+    {
+        no_check_for_deadlock_ = true;
+    }
+
 protected:
     void Init(pthread_mutexattr_t *attrs);
 
 private:
     pthread_mutex_t mutex_;
+
+    // This field is set to false in case of deadlock with daemon threads (only daemon threads
+    // are not finished and they have state IS_BLOCKED). In this case we should terminate
+    // those threads ignoring failures on lock structures destructors.
+    static std::atomic_bool no_check_for_deadlock_;
 
     NO_COPY_SEMANTIC(Mutex);
     NO_MOVE_SEMANTIC(Mutex);
@@ -132,17 +150,21 @@ const auto PandaGetspecific = pthread_getspecific;     // NOLINT(readability-ide
 const auto PandaSetspecific = pthread_setspecific;     // NOLINT(readability-identifier-naming)
 const auto PandaThreadKeyCreate = pthread_key_create;  // NOLINT(readability-identifier-naming)
 
-template <class T>
+template <class T, bool need_lock = true>
 class SCOPED_CAPABILITY LockHolder {
 public:
     explicit LockHolder(T &lock) ACQUIRE(lock) : lock_(lock)
     {
-        lock_.Lock();
+        if constexpr (need_lock) {  // NOLINTNEXTLINE(readability-braces-around-statements)
+            lock_.Lock();
+        }
     }
 
     ~LockHolder() RELEASE()
     {
-        lock_.Unlock();
+        if constexpr (need_lock) {  // NOLINTNEXTLINE(readability-braces-around-statements)
+            lock_.Unlock();
+        }
     }
 
 private:
@@ -152,17 +174,21 @@ private:
     NO_MOVE_SEMANTIC(LockHolder);
 };
 
-template <class T>
+template <class T, bool need_lock = true>
 class SCOPED_CAPABILITY ReadLockHolder {
 public:
     explicit ReadLockHolder(T &lock) ACQUIRE_SHARED(lock) : lock_(lock)
     {
-        lock_.ReadLock();
+        if constexpr (need_lock) {  // NOLINTNEXTLINE(readability-braces-around-statements)
+            lock_.ReadLock();
+        }
     }
 
     ~ReadLockHolder() RELEASE()
     {
-        lock_.Unlock();
+        if constexpr (need_lock) {  // NOLINTNEXTLINE(readability-braces-around-statements)
+            lock_.Unlock();
+        }
     }
 
 private:
@@ -172,17 +198,21 @@ private:
     NO_MOVE_SEMANTIC(ReadLockHolder);
 };
 
-template <class T>
+template <class T, bool need_lock = true>
 class SCOPED_CAPABILITY WriteLockHolder {
 public:
     explicit WriteLockHolder(T &lock) ACQUIRE(lock) : lock_(lock)
     {
-        lock_.WriteLock();
+        if constexpr (need_lock) {  // NOLINTNEXTLINE(readability-braces-around-statements)
+            lock_.WriteLock();
+        }
     }
 
     ~WriteLockHolder() RELEASE()
     {
-        lock_.Unlock();
+        if constexpr (need_lock) {  // NOLINTNEXTLINE(readability-braces-around-statements)
+            lock_.Unlock();
+        }
     }
 
 private:
@@ -191,6 +221,7 @@ private:
     NO_COPY_SEMANTIC(WriteLockHolder);
     NO_MOVE_SEMANTIC(WriteLockHolder);
 };
+
 }  // namespace panda::os::memory
 
-#endif  // PANDA_LIBPANDABASE_OS_MUTEX_H_
+#endif  // PAND_LIBPANDABASE_PBASE_OS_MACROS_H_

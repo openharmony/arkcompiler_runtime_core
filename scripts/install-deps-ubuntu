@@ -16,6 +16,15 @@
 # Aux functions
 #
 
+SCRIPT_DIR="$(realpath "${0}")"
+SCRIPT_DIR="$(dirname "${SCRIPT_DIR}")"
+cd "${SCRIPT_DIR}"
+
+if [[ -f "${SCRIPT_DIR}/extras/install-deps-extras.sh" ]]
+then
+    source "${SCRIPT_DIR}/extras/install-deps-extras.sh"
+fi
+
 function print_help
 {
     HELP_MESSAGE="
@@ -47,14 +56,22 @@ function print_help
 
     --install=dev       | -i=dev          Install tools needed for development.
 
+    --install=arm-dev   | -i=arm-dev      Install ARM64-hosted tools needed for development.
+
     --install=arm-all   | -i=arm-all      Install extra packages for cross-compiling for AArch32 and AArch64.
 
     --install=x86       | -i=x86          Install extra packages for cross-compiling for x86.
 
     --install=windows   | -i=windows      Install extra packages for cross-compiling for Windows.
+    "
 
-    --install=fuzzing   | -i=fuzzing      Install extra packages for fuzzing.
+    if [[ -n "${EXTRA_OPTIONS}" ]]
+    then
+        HELP_MESSAGE="${HELP_MESSAGE}${ADDITIONAL_OPTIONS_HELP}"
+    fi
 
+
+    HELP_MESSAGE="${HELP_MESSAGE}
     CAVEAT
 
     * Packages for cross-compiling for aarch64 and x86 cannot co-exist, so the
@@ -79,45 +96,6 @@ function install_dep
     grep --color=never -o '^[^#]*' "$fname" | xargs apt install -y --no-install-recommends -o Dpkg::Options::="--force-overwrite"
 }
 
-function install_qemu
-{
-    local needed_version="6.0.0"
-
-    local aarch64_version=$(qemu-aarch64 --version | grep version | awk '{print $3}')
-    local arm_version=$(qemu-arm --version | grep version | awk '{print $3}')
-
-    if [[ "$aarch64_version" == "$needed_version" && "$arm_version" == "$needed_version" ]] ; then
-        return
-    fi
-
-    local src_dir=$(mktemp -d)
-    local qemu_name="qemu-$needed_version"
-    local archive_name="$src_dir/$qemu_name.tar.xz"
-
-    echo "Downloading qemu sources to $archive_name"
-    curl --progress https://download.qemu.org/$qemu_name.tar.xz --output "$archive_name"
-
-    echo "Extracting $archive_name"
-    tar -C $src_dir -xf $archive_name
-
-    echo "Installing qemu build dependencies"
-    apt-get install libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev pkg-config flex bison ninja
-
-    cd "$src_dir/$qemu_name"
-    ./configure --target-list=aarch64-linux-user,arm-linux-user
-    make -j install
-}
-
-function enable_llvm_repo
-{
-    local llvm_url=http://apt.llvm.org
-
-    local repo_name="deb ${llvm_url}/${UBUNTU_CODENAME}/  llvm-toolchain-${UBUNTU_CODENAME}-12  main"
-    curl https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
-        && echo -e $repo_name > /etc/apt/sources.list.d/llvm-12.list \
-        && apt-get update
-}
-
 #
 # Main logic
 #
@@ -127,22 +105,23 @@ function enable_llvm_repo
 #
 
 # Set default flag values
-INSTALL_CI_TOOLS=no
 INSTALL_DEV=no
-INSTALL_CROSS_ARM_ALL=no
 INSTALL_CROSS_x86=no
 INSTALL_CROSS_WINDOWS=no
-INSTALL_FUZZING_TOOLS=no
 INSTALL_ARM_DEV=no
+INSTALL_CROSS_ARM_ALL=no
 SRC_LIST_STR='# This file is generated automatically by Panda install-deps-ubuntu script. DO NOT EDIT!!!\n'
-
 
 for i in "$@"
 do
+    ERROR_ARG=""
     case $i in
     -h|--help)
         print_help
         exit 0
+        ;;
+    --install-qemu-from-sources)
+        INSTALL_QEMU_FROM_SOURCES=yes
         ;;
     -i=*|--install=*)
         FLAG_ARG=${i//[-a-zA-Z0-9]*=/}
@@ -154,24 +133,14 @@ do
                 INSTALL_DEV=yes
             fi
         fi
-        if [[ $FLAG_ARG == "arm-all" ]] ; then
-            INSTALL_CROSS_ARM_ALL=yes
-        fi
         if [[ $FLAG_ARG == "x86" ]] ; then
             INSTALL_CROSS_x86=yes
         fi
+        if [[ $FLAG_ARG == "arm-all" ]] ; then
+            INSTALL_CROSS_ARM_ALL=yes
+        fi
         if [[ $FLAG_ARG == "windows" ]] ; then
             INSTALL_CROSS_WINDOWS=yes
-        fi
-        if [[ $FLAG_ARG == "ci-tools" ]] ; then
-            INSTALL_CI_TOOLS=yes
-        fi
-        if [[ $FLAG_ARG == "fuzzing" ]] ; then
-            if [[ $(arch) == "x86_64" ]] ; then
-               INSTALL_FUZZING_TOOLS=yes
-            else
-               echo "Fuzzing is supported only for amd64. Options will have no effect"
-            fi
         fi
         if [[ $FLAG_ARG == "arm-dev" ]] ; then
             if [[ $INSTALL_DEV == "yes" ]] ; then
@@ -183,10 +152,21 @@ do
         fi
       ;;
     *)
-      echo "Error: Unsupported flag $i" >&2
-      exit 1
+        ERROR_ARG="YES"
       ;;
-  esac
+    esac
+
+    if [[ -n "${EXTRA_OPTIONS}" ]]
+    then
+        extra_parse "${i}"
+    fi
+
+    if [[ -n "${ERROR_ARG}" ]]
+    then
+        echo "Error: Unsupported flag $i" >&2
+        exit 1
+    fi
+
 done
 
 #
@@ -194,7 +174,10 @@ done
 #
 
 if [[ $(id -u) -ne 0 ]] ; then
+    print_help
+    echo "!!!"
     echo "FATAL: Please run as root."
+    echo "!!!"
     exit 1
 fi
 
@@ -202,7 +185,7 @@ fi
 # Check specific Ubuntu version
 #
 
-UBUNTU_NAME=ubuntu
+UBUNTU_NAME=ubuntu-18-04
 
 if [ ! -f /etc/os-release ]; then
     echo "FATAL: /etc/os-release not found. Exiting..."
@@ -210,11 +193,19 @@ if [ ! -f /etc/os-release ]; then
 else
     . /etc/os-release
 
-    if [[ $NAME == "Ubuntu" ]]; then
-        apt-get update \
-        && dpkg -l | grep curl  || apt-get -y install curl \
-        && dpkg -l | grep gnupg || apt-get -y install gnupg \
-        && apt-get update
+    if [[ $NAME == "Ubuntu" ]]
+    then
+        set -x
+        apt-get update
+        dpkg -l | grep curl  || apt-get -y install curl
+        dpkg -l | grep gnupg || apt-get -y install gnupg
+
+        if [[ -n "${EXTRA_OPTIONS}" ]]
+        then
+            extra_add_repo
+        fi
+
+        set +x
     else
         echo "FATAL: Only Ubuntu is supported. This is not. Exiting..."
         exit 1
@@ -237,27 +228,14 @@ set -e
 # Install dependencies
 #
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
-NEED_INSTALL_ADDITIONAL_FILES=false
-
 install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-build"
-
-if [[ "x$INSTALL_CI_TOOLS" == "xyes" ]] ; then
-    install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-ci"
-fi
-
-if [[ "x$INSTALL_FUZZING_TOOLS" == "xyes" ]] ; then
-    enable_llvm_repo
-    install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-fuzzing"
-fi
 
 if [[ "x$INSTALL_DEV" == "xyes" ]] ; then
     install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-dev"
 fi
 
-if [[ "x$INSTALL_CROSS_ARM_ALL" == "xyes" ]] ; then
-    install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-cross-arm-all"
-    install_qemu
+if [[ "x$INSTALL_ARM_DEV" == "xyes" ]] ; then
+    install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-arm-dev"
 fi
 
 if [[ "x$INSTALL_CROSS_x86" == "xyes" ]] ; then
@@ -268,7 +246,15 @@ if [[ "x$INSTALL_CROSS_WINDOWS" == "xyes" ]] ; then
     install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-cross-windows"
 fi
 
-if [[ "x$INSTALL_ARM_DEV" == "xyes" ]] ; then
-    install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-arm-dev"
-    install_qemu
+if [[ "x$INSTALL_CROSS_ARM_ALL" == "xyes" ]] ; then
+    if [[ -z "${EXTRA_OPTIONS}" ]]
+    then
+        "${SCRIPT_DIR}/install-deps-qemu"
+    fi
+    install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-cross-arm-all"
+fi
+
+if [[ -n "${EXTRA_OPTIONS}" ]]
+then
+    extra_install
 fi

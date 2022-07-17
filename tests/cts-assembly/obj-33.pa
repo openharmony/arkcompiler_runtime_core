@@ -31,7 +31,7 @@
     return.void
 }
 
-.function u1 main() {
+.function i32 main() {
     call R1.foo
     ldstatic R2.s_f
     movi v0, 10

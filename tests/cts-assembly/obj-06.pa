@@ -34,7 +34,7 @@
     return.void
 }
 
-.function u1 main() {
+.function i32 main() {
     movi v1, 0xFFFFFFFF
 
     ldai.64 0xFFFFFFFFFFFFFFFF

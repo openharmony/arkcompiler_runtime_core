@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_REFSTORAGE_REFERENCE_STORAGE_H_
-#define PANDA_RUNTIME_MEM_REFSTORAGE_REFERENCE_STORAGE_H_
+#ifndef PANDA_RUNTIME_MEM_REFERENCES_STORAGE_H
+#define PANDA_RUNTIME_MEM_REFERENCES_STORAGE_H
 
 #include "runtime/include/object_header.h"
 #include "runtime/mem/frame_allocator.h"
@@ -50,7 +49,7 @@ public:
 
     static Reference::ObjectType GetObjectType(const Reference *ref);
 
-    [[nodiscard]] static Reference *NewStackRef(const ObjectHeader *const *object_ptr)
+    [[nodiscard]] static Reference *NewStackRef(ObjectHeader **object_ptr)
     {
         ASSERT(object_ptr != nullptr);
         if (*object_ptr == nullptr) {
@@ -80,7 +79,7 @@ public:
      * @param result reference which you want to return in the previous frame.
      * @return new reference in the previous frame for given reference.
      */
-    Reference *PopLocalFrame(Reference *result);
+    Reference *PopLocalFrame(const Reference *result);
 
     /**
      * Ensure that capacity in current frame can contain at least `size` references.
@@ -141,6 +140,7 @@ private:
     PandaVector<RefBlock *> *local_storage_ {nullptr};
     StorageFrameAllocator *frame_allocator_ {nullptr};
     size_t blocks_count_ {0};
+    // TODO(alovkov): remove it when storage will be working over mmap
     RefBlock *cached_block_ {nullptr};
 
     bool ref_check_validate_;
@@ -150,6 +150,8 @@ private:
     size_t GetLocalObjectStorageSize();
 
     void RemoveAllLocalRefs();
+
+    bool StackReferenceCheck(const Reference *stack_ref);
 
     friend class panda::mem::test::ReferenceStorageTest;
 };
@@ -177,7 +179,7 @@ public:
     }
 
     template <typename T>
-    T *GetObject() const
+    T *GetObject()
     {
         return reinterpret_cast<T *>(rs_->GetObject(ref_));
     }
@@ -212,4 +214,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_REFSTORAGE_REFERENCE_STORAGE_H_
+#endif  // PANDA_RUNTIME_MEM_REFERENCES_STORAGE_H

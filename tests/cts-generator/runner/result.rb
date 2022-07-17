@@ -20,6 +20,7 @@ module TestRunner
                      failed: { cnt: 0, files: [] },
                      core: { cnt: 0, files: [] },
                      compilation_error: { cnt: 0, files: [] },
+                     quickening_error: { cnt: 0, files: [] },
                      excluded: { cnt: 0, files: [] }}
     def initialize(reporter)
       @reporter = reporter
@@ -31,6 +32,14 @@ module TestRunner
         @@stats[:compilation_error][:files] << file
       end
       @reporter.log_failed_compilation output
+    end
+
+    def update_failed_quickening(output, file)
+      @@mutex.synchronize do
+        @@stats[:quickening_error][:cnt] += 1
+        @@stats[:quickening_error][:files] << file
+      end
+      @reporter.log_failed_quickening output
     end
 
     def update_negative_passed_compilation(output, file)
@@ -50,7 +59,6 @@ module TestRunner
     end
 
     def update_compilation_passed(output, file)
-      # Compilation passed
       @@mutex.synchronize do
         @@stats[:passed][:cnt] += 1
         @@stats[:passed][:files] << file

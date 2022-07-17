@@ -25,6 +25,7 @@ set(PANDA_SANITIZERS_LIST)
 if (PANDA_ENABLE_ADDRESS_SANITIZER)
     message(STATUS "Enabled ASAN")
     list(APPEND PANDA_SANITIZERS_LIST "address")
+    add_definitions(-D__SANITIZE_ADDRESS__)
 endif()
 
 if (PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER)
@@ -37,15 +38,23 @@ endif()
 if (PANDA_ENABLE_THREAD_SANITIZER)
     message(STATUS "Enabled TSAN")
     list(APPEND PANDA_SANITIZERS_LIST "thread")
+    add_definitions(-D__SANITIZE_THREAD__)
 endif()
 
-# Workaround for issue 529
-# As of the beginning of May 2020 we have checked: gcc 7.5.0, gcc 8.4.0, gcc 9.3.0 and 10.0-rc versions, all have
+# Workaround for http://rnd-gitlab-msc.huawei.com/rus-os-team/virtual-machines-and-tools/panda/-/issues/529
+# As of beginning of May 2020 we have checked: gcc 7.5.0, gcc 8.4.0, gcc 9.3.0 and 10.0-rc versions, all have
 # some false-positive or another issues when compiling with ASAN or UBSAN in release mode. So, cover this with early-bailout.
 if ((PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER) AND
-    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND (CMAKE_BUILD_TYPE MATCHES Release))
+    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND (CMAKE_BUILD_TYPE MATCHES Release) AND
+    (NOT CROSS_VALUES_CONFIG))
         message(FATAL_ERROR "GCC gives false positives in release builds with ASAN or UBSAN, please use clang or another compiler.")
     unset(build_type)
+endif()
+
+# Suppress warning for line `target_link_libraries(${ARG_TARGET} log)`:
+# Attempt to add link library "log" to target * which is not built in this directory.
+if(POLICY CMP0079)
+    cmake_policy(SET CMP0079 NEW)
 endif()
 
 # Add options to build with sanitizers to specified target

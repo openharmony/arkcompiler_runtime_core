@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 
 #include "json_parser.h"
 #include "logger.h"
+#include "utils.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_JSON(level) LOG(level, COMMON) << "JsonParser: " << std::string(log_recursion_level_, '\t')
@@ -54,6 +55,11 @@ bool JsonObject::Parser::GetJsonObject(JsonObject *empty_obj)
     ASSERT(empty_obj->values_map_.empty());
     if (!TryGetSymbol('{')) {
         return false;
+    }
+
+    if (TryGetSymbol('}')) {
+        empty_obj->is_valid_ = true;
+        return true;
     }
 
     while (true) {
@@ -122,13 +128,80 @@ bool JsonObject::Parser::GetJsonString()
     return GetString('"');
 }
 
+static bool UnescapeStringChunk(std::string *result, const std::string &chunk, char delim, bool *finished)
+{
+    for (size_t start = 0; start < chunk.size();) {
+        size_t end = chunk.find('\\', start);
+        *result += chunk.substr(start, end - start);
+
+        if (end == std::string::npos) {
+            // No more escapes.
+            break;
+        }
+
+        if (end == chunk.size() - 1) {
+            // Chunk ends with an unfinished escape sequence.
+            *result += delim;
+            *finished = false;
+            return true;
+        }
+
+        ++end;
+        start = end + 1;
+
+        constexpr unsigned ULEN = 4;
+
+        switch (chunk[end]) {
+            case '"':
+            case '\\':
+            case '/':
+                *result += chunk[end];
+                break;
+            case 'b':
+                *result += '\b';
+                break;
+            case 'f':
+                *result += '\f';
+                break;
+            case 'n':
+                *result += '\n';
+                break;
+            case 'r':
+                *result += '\r';
+                break;
+            case 't':
+                *result += '\t';
+                break;
+            case 'u':
+                if (end + ULEN < chunk.size()) {
+                    // Char strings cannot include multibyte characters, ignore top byte.
+                    *result += static_cast<char>((HexValue(chunk[end + ULEN - 1]) << 4U) | HexValue(chunk[end + ULEN]));
+                    start += ULEN;
+                    break;
+                }
+                [[fallthrough]];
+            default:
+                // Invalid escape sequence.
+                return false;
+        }
+    }
+
+    *finished = true;
+    return true;
+}
+
 bool JsonObject::Parser::GetString(char delim)
 {
     std::string string;
-    if (!std::getline(istream_, string, delim)) {
-        LOG_JSON(ERROR) << "Error while reading a string";
-        return false;
+
+    for (bool finished = false; !finished;) {
+        std::string chunk;
+        if (!std::getline(istream_, chunk, delim) || !UnescapeStringChunk(&string, chunk, delim, &finished)) {
+            LOG_JSON(ERROR) << "Error while reading a string";
+            return false;
+        }
     }
+
     LOG_JSON(DEBUG) << "Got a string: \"" << string << '"';
     string_temp_ = string;
     parsed_temp_.SetValue(std::move(string));
@@ -227,13 +300,19 @@ bool JsonObject::Parser::GetArray()
     }
 
     ArrayT temp;
+
+    if (TryGetSymbol(']')) {
+        parsed_temp_.SetValue(std::move(temp));
+        return true;
+    }
+
     while (true) {
         if (!GetValue()) {
             return false;
         }
         temp.push_back(std::move(parsed_temp_));
         if (TryGetSymbol(',')) {
-            LOG_JSON(DEBUG) << "Got a comma-separator, moving to get the next array element";
+            LOG_JSON(DEBUG) << "Got a comma-separator, getting the next array element";
             continue;
         }
         break;

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_GLOBAL_HANDLE_STORAGE_H_
-#define PANDA_RUNTIME_GLOBAL_HANDLE_STORAGE_H_
+#ifndef PANDA_RUNTIME_GLOABL_HANDLE_STORAGE_H
+#define PANDA_RUNTIME_GLOABL_HANDLE_STORAGE_H
 
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/mem/allocator.h"
@@ -115,7 +115,5 @@ private:
 
     friend class ManagedThread;
 };
-
 }  // namespace panda
-
-#endif  // PANDA_RUNTIME_GLOBAL_HANDLE_STORAGE_H_
+#endif  // PANDA_RUNTIME_GLOABL_HANDLE_STORAGE_H

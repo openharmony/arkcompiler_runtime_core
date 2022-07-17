@@ -71,11 +71,18 @@ function(add_panda_assembly)
         set(assembler_bin    $<TARGET_FILE:${assembler_target}>)
     endif()
 
-    add_custom_target(${ARG_TARGET}
+    add_custom_command(OUTPUT "${binary_file}"
                        COMMENT "Building ${ARG_TARGET}"
                        COMMAND "${assembler_bin}" "${source_file}" "${binary_file}"
                        DEPENDS ${assembler_target} "${source_file}")
+
+    add_custom_target(${ARG_TARGET} DEPENDS "${binary_file}")
 endfunction()
+
+# Use `mkdir` instead of `file(MAKE_DIRECTORY)` to create dependency on the directory existence:
+set(COMPILER_STATS_DIR "${CMAKE_BINARY_DIR}/compiler/stats/csv")
+add_custom_target(compiler_stats_dir
+                  COMMAND mkdir -p "${COMPILER_STATS_DIR}")
 
 # Add a single buildable and runnable Panda Assembly file to the build tree.
 #
@@ -90,10 +97,11 @@ endfunction()
 #        [ERROR_FILE_VARIABLE <variable>]
 #        [SKIP_BUILD TRUE|FALSE]
 #        [AOT_MODE TRUE|FALSE]
+#        [AOT_STATS TRUE|FALSE]
 #        [DEPENDS <dependency>...]
 #        [RUNTIME_OPTIONS <option>...]
 #        [COMPILER_OPTIONS <option>...]
-#        [GC_OPTIONS <option>]
+#        [AOT_GC_OPTION <option>]
 #        [ENTRY_ARGUMENTS <argument>...]
 #        [TIMEOUT <timeout>]
 #        [LANGUAGE_CONTEXT <language>]
@@ -115,6 +123,16 @@ endfunction()
 #   The variable named will be set with the paths to files with contents of the stdout and
 #   stderr of the program respectively
 #
+# SKIP_BUILD
+#   Do not run assembly
+#
+# AOT_MODE
+#   Run test in AOT mode
+#
+# AOT_STATS
+#   Creates additional independent target `${TARGET}-stats`.
+#   `stats`-target dumps AOT compiler statistics in `${COMPILER_STATS_DIR}/${TARGET}.csv`
+#
 # DEPENDS
 #   List of additional dependences (exclude assembler and interpreter)
 #
@@ -124,7 +142,7 @@ endfunction()
 # COMPILER_OPTIONS
 #   Options for compiler, given both to panda and paoc
 #
-# GC_OPTIONS
+# AOT_GC_OPTION
 #  Type of a gc
 #
 # ENTRY_ARGUMENTS
@@ -138,12 +156,12 @@ endfunction()
 #   after the timeout with the signal 10.
 #
 # LANGUAGE_CONTEXT
-#   Set the language-dependent semantics for the code. Possible values: panda-assembly.
+#   Set the language-dependent semantics for the code. Possible values: core, java.
 #
 function(panda_add_asm_file)
     set(prefix ARG)
     set(noValues)
-    set(singleValues FILE ENTRY TARGET SUBDIR OUTPUT_FILE_VARIABLE ERROR_FILE_VARIABLE SKIP_BUILD AOT_MODE TIMEOUT LANGUAGE_CONTEXT GC_OPTIONS)
+    set(singleValues FILE ENTRY TARGET SUBDIR OUTPUT_FILE_VARIABLE ERROR_FILE_VARIABLE SKIP_BUILD AOT_MODE AOT_STATS TIMEOUT LANGUAGE_CONTEXT AOT_GC_OPTION)
     set(multiValues DEPENDS RUNTIME_OPTIONS COMPILER_OPTIONS ENTRY_ARGUMENTS PRLIMIT_OPTIONS ADDITIONAL_STDLIBS)
     cmake_parse_arguments(${prefix}
                           "${noValues}"
@@ -214,18 +232,86 @@ function(panda_add_asm_file)
         list(APPEND stdlibs ${ARG_ADDITIONAL_STDLIBS})
     endif()
 
-    set(spaces  "core")
-    set(runtime_type "core")
-    if (DEFINED ARG_LANGUAGE_CONTEXT AND NOT "${ARG_LANGUAGE_CONTEXT}" STREQUAL "panda-assembly")
-        list(APPEND spaces "${ARG_LANGUAGE_CONTEXT}")
-        set(runtime_type "${ARG_LANGUAGE_CONTEXT}")
+    set(spaces "core")
+    if (NOT "core" STREQUAL "${ARG_LANGUAGE_CONTEXT}")
+        set(spaces "${ARG_LANGUAGE_CONTEXT}")
     endif()
 
     string(REPLACE ";" ":" boot_stdlibs "${stdlibs}")
     string(REPLACE ";" ":" boot_spaces  "${spaces}")
 
-    # Note well! The lines below imply that we cannot handle ";" properly
-    # in both Panda's own options and the running program's options.
+    if (ARG_AOT_MODE)
+        set(aot_compiler ark_aot)
+        set(launch_aot_file "${build_dir}/launch_aot.sh")
+        set(aot_file        "${build_dir}/test.an")
+        set(aot_file_stats  "${build_dir}/test_stats.an")
+        set(launcher_aot
+            "${PANDA_RUN_PREFIX}"
+            "$<TARGET_FILE:${aot_compiler}>"
+            "--boot-panda-files \"${boot_stdlibs}\""
+            "--load-runtimes=${boot_spaces}"
+            "--paoc-panda-files \"${binary_file}\""
+            "--paoc-output \"${aot_file}\""
+            "--compiler-ignore-failures=false"
+            "${ARG_COMPILER_OPTIONS}"
+            "${ARG_AOT_GC_OPTION}"
+            "1>>\"${build_out}\""
+            "2>>\"${build_err}\""
+        )
+        string(REPLACE ";" " " launcher_aot "${launcher_aot}")
+        file(GENERATE OUTPUT ${launch_aot_file} CONTENT "${launcher_aot}")
+
+        # TODO(msherstennikov): enable for arm64
+        # Problem in arm64 is that ark_aotdump cannot open aot elf file with error: "undefined symbol: aot"
+        if (NOT PANDA_MINIMAL_VIXL AND PANDA_TARGET_AMD64)
+            set(aotdump_command
+                    "${PANDA_RUN_PREFIX}"
+                    "$<TARGET_FILE:ark_aotdump>"
+                    "--output-file=/dev/null"
+                    "--show-code" "disasm"
+                    "${aot_file}")
+        endif()
+
+        set(aot_compile_depends "${aot_compiler}" "${binary_file}")
+        if (NOT PANDA_MINIMAL_VIXL)
+            list(APPEND aot_compile_depends "ark_aotdump")
+        endif()
+        
+        add_custom_command(OUTPUT "${aot_file}"
+                COMMENT "Running aot compiler for ${ARG_TARGET}"
+                COMMAND . ${launch_aot_file} || (cat ${build_err} && false)
+                COMMAND ${aotdump_command}
+                DEPENDS ${aot_compile_depends})
+        list(APPEND ARG_RUNTIME_OPTIONS "--aot-file=${aot_file}")
+
+        if (ARG_AOT_STATS)
+            set(launch_aot_stats_file "${build_dir}/launch_aot_stats.sh")
+            set(launcher_aot_stats
+                "${PANDA_RUN_PREFIX}"
+                "$<TARGET_FILE:${aot_compiler}>"
+                "--boot-panda-files \"${boot_stdlibs}\""
+                "--load-runtimes=${boot_spaces}"
+                "--paoc-panda-files \"${binary_file}\""
+                "--paoc-output \"${aot_file_stats}\""
+                "--compiler-ignore-failures=false"
+                "--compiler-dump-stats-csv=\"${COMPILER_STATS_DIR}/${ARG_TARGET}.csv\""
+                "${ARG_COMPILER_OPTIONS}"
+                "${ARG_AOT_GC_OPTION}"
+                "1>>\"${build_out}\""
+                "2>>\"${build_err}\""
+            )
+            string(REPLACE ";" " " launcher_aot_stats "${launcher_aot_stats}")
+            file(GENERATE OUTPUT ${launch_aot_stats_file} CONTENT "${launcher_aot_stats}")
+            add_custom_target(${ARG_TARGET}-stats
+                              COMMENT "Gathering AOT-statistics for ${ARG_TARGET}"
+                              COMMAND . ${launch_aot_stats_file}
+                              DEPENDS ${aot_compiler} "${binary_file}" compiler_stats_dir)
+        endif()
+    endif()
+
+    # NB! The lines below imply that we cannot handle ";" properly
+    # in both Panda's own options and the runned program's options.
+    # TODO: Fix this once this becomes an issue.
     string(REPLACE ";" " " runtime_options "${ARG_COMPILER_OPTIONS} ${ARG_RUNTIME_OPTIONS}")
     string(REPLACE ";" " " entry_arguments "${ARG_ENTRY_ARGUMENTS}")
 
@@ -245,9 +331,8 @@ function(panda_add_asm_file)
         "${PANDA_RUN_PREFIX}"
         $<TARGET_FILE:${panda_cli}>
         "--boot-panda-files \"${boot_stdlibs}\""
-        "--boot-intrinsic-spaces=${boot_spaces}"
-        "--boot-class-spaces=${boot_spaces}"
-        "--runtime-type=${runtime_type}"
+        "--load-runtimes=${boot_spaces}"
+        "--compiler-ignore-failures=false"
         "${runtime_options}"
         "\"${binary_file}\""
         "\"${ARG_ENTRY}\""
@@ -278,7 +363,6 @@ endfunction()
 #   verifier_add_asm_file(
 #        FILE <source>
 #        TARGET <target>
-#        [ENTRY <entry_point>]
 #        [RUNTIME_OPTIONS <runtime options>]
 #        [VERIFIER_OPTIONS <verifier options>]
 #        [SUBDIR <subdir>]
@@ -293,9 +377,6 @@ endfunction()
 # with Panda assembler and verifies it with verifier.
 #
 # Options:
-#
-# ENTRY
-#   Entry point to execute in format <Class>::<method>. By default _GLOBAL::main is used
 #
 # SUBDIR
 #   Subdirectory in the current binary directory that is used to store build artifacts.
@@ -314,6 +395,9 @@ endfunction()
 # VERIFIER_OPTIONS
 #   Verifier CLI options
 #
+# VERIFIER_FAIL_TEST
+#   If true, verifier is allowed to exit with non-0 exit code
+#
 # TIMEOUT
 #   If specified, the program will be run and terminated with the signal 10 (corresponds
 #   to SIGUSR1 on most platforms) after the given timeout. The format of the value
@@ -322,13 +406,20 @@ endfunction()
 #   after the timeout with the signal 10.
 #
 # LANGUAGE_CONTEXT
-#   Set the language-dependent semantics for the code. Possible values: panda-assembly.
+#   Set the language-dependent semantics for the code. Possible values: core, java.
 #
 function(verifier_add_asm_file)
     set(prefix ARG)
-    set(noValues)
-    set(singleValues FILE ENTRY TARGET SUBDIR OUTPUT_FILE_VARIABLE ERROR_FILE_VARIABLE TIMEOUT LANGUAGE_CONTEXT)
-    set(multiValues DEPENDS RUNTIME_OPTIONS VERIFIER_OPTIONS)
+    set(noValues VERIFIER_FAIL_TEST)
+    set(singleValues
+        FILE
+        TARGET
+        SUBDIR
+        OUTPUT_FILE_VARIABLE
+        ERROR_FILE_VARIABLE
+        TIMEOUT
+        LANGUAGE_CONTEXT)
+    set(multiValues DEPENDS RUNTIME_OPTIONS VERIFIER_OPTIONS STDLIBS)
     cmake_parse_arguments(${prefix}
                           "${noValues}"
                           "${singleValues}"
@@ -380,43 +471,37 @@ function(verifier_add_asm_file)
         set(timeout_suffix "")
     endif()
 
-    if (NOT DEFINED ARG_ENTRY)
-        set(ARG_ENTRY "_GLOBAL::main")
-    endif()
-
     set(panda_stdlib arkstdlib)
-    set(verifier_cli ark)
+    set(verifier_cli verifier)
 
-    set(stdlibs "${${panda_stdlib}_BINARY_DIR}/${panda_stdlib}.abc")
-    set(spaces  "core")
-    set(runtime_type "core")
-    if (NOT DEFINED ARG_LANGUAGE_CONTEXT)
-        set(ARG_LANGUAGE_CONTEXT "panda-assembly")
+    set(spaces "core")
+    if (NOT "core" STREQUAL "${ARG_LANGUAGE_CONTEXT}")
+        set(spaces "${ARG_LANGUAGE_CONTEXT}")
+    else()
+        set(stdlibs "${${panda_stdlib}_BINARY_DIR}/${panda_stdlib}.abc")
     endif()
+
+    list(APPEND stdlibs ${ARG_STDLIBS})
 
     string(REPLACE ";" ":" boot_stdlibs "${stdlibs}")
     string(REPLACE ";" ":" boot_spaces  "${spaces}")
 
-    if(NOT "${ARG_VERIFIER_OPTIONS}" STREQUAL "")
-        set(ARG_VERIFIER_OPTIONS ",${ARG_VERIFIER_OPTIONS}")
-    endif()
-
     set(launcher_verifier
         "${PANDA_RUN_PREFIX}"
         $<TARGET_FILE:${verifier_cli}>
-        "--verification-enabled"
-        "--verification-options only-verify${ARG_VERIFIER_OPTIONS}"
+        "${ARG_VERIFIER_OPTIONS}"
         "${ARG_RUNTIME_OPTIONS}"
-        "--boot-panda-files \"${boot_stdlibs}\""
-        "--boot-intrinsic-spaces=${boot_spaces}"
-        "--boot-class-spaces=${boot_spaces}"
-        "--runtime-type=${runtime_type}"
+        "--boot-panda-files=\"${boot_stdlibs}\""
+        "--load-runtimes=${boot_spaces}"
         "\"${binary_file}\""
-        "\"${ARG_ENTRY}\""
         "1>\"${output_file}\""
         "2>\"${error_file}\""
     )
     string(REPLACE ";" " " launcher_verifier "${launcher_verifier}")
+    if (ARG_VERIFIER_FAIL_TEST)
+        string(APPEND launcher_verifier " || (exit 0)")
+    endif()
+
     file(GENERATE OUTPUT ${launch_file} CONTENT "${launcher_verifier}")
 
     add_custom_target(${ARG_TARGET}

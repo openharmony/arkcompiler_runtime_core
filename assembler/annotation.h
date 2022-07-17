@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "assembly-type.h"
+
 #include "macros.h"
 
 namespace panda::pandasm {
@@ -96,7 +97,6 @@ public:
         UNKNOWN
     };
 
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
     static constexpr char GetTypeAsChar(Type t)
     {
         char type = '0';
@@ -164,12 +164,10 @@ public:
             case Type::UNKNOWN:
             default:
                 type = '0';
-                break;
         }
         return type;
     }
 
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
     static constexpr char GetArrayTypeAsChar(Type t)
     {
         char type = '0';
@@ -228,12 +226,10 @@ public:
             case Type::UNKNOWN:
             default:
                 type = '0';
-                break;
         }
         return type;
     }
 
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
     static constexpr Type GetCharAsType(char c)
     {
         Type type = Type::UNKNOWN;
@@ -301,12 +297,10 @@ public:
             case '0':
             default:
                 type = Type::UNKNOWN;
-                break;
         }
         return type;
     }
 
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
     static constexpr Type GetCharAsArrayType(char c)
     {
         Type type = Type::UNKNOWN;
@@ -365,7 +359,6 @@ public:
             case '0':
             default:
                 type = Type::UNKNOWN;
-                break;
         }
         return type;
     }
@@ -501,7 +494,7 @@ private:
 
     ScalarValue(Type type, pandasm::Type value) : Value(type), value_(std::move(value)) {}
 
-    ScalarValue(Type type, const AnnotationData &value) : Value(type), value_(value) {}
+    ScalarValue(Type type, AnnotationData &value) : Value(type), value_(value) {}
 
     std::variant<uint64_t, float, double, std::string, pandasm::Type, AnnotationData> value_;
 };

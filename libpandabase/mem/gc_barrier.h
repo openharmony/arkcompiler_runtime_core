@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_GC_BARRIER_H_
-#define PANDA_LIBPANDABASE_MEM_GC_BARRIER_H_
+#ifndef PANDA_LIBPANDABASE_MEM_GC_BARRIER_H
+#define PANDA_LIBPANDABASE_MEM_GC_BARRIER_H
 
 #include "utils/bit_field.h"
 
+#include <atomic>
 #include <cstdint>
+#include <functional>
 #include <variant>
 
 namespace panda::mem {
 
 /**
- * Represents Pre and Post barriers.
+ * Represents Pre and Post barrier
  */
 enum BarrierPosition : uint8_t {
     BARRIER_POSITION_PRE = 0x1,   // Should be inserted before each store/load when reference stored/loaded
@@ -32,7 +34,7 @@ enum BarrierPosition : uint8_t {
 };
 
 /**
- * Indicates if the barrier is for store or load.
+ * Indicates if barrier for store or load
  */
 enum BarrierActionType : uint8_t {
     WRITE_BARRIER = 0x1,  // Should be used around store
@@ -52,9 +54,9 @@ constexpr uint8_t EncodeBarrierType(uint8_t value, BarrierPosition position, Bar
 }
 
 /**
- * Eencodes barrier for the compiler.
- * PreWrite barrier can be used for avoiding object loss.
- * PostWrite barrier can be used for tracking intergenerational or interregion references.
+ * Should help to encode barrier for the compiler.
+ * PreWrite barrier can be used for avoiding lost object problem.
+ * PostWrite barrier used for tracking intergenerational or interregion references
  */
 enum BarrierType : uint8_t {
     PRE_WRB_NONE = EncodeBarrierType(1U, BarrierPosition::BARRIER_POSITION_PRE, BarrierActionType::WRITE_BARRIER),
@@ -74,7 +76,7 @@ enum BarrierType : uint8_t {
      * store obj.field <- new_val // STORE for which barrier generated
      *
      * Runtime should provide these parameters:
-     * CONCURRENT_MARKING_ADDR - address of bool flag for concurrent marking
+     * CONCURRENT_MARKING_ADDR - address of bool flag which indicates that we have concurrent marking on
      * STORE_IN_BUFF_TO_MARK_FUNC - address of function to store replaced reference
      */
     PRE_SATB_BARRIER = EncodeBarrierType(2U, BarrierPosition::BARRIER_POSITION_PRE, BarrierActionType::WRITE_BARRIER),
@@ -82,7 +84,7 @@ enum BarrierType : uint8_t {
      * Post barrier. Intergenerational barrier for GCs with explicit continuous young gen space. Unconditional.
      * Can be fully encoded by compiler
      * Pseudocode:
-     * store obj.field <- new_val // Store for which barrier is generated
+     * store obj.field <- new_val // STORE for which barrier generated
      * load AddressOf(MIN_ADDR) -> min_addr
      * load AddressOf(CARD_TABLE_ADDR) -> card_table_addr
      * card_index = (AddressOf(obj) - min_addr) >> CARD_BITS   // shift right
@@ -90,13 +92,13 @@ enum BarrierType : uint8_t {
      * store card_addr <- DIRTY_VAL
      *
      * Runtime should provide these parameters:
-     * MIN_ADDR - minimal address used by runtime (it is required only to support 64-bit address)
+     * MIN_ADDR - minimal address used by runtime (it is required only to support 64-bit addresses)
      * CARD_TABLE_ADDR - address of the start of card table raw data array
      * CARD_BITS - how many bits covered by one card (probably it will be a literal)
-     * DIRTY_VAL - literals representing dirty card
+     * DIRTY_VAL - some literal representing dirty card
      *
-     * Note: If the store is built with an expensive architecture (for example, in multithreading environment) -
-     * consider creating a conditional barrier, i.e. check that card is not dirty before adding it to store.
+     * Note if store if to expensive on the architecture(for example in multithreading environment) -
+     * consider to create conditional barrier, ie check that card is not dirty before store
      */
     POST_INTERGENERATIONAL_BARRIER =
         EncodeBarrierType(3U, BarrierPosition::BARRIER_POSITION_POST, BarrierActionType::WRITE_BARRIER),
@@ -104,6 +106,10 @@ enum BarrierType : uint8_t {
      * Inter-region barrier. For GCs without explicit continuous young gen space.
      * Pseudocode:
      * store obj.field <- new_val // STORE for which barrier generated
+     * // Check if new_val is nullptr first - then we don't need a barrier
+     * if (new_val == null) {
+     *     return
+     * }
      * // Check if new_val and address of field is in different regions
      * // (each region contain 2^REGION_SIZE_BITS and aligned with 2^REGION_SIZE_BITS bytes)
      * if ((AddressOf(obj) XOR AddressOf(new_val)) >> REGION_SIZE_BITS) != 0) {
@@ -157,16 +163,19 @@ constexpr bool IsEmptyBarrier(BarrierType barrier_type)
 }
 
 using objRefProcessFunc = void (*)(void *);
+using objTwoRefProcessFunc = void (*)(const void *, const void *);
 
 enum class BarrierOperandType {
-    ADDRESS = 0,                // just an address (void*)
-    BOOL_ADDRESS,               // contains address of bool value (bool*)
-    UINT8_ADDRESS,              // contains address of uint8_t value
-    FUNC_WITH_OBJ_REF_ADDRESS,  // contains address of function with this sig: void foo(void* );
-    UINT8_LITERAL,              // contains uint8_t value
+    ADDRESS = 0,                      // just an address (void*)
+    BOOL_ADDRESS,                     // contains address of bool value (bool*)
+    UINT8_ADDRESS,                    // contains address of uint8_t value
+    FUNC_WITH_OBJ_REF_ADDRESS,        // contains address of function with this sig: void foo(void* );
+    UINT8_LITERAL,                    // contains uint8_t value
+    FUNC_WITH_TWO_OBJ_REF_ADDRESSES,  // contains address of function with this sig: void foo(void* , void* );
 };
 
-using BarrierOperandValue = std::variant<void *, bool *, uint8_t *, objRefProcessFunc, uint8_t>;
+using BarrierOperandValue =
+    std::variant<void *, bool *, std::atomic<bool> *, uint8_t *, objRefProcessFunc, uint8_t, objTwoRefProcessFunc>;
 
 class BarrierOperand {
 public:
@@ -176,12 +185,12 @@ public:
     {
     }
 
-    inline BarrierOperandType GetType()
+    inline BarrierOperandType GetType() const
     {
         return barrier_operand_type_;
     }
 
-    inline BarrierOperandValue GetValue()
+    inline BarrierOperandValue GetValue() const
     {
         return barrier_operand_value_;
     }
@@ -198,4 +207,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_LIBPANDABASE_MEM_GC_BARRIER_H_
+#endif  // PANDA_LIBPANDABASE_MEM_GC_BARRIER_H

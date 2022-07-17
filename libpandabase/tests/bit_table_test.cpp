@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public:
         panda::mem::MemConfig::Finalize();
     }
 
-    ArenaAllocator *GetAllocator() const
+    ArenaAllocator *GetAllocator()
     {
         return allocator_;
     }
@@ -159,22 +159,22 @@ TEST_F(BitTableTest, MultipleColumns)
     }
 }
 
-class TestAccessor : public BitTableRow<2U, TestAccessor> {
+class TestAccessor : public BitTableRow<2, TestAccessor> {
 public:
-    using Base = BitTableRow<2U, TestAccessor>;
+    using Base = BitTableRow<2, TestAccessor>;
     using Base::Base;
 
-    static_assert(Base::NUM_COLUMNS == 2U);
+    static_assert(Base::NUM_COLUMNS == 2);
 
-    uint32_t GetField0() const
+    uint32_t GetField0()
     {
         return Base::Get(0);
     }
-    uint32_t GetField1() const
+    uint32_t GetField1()
     {
         return Base::Get(1);
     }
-    const char *GetName(size_t index) const
+    const char *GetName(size_t index)
     {
         ASSERT(index < Base::ColumnsCount());
         static constexpr const char *names[] = {"field0", "field1"};

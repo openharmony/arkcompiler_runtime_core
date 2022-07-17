@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_REFSTORAGE_GLOBAL_OBJECT_STORAGE_H_
-#define PANDA_RUNTIME_MEM_REFSTORAGE_GLOBAL_OBJECT_STORAGE_H_
+#ifndef PANDA_GLOBAL_OBJECT_STORAGE_H
+#define PANDA_GLOBAL_OBJECT_STORAGE_H
 
 #include <libpandabase/os/mutex.h>
 
@@ -66,21 +65,22 @@ public:
     /**
      * Remove object from storage by given reference. Reference should be returned on Add method before.
      */
-    void Remove(const Reference *reference) const;
+    void Remove(const Reference *reference);
 
     /**
      * Get all objects from storage. Used by debugging.
      */
     PandaVector<ObjectHeader *> GetAllObjects();
 
-    void VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType rootType) const;
+    void VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType rootType);
 
     /**
      * Update pointers to moved Objects in global storage.
      */
+    // TODO(alovkov): take a closure from gc
     void UpdateMovedRefs();
 
-    void ClearUnmarkedWeakRefs(const GC *gc);
+    void ClearUnmarkedWeakRefs(const GC *gc, const mem::GC::ReferenceClearPredicateT &pred);
 
     size_t GetSize();
 
@@ -183,7 +183,7 @@ private:
                 if (storage_.size() * ENSURE_CAPACITY_MULTIPLIER <= max_size_) {
                     EnsureCapacity();
                 } else {
-                    LOG(ERROR, RUNTIME) << "Global reference storage is full";
+                    LOG(ERROR, GC) << "Global reference storage is full";
                     Dump();
                     return nullptr;
                 }
@@ -216,15 +216,16 @@ private:
                 storage_[i] = EncodeNextIndex(i + 1);
             }
             storage_[storage_.size() - 1] = 0;
-            LOG(DEBUG, RUNTIME) << "Increase global storage from: " << prev_length << " to: " << new_length;
+            LOG(DEBUG, GC) << "Increase global storage from: " << prev_length << " to: " << new_length;
         }
 
         void CheckAlmostOverflow() REQUIRES_SHARED(mutex_)
         {
             size_t now_size = GetSize();
             if (enable_size_check_ && now_size >= max_size_ - GLOBAL_REF_SIZE_WARNING_LINE) {
-                LOG(INFO, RUNTIME) << "Global reference storage almost overflow. now size: " << now_size
-                                   << ", max size: " << max_size_;
+                LOG(INFO, GC) << "Global reference storage almost overflow. now size: " << now_size
+                              << ", max size: " << max_size_;
+                // TODO(xucheng): Dump global reference storage info now. May use Thread::Dump() when it can be used.
                 Dump();
             }
         }
@@ -255,7 +256,8 @@ private:
                     auto obj = reinterpret_cast<ObjectHeader *>(ref);
                     if (obj != nullptr && obj->IsForwarded()) {
                         auto new_addr = reinterpret_cast<ObjectHeader *>(GetForwardAddress(obj));
-                        storage_[index] = reinterpret_cast<uintptr_t>(new_addr);
+                        LOG(DEBUG, GC) << "Global ref update from: " << obj << " to: " << new_addr;
+                        storage_[index] = ToUintPtr(new_addr);
                     }
                 }
             }
@@ -269,14 +271,14 @@ private:
                 if (IsBusy(ref)) {
                     auto obj = reinterpret_cast<ObjectHeader *>(ref);
                     if (obj != nullptr) {
-                        LOG(DEBUG, GC) << " Found root from global JNI: " << mem::GetDebugInfoAboutObject(obj);
+                        LOG(DEBUG, GC) << " Found root from global storage: " << mem::GetDebugInfoAboutObject(obj);
                         gc_root_visitor({rootType, obj});
                     }
                 }
             }
         }
 
-        void ClearUnmarkedWeakRefs(const GC *gc)
+        void ClearUnmarkedWeakRefs(const GC *gc, const mem::GC::ReferenceClearPredicateT &pred)
         {
             ASSERT(IsMarking(gc->GetGCPhase()));
             os::memory::WriteLockHolder lk(mutex_);
@@ -284,13 +286,9 @@ private:
             for (auto &ref : storage_) {
                 if (IsBusy(ref)) {
                     auto obj = reinterpret_cast<ObjectHeader *>(ref);
-                    uintptr_t obj_addr = ToUintPtr(obj);
-                    if (gc->InGCSweepRange(obj_addr)) {
-                        if (obj != nullptr && !gc->IsMarked(obj)) {
-                            LOG(DEBUG, RUNTIME)
-                                << "Clear not marked weak-reference: " << std::hex << ref << " object: " << obj;
-                            ref = reinterpret_cast<uintptr_t>(nullptr);
-                        }
+                    if (obj != nullptr && pred(obj) && !gc->IsMarked(obj)) {
+                        LOG(DEBUG, GC) << "Clear not marked weak-reference: " << std::hex << ref << " object: " << obj;
+                        ref = reinterpret_cast<uintptr_t>(nullptr);
                     }
                 }
             }
@@ -312,15 +310,14 @@ private:
             return objects;
         }
 
-        // NO_THREAD_SAFETY_ANALYSIS cause TSAN doesn't understand that we don't touch storage_ in ReferenceToIndex
-        bool IsValidGlobalRef(const Reference *ref) NO_THREAD_SAFETY_ANALYSIS
+        bool IsValidGlobalRef(const Reference *ref)
         {
             ASSERT(ref != nullptr);
+            os::memory::ReadLockHolder lk(mutex_);
             uintptr_t index = ReferenceToIndex<false>(ref);
             if (index >= storage_.size()) {
                 return false;
             }
-            os::memory::ReadLockHolder lk(mutex_);
             if (IsFreeIndex(index)) {
                 return false;
             }
@@ -341,15 +338,15 @@ private:
             }
             static constexpr size_t DUMP_NUMS = 20;
             size_t num = 0;
-            LOG(INFO, RUNTIME) << "Dump the last " << DUMP_NUMS << " global references info:";
+            LOG(INFO, GC) << "Dump the last " << DUMP_NUMS << " global references info:";
 
             for (auto it = storage_.rbegin(); it != storage_.rend(); it++) {
                 uintptr_t ref = *it;
                 if (IsBusy(ref)) {
                     auto obj = reinterpret_cast<ObjectHeader *>(ref);
-                    LOG(INFO, RUNTIME) << "\t Index: " << GetSize() - num << ", Global reference: " << std::hex << ref
-                                       << ", Object: " << std::hex << obj
-                                       << ", Class: " << obj->ClassAddr<panda::Class>()->GetName();
+                    LOG(INFO, GC) << "\t Index: " << GetSize() - num << ", Global reference: " << std::hex << ref
+                                  << ", Object: " << std::hex << obj
+                                  << ", Class: " << obj->ClassAddr<panda::Class>()->GetName();
                     num++;
                     if (num == DUMP_NUMS || num > GetSize()) {
                         break;
@@ -374,13 +371,13 @@ private:
             return IsFreeValue(storage_[index]);
         }
 
-        bool IsFreeValue(uintptr_t value) const
+        bool IsFreeValue(uintptr_t value)
         {
             uintptr_t last_bit = BitField<uintptr_t, FREE_INDEX_BIT>::Get(value);
             return last_bit == 1;
         }
 
-        bool IsBusy(uintptr_t value) const
+        bool IsBusy(uintptr_t value)
         {
             return !IsFreeValue(value);
         }
@@ -404,7 +401,7 @@ private:
         }
 
         /**
-         * We need to add 1 to not return nullptr (JNI-API would think that we couldn't add this object).
+         * We need to add 1 to not return nullptr to distinct it from situation when we couldn't create a reference.
          * Shift by 2 is needed because every Reference stores type in lowest 2 bits.
          */
         Reference *IndexToReference(uintptr_t encoded_index) const REQUIRES_SHARED(mutex_)
@@ -443,7 +440,5 @@ private:
         friend class ::panda::mem::test::ReferenceStorageTest;
     };
 };
-
 }  // namespace panda::mem
-
-#endif  // PANDA_RUNTIME_MEM_REFSTORAGE_GLOBAL_OBJECT_STORAGE_H_
+#endif  // PANDA_GLOBAL_OBJECT_STORAGE_H

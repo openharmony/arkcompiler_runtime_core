@@ -15,32 +15,10 @@ cmake_minimum_required(VERSION 3.10)
 
 project(arkruntime)
 
+enable_language(ASM)
+
 include(core/Core.cmake)
 include(${PANDA_ROOT}/verification/Verification.cmake)
-
-function(gen_intrinsics_yaml)
-    set(prefix ARG)
-    set(noValues)
-    set(singleValues OUTPUTFILE TARGET)
-    set(multiValues DATAFILES DEPENDS)
-    cmake_parse_arguments(${prefix}
-                          "${noValues}"
-                          "${singleValues}"
-                          "${multiValues}"
-                        ${ARGN})
-    set(GENERATOR ${CMAKE_CURRENT_LIST_DIR}/templates/gen_intrinsics_data.rb ${CMAKE_CURRENT_LIST_DIR}/templates/runtime.rb)
-    set(TEMPLATE ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.yaml.erb)
-    set(DEPENDS_LIST ${GENERATOR} ${TEMPLATE} ${ARG_DEPENDS})
-    string(REPLACE ";" "," DATAFILES_STR "${ARG_DATAFILES}")
-    foreach(d ${ARG_DATAFILES})
-        list(APPEND DEPENDS_LIST ${d})
-    endforeach()
-    add_custom_command(OUTPUT ${ARG_OUTPUTFILE}
-                       COMMENT "Generate intrinsics.yaml"
-                       COMMAND ${GENERATOR} -d ${DATAFILES_STR} -t ${TEMPLATE} -o ${ARG_OUTPUTFILE}
-                       DEPENDS ${DEPENDS_LIST})
-    add_custom_target(${ARG_TARGET} ALL DEPENDS ${ARG_OUTPUTFILE})
-endfunction()
 
 set(SOURCES
     assert_gc_scope.cpp
@@ -51,13 +29,8 @@ set(SOURCES
     class_linker_extension.cpp
     class_initializer.cpp
     tooling/debugger.cpp
-    tooling/pt_class.cpp
-    tooling/pt_method.cpp
     tooling/pt_thread.cpp
-    tooling/pt_reference.cpp
-    tooling/pt_lang_extension.cpp
     tooling/debug_inf.cpp
-    dyn_class_linker_extension.cpp
     field.cpp
     gc_task.cpp
     dprofiler/dprofiler.cpp
@@ -74,23 +47,26 @@ set(SOURCES
     mem/gc/epsilon/epsilon.cpp
     mem/gc/epsilon/epsilon_barrier.cpp
     mem/gc/gc.cpp
+    mem/gc/gc_adaptive_stack.cpp
+    mem/gc/gc_settings.cpp
     mem/gc/lang/gc_lang.cpp
-    mem/gc/static/gc_static_impl.cpp
-    mem/gc/dynamic/gc_dynamic_impl.cpp
     mem/gc/gc_queue.cpp
     mem/gc/gc_root.cpp
+    mem/gc/gc_root_type.cpp
     mem/gc/gc_stats.cpp
     mem/gc/gc_trigger.cpp
+    mem/gc/gc-hung/gc_hung.cpp
     mem/gc/card_table.cpp
-    mem/gc/crossing_map.cpp
-    mem/gc/crossing_map_singleton.cpp
+    mem/gc/heap-space-misc/crossing_map.cpp
+    mem/gc/heap-space-misc/crossing_map_singleton.cpp
     mem/gc/bitmap.cpp
+    mem/gc/gc_scope.cpp
     mem/gc/gc_scoped_phase.cpp
+    mem/gc/gc_workers_thread_pool.cpp
     mem/gc/stw-gc/stw-gc.cpp
     mem/gc/gc_barrier_set.cpp
     mem/gc/gen-gc/gen-gc.cpp
     mem/gc/hybrid-gc/hybrid_object_allocator.cpp
-    mem/gc/reference-processor/reference_processor.cpp
     mem/refstorage/ref_block.cpp
     mem/refstorage/reference_storage.cpp
     mem/refstorage/global_object_storage.cpp
@@ -108,38 +84,55 @@ set(SOURCES
     mem/internal_allocator.cpp
     mem/panda_string.cpp
     mem/memory_manager.cpp
+    mem/heap_space.cpp
+    methodtrace/trace.cpp
     mark_word.cpp
     method.cpp
     monitor.cpp
     monitor_object_lock.cpp
     monitor_pool.cpp
+    global_object_lock.cpp
     object_header.cpp
     runtime.cpp
+    runtime_controller.cpp
     string_table.cpp
     thread.cpp
     thread_manager.cpp
+    lock_order_graph.cpp
     time_utils.cpp
     timing.cpp
+    compiler.cpp
     vtable_builder.cpp
     imtable_builder.cpp
     cframe.cpp
     stack_walker.cpp
+    deoptimization.cpp
     object_accessor.cpp
+    osr.cpp
     arch/asm_support.cpp
     signal_handler.cpp
+    cha.cpp
     runtime_helpers.cpp
     handle_scope.cpp
     file_manager.cpp
     mem/gc/generational-gc-base.cpp
     mem/gc/g1/g1-gc.cpp
-    mem/gc/g1/g1-allocator.cpp)
+    mem/gc/g1/g1-allocator.cpp
+    plugins.cpp
+    mem/gc/g1/update_remset_thread.cpp
+    relayout_profiler.cpp
+    loadable_agent.cpp
+)
 
-if(PANDA_TARGET_ARM32_ABI_SOFT)
+if(PANDA_TARGET_ARM32_ABI_SOFT OR PANDA_TARGET_ARM32_ABI_SOFTFP)
     list(APPEND SOURCES
         bridge/arch/arm/interpreter_to_compiled_code_bridge_arm.S
         bridge/arch/arm/compiled_code_to_interpreter_bridge_arm.S
         bridge/arch/arm/compiled_code_to_interpreter_bridge_dyn_arm.S
         bridge/arch/arm/interpreter_to_compiled_code_bridge_dyn_arm.S
+        bridge/arch/arm/compiled_code_to_runtime_bridge_arm.S
+        bridge/arch/arm/deoptimization_arm.S
+        arch/arm/osr_arm.S
         arch/arm/interpreter_support.S)
 elseif (PANDA_TARGET_ARM32_ABI_HARD)
     list(APPEND SOURCES
@@ -147,6 +140,9 @@ elseif (PANDA_TARGET_ARM32_ABI_HARD)
         bridge/arch/arm/compiled_code_to_interpreter_bridge_armhf.S
         bridge/arch/arm/compiled_code_to_interpreter_bridge_dyn_arm.S
         bridge/arch/arm/interpreter_to_compiled_code_bridge_dyn_arm.S
+        bridge/arch/arm/compiled_code_to_runtime_bridge_arm.S
+        bridge/arch/arm/deoptimization_arm.S
+        arch/arm/osr_arm.S
         arch/arm/interpreter_support.S)
 elseif(PANDA_TARGET_ARM64)
     list(APPEND SOURCES
@@ -154,11 +150,17 @@ elseif(PANDA_TARGET_ARM64)
         bridge/arch/aarch64/compiled_code_to_interpreter_bridge_aarch64.S
         bridge/arch/aarch64/compiled_code_to_interpreter_bridge_dyn_aarch64.S
         bridge/arch/aarch64/interpreter_to_compiled_code_bridge_dyn_aarch64.S
-        arch/aarch64/interpreter_support.S)
+        bridge/arch/aarch64/compiled_code_to_runtime_bridge_aarch64.S
+        bridge/arch/aarch64/deoptimization_aarch64.S
+        arch/aarch64/osr_aarch64.S
+        arch/aarch64/interpreter_support.S
+        tests/arch/aarch64/stack_walker_test_bridge_aarch64.S)
 elseif(PANDA_TARGET_X86)
     list(APPEND SOURCES
         bridge/arch/x86/interpreter_to_compiled_code_bridge_x86.S
         bridge/arch/x86/compiled_code_to_interpreter_bridge_x86.S
+        bridge/arch/x86/deoptimization_x86.S
+        arch/x86/osr_x86.S
         arch/x86/interpreter_support.S)
 elseif(PANDA_TARGET_AMD64)
     list(APPEND SOURCES
@@ -166,7 +168,19 @@ elseif(PANDA_TARGET_AMD64)
         bridge/arch/amd64/compiled_code_to_interpreter_bridge_dyn_amd64.S
         bridge/arch/amd64/interpreter_to_compiled_code_bridge_amd64.S
         bridge/arch/amd64/interpreter_to_compiled_code_bridge_dyn_amd64.S
+        bridge/arch/amd64/compiled_code_to_runtime_bridge_amd64.S
+        bridge/arch/amd64/deoptimization_amd64.S
+        arch/amd64/common_amd64.S
+        arch/amd64/osr_amd64.S
         arch/amd64/interpreter_support.S)
+endif()
+
+if (NOT PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS)
+    list(APPEND SOURCES ${PANDA_ROOT}/platforms/common/runtime/thread.cpp)
+endif()
+
+if (NOT PANDA_TARGET_MOBILE)
+    list(APPEND SOURCES ${PANDA_ROOT}/platforms/common/runtime/verify_app_install.cpp)
 endif()
 
 set(INTERPRETER_IMPL_SOURCES
@@ -176,11 +190,38 @@ set(INTERPRETER_IMPL_SOURCES
 add_library(arkruntime_interpreter_impl OBJECT ${INTERPRETER_IMPL_SOURCES})
 panda_set_lib_32bit_property(arkruntime_interpreter_impl)
 
+if (PANDA_WITH_ECMASCRIPT)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/js_locale.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/js_date_time_format.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/js_relative_time_format.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/js_number_format.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/global_env.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/ecma_vm.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/mem/verification.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/mem/semi_space_collector.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/snapshot/mem/snapshot_serialize.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/builtins.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/builtins/builtins_string.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/builtins/builtins_locale.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/builtins/builtins_intl.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/builtins/builtins_number_format.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/builtins/builtins_number.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/builtins/builtins_relative_time_format.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/builtins/builtins_date.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties(${PANDA_ECMASCRIPT_PLUGIN_SOURCE}/runtime/builtins/builtins_date_time_format.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+endif()
+
 set(ISA_TEMPLATES
     interpreter-inl_gen.h.erb
     isa_constants_gen.h.erb
     unimplemented_handlers-inl.h.erb
+    irtoc_interpreter_utils.h.erb
+    debug_test_interpreter-inl_gen.cpp.erb
 )
+
 set(GEN_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
 file(MAKE_DIRECTORY ${GEN_INCLUDE_DIR})
 panda_isa_gen(
@@ -192,6 +233,7 @@ panda_isa_gen(
 set(ISA "${CMAKE_BINARY_DIR}/isa/isa.yaml")
 set(ISA_API "${PANDA_ROOT}/isa/isapi.rb")
 set(BRIDGE_DISPATCH_TEMPLATE "${CMAKE_CURRENT_LIST_DIR}/templates/bridge_dispatch.S.erb")
+set(BRIDGE_DISPATCH_DYN_TEMPLATE "${CMAKE_CURRENT_LIST_DIR}/templates/bridge_dispatch_dyn.S.erb")
 set(BRIDGE_ARCHS aarch64 arm armhf amd64 x86)
 foreach(arch ${BRIDGE_ARCHS})
     panda_gen_file(
@@ -199,6 +241,7 @@ foreach(arch ${BRIDGE_ARCHS})
         TEMPLATE ${BRIDGE_DISPATCH_TEMPLATE}
         OUTPUTFILE ${GEN_INCLUDE_DIR}/bridge_dispatch_${arch}.S
         REQUIRES ${ISA_API} ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_${arch}.rb
+                            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_common.rb
                             ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_static.rb
     )
     add_custom_target(bridge_dispatch_${arch} DEPENDS ${GEN_INCLUDE_DIR}/bridge_dispatch_${arch}.S ${ISA})
@@ -206,9 +249,11 @@ foreach(arch ${BRIDGE_ARCHS})
 
     panda_gen_file(
         DATAFILE ${ISA}
-        TEMPLATE ${BRIDGE_DISPATCH_TEMPLATE}
+        TEMPLATE ${BRIDGE_DISPATCH_DYN_TEMPLATE}
         OUTPUTFILE ${GEN_INCLUDE_DIR}/bridge_dispatch_dyn_${arch}.S
-        REQUIRES ${ISA_API} ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_dynamic.rb ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_${arch}.rb
+        REQUIRES ${ISA_API} ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_${arch}.rb
+                            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_common.rb
+                            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_dynamic.rb
     )
     add_custom_target(bridge_dispatch_dyn_${arch} DEPENDS ${GEN_INCLUDE_DIR}/bridge_dispatch_dyn_${arch}.S ${ISA})
     add_dependencies(bridge_dispatch_${arch} isa_assert)
@@ -232,7 +277,7 @@ set_property(TARGET arkruntime_interpreter_impl PROPERTY POSITION_INDEPENDENT_CO
 
 if (PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES)
     if (PANDA_TARGET_ARM64)
-        target_compile_options(arkruntime_interpreter_impl PUBLIC -ffixed-x20 -ffixed-x21 -ffixed-x22 -ffixed-x23 -ffixed-x24 -ffixed-x28)
+        target_compile_options(arkruntime_interpreter_impl PUBLIC -ffixed-x20 -ffixed-x21 -ffixed-x22 -ffixed-x23 -ffixed-x24 -ffixed-x25 -ffixed-x28)
         target_compile_definitions(arkruntime_interpreter_impl PUBLIC FFIXED_REGISTERS)
     endif()
 
@@ -245,13 +290,14 @@ target_include_directories(arkruntime_interpreter_impl
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     PUBLIC ${PANDA_ROOT}
     PUBLIC ${GEN_INCLUDE_DIR}
+    PUBLIC ${PANDA_ROOT}/compiler
     PUBLIC ${PANDA_ROOT}/libpandabase
     PUBLIC ${PANDA_ROOT}/libpandafile
-    PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/panda_gen_options
+    PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
+    PUBLIC ${PANDA_BINARY_ROOT}
     PUBLIC ${PANDA_BINARY_ROOT}/libpandafile/include
     PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
-    PUBLIC ${VERIFIER_GEN_INCLUDE_DIR}
     PUBLIC ${PANDA_BINARY_ROOT}
 )
 
@@ -262,62 +308,83 @@ add_dependencies(arkruntime_interpreter_impl
     shorty_values_gen_${PROJECT_NAME}
     arkbase
     arkfile
+    entrypoints_gen
 )
 
-set(INTRINSICS_YAML ${CMAKE_CURRENT_BINARY_DIR}/intrinsics.yaml)
-set(INTRINSICS_TARGET ${PROJECT_NAME}_gen_intrinsics_yaml)
-set(DATAFILES_TARGET ${CMAKE_CURRENT_LIST_DIR}/runtime.yaml)
+add_dependencies(arkcompiler entrypoints_gen entrypoints_compiler_checksum_gen)
 
-gen_intrinsics_yaml(
-    TARGET ${INTRINSICS_TARGET}
-    DATAFILES ${DATAFILES_TARGET}
-    OUTPUTFILE ${INTRINSICS_YAML}
+if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
+    irtoc_compile(TARGET_NAME irtoc_fastpath
+                  INPUT_FILES ${IRTOC_SOURCE_DIR}/scripts/resolvers.irt
+                              ${IRTOC_SOURCE_DIR}/scripts/allocation.irt
+                              ${IRTOC_SOURCE_DIR}/scripts/monitors.irt
+                              ${IRTOC_SOURCE_DIR}/scripts/check_cast.irt
+                  TARGET_VARIABLE IRTOC_FASTPATH_OBJ)
+
+    irtoc_compile(TARGET_NAME irtoc_interpreter
+                  INPUT_FILES ${IRTOC_SOURCE_DIR}/scripts/interpreter.irt
+                  TARGET_VARIABLE IRTOC_INTERPRETER_OBJ)
+    set(irtoc_fastpath_target irtoc_fastpath)
+    set(irtoc_interpreter_target irtoc_interpreter)
+else()
+    ExternalProject_Get_Property(panda_host_tools binary_dir)
+    set(IRTOC_FASTPATH_OBJ "${binary_dir}/irtoc/irtoc_fastpath/irtoc_fastpath.o")
+    set(IRTOC_INTERPRETER_OBJ "${binary_dir}/irtoc/irtoc_interpreter/irtoc_interpreter.o")
+
+    SET_SOURCE_FILES_PROPERTIES(${IRTOC_FASTPATH_OBJ} PROPERTIES
+        EXTERNAL_OBJECT true
+        GENERATED true
+    )
+    SET_SOURCE_FILES_PROPERTIES(${IRTOC_INTERPRETER_OBJ} PROPERTIES
+        EXTERNAL_OBJECT true
+        GENERATED true
+    )
+    # Due to cmake complain about absence of the irtoc file, we just fake it until it will be generated
+    execute_process(COMMAND mkdir -p ${binary_dir}/irtoc/irtoc_fastpath)
+    execute_process(COMMAND touch ${IRTOC_FASTPATH_OBJ})
+    execute_process(COMMAND mkdir -p ${binary_dir}/irtoc/irtoc_interpreter)
+    execute_process(COMMAND touch ${IRTOC_INTERPRETER_OBJ})
+    set(irtoc_fastpath_target build_host_tools)
+    set(irtoc_interpreter_target build_host_tools)
+endif()
+
+set(ARKRUNTIME_SOURCES
+    ${IRTOC_FASTPATH_OBJ}
+    ${IRTOC_INTERPRETER_OBJ}
+    ${SOURCES}
+    ${CORE_VM_SOURCES}
+    ${VERIFIER_SOURCES}
 )
 
-set(RUNTIME_TEMPLATES
-    intrinsics_gen.h.erb
-    intrinsics.h.erb
-    unimplemented_intrinsics-inl.cpp.erb
+add_library(arkruntime_static STATIC
+    ${ARKRUNTIME_SOURCES}
+    $<TARGET_OBJECTS:arkruntime_interpreter_impl>
 )
-
-panda_gen(
-    DATA ${INTRINSICS_YAML}
-    TEMPLATES ${RUNTIME_TEMPLATES}
-    REQUIRES ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
-    SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
-    DESTINATION ${GEN_INCLUDE_DIR}
-    EXTRA_DEPENDENCIES ${INTRINSICS_TARGET}
-)
-
-add_library(arkruntime_static STATIC ${SOURCES} ${CORE_VM_SOURCES} ${VERIFIER_SOURCES} $<TARGET_OBJECTS:arkruntime_interpreter_impl>)
-target_compile_options(arkruntime_static PUBLIC -Wno-unused-parameter)
-
 set_property(TARGET arkruntime_static PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-add_library(arkruntime SHARED $<TARGET_OBJECTS:arkruntime_interpreter_impl>)
+add_library(arkruntime SHARED $<TARGET_OBJECTS:arkruntime_interpreter_impl> runtime_helpers.cpp)
 target_link_libraries(arkruntime arkruntime_static)
 
-panda_gen_options(
-    TARGET arkruntime_static
-    YAML_FILE options.yaml
-    GENERATED_HEADER runtime_options_gen.h
-)
+add_subdirectory(scheduler)
 
-add_dependencies(arkruntime_static_options arkbase_options)
 
 panda_add_to_clang_tidy(TARGET arkruntime_static)
+panda_add_to_clang_tidy(TARGET arkruntime)
 
 add_subdirectory(asm_defines)
 
 add_dependencies(arkruntime_static
     intrinsics_gen_${PROJECT_NAME}
-    isa_gen_pandaverification_gen
-    messages_gen_pandaverification_gen
+    isa_gen_pandaverification
+    messages_gen_pandaverification
     arkstdlib
     asm_defines_generator
+    entrypoints_gen
+    ${irtoc_fastpath_target}
+    ${irtoc_interpreter_target}
 )
 
-if(PANDA_TARGET_ARM32_ABI_SOFT)
+if(PANDA_TARGET_ARM32_ABI_SOFT OR PANDA_TARGET_ARM32_ABI_SOFTFP)
     add_dependencies(arkruntime_static bridge_dispatch_arm bridge_dispatch_dyn_arm)
 elseif (PANDA_TARGET_ARM32_ABI_HARD)
     add_dependencies(arkruntime_static bridge_dispatch_armhf bridge_dispatch_dyn_arm)
@@ -332,15 +399,40 @@ endif()
 target_include_directories(arkruntime_static
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     PUBLIC ${PANDA_ROOT}
+    PUBLIC ${PANDA_BINARY_ROOT}
+    PUBLIC ${PANDA_BINARY_ROOT}/runtime/asm_defines
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${VERIFIER_INCLUDE_DIR}
-    PUBLIC ${VERIFIER_GEN_INCLUDE_DIR}
 )
 
-target_link_libraries(arkruntime_static arkbase arkfile dprof)
+target_link_libraries(arkruntime_static arkbase arkfile arkcompiler dprof arkaotmanager)
 if (NOT PANDA_TARGET_OHOS)
   target_link_libraries(arkruntime_static atomic)
 endif()
+
+set(CSA_TESTS_ARKRUNTIME_PATH ${GEN_INCLUDE_DIR}/debug_test_interpreter-inl_gen.cpp)
+add_library(csa_tests_arkruntime_interpreter_impl OBJECT EXCLUDE_FROM_ALL ${CSA_TESTS_ARKRUNTIME_PATH})
+target_include_directories(csa_tests_arkruntime_interpreter_impl
+    PRIVATE "$<TARGET_PROPERTY:c_secshared,INCLUDE_DIRECTORIES>"
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+    PUBLIC ${PANDA_ROOT}
+    PUBLIC ${GEN_INCLUDE_DIR}
+    PUBLIC ${PANDA_ROOT}/compiler
+    PUBLIC ${PANDA_ROOT}/libpandabase
+    PUBLIC ${PANDA_ROOT}/libpandafile
+    PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
+    PUBLIC ${PANDA_BINARY_ROOT}
+    PUBLIC ${PANDA_BINARY_ROOT}/compiler/generated
+    PUBLIC ${PANDA_BINARY_ROOT}/libpandafile/include
+    PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
+    PUBLIC ${VERIFIER_INCLUDE_DIR}
+    PUBLIC ${PANDA_BINARY_ROOT}
+)
+add_dependencies(csa_tests_arkruntime_interpreter_impl arkruntime_static)
+
+# Runtime uses CodeInfo from the compiler. Maybe in the future CodeInfo
+# will be moved to another place, then this line should be removed.
+target_include_directories(arkruntime_static PUBLIC ${PANDA_ROOT}/compiler)
 
 # Disable warning about offsetof usage for non-standard layout types.
 # In C++17 offsetof is conditionally implemented for such types, so
@@ -349,58 +441,67 @@ endif()
 # for non-standard layout types.
 target_compile_options(arkruntime_static PUBLIC -Wno-invalid-offsetof)
 
-set(TEST_INTERPRETER_IMPL_SOURCES
+#Build PANDA_QEMU_AARCH64_GCC_8 hangs for target arkruntime_test_interpreter_impl. It is compiler issue.
+if(PANDA_WITH_TESTS AND NOT PANDA_QEMU_AARCH64_GCC_8)
+  set(TEST_INTERPRETER_IMPL_SOURCES
     tests/interpreter/test_interpreter_impl.cpp
-)
+    )
 
-add_library(arkruntime_test_interpreter_impl OBJECT ${TEST_INTERPRETER_IMPL_SOURCES})
+  add_library(arkruntime_test_interpreter_impl OBJECT ${TEST_INTERPRETER_IMPL_SOURCES})
 
-target_compile_options(arkruntime_test_interpreter_impl PUBLIC -Wno-invalid-offsetof)
-panda_set_lib_32bit_property(arkruntime_test_interpreter_impl)
+  target_compile_options(arkruntime_test_interpreter_impl PUBLIC -Wno-invalid-offsetof)
+  panda_set_lib_32bit_property(arkruntime_test_interpreter_impl)
 
-if (PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES)
+  if (PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES)
     if (PANDA_TARGET_ARM64)
-        target_compile_options(arkruntime_test_interpreter_impl PUBLIC -ffixed-x20 -ffixed-x21 -ffixed-x22 -ffixed-x23 -ffixed-x24 -ffixed-x24 -ffixed-x28)
-        target_compile_definitions(arkruntime_test_interpreter_impl PUBLIC FFIXED_REGISTERS)
+      target_compile_options(arkruntime_test_interpreter_impl PUBLIC -ffixed-x20 -ffixed-x21 -ffixed-x22 -ffixed-x23 -ffixed-x24 -ffixed-x25 -ffixed-x28)
+      target_compile_definitions(arkruntime_test_interpreter_impl PUBLIC FFIXED_REGISTERS)
     endif()
 
     # Temporary disable clang tidy as it cannot recognize -ffixed-<reg> params that we used. Should be fixed in clang tidy 9
     set_target_properties(arkruntime_test_interpreter_impl PROPERTIES CXX_CLANG_TIDY "")
-endif()
+  endif()
 
-target_include_directories(arkruntime_test_interpreter_impl
+  target_include_directories(arkruntime_test_interpreter_impl
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     PUBLIC ${PANDA_ROOT}
     PUBLIC ${GEN_INCLUDE_DIR}
+    PUBLIC ${PANDA_ROOT}/compiler
     PUBLIC ${PANDA_ROOT}/libpandabase
     PUBLIC ${PANDA_ROOT}/libpandafile
-    PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/panda_gen_options
+    PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
     PUBLIC ${PANDA_BINARY_ROOT}/libpandafile/include
+    PUBLIC ${PANDA_BINARY_ROOT}
     PUBLIC "$<TARGET_PROPERTY:c_secshared,INCLUDE_DIRECTORIES>"
-    PUBLIC "$<TARGET_PROPERTY:gtest,INCLUDE_DIRECTORIES>"
     PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
-    PUBLIC ${VERIFIER_GEN_INCLUDE_DIR}
-)
+    )
+  if (PANDA_WITH_TESTS)
+      target_include_directories(arkruntime_test_interpreter_impl
+          PUBLIC "$<TARGET_PROPERTY:gtest,INCLUDE_DIRECTORIES>")
+  endif()
 
-add_dependencies(arkruntime_test_interpreter_impl
+
+  add_dependencies(arkruntime_test_interpreter_impl
     isa_gen_${PROJECT_NAME}
     intrinsics_gen_${PROJECT_NAME}
     ${PROJECT_NAME}_static_options
     arkbase
     arkfile
-)
+    entrypoints_gen
+    )
 
-if(PANDA_TARGET_ARM32_ABI_SOFT)
+  if(PANDA_TARGET_ARM32_ABI_SOFT OR PANDA_TARGET_ARM32_ABI_SOFTFP)
     SET(INVOKE_HELPER tests/arch/arm/invokation_helper.S)
-elseif (PANDA_TARGET_ARM32_ABI_HARD)
+  elseif (PANDA_TARGET_ARM32_ABI_HARD)
     SET(INVOKE_HELPER tests/arch/arm/invokation_helper_hf.S)
-elseif(PANDA_TARGET_ARM64)
+  elseif(PANDA_TARGET_ARM64)
     SET(INVOKE_HELPER tests/arch/aarch64/invokation_helper.S)
-elseif(PANDA_TARGET_X86)
+  elseif(PANDA_TARGET_X86)
     #SET(INVOKE_HELPER tests/arch/x86/invokation_helper.S)
-elseif(PANDA_TARGET_AMD64)
+  elseif(PANDA_TARGET_AMD64)
     SET(INVOKE_HELPER tests/arch/amd64/invokation_helper.S)
+  endif()
 endif()
 
 function(add_gtests test_name)
@@ -423,8 +524,8 @@ function(add_gtests test_name)
             PRIVATE ${GEN_INCLUDE_DIR}
         )
         target_compile_options(${test_name} PUBLIC "-Wno-ignored-attributes")
-
     endif()
+
 endfunction()
 
 function(add_multithread_gtests test_name)
@@ -446,8 +547,8 @@ function(add_multithread_gtests test_name)
             PRIVATE ${GEN_INCLUDE_DIR}
         )
         target_compile_options(${test_name} PUBLIC "-Wno-ignored-attributes")
-
     endif()
+
 endfunction()
 
 add_multithread_gtests (
@@ -480,9 +581,18 @@ add_gtests(
     tests/array_test.cpp
     tests/mark_word_test.cpp
     tests/method_test.cpp
+    tests/compiler_thread_pool.cpp
     tests/mock_queue_thread_pool.cpp
-    tests/string_table_test.cpp
+    tests/string_table_base_test.h
+    tests/string_table_gc_test.cpp
     tests/string_test.cpp
+    tests/compilation_status_test.cpp
+    tests/osr_code_test.cpp
+)
+
+add_gtests(
+    arkruntime_get_method_test
+    tests/getmethod_test.cpp
 )
 
 add_gtests(
@@ -495,6 +605,7 @@ add_gtests(
     tests/histogram_test.cpp
     tests/mem_stats_additional_info_test.cpp
     tests/mem_stats_gc_test.cpp
+    tests/mem_stats_gen_gc_test.cpp
     tests/mem_stats_test.cpp
 )
 
@@ -538,10 +649,11 @@ add_gtests(
     tests/pygote_space_allocator_stw_test.cpp
 )
 
-add_gtests(
-    arkruntime_memory_management_region_allocator_test
-    tests/region_allocator_test.cpp
-)
+# TODO(agrebenkin) Enable the tests as soon as full gc doesn't require to maintain free young-space-size
+#add_gtests(
+#    arkruntime_memory_management_region_allocator_test
+#    tests/region_allocator_test.cpp
+#)
 
 add_gtests(
     arkruntime_memory_management_rem_set_test
@@ -550,7 +662,7 @@ add_gtests(
 
 add_gtests(
     arkruntime_memory_management_runslots_allocator_test
-    tests/runslots_allocator_test
+    tests/runslots_allocator_test.cpp
 )
 
 add_gtests(
@@ -558,12 +670,34 @@ add_gtests(
     tests/card_table_test.cpp
     tests/crossing_map_test.cpp
     tests/panda_smart_pointers_test.cpp
+    tests/panda_tl_containers_test.cpp
     tests/tlab_test.cpp
     tests/gc_task_test.cpp
+    tests/g1gc_test.cpp
+    tests/collection_set_test.cpp
+    tests/g1gc_fullgc_test.cpp
+    tests/object_helpers_test.cpp
+    tests/gc_log_test.cpp
+)
+
+add_gtests(
+    arkruntime_sa_object_helpers_test
+    tests/static_analyzer_test.cpp
+)
+
+add_gtests(
+    arkruntime_gc_trigger_test
+    tests/gc_trigger_test.cpp
+)
+
+add_gtests(
+    arkruntime_memory_management_heap_space_test
+    tests/heap_space_test.cpp
 )
 
 add_gtests(
     arkruntime_multithreading_test
+    tests/compiler_queue_test.cpp
     tests/monitor_test.cpp
     tests/thread_test.cpp
 )
@@ -573,19 +707,108 @@ add_gtests(
     tests/options_test.cpp
 )
 
+# We run irtoc tests only in host mode, because irtoc tests are intended for testing only Irtoc language capabilities.
+if (PANDA_WITH_TESTS OR HOST_TOOLS)
+    if (NOT CMAKE_CROSSCOMPILING)
+        irtoc_compile(TARGET_NAME irtoc_tests
+            INPUT_FILES ${IRTOC_SOURCE_DIR}/scripts/tests.irt
+            TARGET_VARIABLE IRTOC_TESTS_OBJ)
+        set(irtoc_tests_target irtoc_tests)
+    else()
+        ExternalProject_Get_Property(panda_host_tools binary_dir)
+        set(IRTOC_TESTS_OBJ "${binary_dir}/irtoc/irtoc_tests/irtoc_tests.o")
+
+        SET_SOURCE_FILES_PROPERTIES(${IRTOC_TESTS_OBJ} PROPERTIES
+            EXTERNAL_OBJECT true
+            GENERATED true
+        )
+        # Due to cmake complain about absence of the irtoc file, we just fake it until it will be generated
+        execute_process(COMMAND mkdir -p ${binary_dir}/irtoc/irtoc_tests)
+        execute_process(COMMAND touch ${IRTOC_TESTS_OBJ})
+        set(irtoc_tests_target build_host_tools)
+    endif()
+    # In Host tools mode we only generate Irtoc files for irtoc_tests, we shouldn't create irtoc_tests itself.
+    if (irtoc_tests_target AND NOT HOST_TOOLS)
+        add_gtests(
+            arkruntime_irtoc_tests
+            tests/irtoc_test.cpp
+            ${IRTOC_TESTS_OBJ}
+        )
+        add_dependencies(arkruntime_irtoc_tests ${irtoc_tests_target})
+    endif()
+endif()
+
+if (NOT PANDA_PRODUCT_BUILD)
+  add_gtests(
+    arkruntime_intrinsics_blacklist_test
+    tests/intrinsics_blacklist_test.cpp
+    )
+endif()
+
+if (TARGET arkruntime_test_interpreter_impl)
+    add_gtests(
+        arkruntime_interpreter_test
+        tests/c2i_bridge_test.cpp
+        tests/class_linker_test.cpp
+        tests/class_linker_test_extension.cpp
+        tests/exception_test.cpp
+        tests/hybrid_object_allocator_test.cpp
+        tests/interpreter/test_interpreter.cpp
+        tests/interpreter/test_runtime_interface.cpp
+        tests/interpreter_test.cpp
+        tests/invokation_helper.cpp
+        $<TARGET_OBJECTS:arkruntime_test_interpreter_impl>
+        ${INVOKE_HELPER}
+    )
+endif()
+
+# In interpreter_test.cpp tests ResolveCtorClass and
+# ResolveField are extremely slow (that lead to timeout in arm32 debug builds).
+# To avoid timeout these tests were moved to special targets
+# and code generation that needed in tests is made in build time
 add_gtests(
-    arkruntime_interpreter_test
-    tests/c2i_bridge_test.cpp
-    tests/class_linker_test.cpp
-    tests/class_linker_test_extension.cpp
-    tests/hybrid_object_allocator_test.cpp
-    tests/interpreter/test_interpreter.cpp
-    tests/interpreter/test_runtime_interface.cpp
-    tests/interpreter_test.cpp
-    tests/invokation_helper.cpp
-    $<TARGET_OBJECTS:arkruntime_test_interpreter_impl>
-    ${INVOKE_HELPER}
+    interpreter_test_resolve_field
+    tests/interpreter_test_resolve_field.cpp
 )
+
+add_gtests(
+    interpreter_test_resolve_ctor_class
+    tests/interpreter_test_resolve_ctor_class.cpp
+)
+
+if (PANDA_WITH_TESTS)
+    file(MAKE_DIRECTORY ${PANDA_BINARY_ROOT}/bin-gtests/pre-build)
+
+    function(generate_gtests_prebuild test_name)
+        set(SOURCE_TEMPLATE "${CMAKE_CURRENT_LIST_DIR}/tests/templates/${test_name}.pa.erb")
+        set(GENERATED_OUTPUT "${PANDA_BINARY_ROOT}/bin-gtests/pre-build/${test_name}")
+
+        if(CMAKE_CROSSCOMPILING)
+            ExternalProject_Get_Property(panda_host_tools binary_dir)
+            set(assembler_target panda_host_tools)
+            set(assembler_bin    "${binary_dir}/assembler/ark_asm")
+        else()
+            set(assembler_target ark_asm)
+            set(assembler_bin    $<TARGET_FILE:${assembler_target}>)
+        endif()
+
+        add_custom_command(OUTPUT ${GENERATED_OUTPUT}.abc
+            COMMENT "Generating ${test_name}.abc"
+            COMMAND erb ${SOURCE_TEMPLATE} > ${GENERATED_OUTPUT}.pa
+            COMMAND ${assembler_bin} ${GENERATED_OUTPUT}.pa ${GENERATED_OUTPUT}.abc
+            DEPENDS ${assembler_target}
+        )
+
+        add_custom_target(${test_name}_abc
+            DEPENDS ${GENERATED_OUTPUT}.abc
+        )
+
+        add_dependencies(${test_name}_gtests ${test_name}_abc)
+    endfunction()
+
+    generate_gtests_prebuild(interpreter_test_resolve_field)
+    generate_gtests_prebuild(interpreter_test_resolve_ctor_class)
+endif()
 
 add_gtests(
     arkruntime_utils_test
@@ -594,13 +817,22 @@ add_gtests(
     tests/frame_test.cpp
     tests/i2c_bridge_test.cpp
     tests/math_helpers_test.cpp
-    tests/offsets_test.cpp
+    tests/stack_walker_test.cpp
     tests/time_utils_test.cpp
 )
+
+include(intrinsics.cmake)
+
+add_subdirectory(tooling/inspector)
+
+if(PANDA_WITH_TESTS)
+    add_subdirectory(tests/tooling)
+endif()
 
 panda_add_sanitizers(TARGET arkruntime SANITIZERS ${PANDA_SANITIZERS_LIST})
 panda_add_sanitizers(TARGET arkruntime_static SANITIZERS ${PANDA_SANITIZERS_LIST})
 panda_add_sanitizers(TARGET arkruntime_interpreter_impl SANITIZERS ${PANDA_SANITIZERS_LIST})
-panda_add_sanitizers(TARGET arkruntime_test_interpreter_impl SANITIZERS ${PANDA_SANITIZERS_LIST})
-
+if(PANDA_WITH_TESTS AND TARGET arkruntime_test_interpreter_impl)
+    panda_add_sanitizers(TARGET arkruntime_test_interpreter_impl SANITIZERS ${PANDA_SANITIZERS_LIST})
+endif()
 add_check_style(".")

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_MEM_PANDA_SMART_POINTERS_H_
-#define PANDA_RUNTIME_INCLUDE_MEM_PANDA_SMART_POINTERS_H_
+#ifndef PANDA_RUNTIME_MEM_PANDA_SMART_POINTERS_H
+#define PANDA_RUNTIME_MEM_PANDA_SMART_POINTERS_H
 
 #include <memory>
 
@@ -85,6 +84,26 @@ inline PandaUniquePtrIf<T, is_unbounded_array_v<T>> MakePandaUnique(size_t size)
 template <class T, class... Args>
 inline PandaUniquePtrIf<T, is_bounded_array_v<T>> MakePandaUnique(Args &&... args) = delete;
 
+template <class T, bool cond>
+using PandaSharedPtrIf = std::enable_if_t<cond, std::shared_ptr<T>>;
+
+template <class T, class... Args>
+inline PandaSharedPtrIf<T, !std::is_array_v<T>> MakePandaShared(Args &&... args)
+{
+    return std::shared_ptr<T>(
+        mem::InternalAllocator<>::GetInternalAllocatorFromRuntime()->New<T>(std::forward<Args>(args)...),
+        DefaultPandaDelete<T>());
+}
+
+template <class T>
+inline PandaSharedPtrIf<T, is_unbounded_array_v<T>> MakePandaShared(size_t size)
+{
+    return std::shared_ptr<T>(mem::InternalAllocator<>::GetInternalAllocatorFromRuntime()->New<T>(size),
+                              DefaultPandaDelete<T>());
+}
+
+template <class T, class... Args>
+inline PandaSharedPtrIf<T, is_bounded_array_v<T>> MakePandaShared(Args &&... args) = delete;
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_MEM_PANDA_SMART_POINTERS_H_
+#endif  // PANDA_RUNTIME_MEM_PANDA_SMART_POINTERS_H

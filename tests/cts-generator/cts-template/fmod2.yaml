@@ -13,7 +13,7 @@
 
 definitions: []
 tests:
-  - file-name: "fmod2.64"
+  - file-name: "fmod2"
     isa:
       title: Two address floating-point binary operation on accumulator
       description: >
@@ -25,87 +25,86 @@ tests:
       - file-name: "op_vs_8_nan"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
           description: Any operation with NaN results to NaN value.
-        check-type: check-acc-nan
+        check-type: check-acc-nan-f32
+        tags: ['irtoc_ignore']
         code-template: |
           #
-              fldai.64 %s
-              fmovi.64 v0, *s
-              fmod2.64 v0
+              fldai %s
+              fmovi v0, *s
+              fmod2 v0
         description: >
-          Check fmod2.64 results in NaN when acc or v0 is NaN
+          Check fmod2 results in NaN when acc or v0 is NaN
         template-cases:
           - values:
               # NaN
-              - "0x7ff8000000000000"
+            - "0x7fc00000"
           - values:
               # NaN representation
-              - "0xFFFFFFFFFFFFFFFF"
+            - "0xFFFFFFFF"
           - values:
-              - "0"
+            - "0"
             exclude: [hasval]
           - values:
               # Negative zero
               # -0.0d
-              - "0x8000000000000000"
+              - "0x80000000"
             exclude: [hasval]
           - values:
-              - "1"
+            - "1"
             exclude: [hasval]
           - values:
-              - "-1"
+            - "-1"
             exclude: [hasval]
           - values:
-              # +Inf
-              - "0x7ff0000000000000"
+            # +Inf
+            - "0x7f800000"
             exclude: [hasval]
           - values:
-              # -Inf
-              - "0xfff0000000000000"
+            # -Inf
+            - "0xff800000"
             exclude: [hasval]
           - values:
             # +max
-            - "0x7fefffffffffffff"
+            - "0x7f7ffffff"
             exclude: [hasval]
           - values:
             # -max
-            - "0xffefffffffffffff"
+            - "0xff7ffffff"
             exclude: [hasval]
           - values:
             # +min
-            - "0x0000000000000001"
+            - "0x000000001"
             exclude: [hasval]
           - values:
             # -min
-            - "0x8000000000000001"
+            - "0x800000001"
             exclude: [hasval]
           - values:
-              - "3.14159265358979323846"
+            - "3.1415927"
             exclude: [hasval]
           - values:
-              - "1234567890987654321"
+            - "1234567890"
             exclude: [hasval]
         cases:
           - values:
               # NaN
-              - "0x7ff8000000000000"
+              - "0x7fc00000"
           - values:
               # NaN
-              - "0xFFFFFFFFFFFFFFFF"
+              - "0xFFFFFFFF"
           - values:
               - "0"
             id: hasval
-            tags: [aot-fail]
             bugid: ['3846']
           - values:
               # Negative zero
               # -0.0d
-              - "0x8000000000000000"
+              - "0x80000000"
             id: hasval
-            tags: [aot-fail]
             bugid: ['3846']
           - values:
               - "1"
@@ -115,64 +114,63 @@ tests:
             id: hasval
           - values:
               # +Inf
-              - "0x7ff0000000000000"
+              - "0x7f800000"
             id: hasval
           - values:
               # -Inf
-              - "0xfff0000000000000"
+              - "0xff800000"
             id: hasval
           - values:
               # +max
-              - "0x7fefffffffffffff"
+              - "0x7f7fffff"
             id: hasval
           - values:
               # -max
-              - "0xffefffffffffffff"
+              - "0xff7fffff"
             id: hasval
           - values:
               # +min
-              - "0x0000000000000001"
+              - "0x00000001"
             id: hasval
           - values:
               # -min
-              - "0x8000000000000001"
+              - "0x80000001"
             id: hasval
           - values:
-              - "3.14159265358979323846"
+              - "3.1415927"
             id: hasval
           - values:
-              - "1234567890987654321"
+              - "1234567890"
             id: hasval
 
       - file-name: "op_vs_8_pinf"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
-        check-type: check-acc-nan
+        check-type: check-acc-nan-f32
+        tags: ['irtoc_ignore']
         code-template: |
             #
-                fldai.64 0x7ff0000000000000 # +Inf
-                fmovi.64 v0, %s
+                fldai 0x7f800000 # +Inf
+                fmovi v0, %s
             # Mod of +Inf and value
-                fmod2.64 v0
-        description: Check fmod2.64 with positive Inf and various values (NaN, Inf, min, max, numbers).
+                fmod2 v0
+        description: Check fmod2 with positive Inf and various values (NaN, Inf, min, max, numbers).
         cases:
           - values:
               # NaN
-              - "0x7ff8000000000000"
+              - "0x7fc00000"
           - values:
               # NaN
-              - "0xFFFFFFFFFFFFFFFF"
+              - "0xFFFFFFFF"
           - values:
               - "0"
-            tags: [aot-fail]
             bugid: ['3846']
           - values:
               # -0.0
-              - "0x8000000000000000"
-            tags: [aot-fail]
+              - "0x80000000"
             bugid: ['3846']
           - values:
               - "1"
@@ -180,133 +178,134 @@ tests:
              - "-1"
           - values:
               # +Inf
-              - "0x7ff0000000000000"
+              - "0x7f800000"
           - values:
               # -Inf
-              - "0xfff0000000000000"
+              - "0xff800000"
           - values:
               # +max
-              - "0x7fefffffffffffff"
+              - "0x7f7fffff"
           - values:
               # -max
-              - "0xffefffffffffffff"
+              - "0xff7fffff"
           - values:
               # +min
-              - "0x0000000000000001"
+              - "0x00000001"
           - values:
               # -min
-              - "0x8000000000000001"
+              - "0x80000001"
           - values:
-              - "3.14159265358979323846"
+              - "3.1415927"
           - values:
-              - "1234567890987654321"
+              - "1234567890"
 
       - file-name: "op_vs_8_ninf"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
-        check-type: check-acc-nan
+        check-type: check-acc-nan-f32
+        tags: ['irtoc_ignore']
 
         code-template: |
             #
-                fldai.64 0xfff0000000000000 # -Inf
-                fmovi.64 v0, %s
+                fldai 0xff800000 # -Inf
+                fmovi v0, %s
             # Mod of -Inf and value
-                fmod2.64 v0
-        description: Check fmod2.64 with negative Inf and various values (NaN, Inf, min, max, numbers).
+                fmod2 v0
+        description: Check fmod2 with negative Inf and various values (NaN, Inf, min, max, numbers).
         cases:
-            - values:
-                # NaN
-                - "0x7ff8000000000000"
-            - values:
-                # NaN
-                - "0xFFFFFFFFFFFFFFFF"
-            - values:
-                - "0"
-              tags: [aot-fail]
-              bugid: ['3846']
-            - values:
-                # -0.0d
-                - "0x8000000000000000"
-              tags: [aot-fail]
-              bugid: ['3846']
-            - values:
-                - "1"
-            - values:
-                - "-1"
-            - values:
-                # +Inf
-                - "0x7ff0000000000000"
-            - values:
-                # -Inf
-                - "0xfff0000000000000"
-            - values:
-                # +max
-                - "0x7fefffffffffffff"
-            - values:
-                # -max
-                - "0xffefffffffffffff"
-            - values:
-                # +min
-                - "0x0000000000000001"
-            - values:
-                # -min
-                - "0x8000000000000001"
-            - values:
-                - "3.14159265358979323846"
-            - values:
-                - "1234567890987654321"
+          - values:
+              # NaN
+              - "0x7fc00000"
+          - values:
+              # NaN
+              - "0xFFFFFFFF"
+          - values:
+              - "0"
+            bugid: ['3846']
+          - values:
+              # -0.0d
+              - "0x80000000"
+            bugid: ['3846']
+          - values:
+              - "1"
+          - values:
+              - "-1"
+          - values:
+              # +Inf
+              - "0x7f800000"
+          - values:
+              # -Inf
+              - "0xff800000"
+          - values:
+              # +max
+              - "0x7f7fffff"
+          - values:
+              # -max
+              - "0xff7fffff"
+          - values:
+              # +min
+              - "0x00000001"
+          - values:
+              # -min
+              - "0x80000001"
+          - values:
+              - "3.1415927"
+          - values:
+              - "1234567890"
 
       - file-name: "op_vs_8_inf_nan"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
           description: >
             Division is NaN if Infinity is divided by Infinity.
-        check-type: check-acc-nan
+        check-type: check-acc-nan-f32
+        tags: ['irtoc_ignore']
         code-template: |
             #
-                fldai.64 %s
-                fmovi.64 v0, *s
+                fldai %s
+                fmovi v0, *s
             # Modulo of Inf by Inf
-                fmod2.64 v0
+                fmod2 v0
         description: >
-          Check fmod2.64 of Inf by Inf is NaN. (Case of Modulo)
+          Check fmod2 of Inf by Inf is NaN. (Case of Modulo)
         template-cases:
-          - values: ["0x7ff0000000000000"]
-          - values: ["0xfff0000000000000"]
+          - values: ["0x7f800000"]
+          - values: ["0xff800000"]
         cases:
-          - values: ["0x7ff0000000000000"]
-          - values: ["0xfff0000000000000"]
+          - values: ["0x7f800000"]
+          - values: ["0xff800000"]
 
       - file-name: "op_vs_8_pzero"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
         check-type: check-positive
+        tags: ['irtoc_ignore']
         code-template: |
             #
-                fldai.64 0.0 #
-                fmovi.64 v0, %s
+                fldai 0.0 #
+                fmovi v0, %s
             # Mod of +0.0 and value
-                fmod2.64 v0
-                fmovi.64 v1, %s
-                fcmpg.64 v1
-        description: Check fmod2.64 with +0 and various values (NaN, Inf, min, max, numbers).
+                fmod2 v0
+                fmovi v1, %s
+                fcmpg v1
+        description: Check fmod2 with +0 and various values (NaN, Inf, min, max, numbers).
         cases:
             - values:
                 # +Inf
-                - "0x7ff0000000000000"
+                - "0x7f800000"
                 - "0"
             - values:
                 # -Inf
-                - "0xfff0000000000000"
+                - "0xff800000"
                 - "0"
             - values:
                 # 1d
@@ -315,106 +314,108 @@ tests:
             - values:
                 - "-1"
                 # -0.0
-                - "0x8000000000000000"
+                - "0x80000000"
 
             - values:
                 # +max
-                - "0x7fefffffffffffff"
+                - "0x7f7fffff"
                 - "0"
             - values:
                 # -max
-                - "0xffefffffffffffff"
+                - "0xff7fffff"
                 # -0.0
-                - "0x8000000000000000"
+                - "0x80000000"
             - values:
                 # +min
-                - "0x0000000000000001"
+                - "0x00000001"
                 - "0"
             - values:
                 # -min
-                - "0x8000000000000001"
+                - "0x80000001"
                 # -0.0
-                - "0x8000000000000000"
+                - "0x80000000"
             - values:
-                # Some FP value, 3.14159265358979323846
-                - "3.14159265358979323846"
+                # Some FP value, 3.1415927
+                - "3.1415927"
                 - "0"
 
       - file-name: "op_vs_8_nzero"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
         check-type: check-positive
+        tags: ['irtoc_ignore']
         code-template: |
             #
-                fldai.64 -0.0 #
-                fmovi.64 v0, %s
+                fldai -0.0 #
+                fmovi v0, %s
             # Mod of -0.0 and value
-                fmod2.64 v0
-                fmovi.64 v1, %s
-                fcmpg.64 v1
-        description: Check fmod2.64 with -0 and various values (NaN, Inf, min, max, numbers).
+                fmod2 v0
+                fmovi v1, %s
+                fcmpg v1
+        description: Check fmod2 with -0 and various values (NaN, Inf, min, max, numbers).
         cases:
           - values:
               # +Inf
-              - "0x7ff0000000000000"
+              - "0x7f800000"
               - "0"
           - values:
               # -Inf
-              - "0xfff0000000000000"
+              - "0xff800000"
               - "0"
           - values:
               - "1"
               # -0.0d
-              - "0x8000000000000000"
+              - "0x80000000"
           - values:
               - "-1"
               - "0"
           - values:
               # +max
-              - "0x7fefffffffffffff"
+              - "0x7f7fffff"
               # -0.0d
-              - "0x8000000000000000"
+              - "0x80000000"
           - values:
               # -max
-              - "0xffefffffffffffff"
+              - "0xff7fffff"
               - "0"
           - values:
               # +min
-              - "0x0000000000000001"
+              - "0x00000001"
               # -0.0d
-              - "0x8000000000000000"
+              - "0x80000000"
           - values:
               # -min
-              - "0x8000000000000001"
+              - "0x80000001"
               - "0"
           - values:
-              - "3.14159265358979323846"
+              - "3.1415927"
               # -0.0d
-              - "0x8000000000000000"
+              - "0x80000000"
           - values:
               # Some FP value,
-              - "-3.14159265358979323846"
+              - "-3.1415927"
               - "0"
 
       - file-name: "op_vs_8_pone"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
         check-type: check-positive
+        tags: ['irtoc_ignore']
         code-template: |
             #
-                fldai.64 1.0 #
-                fmovi.64 v0, %s
+                fldai 1.0 #
+                fmovi v0, %s
             # Mod of 1.0 and value
-                fmod2.64 v0
-                fmovi.64 v1, %s
-                fcmpg.64 v1
-        description: Check fmod2.64 with +1 and various values (NaN, Inf, min, max, numbers).
+                fmod2 v0
+                fmovi v1, %s
+                fcmpg v1
+        description: Check fmod2 with +1 and various values (NaN, Inf, min, max, numbers).
         cases:
           - values:
               - "1"
@@ -424,55 +425,56 @@ tests:
               - "0"
           - values:
               # +Inf
-              - "0x7ff0000000000000"
+              - "0x7f800000"
               - "1"
           - values:
               # -Inf
-              - "0xfff0000000000000"
+              - "0xff800000"
               - "1"
           - values:
               # +max
-              - "0x7fefffffffffffff"
+              - "0x7f7fffff"
               - "1"
           - values:
               # -max
-              - "0xffefffffffffffff"
+              - "0xff7fffff"
               - "1"
           - values:
               # +min
-              - "0x0000000000000001"
+              - "0x00000001"
               - "0"
           - values:
               # -min
-              - "0x8000000000000001"
+              - "0x80000001"
               - "0"
           - values:
               # Some FP value,
-              - "3.14159265358979323846"
+              - "3.1415927"
               - "1"
           - values:
-              - "-3.14159265358979323846"
+              - "-3.1415927"
               - "1"
           - values:
-              - "1234567890.987654321"
+              - "1234.9876"
               - "1"
 
       - file-name: "op_vs_8_none"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
         check-type: check-positive
+        tags: ['irtoc_ignore']
         code-template: |
             #
-                fldai.64 -1.0 #
-                fmovi.64 v0, %s
+                fldai -1.0 #
+                fmovi v0, %s
             # Mod of -1.0 and value
-                fmod2.64 v0
-                fmovi.64 v1, %s
-                fcmpg.64 v1
-        description: Check fmod2.64 with -1 and various values (NaN, Inf, min, max, numbers).
+                fmod2 v0
+                fmovi v1, %s
+                fcmpg v1
+        description: Check fmod2 with -1 and various values (NaN, Inf, min, max, numbers).
         cases:
           - values:
               - "1"
@@ -482,55 +484,56 @@ tests:
               - "-0.0"
           - values:
               # +Inf
-              - "0x7ff0000000000000"
+              - "0x7f800000"
               - "-1"
           - values:
               # -Inf
-              - "0xFFF0000000000000"
+              - "0xFF800000"
               - "-1"
           - values:
               # +max
-              - "0x7fefffffffffffff"
+              - "0x7f7fffff"
               - "-1"
           - values:
               # -max
-              - "0xffefffffffffffff"
+              - "0xff7fffff"
               - "-1"
           - values:
               # +min
-              - "0x0000000000000001"
+              - "0x00000001"
               - "-0.0"
           - values:
               # -min
-              - "0x8000000000000001"
+              - "0x80000001"
               - "-0.0"
           - values:
               # Some FP value,
-              - "3.14159265358979323846"
+              - "3.1415927"
               - "-1"
           - values:
-              - "-3.14159265358979323846"
+              - "-3.1415927"
               - "-1"
           - values:
-              - "1234567890.987654321"
+              - "1234.9876"
               - "-1"
 
       - file-name: "op_vs_8"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
         check-type: check-positive
+        tags: ['irtoc_ignore']
         code-template: |
             #
-                fldai.64 %s #
-                fmovi.64 v0, %s
+                fldai %s #
+                fmovi v0, %s
             # Mod of -1.0 and value
-                fmod2.64 v0
-                fmovi.64 v1, %s
-                fcmpg.64 v1
-        description: Check fmod2.64 with various values.
+                fmod2 v0
+                fmovi v1, %s
+                fcmpg v1
+        description: Check fmod2 with various values.
         cases:
             - values:
                 - "1.0"
@@ -545,101 +548,104 @@ tests:
                 - "1.0"
                 - "0.0"
             - values:
-                - "1.0e100"
-                - "1.0e100"
+                - "1.0e10"
+                - "1.0e10"
                 - "0.0"
             - values:
-                - "1.0e100"
-                - "-1.0e100"
+                - "1.0e10"
+                - "-1.0e10"
                 - "-0.0"
             - values:
-                - "1.0e+100"
-                - "1.0e-100"
-                - "9.885752855515831e-101"
+                - "1.0e+10"
+                - "1.0e-10"
+                - "2.6432634e-11"
             - values:
-                - "-1.0e100"
-                - "1.0e100"
+                - "-1.0e10"
+                - "1.0e10"
                 - "-0.0"
             - values:
-                - "-1.0e-100"
-                - "1.0e-100"
+                - "-1.0e-10"
+                - "1.0e-10"
                 - "-0.0"
             - values:
-                - "-1.0e+100"
-                - "-1.0e-100"
-                - "-9.885752855515831e-101"
+                - "-1.0e+10"
+                - "-1.0e-10"
+                - "-2.6432634e-11"
             - values:
-                - "3.14159265358979323846"
-                - "-3.14159265358979323846"
+                - "3.1415927"
+                - "-3.1415927"
                 - "0.0"
             - values:
-                - "3.14159265358979323846e100"
-                - "-3.14159265358979323846e100"
+                - "3.1415927e10"
+                - "-3.1415927e10"
                 - "-0.0"
+#            - values:
+#              # TODO add test cases for maximal and minimal FP value in decimal scientific literal
 
       - file-name: "op_vs_8_max"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
         check-type: check-positive
+        tags: ['irtoc_ignore']
         code-template: |
             #
-                fldai.64 %s
-                fmovi.64 v0, %s
+                fldai %s
+                fmovi v0, %s
             # Mod of two values
-                fmod2.64 v0
-                fmovi.64 v1, 0
-                fcmpg.64 v1
-        description: Check fmod2.64 with various maximal values.
+                fmod2 v0
+                fmovi v1, 0
+                fcmpg v1
+        description: Check fmod2 with various maximal values.
         cases:
           - values:
               # +max
-              - "0x7fefffffffffffff"
+              - "0x7f7fffff"
               # +max
-              - "0x7fefffffffffffff"
+              - "0x7f7fffff"
           - values:
               # -max
-              - "0xffefffffffffffff"
-              - "0xffefffffffffffff"
+              - "0xff7fffff"
+              - "0xff7fffff"
           - values:
               # +max
-              - "0x7fefffffffffffff"
+              - "0x7f7fffff"
               # -max
-              - "0xffefffffffffffff"
+              - "0xff7fffff"
           - values:
               # +max
-              - "0x7fefffffffffffff"
+              - "0x7f7fffff"
               - "1"
           - values:
               # +max
-              - "0x7fefffffffffffff"
+              - "0x7f7fffff"
               - "-1"
           - values:
               # -max
-              - "0xffefffffffffffff"
+              - "0xff7fffff"
               - "1"
           - values:
               # -max
-              - "0xffefffffffffffff"
+              - "0xff7fffff"
               - "-1"
 
       - file-name: "op_vs_8_zeroes_nan"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
-        check-type: check-acc-nan
+        check-type: check-acc-nan-f32
+        tags: ['irtoc_ignore']
         code-template: |
             #
-                fldai.64 %s #
-                fmovi.64 v0, %s
+                fldai %s #
+                fmovi v0, %s
             # Mod of -1.0 and value
-                fmod2.64 v0
-        description: Check fmod2.64 with zeroes.
-        tags: [aot-fail]
+                fmod2 v0
+        description: Check fmod2 with zeroes.
         bugid: ['3846']
         cases:
             - values:
@@ -658,21 +664,21 @@ tests:
       - file-name: "incorrect_reg"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
         check-type: none
         runner-options: [compile-failure]
-        description: Check fmod2.64 with incorrect register numbers.
+        description: Check fmod2 with incorrect register numbers.
         code-template: |
           #
-              fmod2.64 %s
+              fmod2 %s
         cases:
           - values: [v256]
           - values: [v65535]
           - values: [a0]
           - values: [a255]
-          - values: [null]
+          - values: ['null']
           - values: [0]
           - values: [1.1]
           - values: ['2.2']
@@ -680,15 +686,15 @@ tests:
       - file-name: "reg_number"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
         check-type: none
         runner-options: [compile-only]
-        description: Check fmod2.64 with correct register numbers.
+        description: Check fmod2 with correct register numbers.
         code-template: |
           #
-              fmod2.64 %s
+              fmod2 %s
         cases:
           - values: [v0]
           - values: [v16]
@@ -698,112 +704,72 @@ tests:
       - file-name: "calc"
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
         check-type: check-positive
         code-template: |
             #
-                fldai.64 %s #
-                fmovi.64 v0, %s
-                fmod2.64 v0
-                fmovi.64 v1, %s
-                fcmpg.64 v1
-        description: Check fmod2.64 with various values.
-        tags: ['tsan']
+                fldai %s #
+                fmovi v0, %s
+                fmod2 v0
+                fmovi v1, %s
+                fcmpg v1
+        description: Check fmod2 with various values.
+        tags: ['tsan', 'irtoc_ignore']
         cases:
           - values:
-              - "0.12018311893073663"
-              - "-0.025131139878436515"
-              - "0.019658559416990573"
+              - "0.1201831"
+              - "-0.0251311"
+              - "0.0196587"
           - values:
-              - "0.22440258667093504"
-              - "0.29473667141886917"
-              - "0.22440258667093504"
+              - "0.2244025"
+              - "0.2947366"
+              - "0.2244025"
           - values:
-              - "0.3033862126622541"
-              - "-0.3756010672721948"
-              - "0.3033862126622541"
+              - "0.3033862"
+              - "-0.375601"
+              - "0.3033862"
           - values:
-              - "0.2936997127243267"
-              - "-0.1764426330424449"
-              - "0.11725707968188182"
+              - "0.2936997"
+              - "-0.1764426"
+              - "0.11725712"
           - values:
-              - "-0.09956939773023954"
-              - "-0.3877892950497467"
-              - "-0.09956939773023954"
+              - "-0.0995693"
+              - "-0.3877892"
+              - "-0.0995693"
           - values:
-              - "0.3314930901944054"
-              - "-0.13506203672501027"
-              - "0.061369016744384886"
+              - "0.33149309"
+              - "-0.13506203"
+              - "0.06136903"
           - values:
-              - "0.12451977351331212"
-              - "-0.39010722580021084"
-              - "0.12451977351331212"
+              - "0.12451977"
+              - "-0.39010722"
+              - "0.12451977"
           - values:
-              - "0.22556927027597906"
-              - "-0.3969391565251753"
-              - "0.22556927027597906"
+              - "0.2255692"
+              - "-0.3969391"
+              - "0.2255692"
           - values:
-              - "-0.35731514337836257"
-              - "0.3968803690491226"
-              - "-0.35731514337836257"
+              - "-0.3573151"
+              - "0.3968803"
+              - "-0.3573151"
           - values:
-              - "0.16934379656892917"
-              - "0.40037033331415206"
-              - "0.16934379656892917"
-          - values:
-              - "2.764634450793475e-72"
-              - "2.0593829964602962e61"
-              - "2.764634450793475e-72"
-          - values:
-              - "4.290222845632546e-94"
-              - "-5.310600113825947e93"
-              - "4.290222845632546e-94"
-          - values:
-              - "2.814056900722342e-31"
-              - "2.4791336743619776e78"
-              - "2.814056900722342e-31"
-          - values:
-              - "-4.372802884913136e-54"
-              - "-1.61600705349081e30"
-              - "-4.372802884913136e-54"
-          - values:
-              - "-1.4731713675366709e13"
-              - "-3.3542106259826996e91"
-              - "-1.4731713675366709e13"
-          - values:
-              - "-1.88388347188423"
-              - "-1.999969914515257e-71"
-              - "-1.833137632695426e-71"
-          - values:
-              - "3.938475013167094e-93"
-              - "1.7543416973210034e72"
-              - "3.938475013167094e-93"
-          - values:
-              - "2.2405919845682808e21"
-              - "-3.4260926065796194e48"
-              - "2.2405919845682808e21"
-          - values:
-              - "-6.920653318603553e47"
-              - "-1.3028837314073981e-65"
-              - "-1.200852789951636e-65"
-          - values:
-              - "-4.407583571028892e-90"
-              - "-0.0031674185526174184"
-              - "-4.407583571028892e-90"
+              - "0.16934379"
+              - "0.40037033"
+              - "0.16934379"
 
       - file-name: "type"
         isa:
             instructions:
-              - sig: fmod2.64 v:in:f64
-                acc: inout:f64
+              - sig: fmod2 v:in:f32
+                acc: inout:f32
                 format: [op_v_8]
             verification:
               - acc_type
               - v1_type
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -814,17 +780,19 @@ tests:
           .function i32 main() {
               %s
               *s
-              fmod2.64 v0
+              fmod2 v0
         check-type: exit-positive
-        description: Check 'fmod2.64' with incorrect register and accumulator type.
+        description: Check 'fmod2' with incorrect register and accumulator type.
         template-cases:
           - values:
               - movi v0, 0
           - values:
               - movi.64 v0, 0
           - values:
-              - fmovi.64 v0, 0
+              - fmovi v0, 0
             exclude: [val]
+          - values:
+              - fmovi.64 v0, 0
           - values:
               - |
                 #
@@ -859,8 +827,10 @@ tests:
           - values:
               - ldai.64 0
           - values:
-              - fldai.64 0
+              - fldai 0
             id: val
+          - values:
+              - fldai.64 0
           - values:
               - |
                 #
@@ -881,7 +851,7 @@ tests:
               - |
                 #
                     movi v1, 10
-                    newarr v1, v1, f64[]
+                    newarr v1, v1, f32[]
                     lda.obj v1
           - values:
               - lda.null
@@ -889,26 +859,24 @@ tests:
       - file-name: uninitialized_regs
         isa:
           instructions:
-            - sig: fmod2.64 v:in:f64
-              acc: inout:f64
+            - sig: fmod2 v:in:f32
+              acc: inout:f32
               format: [op_v_8]
-        description: Check 'fmod2.64' with uninitialized register and accumulator.
+        description: Check 'fmod2' with uninitialized register and accumulator.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        header-template: []
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
             #
-            .function i32 main() {
                 %s
                 *s
-                fmod2.64 %s
+                fmod2 %s
         check-type: exit-positive
         template-cases:
           - values:
               - ''
               - v0
           - values:
-              - fmovi.64 v0, 0
+              - fmovi v0, 0
               - v0
             exclude: [init]
           - values:
@@ -918,26 +886,26 @@ tests:
               - ''
               - v15
           - values:
-              - fmovi.64 v15, 0
+              - fmovi v15, 0
               - v15
             exclude: [init]
           - values:
               - ''
               - v128
           - values:
-              - fmovi.64 v128, 0
+              - fmovi v128, 0
               - v128
             exclude: [init]
           - values:
               - ''
               - v255
           - values:
-              - fmovi.64 v255, 0
+              - fmovi v255, 0
               - v255
             exclude: [init]
         cases:
           - values:
               - ''
           - values:
-              - fldai.64 0
+              - fldai 0
             id: init

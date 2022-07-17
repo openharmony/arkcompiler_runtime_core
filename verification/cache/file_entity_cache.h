@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_CACHE_FILE_ENTITY_CACHE_H_
-#define PANDA_VERIFICATION_CACHE_FILE_ENTITY_CACHE_H_
+#ifndef _PANDA_VERIFIER_CACHE_FILE_ENTITY_CACHE_H__
+#define _PANDA_VERIFIER_CACHE_FILE_ENTITY_CACHE_H__
 
 #include "macros.h"
 
-#include "verification/util/misc.h"
-#include "verification/util/invalid_ref.h"
+#include "verification/util/hash.h"
+#include "verification/util/optional_ref.h"
 
 #include "libpandafile/file.h"
 
@@ -31,36 +31,56 @@
 
 namespace panda::verifier {
 
+using TypeIndexT = uint8_t;
+
+template <typename... Types>
+constexpr TypeIndexT TypeIndex = []() {
+    static_assert(sizeof...(Types) > 1, "Type was not found in list");
+    return 0;
+}();
+
+template <typename T, typename... Types>
+constexpr TypeIndexT TypeIndex<T, T, Types...> = 0;
+
+template <typename T, typename U, typename... Types>
+constexpr TypeIndexT TypeIndex<T, U, Types...> = []() {
+    constexpr TypeIndexT result = 1 + TypeIndex<T, Types...>;
+    static_assert(result != 0, "Overflow! TypeIndex used with more than 255 arguments");
+    return result;
+}();
+
 template <typename... CachedTypes>
 class FileEntityCache {
-    using Storage = PandaUnorderedMap<std::pair<uint64_t, std::pair<uint32_t, size_t>>, void *>;
-    using EntityTypes = std::tuple<CachedTypes...>;
+    using FileId = uint64_t;
+    using Key = std::tuple<FileId, panda_file::File::EntityId, TypeIndexT>;
+
+    template <typename Entity>
+    Key GetKey(const panda_file::File &pf, panda_file::File::EntityId id)
+    {
+        return {pf.GetUniqId(), id, TypeIndex<Entity, CachedTypes...>};
+    }
 
 public:
     template <typename Entity>
-    Entity &GetCached(const panda_file::File *pf, uint32_t file_offset) const
+    OptionalRef<Entity> GetCached(const panda_file::File &pf, panda_file::File::EntityId id)
     {
-        const auto it = storage.find(std::make_pair(
-            pf->GetUniqId(), std::make_pair(file_offset, std::tuple_type_index<Entity, EntityTypes>::value)));
+        const auto it = storage.find(GetKey<Entity>(pf, id));
         if (it != storage.cend()) {
-            return *reinterpret_cast<Entity *>(it->second);
+            return *static_cast<Entity *>(it->second);
         }
-        return Invalid<Entity>();
+        return {};
     }
 
     template <typename Entity>
-    void AddToCache(const panda_file::File *pf, uint32_t file_offset, const Entity &entity)
+    void AddToCache(const panda_file::File &pf, panda_file::File::EntityId id, Entity &entity)
     {
-        storage.insert_or_assign(
-            std::make_pair(pf->GetUniqId(),
-                           std::make_pair(file_offset, std::tuple_type_index<Entity, EntityTypes>::value)),
-            const_cast<void *>(reinterpret_cast<const void *>(&entity)));
+        storage.insert_or_assign(GetKey<Entity>(pf, id), &entity);
     }
 
 private:
-    Storage storage;
+    PandaUnorderedMap<Key, void *> storage;
 };
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_CACHE_FILE_ENTITY_CACHE_H_
+#endif  // !_PANDA_VERIFIER_CACHE_FILE_ENTITY_CACHE_H__

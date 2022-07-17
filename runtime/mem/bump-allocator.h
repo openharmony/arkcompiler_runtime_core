@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,16 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_BUMP_ALLOCATOR_H_
-#define PANDA_RUNTIME_MEM_BUMP_ALLOCATOR_H_
+#ifndef RUNTIME_MEM_PANDA_BUMP_ALLOCATOR_H
+#define RUNTIME_MEM_PANDA_BUMP_ALLOCATOR_H
 
 #include <functional>
 #include <memory>
 
 #include "mem/mem_pool.h"
 #include "libpandabase/macros.h"
-#include "libpandabase/mem/arena.h"
+#include "libpandabase/mem/arena-inl.h"
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/mem/mem_range.h"
 #include "runtime/mem/tlab.h"
@@ -145,9 +144,6 @@ private:
     class TLABsManager {
     public:
         explicit TLABsManager(size_t tlabs_max_count) : tlabs_max_count_(tlabs_max_count), tlabs_(tlabs_max_count) {}
-        ~TLABsManager() = default;
-        DEFAULT_MOVE_SEMANTIC(TLABsManager);
-        DEFAULT_COPY_SEMANTIC(TLABsManager);
 
         void Reset()
         {
@@ -203,4 +199,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_BUMP_ALLOCATOR_H_
+#endif  // RUNTIME_MEM_PANDA_BUMP_ALLOCATOR_H

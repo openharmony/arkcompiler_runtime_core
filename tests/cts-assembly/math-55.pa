@@ -58,7 +58,7 @@
     return.64
 }
 
-.function u1 main() {
+.function i32 main() {
     movi v0, 10
     movi v1, 12
     call.short mneg_i32_0, v0, v1

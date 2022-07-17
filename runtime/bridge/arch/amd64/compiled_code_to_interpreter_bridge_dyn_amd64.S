@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 #include "arch/asm_support.h"
 #include "arch/amd64/helpers_amd64.S"
 
-// Frame* CreateFrameForMethodWithActualArgs(uint32_t num_actual_args, Method* method, Frame* prev);
-.extern CreateFrameForMethodWithActualArgs
+// Frame* CreateFrameForMethodWithActualArgsDyn(uint32_t num_actual_args, Method* method, Frame* prev);
+.extern CreateFrameForMethodWithActualArgsDyn
 // void InterpreterEntryPoint(Method* pc, Frame* frame, bool is_dynamic);
 .extern InterpreterEntryPoint
 // void FreeFrame(Frame* frame);
@@ -37,15 +37,13 @@ CompiledCodeToInterpreterBridgeDyn:
     // method:      %rdi
     // num_args:    %rsi
     // func_obj:    %rdx
-    // func_tag:    %rcx
     // arg_0:       %r8
-    // tag_0:       %r9
     // arg_i:       8*i(%rbp)
     // tag_i:       8*(i+1)(%rbp)
 
     // Save return address to the TLS field
     movq (%rsp), %rax
-    movq %rax, THREAD_NATIVE_PC(%THREAD_REG)
+    movq %rax, MANAGED_THREAD_NATIVE_PC_OFFSET(%THREAD_REG)
 
     pushq $COMPILED_CODE_TO_INTERPRETER_BRIDGE
     CFI_ADJUST_CFA_OFFSET(8)
@@ -77,7 +75,7 @@ CompiledCodeToInterpreterBridgeDyn:
     // Before we call IncrementHotnessCounter we should set pointer to C2I frame in the TLS,
     // because compilation may fall into safepoint, so we need to make caller's callee registers
     // visible for the stack walker.
-    movq %rbp, THREAD_CURRENT_FRAME(%THREAD_REG)
+    movq %rbp, MANAGED_THREAD_FRAME_OFFSET(%THREAD_REG)
 
     PUSH_GENERAL_REGS
 
@@ -87,7 +85,7 @@ CompiledCodeToInterpreterBridgeDyn:
 
     // Compilation successfully done, so recover caller's frame in the TLS, since C2I is not needed.
     movq (%rbp), %r8
-    movq %r8, THREAD_CURRENT_FRAME(%THREAD_REG)
+    movq %r8, MANAGED_THREAD_FRAME_OFFSET(%THREAD_REG)
 
     POP_GENERAL_REGS
 
@@ -129,8 +127,8 @@ CompiledCodeToInterpreterBridgeDyn:
 
     movq %r14, %rsi
     leaq (%rbp), %rdx
-    // Frame* CreateFrameForMethodWithActualArgs(uint32_t num_actual_args, Method* method, Frame* prev);
-    callq CreateFrameForMethodWithActualArgs@plt
+    // Frame* CreateFrameForMethodWithActualArgsDyn(uint32_t num_actual_args, Method* method, Frame* prev);
+    callq CreateFrameForMethodWithActualArgsDyn@plt
     movq %rax, %r12 // iframe*
 
     POP_GENERAL_REGS
@@ -139,37 +137,33 @@ CompiledCodeToInterpreterBridgeDyn:
     // %rax         - iframe.vregs_ + num_vregs_
     // %rdi         - stack args
     // %rsi         - num args
-    // %rdx/%rcx    - func obj
-    // %r8/%r9      - arg0
+    // %rdx         - func obj
+    // %r8          - arg0
     // %rbx         - method*
     // %r12         - iframe*
     // %r13         - num of rest arguments
     movl FRAME_NUM_VREGS_OFFSET(%rax), %ebx
     subl %r15d, %ebx
-    shll $4, %ebx
+    shll $3, %ebx
     leaq FRAME_VREGS_OFFSET(%r12,%rbx), %rax
     movq %rdi, %rbx // method*
     leaq 24(%rbp), %rdi
 
     movq %rdx, (%rax)
-    movq %rcx, FRAME_VREGISTER_TAG_OFFSET(%rax)
     addq $FRAME_VREGISTER_SIZE, %rax
     cmpl $0, %esi
     je .Lrest_args
 
     movq %r8, (%rax)
-    movq %r9, FRAME_VREGISTER_TAG_OFFSET(%rax)
     addq $FRAME_VREGISTER_SIZE, %rax
     subl $1, %esi
     je .Lrest_args
 
 .Lloop:
     movq (%rdi), %rdx
-    movq FRAME_VREGISTER_TAG_OFFSET(%rdi), %rcx
     addq $FRAME_VREGISTER_SIZE, %rdi
 
     movq %rdx, (%rax)
-    movq %rcx, FRAME_VREGISTER_TAG_OFFSET(%rax)
     addq $FRAME_VREGISTER_SIZE, %rax
 
     subl $1, %esi
@@ -193,7 +187,6 @@ CompiledCodeToInterpreterBridgeDyn:
     test %r13, %r13
     je .Lcall_interpreter
     movq %rax, (%r14)
-    movq %rdx, FRAME_VREGISTER_TAG_OFFSET(%r14)
     addq $FRAME_VREGISTER_SIZE, %r14
     subl $1, %r13d
     jmp 1b
@@ -213,7 +206,7 @@ CompiledCodeToInterpreterBridgeDyn:
     leaq FRAME_ACC_OFFSET(%r12), %rax
 
     movq (%rax), %r13
-    movq FRAME_VREGISTER_TAG_OFFSET(%rax), %r14
+    movq FRAME_ACC_MIRROR_OFFSET(%rax), %r14
 
     movq %r12, %rdi
     // void FreeFrame(Frame* frame);

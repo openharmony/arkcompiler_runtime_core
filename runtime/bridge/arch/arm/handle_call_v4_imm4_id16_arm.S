@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
     // handle call.acc.short || call.virt.acc.short
     // regs contain the following (see runtime/bridge/arch/arm/interpreter_to_compiled_code_bridge_arm.S)
     // r0 - SHORTY_PTR_REG, r1 - SHORTY_REG, r2 - shorty value, r3 - insn, r4 - insn_ptr,
-    // r5 - iframe, r6 and r7 - temps, r8 - pointer to stack, lr - method
+    // r5 - iframe.vregs, r6 and r7 - temps, r8 - pointer to stack, lr - method
     NEXT_SHORTY r2
     cmp r2, #0
     beq .Linvoke_from_bridge
@@ -30,9 +30,8 @@
     beq 11f
 
     // 'call vreg, acc' case
-
     and r6, r3, #0xF
-    add r6, r5, r6, lsl #4
+    add r6, r5, r6, lsl #3
     // handle the first arg index
     PUSH_ARG r6, r8, r6, r7, 10f
 
@@ -47,7 +46,6 @@
 11:
     // 'call acc, vreg' case
     // handle acc
-
     sub r6, r5, #(FRAME_VREGS_OFFSET - FRAME_ACC_OFFSET)
     PUSH_ARG r6, r8, r6, r7, 12f
 
@@ -57,5 +55,5 @@
     beq .Linvoke_from_bridge
     // handle arg index
     and r6, r3, #0xF
-    add r6, r5, r6, lsl #4
+    add r6, r5, r6, lsl #3
     PUSH_ARG r6, r8, r6, r7, .Linvoke_from_bridge

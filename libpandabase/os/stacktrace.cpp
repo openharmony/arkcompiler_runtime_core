@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,8 +137,7 @@ private:
         out << "??:??\n";
     }
 
-    void PrintFrame(const std::string &function, const std::string &src_file, unsigned int line,
-                    std::ostream &out) const
+    void PrintFrame(const std::string &function, const std::string &src_file, unsigned int line, std::ostream &out)
     {
         if (function.empty()) {
             out << "??";
@@ -161,7 +160,7 @@ private:
         out << "\n";
     }
 
-    void PrintFrame(const std::string &function, uintptr_t offset, std::ostream &out) const
+    void PrintFrame(const std::string &function, uintptr_t offset, std::ostream &out)
     {
         std::ios_base::fmtflags f = out.flags();
         Demangle(function, out);
@@ -169,7 +168,7 @@ private:
         out.flags(f);
     }
 
-    bool ReadSymbol(uintptr_t pc, std::string *function, uintptr_t *offset) const
+    bool ReadSymbol(uintptr_t pc, std::string *function, uintptr_t *offset)
     {
         Dl_info info {};
         if (dladdr(reinterpret_cast<void *>(pc), &info) != 0 && info.dli_sname != nullptr) {
@@ -180,7 +179,7 @@ private:
         return false;
     }
 
-    void Demangle(const std::string &function, std::ostream &out) const
+    void Demangle(const std::string &function, std::ostream &out)
     {
         size_t length = 0;
         int status = 0;
@@ -204,7 +203,7 @@ private:
         return nullptr;
     }
 
-    bool ReadDebugInfo(VmaEntry *vma) const
+    bool ReadDebugInfo(VmaEntry *vma)
     {
         if (vma->status == VmaEntry::VALID) {
             return true;
@@ -261,9 +260,7 @@ private:
 class Buf {
 public:
     Buf(uintptr_t *buf, size_t skip, size_t capacity) : buf_(buf), skip_(skip), size_(0), capacity_(capacity) {}
-    ~Buf() = default;
-    DEFAULT_MOVE_SEMANTIC(Buf);
-    DEFAULT_COPY_SEMANTIC(Buf);
+
     void Append(uintptr_t pc)
     {
         if (skip_ > 0) {

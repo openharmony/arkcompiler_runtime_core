@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,21 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_LIBPANDABASE_UTILS_HASH_H_
-#define PANDA_LIBPANDABASE_UTILS_HASH_H_
+#ifndef LIBPANDABASE_UTILS_HASH_H
+#define LIBPANDABASE_UTILS_HASH_H
 
 #include "murmur3_hash.h"
 
 namespace panda {
 
-// Now, murmur3 Hash is used by default
+// Now, murmur3 hash is used by default
 template <uint32_t seed_value>
 using DefaultHash = MurmurHash32<seed_value>;
 
 // Default seed which is used in hash functions.
-// NOTE: To create different seeds for your purposes,
-// you must define it here and create new alias hash class
+// NOTE: To create different seed for your purposes,
+// one must define it here and create new alias hash class
 static constexpr uint32_t DEFAULT_SEED = 0x12345678U;
 
 // Hash class alias with the default seed inside.
@@ -36,8 +35,8 @@ using Hash = DefaultHash<DEFAULT_SEED>;
  * \brief Create 32 bits Hash from \param key via \param seed.
  * @param key - a key which should be hashed
  * @param len - length of the key in bytes
- * @param seed - seed which is used to calculate Hash
- * @return 32 bits Hash
+ * @param seed - seed which is used to calculate hash
+ * @return 32 bits hash
  */
 inline uint32_t GetHash32WithSeed(const uint8_t *key, size_t len, uint32_t seed)
 {
@@ -48,7 +47,7 @@ inline uint32_t GetHash32WithSeed(const uint8_t *key, size_t len, uint32_t seed)
  * \brief Create 32 bits Hash from \param key.
  * @param key - a key which should be hashed
  * @param len - length of the key in bytes
- * @return 32 bits Hash
+ * @return 32 bits hash
  */
 inline uint32_t GetHash32(const uint8_t *key, size_t len)
 {
@@ -58,7 +57,7 @@ inline uint32_t GetHash32(const uint8_t *key, size_t len)
 /**
  * \brief Create 32 bits Hash from MUTF8 \param string.
  * @param string - a pointer to the MUTF8 string
- * @return 32 bits Hash
+ * @return 32 bits hash
  */
 inline uint32_t GetHash32String(const uint8_t *mutf8_string)
 {
@@ -68,8 +67,8 @@ inline uint32_t GetHash32String(const uint8_t *mutf8_string)
 /**
  * \brief Create 32 bits Hash from MUTF8 \param string.
  * @param string - a pointer to the MUTF8 string
- * @param seed - seed which is used to calculate Hash
- * @return 32 bits Hash
+ * @param seed - seed which is used to calculate hash
+ * @return 32 bits hash
  */
 inline uint32_t GetHash32StringWithSeed(const uint8_t *mutf8_string, uint32_t seed)
 {
@@ -78,7 +77,7 @@ inline uint32_t GetHash32StringWithSeed(const uint8_t *mutf8_string, uint32_t se
 
 constexpr uint32_t FNV_INITIAL_SEED = 0x811c9dc5;
 
-// Works like FNV Hash but operates over 4-byte words at a time instead of single bytes
+/// Works like FNV hash but operates over 4-byte words at a time instead of single bytes
 template <typename Item>
 uint32_t PseudoFnvHashItem(Item item, uint32_t seed = FNV_INITIAL_SEED)
 {
@@ -96,7 +95,7 @@ uint32_t PseudoFnvHashItem(Item item, uint32_t seed = FNV_INITIAL_SEED)
     }
 }
 
-// Works like FNV Hash but operates over 4-byte words at a time instead of single bytes
+/// Works like FNV hash but operates over 4-byte words at a time instead of single bytes
 inline uint32_t PseudoFnvHashString(const uint8_t *str, uint32_t hash = FNV_INITIAL_SEED)
 {
     while (true) {
@@ -125,6 +124,7 @@ inline uint32_t PseudoFnvHashString(const uint8_t *str, uint32_t hash = FNV_INIT
     return hash;
 }
 
+// TODO(romanov,dyadov) Either rename to PseudoFnvHash or implement and call original FNV
 template <typename Container>
 uint32_t FnvHash(const Container &data, uint32_t hash = FNV_INITIAL_SEED)
 {
@@ -134,7 +134,9 @@ uint32_t FnvHash(const Container &data, uint32_t hash = FNV_INITIAL_SEED)
     return hash;
 }
 
-// Combine lhash and rhash
+/**
+ * Combine lhash and rhash
+ */
 inline size_t merge_hashes(size_t lhash, size_t rhash)
 {
     constexpr const size_t magic_constant = 0x9e3779b9;
@@ -143,6 +145,20 @@ inline size_t merge_hashes(size_t lhash, size_t rhash)
     return lhash ^ (rhash + magic_constant + shl + shr);
 }
 
+/**
+ * Combine lhash and rhash
+ */
+// this overload is only enabled when it can't conflict with the size_t one
+template <typename T = uint32_t, typename std::enable_if_t<(sizeof(size_t) != sizeof(T)), int> = 0>
+inline uint32_t merge_hashes(uint32_t lhash, uint32_t rhash)
+{
+    // note that the numbers are for 32 bits specifically, see https://github.com/HowardHinnant/hash_append/issues/7
+    constexpr const uint32_t magic_constant = 0x9e3779b9;
+    uint32_t shl = lhash << 6U;
+    uint32_t shr = lhash >> 2U;
+    return lhash ^ (rhash + magic_constant + shl + shr);
+}
+
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_HASH_H_
+#endif  // LIBPANDABASE_UTILS_HASH_H

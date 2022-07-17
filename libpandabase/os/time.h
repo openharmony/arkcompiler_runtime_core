@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_TIME_H_
-#define PANDA_LIBPANDABASE_OS_TIME_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_OS_TIME_H_
+#define PANDA_LIBPANDABASE_PBASE_OS_TIME_H_
 
 #ifdef PANDA_TARGET_UNIX
-#include "os/unix/time.h"
+#include "platforms/unix/libpandabase/time.h"
 #elif PANDA_TARGET_WINDOWS
-#include "os/windows/time.h"
+#include "platforms/windows/libpandabase/time.h"
 #else
 #error "Unsupported platform"
 #endif  // PANDA_TARGET_UNIX
 
+#include <macros.h>
+
 #include <cstdint>
 
+WEAK_FOR_LTO_START
+
 namespace panda::os::time {
+
 uint64_t GetClockTimeInMicro();
 uint64_t GetClockTimeInMilli();
 uint64_t GetClockTimeInThreadCpuTime();
+
 }  // namespace panda::os::time
 
-#endif  // PANDA_LIBPANDABASE_OS_TIME_H_
+WEAK_FOR_LTO_END
+
+#endif  // PANDA_LIBPANDABASE_PBASE_OS_TIME_H_

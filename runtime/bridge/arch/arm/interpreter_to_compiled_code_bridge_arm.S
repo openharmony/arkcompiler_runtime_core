@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,13 @@
     b \next_label
 1:  // it is a 64bit value
     ldm \arg_ptr, {\tmp1, \tmp2}
-    add \stack_ptr, \stack_ptr, #7 // round the address up to 8 bytes boundary
+    add \stack_ptr, \stack_ptr, #7 // round the address up to 8 byte boundary
     bic \stack_ptr, \stack_ptr, #7
     stm \stack_ptr!, {\tmp1, \tmp2}
     b \next_label
 
 2:  // the arg has type 'any'
-    add \stack_ptr, \stack_ptr, #7 // round the address up to 8 bytes boundary
+    add \stack_ptr, \stack_ptr, #7 // round the address up to 8 byte boundary
     bic \stack_ptr, \stack_ptr, #7
     // copy value
     ldr \tmp2, [\arg_ptr], #4
@@ -64,7 +64,7 @@
     beq 1f
     ldr r3, [\begin_ptr], #4
 1:
-    bic sp, sp, #7 // round downd sp to 8 bytes boundary
+    bic sp, sp, #7 // round downd sp to 8byte boundary
 .endm
 
 // The procedure reserves stack space for the arguments
@@ -110,7 +110,7 @@ PrepareArgStack:
     sub sp, sp, #16
     b .Lloop_shorty
 .Lexit:
-    bic sp, sp, #7 // round downd sp to 8 bytes boundary
+    bic sp, sp, #7 // round downd sp to 8byte boundary
     mov pc, lr
 
 // void InterpreterToCompiledCodeBridge(const BytecodeInstruction* insn, const Frame *iframe, const Method *method, ManagedThread* thread)
@@ -136,7 +136,7 @@ InterpreterToCompiledCodeBridge:
     mov THREAD_REG, r3
 
     // According to the current frame kind set the bridge type
-    ldrb r3, [THREAD_REG, #THREAD_FRAME_KIND]
+    ldrb r3, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     cmp r3, #0
     moveq r3, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
     movne r3, #BYPASS_BRIDGE
@@ -151,7 +151,7 @@ InterpreterToCompiledCodeBridge:
     CFI_REL_OFFSET(r4,  -((3 + 6) * 4))
     CFI_REL_OFFSET(r3,  -((3 + 7) * 4))
     sub sp, sp, #4
-    // sp should be 8 bytes aligned
+    // sp should be 8 byte aligned
 
     // save regs to survive call of PrepareArgStack
     // r4 - insn_ptr, r5 - iframe, r6 - method.shorty, r7 - method
@@ -228,7 +228,7 @@ InterpreterToCompiledCodeBridge:
     cmp r2, #SHORTY_REFERENCE
     moveq r4, #1
     movne r4, #0
-    str r4, [r3, #FRAME_VREGISTER_TAG_OFFSET]
+    str r4, [r3, #FRAME_ACC_MIRROR_OFFSET]
     streq r0, [r3]
     beq .Lreturn
     cmp r2, #SHORTY_FIRST_64
@@ -301,7 +301,7 @@ InvokeCompiledCodeWithArgArray:
     ldr THREAD_REG, [fp, #8]
 
     // According to the current frame kind set the bridge type
-    ldrb r2, [THREAD_REG, #THREAD_FRAME_KIND]
+    ldrb r2, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     cmp r2, #0
     moveq r2, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
     movne r2, #BYPASS_BRIDGE

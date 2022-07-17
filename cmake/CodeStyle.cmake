@@ -30,7 +30,7 @@ endif()
 # Function to add targets for clang_format, clang_force_format
 function(add_check_style dir)
     file(GLOB_RECURSE dir_sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${dir}/*.cpp ${dir}/*.cc)
-    file(GLOB_RECURSE dir_headers RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${dir}/*.h)
+    file(GLOB_RECURSE dir_headers RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${dir}/*.h ${dir}/*.inl)
 
     if (CLANG_FORMAT)
         if(TARGET clang_format)
@@ -47,6 +47,10 @@ function(add_check_style dir)
         add_custom_target(check_concurrency_format)
     endif()
 
+    if(NOT TARGET check_atomic_format)
+        add_custom_target(check_atomic_format)
+    endif()
+
     foreach(src ${dir_sources})
         get_filename_component(source ${src} ABSOLUTE)
         file(RELATIVE_PATH src ${PANDA_ROOT} ${source})
@@ -56,6 +60,7 @@ function(add_check_style dir)
             add_clang_force_format(${source} ${src})
         endif()
         add_check_concurrency_format(${source} ${src})
+        add_check_atomic_format(${source} ${src})
     endforeach()
 
     # Also add format-target for headers
@@ -71,6 +76,8 @@ function(add_check_style dir)
         endif()
         add_check_concurrency_format(${source} ${src})
         add_dependencies(check_concurrency_format check_concurrency_format_${src})
+        add_check_atomic_format(${source} ${src})
+        add_dependencies(check_atomic_format check_atomic_format_${src})
     endforeach()
 endfunction()
 
@@ -93,6 +100,18 @@ function(add_check_concurrency_format src tgt)
             COMMAND ${CHECK_CONCURRENCY_FORMAT} ${src}
         )
         add_dependencies(check_concurrency_format check_concurrency_format_${tgt})
+    endif()
+endfunction()
+
+# Function to check correct usage of memory order in atomics.
+function(add_check_atomic_format src tgt)
+    set(CHECK_CONCURRENCY_FORMAT "${PANDA_ROOT}/scripts/run_check_atomic_format.py")
+
+    if (NOT TARGET check_atomic_format_${tgt})
+        add_custom_target(check_atomic_format_${tgt}
+            COMMAND ${CHECK_CONCURRENCY_FORMAT} ${src}
+        )
+        add_dependencies(check_atomic_format check_atomic_format_${tgt})
     endif()
 endfunction()
 

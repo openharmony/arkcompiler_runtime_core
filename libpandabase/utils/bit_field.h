@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_BIT_FIELD_H_
-#define PANDA_LIBPANDABASE_UTILS_BIT_FIELD_H_
+#ifndef LIBPANDABASE_UTILS_BIT_FIELD_H_
+#define LIBPANDABASE_UTILS_BIT_FIELD_H_
 
+#include <limits>
 #include "macros.h"
 
 namespace panda {
@@ -49,7 +50,7 @@ public:
     NO_MOVE_SEMANTIC(BitField);
 
     /*
-     * Make BitField type follow right after current bit range.
+     * Make BitField type that follows right after current bit range.
      *
      *  If we have
      *   BitField<T, 0, 9>
@@ -64,18 +65,26 @@ public:
     using NextField = BitField<T2, start + bits_num, bits_num2>;
 
     /*
-     * Make Flag field follow right after current bit range.
-     * Same as NextField, but no need to specify number of bits. It is always 1.
+     * Make Flag field that follows right after current bit range.
+     * Same as NextField, but no need to specify number of bits, it is always 1.
      */
     using NextFlag = BitField<bool, start + bits_num, 1>;
 
 public:
     /*
-     * Return mask of bit range, i.e. 0b1110 for BitField<T, 1, 3>
+     * Return maximum value that fits bit range [START_BIT : START_BIT+END_BIT]
+     */
+    static constexpr uint64_t MaxValue()
+    {
+        return (1LLU << bits_num) - 1;
+    }
+
+    /*
+     * Return mask of bit range, f.e. 0b1110 for BitField<T, 1, 3>
      */
     static constexpr uint64_t Mask()
     {
-        return ((1LLU << bits_num) - 1) << start;
+        return MaxValue() << start;
     }
 
     /*
@@ -83,7 +92,7 @@ public:
      */
     static constexpr bool IsValid(T value)
     {
-        return (static_cast<uint64_t>(value) & ~((1LLU << bits_num) - 1)) == 0;
+        return (static_cast<uint64_t>(value) & ~MaxValue()) == 0;
     }
 
     /*
@@ -92,21 +101,22 @@ public:
     template <typename Stor>
     static constexpr void Set(T value, Stor *stor)
     {
-        *stor = (*stor & ~Mask()) | (static_cast<uint64_t>(value) << start);
+        static_assert(END_BIT <= std::numeric_limits<Stor>::digits);
+        *stor = (*stor & ~Mask()) | Encode(value);
     }
 
     /*
      * Return bit range [START_BIT : START_BIT+END_BIT] value from given integer 'value'
      */
-    constexpr static T Get([[maybe_unused]] uint64_t value)
+    static constexpr T Get(uint64_t value)
     {
-        return static_cast<T>((value >> start) & ((1LLU << bits_num) - 1));
+        return static_cast<T>((value >> start) & MaxValue());
     }
 
     /*
      * Encode 'value' to current bit range [START_BIT : START_BIT+END_BIT] and return it
      */
-    static uint64_t Encode(T value)
+    static constexpr uint64_t Encode(T value)
     {
         ASSERT(IsValid(value));
         return (static_cast<uint64_t>(value) << start);
@@ -115,21 +125,20 @@ public:
     /*
      * Update 'value' to current bit range [START_BIT : START_BIT+END_BIT] and return it
      */
-    static uint64_t Update(uint64_t old_value, T value)
+    static constexpr uint64_t Update(uint64_t old_value, T value)
     {
-        ASSERT(IsValid(value));
-        return (old_value & ~Mask()) | (static_cast<uint64_t>(value) << start);
+        return (old_value & ~Mask()) | Encode(value);
     }
 
     /*
      * Decode from value
      */
-    static T Decode(uint64_t value)
+    static constexpr T Decode(uint64_t value)
     {
-        return static_cast<T>((value >> start) & ((1LLU << bits_num) - 1));
+        return Get(value);
     }
 };
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_BIT_FIELD_H_
+#endif  // LIBPANDABASE_UTILS_BIT_FIELD_H_

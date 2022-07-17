@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_TOOLING_PT_VALUE_H_
-#define PANDA_RUNTIME_INCLUDE_TOOLING_PT_VALUE_H_
+#ifndef PANDA_TOOLING_PT_VALUE_H
+#define PANDA_TOOLING_PT_VALUE_H
 
 #include <cstdint>
 #include "libpandabase/macros.h"
 
 namespace panda::tooling {
+// Deprecated API
 class PtValueMeta {
 public:
     explicit PtValueMeta(uint64_t data = 0) : data_(data) {}
@@ -43,9 +43,12 @@ private:
     uint64_t data_;  // Language dependent data
 };
 
+// Deprecated API
 class PtValue {
 public:
-    explicit PtValue(int64_t value = 0, PtValueMeta meta = PtValueMeta()) : value_(value), meta_(meta) {}
+    explicit PtValue(int64_t value = 0) : value_(value) {}
+
+    PtValue(int64_t value, PtValueMeta /* unused */) : value_(value) {}
 
     int64_t GetValue() const
     {
@@ -57,16 +60,6 @@ public:
         value_ = value;
     }
 
-    PtValueMeta GetMeta() const
-    {
-        return meta_;
-    }
-
-    void SetMeta(PtValueMeta meta)
-    {
-        meta_ = meta;
-    }
-
     ~PtValue() = default;
 
     DEFAULT_COPY_SEMANTIC(PtValue);
@@ -74,9 +67,7 @@ public:
 
 private:
     int64_t value_;
-    PtValueMeta meta_;
 };
-
 }  // namespace panda::tooling
 
-#endif  // PANDA_RUNTIME_INCLUDE_TOOLING_PT_VALUE_H_
+#endif  // PANDA_TOOLING_PT_VALUE_H

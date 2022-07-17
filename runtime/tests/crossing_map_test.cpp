@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 #include <ctime>
 
 #include "gtest/gtest.h"
-#include "runtime/mem/gc/crossing_map.h"
+#include "runtime/mem/gc/heap-space-misc/crossing_map.h"
 #include "runtime/mem/internal_allocator-inl.h"
 
 namespace panda::mem {
@@ -25,6 +25,7 @@ class CrossingMapTest : public testing::Test {
 public:
     CrossingMapTest()
     {
+        // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
 #ifdef PANDA_NIGHTLY_TEST_ON
         seed_ = std::time(NULL);
 #else
@@ -49,6 +50,7 @@ public:
         delete static_cast<Allocator *>(internal_allocator_);
         PoolManager::Finalize();
         panda::mem::MemConfig::Finalize();
+        // Logger::Destroy();
         delete mem_stats_;
     }
 
@@ -110,23 +112,24 @@ protected:
         return ToVoidPtr(ToUintPtr(obj_addr) + obj_size - 1U);
     }
 
-    unsigned int GetSeed() const
+    unsigned int GetSeed()
     {
         return seed_;
     }
 
 private:
-    unsigned int seed_ {0};
-    InternalAllocatorPtr internal_allocator_ {nullptr};
-    uintptr_t start_addr_ {0};
-    CrossingMap *crossing_map_ {nullptr};
-    mem::MemStatsType *mem_stats_ {nullptr};
+    unsigned int seed_;
+    InternalAllocatorPtr internal_allocator_;
+    uintptr_t start_addr_;
+    CrossingMap *crossing_map_;
+    mem::MemStatsType *mem_stats_;
 };
 
 TEST_F(CrossingMapTest, OneSmallObjTest)
 {
     static constexpr size_t OBJ_SIZE = 1;
-    void *obj_addr = GetRandomObjAddr(OBJ_SIZE);
+    // Use OBJ_SIZE + PAGE_SIZE here or we can get an overflow during AddPage(obj_addr)
+    void *obj_addr = GetRandomObjAddr(OBJ_SIZE + PAGE_SIZE);
     GetCrossingMap()->AddObject(obj_addr, OBJ_SIZE);
     ASSERT_TRUE(GetCrossingMap()->FindFirstObject(obj_addr, obj_addr) == obj_addr) << " seed = " << GetSeed();
     ASSERT_TRUE(GetCrossingMap()->FindFirstObject(AddPage(obj_addr), AddPage(obj_addr)) == nullptr)

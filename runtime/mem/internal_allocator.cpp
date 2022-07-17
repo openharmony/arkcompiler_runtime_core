@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ InternalAllocator<Config>::InternalAllocator(MemStatsType *mem_stats)
     mem_stats_ = mem_stats;
     tracker_ = CreateAllocTracker();
 #endif  // TRACK_INTERNAL_ALLOCATIONS
-    LOG_INTERNAL_ALLOCATOR(INFO) << "Initializing InternalAllocator finished";
+    LOG_INTERNAL_ALLOCATOR(DEBUG) << "Initializing InternalAllocator finished";
 }
 
 template <InternalAllocatorConfig Config>
@@ -68,7 +68,7 @@ template <AllocScope AllocScopeT>
     os::memory::LockHolder lock(lock_);
 #endif  // TRACK_INTERNAL_ALLOCATIONS
     void *res = nullptr;
-    LOG_INTERNAL_ALLOCATOR(INFO) << "Try to allocate " << size << " bytes";
+    LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to allocate " << size << " bytes";
     if (UNLIKELY(size == 0)) {
         LOG_INTERNAL_ALLOCATOR(DEBUG) << "Failed to allocate - size of object is zero";
         return nullptr;
@@ -82,7 +82,7 @@ template <AllocScope AllocScopeT>
     if (res == nullptr) {
         return nullptr;
     }
-    LOG_INTERNAL_ALLOCATOR(INFO) << "Allocate " << size << " bytes at address " << std::hex << res;
+    LOG_INTERNAL_ALLOCATOR(DEBUG) << "Allocate " << size << " bytes at address " << std::hex << res;
 #ifdef TRACK_INTERNAL_ALLOCATIONS
     tracker_->TrackAlloc(res, AlignUp(size, align), SpaceType::SPACE_TYPE_INTERNAL);
 #endif  // TRACK_INTERNAL_ALLOCATIONS
@@ -98,16 +98,19 @@ void InternalAllocator<Config>::Free(void *ptr)
     if (ptr == nullptr) {
         return;
     }
-    LOG_INTERNAL_ALLOCATOR(INFO) << "Try to free via InternalAllocator at address " << std::hex << ptr;
+#ifdef TRACK_INTERNAL_ALLOCATIONS
+    // Do it before actual free even we don't do something with ptr.
+    // Clang tidy detects memory at ptr gets unavailable after free
+    // and reports errors.
+    tracker_->TrackFree(ptr);
+#endif  // TRACK_INTERNAL_ALLOCATIONS
+    LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to free via InternalAllocator at address " << std::hex << ptr;
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (Config == InternalAllocatorConfig::PANDA_ALLOCATORS) {
         FreeViaPandaAllocators(ptr);
     } else {  // NOLINT(readability-misleading-indentation
         malloc_allocator_->Free(ptr);
     }
-#ifdef TRACK_INTERNAL_ALLOCATIONS
-    tracker_->TrackFree(ptr);
-#endif  // TRACK_INTERNAL_ALLOCATIONS
 }
 
 template <InternalAllocatorConfig Config>
@@ -131,7 +134,7 @@ InternalAllocator<Config>::~InternalAllocator()
     } else {  // NOLINT(readability-misleading-indentation
         delete malloc_allocator_;
     }
-    LOG_INTERNAL_ALLOCATOR(INFO) << "Destroying InternalAllocator finished";
+    LOG_INTERNAL_ALLOCATOR(DEBUG) << "Destroying InternalAllocator finished";
 }
 
 template <class AllocatorT>
@@ -280,7 +283,8 @@ typename InternalAllocator<Config>::LocalSmallObjectAllocator *InternalAllocator
     (void)allocator;
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (Config == InternalAllocatorConfig::PANDA_ALLOCATORS) {
-        auto local_allocator = allocator->New<LocalSmallObjectAllocator>(allocator->GetMemStats());
+        auto local_allocator =
+            allocator->New<LocalSmallObjectAllocator>(allocator->GetMemStats(), SpaceType::SPACE_TYPE_INTERNAL);
         LOG_INTERNAL_ALLOCATOR(DEBUG) << "Set up local internal allocator at addr " << local_allocator
                                       << " for the thread " << panda::Thread::GetCurrent();
         return local_allocator;

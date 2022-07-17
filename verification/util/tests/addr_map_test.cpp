@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@ namespace panda::verifier::test {
 
 TEST_F(VerifierTest, AddrMap)
 {
-    constexpr size_t N = 123;
-    char mem[N];
+    char mem[123];
     AddrMap amap1 {&mem[0], &mem[122]};
     AddrMap amap2 {&mem[0], &mem[122]};
     amap1.Mark(&mem[50], &mem[60]);

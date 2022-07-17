@@ -15,7 +15,7 @@
 .record Convert <external>
 .function u32 Convert.stringToU32(panda.String a0) <external>
 
-.function u1 main(){
+.function i32 main(){
     # Convert.stringToI32("-1") == -1
     lda.str "-1"
     sta.obj v0

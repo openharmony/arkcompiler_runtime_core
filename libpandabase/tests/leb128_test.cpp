@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ static void TestDecodeUnsigned(const std::vector<TestData<uint64_t>> &data, bool
 
         auto [value, size, is_full] = DecodeUnsigned<T>(t.data);
         EXPECT_EQ(is_full, MinimumBitsToStore(t.value) <= bitwidth && !is_partial) << ss.str();
-        EXPECT_EQ(size, is_full ? t.size : (bitwidth + 6U) / 7U) << ss.str();
+        EXPECT_EQ(size, is_full ? t.size : (bitwidth + 6) / 7) << ss.str();
         EXPECT_EQ(value, static_cast<T>(t.value)) << ss.str();
     }
 }
@@ -149,7 +149,7 @@ static void TestDecodeSigned(const std::vector<TestData<T>> &data, bool is_parti
 
         auto [value, size, is_full] = DecodeSigned<T>(t.data);
         EXPECT_EQ(is_full, !is_partial) << ss.str();
-        EXPECT_EQ(size, is_full ? t.size : (bitwidth + 6U) / 7U) << ss.str();
+        EXPECT_EQ(size, is_full ? t.size : (bitwidth + 6) / 7) << ss.str();
         EXPECT_EQ(value, t.value) << ss.str();
     }
 }

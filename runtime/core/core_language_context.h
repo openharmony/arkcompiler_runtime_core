@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef PANDA_RUNTIME_CORE_CORE_LANGUAGE_CONTEXT_H_
 #define PANDA_RUNTIME_CORE_CORE_LANGUAGE_CONTEXT_H_
 
+#include "core/core_vm.h"
 #include "runtime/include/language_context.h"
 
 #include "runtime/class_initializer.h"
@@ -35,11 +35,6 @@ public:
     panda_file::SourceLang GetLanguage() const override
     {
         return panda_file::SourceLang::PANDA_ASSEMBLY;
-    }
-
-    const uint8_t *GetStringClassDescriptor() const override
-    {
-        return utf::CStringAsMutf8("Lpanda/String;");
     }
 
     const uint8_t *GetObjectClassDescriptor() const override
@@ -62,19 +57,14 @@ public:
         return utf::CStringAsMutf8("[Lpanda/String;");
     }
 
-    const uint8_t *GetCtorName() const override
-    {
-        return utf::CStringAsMutf8(".ctor");
-    }
-
-    const uint8_t *GetCctorName() const override
-    {
-        return utf::CStringAsMutf8(".cctor");
-    }
-
     const uint8_t *GetNullPointerExceptionClassDescriptor() const override
     {
         return utf::CStringAsMutf8("Lpanda/NullPointerException;");
+    }
+
+    const uint8_t *GetStackOverflowErrorClassDescriptor() const override
+    {
+        return utf::CStringAsMutf8("Lpanda/StackOverflowException;");
     }
 
     const uint8_t *GetArrayIndexOutOfBoundsExceptionClassDescriptor() const override
@@ -201,6 +191,11 @@ public:
         return utf::CStringAsMutf8("Lpanda/Error;");
     }
 
+    const uint8_t *GetIncompatibleClassChangeErrorDescriptor() const override
+    {
+        return utf::CStringAsMutf8("Lpanda/IncompatibleClassChangeError;");
+    }
+
     coretypes::TaggedValue GetInitialTaggedValue() const override
     {
         return coretypes::TaggedValue(coretypes::TaggedValue::VALUE_UNDEFINED);
@@ -223,18 +218,15 @@ public:
         return coretypes::TaggedValue(coretypes::TaggedValue::VALUE_UNDEFINED);
     }
 
-    PandaVM *CreateVM(Runtime *runtime, const RuntimeOptions &options) const override;
-
-    mem::GC *CreateGC(mem::GCType gc_type, mem::ObjectAllocatorBase *object_allocator,
-                      const mem::GCSettings &settings) const override;
-
-    void SetExceptionToVReg([[maybe_unused]] Frame::VRegister &vreg, [[maybe_unused]] ObjectHeader *obj) const override
+    void SetExceptionToVReg([[maybe_unused]] interpreter::AccVRegister &vreg,
+                            [[maybe_unused]] ObjectHeader *obj) const override
     {
-        vreg.SetReference(obj);
+        vreg.AsVRegRef().SetReference(obj);
     }
 
     bool IsCallableObject([[maybe_unused]] ObjectHeader *obj) const override
     {
+        // TODO(yaojian) : return value according to CoreLanguageContext
         return false;
     }
 
@@ -245,11 +237,13 @@ public:
 
     const uint8_t *GetReferenceErrorDescriptor() const override
     {
+        // TODO(yaojian) : return value according to CoreLanguageContext
         return nullptr;
     }
 
     const uint8_t *GetTypedErrorDescriptor() const override
     {
+        // TODO(yaojian) : return value according to CoreLanguageContext
         return nullptr;
     }
 
@@ -266,7 +260,7 @@ public:
 
     bool InitializeClass(ClassLinker *class_linker, ManagedThread *thread, Class *klass) const override
     {
-        return ClassInitializer::Initialize(class_linker, thread, klass);
+        return ClassInitializer<MT_MODE_MULTI>::Initialize(class_linker, thread, klass);
     }
 
     std::unique_ptr<ClassLinkerExtension> CreateClassLinkerExtension() const override
@@ -274,9 +268,28 @@ public:
         return std::make_unique<CoreClassLinkerExtension>();
     }
 
-    PandaUniquePtr<tooling::PtLangExt> CreatePtLangExt() const override
+    PandaVM *CreateVM(Runtime *runtime, const RuntimeOptions &options) const override;
+
+    mem::GC *CreateGC(mem::GCType gc_type, mem::ObjectAllocatorBase *object_allocator,
+                      const mem::GCSettings &settings) const override;
+
+    void ThrowStackOverflowException(ManagedThread *thread) const override;
+
+    VerificationInitAPI GetVerificationInitAPI() const override;
+
+    const char *GetVerificationTypeClass() const override
     {
-        return nullptr;
+        return "panda.Class";
+    }
+
+    const char *GetVerificationTypeObject() const override
+    {
+        return "panda.Object";
+    }
+
+    const char *GetVerificationTypeThrowable() const override
+    {
+        return "panda.Object";
     }
 };
 

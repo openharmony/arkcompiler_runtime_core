@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_CFRAME_ITERATORS_H_
-#define PANDA_RUNTIME_INCLUDE_CFRAME_ITERATORS_H_
+#ifndef PANDA_CFRAME_ITERATORS_H
+#define PANDA_CFRAME_ITERATORS_H
 
 #include "libpandabase/utils/arch.h"
+#include "libpandabase/utils/range.h"
 #include "libpandafile/shorty_iterator.h"
 #include "runtime/arch/helpers.h"
 #include "runtime/include/cframe.h"
@@ -25,29 +26,10 @@
 
 namespace panda {
 
-template <typename It>
-class Range {
-public:
-    Range(It begin, It end) : begin_(begin), end_(end) {}
-
-    It begin()  // NOLINT(readability-identifier-naming)
-    {
-        return begin_;
-    }
-
-    It end()  // NOLINT(readability-identifier-naming)
-    {
-        return end_;
-    }
-
-private:
-    It begin_;
-    It end_;
-};
-
 template <Arch arch = RUNTIME_ARCH>
-class CFrameJniMethodIterator {
+class CFrameStaticNativeMethodIterator {
     using SlotType = typename CFrame::SlotType;
+    using VRegInfo = compiler::VRegInfo;
 
     static constexpr size_t ARG_FP_REGS_COUNG = arch::ExtArchTraits<arch>::NUM_FP_ARG_REGS;
     static constexpr size_t ARG_GP_REGS_COUNG = arch::ExtArchTraits<arch>::NUM_GP_ARG_REGS;
@@ -57,11 +39,10 @@ public:
     {
         CFrameLayout cframe_layout(arch, 0);
 
-        const ptrdiff_t IN_REGS_START_SLOT =
-            cframe_layout.GetCallerRegsStartSlot() -
-            cframe_layout.GetStackStartSlot()
-            // skipped the slot to align the stack, CODECHECK-NOLINT(C_RULE_ID_INDENT_CHECK)
-            + (arch == Arch::X86_64 ? 1 : 0);
+        const ptrdiff_t IN_REGS_START_SLOT = cframe_layout.GetCallerRegsStartSlot() -
+                                             cframe_layout.GetStackStartSlot()
+                                             // skipped the slot to align the stack
+                                             + ((arch == Arch::X86_64) ? 1 : 0);
         const ptrdiff_t IN_STACK_START_SLOT = cframe_layout.GetStackArgsStartSlot() - cframe_layout.GetStackStartSlot();
 
         ptrdiff_t fp_end_slot = IN_REGS_START_SLOT - 1;
@@ -79,10 +60,10 @@ public:
         uint32_t num_args = method->GetNumArgs();
         uint32_t vreg_num = num_args + (is_static ? 1 : 0);
 
-        return Range<CFrameJniMethodIterator>(
-            CFrameJniMethodIterator(0, vreg_num, method->GetShorty(), gpr_begin_slot, gpr_end_slot, fp_begin_slot + 1,
-                                    fp_end_slot, stack_begin_slot),
-            CFrameJniMethodIterator(vreg_num, vreg_num, method->GetShorty(), 0, 0, 0, 0, 0));
+        return Range<CFrameStaticNativeMethodIterator>(
+            CFrameStaticNativeMethodIterator(0, vreg_num, method->GetShorty(), gpr_begin_slot, gpr_end_slot,
+                                             fp_begin_slot + 1, fp_end_slot, stack_begin_slot),
+            CFrameStaticNativeMethodIterator(vreg_num, vreg_num, method->GetShorty(), 0, 0, 0, 0, 0));
     }
 
     VRegInfo operator*()
@@ -129,20 +110,20 @@ public:
         return res;
     }
 
-    bool operator==(const CFrameJniMethodIterator &it) const
+    bool operator==(const CFrameStaticNativeMethodIterator &it) const
     {
         return vreg_index_ == it.vreg_index_;
     }
 
-    bool operator!=(const CFrameJniMethodIterator &it) const
+    bool operator!=(const CFrameStaticNativeMethodIterator &it) const
     {
         return !(*this == it);
     }
 
 private:
-    CFrameJniMethodIterator(uint32_t vreg_index, uint32_t vreg_num, const uint16_t *shorty, ptrdiff_t gpr_begin_slot,
-                            ptrdiff_t gpr_end_slot, ptrdiff_t fp_begin_slot, ptrdiff_t fp_end_slot,
-                            ptrdiff_t stack_current_slot)
+    CFrameStaticNativeMethodIterator(uint32_t vreg_index, uint32_t vreg_num, const uint16_t *shorty,
+                                     ptrdiff_t gpr_begin_slot, ptrdiff_t gpr_end_slot, ptrdiff_t fp_begin_slot,
+                                     ptrdiff_t fp_end_slot, ptrdiff_t stack_current_slot)
         : vreg_index_(vreg_index),
           vreg_num_(vreg_num),
           shorty_it_(shorty),
@@ -199,8 +180,9 @@ private:
 };
 
 template <>
-class CFrameJniMethodIterator<Arch::AARCH32> {
+class CFrameStaticNativeMethodIterator<Arch::AARCH32> {
     using SlotType = typename CFrame::SlotType;
+    using VRegInfo = compiler::VRegInfo;
 
     static constexpr size_t ARG_FP_REGS_COUNG = arch::ExtArchTraits<Arch::AARCH32>::NUM_FP_ARG_REGS;
     static constexpr size_t ARG_GP_REGS_COUNG = arch::ExtArchTraits<Arch::AARCH32>::NUM_GP_ARG_REGS;
@@ -226,10 +208,10 @@ public:
         uint32_t num_args = method->GetNumArgs();
         uint32_t vreg_num = num_args + (is_static ? 1 : 0);
 
-        return Range<CFrameJniMethodIterator>(
-            CFrameJniMethodIterator(0, vreg_num, method->GetShorty(), gpr_begin_slot, GPR_END_SLOT, FP_BEGIN_SLOT,
-                                    FP_END_SLOT, STACK_BEGIN_SLOT),
-            CFrameJniMethodIterator(vreg_num, vreg_num, method->GetShorty(), 0, 0, 0, 0, 0));
+        return Range<CFrameStaticNativeMethodIterator>(
+            CFrameStaticNativeMethodIterator(0, vreg_num, method->GetShorty(), gpr_begin_slot, GPR_END_SLOT,
+                                             FP_BEGIN_SLOT, FP_END_SLOT, STACK_BEGIN_SLOT),
+            CFrameStaticNativeMethodIterator(vreg_num, vreg_num, method->GetShorty(), 0, 0, 0, 0, 0));
     }
 
     VRegInfo operator*()
@@ -302,20 +284,20 @@ public:
         return res;
     }
 
-    bool operator==(const CFrameJniMethodIterator &it) const
+    bool operator==(const CFrameStaticNativeMethodIterator &it) const
     {
         return vreg_index_ == it.vreg_index_;
     }
 
-    bool operator!=(const CFrameJniMethodIterator &it) const
+    bool operator!=(const CFrameStaticNativeMethodIterator &it) const
     {
         return !(*this == it);
     }
 
 private:
-    CFrameJniMethodIterator(uint32_t vreg_index, uint32_t vreg_num, const uint16_t *shorty, ptrdiff_t gpr_begin_slot,
-                            ptrdiff_t gpr_end_slot, ptrdiff_t fp_begin_slot, ptrdiff_t fp_end_slot,
-                            ptrdiff_t stack_current_slot)
+    CFrameStaticNativeMethodIterator(uint32_t vreg_index, uint32_t vreg_num, const uint16_t *shorty,
+                                     ptrdiff_t gpr_begin_slot, ptrdiff_t gpr_end_slot, ptrdiff_t fp_begin_slot,
+                                     ptrdiff_t fp_end_slot, ptrdiff_t stack_current_slot)
         : vreg_index_(vreg_index),
           vreg_num_(vreg_num),
           shorty_it_(shorty),
@@ -358,7 +340,7 @@ private:
         return VRegInfo::Type::INT32;
     }
 
-    CFrameJniMethodIterator &HandleHardFloat()
+    CFrameStaticNativeMethodIterator &HandleHardFloat()
     {
         ASSERT(vreg_type_ == VRegInfo::Type::FLOAT32);
         if (fp_current_slot_ > fp_end_slot_) {
@@ -371,7 +353,7 @@ private:
         return *this;
     }
 
-    CFrameJniMethodIterator &HandleHardDouble()
+    CFrameStaticNativeMethodIterator &HandleHardDouble()
     {
         ASSERT(vreg_type_ == VRegInfo::Type::FLOAT64);
         fp_current_slot_ = static_cast<ptrdiff_t>(RoundDown(static_cast<uintptr_t>(fp_current_slot_) + 1, 2U) - 1);
@@ -402,6 +384,7 @@ private:
 template <Arch arch = RUNTIME_ARCH>
 class CFrameDynamicNativeMethodIterator {
     using SlotType = typename CFrame::SlotType;
+    using VRegInfo = compiler::VRegInfo;
 
 public:
     static auto MakeRange(CFrame *cframe)
@@ -413,7 +396,7 @@ public:
         // Read num_args
         auto num_args = static_cast<uint32_t>(callers[1]);
         ++num_args;  // count function object
-        size_t num_arg_slots = num_args * sizeof(Frame::VRegister) / sizeof(SlotType);
+        size_t num_arg_slots = num_args * sizeof(interpreter::VRegister) / sizeof(SlotType);
 
         CFrameLayout cframe_layout(arch, 0);
         size_t caller_end_slot = cframe_layout.GetCallerRegsStartSlot();
@@ -421,7 +404,7 @@ public:
         size_t gpr_arg_start_slot = caller_start_slot - 2;  // skip Method and num_args, 2 - offset
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (arch != Arch::X86_64) {
-            gpr_arg_start_slot = RoundDown(gpr_arg_start_slot, sizeof(Frame::VRegister) / sizeof(SlotType));
+            gpr_arg_start_slot = RoundDown(gpr_arg_start_slot, sizeof(interpreter::VRegister) / sizeof(SlotType));
         }
         size_t num_gpr_arg_slots = std::min(gpr_arg_start_slot - caller_end_slot, num_arg_slots);
 
@@ -454,7 +437,7 @@ public:
 
     CFrameDynamicNativeMethodIterator &operator++()
     {
-        size_t inc = sizeof(Frame::VRegister) / sizeof(SlotType);
+        size_t inc = sizeof(interpreter::VRegister) / sizeof(SlotType);
         if (gpr_start_slot_ > gpr_end_slot_) {
             gpr_start_slot_ -= inc;
             ++vreg_num_;
@@ -505,4 +488,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_CFRAME_ITERATORS_H_
+#endif  // PANDA_CFRAME_ITERATORS

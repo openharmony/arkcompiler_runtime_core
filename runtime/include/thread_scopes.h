@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_THREAD_SCOPES_H_
-#define PANDA_RUNTIME_INCLUDE_THREAD_SCOPES_H_
+#ifndef PANDA_RUNTIME_THREAD_SCOPES_H_
+#define PANDA_RUNTIME_THREAD_SCOPES_H_
 
 #include "mtmanaged_thread.h"
 
@@ -22,10 +22,10 @@ namespace panda {
 
 class ScopedNativeCodeThread {
 public:
-    explicit ScopedNativeCodeThread(MTManagedThread *thread) : thread_(thread)
+    explicit ScopedNativeCodeThread(ManagedThread *thread) : thread_(thread)
     {
         ASSERT(thread_ != nullptr);
-        ASSERT(thread_ == MTManagedThread::GetCurrent());
+        ASSERT(thread_ == ManagedThread::GetCurrent());
         thread_->NativeCodeBegin();
     }
 
@@ -35,7 +35,7 @@ public:
     }
 
 private:
-    MTManagedThread *thread_;
+    ManagedThread *thread_;
 
     NO_COPY_SEMANTIC(ScopedNativeCodeThread);
     NO_MOVE_SEMANTIC(ScopedNativeCodeThread);
@@ -43,10 +43,10 @@ private:
 
 class ScopedManagedCodeThread {
 public:
-    explicit ScopedManagedCodeThread(MTManagedThread *thread) : thread_(thread)
+    explicit ScopedManagedCodeThread(ManagedThread *thread) : thread_(thread)
     {
         ASSERT(thread_ != nullptr);
-        ASSERT(thread_ == MTManagedThread::GetCurrent());
+        ASSERT(thread_ == ManagedThread::GetCurrent());
         thread_->ManagedCodeBegin();
     }
 
@@ -56,7 +56,7 @@ public:
     }
 
 private:
-    MTManagedThread *thread_;
+    ManagedThread *thread_;
 
     NO_COPY_SEMANTIC(ScopedManagedCodeThread);
     NO_MOVE_SEMANTIC(ScopedManagedCodeThread);
@@ -64,7 +64,7 @@ private:
 
 class ScopedChangeThreadStatus {
 public:
-    explicit ScopedChangeThreadStatus(MTManagedThread *thread, ThreadStatus new_status) : thread_(thread)
+    explicit ScopedChangeThreadStatus(ManagedThread *thread, ThreadStatus new_status) : thread_(thread)
     {
         old_status_ = thread_->GetStatus();
         thread_->UpdateStatus(new_status);
@@ -76,7 +76,7 @@ public:
     }
 
 private:
-    MTManagedThread *thread_;
+    ManagedThread *thread_;
     ThreadStatus old_status_;
 
     NO_COPY_SEMANTIC(ScopedChangeThreadStatus);
@@ -85,4 +85,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_THREAD_SCOPES_H_
+#endif  // PANDA_RUNTIME_THREAD_SCOPES_H_

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ASSEMBLY_PROGRAM_H_
-#define PANDA_ASSEMBLER_ASSEMBLY_PROGRAM_H_
+#ifndef _PANDA_ASSEMBLER_PROGRAM_HPP
+#define _PANDA_ASSEMBLER_PROGRAM_HPP
 
 #include <string>
 #include <unordered_set>
@@ -30,9 +30,10 @@
 namespace panda::pandasm {
 
 struct Program {
-    extensions::Language lang {extensions::Language::PANDA_ASSEMBLY};
+    panda::panda_file::SourceLang lang {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
     std::unordered_map<std::string, panda::pandasm::Record> record_table;
     std::unordered_map<std::string, panda::pandasm::Function> function_table;
+    std::unordered_map<std::string, std::vector<std::string>> function_synonyms;
     std::map<std::string, panda::pandasm::LiteralArray> literalarray_table;
     std::unordered_set<std::string> strings;
     std::unordered_set<Type> array_types;
@@ -45,4 +46,4 @@ struct Program {
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_ASSEMBLY_PROGRAM_H_
+#endif  // !_PANDA_ASSEMBLER_PROGRAM_HPP

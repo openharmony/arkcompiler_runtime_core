@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/coretypes/class.h"
+#include "runtime/include/hclass.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/panda_vm.h"
+#include "runtime/mem/free_object.h"
 #include "runtime/mem/vm_handle.h"
 #include "runtime/monitor_pool.h"
 #include "runtime/handle_base-inl.h"
@@ -29,6 +31,7 @@ namespace panda {
 /* static */
 ObjectHeader *ObjectHeader::CreateObject(panda::BaseClass *klass, bool non_movable)
 {
+    ASSERT(klass != nullptr);
 #ifndef NDEBUG
     if (!klass->IsDynamicClass()) {
         auto cls = static_cast<panda::Class *>(klass);
@@ -62,52 +65,60 @@ ObjectHeader *ObjectHeader::CreateNonMovable(BaseClass *klass)
     return CreateObject(klass, true);
 }
 
-bool ObjectHeader::AtomicSetMark(MarkWord old_mark_word, MarkWord new_mark_word)
-{
-    // This is the way to operate with casting MarkWordSize <-> MarkWord and atomics
-    auto ptr = reinterpret_cast<MarkWord *>(&markWord_);
-    auto atomic_ptr = reinterpret_cast<std::atomic<MarkWord> *>(ptr);
-    return atomic_ptr->compare_exchange_weak(old_mark_word, new_mark_word);
-}
-
 uint32_t ObjectHeader::GetHashCodeFromMonitor(Monitor *monitor_p)
 {
-    if (monitor_p->GetHashCode() == 0) {
-        Monitor::MonitorEnter(this);
-        // We check it again in case someone changed it before we aquire monitor
-        if (monitor_p->GetHashCode() == 0) {
-            monitor_p->SetHashCode(GenerateHashCode());
-        }
-        Monitor::MonitorExit(this);
-    }
-
     return monitor_p->GetHashCode();
 }
 
-uint32_t ObjectHeader::GetHashCode()
+uint32_t ObjectHeader::GetHashCodeMTSingle()
 {
+    auto mark = GetMark();
+
+    switch (mark.GetState()) {
+        case MarkWord::STATE_UNLOCKED: {
+            mark = mark.DecodeFromHash(GenerateHashCode());
+            ASSERT(mark.GetState() == MarkWord::STATE_HASHED);
+            SetMark(mark);
+            return mark.GetHash();
+        }
+        case MarkWord::STATE_HASHED:
+            return mark.GetHash();
+        default:
+            LOG(FATAL, RUNTIME) << "Error on GetHashCode(): invalid state";
+            return 0;
+    }
+}
+
+uint32_t ObjectHeader::GetHashCodeMTMulti()
+{
+    ObjectHeader *current_obj = this;
     while (true) {
-        auto mark = this->AtomicGetMark();
+        auto mark = current_obj->AtomicGetMark();
+        auto *thread = MTManagedThread::GetCurrent();
+        ASSERT(thread != nullptr);
+        [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+        VMHandle<ObjectHeader> handle_obj(thread, current_obj);
+
         switch (mark.GetState()) {
             case MarkWord::STATE_UNLOCKED: {
                 auto hash_mark = mark.DecodeFromHash(GenerateHashCode());
                 ASSERT(hash_mark.GetState() == MarkWord::STATE_HASHED);
-                this->AtomicSetMark(mark, hash_mark);
+                current_obj->AtomicSetMark(mark, hash_mark);
                 break;
             }
             case MarkWord::STATE_LIGHT_LOCKED: {
-                // Futexes and has support for locking with non-current thread.
-                auto thread = MTManagedThread::GetCurrent();
-                // Try to inflate and if it fails, wait a bit before trying again.
-                if (!Monitor::Inflate(this, thread)) {
-                    static constexpr uint64_t SLEEP_MS = 10;
-                    MTManagedThread::Sleep(SLEEP_MS);
+                os::thread::ThreadId owner_thread_id = mark.GetThreadId();
+                if (owner_thread_id == thread->GetInternalId()) {
+                    Monitor::Inflate(this, thread);
+                } else {
+                    Monitor::InflateThinLock(thread, handle_obj);
+                    current_obj = handle_obj.GetPtr();
                 }
                 break;
             }
             case MarkWord::STATE_HEAVY_LOCKED: {
                 auto monitor_id = mark.GetMonitorId();
-                auto monitor_p = MonitorPool::LookupMonitor(Thread::GetCurrent()->GetVM(), monitor_id);
+                auto monitor_p = MTManagedThread::GetCurrent()->GetMonitorPool()->LookupMonitor(monitor_id);
                 if (monitor_p != nullptr) {
                     return GetHashCodeFromMonitor(monitor_p);
                 }
@@ -132,11 +143,16 @@ ObjectHeader *ObjectHeader::Clone(ObjectHeader *src)
 
 ObjectHeader *ObjectHeader::ShallowCopy(ObjectHeader *src)
 {
+    /*
+     TODO(d.trubenkov):
+        use bariers for possible copied reference fields
+    */
     auto object_class = src->ClassAddr<Class>();
     std::size_t obj_size = src->ObjectSize();
 
     // AllocateObject can trigger gc, use handle for src.
-    auto thread = ManagedThread::GetCurrent();
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     mem::HeapManager *heap_manager = thread->GetVM()->GetHeapManager();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<ObjectHeader> src_handle(thread, src);
@@ -151,7 +167,7 @@ ObjectHeader *ObjectHeader::ShallowCopy(ObjectHeader *src)
     if (dst == nullptr) {
         return nullptr;
     }
-    ASSERT(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(src) ==
+    ASSERT(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(src_handle.GetPtr()) ==
            PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(dst));
 
     Span<uint8_t> src_sp(reinterpret_cast<uint8_t *>(src_handle.GetPtr()), obj_size);
@@ -161,20 +177,24 @@ ObjectHeader *ObjectHeader::ShallowCopy(ObjectHeader *src)
     std::size_t words_to_copy = bytes_to_copy / WORD_SIZE;
     std::size_t remaining_offset = ObjectHeader::ObjectHeaderSize() + WORD_SIZE * words_to_copy;
     // copy words
-    for (std::size_t i = static_cast<size_t>(ObjectHeader::ObjectHeaderSize()); i < remaining_offset; i += WORD_SIZE) {
+    for (std::size_t i = ObjectHeader::ObjectHeaderSize(); i < remaining_offset; i += WORD_SIZE) {
+        // Atomic with relaxed order reason: data race with src_handle with no synchronization or ordering constraints
+        // imposed on other reads or writes
         reinterpret_cast<std::atomic<uintptr_t> *>(&dst_sp[i])
             ->store(reinterpret_cast<std::atomic<uintptr_t> *>(&src_sp[i])->load(std::memory_order_relaxed),
                     std::memory_order_relaxed);
     }
     // copy remaining bytes
     for (std::size_t i = remaining_offset; i < obj_size; i++) {
+        // Atomic with relaxed order reason: data race with src_handle with no synchronization or ordering constraints
+        // imposed on other reads or writes
         reinterpret_cast<std::atomic<uint8_t> *>(&dst_sp[i])
             ->store(reinterpret_cast<std::atomic<uint8_t> *>(&src_sp[i])->load(std::memory_order_relaxed),
                     std::memory_order_relaxed);
     }
 
     // Call barriers here.
-    auto *barrier_set = thread->GetVM()->GetGC()->GetBarrierSet();
+    auto *barrier_set = thread->GetBarrierSet();
     // We don't need pre barrier here because we don't change any links inside main object
     // Post barrier
     auto gc_post_barrier_type = barrier_set->GetPostType();
@@ -192,24 +212,39 @@ ObjectHeader *ObjectHeader::ShallowCopy(ObjectHeader *src)
 
 size_t ObjectHeader::ObjectSize() const
 {
-    auto *klass = ClassAddr<Class>();
+    auto *base_klass = ClassAddr<BaseClass>();
+    if (base_klass->IsDynamicClass()) {
+        auto *klass = ClassAddr<HClass>();
 
-    if (klass->IsArrayClass()) {
-        return static_cast<const coretypes::Array *>(this)->ObjectSize();
-    }
+        if (klass->IsArray()) {
+            return static_cast<const coretypes::Array *>(this)->ObjectSize(TaggedValue::TaggedTypeSize());
+        }
+        if (klass->IsString()) {
+            LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(klass->GetSourceLang());
+            return ctx.GetStringSize(this);
+        }
+        if (klass->IsFreeObject()) {
+            return static_cast<const mem::FreeObject *>(this)->GetSize();
+        }
+    } else {
+        auto *klass = ClassAddr<Class>();
 
-    if (klass->IsStringClass()) {
-        return static_cast<const coretypes::String *>(this)->ObjectSize();
-    }
+        if (klass->IsArrayClass()) {
+            return static_cast<const coretypes::Array *>(this)->ObjectSize(klass->GetComponentSize());
+        }
 
-    if (klass->IsClassClass()) {
-        auto cls = panda::Class::FromClassObject(const_cast<ObjectHeader *>(this));
-        if (cls != nullptr) {
-            return panda::Class::GetClassObjectSizeFromClass(cls);
+        if (klass->IsStringClass()) {
+            return static_cast<const coretypes::String *>(this)->ObjectSize();
+        }
+
+        if (klass->IsClassClass()) {
+            auto cls = panda::Class::FromClassObject(const_cast<ObjectHeader *>(this));
+            if (cls != nullptr) {
+                return panda::Class::GetClassObjectSizeFromClass(cls);
+            }
         }
     }
-
-    return klass->GetObjectSize();
+    return base_klass->GetObjectSize();
 }
 
 }  // namespace panda

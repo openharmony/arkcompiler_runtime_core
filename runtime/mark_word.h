@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -284,6 +284,7 @@ public:
                 // We should distinguish between Unlocked and Lightweight Lock states:
                 return ((Value() & UNLOCKED_STATE_MASK_IN_PLACE) == 0U) ? STATE_UNLOCKED : STATE_LIGHT_LOCKED;
             default:
+                // TODO(aemelenko): Make it more user-friendly
                 LOG(DEBUG, RUNTIME) << "Undefined object state";
                 return STATE_GC;
         }
@@ -365,7 +366,7 @@ private:
      */
     MarkWord DecodeFromForwardingAddressField(markWordSize forwarding_address)
     {
-        ASSERT(forwarding_address <= (std::numeric_limits<markWordSize>::max() >> FORWARDING_ADDRESS_SHIFT));
+        ASSERT(forwarding_address <= ((std::numeric_limits<markWordSize>::max()) >> FORWARDING_ADDRESS_SHIFT));
         // Forwardind address consumes all bits except status. We don't need to save GC state
         markWordSize forwarding_address_in_place = (forwarding_address & FORWARDING_ADDRESS_MASK)
                                                    << FORWARDING_ADDRESS_SHIFT;

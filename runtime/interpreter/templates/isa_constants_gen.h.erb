@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_ISA_CONSTANTS_GEN_H_
-#define PANDA_RUNTIME_INCLUDE_ISA_CONSTANTS_GEN_H_
+#ifndef PANDA_INTERPRETER_ISA_CONSTANTS_H_
+#define PANDA_INTERPRETER_ISA_CONSTANTS_H_
 
 namespace panda::interpreter {
     constexpr auto NUM_PREFIXED = <%= Panda::instructions.select(&:prefix).size %>;
@@ -23,4 +23,4 @@ namespace panda::interpreter {
     static_assert(NUM_NON_PREFIXED_OPS + NUM_PREFIXES <= 210, "Too many first-level-dispatch opcodes in use, please review the ISA");
 }  // namespace panda::interpreter
 
-#endif  // PANDA_RUNTIME_INCLUDE_ISA_CONSTANTS_GEN_H_
+#endif  // PANDA_INTERPRETER_ISA_CONSTANTS_H_

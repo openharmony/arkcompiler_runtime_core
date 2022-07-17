@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_MEM_GC_BITMAP_H_
-#define PANDA_RUNTIME_MEM_GC_BITMAP_H_
+#ifndef PANDA_MEM_GC_BITMAP_H
+#define PANDA_MEM_GC_BITMAP_H
 
 #include <securec.h>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <atomic>
 
 #include "libpandabase/macros.h"
 #include "libpandabase/mem/mem.h"
@@ -43,7 +44,7 @@ public:
 
     void ClearAllBits()
     {
-        (void)memset_s(bitmap_.Data(), bitmap_.SizeBytes(), 0, bitmap_.SizeBytes());
+        memset_s(bitmap_.Data(), bitmap_.SizeBytes(), 0, bitmap_.SizeBytes());
     }
 
     Span<BitmapWordType> GetBitMap()
@@ -110,19 +111,7 @@ protected:
     bool AtomicTestBit(size_t bit_offset);
 
     /**
-     * \brief Iterate over marked bits of bitmap sequentially.
-     * Finish iteration if the visitor returns false.
-     * @tparam VisitorType
-     * @param visitor - function pointer or functor.
-     */
-    template <typename VisitorType>
-    void IterateOverSetBits(const VisitorType &visitor)
-    {
-        IterateOverSetBitsInRange(0, Size(), visitor);
-    }
-
-    /**
-     * \brief Iterate over all bits of bitmap sequentially.
+     * \brief Iterates over all bits of bitmap sequentially.
      * @tparam VisitorType
      * @param visitor - function pointer or functor.
      */
@@ -133,14 +122,16 @@ protected:
     }
 
     /**
-     * \brief Iterate over marked bits in range [begin, end) sequentially.
+     * \brief Iterates over marked bits in range [begin, end) sequentially.
      * Finish iteration if the visitor returns false.
+     * @tparam atomic - true if want to set bit atomically.
      * @tparam VisitorType
      * @param begin - beginning index of the range, inclusive.
      * @param end - end index of the range, exclusive.
      * @param visitor - function pointer or functor.
      */
-    template <typename VisitorType>
+    // default value exists only with backward-compatibility with ets_runtime, should be removed in the future
+    template <bool atomic = false, typename VisitorType>
     void IterateOverSetBitsInRange(size_t begin, size_t end, const VisitorType &visitor)
     {
         CheckBitRange(begin, end);
@@ -149,7 +140,16 @@ protected:
         }
 
         // first word, clear bits before begin
-        auto bitmap_word = bitmap_[GetWordIdx(begin)];
+        BitmapWordType bitmap_word;
+        if (atomic) {
+            size_t begin_index = GetWordIdx(begin);
+            auto *word_addr_begin = reinterpret_cast<std::atomic<BitmapWordType> *>(&bitmap_[begin_index]);
+            // Atomic with seq_cst order reason: datarace with AtomicTestAndSet
+            bitmap_word = word_addr_begin->load(std::memory_order_seq_cst);
+        } else {
+            bitmap_word = bitmap_[GetWordIdx(begin)];
+        }
+
         auto offset_within_word = GetBitIdxWithinWord(begin);
         bitmap_word &= GetRangeBitMask(offset_within_word, BITSPERWORD);
         auto offset_word_begin = GetWordIdx(begin) * BITSPERWORD;
@@ -176,14 +176,34 @@ protected:
 
             offset_word_begin += BITSPERWORD;
             if (offset_word_begin < end) {
-                bitmap_word = bitmap_[GetWordIdx(offset_word_begin)];
+                if (atomic) {
+                    size_t index = GetWordIdx(offset_word_begin);
+                    auto *word_addr = reinterpret_cast<std::atomic<BitmapWordType> *>(&bitmap_[index]);
+                    // Atomic with seq_cst order reason: datarace with AtomicTestAndSet
+                    bitmap_word = word_addr->load(std::memory_order_seq_cst);
+                } else {
+                    bitmap_word = bitmap_[GetWordIdx(offset_word_begin)];
+                }
                 offset_within_word = 0;
             }
         } while (offset_word_begin < end);
     }
 
     /**
-     * \brief Iterate over all bits in range [begin, end) sequentially.
+     * \brief Iterates over marked bits of bitmap sequentially.
+     * Finish iteration if the visitor returns false.
+     * @tparam atomic - true if want to iterate with atomic reading.
+     * @tparam VisitorType
+     * @param visitor - function pointer or functor.
+     */
+    template <bool atomic, typename VisitorType>
+    void IterateOverSetBits(const VisitorType &visitor)
+    {
+        IterateOverSetBitsInRange<atomic, VisitorType>(0, Size(), visitor);
+    }
+
+    /**
+     * \brief Iterates over all bits in range [begin, end) sequentially.
      * @tparam VisitorType
      * @param begin - beginning index of the range, inclusive.
      * @param end - end index of the range, exclusive.
@@ -240,8 +260,8 @@ protected:
         if (UNLIKELY(word_begin == word_end)) {
             return;
         }
-        (void)memset_s(&bitmap_[word_begin], (word_end - word_begin) * sizeof(BitmapWordType),
-                       ~static_cast<unsigned char>(0), (word_end - word_begin) * sizeof(BitmapWordType));
+        memset_s(&bitmap_[word_begin], (word_end - word_begin) * sizeof(BitmapWordType), ~static_cast<unsigned char>(0),
+                 (word_end - word_begin) * sizeof(BitmapWordType));
     }
 
     /**
@@ -255,8 +275,8 @@ protected:
         if (UNLIKELY(word_begin == word_end)) {
             return;
         }
-        (void)memset_s(&bitmap_[word_begin], (word_end - word_begin) * sizeof(BitmapWordType),
-                       static_cast<unsigned char>(0), (word_end - word_begin) * sizeof(BitmapWordType));
+        memset_s(&bitmap_[word_begin], (word_end - word_begin) * sizeof(BitmapWordType), static_cast<unsigned char>(0),
+                 (word_end - word_begin) * sizeof(BitmapWordType));
     }
 
     explicit Bitmap(BitmapWordType *bitmap, size_t bitsize)
@@ -497,7 +517,7 @@ public:
      * @param addr - addr must be aligned to BYTESPERCHUNK.
      * @return Returns the value of the bit.
      */
-    bool AtomicTest(void *addr)
+    bool AtomicTest(const void *addr)
     {
         CheckAddrValidity(addr);
         return AtomicTestBit(AddrToBitOffset(ToPointerType(addr)));
@@ -506,10 +526,11 @@ public:
     /**
      * \brief Find first marked chunk.
      */
+    template <bool atomic = false>
     void *FindFirstMarkedChunks()
     {
         void *first_marked = nullptr;
-        IterateOverSetBits([&first_marked, this](size_t bit_offset) {
+        IterateOverSetBits<atomic>([&first_marked, this](size_t bit_offset) {
             first_marked = BitOffsetToAddr(bit_offset);
             return false;
         });
@@ -517,19 +538,19 @@ public:
     }
 
     /**
-     * \brief Iterate over marked chunks of memory sequentially.
+     * \brief Iterates over marked chunks of memory sequentially.
      */
-    template <typename MemVisitor>
+    template <bool atomic = false, typename MemVisitor>
     void IterateOverMarkedChunks(const MemVisitor &visitor)
     {
-        IterateOverSetBits([&visitor, this](size_t bit_offset) {
+        IterateOverSetBits<atomic>([&visitor, this](size_t bit_offset) {
             visitor(BitOffsetToAddr(bit_offset));
             return true;
         });
     }
 
     /**
-     * \brief Iterate over all chunks of memory sequentially.
+     * \brief Iterates over all chunks of memory sequentially.
      */
     template <typename MemVisitor>
     void IterateOverChunks(const MemVisitor &visitor)
@@ -538,21 +559,21 @@ public:
     }
 
     /**
-     * \brief Iterate over marked chunks of memory in range [begin, end) sequentially.
+     * \brief Iterates over marked chunks of memory in range [begin, end) sequentially.
      */
-    template <typename MemVisitor>
+    template <bool atomic = false, typename MemVisitor, typename T = void *>
     void IterateOverMarkedChunkInRange(void *begin, void *end, const MemVisitor &visitor)
     {
         CheckHalfClosedHalfOpenAddressRange(begin, end);
-        IterateOverSetBitsInRange(AddrToBitOffset(ToPointerType(begin)), EndAddrToBitOffset(ToPointerType(end)),
-                                  [&visitor, this](size_t bit_offset) {
-                                      visitor(BitOffsetToAddr(bit_offset));
-                                      return true;
-                                  });
+        IterateOverSetBitsInRange<atomic>(AddrToBitOffset(ToPointerType(begin)), EndAddrToBitOffset(ToPointerType(end)),
+                                          [&visitor, this](size_t bit_offset) {
+                                              visitor(BitOffsetToAddr(bit_offset));
+                                              return true;
+                                          });
     }
 
     /**
-     * \brief Iterate over all chunks of memory in range [begin, end) sequentially.
+     * \brief Iterates over all chunks of memory in range [begin, end) sequentially.
      */
     template <typename MemVisitor>
     void IterateOverChunkInRange(void *begin, void *end, const MemVisitor &visitor)
@@ -575,7 +596,7 @@ public:
 
 private:
     /**
-     * \brief Compute bit offset from addr.
+     * \brief Computes bit offset from addr.
      */
     size_t AddrToBitOffset(pointer_type addr) const
     {
@@ -588,7 +609,7 @@ private:
     }
 
     /**
-     * \brief Compute address from bit offset.
+     * \brief Computes address from bit offset.
      */
     void *BitOffsetToAddr(size_t bit_offset) const
     {
@@ -631,5 +652,4 @@ private:
 using MarkBitmap = MemBitmap<DEFAULT_ALIGNMENT_IN_BYTES>;
 
 }  // namespace panda::mem
-
-#endif  // PANDA_RUNTIME_MEM_GC_BITMAP_H_
+#endif  // PANDA_MEM_GC_BITMAP_H

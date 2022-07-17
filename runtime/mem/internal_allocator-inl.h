@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_INL_H_
-#define PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_INL_H_
+#ifndef PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_INL_H
+#define PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_INL_H
 
 #include "runtime/mem/malloc-proxy-allocator-inl.h"
 #include "runtime/mem/freelist_allocator-inl.h"
@@ -31,14 +30,21 @@ template <InternalAllocatorConfig Config>
 template <class T>
 T *InternalAllocator<Config>::AllocArray(size_t size)
 {
-    return static_cast<T *>(this->Alloc(sizeof(T) * size));
+    return static_cast<T *>(this->Alloc(sizeof(T) * size, GetAlignment<T>()));
+}
+
+template <InternalAllocatorConfig Config>
+template <class T>
+T *InternalAllocator<Config>::AllocArrayLocal(size_t size)
+{
+    return static_cast<T *>(this->AllocLocal(sizeof(T) * size, GetAlignment<T>()));
 }
 
 template <InternalAllocatorConfig Config>
 template <typename T, typename... Args>
 std::enable_if_t<!std::is_array_v<T>, T *> InternalAllocator<Config>::New(Args &&... args)
 {
-    void *p = Alloc(sizeof(T));
+    void *p = Alloc(sizeof(T), GetAlignment<T>());
     if (UNLIKELY(p == nullptr)) {
         return nullptr;
     }
@@ -50,9 +56,9 @@ template <InternalAllocatorConfig Config>
 template <typename T>
 std::enable_if_t<is_unbounded_array_v<T>, std::remove_extent_t<T> *> InternalAllocator<Config>::New(size_t size)
 {
-    static constexpr size_t SIZE_BEFORE_DATA_OFFSET = AlignUp(sizeof(size_t), DEFAULT_ALIGNMENT_IN_BYTES);
+    static constexpr size_t SIZE_BEFORE_DATA_OFFSET = AlignUp(sizeof(size_t), GetAlignmentInBytes(GetAlignment<T>()));
     using element_type = std::remove_extent_t<T>;
-    void *p = Alloc(SIZE_BEFORE_DATA_OFFSET + sizeof(element_type) * size);
+    void *p = Alloc(SIZE_BEFORE_DATA_OFFSET + sizeof(element_type) * size, GetAlignment<T>());
     *static_cast<size_t *>(p) = size;
     element_type *data = ToNativePtr<element_type>(ToUintPtr(p) + SIZE_BEFORE_DATA_OFFSET);
     element_type *current_element = data;
@@ -76,7 +82,7 @@ template <InternalAllocatorConfig Config>
 template <typename T>
 void InternalAllocator<Config>::DeleteArray(T *data)
 {
-    static constexpr size_t SIZE_BEFORE_DATA_OFFSET = AlignUp(sizeof(size_t), DEFAULT_ALIGNMENT_IN_BYTES);
+    static constexpr size_t SIZE_BEFORE_DATA_OFFSET = AlignUp(sizeof(size_t), GetAlignmentInBytes(GetAlignment<T>()));
     void *p = ToVoidPtr(ToUintPtr(data) - SIZE_BEFORE_DATA_OFFSET);
     size_t size = *static_cast<size_t *>(p);
     if constexpr (std::is_class_v<T>) {
@@ -115,4 +121,4 @@ void InternalAllocator<Config>::VisitAndRemoveFreePools(MemVisitor mem_visitor)
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_INL_H_
+#endif  // PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_H

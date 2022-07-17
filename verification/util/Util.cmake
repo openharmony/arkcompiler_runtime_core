@@ -20,14 +20,30 @@ set(UTIL_TESTS_SOURCES
     ${VERIFICATION_SOURCES_DIR}/util/tests/lazy_test.cpp
     ${VERIFICATION_SOURCES_DIR}/util/tests/relation_test.cpp
     ${VERIFICATION_SOURCES_DIR}/util/tests/addr_map_test.cpp
-    ${VERIFICATION_SOURCES_DIR}/util/tests/tagged_index.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/tagged_index_test.cpp
     ${VERIFICATION_SOURCES_DIR}/util/tests/flags.cpp
     ${VERIFICATION_SOURCES_DIR}/util/tests/obj_pool_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/enum_array_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/index_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/abstract_index_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/optional_ref_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/saturated_enum_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/shifted_vector_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/str_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/struct_field_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/callable_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/function_traits_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/parser/tests/parser_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/parser/tests/charset_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/enum_tag_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/int_tag_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/int_set_test.cpp
 )
 
 set(UTIL_RAPIDCHECK_TESTS_SOURCES
     ${VERIFICATION_SOURCES_DIR}/util/tests/environment.cpp
-    ${VERIFICATION_SOURCES_DIR}/util/tests/bit_vector_test.cpp
-    ${VERIFICATION_SOURCES_DIR}/util/tests/set_operations_test.cpp
-    ${VERIFICATION_SOURCES_DIR}/util/tests/int_set_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/bit_vector_property_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/set_operations_property_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/int_set_property_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/tagged_index_property_test.cpp
 )

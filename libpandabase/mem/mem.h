@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_MEM_H_
-#define PANDA_LIBPANDABASE_MEM_MEM_H_
+#ifndef LIBPANDABASE_MEM_H
+#define LIBPANDABASE_MEM_H
 
 #include "macros.h"
 #include "utils/math_helpers.h"
@@ -71,9 +71,8 @@ enum Alignment {
 };
 
 /**
- * \brief gets alignment in bytes.
  * @param logAlignment - logarithmic alignment
- * @return alignment in bytes
+ * @return alingnment in bytes
  */
 constexpr size_t GetAlignmentInBytes(const Alignment LOG_ALIGNMENT)
 {
@@ -82,25 +81,27 @@ constexpr size_t GetAlignmentInBytes(const Alignment LOG_ALIGNMENT)
 
 /**
  * \brief returns log2 for alignment in bytes
- * @param ALIGNMENT_IN_BYTES - should be a power of 2
+ * @param ALIGNMENT_IN_BYTES - should be power of 2
  * @return alignment in bits
  */
 constexpr Alignment GetLogAlignment(const uint32_t ALIGNMENT_IN_BYTES)
 {
     using helpers::math::GetIntLog2;
-    // check if it is a power of 2
+    // check if it is power of 2
     ASSERT((ALIGNMENT_IN_BYTES != 0) && !(ALIGNMENT_IN_BYTES & (ALIGNMENT_IN_BYTES - 1)));
     ASSERT(GetIntLog2(ALIGNMENT_IN_BYTES) >= Alignment::LOG_ALIGN_MIN);
     ASSERT(GetIntLog2(ALIGNMENT_IN_BYTES) <= Alignment::LOG_ALIGN_MAX);
     return static_cast<Alignment>(GetIntLog2(ALIGNMENT_IN_BYTES));
 }
 
-constexpr size_t AlignUp(size_t value, size_t alignment)
+template <class T>
+constexpr std::enable_if_t<std::is_unsigned_v<T>, T> AlignUp(T value, size_t alignment)
 {
     return (value + alignment - 1U) & ~(alignment - 1U);
 }
 
-constexpr size_t AlignDown(size_t value, size_t alignment)
+template <class T>
+constexpr std::enable_if_t<std::is_unsigned_v<T>, T> AlignDown(T value, size_t alignment)
 {
     return value & ~(alignment - 1U);
 }
@@ -133,6 +134,12 @@ constexpr size_t DEFAULT_ALIGNMENT_IN_BYTES = GetAlignmentInBytes(DEFAULT_ALIGNM
 constexpr size_t GetAlignedObjectSize(size_t size)
 {
     return AlignUp(size, DEFAULT_ALIGNMENT_IN_BYTES);
+}
+
+template <typename T>
+constexpr Alignment GetAlignment()
+{
+    return GetLogAlignment(std::max(alignof(T), DEFAULT_ALIGNMENT_IN_BYTES));
 }
 
 /*
@@ -191,19 +198,29 @@ static_assert(PANDA_DEFAULT_POOL_SIZE % PANDA_POOL_ALIGNMENT_IN_BYTES == 0);
 static_assert(PANDA_DEFAULT_ARENA_SIZE % PANDA_POOL_ALIGNMENT_IN_BYTES == 0);
 static_assert(PANDA_DEFAULT_ALLOCATOR_POOL_SIZE % PANDA_POOL_ALIGNMENT_IN_BYTES == 0);
 
-static constexpr Alignment DEFAULT_FRAME_ALIGNMENT = LOG_ALIGN_6;
+constexpr Alignment DEFAULT_FRAME_ALIGNMENT = LOG_ALIGN_6;
 
-constexpr uintptr_t PANDA_32BITS_HEAP_START_ADDRESS = AlignUp(72_KB, PANDA_POOL_ALIGNMENT_IN_BYTES);
+constexpr uintptr_t PANDA_32BITS_HEAP_START_ADDRESS = AlignUp(1U, PANDA_POOL_ALIGNMENT_IN_BYTES);
 constexpr uint64_t PANDA_32BITS_HEAP_END_OBJECTS_ADDRESS = 4_GB;
 
-inline bool IsInObjectsAddressSpace([[maybe_unused]] uintptr_t address)
+inline bool IsAddressInObjectsHeap([[maybe_unused]] uintptr_t address)
 {
 #ifdef PANDA_USE_32_BIT_POINTER
-    return address == ToUintPtr(nullptr) ||
-           (address >= PANDA_32BITS_HEAP_START_ADDRESS && address < PANDA_32BITS_HEAP_END_OBJECTS_ADDRESS);
+    return PANDA_32BITS_HEAP_START_ADDRESS <= address && address < PANDA_32BITS_HEAP_END_OBJECTS_ADDRESS;
 #else  // In this case, all 64 bits addresses are valid
     return true;
 #endif
+}
+
+inline bool IsInObjectsAddressSpace(uintptr_t address)
+{
+    return address == ToUintPtr(nullptr) || IsAddressInObjectsHeap(address);
+}
+
+template <class T>
+inline bool IsInObjectsAddressSpace(T *address)
+{
+    return IsInObjectsAddressSpace(ToUintPtr(address));
 }
 
 template <class T>
@@ -240,11 +257,11 @@ inline bool NoFilterChecker([[maybe_unused]] const ObjectHeader *object_header)
     return true;
 }
 
-inline ObjectStatus GCKillEmAllVisitor([[maybe_unused]] ObjectHeader *mem)
+inline ObjectStatus GCKillEmAllVisitor([[maybe_unused]] const ObjectHeader *mem)
 {
     return ObjectStatus::DEAD_OBJECT;
 }
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_MEM_H_
+#endif  // LIBPANDABASE_MEM_H

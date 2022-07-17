@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_SHORTY_ITERATOR_H_
-#define PANDA_LIBPANDAFILE_SHORTY_ITERATOR_H_
+#ifndef LIBPANDAFILE_SHORTY_ITERATOR_H_
+#define LIBPANDAFILE_SHORTY_ITERATOR_H_
 
 #include <cstdint>
 #include "file_items.h"
@@ -58,14 +58,7 @@ public:
         if (element_ == 0) {
             return *this;
         }
-        ++elem_idx_;
-        if (elem_idx_ == NUM_ELEMENTS_PER_16BIT) {
-            shorty_ = *shorty_ptr_++;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            elem_idx_ = 0;
-        } else {
-            shorty_ >>= NUM_BITS_PER_ELEMENT;
-        }
-        element_ = shorty_ & ELEMENT_MASK;
+        IncrementWithoutCheck();
         if (element_ == 0) {
             *this = ShortyIterator();
         }
@@ -77,6 +70,22 @@ public:
         ShortyIterator prev = *this;
         ++(*this);
         return prev;
+    }
+
+    // Current method made for high performance iterator usage
+    // !!! Do not use it in general way !!!
+    ALWAYS_INLINE inline void IncrementWithoutCheck()
+    {
+        ASSERT(element_ != 0);
+
+        ++elem_idx_;
+        if (elem_idx_ == NUM_ELEMENTS_PER_16BIT) {
+            shorty_ = *shorty_ptr_++;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            elem_idx_ = 0;
+        } else {
+            shorty_ >>= NUM_BITS_PER_ELEMENT;
+        }
+        element_ = shorty_ & ELEMENT_MASK;
     }
 
 private:
@@ -92,4 +101,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_SHORTY_ITERATOR_H_
+#endif  // LIBPANDAFILE_SHORTY_ITERATOR_H_

@@ -13,14 +13,14 @@
 
 definitions: []
 tests:
-  - file-name: "ucmp"
+  - file-name: 'ucmp'
     isa:
       title: Integer comparison
       description: Perform specified signed or unsigned integer comparison between register and accumulator.
       exceptions:
         - x_none
     commands:
-      - file-name: "op_vs_8_eq"
+      - file-name: 'op_vs_8_eq'
         isa:
           instructions:
             - sig: ucmp v:in:u32
@@ -29,61 +29,62 @@ tests:
               format: [pref_op_v_8]
         check-type: check-positive
         code-template: |
-            # test - compare equal values
-                ldai %s
-                movi v0, %s
-                ucmp v0
+          # test - compare equal values
+              ldai %s
+              movi v0, %s
+              ucmp v0
         description: Check ucmp with equal values.
         cases:
           - values:
-            - "0"
-            - "0x00000000"
+              - '0'
+              - '0x00000000'
           - values:
-            - "1"  
-            - "0x00000001"
+              - '1'
+              - '0x00000001'
           - values:
-            - "0x7fffffff"  
-            - "2147483647"
+              - '0x7fffffff'
+              - '2147483647'
           - values:
-            - "0x80000000"  
-            - "2147483648"
-          - values:  
-            - "0xCAFEBABE"
-            - "3405691582"
+              - '0x80000000'
+              - '2147483648'
+          - values:
+              - '0xCAFEBABE'
+              - '3405691582'
 
-      - file-name: "op_vs_8_lt"
+      - file-name: 'op_vs_8_lt'
         isa:
           instructions:
             - sig: ucmp v:in:u32
               acc: inout:u32->i32
               prefix: unsigned
               format: [pref_op_v_8]
+        tags: ['irtoc_ignore']
         check-type: check-positive
         code-template: |
           # test - check less than
-                ldai %s
-                movi v0, %s
-                ucmp v0
-                addi 1
+              ldai %s
+              movi v0, %s
+              ucmp v0
+              addi 1
         description: Check ucmp with different values.
         cases:
           - values:
-            - "0"
-            - "0x00000001"
+              - '0'
+              - '0x00000001'
           - values:
-            - "1"  
-            - "0x80000000"
+              - '1'
+              - '0x80000000'
           - values:
-            - "0x7fffffff"  
-            - "2147483648"
+              - '0x7fffffff'
+              - '2147483648'
           - values:
-            - "0x80000000"  
-            - "3147483648"
-          - values:  
-            - "0xCAFEBABE"
-            - "3405691583"
+              - '0x80000000'
+              - '3147483648'
+          - values:
+              - '0xCAFEBABE'
+              - '3405691583'
 
-      - file-name: "op_vs_8_gt"
+      - file-name: 'op_vs_8_gt'
         isa:
           instructions:
             - sig: ucmp v:in:u32
@@ -93,51 +94,51 @@ tests:
         check-type: check-positive
         code-template: |
           #   test - check greater than
-                ldai %s
-                movi v0, %s
-                ucmp v0
-                subi 1
+              ldai %s
+              movi v0, %s
+              ucmp v0
+              subi 1
         description: Check ucmp with different values.
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         cases:
           - values:
-            - "0x00000001"
-            - "0"
+              - '0x00000001'
+              - '0'
           - values:
-            - "0x80000000"
-            - "1"  
+              - '0x80000000'
+              - '1'
           - values:
-            - "2147483648"
-            - "0x7fffffff"  
+              - '2147483648'
+              - '0x7fffffff'
           - values:
-            - "3147483648"
-            - "0x80000000"  
-          - values:  
-            - "3405691583"
-            - "0xCAFEBABE"
+              - '3147483648'
+              - '0x80000000'
+          - values:
+              - '3405691583'
+              - '0xCAFEBABE'
 
-      - file-name: "op_vs_8_reg256"
+      - file-name: 'op_vs_8_reg256'
         isa:
           instructions:
             - sig: ucmp v:in:u32
               acc: inout:u32->i32
               prefix: unsigned
               format: [pref_op_v_8]
-        check-type: none
+        check-type: exit-positive
         runner-options: [compile-failure]
         code-template: |
           #
               ucmp v256
         description: Check ucmp with incorrect register numbers.
 
-      - file-name: "op_vs_8_reg255"
+      - file-name: 'op_vs_8_reg255'
         isa:
           instructions:
             - sig: ucmp v:in:u32
               acc: inout:u32->i32
               prefix: unsigned
               format: [pref_op_v_8]
-        check-type: none
+        check-type: exit-positive
         runner-options: [compile-only]
         code-template: |
           #
@@ -146,16 +147,11 @@ tests:
 
       - file-name: type
         isa:
-          instructions:
-            - sig: ucmp v:in:u32
-              acc: inout:u32->i32
-              prefix: unsigned
-              format: [pref_op_v_8]
           verification:
             - v1_type
             - acc_type
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -173,6 +169,8 @@ tests:
           - values:
               - movi v0, 0
             exclude: [val]
+          - values:
+              - fmovi v0, 0
           - values:
               - movi.64 v0, 0
           - values:
@@ -209,6 +207,8 @@ tests:
           - values:
               - ldai 0
             id: val
+          - values:
+              - fldai 0
           - values:
               - ldai.64 0
           - values:
@@ -248,14 +248,14 @@ tests:
               format: [pref_op_v_8]
         description: Check 'ucmp' with uninitialized registers.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
-            #
-            .function i32 main() {
-                %s
-                *s
-                ucmp %s
+          #
+          .function i32 main() {
+              %s
+              *s
+              ucmp %s
         check-type: exit-positive
         template-cases:
           - values:

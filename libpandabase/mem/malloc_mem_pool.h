@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_MALLOC_MEM_POOL_H_
-#define PANDA_LIBPANDABASE_MEM_MALLOC_MEM_POOL_H_
+#ifndef LIBPANDABASE_MEM_MALLOC_MEM_POOL_H
+#define LIBPANDABASE_MEM_MALLOC_MEM_POOL_H
 
 #include "mem_pool.h"
 
@@ -24,20 +24,21 @@ namespace panda {
 class MallocMemPool : public MemPool<MallocMemPool> {
 private:
     template <class ArenaT = Arena>
-    ArenaT *AllocArenaImpl(size_t size, SpaceType space_type, AllocatorType allocator_type, void *allocator_addr);
+    ArenaT *AllocArenaImpl(size_t size, SpaceType space_type, AllocatorType allocator_type, const void *allocator_addr);
 
     template <class ArenaT = Arena>
     void FreeArenaImpl(ArenaT *arena);
 
-    static Pool AllocPoolImpl(size_t size, SpaceType space_type, AllocatorType allocator_type, void *allocator_addr);
+    static Pool AllocPoolImpl(size_t size, SpaceType space_type, AllocatorType allocator_type,
+                              const void *allocator_addr);
 
     static void FreePoolImpl(void *mem, size_t size);
 
-    static AllocatorInfo GetAllocatorInfoForAddrImpl(void *addr);
+    static AllocatorInfo GetAllocatorInfoForAddrImpl(const void *addr);
 
-    static SpaceType GetSpaceTypeForAddrImpl(void *addr);
+    static SpaceType GetSpaceTypeForAddrImpl(const void *addr);
 
-    static void *GetStartAddrPoolForAddrImpl(void *addr);
+    static void *GetStartAddrPoolForAddrImpl(const void *addr);
 
     MallocMemPool();
 
@@ -52,4 +53,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_MALLOC_MEM_POOL_H_
+#endif  // LIBPANDABASE_MEM_MALLOC_MEM_POOL_H

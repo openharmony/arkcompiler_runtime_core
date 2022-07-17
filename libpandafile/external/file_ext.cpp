@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,12 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+//
 
+#include "file_ext.h"
 #include "panda_file_external.h"
 #include "libpandafile/file-inl.h"
 #include "libpandafile/class_data_accessor-inl.h"
 #include "libpandafile/method_data_accessor-inl.h"
 #include "libpandafile/code_data_accessor-inl.h"
+#include "libpandafile/debug_helpers.h"
+#include "libpandabase/utils/logger.h"
+#include "libpandabase/os/native_stack.h"
 #include <map>
 
 namespace panda::panda_file::ext {
@@ -39,6 +44,11 @@ public:
     explicit PandaFileExt(std::unique_ptr<const panda::panda_file::File> &&panda_file)
         : panda_file_(std::move(panda_file))
     {
+    }
+
+    size_t GetExtFileLineNumber(panda::panda_file::MethodDataAccessor mda, uint32_t bc_offset)
+    {
+        return panda::panda_file::debug_helpers::GetLineNumber(mda, bc_offset, panda_file_.get());
     }
 
     panda::panda_file::ext::MethodSymEntry *QueryMethodSymByOffset(uint64_t offset)
@@ -68,6 +78,47 @@ public:
                     if (mda.GetCodeId().value().GetOffset() <= offset &&
                         offset < mda.GetCodeId().value().GetOffset() + ca.GetCodeSize()) {
                         found = &ret.first->second;
+                    }
+                }
+            });
+        }
+        return found;
+    }
+
+    panda::panda_file::ext::MethodSymEntry *QueryMethodSymAndLineByOffset(uint64_t offset)
+    {
+        auto it = method_symbols_.upper_bound(offset);
+        if (it != method_symbols_.end() && offset >= it->second.id_.GetOffset()) {
+            return &it->second;
+        }
+
+        // Enmuate all methods and put them to local cache.
+        panda::panda_file::ext::MethodSymEntry *found = nullptr;
+        for (uint32_t id : panda_file_->GetClasses()) {
+            if (panda_file_->IsExternal(panda::panda_file::File::EntityId(id))) {
+                continue;
+            }
+            panda::panda_file::ClassDataAccessor cda {*panda_file_, panda::panda_file::File::EntityId(id)};
+            cda.EnumerateMethods([&](panda::panda_file::MethodDataAccessor &mda) -> void {
+                if (mda.GetCodeId().has_value()) {
+                    panda::panda_file::CodeDataAccessor ca {*panda_file_, mda.GetCodeId().value()};
+                    panda::panda_file::ext::MethodSymEntry entry;
+                    entry.id_ = mda.GetCodeId().value();
+                    entry.length_ = ca.GetCodeSize();
+                    entry.name_ =
+                        std::string(panda::utf::Mutf8AsCString(panda_file_->GetStringData(mda.GetNameId()).data));
+
+                    auto ret = method_symbols_.emplace(offset, entry);
+                    if (mda.GetCodeId().value().GetOffset() <= offset &&
+                        offset < mda.GetCodeId().value().GetOffset() + ca.GetCodeSize()) {
+                        size_t line_number = GetExtFileLineNumber(mda, offset - mda.GetCodeId().value().GetOffset());
+                        found = &ret.first->second;
+                        panda::panda_file::File::EntityId id_new(line_number);
+                        auto name_id = cda.GetDescriptor();
+                        found->id_ = id_new;
+                        found->name_ =
+                            panda::os::native_stack::ChangeJaveStackFormat(reinterpret_cast<const char *>(name_id)) +
+                            "." + found->name_;
                     }
                 }
             });
@@ -140,7 +191,7 @@ bool OpenPandafileFromMemoryExt(void *addr, const uint64_t *size, [[maybe_unused
 bool OpenPandafileFromFdExt([[maybe_unused]] int fd, [[maybe_unused]] uint64_t offset, const std::string &file_name,
                             PandaFileExt **panda_file_ext)
 {
-    auto pf = panda::panda_file::File::Open(file_name);
+    auto pf = panda::panda_file::OpenPandaFile(file_name);
     if (pf == nullptr) {
         return false;
     }
@@ -153,6 +204,18 @@ bool OpenPandafileFromFdExt([[maybe_unused]] int fd, [[maybe_unused]] uint64_t o
 bool QueryMethodSymByOffsetExt(struct PandaFileExt *pf, uint64_t offset, struct MethodSymInfoExt *method_info)
 {
     auto entry = pf->QueryMethodSymByOffset(offset);
+    if ((entry != nullptr) && (method_info != nullptr)) {
+        method_info->offset_ = entry->id_.GetOffset();
+        method_info->length_ = entry->length_;
+        method_info->name_ = entry->name_;
+        return true;
+    }
+    return false;
+}
+
+bool QueryMethodSymAndLineByOffsetExt(struct PandaFileExt *pf, uint64_t offset, struct MethodSymInfoExt *method_info)
+{
+    auto entry = pf->QueryMethodSymAndLineByOffset(offset);
     if ((entry != nullptr) && (method_info != nullptr)) {
         method_info->offset_ = entry->id_.GetOffset();
         method_info->length_ = entry->length_;

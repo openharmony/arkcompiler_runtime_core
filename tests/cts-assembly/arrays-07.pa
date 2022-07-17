@@ -50,7 +50,7 @@
 #         etype: u8
 
 # assert that operation ldarru.8 works fine
-.function u1 main() {
+.function i32 main() {
     movi v0, 10
     newarr v1, v0, u8[]
     movi v2, 0

@@ -14,7 +14,7 @@
 #Assert that intrinsic Math.absI32 works fine
 .record Math <external>
 .function i32 Math.absI32(i32 a0)<external>
-.function u1 main(){
+.function i32 main(){
     movi v0, 2
     movi.64 v1, 2
     call.short Math.absI32, v0, v0

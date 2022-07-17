@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_CORETYPES_ARRAY_H_
-#define PANDA_RUNTIME_INCLUDE_CORETYPES_ARRAY_H_
+#ifndef PANDA_RUNTIME_CORETYPES_ARRAY_H_
+#define PANDA_RUNTIME_CORETYPES_ARRAY_H_
 
 #include <securec.h>
 #include <cstddef>
@@ -37,7 +36,7 @@ class PandaVM;
 }  // namespace panda
 
 namespace panda::interpreter {
-template <BytecodeInstruction::Format format>
+template <BytecodeInstruction::Format format, bool is_dynamic = false>
 class DimIterator;
 }  // namespace panda::interpreter
 
@@ -52,6 +51,7 @@ public:
 
     static Array *Cast(ObjectHeader *object)
     {
+        // TODO(linxiang) to do assert
         return reinterpret_cast<Array *>(object);
     }
 
@@ -83,6 +83,8 @@ public:
 
     array_size_t GetLength() const
     {
+        // Atomic with relaxed order reason: data race with length_ with no synchronization or ordering constraints
+        // imposed on other reads or writes
         return length_.load(std::memory_order_relaxed);
     }
 
@@ -165,9 +167,9 @@ public:
     template <class T, bool need_read_barrier = true, bool is_dyn = false>
     T Get([[maybe_unused]] const ManagedThread *thread, array_size_t idx) const;
 
-    size_t ObjectSize() const
+    size_t ObjectSize(uint32_t component_size) const
     {
-        return ComputeSize(ClassAddr<panda::Class>()->GetComponentSize(), length_);
+        return ComputeSize(component_size, length_);
     }
 
     static constexpr uint32_t GetLengthOffset()
@@ -180,6 +182,19 @@ public:
         return MEMBER_OFFSET(Array, data_);
     }
 
+    template <bool is_dyn>
+    uint32_t GetElementOffset(array_size_t idx) const
+    {
+        size_t elem_size;
+        // NOLINTNEXTLINE(readability-braces-around-statements)
+        if constexpr (is_dyn) {
+            elem_size = TaggedValue::TaggedTypeSize();
+        } else {  // NOLINT(readability-misleading-indentation)
+            elem_size = ClassAddr<panda::Class>()->GetComponentSize();
+        }
+        return GetDataOffset() + idx * elem_size;
+    }
+
     template <class DimIterator>
     static Array *CreateMultiDimensionalArray(ManagedThread *thread, panda::Class *klass, uint32_t nargs,
                                               const DimIterator &iter, size_t dim_idx = 0);
@@ -187,11 +202,13 @@ public:
 private:
     void SetLength(array_size_t length)
     {
+        // Atomic with relaxed order reason: data race with length_ with no synchronization or ordering constraints
+        // imposed on other reads or writes
         length_.store(length, std::memory_order_relaxed);
     }
 
     std::atomic<array_size_t> length_;
-    // Align with 64bits, because dynamic language data is always 64bits
+    // Align by 64bits, because dynamic language data is always 64bits
     __extension__ alignas(sizeof(uint64_t)) uint32_t data_[0];  // NOLINT(modernize-avoid-c-arrays)
 };
 
@@ -205,7 +222,6 @@ static_assert(ARRAY_LENGTH_OFFSET == panda::coretypes::Array::GetLengthOffset())
 constexpr uint32_t ARRAY_DATA_OFFSET = 16U;
 static_assert(ARRAY_DATA_OFFSET == panda::coretypes::Array::GetDataOffset());
 #endif
-
 }  // namespace panda::coretypes
 
-#endif  // PANDA_RUNTIME_INCLUDE_CORETYPES_ARRAY_H_
+#endif  // PANDA_RUNTIME_CORETYPES_ARRAY_H_

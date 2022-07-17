@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_JSON_PARSER_H_
-#define PANDA_LIBPANDABASE_UTILS_JSON_PARSER_H_
+#ifndef COMPILER_TOOLS_PAOC_JSON_PARSER_H
+#define COMPILER_TOOLS_PAOC_JSON_PARSER_H
 
 #include <string>
 #include <vector>
@@ -24,6 +24,8 @@
 #include <algorithm>
 
 #include "macros.h"
+
+WEAK_FOR_LTO_START
 
 namespace panda {
 
@@ -42,13 +44,11 @@ public:
         Value() = default;
         ~Value() = default;
         NO_COPY_SEMANTIC(Value);
-
         Value(Value &&rhs) noexcept
         {
             value_ = std::move(rhs.value_);
             rhs.value_ = std::monostate {};
         }
-
         Value &operator=(Value &&rhs) noexcept
         {
             value_ = std::move(rhs.value_);
@@ -67,7 +67,6 @@ public:
         {
             return std::get_if<T>(&value_);
         }
-
         template <typename T>
         const T *Get() const
         {
@@ -122,12 +121,10 @@ public:
     ~JsonObject() = default;
     NO_COPY_SEMANTIC(JsonObject);
     NO_MOVE_SEMANTIC(JsonObject);
-
     explicit JsonObject(const std::string &text)
     {
         Parser(this).Parse(text);
     }
-
     explicit JsonObject(std::streambuf *stream_buf)
     {
         Parser(this).Parse(stream_buf);
@@ -148,7 +145,6 @@ public:
         }
         return static_cast<size_t>(-1);
     }
-
     const auto &GetKeyByIndex(size_t idx) const
     {
         ASSERT(idx < GetSize());
@@ -161,13 +157,11 @@ public:
         auto iter = values_map_.find(key);
         return (iter == values_map_.end()) ? nullptr : iter->second.Get<T>();
     }
-
     const StringT *GetValueSourceString(const Key &key) const
     {
         auto iter = string_map_.find(key);
         return (iter == string_map_.end()) ? nullptr : &iter->second;
     }
-
     template <typename T>
     const T *GetValue(size_t idx) const
     {
@@ -197,4 +191,6 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_JSON_PARSER_H_
+WEAK_FOR_LTO_END
+
+#endif  // COMPILER_TOOLS_PAOC_JSON_PARSER_H

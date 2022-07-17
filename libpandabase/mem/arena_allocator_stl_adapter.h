@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_ARENA_ALLOCATOR_STL_ADAPTER_H_
-#define PANDA_LIBPANDABASE_MEM_ARENA_ALLOCATOR_STL_ADAPTER_H_
+#ifndef PANDA_RUNTIME_MEM_STL_ADAPTER_H
+#define PANDA_RUNTIME_MEM_STL_ADAPTER_H
 
 #include "arena_allocator.h"
 
@@ -120,7 +120,7 @@ public:
                      [[maybe_unused]] typename ArenaAllocatorAdapter<void, use_oom_handler>::pointer ptr = nullptr)
     {
         ASSERT(n <= max_size());
-        return allocator_->template AllocArray<T>(n);  // CODECHECK-NOLINT(C_RULE_ID_HORIZON_SPACE)
+        return allocator_->template AllocArray<T>(n);
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
@@ -129,7 +129,6 @@ public:
     template <typename U, typename... Args>
     void construct(U *p, Args &&... args)  // NOLINT(readability-identifier-naming)
     {
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         ::new (static_cast<void *>(p)) U(std::forward<Args>(args)...);
     }
     template <typename U>
@@ -172,4 +171,4 @@ inline ArenaAllocatorAdapter<void, use_oom_handler> ArenaAllocatorT<use_oom_hand
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_ARENA_ALLOCATOR_STL_ADAPTER_H_
+#endif  // PANDA_RUNTIME_MEM_STL_ADAPTER_H

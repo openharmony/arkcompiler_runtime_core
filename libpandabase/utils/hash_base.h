@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_LIBPANDABASE_UTILS_HASH_BASE_H_
-#define PANDA_LIBPANDABASE_UTILS_HASH_BASE_H_
+#ifndef LIBPANDABASE_UTILS_HASH_BASE_H_
+#define LIBPANDABASE_UTILS_HASH_BASE_H_
 
 #include <array>
 #include <cstdint>
@@ -38,7 +37,6 @@ public:
     {
         return HashImpl::GetHash32WithSeedImpl(key, len, seed);
     }
-
     /**
      * \brief Create 32 bits Hash from \param key.
      * @param key - a key which should be hashed
@@ -49,7 +47,6 @@ public:
     {
         return HashImpl::GetHash32Impl(key, len);
     }
-
     /**
      * \brief Create 32 bits Hash from MUTF8 \param string.
      * @param string - a pointer to the MUTF8 string
@@ -59,7 +56,6 @@ public:
     {
         return HashImpl::GetHash32StringImpl(mutf8_string);
     }
-
     /**
      * \brief Create 32 bits Hash from MUTF8 \param string.
      * @param string - a pointer to the MUTF8 string
@@ -74,4 +70,4 @@ public:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_HASH_BASE_H_
+#endif  // LIBPANDABASE_UTILS_HASH_BASE_H_

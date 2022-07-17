@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,7 +128,6 @@ public:
     NO_COPY_SEMANTIC(LineNumberProgramProcessor);
     NO_MOVE_SEMANTIC(LineNumberProgramProcessor);
 
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
     void Process()
     {
         handler_->ProcessBegin();
@@ -173,7 +172,7 @@ public:
                     break;
                 }
                 case Opcode::SET_COLUMN: {
-                    HandleSetColumn();
+                    res = HandleSetColumn();
                     break;
                 }
                 default: {

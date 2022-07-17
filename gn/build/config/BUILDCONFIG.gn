@@ -11,11 +11,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if (target_os == "") {
+  target_os = host_os
+}
+if (target_cpu == "") {
+  target_cpu = host_cpu
+}
 if (current_cpu == "") {
-  current_cpu = host_cpu
+  current_cpu = target_cpu
 }
 if (current_os == "") {
-  current_os = host_os
+  current_os = target_os
 }
 
 declare_args() {
@@ -26,25 +32,26 @@ declare_args() {
 is_linux = current_os == "linux"
 is_mingw = current_os == "mingw"
 is_mac = current_os == "mac"
+is_win = current_os == "win" || current_os == "winuwp"
 
-default_configs = [ "//build:compiler_defaults" ]
+_shared_binary_target_configs = [ "//build:compiler_defaults" ]
 set_defaults("executable") {
-  configs = default_configs
+  configs = _shared_binary_target_configs
   configs += [ "//build:executable_config" ]
   configs += [ "//build:ldconfig" ]
 }
 set_defaults("static_library") {
-  configs = default_configs
+  configs = _shared_binary_target_configs
 }
 set_defaults("shared_library") {
-  configs = default_configs
+  configs = _shared_binary_target_configs
   configs += [ "//build:ldconfig" ]
 }
 set_defaults("source_set") {
-  configs = default_configs
+  configs = _shared_binary_target_configs
 }
 
-host_toolchain = "//build/toolchain:clang-8"
+host_toolchain = "//build/toolchain:clang-9"
 set_default_toolchain(host_toolchain)
 
 ark_standalone_build = true

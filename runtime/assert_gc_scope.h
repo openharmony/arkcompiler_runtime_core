@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_ASSERT_GC_SCOPE_H_
-#define PANDA_RUNTIME_ASSERT_GC_SCOPE_H_
+#ifndef PANDA_RUNTIME_ASSERT_GC_SCOPE_H
+#define PANDA_RUNTIME_ASSERT_GC_SCOPE_H
 
 #include "macros.h"
 
@@ -42,11 +42,15 @@ class AssertGCScopeT<true> {
 public:
     AssertGCScopeT()
     {
+        // Atomic with relaxed order reason: data race with gc_flag with no synchronization or ordering constraints
+        // imposed on other reads or writes
         AssertGCScopeT::gc_flag.fetch_add(1, std::memory_order_relaxed);
     }
 
     ~AssertGCScopeT()
     {
+        // Atomic with relaxed order reason: data race with gc_flag with no synchronization or ordering constraints
+        // imposed on other reads or writes
         AssertGCScopeT::gc_flag.fetch_sub(1, std::memory_order_relaxed);
     }
 
@@ -73,4 +77,4 @@ using DisallowGarbageCollection = AssertGCScopeT<IS_GC_ALLOW_CHECK>;
     ASSERT_PRINT(AssertGCScopeT<IS_GC_ALLOW_CHECK>::IsAllowed(), "disallow execute garbage collection.");
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_ASSERT_GC_SCOPE_H_
+#endif  // PANDA_RUNTIME_ASSERT_GC_SCOPE_H

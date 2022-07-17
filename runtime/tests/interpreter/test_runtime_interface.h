@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef PANDA_RUNTIME_TESTS_INTERPRETER_TEST_RUNTIME_INTERFACE_H_
 #define PANDA_RUNTIME_TESTS_INTERPRETER_TEST_RUNTIME_INTERFACE_H_
 
@@ -38,7 +37,7 @@ public:
     explicit DummyGC(panda::mem::ObjectAllocatorBase *object_allocator, const panda::mem::GCSettings &settings);
     ~DummyGC() {}
     // NOLINTNEXTLINE(misc-unused-parameters)
-    void WaitForGC([[maybe_unused]] const GCTask &task) override {}
+    void WaitForGC([[maybe_unused]] GCTask task) override {}
     void InitGCBits([[maybe_unused]] panda::ObjectHeader *obj_header) override {}
     void InitGCBitsForAllocationInTLAB([[maybe_unused]] panda::ObjectHeader *obj_header) override {}
     void Trigger() override {}
@@ -51,8 +50,17 @@ private:
     void InitializeImpl() override {}
 
     void PreRunPhasesImpl() override {}
-    void RunPhasesImpl([[maybe_unused]] const GCTask &task) override {}
-    void MarkReferences([[maybe_unused]] PandaStackTL<ObjectHeader *> *references,
+    void RunPhasesImpl([[maybe_unused]] GCTask &task) override {}
+    bool IsMarked([[maybe_unused]] const ObjectHeader *object) const override
+    {
+        return false;
+    }
+    void MarkObject([[maybe_unused]] ObjectHeader *object) override {}
+    bool MarkObjectIfNotMarked([[maybe_unused]] ObjectHeader *object) override
+    {
+        return false;
+    }
+    void MarkReferences([[maybe_unused]] mem::GCMarkingStackType *references,
                         [[maybe_unused]] panda::mem::GCPhase gc_phase) override
     {
     }
@@ -69,11 +77,13 @@ private:
                              [[maybe_unused]] const uint32_t processed_flag) override
     {
     }
-    void CommonUpdateRefsToMovedObjects([[maybe_unused]] const mem::UpdateRefInAllocator &update_allocator) override {}
+    void CommonUpdateRefsToMovedObjects() override {}
+    void UpdateRefsToMovedObjectsInPygoteSpace() override {}
     void UpdateVmRefs() override {}
     void UpdateGlobalObjectStorage() override {}
     void UpdateClassLinkerContextRoots() override {}
     void UpdateThreadLocals() override {}
+    void ClearLocalInternalAllocatorPools() override {}
 };
 
 template <class T>
@@ -127,21 +137,13 @@ public:
 
     static constexpr BytecodeId METHOD_ID {0xaabb};
     static constexpr BytecodeId FIELD_ID {0xeeff};
-    static constexpr BytecodeId STRING_ID {0x11223344};
     static constexpr BytecodeId TYPE_ID {0x5566};
     static constexpr BytecodeId LITERALARRAY_ID {0x7788};
-
-    static coretypes::String *ResolveString([[maybe_unused]] PandaVM *vm, [[maybe_unused]] const Method &caller,
-                                            BytecodeId id)
-    {
-        EXPECT_EQ(id, STRING_ID);
-        return ToPointer<coretypes::String>(0x55667788);
-    }
 
     static coretypes::Array *ResolveLiteralArray([[maybe_unused]] PandaVM *vm, [[maybe_unused]] const Method &caller,
                                                  BytecodeId id)
     {
-        EXPECT_EQ(id, STRING_ID);
+        EXPECT_EQ(id, LITERALARRAY_ID);
         return ToPointer<coretypes::Array>(0x7788);
     }
 
@@ -193,6 +195,11 @@ public:
         jit_threshold = threshold;
     }
 
+    static void JITCompileMethod(Method *method)
+    {
+        method->SetCompiledEntryPoint(entry_point);
+    }
+
     static void SetCurrentFrame([[maybe_unused]] ManagedThread *thread, Frame *frame)
     {
         ASSERT_NE(frame, nullptr);
@@ -224,6 +231,11 @@ public:
     static void SetupCatchBlockPcOffset(uint32_t pc_offset)
     {
         catch_block_pc_offset = pc_offset;
+    }
+
+    static void SetupNativeEntryPoint(const void *p)
+    {
+        entry_point = p;
     }
 
     static coretypes::Array *CreateArray(Class *klass, coretypes::array_size_t length)
@@ -312,6 +324,8 @@ public:
         ASSERT_EQ(abstract_method_error_data.method, method);
     }
 
+    static void ThrowIncompatibleClassChangeErrorForMethodConflict([[maybe_unused]] Method *method) {}
+
     static void ThrowOutOfMemoryError([[maybe_unused]] const PandaString &msg) {}
 
     static void ThrowVerificationException([[maybe_unused]] const PandaString &msg)
@@ -362,35 +376,34 @@ public:
         abstract_method_error_data = data;
     }
 
+    template <bool is_dynamic = false>
     static Frame *CreateFrame(size_t nregs, Method *method, Frame *prev)
     {
+        uint32_t ext_sz = EmptyExtFrameDataSize;
         auto allocator = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetInternalAllocator();
-        Frame *mem = static_cast<Frame *>(
-            allocator->Allocate(panda::Frame::GetSize(nregs), GetLogAlignment(8U), ManagedThread::GetCurrent()));
-        return (new (mem) panda::Frame(method, prev, nregs));
+        void *mem =
+            allocator->Allocate(panda::Frame::GetAllocSize(panda::Frame::GetActualSize<is_dynamic>(nregs), ext_sz),
+                                GetLogAlignment(8), ManagedThread::GetCurrent());
+        return new (Frame::FromExt(mem, ext_sz)) panda::Frame(mem, method, prev, nregs);
     }
 
-    static Frame *CreateFrameWithActualArgs(size_t nregs, size_t num_actual_args, Method *method, Frame *prev)
+    static Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t num_actual_args,
+                                                   Method *method, Frame *prev)
     {
-        return CreateFrameWithActualArgs(nregs, nregs, num_actual_args, method, prev);
-    }
-
-    static Frame *CreateFrameWithActualArgs(size_t size, size_t nregs, size_t num_actual_args, Method *method,
-                                            Frame *prev)
-    {
+        uint32_t ext_sz = EmptyExtFrameDataSize;
         auto allocator = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetInternalAllocator();
-        Frame *mem = static_cast<Frame *>(
-            allocator->Allocate(panda::Frame::GetSize(size), GetLogAlignment(8U), ManagedThread::GetCurrent()));
+        void *mem = allocator->Allocate(panda::Frame::GetAllocSize(size, ext_sz), GetLogAlignment(8),
+                                        ManagedThread::GetCurrent());
         if (UNLIKELY(mem == nullptr)) {
             return nullptr;
         }
-        return (new (mem) panda::Frame(method, prev, nregs, num_actual_args));
+        return new (Frame::FromExt(mem, ext_sz)) panda::Frame(mem, method, prev, nregs, num_actual_args);
     }
 
-    static void FreeFrame(Frame *frame)
+    static void FreeFrame(ManagedThread *thread, Frame *frame)
     {
-        auto allocator = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetInternalAllocator();
-        allocator->Free(frame);
+        auto allocator = thread->GetVM()->GetHeapManager()->GetInternalAllocator();
+        allocator->Free(frame->GetExt());
     }
 
     static mem::GC *GetGC()
@@ -456,6 +469,8 @@ private:
     static Field *resolved_field;
 
     static InvokeMethodHandler invoke_handler;
+
+    static const void *entry_point;
 
     static uint32_t jit_threshold;
 

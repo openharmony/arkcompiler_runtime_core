@@ -15,7 +15,7 @@
 .record Asm{
     i32[] asm1 <static>
 }
-.function u1 main(){
+.function i32 main(){
     movi v0, 7
     newarr v1, v0, i32[]
     lda.obj v1

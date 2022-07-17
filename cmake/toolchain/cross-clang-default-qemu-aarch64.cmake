@@ -13,7 +13,6 @@
 
 set(PANDA_TRIPLET aarch64-linux-gnu)
 set(PANDA_SYSROOT /usr/${PANDA_TRIPLET})
-set(PANDA_RUN_PREFIX qemu-aarch64 -L ${PANDA_SYSROOT})
 
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR aarch64)
@@ -29,3 +28,4 @@ add_compile_options(
 include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
 set_c_compiler(clang)
 set_cxx_compiler(clang++)
+set(PANDA_RUN_PREFIX ${QEMU_ARM64_BIN} -L ${PANDA_SYSROOT})

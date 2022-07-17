@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H_
-#define PANDA_LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H_
+#ifndef LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H_
+#define LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H_
 
 #include "helpers.h"
 #include "method_data_accessor.h"
@@ -22,6 +22,42 @@
 #include "proto_data_accessor.h"
 
 namespace panda::panda_file {
+
+// static
+inline File::EntityId MethodDataAccessor::GetNameId(const File &panda_file, File::EntityId method_id)
+{
+    constexpr size_t SKIP_NUM = 2;  // skip class_idx and proto_idx
+    auto sp = panda_file.GetSpanFromId(method_id).SubSpan(IDX_SIZE * SKIP_NUM);
+    return File::EntityId(helpers::Read<ID_SIZE>(&sp));
+}
+
+// static
+inline panda_file::File::StringData MethodDataAccessor::GetName(const File &panda_file, File::EntityId method_id)
+{
+    return panda_file.GetStringData(GetNameId(panda_file, method_id));
+}
+
+// static
+inline File::EntityId MethodDataAccessor::GetProtoId(const File &panda_file, File::EntityId method_id)
+{
+    constexpr size_t SKIP_NUM = 1;  // skip class_idx
+    auto sp = panda_file.GetSpanFromId(method_id).SubSpan(IDX_SIZE * SKIP_NUM);
+    auto proto_idx_ = helpers::Read<IDX_SIZE>(&sp);
+    return File::EntityId(panda_file.ResolveProtoIndex(method_id, proto_idx_).GetOffset());
+}
+
+// static
+inline File::EntityId MethodDataAccessor::GetClassId(const File &panda_file, File::EntityId method_id)
+{
+    auto sp = panda_file.GetSpanFromId(method_id);
+    auto class_idx = helpers::Read<IDX_SIZE>(&sp);
+    return File::EntityId(panda_file.ResolveClassIndex(method_id, class_idx).GetOffset());
+}
+
+inline panda_file::File::StringData MethodDataAccessor::GetName() const
+{
+    return panda_file_.GetStringData(GetNameId());
+}
 
 inline void MethodDataAccessor::SkipCode()
 {
@@ -56,6 +92,16 @@ inline void MethodDataAccessor::SkipAnnotations()
 inline void MethodDataAccessor::SkipParamAnnotation()
 {
     GetParamAnnotationId();
+}
+
+inline void MethodDataAccessor::SkipTypeAnnotation()
+{
+    EnumerateTypeAnnotations([](File::EntityId /* unused */) {});
+}
+
+inline void MethodDataAccessor::SkipRuntimeTypeAnnotation()
+{
+    EnumerateRuntimeTypeAnnotations([](File::EntityId /* unused */) {});
 }
 
 inline std::optional<File::EntityId> MethodDataAccessor::GetCodeId()
@@ -144,6 +190,69 @@ inline void MethodDataAccessor::EnumerateAnnotations(Callback cb)
                                                                         &param_annotation_sp_);
 }
 
+template <class Callback>
+inline bool MethodDataAccessor::EnumerateRuntimeAnnotationsWithEarlyStop(Callback cb)
+{
+    if (is_external_) {
+        return false;
+    }
+
+    if (runtime_annotations_sp_.data() == nullptr) {
+        SkipSourceLang();
+    }
+
+    return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, MethodTag, Callback>(
+        runtime_annotations_sp_, MethodTag::RUNTIME_ANNOTATION, cb);
+}
+
+template <class Callback>
+inline bool MethodDataAccessor::EnumerateAnnotationsWithEarlyStop(Callback cb)
+{
+    if (is_external_) {
+        return false;
+    }
+
+    if (annotations_sp_.data() == nullptr) {
+        SkipDebugInfo();
+    }
+
+    return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, MethodTag, Callback>(annotations_sp_,
+                                                                                            MethodTag::ANNOTATION, cb);
+}
+
+template <class Callback>
+inline void MethodDataAccessor::EnumerateTypeAnnotations(Callback cb)
+{
+    if (is_external_) {
+        return;
+    }
+
+    if (type_annotation_sp_.data() == nullptr) {
+        SkipParamAnnotation();
+    }
+
+    helpers::EnumerateTaggedValues<File::EntityId, MethodTag, Callback>(type_annotation_sp_, MethodTag::TYPE_ANNOTATION,
+                                                                        cb, &runtime_type_annotation_sp_);
+}
+
+template <class Callback>
+inline void MethodDataAccessor::EnumerateRuntimeTypeAnnotations(Callback cb)
+{
+    if (is_external_) {
+        return;
+    }
+
+    if (runtime_type_annotation_sp_.data() == nullptr) {
+        SkipTypeAnnotation();
+    }
+
+    Span<const uint8_t> sp {nullptr, nullptr};
+    size_ = panda_file_.GetIdFromPointer(runtime_type_annotation_sp_.data()).GetOffset() - method_id_.GetOffset() +
+            1;  // + 1 for NOTHING tag
+    helpers::EnumerateTaggedValues<File::EntityId, MethodTag, Callback>(runtime_type_annotation_sp_,
+                                                                        MethodTag::RUNTIME_TYPE_ANNOTATION, cb, &sp);
+}
+
 inline std::optional<File::EntityId> MethodDataAccessor::GetParamAnnotationId()
 {
     if (is_external_) {
@@ -157,10 +266,8 @@ inline std::optional<File::EntityId> MethodDataAccessor::GetParamAnnotationId()
         SkipAnnotations();
     }
 
-    Span<const uint8_t> sp {nullptr, nullptr};
-    auto v = helpers::GetOptionalTaggedValue<File::EntityId>(param_annotation_sp_, MethodTag::PARAM_ANNOTATION, &sp);
-
-    size_ = panda_file_.GetIdFromPointer(sp.data()).GetOffset() - method_id_.GetOffset() + 1;  // + 1 for NOTHING tag
+    auto v = helpers::GetOptionalTaggedValue<File::EntityId>(param_annotation_sp_, MethodTag::PARAM_ANNOTATION,
+                                                             &type_annotation_sp_);
 
     return v;
 }
@@ -179,8 +286,22 @@ inline uint32_t MethodDataAccessor::GetRuntimeAnnotationsNumber()
     return n;
 }
 
+inline uint32_t MethodDataAccessor::GetTypeAnnotationsNumber()
+{
+    size_t n = 0;
+    EnumerateTypeAnnotations([&n](File::EntityId /* unused */) { n++; });
+    return n;
+}
+
+inline uint32_t MethodDataAccessor::GetRuntimeTypeAnnotationsNumber()
+{
+    size_t n = 0;
+    EnumerateRuntimeTypeAnnotations([&n](File::EntityId /* unused */) { n++; });
+    return n;
+}
+
 template <typename Callback>
-void MethodDataAccessor::EnumerateTypesInProto(Callback cb)
+void MethodDataAccessor::EnumerateTypesInProto(Callback cb, bool skip_this)
 {
     size_t ref_idx = 0;
     panda_file::ProtoDataAccessor pda(GetPandaFile(), GetProtoId());
@@ -194,7 +315,7 @@ void MethodDataAccessor::EnumerateTypesInProto(Callback cb)
 
     cb(type, class_id);
 
-    if (!IsStatic()) {
+    if (!IsStatic() && !skip_this) {
         // first arg type is method class
         cb(panda_file::Type {panda_file::Type::TypeId::REFERENCE}, GetClassId());
     }
@@ -233,4 +354,4 @@ inline uint32_t MethodDataAccessor::GetNumericalAnnotation(uint32_t field_id)
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H_
+#endif  // LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H_

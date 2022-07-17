@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_LANGUAGE_CONFIG_H_
-#define PANDA_RUNTIME_INCLUDE_LANGUAGE_CONFIG_H_
+#ifndef PANDA_RUNTIME_LANGUAGE_CONFIG_H_
+#define PANDA_RUNTIME_LANGUAGE_CONFIG_H_
 
-#include "file_items.h"
+#include "runtime/mem/lock_config_helper.h"
 
 namespace panda {
-
-enum LangTypeT : bool { LANG_TYPE_STATIC, LANG_TYPE_DYNAMIC };
-
-enum MTModeT : bool { MT_MODE_SINGLE, MT_MODE_MULTI };
 
 class PandaAssemblyLanguageConfig {
 public:
@@ -32,6 +28,8 @@ public:
     static constexpr bool HAS_VALUE_OBJECT_TYPES = false;
 };
 
+#include "language_config_gen.inc"
+
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_LANGUAGE_CONFIG_H_
+#endif  // PANDA_RUNTIME_LANGUAGE_CONFIG_H_

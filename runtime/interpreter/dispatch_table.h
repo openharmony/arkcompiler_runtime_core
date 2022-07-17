@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INTERPRETER_DISPATCH_TABLE_H_
-#define PANDA_RUNTIME_INTERPRETER_DISPATCH_TABLE_H_
+#ifndef PANDA_INTERPRETER_DISPATCH_TABLE_H_
+#define PANDA_INTERPRETER_DISPATCH_TABLE_H_
 
 #include <array>
 #include <cstddef>
@@ -28,34 +27,27 @@ namespace panda::interpreter {
 
 #ifdef PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES
 
-template <size_t N>
-ALWAYS_INLINE inline void SetDispatchTable(const std::array<const void *, N> &dispatch_table)
+ALWAYS_INLINE inline void SetDispatchTable(const void *const *dispatch_table)
 {
-    arch::regs::SetDispatchTable(dispatch_table.data());
+    arch::regs::SetDispatchTable(dispatch_table);
 }
 
-template <size_t N>
-ALWAYS_INLINE inline const void *const *GetDispatchTable([
-    [maybe_unused]] const std::array<const void *, N> &dispatch_table)
+ALWAYS_INLINE inline const void *const *GetDispatchTable([[maybe_unused]] const void *const *dispatch_table)
 {
     return arch::regs::GetDispatchTable();
 }
 
 #else
 
-template <size_t N>
-ALWAYS_INLINE inline void SetDispatchTable([[maybe_unused]] const std::array<const void *, N> &dispatch_table)
-{
-}
+ALWAYS_INLINE inline void SetDispatchTable([[maybe_unused]] const void *const *dispatch_table) {}
 
-template <size_t N>
-ALWAYS_INLINE inline const void *const *GetDispatchTable(const std::array<const void *, N> &dispatch_table)
+ALWAYS_INLINE inline const void *const *GetDispatchTable(const void *const *dispatch_table)
 {
-    return dispatch_table.data();
+    return dispatch_table;
 }
 
 #endif  // PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_RUNTIME_INTERPRETER_DISPATCH_TABLE_H_
+#endif  // PANDA_INTERPRETER_DISPATCH_TABLE_H_

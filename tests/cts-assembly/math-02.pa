@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(3 - 2 == 1) operation --> subi
-.function u1 main(){
+.function i32 main(){
     ldai 3
     subi 2
     movi v0, 1

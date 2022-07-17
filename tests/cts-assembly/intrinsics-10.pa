@@ -16,7 +16,7 @@
 .function f64 Math.pow (f64 a0, f64 a1) <external>
 .function f64 Math.absF64 (f64 a0) <external>
 
-.function u1 main(){
+.function i32 main(){
     fmovi.64 v0, 2.5
     fmovi.64 v1, 24.7052942201
     fmovi.64 v2, 1e-6

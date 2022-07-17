@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,19 +50,20 @@ CompiledCodeToInterpreterBridge:
     CFI_DEF_CFA_REGISTER(fp)
 
     // Save return address to the TLS field
-    str lr, [THREAD_REG, #THREAD_NATIVE_PC]
+    str lr, [THREAD_REG, #MANAGED_THREAD_NATIVE_PC_OFFSET]
 
     // save all the callee saved registers to the stack
     // stack walker will read them during stack unwinding
-    push {r4 - r11}
-    // CFI_REL_OFFSET(r11, -(2 * 4)) - fp already pushed
-    CFI_REL_OFFSET(r10, -(3 * 4))
-    CFI_REL_OFFSET(r9,  -(4 * 4))
-    CFI_REL_OFFSET(r8,  -(5 * 4))
-    CFI_REL_OFFSET(r7,  -(6 * 4))
-    CFI_REL_OFFSET(r6,  -(7 * 4))
-    CFI_REL_OFFSET(r5,  -(8 * 4))
-    CFI_REL_OFFSET(r4,  -(9 * 4))
+    push {r4 - r10}
+    CFI_REL_OFFSET(r10, -(2 * 4))
+    CFI_REL_OFFSET(r9,  -(3 * 4))
+    CFI_REL_OFFSET(r8,  -(4 * 4))
+    CFI_REL_OFFSET(r7,  -(5 * 4))
+    CFI_REL_OFFSET(r6,  -(6 * 4))
+    CFI_REL_OFFSET(r5,  -(7 * 4))
+    CFI_REL_OFFSET(r4,  -(8 * 4))
+
+#ifndef PANDA_TARGET_ARM32_ABI_SOFT
     vpush {d8 - d15}
     CFI_REL_OFFSET(d15, -(10 * 4))
     CFI_REL_OFFSET(d14, -(12 * 4))
@@ -72,11 +73,15 @@ CompiledCodeToInterpreterBridge:
     CFI_REL_OFFSET(d10, -(20 * 4))
     CFI_REL_OFFSET(d9,  -(22 * 4))
     CFI_REL_OFFSET(d8,  -(24 * 4))
+#endif
+
+    // align to 8
+    sub sp, sp, #4
 
     // Before we call IncrementHotnessCounter we should set pointer to C2I frame in the TLS,
     // because compilation may fall into safepoint, so we need to make caller's callee registers
     // visible for the stack walker.
-    str fp, [THREAD_REG, #THREAD_CURRENT_FRAME]
+    str fp, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]
 
     push {r0 - r3}
     blx IncrementHotnessCounter
@@ -95,7 +100,7 @@ CompiledCodeToInterpreterBridge:
     CFI_ADJUST_CFA_OFFSET(-8)
     CFI_RESTORE(fp)
 
-    str fp, [THREAD_REG, #THREAD_CURRENT_FRAME]
+    str fp, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]
     pop {r1, lr}
     CFI_ADJUST_CFA_OFFSET(-8)
     CFI_RESTORE(lr)
@@ -119,16 +124,17 @@ CompiledCodeToInterpreterBridge:
 
     // setup regs as follow
     // r0 - SHORTY_PTR_REG, r1 - SHORTY_REG, r2 - iframe.vregs_ + num_vregs_,
-    // r3 - args, r4, r5 - temp, r6 - iframe, r7 - method, r8 - method.shorty
+    // r3 - args, r4, r5, r9 - temp, r6 - iframe, r7 - method, r8 - method.shorty
     mov r6, r0
     ldr r5, [r6, #FRAME_NUM_VREGS_OFFSET]
+    mov r9, r5, lsl #3
     ldr r0, [r7, #METHOD_NUM_ARGS_OFFSET]
     sub r5, r5, r0
     ldr r8, [r7, #METHOD_SHORTY_OFFSET]
     mov SHORTY_PTR_REG, r8
     INIT_SHORTY_REG
     add r2, r6, #FRAME_VREGS_OFFSET
-    add r2, r2, r5, lsl #4
+    add r2, r2, r5, lsl #3
     add r3, fp, #16
 
     // parameter 'this' of instance methods is not encoded in the shorty
@@ -160,7 +166,7 @@ CompiledCodeToInterpreterBridge:
     cmp r4, #(SHORTY_REFERENCE - SHORTY_FIRST_64)
     movne r5, #FRAME_VREGISTER_PRIMITIVE_TAG
     moveq r5, #FRAME_VREGISTER_OBJECT_TAG
-    str r5, [r2, #FRAME_VREGISTER_TAG_OFFSET]
+    str r5, [r2, r9]
     // store the value
     ldr r4, [r3], #4
     str r4, [r2]
@@ -172,7 +178,7 @@ CompiledCodeToInterpreterBridge:
     ldm r3!, {r4, r5}
     stm r2, {r4, r5}
     mov r4, #FRAME_VREGISTER_PRIMITIVE_TAG
-    str r4, [r2, #FRAME_VREGISTER_TAG_OFFSET]
+    str r4, [r2, r9]
 2:
     add r2, r2, #FRAME_VREGISTER_SIZE
     b .Lloop_copy_args
@@ -213,7 +219,8 @@ CompiledCodeToInterpreterBridge:
     mov r1, r5
 
 3:
-    sub sp, fp, #(4 + 8 * 4 + 8 * 8)
+#ifndef PANDA_TARGET_ARM32_ABI_SOFT
+    sub sp, fp, #(4 + 7 * 4 + 8 * 8)
     vpop {d8 - d15}
     CFI_RESTORE(d15)
     CFI_RESTORE(d14)
@@ -223,9 +230,11 @@ CompiledCodeToInterpreterBridge:
     CFI_RESTORE(d10)
     CFI_RESTORE(d9)
     CFI_RESTORE(d8)
+#else
+    sub sp, fp, #(4 + 7 * 4)
+#endif
 
-    pop {r4 - r11}
-    // CFI_RESTORE(r11) fp - will restore down
+    pop {r4 - r10}
     CFI_RESTORE(r10)
     CFI_RESTORE(r9)
     CFI_RESTORE(r8)

@@ -25,12 +25,12 @@ while (iterate over Translation units)
     ->build Exploded Graph(symbolic execution of CFG);
     while (iterate over called functions)
         if (function in GC FUNCTION LIST)
-            :Apply path-sensitive checker for detection usage of
+            :Apply path-sensitive checker for detection usage
             raw pointers of ObjectHeader after calling the function:
             - detect and mark memory regions for ObjectHeader
             - in case of calling function from GC FUNCTION LIST, mark regions as not safe
             - in case if it is a store to raw pointer - mark it as safe
-            - in case of reading from raw pointers (except cast to bool), generate warning;
+            - in case of reading from them(except cast to bool) generate warning;
         endif
     endwhile
     :Write warnings to the file;

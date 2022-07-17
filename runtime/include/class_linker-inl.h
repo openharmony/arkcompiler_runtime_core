@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_CLASS_LINKER_INL_H_
-#define PANDA_RUNTIME_INCLUDE_CLASS_LINKER_INL_H_
+#ifndef PANDA_RUNTIME_CLASS_LINKER_INL_H_
+#define PANDA_RUNTIME_CLASS_LINKER_INL_H_
 
 #include "libpandafile/panda_cache.h"
 #include "runtime/include/class_linker.h"
+#include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/mtmanaged_thread.h"
 
@@ -26,6 +26,9 @@ namespace panda {
 inline Class *ClassLinker::GetClass(const Method &caller, panda_file::File::EntityId id,
                                     ClassLinkerErrorHandler *error_handler /* = nullptr */)
 {
+    ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
+           !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || Locks::mutator_lock->HasLock());
+
     Class *klass = caller.GetPandaFile()->GetPandaCache()->GetClassFromCache(id);
     if (klass != nullptr) {
         return klass;
@@ -34,7 +37,7 @@ inline Class *ClassLinker::GetClass(const Method &caller, panda_file::File::Enti
     auto *ext = GetExtension(ctx);
     ASSERT(ext != nullptr);
     klass = ext->GetClass(*caller.GetPandaFile(), id, caller.GetClass()->GetLoadContext(),
-                          error_handler == nullptr ? ext->GetErrorHandler() : error_handler);
+                          (error_handler == nullptr) ? ext->GetErrorHandler() : error_handler);
     if (LIKELY(klass != nullptr)) {
         caller.GetPandaFile()->GetPandaCache()->SetClassCache(id, klass);
     }
@@ -46,6 +49,7 @@ inline void ClassLinker::AddClassRoot(ClassRoot root, Class *klass)
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*klass);
     auto *ext = GetExtension(ctx);
     ASSERT(ext != nullptr);
+    ASSERT(klass != nullptr);
     ext->SetClassRoot(root, klass);
 
     RemoveCreatedClassInExtension(klass);
@@ -53,4 +57,4 @@ inline void ClassLinker::AddClassRoot(ClassRoot root, Class *klass)
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_CLASS_LINKER_INL_H_
+#endif  // PANDA_RUNTIME_CLASS_LINKER_INL_H_

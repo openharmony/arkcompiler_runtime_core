@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INTERPRETER_INTERPRETER_IMPL_H_
-#define PANDA_RUNTIME_INTERPRETER_INTERPRETER_IMPL_H_
+#ifndef PANDA_INTERPRETER_IMPL_H_
+#define PANDA_INTERPRETER_IMPL_H_
 
 #include <cstdint>
 
@@ -27,4 +26,4 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_RUNTIME_INTERPRETER_INTERPRETER_IMPL_H_
+#endif  // PANDA_INTERPRETER_IMPL_H_

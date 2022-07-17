@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_SERIALIZER_TUPLE_TO_STRUCT_H_
-#define PANDA_LIBPANDABASE_SERIALIZER_TUPLE_TO_STRUCT_H_
+#ifndef PANDA_LIBPANDABASE_UTILS_SERIALIZER_TUPLE_TO_STRUCT_H_
+#define PANDA_LIBPANDABASE_UTILS_SERIALIZER_TUPLE_TO_STRUCT_H_
 
 #include <tuple>
 
@@ -37,4 +37,4 @@ Struct TupleToStruct(Tuple &&tup)
 
 }  // namespace panda::serializer::internal
 
-#endif  // PANDA_LIBPANDABASE_SERIALIZER_TUPLE_TO_STRUCT_H_
+#endif  // PANDA_LIBPANDABASE_UTILS_SERIALIZER_TUPLE_TO_STRUCT_H_

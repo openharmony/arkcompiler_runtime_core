@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,14 +42,14 @@ protected:
     static constexpr size_t ARENA_SIZE = 1_MB;
 
     template <class ArenaT>
-    ArenaT *CreateArena(size_t size) const
+    ArenaT *CreateArena(size_t size)
     {
         return PoolManager::GetMmapMemPool()->AllocArena<ArenaT>(size, SpaceType::SPACE_TYPE_INTERNAL,
                                                                  AllocatorType::ARENA_ALLOCATOR);
     }
 
     template <class ArenaT>
-    void GetOccupiedAndFreeSizeTestImplementation(size_t arena_size, size_t alloc_size) const
+    void GetOccupiedAndFreeSizeTestImplementation(size_t arena_size, size_t alloc_size)
     {
         ASSERT_TRUE(arena_size != 0);
         ASSERT_TRUE(alloc_size != 0);
@@ -61,23 +61,24 @@ protected:
     }
 
     template <class ArenaT>
-    void ResizeAndResetTestImplementation(size_t arena_size, size_t alloc_size) const
+    void ResizeAndResetTestImplementation(size_t arena_size, size_t alloc_size)
     {
+        constexpr const int64_t immTwo = 2;
         ASSERT_TRUE(arena_size != 0);
         ASSERT_TRUE(alloc_size != 0);
         ArenaT *arena = CreateArena<ArenaT>(arena_size);
-        ASSERT_TRUE(alloc_size * 2U <= arena->GetFreeSize());
+        ASSERT_TRUE(alloc_size * immTwo <= arena->GetFreeSize());
         void *first_allocation = arena->Alloc(alloc_size);
         void *second_allocation = arena->Alloc(alloc_size);
         ASSERT_TRUE(first_allocation != nullptr);
         ASSERT_TRUE(first_allocation != nullptr);
-        ASSERT_TRUE(arena->GetOccupiedSize() == 2U * alloc_size);
+        ASSERT_TRUE(arena->GetOccupiedSize() == immTwo * alloc_size);
         arena->Resize(alloc_size);
         ASSERT_TRUE(arena->GetOccupiedSize() == alloc_size);
         void *third_allocation = arena->Alloc(alloc_size);
         // we expect that we get the same address
         ASSERT_TRUE(ToUintPtr(second_allocation) == ToUintPtr(third_allocation));
-        ASSERT_TRUE(arena->GetOccupiedSize() == 2U * alloc_size);
+        ASSERT_TRUE(arena->GetOccupiedSize() == immTwo * alloc_size);
         arena->Reset();
         ASSERT_TRUE(arena->GetOccupiedSize() == 0);
     }

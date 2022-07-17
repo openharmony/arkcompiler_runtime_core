@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_ARENA_ALLOCATOR_H_
-#define PANDA_LIBPANDABASE_MEM_ARENA_ALLOCATOR_H_
+#ifndef LIBPANDABASE_MEM_ARENA_ALLOCATOR_H
+#define LIBPANDABASE_MEM_ARENA_ALLOCATOR_H
 
 #include <array>
 #include <cstdint>
@@ -29,9 +29,11 @@
 #include "mmap_mem_pool-inl.h"
 #include "mem.h"
 #include "mem_pool.h"
-#include "arena.h"
+#include "arena-inl.h"
 
 #define USE_MMAP_POOL_FOR_ARENAS
+
+WEAK_FOR_LTO_START
 
 namespace panda {
 
@@ -74,7 +76,9 @@ public:
     [[nodiscard]] std::enable_if_t<!std::is_array_v<T>, T *> New(Args &&... args)
     {
         auto p = reinterpret_cast<void *>(Alloc(sizeof(T)));
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
+        if (UNLIKELY(p == nullptr)) {
+            return nullptr;
+        }
         new (p) T(std::forward<Args>(args)...);
         return reinterpret_cast<T *>(p);
     }
@@ -86,12 +90,14 @@ public:
             AlignUp(sizeof(size_t), GetAlignmentInBytes(DEFAULT_ARENA_ALIGNMENT));
         using element_type = std::remove_extent_t<T>;
         void *p = Alloc(SIZE_BEFORE_DATA_OFFSET + sizeof(element_type) * size);
+        if (UNLIKELY(p == nullptr)) {
+            return nullptr;
+        }
         *static_cast<size_t *>(p) = size;
         auto *data = ToNativePtr<element_type>(ToUintPtr(p) + SIZE_BEFORE_DATA_OFFSET);
         element_type *current_element = data;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         for (size_t i = 0; i < size; ++i, ++current_element) {
-            // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
             new (current_element) element_type();
         }
         return data;
@@ -105,7 +111,7 @@ public:
     size_t GetAllocatedSize() const;
 
     /**
-     * \brief Set the size of allocated memory to \param new_size
+     * \brief Set the size of allocated memory to \param new_size.
      *  Free all memory that exceeds \param new_size bytes in the allocator.
      */
     void Resize(size_t new_size);
@@ -174,21 +180,21 @@ private:
     };
 
     /**
-     * \brief Add Arena from MallocMemPool and links it to active
+     * \brief Adds Arena from MallocMemPool and links it to active
      * @param pool_size size of new pool
      */
     bool AddArenaFromPool(size_t pool_size);
 
     /**
-     * \brief Allocate new element
-     * Try to allocate new element at current arena
-     * or try to add new pool to this allocator and allocate element at new pool.
+     * \brief Allocate new element.
+     * Try to allocate new element at current arena or try to add new pool to this allocator and allocate element at new
+     * pool
      * @param size new element size
      * @param alignment alignment of new element address
      */
     [[nodiscard]] void *AllocateAndAddNewPool(size_t size, Alignment alignment);
 
-    inline void AllocArenaMemStats(size_t size) const
+    inline void AllocArenaMemStats(size_t size)
     {
         if (memStats_ != nullptr) {
             memStats_->RecordAllocateRaw(size, space_type_);
@@ -231,9 +237,12 @@ template <bool use_oom_handler>
 template <typename T>
 T *ArenaAllocatorT<use_oom_handler>::AllocArray(size_t arr_length)
 {
+    // TODO(Dmitrii Trubenkov): change to the proper implementation
     return static_cast<T *>(Alloc(sizeof(T) * arr_length));
 }
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_ARENA_ALLOCATOR_H_
+WEAK_FOR_LTO_END
+
+#endif  // LIBPANDABASE_MEM_ARENA_ALLOCATOR_H

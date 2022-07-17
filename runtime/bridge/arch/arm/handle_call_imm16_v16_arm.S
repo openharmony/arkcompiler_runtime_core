@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
     lsl r3, r3, #8
     orr r2, r2, r3
     // make r5 = iframe.vregs + arg_idx
-    add r5, r5, r2, lsl #4
+    add r5, r5, r2, lsl #3
     ldm r5, {r2, r3}
     add r5, r5, #FRAME_VREGISTER_SIZE
 
@@ -36,7 +36,7 @@
     // r0 - the pointer to the acc, r1 - num args, r2-r3 - function object as int64_t
     // r4 - arg counter, r5 - iframe.vregs + arg_idx, r6 - stack pointer, r7,r8 - temp, lr - method
     mov r4, r1
-    sub sp, sp, r1, lsl #4
+    sub sp, sp, r1, lsl #3
     mov r6, sp
 
     // get all the arguments

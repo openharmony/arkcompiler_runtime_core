@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+
 % Metadata::item_types.each do |item_type|
 std::optional<Metadata::Error>
 <%= MetadataGen::class_name(item_type) %>::Validate(<%= MetadataGen::validate_arg_list(item_type, true).join(', ') %>) const {

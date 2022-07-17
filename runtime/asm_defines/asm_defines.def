@@ -1,35 +1,36 @@
-/*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/**
+ * Copyright (c) Huawei Technologies Co., Ltd. 2019-2021. All rights reserved.
  */
 
+DEFINE_VALUE(SLOT_SIZE, PointerSize(RUNTIME_ARCH))
+
+// File offsets
+DEFINE_VALUE(FILE_BASE_OFFSET, panda::panda_file::File::GetFileBaseOffset())
+
+// Method offsets
 DEFINE_VALUE(METHOD_ACCESS_FLAGS_OFFSET, Method::GetAccessFlagsOffset())
+DEFINE_VALUE(METHOD_V_TABLE_INDEX_OFFSET, Method::GetVTableIndexOffset())
 DEFINE_VALUE(METHOD_NUM_ARGS_OFFSET, Method::GetNumArgsOffset())
-DEFINE_VALUE(METHOD_COMPILED_ENTRY_POINT_OFFSET, Method::GetCompilerEntryPointOffset(RUNTIME_ARCH))
-DEFINE_VALUE(METHOD_NATIVE_POINTER_OFFSET, Method::GetNativePointerOffset(RUNTIME_ARCH))
+DEFINE_VALUE(METHOD_HOTNESS_COUNTER_OFFSET, Method::GetHotnessCounterOffset())
+DEFINE_VALUE(METHOD_CLASS_OFFSET, Method::GetClassOffset())
+DEFINE_VALUE(METHOD_COMPILED_ENTRY_POINT_OFFSET, Method::GetCompiledEntryPointOffset())
+DEFINE_VALUE(METHOD_PANDA_FILE_OFFSET, Method::GetPandaFileOffset())
+DEFINE_VALUE(METHOD_NATIVE_POINTER_OFFSET, Method::GetNativePointerOffset())
 DEFINE_VALUE(METHOD_SHORTY_OFFSET, Method::GetShortyOffset())
 
+// Frame offsets
 DEFINE_VALUE(FRAME_METHOD_OFFSET, Frame::GetMethodOffset())
 DEFINE_VALUE(FRAME_PREV_FRAME_OFFSET, Frame::GetPrevFrameOffset())
 DEFINE_VALUE(FRAME_NUM_VREGS_OFFSET, Frame::GetNumVregsOffset())
 DEFINE_VALUE(FRAME_ACC_OFFSET, Frame::GetAccOffset())
-
+DEFINE_VALUE(FRAME_ACC_MIRROR_OFFSET, interpreter::AccVRegister::GetMirrorOffset())
 DEFINE_VALUE(FRAME_VREGS_OFFSET, Frame::GetVregsOffset())
-DEFINE_VALUE(FRAME_VREGISTER_SIZE, sizeof(Frame::VRegister))
-DEFINE_VALUE(FRAME_VREGISTER_VALUE_OFFSET, Frame::VRegister::GetValueOffset())
-DEFINE_VALUE(FRAME_VREGISTER_TAG_OFFSET, Frame::VRegister::GetTagOffset())
-DEFINE_VALUE(FRAME_VREGISTER_PRIMITIVE_TAG, 0)  DEFINE_VALUE(FRAME_VREGISTER_OBJECT_TAG, 1)     DEFINE_VALUE(FRAME_SLOT_OFFSET, panda::Frame::GetVregsOffset() + Frame::VRegister::GetValueOffset())
-DEFINE_VALUE(FRAME_TAG_OFFSET, panda::Frame::GetVregsOffset() + panda::Frame::VRegister::GetTagOffset())
+
+DEFINE_VALUE(FRAME_VREGISTER_SIZE, sizeof(interpreter::VRegister))
+DEFINE_VALUE(FRAME_VREGISTER_VALUE_OFFSET, interpreter::VRegister::GetValueOffset())
+DEFINE_VALUE(FRAME_VREGISTER_PRIMITIVE_TAG, 0)  // TODO(runtime): find a way to get primitive tag from vreg
+DEFINE_VALUE(FRAME_VREGISTER_OBJECT_TAG, 1)     // TODO(runtime): find a way to get object tag from vreg
+DEFINE_VALUE(FRAME_SLOT_OFFSET, panda::Frame::GetVregsOffset() + interpreter::VRegister::GetValueOffset())
 
 DEFINE_VALUE(CFRAME_LR_SLOT, CFrameReturnAddr::Start())
 DEFINE_VALUE(CFRAME_STACK_START_SLOT, CFrameSlots::Start())
@@ -38,20 +39,91 @@ DEFINE_VALUE(CFRAME_LOCALS_COUNT, (CFrameSlots::Start() - CFrameData::Start()))
 DEFINE_VALUE(CFRAME_HEADER_SIZE, (CFrameFlags::End() - CFrameReturnAddr::Start()))
 DEFINE_VALUE(CFRAME_FLAGS_SLOT, (CFrameFlags::Start()))
 DEFINE_VALUE(CFRAME_LOCALS_START_SLOT, (CFrameLocals::Start()))
-DEFINE_VALUE(CFRAME_KIND_OSR, (CFrame::FrameKind::OSR << CFrame::FrameKindField::START_BIT))
-DEFINE_VALUE(CFRAME_KIND_JNI, (CFrame::FrameKind::JNI << CFrame::FrameKindField::START_BIT))
+DEFINE_VALUE(CFRAME_KIND_OSR, (helpers::ToUnderlying(CFrameLayout::FrameKind::OSR) << CFrameLayout::FrameKindField::START_BIT))
+DEFINE_VALUE(CFRAME_KIND_NATIVE, (helpers::ToUnderlying(CFrameLayout::FrameKind::NATIVE) << CFrameLayout::FrameKindField::START_BIT))
+DEFINE_VALUE(CFRAME_HAS_FLOAT_REGS_FLAG_MASK, (1U << CFrameLayout::HasFloatRegsFlag::START_BIT))
+DEFINE_VALUE(CFRAME_HAS_FLOAT_REGS_FLAG_BIT, (CFrameLayout::HasFloatRegsFlag::START_BIT))
 
-DEFINE_VALUE(THREAD_CURRENT_FRAME, ManagedThread::GetFrameOffset(RUNTIME_ARCH))
-DEFINE_VALUE(THREAD_FRAME_KIND, ManagedThread::GetFrameKindOffset())
-DEFINE_VALUE(THREAD_NATIVE_PC, ManagedThread::GetNativePcOffset(RUNTIME_ARCH))
-DEFINE_VALUE(THREAD_TLAB, ManagedThread::GetTLABOffset(RUNTIME_ARCH))
+// Thread offsets
+DEFINE_VALUE(MANAGED_THREAD_FRAME_KIND_OFFSET, ManagedThread::GetFrameKindOffset())
+DEFINE_VALUE(MANAGED_THREAD_FLAG_OFFSET, ManagedThread::GetFlagOffset())
+DEFINE_VALUE(MANAGED_THREAD_ENTRYPOINTS_OFFSET, ManagedThread::GetEntrypointsOffset())
+DEFINE_VALUE(MANAGED_THREAD_OBJECT_OFFSET, ManagedThread::GetObjectOffset())
+DEFINE_VALUE(MANAGED_THREAD_FRAME_OFFSET, ManagedThread::GetFrameOffset())
+DEFINE_VALUE(MANAGED_THREAD_EXCEPTION_OFFSET, ManagedThread::GetExceptionOffset())
+DEFINE_VALUE(MANAGED_THREAD_NATIVE_PC_OFFSET, ManagedThread::GetNativePcOffset())
+
+DEFINE_VALUE(MANAGED_THREAD_TLAB_OFFSET, ManagedThread::GetTLABOffset())
+DEFINE_VALUE(MANAGED_THREAD_CARD_TABLE_ADDR_OFFSET, ManagedThread::GetTlsCardTableAddrOffset())
+DEFINE_VALUE(MANAGED_THREAD_CARD_TABLE_MIN_ADDR_OFFSET, ManagedThread::GetTlsCardTableMinAddrOffset())
+DEFINE_VALUE(MANAGED_THREAD_CONCURRENT_MARKING_ADDR_OFFSET, ManagedThread::GetTlsConcurrentMarkingAddrOffset())
+DEFINE_VALUE(MANAGED_THREAD_STRING_CLASS_PTR_OFFSET, ManagedThread::GetTlsStringClassPointerOffset())
+DEFINE_VALUE(MANAGED_THREAD_PRE_BUFF_OFFSET, ManagedThread::GetPreBuffOffset())
+DEFINE_VALUE(MANAGED_THREAD_LANGUAGE_EXTENSION_DATA_OFFSET, ManagedThread::GetLanguageExtensionsDataOffset())
+DEFINE_VALUE(MANAGED_THREAD_INTERNAL_ID_OFFSET, ManagedThread::GetInternalIdOffset())
+DEFINE_VALUE(MANAGED_THREAD_RUNTIME_CALL_ENABLED_OFFSET, ManagedThread::GetRuntimeCallEnabledOffset())
+
+DEFINE_VALUE(MT_MANAGED_THREAD_LOCKED_OBJECT_CAPACITY_OFFSET, MTManagedThread::GetLockedObjectCapacityOffset())
+DEFINE_VALUE(MT_MANAGED_THREAD_LOCKED_OBJECT_SIZE_OFFSET, MTManagedThread::GetLockedObjectSizeOffset())
+DEFINE_VALUE(MT_MANAGED_THREAD_LOCKED_OBJECT_DATA_OFFSET, MTManagedThread::GetLockedObjectDataOffset())
+
+DEFINE_VALUE(LOCKED_OBJECT_INFO_SIZE, sizeof(LockedObjectInfo))
+DEFINE_VALUE(LOCKED_OBJECT_INFO_MONITOR_OFFSET, LockedObjectInfo::GetMonitorOffset())
+DEFINE_VALUE(LOCKED_OBJECT_INFO_STACK_OFFSET, LockedObjectInfo::GetStackOffset())
+
+// Array offsets
+DEFINE_VALUE(CORETYPES_ARRAY_DATA_OFFSET, coretypes::Array::GetDataOffset())
+DEFINE_VALUE(CORETYPES_ARRAY_LENGTH_OFFSET, coretypes::Array::GetLengthOffset())
+DEFINE_VALUE(CORETYPES_ARRAY_CLASS_SIZE, sizeof(panda::coretypes::Array))
+
+// String offsets
+DEFINE_VALUE(CORETYPES_STRING_DATA_OFFSET, coretypes::String::GetDataOffset())
+DEFINE_VALUE(CORETYPES_STRING_LENGTH_OFFSET, coretypes::String::GetLengthOffset())
+DEFINE_VALUE(CORETYPES_STRING_CLASS_SIZE, sizeof(coretypes::String))
+DEFINE_VALUE(CORETYPES_STRING_MUTF8_1B_MAX, utf::MUTF8_1B_MAX)
+
+// TLAB offsets
+DEFINE_VALUE(TLAB_MEMORY_START_ADDR_OFFSET, mem::TLAB::TLABStartAddrOffset())
+DEFINE_VALUE(TLAB_CUR_FREE_POSITION_OFFSET, mem::TLAB::TLABFreePointerOffset())
+DEFINE_VALUE(TLAB_MEMORY_END_ADDR_OFFSET, mem::TLAB::TLABEndAddrOffset())
+DEFINE_VALUE(TLAB_ALIGNMENT, DEFAULT_ALIGNMENT_IN_BYTES)
+
+// ObjectHeader offsets
+DEFINE_VALUE(OBJECT_HEADER_CLASS_POINTER_OFFSET, panda::ObjectHeader::GetClassOffset())
+DEFINE_VALUE(OBJECT_HEADER_MARK_WORD_OFFSET, panda::ObjectHeader::GetMarkWordOffset())
+
+// Class offsets
+DEFINE_VALUE(BASE_CLASS_MANAGED_OBJECT_OFFSET, BaseClass::GetManagedObjectOffset())
+DEFINE_VALUE(BASE_CLASS_FLAGS_OFFSET, BaseClass::GetFlagsOffset())
+DEFINE_VALUE(CLASS_VTABLE_OFFSET, panda::Class::GetVTableOffset())
+DEFINE_VALUE(CLASS_BASE_OFFSET, panda::Class::GetBaseOffset())
+DEFINE_VALUE(CLASS_METHODS_OFFSET, panda::Class::GetMethodsOffset())
+DEFINE_VALUE(CLASS_COMPONENT_TYPE_OFFSET, panda::Class::GetComponentTypeOffset())
+DEFINE_VALUE(CLASS_TYPE_OFFSET, panda::Class::GetTypeOffset())
+DEFINE_VALUE(CLASS_STATE_OFFSET, panda::Class::GetStateOffset())
+
+DEFINE_VALUE(CLASS_IS_CLONEABLE, panda::Class::IS_CLONEABLE)
+DEFINE_VALUE(CLASS_ISARRAY_OFFSET, panda::Class::GetComponentTypeOffset())
+DEFINE_VALUE(CLASS_ARRAY_ELEMENT_TYPE_OFFSET, panda::Class::GetTypeOffset())
+DEFINE_VALUE(CLASS_ITABLE_OFFSET, panda::Class::GetITableOffset())
+DEFINE_VALUE(CLASS_ITABLE_ENTRY_SIZE, panda::ITable::GetEntrySize())
+DEFINE_VALUE(CLASS_ITABLE_ENTRIES_DATA_OFFSET, panda::ITable::GetEntriesDataOffset())
+DEFINE_VALUE(CLASS_ITABLE_ENTRIES_SIZE_OFFSET, panda::ITable::GetEntriesSizeOffset())
+DEFINE_VALUE(CLASS_ITABLE_ENTRY_INTERFACE_OFFSET, panda::ITable::Entry::GetInterfaceOffset())
+
+// Field offsets
+DEFINE_VALUE(FIELD_CLASS_OFFSET, Field::GetClassOffset())
+DEFINE_VALUE(FIELD_OFFSET_OFFSET, Field::GetOffsetOffset())
+
+// NativePointer offsets
+DEFINE_VALUE(CORETYPES_NATIVE_POINTER_EXTERNAL_POINTER_OFFSET, coretypes::NativePointer::GetExternalPointerOffset())
 
 DEFINE_VALUE(ACCESS_STATIC, ACC_STATIC)
 DEFINE_VALUE(CALLEE_SAVED_SIZE, (GetCalleeRegsCount(RUNTIME_ARCH, false) + GetCalleeRegsCount(RUNTIME_ARCH, true)) *
                                        PointerSize(RUNTIME_ARCH))
 
 DEFINE_VALUE(BRIDGE_FRAME_SIZE, AlignUp(
-    (static_cast<size_t>(CFrameFlags::End()) + GetCalleeRegsCount(RUNTIME_ARCH, false) + GetCalleeRegsCount(RUNTIME_ARCH, true)) *
+    (static_cast<size_t>(CFrameLayout::HEADER_SIZE) + GetCalleeRegsCount(RUNTIME_ARCH, false) + GetCalleeRegsCount(RUNTIME_ARCH, true)) *
     PointerSize(RUNTIME_ARCH),
     16))
 
@@ -78,14 +150,29 @@ DEFINE_VALUE(COMP_FP_OFFSET, BoundaryFrame<FrameKind::COMPILER>::FP_OFFSET)
 DEFINE_VALUE(COMP_RETURN_OFFSET, BoundaryFrame<FrameKind::COMPILER>::RETURN_OFFSET)
 DEFINE_VALUE(COMP_CALLEES_OFFSET, BoundaryFrame<FrameKind::COMPILER>::CALLEES_OFFSET)
 
-DEFINE_VALUE(TLAB_END_OFFSET, mem::TLAB::TLABEndAddrOffset())
-DEFINE_VALUE(TLAB_START_OFFSET, mem::TLAB::TLABFreePointerOffset())
-DEFINE_VALUE(TLAB_ALIGNMENT, DEFAULT_ALIGNMENT_IN_BYTES)
+DEFINE_VALUE(CLASS_STATE_INITIALIZED, static_cast<std::underlying_type_t<panda::Class::State>>(panda::Class::State::INITIALIZED))
 
-DEFINE_VALUE(CORETYPES_ARRAY_DATA_OFFSET, coretypes::Array::GetDataOffset())
-DEFINE_VALUE(CORETYPES_STRING_DATA_OFFSET, coretypes::String::GetDataOffset())
-DEFINE_VALUE(CORETYPES_STRING_LENGTH_OFFSET, coretypes::String::GetLengthOffset())
-DEFINE_VALUE(CORETYPES_STRING_CLASS_SIZE, sizeof(coretypes::String))
-DEFINE_VALUE(CORETYPES_STRING_MUTF8_1B_MAX, utf::MUTF8_1B_MAX)
+DEFINE_VALUE(ELEMENT_TYPE_U1, (int)panda::panda_file::Type::TypeId::U1)
+DEFINE_VALUE(ELEMENT_TYPE_I8, (int)panda::panda_file::Type::TypeId::I8)
+DEFINE_VALUE(ELEMENT_TYPE_U8, (int)panda::panda_file::Type::TypeId::U8)
+DEFINE_VALUE(ELEMENT_TYPE_I16, (int)panda::panda_file::Type::TypeId::I16)
+DEFINE_VALUE(ELEMENT_TYPE_U16, (int)panda::panda_file::Type::TypeId::U16)
+DEFINE_VALUE(ELEMENT_TYPE_I32, (int)panda::panda_file::Type::TypeId::I32)
+DEFINE_VALUE(ELEMENT_TYPE_U32, (int)panda::panda_file::Type::TypeId::U32)
+DEFINE_VALUE(ELEMENT_TYPE_F32, (int)panda::panda_file::Type::TypeId::F32)
+DEFINE_VALUE(ELEMENT_TYPE_F64, (int)panda::panda_file::Type::TypeId::F64)
+DEFINE_VALUE(ELEMENT_TYPE_I64, (int)panda::panda_file::Type::TypeId::I64)
+DEFINE_VALUE(ELEMENT_TYPE_U64, (int)panda::panda_file::Type::TypeId::U64)
+DEFINE_VALUE(ELEMENT_TYPE_REFERENCE, (int)panda::panda_file::Type::TypeId::REFERENCE)
 
-DEFINE_VALUE(OBJECT_HEADER_CLASS_POINTER_OFFSET, panda::ObjectHeader::GetClassOffset())
+DEFINE_VALUE(RUNTIME_MODE_DEFAULT, 0)
+DEFINE_VALUE(RUNTIME_MODE_STUB, 1)
+DEFINE_VALUE(RUNTIME_MODE_SLOW_PATH, 2)
+
+DEFINE_VALUE(MIN_PREFIX_OPCODE_INDEX, BytecodeInstruction::GetMinPrefixOpcodeIndex())
+DEFINE_VALUE(TAGGED_VALUE_UNDEFINED, TaggedValue::VALUE_UNDEFINED)
+
+DEFINE_VALUE(IS_NOT_STUB_CALL, 0)
+DEFINE_VALUE(IS_STUB_CALL, 1)
+
+#include "plugins_asm_defines.def"

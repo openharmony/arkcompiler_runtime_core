@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,57 +18,27 @@
 
 #include "runtime/include/runtime_options.h"
 #include "libpandabase/utils/pandargs.h"
+#include "options_test_base.h"
 
 namespace panda::test {
 
-class RuntimeOptionsTest : public testing::Test {
+class RuntimeOptionsTest : public RuntimeOptionsTestBase {
 public:
-    RuntimeOptionsTest() : runtime_options_("AAA") {}
+    RuntimeOptionsTest() = default;
     ~RuntimeOptionsTest() = default;
 
-    void SetUp() override
-    {
-        runtime_options_.AddOptions(&pa_parser_);
-        LoadCorrectOptionsList();
-    }
-
-    void TearDown() override {}
-
-    panda::PandArgParser *GetParser()
-    {
-        return &pa_parser_;
-    }
-
-    const std::vector<std::string> &GetCorrectOptionsList() const
-    {
-        return correct_options_list_;
-    }
-
 private:
-    void LoadCorrectOptionsList();
-    void AddTestingOption(std::string opt, std::string value);
-
-    RuntimeOptions runtime_options_;
-    panda::PandArgParser pa_parser_;
-    std::vector<std::string> correct_options_list_;
+    void LoadCorrectOptionsList() override;
 };
-
-void RuntimeOptionsTest::AddTestingOption(std::string opt, std::string value)
-{
-    correct_options_list_.push_back("--" + opt + "=" + value);
-}
 
 void RuntimeOptionsTest::LoadCorrectOptionsList()
 {
     AddTestingOption("runtime-compressed-strings-enabled", "true");
-    AddTestingOption("run-gc-in-place", "true");
     AddTestingOption("compiler-enable-jit", "true");
     AddTestingOption("sigquit-flag", "1234");
     AddTestingOption("dfx-log", "1234");
-    AddTestingOption("gc-dump-heap", "true");
     AddTestingOption("start-as-zygote", "true");
-    AddTestingOption("verification-enabled", "true");
-    AddTestingOption("pre-gc-heap-verify-enabled", "true");
+    AddTestingOption("gc-trigger-type", "no-gc-for-start-up");
 }
 
 // Testing that generator correctly generate options for different languages
@@ -85,12 +55,6 @@ TEST_F(RuntimeOptionsTest, TestIncorrectOptions)
     ASSERT_FALSE(GetParser()->Parse(invalid_options));
     ASSERT_EQ(GetParser()->GetErrorString(),
               "pandargs: Invalid option \"InvalidOptionThatNotExistAndNeverWillBeAdded\"\n");
-
-    invalid_options.clear();
-    invalid_options.push_back("--run-gc-in-place=1234");
-    ASSERT_FALSE(GetParser()->Parse(invalid_options));
-    ASSERT_EQ(GetParser()->GetErrorString(),
-              "pandargs: Bool argument run-gc-in-place has unexpected parameter value 1234\n");
 }
 
 TEST_F(RuntimeOptionsTest, TestTailArgumets)
@@ -112,6 +76,12 @@ TEST_F(RuntimeOptionsTest, TestTailArgumets)
     ASSERT_FALSE(GetParser()->Parse(options_vector));
     ASSERT_EQ(GetParser()->GetErrorString(),
               "pandargs: Tail arguments are not enabled\npandargs: Tail found at literal \"tail1\"\n");
+}
+
+TEST_F(RuntimeOptionsTest, TestLangSpecificOptions)
+{
+    ASSERT_TRUE(GetParser()->Parse(GetCorrectOptionsList()));
+    ASSERT_EQ(GetRuntimeOptions()->GetGcTriggerType("core"), "no-gc-for-start-up");
 }
 
 }  // namespace panda::test

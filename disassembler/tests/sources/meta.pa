@@ -23,6 +23,8 @@
 
 .function u1 A.EEE(A a0, u1 a1) {
     call DDD, v0
+    initobj A.BBB, v0, v1
+    initobj A.CCC, v1, v2
 }
 
 .function u1 FFF() <noimpl>

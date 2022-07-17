@@ -14,7 +14,7 @@
 #Assert that intrinsic Math.absI64 works fine
 .record Math <external>
 .function i64 Math.absI64(i64 a0)<external>
-.function u1 main(){
+.function i32 main(){
     movi.64 v0, 2
     movi.64 v1, 2
     call.short Math.absI64, v0, v0

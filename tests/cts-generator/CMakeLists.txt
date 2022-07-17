@@ -35,9 +35,9 @@ if(NOT CMAKE_CROSSCOMPILING)
     if(NOT PANDA_CTS_TESTING_TIMEOUT)
         # Increase timeout for build with sanitizers
         if(PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER OR PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER)
-            set(PANDA_CTS_TESTING_TIMEOUT 3000)
+            set(PANDA_CTS_TESTING_TIMEOUT 6000)
         else()
-            set(PANDA_CTS_TESTING_TIMEOUT 1000)
+            set(PANDA_CTS_TESTING_TIMEOUT 4000)
         endif()
     endif()
 
@@ -45,9 +45,9 @@ if(NOT CMAKE_CROSSCOMPILING)
     if(NOT PANDA_CTS_TEST_TIMEOUT)
         # Increase single test timeout for build with sanitizers
         if(PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER OR PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER)
-            set(PANDA_CTS_TEST_TIMEOUT 200)   # 200 seconds
+            set(PANDA_CTS_TEST_TIMEOUT 300)   # 300 seconds
         else()
-            set(PANDA_CTS_TEST_TIMEOUT 30)    # 30 seconds
+            set(PANDA_CTS_TEST_TIMEOUT 60)    # 60 seconds
         endif()
     endif()
 
@@ -56,7 +56,8 @@ if(NOT CMAKE_CROSSCOMPILING)
     set(CTS_TEMPLATE "${PROJECT_BINARY_DIR}/cts-template/template.yaml")
     set(CTS_TEMPLATE_SCHEMA "${PROJECT_BINARY_DIR}/cts-template/yaml-schema.json")
     set(CTS_GENERATED_DIR "${PROJECT_BINARY_DIR}/cts-generated/")
-    set(VERIFIER_DEBUG_CONFIG "${PROJECT_SOURCE_DIR}/verifier.debug.config")
+    set(CTS_TEMP_DIR "${PROJECT_BINARY_DIR}/tmp/")
+    set(VERIFIER_DEBUG_CONFIG "${PROJECT_SOURCE_DIR}/verifier.config")
 
     file(
         COPY "${CTS_TEMPLATE_DIR_SRC}"
@@ -76,6 +77,7 @@ if(NOT CMAKE_CROSSCOMPILING)
     set(OUTPUT_RUN ${CTS_REPORT_RUN})
 
     # CTS Generator
+
     set(CTS_GENERATOR "${PROJECT_SOURCE_DIR}/generate-cts.rb")
     set(CTS_TEST_RUNNER "${PROJECT_SOURCE_DIR}/test-runner.rb")
 
@@ -83,7 +85,7 @@ if(NOT CMAKE_CROSSCOMPILING)
     if (NOT DEFINED CTS_TEST_SELECT_OPTION)
       if (CMAKE_BUILD_TYPE STREQUAL "Release")
         if (PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER OR PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER)
-          set(CTS_TEST_SELECT_OPTION "--exclude-tag clang_release_sanitizer")
+          set(CTS_TEST_SELECT_OPTION "--exclude-tag sanitizer-fail")
         else()
           set(CTS_TEST_SELECT_OPTION "--exclude-tag release")
         endif()
@@ -96,7 +98,7 @@ if(NOT CMAKE_CROSSCOMPILING)
     if (NOT DEFINED CTS_TEST_SELECT_OPTION_JIT)
       if (CMAKE_BUILD_TYPE STREQUAL "Release")
         if (PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER OR PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER)
-          set(CTS_TEST_SELECT_OPTION_JIT "--exclude-tag clang_release_sanitizer --exclude-tag clang_release_sanitizer_jit")
+          set(CTS_TEST_SELECT_OPTION_JIT "--exclude-tag sanitizer-fail")
         else()
           set(CTS_TEST_SELECT_OPTION_JIT "--exclude-tag release")
         endif()
@@ -105,6 +107,8 @@ if(NOT CMAKE_CROSSCOMPILING)
       endif()
     endif()
 
+    set(CTS_TEST_SELECT_NIGHTLY_OPTION "${CTS_TEST_SELECT_OPTION}")
+    set(CTS_TEST_SELECT_NIGHTLY_OPTION_JIT "${CTS_TEST_SELECT_OPTION_JIT}")
     # Limit tests for sanitizer build
     if (PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER OR PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER)
         set(CTS_TEST_SELECT_OPTION "${CTS_TEST_SELECT_OPTION} ${CTS_TSAN_TEST_SELECTION}")
@@ -120,6 +124,7 @@ if(NOT CMAKE_CROSSCOMPILING)
     # Exclude Arm-specific failures
     if ((PANDA_TARGET_ARM32) OR (PANDA_TARGET_ARM64))
       set(CTS_TEST_SELECT_OPTION_JIT "${CTS_TEST_SELECT_OPTION_JIT} --exclude-tag arm64-fail --exclude-tag arm64-jit")
+      set(CTS_TEST_SELECT_NIGHTLY_OPTION_JIT "${CTS_TEST_SELECT_NIGHTLY_OPTION_JIT} --exclude-tag arm64-fail --exclude-tag arm64-jit")
     endif()
 
     add_custom_command(OUTPUT ${OUTPUT_FILES}
@@ -129,64 +134,74 @@ if(NOT CMAKE_CROSSCOMPILING)
             -s "${CTS_TEMPLATE_SCHEMA}"
             -o "${CTS_GENERATED_DIR}"
             -k
-        DEPENDS "$<TARGET_FILE:ark_asm>" "$<TARGET_FILE:ark>"
+        DEPENDS "$<TARGET_FILE:ark_asm>" "$<TARGET_FILE:ark>" "$<TARGET_FILE:arkquick>"
     )
 
     # Convert arg string to separate args
     string(REPLACE " " ";" CTS_TEST_SELECT_OPTION_ARGS ${CTS_TEST_SELECT_OPTION})
     string(REPLACE " " ";" CTS_TEST_SELECT_OPTION_JIT_ARGS ${CTS_TEST_SELECT_OPTION_JIT})
+    string(REPLACE " " ";" CTS_TEST_SELECT_NIGHTLY_OPTION_ARGS ${CTS_TEST_SELECT_NIGHTLY_OPTION})
+    string(REPLACE " " ";" CTS_TEST_SELECT_NIGHTLY_OPTION_JIT_ARGS ${CTS_TEST_SELECT_NIGHTLY_OPTION_JIT})
 
-    # Run tests without enforced JIT and with enforced JIT
+    # Run tests without enforced JIT, with irtoc-interpreter and with enforced JIT
+
     add_custom_command(OUTPUT ${OUTPUT_RUN}
         COMMENT "Run generated CTS tests"
         COMMAND ${CTS_TEST_RUNNER}
              -t "${CTS_GENERATED_DIR}"
              -p "${PROJECT_BINARY_DIR}/../../"
+             -x "${CTS_TEMP_DIR}"
              -v 1
+             --with-quickener
              --global-timeout ${PANDA_CTS_TESTING_TIMEOUT}
              --timeout ${PANDA_CTS_TEST_TIMEOUT}
              -j ${PANDA_CTS_JOBS_NUMBER}
-             --verifier-debug-config "${PROJECT_BINARY_DIR}/verifier.debug.config"
+             --verifier-config "${PROJECT_BINARY_DIR}/verifier.config"
              ${CTS_TEST_PRLIMIT_OPTIONS}
+             ${CTS_TEST_SELECT_OPTION_ARGS} VERBATIM
+        COMMAND ${CTS_TEST_RUNNER}
+             -t "${CTS_GENERATED_DIR}"
+             -p "${PROJECT_BINARY_DIR}/../../"
+             -x "${CTS_TEMP_DIR}"
+             -v 1
+             -e irtoc_ignore
+             -o "--interpreter-type=irtoc --gc-type=g1-gc"
+             --with-quickener
+             --global-timeout ${PANDA_CTS_TESTING_TIMEOUT}
+             --timeout ${PANDA_CTS_TEST_TIMEOUT}
+             -j ${PANDA_CTS_JOBS_NUMBER}
+             --verifier-config "${PROJECT_BINARY_DIR}/verifier.config"
+             ${CTS_TEST_PRLIMIT_OPTIONS}
+            --exclude-tag verifier
              ${CTS_TEST_SELECT_OPTION_ARGS} VERBATIM
         COMMAND ${CTS_TEST_RUNNER}
             -t "${CTS_GENERATED_DIR}"
             -p "${PROJECT_BINARY_DIR}/../../"
+            -x "${CTS_TEMP_DIR}"
             -v 1
+            --with-quickener
             --global-timeout ${PANDA_CTS_TESTING_TIMEOUT}
             --timeout ${PANDA_CTS_TEST_TIMEOUT}
             -j ${PANDA_CTS_JOBS_NUMBER}
-            --verifier-debug-config "${PROJECT_BINARY_DIR}/verifier.debug.config"
+            --verifier-config "${PROJECT_BINARY_DIR}/verifier.config"
             -o "--compiler-hotness-threshold=0"
             -o "--no-async-jit"
             ${CTS_TEST_PRLIMIT_OPTIONS}
             --exclude-tag verifier
             ${CTS_TEST_SELECT_OPTION_JIT_ARGS} VERBATIM
-        DEPENDS "$<TARGET_FILE:ark_asm>" "$<TARGET_FILE:ark>" "${OUTPUT_FILES}"
+        DEPENDS "$<TARGET_FILE:ark_asm>" "$<TARGET_FILE:ark>" "$<TARGET_FILE:arkquick>" "$<TARGET_FILE:verifier>" "${OUTPUT_FILES}"
     )
 
     if (PANDA_EXPORT_CTS_OPTIONS)
       file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/cts-options" "CTS_TEST_SELECT_OPTION_ARGS=\"${CTS_TEST_SELECT_OPTION}\"\n")
       file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/cts-options" "CTS_TEST_SELECT_OPTION_JIT_ARGS=\"${CTS_TEST_SELECT_OPTION_JIT}\"\n")
       file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/cts-options" "CTS_TEST_PRLIMIT_OPTIONS=\"${CTS_TEST_PRLIMIT_OPTIONS}\"\n")
+      file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/cts-options" "CTS_TEST_SELECT_NIGHTLY_OPTION_ARGS=\"${CTS_TEST_SELECT_NIGHTLY_OPTION}\"\n")
+      file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/cts-options" "CTS_TEST_SELECT_NIGHTLY_OPTION_JIT_ARGS=\"${CTS_TEST_SELECT_NIGHTLY_OPTION_JIT}\"\n")
     endif()
 
     add_custom_target(cts-generator-build DEPENDS ${OUTPUT_FILES})
+    add_dependencies(cts-generator-build arkstdlib)
+
     add_custom_target(cts-generator DEPENDS cts-generator-build ${OUTPUT_RUN})
-
-    # Added dependency on gtests - this is necessary to avoid memory allocation problem during test-runner work.
-    # At this moment (10/22/2020) JNI test can consume all available memory during build on clang 8 with thread safety analysis.
-    # So this fix is workaround for this problem to allow test-runner successfully work.
-    # This dependency can be removed and only arkstdlib java_libbase can be kept as dependency after JNI issue will be fixed.
-    if (TARGET gtests)
-      if(PANDA_ENABLE_THREAD_SANITIZER)
-        # 04.12.20 add dependency in gtests only for build with thread sanitizers
-        add_dependencies(cts-generator-build gtests arkstdlib)
-      else()
-        add_dependencies(cts-generator-build arkstdlib)
-      endif()
-    else()
-      add_dependencies(cts-generator-build arkstdlib)
-    endif()
-
 endif()

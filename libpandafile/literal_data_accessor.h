@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_LITERAL_DATA_ACCESSOR_H_
-#define PANDA_LIBPANDAFILE_LITERAL_DATA_ACCESSOR_H_
+#ifndef LIBPANDAFILE_LITERAL_DATA_ACCESSOR_H_
+#define LIBPANDAFILE_LITERAL_DATA_ACCESSOR_H_
 
-#include "field_data_accessor.h"
 #include "file.h"
+#include "field_data_accessor.h"
 #include "helpers.h"
+
 #include "utils/span.h"
 
 namespace panda::panda_file {
@@ -39,24 +40,25 @@ enum class LiteralTag : uint8_t {
     GENERATORMETHOD = 0x07,
     ACCESSOR = 0x08,
     METHODAFFILIATE = 0x09,
-    ARRAY_I8 = 0x0a,
-    ARRAY_I16 = 0x0b,
-    ARRAY_I32 = 0x0c,
-    ARRAY_I64 = 0x0d,
-    ARRAY_F32 = 0x0e,
-    ARRAY_F64 = 0x0f,
-    ARRAY_STRING = 0x10,
+    ARRAY_U1 = 0x0a,
+    ARRAY_U8 = 0x0b,
+    ARRAY_I8 = 0x0c,
+    ARRAY_U16 = 0x0d,
+    ARRAY_I16 = 0x0e,
+    ARRAY_U32 = 0x0f,
+    ARRAY_I32 = 0x10,
+    ARRAY_U64 = 0x11,
+    ARRAY_I64 = 0x12,
+    ARRAY_F32 = 0x13,
+    ARRAY_F64 = 0x14,
+    ARRAY_STRING = 0x15,
+    ASYNCGENERATORMETHOD = 0x16,
     NULLVALUE = 0xff
 };
 
 class LiteralDataAccessor {
 public:
     LiteralDataAccessor(const File &panda_file, File::EntityId literal_data_id);
-    ~LiteralDataAccessor() = default;
-    DEFAULT_MOVE_CTOR(LiteralDataAccessor)
-    DEFAULT_COPY_CTOR(LiteralDataAccessor)
-    NO_MOVE_OPERATOR(LiteralDataAccessor);
-    NO_COPY_OPERATOR(LiteralDataAccessor);
 
     template <class Callback>
     void EnumerateObjectLiterals(size_t index, const Callback &cb);
@@ -91,9 +93,26 @@ public:
         return File::EntityId(static_cast<uint32_t>(helpers::Read<sizeof(uint32_t)>(&l_sp)));
     }
 
+    size_t ResolveLiteralArrayIndex(File::EntityId id) const
+    {
+        auto offset = id.GetOffset();
+
+        size_t index = 0;
+        while (index < literal_num_) {
+            auto array_offset = helpers::Read<sizeof(uint32_t)>(literal_data_sp_.SubSpan(index * ID_SIZE));
+            if (array_offset == offset) {
+                break;
+            }
+            index++;
+        }
+        return index;
+    }
+
     using LiteralValue = std::variant<bool, void *, uint8_t, uint16_t, uint32_t, uint64_t, float, double, StringData>;
 
 private:
+    static constexpr size_t LEN_SIZE = sizeof(uint32_t);
+
     const File &panda_file_;
     File::EntityId literal_data_id_;
     uint32_t literal_num_;
@@ -102,4 +121,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_LITERAL_DATA_ACCESSOR_H_
+#endif  // LIBPANDAFILE_Literal_DATA_ACCESSOR_H_

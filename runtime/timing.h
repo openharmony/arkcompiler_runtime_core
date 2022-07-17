@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TIMING_H_
-#define PANDA_RUNTIME_TIMING_H_
+#ifndef PANDA_RUNTIME_TIMING_H
+#define PANDA_RUNTIME_TIMING_H
 
 #include <string>
 #include <iostream>
+#include <string_view>
 
 #include "libpandabase/os/time.h"
 #include "libpandabase/utils/time.h"
@@ -38,8 +39,8 @@ public:
 
     class TimeLabel {
     public:
-        TimeLabel(std::string name, uint64_t time, uint64_t cpu_time, TimeLabelType type = TimeLabelType::BEGIN)
-            : name_(std::move(name)), time_(time), cpu_time_(cpu_time), type_(type)
+        TimeLabel(std::string_view name, uint64_t time, uint64_t cpu_time, TimeLabelType type = TimeLabelType::BEGIN)
+            : name_(name), time_(time), cpu_time_(cpu_time), type_(type)
         {
         }
 
@@ -50,7 +51,7 @@ public:
             return type_;
         }
 
-        std::string GetName() const
+        std::string_view GetName() const
         {
             return name_;
         }
@@ -79,13 +80,13 @@ public:
         DEFAULT_MOVE_SEMANTIC(TimeLabel);
 
     private:
-        std::string name_;
+        std::string_view name_;
         uint64_t time_;      //  After processed, time_ is used to save duration.
         uint64_t cpu_time_;  //  After processed, cpu_time_ is used to save duration.
         TimeLabelType type_;
     };
 
-    void NewSection(const std::string &tag)
+    void NewSection(std::string_view tag)
     {
         labels_.push_back(TimeLabel(tag, time::GetCurrentTimeInNanos(), panda::os::time::GetClockTimeInThreadCpuTime(),
                                     TimeLabelType::BEGIN));
@@ -104,7 +105,7 @@ public:
         labels_.clear();
     }
 
-    static std::string PrettyTimeNs(uint64_t duration);
+    static PandaString PrettyTimeNs(uint64_t duration);
 
 private:
     void Process();
@@ -118,7 +119,7 @@ private:
 class ScopedTiming {
 public:
     // NOLINTNEXTLINE(google-runtime-references)
-    ScopedTiming(const std::string &tag, Timing &timing) : timing_(timing)
+    ScopedTiming(std::string_view tag, Timing &timing) : timing_(timing)
     {
         timing_.NewSection(tag);
     }
@@ -135,5 +136,4 @@ private:
 };
 
 }  // namespace panda
-
-#endif  // PANDA_RUNTIME_TIMING_H_
+#endif  // PANDA_RUNTIME_TIMING_H

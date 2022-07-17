@@ -70,15 +70,18 @@ pred is_correct [universe: Sort -> Params -> Type] {
 
   // if sort has several params tuples of equal length,
   // then their sequencies of variances should match
-  // (otherwise it is unclear how to calculate subtyping)
+  // (otherwise it is unclean how to calculate subtyping)
   all s: Sort
   | all ps1, ps2: s.universe.Type
   | #ps1 = #ps2 implies
     all idx: ps1.signature.inds
     | ps1.signature[idx].variance = ps1.signature[idx].variance
 
-  // type cannot be present in its own parameters
+  // type cannot present in its own parameters
   all t: Type| t not in universe.signature[t].elems.type
+
+  // todo: all params are in signatures
+  // todo: all signatures are used by sorts
 }
 
 // p1 <: p2
@@ -150,7 +153,7 @@ private one sig TestTypeSystem {
   // subtyping relation
   subtyping: Type -> Type,
 
-  // auxiliary, for better visual representation of
+  // auxillary, for better visual representation of
   // relations between params and signatures
   params_subtyping: Params -> Params,
   param_subtyping: Param -> Param
@@ -163,7 +166,7 @@ private one sig TestTypeSystem {
   ]
 }
 
-// let's look at some instances of correct subtyping
+// lets look at some instances of correct subtyping
 show: run {
   #universe > 2
   #Params > 2

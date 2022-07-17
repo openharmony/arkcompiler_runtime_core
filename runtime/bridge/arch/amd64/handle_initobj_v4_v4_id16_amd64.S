@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,13 @@
     je .Lload_reg_args
 
     leaq (FRAME_ACC_OFFSET - FRAME_VREGS_OFFSET)(%r12), %r13
-    movq FRAME_VREGISTER_TAG_OFFSET(%r13), %r15
+    movq FRAME_ACC_MIRROR_OFFSET(%r13), %r15
     movq (%r13), %r13
     PUSH_ARG %r13, %r15, %rdx, %rdi, %rsi, %r9, .Lloop_handle_initobj
+
+    // load frame.nregs and then calculate the mirror vreg offset
+    movl (FRAME_NUM_VREGS_OFFSET - FRAME_VREGS_OFFSET)(%r12), %ecx
+    shlq $3, %rcx
 
 .Lloop_handle_initobj:
     NEXT_SHORTY %r11d
@@ -36,9 +40,10 @@
     // handle the first arg index
     movl %ecx, %r15d
     andl $0xF, %r15d
-    shlq $4, %r15
-    movq (%r12,%r15), %r13
-    movq FRAME_VREGISTER_TAG_OFFSET(%r12,%r15), %r15
+    shlq $3, %r15
+    movq (%r12, %r15), %r13
+    leaq (%rcx, %r15), %r15
+    movq (%r12, %r15), %r15
     PUSH_ARG %r13, %r15, %rdx, %rdi, %rsi, %r9, 4f
 
 4:
@@ -49,8 +54,9 @@
 
     movl %ecx, %r15d
     sarl $4, %r15d
-    shlq $4, %r15
+    shlq $3, %r15
     movq (%r12, %r15), %r13
-    movq FRAME_VREGISTER_TAG_OFFSET(%r12,%r15), %r15
+    leaq (%rcx, %r15), %r15
+    movq (%r12, %r15), %r15
     PUSH_ARG %r13, %r15, %rdx, %rdi, %rsi, %r9, .Lloop_handle_initobj
     jmp .Lloop_handle_initobj

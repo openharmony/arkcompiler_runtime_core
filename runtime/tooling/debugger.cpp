@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,12 @@
 
 #include "debugger.h"
 #include "include/stack_walker.h"
+#include "include/thread_scopes.h"
 #include "include/tooling/pt_location.h"
 #include "include/tooling/pt_thread.h"
-#include "pt_method_private.h"
 #include "pt_scoped_managed_code.h"
-#include "pt_lang_ext_private.h"
-#include "pt_object_private.h"
 #include "interpreter/frame.h"
 #include "include/mem/panda_smart_pointers.h"
-#include "tooling/pt_object_private.h"
-#include "tooling/pt_reference_private.h"
 #include "pt_thread_info.h"
 
 #include "libpandabase/macros.h"
@@ -33,15 +29,22 @@
 #include "libpandabase/utils/span.h"
 #include "libpandafile/bytecode_instruction.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
+#include "runtime/include/stack_walker-inl.h"
 #include "runtime/include/stack_walker.h"
+#include "runtime/include/thread-inl.h"
 #include "runtime/interpreter/frame.h"
-#include "runtime/tooling/pt_method_private.h"
-#include "runtime/tooling/pt_value_private.h"
+#include "runtime/handle_scope-inl.h"
 
 namespace panda::tooling {
-static PtLangExtPrivate *GetPtLangExtPrivate()
+// TODO(maksenov): remove PtProperty class
+static PtProperty FieldToPtProperty(Field *field)
 {
-    return reinterpret_cast<PtLangExtPrivate *>(Runtime::GetCurrent()->GetPtLangExt());
+    return PtProperty(field);
+}
+
+static Field *PtPropertyToField(PtProperty property)
+{
+    return reinterpret_cast<Field *>(property.GetData());
 }
 
 std::optional<Error> Debugger::SetNotification(PtThread thread, bool enable, PtHookType hookType)
@@ -53,34 +56,85 @@ std::optional<Error> Debugger::SetNotification(PtThread thread, bool enable, PtH
             hooks_.DisableGlobalHook(hookType);
         }
     } else {
-        MTManagedThread *mt_managed_thread = GetManagedThreadByPtThread(thread);
+        ManagedThread *managed_thread = thread.GetManagedThread();
         if (enable) {
-            mt_managed_thread->GetPtThreadInfo()->GetHookTypeInfo().Enable(hookType);
+            managed_thread->GetPtThreadInfo()->GetHookTypeInfo().Enable(hookType);
         } else {
-            mt_managed_thread->GetPtThreadInfo()->GetHookTypeInfo().Disable(hookType);
+            managed_thread->GetPtThreadInfo()->GetHookTypeInfo().Disable(hookType);
         }
     }
 
     return {};
 }
 
+static bool CheckLocationInClass(const panda_file::File &pf, panda_file::File::EntityId class_id,
+                                 const PtLocation &location, std::optional<Error> &error)
+{
+    panda_file::ClassDataAccessor cda(pf, class_id);
+    bool found = false;
+    cda.EnumerateMethods([&pf, &location, &error, &found](panda_file::MethodDataAccessor mda) {
+        if (mda.GetMethodId() == location.GetMethodId()) {
+            found = true;
+            auto code_id = mda.GetCodeId();
+            uint32_t code_size = 0;
+            if (code_id.has_value()) {
+                panda_file::CodeDataAccessor code_da(pf, *code_id);
+                code_size = code_da.GetCodeSize();
+            }
+            if (location.GetBytecodeOffset() >= code_size) {
+                error = Error(Error::Type::INVALID_BREAKPOINT,
+                              std::string("Invalid breakpoint location: bytecode offset (") +
+                                  std::to_string(location.GetBytecodeOffset()) + ") >= method code size (" +
+                                  std::to_string(code_size) + ")");
+            }
+            return false;
+        }
+        return true;
+    });
+    return found;
+}
+
+std::optional<Error> Debugger::CheckLocation(const PtLocation &location)
+{
+    std::optional<Error> res;
+    runtime_->GetClassLinker()->EnumeratePandaFiles([&location, &res](const panda_file::File &pf) {
+        if (pf.GetFilename() != location.GetPandaFile()) {
+            return true;
+        }
+
+        auto classes = pf.GetClasses();
+        bool found = false;
+        for (size_t i = 0; i < classes.Size(); i++) {
+            panda_file::File::EntityId id(classes[i]);
+            if (pf.IsExternal(id) || id.GetOffset() > location.GetMethodId().GetOffset()) {
+                continue;
+            }
+
+            found = CheckLocationInClass(pf, id, location, res);
+            if (found) {
+                break;
+            }
+        }
+        if (!found) {
+            res =
+                Error(Error::Type::METHOD_NOT_FOUND,
+                      std::string("Cannot find method with id ") + std::to_string(location.GetMethodId().GetOffset()) +
+                          " in panda file '" + std::string(location.GetPandaFile()) + "'");
+        }
+        return false;
+    });
+    return res;
+}
+
 std::optional<Error> Debugger::SetBreakpoint(const PtLocation &location)
 {
-    Method *method = runtime_->GetClassLinker()->GetMethod(location.GetPandaFile(), location.GetMethodId());
-    if (method == nullptr) {
-        return Error(Error::Type::METHOD_NOT_FOUND,
-                     std::string("Cannot find method with id ") + std::to_string(location.GetMethodId().GetOffset()) +
-                         " in panda file '" + std::string(location.GetPandaFile()) + "'");
+    auto error = CheckLocation(location);
+    if (error.has_value()) {
+        return error;
     }
 
-    if (location.GetBytecodeOffset() >= method->GetCodeSize()) {
-        return Error(Error::Type::INVALID_BREAKPOINT, std::string("Invalid breakpoint location: bytecode offset (") +
-                                                          std::to_string(location.GetBytecodeOffset()) +
-                                                          ") >= method code size (" +
-                                                          std::to_string(method->GetCodeSize()) + ")");
-    }
-
-    if (!breakpoints_.emplace(method, location.GetBytecodeOffset()).second) {
+    os::memory::WriteLockHolder wholder(rwlock_);
+    if (!breakpoints_.emplace(location).second) {
         return Error(Error::Type::BREAKPOINT_ALREADY_EXISTS,
                      std::string("Breakpoint already exists: bytecode offset ") +
                          std::to_string(location.GetBytecodeOffset()));
@@ -91,23 +145,17 @@ std::optional<Error> Debugger::SetBreakpoint(const PtLocation &location)
 
 std::optional<Error> Debugger::RemoveBreakpoint(const PtLocation &location)
 {
-    Method *method = runtime_->GetClassLinker()->GetMethod(location.GetPandaFile(), location.GetMethodId());
-    if (method == nullptr) {
-        return Error(Error::Type::METHOD_NOT_FOUND,
-                     std::string("Cannot find method with id ") + std::to_string(location.GetMethodId().GetOffset()) +
-                         " in panda file '" + std::string(location.GetPandaFile()) + "'");
-    }
-
-    if (!RemoveBreakpoint(method, location.GetBytecodeOffset())) {
+    if (!EraseBreakpoint(location)) {
         return Error(Error::Type::BREAKPOINT_NOT_FOUND, "Breakpoint not found");
     }
 
     return {};
 }
 
-static panda::Frame *GetPandaFrame(ManagedThread *thread, uint32_t frameDepth = 0, bool *outIsNative = nullptr)
+static panda::Frame *GetPandaFrame(StackWalker *pstack, uint32_t frameDepth, bool *outIsNative = nullptr)
 {
-    StackWalker stack(thread);
+    ASSERT(pstack != nullptr);
+    StackWalker &stack = *pstack;
 
     while (stack.HasFrame() && frameDepth != 0) {
         stack.NextFrame();
@@ -117,10 +165,10 @@ static panda::Frame *GetPandaFrame(ManagedThread *thread, uint32_t frameDepth = 
     bool isNative = false;
     panda::Frame *frame = nullptr;
     if (stack.HasFrame()) {
-        if (!stack.IsCFrame()) {
-            frame = stack.GetIFrame();
-        } else {
+        if (stack.IsCFrame()) {
             isNative = true;
+        } else {
+            frame = stack.GetIFrame();
         }
     }
 
@@ -131,103 +179,224 @@ static panda::Frame *GetPandaFrame(ManagedThread *thread, uint32_t frameDepth = 
     return frame;
 }
 
-Expected<panda::Frame::VRegister *, Error> Debugger::GetVRegByPtThread(PtThread thread, uint32_t frameDepth,
-                                                                       int32_t regNumber) const
+static panda::Frame *GetPandaFrame(ManagedThread *thread, uint32_t frameDepth = 0, bool *outIsNative = nullptr)
 {
-    MTManagedThread *mt_managed_thread = GetManagedThreadByPtThread(thread);
-    if (MTManagedThread::GetCurrent() != mt_managed_thread && !mt_managed_thread->IsUserSuspended()) {
-        return Unexpected(Error(Error::Type::THREAD_NOT_SUSPENDED,
-                                std::string("Thread " + std::to_string(thread.GetId()) + " is not suspended")));
+    auto stack = StackWalker::Create(thread);
+    return GetPandaFrame(&stack, frameDepth, outIsNative);
+}
+
+static interpreter::StaticVRegisterRef GetThisAddrVRegByPandaFrame(panda::Frame *frame)
+{
+    ASSERT(!frame->IsDynamic());
+    ASSERT(frame->GetMethod()->GetNumArgs() > 0);
+    uint32_t thisRegNum = frame->GetSize() - frame->GetMethod()->GetNumArgs();
+    return StaticFrameHandler(frame).GetVReg(thisRegNum);
+}
+
+static interpreter::DynamicVRegisterRef GetThisAddrVRegByPandaFrameDyn(panda::Frame *frame)
+{
+    ASSERT(frame->IsDynamic());
+    ASSERT(frame->GetMethod()->GetNumArgs() > 0);
+    uint32_t thisRegNum = frame->GetSize() - frame->GetMethod()->GetNumArgs();
+    return DynamicFrameHandler(frame).GetVReg(thisRegNum);
+}
+
+template <typename Callback>
+Expected<panda::Frame *, Error> GetPandaFrameByPtThread(PtThread thread, uint32_t frameDepth,
+                                                        Callback nativeFrameHandler)
+{
+    ManagedThread *managed_thread = thread.GetManagedThread();
+    ASSERT(managed_thread != nullptr);
+
+    if (MTManagedThread::ThreadIsMTManagedThread(managed_thread)) {
+        // Check if thread is suspended
+        MTManagedThread *mt_managed_thread = MTManagedThread::CastFromThread(managed_thread);
+        if (MTManagedThread::GetCurrent() != mt_managed_thread && !mt_managed_thread->IsUserSuspended()) {
+            return Unexpected(Error(Error::Type::THREAD_NOT_SUSPENDED,
+                                    std::string("Thread " + std::to_string(thread.GetId()) + " is not suspended")));
+        }
     }
 
-    bool isNative = false;
-    panda::Frame *frame = GetPandaFrame(mt_managed_thread, frameDepth, &isNative);
+    auto stack = StackWalker::Create(managed_thread);
+    panda::Frame *frame = GetPandaFrame(&stack, frameDepth, nullptr);
     if (frame == nullptr) {
-        if (isNative) {
-            return Unexpected(Error(Error::Type::OPAQUE_FRAME,
-                                    std::string("Frame is native, threadId=" + std::to_string(thread.GetId()) +
-                                                " frameDepth=" + std::to_string(frameDepth))));
+        // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
+        if constexpr (!std::is_same_v<decltype(nativeFrameHandler), std::nullptr_t>) {
+            nativeFrameHandler(&stack);
         }
-
         return Unexpected(Error(Error::Type::FRAME_NOT_FOUND,
                                 std::string("Frame not found or native, threadId=" + std::to_string(thread.GetId()) +
                                             " frameDepth=" + std::to_string(frameDepth))));
     }
+    return frame;
+}
 
+Expected<interpreter::StaticVRegisterRef, Error> Debugger::GetVRegByPandaFrame(panda::Frame *frame,
+                                                                               int32_t regNumber) const
+{
     if (regNumber == -1) {
-        return &frame->GetAcc();
+        return frame->GetAccAsVReg();
     }
 
     if (regNumber >= 0 && uint32_t(regNumber) < frame->GetSize()) {
-        return &frame->GetVReg(uint32_t(regNumber));
+        return StaticFrameHandler(frame).GetVReg(uint32_t(regNumber));
     }
 
     return Unexpected(
         Error(Error::Type::INVALID_REGISTER, std::string("Invalid register number: ") + std::to_string(regNumber)));
 }
 
-std::optional<Error> Debugger::GetThisVariableByFrame(PtThread thread, uint32_t frameDepth, PtValue *result)
+Expected<interpreter::DynamicVRegisterRef, Error> Debugger::GetVRegByPandaFrameDyn(panda::Frame *frame,
+                                                                                   int32_t regNumber) const
 {
+    if (regNumber == -1) {
+        return frame->template GetAccAsVReg<true>();
+    }
+
+    if (regNumber >= 0 && uint32_t(regNumber) < frame->GetSize()) {
+        return DynamicFrameHandler(frame).GetVReg(uint32_t(regNumber));
+    }
+
+    return Unexpected(
+        Error(Error::Type::INVALID_REGISTER, std::string("Invalid register number: ") + std::to_string(regNumber)));
+}
+
+std::optional<Error> Debugger::GetThisVariableByFrame(PtThread thread, uint32_t frameDepth, ObjectHeader **thisPtr)
+{
+    ASSERT_MANAGED_CODE();
+    *thisPtr = nullptr;
+
+    std::optional<Error> nativeError;
+
+    auto nativeFrameHandler = [thread, &nativeError, thisPtr](StackWalker *stack) {
+        if (!stack->GetCFrame().IsNative()) {
+            return;
+        }
+        if (stack->GetCFrame().GetMethod()->IsStatic()) {
+            nativeError =
+                Error(Error::Type::INVALID_VALUE, std::string("Static native method, no this address slot, threadId=" +
+                                                              std::to_string(thread.GetId())));
+            return;
+        }
+        stack->IterateObjects([thisPtr](auto &vreg) {
+            // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
+            if constexpr (std::is_same_v<decltype(vreg), interpreter::StaticVRegisterRef &>) {
+                ASSERT(vreg.HasObject());
+                *thisPtr = vreg.GetReference();
+            }
+            return false;
+        });
+    };
+    auto ret = GetPandaFrameByPtThread(thread, frameDepth, nativeFrameHandler);
+    if (nativeError) {
+        return nativeError;
+    }
+    if (*thisPtr != nullptr) {
+        // The value was set by native frame handler
+        return {};
+    }
+    if (!ret) {
+        return ret.Error();
+    }
+    Frame *frame = ret.Value();
+    if (frame->GetMethod()->IsStatic()) {
+        return Error(Error::Type::INVALID_VALUE,
+                     std::string("Static method, no this address slot, threadId=" + std::to_string(thread.GetId())));
+    }
+
+    if (frame->IsDynamic()) {
+        auto reg = GetThisAddrVRegByPandaFrameDyn(frame);
+        *thisPtr = reg.GetReference();
+    } else {
+        auto reg = GetThisAddrVRegByPandaFrame(ret.Value());
+        *thisPtr = reg.GetReference();
+    }
     return {};
 }
 
 std::optional<Error> Debugger::GetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
-                                           PtValue *result) const
+                                           VRegValue *result) const
 {
-    ASSERT_NATIVE_CODE();
-    auto ret = GetVRegByPtThread(thread, frameDepth, regNumber);
+    ASSERT_MANAGED_CODE();
+    auto ret = GetPandaFrameByPtThread(thread, frameDepth, nullptr);
     if (!ret) {
         return ret.Error();
     }
 
-    Frame::VRegister *reg = ret.Value();
-    PtScopedManagedCode smc;
-    return GetPtLangExtPrivate()->GetPtValueFromManaged(*reg, result);
+    Frame *frame = ret.Value();
+    if (frame->IsDynamic()) {
+        auto reg = GetVRegByPandaFrameDyn(frame, regNumber);
+        if (!reg) {
+            return reg.Error();
+        }
+
+        auto vreg = reg.Value();
+        *result = VRegValue(vreg.GetValue());
+        return {};
+    }
+
+    auto reg = GetVRegByPandaFrame(ret.Value(), regNumber);
+    if (!reg) {
+        return reg.Error();
+    }
+
+    auto vreg = reg.Value();
+    *result = VRegValue(vreg.GetValue());
+    return {};
 }
 
 std::optional<Error> Debugger::SetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
-                                           const PtValue &value) const
+                                           const VRegValue &value) const
 {
-    ASSERT_NATIVE_CODE();
-    auto ret = GetVRegByPtThread(thread, frameDepth, regNumber);
+    ASSERT_MANAGED_CODE();
+    auto ret = GetPandaFrameByPtThread(thread, frameDepth, nullptr);
     if (!ret) {
         return ret.Error();
     }
 
-    Frame::VRegister *reg = ret.Value();
-    PtScopedManagedCode smc;
-    return GetPtLangExtPrivate()->StorePtValueFromManaged(value, reg);
+    if (ret.Value()->IsDynamic()) {
+        auto reg = GetVRegByPandaFrameDyn(ret.Value(), regNumber);
+        if (!reg) {
+            return reg.Error();
+        }
+
+        auto vreg = reg.Value();
+        vreg.SetValue(value.GetValue());
+        return {};
+    }
+
+    auto reg = GetVRegByPandaFrame(ret.Value(), regNumber);
+    if (!reg) {
+        return reg.Error();
+    }
+
+    auto vreg = reg.Value();
+    vreg.SetValue(value.GetValue());
+    return {};
 }
 
 Expected<std::unique_ptr<PtFrame>, Error> Debugger::GetCurrentFrame(PtThread thread) const
 {
-    MTManagedThread *mt_managed_thread = GetManagedThreadByPtThread(thread);
-    if (mt_managed_thread == nullptr) {
-        return Unexpected(Error(Error::Type::THREAD_NOT_FOUND,
-                                std::string("Thread ") + std::to_string(thread.GetId()) + " not found"));
-    }
+    ManagedThread *managed_thread = thread.GetManagedThread();
+    ASSERT(managed_thread != nullptr);
 
-    StackWalker stack(mt_managed_thread);
-
+    auto stack = StackWalker::Create(managed_thread);
     Method *method = stack.GetMethod();
-    Frame *interpreterFrame = nullptr;
 
+    Frame *interpreter_frame = nullptr;
     if (!stack.IsCFrame()) {
-        interpreterFrame = stack.GetIFrame();
+        interpreter_frame = stack.GetIFrame();
     }
 
-    return {std::make_unique<PtDebugFrame>(method, interpreterFrame)};
+    return {std::make_unique<PtDebugFrame>(method, interpreter_frame)};
 }
 
 std::optional<Error> Debugger::EnumerateFrames(PtThread thread, std::function<bool(const PtFrame &)> callback) const
 {
-    MTManagedThread *mt_managed_thread = GetManagedThreadByPtThread(thread);
-    if (mt_managed_thread == nullptr) {
-        return Error(Error::Type::THREAD_NOT_FOUND,
-                     std::string("Thread ") + std::to_string(thread.GetId()) + " not found");
-    }
+    ManagedThread *managed_thread = thread.GetManagedThread();
+    ASSERT(managed_thread != nullptr);
 
-    StackWalker stack(mt_managed_thread);
+    auto stack = StackWalker::Create(managed_thread);
     while (stack.HasFrame()) {
         Method *method = stack.GetMethod();
         Frame *frame = stack.IsCFrame() ? nullptr : stack.GetIFrame();
@@ -243,54 +412,52 @@ std::optional<Error> Debugger::EnumerateFrames(PtThread thread, std::function<bo
 
 std::optional<Error> Debugger::SuspendThread(PtThread thread) const
 {
-    auto managedThread = GetManagedThreadByPtThread(thread);
-    if (managedThread == nullptr) {
+    ManagedThread *managed_thread = thread.GetManagedThread();
+    ASSERT(managed_thread != nullptr);
+
+    if (!MTManagedThread::ThreadIsMTManagedThread(managed_thread)) {
         return Error(Error::Type::THREAD_NOT_FOUND,
-                     std::string("MT thread ") + std::to_string(thread.GetId()) + " not found");
+                     std::string("Thread ") + std::to_string(thread.GetId()) + " is not MT Thread");
     }
-    managedThread->SuspendImpl();
+    MTManagedThread *mt_managed_thread = MTManagedThread::CastFromThread(managed_thread);
+    mt_managed_thread->Suspend();
 
     return {};
 }
 
 std::optional<Error> Debugger::ResumeThread(PtThread thread) const
 {
-    auto managedThread = GetManagedThreadByPtThread(thread);
-    if (managedThread == nullptr) {
+    ManagedThread *managed_thread = thread.GetManagedThread();
+    ASSERT(managed_thread != nullptr);
+
+    if (!MTManagedThread::ThreadIsMTManagedThread(managed_thread)) {
         return Error(Error::Type::THREAD_NOT_FOUND,
-                     std::string("MT thread ") + std::to_string(thread.GetId()) + " not found");
+                     std::string("Thread ") + std::to_string(thread.GetId()) + " is not MT Thread");
     }
-    managedThread->ResumeImpl();
+    MTManagedThread *mt_managed_thread = MTManagedThread::CastFromThread(managed_thread);
+    mt_managed_thread->Resume();
 
     return {};
 }
 
-Expected<PtMethod, Error> Debugger::GetPtMethod(const PtLocation &location) const
-{
-    panda_file::File::EntityId methodId = location.GetMethodId();
-    const char *pandaFile = location.GetPandaFile();
-    Method *method = runtime_->GetClassLinker()->GetMethod(pandaFile, methodId);
-    if (method == nullptr) {
-        return Unexpected(Error(Error::Type::METHOD_NOT_FOUND, std::string("Cannot find method with id ") +
-                                                                   std::to_string(methodId.GetOffset()) +
-                                                                   " in panda file '" + std::string(pandaFile) + "'"));
-    }
-    return MethodToPtMethod(method);
-}
-
 std::optional<Error> Debugger::RestartFrame(PtThread thread, uint32_t frameNumber) const
 {
-    MTManagedThread *mt_managed_thread = GetManagedThreadByPtThread(thread);
-    if (mt_managed_thread == nullptr) {
+    ManagedThread *managed_thread = thread.GetManagedThread();
+    ASSERT(managed_thread != nullptr);
+
+    if (!MTManagedThread::ThreadIsMTManagedThread(managed_thread)) {
+        // TODO(maksenov): Support it for non-MT thread
         return Error(Error::Type::THREAD_NOT_FOUND,
-                     std::string("Thread ") + std::to_string(thread.GetId()) + " not found");
+                     std::string("Thread ") + std::to_string(thread.GetId()) + " is not MT Thread");
     }
-    if (!mt_managed_thread->IsUserSuspended() && mt_managed_thread->IsJavaThread()) {
+
+    MTManagedThread *mt_managed_thread = MTManagedThread::CastFromThread(managed_thread);
+    if (!mt_managed_thread->IsUserSuspended()) {
         return Error(Error::Type::THREAD_NOT_SUSPENDED,
                      std::string("Thread ") + std::to_string(thread.GetId()) + " is not suspended");
     }
 
-    StackWalker stack(mt_managed_thread);
+    auto stack = StackWalker::Create(managed_thread);
     panda::Frame *popFrame = nullptr;
     panda::Frame *retryFrame = nullptr;
     uint32_t currentFrameNumber = 0;
@@ -322,7 +489,7 @@ std::optional<Error> Debugger::RestartFrame(PtThread thread, uint32_t frameNumbe
     }
 
     // Set force pop frames from top to target
-    stack.Reset(mt_managed_thread);
+    stack.Reset(managed_thread);
     while (stack.HasFrame()) {
         panda::Frame *frame = stack.GetIFrame();
         frame->SetForcePop();
@@ -338,14 +505,18 @@ std::optional<Error> Debugger::RestartFrame(PtThread thread, uint32_t frameNumbe
 
 std::optional<Error> Debugger::NotifyFramePop(PtThread thread, uint32_t depth) const
 {
-    MTManagedThread *mt_managed_thread = GetManagedThreadByPtThread(thread);
-    if (mt_managed_thread == nullptr) {
-        return Error(Error::Type::THREAD_NOT_FOUND,
-                     std::string("Thread ") + std::to_string(thread.GetId()) + " not found");
+    ManagedThread *managed_thread = thread.GetManagedThread();
+    ASSERT(managed_thread != nullptr);
+
+    /* TODO: (cmd) the second NotifyFramePop is error. use one debugger instance to resolve this.
+    if (!mt_managed_thread->IsUserSuspended()) {
+        return Error(Error::Type::THREAD_NOT_SUSPENDED,
+                     std::string("Thread ") + std::to_string(thread.GetId()) + " is not suspended");
     }
+    */
 
     bool isNative = false;
-    panda::Frame *popFrame = GetPandaFrame(mt_managed_thread, depth, &isNative);
+    panda::Frame *popFrame = GetPandaFrame(managed_thread, depth, &isNative);
     if (popFrame == nullptr) {
         if (isNative) {
             return Error(Error::Type::OPAQUE_FRAME, std::string("Thread ") + std::to_string(thread.GetId()) +
@@ -364,16 +535,15 @@ std::optional<Error> Debugger::NotifyFramePop(PtThread thread, uint32_t depth) c
 void Debugger::BytecodePcChanged(ManagedThread *thread, Method *method, uint32_t bcOffset)
 {
     ASSERT(bcOffset < method->GetCodeSize() && "code size of current method less then bcOffset");
-
-    HandleExceptionThrowEvent(thread, method, bcOffset);
+    PtLocation location(method->GetPandaFile()->GetFilename().c_str(), method->GetFileId(), bcOffset);
 
     // Step event is reported before breakpoint, according to the spec.
-    HandleStep(thread, method, bcOffset);
-    HandleBreakpoint(thread, method, bcOffset);
+    HandleStep(thread, method, location);
+    HandleBreakpoint(thread, method, location);
 
     if (IsPropertyWatchActive()) {
-        if (!HandlePropertyAccess(thread, method, bcOffset)) {
-            HandlePropertyModify(thread, method, bcOffset);
+        if (!HandlePropertyAccess(thread, method, location)) {
+            HandlePropertyModify(thread, method, location);
         }
     }
 }
@@ -385,156 +555,110 @@ void Debugger::ObjectAlloc(BaseClass *klass, ObjectHeader *object, ManagedThread
     }
     if (thread == nullptr) {
         thread = ManagedThread::GetCurrent();
-    }
-    if (thread == nullptr) {
-        return;
+        if (thread == nullptr) {
+            return;
+        }
     }
 
-    PtThread ptThread(thread->GetId());
-    PtLangExtPrivate *ext = GetPtLangExtPrivate();
-    PtClass ptClass = ext->ClassToPtClass(klass);
-    PtScopedObjectPrivate scopedObject(object);
-    hooks_.ObjectAlloc(ptClass, scopedObject.GetObject(), ptThread, size);
+    hooks_.ObjectAlloc(klass, object, PtThread(thread), size);
 }
 
 void Debugger::MethodEntry(ManagedThread *managedThread, Method *method)
 {
-    uint32_t threadId = managedThread->GetId();
-    PtThread ptThread(threadId);
-
-    hooks_.MethodEntry(ptThread, MethodToPtMethod(method));
+    hooks_.MethodEntry(PtThread(managedThread), method);
 }
 
 void Debugger::MethodExit(ManagedThread *managedThread, Method *method)
 {
     bool isExceptionTriggered = managedThread->HasPendingException();
-    PtThread ptThread(managedThread->GetId());
-    PtValue retValue(managedThread->GetCurrentFrame()->GetAcc().GetValue());
-    hooks_.MethodExit(ptThread, MethodToPtMethod(method), isExceptionTriggered, retValue);
+    VRegValue retValue(managedThread->GetCurrentFrame()->GetAcc().GetValue());
+    hooks_.MethodExit(PtThread(managedThread), method, isExceptionTriggered, retValue);
 
     HandleNotifyFramePop(managedThread, method, isExceptionTriggered);
 }
 
-static bool IsSkipClassEvent()
-{
-    auto *thread = ManagedThread::GetCurrent();
-    return (thread == nullptr || thread->IsJSThread());
-}
-
 void Debugger::ClassLoad(Class *klass)
 {
-    if (!vm_started_ || IsSkipClassEvent()) {
+    auto *thread = Thread::GetCurrent();
+    if (!vm_started_ || thread->GetThreadType() == Thread::ThreadType::THREAD_TYPE_COMPILER) {
         return;
     }
 
-    PtLangExtPrivate *ext = GetPtLangExtPrivate();
-    PtThread ptThread(ManagedThread::GetCurrent()->GetId());
-    PtClass ptClass = ext->ClassToPtClass(klass);
-
-    hooks_.ClassLoad(ptThread, ptClass);
+    hooks_.ClassLoad(PtThread(ManagedThread::CastFromThread(thread)), klass);
 }
 
 void Debugger::ClassPrepare(Class *klass)
 {
-    if (!vm_started_ || IsSkipClassEvent()) {
+    auto *thread = Thread::GetCurrent();
+    if (!vm_started_ || thread->GetThreadType() == Thread::ThreadType::THREAD_TYPE_COMPILER) {
         return;
     }
 
-    PtLangExtPrivate *ext = GetPtLangExtPrivate();
-    PtThread ptThread(ManagedThread::GetCurrent()->GetId());
-    PtClass ptClass = ext->ClassToPtClass(klass);
-
-    hooks_.ClassPrepare(ptThread, ptClass);
+    hooks_.ClassPrepare(PtThread(ManagedThread::CastFromThread(thread)), klass);
 }
 
 void Debugger::MonitorWait(ObjectHeader *object, int64_t timeout)
 {
-    PtThread ptThread(ManagedThread::GetCurrent()->GetId());
-    PtScopedObjectPrivate ptScopedObj(object);
-
-    hooks_.MonitorWait(ptThread, ptScopedObj.GetObject(), timeout);
+    hooks_.MonitorWait(PtThread(ManagedThread::GetCurrent()), object, timeout);
 }
 
 void Debugger::MonitorWaited(ObjectHeader *object, bool timedOut)
 {
-    PtThread ptThread(ManagedThread::GetCurrent()->GetId());
-    PtScopedObjectPrivate ptScopedObj(object);
-
-    hooks_.MonitorWaited(ptThread, ptScopedObj.GetObject(), timedOut);
+    hooks_.MonitorWaited(PtThread(ManagedThread::GetCurrent()), object, timedOut);
 }
 
 void Debugger::MonitorContendedEnter(ObjectHeader *object)
 {
-    PtThread ptThread(ManagedThread::GetCurrent()->GetId());
-    PtScopedObjectPrivate ptScopedObj(object);
-
-    hooks_.MonitorContendedEnter(ptThread, ptScopedObj.GetObject());
+    hooks_.MonitorContendedEnter(PtThread(ManagedThread::GetCurrent()), object);
 }
 
 void Debugger::MonitorContendedEntered(ObjectHeader *object)
 {
-    PtThread ptThread(ManagedThread::GetCurrent()->GetId());
-    PtScopedObjectPrivate ptScopedObj(object);
-
-    hooks_.MonitorContendedEntered(ptThread, ptScopedObj.GetObject());
+    hooks_.MonitorContendedEntered(PtThread(ManagedThread::GetCurrent()), object);
 }
 
-bool Debugger::HandleBreakpoint(const ManagedThread *managedThread, const Method *method, uint32_t bcOffset)
+bool Debugger::HandleBreakpoint(ManagedThread *managedThread, Method *method, const PtLocation &location)
 {
-    if (FindBreakpoint(method, bcOffset) == nullptr) {
-        return false;
+    {
+        os::memory::ReadLockHolder rholder(rwlock_);
+        if (!IsBreakpoint(location)) {
+            return false;
+        }
     }
 
-    auto *pf = method->GetPandaFile();
-    PtLocation location {pf->GetFilename().c_str(), method->GetFileId(), bcOffset};
-    hooks_.Breakpoint(PtThread(managedThread->GetId()), location);
-
+    hooks_.Breakpoint(PtThread(managedThread), method, location);
     return true;
 }
 
-void Debugger::HandleExceptionThrowEvent(ManagedThread *thread, Method *method, uint32_t bcOffset)
+void Debugger::ExceptionThrow(ManagedThread *thread, Method *method, ObjectHeader *exceptionObject, uint32_t bcOffset)
 {
-    if (!thread->HasPendingException() || thread->GetPtThreadInfo()->GetPtActiveExceptionThrown()) {
-        return;
-    }
+    ASSERT(thread->HasPendingException());
+    HandleScope<ObjectHeader *> scope(thread);
+    VMHandle<ObjectHeader> handle(thread, exceptionObject);
 
-    thread->GetPtThreadInfo()->SetPtActiveExceptionThrown(true);
-
-    auto *pf = method->GetPandaFile();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*method);
     std::pair<Method *, uint32_t> res = ctx.GetCatchMethodAndOffset(method, thread);
     auto *catchMethodFile = res.first->GetPandaFile();
 
-    PtLocation throwLocation {pf->GetFilename().c_str(), method->GetFileId(), bcOffset};
+    PtLocation throwLocation {method->GetPandaFile()->GetFilename().c_str(), method->GetFileId(), bcOffset};
     PtLocation catchLocation {catchMethodFile->GetFilename().c_str(), res.first->GetFileId(), res.second};
 
-    ObjectHeader *exceptionObject = thread->GetException();
-    PtScopedObjectPrivate ptScopedExObj(exceptionObject);
-
-    thread->GetPtThreadInfo()->SetCurrentException(ptScopedExObj.GetObject());
-
-    hooks_.Exception(PtThread(thread->GetId()), throwLocation, ptScopedExObj.GetObject(), catchLocation);
+    hooks_.Exception(PtThread(thread), method, throwLocation, handle.GetPtr(), res.first, catchLocation);
 }
 
-void Debugger::ExceptionCatch(const ManagedThread *thread, const Method *method, uint32_t bcOffset)
+void Debugger::ExceptionCatch(ManagedThread *thread, Method *method, ObjectHeader *exceptionObject, uint32_t bcOffset)
 {
-    ASSERT(!thread->HasPendingException() && thread->GetPtThreadInfo()->GetPtActiveExceptionThrown());
-
-    thread->GetPtThreadInfo()->SetPtActiveExceptionThrown(false);
+    ASSERT(!thread->HasPendingException());
 
     auto *pf = method->GetPandaFile();
     PtLocation catchLocation {pf->GetFilename().c_str(), method->GetFileId(), bcOffset};
 
-    PtObject exceptionObject = thread->GetPtThreadInfo()->GetCurrentException();
-    hooks_.ExceptionCatch(PtThread(thread->GetId()), catchLocation, exceptionObject);
-    thread->GetPtThreadInfo()->ResetCurrentException();
+    hooks_.ExceptionCatch(PtThread(thread), method, catchLocation, exceptionObject);
 }
 
-bool Debugger::HandleStep(const ManagedThread *managedThread, const Method *method, uint32_t bcOffset)
+bool Debugger::HandleStep(ManagedThread *managedThread, Method *method, const PtLocation &location)
 {
-    auto *pf = method->GetPandaFile();
-    PtLocation location {pf->GetFilename().c_str(), method->GetFileId(), bcOffset};
-    hooks_.SingleStep(PtThread(managedThread->GetId()), location);
+    hooks_.SingleStep(PtThread(managedThread), method, location);
     return true;
 }
 
@@ -542,15 +666,30 @@ void Debugger::HandleNotifyFramePop(ManagedThread *managedThread, Method *method
 {
     panda::Frame *frame = GetPandaFrame(managedThread);
     if (frame != nullptr && frame->IsNotifyPop()) {
-        hooks_.FramePop(PtThread(managedThread->GetId()), MethodToPtMethod(method), wasPoppedByException);
+        hooks_.FramePop(PtThread(managedThread), method, wasPoppedByException);
         frame->ClearNotifyPop();
     }
 }
 
-bool Debugger::HandlePropertyAccess(const ManagedThread *thread, const Method *method, uint32_t bcOffset)
+static Field *ResolveField(ManagedThread *thread, const Method *caller, const BytecodeInstruction &inst)
+{
+    auto propertyIndex = inst.GetId().AsIndex();
+    auto propertyId = caller->GetClass()->ResolveFieldIndex(propertyIndex);
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    ASSERT(classLinker);
+    ASSERT(!thread->HasPendingException());
+    auto *field = classLinker->GetField(*caller, propertyId);
+    if (UNLIKELY(field == nullptr)) {
+        // Field might be nullptr if a class was not found
+        thread->ClearException();
+    }
+    return field;
+}
+
+bool Debugger::HandlePropertyAccess(ManagedThread *thread, Method *method, const PtLocation &location)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    BytecodeInstruction inst(method->GetInstructions() + bcOffset);
+    BytecodeInstruction inst(method->GetInstructions() + location.GetBytecodeOffset());
     auto opcode = inst.GetOpcode();
     bool isStatic = false;
 
@@ -568,40 +707,36 @@ bool Debugger::HandlePropertyAccess(const ManagedThread *thread, const Method *m
             return false;
     }
 
-    auto propertyIndex = inst.GetId().AsIndex();
-    auto propertyId = method->GetClass()->ResolveFieldIndex(propertyIndex);
-    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    ASSERT(classLinker);
-    auto *field = classLinker->GetField(*method, propertyId);
-    ASSERT(field);
-    auto *klass = field->GetClass();
-    ASSERT(klass);
-
-    if (FindPropertyWatch(klass->GetFileId(), field->GetFileId(), PropertyWatch::Type::ACCESS) == nullptr) {
+    Field *field = ResolveField(thread, method, inst);
+    if (field == nullptr) {
         return false;
     }
+    Class *klass = field->GetClass();
+    ASSERT(klass);
 
-    PtLocation location {method->GetPandaFile()->GetFilename().c_str(), method->GetFileId(), bcOffset};
-    PtThread ptThread(thread->GetId());
-    PtLangExtPrivate *ext = GetPtLangExtPrivate();
-    PtProperty ptProperty = ext->FieldToPtProperty(field);
+    {
+        os::memory::ReadLockHolder rholder(rwlock_);
+        if (FindPropertyWatch(klass->GetFileId(), field->GetFileId(), PropertyWatch::Type::ACCESS) == nullptr) {
+            return false;
+        }
+    }
+
+    PtProperty ptProperty = FieldToPtProperty(field);
 
     if (isStatic) {
-        hooks_.PropertyAccess(ptThread, location, PtObject(), ptProperty);
+        hooks_.PropertyAccess(PtThread(thread), method, location, nullptr, ptProperty);
     } else {
-        Frame::VRegister &reg = thread->GetCurrentFrame()->GetVReg(inst.GetVReg());
-        ASSERT(reg.HasObject());
-        PtScopedObjectPrivate slo(reg.GetReference());
-        hooks_.PropertyAccess(ptThread, location, slo.GetObject(), ptProperty);
+        interpreter::VRegister &reg = thread->GetCurrentFrame()->GetVReg(inst.GetVReg());
+        hooks_.PropertyAccess(PtThread(thread), method, location, reg.GetReference(), ptProperty);
     }
 
     return true;
 }
 
-bool Debugger::HandlePropertyModify(const ManagedThread *thread, const Method *method, uint32_t bcOffset)
+bool Debugger::HandlePropertyModify(ManagedThread *thread, Method *method, const PtLocation &location)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    BytecodeInstruction inst(method->GetInstructions() + bcOffset);
+    BytecodeInstruction inst(method->GetInstructions() + location.GetBytecodeOffset());
     auto opcode = inst.GetOpcode();
     bool isStatic = false;
 
@@ -619,42 +754,39 @@ bool Debugger::HandlePropertyModify(const ManagedThread *thread, const Method *m
             return false;
     }
 
-    auto propertyIdx = inst.GetId().AsIndex();
-    auto propertyId = method->GetClass()->ResolveFieldIndex(propertyIdx);
-    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    ASSERT(classLinker);
-    auto *field = classLinker->GetField(*method, propertyId);
-    ASSERT(field);
-    auto *klass = field->GetClass();
-    ASSERT(klass);
-
-    if (FindPropertyWatch(klass->GetFileId(), field->GetFileId(), PropertyWatch::Type::MODIFY) == nullptr) {
+    Field *field = ResolveField(thread, method, inst);
+    if (field == nullptr) {
         return false;
     }
+    Class *klass = field->GetClass();
+    ASSERT(klass);
 
-    PtThread ptThread(thread->GetId());
-    PtLangExtPrivate *ext = GetPtLangExtPrivate();
-    PtLocation location {method->GetPandaFile()->GetFilename().c_str(), method->GetFileId(), bcOffset};
-    PtProperty ptProperty = ext->FieldToPtProperty(field);
+    {
+        os::memory::ReadLockHolder rholder(rwlock_);
+        if (FindPropertyWatch(klass->GetFileId(), field->GetFileId(), PropertyWatch::Type::MODIFY) == nullptr) {
+            return false;
+        }
+    }
 
-    PtValuePrivate svfm(ext, &thread->GetCurrentFrame()->GetAcc());
+    PtProperty ptProperty = FieldToPtProperty(field);
+
+    VRegValue value(thread->GetCurrentFrame()->GetAcc().GetValue());
     if (isStatic) {
-        hooks_.PropertyModification(ptThread, location, PtObject(), ptProperty, svfm.GetValue());
+        hooks_.PropertyModification(PtThread(thread), method, location, nullptr, ptProperty, value);
     } else {
-        Frame::VRegister &reg = thread->GetCurrentFrame()->GetVReg(inst.GetVReg());
-        ASSERT(reg.HasObject());
-        PtScopedObjectPrivate slo(reg.GetReference());
-        hooks_.PropertyModification(ptThread, location, slo.GetObject(), ptProperty, svfm.GetValue());
+        interpreter::VRegister &reg = thread->GetCurrentFrame()->GetVReg(inst.GetVReg());
+        hooks_.PropertyModification(PtThread(thread), method, location, reg.GetReference(), ptProperty, value);
     }
 
     return true;
 }
 
-std::optional<Error> Debugger::SetPropertyAccessWatch(PtClass klass, PtProperty property)
+std::optional<Error> Debugger::SetPropertyAccessWatch(BaseClass *klass, PtProperty property)
 {
-    PtLangExtPrivate *langExt = GetPtLangExtPrivate();
-    panda_file::File::EntityId classId = langExt->PtClassToClass(klass)->GetFileId();
-    panda_file::File::EntityId propertyId = langExt->PtPropertyToField(property)->GetFileId();
+    os::memory::WriteLockHolder wholder(rwlock_);
+    ASSERT(!klass->IsDynamicClass());
+    panda_file::File::EntityId classId = static_cast<Class *>(klass)->GetFileId();
+    panda_file::File::EntityId propertyId = PtPropertyToField(property)->GetFileId();
     if (FindPropertyWatch(classId, propertyId, PropertyWatch::Type::ACCESS) != nullptr) {
         return Error(Error::Type::INVALID_PROPERTY_ACCESS_WATCH,
                      std::string("Invalid property access watch, already exist, ClassID: ") +
@@ -665,11 +797,11 @@ std::optional<Error> Debugger::SetPropertyAccessWatch(PtClass klass, PtProperty 
     return {};
 }
 
-std::optional<Error> Debugger::ClearPropertyAccessWatch(PtClass klass, PtProperty property)
+std::optional<Error> Debugger::ClearPropertyAccessWatch(BaseClass *klass, PtProperty property)
 {
-    PtLangExtPrivate *langExt = GetPtLangExtPrivate();
-    panda_file::File::EntityId classId = langExt->PtClassToClass(klass)->GetFileId();
-    panda_file::File::EntityId propertyId = langExt->PtPropertyToField(property)->GetFileId();
+    ASSERT(!klass->IsDynamicClass());
+    panda_file::File::EntityId classId = static_cast<Class *>(klass)->GetFileId();
+    panda_file::File::EntityId propertyId = PtPropertyToField(property)->GetFileId();
     if (!RemovePropertyWatch(classId, propertyId, PropertyWatch::Type::ACCESS)) {
         return Error(Error::Type::PROPERTY_ACCESS_WATCH_NOT_FOUND,
                      std::string("Property access watch not found, ClassID: ") + std::to_string(classId.GetOffset()) +
@@ -678,11 +810,12 @@ std::optional<Error> Debugger::ClearPropertyAccessWatch(PtClass klass, PtPropert
     return {};
 }
 
-std::optional<Error> Debugger::SetPropertyModificationWatch(PtClass klass, PtProperty property)
+std::optional<Error> Debugger::SetPropertyModificationWatch(BaseClass *klass, PtProperty property)
 {
-    PtLangExtPrivate *langExt = GetPtLangExtPrivate();
-    panda_file::File::EntityId classId = langExt->PtClassToClass(klass)->GetFileId();
-    panda_file::File::EntityId propertyId = langExt->PtPropertyToField(property)->GetFileId();
+    os::memory::WriteLockHolder wholder(rwlock_);
+    ASSERT(!klass->IsDynamicClass());
+    panda_file::File::EntityId classId = static_cast<Class *>(klass)->GetFileId();
+    panda_file::File::EntityId propertyId = PtPropertyToField(property)->GetFileId();
     if (FindPropertyWatch(classId, propertyId, PropertyWatch::Type::MODIFY) != nullptr) {
         return Error(Error::Type::INVALID_PROPERTY_MODIFY_WATCH,
                      std::string("Invalid property modification watch, already exist, ClassID: ") +
@@ -692,11 +825,11 @@ std::optional<Error> Debugger::SetPropertyModificationWatch(PtClass klass, PtPro
     return {};
 }
 
-std::optional<Error> Debugger::ClearPropertyModificationWatch(PtClass klass, PtProperty property)
+std::optional<Error> Debugger::ClearPropertyModificationWatch(BaseClass *klass, PtProperty property)
 {
-    PtLangExtPrivate *langExt = GetPtLangExtPrivate();
-    panda_file::File::EntityId classId = langExt->PtClassToClass(klass)->GetFileId();
-    panda_file::File::EntityId propertyId = langExt->PtPropertyToField(property)->GetFileId();
+    ASSERT(!klass->IsDynamicClass());
+    panda_file::File::EntityId classId = static_cast<Class *>(klass)->GetFileId();
+    panda_file::File::EntityId propertyId = PtPropertyToField(property)->GetFileId();
     if (!RemovePropertyWatch(classId, propertyId, PropertyWatch::Type::MODIFY)) {
         return Error(Error::Type::PROPERTY_MODIFY_WATCH_NOT_FOUND,
                      std::string("Property modification watch not found, ClassID: ") +
@@ -705,37 +838,27 @@ std::optional<Error> Debugger::ClearPropertyModificationWatch(PtClass klass, PtP
     return {};
 }
 
-const tooling::Breakpoint *Debugger::FindBreakpoint(const Method *method, uint32_t bcOffset) const
+bool Debugger::IsBreakpoint(const PtLocation &location) const REQUIRES_SHARED(rwlock_)
 {
-    for (const auto &bp : breakpoints_) {
-        if (bp.GetBytecodeOffset() == bcOffset && bp.GetMethod()->GetPandaFile() == method->GetPandaFile() &&
-            bp.GetMethod()->GetFileId() == method->GetFileId()) {
-            return &bp;
-        }
-    }
-
-    return nullptr;
+    auto it = breakpoints_.find(location);
+    return it != breakpoints_.end();
 }
 
-bool Debugger::RemoveBreakpoint(Method *method, uint32_t bcOffset)
+bool Debugger::EraseBreakpoint(const PtLocation &location)
 {
-    auto it = breakpoints_.begin();
-    while (it != breakpoints_.end()) {
-        const auto &bp = *it;
-        if (bp.GetBytecodeOffset() == bcOffset && bp.GetMethod() == method) {
-            it = breakpoints_.erase(it);
-            return true;
-        }
-
-        it++;
+    os::memory::WriteLockHolder wholder(rwlock_);
+    auto it = breakpoints_.find(location);
+    if (it != breakpoints_.end()) {
+        breakpoints_.erase(it);
+        return true;
     }
-
     return false;
 }
 
 const tooling::PropertyWatch *Debugger::FindPropertyWatch(panda_file::File::EntityId classId,
                                                           panda_file::File::EntityId fieldId,
                                                           tooling::PropertyWatch::Type type) const
+    REQUIRES_SHARED(rwlock_)
 {
     for (const auto &pw : property_watches_) {
         if (pw.GetClassId() == classId && pw.GetFieldId() == fieldId && pw.GetType() == type) {
@@ -749,6 +872,7 @@ const tooling::PropertyWatch *Debugger::FindPropertyWatch(panda_file::File::Enti
 bool Debugger::RemovePropertyWatch(panda_file::File::EntityId classId, panda_file::File::EntityId fieldId,
                                    tooling::PropertyWatch::Type type)
 {
+    os::memory::WriteLockHolder wholder(rwlock_);
     auto it = property_watches_.begin();
     while (it != property_watches_.end()) {
         const auto &pw = *it;
@@ -763,43 +887,33 @@ bool Debugger::RemovePropertyWatch(panda_file::File::EntityId classId, panda_fil
     return false;
 }
 
-MTManagedThread *Debugger::GetManagedThreadByPtThread(PtThread thread) const
-{
-    if (thread.GetId() == 0) {
-        MTManagedThread *curr_thread = MTManagedThread::GetCurrent();
-        ASSERT(curr_thread && "Current thread is nullptr!");
-        if (curr_thread->IsJSThread()) {
-            return curr_thread;
-        }
-    }
-
-    MTManagedThread *res = nullptr;
-    runtime_->GetPandaVM()->GetThreadManager()->EnumerateThreads(
-        [&res, thread](MTManagedThread *mt_managed_thread) {
-            if (mt_managed_thread->GetId() == thread.GetId()) {
-                res = mt_managed_thread;
-                return false;
-            }
-
-            return true;
-        },
-        static_cast<unsigned int>(panda::EnumerationFlag::ALL),
-        static_cast<unsigned int>(panda::EnumerationFlag::VM_THREAD));
-
-    return res;
-}
-
-static uint64_t GetVRegValue(const Frame::VRegister &reg)
+template <class VRegRef>
+static inline uint64_t GetVRegValue(VRegRef reg)
 {
     return reg.HasObject() ? reinterpret_cast<uintptr_t>(reg.GetReference()) : reg.GetLong();
 }
 
-// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-PtDebugFrame::PtDebugFrame(Method *method, const Frame *interpreterFrame)
-    : method_(MethodToPtMethod(method)),
-      method_id_(method->GetFileId()),
-      panda_file_(method->GetPandaFile()->GetFilename())
+template <class FrameHandler>
+static inline uint64_t GetAccValue(PandaVector<uint64_t> &vregs, size_t nregs, PandaVector<uint64_t> &args,
+                                   size_t nargs, FrameHandler frame_handler)
 {
+    for (size_t i = 0; i < nregs; i++) {
+        vregs.push_back(GetVRegValue(frame_handler.GetVReg(i)));
+    }
+
+    for (size_t i = 0; i < nargs; i++) {
+        args.push_back(GetVRegValue(frame_handler.GetVReg(i + nregs)));
+    }
+
+    return GetVRegValue(frame_handler.GetAccAsVReg());
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+PtDebugFrame::PtDebugFrame(Method *method, Frame *interpreterFrame) : method_(method)
+{
+    panda_file_ = method->GetPandaFile()->GetFilename();
+    method_id_ = method->GetFileId();
+
     is_interpreter_frame_ = interpreterFrame != nullptr;
     if (!is_interpreter_frame_) {
         return;
@@ -807,16 +921,13 @@ PtDebugFrame::PtDebugFrame(Method *method, const Frame *interpreterFrame)
 
     size_t nregs = method->GetNumVregs();
     size_t nargs = method->GetNumArgs();
-
-    for (size_t i = 0; i < nregs; i++) {
-        vregs_.push_back(GetVRegValue(interpreterFrame->GetVReg(i)));
+    if (interpreterFrame->IsDynamic()) {
+        acc_ = GetAccValue(vregs_, nregs, args_, nargs, DynamicFrameHandler(interpreterFrame));
+    } else {
+        acc_ = GetAccValue(vregs_, nregs, args_, nargs, StaticFrameHandler(interpreterFrame));
     }
 
-    for (size_t i = 0; i < nargs; i++) {
-        args_.push_back(GetVRegValue(interpreterFrame->GetVReg(i + nregs)));
-    }
-
-    acc_ = GetVRegValue(interpreterFrame->GetAcc());
     bc_offset_ = interpreterFrame->GetBytecodeOffset();
 }
+
 }  // namespace panda::tooling

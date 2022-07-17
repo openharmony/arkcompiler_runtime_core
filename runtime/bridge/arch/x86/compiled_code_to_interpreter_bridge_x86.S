@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ CompiledCodeToInterpreterBridge:
     addl $FRAME_VREGS_OFFSET, %eax
     movl FRAME_NUM_VREGS_OFFSET(%eax), %edi
     subl METHOD_NUM_ARGS_OFFSET(%ebx), %edi
-    shll $4, %edi
+    shll $3, %edi
     addl %eax, %edi // iframe.vregs_ + num_vregs_
 
     leal 8(%ebp), %esi // args
@@ -121,7 +121,8 @@ CompiledCodeToInterpreterBridge:
     cmpl $(SHORTY_REFERENCE - SHORTY_FIRST_64), %ecx
     movl $0, %ecx
     sete %cl
-    movl %ecx, FRAME_VREGISTER_TAG_OFFSET(%edi)
+    movl FRAME_NUM_VREGS_OFFSET(%eax), %edx
+    movl %ecx, (%edi, %edx, 8)
 
     movl (%esi), %ecx
     movl %ecx, (%edi)
@@ -131,7 +132,8 @@ CompiledCodeToInterpreterBridge:
 1:
     // it is a 64bit value
     // store the tag
-    movl $FRAME_VREGISTER_PRIMITIVE_TAG, FRAME_VREGISTER_TAG_OFFSET(%edi)
+    movl FRAME_NUM_VREGS_OFFSET(%eax), %edx
+    movl $FRAME_VREGISTER_PRIMITIVE_TAG, (%edi, %edx, 8)
 
     movl (%esi), %ecx
     movl %ecx, (%edi)

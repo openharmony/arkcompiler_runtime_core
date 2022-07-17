@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <iostream>
-
 #include "macros.h"
 #include "features_manager.h"
 #include "dprof/storage.h"
@@ -22,6 +20,9 @@
 #include "utils/pandargs.h"
 #include "utils/span.h"
 #include "features/hotness_counters.h"
+
+#include <iostream>
+
 #include "generated/converter_options.h"
 
 namespace panda::dprof {

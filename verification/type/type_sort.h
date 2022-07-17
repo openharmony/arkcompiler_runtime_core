@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_TYPE_TYPE_SORT_H_
-#define PANDA_VERIFICATION_TYPE_TYPE_SORT_H_
+#ifndef _PANDA_TYPE_SORT_HPP
+#define _PANDA_TYPE_SORT_HPP
 
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
@@ -22,25 +22,24 @@
 namespace panda::verifier {
 using SortIdx = size_t;
 
-template <typename Name>
 class SortNames {
 public:
-    using NameType = Name;
-
-    SortNames(const Name &bot, const Name &top)
+    SortNames(const PandaString &bot, const PandaString &top)
     {
         operator[](bot);
         operator[](top);
     }
+    DEFAULT_COPY_SEMANTIC(SortNames);
+    DEFAULT_MOVE_SEMANTIC(SortNames);
 
     ~SortNames() = default;
 
-    const Name &operator[](SortIdx sort) const
+    const PandaString &operator[](SortIdx sort) const
     {
         return SortToName_[sort];
     }
 
-    SortIdx operator[](const Name &name)
+    SortIdx operator[](const PandaString &name)
     {
         auto s = NameToSort_.find(name);
         if (s != NameToSort_.end()) {
@@ -53,9 +52,9 @@ public:
     }
 
 private:
-    PandaUnorderedMap<Name, SortIdx> NameToSort_;
-    PandaVector<Name> SortToName_;
+    PandaUnorderedMap<PandaString, SortIdx> NameToSort_;
+    PandaVector<PandaString> SortToName_;
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_TYPE_TYPE_SORT_H_
+#endif  // !_PANDA_TYPE_SORT_HPP

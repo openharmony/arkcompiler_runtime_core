@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_MEM_GC_CARD_TABLE_INL_H_
-#define PANDA_RUNTIME_MEM_GC_CARD_TABLE_INL_H_
+#ifndef RUNTIME_MEM_GC_CARD_TABLE_INL_H
+#define RUNTIME_MEM_GC_CARD_TABLE_INL_H
 
 #include "runtime/mem/gc/card_table.h"
 #include "runtime/include/mem/panda_containers.h"
@@ -68,7 +68,9 @@ void CardTable::VisitMarked(CardVisitor card_visitor, uint32_t processed_flag)
     while (card < card_end) {
         // NB! In general wide load/short store on overlapping memory of different address are allowed to be reordered
         // This optimization currently is allowed since additional VisitMarked is called after concurrent mark with
-        // global Mutator lock held, so all previous java thread's writes should be visible by GC thread
+        // global Mutator lock held, so all previous managed thread's writes should be visible by GC thread
+        // Atomic with relaxed order reason: data race with card with no synchronization or ordering constraints imposed
+        // on other reads or writes
         if (LIKELY((reinterpret_cast<std::atomic_size_t *>(card))->load(std::memory_order_relaxed) == 0)) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             card += chunk_card_num;
@@ -127,4 +129,4 @@ void CardTable::VisitMarkedCompact(CardVisitor card_visitor)
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_GC_CARD_TABLE_INL_H_
+#endif  // RUNTIME_MEM_GC_CARD_TABLE_INL_H

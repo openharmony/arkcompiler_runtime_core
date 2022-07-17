@@ -23,7 +23,7 @@
     return
 }
 
-.function u8 B.Bhandler_short2(B a0, u1 a1, i64 a2) {
+.function u8 B.Bhandler_short2(B a0, u1[] a1, i64 a2) {
     return
 }
 
@@ -136,7 +136,7 @@
 
     call.range handler_range_ext, v0
 
-    calli.dyn.short 1, v0
+    calli.dyn.short 1, v0, v0, v0
 
     # ====================
 

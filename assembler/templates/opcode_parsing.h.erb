@@ -17,7 +17,6 @@
 #include "utils/number-utils.h"
 
 namespace panda::pandasm {
-
 bool Parser::ParseOperands()
 {
     std::string_view p;
@@ -42,7 +41,7 @@ bool Parser::ParseOperands()
 %    elsif insn.return_void?
                 if (!curr_func_->return_type.IsVoid()) {
 %    end
-                    GetWarning("Unexpected return type. Correct the return type in the function definition: " +
+                    GetWarning("Unexpected return type. Look at the return type in the function definition: " +
                                curr_func_->return_type.GetName(),
                                Error::ErrorType::WAR_UNEXPECTED_RETURN_TYPE);
                 }
@@ -103,6 +102,8 @@ bool Parser::ParseOperands()
 %        end
 %      elsif properties.include?("string_id")
                 ParseOperandString();
+%      elsif properties.include?("literalarray_id")
+                ParseOperandLiteralArray();
 %      elsif properties.include?("method_id")
                 ParseOperandCall();
 %      elsif properties.include?("field_id")
@@ -129,5 +130,4 @@ bool Parser::ParseOperands()
     }
     return context_.Mask();
 }
-
-}  // namespace panda::pandasm
+}

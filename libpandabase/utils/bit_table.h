@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_BIT_TABLE_H_
-#define PANDA_LIBPANDABASE_UTILS_BIT_TABLE_H_
+#ifndef PANDA_BITTABLE_H
+#define PANDA_BITTABLE_H
 
 #include "utils/arena_containers.h"
 #include "utils/bit_memory_region.h"
@@ -253,7 +253,7 @@ struct BitTableDefault : public BitTableRow<NumColumns, BitTableDefault<NumColum
     using Base::Base;
 };
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage), CODECHECK-NOLINTNEXTLINE(C_RULE_ID_DEFINE_MULTILINE)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BIT_TABLE_HEADER(columns, name)            \
     using Base = BitTableRow<columns, name>;       \
     using BitTableRow<columns, name>::BitTableRow; \
@@ -261,7 +261,7 @@ struct BitTableDefault : public BitTableRow<NumColumns, BitTableDefault<NumColum
     struct ColumnName;                             \
     static constexpr const char *TABLE_NAME = #name;
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage), CODECHECK-NOLINTNEXTLINE(C_RULE_ID_DEFINE_MULTILINE)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BIT_TABLE_COLUMN(index, name, upname)                                \
     static constexpr size_t COLUMN_##upname = index;                         \
     static constexpr const char COLUMN_NAME_##upname[] = #name; /* NOLINT */ \
@@ -538,6 +538,11 @@ public:
         return entries_.back();
     }
 
+    const Entry &GetEntry(size_t index) const
+    {
+        return entries_[index];
+    }
+
     size_t GetSize() const
     {
         return entries_.size();
@@ -555,7 +560,6 @@ public:
 
     size_t AddArray(Span<Entry> entries)
     {
-        // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
         uint32_t hash = FnvHash(entries.template SubSpan<uint32_t>(0, entries.size() * NUM_COLUMNS));
         auto range = dedup_map_.equal_range(hash);
         for (auto it = range.first; it != range.second; ++it) {
@@ -612,6 +616,8 @@ private:
 
 class BitmapTableBuilder {
 public:
+    using Entry = std::pair<uint32_t *, uint32_t>;
+
     explicit BitmapTableBuilder(ArenaAllocator *allocator)
         : allocator_(allocator), rows_(allocator->Adapter()), dedup_map_(allocator->Adapter())
     {
@@ -620,6 +626,11 @@ public:
     size_t GetRowsCount() const
     {
         return rows_.size();
+    }
+
+    auto GetEntry(size_t index) const
+    {
+        return BitMemoryRegion<uint32_t>(rows_[index].first, rows_[index].second);
     }
 
     size_t Add(BitVectorSpan vec)
@@ -649,7 +660,7 @@ public:
         size_t extra_bytes = data_size_in_bytes - vec_size_in_bytes;
         if (extra_bytes != 0) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic,-warnings-as-errors)
-            (void)memset_s(reinterpret_cast<uint8_t *>(data) + vec_size_in_bytes, extra_bytes, 0, extra_bytes);
+            memset_s(reinterpret_cast<uint8_t *>(data) + vec_size_in_bytes, extra_bytes, 0, extra_bytes);
         }
         uint32_t index = rows_.size();
         rows_.push_back({data, vec.size()});
@@ -660,7 +671,6 @@ public:
     template <typename Container>
     void Encode(BitMemoryStreamOut<Container> &stream)
     {
-        // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_REDUNDANT_INIT)
         static constexpr size_t COLUMNS_SIZE = 2;
         std::array<uint32_t, COLUMNS_SIZE> columns = {0, static_cast<uint32_t>(rows_.size())};
         std::for_each(rows_.begin(), rows_.end(),
@@ -679,10 +689,10 @@ public:
 
 private:
     ArenaAllocator *allocator_ {nullptr};
-    ArenaDeque<std::pair<uint32_t *, uint32_t>> rows_;
+    ArenaDeque<Entry> rows_;
     ArenaUnorderedMultiMap<uint32_t, uint32_t> dedup_map_;
 };
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_BIT_TABLE_H_
+#endif  // PANDA_BITTABLE_H

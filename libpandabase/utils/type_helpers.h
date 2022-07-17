@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
 
 #ifndef PANDA_LIBPANDABASE_UTILS_TYPE_HELPERS_H_
 #define PANDA_LIBPANDABASE_UTILS_TYPE_HELPERS_H_
+
+#include <cstddef>
+#include <cstdint>
+#include <type_traits>
 
 namespace panda::helpers {
 
@@ -67,4 +71,4 @@ using int128 = struct int128_type {
 static_assert(sizeof(int128) == sizeof(std::int64_t) * 2U);
 #endif
 
-#endif  // PANDA_LIBPANDABASE_UTILS_TYPE_HELPERS_H_
+#endif  // PANDA_LIBPANDABASE_UTILS_STRING_HELPERS_H_

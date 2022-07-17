@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,9 @@
 
 namespace panda::verifier::test {
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
 TEST_F(VerifierTest, AbsIntExecContext)
 {
-    SortNames<PandaString> sort {"Bot", "Top"};
+    SortNames sort {"Bot", "Top"};
     TypeSystem type_system {sort["Bot"], sort["Top"]};
     Variables variables;
 
@@ -52,7 +51,7 @@ TEST_F(VerifierTest, AbsIntExecContext)
 
     u8 << u16 << u32 << u64;
 
-    auto nv = std::bind(&Variables::NewVar, variables);
+    auto nv = [&variables] { return variables.NewVar(); };
 
     AbstractTypedValue av1 {i16, nv()};
     AbstractTypedValue av2 {i32, nv()};

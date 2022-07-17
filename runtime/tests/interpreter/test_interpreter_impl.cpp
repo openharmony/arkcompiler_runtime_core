@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
 
 #include "runtime/interpreter/interpreter-inl.h"
 #include "runtime/tests/interpreter/test_runtime_interface.h"
+#include "interpreter-inl_gen.h"
 
 namespace panda::interpreter::test {
 
 void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame)
 {
-    panda::interpreter::ExecuteImpl<RuntimeInterface, false>(thread, pc, frame);
+    panda::interpreter::ExecuteImpl<RuntimeInterface, false, false>(thread, pc, frame);
 }
 
 }  // namespace panda::interpreter::test

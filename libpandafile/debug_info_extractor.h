@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H_
-#define PANDA_LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H_
+#ifndef LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H_
+#define LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H_
 
 #include "file.h"
+#include "file_items.h"
 
 #include <string>
 #include <vector>
@@ -50,6 +51,11 @@ using LocalVariableTable = std::vector<LocalVariableInfo>;
 
 class DebugInfoExtractor {
 public:
+    struct ParamInfo {
+        std::string name;
+        std::string signature;
+    };
+
     explicit DebugInfoExtractor(const File *pf);
 
     ~DebugInfoExtractor() = default;
@@ -63,7 +69,7 @@ public:
 
     const LocalVariableTable &GetLocalVariableTable(File::EntityId method_id) const;
 
-    const std::vector<std::string> &GetParameterNames(File::EntityId method_id) const;
+    const std::vector<ParamInfo> &GetParameterInfo(File::EntityId method_id) const;
 
     const char *GetSourceFile(File::EntityId method_id) const;
 
@@ -80,7 +86,7 @@ private:
         File::EntityId method_id;
         LineNumberTable line_number_table;
         LocalVariableTable local_variable_table;
-        std::vector<std::string> param_names;
+        std::vector<ParamInfo> param_info;
         ColumnNumberTable column_number_table;
     };
 
@@ -89,4 +95,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H_
+#endif  // LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H_

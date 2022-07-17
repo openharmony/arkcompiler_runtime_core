@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(7 shli 2 == 28) operation --> shli
-.function u1 main(){
+.function i32 main(){
     ldai 7
     shli 2
     movi v0, 28

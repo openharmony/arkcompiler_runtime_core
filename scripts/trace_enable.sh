@@ -44,7 +44,7 @@ category_disable() {
 }
 
 start_trace() {
-    echo "Warning: If the PandaVM aborted while writing trace, try to enlarge the trace buffer size here."
+    echo "Warning: If the PandaVM aborted while writting trace, try to enlarge the trace buffer size here."
     echo $BUFF_SIZE > $TRACKING_PATH/buffer_size_kb
     echo 'global' > $TRACKING_PATH/trace_clock
     echo 'nop' > $TRACKING_PATH/current_tracer

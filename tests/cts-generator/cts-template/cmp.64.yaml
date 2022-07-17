@@ -13,14 +13,14 @@
 
 definitions: []
 tests:
-  - file-name: "cmp.64"
+  - file-name: 'cmp.64'
     isa:
       title: Integer comparison
       description: Perform specified signed or unsigned integer comparison between register and accumulator.
       exceptions:
         - x_none
     commands:
-      - file-name: "op_vs_8_eq"
+      - file-name: 'op_vs_8_eq'
         isa:
           instructions:
             - sig: cmp.64 v:in:i64
@@ -30,46 +30,46 @@ tests:
         description: Check cmp.64 with equal values.
         tags: ['tsan']
         code-template: |
-            # test - compare equal values
-                ldai.64 %s
-                movi.64 v0, %s
-                cmp.64 v0
+          # test - compare equal values
+              ldai.64 %s
+              movi.64 v0, %s
+              cmp.64 v0
         cases:
           - values:
-              - "0"
-              - "0"
+              - '0'
+              - '0'
           - values:
-              - "1"
-              - "1"
+              - '1'
+              - '1'
           - values:
-              - "-1"
-              - "-1"
+              - '-1'
+              - '-1'
           - values:
-              - "0x7fffffff"
-              - "0x7fffffff"
+              - '0x7fffffff'
+              - '0x7fffffff'
           - values:
-              - "-0x7fffffff"
-              - "-0x7fffffff"
+              - '-0x7fffffff'
+              - '-0x7fffffff'
           - values:
-              - "0x80000000"
-              - "0x80000000"
+              - '0x80000000'
+              - '0x80000000'
           - values:
-              - "-0x80000000"
-              - "-0x80000000"
+              - '-0x80000000'
+              - '-0x80000000'
           - values:
-              - "0xffffffff"
-              - "0xffffffff"
+              - '0xffffffff'
+              - '0xffffffff'
           - values:
-              - "-0xffffffff"
-              - "-0xffffffff"
+              - '-0xffffffff'
+              - '-0xffffffff'
           - values:
-              - "0x7fffffffffffffff"
-              - "0x7fffffffffffffff"
-          - values:  
-              - "-9223372036854775808"
-              - "0x8000000000000000"
+              - '0x7fffffffffffffff'
+              - '0x7fffffffffffffff'
+          - values:
+              - '-9223372036854775808'
+              - '0x8000000000000000'
 
-      - file-name: "op_vs_8_lt"
+      - file-name: 'op_vs_8_lt'
         isa:
           instructions:
             - sig: cmp.64 v:in:i64
@@ -80,37 +80,37 @@ tests:
         tags: ['tsan']
         code-template: |
           # test - check less than
-                ldai.64 %s
-                movi.64 v0, %s
-                cmp.64 v0
-                addi 1
+              ldai.64 %s
+              movi.64 v0, %s
+              cmp.64 v0
+              addi 1
         cases:
           - values:
-            - "0"
-            - "0x0000000000000001"
+              - '0'
+              - '0x0000000000000001'
           - values:
-            - "-1"
-            - "0"
+              - '-1'
+              - '0'
           - values:
-            - "9223372036854775707"
-            - "9223372036854775807"
+              - '9223372036854775707'
+              - '9223372036854775807'
           - values:
-            - "0x8000000000000000"
-            - "0x7fffffffffffffff"
+              - '0x8000000000000000'
+              - '0x7fffffffffffffff'
           - values:
-            - "0x8000000000000000"
-            - "0x8000000000000001"  
+              - '0x8000000000000000'
+              - '0x8000000000000001'
           - values:
-            - "-2"
-            - "0xffffffffffffffff"
+              - '-2'
+              - '0xffffffffffffffff'
           - values:
-            - "0x7ffffffffffffffe"  
-            - "9223372036854775807"
-          - values:  
-            - "65535"
-            - "0x00010000"
+              - '0x7ffffffffffffffe'
+              - '9223372036854775807'
+          - values:
+              - '65535'
+              - '0x00010000'
 
-      - file-name: "op_vs_8_gt"
+      - file-name: 'op_vs_8_gt'
         isa:
           instructions:
             - sig: cmp.64 v:in:i64
@@ -121,56 +121,56 @@ tests:
         tags: ['tsan']
         code-template: |
           #   test - check greater than
-                ldai.64 %s
-                movi.64 v0, %s
-                cmp.64 v0
-                subi 1
+              ldai.64 %s
+              movi.64 v0, %s
+              cmp.64 v0
+              subi 1
         cases:
           - values:
-            - "0x0000000000000001"
-            - "0"
+              - '0x0000000000000001'
+              - '0'
           - values:
-            - "0"
-            - "-1"
+              - '0'
+              - '-1'
           - values:
-            - "9223372036854775807"
-            - "9223372036854775707"
+              - '9223372036854775807'
+              - '9223372036854775707'
           - values:
-            - "0x7fffffffffffffff"
-            - "0x8000000000000000"
+              - '0x7fffffffffffffff'
+              - '0x8000000000000000'
           - values:
-            - "0x8000000000000001"  
-            - "0x8000000000000000"
+              - '0x8000000000000001'
+              - '0x8000000000000000'
           - values:
-            - "0xffffffffffffffff"
-            - "-2"
+              - '0xffffffffffffffff'
+              - '-2'
           - values:
-            - "9223372036854775807"
-            - "0x7ffffffffffffffe"  
-          - values:  
-            - "0x00010000"
-            - "65535"
+              - '9223372036854775807'
+              - '0x7ffffffffffffffe'
+          - values:
+              - '0x00010000'
+              - '65535'
 
-      - file-name: "op_vs_8_reg256"
+      - file-name: 'op_vs_8_reg256'
         isa:
           instructions:
             - sig: cmp.64 v:in:i64
               acc: inout:i64->i32
               format: [op_v_8]
-        check-type: none
+        check-type: exit-positive
         runner-options: [compile-failure]
         description: Check cmp.64 with incorrect register numbers.
         code-template: |
           #
               cmp.64 v256
 
-      - file-name: "op_vs_8_reg255"
+      - file-name: 'op_vs_8_reg255'
         isa:
           instructions:
             - sig: cmp.64 v:in:i64
               acc: inout:i64->i32
               format: [op_v_8]
-        check-type: none
+        check-type: exit-positive
         runner-options: [compile-only]
         description: Check cmp.64 with correct register numbers.
         code-template: |
@@ -179,15 +179,11 @@ tests:
 
       - file-name: type
         isa:
-          instructions:
-            - sig: cmp.64 v:in:i64
-              acc: inout:i64->i32
-              format: [op_v_8]
           verification:
             - v1_type
             - acc_type
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -204,6 +200,8 @@ tests:
         template-cases:
           - values:
               - movi v0, 0
+          - values:
+              - fmovi v0, 0
           - values:
               - movi.64 v0, 0
             exclude: [val]
@@ -240,6 +238,8 @@ tests:
         cases:
           - values:
               - ldai 0
+          - values:
+              - fldai 0
           - values:
               - ldai.64 0
             id: val
@@ -279,14 +279,14 @@ tests:
               format: [op_v_8]
         description: Check 'cmp.64' with uninitialized registers.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
-            #
-            .function i32 main() {
-                %s
-                *s
-                cmp.64 %s
+          #
+          .function i32 main() {
+              %s
+              *s
+              cmp.64 %s
         check-type: exit-positive
         template-cases:
           - values:

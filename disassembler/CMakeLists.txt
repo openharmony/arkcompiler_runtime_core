@@ -12,21 +12,9 @@
 # limitations under the License.
 
 cmake_minimum_required(VERSION 3.3.2 FATAL_ERROR)
-project(disassembler CXX)
+project(arkdisassembler CXX)
 
 panda_add_executable(ark_disasm disasm.cpp)
-
-panda_isa_gen(
-    TEMPLATES
-        "opcode_translator.cpp.erb"
-        "bc_ins_to_pandasm_ins.cpp.erb"
-        "get_ins_info.cpp.erb"
-    REQUIRES
-        "${PANDA_ROOT}/assembler/asm_isapi.rb"
-        "${PANDA_ROOT}/libpandafile/pandafile_isapi.rb"
-    EXTRA_DEPENDENCIES
-        ${GET_INSTRUCTIONS_CPP}
-)
 
 set(GENERATOR ${PANDA_ROOT}/libpandafile/types.rb)
 set(TEMPLATE ${CMAKE_CURRENT_LIST_DIR}/templates/type_to_pandasm_type.cpp.erb)
@@ -39,6 +27,16 @@ add_custom_command(OUTPUT "${OUTFILE}"
                    DEPENDS ${DEPENDENCIES})
 add_custom_target(type_to_pandasm_type_gen_${PROJECT_NAME} ALL DEPENDS "${OUTFILE}")
 
+panda_isa_gen(
+    TEMPLATES
+        "opcode_translator.cpp.erb"
+        "bc_ins_to_pandasm_ins.cpp.erb"
+        "get_ins_info.cpp.erb"
+    REQUIRES
+        "${PANDA_ROOT}/assembler/asm_isapi.rb"
+        "${PANDA_ROOT}/libpandafile/pandafile_isapi.rb"
+)
+
 add_library(arkdisassembler ${PANDA_DEFAULT_LIB_TYPE}
     disassembler.cpp
     opcode_translator.cpp
@@ -50,12 +48,16 @@ add_library(arkdisassembler ${PANDA_DEFAULT_LIB_TYPE}
 target_include_directories(arkdisassembler
     PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+    PUBLIC ${CMAKE_SOURCE_DIR}/libpandabase
+    PUBLIC ${CMAKE_BINARY_DIR}/libpandabase
+    PUBLIC ${CMAKE_BINARY_DIR}/libpandafile/include
 )
 
 target_link_libraries(arkdisassembler arkfile arkbase arkassembler)
 
 target_link_libraries(ark_disasm arkdisassembler arkbase arkfile arkassembler)
 
+panda_add_to_clang_tidy(arkdisassembler)
 panda_add_to_clang_tidy(TARGET ark_disasm CHECKS
     "-cert-dcl21-cpp"
     "-cppcoreguidelines-macro-usage"
@@ -72,33 +74,37 @@ if(NOT PANDA_WITH_TESTS)
     return()
 endif()
 
-panda_add_gtest(
-   CONTAINS_MAIN
-   NAME disasm_test_labels
-   SOURCES
-       tests/labels_test.cpp
-   LIBRARIES
-       arkbase arkassembler arkdisassembler arkfile
-   SANITIZERS
-       ${PANDA_SANITIZERS_LIST}
-)
+# disasm_bin directory
+set(DISASM_BIN_DIR ${CMAKE_CURRENT_BINARY_DIR}/bin)
+file(MAKE_DIRECTORY "${DISASM_BIN_DIR}")
+
+# disasm_tests directory
+set(DISASM_TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests/sources)
+
+set(FUNCTIONS_TEST_SRC ${CMAKE_CURRENT_BINARY_DIR}/functions_test.cpp)
+set(INSTRUCTIONS_TEST_SRC ${CMAKE_CURRENT_BINARY_DIR}/instructions_test.cpp)
+set(LABELS_TEST_SRC ${CMAKE_CURRENT_BINARY_DIR}/labels_test.cpp)
+set(LITERALS_TEST_SRC ${CMAKE_CURRENT_BINARY_DIR}/literals_test.cpp)
+set(METADATA_TEST_SRC ${CMAKE_CURRENT_BINARY_DIR}/metadata_test.cpp)
+set(RECORDS_TEST_SRC ${CMAKE_CURRENT_BINARY_DIR}/records_test.cpp)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/functions_test.cpp.in ${FUNCTIONS_TEST_SRC} @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/instructions_test.cpp.in ${INSTRUCTIONS_TEST_SRC} @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/labels_test.cpp.in ${LABELS_TEST_SRC} @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/literals_test.cpp.in ${LITERALS_TEST_SRC} @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/metadata_test.cpp.in ${METADATA_TEST_SRC} @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/records_test.cpp.in ${RECORDS_TEST_SRC} @ONLY)
+
 
 panda_add_gtest(
-    CONTAINS_MAIN
-    NAME disasm_test_records
-    SOURCES
-        tests/records_test.cpp
-    LIBRARIES
-        arkbase arkassembler arkdisassembler arkfile
-    SANITIZERS
-        ${PANDA_SANITIZERS_LIST}
-)
-
-panda_add_gtest(
-   CONTAINS_MAIN
-   NAME disasm_test_instructions
+   NAME disasm_tests
    SOURCES
-       tests/instructions_test.cpp
+       ${FUNCTIONS_TEST_SRC}
+       ${INSTRUCTIONS_TEST_SRC}
+       ${LABELS_TEST_SRC}
+       ${LITERALS_TEST_SRC}
+       ${METADATA_TEST_SRC}
+       ${RECORDS_TEST_SRC}
    LIBRARIES
        arkbase arkassembler arkdisassembler arkfile
    SANITIZERS
@@ -106,13 +112,6 @@ panda_add_gtest(
 )
 
 ##############################
-
-# disasm_bin directory
-set(DISASM_BIN_DIR ${PANDA_BINARY_ROOT}/disassembler/bin)
-file(MAKE_DIRECTORY "${DISASM_BIN_DIR}")
-
-# disasm_tests directory
-set(DISASM_TESTS_DIR ${PANDA_ROOT}/disassembler/tests/sources)
 
 if(CMAKE_CROSSCOMPILING)
     ExternalProject_Get_Property(panda_host_tools binary_dir)
@@ -163,13 +162,9 @@ compile_pre_build(TARGET disasm_binaries-exceptions
                   FILE_SRC ${DISASM_TESTS_DIR}/exceptions.pa
                   FILE_DST ${DISASM_BIN_DIR}/exceptions.bc)
 
-add_custom_target(disasm_binaries_test_labels)
-
-add_dependencies(disasm_binaries_test_labels disasm_binaries-labels1)
-add_dependencies(disasm_binaries_test_labels disasm_binaries-labels2)
-add_dependencies(disasm_binaries_test_labels disasm_binaries-exceptions)
-
-add_dependencies(disasm_test_labels disasm_binaries_test_labels)
+add_dependencies(disasm_tests disasm_binaries-labels1)
+add_dependencies(disasm_tests disasm_binaries-labels2)
+add_dependencies(disasm_tests disasm_binaries-exceptions)
 
 # record_tests files
 compile_pre_build(TARGET disasm_binaries-record_with_fields
@@ -181,13 +176,21 @@ compile_pre_build(TARGET disasm_binaries-record_in_record
 compile_pre_build(TARGET disasm_binaries-empty_record
                   FILE_SRC ${DISASM_TESTS_DIR}/empty_record.pa
                   FILE_DST ${DISASM_BIN_DIR}/empty_record.bc)
-add_custom_target(disasm_binaries_test_records)
 
-add_dependencies(disasm_binaries_test_records disasm_binaries-record_with_fields)
-add_dependencies(disasm_binaries_test_records disasm_binaries-record_in_record)
-add_dependencies(disasm_binaries_test_records disasm_binaries-empty_record)
+add_dependencies(disasm_tests disasm_binaries-record_with_fields)
+add_dependencies(disasm_tests disasm_binaries-record_in_record)
+add_dependencies(disasm_tests disasm_binaries-empty_record)
 
-add_dependencies(disasm_test_records disasm_binaries_test_records)
+# functions_tests files
+compile_pre_build(TARGET disasm_binaries-empty_function
+                  FILE_SRC ${DISASM_TESTS_DIR}/empty_function.pa
+                  FILE_DST ${DISASM_BIN_DIR}/empty_function.bc)
+compile_pre_build(TARGET disasm_binaries-overloading
+                  FILE_SRC ${DISASM_TESTS_DIR}/overloading.pa
+                  FILE_DST ${DISASM_BIN_DIR}/overloading.bc)
+
+add_dependencies(disasm_tests disasm_binaries-empty_function)
+add_dependencies(disasm_tests disasm_binaries-overloading)
 
 # instruction_tests files
 compile_pre_build(TARGET disasm_binaries-instructions
@@ -203,28 +206,28 @@ compile_pre_build(TARGET disasm_binaries-newarrs
                   FILE_SRC ${DISASM_TESTS_DIR}/newarrs.pa
                   FILE_DST ${DISASM_BIN_DIR}/newarrs.bc)
 
-add_custom_target(disasm_binaries_test_instructions)
-
-add_dependencies(disasm_binaries_test_instructions disasm_binaries-instructions)
-add_dependencies(disasm_binaries_test_instructions disasm_binaries-returns)
-add_dependencies(disasm_binaries_test_instructions disasm_binaries-calls)
-add_dependencies(disasm_binaries_test_instructions disasm_binaries-newarrs)
-
-add_dependencies(disasm_test_instructions disasm_binaries_test_instructions)
+add_dependencies(disasm_tests disasm_binaries-instructions)
+add_dependencies(disasm_tests disasm_binaries-returns)
+add_dependencies(disasm_tests disasm_binaries-calls)
+add_dependencies(disasm_tests disasm_binaries-newarrs)
 
 # metadata_tests files
 compile_pre_build(TARGET disasm_binaries-meta
                   FILE_SRC ${DISASM_TESTS_DIR}/meta.pa
                   FILE_DST ${DISASM_BIN_DIR}/meta.bc)
 
-add_custom_target(disasm_binaries_test_metadata)
+add_dependencies(disasm_tests disasm_binaries-meta)
 
-add_dependencies(disasm_binaries_test_metadata disasm_binaries-meta)
+# literals_tests files
+compile_pre_build(TARGET disasm_binaries-literals
+                  FILE_SRC ${DISASM_TESTS_DIR}/literals.pa
+                  FILE_DST ${DISASM_BIN_DIR}/literals.bc)
+compile_pre_build(TARGET disasm_binaries-literals_same
+                  FILE_SRC ${DISASM_TESTS_DIR}/literals_same.pa
+                  FILE_DST ${DISASM_BIN_DIR}/literals_same.bc)
 
-add_custom_target(disasm_tests
-                  DEPENDS disasm_test_records
-                  DEPENDS disasm_test_labels
-                  DEPENDS disasm_test_instructions)
+add_dependencies(disasm_tests disasm_binaries-literals)
+add_dependencies(disasm_tests disasm_binaries-literals_same)
 
 add_dependencies(arkdisassembler isa_gen_${PROJECT_NAME} type_to_pandasm_type_gen_${PROJECT_NAME})
 

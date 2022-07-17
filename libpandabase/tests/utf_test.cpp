@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ namespace panda::utf::test {
 
 static uint16_t U16_lead(uint32_t codepoint)
 {
-    return ((codepoint >> 10U) + 0xd7c0) & 0xffff;
+    return ((codepoint >> 10) + 0xd7c0) & 0xffff;
 }
 
 static uint16_t U16_tail(uint32_t codepoint)

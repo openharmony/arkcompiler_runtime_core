@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_PANDASM_H_
-#define PANDA_ASSEMBLER_PANDASM_H_
+#ifndef PANDA_PANDASM_H
+#define PANDA_PANDASM_H
 
 #include "utils/pandargs.h"
 
@@ -48,4 +48,4 @@ bool BuildFiles(panda::pandasm::Program &program, panda::PandArgParser &pa_parse
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_PANDASM_H_
+#endif  // PANDA_PANDASM_H

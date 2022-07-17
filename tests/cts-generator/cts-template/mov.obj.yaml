@@ -128,6 +128,58 @@ tests:
                   ldai 1
                   return
 
+      - file-name: "op_j"
+        runner-options: [use-pa]
+        isa:
+          instructions:
+            - sig: mov.obj v1:out:ref, v2:in:ref
+              acc: none
+              format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
+        code-template: |
+          .language PandaAssembly
+          %s
+          # header
+          .function i32 main() {
+          #
+              %s
+              %s
+              mov.obj v1, v0
+              jne.obj v1, return_ne_num
+              ldai 0
+              return
+          return_ne_num:
+              ldai 1
+              return
+        header-template: []
+        description: Check mov.obj with different type of arguments (empty object, with fields, with static fields, string, type) in PandaAssembly context.
+        tags: ['tsan']
+        cases:
+          - values:
+              - |
+                .record Obj {
+                }
+              - newobj v0, Obj
+              - lda.obj v0
+          - values:
+              - |
+                .record Obj {
+                    i32 fld2
+                }
+              - newobj v0, Obj
+              - lda.obj v0
+          - values:
+              - ""
+              - lda.str "test string"
+              - sta.obj v0
+          - values:
+              - .record panda.Object <external>
+              - lda.type panda.Object
+              - sta.obj v0
+          - values:
+              - .record panda.NullPointerException <external>
+              - newobj v0, panda.NullPointerException
+              - lda.obj v0
+
       - file-name: "null"
         isa:
           instructions:
@@ -212,6 +264,7 @@ tests:
             - values: [v65535, v65535]
             - values: [v65536, v65536]
               runner-options: [compile-failure]
+
       - file-name: "op_4_8_16_null"
         isa:
             instructions:
@@ -265,18 +318,22 @@ tests:
                 %s
                 mov.obj v1, v0
         check-type: none
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         cases:
             - values:
                 - movi v0, 123
             - values:
                 - movi.64 v0, 123
             - values:
+                - fmovi v0, 123
+            - values:
                 - fmovi.64 v0, 123
             - values:
                 - movi v0, 0
             - values:
                 - movi.64 v0, 0
+            - values:
+                - fmovi v0, 0
             - values:
                 - fmovi.64 v0, 0
 
@@ -335,7 +392,7 @@ tests:
               format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
           verification:
             - v2_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
             #
@@ -390,6 +447,78 @@ tests:
           - values:
               - movi.64 v1, 0
           - values:
+              - fmovi v1, 0
+          - values:
+              - fmovi.64 v1, 0
+
+      - file-name: "type_j"
+        tags: [verifier, pa-verifier]
+        isa:
+          instructions:
+            - sig: mov.obj v1:out:ref, v2:in:ref
+              acc: none
+              format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
+          verification:
+            - v2_type
+        runner-options: [verifier-failure, use-pa, verifier-config]
+        header-template: []
+        bugid: ["5271"]
+        code-template: |
+            .language PandaAssembly
+            #
+            .record A {}
+            .record B <panda.extends=A> {}
+            .record panda.String <external>
+            .record panda.Object <external>
+            .function i32 main() {
+                %s
+                *s
+                mov.obj v0, v1
+                ldai 0
+        check-type: no-check
+        description: Check mov.obj with incorrect source register type in PandaAssembly context. Destination type is not checked.
+        template-cases:
+          - values:
+              - |
+                #
+                    lda.type B
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type B[]
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type panda.String
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type panda.Object
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    movi v0, 10
+                    newarr v0, v0, i32[]
+          - values:
+              - mov.null v0
+          - values:
+              - movi v0, 0
+          - values:
+              - movi.64 v0, 0
+          - values:
+              - fmovi.64 v0, 0
+        cases:
+          - values:
+              - movi v1, 0
+          - values:
+              - movi.64 v1, 0
+          - values:
+              - fmovi v1, 0
+          - values:
               - fmovi.64 v1, 0
 
       - file-name: uninitialized_regs
@@ -400,7 +529,7 @@ tests:
               format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
         description: Check mov.obj with uninitialized registers.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 #include "gtest/gtest.h"
 #include "iostream"
 #include "runtime/class_linker_context.h"
-#include "runtime/include/class_linker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/vm_handle.h"
@@ -76,14 +75,14 @@ void MemStatsGCTest::MemStatsTest(uint64_t tries, size_t object_size)
     thread_->GetVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
 
     size_t alloc_size = simple_string.size() + sizeof(coretypes::String);
-    size_t aligment_size;
-    size_t aligment_diff;
+    size_t aligment_size = 0;
+    size_t aligment_diff = 0;
     if (alloc_size < object_allocator->GetRegularObjectMaxSize()) {
         aligment_size = 1UL << RunSlots<>::ConvertToPowerOfTwoUnsafe(alloc_size);
         aligment_diff = aligment_size - alloc_size;
     } else {
         aligment_size = AlignUp(alloc_size, GetAlignmentInBytes(FREELIST_DEFAULT_ALIGNMENT));
-        aligment_diff = 2U * (aligment_size - alloc_size);
+        aligment_diff = 2 * (aligment_size - alloc_size);
     }
 
     uint64_t allocated_objects = stats->GetTotalObjectsAllocated();

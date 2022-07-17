@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_OBJECT_ACCESSOR_INL_H_
-#define PANDA_RUNTIME_INCLUDE_OBJECT_ACCESSOR_INL_H_
+#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_INL_H_
+#define PANDA_RUNTIME_OBJECT_ACCESSOR_INL_H_
 
 #include <securec.h>
 
@@ -26,7 +25,6 @@
 namespace panda {
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool is_volatile /* = false */, bool need_read_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *ObjectAccessor::GetObject(const void *obj, size_t offset)
 {
@@ -38,17 +36,15 @@ inline ObjectHeader *ObjectAccessor::GetObject(const void *obj, size_t offset)
 }
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool is_volatile /* = false */, bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline void ObjectAccessor::SetObject(void *obj, size_t offset, ObjectHeader *value)
 {
     if (need_write_barrier) {
         auto *barrier_set = GetBarrierSet();
-        auto gc_pre_barrier_type = barrier_set->GetPreType();
 
-        if (!mem::IsEmptyBarrier(gc_pre_barrier_type)) {
-            ObjectHeader *pre_val = GetObject<is_volatile, is_dyn>(obj, offset);
-            barrier_set->PreBarrier(ToVoidPtr(ToUintPtr(obj) + offset), pre_val);
+        if (barrier_set->IsPreBarrierEnabled()) {
+            ObjectHeader *pre_val = GetObject<is_volatile, false, is_dyn>(obj, offset);
+            barrier_set->PreBarrier(pre_val);
         }
 
         if (!is_dyn) {
@@ -70,7 +66,6 @@ inline void ObjectAccessor::SetObject(void *obj, size_t offset, ObjectHeader *va
 }
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool is_volatile /* = false */, bool need_read_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *ObjectAccessor::GetObject([[maybe_unused]] const ManagedThread *thread, const void *obj,
                                                size_t offset)
@@ -83,15 +78,14 @@ inline ObjectHeader *ObjectAccessor::GetObject([[maybe_unused]] const ManagedThr
 }
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool is_volatile /* = false */, bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline void ObjectAccessor::SetObject(const ManagedThread *thread, void *obj, size_t offset, ObjectHeader *value)
 {
     if (need_write_barrier) {
         auto *barrier_set = GetBarrierSet(thread);
-        if (!mem::IsEmptyBarrier(barrier_set->GetPreType())) {
+        if (barrier_set->IsPreBarrierEnabled()) {
             ObjectHeader *pre_val = GetObject<is_volatile, is_dyn>(obj, offset);
-            barrier_set->PreBarrier(ToVoidPtr(ToUintPtr(obj) + offset), pre_val);
+            barrier_set->PreBarrier(pre_val);
         }
 
         if (!is_dyn) {
@@ -133,7 +127,6 @@ inline void ObjectAccessor::SetFieldPrimitive(void *obj, const Field &field, T v
 }
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_read_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *ObjectAccessor::GetFieldObject(const void *obj, const Field &field)
 {
@@ -144,7 +137,6 @@ inline ObjectHeader *ObjectAccessor::GetFieldObject(const void *obj, const Field
 }
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline void ObjectAccessor::SetFieldObject(void *obj, const Field &field, ObjectHeader *value)
 {
@@ -159,9 +151,8 @@ inline void ObjectAccessor::SetFieldObject(void *obj, const Field &field, Object
 }
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_read_barrier /* = true */, bool is_dyn /* = false */>
-inline ObjectHeader *ObjectAccessor::GetFieldObject(ManagedThread *thread, const void *obj, const Field &field)
+inline ObjectHeader *ObjectAccessor::GetFieldObject(const ManagedThread *thread, const void *obj, const Field &field)
 {
     if (UNLIKELY(field.IsVolatile())) {
         return GetObject<true, need_read_barrier, is_dyn>(thread, obj, field.GetOffset());
@@ -170,9 +161,9 @@ inline ObjectHeader *ObjectAccessor::GetFieldObject(ManagedThread *thread, const
 }
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
-inline void ObjectAccessor::SetFieldObject(ManagedThread *thread, void *obj, const Field &field, ObjectHeader *value)
+inline void ObjectAccessor::SetFieldObject(const ManagedThread *thread, void *obj, const Field &field,
+                                           ObjectHeader *value)
 {
     if (UNLIKELY(field.IsVolatile())) {
         SetObject<true, need_write_barrier, is_dyn>(thread, obj, field.GetOffset(), value);
@@ -196,7 +187,6 @@ inline void ObjectAccessor::SetFieldPrimitive(void *obj, size_t offset, T value,
 }
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_read_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *ObjectAccessor::GetFieldObject(const void *obj, int offset, std::memory_order memory_order)
 {
@@ -206,19 +196,30 @@ inline ObjectHeader *ObjectAccessor::GetFieldObject(const void *obj, int offset,
     return Get<ObjectHeader *>(obj, offset, memory_order);
 }
 
+static inline std::memory_order GetComplementMemoryOrder(std::memory_order memory_order)
+{
+    if (memory_order == std::memory_order_acquire) {
+        memory_order = std::memory_order_release;
+    } else if (memory_order == std::memory_order_release) {
+        memory_order = std::memory_order_acquire;
+    }
+    return memory_order;
+}
+
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline void ObjectAccessor::SetFieldObject(void *obj, size_t offset, ObjectHeader *value,
                                            std::memory_order memory_order)
 {
     if (need_write_barrier) {
         auto *barrier_set = GetBarrierSet();
-        auto gc_pre_barrier_type = barrier_set->GetPreType();
 
-        if (!mem::IsEmptyBarrier(gc_pre_barrier_type)) {
-            ObjectHeader *pre_val = GetFieldObject<is_dyn>(obj, offset, memory_order);
-            barrier_set->PreBarrier(ToVoidPtr(ToUintPtr(obj) + offset), pre_val);
+        if (barrier_set->IsPreBarrierEnabled()) {
+            // If SetFieldObject is called with std::memory_order_release
+            // we need to use the complement memory order std::memory_order_acquire
+            // because we read the value.
+            ObjectHeader *pre_val = GetFieldObject<is_dyn>(obj, offset, GetComplementMemoryOrder(memory_order));
+            barrier_set->PreBarrier(pre_val);
         }
 
         if (!is_dyn) {
@@ -255,7 +256,6 @@ inline std::pair<bool, T> ObjectAccessor::CompareAndSetFieldPrimitive(void *obj,
 }
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline std::pair<bool, ObjectHeader *> ObjectAccessor::CompareAndSetFieldObject(void *obj, size_t offset,
                                                                                 ObjectHeader *old_value,
@@ -263,8 +263,6 @@ inline std::pair<bool, ObjectHeader *> ObjectAccessor::CompareAndSetFieldObject(
                                                                                 std::memory_order memory_order,
                                                                                 bool strong)
 {
-    // update field with read barrier
-    ObjectHeader *pre_val = GetObject<false, is_dyn>(obj, offset);
     bool success = false;
     ObjectHeader *result = nullptr;
     auto get_result = [&]() {
@@ -282,9 +280,10 @@ inline std::pair<bool, ObjectHeader *> ObjectAccessor::CompareAndSetFieldObject(
     };
 
     if (need_write_barrier) {
+        // update field with pre barrier
         auto *barrier_set = GetBarrierSet();
-        if (!mem::IsEmptyBarrier(barrier_set->GetPreType())) {
-            barrier_set->PreBarrier(ToVoidPtr(ToUintPtr(obj) + offset), pre_val);
+        if (barrier_set->IsPreBarrierEnabled()) {
+            barrier_set->PreBarrier(GetObject<false, is_dyn>(obj, offset));
         }
 
         get_result();
@@ -309,18 +308,15 @@ inline T ObjectAccessor::GetAndSetFieldPrimitive(void *obj, size_t offset, T val
 }
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *ObjectAccessor::GetAndSetFieldObject(void *obj, size_t offset, ObjectHeader *value,
                                                           std::memory_order memory_order)
 {
-    // update field with read barrier
-    ObjectHeader *pre_val = GetObject<false, is_dyn>(obj, offset);
-
     if (need_write_barrier) {
+        // update field with pre barrier
         auto *barrier_set = GetBarrierSet();
-        if (!mem::IsEmptyBarrier(barrier_set->GetPreType())) {
-            barrier_set->PreBarrier(ToVoidPtr(ToUintPtr(obj) + offset), pre_val);
+        if (barrier_set->IsPreBarrierEnabled()) {
+            barrier_set->PreBarrier(GetObject<false, is_dyn>(obj, offset));
         }
         ObjectHeader *result = is_dyn ? GetAndSetFieldPrimitive<ObjectHeader *>(obj, offset, value, memory_order)
                                       : reinterpret_cast<ObjectHeader *>(GetAndSetFieldPrimitive<object_pointer_type>(
@@ -352,6 +348,7 @@ inline T ObjectAccessor::GetAndAddFieldPrimitive([[maybe_unused]] void *obj, [[m
             uintptr_t raw_addr = reinterpret_cast<uintptr_t>(obj) + offset;
             ASSERT(IsInObjectsAddressSpace(raw_addr));
             auto *atomic_addr = reinterpret_cast<std::atomic<T> *>(raw_addr);
+            // Atomic with parameterized order reason: memory order passed as argument
             T old_value = atomic_addr->load(memory_order);
             T new_value;
             do {
@@ -362,6 +359,7 @@ inline T ObjectAccessor::GetAndAddFieldPrimitive([[maybe_unused]] void *obj, [[m
             uintptr_t raw_addr = reinterpret_cast<uintptr_t>(obj) + offset;
             ASSERT(IsInObjectsAddressSpace(raw_addr));
             auto *atomic_addr = reinterpret_cast<std::atomic<T> *>(raw_addr);
+            // Atomic with parameterized order reason: memory order passed as argument
             return atomic_addr->fetch_add(value, memory_order);
         }
     }
@@ -380,6 +378,7 @@ inline T ObjectAccessor::GetAndBitwiseOrFieldPrimitive([[maybe_unused]] void *ob
         uintptr_t raw_addr = reinterpret_cast<uintptr_t>(obj) + offset;
         ASSERT(IsInObjectsAddressSpace(raw_addr));
         auto *atomic_addr = reinterpret_cast<std::atomic<T> *>(raw_addr);
+        // Atomic with parameterized order reason: memory order passed as argument
         return atomic_addr->fetch_or(value, memory_order);
     }
 }
@@ -397,6 +396,7 @@ inline T ObjectAccessor::GetAndBitwiseAndFieldPrimitive([[maybe_unused]] void *o
         uintptr_t raw_addr = reinterpret_cast<uintptr_t>(obj) + offset;
         ASSERT(IsInObjectsAddressSpace(raw_addr));
         auto *atomic_addr = reinterpret_cast<std::atomic<T> *>(raw_addr);
+        // Atomic with parameterized order reason: memory order passed as argument
         return atomic_addr->fetch_and(value, memory_order);
     }
 }
@@ -414,25 +414,54 @@ inline T ObjectAccessor::GetAndBitwiseXorFieldPrimitive([[maybe_unused]] void *o
         uintptr_t raw_addr = reinterpret_cast<uintptr_t>(obj) + offset;
         ASSERT(IsInObjectsAddressSpace(raw_addr));
         auto *atomic_addr = reinterpret_cast<std::atomic<T> *>(raw_addr);
+        // Atomic with parameterized order reason: memory order passed as argument
         return atomic_addr->fetch_xor(value, memory_order);
     }
 }
 
 /* static */
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_COMMENT_LOCATION)
-template <bool need_write_barrier /* = true */>
-inline void ObjectAccessor::SetDynObject(const ManagedThread *thread, void *obj, size_t offset, ObjectHeader *value)
+inline void ObjectAccessor::SetDynValueWithoutBarrier(void *obj, size_t offset, coretypes::TaggedType value)
 {
-    auto *addr = reinterpret_cast<ObjectHeader *>(ToUintPtr(obj) + offset);
-    ASSERT(IsInObjectsAddressSpace(ToUintPtr(addr)));
-    (void)memcpy_s(reinterpret_cast<void *>(addr), coretypes::TaggedValue::TaggedTypeSize(), &value,
-                   coretypes::TaggedValue::TaggedTypeSize());
-    auto gc_post_barrier_type = GetPostBarrierType(thread);
-    if (need_write_barrier && !mem::IsEmptyBarrier(gc_post_barrier_type)) {
-        GetBarrierSet(thread)->PostBarrier(ToVoidPtr(ToUintPtr(obj)), value);
+    ASSERT(IsInObjectsAddressSpace(ToUintPtr(obj)));
+    uintptr_t addr = ToUintPtr(obj) + offset;
+    // Atomic with relaxed order reason: concurrent access from GC
+    reinterpret_cast<std::atomic<coretypes::TaggedType> *>(addr)->store(value, std::memory_order_relaxed);
+}
+
+/* static */
+inline void ObjectAccessor::SetDynValue(const ManagedThread *thread, void *obj, size_t offset,
+                                        coretypes::TaggedType value)
+{
+    if (UNLIKELY(GetBarrierSet(thread)->IsPreBarrierEnabled())) {
+        coretypes::TaggedValue pre_val(GetDynValue<coretypes::TaggedType>(obj, offset));
+        if (pre_val.IsHeapObject()) {
+            GetBarrierSet(thread)->PreBarrier(pre_val.GetRawHeapObject());
+        }
+    }
+    SetDynValueWithoutBarrier(obj, offset, value);
+    coretypes::TaggedValue tv(value);
+    if (tv.IsHeapObject() && tv.GetRawHeapObject() != nullptr) {
+        auto gc_post_barrier_type = GetPostBarrierType(thread);
+        if (!mem::IsEmptyBarrier(gc_post_barrier_type)) {
+            GetBarrierSet(thread)->PostBarrier(obj, tv.GetRawHeapObject());
+        }
     }
 }
 
+/* static */
+template <typename T>
+inline void ObjectAccessor::SetDynPrimitive(const ManagedThread *thread, void *obj, size_t offset, T value)
+{
+    // Need pre-barrier becuase the previous value may be a reference.
+    if (UNLIKELY(GetBarrierSet(thread)->IsPreBarrierEnabled())) {
+        coretypes::TaggedValue pre_val(GetDynValue<coretypes::TaggedType>(obj, offset));
+        if (pre_val.IsHeapObject()) {
+            GetBarrierSet(thread)->PreBarrier(pre_val.GetRawHeapObject());
+        }
+    }
+    SetDynValueWithoutBarrier(obj, offset, value);
+    // Don't need post barrier because the value is a primitive.
+}
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_OBJECT_ACCESSOR_INL_H_
+#endif  // PANDA_RUNTIME_OBJECT_ACCESSOR_INL_H_

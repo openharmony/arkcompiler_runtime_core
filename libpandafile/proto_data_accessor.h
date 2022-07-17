@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_PROTO_DATA_ACCESSOR_H_
-#define PANDA_LIBPANDAFILE_PROTO_DATA_ACCESSOR_H_
+#ifndef LIBPANDAFILE_PROTO_DATA_ACCESSOR_H_
+#define LIBPANDAFILE_PROTO_DATA_ACCESSOR_H_
 
 #include "file.h"
 #include "file_items.h"
@@ -54,6 +54,15 @@ public:
 
     File::EntityId GetReferenceType(size_t i);
 
+    size_t GetRefNum()
+    {
+        if (ref_types_sp_.data() == nullptr) {
+            SkipShorty();
+        }
+
+        return ref_types_num_;
+    }
+
     size_t GetSize()
     {
         if (size_ == 0) {
@@ -62,6 +71,8 @@ public:
 
         return size_;
     }
+
+    bool IsEqual(ProtoDataAccessor *other);
 
 private:
     void SkipShorty();
@@ -73,10 +84,10 @@ private:
 
     size_t elem_num_ {0};
     Span<const uint8_t> ref_types_sp_ {nullptr, nullptr};
-
+    size_t ref_types_num_ {0};
     size_t size_ {0};
 };
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_PROTO_DATA_ACCESSOR_H_
+#endif  // LIBPANDAFILE_PROTO_DATA_ACCESSOR_H_

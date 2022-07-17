@@ -24,7 +24,7 @@
 
 # assert that operation lenarr works fine
 
-.function u1 main(){
+.function i32 main(){
     movi v0, 5
     newarr v1, v0, u1[]
     lenarr v1

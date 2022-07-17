@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-#define LOG_INST()                                                                                         \
-    LOG(DEBUG, VERIFIER) << "JOBFILL: " << std::hex << std::setw(sizeof(uint32_t) * 2) << std::setfill('0') \
+#include "verification/jobs/thread_pool.h"
+
+namespace panda::verifier {
+
+#define LOG_INST()                                                                                              \
+    LOG(DEBUG, VERIFIER) << "JOBFILL: " << std::hex << std::setw(sizeof(inst.GetOffset())) << std::setfill('0') \
                          << inst.GetOffset() << std::dec << ": " << inst
 
-
 // NOLINTNEXTLINE(readability-function-size)
-bool ResolveIdentifiersForJob(CacheOfRuntimeThings& cache, Job& job, const uint8_t* start, const uint8_t* end) {
+bool Job::ResolveIdentifiers(LibCache &cache) {
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wvoid-ptr-dereference"
@@ -29,7 +32,7 @@ bool ResolveIdentifiersForJob(CacheOfRuntimeThings& cache, Job& job, const uint8
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
-    LOG(DEBUG, VERIFIER) << "JOBFILL: Filling Job cache for method '" << job.JobCachedMethod().name << "'";
+    LOG(DEBUG, VERIFIER) << "JOBFILL: Filling Job cache for method '" << cached_method_.GetName() << "'";
 
     std::array<const void*, <%= Panda::dispatch_table.handler_names.size %>> dispatch_table{
 % Panda::dispatch_table.handler_names.each do |name|
@@ -37,121 +40,138 @@ bool ResolveIdentifiersForJob(CacheOfRuntimeThings& cache, Job& job, const uint8
 % end
     };
 
+    // ASSERT method_.bytecode == cached_method_.bytecode
+    const uint8_t *start = cached_method_.bytecode;
+    size_t code_size = cached_method_.bytecode_size;
+    ASSERT(start == method_.GetInstructions());
+    ASSERT(code_size == method_.GetCodeSize());
+    const uint8_t *end = &start[code_size - 1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
     BytecodeInstructionSafe inst{start, start, end};
     uint8_t secondary_opcode;
 
-    ASSERT(inst.IsPrimaryOpcodeValid());
+    if (!inst.IsPrimaryOpcodeValid()) {
+        LOG(ERROR, VERIFIER) << "Incorrect opcode";
+        return false;
+    }
     goto* dispatch_table[inst.GetPrimaryOpcode()];
 
 % Panda::instructions.each do |i|
 %   mnemonic = i.mnemonic.split('.').map { |p| p == '64' ? 'Wide' : p.capitalize }.join
 HANDLE_<%= i.opcode.upcase %>:
-%   if i.properties.any? { |prop| ['method_id', 'field_id', 'type_id', 'literalarray_id'].include?(prop) }
     {
+%   if i.properties.any? { |prop| ['method_id', 'field_id', 'type_id', 'literalarray_id'].include?(prop) }
         LOG_INST();
         auto id = inst.GetId();
-        const CacheOfRuntimeThings::CachedMethod&
-            self_method = job.JobCachedMethod();
 %   end
-%   if i.properties.any? { |prop| ['string_id'].include?(prop) }
-    {
-        const CacheOfRuntimeThings::CachedMethod&
-            self_method = job.JobCachedMethod();
-%   end
-%   if i.properties.any? { |prop| ['method_id', 'field_id', 'type_id', 'string_id', 'literalarray_id'].include?(prop) }
+%   if (['method_id', 'field_id', 'type_id', 'string_id', 'literalarray_id'] & i.properties).size > 1
+%     cache_api = "cache_api"
         auto cache_api = cache.FastAPI();
+%   else
+%     cache_api = "cache.FastAPI()"
 %   end
 %   if i.properties.include?('literalarray_id')
-    {
-        auto src_lang = CacheOfRuntimeThings::GetRef(self_method.klass).source_lang;
-        const auto& pf = *self_method.file;
+        auto src_lang = cached_method_.GetSourceLang();
+        const auto& pf = *cached_method_.file;
         panda_file::LiteralTag tag;
         panda_file::LiteralDataAccessor::LiteralValue value;
-        if (!Runtime::GetLiteralTagAndValue(pf, id.AsFileId(), &tag, &value)) {
+        if (!Runtime::GetLiteralTagAndValue(pf, id.AsFileId().GetOffset(), &tag, &value)) {
             LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot get literal tag with id=" << std::hex << id << " for offset 0x" << std::hex << inst.GetOffset();
         } else {
-            const CacheOfRuntimeThings::CachedClass* cached_class = nullptr;
+            OptionalConstRef<LibCache::CachedClass> cached_class;
+            auto resolve_and_link = [&](const char *descr) {
+                cached_class = <%= cache_api %>.ResolveAndLink(src_lang, utf::CStringAsMutf8(descr));
+            };
+            // descriptors for primitive types get from libpandafile/templates/type
             switch (tag) {
+                case panda_file::LiteralTag::ARRAY_U1:
+                    resolve_and_link("[Z");
+                    break;
+                case panda_file::LiteralTag::ARRAY_U8:
+                    resolve_and_link("[H");
+                    break;
                 case panda_file::LiteralTag::ARRAY_I8:
-                    cached_class = &cache_api.ResolveByDescriptor(src_lang, utf::CStringAsMutf8("[B"));
+                    resolve_and_link("[B");
                     break;
                 case panda_file::LiteralTag::ARRAY_I16:
-                    cached_class = &cache_api.ResolveByDescriptor(src_lang, utf::CStringAsMutf8("[S"));
+                    resolve_and_link("[S");
+                    break;
+                case panda_file::LiteralTag::ARRAY_U16:
+                    resolve_and_link("[C");
+                    break;
+                case panda_file::LiteralTag::ARRAY_U32:
+                    resolve_and_link("[U");
                     break;
                 case panda_file::LiteralTag::ARRAY_I32:
-                    cached_class = &cache_api.ResolveByDescriptor(src_lang, utf::CStringAsMutf8("[I"));
+                    resolve_and_link("[I");
+                    break;
+                case panda_file::LiteralTag::ARRAY_U64:
+                    resolve_and_link("[Q");
                     break;
                 case panda_file::LiteralTag::ARRAY_I64:
-                    cached_class = &cache_api.ResolveByDescriptor(src_lang, utf::CStringAsMutf8("[J"));
+                    resolve_and_link("[J");
                     break;
                 case panda_file::LiteralTag::ARRAY_F32:
-                    cached_class = &cache_api.ResolveByDescriptor(src_lang, utf::CStringAsMutf8("[F"));
+                    resolve_and_link("[F");
                     break;
                 case panda_file::LiteralTag::ARRAY_F64:
-                    cached_class = &cache_api.ResolveByDescriptor(src_lang, utf::CStringAsMutf8("[D"));
+                    resolve_and_link("[D");
                     break;
                 case panda_file::LiteralTag::ARRAY_STRING:
-                    cached_class = &cache_api.GetStringArrayClass(self_method);
+                    cached_class = <%= cache_api %>.GetStringArrayClass(src_lang);
                     break;
                 default:
                     break;
             }
-            if (cached_class != nullptr && Valid(*cached_class)) {
-                job.AddClass(inst.GetOffset(), *cached_class);
+            if (cached_class.HasRef()) {
+                AddClass(inst.GetOffset(), cached_class.Get());
             } else {
                 LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot find class for literal with id=" << std::hex << id << " for offset 0x" << std::hex << inst.GetOffset();
             }
         }
-    }
 %   end
 %   if i.properties.include?('method_id')
-    {
-        const auto& cached_method = cache_api.GetFromCache<CacheOfRuntimeThings::CachedMethod>(self_method, id.AsIndex());
-        if (Valid(cached_method)) {
-            job.AddMethod(inst.GetOffset(), cached_method);
-            job.AddClass(inst.GetOffset(), cached_method.klass.get());
+        auto cached_method = <%= cache_api %>.GetFromCache<LibCache::CachedMethod>(cached_method_, id.AsIndex());
+        if (cached_method.HasRef()) {
+            AddMethod(inst.GetOffset(), cached_method.Get());
+            AddClass(inst.GetOffset(), cached_method->klass);
         } else {
-            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve method";
+            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve method with id " << id << " in method "
+                                 << cached_method_.GetName();
         }
-    }
 %   end
 %   if i.properties.include?('field_id')
-    {
-        const auto& cached_field = cache_api.GetFromCache<CacheOfRuntimeThings::CachedField>(self_method, id.AsIndex());
-        if (Valid(cached_field)) {
-            job.AddField(inst.GetOffset(), cached_field);
+        auto cached_field = <%= cache_api %>.GetFromCache<LibCache::CachedField>(cached_method_, id.AsIndex());
+        if (cached_field.HasRef()) {
+            AddField(inst.GetOffset(), cached_field.Get());
         } else {
-            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve field";
+            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve field with id " << id << " in method "
+                                 << cached_method_.GetName();
         }
-    }
 %   end
 %   if i.properties.include?('type_id')
-    {
-        const auto& cached_class = cache_api.GetFromCache<CacheOfRuntimeThings::CachedClass>(self_method, id.AsIndex());
-        if (Valid(cached_class)) {
-            job.AddClass(inst.GetOffset(), cached_class);
+        auto cached_class = <%= cache_api %>.GetFromCache<LibCache::CachedClass>(cached_method_, id.AsIndex());
+        if (cached_class.HasRef()) {
+            AddClass(inst.GetOffset(), cached_class.Get());
         } else {
-            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve field";
+            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve class with id " << id << " in method "
+                                 << cached_method_.GetName();
         }
-    }
 %   end
 %   if i.properties.include?('string_id')
-        const auto& cached_class = cache_api.GetStringClass(self_method);
-        if (Valid(cached_class)) {
-            job.AddClass(inst.GetOffset(), cached_class);
+        // todo: check presence of string in index tables
+        auto cached_string_class = <%= cache_api %>.GetStringClass(cached_method_);
+        if (cached_string_class.HasRef()) {
+            AddClass(inst.GetOffset(), cached_string_class.Get());
         } else {
-            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve string class";
+            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve string class in method " << cached_method_.GetName();
         }
 %   end
-%   if i.properties.any? { |prop| ['method_id', 'field_id', 'type_id', 'string_id', 'literalarray_id'].include?(prop) }
-    }
-%   end
 
-    if (inst.IsLast()) {
-        return true;
-    }
+        if (inst.IsLast()) {
+            return true;
+        }
 
-    {
         auto next_inst = inst.GetNext();
         if (!inst.IsPrimaryOpcodeValid()) {
             LOG(DEBUG, VERIFIER) << "Opcode value is out of range. "
@@ -177,7 +197,7 @@ HANDLE_INVALID:
 % Panda::prefixes.each do |p|
 HANDLE_<%= p.handler_name %>:
     secondary_opcode = inst.GetSecondaryOpcode();
-    LOG(DEBUG, VERIFIER) << "Prefix subdispatch: " << "<%= p.name %>, " << secondary_opcode;
+    LOG(DEBUG, VERIFIER) << "Prefix subdispatch: " << "<%= p.name %>, " << static_cast<int32_t>(secondary_opcode);
 
     if (secondary_opcode > <%= Panda::dispatch_table.secondary_opcode_bound(p) %> ) {
         LOG(ERROR, VERIFIER) << "Incorrect opcode";
@@ -192,3 +212,5 @@ HANDLE_<%= p.handler_name %>:
 #pragma GCC diagnostic pop
 #endif
 }
+
+}  // namespace panda::verifier

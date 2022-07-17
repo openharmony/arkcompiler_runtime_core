@@ -216,7 +216,7 @@ tests:
                 label:
                 }
             case-check-type: empty
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             tags: ['verifier']
 
       - file-name: "outside_try_catch_p"
@@ -247,3 +247,32 @@ tests:
           outside:
         check-type: exit-positive
 
+      - file-name: "outside_try_catch_j"
+        isa:
+          instructions:
+            - sig: jmp imm:i32
+              acc: none
+              format: [op_imm_8, op_imm_16, op_imm_32]
+        description: Jump outside try/catch block.
+        bugid: ['3425']
+        header-template: []
+        runner-options: ['use-pa']
+        code-template: |
+          .language PandaAssembly
+          .record panda.NullPointerException <external>
+          .function i32 main() {
+          begin:
+              jmp outside
+              mov.null v0
+              throw v0
+          end:
+              ldai 1
+              return
+          catch_npe:
+              ldai 2
+              return
+          .catch panda.NullPointerException, begin, end, catch_npe
+              ldai 3
+              return
+          outside:
+        check-type: exit-positive

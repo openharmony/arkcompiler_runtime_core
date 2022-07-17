@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,9 @@ void DfxController::SetDefaultOption()
             case DfxOptionHandler::MOBILE_LOG:
                 dfx_controller->option_map_[DfxOptionHandler::MOBILE_LOG] = 1;
                 break;
+            case DfxOptionHandler::HUNG_UPDATE:
+                dfx_controller->option_map_[DfxOptionHandler::HUNG_UPDATE] = 0;
+                break;
 #endif
             case DfxOptionHandler::DFXLOG:
                 dfx_controller->option_map_[DfxOptionHandler::DFXLOG] = 0;
@@ -78,7 +81,6 @@ void DfxController::ResetOptionValueFromString(const std::string &s)
             DfxController::SetOptionValue(dfx_option, value);
 #ifdef PANDA_TARGET_UNIX
             if (dfx_option == DfxOptionHandler::MOBILE_LOG) {
-                // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
                 if (value == 0) {
                     Logger::SetMobileLogOpenFlag(false);
                 } else {
@@ -115,7 +117,6 @@ void DfxController::Initialize(std::map<DfxOptionHandler::DfxOption, uint8_t> op
             dfx_controller->SetDefaultOption();
             return;
         }
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         dfx_controller = new DfxController(std::move(option_map));
     }
 }
@@ -162,6 +163,9 @@ void DfxController::Initialize()
                 case DfxOptionHandler::MOBILE_LOG:
                     option_map[DfxOptionHandler::MOBILE_LOG] = 1;
                     break;
+                case DfxOptionHandler::HUNG_UPDATE:
+                    option_map[DfxOptionHandler::HUNG_UPDATE] = 0;
+                    break;
 #endif
                 case DfxOptionHandler::DFXLOG:
                     option_map[DfxOptionHandler::DFXLOG] = 0;
@@ -170,7 +174,6 @@ void DfxController::Initialize()
                     break;
             }
         }
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         dfx_controller = new DfxController(std::move(option_map));
     }
 }

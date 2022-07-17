@@ -47,7 +47,8 @@ public:
 % end
 
 public:
-    // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+    // TODO (a.popov) synchronize object in multithreaded mode
+    // NOLINTNEXTLINE(cert-err58-cpp,fuchsia-statically-constructed-objects)
     static inline std::ofstream events_file;
 
 private:

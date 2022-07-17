@@ -13,22 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_DISASSEMBLER_ACCUMULATORS_H_
-#define PANDA_DISASSEMBLER_ACCUMULATORS_H_
+#ifndef DISASM_ACCUMULATORS_H_INCLUDED
+#define DISASM_ACCUMULATORS_H_INCLUDED
 
 #include <map>
 #include <string>
 #include <vector>
 
+#include "libpandafile/debug_info_extractor.h"
+
 namespace panda::disasm {
 using LabelTable = std::map<size_t, std::string>;
 using IdList = std::vector<panda::panda_file::File::EntityId>;
-using AnnotationList = std::vector<std::pair<std::string, std::string>>;
 
 struct MethodInfo {
     std::string method_info;
 
     std::vector<std::string> instructions_info;
+
+    panda_file::LineNumberTable line_number_table;
+
+    panda_file::LocalVariableTable local_variable_table;
 };
 
 struct RecordInfo {
@@ -42,15 +47,17 @@ struct ProgInfo {
     std::map<std::string, MethodInfo> methods_info;
 };
 
-struct RecordJavaAnnotations {
+using AnnotationList = std::vector<std::pair<std::string, std::string>>;
+
+struct RecordAnnotations {
     AnnotationList ann_list;
     std::map<std::string, AnnotationList> field_annotations;
 };
 
-struct ProgJavaAnnotations {
+struct ProgAnnotations {
     std::map<std::string, AnnotationList> method_annotations;
-    std::map<std::string, RecordJavaAnnotations> record_annotations;
+    std::map<std::string, RecordAnnotations> record_annotations;
 };
 }  // namespace panda::disasm
 
-#endif  // PANDA_DISASSEMBLER_ACCUMULATORS_H_
+#endif

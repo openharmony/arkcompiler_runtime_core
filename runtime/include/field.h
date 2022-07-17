@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,18 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_FIELD_H_
-#define PANDA_RUNTIME_INCLUDE_FIELD_H_
+#ifndef PANDA_RUNTIME_FIELD_H_
+#define PANDA_RUNTIME_FIELD_H_
 
 #include <cstdint>
 #include <atomic>
 
-#include "intrinsics.h"
+#include "intrinsics_enum.h"
 #include "libpandafile/file.h"
 #include "libpandafile/file_items.h"
 #include "libpandafile/modifiers.h"
 #include "runtime/include/compiler_interface.h"
+#include "runtime/include/class_helper.h"
+#include "runtime/include/value-inl.h"
+#include "libpandabase/macros.h"
+
 namespace panda {
 
 class Class;
@@ -34,31 +37,28 @@ class Field {
 public:
     using UniqId = uint64_t;
 
-    Field(Class *klass, const panda_file::File *pf, panda_file::File::EntityId file_id, uint32_t access_flags,
-          panda_file::Type type)
-        : class_(klass), panda_file_(pf), file_id_(file_id), access_flags_(access_flags), type_(type)
+    Field(Class *klass, panda_file::File::EntityId file_id, uint32_t access_flags, panda_file::Type type)
+        : class_word_(static_cast<ClassHelper::classWordSize>(ToObjPtrType(klass))), file_id_(file_id)
     {
+        access_flags_ = access_flags | (static_cast<uint32_t>(type.GetEncoding()) << ACC_TYPE_SHIFT);
     }
 
     Class *GetClass() const
     {
-        return class_;
+        return reinterpret_cast<Class *>(class_word_);
     }
 
     void SetClass(Class *cls)
     {
-        class_ = cls;
+        class_word_ = static_cast<ClassHelper::classWordSize>(ToObjPtrType(cls));
     }
 
     static constexpr uint32_t GetClassOffset()
     {
-        return MEMBER_OFFSET(Field, class_);
+        return MEMBER_OFFSET(Field, class_word_);
     }
 
-    const panda_file::File *GetPandaFile() const
-    {
-        return panda_file_;
-    }
+    const panda_file::File *GetPandaFile() const;
 
     panda_file::File::EntityId GetFileId() const
     {
@@ -89,7 +89,12 @@ public:
 
     panda_file::Type GetType() const
     {
-        return type_;
+        return panda_file::Type(GetTypeId());
+    }
+
+    panda_file::Type::TypeId GetTypeId() const
+    {
+        return static_cast<panda_file::Type::TypeId>((access_flags_ & ACC_TYPE) >> ACC_TYPE_SHIFT);
     }
 
     panda_file::File::StringData GetName() const;
@@ -135,7 +140,7 @@ public:
 
     UniqId GetUniqId() const
     {
-        return CalcUniqId(panda_file_, file_id_);
+        return CalcUniqId(GetPandaFile(), file_id_);
     }
 
     ~Field() = default;
@@ -144,14 +149,12 @@ public:
     NO_MOVE_SEMANTIC(Field);
 
 private:
-    Class *class_;
-    const panda_file::File *panda_file_;
+    ClassHelper::classWordSize class_word_;
     panda_file::File::EntityId file_id_;
     uint32_t access_flags_;
-    panda_file::Type type_;
     uint32_t offset_ {0};
 };
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_FIELD_H_
+#endif  // PANDA_RUNTIME_FIELD_H_

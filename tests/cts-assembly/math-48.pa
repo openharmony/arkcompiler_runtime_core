@@ -20,15 +20,14 @@
 
 # check ArithmeticException in case of mod by zero
 
-.function u1 main() {
+.function i32 main() {
     movi v0, 1
     movi v1, 0
 try_begin:
     mod v0, v1
     ldai 2
-    return
 try_end:
-
+    return
 catch_block1_begin:
     sta.obj v0
     call.virt panda.ArithmeticException.getMessage, v0

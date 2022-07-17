@@ -14,7 +14,7 @@
 .record IO <external>
 .function void IO.printI64(i64 a0) <external>
 
-.function u1 main(){
+.function i32 main(){
     movi.64 v0, 24
     call.short IO.printI64, v0, v0
     ldai 0

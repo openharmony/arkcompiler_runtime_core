@@ -14,19 +14,29 @@
 import("//arkcompiler/runtime_core/ark_config.gni")
 import("//build/ohos.gni")
 
+foreach(plugin, enabled_plugins) {
+  print("plugin $plugin is enabled")
+}
+
 group("ark_packages") {
+  deps = []
   if (host_os != "mac") {
-    deps = [
+    deps += [
       "$ark_root/libpandabase:libarkbase",
       "$ark_root/libpandafile:libarkfile",
       "$ark_root/libziparchive:libarkziparchive",
     ]
   }
+
+  foreach(plugin, enabled_plugins) {
+    deps += [ "$ark_root/plugins/$plugin:ark_packages" ]
+  }
 }
 
 group("ark_host_linux_tools_packages") {
+  deps = []
   if (host_os != "mac") {
-    deps = [
+    deps += [
       "$ark_root/assembler:ark_asm(${host_toolchain})",
       "$ark_root/disassembler:ark_disasm(${host_toolchain})",
       "$ark_root/libpandabase:libarkbase(${host_toolchain})",
@@ -34,21 +44,30 @@ group("ark_host_linux_tools_packages") {
       "$ark_root/libziparchive:libarkziparchive(${host_toolchain})",
     ]
   }
+  foreach(plugin, enabled_plugins) {
+    deps += [ "$ark_root/plugins/$plugin:ark_host_linux_tools_packages" ]
+  }
 }
 
 group("ark_host_windows_tools_packages") {
+  deps = []
   if (host_os != "mac" && !ark_standalone_build) {
-    deps = [
+    deps += [
       "$ark_root/assembler:ark_asm(//build/toolchain/mingw:mingw_x86_64)",
       "$ark_root/disassembler:ark_disasm(//build/toolchain/mingw:mingw_x86_64)",
     ]
   }
+
+  foreach(plugin, enabled_plugins) {
+    deps += [ "$ark_root/plugins/$plugin:ark_host_windows_tools_packages" ]
+  }
 }
 
 group("ark_host_mac_tools_packages") {
+  deps = []
   if (host_os == "mac") {
     if (host_cpu == "arm64") {
-      deps = [
+      deps += [
         "$ark_root/assembler:ark_asm(//build/toolchain/mac:clang_arm64)",
         "$ark_root/disassembler:ark_disasm(//build/toolchain/mac:clang_arm64)",
         "$ark_root/libpandabase:libarkbase(//build/toolchain/mac:clang_arm64)",
@@ -56,7 +75,7 @@ group("ark_host_mac_tools_packages") {
         "$ark_root/libziparchive:libarkziparchive(//build/toolchain/mac:clang_arm64)",
       ]
     } else {
-      deps = [
+      deps += [
         "$ark_root/assembler:ark_asm(//build/toolchain/mac:clang_x64)",
         "$ark_root/disassembler:ark_disasm(//build/toolchain/mac:clang_x64)",
         "$ark_root/libpandabase:libarkbase(//build/toolchain/mac:clang_x64)",
@@ -64,6 +83,10 @@ group("ark_host_mac_tools_packages") {
         "$ark_root/libziparchive:libarkziparchive(//build/toolchain/mac:clang_x64)",
       ]
     }
+  }
+
+  foreach(plugin, enabled_plugins) {
+    deps += [ "$ark_root/plugins/$plugin:ark_host_mac_tools_packages" ]
   }
 }
 
@@ -74,17 +97,21 @@ config("ark_config") {
   }
 
   include_dirs = [ "$ark_root" ]
-  defines = [ "PANDA_ENABLE_LTO" ]
+  defines = [ "PANDA_TARGET_MOBILE_WITH_MANAGED_LIBS=1" ]
 
   if (is_linux) {
     defines += [
       "PANDA_TARGET_UNIX",
       "PANDA_TARGET_LINUX",
+      "PANDA_WITH_BYTECODE_OPTIMIZER",
+      "PANDA_WITH_COMPILER",
       "PANDA_USE_FUTEX",
     ]
   } else if (is_mingw) {
     defines += [
       "PANDA_TARGET_WINDOWS",
+      "PANDA_WITH_BYTECODE_OPTIMIZER",
+      "PANDA_WITH_COMPILER",
       "_CRTBLD",
       "__LIBMSVCRT__",
     ]
@@ -92,15 +119,21 @@ config("ark_config") {
     defines += [
       "PANDA_TARGET_UNIX",
       "PANDA_TARGET_MACOS",
+      "PANDA_WITH_BYTECODE_OPTIMIZER",
+      "PANDA_WITH_COMPILER",
+    ]
+  } else if (is_mob) {
+    defines += [
+      "PANDA_TARGET_UNIX",
+      "PANDA_USE_FUTEX",
+      "PANDA_TARGET_MOBILE",
+      "PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS",
     ]
   } else {
     defines += [
       "PANDA_TARGET_UNIX",
       "PANDA_USE_FUTEX",
     ]
-    if (!is_standard_system && (current_cpu != "arm" || is_wearable_product)) {
-      defines += [ "PANDA_TARGET_MOBILE" ]
-    }
   }
 
   if (!is_debug) {
@@ -113,7 +146,6 @@ config("ark_config") {
     "-Wall",
     "-Wextra",
     "-Werror",
-    "-Wshadow",
     "-fno-rtti",
     "-fno-exceptions",
     "-Wno-invalid-offsetof",
@@ -138,11 +170,32 @@ config("ark_config") {
     ]
   }
 
+  if (enable_relayout_profile) {
+    defines += [ "PANDA_ENABLE_RELAYOUT_PROFILE" ]
+  }
+
+  configs = []
+  foreach(plugin, enabled_plugins) {
+    configs += [ "$ark_root/plugins/$plugin:ark_config" ]
+  }
+
   if (current_cpu == "arm") {
-    defines += [
-      "PANDA_TARGET_ARM32_ABI_SOFT=1",
-      "PANDA_TARGET_ARM32",
+    cflags_cc += [
+      "-march=armv7-a",
+      "-mfloat-abi=${arm_float_abi}",
+      "-marm",
+      "-mfpu=vfp",
     ]
+
+    if (arm_float_abi == "soft") {
+      defines += [ "PANDA_TARGET_ARM32_ABI_SOFT=1" ]
+    } else if (arm_float_abi == "softfp") {
+      defines += [ "PANDA_TARGET_ARM32_ABI_SOFTFP=1" ]
+    } else if (arm_float_abi == "hard") {
+      defines += [ "PANDA_TARGET_ARM32_ABI_HARD=1" ]
+    }
+
+    defines += [ "PANDA_TARGET_ARM32" ]
   } else if (current_cpu == "arm64") {
     defines += [
       "PANDA_TARGET_ARM64",
@@ -160,4 +213,69 @@ config("ark_config") {
       "PANDA_USE_32_BIT_POINTER",
     ]
   }
+}
+
+plugins_yamls = []
+runtime_options_yamls = []
+foreach(plugin, enabled_plugins) {
+  plugin_dir = "$ark_root/plugins/$plugin"
+  source_files = read_file("$plugin_dir/subproject_sources.gn", "scope")
+
+  if (defined(source_files.option_yaml_path)) {
+    plugins_yamls += [ "$plugin_dir/${source_files.option_yaml_path}" ]
+  }
+
+  if (defined(source_files.runtime_option_yaml_path)) {
+    runtime_options_yamls +=
+        [ "$plugin_dir/${source_files.runtime_option_yaml_path}" ]
+  }
+
+  source_files = {
+  }
+}
+
+entrypoints_yamls = []
+foreach(plugin, enabled_plugins) {
+  plugin_dir = "$ark_root/plugins/$plugin"
+  source_files = read_file("$plugin_dir/subproject_sources.gn", "scope")
+  if (defined(source_files.entrypoints_yaml_path)) {
+    entrypoints_yamls += [ "$plugin_dir/${source_files.entrypoints_yaml_path}" ]
+  }
+  source_files = {
+  }
+}
+
+inst_templates_yamls = []
+foreach(plugin, enabled_plugins) {
+  plugin_dir = "$ark_root/plugins/$plugin"
+  source_files = read_file("$plugin_dir/subproject_sources.gn", "scope")
+  if (defined(source_files.inst_templates_yaml_path)) {
+    inst_templates_yamls +=
+        [ "$plugin_dir/${source_files.inst_templates_yaml_path}" ]
+  }
+  source_files = {
+  }
+}
+
+concat_yamls("concat_plugins_yamls") {
+  output_file = "$target_gen_dir/plugin_options.yaml"
+  default_file = "$ark_root/templates/plugin_options.yaml"
+  add_yamls = plugins_yamls
+}
+
+concat_yamls("concat_entrypoints_yamls") {
+  output_file = "$target_gen_dir/runtime/entrypoints.yaml"
+  default_file = "$ark_root/runtime/entrypoints/entrypoints.yaml"
+  add_yamls = entrypoints_yamls
+}
+
+concat_yamls("concat_inst_templates_yamls") {
+  output_file = "$target_gen_dir/compiler/generated/inst_templates.yaml"
+  default_file = "$ark_root/compiler/optimizer/ir_builder/inst_templates.yaml"
+  add_yamls = inst_templates_yamls
+}
+
+merge_yamls("merge_runtime_options_yamls") {
+  output_file = "$target_gen_dir/runtime_options.yaml"
+  add_yamls = [ "$ark_root/runtime/options.yaml" ] + runtime_options_yamls
 }

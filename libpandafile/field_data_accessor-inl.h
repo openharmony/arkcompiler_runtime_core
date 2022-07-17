@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H_
-#define PANDA_LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H_
+#ifndef LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H_
+#define LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H_
 
-#include "field_data_accessor-inl.h"
+#include "field_data_accessor.h"
 #include "helpers.h"
 
 #include "utils/bit_utils.h"
@@ -24,6 +24,21 @@
 #include <type_traits>
 
 namespace panda::panda_file {
+
+// static
+inline File::EntityId FieldDataAccessor::GetTypeId(const File &panda_file, File::EntityId field_id)
+{
+    auto sp = panda_file.GetSpanFromId(field_id).SubSpan(IDX_SIZE);  // skip class_idx
+    auto type_idx = helpers::Read<panda_file::IDX_SIZE>(&sp);
+    return panda_file.ResolveClassIndex(field_id, type_idx);
+}
+
+// static
+inline File::EntityId FieldDataAccessor::GetNameId(const File &panda_file, File::EntityId field_id)
+{
+    auto sp = panda_file.GetSpanFromId(field_id).SubSpan(IDX_SIZE * 2);  // skip class_idx, type_idx
+    return File::EntityId(helpers::Read<panda_file::ID_SIZE>(&sp));
+}
 
 template <class T>
 inline std::optional<T> FieldDataAccessor::GetValue()
@@ -76,6 +91,7 @@ inline std::optional<File::EntityId> FieldDataAccessor::GetValue()
     }
 
     auto v = GetValueInternal();
+
     if (!v.has_value()) {
         return {};
     }
@@ -98,6 +114,16 @@ inline void FieldDataAccessor::SkipRuntimeAnnotations()
 inline void FieldDataAccessor::SkipAnnotations()
 {
     EnumerateAnnotations([](File::EntityId /* unused */) {});
+}
+
+inline void FieldDataAccessor::SkipRuntimeTypeAnnotations()
+{
+    EnumerateRuntimeTypeAnnotations([](File::EntityId /* unused */) {});
+}
+
+inline void FieldDataAccessor::SkipTypeAnnotations()
+{
+    EnumerateTypeAnnotations([](File::EntityId /* unused */) {});
 }
 
 template <class Callback>
@@ -126,10 +152,71 @@ inline void FieldDataAccessor::EnumerateAnnotations(const Callback &cb)
         SkipRuntimeAnnotations();
     }
 
+    helpers::EnumerateTaggedValues<File::EntityId, FieldTag, Callback>(annotations_sp_, FieldTag::ANNOTATION, cb,
+                                                                       &runtime_type_annotations_sp_);
+}
+
+template <class Callback>
+inline void FieldDataAccessor::EnumerateRuntimeTypeAnnotations(const Callback &cb)
+{
+    if (is_external_) {
+        return;
+    }
+
+    if (runtime_type_annotations_sp_.data() == nullptr) {
+        SkipAnnotations();
+    }
+
+    helpers::EnumerateTaggedValues<File::EntityId, FieldTag, Callback>(runtime_type_annotations_sp_,
+                                                                       FieldTag::ANNOTATION, cb, &type_annotations_sp_);
+}
+
+template <class Callback>
+inline void FieldDataAccessor::EnumerateTypeAnnotations(const Callback &cb)
+{
+    if (is_external_) {
+        return;
+    }
+
+    if (type_annotations_sp_.data() == nullptr) {
+        SkipRuntimeTypeAnnotations();
+    }
+
     Span<const uint8_t> sp {nullptr, nullptr};
-    helpers::EnumerateTaggedValues<File::EntityId, FieldTag, Callback>(annotations_sp_, FieldTag::ANNOTATION, cb, &sp);
+    helpers::EnumerateTaggedValues<File::EntityId, FieldTag, Callback>(type_annotations_sp_, FieldTag::ANNOTATION, cb,
+                                                                       &sp);
 
     size_ = panda_file_.GetIdFromPointer(sp.data()).GetOffset() - field_id_.GetOffset() + 1;  // + 1 for NOTHING tag
+}
+
+template <class Callback>
+inline bool FieldDataAccessor::EnumerateRuntimeAnnotationsWithEarlyStop(const Callback &cb)
+{
+    if (is_external_) {
+        return false;
+    }
+
+    if (runtime_annotations_sp_.data() == nullptr) {
+        SkipValue();
+    }
+
+    return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, FieldTag, Callback>(
+        runtime_annotations_sp_, FieldTag::RUNTIME_ANNOTATION, cb);
+}
+
+template <class Callback>
+inline bool FieldDataAccessor::EnumerateAnnotationsWithEarlyStop(const Callback &cb)
+{
+    if (is_external_) {
+        return false;
+    }
+
+    if (annotations_sp_.data() == nullptr) {
+        SkipRuntimeAnnotations();
+    }
+
+    return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, FieldTag, Callback>(annotations_sp_,
+                                                                                           FieldTag::ANNOTATION, cb);
 }
 
 inline uint32_t FieldDataAccessor::GetAnnotationsNumber()
@@ -146,6 +233,20 @@ inline uint32_t FieldDataAccessor::GetRuntimeAnnotationsNumber()
     return n;
 }
 
+inline uint32_t FieldDataAccessor::GetRuntimeTypeAnnotationsNumber()
+{
+    size_t n = 0;
+    EnumerateRuntimeTypeAnnotations([&n](File::EntityId /* unused */) { n++; });
+    return n;
+}
+
+inline uint32_t FieldDataAccessor::GetTypeAnnotationsNumber()
+{
+    size_t n = 0;
+    EnumerateTypeAnnotations([&n](File::EntityId /* unused */) { n++; });
+    return n;
+}
+
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H_
+#endif  // LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H_

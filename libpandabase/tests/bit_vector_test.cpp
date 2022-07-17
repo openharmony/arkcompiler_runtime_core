@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public:
         panda::mem::MemConfig::Finalize();
     }
 
-    ArenaAllocator *GetAllocator() const
+    ArenaAllocator *GetAllocator()
     {
         return allocator_;
     }
@@ -112,6 +112,8 @@ TEST_F(BitVectorTest, Comparison)
 template <typename T>
 void TestIteration(T &vector, size_t bits)
 {
+    int index = 0;
+
     ASSERT_FALSE(vector.empty());
     ASSERT_EQ(vector.size(), bits);
 
@@ -119,7 +121,7 @@ void TestIteration(T &vector, size_t bits)
     for (uint32_t i : vector.GetZeroBitsIndices()) {
         ADD_FAILURE();
     }
-    int index = 0;
+    index = 0;
     for (uint32_t i : vector.GetSetBitsIndices()) {
         ASSERT_EQ(i, index++);
     }
@@ -135,15 +137,15 @@ void TestIteration(T &vector, size_t bits)
 
     index = 0;
     for (auto v : vector) {
-        v = (index++ % 2U) != 0;
+        v = (index++ % 2) != 0;
     }
     index = 0;
     for (auto v : vector) {
-        ASSERT_EQ(v, index++ % 2U);
+        ASSERT_EQ(v, index++ % 2);
     }
     index = vector.size() - 1;
     for (auto it = vector.end() - 1;; --it) {
-        ASSERT_EQ(*it, index-- % 2U);
+        ASSERT_EQ(*it, index-- % 2);
         if (it == vector.begin()) {
             break;
         }
@@ -151,12 +153,12 @@ void TestIteration(T &vector, size_t bits)
     index = 1;
     for (uint32_t i : vector.GetSetBitsIndices()) {
         ASSERT_EQ(i, index);
-        index += 2U;
+        index += 2;
     }
     index = 0;
     for (uint32_t i : vector.GetZeroBitsIndices()) {
         ASSERT_EQ(i, index);
-        index += 2U;
+        index += 2;
     }
 
     auto it = vector.begin();
@@ -167,32 +169,32 @@ void TestIteration(T &vector, size_t bits)
     ASSERT_EQ(*it, false);
     ASSERT_EQ(*it1, true);
     ASSERT_TRUE(it1 < it);
-    it += 3U;
+    it += 3;
     ASSERT_EQ(*it, true);
-    it -= 5U;
+    it -= 5;
     ASSERT_EQ(*it, false);
     ASSERT_EQ(it, vector.begin());
 
-    it = it + 6U;
+    it = it + 6;
     ASSERT_EQ(*it, false);
-    ASSERT_EQ(std::distance(vector.begin(), it), 6U);
+    ASSERT_EQ(std::distance(vector.begin(), it), 6);
     ASSERT_EQ(it[1], true);
-    it = it - 3U;
+    it = it - 3;
     ASSERT_EQ(*it, true);
-    ASSERT_EQ(std::distance(vector.begin(), it), 3U);
+    ASSERT_EQ(std::distance(vector.begin(), it), 3);
     --it;
     ASSERT_EQ(*it, false);
     it1 = it--;
     ASSERT_EQ(*it, true);
     ASSERT_EQ(*it1, false);
     ASSERT_TRUE(it1 > it);
-    it = vector.begin() + 100U;
-    ASSERT_EQ(std::distance(vector.begin(), it), 100U);
-    ASSERT_TRUE(it + 2U > it);
-    ASSERT_TRUE(it + 2U >= it);
+    it = vector.begin() + 100;
+    ASSERT_EQ(std::distance(vector.begin(), it), 100);
+    ASSERT_TRUE(it + 2 > it);
+    ASSERT_TRUE(it + 2 >= it);
     ASSERT_TRUE(it + 0 >= it);
-    ASSERT_TRUE(it - 2U < it);
-    ASSERT_TRUE(it - 2U <= it);
+    ASSERT_TRUE(it - 2 < it);
+    ASSERT_TRUE(it - 2 <= it);
 
     auto cit = vector.cbegin();
     ASSERT_EQ(cit, vector.begin());
@@ -202,7 +204,7 @@ void TestIteration(T &vector, size_t bits)
 
 TEST_F(BitVectorTest, Iteration)
 {
-    std::array<uint32_t, 10U> data {};
+    std::array<uint32_t, 10> data {};
     size_t bits_num = data.size() * BitsNumInValue(data[0]);
 
     BitVector<> vec1;
@@ -240,10 +242,10 @@ void TestModification(T &vector)
     ASSERT_EQ(vector.GetHighestBitSet(), 0);
 
     std::copy(values.begin(), values.end(), std::back_inserter(vector));
-    ASSERT_EQ(vector.size(), 11U);
+    ASSERT_EQ(vector.size(), 11);
     ASSERT_EQ(vector[1], false);
-    ASSERT_EQ(vector.PopCount(), 6U);
-    ASSERT_EQ(vector.GetHighestBitSet(), 10U);
+    ASSERT_EQ(vector.PopCount(), 6);
+    ASSERT_EQ(vector.GetHighestBitSet(), 10);
 
     vector[1] = true;
     ASSERT_EQ(vector[1], true);
@@ -251,12 +253,12 @@ void TestModification(T &vector)
     uint32_t value = 0b10101010111;
     ASSERT_EQ(std::memcmp(vector.data(), &value, vector.GetSizeInBytes()), 0);
 
-    vector.resize(3U);
-    ASSERT_EQ(vector.size(), 3U);
-    ASSERT_EQ(vector.PopCount(), 3U);
+    vector.resize(3);
+    ASSERT_EQ(vector.size(), 3);
+    ASSERT_EQ(vector.PopCount(), 3);
 
-    vector.resize(10U);
-    ASSERT_EQ(vector.PopCount(), 3U);
+    vector.resize(10);
+    ASSERT_EQ(vector.PopCount(), 3);
 
     vector.clear();
     ASSERT_TRUE(vector.empty());
@@ -266,24 +268,24 @@ void TestModification(T &vector)
     for (int i = 0; i < 100; i++) {
         std::copy(values.begin(), values.end(), std::back_inserter(vector));
     }
-    ASSERT_EQ(vector.size(), 1000U);
-    ASSERT_EQ(vector.PopCount(), 500U);
-    for (size_t i = 0; i < 1000U; i++) {
+    ASSERT_EQ(vector.size(), 1000);
+    ASSERT_EQ(vector.PopCount(), 500);
+    for (int i = 0; i < 1000; i++) {
         vector.push_back(false);
     }
-    ASSERT_EQ(vector.size(), 2000U);
-    ASSERT_EQ(vector.PopCount(), 500U);
-    ASSERT_EQ(vector.GetHighestBitSet(), 999U);
+    ASSERT_EQ(vector.size(), 2000);
+    ASSERT_EQ(vector.PopCount(), 500);
+    ASSERT_EQ(vector.GetHighestBitSet(), 999);
 
-    vector.ClearBit(3000U);
-    ASSERT_EQ(vector.size(), 3001U);
-    ASSERT_EQ(vector.PopCount(), 500U);
-    ASSERT_EQ(vector.GetHighestBitSet(), 999U);
+    vector.ClearBit(3000);
+    ASSERT_EQ(vector.size(), 3001);
+    ASSERT_EQ(vector.PopCount(), 500);
+    ASSERT_EQ(vector.GetHighestBitSet(), 999);
 
-    vector.SetBit(4000U);
-    ASSERT_EQ(vector.size(), 4001U);
-    ASSERT_EQ(vector.PopCount(), 501U);
-    ASSERT_EQ(vector.GetHighestBitSet(), 4000U);
+    vector.SetBit(4000);
+    ASSERT_EQ(vector.size(), 4001);
+    ASSERT_EQ(vector.PopCount(), 501);
+    ASSERT_EQ(vector.GetHighestBitSet(), 4000);
 }
 
 TEST_F(BitVectorTest, Modification)

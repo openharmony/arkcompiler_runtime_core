@@ -16,7 +16,6 @@
 #include "assembly-parser.h"
 
 namespace panda::pandasm {
-
 inline std::string OperandTypePrint(panda::pandasm::Opcode op) {
     switch (op) {
 % Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
@@ -49,5 +48,4 @@ inline std::string OperandTypePrint(panda::pandasm::Opcode op) {
             return "undefined";
     }
 }
-
-}  // namespace panda::pandasm
+}

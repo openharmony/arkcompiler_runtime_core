@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_CFLOW_INSTRUCTIONS_MAP_H_
-#define PANDA_VERIFICATION_CFLOW_INSTRUCTIONS_MAP_H_
+#ifndef _PANDA_VERIFIER_INSTRUCTIONS_MAP_HPP
+#define _PANDA_VERIFIER_INSTRUCTIONS_MAP_HPP
 
 #include "util/addr_map.h"
 
@@ -28,8 +28,10 @@ public:
         if (!AddrMap_.IsInAddressSpace(pc_curr)) {
             return false;
         }
+        // why + 1: those byte addresses are marked that stays in between bytecode starts
         pc_curr = reinterpret_cast<const void *>(reinterpret_cast<uintptr_t>(pc_curr) + 1);
         if (pc_curr == pc_next) {
+            // the bytecode is one-byte length => no marks
             return true;
         }
         pc_next = reinterpret_cast<const void *>(reinterpret_cast<uintptr_t>(pc_next) - 1);
@@ -55,9 +57,7 @@ public:
     {
         return AddrMap_.Clear(pc_start, reinterpret_cast<const void *>(reinterpret_cast<uintptr_t>(pc_start) + sz - 1));
     }
-
     InstructionsMap(const void *ptr_start, const void *ptr_end) : AddrMap_ {ptr_start, ptr_end} {}
-
     InstructionsMap(const void *ptr_start, size_t size)
         : InstructionsMap(ptr_start, reinterpret_cast<const void *>(reinterpret_cast<uintptr_t>(ptr_start) + size - 1))
     {
@@ -88,4 +88,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_CFLOW_INSTRUCTIONS_MAP_H_
+#endif  // !_PANDA_VERIFIER_INSTRUCTIONS_MAP_HPP

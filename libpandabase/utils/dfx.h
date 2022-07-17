@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 // DfxController is designed to help developers enable/disable or set level of some DFX capabilities.
 //
 // Developers can change the option value of each capability included in DfxOptionHandler::DfxOption.
@@ -28,14 +27,13 @@
 // |     ARKSIGQUIT     |    sigquit-flag    |         sigquit        |         0/1(default) sigquit action          |
 // |     ARKSIGUSR1     |    sigusr1-flag    |         sigusr1        |         0/1(default) sigusr1 action          |
 // |     ARKSIGUSR2     |    sigusr2-flag    |         sigusr2        |         0/1(default) sigusr2 action          |
-// |       MOBILE_LOG       |     mlog-flag    |         mlog         |    0/1(default) ark log printed in mlog    |
+// |       MOBILE_LOG   |     mlog-flag      |         mlog           |    0/1(default) ark log printed in mlog      |
 // |       DFXLOG       |       dfx-log      |         dfx-log        |          0(default)/1 ark dfx log            |
 // |--------------------|--------------------|------------------------|----------------------------------------------|
 // Note: if option value can only be set to 0/1, it means disable/enable, else enable in multiple levels.
 //
-// If you want to control your own DFX capability, please add your dfx option in DfxOptionHandler::DfxOption,
-// and update code related to DfxController initialize and runtime options.
-
+// For developers who want to controll your own DFX capability, add your dfx option in DfxOptionHandler::DfxOption,
+// improve code related to DfxController initialize and runtime options.
 #ifndef PANDA_LIBPANDABASE_UTILS_DFX_H_
 #define PANDA_LIBPANDABASE_UTILS_DFX_H_
 
@@ -101,4 +99,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_DFX_H_
+#endif  // PANDA_LIBPANDABASE_UTILS_LOGGER_H_

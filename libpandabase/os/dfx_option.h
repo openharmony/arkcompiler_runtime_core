@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_DFX_OPTION_H_
-#define PANDA_LIBPANDABASE_OS_DFX_OPTION_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_OS_DFX_OPTION_H_
+#define PANDA_LIBPANDABASE_PBASE_OS_DFX_OPTION_H_
 
 #include "macros.h"
 
@@ -38,6 +38,7 @@ namespace panda::os::dfx_option {
     DFX_OPTION_ELEM(D, ARK_SIGUSR2, "sigusr2")                   \
     DFX_OPTION_ELEM(D, MOBILE_LOG, "mobile-log")                 \
     DFX_OPTION_ELEM(D, DFXLOG, "dfx-log")                        \
+    DFX_OPTION_ELEM(D, HUNG_UPDATE, "hung-update")               \
     DFX_OPTION_ELEM(D, END_FLAG, "end-flag")
 #else
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -58,6 +59,7 @@ public:
         ARK_SIGUSR1_ID,
         ARK_SIGUSR2_ID,
         MOBILE_LOG_ID,
+        HUNG_UPDATE_ID,
 #endif  // PANDA_TARGET_UNIX
         REFERENCE_DUMP_ID,
         DFXLOG_ID,
@@ -79,5 +81,4 @@ public:
 };
 
 }  // namespace panda::os::dfx_option
-
-#endif  // PANDA_LIBPANDABASE_OS_DFX_OPTION_H_
+#endif  // PANDA_LIBPANDABASE_PBASE_OS_DFX_OPTION_H_

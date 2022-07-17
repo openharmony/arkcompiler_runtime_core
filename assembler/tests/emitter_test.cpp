@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@
 #include "utils/span.h"
 #include "utils/leb128.h"
 #include "utils/utf.h"
+#include "bytecode_instruction-inl.h"
 
 namespace panda::test {
 
@@ -69,6 +70,7 @@ TEST(emittertests, test)
     ASSERT_NE(pf, nullptr);
 
     // Check _GLOBAL class
+
     {
         std::string descriptor;
         auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
@@ -123,6 +125,7 @@ TEST(emittertests, test)
     }
 
     // Check R class
+
     {
         std::string descriptor;
         auto class_id = pf->GetClassId(GetTypeDescriptor("R", &descriptor));
@@ -418,112 +421,6 @@ TEST(emittertests, errors)
         auto pf = AsmEmitter::Emit(res.Value());
         ASSERT_EQ(pf, nullptr);
         ASSERT_EQ(AsmEmitter::GetLastError(), "Non-external function A.x is bound to external record");
-    }
-
-    {
-        Ins i;
-        Function f("test_fuzz_imms", pandasm::extensions::Language::ECMASCRIPT);
-        Program prog;
-        i.opcode = Opcode::LDAI_64;
-        i.imms.clear();
-        f.ins.push_back(i);
-        prog.function_table.emplace("test_fuzz_imms", std::move(f));
-
-        auto pf = AsmEmitter::Emit(prog);
-        ASSERT_EQ(pf, nullptr);
-        ASSERT_EQ(AsmEmitter::GetLastError(), "Internal error during emitting function: test_fuzz_imms");
-    }
-
-    {
-        Ins i;
-        Function f("test_fuzz_regs", pandasm::extensions::Language::ECMASCRIPT);
-        Program prog;
-        i.opcode = Opcode::LDA;
-        i.regs.clear();
-        f.ins.push_back(i);
-        prog.function_table.emplace("test_fuzz_regs", std::move(f));
-
-        auto pf = AsmEmitter::Emit(prog);
-        ASSERT_EQ(pf, nullptr);
-        ASSERT_EQ(AsmEmitter::GetLastError(), "Internal error during emitting function: test_fuzz_regs");
-    }
-
-    {
-        Ins i;
-        Function f("test_fuzz_ids", pandasm::extensions::Language::ECMASCRIPT);
-        Program prog;
-        i.opcode = Opcode::LDA_STR;
-        i.ids.push_back("testFuzz");
-        f.ins.push_back(i);
-        prog.function_table.emplace("test_fuzz_ids", std::move(f));
-        prog.strings.insert("testFuz_");
-
-        auto pf = AsmEmitter::Emit(prog);
-        ASSERT_EQ(pf, nullptr);
-        ASSERT_EQ(AsmEmitter::GetLastError(), "Internal error during emitting function: test_fuzz_ids");
-    }
-}
-
-enum class ItemType { RECORD, FIELD, FUNCTION, PARAMETER };
-
-std::string ItemTypeToString(ItemType item_type)
-{
-    switch (item_type) {
-        case ItemType::RECORD:
-            return "record";
-        case ItemType::FIELD:
-            return "field";
-        case ItemType::FUNCTION:
-            return "function";
-        case ItemType::PARAMETER:
-            return "parameter";
-        default:
-            break;
-    }
-
-    UNREACHABLE();
-    return "";
-}
-
-template <Value::Type type>
-auto GetAnnotationElementValue(size_t idx)
-{
-    using T = ValueTypeHelperT<type>;
-
-    if constexpr (std::is_arithmetic_v<T>) {
-        if constexpr (type == Value::Type::U1) {
-            return static_cast<uint32_t>(idx == 0 ? 0 : 1);
-        }
-
-        auto res = idx == 0 ? std::numeric_limits<T>::min() : std::numeric_limits<T>::max();
-
-        if constexpr (type == Value::Type::I8) {
-            return static_cast<int32_t>(res);
-        }
-        if constexpr (type == Value::Type::U8) {
-            return static_cast<uint32_t>(res);
-        }
-        if constexpr (std::is_floating_point_v<T>) {
-            return res * (idx == 0 ? 10 : 0.1);
-        }
-
-        return res;
-    } else {
-        switch (type) {
-            case Value::Type::STRING:
-                return idx == 0 ? "123" : "456";
-            case Value::Type::RECORD:
-                return idx == 0 ? "A" : "B";
-            case Value::Type::ENUM:
-                return idx == 0 ? "E.E1" : "E.E2";
-            case Value::Type::ANNOTATION:
-                return idx == 0 ? "id_A" : "id_B";
-            default:
-                break;
-        }
-
-        UNREACHABLE();
-        return "";
     }
 }
 
@@ -840,14 +737,16 @@ TEST(emittertests, tagged_in_field_decl)
     ASSERT_EQ(1, num_fields);
 }
 
-TEST(emittertests, get_GLOBAL_lang_for_JS_func)
+TEST(emittertests, function_overloading_1)
 {
     Parser p;
     auto source = R"(
-        .language ECMAScript
+        .function void foo(i8 a0) {}
+        .function u1 foo(u1 a0) {}
 
-        .function any main() {
-            return.dyn
+        .function i8 f(i32 a0) {
+            call foo:(i8), v0
+            call foo:(u1), v1
         }
     )";
 
@@ -857,15 +756,55 @@ TEST(emittertests, get_GLOBAL_lang_for_JS_func)
     auto pf = AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    std::string descriptor;
+    std::string descriptor {};
 
     auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
     ASSERT_TRUE(class_id.IsValid());
 
     panda_file::ClassDataAccessor cda(*pf, class_id);
 
-    ASSERT_TRUE(cda.GetSourceLang().has_value());
-    ASSERT_EQ(cda.GetSourceLang(), panda_file::SourceLang::ECMASCRIPT);
+    size_t num_methods = 0;
+
+    std::unordered_map<panda_file::File::EntityId, panda_file::Type> id_to_arg_type {};
+    panda_file::File::EntityId id_f {};
+
+    cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
+        ++num_methods;
+
+        panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
+
+        if (pda.GetArgType(0) == panda_file::Type(panda_file::Type::TypeId::I32)) {
+            id_f = mda.GetMethodId();
+
+            return;
+        }
+
+        id_to_arg_type.emplace(mda.GetMethodId(), pda.GetArgType(0));
+    });
+
+    panda_file::MethodDataAccessor mda_f(*pf, id_f);
+    panda_file::CodeDataAccessor cda_f(*pf, mda_f.GetCodeId().value());
+
+    const auto ins_sz = cda_f.GetCodeSize();
+    const auto ins_arr = cda_f.GetInstructions();
+
+    auto bc_ins = BytecodeInstruction(ins_arr);
+    const auto bc_ins_last = bc_ins.JumpTo(ins_sz);
+
+    while (bc_ins.GetAddress() != bc_ins_last.GetAddress()) {
+        const auto arg_method_idx = bc_ins.GetId().AsIndex();
+        const auto arg_method_id = pf->ResolveMethodIndex(id_f, arg_method_idx);
+
+        panda_file::MethodDataAccessor method_accessor(*pf, arg_method_id);
+        panda_file::ProtoDataAccessor proto_accessor(*pf, method_accessor.GetProtoId());
+
+        ASSERT_EQ(proto_accessor.GetArgType(0), id_to_arg_type.at(arg_method_id));
+        ASSERT_EQ(std::string(utf::Mutf8AsCString(pf->GetStringData(method_accessor.GetNameId()).data)), "foo");
+
+        bc_ins = bc_ins.GetNext();
+    }
+
+    ASSERT_EQ(3, num_methods);
 }
 
 }  // namespace panda::test

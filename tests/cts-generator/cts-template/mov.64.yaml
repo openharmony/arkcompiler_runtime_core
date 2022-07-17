@@ -50,39 +50,6 @@ tests:
           - values: [v4, v7, v4, v7]
           - values: [v7, v7, v7, v7]
 
-      - file-name: "op_vs_8_vs_8"
-        isa:
-          instructions:
-            - sig: mov.64 v1:out:b64, v2:in:b64
-              acc: none
-              format: [op_v1_4_v2_4, op_v1_16_v2_16]
-        code-template: |
-          #
-              movi.64 %s, 0x123456789
-              mov.64 %s, %s
-              ldai.64 0x123456789
-              cmp.64 %s
-        description: Check mov.64 instruction with different register numbers (8 bit)
-        cases:
-          - values: [v0, v8, v0, v8]
-          - values: [v0, v64, v0, v64]
-          - values: [v0, v128, v0, v128]
-          - values: [v0, v255, v0, v255]
-          - values: [v8,   v0, v8, v0]
-          - values: [v64,  v0, v64, v0]
-          - values: [v128, v0, v128, v0]
-          - values: [v255, v0, v255, v0]
-          - values: [v8, v8, v8, v8]
-          - values: [v8, v64, v8, v64]
-          - values: [v8, v128, v8, v128]
-          - values: [v8, v255, v8, v255]
-          - values: [v64, v64, v64, v64]
-          - values: [v64, v128, v64, v128]
-          - values: [v64, v255, v64, v255]
-          - values: [v128, v128, v128, v128]
-          - values: [v128, v255, v128, v255]
-          - values: [v255, v255, v255, v255]
-
       - file-name: "op_vs_16_vs_16"
         isa:
           instructions:
@@ -99,7 +66,11 @@ tests:
               cmp.64 v1
         description: Check mov.64 instruction with different register numbers (16 bit)
         cases:
-          - values: [v256, v256, v256, v256]
+          - values: [v8, v255, v8, v255]
+          - values: [v64, v128, v64, v128]
+          - values: [v64, v255, v64, v255]
+          - values: [v128, v255, v128, v255]
+          - values: [v255, v256, v255, v256]
           - values: [v256, v1024, v256, v1024]
           - values: [v256, v32768, v256, v32768]
           - values: [v256, v65535, v256, v65535]
@@ -168,12 +139,12 @@ tests:
                   return
             bugid: ['1324', '2089']
             tags: ['verifier']
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             description: There are two places where bytecode is incorrect - mov.64 and jne/cmp
           - values: ["movi v0, 0", "ldai 0", "cmp.64 v1"]
             bugid: ['1324', '2089']
             tags: ['verifier']
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             description: There are two places where bytecode is incorrect - mov.64 and cmp.64
           - values:
             - "movi v0, 0x12345678"
@@ -188,11 +159,11 @@ tests:
                   return
             bugid: ['1324', '2089']
             tags: ['verifier']
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
           - values: ["movi v0, 0x12345678", "ldai 0x12345678", "cmp.64 v1"]
             bugid: ['1324', '2089']
             tags: ['verifier']
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
 
           - values: ["fmovi.64 v0, 0x1234567890abcdef", "fldai.64 0x1234567890abcdef", "fcmpg.64 v1"]
           - values: ["fmovi.64 v0, 0", "fldai.64 0", "fcmpg.64 v1"]
@@ -210,7 +181,7 @@ tests:
                 ldai 1
                 return
             tags: ['verifier']
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324']
 
       - file-name: "vals_int_pos"
@@ -306,14 +277,14 @@ tests:
                   mov.64 v1, v0
                   lda.64 v1
             description: "Test NaN value."
-            case-check-type: check-acc-nan
+            case-check-type: check-acc-nan-f64
           - case-template: |
               #
                   fmovi.64 v0, 0xFFFFFFFFFFFFFFFF
                   mov.64 v1, v0
                   lda.64 v1
             description: "Test NaN value."
-            case-check-type: check-acc-nan
+            case-check-type: check-acc-nan-f64
           - values: ['0x0']
           - values: ['0x8000000000000000']
             description: "Test -0.0."
@@ -339,7 +310,7 @@ tests:
               format: [op_v1_4_v2_4, op_v1_16_v2_16]
           verification:
             - v2_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
             #
@@ -424,6 +395,9 @@ tests:
               - mov.null v1
           - values:
               - movi v1, 0
+          - values:
+              - fmovi v1, 1.0
+            bugid: ['6094']
 
       - file-name: uninitialized_regs
         isa:
@@ -433,7 +407,7 @@ tests:
               format: [op_v1_4_v2_4, op_v1_16_v2_16]
         description: Check mov.64 with uninitialized registers.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #

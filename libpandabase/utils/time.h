@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,10 @@
 
 #include <cstdint>
 
+#include "macros.h"
+
+WEAK_FOR_LTO_START
+
 namespace panda::time {
 
 /**
@@ -31,5 +35,7 @@ uint64_t GetCurrentTimeInMillis(bool need_system = false);
 uint64_t GetCurrentTimeInNanos(bool need_system = false);
 
 }  // namespace panda::time
+
+WEAK_FOR_LTO_END
 
 #endif  // PANDA_LIBPANDABASE_UTILS_TIME_H_

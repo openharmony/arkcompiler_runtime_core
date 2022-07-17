@@ -15,7 +15,7 @@
 .record Convert <external>
 .function u64 Convert.stringToU64(panda.String a0) <external>
 
-.function u1 main(){
+.function i32 main(){
     # Convert.stringToU64("-1") == 18446744073709551615
     lda.str "-1"
     sta.obj v0

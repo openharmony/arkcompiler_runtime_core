@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,16 @@ public:
     MarkWordTest() {}
 
 protected:
+    void SetUp() override
+    {
+        // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
+    }
+
+    void TearDown() override
+    {
+        // Logger::Destroy();
+    }
+
     enum MarkWordFieldsMaxValues : MarkWord::markWordSize {
         MAX_THREAD_ID = (1UL << MarkWord::MarkWordRepresentation::LIGHT_LOCK_THREADID_SIZE) - 1UL,
         MAX_LOCK_COUNT = (1UL << MarkWord::MarkWordRepresentation::LIGHT_LOCK_LOCK_COUNT_SIZE) - 1UL,
@@ -80,13 +90,13 @@ protected:
             return forwardingAddressRange_(gen_) & MarkWord::MarkWordRepresentation::FORWARDING_ADDRESS_MASK_IN_PLACE;
         }
 
-        uint32_t GetSeed() const
+        uint32_t GetSeed()
         {
             return seed_;
         }
 
     private:
-        uint32_t seed_ {0};
+        uint32_t seed_;
         std::mt19937 gen_;
         MarkWordDistribution threadIdRange_;
         MarkWordDistribution lockCountRange_;
@@ -132,7 +142,7 @@ protected:
     template <class Getter>
     class MarkWordWrapper {
     public:
-        explicit MarkWordWrapper(bool isMarkedForGC = false, bool isReadBarrierSet = false)
+        MarkWordWrapper(bool isMarkedForGC = false, bool isReadBarrierSet = false)
         {
             if (isMarkedForGC) {
                 mw_ = mw_.SetMarkedForGC();
@@ -142,7 +152,7 @@ protected:
             }
         };
 
-        void CheckUnlocked(bool isMarkedForGC = false, bool isReadBarrierSet = false) const
+        void CheckUnlocked(bool isMarkedForGC = false, bool isReadBarrierSet = false)
         {
             ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_UNLOCKED) << " seed = " << paramGetter_.GetSeed();
             ASSERT_EQ(mw_.IsMarkedForGC(), isMarkedForGC) << " seed = " << paramGetter_.GetSeed();
@@ -150,7 +160,7 @@ protected:
         }
 
         void CheckLightweightLock(const ManagedThread::ThreadId tId, const uint32_t lockCount, bool isMarkedForGC,
-                                  bool isReadBarrierSet = false) const
+                                  bool isReadBarrierSet = false)
         {
             ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_LIGHT_LOCKED)
                 << " seed = " << paramGetter_.GetSeed();
@@ -160,7 +170,7 @@ protected:
             ASSERT_EQ(mw_.IsReadBarrierSet(), isReadBarrierSet) << " seed = " << paramGetter_.GetSeed();
         }
 
-        void CheckHeavyweightLock(const Monitor::MonitorId mId, bool isMarkedForGC, bool isReadBarrierSet = false) const
+        void CheckHeavyweightLock(const Monitor::MonitorId mId, bool isMarkedForGC, bool isReadBarrierSet = false)
         {
             ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_HEAVY_LOCKED)
                 << " seed = " << paramGetter_.GetSeed();
@@ -169,7 +179,7 @@ protected:
             ASSERT_EQ(mw_.IsReadBarrierSet(), isReadBarrierSet) << " seed = " << paramGetter_.GetSeed();
         }
 
-        void CheckHashed(uint32_t hash, bool isMarkedForGC, bool isReadBarrierSet = false) const
+        void CheckHashed(uint32_t hash, bool isMarkedForGC, bool isReadBarrierSet = false)
         {
             if (mw_.CONFIG_IS_HASH_IN_OBJ_HEADER) {
                 ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_HASHED) << " seed = " << paramGetter_.GetSeed();
@@ -179,7 +189,7 @@ protected:
             }
         }
 
-        void CheckGC(MarkWord::markWordSize forwardingAddress) const
+        void CheckGC(MarkWord::markWordSize forwardingAddress)
         {
             ASSERT_EQ(mw_.GetState(), MarkWord::ObjectState::STATE_GC) << " seed = " << paramGetter_.GetSeed();
             ASSERT_EQ(mw_.GetForwardingAddress(), forwardingAddress) << " seed = " << paramGetter_.GetSeed();

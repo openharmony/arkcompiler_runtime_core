@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_MEM_CONFIG_H_
-#define PANDA_LIBPANDABASE_MEM_MEM_CONFIG_H_
+#ifndef PANDA_RUNTIME_MEM_MEM_CONFIG_H
+#define PANDA_RUNTIME_MEM_MEM_CONFIG_H
 
 #include "macros.h"
-#include "mem/mem.h"
+#include "libpandabase/mem/mem.h"
 #include "utils/asan_interface.h"
 
 #include <cstddef>
@@ -29,46 +29,59 @@ namespace panda::mem {
  */
 class MemConfig {
 public:
-    static void Initialize(size_t object_pool_size, size_t internal_size, size_t compiler_size, size_t code_size)
+    static void Initialize(size_t object_pool_size, size_t internal_size, size_t compiler_size, size_t code_size,
+                           size_t initial_object_pool_size)
     {
         ASSERT(!is_initialized);
-        heap_pool_size = object_pool_size;
-        internal_pool_size = internal_size;
-        compiler_pool_size = compiler_size;
-        code_pool_size = code_size;
+        initial_heap_size_limit = initial_object_pool_size;
+        heap_size_limit = object_pool_size;
+        internal_memory_size_limit = internal_size;
+        compiler_memory_size_limit = compiler_size;
+        code_cache_size_limit = code_size;
         is_initialized = true;
+    }
+
+    static void Initialize(size_t object_pool_size, size_t internal_size, size_t compiler_size, size_t code_size)
+    {
+        Initialize(object_pool_size, internal_size, compiler_size, code_size, object_pool_size);
     }
 
     static void Finalize()
     {
         is_initialized = false;
-        heap_pool_size = 0;
-        internal_pool_size = 0;
-        code_pool_size = 0;
+        heap_size_limit = 0;
+        internal_memory_size_limit = 0;
+        code_cache_size_limit = 0;
     }
 
-    static size_t GetObjectPoolSize()
+    static size_t GetInitialHeapSizeLimit()
     {
         ASSERT(is_initialized);
-        return heap_pool_size;
+        return initial_heap_size_limit;
     }
 
-    static size_t GetInternalPoolSize()
+    static size_t GetHeapSizeLimit()
     {
         ASSERT(is_initialized);
-        return internal_pool_size;
+        return heap_size_limit;
     }
 
-    static size_t GetCodePoolSize()
+    static size_t GetInternalMemorySizeLimit()
     {
         ASSERT(is_initialized);
-        return code_pool_size;
+        return internal_memory_size_limit;
     }
 
-    static size_t GetCompilerPoolSize()
+    static size_t GetCodeCacheSizeLimit()
     {
         ASSERT(is_initialized);
-        return compiler_pool_size;
+        return code_cache_size_limit;
+    }
+
+    static size_t GetCompilerMemorySizeLimit()
+    {
+        ASSERT(is_initialized);
+        return compiler_memory_size_limit;
     }
 
     MemConfig() = delete;
@@ -80,12 +93,13 @@ public:
 
 private:
     static bool is_initialized;
-    static size_t heap_pool_size;      // Pool size used for object storage
-    static size_t internal_pool_size;  // Pool size used for internal storage
-    static size_t code_pool_size;      // Pool size used for compiled code storage
-    static size_t compiler_pool_size;  // Pool size used for internal compiler storage
+    static size_t initial_heap_size_limit;     // Initial heap size
+    static size_t heap_size_limit;             // Max heap size
+    static size_t internal_memory_size_limit;  // Max internal memory used by the VM
+    static size_t code_cache_size_limit;       // The limit for compiled code size.
+    static size_t compiler_memory_size_limit;  // Max memory used by compiler
 };
 
 }  // namespace panda::mem
 
-#endif  // PANDA_LIBPANDABASE_MEM_MEM_CONFIG_H_
+#endif  // PANDA_RUNTIME_MEM_MEM_CONFIG_H

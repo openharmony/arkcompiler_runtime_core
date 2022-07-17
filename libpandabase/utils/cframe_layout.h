@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_CFRAME_LAYOUT_H_
-#define PANDA_LIBPANDABASE_UTILS_CFRAME_LAYOUT_H_
+#ifndef PANDA_CFRAME_LAYOUT_H
+#define PANDA_CFRAME_LAYOUT_H
 
 #include "arch.h"
 
@@ -39,24 +39,19 @@ public:
     {
         return START;
     }
-
     static constexpr ssize_t End()
     {
         return Start() + GetSize();
     }
-
     static constexpr ssize_t GetSize()
     {
         return SIZE;
     }
-
     template <class CFrameLayoutT>
     static constexpr ssize_t GetOffsetFromSpInSlots(const CFrameLayoutT &fl)
     {
-        // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE)
         return fl.template GetFrameSize<CFrameLayoutT::SLOTS>() - START - 2U;
     }
-
     template <class CFrameLayoutT>
     static constexpr ssize_t GetOffsetFromSpInBytes(const CFrameLayoutT &fl)
     {
@@ -91,9 +86,16 @@ public:
 
     static constexpr ssize_t HEADER_SIZE = FlagsSlot::End() - LrSlot::Start();
 
+    enum class FrameKind : uint8_t { DEFAULT = 0, OSR = 1, NATIVE = 2, LAST = NATIVE };
+
+    using ShouldDeoptimizeFlag = BitField<bool, 0, 1>;
+    using HasFloatRegsFlag = ShouldDeoptimizeFlag::NextFlag;
+    using FrameKindField = HasFloatRegsFlag::NextField<FrameKind, MinimumBitsToStore(FrameKind::LAST)>;
+
     // Current usage of the locals:
     //  [0..1] slots: internal spill slots for codegen
     //  [2..3] slots: fp and lr in osr mode
+    // TODO(msherstennikov): need to make flexible machinery to handle locals
     static constexpr size_t LOCALS_START_SLOT = 5;
     static constexpr size_t STACK_START_SLOT = 9;
     static constexpr size_t CALLEE_REGS_START_SLOT = STACK_START_SLOT;
@@ -149,7 +151,24 @@ public:
     {
         // +1 for LR slot
         size_t size_in_slots = STACK_START_SLOT + GetFirstSpillSlot() + spills_count_ + 1U;
-        return unit == BYTES ? size_in_slots * GetSlotSize() : size_in_slots;
+        return unit == BYTES ? (size_in_slots * GetSlotSize()) : size_in_slots;
+    }
+
+    template <OffsetOrigin origin, OffsetUnit unit>
+    constexpr ssize_t GetOffset(ssize_t slot) const
+    {
+        if constexpr (origin == SP) {  // NOLINT(readability-braces-around-statements)
+            const auto OFFSET = GetFrameSize<SLOTS>() - slot - 2U;
+            if constexpr (unit == BYTES) {  // NOLINT
+                return OFFSET * GetSlotSize();
+            }
+            return OFFSET;
+        } else {                            // NOLINT
+            if constexpr (unit == BYTES) {  // NOLINT
+                return slot * PointerSize(arch_);
+            }
+            return slot;
+        }
     }
 
     template <OffsetOrigin origin, OffsetUnit unit>
@@ -182,38 +201,25 @@ public:
         return GetSpillOffset<CFrameLayout::SP, CFrameLayout::BYTES>(spill_slot);
     }
 
-    template <OffsetOrigin origin, OffsetUnit unit>
-    constexpr ssize_t GetOffset(ssize_t slot) const
-    {
-        if constexpr (origin == SP) {  // NOLINT(readability-braces-around-statements)
-            const auto OFFSET = GetFrameSize<SLOTS>() - slot - 2U;
-            if constexpr (unit == BYTES) {  // NOLINT
-                return OFFSET * GetSlotSize();
-            }
-            return OFFSET;
-        } else {                            // NOLINT
-            if constexpr (unit == BYTES) {  // NOLINT
-                return slot * PointerSize(arch_);
-            }
-            return slot;
-        }
-    }
-
-    constexpr ssize_t GetBytesOffsetSp(ssize_t slot) const
-    {
-        return GetOffset<SP, BYTES>(slot);
-    }
-
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-    constexpr ssize_t GetStackStartSlot() const
+    static constexpr ssize_t GetStackStartSlot()
     {
         return STACK_START_SLOT;
     }
 
+    constexpr size_t GetCalleeSlotsCount() const
+    {
+        return GetCalleeRegistersCount(false) + GetCalleeRegistersCount(true);
+    }
+
+    constexpr size_t GetCallerSlotsCount() const
+    {
+        return GetCallerRegistersCount(false) + GetCallerRegistersCount(true);
+    }
+
     constexpr size_t GetFirstSpillSlot() const
     {
-        return GetCalleeRegistersCount(false) + GetCalleeRegistersCount(true) + GetCallerRegistersCount(false) +
-               GetCallerRegistersCount(true);
+        return GetCalleeSlotsCount() + GetCallerSlotsCount();
     }
     constexpr size_t GetLastSpillSlot() const
     {
@@ -255,9 +261,14 @@ public:
         return PointerSize(arch_);
     }
 
-    constexpr size_t GetSlotsCount() const
+    constexpr size_t GetSpillsCount() const
     {
         return spills_count_;
+    }
+
+    constexpr size_t GetRegsSlotsCount() const
+    {
+        return GetCalleeSlotsCount() + GetCallerSlotsCount() + GetSpillsCount();
     }
 
     static constexpr size_t GetLocalsCount()
@@ -265,10 +276,32 @@ public:
         return STACK_START_SLOT - LOCALS_START_SLOT;
     }
 
+    static constexpr ssize_t GetOsrFpLrSlot()
+    {
+        return LocalsRegion::Start() + static_cast<ssize_t>(GetLocalsCount()) - 1;
+    }
+
+    constexpr ssize_t GetOsrFpLrOffset() const
+    {
+        return GetOffset<CFrameLayout::FP, CFrameLayout::BYTES>(GetOsrFpLrSlot());
+    }
+
+    static constexpr size_t GetFpLrSlotsCount()
+    {
+        static_assert(MethodSlot::Start() > LrSlot::Start());
+        return MethodSlot::Start() - LrSlot::Start();
+    }
+
+    static constexpr size_t GetTopToRegsSlotsCount()
+    {
+        static_assert(SlotsRegion::Start() > LrSlot::Start());
+        return SlotsRegion::Start() - LrSlot::Start();
+    }
+
 private:
     constexpr size_t AlignSpillCount(Arch arch, size_t spills_count)
     {
-        // Align by odd-number, because GetSpillsStartSlot begins from fp (+1 slot for lr)
+        // Allign by odd-number, because GetSpillsStartSlot begins from fp (+1 slot for lr)
         if (arch == Arch::AARCH64 || arch == Arch::X86_64) {
             if (((GetSpillsStartSlot() + spills_count) % 2) == 0) {
                 spills_count++;
@@ -288,6 +321,30 @@ private:
     size_t spills_count_ {0};
 };
 
+static_assert(CFrameLayout::GetLocalsCount() >= 2U);
+static_assert(CFrameLayout::GetFpLrSlotsCount() == 2U);
+
+enum class FrameKind { NONE, INTERPRETER, COMPILER };
+
+template <FrameKind kind>
+struct BoundaryFrame;
+
+template <>
+struct BoundaryFrame<FrameKind::INTERPRETER> {
+    static constexpr ssize_t METHOD_OFFSET = 1;
+    static constexpr ssize_t FP_OFFSET = 0;
+    static constexpr ssize_t RETURN_OFFSET = 2;
+    static constexpr ssize_t CALLEES_OFFSET = -1;
+};
+
+template <>
+struct BoundaryFrame<FrameKind::COMPILER> {
+    static constexpr ssize_t METHOD_OFFSET = -1;
+    static constexpr ssize_t FP_OFFSET = 0;
+    static constexpr ssize_t RETURN_OFFSET = 1;
+    static constexpr ssize_t CALLEES_OFFSET = -2;
+};
+
 using CFrameReturnAddr = CFrameLayout::LrSlot;
 using CFramePrevFrame = CFrameLayout::PrevFrameSlot;
 using CFrameMethod = CFrameLayout::MethodSlot;
@@ -295,7 +352,8 @@ using CFrameFlags = CFrameLayout::FlagsSlot;
 using CFrameData = CFrameLayout::DataRegion;
 using CFrameLocals = CFrameLayout::LocalsRegion;
 using CFrameSlots = CFrameLayout::SlotsRegion;
+using CFrameRegs = CFrameLayout::RegsRegion;
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_CFRAME_LAYOUT_H_
+#endif  // PANDA_CFRAME_LAYOUT_H

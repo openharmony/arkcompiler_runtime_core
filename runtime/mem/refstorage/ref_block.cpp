@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ void RefBlock::VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType 
             if (block->IsBusyIndex(index)) {
                 auto object_pointer = block->refs_[index];
                 auto *obj = object_pointer.ReinterpretCast<ObjectHeader *>();
-                ASSERT(obj->ClassAddr<Class>() != nullptr);
+                ASSERT(obj->ClassAddr<BaseClass>() != nullptr);
                 LOG(DEBUG, GC) << " Found root from ref-storage: " << mem::GetDebugInfoAboutObject(obj);
                 gc_root_visitor({rootType, obj});
             }
@@ -113,7 +113,7 @@ PandaVector<Reference *> RefBlock::GetAllReferencesInFrame()
     return refs;
 }
 
-uint8_t RefBlock::GetFreeIndex() const
+uint8_t RefBlock::GetFreeIndex()
 {
     ASSERT(!IsFull());
     auto res = Ffs(slots_) - 1;
@@ -135,12 +135,12 @@ void RefBlock::Set(uint8_t index, const ObjectHeader *object)
     slots_ &= ~(static_cast<uint64_t>(1U) << index);
 }
 
-bool RefBlock::IsFreeIndex(uint8_t index) const
+bool RefBlock::IsFreeIndex(uint8_t index)
 {
     return !IsBusyIndex(index);
 }
 
-bool RefBlock::IsBusyIndex(uint8_t index) const
+bool RefBlock::IsBusyIndex(uint8_t index)
 {
     return ((slots_ >> index) & 1U) == 0;
 }

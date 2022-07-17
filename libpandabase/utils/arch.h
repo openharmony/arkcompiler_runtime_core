@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_ARCH_H_
-#define PANDA_LIBPANDABASE_UTILS_ARCH_H_
+#ifndef PANDA_ARCH_H
+#define PANDA_ARCH_H
 
 #include "macros.h"
 #include "utils/math_helpers.h"
+#include "utils/regmask.h"
 #include "concepts.h"
 
 namespace panda {
@@ -43,17 +44,22 @@ struct ArchTraits;
 template <>
 struct ArchTraits<Arch::AARCH32> {
     static constexpr size_t CODE_ALIGNMENT = 8;
-    static constexpr size_t INSTRUCTION_ALIGNMENT = 2;
+    static constexpr size_t INSTRUCTION_ALIGNMENT = 4;
     static constexpr size_t INSTRUCTION_MAX_SIZE_BITS = 32;
     static constexpr size_t POINTER_SIZE = 4;
     static constexpr bool IS_64_BITS = false;
     static constexpr size_t THREAD_REG = 10;
     static constexpr size_t CALLER_REG_MASK = 0x0000000f;
-    static constexpr size_t CALLER_FP_REG_MASK = 0x0000ffff;
+    static constexpr size_t CALLER_FP_REG_MASK = 0x0000ffff;  // s0-s15 or d0-d7
     static constexpr size_t CALLEE_REG_MASK = 0x000007f0;
-    static constexpr size_t CALLEE_FP_REG_MASK = 0x0000ff00;
+    static constexpr size_t CALLEE_FP_REG_MASK = 0xffff0000;  // s16-s31 or d8-d15
     static constexpr bool SUPPORT_OSR = false;
     static constexpr bool SUPPORT_DEOPTIMIZATION = true;
+    static constexpr const char *ISA_NAME = "arm";
+    static constexpr size_t DWARF_SP = 13;
+    static constexpr size_t DWARF_RIP = 15;
+    static constexpr size_t DWARF_FP = 11;
+    static constexpr size_t DWARF_LR = 14;
     using WordType = uint32_t;
 };
 
@@ -71,6 +77,11 @@ struct ArchTraits<Arch::AARCH64> {
     static constexpr size_t CALLEE_FP_REG_MASK = 0x0000ff00;
     static constexpr bool SUPPORT_OSR = true;
     static constexpr bool SUPPORT_DEOPTIMIZATION = true;
+    static constexpr const char *ISA_NAME = "arm64";
+    static constexpr size_t DWARF_SP = 31;
+    static constexpr size_t DWARF_RIP = 32;
+    static constexpr size_t DWARF_FP = 29;
+    static constexpr size_t DWARF_LR = 30;
     using WordType = uint64_t;
 };
 
@@ -85,9 +96,15 @@ struct ArchTraits<Arch::X86> {
     static constexpr size_t CALLER_REG_MASK = 0x00000000;
     static constexpr size_t CALLER_FP_REG_MASK = 0x00000000;
     static constexpr size_t CALLEE_REG_MASK = 0x00000001;
-    static constexpr size_t CALLEE_FP_REG_MASK = 0x00000001;
+    static constexpr size_t CALLEE_FP_REG_MASK =
+        0x00000001;  // TODO(msherstennikov): fill once x86 codegen is supported
     static constexpr bool SUPPORT_OSR = false;
     static constexpr bool SUPPORT_DEOPTIMIZATION = false;
+    static constexpr const char *ISA_NAME = "x86";
+    static constexpr size_t DWARF_SP = 0;
+    static constexpr size_t DWARF_RIP = 0;
+    static constexpr size_t DWARF_FP = 0;
+    static constexpr size_t DWARF_LR = 0;
     using WordType = uint32_t;
 };
 
@@ -105,6 +122,11 @@ struct ArchTraits<Arch::X86_64> {
     static constexpr size_t CALLEE_FP_REG_MASK = 0x00000000;
     static constexpr bool SUPPORT_OSR = false;
     static constexpr bool SUPPORT_DEOPTIMIZATION = true;
+    static constexpr const char *ISA_NAME = "x86_64";
+    static constexpr size_t DWARF_SP = 7;
+    static constexpr size_t DWARF_RIP = 16;
+    static constexpr size_t DWARF_FP = 6;
+    static constexpr size_t DWARF_LR = 0;
     using WordType = uint64_t;
 };
 
@@ -117,6 +139,11 @@ struct ArchTraits<Arch::NONE> {
     static constexpr bool IS_64_BITS = false;
     static constexpr size_t CALLEE_REG_MASK = 0x00000000;
     static constexpr size_t CALLEE_FP_REG_MASK = 0x00000000;
+    static constexpr const char *ISA_NAME = "";
+    static constexpr size_t DWARF_SP = 0;
+    static constexpr size_t DWARF_RIP = 0;
+    static constexpr size_t DWARF_FP = 0;
+    static constexpr size_t DWARF_LR = 0;
     using WordType = void;
 };
 
@@ -147,6 +174,12 @@ DEF_ARCH_PROPERTY_GETTER(GetInstructionSizeBits, INSTRUCTION_MAX_SIZE_BITS)
 DEF_ARCH_PROPERTY_GETTER(Is64BitsArch, IS_64_BITS)
 DEF_ARCH_PROPERTY_GETTER(PointerSize, POINTER_SIZE)
 DEF_ARCH_PROPERTY_GETTER(GetThreadReg, THREAD_REG)
+// constant is needed for correct call libdwarf-library
+DEF_ARCH_PROPERTY_GETTER(GetIsaName, ISA_NAME)
+DEF_ARCH_PROPERTY_GETTER(GetDwarfSP, DWARF_SP)
+DEF_ARCH_PROPERTY_GETTER(GetDwarfRIP, DWARF_RIP)
+DEF_ARCH_PROPERTY_GETTER(GetDwarfFP, DWARF_FP)
+DEF_ARCH_PROPERTY_GETTER(GetDwarfLR, DWARF_LR)
 
 constexpr const char *GetArchString(Arch arch)
 {
@@ -159,11 +192,10 @@ constexpr const char *GetArchString(Arch arch)
 #undef DEF
         default:
             UNREACHABLE();
-            return "NONE";
     }
 }
 
-inline constexpr size_t GetCallerRegsMask(Arch arch, bool is_fp)
+inline constexpr RegMask GetCallerRegsMask(Arch arch, bool is_fp)
 {
     switch (arch) {
         case Arch::AARCH32:
@@ -176,11 +208,10 @@ inline constexpr size_t GetCallerRegsMask(Arch arch, bool is_fp)
             return is_fp ? ArchTraits<Arch::X86_64>::CALLER_FP_REG_MASK : ArchTraits<Arch::X86_64>::CALLER_REG_MASK;
         default:
             UNREACHABLE();
-            return 0;
     }
 }
 
-inline constexpr size_t GetCalleeRegsMask(Arch arch, bool is_fp)
+inline constexpr RegMask GetCalleeRegsMask(Arch arch, bool is_fp)
 {
     switch (arch) {
         case Arch::AARCH32:
@@ -193,11 +224,8 @@ inline constexpr size_t GetCalleeRegsMask(Arch arch, bool is_fp)
             return is_fp ? ArchTraits<Arch::X86_64>::CALLEE_FP_REG_MASK : ArchTraits<Arch::X86_64>::CALLEE_REG_MASK;
         default:
             UNREACHABLE();
-            return 0;
     }
 }
-
-static constexpr size_t LAST_BIT_IN_MASK = 63;
 
 inline constexpr size_t GetFirstCalleeReg(Arch arch, bool is_fp)
 {
@@ -207,8 +235,7 @@ inline constexpr size_t GetFirstCalleeReg(Arch arch, bool is_fp)
         return 1;
     }
 
-    size_t mask = GetCalleeRegsMask(arch, is_fp);
-    return mask == 0 ? 0 : helpers::math::Ctz(mask);
+    return GetCalleeRegsMask(arch, is_fp).GetMinRegister();
 }
 
 inline constexpr size_t GetLastCalleeReg(Arch arch, bool is_fp)
@@ -217,32 +244,33 @@ inline constexpr size_t GetLastCalleeReg(Arch arch, bool is_fp)
         return 0;
     }
 
-    size_t mask = GetCalleeRegsMask(arch, is_fp);
-    constexpr size_t BIT32 = 32;
-    return BIT32 - 1 - helpers::math::Clz(mask);
+    return GetCalleeRegsMask(arch, is_fp).GetMaxRegister();
 }
 
 inline constexpr size_t GetCalleeRegsCount(Arch arch, bool is_fp)
 {
-    return (GetLastCalleeReg(arch, is_fp) + 1) - GetFirstCalleeReg(arch, is_fp);
+    return GetCalleeRegsMask(arch, is_fp).Count();
 }
 
 inline constexpr size_t GetFirstCallerReg(Arch arch, bool is_fp)
 {
-    size_t mask = GetCallerRegsMask(arch, is_fp);
-    return mask == 0 ? 0 : helpers::math::Ctz(mask);
+    return GetCallerRegsMask(arch, is_fp).GetMinRegister();
 }
 
 inline constexpr size_t GetLastCallerReg(Arch arch, bool is_fp)
 {
-    size_t mask = GetCallerRegsMask(arch, is_fp);
-    constexpr size_t BIT32 = 32;
-    return BIT32 - 1 - helpers::math::Clz(mask);
+    return GetCallerRegsMask(arch, is_fp).GetMaxRegister();
 }
 
 inline constexpr size_t GetCallerRegsCount(Arch arch, bool is_fp)
 {
-    return GetLastCallerReg(arch, is_fp) - GetFirstCallerReg(arch, is_fp) + 1;
+    return GetCallerRegsMask(arch, is_fp).Count();
+}
+
+inline constexpr size_t GetRegsCount(Arch arch)
+{
+    return GetCalleeRegsCount(arch, false) + GetCalleeRegsCount(arch, true) + GetCallerRegsCount(arch, false) +
+           GetCallerRegsCount(arch, true);
 }
 
 #ifdef PANDA_TARGET_ARM32
@@ -260,16 +288,17 @@ static constexpr Arch RUNTIME_ARCH = Arch::NONE;
 template <class String = std::string>
 std::enable_if_t<is_stringable_v<String>, Arch> GetArchFromString(const String &str)
 {
+    // TODO(msherstennikov): implement using macro if "aarch64", "aarch32" and so on would be a proper choice
     if (str == "arm64") {
         return Arch::AARCH64;
     }
-    if (str == "arm") {
+    if (str == "arm" || str == "arm32") {
         return Arch::AARCH32;
     }
     if (str == "x86") {
         return Arch::X86;
     }
-    if (str == "x86_64") {
+    if (str == "x86_64" || str == "x64") {
         return Arch::X86_64;
     }
     return Arch::NONE;
@@ -295,4 +324,4 @@ std::enable_if_t<is_stringable_v<String>, String> GetStringFromArch(const Arch &
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_ARCH_H_
+#endif  // PANDA_ARCH_H

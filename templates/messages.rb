@@ -86,11 +86,12 @@ module Messages
     end
   end
 
-  ATTRS = %i[component enum_name namespace messages].freeze
-
-  attr_reader(*ATTRS)
-
-  module_function(*ATTRS)
+  [:component, :enum_name, :namespace, :messages].each do |attr|
+    # equivalent to attr_reader(attr), but that gives a warning in JRuby 9.2.17.0
+    define_method(attr) do
+      instance_variable_get("@#{attr}")
+    end
+  end
 end
 
 def Gen.on_require(data)

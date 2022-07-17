@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.function u1 main () {
+.function i32 main () {
     ldai 0
     movi v0, 0
     jmp lbl

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,54 +18,22 @@
 
 namespace panda {
 
-bool MethodInfo::Proto::AreTypesEqual(const Proto &other, panda_file::Type t1, panda_file::Type t2,
-                                      size_t ref_idx) const
+// check max-specific method or not according to JVM specs chap5.4.3.3
+// we have to guarantee that while we are iterating itable, the child interface has to be accessed before father
+// interface. interface without inheritance has no limit.
+bool IsMaxSpecificMethod(const Class *iface, const Method &method, size_t startindex, const ITable &itable)
 {
-    if (t1 != t2) {
-        return false;
-    }
-
-    if (!t1.IsPrimitive()) {
-        auto &pf1 = pda_.GetPandaFile();
-        auto &pf2 = other.pda_.GetPandaFile();
-
-        auto name1 = pf1.GetStringData(pda_.GetReferenceType(ref_idx));
-        auto name2 = pf2.GetStringData(other.pda_.GetReferenceType(ref_idx));
-
-        if (name1 != name2) {
-            return false;
+    for (size_t j = startindex; j < itable.Size(); j++) {
+        auto current_iface = itable[j].GetInterface();
+        if (iface->IsAssignableFrom(current_iface)) {
+            for (auto &curmethod : current_iface->GetVirtualMethods()) {
+                if (method.GetName() == curmethod.GetName() && method.GetProto() == curmethod.GetProto()) {
+                    ASSERT(curmethod.IsAbstract());
+                    return false;
+                }
+            }
         }
     }
-
-    return true;
-}
-
-bool MethodInfo::Proto::IsEqualBySignatureAndReturnType(const Proto &other) const
-{
-    if (pda_.GetNumArgs() != other.pda_.GetNumArgs()) {
-        return false;
-    }
-
-    auto rt1 = pda_.GetReturnType();
-    auto rt2 = other.pda_.GetReturnType();
-    if (!AreTypesEqual(other, rt1, rt2, 0)) {
-        return false;
-    }
-
-    size_t ref_idx = rt1.IsPrimitive() ? 0 : 1;
-    for (size_t i = 0; i < pda_.GetNumArgs(); i++) {
-        auto t1 = pda_.GetArgType(i);
-        auto t2 = other.pda_.GetArgType(i);
-
-        if (!AreTypesEqual(other, t1, t2, ref_idx)) {
-            return false;
-        }
-
-        if (!t1.IsPrimitive()) {
-            ++ref_idx;
-        }
-    }
-
     return true;
 }
 

@@ -17,7 +17,7 @@
     i64 asm2
 }
 
-.function u1 main(){
+.function i32 main(){
     newobj v0, Asm
     ldai 0
     return

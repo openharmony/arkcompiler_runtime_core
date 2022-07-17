@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,13 +142,27 @@ void CardTable::Card::SetProcessed()
     SetCard(PROCESSED_VALUE);
 }
 
+bool CardTable::Card::IsYoung() const
+{
+    return GetCard() == YOUNG_VALUE;
+}
+
+void CardTable::Card::SetYoung()
+{
+    SetCard(YOUNG_VALUE);
+}
+
 uint8_t CardTable::Card::GetCard() const
 {
+    // Atomic with relaxed order reason: data race with value_ with no synchronization or ordering constraints imposed
+    // on other reads or writes
     return value_.load(std::memory_order_relaxed);
 }
 
 void CardTable::Card::SetCard(uint8_t new_val)
 {
+    // Atomic with relaxed order reason: data race with value_ with no synchronization or ordering constraints imposed
+    // on other reads or writes
     value_.store(new_val, std::memory_order_relaxed);
 }
 
@@ -158,5 +172,16 @@ CardTable::CardPtr CardTable::GetCardPtr(uintptr_t addr) const
     ASSERT(addr < min_address_ + cards_count_ * CARD_SIZE);
     auto card = static_cast<CardPtr>(ToVoidPtr(ToUintPtr(cards_) + ((addr - min_address_) >> LOG2_CARD_SIZE)));
     return card;
+}
+
+void CardTable::MarkCardsAsYoung(const MemRange &mem_range)
+{
+    CardPtrIterator cur_card = CardPtrIterator(GetCardPtr(mem_range.GetStartAddress()));
+    auto end_card = CardPtrIterator(GetCardPtr(mem_range.GetEndAddress() - 1));
+    while (cur_card != end_card) {
+        (*cur_card)->SetYoung();
+        ++cur_card;
+    }
+    (*cur_card)->SetYoung();
 }
 }  // namespace panda::mem

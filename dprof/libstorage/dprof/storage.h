@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_DPROF_LIBSTORAGE_DPROF_STORAGE_H_
-#define PANDA_DPROF_LIBSTORAGE_DPROF_STORAGE_H_
+#ifndef DPROF_LIBSTORAGE_DPROF_STORAGE_H
+#define DPROF_LIBSTORAGE_DPROF_STORAGE_H
 
 #include "macros.h"
 
@@ -93,7 +93,6 @@ private:
 
     std::string storage_dir_;
 };
-
 }  // namespace panda::dprof
 
-#endif  // PANDA_DPROF_LIBSTORAGE_DPROF_STORAGE_H_
+#endif  // DPROF_LIBSTORAGE_DPROF_STORAGE_H

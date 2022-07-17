@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_MMAP_MEM_POOL_INL_H_
-#define PANDA_LIBPANDABASE_MEM_MMAP_MEM_POOL_INL_H_
+#ifndef LIBPANDABASE_MEM_MMAP_MEM_POOL_INLINE_H
+#define LIBPANDABASE_MEM_MMAP_MEM_POOL_INLINE_H
 
 #include "mmap_mem_pool.h"
 #include "mem.h"
 #include "os/mem.h"
 #include "utils/logger.h"
-#include "mem/arena.h"
+#include "mem/arena-inl.h"
 #include "mem/mem_config.h"
 #include "utils/asan_interface.h"
 
@@ -47,7 +47,6 @@ inline Pool MmapPoolMap::PopFreePool(size_t size)
     if (size < element_size) {
         Pool new_pool(element_size - size, ToVoidPtr(ToUintPtr(element_mem) + size));
         mmap_pool->SetSize(size);
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         auto new_mmap_pool = new MmapPool(new_pool, free_pools_.end());
         pool_map_.insert(std::pair<void *, MmapPool *>(new_pool.GetMem(), new_mmap_pool));
         auto new_free_pools_iter = free_pools_.insert(std::pair<size_t, MmapPool *>(new_pool.GetSize(), new_mmap_pool));
@@ -66,7 +65,7 @@ inline void MmapPoolMap::PushFreePool(Pool pool)
     auto mmap_pool = mmap_pool_element->second;
     ASSERT(mmap_pool->IsUsed(free_pools_.end()));
 
-    auto prev_pool = mmap_pool_element != pool_map_.begin() ? prev(mmap_pool_element, 1)->second : nullptr;
+    auto prev_pool = (mmap_pool_element != pool_map_.begin()) ? (prev(mmap_pool_element, 1)->second) : nullptr;
     if (prev_pool != nullptr && !prev_pool->IsUsed(free_pools_.end())) {
         ASSERT(ToUintPtr(prev_pool->GetMem()) + prev_pool->GetSize() == ToUintPtr(mmap_pool->GetMem()));
         free_pools_.erase(prev_pool->GetFreePoolsIter());
@@ -76,7 +75,7 @@ inline void MmapPoolMap::PushFreePool(Pool pool)
         mmap_pool = prev_pool;
     }
 
-    auto next_pool = mmap_pool_element != prev(pool_map_.end(), 1) ? next(mmap_pool_element, 1)->second : nullptr;
+    auto next_pool = (mmap_pool_element != prev(pool_map_.end(), 1)) ? (next(mmap_pool_element, 1)->second) : nullptr;
     if (next_pool != nullptr && !next_pool->IsUsed(free_pools_.end())) {
         ASSERT(ToUintPtr(mmap_pool->GetMem()) + mmap_pool->GetSize() == ToUintPtr(next_pool->GetMem()));
         free_pools_.erase(next_pool->GetFreePoolsIter());
@@ -91,7 +90,6 @@ inline void MmapPoolMap::PushFreePool(Pool pool)
 
 inline void MmapPoolMap::AddNewPool(Pool pool)
 {
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
     auto new_mmap_pool = new MmapPool(pool, free_pools_.end());
     pool_map_.insert(std::pair<void *, MmapPool *>(pool.GetMem(), new_mmap_pool));
 }
@@ -105,11 +103,26 @@ inline size_t MmapPoolMap::GetAllSize() const
     return bytes;
 }
 
+inline bool MmapPoolMap::HaveEnoughFreePools(size_t pools_num, size_t pool_size) const
+{
+    size_t pools = 0;
+    for (auto pool = free_pools_.rbegin(); pool != free_pools_.rend(); pool++) {
+        if (pool->first < pool_size) {
+            return false;
+        }
+        pools += pool->first / pool_size;
+        if (pools >= pools_num) {
+            return true;
+        }
+    }
+    return false;
+}
+
 inline MmapMemPool::MmapMemPool() : MemPool("MmapMemPool")
 {
-    ASSERT(static_cast<uint64_t>(mem::MemConfig::GetObjectPoolSize()) <= PANDA_MAX_HEAP_SIZE);
-    uint64_t object_space_size = mem::MemConfig::GetObjectPoolSize();
-    if (PANDA_MAX_HEAP_SIZE < object_space_size) {
+    ASSERT(static_cast<uint64_t>(mem::MemConfig::GetHeapSizeLimit()) <= PANDA_MAX_HEAP_SIZE);
+    uint64_t object_space_size = mem::MemConfig::GetHeapSizeLimit();
+    if (object_space_size > PANDA_MAX_HEAP_SIZE) {
         LOG_MMAP_MEM_POOL(FATAL) << "The memory limits is too high. We can't allocate so much memory from the system";
     }
     ASSERT(object_space_size <= PANDA_MAX_HEAP_SIZE);
@@ -127,9 +140,9 @@ inline MmapMemPool::MmapMemPool() : MemPool("MmapMemPool")
     min_object_memory_addr_ = ToUintPtr(mem);
     mmaped_object_memory_size_ = object_space_size;
     common_space_.Initialize(min_object_memory_addr_, object_space_size);
-    code_space_max_size_ = mem::MemConfig::GetCodePoolSize();
-    compiler_space_max_size_ = mem::MemConfig::GetCompilerPoolSize();
-    internal_space_max_size_ = mem::MemConfig::GetInternalPoolSize();
+    code_space_max_size_ = mem::MemConfig::GetCodeCacheSizeLimit();
+    compiler_space_max_size_ = mem::MemConfig::GetCompilerMemorySizeLimit();
+    internal_space_max_size_ = mem::MemConfig::GetInternalMemorySizeLimit();
     LOG_MMAP_MEM_POOL(DEBUG) << "Successfully initialized MMapMemPool. Object memory start from addr "
                              << ToVoidPtr(min_object_memory_addr_) << " Preallocated size is equal to "
                              << object_space_size;
@@ -139,13 +152,25 @@ inline MmapMemPool::~MmapMemPool()
 {
     for (auto i : non_object_mmaped_pools_) {
         Pool pool = std::get<0>(i.second);
+        [[maybe_unused]] AllocatorInfo info = std::get<1>(i.second);
+        [[maybe_unused]] SpaceType type = std::get<2>(i.second);
+
+        ASSERT(info.GetType() != AllocatorType::UNDEFINED);
+        ASSERT(type != SpaceType::SPACE_TYPE_UNDEFINED);
+        // does not clears non_object_mmaped_pools_ record because can fail (int munmap(void*, size_t) returned -1)
         FreeRawMemImpl(pool.GetMem(), pool.GetSize());
     }
+    non_object_mmaped_pools_.clear();
+
     void *mmaped_mem_addr = ToVoidPtr(min_object_memory_addr_);
     if (mmaped_mem_addr == nullptr) {
         ASSERT(mmaped_object_memory_size_ == 0);
         return;
     }
+
+    ASSERT(pool_map_.IsEmpty());
+
+    // TODO(dtrubenkov): consider madvise(mem, total_size_, MADV_DONTNEED); when possible
     if (auto unmap_res = panda::os::mem::UnmapRaw(mmaped_mem_addr, mmaped_object_memory_size_)) {
         LOG_MMAP_MEM_POOL(FATAL) << "Destructor unnmap  error: " << unmap_res->ToString();
     }
@@ -153,7 +178,7 @@ inline MmapMemPool::~MmapMemPool()
 
 template <class ArenaT>
 inline ArenaT *MmapMemPool::AllocArenaImpl(size_t size, SpaceType space_type, AllocatorType allocator_type,
-                                           void *allocator_addr)
+                                           const void *allocator_addr)
 {
     os::memory::LockHolder lk(lock_);
     LOG_MMAP_MEM_POOL(DEBUG) << "Try to get new arena with size " << std::dec << size << " for "
@@ -161,12 +186,11 @@ inline ArenaT *MmapMemPool::AllocArenaImpl(size_t size, SpaceType space_type, Al
     Pool pool_for_arena = AllocPoolUnsafe(size, space_type, allocator_type, allocator_addr);
     void *mem = pool_for_arena.GetMem();
     if (UNLIKELY(mem == nullptr)) {
-        LOG_MMAP_MEM_POOL(ERROR) << "Failed to allocated new arena"
+        LOG_MMAP_MEM_POOL(ERROR) << "Failed to allocate new arena"
                                  << " for " << SpaceTypeToString(space_type);
         return nullptr;
     }
     ASSERT(pool_for_arena.GetSize() == size);
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
     mem = new (mem) ArenaT(size - sizeof(ArenaT), ToVoidPtr(ToUintPtr(mem) + sizeof(ArenaT)));
     LOG_MMAP_MEM_POOL(DEBUG) << "Allocated new arena with size " << std::dec << pool_for_arena.GetSize()
                              << " at addr = " << std::hex << pool_for_arena.GetMem() << " for "
@@ -178,7 +202,6 @@ template <class ArenaT>
 inline void MmapMemPool::FreeArenaImpl(ArenaT *arena)
 {
     os::memory::LockHolder lk(lock_);
-    arena->ClearNextLink();
     size_t size = arena->GetSize();
     size = size + sizeof(ArenaT);
     ASSERT(size == AlignUp(size, panda::os::mem::GetPageSize()));
@@ -257,7 +280,7 @@ inline void *MmapMemPool::AllocRawMemImpl(size_t size, SpaceType type)
         case SpaceType::SPACE_TYPE_CODE:
             mem = AllocRawMemCodeImpl(size);
             break;
-        // Heap spaces
+        // Heap spaces:
         case SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT:
         case SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT:
         case SpaceType::SPACE_TYPE_OBJECT:
@@ -287,13 +310,13 @@ inline void MmapMemPool::FreeRawMemImpl(void *mem, size_t size)
 }
 
 inline Pool MmapMemPool::AllocPoolUnsafe(size_t size, SpaceType space_type, AllocatorType allocator_type,
-                                         void *allocator_addr)
+                                         const void *allocator_addr)
 {
     ASSERT(size == AlignUp(size, panda::os::mem::GetPageSize()));
     ASSERT(size == AlignUp(size, PANDA_POOL_ALIGNMENT_IN_BYTES));
     Pool pool = NULLPOOL;
     bool add_to_pool_map = false;
-    // Try to find free pool from the early allocated memory
+    // Try to find free pool from the allocated earlier
     switch (space_type) {
         case SpaceType::SPACE_TYPE_CODE:
         case SpaceType::SPACE_TYPE_COMPILER:
@@ -309,7 +332,6 @@ inline Pool MmapMemPool::AllocPoolUnsafe(size_t size, SpaceType space_type, Allo
         default:
             LOG_MMAP_MEM_POOL(FATAL) << "Try to use incorrect " << SpaceTypeToString(space_type)
                                      << " for AllocPoolUnsafe.";
-            break;
     }
     if (pool.GetMem() != nullptr) {
         LOG_MMAP_MEM_POOL(DEBUG) << "Reuse pool with size " << pool.GetSize() << " at addr = " << pool.GetMem()
@@ -326,7 +348,7 @@ inline Pool MmapMemPool::AllocPoolUnsafe(size_t size, SpaceType space_type, Allo
     }
     ASAN_UNPOISON_MEMORY_REGION(pool.GetMem(), pool.GetSize());
     if (UNLIKELY(allocator_addr == nullptr)) {
-        // Save the pointer to the first byte of a Pool
+        // Save a pointer to the first byte of a Pool
         allocator_addr = pool.GetMem();
     }
     if (add_to_pool_map) {
@@ -368,7 +390,6 @@ inline void MmapMemPool::FreePoolUnsafe(void *mem, size_t size)
         default:
             LOG_MMAP_MEM_POOL(FATAL) << "Try to use incorrect " << SpaceTypeToString(pool_space_type)
                                      << " for FreePoolUnsafe.";
-            break;
     }
     os::mem::TagAnonymousMemory(mem, size, nullptr);
     if (remove_from_pool_map) {
@@ -381,7 +402,7 @@ inline void MmapMemPool::FreePoolUnsafe(void *mem, size_t size)
 }
 
 inline Pool MmapMemPool::AllocPoolImpl(size_t size, SpaceType space_type, AllocatorType allocator_type,
-                                       void *allocator_addr)
+                                       const void *allocator_addr)
 {
     os::memory::LockHolder lk(lock_);
     LOG_MMAP_MEM_POOL(DEBUG) << "Try to get new pool with size " << std::dec << size << " for "
@@ -414,11 +435,11 @@ inline void MmapMemPool::RemoveFromNonObjectPoolsMap(void *pool_addr)
     non_object_mmaped_pools_.erase(element);
 }
 
-inline std::tuple<Pool, AllocatorInfo, SpaceType> MmapMemPool::FindAddrInNonObjectPoolsMap(void *addr)
+inline std::tuple<Pool, AllocatorInfo, SpaceType> MmapMemPool::FindAddrInNonObjectPoolsMap(const void *addr) const
 {
     auto element = non_object_mmaped_pools_.lower_bound(addr);
-    uintptr_t pool_start =
-        element != non_object_mmaped_pools_.end() ? ToUintPtr(element->first) : std::numeric_limits<uintptr_t>::max();
+    uintptr_t pool_start = (element != non_object_mmaped_pools_.end()) ? ToUintPtr(element->first)
+                                                                       : (std::numeric_limits<uintptr_t>::max());
     if (ToUintPtr(addr) < pool_start) {
         ASSERT(element != non_object_mmaped_pools_.begin());
         element = std::prev(element);
@@ -426,15 +447,14 @@ inline std::tuple<Pool, AllocatorInfo, SpaceType> MmapMemPool::FindAddrInNonObje
     }
     ASSERT(element != non_object_mmaped_pools_.end());
     [[maybe_unused]] uintptr_t pool_end = pool_start + std::get<0>(element->second).GetSize();
-    ASSERT(ToUintPtr(addr) >= pool_start);
-    ASSERT(ToUintPtr(addr) < pool_end);
+    ASSERT((pool_start <= ToUintPtr(addr)) && (ToUintPtr(addr) < pool_end));
     return element->second;
 }
 
-inline AllocatorInfo MmapMemPool::GetAllocatorInfoForAddrImpl(void *addr)
+inline AllocatorInfo MmapMemPool::GetAllocatorInfoForAddrImpl(const void *addr) const
 {
-    os::memory::LockHolder lk(lock_);
     if ((ToUintPtr(addr) < GetMinObjectAddress()) || (ToUintPtr(addr) >= GetMaxObjectAddress())) {
+        os::memory::LockHolder lk(lock_);
         return std::get<1>(FindAddrInNonObjectPoolsMap(addr));
     }
     AllocatorInfo info = pool_map_.GetAllocatorInfo(ToVoidPtr(ToUintPtr(addr) - GetMinObjectAddress()));
@@ -443,10 +463,10 @@ inline AllocatorInfo MmapMemPool::GetAllocatorInfoForAddrImpl(void *addr)
     return info;
 }
 
-inline SpaceType MmapMemPool::GetSpaceTypeForAddrImpl(void *addr)
+inline SpaceType MmapMemPool::GetSpaceTypeForAddrImpl(const void *addr) const
 {
-    os::memory::LockHolder lk(lock_);
     if ((ToUintPtr(addr) < GetMinObjectAddress()) || (ToUintPtr(addr) >= GetMaxObjectAddress())) {
+        os::memory::LockHolder lk(lock_);
         // <2> is a pointer to SpaceType
         return std::get<2>(FindAddrInNonObjectPoolsMap(addr));
     }
@@ -455,17 +475,17 @@ inline SpaceType MmapMemPool::GetSpaceTypeForAddrImpl(void *addr)
     return space_type;
 }
 
-inline void *MmapMemPool::GetStartAddrPoolForAddrImpl(void *addr)
+inline void *MmapMemPool::GetStartAddrPoolForAddrImpl(const void *addr) const
 {
-    os::memory::LockHolder lk(lock_);
     if ((ToUintPtr(addr) < GetMinObjectAddress()) || (ToUintPtr(addr) >= GetMaxObjectAddress())) {
+        os::memory::LockHolder lk(lock_);
         return std::get<0>(FindAddrInNonObjectPoolsMap(addr)).GetMem();
     }
     void *pool_start_addr = pool_map_.GetFirstByteOfPoolForAddr(ToVoidPtr(ToUintPtr(addr) - GetMinObjectAddress()));
     return ToVoidPtr(ToUintPtr(pool_start_addr) + GetMinObjectAddress());
 }
 
-inline size_t MmapMemPool::GetObjectSpaceFreeBytes()
+inline size_t MmapMemPool::GetObjectSpaceFreeBytes() const
 {
     os::memory::LockHolder lk(lock_);
 
@@ -475,8 +495,28 @@ inline size_t MmapMemPool::GetObjectSpaceFreeBytes()
     return unused_bytes + freed_bytes;
 }
 
+inline bool MmapMemPool::HaveEnoughPoolsInObjectSpace(size_t pools_num, size_t pool_size) const
+{
+    os::memory::LockHolder lk(lock_);
+
+    size_t unused_bytes = common_space_.GetFreeSpace();
+    ASSERT(pool_size != 0);
+    size_t pools = unused_bytes / pool_size;
+    if (pools >= pools_num) {
+        return true;
+    }
+    return common_space_pools_.HaveEnoughFreePools(pools_num - pools, pool_size);
+}
+
+inline size_t MmapMemPool::GetObjectUsedBytes() const
+{
+    os::memory::LockHolder lk(lock_);
+    ASSERT(common_space_.GetOccupiedMemorySize() >= common_space_pools_.GetAllSize());
+    return common_space_.GetOccupiedMemorySize() - common_space_pools_.GetAllSize();
+}
+
 #undef LOG_MMAP_MEM_POOL
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_MMAP_MEM_POOL_INL_H_
+#endif  // LIBPANDABASE_MEM_MMAP_MEM_POOL_INLINE_H

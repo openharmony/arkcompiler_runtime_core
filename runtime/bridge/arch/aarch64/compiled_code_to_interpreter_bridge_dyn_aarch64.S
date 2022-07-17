@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 #include "arch/asm_support.h"
 #include "arch/aarch64/helpers_aarch64.S"
 
-// Frame* CreateFrameForMethodWithActualArgs(uint32_t num_actual_args, Method* method, Frame* prev);
-.extern CreateFrameForMethodWithActualArgs
+// Frame* CreateFrameForMethodWithActualArgsDyn(uint32_t num_actual_args, Method* method, Frame* prev);
+.extern CreateFrameForMethodWithActualArgsDyn
 // void FreeFrame(Frame* frame)
 .extern FreeFrame
 // void InterpreterEntryPoint(Method *method, Frame* frame);
@@ -74,7 +74,7 @@ CompiledCodeToInterpreterBridgeDyn:
     // Before we call IncrementHotnessCounter we should set pointer to C2I frame in the TLS,
     // because compilation may fall into safepoint, so we need to make caller's callee registers
     // visible for the stack walker.
-    str fp, [THREAD_REG, #THREAD_CURRENT_FRAME]
+    str fp, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]
 
     PUSH_ARGS_REGS
 
@@ -82,7 +82,7 @@ CompiledCodeToInterpreterBridgeDyn:
 
     // Compilation finished, so recover caller's frame in the TLS.
     ldr lr, [fp]
-    str lr, [THREAD_REG, #THREAD_CURRENT_FRAME]
+    str lr, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]
 
     uxtb x0, w0
     cbz x0, .Lnot_compiled
@@ -124,7 +124,8 @@ CompiledCodeToInterpreterBridgeDyn:
     sub w22, w19, w0
     mov x1, x20
     mov x2, fp
-    bl CreateFrameForMethodWithActualArgs
+    // Frame* CreateFrameForMethodWithActualArgsDyn(uint32_t num_actual_args, Method* method, Frame* prev);
+    bl CreateFrameForMethodWithActualArgsDyn
 
     // setup regs as follow
     // w0 - actual_num_args, x1 - args, x9, x10 - temp,
@@ -136,12 +137,12 @@ CompiledCodeToInterpreterBridgeDyn:
     sub w9, w9, w0
     mov w0, w23
     add x19, x21, #FRAME_VREGS_OFFSET
-    add x19, x19, x9, lsl 4
+    add x19, x19, x9, lsl 3
     add x1, fp, #24
 
-    // copy function object (value and tag)
+    // copy function object (value only)
     ldp x9, x10, [sp, #16]
-    stp x9, x10, [x19], #16
+    str x9, [x19], #8
     sub w0, w0, #1
 
     // fill in the iframe
@@ -149,19 +150,19 @@ CompiledCodeToInterpreterBridgeDyn:
     cbz w0, 2f
     // copy x4, x5
     ldp x9, x10, [sp, #32]
-    stp x9, x10, [x19], #16
+    str x9, [x19], #8
     sub w0, w0, #1
 
     cbz w0, 2f
     // copy x6, x7
     ldp x9, x10, [sp, #48]
-    stp x9, x10, [x19], #16
+    str x9, [x19], #8
     sub w0, w0, #1
 
     // copy stack arguments into the frame
 1:  cbz w0, 2f
     ldp x9, x10, [x1], #16
-    stp x9, x10, [x19], #16
+    str x9, [x19], #8
     sub w0, w0, #1
     b 1b
 
@@ -175,7 +176,7 @@ CompiledCodeToInterpreterBridgeDyn:
     mov x0, x20
     bl GetInitialTaggedValue
 3:  cbz w22, 4f
-    stp x0, x1, [x19], #16
+    str x0, [x19], #8
     sub w22, w22, #1
     b 3b
 

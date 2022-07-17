@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_SET_OPERATIONS_H_
-#define PANDA_VERIFICATION_UTIL_SET_OPERATIONS_H_
+#ifndef PANDA_VERIFIER_UTIL_SET_OPERATIONS__
+#define PANDA_VERIFIER_UTIL_SET_OPERATIONS__
 
 #include <cstddef>
 #include "function_traits.h"
@@ -115,4 +115,4 @@ S ToSet(const C &c)
 }
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_UTIL_SET_OPERATIONS_H_
+#endif  // !PANDA_VERIFIER_UTIL_SET_OPERATIONS__

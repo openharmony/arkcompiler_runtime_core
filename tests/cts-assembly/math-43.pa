@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #Assert that operation divu works fine
-.function u1 main(){
+.function i32 main(){
     movi v0, 3
     movi v1, 2
     ldai 6

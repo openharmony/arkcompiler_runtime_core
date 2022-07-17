@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,18 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_MEM_STATS_ADDITIONAL_INFO_H_
-#define PANDA_RUNTIME_MEM_MEM_STATS_ADDITIONAL_INFO_H_
+#ifndef PANDA_RUNTIME_MEM_MEM_STATS_ADDITIONAL_INFO_H
+#define PANDA_RUNTIME_MEM_MEM_STATS_ADDITIONAL_INFO_H
 
 #include <array>
 
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/mem/mem_stats.h"
-
-namespace panda {
-class Class;
-}  // namespace panda
 
 namespace panda::mem {
 
@@ -62,7 +57,5 @@ private:
 };
 
 extern template class MemStats<MemStatsAdditionalInfo>;
-
 }  // namespace panda::mem
-
-#endif  // PANDA_RUNTIME_MEM_MEM_STATS_ADDITIONAL_INFO_H_
+#endif  // PANDA_RUNTIME_MEM_MEM_STATS_ADDITIONAL_INFO_H

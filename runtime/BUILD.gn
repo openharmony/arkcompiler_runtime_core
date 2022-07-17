@@ -16,17 +16,95 @@ import("//build/config/arm.gni")
 import("//build/ohos.gni")
 import("$ark_root/verification/verification.gni")
 
+plugin_runtime_sources = []
+plugin_runtime_configs = []
+plugin_runtime_interpreter_impl_configs = []
+arkruntime_header_plugin_deps = []
+plugin_runtime_deps = []
+
+runtime_yaml = [
+  "runtime.yaml",
+  "$ark_root/irtoc/intrinsics.yaml",
+]
+foreach(plugin, enabled_plugins) {
+  print("add runtime plugin: $plugin")
+  plugin_dir = "$ark_root/plugins/$plugin"
+  plugin_runtime_configs += [ "$plugin_dir:runtime" ]
+
+  plugin_runtime_interpreter_impl_configs +=
+      [ "$plugin_dir:runtime_interpreter_impl" ]
+
+  source_files = read_file("$plugin_dir/subproject_sources.gn", "scope")
+
+  if (defined(source_files.arkruntime_header_sub_deps)) {
+    foreach(sub_dep, source_files.arkruntime_header_sub_deps) {
+      arkruntime_header_plugin_deps += [ "$plugin_dir/$sub_dep" ]
+    }
+  }
+
+  if (defined(source_files.arkruntime_deps)) {
+    foreach(sub_dep, source_files.arkruntime_deps) {
+      plugin_runtime_deps += [ "$plugin_dir/$sub_dep" ]
+    }
+  }
+
+  if (defined(source_files.srcs_runtime_path)) {
+    source_file = "$plugin_dir/${source_files.srcs_runtime_path}"
+    src_scope = read_file(source_file, "scope")
+
+    if (defined(src_scope.srcs)) {
+      foreach(src, src_scope.srcs) {
+        plugin_runtime_sources += [ "$plugin_dir/runtime/$src" ]
+      }
+    }
+
+    if (defined(src_scope.runtime_yamls)) {
+      foreach(yaml_file, src_scope.runtime_yamls) {
+        runtime_yaml += [ "$plugin_dir/runtime/$yaml_file" ]
+      }
+    }
+
+    if (current_cpu == "arm" && defined(src_scope.srcs_arm)) {
+      foreach(src, src_scope.srcs_arm) {
+        plugin_runtime_sources += [ "$plugin_dir/runtime/$src" ]
+      }
+    } else if (current_cpu == "arm64" && defined(src_scope.srcs_arm64)) {
+      foreach(src, src_scope.srcs_arm64) {
+        plugin_runtime_sources += [ "$plugin_dir/runtime/$src" ]
+      }
+    } else if (current_cpu == "amd64" || current_cpu == "x64" ||
+               current_cpu == "x86_64") {
+      if (defined(src_scope.srcs_x86)) {
+        foreach(src, src_scope.srcs_x86) {
+          plugin_runtime_sources += [ "$plugin_dir/runtime/$src" ]
+        }
+      }
+    }
+
+    src_scope = {
+    }
+  }
+  source_files = []
+}
+
 config("arkruntime_public_config") {
   include_dirs = [
     "$ark_root/runtime",
+    get_label_info(
+        "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
+        "target_gen_dir"),
     "$target_gen_dir",
     "$target_gen_dir/generated",
     "$target_gen_dir/include",
-    "//third_party/icu/icu4c/source/common",
-    "//third_party/icu/icu4c/source/i18n",
-    "//third_party/icu/icu4c/source/",
   ]
-  configs = [ "$ark_root/verification/gen:verification_public_config" ]
+
+  include_dirs += platform_include_dirs
+
+  configs = [
+    "$ark_root/verification/gen:verification_public_config",
+    "$ark_root/compiler:arkcompiler_public_config",
+  ]
+  configs += plugin_runtime_configs
 }
 
 config("arkruntime_config") {
@@ -41,26 +119,44 @@ config("arkruntime_config") {
     "-Wno-invalid-offsetof",
     "-Wno-unused-parameter",
   ]
+
+  if (current_cpu == "arm64") {
+    asmflags = [ "-march=armv8-a+crc" ]
+  }
 }
 
 group("arkruntime_header_deps") {
   deps = [
+    ":arkruntime_gen_entrypoints_entrypoints_gen_S",
+    ":arkruntime_gen_entrypoints_entrypoints_gen_h",
+    ":arkruntime_gen_intrinsics_intrinsics_enum_h",
     ":arkruntime_gen_intrinsics_intrinsics_gen_h",
     ":arkruntime_gen_intrinsics_intrinsics_h",
     ":arkruntime_gen_intrinsics_unimplemented_intrinsics-inl_cpp",
     ":arkruntime_gen_intrinsics_yaml",
+    ":intrinsics_inl_h",
     ":isa_gen_libarkruntime_interpreter-inl_gen_h",
+    ":isa_gen_libarkruntime_irtoc_interpreter_utils_h",
     ":isa_gen_libarkruntime_isa_constants_gen_h",
     ":isa_gen_libarkruntime_unimplemented_handlers-inl_h",
+    ":language_config_gen_inc",
     ":libarkruntime_options_gen_h",
     ":libarkruntime_shorty_values_h",
+    ":plugins_asm_defines_def",
+    ":plugins_defines_h",
+    ":plugins_entrypoints_gen_h",
+    ":plugins_inc",
+    ":plugins_interpreters_inl_h",
     "$ark_root/libpandabase:base_options_h",
     "$ark_root/verification/gen:isa_gen_verification_gen_abs_int_inl_gen_h",
     "$ark_root/verification/gen:isa_gen_verification_gen_cflow_iterate_inl_gen_h",
     "$ark_root/verification/gen:isa_gen_verification_gen_job_fill_gen_h",
+    "$ark_root/verification/gen:lang_specifics_h",
     "$ark_root/verification/gen:verification_abs_int_inl_compat_checks_h",
     "$ark_root/verification/gen:verification_verifier_messages_h",
   ]
+
+  deps += arkruntime_header_plugin_deps
 }
 
 source_set("libarkruntime_set_static") {
@@ -69,52 +165,62 @@ source_set("libarkruntime_set_static") {
     "assert_gc_scope.cpp",
     "bridge/bridge.cpp",
     "cframe.cpp",
+    "cha.cpp",
     "class.cpp",
     "class_helper.cpp",
     "class_initializer.cpp",
     "class_linker.cpp",
     "class_linker_extension.cpp",
+    "compiler.cpp",
     "coretypes/array.cpp",
     "coretypes/string.cpp",
-    "dyn_class_linker_extension.cpp",
+    "deoptimization.cpp",
     "entrypoints/entrypoints.cpp",
     "exceptions.cpp",
     "field.cpp",
     "file_manager.cpp",
     "gc_task.cpp",
+    "global_object_lock.cpp",
     "handle_scope.cpp",
     "imtable_builder.cpp",
     "interpreter/interpreter.cpp",
     "interpreter/runtime_interface.cpp",
     "intrinsics.cpp",
     "language_context.cpp",
+    "loadable_agent.cpp",
+    "lock_order_graph.cpp",
     "locks.cpp",
     "mark_word.cpp",
     "mem/allocator.cpp",
     "mem/gc/bitmap.cpp",
     "mem/gc/card_table.cpp",
-    "mem/gc/crossing_map.cpp",
-    "mem/gc/crossing_map_singleton.cpp",
-    "mem/gc/dynamic/gc_dynamic_impl.cpp",
     "mem/gc/epsilon/epsilon.cpp",
     "mem/gc/epsilon/epsilon_barrier.cpp",
     "mem/gc/g1/g1-allocator.cpp",
     "mem/gc/g1/g1-gc.cpp",
+    "mem/gc/g1/update_remset_thread.cpp",
+    "mem/gc/gc-hung/gc_hung.cpp",
     "mem/gc/gc.cpp",
+    "mem/gc/gc_adaptive_stack.cpp",
     "mem/gc/gc_barrier_set.cpp",
     "mem/gc/gc_queue.cpp",
     "mem/gc/gc_root.cpp",
+    "mem/gc/gc_root_type.cpp",
+    "mem/gc/gc_scope.cpp",
     "mem/gc/gc_scoped_phase.cpp",
+    "mem/gc/gc_settings.cpp",
     "mem/gc/gc_stats.cpp",
     "mem/gc/gc_trigger.cpp",
+    "mem/gc/gc_workers_thread_pool.cpp",
     "mem/gc/gen-gc/gen-gc.cpp",
     "mem/gc/generational-gc-base.cpp",
+    "mem/gc/heap-space-misc/crossing_map.cpp",
+    "mem/gc/heap-space-misc/crossing_map_singleton.cpp",
     "mem/gc/hybrid-gc/hybrid_object_allocator.cpp",
     "mem/gc/lang/gc_lang.cpp",
-    "mem/gc/reference-processor/reference_processor.cpp",
-    "mem/gc/static/gc_static_impl.cpp",
     "mem/gc/stw-gc/stw-gc.cpp",
     "mem/heap_manager.cpp",
+    "mem/heap_space.cpp",
     "mem/heap_verifier.cpp",
     "mem/internal_allocator.cpp",
     "mem/mem_stats.cpp",
@@ -131,13 +237,18 @@ source_set("libarkruntime_set_static") {
     "mem/runslots.cpp",
     "mem/tlab.cpp",
     "method.cpp",
+    "methodtrace/trace.cpp",
     "monitor.cpp",
     "monitor_object_lock.cpp",
     "monitor_pool.cpp",
     "object_accessor.cpp",
     "object_header.cpp",
+    "osr.cpp",
     "panda_vm.cpp",
+    "plugins.cpp",
+    "relayout_profiler.cpp",
     "runtime.cpp",
+    "runtime_controller.cpp",
     "runtime_helpers.cpp",
     "stack_walker.cpp",
     "string_table.cpp",
@@ -147,23 +258,29 @@ source_set("libarkruntime_set_static") {
     "timing.cpp",
     "tooling/debug_inf.cpp",
     "tooling/debugger.cpp",
-    "tooling/pt_class.cpp",
-    "tooling/pt_lang_extension.cpp",
-    "tooling/pt_method.cpp",
-    "tooling/pt_reference.cpp",
     "tooling/pt_thread.cpp",
     "vtable_builder.cpp",
   ]
+
   if (!is_mingw) {
     sources += [
       "dprofiler/dprofiler.cpp",
       "signal_handler.cpp",
     ]
   }
+
+  # irtoc_lib is enabled only for arm64 target for now, because Realease build doesn't support
+  # asmjit, needed for compiling of irtoc code for x86_64 target.
+  if (current_cpu == "arm64") {
+    sources += [ "$root_gen_dir/generated/irtoc_lib.o" ]
+  }
   if (current_cpu == "arm") {
     sources += [
       "arch/arm/interpreter_support.S",
+      "arch/arm/osr_arm.S",
       "bridge/arch/arm/compiled_code_to_interpreter_bridge_dyn_arm.S",
+      "bridge/arch/arm/compiled_code_to_runtime_bridge_arm.S",
+      "bridge/arch/arm/deoptimization_arm.S",
       "bridge/arch/arm/interpreter_to_compiled_code_bridge_dyn_arm.S",
     ]
     if (arm_float_abi == "softfp") {
@@ -186,25 +303,41 @@ source_set("libarkruntime_set_static") {
   } else if (current_cpu == "arm64") {
     sources += [
       "arch/aarch64/interpreter_support.S",
+      "arch/aarch64/osr_aarch64.S",
       "bridge/arch/aarch64/compiled_code_to_interpreter_bridge_aarch64.S",
       "bridge/arch/aarch64/compiled_code_to_interpreter_bridge_dyn_aarch64.S",
+      "bridge/arch/aarch64/compiled_code_to_runtime_bridge_aarch64.S",
+      "bridge/arch/aarch64/deoptimization_aarch64.S",
       "bridge/arch/aarch64/interpreter_to_compiled_code_bridge_aarch64.S",
       "bridge/arch/aarch64/interpreter_to_compiled_code_bridge_dyn_aarch64.S",
     ]
   } else if (current_cpu == "x86") {
     sources += [
       "arch/x86/interpreter_support.S",
+      "arch/x86/osr_x86.S",
       "bridge/arch/x86/compiled_code_to_interpreter_bridge_x86.S",
+      "bridge/arch/x86/deoptimization_x86.S",
       "bridge/arch/x86/interpreter_to_compiled_code_bridge_x86.S",
     ]
   } else if (current_cpu == "amd64" || current_cpu == "x64" ||
              current_cpu == "x86_64") {
     sources += [
+      "arch/amd64/common_amd64.S",
       "arch/amd64/interpreter_support.S",
+      "arch/amd64/osr_amd64.S",
       "bridge/arch/amd64/compiled_code_to_interpreter_bridge_amd64.S",
       "bridge/arch/amd64/compiled_code_to_interpreter_bridge_dyn_amd64.S",
+      "bridge/arch/amd64/compiled_code_to_runtime_bridge_amd64.S",
+      "bridge/arch/amd64/deoptimization_amd64.S",
       "bridge/arch/amd64/interpreter_to_compiled_code_bridge_amd64.S",
       "bridge/arch/amd64/interpreter_to_compiled_code_bridge_dyn_amd64.S",
+    ]
+  }
+
+  if (!is_mob) {
+    sources += [
+      "$ark_root/platforms/common/runtime/thread.cpp",
+      "$ark_root/platforms/common/runtime/verify_app_install.cpp",
     ]
   }
 
@@ -216,11 +349,13 @@ source_set("libarkruntime_set_static") {
 
   sources += core_vm_sources
   sources += verifier_sources
+  sources += plugin_runtime_sources
 
   public_configs = [
     "$ark_root:ark_config",
     "$ark_root/libpandabase:arkbase_public_config",
     "$ark_root/libpandafile:arkfile_public_config",
+    "$ark_root/compiler:arkcompiler_public_config",
     "$ark_root/verification/gen:verification_public_config",
     sdk_libc_secshared_config,
     ":arkruntime_public_config",
@@ -231,6 +366,11 @@ source_set("libarkruntime_set_static") {
   deps = [
     ":arkruntime_header_deps",
     ":arkruntime_interpreter_impl",
+    "$ark_root/compiler:libarkcompiler",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_entrypoints_bridge_asm_macro_inl",
+    "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
+    "$ark_root/compiler/aot:libarkaotmanager",
+    "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarkbase",
     "$ark_root/libpandafile:libarkfile",
     "$ark_root/libpandafile:libarkfile_type_gen_h",
@@ -239,12 +379,14 @@ source_set("libarkruntime_set_static") {
     sdk_libc_secshared_dep,
   ]
 
+  deps += plugin_runtime_deps
+
   if (!is_mingw) {
     deps += [ "$ark_root/dprof:libdprof" ]
   }
 
-  if (is_standard_system) {
-    cflags_cc = [ "-fvisibility=hidden" ]
+  if (current_cpu == "arm64") {
+    deps += [ "$ark_root/irtoc:irtoc_generate" ]
   }
 
   if (current_cpu == "arm") {
@@ -264,11 +406,6 @@ source_set("libarkruntime_set_static") {
       ":bridge_dispatch_dyn_amd64",
     ]
   }
-
-  if (current_cpu == "amd64" || current_cpu == "x64" ||
-      current_cpu == "x86_64") {
-    ldflags = [ "-latomic" ]
-  }
 }
 
 ohos_static_library("libarkruntime_static") {
@@ -281,6 +418,11 @@ ohos_static_library("libarkruntime_static") {
 
 ohos_shared_library("libarkruntime") {
   deps = [ ":libarkruntime_static" ]
+
+  if (current_cpu == "amd64" || current_cpu == "x64" ||
+      current_cpu == "x86_64") {
+    ldflags = [ "-latomic" ]
+  }
 
   output_extension = "so"
   if (!is_standard_system) {
@@ -297,13 +439,17 @@ config("arkruntime_interpreter_impl_config") {
     "$ark_root/libpandafile",
     "$ark_root/runtime",
     "$ark_root/dprof/libdprof",
+    get_label_info(
+        "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
+        "target_gen_dir"),
     "$target_gen_dir",
     "$target_gen_dir/generated",
     "$target_gen_dir/include",
-    "//third_party/icu/icu4c/source/common",
-    "//third_party/icu/icu4c/source/i18n",
-    "//third_party/icu/icu4c/source/",
   ]
+
+  include_dirs += platform_include_dirs
+
+  configs = plugin_runtime_interpreter_impl_configs
 
   cflags_cc = [
     "-Wno-invalid-offsetof",
@@ -319,6 +465,7 @@ config("arkruntime_interpreter_impl_config") {
         "-ffixed-x22",
         "-ffixed-x23",
         "-ffixed-x24",
+        "-ffixed-x25",
         "-ffixed-x28",
       ]
       defines += [ "FFIXED_REGISTERS" ]
@@ -333,6 +480,7 @@ source_set("arkruntime_interpreter_impl_static") {
     "$ark_root:ark_config",
     "$ark_root/libpandabase:arkbase_public_config",
     "$ark_root/libpandafile:arkfile_public_config",
+    "$ark_root/compiler:arkcompiler_public_config",
     "$ark_root/verification/gen:verification_public_config",
     sdk_libc_secshared_config,
     ":arkruntime_interpreter_impl_config",
@@ -340,6 +488,7 @@ source_set("arkruntime_interpreter_impl_static") {
 
   deps = [
     ":arkruntime_header_deps",
+    "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarkbase",
     "$ark_root/libpandafile:libarkfile",
   ]
@@ -379,8 +528,6 @@ template("gen_intrinsics_yaml") {
   }
 }
 
-runtime_yaml = [ "runtime.yaml" ]
-
 gen_intrinsics_yaml("arkruntime_gen_intrinsics_yaml") {
   data_files = runtime_yaml
   output_file = "$target_gen_dir/intrinsics.yaml"
@@ -393,6 +540,7 @@ ark_isa_gen("isa_gen_libarkruntime") {
     "interpreter-inl_gen.h.erb",
     "isa_constants_gen.h.erb",
     "unimplemented_handlers-inl.h.erb",
+    "irtoc_interpreter_utils.h.erb",
   ]
   sources = "interpreter/templates"
   destination = gen_include_dir
@@ -401,6 +549,7 @@ ark_isa_gen("isa_gen_libarkruntime") {
 isa = "$root_gen_dir/isa/isa.yaml"
 isa_api = "$ark_root/isa/isapi.rb"
 bridge_dispatch_template = "templates/bridge_dispatch.S.erb"
+bridge_dispatch_dyn_template = "templates/bridge_dispatch_dyn.S.erb"
 bridge_archs = [
   "aarch64",
   "arm",
@@ -418,6 +567,7 @@ foreach(arch, bridge_archs) {
     requires = [
       isa_api,
       "templates/bridge_helpers_${arch}.rb",
+      "templates/bridge_helpers_common.rb",
       "templates/bridge_helpers_static.rb",
     ]
     extra_dependencies = [ "$ark_root/isa:isa_combine" ]
@@ -425,15 +575,47 @@ foreach(arch, bridge_archs) {
 
   ark_gen_file("bridge_dispatch_dyn_${arch}") {
     data_file = isa
-    template_file = bridge_dispatch_template
+    template_file = bridge_dispatch_dyn_template
     output_file = "$gen_include_dir/bridge_dispatch_dyn_${arch}.S"
     requires = [
       isa_api,
       "templates/bridge_helpers_dynamic.rb",
+      "templates/bridge_helpers_common.rb",
       "templates/bridge_helpers_${arch}.rb",
     ]
     extra_dependencies = [ "$ark_root/isa:isa_combine" ]
   }
+}
+
+ark_gen("arkruntime_gen_entrypoints") {
+  data = "$target_gen_dir/entrypoints.yaml"
+  template_files = [
+    "entrypoints_gen.h.erb",
+    "entrypoints_gen.S.erb",
+    "entrypoints_compiler.inl.erb",
+  ]
+  requires = [
+    "$ark_root/templates/common.rb",
+    "entrypoints/entrypoints.rb",
+  ]
+  sources = "entrypoints"
+  destination = "$target_gen_dir/generated"
+  extra_dependencies = [ "$ark_root:concat_entrypoints_yamls" ]
+}
+
+ark_gen("arkruntime_gen_entrypoints_compiler_checksum") {
+  data = "entrypoints/entrypoints.yaml"
+  template_files = [ "entrypoints_compiler_checksum.inl.erb" ]
+  requires = [ "entrypoints/entrypoints.rb" ]
+  sources = "entrypoints"
+  destination = "$target_gen_dir/generated"
+  extra_dependencies =
+      [ "$ark_root/cross_values:cross_values_generate(${default_toolchain})" ]
+  extra_argv = [ rebase_path(
+          get_label_info(
+              "$ark_root/cross_values:cross_values_generate(${default_toolchain})",
+              "target_gen_dir"),
+          root_build_dir) ]
 }
 
 ark_gen("arkruntime_gen_intrinsics") {
@@ -441,6 +623,7 @@ ark_gen("arkruntime_gen_intrinsics") {
   template_files = [
     "intrinsics_gen.h.erb",
     "intrinsics.h.erb",
+    "intrinsics_enum.h.erb",
     "unimplemented_intrinsics-inl.cpp.erb",
   ]
   requires = [ "templates/intrinsics.rb" ]
@@ -451,9 +634,10 @@ ark_gen("arkruntime_gen_intrinsics") {
 
 ark_gen_file("libarkruntime_options_gen_h") {
   template_file = "../templates/options/options.h.erb"
-  data_file = "options.yaml"
+  data_file = "$target_gen_dir/../runtime_options.yaml"
   requires = [ "../templates/common.rb" ]
   output_file = "$target_gen_dir/generated/runtime_options_gen.h"
+  extra_dependencies = [ "$ark_root:merge_runtime_options_yamls" ]
 }
 
 ark_gen_file("libarkruntime_shorty_values_h") {
@@ -461,4 +645,60 @@ ark_gen_file("libarkruntime_shorty_values_h") {
   data_file = "../libpandafile/types.yaml"
   requires = [ "../libpandafile/types.rb" ]
   output_file = "$target_gen_dir/generated/shorty_values.h"
+}
+
+ark_gen_file("plugins_inc") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "templates/plugins.inc.erb"
+  data_file = "$target_gen_dir/../plugin_options.yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/plugins.inc"
+}
+
+ark_gen_file("plugins_entrypoints_gen_h") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "entrypoints/plugins_entrypoints_gen.h.erb"
+  data_file = "$target_gen_dir/../plugin_options.yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/plugins_entrypoints_gen.h"
+}
+
+ark_gen_file("plugins_interpreters_inl_h") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "templates/plugins_interpreters-inl.h.erb"
+  data_file = "$target_gen_dir/../plugin_options.yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/plugins_interpreters-inl.h"
+}
+
+ark_gen_file("language_config_gen_inc") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "templates/language_config_gen.inc.erb"
+  data_file = "$target_gen_dir/../plugin_options.yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/language_config_gen.inc"
+}
+
+ark_gen_file("intrinsics_inl_h") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "templates/intrinsics.inl.h.erb"
+  data_file = "$target_gen_dir/../plugin_options.yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/intrinsics.inl.h"
+}
+
+ark_gen_file("plugins_defines_h") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "templates/plugins_defines.h.erb"
+  data_file = "$target_gen_dir/../plugin_options.yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/plugins_defines.h"
+}
+
+ark_gen_file("plugins_asm_defines_def") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "templates/plugins_asm_defines.def.erb"
+  data_file = "$target_gen_dir/../plugin_options.yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/plugins_asm_defines.def"
 }

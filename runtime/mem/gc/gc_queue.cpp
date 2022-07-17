@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ void GCQueueWithTime::AddTask(GCTask *task)
 {
     os::memory::LockHolder lock(lock_);
     if (finalized) {
-        LOG(DEBUG, GC) << "Skip AddTask to queue: " << queue_name_ << " cause it's finalized already";
+        LOG(DEBUG, GC) << "Skip AddTask to queue: " << queue_name_ << " because it's finalized already";
         task->Release(gc_->GetInternalAllocator());
         return;
     }

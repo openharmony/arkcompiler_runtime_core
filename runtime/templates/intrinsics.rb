@@ -108,15 +108,27 @@ class Intrinsic < SimpleDelegator
   def need_abi_wrapper?
     defined? orig_impl
   end
+
+  def has_impl?
+    respond_to?(:impl)
+  end
+
+  def is_irtoc?
+    class_name == 'Irtoc'
+  end
 end
 
 module Runtime
   module_function
 
   def intrinsics
-    @data.map do |intrinsic|
+    @data.intrinsics.map do |intrinsic|
       Intrinsic.new(intrinsic)
     end
+  end
+
+  def include_headers
+    @data.include_headers
   end
 
   def wrap_data(data)

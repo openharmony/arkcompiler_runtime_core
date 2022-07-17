@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
  */
 
 #include "os/filesystem.h"
-#include "macros.h"
-#if defined PANDA_TARGET_MOBILE || defined PANDA_TARGET_UNIX || defined PANDA_TARGET_ARM32 || \
-    defined PANDA_TARGET_ARM64
+#include "utils/logger.h"
+#if defined PANDA_TARGET_MOBILE || defined PANDA_TARGET_UNIX || defined PANDA_TARGET_ARM32 || defined PANDA_TARGET_ARM64
 #include <sys/stat.h>
 #endif
 #if defined(PANDA_TARGET_WINDOWS)
@@ -25,20 +24,22 @@
 
 namespace panda::os {
 
-bool CreateDirectories(const std::string &folder_name)
+void CreateDirectories(const std::string &folder_name)
 {
 #ifdef PANDA_TARGET_MOBILE
-    constexpr auto DIR_PERMISSIONS = 0777;
-    auto res = mkdir(folder_name.c_str(), DIR_PERMISSIONS);
-    return res == 0;
+    constexpr auto DIR_PERMISSIONS = 0775;
+    mkdir(folder_name.c_str(), DIR_PERMISSIONS);
 #elif PANDA_TARGET_MACOS || PANDA_TARGET_OHOS
-    return std::filesystem::create_directories(std::filesystem::path(folder_name));
+    std::filesystem::create_directories(std::filesystem::path(folder_name));
 #elif PANDA_TARGET_WINDOWS
-    return CreateDirectory(folder_name.c_str(), NULL);
+    CreateDirectory(folder_name.c_str(), NULL);
 #else
-    constexpr auto DIR_PERMISSIONS = 0777;
-    auto res = mkdir(folder_name.c_str(), DIR_PERMISSIONS);
-    return res == 0;
+    constexpr auto DIR_PERMISSIONS = 0775;
+    auto status = mkdir(folder_name.c_str(), DIR_PERMISSIONS);
+    if (status != 0) {
+        LOG(WARNING, COMMON) << "Failed to create directory \"" << folder_name.c_str() << "\"\n";
+        LOG(WARNING, COMMON) << "Return status :" << status << "\n";
+    }
 #endif
 }
 

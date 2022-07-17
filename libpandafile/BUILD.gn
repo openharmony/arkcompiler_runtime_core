@@ -28,7 +28,10 @@ config("arkfile_public_config") {
       "//third_party/zlib/contrib/minizip",
     ]
   } else {
-    include_dirs += [ "$ark_third_party_root/miniz" ]
+    include_dirs += [
+      "$ark_third_party_root/zlib",
+      "$ark_third_party_root/zlib/contrib/minizip",
+    ]
   }
 }
 
@@ -48,6 +51,7 @@ libarkfile_sources = [
   "literal_data_accessor.cpp",
   "method_data_accessor.cpp",
   "method_handle_data_accessor.cpp",
+  "pgo.cpp",
 ]
 
 libarkfile_configs = [
@@ -69,7 +73,9 @@ source_set("libarkfile_static") {
     ":isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
     ":isa_gen_libarkfile_file_format_version_h",
     ":isa_gen_libarkfile_tests_bytecode_emitter_tests_gen_h",
+    ":libarkfile_file_items_gen_inc",
     ":libarkfile_type_gen_h",
+    ":source_lang_enum_h",
     "$ark_root/libpandabase:libarkbase",
     "$ark_root/libziparchive:libarkziparchive",
     sdk_libc_secshared_dep,
@@ -85,6 +91,7 @@ ohos_shared_library("libarkfile") {
   if (!is_mingw && !is_mac) {
     output_extension = "so"
   }
+
   subsystem_name = "ark"
   part_name = "ark"
 }
@@ -101,7 +108,9 @@ source_set("libarkfile_frontend_set_static") {
     ":isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
     ":isa_gen_libarkfile_file_format_version_h",
     ":isa_gen_libarkfile_tests_bytecode_emitter_tests_gen_h",
+    ":libarkfile_file_items_gen_inc",
     ":libarkfile_type_gen_h",
+    ":source_lang_enum_h",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libziparchive:libarkziparchive_frontend_static",
     sdk_libc_secshared_dep,
@@ -111,8 +120,8 @@ source_set("libarkfile_frontend_set_static") {
 ohos_static_library("libarkfile_frontend_static") {
   deps = [ ":libarkfile_frontend_set_static" ]
 
-  part_name = "ark"
   subsystem_name = "ark"
+  part_name = "ark"
 }
 
 ark_gen_file("libarkfile_type_gen_h") {
@@ -134,4 +143,20 @@ ark_isa_gen("isa_gen_libarkfile") {
   sources = "templates"  ## ark_root/templates
   destination = "$target_gen_dir/include"  ## target_gen_dir/include
   requires = [ "pandafile_isapi.rb" ]
+}
+
+ark_gen_file("libarkfile_file_items_gen_inc") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "templates/file_items_gen.inc.erb"
+  data_file = "$target_gen_dir/../plugin_options.yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/include/file_items_gen.inc"
+}
+
+ark_gen_file("source_lang_enum_h") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "templates/source_lang_enum.h.erb"
+  data_file = "$target_gen_dir/../plugin_options.yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/include/source_lang_enum.h"
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_MEM_GC_GC_QUEUE_H_
-#define PANDA_RUNTIME_MEM_GC_GC_QUEUE_H_
+#ifndef PANDA_RUNTIME_GC_QUEUE_H
+#define PANDA_RUNTIME_GC_QUEUE_H
 
 #include <memory>
 
@@ -53,9 +53,6 @@ public:
 class GCQueueWithTime : public GCQueueInterface {
 public:
     explicit GCQueueWithTime(GC *gc) : gc_(gc) {}
-    ~GCQueueWithTime() override = default;
-    NO_MOVE_SEMANTIC(GCQueueWithTime);
-    NO_COPY_SEMANTIC(GCQueueWithTime);
 
     GCTask *GetTask() override;
 
@@ -94,4 +91,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_GC_GC_QUEUE_H_
+#endif  // PANDA_RUNTIME_GC_QUEUE_H

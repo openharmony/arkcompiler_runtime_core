@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_CORE_CORE_VM_H_
-#define PANDA_RUNTIME_CORE_CORE_VM_H_
+#ifndef PANDA_RUNTIME_VM_CORE_CORE_VM_H_
+#define PANDA_RUNTIME_VM_CORE_CORE_VM_H_
 
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/expected.h"
+#include "runtime/include/compiler_interface.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/panda_vm.h"
@@ -28,10 +29,11 @@ namespace panda {
 
 class Method;
 class Runtime;
+class Compiler;
 
 namespace core {
 
-class PandaCoreVM : public PandaVM {
+class PandaCoreVM final : public PandaVM {
 public:
     static Expected<PandaCoreVM *, PandaString> Create(Runtime *runtime, const RuntimeOptions &options);
     ~PandaCoreVM() override;
@@ -49,12 +51,12 @@ public:
     void StartGC() override;
     void StopGC() override;
 
-    void HandleReferences(const GCTask &task) override;
+    void HandleReferences(const GCTask &task, const mem::GC::ReferenceClearPredicateT &pred) override;
     void HandleEnqueueReferences() override;
     void HandleGCFinished() override;
 
-    void VisitVmRoots(const GCRootVisitor &visitor) override;
-    void UpdateVmRefs() override {}
+    void VisitVmRoots(const GCRootVisitor & /* visitor */) override;
+    void UpdateVmRefs() override;
 
     mem::HeapManager *GetHeapManager() const override
     {
@@ -117,13 +119,6 @@ public:
         return reference_processor_;
     }
 
-    void DumpForSigQuit(std::ostream &os);
-
-    PandaVMType GetPandaVMType() const override
-    {
-        return PandaVMType::CORE_VM;
-    }
-
     LanguageContext GetLanguageContext() const override
     {
         return Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -131,12 +126,28 @@ public:
 
     CompilerInterface *GetCompiler() const override
     {
-        return nullptr;
+        return compiler_;
+    }
+
+    coretypes::String *ResolveString([[maybe_unused]] const panda_file::File &pf,
+                                     [[maybe_unused]] panda_file::File::EntityId id) override
+    {
+        coretypes::String *str = GetStringTable()->GetInternalStringFast(pf, id);
+        if (str != nullptr) {
+            return str;
+        }
+        str = GetStringTable()->GetOrInternInternalString(pf, id, GetLanguageContext());
+        return str;
     }
 
     Rendezvous *GetRendezvous() const override
     {
         return rendezvous_;
+    }
+
+    compiler::RuntimeInterface *GetCompilerRuntimeInterface() const override
+    {
+        return runtime_iface_;
     }
 
     ObjectHeader *GetOOMErrorObject() override;
@@ -145,10 +156,12 @@ protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,
                                                        const std::vector<std::string> &args) override;
-    void HandleUncaughtException(ObjectHeader *exception) override;
+    void HandleUncaughtException() override;
 
 private:
     explicit PandaCoreVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm);
+
+    void PreAllocOOMErrorObject();
 
     Runtime *runtime_ {nullptr};
     mem::MemoryManager *mm_ {nullptr};
@@ -160,6 +173,8 @@ private:
     StringTable *string_table_ {nullptr};
     MonitorPool *monitor_pool_ {nullptr};
     ThreadManager *thread_manager_ {nullptr};
+    panda::mem::Reference *oom_obj_ref_ {nullptr};
+    compiler::RuntimeInterface *runtime_iface_ {nullptr};
 
     NO_MOVE_SEMANTIC(PandaCoreVM);
     NO_COPY_SEMANTIC(PandaCoreVM);
@@ -170,4 +185,4 @@ private:
 }  // namespace core
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_CORE_CORE_VM_H_
+#endif  // PANDA_RUNTIME_VM_CORE_CORE_VM_H_

@@ -15,7 +15,7 @@
 .record IO <external>
 .function void IO.printString(panda.String a0) <external>
 
-.function u1 main(){
+.function i32 main(){
     lda.str "asdf\n"
     sta.obj v0
     call.short IO.printString, v0, v0

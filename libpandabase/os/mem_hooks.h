@@ -17,9 +17,9 @@
 #define PANDA_LIBPANDABASE_OS_MEM_HOOKS_H_
 
 #ifdef PANDA_TARGET_UNIX
-#include "os/unix/mem_hooks.h"
+#include "platforms/unix/libpandabase/mem_hooks.h"
 #elif PANDA_TARGET_WINDOWS
-#include "os/windows/mem_hooks.h"
+#include "platforms/windows/libpandabase/mem_hooks.h"
 #else
 #error "Unsupported platform"
 #endif  // PANDA_TARGET_UNIX

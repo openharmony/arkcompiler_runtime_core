@@ -12,10 +12,43 @@
 # limitations under the License.
 
 module TestRunner
-
   ERROR_NODATA = 86
   ERROR_CANNOT_CREATE_PROCESS = 87
   ERROR_TIMEOUT = 88
+
+  @@plugins = []
+  @@runner_class = nil
+  @@target = 'Host'
+
+  def self.plugins
+    @@plugins
+  end
+
+  def self.runner_class=(value)
+    @@runner_class = value
+  end
+
+  def self.target
+    @@target
+  end
+
+  def self.target=(value)
+    @@target = value
+  end
+
+  class Plugin
+    def name
+      raise NotImplementedError, "#{self.class} does not implement name()."
+    end
+
+    def add_options(opts, options)
+      false
+    end
+
+    def process(options)
+      false
+    end
+  end
 
   def self.log(level, *args)
     puts args if level <= $VERBOSITY
@@ -31,8 +64,13 @@ module TestRunner
 
   def self.split_separated_by_colon(string)
     string.split(':')
-                   .drop(1)
-                   .flat_map { |s| s.split(',').map(&:strip) }
+          .drop(1)
+          .flat_map { |s| s.split(',').map(&:strip) }
+  end
+
+  def self.create_runner(file, id, reporter_factory, root_dir, report_dir)
+    @@runner_class.new(
+          file, id, reporter_factory, root_dir, report_dir)
   end
 
   class CommandRunner
@@ -44,69 +82,66 @@ module TestRunner
     def dump_output(t, output_err, output)
       start = Time.now
 
-      while (Time.now - start) <= $TIMEOUT and t.alive?
+      while (Time.now - start) <= $TIMEOUT
         Kernel.select([output_err], nil, nil, 1)
         begin
-          output << output_err.read_nonblock(256)
+          output << output_err.read_nonblock(2048)
         rescue IO::WaitReadable
         rescue EOFError
-          return true
+          return true # finished normally
+        rescue StandardError => e
+          output << "\nUnexpected exception when reading from pipe: #{e.class.name}, #{e.message}"
+          break
         end
       end
-      !t.alive?
+      !t.alive? # finished on timeout
     end
 
     def start_process_timeout
-      begin
-        input, output_err, t = if $enable_core
-          Open3.popen2e(@command, :pgroup => true)
-        else
-          Open3.popen2e(@command, :pgroup => true, :rlimit_core => 0)
+      input, output_err, t = if $enable_core
+                               Open3.popen2e(@command, pgroup: true)
+                             else
+                               Open3.popen2e(@command, pgroup: true, rlimit_core: 0)
+                             end
+      pid = t[:pid]
+      output = ''
+      finished = dump_output t, output_err, output
+
+      input.close
+      output_err.close
+
+      unless finished
+        output << "\nProcess hangs for #{$TIMEOUT}s '#{@command}'" \
+                  "\nKilling pid:#{pid}"
+        begin
+          Process.kill('-TERM', Process.getpgid(pid))
+        rescue Errno::ESRCH
+        rescue Exception => e
+          TestRunner.print_exception e
         end
-        pid = t[:pid]
-        output = ""
-        finished = dump_output t, output_err, output
-
-        input.close
-        output_err.close
-
-        if !finished
-          output << "Process hangs for #{$TIMEOUT}s '#{@command}'\n" \
-                    "Killing pid:#{pid}"
-          begin
-            Process.kill('-TERM', Process.getpgid(pid))
-          rescue Errno::ESRCH
-          rescue Exception => e
-            TestRunner.print_exception e
-          end
-          return output, ERROR_TIMEOUT, false
-        end
-
-        exitstatus = if t.value.coredump?
-                           t.value.termsig + 128
-                         else
-                           t.value.exitstatus
-                         end
-
-        return output, exitstatus, t.value.coredump?
-      rescue Errno::ENOENT  => e
-        return "Failed to start #{@command} - no executable",
-          ERROR_CANNOT_CREATE_PROCESS, false
-      rescue
-        return "Failed to start #{@command}",
-          ERROR_CANNOT_CREATE_PROCESS, false
+        return output.strip, ERROR_TIMEOUT, false
       end
+
+      if t.value.exited?
+        exitstatus = t.value.exitstatus
+      elsif t.value.signaled?
+        output << t.value.inspect
+        exitstatus = 128 + t.value.termsig
+      else
+        output << t.value.inspect
+        exitstatus = 254 # fallback exit code for an unexpected abnormal exit
+      end
+
+      [output.strip, exitstatus, t.value.coredump?]
+    rescue Errno::ENOENT => e
+      ["Failed to start #{@command} - no executable", ERROR_CANNOT_CREATE_PROCESS, false]
+    rescue StandardError
+      ["Failed to start #{@command}", ERROR_CANNOT_CREATE_PROCESS, false]
     end
 
-    def run_cmd()
+    def run_cmd
       @reporter.log_start_command @command
-      StringIO.open do |content|
-        content.puts "# Start command: #{@command}"
-        output, exitstatus, core = start_process_timeout
-        content.puts output
-        return content.string, exitstatus, core
-      end
+      start_process_timeout
     end
-
   end # Runner
 end # module

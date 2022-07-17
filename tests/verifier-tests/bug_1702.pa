@@ -16,7 +16,7 @@
     lda v0
     return
 }
-.function u1 main() {
+.function i32 main() {
     call.short f1
     ldai 0
     return

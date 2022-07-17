@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ASSEMBLY_LABEL_H_
-#define PANDA_ASSEMBLER_ASSEMBLY_LABEL_H_
+#ifndef _PANDA_ASSEMBLER_LABEL_HPP
+#define _PANDA_ASSEMBLER_LABEL_HPP
 
 #include <string>
 #include "assembly-file-location.h"
@@ -35,4 +35,4 @@ struct Label {
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_ASSEMBLY_LABEL_H_
+#endif  // !_PANDA_ASSEMBLER_LABEL_HPP

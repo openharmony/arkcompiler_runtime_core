@@ -21,7 +21,7 @@
 
 # check exception from ctor
 
-.function u1 main() {
+.function i32 main() {
 try_begin:
     initobj.short R.ctor
     jmp label

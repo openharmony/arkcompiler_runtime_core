@@ -1,13 +1,12 @@
 # Run Spec Coverage Tool
 
-The tool reads isa.yaml spec file and the provided set of test files, computes the coverage and outputs a bunch of coverage reports.
+The tool reads ISA spec files and the given set of test files, then computes the coverage and outputs a bunch of coverage reports.
 
 ```
-spectrac -r path_to_summary_yaml_file \
-    -d tests_directory \
+spectrac -r path_to_summary_report_yaml_file \
+    -d directory_where_tests_located \
     -g glob_to_select_tests_files_in_tests_directory \
-   [-g more_glob_to_select_tests_files_in_the_same_tests_directory [-g ..] ] \
-    -s path_to_isa_yaml_file \
+    -s paths_to_isa_yaml_files \
     -n path_to_nontestable_yaml_file \
     -u path_to_output_notcovered_yaml_file \
     -U path_to_output_notcovered_markdown_file \
@@ -21,7 +20,7 @@ Options:
 ```
 --testdir (-d) - directory with tests, required
 --testglob (-g) - glob for selecting test files in tests directory ("**/*.pa" for example), required
---spec (-s) - ISA spec file, required
+--spec (-s) - ISA spec files, comma-separated, merged into one if multiple specified, required
 --non-testable (-n) - yaml file with non-testable assertions
 --full (-f) - output the full spec in yaml format with additional fields showing the coverage data (mark assertions as covered/not-covered/non-testable, provide coverage metric for each group)
 --full_md (-F) - same as --full, but in markdown format
@@ -34,13 +33,13 @@ Options:
 
 Example:
 ```
-spectrac -r ~/panda/summary.yaml \
-    -d ~/panda/tests \
-    -g "cts-assembly/*.pa" \
-    -g "cts-generator/**/*.pa" \
-    -s ~/panda/isa/isa.yaml \
-    -n ~/panda/isa/nontestable.yaml \
-    -u notcovered.yaml \
-    -o lost.txt \
-    -f full_spec.yaml
+cd ~/panda
+tests/cts-coverage-tool/bin/spectrac.rb \
+  -g "**/*.pa" \
+  -d tests/cts-generator/cts-generated/ \
+  -s isa/isa.yaml,plugins/java/isa/isa.yaml \
+  -f full.yaml \
+  -u uncovered.yaml \
+  -o orphaned.yaml \
+  -n tests/cts-coverage-tool/config/non_testable.yaml
 ```

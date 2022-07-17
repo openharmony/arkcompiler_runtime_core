@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,30 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_ABSINT_EXEC_CONTEXT_H_
-#define PANDA_VERIFICATION_ABSINT_EXEC_CONTEXT_H_
+#ifndef PANDA_VERIFIER_ABSINT_EXEC_CONTEXT_HPP_
+#define PANDA_VERIFIER_ABSINT_EXEC_CONTEXT_HPP_
 
 #include "reg_context.h"
 
 #include "util/addr_map.h"
+#include "util/hash.h"
 
 #include "include/mem/panda_containers.h"
 
 namespace panda::verifier {
+
 enum class EntryPointType : size_t { METHOD_BODY, EXCEPTION_HANDLER, __LAST__ = EXCEPTION_HANDLER };
-}  // namespace panda::verifier
 
-namespace std {
-template <>
-struct hash<std::pair<const uint8_t *, panda::verifier::EntryPointType>> {
-    size_t operator()(const std::pair<const uint8_t *, panda::verifier::EntryPointType> &pair) const
-    {
-        return std::hash<const uint8_t *> {}(pair.first) ^ std::hash<size_t> {}(static_cast<size_t>(pair.second));
-    }
-};
-}  // namespace std
-
-namespace panda::verifier {
 class ExecContext {
 public:
     enum class Status { OK, ALL_DONE, NO_ENTRY_POINTS_WITH_CONTEXT };
@@ -99,22 +89,21 @@ public:
     }
 
     template <typename Reporter>
-    void ProcessJump(const uint8_t *jmp_insn_ptr, const uint8_t *target_ptr, Reporter reporter,
-                     EntryPointType code_type)
+    void ProcessJump(const uint8_t *jmpInsnPtr, const uint8_t *targetPtr, Reporter reporter, EntryPointType codeType)
     {
-        if (!ProcessedJumps_.HasMark(jmp_insn_ptr)) {
-            ProcessedJumps_.Mark(jmp_insn_ptr);
-            AddEntryPoint(target_ptr, code_type);
-            StoreCurrentRegContextForAddr(target_ptr, reporter);
+        if (!ProcessedJumps_.HasMark(jmpInsnPtr)) {
+            ProcessedJumps_.Mark(jmpInsnPtr);
+            AddEntryPoint(targetPtr, codeType);
+            StoreCurrentRegContextForAddr(targetPtr, reporter);
         }
     }
 
-    void ProcessJump(const uint8_t *jmp_insn_ptr, const uint8_t *target_ptr, EntryPointType code_type)
+    void ProcessJump(const uint8_t *jmpInsnPtr, const uint8_t *targetPtr, EntryPointType codeType)
     {
-        if (!ProcessedJumps_.HasMark(jmp_insn_ptr)) {
-            ProcessedJumps_.Mark(jmp_insn_ptr);
-            AddEntryPoint(target_ptr, code_type);
-            StoreCurrentRegContextForAddr(target_ptr);
+        if (!ProcessedJumps_.HasMark(jmpInsnPtr)) {
+            ProcessedJumps_.Mark(jmpInsnPtr);
+            AddEntryPoint(targetPtr, codeType);
+            StoreCurrentRegContextForAddr(targetPtr);
         }
     }
 
@@ -125,12 +114,12 @@ public:
         return ctx->second;
     }
 
-    Status GetEntryPointForChecking(const uint8_t **entry, EntryPointType *entry_type)
+    Status GetEntryPointForChecking(const uint8_t **entry, EntryPointType *entryType)
     {
         for (auto [addr, type] : EntryPoint_) {
             if (HasContext(addr)) {
                 *entry = addr;
-                *entry_type = type;
+                *entryType = type;
                 CurrentRegContext_ = RegContextOnTarget(addr);
                 EntryPoint_.erase({addr, type});
                 return Status::OK;
@@ -163,7 +152,7 @@ public:
         TypecastPoint_.Mark(addr);
     }
 
-    bool IsTypecastPoint(const uint8_t *addr)
+    bool IsTypecastPoint(const uint8_t *addr) const
     {
         return TypecastPoint_.HasMark(addr);
     }
@@ -206,10 +195,10 @@ public:
         });
     }
 
-    ExecContext(const uint8_t *pc_start_ptr, const uint8_t *pc_end_ptr)
-        : CheckPoint_ {pc_start_ptr, pc_end_ptr},
-          ProcessedJumps_ {pc_start_ptr, pc_end_ptr},
-          TypecastPoint_ {pc_start_ptr, pc_end_ptr}
+    ExecContext(const uint8_t *pcStartPtr, const uint8_t *pcEndPtr)
+        : CheckPoint_ {pcStartPtr, pcEndPtr},
+          ProcessedJumps_ {pcStartPtr, pcEndPtr},
+          TypecastPoint_ {pcStartPtr, pcEndPtr}
     {
     }
 
@@ -227,4 +216,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_ABSINT_EXEC_CONTEXT_H_
+#endif  // !PANDA_VERIFIER_ABSINT_EXEC_CONTEXT_HPP_

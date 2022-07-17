@@ -14,7 +14,6 @@
 set(PANDA_TRIPLET arm-linux-gnueabihf)
 set(PANDA_SYSROOT /usr/${PANDA_TRIPLET})
 set(PANDA_TARGET_ARM32_ABI_HARD 1)
-set(PANDA_RUN_PREFIX qemu-arm -L ${PANDA_SYSROOT})
 
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
@@ -26,9 +25,10 @@ add_compile_options(
     --sysroot=${PANDA_SYSROOT}
     --target=${PANDA_TRIPLET}
     -mfloat-abi=hard
-    -march=armv7
 )
 
+include(${CMAKE_CURRENT_LIST_DIR}/arm.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
 set_c_compiler(clang)
 set_cxx_compiler(clang++)
+set(PANDA_RUN_PREFIX ${QEMU_ARM32_BIN} -L ${PANDA_SYSROOT})

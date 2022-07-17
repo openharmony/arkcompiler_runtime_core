@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H_
-#define PANDA_LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H_
+#ifndef LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H_
+#define LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H_
 
 #include "code_data_accessor.h"
 
@@ -58,6 +58,37 @@ inline void CodeDataAccessor::SkipTryBlocks()
     EnumerateTryBlocks([](const TryBlock & /* unused */) { return true; });
 }
 
+// static
+inline uint32_t CodeDataAccessor::GetNumVregs(const File &pf, File::EntityId code_id)
+{
+    uint32_t num_vregs_;
+    auto sp = pf.GetSpanFromId(code_id);
+    num_vregs_ = helpers::ReadULeb128(&sp);
+    return num_vregs_;
+}
+
+// static
+inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::EntityId code_id, uint32_t *vregs)
+{
+    auto sp = pf.GetSpanFromId(code_id);
+    *vregs = helpers::ReadULeb128(&sp);
+    helpers::SkipULeb128(&sp);  // num_args
+    helpers::SkipULeb128(&sp);  // code_size
+    helpers::SkipULeb128(&sp);  // tries_size
+    return sp.data();
+}
+
+// static
+inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::EntityId code_id)
+{
+    auto sp = pf.GetSpanFromId(code_id);
+    helpers::SkipULeb128(&sp);  // num_vregs
+    helpers::SkipULeb128(&sp);  // num_args
+    helpers::SkipULeb128(&sp);  // code_size
+    helpers::SkipULeb128(&sp);  // tries_size
+    return sp.data();
+}
+
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H_
+#endif  // LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H_

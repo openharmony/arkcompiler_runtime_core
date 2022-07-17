@@ -27,7 +27,7 @@
     return.void
 }
 
-.function u1 main() {
+.function i32 main() {
     movi v0, 10
     movi v1, 0
     movi v2, 0

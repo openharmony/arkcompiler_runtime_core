@@ -13,100 +13,103 @@
 
 definitions: []
 tests:
-  - file-name: "ldai.64"
+  - file-name: ldai.64
     isa:
       title: Load accumulator from immediate
       description: >
         Load immediate into accumulator. For short formats immediate is sign extended to operand size.
       exceptions:
-          - x_none
+        - x_none
       verification:
-          - none
+        - none
     commands:
-      - file-name: "pos"
+      - file-name: pos
         isa:
           instructions:
             - sig: ldai.64 imm:i64
               acc: out:i64
               format: [op_imm_64]
+        check-type: no-check
         code-template: |
-            #   test case1 - should put result to accumulator
-                ldai.64 %s
-                movi.64 v0, %s
-                cmp.64 v0
+          #
+              ldai.64 %s
+              movi.64 v0, %s
+              cmp.64 v0
         description: Check ldai.64 with various positive values.
         tags: ['tsan']
         cases:
           - values:
-              - "0x0"
-              - "0x0"
+              - '0x0'
+              - '0x0'
           - values:
-              - "0"
-              - "0"
+              - '0'
+              - '0'
           - values:
-              - "1"
-              - "1"
+              - '1'
+              - '1'
           - values:
-              - "0x7FFFFFFFFFFFFFFF"
-              - "0x7FFFFFFFFFFFFFFF"
+              - '0x7FFFFFFFFFFFFFFF'
+              - '0x7FFFFFFFFFFFFFFF'
           - values:
-              - "0x1234567890ABCDEF"
-              - "0x1234567890ABCDEF"
+              - '0x1234567890ABCDEF'
+              - '0x1234567890ABCDEF'
           - values:
-              - "0x7FFFFFFFFFFFFFFF"
-              - "0x7FFFFFFFFFFFFFFF"
+              - '0x7FFFFFFFFFFFFFFF'
+              - '0x7FFFFFFFFFFFFFFF'
           - values:
-              - "0x8000000000000000"
-              - "0x8000000000000000"
+              - '0x8000000000000000'
+              - '0x8000000000000000'
           - values:
-              - "0.0"
-              - "0"
+              - '0.0'
+              - '0'
             runner-options: [compile-failure]
-            description: Check ldai.64 with incorrect positive values (f64).
+            description: Check ldai.64 with incorrect positive values (float).
           - values:
-              - "1.0"
-              - "1"
+              - '1.0'
+              - '1'
             runner-options: [compile-failure]
-            description: Check ldai.64 with incorrect positive values (f64).
-      - file-name: "neg"
+            description: Check ldai.64 with incorrect positive values (float).
+
+      - file-name: neg
         isa:
           instructions:
             - sig: ldai.64 imm:i64
               acc: out:i64
               format: [op_imm_64]
+        check-type: no-check
         code-template: |
-            #   test case1 - should put result to accumulator
-                ldai.64 %s
-                movi.64 v0, %s
-                cmp.64 v0
+          #
+              ldai.64 %s
+              movi.64 v0, %s
+              cmp.64 v0
         description: Check ldai.64 with various negative values.
         cases:
           - values:
-              - "-0x0"
-              - "0x0"
+              - '-0x0'
+              - '0x0'
           - values:
-              - "-0"
-              - "0"
+              - '-0'
+              - '0'
           - values:
-              - "-1"
-              - "-1"
+              - '-1'
+              - '-1'
           - values:
-              - "-0x7FFFFFFFFFFFFFFF"
-              - "-9223372036854775807‬"
+              - '-0x7FFFFFFFFFFFFFFF'
+              - '-9223372036854775807‬'
             runner-options: [compile-failure]
           - values:
-              - "-0x1234567890ABCDEF"
-              - "-0x1234567890ABCDEF"
+              - '-0x1234567890ABCDEF'
+              - '-0x1234567890ABCDEF'
           - values:
-              - "-0x8000000000000000"
-              - "0x8000000000000000"
+              - '-0x8000000000000000'
+              - '0x8000000000000000'
           - values:
-              - "-0.0"
-              - "0"
+              - '-0.0'
+              - '0'
             runner-options: [compile-failure]
-            description: Check ldai.64 with incorrect negative values (f64).
+            description: Check ldai.64 with incorrect negative values (float).
           - values:
-              - "-1.0"
-              - "-1"
+              - '-1.0'
+              - '-1'
             runner-options: [compile-failure]
-            description: Check ldai.64 with incorrect negative values (f64).
+            description: Check ldai.64 with incorrect negative values (float).

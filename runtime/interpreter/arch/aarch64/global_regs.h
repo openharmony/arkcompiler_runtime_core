@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INTERPRETER_ARCH_AARCH64_GLOBAL_REGS_H_
-#define PANDA_RUNTIME_INTERPRETER_ARCH_AARCH64_GLOBAL_REGS_H_
+#ifndef PANDA_INTERPRETER_ARCH_AARCH64_GLOBAL_REGS_H_
+#define PANDA_INTERPRETER_ARCH_AARCH64_GLOBAL_REGS_H_
 
 #include <cstdint>
 
@@ -26,14 +25,15 @@ class ManagedThread;
 namespace panda::interpreter::arch::regs {
 
 #ifndef FFIXED_REGISTERS
-#error "Need to compile source with -ffixed-x20 -ffixed-x21 -ffixed-x22 -ffixed-x23 -ffixed-x24 -ffixed-x28"
+#error "Need to compile source with -ffixed-x20 -ffixed-x21 -ffixed-x22 -ffixed-x23 -ffixed-x24 -ffixed-x25 -ffixed-x28"
 #endif
 
 register const uint8_t *g_pc asm("x20");
 register int64_t g_acc_value asm("x21");
-register uint64_t g_acc_tag asm("x22");
-register Frame *g_frame asm("x23");
+register int64_t g_acc_tag asm("x22");
+register void *g_fp asm("x23");
 register const void *const *g_dispatch_table asm("x24");
+register void *g_m_fp asm("x25");
 register ManagedThread *g_thread asm("x28");
 
 ALWAYS_INLINE inline const uint8_t *GetPc()
@@ -56,24 +56,44 @@ ALWAYS_INLINE inline void SetAccValue(int64_t value)
     g_acc_value = value;
 }
 
-ALWAYS_INLINE inline uint64_t GetAccTag()
+ALWAYS_INLINE inline int64_t GetAccTag()
 {
     return g_acc_tag;
 }
 
-ALWAYS_INLINE inline void SetAccTag(uint64_t tag)
+ALWAYS_INLINE inline void SetAccTag(int64_t tag)
 {
     g_acc_tag = tag;
 }
 
 ALWAYS_INLINE inline Frame *GetFrame()
 {
-    return g_frame;
+    return reinterpret_cast<Frame *>(reinterpret_cast<uintptr_t>(g_fp) - Frame::GetVregsOffset());
 }
 
 ALWAYS_INLINE inline void SetFrame(Frame *frame)
 {
-    g_frame = frame;
+    g_fp = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(frame) + Frame::GetVregsOffset());
+}
+
+ALWAYS_INLINE inline void *GetFp()
+{
+    return g_fp;
+}
+
+ALWAYS_INLINE inline void SetFp(void *fp)
+{
+    g_fp = fp;
+}
+
+ALWAYS_INLINE inline void *GetMirrorFp()
+{
+    return g_m_fp;
+}
+
+ALWAYS_INLINE inline void SetMirrorFp(void *m_fp)
+{
+    g_m_fp = m_fp;
 }
 
 ALWAYS_INLINE inline const void *const *GetDispatchTable()
@@ -98,4 +118,4 @@ ALWAYS_INLINE inline void SetThread(ManagedThread *thread)
 
 }  // namespace panda::interpreter::arch::regs
 
-#endif  // PANDA_RUNTIME_INTERPRETER_ARCH_AARCH64_GLOBAL_REGS_H_
+#endif  // PANDA_INTERPRETER_ARCH_AARCH64_GLOBAL_REG_VARS_H_

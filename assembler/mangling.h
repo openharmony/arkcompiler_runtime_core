@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_MANGLING_H_
-#define PANDA_ASSEMBLER_MANGLING_H_
+#ifndef _PANDA_ASSEMBLER_MANGLING_H
+#define _PANDA_ASSEMBLER_MANGLING_H
 
 #include "assembly-function.h"
 
@@ -22,21 +22,13 @@
 #include <vector>
 
 namespace panda::pandasm {
-static std::string MANGLE_BEGIN = ":";
-static std::string MANGLE_SEPARATOR = ";";
+constexpr const std::string_view MANGLE_BEGIN = ":";
+constexpr const std::string_view MANGLE_SEPARATOR = ";";
 
-inline std::string MangleFunctionName(const std::string &name, const std::vector<pandasm::Function::Parameter> &params,
-                                      const pandasm::Type &return_type)
-{
-    std::string mangle_name {name};
-    mangle_name += MANGLE_BEGIN;
-    for (const auto &p : params) {
-        mangle_name += p.type.GetName() + MANGLE_SEPARATOR;
-    }
-    mangle_name += return_type.GetName() + MANGLE_SEPARATOR;
-
-    return mangle_name;
-}
+constexpr const std::string_view SIGNATURE_BEGIN = MANGLE_BEGIN;
+constexpr const std::string_view SIGNATURE_TYPES_SEPARATOR = ",";
+constexpr const std::string_view SIGNATURE_TYPES_SEPARATOR_L = "(";
+constexpr const std::string_view SIGNATURE_TYPES_SEPARATOR_R = ")";
 
 inline std::string DeMangleName(const std::string &name)
 {
@@ -47,14 +39,55 @@ inline std::string DeMangleName(const std::string &name)
     return name;
 }
 
+inline std::string MangleFunctionName(const std::string &name, const std::vector<pandasm::Function::Parameter> &params,
+                                      const pandasm::Type &return_type)
+{
+    std::string mangle_name {name};
+    mangle_name += MANGLE_BEGIN;
+    for (const auto &p : params) {
+        mangle_name += p.type.GetName() + std::string(MANGLE_SEPARATOR);
+    }
+    mangle_name += return_type.GetName() + std::string(MANGLE_SEPARATOR);
+
+    return mangle_name;
+}
+
 inline std::string MangleFieldName(const std::string &name, const pandasm::Type &type)
 {
     std::string mangle_name {name};
     mangle_name += MANGLE_BEGIN;
-    mangle_name += type.GetName() + MANGLE_SEPARATOR;
+    mangle_name += type.GetName() + std::string(MANGLE_SEPARATOR);
     return mangle_name;
+}
+
+inline std::string GetFunctionSignatureFromName(std::string name,
+                                                const std::vector<pandasm::Function::Parameter> &params)
+{
+    name += SIGNATURE_BEGIN;
+    name += SIGNATURE_TYPES_SEPARATOR_L;
+
+    bool first = true;
+    for (const auto &p : params) {
+        name += (first) ? "" : SIGNATURE_TYPES_SEPARATOR;
+        first = false;
+        name += p.type.GetPandasmName();
+    }
+
+    name += SIGNATURE_TYPES_SEPARATOR_R;
+
+    return name;
+}
+
+inline std::string GetFunctionNameFromSignature(const std::string &sig)
+{
+    return DeMangleName(sig);
+}
+
+inline bool IsSignatureOrMangled(const std::string &str)
+{
+    return str.find(SIGNATURE_BEGIN) != std::string::npos;
 }
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_MANGLING_H_
+#endif  // !_PANDA_ASSEMBLER_MANGLING_HPP

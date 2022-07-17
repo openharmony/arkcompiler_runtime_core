@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_OBJECT_POINTER_H_
-#define PANDA_LIBPANDABASE_MEM_OBJECT_POINTER_H_
+#ifndef PANDA_LIBPANDABASE_MEM_OBJECT_POINTER_H
+#define PANDA_LIBPANDABASE_MEM_OBJECT_POINTER_H
 
 #include "mem.h"
 
@@ -140,4 +140,4 @@ static_assert(sizeof(ObjectPointer<bool>) == sizeof(object_pointer_type));
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_OBJECT_POINTER_H_
+#endif  // PANDA_LIBPANDABASE_MEM_OBJECT_POINTER_H

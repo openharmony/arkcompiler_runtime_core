@@ -59,12 +59,10 @@ tests:
           - values:
               - "0x80000000"
               - "0x80000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0x80000000"
               - "0x80000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0xFFFFFFFF"
@@ -108,17 +106,14 @@ tests:
           - values:
               - "-0x7FFFFFFF"
               - "0x80000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0x80000000"
               - "0x80000001"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0x80000000"
               - "0x80000001"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0xFFFFFFFF"
@@ -202,7 +197,6 @@ tests:
           - values:
               - "-1"
               - "0x80000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0x7fffffff"
@@ -210,22 +204,18 @@ tests:
           - values:
               - "-0x7fffffff"
               - "0xfffffffe"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0x80000000"
               - "0xffffffff"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0x80000000"
               - "0xffffffff"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0xffffffff"
               - "0x80000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0xffffffff"
@@ -257,7 +247,6 @@ tests:
           - values:
               - "1"
               - "0x7fffffff"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-1"
@@ -265,7 +254,6 @@ tests:
           - values:
               - "0x7fffffff"
               - "1"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0x7fffffff"
@@ -282,7 +270,6 @@ tests:
           - values:
               - "-0xffffffff"
               - "0x7fffffff"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
 
       - file-name: "vals"
@@ -322,13 +309,11 @@ tests:
               - "0x5aac44d7"
               - "0xbe450a68"
               - "0x9c673a6f"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0xa9a2ee6d"
               - "0x6e000ede"
               - "0x3ba2df8f"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0xd9ec934b"
@@ -338,7 +323,6 @@ tests:
               - "0xc5c7ee89"
               - "0x600e6f58"
               - "0x65b97f31"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0x76016f79"
@@ -352,13 +336,12 @@ tests:
               - "0x82250785"
               - "0xac94f78"
               - "0x775bb80d"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
 
       - file-name: "vals_mod32_1"
         bugid: ['1324', '2072']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: sub v1:in:i32, v2:in:i32
@@ -377,13 +360,11 @@ tests:
               - "0"
               - "0x80000000"
               - "0xFFFFFFFF80000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0x80000000"
               - "1"
               - "0x7FFFFFFF"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0x80000000"
@@ -393,7 +374,7 @@ tests:
       - file-name: "vals_mod32_2"
         bugid: ['1324']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: sub v1:in:i32, v2:in:i32
@@ -412,13 +393,11 @@ tests:
                 - "0"
                 - "0x180000000"
                 - "0xFFFFFFFF80000000"
-              tags: ["clang_release_sanitizer"]
               bugid: ['966']
             - values:
                 - "0x1234567680000000"
                 - "1"
                 - "0x7FFFFFFF"
-              tags: ["clang_release_sanitizer"]
               bugid: ['966']
             - values:
                 - "0x7654321080000000"
@@ -455,33 +434,147 @@ tests:
             runner-options:
               - compile-failure
 
-      - file-name: "type"
-        tags: ["verifier"]
-        bugid: ['966', '964']
+      - file-name: type
+        isa:
+          verification:
+            - v1_type
+            - v2_type
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
+        header-template: []
+        code-template: |
+          #
+          .record A {}
+          .record B {}
+          .record panda.String <external>
+          .record panda.Object <external>
+          .function i32 main() {
+              %s
+              *s
+              sub v0, v1
+        check-type: exit-positive
+        description: Check 'sub' with incorrect register types.
+        template-cases:
+          - values:
+              - movi v0, 0
+            exclude: [val]
+          - values:
+              - movi.64 v0, 0
+          - values:
+              - fmovi v0, 0
+          - values:
+              - fmovi.64 v0, 0
+          - values:
+              - |
+                #
+                    lda.type B
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type B[]
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type panda.String
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type panda.Object
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    movi v0, 10
+                    newarr v0, v0, i32[]
+          - values:
+              - mov.null v0
+        cases:
+          - values:
+              - movi v1, 0
+            id: val
+          - values:
+              - movi.64 v1, 0
+          - values:
+              - fmovi v1, 0
+          - values:
+              - fmovi.64 v1, 0
+          - values:
+              - |
+                #
+                    lda.type A
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    lda.type A[]
+                    sta.obj v1
+
+          - values:
+              - |
+                #
+                    lda.type panda.String
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    lda.type panda.Object
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    movi v1, 10
+                    newarr v1, v1, f64[]
+          - values:
+              - mov.null v1
+
+
+      - file-name: uninitialized_regs
         isa:
           instructions:
             - sig: sub v1:in:i32, v2:in:i32
               acc: out:i32
               format: [op_v1_4_v2_4]
-          verification:
-            - v1_type
-            - v2_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        description: Check 'sub' with uninitialized registers.
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
-          #
-              %s
-              %s
-              sub v0, v1
-              ldai 0
-        check-type: no-check
-        description: Check sub with incorrect register types.
+            #
+                %s
+                *s
+                sub %s, *s
+        check-type: exit-positive
+        template-cases:
+          - values:
+              - ''
+              - v0
+          - values:
+              - movi v0, 0
+              - v0
+            exclude: [init]
+          - values:
+              - ''
+              - v7
+          - values:
+              - ''
+              - v15
+          - values:
+              - 'movi v15, 0'
+              - v15
+            exclude: [init]
         cases:
           - values:
-              - "movi v0, 0"
-              - "mov.null v1"
+              - ''
+              - v1
           - values:
-              - "mov.null v0"
-              - "movi v1, 0"
+              - movi v1, 0
+              - v1
+            id: init
           - values:
-              - "mov.null v0"
-              - "mov.null v1"
+              - ''
+              - v8
+          - values:
+              - ''
+              - v14

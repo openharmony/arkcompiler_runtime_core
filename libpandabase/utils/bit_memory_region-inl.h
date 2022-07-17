@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_REGION_INL_H_
-#define PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_REGION_INL_H_
+#ifndef LIBPANDABASE_UTILS_BIT_MEMORY_REGION_INL_H
+#define LIBPANDABASE_UTILS_BIT_MEMORY_REGION_INL_H
 
 #include "bit_memory_region.h"
 
@@ -34,7 +34,6 @@ void BitMemoryRegion<Base>::Dump(std::ostream &os) const
         for (ssize_t i = Size() - width; i >= 0; i -= width) {
             auto val = Read(i, width);
             if (val != 0 || !is_zero) {
-                // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
                 if (!is_zero) {
                     os << std::setw(static_cast<int>(width / BITS_PER_HEX_DIGIT)) << std::setfill('0');
                 }
@@ -63,5 +62,4 @@ inline std::ostream &operator<<(std::ostream &os, const BitMemoryRegion<T> &regi
 }
 
 }  // namespace panda
-
-#endif  // PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_REGION_INL_H_
+#endif  // LIBPANDABASE_UTILS_BIT_MEMORY_REGION_INL_H

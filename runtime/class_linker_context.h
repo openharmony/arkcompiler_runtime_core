@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef PANDA_RUNTIME_CLASS_LINKER_CONTEXT_H_
 #define PANDA_RUNTIME_CLASS_LINKER_CONTEXT_H_
 
@@ -33,6 +32,7 @@ class ClassLinkerErrorHandler;
 
 class ClassLinkerContext {
 public:
+    explicit ClassLinkerContext(panda_file::SourceLang lang) : lang_(lang) {}
     Class *FindClass(const uint8_t *descriptor)
     {
         os::memory::LockHolder lock(classes_lock_);
@@ -47,6 +47,11 @@ public:
     virtual bool IsBootContext() const
     {
         return false;
+    }
+
+    panda_file::SourceLang GetSourceLang()
+    {
+        return lang_;
     }
 
     virtual Class *LoadClass([[maybe_unused]] const uint8_t *descriptor, [[maybe_unused]] bool need_copy_descriptor,
@@ -65,9 +70,6 @@ public:
 
         ASSERT(klass->GetSourceLang() == lang_);
         loaded_classes_.insert({klass->GetDescriptor(), klass});
-        if (record_new_class_) {
-            new_classes_.push_back(klass);
-        }
         return nullptr;
     }
 
@@ -78,44 +80,18 @@ public:
     }
 
     template <class Callback>
-    bool EnumerateClasses(const Callback &cb, mem::VisitGCRootFlags flags = mem::VisitGCRootFlags::ACCESS_ROOT_ALL)
+    bool EnumerateClasses(const Callback &cb)
     {
-        ASSERT(BitCount(flags & (mem::VisitGCRootFlags::ACCESS_ROOT_ALL | mem::VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW |
-                                 mem::VisitGCRootFlags::ACCESS_ROOT_NONE)) == 1);
-        if ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ALL) != 0) {
-            os::memory::LockHolder lock(classes_lock_);
-            for (const auto &v : loaded_classes_) {
-                if (!cb(v.second)) {
-                    return false;
-                }
+        os::memory::LockHolder lock(classes_lock_);
+        for (const auto &v : loaded_classes_) {
+            if (!cb(v.second)) {
+                return false;
             }
-        } else if ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW) != 0) {
-            os::memory::LockHolder lock(classes_lock_);
-            for (const auto klass : new_classes_) {
-                if ((klass != nullptr) && (!cb(klass))) {
-                    return false;
-                }
-            }
-        } else if ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_NONE) != 0) {
-            // Just for starting record new classes.
-        } else {
-            LOG(FATAL, CLASS_LINKER) << "Unknown VisitGCRootFlags: " << static_cast<uint32_t>(flags);
-            UNREACHABLE();
         }
-
-        ASSERT(BitCount(flags & (mem::VisitGCRootFlags::START_RECORDING_NEW_ROOT |
-                                 mem::VisitGCRootFlags::END_RECORDING_NEW_ROOT)) <= 1);
-        if ((flags & mem::VisitGCRootFlags::START_RECORDING_NEW_ROOT) != 0) {
-            os::memory::LockHolder lock(classes_lock_);
-            record_new_class_ = true;
-        } else if ((flags & mem::VisitGCRootFlags::END_RECORDING_NEW_ROOT) != 0) {
-            os::memory::LockHolder lock(classes_lock_);
-            record_new_class_ = false;
-            new_classes_.clear();
-        }
-
         return true;
     }
+
+    virtual void EnumeratePandaFiles(const std::function<bool(const panda_file::File &)> & /* cb */) const {}
 
     size_t NumLoadedClasses()
     {
@@ -184,20 +160,13 @@ public:
     NO_COPY_SEMANTIC(ClassLinkerContext);
     NO_MOVE_SEMANTIC(ClassLinkerContext);
 
-#ifndef NDEBUG
-protected:
-    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    panda_file::SourceLang lang_ {panda_file::SourceLang::PANDA_ASSEMBLY};
-#endif  // NDEBUG
-
 private:
     // Dummy fix of concurrency issues to evaluate degradation
     os::memory::RecursiveMutex classes_lock_;
     PandaUnorderedMap<const uint8_t *, Class *, utf::Mutf8Hash, utf::Mutf8Equal> loaded_classes_
         GUARDED_BY(classes_lock_);
     PandaVector<ObjectPointer<ObjectHeader>> roots_;
-    bool record_new_class_ {false};
-    PandaVector<Class *> new_classes_;
+    panda_file::SourceLang lang_ {panda_file::SourceLang::PANDA_ASSEMBLY};
 };
 
 }  // namespace panda

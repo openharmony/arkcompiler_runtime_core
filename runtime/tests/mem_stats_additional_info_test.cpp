@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public:
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
+        options.SetGcType("epsilon");
         Runtime::Create(options);
         thread_ = panda::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
@@ -49,7 +50,7 @@ public:
     }
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
 };
 
 TEST_F(MemStatsAdditionalInfoTest, HeapAllocatedMaxAndTotal)

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include "assembly-program.h"
-
 #include <sstream>
 
 #include "ide_helpers.h"
+#include "assembly-program.h"
 
 namespace panda::pandasm {
 

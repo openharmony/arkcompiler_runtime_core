@@ -16,7 +16,7 @@
 .function f32 Math.fcos (f32 a0) <external>
 .function f32 Math.absF32 (f32 a0) <external>
 
-.function u1 main(){
+.function i32 main(){
     fmovi v0, 1.0
     fmovi v1, 0.5403023059
     fmovi v2, 1e-6

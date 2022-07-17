@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_MEM_STATS_H_
-#define PANDA_RUNTIME_MEM_MEM_STATS_H_
+#ifndef PANDA_RUNTIME_MEM_STATS_H
+#define PANDA_RUNTIME_MEM_STATS_H
 
 #include <chrono>
 #include <cstdint>
@@ -50,7 +49,11 @@ public:
 
     void RecordAllocateObject(size_t size, SpaceType type_mem);
 
-    void RecordMovedObjects(size_t total_object_num, size_t size, SpaceType type_mem);
+    void RecordAllocateObjects(size_t total_object_num, size_t total_object_size, SpaceType type_mem);
+
+    void RecordYoungMovedObjects(size_t young_object_num, size_t size, SpaceType type_mem);
+
+    void RecordTenuredMovedObjects(size_t tenured_object_num, size_t size, SpaceType type_mem);
 
     void RecordFreeObject(size_t object_size, SpaceType type_mem);
 
@@ -104,6 +107,16 @@ public:
      */
     [[nodiscard]] uint64_t GetHumonguousObjectsCountAlive() const;
 
+    /**
+     *  Number of moved bytes in last gc
+     */
+    [[nodiscard]] uint64_t GetLastYoungObjectsMovedBytes() const;
+
+    void ClearLastYoungObjectsMovedBytes()
+    {
+        last_young_objects_moved_bytes_ = 0;
+    }
+
     PandaString GetStatistics(HeapManager *heap_manager);
 
     uint64_t GetMinGCPause() const;
@@ -122,6 +135,8 @@ private:
     duration sum_pause_ = duration(0);
     uint64_t pause_count_ = 0;
 
+    std::atomic_uint64_t last_young_objects_moved_bytes_ = 0;
+
     // make groups of different parts of the VM (JIT, interpreter, etc)
     std::atomic_uint64_t objects_allocated_ = 0;
     std::atomic_uint64_t objects_freed_ = 0;
@@ -131,5 +146,4 @@ private:
 };
 
 }  // namespace panda::mem
-
-#endif  // PANDA_RUNTIME_MEM_MEM_STATS_H_
+#endif  // PANDA_RUNTIME_MEM_STATS_H

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TOOLING_PT_THREAD_INFO_H_
-#define PANDA_RUNTIME_TOOLING_PT_THREAD_INFO_H_
+#ifndef PANDA_TOOLING_PT_THREAD_INFO_H
+#define PANDA_TOOLING_PT_THREAD_INFO_H
 
 #include <cstdint>
 
+#include "runtime/include/panda_vm.h"
 #include "runtime/include/tooling/pt_object.h"
-#include "pt_reference_private.h"
+#include "runtime/mem/refstorage/global_object_storage.h"
 #include "pt_hook_type_info.h"
 
 namespace panda::tooling {
@@ -29,7 +30,6 @@ public:
 
     ~PtThreadInfo()
     {
-        ASSERT(pt_exception_ref_ == nullptr);
         ASSERT(managed_thread_ref_ == nullptr);
     }
 
@@ -38,79 +38,34 @@ public:
         return hook_type_info_;
     }
 
-    bool GetPtIsEnteredFlag() const
-    {
-        return pt_is_entered_flag_;
-    }
-
-    void SetPtIsEnteredFlag(bool flag)
-    {
-        pt_is_entered_flag_ = flag;
-    }
-
-    bool GetPtActiveExceptionThrown() const
-    {
-        return pt_active_exception_thrown_;
-    }
-
-    void SetPtActiveExceptionThrown(bool value)
-    {
-        pt_active_exception_thrown_ = value;
-    }
-
-    void SetCurrentException(PtObject object)
-    {
-        ASSERT(pt_exception_ref_ == nullptr);
-        pt_exception_ref_ = PtCreateGlobalReference(object.GetReference());
-    }
-
-    void ResetCurrentException()
-    {
-        ASSERT(pt_exception_ref_ != nullptr);
-        PtDestroyGlobalReference(pt_exception_ref_);
-        pt_exception_ref_ = nullptr;
-    }
-
-    PtObject GetCurrentException() const
-    {
-        return PtObject(pt_exception_ref_);
-    }
-
-    void SetThreadObjectHeader(const ObjectHeader *threadObjectHeader)
+    void SetThreadObjectHeader(ObjectHeader *threadObjectHeader)
     {
         ASSERT(managed_thread_ref_ == nullptr);
-        managed_thread_ref_ = PtCreateGlobalReference(threadObjectHeader);
+        managed_thread_ref_ = PandaVM::GetCurrent()->GetGlobalObjectStorage()->Add(threadObjectHeader,
+                                                                                   mem::Reference::ObjectType::GLOBAL);
     }
 
     void Destroy()
     {
         if (managed_thread_ref_ != nullptr) {
-            PtDestroyGlobalReference(managed_thread_ref_);
+            PandaVM::GetCurrent()->GetGlobalObjectStorage()->Remove(managed_thread_ref_);
             managed_thread_ref_ = nullptr;
-        }
-
-        if (pt_exception_ref_ != nullptr) {
-            PtDestroyGlobalReference(pt_exception_ref_);
-            pt_exception_ref_ = nullptr;
         }
     }
 
-    PtReference *GetThreadRef() const
+    ObjectHeader *GetThreadObjectHeader() const
     {
-        return managed_thread_ref_;
+        ASSERT(managed_thread_ref_ != nullptr);
+        return PandaVM::GetCurrent()->GetGlobalObjectStorage()->Get(managed_thread_ref_);
     }
 
 private:
     PtHookTypeInfo hook_type_info_ {false};
-    bool pt_is_entered_flag_ {false};
-    bool pt_active_exception_thrown_ {false};
-    PtGlobalReference *pt_exception_ref_ {nullptr};
-    PtGlobalReference *managed_thread_ref_ {nullptr};
+    mem::Reference *managed_thread_ref_ {nullptr};
 
     NO_COPY_SEMANTIC(PtThreadInfo);
     NO_MOVE_SEMANTIC(PtThreadInfo);
 };
-
 }  // namespace panda::tooling
 
-#endif  // PANDA_RUNTIME_TOOLING_PT_THREAD_INFO_H_
+#endif  // PANDA_TOOLING_PT_THREAD_INFO_H

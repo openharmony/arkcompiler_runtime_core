@@ -46,11 +46,11 @@ definitions:
         return.void
       }
 
-  - name: java_header
+  - name: PandaAssembly_header
     template: |
-      .language Java
+      .language PandaAssembly
 
-      .record java.lang.Object <external>
+      .record panda.Object <external>
 
       .record Q {}
       .function void Q.ctor(Q a0) <ctor> {
@@ -70,8 +70,8 @@ definitions:
         i32[]          fi32Array
         Q              fQ
         Q[]            fQArray
-        java.lang.Object   fObj
-        java.lang.Object[] fObjArray
+        panda.Object   fObj
+        panda.Object[] fObjArray
       }
       .function void R.ctor(R a0) <ctor> {
         return.void
@@ -106,7 +106,7 @@ tests:
         check-type: exit-positive
         tags: ['verifier']
         bugid: ['1324', '2084']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
 
           .function i32 main() {
@@ -131,7 +131,7 @@ tests:
             - x_null
         header-template: ['pandasm_header', 'get_null_R']
         check-type: empty
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         code-template: |
           .record panda.NullPointerException <external>
 
@@ -162,6 +162,46 @@ tests:
             - R.fu32
           - values:
             - R.fi32
+          - values:
+            - R.ff32
+
+      - file-name: "with_null_ref_j"
+        description: Check that NullPointerException is thrown if object ref is null in PandaAssembly context.
+        isa:
+          exceptions:
+            - x_null
+        header-template: ['PandaAssembly_header', 'get_null_R']
+        runner-options: [use-pa]
+        check-type: empty
+        tags: ['tsan', 'irtoc_ignore']
+        code-template: |
+          .record panda.NullPointerException <external>
+
+          .function i32 main() {
+            call.short get_null_R
+            sta.obj v0
+          try_begin:
+            ldobj v0, %s
+            ldai 1
+            return
+          try_end:
+            ldai 0
+            return
+          .catch panda.NullPointerException, try_begin, try_end, try_end
+          }
+        cases:
+          - values:
+            - R.fu1
+          - values:
+            - R.fi8
+          - values:
+            - R.fu16
+          - values:
+            - R.fi16
+          - values:
+            - R.fi32
+          - values:
+            - R.ff32
 
       - file-name: "with_non_object_ref"
         description: Check that verifier reports an error when the 1st operand is not a ref to an object (other than array)
@@ -169,43 +209,35 @@ tests:
           verification:
             - v1_object
         header-template: ['pandasm_header']
-        check-type: empty
+        check-type: exit-positive
         tags: ['verifier']
         bugid: ['2085']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
 
           .function i32 main() {
             %s
-          try_begin:
             ldobj v0, R.fu1
-          try_end:
-            ldai 0
-            return
-          .catchall try_begin, try_end, try_end
-          }
         cases:
           - values:
             - movi v0, 0
-            tags: ['release', 'clang_release_sanitizer']
             bugid: ['1324', '1826']
           - values:
             - movi v0, 1
           - values:
             - movi.64 v0, 0x00
-            tags: ['release', 'clang_release_sanitizer']
             bugid: ['1324', '1826']
           - values:
             - movi.64 v0, 0xCAFECAFECAFECAFE
           - values:
             - fmovi.64 v0, 0.0
-            tags: ['release', 'clang_release_sanitizer']
             bugid: ['1324', '1826']
           - values:
             - fmovi.64 v0, 6.62607015
           - values:
             - |
-                movi v1, 10
+                #
+                  movi v1, 10
                   newarr v0, v1, R[]
             bugid: ['1827']
 
@@ -239,7 +271,7 @@ tests:
           - values:
             - W.static_field
             tags: ['verifier']
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1324', '1828', '2086']
           - values:
             - random_record_name
@@ -253,9 +285,8 @@ tests:
           - values:
             - random_record_name.random_field_name
             tags: ['verifier']
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['1833', '2086', '3536']
-            ignore: true
           - values:
             - 0
             runner-options: ['compile-failure']
@@ -278,7 +309,7 @@ tests:
         header-template: ['pandasm_header']
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         bugid: ['1834', '2088']
         code-template: |
 
@@ -294,13 +325,46 @@ tests:
           - values:
             - R.ff64
           - values:
-            - R.ff32
-          - values:
             - R.fObj
           - values:
             - R.fObjArray
           - values:
             - R.fi32Array
+
+
+      - file-name: "with_correct_field_size_or_type"
+        description: Check that verifier does not report any error when the field has size or type corresponding to bytecode
+        isa:
+          verification:
+            - field_id_size
+        header-template: ['pandasm_header']
+        check-type: exit-positive
+        tags: ['verifier']
+        runner-options: ['verifier-only', 'verifier-config']
+        code-template: |
+
+          .function i32 main() {
+            initobj R.ctor
+            sta.obj v0
+            ldobj v0, %s
+        cases:
+          - values:
+            - R.fu1
+          - values:
+            - R.fu8
+          - values:
+            - R.fi8
+          - values:
+            - R.fu16
+          - values:
+            - R.fi16
+          - values:
+            - R.fu32
+          - values:
+            - R.fi32
+          - values:
+            - R.ff32
+            bugid: ["7245"]
 
 
       - file-name: "op_v_8_id_16"
@@ -328,6 +392,7 @@ tests:
           - values: ['1']
           - values: ['"0"']
 
+
       - file-name: "from_all_field_types"
         description: Check that field value is loaded into accumulator. More tests on ldobj can be found in stobj tests
         isa:
@@ -336,6 +401,7 @@ tests:
             most significant bits are sign or unsigned extended based on the field type to fit accumulator size.
             If field type is less than 32, then loaded value is sign or zero extended to i32 depending on field type.
         header-template: ['pandasm_header']
+        runner-options: ['verifier-config']
         check-type: exit-positive
         tags: ['tsan']
         code-template: |
@@ -370,6 +436,7 @@ tests:
           - values: [0xffffffff, 'u32', 0xffffffff, 'u32', 'ucmp']
           - values: [0xa5a5a5a5, 'u32', 0xa5a5a5a5, 'u32', 'ucmp']
 
+
       - file-name: "from_all_field_types_int"
         description: Version for signed integer types
         isa:
@@ -378,8 +445,9 @@ tests:
             most significant bits are sign or unsigned extended based on the field type to fit accumulator size.
             If field type is less than 32, then loaded value is sign or zero extended to i32 depending on field type.
         header-template: ['pandasm_header']
+        runner-options: ['verifier-config']
         check-type: exit-positive
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         code-template: |
 
           .function i32 main() {
@@ -411,6 +479,7 @@ tests:
           - values: [0xa5a5a5a5, 'i32', 0xa5a5a5a5, 'i32']
           - values: [0x5a5a5a5a, 'i32', 0x5a5a5a5a, 'i32']
 
+
       - file-name: "from_float_field_type"
         description: Check that accumulator value is loaded from field into accumulator. More tests on ldobj can be found in stobj tests
         isa:
@@ -418,7 +487,9 @@ tests:
             - sig: ldobj v:in:ref, field_id
               acc: out:b32
               format: [op_v_8_id_16]
+        tags: ['irtoc_ignore']
         header-template: ['pandasm_header']
+        runner-options: ['verifier-config']
         bugid: ['3292']
         check-type: exit-positive
         code-template: |

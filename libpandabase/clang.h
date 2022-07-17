@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_CLANG_H_
-#define PANDA_LIBPANDABASE_CLANG_H_
+#ifndef THREAD_SAFETY_ANALYSIS_MUTEX_H
+#define THREAD_SAFETY_ANALYSIS_MUTEX_H
 
 // Based on Thread safety analysis annotations taken from https://clang.llvm.org/docs/ThreadSafetyAnalysis.html
 
@@ -93,4 +93,4 @@
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_THREAD_SAFETY_ANALYSIS THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)
 
-#endif  // PANDA_LIBPANDABASE_CLANG_H_
+#endif  // THREAD_SAFETY_ANALYSIS_MUTEX_H

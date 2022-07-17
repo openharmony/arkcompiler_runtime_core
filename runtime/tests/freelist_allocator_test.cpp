@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ class FreeListAllocatorTest : public AllocatorTest<NonObjectFreeListAllocator> {
 public:
     FreeListAllocatorTest()
     {
+        // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
         // We need to create a runtime instance to be able to use CrossingMap.
         options_.SetShouldLoadBootPandaFiles(false);
         options_.SetShouldInitializeIntrinsics(false);
@@ -53,10 +54,11 @@ public:
             CrossingMapSingleton::Destroy();
         }
         Runtime::Destroy();
+        // Logger::Destroy();
     }
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
     static constexpr size_t DEFAULT_POOL_SIZE_FOR_ALLOC = NonObjectFreeListAllocator::GetMinPoolSize();
     static constexpr size_t DEFAULT_POOL_ALIGNMENT_FOR_ALLOC = FREELIST_DEFAULT_ALIGNMENT;
     static constexpr size_t POOL_HEADER_SIZE = sizeof(NonObjectFreeListAllocator::MemoryPoolHeader);
@@ -128,7 +130,9 @@ TEST_F(FreeListAllocatorTest, AllocateWriteFreeTest)
 TEST_F(FreeListAllocatorTest, AllocateRandomFreeTest)
 {
     static constexpr size_t ALLOC_SIZE = FREELIST_ALLOCATOR_MIN_SIZE;
-    AllocateFreeDifferentSizesTest<ALLOC_SIZE, 2 * ALLOC_SIZE>(512);
+    static constexpr size_t ELEMENTS_COUNT = 512;
+    static constexpr size_t POOLS_COUNT = 1;
+    AllocateFreeDifferentSizesTest<ALLOC_SIZE, 2 * ALLOC_SIZE>(ELEMENTS_COUNT, POOLS_COUNT);
 }
 
 TEST_F(FreeListAllocatorTest, AllocateTooBigObjTest)
@@ -266,7 +270,7 @@ TEST_F(FreeListAllocatorTest, AllocateTheWholePoolFreeAndAllocateAgainTest)
     if ((FREELIST_ALLOCATOR_MIN_SIZE & (FREELIST_ALLOCATOR_MIN_SIZE - 1)) == 0U) {
         min_size_power_of_two = panda::helpers::math::GetIntLog2(FREELIST_ALLOCATOR_MIN_SIZE);
     } else {
-        min_size_power_of_two = ceil(std::log(FREELIST_ALLOCATOR_MIN_SIZE) / std::log(2U));
+        min_size_power_of_two = ceil(std::log(FREELIST_ALLOCATOR_MIN_SIZE) / std::log(2));
     }
     if (((1 << min_size_power_of_two) - sizeof(freelist::MemoryBlockHeader)) < FREELIST_ALLOCATOR_MIN_SIZE) {
         min_size_power_of_two++;
@@ -338,7 +342,7 @@ TEST_F(FreeListAllocatorTest, MTAllocFreeTest)
     static constexpr size_t MT_TEST_RUN_COUNT = 5;
     // Threads can concurrently add Pools to the allocator, therefore, we must make it into account
     // And also we must take fragmentation into account
-    ASSERT_TRUE(mem::MemConfig::GetObjectPoolSize() >
+    ASSERT_TRUE(mem::MemConfig::GetHeapSizeLimit() >
                 2 * (AlignUp(MAX_ELEMENTS_COUNT * MAX_MT_ALLOC_SIZE, DEFAULT_POOL_SIZE_FOR_ALLOC)) +
                     THREADS_COUNT * DEFAULT_POOL_SIZE_FOR_ALLOC);
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
@@ -362,7 +366,7 @@ TEST_F(FreeListAllocatorTest, MTAllocIterateTest)
     static constexpr size_t MT_TEST_RUN_COUNT = 5;
     // Threads can concurrently add Pools to the allocator, therefore, we must make it into account
     // And also we must take fragmentation into account
-    ASSERT_TRUE(mem::MemConfig::GetObjectPoolSize() >
+    ASSERT_TRUE(mem::MemConfig::GetHeapSizeLimit() >
                 2 * (AlignUp(MAX_ELEMENTS_COUNT * MAX_MT_ALLOC_SIZE, DEFAULT_POOL_SIZE_FOR_ALLOC)) +
                     THREADS_COUNT * DEFAULT_POOL_SIZE_FOR_ALLOC);
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
@@ -386,7 +390,7 @@ TEST_F(FreeListAllocatorTest, MTAllocCollectTest)
     static constexpr size_t MT_TEST_RUN_COUNT = 5;
     // Threads can concurrently add Pools to the allocator, therefore, we must make it into account
     // And also we must take fragmentation into account
-    ASSERT_TRUE(mem::MemConfig::GetObjectPoolSize() >
+    ASSERT_TRUE(mem::MemConfig::GetHeapSizeLimit() >
                 2 * (AlignUp(MAX_ELEMENTS_COUNT * MAX_MT_ALLOC_SIZE, DEFAULT_POOL_SIZE_FOR_ALLOC)) +
                     THREADS_COUNT * DEFAULT_POOL_SIZE_FOR_ALLOC);
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
@@ -394,6 +398,44 @@ TEST_F(FreeListAllocatorTest, MTAllocCollectTest)
                                                                                            MAX_ELEMENTS_COUNT);
         ClearPoolManager(true);
     }
+}
+
+/*
+ * This test checks that `Free` clears padding status bits in MemoryBlockHeader.
+ * We allocate 4 consecutive blocks and free the 3rd and 1st ones. After it we
+ * allocate block that needs alignment that leads to padding size is saved after
+ * block header and PADDING_STATUS_COMMON_HEADER_WITH_PADDING_SIZE bit is set.
+ * We free this block and allocator overwrites padding size by pointer to the next
+ * free block. Allocator should clear padding status otherwise incorrect padding
+ * will be used and we got heap corruption.
+ */
+TEST_F(FreeListAllocatorTest, AlignTest)
+{
+    auto mem_stats = std::unique_ptr<mem::MemStatsType>();
+    NonObjectFreeListAllocator allocator(mem_stats.get());
+    AddMemoryPoolToAllocator(allocator);
+
+    auto *ptr1 = allocator.Alloc(1678U);
+    auto *ptr2 = allocator.Alloc(1678U);
+    auto *ptr3 = allocator.Alloc(1678U);
+    auto *ptr4 = allocator.Alloc(1678U);
+
+    allocator.Free(ptr3);
+    allocator.Free(ptr1);
+
+    auto *ptr5 = allocator.Alloc(1536U, GetLogAlignment(128U));
+    ASSERT_FALSE(IsAligned(reinterpret_cast<uintptr_t>(ptr3), 128U));
+    ASSERT_TRUE(IsAligned(reinterpret_cast<uintptr_t>(ptr5), 128U));
+    allocator.Free(ptr5);
+
+    auto *ptr6 = allocator.Alloc(1272U);
+    // allocations 5 and 6 should use the same memory block. But after free padding bits
+    // should be cleared so pointers will be not equal.
+    ASSERT_TRUE(ptr5 != ptr6);
+    allocator.Free(ptr6);
+
+    allocator.Free(ptr2);
+    allocator.Free(ptr4);
 }
 
 }  // namespace panda::mem

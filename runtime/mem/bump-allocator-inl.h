@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_BUMP_ALLOCATOR_INL_H_
-#define PANDA_RUNTIME_MEM_BUMP_ALLOCATOR_INL_H_
+#ifndef RUNTIME_MEM_PANDA_BUMP_ALLOCATOR_INL_H
+#define RUNTIME_MEM_PANDA_BUMP_ALLOCATOR_INL_H
 
 #include "libpandabase/utils/logger.h"
 #include "runtime/include/mem/allocator.h"
@@ -38,7 +37,7 @@ BumpPointerAllocator<AllocConfigT, LockConfigT, UseTlabs>::BumpPointerAllocator(
 {
     LOG_BUMP_ALLOCATOR(DEBUG) << "Initializing of BumpPointerAllocator";
     AllocConfigT::InitializeCrossingMapForMemory(pool.GetMem(), arena_.GetSize());
-    LOG_BUMP_ALLOCATOR(INFO) << "Initializing of BumpPointerAllocator finished";
+    LOG_BUMP_ALLOCATOR(DEBUG) << "Initializing of BumpPointerAllocator finished";
     ASSERT(UseTlabs ? tlabs_max_count > 0 : tlabs_max_count == 0);
 }
 
@@ -46,13 +45,13 @@ template <typename AllocConfigT, typename LockConfigT, bool UseTlabs>
 BumpPointerAllocator<AllocConfigT, LockConfigT, UseTlabs>::~BumpPointerAllocator()
 {
     LOG_BUMP_ALLOCATOR(DEBUG) << "Destroying of BumpPointerAllocator";
-    LOG_BUMP_ALLOCATOR(INFO) << "Destroying of BumpPointerAllocator finished";
+    LOG_BUMP_ALLOCATOR(DEBUG) << "Destroying of BumpPointerAllocator finished";
 }
 
 template <typename AllocConfigT, typename LockConfigT, bool UseTlabs>
 void BumpPointerAllocator<AllocConfigT, LockConfigT, UseTlabs>::Reset()
 {
-    // Remove CrossingMap and create to avoid check in Alloc method
+    // Remove CrossingMap and create for avoid check in Alloc method
     if (LIKELY(arena_.GetOccupiedSize() > 0)) {
         AllocConfigT::RemoveCrossingMapForMemory(arena_.GetMem(), arena_.GetSize());
         AllocConfigT::InitializeCrossingMapForMemory(arena_.GetMem(), arena_.GetSize());
@@ -130,8 +129,8 @@ TLAB *BumpPointerAllocator<AllocConfigT, LockConfigT, UseTlabs>::CreateNewTLAB(s
             ASAN_UNPOISON_MEMORY_REGION(tlab_buffer_start, size);
             AllocConfigT::MemoryInit(tlab_buffer_start, size);
             tlab->Fill(tlab_buffer_start, size);
-            LOG_BUMP_ALLOCATOR(INFO) << "Created new TLAB with size " << std::dec << size << " at addr " << std::hex
-                                     << tlab_buffer_start;
+            LOG_BUMP_ALLOCATOR(DEBUG) << "Created new TLAB with size " << std::dec << size << " at addr " << std::hex
+                                      << tlab_buffer_start;
         } else {
             LOG_BUMP_ALLOCATOR(DEBUG) << "Reached the limit of TLABs inside the allocator";
         }
@@ -150,9 +149,9 @@ void BumpPointerAllocator<AllocConfigT, LockConfigT, UseTlabs>::VisitAndRemoveAl
 }
 
 template <typename AllocConfigT, typename LockConfigT, bool UseTlabs>
-void BumpPointerAllocator<AllocConfigT, LockConfigT, UseTlabs>::VisitAndRemoveFreePools([
-    [maybe_unused]] const MemVisitor &mem_visitor)
+void BumpPointerAllocator<AllocConfigT, LockConfigT, UseTlabs>::VisitAndRemoveFreePools(const MemVisitor &mem_visitor)
 {
+    (void)mem_visitor;
     os::memory::LockHolder lock(allocator_lock_);
     // We should do nothing here
 }
@@ -191,6 +190,7 @@ void BumpPointerAllocator<AllocConfigT, LockConfigT, UseTlabs>::IterateOverObjec
                                                                                           void *right_border)
 {
     ASSERT(ToUintPtr(right_border) >= ToUintPtr(left_border));
+    // TODO(ipetrov): These are temporary asserts because we can't do anything
     // if the range crosses different allocators memory pools
     ASSERT(ToUintPtr(right_border) - ToUintPtr(left_border) ==
            (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));
@@ -201,28 +201,28 @@ void BumpPointerAllocator<AllocConfigT, LockConfigT, UseTlabs>::IterateOverObjec
     LOG_BUMP_ALLOCATOR(DEBUG) << "IterateOverObjectsInRange for range [" << std::hex << left_border << ", "
                               << right_border << "]";
     MemRange input_mem_range(ToUintPtr(left_border), ToUintPtr(right_border));
+    MemRange arena_occupied_mem_range(0U, 0U);
     if (arena_.GetOccupiedSize() > 0) {
-        MemRange arena_occupied_mem_range(ToUintPtr(arena_.GetAllocatedStart()),
-                                          ToUintPtr(arena_.GetAllocatedEnd()) - 1);
-        // In this case, we iterate over objects in intersection of memory range of occupied memory via arena_.Alloc()
-        // and memory range of input range
-        if (arena_occupied_mem_range.IsIntersect(input_mem_range)) {
-            void *start_ptr =
-                ToVoidPtr(std::max(input_mem_range.GetStartAddress(), arena_occupied_mem_range.GetStartAddress()));
-            void *end_ptr =
-                ToVoidPtr(std::min(input_mem_range.GetEndAddress(), arena_occupied_mem_range.GetEndAddress()));
+        arena_occupied_mem_range =
+            MemRange(ToUintPtr(arena_.GetAllocatedStart()), ToUintPtr(arena_.GetAllocatedEnd()) - 1);
+    }
+    // In this case, we iterate over objects in intersection of memory range of occupied memory via arena_.Alloc()
+    // and memory range of input range
+    if (arena_occupied_mem_range.IsIntersect(input_mem_range)) {
+        void *start_ptr =
+            ToVoidPtr(std::max(input_mem_range.GetStartAddress(), arena_occupied_mem_range.GetStartAddress()));
+        void *end_ptr = ToVoidPtr(std::min(input_mem_range.GetEndAddress(), arena_occupied_mem_range.GetEndAddress()));
 
-            void *obj_addr = AllocConfigT::FindFirstObjInCrossingMap(start_ptr, end_ptr);
-            if (obj_addr != nullptr) {
-                ASSERT(arena_occupied_mem_range.GetStartAddress() <= ToUintPtr(obj_addr) &&
-                       ToUintPtr(obj_addr) <= arena_occupied_mem_range.GetEndAddress());
-                void *current_ptr = obj_addr;
-                while (current_ptr < end_ptr) {
-                    auto *object_header = static_cast<ObjectHeader *>(current_ptr);
-                    size_t object_size = GetObjectSize(current_ptr);
-                    mem_visitor(object_header);
-                    current_ptr = ToVoidPtr(AlignUp(ToUintPtr(current_ptr) + object_size, DEFAULT_ALIGNMENT_IN_BYTES));
-                }
+        void *obj_addr = AllocConfigT::FindFirstObjInCrossingMap(start_ptr, end_ptr);
+        if (obj_addr != nullptr) {
+            ASSERT(arena_occupied_mem_range.GetStartAddress() <= ToUintPtr(obj_addr) &&
+                   ToUintPtr(obj_addr) <= arena_occupied_mem_range.GetEndAddress());
+            void *current_ptr = obj_addr;
+            while (current_ptr < end_ptr) {
+                auto *object_header = static_cast<ObjectHeader *>(current_ptr);
+                size_t object_size = GetObjectSize(current_ptr);
+                mem_visitor(object_header);
+                current_ptr = ToVoidPtr(AlignUp(ToUintPtr(current_ptr) + object_size, DEFAULT_ALIGNMENT_IN_BYTES));
             }
         }
     }
@@ -322,4 +322,4 @@ bool BumpPointerAllocator<AllocConfigT, LockConfigT, UseTlabs>::IsLive(const Obj
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_BUMP_ALLOCATOR_INL_H_
+#endif  // RUNTIME_MEM_PANDA_BUMP_ALLOCATOR_INL_H

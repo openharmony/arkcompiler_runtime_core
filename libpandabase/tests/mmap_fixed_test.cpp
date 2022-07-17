@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ namespace panda::os::mem {
 class MMapFixedTest : public testing::Test {
 protected:
     static constexpr uint64_t MAGIC_VALUE = 0xDEADBEAF;
-    void DeathWrite64(uintptr_t addr) const
+    void DeathWrite64(uintptr_t addr)
     {
         auto pointer = static_cast<uint64_t *>(ToVoidPtr(addr));
         *pointer = MAGIC_VALUE;

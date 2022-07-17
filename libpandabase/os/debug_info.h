@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_LIBPANDABASE_OS_DEBUG_INFO_H_
-#define PANDA_LIBPANDABASE_OS_DEBUG_INFO_H_
+#ifndef PANDA_DEBUG_INFO_H_
+#define PANDA_DEBUG_INFO_H_
 
 #include <set>
 #include <list>
@@ -99,9 +98,6 @@ private:
             : low_pc_(low_pc), high_pc_(high_pc), cu_(cu), function_(function)
         {
         }
-        ~Range() = default;
-        DEFAULT_COPY_SEMANTIC(Range);
-        DEFAULT_MOVE_SEMANTIC(Range);
 
         Dwarf_Addr GetLowPc() const
         {
@@ -159,17 +155,17 @@ private:
     bool FindCompUnitByPc(uintptr_t pc, Dwarf_Die *cu_die);
     void TraverseChildren(CompUnit *cu, Dwarf_Die die);
     void TraverseSiblings(CompUnit *cu, Dwarf_Die die);
-    void GetFunctionName(Dwarf_Die die, std::string *function) const;
+    void GetFunctionName(Dwarf_Die die, std::string *function);
     void AddFunction(CompUnit *cu, Dwarf_Addr low_pc, Dwarf_Addr high_pc, const std::string &function);
-    bool GetSrcFileAndLine(uintptr_t pc, Dwarf_Line_Context line_ctx, std::string *src_file, uint32_t *line) const;
+    bool GetSrcFileAndLine(uintptr_t pc, Dwarf_Line_Context line_ctx, std::string *src_file, uint32_t *line);
     Dwarf_Line GetLastLineWithPc(Dwarf_Addr pc, Span<Dwarf_Line>::ConstIterator it,
-                                 Span<Dwarf_Line>::ConstIterator end) const;
-    void GetSrcFileAndLine(Dwarf_Line line, std::string *out_src_file, uint32_t *out_line) const;
-    bool PcMatches(uintptr_t pc, Dwarf_Die die) const;
-    bool GetDieRange(Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc) const;
-    bool GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc) const;
+                                 Span<Dwarf_Line>::ConstIterator end);
+    void GetSrcFileAndLine(Dwarf_Line line, std::string *out_src_file, uint32_t *out_line);
+    bool PcMatches(uintptr_t pc, Dwarf_Die die);
+    bool GetDieRange(Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc);
+    bool GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc);
     bool FindRangeForPc(uintptr_t pc, const Span<Dwarf_Ranges> &ranges, Dwarf_Addr base_addr, Dwarf_Addr *out_low_pc,
-                        Dwarf_Addr *out_high_pc) const;
+                        Dwarf_Addr *out_high_pc);
 
 private:
     static constexpr int INVALID_FD = -1;
@@ -183,5 +179,4 @@ private:
 };
 
 }  // namespace panda
-
-#endif  // PANDA_LIBPANDABASE_OS_DEBUG_INFO_H_
+#endif  // PANDA_DEBUG_INFO_H_

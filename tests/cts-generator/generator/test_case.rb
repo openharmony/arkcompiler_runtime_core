@@ -21,6 +21,7 @@ module Generator
   class TestCase < TestBase
     def initialize(command, current_case, instruction, definitions, predefined, template, skip_header)
       super instruction, command, definitions, predefined, skip_header
+      # TODO: improve this logging to avoid all hashes in the log
       LOG.debug "TestCase created with '#{command}' '#{current_case}' '#{instruction}'"
 
       # command - YAML:

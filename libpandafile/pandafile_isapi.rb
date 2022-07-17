@@ -49,7 +49,7 @@ def storage_width(bits)
 end
 
 def format_ops(format)
-  format.encoding.values
+  format.encoding.values.map(&:dup)
 end
 
 # returns array of OpenStruct with fields
@@ -58,11 +58,9 @@ end
 # width - bit width
 # tag - the same as in Operand isapi class
 def emitter_signature(group, is_jump)
-  sig = format_ops(group.first.format)
-  sig.each { |o| o.width = storage_width(o.width) }
-  group.map do |insn|
-    operands = insn.operands
-    operands.each_with_index do |o, i|
+  sig = format_ops(group.first.format).each { |o| o.width = storage_width(o.width) }
+  group.each do |insn|
+    insn.operands.each_with_index do |o, i|
       sig[i].width = [o.width, sig[i].width].max
     end
   end

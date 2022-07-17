@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.14.1 FATAL_ERROR)
 project(PANDA NONE)
 
 # Add our custom configuration types to
@@ -23,7 +23,7 @@ if(CMAKE_CONFIGURATION_TYPES)
         CACHE STRING "CMake configuration types" FORCE)
 endif()
 
-enable_language(CXX ASM)
+enable_language(CXX)
 
 # NB! For God's sake do not touch the command below.
 # See https://gitlab.kitware.com/cmake/cmake/issues/16588.
@@ -56,6 +56,48 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Werror -Wshadow")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
+
+find_program(
+    LCOV
+    NAMES "lcov"
+    DOC "Path to lcov executable")
+if(NOT LCOV)
+    set(PANDA_ENABLE_COVERAGE false)
+endif()
+
+find_program(
+    GENHTML
+    NAMES "genhtml"
+    DOC "Path to genhtml executable")
+if(NOT GENHTML)
+    set(PANDA_ENABLE_COVERAGE false)
+endif()
+
+if(PANDA_ENABLE_COVERAGE)
+    # Set coverage options
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    set(ENABLE_BYTECODE_OPTIMIZER_COVERAGE true)
+    set(ENABLE_COMPILER_COVERAGE true)
+    add_custom_target(coverage_full DEPENDS cts-assembly tests benchmarks)  # Execute tests
+    set(ADD_COV_FLAGS --quiet --rc lcov_branch_coverage=1)
+    set(COVERAGE_DIRECTORY coverage_report)
+    set(COVERAGE_INTERMEDIATE_REPORT coverage_full.info)
+    set(COVERAGE_FULL_REPORT cov.zip)
+    add_custom_command(TARGET coverage_full POST_BUILD
+        WORKING_DIRECTORY ${PANDA_BINARY_ROOT}
+        # Update current coverage info
+        COMMAND lcov --no-external -b ${PANDA_ROOT} -d  ${PANDA_BINARY_ROOT} -c -o ${COVERAGE_INTERMEDIATE_REPORT} ${ADD_COV_FLAGS}
+        # Generate html report
+        COMMAND genhtml -o ${COVERAGE_DIRECTORY} ${COVERAGE_INTERMEDIATE_REPORT} --ignore-errors source ${ADD_COV_FLAGS}
+        COMMAND echo "Coverage report: ${PANDA_BINARY_ROOT}/${COVERAGE_DIRECTORY}/index.html"
+        # Delete temporary files with collected statistics
+        COMMAND rm ${COVERAGE_INTERMEDIATE_REPORT}
+        COMMAND find ${PANDA_BINARY_ROOT}/* -iname "*.gcda" -delete
+    )
+else()
+    message(STATUS "Full coverage will not be calculated (may be enabled by -DPANDA_ENABLE_COVERAGE=true ).")
+endif(PANDA_ENABLE_COVERAGE)
+
 if(PANDA_TARGET_MACOS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.13")
 endif()
@@ -96,27 +138,55 @@ endif()
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
     add_compile_options(-O2 -ggdb3 -fno-omit-frame-pointer)
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "FastVerify")
-    add_compile_options(-O2 -ggdb3)
+    add_compile_options(-O2 -ggdb3 -fno-omit-frame-pointer)
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "DebugDetailed")
-    add_compile_options(-Og -ggdb3)
+    add_compile_options(-Og -ggdb3 -fno-omit-frame-pointer)
 endif()
 
 if (PANDA_THREAD_SAFETY)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wthread-safety")
 endif()
 
-if (PANDA_ARK_JS_VM)
-    add_definitions(-DPANDA_ARK_JS_VM)
+if (PANDA_WITH_JAVA)
+    set(PANDA_JAVA_PLUGIN_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/plugins/java")
+    set(PANDA_JAVA_PLUGIN_BINARY "${CMAKE_CURRENT_BINARY_DIR}/plugins/java")
 endif()
+
+if (PANDA_WITH_ECMASCRIPT)
+    set(PANDA_ECMASCRIPT_PLUGIN_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/plugins/ecmascript")
+    set(PANDA_ECMASCRIPT_PLUGIN_BINARY "${CMAKE_CURRENT_BINARY_DIR}/plugins/ecmascript")
+    add_definitions(-DENABLE_BYTECODE_OPT)
+    add_definitions(-DARK_INTRINSIC_SET)
+endif()
+
+if (PANDA_WITH_ACCORD)
+    set(PANDA_ACCORD_PLUGIN_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/plugins/accord")
+    set(PANDA_ACCORD_PLUGIN_BINARY "${CMAKE_CURRENT_BINARY_DIR}/plugins/accord")
+endif()
+
+if (PANDA_WITH_CANGJIE)
+    set(PANDA_CANGJIE_PLUGIN_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/plugins/cangjie")
+    set(PANDA_CANGJIE_PLUGIN_BINARY "${CMAKE_CURRENT_BINARY_DIR}/plugins/cangjie")
+endif()
+
+panda_promote_to_definitions(
+    PANDA_WITH_JAVA
+    PANDA_WITH_ECMASCRIPT
+    PANDA_WITH_ACCORD
+    PANDA_WITH_CANGJIE
+    PANDA_ENABLE_RELAYOUT_PROFILE
+)
 
 # ----- Deliverable executables and libraries ----------------------------------
 # Please override with per-target properties if your artifact should reside
 # elsewhere, like this:
 # set_target_properties(... PROPERTIES RUNTIME_OUTPUT_DIRECTORY ...)
 # Applicable for tests and all "internal" artifacts.
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PANDA_BINARY_ROOT}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PANDA_BINARY_ROOT}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PANDA_BINARY_ROOT}/bin)
+if(NOT HOST_TOOLS)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PANDA_BINARY_ROOT}/lib)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PANDA_BINARY_ROOT}/lib)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PANDA_BINARY_ROOT}/bin)
+endif()
 
 # ----- Panda CMake functions --------------------------------------------------
 include(cmake/PandaCmakeFunctions.cmake)
@@ -126,6 +196,9 @@ include(cmake/HostTools.cmake)
 
 # ----- Enable CCache ----------------------------------------------------------
 include(cmake/PandaCCache.cmake)
+
+# ----- Documentation generation -----------------------------------------------
+include(cmake/Doxygen.cmake)
 
 # ----- Code analysis and style ------------------------------------------------
 include(cmake/ClangTidy.cmake)
@@ -138,7 +211,6 @@ include(cmake/Sanitizers.cmake)
 
 # Umbrella target for testing:
 add_custom_target(tests COMMENT "Running all test suites")
-
 include(cmake/Testing.cmake)
 
 # ----- Template Based Generator -----------------------------------------------
@@ -165,7 +237,7 @@ endif()
 if(PANDA_WITH_TOOLCHAIN)
     add_subdirectory(isa)
 
-    set(SECUREC_ROOT ${PANDA_THIRD_PARTY_SOURCES_DIR}/securec)
+    set(SECUREC_ROOT ${PANDA_THIRD_PARTY_SOURCES_DIR}/utils_native/base)
     add_subdirectory(${PANDA_THIRD_PARTY_CONFIG_DIR}/securec)
     add_subdirectory(libpandabase)
 
@@ -182,12 +254,36 @@ if(PANDA_WITH_TOOLCHAIN)
     add_subdirectory(disassembler)
 
     if(PANDA_WITH_RUNTIME)
-        if (PANDA_TARGET_X86 OR PANDA_TARGET_AMD64)
-            add_subdirectory(verification/tests)
-        endif()
-        add_subdirectory(verification/gen)
         add_subdirectory(verification)
     endif()
+
+    if(PANDA_WITH_COMPILER)
+        add_subdirectory(bytecode_optimizer)
+    endif()
+endif()
+
+if(PANDA_WITH_COMPILER)
+    add_subdirectory(cross_values)
+    if (PANDA_TARGET_X86 OR PANDA_TARGET_AMD64)
+        set(ASMJIT_STATIC TRUE)
+        add_subdirectory(${PANDA_THIRD_PARTY_SOURCES_DIR}/asmjit)
+        add_subdirectory(${PANDA_THIRD_PARTY_SOURCES_DIR}/zydis)
+    endif()
+
+    add_subdirectory(${PANDA_THIRD_PARTY_SOURCES_DIR}/vixl)
+    add_subdirectory(irtoc)
+    add_subdirectory(compiler/optimizer/code_generator)
+    add_subdirectory(compiler)
+    set(IRTOC_INTRINSICS_YAML ${PANDA_ROOT}/irtoc/intrinsics.yaml)
+    # Irtoc is built within the host tools in cross-compiling mode.
+    if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
+        add_subdirectory(irtoc/backend)
+        add_subdirectory(${PANDA_THIRD_PARTY_SOURCES_DIR}/elfio)
+    endif()
+else()
+    add_library(arkcompiler ${PANDA_DEFAULT_LIB_TYPE})
+    add_library(arkbytecodeopt ${PANDA_DEFAULT_LIB_TYPE})
+    add_library(arkaotmanager ${PANDA_DEFAULT_LIB_TYPE})
 endif()
 
 if(PANDA_WITH_RUNTIME)
@@ -202,26 +298,43 @@ if(PANDA_WITH_RUNTIME)
     add_subdirectory(panda)
 
     add_subdirectory(verification/verifier)
-
 endif()
 
 # ----- Testing ----------------------------------------------------------------
 
 if(PANDA_WITH_TESTS)
     add_subdirectory(${PANDA_THIRD_PARTY_SOURCES_DIR}/googletest)
-    target_compile_options(gtest PUBLIC "-Wno-shadow" "-Wno-pedantic")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND PANDA_USE_32_BIT_POINTER AND PANDA_TARGET_AMD64)
+        set_target_properties(gtest PROPERTIES POSITION_INDEPENDENT_CODE ON)
+        set_target_properties(gtest_main PROPERTIES POSITION_INDEPENDENT_CODE ON)
+        set_target_properties(gmock PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    endif()
+
+    add_subdirectory(${PANDA_THIRD_PARTY_SOURCES_DIR}/rapidcheck)
+    add_subdirectory(${PANDA_THIRD_PARTY_SOURCES_DIR}/rapidcheck/extras/catch)
+    target_compile_options(rapidcheck PUBLIC "-fexceptions" "-frtti" "-fPIC")
 
     add_subdirectory(tests)
+    add_subdirectory(tools)
 
     add_custom_target(tests_full COMMENT "Running all test suites and code checks")
     add_dependencies(tests_full
         check_concurrency_format
+        check_atomic_format
         tests
+        tools
     )
     if(NOT PANDA_TARGET_MACOS)
-        # add_dependencies(tests_full clang_format)
+        add_dependencies(tests_full clang_format)
     endif()
+
 endif()
+
+# ----- Aliases ----------------------------------------------------------------
+
+add_custom_target(panda_bins COMMENT "Build all common Panda binaries")
+add_dependencies(panda_bins panda pandasm ark_disasm paoc verifier)
+
 
 # ----- Benchmarking -----------------------------------------------------------
 
@@ -232,9 +345,22 @@ if(PANDA_WITH_BENCHMARKS)
 
     add_custom_target(benchmarks COMMENT "Running all benchmark suites")
     add_subdirectory(tests/benchmarks)
+    add_subdirectory(experiments/benchmarks)
 endif()
 
-# ----- Aliases ----------------------------------------------------------------
+# ----- Plugins ----------------------------------------------------------------
 
-add_custom_target(panda_bins COMMENT "Build all common Panda binaries")
-add_dependencies(panda_bins panda pandasm)
+add_subdirectory(plugins)
+include(cmake/PostPlugins.cmake)
+
+# ----- Platforms --------------------------------------------------------------
+
+add_subdirectory(platforms)
+
+# ----- Fuzzing ----------------------------------------------------------------
+
+add_subdirectory(fuzzing)
+
+# ----- Quickening tool --------------------------------------------------------
+
+add_subdirectory(quickener)

@@ -20,7 +20,7 @@
 
 # check ArithmeticException in case of division by zero
 
-.function u1 main() {
+.function i32 main() {
     movi v0, 1
     movi v1, 0
 try_begin:

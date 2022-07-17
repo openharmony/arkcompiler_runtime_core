@@ -321,7 +321,7 @@ tests:
       - file-name: "vals_mod32_1"
         bugid: ['1324', '2075']
         tags: [verifier]
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         description: Check 'and' with incorrect type of registers.
         isa:
           instructions:
@@ -381,19 +381,13 @@ tests:
             runner-options:
               - compile-failure
 
-      - file-name: "type"
-        bugid: ["964", "966", "2075", "2260"]
+      - file-name: type
         isa:
-          instructions:
-            - sig: and v1:in:i32, v2:in:i32
-              acc: out:i32
-              prefix: bit
-              format: [pref_op_v1_4_v2_4]
           verification:
             - v1_type
             - v2_type
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -405,12 +399,17 @@ tests:
               %s
               *s
               and v0, v1
-              ldai 0
-        check-type: no-check
-        description: Check `and` with incorrect register type.
+        check-type: exit-positive
+        description: Check 'and' with incorrect register types.
         template-cases:
           - values:
+              - movi v0, 0
+            exclude: [val]
+          - values:
               - movi.64 v0, 0
+          - values:
+              - fmovi v0, 0
+            bugid: ['7315']
           - values:
               - fmovi.64 v0, 0
           - values:
@@ -440,12 +439,15 @@ tests:
                     newarr v0, v0, i32[]
           - values:
               - mov.null v0
-          - values:
-              - movi v0, 0
-            exclude: [val]
         cases:
           - values:
+              - movi v1, 0
+            id: val
+          - values:
               - movi.64 v1, 0
+          - values:
+              - fmovi v1, 0
+            bugid: ['7315']
           - values:
               - fmovi.64 v1, 0
           - values:
@@ -476,9 +478,6 @@ tests:
                     newarr v1, v1, f64[]
           - values:
               - mov.null v1
-          - values:
-              - movi v1, 0
-            id: val
 
       - file-name: uninitialized_regs
         bugid: ['2260']
@@ -488,18 +487,15 @@ tests:
               acc: out:i32
               prefix: bit
               format: [pref_op_v1_4_v2_4]
-        description: Check `and` with uninitialized registers.
+        description: Check 'and' with uninitialized registers.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        header-template: []
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
             #
-            .function i32 main() {
                 %s
                 *s
                 and %s, *s
-                ldai 0
-        check-type: no-check
+        check-type: exit-positive
         template-cases:
           - values:
               - ''

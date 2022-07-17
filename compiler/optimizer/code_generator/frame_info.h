@@ -1,0 +1,154 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef PANDA_FRAME_INFO_H
+#define PANDA_FRAME_INFO_H
+
+#include "libpandabase/utils/cframe_layout.h"
+#include "libpandabase/utils/bit_field.h"
+#include "libpandabase/mem/mem.h"
+
+namespace panda::compiler {
+
+class Encoder;
+class Graph;
+
+/**
+ * This class describes layout of the frame being compiled.
+ */
+class FrameInfo {
+public:
+    explicit FrameInfo(uint32_t fields) : fields_(fields) {}
+    ~FrameInfo() = default;
+    NO_COPY_SEMANTIC(FrameInfo);
+    NO_MOVE_SEMANTIC(FrameInfo);
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define FRAME_INFO_GET_ATTR(name, var) \
+    auto Get##name() const             \
+    {                                  \
+        return var;                    \
+    }
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define FRAME_INFO_SET_ATTR(name, var)                            \
+    void Set##name(ssize_t val)                                   \
+    {                                                             \
+        ASSERT(val <= std::numeric_limits<decltype(var)>::max()); \
+        ASSERT(val >= std::numeric_limits<decltype(var)>::min()); \
+        var = val;                                                \
+    }
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define FRAME_INFO_ATTR(name, var) \
+    FRAME_INFO_GET_ATTR(name, var) \
+    FRAME_INFO_SET_ATTR(name, var)
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define FRAME_INFO_GET_FIELD(name, type) \
+    type Get##name() const               \
+    {                                    \
+        return name::Get(fields_);       \
+    }
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define FRAME_INFO_SET_FIELD(name, type) \
+    void Set##name(type val)             \
+    {                                    \
+        name::Set(val, &fields_);        \
+    }
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define FRAME_INFO_FIELD(name, type) \
+    FRAME_INFO_GET_FIELD(name, type) \
+    FRAME_INFO_SET_FIELD(name, type)
+
+    FRAME_INFO_ATTR(FrameSize, frame_size_);
+    FRAME_INFO_ATTR(SpillsCount, spills_count_);
+    FRAME_INFO_ATTR(CallersOffset, callers_offset_);
+    FRAME_INFO_ATTR(CalleesOffset, callees_offset_);
+    FRAME_INFO_ATTR(FpCallersOffset, fp_callers_offset_);
+    FRAME_INFO_ATTR(FpCalleesOffset, fp_callees_offset_);
+    FRAME_INFO_FIELD(PositionedCallers, bool);
+    FRAME_INFO_FIELD(PositionedCallees, bool);
+    FRAME_INFO_FIELD(CallersRelativeFp, bool);
+    FRAME_INFO_FIELD(CalleesRelativeFp, bool);
+    // SaveFrameAndLinkRegs - save/restore FP and LR registers in prologue/epilogue.
+    FRAME_INFO_FIELD(SaveFrameAndLinkRegs, bool);
+    // SetupFrame - setup CFrame (aka. 'managed' frame).
+    // Namely, set FP reg, method and flags in prologue.
+    FRAME_INFO_FIELD(SetupFrame, bool);
+    // SaveUnusedCalleeRegs - save/restore used+unused callee-saved registers in prologue/epilogue.
+    FRAME_INFO_FIELD(SaveUnusedCalleeRegs, bool);
+    // AdjustSpReg - sub SP,#framesize in prologue and add SP,#framesize in epilogue.
+    FRAME_INFO_FIELD(AdjustSpReg, bool);
+    FRAME_INFO_FIELD(HasFloatRegs, bool);
+
+    using PositionedCallers = BitField<bool, 0, 1>;
+    using PositionedCallees = PositionedCallers::NextFlag;
+    using CallersRelativeFp = PositionedCallees::NextFlag;
+    using CalleesRelativeFp = CallersRelativeFp::NextFlag;
+    using SaveFrameAndLinkRegs = CalleesRelativeFp::NextFlag;
+    using SetupFrame = SaveFrameAndLinkRegs::NextFlag;
+    using SaveUnusedCalleeRegs = SetupFrame::NextFlag;
+    using AdjustSpReg = SaveUnusedCalleeRegs::NextFlag;
+    using HasFloatRegs = AdjustSpReg::NextFlag;
+
+    // The following static 'constructors' are for situations
+    // when we have to generate prologue/epilogue but there is
+    // no codegen at hand (some tests etc.)
+    // 'Leaf' means a prologue for a function which does not call
+    // any other functions (library, runtime etc.)
+    static FrameInfo LeafPrologue()
+    {
+        return FrameInfo(AdjustSpReg::Encode(true));
+    }
+
+    // 'Native' means just a regular prologue, that is used for native functions.
+    // 'Native' is also used for Irtoc.
+    static FrameInfo NativePrologue()
+    {
+        return FrameInfo(AdjustSpReg::Encode(true) | SaveFrameAndLinkRegs::Encode(true) |
+                         SaveUnusedCalleeRegs::Encode(true));
+    }
+
+    // 'Full' means NativePrologue + setting up frame (set FP, method and flags),
+    // i.e. a prologue for managed code.
+    static FrameInfo FullPrologue()
+    {
+        return FrameInfo(AdjustSpReg::Encode(true) | SaveFrameAndLinkRegs::Encode(true) |
+                         SaveUnusedCalleeRegs::Encode(true) | SetupFrame::Encode(true));
+    }
+
+#undef FRAME_INFO_GET_ATTR
+#undef FRAME_INFO_SET_ATTR
+#undef FRAME_INFO_ATTR
+#undef FRAME_INFO_GET_FIELD
+#undef FRAME_INFO_SET_FIELD
+#undef FRAME_INFO_FIELD
+
+private:
+    uint32_t fields_ {0};
+    int32_t frame_size_ {0};
+    int16_t spills_count_ {0};
+    // Offset to caller registers storage (in words)
+    int16_t callers_offset_ {0};
+    int16_t callees_offset_ {0};
+    int16_t fp_callers_offset_ {0};
+    int16_t fp_callees_offset_ {0};
+};
+}  // namespace panda::compiler
+
+#endif  // PANDA_FRAME_INFO_H

@@ -17,7 +17,7 @@
 #define PANDA_LIBPANDABASE_OS_SIGHOOK_H_
 
 #ifdef PANDA_TARGET_UNIX
-#include "os/unix/sighook.h"
+#include "platforms/unix/libpandabase/sighook.h"
 #else
 #error "Unsupported platform"
 #endif  // PANDA_TARGET_UNIX

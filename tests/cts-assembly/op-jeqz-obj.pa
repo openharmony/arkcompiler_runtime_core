@@ -16,7 +16,7 @@
     i32 a1
 }
 
-.function u1 main() {
+.function i32 main() {
     newobj v0, A
     lda.obj v0
     jeqz.obj label

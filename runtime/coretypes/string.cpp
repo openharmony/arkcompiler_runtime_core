@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,10 @@ namespace panda::coretypes {
 bool String::compressed_strings_enabled = true;
 
 /* static */
-String *String::CreateFromString(String *str, LanguageContext ctx, PandaVM *vm)
+String *String::CreateFromString(String *str, const LanguageContext &ctx, PandaVM *vm)
 {
-    // Allocator may trig gc and move str, need to hold it
+    ASSERT(str != nullptr);
+    // allocator may trig gc and move str, need to hold it
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<String> str_handle(thread, str);
@@ -42,7 +43,7 @@ String *String::CreateFromString(String *str, LanguageContext ctx, PandaVM *vm)
         return nullptr;
     }
 
-    // Retrieve str after gc
+    // retrive str after gc
     str = str_handle.GetPtr();
     string->length_ = str->length_;
     string->hashcode_ = str->hashcode_;
@@ -51,19 +52,13 @@ String *String::CreateFromString(String *str, LanguageContext ctx, PandaVM *vm)
     // After memcpy we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     if (str->IsUtf16()) {
-        if (memcpy_s(string->GetDataUtf16(), ComputeDataSizeUtf16(string->GetLength()), str->GetDataUtf16(),
-                     ComputeDataSizeUtf16(length)) != EOK) {
-            LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-            UNREACHABLE();
-        }
+        memcpy_s(string->GetDataUtf16(), ComputeDataSizeUtf16(string->GetLength()), str->GetDataUtf16(),
+                 ComputeDataSizeUtf16(length));
     } else {
-        if (memcpy_s(string->GetDataMUtf8(), string->GetLength(), str->GetDataMUtf8(), length) != EOK) {
-            LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-            UNREACHABLE();
-        }
+        memcpy_s(string->GetDataMUtf8(), string->GetLength(), str->GetDataMUtf8(), length);
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
-    // String is supposed to be a constant object, so all its data should be visible to all threads
+    // String is supposed to be a constant object, so all its data should be visible by all threads
     arch::FullMemoryBarrier();
 
     return string;
@@ -71,7 +66,7 @@ String *String::CreateFromString(String *str, LanguageContext ctx, PandaVM *vm)
 
 /* static */
 String *String::CreateFromMUtf8(const uint8_t *mutf8_data, size_t mutf8_length, uint32_t utf16_length,
-                                bool can_be_compressed, LanguageContext ctx, PandaVM *vm, bool movable)
+                                bool can_be_compressed, const LanguageContext &ctx, PandaVM *vm, bool movable)
 {
     auto string = AllocStringObject(utf16_length, can_be_compressed, ctx, vm, movable);
     if (string == nullptr) {
@@ -82,23 +77,19 @@ String *String::CreateFromMUtf8(const uint8_t *mutf8_data, size_t mutf8_length, 
     // After copying we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     if (can_be_compressed) {
-        if (utf16_length != 0 &&
-            memcpy_s(string->GetDataMUtf8(), string->GetLength(), mutf8_data, utf16_length) != EOK) {
-            LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-            UNREACHABLE();
-        }
+        memcpy_s(string->GetDataMUtf8(), string->GetLength(), mutf8_data, utf16_length);
     } else {
         utf::ConvertMUtf8ToUtf16(mutf8_data, mutf8_length, string->GetDataUtf16());
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
-    // String is supposed to be a constant object, so all its data should be visible to all threads
+    // String is supposed to be a constant object, so all its data should be visible by all threads
     arch::FullMemoryBarrier();
     return string;
 }
 
 /* static */
-String *String::CreateFromMUtf8(const uint8_t *mutf8_data, uint32_t utf16_length, LanguageContext ctx, PandaVM *vm,
-                                bool movable)
+String *String::CreateFromMUtf8(const uint8_t *mutf8_data, uint32_t utf16_length, const LanguageContext &ctx,
+                                PandaVM *vm, bool movable)
 {
     bool can_be_compressed = CanBeCompressedMUtf8(mutf8_data);
     return CreateFromMUtf8(mutf8_data, utf::Mutf8Size(mutf8_data), utf16_length, can_be_compressed, ctx, vm, movable);
@@ -106,13 +97,13 @@ String *String::CreateFromMUtf8(const uint8_t *mutf8_data, uint32_t utf16_length
 
 /* static */
 String *String::CreateFromMUtf8(const uint8_t *mutf8_data, uint32_t utf16_length, bool can_be_compressed,
-                                LanguageContext ctx, PandaVM *vm, bool movable)
+                                const LanguageContext &ctx, PandaVM *vm, bool movable)
 {
     return CreateFromMUtf8(mutf8_data, utf::Mutf8Size(mutf8_data), utf16_length, can_be_compressed, ctx, vm, movable);
 }
 
 /* static */
-String *String::CreateFromMUtf8(const uint8_t *mutf8_data, LanguageContext ctx, PandaVM *vm, bool movable)
+String *String::CreateFromMUtf8(const uint8_t *mutf8_data, const LanguageContext &ctx, PandaVM *vm, bool movable)
 {
     size_t mutf8_length = utf::Mutf8Size(mutf8_data);
     size_t utf16_length = utf::MUtf8ToUtf16Size(mutf8_data, mutf8_length);
@@ -121,8 +112,8 @@ String *String::CreateFromMUtf8(const uint8_t *mutf8_data, LanguageContext ctx, 
 }
 
 /* static */
-String *String::CreateFromUtf16(const uint16_t *utf16_data, uint32_t utf16_length, LanguageContext ctx, PandaVM *vm,
-                                bool movable)
+String *String::CreateFromUtf16(const uint16_t *utf16_data, uint32_t utf16_length, const LanguageContext &ctx,
+                                PandaVM *vm, bool movable)
 {
     bool can_be_compressed = CanBeCompressed(utf16_data, utf16_length);
     auto string = AllocStringObject(utf16_length, can_be_compressed, ctx, vm, movable);
@@ -136,20 +127,16 @@ String *String::CreateFromUtf16(const uint16_t *utf16_data, uint32_t utf16_lengt
     if (can_be_compressed) {
         CopyUtf16AsMUtf8(utf16_data, string->GetDataMUtf8(), utf16_length);
     } else {
-        if (utf16_length != 0 && memcpy_s(string->GetDataUtf16(), ComputeDataSizeUtf16(string->GetLength()), utf16_data,
-                                          utf16_length << 1UL) != EOK) {
-            LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-            UNREACHABLE();
-        }
+        memcpy_s(string->GetDataUtf16(), ComputeDataSizeUtf16(string->GetLength()), utf16_data, utf16_length << 1UL);
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
-    // String is supposed to be a constant object, so all its data should be visible to all threads
+    // String is supposed to be a constant object, so all its data should be visible by all threads
     arch::FullMemoryBarrier();
     return string;
 }
 
 /* static */
-String *String::CreateEmptyString(LanguageContext ctx, PandaVM *vm)
+String *String::CreateEmptyString(const LanguageContext &ctx, PandaVM *vm)
 {
     uint16_t data = 0;
     return CreateFromUtf16(&data, 0, ctx, vm);
@@ -166,10 +153,11 @@ void String::CopyUtf16AsMUtf8(const uint16_t *utf16_from, uint8_t *mutf8_to, uin
 }
 
 // static
-String *String::CreateNewStringFromChars(uint32_t offset, uint32_t length, Array *chararray, LanguageContext ctx,
+String *String::CreateNewStringFromChars(uint32_t offset, uint32_t length, Array *chararray, const LanguageContext &ctx,
                                          PandaVM *vm)
 {
-    // Allocator may trig gc and move array, need to hold it
+    ASSERT(chararray != nullptr);
+    // allocator may trig gc and move array, need to hold it
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<Array> array_handle(thread, chararray);
@@ -182,7 +170,7 @@ String *String::CreateNewStringFromChars(uint32_t offset, uint32_t length, Array
         return nullptr;
     }
 
-    // Retrieve src since gc may move it
+    // retrieve src since gc may move it
     src = reinterpret_cast<uint16_t *>(ToUintPtr<uint32_t>(array_handle->GetData()) + (offset << 1UL));
     ASSERT(string->hashcode_ == 0);
     // After copying we should have a full barrier, so this writes should happen-before barrier
@@ -190,22 +178,21 @@ String *String::CreateNewStringFromChars(uint32_t offset, uint32_t length, Array
     if (can_be_compressed) {
         CopyUtf16AsMUtf8(src, string->GetDataMUtf8(), length);
     } else {
-        if (memcpy_s(string->GetDataUtf16(), ComputeDataSizeUtf16(string->GetLength()), src, length << 1UL) != EOK) {
-            LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-            UNREACHABLE();
-        }
+        memcpy_s(string->GetDataUtf16(), ComputeDataSizeUtf16(string->GetLength()), src, length << 1UL);
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
-    // String is supposed to be a constant object, so all its data should be visible to all threads
+    // String is supposed to be a constant object, so all its data should be visible by all threads
     arch::FullMemoryBarrier();
     return string;
 }
 
 // static
 String *String::CreateNewStringFromBytes(uint32_t offset, uint32_t length, uint32_t high_byte, Array *bytearray,
-                                         LanguageContext ctx, PandaVM *vm)
+                                         const LanguageContext &ctx, PandaVM *vm)
 {
-    // Allocator may trig gc and move array, need to hold it
+    ASSERT(length != 0);
+    ASSERT(bytearray != nullptr);
+    // allocator may trig gc and move array, need to hold it
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<Array> array_handle(thread, bytearray);
@@ -221,7 +208,7 @@ String *String::CreateNewStringFromBytes(uint32_t offset, uint32_t length, uint3
         return nullptr;
     }
 
-    // Retrieve src since gc may move it
+    // retrieve src since gc may move it
     src = reinterpret_cast<uint8_t *>(ToUintPtr<uint32_t>(array_handle->GetData()) + offset);
     ASSERT(string->hashcode_ == 0);
     // After copying we should have a full barrier, so this writes should happen-before barrier
@@ -241,7 +228,7 @@ String *String::CreateNewStringFromBytes(uint32_t offset, uint32_t length, uint3
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
 
-    // String is supposed to be a constant object, so all its data should be visible to all threads
+    // String is supposed to be a constant object, so all its data should be visible by all threads
     arch::FullMemoryBarrier();
     return string;
 }
@@ -258,41 +245,72 @@ int32_t CompareStringSpan(Span<T1> &lhs_sp, Span<T2> &rhs_sp, int32_t count)
     return 0;
 }
 
+template <typename T>
+int32_t CompareBytesBlock(T *lstr_pt, T *rstr_pt, int32_t min_count)
+{
+    constexpr int32_t bytes_cnt = sizeof(size_t);
+    static_assert(bytes_cnt >= sizeof(T));
+    static_assert(bytes_cnt % sizeof(T) == 0);
+    int32_t total_bytes = min_count * sizeof(T);
+    auto lhs_block = reinterpret_cast<size_t *>(lstr_pt);
+    auto rhs_block = reinterpret_cast<size_t *>(rstr_pt);
+    int32_t cur_byte_pos = 0;
+    while (cur_byte_pos + bytes_cnt <= total_bytes) {
+        if (*lhs_block == *rhs_block) {
+            cur_byte_pos += bytes_cnt;
+            lhs_block++;
+            rhs_block++;
+        } else {
+            break;
+        }
+    }
+    int32_t cur_element_pos = cur_byte_pos / sizeof(T);
+    for (int32_t i = cur_element_pos; i < min_count; ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        int32_t char_diff = static_cast<int32_t>(lstr_pt[i]) - static_cast<int32_t>(rstr_pt[i]);
+        if (char_diff != 0) {
+            return char_diff;
+        }
+    }
+
+    return 0;
+}
+
 int32_t String::Compare(String *rstr)
 {
     String *lstr = this;
     if (lstr == rstr) {
         return 0;
     }
+    ASSERT(lstr->GetLength() <= static_cast<uint32_t>(std::numeric_limits<int32_t>::max()));
+    ASSERT(rstr->GetLength() <= static_cast<uint32_t>(std::numeric_limits<int32_t>::max()));
     auto lstr_leng = static_cast<int32_t>(lstr->GetLength());
     auto rstr_leng = static_cast<int32_t>(rstr->GetLength());
     int32_t leng_ret = lstr_leng - rstr_leng;
     int32_t min_count = (leng_ret < 0) ? lstr_leng : rstr_leng;
-    if (!lstr->IsUtf16() && !rstr->IsUtf16()) {
+    bool lstr_isUtf16 = lstr->IsUtf16();
+    bool rstr_isUtf16 = rstr->IsUtf16();
+    if (!lstr_isUtf16 && !rstr_isUtf16) {
+        int32_t char_diff = CompareBytesBlock(lstr->GetDataMUtf8(), rstr->GetDataMUtf8(), min_count);
+        if (char_diff != 0) {
+            return char_diff;
+        }
+    } else if (!lstr_isUtf16) {
         Span<uint8_t> lhs_sp(lstr->GetDataMUtf8(), lstr_leng);
+        Span<uint16_t> rhs_sp(rstr->GetDataUtf16(), rstr_leng);
+        int32_t char_diff = CompareStringSpan(lhs_sp, rhs_sp, min_count);
+        if (char_diff != 0) {
+            return char_diff;
+        }
+    } else if (!rstr_isUtf16) {
+        Span<uint16_t> lhs_sp(lstr->GetDataUtf16(), lstr_leng);
         Span<uint8_t> rhs_sp(rstr->GetDataMUtf8(), rstr_leng);
         int32_t char_diff = CompareStringSpan(lhs_sp, rhs_sp, min_count);
         if (char_diff != 0) {
             return char_diff;
         }
-    } else if (!lstr->IsUtf16()) {
-        Span<uint8_t> lhs_sp(lstr->GetDataMUtf8(), lstr_leng);
-        Span<uint16_t> rhs_sp(rstr->GetDataUtf16(), rstr_leng);
-        int32_t char_diff = CompareStringSpan(lhs_sp, rhs_sp, min_count);
-        if (char_diff != 0) {
-            return char_diff;
-        }
-    } else if (!rstr->IsUtf16()) {
-        Span<uint16_t> lhs_sp(lstr->GetDataUtf16(), rstr_leng);
-        Span<uint8_t> rhs_sp(rstr->GetDataMUtf8(), lstr_leng);
-        int32_t char_diff = CompareStringSpan(lhs_sp, rhs_sp, min_count);
-        if (char_diff != 0) {
-            return char_diff;
-        }
     } else {
-        Span<uint16_t> lhs_sp(lstr->GetDataUtf16(), lstr_leng);
-        Span<uint16_t> rhs_sp(rstr->GetDataUtf16(), rstr_leng);
-        int32_t char_diff = CompareStringSpan(lhs_sp, rhs_sp, min_count);
+        int32_t char_diff = CompareBytesBlock(lstr->GetDataUtf16(), rstr->GetDataUtf16(), min_count);
         if (char_diff != 0) {
             return char_diff;
         }
@@ -312,7 +330,7 @@ int32_t String::IndexOf(Span<const T1> &lhs_sp, Span<const T2> &rhs_sp, int32_t 
                 i++;
             }
         }
-        /* Found the first character, now look at the rest of rhs_sp */
+        /* Found first character, now look at the rest of rhs_sp */
         if (i <= max) {
             int j = i + 1;
             int end = j + rhs_sp.size() - 1;
@@ -334,6 +352,8 @@ int32_t String::IndexOf(String *rhs, int32_t pos)
         return -1;
     }
     String *lhs = this;
+    ASSERT(lhs->GetLength() <= static_cast<uint32_t>(std::numeric_limits<int32_t>::max()));
+    ASSERT(rhs->GetLength() <= static_cast<uint32_t>(std::numeric_limits<int32_t>::max()));
     auto lhs_count = static_cast<int32_t>(lhs->GetLength());
     auto rhs_count = static_cast<int32_t>(rhs->GetLength());
 
@@ -405,7 +425,7 @@ bool String::CanBeCompressedMUtf8(const uint8_t *mutf8_data, uint32_t mutf8_leng
     return is_compressed;
 }
 
-/* static */
+// static
 bool String::CanBeCompressedMUtf8(const uint8_t *mutf8_data)
 {
     return compressed_strings_enabled ? utf::IsMUtf8OnlySingleBytes(mutf8_data) : false;
@@ -448,6 +468,9 @@ bool String::CanBeCompressedMUtf8(const uint8_t *mutf8_data, uint32_t mutf8_leng
 /* static */
 bool String::StringsAreEqual(String *str1, String *str2)
 {
+    ASSERT(str1 != nullptr);
+    ASSERT(str2 != nullptr);
+
     if ((str1->IsUtf16() != str2->IsUtf16()) || (str1->GetLength() != str2->GetLength())) {
         return false;
     }
@@ -469,7 +492,8 @@ bool String::StringsAreEqualMUtf8(String *str1, const uint8_t *mutf8_data, uint3
     if (str1->GetLength() != utf16_length) {
         return false;
     }
-    return StringsAreEqualMUtf8(str1, mutf8_data, utf16_length, CanBeCompressedMUtf8(mutf8_data));
+    bool can_be_compressed = CanBeCompressedMUtf8(mutf8_data);
+    return StringsAreEqualMUtf8(str1, mutf8_data, utf16_length, can_be_compressed);
 }
 
 /* static */
@@ -481,11 +505,12 @@ bool String::StringsAreEqualMUtf8(String *str1, const uint8_t *mutf8_data, uint3
         result = false;
     } else {
         bool str1_can_be_compressed = !str1->IsUtf16();
-        if (str1_can_be_compressed != can_be_compressed) {
+        bool data2_can_be_compressed = can_be_compressed;
+        if (str1_can_be_compressed != data2_can_be_compressed) {
             return false;
         }
 
-        ASSERT(str1_can_be_compressed == can_be_compressed);
+        ASSERT(str1_can_be_compressed == data2_can_be_compressed);
         if (str1_can_be_compressed) {
             Span<const uint8_t> data1(str1->GetDataMUtf8(), str1->GetLength());
             Span<const uint8_t> data2(mutf8_data, utf16_length);
@@ -548,15 +573,10 @@ bool String::IsMutf8EqualsUtf16(const uint8_t *utf8_data, const uint16_t *utf16_
 template <typename T>
 bool String::StringsAreEquals(Span<const T> &str1, Span<const T> &str2)
 {
-    for (size_t i = 0; i < str1.Size(); i++) {
-        if (str1[i] != str2[i]) {
-            return false;
-        }
-    }
-    return true;
+    return std::memcmp(str1.Data(), str2.Data(), str1.SizeBytes()) == 0;
 }
 
-Array *String::ToCharArray(LanguageContext ctx)
+Array *String::ToCharArray(const LanguageContext &ctx)
 {
     // allocator may trig gc and move 'this', need to hold it
     auto thread = ManagedThread::GetCurrent();
@@ -583,8 +603,6 @@ Array *String::ToCharArray(LanguageContext ctx)
     return array;
 }
 
-// We need to use java compatible hash algorithm as javac relies on it
-// when compiles switch-case statement with strings
 template <class T>
 static int32_t ComputeHashForData(const T *data, size_t size)
 {
@@ -631,7 +649,8 @@ uint32_t String::ComputeHashcode()
 /* static */
 uint32_t String::ComputeHashcodeMutf8(const uint8_t *mutf8_data, uint32_t utf16_length)
 {
-    return ComputeHashcodeMutf8(mutf8_data, utf16_length, CanBeCompressedMUtf8(mutf8_data));
+    bool can_be_compressed = CanBeCompressedMUtf8(mutf8_data);
+    return ComputeHashcodeMutf8(mutf8_data, utf16_length, can_be_compressed);
 }
 
 /* static */
@@ -641,6 +660,7 @@ uint32_t String::ComputeHashcodeMutf8(const uint8_t *mutf8_data, uint32_t utf16_
     if (can_be_compressed) {
         hash = static_cast<uint32_t>(ComputeHashForMutf8(mutf8_data));
     } else {
+        // TODO(alovkov): optimize it without allocation a temporary buffer
         auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
         auto tmp_buffer = allocator->AllocArray<uint16_t>(utf16_length);
         utf::ConvertMUtf8ToUtf16(mutf8_data, utf::Mutf8Size(mutf8_data), tmp_buffer);
@@ -651,15 +671,16 @@ uint32_t String::ComputeHashcodeMutf8(const uint8_t *mutf8_data, uint32_t utf16_
 }
 
 /* static */
-uint32_t String::ComputeHashcodeUtf16(uint16_t *utf16_data, uint32_t length)
+uint32_t String::ComputeHashcodeUtf16(const uint16_t *utf16_data, uint32_t length)
 {
     return ComputeHashForData(utf16_data, length);
 }
 
 /* static */
-String *String::DoReplace(String *src, uint16_t old_c, uint16_t new_c, LanguageContext ctx, PandaVM *vm)
+String *String::DoReplace(String *src, uint16_t old_c, uint16_t new_c, const LanguageContext &ctx, PandaVM *vm)
 {
-    auto length = src->GetLength();
+    ASSERT(src != nullptr);
+    auto length = static_cast<int32_t>(src->GetLength());
     bool can_be_compressed = IsASCIICharacter(new_c);
     if (src->IsUtf16()) {
         can_be_compressed = can_be_compressed && CanBeCompressedUtf16(src->GetDataUtf16(), length, old_c);
@@ -676,7 +697,7 @@ String *String::DoReplace(String *src, uint16_t old_c, uint16_t new_c, LanguageC
         return nullptr;
     }
 
-    // Retrieve src after gc
+    // retrieve src after gc
     src = src_handle.GetPtr();
     ASSERT(string->hashcode_ == 0);
 
@@ -704,14 +725,16 @@ String *String::DoReplace(String *src, uint16_t old_c, uint16_t new_c, LanguageC
         }
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
-    // String is supposed to be a constant object, so all its data should be visible to all threads
+    // String is supposed to be a constant object, so all its data should be visible by all threads
     arch::FullMemoryBarrier();
     return string;
 }
 
 /* static */
-String *String::FastSubString(String *src, uint32_t start, uint32_t utf16_length, LanguageContext ctx, PandaVM *vm)
+String *String::FastSubString(String *src, uint32_t start, uint32_t utf16_length, const LanguageContext &ctx,
+                              PandaVM *vm)
 {
+    ASSERT(src != nullptr);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     bool can_be_compressed = !src->IsUtf16() || CanBeCompressed(src->GetDataUtf16() + start, utf16_length);
 
@@ -724,7 +747,7 @@ String *String::FastSubString(String *src, uint32_t start, uint32_t utf16_length
         return nullptr;
     }
 
-    // Retrieve src after gc
+    // retrieve src after gc
     src = src_handle.GetPtr();
     ASSERT(string->hashcode_ == 0);
 
@@ -735,29 +758,25 @@ String *String::FastSubString(String *src, uint32_t start, uint32_t utf16_length
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             CopyUtf16AsMUtf8(src->GetDataUtf16() + start, string->GetDataMUtf8(), utf16_length);
         } else {
-            if (memcpy_s(string->GetDataUtf16(), ComputeDataSizeUtf16(string->GetLength()),
-                         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                         src->GetDataUtf16() + start, utf16_length << 1UL) != EOK) {
-                LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-                UNREACHABLE();
-            }
+            memcpy_s(string->GetDataUtf16(), ComputeDataSizeUtf16(string->GetLength()),
+                     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                     src->GetDataUtf16() + start, utf16_length << 1UL);
         }
     } else {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        if (memcpy_s(string->GetDataMUtf8(), string->GetLength(), src->GetDataMUtf8() + start, utf16_length) != EOK) {
-            LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-            UNREACHABLE();
-        }
+        memcpy_s(string->GetDataMUtf8(), string->GetLength(), src->GetDataMUtf8() + start, utf16_length);
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
-    // String is supposed to be a constant object, so all its data should be visible to all threads
+    // String is supposed to be a constant object, so all its data should be visible by all threads
     arch::FullMemoryBarrier();
     return string;
 }
 
 /* static */
-String *String::Concat(String *string1, String *string2, LanguageContext ctx, PandaVM *vm)
+String *String::Concat(String *string1, String *string2, const LanguageContext &ctx, PandaVM *vm)
 {
+    ASSERT(string1 != nullptr);
+    ASSERT(string2 != nullptr);
     // allocator may trig gc and move src, need to hold it
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
@@ -775,7 +794,7 @@ String *String::Concat(String *string1, String *string2, LanguageContext ctx, Pa
 
     ASSERT(new_string->hashcode_ == 0);
 
-    // Retrieve strings after gc
+    // retrieve strings after gc
     string1 = str1_handle.GetPtr();
     string2 = str2_handle.GetPtr();
 
@@ -783,15 +802,9 @@ String *String::Concat(String *string1, String *string2, LanguageContext ctx, Pa
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     if (compressed) {
         Span<uint8_t> sp(new_string->GetDataMUtf8(), new_length);
-        if (memcpy_s(sp.Data(), sp.SizeBytes(), string1->GetDataMUtf8(), length1) != EOK) {
-            LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-            UNREACHABLE();
-        }
+        memcpy_s(sp.Data(), sp.SizeBytes(), string1->GetDataMUtf8(), length1);
         sp = sp.SubSpan(length1);
-        if (memcpy_s(sp.Data(), sp.SizeBytes(), string2->GetDataMUtf8(), length2) != EOK) {
-            LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-            UNREACHABLE();
-        }
+        memcpy_s(sp.Data(), sp.SizeBytes(), string2->GetDataMUtf8(), length2);
     } else {
         Span<uint16_t> sp(new_string->GetDataUtf16(), new_length);
         if (!string1->IsUtf16()) {
@@ -799,10 +812,7 @@ String *String::Concat(String *string1, String *string2, LanguageContext ctx, Pa
                 sp[i] = string1->At<false>(i);
             }
         } else {
-            if (memcpy_s(sp.Data(), sp.SizeBytes(), string1->GetDataUtf16(), length1 << 1U) != EOK) {
-                LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-                UNREACHABLE();
-            }
+            memcpy_s(sp.Data(), sp.SizeBytes(), string1->GetDataUtf16(), length1 << 1U);
         }
         sp = sp.SubSpan(length1);
         if (!string2->IsUtf16()) {
@@ -810,21 +820,18 @@ String *String::Concat(String *string1, String *string2, LanguageContext ctx, Pa
                 sp[i] = string2->At<false>(i);
             }
         } else {
-            if (memcpy_s(sp.Data(), sp.SizeBytes(), string2->GetDataUtf16(), length2 << 1U) != EOK) {
-                LOG(FATAL, RUNTIME) << __func__ << " memcpy_s failed";
-                UNREACHABLE();
-            }
+            memcpy_s(sp.Data(), sp.SizeBytes(), string2->GetDataUtf16(), length2 << 1U);
         }
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
-    // String is supposed to be a constant object, so all its data should be visible to all threads
+    // String is supposed to be a constant object, so all its data should be visible by all threads
     arch::FullMemoryBarrier();
 
     return new_string;
 }
 
 /* static */
-String *String::AllocStringObject(size_t length, bool compressed, LanguageContext ctx, PandaVM *vm, bool movable)
+String *String::AllocStringObject(size_t length, bool compressed, const LanguageContext &ctx, PandaVM *vm, bool movable)
 {
     ASSERT(vm != nullptr);
     auto *string_class = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::STRING);

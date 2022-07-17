@@ -13,259 +13,261 @@
 
 definitions: []
 tests:
-  - file-name: "fcmpl.64"
+  - file-name: fcmpl
     isa:
       title: Floating-point comparison
       description: Perform specified floating point comparison between register and accumulator.
       exceptions:
         - x_none
     commands:
-      - file-name: "op_vs_8_zero"
+      - file-name: zero
         isa:
           instructions:
-            - sig: fcmpl.64 v:in:f64
-              acc: inout:f64->i32
-              format: [op_v_8]
-        check-type: check-positive
-        description: Check fcmpl.64 compares zero with other zero values.
-        code-template: |
-            #
-                fldai.64 %s
-                fmovi.64 v0, %s
-                fcmpl.64 v0
-        cases:
-          - values:
-              - "0.0"
-              - "0.0"
-          - values:
-              - "-0.0"
-              - "-0.0"
-          - values:
-              - "-0.0"
-              - "0.0"
-          - values:
-              - "0.0"
-              - "-0.0"
-
-      - file-name: "op_vs_8_nan"
-        isa:
-          instructions:
-            - sig: fcmpl.64 v:in:f64
-              acc: inout:f64->i32
-              format: [op_v_8]
-        check-type: check-acc-minus-1
-        code-template: |
-          #   test - check binary representation and comparison of FP literals - NaN
-              fldai.64 0x7ff8000000000000
-              fmovi.64 v0, %s
-              fcmpl.64 v0
-        description: Check fcmpl.64 compares NaN values.
-        cases:
-          - values:
-              - "0x7ff8000000000000"
-          - values:
-              - "0x7ff8000000000001"
-          - values:
-              - "0x7ff8000000000010"
-          - values:
-              - "0x7fffffffffffffff"
-          - values:
-              - "0xFFFFFFFFFFFFFFFF"
-          - values:
-              - "0x7ff8123456789012"
-          - values:
-              # +Inf
-              - "0x7ff0000000000000"
-            description: Check fcmpl.64 compares NaN with +Inf
-          - values:
-              # -Inf
-              - "0xfff0000000000000"
-            description: Check fcmpl.64 compares NaN with -Inf
-
-      - file-name: "op_vs_8_nan_numbers_1"
-        isa:
-          instructions:
-            - sig: fcmpl.64 v:in:f64
-              acc: inout:f64->i32
-              format: [op_v_8]
-        check-type: check-acc-minus-1
-        description: Check fcmpl.64 compares NaN with various values.
-        code-template: |
-          #   test - check comparison of NaN with values
-              fldai.64 0x7ff8000000000000 # One of valid NaN values
-              fmovi.64 v0, %s
-              fcmpl.64 v0
-        cases:
-          - values:
-              - "4e300"
-          - values:
-              - "0.0"
-          - values:
-              - "-1.0e20"
-
-      - file-name: "op_vs_8_numbers_2"
-        isa:
-          instructions:
-            - sig: fcmpl.64 v:in:f64
-              acc: inout:f64->i32
-              format: [op_v_8]
-        check-type: check-positive
-        code-template: |
-          #   test - check comparison of values
-              fldai.64 %s
-              fmovi.64 v0, %s
-              movi v1, %s
-              fcmpl.64 v0
-              jne v1, set_failure
-              ldai 0
-              jmp fall_through
-          set_failure:
-              ldai 1
-          fall_through:
-        description: Check fcmpl.64 compares various values.
-        tags: ['tsan']
-        cases:
-          - values:
-            - "1.0"
-            - "0.0"
-            - "1"
-          - values:
-              - "12345678.9098765"
-              - "12345678.9098764"
-              - "1"
-          - values:
-              - "12345678.9098765"
-              - "-12345678.9098765"
-              - "1"
-          - values:
-              - "-1.0"
-              - "0.0"
-              - "-1"
-          - values:
-              - "-12345678.9098765"
-              - "0.0"
-              - "-1"
-          - values:
-              - "-12345678.9098765"
-              - "12345678.9098765"
-              - "-1"
-          - values:
-              - "-12345678.9098765"
-              - "12345678.9098765"
-              - "-1"
-      - file-name: "op_vs_8_pinf"
-        isa:
-          instructions:
-            - sig: fcmpl.64 v:in:f64
-              acc: inout:f64->i32
-              format: [op_v_8]
-        check-type: check-positive
-        description: Check fcmpl.64 compares positive Inf with various values.
-        code-template: |
-          #   test - check comparison of values
-              # +Inf
-              fldai.64 0x7ff0000000000000
-              fmovi.64 v0, %s
-              movi v1, 1
-              fcmpl.64 v0
-              jne v1, set_failure
-              ldai 0
-              jmp fall_through
-          set_failure:
-              ldai 1
-          fall_through:
-        cases:
-          - values:
-              - "1.0"
-          - values:
-              - "12345678.9098765"
-          - values:
-              - "-12345678.9098765"
-          - values:
-              - "-1.0"
-          - values:
-              - "4e300"
-          - values:
-              - "-4e300"
-      - file-name: "op_vs_8_ninf"
-        isa:
-          instructions:
-            - sig: fcmpl.64 v:in:f64
-              acc: inout:f64->i32
-              format: [op_v_8]
-        check-type: check-positive
-        description: Check fcmpl.64 compares negative Inf with various values.
-        code-template: |
-          #   test - check comparison of values
-              # -Inf
-              fldai.64 0xfff0000000000000
-              fmovi.64 v0, %s
-              movi v1, -1
-              fcmpl.64 v0
-              jne v1, set_failure
-              ldai 0
-              jmp fall_through
-          set_failure:
-              ldai 1
-          fall_through:
-        cases:
-          - values:
-              - "1.0"
-          - values:
-              - "12345678.9098765"
-          - values:
-              - "-12345678.9098765"
-          - values:
-              - "-1.0"
-          - values:
-              - "4e300"
-          - values:
-              - "-4e300"
-
-      - file-name: "op_vs_8_inf"
-        isa:
-          instructions:
-            - sig: fcmpl.64 v:in:f64
-              acc: inout:f64->i32
-              format: [op_v_8]
-        check-type: check-positive
-        code-template: |
-          #   test - check comparison of values
-              fldai.64 %s
-              # +Inf
-              fmovi.64 v0, %s
-              movi v1, %s
-              fcmpl.64 v0
-              jne v1, set_failure
-              ldai 0
-              jmp fall_through
-          set_failure:
-              ldai 1
-          fall_through:
-        cases:
-          - values:
-              # -Inf
-              - "0xfff0000000000000"
-              - "0x7ff0000000000000"
-              - "-1"
-          - values:
-              - "0x7ff0000000000000"
-              # -Inf
-              - "0xfff0000000000000"
-              - "+1"
-
-      - file-name: "incorrect_register"
-        isa:
-          instructions:
-            - sig: fcmpl.64 v:in:f64
-              acc: inout:f64->i32
-              format: [op_v_8]
-        check-type: none
-        runner-options: [compile-failure]
-        description: Check fcmpl.64 with incorrect register numbers.
+            - sig: fcmpl v:in:f32
+              acc: inout:f32->i32
+              prefix: f32
+              format: [pref_op_v_8]
+        description: Check fcmpl compares zero with other zero values.
+        tags: ['irtoc_ignore']
         code-template: |
           #
-              fcmpl.64 %s
+              fldai %s
+              fmovi v0, %s
+              fcmpl v0
+        check-type: check-positive
+        cases:
+          - values:
+              - '0.0'
+              - '0.0'
+          - values:
+              - '-0.0'
+              - '-0.0'
+          - values:
+              - '-0.0'
+              - '0.0'
+          - values:
+              - '0.0'
+              - '-0.0'
+
+      - file-name: nan
+        isa:
+          instructions:
+            - sig: fcmpl v:in:f32
+              acc: inout:f32->i32
+              prefix: f32
+              format: [pref_op_v_8]
+        tags: ['irtoc_ignore']
+        code-template: |
+          #   test - check binary representation and comparison of FP literals - NaN
+              fldai 0x7fc00000
+              fmovi v0, %s
+              fcmpl v0
+        check-type: check-acc-minus-1
+        description: Check fcmpl compares NaN values.
+        cases:
+          - values:
+              - '0x7fc00000'
+          - values:
+              - '0x7fc00001'
+          - values:
+              - '0x7fc00010'
+          - values:
+              - '0x7fffffff'
+          - values:
+              - '0xffffffff'
+          - values:
+              - '0x7ff81234'
+          - values:
+              # +Inf
+              - '0x7f800000'
+            description: Check fcmpl compares NaN with +Inf
+          - values:
+              # -Inf
+              - '0xff800000'
+            description: Check fcmpl compares NaN with -Inf
+
+      - file-name: nan_numbers_1
+        isa:
+          instructions:
+            - sig: fcmpl v:in:f32
+              acc: inout:f32->i32
+              prefix: f32
+              format: [pref_op_v_8]
+        tags: ['irtoc_ignore']
+        description: Check fcmpl compares NaN with various values.
+        code-template: |
+          #   test - check comparison of NaN with values
+              fldai 0x7fc00000 # One of valid NaN values
+              fmovi v0, %s
+              fcmpl v0
+        check-type: check-acc-minus-1
+        cases:
+          - values:
+              - '4e30'
+          - values:
+              - '0.0'
+          - values:
+              - '-1.0e20'
+
+      - file-name: numbers_2
+        isa:
+          instructions:
+            - sig: fcmpl v:in:f32
+              acc: inout:f32->i32
+              prefix: f32
+              format: [pref_op_v_8]
+        code-template: |
+          #   test - check comparison of values
+              fldai %s
+              fmovi v0, %s
+              movi v1, %s
+              fcmpl v0
+              jne v1, set_failure
+              ldai 0
+              return
+          set_failure:
+              ldai 1
+              return
+        check-type: none
+        description: Check fcmpl compares various values.
+        tags: ['tsan', 'irtoc_ignore']
+        cases:
+          - values:
+              - '1.0'
+              - '0.0'
+              - '1'
+          - values:
+              - '12345679'
+              - '12345678'
+              - '1'
+          - values:
+              - '12345679'
+              - '-12345679'
+              - '1'
+          - values:
+              - '-1.0'
+              - '0.0'
+              - '-1'
+          - values:
+              - '-12345679'
+              - '0.0'
+              - '-1'
+          - values:
+              - '-12345679'
+              - '12345679'
+              - '-1'
+          - values:
+              - '-12345679'
+              - '12345679'
+              - '-1'
+
+      - file-name: pinf
+        isa:
+          instructions:
+            - sig: fcmpl v:in:f32
+              acc: inout:f32->i32
+              prefix: f32
+              format: [pref_op_v_8]
+        tags: ['irtoc_ignore']
+        description: Check fcmpl compares positive Inf with various values.
+        code-template: |
+          #   test - check comparison of values
+              # +Inf
+              fldai 0x7f800000
+              fmovi v0, %s
+              fcmpl v0
+        check-type: check-acc-1
+        cases:
+          - values:
+              - '1.0'
+          - values:
+              - '12345678'
+          - values:
+              - '-12345678'
+          - values:
+              - '-1.0'
+          - values:
+              - '4e30'
+          - values:
+              - '-4e30'
+
+      - file-name: ninf
+        isa:
+          instructions:
+            - sig: fcmpl v:in:f32
+              acc: inout:f32->i32
+              prefix: f32
+              format: [pref_op_v_8]
+        tags: ['irtoc_ignore']
+        description: Check fcmpl compares negative Inf with various values.
+        code-template: |
+          #   test - check comparison of values
+              # -Inf
+              fldai 0xff800000
+              fmovi v0, %s
+              fcmpl v0
+        check-type: check-acc-minus-1
+        cases:
+          - values:
+              - '1.0'
+          - values:
+              - '12345678'
+          - values:
+              - '-12345678'
+          - values:
+              - '-1.0'
+          - values:
+              - '4e30'
+          - values:
+              - '-4e30'
+
+      - file-name: inf
+        isa:
+          instructions:
+            - sig: fcmpl v:in:f32
+              acc: inout:f32->i32
+              prefix: f32
+              format: [pref_op_v_8]
+        tags: ['irtoc_ignore']
+        code-template: |
+          #   test - check comparison of values
+              fldai %s
+              # +Inf
+              fmovi v0, %s
+              movi v1, %s
+              fcmpl v0
+              jne v1, set_failure
+              ldai 0
+              return
+          set_failure:
+              ldai 1
+              return
+        check-type: none
+        cases:
+          - values:
+              # -Inf
+              - '0xff800000'
+              - '0x7f800000'
+              - '-1'
+          - values:
+              - '0x7f800000'
+              # -Inf
+              - '0xff800000'
+              - '+1'
+
+      - file-name: incorrect_register
+        isa:
+          instructions:
+            - sig: fcmpl v:in:f32
+              acc: inout:f32->i32
+              prefix: f32
+              format: [pref_op_v_8]
+        runner-options: [compile-failure]
+        description: Check fcmpl with incorrect register numbers.
+        code-template: |
+          #
+              fcmpl %s
+        check-type: exit-positive
         cases:
           - values: [v256]
           - values: [a0]
@@ -273,37 +275,31 @@ tests:
           - values: ['1.1']
           - values: [1.1]
 
-      - file-name: "applicable_register"
+      - file-name: applicable_register
         isa:
           instructions:
-            - sig: fcmpl.64 v:in:f64
-              acc: inout:f64->i32
-              format: [op_v_8]
-        check-type: none
+            - sig: fcmpl v:in:f32
+              acc: inout:f32->i32
+              prefix: f32
+              format: [pref_op_v_8]
         runner-options: [compile-only]
-        description: Check fcmpl.64 with correct register numbers.
+        description: Check fcmpl with correct register numbers.
         code-template: |
           #
-              fcmpl.64 %s
+              fldai 0.0
+          %s
+        check-type: exit-positive
         cases:
-          - values: [v0]
-          - values: [v8]
-          - values: [v16]
-          - values: [v64]
-          - values: [v128]
-          - values: [v255]
+          - values:
+              - '#{[*0..255].map do |i| "    fmovi v#{i}, 0\n    fcmpl v#{i}\n" end .join}'
 
       - file-name: type
         isa:
-          instructions:
-            - sig: fcmpl.64 v:in:f64
-              acc: inout:f64->i32
-              format: [op_v_8]
           verification:
             - v1_type
             - acc_type
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -314,18 +310,19 @@ tests:
           .function i32 main() {
               %s
               *s
-              fcmpl.64 v0
-              ldai 0
-        check-type: no-check
-        description: Check 'fcmpl.64' with incorrect register type.
+              fcmpl v0
+        check-type: exit-positive
+        description: Check 'fcmpl' with incorrect register type.
         template-cases:
           - values:
               - movi v0, 0
           - values:
+              - fmovi v0, 0
+            exclude: [val]
+          - values:
               - movi.64 v0, 0
           - values:
               - fmovi.64 v0, 0
-            exclude: [val]
           - values:
               - |
                 #
@@ -353,15 +350,16 @@ tests:
                     newarr v0, v0, i32[]
           - values:
               - mov.null v0
-
         cases:
           - values:
               - ldai 0
           - values:
+              - fldai 0
+            id: val
+          - values:
               - ldai.64 0
           - values:
               - fldai.64 0
-            id: val
           - values:
               - |
                 #
@@ -390,27 +388,27 @@ tests:
       - file-name: uninitialized_regs
         isa:
           instructions:
-            - sig: fcmpl.64 v:in:f64
-              acc: inout:f64->i32
-              format: [op_v_8]
-        description: Check 'fcmpl.64' with uninitialized registers.
+            - sig: fcmpl v:in:f32
+              acc: inout:f32->i32
+              prefix: f32
+              format: [pref_op_v_8]
+        description: Check 'fcmpl' with uninitialized registers.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
-            #
-            .function i32 main() {
-                %s
-                *s
-                fcmpl.64 %s
-                ldai 0
-        check-type: no-check
+          #
+          .function i32 main() {
+              %s
+              *s
+              fcmpl %s
+        check-type: exit-positive
         template-cases:
           - values:
               - ''
               - v0
           - values:
-              - fmovi.64 v0, 0
+              - fmovi v0, 0
               - v0
             exclude: [init]
           - values:
@@ -420,26 +418,26 @@ tests:
               - ''
               - v15
           - values:
-              - 'fmovi.64 v15, 0'
+              - 'fmovi v15, 0'
               - v15
             exclude: [init]
           - values:
               - ''
               - v128
           - values:
-              - 'fmovi.64 v128, 0'
+              - 'fmovi v128, 0'
               - v128
             exclude: [init]
           - values:
               - ''
               - v255
           - values:
-              - 'fmovi.64 v255, 0'
+              - 'fmovi v255, 0'
               - v255
             exclude: [init]
         cases:
           - values:
               - ''
           - values:
-              - fldai.64 0
+              - fldai 0
             id: init

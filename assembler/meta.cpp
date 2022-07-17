@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,6 +138,7 @@ static Expected<ScalarValue, Metadata::Error> CreatePrimitiveValue(std::string_v
     }
 
     auto converted = res.Value();
+
     if (converted > max_value) {
         return Unexpected(Metadata::Error("Value is out of range", Metadata::Error::Type::INVALID_VALUE));
     }
@@ -145,7 +146,6 @@ static Expected<ScalarValue, Metadata::Error> CreatePrimitiveValue(std::string_v
     return ScalarValue::Create<type>(converted);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
 static Expected<ScalarValue, Metadata::Error> CreateValue(
     Value::Type type, std::string_view value,
     const std::unordered_map<std::string, std::unique_ptr<AnnotationData>> &annotation_id_map = {})
@@ -219,6 +219,7 @@ std::optional<Metadata::Error> AnnotationMetadata::AnnotationElementBuilder::Add
     ASSERT(type_.has_value());
 
     auto type = type_.value();
+
     if (type == Value::Type::ARRAY) {
         ASSERT(component_type_.has_value());
         type = component_type_.value();

@@ -23,7 +23,7 @@
 
 # check ClassCastException
 
-.function u1 main() {
+.function i32 main() {
     newobj v0, R1
     lda.obj v0
 

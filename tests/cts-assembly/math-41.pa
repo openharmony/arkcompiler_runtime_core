@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #Assert that type widening i64 => i32 works fine with hex literals
-.function u1 main() {
+.function i32 main() {
     ldai.64 0xaabbcc
     i64toi32
     movi v0, 0xaabbcc

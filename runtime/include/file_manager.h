@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_FILE_MANAGER_H_
-#define PANDA_RUNTIME_INCLUDE_FILE_MANAGER_H_
+#ifndef PANDA_FILE_MANAGER_H_
+#define PANDA_FILE_MANAGER_H_
 
 #include "libpandafile/file.h"
+#include "runtime/compiler.h"
 #include "runtime/include/mem/panda_string.h"
 
 namespace panda {
 
 class FileManager {
 public:
-    static bool LoadAbcFile(const PandaString &location, panda_file::File::OpenMode open_mode);
+    static bool LoadAbcFile(std::string_view location, panda_file::File::OpenMode open_mode);
 
-    static Expected<bool, std::string> LoadAnFile(const PandaString &an_location);
+    static bool TryLoadAnFileForLocation(std::string_view panda_file_location);
 
-    static PandaString ResolveAnFilePath(const PandaString &abc_path);
+    static Expected<bool, std::string> LoadAnFile(std::string_view an_location, bool force = false);
+
+    static PandaString ResolveAnFilePath(std::string_view abc_path);
 };
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_FILE_MANAGER_H_
+#endif  // PANDA_FILE_MANAGER_H_

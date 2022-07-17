@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,37 +27,58 @@ namespace panda::mem {
 template <typename T>
 void MemStats<T>::RecordAllocateObject(size_t size, SpaceType type_mem)
 {
+    RecordAllocateObjects(1, size, type_mem);
+}
+
+template <typename T>
+void MemStats<T>::RecordAllocateObjects(size_t total_object_num, size_t total_object_size, SpaceType type_mem)
+{
     ASSERT(IsHeapSpace(type_mem));
-    RecordAllocate(size, type_mem);
+    RecordAllocate(total_object_size, type_mem);
     if (type_mem == SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT) {
-        humongous_objects_allocated_.fetch_add(1, std::memory_order_acq_rel);
+        // Atomic with acq_rel order reason: data race with humongous_objects_allocated_ with dependecies on reads after
+        // the load and on writes before the store
+        humongous_objects_allocated_.fetch_add(total_object_num, std::memory_order_acq_rel);
     } else {
-        objects_allocated_.fetch_add(1, std::memory_order_acq_rel);
+        // Atomic with acq_rel order reason: data race with objects_allocated_ with dependecies on reads after the load
+        // and on writes before the store
+        objects_allocated_.fetch_add(total_object_num, std::memory_order_acq_rel);
     }
 }
 
 template <typename T>
-void MemStats<T>::RecordMovedObjects(size_t total_object_num, size_t size, SpaceType type_mem)
+void MemStats<T>::RecordYoungMovedObjects(size_t young_object_num, size_t size, SpaceType type_mem)
 {
     ASSERT(IsHeapSpace(type_mem));
     RecordMoved(size, type_mem);
     // We can't move SPACE_TYPE_HUMONGOUS_OBJECT
     ASSERT(type_mem != SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
-    uint64_t old_val = objects_allocated_.fetch_sub(total_object_num, std::memory_order_acq_rel);
-    (void)old_val;
-    ASSERT(old_val >= total_object_num);
+    // Atomic with acq_rel order reason: data race with last_young_objects_moved_bytes_ with dependecies on reads after
+    // the load and on writes before the store
+    last_young_objects_moved_bytes_.fetch_add(size, std::memory_order_acq_rel);
+    // Atomic with acq_rel order reason: data race with objects_allocated_ with dependecies on reads after the load and
+    // on writes before the store
+    [[maybe_unused]] uint64_t old_val = objects_allocated_.fetch_sub(young_object_num, std::memory_order_acq_rel);
+    ASSERT(old_val >= young_object_num);
+}
+
+template <typename T>
+void MemStats<T>::RecordTenuredMovedObjects(size_t tenured_object_num, size_t size, SpaceType type_mem)
+{
+    ASSERT(IsHeapSpace(type_mem));
+    RecordMoved(size, type_mem);
+    // We can't move SPACE_TYPE_HUMONGOUS_OBJECT
+    ASSERT(type_mem != SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+    // Atomic with acq_rel order reason: data race with objects_allocated_ with dependecies on reads after the load and
+    // on writes before the store
+    [[maybe_unused]] uint64_t old_val = objects_allocated_.fetch_sub(tenured_object_num, std::memory_order_acq_rel);
+    ASSERT(old_val >= tenured_object_num);
 }
 
 template <typename T>
 void MemStats<T>::RecordFreeObject(size_t object_size, SpaceType type_mem)
 {
-    ASSERT(IsHeapSpace(type_mem));
-    RecordFree(object_size, type_mem);
-    if (type_mem == SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT) {
-        humongous_objects_freed_.fetch_add(1, std::memory_order_acq_rel);
-    } else {
-        objects_freed_.fetch_add(1, std::memory_order_acq_rel);
-    }
+    RecordFreeObjects(1, object_size, type_mem);
 }
 
 template <typename T>
@@ -66,8 +87,12 @@ void MemStats<T>::RecordFreeObjects(size_t total_object_num, size_t total_object
     ASSERT(IsHeapSpace(type_mem));
     RecordFree(total_object_size, type_mem);
     if (type_mem == SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT) {
+        // Atomic with acq_rel order reason: data race with humongous_objects_freed_ with dependecies on reads after the
+        // load and on writes before the store
         humongous_objects_freed_.fetch_add(total_object_num, std::memory_order_acq_rel);
     } else {
+        // Atomic with acq_rel order reason: data race with objects_freed_ with dependecies on reads after the load and
+        // on writes before the store
         objects_freed_.fetch_add(total_object_num, std::memory_order_acq_rel);
     }
 }
@@ -95,12 +120,16 @@ PandaString MemStats<T>::GetStatistics(HeapManager *heap_manager)
 template <typename T>
 [[nodiscard]] uint64_t MemStats<T>::GetTotalObjectsAllocated() const
 {
+    // Atomic with acquire order reason: data race with objects_allocated_ with dependecies on reads after the load
+    // which should become visible
     return objects_allocated_.load(std::memory_order_acquire);
 }
 
 template <typename T>
 [[nodiscard]] uint64_t MemStats<T>::GetTotalObjectsFreed() const
 {
+    // Atomic with acquire order reason: data race with objects_freed_ with dependecies on reads after the load which
+    // should become visible
     return objects_freed_.load(std::memory_order_acquire);
 }
 
@@ -119,12 +148,16 @@ template <typename T>
 template <typename T>
 [[nodiscard]] uint64_t MemStats<T>::GetTotalHumongousObjectsAllocated() const
 {
+    // Atomic with acquire order reason: data race with humongous_objects_allocated_ with dependecies on reads after the
+    // load which should become visible
     return humongous_objects_allocated_.load(std::memory_order_acquire);
 }
 
 template <typename T>
 [[nodiscard]] uint64_t MemStats<T>::GetTotalHumongousObjectsFreed() const
 {
+    // Atomic with acquire order reason: data race with humongous_objects_freed_ with dependecies on reads after the
+    // load which should become visible
     return humongous_objects_freed_.load(std::memory_order_acquire);
 }
 
@@ -144,6 +177,14 @@ template <typename T>
 [[nodiscard]] uint64_t MemStats<T>::GetHumonguousObjectsCountAlive() const
 {
     return GetTotalHumongousObjectsAllocated() - GetTotalHumongousObjectsFreed();
+}
+
+template <typename T>
+[[nodiscard]] uint64_t MemStats<T>::GetLastYoungObjectsMovedBytes() const
+{
+    // Atomic with acquire order reason: data race with last_young_objects_moved_bytes_ with dependecies on reads after
+    // the load which should become visible
+    return last_young_objects_moved_bytes_.load(std::memory_order_acquire);
 }
 
 template <typename T>

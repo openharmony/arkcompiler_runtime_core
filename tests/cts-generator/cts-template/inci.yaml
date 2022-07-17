@@ -13,7 +13,7 @@
 
 definitions: []
 tests:
-  - file-name: "inci"
+  - file-name: 'inci'
     isa:
       title: Increment register with immediate
       description: >
@@ -21,7 +21,7 @@ tests:
       exceptions:
         - x_none
     commands:
-      - file-name: "op_v_4_imm_4_zero"
+      - file-name: 'op_v_4_imm_4_zero'
         isa:
           instructions:
             - sig: inci v:inout:i32, imm:i32
@@ -34,40 +34,24 @@ tests:
               ldai %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
-
-        description: Check `inci` with various values.
+              return
+        check-type: none
+        description: Check 'inci' with various values.
         cases:
-          - values: ["0", "0x0"]
-          - values: ["1", "0x1"]
-          - values: ["-1", "0xFFFFFFFF"]
-          - values: ["0x7", "0x7"]
-          - values: ["-0x7", "0xFFFFFFF9"]
-          - values: ["0x8", "0xFFFFFFF8"]
-          - values: ["-0x8", "0xFFFFFFF8"]
-          - values: ["0xF", "0xFFFFFFFF"]
-          - values: ["-0xF", "0x1"]
+          - values: ['0', '0x0']
+          - values: ['1', '0x1']
+          - values: ['-1', '0xFFFFFFFF']
+          - values: ['0x7', '0x7']
+          - values: ['-0x7', '0xFFFFFFF9']
+          - values: ['0x8', '0xFFFFFFF8']
+          - values: ['-0x8', '0xFFFFFFF8']
+          - values: ['0xF', '0xFFFFFFFF']
+          - values: ['-0xF', '0x1']
 
-          # The following tests truncates first argument to imm4 size.
-          - values: ["0xF1", "1"]
-          - values: ["-0xF1", "-1"]
-          - values: ["0xF7", "7"]
-          - values: ["-0xF7", "-7"]
-          - values: ["0xF8", "-8"]
-          - values: ["-0xF8", "-8"]
-          - values: ["0xFF", "-1"]
-          - values: ["-0xFF", "1"]
-          - values: ["0xFFFF", "-1"]
-          - values: ["-0xFFFF", "1"]
-          - values: ["0xFFFFFF", "-1"]
-          - values: ["-0xFFFFFF", "1"]
-          - values: ["0xFFFFFFFF", "-1"]
-          - values: ["-0xFFFFFFFF", "1"]
-
-      - file-name: "op_v_4_imm_4_pone"
+      - file-name: 'op_v_4_imm_4_pone'
         isa:
           instructions:
             - sig: inci v:inout:i32, imm:i32
@@ -80,22 +64,24 @@ tests:
               ldai %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
-        description: Check `inci` with various values.
+              return
+        check-type: none
+        description: Check 'inci' with various values.
         cases:
-          - values: ["0", "0x1"]
-          - values: ["1", "0x2"]
-          - values: ["-1", "0"]
-          - values: ["0x7", "0x8"]
-          - values: ["-0x7", "0xFFFFFFFA"]
-          - values: ["0x8", "0xFFFFFFF9"]
-          - values: ["-0x8", "0xFFFFFFF9"]
-          - values: ["0xF", "0"]
-          - values: ["-0xF", "0x2"]
-      - file-name: "op_v_4_imm_4_none"
+          - values: ['0', '0x1']
+          - values: ['1', '0x2']
+          - values: ['-1', '0']
+          - values: ['0x7', '0x8']
+          - values: ['-0x7', '0xFFFFFFFA']
+          - values: ['0x8', '0xFFFFFFF9']
+          - values: ['-0x8', '0xFFFFFFF9']
+          - values: ['0xF', '0']
+          - values: ['-0xF', '0x2']
+
+      - file-name: 'op_v_4_imm_4_none'
         isa:
           instructions:
             - sig: inci v:inout:i32, imm:i32
@@ -108,23 +94,24 @@ tests:
               ldai %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
-        description: Check `inci` with various values.
+              return
+        check-type: none
+        description: Check 'inci' with various values.
         cases:
-          - values: ["0", "0xFFFFFFFF"]
-          - values: ["1", "0"]
-          - values: ["-1", "0xFFFFFFFE"]
-          - values: ["0x7", "0x6"]
-          - values: ["-0x7", "0xFFFFFFF8"]
-          - values: ["0x8", "0xFFFFFFF7"]
-          - values: ["-0x8", "0xFFFFFFF7"]
-          - values: ["0xF", "0xFFFFFFFE"]
-          - values: ["-0xF", "0"]
+          - values: ['0', '0xFFFFFFFF']
+          - values: ['1', '0']
+          - values: ['-1', '0xFFFFFFFE']
+          - values: ['0x7', '0x6']
+          - values: ['-0x7', '0xFFFFFFF8']
+          - values: ['0x8', '0xFFFFFFF7']
+          - values: ['-0x8', '0xFFFFFFF7']
+          - values: ['0xF', '0xFFFFFFFE']
+          - values: ['-0xF', '0']
 
-      - file-name: "op_v_4_imm_4_pmax"
+      - file-name: 'op_v_4_imm_4_pmax'
         isa:
           instructions:
             - sig: inci v:inout:i32, imm:i32
@@ -137,24 +124,27 @@ tests:
               ldai %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `inci` with various values.
-        tags: ['clang_release_sanitizer']
         cases:
           - values: ["0", "0x7FFFFFFF"]
           - values: ["1", "0x80000000"]
+            tags: [sanitizer-fail]
           - values: ["-1", "0x7FFFFFFE"]
           - values: ["0x7", "0x80000006"]
+            tags: [sanitizer-fail]
           - values: ["-0x7", "0x7FFFFFF8"]
           - values: ["0x8", "0x7FFFFFF7"]
           - values: ["-0x8", "0x7FFFFFF7"]
           - values: ["0xF", "0x7FFFFFFE"]
           - values: ["-0xF", "0x80000000"]
+            tags: [sanitizer-fail]
 
-      - file-name: "op_v_4_imm_4_nmax"
+      - file-name: 'op_v_4_imm_4_nmax'
         isa:
           instructions:
             - sig: inci v:inout:i32, imm:i32
@@ -167,24 +157,29 @@ tests:
               ldai %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `inci` with various values.
-        tags: ['clang_release_sanitizer']
         cases:
           - values: ["0", "0x80000000"]
           - values: ["1", "0x80000001"]
           - values: ["-1", "0x7FFFFFFF"]
+            tags: [sanitizer-fail]
           - values: ["0x7", "0x80000007"]
           - values: ["-0x7", "0x7FFFFFF9"]
+            tags: [sanitizer-fail]
           - values: ["0x8", "0x7FFFFFF8"]
+            tags: [sanitizer-fail]
           - values: ["-0x8", "0x7FFFFFF8"]
+            tags: [sanitizer-fail]
           - values: ["0xF", "0x7FFFFFFF"]
+            tags: [sanitizer-fail]
           - values: ["-0xF", "0x80000001"]
 
-      - file-name: "values"
+      - file-name: 'values'
         isa:
           instructions:
             - sig: inci v:inout:i32, imm:i32
@@ -198,36 +193,36 @@ tests:
               lda v0
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
-
-        description: Check `inci` with various values.
+              return
+        check-type: none
+        description: Check 'inci' with various values.
         tags: ['tsan']
         cases:
-          - values: ["0x527DF0C9", "0x810768F7", "0x527DF0D0"]
-          - values: ["0xF4D85C6B", "0x6A4FAA10", "0xF4D85C6B"]
-          - values: ["0xE1A513C2", "0x441A43A5", "0xE1A513C7"]
-          - values: ["0x22587543", "0xC0315D2F", "0x22587542"]
-          - values: ["0xAC2F0564", "0x4184FBB0", "0xAC2F0564"]
-          - values: ["0x789DD1C7", "0x785F2B4D", "0x789DD1C4"]
-          - values: ["0xF2945867", "0x9E7905DA", "0xF2945861"]
-          - values: ["0xCAF110C4", "0xD75B995", "0xCAF110C9"]
-          - values: ["0x36A6B239", "0x673DF774", "0x36A6B23D"]
-          - values: ["0xA9C7A3F1", "0xB6A9ED44", "0xA9C7A3F5"]
-          - values: ["0x76A8E402", "0xDC74D94E", "0x76A8E400"]
-          - values: ["0xB7BFCE38", "0x9C079C1F", "0xB7BFCE37"]
-          - values: ["0x78E8FD86", "0xCABD40FC", "0x78E8FD82"]
-          - values: ["0xAC15926", "0xFE5CF7C0", "0xAC15926"]
-          - values: ["0x49CC307D", "0xDC493657", "0x49CC3084"]
-          - values: ["0xAB00FCF5", "0xD97A5566", "0xAB00FCFB"]
-          - values: ["0x36863547", "0xB57C2433", "0x3686354A"]
-          - values: ["0x6AFD4EF", "0x70D9AA3C", "0x6AFD4EB"]
-          - values: ["0x41941827", "0x211BB144", "0x4194182B"]
-          - values: ["0x2FFB422A", "0xCB5D991A", "0x2FFB4224"]
+          - values: ['0x527DF0C9', '0x7', '0x527DF0D0']
+          - values: ['0xF4D85C6B', '0x0', '0xF4D85C6B']
+          - values: ['0xE1A513C2', '0x5', '0xE1A513C7']
+          - values: ['0x22587543', '0xF', '0x22587542']
+          - values: ['0xAC2F0564', '0x0', '0xAC2F0564']
+          - values: ['0x789DD1C7', '0xD', '0x789DD1C4']
+          - values: ['0xF2945867', '0xA', '0xF2945861']
+          - values: ['0xCAF110C4', '0x5', '0xCAF110C9']
+          - values: ['0x36A6B239', '0x4', '0x36A6B23D']
+          - values: ['0xA9C7A3F1', '0x4', '0xA9C7A3F5']
+          - values: ['0x76A8E402', '0xE', '0x76A8E400']
+          - values: ['0xB7BFCE38', '0xF', '0xB7BFCE37']
+          - values: ['0x78E8FD86', '0xC', '0x78E8FD82']
+          - values: ['0xAC15926', '0x0', '0xAC15926']
+          - values: ['0x49CC307D', '0x7', '0x49CC3084']
+          - values: ['0xAB00FCF5', '0x6', '0xAB00FCFB']
+          - values: ['0x36863547', '0x3', '0x3686354A']
+          - values: ['0x6AFD4EF', '0xC', '0x6AFD4EB']
+          - values: ['0x41941827', '0x4', '0x4194182B']
+          - values: ['0x2FFB422A', '0xA', '0x2FFB4224']
 
-      - file-name: "regs"
+      - file-name: 'regs'
         isa:
           instructions:
             - sig: inci v:inout:i32, imm:i32
@@ -235,126 +230,77 @@ tests:
               format: [op_v_4_imm_4]
         runner-options: ['compile-only']
         code-template: |
-            #
-                inci %s, 0
+          #
+              inci %s, 0
         check-type: none
-        description: Check `inci` with various register numbers.
+        description: Check 'inci' with various register numbers.
         cases:
-            - values: ["v0"]
-            - values: ["v1"]
-            - values: ["v15"]
-            - values: ["v16"]
-              runner-options: ['compile-failure']
+          - values: ['v0']
+          - values: ['v1']
+          - values: ['v15']
+          - values: ['v16']
+            runner-options: ['compile-failure']
 
-      - file-name: "type"
+      - file-name: 'type'
         isa:
-          instructions:
-            - sig: inci v:inout:i32, imm:i32
-              acc: none
-              format: [op_v_4_imm_4]
           verification:
             - v1_i32
-        bugid: ["964", "1653"]
-        tags: ["verifier"]
+        bugid: ['964', '1653']
+        tags: ['verifier']
         description: |
-          Check `inci` with incorrect accumulator type.
-          Load different values (objects, strings, types, 64-bit floating point values, 64-bit integer values) and invokes `inci`.
-          Return 0 to indicate that negative test failed, because this line is unreachable and code will not be executed after verification error.
-        code-template: |
-              #
-                  %s
-                  inci v0, 1
-                  ldai 0
-                  return
-        check-type: none
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        cases:
-          - values: [mov.null v0]
-          - values:
-            - |
-              #
-                  lda.str ""
-                  sta v0
-          - values:
-            - |
-              #
-                  lda.str "some string"
-                  sta v0
-          - values: ["fmovi.64 v0, 0.0"]
-          - values: ["fmovi.64 v0, -0.0"]
-          - values: ["fmovi.64 v0, 1.0"]
-          - values: ["fmovi.64 v0, -1.0"]
-          - values: ["fmovi.64 v0, 0x7FF8000000000000"]
-          - values: ["fmovi.64 v0, 0xFFFFFFFFFFFFFFFF"]
-          - values: ["fmovi.64 v0, 0x7FF0000000000000"]
-          - values: ["fmovi.64 v0, 0xFFF0000000000000"]
-          - values: ["fmovi.64 v0, 0xffefffffffffffff"]
-          - values: ["fmovi.64 v0, 0x7fefffffffffffff"]
-          - values: ["fmovi.64 v0, 0x0000000000000001"]
-          - values: ["fmovi.64 v0, 0x8000000000000001"]
-          - values: ["fmovi.64 v0, 3.14159265358979323846"]
-          - values: ["fmovi.64 v0, 0.0"]
-          - values: ["fmovi.64 v0, -0.0"]
-          - values: ["fmovi.64 v0, 1.0"]
-          - values: ["fmovi.64 v0, -1.0"]
-          - values: ["fmovi.64 v0, 0x7FF8000000000000"]
-          - values: ["fmovi.64 v0, 0xFFFFFFFFFFFFFFFF"]
-          - values: ["fmovi.64 v0, 0x7FF0000000000000"]
-          - values: ["fmovi.64 v0, 0xFFF0000000000000"]
-          - values: ["fmovi.64 v0, 0xffefffffffffffff"]
-          - values: ["fmovi.64 v0, 0x7fefffffffffffff"]
-          - values: ["fmovi.64 v0, 0x0000000000000001"]
-          - values: ["fmovi.64 v0, 0x8000000000000001"]
-          - values: ["fmovi.64 v0, 3.14159265358979323846"]
-          - values: ["movi.64 v0, 0"]
-          - values: ["movi.64 v0, 1"]
-          - values: ["movi.64 v0, -1"]
-          - values: ["movi.64 v0, 0x0000000100000000"]
-          - values: ["movi.64 v0, -0x0000000100000000"]
-          - values: ["movi.64 v0, 0x0000000080000000"]
-          - values: ["movi.64 v0, -0x0000000080000000"]
-          - values: ["movi.64 v0, 0x7FFFFFFFFFFFFFFF"]
-          - values: ["movi.64 v0, -0x7FFFFFFFFFFFFFFF"]
-          - values: ["movi.64 v0, 0x1000000000000000"]
-          - values: ["movi.64 v0, 0x8000000000000000"]
-          - values: ["movi.64 v0, 0xF000000000000000"]
-          - values: ["movi.64 v0, 0xFFFFFFFF00000000"]
-          - values: ["movi.64 v0, 0xFFFFFFFFFFFFFFFF"]
-          - values: ["movi.64 v0, -0x1000000000000000"]
-          - values: ["movi.64 v0, -0x8000000000000000"]
-          - values: ["movi.64 v0, -0xF000000000000000"]
-          - values: ["movi.64 v0, -0xFFFFFFFF00000000"]
-          - values: ["movi.64 v0, -0xFFFFFFFFFFFFFFFF"]
-
-      - file-name: "type_obj"
-        isa:
-          instructions:
-            - sig: inci v:inout:i32, imm:i32
-              acc: none
-              format: [op_v_4_imm_4]
-          verification:
-            - v1_i32
-        bugid: ["964"]
-        tags: ["verifier"]
-        description: |
-          Check `inci` with incorrect accumulator type.
-          Load different values (objects, strings, types, 64-bit floating point values, 64-bit integer values) and invokes `inci`.
-          Return 0 to indicate that negative test failed, because this line is unreachable and code will not be executed after verification error.
-        code-template: |
-              #
-              .record Object {}
-              .function i32 main() {
-                  %s
-                  inci v0, 1
-                  ldai 0
-                  return
-        check-type: none
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+          Check 'inci' with incorrect register type.
+          Load different values (objects, strings, types, 64-bit floating point values, 64-bit integer values) in register and invoke 'inci'.
         header-template: []
+        code-template: |
+          .record panda.Object <external>
+          .record B {}
+          .function i32 main() {
+              %s
+              inci v0, 1
+        check-type: exit-positive
+        runner-options: ['verifier-failure', 'verifier-config']
         cases:
           - values:
-            - |
-              lda.type Object
-              sta v0
+              - movi.64 v0, 0
           - values:
-            - newobj v0, Object
+              - fmovi v0, 0
+          - values:
+              - fmovi.64 v0, 0
+          - values:
+              - newobj v0, B
+          - values:
+              - |
+                #
+                    lda.type B
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type B[]
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type panda.Object
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    movi v0, 10
+                    newarr v0, v0, i32[]
+          - values:
+              - mov.null v0
+
+      - file-name: uninitialized_reg
+        isa:
+          instructions:
+            - sig: inci v:inout:i32, imm:i32
+              acc: none
+              format: [op_v_4_imm_4]
+        description: Check 'inci' with uninitialized register.
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
+        code-template: |
+          #
+              inci v0, 2
+        check-type: exit-positive

@@ -16,45 +16,45 @@ cmake_minimum_required(VERSION 3.10)
 project(securec)
 
 set(SOURCES
-    ${SECUREC_ROOT}/src/vsprintf_s.c
-    ${SECUREC_ROOT}/src/wmemmove_s.c
-    ${SECUREC_ROOT}/src/strncat_s.c
-    ${SECUREC_ROOT}/src/vsnprintf_s.c
-    ${SECUREC_ROOT}/src/fwscanf_s.c
-    ${SECUREC_ROOT}/src/scanf_s.c
-    ${SECUREC_ROOT}/src/strcat_s.c
-    ${SECUREC_ROOT}/src/sscanf_s.c
-    ${SECUREC_ROOT}/src/secureprintoutput_w.c
-    ${SECUREC_ROOT}/src/wmemcpy_s.c
-    ${SECUREC_ROOT}/src/wcsncat_s.c
-    ${SECUREC_ROOT}/src/secureprintoutput_a.c
-    ${SECUREC_ROOT}/src/secureinput_w.c
-    ${SECUREC_ROOT}/src/memcpy_s.c
-    ${SECUREC_ROOT}/src/fscanf_s.c
-    ${SECUREC_ROOT}/src/vswscanf_s.c
-    ${SECUREC_ROOT}/src/secureinput_a.c
-    ${SECUREC_ROOT}/src/sprintf_s.c
-    ${SECUREC_ROOT}/src/memmove_s.c
-    ${SECUREC_ROOT}/src/swscanf_s.c
-    ${SECUREC_ROOT}/src/snprintf_s.c
-    ${SECUREC_ROOT}/src/vscanf_s.c
-    ${SECUREC_ROOT}/src/vswprintf_s.c
-    ${SECUREC_ROOT}/src/wcscpy_s.c
-    ${SECUREC_ROOT}/src/vfwscanf_s.c
-    ${SECUREC_ROOT}/src/memset_s.c
-    ${SECUREC_ROOT}/src/wscanf_s.c
-    ${SECUREC_ROOT}/src/vwscanf_s.c
-    ${SECUREC_ROOT}/src/strtok_s.c
-    ${SECUREC_ROOT}/src/wcsncpy_s.c
-    ${SECUREC_ROOT}/src/vfscanf_s.c
-    ${SECUREC_ROOT}/src/vsscanf_s.c
-    ${SECUREC_ROOT}/src/wcstok_s.c
-    ${SECUREC_ROOT}/src/securecutil.c
-    ${SECUREC_ROOT}/src/gets_s.c
-    ${SECUREC_ROOT}/src/swprintf_s.c
-    ${SECUREC_ROOT}/src/strcpy_s.c
-    ${SECUREC_ROOT}/src/wcscat_s.c
-    ${SECUREC_ROOT}/src/strncpy_s.c
+    ${SECUREC_ROOT}/src/securec/vsprintf_s.c
+    ${SECUREC_ROOT}/src/securec/wmemmove_s.c
+    ${SECUREC_ROOT}/src/securec/strncat_s.c
+    ${SECUREC_ROOT}/src/securec/vsnprintf_s.c
+    ${SECUREC_ROOT}/src/securec/fwscanf_s.c
+    ${SECUREC_ROOT}/src/securec/scanf_s.c
+    ${SECUREC_ROOT}/src/securec/strcat_s.c
+    ${SECUREC_ROOT}/src/securec/sscanf_s.c
+    ${SECUREC_ROOT}/src/securec/secureprintoutput_w.c
+    ${SECUREC_ROOT}/src/securec/wmemcpy_s.c
+    ${SECUREC_ROOT}/src/securec/wcsncat_s.c
+    ${SECUREC_ROOT}/src/securec/secureprintoutput_a.c
+    ${SECUREC_ROOT}/src/securec/secureinput_w.c
+    ${SECUREC_ROOT}/src/securec/memcpy_s.c
+    ${SECUREC_ROOT}/src/securec/fscanf_s.c
+    ${SECUREC_ROOT}/src/securec/vswscanf_s.c
+    ${SECUREC_ROOT}/src/securec/secureinput_a.c
+    ${SECUREC_ROOT}/src/securec/sprintf_s.c
+    ${SECUREC_ROOT}/src/securec/memmove_s.c
+    ${SECUREC_ROOT}/src/securec/swscanf_s.c
+    ${SECUREC_ROOT}/src/securec/snprintf_s.c
+    ${SECUREC_ROOT}/src/securec/vscanf_s.c
+    ${SECUREC_ROOT}/src/securec/vswprintf_s.c
+    ${SECUREC_ROOT}/src/securec/wcscpy_s.c
+    ${SECUREC_ROOT}/src/securec/vfwscanf_s.c
+    ${SECUREC_ROOT}/src/securec/memset_s.c
+    ${SECUREC_ROOT}/src/securec/wscanf_s.c
+    ${SECUREC_ROOT}/src/securec/vwscanf_s.c
+    ${SECUREC_ROOT}/src/securec/strtok_s.c
+    ${SECUREC_ROOT}/src/securec/wcsncpy_s.c
+    ${SECUREC_ROOT}/src/securec/vfscanf_s.c
+    ${SECUREC_ROOT}/src/securec/vsscanf_s.c
+    ${SECUREC_ROOT}/src/securec/wcstok_s.c
+    ${SECUREC_ROOT}/src/securec/securecutil.c
+    ${SECUREC_ROOT}/src/securec/gets_s.c
+    ${SECUREC_ROOT}/src/securec/swprintf_s.c
+    ${SECUREC_ROOT}/src/securec/strcpy_s.c
+    ${SECUREC_ROOT}/src/securec/wcscat_s.c
+    ${SECUREC_ROOT}/src/securec/strncpy_s.c
 )
 
 add_library(c_secshared ${PANDA_DEFAULT_LIB_TYPE} ${SOURCES})
@@ -65,12 +65,26 @@ if (PANDA_TARGET_WINDOWS)
 endif()
 target_compile_options(c_secshared PRIVATE -Wall -O1)
 
+if(HOST_TOOLS)
+    set_target_properties(c_secshared
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/third_party/libc_sec
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/third_party/libc_sec
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/third_party/libc_sec
+    )
+endif()
+
+
 if (PANDA_ENABLE_AFL)
     add_library(c_secshared_fuzz ${PANDA_DEFAULT_LIB_TYPE} ${SOURCES})
     target_include_directories(c_secshared_fuzz PUBLIC ${SECUREC_ROOT}/include)
     target_compile_definitions(c_secshared_fuzz PRIVATE NDEBUG SECUREC_SUPPORT_STRTOLD=1)
     if (PANDA_TARGET_WINDOWS)
         target_compile_definitions(c_secshared_fuzz PUBLIC _CRTBLD __LIBMSVCRT__)
+      endif()
+
+    if(NOT PANDA_AFL_COVERAGE)
+      set(AFL_NOOPT "--afl_noopt")
     endif()
-    target_compile_options(c_secshared_fuzz PRIVATE -Wall -O1 --afl_noopt)
+    target_compile_options(c_secshared_fuzz PRIVATE -Wall -O1 ${AFL_NOOPT})
 endif()

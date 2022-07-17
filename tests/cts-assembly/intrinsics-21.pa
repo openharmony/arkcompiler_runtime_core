@@ -15,7 +15,7 @@
 .record System <external>
 .function void System.assertPrint(u1 a0, panda.String a1) <external>
 
-.function u1 main(){
+.function i32 main(){
     movi v0, 1
     lda.str "qwert\n"
     sta.obj v1

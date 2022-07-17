@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_OBJECT_ACCESSOR_H_
-#define PANDA_RUNTIME_INCLUDE_OBJECT_ACCESSOR_H_
+#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_H_
+#define PANDA_RUNTIME_OBJECT_ACCESSOR_H_
 
 #include <cstddef>
 
@@ -66,10 +65,10 @@ public:
     static void SetObject(const ManagedThread *thread, void *obj, size_t offset, ObjectHeader *value);
 
     template <bool need_read_barrier = true, bool is_dyn = false>
-    static ObjectHeader *GetFieldObject(ManagedThread *thread, const void *obj, const Field &field);
+    static ObjectHeader *GetFieldObject(const ManagedThread *thread, const void *obj, const Field &field);
 
     template <bool need_write_barrier = true, bool is_dyn = false>
-    static void SetFieldObject(ManagedThread *thread, void *obj, const Field &field, ObjectHeader *value);
+    static void SetFieldObject(const ManagedThread *thread, void *obj, const Field &field, ObjectHeader *value);
 
     template <class T>
     static T GetFieldPrimitive(const void *obj, size_t offset, std::memory_order memory_order);
@@ -111,23 +110,20 @@ public:
     template <typename T>
     static T GetAndBitwiseXorFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memory_order);
 
-    template <class T>
-    static inline void SetDynPrimitive(void *obj, size_t offset, T value)
-    {
-        auto *addr = reinterpret_cast<T *>(ToUintPtr(obj) + offset);
-        ASSERT(IsInObjectsAddressSpace(ToUintPtr(addr)));
-        *addr = value;
-    }
+    static inline void SetDynValueWithoutBarrier(void *obj, size_t offset, coretypes::TaggedType value);
 
-    template <bool need_write_barrier = true>
-    static inline void SetDynObject(const ManagedThread *thread, void *obj, size_t offset, ObjectHeader *value);
+    static inline void SetDynValue(const ManagedThread *thread, void *obj, size_t offset, coretypes::TaggedType value);
+
+    template <typename T>
+    static inline void SetDynPrimitive(const ManagedThread *thread, void *obj, size_t offset, T value);
 
     template <class T>
     static inline T GetDynValue(const void *obj, size_t offset)
     {
-        auto *addr = reinterpret_cast<T *>(ToUintPtr(obj) + offset);
-        ASSERT(IsInObjectsAddressSpace(ToUintPtr(addr)));
-        return *addr;
+        uintptr_t addr = ToUintPtr(obj) + offset;
+        ASSERT(IsInObjectsAddressSpace(addr));
+        // Atomic with relaxed order reason: concurrent access from GC
+        return reinterpret_cast<const std::atomic<T> *>(addr)->load(std::memory_order_relaxed);
     }
 
 private:
@@ -137,8 +133,10 @@ private:
         auto *addr = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(obj) + offset);
         ASSERT(IsInObjectsAddressSpace(ToUintPtr(addr)));
         if (is_volatile) {
+            // Atomic with seq_cst order reason: required for volatile
             return reinterpret_cast<const std::atomic<T> *>(addr)->load(std::memory_order_seq_cst);
         }
+        // Atomic with relaxed order reason: to be compatible with other vms
         return reinterpret_cast<const std::atomic<T> *>(addr)->load(std::memory_order_relaxed);
     }
 
@@ -148,8 +146,10 @@ private:
         auto *addr = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(obj) + offset);
         ASSERT(IsInObjectsAddressSpace(ToUintPtr(addr)));
         if (is_volatile) {
+            // Atomic with seq_cst order reason: required for volatile
             return reinterpret_cast<std::atomic<T> *>(addr)->store(value, std::memory_order_seq_cst);
         }
+        // Atomic with relaxed order reason: to be compatible with other vms
         return reinterpret_cast<std::atomic<T> *>(addr)->store(value, std::memory_order_relaxed);
     }
 
@@ -158,6 +158,7 @@ private:
     {
         auto *addr = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(obj) + offset);
         ASSERT(IsInObjectsAddressSpace(ToUintPtr(addr)));
+        // Atomic with parameterized order reason: memory order passed as argument
         return reinterpret_cast<const std::atomic<T> *>(addr)->load(memory_order);
     }
 
@@ -166,6 +167,7 @@ private:
     {
         auto *addr = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(obj) + offset);
         ASSERT(IsInObjectsAddressSpace(ToUintPtr(addr)));
+        // Atomic with parameterized order reason: memory order passed as argument
         return reinterpret_cast<std::atomic<T> *>(addr)->store(value, memory_order);
     }
 
@@ -180,4 +182,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_OBJECT_ACCESSOR_H_
+#endif  // PANDA_RUNTIME_OBJECT_ACCESSOR_H_

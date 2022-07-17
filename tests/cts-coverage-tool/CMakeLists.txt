@@ -19,14 +19,9 @@ project(cts_coverage_tool)
 
 # Source files:
 set(ISA_FILE "${CMAKE_BINARY_DIR}/isa/isa.yaml")
-set(NON_TESTABLE "${PROJECT_SOURCE_DIR}/non_testable.yaml")
-set(TESTS_DIR "${PROJECT_BINARY_DIR}/../cts-generator")
-set(TESTS_GLOB_ASSEMBLY "cts-assembly/**/*.pa")
-set(TESTS_GLOB_GENERATED "cts-generated/**/*.pa")
-file(
-    COPY "${PROJECT_SOURCE_DIR}/../cts-assembly"
-    DESTINATION "${PROJECT_BINARY_DIR}/../cts-generator"
-)
+set(NON_TESTABLE "${PROJECT_SOURCE_DIR}/config/non_testable.yaml")
+set(TESTS_DIR "${PROJECT_BINARY_DIR}/../cts-generator/cts-generated")
+set(TESTS_GLOB_GENERATED "**/*.pa")
 
 # Generated files:
 set(UNCOVERED "${PROJECT_BINARY_DIR}/uncovered.yaml")
@@ -39,11 +34,11 @@ set(REPORT "${PROJECT_BINARY_DIR}/report.yaml")
 set(OUTPUT_FILES ${UNCOVERED} ${UNCOVERED_MD} ${ORPHANED} ${ORPHANED_MD} ${FULL} ${FULL_MD} ${REPORT} ALWAYS_REBUILD)
 
 # Coverage tool:
-set(SPECTRAC "${PROJECT_SOURCE_DIR}/spectrac.rb")
+set(SPECTRAC "${PROJECT_SOURCE_DIR}/bin/spectrac.rb")
 
 add_custom_command(OUTPUT ${OUTPUT_FILES}
     COMMENT "Compute ISA spec coverage by CTS tests"
-    COMMAND ${SPECTRAC} --spec ${ISA_FILE} --testglob ${TESTS_GLOB_ASSEMBLY} --testglob ${TESTS_GLOB_GENERATED} --testdir ${TESTS_DIR} --non_testable ${NON_TESTABLE} --uncovered ${UNCOVERED} --uncovered_md ${UNCOVERED_MD} --orphaned ${ORPHANED} --orphaned_md ${ORPHANED_MD} --full ${FULL} --full_md ${FULL_MD} --report ${REPORT}
+    COMMAND ${SPECTRAC} --spec ${ISA_FILE} --testglob ${TESTS_GLOB_GENERATED} --testdir ${TESTS_DIR} --non_testable ${NON_TESTABLE} --uncovered ${UNCOVERED} --uncovered_md ${UNCOVERED_MD} --orphaned ${ORPHANED} --orphaned_md ${ORPHANED_MD} --full ${FULL} --full_md ${FULL_MD} --report ${REPORT}
 )
 
-add_custom_target(isa_coverage DEPENDS cts-generator ${OUTPUT_FILES})
+add_custom_target(isa_coverage DEPENDS cts-generator-build ${OUTPUT_FILES})

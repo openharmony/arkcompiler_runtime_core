@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
     ldrb r6, [r4], #1
     and r1, r6, #0xF
     and r6, r6, #0xF0
+    lsr r6, #1
     add r6, r5, r6
     ldm r6, {r2-r3}
 
@@ -30,51 +31,53 @@
 
     // there are some argumetns
     // push them to the stack
-    sub sp, sp, r1, lsl #4
+    sub sp, sp, r1, lsl #3
 
     // get the first argument
     ldrb r6, [r4]
     and r6, r6, #0xF
-    add r6, r5, r6, lsl #4
+    add r6, r5, r6, lsl #3
     ldm r6!, {r7-r8}
     stm sp!, {r7, r8}
     ldm r6, {r7-r8}
     stm sp!, {r7-r8}
     cmp r1, #1
-    subeq sp, sp, r1, lsl #4
+    subeq sp, sp, r1, lsl #3
     beq .Linvoke
 
     // get the second argument
     ldrb r6, [r4], #1
     and r6, r6, #0xF0
+    lsr r6, #1
     add r6, r5, r6
     ldm r6!, {r7-r8}
     stm sp!, {r7, r8}
     ldm r6, {r7-r8}
     stm sp!, {r7-r8}
     cmp r1, #2
-    subeq sp, sp, r1, lsl #4
+    subeq sp, sp, r1, lsl #3
     beq .Linvoke
 
     // get the third argument
     ldrb r6, [r4]
     and r6, r6, #0xF
-    add r6, r5, r6, lsl #4
+    add r6, r5, r6, lsl #3
     ldm r6!, {r7-r8}
     stm sp!, {r7, r8}
     ldm r6, {r7-r8}
     stm sp!, {r7-r8}
     cmp r1, #3
-    subeq sp, sp, r1, lsl #4
+    subeq sp, sp, r1, lsl #3
     beq .Linvoke
 
     // get the fourth argument
     ldrb r6, [r4], #1
     and r6, r6, #0xF0
+    lsr r6, #1
     add r6, r5, r6
     ldm r6!, {r7-r8}
     stm sp!, {r7, r8}
     ldm r6, {r7-r8}
     stm sp!, {r7-r8}
-    subeq sp, sp, r1, lsl #4
+    subeq sp, sp, r1, lsl #3
     beq .Linvoke

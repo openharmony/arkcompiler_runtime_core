@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_GC_GC_STATS_H_
-#define PANDA_RUNTIME_MEM_GC_GC_STATS_H_
+#ifndef PANDA_RUNTIME_MEM_GC_GC_STATS_H
+#define PANDA_RUNTIME_MEM_GC_GC_STATS_H
 
 #include "libpandabase/os/mutex.h"
 #include "runtime/include/histogram-inl.h"
@@ -28,6 +27,10 @@
 #include <ratio>
 
 namespace panda::mem {
+
+namespace test {
+class MemStatsGenGCTest;
+}  // namespace test
 
 class GCStats;
 class HeapManager;
@@ -179,9 +182,36 @@ public:
 
     PandaString GetFinalStatistics(HeapManager *heap_manager);
 
-    uint64_t GetObjectsFreedBytes()
+    size_t GetObjectsFreedBytes()
     {
-        return objects_freed_bytes_;
+#ifdef PANDA_TARGET_64
+        static_assert(sizeof(objects_freed_bytes_) == sizeof(std::atomic_uint64_t));
+        // Atomic with seq_cst order reason: data race with objects_freed_bytes_ with requirement for sequentially
+        // consistent order where threads observe all modifications in the same order
+        return reinterpret_cast<std::atomic_uint64_t *>(&objects_freed_bytes_)->load(std::memory_order_seq_cst);
+#endif
+#ifdef PANDA_TARGET_32
+        static_assert(sizeof(objects_freed_bytes_) == sizeof(std::atomic_uint32_t));
+        // Atomic with seq_cst order reason: data race with objects_freed_bytes_ with requirement for sequentially
+        // consistent order where threads observe all modifications in the same order
+        return reinterpret_cast<std::atomic_uint32_t *>(&objects_freed_bytes_)->load(std::memory_order_seq_cst);
+#endif
+        UNREACHABLE();
+    }
+
+    uint64_t GetObjectsFreedCount()
+    {
+        return objects_freed_;
+    }
+
+    uint64_t GetLargeObjectsFreedBytes()
+    {
+        return large_objects_freed_bytes_;
+    }
+
+    uint64_t GetLargeObjectsFreedCount()
+    {
+        return large_objects_freed_;
     }
 
     void StartMutatorLock();
@@ -226,6 +256,7 @@ private:
 
     friend GCScopedPauseStats;
     friend GCScopedStats;
+    friend test::MemStatsGenGCTest;
 };
 
 }  // namespace panda::mem

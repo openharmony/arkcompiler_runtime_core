@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
     // r0 - SHORTY_PTR_REG, r1 - SHORTY_REG, r2 - shorty value, r3 - iframe.vregs + arg_idx,
     // r6 and r7 - temps, r8 - pointer to stack, lr - method
     ldrb r3, [r4]
-    add r3, r5, r3, lsl #4
+    add r3, r5, r3, lsl #3
 
 .Lloop_handle_call_range:
     NEXT_SHORTY r2

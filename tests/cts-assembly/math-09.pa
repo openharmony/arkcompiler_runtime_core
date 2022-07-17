@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(151 ashri 1 == 71) operation --> ashri
-.function u1 main(){
+.function i32 main(){
     ldai 151
     ashri 1
     movi v0, 75

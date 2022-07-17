@@ -142,7 +142,6 @@ tests:
           - values:
               - "0x80000000"
               - "0x80000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0x7FFFFFFF"
@@ -150,7 +149,6 @@ tests:
           - values:
               - "-0x80000000"
               - "0x80000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0xFFFFFFFF"
@@ -190,22 +188,18 @@ tests:
           - values:
               - "0x7FFFFFFF"
               - "1"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0x7FFFFFFF"
               - "-1"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0x80000000"
               - "0x80000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "-0x80000000"
               - "0x80000000"
-            tags: ["clang_release_sanitizer"]
             bugid: ['966']
           - values:
               - "0xFFFFFFFF"
@@ -215,7 +209,6 @@ tests:
               - "0x7FFFFFFF"
 
       - file-name: "op_vs_8_nmax"
-        tags: ["clang_release_sanitizer"]
         bugid: ['966']
         isa:
           instructions:
@@ -282,7 +275,7 @@ tests:
           set_failure:
               ldai 1
           fall_through:
-        tags: ['clang_release_sanitizer', 'tsan']
+        tags: ['tsan']
         bugid: ['966']
         description: Check mul2 with various values.
         cases:
@@ -342,7 +335,7 @@ tests:
               cmp.64 v0
         tags: ["verifier"]
         bugid: ['966', '1324', '2072']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         description: Check mul2 with incorrect accumulator ang register type.
         cases:
           - values:
@@ -361,7 +354,7 @@ tests:
       - file-name: "vals_mod32_2"
         tags: ["verifier"]
         bugid: ['1324', '966']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: mul2 v:in:i32
@@ -409,32 +402,118 @@ tests:
             runner-options: ['compile-failure']
 
       - file-name: "type"
+        bugid: ["964", "966"]
         tags: ["verifier"]
-        bugid: ['966', '964']
+        isa:
+          verification:
+            - acc_type
+            - v1_type
+        runner-options: ['verifier-failure', 'verifier-config']
+        header-template: []
+        code-template: |
+          .record T {}
+          .function i32 main() {
+              %s
+              *s
+              mul2 v0
+        check-type: exit-positive
+        description: Check 'mul2' with incorrect accumulator and/or register types.
+        cases:
+          - values:
+            - ldai 0
+            id: acc_ok
+          - values:
+            - ldai.64 0
+          - values:
+            - fldai 0
+            bugid: ['7315']
+          - values:
+            - fldai.64 0
+          - values:
+            - lda.null
+          - values:
+            - |
+              #
+                  movi v1, 0
+                  newarr v1, v1, i32[]
+                  lda.obj v1
+          - values:
+            - lda.str "0"
+          - values:
+            - lda.type T
+          - values:
+            - |
+              #
+                  newobj v1, T
+                  lda.obj v1
+        template-cases:
+          - values:
+            - movi v0, 0
+            exclude: [acc_ok]
+          - values:
+            - movi.64 v0, 0
+          - values:
+            - fmovi v0, 0
+            bugid: ['7315']
+          - values:
+            - fmovi.64 v0, 0
+          - values:
+            - mov.null v0
+          - values:
+            - |
+              #
+                  movi v0, 0
+                  newarr v0, v0, i32[]
+          - values:
+            - |
+              #
+                  lda.str "0"
+                  sta.obj v0
+          - values:
+            - |
+              #
+                  lda.type T
+                  sta.obj v0
+          - values:
+            - newobj v0, T
+
+
+      - file-name: uninitialized_regs
         isa:
           instructions:
             - sig: mul2 v:in:i32
               acc: inout:i32
               format: [op_v_8]
-          verification:
-            - acc_type
-            - v1_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        description: Check 'mul2' with uninitialized registers.
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
           #
               %s
-              %s
-              mul2 v0
-              ldai 0
-        check-type: no-check
-        description: Check mul2 with incorrect accumulator ang register type.
+              *s
+              mul2 *s
+        check-type: exit-positive
+        template-cases:
+          - values:
+              - ''
+          - values:
+              - ldai 0
+            exclude: [init]
         cases:
           - values:
-              - "lda.null"
-              - "movi v0, 0"
+              - ''
+              - v0
           - values:
-              - "ldai 0 "
-              - "mov.null v0"
+              - movi v1, 0
+              - v1
+            id: init
           - values:
-              - "lda.null"
-              - "mov.null v0"
+              - ''
+              - v8
+          - values:
+              - ''
+              - v15
+          - values:
+              - movi v15, 0
+              - v15
+            id: init

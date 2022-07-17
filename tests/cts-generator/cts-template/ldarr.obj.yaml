@@ -12,24 +12,24 @@
 # limitations under the License.
 
 definitions:
-  - name: java
+  - name: PandaAssembly
     template: |
-      .language Java
+      .language PandaAssembly
   - name: aoobe_p
     template: |
       .record panda.ArrayIndexOutOfBoundsException <external>
       .record R {}
   - name: aoobe_j
     template: |
-      .record java.lang.ArrayIndexOutOfBoundsException <external>
-      .record java.lang.String <external>
+      .record panda.ArrayIndexOutOfBoundsException <external>
+      .record panda.String <external>
       .record R {}
   - name: npe_p
     template: |
       .record panda.NullPointerException <external>
   - name: npe_j
     template: |
-      .record java.lang.NullPointerException <external>
+      .record panda.NullPointerException <external>
 tests:
   - file-name: "ldarr.obj"
     isa:
@@ -88,7 +88,7 @@ tests:
             runner-options: [compile-failure]
           - values: [a255]
             runner-options: [compile-failure]
-          - values: [null]
+          - values: ['null']
             runner-options: [compile-failure]
           - values: [0]
             runner-options: [compile-failure]
@@ -103,7 +103,7 @@ tests:
             - acc_i32
         description: Check 'ldarr.obj' with uninitialized accumulator
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
             #
@@ -124,7 +124,7 @@ tests:
             - v1_array_type
         description: Check 'ldarr.obj' with uninitialized register
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
             #
@@ -140,7 +140,7 @@ tests:
             - acc_i32
         description: Check 'ldarr.obj' with uninitialized register and accumulator
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
             #
@@ -153,8 +153,58 @@ tests:
           exceptions:
             - x_null
         description: Check 'ldarr.obj' behavior when array is null reference.
+        tags: ['irtoc_ignore']
         header-template: [npe_p]
         bugid: ['3228']
+        code-template: |
+          .record R {}
+          .function R[] get_null() {
+              lda.null
+              return.obj
+          }
+          .function i32 main() {
+              call.short get_null
+              sta.obj v0
+              ldai %s
+          begin:
+              ldarr.obj v0
+          end:
+              ldai 1 # Should not reach this line
+              return
+
+          catch_NPE:
+              ldai 0 # Expected panda.NullPointerException
+              return
+
+          catch_all:
+              ldai 2 # Unexpected exception, test failed
+              return
+
+          .catch panda.NullPointerException, begin, end, catch_NPE
+          .catchall begin, end, catch_all
+        check-type: none
+        cases:
+          - values: [0]
+            tags: ['tsan']
+          - values: [1]
+          - values: [10]
+          - values: [128]
+          - values: [255]
+          - values: [65535]
+            tags: ['tsan']
+          - values: [0x7FFFFFFF]
+          - values: [0xFFFFFFFF]
+          - values: [0x80000000]
+
+      - file-name: null_pointer_j
+        isa:
+          exceptions:
+            - x_null
+        description: Check 'ldarr.obj' behavior when array is null reference.
+        tags: ['irtoc_ignore']
+        header-template: [PandaAssembly, npe_j]
+        runner-options: [use-pa]
+        bugid: ['3047', '3228']
         code-template: |
           .record R {}
           .function R[] get_null() {
@@ -201,6 +251,7 @@ tests:
             - x_bounds
         description: Check 'ldarr.obj' behavior when index is out of array bounds.
         header-template: [aoobe_p, main]
+        tags: ['irtoc_ignore']
         code-template: |
           #
               movi v0, *s
@@ -248,6 +299,62 @@ tests:
             tags: ['tsan']
           - values: [0x100000, 0x80000003]
 
+      - file-name: array_out_of_bound_exception_j
+        isa:
+          exceptions:
+            - x_bounds
+        description: Check 'ldarr.obj' behavior when index is out of array bounds.
+        runner-options: [use-pa]
+        tags: ['irtoc_ignore']
+        header-template: [PandaAssembly, aoobe_j, main]
+        bugid: ['3227']
+        code-template: |
+          #
+              movi v0, *s
+              newarr v0, v0, %s
+              ldai *s
+          begin:
+              ldarr.obj v0
+          end:
+              ldai 1 # Should not reach this line
+              return
+
+          catch_AOOBE:
+              ldai 0 # Expected panda.ArrayIndexOutOfBoundsException
+              return
+
+          catch_all:
+              ldai 2 # Unexpected exception, test failed
+              return
+
+          .catch panda.ArrayIndexOutOfBoundsException, begin, end, catch_AOOBE
+          .catchall begin, end, catch_all
+        check-type: none
+        template-cases:
+            - values: ['R[]']
+            - values: ['panda.String[][][]']
+        cases:
+          - values: [0, 0]
+            tags: ['tsan']
+          - values: [0, 1]
+          - values: [10, -10]
+          - values: [10, 128]
+          - values: [255, 255]
+          - values: [254, 255]
+          - values: [65535, 65535]
+            tags: ['tsan']
+          - values: [65535, 65536]
+          - values: [10, 0xFFFFFFFF]
+          - values: [256, 0xFFFFFFFE]
+          - values: [65536, 0xFFFFFFFD]
+            tags: ['tsan']
+          - values: [0x100000, 0xFFFFFFFC]
+          - values: [10, 0x80000000]
+          - values: [256, 0x80000001]
+          - values: [65536, 0x80000002]
+            tags: ['tsan']
+          - values: [0x100000, 0x80000003]
+
       - file-name: "rejectable_primitive_types_p"
         isa:
           verification:
@@ -261,7 +368,36 @@ tests:
               ldarr.obj v0
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
+        cases:
+          - values: ['u1[]']
+          - values: ['i8[]']
+          - values: ['u8[]']
+          - values: ['i16[]']
+          - values: ['u16[]']
+          - values: ['i32[]']
+          - values: ['u32[]']
+          - values: ['i64[]']
+          - values: ['u64[]']
+          - values: ['f32[]']
+          - values: ['f64[]']
+
+      - file-name: "rejectable_primitive_types_j"
+        isa:
+          verification:
+            - v1_array_type
+        description: Check rejectable array of primitive types for ldarr.obj instruction in PandaAssembly context.
+        header-template: [PandaAssembly, main]
+        code-template: |
+          #
+              movi v0, 1
+              newarr v0, v0, %s
+              ldai 0
+              ldarr.obj v0
+        check-type: exit-positive
+        tags: [verifier, pa-verifier]
+        bugid: ['3293', '5271']
+        runner-options: [verifier-failure, use-pa, verifier-config]
         cases:
           - values: ['u1[]']
           - values: ['i8[]']
@@ -293,7 +429,7 @@ tests:
               ldarr.obj v0
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-only', 'verifier-debug-config']
+        runner-options: ['verifier-only', 'verifier-config']
         cases:
           - values: ['panda.Object[]']
           - values: ['panda.String[]']
@@ -307,12 +443,57 @@ tests:
           - values: ['u32[][]']
           - values: ['u64[][]']
 
+      - file-name: "acceptable_types_j"
+        isa:
+          verification:
+            - v1_array_type
+        description: Check acceptable array types for ldarr.obj instruction in PandaAssembly context.
+        header-template: [PandaAssembly]
+        bugid: ['3227']
+        code-template: |
+          .record R {}
+          .record I <panda.interface> {}
+          .record Q <panda.implements=I> {}
+          .record E <panda.extends=Q> {}
+          .record A <panda.annotation, panda.annotation.type=runtime> {}
+          .record panda.Object <external>
+          .record panda.String <external>
+          .record panda.Class <external>
+          .function i32 main() {
+              movi v0, 1
+              newarr v0, v0, %s
+              ldai 0
+              ldarr.obj v0
+        check-type: exit-positive
+        tags: [verifier, pa-verifier]
+        runner-options: [verifier-only, use-pa, verifier-config]
+        cases:
+          - values: ['R[]']
+          - values: ['I[]']
+          - values: ['Q[]']
+          - values: ['E[]']
+          - values: ['A[]']
+          - values: ['panda.Object[]']
+          - values: ['panda.String[]']
+          - values: ['panda.Class[]']
+          - values: ['R[][]']
+          - values: ['I[][]']
+          - values: ['Q[][]']
+          - values: ['E[][]']
+          - values: ['A[][]']
+          - values: ['panda.Object[][]']
+          - values: ['panda.String[][]']
+          - values: ['panda.Class[][]']
+          - values: ['i8[][]']
+          - values: ['i32[][]']
+          - values: ['f64[][]']
+
       - file-name: "arr_type"
         isa:
           verification:
             - v1_array_type
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -331,6 +512,8 @@ tests:
               - movi v0, 0
           - values:
               - movi.64 v0, 0
+          - values:
+              - fmovi v0, 0
           - values:
               - fmovi.64 v0, 0
           - values:
@@ -379,7 +562,7 @@ tests:
           verification:
             - acc_i32
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -399,6 +582,8 @@ tests:
               - lda.null
           - values:
               - ldai.64 0
+          - values:
+              - fldai 0
           - values:
               - fldai.64 0
           - values:
@@ -436,7 +621,7 @@ tests:
             - v1_array_type
             - acc_i32
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -455,6 +640,8 @@ tests:
               - movi v0, 0
           - values:
               - movi.64 v0, 0
+          - values:
+              - fmovi v0, 0
           - values:
               - fmovi.64 v0, 0
           - values:
@@ -513,6 +700,8 @@ tests:
           - values:
               - ldai.64 0
           - values:
+              - fldai 0
+          - values:
               - fldai.64 0
           - values:
               - lda.type A
@@ -548,6 +737,7 @@ tests:
           description: >
             Load an element from array using accumulator as an index and puts it into accumulator.
         description: Check ldarr.obj reads correct items from array of objects.
+        tags: ['irtoc_ignore']
         header-template: []
         check-type: exit-positive
         code-template: |
@@ -702,3 +892,70 @@ tests:
                   newarr v4, v4, A[]
                   lda.obj v4
 
+      - file-name: "read_different_type_values_j"
+        isa:
+          description: >
+            Load an element from array using accumulator as an index and puts it into accumulator.
+        description: Check ldarr.obj reads correct items with various types from array of objects.
+        header-template: [PandaAssembly]
+        runner-options: [use-pa]
+        check-type: exit-positive
+        code-template: |
+            %s
+            .function i32 main() {
+                movi v1, 1
+                newarr v0, v1, %s          # v0 - testable array
+                movi v1, 0          # v1 - index = 0
+
+            check_null:
+                lda v1
+                ldarr.obj v0        # acc = v0[acc]
+                jeqz.obj fill_array
+                ldai 1
+                return
+
+            fill_array:
+                %s
+                sta.obj v10         # v10 - saved object ref
+                starr.obj v0, v1    # v0[v1] = acc
+
+            check_ref:
+                lda v1
+                ldarr.obj v0        # acc = v0[acc]
+                jeq.obj v10, ok
+                ldai 2
+                return
+            ok:
+        cases:
+          - values:
+            - .record panda.Object <external>
+            - panda.Object[]
+            - lda.null
+          - values:
+            - |
+                  .record panda.Long <external>
+                  .function void panda.Long.ctor(panda.Long a0, i64 a1) <external,ctor>
+            - panda.Long[]
+            - |
+              #
+                  movi.64 v7, 0x7FFFFFFFFFFFFFFF
+                  initobj panda.Long.ctor, v7
+            tags: ['tsan']
+          - values:
+            - .record panda.Class <external>
+            - panda.Class[]
+            - lda.type panda.Class
+          - values:
+            - .record panda.Object <external>
+            - panda.Object[]
+            - lda.str "test string"
+            tags: ['tsan']
+          - values:
+            - .record panda.String <external>
+            - panda.String[][]
+            - |
+              #
+                  movi v4, 10
+                  newarr v4, v4, panda.String[]
+                  lda.obj v4
+            bugid: ['3227']

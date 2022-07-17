@@ -17,15 +17,15 @@ import("//build/ohos.gni")
 config("arkbase_public_config") {
   include_dirs = [
     "$ark_root/libpandabase",
+    "$target_gen_dir/include",
     "$target_gen_dir",
   ]
-}
 
-ark_gen_file("base_options_h") {
-  template_file = "../templates/options/options.h.erb"
-  data_file = "options.yaml"
-  requires = [ "../templates/common.rb" ]
-  output_file = "$target_gen_dir/generated/base_options.h"
+  include_dirs += platform_include_dirs
+
+  if (ark_standalone_build) {
+    ldflags = [ "-ldl" ]
+  }
 }
 
 ark_gen_file("events_gen") {
@@ -35,9 +35,39 @@ ark_gen_file("events_gen") {
   output_file = "$target_gen_dir/events_gen.h"
 }
 
+ark_gen_file("base_options_h") {
+  template_file = "../templates/options/options.h.erb"
+  data_file = "options.yaml"
+  requires = [ "../templates/common.rb" ]
+  output_file = "$target_gen_dir/generated/base_options.h"
+}
+
+action("generate_version_file") {
+  script = "$ark_root/gn/build/cmake_configure_file.py"
+
+  sources = [ "$ark_root/libpandabase/templates/ark_version.h.in" ]
+  outputs = [ "$root_gen_dir/libpandabase/ark_version.h" ]
+
+  hash = exec_script("$ark_root/gn/build/find_git.sh",
+                     [ rebase_path("${ark_root}", "$root_build_dir") ],
+                     "trim string")
+
+  if (hash == "") {
+    args = [
+      rebase_path(sources[0], "$root_build_dir"),
+      rebase_path(outputs[0], "$root_build_dir"),
+    ]
+  } else {
+    args = [
+      rebase_path(sources[0], "$root_build_dir"),
+      rebase_path(outputs[0], "$root_build_dir"),
+      "ARK_VERSION_GIT_HASH=${hash}",
+    ]
+  }
+}
+
 if (is_mingw) {
   libarkbase_sources = [
-    "$ark_root/libpandabase/mem/arena.cpp",
     "$ark_root/libpandabase/mem/arena_allocator.cpp",
     "$ark_root/libpandabase/mem/base_mem_stats.cpp",
     "$ark_root/libpandabase/mem/code_allocator.cpp",
@@ -50,23 +80,23 @@ if (is_mingw) {
     "$ark_root/libpandabase/os/native_stack.cpp",
     "$ark_root/libpandabase/os/stacktrace_stub.cpp",
     "$ark_root/libpandabase/os/time.cpp",
-    "$ark_root/libpandabase/os/windows/error.cpp",
-    "$ark_root/libpandabase/os/windows/file.cpp",
-    "$ark_root/libpandabase/os/windows/library_loader.cpp",
-    "$ark_root/libpandabase/os/windows/mem.cpp",
-    "$ark_root/libpandabase/os/windows/mem_hooks.cpp",
-    "$ark_root/libpandabase/os/windows/thread.cpp",
-    "$ark_root/libpandabase/trace/windows/trace.cpp",
     "$ark_root/libpandabase/utils/dfx.cpp",
     "$ark_root/libpandabase/utils/json_parser.cpp",
     "$ark_root/libpandabase/utils/logger.cpp",
     "$ark_root/libpandabase/utils/time.cpp",
     "$ark_root/libpandabase/utils/type_converter.cpp",
     "$ark_root/libpandabase/utils/utf.cpp",
+    "$ark_root/platforms/windows/libpandabase/error.cpp",
+    "$ark_root/platforms/windows/libpandabase/file.cpp",
+    "$ark_root/platforms/windows/libpandabase/filesystem.cpp",
+    "$ark_root/platforms/windows/libpandabase/library_loader.cpp",
+    "$ark_root/platforms/windows/libpandabase/mem.cpp",
+    "$ark_root/platforms/windows/libpandabase/mem_hooks.cpp",
+    "$ark_root/platforms/windows/libpandabase/thread.cpp",
+    "$ark_root/platforms/windows/libpandabase/trace.cpp",
   ]
 } else {
   libarkbase_sources = [
-    "$ark_root/libpandabase/mem/arena.cpp",
     "$ark_root/libpandabase/mem/arena_allocator.cpp",
     "$ark_root/libpandabase/mem/base_mem_stats.cpp",
     "$ark_root/libpandabase/mem/code_allocator.cpp",
@@ -80,16 +110,7 @@ if (is_mingw) {
     # product build
     "$ark_root/libpandabase/os/stacktrace_stub.cpp",
     "$ark_root/libpandabase/os/time.cpp",
-    "$ark_root/libpandabase/os/unix/error.cpp",
-    "$ark_root/libpandabase/os/unix/file.cpp",
-    "$ark_root/libpandabase/os/unix/filesystem.cpp",
-    "$ark_root/libpandabase/os/unix/library_loader.cpp",
-    "$ark_root/libpandabase/os/unix/mem.cpp",
-    "$ark_root/libpandabase/os/unix/native_stack.cpp",
-    "$ark_root/libpandabase/os/unix/property.cpp",
-    "$ark_root/libpandabase/os/unix/thread.cpp",
     "$ark_root/libpandabase/trace/trace.cpp",
-    "$ark_root/libpandabase/trace/unix/trace.cpp",
     "$ark_root/libpandabase/utils/dfx.cpp",
     "$ark_root/libpandabase/utils/json_parser.cpp",
     "$ark_root/libpandabase/utils/logger.cpp",
@@ -97,16 +118,31 @@ if (is_mingw) {
     "$ark_root/libpandabase/utils/time.cpp",
     "$ark_root/libpandabase/utils/type_converter.cpp",
     "$ark_root/libpandabase/utils/utf.cpp",
+    "$ark_root/platforms/unix/libpandabase/error.cpp",
+    "$ark_root/platforms/unix/libpandabase/file.cpp",
+    "$ark_root/platforms/unix/libpandabase/filesystem.cpp",
+    "$ark_root/platforms/unix/libpandabase/library_loader_resolve_symbol.cpp",
+    "$ark_root/platforms/unix/libpandabase/mem.cpp",
+    "$ark_root/platforms/unix/libpandabase/native_stack.cpp",
+    "$ark_root/platforms/unix/libpandabase/property.cpp",
+    "$ark_root/platforms/unix/libpandabase/thread.cpp",
+    "$ark_root/platforms/unix/libpandabase/trace.cpp",
   ]
+
+  if (!is_mob) {
+    libarkbase_sources +=
+        [ "$ark_root/platforms/unix/libpandabase/library_loader_load.cpp" ]
+  }
 
   if (!is_mac) {
     libarkbase_sources += [
       "$ark_root/libpandabase/os/filesystem.cpp",
-      "$ark_root/libpandabase/os/unix/exec.cpp",
-      "$ark_root/libpandabase/os/unix/futex/mutex.cpp",
-      "$ark_root/libpandabase/os/unix/mem_hooks.cpp",
-      "$ark_root/libpandabase/os/unix/pipe.cpp",
-      "$ark_root/libpandabase/os/unix/sighook.cpp",
+      "$ark_root/platforms/unix/libpandabase/exec.cpp",
+      "$ark_root/platforms/unix/libpandabase/futex/fmutex.cpp",
+      "$ark_root/platforms/unix/libpandabase/futex/mutex.cpp",
+      "$ark_root/platforms/unix/libpandabase/mem_hooks.cpp",
+      "$ark_root/platforms/unix/libpandabase/pipe.cpp",
+      "$ark_root/platforms/unix/libpandabase/sighook.cpp",
     ]
   } else {
     libarkbase_sources += [ "$ark_root/libpandabase/os/mutex.cpp" ]
@@ -115,6 +151,14 @@ if (is_mingw) {
 
 if (is_debug) {
   libarkbase_sources += [ "$ark_root/libpandabase/utils/debug.cpp" ]
+}
+
+if (current_cpu == "arm64") {
+  libarkbase_sources +=
+      [ "$ark_root/libpandabase/arch/aarch64/cpu_features.cpp" ]
+} else {
+  libarkbase_sources +=
+      [ "$ark_root/libpandabase/arch/default/cpu_features.cpp" ]
 }
 
 libarkbase_configs = [
@@ -126,18 +170,13 @@ libarkbase_configs = [
 libarkbase_deps = [
   ":base_options_h",
   ":events_gen",
+  ":generate_version_file",
+  ":logger_enum_gen_h",
+  ":logger_impl_gen_h",
   sdk_libc_secshared_dep,
 ]
 
 source_set("libarkbase_static") {
-  sources = libarkbase_sources
-
-  public_configs = libarkbase_configs
-
-  deps = libarkbase_deps
-}
-
-source_set("libarkbase_frontend_set_static") {
   sources = libarkbase_sources
 
   public_configs = libarkbase_configs
@@ -157,9 +196,48 @@ ohos_shared_library("libarkbase") {
   part_name = "ark"
 }
 
+source_set("libarkbase_frontend_set_static") {
+  sources = libarkbase_sources
+
+  public_configs = libarkbase_configs
+
+  deps = libarkbase_deps
+}
+
 ohos_static_library("libarkbase_frontend_static") {
   deps = [ ":libarkbase_frontend_set_static" ]
 
   subsystem_name = "ark"
   part_name = "ark"
+}
+
+action("logger_yaml_gen") {
+  script = "$ark_root/libpandabase/templates/logger_gen.rb"
+  inputs = [ "$ark_root/libpandabase/templates/logger.yaml" ]
+  outputs = [ "$root_gen_dir/libpandabase/logger.yaml" ]
+  args = [
+    "-p",
+    rebase_path("$target_gen_dir/../plugin_options.yaml", root_build_dir),
+    "-d",
+    rebase_path(inputs[0], root_build_dir),
+    "-o",
+    rebase_path(outputs[0], root_build_dir),
+  ]
+  deps = [ "$ark_root:concat_plugins_yamls" ]
+}
+
+ark_gen_file("logger_enum_gen_h") {
+  extra_dependencies = [ ":logger_yaml_gen" ]
+  template_file = "templates/logger_enum_gen.h.erb"
+  data_file = "$root_gen_dir/libpandabase/logger.yaml"
+  requires = [ "$ark_root/libpandabase/templates/logger.rb" ]
+  output_file = "$target_gen_dir/include/logger_enum_gen.h"
+}
+
+ark_gen_file("logger_impl_gen_h") {
+  extra_dependencies = [ ":logger_yaml_gen" ]
+  template_file = "templates/logger_impl_gen.inc.erb"
+  data_file = "$root_gen_dir/libpandabase/logger.yaml"
+  requires = [ "$ark_root/libpandabase/templates/logger.rb" ]
+  output_file = "$target_gen_dir/include/logger_impl_gen.inc"
 }

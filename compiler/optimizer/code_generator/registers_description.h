@@ -1,0 +1,152 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef COMPILER_OPTIMIZER_CODEGEN_REGFILE_H_
+#define COMPILER_OPTIMIZER_CODEGEN_REGFILE_H_
+
+#include "operands.h"
+#include "utils/arch.h"
+
+/*
+Register file wrapper  used for get major data and for Regalloc
+*/
+namespace panda::compiler {
+#ifdef PANDA_COMPILER_TARGET_X86_64
+namespace amd64 {
+static constexpr size_t RENAMING_MASK_3_5_OR_9_11 {0xE38};
+static constexpr size_t RENAMING_CONST {14U};
+
+// There is a problem with callee/caller register numbers with amd64.
+// For example, take a look at
+// caller reg mask: 0000111111000111 and
+// callee reg mask: 1111000000001000
+// Stack walker requires this mask to be densed, so the decision is to
+// rename regs number 3, 4, 5 to 11, 10, 9 (and vice versa).
+// Resulting
+// caller mask is 0000000111111111 and
+// callee mask is 1111100000000000.
+static inline constexpr size_t ConvertRegNumber(size_t reg_id)
+{
+    ASSERT(reg_id < MAX_NUM_REGS);
+    // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
+    if ((RENAMING_MASK_3_5_OR_9_11 & (size_t(1) << reg_id)) != 0) {
+        return RENAMING_CONST - reg_id;
+    }
+    return reg_id;
+}
+}  // namespace amd64
+#endif  // PANDA_COMPILER_TARGET_X86_64
+
+class RegistersDescription {
+public:
+    explicit RegistersDescription(ArenaAllocator *aa, Arch arch) : arena_allocator_(aa), arch_(arch) {}
+    virtual ~RegistersDescription() = default;
+
+    virtual ArenaVector<Reg> GetCalleeSaved() = 0;
+    virtual void SetCalleeSaved(const ArenaVector<Reg> &) = 0;
+    // Set used regs - change GetCallee
+    virtual void SetUsedRegs(const ArenaVector<Reg> &) = 0;
+    // Return zero register. If target architecture doesn't support zero register, it should return INVALID_REGISTER.
+    virtual Reg GetZeroReg() const = 0;
+    virtual bool IsZeroReg(Reg reg) const = 0;
+    virtual Reg::RegIDType GetTempReg() = 0;
+    virtual Reg::RegIDType GetTempVReg() = 0;
+    // Return RegMapping bitset
+    virtual bool SupportMapping(uint32_t) = 0;
+
+    virtual bool IsValid() const
+    {
+        return false;
+    };
+
+    virtual bool IsCalleeRegister(Reg reg) = 0;
+
+    ArenaAllocator *GetAllocator() const
+    {
+        return arena_allocator_;
+    };
+
+    // May be re-define to ignore some cases
+    virtual bool IsRegUsed(ArenaVector<Reg> vec_reg, Reg reg)
+    {
+        // size ignored in arm64
+        auto equality = [reg](Reg in) {
+            return ((reg.GetId() == in.GetId()) && (reg.GetType() == in.GetType()) &&
+                    (reg.GetSize() == in.GetSize())) ||
+                   (!reg.IsValid() && !in.IsValid());
+        };
+        return (std::find_if(vec_reg.begin(), vec_reg.end(), equality) != vec_reg.end());
+    }
+
+    static RegistersDescription *Create(ArenaAllocator *arena_allocator, Arch arch);
+
+    RegMask GetRegMask() const
+    {
+        return reg_mask_.None() ? GetDefaultRegMask() : reg_mask_;
+    }
+
+    void SetRegMask(const RegMask &mask)
+    {
+        reg_mask_ = mask;
+    }
+
+    // Get registers mask which used in codegen, runtime e.t.c
+    // 0 means - available, 1 - unavailable to use
+    // Note that it is a default architecture-specific registers mask.
+    virtual RegMask GetDefaultRegMask() const = 0;
+
+    // Get vector registers mask which used in codegen, runtime e.t.c
+    virtual VRegMask GetVRegMask() = 0;
+
+    virtual RegMask GetCallerSavedRegMask() const = 0;
+    virtual RegMask GetCallerSavedVRegMask() const = 0;
+
+    void FillUsedCalleeSavedRegisters(RegMask *callee_regs, VRegMask *callee_vregs, bool set_all_callee_registers)
+    {
+        if (set_all_callee_registers) {
+            *callee_regs = RegMask(panda::GetCalleeRegsMask(arch_, false));
+            *callee_vregs = VRegMask(panda::GetCalleeRegsMask(arch_, true));
+        } else {
+            *callee_regs = GetUsedRegsMask<RegMask, false>(GetCalleeSaved());
+            *callee_vregs = GetUsedRegsMask<VRegMask, true>(GetCalleeSaved());
+        }
+    }
+
+    NO_COPY_SEMANTIC(RegistersDescription);
+    NO_MOVE_SEMANTIC(RegistersDescription);
+
+private:
+    ArenaAllocator *arena_allocator_ {nullptr};
+    Arch arch_;
+    RegMask reg_mask_ {0};
+
+    template <typename M, bool is_fp>
+    M GetUsedRegsMask(const ArenaVector<Reg> &regs)
+    {
+        M mask;
+        for (auto reg : regs) {
+            // NOLINTNEXTLINE(bugprone-branch-clone,-warnings-as-errors)
+            if (reg.IsFloat() && is_fp) {
+                mask.set(reg.GetId());
+            } else if (reg.IsScalar() && !is_fp) {
+                mask.set(reg.GetId());
+            }
+        }
+        return mask;
+    }
+};
+}  // namespace panda::compiler
+
+#endif  // COMPILER_OPTIMIZER_CODEGEN_REGFILE_H_

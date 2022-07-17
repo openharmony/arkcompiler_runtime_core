@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public:
         panda::mem::MemConfig::Finalize();
     }
 
-    ArenaAllocator *GetAllocator() const
+    ArenaAllocator *GetAllocator()
     {
         return allocator_;
     }
@@ -50,29 +50,29 @@ void TestVectorGrow(Vector &vector)
 {
     std::array values = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
     ASSERT_EQ(vector.size(), 0);
-    ASSERT_EQ(vector.capacity(), 4U);
+    ASSERT_EQ(vector.capacity(), 4);
 
     vector.push_back(values[0]);
     ASSERT_EQ(vector.size(), 1);
-    ASSERT_EQ(vector.capacity(), 4U);
+    ASSERT_EQ(vector.capacity(), 4);
     ASSERT_TRUE(vector.IsStatic());
 
     vector.push_back(values[1]);
-    vector.push_back(values[2U]);
-    vector.push_back(values[3U]);
-    ASSERT_EQ(vector.size(), 4U);
-    ASSERT_EQ(vector.capacity(), 4U);
+    vector.push_back(values[2]);
+    vector.push_back(values[3]);
+    ASSERT_EQ(vector.size(), 4);
+    ASSERT_EQ(vector.capacity(), 4);
     ASSERT_TRUE(vector.IsStatic());
 
-    vector.push_back(values[4U]);
-    ASSERT_EQ(vector.size(), 5U);
-    ASSERT_GE(vector.capacity(), 5U);
+    vector.push_back(values[4]);
+    ASSERT_EQ(vector.size(), 5);
+    ASSERT_GE(vector.capacity(), 5);
     ASSERT_FALSE(vector.IsStatic());
 
-    ASSERT_TRUE(std::equal(values.begin(), values.begin() + 5U, vector.begin()));
+    ASSERT_TRUE(std::equal(values.begin(), values.begin() + 5, vector.begin()));
 
-    std::copy(values.begin() + 5U, values.end(), std::back_inserter(vector));
-    ASSERT_EQ(vector.size(), 10U);
+    std::copy(values.begin() + 5, values.end(), std::back_inserter(vector));
+    ASSERT_EQ(vector.size(), 10);
     ASSERT_FALSE(vector.IsStatic());
     for (size_t i = 0; i < values.size(); i++) {
         ASSERT_EQ(vector[i], values[i]);
@@ -86,7 +86,7 @@ TEST_F(SmallVectorTest, Growing)
         TestVectorGrow(vector);
     }
     {
-        SmallVector<int, 4, ArenaAllocator> vector(GetAllocator());
+        SmallVector<int, 4, ArenaAllocator, true> vector(GetAllocator());
         TestVectorGrow(vector);
     }
 }
@@ -97,28 +97,28 @@ void TestVectorIteration(Vector &vector)
     std::array values = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
     ASSERT_EQ(vector.size(), 0);
 
-    std::copy(values.begin(), values.begin() + 4U, std::back_inserter(vector));
+    std::copy(values.begin(), values.begin() + 4, std::back_inserter(vector));
     ASSERT_TRUE(vector.IsStatic());
-    ASSERT_EQ(vector.size(), 4U);
+    ASSERT_EQ(vector.size(), 4);
     ASSERT_TRUE(std::equal(vector.begin(), vector.end(), values.begin()));
 
     {
-        auto it = std::find(vector.begin(), vector.end(), 30U);
+        auto it = std::find(vector.begin(), vector.end(), 30);
         ASSERT_NE(it, vector.end());
-        ASSERT_EQ(*it, 30U);
-        ASSERT_EQ(std::distance(vector.begin(), it), 2U);
+        ASSERT_EQ(*it, 30);
+        ASSERT_EQ(std::distance(vector.begin(), it), 2);
 
-        it = std::find(vector.begin(), vector.end(), 50U);
+        it = std::find(vector.begin(), vector.end(), 50);
         ASSERT_EQ(it, vector.end());
     }
 
     {
-        auto it = std::find(vector.rbegin(), vector.rend(), 30U);
+        auto it = std::find(vector.rbegin(), vector.rend(), 30);
         ASSERT_NE(it, vector.rend());
-        ASSERT_EQ(*it, 30U);
+        ASSERT_EQ(*it, 30);
         ASSERT_EQ(std::distance(vector.rbegin(), it), 1);
 
-        it = std::find(vector.rbegin(), vector.rend(), 50U);
+        it = std::find(vector.rbegin(), vector.rend(), 50);
         ASSERT_EQ(it, vector.rend());
     }
 
@@ -127,35 +127,35 @@ void TestVectorIteration(Vector &vector)
         ASSERT_TRUE(std::equal(const_vector.begin(), const_vector.end(), values.begin()));
     }
 
-    std::copy(values.begin() + 4U, values.end(), std::back_inserter(vector));
-    ASSERT_EQ(vector.size(), 10U);
+    std::copy(values.begin() + 4, values.end(), std::back_inserter(vector));
+    ASSERT_EQ(vector.size(), 10);
     ASSERT_FALSE(vector.IsStatic());
     ASSERT_TRUE(std::equal(vector.begin(), vector.end(), values.begin()));
 
     {
-        auto it = std::find(vector.crbegin(), vector.crend(), 30U);
+        auto it = std::find(vector.crbegin(), vector.crend(), 30);
         ASSERT_NE(it, vector.crend());
-        ASSERT_EQ(*it, 30U);
-        ASSERT_EQ(std::distance(vector.crbegin(), it), 7U);
+        ASSERT_EQ(*it, 30);
+        ASSERT_EQ(std::distance(vector.crbegin(), it), 7);
 
-        it = std::find(vector.crbegin(), vector.crend(), 190U);
+        it = std::find(vector.crbegin(), vector.crend(), 190);
         ASSERT_EQ(it, vector.crend());
     }
 
     {
         auto it = vector.begin();
-        ASSERT_EQ(*(it + 3U), vector[3U]);
-        std::advance(it, 8U);
-        ASSERT_EQ(*it, vector[8U]);
-        it -= 3U;
-        ASSERT_EQ(*it, vector[5U]);
-        ASSERT_EQ(*(it - 3U), vector[2U]);
+        ASSERT_EQ(*(it + 3), vector[3]);
+        std::advance(it, 8);
+        ASSERT_EQ(*it, vector[8]);
+        it -= 3;
+        ASSERT_EQ(*it, vector[5]);
+        ASSERT_EQ(*(it - 3), vector[2]);
         it++;
-        ASSERT_EQ(*(it - 3U), vector[3U]);
+        ASSERT_EQ(*(it - 3), vector[3]);
         --it;
-        ASSERT_EQ(*(it - 3U), vector[2U]);
+        ASSERT_EQ(*(it - 3), vector[2]);
         it--;
-        ASSERT_EQ(*(it - 3U), vector[1]);
+        ASSERT_EQ(*(it - 3), vector[1]);
     }
 }
 
@@ -166,7 +166,7 @@ TEST_F(SmallVectorTest, Iteration)
         TestVectorIteration(vector);
     }
     {
-        SmallVector<int, 4, ArenaAllocator> vector(GetAllocator());
+        SmallVector<int, 4, ArenaAllocator, true> vector(GetAllocator());
         TestVectorIteration(vector);
     }
 }

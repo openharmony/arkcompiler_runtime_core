@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "intrinsics.h"
-
 #include <chrono>
 #include <cmath>
 #include <limits>
@@ -27,7 +25,7 @@
 #include "libpandabase/utils/span.h"
 #include "libpandabase/utils/time.h"
 #include "runtime/include/exceptions.h"
-#include "runtime/include/class_linker.h"
+#include "runtime/include/compiler_interface.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/panda_vm.h"
@@ -36,10 +34,11 @@
 #include "runtime/include/thread_status.h"
 #include "runtime/interpreter/frame.h"
 #include "utils/math_helpers.h"
+#include "intrinsics.h"
 
 namespace panda::intrinsics {
 
-extern "C" uint8_t IsInfF64(double v)
+uint8_t IsInfF64(double v)
 {
     return static_cast<uint8_t>(std::isinf(v));
 }
@@ -246,6 +245,60 @@ void AssertPrint(uint8_t cond, coretypes::String *s)
     }
 }
 
+#ifndef PANDA_PRODUCT_BUILD
+uint8_t CompileMethod(coretypes::String *full_method_name)
+{
+    auto name = ConvertToString(full_method_name);
+    auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
+
+    size_t pos = name.find_last_of("::");
+    if (pos == std::string_view::npos) {
+        return 1;
+    }
+    auto class_name = PandaString(name.substr(0, pos - 1));
+    auto method_name = PandaString(name.substr(pos + 1));
+
+    PandaString descriptor;
+    auto class_name_bytes = ClassHelper::GetDescriptor(utf::CStringAsMutf8(class_name.c_str()), &descriptor);
+    auto method_name_bytes = utf::CStringAsMutf8(method_name.c_str());
+
+    ClassLinkerExtension *ext = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    Class *cls = class_linker->GetClass(class_name_bytes, true, ext->GetBootContext());
+    if (cls == nullptr) {
+        static constexpr uint8_t CLASS_IS_NULL = 2;
+        return CLASS_IS_NULL;
+    }
+
+    auto method = cls->GetDirectMethod(method_name_bytes);
+    if (method == nullptr) {
+        static constexpr uint8_t METHOD_IS_NULL = 3;
+        return METHOD_IS_NULL;
+    }
+
+    if (method->IsAbstract()) {
+        static constexpr uint8_t ABSTRACT_ERROR = 4;
+        return ABSTRACT_ERROR;
+    }
+    if (method->HasCompiledCode()) {
+        return 0;
+    }
+    auto *compiler = Runtime::GetCurrent()->GetPandaVM()->GetCompiler();
+    auto status = method->GetCompilationStatus();
+    for (; (status != Method::COMPILED) && (status != Method::FAILED); status = method->GetCompilationStatus()) {
+        if (status == Method::NOT_COMPILED) {
+            ASSERT(!method->HasCompiledCode());
+            compiler->CompileMethod(method, 0, false);
+        }
+        static constexpr uint64_t SLEEP_MS = 10;
+        MTManagedThread::GetCurrent()->TimedWait(ThreadStatus::IS_COMPILER_WAITING, SLEEP_MS, 0);
+    }
+    static constexpr uint8_t COMPILATION_FAILED = 5;
+    return (status == Method::COMPILED ? 0 : COMPILATION_FAILED);
+}
+#endif  // PANDA_PRODUCT_BUILD
+
+// TODO(kbaladurin) : Convert methods should be implemented in managed library
+
 int32_t ConvertStringToI32(coretypes::String *s)
 {
     return static_cast<int32_t>(PandaStringToLL(ConvertToString(s)));
@@ -276,16 +329,15 @@ double ConvertStringToF64(coretypes::String *s)
     return PandaStringToD(ConvertToString(s));
 }
 
-// Need for java.lang.Runtime
-// it is explicit function in java.lang.Runtime class
-static void RuntimeExit(int32_t status)
+void SystemExit(int32_t status)
 {
     Runtime::Halt(status);
 }
 
-void SystemExit(int32_t status)
+ObjectHeader *ObjectCreateNonMovable(coretypes::Class *cls)
 {
-    RuntimeExit(status);
+    ASSERT(cls != nullptr);
+    return ObjectHeader::CreateNonMovable(cls->GetRuntimeClass());
 }
 
 void ObjectMonitorEnter(ObjectHeader *header)

@@ -12,9 +12,9 @@
 # limitations under the License.
 ---
 definitions:
-  - name: java
+  - name: PandaAssembly
     template: >
-      .language Java
+      .language PandaAssembly
   - name: r_A
     template: |
       .record A {}
@@ -44,7 +44,7 @@ tests:
         definition in the new frame.
         Result (if any) is returned in accumulator (see 'Calling sequence' chapter for more details).
         Method, its class and the number of argument is resolved by given method_id in runtime
-        constant-pool based on object reference using language-specific semantics (currently only Java
+        constant-pool based on object reference using language-specific semantics (currently only PandaAssembly
         virtual methods are supported, further extensions are TBD).
         Object reference is passed in the first source register, arguments are passed starting from
         the second source register in the same order as in method signature.
@@ -73,7 +73,7 @@ tests:
             - compatible_arguments
         header-template: [r_A, r_B]
         description: Check incorrect usage of `call.virt.short` instruction. First argument is of incorrect type instead of object reference.
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         tags: ['verifier']
         code-template: |
           .function i32 A.foo(A a0%s) {
@@ -224,6 +224,92 @@ tests:
                   fmovi.64 v1, 1.1
             - ', v0, v1'
 
+      - file-name: j_wrong_object_2
+        isa:
+          instructions:
+            - sig: call.virt.short method_id, v1:in:top, v2:in:top
+              acc: out:top
+              format: [op_v1_4_v2_4_id_16]
+          verification:
+            - compatible_arguments
+        header-template: [PandaAssembly, r_A, r_B]
+        description: >
+            Check incorrect usage of `call.virt.short` instruction. First argument is a reference to object of incompatible type.
+            Use PandaAssembly language context.
+        runner-options: [use-pa, verifier-failure, verifier-config]
+        tags: [verifier, pa-verifier]
+        bugid: ['1324', '3293', '5271', '6886']
+        template-cases:
+          - values:
+            - |
+              %s
+              .function i32 A.foo(A a0%s) {
+                  ldai 1
+                  return
+              }
+          - values:
+            - |
+              %s
+              ##- %s
+              .function i32 A.foo(A a0) {
+                  ldai 1
+                  return
+              }
+        code-template: |
+          %s
+
+          .function i32 main() {
+              initobj.short B.constructor
+              sta.obj v0
+              *s
+              call.virt.short A.foo, v0*s
+
+        check-type: exit-positive
+        cases:
+          - values:
+            - ''
+            - ''
+            - ''
+            - ''
+          - values:
+            - ''
+            - ',i32 a1'
+            - 'movi v1, 0'
+            - ', v1'
+          - values:
+            - ''
+            - ',i32 a1'
+            - 'movi v1, 1'
+            - ', v1'
+          - values:
+            - ''
+            - ', i64 a1'
+            - 'movi.64 v1, 0'
+            - ', v1'
+          - values:
+            - ''
+            - ', i64 a1'
+            - 'movi.64 v1, 0x100000000'
+            - ', v1'
+          - values:
+            - ''
+            - ', f64 a1'
+            - 'fmovi.64 v1, 0'
+            - ', v1'
+          - values:
+            - ''
+            - ', f64 a1'
+            - 'fmovi.64 v1, 1.1'
+            - ', v1'
+          - values:
+            - '.record panda.String <external>'
+            - ', panda.String a1'
+            - |
+              #
+                  lda.str "some string"
+                  sta.obj v1
+            - ', v1'
+
       - file-name: p_wrong_object_2
         isa:
           instructions:
@@ -236,7 +322,7 @@ tests:
         description: >
           Check incorrect usage of `call.virt.short` instruction. First argument is a reference to object of incompatible type.
           Use PandaAssembly language context.
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         tags: [verifier]
         bugid: ['1324']
         template-cases:
@@ -368,7 +454,7 @@ tests:
         check-type: exit-positive
         bugid: ['1324']
         tags: [verifier]
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         cases:
           - values:
             - |
@@ -454,7 +540,7 @@ tests:
         check-type: exit-positive
         bugid: ['1324']
         tags: [verifier]
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
             .function void A.func(A a0) {
                 %s
@@ -485,7 +571,7 @@ tests:
         check-type: exit-positive
         bugid: ['1324']
         tags: [verifier]
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
             .function void A.func(A a0) {
                 %s
@@ -533,7 +619,7 @@ tests:
           Verifier should report that method is not accessible if method_id is not resolved to existing method. Use PandaAssembly language context.
         check-type: exit-positive
         tags: [verifier]
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
             .function %s A.func(A a0, *s a1) <external>
 
@@ -613,6 +699,60 @@ tests:
                   movi v1, 123
                   newarr v1, v1, A[]
 
+      - file-name: j_method_id_accessible
+        isa:
+          instructions:
+            - sig: call.virt.short method_id, v1:in:top, v2:in:top
+              acc: out:top
+              format: [op_v1_4_v2_4_id_16]
+          verification:
+            - method_id_accessible
+        header-template: [PandaAssembly, r_A]
+        description: >
+          Verifier should report that method is not accessible if method_id is not resolved to existing method. Use PandaAssembly language context.
+        check-type: exit-positive
+        bugid: ['3293', '6886']
+        tags: [verifier, release, pa-verifier]
+        runner-options: [use-pa, verifier-failure, verifier-config]
+        code-template: |
+            %s
+            .record B<panda.extends = A> {}
+
+            .function void B.constructor(B a0) <ctor> {
+                return.void
+            }
+
+            .function i32 main() {
+                initobj B.constructor
+                sta.obj v0
+                movi v1, 123
+                call.virt.short *s.func, v0, v1
+        template-cases:
+          - values:
+              - |
+                .function void A.func(A a0, i32 a1) <external>
+                .function void B.func(B a0, i32 a1) <external>
+          - values:
+              - |
+                .function void A.func(A a0, i32 a1) <external>
+                .function void B.func(B a0, i32 a1) <noimpl>
+            ignore: true
+            bugid: ['3247']
+          - values:
+              - |
+                .function void A.func(A a0, i32 a1) <noimpl>
+                .function void B.func(B a0, i32 a1) <external>
+            exclude: [a]
+            ignore: true
+            bugid: ['3247']
+        cases:
+          - values:
+              - A
+            id: a
+          - values:
+              - B
+            id: b
+
       - file-name: p_method_id_non_static
         bugid: ["1324"]
         isa:
@@ -627,7 +767,7 @@ tests:
           Verifier should report that method is not accessible if method_id is not resolved to existing method. Use PandaAssembly language context.
         check-type: exit-positive
         tags: [verifier]
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
             .function %s A.func(A a0, *s a1) <static> {
                 %s
@@ -750,6 +890,70 @@ tests:
                   movi v1, 123
                   newarr v1, v1, A[]
 
+      - file-name: j_method_id_non_static
+        tags: [verifier, pa-verifier]
+        bugid: ['1324', '3293', '5271', '6886']
+        isa:
+          instructions:
+            - sig: call.virt.short method_id, v1:in:top, v2:in:top
+              acc: out:top
+              format: [op_v1_4_v2_4_id_16]
+          verification:
+            - method_id_non_static
+        header-template: [PandaAssembly, r_A]
+        description: >
+          Verifier should report that method is not accessible if method_id is not resolved to existing method. Use PandaAssembly language context.
+        check-type: exit-positive
+        runner-options: [use-pa, verifier-failure, verifier-config]
+        code-template: |
+            *s
+            .record B<panda.extends = A> {}
+
+            .function void B.constructor(B a0) <ctor> {
+                return.void
+            }
+
+            .function i32 main() {
+                initobj B.constructor
+                sta.obj v0
+                movi v1, 123
+                call.virt.short %s.func, v0, v1
+        template-cases:
+          - values:
+              - A
+            exclude: [virta] # call.virt.short A.func where A.func is virtual
+          - values:
+              - B
+            exclude: [virtb]
+
+        cases:
+          - values:
+              - |
+                .function void A.func(A a0, i32 a1) <static> {
+                    return.void
+                }
+                .function void B.func(B a0, i32 a1) <static> {
+                    return.void
+                }
+          - values:
+              - |
+                .function void A.func(A a0, i32 a1) {
+                    return.void
+                }
+                .function void B.func(B a0, i32 a1) <static> {
+                    return.void
+                }
+            id: virta
+          - values:
+              - |
+                .function void A.func(A a0, i32 a1) <static> {
+                    return.void
+                }
+                .function void B.func(B a0, i32 a1) {
+                    return.void
+                }
+            id: virtb
+
       - file-name: match_parameters_amount
         isa:
           instructions:
@@ -761,6 +965,8 @@ tests:
           Compiler should check amount of function parameters with corresponding call.virt.short
         check-type: none
         runner-options: [compile-failure]
+        ignore: true
+        bugid: ['1956','1304']
         code-template: |
 
             .function void A.func(A a0, i32 a1%s) <external>

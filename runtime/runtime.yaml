@@ -20,7 +20,7 @@ coretypes:
   mirror_class: coretypes::String
 
 - managed_class: panda.Class
-  mirror_class: Class
+  mirror_class: coretypes::Class
 
 # Namespace that contains intrinsics implementation. For functions from
 # this namespace declaration in intrinsics.h will be generated
@@ -28,7 +28,7 @@ intrinsics_namespace: panda::intrinsics
 
 # NB! The `space` property allows to group intrinsics and control
 # which intrinsics are loaded during startup. By default only "core"
-# space is loaded. See --boot-intrinsic-spaces for more details.
+# space is loaded. See --load-runtimes for more details.
 #
 # The `signature` for instance intrinsics (`static` is false) doesn't include
 # `this` argument.
@@ -43,6 +43,7 @@ intrinsics:
     args:
       - i32
   impl: panda::intrinsics::AbsI32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathAbsI64
   space: core
@@ -54,6 +55,7 @@ intrinsics:
     args:
       - i64
   impl: panda::intrinsics::AbsI64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathAbsF32
   space: core
@@ -65,6 +67,7 @@ intrinsics:
     args:
       - f32
   impl: panda::intrinsics::AbsF32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathAbsF64
   space: core
@@ -76,6 +79,7 @@ intrinsics:
     args:
       - f64
   impl: panda::intrinsics::AbsF64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMinI32
   space: core
@@ -86,6 +90,7 @@ intrinsics:
     ret: i32
     args: [i32, i32]
   impl: panda::intrinsics::MinI32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMinI64
   space: core
@@ -96,6 +101,7 @@ intrinsics:
     ret: i64
     args: [i64, i64]
   impl: panda::intrinsics::MinI64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMinF32
   space: core
@@ -106,6 +112,7 @@ intrinsics:
     ret: f32
     args: [f32, f32]
   impl: panda::intrinsics::MinF32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMinF64
   space: core
@@ -116,6 +123,7 @@ intrinsics:
     ret: f64
     args: [f64, f64]
   impl: panda::intrinsics::MinF64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMaxI32
   space: core
@@ -126,6 +134,7 @@ intrinsics:
     ret: i32
     args: [i32, i32]
   impl: panda::intrinsics::MaxI32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMaxI64
   space: core
@@ -136,6 +145,7 @@ intrinsics:
     ret: i64
     args: [i64, i64]
   impl: panda::intrinsics::MaxI64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMaxF32
   space: core
@@ -146,6 +156,7 @@ intrinsics:
     ret: f32
     args: [f32, f32]
   impl: panda::intrinsics::MaxF32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMaxF64
   space: core
@@ -156,30 +167,33 @@ intrinsics:
     ret: f64
     args: [f64, f64]
   impl: panda::intrinsics::MaxF64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: DoubleIsInf
   space: core
   class_name: Double
   method_name: isInfinite
   static: true
-  builtin: true
   signature:
     ret: u1
     args:
       - f64
   impl: panda::intrinsics::IsInfF64
+  codegen_func: CreateFloatIsInf
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: FloatIsInf
   space: core
   class_name: Float
   method_name: isInfinite
   static: true
-  builtin: true
   signature:
     ret: u1
     args:
       - f32
   impl: panda::intrinsics::IsInfF32
+  codegen_func: CreateFloatIsInf
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathSinF32
   space: core
@@ -191,6 +205,7 @@ intrinsics:
     args:
       - f32
   impl: panda::intrinsics::SinF32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathSinF64
   space: core
@@ -202,6 +217,7 @@ intrinsics:
     args:
       - f64
   impl: panda::intrinsics::SinF64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathCosF32
   space: core
@@ -213,6 +229,7 @@ intrinsics:
     args:
       - f32
   impl: panda::intrinsics::CosF32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathCosF64
   space: core
@@ -224,6 +241,7 @@ intrinsics:
     args:
       - f64
   impl: panda::intrinsics::CosF64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathPowF32
   space: core
@@ -236,6 +254,7 @@ intrinsics:
       - f32
       - f32
   impl: panda::intrinsics::PowF32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathPowF64
   space: core
@@ -248,6 +267,7 @@ intrinsics:
       - f64
       - f64
   impl: panda::intrinsics::PowF64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathSqrtF32
   space: core
@@ -259,6 +279,7 @@ intrinsics:
     args:
       - f32
   impl: panda::intrinsics::SqrtF32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathSqrtF64
   space: core
@@ -270,6 +291,7 @@ intrinsics:
     args:
       - f64
   impl: panda::intrinsics::SqrtF64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: IOPrintString
   space: core
@@ -281,6 +303,7 @@ intrinsics:
     args:
       - panda.String
   impl: panda::intrinsics::PrintString
+  clear_flags: [require_state, runtime_call]
 
 - name: IOPrintF32
   space: core
@@ -292,6 +315,7 @@ intrinsics:
     args:
       - f32
   impl: panda::intrinsics::PrintF32
+  clear_flags: [require_state, runtime_call]
 
 - name: IOPrintF64
   space: core
@@ -303,6 +327,7 @@ intrinsics:
     args:
       - f64
   impl: panda::intrinsics::PrintF64
+  clear_flags: [require_state, runtime_call]
 
 - name: IOPrintI32
   space: core
@@ -314,6 +339,7 @@ intrinsics:
     args:
       - i32
   impl: panda::intrinsics::PrintI32
+  clear_flags: [require_state, runtime_call]
 
 - name: IOPrintU32
   space: core
@@ -325,6 +351,7 @@ intrinsics:
     args:
       - u32
   impl: panda::intrinsics::PrintU32
+  clear_flags: [require_state, runtime_call]
 
 - name: IOPrintI64
   space: core
@@ -336,6 +363,7 @@ intrinsics:
     args:
       - i64
   impl: panda::intrinsics::PrintI64
+  clear_flags: [require_state, runtime_call]
 
 - name: IOPrintU64
   space: core
@@ -347,6 +375,18 @@ intrinsics:
     args:
       - u64
   impl: panda::intrinsics::PrintU64
+  clear_flags: [require_state, runtime_call]
+
+- name: SystemCompileMethod
+  space: core
+  class_name: System
+  method_name: compileMethod
+  static: true
+  private: true
+  signature:
+    ret: u8
+    args: [panda.String]
+  impl: panda::intrinsics::CompileMethod
 
 - name: SystemExit
   space: core
@@ -358,6 +398,7 @@ intrinsics:
     args:
       - i32
   impl: panda::intrinsics::SystemExit
+  clear_flags: [require_state, runtime_call]
 
 - name: SystemNanoTime
   space: core
@@ -368,6 +409,7 @@ intrinsics:
     ret: i64
     args: []
   impl: panda::intrinsics::NanoTime
+  clear_flags: [require_state, runtime_call]
 
 - name: SystemAssert
   space: core
@@ -378,6 +420,7 @@ intrinsics:
     ret: void
     args: [u1]
   impl: panda::intrinsics::Assert
+  clear_flags: [require_state, runtime_call]
 
 - name: SystemAssertPrint
   space: core
@@ -388,6 +431,7 @@ intrinsics:
     ret: void
     args: [u1, panda.String]
   impl: panda::intrinsics::AssertPrint
+  clear_flags: [require_state, runtime_call]
 
 - name: ConvertStringToI32
   space: core
@@ -398,6 +442,7 @@ intrinsics:
     ret: i32
     args: [panda.String]
   impl: panda::intrinsics::ConvertStringToI32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: ConvertStringToU32
   space: core
@@ -408,6 +453,7 @@ intrinsics:
     ret: u32
     args: [panda.String]
   impl: panda::intrinsics::ConvertStringToU32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: ConvertStringToI64
   space: core
@@ -418,6 +464,7 @@ intrinsics:
     ret: i64
     args: [panda.String]
   impl: panda::intrinsics::ConvertStringToI64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: ConvertStringToU64
   space: core
@@ -428,6 +475,7 @@ intrinsics:
     ret: u64
     args: [panda.String]
   impl: panda::intrinsics::ConvertStringToU64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: ConvertStringToF32
   space: core
@@ -438,6 +486,7 @@ intrinsics:
     ret: f32
     args: [panda.String]
   impl: panda::intrinsics::ConvertStringToF32
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: ConvertStringToF64
   space: core
@@ -448,13 +497,24 @@ intrinsics:
     ret: f64
     args: [panda.String]
   impl: panda::intrinsics::ConvertStringToF64
+  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+
+- name: ObjectCreateNonMovable
+  space: core
+  class_name: Object
+  method_name: createNonMovable
+  static: true
+  signature:
+    ret: panda.Object
+    args: [panda.Class]
+  impl: panda::intrinsics::ObjectCreateNonMovable
+  set_flags: [can_throw]
 
 - name: ObjectMonitorEnter
   space: core
   class_name: Object
   method_name: monitorEnter
   static: true
-  safepoint: true
   signature:
     ret: void
     args: [panda.Object]
@@ -465,7 +525,6 @@ intrinsics:
   class_name: Object
   method_name: monitorExit
   static: true
-  safepoint: true
   signature:
     ret: void
     args: [panda.Object]
@@ -476,17 +535,16 @@ intrinsics:
   class_name: Object
   method_name: Wait
   static: true
-  safepoint: true
   signature:
     ret: void
     args: [panda.Object]
   impl: panda::intrinsics::ObjectWait
+
 - name: ObjectTimedWait
   space: core
   class_name: Object
   method_name: TimedWait
   static: true
-  safepoint: true
   signature:
     ret: void
     args: [panda.Object, u64]
@@ -497,7 +555,6 @@ intrinsics:
   class_name: Object
   method_name: TimedWaitNanos
   static: true
-  safepoint: true
   signature:
     ret: void
     args: [panda.Object, u64, u64]
@@ -512,6 +569,7 @@ intrinsics:
     ret: void
     args: [panda.Object]
   impl: panda::intrinsics::ObjectNotify
+  clear_flags: [require_state, runtime_call]
 
 - name: ObjectNotifyAll
   space: core
@@ -522,3 +580,4 @@ intrinsics:
     ret: void
     args: [panda.Object]
   impl: panda::intrinsics::ObjectNotifyAll
+  clear_flags: [require_state, runtime_call]

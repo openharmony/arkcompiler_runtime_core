@@ -314,7 +314,7 @@ tests:
       - file-name: "vals_mod32_1"
         bugid: ['1324', '2075']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: or v1:in:i32, v2:in:i32
@@ -374,34 +374,149 @@ tests:
             runner-options:
               - compile-failure
 
-      - file-name: "type"
-        bugid: ["964", "966", "2075"]
-        tags: ["verifier"]
+      - file-name: type
+        isa:
+          verification:
+            - v1_type
+            - v2_type
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
+        header-template: []
+        code-template: |
+          #
+          .record A {}
+          .record B {}
+          .record panda.String <external>
+          .record panda.Object <external>
+          .function i32 main() {
+              %s
+              *s
+              or v0, v1
+        check-type: exit-positive
+        description: Check 'or' with incorrect register types.
+        template-cases:
+          - values:
+              - movi v0, 0
+            exclude: [val]
+          - values:
+              - movi.64 v0, 0
+          - values:
+              - fmovi v0, 0
+            bugid: ['7315']
+          - values:
+              - fmovi.64 v0, 0
+          - values:
+              - |
+                #
+                    lda.type B
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type B[]
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type panda.String
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type panda.Object
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    movi v0, 10
+                    newarr v0, v0, i32[]
+          - values:
+              - mov.null v0
+        cases:
+          - values:
+              - movi v1, 0
+            id: val
+          - values:
+              - movi.64 v1, 0
+          - values:
+              - fmovi v1, 0
+            bugid: ['7315']
+          - values:
+              - fmovi.64 v1, 0
+          - values:
+              - |
+                #
+                    lda.type A
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    lda.type A[]
+                    sta.obj v1
+
+          - values:
+              - |
+                #
+                    lda.type panda.String
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    lda.type panda.Object
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    movi v1, 10
+                    newarr v1, v1, f64[]
+          - values:
+              - mov.null v1
+
+
+      - file-name: uninitialized_regs
         isa:
           instructions:
             - sig: or v1:in:i32, v2:in:i32
               acc: out:i32
-              prefix: bit
-              format: [pref_op_v1_4_v2_4]
-          verification:
-            - v1_type
-            - v2_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+              format: [op_v1_4_v2_4]
+        description: Check 'or' with uninitialized registers.
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
-          #
-              %s
-              %s
-              or v0, v1
-              ldai 0
-        check-type: no-check
-        description: Check 'or' with incorrect register types.
-        cases:
+            #
+                %s
+                *s
+                or %s, *s
+        check-type: exit-positive
+        template-cases:
           - values:
-              - mov.null v0
-              - movi v1, 0
+              - ''
+              - v0
           - values:
               - movi v0, 0
-              - mov.null v1
+              - v0
+            exclude: [init]
           - values:
-              - mov.null v0
-              - mov.null v1
+              - ''
+              - v7
+          - values:
+              - ''
+              - v15
+          - values:
+              - 'movi v15, 0'
+              - v15
+            exclude: [init]
+        cases:
+          - values:
+              - ''
+              - v1
+          - values:
+              - movi v1, 0
+              - v1
+            id: init
+          - values:
+              - ''
+              - v8
+          - values:
+              - ''
+              - v14

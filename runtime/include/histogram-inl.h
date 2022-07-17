@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_HISTOGRAM_INL_H_
-#define PANDA_RUNTIME_INCLUDE_HISTOGRAM_INL_H_
+#ifndef PANDA_RUNTIME_HISTOGRAM_INL_H_
+#define PANDA_RUNTIME_HISTOGRAM_INL_H_
 
 #include "histogram.h"
 #include "mem/panda_containers.h"
@@ -94,4 +94,4 @@ void Histogram<Value>::AddValue(const Value &element, size_t number)
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_HISTOGRAM_INL_H_
+#endif  // PANDA_RUNTIME_HISTOGRAM_INL_H_

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_PANDARGS_H_
-#define PANDA_LIBPANDABASE_UTILS_PANDARGS_H_
+#ifndef LIBPANDABASE_UTILS_PANDARGS_H_
+#define LIBPANDABASE_UTILS_PANDARGS_H_
 
 #include <algorithm>
 #include <array>
@@ -23,6 +23,7 @@
 #include <map>
 #include <string>
 #include <string_view>
+#include <sstream>
 #include <type_traits>
 #include <vector>
 #include <cerrno>
@@ -32,11 +33,13 @@
 #include "macros.h"
 
 namespace panda {
+class PandArgBase;
+using sub_args_t = std::vector<PandArgBase *>;
 using arg_list_t = std::vector<std::string>;
 using std::enable_if_t;
 using std::is_same_v;
 
-enum class PandArgType : uint8_t { STRING, INTEGER, DOUBLE, BOOL, LIST, UINT32, UINT64, NOTYPE };
+enum class PandArgType : uint8_t { STRING, INTEGER, DOUBLE, BOOL, LIST, UINT32, UINT64, COMPOUND, NOTYPE };
 
 // Base class for panda argument
 class PandArgBase {
@@ -61,10 +64,23 @@ public:
         return desc_;
     }
 
+    bool WasSet() const
+    {
+        return was_set_;
+    }
+
+    void SetWasSet(bool value)
+    {
+        was_set_ = value;
+    }
+
+    virtual void ResetDefaultValue() = 0;
+
 private:
     std::string name_;
     std::string desc_;
     PandArgType type_;
+    bool was_set_ {false};
 };
 
 template <typename T,
@@ -74,6 +90,11 @@ class PandArg : public PandArgBase {
 public:
     explicit PandArg(const std::string &name, T default_val, const std::string &desc)
         : PandArgBase(name, desc, this->EvalType()), default_val_(default_val), real_val_(default_val)
+    {
+    }
+
+    explicit PandArg(const std::string &name, T default_val, const std::string &desc, PandArgType type)
+        : PandArgBase(name, desc, type), default_val_(default_val), real_val_(default_val)
     {
     }
 
@@ -90,7 +111,9 @@ public:
         : PandArgBase(name, desc, PandArgType::LIST),
           default_val_(default_val),
           real_val_(default_val),
-          delimiter_(std::move(delimiter)) {}
+          delimiter_(std::move(delimiter))
+    {
+    }
 
     T GetValue() const
     {
@@ -106,19 +129,15 @@ public:
     void SetValue(T val)
     {
         real_val_ = val;
-        if constexpr (update_flag) {
-            was_set_ = true;
+        // NOLINTNEXTLINE(bugprone-suspicious-semicolon)
+        if constexpr (update_flag) {  // NOLINT(readability-braces-around-statements)
+            SetWasSet(true);
         }
     }
 
-    void ResetDefaultValue()
+    void ResetDefaultValue() override
     {
         real_val_ = default_val_;
-    }
-
-    bool WasSet() const
-    {
-        return was_set_;
     }
 
     std::optional<std::string> GetDelimiter() const
@@ -160,13 +179,41 @@ private:
 
     T default_val_;
     T real_val_;
-    bool was_set_ {false};
 
     // Only for integer arguments with range
     std::optional<std::pair<T, T>> min_max_val_;
 
     // Only for strings with delimiter
     std::optional<std::string> delimiter_;
+};
+
+class PandArgCompound : public PandArg<bool> {
+public:
+    PandArgCompound(const std::string &name, const std::string &desc, std::initializer_list<PandArgBase *> sub_args)
+        : PandArg<bool>(name, false, desc, PandArgType::COMPOUND), sub_args_(sub_args)
+    {
+    }
+
+    PandArgBase *FindSubArg(std::string_view name)
+    {
+        auto res = std::find_if(sub_args_.begin(), sub_args_.end(),
+                                [name](const auto &arg) { return arg->GetName() == name; });
+        return res == sub_args_.end() ? nullptr : *res;
+    }
+
+    void ResetDefaultValue() override
+    {
+        PandArg<bool>::ResetDefaultValue();
+        std::for_each(sub_args_.begin(), sub_args_.end(), [](auto &arg) { arg->ResetDefaultValue(); });
+    }
+
+    const auto &GetSubArgs() const
+    {
+        return sub_args_;
+    }
+
+private:
+    sub_args_t sub_args_;
 };
 
 class PandArgParser {
@@ -220,7 +267,7 @@ public:
         return ParseArgs();
     }
 
-    bool Parse(int argc, const char *argv[])  // NOLINT(modernize-avoid-c-arrays, hicpp-avoid-c-arrays)
+    bool Parse(int argc, const char *const argv[])  // NOLINT(modernize-avoid-c-arrays, hicpp-avoid-c-arrays)
     {
         InitDefault();
         for (int i = 1; i < argc; i++) {
@@ -237,7 +284,7 @@ public:
         ASSERT(option != nullptr);
         argv_vec_ = {std::string(option_value)};
         argv_index_ = 0;
-        ParseNextParam(option);
+        argv_index_ += ParseNextParam(option, argv_vec_[argv_index_]);
         return errstr_.empty();
     }
 
@@ -307,17 +354,26 @@ public:
 
     std::string GetHelpString() const
     {
-        std::string helpstr;
+        std::ostringstream helpstr;
         for (auto i : args_) {
-            helpstr += DOUBLE_DASH + i->GetName() + ": " + i->GetDesc() + "\n";
-        }
-        if (!tail_args_.empty()) {
-            helpstr += "Tail arguments:\n";
-            for (auto i : tail_args_) {
-                helpstr += i->GetName() + ": " + i->GetDesc() + "\n";
+            if (i->GetType() == PandArgType::COMPOUND) {
+                auto arg = static_cast<PandArgCompound *>(i);
+                helpstr << DOUBLE_DASH << i->GetName() << ": " << i->GetDesc() << "\n";
+                helpstr << "  Sub arguments:\n";
+                for (auto sub_arg : arg->GetSubArgs()) {
+                    helpstr << "    " << sub_arg->GetName() << ": " << sub_arg->GetDesc() << "\n";
+                }
+            } else {
+                helpstr << DOUBLE_DASH << i->GetName() << ": " << i->GetDesc() << "\n";
             }
         }
-        return helpstr;
+        if (!tail_args_.empty()) {
+            helpstr << "Tail arguments:\n";
+            for (auto i : tail_args_) {
+                helpstr << i->GetName() << ": " << i->GetDesc() << "\n";
+            }
+        }
+        return helpstr.str();
     }
 
     std::string GetRegularArgs()
@@ -386,9 +442,11 @@ private:
             if (!errstr_.empty()) {
                 return false;
             }
-            ParseNextParam(parsed_arg);
-            if (!errstr_.empty()) {
-                return false;
+            if (argv_index_ < argv_vec_.size()) {
+                argv_index_ += ParseNextParam(parsed_arg, argv_vec_[argv_index_]);
+                if (!errstr_.empty()) {
+                    return false;
+                }
             }
         }
         return true;
@@ -433,12 +491,89 @@ private:
         remainder_ = arg_list_t();
     }
 
+    PandArgBase *FindArg(std::string_view arg_name)
+    {
+        auto arg_it = args_.find(arg_name);
+        if (arg_it == args_.end()) {
+            errstr_.append("pandargs: Invalid option \"");
+            errstr_.append(arg_name);
+            errstr_.append("\"\n");
+            return nullptr;
+        }
+        return *arg_it;
+    }
+
+    bool ParseSubArgument(PandArgCompound *parent_arg, std::string_view str)
+    {
+        size_t assign_pos = str.find('=');
+        std::string_view arg_name = str.substr(0, assign_pos);
+        auto arg = parent_arg->FindSubArg(arg_name);
+        if (arg == nullptr) {
+            errstr_.append("pandargs: Invalid sub-argument \"");
+            errstr_.append(arg_name);
+            errstr_.append("\"\n");
+            return false;
+        }
+
+        if (assign_pos != std::string_view::npos) {
+            std::string_view value_str = str.substr(assign_pos + 1);
+            ParseNextParam(arg, value_str);
+            if (!errstr_.empty()) {
+                return false;
+            }
+        } else {
+            if (arg->GetType() != PandArgType::BOOL) {
+                errstr_.append("pandargs: Only boolean arguments might have no value \"");
+                errstr_.append(arg_name);
+                errstr_.append("\"\n");
+                return false;
+            }
+            static_cast<PandArg<bool> *>(arg)->SetValue(true);
+        }
+
+        return true;
+    }
+
+    PandArgBase *ParseCompoundArg(std::string_view argstr, size_t sep_pos)
+    {
+        auto arg_name = argstr.substr(0, sep_pos);
+
+        auto arg = static_cast<PandArgCompound *>(FindArg(arg_name));
+        if (arg == nullptr) {
+            return nullptr;
+        }
+
+        arg->SetValue(true);
+
+        auto sub_args_str = argstr.substr(sep_pos + 1);
+        size_t start = 0;
+        for (size_t pos = sub_args_str.find(',', 0); pos != std::string_view::npos;
+             start = pos + 1, pos = sub_args_str.find(',', start)) {
+            auto arg_str = sub_args_str.substr(start, pos - start);
+            if (!ParseSubArgument(arg, arg_str)) {
+                return nullptr;
+            }
+        }
+        if (start < sub_args_str.size()) {
+            if (!ParseSubArgument(arg, sub_args_str.substr(start))) {
+                return nullptr;
+            }
+        }
+        argv_index_++;
+        return arg;
+    }
+
     PandArgBase *ParseNextRegularArg()
     {
-        PandArgBase *arg = nullptr;
         std::string argstr = argv_vec_[argv_index_];
 
         const std::size_t SEP_FOUND = NextSeparator(argstr);
+
+        const std::size_t SEP_COMPOUND = argstr.find_first_of(':', 0);
+        if (SEP_COMPOUND != std::string::npos && (SEP_FOUND == std::string::npos || SEP_COMPOUND < SEP_FOUND)) {
+            return ParseCompoundArg(std::string_view(argstr).substr(DASH_COUNT), SEP_COMPOUND - DASH_COUNT);
+        }
+
         std::string arg_name;
 
         if (SEP_FOUND != std::string::npos) {
@@ -455,15 +590,20 @@ private:
             }
         }
 
-        auto arg_it = args_.find(arg_name);
-
-        if (arg_it != args_.end()) {
-            arg = *arg_it;
-        } else {
-            errstr_.append("pandargs: Invalid option \"");
-            errstr_.append(arg_name);
-            errstr_.append("\"\n");
+        PandArgBase *arg = FindArg(arg_name);
+        if (arg == nullptr) {
             return nullptr;
+        }
+
+        if (arg->GetType() == PandArgType::COMPOUND) {
+            // It is forbidden to explicitly set compound option, e.g. `--compound=true`, must be `--compound`.
+            if (SEP_FOUND != std::string::npos) {
+                errstr_.append("pandargs: Compound option can not be explicitly set \"");
+                errstr_.append(arg_name);
+                errstr_.append("\"\n");
+                return nullptr;
+            }
+            static_cast<PandArgCompound *>(arg)->SetValue(true);
         }
 
         return arg;
@@ -529,25 +669,31 @@ private:
         for (auto &tail_arg : tail_args_) {
             switch (tail_arg->GetType()) {
                 case PandArgType::STRING:
-                    argv_index_ = ParseStringArgParam(static_cast<PandArg<std::string> *>(tail_arg));
+                    argv_index_ +=
+                        ParseStringArgParam(static_cast<PandArg<std::string> *>(tail_arg), argv_vec_[argv_index_]);
                     break;
                 case PandArgType::INTEGER:
-                    argv_index_ = ParseIntArgParam(static_cast<PandArg<int> *>(tail_arg));
+                    argv_index_ += ParseIntArgParam(static_cast<PandArg<int> *>(tail_arg), argv_vec_[argv_index_]);
                     break;
                 case PandArgType::DOUBLE:
-                    argv_index_ = ParseDoubleArgParam(static_cast<PandArg<double> *>(tail_arg));
+                    argv_index_ +=
+                        ParseDoubleArgParam(static_cast<PandArg<double> *>(tail_arg), argv_vec_[argv_index_]);
                     break;
                 case PandArgType::BOOL:
-                    argv_index_ = ParseBoolArgParam(static_cast<PandArg<bool> *>(tail_arg), true);
+                    argv_index_ +=
+                        ParseBoolArgParam(static_cast<PandArg<bool> *>(tail_arg), argv_vec_[argv_index_], true);
                     break;
                 case PandArgType::UINT32:
-                    argv_index_ = ParseUint32ArgParam(static_cast<PandArg<uint32_t> *>(tail_arg));
+                    argv_index_ +=
+                        ParseUint32ArgParam(static_cast<PandArg<uint32_t> *>(tail_arg), argv_vec_[argv_index_]);
                     break;
                 case PandArgType::UINT64:
-                    argv_index_ = ParseUint64ArgParam(static_cast<PandArg<uint64_t> *>(tail_arg));
+                    argv_index_ +=
+                        ParseUint64ArgParam(static_cast<PandArg<uint64_t> *>(tail_arg), argv_vec_[argv_index_]);
                     break;
                 case PandArgType::LIST:
-                    argv_index_ = ParseListArgParam(static_cast<PandArg<arg_list_t> *>(tail_arg));
+                    argv_index_ +=
+                        ParseListArgParam(static_cast<PandArg<arg_list_t> *>(tail_arg), argv_vec_[argv_index_]);
                     break;
                 default:
                     errstr_.append("pandargs: Invalid tail option type: \"");
@@ -569,33 +715,28 @@ private:
         argv_index_ = argv_vec_.size();
     }
 
-    void ParseNextParam(PandArgBase *arg)
+    size_t ParseNextParam(PandArgBase *arg, std::string_view argstr)
     {
         if (argv_index_ >= argv_vec_.size() || arg == nullptr) {
-            return;
+            return 0;
         }
         switch (arg->GetType()) {
             case PandArgType::STRING:
-                argv_index_ = ParseStringArgParam(static_cast<PandArg<std::string> *>(arg));
-                break;
+                return ParseStringArgParam(static_cast<PandArg<std::string> *>(arg), argstr);
             case PandArgType::INTEGER:
-                argv_index_ = ParseIntArgParam(static_cast<PandArg<int> *>(arg));
-                break;
+                return ParseIntArgParam(static_cast<PandArg<int> *>(arg), argstr);
             case PandArgType::DOUBLE:
-                argv_index_ = ParseDoubleArgParam(static_cast<PandArg<double> *>(arg));
-                break;
+                return ParseDoubleArgParam(static_cast<PandArg<double> *>(arg), argstr);
             case PandArgType::BOOL:
-                argv_index_ = ParseBoolArgParam(static_cast<PandArg<bool> *>(arg));
-                break;
+                return ParseBoolArgParam(static_cast<PandArg<bool> *>(arg), argstr);
             case PandArgType::UINT32:
-                argv_index_ = ParseUint32ArgParam(static_cast<PandArg<uint32_t> *>(arg));
-                break;
+                return ParseUint32ArgParam(static_cast<PandArg<uint32_t> *>(arg), argstr);
             case PandArgType::UINT64:
-                argv_index_ = ParseUint64ArgParam(static_cast<PandArg<uint64_t> *>(arg));
-                break;
+                return ParseUint64ArgParam(static_cast<PandArg<uint64_t> *>(arg), argstr);
             case PandArgType::LIST:
-                argv_index_ = ParseListArgParam(static_cast<PandArg<arg_list_t> *>(arg));
-                break;
+                return ParseListArgParam(static_cast<PandArg<arg_list_t> *>(arg), argstr);
+            case PandArgType::COMPOUND:
+                return argstr.empty() ? 1 : 0;
             case PandArgType::NOTYPE:
                 errstr_.append("pandargs: Invalid option type: \"");
                 errstr_.append(arg->GetName());
@@ -606,17 +747,18 @@ private:
                 UNREACHABLE();
                 break;
         }
+        return 0;
     }
 
-    std::size_t ParseStringArgParam(PandArg<std::string> *arg)
+    std::size_t ParseStringArgParam(PandArg<std::string> *arg, std::string_view argstr)
     {
-        arg->SetValue(argv_vec_[argv_index_]);
-        return argv_index_ + 1;
+        arg->SetValue(std::string(argstr));
+        return 1;
     }
 
-    std::size_t ParseIntArgParam(PandArg<int> *arg)
+    std::size_t ParseIntArgParam(PandArg<int> *arg, std::string_view argstr)
     {
-        std::string param_str(argv_vec_[argv_index_]);
+        std::string param_str(argstr);
         if (IsIntegerNumber(param_str)) {
             int num;
             errno = 0;
@@ -642,24 +784,24 @@ private:
             errstr_ += "pandargs: \"" + arg->GetName() + "\" argument has out of range parameter value \"" + param_str +
                        "\"\n";
         }
-        return argv_index_ + 1;
+        return 1;
     }
 
-    std::size_t ParseDoubleArgParam(PandArg<double> *arg)
+    std::size_t ParseDoubleArgParam(PandArg<double> *arg, std::string_view argstr)
     {
-        std::string param_str(argv_vec_[argv_index_]);
+        std::string param_str(argstr);
         if (IsRationalNumber(param_str)) {
             arg->SetValue(std::stod(param_str));
         } else {
             errstr_ +=
                 "pandargs: \"" + arg->GetName() + "\" argument has invalid parameter value \"" + param_str + "\"\n";
         }
-        return argv_index_ + 1;
+        return 1;
     }
 
-    std::size_t ParseBoolArgParam(PandArg<bool> *arg, bool is_tail_param = false)
+    std::size_t ParseBoolArgParam(PandArg<bool> *arg, std::string_view argstr, bool is_tail_param = false)
     {
-        std::string param_str(argv_vec_[argv_index_]);
+        std::string param_str(argstr);
 
         // if not a tail argument, assume two following cases
         if (!is_tail_param) {
@@ -670,7 +812,7 @@ private:
                 if (equal_flag_) {
                     SetBoolUnexpectedValueError(arg, param_str);
                 }
-                return argv_index_;
+                return 0;
             }
             // OR bool arg at the end of arguments line
             if (param_str.empty()) {
@@ -678,7 +820,7 @@ private:
                 if (equal_flag_) {
                     SetBoolUnexpectedValueError(arg, param_str);
                 }
-                return argv_index_ + 1;
+                return 1;
             }
         }
 
@@ -688,19 +830,19 @@ private:
         for (const auto &i : TRUE_VALUES) {
             if (param_str == i) {
                 arg->SetValue(true);
-                return argv_index_ + 1;
+                return 1;
             }
         }
         for (const auto &i : FALSE_VALUES) {
             if (param_str == i) {
                 arg->SetValue(false);
-                return argv_index_ + 1;
+                return 1;
             }
         }
 
         // if it's not a part of tail argument,
         // assume that it's bool with no param,
-        // preceding tail argument
+        // preceiding tail argument
         if (!is_tail_param) {
             // check that bool param came without "="
             if (equal_flag_) {
@@ -714,12 +856,12 @@ private:
             arg->ResetDefaultValue();
         }
 
-        return argv_index_;
+        return 0;
     }
 
-    std::size_t ParseUint64ArgParam(PandArg<uint64_t> *arg)
+    std::size_t ParseUint64ArgParam(PandArg<uint64_t> *arg, std::string_view argstr)
     {
-        std::string param_str(argv_vec_[argv_index_]);
+        std::string param_str(argstr);
         if (IsUintNumber(param_str)) {
             errno = 0;
             uint64_t num;
@@ -745,12 +887,12 @@ private:
             errstr_ +=
                 "pandargs: \"" + arg->GetName() + "\" argument has invalid parameter value \"" + param_str + "\"\n";
         }
-        return argv_index_ + 1;
+        return 1;
     }
 
-    std::size_t ParseUint32ArgParam(PandArg<uint32_t> *arg)
+    std::size_t ParseUint32ArgParam(PandArg<uint32_t> *arg, std::string_view argstr)
     {
-        std::string param_str(argv_vec_[argv_index_]);
+        std::string param_str(argstr);
         if (IsUintNumber(param_str)) {
             errno = 0;
             uint32_t num;
@@ -776,12 +918,12 @@ private:
             errstr_ +=
                 "pandargs: \"" + arg->GetName() + "\" argument has invalid parameter value \"" + param_str + "\"\n";
         }
-        return argv_index_ + 1;
+        return 1;
     }
 
-    std::size_t ParseListArgParam(PandArg<arg_list_t> *arg)
+    std::size_t ParseListArgParam(PandArg<arg_list_t> *arg, std::string_view argstr)
     {
-        std::string param_str(argv_vec_[argv_index_]);
+        std::string param_str(argstr);
         arg_list_t value;
         if (arg->WasSet()) {
             value = arg->GetValue();
@@ -791,7 +933,7 @@ private:
         if (!arg->GetDelimiter().has_value()) {
             value.push_back(param_str);
             arg->SetValue(value);
-            return argv_index_ + 1;
+            return 1;
         }
         std::string delimiter = arg->GetDelimiter().value();
         std::size_t param_str_index = 0;
@@ -805,7 +947,7 @@ private:
 
         value.push_back(param_str.substr(param_str_index, pos - param_str_index));
         arg->SetValue(value);
-        return argv_index_ + 1;
+        return 1;
     }
 
     static std::size_t NextSeparator(std::string_view argstr, std::size_t pos = 0,
@@ -850,12 +992,15 @@ private:
             return false;
         }
 
+        constexpr std::string_view char_search = "0123456789";
+        constexpr std::string_view char_search_hex = "0123456789abcdef";
         std::size_t pos = 0;
         // look for hex-style uint_t integer
         if (str[0] == '0' && str[1] == 'x') {
             pos += HEX_PREFIX_WIDTH;
         }
-        return str.find_first_not_of("0123456789", pos) == std::string::npos;
+        return str.find_first_not_of((pos != 0) ? char_search_hex.data() : char_search.data(), pos) ==
+               std::string::npos;
     }
 
     template <typename T,
@@ -899,4 +1044,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_PANDARGS_H_
+#endif  // LIBPANDABASE_UTILS_PANDARGS_H_

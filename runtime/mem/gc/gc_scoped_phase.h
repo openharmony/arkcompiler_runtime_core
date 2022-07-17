@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_GC_GC_SCOPED_PHASE_H_
-#define PANDA_RUNTIME_MEM_GC_GC_SCOPED_PHASE_H_
+#ifndef GC_SCOPED_PHASE_H
+#define GC_SCOPED_PHASE_H
 
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/logger.h"
@@ -50,11 +49,11 @@ public:
             case GCPhase::GC_PHASE_MARK:
                 return "MarkAll()";
             case GCPhase::GC_PHASE_MARK_YOUNG:
-                return "MarkYoung()";
+                return "Mark()";
             case GCPhase::GC_PHASE_REMARK:
                 return "YoungRemark()";
             case GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE:
-                return "CollectYoungAndMove()";
+                return "CollectAndMove()";
             case GCPhase::GC_PHASE_SWEEP_STRING_TABLE:
                 return "SweepStringTable()";
             case GCPhase::GC_PHASE_SWEEP_STRING_TABLE_YOUNG:
@@ -68,7 +67,7 @@ public:
         }
     }
 
-    static PandaString GetPhaseAbbr(GCPhase phase)
+    static const char *GetPhaseAbbr(GCPhase phase)
     {
         switch (phase) {
             case GCPhase::GC_PHASE_IDLE:
@@ -111,4 +110,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_GC_GC_SCOPED_PHASE_H_
+#endif  // GC_SCOPED_PHASE_H

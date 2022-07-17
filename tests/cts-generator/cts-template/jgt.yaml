@@ -171,7 +171,7 @@ tests:
           verification:
             - acc_type
             - v1_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         tags: [verifier]
         description: Check 'jgt' instruction with uninitialized registers.
         header-template: []
@@ -249,7 +249,7 @@ tests:
         isa:
           verification:
             - branch_target
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         tags: [verifier]
         description: Check 'jgt' instruction with prohibited branch target.
         header-template: []
@@ -300,21 +300,21 @@ tests:
         check-type: none
         cases:
           - values: ["begin"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["mid"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["end"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["quit"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["catch_E1_begin"]
           - values: ["catch_E1_mid"]
           - values: ["catch_E1_end"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["catch_E2_begin"]
           - values: ["catch_E2_mid"]
           - values: ["catch_E2_end"]
-            runner-options: ['verifier-only', 'verifier-debug-config']
+            runner-options: ['verifier-only', 'verifier-config']
           - values: ["outside"]
 
 
@@ -322,7 +322,7 @@ tests:
         isa:
           verification:
             - acc_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         tags: [verifier]
         description: Check 'jgt' instruction with invalid accumulator value
         header-template: []
@@ -394,6 +394,42 @@ tests:
           - values:
             - |
               #
+                  fldai 0x00000000 # Positive zero (+0.0)
+          - values:
+            - |
+              #
+                  fldai 0x80000000 # Negative zero (-0.0)
+          - values:
+            - |
+              #
+                  fldai 0x00000001 # Minimal positive value (1.4012985e-45)
+          - values:
+            - |
+              #
+                  fldai 0x80000001 # Maximal negative value (-1.4012985e-45)
+          - values:
+            - |
+              #
+                  fldai 0x7f7fffff # Maximal positive value (3.4028235e38)
+          - values:
+            - |
+              #
+                  fldai 0xff7fffff # Minimal negative value (-3.4028235e38)
+          - values:
+            - |
+              #
+                  fldai 0x7f800000 # Positive infinity
+          - values:
+            - |
+              #
+                  fldai 0xff800000 # Negative infinity
+          - values:
+            - |
+              #
+                  fldai 0x7fc00000 # NaN
+          - values:
+            - |
+              #
                   fldai.64 0x0000000000000000 # Positive zero (+0.0, hexadecimal representation is `0x0000000000000000`)
           - values:
             - |
@@ -433,7 +469,7 @@ tests:
         isa:
           verification:
             - v1_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         tags: [verifier]
         description: Check 'jgt' instruction with invalid v register value
         header-template: []
@@ -514,6 +550,42 @@ tests:
           - values:
             - |
               #
+                  fmovi v1, 0x00000000 # Positive zero (+0.0)
+          - values:
+            - |
+              #
+                  fmovi v1, 0x80000000 # Negative zero (-0.0)
+          - values:
+            - |
+              #
+                  fmovi v1, 0x00000001 # Minimal positive value (1.4012985e-45)
+          - values:
+            - |
+              #
+                  fmovi v1, 0x80000001 # Maximal negative value (-1.4012985e-45)
+          - values:
+            - |
+              #
+                  fmovi v1, 0x7f7fffff # Maximal positive value (3.4028235e38)
+          - values:
+            - |
+              #
+                  fmovi v1, 0xff7fffff # Minimal negative value (-3.4028235e38)
+          - values:
+            - |
+              #
+                  fmovi v1, 0x7f800000 # Positive infinity
+          - values:
+            - |
+              #
+                  fmovi v1, 0xff800000 # Negative infinity
+          - values:
+            - |
+              #
+                  fmovi v1, 0x7fc00000 # NaN
+          - values:
+            - |
+              #
                   fmovi.64 v1, 0x0000000000000000 # Positive zero (+0.0, hexadecimal representation is `0x0000000000000000`)
           - values:
             - |
@@ -554,7 +626,7 @@ tests:
           verification:
             - v1_type
             - acc_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         tags: [verifier]
         description: Check 'jgt' instruction with invalid accumulator and v register value
         header-template: []
@@ -623,6 +695,42 @@ tests:
             - ldai.64 0xffffffffffffffff
           - values:
             - ldai.64 0x8000000000000000
+          - values:
+            - |
+              #
+                  fldai 0x00000000 # Positive zero (+0.0)
+          - values:
+            - |
+              #
+                  fldai 0x80000000 # Negative zero (-0.0)
+          - values:
+            - |
+              #
+                  fldai 0x00000001 # Minimal positive value (1.4012985e-45)
+          - values:
+            - |
+              #
+                  fldai 0x80000001 # Maximal negative value (-1.4012985e-45)
+          - values:
+            - |
+              #
+                  fldai 0x7f7fffff # Maximal positive value (3.4028235e38)
+          - values:
+            - |
+              #
+                  fldai 0xff7fffff # Minimal negative value (-3.4028235e38)
+          - values:
+            - |
+              #
+                  fldai 0x7f800000 # Positive infinity
+          - values:
+            - |
+              #
+                  fldai 0xff800000 # Negative infinity
+          - values:
+            - |
+              #
+                  fldai 0x7fc00000 # NaN
           - values:
             - |
               #
@@ -717,6 +825,42 @@ tests:
             - movi.64 v1, 0xffffffffffffffff
           - values:
             - movi.64 v1, 0x8000000000000000
+          - values:
+            - |
+              #
+                  fmovi v1, 0x00000000 # Positive zero (+0.0)
+          - values:
+            - |
+              #
+                  fmovi v1, 0x80000000 # Negative zero (-0.0)
+          - values:
+            - |
+              #
+                  fmovi v1, 0x00000001 # Minimal positive value (1.4012985e-45)
+          - values:
+            - |
+              #
+                  fmovi v1, 0x80000001 # Maximal negative value (-1.4012985e-45)
+          - values:
+            - |
+              #
+                  fmovi v1, 0x7f7fffff # Maximal positive value (3.4028235e38)
+          - values:
+            - |
+              #
+                  fmovi v1, 0xff7fffff # Minimal negative value (-3.4028235e38)
+          - values:
+            - |
+              #
+                  fmovi v1, 0x7f800000 # Positive infinity
+          - values:
+            - |
+              #
+                  fmovi v1, 0xff800000 # Negative infinity
+          - values:
+            - |
+              #
+                  fmovi v1, 0x7fc00000 # NaN
           - values:
             - |
               #

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,46 +17,58 @@
 // regs set as follow
 // %rax - insn_ptr, %rbx - frame.vregs, %r12 - method, %r13, %r14, %r15 - temp
 
-    // load method* into %rdi
+    // ABI arg reg 0 (rdi) <- panda::Method*
     movq %r12, %rdi
 
-    // load num args into %rsi and function object into %rdx, %rcx
+    // ABI arg reg 1 (rsi) <- num_args
     movzwl (%rax), %esi
-    movzwl 2(%rax), %r13d
-    shll $4, %r13d
-    addq %r13, %rbx
-    movq (%rbx), %rdx
-    movq FRAME_VREGISTER_TAG_OFFSET(%rbx), %rcx
-    addq $FRAME_VREGISTER_SIZE, %rbx
 
-    // setup regs as follow
-    // rdi, rsi, rdx, rcx, r8, r9 - arguments, rax - arg counter, rbx - frame.vregs + vreg_idx, r12 - method,
-    // r13, r14, r15 - temps
-    movl %esi, %eax
-    // load arguments into the registers
-    cmpl $0, %eax
+    cmpl $0, %esi
     je .Linvoke
 
-    movq (%rbx), %r8
-    movq FRAME_VREGISTER_TAG_OFFSET(%rbx), %r9
+    // rbx <- vreg pointed by the insn (user's first argument)
+    movzwl 2(%rax), %eax
+    shll $3, %eax
+    addq %rax, %rbx
+
+    // rax <- counter of args
+    movl %esi, %eax
+
+    // ABI arg reg 2 (rdx) <- boxed arg0 from user's code
+    movq (%rbx), %rdx
     addq $FRAME_VREGISTER_SIZE, %rbx
     subl $1, %eax
     je .Linvoke
 
-    // reserve stack space for the arguments
-    movl %eax, %r15d
-    shll $4, %r15d
-    subq %r15, %rsp
+    // ABI arg reg 3 (rcx) <- boxed arg1 from user's code
+    movq (%rbx), %rcx
+    addq $FRAME_VREGISTER_SIZE, %rbx
+    subl $1, %eax
+    je .Linvoke
 
-    // r15 - stack pointer
-    movq %rsp, %r15
-    // push the rest arguments to the stack
+    // ABI arg reg 4 (r8) <- boxed arg2 from user's code
+    movq (%rbx), %r8
+    addq $FRAME_VREGISTER_SIZE, %rbx
+    subl $1, %eax
+    je .Linvoke
 
-1:  movq (%rbx), %r13
-    movq FRAME_VREGISTER_TAG_OFFSET(%rbx), %r14
-    movq %r13, (%r15)
-    movq %r14, FRAME_VREGISTER_TAG_OFFSET(%r15)
-    addq $FRAME_VREGISTER_SIZE, %r15
+    // ABI arg reg 5 (r9) <- boxed arg3 from user's code
+    movq (%rbx), %r9
+    addq $FRAME_VREGISTER_SIZE, %rbx
+    subl $1, %eax
+    je .Linvoke
+
+    // Reserve stack space for the arguments, starting from r13:
+    movl %eax, %r13d
+    shll $3, %r13d
+    subq %r13, %rsp
+    andq $-16, %rsp
+    movq %rsp, %r13
+
+    // Push the rest arguments to the stack (r14 is temp):
+1:  movq (%rbx), %r14
+    movq %r14, (%r13)
+    addq $FRAME_VREGISTER_SIZE, %r13
     addq $FRAME_VREGISTER_SIZE, %rbx
     subl $1, %eax
     ja 1b

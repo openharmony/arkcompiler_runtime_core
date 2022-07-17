@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ void EpsilonGC<LanguageConfig>::InitializeImpl()
 }
 
 template <class LanguageConfig>
-void EpsilonGC<LanguageConfig>::RunPhasesImpl([[maybe_unused]] const GCTask &task)
+void EpsilonGC<LanguageConfig>::RunPhasesImpl([[maybe_unused]] GCTask &task)
 {
     LOG(DEBUG, GC) << "Epsilon GC RunPhases...";
     GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats());
@@ -46,7 +46,7 @@ void EpsilonGC<LanguageConfig>::RunPhasesImpl([[maybe_unused]] const GCTask &tas
 
 // NOLINTNEXTLINE(misc-unused-parameters)
 template <class LanguageConfig>
-void EpsilonGC<LanguageConfig>::WaitForGC([[maybe_unused]] const GCTask &task)
+void EpsilonGC<LanguageConfig>::WaitForGC([[maybe_unused]] GCTask task)
 {
 }
 
@@ -67,11 +67,23 @@ void EpsilonGC<LanguageConfig>::Trigger()
 }
 
 template <class LanguageConfig>
-void EpsilonGC<LanguageConfig>::MarkReferences([[maybe_unused]] PandaStackTL<ObjectHeader *> *references,
+void EpsilonGC<LanguageConfig>::MarkObject(ObjectHeader *object)
+{
+    object->SetMarkedForGC<true>();
+}
+
+template <class LanguageConfig>
+bool EpsilonGC<LanguageConfig>::IsMarked(const ObjectHeader *object) const
+{
+    return object->IsMarkedForGC<true>();
+}
+
+template <class LanguageConfig>
+void EpsilonGC<LanguageConfig>::MarkReferences([[maybe_unused]] GCMarkingStackType *references,
                                                [[maybe_unused]] GCPhase gc_phase)
 {
 }
 
-template class EpsilonGC<PandaAssemblyLanguageConfig>;
+TEMPLATE_CLASS_LANGUAGE_CONFIG(EpsilonGC);
 
 }  // namespace panda::mem

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,15 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INTERPRETER_VREGISTER_ITERATOR_H_
-#define PANDA_RUNTIME_INTERPRETER_VREGISTER_ITERATOR_H_
+#ifndef PANDA_RUNTIME_VREGISTER_ITERATOR_H_
+#define PANDA_RUNTIME_VREGISTER_ITERATOR_H_
 
 namespace panda::interpreter {
 
 template <BytecodeInstruction::Format format>
 class VRegisterIterator {
 public:
+    // NOLINTNEXTLINE(performance-move-const-arg)
     explicit VRegisterIterator(BytecodeInstruction insn, Frame *frame) : instn_(std::move(insn)), frame_(frame) {}
 
     template <class T>
@@ -28,7 +28,6 @@ public:
     {
         size_t vreg_idx;
 
-        // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_COMMENT_LOCATION)
         if constexpr (format == BytecodeInstruction::Format::V4_V4_ID16 /* short */) {
             switch (param_idx) {
                 case 0: {
@@ -63,7 +62,6 @@ public:
                 default:
                     UNREACHABLE();
             }
-            // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_COMMENT_LOCATION)
         } else if constexpr (format == BytecodeInstruction::Format::V8_ID16 /* range */) {
             vreg_idx = instn_.GetVReg<format, 0>() + param_idx;
         } else {
@@ -81,4 +79,4 @@ private:
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_RUNTIME_INTERPRETER_VREGISTER_ITERATOR_H_
+#endif  // PANDA_RUNTIME_CORETYPES_ARRAY_H_

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ CompiledCodeToInterpreterBridge:
 
     // Save return address to the TLS field
     movq (%rsp), %rax
-    movq %rax, THREAD_NATIVE_PC(%THREAD_REG)
+    movq %rax, MANAGED_THREAD_NATIVE_PC_OFFSET(%THREAD_REG)
 
     pushq $COMPILED_CODE_TO_INTERPRETER_BRIDGE
     CFI_ADJUST_CFA_OFFSET(8)
@@ -69,7 +69,7 @@ CompiledCodeToInterpreterBridge:
     // Before we call IncrementHotnessCounter we should set pointer to C2I frame in the TLS,
     // because compilation may fall into safepoint, so we need to make caller's callee registers
     // visible for the stack walker.
-    movq %rbp, THREAD_CURRENT_FRAME(%THREAD_REG)
+    movq %rbp, MANAGED_THREAD_FRAME_OFFSET(%THREAD_REG)
 
     PUSH_GENERAL_REGS
     PUSH_FP_REGS
@@ -81,7 +81,7 @@ CompiledCodeToInterpreterBridge:
 
     // Compilation successfully done, so recover caller's frame in the TLS, since C2I is not needed.
     movq (%rbp), %r8
-    movq %r8, THREAD_CURRENT_FRAME(%THREAD_REG)
+    movq %r8, MANAGED_THREAD_FRAME_OFFSET(%THREAD_REG)
 
     POP_FP_REGS
     POP_GENERAL_REGS
@@ -125,8 +125,8 @@ CompiledCodeToInterpreterBridge:
     movq METHOD_SHORTY_OFFSET(%rbx), %r14
     movl FRAME_NUM_VREGS_OFFSET(%r13), %r12d
     subl METHOD_NUM_ARGS_OFFSET(%rbx), %r12d
-    shlq $4, %r12
-    leaq FRAME_VREGS_OFFSET(%r13,%r12), %r12
+    shlq $3, %r12
+    leaq FRAME_VREGS_OFFSET(%r13, %r12), %r12
     leaq 8(%rsp), %rdx // skip Method*
     leaq 48(%rsp), %rsi
     leaq 24(%rbp), %rdi
@@ -164,7 +164,8 @@ CompiledCodeToInterpreterBridge:
     xorq %rcx, %rcx
     cmpl $SHORTY_REFERENCE, %r11d
     sete %cl
-    movq %rcx, FRAME_VREGISTER_TAG_OFFSET(%r12)
+    movl FRAME_NUM_VREGS_OFFSET(%r13), %r15d
+    movq %rcx, (%r12, %r15, 8)
 
     subl $SHORTY_FIRST_FLOAT, %r11d
     cmpl $(SHORTY_NUM_FLOAT_TYPES - 1), %r11d
@@ -221,7 +222,7 @@ CompiledCodeToInterpreterBridge:
     jmp 3f
 1:
     movq (%rax), %r12
-    movq FRAME_VREGISTER_TAG_OFFSET(%rax), %r13
+    movq FRAME_ACC_MIRROR_OFFSET(%rax), %r13
     subl $SHORTY_FIRST_FLOAT, %r14d
     cmpl $(SHORTY_NUM_FLOAT_TYPES - 1), %r14d
     jbe 2f

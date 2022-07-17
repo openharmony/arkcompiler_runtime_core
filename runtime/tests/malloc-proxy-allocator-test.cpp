@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,15 @@ using MallocProxyNonObjectAllocator = MallocProxyAllocator<EmptyAllocConfigWithC
 
 class MallocProxyAllocatorTest : public AllocatorTest<MallocProxyNonObjectAllocator> {
 public:
-    MallocProxyAllocatorTest() = default;
-    ~MallocProxyAllocatorTest() = default;
+    MallocProxyAllocatorTest()
+    {
+        // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
+    }
+
+    ~MallocProxyAllocatorTest()
+    {
+        // Logger::Destroy();
+    }
 
 protected:
     static constexpr size_t SIZE_ALLOC = 1_KB;
@@ -59,7 +66,8 @@ TEST_F(MallocProxyAllocatorTest, AlignedAllocFreeTest)
 
 TEST_F(MallocProxyAllocatorTest, AllocFreeTest)
 {
-    AllocateFreeDifferentSizesTest<1, 4 * SIZE_ALLOC>();
+    static constexpr size_t POOLS_COUNT = 1;
+    AllocateFreeDifferentSizesTest<1, 4 * SIZE_ALLOC>(4 * SIZE_ALLOC, POOLS_COUNT);
 }
 
 TEST_F(MallocProxyAllocatorTest, AdapterTest)

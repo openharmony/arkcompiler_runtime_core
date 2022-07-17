@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,25 +21,39 @@
 #include "libpandabase/utils/asan_interface.h"
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/math_helpers.h"
-#include "runtime/include/class_linker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/alloc_config.h"
 #include "runtime/mem/tlab.h"
 #include "runtime/tests/allocator_test_base.h"
 #include "runtime/mem/region_allocator-inl.h"
 
-namespace panda::mem {
+namespace panda::mem::test {
 using NonObjectRegionAllocator = RegionAllocator<EmptyAllocConfigWithCrossingMap>;
 
-template <typename ObjectAllocator>
+static constexpr size_t YOUNG_SPACE_SIZE = 128_MB;
+
+template <typename ObjectAllocator, bool RegularSpace = true>
 class RegionAllocatorTestBase : public AllocatorTest<ObjectAllocator> {
 public:
     RegionAllocatorTestBase()
     {
         options_.SetShouldLoadBootPandaFiles(false);
         options_.SetShouldInitializeIntrinsics(false);
-        options_.SetHeapSizeLimit(256_MB);
+        options_.SetYoungSpaceSize(YOUNG_SPACE_SIZE);
+        options_.SetHeapSizeLimit(320_MB);
+        options_.SetGcType("epsilon");
         Runtime::Create(options_);
+        // For tests we don't limit spaces
+        size_t space_size = options_.GetHeapSizeLimit();
+        size_t young_size = space_size;
+        if (!RegularSpace) {
+            // we don't need young space for non-movable or humongous allocator tests
+            young_size = 0;
+        }
+        spaces_.young_space_.Initialize(young_size, young_size);
+        spaces_.mem_space_.Initialize(space_size, space_size);
+        spaces_.InitializePercentages(0, 100);
+        spaces_.is_initialized_ = true;
         thread_ = panda::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
         class_linker_ = Runtime::GetCurrent()->GetClassLinker();
@@ -70,24 +84,20 @@ protected:
         object->SetClass(test_class_);
     }
 
-    panda::MTManagedThread *thread_ {nullptr};
-    ClassLinker *class_linker_ {nullptr};
-    Class *test_class_ {nullptr};
+    panda::MTManagedThread *thread_;
+    ClassLinker *class_linker_;
+    Class *test_class_;
     RuntimeOptions options_;
+    GenerationalSpaces spaces_;
 };
 
 class RegionAllocatorTest : public RegionAllocatorTestBase<NonObjectRegionAllocator> {
 public:
-    static constexpr size_t TEST_REGION_SPACE_SIZE = 128_MB;
+    static constexpr size_t TEST_REGION_SPACE_SIZE = YOUNG_SPACE_SIZE;
 
     size_t GetNumFreeRegions(NonObjectRegionAllocator &allocator)
     {
         return allocator.GetSpace()->GetPool()->GetFreeRegionsNumInRegionBlock();
-    }
-
-    bool IsTLAB(Region *reg)
-    {
-        return reg->GetTLAB() != nullptr;
     }
 
     size_t static constexpr RegionSize()
@@ -140,13 +150,12 @@ public:
     {
         ASSERT_EQ(GetNumFreeRegions(allocator), free_regions);
         size_t alloc_size = AlignUp(size, GetAlignmentInBytes(DEFAULT_ALIGNMENT));
-        if (alloc_size > free_regions * NonObjectRegionAllocator::GetMaxRegularObjectSize()) {
+        if (alloc_size + Region::HeadSize() > free_regions * RegionSize()) {
             ASSERT_TRUE(allocator.Alloc(alloc_size) == nullptr);
             alloc_size = std::min(alloc_size, free_regions * NonObjectRegionAllocator::GetMaxRegularObjectSize());
         }
         ASSERT_TRUE(allocator.Alloc(alloc_size) != nullptr);
-        free_regions -= (alloc_size + Region::HeadSize() + NonObjectRegionAllocator::REGION_SIZE - 1) /
-                        NonObjectRegionAllocator::REGION_SIZE;
+        free_regions -= (alloc_size + Region::HeadSize() + RegionSize() - 1) / RegionSize();
         ASSERT_EQ(GetNumFreeRegions(allocator), free_regions);
     }
 
@@ -156,20 +165,22 @@ public:
 TEST_F(RegionAllocatorTest, AllocateTooMuchRegularObject)
 {
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
-    NonObjectRegionAllocator allocator(mem_stats, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE, false);
+    NonObjectRegionAllocator allocator(mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE,
+                                       false);
     size_t alloc_times = GetRegionsNumber();
     for (size_t i = 0; i < alloc_times; i++) {
-        ASSERT_TRUE(allocator.Alloc(allocator.GetMaxRegularObjectSize() / 2U + 1) != nullptr);
+        ASSERT_TRUE(allocator.Alloc(allocator.GetMaxRegularObjectSize() / 2 + 1) != nullptr);
     }
     delete mem_stats;
-    ASSERT_TRUE(allocator.Alloc(allocator.GetMaxRegularObjectSize() / 2U + 1) == nullptr);
+    ASSERT_TRUE(allocator.Alloc(allocator.GetMaxRegularObjectSize() / 2 + 1) == nullptr);
 }
 
 TEST_F(RegionAllocatorTest, AllocateTooMuchRandomRegularObject)
 {
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
     for (int i = 0; i < RegionAllocatorTest::LOOP_COUNT; i++) {
-        NonObjectRegionAllocator allocator(mem_stats, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE, false);
+        NonObjectRegionAllocator allocator(mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE,
+                                           false);
         size_t free_regions = GetRegionsNumber();
         size_t free_bytes_for_cur_reg = 0;
         while (free_regions != 0 || free_bytes_for_cur_reg != 0) {
@@ -184,9 +195,10 @@ TEST_F(RegionAllocatorTest, AllocateTooMuchRandomRegularObject)
 TEST_F(RegionAllocatorTest, AllocateTooMuchLargeObject)
 {
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
-    NonObjectRegionAllocator allocator(mem_stats, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE, false);
+    NonObjectRegionAllocator allocator(mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE,
+                                       false);
     ASSERT_TRUE(allocator.Alloc(allocator.GetMaxRegularObjectSize()) != nullptr);
-    size_t alloc_times = (GetRegionsNumber() - 1) / 2U;
+    size_t alloc_times = (GetRegionsNumber() - 1) / 2;
     for (size_t i = 0; i < alloc_times; i++) {
         ASSERT_TRUE(allocator.Alloc(allocator.GetMaxRegularObjectSize() + 1) != nullptr);
     }
@@ -200,7 +212,8 @@ TEST_F(RegionAllocatorTest, AllocateTooMuchRandomLargeObject)
 {
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
     for (int i = 0; i < RegionAllocatorTest::LOOP_COUNT; i++) {
-        NonObjectRegionAllocator allocator(mem_stats, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE, false);
+        NonObjectRegionAllocator allocator(mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE,
+                                           false);
         ASSERT_TRUE(allocator.Alloc(allocator.GetMaxRegularObjectSize()) != nullptr);
         size_t free_regions = GetRegionsNumber() - 1;
         while (free_regions > 1) {
@@ -220,7 +233,8 @@ TEST_F(RegionAllocatorTest, AllocateTooMuchRandomRegularAndLargeObjectTest)
 {
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
     for (int i = 0; i < RegionAllocatorTest::LOOP_COUNT; i++) {
-        NonObjectRegionAllocator allocator(mem_stats, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE, false);
+        NonObjectRegionAllocator allocator(mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE,
+                                           false);
         size_t free_regions = GetRegionsNumber();
         size_t free_bytes_for_cur_reg = 0;
         while (free_regions != 0 || free_bytes_for_cur_reg != 0) {
@@ -241,20 +255,24 @@ TEST_F(RegionAllocatorTest, AllocateTooMuchRandomRegularAndLargeObjectTest)
 TEST_F(RegionAllocatorTest, AllocatedByRegionAllocatorTest)
 {
     mem::MemStatsType mem_stats;
-    NonObjectRegionAllocator allocator(&mem_stats, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE, false);
+    NonObjectRegionAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE,
+                                       false);
     AllocatedByThisAllocatorTest(allocator);
 }
 
 TEST_F(RegionAllocatorTest, OneAlignmentAllocTest)
 {
     OneAlignedAllocFreeTest<NonObjectRegionAllocator::GetMaxRegularObjectSize() - 128,
-                            NonObjectRegionAllocator::GetMaxRegularObjectSize() + 128, DEFAULT_ALIGNMENT>(1);
+                            NonObjectRegionAllocator::GetMaxRegularObjectSize() + 128, DEFAULT_ALIGNMENT>(1, &spaces_);
 }
 
 TEST_F(RegionAllocatorTest, AllocateFreeDifferentSizesTest)
 {
+    static constexpr size_t ELEMENTS_COUNT = 256;
+    static constexpr size_t POOLS_COUNT = 1;
     AllocateFreeDifferentSizesTest<NonObjectRegionAllocator::GetMaxRegularObjectSize() - 128,
-                                   NonObjectRegionAllocator::GetMaxRegularObjectSize() + 128>(256, 1);
+                                   NonObjectRegionAllocator::GetMaxRegularObjectSize() + 128>(ELEMENTS_COUNT,
+                                                                                              POOLS_COUNT, &spaces_);
 }
 
 TEST_F(RegionAllocatorTest, RegionTLABAllocTest)
@@ -263,27 +281,24 @@ TEST_F(RegionAllocatorTest, RegionTLABAllocTest)
     static constexpr size_t ALLOC_COUNT = 5000000;
     auto thread = ManagedThread::GetCurrent();
     mem::MemStatsType *mem_stats = new mem::MemStatsType();
-    NonObjectRegionAllocator allocator(mem_stats, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE, false);
+    NonObjectRegionAllocator allocator(mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE,
+                                       false);
     bool is_oom = false;
-    auto tlab = thread->GetTLAB();
-    ASSERT_NE(tlab, nullptr);
-    tlab = allocator.CreateNewTLAB(thread);
+    TLAB *tlab = allocator.CreateNewTLAB(thread);
     for (size_t i = 0; i < ALLOC_COUNT; i++) {
         auto old_start_pointer = tlab->GetStartAddr();
-        auto old_reg = allocator.GetRegion(reinterpret_cast<ObjectHeader *>(old_start_pointer));
         auto mem = tlab->Alloc(ALLOC_SIZE);
-        // Check new tlab address
+        // checking new tlab address
         if (mem == nullptr) {
             auto new_tlab = allocator.CreateNewTLAB(thread);
-            ASSERT_FALSE(IsTLAB(old_reg));
-            auto new_start_pointer = tlab->GetStartAddr();
-            if (new_start_pointer != 0) {
+            if (new_tlab != nullptr) {
+                auto new_start_pointer = new_tlab->GetStartAddr();
+                ASSERT_NE(new_start_pointer, nullptr);
                 ASSERT_NE(new_start_pointer, old_start_pointer);
-                auto new_reg = allocator.GetRegion(reinterpret_cast<ObjectHeader *>(new_start_pointer));
-                ASSERT_TRUE(IsTLAB(new_reg));
+                ASSERT_NE(new_tlab, tlab);
+                tlab = new_tlab;
+                mem = tlab->Alloc(ALLOC_SIZE);
             }
-            ASSERT_EQ(new_tlab, tlab);
-            mem = tlab->Alloc(ALLOC_SIZE);
         }
         if (mem == nullptr) {
             ASSERT_EQ(GetNumFreeRegions(allocator), 0);
@@ -299,9 +314,9 @@ TEST_F(RegionAllocatorTest, RegionTLABAllocTest)
 TEST_F(RegionAllocatorTest, RegionPoolTest)
 {
     mem::MemStatsType mem_stats;
-    NonObjectRegionAllocator allocator(&mem_stats, SpaceType::SPACE_TYPE_OBJECT, RegionSize() * 2, true);
+    NonObjectRegionAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, RegionSize() * 2, true);
 
-    // Alloc two small objects in a region
+    // alloc two small objects in a region
     ASSERT_EQ(GetNumFreeRegions(allocator), 2);
     auto *obj1 = reinterpret_cast<ObjectHeader *>(allocator.Alloc(1));  // one byte
     ASSERT_TRUE(obj1 != nullptr);
@@ -310,7 +325,7 @@ TEST_F(RegionAllocatorTest, RegionPoolTest)
     ASSERT_TRUE(obj2 != nullptr);
     ASSERT_EQ(GetNumFreeRegions(allocator), 1);
 
-    // Check that the two objects should be in a region
+    // check that the two objects should be in a region
     ASSERT_EQ(ToUintPtr(obj2), ToUintPtr(obj1) + DEFAULT_ALIGNMENT_IN_BYTES);
     auto *region1 = allocator.GetRegion(obj1);
     ASSERT_TRUE(region1 != nullptr);
@@ -319,7 +334,7 @@ TEST_F(RegionAllocatorTest, RegionPoolTest)
     ASSERT_EQ(region1, region2);
     ASSERT_EQ(region1->Top() - region1->Begin(), 3 * DEFAULT_ALIGNMENT_IN_BYTES);
 
-    // Allocate a large object in pool(not in initial block)
+    // allocate a large object in pool(not in initial block)
     ASSERT_EQ(GetNumFreeRegions(allocator), 1);
     auto *obj3 = reinterpret_cast<ObjectHeader *>(allocator.Alloc(allocator.GetMaxRegularObjectSize() + 200));
     ASSERT_TRUE(obj3 != nullptr);
@@ -327,11 +342,9 @@ TEST_F(RegionAllocatorTest, RegionPoolTest)
     auto *region3 = allocator.GetRegion(obj3);
     ASSERT_TRUE(region3 != nullptr);
     ASSERT_NE(region2, region3);
-    auto *region30 = allocator.GetSpace()->GetPool()->GetRegion<true>(
-        reinterpret_cast<ObjectHeader *>(ToUintPtr(obj3) + allocator.GetMaxRegularObjectSize()));
-    ASSERT_EQ(region3, region30);
+    ASSERT_TRUE(region3->HasFlag(RegionFlag::IS_LARGE_OBJECT));
 
-    // Allocate a regular object which can't be allocated in current region
+    // allocate a regular object which can't be allocated in current region
     auto *obj4 = reinterpret_cast<ObjectHeader *>(
         allocator.Alloc(allocator.GetMaxRegularObjectSize() - DEFAULT_ALIGNMENT_IN_BYTES));
     ASSERT_TRUE(obj4 != nullptr);
@@ -349,7 +362,7 @@ TEST_F(RegionAllocatorTest, RegionPoolTest)
 TEST_F(RegionAllocatorTest, IterateOverObjectsTest)
 {
     mem::MemStatsType mem_stats;
-    NonObjectRegionAllocator allocator(&mem_stats, SpaceType::SPACE_TYPE_OBJECT, 0, true);
+    NonObjectRegionAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, 0, true);
     auto *obj1 = reinterpret_cast<ObjectHeader *>(allocator.Alloc(test_class_->GetObjectSize()));
     obj1->SetClass(test_class_);
     auto *obj2 = reinterpret_cast<ObjectHeader *>(allocator.Alloc(test_class_->GetObjectSize()));
@@ -368,7 +381,7 @@ TEST_F(RegionAllocatorTest, IterateOverObjectsTest)
         }
 
 #ifndef NDEBUG
-        // Can't allocator object while iterating the region
+        // can't allocator object while iterating the region
         ASSERT_DEATH(allocator.Alloc(test_class_->GetObjectSize()), "");
 #endif
     });
@@ -377,8 +390,8 @@ TEST_F(RegionAllocatorTest, IterateOverObjectsTest)
 
 #ifndef NDEBUG
     ASSERT_TRUE(region->SetAllocating(true));
-    // Can't iterating the region while allocating
-    ASSERT_DEATH(region->IterateOverObjects([]([[maybe_unused]] ObjectHeader *object) {}), "");
+    // can't iterating the region while allocating
+    ASSERT_DEATH(region->IterateOverObjects([]([[maybe_unused]] ObjectHeader *object) {});, "");
     ASSERT_TRUE(region->SetAllocating(false));
 #endif
 }
@@ -388,7 +401,8 @@ TEST_F(RegionAllocatorTest, AllocateAndMoveYoungObjectsToTenured)
     static constexpr size_t ALLOCATION_COUNT = 10000;
     static constexpr size_t TENURED_OBJECTS_CREATION_RATE = 4;
     mem::MemStatsType mem_stats;
-    NonObjectRegionAllocator allocator(&mem_stats, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE, false);
+    NonObjectRegionAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE,
+                                       false);
     // Allocate some objects (young and tenured) in allocator
     for (size_t i = 0; i < ALLOCATION_COUNT; i++) {
         void *mem = nullptr;
@@ -400,10 +414,12 @@ TEST_F(RegionAllocatorTest, AllocateAndMoveYoungObjectsToTenured)
         ASSERT_TRUE(mem != nullptr);
     }
     // Iterate over young objects and move them into tenured:
-    allocator.CompactAllSpecificRegions<RegionFlag::IS_EDEN, RegionFlag::IS_OLD>([&](ObjectHeader *object) {
-        (void)object;
-        return ObjectStatus::ALIVE_OBJECT;
-    });
+    allocator.CompactAllSpecificRegions<RegionFlag::IS_EDEN, RegionFlag::IS_OLD>(
+        [&](ObjectHeader *object) {
+            (void)object;
+            return ObjectStatus::ALIVE_OBJECT;
+        },
+        []([[maybe_unused]] ObjectHeader *src, [[maybe_unused]] ObjectHeader *dst) {});
     allocator.ResetAllSpecificRegions<RegionFlag::IS_EDEN>();
     size_t object_found = 0;
     allocator.IterateOverObjects([&](ObjectHeader *object) {
@@ -418,7 +434,8 @@ TEST_F(RegionAllocatorTest, AllocateAndCompactTenuredObjects)
     static constexpr size_t ALLOCATION_COUNT = 7000;
     static constexpr size_t YOUNG_OBJECTS_CREATION_RATE = 100;
     mem::MemStatsType mem_stats;
-    NonObjectRegionAllocator allocator(&mem_stats, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE, false);
+    NonObjectRegionAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE,
+                                       false);
     PandaVector<Region *> regions_vector;
     size_t tenured_object_count = 0;
     // Allocate some objects (young and tenured) in allocator
@@ -439,12 +456,17 @@ TEST_F(RegionAllocatorTest, AllocateAndCompactTenuredObjects)
     ASSERT_TRUE(regions_vector.size() > 1);
     ASSERT_EQ(allocator.GetAllSpecificRegions<RegionFlag::IS_OLD>().size(), regions_vector.size());
     // Iterate over some tenured regions and compact them:
+    allocator.ClearCurrentRegion<RegionFlag::IS_OLD>();
     size_t object_found = 0;
     allocator.CompactSeveralSpecificRegions<RegionFlag::IS_OLD, RegionFlag::IS_OLD>(
-        regions_vector, [&](ObjectHeader *object) {
+        regions_vector,
+        [&](ObjectHeader *object) {
             (void)object;
             object_found++;
             return ObjectStatus::ALIVE_OBJECT;
+        },
+        []([[maybe_unused]] ObjectHeader *from, [[maybe_unused]] ObjectHeader *to) {
+            // no need anything here
         });
     ASSERT_EQ(object_found, tenured_object_count);
     object_found = 0;
@@ -474,7 +496,8 @@ TEST_F(RegionAllocatorTest, AllocateAndCompactTenuredObjectsViaMarkedBitmap)
     static constexpr size_t ALLOCATION_COUNT = 7000;
     static constexpr size_t MARKED_OBJECTS_RATE = 2;
     mem::MemStatsType mem_stats;
-    NonObjectRegionAllocator allocator(&mem_stats, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE, false);
+    NonObjectRegionAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE,
+                                       false);
     PandaVector<Region *> regions_vector;
     size_t marked_tenured_object_count = 0;
     // Allocate some objects (young and tenured) in allocator
@@ -493,12 +516,17 @@ TEST_F(RegionAllocatorTest, AllocateAndCompactTenuredObjectsViaMarkedBitmap)
     ASSERT_TRUE(regions_vector.size() > 1);
     ASSERT_EQ(allocator.GetAllSpecificRegions<RegionFlag::IS_OLD>().size(), regions_vector.size());
     // Iterate over some tenured regions and compact them:
+    allocator.ClearCurrentRegion<RegionFlag::IS_OLD>();
     size_t object_found = 0;
     allocator.CompactSeveralSpecificRegions<RegionFlag::IS_OLD, RegionFlag::IS_OLD, true>(
-        regions_vector, [&](ObjectHeader *object) {
+        regions_vector,
+        [&](ObjectHeader *object) {
             (void)object;
             object_found++;
             return ObjectStatus::ALIVE_OBJECT;
+        },
+        []([[maybe_unused]] ObjectHeader *from, [[maybe_unused]] ObjectHeader *to) {
+            // stub
         });
     ASSERT_EQ(object_found, marked_tenured_object_count);
     object_found = 0;
@@ -523,6 +551,50 @@ TEST_F(RegionAllocatorTest, AllocateAndCompactTenuredObjectsViaMarkedBitmap)
     ASSERT_TRUE(AllocateObjectWithClass<RegionFlag::IS_OLD>(allocator) != nullptr);
 }
 
+TEST_F(RegionAllocatorTest, AsanTest)
+{
+    static constexpr size_t ALLOCATION_COUNT = 100;
+    static constexpr size_t TENURED_OBJECTS_CREATION_RATE = 4;
+    mem::MemStatsType mem_stats;
+    NonObjectRegionAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, TEST_REGION_SPACE_SIZE,
+                                       false);
+    std::vector<void *> young_objects;
+    std::vector<void *> old_objects;
+    // Allocate some objects (young and tenured) in allocator
+    for (size_t i = 0; i < ALLOCATION_COUNT; i++) {
+        if (i % TENURED_OBJECTS_CREATION_RATE == 0) {
+            old_objects.push_back(AllocateObjectWithClass<RegionFlag::IS_OLD>(allocator));
+        } else {
+            young_objects.push_back(AllocateObjectWithClass<RegionFlag::IS_EDEN>(allocator));
+        }
+    }
+    // Iterate over young objects and move them into tenured:
+    allocator.CompactAllSpecificRegions<RegionFlag::IS_EDEN, RegionFlag::IS_OLD>(
+        [&](ObjectHeader *object) {
+            (void)object;
+            return ObjectStatus::ALIVE_OBJECT;
+        },
+        []([[maybe_unused]] ObjectHeader *src, [[maybe_unused]] ObjectHeader *dst) {});
+    allocator.ResetAllSpecificRegions<RegionFlag::IS_EDEN>();
+    for (auto i : young_objects) {
+#ifdef PANDA_ASAN_ON
+        EXPECT_DEATH(DeathWriteUint64(i), "") << "Write " << sizeof(uint64_t) << " bytes at address " << std::hex << i;
+#else
+        (void)i;
+        continue;
+#endif  // PANDA_ASAN_ON
+    }
+    allocator.ResetAllSpecificRegions<RegionFlag::IS_OLD>();
+    for (auto i : old_objects) {
+#ifdef PANDA_ASAN_ON
+        EXPECT_DEATH(DeathWriteUint64(i), "") << "Write " << sizeof(uint64_t) << " bytes at address " << std::hex << i;
+#else
+        (void)i;
+        continue;
+#endif  // PANDA_ASAN_ON
+    }
+}
+
 TEST_F(RegionAllocatorTest, MTAllocTest)
 {
 #if defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_32)
@@ -538,7 +610,8 @@ TEST_F(RegionAllocatorTest, MTAllocTest)
     static constexpr size_t MT_TEST_RUN_COUNT = 20;
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
         mem::MemStatsType mem_stats;
-        NonObjectRegionAllocator allocator(&mem_stats, SpaceType::SPACE_TYPE_OBJECT, RegionSize() * 128, true);
+        NonObjectRegionAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, RegionSize() * 128,
+                                           true);
         MT_AllocTest<MIN_MT_ALLOC_SIZE, MAX_MT_ALLOC_SIZE, THREADS_COUNT>(&allocator, MIN_ELEMENTS_COUNT,
                                                                           MAX_ELEMENTS_COUNT);
     }
@@ -559,7 +632,8 @@ TEST_F(RegionAllocatorTest, MTAllocLargeTest)
     static constexpr size_t MT_TEST_RUN_COUNT = 20;
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
         mem::MemStatsType mem_stats;
-        NonObjectRegionAllocator allocator(&mem_stats, SpaceType::SPACE_TYPE_OBJECT, RegionSize() * 256, true);
+        NonObjectRegionAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, RegionSize() * 256,
+                                           true);
         MT_AllocTest<MIN_MT_ALLOC_SIZE, MAX_MT_ALLOC_SIZE, THREADS_COUNT>(&allocator, MIN_ELEMENTS_COUNT,
                                                                           MAX_ELEMENTS_COUNT);
     }
@@ -567,18 +641,19 @@ TEST_F(RegionAllocatorTest, MTAllocLargeTest)
 
 using RegionNonmovableObjectAllocator =
     RegionRunslotsAllocator<ObjectAllocConfigWithCrossingMap, RegionAllocatorLockConfig::CommonLock>;
-class RegionNonmovableObjectAllocatorTest : public RegionAllocatorTestBase<RegionNonmovableObjectAllocator> {
+class RegionNonmovableObjectAllocatorTest : public RegionAllocatorTestBase<RegionNonmovableObjectAllocator, false> {
 };
 
 using RegionNonmovableLargeObjectAllocator =
     RegionFreeListAllocator<ObjectAllocConfigWithCrossingMap, RegionAllocatorLockConfig::CommonLock>;
-class RegionNonmovableLargeObjectAllocatorTest : public RegionAllocatorTestBase<RegionNonmovableLargeObjectAllocator> {
+class RegionNonmovableLargeObjectAllocatorTest
+    : public RegionAllocatorTestBase<RegionNonmovableLargeObjectAllocator, false> {
 };
 
 TEST_F(RegionNonmovableObjectAllocatorTest, AllocatorTest)
 {
     mem::MemStatsType mem_stats;
-    RegionNonmovableObjectAllocator allocator(&mem_stats, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    RegionNonmovableObjectAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     for (uint32_t i = 8; i <= RegionNonmovableObjectAllocator::GetMaxSize(); i++) {
         ASSERT_TRUE(allocator.Alloc(i) != nullptr);
     }
@@ -599,10 +674,10 @@ TEST_F(RegionNonmovableObjectAllocatorTest, MTAllocatorTest)
     static constexpr size_t MT_TEST_RUN_COUNT = 20;
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
         mem::MemStatsType mem_stats;
-        RegionNonmovableObjectAllocator allocator(&mem_stats, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+        RegionNonmovableObjectAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
         MT_AllocTest<MIN_MT_ALLOC_SIZE, MAX_MT_ALLOC_SIZE, THREADS_COUNT>(&allocator, MIN_ELEMENTS_COUNT,
                                                                           MAX_ELEMENTS_COUNT);
-        // Region is allocated in allocator, so don't free it explicitly
+        // region is allocated in allocator, so don't free it explicitly
         allocator.VisitAndRemoveAllPools([]([[maybe_unused]] void *mem, [[maybe_unused]] size_t size) {});
     }
 }
@@ -610,7 +685,7 @@ TEST_F(RegionNonmovableObjectAllocatorTest, MTAllocatorTest)
 TEST_F(RegionNonmovableLargeObjectAllocatorTest, AllocatorTest)
 {
     mem::MemStatsType mem_stats;
-    RegionNonmovableLargeObjectAllocator allocator(&mem_stats, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    RegionNonmovableLargeObjectAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     size_t start_object_size = RegionNonmovableObjectAllocator::GetMaxSize() + 1;
     for (uint32_t i = start_object_size; i <= start_object_size + 200; i++) {
         ASSERT_TRUE(allocator.Alloc(i) != nullptr);
@@ -634,12 +709,161 @@ TEST_F(RegionNonmovableLargeObjectAllocatorTest, MTAllocatorTest)
     static constexpr size_t MT_TEST_RUN_COUNT = 20;
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
         mem::MemStatsType mem_stats;
-        RegionNonmovableLargeObjectAllocator allocator(&mem_stats, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+        RegionNonmovableLargeObjectAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
         MT_AllocTest<MIN_MT_ALLOC_SIZE, MAX_MT_ALLOC_SIZE, THREADS_COUNT>(&allocator, MIN_ELEMENTS_COUNT,
                                                                           MAX_ELEMENTS_COUNT);
-        // Region is allocated in allocator, so don't free it explicitly
+        // region is allocated in allocator, so don't free it explicitly
         allocator.VisitAndRemoveAllPools([]([[maybe_unused]] void *mem, [[maybe_unused]] size_t size) {});
     }
 }
 
-}  // namespace panda::mem
+TEST_F(RegionNonmovableLargeObjectAllocatorTest, MemStatsAllocatorTest)
+{
+    mem::MemStatsType mem_stats;
+    RegionNonmovableLargeObjectAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    static constexpr size_t ALLOC_SIZE = 128;
+    void *mem = nullptr;
+
+    auto object_allocated_size = mem_stats.GetAllocated(SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    ASSERT_TRUE(object_allocated_size == 0);
+    mem = allocator.Alloc(ALLOC_SIZE);
+    ASSERT_TRUE(mem != nullptr);
+    auto object_allocated_size_1 = mem_stats.GetAllocated(SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    ASSERT_EQ(mem_stats.GetTotalObjectsAllocated(), 1);
+    ASSERT_TRUE(object_allocated_size_1 != 0);
+
+    mem = allocator.Alloc(ALLOC_SIZE);
+    ASSERT_TRUE(mem != nullptr);
+    auto object_allocated_size_2 = mem_stats.GetAllocated(SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    ASSERT_EQ(mem_stats.GetTotalObjectsAllocated(), 2);
+    ASSERT_EQ(object_allocated_size_2, object_allocated_size_1 + object_allocated_size_1);
+}
+
+using RegionHumongousObjectAllocator =
+    RegionHumongousAllocator<ObjectAllocConfig, RegionAllocatorLockConfig::CommonLock>;
+class RegionHumongousObjectAllocatorTest : public RegionAllocatorTestBase<RegionHumongousObjectAllocator, false> {
+protected:
+    static constexpr auto RegionVisitor = []([[maybe_unused]] void *mem, [[maybe_unused]] size_t size) {};
+};
+
+TEST_F(RegionHumongousObjectAllocatorTest, AllocatorTest)
+{
+    static constexpr size_t MAX_ALLOC_SIZE = 5_MB;
+    static constexpr size_t ALLOC_COUNT = 20;
+    mem::MemStatsType mem_stats;
+    RegionHumongousObjectAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+    for (uint32_t i = MAX_ALLOC_SIZE / ALLOC_COUNT; i <= MAX_ALLOC_SIZE; i += MAX_ALLOC_SIZE / ALLOC_COUNT) {
+        ASSERT_TRUE(allocator.Alloc(i) != nullptr);
+    }
+}
+
+TEST_F(RegionHumongousObjectAllocatorTest, MTAllocatorTest)
+{
+#if defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_32)
+    // We have an issue with QEMU during MT tests. Issue 2852
+    static constexpr size_t THREADS_COUNT = 1;
+#else
+    static constexpr size_t THREADS_COUNT = 5;
+#endif
+    static constexpr size_t MIN_MT_ALLOC_SIZE = DEFAULT_REGION_SIZE;
+    static constexpr size_t MAX_MT_ALLOC_SIZE = 1_MB;
+    static constexpr size_t MIN_ELEMENTS_COUNT = 20;
+    static constexpr size_t MAX_ELEMENTS_COUNT = 30;
+    // Test with DEFAULT_REGION_SIZE
+    {
+        mem::MemStatsType mem_stats;
+        RegionHumongousObjectAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+        MT_AllocTest<MIN_MT_ALLOC_SIZE, MIN_MT_ALLOC_SIZE, THREADS_COUNT>(&allocator, MIN_ELEMENTS_COUNT,
+                                                                          MAX_ELEMENTS_COUNT);
+        allocator.VisitAndRemoveAllPools([]([[maybe_unused]] void *mem, [[maybe_unused]] size_t size) {});
+    }
+    // Test with 1Mb
+    {
+        mem::MemStatsType mem_stats;
+        RegionHumongousObjectAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+        MT_AllocTest<MAX_MT_ALLOC_SIZE, MAX_MT_ALLOC_SIZE, THREADS_COUNT>(&allocator, MIN_ELEMENTS_COUNT,
+                                                                          MAX_ELEMENTS_COUNT);
+        allocator.VisitAndRemoveAllPools([]([[maybe_unused]] void *mem, [[maybe_unused]] size_t size) {});
+    }
+}
+
+TEST_F(RegionHumongousObjectAllocatorTest, CollectTest)
+{
+    static constexpr size_t MIN_ALLOC_SIZE = 1_MB;
+    static constexpr size_t MAX_ALLOC_SIZE = 9_MB;
+    static constexpr size_t ALLOCATION_COUNT = 50;
+    std::vector<void *> allocated_elements;
+    mem::MemStatsType mem_stats;
+    RegionHumongousObjectAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+    size_t current_alloc_size = MIN_ALLOC_SIZE;
+    auto lang = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *class_linker_ext = Runtime::GetCurrent()->GetClassLinker()->GetExtension(lang);
+    for (size_t i = 0; i < ALLOCATION_COUNT; i++) {
+        auto test_class = class_linker_ext->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
+        test_class->SetObjectSize(current_alloc_size);
+        void *mem = allocator.Alloc(current_alloc_size);
+        ASSERT_TRUE(mem != nullptr);
+        allocated_elements.push_back(mem);
+        auto object = static_cast<ObjectHeader *>(mem);
+        object->SetClass(test_class);
+        current_alloc_size += ((MAX_ALLOC_SIZE - MIN_ALLOC_SIZE) / ALLOCATION_COUNT);
+    }
+    static std::set<void *> founded_elements;
+    static auto delete_all = [](ObjectHeader *object) {
+        founded_elements.insert(object);
+        return ObjectStatus::ALIVE_OBJECT;
+    };
+    // Collect all objects into unordered_set via allocator's method
+    allocator.CollectAndRemoveFreeRegions(RegionVisitor, delete_all);
+    for (auto i : allocated_elements) {
+        auto element = founded_elements.find(i);
+        ASSERT_TRUE(element != founded_elements.end());
+        founded_elements.erase(element);
+    }
+    ASSERT_TRUE(founded_elements.empty());
+}
+
+TEST_F(RegionHumongousObjectAllocatorTest, TestCollectAliveObject)
+{
+    mem::MemStatsType mem_stats;
+    RegionHumongousObjectAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+    auto lang = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *class_linker_ext = Runtime::GetCurrent()->GetClassLinker()->GetExtension(lang);
+    auto test_class = class_linker_ext->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
+    size_t object_size = DEFAULT_REGION_SIZE + 1;
+    test_class->SetObjectSize(object_size);
+    void *mem = allocator.Alloc(object_size);
+    ASSERT_TRUE(mem != nullptr);
+    auto object = static_cast<ObjectHeader *>(mem);
+    object->SetClass(test_class);
+    Region *region = ObjectToRegion(object);
+
+    allocator.CollectAndRemoveFreeRegions(RegionVisitor, [](ObjectHeader *) { return ObjectStatus::ALIVE_OBJECT; });
+    bool has_region = false;
+    allocator.GetSpace()->IterateRegions([region, &has_region](Region *r) { has_region |= region == r; });
+    ASSERT_TRUE(has_region);
+    ASSERT(!region->HasFlag(RegionFlag::IS_FREE));
+}
+
+TEST_F(RegionHumongousObjectAllocatorTest, TestCollectDeadObject)
+{
+    mem::MemStatsType mem_stats;
+    RegionHumongousObjectAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+    auto lang = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *class_linker_ext = Runtime::GetCurrent()->GetClassLinker()->GetExtension(lang);
+    auto test_class = class_linker_ext->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
+    size_t object_size = DEFAULT_REGION_SIZE + 1;
+    test_class->SetObjectSize(object_size);
+    void *mem = allocator.Alloc(object_size);
+    ASSERT_TRUE(mem != nullptr);
+    auto object = static_cast<ObjectHeader *>(mem);
+    object->SetClass(test_class);
+    Region *region = ObjectToRegion(object);
+
+    allocator.CollectAndRemoveFreeRegions(RegionVisitor, [](ObjectHeader *) { return ObjectStatus::DEAD_OBJECT; });
+    bool has_region = false;
+    allocator.GetSpace()->IterateRegions([region, &has_region](Region *r) { has_region |= region == r; });
+    ASSERT_TRUE(!has_region);
+}
+
+}  // namespace panda::mem::test

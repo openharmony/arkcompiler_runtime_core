@@ -40,7 +40,7 @@
 #for(i=0; i<7; i++) array[i]=(double)i;
 #for(i=6; i>=0; i--) assert_eq((double)i, array[i]);
 
-.function u1 main(){
+.function i32 main(){
     movi v0, 7
     newarr v1, v0, f64[]
     movi v2, 0

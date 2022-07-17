@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_LIBPANDAFILE_FILE_WRITER_H_
-#define PANDA_LIBPANDAFILE_FILE_WRITER_H_
+#ifndef LIBPANDAFILE_FILE_WRITER_H_
+#define LIBPANDAFILE_FILE_WRITER_H_
 
 #include "os/file.h"
 #include "utils/span.h"
@@ -38,10 +37,8 @@ public:
 
     virtual size_t GetOffset() const = 0;
 
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_COMMENT_ADDSPASE)
     virtual void CountChecksum(bool /* counting */) {}
 
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_COMMENT_ADDSPASE)
     virtual bool WriteChecksum(size_t /* offset */)
     {
         return false;
@@ -95,7 +92,6 @@ public:
         return WriteBytes(out);
     }
 
-public:
     // default methods
     Writer() = default;
     virtual ~Writer() = default;
@@ -213,7 +209,7 @@ public:
     }
 
 private:
-    FILE *file_ {nullptr};
+    FILE *file_;
     size_t offset_;
     uint32_t checksum_;
     bool count_checksum_ {false};
@@ -221,4 +217,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_FILE_WRITER_H_
+#endif  // LIBPANDAFILE_FILE_WRITER_H_

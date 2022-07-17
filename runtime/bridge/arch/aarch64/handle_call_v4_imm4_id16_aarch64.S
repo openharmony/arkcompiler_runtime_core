@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@
     // the case call vreg, acc
     // handle the first arg index
     and w11, w5, #0xF
-    add x11, x7, x11, lsl #4
+    add x11, x7, x11, lsl #3
     ldp x11, x12, [x11]
     PUSH_ARG x11, x12, x10, x4, x3, x13, 10f
 
@@ -57,7 +57,7 @@
 
     // handle the reg
     and w11, w5, #0xF
-    add x11, x7, x11, lsl #4
+    add x11, x7, x11, lsl #3
     ldp x11, x12, [x11]
     PUSH_ARG x11, x12, x10, x4, x3, x13, .Lload_reg_args
     b .Lload_reg_args

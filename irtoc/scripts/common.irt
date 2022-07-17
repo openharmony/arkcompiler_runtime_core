@@ -1,0 +1,152 @@
+#!/usr/bin/env ruby
+
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+$panda_regmap = Regmap.new({
+  arm64: {tr: 28},
+  arm32: {tr: 10},
+  x86_64: {tr: 15}
+})
+
+$arch_regmap = Regmap.new({
+  arm64: {fp: 29, sp: 31, lr: 30},
+  arm32: {fp: 11, sp: 13, lr: 14, pc: 15},
+  x86_64: {fp: 9, sp: 10}
+})
+
+$args_regmap = Regmap.new({
+  arm64: {fp: 29, sp: 31, ret: 0, arg0: 0, arg1: 1, arg2: 2, arg3: 3, arg4: 4, arg5: 5, arg6: 6, arg7: 7},
+  arm32: {fp: 11, sp: 13, ret: 0, arg0: 0, arg1: 1, arg2: 2, arg3: 3},
+  x86_64: {fp: 9, sp: 10, ret: 0, arg0: 7, arg1: 6, arg2: 2, arg3: 1, arg4: 8, arg5: 5}
+})
+
+# Regmap for temp registers
+$temps_regmap = Regmap.new(Options.arch_info.temp_regs.each_with_index.map { |x, i| ["tmp#{i}".to_sym, x] }.to_h,
+                         direct: true)
+
+$callees_regmap = Regmap.new({
+   arm64: (19..28).each_with_index.map { |x, i| ["callee#{i}".to_sym, x] }.to_h,
+   arm32: (4..10).each_with_index.map { |x, i| ["callee#{i}".to_sym, x] }.to_h,
+   x86_64: (11..15).each_with_index.map { |x, i| ["callee#{i}".to_sym, x] }.to_h,
+})
+
+$callers_regmap = Regmap.new({
+  arm64: (0..18).each_with_index.map { |x, i| ["caller#{i}".to_sym, x] }.to_h,
+  arm32: (0..3).each_with_index.map { |x, i| ["caller#{i}".to_sym, x] }.to_h,
+  x86_64: (0..8).each_with_index.map { |x, i| ["caller#{i}".to_sym, x] }.to_h,
+})
+
+# Regmap that contains all defined regmap
+$full_regmap = $panda_regmap + $args_regmap + $arch_regmap + $temps_regmap + $callees_regmap + $callers_regmap
+
+# In default mask we use all registers, except temps and special arch registers(e.g. lr)
+$default_mask = ~RegMask.new($full_regmap, *(Options.arch_info.temp_regs)) - $arch_regmap
+
+# Panda mask is the mask intended to be used with Panda ABI. Currently, we just remove thread reg from the default mask.
+$panda_mask = $default_mask - :tr
+
+# Temporary registers mask
+$temps_mask = RegMask.new($full_regmap, :tmp0, :tmp1, :tmp2)
+
+# Mask of all callers regsiters, except temp registers
+$panda_callers_mask = RegMask.from_regmap($full_regmap, $callers_regmap) - $temps_mask
+
+# Mask of all callees regsiters, except temp registers
+$panda_callees_mask = RegMask.from_regmap($full_regmap, $callees_regmap) - $temps_mask
+
+# Remove even registers from regmask for ARM32, because compiler conservatively uses two physical registers for one
+# virtual register, e.g. for r0 we should also remove r1.
+if Options.arch == :arm32
+  $default_mask = RegMask.from_value($default_mask. regmap, $default_mask.value & 0x55555555)
+  # Some temps may have even values
+  $temps_mask.each { |x| $default_mask[x + 1] = false }
+end
+
+module Constants
+    TLAB_OFFSET = "cross_values::GetManagedThreadTlabOffset(GetArch())"
+    TLAB_CUR_FREE_POSITION_OFFSET = "cross_values::GetTlabCurFreePositionOffset(GetArch())"
+    TLAB_MEMORY_END_ADDR_OFFSET = "cross_values::GetTlabMemoryEndAddrOffset(GetArch())"
+    CREATE_OBJECT_BY_CLASS = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::CREATE_OBJECT_BY_CLASS_SLOW_PATH)"
+    OBJECT_CLASS_OFFSET = "cross_values::GetObjectHeaderClassPointerOffset(GetArch())"
+    WRITE_TLAB_STATS_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE)"
+    WRITE_TLAB_STATS = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS)"
+    ANNOTATE_SANITIZERS_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_NO_BRIDGE)"
+    CREATE_ARRAY_SLOW_PATH = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::CREATE_ARRAY_SLOW_PATH)"
+    GET_CALLEE_METHOD = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::GET_CALLEE_METHOD_DIRECT)"
+    INITIALIZE_CLASS_BY_ID = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::INITIALIZE_CLASS_BY_ID_DIRECT)"
+    RESOLVE_CLASS = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::RESOLVE_CLASS_DIRECT)"
+    GET_VTABLE_INDEX = "cross_values::GetMethodVTableIndexOffset(GetArch())"
+    CLASS_STATE_OFFSET = "cross_values::GetClassStateOffset(GetArch())"
+    ARRAY_LENGTH_OFFSET = "cross_values::GetCoretypesArrayLengthOffset(GetArch())"
+    VREGISTERS_NUM_OFFSET = "cross_values::GetFrameNumVregsOffset(GetArch())"
+    VREGISTERS_OFFSET = "cross_values::GetFrameVregsOffset(GetArch())"
+    VREGISTER_SIZE = "cross_values::GetFrameVregisterSize(GetArch())"
+    VREGISTER_VALUE_OFFSET = "cross_values::GetFrameVregisterValueOffset(GetArch())"
+    GET_ACC_OFFSET = "cross_values::GetFrameAccOffset(GetArch())"
+    GET_ACC_MIRROR_OFFSET = "cross_values::GetFrameAccMirrorOffset(GetArch())"
+    RESOLVE_VIRTUAL_CALL_AOT = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::RESOLVE_VIRTUAL_CALL_AOT)"
+    GET_CLASS_METHODS_OFFSET = "cross_values::GetClassMethodsOffset(GetArch())"
+    FRAME_METHOD_OFFSET = "Frame::GetMethodOffset()"
+    FRAME_INSTRUCTIONS_OFFSET = "Frame::GetInstructionsOffset()"
+    MARK_WORD_OFFSET = "cross_values::GetObjectHeaderMarkWordOffset(GetArch())"
+    INTERNAL_THREAD_ID_OFFSET = "cross_values::GetManagedThreadInternalIdOffset(GetArch())"
+    LOCAL_OBJECTS_LOCKED_ADDR_OFFSET = "cross_values::GetManagedThreadLocalObjectsLockedAddrOffset(GetArch())"
+    LOCKED_OBJECTS_CAPACITY_OFFSET = "cross_values::GetMtManagedThreadLockedObjectCapacityOffset(GetArch())"
+    LOCKED_OBJECTS_SIZE_OFFSET = "cross_values::GetMtManagedThreadLockedObjectSizeOffset(GetArch())"
+    LOCKED_OBJECTS_DATA_OFFSET = "cross_values::GetMtManagedThreadLockedObjectDataOffset(GetArch())"
+    LOCKED_OBJECT_INFO_MONITOR_OFFSET = "cross_values::GetLockedObjectInfoMonitorOffset(GetArch())"
+    LOCKED_OBJECT_INFO_FRAME_OFFSET = "cross_values::GetLockedObjectInfoStackOffset(GetArch())"
+    LOCKED_OBJECT_INFO_SIZE = "cross_values::GetLockedObjectInfoSize(GetArch())"
+    MONITOR_ENTER_SLOW_PATH = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::MONITOR_ENTER_SLOW_PATH)"
+    MONITOR_EXIT_SLOW_PATH = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::MONITOR_EXIT_SLOW_PATH)"
+    CHECK_CAST_SLOW_PATH = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::CHECK_CAST)"
+    MARK_WORD_STATUS_MASK = "static_cast<uint64_t>(MarkWord::STATUS_MASK)"
+    MARK_WORD_LWL_THREAD_ID_OFFSET = "static_cast<uint64_t>(MarkWord::LIGHT_LOCK_THREADID_SHIFT)"
+    MARK_WORD_LWL_THREAD_ID_MASK = "static_cast<uint64_t>(MarkWord::LIGHT_LOCK_THREADID_MASK_IN_PLACE)"
+    MARK_WORD_LWL_COUNTER_INC = "static_cast<uint64_t>(1 << MarkWord::LIGHT_LOCK_LOCK_COUNT_SHIFT)"
+    MARK_WORD_LWL_COUNTER_MASK = "static_cast<uint64_t>(MarkWord::LIGHT_LOCK_LOCK_COUNT_MASK_IN_PLACE)"
+    MARK_WORD_LWL_THREAD_ID_AND_COUNTER_MASK = "static_cast<uint64_t>(MarkWord::LIGHT_LOCK_THREADID_MASK_IN_PLACE | MarkWord::LIGHT_LOCK_LOCK_COUNT_MASK_IN_PLACE)"
+    MARK_WORD_STATUS_MASK_AND_LWL_THREAD_ID_MASK = "static_cast<uint64_t>(MarkWord::STATUS_MASK | MarkWord::LIGHT_LOCK_THREADID_MASK_IN_PLACE)"
+    CLASS_COMPONENT_OFFSET = "cross_values::GetClassComponentTypeOffset(GetArch())"
+    CLASS_TYPE_OFFSET = "cross_values::GetClassTypeOffset(GetArch())"
+    CLASS_ITABLE_ENTRIES_DATA_OFFSET = "CLASS_ITABLE_OFFSET + CLASS_ITABLE_ENTRIES_DATA_OFFSET"
+    CLASS_ITABLE_ENTRIES_SIZE_OFFSET = "CLASS_ITABLE_OFFSET + CLASS_ITABLE_ENTRIES_SIZE_OFFSET"
+    CLASS_ITABLE_ENTRY_SIZE = "cross_values::GetClassItableEntrySize(GetArch())"
+    CLASS_ITABLE_ENTRY_INTERFACE_OFFSET = "cross_values::GetClassItableEntryInterfaceOffset(GetArch())"
+    IS_INSTANCE_BY_BCID = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::IS_INSTANCE_BY_BCID)"
+    CHECK_CAST_BY_BCID = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::CHECK_CAST_BY_BCID)"
+
+    IC_HANDLER_KIND_BIT = "cross_values::GetIcHandlerKindBitStartBit(graph->GetArch())"
+    IC_HANDLER_KIND_MASK = "cross_values::GetIcHandlerKindBitMask(graph->GetArch())"
+    IC_HANDLER_OFFSET_BIT = "cross_values::GetIcHandlerOffsetBitStartBit(graph->GetArch())"
+    IC_HANDLER_OFFSET_MASK = "cross_values::GetIcHandlerOffsetBitMask(graph->GetArch())"
+    IC_HANDLER_INLINE_BIT = "cross_values::GetIcHandlerInlinedPropsBitStartBit(graph->GetArch())"
+    IC_HANDLER_INLINE_MASK = "cross_values::GetIcHandlerInlinedPropsBitMask(graph->GetArch())"
+
+    IC_HANDLER_KIND_FIELD = "cross_values::GetIcHandlerHandlerKindField(graph->GetArch())"
+    DYN_INT_TYPE = "AnyBaseType::UNDEFINED_TYPE"
+    DYN_DOUBLE_TYPE = "AnyBaseType::UNDEFINED_TYPE"
+
+end
+macro(:call_runtime) { |e, *args|
+    entry := LoadI(%tr).Imm(e).ptr
+    CallIndirect(entry, *args)
+}
+
+macro(:call_runtime_save_all) { |e, *args|
+    Intrinsic(:SAVE_REGISTERS_EP).void
+    ret = call_runtime(e, *args)
+    Intrinsic(:RESTORE_REGISTERS_EP).void
+    ret
+}

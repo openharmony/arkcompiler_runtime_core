@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_FILE_INL_H_
-#define PANDA_LIBPANDAFILE_FILE_INL_H_
+#ifndef LIBPANDAFILE_FILE_INL_H_
+#define LIBPANDAFILE_FILE_INL_H_
 
 #include "helpers.h"
 #include "file.h"
@@ -37,4 +37,4 @@ inline File::StringData File::GetStringData(EntityId id) const
 
 }  // namespace panda::panda_file
 
-#endif  // PANDA_LIBPANDAFILE_FILE_INL_H_
+#endif

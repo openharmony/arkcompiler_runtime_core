@@ -11,15 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require "pathname"
-require_relative "string_logger"
-require_relative "base_test_reporter"
+require 'pathname'
+require_relative 'string_logger'
+require_relative 'base_test_reporter'
 
 module TestRunner
-
   # JtrTestReporter is reporter to separate file of each test.
   class JtrTestReporter < BaseTestReporter
-
     def initialize(root_dir, pa_file, report_dir)
       @root = Pathname.new(root_dir)
       file = Pathname.new(pa_file) # path to file
@@ -27,7 +25,7 @@ module TestRunner
       report_dir = Pathname.new(report_dir)
       actual_file = @root.basename if @root.file?
       @pa_file = actual_file.to_s
-      report_file = report_dir + Pathname.new("#{@pa_file.gsub(/.pa$/, '.jtr')}")
+      report_file = report_dir + Pathname.new(@pa_file.gsub(/.pa$/, '.jtr').to_s)
       report_file.dirname.mkpath
       FileUtils.rm report_file if report_file.exist?
       @logger = Reporters::SeparateFileLogger.new(report_file)
@@ -41,53 +39,53 @@ module TestRunner
       Time.now.strftime('%a %b %d %H:%M:%S MSK %Y')
     end
 
-    def prologue()
+    def prologue
       @logger.log 1, '#Test Results (version 2)'
       @logger.log 1, '#-----testdescription-----'
-      @logger.log 1, "$file=#@root/CTS/conformance/tests/#@pa_file"
-      @logger.log 1, "$root=#@root"
+      @logger.log 1, "$file=#{@root}/CTS/conformance/tests/#{@pa_file}"
+      @logger.log 1, "$root=#{@root}"
       @logger.log 1, ''
       @logger.log 1, '#-----testresult-----'
-      @logger.log 1, "test=CTS/conformance/tests/#@pa_file"
+      @logger.log 1, "test=CTS/conformance/tests/#{@pa_file}"
       @logger.log 1, 'suitename=CTS'
       @logger.log 1, "start=#{jtr_time}"
     end
 
-    def epilogue()
+    def epilogue
       @logger.log 1, "end=#{jtr_time}"
-      @logger.log 1, "execStatus=#@status"
+      @logger.log 1, "execStatus=#{@status}"
       # add output section in case of failure
-      if !(@status =~ /Passed\.|Not run\./) and !(@output.empty?)
-        @logger.log 1, "sections=output"
+      if !(@status =~ /Passed\.|Not run\./) and !@output.empty?
+        @logger.log 1, 'sections=output'
         @logger.log 1, ''
         @logger.log 1, '#section:output'
         lines = @output.split("\n").map(&:strip).reject { |l| l.match(/^$/) }
         @output = lines.join("\n")
         @logger.log 1, "----------messages:(#{lines.length}/#{@output.length + 1})----------"
         @logger.log 1, @output
-        @logger.log 1, "result: Failed."
+        @logger.log 1, 'result: Failed.'
       end
       @logger.close
     end
 
     def log_exclusion
-      @status = "Not run. Excluded by tag"
+      @status = 'Not run. Excluded by tag'
     end
 
     def log_skip_include
-      @status = "Not run. Not included by tag"
+      @status = 'Not run. Not included by tag'
     end
 
     def log_skip_bugid
-      @status = "Not run. Not mtched bugid"
+      @status = 'Not run. Not mtched bugid'
     end
 
     def log_skip_ignore
-      @status = "Not run. runner_option is ignore"
+      @status = 'Not run. runner_option is ignore'
     end
 
     def log_skip_only_ignore
-      @status = "Not run. Running only ignored"
+      @status = 'Not run. Running only ignored'
     end
 
     def log_ignore_ignored
@@ -99,23 +97,22 @@ module TestRunner
     end
 
     def log_failed_compilation(output)
-      @status = "Failed. Failed to compile"
+      @status = 'Failed. Failed to compile'
       @output << "\n" << output
     end
 
-
     def log_negative_passed_compilation(output)
-      @status = "Failed. Test is compiled, but should be rejected."
+      @status = 'Failed. Test is compiled, but should be rejected.'
       @output << "\n" << output
     end
 
     def log_failed_negative_compilation(output)
-      @status = "Passed. Test failed to compile, as expected."
+      @status = 'Passed. Test failed to compile, as expected.'
       @output << "\n" << output
     end
 
     def log_compilation_passed(output)
-      @status = "Passed. Compilation-only test."
+      @status = 'Passed. Compilation-only test.'
       @output << "\n" << output
     end
 
@@ -147,15 +144,15 @@ module TestRunner
     end
 
     def log_excluded
-      @status = "Not run."
+      @status = 'Not run.'
     end
 
     def verbose_log(status)
       @output << "\n" << status
     end
 
-    def log_bugids(bugids)
-    end
+    def log_bugids(bugids) end
 
+    def log_repro_commands(cmds) end
   end
 end

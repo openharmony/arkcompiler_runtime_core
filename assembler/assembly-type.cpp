@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,12 +49,14 @@ panda_file::Type::TypeId Type::GetId(std::string_view name, bool ignore_primitiv
 
     if (!ignore_primitive) {
         auto iter = panda_types.find(name);
+
         if (iter == panda_types.end()) {
             return panda_file::Type::TypeId::REFERENCE;
         }
         return iter->second;
+    } else {
+        return panda_file::Type::TypeId::REFERENCE;
     }
-    return panda_file::Type::TypeId::REFERENCE;
 }
 
 /* static */
@@ -91,6 +93,7 @@ Type Type::FromDescriptor(std::string_view descriptor)
     if (is_ref_type) {
         return Type(descriptor, rank);
     }
+
     return Type(reverse_primitive_types[descriptor], rank);
 }
 
@@ -107,7 +110,19 @@ Type Type::FromName(std::string_view name, bool ignore_primitive)
     }
 
     name.remove_suffix(i);
+
     return Type(name, i / STEP, ignore_primitive);
+}
+
+/* static */
+bool Type::IsStringType(const std::string &name, panda::panda_file::SourceLang lang)
+{
+    auto string_type = Type::FromDescriptor(panda::panda_file::GetStringClassDescriptor(lang));
+    if (name == string_type.GetName()) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /* static */

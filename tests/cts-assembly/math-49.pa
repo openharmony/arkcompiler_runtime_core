@@ -13,7 +13,7 @@
 
 # check that 0x80000000 / (-1) = 0x80000000.
 
-.function u1 main() {
+.function i32 main() {
     ldai 0x80000000
     movi v0, -1
     div2 v0

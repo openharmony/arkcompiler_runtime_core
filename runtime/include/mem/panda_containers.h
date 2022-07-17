@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_MEM_PANDA_CONTAINERS_H_
-#define PANDA_RUNTIME_INCLUDE_MEM_PANDA_CONTAINERS_H_
+#ifndef PANDA_RUNTIME_MEM_PANDA_CONTAINERS_H
+#define PANDA_RUNTIME_MEM_PANDA_CONTAINERS_H
 
 #include <deque>
 #include <forward_list>
@@ -26,7 +25,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
+#include "libpandabase/utils/small_vector.h"
 #include "runtime/mem/allocator_adapter.h"
 
 namespace panda {
@@ -79,6 +78,13 @@ using PandaVector = std::vector<T, mem::AllocatorAdapter<T>>;
 template <class T>
 using PandaVectorTL = std::vector<T, mem::AllocatorAdapter<T, mem::AllocScope::LOCAL>>;
 
+// For small vector with static allocation support
+static constexpr size_t STATIC_CAPACITY_DEFAULT = 8;
+template <typename T, size_t N = STATIC_CAPACITY_DEFAULT>
+using PandaSmallVector = SmallVector<T, N, mem::AllocatorAdapter<T>>;
+template <typename T, size_t N = STATIC_CAPACITY_DEFAULT>
+using PandaSmallVectorTL = SmallVector<T, N, mem::AllocatorAdapter<T, mem::AllocScope::LOCAL>>;
+
 template <class T, class Container = PandaVector<T>, class Compare = std::less<typename Container::value_type>>
 using PandaPriorityQueue = std::priority_queue<T, Container, Compare>;
 // Thread local version of PandaPriorityQueue
@@ -115,4 +121,4 @@ using PandaUnorderedMultiMapTL =
                             mem::AllocatorAdapter<std::pair<const Key, Value>, mem::AllocScope::LOCAL>>;
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_MEM_PANDA_CONTAINERS_H_
+#endif  // PANDA_RUNTIME_MEM_PANDA_CONTAINERS_H

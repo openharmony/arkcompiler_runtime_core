@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/mem/allocator-inl.h"
-
 #include "mem/mem_pool.h"
 #include "mem/mem_config.h"
 #include "runtime/include/runtime.h"
@@ -50,10 +49,24 @@ ObjectAllocatorBase::~ObjectAllocatorBase()
     }
 }
 
+bool ObjectAllocatorBase::HaveEnoughPoolsInObjectSpace(size_t pools_num) const
+{
+    auto mem_pool = PoolManager::GetMmapMemPool();
+    auto pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, PANDA_DEFAULT_ALLOCATOR_POOL_SIZE);
+    return mem_pool->HaveEnoughPoolsInObjectSpace(pools_num, pool_size);
+}
+
 template <MTModeT MTMode>
 ObjectAllocatorNoGen<MTMode>::ObjectAllocatorNoGen(MemStatsType *mem_stats, bool create_pygote_space_allocator)
     : ObjectAllocatorBase(mem_stats, GCCollectMode::GC_ALL, create_pygote_space_allocator)
 {
+    const auto &options = Runtime::GetOptions();
+    heap_space_.Initialize(MemConfig::GetInitialHeapSizeLimit(), MemConfig::GetHeapSizeLimit(),
+                           options.GetMinHeapFreePercentage(), options.GetMaxHeapFreePercentage());
+    if (create_pygote_space_allocator) {
+        ASSERT(pygote_space_allocator_ != nullptr);
+        pygote_space_allocator_->SetHeapSpace(&heap_space_);
+    }
     object_allocator_ = new (std::nothrow) ObjectAllocator(mem_stats);
     large_object_allocator_ = new (std::nothrow) LargeObjectAllocator(mem_stats);
     humongous_object_allocator_ = new (std::nothrow) HumongousObjectAllocator(mem_stats);
@@ -72,17 +85,17 @@ void *ObjectAllocatorNoGen<MTMode>::Allocate(size_t size, Alignment align,
                                              [[maybe_unused]] panda::ManagedThread *thread)
 {
     void *mem = nullptr;
-    size_t aligned_size;
-    aligned_size = AlignUp(size, GetAlignmentInBytes(align));
+    size_t aligned_size = AlignUp(size, GetAlignmentInBytes(align));
     if (aligned_size <= ObjectAllocator::GetMaxSize()) {
         size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, ObjectAllocator::GetMinPoolSize());
-        mem = AllocateSafe(size, align, object_allocator_, pool_size, SpaceType::SPACE_TYPE_OBJECT);
+        mem = AllocateSafe(size, align, object_allocator_, pool_size, SpaceType::SPACE_TYPE_OBJECT, &heap_space_);
     } else if (aligned_size <= LargeObjectAllocator::GetMaxSize()) {
         size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, LargeObjectAllocator::GetMinPoolSize());
-        mem = AllocateSafe(size, align, large_object_allocator_, pool_size, SpaceType::SPACE_TYPE_OBJECT);
+        mem = AllocateSafe(size, align, large_object_allocator_, pool_size, SpaceType::SPACE_TYPE_OBJECT, &heap_space_);
     } else {
         size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, HumongousObjectAllocator::GetMinPoolSize(size));
-        mem = AllocateSafe(size, align, humongous_object_allocator_, pool_size, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+        mem = AllocateSafe(size, align, humongous_object_allocator_, pool_size, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT,
+                           &heap_space_);
     }
     return mem;
 }
@@ -90,7 +103,7 @@ void *ObjectAllocatorNoGen<MTMode>::Allocate(size_t size, Alignment align,
 template <MTModeT MTMode>
 void *ObjectAllocatorNoGen<MTMode>::AllocateNonMovable(size_t size, Alignment align, panda::ManagedThread *thread)
 {
-    // Before pygote fork, allocate small non-movable objects in pygote space
+    // before pygote fork, allocate small non-movable objects in pygote space
     if (UNLIKELY(IsPygoteAllocEnabled() && pygote_space_allocator_->CanAllocNonMovable(size, align))) {
         return pygote_space_allocator_->Alloc(size, align);
     }
@@ -150,7 +163,7 @@ void ObjectAllocatorNoGen<MTMode>::IterateNonRegularSizeObjects(const ObjectVisi
 template <MTModeT MTMode>
 void ObjectAllocatorNoGen<MTMode>::FreeObjectsMovedToPygoteSpace()
 {
-    // Clear allocator because we have move all objects in it to pygote space
+    // clear because we have move all objects in it to pygote space
     object_allocator_->VisitAndRemoveAllPools(
         [](void *mem, size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
     delete object_allocator_;
@@ -169,7 +182,7 @@ void ObjectAllocatorNoGen<MTMode>::Collect(const GCObjectVisitor &gc_object_visi
     humongous_object_allocator_->Collect(gc_object_visitor);
 }
 
-// If there is a common base class for these allocators, we could split this func and return the pointer to the
+// if there is a common base class for these allocators, we could split this func and return the pointer to the
 // allocator containing the object
 template <MTModeT MTMode>
 bool ObjectAllocatorNoGen<MTMode>::ContainObject(const ObjectHeader *obj) const
@@ -209,8 +222,7 @@ template <MTModeT MTMode>
 void *ObjectAllocatorGen<MTMode>::Allocate(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread)
 {
     void *mem = nullptr;
-    size_t aligned_size;
-    aligned_size = AlignUp(size, GetAlignmentInBytes(align));
+    size_t aligned_size = AlignUp(size, GetAlignmentInBytes(align));
     if (LIKELY(aligned_size <= YOUNG_ALLOC_MAX_SIZE)) {
         mem = young_gen_allocator_->Alloc(size, align);
     } else {
@@ -223,44 +235,26 @@ template <MTModeT MTMode>
 void *ObjectAllocatorGen<MTMode>::AllocateNonMovable(size_t size, Alignment align,
                                                      [[maybe_unused]] panda::ManagedThread *thread)
 {
-    // Before pygote fork, allocate small non-movable objects in pygote space
+    // before pygote fork, allocate small non-movable objects in pygote space
     if (UNLIKELY(IsPygoteAllocEnabled() && pygote_space_allocator_->CanAllocNonMovable(size, align))) {
         return pygote_space_allocator_->Alloc(size, align);
     }
     void *mem = nullptr;
-    size_t aligned_size;
-    aligned_size = AlignUp(size, GetAlignmentInBytes(align));
-    if (aligned_size <= ObjectAllocator::GetMaxSize()) {
-        size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, ObjectAllocator::GetMinPoolSize());
-        mem = AllocateSafe(size, align, non_movable_object_allocator_, pool_size,
-                           SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-    } else if (aligned_size <= LargeObjectAllocator::GetMaxSize()) {
-        size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, LargeObjectAllocator::GetMinPoolSize());
-        mem = AllocateSafe(size, align, large_non_movable_object_allocator_, pool_size,
-                           SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-    } else {
-        // We don't need special allocator for these Humongous objects are non-movable
-        size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, HumongousObjectAllocator::GetMinPoolSize(size));
-        mem = AllocateSafe(size, align, humongous_object_allocator_, pool_size, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
-    }
-    return mem;
-}
-
-template <MTModeT MTMode>
-void *ObjectAllocatorGen<MTMode>::AllocateTenured(size_t size)
-{
-    void *mem = nullptr;
-    Alignment align = DEFAULT_ALIGNMENT;
     size_t aligned_size = AlignUp(size, GetAlignmentInBytes(align));
     if (aligned_size <= ObjectAllocator::GetMaxSize()) {
         size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, ObjectAllocator::GetMinPoolSize());
-        mem = AllocateSafe(size, align, object_allocator_, pool_size, SpaceType::SPACE_TYPE_OBJECT);
+        mem = AllocateSafe(size, align, non_movable_object_allocator_, pool_size,
+                           SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT, &heap_spaces_);
     } else if (aligned_size <= LargeObjectAllocator::GetMaxSize()) {
         size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, LargeObjectAllocator::GetMinPoolSize());
-        mem = AllocateSafe(size, align, large_object_allocator_, pool_size, SpaceType::SPACE_TYPE_OBJECT);
+        mem = AllocateSafe(size, align, large_non_movable_object_allocator_, pool_size,
+                           SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT, &heap_spaces_);
     } else {
+        // We don't need special allocator for this
+        // Humongous objects are non-movable
         size_t pool_size = std::max(PANDA_DEFAULT_POOL_SIZE, HumongousObjectAllocator::GetMinPoolSize(size));
-        mem = AllocateSafe(size, align, humongous_object_allocator_, pool_size, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+        mem = AllocateSafe(size, align, humongous_object_allocator_, pool_size, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT,
+                           &heap_spaces_);
     }
     return mem;
 }
@@ -345,7 +339,7 @@ void ObjectAllocatorGen<MTMode>::IterateNonRegularSizeObjects(const ObjectVisito
 template <MTModeT MTMode>
 void ObjectAllocatorGen<MTMode>::FreeObjectsMovedToPygoteSpace()
 {
-    // Clear allocator because we have move all objects in it to pygote space
+    // clear because we have move all objects in it to pygote space
     object_allocator_->VisitAndRemoveAllPools(
         [](void *mem, size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
     delete object_allocator_;
@@ -395,6 +389,7 @@ size_t ObjectAllocatorNoGen<MTMode>::GetLargeObjectMaxSize()
 template <MTModeT MTMode>
 TLAB *ObjectAllocatorNoGen<MTMode>::CreateNewTLAB([[maybe_unused]] panda::ManagedThread *thread)
 {
+    // TODO(aemelenko): Implement this method
     LOG(FATAL, ALLOC) << "Unimplemented";
     return nullptr;
 }
@@ -402,23 +397,43 @@ TLAB *ObjectAllocatorNoGen<MTMode>::CreateNewTLAB([[maybe_unused]] panda::Manage
 template <MTModeT MTMode>
 size_t ObjectAllocatorNoGen<MTMode>::GetTLABMaxAllocSize()
 {
+    // TODO(aemelenko): TLAB usage is not supported for non-gen GCs.
     return 0;
+}
+
+ObjectAllocatorGenBase::ObjectAllocatorGenBase(MemStatsType *mem_stats, GCCollectMode gc_collect_mode,
+                                               bool create_pygote_space_allocator)
+    : ObjectAllocatorBase(mem_stats, gc_collect_mode, create_pygote_space_allocator)
+{
+    const auto &options = Runtime::GetOptions();
+    heap_spaces_.Initialize(options.GetInitYoungSpaceSize(), options.WasSetInitYoungSpaceSize(),
+                            options.GetYoungSpaceSize(), options.WasSetYoungSpaceSize(),
+                            MemConfig::GetInitialHeapSizeLimit(), MemConfig::GetHeapSizeLimit(),
+                            options.GetMinHeapFreePercentage(), options.GetMaxHeapFreePercentage());
+    if (create_pygote_space_allocator) {
+        ASSERT(pygote_space_allocator_ != nullptr);
+        pygote_space_allocator_->SetHeapSpace(&heap_spaces_);
+    }
 }
 
 template <MTModeT MTMode>
 ObjectAllocatorGen<MTMode>::ObjectAllocatorGen(MemStatsType *mem_stats, bool create_pygote_space_allocator)
     : ObjectAllocatorGenBase(mem_stats, GCCollectMode::GC_ALL, create_pygote_space_allocator)
 {
-    auto young_space_size = Runtime::GetOptions().GetYoungSpaceSize();
+    // For Gen-GC we use alone pool for young space, so we will use full such pool
+    heap_spaces_.UseFullYoungSpace();
+    size_t young_space_size = heap_spaces_.GetCurrentMaxYoungSize();
     auto young_shared_space_size = Runtime::GetOptions().GetYoungSharedSpaceSize();
+    ASSERT(young_space_size >= young_shared_space_size);
     auto tlabs_count_in_young_gen = (young_space_size - young_shared_space_size) / YOUNG_TLAB_SIZE;
     ASSERT(((young_space_size - young_shared_space_size) % YOUNG_TLAB_SIZE) == 0);
     ASSERT(YOUNG_ALLOC_MAX_SIZE <= YOUNG_TLAB_SIZE);
     ASSERT(tlabs_count_in_young_gen * YOUNG_TLAB_SIZE <= young_space_size);
 
-    // Because we construct BumpPointer Allocator after calling AllocArena method
-    auto young_pool = PoolManager::GetMmapMemPool()->AllocPool(
-        young_space_size, SpaceType::SPACE_TYPE_OBJECT, YoungGenAllocator::GetAllocatorType(), &young_gen_allocator_);
+    // TODO(aemelenko): Missed an allocator pointer
+    // because we construct BumpPointer Allocator after calling AllocArena method
+    auto young_pool = heap_spaces_.AllocAlonePoolForYoung(SpaceType::SPACE_TYPE_OBJECT,
+                                                          YoungGenAllocator::GetAllocatorType(), &young_gen_allocator_);
     young_gen_allocator_ = new (std::nothrow)
         YoungGenAllocator(std::move(young_pool), SpaceType::SPACE_TYPE_OBJECT, mem_stats, tlabs_count_in_young_gen);
     object_allocator_ = new (std::nothrow) ObjectAllocator(mem_stats);
@@ -429,12 +444,13 @@ ObjectAllocatorGen<MTMode>::ObjectAllocatorGen(MemStatsType *mem_stats, bool cre
     large_non_movable_object_allocator_ =
         new (std::nothrow) LargeObjectAllocator(mem_stats, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     mem_stats_ = mem_stats;
+    GetYoungRanges().push_back({0, 0});
 }
 
 template <MTModeT MTMode>
 ObjectAllocatorGen<MTMode>::~ObjectAllocatorGen()
 {
-    // Need to free the pool space when the allocator destroyed
+    // need to free the pool space when the allocator destroy
     young_gen_allocator_->VisitAndRemoveAllPools(
         [](void *mem, [[maybe_unused]] size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
     delete young_gen_allocator_;
@@ -463,6 +479,12 @@ bool ObjectAllocatorGen<MTMode>::IsAddressInYoungSpace(uintptr_t address)
 }
 
 template <MTModeT MTMode>
+bool ObjectAllocatorGen<MTMode>::IsIntersectedWithYoung(const MemRange &mem_range)
+{
+    return young_gen_allocator_->GetMemRange().IsIntersect(mem_range);
+}
+
+template <MTModeT MTMode>
 bool ObjectAllocatorGen<MTMode>::IsObjectInNonMovableSpace(const ObjectHeader *obj)
 {
     return non_movable_object_allocator_->ContainObject(obj);
@@ -475,24 +497,36 @@ bool ObjectAllocatorGen<MTMode>::HasYoungSpace()
 }
 
 template <MTModeT MTMode>
-MemRange ObjectAllocatorGen<MTMode>::GetYoungSpaceMemRange()
+const std::vector<MemRange> &ObjectAllocatorGen<MTMode>::GetYoungSpaceMemRanges()
 {
-    return young_gen_allocator_->GetMemRange();
+    return GetYoungRanges();
+}
+
+template <MTModeT MTMode>
+std::vector<MarkBitmap *> &ObjectAllocatorGen<MTMode>::GetYoungSpaceBitmaps()
+{
+    static std::vector<MarkBitmap *> ret;
+    LOG(FATAL, ALLOC) << "GetYoungSpaceBitmaps not applicable for ObjectAllocatorGen";
+    return ret;
 }
 
 template <MTModeT MTMode>
 void ObjectAllocatorGen<MTMode>::ResetYoungAllocator()
 {
     MemStatsType *mem_stats = mem_stats_;
-    Thread::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(
-        [&mem_stats](ManagedThread *thread) {
-            if (!PANDA_TRACK_TLAB_ALLOCATIONS && (thread->GetTLAB()->GetOccupiedSize() != 0)) {
-                mem_stats->RecordAllocateObject(thread->GetTLAB()->GetOccupiedSize(), SpaceType::SPACE_TYPE_OBJECT);
-            }
-            thread->ClearTLAB();
-            return true;
-        },
-        static_cast<unsigned int>(EnumerationFlag::ALL));
+    auto thread_callback = [&mem_stats](ManagedThread *thread) {
+        if (!PANDA_TRACK_TLAB_ALLOCATIONS && (thread->GetTLAB()->GetOccupiedSize() != 0)) {
+            mem_stats->RecordAllocateObject(thread->GetTLAB()->GetOccupiedSize(), SpaceType::SPACE_TYPE_OBJECT);
+        }
+        thread->ClearTLAB();
+        return true;
+    };
+    // NOLINTNEXTLINE(readability-braces-around-statements)
+    if constexpr (MTMode == MT_MODE_MULTI) {
+        Thread::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(thread_callback);
+    } else {  // NOLINT(readability-misleading-indentation)
+        thread_callback(Thread::GetCurrent()->GetVM()->GetAssociatedThread());
+    }
     young_gen_allocator_->Reset();
 }
 
@@ -511,7 +545,7 @@ size_t ObjectAllocatorGen<MTMode>::GetTLABMaxAllocSize()
 template <MTModeT MTMode>
 void ObjectAllocatorGen<MTMode>::IterateOverObjectsInRange(MemRange mem_range, const ObjectVisitor &object_visitor)
 {
-    // We need ensure that the mem range related to a card must be located in one allocator
+    // we need ensure that the mem range related to a card must be located in one allocator
     auto space_type = PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(ToVoidPtr(mem_range.GetStartAddress()));
     auto alloc_info = PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ToVoidPtr(mem_range.GetStartAddress()));
     auto *allocator = alloc_info.GetAllocatorHeaderAddr();
@@ -530,7 +564,7 @@ void ObjectAllocatorGen<MTMode>::IterateOverObjectsInRange(MemRange mem_range, c
                 large_object_allocator_->IterateOverObjectsInRange(
                     object_visitor, ToVoidPtr(mem_range.GetStartAddress()), ToVoidPtr(mem_range.GetEndAddress()));
             } else {
-                // If we reach this line, we may have an issue with multiVM CardTable iteration
+                // if we reach this line, we may have an issue with multiVM CardTable iteration
                 UNREACHABLE();
             }
             break;
@@ -539,7 +573,7 @@ void ObjectAllocatorGen<MTMode>::IterateOverObjectsInRange(MemRange mem_range, c
                 humongous_object_allocator_->IterateOverObjectsInRange(
                     object_visitor, ToVoidPtr(mem_range.GetStartAddress()), ToVoidPtr(mem_range.GetEndAddress()));
             } else {
-                // If we reach this line, we may have an issue with multiVM CardTable iteration
+                // if we reach this line, we may have an issue with multiVM CardTable iteration
                 UNREACHABLE();
             }
             break;
@@ -551,12 +585,12 @@ void ObjectAllocatorGen<MTMode>::IterateOverObjectsInRange(MemRange mem_range, c
                 large_non_movable_object_allocator_->IterateOverObjectsInRange(
                     object_visitor, ToVoidPtr(mem_range.GetStartAddress()), ToVoidPtr(mem_range.GetEndAddress()));
             } else {
-                // If we reach this line, we may have an issue with multiVM CardTable iteration
+                // if we reach this line, we may have an issue with multiVM CardTable iteration
                 UNREACHABLE();
             }
             break;
         default:
-            // If we reach this line, we may have an issue with multiVM CardTable iteration
+            // if we reach this line, we may have an issue with multiVM CardTable iteration
             UNREACHABLE();
             break;
     }
@@ -616,6 +650,18 @@ bool ObjectAllocatorGen<MTMode>::IsLive(const ObjectHeader *obj)
     }
 
     return false;
+}
+
+template <MTModeT MTMode>
+void ObjectAllocatorGen<MTMode>::UpdateSpaceData()
+{
+    GetYoungRanges().push_back(young_gen_allocator_->GetMemRange());
+}
+
+void ObjectAllocatorGenBase::InvalidateSpaceData()
+{
+    ranges_.clear();
+    young_bitmaps_.clear();
 }
 
 template class ObjectAllocatorGen<MT_MODE_SINGLE>;

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_FREELIST_ALLOCATOR_INL_H_
-#define PANDA_RUNTIME_MEM_FREELIST_ALLOCATOR_INL_H_
+#ifndef PANDA_MEM_FREELIST_ALLOCATOR_INL_H
+#define PANDA_MEM_FREELIST_ALLOCATOR_INL_H
 
 #include "libpandabase/utils/logger.h"
 #include "runtime/mem/alloc_config.h"
@@ -32,7 +31,7 @@ FreeListAllocator<AllocConfigT, LockConfigT>::FreeListAllocator(MemStatsType *me
 {
     LOG_FREELIST_ALLOCATOR(DEBUG) << "Initializing FreeListAllocator";
     ASAN_POISON_MEMORY_REGION(&segregated_list_, sizeof(segregated_list_));
-    LOG_FREELIST_ALLOCATOR(INFO) << "Initializing FreeListAllocator finished";
+    LOG_FREELIST_ALLOCATOR(DEBUG) << "Initializing FreeListAllocator finished";
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -40,13 +39,14 @@ FreeListAllocator<AllocConfigT, LockConfigT>::~FreeListAllocator()
 {
     LOG_FREELIST_ALLOCATOR(DEBUG) << "Destroying FreeListAllocator";
     ASAN_UNPOISON_MEMORY_REGION(&segregated_list_, sizeof(segregated_list_));
-    LOG_FREELIST_ALLOCATOR(INFO) << "Destroying FreeListAllocator finished";
+    LOG_FREELIST_ALLOCATOR(DEBUG) << "Destroying FreeListAllocator finished";
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+template <bool need_lock>
 void *FreeListAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Alignment align)
 {
-    os::memory::WriteLockHolder wlock(alloc_free_lock_);
+    os::memory::WriteLockHolder<LockConfigT, need_lock> wlock(alloc_free_lock_);
     LOG_FREELIST_ALLOCATOR(DEBUG) << "Try to allocate object with size " << std::dec << size;
     size_t alloc_size = size;
     if (alloc_size < FREELIST_ALLOCATOR_MIN_SIZE) {
@@ -116,10 +116,10 @@ void *FreeListAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Alignment
             memory_block->SetPaddingSize(padding_size);
         }
     }
-    LOG_FREELIST_ALLOCATOR(INFO) << "Allocated memory at addr " << std::hex << ToVoidPtr(memory_pointer);
+    LOG_FREELIST_ALLOCATOR(DEBUG) << "Allocated memory at addr " << std::hex << ToVoidPtr(memory_pointer);
     {
         AllocConfigT::OnAlloc(memory_block->GetSize(), type_allocation_, mem_stats_);
-        // It is not the object size itself, cause we can't compute it from MemoryBlockHeader structure at Free call.
+        // It is not the object size itself, because we can't compute it from MemoryBlockHeader structure at Free call.
         // It is an approximation.
         size_t current_size =
             ToUintPtr(memory_block) + memory_block->GetSize() + sizeof(MemoryBlockHeader) - memory_pointer;
@@ -157,7 +157,7 @@ void FreeListAllocator<AllocConfigT, LockConfigT>::FreeUnsafe(void *mem)
                                   << std::dec << memory_header->GetSize() << " (probably with padding)";
     {
         AllocConfigT::OnFree(memory_header->GetSize(), type_allocation_, mem_stats_);
-        // It is not the object size itself, cause we can't compute it from MemoryBlockHeader structure.
+        // It is not the object size itself, because we can't compute it from MemoryBlockHeader structure.
         // It is an approximation.
         size_t current_size =
             ToUintPtr(memory_header) + memory_header->GetSize() + sizeof(MemoryBlockHeader) - ToUintPtr(mem);
@@ -177,12 +177,14 @@ void FreeListAllocator<AllocConfigT, LockConfigT>::FreeUnsafe(void *mem)
         AllocConfigT::RemoveFromCrossingMap(mem, current_size, next_object, prev_object, prev_size);
     }
     memory_header->SetUnused();
+    memory_header->SetCommonHeader();
     FreeListHeader *new_free_list_element = TryToCoalescing(memory_header);
     ASAN_POISON_MEMORY_REGION(new_free_list_element, new_free_list_element->GetSize() + sizeof(MemoryBlockHeader));
     AddToSegregatedList(new_free_list_element);
-    LOG_FREELIST_ALLOCATOR(INFO) << "Freed memory at addr " << std::hex << mem;
+    LOG_FREELIST_ALLOCATOR(DEBUG) << "Freed memory at addr " << std::hex << mem;
 }
 
+// TODO(aemelenko): We can create a mutex for each pool to increase performance,
 // but it requires pool alignment restriction
 // (we must compute memory pool header addr from a memory block addr stored inside it)
 
@@ -222,6 +224,7 @@ template <typename AllocConfigT, typename LockConfigT>
 void FreeListAllocator<AllocConfigT, LockConfigT>::Collect(const GCObjectVisitor &death_checker_fn)
 {
     LOG_FREELIST_ALLOCATOR(DEBUG) << "Collecting started";
+    // TODO(aemelenko): Looks like we can unlock alloc_free_lock_ for not dead objects during collection
     IterateOverObjects([&](ObjectHeader *mem) {
         if (death_checker_fn(mem) == ObjectStatus::DEAD_OBJECT) {
             LOG(DEBUG, GC) << "DELETE OBJECT " << GetDebugInfoAboutObject(mem);
@@ -279,11 +282,11 @@ void FreeListAllocator<AllocConfigT, LockConfigT>::IterateOverObjects(const Obje
 template <typename AllocConfigT, typename LockConfigT>
 bool FreeListAllocator<AllocConfigT, LockConfigT>::AddMemoryPool(void *mem, size_t size)
 {
-    // Lock alloc/free cause we add new block to segregated list here.
+    // Lock alloc/free because we add new block to segregated list here.
     os::memory::WriteLockHolder wlock(alloc_free_lock_);
     ASSERT(mem != nullptr);
-    LOG_FREELIST_ALLOCATOR(INFO) << "Add memory pool to FreeListAllocator from  " << std::hex << mem << " with size "
-                                 << std::dec << size;
+    LOG_FREELIST_ALLOCATOR(DEBUG) << "Add memory pool to FreeListAllocator from  " << std::hex << mem << " with size "
+                                  << std::dec << size;
     ASSERT((ToUintPtr(mem) & (sizeof(MemoryBlockHeader) - 1)) == 0U);
     auto mempool_header = static_cast<MemoryPoolHeader *>(mem);
     if (mempool_head_ == nullptr) {
@@ -327,7 +330,6 @@ void FreeListAllocator<AllocConfigT, LockConfigT>::VisitAndRemoveAllPools(const 
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename MemVisitor>
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_DECL_PARENTHESIS_PARAM_TYPE)
 void FreeListAllocator<AllocConfigT, LockConfigT>::VisitAndRemoveFreePools(const MemVisitor &mem_visitor)
 {
     // Lock everything to avoid race condition.
@@ -384,6 +386,7 @@ void FreeListAllocator<AllocConfigT, LockConfigT>::IterateOverObjectsInRange(con
     LOG_FREELIST_ALLOCATOR(DEBUG) << "FreeListAllocator::IterateOverObjectsInRange for range [" << std::hex
                                   << left_border << ", " << right_border << "]";
     ASSERT(ToUintPtr(right_border) >= ToUintPtr(left_border));
+    // TODO(aemelenko): These are temporary asserts because we can't do anything
     // if the range crosses different allocators memory pools
     ASSERT(ToUintPtr(right_border) - ToUintPtr(left_border) ==
            (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));
@@ -443,6 +446,7 @@ void FreeListAllocator<AllocConfigT, LockConfigT>::CoalesceMemoryBlocks(MemoryBl
                                   << "first block = " << std::hex << first_block << " with size " << std::dec
                                   << first_block->GetSize() << " ; second block = " << std::hex << second_block
                                   << " with size " << std::dec << second_block->GetSize();
+    ASSERT(first_block != nullptr);
     ASSERT(first_block->GetNextHeader() == second_block);
     ASSERT(first_block->CanBeCoalescedWithNext() || second_block->CanBeCoalescedWithPrev());
     first_block->Initialize(first_block->GetSize() + second_block->GetSize() + sizeof(MemoryBlockHeader),
@@ -451,6 +455,7 @@ void FreeListAllocator<AllocConfigT, LockConfigT>::CoalesceMemoryBlocks(MemoryBl
         LOG_FREELIST_ALLOCATOR(DEBUG) << "CoalesceMemoryBlock: second_block was the last in a pool";
         first_block->SetLastBlockInPool();
     } else {
+        ASSERT(first_block->GetNextHeader() != nullptr);
         first_block->GetNextHeader()->SetPrevHeader(first_block);
     }
 }
@@ -468,6 +473,7 @@ freelist::MemoryBlockHeader *FreeListAllocator<AllocConfigT, LockConfigT>::Split
     if (memory_block->IsLastBlockInPool()) {
         second_block->SetLastBlockInPool();
     } else {
+        ASSERT(second_block->GetNextHeader() != nullptr);
         second_block->GetNextHeader()->SetPrevHeader(second_block);
     }
     memory_block->Initialize(first_block_size, memory_block->GetPrevHeader());
@@ -499,6 +505,7 @@ bool FreeListAllocator<AllocConfigT, LockConfigT>::AllocatedByFreeListAllocator(
 template <typename AllocConfigT, typename LockConfigT>
 bool FreeListAllocator<AllocConfigT, LockConfigT>::AllocatedByFreeListAllocatorUnsafe(void *mem)
 {
+    // TODO(aemelenko): Create more complex solution
     MemoryPoolHeader *current_pool = mempool_head_;
     while (current_pool != nullptr) {
         // This assert means that we asked about memory inside MemoryPoolHeader
@@ -523,6 +530,7 @@ freelist::FreeListHeader *FreeListAllocator<AllocConfigT, LockConfigT>::TryToCoa
         ASSERT(!memory_header->GetNextHeader()->IsUsed());
         LOG_FREELIST_ALLOCATOR(DEBUG) << "Coalesce with next block";
         auto next_free_list = static_cast<FreeListHeader *>(memory_header->GetNextHeader());
+        ASSERT(next_free_list != nullptr);
         // Pop this free list element from the list
         next_free_list->PopFromFreeList();
         // Combine these two blocks together
@@ -557,7 +565,8 @@ freelist::MemoryBlockHeader *FreeListAllocator<AllocConfigT, LockConfigT>::GetFr
                                   << align;
     size_t aligned_size = size;
     if (align != FREELIST_DEFAULT_ALIGNMENT) {
-        // Consider this:
+        // TODO(aemelenko): This is raw but fast solution with bigger fragmentation.
+        // It's better to add here this value, but I'm not 100% sure about all corner cases.
         // (GetAlignmentInBytes(align) + sizeof(MemoryBlockHeader) - GetAlignmentInBytes(FREELIST_DEFAULT_ALIGNMENT))
         aligned_size += (GetAlignmentInBytes(align) + sizeof(MemoryBlockHeader));
     }
@@ -616,26 +625,22 @@ freelist::FreeListHeader *FreeListAllocator<AllocConfigT, LockConfigT>::Segregat
             // and we need to iterate over the whole list
             FreeListHeader *current = head;
             while (current != nullptr) {
-                if (current->GetSize() < size) {
-                    current = current->GetNextFree();
-                    continue;
-                }
-
-                if (SEGREGATED_LIST_FAST_EXTRACT) {
-                    suitable_block = current;
-                    break;
-                }
-
-                if (suitable_block != nullptr) {
-                    suitable_block = current;
-                } else {
-                    if (suitable_block->GetSize() > current->GetSize()) {
+                if (current->GetSize() >= size) {
+                    if (SEGREGATED_LIST_FAST_EXTRACT) {
                         suitable_block = current;
+                        break;
+                    } else {  // NOLINT(readability-else-after-return)
+                        if (suitable_block != nullptr) {
+                            suitable_block = current;
+                        } else {
+                            if (suitable_block->GetSize() > current->GetSize()) {
+                                suitable_block = current;
+                            }
+                        }
+                        if (suitable_block->GetSize() == size) {
+                            break;
+                        }
                     }
-                }
-
-                if (suitable_block->GetSize() == size) {
-                    break;
                 }
                 current = current->GetNextFree();
             }
@@ -754,10 +759,9 @@ bool FreeListAllocator<AllocConfigT, LockConfigT>::IsLive(const ObjectHeader *ob
     // for avoid iteration over all pools in allocator
     auto mem_pool_header =
         static_cast<MemoryPoolHeader *>(PoolManager::GetMmapMemPool()->GetStartAddrPoolForAddr(obj_mem));
-    ASSERT(PoolManager::GetMmapMemPool()
-               ->GetAllocatorInfoForAddr(static_cast<void *>(mem_pool_header))
-               .GetAllocatorHeaderAddr()  // CODECHECK-NOLINT(C_RULE_ID_INDENT_CHECK)
-           == static_cast<const void *>(this));
+    [[maybe_unused]] auto alloc_info =
+        PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(static_cast<void *>(mem_pool_header));
+    ASSERT(alloc_info.GetAllocatorHeaderAddr() == static_cast<const void *>(this));
     MemoryBlockHeader *current_mem_header = mem_pool_header->GetFirstMemoryHeader();
     while (current_mem_header != nullptr) {
         if (current_mem_header->IsUsed()) {
@@ -774,4 +778,4 @@ bool FreeListAllocator<AllocConfigT, LockConfigT>::IsLive(const ObjectHeader *ob
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_FREELIST_ALLOCATOR_INL_H_
+#endif  // PANDA_MEM_FREELIST_ALLOCATOR_INL_H

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_RENDEZVOUS_H_
-#define PANDA_RUNTIME_MEM_RENDEZVOUS_H_
+#ifndef PANDA_RUNTIME_MEM_RENDEZVOUS_H
+#define PANDA_RUNTIME_MEM_RENDEZVOUS_H
 
 #include <atomic>
 
@@ -25,7 +24,7 @@
 
 namespace panda {
 
-/** Meeting point for all java threads.
+/** Meeting point for all managed threads.
  * High level plan:
  *      * Check if there's already a main thread (running_)
  *      * If there is, wait until we get woken up
@@ -93,4 +92,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_MEM_RENDEZVOUS_H_
+#endif  // PANDA_RUNTIME_MEM_RENDEZVOUS_H

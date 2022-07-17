@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_RUNSLOTS_ALLOCATOR_H_
-#define PANDA_RUNTIME_MEM_RUNSLOTS_ALLOCATOR_H_
+#ifndef PANDA_RUNTIME_MEM_RUNSLOTS_ALLOCATOR_H
+#define PANDA_RUNTIME_MEM_RUNSLOTS_ALLOCATOR_H
 
 #include <algorithm>
 #include <array>
@@ -82,7 +81,7 @@ public:
     template <typename T>
     [[nodiscard]] T *AllocArray(size_t arr_length);
 
-    template <bool disable_use_free_runslots = false>
+    template <bool need_lock = true, bool disable_use_free_runslots = false>
     [[nodiscard]] void *Alloc(size_t size, Alignment align = DEFAULT_ALIGNMENT);
 
     void Free(void *mem);
@@ -254,6 +253,7 @@ private:
     public:
         explicit MemPoolManager();
 
+        template <bool need_lock = true>
         RunSlotsType *GetNewRunSlots(size_t slots_size);
 
         bool AddNewMemoryPool(void *mem, size_t size);
@@ -414,6 +414,7 @@ private:
 
     bool AllocatedByRunSlotsAllocatorUnsafe(void *object);
 
+    template <bool need_lock = true>
     RunSlotsType *CreateNewRunSlotsFromMemory(size_t slots_size);
 
     // Add one to the array size to just use the size (power of two) for RunSlots list without any modifications
@@ -440,6 +441,7 @@ template <typename AllocConfigT, typename LockConfigT>
 template <typename T>
 T *RunSlotsAllocator<AllocConfigT, LockConfigT>::AllocArray(size_t arr_length)
 {
+    // TODO(aemelenko): Very dirty hack. If you want to fix it, you must change RunSlotsAllocatorAdapter::max_size() too
     return static_cast<T *>(Alloc(sizeof(T) * arr_length));
 }
 
@@ -447,4 +449,4 @@ T *RunSlotsAllocator<AllocConfigT, LockConfigT>::AllocArray(size_t arr_length)
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_RUNSLOTS_ALLOCATOR_H_
+#endif  // PANDA_RUNTIME_MEM_RUNSLOTS_ALLOCATOR_H

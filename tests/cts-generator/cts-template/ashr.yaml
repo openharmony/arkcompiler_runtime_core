@@ -93,32 +93,26 @@ tests:
               - "-1"
               - "0"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "0x7FFFFFFF"
               - "0"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "0x80000000"
               - "1"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "-0x7FFFFFFF"
               - "0"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "-0x80000000"
               - "1"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "0xFFFFFFFF"
               - "0"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "-0xFFFFFFFF"
               - "0"
@@ -150,27 +144,21 @@ tests:
           - values:
               - "-1"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "0x7FFFFFFF"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "0x80000000"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "-0x7FFFFFFF"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "-0x80000000"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "0xFFFFFFFF"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "-0xFFFFFFFF"
 
@@ -205,32 +193,26 @@ tests:
               - "-1"
               - "0x0"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "0x7FFFFFFF"
               - "0x0"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "0x80000000"
               - "0x7FFFFFFF"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "-0x7FFFFFFF"
               - "0x3FFFFFFF"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "-0x80000000"
               - "0x7FFFFFFF"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "0xFFFFFFFF"
               - "0x0"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "-0xFFFFFFFF"
               - "0x3FFFFFFF"
@@ -266,39 +248,33 @@ tests:
               - "-1"
               - "0xFFFFFFFF"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "0x7FFFFFFF"
               - "0xFFFFFFFF"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "0x80000000"
               - "0x80000000"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "-0x7FFFFFFF"
               - "0xC0000000"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "-0x80000000"
               - "0x80000000"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "0xFFFFFFFF"
               - "0xFFFFFFFF"
             bugid: ['1387']
-            tags: ["clang_release_sanitizer_jit"]
           - values:
               - "-0xFFFFFFFF"
               - "0xC0000000"
 
       - file-name: "vals"
         bugid: ['1387']
-        tags: ['clang_release_sanitizer_jit', 'tsan']
+        tags: ['tsan']
         isa:
           instructions:
             - sig: ashr v1:in:i32, v2:in:i32
@@ -327,7 +303,6 @@ tests:
               - "0xC85A6FD0"
               - "0xD6D79891"
               - "0xFFFFE42D"
-              -
           - values:
               - "0x64A99B3C"
               - "0x97FC66F9"
@@ -364,7 +339,7 @@ tests:
       - file-name: "vals_mod32_1"
         bugid: ['1324', '2075']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: ashr v1:in:i32, v2:in:i32
@@ -424,34 +399,149 @@ tests:
             runner-options:
               - compile-failure
 
-      - file-name: "type"
-        bugid: ["964", "966", "2075"]
-        tags: ["verifier"]
+      - file-name: type
+        isa:
+          verification:
+            - v1_type
+            - v2_type
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
+        header-template: []
+        code-template: |
+          #
+          .record A {}
+          .record B {}
+          .record panda.String <external>
+          .record panda.Object <external>
+          .function i32 main() {
+              %s
+              *s
+              ashr v0, v1
+        check-type: exit-positive
+        description: Check 'ashr' with incorrect register types.
+        template-cases:
+          - values:
+              - movi v0, 0
+            exclude: [val]
+          - values:
+              - movi.64 v0, 0
+          - values:
+              - fmovi v0, 0
+            bugid: ['7315']
+          - values:
+              - fmovi.64 v0, 0
+          - values:
+              - |
+                #
+                    lda.type B
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type B[]
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type panda.String
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    lda.type panda.Object
+                    sta.obj v0
+          - values:
+              - |
+                #
+                    movi v0, 10
+                    newarr v0, v0, i32[]
+          - values:
+              - mov.null v0
+        cases:
+          - values:
+              - movi v1, 0
+            id: val
+          - values:
+              - movi.64 v1, 0
+          - values:
+              - fmovi v1, 0
+            bugid: ['7315']
+          - values:
+              - fmovi.64 v1, 0
+          - values:
+              - |
+                #
+                    lda.type A
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    lda.type A[]
+                    sta.obj v1
+
+          - values:
+              - |
+                #
+                    lda.type panda.String
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    lda.type panda.Object
+                    sta.obj v1
+          - values:
+              - |
+                #
+                    movi v1, 10
+                    newarr v1, v1, f64[]
+          - values:
+              - mov.null v1
+
+
+      - file-name: uninitialized_regs
         isa:
           instructions:
             - sig: ashr v1:in:i32, v2:in:i32
               acc: out:i32
-              prefix: bit
-              format: [pref_op_v1_4_v2_4]
-          verification:
-            - v1_type
-            - v2_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+              format: [op_v1_4_v2_4]
+        description: Check 'ashr' with uninitialized registers.
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
-          #
-              %s
-              %s
-              ashr v0, v1
-              ldai 0
-        check-type: no-check
-        description: Check ashr with incorrect registers type.
-        cases:
+            #
+                %s
+                *s
+                ashr %s, *s
+        check-type: exit-positive
+        template-cases:
           - values:
-              - mov.null v0
-              - movi v1, 0
+              - ''
+              - v0
           - values:
               - movi v0, 0
-              - mov.null v1
+              - v0
+            exclude: [init]
           - values:
-              - mov.null v0
-              - mov.null v1
+              - ''
+              - v7
+          - values:
+              - ''
+              - v15
+          - values:
+              - 'movi v15, 0'
+              - v15
+            exclude: [init]
+        cases:
+          - values:
+              - ''
+              - v1
+          - values:
+              - movi v1, 0
+              - v1
+            id: init
+          - values:
+              - ''
+              - v8
+          - values:
+              - ''
+              - v14

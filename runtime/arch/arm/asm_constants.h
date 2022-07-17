@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@
 // |   |        |  d9.0 |
 // |   |        |  d8.1 |
 // |   |        |  d8.0 |
-// |   |        |   r11 |
 // |   |        |   r10 |
 // |   |        |    r9 |
 // |   |        |    r8 |
@@ -53,7 +52,7 @@
 // +---+--------+-------+ <-- CFRAME_ARM_SOFTFP_CALLEE_REGS_OFFSET
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CFRAME_ARM_SOFTFP_CALLEE_REGS_COUNT (16 + 8) /* [d8..d15] + [r4..r11] */
+#define CFRAME_ARM_SOFTFP_CALLEE_REGS_COUNT (16 + 7) /* [d8..d15] + [r4..r10] */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CFRAME_ARM_SOFTFP_CALLEE_REGS_OFFSET (4 * (CFRAME_CALLEE_REGS_START_SLOT + CFRAME_ARM_SOFTFP_CALLEE_REGS_COUNT))
 
@@ -83,7 +82,6 @@
 // |   |        |  d9.0 |
 // |   |        |  d8.1 |
 // |   |        |  d8.0 |
-// |   |        |   r11 |
 // |   |        |   r10 |
 // |   |        |    r9 |
 // |   |        |    r8 |
@@ -94,7 +92,7 @@
 // +---+--------+-------+ <-- CFRAME_ARM_HARD_CALLEE_REGS_OFFSET
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CFRAME_ARM_HARD_CALLEE_REGS_COUNT (16 + 8) /* [d8..d15] + [r4..r11] */
+#define CFRAME_ARM_HARD_CALLEE_REGS_COUNT (16 + 7) /* [d8..d15] + [r4..r10] */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CFRAME_ARM_HARD_CALLEE_REGS_OFFSET (4 * (CFRAME_CALLEE_REGS_START_SLOT + CFRAME_ARM_HARD_CALLEE_REGS_COUNT))
 

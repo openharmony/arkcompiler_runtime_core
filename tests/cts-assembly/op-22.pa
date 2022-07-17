@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #Assert that operation ucmp.64 works fine
-.function u1 main(){
+.function i32 main(){
     movi.64 v0, 5
     movi.64 v1, 7
     lda.64 v0

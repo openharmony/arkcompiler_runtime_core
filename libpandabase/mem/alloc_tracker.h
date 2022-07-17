@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_LIBPANDABASE_MEM_ALLOC_TRACKER_H_
-#define PANDA_LIBPANDABASE_MEM_ALLOC_TRACKER_H_
+#ifndef PANDA_RUNTIME_MEM_ALLOC_TRACKER_H
+#define PANDA_RUNTIME_MEM_ALLOC_TRACKER_H
 
 #include <list>
 #include <map>
@@ -26,6 +25,8 @@
 #include "space.h"
 #include "os/mutex.h"
 #include "utils/span.h"
+
+WEAK_FOR_LTO_START
 
 namespace panda {
 
@@ -96,9 +97,6 @@ private:
     class AllocInfo {
     public:
         AllocInfo(size_t alloc_number, size_t size) : alloc_number_(alloc_number), size_(size) {}
-        ~AllocInfo() = default;
-        DEFAULT_COPY_SEMANTIC(AllocInfo);
-        DEFAULT_MOVE_SEMANTIC(AllocInfo);
 
         size_t GetAllocNumber() const
         {
@@ -214,4 +212,6 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_ALLOC_TRACKER_H_
+WEAK_FOR_LTO_END
+
+#endif  // PANDA_RUNTIME_MEM_ALLOC_TRACKER_H

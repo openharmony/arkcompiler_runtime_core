@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ASSEMBLY_PARSER_H_
-#define PANDA_ASSEMBLER_ASSEMBLY_PARSER_H_
+#ifndef _PANDA_ASSEMBLER_PARSER_HPP
+#define _PANDA_ASSEMBLER_PARSER_HPP
 
 #include <iostream>
 #include <memory>
@@ -90,6 +90,8 @@ private:
     Metadata *metadata_ = nullptr;
     Context context_; /* token iterator */
     panda::pandasm::Record *curr_record_ = nullptr;
+    panda::pandasm::LiteralArray *curr_array_ = nullptr;
+    panda::pandasm::LiteralArray::Literal *curr_array_elem_ = nullptr;
     panda::pandasm::Function *curr_func_ = nullptr;
     panda::pandasm::Ins *curr_ins_ = nullptr;
     panda::pandasm::Field *curr_fld_ = nullptr;
@@ -98,7 +100,9 @@ private:
     panda::pandasm::ErrorList war_;
     bool open_ = false; /* flag of being in a code section */
     bool record_def_ = false;
+    bool array_def_ = false;
     bool func_def_ = false;
+    static constexpr uint32_t INTRO_CONST_ARRAY_LITERALS_NUMBER = 2;
 
     inline Error GetError(const std::string &mess = "", Error::ErrorType err = Error::ErrorType::ERR_NONE,
                           int8_t shift = 0, int token_shift = 0, const std::string &add_mess = "") const
@@ -138,6 +142,7 @@ private:
     bool ParseFunctionCode();
     bool ParseFunctionInstruction();
     bool ParseFunctionFullSign();
+    bool UpdateFunctionName();
     bool ParseFunctionReturn();
     bool ParseFunctionArg();
     bool ParseFunctionArgComma(bool &comma);
@@ -154,11 +159,25 @@ private:
     bool ParseRecordField();
     bool ParseRecordName();
     bool RecordValidName();
+    bool ParseArrayFullSign();
+    bool IsConstArray();
+    bool ParseArrayName();
+    bool ArrayValidName();
+    bool ArrayElementsValidNumber();
+    bool ParseArrayElements();
+    bool ParseArrayElement();
+    bool ParseArrayElementType();
+    bool ParseArrayElementValue();
+    bool ParseArrayElementValueInteger();
+    bool ParseArrayElementValueFloat();
+    bool ParseArrayElementValueString();
     bool ParseFieldName();
     bool ParseFieldType();
     std::optional<std::string> ParseStringLiteral();
     int64_t MnemonicToBuiltinId();
 
+    bool ParseInteger(int64_t *value);
+    bool ParseFloat(double *value, bool is_64bit);
     bool ParseOperandVreg();
     bool ParseOperandComma();
     bool ParseOperandInteger();
@@ -169,15 +188,20 @@ private:
     bool ParseOperandType(Type::VerificationType ver_type);
     bool ParseOperandNone();
     bool ParseOperandString();
+    bool ParseOperandLiteralArray();
     bool ParseOperandCall();
+    bool ParseOperandSignature(std::string *sign);
+    bool ParseOperandSignatureTypesList(std::string *sign);
     bool ParseOperandBuiltinMnemonic();
 
     void SetFunctionInformation();
     void SetRecordInformation();
+    void SetArrayInformation();
     void SetOperationInformation();
     void ParseAsCatchall(const std::vector<Token> &tokens);
     void ParseAsLanguage(const std::vector<Token> &tokens, bool &is_lang_parsed, bool &is_first_statement);
     void ParseAsRecord(const std::vector<Token> &tokens);
+    void ParseAsArray(const std::vector<Token> &tokens);
     void ParseAsFunction(const std::vector<Token> &tokens);
     void ParseAsBraceRight(const std::vector<Token> &tokens);
     bool ParseAfterLine(bool &is_first_statement);
@@ -186,6 +210,7 @@ private:
     void ParseResetTables();
     void ParseResetFunctionTable();
     void ParseResetRecordTable();
+    void ParseResetArrayTable();
     void ParseAsLanguageDirective();
     Function::CatchBlock PrepareCatchBlock(bool is_catchall, size_t size, size_t catchall_tokens_num,
                                            size_t catch_tokens_num);
@@ -248,4 +273,4 @@ inline auto Parser::TryEmplaceInTable(bool flag, std::unordered_map<std::string,
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_ASSEMBLY_PARSER_H_
+#endif  // !_PANDA_ASSEMBLER_PARSER_HPP

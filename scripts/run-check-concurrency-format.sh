@@ -25,6 +25,11 @@ if [[ "$FILE" == *"libpandabase/os"* ]]; then
     exit 0
 fi
 
+if [[ "$FILE" == *"libopenjdkpandavm/"* ]]; then
+    # Do not check files with primitives wrappers.
+    exit 0
+fi
+
 if [[ "$FILE" == *"runtime/tests"* ]]; then
     # Usage of this_thread::sleep
     exit 0
@@ -32,6 +37,21 @@ fi
 
 if [[ "$FILE" == *"runtime/profilesaver"* ]]; then
     # Usage of this_thread::sleep
+    exit 0
+fi
+
+if [[ "$FILE" == *"runtime/methodtrace/trace"* ]]; then
+    # Usage of specific UNIX functions: clock_gettime(), pthread_getcpuclockid()
+    exit 0
+fi
+
+if [[ "$FILE" == *"java/runtime/java_signal_catcher.cpp"* ]]; then
+    # Usage of specific UNIX functions: pthread_kill()
+    exit 0
+fi
+
+if [[ "$FILE" == *"compiler/optimizer/code_generator/disassembly.cpp"* ]]; then
+    # Usage of std::call_once
     exit 0
 fi
 

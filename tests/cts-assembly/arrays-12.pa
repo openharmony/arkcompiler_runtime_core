@@ -20,7 +20,7 @@
 
 # check ArrayIndexOutOfBoundsException in case of load from the array
 
-.function u1 main() {
+.function i32 main() {
     movi v0, 1
     newarr v0, v0, i32[]
     ldai 2

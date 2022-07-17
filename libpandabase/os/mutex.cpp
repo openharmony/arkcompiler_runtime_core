@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,29 @@
  */
 
 #include "mutex.h"
+
 #include "utils/logger.h"
 
 #include <cstring>
+
 #include <ctime>
 
 namespace panda::os::memory {
-const int64_t MILLISECONDS_PER_SEC = 1000;
-const int64_t NANOSECONDS_PER_MILLISEC = 1000000;
-const int64_t NANOSECONDS_PER_SEC = 1000000000;
+
+std::atomic_bool Mutex::no_check_for_deadlock_ = false;
 
 ALWAYS_INLINE inline void FatalIfError(const char *f, int rc)
 {
     if (rc != 0) {
-        LOG(FATAL, COMMON) << f << " failed: " << Error(rc).ToString();
+#ifndef PANDA_TARGET_MOBILE
+        if (!Mutex::DoNotCheckOnDeadlock()) {
+#endif  // PANDA_TARGET_MOBILE
+            LOG(FATAL, COMMON) << f << " failed: " << Error(rc).ToString();
+#ifndef PANDA_TARGET_MOBILE
+        } else {
+            LOG(WARNING, COMMON) << f << " failed: deadlock detected";
+        }
+#endif  // PANDA_TARGET_MOBILE
     }
 }
 
@@ -172,8 +181,11 @@ struct timespec ConvertTime(uint64_t ms, uint64_t ns, bool is_absolute)
     if (!is_absolute) {
         clock_gettime(CLOCK_REALTIME, &abs_time);
     }
-    auto seconds = static_cast<time_t>(ms / MILLISECONDS_PER_SEC);
-    auto nanoseconds = static_cast<time_t>((ms % MILLISECONDS_PER_SEC) * NANOSECONDS_PER_MILLISEC + ns);
+    const int64_t MILLISECONDS_PER_SEC = 1000;
+    const int64_t NANOSECONDS_PER_MILLISEC = 1000000;
+    const int64_t NANOSECONDS_PER_SEC = 1000000000;
+    time_t seconds = ms / MILLISECONDS_PER_SEC;
+    time_t nanoseconds = (ms % MILLISECONDS_PER_SEC) * NANOSECONDS_PER_MILLISEC + ns;
     abs_time.tv_sec += seconds;
     abs_time.tv_nsec += nanoseconds;
     if (abs_time.tv_nsec >= NANOSECONDS_PER_SEC) {
@@ -196,4 +208,5 @@ bool ConditionVariable::TimedWait(Mutex *mutex, uint64_t ms, uint64_t ns, bool i
     FatalIfError("pthread_cond_timedwait", rc);
     return false;
 }
+
 }  // namespace panda::os::memory

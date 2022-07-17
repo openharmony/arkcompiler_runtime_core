@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "runtime/mem/gc/gc_scoped_phase.h"
 
 #include "runtime/mem/gc/gc.h"
@@ -29,12 +28,14 @@ GCScopedPhase::GCScopedPhase(MemStatsType *mem_stats, GC *gc, GCPhase new_phase)
     old_phase_ = gc_->GetGCPhase();
     gc_->SetGCPhase(phase_);
     LOG(DEBUG, GC) << "== " << GetGCName() << "::" << GetPhaseName(phase_) << " started ==";
+    gc_->FireGCPhaseStarted(new_phase);
     mem_stats_->RecordGCPhaseStart(phase_);
 }
 
 GCScopedPhase::~GCScopedPhase()
 {
     mem_stats_->RecordGCPhaseEnd();
+    gc_->FireGCPhaseFinished(phase_);
     gc_->SetGCPhase(old_phase_);
     gc_->EndTracePoint();
     LOG(DEBUG, GC) << "== " << GetGCName() << "::" << GetPhaseName(phase_) << " finished ==";

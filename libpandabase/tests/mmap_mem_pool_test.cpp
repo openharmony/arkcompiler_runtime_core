@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,12 +45,12 @@ protected:
     }
 
 private:
-    void SetupMemConfig(size_t object_pool_size, size_t internal_size, size_t compiler_size, size_t code_size) const
+    void SetupMemConfig(size_t object_pool_size, size_t internal_size, size_t compiler_size, size_t code_size)
     {
         mem::MemConfig::Initialize(object_pool_size, internal_size, compiler_size, code_size);
     }
 
-    void FinalizeMemConfig() const
+    void FinalizeMemConfig()
     {
         mem::MemConfig::Finalize();
     }
@@ -61,31 +61,39 @@ private:
 TEST_F(MMapMemPoolTest, HeapOOMTest)
 {
     MmapMemPool *memPool = CreateMMapMemPool(4_MB);
-    ASSERT_TRUE(
-        memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR).GetMem() !=
-        nullptr);
-    ASSERT_TRUE(
-        memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR).GetMem() ==
-        nullptr);
-    ASSERT_TRUE(memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR)
-                    .GetMem() == nullptr);
-    ASSERT_TRUE(memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR).GetMem() ==
-                nullptr);
+
+    auto pool1 = memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
+    ASSERT_TRUE(pool1.GetMem() != nullptr);
+    auto pool2 = memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
+    ASSERT_TRUE(pool2.GetMem() == nullptr);
+    auto pool3 = memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
+    ASSERT_TRUE(pool3.GetMem() == nullptr);
+    auto pool4 = memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
+    ASSERT_TRUE(pool4.GetMem() == nullptr);
+
+    memPool->FreePool(pool1.GetMem(), pool1.GetSize());
 }
 
 TEST_F(MMapMemPoolTest, HeapOOMAndAllocInOtherSpacesTest)
 {
     MmapMemPool *memPool = CreateMMapMemPool(4_MB, 1_MB, 1_MB, 1_MB);
-    ASSERT_TRUE(memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::BUMP_ALLOCATOR).GetMem() !=
-                nullptr);
-    ASSERT_TRUE(memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::BUMP_ALLOCATOR).GetMem() ==
-                nullptr);
-    ASSERT_TRUE(memPool->AllocPool(1_MB, SpaceType::SPACE_TYPE_COMPILER, AllocatorType::BUMP_ALLOCATOR).GetMem() !=
-                nullptr);
-    ASSERT_TRUE(memPool->AllocPool(1_MB, SpaceType::SPACE_TYPE_CODE, AllocatorType::BUMP_ALLOCATOR).GetMem() !=
-                nullptr);
-    ASSERT_TRUE(memPool->AllocPool(1_MB, SpaceType::SPACE_TYPE_INTERNAL, AllocatorType::BUMP_ALLOCATOR).GetMem() !=
-                nullptr);
+
+    auto pool1 = memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::BUMP_ALLOCATOR);
+    ASSERT_TRUE(pool1.GetMem() != nullptr);
+    auto pool2 = memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::BUMP_ALLOCATOR);
+    ASSERT_TRUE(pool2.GetMem() == nullptr);
+    auto pool3 = memPool->AllocPool(1_MB, SpaceType::SPACE_TYPE_COMPILER, AllocatorType::BUMP_ALLOCATOR);
+    ASSERT_TRUE(pool3.GetMem() != nullptr);
+    auto pool4 = memPool->AllocPool(1_MB, SpaceType::SPACE_TYPE_CODE, AllocatorType::BUMP_ALLOCATOR);
+    ASSERT_TRUE(pool4.GetMem() != nullptr);
+    auto pool5 = memPool->AllocPool(1_MB, SpaceType::SPACE_TYPE_INTERNAL, AllocatorType::BUMP_ALLOCATOR);
+    ASSERT_TRUE(pool5.GetMem() != nullptr);
+
+    // cleaning
+    memPool->FreePool(pool1.GetMem(), pool1.GetSize());
+    memPool->FreePool(pool3.GetMem(), pool3.GetSize());
+    memPool->FreePool(pool4.GetMem(), pool4.GetSize());
+    memPool->FreePool(pool5.GetMem(), pool5.GetSize());
 }
 
 TEST_F(MMapMemPoolTest, GetAllocatorInfoTest)
@@ -115,6 +123,10 @@ TEST_F(MMapMemPoolTest, GetAllocatorInfoTest)
     ASSERT_TRUE(ToUintPtr(memPool->GetStartAddrPoolForAddr(second_pool_pointer)) ==
                 ToUintPtr(pool_without_alloc_addr.GetMem()));
 
+    // cleaning
+    memPool->FreePool(pool_with_alloc_addr.GetMem(), pool_with_alloc_addr.GetSize());
+    memPool->FreePool(pool_without_alloc_addr.GetMem(), pool_without_alloc_addr.GetSize());
+
     delete allocator_addr;
 }
 
@@ -126,23 +138,30 @@ TEST_F(MMapMemPoolTest, CheckLimitsForInternalSpacesTest)
     Pool internal_pool = memPool->AllocPool(5_GB, SpaceType::SPACE_TYPE_COMPILER, AllocatorType::BUMP_ALLOCATOR);
     Pool code_pool = memPool->AllocPool(5_GB, SpaceType::SPACE_TYPE_CODE, AllocatorType::BUMP_ALLOCATOR);
     Pool compiler_pool = memPool->AllocPool(5_GB, SpaceType::SPACE_TYPE_INTERNAL, AllocatorType::BUMP_ALLOCATOR);
-    // Check that these pools have been created successfully
+    // Check that these pools has been created successfully
     ASSERT_TRUE(object_pool.GetMem() != nullptr);
     ASSERT_TRUE(internal_pool.GetMem() != nullptr);
     ASSERT_TRUE(code_pool.GetMem() != nullptr);
     ASSERT_TRUE(compiler_pool.GetMem() != nullptr);
-    // Check that part of internal pools are located in 64 bits address space
+    // Check that part of internal pools located in 64 bits address space
     ASSERT_TRUE((ToUintPtr(internal_pool.GetMem()) + internal_pool.GetSize() - 1U) >
                 std::numeric_limits<uint32_t>::max());
     ASSERT_TRUE((ToUintPtr(code_pool.GetMem()) + code_pool.GetSize() - 1U) > std::numeric_limits<uint32_t>::max());
     ASSERT_TRUE((ToUintPtr(compiler_pool.GetMem()) + compiler_pool.GetSize() - 1U) >
                 std::numeric_limits<uint32_t>::max());
+
+    // cleaning
+    memPool->FreePool(object_pool.GetMem(), object_pool.GetSize());
+    memPool->FreePool(internal_pool.GetMem(), internal_pool.GetSize());
+    memPool->FreePool(code_pool.GetMem(), code_pool.GetSize());
+    memPool->FreePool(compiler_pool.GetMem(), compiler_pool.GetSize());
 #endif
 }
 
 TEST_F(MMapMemPoolTest, PoolReturnTest)
 {
     MmapMemPool *memPool = CreateMMapMemPool(8_MB);
+
     auto pool1 = memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
     ASSERT_TRUE(pool1.GetMem() != nullptr);
     auto pool2 = memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
@@ -151,6 +170,7 @@ TEST_F(MMapMemPoolTest, PoolReturnTest)
     ASSERT_TRUE(pool3.GetMem() == nullptr);
     memPool->FreePool(pool1.GetMem(), pool1.GetSize());
     memPool->FreePool(pool2.GetMem(), pool2.GetSize());
+
     auto pool4 = memPool->AllocPool(6_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
     ASSERT_TRUE(pool4.GetMem() != nullptr);
     auto pool5 = memPool->AllocPool(1_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
@@ -160,8 +180,46 @@ TEST_F(MMapMemPoolTest, PoolReturnTest)
     memPool->FreePool(pool6.GetMem(), pool6.GetSize());
     memPool->FreePool(pool4.GetMem(), pool4.GetSize());
     memPool->FreePool(pool5.GetMem(), pool5.GetSize());
+
     auto pool7 = memPool->AllocPool(8_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
     ASSERT_TRUE(pool7.GetMem() != nullptr);
+    memPool->FreePool(pool7.GetMem(), pool7.GetSize());
+}
+
+TEST_F(MMapMemPoolTest, CheckEnoughPoolsTest)
+{
+    static constexpr size_t POOL_SIZE = 4_MB;
+    MmapMemPool *memPool = CreateMMapMemPool(10_MB);
+
+    ASSERT_TRUE(memPool->HaveEnoughPoolsInObjectSpace(2, POOL_SIZE));
+    ASSERT_FALSE(memPool->HaveEnoughPoolsInObjectSpace(3, POOL_SIZE));
+    auto pool1 = memPool->AllocPool(3_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
+    ASSERT_TRUE(memPool->HaveEnoughPoolsInObjectSpace(1, POOL_SIZE));
+    ASSERT_FALSE(memPool->HaveEnoughPoolsInObjectSpace(2, POOL_SIZE));
+    auto pool2 = memPool->AllocPool(1_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
+    memPool->FreePool(pool1.GetMem(), pool1.GetSize());
+    ASSERT_TRUE(memPool->HaveEnoughPoolsInObjectSpace(1, POOL_SIZE));
+    ASSERT_FALSE(memPool->HaveEnoughPoolsInObjectSpace(2, POOL_SIZE));
+    memPool->FreePool(pool2.GetMem(), pool2.GetSize());
+    ASSERT_TRUE(memPool->HaveEnoughPoolsInObjectSpace(2, POOL_SIZE));
+    ASSERT_FALSE(memPool->HaveEnoughPoolsInObjectSpace(3, POOL_SIZE));
+
+    auto pool3 = memPool->AllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
+    auto pool4 = memPool->AllocPool(1_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
+    ASSERT_TRUE(memPool->HaveEnoughPoolsInObjectSpace(1, POOL_SIZE));
+    ASSERT_FALSE(memPool->HaveEnoughPoolsInObjectSpace(2, POOL_SIZE));
+    memPool->FreePool(pool3.GetMem(), pool3.GetSize());
+    ASSERT_TRUE(memPool->HaveEnoughPoolsInObjectSpace(2, POOL_SIZE));
+    ASSERT_FALSE(memPool->HaveEnoughPoolsInObjectSpace(3, POOL_SIZE));
+    auto pool5 = memPool->AllocPool(5_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::HUMONGOUS_ALLOCATOR);
+    ASSERT_TRUE(memPool->HaveEnoughPoolsInObjectSpace(1, POOL_SIZE));
+    ASSERT_FALSE(memPool->HaveEnoughPoolsInObjectSpace(2, POOL_SIZE));
+    memPool->FreePool(pool5.GetMem(), pool5.GetSize());
+    ASSERT_TRUE(memPool->HaveEnoughPoolsInObjectSpace(2, POOL_SIZE));
+    ASSERT_FALSE(memPool->HaveEnoughPoolsInObjectSpace(3, POOL_SIZE));
+    memPool->FreePool(pool4.GetMem(), pool4.GetSize());
+    ASSERT_TRUE(memPool->HaveEnoughPoolsInObjectSpace(2, POOL_SIZE));
+    ASSERT_FALSE(memPool->HaveEnoughPoolsInObjectSpace(3, POOL_SIZE));
 }
 
 }  // namespace panda

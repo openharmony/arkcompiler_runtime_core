@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "verification/debug/config_load.h"
-#include "verification/debug/allowlist/allowlist.h"
-#include "verification/job_queue/job_queue.h"
-#include "verification/job_queue/job_fill.h"
+#include "verification/config/config_load.h"
+#include "verification/config/context/context.h"
+#include "verification/config/debug_breakpoint/breakpoint_private.h"
+#include "verification/config/whitelist/whitelist_private.h"
+#include "verification/jobs/thread_pool.h"
 #include "verification/cache/results_cache.h"
-#include "verification/util/invalid_ref.h"
+#include "verification/util/is_system.h"
 
 #include "events/events.h"
 #include "runtime/bridge/bridge.h"
@@ -41,10 +42,10 @@
 #include "libpandabase/os/mutex.h"
 #include "libpandafile/code_data_accessor-inl.h"
 #include "libpandafile/debug_data_accessor-inl.h"
+#include "libpandafile/debug_helpers.h"
 #include "libpandafile/file-inl.h"
 #include "libpandafile/line_number_program.h"
 #include "libpandafile/method_data_accessor-inl.h"
-#include "libpandafile/method_data_accessor.h"
 #include "libpandafile/proto_data_accessor-inl.h"
 #include "libpandafile/shorty_iterator.h"
 #include "runtime/handle_base-inl.h"
@@ -59,16 +60,49 @@ Method::Proto::Proto(const panda_file::File &pf, panda_file::File::EntityId prot
 
     pda.EnumerateTypes([this](panda_file::Type type) { shorty_.push_back(type); });
 
-    size_t ref_idx = 0;
-
-    for (auto &t : shorty_) {
-        if (t.IsPrimitive()) {
-            continue;
-        }
-
-        auto id = pda.GetReferenceType(ref_idx++);
+    auto ref_num = pda.GetRefNum();
+    for (size_t ref_idx = 0; ref_idx < ref_num; ++ref_idx) {
+        auto id = pda.GetReferenceType(ref_idx);
         ref_types_.emplace_back(utf::Mutf8AsCString(pf.GetStringData(id).data));
     }
+}
+
+bool Method::ProtoId::operator==(const Method::ProtoId &other) const
+{
+    if (&pf_ == &other.pf_) {
+        return proto_id_ == other.proto_id_;
+    }
+
+    panda_file::ProtoDataAccessor pda1(pf_, proto_id_);
+    panda_file::ProtoDataAccessor pda2(other.pf_, other.proto_id_);
+    return pda1.IsEqual(&pda2);
+}
+
+bool Method::ProtoId::operator==(const Proto &other) const
+{
+    const auto &shorties = other.GetShorty();
+    const auto &ref_types = other.GetRefTypes();
+
+    bool equal = true;
+    size_t shorty_idx = 0;
+    panda_file::ProtoDataAccessor pda(pf_, proto_id_);
+    pda.EnumerateTypes([&equal, &shorties, &shorty_idx](panda_file::Type type) {
+        equal = equal && shorty_idx < shorties.size() && type == shorties[shorty_idx];
+        ++shorty_idx;
+    });
+    if (!equal || shorty_idx != shorties.size() || pda.GetRefNum() != ref_types.size()) {
+        return false;
+    }
+
+    // check ref types
+    for (size_t ref_idx = 0; ref_idx < ref_types.size(); ++ref_idx) {
+        auto id = pda.GetReferenceType(ref_idx);
+        if (ref_types[ref_idx] != utf::Mutf8AsCString(pf_.GetStringData(id).data)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 std::string_view Method::Proto::GetReturnTypeDescriptor() const
@@ -110,26 +144,14 @@ std::string_view Method::Proto::GetReturnTypeDescriptor() const
     }
 }
 
-uint32_t Method::GetFullNameHashFromString(const uint8_t *str)
+uint32_t Method::GetFullNameHashFromString(const PandaString &str)
 {
-    return GetHash32String(str);
+    return GetHash32String(reinterpret_cast<const uint8_t *>(str.c_str()));
 }
 
-uint32_t Method::GetClassNameHashFromString(const uint8_t *str)
+uint32_t Method::GetClassNameHashFromString(const PandaString &str)
 {
-    return GetHash32String(str);
-}
-
-uint32_t Method::GetFullNameHash() const
-{
-    // NB: this function cannot be used in current unit tests, because
-    //     some unit tests are using underdefined method objects
-    ASSERT(panda_file_ != nullptr && file_id_.IsValid());
-    PandaString full_name {ClassHelper::GetName(GetClassName().data)};
-    full_name += "::";
-    full_name += utf::Mutf8AsCString(GetName().data);
-    auto hash = GetFullNameHashFromString(reinterpret_cast<const uint8_t *>(full_name.c_str()));
-    return hash;
+    return GetHash32String(reinterpret_cast<const uint8_t *>(str.c_str()));
 }
 
 Method::UniqId Method::CalcUniqId(const uint8_t *class_descr, const uint8_t *name)
@@ -143,80 +165,28 @@ Method::UniqId Method::CalcUniqId(const uint8_t *class_descr, const uint8_t *nam
 
 Method::Method(Class *klass, const panda_file::File *pf, panda_file::File::EntityId file_id,
                panda_file::File::EntityId code_id, uint32_t access_flags, uint32_t num_args, const uint16_t *shorty)
-    : stor_32_ {{}, access_flags, 0, num_args, 0},
-      stor_ptr_ {{}, klass, nullptr, nullptr},
+    : access_flags_(access_flags),
+      num_args_(num_args),
+      stor_16_pair_({0, 0}),
+      class_word_(static_cast<ClassHelper::classWordSize>(ToObjPtrType(klass))),
+      compiled_entry_point_(nullptr),
       panda_file_(pf),
+      pointer_(),
+
       file_id_(file_id),
       code_id_(code_id),
       shorty_(shorty)
 {
+    // Atomic with relaxed order reason: data race with native_pointer_ with no synchronization or ordering constraints
+    // imposed on other reads or writes NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+    pointer_.native_pointer_.store(nullptr, std::memory_order_relaxed);
     SetCompilationStatus(CompilationStage::NOT_COMPILED);
 }
 
 Value Method::Invoke(ManagedThread *thread, Value *args, bool proxy_call)
 {
-    return InvokeImpl<false>(thread, GetNumArgs(), args, proxy_call);
-}
-
-Value Method::InvokeDyn(ManagedThread *thread, uint32_t num_args, Value *args, bool proxy_call, void *data)
-{
-    return InvokeImpl<true>(thread, num_args, args, proxy_call, data);
-}
-
-Value Method::InvokeGen(ManagedThread *thread, const uint8_t *pc, Value acc, uint32_t num_actual_args, Value *args,
-                        void *data)
-{
-    Frame *current_frame = thread->GetCurrentFrame();
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_REDUNDANT_INIT)
-    Value res(static_cast<int64_t>(0));
-    panda_file::Type ret_type = GetReturnType();
-    if (!Verify()) {
-        auto ctx = Runtime::GetCurrent()->GetLanguageContext(*this);
-        panda::ThrowVerificationException(ctx, GetFullName());
-        if (ret_type.IsReference()) {
-            res = Value(nullptr);
-        } else {
-            res = Value(static_cast<int64_t>(0));
-        }
-    } else {
-        Span<Value> args_span(args, num_actual_args);
-        auto frame_deleter = [](Frame *frame) { FreeFrame(frame); };
-        PandaUniquePtr<Frame, FrameDeleter> frame(
-            CreateFrameWithActualArgs(num_actual_args, num_actual_args, this, current_frame), frame_deleter);
-
-        for (size_t i = 0; i < num_actual_args; i++) {
-            if (args_span[i].IsDecodedTaggedValue()) {
-                DecodedTaggedValue decoded = args_span[i].GetDecodedTaggedValue();
-                frame->GetVReg(i).SetValue(decoded.value);
-                frame->GetVReg(i).SetTag(decoded.tag);
-            } else if (args_span[i].IsReference()) {
-                frame->GetVReg(i).SetReference(args_span[i].GetAs<ObjectHeader *>());
-            } else {
-                frame->GetVReg(i).SetPrimitive(args_span[i].GetAs<int64_t>());
-            }
-        }
-        frame->GetAcc().SetValue(static_cast<uint64_t>(acc.GetAs<int64_t>()));
-        frame->SetData(data);
-
-        if (UNLIKELY(frame.get() == nullptr)) {
-            panda::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
-            if (ret_type.IsReference()) {
-                res = Value(nullptr);
-            } else {
-                res = Value(static_cast<int64_t>(0));
-            }
-            return res;
-        }
-        thread->SetCurrentFrame(frame.get());
-
-        Runtime::GetCurrent()->GetNotificationManager()->MethodEntryEvent(thread, this);
-        interpreter::Execute(thread, pc, frame.get());
-        Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(thread, this);
-
-        thread->SetCurrentFrame(current_frame);
-        res = GetReturnValueFromAcc(ret_type, thread->HasPendingException(), frame->GetAcc());
-    }
-    return res;
+    ASSERT(!thread->HasPendingException());
+    return InvokeImpl<InvokeHelperStatic>(thread, GetNumArgs(), args, proxy_call);
 }
 
 panda_file::Type Method::GetReturnType() const
@@ -235,32 +205,43 @@ panda_file::Type Method::GetArgType(size_t idx) const
         --idx;
     }
 
-    panda_file::MethodDataAccessor mda(*panda_file_, file_id_);
-    panda_file::ProtoDataAccessor pda(*panda_file_, mda.GetProtoId());
+    panda_file::ProtoDataAccessor pda(*(panda_file_),
+                                      panda_file::MethodDataAccessor::GetProtoId(*(panda_file_), file_id_));
     return pda.GetArgType(idx);
+}
+
+panda_file::File::StringData Method::GetRefReturnType() const
+{
+    ASSERT(GetReturnType().IsReference());
+    panda_file::ProtoDataAccessor pda(*(panda_file_),
+                                      panda_file::MethodDataAccessor::GetProtoId(*(panda_file_), file_id_));
+    panda_file::File::EntityId class_id = pda.GetReferenceType(0);
+    return panda_file_->GetStringData(class_id);
 }
 
 panda_file::File::StringData Method::GetRefArgType(size_t idx) const
 {
-    panda_file::MethodDataAccessor mda(*panda_file_, file_id_);
-
     if (!IsStatic()) {
         if (idx == 0) {
-            return panda_file_->GetStringData(mda.GetClassId());
+            return panda_file_->GetStringData(panda_file::MethodDataAccessor::GetClassId(*(panda_file_), file_id_));
         }
 
         --idx;
     }
 
-    panda_file::ProtoDataAccessor pda(*panda_file_, mda.GetProtoId());
+    // in case of reference return type first idx corresponds to it
+    if (GetReturnType().IsReference()) {
+        ++idx;
+    }
+    panda_file::ProtoDataAccessor pda(*(panda_file_),
+                                      panda_file::MethodDataAccessor::GetProtoId(*(panda_file_), file_id_));
     panda_file::File::EntityId class_id = pda.GetReferenceType(idx);
     return panda_file_->GetStringData(class_id);
 }
 
 panda_file::File::StringData Method::GetName() const
 {
-    panda_file::MethodDataAccessor mda(*panda_file_, file_id_);
-    return panda_file_->GetStringData(mda.GetNameId());
+    return panda_file::MethodDataAccessor::GetName(*(panda_file_), file_id_);
 }
 
 PandaString Method::GetFullName(bool with_signature) const
@@ -270,19 +251,22 @@ PandaString Method::GetFullName(bool with_signature) const
     if (with_signature) {
         auto return_type = GetReturnType();
         if (return_type.IsReference()) {
-            ss << ClassHelper::GetName(GetRefArgType(ref_idx++).data) << ' ';
+            ss << ClassHelper::GetName(GetRefReturnType().data) << ' ';
         } else {
             ss << return_type << ' ';
         }
     }
-    ss << PandaString(GetClass()->GetName()) << "::" << utf::Mutf8AsCString(Method::GetName().data);
+    if (GetClass() != nullptr) {
+        ss << PandaString(GetClass()->GetName());
+    }
+    ss << "::" << utf::Mutf8AsCString(Method::GetName().data);
     if (!with_signature) {
         return ss.str();
     }
     const char *sep = "";
     ss << '(';
-    panda_file::MethodDataAccessor mda(*panda_file_, file_id_);
-    panda_file::ProtoDataAccessor pda(*panda_file_, mda.GetProtoId());
+    panda_file::ProtoDataAccessor pda(*(panda_file_),
+                                      panda_file::MethodDataAccessor::GetProtoId(*(panda_file_), file_id_));
     for (size_t i = 0; i < GetNumArgs(); i++) {
         auto type = GetEffectiveArgType(i);
         if (type.IsReference()) {
@@ -298,27 +282,29 @@ PandaString Method::GetFullName(bool with_signature) const
 
 panda_file::File::StringData Method::GetClassName() const
 {
-    panda_file::MethodDataAccessor mda(*panda_file_, file_id_);
-    return panda_file_->GetStringData(mda.GetClassId());
+    return panda_file_->GetStringData(panda_file::MethodDataAccessor::GetClassId(*(panda_file_), file_id_));
 }
 
 Method::Proto Method::GetProto() const
 {
-    panda_file::MethodDataAccessor mda(*panda_file_, file_id_);
-    return Proto(*panda_file_, mda.GetProtoId());
+    return Proto(*(panda_file_), panda_file::MethodDataAccessor::GetProtoId(*(panda_file_), file_id_));
+}
+
+Method::ProtoId Method::GetProtoId() const
+{
+    return ProtoId(*(panda_file_), panda_file::MethodDataAccessor::GetProtoId(*(panda_file_), file_id_));
 }
 
 uint32_t Method::GetNumericalAnnotation(AnnotationField field_id) const
 {
-    panda_file::MethodDataAccessor mda(*panda_file_, file_id_);
+    panda_file::MethodDataAccessor mda(*(panda_file_), file_id_);
     return mda.GetNumericalAnnotation(field_id);
 }
 
 panda_file::File::StringData Method::GetStringDataAnnotation(AnnotationField field_id) const
 {
-    ASSERT(field_id >= AnnotationField::STRING_DATA_BEGIN);
-    ASSERT(field_id <= AnnotationField::STRING_DATA_END);
-    panda_file::MethodDataAccessor mda(*panda_file_, file_id_);
+    ASSERT(field_id >= AnnotationField::STRING_DATA_BEGIN && field_id <= AnnotationField::STRING_DATA_END);
+    panda_file::MethodDataAccessor mda(*(panda_file_), file_id_);
     uint32_t str_offset = mda.GetNumericalAnnotation(field_id);
     if (str_offset == 0) {
         return {0, nullptr};
@@ -326,7 +312,25 @@ panda_file::File::StringData Method::GetStringDataAnnotation(AnnotationField fie
     return panda_file_->GetStringData(panda_file::File::EntityId(str_offset));
 }
 
-uint32_t Method::FindCatchBlock(Class *cls, uint32_t pc) const
+int64_t Method::GetBranchTakenCounter(uint32_t pc)
+{
+    auto profiling_data = GetProfilingData();
+    if (profiling_data == nullptr) {
+        return 0;
+    }
+    return profiling_data->GetBranchTakenCounter(pc);
+}
+
+int64_t Method::GetBranchNotTakenCounter(uint32_t pc)
+{
+    auto profiling_data = GetProfilingData();
+    if (profiling_data == nullptr) {
+        return 0;
+    }
+    return profiling_data->GetBranchNotTakenCounter(pc);
+}
+
+uint32_t Method::FindCatchBlock(const Class *cls, uint32_t pc) const
 {
     ASSERT(!IsAbstract());
 
@@ -335,8 +339,8 @@ uint32_t Method::FindCatchBlock(Class *cls, uint32_t pc) const
     VMHandle<ObjectHeader> exception(thread, thread->GetException());
     thread->ClearException();
 
-    panda_file::MethodDataAccessor mda(*panda_file_, file_id_);
-    panda_file::CodeDataAccessor cda(*panda_file_, mda.GetCodeId().value());
+    panda_file::MethodDataAccessor mda(*(panda_file_), file_id_);
+    panda_file::CodeDataAccessor cda(*(panda_file_), mda.GetCodeId().value());
 
     uint32_t pc_offset = panda_file::INVALID_OFFSET;
 
@@ -376,137 +380,15 @@ panda_file::Type Method::GetEffectiveReturnType() const
     return panda_file::GetEffectiveType(GetReturnType());
 }
 
-class BytecodeOffsetResolver {
-public:
-    BytecodeOffsetResolver(panda_file::LineProgramState *state, uint32_t bc_offset)
-        : state_(state), bc_offset_(bc_offset), prev_line_(state->GetLine()), line_(0)
-    {
-    }
-
-    panda_file::LineProgramState *GetState() const
-    {
-        return state_;
-    }
-
-    uint32_t GetLine() const
-    {
-        return line_;
-    }
-
-    void ProcessBegin() const {}
-
-    void ProcessEnd()
-    {
-        if (line_ == 0) {
-            line_ = state_->GetLine();
-        }
-    }
-
-    bool HandleAdvanceLine(int32_t line_diff) const
-    {
-        state_->AdvanceLine(line_diff);
-        return true;
-    }
-
-    bool HandleAdvancePc(uint32_t pc_diff) const
-    {
-        state_->AdvancePc(pc_diff);
-        return true;
-    }
-
-    bool HandleSetFile([[maybe_unused]] uint32_t source_file_id) const
-    {
-        return true;
-    }
-
-    bool HandleSetSourceCode([[maybe_unused]] uint32_t source_code_id) const
-    {
-        return true;
-    }
-
-    bool HandleSetPrologueEnd() const
-    {
-        return true;
-    }
-
-    bool HandleSetEpilogueBegin() const
-    {
-        return true;
-    }
-
-    bool HandleStartLocal([[maybe_unused]] int32_t reg_number, [[maybe_unused]] uint32_t name_id,
-                          [[maybe_unused]] uint32_t type_id) const
-    {
-        return true;
-    }
-
-    bool HandleStartLocalExtended([[maybe_unused]] int32_t reg_number, [[maybe_unused]] uint32_t name_id,
-                                  [[maybe_unused]] uint32_t type_id, [[maybe_unused]] uint32_t type_signature_id) const
-    {
-        return true;
-    }
-
-    bool HandleEndLocal([[maybe_unused]] int32_t reg_number) const
-    {
-        return true;
-    }
-
-    bool HandleSetColumn([[maybe_unused]] int32_t column_number) const
-    {
-        return true;
-    }
-
-    bool HandleSpecialOpcode(uint32_t pc_offset, int32_t line_offset)
-    {
-        state_->AdvancePc(pc_offset);
-        state_->AdvanceLine(line_offset);
-
-        if (state_->GetAddress() == bc_offset_) {
-            line_ = state_->GetLine();
-            return false;
-        }
-
-        if (state_->GetAddress() > bc_offset_) {
-            line_ = prev_line_;
-            return false;
-        }
-
-        prev_line_ = state_->GetLine();
-
-        return true;
-    }
-
-private:
-    panda_file::LineProgramState *state_;
-    uint32_t bc_offset_;
-    uint32_t prev_line_;
-    uint32_t line_;
-};
-
 int32_t Method::GetLineNumFromBytecodeOffset(uint32_t bc_offset) const
 {
-    panda_file::MethodDataAccessor mda(*panda_file_, file_id_);
-    auto debug_info_id = mda.GetDebugInfoId();
-    if (!debug_info_id) {
-        return -1;
-    }
-
-    panda_file::DebugInfoDataAccessor dda(*panda_file_, debug_info_id.value());
-    const uint8_t *program = dda.GetLineNumberProgram();
-
-    panda_file::LineProgramState state(*panda_file_, panda_file::File::EntityId(0), dda.GetLineStart(),
-                                       dda.GetConstantPool());
-
-    BytecodeOffsetResolver resolver(&state, bc_offset);
-    panda_file::LineNumberProgramProcessor<BytecodeOffsetResolver> program_processor(program, &resolver);
-    program_processor.Process();
-
-    return resolver.GetLine();
+    panda_file::MethodDataAccessor mda(*(panda_file_), file_id_);
+    return panda_file::debug_helpers::GetLineNumber(mda, bc_offset, panda_file_);
 }
 
 panda_file::File::StringData Method::GetClassSourceFile() const
 {
-    panda_file::ClassDataAccessor cda(*panda_file_, GetClass()->GetFileId());
+    panda_file::ClassDataAccessor cda(*(panda_file_), GetClass()->GetFileId());
     auto source_file_id = cda.GetSourceFileId();
     if (!source_file_id) {
         return {0, nullptr};
@@ -527,24 +409,21 @@ bool Method::IsVerified() const
 void Method::WaitForVerification()
 {
     if (GetVerificationStage() == VerificationStage::WAITING) {
-        LOG(DEBUG, VERIFIER) << "Method '" << GetFullName() << std::hex << "' ( 0x" << GetUniqId() << ", 0x"
-                             << reinterpret_cast<uintptr_t>(this) << " ) is waiting to be verified";
-        panda::verifier::JobQueue::WaitForVerification(
+        LOG(DEBUG, VERIFIER) << "Method '" << GetFullName() << std::hex << "' is waiting to be verified";
+        panda::verifier::ThreadPool::WaitForVerification(
             [this] { return GetVerificationStage() == VerificationStage::WAITING; },
-            [this] {
-                auto &runtime = *Runtime::GetCurrent();
-                auto &&verif_options = runtime.GetVerificationOptions();
-                auto does_not_fail = verif_options.Mode.VerifierDoesNotFail;
-                SetVerificationStage(does_not_fail ? VerificationStage::VERIFIED_OK : VerificationStage::VERIFIED_FAIL);
-            });
+            [this] { SetVerificationStage(VerificationStage::VERIFIED_FAIL); });
     }
 }
 
 void Method::SetVerified(bool result)
 {
+    if (IsIntrinsic()) {
+        return;
+    }
     verifier::VerificationResultCache::CacheResult(GetUniqId(), result);
     SetVerificationStage(result ? VerificationStage::VERIFIED_OK : VerificationStage::VERIFIED_FAIL);
-    panda::verifier::JobQueue::SignalMethodVerified();
+    panda::verifier::ThreadPool::SignalMethodVerified();
 }
 
 bool Method::Verify()
@@ -561,11 +440,6 @@ bool Method::Verify()
     }
 
     EnqueueForVerification();
-    auto &runtime = *Runtime::GetCurrent();
-    auto &&verif_options = runtime.GetVerificationOptions();
-    if (verif_options.Mode.VerifierDoesNotFail) {
-        return true;
-    }
     WaitForVerification();
 
     return Verify();
@@ -578,7 +452,7 @@ Method::~Method()
 
 bool Method::AddJobInQueue()
 {
-    if (code_id_.IsValid() && !SKIP_VERIFICATION(GetUniqId())) {
+    if (code_id_.IsValid() && !verifier::debug::SkipVerification(GetUniqId())) {
         if (ExchangeVerificationStage(VerificationStage::WAITING) == VerificationStage::WAITING) {
             return true;
         }
@@ -587,38 +461,22 @@ bool Method::AddJobInQueue()
             switch (status) {
                 case verifier::VerificationResultCache::Status::OK:
                     SetVerificationStage(VerificationStage::VERIFIED_OK);
-                    LOG(INFO, VERIFIER) << "Verification result of method '" << GetFullName() << "' was cached: OK";
+                    LOG(DEBUG, VERIFIER) << "Verification result of method '" << GetFullName() << "' was cached: OK";
                     return true;
                 case verifier::VerificationResultCache::Status::FAILED:
                     SetVerificationStage(VerificationStage::VERIFIED_FAIL);
-                    LOG(INFO, VERIFIER) << "Verification result of method '" << GetFullName() << "' was cached: FAIL";
+                    LOG(DEBUG, VERIFIER) << "Verification result of method '" << GetFullName() << "' was cached: FAIL";
                     return true;
                 default:
                     break;
             }
         }
-        auto &job = panda::verifier::JobQueue::NewJob(*this);
-        if (Invalid(job)) {
-            LOG(INFO, VERIFIER) << "Method '" << GetFullName()
-                                << "' cannot be enqueued for verification. Cannot create job object.";
-            auto &runtime = *Runtime::GetCurrent();
-            auto &&verif_options = runtime.GetVerificationOptions();
-            auto does_not_fail = verif_options.Mode.VerifierDoesNotFail;
-            SetVerificationStage(does_not_fail ? VerificationStage::VERIFIED_OK : VerificationStage::VERIFIED_FAIL);
-            return true;
+        if (panda::verifier::ThreadPool::Enqueue(this)) {
+            LOG(DEBUG, VERIFIER) << "Method '" << GetFullName() << "' enqueued for verification";
+        } else {
+            LOG(WARNING, VERIFIER) << "Method '" << GetFullName() << "' cannot be enqueued for verification";
+            SetVerificationStage(VerificationStage::VERIFIED_FAIL);
         }
-        if (!panda::verifier::FillJob(job)) {
-            LOG(INFO, VERIFIER) << "Method '" << GetFullName() << "' cannot be enqueued for verification";
-            auto &runtime = *Runtime::GetCurrent();
-            auto &&verif_options = runtime.GetVerificationOptions();
-            auto does_not_fail = verif_options.Mode.VerifierDoesNotFail;
-            SetVerificationStage(does_not_fail ? VerificationStage::VERIFIED_OK : VerificationStage::VERIFIED_FAIL);
-            panda::verifier::JobQueue::DisposeJob(&job);
-            return true;
-        }
-        panda::verifier::JobQueue::AddJob(job);
-        LOG(INFO, VERIFIER) << "Method '" << GetFullName() << std::hex << "' ( 0x" << GetUniqId() << ", 0x"
-                            << reinterpret_cast<uintptr_t>(this) << " ) enqueued for verification";
         return true;
     }
 
@@ -627,51 +485,57 @@ bool Method::AddJobInQueue()
 
 void Method::EnqueueForVerification()
 {
-    if (GetVerificationStage() != VerificationStage::NOT_VERIFIED) {
+    if (IsIntrinsic()) {
+        LOG(DEBUG, VERIFIER) << "Intrinsic method " << GetFullName(true) << " doesn't need to be verified";
         return;
     }
-    auto &runtime = *Runtime::GetCurrent();
-    auto &&verif_options = runtime.GetVerificationOptions();
-    if (verif_options.Enable) {
-        if (verif_options.Mode.DebugEnable) {
-            auto hash = GetFullNameHash();
-            PandaString class_name {ClassHelper::GetName(GetClassName().data)};
-            auto class_hash = GetFullNameHashFromString(reinterpret_cast<const uint8_t *>(class_name.c_str()));
-            panda::verifier::config::MethodIdCalculationHandler(class_hash, hash, GetUniqId());
-        }
+    if (GetVerificationStage() != VerificationStage::NOT_VERIFIED) {
+        LOG(DEBUG, VERIFIER) << "Method " << GetFullName(true) << " is already verified";
+        return;
+    }
+    auto &&verif_options = Runtime::GetCurrent()->GetVerificationOptions();
+    if (verif_options.IsEnabled()) {
+        verifier::debug::DebugContext::GetCurrent().AddMethod(*this, verif_options.Mode == VerificationMode::DEBUG);
 
         bool is_system = false;
-        if (!verif_options.Mode.DoNotAssumeLibraryMethodsVerified) {
+        if (!verif_options.VerifyRuntimeLibraries) {
             auto *klass = GetClass();
             if (klass != nullptr) {
-                auto *file = klass->GetPandaFile();
-                is_system = file != nullptr && verifier::JobQueue::IsSystemFile(file);
+                is_system = verifier::IsSystemClass(*klass);
             }
         }
-        if (!is_system && AddJobInQueue()) {
+        if (is_system) {
+            LOG(DEBUG, VERIFIER) << "Skipping verification of system method " << GetFullName(true);
+        } else if (AddJobInQueue()) {
             return;
         }
     }
     if (verif_options.Show.Status) {
-        LOG(INFO, VERIFIER) << "Verification result of method '" << GetFullName() << "': SKIP";
+        LOG(DEBUG, VERIFIER) << "Verification result of method '" << GetFullName(true) << "': SKIP";
     }
     SetVerified(true);
 }
 
 Method::VerificationStage Method::GetVerificationStage() const
 {
-    return BitsToVerificationStage(stor_32_.access_flags_.load());
+    // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
+    // should become visible
+    return BitsToVerificationStage(access_flags_.load(std::memory_order_acquire));
 }
 
 void Method::SetVerificationStage(VerificationStage stage)
 {
-    stor_32_.access_flags_.fetch_or((static_cast<uint32_t>(stage) << VERIFICATION_STATUS_SHIFT));
+    // Atomic with acq_rel order reason: data race with access_flags_ with dependecies on reads after the load and on
+    // writes before the store
+    access_flags_.fetch_or((static_cast<uint32_t>(stage) << VERIFICATION_STATUS_SHIFT), std::memory_order_acq_rel);
 }
 
 Method::VerificationStage Method::ExchangeVerificationStage(VerificationStage stage)
 {
+    // Atomic with acq_rel order reason: data race with access_flags_ with dependecies on reads after the load and on
+    // writes before the store
     return BitsToVerificationStage(
-        stor_32_.access_flags_.fetch_or(static_cast<uint32_t>(stage) << VERIFICATION_STATUS_SHIFT));
+        access_flags_.fetch_or((static_cast<uint32_t>(stage) << VERIFICATION_STATUS_SHIFT), std::memory_order_acq_rel));
 }
 
 Method::VerificationStage Method::BitsToVerificationStage(uint32_t bits)
@@ -690,7 +554,13 @@ Method::VerificationStage Method::BitsToVerificationStage(uint32_t bits)
 
 void Method::StartProfiling()
 {
+#ifdef PANDA_WITH_ECMASCRIPT
+    // Object handles can be created during class initialization, so check lock state only after GC is started.
+    ASSERT(!ManagedThread::GetCurrent()->GetVM()->GetGC()->IsGCRunning() || Locks::mutator_lock->HasLock() ||
+           ManagedThread::GetCurrent()->GetThreadLang() == panda::panda_file::SourceLang::ECMASCRIPT);
+#else
     ASSERT(!ManagedThread::GetCurrent()->GetVM()->GetGC()->IsGCRunning() || Locks::mutator_lock->HasLock());
+#endif
 
     // Some thread already started profiling
     if (IsProfilingWithoutLock()) {
@@ -699,6 +569,7 @@ void Method::StartProfiling()
 
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
     PandaVector<uint32_t> vcalls;
+    PandaVector<uint32_t> branches;
 
     Span<const uint8_t> instructions(GetInstructions(), GetCodeSize());
     for (BytecodeInstruction inst(instructions.begin()); inst.GetAddress() < instructions.end();
@@ -706,24 +577,32 @@ void Method::StartProfiling()
         if (inst.HasFlag(BytecodeInstruction::Flags::CALL_VIRT)) {
             vcalls.push_back(inst.GetAddress() - GetInstructions());
         }
+        if (inst.HasFlag(BytecodeInstruction::Flags::JUMP)) {
+            branches.push_back(inst.GetAddress() - GetInstructions());
+        }
     }
-    if (vcalls.empty()) {
+    if (vcalls.empty() && branches.empty()) {
         return;
     }
     ASSERT(std::is_sorted(vcalls.begin(), vcalls.end()));
 
-    auto data = allocator->Alloc(RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache)) +
-                                 sizeof(CallSiteInlineCache) * vcalls.size());
-    // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
-    auto profiling_data = new (data) ProfilingData(vcalls.size());
-
-    auto ics = profiling_data->GetInlineCaches();
-    for (size_t i = 0; i < vcalls.size(); i++) {
-        ics[i].Init(vcalls[i]);
-    }
+    auto data = allocator->Alloc(RoundUp(RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache)) +
+                                             sizeof(CallSiteInlineCache) * vcalls.size(),
+                                         alignof(BranchData)) +
+                                 sizeof(BranchData) * branches.size());
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto vcalls_mem = reinterpret_cast<uint8_t *>(data) + RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache));
+    auto branches_data_offset = RoundUp(RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache)) +
+                                            sizeof(CallSiteInlineCache) * vcalls.size(),
+                                        alignof(BranchData));
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto branches_mem = reinterpret_cast<uint8_t *>(data) + branches_data_offset;
+    auto profiling_data = new (data)
+        ProfilingData(CallSiteInlineCache::From(vcalls_mem, vcalls), BranchData::From(branches_mem, branches));
 
     ProfilingData *old_value = nullptr;
-    while (!profiling_data_.compare_exchange_weak(old_value, profiling_data)) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+    while (!pointer_.profiling_data_.compare_exchange_weak(old_value, profiling_data)) {
         if (old_value != nullptr) {
             // We're late, some thread already started profiling.
             allocator->Delete(data);
@@ -746,7 +625,14 @@ void Method::StopProfiling()
 
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
     allocator->Free(GetProfilingData());
-    profiling_data_ = nullptr;
+    // Atomic with release order reason: data race with profiling_data_ with dependecies on writes before the store
+    // which should become visible acquire NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+    pointer_.profiling_data_.store(nullptr, std::memory_order_release);
+}
+
+bool Method::IsProxy() const
+{
+    return GetClass()->IsProxy();
 }
 
 }  // namespace panda

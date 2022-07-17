@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@ namespace panda::verifier::test {
 
 TEST_F(VerifierTest, JumpsMap)
 {
-    constexpr size_t N = 148;
-    char code[N];
+    char code[148];
     JumpsMap map {&code[5], &code[147]};
 
     // 11110010

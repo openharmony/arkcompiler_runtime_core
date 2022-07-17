@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_FILE_H_
-#define PANDA_LIBPANDABASE_OS_FILE_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_OS_FILE_H_
+#define PANDA_LIBPANDABASE_PBASE_OS_FILE_H_
 
 #include "macros.h"
 
 #if defined(PANDA_TARGET_UNIX)
-#include "os/unix/file.h"
+#include "platforms/unix/libpandabase/file.h"
 #elif defined(PANDA_TARGET_WINDOWS)
-#include "os/windows/file.h"
+#include "platforms/windows/libpandabase//file.h"
 #else
 #error "Unsupported platform"
 #endif
@@ -58,4 +58,4 @@ File Open(std::string_view filename, Mode mode);
 
 }  // namespace panda::os::file
 
-#endif  // PANDA_LIBPANDABASE_OS_FILE_H_
+#endif  // PANDA_LIBPANDABASE_PBASE_OS_FILE_H_

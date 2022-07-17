@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ bool PoolManager::is_initialized = false;
 MallocMemPool *PoolManager::malloc_mem_pool = nullptr;
 MmapMemPool *PoolManager::mmap_mem_pool = nullptr;
 
-Arena *PoolManager::AllocArena(size_t size, SpaceType space_type, AllocatorType allocator_type, void *allocator_addr)
+Arena *PoolManager::AllocArena(size_t size, SpaceType space_type, AllocatorType allocator_type,
+                               const void *allocator_addr)
 {
     if (pool_type == PoolType::MMAP) {
         return mmap_mem_pool->AllocArenaImpl(size, space_type, allocator_type, allocator_addr);
@@ -49,10 +50,8 @@ void PoolManager::Initialize(PoolType type)
     is_initialized = true;
     pool_type = type;
     if (pool_type == PoolType::MMAP) {
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         mmap_mem_pool = new MmapMemPool();
     } else {
-        // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
         malloc_mem_pool = new MallocMemPool();
     }
     LOG(DEBUG, ALLOC) << "PoolManager Initialized";

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_RUNTIME_H_
-#define PANDA_RUNTIME_INCLUDE_RUNTIME_H_
+#ifndef PANDA_RUNTIME_RUNTIME_H_
+#define PANDA_RUNTIME_RUNTIME_H_
 
 #include <atomic>
 #include <memory>
@@ -29,7 +29,11 @@
 #include "libpandafile/file_items.h"
 #include "libpandafile/literal_data_accessor.h"
 #include "runtime/include/class_linker.h"
+#include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
+#include "runtime/include/mem/panda_string.h"
+#include "runtime/include/method.h"
+#include "runtime/include/relayout_profiler.h"
 #include "runtime/include/runtime_options.h"
 #include "runtime/include/gc_task.h"
 #include "runtime/include/tooling/debug_interface.h"
@@ -44,23 +48,25 @@
 #include "runtime/string_table.h"
 #include "runtime/thread_manager.h"
 #include "verification/verification_options.h"
+#include "libpandabase/os/native_stack.h"
 #include "libpandabase/os/library_loader.h"
+#include "runtime/include/loadable_agent.h"
 
 namespace panda {
 
 class DProfiler;
-class ClassLinker;
 class CompilerInterface;
+class ClassHierarchyAnalysis;
 class RuntimeController;
-
 class PandaVM;
 class RuntimeNotificationManager;
 class Trace;
 
 namespace tooling {
-class PtLangExt;
 class Debugger;
 }  // namespace tooling
+
+using UnwindStackFn = os::unix::native_stack::FUNC_UNWINDSTACK;
 
 class Runtime {
 public:
@@ -76,6 +82,25 @@ public:
         CLASS_LINKER_EXTENSION_NOT_FOUND
     };
 
+    class DebugSession final {
+    public:
+        explicit DebugSession(Runtime &runtime);
+        ~DebugSession();
+
+        tooling::DebugInterface &GetDebugger();
+
+    private:
+        Runtime &runtime_;
+        bool is_jit_enabled_;
+        os::memory::LockHolder<os::memory::Mutex> lock_;
+        PandaUniquePtr<tooling::DebugInterface> debugger_;
+
+        NO_COPY_SEMANTIC(DebugSession);
+        NO_MOVE_SEMANTIC(DebugSession);
+    };
+
+    using DebugSessionHandle = std::shared_ptr<DebugSession>;
+
     LanguageContext GetLanguageContext(const std::string &runtime_type);
     LanguageContext GetLanguageContext(const Method &method);
     LanguageContext GetLanguageContext(const Class &cls);
@@ -83,11 +108,12 @@ public:
     LanguageContext GetLanguageContext(panda_file::ClassDataAccessor *cda);
     LanguageContext GetLanguageContext(panda_file::SourceLang lang);
 
-    static bool CreateInstance(const RuntimeOptions &options, mem::InternalAllocatorPtr internal_allocator,
-                               const std::vector<LanguageContextBase *> &ctxs);
+    static bool CreateInstance(const RuntimeOptions &options, mem::InternalAllocatorPtr internal_allocator);
 
-    PANDA_PUBLIC_API static bool Create(const RuntimeOptions &options,
-                                        const std::vector<LanguageContextBase *> &ctxs = {});
+    PANDA_PUBLIC_API static bool Create(const RuntimeOptions &options);
+
+    // Deprecated. Only for capability with ets_runtime.
+    PANDA_PUBLIC_API static bool Create(const RuntimeOptions &options, const std::vector<LanguageContextBase *> &ctxs);
 
     static bool DestroyUnderLockHolder();
 
@@ -124,20 +150,23 @@ public:
 
     coretypes::String *ResolveString(PandaVM *vm, const Method &caller, panda_file::File::EntityId id);
 
-    coretypes::String *ResolveString(PandaVM *vm, const panda_file::File &pf, panda_file::File::EntityId id,
-                                     LanguageContext ctx);
+    coretypes::String *ResolveStringFromCompiledCode(PandaVM *vm, const Method &caller, panda_file::File::EntityId id);
 
-    coretypes::String *ResolveString(PandaVM *vm, const uint8_t *mutf8, uint32_t length, LanguageContext ctx);
+    coretypes::String *ResolveString(PandaVM *vm, const panda_file::File &pf, panda_file::File::EntityId id,
+                                     const LanguageContext &ctx);
+
+    coretypes::String *ResolveString(PandaVM *vm, const uint8_t *mutf8, uint32_t length, const LanguageContext &ctx);
 
     Class *GetClassRootForLiteralTag(const ClassLinkerExtension &ext, panda_file::LiteralTag tag) const;
-    static bool GetLiteralTagAndValue(const panda_file::File &pf, panda_file::File::EntityId id,
-                                      panda_file::LiteralTag *tag,
+
+    static bool GetLiteralTagAndValue(const panda_file::File &pf, uint32_t id, panda_file::LiteralTag *tag,
                                       panda_file::LiteralDataAccessor::LiteralValue *value);
 
-    coretypes::Array *ResolveLiteralArray(PandaVM *vm, const Method &caller, panda_file::File::EntityId id);
+    uintptr_t GetPointerToConstArrayData(const panda_file::File &pf, uint32_t id) const;
 
-    coretypes::Array *ResolveLiteralArray(PandaVM *vm, const panda_file::File &pf, panda_file::File::EntityId id,
-                                          LanguageContext ctx);
+    coretypes::Array *ResolveLiteralArray(PandaVM *vm, const Method &caller, uint32_t id);
+    coretypes::Array *ResolveLiteralArray(PandaVM *vm, const panda_file::File &pf, uint32_t id,
+                                          const LanguageContext &ctx);
 
     void PreZygoteFork();
 
@@ -162,11 +191,6 @@ public:
         is_debug_mode_ = is_debug_mode;
     }
 
-    void SetDebuggerLibrary(os::library_loader::LibraryHandle debugger_library)
-    {
-        debugger_library_ = std::move(debugger_library);
-    }
-
     bool IsDebuggerConnected() const
     {
         return is_debugger_connected_;
@@ -177,12 +201,19 @@ public:
         is_debugger_connected_ = dbg_connected_state;
     }
 
+    bool IsProfileableFromShell() const
+    {
+        return is_profileable_from_shell_;
+    }
+
+    void SetProfileableFromShell(bool profileable_from_shell)
+    {
+        is_profileable_from_shell_ = profileable_from_shell;
+    }
+
     PandaVector<PandaString> GetBootPandaFiles();
 
     PandaVector<PandaString> GetPandaFiles();
-
-    // Additional VMInfo
-    void RegisterAppInfo(const PandaVector<PandaString> &code_paths, const PandaString &profile_output_filename);
 
     // Returns true if profile saving is enabled.
     bool SaveProfileInfo() const;
@@ -220,6 +251,11 @@ public:
         return panda_path_string_;
     }
 
+    static const std::string &GetRuntimeType()
+    {
+        return runtime_type_;
+    }
+
     void UpdateProcessState(int state);
 
     bool IsZygote() const
@@ -232,8 +268,12 @@ public:
         return is_initialized_;
     }
 
+    // TODO: lack NativeBridgeAction action
+    void InitNonZygoteOrPostFork(bool is_system_server, const char *isa, bool profile_system_server = false);
+
     static const char *GetVersion()
     {
+        // TODO(chenmudan): change to the correct version when we have one;
         return "1.0.0";
     }
 
@@ -262,14 +302,17 @@ public:
 
     void RegisterSensitiveThread() const;
 
+    // Deprecated.
+    // Get VM instance from the thread. In multi-vm runtime this method returns
+    // the first VM. It is undeterminated which VM will be first.
     PandaVM *GetPandaVM() const
     {
         return panda_vm_;
     }
 
-    tooling::PtLangExt *GetPtLangExt() const
+    ClassHierarchyAnalysis *GetCha() const
     {
-        return pt_lang_ext_;
+        return cha_;
     }
 
     const panda::verifier::VerificationOptions &GetVerificationOptions() const
@@ -280,6 +323,11 @@ public:
     panda::verifier::VerificationOptions &GetVerificationOptions()
     {
         return VerificationOptions_;
+    }
+
+    bool IsDebuggerAttached()
+    {
+        return debug_session_.use_count() > 0;
     }
 
     void DumpForSigQuit(std::ostream &os);
@@ -309,6 +357,21 @@ public:
         return is_stacktrace_;
     }
 
+    bool IsJitEnabled() const
+    {
+        return is_jit_enabled_;
+    }
+
+    void ForceEnableJit()
+    {
+        is_jit_enabled_ = true;
+    }
+
+    void ForceDisableJit()
+    {
+        is_jit_enabled_ = false;
+    }
+
 #ifndef PANDA_TARGET_WINDOWS
     SignalManager *GetSignalManager()
     {
@@ -316,11 +379,11 @@ public:
     }
 #endif
 
-    void SetPtLangExt(tooling::PtLangExt *pt_lang_ext);
+    static mem::GCType GetGCType(const RuntimeOptions &options, panda_file::SourceLang lang);
 
-    static mem::GCType GetGCType(const RuntimeOptions &options);
+    static void SetDaemonMemoryLeakThreshold(uint32_t daemon_memory_leak_threshold);
 
-    bool AttachDebugger();
+    DebugSessionHandle StartDebugSession();
 
     mem::InternalAllocatorPtr GetInternalAllocator() const
     {
@@ -331,6 +394,21 @@ public:
     PandaString GetFinalStatistics();
 
     Expected<LanguageContext, Error> ExtractLanguageContext(const panda_file::File *pf, std::string_view entry_point);
+
+    UnwindStackFn GetUnwindStackFn() const
+    {
+        return unwind_stack_fn_;
+    }
+
+    void SetUnwindStackFn(UnwindStackFn unwind_stack_fn)
+    {
+        unwind_stack_fn_ = unwind_stack_fn;
+    }
+
+    RelayoutProfiler *GetRelayoutProfiler()
+    {
+        return relayout_profiler_;
+    }
 
 private:
     void NotifyAboutLoadedModules();
@@ -343,6 +421,10 @@ private:
 
     bool InitializePandaVM();
 
+    bool HandleAotOptions();
+
+    void HandleJitOptions();
+
     bool CheckOptionsConsistency();
 
     void SetPandaPath();
@@ -353,28 +435,28 @@ private:
 
     bool LoadBootPandaFiles(panda_file::File::OpenMode open_mode);
 
-    bool StartDebugger(const std::string &library_path);
-
     bool IsEnableMemoryHooks() const;
 
     static void CreateDfxController(const RuntimeOptions &options);
 
     static void BlockSignals();
 
-    inline void InitializeVerificationResultCache(const RuntimeOptions &options);
+    inline void InitializeVerificationResultCache();
 
-    Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr internal_allocator,
-            const std::vector<LanguageContextBase *> &ctxs);
+    Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr internal_allocator);
 
     ~Runtime();
 
     static Runtime *instance;
     static RuntimeOptions options_;
+    static std::string runtime_type_;
     static os::memory::Mutex mutex;
 
+    // TODO(dtrubenk): put all of it in the permanent space
     mem::InternalAllocatorPtr internal_allocator_;
     RuntimeNotificationManager *notification_manager_;
     ClassLinker *class_linker_;
+    ClassHierarchyAnalysis *cha_;
     DProfiler *dprofiler_ = nullptr;
 
     PandaVM *panda_vm_ = nullptr;
@@ -383,16 +465,13 @@ private:
     SignalManager *signal_manager_ {nullptr};
 #endif
 
-    // Language context
-    static constexpr size_t LANG_EXTENSIONS_COUNT = static_cast<size_t>(panda_file::SourceLang::LAST) + 1;
-    std::array<LanguageContextBase *, LANG_EXTENSIONS_COUNT> language_contexts_ {nullptr};
-
-    // For IDE is really connected.
+    // For IDE is real connected.
     bool is_debug_mode_ {false};
     bool is_debugger_connected_ {false};
-    tooling::PtLangExt *pt_lang_ext_ {nullptr};
-    tooling::DebugInterface *debugger_ {nullptr};
-    os::library_loader::LibraryHandle debugger_library_;
+    bool is_profileable_from_shell_ {false};
+    os::memory::Mutex debug_session_creation_mutex_ {};
+    os::memory::Mutex debug_session_uniqueness_mutex_ {};
+    DebugSessionHandle debug_session_ {};
 
     // Additional VMInfo
     std::string process_package_name_;
@@ -414,6 +493,7 @@ private:
     bool checks_stack_ {true};
     bool checks_nullptr_ {true};
     bool is_stacktrace_ {false};
+    bool is_jit_enabled_ {false};
 
     bool is_dump_native_crash_ {true};
 
@@ -428,6 +508,11 @@ private:
     };
     AppContext app_context_ {};
 
+    RuntimeController *runtime_controller_ {nullptr};
+    UnwindStackFn unwind_stack_fn_ {nullptr};
+
+    RelayoutProfiler *relayout_profiler_ {nullptr};
+
     NO_COPY_SEMANTIC(Runtime);
     NO_MOVE_SEMANTIC(Runtime);
 };
@@ -441,4 +526,4 @@ void InitSignals();
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_RUNTIME_H_
+#endif  // PANDA_RUNTIME_RUNTIME_H_

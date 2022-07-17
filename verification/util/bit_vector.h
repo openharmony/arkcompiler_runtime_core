@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_BIT_VECTOR_H_
-#define PANDA_VERIFICATION_UTIL_BIT_VECTOR_H_
+#ifndef PANDA_VERIFIER_BIT_VECTOR_HPP_
+#define PANDA_VERIFIER_BIT_VECTOR_HPP_
 
 #include "utils/bit_utils.h"
 #include "function_traits.h"
@@ -117,9 +117,6 @@ class BitVector {
     class Bit {
     public:
         Bit(BitVector &bit_vector, size_t index) : bit_vector_ {bit_vector}, index_ {index} {};
-        ~Bit() = default;
-        NO_MOVE_SEMANTIC(Bit);
-        NO_COPY_SEMANTIC(Bit);
 
         operator bool() const
         {
@@ -379,20 +376,21 @@ public:
     }
 
     template <typename Handler>
-    void process(const BitVector &rhs, Handler &&handler)
+    void process(const BitVector &rhs,
+                 Handler &&handler)  // every handler result bit must depend only from corresponding bit pair
     {
         size_t sz = std::min(size(), rhs.size());
         size_t words = SizeInWordsFromSizeInBits(sz);
+        size_t lhs_words = size_in_words();
         size_t pos = 0;
-        bool last_word_partially_filled = ((sz & POS_MASK) == 0) ? false : true;
-        if (words > 0) {
-            for (; pos < (words - (last_word_partially_filled ? 1 : 0)); ++pos) {
-                data_[pos] = handler(data_[pos], rhs.data_[pos]);
-            }
+        for (; pos < words; ++pos) {
+            data_[pos] = handler(data_[pos], rhs.data_[pos]);
         }
-        if (last_word_partially_filled) {
-            const Word MASK = MaskUpToIndex(sz & POS_MASK);
-            data_[pos] = (data_[pos] & ~MASK) | (handler(data_[pos] & MASK, rhs.data_[pos] & MASK) & MASK);
+        if ((pos >= lhs_words) || ((handler(0U, 0U) == 0U) && (handler(1U, 0U) == 1U))) {
+            return;
+        }
+        for (; pos < lhs_words; ++pos) {
+            data_[pos] = handler(data_[pos], 0U);
         }
     }
 
@@ -404,12 +402,18 @@ public:
 
     BitVector &operator|=(const BitVector &rhs)
     {
+        if (size() < rhs.size()) {
+            resize(rhs.size());
+        }
         process(rhs, [](const auto l, const auto r) { return l | r; });
         return *this;
     }
 
     BitVector &operator^=(const BitVector &rhs)
     {
+        if (size() < rhs.size()) {
+            resize(rhs.size());
+        }
         process(rhs, [](const auto l, const auto r) { return l ^ r; });
         return *this;
     }
@@ -617,7 +621,7 @@ public:
             size_t old_size_in_words = SizeInWordsFromSizeInBits(size_);
             if (old_size_in_words != new_size_in_words) {
                 Allocator allocator;
-                Word *new_data = allocator.allocate(sz);
+                Word *new_data = allocator.allocate(new_size_in_words);
                 ASSERT(new_data != nullptr);
                 size_t pos = 0;
                 for (; pos < std::min(old_size_in_words, new_size_in_words); ++pos) {
@@ -731,4 +735,4 @@ private:
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_UTIL_BIT_VECTOR_H_
+#endif  // !PANDA_VERIFIER_BIT_VECTOR_HPP_

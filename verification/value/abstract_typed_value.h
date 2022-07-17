@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_VALUE_ABSTRACT_TYPED_VALUE_H_
-#define PANDA_VERIFICATION_VALUE_ABSTRACT_TYPED_VALUE_H_
+#ifndef _PANDA_VERIFIER_ABSTRACT_TYPED_VALUE_HPP
+#define _PANDA_VERIFIER_ABSTRACT_TYPED_VALUE_HPP
 
 #include "verification/value/abstract_type.h"
 #include "verification/value/abstract_value.h"
@@ -96,16 +96,16 @@ public:
     {
         return Origin_;
     }
-    template <typename StrT, typename TypeImageFunc>
-    StrT Image(TypeImageFunc type_img_func) const
+    template <typename TypeImageFunc>
+    PandaString Image(TypeImageFunc type_img_func) const
     {
         // currently only types and origin printed
-        StrT result {GetAbstractType().Image<StrT>(type_img_func)};
+        PandaString result {GetAbstractType().Image(type_img_func)};
         if (Origin_.IsValid()) {
             if (Origin_.AtStart()) {
                 result += "@start";
             } else {
-                result += "@" + NumToStr<StrT>(Origin_.GetOffset(), 16U, sizeof(decltype(Origin_.GetOffset())) * 2U);
+                result += "@" + OffsetToHexStr(Origin_.GetOffset());
             }
         }
         return result;
@@ -119,4 +119,4 @@ private:
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_VALUE_ABSTRACT_TYPED_VALUE_H_
+#endif  // !_PANDA_VERIFIER_ABSTRACT_TYPED_VALUE_HPP

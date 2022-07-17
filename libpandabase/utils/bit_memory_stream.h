@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_STREAM_H_
-#define PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_STREAM_H_
+#ifndef PANDA_BIT_MEMORY_STREAM_H
+#define PANDA_BIT_MEMORY_STREAM_H
 
 #include "utils/bit_memory_region.h"
 #include "utils/bit_utils.h"
@@ -110,4 +110,4 @@ public:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_STREAM_H_
+#endif  // PANDA_BIT_MEMORY_STREAM_H

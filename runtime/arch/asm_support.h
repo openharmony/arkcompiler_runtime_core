@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_ARCH_ASM_SUPPORT_H_
-#define PANDA_RUNTIME_ARCH_ASM_SUPPORT_H_
+#ifndef PANDA_ASM_SUPPORT_H
+#define PANDA_ASM_SUPPORT_H
 
 #include "asm_defines.h"
 #include "shorty_values.h"
@@ -47,9 +47,9 @@
 #ifndef NDEBUG
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CFI_STARTPROC .cfi_startproc // CODECHECK-NOLINT(C_RULE_ID_HORIZON_SPACE)
+#define CFI_STARTPROC .cfi_startproc
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CFI_ENDPROC .cfi_endproc // CODECHECK-NOLINT(C_RULE_ID_HORIZON_SPACE)
+#define CFI_ENDPROC .cfi_endproc
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CFI_DEF_CFA(reg, offset) .cfi_def_cfa reg, (offset)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -61,9 +61,9 @@
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CFI_OFFSET(reg, offset) .cfi_offset reg, (offset)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CFI_REMEMBER_STATE .cfi_remember_state // CODECHECK-NOLINT(C_RULE_ID_HORIZON_SPACE)
+#define CFI_REMEMBER_STATE .cfi_remember_state
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CFI_RESTORE_STATE .cfi_restore_state // CODECHECK-NOLINT(C_RULE_ID_HORIZON_SPACE)
+#define CFI_RESTORE_STATE .cfi_restore_state
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CFI_RESTORE(reg) .cfi_restore reg
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -98,4 +98,4 @@
 
 // clang-format on
 
-#endif  // PANDA_RUNTIME_ARCH_ASM_SUPPORT_H_
+#endif  // PANDA_ASM_SUPPORT_H

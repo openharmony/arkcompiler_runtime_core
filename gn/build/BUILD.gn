@@ -31,8 +31,6 @@ config("executable_config") {
 config("ldconfig") {
   if (is_linux) {
     ldflags = [
-      "-latomic",
-      "-ldl",
       "-pthread",
       "-Wl,-rpath=\$ORIGIN",
       "-Wl,-rpath-link=",

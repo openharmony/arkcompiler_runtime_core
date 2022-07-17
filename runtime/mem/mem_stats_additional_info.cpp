@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 #include "runtime/mem/mem_stats_additional_info.h"
 
 #include "runtime/include/class-inl.h"
-#include "runtime/include/class_linker.h"
 #include "runtime/include/runtime.h"
 
 namespace panda::mem {
@@ -40,7 +39,7 @@ PandaString MemStatsAdditionalInfo::GetAdditionalStatistics(HeapManager *heap_ma
 
     PandaStringStream statistic;
     PandaMultiMap<uint64_t, Class *>::reverse_iterator rit;
-    for (rit = footprint_to_class.rbegin(); rit != footprint_to_class.rend(); ++rit) {
+    for (rit = footprint_to_class.rbegin(); rit != footprint_to_class.rend(); rit++) {
         if (rit->first == 0U) {
             break;
         }

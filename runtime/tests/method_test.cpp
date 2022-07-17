@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@
 #include <vector>
 
 #include "assembly-parser.h"
+#include "mangling.h"
 #include "libpandafile/value.h"
 #include "runtime/entrypoints/entrypoints.h"
-#include "runtime/include/class_linker.h"
-#include "runtime/include/method.h"
+#include "runtime/include/compiler_interface.h"
+#include "runtime/include/method-inl.h"
 #include "runtime/include/runtime.h"
 
 namespace panda::test {
@@ -72,7 +73,7 @@ public:
         const std::vector<int> offsets {0x0, 0x3, 0x5, 0x7, 0x9, 0xb, 0xd, 0xf, 0x11, 0x13, 0x15, 0x16, 0x18, 0x20};
         auto res = p.Parse(source);
         auto &prog = res.Value();
-        const std::string name = "foo";
+        const std::string name = pandasm::GetFunctionSignatureFromName("foo", {});
         ASSERT_NE(prog.function_table.find(name), prog.function_table.end());
         auto &insVec = prog.function_table.find(name)->second.ins;
         const int insNum = insVec.size();
@@ -103,8 +104,14 @@ public:
     }
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    panda::MTManagedThread *thread_;
 };
+
+template <bool is_dynamic = false>
+static Frame *CreateFrame(size_t nregs, Method *method, Frame *prev)
+{
+    return panda::CreateFrameWithSize(Frame::GetActualSize<is_dynamic>(nregs), nregs, method, prev);
+}
 
 TEST_F(MethodTest, SetIntrinsic)
 {
@@ -118,7 +125,7 @@ TEST_F(MethodTest, SetIntrinsic)
     ASSERT_EQ(method.GetIntrinsic(), intrinsic);
 }
 
-static int32_t EntryPoint([[maybe_unused]] Method *method)
+static int32_t EntryPoint(Method * /* unused */)
 {
     return 0;
 }
@@ -221,12 +228,10 @@ TEST_F(MethodTest, CheckTaggedReturnType)
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("Foo"));
     ASSERT_NE(method, nullptr);
 
-    std::vector<Value> args;
-    args.emplace_back(Value(1, interpreter::TypeTag::INT));
-    Value v = method->Invoke(ManagedThread::GetCurrent(), args.data());
-    DecodedTaggedValue decoded = v.GetDecodedTaggedValue();
-    EXPECT_EQ(decoded.value, 1);
-    EXPECT_EQ(decoded.tag, interpreter::TypeTag::INT);
+    std::array args = {TaggedValue(1)};
+    TaggedValue v = method->InvokeDyn(ManagedThread::GetCurrent(), args.size(), args.data());
+
+    EXPECT_EQ(v.GetInt(), 1);
 }
 
 TEST_F(MethodTest, VirtualMethod)
@@ -295,7 +300,7 @@ TEST_F(MethodTest, GetLineNumFromBytecodeOffset1)
     ASSERT_NE(method, nullptr);
 
     ASSERT_EQ(method->GetLineNumFromBytecodeOffset(0), 3);
-    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(2U), 4);
+    ASSERT_EQ(method->GetLineNumFromBytecodeOffset(2), 4);
     ASSERT_EQ(method->GetLineNumFromBytecodeOffset(5), 5);
     ASSERT_EQ(method->GetLineNumFromBytecodeOffset(7), 6);
     ASSERT_EQ(method->GetLineNumFromBytecodeOffset(10), 7);
@@ -361,8 +366,7 @@ TEST_F(MethodTest, GetLineNumFromBytecodeOffset10)
 
     auto res = p.Parse(source);
     auto &prog = res.Value();
-
-    auto &function = prog.function_table.at("foo");
+    auto &function = prog.function_table.at(pandasm::GetFunctionSignatureFromName("foo", {}));
 
     pandasm::debuginfo::LocalVariable lv;
     lv.name = "a";
@@ -454,7 +458,7 @@ TEST_F(MethodTest, GetClassSourceFile)
     }
 }
 
-static int32_t StackTraceEntryPoint([[maybe_unused]] Method *method)
+static int32_t StackTraceEntryPoint(Method * /* unused */)
 {
     auto thread = ManagedThread::GetCurrent();
 
@@ -471,7 +475,7 @@ static int32_t StackTraceEntryPoint([[maybe_unused]] Method *method)
     std::vector<StackTraceData> expected {{"f3", 31},   {"f2", 26}, {".cctor", 14},
                                           {".ctor", 9}, {"f1", 20}, {"main", 41}};
     std::vector<StackTraceData> trace;
-    for (StackWalker stack(thread); stack.HasFrame(); stack.NextFrame()) {
+    for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
         auto pc = stack.GetBytecodePc();
         auto *method_from_frame = stack.GetMethod();
         auto line_num = method_from_frame->GetLineNumFromBytecodeOffset(pc);
@@ -564,6 +568,54 @@ TEST_F(MethodTest, StackTrace)
     std::vector<Value> args;
     Value v = main_method->Invoke(thread, args.data());
     EXPECT_EQ(v.GetAs<int32_t>(), 0);
+}
+
+TEST_F(MethodTest, GetFullName)
+{
+    pandasm::Parser p;
+
+    auto source = R"(
+        .record Foo {}
+        .record R {}
+
+        .function void R.void_fun(R a0) {
+            return.void
+        }
+        .function void R.static_void_fun() <static> {
+            return.void
+        }
+        .function Foo R.multiple_args(R a0, i32 a1, Foo a2, i64[] a3, Foo[] a4) {
+            lda.obj a2
+            return.obj
+        }
+    )";
+
+    auto res = p.Parse(source);
+    auto pf = pandasm::AsmEmitter::Emit(res.Value());
+    ASSERT_NE(pf, nullptr);
+
+    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    class_linker->AddPandaFile(std::move(pf));
+    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    PandaString descriptor;
+
+    Class *klass = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R"), &descriptor));
+    ASSERT_NE(klass, nullptr);
+
+    Method *method1 = klass->GetDirectMethod(utf::CStringAsMutf8("void_fun"));
+    ASSERT_NE(method1, nullptr);
+    ASSERT_EQ(PandaStringToStd(method1->GetFullName()), "R::void_fun");
+    ASSERT_EQ(PandaStringToStd(method1->GetFullName(true)), "void R::void_fun(R)");
+
+    Method *method2 = klass->GetDirectMethod(utf::CStringAsMutf8("static_void_fun"));
+    ASSERT_NE(method2, nullptr);
+    ASSERT_EQ(PandaStringToStd(method2->GetFullName()), "R::static_void_fun");
+    ASSERT_EQ(PandaStringToStd(method2->GetFullName(true)), "void R::static_void_fun()");
+
+    Method *method3 = klass->GetDirectMethod(utf::CStringAsMutf8("multiple_args"));
+    ASSERT_NE(method3, nullptr);
+    ASSERT_EQ(PandaStringToStd(method3->GetFullName()), "R::multiple_args");
+    ASSERT_EQ(PandaStringToStd(method3->GetFullName(true)), "Foo R::multiple_args(R, i32, Foo, [J, [LFoo;)");
 }
 
 }  // namespace panda::test

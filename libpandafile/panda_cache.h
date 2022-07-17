@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_PANDA_CACHE_H_
-#define PANDA_LIBPANDAFILE_PANDA_CACHE_H_
+#ifndef LIBPANDAFILE_PANDA_CACHE_H_
+#define LIBPANDAFILE_PANDA_CACHE_H_
 
 #include "file.h"
 #include "os/mutex.h"
@@ -68,7 +68,7 @@ public:
 
     inline uint32_t GetFieldIndex(File::EntityId id) const
     {
-        // lowest one or two bits are very likely same between different fields
+        // lowest one or two bits is very likely same between different fields
         return panda::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), FIELD_CACHE_SIZE, 2U);
     }
 
@@ -77,11 +77,12 @@ public:
         return panda::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), CLASS_CACHE_SIZE);
     }
 
-    inline Method *GetMethodFromCache([[maybe_unused]] File::EntityId id) const
+    inline Method *GetMethodFromCache(File::EntityId id) const
     {
         uint32_t index = GetMethodIndex(id);
         auto *pair_ptr =
             reinterpret_cast<std::atomic<MethodCachePair> *>(reinterpret_cast<uintptr_t>(&(method_cache_[index])));
+        // Atomic with acquire order reason: fixes a data race with method_cache_
         auto pair = pair_ptr->load(std::memory_order_acquire);
         TSAN_ANNOTATE_HAPPENS_AFTER(pair_ptr);
         if (pair.id_ == id) {
@@ -90,7 +91,7 @@ public:
         return nullptr;
     }
 
-    inline void SetMethodCache([[maybe_unused]] File::EntityId id, [[maybe_unused]] Method *method)
+    inline void SetMethodCache(File::EntityId id, Method *method)
     {
         MethodCachePair pair;
         pair.id_ = id;
@@ -99,14 +100,16 @@ public:
         auto *pair_ptr =
             reinterpret_cast<std::atomic<MethodCachePair> *>(reinterpret_cast<uintptr_t>(&(method_cache_[index])));
         TSAN_ANNOTATE_HAPPENS_BEFORE(pair_ptr);
+        // Atomic with release order reason: fixes a data race with method_cache_
         pair_ptr->store(pair, std::memory_order_release);
     }
 
-    inline Field *GetFieldFromCache([[maybe_unused]] File::EntityId id) const
+    inline Field *GetFieldFromCache(File::EntityId id) const
     {
         uint32_t index = GetFieldIndex(id);
         auto *pair_ptr =
             reinterpret_cast<std::atomic<FieldCachePair> *>(reinterpret_cast<uintptr_t>(&(field_cache_[index])));
+        // Atomic with acquire order reason: fixes a data race with field_cache_
         auto pair = pair_ptr->load(std::memory_order_acquire);
         TSAN_ANNOTATE_HAPPENS_AFTER(pair_ptr);
         if (pair.id_ == id) {
@@ -115,7 +118,7 @@ public:
         return nullptr;
     }
 
-    inline void SetFieldCache([[maybe_unused]] File::EntityId id, [[maybe_unused]] Field *field)
+    inline void SetFieldCache(File::EntityId id, Field *field)
     {
         uint32_t index = GetFieldIndex(id);
         auto *pair_ptr =
@@ -124,14 +127,16 @@ public:
         pair.id_ = id;
         pair.ptr_ = field;
         TSAN_ANNOTATE_HAPPENS_BEFORE(pair_ptr);
+        // Atomic with release order reason: fixes a data race with field_cache_
         pair_ptr->store(pair, std::memory_order_release);
     }
 
-    inline Class *GetClassFromCache([[maybe_unused]] File::EntityId id) const
+    inline Class *GetClassFromCache(File::EntityId id) const
     {
         uint32_t index = GetClassIndex(id);
         auto *pair_ptr =
             reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(class_cache_[index])));
+        // Atomic with acquire order reason: fixes a data race with class_cache_
         auto pair = pair_ptr->load(std::memory_order_acquire);
         TSAN_ANNOTATE_HAPPENS_AFTER(pair_ptr);
         if (pair.id_ == id) {
@@ -140,7 +145,7 @@ public:
         return nullptr;
     }
 
-    inline void SetClassCache([[maybe_unused]] File::EntityId id, [[maybe_unused]] Class *clazz)
+    inline void SetClassCache(File::EntityId id, Class *clazz)
     {
         ClassCachePair pair;
         pair.id_ = id;
@@ -149,15 +154,28 @@ public:
         auto *pair_ptr =
             reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(class_cache_[index])));
         TSAN_ANNOTATE_HAPPENS_BEFORE(pair_ptr);
+        // Atomic with release order reason: fixes a data race with class_cache_
         pair_ptr->store(pair, std::memory_order_release);
     }
 
+    inline void Clear()
+    {
+        method_cache_.clear();
+        field_cache_.clear();
+        class_cache_.clear();
+
+        method_cache_.resize(METHOD_CACHE_SIZE, MethodCachePair());
+        field_cache_.resize(FIELD_CACHE_SIZE, FieldCachePair());
+        class_cache_.resize(CLASS_CACHE_SIZE, ClassCachePair());
+    }
+
     template <class Callback>
-    bool EnumerateCachedClasses([[maybe_unused]] const Callback &cb)
+    bool EnumerateCachedClasses(const Callback &cb)
     {
         for (uint32_t i = 0; i < CLASS_CACHE_SIZE; i++) {
             auto *pair_ptr =
                 reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(class_cache_[i])));
+            // Atomic with acquire order reason: fixes a data race with class_cache_
             auto pair = pair_ptr->load(std::memory_order_acquire);
             TSAN_ANNOTATE_HAPPENS_AFTER(pair_ptr);
             if (pair.ptr_ != nullptr) {
@@ -189,4 +207,4 @@ private:
 }  // namespace panda_file
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDAFILE_PANDA_CACHE_H_
+#endif

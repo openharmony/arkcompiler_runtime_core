@@ -13,19 +13,19 @@
 
 set(PANDA_TRIPLET arm-linux-gnueabi)
 set(PANDA_SYSROOT /usr/${PANDA_TRIPLET})
-set(PANDA_TARGET_ARM32_ABI_SOFT 1)
-set(PANDA_RUN_PREFIX qemu-arm -L ${PANDA_SYSROOT})
+set(PANDA_TARGET_ARM32_ABI_SOFTFP 1)
 
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(CMAKE_PREFIX_PATH ${PANDA_SYSROOT})
 
-set(CMAKE_CROSSCOMPILING True)
 add_compile_options(
-   -march=armv7-a
-   -mfpu=vfp
+   -mfloat-abi=softfp
+   -Wno-psabi
 )
 
+include(${CMAKE_CURRENT_LIST_DIR}/arm.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
 set_c_compiler(${PANDA_TRIPLET}-gcc)
 set_cxx_compiler(${PANDA_TRIPLET}-g++)
+set(PANDA_RUN_PREFIX ${QEMU_ARM32_BIN} -L ${PANDA_SYSROOT})

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDAFILE_MODIFIERS_H_
-#define PANDA_LIBPANDAFILE_MODIFIERS_H_
+#ifndef LIBPANDAFILE_MODIFIERS_H_
+#define LIBPANDAFILE_MODIFIERS_H_
 
 #include "utils/bit_utils.h"
 
@@ -43,6 +43,10 @@ static constexpr uint32_t ACC_ENUM = 0x4000;          // field, class
 
 static constexpr uint32_t ACC_FILE_MASK = 0xFFFF;
 
+// Field type
+static constexpr uint32_t ACC_TYPE = 0x00FF0000;  // field
+static constexpr uint32_t ACC_TYPE_SHIFT = Ctz(ACC_TYPE);
+
 // Runtime internal modifiers
 static constexpr uint32_t ACC_HAS_DEFAULT_METHODS = 0x00010000;       // class (runtime)
 static constexpr uint32_t ACC_CONSTRUCTOR = 0x00010000;               // method (runtime)
@@ -51,7 +55,8 @@ static constexpr uint32_t ACC_SINGLE_IMPL = 0x00040000;               // method 
 static constexpr uint32_t ACC_INTRINSIC = 0x00200000;                 // method (runtime)
 
 static constexpr uint32_t INTRINSIC_SHIFT = MinimumBitsToStore(ACC_INTRINSIC);
-static constexpr uint32_t INTRINSIC_MASK = static_cast<uint32_t>(0xff) << INTRINSIC_SHIFT;
+static constexpr uint32_t INTRINSIC_MASK = static_cast<uint32_t>(0xffffffff) << INTRINSIC_SHIFT;
+static constexpr uint32_t MAX_INTRINSIC_NUMBER = INTRINSIC_MASK >> INTRINSIC_SHIFT;
 
 // Runtime internal language specific modifiers
 static constexpr uint32_t ACC_PROXY = 0x00020000;            // class (java runtime)
@@ -67,4 +72,4 @@ static constexpr uint32_t COMPILATION_STATUS_SHIFT = MinimumBitsToStore(ACC_COMP
 static constexpr uint32_t COMPILATION_STATUS_MASK = static_cast<uint32_t>(0x7) << COMPILATION_STATUS_SHIFT;
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDAFILE_MODIFIERS_H_
+#endif

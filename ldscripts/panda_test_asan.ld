@@ -1,17 +1,4 @@
-/*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/* Huawei Technologies Co.,Ltd. */
 
 /*
     Panda linker script for placement of sections above 4GB.
@@ -19,7 +6,7 @@
 ENTRY(_start)
 SECTIONS {
     /*
-    According to asan_mapping.h mem range lower than ~2G is safe for usage on all platforms.
+    According to asan_mapping.h mem range lower ~2G is safe for usage on all platforms.
     So memory map is set up for data in 0..1G and ELF in 1..2G.
 
     Typical shadow mapping on Linux/x86_64 with SHADOW_OFFSET == 0x00007fff8000:
@@ -291,7 +278,7 @@ SECTIONS {
    /* Align here to ensure that the .bss section occupies space up to
       _end.  Align after .bss to ensure correct alignment even if the
       .bss section disappears because there are no input sections.
-      Note: Why do we need it? When there is no .bss section, we don't
+      FIXME: Why do we need it? When there is no .bss section, we don't
       pad the .data section.  */
    . = ALIGN(. != 0 ? 64 / 8 : 1);
   }
@@ -358,3 +345,4 @@ SECTIONS {
   /DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) *(.gnu.lto_*) }
 
 }
+    

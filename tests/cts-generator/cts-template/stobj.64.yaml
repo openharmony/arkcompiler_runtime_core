@@ -67,7 +67,7 @@ tests:
         check-type: exit-positive
         tags: ['verifier']
         bugid: ['1324']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
 
           %s
@@ -97,6 +97,7 @@ tests:
             - v1
             bugid: ['1324']
 
+
       - file-name: "with_null_ref"
         description: Check that NullPointerException is thrown if object ref is null
         isa:
@@ -104,7 +105,7 @@ tests:
             - x_null
         header-template: ['pandasm_header']
         check-type: empty
-        tags: ['tsan', 'arm64-jit']
+        tags: ['tsan', 'irtoc_ignore']
         bugid: ['3047']
         code-template: |
           .record panda.NullPointerException <external>
@@ -139,6 +140,7 @@ tests:
             - R.ff64
             bugid: ['1882']
 
+
       - file-name: "with_non_object_ref"
         description: Check that verifier reports error when the 1st operand is not a ref to an object (other than array)
         isa:
@@ -147,7 +149,7 @@ tests:
         header-template: ['pandasm_header']
         check-type: empty
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
           .function i32 main() {
             %s
@@ -211,7 +213,7 @@ tests:
         cases:
           - values:
             - W.static_field
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             tags: ['verifier']
             bugid: ['1324', '1828']
           - values:
@@ -226,9 +228,8 @@ tests:
           - values:
             - random_record_name.random_field_name
             tags: ['verifier']
-            runner-options: ['verifier-failure', 'verifier-debug-config']
+            runner-options: ['verifier-failure', 'verifier-config']
             bugid: ['3536']
-            ignore: true
           - values:
             - 0
             runner-options: ['compile-failure']
@@ -242,6 +243,7 @@ tests:
             - "\"abc\""
             runner-options: ['compile-failure']
 
+
       - file-name: "with_wrong_field_size"
         description: Check that verifier reports error when the field resolves to a field with size that is not corresponding to bytecode
         isa:
@@ -250,36 +252,50 @@ tests:
         header-template: ['pandasm_header']
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         bugid: ['1834']
         code-template: |
-
           .function i32 main() {
             initobj R.ctor
             sta.obj v0
-            ldai.64 0
+            %s
             stobj.64 v0, %s
         cases:
           - values:
+            - ldai.64 0
             - R.fu1
           - values:
+            - ldai.64 0
             - R.fu8
           - values:
+            - ldai.64 0
             - R.fi8
           - values:
+            - ldai.64 0
             - R.fu16
           - values:
+            - ldai.64 0
             - R.fi16
           - values:
+            - ldai.64 0
             - R.fu32
           - values:
+            - ldai.64 0
             - R.fi32
           - values:
+            - fldai.64 0.0
+            - R.ff32
+            bugid: ['6094']
+          - values:
+            - ldai.64 0
             - R.fObj
           - values:
+            - fldai.64 0.0
             - R.fObjArray
           - values:
+            - ldai.64 0
             - R.fi32Array
+
 
       - file-name: "with_wrong_acc_type"
         description: Check that verifier reports error when the accumulator contains a value of type not corresponding to the bytecode
@@ -289,7 +305,7 @@ tests:
         header-template: ['pandasm_header']
         check-type: exit-positive
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         bugid: ['1834']
         code-template: |
           .function i32 main() {
@@ -304,6 +320,9 @@ tests:
             - R.fu64
           - values:
             - ldai 0xCAFECAFE
+            - R.fu64
+          - values:
+            - fldai 1.1
             - R.fu64
           - values:
             - fldai.64 1.1
@@ -328,6 +347,9 @@ tests:
             - ldai 0xCAFECAFE
             - R.fi64
           - values:
+            - fldai 1.1
+            - R.fi64
+          - values:
             - fldai.64 1.1
             - R.fi64
           - values:
@@ -350,6 +372,10 @@ tests:
             - ldai 0xCAFECAFE
             - R.ff64
           - values:
+            - fldai 1.1
+            - R.ff64
+            bugid: ['6094']
+          - values:
             - ldai.64 1
             - R.ff64
           - values:
@@ -364,28 +390,6 @@ tests:
                 newarr v1, v1, i32[]
                 lda.obj v1
             - R.ff64
-          # f32
-          - values:
-            - ldai 0
-            - R.ff32
-          - values:
-            - ldai 0xCAFECAFE
-            - R.ff32
-          - values:
-            - ldai.64 1
-            - R.ff32
-          - values:
-            - lda.null
-            - R.ff32
-          - values:
-            - initobj Q.ctor
-            - R.ff32
-          - values:
-            - |
-              movi v1, 10
-                newarr v1, v1, i32[]
-                lda.obj v1
-            - R.ff32
 
 
       - file-name: "op_v_8_id_16"
@@ -408,13 +412,17 @@ tests:
           - values: ['v65535']
             runner-options: ['compile-failure']
 
+
       - file-name: "into_all_field_types"
         description: Check that accumulator value is stored in field
         isa:
-          description: If field type is f32, accumulator content will be implicitly converted from f64 to f32 before storing.
+          instructions:
+            - sig: stobj.64 v:in:ref, field_id
+              acc: in:b64
+              format: [op_v_8_id_16]
         header-template: ['pandasm_header']
         check-type: exit-positive
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         code-template: |
           .function i32 main() {
             initobj R.ctor
@@ -510,3 +518,43 @@ tests:
             - |
                 fmovi.64 v1, 0xfff0000000000000
                   fcmpg.64 v1
+
+
+      - file-name: "implicit_type_converting"
+        description: Check that verifier does not allow to convert f64 -> f32 implicitly
+        isa:
+          instructions:
+            - sig: stobj.64 v:in:ref, field_id
+              acc: in:b64
+              format: [op_v_8_id_16]
+        header-template: ['pandasm_header']
+        check-type: exit-positive
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
+        bugid: ['6094']
+        code-template: |
+          .function i32 main() {
+            initobj R.ctor
+            sta.obj v0
+            %s
+            stobj.64 v0, R.%s
+            ldai 1
+            return
+          success:
+        cases:
+          # f32
+          - values:
+            - fldai.64 0.0
+            - ff32
+          - values:
+            - fldai.64 -6510615555426900571.0
+            - ff32
+          - values:
+            - fldai.64 0x7FFFFFFFFFFFFFFF  # NaN
+            - ff32
+          - values:
+            - fldai.64 0x7ff0000000000000  # + Inf
+            - ff32
+          - values:
+            - fldai.64 0xfff0000000000000  # - Inf
+            - ff32

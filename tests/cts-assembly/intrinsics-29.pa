@@ -14,7 +14,7 @@
 .record System <external>
 .function void System.exit(i32 a0) <external>
 
-.function u1 main(){
+.function i32 main(){
     movi v0, 0
     call System.exit, v0
     ldai 1

@@ -27,7 +27,7 @@
     return.void
 }
 
-.function u1 main() {
+.function i32 main() {
     movi v0, 10
 
     initobj.short R.ctor

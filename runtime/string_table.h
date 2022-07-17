@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef PANDA_RUNTIME_STRING_TABLE_H_
 #define PANDA_RUNTIME_STRING_TABLE_H_
 
@@ -35,24 +34,30 @@ public:
     explicit StringTable(mem::InternalAllocatorPtr allocator) : internal_table_(allocator), table_(allocator) {}
     StringTable() = default;
     virtual ~StringTable() = default;
-    virtual coretypes::String *GetOrInternString(const uint8_t *mutf8_data, uint32_t utf16_length, LanguageContext ctx);
+    virtual coretypes::String *GetOrInternString(const uint8_t *mutf8_data, uint32_t utf16_length,
+                                                 const LanguageContext &ctx);
     virtual coretypes::String *GetOrInternString(const uint16_t *utf16_data, uint32_t utf16_length,
-                                                 LanguageContext ctx);
-    coretypes::String *GetOrInternString(coretypes::String *string, LanguageContext ctx);
+                                                 const LanguageContext &ctx);
+    coretypes::String *GetOrInternString(coretypes::String *string, const LanguageContext &ctx);
 
     coretypes::String *GetOrInternInternalString(const panda_file::File &pf, panda_file::File::EntityId id,
-                                                 LanguageContext ctx);
+                                                 const LanguageContext &ctx);
 
     coretypes::String *GetInternalStringFast(const panda_file::File &pf, panda_file::File::EntityId id)
     {
         return internal_table_.GetStringFast(pf, id);
     }
 
-    using StringVisitor = std::function<void(coretypes::String *)>;
+    using StringVisitor = std::function<void(ObjectHeader *)>;
 
     void VisitRoots(const StringVisitor &visitor, mem::VisitGCRootFlags flags = mem::VisitGCRootFlags::ACCESS_ROOT_ALL)
     {
         internal_table_.VisitRoots(visitor, flags);
+    }
+
+    void VisitStrings(const StringVisitor &visitor)
+    {
+        table_.VisitStrings(visitor);
     }
 
     virtual void Sweep(const GCObjectVisitor &gc_object_visitor);
@@ -69,29 +74,31 @@ protected:
         virtual ~Table() = default;
 
         virtual coretypes::String *GetOrInternString(const uint8_t *mutf8_data, uint32_t utf16_length,
-                                                     bool can_be_compressed, LanguageContext ctx);
+                                                     bool can_be_compressed, const LanguageContext &ctx);
         virtual coretypes::String *GetOrInternString(const uint16_t *utf16_data, uint32_t utf16_length,
-                                                     LanguageContext ctx);
-        coretypes::String *GetOrInternString(coretypes::String *string, LanguageContext ctx);
+                                                     const LanguageContext &ctx);
+        coretypes::String *GetOrInternString(coretypes::String *string, const LanguageContext &ctx);
         virtual void Sweep(const GCObjectVisitor &gc_object_visitor);
 
         bool UpdateMoved();
 
+        void VisitStrings(const StringVisitor &visitor);
+
         size_t Size();
 
         coretypes::String *GetString(const uint8_t *utf8_data, uint32_t utf16_length, bool can_be_compressed,
-                                     LanguageContext ctx);
-        coretypes::String *GetString(const uint16_t *utf16_data, uint32_t utf16_length, LanguageContext ctx);
-        coretypes::String *GetString(coretypes::String *string, LanguageContext ctx);
+                                     const LanguageContext &ctx);
+        coretypes::String *GetString(const uint16_t *utf16_data, uint32_t utf16_length, const LanguageContext &ctx);
+        coretypes::String *GetString(coretypes::String *string, const LanguageContext &ctx);
 
-        coretypes::String *InternString(coretypes::String *string, LanguageContext ctx);
-        void ForceInternString(coretypes::String *string, LanguageContext ctx);
+        coretypes::String *InternString(coretypes::String *string, const LanguageContext &ctx);
+        void ForceInternString(coretypes::String *string, const LanguageContext &ctx);
 
     protected:
         // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
         PandaUnorderedMultiMap<uint32_t, coretypes::String *> table_ GUARDED_BY(table_lock_) {};
         os::memory::RWLock table_lock_;  // NOLINT(misc-non-private-member-variables-in-classes)
-        
+
     private:
         NO_COPY_SEMANTIC(Table);
         NO_MOVE_SEMANTIC(Table);
@@ -110,13 +117,13 @@ protected:
         ~InternalTable() override = default;
 
         coretypes::String *GetOrInternString(const uint8_t *mutf8_data, uint32_t utf16_length, bool can_be_compressed,
-                                             LanguageContext ctx) override;
+                                             const LanguageContext &ctx) override;
 
         coretypes::String *GetOrInternString(const uint16_t *utf16_data, uint32_t utf16_length,
-                                             LanguageContext ctx) override;
+                                             const LanguageContext &ctx) override;
 
         coretypes::String *GetOrInternString(const panda_file::File &pf, panda_file::File::EntityId id,
-                                             LanguageContext ctx);
+                                             const LanguageContext &ctx);
 
         coretypes::String *GetStringFast(const panda_file::File &pf, panda_file::File::EntityId id);
 
@@ -124,7 +131,7 @@ protected:
                         mem::VisitGCRootFlags flags = mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
 
     protected:
-        coretypes::String *InternStringNonMovable(coretypes::String *string, LanguageContext ctx);
+        coretypes::String *InternStringNonMovable(coretypes::String *string, const LanguageContext &ctx);
 
     private:
         bool record_new_string_ {false};

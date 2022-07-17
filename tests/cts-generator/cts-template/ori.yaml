@@ -36,10 +36,11 @@ tests:
               movi v0, %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `ori` with zero and various values.
         cases:
           - values: ["0", "0x0"]
@@ -51,6 +52,8 @@ tests:
           - values: ["-0x80000000", "0x80000000"]
           - values: ["0xFFFFFFFF", "0xFFFFFFFF"]
           - values: ["-0xFFFFFFFF", "0x1"]
+
+
       - file-name: op_imm_32_pone
         isa:
           instructions:
@@ -64,10 +67,11 @@ tests:
               movi v0, %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `ori` with +1 and various values.
         cases:
           - values: ["0", "0x1"]
@@ -79,6 +83,8 @@ tests:
           - values: ["-0x80000000", "0x80000001"]
           - values: ["0xFFFFFFFF", "0xFFFFFFFF"]
           - values: ["-0xFFFFFFFF", "0x1"]
+
+
       - file-name: op_imm_32_none
         isa:
           instructions:
@@ -92,10 +98,11 @@ tests:
               movi v0, -1
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `ori` with -1 and various values.
         cases:
           - values: ["0"]
@@ -107,6 +114,8 @@ tests:
           - values: ["-0x80000000"]
           - values: ["0xFFFFFFFF"]
           - values: ["-0xFFFFFFFF"]
+
+
       - file-name: op_imm_32_pmax
         isa:
           instructions:
@@ -120,10 +129,11 @@ tests:
               movi v0, %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `ori` with +max and various values.
         cases:
           - values: ["0", "0x7FFFFFFF"]
@@ -135,6 +145,8 @@ tests:
           - values: ["-0x80000000", "0xFFFFFFFF"]
           - values: ["0xFFFFFFFF", "0xFFFFFFFF"]
           - values: ["-0xFFFFFFFF", "0x7FFFFFFF"]
+
+
       - file-name: op_imm_32_nmax
         isa:
           instructions:
@@ -148,10 +160,11 @@ tests:
               movi v0, %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `ori` with -max and various values.
         cases:
           - values: ["0", "0x80000000"]
@@ -163,6 +176,8 @@ tests:
           - values: ["-0x80000000", "0x80000000"]
           - values: ["0xFFFFFFFF", "0xFFFFFFFF"]
           - values: ["-0xFFFFFFFF", "0x80000001"]
+
+
       - file-name: vals
         isa:
           instructions:
@@ -176,10 +191,11 @@ tests:
               movi v0, %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
+              return
+        check-type: none
         description: Check `ori` with various values.
         tags: ['tsan']
         cases:
@@ -193,83 +209,55 @@ tests:
           - values: ["0x7087DE68", "0xCA657C6B", "0xFAE7FE6B"]
           - values: ["0xDAE0024B", "0x710D16E", "0xDFF0D36F"]
           - values: ["0xA7D559B3", "0x9216E6E5", "0xB7D7FFF7"]
+
+
       - file-name: type
-        bugid: ["964", "966"]
-        tags: ["verifier"]
         isa:
-          instructions:
-            - sig: ori imm:i32
-              acc: inout:i32
-              format: [op_imm_32]
           verification:
             - acc_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
+        header-template: []
         code-template: |
           #
-              %s
-              ori 1
-              ldai 0
-        check-type: no-check
-        description: Check `ori` with incorrect accumulator type.
-        cases:
-          - values: [fldai.64 0.0]
-          - values: [fldai.64 -0.0]
-          - values: [fldai.64 1.0]
-          - values: [fldai.64 -1.0]
-          - values: [fldai.64 0x7FF8000000000000]
-          - values: [fldai.64 0xFFFFFFFFFFFFFFFF]
-          - values: [fldai.64 0x7FF0000000000000]
-          - values: [fldai.64 0xFFF0000000000000]
-          - values: [fldai.64 0xFFEFFFFFFFFFFFFF]
-          - values: [fldai.64 0x7FEFFFFFFFFFFFFF]
-          - values: [fldai.64 0x0000000000000001]
-          - values: [fldai.64 0x8000000000000001]
-          - values: [fldai.64 3.14159265358979323846]
-          - values: [lda.str ""]
-          - values: [lda.str "some string"]
-          - values: [lda.null]
-          - values: [ldai.64 0]
-          - values: [ldai.64 1]
-          - values: [ldai.64 -1]
-          - values: [ldai.64 0x0000000100000000]
-          - values: [ldai.64 -0x0000000100000000]
-          - values: [ldai.64 0x0000000080000000]
-          - values: [ldai.64 -0x0000000080000000]
-          - values: [ldai.64 0x1000000000000000]
-          - values: [ldai.64 0x8000000000000000]
-          - values: [ldai.64 0xF000000000000000]
-          - values: [ldai.64 0xFFFFFFFF00000000]
-          - values: [ldai.64 0xFFFFFFFFFFFFFFFF]
-          - values: [ldai.64 -0x1000000000000000]
-          - values: [ldai.64 -0x8000000000000000]
-          - values: [ldai.64 -0xF000000000000000]
-          - values: [ldai.64 -0xFFFFFFFF00000000]
-          - values: [ldai.64 -0xFFFFFFFFFFFFFFFF]
-      - file-name: type_obj
-        bugid: ["964", "966"]
-        tags: ["verifier"]
-        isa:
-          instructions:
-            - sig: ori imm:i32
-              acc: inout:i32
-              format: [op_imm_32]
-          verification:
-            - acc_type
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        description: Check `ori` with incorrect accumulator type.
-        code-template: |
-          #
-          .record Object {}
+          .record panda.Object <external>
           .function i32 main() {
               %s
-              ori 1
-              ldai 0
-              return
-        check-type: none
-        header-template: []
+              ori 0
+        check-type: exit-positive
+        description: Check 'ori' with incorrect acc type.
         cases:
-          - values: [lda.type Object]
+          - values: [ldai.64 0]
+          - values: [fldai 0]
+            bugid: ['7315']
+          - values: [fldai.64 0]
+          - values: [lda.null]
+          - values: [lda.type panda.Object]
+          - values: ['lda.type i32[]']
+          - values: [lda.str ""]
           - values:
             - |
-              newobj v0, Object
-              lda.obj v0
+              #
+                  newobj v0, panda.Object
+                  lda.obj v0
+          - values:
+            - |
+              #
+                  movi v0, 10
+                  newarr v0, v0, i32[]
+                  lda.obj v0
+
+
+      - file-name: uninitialized_acc
+        isa:
+          instructions:
+            - sig: ori imm:i32
+              acc: inout:i32
+              format: [op_imm_32]
+        description: Check 'ori' with uninitialized accumulator.
+        tags: ['verifier']
+        runner-options: ['verifier-failure', 'verifier-config']
+        code-template: |
+            #
+                ori 0
+        check-type: exit-positive

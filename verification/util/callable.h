@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_UTIL_CALLABLE_H_
-#define PANDA_VERIFICATION_UTIL_CALLABLE_H_
+#ifndef PANDA_VERIF_PARSER_CALLABLE_H_
+#define PANDA_VERIF_PARSER_CALLABLE_H_
 
 #include <utility>
 #include <tuple>
@@ -107,9 +107,9 @@ public:
 
     operator bool() const
     {
-        return method != nullptr;
+        return (method.m != nullptr) || (method.f != nullptr);
     }
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_UTIL_CALLABLE_H_
+#endif  // PANDA_VERIF_PARSER_CALLABLE_H_

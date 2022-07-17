@@ -12,9 +12,9 @@
 # limitations under the License.
 ---
 definitions:
-  - name: java
+  - name: PandaAssembly
     template: >
-      .language Java
+      .language PandaAssembly
 
 tests:
   - file-name: call.range
@@ -33,8 +33,6 @@ tests:
         be discarded and corresponding registers will not be passed to the callee).
         For methods with more arguments range kind of instruction is to be used, which takes the needed number
         of arguments starting from 'vs' register.
-      exceptions:
-        - x_none
       verification:
         - method_id_static
         - compatible_arguments
@@ -172,7 +170,7 @@ tests:
       - file-name: uninitialized_values
         bugid: ['1324']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: call.range method_id, v:in:top
@@ -217,7 +215,7 @@ tests:
       - file-name: uninitialized_reg_no_arg
         bugid: ['1324']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: call.range method_id, v:in:top
@@ -270,7 +268,7 @@ tests:
       - file-name: args_type_mismatch
         bugid: ['1324']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: call.range method_id, v:in:top
@@ -392,6 +390,7 @@ tests:
               acc: out:top
               format: [op_v_8_id_16]
         description: Check correctness of passed arguments. Load parameter to accumulator. Check f64 type of arguments.
+        tags: ['irtoc_ignore']
         header-template: []
         code-template: |
           .function i32 f1(f64 a0) {
@@ -452,6 +451,7 @@ tests:
               acc: out:top
               format: [op_v_8_id_16]
         description: Check correctness of passed arguments. Load parameter to register. Check f64 type of arguments.
+        tags: ['irtoc_ignore']
         header-template: []
         code-template: |
           .function i32 f1(f64 a0) {
@@ -602,6 +602,7 @@ tests:
               format: [op_v_8_id_16]
         description: Check correctness of passed arguments. Load parameter to accumulator. Check f64 type of arguments.
         header-template: []
+        tags: ['irtoc_ignore']
         code-template: |
           .function i32 f1(f64 a0, f64 a1, f64 a2, f64 a3) {
               lda.64 a0
@@ -652,7 +653,7 @@ tests:
               acc: out:top
               format: [op_v_8_id_16]
         description: Check correctness of passed arguments. Load parameter to register. Check f64 type of arguments.
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         header-template: []
         code-template: |
           .function i32 f1(f64 a0, f64 a1, f64 a2, f64 a3) {
@@ -912,6 +913,7 @@ tests:
               acc: out:top
               format: [op_v_8_id_16]
         description: Check correctness of passed arguments. Load parameter to accumulator. Check object type.
+        tags: ['irtoc_ignore']
         header-template: [obj_ctor]
         code-template: |
           .record ObjTuple {
@@ -1042,7 +1044,7 @@ tests:
               acc: out:top
               format: [op_v_8_id_16]
         description: Check correctness of passed arguments. Load parameter to accumulator. Check String type.
-        tags: ['tsan']
+        tags: ['tsan', 'irtoc_ignore']
         header-template: [panda_string]
         code-template: |
           .record ObjTuple {
@@ -1168,8 +1170,7 @@ tests:
 
       - file-name: method_id_not_static_p
         tags: ['verifier']
-        bugid: ['3247']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
             instructions:
               - sig: call.range method_id, v:in:top
@@ -1203,16 +1204,172 @@ tests:
                     return
                 }
               ignore: true
+              bugid: ['3247']
             - values: ['<noimpl>']
               ignore: true
+              bugid: ['3247']
             - values:
               - |
                 <static> {
                     ldai 0
                     return
                 }
-              runner-options: ['verifier-only', 'verifier-debug-config']
+              runner-options: ['verifier-only', 'verifier-config']
         template-cases:
           - values: ['', '##-']
           - values: [', A a1', 'mov.obj v1, v0']
+
+      - file-name: method_id_not_static_j
+        tags: ['verifier', 'pa-verifier']
+        runner-options: [verifier-failure, use-pa, verifier-config]
+        isa:
+            instructions:
+              - sig: call.range method_id, v:in:top
+                acc: out:top
+                format: [op_v_8_id_16]
+            verification:
+              - method_id_static
+              - method_id_non_abstract
+        description: Method_id must resolve to a static method in PandaAssembly context. Not static methods should be rejected by verifier.
+        header-template: [PandaAssembly]
+        code-template: |
+            .record A {}
+
+            .function void A.ctor(A a0) <ctor> {
+                return.void
+            }
+
+            .function i32 A.foo(A a0%s) *s
+
+            .function i32 main() {
+                initobj A.ctor
+                sta.obj v0
+                %s
+                call.range A.foo, v0
+        check-type: exit-positive
+        cases:
+            - values:
+              - |
+                {
+                    ldai 0
+                    return
+                }
+              ignore: true
+              bugid: ['3247']
+            - values: ['<noimpl>']
+              ignore: true
+              bugid: ['3247']
+            - values:
+              - |
+                <static> {
+                  ldai 0
+                  return
+                }
+              runner-options: [verifier-only, use-pa, verifier-config]
+        template-cases:
+          - values: ['', '##-']
+          - values: [', A a1', 'mov.obj v1, v0']
+
+
+      - file-name: method_id_not_static_j_2
+        tags: ['verifier']
+        bugid: ['3247']
+        ignore: true
+        runner-options: [verifier-failure, use-pa, verifier-config]
+        isa:
+          instructions:
+            - sig: call.range method_id, v:in:top
+              acc: out:top
+              format: [op_v_8_id_16]
+          verification:
+            - method_id_static
+            - method_id_non_abstract
+        description: Method_id must resolve to a static method.
+        header-template: [PandaAssembly]
+        code-template: |
+            .record A {}
+            .function i32 A.foo(A a0) <noimpl>
+            %s
+            .function i32 %s.foo(%s a0) {
+                ldai 0
+                return
+            }
+
+            .function i32 main() {
+                newobj v0, %s
+                call.range A.foo, v0
+
+        check-type: exit-positive
+        cases:
+          - values:
+              - .record B <panda.extends=A> {}
+              - B
+              - B
+              - B
+
+          - values:
+              - |
+                .record B <panda.extends=A> {}
+                .record C <panda.extends=B> {}
+              - C
+              - C
+              - C
+
+          - values:
+              - |
+                #
+                .record B <panda.extends=A> {}
+                .record C <panda.extends=B> {}
+                .record D <panda.extends=C> {}
+                .record E <panda.extends=D> {}
+                .record F <panda.extends=E> {}
+              - F
+              - F
+              - F
+
+      - file-name: method_id_abstract
+        isa:
+          instructions:
+            - sig: call.range method_id, v:in:top
+              acc: out:top
+              format: [op_v_8_id_16]
+          verification:
+            - method_id_static
+            - method_id_non_abstract
+        description: Check behavior when 'call.range' is used with abstract method.
+        header-template: []
+        runner-options: [use-pa]
+        code-template: |
+            .language PandaAssembly
+
+            .record A {}
+            .function i32 A.foo(A a0) <noimpl>
+
+            %s
+
+            .function i32 main() {
+                call.range %s.foo, v0
+        check-type: exit-positive
+        cases:
+          - values:
+              - ''
+              - A
+            runner-options: [verifier-failure, use-pa, verifier-config]
+            tags: ['verifier', 'pa-verifier']
+            bugid: ['3293', '5271']
+          - values:
+              - .record B <panda.extends=A> {}
+              - B
+            runner-options: [compile-failure]
+
+          - values:
+              - |
+                #
+                .record B <panda.extends=A> {}
+                .record C <panda.extends=B> {}
+                .record D <panda.extends=C> {}
+                .record E <panda.extends=D> {}
+                .record F <panda.extends=E> {}
+              - F
+            runner-options: [compile-failure]
 

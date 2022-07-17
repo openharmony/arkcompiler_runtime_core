@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_OBJECT_HEADER_INL_H_
-#define PANDA_RUNTIME_INCLUDE_OBJECT_HEADER_INL_H_
+#ifndef PANDA_RUNTIME_OBJECT_HEADER_INL_H_
+#define PANDA_RUNTIME_OBJECT_HEADER_INL_H_
 
 #include "runtime/include/class-inl.h"
 #include "runtime/include/field.h"
@@ -23,33 +22,41 @@
 
 namespace panda {
 
-inline bool ObjectHeader::IsInstanceOf(Class *klass)
+template <MTModeT MTMode>
+uint32_t ObjectHeader::GetHashCode()
 {
+    // NOLINTNEXTLINE(readability-braces-around-statements)
+    if constexpr (MTMode == MT_MODE_SINGLE) {
+        return GetHashCodeMTSingle();
+    } else {  // NOLINT(readability-misleading-indentation)
+        return GetHashCodeMTMulti();
+    }
+}
+
+inline bool ObjectHeader::IsInstanceOf(const Class *klass) const
+{
+    ASSERT(klass != nullptr);
     return klass->IsAssignableFrom(ClassAddr<Class>());
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_COMMENT_LOCATION)
 template <class T, bool is_volatile /* = false */>
 inline T ObjectHeader::GetFieldPrimitive(size_t offset) const
 {
     return ObjectAccessor::GetPrimitive<T, is_volatile>(this, offset);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_COMMENT_LOCATION)
 template <class T, bool is_volatile /* = false */>
 inline void ObjectHeader::SetFieldPrimitive(size_t offset, T value)
 {
     ObjectAccessor::SetPrimitive<T, is_volatile>(this, offset, value);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool is_volatile /* = false */, bool need_read_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *ObjectHeader::GetFieldObject(int offset) const
 {
     return ObjectAccessor::GetObject<is_volatile, need_read_barrier, is_dyn>(this, offset);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool is_volatile /* = false */, bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline void ObjectHeader::SetFieldObject(size_t offset, ObjectHeader *value)
 {
@@ -68,37 +75,32 @@ inline void ObjectHeader::SetFieldPrimitive(const Field &field, T value)
     ObjectAccessor::SetFieldPrimitive(this, field, value);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_read_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *ObjectHeader::GetFieldObject(const Field &field) const
 {
     return ObjectAccessor::GetFieldObject<need_read_barrier, is_dyn>(this, field);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline void ObjectHeader::SetFieldObject(const Field &field, ObjectHeader *value)
 {
     ObjectAccessor::SetFieldObject<need_write_barrier, is_dyn>(this, field, value);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_read_barrier /* = true */, bool is_dyn /* = false */>
-inline ObjectHeader *ObjectHeader::GetFieldObject(ManagedThread *thread, const Field &field)
+inline ObjectHeader *ObjectHeader::GetFieldObject(const ManagedThread *thread, const Field &field)
 {
     return ObjectAccessor::GetFieldObject<need_read_barrier, is_dyn>(thread, this, field);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
-inline void ObjectHeader::SetFieldObject(ManagedThread *thread, const Field &field, ObjectHeader *value)
+inline void ObjectHeader::SetFieldObject(const ManagedThread *thread, const Field &field, ObjectHeader *value)
 {
     ObjectAccessor::SetFieldObject<need_write_barrier, is_dyn>(thread, this, field, value);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool is_volatile /* = false */, bool need_write_barrier /* = true */, bool is_dyn /* = false */>
-inline void ObjectHeader::SetFieldObject(ManagedThread *thread, size_t offset, ObjectHeader *value)
+inline void ObjectHeader::SetFieldObject(const ManagedThread *thread, size_t offset, ObjectHeader *value)
 {
     ObjectAccessor::SetObject<is_volatile, need_write_barrier, is_dyn>(thread, this, offset, value);
 }
@@ -115,14 +117,12 @@ inline void ObjectHeader::SetFieldPrimitive(size_t offset, T value, std::memory_
     ObjectAccessor::SetFieldPrimitive(this, offset, value, memory_order);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_read_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *ObjectHeader::GetFieldObject(size_t offset, std::memory_order memory_order) const
 {
     return ObjectAccessor::GetFieldObject<need_read_barrier, is_dyn>(this, offset, memory_order);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline void ObjectHeader::SetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memory_order)
 {
@@ -136,7 +136,6 @@ inline bool ObjectHeader::CompareAndSetFieldPrimitive(size_t offset, T old_value
     return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, old_value, new_value, memory_order, strong).first;
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline bool ObjectHeader::CompareAndSetFieldObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
                                                    std::memory_order memory_order, bool strong)
@@ -153,7 +152,6 @@ inline T ObjectHeader::CompareAndExchangeFieldPrimitive(size_t offset, T old_val
     return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, old_value, new_value, memory_order, strong).second;
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *ObjectHeader::CompareAndExchangeFieldObject(size_t offset, ObjectHeader *old_value,
                                                                  ObjectHeader *new_value,
@@ -170,7 +168,6 @@ inline T ObjectHeader::GetAndSetFieldPrimitive(size_t offset, T value, std::memo
     return ObjectAccessor::GetAndSetFieldPrimitive(this, offset, value, memory_order);
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_HORIZON_SPACE, C_RULE_ID_COMMENT_LOCATION)
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
 inline ObjectHeader *ObjectHeader::GetAndSetFieldObject(size_t offset, ObjectHeader *value,
                                                         std::memory_order memory_order)
@@ -204,4 +201,4 @@ inline T ObjectHeader::GetAndBitwiseXorFieldPrimitive(size_t offset, T value, st
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_OBJECT_HEADER_INL_H_
+#endif  // PANDA_RUNTIME_OBJECT_HEADER_INL_H_

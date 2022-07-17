@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,37 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_EXTENSIONS_EXTENSIONS_H_
-#define PANDA_ASSEMBLER_EXTENSIONS_EXTENSIONS_H_
+#ifndef PANDA_ASSEMBLER_EXTENSIONS_H_
+#define PANDA_ASSEMBLER_EXTENSIONS_H_
 
 #include <memory>
 #include <optional>
 
 #include "meta.h"
+#include "libpandafile/file_items.h"
 
 namespace panda::pandasm::extensions {
 
-enum class Language { ECMASCRIPT, PANDA_ASSEMBLY };
-
-std::optional<Language> LanguageFromString(std::string_view lang);
-
-std::string LanguageToString(const Language &lang);
-
-std::string GetCtorName(Language lang);
-
-std::string GetCctorName(Language lang);
+// Workaround for ets_frontend. Should be removed by our colleagues.
+using Language = panda::panda_file::SourceLang;
 
 class MetadataExtension {
 public:
-    static std::unique_ptr<RecordMetadata> CreateRecordMetadata(Language lang);
+    static std::unique_ptr<RecordMetadata> CreateRecordMetadata(panda::panda_file::SourceLang lang);
 
-    static std::unique_ptr<FieldMetadata> CreateFieldMetadata(Language lang);
+    static std::unique_ptr<FieldMetadata> CreateFieldMetadata(panda::panda_file::SourceLang lang);
 
-    static std::unique_ptr<FunctionMetadata> CreateFunctionMetadata(Language lang);
+    static std::unique_ptr<FunctionMetadata> CreateFunctionMetadata(panda::panda_file::SourceLang lang);
 
-    static std::unique_ptr<ParamMetadata> CreateParamMetadata(Language lang);
+    static std::unique_ptr<ParamMetadata> CreateParamMetadata(panda::panda_file::SourceLang lang);
 };
 
 }  // namespace panda::pandasm::extensions
 
-#endif  // PANDA_ASSEMBLER_EXTENSIONS_EXTENSIONS_H_
+#endif  // PANDA_ASSEMBLER_EXTENSIONS_H_

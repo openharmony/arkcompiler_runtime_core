@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TOOLING_PT_HOOK_TYPE_INFO_H_
-#define PANDA_RUNTIME_TOOLING_PT_HOOK_TYPE_INFO_H_
+#ifndef PANDA_TOOLING_PT_HOOK_TYPE_INFO_H
+#define PANDA_TOOLING_PT_HOOK_TYPE_INFO_H
 
 #include <array>
 #include "runtime/include/tooling/debug_interface.h"
 
 namespace panda::tooling {
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class PtHookTypeInfo {
 public:
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     explicit PtHookTypeInfo(bool defaultValue)
     {
         for (auto &v : is_enabled_) {
@@ -67,9 +69,8 @@ private:
     }
 
     static constexpr size_t HOOKS_COUNT = static_cast<size_t>(PtHookType::PT_HOOK_TYPE_COUNT);
-    std::array<bool, HOOKS_COUNT> is_enabled_ {};
+    std::array<bool, HOOKS_COUNT> is_enabled_;
 };
-
 }  // namespace panda::tooling
 
-#endif  // PANDA_RUNTIME_TOOLING_PT_HOOK_TYPE_INFO_H_
+#endif  // PANDA_TOOLING_PT_HOOK_TYPE_INFO_H

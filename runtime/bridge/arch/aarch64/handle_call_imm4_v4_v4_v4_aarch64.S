@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,55 +18,55 @@
 // x0-x7 - arguments, x9 - frame.vregs, x10 - insn_ptr, x12 - method, x19 - frame
 // x13, x14, x15 - temp
 
+    // ABI arg reg 0 (x0) <- panda::Method*
     mov x0, x12
-    // get number of args in w1 and function object in x2 and tag in x3
+
+    // ABI arg reg 1 (x1/w1) <- num_args
     ldrb w13, [x10], 1
     and w1, w13, 0xF
-    and w2, w13, -16
-    add x2, x9, x2
-    ldp x2, x3, [x2]
+
     cbz w1, .Linvoke
 
-    // there are some arguments
-    // load the first argument into x4, x5
-    ldrb w13, [x10], 1
-    and w4, w13, 0xF
-    add x4, x9, x4, lsl 4
-    ldp x4, x5, [x4]
+    // ABI arg reg 2 (x2) <- boxed arg0 from user's code
+    and w2, w13, -16
+    lsr w2, w2, #1
+    add x2, x9, x2
+    ldr x2, [x2]
     cmp w1, 1
-    beq .Linvoke // there is only one argument
+    beq .Linvoke // No more args from user's code?
 
-    // there are two arguments
-    // load the second arg into x6, x7
-    and w6, w13, -16
-    add x6, x9, x6
-    ldp x6, x7, [x6]
+    // Read next insn byte for user's arg1 and arg2:
+    ldrb w13, [x10], 1
+
+    // ABI arg reg 3 (x3) <- boxed arg1 from user's code
+    and w3, w13, 0xF
+    add x3, x9, x3, lsl 3
+    ldr x3, [x3]
     cmp w1, 2
-    beq .Linvoke // there are two arguments
+    beq .Linvoke // No more args from user's code?
 
-    cmp w1, 4
-    beq .Lfour_args
- // there are three arguments
-    // load the 3rd arg into the stack
-    ldrb w13, [x10], 1
-    and w14, w13, 0xF
-    add x14, x9, x14, lsl 4
-    ldp x14, x15, [x14]
-    stp x14, x15, [sp, -16]!
+    // ABI arg reg 4 (x4) <- boxed arg2 from user's code
+    and w4, w13, -16
+    lsr w4, w4, #1
+    add x4, x9, x4
+    ldr x4, [x4]
     cmp w1, 3
-    beq .Linvoke // there are three arguments
+    beq .Linvoke // No more args from user's code?
 
-.Lfour_args:
-    // there are four arguments
-    // load the 3rd arg into the stack
+    // Read next insn byte for user's arg3 and arg4:
     ldrb w13, [x10], 1
-    and w14, w13, 0xF
-    add x14, x9, x14, lsl 4
-    ldp x14, x15, [x14]
-    stp x14, x15, [sp, -32]!
-    // load the 4th arg into the stack
-    and w14, w13, -16
-    add x14, x9, x14
-    ldp x14, x15, [x14]
-    stp x14, x15, [sp, 16]
+
+    // ABI arg reg 5 (x5) <- boxed arg3 from user's code
+    and w5, w13, 0xF
+    add x5, x9, x5, lsl 3
+    ldr x5, [x5]
+    cmp w1, 4
+    beq .Linvoke // No more args from user's code?
+
+    // ABI arg reg 6 (x6) <- boxed arg4 from user's code
+    and w6, w13, -16
+    lsr w6, w6, #1
+    add x6, x9, x6
+    ldr x6, [x6]
+
     b .Linvoke

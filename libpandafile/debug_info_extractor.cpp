@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 #include "line_number_program.h"
 #include "class_data_accessor-inl.h"
 #include "debug_data_accessor-inl.h"
+#include "proto_data_accessor-inl.h"
 #include "utils/utf.h"
 
 namespace panda::panda_file {
@@ -181,7 +182,6 @@ private:
 
 void DebugInfoExtractor::Extract(const File *pf)
 {
-    ASSERT(pf != nullptr);
     const auto &panda_file = *pf;
     auto classes = pf->GetClasses();
     for (size_t i = 0; i < classes.Size(); i++) {
@@ -204,14 +204,30 @@ void DebugInfoExtractor::Extract(const File *pf)
             DebugInfoDataAccessor dda(panda_file, debug_info_id.value());
             ProtoDataAccessor pda(panda_file, mda.GetProtoId());
 
-            std::vector<std::string> param_names;
+            std::vector<ParamInfo> param_info;
 
+            size_t idx = 0;
+            size_t idx_ref = pda.GetReturnType().IsReference() ? 1 : 0;
+            bool first_param = true;
+            const char *class_name = utf::Mutf8AsCString(pf->GetStringData(cda.GetClassId()).data);
             dda.EnumerateParameters([&](File::EntityId &param_id) {
+                ParamInfo info;
                 if (param_id.IsValid()) {
-                    param_names.emplace_back(utf::Mutf8AsCString(pf->GetStringData(param_id).data));
-                } else {
-                    param_names.emplace_back();
+                    info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
+                    if (first_param && !mda.IsStatic()) {
+                        info.signature = class_name;
+                    } else {
+                        Type param_type = pda.GetArgType(idx++);
+                        if (param_type.IsPrimitive()) {
+                            info.signature = Type::GetSignatureByTypeId(param_type);
+                        } else {
+                            auto ref_type = pda.GetReferenceType(idx_ref++);
+                            info.signature = utf::Mutf8AsCString(pf->GetStringData(ref_type).data);
+                        }
+                    }
                 }
+                first_param = false;
+                param_info.emplace_back(info);
             });
 
             const uint8_t *program = dda.GetLineNumberProgram();
@@ -227,7 +243,7 @@ void DebugInfoExtractor::Extract(const File *pf)
             const char *source_file = utf::Mutf8AsCString(handler.GetFile());
             const char *source_code = utf::Mutf8AsCString(handler.GetSourceCode());
             methods_.push_back({source_file, source_code, method_id, handler.GetLineNumberTable(),
-                                handler.GetLocalVariableTable(), std::move(param_names),
+                                handler.GetLocalVariableTable(), std::move(param_info),
                                 handler.GetColumnNumberTable()});
         });
     }
@@ -269,16 +285,16 @@ const LocalVariableTable &DebugInfoExtractor::GetLocalVariableTable(File::Entity
     return EMPTY_VARIABLE_TABLE;
 }
 
-const std::vector<std::string> &DebugInfoExtractor::GetParameterNames(File::EntityId method_id) const
+const std::vector<DebugInfoExtractor::ParamInfo> &DebugInfoExtractor::GetParameterInfo(File::EntityId method_id) const
 {
     for (const auto &method : methods_) {
         if (method.method_id == method_id) {
-            return method.param_names;
+            return method.param_info;
         }
     }
 
-    static const std::vector<std::string> EMPTY_PARAM_LIST {};  // NOLINT(fuchsia-statically-constructed-objects)
-    return EMPTY_PARAM_LIST;
+    static const std::vector<ParamInfo> EMPTY_PARAM_INFO {};  // NOLINT(fuchsia-statically-constructed-objects)
+    return EMPTY_PARAM_INFO;
 }
 
 const char *DebugInfoExtractor::GetSourceFile(File::EntityId method_id) const

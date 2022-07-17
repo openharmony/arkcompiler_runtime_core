@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,8 @@
 // - Marked for GC or not
 // - Monitor functions (get monitor, notify, notify all, wait)
 // - Forwarded or not
-
-#ifndef PANDA_RUNTIME_INCLUDE_OBJECT_HEADER_H_
-#define PANDA_RUNTIME_INCLUDE_OBJECT_HEADER_H_
+#ifndef PANDA_RUNTIME_OBJECT_HEADER_H_
+#define PANDA_RUNTIME_OBJECT_HEADER_H_
 
 #include <atomic>
 #include <ctime>
@@ -71,12 +70,16 @@ public:
     {
         auto ptr = const_cast<MarkWord *>(reinterpret_cast<const MarkWord *>(&markWord_));
         auto atomic_ptr = reinterpret_cast<std::atomic<MarkWord> *>(ptr);
-        return atomic_ptr->load();
+        // Atomic with seq_cst order reason: data race with markWord_ with requirement for sequentially consistent order
+        // where threads observe all modifications in the same order
+        return atomic_ptr->load(std::memory_order_seq_cst);
     }
 
     inline void SetClass(BaseClass *klass)
     {
         static_assert(sizeof(ClassHelper::classWordSize) == sizeof(object_pointer_type));
+        // Atomic with release order reason: data race with classWord_ with dependecies on writes before the store which
+        // should become visible acquire
         reinterpret_cast<std::atomic<ClassHelper::classWordSize> *>(&classWord_)
             ->store(static_cast<ClassHelper::classWordSize>(ToObjPtrType(klass)), std::memory_order_release);
         ASSERT(AtomicClassAddr<BaseClass>() == klass);
@@ -92,6 +95,8 @@ public:
     inline T *AtomicClassAddr() const
     {
         auto ptr = const_cast<ClassHelper::classWordSize *>(&classWord_);
+        // Atomic with acquire order reason: data race with classWord_ with dependecies on reads after the load which
+        // should become visible
         return reinterpret_cast<T *>(
             reinterpret_cast<std::atomic<ClassHelper::classWordSize> *>(ptr)->load(std::memory_order_acquire));
     }
@@ -102,6 +107,8 @@ public:
         uint32_t ex_val;
         uint32_t n_val;
         do {
+            // Atomic with relaxed order reason: data race with hash_seed with no synchronization or ordering
+            // constraints imposed on other reads or writes
             ex_val = object_header_traits::hash_seed.load(std::memory_order_relaxed);
             n_val = ex_val * object_header_traits::LINEAR_X + object_header_traits::LINEAR_Y;
         } while (!object_header_traits::hash_seed.compare_exchange_weak(ex_val, n_val, std::memory_order_relaxed) ||
@@ -110,11 +117,12 @@ public:
     }
 
     // Get Hash value for an object.
+    template <MTModeT MTMode>
     uint32_t GetHashCode();
     uint32_t GetHashCodeFromMonitor(Monitor *monitor_p);
 
     // Size of object header
-    static constexpr int ObjectHeaderSize()
+    static constexpr size_t ObjectHeaderSize()
     {
         return sizeof(ObjectHeader);
     }
@@ -148,7 +156,7 @@ public:
         bool res;
         do {
             MarkWord word = AtomicGetMark();
-            res = AtomicSetMark(word, word.SetMarkedForGC());
+            res = AtomicSetMark<false>(word, word.SetMarkedForGC());
         } while (!res);
     }
     template <bool atomic_flag = true>
@@ -161,7 +169,7 @@ public:
         bool res;
         do {
             MarkWord word = AtomicGetMark();
-            res = AtomicSetMark(word, word.SetUnMarkedForGC());
+            res = AtomicSetMark<false>(word, word.SetUnMarkedForGC());
         } while (!res);
     }
     inline bool IsForwarded() const
@@ -175,9 +183,22 @@ public:
     // Get field address in Class
     inline void *FieldAddr(int offset) const;
 
-    bool AtomicSetMark(MarkWord old_mark_word, MarkWord new_mark_word);
+    template <bool strong = true>
+    bool AtomicSetMark(MarkWord old_mark_word, MarkWord new_mark_word)
+    {
+        // This is the way to operate with casting MarkWordSize <-> MarkWord and atomics
+        auto ptr = reinterpret_cast<MarkWord *>(&markWord_);
+        auto atomic_ptr = reinterpret_cast<std::atomic<MarkWord> *>(ptr);
+        // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
+        if constexpr (strong) {  // NOLINT(bugprone-suspicious-semicolon)
+            return atomic_ptr->compare_exchange_strong(old_mark_word, new_mark_word);
+        }
+        // CAS weak may return false results, but is more efficient, use it only in loops
+        return atomic_ptr->compare_exchange_weak(old_mark_word, new_mark_word);
+    }
 
     // Accessors to typical Class types
+
     template <class T, bool is_volatile = false>
     T GetFieldPrimitive(size_t offset) const;
 
@@ -204,13 +225,13 @@ public:
 
     // Pass thread parameter to speed up interpreter
     template <bool need_read_barrier = true, bool is_dyn = false>
-    ObjectHeader *GetFieldObject(ManagedThread *thread, const Field &field);
+    ObjectHeader *GetFieldObject(const ManagedThread *thread, const Field &field);
 
     template <bool need_write_barrier = true, bool is_dyn = false>
-    void SetFieldObject(ManagedThread *thread, const Field &field, ObjectHeader *value);
+    void SetFieldObject(const ManagedThread *thread, const Field &field, ObjectHeader *value);
 
     template <bool is_volatile = false, bool need_write_barrier = true, bool is_dyn = false>
-    void SetFieldObject(ManagedThread *thread, size_t offset, ObjectHeader *value);
+    void SetFieldObject(const ManagedThread *thread, size_t offset, ObjectHeader *value);
 
     template <class T>
     T GetFieldPrimitive(size_t offset, std::memory_order memory_order) const;
@@ -263,7 +284,7 @@ public:
      * Object of type O is instance of type T if O is the same as T or is subtype of T. For arrays T should be a root
      * type in type hierarchy or T is such array that O array elements are the same or subtype of T array elements.
      */
-    inline bool IsInstanceOf(Class *klass);
+    inline bool IsInstanceOf(const Class *klass) const;
 
     // Verification methods
     static void Verify(ObjectHeader *object_header);
@@ -279,6 +300,9 @@ public:
     size_t ObjectSize() const;
 
 private:
+    uint32_t GetHashCodeMTSingle();
+    uint32_t GetHashCodeMTMulti();
+
     MarkWord::markWordSize markWord_;
     ClassHelper::classWordSize classWord_;
 
@@ -296,4 +320,4 @@ static_assert(OBJECT_HEADER_CLASS_OFFSET == panda::ObjectHeader::GetClassOffset(
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_OBJECT_HEADER_H_
+#endif  // PANDA_RUNTIME_OBJECT_HEADER_H_

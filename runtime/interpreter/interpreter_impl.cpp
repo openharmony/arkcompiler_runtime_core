@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,10 @@
 #include "libpandabase/macros.h"
 #include "runtime/interpreter/interpreter-inl.h"
 #include "runtime/interpreter/runtime_interface.h"
+#include "irtoc_interpreter_utils.h"
+#include "interpreter-inl_gen.h"
+
+extern "C" void ExecuteImplFast(void *, void *, void *, void *);
 
 namespace panda::interpreter {
 
@@ -25,25 +29,38 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
 {
     const uint8_t *inst_ = frame->GetMethod()->GetInstructions();
     frame->SetInstruction(inst_);
-    if (UNLIKELY(Runtime::GetCurrent()->IsDebugMode())) {
-        if (jump_to_eh) {
-            ExecuteImpl_Inner<RuntimeInterface, true, true>(thread, pc, frame);
-        } else {
-            ExecuteImpl_Inner<RuntimeInterface, true, false>(thread, pc, frame);
-        }
+// If it is GN Build with disabled asmjit and irtoc is not available
+#if defined(PANDA_TARGET_AMD64) && !defined(PANDA_COMPILER_TARGET_X86_64)
+    bool with_irtoc = false;
+#else
+    bool with_irtoc = true;
+#endif
+    if ((Runtime::GetOptions().GetInterpreterType() == "irtoc") && with_irtoc) {
+        [[maybe_unused]] auto lang = thread->GetVM()->GetLanguageContext().GetLanguage();
+        ASSERT(Runtime::GetOptions().GetGcType(plugins::LangToRuntimeType(lang)) == "g1-gc");
+        auto dispath_table = SetupDispatchTableImpl();
+        ExecuteImplFast(thread, const_cast<uint8_t *>(pc), frame, dispath_table);
     } else {
         if (jump_to_eh) {
-            ExecuteImpl_Inner<RuntimeInterface, false, true>(thread, pc, frame);
+            if (frame->IsDynamic()) {
+                ExecuteImpl_Inner<RuntimeInterface, true, true>(thread, pc, frame);
+            } else {
+                ExecuteImpl_Inner<RuntimeInterface, true, false>(thread, pc, frame);
+            }
         } else {
-            ExecuteImpl_Inner<RuntimeInterface, false, false>(thread, pc, frame);
+            if (frame->IsDynamic()) {
+                ExecuteImpl_Inner<RuntimeInterface, false, true>(thread, pc, frame);
+            } else {
+                ExecuteImpl_Inner<RuntimeInterface, false, false>(thread, pc, frame);
+            }
         }
     }
 }
 
 // Methods for debugging
 
-template <class RuntimeIfaceT, bool enable_instrumentation>
-void InstructionHandlerBase<RuntimeIfaceT, enable_instrumentation>::DebugDump()
+template <class RuntimeIfaceT, bool is_dynamic>
+void InstructionHandlerBase<RuntimeIfaceT, is_dynamic>::DebugDump()
 {
 #ifndef NDEBUG
     auto frame = GetFrame();
@@ -54,9 +71,10 @@ void InstructionHandlerBase<RuntimeIfaceT, enable_instrumentation>::DebugDump()
     std::cerr << pad << "nregs = " << method->GetNumVregs() << std::endl;
     std::cerr << pad << "total frame size = " << frame->GetSize() << std::endl;
     std::cerr << "Frame:" << std::endl;
-    std::cerr << pad << "acc." << GetAcc().DumpVReg() << std::endl;
+    std::cerr << pad << "acc." << GetAccAsVReg<is_dynamic>().DumpVReg() << std::endl;
+    auto frame_handler = GetFrameHandler(frame);
     for (size_t i = 0; i < frame->GetSize(); ++i) {
-        std::cerr << pad << "v" << i << "." << frame->GetVReg(i).DumpVReg() << std::endl;
+        std::cerr << pad << "v" << i << "." << frame_handler.GetVReg(i).DumpVReg() << std::endl;
     }
     std::cerr << "Bytecode:" << std::endl;
     size_t offset = 0;

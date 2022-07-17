@@ -17,6 +17,7 @@ project(arkstdlib)
 
 add_panda_assembly(TARGET arkstdlib SOURCE pandastdlib.pa)
 
+# TODO: remove after all components will use arkstdlib.abc instead of pandastdlib.bin
 add_custom_target(pandastdlib ALL
                   COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_BINARY_DIR}/arkstdlib.abc" "${CMAKE_CURRENT_BINARY_DIR}/pandastdlib.bin")
 

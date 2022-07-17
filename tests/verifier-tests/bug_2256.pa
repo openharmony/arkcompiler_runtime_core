@@ -21,7 +21,7 @@
     return
 }
 
-.function u1 main() {
+.function i32 main() {
     #
     lda.type A
     sta.obj v0

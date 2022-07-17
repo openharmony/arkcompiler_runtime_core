@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_GC_GC_ROOT_H_
-#define PANDA_RUNTIME_MEM_GC_GC_ROOT_H_
+#ifndef PANDA_RUNTIME_MEM_GC_GC_ROOT_H
+#define PANDA_RUNTIME_MEM_GC_GC_ROOT_H
 
 #include <algorithm>
 #include <ostream>
@@ -26,8 +25,8 @@
 #include "runtime/include/language_config.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/interpreter/frame.h"
-#include "runtime/mem/object_helpers.h"
 #include "runtime/mem/gc/card_table.h"
+#include "runtime/mem/gc/gc_root_type.h"
 
 namespace panda {
 class PandaVM;
@@ -36,27 +35,16 @@ class ManagedThread;
 
 namespace panda::mem {
 
-enum class RootType {
-    ROOT_UNKNOWN = 0,
-    ROOT_CLASS,
-    ROOT_FRAME,
-    ROOT_THREAD,
-    ROOT_CLASS_LINKER,
-    ROOT_TENURED,
-    ROOT_VM,
-    ROOT_JNI_GLOBAL,
-    ROOT_JNI_LOCAL,
-    ROOT_RS_GLOBAL,
-    ROOT_PT_LOCAL,
-    ROOT_AOT_STRING_SLOT,
-};
+class GCAdaptiveStack;
+
+using GCMarkingStackType = GCAdaptiveStack;
 
 enum class VisitGCRootFlags : uint32_t {
     ACCESS_ROOT_ALL = 1U,
-    ACCESS_ROOT_ONLY_NEW = 1U << 1U,
+    ACCESS_ROOT_ONLY_NEW = 1U << 1U,  // used at remark to iterate over new roots only for classes and stringtable
     ACCESS_ROOT_NONE = 1U << 2U,
 
-    ACCESS_ROOT_AOT_STRINGS_ONLY_YOUNG = 1U << 3U,
+    ACCESS_ROOT_AOT_STRINGS_ONLY_YOUNG = 1U << 3U,  // visit only young string roots in aot table
 
     START_RECORDING_NEW_ROOT = 1U << 10U,
     END_RECORDING_NEW_ROOT = 1U << 11U,
@@ -113,8 +101,10 @@ public:
      * @param card_table - card table for scan
      * @param allocator - object allocator
      * @param root_visitor
-     * @param range_checker
-     * @param range_object_checker
+     * @param range_checker - return true if we need to check mem range for current card
+     * @param range_object_checker - return true if we should apply root_visitor to the object obtained during
+     * traversing
+     * @param from_object_checker - return true if we need to traverse objects approved by range_checker
      */
     void VisitCardTableRoots(CardTable *card_table, ObjectAllocatorBase *allocator, GCRootVisitor root_visitor,
                              MemRangeChecker range_checker, ObjectChecker range_object_checker,
@@ -125,6 +115,8 @@ public:
      */
     void VisitClassRoots(const GCRootVisitor &gc_root_visitor,
                          VisitGCRootFlags flags = VisitGCRootFlags::ACCESS_ROOT_ALL) const;
+
+    void VisitAotStringRoots(const GCRootVisitor &gc_root_visitor, VisitGCRootFlags flags) const;
 
     /**
      * Updates references to moved objects in TLS
@@ -137,6 +129,8 @@ public:
 
     void UpdateClassLinkerContextRoots();
 
+    void UpdateAotStringRoots();
+
     void SetPandaVM(PandaVM *vm)
     {
         vm_ = vm;
@@ -148,7 +142,8 @@ private:
      */
     void VisitVmRoots(const GCRootVisitor &gc_root_visitor) const;
 
-    void VisitRegisterRoot(const Frame::VRegister &v_register, const GCRootVisitor &gc_root_visitor) const;
+    template <class VRegRef>
+    void VisitRegisterRoot(const VRegRef &v_register, const GCRootVisitor &gc_root_visitor) const;
 
     void VisitClassLinkerContextRoots(const GCRootVisitor &gc_root_visitor) const;
 
@@ -163,4 +158,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_GC_GC_ROOT_H_
+#endif  // PANDA_RUNTIME_MEM_GC_GC_ROOT_H

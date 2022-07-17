@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PANDA_RUNTIME_HCLASS_H_
+#define PANDA_RUNTIME_HCLASS_H_
 
-#ifndef PANDA_RUNTIME_INCLUDE_HCLASS_H_
-#define PANDA_RUNTIME_INCLUDE_HCLASS_H_
-
+#include "mem/mem.h"
+#include "mem/vm_handle.h"
 #include "runtime/include/class.h"
 
 namespace panda {
@@ -27,15 +28,14 @@ class DynClass;
 // Class for objects in DYNAMIC_CLASS languages like JavaScript
 class HClass : public BaseClass {
 public:
-    static constexpr uint32_t HCLASS = 1U << 1U;
-    static constexpr uint32_t STRING = 1U << 2U;
-    static constexpr uint32_t ARRAY = 1U << 3U;
-    static constexpr uint32_t NATIVE_POINTER = 1U << 4U;
-    static constexpr uint32_t IS_DICTIONARY_ARRAY = 1U << 5U;
-    static constexpr uint32_t IS_BUILTINS_CTOR = 1U << 6U;
-    static constexpr uint32_t IS_CALLABLE = 1U << 7U;
-
-    static constexpr uint32_t BITS_SIZE = 8;
+    static constexpr uint32_t HCLASS = DYNAMIC_CLASSROOT << 1U;
+    static constexpr uint32_t STRING = HCLASS << 1U;
+    static constexpr uint32_t ARRAY = STRING << 1U;
+    static constexpr uint32_t NATIVE_POINTER = ARRAY << 1U;
+    static constexpr uint32_t IS_DICTIONARY_ARRAY = NATIVE_POINTER << 1U;
+    static constexpr uint32_t IS_BUILTINS_CTOR = IS_DICTIONARY_ARRAY << 1U;
+    static constexpr uint32_t IS_CALLABLE = IS_BUILTINS_CTOR << 1U;
+    static constexpr uint32_t IS_FREE_OBJECT = IS_CALLABLE << 1U;
 
 public:
     HClass(uint32_t flags, panda_file::SourceLang lang) : BaseClass(lang)
@@ -43,10 +43,9 @@ public:
         SetFlags(flags | BaseClass::DYNAMIC_CLASS);
     }
 
-    void SetFlags(uint32_t flags)
+    inline bool IsFreeObject() const
     {
-        ASSERT(flags & BaseClass::DYNAMIC_CLASS);
-        BaseClass::SetFlags(flags);
+        return (GetFlags() & IS_FREE_OBJECT) != 0;
     }
 
     inline bool IsNativePointer() const
@@ -69,23 +68,9 @@ public:
         return (GetFlags() & HCLASS) != 0;
     }
 
-    void SetDictionary()
-    {
-        uint32_t flags = BaseClass::GetFlags() | IS_DICTIONARY_ARRAY;
-        ASSERT(flags & IS_DICTIONARY_ARRAY);
-        BaseClass::SetFlags(flags);
-    }
-
     bool IsDictionary() const
     {
         return (BaseClass::GetFlags() & IS_DICTIONARY_ARRAY) != 0U;
-    }
-
-    void SetBuiltinsCtorMode()
-    {
-        uint32_t flags = BaseClass::GetFlags() | IS_BUILTINS_CTOR;
-        ASSERT(flags & IS_BUILTINS_CTOR);
-        BaseClass::SetFlags(flags);
     }
 
     bool IsBuiltinsConstructor() const
@@ -93,22 +78,39 @@ public:
         return (BaseClass::GetFlags() & IS_BUILTINS_CTOR) != 0U;
     }
 
-    void SetCallable(bool flag)
-    {
-        if (flag) {
-            uint32_t flags = BaseClass::GetFlags() | IS_CALLABLE;
-            ASSERT(flags & IS_CALLABLE);
-            BaseClass::SetFlags(flags);
-        } else {
-            uint32_t flags = BaseClass::GetFlags() & (~(IS_CALLABLE));
-            ASSERT(!(flags & IS_CALLABLE));
-            BaseClass::SetFlags(flags);
-        }
-    }
-
     bool IsCallable() const
     {
         return (BaseClass::GetFlags() & IS_CALLABLE) != 0U;
+    }
+
+    void MarkFieldAsNative(size_t offset)
+    {
+        ASSERT(offset <= MaxNativeFieldOffset());
+        native_fields_ |= FieldOffsetToMask(offset);
+    }
+
+    bool IsNativeField(size_t offset) const
+    {
+        if (offset > MaxNativeFieldOffset()) {
+            return false;
+        }
+
+        return (native_fields_ & FieldOffsetToMask(offset)) != 0;
+    }
+
+    uint32_t GetNativeFieldMask() const
+    {
+        return native_fields_;
+    }
+
+    void SetNativeFieldMask(uint32_t mask)
+    {
+        native_fields_ = mask;
+    }
+
+    static constexpr size_t GetDataOffset()
+    {
+        return MEMBER_OFFSET(HClass, data_);
     }
 
     ~HClass() = default;
@@ -116,10 +118,35 @@ public:
     DEFAULT_COPY_SEMANTIC(HClass);
     DEFAULT_MOVE_SEMANTIC(HClass);
 
+protected:
+    void SetFlags(uint32_t flags)
+    {
+        ASSERT(flags & BaseClass::DYNAMIC_CLASS);
+        BaseClass::SetFlags(flags);
+    }
+
 private:
+    static size_t MaxNativeFieldOffset()
+    {
+        size_t max_index = std::numeric_limits<decltype(native_fields_)>::digits - 1;
+        return ObjectHeader::ObjectHeaderSize() + max_index * TaggedValue::TaggedTypeSize();
+    }
+
+    static uint32_t FieldOffsetToMask(size_t offset)
+    {
+        uint32_t index = (offset - ObjectHeader::ObjectHeaderSize()) / TaggedValue::TaggedTypeSize();
+        return 1U << index;
+    }
+
     friend class coretypes::DynClass;
+
+    uint32_t native_fields_ {0};
+
+    // Data for language extension flags
+    // TODO(maksenov): maybe merge this with BaseClass flags
+    FIELD_UNUSED uint64_t data_ {0};
 };
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_HCLASS_H_
+#endif  // PANDA_RUNTIME_HCLASS_H_

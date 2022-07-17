@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +19,29 @@
 
 namespace panda::verifier {
 
-TypeParam::TypeParam(const Type &t, TypeVariance v) : TypeParamIdx {t.Index(), v}, kind_ {t.GetTypeSystem().GetKind()}
+TypeParam::TypeParam(TypeVariance v, const Type &t)
+    : TypeParamIdx {v, t.Number()}, kind_ {t.GetTypeSystemKind()}, threadnum_ {t.GetThreadNum()}
 {
 }
 
-TypeParam::TypeParam(TypeSystemKind kind, const TypeParamIdx &p) : TypeParamIdx {p}, kind_ {kind} {}
+TypeParam::TypeParam(TypeSystemKind kind, ThreadNum threadnum, const TypeParamIdx &p)
+    : TypeParamIdx {p}, kind_ {kind}, threadnum_ {threadnum}
+{
+}
 
 TypeParams TypeParam::operator>>(const TypeParam &p) const
 {
-    return TypeParams {kind_} >> *this >> p;
+    return TypeParams {kind_, threadnum_} >> *this >> p;
 }
 
 TypeParam::operator TypeParams() const  // NOLINT(google-explicit-constructor)
 {
-    return TypeParams {kind_} >> *this;
+    return TypeParams {kind_, threadnum_} >> *this;
 }
 
 TypeParam::operator Type() const
 {
-    return {kind_, *this};
+    return {kind_, threadnum_, TypeParamIdx::GetInt()};
 }
 
 }  // namespace panda::verifier

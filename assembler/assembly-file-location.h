@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ASSEMBLY_FILE_LOCATION_H_
-#define PANDA_ASSEMBLER_ASSEMBLY_FILE_LOCATION_H_
+#ifndef _PANDA_ASSEMBLER_FILE_LOCATION_HPP
+#define _PANDA_ASSEMBLER_FILE_LOCATION_HPP
 
 namespace panda::pandasm {
 
 class FileLocation {
 public:
     std::string whole_line = ""; /* The line in which the field is defined */
-                                 /*  Or line in which the field is met, if the field is not defined */
+                                 /*  Or line in which the field met, if the field is not defined */
     size_t bound_left = 0;
     size_t bound_right = 0;
     size_t line_number = 0;
@@ -40,4 +40,4 @@ public:
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_ASSEMBLY_FILE_LOCATION_H_
+#endif  // !_PANDA_ASSEMBLER_FILE_INFORMATION

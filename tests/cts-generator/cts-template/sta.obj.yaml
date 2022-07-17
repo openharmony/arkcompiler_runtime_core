@@ -12,7 +12,6 @@
 # limitations under the License.
 
 definitions: []
-
 tests:
   - file-name: "sta.obj"
     isa:
@@ -22,11 +21,13 @@ tests:
         - x_none
     commands:
       - file-name: "op"
+        description: Check sta.obj with different type of arguments (empty object, with fields, statics, string, type).
         isa:
           instructions:
             - sig: sta.obj v:out:ref
               acc: in:ref
               format: [op_v_8]
+        header-template: []
         code-template: |
           %s
           # header
@@ -41,9 +42,7 @@ tests:
           return_ne_num:
               ldai 1
               return
-        header-template: []
         check-type: none
-        description: Check sta.obj with different type of arguments (empty object, with fields, statics, string, type).
         tags: ['tsan']
         cases:
           - values:
@@ -128,13 +127,13 @@ tests:
                   return
 
       - file-name: "null"
+        description: Check sta.obj with null.
         isa:
           instructions:
             - sig: sta.obj v:out:ref
               acc: in:ref
               format: [op_v_8]
-        description: Check sta.obj with null.
-        check-type: none
+        header-template: []
         code-template: |
           # header
           .function i32 main() {
@@ -147,14 +146,16 @@ tests:
           return_ne_num:
               ldai 1
               return
-        header-template: []
+        check-type: none
 
       - file-name: "op_v8"
+        description: Check sta.obj with various register numbers.
         isa:
           instructions:
             - sig: sta.obj v:out:ref
               acc: in:ref
               format: [op_v_8]
+        header-template: []
         code-template: |
             .record Object {}
             # header
@@ -169,9 +170,7 @@ tests:
             return_ne_num:
                 ldai 1
                 return
-        header-template: []
         check-type: none
-        description: Check sta.obj with various register numbers.
         cases:
             - values: [v0, v0]
             - values: [v7, v7]
@@ -186,6 +185,7 @@ tests:
               description: Check sta.obj with incorrect register numbers.
 
       - file-name: "op_v8_null"
+        description: Check sta.obj with various register numbers.
         isa:
             instructions:
               - sig: sta.obj v:out:ref
@@ -201,7 +201,6 @@ tests:
             return_ne_num:
                 ldai 1
                 return
-        description: Check sta.obj with various register numbers.
         check-type: none
         cases:
             - values: [v0, v0]
@@ -217,6 +216,7 @@ tests:
               description: Check sta.obj with incorrect register numbers.
 
       - file-name: 'type'
+        description: Check 'sta.obj' with incorrect accumulator type. Register type is not checked.
         isa:
           instructions:
               - sig: sta.obj v:out:ref
@@ -225,7 +225,7 @@ tests:
           verification:
             - acc_type
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -238,18 +238,20 @@ tests:
               %s
               sta.obj v1
         check-type: exit-positive
-        description: Check 'sta.obj' with incorrect accumulator type. Register type is not checked.
         template-cases:
           - values:
               - ldai 0
           - values:
+              - fldai 0
+          - values:
               - ldai.64 0
           - values:
               - fldai.64 0
-
         cases:
           - values:
               - movi v1, 0
+          - values:
+              - fmovi v1, 0
           - values:
               - movi.64 v1, 0
           - values:
@@ -284,12 +286,12 @@ tests:
               - mov.null v1
 
       - file-name: uninitialized_acc
+        description: Check 'sta.obj' with uninitialized accumulator. Destination register is not checked.
         isa:
           verification:
             - acc_type
-        description: Check 'sta.obj' with uninitialized accumulator. Destination register is not checked.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
             #
@@ -324,17 +326,17 @@ tests:
               - v255
 
       - file-name: "err"
+        description: Check sta.obj with incorrect value.
         isa:
           instructions:
             - sig: sta.obj v:out:ref
               acc: in:ref
               format: [op_v_8]
+        runner-options: [compile-failure]
         code-template: |
             # Check sta.obj with wrong arguments
                 %s
-        check-type: none
-        runner-options: [compile-failure]
-        description: Check sta.obj with incorrect value.
+        check-type: exit-positive
         cases:
             - values:
                 - sta.obj 1

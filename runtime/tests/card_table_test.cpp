@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,19 +31,20 @@ namespace panda::mem::test {
 
 class CardTableTest : public testing::Test {
 protected:
-    // static constexpr size_t kHeapSize = 0xffffffff;
+    //    static constexpr size_t kHeapSize = 0xffffffff;
     static constexpr size_t kAllocCount = 1000;
-    // static constexpr size_t maxCardIndex = kHeapSize / ::panda::mem::CardTable::GetCardSize();
+    //    static constexpr size_t maxCardIndex = kHeapSize / ::panda::mem::CardTable::GetCardSize();
     std::mt19937 gen;
     std::uniform_int_distribution<uintptr_t> addrDis;
     std::uniform_int_distribution<size_t> cardIndexDis;
+    mem::MemStatsType *mem_stats;
 
     CardTableTest()
     {
 #ifdef PANDA_NIGHTLY_TEST_ON
         seed_ = std::time(NULL);
 #else
-        seed_ = 123456U;
+        seed_ = 123456;
 #endif
         RuntimeOptions options;
         options.SetHeapSizeLimit(64_MB);
@@ -103,21 +104,22 @@ protected:
         return cardIndexDis(gen) % GetPoolSize();
     }
 
-    // Generate address at the beginning of the card
+    // generate address at the begining of the card
     uintptr_t GetRandomCardAddress()
     {
         return PoolManager::GetMmapMemPool()->GetMinObjectAddress() + GetRandomCardIndex() * CardTable::GetCardSize();
     }
 
-    InternalAllocatorPtr internal_allocator_ {nullptr};
-    std::unique_ptr<CardTable> card_table_ {nullptr};
-    unsigned int seed_ {0};
-    panda::MTManagedThread *thread_ {nullptr};
+    InternalAllocatorPtr internal_allocator_;
+    std::unique_ptr<CardTable> card_table_;
+    unsigned int seed_;
+    panda::MTManagedThread *thread_;
 };
 
 TEST_F(CardTableTest, MarkTest)
 {
     size_t markedCnt = 0;
+
     for (size_t i = 0; i < kAllocCount; i++) {
         uintptr_t addr;
         addr = GetRandomAddress();
@@ -137,6 +139,8 @@ TEST_F(CardTableTest, MarkTest)
 
 TEST_F(CardTableTest, MarkAndClearAllTest)
 {
+    // std::set<uintptr_t> addrSet;
+
     size_t cnt = 0;
     for (auto card : *card_table_) {
         card->Mark();
@@ -167,7 +171,7 @@ TEST_F(CardTableTest, ClearTest)
     }
 
     size_t cleared_cnt = 0;
-    // Clear all marked and count them
+    // clear all marked and count them
     for (auto card : *card_table_) {
         if (card->IsMarked()) {
             card->Clear();
@@ -176,7 +180,7 @@ TEST_F(CardTableTest, ClearTest)
     }
 
     ASSERT_EQ(addrSet.size(), cleared_cnt);
-    // Check that there are no marked
+    // check that there are no marked
     for (auto card : *card_table_) {
         ASSERT_EQ(card->IsMarked(), false);
     }
@@ -228,6 +232,7 @@ TEST_F(CardTableTest, corner_cases)
 TEST_F(CardTableTest, VisitMarked)
 {
     size_t markedCnt = 0;
+
     while (markedCnt < kAllocCount) {
         uintptr_t addr;
         addr = GetRandomAddress();

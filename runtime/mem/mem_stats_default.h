@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_MEM_MEM_STATS_DEFAULT_H_
-#define PANDA_RUNTIME_MEM_MEM_STATS_DEFAULT_H_
+#ifndef PANDA_RUNTIME_MEM_MEM_STATS_DEFAULT_H
+#define PANDA_RUNTIME_MEM_MEM_STATS_DEFAULT_H
 
 #include <cstdio>
 
@@ -52,7 +51,5 @@ public:
 };
 
 extern template class MemStats<MemStatsDefault>;
-
 }  // namespace panda::mem
-
-#endif  // PANDA_RUNTIME_MEM_MEM_STATS_DEFAULT_H_
+#endif  // PANDA_RUNTIME_MEM_MEM_STATS_ADDITIONAL_INFO_H

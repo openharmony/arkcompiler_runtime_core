@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INTERPRETER_RUNTIME_INTERFACE_H_
-#define PANDA_RUNTIME_INTERPRETER_RUNTIME_INTERFACE_H_
+#ifndef PANDA_INTERPRETER_RUNTIME_INTERFACE_H_
+#define PANDA_INTERPRETER_RUNTIME_INTERFACE_H_
 
 #include <memory>
 
@@ -26,11 +25,10 @@
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/field.h"
-#include "runtime/include/managed_thread.h"
 #include "runtime/include/method.h"
 #include "runtime/include/runtime.h"
+#include "runtime/include/managed_thread.h"
 #include "runtime/mem/gc/gc.h"
-#include "runtime/tooling/pt_thread_info.h"
 
 namespace panda::interpreter {
 
@@ -38,11 +36,6 @@ class RuntimeInterface {
 public:
     static constexpr bool NEED_READ_BARRIER = true;
     static constexpr bool NEED_WRITE_BARRIER = true;
-
-    static coretypes::String *ResolveString(PandaVM *vm, const Method &caller, BytecodeId id)
-    {
-        return Runtime::GetCurrent()->ResolveString(vm, caller, id.AsFileId());
-    }
 
     static Method *ResolveMethod(ManagedThread *thread, const Method &caller, BytecodeId id)
     {
@@ -129,17 +122,17 @@ public:
 
     static coretypes::Array *ResolveLiteralArray(PandaVM *vm, const Method &caller, BytecodeId id)
     {
-        return Runtime::GetCurrent()->ResolveLiteralArray(vm, caller, id.AsFileId());
+        return Runtime::GetCurrent()->ResolveLiteralArray(vm, caller, id.AsFileId().GetOffset());
     }
 
     static uint32_t GetCompilerHotnessThreshold()
     {
-        return 0;
+        return Runtime::GetOptions().GetCompilerHotnessThreshold();
     }
 
     static bool IsCompilerEnableJit()
     {
-        return false;
+        return Runtime::GetOptions().IsCompilerEnableJit();
     }
 
     static void SetCurrentFrame(ManagedThread *thread, Frame *frame)
@@ -199,6 +192,11 @@ public:
         panda::ThrowAbstractMethodError(method);
     }
 
+    static void ThrowIncompatibleClassChangeErrorForMethodConflict(Method *method)
+    {
+        panda::ThrowIncompatibleClassChangeErrorForMethodConflict(method);
+    }
+
     static void ThrowOutOfMemoryError(const PandaString &msg)
     {
         panda::ThrowOutOfMemoryError(msg);
@@ -216,7 +214,7 @@ public:
 
     static void ThrowVerificationException(const PandaString &msg)
     {
-        panda::ThrowVerificationException(msg);
+        return panda::ThrowVerificationException(msg);
     }
 
     static void ThrowTypedErrorDyn(const std::string &msg)
@@ -229,35 +227,45 @@ public:
         panda::ThrowReferenceErrorDyn(msg);
     }
 
-    static Frame *CreateFrame(size_t nregs, Method *method, Frame *prev)
+    template <bool is_dynamic = false>
+    static Frame *CreateFrame(uint32_t nregs, Method *method, Frame *prev)
     {
-        return panda::CreateFrame(nregs, method, prev);
+        return panda::CreateFrameWithSize(Frame::GetActualSize<is_dynamic>(nregs), nregs, method, prev);
     }
 
+    template <bool is_dynamic = false>
     static Frame *CreateFrameWithActualArgs(uint32_t nregs, uint32_t num_actual_args, Method *method, Frame *prev)
     {
-        return panda::CreateFrameWithActualArgs(nregs, num_actual_args, method, prev);
+        return panda::CreateFrameWithActualArgsAndSize(Frame::GetActualSize<is_dynamic>(nregs), nregs, num_actual_args,
+                                                       method, prev);
     }
 
-    static Frame *CreateFrameWithActualArgs(uint32_t size, uint32_t nregs, uint32_t num_actual_args, Method *method,
-                                            Frame *prev)
+    ALWAYS_INLINE static Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs,
+                                                                 uint32_t num_actual_args, Method *method, Frame *prev)
     {
         return panda::CreateFrameWithActualArgsAndSize(size, nregs, num_actual_args, method, prev);
     }
 
-    static void FreeFrame(Frame *frame)
+    template <bool is_dynamic = false>
+    static Frame *CreateNativeFrameWithActualArgs(uint32_t nregs, uint32_t num_actual_args, Method *method, Frame *prev)
     {
-        panda::FreeFrame(frame);
+        return panda::CreateNativeFrameWithActualArgsAndSize(Frame::GetActualSize<is_dynamic>(nregs), nregs,
+                                                             num_actual_args, method, prev);
     }
 
-    static void ThreadSuspension(MTManagedThread *thread)
+    ALWAYS_INLINE static void FreeFrame(ManagedThread *thread, Frame *frame)
+    {
+        thread->GetStackFrameAllocator()->Free(frame->GetExt());
+    }
+
+    static void ThreadSuspension(ManagedThread *thread)
     {
         thread->WaitSuspension();
     }
 
-    static void ThreadRuntimeTermination(MTManagedThread *thread)
+    static void ThreadRuntimeTermination(ManagedThread *thread)
     {
-        thread->TerminationLoop();
+        thread->OnRuntimeTerminated();
     }
 
     static panda_file::SourceLang GetLanguageContext(Method *method_ptr)
@@ -274,7 +282,8 @@ public:
      */
     static void Safepoint()
     {
-        MTManagedThread *thread = MTManagedThread::GetCurrent();
+        ManagedThread *thread = ManagedThread::GetCurrent();
+        ASSERT(thread->IsRuntimeCallEnabled());
         if (UNLIKELY(thread->IsRuntimeTerminated())) {
             ThreadRuntimeTermination(thread);
         }
@@ -291,4 +300,4 @@ public:
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_RUNTIME_INTERPRETER_RUNTIME_INTERFACE_H_
+#endif  // PANDA_INTERPRETER_RUNTIME_INTERFACE_H_

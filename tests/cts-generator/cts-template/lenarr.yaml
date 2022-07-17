@@ -19,30 +19,30 @@ definitions:
       .record panda.NullPointerException <external>
       .record R {}
 
-  - name: java_obj
+  - name: PandaAssembly_obj
     template: |
-      .language Java
+      .language PandaAssembly
 
-      .record java.lang.Class <external>
-      .record java.lang.Object <external>
-      .record java.lang.String <external>
-      .record java.lang.NullPointerException <external>
+      .record panda.Class <external>
+      .record panda.Object <external>
+      .record panda.String <external>
+      .record panda.NullPointerException <external>
 
       .record R <> {}
-      .record I <java.interface> {}
-      .record Q <java.extends=R, java.implements=I> {}
-      .record A <java.annotation, java.annotation.type=runtime> {}
-      .record J <java.interface, java.implements=I> {}
-  - name: java
+      .record I <panda.interface> {}
+      .record Q <panda.extends=R, panda.implements=I> {}
+      .record A <panda.annotation, panda.annotation.type=runtime> {}
+      .record J <panda.interface, panda.implements=I> {}
+  - name: PandaAssembly
     template: |
-      .language Java
+      .language PandaAssembly
   - name: NPE_p
     template: |
       .record panda.NullPointerException <external>
   - name: NPE_j
     template: |
-      .language Java
-      .record java.lang.NullPointerException <external>
+      .language PandaAssembly
+      .record panda.NullPointerException <external>
 
 tests:
   - file-name: "lenarr"
@@ -63,6 +63,7 @@ tests:
               movi v0, *s
               mov v1, v0
               newarr %s, v0, %s
+              mov.obj %s
               lenarr %s
               jne v1, exit_failure
                 ldai 0
@@ -71,10 +72,17 @@ tests:
                 ldai 1
                 return
         template-cases:
-          - values: ['v2', 'u1[]', 'v2']
-          - values: ['v7', 'i8[]', 'v7']
-          - values: ['v15', 'u8[]', 'v15']
-          - values: ['v0', 'f64[]', 'v0']
+          - values: ['v0',  'u1[]',  'v2, v0',    'v2'  ]
+          - values: ['v2',  'i8[]',  'v7, v2',    'v7'  ]
+          - values: ['v3',  'u8[]',  'v15, v3',   'v15' ]
+          - values: ['v5',  'i16[]', 'v31, v5',   'v31' ]
+          - values: ['v7',  'u16[]', 'v32, v7',   'v32' ]
+          - values: ['v8',  'i32[]', 'v63, v8',   'v63' ]
+          - values: ['v9',  'u32[]', 'v64, v9',   'v64' ]
+          - values: ['v10', 'i64[]', 'v127, v10', 'v127']
+          - values: ['v13', 'u64[]', 'v128, v13', 'v128']
+          - values: ['v14', 'f32[]', 'v255, v14', 'v255']
+          - values: ['v15', 'f64[]', 'v0, v15',   'v0'  ]
         cases:
           - values: [0]
           - values: [1]
@@ -129,6 +137,53 @@ tests:
           - values: [0x8000]
           - values: [0x100000]
 
+      - file-name: "ref_array_j"
+        description: Check 'lenarr' returns correct array length with array of objects in PandaAssembly context.
+        isa:
+          instructions:
+            - sig: lenarr v:in:top[]
+              acc: out:i32
+              format: [op_v_8]
+        check-type: none
+        runner-options: ['use-pa']
+        header-template: ['PandaAssembly_obj', 'main']
+        code-template: |
+          #
+              movi v0, *s
+              mov v1, v0
+              newarr v0, v0, %s
+              lenarr v0
+              jne v1, exit_failure
+              ldai 0
+              return
+            exit_failure:
+              ldai 1
+              return
+        template-cases:
+          - values: ['panda.Class[]']
+          - values: ['panda.Class[][]']
+          - values: ['panda.Object[]']
+          - values: ['panda.Object[][][]']
+          - values: ['panda.String[]']
+          - values: ['panda.String[][][][]']
+          - values: ['panda.NullPointerException[]']
+          - values: ['panda.NullPointerException[][][][][]']
+          - values: ['R[]']
+          - values: ['R[][][][][][]']
+          - values: ['I[]']
+          - values: ['I[][][][][][][]']
+          - values: ['Q[]']
+          - values: ['Q[][][][][][][][]']
+          - values: ['A[]']
+          - values: ['A[][][][][][][][][]']
+          - values: ['J[]']
+          - values: ['J[][][][][][][][][][]']
+        cases:
+          - values: [0]
+          - values: [1]
+          - values: [0x8000]
+          - values: [0x100000]
+
       - file-name: "npe_p"
         description: Check 'lenarr' throws NPE when null is passed as argument with Panda Assembly context.
         isa:
@@ -138,8 +193,48 @@ tests:
               format: [op_v_8]
           exceptions:
             - x_null
+        tags: ['irtoc_ignore']
         check-type: none
         header-template: ['NPE_p', 'main']
+        code-template: |
+          #
+              mov.null %s
+          begin:
+              lenarr %s
+          end:
+              ldai 1 # Should not reach this line
+              return
+
+          catch_NPE:
+              ldai 0 # Expected panda.NullPointerException
+              return
+
+          catch_all:
+              ldai 2 # Unexpected exception, test failed
+              return
+
+          .catch panda.NullPointerException, begin, end, catch_NPE
+          .catchall begin, end, catch_all
+
+        cases:
+          - values: ['v0', 'v0']
+          - values: ['v1', 'v1']
+          - values: ['v128', 'v128']
+          - values: ['v255', 'v255']
+
+      - file-name: "npe_j"
+        description: Check 'lenarr' throws NPE when null is passed as argument with PandaAssembly context.
+        isa:
+          instructions:
+            - sig: lenarr v:in:top[]
+              acc: out:i32
+              format: [op_v_8]
+          exceptions:
+            - x_null
+        tags: ['irtoc_ignore']
+        check-type: none
+        runner-options: ['use-pa']
+        header-template: ['NPE_j', 'main']
         code-template: |
           #
               mov.null %s
@@ -183,7 +278,7 @@ tests:
           - values: [v65535]
           - values: [a0]
           - values: [a255]
-          - values: [null]
+          - values: ['null']
           - values: [0]
           - values: [1.1]
           - values: ['2.2']
@@ -215,7 +310,7 @@ tests:
             verification:
               - v1_array
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -232,6 +327,8 @@ tests:
               - movi v0, 0
           - values:
               - movi.64 v0, 0
+          - values:
+              - fmovi v0, 0
           - values:
               - fmovi.64 v0, 0
           - values:
@@ -281,11 +378,9 @@ tests:
               format: [op_v_8]
         description: Check 'lenarr' with uninitialized register.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        header-template: []
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
             #
-            .function i32 main() {
                 lenarr %s
         check-type: exit-positive
         cases:

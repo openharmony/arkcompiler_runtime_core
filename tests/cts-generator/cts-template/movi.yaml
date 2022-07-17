@@ -28,22 +28,20 @@ tests:
           instructions:
             - sig: movi v:out:i32, imm:i32
               acc: none
-              format: [op_v_4_imm_4, op_v_8_imm_8, op_v_8_imm_16]
-            - sig: movi v:out:i32, imm:i32
-              acc: none
-              format: [op_v_8_imm_32]
+              format: [op_v_4_imm_4, op_v_8_imm_8, op_v_8_imm_16, op_v_8_imm_32]
+              opcode_idx: [0x9, 0xa, 0xb, 0xc]
         description: Check movi with various values.
         tags: ['tsan']
+        check-type: no-check
         code-template: |
           #
               ldai %s
               movi v0, %s
               jne v0, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
         cases:
           - values:
               - 0
@@ -108,96 +106,25 @@ tests:
           - values:
               - -0xFEDCBA98
               - -0xFEDCBA98
-          - values:
-              - 0
-              - 0x100000000
-          - values:
-              - 0
-              - -0x100000000
-          - values:
-              - 1
-              - 0x100000001
-          - values:
-              - -1
-              - -0x100000001
-          - values:
-              - 0
-              - 0.1
-            runner-options: [compile-failure]
-            case-check-type: no-check
-            description: Check movi with incorrect value (f64 value).
-          - values:
-              - 0
-              - 1e1
-            runner-options: [compile-failure]
-            case-check-type: no-check
-            description: Check movi with incorrect value (f64 value).
-          - values:
-              - 0
-              - e1
-            runner-options: [compile-failure]
-            case-check-type: no-check
-            description: Check movi with incorrect value (incorrect literal).
 
-      - file-name: "vals"
-        isa:
-          instructions:
-            - sig: movi v:out:i32, imm:i32
-              acc: none
-              format: [op_v_4_imm_4, op_v_8_imm_8, op_v_8_imm_16]
-            - sig: movi v:out:i32, imm:i32
-              acc: none
-              format: [op_v_8_imm_32]
-        code-template: |
-          #
-              ldai %s
-              movi v0, %s
-              jne v0, set_failure
-              ldai 0
-              jmp fall_through
-          set_failure:
-              ldai 1
-          fall_through:
-        description: Check compiler shrinks value to 32 bit.
-        cases:
-          - values:
-              - 0
-              - 0x100000000
-          - values:
-              - 1
-              - 0xFFFFFFFF00000001
-          - values:
-              - 1
-              - 0x100000001
-          - values:
-              - -1
-              - -0x100000001
-          - values:
-              - 0xFFFFFFFFFFFFFFFF
-              - 0xFFFFFFFF
-          - values:
-              - 0xFFFFFFFFFFFFFFFF
-              - 0x12345678FFFFFFFF
 
       - file-name: "vd_4_8"
         isa:
           instructions:
             - sig: movi v:out:i32, imm:i32
               acc: none
-              format: [op_v_4_imm_4, op_v_8_imm_8, op_v_8_imm_16]
-            - sig: movi v:out:i32, imm:i32
-              acc: none
-              format: [op_v_8_imm_32]
+              format: [op_v_4_imm_4, op_v_8_imm_8, op_v_8_imm_16, op_v_8_imm_32]
+              opcode_idx: [0x9, 0xa, 0xb, 0xc]
+        check-type: no-check
         code-template: |
           #
               ldai 1
               movi %s, 1
               jne %s, set_failure
               ldai 0
-              jmp fall_through
+              return
           set_failure:
               ldai 1
-          fall_through:
         description: Check movi instruction with different register numbers (8 bit).
         cases:
           - values:
@@ -215,9 +142,45 @@ tests:
           - values:
               - v255
               - v255
+
+
+      - file-name: "err"
+        isa:
+          instructions:
+            - sig: movi v:out:i32, imm:i32
+              acc: none
+              format: [op_v_4_imm_4, op_v_8_imm_8, op_v_8_imm_16, op_v_8_imm_32]
+              opcode_idx: [0x9, 0xa, 0xb, 0xc]
+        header-template: []
+        runner-options: [compile-failure]
+        check-type: exit-positive
+        description: Check movi instruction with syntax error.
+        code-template: |
+          .record panda.Object <external>
+          .function i32 main() {
+              movi %s
+        cases:
           - values:
-              - v256
+              - ''
+          - values:
+              - v0, v1
+          - values:
+              - v256, 0
+          - values:
+              - v65536, 0
+          - values:
+              - a0, 0
+          - values:
+              - 1, 0
+          - values:
               - v0
-            runner-options: [compile-failure]
-            case-check-type: no-check
-            description: Check movi instruction with out-of-range register number.
+          - values:
+              - v0, null
+          - values:
+              - v0, ""
+          - values:
+              - v0, panda.Object
+          - values:
+              - v0, 10e10
+          - values:
+              - v0, 0.0000003

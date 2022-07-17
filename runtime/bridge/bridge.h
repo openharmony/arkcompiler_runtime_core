@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,13 +45,20 @@ extern "C" void InterpreterToCompiledCodeBridge(const uint8_t *, const Frame *, 
 extern "C" void InterpreterToCompiledCodeBridgeDyn(const uint8_t *, const Frame *, const Method *, ManagedThread *);
 extern "C" DecodedTaggedValue InvokeCompiledCodeWithArgArray(const int64_t *, const Frame *, const Method *,
                                                              ManagedThread *);
-extern "C" DecodedTaggedValue InvokeCompiledCodeWithArgArrayDyn(const int64_t *, uint32_t, const Frame *,
-                                                                const Method *, ManagedThread *);
+extern "C" uint64_t InvokeCompiledCodeWithArgArrayDyn(const uint64_t *, uint32_t, const Frame *, const Method *,
+                                                      ManagedThread *);
 
 extern "C" int64_t InvokeInterpreter(ManagedThread *thread, const uint8_t *pc, Frame *frame, Frame *last_frame);
 
 const void *GetCompiledCodeToInterpreterBridge(const Method *method);
 
+const void *GetCompiledCodeToInterpreterBridge();
+
+const void *GetCompiledCodeToInterpreterBridgeDyn();
+
+const void *GetAbstractMethodStub();
+
+const void *GetDefaultConflictMethodStub();
 }  // namespace panda
 
 #endif  // PANDA_RUNTIME_BRIDGE_BRIDGE_H_

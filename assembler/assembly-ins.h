@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ASSEMBLY_INS_H_
-#define PANDA_ASSEMBLER_ASSEMBLY_INS_H_
+#ifndef _PANDA_ASSEMBLER_INS_HPP
+#define _PANDA_ASSEMBLER_INS_HPP
 
 #include <array>
 #include <string>
@@ -53,14 +53,13 @@ enum InstFlags {
     FIELD_ID = (1U << 9U),
     TYPE_ID = (1U << 10U),
     STRING_ID = (1U << 11U),
-    LITERALARRAY_ID = (1U << 12U)
+    LITERALARRAY_ID = (1U << 12U),
+    CALL_RANGE = (1U << 13U)
 };
 
-enum class PrintKind { DEFAULT, CALL, CALLI };
-
 constexpr int INVALID_REG_IDX = -1;
-constexpr size_t MAX_NUMBER_OF_SRC_REGS = 5;
-constexpr size_t NUM_OPCODES = static_cast<size_t>(Opcode::NUM_OPCODES);
+
+constexpr size_t MAX_NUMBER_OF_SRC_REGS = 5;  // TODO(mbolshov): auto-generate
 
 constexpr InstFlags operator|(InstFlags a, InstFlags b)
 {
@@ -69,20 +68,24 @@ constexpr InstFlags operator|(InstFlags a, InstFlags b)
 }
 
 #define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs) flags,
-constexpr std::array<unsigned, NUM_OPCODES> INST_FLAGS_TABLE = {PANDA_INSTRUCTION_LIST(OPLIST)};
+constexpr std::array<unsigned, static_cast<size_t>(Opcode::NUM_OPCODES)> INST_FLAGS_TABLE = {
+    PANDA_INSTRUCTION_LIST(OPLIST)};
 #undef OPLIST
 
 #define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs) width,
-constexpr std::array<size_t, NUM_OPCODES> INST_WIDTH_TABLE = {PANDA_INSTRUCTION_LIST(OPLIST)};
+constexpr std::array<size_t, static_cast<size_t>(Opcode::NUM_OPCODES)> INST_WIDTH_TABLE = {
+    PANDA_INSTRUCTION_LIST(OPLIST)};
 #undef OPLIST
 
 #define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs) def_idx,
-constexpr std::array<int, NUM_OPCODES> DEF_IDX_TABLE = {PANDA_INSTRUCTION_LIST(OPLIST)};
+constexpr std::array<int, static_cast<size_t>(Opcode::NUM_OPCODES)> DEF_IDX_TABLE = {PANDA_INSTRUCTION_LIST(OPLIST)};
 #undef OPLIST
 
 #define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs) use_idxs,
-constexpr std::array<std::array<int, MAX_NUMBER_OF_SRC_REGS>, NUM_OPCODES> USE_IDXS_TABLE = {
+// clang-format off
+constexpr std::array<std::array<int, MAX_NUMBER_OF_SRC_REGS>, static_cast<size_t>(Opcode::NUM_OPCODES)> USE_IDXS_TABLE = {
     PANDA_INSTRUCTION_LIST(OPLIST)};
+// clang-format on
 #undef OPLIST
 
 struct Ins {
@@ -119,7 +122,7 @@ struct Ins {
 
     bool HasFlag(InstFlags flag) const
     {
-        if (opcode == Opcode::INVALID) {
+        if (opcode == Opcode::INVALID) {  // TODO(mbolshov): introduce 'label' opcode for labels
             return false;
         }
         return (INST_FLAGS_TABLE[static_cast<size_t>(opcode)] & flag) != 0;
@@ -144,6 +147,11 @@ struct Ins {
     bool IsCall() const
     {  // Non-range call
         return HasFlag(InstFlags::CALL);
+    }
+
+    bool IsCallRange() const
+    {  // Range call
+        return HasFlag(InstFlags::CALL_RANGE);
     }
 
     bool IsPseudoCall() const
@@ -175,15 +183,16 @@ struct Ins {
         }
 
         auto use_idxs = USE_IDXS_TABLE[static_cast<size_t>(opcode)];
-        std::vector<uint16_t> res;
+        std::vector<uint16_t> res(MAX_NUMBER_OF_SRC_REGS + 1);
+        if (HasFlag(InstFlags::ACC_READ)) {
+            res.push_back(Ins::ACCUMULATOR);
+        }
         for (auto idx : use_idxs) {
-            if (HasFlag(InstFlags::ACC_READ)) {
-                res.push_back(Ins::ACCUMULATOR);
+            if (idx == INVALID_REG_IDX) {
+                break;
             }
-            if (idx != INVALID_REG_IDX) {
-                ASSERT(static_cast<size_t>(idx) < regs.size());
-                res.push_back(regs[idx]);
-            }
+            ASSERT(static_cast<size_t>(idx) < regs.size());
+            res.emplace_back(regs[idx]);
         }
         return res;
     }
@@ -220,12 +229,15 @@ struct Ins {
     }
 
 private:
-    std::string OperandsToString(PrintKind print_kind = PrintKind::DEFAULT, bool print_args = false,
-                                 size_t first_arg_idx = 0) const;
+    std::string OperandsToString(bool print_args = false, size_t first_arg_idx = 0) const;
     std::string RegsToString(bool &first, bool print_args = false, size_t first_arg_idx = 0) const;
     std::string ImmsToString(bool &first) const;
     std::string IdsToString(bool &first) const;
+
+    std::string IdToString(size_t idx, bool is_first) const;
+    std::string ImmToString(size_t idx, bool is_first) const;
+    std::string RegToString(size_t idx, bool is_first, bool print_args = false, size_t first_arg_idx = 0) const;
 };
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_ASSEMBLY_INS_H_
+#endif  // !_PANDA_ASSEMBLER_INS_HPP

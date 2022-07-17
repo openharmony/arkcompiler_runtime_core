@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,20 @@
  * limitations under the License.
  */
 
-#include "runtime/mem/heap_manager.h"
-
-#include <string>
-
 #include "heap_manager.h"
-#include "include/runtime.h"
-#include "include/locks.h"
-#include "include/thread.h"
-#include "libpandabase/mem/mmap_mem_pool-inl.h"
-#include "libpandabase/mem/pool_manager.h"
-#include "libpandabase/utils/logger.h"
+#include "mem/gc/hybrid-gc/hybrid_object_allocator.h"
 #include "mem/pool_manager.h"
 #include "mem/mmap_mem_pool-inl.h"
 #include "mem/internal_allocator-inl.h"
-#include "mem/gc/hybrid-gc/hybrid_object_allocator.h"
-#include "runtime/include/locks.h"
-#include "runtime/include/runtime.h"
+#include "include/runtime.h"
+#include "include/locks.h"
+
+#include <string>
+
+#include "libpandabase/mem/mmap_mem_pool-inl.h"
+#include "libpandabase/mem/pool_manager.h"
 #include "runtime/include/runtime_notification.h"
-#include "runtime/include/thread.h"
 #include "runtime/include/thread_scopes.h"
-#include "runtime/mem/internal_allocator-inl.h"
 #include "runtime/handle_base-inl.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
@@ -90,18 +83,17 @@ bool HeapManager::Finalize()
     objectAllocator_->VisitAndRemoveAllPools(
         [](void *mem, [[maybe_unused]] size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
     delete static_cast<Allocator *>(objectAllocator_);
-    objectAllocator_ = nullptr;
 
     return true;
 }
 
-ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment align, MTManagedThread *thread)
+ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment align, ManagedThread *thread)
 {
-    ASSERT(vm_->GetLanguageContext().GetLanguage() == panda_file::SourceLang::ECMASCRIPT || !GetGC()->IsGCRunning() ||
-           Locks::mutator_lock->HasLock());
+    ASSERT(GetGC()->IsMutatorAllowed());
     TriggerGCIfNeeded();
     if (thread == nullptr) {
-        thread = MTManagedThread::GetCurrent();
+        // TODO(dtrubenkov): try to avoid this
+        thread = ManagedThread::GetCurrent();
         ASSERT(thread != nullptr);
     }
     void *mem = AllocateMemoryForObject(size, align, thread);
@@ -112,7 +104,7 @@ ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment
             return nullptr;
         }
     }
-    LOG(DEBUG, ALLOC_OBJECT) << "Alloc object at " << std::hex << mem << " size: " << size;
+    LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc object at " << mem << " size: " << size;
     ObjectHeader *object = InitObjectHeaderAtMem(cls, mem);
     bool is_object_finalizable = IsObjectFinalized(cls);
     if (UNLIKELY(is_object_finalizable || GetNotificationManager()->HasAllocationListeners())) {
@@ -126,7 +118,7 @@ ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment
     return object;
 }
 
-void *HeapManager::TryGCAndAlloc(size_t size, Alignment align, panda::MTManagedThread *thread)
+void *HeapManager::TryGCAndAlloc(size_t size, Alignment align, ManagedThread *thread)
 {
     // do not try many times in case of OOM scenarios.
     constexpr size_t ALLOC_RETRY = 4;
@@ -135,7 +127,8 @@ void *HeapManager::TryGCAndAlloc(size_t size, Alignment align, panda::MTManagedT
     bool is_generational = GetGC()->IsGenerational();
     ASSERT(!thread->HasPendingException());
 
-    while (mem == nullptr && alloc_try_cnt++ < ALLOC_RETRY) {
+    while (mem == nullptr && alloc_try_cnt < ALLOC_RETRY) {
+        ++alloc_try_cnt;
         GCTaskCause cause;
         // add comment why -1
         if (alloc_try_cnt == ALLOC_RETRY - 1 || !is_generational) {
@@ -146,13 +139,14 @@ void *HeapManager::TryGCAndAlloc(size_t size, Alignment align, panda::MTManagedT
         GetGC()->WaitForGCInManaged(GCTask(cause, thread));
         mem = AllocateMemoryForObject(size, align, thread);
         if (mem != nullptr) {
-            // we could set OOM in gc, but we need to clear it if next gc was successful and we allocated memory
+            // we could set OOM in gc, but we need to clear it if next gc was successfully and we allocated memory
             thread->ClearException();
         } else {
-            auto reclaimed_bytes = GetGC()->GetLastGCReclaimedBytes();
-            // if last GC reclaimed some bytes - it means that we have a progress in JVM, just this thread was unlucky
-            // to get some memory. We reset alloc_try_cnt to try again.
-            if (reclaimed_bytes != 0) {
+            auto freed_bytes = GetPandaVM()->GetGCStats()->GetObjectsFreedBytes();
+            auto last_young_moved_bytes = GetPandaVM()->GetMemStats()->GetLastYoungObjectsMovedBytes();
+            // if last GC freed or moved from young space some bytes - it means that we have a progress in VM,
+            // just this thread was unlucky to get some memory. We reset alloc_try_cnt to try again.
+            if (freed_bytes + last_young_moved_bytes != 0) {
                 alloc_try_cnt = 0;
             }
         }
@@ -191,8 +185,7 @@ void *HeapManager::AllocateMemoryForObject(size_t size, Alignment align, Managed
 template <bool IsFirstClassClass>
 ObjectHeader *HeapManager::AllocateNonMovableObject(BaseClass *cls, size_t size, Alignment align, ManagedThread *thread)
 {
-    ASSERT(vm_->GetLanguageContext().GetLanguage() == panda_file::SourceLang::ECMASCRIPT || !GetGC()->IsGCRunning() ||
-           Locks::mutator_lock->HasLock());
+    ASSERT(GetGC()->IsMutatorAllowed());
     TriggerGCIfNeeded();
     void *mem = objectAllocator_->AllocateNonMovable(size, align, thread);
     if (UNLIKELY(mem == nullptr)) {
@@ -201,10 +194,12 @@ ObjectHeader *HeapManager::AllocateNonMovableObject(BaseClass *cls, size_t size,
         mem = objectAllocator_->AllocateNonMovable(size, align, thread);
     }
     if (UNLIKELY(mem == nullptr)) {
-        ThrowOutOfMemoryError("AllocateNonMovableObject failed");
+        if (ManagedThread::GetCurrent() != nullptr) {
+            ThrowOutOfMemoryError("AllocateNonMovableObject failed");
+        }
         return nullptr;
     }
-    LOG(DEBUG, ALLOC_OBJECT) << "Alloc non-movable object at " << std::hex << mem;
+    LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc non-movable object at " << mem << " size: " << size;
     auto *object = InitObjectHeaderAtMem(cls, mem);
     // cls can be null for first class creation, when we create ClassRoot::Class
     // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
@@ -223,8 +218,7 @@ ObjectHeader *HeapManager::AllocateNonMovableObject(BaseClass *cls, size_t size,
 ObjectHeader *HeapManager::InitObjectHeaderAtMem(BaseClass *cls, void *mem)
 {
     ASSERT(mem != nullptr);
-    ASSERT(vm_->GetLanguageContext().GetLanguage() == panda_file::SourceLang::ECMASCRIPT || !GetGC()->IsGCRunning() ||
-           Locks::mutator_lock->HasLock());
+    ASSERT(GetGC()->IsMutatorAllowed());
 
     auto object = static_cast<ObjectHeader *>(mem);
     // we need zeroed memory here according to ISA
@@ -244,18 +238,16 @@ void HeapManager::TriggerGCIfNeeded()
     }
 }
 
-Frame *HeapManager::AllocateFrame(size_t size)
+Frame *HeapManager::AllocateExtFrame(size_t size, size_t ext_sz)
 {
-    ASSERT(vm_->GetLanguageContext().GetLanguage() == panda_file::SourceLang::ECMASCRIPT || !GetGC()->IsGCRunning() ||
-           Locks::mutator_lock->HasLock());
+    ASSERT(GetGC()->IsMutatorAllowed());
     StackFrameAllocator *frame_allocator = GetCurrentStackFrameAllocator();
-    return static_cast<Frame *>(frame_allocator->Alloc(size));
+    return Frame::FromExt(frame_allocator->Alloc(size), ext_sz);
 }
 
 bool HeapManager::CreateNewTLAB(ManagedThread *thread)
 {
-    ASSERT(vm_->GetLanguageContext().GetLanguage() == panda_file::SourceLang::ECMASCRIPT || !GetGC()->IsGCRunning() ||
-           Locks::mutator_lock->HasLock());
+    ASSERT(GetGC()->IsMutatorAllowed());
     ASSERT(thread != nullptr);
     TLAB *new_tlab = objectAllocator_.AsObjectAllocator()->CreateNewTLAB(thread);
     if (new_tlab != nullptr) {
@@ -266,7 +258,7 @@ bool HeapManager::CreateNewTLAB(ManagedThread *thread)
     return false;
 }
 
-void HeapManager::RegisterTLAB(TLAB *tlab)
+void HeapManager::RegisterTLAB(const TLAB *tlab)
 {
     ASSERT(tlab != nullptr);
     if (!PANDA_TRACK_TLAB_ALLOCATIONS && (tlab->GetOccupiedSize() != 0)) {
@@ -274,12 +266,11 @@ void HeapManager::RegisterTLAB(TLAB *tlab)
     }
 }
 
-void HeapManager::FreeFrame(Frame *frame_ptr)
+void HeapManager::FreeExtFrame(Frame *frame, size_t ext_sz)
 {
-    ASSERT(vm_->GetLanguageContext().GetLanguage() == panda_file::SourceLang::ECMASCRIPT || !GetGC()->IsGCRunning() ||
-           Locks::mutator_lock->HasLock());
+    ASSERT(GetGC()->IsMutatorAllowed());
     StackFrameAllocator *frame_allocator = GetCurrentStackFrameAllocator();
-    frame_allocator->Free(frame_ptr);
+    frame_allocator->Free(Frame::ToExt(frame, ext_sz));
 }
 
 CodeAllocator *HeapManager::GetCodeAllocator() const
@@ -320,7 +311,7 @@ void HeapManager::SetTargetHeapUtilization(float target)
 
 size_t HeapManager::GetTotalMemory() const
 {
-    return vm_->GetGCTrigger()->GetTargetFootprint();
+    return vm_->GetMemStats()->GetFootprintHeap();
 }
 
 size_t HeapManager::GetFreeMemory() const
@@ -346,7 +337,7 @@ void HeapManager::DumpHeap(PandaOStringStream *o_string_stream)
  * @param assignable - whether the subclass of h_class counts
  * @return true if obj is instanceOf h_class, otherwise false
  */
-static bool MatchesClass(ObjectHeader *obj, Class *h_class, bool assignable)
+static bool MatchesClass(const ObjectHeader *obj, const Class *h_class, bool assignable)
 {
     if (assignable) {
         return obj->IsInstanceOf(h_class);
@@ -371,7 +362,7 @@ void HeapManager::CountInstances(const PandaVector<Class *> &classes, bool assig
         MTManagedThread *thread = MTManagedThread::GetCurrent();
         ASSERT(thread != nullptr);
         ScopedChangeThreadStatus sts(thread, ThreadStatus::RUNNING);
-        ScopedSuspendAllThreadsRunning ssatr(Runtime::GetCurrent()->GetPandaVM()->GetRendezvous());
+        ScopedSuspendAllThreadsRunning ssatr(thread->GetVM()->GetRendezvous());
         GetObjectAllocator().AsObjectAllocator()->IterateOverObjects(objects_checker);
     }
 }

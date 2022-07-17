@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
     // read the pair of arg indexes into r3 and advance insn_ptr
     ldrb r3, [r4], #1
     and r6, r3, #0xF
-    add r6, r5, r6, lsl #4
+    add r6, r5, r6, lsl #3
 
     // handle the first arg index
     PUSH_ARG r6, r8, r6, r7, 10f
@@ -33,6 +33,6 @@
     beq .Linvoke_from_bridge
 
     asr r6, r3, #4
-    add r6, r5, r6, lsl #4
+    add r6, r5, r6, lsl #3
 
     PUSH_ARG r6, r8, r6, r7, .Lloop_handle_call

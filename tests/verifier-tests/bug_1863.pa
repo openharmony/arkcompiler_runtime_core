@@ -22,7 +22,7 @@
     return
 }
 
-.function u1 main() {
+.function i32 main() {
     initobj.short A.constructor
     sta.obj v0
     lda.type A

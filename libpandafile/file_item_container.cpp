@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  */
 
 #include "file_item_container.h"
-
-#include "file_format_version.h"
 #include "macros.h"
+#include "file_format_version.h"
+#include "pgo.h"
 
 namespace panda::panda_file {
 
@@ -142,8 +142,8 @@ private:
     std::unordered_set<ItemData, ItemHash> items_;
 };
 
-template <class T, class C, class I, class E, class... Args>
-static T *GetOrInsert(C &map, I &items, const E &key, bool is_foreign, Args &&... args)
+template <class T, class C, class I, class P, class E, class... Args>
+static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool is_foreign, Args &&... args)
 {
     auto it = map.find(key);
     if (it != map.cend()) {
@@ -156,22 +156,30 @@ static T *GetOrInsert(C &map, I &items, const E &key, bool is_foreign, Args &&..
         return nullptr;
     }
 
-    items.push_back(std::make_unique<T>(std::forward<Args>(args)...));
-    auto *item = static_cast<T *>(items.back().get());
+    auto ii = items.insert(pos, std::make_unique<T>(std::forward<Args>(args)...));
+    auto *item = static_cast<T *>(ii->get());
 
     [[maybe_unused]] auto res = map.insert({key, item});
     ASSERT(res.second);
     return item;
 }
 
+ItemContainer::ItemContainer()
+{
+    items_end_ = items_.insert(items_.end(), std::make_unique<EndItem>());
+    code_items_end_ = items_.insert(items_.end(), std::make_unique<EndItem>());
+    debug_items_end_ = items_.insert(items_.end(), std::make_unique<EndItem>());
+    end_ = debug_items_end_->get();
+}
+
 ClassItem *ItemContainer::GetOrCreateClassItem(const std::string &str)
 {
-    return GetOrInsert<ClassItem>(class_map_, items_, str, false, str);
+    return GetOrInsert<ClassItem>(class_map_, items_, items_end_, str, false, str);
 }
 
 ForeignClassItem *ItemContainer::GetOrCreateForeignClassItem(const std::string &str)
 {
-    return GetOrInsert<ForeignClassItem>(class_map_, foreign_items_, str, true, str);
+    return GetOrInsert<ForeignClassItem>(class_map_, foreign_items_, foreign_items_.end(), str, true, str);
 }
 
 StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
@@ -181,49 +189,59 @@ StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
         return it->second->GetNameItem();
     }
 
-    return GetOrInsert<StringItem>(string_map_, items_, str, false, str);
+    return GetOrInsert<StringItem>(string_map_, items_, items_end_, str, false, str);
 }
 
 LiteralArrayItem *ItemContainer::GetOrCreateLiteralArrayItem(const std::string &id)
 {
-    return GetOrInsert<LiteralArrayItem>(literalarray_map_, items_, id, false);
+    return GetOrInsert<LiteralArrayItem>(literalarray_map_, items_, items_end_, id, false);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateIntegerValueItem(uint32_t v)
 {
-    return GetOrInsert<ScalarValueItem>(int_value_map_, items_, v, false, v);
+    return GetOrInsert<ScalarValueItem>(int_value_map_, items_, items_end_, v, false, v);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateLongValueItem(uint64_t v)
 {
-    return GetOrInsert<ScalarValueItem>(long_value_map_, items_, v, false, v);
+    return GetOrInsert<ScalarValueItem>(long_value_map_, items_, items_end_, v, false, v);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateFloatValueItem(float v)
 {
-    return GetOrInsert<ScalarValueItem>(float_value_map_, items_, bit_cast<uint32_t>(v), false, v);
+    return GetOrInsert<ScalarValueItem>(float_value_map_, items_, items_end_, bit_cast<uint32_t>(v), false, v);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateDoubleValueItem(double v)
 {
-    return GetOrInsert<ScalarValueItem>(double_value_map_, items_, bit_cast<uint64_t>(v), false, v);
+    return GetOrInsert<ScalarValueItem>(double_value_map_, items_, items_end_, bit_cast<uint64_t>(v), false, v);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateIdValueItem(BaseItem *v)
 {
-    return GetOrInsert<ScalarValueItem>(id_value_map_, items_, v, false, v);
+    return GetOrInsert<ScalarValueItem>(id_value_map_, items_, items_end_, v, false, v);
 }
 
 ProtoItem *ItemContainer::GetOrCreateProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params)
 {
     ProtoKey key(ret_type, params);
-    return GetOrInsert<ProtoItem>(proto_map_, items_, key, false, ret_type, params);
+    return GetOrInsert<ProtoItem>(proto_map_, items_, items_end_, key, false, ret_type, params);
+}
+
+PrimitiveTypeItem *ItemContainer::GetOrCreatePrimitiveTypeItem(Type type)
+{
+    return GetOrCreatePrimitiveTypeItem(type.GetId());
+}
+
+PrimitiveTypeItem *ItemContainer::GetOrCreatePrimitiveTypeItem(Type::TypeId type)
+{
+    return GetOrInsert<PrimitiveTypeItem>(primitive_type_map_, items_, items_end_, type, false, type);
 }
 
 LineNumberProgramItem *ItemContainer::CreateLineNumberProgramItem()
 {
-    items_.push_back(std::make_unique<LineNumberProgramItem>());
-    auto *item = static_cast<LineNumberProgramItem *>(items_.back().get());
+    auto it = items_.insert(debug_items_end_, std::make_unique<LineNumberProgramItem>());
+    auto *item = static_cast<LineNumberProgramItem *>(it->get());
     [[maybe_unused]] auto res = line_number_program_index_item_.Add(item);
     ASSERT(res);
     return item;
@@ -267,6 +285,7 @@ static void DeduplicateCode(MethodItem *method, ItemDeduper *code_deduper)
     auto *deduplicated = code_deduper->Deduplicate(code_item);
     if (deduplicated != code_item) {
         method->SetCode(deduplicated);
+        deduplicated->AddMethod(method);  // we need it for Profile-Guided optimization
     }
 }
 
@@ -302,7 +321,7 @@ static void DeduplicateAnnotationValue(AnnotationItem *annotation_item, ItemDedu
     for (size_t i = 0; i < elems->size(); i++) {
         auto tag = tags[i];
 
-        // Try to dedupe only ArrayValueItems
+        // try to dedupe only ArrayValueItems
         switch (tag.GetItem()) {
             case 'K':
             case 'L':
@@ -390,9 +409,11 @@ void ItemContainer::DeduplicateAnnotations()
     }
 }
 
-void ItemContainer::DeduplicateItems()
+void ItemContainer::DeduplicateItems(bool computeLayout)
 {
-    ComputeLayout();
+    if (computeLayout) {
+        ComputeLayout();
+    }
     DeduplicateCodeAndDebugInfo();
     DeduplicateAnnotations();
 }
@@ -437,7 +458,7 @@ uint32_t ItemContainer::ComputeLayout()
     line_number_program_index_item_.ComputeLayout();
     cur_offset += line_number_program_index_item_.GetSize();
 
-    end_.SetOffset(cur_offset);
+    end_->SetOffset(cur_offset);
 
     return cur_offset;
 }
@@ -465,7 +486,7 @@ void ItemContainer::RebuildIndexSection()
     }
 
     if (!index_section_item_.IsEmpty()) {
-        index_section_item_.GetCurrentHeader()->SetEnd(&end_);
+        index_section_item_.GetCurrentHeader()->SetEnd(end_);
     }
 
     index_section_item_.UpdateItems();
@@ -495,7 +516,12 @@ void ItemContainer::UpdateOrderIndexes()
         });
     }
 
-    end_.SetOrderIndex(idx++);
+    end_->SetOrderIndex(idx++);
+}
+
+void ItemContainer::ReorderItems(panda::panda_file::pgo::ProfileOptimizer *profile_opt)
+{
+    profile_opt->ProfileGuidedRelayout(items_);
 }
 
 void ItemContainer::ProcessIndexDependecies(BaseItem *item)
@@ -600,9 +626,11 @@ bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksum_offset)
     return WriteHeaderIndexInfo(writer);
 }
 
-bool ItemContainer::Write(Writer *writer)
+bool ItemContainer::Write(Writer *writer, bool deduplicateItems)
 {
-    DeduplicateItems();
+    if (deduplicateItems) {
+        DeduplicateItems();
+    }
 
     ssize_t checksum_offset = -1;
     if (!WriteHeader(writer, &checksum_offset)) {
@@ -722,7 +750,7 @@ void ItemContainer::DumpItemsStat(std::ostream &os) const
 
     std::map<std::string, Stat> stat;
 
-    auto collect_stat = [&stat](const std::vector<std::unique_ptr<BaseItem>> &items) {
+    auto collect_stat = [&stat](auto &items) {
         for (auto &item : items) {
             if (!item->NeedsEmit()) {
                 continue;
@@ -850,19 +878,19 @@ bool ItemContainer::IndexItem::Write(Writer *writer)
     return true;
 }
 
-std::string ItemContainer::IndexItem::GetName() const
+ItemTypes ItemContainer::IndexItem::GetItemType() const
 {
     switch (type_) {
         case IndexType::CLASS:
-            return "class_index_item";
+            return ItemTypes::CLASS_INDEX_ITEM;
         case IndexType::METHOD:
-            return "method_index_item";
+            return ItemTypes::METHOD_INDEX_ITEM;
         case IndexType::FIELD:
-            return "field_index_item";
+            return ItemTypes::FIELD_INDEX_ITEM;
         case IndexType::PROTO:
-            return "proto_index_item";
+            return ItemTypes::PROTO_INDEX_ITEM;
         case IndexType::LINE_NUMBER_PROG:
-            return "line_number_program_index_item";
+            return ItemTypes::LINE_NUMBER_PROGRAM_INDEX_ITEM;
         default:
             break;
     }

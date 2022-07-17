@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ struct Pool : public ObjPool<S, std::vector, I, C> {
 
 }  // namespace
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
 TEST(VerifierTest_ObjPool, Basic)
 {
     int result = 0;
@@ -51,11 +50,13 @@ TEST(VerifierTest_ObjPool, Basic)
         auto p = pool.New();
         EXPECT_EQ(pool.Count(), 2);
         EXPECT_EQ(pool.FreeCount(), 0);
+        EXPECT_EQ(pool.AccCount(), 2);
         EXPECT_EQ(result, 1);
     }
 
     EXPECT_EQ(pool.Count(), 2);
     EXPECT_EQ(pool.FreeCount(), 2);
+    EXPECT_EQ(pool.AccCount(), 0);
     EXPECT_EQ(result, 0);
 
     {
@@ -63,6 +64,7 @@ TEST(VerifierTest_ObjPool, Basic)
         auto w = pool.New();
         EXPECT_EQ(pool.Count(), 2);
         EXPECT_EQ(pool.FreeCount(), 0);
+        EXPECT_EQ(pool.AccCount(), 2);
         EXPECT_EQ(result, 1);
     }
 
@@ -71,34 +73,141 @@ TEST(VerifierTest_ObjPool, Basic)
         auto w = pool.New();
         EXPECT_EQ(pool.Count(), 2);
         EXPECT_EQ(pool.FreeCount(), 0);
+        EXPECT_EQ(pool.AccCount(), 2);
         EXPECT_EQ(result, 1);
         {
             auto p = pool.New();
             EXPECT_EQ(pool.Count(), 3);
             EXPECT_EQ(pool.FreeCount(), 0);
+            EXPECT_EQ(pool.AccCount(), 3);
             EXPECT_EQ(result, 3);
         }
         EXPECT_EQ(pool.Count(), 3);
         EXPECT_EQ(pool.FreeCount(), 1);
+        EXPECT_EQ(pool.AccCount(), 2);
         EXPECT_EQ(result, 1);
         {
             auto p = pool.New();
             EXPECT_EQ(pool.Count(), 3);
             EXPECT_EQ(pool.FreeCount(), 0);
-            EXPECT_EQ(result, 3);
-        }
-
-        {
-            auto p = pool.New();
-            auto e {std::move(p)};
-            EXPECT_EQ(pool.Count(), 3);
-            EXPECT_EQ(pool.FreeCount(), 0);
+            EXPECT_EQ(pool.AccCount(), 3);
             EXPECT_EQ(result, 3);
         }
     }
 
     EXPECT_EQ(pool.Count(), 3);
     EXPECT_EQ(pool.FreeCount(), 3);
+    EXPECT_EQ(pool.AccCount(), 0);
+    EXPECT_EQ(result, 0);
+
+    {
+        auto q = pool.New();
+        auto w = pool.New();
+        pool.ShrinkToFit();
+        EXPECT_EQ(pool.Count(), 2);
+        EXPECT_EQ(pool.FreeCount(), 0);
+        EXPECT_EQ(pool.AccCount(), 2);
+        EXPECT_EQ(result, 1);
+    }
+
+    EXPECT_EQ(pool.Count(), 2);
+    EXPECT_EQ(pool.FreeCount(), 2);
+    EXPECT_EQ(pool.AccCount(), 0);
+    EXPECT_EQ(result, 0);
+
+    {
+        auto q = pool.New();
+        auto w = pool.New();
+        auto p = pool.New();
+        EXPECT_EQ(pool.Count(), 3);
+        EXPECT_EQ(pool.FreeCount(), 0);
+        EXPECT_EQ(pool.AccCount(), 3);
+        EXPECT_EQ(result, 3);
+
+        auto u {p};
+
+        EXPECT_EQ(pool.Count(), 3);
+        EXPECT_EQ(pool.FreeCount(), 0);
+        EXPECT_EQ(pool.AccCount(), 4);
+        EXPECT_EQ(result, 3);
+
+        auto e {std::move(p)};
+
+        EXPECT_EQ(pool.Count(), 3);
+        EXPECT_EQ(pool.FreeCount(), 0);
+        EXPECT_EQ(pool.AccCount(), 4);
+        EXPECT_EQ(result, 3);
+        EXPECT_FALSE(p);
+        EXPECT_TRUE(u);
+
+        p = e;
+
+        EXPECT_EQ(pool.Count(), 3);
+        EXPECT_EQ(pool.FreeCount(), 0);
+        EXPECT_EQ(pool.AccCount(), 5);
+        EXPECT_EQ(result, 3);
+        EXPECT_TRUE(p);
+
+        q = e;
+
+        EXPECT_EQ(pool.Count(), 3);
+        EXPECT_EQ(pool.FreeCount(), 1);
+        EXPECT_EQ(pool.AccCount(), 5);
+        EXPECT_EQ(result, 3);
+
+        w = std::move(e);
+
+        EXPECT_EQ(pool.Count(), 3);
+        EXPECT_EQ(pool.FreeCount(), 2);
+        EXPECT_EQ(pool.AccCount(), 4);
+        EXPECT_EQ(result, 2);
+        EXPECT_FALSE(e);
+
+        EXPECT_EQ((*w).a, 2);
+    }
+
+    EXPECT_EQ(pool.Count(), 3);
+    EXPECT_EQ(pool.FreeCount(), 3);
+    EXPECT_EQ(pool.AccCount(), 0);
+    EXPECT_EQ(result, 0);
+
+    pool.ShrinkToFit();
+    EXPECT_EQ(pool.Count(), 0);
+    EXPECT_EQ(pool.FreeCount(), 0);
+    EXPECT_EQ(pool.AccCount(), 0);
+    EXPECT_EQ(result, 0);
+
+    {
+        auto q = pool.New();
+        auto w = pool.New();
+        auto p = pool.New();
+        q = std::move(w);
+        auto e = p;
+
+        EXPECT_EQ(pool.Count(), 3);
+        EXPECT_EQ(pool.FreeCount(), 1);
+        EXPECT_EQ(pool.AccCount(), 3);
+        EXPECT_EQ(result, 3);
+
+        int sum = 0;
+        int prod = 1;
+        int num = 0;
+
+        while (auto acc = pool.AllObjects()()) {
+            const S &obj = *(*acc);
+            sum += obj.a;
+            prod *= obj.a;
+            ++num;
+        }
+
+        EXPECT_EQ(sum, 3);
+        EXPECT_EQ(prod, 2);
+        EXPECT_EQ(num, 2);
+    }
+
+    EXPECT_EQ(pool.Count(), 3);
+    EXPECT_EQ(pool.FreeCount(), 3);
+    EXPECT_EQ(pool.AccCount(), 0);
     EXPECT_EQ(result, 0);
 }
 

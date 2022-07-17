@@ -101,7 +101,6 @@ tests:
           - values:
               - '0x7FFFFFFF'
               - '0x80000000'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - '0x80000000'
@@ -153,7 +152,6 @@ tests:
           - values:
               - '0x80000000'
               - '0x7FFFFFFF'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - "-0x7FFFFFFF"
@@ -161,7 +159,6 @@ tests:
           - values:
               - "-0x80000000"
               - "-0x80000001"
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - '0xFFFFFFFF'
@@ -195,7 +192,6 @@ tests:
           - values:
               - '1'
               - '0x80000000'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - "-1"
@@ -203,7 +199,6 @@ tests:
           - values:
               - '0x7FFFFFFF'
               - '0xFFFFFFFE'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - '0x80000000'
@@ -220,7 +215,6 @@ tests:
           - values:
               - "-0xFFFFFFFF"
               - '0x80000000'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
       - file-name: op_vs1_4_vs2_4_nmax
         isa:
@@ -251,7 +245,6 @@ tests:
           - values:
               - "-1"
               - '0x7FFFFFFF'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - '0x7FFFFFFF'
@@ -259,22 +252,18 @@ tests:
           - values:
               - '0x80000000'
               - '0'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - "-0x7FFFFFFF"
               - '1'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - "-0x80000000"
               - '0'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - '0xFFFFFFFF'
               - '0x7FFFFFFF'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - "-0xFFFFFFFF"
@@ -328,7 +317,6 @@ tests:
               - '0x4bb930e4'
               - '0x416b3a07'
               - '0x8d246aeb'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - '0x61a80560'
@@ -345,7 +333,7 @@ tests:
       - file-name: vals_mod32_1
         bugid: ['1324', '2072']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: add v1:in:i32, v2:in:i32
@@ -364,7 +352,6 @@ tests:
               - '0x7FFFFFFF'
               - '0x7FFFFFFF'
               - '0xFFFFFFFFFFFFFFFE'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - '0x7FFFFFFF'
@@ -374,12 +361,11 @@ tests:
               - '0x80000000'
               - '0x80000000'
               - '0'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
       - file-name: vals_mod32_2
         bugid: ['1324']
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         isa:
           instructions:
             - sig: add v1:in:i32, v2:in:i32
@@ -398,7 +384,6 @@ tests:
               - '0x17FFFFFFF'
               - '0x17FFFFFFF'
               - '0xFFFFFFFFFFFFFFFE'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
           - values:
               - '0x777777777FFFFFFF'
@@ -408,7 +393,6 @@ tests:
               - '0x180000000'
               - '0x180000000'
               - '0'
-            tags: ["clang_release_sanitizer"]
             bugid: ["966"]
       - file-name: regs
         isa:
@@ -443,15 +427,11 @@ tests:
 
       - file-name: type
         isa:
-          instructions:
-            - sig: add v1:in:i32, v2:in:i32
-              acc: out:i32
-              format: [op_v1_4_v2_4]
           verification:
             - v1_type
             - v2_type
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
           #
@@ -463,12 +443,16 @@ tests:
               %s
               *s
               add v0, v1
-              ldai 0
-        check-type: no-check
-        description: Check add with incorrect register type.
+        check-type: exit-positive
+        description: Check 'add' with incorrect register types.
         template-cases:
           - values:
+              - movi v0, 0
+            exclude: [val]
+          - values:
               - movi.64 v0, 0
+          - values:
+              - fmovi v0, 0
           - values:
               - fmovi.64 v0, 0
           - values:
@@ -498,12 +482,14 @@ tests:
                     newarr v0, v0, i32[]
           - values:
               - mov.null v0
-          - values:
-              - movi v0, 0
-            exclude: [val]
         cases:
           - values:
+              - movi v1, 0
+            id: val
+          - values:
               - movi.64 v1, 0
+          - values:
+              - fmovi v1, 0
           - values:
               - fmovi.64 v1, 0
           - values:
@@ -534,9 +520,6 @@ tests:
                     newarr v1, v1, f64[]
           - values:
               - mov.null v1
-          - values:
-              - movi v1, 0
-            id: val
 
       - file-name: uninitialized_regs
         isa:
@@ -544,18 +527,15 @@ tests:
             - sig: add v1:in:i32, v2:in:i32
               acc: out:i32
               format: [op_v1_4_v2_4]
-        description: Check add with uninitialized registers.
+        description: Check 'add' with uninitialized registers.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        header-template: []
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
-            #
-            .function i32 main() {
-                %s
-                *s
-                add %s, *s
-                ldai 0
-        check-type: no-check
+          #
+              %s
+              *s
+              add %s, *s
+        check-type: exit-positive
         template-cases:
           - values:
               - ''

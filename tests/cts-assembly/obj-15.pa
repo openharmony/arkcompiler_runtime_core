@@ -13,7 +13,7 @@
 
 # Compare a null object against another null object
 
-.function u1 main() {
+.function i32 main() {
     lda.null
     mov.null v0
     jeq.obj v0, ok

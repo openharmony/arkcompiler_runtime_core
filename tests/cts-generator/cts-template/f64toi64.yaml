@@ -235,7 +235,7 @@ tests:
           Check `f64toi64` with incorrect accumulator type.
           Load different values (objects, strings, types, 32-bit values, 64-bit integer values) and invokes `f64toi64`.
           Return 0 to indicate that negative test failed, because this line is unreachable and code will not be executed after verification error.
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         bugid: ["964", "1653"]
         tags: ["verifier"]
         header-template: []
@@ -253,6 +253,9 @@ tests:
                 - ldai 0
             - values:
                 - ldai.64 0
+            - values:
+                - fldai 0
+              bugid: ['6094']
             - values:
                 - lda.type B
             - values:
@@ -279,12 +282,10 @@ tests:
               acc: inout:f64->i64
               prefix: cast
               format: [pref_op_none]
-        description: Check i32tof64 with uninitialized accumulator.
+        description: Check 'f64toi64' with uninitialized accumulator.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        header-template: []
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
             #
-            .function i32 main() {
                 f64toi64
         check-type: exit-positive

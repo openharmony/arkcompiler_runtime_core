@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,40 +13,34 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_ABSINT_ABS_INT_INL_H_
-#define PANDA_VERIFICATION_ABSINT_ABS_INT_INL_H_
+#ifndef PANDA_VERIFICATION_ABSINT_ABS_INT_INL_H
+#define PANDA_VERIFICATION_ABSINT_ABS_INT_INL_H
 
-#include "type/type_system.h"
-#include "panda_types.h"
-#include "verification_context.h"
-#include "verification_status.h"
-
-#include "verification/debug/breakpoint/breakpoint.h"
-#include "verification/debug/allowlist/allowlist.h"
-
-#include "verification/job_queue/cache.h"
-
-#include "verifier_messages.h"
 #include "abs_int_inl_compat_checks.h"
-
 #include "bytecode_instruction-inl.h"
 #include "file_items.h"
-#include "macros.h"
+#include "include/mem/panda_containers.h"
 #include "include/method.h"
 #include "include/runtime.h"
+#include "lang_specifics.h"
+#include "macros.h"
+#include "panda_types.h"
 #include "runtime/include/class.h"
 #include "runtime/interpreter/runtime_interface.h"
-#include "include/mem/panda_containers.h"
-
+#include "type/type_system.h"
 #include "util/lazy.h"
-#include "util/str.h"
-
 #include "utils/logger.h"
-
-#include <cstdint>
-#include <cmath>
+#include "util/str.h"
+#include "verification/config/debug_breakpoint/breakpoint.h"
+#include "verification/config/whitelist/whitelist.h"
+#include "verification_context.h"
+#include "verification/jobs/cache.h"
+#include "verification_status.h"
+#include "verifier_messages.h"
 
 #include <array>
+#include <cmath>
+#include <cstdint>
 #include <functional>
 #include <iomanip>
 #include <limits>
@@ -73,10 +67,9 @@
     } while (0)
 
 #ifndef NDEBUG
-#define DBGBRK()                                                                                      \
-    if (debug_) {                                                                                     \
-        DBG_MANAGED_BRK(panda::verifier::debug::Component::VERIFIER, CurrentJob.JobCachedMethod().id, \
-                        inst_.GetOffset());                                                           \
+#define DBGBRK()                                                             \
+    if (debug_) {                                                            \
+        DBG_MANAGED_BRK(CurrentJob.JobCachedMethod().id, inst_.GetOffset()); \
     }
 #else
 #define DBGBRK()
@@ -100,6 +93,15 @@
     } while (0)
 
 /*
+TODO(vdyadov): add AddrMap to verification context where put marks on all checked bytes.
+after absint process ends, check this AddrMap for holes.
+holes are either dead byte-code or issues with absint cflow handling.
+*/
+
+// TODO(vdyadov): refactor this file, all utility functions put in separate/other files
+
+/*
+TODO(vdyadov): IMPORTANT!!! (Done)
 Current definition of context incompatibility is NOT CORRECT one!
 There are situations when verifier will rule out fully correct programs.
 For instance:
@@ -120,12 +122,14 @@ Here we have context incompatibility on label1, but it does not harm, because co
 not used anymore.
 
 Solutions:
-1(current). Conflicts are reported as warnings, conflicting regs are removed for resulting context.
-  So, on attempt of usage of conflicting reg, absint will fail with message of undefined reg.
-  May be mark them as conflicting? (done)
-2. On each label/checkpoint compute set of registers that will be used in next computations and process
-   conflicting contexts modulo used registers set. It is complex solution, but very precise.
+1(current). Conflicts are reported as warnings, conflicting regs are removed fro resulting context.
+So, on attempt of usage of conflicting reg, absint will fail with message of undefined reg.
+May be mark them as conflicting? (done)
+2. On each label/checkpoint compute set of registers that will be used in next conputations and process
+conflicting contexts modulo used registers set. It is complex solution, but very preciese.
 */
+
+// TODO(vdyadov): regain laziness, strict evaluation is very expensive!
 
 namespace panda::verifier {
 template <typename Handler>
@@ -152,13 +156,10 @@ bool IsItemPresent(const PandaVector<Type> &items, Handler &&handler)
 }
 
 class AbsIntInstructionHandler {
-    using CachedClass = CacheOfRuntimeThings::CachedClass;
-    using CachedMethod = CacheOfRuntimeThings::CachedMethod;
-    using CachedField = CacheOfRuntimeThings::CachedField;
-
 public:
     static constexpr int ACC = -1;
-    static constexpr int INVALID_REG = -2;
+    static constexpr int INVALID_REG = -2;  // TODO(vdyadov): may be use Index<..> here?
+
     using TypeId = panda_file::Type::TypeId;
 
     const Type &U1;
@@ -175,33 +176,31 @@ public:
 
     const Job &CurrentJob;
 
-    AbsIntInstructionHandler(VerificationContext *v_ctx, const uint8_t *pc, EntryPointType code_type)
-        : U1 {v_ctx->Types().U1()},
-          I8 {v_ctx->Types().I8()},
-          U8 {v_ctx->Types().U8()},
-          I16 {v_ctx->Types().I16()},
-          U16 {v_ctx->Types().U16()},
-          I32 {v_ctx->Types().I32()},
-          U32 {v_ctx->Types().U32()},
-          I64 {v_ctx->Types().I64()},
-          U64 {v_ctx->Types().U64()},
-          F32 {v_ctx->Types().F32()},
-          F64 {v_ctx->Types().F64()},
-          CurrentJob {v_ctx->GetJob()},
-          inst_(pc, v_ctx->CflowInfo().InstMap().AddrStart<const uint8_t *>(),
-                v_ctx->CflowInfo().InstMap().AddrEnd<const uint8_t *>()),
-          context_ {*v_ctx},
+    AbsIntInstructionHandler(VerificationContext &verif_ctx, const uint8_t *pc, EntryPointType code_type)
+        : U1 {verif_ctx.Types().U1()},
+          I8 {verif_ctx.Types().I8()},
+          U8 {verif_ctx.Types().U8()},
+          I16 {verif_ctx.Types().I16()},
+          U16 {verif_ctx.Types().U16()},
+          I32 {verif_ctx.Types().I32()},
+          U32 {verif_ctx.Types().U32()},
+          I64 {verif_ctx.Types().I64()},
+          U64 {verif_ctx.Types().U64()},
+          F32 {verif_ctx.Types().F32()},
+          F64 {verif_ctx.Types().F64()},
+          CurrentJob {verif_ctx.GetJob()},
+          inst_(pc, verif_ctx.CflowInfo().InstMap().AddrStart<const uint8_t *>(),
+                verif_ctx.CflowInfo().InstMap().AddrEnd<const uint8_t *>()),
+          context_ {verif_ctx},
           status_ {VerificationStatus::OK},
           code_type_ {code_type}
     {
-        ASSERT(v_ctx != nullptr);
 #ifndef NDEBUG
-        const auto &verif_opts = Runtime::GetCurrent()->GetVerificationOptions();
-        if (verif_opts.Mode.DebugEnable) {
-            debug_ =
-                DBG_MANAGED_BRK_PRESENT(panda::verifier::debug::Component::VERIFIER, CurrentJob.JobCachedMethod().id);
+        if (Runtime::GetCurrent()->GetVerificationOptions().Mode == VerificationMode::DEBUG) {
+            const auto &method = CurrentJob.JobCachedMethod();
+            debug_ = debug::ManagedBreakpointPresent(method.id);
             if (debug_) {
-                LOG(DEBUG, VERIFIER) << "Debug mode is on";
+                LOG(DEBUG, VERIFIER) << "Debug mode for method " << method.GetName() << " is on";
             }
         }
 #endif
@@ -209,17 +208,17 @@ public:
 
     ~AbsIntInstructionHandler() = default;
 
-    VerificationStatus GetStatus() const
+    VerificationStatus GetStatus()
     {
         return status_;
     }
 
-    uint8_t GetPrimaryOpcode() const
+    uint8_t GetPrimaryOpcode()
     {
         return inst_.GetPrimaryOpcode();
     }
 
-    uint8_t GetSecondaryOpcode() const
+    uint8_t GetSecondaryOpcode()
     {
         return inst_.GetSecondaryOpcode();
     }
@@ -408,6 +407,7 @@ public:
         return true;
     }
 
+    // Names meanings: vs - v_source, vd - v_destination
     template <BytecodeInstructionSafe::Format format>
     bool HandleMov()
     {
@@ -465,6 +465,8 @@ public:
     template <BytecodeInstructionSafe::Format format>
     bool HandleMovDyn()
     {
+        // TODO(vdyadov): implement
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -484,6 +486,8 @@ public:
     template <BytecodeInstructionSafe::Format format>
     bool HandleMoviDyn()
     {
+        // TODO(vdyadov): implement
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return true;
     }
@@ -539,7 +543,9 @@ public:
     template <BytecodeInstructionSafe::Format format>
     bool HandleLdglobalDyn()
     {
+        // TODO(vdyadov): implement
         MoveToNextInst<format>();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -566,8 +572,10 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
         MoveToNextInst<format>();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -577,8 +585,10 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
         MoveToNextInst<format>();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -622,8 +632,10 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
         MoveToNextInst<format>();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -677,6 +689,8 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -707,6 +721,8 @@ public:
         Sync();
         const CachedClass *cached_class = GetCachedClass();
         if (cached_class == nullptr) {
+            // TODO(vdyadov): refactor to verifier-messages
+            LOG(ERROR, VERIFIER) << "Verifier error: HandleLdaConst cache error";
             status_ = VerificationStatus::ERROR;
             return false;
         }
@@ -732,15 +748,8 @@ public:
             LOG(DEBUG, VERIFIER) << "LDA_TYPE type of class is not valid.";
             return false;
         }
-        auto lang = CurrentJob.JobCachedMethod().GetClass().source_lang;
-        if (lang == panda_file::SourceLang::PANDA_ASSEMBLY) {
-            SetAcc(Types().PandaClass());
-        } else {
-            SHOW_MSG(LdaTypeBadLanguage)
-            LOG_VERIFIER_LDA_TYPE_BAD_LANGUAGE();
-            END_SHOW_MSG();
-            return false;
-        }
+        auto lang = CurrentJob.JobCachedMethod().GetSourceLang();
+        SetAcc(Types().Class(lang));
         MoveToNextInst<format>();
         return true;
     }
@@ -778,8 +787,10 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
         MoveToNextInst<format>();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -834,7 +845,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -925,6 +938,8 @@ public:
             SET_STATUS_FOR_MSG(UndefinedRegister);
             return false;
         }
+
+        // TODO(vdyadov): think of two-pass absint, where we can catch const-null cases
 
         if (!ProcessBranching(imm)) {
             return false;
@@ -1129,7 +1144,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -1175,7 +1192,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -1221,7 +1240,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -1270,6 +1291,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
+        // TODO(vdyadov): take into consideration possible exception generation
         //                context is of good precision here
         return CheckBinaryOp2<format>(F64, F64, F64);
     }
@@ -1298,7 +1320,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2<format>(Types().Bits32Type(), Types().Bits32Type());
+        return CheckBinaryOp2<format>(Types().Integral32Type(), Types().Integral32Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1307,7 +1329,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2<format>(Types().Bits64Type(), Types().Bits64Type());
+        return CheckBinaryOp2<format>(Types().Integral64Type(), Types().Integral64Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1316,7 +1338,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2<format>(Types().Bits32Type(), Types().Bits32Type());
+        return CheckBinaryOp2<format>(Types().Integral32Type(), Types().Integral32Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1325,7 +1347,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2<format>(Types().Bits64Type(), Types().Bits64Type());
+        return CheckBinaryOp2<format>(Types().Integral64Type(), Types().Integral64Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1334,7 +1356,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2<format>(Types().Bits32Type(), Types().Bits32Type());
+        return CheckBinaryOp2<format>(Types().Integral32Type(), Types().Integral32Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1343,7 +1365,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2<format>(Types().Bits64Type(), Types().Bits64Type());
+        return CheckBinaryOp2<format>(Types().Integral64Type(), Types().Integral64Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1352,7 +1374,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2<format>(Types().Bits32Type(), Types().Bits32Type());
+        return CheckBinaryOp2<format>(Types().Integral32Type(), Types().Integral32Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1361,7 +1383,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2<format>(Types().Bits64Type(), Types().Bits64Type());
+        return CheckBinaryOp2<format>(Types().Integral64Type(), Types().Integral64Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1370,7 +1392,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2<format>(Types().Bits32Type(), Types().Bits32Type());
+        return CheckBinaryOp2<format>(Types().Integral32Type(), Types().Integral32Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1379,7 +1401,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2<format>(Types().Bits64Type(), Types().Bits64Type());
+        return CheckBinaryOp2<format>(Types().Integral64Type(), Types().Integral64Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1388,7 +1410,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2<format>(Types().Bits32Type(), Types().Bits32Type());
+        return CheckBinaryOp2<format>(Types().Integral32Type(), Types().Integral32Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1397,7 +1419,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2<format>(Types().Bits64Type(), Types().Bits64Type());
+        return CheckBinaryOp2<format>(Types().Integral64Type(), Types().Integral64Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1406,6 +1428,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
+        // TODO(vdyadov): take into consideration possible exception generation
         //                context is of good precision here
         return CheckBinaryOp2<format>(Types().Integral32Type(), Types().Integral32Type(), I32);
     }
@@ -1415,7 +1438,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -1443,7 +1468,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -1463,6 +1490,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
+        // TODO(vdyadov) : add warnings when actual type is not unsigned
         return CheckBinaryOp2<format>(Types().Integral32Type(), Types().Integral32Type(), U32);
     }
 
@@ -1472,6 +1500,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
+        // TODO(vdyadov) : add warnings when actual type is not unsigned
         return CheckBinaryOp2<format>(Types().Integral64Type(), Types().Integral64Type(), U64);
     }
 
@@ -1481,6 +1510,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
+        // TODO(vdyadov) : add warnings when actual type is not unsigned
         return CheckBinaryOp2<format>(Types().Integral32Type(), Types().Integral32Type(), U32);
     }
 
@@ -1490,6 +1520,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
+        // TODO(vdyadov) : add warnings when actual type is not unsigned
         return CheckBinaryOp2<format>(Types().Integral64Type(), Types().Integral64Type(), U64);
     }
 
@@ -1526,7 +1557,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp<format>(Types().Bits32Type(), Types().Bits32Type(), I32);
+        return CheckBinaryOp<format>(Types().Integral32Type(), Types().Integral32Type(), I32);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1535,7 +1566,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp<format>(Types().Bits32Type(), Types().Bits32Type(), I32);
+        return CheckBinaryOp<format>(Types().Integral32Type(), Types().Integral32Type(), I32);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1544,7 +1575,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp<format>(Types().Bits32Type(), Types().Bits32Type(), I32);
+        return CheckBinaryOp<format>(Types().Integral32Type(), Types().Integral32Type(), I32);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1553,7 +1584,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp<format>(Types().Bits32Type(), Types().Bits32Type(), I32);
+        return CheckBinaryOp<format>(Types().Integral32Type(), Types().Integral32Type(), I32);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1562,7 +1593,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp<format>(Types().Bits32Type(), Types().Bits32Type(), I32);
+        return CheckBinaryOp<format>(Types().Integral32Type(), Types().Integral32Type(), I32);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1571,7 +1602,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp<format>(Types().Bits32Type(), Types().Bits32Type(), I32);
+        return CheckBinaryOp<format>(Types().Integral32Type(), Types().Integral32Type(), I32);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1625,7 +1656,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2Imm<format>(Types().Bits32Type());
+        return CheckBinaryOp2Imm<format>(Types().Integral32Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1634,7 +1665,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2Imm<format>(Types().Bits32Type());
+        return CheckBinaryOp2Imm<format>(Types().Integral32Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1643,7 +1674,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2Imm<format>(Types().Bits32Type());
+        return CheckBinaryOp2Imm<format>(Types().Integral32Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1652,7 +1683,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2Imm<format>(Types().Bits32Type());
+        return CheckBinaryOp2Imm<format>(Types().Integral32Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1661,7 +1692,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2Imm<format>(Types().Bits32Type());
+        return CheckBinaryOp2Imm<format>(Types().Integral32Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -1670,7 +1701,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return CheckBinaryOp2Imm<format>(Types().Bits32Type());
+        return CheckBinaryOp2Imm<format>(Types().Integral32Type());
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -2175,7 +2206,8 @@ public:
         }
         auto &&reg_type = GetRegType(vs);
         if (reg_type.ForAllTypes([this](auto reg_type1) { return reg_type1 == Types().NullRefType(); })) {
-            // treat it as always throw NPE
+            // TODO(vdyadov): redesign next code, after support exception handlers,
+            //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpe)
             LOG_VERIFIER_ALWAYS_NPE(vs);
             END_SHOW_MSG();
@@ -2185,7 +2217,7 @@ public:
         }
         auto ref_type = Types().RefType();
         auto &&arr_elt_type = GetArrayEltType(reg_type);
-        TypeSet subtypes_of_ref_type_in_arr_elt_type(Types().GetKind());
+        TypeSet subtypes_of_ref_type_in_arr_elt_type(Types().GetKind(), Types().GetThreadNum());
         arr_elt_type.ForAllTypes([&](Type arr_elt_type1) {
             if (arr_elt_type1 <= ref_type) {
                 subtypes_of_ref_type_in_arr_elt_type.Insert(arr_elt_type1);
@@ -2199,7 +2231,6 @@ public:
                                                     ImagesOf(SubtypesOf({Types().RefType()})));
                 END_SHOW_MSG();
                 SET_STATUS_FOR_MSG(BadArrayElementType);
-                status_ = VerificationStatus::ERROR;
                 return false;
             case 1:
                 SetAcc(subtypes_of_ref_type_in_arr_elt_type.TheOnlyType());
@@ -2325,6 +2356,7 @@ public:
         }
         auto type = Types().TypeOf(*cached_class);
         if (!type.IsValid()) {
+            LOG(ERROR, VERIFIER) << "Verifier error: HandleNewarr type error";
             status_ = VerificationStatus::ERROR;
             return false;
         }
@@ -2332,6 +2364,7 @@ public:
         LOG_VERIFIER_DEBUG_TYPE(ImageOf(type));
         END_SHOW_MSG();
         if (!(type <= Types().ArrayType())) {
+            // TODO(vdyadov): implement StrictSubtypes function to not include ArrayType in output
             SHOW_MSG(ArrayOfNonArrayType)
             LOG_VERIFIER_ARRAY_OF_NON_ARRAY_TYPE(ImageOf(type), ImagesOf(SubtypesOf({Types().ArrayType()})));
             END_SHOW_MSG();
@@ -2352,11 +2385,13 @@ public:
         Sync();
         const CachedClass *cached_class = GetCachedClass();
         if (cached_class == nullptr) {
+            LOG(ERROR, VERIFIER) << "Verifier error: HandleNewobj cache error";
             status_ = VerificationStatus::ERROR;
             return false;
         }
         auto type = Types().TypeOf(*cached_class);
         if (!type.IsValid()) {
+            LOG(ERROR, VERIFIER) << "Verifier error: HandleNewobj type error";
             status_ = VerificationStatus::ERROR;
             return false;
         }
@@ -2380,8 +2415,10 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
         MoveToNextInst<format>();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -2389,10 +2426,11 @@ public:
     template <BytecodeInstructionSafe::Format format, typename RegsFetcher>
     bool CheckCallCtor(const CachedMethod &ctor, RegsFetcher regs)
     {
-        Type obj_type = Types().TypeOf(ctor.GetClass());
+        Type obj_type = Types().TypeOf(ctor.klass);
 
+        // TODO(vdyadov): put under NDEBUG?
         {
-            if (SKIP_VERIFICATION_OF_CALL(ctor.id)) {
+            if (debug::SkipVerificationOfCall(ctor.id)) {
                 SetAcc(obj_type);
                 MoveToNextInst<format>();
                 return true;
@@ -2438,6 +2476,14 @@ public:
             LOG_VERIFIER_DEBUG_ARRAY_CONSTRUCTOR();
             END_SHOW_MSG();
             return CheckArrayCtor<format>(*ctor, regs);
+        }
+
+        if (!ctor->flags[CachedMethod::Flag::CONSTRUCTOR]) {
+            SHOW_MSG(InitobjCallsNotConstructor)
+            LOG_VERIFIER_INITOBJ_CALLS_NOT_CONSTRUCTOR(ctor->GetName());
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(InitobjCallsNotConstructor);
+            return false;
         }
 
         SHOW_MSG(DebugConstructor)
@@ -2511,10 +2557,9 @@ public:
             SET_STATUS_FOR_MSG(CannotResolveFieldId);
             return {};
         }
-        return Types().TypeOf(field->GetClass());
+        return Types().TypeOf(field->klass);
     }
 
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
     bool CheckFieldAccess(int reg_idx, Type expected_field_type, bool is_static)
     {
         const CachedField *field = GetCachedField();
@@ -2546,7 +2591,8 @@ public:
             }
             const AbstractType &obj_type = GetRegType(reg_idx);
             if (obj_type.ForAllTypes([&](Type obj_type1) { return obj_type1 == Types().NullRefType(); })) {
-                // treat it as always throw NPE
+                // TODO(vdyadov): redesign next code, after support exception handlers,
+                //                treat it as always throw NPE
                 SHOW_MSG(AlwaysNpe)
                 LOG_VERIFIER_ALWAYS_NPE(reg_idx);
                 END_SHOW_MSG();
@@ -2572,12 +2618,7 @@ public:
             return false;
         }
 
-        Type method_class_type = context_.GetMethodClass();
-        TypeRelationship relation = GetRelationship(method_class_type, field_obj_type);
-        AccessModifier access_mode = GetAccessMode(field);
-
-        auto result = panda::verifier::CheckFieldAccess(relation, access_mode);
-
+        auto result = CheckFieldAccessViolation(field, CurrentJob, Types());
         if (!result.IsOk()) {
             const auto &verif_opts = Runtime::GetCurrent()->GetVerificationOptions();
             if (verif_opts.Debug.Allow.FieldAccessViolation && result.IsError()) {
@@ -2627,7 +2668,7 @@ public:
         DBGBRK();
         uint16_t vs = inst_.GetVReg<format>();
         Sync();
-        return ProcessFieldLoad<format>(vs, Types().Integral32Type(), false);
+        return ProcessFieldLoad<format>(vs, Types().Bits32Type(), false);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -2658,7 +2699,7 @@ public:
         uint16_t vd = inst_.GetVReg<format, 0>();
         uint16_t vs = inst_.GetVReg<format, 1>();
         Sync();
-        return ProcessFieldLoad<format>(vd, vs, Types().Integral32Type(), false);
+        return ProcessFieldLoad<format>(vd, vs, Types().Bits32Type(), false);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -2684,15 +2725,15 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format format, typename Check>
-    bool ProcessStoreField(int vd, int vs, Type expected_field_type, bool is_static, Check check)
+    bool ProcessStoreField(int vs, int vd, Type expected_field_type, bool is_static, Check check)
     {
-        if (!CheckFieldAccess(vs, expected_field_type, is_static)) {
+        if (!CheckRegTypes(vs, {expected_field_type})) {
+            SET_STATUS_FOR_MSG(BadRegisterType);
+            SET_STATUS_FOR_MSG(UndefinedRegister);
             return false;
         }
 
-        if (!CheckRegTypes(vd, {Types().Bits32Type(), Types().Bits64Type()})) {
-            SET_STATUS_FOR_MSG(BadRegisterType);
-            SET_STATUS_FOR_MSG(UndefinedRegister);
+        if (!CheckFieldAccess(vd, expected_field_type, is_static)) {
             return false;
         }
 
@@ -2707,14 +2748,14 @@ public:
             return false;
         }
 
-        const AbstractType &vd_type = GetRegType(vd);
+        const AbstractType &vs_type = GetRegType(vs);
 
         TypeId field_type_id = Types().TypeIdOf(field_type);
 
         PandaVector<CheckResult> results;
 
-        vd_type.ForAllTypes(
-            [&](auto vd_type1) { return AddCheckResult(results, check(field_type_id, Types().TypeIdOf(vd_type1))); });
+        vs_type.ForAllTypes(
+            [&](auto vs_type1) { return AddCheckResult(results, check(field_type_id, Types().TypeIdOf(vs_type1))); });
 
         // results is empty if there was an OK, contains all warnings if there were any warnings, all errors if there
         // were only errors
@@ -2722,7 +2763,7 @@ public:
             for (const auto &result : results) {
                 LogInnerMessage(result);
             }
-            LOG_VERIFIER_DEBUG_STORE_FIELD(field->GetName(), ImageOf(field_type), ImageOf(vd_type),
+            LOG_VERIFIER_DEBUG_STORE_FIELD(field->GetName(), ImageOf(field_type), ImageOf(vs_type),
                                            ImagesOf(SubtypesOf({Types().Integral32Type(), Types().Integral64Type()})),
                                            ImagesOf(SubtypesOf({field_type})));
             status_ = results[0].status;
@@ -2736,15 +2777,15 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format format>
-    bool ProcessStobj(int vd, int vs, bool is_static)
+    bool ProcessStobj(int vs, int vd, bool is_static)
     {
-        return ProcessStoreField<format>(vd, vs, Types().Bits32Type(), is_static, CheckStobj);
+        return ProcessStoreField<format>(vs, vd, Types().Bits32Type(), is_static, CheckStobj);
     }
 
     template <BytecodeInstructionSafe::Format format>
-    bool ProcessStobj(int vs, bool is_static)
+    bool ProcessStobj(int vd, bool is_static)
     {
-        return ProcessStobj<format>(ACC, vs, is_static);
+        return ProcessStobj<format>(ACC, vd, is_static);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -2752,10 +2793,10 @@ public:
     {
         LOG_INST();
         DBGBRK();
-        uint16_t vs = inst_.GetVReg<format>();
+        uint16_t vd = inst_.GetVReg<format>();
         Sync();
 
-        return ProcessStobj<format>(vs, false);
+        return ProcessStobj<format>(vd, false);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -2763,11 +2804,11 @@ public:
     {
         LOG_INST();
         DBGBRK();
-        uint16_t vd = inst_.GetVReg<format, 0>();
-        uint16_t vs = inst_.GetVReg<format, 1>();
+        uint16_t vs = inst_.GetVReg<format, 0>();
+        uint16_t vd = inst_.GetVReg<format, 1>();
         Sync();
 
-        return ProcessStobj<format>(vd, vs, false);
+        return ProcessStobj<format>(vs, vd, false);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -2775,22 +2816,24 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
         MoveToNextInst<format>();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
 
     template <BytecodeInstructionSafe::Format format>
-    bool ProcessStobjWide(int vd, int vs, bool is_static)
+    bool ProcessStobjWide(int vs, int vd, bool is_static)
     {
-        return ProcessStoreField<format>(vd, vs, Types().Bits64Type(), is_static, CheckStobjWide);
+        return ProcessStoreField<format>(vs, vd, Types().Bits64Type(), is_static, CheckStobjWide);
     }
 
     template <BytecodeInstructionSafe::Format format>
-    bool ProcessStobjWide(int vs, bool is_static)
+    bool ProcessStobjWide(int vd, bool is_static)
     {
-        return ProcessStobjWide<format>(ACC, vs, is_static);
+        return ProcessStobjWide<format>(ACC, vd, is_static);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -2798,10 +2841,10 @@ public:
     {
         LOG_INST();
         DBGBRK();
-        uint16_t vs = inst_.GetVReg<format>();
+        uint16_t vd = inst_.GetVReg<format>();
         Sync();
 
-        return ProcessStobjWide<format>(vs, false);
+        return ProcessStobjWide<format>(vd, false);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -2809,17 +2852,17 @@ public:
     {
         LOG_INST();
         DBGBRK();
-        uint16_t vd = inst_.GetVReg<format, 0>();
-        uint16_t vs = inst_.GetVReg<format, 1>();
+        uint16_t vs = inst_.GetVReg<format, 0>();
+        uint16_t vd = inst_.GetVReg<format, 1>();
         Sync();
 
-        return ProcessStobjWide<format>(vd, vs, false);
+        return ProcessStobjWide<format>(vs, vd, false);
     }
 
     template <BytecodeInstructionSafe::Format format>
-    bool ProcessStobjObj(int vd, int vs, bool is_static)
+    bool ProcessStobjObj(int vs, int vd, bool is_static)
     {
-        if (!CheckFieldAccess(vs, Types().RefType(), is_static)) {
+        if (!CheckFieldAccess(vd, Types().RefType(), is_static)) {
             return false;
         }
 
@@ -2835,18 +2878,20 @@ public:
             return false;
         }
 
-        if (!CheckRegTypes(vd, {Types().RefType()})) {
+        if (!CheckRegTypes(vs, {Types().RefType()})) {
             SET_STATUS_FOR_MSG(BadRegisterType);
             SET_STATUS_FOR_MSG(UndefinedRegister);
             return false;
         }
 
-        const AbstractType &vd_type = GetRegType(vd);
+        const AbstractType &vs_type = GetRegType(vs);
 
-        if (vd_type.ForAllTypes([&](Type vd_type1) { return !(vd_type1 <= field_type); })) {
-            LOG_VERIFIER_BAD_ACCUMULATOR_TYPE(ImageOf(vd_type), ImageOf(field_type),
+        if (vs_type.ForAllTypes([&](Type vs_type1) { return !(vs_type1 <= field_type); })) {
+            SHOW_MSG(BadAccumulatorType)
+            LOG_VERIFIER_BAD_ACCUMULATOR_TYPE(ImageOf(vs_type), ImageOf(field_type),
                                               ImagesOf(SubtypesOf({field_type})));
-            status_ = VerificationStatus::ERROR;
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(BadAccumulatorType);
             return false;
         }
 
@@ -2855,9 +2900,9 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format format>
-    bool ProcessStobjObj(int vs, bool is_static)
+    bool ProcessStobjObj(int vd, bool is_static)
     {
-        return ProcessStobjObj<format>(ACC, vs, is_static);
+        return ProcessStobjObj<format>(ACC, vd, is_static);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -2865,9 +2910,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
-        uint16_t vs = inst_.GetVReg<format>();
+        uint16_t vd = inst_.GetVReg<format>();
         Sync();
-        return ProcessStobjObj<format>(vs, false);
+        return ProcessStobjObj<format>(vd, false);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -2875,10 +2920,10 @@ public:
     {
         LOG_INST();
         DBGBRK();
-        uint16_t vd = inst_.GetVReg<format, 0>();
-        uint16_t vs = inst_.GetVReg<format, 1>();
+        uint16_t vs = inst_.GetVReg<format, 0>();
+        uint16_t vd = inst_.GetVReg<format, 1>();
         Sync();
-        return ProcessStobjObj<format>(vd, vs, false);
+        return ProcessStobjObj<format>(vs, vd, false);
     }
 
     template <BytecodeInstructionSafe::Format format>
@@ -2951,7 +2996,7 @@ public:
 
         if (!CheckTypes(acc_type, {Types().PrimitiveType()}) || acc_type == Types().PrimitiveType()) {
             LOG_VERIFIER_BAD_ACCUMULATOR_RETURN_VALUE_TYPE(ImageOf(acc_type), ImagesOf(compatible_acc_types));
-            status_ = VerificationStatus::ERROR;
+            SET_STATUS_FOR_MSG(BadAccumulatorReturnValueType);
             return false;
         }
 
@@ -2983,7 +3028,7 @@ public:
         if (!CheckTypes(ReturnType(), {Types().Bits32Type()})) {
             LOG_VERIFIER_BAD_RETURN_INSTRUCTION_TYPE("", ImageOf(ReturnType()), ImageOf(Types().Bits32Type()),
                                                      ImagesOf(Types().SubtypesOf(Types().Bits32Type())));
-            status_ = VerificationStatus::ERROR;
+            SET_STATUS_FOR_MSG(BadReturnInstructionType);
             return false;
         }
 
@@ -2992,10 +3037,11 @@ public:
             return false;
         }
 
+        // TODO(vdyadov): handle LUB of compatible primitive types
         if (!CheckTypes(GetAccType(), {Types().Bits32Type()})) {
             LOG_VERIFIER_BAD_ACCUMULATOR_RETURN_VALUE_TYPE(ImageOf(GetAccType()),
                                                            ImagesOf(Types().SubtypesOf(Types().Bits32Type())));
-            status_ = VerificationStatus::ERROR;
+            SET_STATUS_FOR_MSG(BadAccumulatorReturnValueType);
         }
         return false;
     }
@@ -3005,7 +3051,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -3061,6 +3109,7 @@ public:
         if (!CheckTypes(acc_type, {ReturnType()})) {
             LOG_VERIFIER_BAD_ACCUMULATOR_RETURN_VALUE_TYPE_WITH_SUBTYPE(ImageOf(acc_type), ImageOf(ReturnType()),
                                                                         ImagesOf(Types().SubtypesOf(ReturnType())));
+            // TODO(vdyadov) : after solving issues with set of types in LUB, uncomment next line
             status_ = VerificationStatus::WARNING;
         }
 
@@ -3072,6 +3121,7 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): think of introducing void as of separate type, like null
         Sync();
 
         if (ReturnType() != Types().Top()) {
@@ -3083,7 +3133,6 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format format>
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
     bool HandleCheckcast()
     {
         LOG_INST();
@@ -3109,9 +3158,10 @@ public:
             return false;
         }
         auto acc_type = GetAccType();
-        if (acc_type.ForAllTypes([&](Type acc_type1) {
-                return !(acc_type1 <= Types().RefType() || acc_type1 <= Types().ArrayType());
-            })) {
+        // TODO(vdyadov): remove this check after #2365
+        auto res = acc_type.ForAllTypes(
+            [&](Type acc_type1) { return !(acc_type1 <= Types().RefType() || acc_type1 <= Types().ArrayType()); });
+        if (res) {
             LOG_VERIFIER_NON_OBJECT_ACCUMULATOR_TYPE();
             status_ = VerificationStatus::ERROR;
             return false;
@@ -3125,13 +3175,14 @@ public:
             status_ = VerificationStatus::WARNING;
         } else if (type <= Types().ArrayType()) {
             auto &&elt_type = GetArrayEltType(type);
-            auto res = acc_type.ForAllTypes(
+            res = acc_type.ForAllTypes(
                 [&](auto acc_type1) { return !(acc_type1 <= Types().ArrayType() || type <= acc_type1); });
             if (res) {
+                // TODO(vdyadov): add here accounting of array elt subtyping in possible types
                 LOG_VERIFIER_IMPOSSIBLE_CHECK_CAST(ImageOf(acc_type), ImagesOf(SubSupTypesOf(type)));
                 status_ = VerificationStatus::WARNING;
             } else {
-                auto result = acc_type.ForAllTypes([&](Type acc_type1) {
+                res = acc_type.ForAllTypes([&](Type acc_type1) {
                     if (IsConcreteArrayType(acc_type1)) {
                         auto &&acc_elt_type = GetArrayEltType(acc_type1);
                         return !(acc_elt_type <= elt_type || elt_type <= acc_elt_type);
@@ -3139,7 +3190,7 @@ public:
                         return true;
                     }
                 });
-                if (result) {
+                if (res) {
                     LOG_VERIFIER_IMPOSSIBLE_ARRAY_CHECK_CAST(ImageOf(GetArrayEltType(acc_type)),
                                                              ImagesOf(SubSupTypesOf(elt_type)));
                     status_ = VerificationStatus::WARNING;
@@ -3167,7 +3218,6 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format format>
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
     bool HandleIsinstance()
     {
         LOG_INST();
@@ -3194,10 +3244,20 @@ public:
             SET_STATUS_FOR_MSG(UndefinedRegister);
             return false;
         }
+
+        auto result = CheckClassAccessViolation(cached_class, CurrentJob, Types());
+        if (!result.IsOk()) {
+            LogInnerMessage(CheckResult::protected_class);
+            LOG_VERIFIER_DEBUG_CALL_FROM_TO(CurrentJob.JobCachedMethod().klass.GetName(), cached_class->GetName());
+            status_ = VerificationStatus::ERROR;
+            return false;
+        }
+
         auto acc_type = GetAccType();
-        if (acc_type.ForAllTypes([&](Type acc_type1) {
-                return !(acc_type1 <= Types().RefType() || acc_type1 <= Types().ArrayType());
-            })) {
+        // TODO(vdyadov): remove this check after #2365
+        auto res = acc_type.ForAllTypes(
+            [&](Type acc_type1) { return !(acc_type1 <= Types().RefType() || acc_type1 <= Types().ArrayType()); });
+        if (res) {
             LOG_VERIFIER_NON_OBJECT_ACCUMULATOR_TYPE();
             status_ = VerificationStatus::ERROR;
             return false;
@@ -3213,12 +3273,13 @@ public:
             auto &&elt_type = GetArrayEltType(type);
             auto &&acc_elt_type = GetArrayEltType(acc_type);
             bool acc_elt_type_is_empty = true;
-            auto res = acc_elt_type.ForAllTypes([&](Type acc_elt_type1) {
+            res = acc_elt_type.ForAllTypes([&](Type acc_elt_type1) {
                 acc_elt_type_is_empty = false;
                 return !(acc_elt_type1 <= elt_type || elt_type <= acc_elt_type1);
             });
             if (res) {
                 if (acc_elt_type_is_empty) {
+                    // TODO(vdyadov): add here accounting of array elt subtyping in possible types
                     LOG_VERIFIER_IMPOSSIBLE_IS_INSTANCE(ImageOf(acc_type), ImagesOf(SubSupTypesOf(type)));
                 } else {
                     LOG_VERIFIER_IMPOSSIBLE_ARRAY_IS_INSTANCE(ImageOf(acc_elt_type), ImagesOf(SubSupTypesOf(elt_type)));
@@ -3232,13 +3293,13 @@ public:
             LOG_VERIFIER_IMPOSSIBLE_IS_INSTANCE(ImageOf(acc_type), ImagesOf(SubSupTypesOf(type)));
             status_ = VerificationStatus::WARNING;
         }  // else {
+        // TODO(vdyadov): here we may increase precision to concrete values in some cases
         SetAcc(I32);
         MoveToNextInst<format>();
         return true;
     }
 
     template <typename Fetcher, typename NameGetter>
-    // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
     bool CheckMethodArgs(NameGetter name_getter, const CachedMethod &method, Fetcher regs_and_types)
     {
         const auto &sig = Types().MethodSignature(method);
@@ -3253,7 +3314,6 @@ public:
         ForEachCond(JoinStreams(regs_and_types, formal_args, norm_formal_args), [this, &result, &name_getter,
                                                                                  &args_num](auto &&types) mutable {
             do {
-                // damn clang-tidy
                 auto &&reg_and_type = std::get<0x0>(types);
                 auto &&formal_param = std::get<0x1>(types);
                 auto &&norm_param = std::get<0x2>(types);
@@ -3268,7 +3328,7 @@ public:
                 ASSERT(formal_param.Variance() == norm_param.Variance());
                 const AbstractType &actual_type =
                     reg_num == INVALID_REG ? std::get<0x1>(reg_and_type) : GetRegType(reg_num);
-                TypeSet norm_actual_type(Types().GetKind());
+                TypeSet norm_actual_type(Types().GetKind(), Types().GetThreadNum());
                 actual_type.ForAllTypes([&](Type actual_type1) {
                     norm_actual_type.Insert(Types().NormalizedTypeOf(actual_type1));
                     return true;
@@ -3276,16 +3336,14 @@ public:
                 // arg: NormalizedTypeOf(actual_type) <= norm_type
                 // check of physical compatibility
                 bool incompatible_types = false;
-                if (reg_num != INVALID_REG && formal_type <= Types().RefType() && !formal_type.IsBot() &&
-                    actual_type.ExistsType([&](auto actual_type1) {
-                        return actual_type1 <= Types().RefType() && !actual_type1.IsBot();
-                    })) {
+                auto res = actual_type.ExistsType(
+                    [&](auto actual_type1) { return actual_type1 <= Types().RefType() && !actual_type1.IsBot(); });
+                if (reg_num != INVALID_REG && formal_type <= Types().RefType() && !formal_type.IsBot() && res) {
                     if (CheckRegTypesTakingIntoAccountTypecasts(reg_num, formal_type)) {
                         break;
-                    } else {
-                        if (!Runtime::GetCurrent()->GetVerificationOptions().Debug.Allow.WrongSubclassingInMethodArgs) {
-                            incompatible_types = true;
-                        }
+                    }
+                    if (!Runtime::GetCurrent()->GetVerificationOptions().Debug.Allow.WrongSubclassingInMethodArgs) {
+                        incompatible_types = true;
                     }
                 } else if (!formal_type.IsBot() && !formal_type.IsTop() &&
                            !norm_actual_type.Exists(
@@ -3365,9 +3423,9 @@ public:
                     if (need_to_break || results.empty()) {
                         break;
                     }
-                    for (const auto &res : results) {
+                    for (const auto &r : results) {
                         SHOW_MSG(DebugCallParameterTypes)
-                        LogInnerMessage(res);
+                        LogInnerMessage(r);
                         LOG_VERIFIER_DEBUG_CALL_PARAMETER_TYPES(
                             name_getter(),
                             (reg_num == INVALID_REG
@@ -3375,7 +3433,7 @@ public:
                                  : PandaString {"Actual parameter in "} + RegisterName(reg_num) + ". "),
                             ImageOf(actual_type), ImageOf(formal_type));
                         END_SHOW_MSG();
-                        status_ = res.status;
+                        status_ = r.status;
                     }
                     status_ = results[0].status;
                     if (status_ == VerificationStatus::WARNING) {
@@ -3384,9 +3442,9 @@ public:
                         return result = false;
                     }
                 } else if (formal_type <= Types().MethodType()) {
-                    auto res =
+                    auto r =
                         norm_actual_type.Exists([&](auto norm_actual_type1) { return norm_actual_type1 <= norm_type; });
-                    if (!res) {
+                    if (!r) {
                         SHOW_MSG(BadCallIncompatibleLambdaType)
                         LOG_VERIFIER_BAD_CALL_INCOMPATIBLE_LAMBDA_TYPE(
                             name_getter(),
@@ -3429,6 +3487,7 @@ public:
             LOG_VERIFIER_BAD_CALL_TOO_FEW_PARAMETERS(name_getter());
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(BadCallTooFewParameters);
+            // we must have set status_ to VerificationStatus::ERROR to make verifier fail
         }
         return result;
     }
@@ -3440,13 +3499,8 @@ public:
             SET_STATUS_FOR_MSG(CannotResolveMethodId);
             return false;
         }
-        auto callee_method_class_type = Types().TypeOf(method->GetClass());
-        auto caller_method_class_type = context_.GetMethodClass();
-        auto relation = GetRelationship(caller_method_class_type, callee_method_class_type);
-        auto access_mode = GetAccessMode(method);
 
-        auto result = panda::verifier::CheckCall(relation, access_mode);
-
+        auto result = CheckMethodAccessViolation(method, CurrentJob, Types());
         if (!result.IsOk()) {
             const auto &verif_opts = Runtime::GetCurrent()->GetVerificationOptions();
             if (verif_opts.Debug.Allow.MethodAccessViolation && result.IsError()) {
@@ -3464,7 +3518,7 @@ public:
         auto method_name_getter = [&method]() { return method->GetName(); };
         Type result_type {Types().TypeOf(method_sig.back())};
 
-        if (!SKIP_VERIFICATION_OF_CALL(method->id) &&
+        if (!debug::SkipVerificationOfCall(method->id) &&
             !CheckMethodArgs(method_name_getter, *method,
                              Transform(regs, [](int reg) { return std::make_tuple(reg, Type {}); }))) {
             return false;
@@ -3499,6 +3553,11 @@ public:
         uint16_t vs1 = inst_.GetVReg<format, 0x00>();
         auto acc_pos = static_cast<unsigned>(inst_.GetImm<format, 0x00>());
         static constexpr auto NUM_ARGS = 2;
+        if (acc_pos >= NUM_ARGS) {
+            LOG_VERIFIER_ACCUMULATOR_POSITION_IS_OUT_OF_RANGE();
+            SET_STATUS_FOR_MSG(AccumulatorPositionIsOutOfRange);
+            return status_ != VerificationStatus::ERROR;
+        }
         const CachedMethod *method = GetCachedMethod();
         if (method != nullptr) {
             LOG_VERIFIER_DEBUG_METHOD(method->GetName());
@@ -3519,7 +3578,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -3529,7 +3590,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -3539,7 +3602,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -3549,7 +3614,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -3559,7 +3626,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -3569,7 +3638,9 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        // TODO(vdyadov): implement
         Sync();
+        LOG(ERROR, VERIFIER) << "Verifier error: instruction is not implemented";
         status_ = VerificationStatus::ERROR;
         return false;
     }
@@ -3600,6 +3671,11 @@ public:
         DBGBRK();
         auto acc_pos = static_cast<unsigned>(inst_.GetImm<format, 0x0>());
         static constexpr auto NUM_ARGS = 4;
+        if (acc_pos >= NUM_ARGS) {
+            LOG_VERIFIER_ACCUMULATOR_POSITION_IS_OUT_OF_RANGE();
+            SET_STATUS_FOR_MSG(AccumulatorPositionIsOutOfRange);
+            return status_ != VerificationStatus::ERROR;
+        }
         const CachedMethod *method = GetCachedMethod();
         if (method != nullptr) {
             LOG_VERIFIER_DEBUG_METHOD(method->GetName());
@@ -3650,7 +3726,7 @@ public:
         }
         if (method != nullptr && method->flags[CachedMethod::Flag::STATIC]) {
             LOG_VERIFIER_BAD_CALL_STATIC_METHOD_AS_VIRTUAL(method->GetName());
-            status_ = VerificationStatus::ERROR;
+            SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual);
             return false;
         }
 
@@ -3674,7 +3750,7 @@ public:
         }
         if (method != nullptr && method->flags[CachedMethod::Flag::STATIC]) {
             LOG_VERIFIER_BAD_CALL_STATIC_METHOD_AS_VIRTUAL(method->GetName());
-            status_ = VerificationStatus::ERROR;
+            SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual);
             return false;
         }
         Sync();
@@ -3703,7 +3779,7 @@ public:
         }
         if (method != nullptr && method->flags[CachedMethod::Flag::STATIC]) {
             LOG_VERIFIER_BAD_CALL_STATIC_METHOD_AS_VIRTUAL(method->GetName());
-            status_ = VerificationStatus::ERROR;
+            SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual);
             return false;
         }
 
@@ -3726,7 +3802,7 @@ public:
         }
         if (method != nullptr && method->flags[CachedMethod::Flag::STATIC]) {
             LOG_VERIFIER_BAD_CALL_STATIC_METHOD_AS_VIRTUAL(method->GetName());
-            status_ = VerificationStatus::ERROR;
+            SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual);
             return false;
         }
         Sync();
@@ -3756,7 +3832,7 @@ public:
         }
         if (method != nullptr && method->flags[CachedMethod::Flag::STATIC]) {
             LOG_VERIFIER_BAD_CALL_STATIC_METHOD_AS_VIRTUAL(method->GetName());
-            status_ = VerificationStatus::ERROR;
+            SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual);
             return false;
         }
 
@@ -3793,9 +3869,123 @@ public:
         return false;
     }
 
+    template <BytecodeInstructionSafe::Format format>
+    bool HandleMonitorenter()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        auto &&acc_type = GetAccType();
+        if (acc_type.ForAllTypes([&](Type acc_type1) { return acc_type1 == Types().NullRefType(); })) {
+            // TODO(vdyadov): redesign next code, after support exception handlers,
+            //                treat it as always throw NPE
+            SHOW_MSG(AlwaysNpeAccumulator)
+            LOG_VERIFIER_ALWAYS_NPE_ACCUMULATOR();
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(AlwaysNpeAccumulator);
+            return false;
+        }
+        if (!CheckTypes(acc_type, {Types().RefType()})) {
+            SET_STATUS_FOR_MSG(BadRegisterType);
+            SET_STATUS_FOR_MSG(UndefinedRegister);
+            return false;
+        }
+        MoveToNextInst<format>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format format>
+    bool HandleMonitorexit()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        auto &&acc_type = GetAccType();
+        if (acc_type.ForAllTypes([&](Type acc_type1) { return acc_type1 == Types().NullRefType(); })) {
+            // TODO(vdyadov): redesign next code, after support exception handlers,
+            //                treat it as always throw NPE
+            SHOW_MSG(AlwaysNpeAccumulator)
+            LOG_VERIFIER_ALWAYS_NPE_ACCUMULATOR();
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(AlwaysNpeAccumulator);
+            return false;
+        }
+        if (!CheckTypes(acc_type, {Types().RefType()})) {
+            SET_STATUS_FOR_MSG(BadRegisterType);
+            SET_STATUS_FOR_MSG(UndefinedRegister);
+            return false;
+        }
+        MoveToNextInst<format>();
+        return true;
+    }
+
     BytecodeInstructionSafe GetInst()
     {
         return inst_;
+    }
+
+    template <BytecodeInstructionSafe::Format format>
+    bool HandleCallPolymorphicShort()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        MoveToNextInst<format>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format format>
+    bool HandleCallPolymorphic()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        MoveToNextInst<format>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format format>
+    bool HandleCallPolymorphicRange()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        // It is a runtime (not verifier) responibility to check the MethodHandle.invoke()
+        // parameter types and throw the WrongMethodTypeException if need
+        MoveToNextInst<format>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format format>
+    bool HandleCallePolymorphicShort()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        MoveToNextInst<format>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format format>
+    bool HandleCallePolymorphic()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        MoveToNextInst<format>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format format>
+    bool HandleCallePolymorphicRange()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        // It is a runtime (not verifier) responibility to check the  MethodHandle.invokeExact()
+        // parameter types and throw the WrongMethodTypeException if need
+        MoveToNextInst<format>();
+        return true;
     }
 
     static PandaString RegisterName(int reg_idx, bool capitalize = false)
@@ -3803,7 +3993,7 @@ public:
         if (reg_idx == ACC) {
             return capitalize ? "Accumulator" : "accumulator";
         } else {
-            return PandaString {capitalize ? "Register v" : "register v"} + NumToStr<PandaString>(reg_idx);
+            return PandaString {capitalize ? "Register v" : "register v"} + NumToStr(reg_idx);
         }
     }
 
@@ -3817,8 +4007,7 @@ private:
             END_SHOW_MSG();
 
             SHOW_MSG(CannotResolveClassId)
-            LOG_VERIFIER_CANNOT_RESOLVE_CLASS_ID(NumToStr<PandaString>(
-                static_cast<size_t>(inst_.GetId().AsFileId().GetOffset()), static_cast<size_t>(16U)))
+            LOG_VERIFIER_CANNOT_RESOLVE_CLASS_ID(inst_.GetId().AsFileId().GetOffset());
             END_SHOW_MSG();
             return nullptr;
         }
@@ -3834,8 +4023,7 @@ private:
             END_SHOW_MSG();
 
             SHOW_MSG(CannotResolveMethodId)
-            LOG_VERIFIER_CANNOT_RESOLVE_METHOD_ID(NumToStr<PandaString>(
-                static_cast<size_t>(inst_.GetId().AsFileId().GetOffset()), static_cast<size_t>(16U)))
+            LOG_VERIFIER_CANNOT_RESOLVE_METHOD_ID(inst_.GetId().AsFileId().GetOffset());
             END_SHOW_MSG();
             return nullptr;
         }
@@ -3851,8 +4039,7 @@ private:
             END_SHOW_MSG();
 
             SHOW_MSG(CannotResolveFieldId)
-            LOG_VERIFIER_CANNOT_RESOLVE_FIELD_ID(NumToStr<PandaString>(
-                static_cast<size_t>(inst_.GetId().AsFileId().GetOffset()), static_cast<size_t>(16U)))
+            LOG_VERIFIER_CANNOT_RESOLVE_FIELD_ID(inst_.GetId().AsFileId().GetOffset());
             END_SHOW_MSG();
             return nullptr;
         }
@@ -3890,7 +4077,8 @@ private:
         auto &&reg_type = GetRegType(v1);
 
         if (reg_type.ForAllTypes([&](Type reg_type1) { return reg_type1 == Types().NullRefType(); })) {
-            // treat it as always throw NPE
+            // TODO(vdyadov): redesign next code, after support exception handlers,
+            //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpe)
             LOG_VERIFIER_ALWAYS_NPE(v1);
             END_SHOW_MSG();
@@ -3911,11 +4099,13 @@ private:
 
         auto &&acc_type = GetAccType();
 
+        // TODO(dvyadov): think of subtyping here. Can we really write more precise type into array?
         // since there is no problems with storage (all refs are of the same size)
         // and no problems with information losses, it seems fine at first sight.
-        if (acc_type.ForAllTypes([&](Type acc_type1) {
-                return arr_elt_type.ForAllTypes([&](Type arr_elt_type1) { return !(acc_type1 <= arr_elt_type1); });
-            })) {
+        auto res = acc_type.ForAllTypes([&](Type acc_type1) {
+            return arr_elt_type.ForAllTypes([&](Type arr_elt_type1) { return !(acc_type1 <= arr_elt_type1); });
+        });
+        if (res) {
             PandaVector<Type> arr_elt_type_members;
             arr_elt_type.ForAllTypes([&](Type arr_elt_type1) {
                 arr_elt_type_members.push_back(arr_elt_type1);
@@ -3938,8 +4128,6 @@ private:
     bool CheckArrayStoreExact(int v1, int v2, const Type &acc_supertype,
                               const std::initializer_list<Type> &expected_elt_types)
     {
-        status_ = VerificationStatus::ERROR;
-
         if (!CheckRegTypes(v2, {Types().Integral32Type()}) || !CheckRegTypes(v1, {Types().ArrayType()}) ||
             !IsRegDefined(ACC)) {
             SET_STATUS_FOR_MSG(BadRegisterType);
@@ -3973,6 +4161,7 @@ private:
         if (!find(arr_elt_type)) {
             // array elt type is not expected one
             LOG_VERIFIER_BAD_ARRAY_ELEMENT_TYPE3(ImageOf(arr_elt_type), ImagesOf(expected_elt_types));
+            SET_STATUS_FOR_MSG(BadArrayElementType);
             return false;
         }
 
@@ -3980,14 +4169,16 @@ private:
 
         if (acc_type.ForAllTypes([&](Type acc_type1) { return !(acc_type1 <= acc_supertype); })) {
             LOG_VERIFIER_BAD_ACCUMULATOR_TYPE2(ImageOf(acc_type), ImagesOf(SubtypesOf({acc_supertype})));
+            SET_STATUS_FOR_MSG(BadArrayElementType);
             return false;
         }
 
-        status_ = VerificationStatus::OK;
         if (!find(acc_type)) {
             // array elt type is not expected one
             LOG_VERIFIER_BAD_ACCUMULATOR_TYPE3(ImageOf(acc_type), ImagesOf(expected_elt_types));
-            status_ = VerificationStatus::WARNING;
+            if (status_ != VerificationStatus::ERROR) {
+                status_ = VerificationStatus::WARNING;
+            }
         }
 
         MoveToNextInst<format>();
@@ -4133,7 +4324,7 @@ private:
         if (arr_type.IsType()) {
             return GetArrayEltType(arr_type.GetType());
         } else if (arr_type.IsTypeSet()) {
-            TypeSet result(Types().GetKind());
+            TypeSet result(Types().GetKind(), Types().GetThreadNum());
             arr_type.GetTypeSet().ForAll([&](Type type1) {
                 if (IsConcreteArrayType(type1)) {
                     result.Insert(GetArrayEltType(type1));
@@ -4160,7 +4351,8 @@ private:
         }
         auto &&reg_type = GetRegType(vs);
         if (reg_type.ForAllTypes([&](Type reg_type1) { return reg_type1 == Types().NullRefType(); })) {
-            // treat it as always throw NPE
+            // TODO(vdyadov): redesign next code, after support exception handlers,
+            //                treat it as always throw NPE
             SHOW_MSG(AlwaysNpe)
             LOG_VERIFIER_ALWAYS_NPE(vs);
             END_SHOW_MSG();
@@ -4169,11 +4361,12 @@ private:
             return false;
         }
         auto &&arr_elt_type = GetArrayEltType(reg_type);
-        if (!IsItemPresent(elt_types, [&arr_elt_type](const auto &type) {
-                return arr_elt_type.ExistsType([&](auto arr_elt_type1) { return type == arr_elt_type1; });
-            })) {
+        auto res = IsItemPresent(elt_types, [&arr_elt_type](const auto &type) {
+            return arr_elt_type.ExistsType([&](auto arr_elt_type1) { return type == arr_elt_type1; });
+        });
+        if (!res) {
             LOG_VERIFIER_BAD_ARRAY_ELEMENT_TYPE3(ImageOf(arr_elt_type), ImagesOf(elt_types));
-            status_ = VerificationStatus::ERROR;
+            SET_STATUS_FOR_MSG(BadArrayElementType);
             return false;
         }
         SetAcc(arr_elt_type);
@@ -4258,7 +4451,7 @@ private:
     template <BytecodeInstructionSafe::Format format, typename Fetcher>
     bool CheckArrayCtor(const CachedMethod &ctor, Fetcher reg_nums)
     {
-        Type klass = Types().TypeOf(ctor.GetClass());
+        Type klass = Types().TypeOf(ctor.klass);
         if (!klass.IsValid()) {
             return false;
         }
@@ -4271,6 +4464,7 @@ private:
             }
             result = CheckRegTypes(reg, {I32});
             if (!result) {
+                LOG(ERROR, VERIFIER) << "Verifier error: ArrayCtor type error";
                 status_ = VerificationStatus::ERROR;
             }
             --args_num;
@@ -4296,30 +4490,6 @@ private:
             LOG(ERROR, VERIFIER) << "Error: " << elt.msg << ". ";
         } else if (elt.IsWarning()) {
             LOG(WARNING, VERIFIER) << "Warning: " << elt.msg << ". ";
-        }
-    }
-
-    TypeRelationship GetRelationship(const Type &type1, const Type &type2)
-    {
-        if (type1 == type2) {
-            return TypeRelationship::SAME;
-        } else if (type1 <= type2) {
-            return TypeRelationship::DESCENDANT;
-        } else {
-            return TypeRelationship::OTHER;
-        }
-    }
-
-    // works for both fields and methods
-    template <typename T>
-    AccessModifier GetAccessMode(const T *x)
-    {
-        if (x->flags[T::Flag::PRIVATE]) {
-            return AccessModifier::PRIVATE;
-        } else if (x->flags[T::Flag::PROTECTED]) {
-            return AccessModifier::PROTECTED;
-        } else {
-            return AccessModifier::PUBLIC;
         }
     }
 
@@ -4361,4 +4531,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_ABSINT_ABS_INT_INL_H_
+#endif  // PANDA_VERIFICATION_ABSINT_ABS_INT_INL_H

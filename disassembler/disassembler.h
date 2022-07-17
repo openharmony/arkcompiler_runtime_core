@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_DISASSEMBLER_DISASSEMBLER_H_
-#define PANDA_DISASSEMBLER_DISASSEMBLER_H_
+#ifndef DISASM_LIB_H_INCLUDED
+#define DISASM_LIB_H_INCLUDED
 
 #include "macros.h"
 #include "utils/type_helpers.h"
@@ -23,6 +23,7 @@
 #include "class_data_accessor-inl.h"
 #include "code_data_accessor-inl.h"
 #include "debug_data_accessor-inl.h"
+#include "debug_info_extractor.h"
 #include "field_data_accessor-inl.h"
 #include "method_data_accessor-inl.h"
 #include "literal_data_accessor-inl.h"
@@ -37,6 +38,7 @@
 #include "assembly-ins.h"
 
 #include "bytecode_instruction-inl.h"
+#include "libpandabase/macros.h"
 
 #include <map>
 #include <memory>
@@ -47,11 +49,8 @@
 namespace panda::disasm {
 class Disassembler {
 public:
-    Disassembler(const Disassembler &) = delete;
-    Disassembler &operator=(const Disassembler &) = delete;
-
-    Disassembler(Disassembler &&that);
-    Disassembler &operator=(Disassembler &&that);
+    NO_COPY_SEMANTIC(Disassembler);
+    DEFAULT_MOVE_SEMANTIC(Disassembler);
 
     Disassembler() = default;
     ~Disassembler() = default;
@@ -63,14 +62,18 @@ public:
     static inline bool IsPandasmFriendly(const char c);
     static inline bool IsSystemType(const std::string &type_name);
 
-    static std::string MakePandasmFriendly(const std::string &str);
-
     void GetRecord(pandasm::Record *record, const panda_file::File::EntityId &record_id);
+    void AddMethodToTables(const panda_file::File::EntityId &method_id);
     void GetMethod(pandasm::Function *method, const panda_file::File::EntityId &method_id);
-    void GetLiteralArray(pandasm::LiteralArray *lit_array, const size_t index) const;
+    void GetLiteralArray(pandasm::LiteralArray *lit_array, const size_t index);
     template <typename T>
     void FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
-                              const panda_file::LiteralDataAccessor::LiteralValue &value) const;
+                              const panda_file::LiteralDataAccessor::LiteralValue &value);
+
+    const ProgInfo &GetProgInfo() const
+    {
+        return prog_info_;
+    }
 
 private:
     void GetLiteralArrays();
@@ -97,18 +100,16 @@ private:
     void GetMetaData(pandasm::Function *method, const panda_file::File::EntityId &method_id) const;
     void GetMetaData(pandasm::Field *field, const panda_file::File::EntityId &field_id) const;
 
-    void GetLanguageSpecificMetadata() const;
+    void GetLanguageSpecificMetadata();
 
     std::string AnnotationTagToString(const char tag) const;
 
-    std::string ScalarValueToString(const panda_file::ScalarValue &value, const std::string &type) const;
-    std::string ArrayValueToString(const panda_file::ArrayValue &value, const std::string &type,
-                                   const size_t idx) const;
+    std::string ScalarValueToString(const panda_file::ScalarValue &value, const std::string &type);
+    std::string ArrayValueToString(const panda_file::ArrayValue &value, const std::string &type, const size_t idx);
 
-    std::string GetFullMethodName(const panda_file::File::EntityId &method_id,
-                                  pandasm::extensions::Language language) const;
-    std::string GetFullRecordName(const panda_file::File::EntityId &class_id,
-                                  pandasm::extensions::Language language) const;
+    std::string GetFullMethodName(const panda_file::File::EntityId &method_id) const;
+    std::string GetMethodSignature(const panda_file::File::EntityId &method_id) const;
+    std::string GetFullRecordName(const panda_file::File::EntityId &class_id) const;
 
     void GetRecordInfo(const panda_file::File::EntityId &record_id, RecordInfo *record_info) const;
     void GetMethodInfo(const panda_file::File::EntityId &method_id, MethodInfo *method_info) const;
@@ -116,50 +117,60 @@ private:
 
     void Serialize(size_t index, const pandasm::LiteralArray &lit_array, std::ostream &os) const;
     void SerializeValues(const pandasm::LiteralArray &lit_array, std::ostream &os) const;
+    std::string LiteralTagToString(const panda_file::LiteralTag &tag) const;
     void Serialize(const pandasm::Record &record, std::ostream &os, bool print_information = false) const;
     void SerializeFields(const pandasm::Record &record, std::ostream &os, bool print_information) const;
     void Serialize(const pandasm::Function &method, std::ostream &os, bool print_information = false) const;
     void Serialize(const pandasm::Function::CatchBlock &catch_block, std::ostream &os) const;
     void Serialize(const pandasm::ItemMetadata &meta, const AnnotationList &ann_list, std::ostream &os) const;
-    void SerializeLanguage(std::ostream &os) const;
+    void SerializeLineNumberTable(const panda_file::LineNumberTable &line_number_table, std::ostream &os) const;
+    void SerializeLocalVariableTable(const panda_file::LocalVariableTable &local_variable_table,
+                                     const pandasm::Function &method, std::ostream &os) const;
+
+    inline void SerializeLanguage(std::ostream &os) const
+    {
+        os << ".language " << panda::panda_file::LanguageToString(file_language_) << "\n\n";
+    }
 
     pandasm::Type PFTypeToPandasmType(const panda_file::Type &type, panda_file::ProtoDataAccessor &pda,
                                       size_t &ref_idx) const;
-    inline pandasm::extensions::Language PFLangToPandasmLang(
-        const std::optional<panda_file::SourceLang> &language) const;
 
     pandasm::Type FieldTypeToPandasmType(const uint32_t &type) const;
 
-    std::string StringDataToString(panda_file::File::StringData sd) const;
+    static inline std::string StringDataToString(panda_file::File::StringData sd)
+    {
+        return std::string(utf::Mutf8AsCString(sd.data));
+    }
 
     pandasm::Opcode BytecodeOpcodeToPandasmOpcode(BytecodeInstruction::Opcode o) const;
     pandasm::Opcode BytecodeOpcodeToPandasmOpcode(uint8_t o) const;
 
     pandasm::Ins BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
-                                                         panda_file::File::EntityId method_id,
-                                                         pandasm::extensions::Language language) const;
+                                                         panda_file::File::EntityId method_id) const;
 
-    std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id,
-                           pandasm::extensions::Language language) const;
+    std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id) const;
 
-    size_t GetBytecodeInstructionNumber(BytecodeInstruction bc_ins_first, BytecodeInstruction bc_ins_cur) const;
-
-    pandasm::extensions::Language GetClassLanguage(panda_file::File::EntityId class_id) const;
+    panda::panda_file::SourceLang GetRecordLanguage(panda_file::File::EntityId class_id) const;
 
     std::unique_ptr<const panda_file::File> file_;
     pandasm::Program prog_;
 
-    pandasm::extensions::Language file_language_ = pandasm::extensions::Language::PANDA_ASSEMBLY;
+    panda::panda_file::SourceLang file_language_ = panda::panda_file::SourceLang::PANDA_ASSEMBLY;
 
     std::map<std::string, panda_file::File::EntityId> record_name_to_id_;
     std::map<std::string, panda_file::File::EntityId> method_name_to_id_;
 
+    ProgAnnotations prog_ann_;
+
     ProgInfo prog_info_;
-    ProgJavaAnnotations prog_j_ann_;
+
+    std::unique_ptr<panda_file::DebugInfoExtractor> debug_info_extractor_;
 
     bool quiet_;
     bool skip_strings_;
+
+#include "disasm_plugins.inc"
 };
 }  // namespace panda::disasm
 
-#endif  // PANDA_DISASSEMBLER_DISASSEMBLER_H_
+#endif

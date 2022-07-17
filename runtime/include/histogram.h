@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_HISTOGRAM_H_
-#define PANDA_RUNTIME_INCLUDE_HISTOGRAM_H_
+#ifndef PANDA_RUNTIME_HISTOGRAM_H_
+#define PANDA_RUNTIME_HISTOGRAM_H_
 
 #include "libpandabase/utils/type_converter.h"
 #include "libpandabase/macros.h"
@@ -87,10 +87,7 @@ public:
 
     double GetDispersion() const
     {
-        if (count_ > 0U) {
-            return sum_of_squares_ / static_cast<double>(count_) - GetAvg() * GetAvg();
-        }
-        return 0;
+        return sum_of_squares_ / static_cast<double>(count_) - GetAvg() * GetAvg();
     }
 
     ~SimpleHistogram() = default;
@@ -118,12 +115,9 @@ public:
         : SimpleHistogram<Value>(type_of_value)
     {
     }
-    ~Histogram() = default;
-    DEFAULT_COPY_SEMANTIC(Histogram);
-    DEFAULT_MOVE_SEMANTIC(Histogram);
 
     /**
-     *  \brief Add all elements to statistics at the half-interval from \param start to \param finish
+     *  \brief Add all element to statistics at the half-interval from \param start to \param finish
      *  @param start begin of values inclusive
      *  @param finish end of values ​​not inclusive
      */
@@ -159,4 +153,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_HISTOGRAM_H_
+#endif  // PANDA_RUNTIME_HISTOGRAM_H_

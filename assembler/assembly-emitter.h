@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ASSEMBLY_EMITTER_H_
-#define PANDA_ASSEMBLER_ASSEMBLY_EMITTER_H_
+#ifndef _PANDA_ASSEMBLER_EMITTER_HPP
+#define _PANDA_ASSEMBLER_EMITTER_HPP
 
 #include <memory>
 #include <type_traits>
@@ -28,6 +28,7 @@
 #include "assembly-function.h"
 #include "bytecode_emitter.h"
 #include "file_item_container.h"
+#include "pgo.h"
 
 namespace panda::pandasm {
 
@@ -50,13 +51,15 @@ public:
     };
 
     static bool Emit(panda_file::ItemContainer *items, const Program &program, PandaFileToPandaAsmMaps *maps = nullptr,
-                     bool emit_debug_info = true);
+                     bool emit_debug_info = true, panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr);
 
     static bool Emit(panda_file::Writer *writer, const Program &program, std::map<std::string, size_t> *stat = nullptr,
-                     PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true);
+                     PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true,
+                     panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr);
 
     static bool Emit(const std::string &filename, const Program &program, std::map<std::string, size_t> *stat = nullptr,
-                     PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true);
+                     PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true,
+                     panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr);
 
     static std::unique_ptr<const panda_file::File> Emit(const Program &program,
                                                         PandaFileToPandaAsmMaps *maps = nullptr);
@@ -127,7 +130,7 @@ private:
                                               panda_file::MethodItem *method, const Function &func);
     static bool MakeFunctionDebugInfoAndAnnotations(panda_file::ItemContainer *items, const Program &program,
                                                     const AsmEntityCollections &entities, bool emit_debug_info);
-    static void FillMap(PandaFileToPandaAsmMaps *maps, const AsmEntityCollections &entities);
+    static void FillMap(PandaFileToPandaAsmMaps *maps, AsmEntityCollections &entities);
     static void EmitDebugInfo(panda_file::ItemContainer *items, const Program &program,
                               const std::vector<uint8_t> *bytes, const panda_file::MethodItem *method,
                               const Function &func, const std::string &name, bool emit_debug_info);
@@ -151,6 +154,7 @@ private:
     static bool CheckValueMethodCase(const Value *value, const Program &program);
     static bool CheckValueRecordCase(const Value *value, const Program &program);
     static bool CheckValue(const Value *value, Type type, const Program &program);
+    static std::string GetMethodSignatureFromProgram(const std::string &name, const Program &program);
 
     static panda_file::LiteralItem *CreateLiteralItem(
         panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::LiteralItem> *out,
@@ -190,7 +194,7 @@ private:
         const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes);
     static panda_file::ScalarValueItem *CreateScalarMethodValueItem(
         panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
-        const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
+        const Program &program, const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
     static panda_file::ScalarValueItem *CreateScalarEnumValueItem(
         panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
         const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields);
@@ -230,12 +234,13 @@ private:
                                const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
                                const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
 
+    // TODO(mgonopolsky): Refactor to introduce a single error-processing mechanism for parser and emitter
     static std::string last_error;
 };
 
-std::string GetOwnerName(const std::string &name);
-std::string GetItemName(const std::string &name);
+std::string GetOwnerName(std::string name);
+std::string GetItemName(std::string name);
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_ASSEMBLY_EMITTER_H_
+#endif  // !_PANDA_ASSEMBLER_EMITTER_HPP

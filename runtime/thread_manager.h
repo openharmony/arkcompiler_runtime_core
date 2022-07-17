@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef PANDA_RUNTIME_THREAD_MANAGER_H_
 #define PANDA_RUNTIME_THREAD_MANAGER_H_
 
@@ -28,10 +27,6 @@
 #include "runtime/include/thread_status.h"
 #include "runtime/include/locks.h"
 
-namespace openjdkjvmti {
-class TiThread;
-}  // namespace openjdkjvmti
-
 namespace panda {
 
 // This interval is required for waiting for threads to stop.
@@ -40,13 +35,11 @@ static constexpr int64_t K_MAX_DUMP_TIME_NS = UINT64_C(6 * 1000 * 1000 * 1000); 
 static constexpr int64_t K_MAX_SINGLE_DUMP_TIME_NS = UINT64_C(50 * 1000 * 1000);  // 50ms
 
 enum class EnumerationFlag {
-    NONE = 0,         // Nothing
-    JAVA_THREAD = 1,  // JAVA thread
-    JS_THREAD = 2,    // JS thread
-    MANAGED_CODE_THREAD =
-        4,          // Thread which can execute managed code - should be used with JAVA_THREAD and/or JS_THREAD
-    VM_THREAD = 8,  // Includes VM threads
-    ALL = 16,       // Not 15, see the comment in the function SatisfyTheMask below
+    NONE = 0,                 // Nothing
+    NON_CORE_THREAD = 1,      // Plugin type thread
+    MANAGED_CODE_THREAD = 2,  // Thread which can execute managed code
+    VM_THREAD = 4,            // Includes VM threads
+    ALL = 8,                  // See the comment in the function SatisfyTheMask below
 };
 
 class ThreadManager {
@@ -62,7 +55,7 @@ public:
     virtual ~ThreadManager();
 
     template <class Callback>
-    void EnumerateThreads(const Callback &cb, unsigned int mask,
+    void EnumerateThreads(const Callback &cb, unsigned int mask = static_cast<unsigned int>(EnumerationFlag::ALL),
                           unsigned int xor_mask = static_cast<unsigned int>(EnumerationFlag::NONE)) const
     {
         os::memory::LockHolder lock(thread_lock_);
@@ -71,8 +64,8 @@ public:
     }
 
     template <class Callback>
-    void EnumerateThreadsWithLockheld(const Callback &cb, unsigned int inc_mask,
-                                      // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_INDENT_CHECK)
+    void EnumerateThreadsWithLockheld(const Callback &cb,
+                                      unsigned int inc_mask = static_cast<unsigned int>(EnumerationFlag::ALL),
                                       unsigned int xor_mask = static_cast<unsigned int>(EnumerationFlag::NONE)) const
         REQUIRES(thread_lock_)
     {
@@ -90,6 +83,8 @@ public:
     template <class Callback>
     void EnumerateThreadsForDump(const Callback &cb, std::ostream &os)
     {
+        // TODO: can not get WriteLock() when other thread run code "while {}"
+        // issue #3085
         SuspendAllThreads();
         Locks::mutator_lock->WriteLock();
         MTManagedThread *self = MTManagedThread::GetCurrent();
@@ -121,17 +116,6 @@ public:
         DumpUnattachedThreads(os);
         Locks::mutator_lock->Unlock();
         ResumeAllThreads();
-    }
-
-    void DeleteFinishedThreads()
-    {
-        os::memory::LockHolder lock(thread_lock_);
-        while (!finished_threads_.empty()) {
-            MTManagedThread *thread = finished_threads_.front();
-            // Explicitly delete thread structure
-            delete thread;
-            finished_threads_.pop();
-        }
     }
 
     void DumpUnattachedThreads(std::ostream &os);
@@ -181,18 +165,10 @@ public:
 
     void RemoveInternalThreadId(uint32_t id);
 
-    bool IsThreadExists(uint32_t thread_id);
+    bool IsRunningThreadExist();
 
     // Returns true if unregistration succeeded; for now it can fail when we are trying to unregister main thread
-    bool UnregisterExitedThread(MTManagedThread *java_thread);
-
-    uint32_t GetThreadIdByInternalThreadId(uint32_t thread_id);
-
-    MTManagedThread *GetThreadByInternalThreadId(uint32_t thread_id)
-    {
-        os::memory::LockHolder lock(thread_lock_);
-        return GetThreadByInternalThreadIdWithLockHeld(thread_id);
-    }
+    bool UnregisterExitedThread(MTManagedThread *thread);
 
     MTManagedThread *SuspendAndWaitThreadByInternalThreadId(uint32_t thread_id);
 
@@ -216,6 +192,8 @@ private:
         return thread < 2 && pending_threads_ == 0;
     }
 
+    bool StopThreadsOnDeadlock(MTManagedThread *current) REQUIRES(thread_lock_);
+
     bool SatisfyTheMask(MTManagedThread *t, unsigned int mask) const
     {
         if ((mask & static_cast<unsigned int>(EnumerationFlag::ALL)) != 0) {
@@ -227,23 +205,14 @@ private:
             return true;
         }
 
-        bool target = true;
-
         // For NONE mask
-        target = false;
+        bool target = false;
         if ((mask & static_cast<unsigned int>(EnumerationFlag::MANAGED_CODE_THREAD)) != 0) {
             target = t->IsAttached();
-            if ((mask & static_cast<unsigned int>(EnumerationFlag::JAVA_THREAD)) != 0 ||
-                (mask & static_cast<unsigned int>(EnumerationFlag::JS_THREAD)) != 0) {
+            if ((mask & static_cast<unsigned int>(EnumerationFlag::NON_CORE_THREAD)) != 0) {
                 // Due to hyerarhical structure, we need to conjunct types
-                bool target_type = false;
-                if ((mask & static_cast<unsigned int>(EnumerationFlag::JAVA_THREAD)) != 0) {
-                    target_type = target_type || t->IsJavaThread();
-                }
-                if ((mask & static_cast<unsigned int>(EnumerationFlag::JS_THREAD)) != 0) {
-                    target_type = target_type || t->IsJSThread();
-                }
-                target = target && target_type;
+                bool non_core_thread = t->GetThreadLang() != panda::panda_file::SourceLang::PANDA_ASSEMBLY;
+                target = target && non_core_thread;
             }
         }
 
@@ -260,21 +229,27 @@ private:
      */
     void StopDaemonThreads() REQUIRES(thread_lock_);
 
-    void DeregisterSuspendedThreads() REQUIRES(thread_lock_);
+    /**
+     * Deregister all suspended threads including daemon threads.
+     * Returns true on success and false otherwise.
+     */
+    bool DeregisterSuspendedThreads() REQUIRES(thread_lock_);
 
-    uint32_t GetInternalThreadIdWithLockHeld();
+    void DecreaseCountersForThread(MTManagedThread *thread) REQUIRES(thread_lock_);
 
     MTManagedThread *GetThreadByInternalThreadIdWithLockHeld(uint32_t thread_id) REQUIRES(thread_lock_);
 
-    void RemoveInternalThreadIdWithLockHeld(uint32_t id);
-
     bool CanDeregister(enum ThreadStatus status)
     {
-        // Do not deregister CREATED threads until they finish initializing which requires communication with
-        // ThreadManaged; Do not deregister BLOCKED threads as it means we are trying to acquire lock in Monitor, which
-        // was created in internalAllocator; Do not deregister TERMINATING threads which requires communication with
-        // Runtime; If thread status is not RUNNING, it's treated as suspended and we can deregister it.
-        return status != CREATED && status != RUNNING && status != IS_BLOCKED && status != TERMINATING;
+        // Deregister thread only for IS_TERMINATED_LOOP.
+        // In all other statuses we should wait:
+        // * CREATED - wait until threads finish initializing which requires communication with ThreadManager;
+        // * BLOCKED - it means we are trying to acquire lock in Monitor, which was created in internalAllocator;
+        // * TERMINATING - threads which requires communication with Runtime;
+        // * FINISHED threads should be deleted itself;
+        // * NATIVE threads are either go to FINISHED status or considered a part of a deadlock;
+        // * other statuses - should eventually go to IS_TERMINATED_LOOP or FINISHED status.
+        return status == ThreadStatus::IS_TERMINATED_LOOP;
     }
 
     mutable os::memory::Mutex thread_lock_;
@@ -284,10 +259,6 @@ private:
     // We should delete only finished thread structures, so call delete explicitly on finished threads
     // and don't touch other pointers
     PandaList<MTManagedThread *> threads_ GUARDED_BY(thread_lock_);
-    // Storage of finished threads which GC deletes, it's unsafe to call delete without safepoint
-    // (i.e. java.lang.Thread intrinsics can fetch nativePeer before its nullified but call JavaThread functions
-    // after thread destroys itself)
-    PandaQueue<MTManagedThread *> finished_threads_ GUARDED_BY(thread_lock_);
     os::memory::Mutex ids_lock_;
     std::bitset<MAX_INTERNAL_THREAD_ID> internal_thread_ids_ GUARDED_BY(ids_lock_);
     uint32_t last_id_ GUARDED_BY(ids_lock_);
@@ -305,8 +276,6 @@ private:
     // When the counter != 0, operations with thread set are permitted to avoid destruction of shared data (mutexes)
     // Synchronized with lock (not atomic) for mutual exclusion with thread operations
     int pending_threads_ GUARDED_BY(thread_lock_);
-
-    friend class openjdkjvmti::TiThread;
 };
 
 }  // namespace panda

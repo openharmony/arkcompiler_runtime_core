@@ -27,13 +27,9 @@ std::mutex mu;
 std::condition_variable cv;
 
 #ifdef PANDA_TARGET_UNIX
-// On linux, the priority can be set within range [-20, 19], and 19 is the lowest priority.
 constexpr int LOWER_PRIOIRITY = 1;
-constexpr int LOWEST_PRIORITY = 19;
-#elif PANDA_TARGET_WINDOWS
-// On Windows, the priority can be set within range [-2, 2], and -2 is the lowest priority.
+#elif defined(PANDA_TARGET_WINDOWS)
 constexpr int LOWER_PRIOIRITY = -1;
-constexpr int LOWEST_PRIORITY = -2;
 #endif
 
 void ThreadFunc()
@@ -65,7 +61,7 @@ TEST_F(ThreadTest, SetCurrentThreadPriorityTest)
 #ifdef PANDA_TARGET_UNIX
     ASSERT_EQ(ret1, 0);
     ASSERT_EQ(ret2, 0);
-#elif PANDA_TARGET_WINDOWS
+#elif defined(PANDA_TARGET_WINDOWS)
     ASSERT_NE(ret1, 0);
     ASSERT_NE(ret2, 0);
 #endif
@@ -98,7 +94,7 @@ TEST_F(ThreadTest, SetOtherThreadPriorityTest)
 #ifdef PANDA_TARGET_UNIX
     ASSERT_EQ(ret, 0);
     ASSERT(child_prio_before <= child_prio_after);
-#elif PANDA_TARGET_WINDOWS
+#elif defined(PANDA_TARGET_WINDOWS)
     ASSERT_NE(ret, 0);
     ASSERT(child_prio_after <= child_prio_before);
 #endif

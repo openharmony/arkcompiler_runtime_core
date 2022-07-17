@@ -28,12 +28,30 @@ template("gcc_toolchain") {
     asm = invoker.asm
   }
 
+  if (defined(invoker.extra_cppflags)) {
+    extra_cppflags = invoker.extra_cppflags
+  } else {
+    extra_cppflags = ""
+  }
+
+  if (defined(invoker.extra_asmflags)) {
+    extra_asmflags = invoker.extra_asmflags
+  } else {
+    extra_asmflags = ""
+  }
+
+  if (defined(invoker.extra_ldflags)) {
+    extra_ldflags = invoker.extra_ldflags
+  } else {
+    extra_ldflags = ""
+  }
+
   object_subdir = "{{source_out_dir}}/{{label_name}}"
 
   toolchain(target_name) {
     tool("cc") {
       depfile = "{{output}}.d"
-      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} ${extra_cppflags} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CC {{output}}"
       outputs =
@@ -42,7 +60,7 @@ template("gcc_toolchain") {
 
     tool("cxx") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
+      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} ${extra_cppflags} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CXX {{output}}"
       outputs =
@@ -51,7 +69,7 @@ template("gcc_toolchain") {
 
     tool("asm") {
       depfile = "{{output}}.d"
-      command = "$asm -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} -c {{source}} -o {{output}}"
+      command = "$asm -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} ${extra_asmflags} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "ASM {{output}}"
       outputs =
@@ -76,13 +94,17 @@ template("gcc_toolchain") {
       os_specific_option = "-Wl,-soname=$soname"
       rspfile_content = "-Wl,--whole-archive {{inputs}} {{solibs}} -Wl,--no-whole-archive {{libs}}"
 
-      command =
-          "$ld -shared {{ldflags}} -o $sofile $os_specific_option @$rspfile"
+      command = "$ld -shared {{ldflags}} ${extra_ldflags} -o $sofile $os_specific_option @$rspfile"
 
       description = "SOLINK $soname"
 
+      # Use this for {{output_extension}} expansions unless a target manually
+      # overrides it (in which case {{output_extension}} will be what the target
+      # specifies).
       default_output_extension = ".so"
 
+      # Use this for {{output_dir}} expansions unless a target manually overrides
+      # it (in which case {{output_dir}} will be what the target specifies).
       default_output_dir = "{{root_out_dir}}"
 
       outputs = [ sofile ]
@@ -113,9 +135,9 @@ template("gcc_toolchain") {
   }
 }
 
-gcc_toolchain("clang-8") {
-  cc = "clang-8"
-  cxx = "clang++-8"
+gcc_toolchain("clang-9") {
+  cc = "clang-9"
+  cxx = "clang++-9"
   ar = "ar"
   ld = cxx
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_SERIALIZER_STRUCT_TO_TUPLE_H_
-#define PANDA_LIBPANDABASE_SERIALIZER_STRUCT_TO_TUPLE_H_
+#ifndef PANDA_LIBPANDABASE_UTILS_SERIALIZER_STRUCT_TO_TUPLE_H_
+#define PANDA_LIBPANDABASE_UTILS_SERIALIZER_STRUCT_TO_TUPLE_H_
 
 #include <tuple>
 
@@ -23,7 +23,7 @@ namespace panda::serializer::internal {
 template <size_t N>
 struct StructToTupleImpl;
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage), CODECHECK-NOLINTNEXTLINE(C_RULE_ID_DEFINE_MULTILINE)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define SERIALIZE_INTERNAL_STRUCT_TO_TUPLE_IMPL(N, ...)     \
     template <>                                             \
     struct StructToTupleImpl<N> {                           \
@@ -62,4 +62,4 @@ auto StructToTuple(Struct &&str)
 
 }  // namespace panda::serializer::internal
 
-#endif  // PANDA_LIBPANDABASE_SERIALIZER_STRUCT_TO_TUPLE_H_
+#endif  // PANDA_LIBPANDABASE_UTILS_SERIALIZER_STRUCT_TO_TUPLE_H_

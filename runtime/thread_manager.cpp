@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-#include "runtime/thread_manager.h"
-
+#include "libpandabase/os/native_stack.h"
+#include "libpandabase/os/thread.h"
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/utf.h"
 #include "runtime/include/mem/allocator.h"
-#include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
+#include "runtime/include/runtime.h"
+#include "runtime/include/thread-inl.h"
 #include "runtime/include/thread_scopes.h"
-#include "libpandabase/os/native_stack.h"
-#include "libpandabase/os/thread.h"
+#include "runtime/lock_order_graph.h"
+#include "runtime/thread_manager.h"
 
 namespace panda {
 
@@ -34,12 +35,12 @@ ThreadManager::ThreadManager(mem::InternalAllocatorPtr allocator) : threads_(all
 
 ThreadManager::~ThreadManager()
 {
-    DeleteFinishedThreads();
     threads_.clear();
 }
 
-uint32_t ThreadManager::GetInternalThreadIdWithLockHeld() REQUIRES(ids_lock_)
+uint32_t ThreadManager::GetInternalThreadId()
 {
+    os::memory::LockHolder lock(ids_lock_);
     for (size_t i = 0; i < internal_thread_ids_.size(); i++) {
         last_id_ = (last_id_ + 1) % internal_thread_ids_.size();
         if (!internal_thread_ids_[last_id_]) {
@@ -51,97 +52,95 @@ uint32_t ThreadManager::GetInternalThreadIdWithLockHeld() REQUIRES(ids_lock_)
     UNREACHABLE();
 }
 
-uint32_t ThreadManager::GetInternalThreadId()
-{
-    os::memory::LockHolder lock(ids_lock_);
-    return GetInternalThreadIdWithLockHeld();
-}
-
-void ThreadManager::RemoveInternalThreadIdWithLockHeld(uint32_t id) REQUIRES(ids_lock_)
+void ThreadManager::RemoveInternalThreadId(uint32_t id)
 {
     id--;  // 0 is reserved as uninitialized value.
+    os::memory::LockHolder lock(ids_lock_);
     ASSERT(internal_thread_ids_[id]);
     internal_thread_ids_.reset(id);
 }
 
-void ThreadManager::RemoveInternalThreadId(uint32_t id)
-{
-    os::memory::LockHolder lock(ids_lock_);
-    return RemoveInternalThreadIdWithLockHeld(id);
-}
-
-bool ThreadManager::IsThreadExists(uint32_t thread_id)
-{
-    os::memory::LockHolder lock(thread_lock_);
-    auto i = threads_.begin();
-    while (i != threads_.end()) {
-        MTManagedThread *thread = *i;
-        if (thread->GetId() == thread_id) {
-            return true;
-        }
-        i++;
-    }
-    return false;
-}
-
-uint32_t ThreadManager::GetThreadIdByInternalThreadId(uint32_t thread_id)
-{
-    os::memory::LockHolder lock(thread_lock_);
-    auto i = threads_.begin();
-    while (i != threads_.end()) {
-        MTManagedThread *thread = *i;
-        if (thread->GetInternalId() == thread_id) {
-            return thread->GetId();
-        }
-        i++;
-    }
-    return 0;
-}
-
 MTManagedThread *ThreadManager::GetThreadByInternalThreadIdWithLockHeld(uint32_t thread_id)
 {
-    auto i = threads_.begin();
-    while (i != threads_.end()) {
-        MTManagedThread *thread = *i;
+    // Do not optimize with std::find_if - sometimes there are problems with incorrect memory accesses
+    for (auto thread : threads_) {
         if (thread->GetInternalId() == thread_id) {
             return thread;
         }
-        i++;
     }
     return nullptr;
 }
 
-void ThreadManager::DeregisterSuspendedThreads()
+bool ThreadManager::DeregisterSuspendedThreads()
 {
-    if (pending_threads_ != 0) {
-        // There are threads, which are not completely registered
-        // We can not destroy other threads, as they may use shared data (waiting mutexes)
-        return;
-    }
-
     auto current = MTManagedThread::GetCurrent();
     auto i = threads_.begin();
+    bool is_potentially_blocked_thread_present = false;
+    bool is_nonblocked_thread_present = false;
     while (i != threads_.end()) {
         MTManagedThread *thread = *i;
         auto status = thread->GetStatus();
         // Do not deregister current thread (which should be in status NATIVE) as HasNoActiveThreads
-        // assumes it stays registered; do not deregister CREATED threads until they finish initializing
-        // which requires communication with ThreadManaged
-        // If thread status is not RUNNING, it's treated as suspended and we can deregister it
-        // Ignore state BLOCKED as it means we are trying to acquire lock in Monitor, which was created in
-        // internalAllocator
+        // assumes it stays registered; only threads in statuses FINISHED, IS_TERMINATED_LOOP and NATIVE
+        // can be deregistered.
         if (thread != current && CanDeregister(status)) {
-            if (thread->IsDaemon()) {
-                daemon_threads_count_--;
-                daemon_threads_.push_back(thread);
-            }
+            DecreaseCountersForThread(thread);
             i = threads_.erase(i);
-            // Do not delete this thread structure as it may be used by suspended thread
-            threads_count_--;
+            continue;
+        }
+        if (status == ThreadStatus::NATIVE || status == ThreadStatus::IS_BLOCKED) {
+            // We have a blocked thread - there is a potential deadlock
+            is_potentially_blocked_thread_present = true;
+        } else if (thread != current) {
+            // We have at least one non-blocked thread - deadlock is impossible
+            is_nonblocked_thread_present = true;
+        }
+        if (thread != current) {
+            LOG(DEBUG, RUNTIME) << "Daemon thread " << thread->GetId()
+                                << " remains in DeregisterSuspendedThreads, status = "
+                                << ManagedThread::ThreadStatusAsString(status);
+        }
+        i++;
+    }
+    if (is_potentially_blocked_thread_present && !is_nonblocked_thread_present) {
+        // All threads except current are blocked (have BLOCKED or NATIVE status)
+        LOG(DEBUG, RUNTIME) << "Potential deadlock with daemon threads is detected";
+        return StopThreadsOnDeadlock(current);
+    }
+    // Sanity check, we should get at least current thread in that list.
+    ASSERT(!threads_.empty());
+    return threads_.size() == 1;
+}
+
+void ThreadManager::DecreaseCountersForThread(MTManagedThread *thread)
+{
+    if (thread->IsDaemon()) {
+        daemon_threads_count_--;
+        // Do not delete this thread structure as it may be used by suspended thread
+        daemon_threads_.push_back(thread);
+    }
+    threads_count_--;
+}
+
+bool ThreadManager::StopThreadsOnDeadlock(MTManagedThread *current)
+{
+    if (!LockOrderGraph::CheckForTerminationLoops(threads_, daemon_threads_, current)) {
+        LOG(DEBUG, RUNTIME) << "Deadlock with daemon threads was not confirmed";
+        return false;
+    }
+
+    os::memory::Mutex::IgnoreChecksOnDeadlock();
+    auto i = threads_.begin();
+    while (i != threads_.end()) {
+        MTManagedThread *thread = *i;
+        if (thread != current) {
+            DecreaseCountersForThread(thread);
+            i = threads_.erase(i);
             continue;
         }
         i++;
     }
+    return true;
 }
 
 void ThreadManager::WaitForDeregistration()
@@ -151,10 +150,7 @@ void ThreadManager::WaitForDeregistration()
         os::memory::LockHolder lock(thread_lock_);
 
         // First wait for non-daemon threads to finish
-        while (true) {
-            if (HasNoActiveThreads()) {
-                break;
-            }
+        while (!HasNoActiveThreads()) {
             stop_var_.TimedWait(&thread_lock_, WAIT_INTERVAL);
         }
 
@@ -163,30 +159,34 @@ void ThreadManager::WaitForDeregistration()
 
         // Finally wait until all threads are suspended
         while (true) {
-            DeregisterSuspendedThreads();
-            // Check for HasNoActiveThreads as new threads might be created by daemons
-            if (HasNoActiveThreads() && daemon_threads_count_ == 0) {
+            if (pending_threads_ != 0) {
+                // There are threads, which are not completely registered
+                // We can not destroy other threads, as they may use shared data (waiting mutexes)
+                stop_var_.TimedWait(&thread_lock_, WAIT_INTERVAL);
+                continue;
+            }
+            if (DeregisterSuspendedThreads()) {
                 break;
             }
             stop_var_.TimedWait(&thread_lock_, WAIT_INTERVAL);
         }
+
+        for (const auto &thread : daemon_threads_) {
+            thread->FreeInternalMemory();
+        }
     }
-    for (const auto &thread : daemon_threads_) {
-        thread->FreeInternalMemory();
-    }
+    auto threshold = Runtime::GetOptions().GetIgnoreDaemonMemoryLeaksThreshold();
+    Runtime::GetCurrent()->SetDaemonMemoryLeakThreshold(daemon_threads_.size() * threshold);
 }
 
-void ThreadManager::StopDaemonThreads()
+void ThreadManager::StopDaemonThreads() REQUIRES(thread_lock_)
 {
     trace::ScopedTrace scoped_trace(__FUNCTION__);
-    auto i = threads_.begin();
-    while (i != threads_.end()) {
-        MTManagedThread *thread = *i;
+    for (auto thread : threads_) {
         if (thread->IsDaemon()) {
             LOG(DEBUG, RUNTIME) << "Stopping daemon thread " << thread->GetId();
             thread->StopDaemonThread();
         }
-        i++;
     }
     // Suspend any future new threads
     suspend_new_count_++;
@@ -209,15 +209,30 @@ void ThreadManager::SuspendAllThreads()
     trace::ScopedTrace scoped_trace("Suspending mutator threads");
     auto cur_thread = MTManagedThread::GetCurrent();
     os::memory::LockHolder lock(thread_lock_);
-    EnumerateThreadsWithLockheld(
-        [cur_thread](MTManagedThread *thread) {
-            if (thread != cur_thread) {
-                thread->SuspendImpl(true);
-            }
-            return true;
-        },
-        static_cast<unsigned int>(EnumerationFlag::ALL));
+    EnumerateThreadsWithLockheld([cur_thread](MTManagedThread *thread) {
+        if (thread != cur_thread) {
+            thread->SuspendImpl(true);
+        }
+        return true;
+    });
     suspend_new_count_++;
+}
+
+bool ThreadManager::IsRunningThreadExist()
+{
+    auto cur_thread = MTManagedThread::GetCurrent();
+    os::memory::LockHolder lock(thread_lock_);
+    bool is_exists = false;
+    EnumerateThreadsWithLockheld([cur_thread, &is_exists](MTManagedThread *thread) {
+        if (thread != cur_thread) {
+            if (thread->GetStatus() == ThreadStatus::RUNNING) {
+                is_exists = true;
+                return false;
+            };
+        }
+        return true;
+    });
+    return is_exists;
 }
 
 void ThreadManager::ResumeAllThreads()
@@ -228,50 +243,54 @@ void ThreadManager::ResumeAllThreads()
     if (suspend_new_count_ > 0) {
         suspend_new_count_--;
     }
-    EnumerateThreadsWithLockheld(
-        [cur_thread](MTManagedThread *thread) {
-            if (thread != cur_thread) {
-                thread->ResumeImpl(true);
-            }
-            return true;
-        },
-        static_cast<unsigned int>(EnumerationFlag::ALL));
+    EnumerateThreadsWithLockheld([cur_thread](MTManagedThread *thread) {
+        if (thread != cur_thread) {
+            thread->ResumeImpl(true);
+        }
+        return true;
+    });
 }
 
 bool ThreadManager::UnregisterExitedThread(MTManagedThread *thread)
 {
     ASSERT(MTManagedThread::GetCurrent() == thread);
-    os::memory::LockHolder lock(thread_lock_);
+    {
+        thread->NativeCodeEnd();
 
-    LOG(DEBUG, RUNTIME) << "Stopping thread " << thread->GetId();
-    thread->UpdateStatus(FINISHED);
-    // Do not delete main thread, Runtime::GetMainThread is expected to always return valid object
-    if (thread == main_thread_) {
-        return false;
+        os::memory::LockHolder lock(thread_lock_);
+        // While this thread is suspended, do not delete it as other thread can be accessing it.
+        // TestAllFlags is required because termination request can be sent while thread_lock_ is unlocked
+        while (thread->TestAllFlags()) {
+            thread_lock_.Unlock();
+            thread->SafepointPoll();
+            thread_lock_.Lock();
+        }
+
+        thread->DestroyInternalResources();
+
+        LOG(DEBUG, RUNTIME) << "Stopping thread " << thread->GetId();
+        thread->UpdateStatus(ThreadStatus::FINISHED);
+        // Do not delete main thread, Runtime::GetMainThread is expected to always return valid object
+        if (thread == main_thread_) {
+            return false;
+        }
+
+        // This code should happen after thread has been resumed: Both WaitSuspension and ResumeImps requires locking
+        // suspend_lock_, so it acts as a memory barrier; flag clean should be visible in this thread after exit from
+        // WaitSuspenion
+        TSAN_ANNOTATE_HAPPENS_AFTER(&thread->fts_);
+
+        threads_.remove(thread);
+        if (thread->IsDaemon()) {
+            daemon_threads_count_--;
+        }
+        threads_count_--;
+
+        // If managed_thread, its nativePeer should be 0 before
+        delete thread;
+        stop_var_.Signal();
+        return true;
     }
-
-    // While this thread is suspended, do not delete it as other thread can be accessing it.
-    // TestAllFlags is required because termination request can be sent while thread_lock_ is unlocked
-    while (thread->TestAllFlags()) {
-        thread_lock_.Unlock();
-        thread->SafepointPoll();
-        thread_lock_.Lock();
-    }
-    // This code should happen after thread has been resumed: Both WaitSuspension and ResumeImps requires locking
-    // suspend_lock_, so it acts as a memory barrier; flag clean should be visible in this thread after exit from
-    // WaitSuspenion
-    TSAN_ANNOTATE_HAPPENS_AFTER(&thread->stor_32_.fts_);
-
-    threads_.remove(thread);
-    if (thread->IsDaemon()) {
-        daemon_threads_count_--;
-    }
-    threads_count_--;
-
-    // If java_thead, its nativePeer should be 0 before
-    delete thread;
-    stop_var_.Signal();
-    return true;
 }
 
 void ThreadManager::RegisterSensitiveThread() const
@@ -287,7 +306,7 @@ void ThreadManager::DumpUnattachedThreads(std::ostream &os)
     for (const auto &thread : threads_) {
         dump.AddTid(static_cast<pid_t>(thread->GetId()));
     }
-    dump.Dump(os, Runtime::GetCurrent()->IsDumpNativeCrash(), nullptr);
+    dump.Dump(os, Runtime::GetCurrent()->IsDumpNativeCrash(), Runtime::GetCurrent()->GetUnwindStackFn());
 }
 
 MTManagedThread *ThreadManager::SuspendAndWaitThreadByInternalThreadId(uint32_t thread_id)
@@ -297,29 +316,34 @@ MTManagedThread *ThreadManager::SuspendAndWaitThreadByInternalThreadId(uint32_t 
     MTManagedThread *current = MTManagedThread::GetCurrent();
     MTManagedThread *suspended = nullptr;
     ASSERT(current->GetStatus() != ThreadStatus::RUNNING);
-    for (uint32_t loop_iter = 0;; loop_iter++) {
-        if (suspended == nullptr) {
-            // If two threads call SuspendAndWaitThreadByInternalThreadId concurrently, one has to get suspended
-            // while other waits for thread to be suspended, so thread_lock_ is required to be held until
-            // SuspendImpl is called
-            ScopedManagedCodeThread sa(current);
-            os::memory::LockHolder lock(thread_lock_);
-            auto *thread = GetThreadByInternalThreadIdWithLockHeld(thread_id);
 
-            if (thread == nullptr) {
+    // Extract target thread
+    while (true) {
+        // If two threads call SuspendAndWaitThreadByInternalThreadId concurrently, one has to get suspended
+        // while other waits for thread to be suspended, so thread_lock_ is required to be held until
+        // SuspendImpl is called
+        current->SafepointPoll();
+        {
+            os::memory::LockHolder lock(thread_lock_);
+
+            suspended = GetThreadByInternalThreadIdWithLockHeld(thread_id);
+            if (UNLIKELY(suspended == nullptr)) {
                 // no thread found, exit
                 return nullptr;
             }
-
-            ASSERT(current != thread);
-            if (current->IsSuspended()) {
-                // Unsafe to suspend as other thread may be waiting for this thread to suspend;
-                // Should get suspended on ScopedManagedCodeThread
-                continue;
+            ASSERT(current != suspended);
+            if (LIKELY(!current->IsSuspended())) {
+                suspended->SuspendImpl(true);
+                break;
             }
-            thread->SuspendImpl(true);
-            suspended = thread;
-        } else if (suspended->GetStatus() != ThreadStatus::RUNNING) {
+            // Unsafe to suspend as other thread may be waiting for this thread to suspend;
+            // Should get suspended on Safepoint()
+        }
+    }
+
+    // Now wait until target thread is really suspended
+    for (uint32_t loop_iter = 0;; loop_iter++) {
+        if (suspended->GetStatus() != ThreadStatus::RUNNING) {
             // Thread is suspended now
             return suspended;
         }
@@ -330,7 +354,7 @@ MTManagedThread *ThreadManager::SuspendAndWaitThreadByInternalThreadId(uint32_t 
             os::thread::NativeSleep(SHORT_SLEEP_MS);
         }
     }
-    return nullptr;
+    UNREACHABLE();
 }
 
 }  // namespace panda

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,28 +22,23 @@
 namespace panda::panda_file {
 
 ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId class_id)
-    : panda_file_(panda_file),
-      class_id_(class_id),
-      name_(),
-      super_class_off_(0),
-      access_flags_(0),
-      num_fields_(0),
-      num_methods_(0),
-      num_ifaces_(0),
-      size_(0)
+    : panda_file_(panda_file), class_id_(class_id), name_(), num_fields_(0), num_methods_(0), num_ifaces_(0), size_(0)
 {
     ASSERT(!panda_file.IsExternal(class_id));
     auto sp = panda_file_.GetSpanFromId(class_id_);
     name_.utf16_length = helpers::ReadULeb128(&sp);
     name_.data = sp.data();
+
     sp = sp.SubSpan(utf::Mutf8Size(name_.data) + 1);  // + 1 for null byte
 
     super_class_off_ = helpers::Read<ID_SIZE>(&sp);
+
     access_flags_ = helpers::ReadULeb128(&sp);
     num_fields_ = helpers::ReadULeb128(&sp);
     num_methods_ = helpers::ReadULeb128(&sp);
 
     auto tag = static_cast<ClassTag>(sp[0]);
+
     while (tag != ClassTag::NOTHING && tag < ClassTag::SOURCE_LANG) {
         sp = sp.SubSpan(1);
 
@@ -57,6 +52,7 @@ ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId clas
     }
 
     source_lang_sp_ = sp;
+
     if (tag == ClassTag::NOTHING) {
         annotations_sp_ = sp;
         source_file_sp_ = sp;

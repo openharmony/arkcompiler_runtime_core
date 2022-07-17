@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,21 @@
  */
 
 #include "type_params.h"
-
-#include "type_systems.h"
-
-#include "type_system_kind.h"
-
 #include "type_system.h"
+#include "type_systems.h"
+#include "type_tags.h"
 
 namespace panda::verifier {
 
 TypeSystem &TypeParams::GetTypeSystem() const
 {
-    return TypeSystems::Get(kind_);
+    return TypeSystems::Get(kind_, threadnum_);
 }
 
 bool TypeParams::operator<=(const TypeParams &rhs) const
 {
     ASSERT(kind_ == rhs.kind_);
+    ASSERT(threadnum_ == rhs.threadnum_);
     if (empty()) {
         return true;
     }
@@ -39,6 +37,8 @@ bool TypeParams::operator<=(const TypeParams &rhs) const
 
 TypeParams &TypeParams::operator>>(const TypeParam &p)
 {
+    ASSERT(kind_ == p.kind_);
+    ASSERT(threadnum_ == p.threadnum_);
     push_back(p);
     return *this;
 }

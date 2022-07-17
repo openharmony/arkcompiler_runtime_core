@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.function u1 main() {
+.function i32 main() {
 #
     movi.64 v0, 0x777777777FFFFFFF
     movi.64 v1, 0x1111111180000000

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # assert(8.3 - 5.2 == 3.1) operation --> fsub2
-.function u1 main(){
+.function i32 main(){
     fldai.64 8.3
     fmovi.64 v0, 5.2
     fsub2.64 v0

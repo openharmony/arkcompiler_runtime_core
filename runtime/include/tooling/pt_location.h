@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_TOOLING_PT_LOCATION_H_
-#define PANDA_RUNTIME_INCLUDE_TOOLING_PT_LOCATION_H_
+#ifndef PANDA_TOOLING_PT_LOCATION_H
+#define PANDA_TOOLING_PT_LOCATION_H
 
 #include <cstring>
 
@@ -62,7 +61,6 @@ private:
     EntityId method_id_;
     uint32_t bytecode_offset_ {0};
 };
-
 }  // namespace panda::tooling
 
-#endif  // PANDA_RUNTIME_INCLUDE_TOOLING_PT_LOCATION_H_
+#endif  // PANDA_TOOLING_PT_LOCATION_H

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_POOL_MAP_H_
-#define PANDA_LIBPANDABASE_MEM_POOL_MAP_H_
+#ifndef LIBPANDABASE_MEM_POOL_MAP_H
+#define LIBPANDABASE_MEM_POOL_MAP_H
 
 #include <cstddef>
 #include <array>
 #include "macros.h"
 #include "mem.h"
 #include "space.h"
+
+WEAK_FOR_LTO_START
 
 namespace panda {
 
@@ -41,7 +43,7 @@ class AllocatorInfo {
 public:
     explicit constexpr AllocatorInfo(AllocatorType type, const void *addr) : type_(type), header_addr_(addr)
     {
-        // We can't create AllocatorInfo without correct pointer to the allocator header.
+        // We can't create AllocatorInfo without correct pointer to the allocator header
         ASSERT(header_addr_ != nullptr);
     }
 
@@ -65,19 +67,21 @@ private:
     const void *header_addr_;
 };
 
-// PoolMap is used to manage all pools which have been given to the allocators.
+// PoolMap is used to manage all pools which has been given to the allocators.
 // It can be used to find which allocator has been used to allocate an object.
 class PoolMap {
 public:
     void AddPoolToMap(const void *pool_addr, size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
                       const void *allocator_addr);
-    void RemovePoolFromMap(void *pool_addr, size_t pool_size);
+    void RemovePoolFromMap(const void *pool_addr, size_t pool_size);
     // Get Allocator info for the object allocated at this address.
     AllocatorInfo GetAllocatorInfo(const void *addr) const;
 
-    void *GetFirstByteOfPoolForAddr(const void *addr);
+    void *GetFirstByteOfPoolForAddr(const void *addr) const;
 
     SpaceType GetSpaceType(const void *addr) const;
+
+    bool IsEmpty() const;
 
 private:
     static constexpr uint64_t POOL_MAP_COVERAGE = PANDA_MAX_HEAP_SIZE;
@@ -93,10 +97,22 @@ private:
         {
             ASSERT(first_byte_in_segment_ == FIRST_BYTE_IN_SEGMENT_VALUE);
             ASSERT(allocator_type_ == AllocatorType::UNDEFINED);
+            // Added a TSAN ignore here because TSAN thinks
+            // that we can have a data race here - concurrent
+            // initialization and reading.
+            // However, we can't get an access for this fields
+            // without initialization in the correct flow.
+            TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
             first_byte_in_segment_ = first_byte_in_segment;
             allocator_addr_ = allocator_addr;
             space_type_ = space_type;
             allocator_type_ = allocator_type;
+            TSAN_ANNOTATE_IGNORE_WRITES_END();
+        }
+
+        inline bool IsEmpty() const
+        {
+            return space_type_ == SpaceType::SPACE_TYPE_UNDEFINED;
         }
 
         void Destroy()
@@ -148,18 +164,7 @@ private:
         return ToVoidPtr(map_num * POOL_MAP_GRANULARITY);
     }
 
-    void *GetFirstByteInSegment(const void *addr);
-
-    // Only for debug
-    bool IsEmpty() const
-    {
-        for (auto i : pool_map_) {
-            if (i.GetSpaceType() != SpaceType::SPACE_TYPE_UNDEFINED) {
-                return false;
-            }
-        }
-        return true;
-    }
+    void *GetFirstByteInSegment(const void *addr) const;
 
     std::array<PoolInfo, POOL_MAP_SIZE> pool_map_;
 
@@ -168,4 +173,6 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_POOL_MAP_H_
+WEAK_FOR_LTO_END
+
+#endif  // LIBPANDABASE_MEM_POOL_MAP_H

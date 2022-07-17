@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_ABS_INT_INL_COMPAT_CHECKS_H_
-#define PANDA_VERIFICATION_ABS_INT_INL_COMPAT_CHECKS_H_
+#ifndef PANDA_VERIFIER_COMPAT_CHECKS_HPP_
+#define PANDA_VERIFIER_COMPAT_CHECKS_HPP_
 
 #include "absint/verification_status.h"
 #include "util/str.h"
+#include "verification/absint/panda_types.h"
 
 % checks = Verification.compatibility_checks
 namespace panda::verifier {
@@ -87,4 +88,4 @@ inline const CheckResult& Check<%= check_name.to_s %>(<%= type1 %> x, <%= type2 
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_ABS_INT_INL_COMPAT_CHECKS_H_
+#endif  // PANDA_VERIFIER_COMPAT_CHECKS_HPP_

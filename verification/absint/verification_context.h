@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_ABSINT_VERIFICATION_CONTEXT_H_
-#define PANDA_VERIFICATION_ABSINT_VERIFICATION_CONTEXT_H_
+#ifndef PANDA_VERIFICATION_VERIFICATION_CONTEXT_HPP_
+#define PANDA_VERIFICATION_VERIFICATION_CONTEXT_HPP_
 
-#include "exec_context.h"
-#include "panda_types.h"
-
-#include "cflow/cflow_info.h"
-#include "value/variables.h"
-
-#include "util/lazy.h"
-#include "util/callable.h"
-
-#include "verification/job_queue/job.h"
-#include "verification/job_queue/cache.h"
-
-#include "verification/type/type_systems.h"
-
+#include "libpandabase/macros.h"
 #include "runtime/include/method.h"
 
-#include "macros.h"
+#include "verification/absint/exec_context.h"
+#include "verification/absint/panda_types.h"
+#include "verification/cflow/cflow_info.h"
+#include "verification/jobs/job.h"
+#include "verification/jobs/cache.h"
+#include "verification/type/type_systems.h"
+#include "verification/util/lazy.h"
+#include "verification/util/callable.h"
+#include "verification/value/variables.h"
 
 #include <functional>
 
@@ -57,11 +52,11 @@ public:
         ExecCtx().SetCheckPoints(CflowInfo().JmpsMap().AllTargetsLazy<const uint8_t *>());
         // set checkpoints for entries of exception handlers
         ExecCtx().SetCheckPoints(Transform(ConstLazyFetch(CflowInfo().ExcHandlers()),
-                                           [](const auto &exc_handler) { return exc_handler.Info.Start; }));
+                                           [](const auto &exc_handler) { return exc_handler.Start; }));
         ExecCtx().SetCheckPoints(Transform(ConstLazyFetch(CflowInfo().ExcHandlers()),
-                                           [](const auto &exc_handler) { return exc_handler.ScopeStart; }));
+                                           [](const auto &exc_handler) { return exc_handler.TryBlock.Start; }));
         ExecCtx().SetCheckPoints(Transform(ConstLazyFetch(CflowInfo().ExcHandlers()),
-                                           [](const auto &exc_handler) { return exc_handler.ScopeEnd; }));
+                                           [](const auto &exc_handler) { return exc_handler.TryBlock.End; }));
     }
 
     ~VerificationContext() = default;
@@ -76,7 +71,7 @@ public:
         return Job_.JobMethodCflow();
     }
 
-    const CacheOfRuntimeThings::CachedMethod &GetCachedMethod() const
+    const LibCache::CachedMethod &GetCachedMethod() const
     {
         return Job_.JobCachedMethod();
     }
@@ -103,7 +98,7 @@ public:
 
     Var NewVar()
     {
-        return TypeSystems::GetVar(Types_.GetKind());
+        return Types_.NewVar();
     }
 
     const Type &ReturnType() const
@@ -125,4 +120,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_ABSINT_VERIFICATION_CONTEXT_H_
+#endif  // !PANDA_VERIFICATION_VERIFICATION_CONTEXT_HPP_

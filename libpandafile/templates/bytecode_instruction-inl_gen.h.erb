@@ -111,6 +111,37 @@ inline BytecodeId BytecodeInst<Mode>::GetId() const {
     UNREACHABLE();
 }
 
+template <const BytecodeInstMode Mode>
+inline void BytecodeInst<Mode>::UpdateId(BytecodeId new_id, uint32_t idx /* = 0 */) {
+    Format format = GetFormat();
+    ASSERT_PRINT(HasId(format, idx), "Instruction doesn't have imm operand with such index");
+
+    if (!HasId(format, idx)) {
+        return;
+    }
+
+% insns_uniq_sort_fmts.each do |i| # Panda::formats.each do |fmt|
+%   fmt = i.format
+%   n = i.operands.count(&:id?)
+%   next if n == 0
+%
+%   id_ops = i.operands.select(&:id?)
+%   offsets = id_ops.map(&:offset)
+%   widths = id_ops.map(&:width)
+%
+    // Disable check due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
+    // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
+    if (format == Format::<%= fmt.pretty.upcase %>) {
+        constexpr std::array<uint8_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
+        constexpr std::array<uint8_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
+        this->Write(new_id.AsRawValue(), OFFSETS[idx] / 8, WIDTHS[idx] / 8);
+        return;
+    }
+
+% end
+    UNREACHABLE();
+}
+
 template<const BytecodeInstMode Mode>
 inline BytecodeId BytecodeInst<Mode>::GetId(size_t idx /* = 0 */) const {
     Format format = GetFormat();
@@ -269,12 +300,29 @@ inline auto BytecodeInst<Mode>::GetImm64(size_t idx /* = 0 */) const {
 
 template <const BytecodeInstMode Mode>
 inline typename BytecodeInst<Mode>::Opcode BytecodeInst<Mode>::GetOpcode() const {
-    uint8_t first_byte = ReadByte(0);
-    if (first_byte >= <%= Panda::prefixes.map(&:opcode_idx).min %>) {  // NOLINT(readability-magic-numbers)
-        uint8_t second_byte = ReadByte(1);
-        return static_cast<BytecodeInst::Opcode>((second_byte << 8U) | first_byte);  // NOLINT(hicpp-signed-bitwise)
+    uint8_t primary = GetPrimaryOpcode();
+    if (primary >= <%= Panda::prefixes.map(&:opcode_idx).min %>) {  // NOLINT(readability-magic-numbers)
+        uint8_t secondary = GetSecondaryOpcode();
+        return static_cast<BytecodeInst::Opcode>((secondary << 8U) | primary);  // NOLINT(hicpp-signed-bitwise)
     }
-    return static_cast<BytecodeInst::Opcode>(first_byte);
+    return static_cast<BytecodeInst::Opcode>(primary);
+}
+
+template <const BytecodeInstMode Mode>
+inline uint8_t BytecodeInst<Mode>::GetSecondaryOpcode() const {
+    ASSERT(GetPrimaryOpcode() >= <%= Panda::prefixes.map(&:opcode_idx).min %>);  // NOLINT(readability-magic-numbers)
+    return ReadByte(1);
+}
+
+/* static */
+template <const BytecodeInstMode Mode>
+constexpr uint8_t BytecodeInst<Mode>::GetMinPrefixOpcodeIndex() {
+    return <%= Panda::prefixes.map(&:opcode_idx).min %>;  // NOLINT(readability-magic-numbers)
+}
+
+template <const BytecodeInstMode Mode>
+inline bool BytecodeInst<Mode>::IsPrefixed() const {
+    return GetPrimaryOpcode() >= <%= Panda::prefixes.map(&:opcode_idx).min %>;  // NOLINT(readability-magic-numbers)
 }
 
 template <const BytecodeInstMode Mode>
@@ -299,7 +347,24 @@ template<const BytecodeInstMode Mode> inline bool BytecodeInst<Mode>::HasFlag(Fl
 %   flag_array += ['0'] if flag_array.empty?
 %   flags = flag_array.join(' | ')
     case BytecodeInst<Mode>::Opcode::<%= i.opcode.upcase %>:
-        return ((<%= flags %>) & flag) == flag;
+        return ((<%= flags %>) & flag) == flag;  // NOLINT(hicpp-signed-bitwise)
+% end
+    default:
+        return false;
+    }
+
+    UNREACHABLE();
+}
+
+// NOLINTNEXTLINE(readability-function-size)
+template<const BytecodeInstMode Mode> inline bool BytecodeInst<Mode>::IsThrow(Exceptions exception) const {
+    switch(GetOpcode()) {
+% Panda::instructions.each do |i|
+%   exception_array = i.exceptions.map {|prop| "Exceptions::" + prop.upcase}
+%   exception_array += ['0'] if exception_array.empty?
+%   exceptions = exception_array.join(' | ')
+    case BytecodeInst<Mode>::Opcode::<%= i.opcode.upcase %>:
+        return ((<%= exceptions %>) & exception) == exception;  // NOLINT(hicpp-signed-bitwise)
 % end
     default:
         return false;

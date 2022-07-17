@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,22 @@
 
 #include "runtime/include/object_header.h"
 #include "runtime/include/runtime.h"
-#include "runtime/include/panda_vm.h"
 #include "runtime/mark_word.h"
 #include "runtime/monitor.h"
 
 namespace panda {
 
-Monitor *MonitorPool::CreateMonitor(PandaVM *vm, ObjectHeader *obj)
+Monitor *MonitorPool::CreateMonitor(ObjectHeader *obj)
 {
-    MonitorPool *pool = vm->GetMonitorPool();
-
-    os::memory::LockHolder lock(pool->pool_lock_);
+    os::memory::LockHolder lock(pool_lock_);
     for (Monitor::MonitorId i = 0; i < MAX_MONITOR_ID; i++) {
-        pool->last_id_ = (pool->last_id_ + 1) % MAX_MONITOR_ID;
-        if (pool->monitors_.count(pool->last_id_) == 0) {
-            auto monitor = pool->allocator_->New<Monitor>(pool->last_id_);
+        last_id_ = (last_id_ + 1) % MAX_MONITOR_ID;
+        if (monitors_.count(last_id_) == 0) {
+            auto monitor = allocator_->New<Monitor>(last_id_);
             if (monitor == nullptr) {
                 return nullptr;
             }
-            (pool->monitors_)[pool->last_id_] = monitor;
+            monitors_[last_id_] = monitor;
             monitor->SetObject(obj);
             return monitor;
         }
@@ -44,23 +41,25 @@ Monitor *MonitorPool::CreateMonitor(PandaVM *vm, ObjectHeader *obj)
     UNREACHABLE();
 }
 
-Monitor *MonitorPool::LookupMonitor(PandaVM *vm, Monitor::MonitorId id)
+Monitor *MonitorPool::LookupMonitor(Monitor::MonitorId id)
 {
-    MonitorPool *pool = vm->GetMonitorPool();
-    os::memory::LockHolder lock(pool->pool_lock_);
-    if (pool->monitors_.count(id) == 0) {
-        return nullptr;
+    os::memory::LockHolder lock(pool_lock_);
+    auto it = monitors_.find(id);
+    if (it != monitors_.end()) {
+        return it->second;
     }
-    return (pool->monitors_)[id];
+    return nullptr;
 }
 
-void MonitorPool::FreeMonitor(PandaVM *vm, Monitor::MonitorId id)
+void MonitorPool::FreeMonitor(Monitor::MonitorId id)
 {
-    MonitorPool *pool = vm->GetMonitorPool();
-    os::memory::LockHolder lock(pool->pool_lock_);
-    auto monitor = (pool->monitors_)[id];
-    pool->monitors_.erase(id);
-    pool->allocator_->Delete(monitor);
+    os::memory::LockHolder lock(pool_lock_);
+    auto it = monitors_.find(id);
+    if (it != monitors_.end()) {
+        auto *monitor = it->second;
+        monitors_.erase(it);
+        allocator_->Delete(monitor);
+    }
 }
 
 void MonitorPool::DeflateMonitors()
@@ -75,6 +74,31 @@ void MonitorPool::DeflateMonitors()
             monitor_iter++;
         }
     }
+}
+
+void MonitorPool::ReleaseMonitors(MTManagedThread *thread)
+{
+    os::memory::LockHolder lock(pool_lock_);
+    for (auto &it : monitors_) {
+        auto *monitor = it.second;
+        // Recursive lock is possible
+        while (monitor->GetOwner() == thread) {
+            monitor->Release(thread);
+        }
+    }
+}
+
+PandaSet<Monitor::MonitorId> MonitorPool::GetEnteredMonitorsIds(MTManagedThread *thread)
+{
+    PandaSet<Monitor::MonitorId> entered_monitors_ids;
+    os::memory::LockHolder lock(pool_lock_);
+    for (auto &it : monitors_) {
+        auto *monitor = it.second;
+        if (monitor->GetOwner() == thread) {
+            entered_monitors_ids.insert(monitor->GetId());
+        }
+    }
+    return entered_monitors_ids;
 }
 
 }  // namespace panda

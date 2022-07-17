@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ constexpr uint64_t NS_PER_SECOND = 1000000000;
 constexpr uint64_t NS_PER_MILLISECOND = 1000000;
 constexpr uint64_t NS_PER_MICROSECOND = 1000;
 
-std::string Timing::PrettyTimeNs(uint64_t duration)
+PandaString Timing::PrettyTimeNs(uint64_t duration)
 {
     uint64_t time_uint;
-    std::string time_uint_name;
+    PandaString time_uint_name;
     uint64_t main_part;
     uint64_t fractional_part;
     if (duration > NS_PER_SECOND) {
@@ -47,7 +47,7 @@ std::string Timing::PrettyTimeNs(uint64_t duration)
         fractional_part = duration % time_uint;
         time_uint_name = "us";
     }
-    std::stringstream ss;
+    PandaStringStream ss;
     constexpr size_t FRACTION_WIDTH = 3U;
     ss << main_part << "." << std::setfill('0') << std::setw(FRACTION_WIDTH) << fractional_part << time_uint_name;
     return ss.str();

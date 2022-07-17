@@ -84,7 +84,7 @@ assert('All tags are used') do
   %i[verification exceptions properties].map do |type|
     uses = Panda.instructions.flat_map(&type.to_proc).uniq
     defs = Panda.send(type).map(&:tag)
-    (defs - uses).size
+    (defs - uses - ['suspend']).size # 'suspend' is non-core optional property, allowed to be unused
   end.reduce(:+).zero?
 end
 
@@ -92,7 +92,7 @@ assert('All tags are defined') do
   %i[verification exceptions properties].map do |type|
     uses = Panda.instructions.flat_map(&type.to_proc).uniq
     defs = Panda.send(type).map(&:tag)
-    (uses - defs).size
+    (uses - defs - ['acc_read', 'acc_write', 'acc_none']).size
   end.reduce(:+).zero?
 end
 
@@ -130,21 +130,12 @@ end
 
 assert('Acc_none should not be specified along with other accumulator properties') do
   Panda.instructions.map do |i|
-    props = i.properties
-    props.include?('acc_none') == !(props.include?('acc_read') || props.include?('acc_write'))
+    i.acc_none? == !(i.acc_read? || i.acc_write?)
   end.all?
 end
 
 assert('All calls write into accumulator') do
-  Panda.instructions.select { |i| i.properties.include?('call') }.map do |i|
-    i.properties.include?('acc_write')
-  end.all?
-end
-
-assert('Calls should be non-prefixed') do # otherwise support in interpreter-to-compiler bridges
-  Panda.instructions.select do |i|
-    i.properties.include?('call') && !i.mnemonic.include?('polymorphic')
-  end.select(&:prefix).empty?
+  Panda.instructions.select { |i| i.properties.include?('call') }.map(&:acc_write?).all?
 end
 
 assert('Jumps differ from other control-flow') do # At least currently
@@ -192,11 +183,11 @@ assert('Register encoding width should be the same in instruction') do
   end.all?
 end
 
-assert('Calls should have call property') do
+assert('Calls should have call property and x_call exception tag') do
   Panda.instructions.map do |i|
-    next true unless i.mnemonic.include?('call')
+    next true unless i.mnemonic.start_with?('call')
 
-    i.properties.include?('call')
+    i.properties.include?('call') && i.exceptions.include?('x_call')
   end.all?
 end
 

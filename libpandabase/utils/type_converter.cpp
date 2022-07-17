@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,10 +60,10 @@ size_t ValueUnit::GetPrecision() const
 bool operator==(const ValueUnit &lhs, const ValueUnit &rhs)
 {
     constexpr size_t NUMERAL_SYSTEM = 10;
-    if (lhs.GetValue().index() != rhs.GetValue().index()) {
+    if (lhs.GetLiteral() != rhs.GetLiteral()) {
         return false;
     }
-    if (lhs.GetLiteral() != rhs.GetLiteral()) {
+    if (lhs.GetValue().index() != rhs.GetValue().index()) {
         return false;
     }
     if (lhs.GetValue().index() == 0U) {
@@ -105,7 +105,6 @@ ValueUnit TypeConverter(const std::array<double, SIZE> &coeffs, const std::array
         division_ratio *= coeffs[index_coeff];
     }
 
-    ASSERT(division_ratio != 0);
     return ValueUnit(value_base_dimension / division_ratio, literals[SIZE]);
 }
 

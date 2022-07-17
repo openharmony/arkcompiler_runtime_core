@@ -70,7 +70,7 @@ tests:
           Return 0 to indicate that negative test failed, because this line is unreachable and code will not be executed after verification error.
         bugid: ["964", "1653"]
         tags: ["verifier"]
-        runner-options: ['verifier-failure', 'verifier-debug-config']
+        runner-options: ['verifier-failure', 'verifier-config']
         header-template: []
         code-template: |
             #
@@ -84,6 +84,8 @@ tests:
         cases:
             - values:
                 - ldai.64 0
+            - values:
+                - fldai 0
             - values:
                 - fldai.64 0
             - values:
@@ -112,12 +114,10 @@ tests:
               acc: inout:i32->i16
               prefix: cast
               format: [pref_op_none]
-        description: Check i32toi16 with uninitialized accumulator.
+        description: Check 'i32toi16' with uninitialized accumulator.
         tags: ['verifier']
-        runner-options: ['verifier-failure', 'verifier-debug-config']
-        header-template: []
+        runner-options: ['verifier-failure', 'verifier-config']
         code-template: |
             #
-            .function i32 main() {
                 i32toi16
         check-type: exit-positive

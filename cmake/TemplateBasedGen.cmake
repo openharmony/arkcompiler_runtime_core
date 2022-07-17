@@ -26,10 +26,11 @@ cmake_minimum_required(VERSION 3.5.2 FATAL_ERROR)
 # * SOURCE -- a directory with templates, default is ${PROJECT_SOURCE_DIR}/templates
 # * DESTINATION -- a directory for output files, default is ${PANDA_BINARY_ROOT}
 # * EXTRA_DEPENDENCIES -- a list of files that should be considered as dependencies
+# * EXTRA_ARGV -- a list of positional arguments that could be accessed in '.erb' files via ARGV[]
 
 function(panda_gen)
     set(singlevalues DATA SOURCE DESTINATION TARGET_NAME)
-    set(multivalues TEMPLATES REQUIRES EXTRA_DEPENDENCIES)
+    set(multivalues TEMPLATES REQUIRES EXTRA_DEPENDENCIES EXTRA_ARGV)
     cmake_parse_arguments(
         GEN_ARG
         ""
@@ -74,6 +75,7 @@ function(panda_gen)
             OUTPUTFILE ${OUTPUT_FILE}
             REQUIRES ${GEN_ARG_REQUIRES}
             EXTRA_DEPENDENCIES ${GEN_ARG_EXTRA_DEPENDENCIES}
+            EXTRA_ARGV ${GEN_ARG_EXTRA_ARGV}
         )
         add_custom_target(${TARGET} DEPENDS ${OUTPUT_FILE})
         add_dependencies(${GEN_ARG_TARGET_NAME} ${TARGET})
@@ -124,10 +126,11 @@ endfunction()
 # OUTPUTFILE -- output file full name
 # REQUIRES -- a list of scripts that provide data-querying API for templates
 # EXTRA_DEPENDENCIES -- a list of files that should be considered as dependencies
+# EXTRA_ARGV -- a list of positional arguments that could be accessed in '.erb' files via ARGV[]
 
 function(panda_gen_file)
     set(singlevalues DATAFILE TEMPLATE OUTPUTFILE)
-    set(multivalues REQUIRES EXTRA_DEPENDENCIES)
+    set(multivalues REQUIRES EXTRA_DEPENDENCIES EXTRA_ARGV)
     cmake_parse_arguments(
         ARG
         ""
@@ -139,18 +142,10 @@ function(panda_gen_file)
     string(REPLACE ";" "," REQUIRE_STR "${ARG_REQUIRES}")
     set(DEPENDS_LIST ${GENERATOR} ${ARG_TEMPLATE} ${ARG_DATAFILE})
 
-    foreach(r ${ARG_REQUIRES})
-        list(APPEND DEPENDS_LIST ${r})
-    endforeach()
-
-    foreach(r ${ARG_EXTRA_DEPENDENCIES})
-        list(APPEND DEPENDS_LIST ${r})
-    endforeach()
-
     add_custom_command(OUTPUT ${ARG_OUTPUTFILE}
         COMMENT "Generate file for ${ARG_TEMPLATE}"
-        COMMAND ${GENERATOR} --template ${ARG_TEMPLATE} --data ${ARG_DATAFILE} --output ${ARG_OUTPUTFILE} --require ${REQUIRE_STR}
-        DEPENDS ${DEPENDS_LIST}
+        COMMAND ${GENERATOR} ${ARG_EXTRA_ARGV} --template ${ARG_TEMPLATE} --data ${ARG_DATAFILE} --output ${ARG_OUTPUTFILE} --require ${REQUIRE_STR}
+        DEPENDS ${DEPENDS_LIST} ${ARG_EXTRA_DEPENDENCIES} ${ARG_REQUIRES}
     )
 endfunction()
 
@@ -168,7 +163,7 @@ function(panda_gen_options)
     set(singlevalues TARGET YAML_FILE GENERATED_HEADER)
     cmake_parse_arguments(GEN_OPTIONS "" "${singlevalues}" "" ${ARGN})
 
-    # Generate an options header
+    # Generate a options header
     get_filename_component(YAML_FILE ${GEN_OPTIONS_YAML_FILE} ABSOLUTE)
     set(GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/panda_gen_options/generated)
     file(MAKE_DIRECTORY ${GENERATED_DIR})
@@ -228,4 +223,31 @@ function(panda_gen_messages)
     endif()
     add_custom_target(${ARG_TARGET}_messages DEPENDS ${MESSAGES_H})
     add_dependencies(${ARG_TARGET} ${ARG_TARGET}_messages)
+endfunction()
+
+add_custom_target(plugin_options_gen)
+set_target_properties(plugin_options_gen PROPERTIES PLUGIN_OPTIONS_YAML_FILES "${PANDA_ROOT}/templates/plugin_options.yaml")
+
+add_custom_target(entrypoints_yaml_gen)
+set_target_properties(entrypoints_yaml_gen PROPERTIES ENTRYPOINT_YAML_FILES "${PANDA_ROOT}/runtime/entrypoints/entrypoints.yaml")
+
+add_custom_target(runtime_options_gen)
+set_target_properties(runtime_options_gen PROPERTIES RUNTIME_OPTIONS_YAML_FILES "${PANDA_ROOT}/runtime/options.yaml")
+
+function(add_plugin_options YAML_FILE_PATH)
+    get_target_property(YAML_FILES plugin_options_gen PLUGIN_OPTIONS_YAML_FILES)
+    list(APPEND YAML_FILES ${YAML_FILE_PATH})
+    set_target_properties(plugin_options_gen PROPERTIES PLUGIN_OPTIONS_YAML_FILES "${YAML_FILES}")
+endfunction()
+
+function(add_entrypoints_yaml YAML_FILE_PATH)
+    get_target_property(YAML_FILES entrypoints_yaml_gen ENTRYPOINT_YAML_FILES)
+    list(APPEND YAML_FILES ${YAML_FILE_PATH})
+    set_target_properties(entrypoints_yaml_gen PROPERTIES ENTRYPOINT_YAML_FILES "${YAML_FILES}")
+endfunction()
+
+function(add_runtime_options YAML_FILE_PATH)
+    get_target_property(YAML_FILES runtime_options_gen RUNTIME_OPTIONS_YAML_FILES)
+    list(APPEND YAML_FILES ${YAML_FILE_PATH})
+    set_target_properties(runtime_options_gen PROPERTIES RUNTIME_OPTIONS_YAML_FILES "${YAML_FILES}")
 endfunction()

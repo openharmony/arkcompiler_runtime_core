@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'ostruct'
 require 'delegate'
 
 class Attritute < SimpleDelegator
@@ -113,7 +114,7 @@ module MetadataGen
           body << ""
         end
 
-        body << "#{indent * 2}return Error(std::string(\"Attribute '#{attribute_name(a)}' has incorrect value '\").append(value) +"
+        body << "#{indent * 2}return Error(std::string(\"Attribute '#{attribute_name(a)}' have incorrect value '\").append(value) +"
         body << "#{indent * 2}             R\"('. Should be one of #{a.values.map(&:value)})\", Error::Type::INVALID_VALUE);"
       elsif a.size?
         body << "#{indent * 2}return ValidateSize(value);"

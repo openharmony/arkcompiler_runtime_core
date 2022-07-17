@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef PANDA_RUNTIME_INCLUDE_VTABLE_BUILDER_H_
-#define PANDA_RUNTIME_INCLUDE_VTABLE_BUILDER_H_
+#ifndef PANDA_RUNTIME_VTABLE_BUILDER_H_
+#define PANDA_RUNTIME_VTABLE_BUILDER_H_
 
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/hash.h"
@@ -30,75 +29,55 @@
 
 namespace panda {
 
+bool IsMaxSpecificMethod(const Class *iface, const Method &method, size_t startindex, const ITable &itable);
+
 class ClassLinker;
 class ClassLinkerContext;
 
 class MethodInfo {
 public:
-    class Proto {
-    public:
-        Proto(const panda_file::File &pf, panda_file::File::EntityId proto_id) : pda_(pf, proto_id) {}
-        ~Proto() = default;
-        DEFAULT_COPY_CTOR(Proto)
-        DEFAULT_MOVE_CTOR(Proto)
-        NO_COPY_OPERATOR(Proto);
-        NO_MOVE_OPERATOR(Proto);
-
-        bool IsEqualBySignatureAndReturnType(const Proto &other) const;
-
-        panda_file::ProtoDataAccessor &GetProtoDataAccessor()
-        {
-            return pda_;
-        }
-
-    private:
-        bool AreTypesEqual(const Proto &other, panda_file::Type t1, panda_file::Type t2, size_t ref_idx) const;
-
-        mutable panda_file::ProtoDataAccessor pda_;
-    };
-
-    MethodInfo(const panda_file::File &pf, panda_file::File::EntityId method_id, size_t index, ClassLinkerContext *ctx)
-        : mda_(pf, method_id), proto_(pf, mda_.GetProtoId()), ctx_(ctx), index_(index)
+    static constexpr size_t INVALID_METHOD_IDX = std::numeric_limits<size_t>::max();
+    MethodInfo(const panda_file::MethodDataAccessor &mda, size_t index, ClassLinkerContext *ctx)
+        : pf_(&mda.GetPandaFile()),
+          class_id_(mda.GetClassId()),
+          access_flags_(mda.GetAccessFlags()),
+          name_(pf_->GetStringData(mda.GetNameId())),
+          proto_(*pf_, mda.GetProtoId()),
+          ctx_(ctx),
+          index_(index)
     {
     }
 
     explicit MethodInfo(Method *method, size_t index = 0, bool is_base = false, bool needs_copy = false)
-        : mda_(*method->GetPandaFile(), method->GetFileId()),
-          proto_(*method->GetPandaFile(), mda_.GetProtoId()),
-          method_(method),
+        : method_(method),
+          pf_(method->GetPandaFile()),
+          class_id_(method->GetClass()->GetFileId()),
+          access_flags_(method->GetAccessFlags()),
+          name_(method->GetName()),
+          proto_(method->GetProtoId()),
           ctx_(method->GetClass()->GetLoadContext()),
           index_(index),
           needs_copy_(needs_copy),
           is_base_(is_base)
     {
     }
-    ~MethodInfo() = default;
-    DEFAULT_COPY_CTOR(MethodInfo)
-    DEFAULT_MOVE_CTOR(MethodInfo)
-    NO_COPY_OPERATOR(MethodInfo);
-    NO_MOVE_OPERATOR(MethodInfo);
 
     bool IsEqualByNameAndSignature(const MethodInfo &other) const
     {
-        return GetName() == other.GetName() && proto_.IsEqualBySignatureAndReturnType(other.proto_);
+        return GetName() == other.GetName() && GetProtoId() == other.GetProtoId();
     }
 
-    panda_file::File::StringData GetName() const
+    const panda_file::File::StringData &GetName() const
     {
-        return mda_.GetPandaFile().GetStringData(mda_.GetNameId());
+        return name_;
     }
 
-    panda_file::File::StringData GetClassName() const
+    const uint8_t *GetClassName() const
     {
-        return mda_.GetPandaFile().GetStringData(mda_.GetClassId());
+        return method_ != nullptr ? method_->GetClass()->GetDescriptor() : pf_->GetStringData(class_id_).data;
     }
 
-    panda_file::MethodDataAccessor &GetMethodDataAccessor()
-    {
-        return mda_;
-    }
-
-    Proto &GetProto()
+    const Method::ProtoId &GetProtoId() const
     {
         return proto_;
     }
@@ -115,22 +94,22 @@ public:
 
     bool IsAbstract() const
     {
-        return (mda_.GetAccessFlags() & ACC_ABSTRACT) != 0;
+        return (access_flags_ & ACC_ABSTRACT) != 0;
     }
 
     bool IsPublic() const
     {
-        return (mda_.GetAccessFlags() & ACC_PUBLIC) != 0;
+        return (access_flags_ & ACC_PUBLIC) != 0;
     }
 
     bool IsProtected() const
     {
-        return (mda_.GetAccessFlags() & ACC_PROTECTED) != 0;
+        return (access_flags_ & ACC_PROTECTED) != 0;
     }
 
     bool IsPrivate() const
     {
-        return (mda_.GetAccessFlags() & ACC_PRIVATE) != 0;
+        return (access_flags_ & ACC_PRIVATE) != 0;
     }
 
     bool IsInterfaceMethod() const
@@ -139,7 +118,7 @@ public:
             return method_->GetClass()->IsInterface();
         }
 
-        panda_file::ClassDataAccessor cda(mda_.GetPandaFile(), mda_.GetClassId());
+        panda_file::ClassDataAccessor cda(*pf_, class_id_);
         return cda.IsInterface();
     }
 
@@ -167,10 +146,19 @@ public:
         return method_->IsDefaultInterfaceMethod();
     }
 
+    ~MethodInfo() = default;
+
+    DEFAULT_COPY_CTOR(MethodInfo)
+    NO_COPY_OPERATOR(MethodInfo);
+    NO_MOVE_SEMANTIC(MethodInfo);
+
 private:
-    mutable panda_file::MethodDataAccessor mda_;
-    Proto proto_;
     Method *method_ {nullptr};
+    const panda_file::File *pf_;
+    panda_file::File::EntityId class_id_;
+    uint32_t access_flags_;
+    panda_file::File::StringData name_;
+    Method::ProtoId proto_;
     ClassLinkerContext *ctx_ {nullptr};
     size_t index_ {0};
     bool needs_copy_ {false};
@@ -185,31 +173,34 @@ public:
         methods_.insert({info, methods_.size()});
     }
 
-    bool AddMethod(const MethodInfo &info)
+    std::pair<bool, size_t> AddMethod(const MethodInfo &info)
     {
         auto [beg_it, end_it] = methods_.equal_range(info);
         if (beg_it == methods_.cend()) {
             methods_.insert({info, methods_.size()});
-            return true;
+            return std::pair<bool, size_t>(true, MethodInfo::INVALID_METHOD_IDX);
         }
 
         for (auto it = beg_it; it != end_it; ++it) {
-            if (OverridePred()(it->first, info)) {
-                size_t idx = it->second;
-                methods_.erase(it);
-                methods_.insert({info, idx});
-                return true;
+            std::pair<bool, size_t> res = OverridePred()(it->first, info);
+            if (res.first) {
+                if (res.second == MethodInfo::INVALID_METHOD_IDX) {
+                    size_t idx = it->second;
+                    methods_.erase(it);
+                    methods_.insert({info, idx});
+                }
+                return res;
             }
         }
 
-        return false;
+        return std::pair<bool, size_t>(false, MethodInfo::INVALID_METHOD_IDX);
     }
 
     void UpdateClass(Class *klass) const
     {
         auto vtable = klass->GetVTable();
 
-        for (const auto [method_info, idx] : methods_) {
+        for (const auto &[method_info, idx] : methods_) {
             Method *method = method_info.GetMethod();
             if (method == nullptr) {
                 method = &klass->GetVirtualMethods()[method_info.GetIndex()];
@@ -255,6 +246,19 @@ private:
     PandaUnorderedMultiMap<MethodInfo, size_t, HashByName, SearchPred> methods_;
 };
 
+struct CopiedMethod {
+    CopiedMethod(Method *method, bool default_conflict, bool default_abstract)
+        : method_(method), default_conflict_(default_conflict), default_abstract_(default_abstract)
+    {
+    }
+    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
+    Method *method_;
+    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
+    bool default_conflict_;  // flag indicates whether current methed is judged icce
+    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
+    bool default_abstract_;  // flag indicates whether current methed is judged ame
+};
+
 class VTableBuilder {
 public:
     VTableBuilder() = default;
@@ -270,7 +274,7 @@ public:
 
     virtual size_t GetVTableSize() const = 0;
 
-    virtual const PandaVector<Method *> &GetCopiedMethods() const = 0;
+    virtual const PandaVector<CopiedMethod> &GetCopiedMethods() const = 0;
 
     virtual ~VTableBuilder() = default;
 
@@ -296,7 +300,7 @@ class VTableBuilderImpl : public VTableBuilder {
         return vtable_.Size();
     }
 
-    const PandaVector<Method *> &GetCopiedMethods() const override
+    const PandaVector<CopiedMethod> &GetCopiedMethods() const override
     {
         return copied_methods_;
     }
@@ -317,9 +321,9 @@ private:
     VTable<SearchBySignature, OverridePred> vtable_;
     size_t num_vmethods_ {0};
     bool has_default_methods_ {false};
-    PandaVector<Method *> copied_methods_;
+    PandaVector<CopiedMethod> copied_methods_;
 };
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_INCLUDE_VTABLE_BUILDER_H_
+#endif  // PANDA_RUNTIME_VTABLE_BUILDER_H_
