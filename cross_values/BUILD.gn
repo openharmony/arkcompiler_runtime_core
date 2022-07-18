@@ -77,6 +77,9 @@ action("cross_values_getters_generate") {
   outputs = [ "$target_gen_dir/cross_values.h" ]
 
   args = [
+    rebase_path(
+        "$target_out_dir/../../../$target_gen_dir/asm_defines_def_cpp_gen/asm_defines_def.o",
+        root_build_dir),
     rebase_path("$target_gen_dir/generated_values", root_build_dir),
     rebase_path(outputs[0], root_build_dir),
   ]
