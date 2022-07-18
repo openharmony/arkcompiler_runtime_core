@@ -18,7 +18,7 @@ set -e
 
 SRC_FULL_PATH="$(realpath ${0})"
 SRC_DIR="$(dirname ${SRC_FULL_PATH})"
-ASM_DEF_SRC=$(find ./ -name *asm_defines_def.o)
+ASM_DEF_SRC=$(find ./ -name *asm_defines_def.o -prune)
 
 echo "ASM_DEF_SRC: ${ASM_DEF_SRC}"
 
