@@ -16,11 +16,11 @@
 #ifndef PANDA_LIBPANDABASE_PBASE_OS_PROP_H_
 #define PANDA_LIBPANDABASE_PBASE_OS_PROP_H_
 
+#include <string>
+
 #if defined(PANDA_TARGET_UNIX)
 #include "platforms/unix/libpandabase/property.h"
 #endif  // PANDA_TARGET_UNIX
-
-#include <string>
 
 namespace panda::os::property {
 

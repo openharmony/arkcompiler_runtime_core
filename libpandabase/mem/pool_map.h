@@ -16,8 +16,10 @@
 #ifndef LIBPANDABASE_MEM_POOL_MAP_H
 #define LIBPANDABASE_MEM_POOL_MAP_H
 
-#include <cstddef>
 #include <array>
+#include <cstddef>
+#include <cstdint>
+
 #include "macros.h"
 #include "mem.h"
 #include "space.h"

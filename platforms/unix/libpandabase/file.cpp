@@ -14,12 +14,11 @@
  */
 
 #include "os/file.h"
-#include "utils/type_helpers.h"
-
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #include <fcntl.h>
+#include <string_view>
+
+#include "macros.h"
 
 namespace panda::os::file {
 

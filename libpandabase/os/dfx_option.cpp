@@ -15,6 +15,8 @@
 
 #include "dfx_option.h"
 
+#include "macros.h"
+
 namespace panda::os::dfx_option {
 
 /* static */

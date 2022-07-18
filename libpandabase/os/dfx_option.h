@@ -16,9 +16,8 @@
 #ifndef PANDA_LIBPANDABASE_PBASE_OS_DFX_OPTION_H_
 #define PANDA_LIBPANDABASE_PBASE_OS_DFX_OPTION_H_
 
-#include "macros.h"
-
 #include <cstdint>
+#include <iosfwd>
 #include <string>
 
 namespace panda::os::dfx_option {

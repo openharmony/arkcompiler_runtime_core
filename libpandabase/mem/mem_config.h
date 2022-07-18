@@ -16,11 +16,9 @@
 #ifndef PANDA_RUNTIME_MEM_MEM_CONFIG_H
 #define PANDA_RUNTIME_MEM_MEM_CONFIG_H
 
-#include "macros.h"
-#include "libpandabase/mem/mem.h"
-#include "utils/asan_interface.h"
-
 #include <cstddef>
+
+#include "macros.h"
 
 namespace panda::mem {
 

@@ -16,17 +16,15 @@
 #ifndef PANDA_FILESYSTEM_H
 #define PANDA_FILESYSTEM_H
 
+#include <iosfwd>
+#include <string_view>
+
 #include "macros.h"
-#include <string>
 
 #if defined(PANDA_TARGET_WINDOWS)
 #ifndef NAME_MAX
 constexpr size_t NAME_MAX = 255;
 #endif  // NAME_MAX
-#elif defined(USE_STD_FILESYSTEM)
-#include <filesystem>
-#else
-#include <experimental/filesystem>
 #endif
 
 namespace panda::os {
