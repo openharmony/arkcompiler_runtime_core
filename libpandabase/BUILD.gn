@@ -153,7 +153,7 @@ if (is_debug) {
   libarkbase_sources += [ "$ark_root/libpandabase/utils/debug.cpp" ]
 }
 
-if (current_cpu == "arm64") {
+if (current_cpu == "arm64" && !is_mac) {
   libarkbase_sources +=
       [ "$ark_root/libpandabase/arch/aarch64/cpu_features.cpp" ]
 } else {
