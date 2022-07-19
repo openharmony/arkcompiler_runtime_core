@@ -23,7 +23,44 @@
 
 namespace panda::panda_file {
 
-#include "file_items_gen.inc"
+bool IsDynamicLanguage(panda::panda_file::SourceLang lang)
+{
+    return lang == panda::panda_file::SourceLang::ECMASCRIPT;
+}
+
+std::optional<panda::panda_file::SourceLang> LanguageFromString(std::string_view lang)
+{
+    if (lang == "ECMAScript") {
+        return panda::panda_file::SourceLang::ECMASCRIPT;
+    }
+    return panda::panda_file::SourceLang::PANDA_ASSEMBLY;
+}
+
+const char *LanguageToString(panda::panda_file::SourceLang lang)
+{
+    if (lang == panda::panda_file::SourceLang::ECMASCRIPT) {
+        return "ECMAScript";
+    }
+    return "PandaAssembly";
+}
+
+const char *GetCtorName([[maybe_unused]] panda::panda_file::SourceLang lang)
+{
+    return ".ctor";
+}
+
+const char *GetCctorName([[maybe_unused]] panda::panda_file::SourceLang lang)
+{
+    return ".cctor";
+}
+
+const char *GetStringClassDescriptor(panda::panda_file::SourceLang lang)
+{
+    if (lang == panda::panda_file::SourceLang::ECMASCRIPT) {
+        return "Lpanda/JSString;";
+    }
+    return "Lpanda/String;";
+}
 
 template <class Tag, class Val>
 static bool WriteUlebTaggedValue(Writer *writer, Tag tag, Val v)

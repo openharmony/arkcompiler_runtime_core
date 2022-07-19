@@ -149,15 +149,6 @@ foreach(plugin, enabled_plugins) {
   source_files = []
 }
 
-if (!is_win && !is_mac && !is_mingw) {
-  libarkcompiler_sources += [
-    "code_info/code_info.cpp",
-    "code_info/code_info_builder.cpp",
-    "compile_method.cpp",
-    "optimizer_run.cpp",
-  ]
-}
-
 libarkcompiler_sources += [ "$target_gen_dir/generated/inst_builder_gen.cpp" ]
 
 libarkcompiler_configs = [

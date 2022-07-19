@@ -118,6 +118,11 @@ templates:
     % end
   sta: |-
     UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), GetDefinitionAcc());
+    % if inst.properties.include? "dynamic"
+    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
+        TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), static_cast<int>(GetPc(instruction->GetAddress())));
+    }
+    % end
   lda: |-
     % if inst.mnemonic.include? "null"
     UpdateDefinitionAcc(graph_->GetOrCreateNullPtr());
@@ -131,6 +136,9 @@ templates:
     %   else
     UpdateDefinitionAcc(FindOrCreateConstant(instruction->GetImm<<%=inst.get_format%>, 0>()));
     %     if inst.properties.include? "dynamic"
+    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
+        TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), static_cast<int>(GetPc(instruction->GetAddress())));
+    }
     BuildCastToAnyNumber(instruction);
     %     end
     %   end
@@ -139,6 +147,11 @@ templates:
     BuildLoadConstArray(instruction);
     %     else
     BuildLoadFromPool<Opcode::<%= inst.opcode =~ /lda_type/ ? 'LoadType' : 'LoadString' %>>(instruction);
+    %       if inst.opcode =~ /lda_str/
+    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
+        TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), static_cast<int>(GetPc(instruction->GetAddress())));
+    }
+    %       end
     %     end
     % else
     % raise "Unsupported instruction type" unless inst.acc_and_operands[1].reg?
@@ -153,6 +166,9 @@ templates:
     UpdateDefinitionAcc(FindOrCreateDoubleConstant(imm));
     % end
     % if inst.properties.include? "dynamic"
+    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
+        TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), static_cast<int>(GetPc(instruction->GetAddress())));
+    }
     BuildCastToAnyNumber(instruction);
     % end
   operands: |-
@@ -228,6 +244,11 @@ templates:
     AddInstruction(jmp_inst);
     % else
     BuildEcma(instruction);
+    %     if inst.acc.include?("out")
+    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
+        TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), static_cast<int>(GetPc(instruction->GetAddress())));
+    }
+    %     end
     % end
   builtin: |-
     BuildBuiltin(instruction);

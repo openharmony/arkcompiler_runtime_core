@@ -16,6 +16,7 @@
 #ifndef PANDA_BYTECODE_OPT_CODEGEN_H
 #define PANDA_BYTECODE_OPT_CODEGEN_H
 
+#include "assembler/annotation.h"
 #include "assembler/assembly-function.h"
 #include "assembler/assembly-ins.h"
 #include "ins_create_api.h"
@@ -145,6 +146,13 @@ private:
     void AppendCatchBlock(uint32_t type_id, const compiler::BasicBlock *try_begin, const compiler::BasicBlock *try_end,
                           const compiler::BasicBlock *catch_begin, const compiler::BasicBlock *catch_end = nullptr);
     void VisitTryBegin(const compiler::BasicBlock *bb);
+
+    // TypeInfoIndex typeinfo adaption
+    using ScalarValue = panda::pandasm::ScalarValue;
+    void AddTypeInfoIndexForArguments(std::vector<ScalarValue> *elements) const;
+    void AddOrderAndTypeInfoIndex(int32_t order, TypeInfoIndex type, std::vector<ScalarValue> *elements) const;
+    void AddTypeInfoIndexForIns(int32_t order, size_t id, std::vector<ScalarValue> *elements) const;
+    void UpdateTypeInfoIndexAnnotation(const std::vector<ScalarValue> *elements);
 
 private:
     pandasm::Function *function_;

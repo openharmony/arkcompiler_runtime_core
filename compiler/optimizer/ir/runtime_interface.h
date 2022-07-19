@@ -44,6 +44,7 @@ enum class ClassType {
 class IClassHierarchyAnalysis;
 class InlineCachesInterface;
 class UnresolvedTypesInterface;
+class Inst;
 
 class RuntimeInterface {
 public:
@@ -905,6 +906,42 @@ public:
     virtual bool HasSafepointDuringCall() const
     {
         return false;
+    }
+
+    // TypeInfoIndex adaption
+    virtual TypeInfoIndex GetTypeInfoIndexByInstId([[maybe_unused]] size_t id) const
+    {
+        return NO_EXPLICIT_TYPE;
+    }
+
+    virtual bool FillInstIdTypePairByPc([[maybe_unused]] size_t id, [[maybe_unused]] int32_t pc)
+    {
+        return false;
+    }
+
+    virtual bool HasInsTypeinfo() const
+    {
+        return false;
+    }
+
+    virtual bool AddPcTypePair([[maybe_unused]] int32_t pc, [[maybe_unused]] TypeInfoIndex type)
+    {
+        return false;
+    }
+
+    virtual bool FillArgTypePairs([[maybe_unused]] std::unordered_map<int32_t, TypeInfoIndex> *map) const
+    {
+        return false;
+    }
+
+    virtual bool SetTypeAnnotationIndex([[maybe_unused]] size_t anno_idx, [[maybe_unused]] size_t elem_idx)
+    {
+        return false;
+    }
+
+    virtual const std::pair<size_t, size_t> *GetTypeAnnotationIndex() const
+    {
+        return nullptr;
     }
 
     NO_COPY_SEMANTIC(RuntimeInterface);

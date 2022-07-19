@@ -342,6 +342,62 @@ public:
         return utf::Mutf8AsCString(string_data.data);
     }
 
+    TypeInfoIndex GetTypeInfoIndexByInstId(size_t id) const override
+    {
+        const auto it = instid_type_map_.find(id);
+        if (it == instid_type_map_.end()) {
+            return NO_EXPLICIT_TYPE;
+        }
+        return it->second;
+    }
+
+    bool FillInstIdTypePairByPc(size_t id, int32_t pc) override
+    {
+        const auto it = pc_type_map_.find(pc);
+        if (it != pc_type_map_.end()) {
+            instid_type_map_.emplace(id, it->second);
+            return true;
+        }
+        return false;
+    }
+
+    bool HasInsTypeinfo() const override
+    {
+        return !instid_type_map_.empty();
+    }
+
+    bool AddPcTypePair(int32_t pc, TypeInfoIndex type) override
+    {
+        if (pc_type_map_.find(pc) != pc_type_map_.end()) {
+            return false;
+        }
+        pc_type_map_.emplace(pc, type);
+        return true;
+    }
+
+    bool FillArgTypePairs(std::unordered_map<int32_t, TypeInfoIndex> *map) const override
+    {
+        ASSERT(map != nullptr);
+        ASSERT(map->empty());
+        for (const auto &[pc, type] : pc_type_map_) {
+            if (pc < 0) {
+                map->emplace(pc, type);
+            }
+        }
+        return !map->empty();
+    }
+
+    bool SetTypeAnnotationIndex(size_t anno_idx, size_t elem_idx) override
+    {
+        anno_elem_idx_ = { anno_idx, elem_idx };
+        return anno_idx != INVALID_TYPE_INDEX && elem_idx != INVALID_TYPE_INDEX;
+    }
+
+    const std::pair<size_t, size_t> *GetTypeAnnotationIndex() const override
+    {
+        return &anno_elem_idx_;
+    }
+
 private:
     static compiler::DataType::Type ToCompilerType(panda_file::Type type)
     {
@@ -397,6 +453,9 @@ private:
     }
 
     const panda_file::File &panda_file_;
+    std::unordered_map<size_t, TypeInfoIndex> instid_type_map_;
+    std::unordered_map<int32_t, TypeInfoIndex> pc_type_map_;
+    std::pair<size_t, size_t> anno_elem_idx_ = std::make_pair(INVALID_TYPE_INDEX, INVALID_TYPE_INDEX);
 };
 }  // namespace panda
 

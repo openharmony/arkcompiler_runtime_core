@@ -279,3 +279,7 @@ merge_yamls("merge_runtime_options_yamls") {
   output_file = "$target_gen_dir/runtime_options.yaml"
   add_yamls = [ "$ark_root/runtime/options.yaml" ] + runtime_options_yamls
 }
+
+group("bcopt_type_adapter_unit_test") {
+  deps = [ "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test(//build/toolchain/linux:clang_x64)" ]
+}
