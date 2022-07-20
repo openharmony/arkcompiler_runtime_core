@@ -16,14 +16,14 @@
 #ifndef PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H_
 #define PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H_
 
-#include "os/thread.h"
+#include <set>
+#include <signal.h>  // NOLINTNEXTLINE(modernize-deprecated-headers)
+#include <string>
+
 #if defined(PANDA_TARGET_UNIX)
 #include "platforms/unix/libpandabase/native_stack.h"
 #endif  // PANDA_TARGET_UNIX
-
-#include <string>
-#include <set>
-#include <signal.h>  // NOLINTNEXTLINE(modernize-deprecated-headers)
+#include "os/thread.h"
 
 namespace panda::os::native_stack {
 

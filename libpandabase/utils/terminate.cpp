@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include <cstdlib>
 #include <cstring>
+#include <iosfwd>
 #include <string>
 
 #include "securec.h"

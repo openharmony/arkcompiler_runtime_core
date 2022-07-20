@@ -15,11 +15,14 @@
 
 #include "type_converter.h"
 
+#include <algorithm>
 #include <array>
-#include <cassert>
 #include <cmath>
 #include <iomanip>
+#include <ios>
+#include <ostream>
 #include <string_view>
+#include <variant>
 
 namespace panda::helpers {
 

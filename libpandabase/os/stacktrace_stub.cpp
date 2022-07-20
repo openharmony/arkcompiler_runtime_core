@@ -15,6 +15,10 @@
 
 #include "stacktrace.h"
 
+#include <cstdint>
+#include <iosfwd>
+#include <vector>
+
 namespace panda {
 
 std::vector<uintptr_t> GetStacktrace()

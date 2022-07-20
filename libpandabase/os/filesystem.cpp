@@ -14,13 +14,18 @@
  */
 
 #include "os/filesystem.h"
-#include "utils/logger.h"
-#if defined PANDA_TARGET_MOBILE || defined PANDA_TARGET_UNIX || defined PANDA_TARGET_ARM32 || defined PANDA_TARGET_ARM64
+
+#include <ostream>
+#include <string>
+#if defined PANDA_TARGET_MOBILE || defined PANDA_TARGET_UNIX || defined PANDA_TARGET_ARM32 || \
+    defined PANDA_TARGET_ARM64
 #include <sys/stat.h>
 #endif
 #if defined(PANDA_TARGET_WINDOWS)
 #include <fileapi.h>
 #endif
+
+#include "utils/logger.h"
 
 namespace panda::os {
 

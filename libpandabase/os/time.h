@@ -16,14 +16,6 @@
 #ifndef PANDA_LIBPANDABASE_PBASE_OS_TIME_H_
 #define PANDA_LIBPANDABASE_PBASE_OS_TIME_H_
 
-#ifdef PANDA_TARGET_UNIX
-#include "platforms/unix/libpandabase/time.h"
-#elif PANDA_TARGET_WINDOWS
-#include "platforms/windows/libpandabase/time.h"
-#else
-#error "Unsupported platform"
-#endif  // PANDA_TARGET_UNIX
-
 #include <macros.h>
 
 #include <cstdint>

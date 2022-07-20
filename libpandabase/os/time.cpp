@@ -15,6 +15,17 @@
 
 #include "os/time.h"
 
+#include <chrono>
+#include <ctime>
+
+#ifdef PANDA_TARGET_UNIX
+#include "platforms/unix/libpandabase/time.h"
+#elif PANDA_TARGET_WINDOWS
+#include "platforms/windows/libpandabase/time.h"
+#else
+#error "Unsupported platform"
+#endif  // PANDA_TARGET_UNIX
+
 namespace panda::os::time {
 
 /**

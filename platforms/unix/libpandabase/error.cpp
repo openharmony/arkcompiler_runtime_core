@@ -15,10 +15,11 @@
 
 #include "os/error.h"
 
-#include <cerrno>
-#include <cstring>
-
 #include <array>
+#include <cstring>
+#include <iosfwd>
+#include <string>
+#include <variant>
 
 namespace panda::os {
 

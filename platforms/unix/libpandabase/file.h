@@ -16,25 +16,28 @@
 #ifndef PANDA_LIBPANDABASE_PBASE_OS_UNIX_FILE_H_
 #define PANDA_LIBPANDABASE_PBASE_OS_UNIX_FILE_H_
 
-#include "os/error.h"
-#include "utils/expected.h"
-#include "utils/logger.h"
-
 #include <array>
 #include <cerrno>
 #include <climits>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
+#include <iosfwd>
 #if PANDA_TARGET_MACOS
 #include <mach-o/dyld.h>
 // Undefine the conflict Mac marco
 #undef BYTE_SIZE
 #endif
+#include <ostream>
 #include <string>
+#include <string_view>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
-#include <utility>
+
+#include "macros.h"
+#include "os/error.h"
+#include "utils/expected.h"
+#include "utils/logger.h"
 
 namespace panda::os::unix::file {
 

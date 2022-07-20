@@ -17,9 +17,9 @@
 #define PANDA_LIBPANDABASE_UTILS_TYPE_CONVERTER_H_
 
 #include <array>
-#include <cassert>
-#include <cmath>
-#include <iomanip>
+#include <cstddef>
+#include <cstdint>
+#include <iosfwd>
 #include <string_view>
 #include <variant>
 

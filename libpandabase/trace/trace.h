@@ -16,8 +16,11 @@
 #ifndef PANDA_TRACE_H_
 #define PANDA_TRACE_H_
 
-#include <string>
+#include <cstdint>
+#include <iosfwd>
 #include <sstream>
+#include <string>
+
 #include "macros.h"
 
 namespace panda::trace {

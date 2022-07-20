@@ -16,9 +16,7 @@
 #ifndef PANDA_LIBPANDABASE_PBASE_OS_UNIX_PROP_H_
 #define PANDA_LIBPANDABASE_PBASE_OS_UNIX_PROP_H_
 
-#include <string>
-#include <vector>
-#include <map>
+#include <iosfwd>
 
 namespace panda::os::unix::property {
 

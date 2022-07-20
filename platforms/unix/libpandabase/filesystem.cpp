@@ -18,6 +18,9 @@
 #include <array>
 #include <climits>
 #include <cstdlib>
+#include <iosfwd>
+#include <string>
+#include <string_view>
 
 namespace panda::os {
 
