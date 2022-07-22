@@ -187,34 +187,6 @@ public:
     // Returns true if profile saving is enabled.
     bool SaveProfileInfo() const;
 
-    const std::string &GetProcessPackageName() const
-    {
-        return process_package_name_;
-    }
-
-    void SetProcessPackageName(const char *package_name)
-    {
-        if (package_name == nullptr) {
-            process_package_name_.clear();
-        } else {
-            process_package_name_ = package_name;
-        }
-    }
-
-    const std::string &GetProcessDataDirectory() const
-    {
-        return process_data_directory_;
-    }
-
-    void SetProcessDataDirectory(const char *data_dir)
-    {
-        if (data_dir == nullptr) {
-            process_data_directory_.clear();
-        } else {
-            process_data_directory_ = data_dir;
-        }
-    }
-
     std::string GetPandaPath()
     {
         return panda_path_string_;
@@ -393,10 +365,6 @@ private:
     tooling::PtLangExt *pt_lang_ext_ {nullptr};
     tooling::DebugInterface *debugger_ {nullptr};
     os::library_loader::LibraryHandle debugger_library_;
-
-    // Additional VMInfo
-    std::string process_package_name_;
-    std::string process_data_directory_;
 
     // For saving class path.
     std::string panda_path_string_;
