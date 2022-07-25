@@ -102,6 +102,10 @@ void BytecodeGen::VisitTryBegin(const compiler::BasicBlock *bb)
 bool BytecodeGen::RunImpl()
 {
     Reserve(function_->ins.size());
+    std::vector<ScalarValue> elements;
+    AddTypeInfoIndexForArguments(&elements);
+    bool need_handle_ins_type = GetGraph()->GetRuntime()->HasInsTypeinfo();
+    int32_t insn_order = 0;
     for (auto *bb : GetGraph()->GetBlocksLinearOrder()) {
         EmitLabel(BytecodeGen::LabelName(bb->GetId()));
         if (bb->IsTryEnd() || bb->IsCatchEnd()) {
@@ -118,9 +122,13 @@ bool BytecodeGen::RunImpl()
             ASSERT(end >= start);
             for (auto i = start; i < end; ++i) {
                 AddLineNumber(inst, i);
-                if (GetGraph()->IsDynamicMethod()) {
-                    AddColumnNumber(inst, i);
-                }
+                AddColumnNumber(inst, i);
+            }
+            if (need_handle_ins_type && end > start) {
+                // fill ins types. Need to exclude invalid ins as they do not emit
+                insn_order += std::count_if(GetResult().begin() + start, GetResult().end(),
+                                            [](const auto &ins) { return ins.opcode != pandasm::Opcode::INVALID; });
+                AddTypeInfoIndexForIns(insn_order - 1, inst->GetId(), &elements);
             }
         }
         if (bb->NeedsJump()) {
@@ -136,7 +144,58 @@ bool BytecodeGen::RunImpl()
     }
     function_->ins = std::move(GetResult());
     function_->catch_blocks = catch_blocks_;
+    UpdateTypeInfoIndexAnnotation(&elements);
     return true;
+}
+
+void BytecodeGen::AddTypeInfoIndexForArguments(std::vector<ScalarValue> *elements) const
+{
+    std::unordered_map<int32_t, TypeInfoIndex> args_types_map;
+    if (GetGraph()->GetRuntime()->FillArgTypePairs(&args_types_map)) {
+        for (const auto &[arg, type] : args_types_map) {
+            ASSERT(arg < 0);
+            AddOrderAndTypeInfoIndex(arg, type, elements);
+        }
+    }
+}
+
+void BytecodeGen::AddOrderAndTypeInfoIndex(int32_t order, TypeInfoIndex type, std::vector<ScalarValue> *elements) const
+{
+    ScalarValue insn_order(ScalarValue::Create<panda::pandasm::Value::Type::I32>(order));
+    elements->emplace_back(std::move(insn_order));
+    ScalarValue type_info_index(ScalarValue::Create<panda::pandasm::Value::Type::I32>(type));
+    elements->emplace_back(std::move(type_info_index));
+}
+
+void BytecodeGen::AddTypeInfoIndexForIns(int32_t order, size_t id, std::vector<ScalarValue> *elements) const
+{
+    auto type = GetGraph()->GetRuntime()->GetTypeInfoIndexByInstId(id);
+    if (type != NO_EXPLICIT_TYPE) {
+        AddOrderAndTypeInfoIndex(order, type, elements);
+    }
+}
+
+void BytecodeGen::UpdateTypeInfoIndexAnnotation(const std::vector<ScalarValue> *elements)
+{
+#ifndef NDEBUG
+    LOG(DEBUG, BYTECODE_OPTIMIZER) << "Typeinfo after optimization for function : " << function_->name;
+    const size_t PAIR_GAP = 2;
+    for (size_t i = 0; i < elements->size(); i += PAIR_GAP) {
+        auto order = (*elements)[i].GetValue<int32_t>();
+        auto type = (*elements)[i + 1].GetValue<int32_t>();
+        LOG(DEBUG, BYTECODE_OPTIMIZER) << "[" << order << ", " << type << "], ";
+    }
+#endif
+    const auto *type_idx = GetGraph()->GetRuntime()->GetTypeAnnotationIndex();
+    ASSERT(type_idx != nullptr);
+    if (type_idx->first == INVALID_TYPE_INDEX || type_idx->second == INVALID_TYPE_INDEX) {
+        return;
+    }
+    ASSERT(type_idx->first < function_->metadata->GetAnnotations().size());
+    panda::pandasm::ArrayValue arr(panda::pandasm::Value::Type::I32, *elements);
+    panda::pandasm::AnnotationElement anno_elem(TSTYPE_ANNO_ELEMENT_NAME,
+                                                std::make_unique<panda::pandasm::ArrayValue>(arr));
+    function_->metadata->SetOrAddAnnotationElementByIndex(type_idx->first, type_idx->second, std::move(anno_elem));
 }
 
 void BytecodeGen::EmitJump(const BasicBlock *bb)
