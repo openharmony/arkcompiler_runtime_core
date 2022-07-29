@@ -75,8 +75,8 @@ source_set("libarkfile_static") {
     ":isa_gen_libarkfile_tests_bytecode_emitter_tests_gen_h",
     ":libarkfile_type_gen_h",
     ":source_lang_enum_h",
-    "$ark_root/libpandabase:libarkbase",
-    "$ark_root/libziparchive:libarkziparchive",
+    "$ark_root/libpandabase:libarkbase_static",
+    "$ark_root/libziparchive:libarkziparchive_static",
     sdk_libc_secshared_dep,
   ]
 }

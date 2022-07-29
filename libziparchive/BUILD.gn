@@ -44,7 +44,7 @@ source_set("libarkziparchive_static") {
   ]
 
   deps = [
-    "$ark_root/libpandabase:libarkbase",
+    "$ark_root/libpandabase:libarkbase_static",
     sdk_libc_secshared_dep,
   ]
 

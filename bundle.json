@@ -25,9 +25,7 @@
             "third_party": []
         },
         "build": {
-            "sub_component": [
-                "//arkcompiler/runtime_core:ark_packages"
-            ],
+            "sub_component": [],
             "inner_kits": [],
             "test": [
                 "//arkcompiler/runtime_core/tests/fuzztest:fuzztest"
