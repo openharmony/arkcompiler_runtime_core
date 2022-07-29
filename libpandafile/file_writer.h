@@ -183,9 +183,9 @@ public:
 
     bool WriteChecksum(size_t offset) override
     {
-        fseek(file_, offset, SEEK_SET);
+        (void)fseek(file_, offset, SEEK_SET);
         auto res = Write<uint32_t>(checksum_);
-        fseek(file_, offset, SEEK_END);
+        (void)fseek(file_, offset, SEEK_END);
         return res;
     }
 

@@ -50,18 +50,17 @@
         <licensefile></licensefile>
         <policylist>
             <policy name="projectPolicy" desc="">
-                <policyitem type="compatibility" name="Apache" path=".*" desc="">
+                <policyitem type="compatibility" name="Apache" path=".*" desc=""/>
             </policy>
         </policylist>
 
         <filefilterlist>
             <filefilter name="defaultFilter" desc="Files not to check">
                 <filteritem type="filename" name="*.iml|*.json|*.txt|*.png" desc="desc files"/>
+                <filteritem type="filename" name="AUTHORS" desc="Author list"/>
                 <filteritem type="filepath" name=".*/docs/.*" desc="Docs files"/>
                 <filteritem type="filepath" name=".*/docs/diagrams/.*" desc="Docs files"/>
                 <filteritem type="filepath" name="scripts/dep-lists/.*" desc="Dependency lists"/>
-                <filteritem type="filepath" name="third_party/.*" desc="Third party"/>
-                <filteritem type="filepath" name="plugins/java/.*" desc="Plugin for java"/>
             </filefilter>
         </filefilterlist>
     </oatconfig>
