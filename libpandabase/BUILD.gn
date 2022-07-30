@@ -167,12 +167,18 @@ libarkbase_configs = [
   "$ark_root:ark_config",
 ]
 
+group("arkbase_header_deps") {
+  deps = [
+    ":base_options_h",
+    ":events_gen",
+    ":generate_version_file",
+    ":logger_enum_gen_h",
+    ":logger_impl_gen_h",
+  ]
+}
+
 libarkbase_deps = [
-  ":base_options_h",
-  ":events_gen",
-  ":generate_version_file",
-  ":logger_enum_gen_h",
-  ":logger_impl_gen_h",
+  ":arkbase_header_deps",
   sdk_libc_secshared_dep,
 ]
 
