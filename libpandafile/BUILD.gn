@@ -61,11 +61,7 @@ libarkfile_configs = [
   ":arkfile_public_config",
 ]
 
-source_set("libarkfile_static") {
-  sources = libarkfile_sources
-
-  public_configs = libarkfile_configs
-
+group("arkfile_header_deps") {
   deps = [
     ":isa_gen_libarkfile_bytecode_emitter_def_gen_h",
     ":isa_gen_libarkfile_bytecode_emitter_gen_h",
@@ -75,6 +71,17 @@ source_set("libarkfile_static") {
     ":isa_gen_libarkfile_tests_bytecode_emitter_tests_gen_h",
     ":libarkfile_type_gen_h",
     ":source_lang_enum_h",
+    "$ark_root/libpandabase:arkbase_header_deps",
+  ]
+}
+
+source_set("libarkfile_static") {
+  sources = libarkfile_sources
+
+  public_configs = libarkfile_configs
+
+  deps = [
+    ":arkfile_header_deps",
     "$ark_root/libpandabase:libarkbase_static",
     "$ark_root/libziparchive:libarkziparchive_static",
     sdk_libc_secshared_dep,
@@ -101,14 +108,7 @@ source_set("libarkfile_frontend_set_static") {
   public_configs = libarkfile_configs
 
   deps = [
-    ":isa_gen_libarkfile_bytecode_emitter_def_gen_h",
-    ":isa_gen_libarkfile_bytecode_emitter_gen_h",
-    ":isa_gen_libarkfile_bytecode_instruction-inl_gen_h",
-    ":isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
-    ":isa_gen_libarkfile_file_format_version_h",
-    ":isa_gen_libarkfile_tests_bytecode_emitter_tests_gen_h",
-    ":libarkfile_type_gen_h",
-    ":source_lang_enum_h",
+    ":arkfile_header_deps",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libziparchive:libarkziparchive_frontend_static",
     sdk_libc_secshared_dep,
