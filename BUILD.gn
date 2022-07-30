@@ -281,5 +281,16 @@ merge_yamls("merge_runtime_options_yamls") {
 }
 
 group("bcopt_type_adapter_unit_test") {
-  deps = [ "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test(//build/toolchain/linux:clang_x64)" ]
+  if (host_os == "mac") {
+    if (host_cpu == "arm64") {
+      deps = [ "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test(//build/toolchain/mac:clang_arm64)" ]
+    } else {
+      deps = [ "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test(//build/toolchain/mac:clang_x64)" ]
+    }
+  } else {
+    deps = [
+      "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test(//build/toolchain/linux:clang_x64)",
+      "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test(//build/toolchain/mingw:mingw_x86_64)",
+    ]
+  }
 }
