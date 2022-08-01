@@ -210,13 +210,13 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
         LOG(ERROR, PANDAFILE) << "Can't fopen location: " << location;
         return nullptr;
     }
-    fseek(fp, 0, SEEK_SET);
+    (void)fseek(fp, 0, SEEK_SET);
     if (fread(&magic, sizeof(magic), 1, fp) != 1) {
         fclose(fp);
         LOG(ERROR, PANDAFILE) << "Can't read from file!(magic) " << location;
         return nullptr;
     }
-    fseek(fp, 0, SEEK_SET);
+    (void)fseek(fp, 0, SEEK_SET);
     std::unique_ptr<const panda_file::File> file;
     if (IsZipMagic(magic)) {
         // Open Zipfile and do the extraction.
