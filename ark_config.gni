@@ -16,6 +16,8 @@ import("//build/ohos.gni")
 
 if (is_standard_system) {
   import("$ark_root/platforms/ohos/ark_config.gni")
+} else {
+  import("$ark_root/platforms/common/ark_config.gni")
 }
 
 declare_args() {
