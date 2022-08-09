@@ -324,7 +324,11 @@ public:
 
     PandaCache *GetPandaCache() const
     {
+#ifdef ENABLE_PANDA_CACHE
         return panda_cache_.get();
+#else
+        return nullptr;
+#endif
     }
 
     uint32_t GetFilenameHash() const
@@ -381,7 +385,9 @@ private:
     const std::string FILENAME;
     const uint32_t FILENAME_HASH;
     const std::string FULL_FILENAME;
+#ifdef ENABLE_PANDA_CACHE
     std::unique_ptr<PandaCache> panda_cache_;
+#endif
     const uint32_t UNIQ_ID;
     mutable panda::Span<const panda::panda_file::EntityPairHeader> class_hash_table_;
 };
