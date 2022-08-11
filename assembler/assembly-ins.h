@@ -59,7 +59,7 @@ enum InstFlags {
 
 constexpr int INVALID_REG_IDX = -1;
 
-constexpr size_t MAX_NUMBER_OF_SRC_REGS = 5;  // TODO(mbolshov): auto-generate
+constexpr size_t MAX_NUMBER_OF_SRC_REGS = 4;  // TODO(mbolshov): auto-generate
 
 constexpr InstFlags operator|(InstFlags a, InstFlags b)
 {
@@ -111,7 +111,7 @@ struct Ins {
               const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
               const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
               const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
-              const std::unordered_map<std::string_view, panda_file::StringItem *> &strings,
+              const std::unordered_map<std::string, panda_file::StringItem *> &strings,
               const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays,
               const std::unordered_map<std::string_view, panda::Label> &labels) const;
 

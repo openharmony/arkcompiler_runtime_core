@@ -733,77 +733,44 @@ bool AsmEmitter::AddAnnotations(T *item, ItemContainer *container, const Annotat
 }
 
 template <class T>
-static void AddBytecodeIndexDependencies(MethodItem *method, const Ins &insn,
-                                         const std::unordered_map<std::string, T *> &items)
+static void AddDependencyByIndex(MethodItem *method, const Ins &insn,
+                                 const std::unordered_map<std::string, T *> &items, size_t idx = 0)
 {
-    ASSERT(!insn.ids.empty());
-
-    for (const auto &id : insn.ids) {
-        auto it = items.find(id);
-        ASSERT(it != items.cend());
-
-        auto *item = it->second;
-        ASSERT(item->GetIndexType() != panda_file::IndexType::NONE);
-        method->AddIndexDependency(item);
-    }
-}
-
-static void IncreaseInsLiteralArrayIdByBase(panda::pandasm::Ins &insn, size_t base)
-{
-    switch (insn.opcode) {
-        case panda::pandasm::Opcode::ECMA_CREATEARRAYWITHBUFFER:
-        case panda::pandasm::Opcode::ECMA_CREATEOBJECTWITHBUFFER:
-        case panda::pandasm::Opcode::ECMA_CREATEOBJECTHAVINGMETHOD:
-        case panda::pandasm::Opcode::ECMA_DEFINECLASSWITHBUFFER:
-            insn.imms[0] = std::get<int64_t>(insn.imms[0]) + static_cast<int64_t>(base);
-            return;
-        case panda::pandasm::Opcode::ECMA_NEWLEXENVWITHNAMEDYN:
-            insn.imms[1] = std::get<int64_t>(insn.imms[1]) + static_cast<int64_t>(base);
-            return;
-        default:
-            return;
-    }
+    ASSERT(idx < insn.ids.size());
+    const auto &id = insn.ids[idx];
+    auto it = items.find(id);
+    ASSERT(it != items.cend());
+    auto *item = it->second;
+    ASSERT(item->GetIndexType() != panda_file::IndexType::NONE);
+    method->AddIndexDependency(item);
 }
 
 static void AddBytecodeIndexDependencies(MethodItem *method, const Function &func,
                                          const AsmEmitter::AsmEntityCollections &entities, uint32_t base)
 {
     for (const auto &insn : func.ins) {
-        // correct literal array id, need to remove after isa refactoring
-        if (base != 0) {
-            IncreaseInsLiteralArrayIdByBase(const_cast<pandasm::Ins &>(insn), base);
-        }
-
         if (insn.opcode == Opcode::INVALID) {
             continue;
         }
 
+        if (insn.opcode == Opcode::DEFINECLASSWITHBUFFER) {
+            AddDependencyByIndex(method, insn, entities.method_items);
+            AddDependencyByIndex(method, insn, entities.literalarray_items, 1);
+            continue;
+        }
         if (insn.HasFlag(InstFlags::METHOD_ID)) {
-            AddBytecodeIndexDependencies(method, insn, entities.method_items);
+            AddDependencyByIndex(method, insn, entities.method_items);
             continue;
         }
 
-        if (insn.HasFlag(InstFlags::FIELD_ID)) {
-            AddBytecodeIndexDependencies(method, insn, entities.field_items);
+        if (insn.HasFlag(InstFlags::STRING_ID)) {
+            AddDependencyByIndex(method, insn, entities.string_items);
             continue;
         }
 
-        if (insn.HasFlag(InstFlags::TYPE_ID)) {
-            AddBytecodeIndexDependencies(method, insn, entities.class_items);
-            continue;
+        if (insn.HasFlag(InstFlags::LITERALARRAY_ID)) {
+            AddDependencyByIndex(method, insn, entities.literalarray_items);
         }
-    }
-
-    for (const auto &catch_block : func.catch_blocks) {
-        if (catch_block.exception_record.empty()) {
-            continue;
-        }
-
-        auto it = entities.class_items.find(catch_block.exception_record);
-        ASSERT(it != entities.class_items.cend());
-        auto *item = it->second;
-        ASSERT(item->GetIndexType() != panda_file::IndexType::NONE);
-        method->AddIndexDependency(item);
     }
 }
 
@@ -1239,6 +1206,7 @@ bool AsmEmitter::CreateMethodItem(ItemContainer *items, AsmEmitter::AsmEntityCol
             method = items->CreateItem<ForeignMethodItem>(area, method_name, proto, access_flags);
         } else {
             method = area->AddMethod(method_name, proto, access_flags, params);
+            method->SetFunctionKind(func.GetFunctionKind());
         }
     } else {
         if (!func.metadata->IsForeign()) {
@@ -1248,7 +1216,7 @@ bool AsmEmitter::CreateMethodItem(ItemContainer *items, AsmEmitter::AsmEntityCol
         method = items->CreateItem<ForeignMethodItem>(foreign_area, method_name, proto, access_flags);
     }
     entities.method_items.insert({mangled_name, method});
-    if (!func.metadata->IsForeign() && func.metadata->HasImplementation()) {
+    if (!func.metadata->IsForeign()) {
         if (!func.source_file.empty()) {
             items->GetOrCreateStringItem(func.source_file);
         }
@@ -1380,22 +1348,6 @@ void AsmEmitter::SetCodeAndDebugInfo(ItemContainer *items, MethodItem *method, c
 }
 
 /* static */
-void AsmEmitter::SetMethodSourceLang(const Program &program, MethodItem *method, const Function &func,
-                                     const std::string &name)
-{
-    std::string record_name = GetOwnerName(name);
-    if (record_name.empty()) {
-        method->SetSourceLang(func.language);
-        return;
-    }
-
-    auto &rec = program.record_table.find(record_name)->second;
-    if (rec.language != func.language) {
-        method->SetSourceLang(func.language);
-    }
-}
-
-/* static */
 bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Program &program,
                                                const AsmEmitter::AsmEntityCollections &entities, MethodItem *method,
                                                const Function &func)
@@ -1442,12 +1394,10 @@ bool AsmEmitter::MakeFunctionDebugInfoAndAnnotations(ItemContainer *items, const
 
         auto *method = static_cast<MethodItem *>(Find(entities.method_items, name));
 
-        if (func.metadata->HasImplementation()) {
-            SetCodeAndDebugInfo(items, method, func, emit_debug_info);
-            AddBytecodeIndexDependencies(method, func, entities, GetBase());
-        }
+        SetCodeAndDebugInfo(items, method, func, emit_debug_info);
+        AddBytecodeIndexDependencies(method, func, entities, GetBase());
 
-        SetMethodSourceLang(program, method, func, name);
+        method->SetSourceLang(func.language);
 
         if (!AddMethodAndParamsAnnotations(items, program, entities, method, func)) {
             return false;
@@ -1520,7 +1470,7 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
     for (const auto &f : program.function_table) {
         const auto &[name, func] = f;
 
-        if (func.metadata->IsForeign() || !func.metadata->HasImplementation()) {
+        if (func.metadata->IsForeign()) {
             continue;
         }
 
@@ -1578,8 +1528,44 @@ bool AsmEmitter::MakeItemsForSingleProgram(ItemContainer *items, const Program &
     return true;
 }
 
+//  temp plan for ic slot number, should be deleted after method refactoring
+static void MakeSlotNumberRecord(Program *prog)
+{
+    static const std::string SLOT_NUMBER = "_ESSlotNumberAnnotation";
+    pandasm::Record record(SLOT_NUMBER, pandasm::extensions::Language::ECMASCRIPT);
+    record.metadata->SetAccessFlags(panda::ACC_ANNOTATION);
+    prog->record_table.emplace(SLOT_NUMBER, std::move(record));
+}
+
+//  temp plan for ic slot number, should be deleted after method refactoring
+static void MakeSlotNumberAnnotation(Program *prog)
+{
+    static const std::string SLOT_NUMBER = "_ESSlotNumberAnnotation";
+    static const std::string ELEMENT_NAME = "SlotNumber";
+    for (auto &[name, func] : prog->function_table) {
+        for (const auto &an : func.metadata->GetAnnotations()) {
+            if (an.GetName() == SLOT_NUMBER) {
+                return;
+            }
+        }
+        pandasm::AnnotationData anno(SLOT_NUMBER);
+        pandasm::AnnotationElement ele(ELEMENT_NAME, std::make_unique<pandasm::ScalarValue>(
+            pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(static_cast<uint32_t>(func.GetSlotsNum()))));
+        anno.AddElement(std::move(ele));
+        std::vector<pandasm::AnnotationData> annos;
+        annos.emplace_back(anno);
+        func.metadata->AddAnnotations(annos);
+    }
+}
+
 bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info)
 {
+    ASSERT(!progs.empty());
+    for (auto *prog : progs) {
+        MakeSlotNumberRecord(prog);
+        MakeSlotNumberAnnotation(prog);
+    }
+
     auto items = ItemContainer {};
     auto primitive_types = CreatePrimitiveTypes(&items);
     auto entities = AsmEmitter::AsmEntityCollections {};
@@ -1624,6 +1610,8 @@ bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Pro
 bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToPandaAsmMaps *maps, bool emit_debug_info,
                       panda::panda_file::pgo::ProfileOptimizer *profile_opt)
 {
+    MakeSlotNumberRecord(const_cast<Program *>(&program));
+    MakeSlotNumberAnnotation(const_cast<Program *>(&program));
     auto primitive_types = CreatePrimitiveTypes(items);
 
     auto entities = AsmEmitter::AsmEntityCollections {};
@@ -1734,7 +1722,7 @@ bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
                     const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
                     const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
                     const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
-                    const std::unordered_map<std::string_view, panda_file::StringItem *> &strings,
+                    const std::unordered_map<std::string, panda_file::StringItem *> &strings,
                     const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays) const
 {
     auto labels = std::unordered_map<std::string_view, panda::Label> {};

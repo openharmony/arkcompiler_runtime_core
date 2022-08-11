@@ -466,11 +466,6 @@ bool RecordMetadata::IsRuntimeTypeAnnotation() const
     return false;
 }
 
-bool FunctionMetadata::HasImplementation() const
-{
-    return !(ACC_ABSTRACT & GetAccessFlags()) && !(ACC_NATIVE & GetAccessFlags());
-}
-
 bool FunctionMetadata::IsCtor() const
 {
     return GetAttribute("ctor");

@@ -15,8 +15,8 @@ import("//arkcompiler/runtime_core/ark_config.gni")
 
 isa_paths = [
   rebase_path("$ark_root/isa/isa.yaml", root_build_dir),
-  rebase_path("$ark_root/../ets_runtime/ecmascript/ecma_isa.yaml",
-              root_build_dir),
+  #  rebase_path("$ark_root/../ets_runtime/ecmascript/ecma_isa.yaml",
+  #              root_build_dir),
 ]
 
 foreach(plugin, enabled_plugins) {
@@ -44,10 +44,7 @@ foreach(plugin, enabled_plugins) {
 action("isa_combine") {
   script = "$ark_root/isa/combine.rb"
   input_args = string_join(",", isa_paths)
-  inputs = [
-    "$ark_root/isa/isa.yaml",
-    "$ark_root/../ets_runtime/ecmascript/ecma_isa.yaml",
-  ]
+  inputs = [ "$ark_root/isa/isa.yaml" ]
   outputs = [ "$root_gen_dir/isa/isa.yaml" ]
   args = [
     "-d",

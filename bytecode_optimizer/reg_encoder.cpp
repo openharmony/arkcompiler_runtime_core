@@ -26,18 +26,19 @@ static bool IsIntrinsicRange(Inst *inst)
     }
 #ifdef ENABLE_BYTECODE_OPT
     switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
-#ifdef ARK_INTRINSIC_SET
-        case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_CALLI_RANGE_DYN:
-        case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_CALLI_THIS_RANGE_DYN:
-        case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_NEWOBJ_DYNRANGE:
-        case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_SUPER_CALL:
-#else
-        case compiler::RuntimeInterface::IntrinsicId::ECMA_CALLIRANGEDYN_PREF_IMM16_V8:
-        case compiler::RuntimeInterface::IntrinsicId::ECMA_CALLITHISRANGEDYN_PREF_IMM16_V8:
-        case compiler::RuntimeInterface::IntrinsicId::ECMA_NEWOBJDYNRANGE_PREF_IMM16_V8:
-        case compiler::RuntimeInterface::IntrinsicId::ECMA_SUPERCALL_PREF_IMM16_V8:
-        case compiler::RuntimeInterface::IntrinsicId::ECMA_CREATEOBJECTWITHEXCLUDEDKEYS_PREF_IMM16_V8_V8:
-#endif
+        case compiler::RuntimeInterface::IntrinsicId::CALLRANGE_IMM8_IMM8_V8:
+        case compiler::RuntimeInterface::IntrinsicId::WIDE_CALLRANGE_PREF_IMM16_V8:
+        case compiler::RuntimeInterface::IntrinsicId::CALLTHISRANGE_IMM8_IMM8_V8:
+        case compiler::RuntimeInterface::IntrinsicId::WIDE_CALLTHISRANGE_PREF_IMM16_V8:
+        case compiler::RuntimeInterface::IntrinsicId::NEWOBJRANGE_IMM8_IMM8_V8:
+        case compiler::RuntimeInterface::IntrinsicId::NEWOBJRANGE_IMM16_IMM8_V8:
+        case compiler::RuntimeInterface::IntrinsicId::WIDE_NEWOBJRANGE_PREF_IMM16_V8:
+        case compiler::RuntimeInterface::IntrinsicId::SUPERCALLTHISRANGE_IMM8_IMM8_V8:
+        case compiler::RuntimeInterface::IntrinsicId::SUPERCALLARROWRANGE_IMM8_IMM8_V8:
+        case compiler::RuntimeInterface::IntrinsicId::WIDE_SUPERCALLTHISRANGE_PREF_IMM16_V8:
+        case compiler::RuntimeInterface::IntrinsicId::WIDE_SUPERCALLARROWRANGE_PREF_IMM16_V8:
+        case compiler::RuntimeInterface::IntrinsicId::CREATEOBJECTWITHEXCLUDEDKEYS_IMM8_V8_V8:
+        case compiler::RuntimeInterface::IntrinsicId::WIDE_CREATEOBJECTWITHEXCLUDEDKEYS_PREF_IMM16_V8_V8:
             return true;
         default:
             return false;
@@ -49,10 +50,6 @@ static bool IsIntrinsicRange(Inst *inst)
 static bool CanHoldRange(Inst *inst)
 {
     switch (inst->GetOpcode()) {
-        case compiler::Opcode::CallStatic:
-        case compiler::Opcode::CallVirtual:
-        case compiler::Opcode::InitObject:
-            return true;
         case compiler::Opcode::Intrinsic:
             return IsIntrinsicRange(inst);
         default:
@@ -70,10 +67,6 @@ static compiler::Register CalculateNumNeededRangeTemps(const compiler::Graph *gr
                 continue;
             }
             auto nargs = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
-            if (inst->GetOpcode() == compiler::Opcode::InitObject) {
-                ASSERT(nargs > 0);
-                nargs -= 1;  // exclude LoadAndInitClass
-            }
             if (ret < nargs) {
                 if (nargs > MAX_NUM_NON_RANGE_ARGS || IsIntrinsicRange(inst)) {
                     ret = nargs;
@@ -634,6 +627,5 @@ void RegEncoder::VisitLoadString([[maybe_unused]] GraphVisitor *v, [[maybe_unuse
 void RegEncoder::VisitReturn([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
 void RegEncoder::VisitCatchPhi([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
 void RegEncoder::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
-
 #include "generated/check_width.cpp"
 }  // namespace panda::bytecodeopt

@@ -86,6 +86,28 @@ struct Function {
     Type return_type;
     SourceLocation body_location;
     std::optional<FileLocation> file_location;
+    panda::panda_file::FunctionKind function_kind = panda::panda_file::FunctionKind::NONE;
+    size_t slots_num = 0;
+
+    void SetSlotsNum(size_t num)
+    {
+        slots_num = num;
+    }
+
+    size_t GetSlotsNum() const
+    {
+        return slots_num;
+    }
+
+    void SetFunctionKind(panda::panda_file::FunctionKind kind)
+    {
+        function_kind = kind;
+    }
+
+    panda::panda_file::FunctionKind GetFunctionKind() const
+    {
+        return function_kind;
+    }
 
     void SetInsDebug(const std::vector<debuginfo::Ins> &ins_debug)
     {
@@ -133,7 +155,7 @@ struct Function {
               const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
               const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
               const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
-              const std::unordered_map<std::string_view, panda_file::StringItem *> &strings,
+              const std::unordered_map<std::string, panda_file::StringItem *> &strings,
               const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays) const;
 
     size_t GetLineNumber(size_t i) const;
@@ -170,7 +192,7 @@ struct Function {
 
     bool HasImplementation() const
     {
-        return !metadata->IsForeign() && metadata->HasImplementation();
+        return !metadata->IsForeign();
     }
 
     bool IsParameter(uint32_t reg_number) const

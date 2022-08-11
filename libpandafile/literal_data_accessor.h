@@ -71,6 +71,7 @@ public:
     void EnumerateLiteralVals(File::EntityId id, const Callback &cb);
 
     size_t GetLiteralValsNum(size_t index);
+    size_t GetLiteralValsNum(File::EntityId id) const;
 
     uint32_t GetLiteralNum() const
     {

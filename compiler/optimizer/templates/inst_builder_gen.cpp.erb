@@ -81,8 +81,17 @@ def get_type(type)
     'f64[]' => 'DataType::FLOAT64',
     'ref[]' => 'DataType::REFERENCE',
     'none' => 'DataType::NO_TYPE'}
-  raise "Unknown type #{type}" if @type_map[type].nil?
-  @type_map[type]
+  return 'DataType::ANY' if @type_map[type].nil?
+  #  raise "Unknown type #{type}" if @type_map[type].nil?
+  return @type_map[type]
+end
+
+def get_template_by_inst(inst)
+  if (inst.namespace == "ecmascript")
+    return "ecma"
+  else
+    return get_template(inst.stripped_mnemonic)
+  end
 end
 
 def get_template(mn)
@@ -92,7 +101,7 @@ def get_template(mn)
     /^return.*/ => "return",
     /^[uf]?cmp/ => "cmp",
     /^[ifu][813264]{1,2}to[ifu][813264]{1,2}$/ => "cast",
-    /^j(eq|ne|lt|gt|le|ge)z?$/ => "if",
+    /^j(eq|ne|lt|gt|le|ge|stricteq|nstricteq)(z|null|undefined)?$/ => "if",
     /^jmp.*/ => "jump",
     /(fdiv|fmod|add|sub|mul|and|or|xor|ashr|shr|shl|neg|not)[2i]?$/ => "binop",
     /^(div|mod)u?[2i]?$/ => "binop_z",
@@ -138,6 +147,8 @@ def get_cc(inst)
   return 'ConditionCode::CC_GT' if inst.opcode.start_with? 'jgt'
   return 'ConditionCode::CC_LE' if inst.opcode.start_with? 'jle'
   return 'ConditionCode::CC_GE' if inst.opcode.start_with? 'jge'
+  return 'ConditionCode::CC_EQ' if inst.opcode.start_with? 'jstricteq'
+  return 'ConditionCode::CC_NE' if inst.opcode.start_with? 'jnstricteq'
   raise 'get_cc: wrong opcode #{inst.opcode}'
 end
 
@@ -159,7 +170,7 @@ namespace panda::compiler {
 void InstBuilder::BuildInstruction(const BytecodeInstruction* instruction) {
     switch(instruction->GetOpcode()) {
 % Panda::instructions.each_with_index do |inst, idx|
-%   tmpl = inst.mnemonic.include?('polymorphic') ? 'unimplemented' : get_template(inst.stripped_mnemonic)
+%   tmpl = inst.mnemonic.include?('polymorphic') ? 'unimplemented' : get_template_by_inst(inst)
     // NOLINTNEXTLINE(bugprone-branch-clone)
     case BytecodeInstruction::Opcode::<%= inst.opcode.upcase %>: {
 %   if tmpl == 'unimplemented'
@@ -292,7 +303,7 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
     switch (bc_inst->GetOpcode()) {
 % Panda::instructions.select{|b| b.namespace == "ecmascript"}.each do |inst|
 %   opc = inst.opcode.upcase
-%   name = opc.split('_')[1]
+%   name = opc
 %     acc_read = inst.acc.include?("in")
 %     acc_write = inst.acc.include?("out")
 %     ret_type = acc_write ? "compiler::DataType::ANY" : "compiler::DataType::VOID"
@@ -315,9 +326,9 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
 %     end
 %     params_arr = inst.operands
 %     format = "BytecodeInstruction::Format::" + inst.format.pretty.upcase
-%     range_should_exclude_last = name == "NEWOBJDYNRANGE" || name == "SUPERCALL" || name == "CREATEOBJECTWITHEXCLUDEDKEYS"
-%     is_range_call = name == "CALLIRANGEDYN" || name == "CALLITHISRANGEDYN" || range_should_exclude_last
-%     need_newtarget = name == "SUPERCALLSPREAD" || name == "SUPERCALL"
+%     range_should_exclude_last = (name.include? "NEWOBJRANGE") || (name.include? "SUPERCALLTHISRANGE") || (name.include? "CREATEOBJECTWITHEXCLUDEDKEYS") || (name.include? "SUPERCALLARROWRANGE") || (name.include? "CALLRANGE")
+%     is_range_call = (name.include? "CALLTHISRANGE") || range_should_exclude_last
+%     need_newtarget = (name.include? "SUPERCALLSPREAD") || (name.include? "SUPERCALL")
 %     num_vregs = params_arr.select{|b| b.reg?}.length
 %     num_imms = params_arr.select{|b| b.imm?}.length
 %     num_ids = params_arr.select{|b| b.id?}.length
@@ -329,8 +340,9 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
 %     if need_newtarget
 %       num_inputs = num_inputs + 1
 %     end
+%     has_ic_slot = inst.properties.include?('ic_slot') || inst.properties.include?('jit_ic_slot')
 %     if is_range_call
-            size_t args_count = <%= num_inputs %>U + static_cast<size_t>(bc_inst->GetImm<<%= format %>, 0>());
+            size_t args_count = <%= num_inputs %>U + static_cast<size_t>(bc_inst->GetImm<<%= format %>, <%= has_ic_slot ? 1 : 0 %>>());
 %     else
             size_t args_count {<%= num_inputs %>U};
 %     end
@@ -355,7 +367,6 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
 %     imm_index = 0
 %     vreg_index = 0
 %     id16_index = 0
-%     id32_index = 0
             auto inst_save_state = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
             AddInstruction(inst_save_state);
 %     params_arr.each do |param|
@@ -376,17 +387,19 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
 %           vreg_index = vreg_index + 1
 %       elsif param.id?
 %         if inst.properties.include?("method_id")
-            auto m_idx<%= id16_index %> = bc_inst->template GetId<<%= format %>>().AsRawValue();
-            if (GetGraph()->IsBytecodeOptimizer()) {
-              m_idx<%= id16_index %> = GetRuntime()->ResolveMethodIndex(GetGraph()->GetMethod(), m_idx<%= id16_index %>);
-            }
+            auto m_idx<%= id16_index %> = bc_inst->template GetId<<%= format %>, <%= id16_index %>>().AsRawValue();
+            m_idx<%= id16_index %> = GetRuntime()->ResolveOffsetByIndex(GetGraph()->GetMethod(), m_idx<%= id16_index %>);
             inst->AddImm(GetGraph()->GetAllocator(), m_idx<%= id16_index %>);
-%           id16_index = id16_index + 1
 %         elsif inst.properties.include?("string_id")
-            auto string_id<%= id32_index %> = bc_inst->template GetId<<%= format %>>().AsFileId().GetOffset();
-            inst->AddImm(GetGraph()->GetAllocator(), string_id<%= id32_index %>);
-%           id32_index = id32_index + 1
+            auto string_id<%= id16_index %> = bc_inst->template GetId<<%= format %>, <%= id16_index %>>().AsRawValue();
+            string_id<%= id16_index %> = GetRuntime()->ResolveOffsetByIndex(GetGraph()->GetMethod(), string_id<%= id16_index %>);
+            inst->AddImm(GetGraph()->GetAllocator(), string_id<%= id16_index %>);
+%         elsif inst.properties.include?("literalarray_id")
+            auto literalarray_id<%= id16_index %> = bc_inst->template GetId<<%= format %>, <%= id16_index %>>().AsRawValue();
+            literalarray_id<%= id16_index %> = GetRuntime()->ResolveOffsetByIndex(GetGraph()->GetMethod(), literalarray_id<%= id16_index %>);
+            inst->AddImm(GetGraph()->GetAllocator(), literalarray_id<%= id16_index %>);
 %         end
+%         id16_index = id16_index + 1
 %       end
 %     end
 %     if need_newtarget
@@ -401,8 +414,9 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
             }
 %     end
 %     if is_range_call
-%           range_reg_idx = name == "CREATEOBJECTWITHEXCLUDEDKEYS" ? 1 : 0
-%           num_actual_vregs = range_should_exclude_last ? "imm0" : "imm0 + 1"
+%           range_reg_idx = (name.include? "CREATEOBJECTWITHEXCLUDEDKEYS") ? 1 : 0
+%           imm_arg_num = has_ic_slot ? 'imm1' : 'imm0'
+%           num_actual_vregs = range_should_exclude_last ? imm_arg_num : imm_arg_num + " + 1"
             size_t start_reg = bc_inst->GetVReg<<%= format %>, <%= range_reg_idx %>>();
             for (uint32_t i = 1; i < <%= num_actual_vregs %>; ++i) {
                 auto input = GetDefinition(start_reg + i);

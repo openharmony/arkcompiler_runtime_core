@@ -65,10 +65,10 @@ public:
     void GetRecord(pandasm::Record *record, const panda_file::File::EntityId &record_id);
     void AddMethodToTables(const panda_file::File::EntityId &method_id);
     void GetMethod(pandasm::Function *method, const panda_file::File::EntityId &method_id);
-    void GetLiteralArray(pandasm::LiteralArray *lit_array, const size_t index);
+    void GetLiteralArray(pandasm::LiteralArray *lit_array, const size_t index) const;
     template <typename T>
     void FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
-                              const panda_file::LiteralDataAccessor::LiteralValue &value);
+                              const panda_file::LiteralDataAccessor::LiteralValue &value) const;
 
     const ProgInfo &GetProgInfo() const
     {
@@ -116,7 +116,8 @@ private:
     void GetInsInfo(const panda_file::File::EntityId &code_id, MethodInfo *method_info) const;
 
     void Serialize(size_t index, const pandasm::LiteralArray &lit_array, std::ostream &os) const;
-    void SerializeValues(const pandasm::LiteralArray &lit_array, std::ostream &os) const;
+    template <typename T>
+    void SerializeValues(const pandasm::LiteralArray &lit_array, T &os) const;
     std::string LiteralTagToString(const panda_file::LiteralTag &tag) const;
     void Serialize(const pandasm::Record &record, std::ostream &os, bool print_information = false) const;
     void SerializeFields(const pandasm::Record &record, std::ostream &os, bool print_information) const;
@@ -151,6 +152,10 @@ private:
     std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id) const;
 
     panda::panda_file::SourceLang GetRecordLanguage(panda_file::File::EntityId class_id) const;
+
+    std::string SerializeLiteralArray(const pandasm::LiteralArray &lit_array) const;
+
+    void GetLiteralArrayByOffset(pandasm::LiteralArray *lit_array, panda_file::File::EntityId offset) const;
 
     std::unique_ptr<const panda_file::File> file_;
     pandasm::Program prog_;

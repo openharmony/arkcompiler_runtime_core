@@ -61,6 +61,8 @@ public:
     using MethodIndex = uint16_t;
     using FieldIndex = uint16_t;
     using TypeIndex = uint16_t;
+    using StringIndex = uint16_t;
+    using LiteralArrayIndex = uint16_t;
 
     static const uintptr_t RESOLVE_STRING_AOT_COUNTER_LIMIT = PANDA_32BITS_HEAP_START_ADDRESS;
 
@@ -98,6 +100,12 @@ public:
 
     virtual MethodId ResolveMethodIndex([[maybe_unused]] MethodPtr parent_method,
                                         [[maybe_unused]] MethodIndex index) const
+    {
+        return 0;
+    }
+
+    virtual uint32_t ResolveOffsetByIndex([[maybe_unused]] MethodPtr parent_method,
+                                          [[maybe_unused]] uint16_t index) const
     {
         return 0;
     }

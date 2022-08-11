@@ -698,23 +698,13 @@ void Parser::ParseResetFunctionTable()
                                  Error::ErrorType::ERR_BAD_ID_FUNCTION, "", k.second.file_location->bound_left,
                                  k.second.file_location->bound_right, k.second.file_location->whole_line);
             SetError();
-        } else if (k.second.HasImplementation() != k.second.body_presence) {
-            context_.err = Error("Inconsistency of the definition of the function and its metadata.",
-                                 k.second.file_location->line_number, Error::ErrorType::ERR_BAD_DEFINITION_FUNCTION, "",
-                                 k.second.file_location->bound_left, k.second.file_location->bound_right,
-                                 k.second.file_location->whole_line);
-            SetError();
         } else {
             for (auto insn_it = k.second.ins.begin(); insn_it != k.second.ins.end(); ++insn_it) {
-                bool is_calli = insn_it->opcode == Opcode::CALLI_DYN || insn_it->opcode == Opcode::CALLI_DYN_SHORT ||
-                                insn_it->opcode == Opcode::CALLI_DYN_RANGE;
-                if (is_calli || !(insn_it->IsCall() || insn_it->IsCallRange())) {
+                if (!(insn_it->IsCall() || insn_it->IsCallRange())) {
                     continue;
                 }
 
-                bool is_initobj = insn_it->opcode == Opcode::INITOBJ || insn_it->opcode == Opcode::INITOBJ_SHORT ||
-                                  insn_it->opcode == Opcode::INITOBJ_RANGE;
-                size_t diff = is_initobj ? 0 : 1;
+                size_t diff = 1;
                 auto func_name = insn_it->ids[0];
 
                 if (!IsSignatureOrMangled(func_name)) {
@@ -987,7 +977,7 @@ Expected<Program, Error> Parser::ParseAfterMainLoop(const std::string &file_name
     }
 
     for (auto &func : program_.function_table) {
-        if (func.second.metadata->HasImplementation()) {
+        if (func.second.HasImplementation()) {
             func.second.source_file = file_name;
         }
     }

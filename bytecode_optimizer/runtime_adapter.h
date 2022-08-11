@@ -46,6 +46,11 @@ public:
         return panda_file_.ResolveMethodIndex(MethodCast(parent_method), index).GetOffset();
     }
 
+    uint32_t ResolveOffsetByIndex(MethodPtr parent_method, uint16_t index) const override
+    {
+        return panda_file_.ResolveOffsetByIndex(MethodCast(parent_method), index).GetOffset();
+    }
+
     FieldId ResolveFieldIndex(MethodPtr parent_method, FieldIndex index) const override
     {
         return panda_file_.ResolveFieldIndex(MethodCast(parent_method), index).GetOffset();
@@ -103,7 +108,7 @@ public:
     {
         panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
 
-        ASSERT(!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative());
+        ASSERT(!mda.IsExternal());
         panda_file::CodeDataAccessor cda(panda_file_, mda.GetCodeId().value());
 
         return cda.GetNumArgs();
@@ -126,7 +131,7 @@ public:
     {
         panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
 
-        ASSERT(!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative());
+        ASSERT(!mda.IsExternal());
         panda_file::CodeDataAccessor cda(panda_file_, mda.GetCodeId().value());
 
         return cda.GetNumVregs();
@@ -136,7 +141,7 @@ public:
     {
         panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
 
-        ASSERT(!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative());
+        ASSERT(!mda.IsExternal());
         panda_file::CodeDataAccessor cda(panda_file_, mda.GetCodeId().value());
 
         return cda.GetInstructions();
@@ -146,7 +151,7 @@ public:
     {
         panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
 
-        ASSERT(!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative());
+        ASSERT(!mda.IsExternal());
         panda_file::CodeDataAccessor cda(panda_file_, mda.GetCodeId().value());
 
         return cda.GetCodeSize();
@@ -156,7 +161,7 @@ public:
     {
         panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
 
-        ASSERT(!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative());
+        ASSERT(!mda.IsExternal());
 
         auto source_lang = mda.GetSourceLang();
         ASSERT(source_lang.has_value());

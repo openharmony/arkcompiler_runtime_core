@@ -158,13 +158,8 @@ templates:
     UpdateDefinitionAcc(GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>()));
     % end
   fldai: |-
-    % if inst.mnemonic == "fldai"
-    auto imm = bit_cast<float>(instruction->GetImm<<%=inst.get_format%>, 0>());
-    UpdateDefinitionAcc(FindOrCreateFloatConstant(imm));
-    % else
     auto imm = bit_cast<double>(instruction->GetImm<<%=inst.get_format%>, 0>());
     UpdateDefinitionAcc(FindOrCreateDoubleConstant(imm));
-    % end
     % if inst.properties.include? "dynamic"
     if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
         TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), static_cast<int>(GetPc(instruction->GetAddress())));

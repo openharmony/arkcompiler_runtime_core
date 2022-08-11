@@ -33,13 +33,8 @@ using compiler::BasicBlock;
 using compiler::Inst;
 using compiler::Opcode;
 
-void DoLdaObj(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoLda(compiler::Register reg, std::vector<pandasm::Ins> &result);
-void DoLda64(compiler::Register reg, std::vector<pandasm::Ins> &result);
 void DoSta(compiler::Register reg, std::vector<pandasm::Ins> &result);
-void DoSta64(compiler::Register reg, std::vector<pandasm::Ins> &result);
-void DoLdaDyn(compiler::Register reg, std::vector<pandasm::Ins> &result);
-void DoStaDyn(compiler::Register reg, std::vector<pandasm::Ins> &result);
 
 class BytecodeGen : public compiler::Optimization, public compiler::GraphVisitor {
 public:
@@ -119,8 +114,6 @@ public:
     static void IfImm64(GraphVisitor *v, Inst *inst_base);
     static void VisitIntrinsic(GraphVisitor *v, Inst *inst_base);
     static void CallHandler(GraphVisitor *visitor, Inst *inst);
-    static void VisitStoreObject(GraphVisitor *v, Inst *inst_base);
-    static void VisitLoadObject(GraphVisitor *v, Inst *inst_base);
     static void VisitLoadString(GraphVisitor *v, Inst *inst_base);
     static void VisitReturn(GraphVisitor *v, Inst *inst_base);
 

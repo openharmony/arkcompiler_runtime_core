@@ -71,21 +71,10 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
 
         int overhead;
 
-        const bool is_initobj = ins.opcode == pandasm::Opcode::INITOBJ_SHORT ||
-                                ins.opcode == pandasm::Opcode::INITOBJ_RANGE || ins.opcode == pandasm::Opcode::INITOBJ;
-
-        const bool is_acc = ins.opcode == pandasm::Opcode::CALL_ACC_SHORT || ins.opcode == pandasm::Opcode::CALL_ACC ||
-                            ins.opcode == pandasm::Opcode::CALL_VIRT_ACC_SHORT ||
-                            ins.opcode == pandasm::Opcode::CALL_VIRT_ACC;
-
-        if (mda.IsStatic() || is_initobj) {
+        if (mda.IsStatic()) {
             overhead = ins.regs.size() - pda.GetNumArgs();
         } else {
             overhead = ins.regs.size() - pda.GetNumArgs() - 1;
-        }
-        // call.acc recieves fixed amount of registers
-        if (is_acc) {
-            return ins;
         }
         if (overhead < 0 || overhead > static_cast<int>(ins.regs.size())) {
             LOG(ERROR, DISASSEMBLER)

@@ -516,6 +516,8 @@ private:
 
     void UpdateOrderIndexes();
 
+    void AddIndexDependecies(BaseItem *item);
+
     void ProcessIndexDependecies(BaseItem *item);
 
     size_t GetForeignOffset() const;

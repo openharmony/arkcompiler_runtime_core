@@ -449,7 +449,7 @@ BasicBlock *IrBuilder::GetBlockToJump(BytecodeInstruction *inst, size_t pc)
     }
 
 #ifdef ENABLE_BYTECODE_OPT
-    if (inst->GetOpcode() == BytecodeInstruction::Opcode::ECMA_RETURNUNDEFINED_PREF_NONE) {
+    if (inst->GetOpcode() == BytecodeInstruction::Opcode::RETURNUNDEFINED) {
         return GetGraph()->GetEndBlock();
     }
 #endif

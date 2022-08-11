@@ -107,7 +107,7 @@ chapters:
 
 # File format and ISA versioning
 min_version: 0.0.0.2
-version: 0.0.0.2
+version: 0.0.0.3
 
 properties:
   - tag: type_id
@@ -142,6 +142,15 @@ properties:
     description: Creates objects of type depending on language context.
   - tag: initialize_type
     description: May initialize type instance during execution.
+  - tag: ic_slot
+    description: Use the immedate number after opcode of length 8-bit or 16-bit as ic slot.
+  - tag: jit_ic_slot
+    description: Use the immedate number after opcode of length 8-bit as jit ic slot.
+  - tag: one_slot
+    description: The intruction occupies one ic slot.
+  - tag: two_slot
+    description: The intruction occupies two ic slots.
+
 exceptions:
   - tag: x_none
     description: Bytecode doesn't throw exceptions.
@@ -237,152 +246,1158 @@ verification:
   - tag: valid_in_dynamic_context
     description: Instruction valid only for dynamically-typed language context.
 
+isa_information:
+    - description: The last encoding number of various ISA. It should be maintained as long as ISA changes.
+      last_opcode_idx: 0xd5
+      last_throw_prefixed_opcode_idx: 0x08
+      last_wide_prefixed_opcode_idx: 0x13
+      last_deprecated_prefixed_opcode_idx: 0x2e
+
 prefixes:
-  - name: bit
-    description: Bit operations.
-    opcode_idx: 0xef
-  - name: unsigned
-    description: Unsigned operations.
-    opcode_idx: 0xee
-  - name: cast
-    description: Cast operations.
-    opcode_idx: 0xed
-  - name: f32
-    description: IEEE-754 single precision floating-point operations.
-    opcode_idx: 0xec
+  - name: throw
+    description: throw operations.
+    opcode_idx: 0xfe
+  - name: wide
+    description: operations with wider width.
+    opcode_idx: 0xfd
+  - name: deprecated
+    description: deprecated instructions but are keeped for compatibility.
+    opcode_idx: 0xfc
 
 groups:
-  - title: No operation
-    description: Perform an operation without behavior.
-    exceptions:
-      - x_none
+  - title: constant object loaders
+    description: instructions which operate on constant objects.
     verification:
       - none
+    exceptions:
+      - x_none
+    properties:
+      - acc_read
+      - acc_write
+    namespace: ecmascript
     pseudo: |
+      acc = ecma_op(acc, operand_0, ..., operands_n)
+    semantics: |
       skip
     instructions:
-      - sig: nop
-        acc: none
+      - sig: ldnan
+        acc: out:top
+        opcode_idx: [0x6a]
         format: [op_none]
-        opcode_idx: [0x0]
+      - sig: ldinfinity
+        acc: out:top
+        opcode_idx: [0x6b]
+        format: [op_none]
+      - sig: ldundefined
+        acc: out:top
+        opcode_idx: [0x00]
+        format: [op_none]
+      - sig: ldnull
+        acc: out:top
+        opcode_idx: [0x01]
+        format: [op_none]
+      - sig: ldsymbol
+        acc: out:top
+        opcode_idx: [0xad]
+        format: [op_none]
+      - sig: ldglobal
+        opcode_idx: [0x6d]
+        acc: out:top
+        format: [op_none]
+      - sig: ldtrue
+        acc: out:top
+        opcode_idx: [0x02]
+        format: [op_none]
+      - sig: ldfalse
+        acc: out:top
+        opcode_idx: [0x03]
+        format: [op_none]
+      - sig: ldhole
+        acc: out:top
+        opcode_idx: [0x70]
+        format: [op_none]
+      - sig: deprecated.ldlexenv
+        acc: out:top
+        opcode_idx: [0x00]
+        format: [pref_op_none]
+        prefix: deprecated
+      - sig: ldnewtarget
+        acc: out:top
+        opcode_idx: [0x6e]
+        format: [op_none]
+      - sig: ldthis
+        acc: out:top
+        opcode_idx: [0x6f]
+        format: [op_none]
+      - sig: poplexenv
+        acc: out:top
+        opcode_idx: [0x69]
+        format: [op_none]
+      - sig: deprecated.poplexenv
+        acc: out:top
+        opcode_idx: [0x01]
+        format: [pref_op_none]
+        prefix: deprecated
+      - sig: getunmappedargs
+        acc: out:top
+        opcode_idx: [0x6c]
+        format: [op_none]
+      - sig: asyncfunctionenter
+        acc: out:top
+        opcode_idx: [0xae]
+        format: [op_none]
+      - sig: ldfunction
+        acc: out:top
+        opcode_idx: [0xaf]
+        format: [op_none]
+      - sig: debugger
+        acc: none
+        opcode_idx: [0xb0]
+        format: [op_none]
 
-  - title: Move register-to-register
-    description: Move values between registers.
-    exceptions:
-      - x_none
-    verification:
-      - v2_type
-    pseudo: |
-      vd = vs
-    instructions:
-      - sig: mov v1:out:b32, v2:in:b32
-        acc: none
-        format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
-        opcode_idx: [0x1, 0x2, 0x3]
-      - sig: mov.64 v1:out:b64, v2:in:b64
-        acc: none
-        format: [op_v1_4_v2_4, op_v1_16_v2_16]
-        opcode_idx: [0x4, 0x5]
-      - sig: mov.obj v1:out:ref, v2:in:ref
-        acc: none
-        format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
-        opcode_idx: [0x6, 0x7, 0x8]
-
-  - title: Move immediate-to-register
-    description: >
-      Move integer immediate into a register. For short formats immediate is sign extended to operand size.
-    exceptions:
-      - x_none
+  - title: iterator instructions
+    description: iterator instructions
     verification:
       - none
-    pseudo: >
-      vd = imm
-    instructions:
-      - sig: movi v:out:i32, imm:i32
-        acc: none
-        format: [op_v_4_imm_4, op_v_8_imm_8, op_v_8_imm_16, op_v_8_imm_32]
-        opcode_idx: [0x9, 0xa, 0xb, 0xc]
-      - sig: movi.64 v:out:i64, imm:i64
-        acc: none
-        format: [op_v_8_imm_64]
-        opcode_idx: [0xd]
-      - sig: fmovi v:out:f32, imm:f32
-        acc: none
-        prefix: f32
-        format: [pref_op_v_8_imm_32]
-        opcode_idx: [0x0]
-        properties: [float]
-      - sig: fmovi.64 v:out:f64, imm:f64
-        acc: none
-        format: [op_v_8_imm_64]
-        opcode_idx: [0xe]
-        properties: [float]
-
-  - title: Move null reference into register
-    description: Move null reference into a register.
     exceptions:
       - x_none
+    properties:
+      - acc_read
+      - acc_write
+    namespace: ecmascript
+    pseudo: |
+      acc = ecma_op(acc, operand_0, ..., operands_n)
+    semantics: |
+      skip
+    instructions:
+      - sig: getpropiterator
+        acc: inout:top
+        opcode_idx: [0x66]
+        format: [op_none]
+      - sig: getiterator imm
+        acc: inout:top
+        opcode_idx: [0x67, 0xab]
+        format: [op_imm_8, op_imm_16]
+        properties: [ic_slot, two_slot]
+      - sig: closeiterator imm, v:in:top
+        acc: out:top
+        opcode_idx: [0x68, 0xac]
+        format: [op_imm_8_v_8, op_imm_16_v_8]
+        properties: [ic_slot, two_slot]
+      - sig: deprecated.getiteratornext v1:in:top, v2:in:top
+        acc: out:top
+        opcode_idx: [0x02]
+        format: [pref_op_v1_8_v2_8]
+        prefix: deprecated
+
+  - title: object creaters
+    description: instructions which create objects
     verification:
       - none
-    pseudo: >
-      vd = null
-    instructions:
-      - sig: mov.null v:out:ref
-        acc: none
-        format: [op_v_8]
-        opcode_idx: [0xf]
-
-  - title: Load accumulator from register
-    description: Moves register content into an accumulator.
     exceptions:
       - x_none
-    verification:
-      - v1_type
+    properties:
+      - acc_read
+      - acc_write
+    namespace: ecmascript
     pseudo: |
-      acc = vs
+      acc = ecma_op(acc, operand_0, ..., operands_n)
+    semantics: |
+      skip
     instructions:
-      - sig: lda v:in:b32
-        acc: out:b32
+      - sig: createemptyobject
+        acc: out:top
+        opcode_idx: [0x04]
+        format: [op_none]
+      - sig: createemptyarray imm
+        acc: out:top
+        opcode_idx: [0x05, 0x80]
+        format: [op_imm_8, op_imm_16]
+        properties: [ic_slot, one_slot]
+      - sig: creategeneratorobj v:in:top
+        acc: out:top
+        opcode_idx: [0xb1]
         format: [op_v_8]
+      - sig: createiterresultobj v1:in:top, v2:in:top
+        acc: out:top
+        opcode_idx: [0xb2]
+        format: [op_v1_8_v2_8]
+      - sig: createobjectwithexcludedkeys imm, v1:in:top, v2:in:top
+        acc: out:top
+        opcode_idx: [0xb3]
+        format: [op_imm_8_v1_8_v2_8]
+      - sig: wide.createobjectwithexcludedkeys imm, v1:in:top, v2:in:top
+        acc: out:top
+        opcode_idx: [0x00]
+        format: [pref_op_imm_16_v1_8_v2_8]
+        prefix: wide
+      - sig: createarraywithbuffer imm, literalarray_id
+        acc: out:top
+        opcode_idx: [0x06, 0x81]
+        format: [op_imm_8_id_16, op_imm_16_id_16]
+        properties: [ic_slot, one_slot, literalarray_id]
+      - sig: deprecated.createarraywithbuffer imm
+        acc: out:top
+        opcode_idx: [0x03]
+        format: [pref_op_imm_16]
+        prefix: deprecated
+      - sig: createobjectwithbuffer imm, literalarray_id
+        opcode_idx: [0x07, 0x82]
+        acc: out:top
+        format: [op_imm_8_id_16, op_imm_16_id_16]
+        properties: [ic_slot, one_slot, literalarray_id]
+      - sig: deprecated.createobjectwithbuffer imm
+        acc: out:top
+        opcode_idx: [0x04]
+        format: [pref_op_imm_16]
+        prefix: deprecated
+      - sig: createregexpwithliteral imm1, string_id, imm2
+        acc: out:top
+        opcode_idx: [0x71, 0x72]
+        format: [op_imm1_8_id_16_imm2_8, op_imm1_16_id_16_imm2_8]
+        properties: [string_id, ic_slot, two_slot]
+      - sig: newobjapply imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0xb4, 0xb5]
+        format: [op_imm_8_v_8, op_imm_16_v_8]
+        properties: [ic_slot, two_slot]
+      - sig: newobjrange imm1, imm2, v:in:top
+        acc: out:top
+        opcode_idx: [0x08, 0x83]
+        format: [op_imm1_8_imm2_8_v_8, op_imm1_16_imm2_8_v_8]
+        properties: [ic_slot, two_slot]
+      - sig: wide.newobjrange imm, v:in:top
+        acc: out:top
+        opcode_idx: [0x01]
+        format: [pref_op_imm_16_v_8]
+        prefix: wide
+      - sig: newlexenv imm
+        acc: out:top
+        opcode_idx: [0x09]
+        format: [op_imm_8]
+      - sig: wide.newlexenv imm
+        acc: out:top
+        opcode_idx: [0x02]
+        format: [pref_op_imm_16]
+        prefix: wide
+      - sig: newlexenvwithname imm, literalarray_id
+        acc: out:top
+        opcode_idx: [0xb6]
+        format: [op_imm_8_id_16]
+        properties: [literalarray_id]
+      - sig: wide.newlexenvwithname imm, literalarray_id
+        acc: out:top
+        opcode_idx: [0x03]
+        format: [pref_op_imm_16_id_16]
+        prefix: wide
+        properties: [literalarray_id]
+      - sig: createasyncgeneratorobj v:in:top
+        acc: out:top
+        opcode_idx: [0xb7]
+        format: [op_v_8]
+      - sig: asyncgeneratorresolve v1:in:top, v2:in:top, v3:in:top
+        acc: out:top
+        opcode_idx: [0xb8]
+        format: [op_v1_8_v2_8_v3_8]
+
+  - title: binary operations 
+    description: binary operations 
+    verification:
+      - none
+    exceptions:
+      - x_none
+    properties:
+      - acc_read
+      - acc_write
+    namespace: ecmascript
+    pseudo: |
+      acc = ecma_op(acc, operand_0, ..., operands_n)
+    semantics: |
+      skip
+    instructions:
+      - sig: add2 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x0a]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: sub2 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x0b]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: mul2 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x0c]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: div2 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x0d]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: mod2 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x0e]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: eq imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x0f]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: noteq imm, v:in:top
+        acc: inout:top
         opcode_idx: [0x10]
-      - sig: lda.64 v:in:b64
-        acc: out:b64
-        format: [op_v_8]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: less imm, v:in:top
+        acc: inout:top
         opcode_idx: [0x11]
-      - sig: lda.obj v:in:ref
-        acc: out:ref
-        format: [op_v_8]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: lesseq imm, v:in:top
+        acc: inout:top
         opcode_idx: [0x12]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: greater imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x13]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: greatereq imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x14]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: shl2 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x15]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: shr2 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x16]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: ashr2 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x17]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: and2 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x18]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: or2 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x19]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: xor2 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x1a]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: exp imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x1b]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
 
-  - title: Load accumulator from immediate
-    description: >
-      Load immediate into accumulator. For short formats immediate is sign extended to operand size.
-    exceptions:
-      - x_none
+  - title: unary operations 
+    description: unary operations
     verification:
       - none
+    exceptions:
+      - x_none
+    properties:
+      - acc_read
+      - acc_write
+    namespace: ecmascript
     pseudo: |
-      acc = imm
+      acc = ecma_op(acc, operand_0, ..., operands_n)
+    semantics: |
+      skip
     instructions:
-      - sig: ldai imm:i32
-        acc: out:i32
-        format: [op_imm_8, op_imm_16, op_imm_32]
-        opcode_idx: [0x13, 0x14, 0x15]
-      - sig: ldai.64 imm:i64
-        acc: out:i64
-        format: [op_imm_64]
+      - sig: typeof imm
+        acc: inout:top
+        opcode_idx: [0x1c, 0x84]
+        format: [op_imm_8, op_imm_16]
+        properties: [ic_slot, two_slot]
+      - sig: tonumber imm
+        acc: inout:top
+        opcode_idx: [0x1d]
+        format: [op_imm_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: deprecated.tonumber v:in:top
+        acc: inout:top
+        opcode_idx: [0x05]
+        format: [pref_op_v_8]
+        prefix: deprecated
+      - sig: tonumeric imm
+        acc: inout:top
+        opcode_idx: [0x1e]
+        format: [op_imm_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: deprecated.tonumeric v:in:top
+        opcode_idx: [0x06]
+        acc: inout:top
+        prefix: deprecated
+        format: [pref_op_v_8]
+      - sig: neg imm
+        acc: inout:top
+        opcode_idx: [0x1f]
+        format: [op_imm_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: deprecated.neg v:in:top
+        acc: out:top
+        opcode_idx: [0x07]
+        format: [pref_op_v_8]
+        prefix: deprecated
+      - sig: not imm
+        acc: inout:top
+        opcode_idx: [0x20]
+        format: [op_imm_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: deprecated.not v:in:top
+        acc: out:top
+        opcode_idx: [0x08]
+        prefix: deprecated
+        format: [pref_op_v_8]
+      - sig: inc imm
+        acc: inout:top
+        opcode_idx: [0x21]
+        format: [op_imm_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: deprecated.inc v:in:top
+        acc: out:top
+        opcode_idx: [0x09]
+        prefix: deprecated
+        format: [pref_op_v_8]
+      - sig: dec imm
+        acc: inout:top
+        opcode_idx: [0x22]
+        format: [op_imm_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: deprecated.dec v:in:top
+        acc: out:top
+        opcode_idx: [0x0a]
+        format: [pref_op_v_8]
+        prefix: deprecated
+      - sig: istrue
+        acc: inout:top
+        opcode_idx: [0x23]
+        format: [op_none]
+      - sig: isfalse
+        acc: inout:top
+        opcode_idx: [0x24]
+        format: [op_none]
+
+  - title: comparation instructions
+    description: comparation instructions
+    verification:
+      - none
+    exceptions:
+      - x_none
+    properties:
+      - acc_read
+      - acc_write
+    namespace: ecmascript
+    pseudo: |
+      acc = ecma_op(acc, operand_0, ..., operands_n)
+    semantics: |
+      skip
+    instructions:
+      - sig: isin imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x25]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: instanceof imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x26]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: strictnoteq imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x27]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+      - sig: stricteq imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x28]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, one_slot]
+
+  - title: throw instructions
+    description: throw instructions
+    verification:
+      - none
+    exceptions:
+      - x_none
+    properties:
+      - acc_read
+      - acc_write
+    namespace: ecmascript
+    pseudo: |
+      acc = ecma_op(acc, operand_0, ..., operands_n)
+    semantics: |
+      skip
+    instructions:
+      - sig: throw
+        acc: in:top
+        opcode_idx: [0x00]
+        format: [pref_op_none]
+        prefix: throw
+      - sig: throw.notexists
+        acc: none
+        opcode_idx: [0x01]
+        format: [pref_op_none]
+        prefix: throw
+      - sig: throw.patternnoncoercible
+        acc: none
+        opcode_idx: [0x02]
+        format: [pref_op_none]
+        prefix: throw
+      - sig: throw.deletesuperproperty
+        acc: none
+        opcode_idx: [0x03]
+        format: [pref_op_none]
+        prefix: throw
+      - sig: throw.constassignment v:in:top
+        acc: none
+        opcode_idx: [0x04]
+        format: [pref_op_v_8]
+        prefix: throw
+      - sig: throw.ifnotobject v:in:top
+        acc: none
+        opcode_idx: [0x05]
+        format: [pref_op_v_8]
+        prefix: throw
+      - sig: throw.undefinedifhole v1:in:top, v2:in:top
+        acc: none
+        opcode_idx: [0x06]
+        format: [pref_op_v1_8_v2_8]
+        prefix: throw
+      - sig: throw.ifsupernotcorrectcall imm
+        acc: in:top
+        opcode_idx: [0x07, 0x08]
+        format: [pref_op_imm_8, pref_op_imm_16]
+        prefix: throw
+
+  - title: call instructions
+    description: call
+    verification:
+      - none
+    exceptions:
+      - x_none
+    properties:
+      - acc_read
+      - acc_write
+    namespace: ecmascript
+    pseudo: |
+      acc = ecma_op(acc, operand_0, ..., operands_n)
+    semantics: |
+      skip
+    instructions:
+      - sig: callarg0 imm
+        acc: inout:top
+        opcode_idx: [0x29]
+        format: [op_imm_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: deprecated.callarg0 v:in:top
+        acc: out:top
+        opcode_idx: [0x0b]
+        format: [pref_op_v_8]
+        prefix: deprecated
+      - sig: callarg1 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x2a]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: deprecated.callarg1 v1:in:top, v2:in:top
+        acc: out:top
+        opcode_idx: [0x0c]
+        format: [pref_op_v1_8_v2_8]
+        prefix: deprecated
+      - sig: callargs2 imm, v1:in:top, v2:in:top
+        acc: inout:top
+        opcode_idx: [0x2b]
+        format: [op_imm_8_v1_8_v2_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: deprecated.callargs2 v1:in:top, v2:in:top, v3:in:top
+        acc: out:top
+        opcode_idx: [0x0d]
+        format: [pref_op_v1_8_v2_8_v3_8]
+        prefix: deprecated
+      - sig: callargs3 imm, v1:in:top, v2:in:top, v3:in:top
+        acc: inout:top
+        opcode_idx: [0x2c]
+        format: [op_imm_8_v1_8_v2_8_v3_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: deprecated.callargs3 v1:in:top, v2:in:top, v3:in:top, v4:in:top
+        acc: out:top
+        opcode_idx: [0x0e]
+        format: [pref_op_v1_8_v2_8_v3_8_v4_8]
+        prefix: deprecated
+      - sig: callrange imm1, imm2, v:in:top
+        acc: inout:top
+        opcode_idx: [0x73]
+        format: [op_imm1_8_imm2_8_v_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: wide.callrange imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x04]
+        format: [pref_op_imm_16_v_8]
+        prefix: wide
+      - sig: deprecated.callrange imm, v:in:top
+        acc: out:top
+        opcode_idx: [0x0f]
+        format: [pref_op_imm_16_v_8]
+        prefix: deprecated
+      - sig: supercallspread imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0xb9]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: apply imm, v1:in:top, v2:in:top
+        acc: inout:top
+        opcode_idx: [0xba]
+        format: [op_imm_8_v1_8_v2_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: deprecated.callspread v1:in:top, v2:in:top, v3:in:top
+        acc: out:top
+        opcode_idx: [0x10]
+        format: [pref_op_v1_8_v2_8_v3_8]
+        prefix: deprecated
+      - sig: callthis0 imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x2d]
+        format: [op_imm_8_v_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: callthis1 imm, v1:in:top, v2:in:top
+        acc: inout:top
+        opcode_idx: [0x2e]
+        format: [op_imm_8_v1_8_v2_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: callthis2 imm, v1:in:top, v2:in:top, v3:in:top
+        acc: inout:top
+        opcode_idx: [0x2f]
+        format: [op_imm_8_v1_8_v2_8_v3_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: callthis3 imm, v1:in:top, v2:in:top, v3:in:top, v4:in:top
+        acc: inout:top
+        opcode_idx: [0x30]
+        format: [op_imm_8_v1_8_v2_8_v3_8_v4_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: callthisrange imm1, imm2, v:in:top
+        acc: inout:top
+        opcode_idx: [0x31]
+        format: [op_imm1_8_imm2_8_v_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: wide.callthisrange imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x05]
+        format: [pref_op_imm_16_v_8]
+        prefix: wide
+      - sig: deprecated.callthisrange imm, v:in:top
+        acc: out:top
+        opcode_idx: [0x11]
+        format: [pref_op_imm_16_v_8]
+        prefix: deprecated
+      - sig: supercallthisrange imm1, imm2, v:in:top
+        acc: out:top
+        opcode_idx: [0x32]
+        format: [op_imm1_8_imm2_8_v_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: wide.supercallthisrange imm, v:in:top
+        acc: out:top
+        opcode_idx: [0x06]
+        format: [pref_op_imm_16_v_8]
+        prefix: wide
+      - sig: supercallarrowrange imm1, imm2, v:in:top
+        acc: inout:top
+        opcode_idx: [0xbb]
+        format: [op_imm1_8_imm2_8_v_8]
+        properties: [jit_ic_slot, two_slot]
+      - sig: wide.supercallarrowrange imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x07]
+        format: [pref_op_imm_16_v_8]
+        prefix: wide
+
+  - title: definition instuctions
+    description: instructions which define object
+    verification:
+      - none
+    exceptions:
+      - x_none
+    properties:
+      - acc_read
+      - acc_write
+    namespace: ecmascript
+    pseudo: |
+      acc = ecma_op(acc, operand_0, ..., operands_n)
+    semantics: |
+      skip
+    instructions:
+      - sig: definegettersetterbyvalue v1:in:top, v2:in:top, v3:in:top, v4:in:top
+        acc: inout:top
+        opcode_idx: [0xbc]
+        format: [op_v1_8_v2_8_v3_8_v4_8]
+      - sig: definefunc imm1, method_id, imm2
+        acc: out:top
+        opcode_idx: [0x33, 0x74]
+        format: [op_imm1_8_id_16_imm2_8, op_imm1_16_id_16_imm2_8]
+        properties: [method_id, ic_slot, one_slot]
+      - sig: definemethod imm1, method_id, imm2
+        acc: inout:top
+        opcode_idx: [0x34, 0xbe]
+        format: [op_imm1_8_id_16_imm2_8, op_imm1_16_id_16_imm2_8]
+        properties: [method_id, ic_slot, one_slot]
+      - sig: defineclasswithbuffer imm1, method_id, literalarray_id, imm2, v:in:top
+        acc: out:top
+        opcode_idx: [0x35, 0x75]
+        format: [op_imm1_8_id1_16_id2_16_imm2_16_v_8, op_imm1_16_id1_16_id2_16_imm2_16_v_8]
+        properties: [method_id, ic_slot, one_slot, literalarray_id]
+      - sig: deprecated.defineclasswithbuffer method_id, imm1, imm2, v1:in:top, v2:in:top
+        acc: out:top
+        opcode_idx: [0x12]
+        format: [pref_op_id_16_imm1_16_imm2_16_v1_8_v2_8]
+        prefix: deprecated
+        properties: [method_id]
+
+  - title: object visitors
+    description: instructions which visit object
+    verification:
+      - none
+    exceptions:
+      - x_none
+    properties:
+      - acc_read
+      - acc_write
+    namespace: ecmascript
+    pseudo: |
+      acc = ecma_op(acc, operand_0, ..., operands_n)
+    semantics: |
+      skip
+    instructions:
+      - sig: resumegenerator
+        acc: inout:top
+        opcode_idx: [0xbf]
+        format: [op_none]
+      - sig: deprecated.resumegenerator v:in:top
+        acc: out:top
+        opcode_idx: [0x13]
+        format: [pref_op_v_8]
+        prefix: deprecated
+      - sig: getresumemode
+        acc: inout:top
+        opcode_idx: [0xc0]
+        format: [op_none]
+      - sig: deprecated.getresumemode v:in:top
+        acc: out:top
+        opcode_idx: [0x14]
+        format: [pref_op_v_8]
+        prefix: deprecated
+      - sig: gettemplateobject imm
+        acc: inout:top
+        opcode_idx: [0x76, 0xc1]
+        format: [op_imm_8, op_imm_16]
+        properties: [ic_slot, one_slot]
+      - sig: deprecated.gettemplateobject v:in:top
+        acc: inout:top
+        opcode_idx: [0x15]
+        format: [pref_op_v_8]
+        prefix: deprecated
+      - sig: getnextpropname v:in:top
+        acc: out:top
+        opcode_idx: [0x36]
+        format: [op_v_8]
+      - sig: delobjprop v:in:top
+        acc: inout:top
+        opcode_idx: [0xc2]
+        format: [op_v_8]
+      - sig: deprecated.delobjprop v1:in:top, v2:in:top
+        acc: out:top
         opcode_idx: [0x16]
-      - sig: fldai imm:f32
-        acc: out:f32
-        prefix: f32
-        format: [pref_op_imm_32]
-        opcode_idx: [0x1]
-        properties: [float]
-      - sig: fldai.64 imm:f64
-        acc: out:f64
-        format: [op_imm_64]
+        format: [pref_op_v1_8_v2_8]
+        prefix: deprecated
+      - sig: suspendgenerator v:in:top
+        acc: inout:top
+        opcode_idx: [0xc3]
+        format: [op_v_8]
+      - sig: deprecated.suspendgenerator v1:in:top, v2:in:top
+        acc: out:top
         opcode_idx: [0x17]
-        properties: [float]
+        format: [pref_op_v1_8_v2_8]
+        prefix: deprecated
+      - sig: asyncfunctionawaituncaught v:in:top
+        acc: inout:top
+        opcode_idx: [0xc4]
+        format: [op_v_8]
+      - sig: deprecated.asyncfunctionawaituncaught v1:in:top, v2:in:top
+        acc: out:top
+        opcode_idx: [0x18]
+        format: [pref_op_v1_8_v2_8]
+        prefix: deprecated
+      - sig: copydataproperties v:in:top
+        acc: inout:top
+        opcode_idx: [0xc5]
+        format: [op_v_8]
+      - sig: deprecated.copydataproperties v1:in:top, v2:in:top
+        acc: out:top
+        opcode_idx: [0x19]
+        format: [pref_op_v1_8_v2_8]
+        prefix: deprecated
+      - sig: starrayspread v1:in:top, v2:in:top
+        acc: inout:top
+        opcode_idx: [0xc6]
+        format: [op_v1_8_v2_8]
+      - sig: setobjectwithproto imm, v:in:top
+        acc: in:top
+        opcode_idx: [0x77, 0xc7]
+        format: [op_imm_8_v_8, op_imm_16_v_8]
+        properties: [ic_slot, two_slot]
+      - sig: deprecated.setobjectwithproto v1:in:top, v2:in:top
+        acc: none
+        opcode_idx: [0x1a]
+        format: [pref_op_v1_8_v2_8]
+        prefix: deprecated
+      - sig: ldobjbyvalue imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x37, 0x85]
+        format: [op_imm_8_v_8, op_imm_16_v_8]
+        properties: [ic_slot, two_slot]
+      - sig: deprecated.ldobjbyvalue v1:in:top, v2:in:top
+        acc: out:top
+        opcode_idx: [0x1b]
+        format: [pref_op_v1_8_v2_8]
+        prefix: deprecated
+      - sig: stobjbyvalue imm, v1:in:top, v2:in:top
+        acc: in:top
+        opcode_idx: [0x38, 0x86]
+        format: [op_imm_8_v1_8_v2_8, op_imm_16_v1_8_v2_8]
+        properties: [ic_slot, two_slot]
+      - sig: stownbyvalue imm, v1:in:top, v2:in:top
+        acc: in:top
+        opcode_idx: [0x78, 0xc8]
+        format: [op_imm_8_v1_8_v2_8, op_imm_16_v1_8_v2_8]
+        properties: [ic_slot, two_slot]
+      - sig: ldsuperbyvalue imm, v:in:top
+        acc: inout:top
+        opcode_idx: [0x39, 0x87]
+        format: [op_imm_8_v_8, op_imm_16_v_8]
+        properties: [ic_slot, two_slot]
+      - sig: deprecated.ldsuperbyvalue v1:in:top, v2:in:top
+        acc: out:top
+        opcode_idx: [0x1c]
+        format: [pref_op_v1_8_v2_8]
+        prefix: deprecated
+      - sig: stsuperbyvalue imm, v1:in:top, v2:in:top
+        acc: in:top
+        opcode_idx: [0xc9, 0xca]
+        format: [op_imm_8_v1_8_v2_8, op_imm_16_v1_8_v2_8]
+        properties: [ic_slot, two_slot]
+      - sig: ldobjbyindex imm1, imm2
+        acc: inout:top
+        opcode_idx: [0x3a, 0x88]
+        format: [op_imm1_8_imm2_16, op_imm1_16_imm2_16]
+        properties: [ic_slot, two_slot]
+      - sig: wide.ldobjbyindex imm
+        acc: inout:top
+        opcode_idx: [0x08]
+        format: [pref_op_imm_32]
+        prefix: wide
+      - sig: deprecated.ldobjbyindex v:in:top, imm
+        acc: out:top
+        opcode_idx: [0x1d]
+        format: [pref_op_v_8_imm_32]
+        prefix: deprecated
+      - sig: stobjbyindex imm1, v:in:top, imm2
+        acc: in:top
+        opcode_idx: [0x3b, 0x89]
+        format: [op_imm1_8_v_8_imm2_16, op_imm1_16_v_8_imm2_16]
+        properties: [ic_slot, two_slot]
+      - sig: wide.stobjbyindex v:in:top, imm
+        acc: in:top
+        opcode_idx: [0x09]
+        format: [pref_op_v_8_imm_32]
+        prefix: wide
+      - sig: stownbyindex imm1, v:in:top, imm2
+        acc: in:top
+        opcode_idx: [0x79, 0xcb]
+        format: [op_imm1_8_v_8_imm2_16, op_imm1_16_v_8_imm2_16]
+        properties: [ic_slot, two_slot]
+      - sig: wide.stownbyindex v:in:top, imm
+        acc: in:top
+        opcode_idx: [0x0a]
+        format: [pref_op_v_8_imm_32]
+        prefix: wide
+      - sig: asyncfunctionresolve v:in:top
+        acc: inout:top
+        opcode_idx: [0xcd]
+        format: [op_v_8]
+      - sig: deprecated.asyncfunctionresolve v1:in:top, v2:in:top, v3:in:top
+        acc: out:top
+        opcode_idx: [0x1e]
+        format: [pref_op_v1_8_v2_8_v3_8]
+        prefix: deprecated
+      - sig: asyncfunctionreject v:in:top
+        acc: inout:top
+        opcode_idx: [0xce]
+        format: [op_v_8]
+      - sig: deprecated.asyncfunctionreject v1:in:top, v2:in:top, v3:in:top
+        acc: out:top
+        opcode_idx: [0x1f]
+        format: [pref_op_v1_8_v2_8_v3_8]
+        prefix: deprecated
+      - sig: copyrestargs imm
+        acc: out:top
+        opcode_idx: [0xcf]
+        format: [op_imm_8]
+      - sig: wide.copyrestargs imm
+        acc: out:top
+        opcode_idx: [0x0b]
+        format: [pref_op_imm_16]
+        prefix: wide
+      - sig: ldlexvar imm1, imm2
+        acc: out:top
+        opcode_idx: [0x3c, 0x8a]
+        format: [op_imm1_4_imm2_4, op_imm1_8_imm2_8]
+      - sig: wide.ldlexvar imm1, imm2
+        acc: out:top
+        opcode_idx: [0x0c]
+        format: [pref_op_imm1_16_imm2_16]
+        prefix: wide
+      - sig: stlexvar imm1, imm2
+        acc: in:top
+        opcode_idx: [0x3d, 0x8b]
+        format: [op_imm1_4_imm2_4, op_imm1_8_imm2_8]
+      - sig: wide.stlexvar imm1, imm2
+        acc: in:top
+        opcode_idx: [0x0d]
+        format: [pref_op_imm1_16_imm2_16]
+        prefix: wide
+      - sig: deprecated.stlexvar imm1, imm2, v:in:top
+        acc: none
+        opcode_idx: [0x20, 0x21, 0x22]
+        format: [pref_op_imm1_4_imm2_4_v_8, pref_op_imm1_8_imm2_8_v_8, pref_op_imm1_16_imm2_16_v_8]
+        prefix: deprecated
+      - sig: getmodulenamespace imm
+        acc: out:top
+        opcode_idx: [0x7b]
+        format: [op_imm_8]
+      - sig: wide.getmodulenamespace imm
+        acc: out:top
+        opcode_idx: [0x0e]
+        format: [pref_op_imm_16]
+        prefix: wide
+      - sig: deprecated.getmodulenamespace string_id
+        acc: out:top
+        opcode_idx: [0x23]
+        format: [pref_op_id_32]
+        properties: [string_id]
+        prefix: deprecated
+      - sig: stmodulevar imm
+        acc: in:top
+        opcode_idx: [0x7c]
+        format: [op_imm_8]
+      - sig: wide.stmodulevar imm
+        acc: in:top
+        opcode_idx: [0x0f]
+        format: [pref_op_imm_16]
+        prefix: wide
+      - sig: deprecated.stmodulevar string_id
+        acc: in:top
+        opcode_idx: [0x24]
+        format: [pref_op_id_32]
+        properties: [string_id]
+        prefix: deprecated
+      - sig: tryldglobalbyname imm, string_id
+        acc: out:top
+        opcode_idx: [0x3f, 0x8c]
+        format: [op_imm_8_id_16, op_imm_16_id_16]
+        properties: [string_id, ic_slot, one_slot]
+      - sig: trystglobalbyname imm, string_id
+        acc: in:top
+        opcode_idx: [0x40, 0x8d]
+        format: [op_imm_8_id_16, op_imm_16_id_16]
+        properties: [string_id, ic_slot, one_slot]
+      - sig: ldglobalvar imm, string_id
+        acc: out:top
+        opcode_idx: [0x41]
+        format: [op_imm_16_id_16]
+        properties: [string_id, ic_slot, one_slot]
+      - sig: stglobalvar imm, string_id
+        acc: in:top
+        opcode_idx: [0x7f]
+        format: [op_imm_16_id_16]
+        properties: [string_id, ic_slot, one_slot]
+      - sig: ldobjbyname imm, string_id
+        acc: inout:top
+        opcode_idx: [0x42, 0x90]
+        format: [op_imm_8_id_16, op_imm_16_id_16]
+        properties: [string_id, ic_slot, two_slot]
+      - sig: deprecated.ldobjbyname string_id, v:in:top
+        acc: out:top
+        opcode_idx: [0x25]
+        format: [pref_op_id_32_v_8]
+        properties: [string_id]
+        prefix: deprecated
+      - sig: stobjbyname imm, string_id, v:in:top
+        acc: in:top
+        opcode_idx: [0x43, 0x91]
+        format: [op_imm_8_id_16_v_8, op_imm_16_id_16_v_8]
+        properties: [string_id, ic_slot, two_slot]
+      - sig: stownbyname imm, string_id, v:in:top
+        acc: in:top
+        opcode_idx: [0x7a, 0xcc]
+        format: [op_imm_8_id_16_v_8, op_imm_16_id_16_v_8]
+        properties: [string_id, ic_slot, two_slot]
+      - sig: ldsuperbyname imm, string_id
+        acc: inout:top
+        opcode_idx: [0x46, 0x92]
+        format: [op_imm_8_id_16, op_imm_16_id_16]
+        properties: [string_id, ic_slot, two_slot]
+      - sig: deprecated.ldsuperbyname string_id, v:in:top
+        acc: out:top
+        opcode_idx: [0x26]
+        format: [pref_op_id_32_v_8]
+        properties: [string_id]
+        prefix: deprecated
+      - sig: stsuperbyname imm, string_id, v:in:top
+        acc: in:top
+        opcode_idx: [0xd0, 0xd1]
+        format: [op_imm_8_id_16_v_8, op_imm_16_id_16_v_8]
+        properties: [string_id, ic_slot, two_slot]
+      - sig: ldlocalmodulevar imm
+        opcode_idx: [0x7d]
+        acc: out:top
+        format: [op_imm_8]
+      - sig: wide.ldlocalmodulevar imm
+        acc: out:top
+        opcode_idx: [0x10]
+        format: [pref_op_imm_16]
+        prefix: wide
+      - sig: ldexternalmodulevar imm
+        acc: out:top
+        opcode_idx: [0x7e]
+        format: [op_imm_8]
+      - sig: wide.ldexternalmodulevar imm
+        acc: out:top
+        opcode_idx: [0x11]
+        format: [pref_op_imm_16]
+        prefix: wide
+      - sig: deprecated.ldmodulevar string_id, imm
+        acc: out:top
+        opcode_idx: [0x27]
+        format: [pref_op_id_32_imm_8]
+        prefix: deprecated
+        properties: [string_id]
+      - sig: stconsttoglobalrecord imm, string_id
+        acc: in:top
+        opcode_idx: [0x47]
+        format: [op_imm_16_id_16]
+        properties: [string_id, ic_slot, one_slot]
+      - sig: deprecated.stconsttoglobalrecord string_id
+        acc: in:top
+        opcode_idx: [0x28]
+        format: [pref_op_id_32]
+        properties: [string_id]
+        prefix: deprecated
+      - sig: sttoglobalrecord imm, string_id
+        acc: in:top
+        opcode_idx: [0x48]
+        format: [op_imm_16_id_16]
+        properties: [string_id, ic_slot, one_slot]
+      - sig: deprecated.stlettoglobalrecord string_id
+        acc: in:top
+        opcode_idx: [0x29]
+        format: [pref_op_id_32]
+        properties: [string_id]
+        prefix: deprecated
+      - sig: deprecated.stclasstoglobalrecord string_id
+        acc: in:top
+        opcode_idx: [0x2a]
+        format: [pref_op_id_32]
+        properties: [string_id]
+        prefix: deprecated
+      - sig: deprecated.ldhomeobject
+        acc: out:top
+        opcode_idx: [0x2b]
+        format: [pref_op_none]
+        prefix: deprecated
+      - sig: deprecated.createobjecthavingmethod imm
+        acc: inout:top
+        opcode_idx: [0x2c]
+        format: [pref_op_imm_16]
+        prefix: deprecated
+      - sig: stownbyvaluewithnameset imm, v1:in:top, v2:in:top
+        acc: in:top
+        opcode_idx: [0x99, 0xd2]
+        format: [op_imm_8_v1_8_v2_8, op_imm_16_v1_8_v2_8]
+        properties: [ic_slot, two_slot]
+      - sig: stownbynamewithnameset imm, string_id, v:in:top
+        acc: in:top
+        opcode_idx: [0x8e, 0xd4]
+        format: [op_imm_8_id_16_v_8, op_imm_16_id_16_v_8]
+        properties: [string_id, ic_slot, two_slot]
+      - sig: ldbigint string_id
+        acc: out:top
+        opcode_idx: [0xd3]
+        format: [op_id_16]
+        properties: [string_id]
+      - sig: ldthisbyname imm, string_id
+        acc: out:top
+        opcode_idx: [0x49, 0x93]
+        format: [op_imm_8_id_16, op_imm_16_id_16]
+        properties: [string_id, ic_slot, two_slot]
+      - sig: stthisbyname imm, string_id
+        acc: in:top
+        opcode_idx: [0x4a, 0x94]
+        format: [op_imm_8_id_16, op_imm_16_id_16]
+        properties: [string_id, ic_slot, two_slot]
+      - sig: ldthisbyvalue imm
+        acc: inout:top
+        opcode_idx: [0x4b, 0x95]
+        format: [op_imm_8, op_imm_16]
+        properties: [ic_slot, two_slot]
+      - sig: stthisbyvalue imm, v:in:top
+        acc: in:top
+        opcode_idx: [0x4c, 0x96]
+        format: [op_imm_8_v_8, op_imm_16_v_8]
+        properties: [ic_slot, two_slot]
+      - sig: wide.ldpatchvar imm
+        acc: out:top
+        opcode_idx: [0x12]
+        format: [pref_op_imm_16]
+        prefix: wide
+      - sig: wide.stpatchvar imm
+        acc: in:top
+        opcode_idx: [0x13]
+        format: [pref_op_imm_16]
+        prefix: wide
+      - sig: dynamicimport
+        acc: inout:top
+        opcode_idx: [0xbd]
+        format: [op_none]
+      - sig: deprecated.dynamicimport v:in:top
+        acc: out:top
+        opcode_idx: [0x2d]
+        format: [pref_op_v_8]
+        prefix: deprecated
+      - sig: asyncgeneratorreject v:in:top
+        acc: inout:top
+        opcode_idx: [0x97]
+        format: [op_v_8]
+      - sig: deprecated.asyncgeneratorreject v1:in:top, v2:in:top
+        acc: out:top
+        opcode_idx: [0x2e]
+        format: [pref_op_v1_8_v2_8]
+        prefix: deprecated
 
   - title: Load accumulator from string constant pool
     description: >
@@ -401,168 +1416,12 @@ groups:
     instructions:
       - sig: lda.str string_id
         acc: out:ref
-        format: [op_id_32]
-        opcode_idx: [0x18]
-
-  - title: Create and initialize new constant array
-    description: >
-      Create a new single-dimensional constant literal array and put a reference to it into register.
-    properties:
-      - literalarray_id
-    exceptions:
-      - x_oom
-    verification:
-      - constant_literalarray_id
-    pseudo: |
-      arr = load(id)
-      if arr == nullptr then
-        throw OutOfMemoryError
-      end
-      v = arr
-    instructions:
-      - sig: lda.const v:out:ref, literalarray_id
-        acc: none
-        format: [op_v_8_id_32]
-        opcode_idx: [0x19]
-
-  - title: Load accumulator from type constant pool
-    description: Load type specified by id into accumulator.
-    properties:
-      - type_id
-      - language_type
-    exceptions:
-      - x_link
-    verification:
-      - type_id_any_object
-    pseudo: |
-      type = load(id)
-      if type == nullptr then
-        throw NoClassDefFoundError
-      end
-      acc = type
-    instructions:
-      - sig: lda.type type_id
-        acc: out:ref
+        opcode_idx: [0x3e]
         format: [op_id_16]
-        opcode_idx: [0x1a]
 
-  - title: Load null reference into accumulator
-    description: Load null reference into accumulator.
-    exceptions:
-      - x_none
-    verification:
-      - none
-    pseudo: |
-      acc = null
-    instructions:
-      - sig: lda.null
-        acc: out:ref
-        format: [op_none]
-        opcode_idx: [0x1b]
-
-  - title: Store accumulator
-    description: Moves accumulator content into a register.
-    exceptions:
-      - x_none
-    verification:
-      - acc_type
-    pseudo: |
-      vd = acc
-    instructions:
-      - sig: sta v:out:b32
-        acc: in:b32
-        format: [op_v_8]
-        opcode_idx: [0x1c]
-      - sig: sta.64 v:out:b64
-        acc: in:b64
-        format: [op_v_8]
-        opcode_idx: [0x1d]
-      - sig: sta.obj v:out:ref
-        acc: in:ref
-        format: [op_v_8]
-        opcode_idx: [0x1e]
-
-  - title: Integer comparison
-    description: Perform specified signed or unsigned integer comparison between register and accumulator.
-    exceptions:
-      - x_none
-    verification:
-      - acc_type
-      - v1_type
-    pseudo: |
-        if acc < vs then
-          acc = -1
-        else if acc == vs then
-          acc = 0
-        else
-          acc = 1
-        end
-    instructions:
-      - sig: cmp.64 v:in:i64
-        acc: inout:i64->i32
-        format: [op_v_8]
-        opcode_idx: [0x1f]
-      - sig: ucmp v:in:u32
-        acc: inout:u32->i32
-        prefix: unsigned
-        format: [pref_op_v_8]
-        opcode_idx: [0x0]
-      - sig: ucmp.64 v:in:u64
-        acc: inout:u64->i32
-        prefix: unsigned
-        format: [pref_op_v_8]
-        opcode_idx: [0x1]
-
-  - title: Floating-point comparison
-    description: Perform specified floating point comparison between register and accumulator.
-    properties:
-      - float
-    exceptions:
-      - x_none
-    verification:
-      - acc_type
-      - v1_type
-    pseudo: |
-      if isnan(acc) or isnan(vs) then
-        switch (op)
-        case fcmpg:
-        case fcmpg.64:
-          acc = 1
-        case fcmpl:
-        case fcmpl.64:
-          acc = -1
-      else
-        if acc < vs then
-          acc = -1
-        else if acc == vs then
-          acc = 0
-        else
-          acc = 1
-        end
-      end
-    instructions:
-      - sig: fcmpl v:in:f32
-        acc: inout:f32->i32
-        prefix: f32
-        format: [pref_op_v_8]
-        opcode_idx: [0x2]
-      - sig: fcmpl.64 v:in:f64
-        acc: inout:f64->i32
-        format: [op_v_8]
-        opcode_idx: [0x20]
-      - sig: fcmpg v:in:f32
-        acc: inout:f32->i32
-        prefix: f32
-        format: [pref_op_v_8]
-        opcode_idx: [0x3]
-      - sig: fcmpg.64 v:in:f64
-        acc: inout:f64->i32
-        format: [op_v_8]
-        opcode_idx: [0x21]
-
-  - title: Unconditional jump
+  - title: jump operations
     description: >
-      Unconditionally transfer execution to an instruction at offset bytes from the beginning of the current
+      Transfer execution to an instruction at offset bytes from the beginning of the current
       instruction. Offset is sign extended to the size of instruction address.
     properties:
       - jump
@@ -573,1817 +1432,90 @@ groups:
     pseudo: |
       pc += imm
     instructions:
-      - sig: jmp imm:i32
+      - sig: jmp imm
         acc: none
+        opcode_idx: [0x4d, 0x4e, 0x98]
         format: [op_imm_8, op_imm_16, op_imm_32]
-        opcode_idx: [0x22, 0x23, 0x24]
-
-  - title: Conditional object comparison jump
-    description: >
-      Transfer execution to an instruction at offset bytes from the beginning of the current instruction if
-      object references in accumulator and source register compare as specified. Offset is sign extended to the size of
-      instruction address.
-    properties:
-      - jump
-      - conditional
-    exceptions:
-      - x_none
-    verification:
-      - branch_target
-      - acc_obj_or_null
-      - v1_obj_or_null
-    pseudo: |
-      switch (cc)
-      case eq:
-        if acc == vs then
-          pc += imm
-        end
-      case ne:
-        if acc != vs then
-          pc += imm
-      end
-    instructions:
-      - sig: jeq.obj v:in:ref, imm:i32
-        acc: in:ref
-        format: [op_v_8_imm_8, op_v_8_imm_16]
-        opcode_idx: [0x25, 0x26]
-      - sig: jne.obj v:in:ref, imm:i32
-        acc: in:ref
-        format: [op_v_8_imm_8, op_v_8_imm_16]
-        opcode_idx: [0x27, 0x28]
-
-  - title: Conditional compared to null jump
-    description: >
-      Transfer execution to an instruction at offset bytes from the beginning of the current instruction if
-      object reference in accumulator compares with null as specified. Offset is sign extended to the size of
-      instruction address.
-    properties:
-      - jump
-      - conditional
-    exceptions:
-      - x_none
-    verification:
-      - branch_target
-      - acc_obj_or_null
-    pseudo: |
-      switch (cc)
-      case eq:
-        if acc == null then
-          pc += imm
-        end
-      case ne:
-        if acc != null then
-          pc += imm
-      end
-    instructions:
-      - sig: jeqz.obj imm:i32
-        acc: in:ref
+      - sig: jeqz imm
+        acc: in:top
+        opcode_idx: [0x4f, 0x50, 0x9a]
+        format: [op_imm_8, op_imm_16, op_imm_32]
+        properties: [conditional]
+      - sig: jnez imm
+        acc: in:top
+        opcode_idx: [0x51, 0x9b, 0x9c]
+        format: [op_imm_8, op_imm_16, op_imm_32]
+        properties: [conditional]
+      - sig: jstricteqz imm
+        acc: in:top
+        opcode_idx: [0x52, 0x9d]
         format: [op_imm_8, op_imm_16]
-        opcode_idx: [0x29, 0x2a]
-      - sig: jnez.obj imm:i32
-        acc: in:ref
+        properties: [conditional]
+      - sig: jnstricteqz imm
+        acc: in:top
+        opcode_idx: [0x53, 0x9e]
         format: [op_imm_8, op_imm_16]
-        opcode_idx: [0x2b, 0x2c]
-
-  - title: Conditional compared to zero jump
-    description: >
-      Transfer execution to an instruction at offset bytes from the beginning of the current instruction if
-      signed 32-bit integer in accumulator compares with 0 as specified. Offset is sign extended to the size
-      of instruction address.
-    properties:
-      - jump
-      - conditional
-    exceptions:
-      - x_none
-    verification:
-      - branch_target
-      - acc_type
-    pseudo: |
-      switch (cc)
-      case eq:
-        if acc == 0 then
-          pc += imm
-        end
-      case ne:
-        if acc != 0 then
-          pc += imm
-        end
-      case lt:
-        if acc < 0 then
-          pc += imm
-        end
-      case gt:
-        if acc > 0 then
-          pc += imm
-        end
-      case le:
-        if acc <= 0 then
-          pc += imm
-        end
-      case ge:
-        if acc >= 0 then
-          pc += imm
-        end
-    instructions:
-      - sig: jeqz imm:i32
-        acc: in:i32
+        properties: [conditional]
+      - sig: jeqnull imm
+        acc: in:top
+        opcode_idx: [0x54, 0x9f]
         format: [op_imm_8, op_imm_16]
-        opcode_idx: [0x2d, 0x2e]
-      - sig: jnez imm:i32
-        acc: in:i32
+        properties: [conditional]
+      - sig: jnenull imm
+        acc: in:top
+        opcode_idx: [0x55, 0xa0]
         format: [op_imm_8, op_imm_16]
-        opcode_idx: [0x2f, 0x30]
-      - sig: jltz imm:i32
-        acc: in:i32
+        properties: [conditional]
+      - sig: jstricteqnull imm
+        acc: in:top
+        opcode_idx: [0x56, 0xa1]
         format: [op_imm_8, op_imm_16]
-        opcode_idx: [0x31, 0x32]
-      - sig: jgtz imm:i32
-        acc: in:i32
+        properties: [conditional]
+      - sig: jnstricteqnull imm
+        acc: in:top
+        opcode_idx: [0x57, 0xa2]
         format: [op_imm_8, op_imm_16]
-        opcode_idx: [0x33, 0x34]
-      - sig: jlez imm:i32
-        acc: in:i32
+        properties: [conditional]
+      - sig: jequndefined imm
+        acc: in:top
+        opcode_idx: [0x58, 0xa3]
         format: [op_imm_8, op_imm_16]
-        opcode_idx: [0x35, 0x36]
-      - sig: jgez imm:i32
-        acc: in:i32
+        properties: [conditional]
+      - sig: jneundefined imm
+        acc: in:top
+        opcode_idx: [0x59, 0xa4]
         format: [op_imm_8, op_imm_16]
-        opcode_idx: [0x37, 0x38]
-
-  - title: Conditional compared to register jump
-    description: >
-      Transfer execution to an instruction at offset bytes from the beginning of the current instruction if signed
-      32-bit integers in accumulator and register compare as specified. Offset is sign extended to the size of
-      instruction address.
-    properties:
-      - jump
-      - conditional
-    exceptions:
-      - x_none
-    verification:
-      - branch_target
-      - acc_type
-      - v1_type
-    pseudo: |
-      diff = signed_cmp(acc, vs)
-      switch (cc)
-      case eq:
-        if diff == 0 then
-          pc += imm
-        end
-      case ne:
-        if diff != 0 then
-          pc += imm
-        end
-      case lt:
-        if diff < 0 then
-          pc += imm
-        end
-      case gt:
-        if diff > 0 then
-          pc += imm
-        end
-      case le:
-        if diff <= 0 then
-          pc += imm
-        end
-      case ge:
-        if diff >= 0 then
-          pc += imm
-        end
-    instructions:
-      - sig: jeq v:in:i32, imm:i32
-        acc: in:i32
+        properties: [conditional]
+      - sig: jstrictequndefined imm
+        acc: in:top
+        opcode_idx: [0x5a, 0xa5]
+        format: [op_imm_8, op_imm_16]
+        properties: [conditional]
+      - sig: jnstrictequndefined imm
+        acc: in:top
+        opcode_idx: [0x5b, 0xa6]
+        format: [op_imm_8, op_imm_16]
+        properties: [conditional]
+      - sig: jeq v:in:top, imm
+        acc: in:top
+        opcode_idx: [0x5c, 0xa7]
         format: [op_v_8_imm_8, op_v_8_imm_16]
-        opcode_idx: [0x39, 0x3a]
-      - sig: jne v:in:i32, imm:i32
-        acc: in:i32
+        properties: [conditional]
+      - sig: jne v:in:top, imm
+        acc: in:top
+        opcode_idx: [0x5d, 0xa8]
         format: [op_v_8_imm_8, op_v_8_imm_16]
-        opcode_idx: [0x3b, 0x3c]
-      - sig: jlt v:in:i32, imm:i32
-        acc: in:i32
+        properties: [conditional]
+      - sig: jstricteq v:in:top, imm
+        acc: in:top
+        opcode_idx: [0x5e, 0xa9]
         format: [op_v_8_imm_8, op_v_8_imm_16]
-        opcode_idx: [0x3d, 0x3e]
-      - sig: jgt v:in:i32, imm:i32
-        acc: in:i32
+        properties: [conditional]
+      - sig: jnstricteq v:in:top, imm
+        acc: in:top
+        opcode_idx: [0x5f, 0xaa]
         format: [op_v_8_imm_8, op_v_8_imm_16]
-        opcode_idx: [0x3f, 0x40]
-      - sig: jle v:in:i32, imm:i32
-        acc: in:i32
-        format: [op_v_8_imm_8, op_v_8_imm_16]
-        opcode_idx: [0x41, 0x42]
-      - sig: jge v:in:i32, imm:i32
-        acc: in:i32
-        format: [op_v_8_imm_8, op_v_8_imm_16]
-        opcode_idx: [0x43, 0x44]
-
-  - title: Floating-point unary
-    description: Perform specified floating-point operation on accumulator
-    properties:
-      - float
-    exceptions:
-      - x_none
-    verification:
-      - acc_type
-    pseudo: |
-      switch (op)
-      case fneg:
-      case fneg.64:
-        acc = -acc
-    instructions:
-      - sig: fneg
-        acc: inout:f32
-        prefix: f32
-        format: [pref_op_none]
-        opcode_idx: [0x4]
-      - sig: fneg.64
-        acc: inout:f64
-        format: [op_none]
-        opcode_idx: [0x45]
-
-  - title: Unary
-    description: Perform specified operation on accumulator
-    exceptions:
-      - x_none
-    verification:
-      - acc_type
-    pseudo: |
-      switch (op)
-      case neg:
-      case neg.64:
-        acc = -acc
-      case not:
-      case not.64:
-        acc = ~acc
-    instructions:
-      - sig: neg
-        acc: inout:i32
-        format: [op_none]
-        opcode_idx: [0x46]
-      - sig: neg.64
-        acc: inout:i64
-        format: [op_none]
-        opcode_idx: [0x47]
-      - sig: not
-        acc: inout:i32
-        prefix: bit
-        format: [pref_op_none]
-        opcode_idx: [0x0]
-      - sig: not.64
-        acc: inout:i64
-        prefix: bit
-        format: [pref_op_none]
-        opcode_idx: [0x1]
-
-  - title: Two address binary operation on accumulator
-    description: Perform specified binary operation on accumulator and register and store result into accumulator
-    exceptions:
-      - x_none
-    verification:
-      - acc_type
-      - v1_type
-    pseudo: |
-      switch (op)
-      case add2:
-        acc = (acc + vs) % 2^32
-      case add2.64:
-        acc = (acc + vs) % 2^64
-      case sub2:
-        acc = (acc - vs) % 2^32
-      case sub2.64:
-        acc = (acc - vs) % 2^64
-      case mul2:
-        acc = (acc * vs) % 2^32
-      case mul2.64:
-        acc = (acc * vs) % 2^64
-      case and2:
-        acc = acc & vs
-      case and2.64:
-        acc = acc & vs
-      case or2:
-        acc = acc | vs
-      case or2.64:
-        acc = acc | vs
-      case xor2:
-        acc = acc ^ vs
-      case xor2.64:
-        acc = acc ^ vs
-      case shl2:
-        acc = (acc << (vs & 0x1f)) % 2^32
-      case shl2.64:
-        acc = (acc << (vs & 0x3f)) % 2^64
-      case shr2:
-        acc = acc >> (vs & 0x1f)
-      case shr2.64:
-        acc = acc >> (vs & 0x3f)
-      case ashr2:
-        acc = (acc < 0) ? ~(~acc >> vs & 0x1f) : acc >> vs & 0x1f
-      case ashr2.64:
-        acc = (acc < 0) ? ~(~acc >> vs & 0x3f) : acc >> vs & 0x3f
-    instructions:
-      - sig: add2 v:in:i32
-        acc: inout:i32
-        format: [op_v_8]
-        opcode_idx: [0x48]
-      - sig: add2.64 v:in:i64
-        acc: inout:i64
-        format: [op_v_8]
-        opcode_idx: [0x49]
-      - sig: sub2 v:in:i32
-        acc: inout:i32
-        format: [op_v_8]
-        opcode_idx: [0x4a]
-      - sig: sub2.64 v:in:i64
-        acc: inout:i64
-        format: [op_v_8]
-        opcode_idx: [0x4b]
-      - sig: mul2 v:in:i32
-        acc: inout:i32
-        format: [op_v_8]
-        opcode_idx: [0x4c]
-      - sig: mul2.64 v:in:i64
-        acc: inout:i64
-        format: [op_v_8]
-        opcode_idx: [0x4d]
-      - sig: and2 v:in:i32
-        acc: inout:i32
-        prefix: bit
-        format: [pref_op_v_8]
-        opcode_idx: [0x2]
-      - sig: and2.64 v:in:i64
-        acc: inout:i64
-        prefix: bit
-        format: [pref_op_v_8]
-        opcode_idx: [0x3]
-      - sig: or2 v:in:i32
-        acc: inout:i32
-        prefix: bit
-        format: [pref_op_v_8]
-        opcode_idx: [0x4]
-      - sig: or2.64 v:in:i64
-        acc: inout:i64
-        prefix: bit
-        format: [pref_op_v_8]
-        opcode_idx: [0x5]
-      - sig: xor2 v:in:i32
-        acc: inout:i32
-        prefix: bit
-        format: [pref_op_v_8]
-        opcode_idx: [0x6]
-      - sig: xor2.64 v:in:i64
-        acc: inout:i64
-        prefix: bit
-        format: [pref_op_v_8]
-        opcode_idx: [0x7]
-      - sig: shl2 v:in:i32
-        acc: inout:i32
-        prefix: bit
-        format: [pref_op_v_8]
-        opcode_idx: [0x8]
-      - sig: shl2.64 v:in:i64
-        acc: inout:i64
-        prefix: bit
-        format: [pref_op_v_8]
-        opcode_idx: [0x9]
-      - sig: shr2 v:in:i32
-        acc: inout:i32
-        prefix: bit
-        format: [pref_op_v_8]
-        opcode_idx: [0xa]
-      - sig: shr2.64 v:in:i64
-        acc: inout:i64
-        prefix: bit
-        format: [pref_op_v_8]
-        opcode_idx: [0xb]
-      - sig: ashr2 v:in:i32
-        acc: inout:i32
-        prefix: bit
-        format: [pref_op_v_8]
-        opcode_idx: [0xc]
-      - sig: ashr2.64 v:in:i64
-        acc: inout:i64
-        prefix: bit
-        format: [pref_op_v_8]
-        opcode_idx: [0xd]
-
-  - title: Two address floating-point binary operation on accumulator
-    description: |
-      Perform specified floating-point binary operation on accumulator and register and store result into accumulator.
-      The results of instructions correspond IEEE-754 arithmetic rules.
-
-      - Any operation with NaN results to NaN value.
-      - The sum of opposite infinities or the difference of the same sign infinities is NaN.
-      - Division is NaN if Infinity is divided by Infinity.
-      - Division is NaN if zero is divided by zero.
-      - Multiplication is NaN if zero is multiplied by infinity.
-      - The sign of division or multiplication result is positive if both values have the same sign, negative if the values have different sign.
-      - Division is infinity if any non zero value is divided by zero.
-      - Multiplication is infinity if any non zero value is multiplied by infinity.
-      - The sum of two infinities of the same sign or the difference of two infinities of opposite sign is infinity. The sign of result matches the sign of accumulator value.
-      - The sum or the difference of infinity and any finite value is infinity. The sign of result matches the sign of infinity.
-      - The sum or the difference of zeros is zero. Exceptions are the sum of two negative zeros and the difference of negative and positive zero - the result is negative zero.
-
-    properties:
-      - float
-    exceptions:
-      - x_none
-    verification:
-      - acc_type
-      - v1_type
-    pseudo: |
-      switch (op)
-      case fadd2:
-      case fadd2.64:
-        acc = acc + vs
-      case fsub2:
-      case fsub2.64:
-        acc = acc - vs
-      case fmul2:
-      case fmul2.64:
-        acc = acc * vs
-      case fdiv2:
-      case fdiv2.64:
-        acc = acc / vs
-      case fmod2:
-      case fmod2.64:
-        acc = acc % vs
-    instructions:
-      - sig: fadd2 v:in:f32
-        acc: inout:f32
-        prefix: f32
-        format: [pref_op_v_8]
-        opcode_idx: [0x5]
-      - sig: fadd2.64 v:in:f64
-        acc: inout:f64
-        format: [op_v_8]
-        opcode_idx: [0x4e]
-      - sig: fsub2 v:in:f32
-        acc: inout:f32
-        prefix: f32
-        format: [pref_op_v_8]
-        opcode_idx: [0x6]
-      - sig: fsub2.64 v:in:f64
-        acc: inout:f64
-        format: [op_v_8]
-        opcode_idx: [0x4f]
-      - sig: fmul2 v:in:f32
-        acc: inout:f32
-        prefix: f32
-        format: [pref_op_v_8]
-        opcode_idx: [0x7]
-      - sig: fmul2.64 v:in:f64
-        acc: inout:f64
-        format: [op_v_8]
-        opcode_idx: [0x50]
-      - sig: fdiv2 v:in:f32
-        acc: inout:f32
-        prefix: f32
-        format: [pref_op_v_8]
-        opcode_idx: [0x8]
-      - sig: fdiv2.64 v:in:f64
-        acc: inout:f64
-        format: [op_v_8]
-        opcode_idx: [0x51]
-      - sig: fmod2 v:in:f32
-        acc: inout:f32
-        prefix: f32
-        format: [pref_op_v_8]
-        opcode_idx: [0x9]
-      - sig: fmod2.64 v:in:f64
-        acc: inout:f64
-        format: [op_v_8]
-        opcode_idx: [0x52]
-
-  - title: Two address integer division and modulo on accumulator
-    description: Perform integer division or modulo on accumulator and register and store result into accumulator
-    exceptions:
-      - x_arith
-    verification:
-      - acc_type
-      - v1_type
-    pseudo: |
-      if vs == 0 then
-        throw ArithmeticException
-      end
-      switch (op)
-      case div:
-        if acc == INT32_MIN and vs == -1 then
-          acc = INT32_MIN
-        else
-          acc = acc / vs
-        end
-      case div.64:
-        if acc == INT64_MIN and vs == -1 then
-          acc = INT64_MIN
-        else
-          acc = acc / vs
-        end
-      case divu:
-      case divu.64:
-        acc = acc / vs
-      case mod:
-        if acc == INT32_MIN and vs == -1 then
-          acc = 0
-        else
-          acc = acc % vs
-        end
-      case mod.64:
-        if acc == INT64_MIN and vs == -1 then
-          acc = 0
-        else
-          acc = acc % vs
-        end
-      case modu:
-      case modu.64:
-        acc = acc % vs
-    instructions:
-      - sig: div2 v:in:i32
-        acc: inout:i32
-        format: [op_v_8]
-        opcode_idx: [0x53]
-      - sig: div2.64 v:in:i64
-        acc: inout:i64
-        format: [op_v_8]
-        opcode_idx: [0x54]
-      - sig: mod2 v:in:i32
-        acc: inout:i32
-        format: [op_v_8]
-        opcode_idx: [0x55]
-      - sig: mod2.64 v:in:i64
-        acc: inout:i64
-        format: [op_v_8]
-        opcode_idx: [0x56]
-      - sig: divu2 v:in:u32
-        acc: inout:u32
-        prefix: unsigned
-        format: [pref_op_v_8]
-        opcode_idx: [0x2]
-      - sig: divu2.64 v:in:u64
-        acc: inout:u64
-        prefix: unsigned
-        format: [pref_op_v_8]
-        opcode_idx: [0x3]
-      - sig: modu2 v:in:u32
-        acc: inout:u32
-        prefix: unsigned
-        format: [pref_op_v_8]
-        opcode_idx: [0x4]
-      - sig: modu2.64 v:in:u64
-        acc: inout:u64
-        prefix: unsigned
-        format: [pref_op_v_8]
-        opcode_idx: [0x5]
-
-  - title: Two address binary operation with immediate on accumulator
-    description: >
-      Perform specified binary operation on accumulator and immediate and store result into accumulator.
-      Immediate is sign extended to operand size.
-    exceptions:
-      - x_none
-    verification:
-      - acc_type
-    pseudo: |
-      switch (op)
-      case addi:
-        acc = (acc + imm) % 2^32
-      case subi:
-        acc = (acc - imm) % 2^32
-      case muli:
-        acc = (acc * imm) % 2^32
-      case andi:
-        acc = acc & imm
-      case ori:
-        acc = acc | imm
-      case xori:
-        acc = acc ^ imm
-      case shli:
-        acc = (acc << (imm & 0x1f)) % 2^32
-      case shri:
-        acc = acc >> (imm & 0x1f)
-      case ashri:
-        acc = (acc < 0) ? ~(~acc >> imm & 0x1f) : acc >> imm & 0x1f
-    instructions:
-      - sig: addi imm:i32
-        acc: inout:i32
-        format: [op_imm_8]
-        opcode_idx: [0x57]
-      - sig: subi imm:i32
-        acc: inout:i32
-        format: [op_imm_8]
-        opcode_idx: [0x58]
-      - sig: muli imm:i32
-        acc: inout:i32
-        format: [op_imm_8]
-        opcode_idx: [0x59]
-      - sig: andi imm:i32
-        acc: inout:i32
-        format: [op_imm_32]
-        opcode_idx: [0x5a]
-      - sig: ori imm:i32
-        acc: inout:i32
-        format: [op_imm_32]
-        opcode_idx: [0x5b]
-      - sig: xori imm:i32
-        acc: inout:i32
-        prefix: bit
-        format: [pref_op_imm_32]
-        opcode_idx: [0xe]
-      - sig: shli imm:i32
-        acc: inout:i32
-        format: [op_imm_8]
-        opcode_idx: [0x5c]
-      - sig: shri imm:i32
-        acc: inout:i32
-        format: [op_imm_8]
-        opcode_idx: [0x5d]
-      - sig: ashri imm:i32
-        acc: inout:i32
-        format: [op_imm_8]
-        opcode_idx: [0x5e]
-
-  - title: Two address integer division or modulo with immediate on accumulator
-    description: >
-      Perform two address integer division or modulo on accumulator and immediate and store result into accumulator.
-      Immediate is sign extended to operand size.
-    exceptions:
-      - x_arith
-    verification:
-      - acc_type
-    pseudo: |
-      if imm == 0 then
-        throw ArithmeticException
-      end
-      switch(op)
-      case divi:
-        if acc == INT32_MIN and imm == -1 then
-          acc = INT32_MIN
-        else
-          acc = acc / imm
-        end
-      case modi:
-        if acc == INT32_MIN and imm == -1 then
-          acc = 0
-        else
-          acc = acc % imm
-        end
-    instructions:
-      - sig: divi imm:i32
-        acc: inout:i32
-        format: [op_imm_8]
-        opcode_idx: [0x5f]
-      - sig: modi imm:i32
-        acc: inout:i32
-        format: [op_imm_8]
-        opcode_idx: [0x60]
-
-  - title: Three address binary operation
-    description: Perform specified binary operation on two registers and store result into accumulator
-    exceptions:
-      - x_none
-    verification:
-      - v1_type
-      - v2_type
-    pseudo: |
-      switch (op)
-      case add:
-        acc = (vs1 + vs2) % 2^32
-      case sub:
-        acc = (vs1 - vs2) % 2^32
-      case mul:
-        acc = (vs1 * vs2) % 2^32
-      case and:
-        acc = vs1 & vs2
-      case or:
-        acc = vs1 | vs2
-      case xor:
-        acc = vs1 ^ vs2
-      case shl:
-        acc = (vs1 << (vs2 & 0x1f)) % 2^32
-      case shr:
-        acc = vs1 >> (vs2 & 0x1f)
-      case ashr:
-        acc = (vs1 < 0) ? ~(~vs1 >> vs2 & 0x1f) : vs1 >> vs2 & 0x1f
-    instructions:
-      - sig: add v1:in:i32, v2:in:i32
-        acc: out:i32
-        format: [op_v1_4_v2_4]
-        opcode_idx: [0x61]
-      - sig: sub v1:in:i32, v2:in:i32
-        acc: out:i32
-        format: [op_v1_4_v2_4]
-        opcode_idx: [0x62]
-      - sig: mul v1:in:i32, v2:in:i32
-        acc: out:i32
-        format: [op_v1_4_v2_4]
-        opcode_idx: [0x63]
-      - sig: and v1:in:i32, v2:in:i32
-        acc: out:i32
-        prefix: bit
-        format: [pref_op_v1_4_v2_4]
-        opcode_idx: [0xf]
-      - sig: or v1:in:i32, v2:in:i32
-        acc: out:i32
-        prefix: bit
-        format: [pref_op_v1_4_v2_4]
-        opcode_idx: [0x10]
-      - sig: xor v1:in:i32, v2:in:i32
-        acc: out:i32
-        prefix: bit
-        format: [pref_op_v1_4_v2_4]
-        opcode_idx: [0x11]
-      - sig: shl v1:in:i32, v2:in:i32
-        acc: out:i32
-        prefix: bit
-        format: [pref_op_v1_4_v2_4]
-        opcode_idx: [0x12]
-      - sig: shr v1:in:i32, v2:in:i32
-        acc: out:i32
-        prefix: bit
-        format: [pref_op_v1_4_v2_4]
-        opcode_idx: [0x13]
-      - sig: ashr v1:in:i32, v2:in:i32
-        acc: out:i32
-        prefix: bit
-        format: [pref_op_v1_4_v2_4]
-        opcode_idx: [0x14]
-
-  - title: Three address integer division or modulo
-    description: Perform integer division or modulo on two registers and store result into accumulator
-    exceptions:
-      - x_arith
-    verification:
-      - v1_type
-      - v2_type
-    pseudo: |
-      if vs2 == 0 then
-        throw ArithmeticException
-      end
-      switch(op)
-      case div:
-        if vs1 == INT32_MIN and vs2 == -1 then
-          acc = INT32_MIN
-        else
-          acc = vs1 / vs2
-        end
-      case mod:
-        if vs1 == INT32_MIN and vs2 == -1 then
-          acc = 0
-        else
-          acc = vs1 % vs2
-        end
-    instructions:
-      - sig: div v1:in:i32, v2:in:i32
-        acc: out:i32
-        format: [op_v1_4_v2_4]
-        opcode_idx: [0x64]
-      - sig: mod v1:in:i32, v2:in:i32
-        acc: out:i32
-        format: [op_v1_4_v2_4]
-        opcode_idx: [0x65]
-
-  - title: Increment register with immediate
-    description: >
-      Increment virtual register by specified immediate. Immediate is sign extended to operand size.
-    exceptions:
-      - x_none
-    verification:
-      - v1_i32
-    pseudo: |
-      vx = (vx + imm) % 2^32
-    instructions:
-      - sig: inci v:inout:i32, imm:i32
-        acc: none
-        format: [op_v_4_imm_4]
-        opcode_idx: [0x66]
-
-  - title: Conversions between integer and floating point types
-    description: |
-      Perform specified primitive type conversion of accumulator.
-      Conversion from floating-point types to integer one obeys the following rules.
-
-      - It is rounding toward zero.
-      - If converted value is less than minimal value for destination type, the result is minimal value for that type.
-      - If source is negative infinity, the result is minimal value for destination type.
-      - If converted value is greater than maximum value for destination type, the result is maximum value for that type.
-      - If source is positive infinity, the result is maximum value for destination type.
-      - If source is NaN, the result is equal to 0.
-
-    properties:
-      - float
-    exceptions:
-      - x_none
-    verification:
-      - acc_type
-    pseudo: |
-      (dest_type) acc = (src_type) acc
-    instructions:
-      - sig: i32tof32
-        acc: inout:i32->f32
-        prefix: f32
-        format: [pref_op_none]
-        opcode_idx: [0xa]
-      - sig: i32tof64
-        acc: inout:i32->f64
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x0]
-      - sig: u32tof32
-        acc: inout:u32->f32
-        prefix: f32
-        format: [pref_op_none]
-        opcode_idx: [0xb]
-      - sig: u32tof64
-        acc: inout:u32->f64
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x1]
-      - sig: i64tof32
-        acc: inout:i64->f32
-        prefix: f32
-        format: [pref_op_none]
-        opcode_idx: [0xc]
-      - sig: i64tof64
-        acc: inout:i64->f64
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x2]
-      - sig: u64tof32
-        acc: inout:u64->f32
-        prefix: f32
-        format: [pref_op_none]
-        opcode_idx: [0xd]
-      - sig: u64tof64
-        acc: inout:u64->f64
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x3]
-      - sig: f32tof64
-        acc: inout:f32->f64
-        prefix: f32
-        format: [pref_op_none]
-        opcode_idx: [0xe]
-      - sig: f32toi32
-        acc: inout:f32->i32
-        prefix: f32
-        format: [pref_op_none]
-        opcode_idx: [0xf]
-      - sig: f32toi64
-        acc: inout:f32->i64
-        prefix: f32
-        format: [pref_op_none]
-        opcode_idx: [0x10]
-      - sig: f32tou32
-        acc: inout:f32->u32
-        prefix: f32
-        format: [pref_op_none]
-        opcode_idx: [0x11]
-      - sig: f32tou64
-        acc: inout:f32->u64
-        prefix: f32
-        format: [pref_op_none]
-        opcode_idx: [0x12]
-      - sig: f64toi32
-        acc: inout:f64->i32
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x4]
-      - sig: f64toi64
-        acc: inout:f64->i64
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x5]
-      - sig: f64tou32
-        acc: inout:f64->u32
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x6]
-      - sig: f64tou64
-        acc: inout:f64->u64
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x7]
-      - sig: f64tof32
-        acc: inout:f64->f32
-        prefix: f32
-        format: [pref_op_none]
-        opcode_idx: [0x13]
-
-  - title: Conversions from integer types to u1
-    description: |
-      Conversion from integer types to u1 obeys the following rules.
-
-      - If converted integer is not equal to zero, the result is 1.
-      - Otherwise the result is 0.
-
-    exceptions:
-      - x_none
-    verification:
-      - acc_type
-    pseudo: |
-      (dest_type) acc = (src_type) acc
-    instructions:
-      - sig: i32tou1
-        acc: inout:i32->u1
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x8]
-      - sig: i64tou1
-        acc: inout:i64->u1
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x9]
-      - sig: u32tou1
-        acc: inout:u32->u1
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0xa]
-      - sig: u64tou1
-        acc: inout:u64->u1
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0xb]
-
-  - title: Integer truncations and extensions.
-    description: >
-      Perform specified integer extension or truncations of accumulator.
-      Truncations discard all but N lowest-order bits, where N is the bit size of destination type.
-      If extension bytecode treats its source as signed integer, the value is sign-extended to destination type.
-      If extension bytecode treats its source as unsigned integer, the value is zero-extended to destination type.
-    exceptions:
-      - x_none
-    verification:
-      - acc_type
-    pseudo: |
-      (dest_type) acc = (src_type) acc
-    instructions:
-      - sig: i32toi64
-        acc: inout:i32->i64
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0xc]
-      - sig: i32toi16
-        acc: inout:i32->i16
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0xd]
-      - sig: i32tou16
-        acc: inout:i32->u16
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0xe]
-      - sig: i32toi8
-        acc: inout:i32->i8
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0xf]
-      - sig: i32tou8
-        acc: inout:i32->u8
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x10]
-      - sig: i64toi32
-        acc: inout:i64->i32
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x11]
-      - sig: u32toi64
-        acc: inout:u32->i64
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x12]
-      - sig: u32toi16
-        acc: inout:u32->i16
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x13]
-      - sig: u32tou16
-        acc: inout:u32->u16
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x14]
-      - sig: u32toi8
-        acc: inout:u32->i8
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x15]
-      - sig: u32tou8
-        acc: inout:u32->u8
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x16]
-      - sig: u64toi32
-        acc: inout:u64->i32
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x17]
-      - sig: u64tou32
-        acc: inout:u64->u32
-        prefix: cast
-        format: [pref_op_none]
-        opcode_idx: [0x18]
-
-  - title: Load from array
-    description: >
-      Load an element from array using accumulator as an index and puts it into accumulator.
-      If element size is smaller then 32 bits, it will be zero or sign extended (depending on bytecode)
-      to i32.
-    verification:
-      - v1_array_type
-      - acc_i32
-    exceptions:
-      - x_null
-      - x_bounds
-    pseudo: |
-      if vs == null then
-        throw NullPointerException
-      end
-      if acc < 0 || acc >= len(vs) then
-        throw ArrayIndexOutOfBoundsException
-      end
-      if op == ldarr.8 then
-        acc = i8toi32(vs[acc])
-      else if op == ldarru.8 then
-        acc = u8toi32(vs[acc])
-      else if op == ldarr.16 then
-        acc = i16toi32(vs[acc])
-      else if op == ldarru.16 then
-        acc = u16toi32(vs[acc])
-      else
-        acc = vs[acc]
-      end
-    instructions:
-      - sig: ldarr.8 v:in:i8[]
-        acc: inout:i32
-        format: [op_v_8]
-        opcode_idx: [0x67]
-      - sig: ldarru.8 v:in:u8[]
-        acc: inout:i32
-        format: [op_v_8]
-        opcode_idx: [0x68]
-      - sig: ldarr.16 v:in:i16[]
-        acc: inout:i32
-        format: [op_v_8]
-        opcode_idx: [0x69]
-      - sig: ldarru.16 v:in:u16[]
-        acc: inout:i32
-        format: [op_v_8]
-        opcode_idx: [0x6a]
-      - sig: ldarr v:in:i32[]
-        acc: inout:i32
-        format: [op_v_8]
-        opcode_idx: [0x6b]
-      - sig: ldarr.64 v:in:i64[]
-        acc: inout:i32->i64
-        format: [op_v_8]
-        opcode_idx: [0x6c]
-      - sig: fldarr.32 v:in:f32[]
-        acc: inout:i32->f32
-        format: [op_v_8]
-        opcode_idx: [0x6d]
-        properties: [float]
-      - sig: fldarr.64 v:in:f64[]
-        acc: inout:i32->f64
-        format: [op_v_8]
-        opcode_idx: [0x6e]
-        properties: [float]
-      - sig: ldarr.obj v:in:ref[]
-        acc: inout:i32->ref
-        format: [op_v_8]
-        opcode_idx: [0x6f]
-
-  - title: Store to array
-    description: >
-      Store accumulator content into array slot pointed by index.
-      If size of element to store is less than 32, accumulator content will be truncated
-      to storage size before storing.
-    verification:
-      - v1_array_type
-      - v2_i32
-      - acc_type
-    exceptions:
-      - x_null
-      - x_bounds
-      - x_store
-    pseudo: |
-      if vs1 == null then
-        throw NullPointerException
-      end
-      if vs2 < 0 || vs2 >= len(vs1) then
-        throw ArrayIndexOutOfBoundsException
-      end
-      if op == starr.obj && !has_type(acc, component_type(vs1))
-        throw ArrayStoreException
-      end
-      if op == starr.8 then
-        vs1[vs2] = truncateto8(acc)
-      else if op == starr.16 then
-        vs1[vs2] = truncateto16(acc)
-      else
-        vs1[vs2] = acc
-      end
-    instructions:
-      - sig: starr.8 v1:in:i8[], v2:in:i32
-        acc: in:i8
-        format: [op_v1_4_v2_4]
-        opcode_idx: [0x70]
-      - sig: starr.16 v1:in:i16[], v2:in:i32
-        acc: in:i16
-        format: [op_v1_4_v2_4]
-        opcode_idx: [0x71]
-      - sig: starr v1:in:i32[], v2:in:i32
-        acc: in:i32
-        format: [op_v1_4_v2_4]
-        opcode_idx: [0x72]
-      - sig: starr.64 v1:in:i64[], v2:in:i32
-        acc: in:i64
-        format: [op_v1_4_v2_4]
-        opcode_idx: [0x73]
-      - sig: fstarr.32 v1:in:f32[], v2:in:i32
-        acc: in:f32
-        format: [op_v1_4_v2_4]
-        opcode_idx: [0x74]
-        properties: [float]
-      - sig: fstarr.64 v1:in:f64[], v2:in:i32
-        acc: in:f64
-        format: [op_v1_4_v2_4]
-        opcode_idx: [0x75]
-        properties: [float]
-      - sig: starr.obj v1:in:ref[], v2:in:i32
-        acc: in:ref
-        format: [op_v1_4_v2_4]
-        opcode_idx: [0x76]
-
-  - title: Array length
-    description: Get length of an array and put it into accumulator.
-    verification:
-      - v1_array
-    exceptions:
-      - x_null
-    pseudo: |
-      if x == null then
-        throw NullPointerException
-      end
-      acc = len(vs)
-    instructions:
-      - sig: lenarr v:in:top[]
-        acc: out:i32
-        format: [op_v_8]
-        opcode_idx: [0x77]
-
-  - title: Create new array
-    description: >
-      Create a new single-dimensional array of given type and size and put a reference to it into register.
-      Elements of array are initialized to a default value, i.e. 0 for primitive types and null for objects.
-    verification:
-      - type_id_array
-      - v2_i32
-    exceptions:
-      - x_negsize
-      - x_oom
-    properties:
-      - type_id
-      - language_type
-      - initialize_type
-    pseudo: |
-      if v2 < 0 then
-        throw NegativeArraySizeException
-      end
-      type = resolve(type_id)
-      v1 = new_array(v2, type)
-      if not initialized(type)
-        initialize(type)
-      end
-      if v1 == null then
-        throw OutOfMemoryError
-      end
-    instructions:
-      - sig: newarr v1:out:ref, v2:in:i32, type_id
-        acc: none
-        format: [op_v1_4_v2_4_id_16]
-        opcode_idx: [0x78]
-
-  - title: Create new object
-    description: |
-      Resolve class type from type_id, allocate memory for an object, initialize its fields with their
-      default values (i.e. 0 for primitives and null for objects) and put a reference to the newly created
-      object into register. The object should be initialized by calling initialization method before
-      further usage.
-    verification:
-      - type_id_object
-    exceptions:
-      - x_oom
-    properties:
-      - type_id
-      - initialize_type
-    pseudo: |
-      type = resolve(type_id)
-      if not initialized(type)
-        initialize(type)
-      end
-      v = new_instance(type)
-      if v == null then
-        throw OutOfMemoryError
-      end
-    instructions:
-      - sig: newobj v:out:ref, type_id
-        acc: none
-        format: [op_v_8_id_16]
-        opcode_idx: [0x79]
-
-  - title: Create new object and call initializer
-    description: >
-      Resolve class type from initializer method_id, allocate memory for an object, initialize its fields with their
-      default values (i.e. 0 for primitives and null for objects), call specified initializer and put a reference to
-      the newly created object into accumulator. method_id should resolve to an initializer.
-      Non-range instructions can be used to pass up to 4 arguments.
-      Unused register slot values will be discarded and corresponding registers will not be passed to initializer).
-      For methods with more arguments range kinds of instruction are to be used, which takes the needed number of
-      arguments starting from 'vs' register.
-    verification:
-      - method_id_non_static
-      - method_id_accessible
-      - method_init_obj
-      - compatible_arguments
-    exceptions:
-      - x_abstract
-      - x_oom
-      - x_call
-    properties:
-      - method_id
-      - call
-      - initialize_type
-    pseudo: |
-      init, type = resolve(method_id)
-      if not initialized(type)
-        initialize(type)
-      end
-      acc = new_instance(type)
-      if acc == null then
-        throw OutOfMemoryError
-      end
-      init(acc, args)
-    instructions:
-      - sig: initobj.short method_id, v1:in:none, v2:in:none
-        acc: out:ref
-        format: [op_v1_4_v2_4_id_16]
-        opcode_idx: [0x7a]
-      - sig: initobj method_id, v1:in:none, v2:in:none, v3:in:none, v4:in:none
-        acc: out:ref
-        format: [op_v1_4_v2_4_v3_4_v4_4_id_16]
-        opcode_idx: [0x7b]
-      - sig: initobj.range method_id, v:in:none
-        acc: out:ref
-        format: [op_v_8_id_16]
-        opcode_idx: [0x7c]
-
-  - title: Get field from object to accumulator
-    description: >
-      Get field value from an object by field id and put it into accumulator.
-      For non-object variant, the size of the field is determined by the field_id,
-      most significant bits are sign or unsigned extended based on the field type to fit accumulator size.
-      If field type size is less than 32, then loaded value is sign or zero extended to i32 depending on field type.
-    verification:
-      - v1_object
-      - field_id_non_static
-      - field_id_size
-    properties:
-      - field_id
-    exceptions:
-      - x_null
-    pseudo: |
-      if vs == null then
-        throw NullPointerException
-      end
-      field = resolve(field_id)
-      if op == ldobj and size(field) < 32 then
-        acc = extendto32(vs.get(field))
-      else
-        acc = vs.get(field)
-      end
-    instructions:
-      - sig: ldobj v:in:ref, field_id
-        acc: out:b32
-        format: [op_v_8_id_16]
-        opcode_idx: [0x7d]
-      - sig: ldobj.64 v:in:ref, field_id
-        acc: out:b64
-        format: [op_v_8_id_16]
-        opcode_idx: [0x7e]
-      - sig: ldobj.obj v:in:ref, field_id
-        acc: out:ref
-        format: [op_v_8_id_16]
-        opcode_idx: [0x7f]
-
-  - title: Store accumulator content into object field
-    description: >
-      Store accumulator content into object field by field_id. For non-object variant the size of actually stored
-      value is determined by field_id, other accumulator bits are discarded.
-      If field type size is less than 32, accumulator content will be truncated to storage size before storing.
-    verification:
-      - v1_object
-      - field_id_non_static
-      - field_id_size
-      - acc_type
-    properties:
-      - field_id
-    exceptions:
-      - x_null
-    pseudo: |
-      if vs == null then
-        throw NullPointerException
-      end
-      field = resolve(field_id)
-      if op == stobj and size(field) < 32 then
-        vs.set(field, truncate(field, acc))
-      else
-        vs.set(field, acc)
-      end
-    instructions:
-      - sig: stobj v:in:ref, field_id
-        acc: in:b32
-        format: [op_v_8_id_16]
-        opcode_idx: [0x80]
-      - sig: stobj.64 v:in:ref, field_id
-        acc: in:b64
-        format: [op_v_8_id_16]
-        opcode_idx: [0x81]
-      - sig: stobj.obj v:in:ref, field_id
-        acc: in:ref
-        format: [op_v_8_id_16]
-        opcode_idx: [0x82]
-
-  - title: Get field from object to register
-    description: >
-      Get field value from an object by field id and put it into register.
-      For non-object variant, the size of the field is determined by the field_id,
-      most significant bits are sign or unsigned extended based on the field type to fit register size.
-      If field type size is less than 32, then loaded value is sign or zero extended to i32 depending on field type.
-    verification:
-      - v2_object
-      - field_id_non_static
-      - field_id_size
-    properties:
-      - field_id
-    exceptions:
-      - x_null
-    pseudo: |
-      if v2 == null then
-        throw NullPointerException
-      end
-      field = resolve(field_id)
-      if op == ldobj and size(field) < 32 then
-        v1 = extendto32(v2.get(field))
-      else
-        v1 = v2.get(field)
-      end
-    instructions:
-      - sig: ldobj.v v1:out:b32, v2:in:ref, field_id
-        acc: none
-        format: [op_v1_4_v2_4_id_16]
-        opcode_idx: [0x83]
-      - sig: ldobj.v.64 v1:out:b64, v2:in:ref, field_id
-        acc: none
-        format: [op_v1_4_v2_4_id_16]
-        opcode_idx: [0x84]
-      - sig: ldobj.v.obj v1:out:ref, v2:in:ref, field_id
-        acc: none
-        format: [op_v1_4_v2_4_id_16]
-        opcode_idx: [0x85]
-
-  - title: Store register content into object field
-    description: >
-      Store register content into object field by field_id. For non-object variant the size of actually stored
-      value is determined by field_id, other register bits are discarded.
-      If field type size is less than 32, register content will be truncated to storage size before storing.
-    verification:
-      - v1_type
-      - v2_object
-      - field_id_non_static
-      - field_id_size
-    properties:
-      - field_id
-    exceptions:
-      - x_null
-    pseudo: |
-      if v2 == null then
-        throw NullPointerException
-      end
-      field = resolve(field_id)
-      if op == stobj and size(field) < 32 then
-        v2.set(field, truncate(field, v1))
-      else
-        v2.set(field, v1)
-      end
-    instructions:
-      - sig: stobj.v v1:in:b32, v2:in:ref, field_id
-        acc: none
-        format: [op_v1_4_v2_4_id_16]
-        opcode_idx: [0x86]
-      - sig: stobj.v.64 v1:in:b64, v2:in:ref, field_id
-        acc: none
-        format: [op_v1_4_v2_4_id_16]
-        opcode_idx: [0x87]
-      - sig: stobj.v.obj v1:in:ref, v2:in:ref, field_id
-        acc: none
-        format: [op_v1_4_v2_4_id_16]
-        opcode_idx: [0x88]
-
-  - title: Get static field
-    description: >
-      Get static field value by field_id and put it into accumulator.
-      For non-object variant, the size of the field is determined by the field_id,
-      most significant bits are sign or unsigned extended based on the field type to fit accumulator size.
-      If field size is less then 32, result will be sign or unsigned extended to i32 depedning on field type.
-    verification:
-      - field_id_static
-      - field_id_size
-    properties:
-      - field_id
-      - initialize_type
-    exceptions:
-      - x_init
-    pseudo: |
-      field, type = resolve(field_id)
-      if not initialized(type)
-        initialize(type)
-      end
-      if op == ldstatic and size(field) < 32 then
-        acc = extendto32(get_static(field))
-      else
-        acc = get_static(field)
-      end
-    instructions:
-      - sig: ldstatic field_id
-        acc: out:b32
-        format: [op_id_16]
-        opcode_idx: [0x89]
-      - sig: ldstatic.64 field_id
-        acc: out:b64
-        format: [op_id_16]
-        opcode_idx: [0x8a]
-      - sig: ldstatic.obj field_id
-        acc: out:ref
-        format: [op_id_16]
-        opcode_idx: [0x8b]
-
-  - title: Store to static field
-    description: >
-      Store accumulator content into static field by field_id. For non-object variant the size of actually stored
-      value is determined by field_id, other accumulator bits are discarded.
-      If field type size is less than 32, then accumulator content will be trunctated to field size before storing.
-    verification:
-      - field_id_static
-      - field_id_size
-      - acc_type
-    properties:
-      - field_id
-      - initialize_type
-    exceptions:
-      - x_init
-    pseudo: |
-      field, type = resolve(field_id)
-      if not initialized(type)
-        initialize(type)
-      end
-      if op == ststatic and size(field) < 32 then
-        set_static(field, truncate(field, acc))
-      else
-        set_static(field, acc)
-      end
-    instructions:
-      - sig: ststatic field_id
-        acc: in:b32
-        format: [op_id_16]
-        opcode_idx: [0x8c]
-      - sig: ststatic.64 field_id
-        acc: in:b64
-        format: [op_id_16]
-        opcode_idx: [0x8d]
-      - sig: ststatic.obj field_id
-        acc: in:ref
-        format: [op_id_16]
-        opcode_idx: [0x8e]
-
-  - title: Return value from method
-    description: >
-      Return from the current method, i.e. restore the frame of method invoker and return control to the
-      invoker. Return value should be in accumulator.
-    verification:
-      - acc_return_type
-    exceptions:
-      - x_none
-    properties:
-      - return
-    pseudo: |
-      return acc
-    instructions:
-      - sig: return
-        acc: in:b32
-        format: [op_none]
-        opcode_idx: [0x8f]
-      - sig: return.64
-        acc: in:b64
-        format: [op_none]
-        opcode_idx: [0x90]
-      - sig: return.obj
-        acc: in:ref
-        format: [op_none]
-        opcode_idx: [0x91]
-
-  - title: Return from a void method
-    description: >
-      Return from the current method, i.e. restore the frame of method invoker and return control to the invoker.
-      Caller should treat accumulator value as undefined and cannot use it until accumulator definition in the caller
-      frame.
-    verification:
-      - none
-    exceptions:
-      - x_none
-    properties:
-      - return
-    pseudo: |
-      return
-    instructions:
-      - sig: return.void
-        acc: none
-        format: [op_none]
-        opcode_idx: [0x92]
-
-  - title: Throw exception
-    description: >
-      Throw an exception located in register. The current method is searched for the first exception handler that
-      matches the class of exception. If exception handler is found, control is passed to the exception handler. If no
-      exception handler is found, the frame of invoker is restored. If such frame exists, the exception is re-thrown.
-      If no such frame exists, the current VM thread exits.
-    verification:
-      - v1_throw_type
-    exceptions:
-      - x_null
-      - x_throw
-    pseudo: |
-      if vs == null then
-        throw NullPointerException
-      end
-      throw vs
-    instructions:
-      - sig: throw v:in:ref
-        acc: none
-        format: [op_v_8]
-        opcode_idx: [0x93]
-
-  - title: Check cast
-    description: >
-      Resolve object type by specified id and if an object in accumulator can be cast to the resolved type,
-      accumulator content remains unchanged. Otherwise ClassCastException is thrown.
-      Object of type O can be cast to type T if O is the same as T or is subtype of T. For arrays O can be cast
-      to T if T is a root type in type hierarchy or T is such array that O array elements are the same or subtype of
-      T array elements.
-      'null' object reference can be cast to every type.
-    verification:
-      - type_id_any_object
-      - acc_obj_or_null
-    exceptions:
-      - x_cast
-    properties:
-      - type_id
-    pseudo: |
-      type = resolve(type_id)
-      if acc != null and !has_type(acc, type) then
-        throw ClassCastException
-      end
-    instructions:
-      - sig: checkcast type_id
-        acc: in:ref
-        format: [op_id_16]
-        opcode_idx: [0x94]
-
-  - title: Is instance
-    description: >
-      Resolve object type by specified id and if an object in accumulator is an instance of the resolved type,
-      put 1 into accumulator, otherwise put 0.
-      Object of type O is instance of type T if O is the same as T or is subtype of T. For arrays T should be a root
-      type in type hierarchy or T is such array that O array elements are the same or subtype of T array elements.
-      'null' object is not an instance of any class.
-    verification:
-      - type_id_any_object
-      - acc_obj_or_null
-    exceptions:
-      - x_classdef
-    properties:
-      - type_id
-    pseudo: |
-      type = resolve(type_id)
-      if acc == null or !has_type(acc, type) then
-        acc = 0
-      else
-        acc = 1
-      end
-    instructions:
-      - sig: isinstance type_id
-        acc: inout:ref->i32
-        format: [op_id_16]
-        opcode_idx: [0x95]
-
-  - title: Static call
-    description: >
-      Call indicated static method, i.e. create new frame, pass values of arguments and
-      continue execution from the first instruction of a method.
-      Callee should treat accumulator value as undefined and cannot use it until accumulator
-      definition in the new frame.
-      Result (if any) is returned in accumulator (see 'Calling sequence' chapter for more details).
-      Method, its class and the number of argument is resolved by given method_id in
-      runtime constant-pool.
-      Arguments are passed in source registers in the same order as in method signature.
-      Non-range instructions can be used to pass up to 4 arguments (unused register slot values will
-      be discarded and corresponding registers will not be passed to the callee).
-      For methods with more arguments range kind of instruction is to be used, which takes the needed number
-      of arguments starting from 'vs' register.
-      In dynamically-typed language context accept 'any' values in source registers.
-    verification:
-      - method_id_static
-      - method_id_non_abstract
-      - compatible_arguments
-    properties:
-      - method_id
-      - call
-      - maybe_dynamic
-      - initialize_type
-    exceptions:
-      - x_call
-    pseudo: |
-      if not initialized(type)
-        initialize(type)
-      end
-      acc = call(method, args)
-    instructions:
-      - sig: call.short method_id, v1:in:top, v2:in:top
-        acc: out:top
-        format: [op_v1_4_v2_4_id_16]
-        opcode_idx: [0x96]
-      - sig: call method_id, v1:in:top, v2:in:top, v3:in:top, v4:in:top
-        acc: out:top
-        format: [op_v1_4_v2_4_v3_4_v4_4_id_16]
-        opcode_idx: [0x97]
-      - sig: call.range method_id, v:in:top
-        acc: out:top
-        format: [op_v_8_id_16]
-        opcode_idx: [0x98]
-
-  - title: Static call with accumulator as input
-    description: >
-      Call indicated static method, i.e. create new frame, pass values of arguments and
-      continue execution from the first instruction of a method.
-      Callee should treat accumulator value as undefined and cannot use it until accumulator
-      definition in the new frame.
-      Result (if any) is returned in accumulator (see 'Calling sequence' chapter for more details).
-      Method, its class and the number of argument is resolved by given method_id in
-      runtime constant-pool.
-      Arguments are passed in source registers in the same order as in method signature.
-      Non-range instructions can be used to pass up to 4 arguments (unused register slot values will
-      be discarded and corresponding registers will not be passed to the callee).
-      In dynamically-typed language context accept 'any' values in source registers.
-      Immediate operand encodes a position starting from 0 on which accumulator is passed.
-    verification:
-      - method_id_static
-      - method_id_non_abstract
-      - compatible_arguments
-    properties:
-      - method_id
-      - call
-      - maybe_dynamic
-    exceptions:
-      - x_call
-    pseudo: |
-      args = []
-      for (i = 0; i < 4; ++i)
-        if (i < imm) then
-          args[i] = regs[i]
-        else if (i == imm) then
-          args[i] = acc
-        else
-          args[i] = regs[i - 1]
-        end
-      end
-      method = resolve(method_id)
-      acc = call(method, args)
-    instructions:
-      - sig: call.acc.short method_id, v:in:top, imm:u1
-        acc: inout:top
-        format: [op_v_4_imm_4_id_16]
-        opcode_idx: [0x99]
-      - sig: call.acc method_id, v1:in:top, v2:in:top, v3:in:top, imm:u2
-        acc: inout:top
-        format: [op_v1_4_v2_4_v3_4_imm_4_id_16]
-        opcode_idx: [0x9a]
-
-  - title: Object calls
-    description: >
-      Call indicated object method, i.e. create new frame, pass values of arguments and
-      continue execution from the first instruction of a method.
-      Callee should treat accumulator value as undefined and cannot use it until accumulator
-      definition in the new frame.
-      Result (if any) is returned in accumulator (see 'Calling sequence' chapter for more details).
-      Method, its class and the number of argument is resolved by given method_id in runtime
-      constant-pool based on object reference using language-specific semantics (currently only Java
-      virtual methods are supported, further extensions are TBD).
-      Object reference is passed in the first source register, arguments are passed starting from
-      the second source register in the same order as in method signature.
-      Non-range instructions can be used to pass up to 4 arguments (including object reference).
-      Unused register slot values will be discarded and corresponding registers will not be
-      passed to the callee).
-      For methods with more arguments range kinds of instruction are to be used, which takes
-      the needed number of arguments starting from 'vs' register (including object reference).
-    verification:
-      - method_id_non_static
-      - compatible_arguments
-      - method_id_accessible
-    exceptions:
-      - x_null
-      - x_abstract
-      - x_call
-    properties:
-      - method_id
-      - call
-      - call_virt
-    pseudo: |
-      if args[0] == null then
-        throw NullPointerException
-      end
-      method = resolve(method_id)
-      if is_abstract(method) then
-        throw AbstractMethodError
-      end
-      acc = call(method, args)
-    instructions:
-      - sig: call.virt.short method_id, v1:in:top, v2:in:top
-        acc: out:top
-        format: [op_v1_4_v2_4_id_16]
-        opcode_idx: [0x9b]
-      - sig: call.virt method_id, v1:in:top, v2:in:top, v3:in:top, v4:in:top
-        acc: out:top
-        format: [op_v1_4_v2_4_v3_4_v4_4_id_16]
-        opcode_idx: [0x9c]
-      - sig: call.virt.range method_id, v:in:top
-        acc: out:top
-        format: [op_v_8_id_16]
-        opcode_idx: [0x9d]
-
-  - title: Object calls with accumulator as input
-    description: >
-      Call indicated object method, i.e. create new frame, pass values of arguments and
-      continue execution from the first instruction of a method.
-      Callee should treat accumulator value as undefined and cannot use it until accumulator
-      definition in the new frame.
-      Result (if any) is returned in accumulator (see 'Calling sequence' chapter for more details).
-      Method, its class and the number of argument is resolved by given method_id in runtime
-      constant-pool based on object reference using language-specific semantics (currently only Java
-      virtual methods are supported, further extensions are TBD).
-      Object reference is passed in the first source register, arguments are passed starting from
-      the second source register in the same order as in method signature.
-      Non-range instructions can be used to pass up to 4 arguments (including object reference).
-      Unused register slot values will be discarded and corresponding registers will not be
-      passed to the callee).
-      Immediate operand encodes a position starting from 0 on which accumulator is passed.
-    verification:
-      - method_id_non_static
-      - compatible_arguments
-      - method_id_accessible
-    exceptions:
-      - x_null
-      - x_abstract
-      - x_call
-    properties:
-      - method_id
-      - call
-      - call_virt
-    pseudo: |
-      args = []
-      for (i = 0; i < 4; ++i)
-        if (i < imm) then
-          args[i] = regs[i]
-        else if (i == imm) then
-          args[i] = acc
-        else
-          args[i] = regs[i - 1]
-        end
-      end
-      if args[0] == null then
-        throw NullPointerException
-      end
-      method = resolve(method_id)
-      if is_abstract(method) then
-        throw AbstractMethodError
-      end
-      acc = call(method, args)
-    instructions:
-      - sig: call.virt.acc.short method_id, v:in:top, imm:u1
-        acc: inout:top
-        format: [op_v_4_imm_4_id_16]
-        opcode_idx: [0x9e]
-      - sig: call.virt.acc method_id, v1:in:top, v2:in:top, v3:in:top, imm:u2
-        acc: inout:top
-        format: [op_v1_4_v2_4_v3_4_imm_4_id_16]
-        opcode_idx: [0x9f]
+        properties: [conditional]
 
   - title: Dynamic move register-to-register
     description: >
@@ -2397,10 +1529,10 @@ groups:
     pseudo: |
       vd = vs
     instructions:
-      - sig: mov.dyn v1:out:any, v2:in:any
+      - sig: mov v1:out:any, v2:in:any
         acc: none
-        format: [op_v1_8_v2_8, op_v1_16_v2_16]
-        opcode_idx: [0xa0, 0xa1]
+        opcode_idx: [0x44, 0x45, 0x8f]
+        format: [op_v1_4_v2_4, op_v1_8_v2_8, op_v1_16_v2_16]
 
   - title: Dynamic load accumulator from register
     description: >
@@ -2414,10 +1546,10 @@ groups:
     pseudo: |
       acc = v
     instructions:
-      - sig: lda.dyn v:in:any
+      - sig: lda v:in:any
         acc: out:any
+        opcode_idx: [0x60]
         format: [op_v_8]
-        opcode_idx: [0xa2]
 
   - title: Dynamic store accumulator
     description: >
@@ -2431,10 +1563,10 @@ groups:
     pseudo: |
       v = acc
     instructions:
-      - sig: sta.dyn v:out:any
+      - sig: sta v:out:any
         acc: in:any
+        opcode_idx: [0x61]
         format: [op_v_8]
-        opcode_idx: [0xa3]
 
   - title: Dynamic load accumulator from immediate
     description: >
@@ -2448,19 +1580,18 @@ groups:
     pseudo: |
       acc = imm
     instructions:
-      - sig: ldai.dyn imm:i32
+      - sig: ldai imm:i32
         acc: out:any
+        opcode_idx: [0x62]
         format: [op_imm_32]
-        opcode_idx: [0xa4]
-      - sig: fldai.dyn imm:f64
+      - sig: fldai imm:f64
         acc: out:any
+        opcode_idx: [0x63]
         format: [op_imm_64]
-        opcode_idx: [0xa5]
         properties: [float, dynamic]
 
-  - title: Dynamic return from method
-    description: >
-      Return 'any' value in accumulator from method to its caller
+  - title: dynamic return
+    description: dynamic return from method
     verification:
       - valid_in_dynamic_context
     exceptions:
@@ -2468,47 +1599,31 @@ groups:
     properties:
       - dynamic
       - return
+    namespace: ecmascript
     pseudo: |
       return acc
     instructions:
-      - sig: return.dyn
+      - sig: return
         acc: in:any
+        opcode_idx: [0x64]
         format: [op_none]
-        opcode_idx: [0xa6]
+        properties: [return]
+      - sig: returnundefined
+        acc: none
+        opcode_idx: [0x65]
+        properties: [return]
+        format: [op_none]
 
-  - title: Dynamic indirect call
-    description: >
-      Call 'any' value that represents a function, i.e. create a new frame, pass values of arguments
-      and continue execution from the first instruction of a method.
-      Callee should treat accumulator value as undefined and cannot use it until accumulator
-      definition in the new frame.
-      The callee must always return the result in the accumulator.
-      First source register contains a function 'any' value, other imm source registers contain
-      arguments of a function.
-      Non-range instructions can be used to pass up to 4 arguments (unused register slot values will
-      be discarded and corresponding registers will not be passed to the callee).
-      For methods with more arguments range kind of instruction is to be used, which takes the needed number
-      of arguments starting from 'v' register.
-    verification:
-      - valid_in_dynamic_context
+  - title: no operation
+    description: Perform an operation without behavior
     exceptions:
-      - x_call
-    properties:
-      - dynamic
-      - call
+      - x_none
+    verification:
+      - none
     pseudo: |
-      func, args = source_registers
-      acc = func(args)
+      skip
     instructions:
-      - sig: calli.dyn.short imm, v1:in:any, v2:in:any, v3:in:any
-        acc: out:any
-        format: [op_imm_4_v1_4_v2_4_v3_4]
-        opcode_idx: [0xa7]
-      - sig: calli.dyn imm, v1:in:any, v2:in:any, v3:in:any, v4:in:any, v5:in:any
-        acc: out:any
-        format: [op_imm_4_v1_4_v2_4_v3_4_v4_4_v5_4]
-        opcode_idx: [0xa8]
-      - sig: calli.dyn.range imm, v:in:any
-        acc: out:any
-        format: [op_imm_16_v_16]
-        opcode_idx: [0xa9]
+      - sig: nop
+        acc: none
+        opcode_idx: [0xd5]
+        format: [op_none]

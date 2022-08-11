@@ -31,6 +31,12 @@ inline size_t LiteralDataAccessor::GetLiteralValsNum(size_t index)
     return num;
 }
 
+inline size_t LiteralDataAccessor::GetLiteralValsNum(File::EntityId id) const
+{
+    auto sp = panda_file_.GetSpanFromId(id);
+    return helpers::Read<LEN_SIZE>(&sp);
+}
+
 template <class Callback>
 inline void LiteralDataAccessor::EnumerateLiteralVals(size_t index, const Callback &cb)
 {

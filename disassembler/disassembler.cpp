@@ -180,10 +180,6 @@ void Disassembler::GetMethod(pandasm::Function *method, const panda_file::File::
     GetParams(method, method_accessor.GetProtoId());
     GetMetaData(method, method_id);
 
-    if (!method->HasImplementation()) {
-        return;
-    }
-
     if (method_accessor.GetCodeId().has_value()) {
         const IdList id_list = GetInstructions(method, method_id, method_accessor.GetCodeId().value());
 
@@ -200,7 +196,7 @@ void Disassembler::GetMethod(pandasm::Function *method, const panda_file::File::
 
 template <typename T>
 void Disassembler::FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
-                                        const panda_file::LiteralDataAccessor::LiteralValue &value)
+                                        const panda_file::LiteralDataAccessor::LiteralValue &value) const
 {
     panda_file::File::EntityId id(std::get<uint32_t>(value));
     auto sp = file_->GetSpanFromId(id);
@@ -268,15 +264,12 @@ void Disassembler::FillLiteralData(pandasm::LiteralArray *lit_array,
     lit_array->literals_.push_back(lit);
 }
 
-void Disassembler::GetLiteralArray(pandasm::LiteralArray *lit_array, const size_t index)
+void Disassembler::GetLiteralArrayByOffset(pandasm::LiteralArray *lit_array, panda_file::File::EntityId offset) const
 {
-    LOG(DEBUG, DISASSEMBLER) << "\n[getting literal array]\nindex: " << index;
-
     panda_file::LiteralDataAccessor lit_array_accessor(*file_, file_->GetLiteralArraysId());
-
     lit_array_accessor.EnumerateLiteralVals(
-        index, [this, lit_array](const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                 const panda_file::LiteralTag &tag) {
+        offset, [this, lit_array](const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                  const panda_file::LiteralTag &tag) {
             switch (tag) {
                 case panda_file::LiteralTag::ARRAY_U1: {
                     FillLiteralArrayData<bool>(lit_array, tag, value);
@@ -320,6 +313,14 @@ void Disassembler::GetLiteralArray(pandasm::LiteralArray *lit_array, const size_
                 }
             }
         });
+}
+
+void Disassembler::GetLiteralArray(pandasm::LiteralArray *lit_array, const size_t index) const
+{
+    LOG(DEBUG, DISASSEMBLER) << "\n[getting literal array]\nindex: " << index;
+
+    panda_file::LiteralDataAccessor lit_array_accessor(*file_, file_->GetLiteralArraysId());
+    GetLiteralArrayByOffset(lit_array, lit_array_accessor.GetLiteralArrayId(index));
 }
 
 void Disassembler::GetLiteralArrays()
@@ -650,14 +651,6 @@ void Disassembler::GetMetaData(pandasm::Function *method, const panda_file::File
 
     if (file_->IsExternal(method_accessor.GetMethodId())) {
         method->metadata->SetAttribute("external");
-    }
-
-    if (method_accessor.IsNative()) {
-        method->metadata->SetAttribute("native");
-    }
-
-    if (method_accessor.IsAbstract()) {
-        method->metadata->SetAttribute("noimpl");
     }
 
     std::string ctor_name = panda::panda_file::GetCtorName(file_language_);
@@ -1019,27 +1012,33 @@ static bool IsArray(const panda_file::LiteralTag &tag)
     }
 }
 
-void Disassembler::Serialize(size_t index, const pandasm::LiteralArray &lit_array, std::ostream &os) const
+std::string Disassembler::SerializeLiteralArray(const pandasm::LiteralArray &lit_array) const
 {
+    std::stringstream ret;
     if (lit_array.literals_.empty()) {
-        return;
+        return ret.str();
     }
-
     const auto &tag = lit_array.literals_[0].tag_;
     if (IsArray(tag)) {
-        os << ".array array_";
+        ret << "{array: ";
     } else {
-        os << ".literal literal_";
+        ret << "{literal: ";
     }
-    os << index << " " << LiteralTagToString(tag);
+    ret << LiteralTagToString(tag);
     if (IsArray(tag)) {
-        os << " " << lit_array.literals_.size();
+        ret << " " << lit_array.literals_.size();
     }
-    os << " { ";
+    ret << " [ ";
+    SerializeValues(lit_array, ret);
+    ret << "]}";
+    return ret.str();
+}
 
-    SerializeValues(lit_array, os);
-
-    os << "}\n";
+void Disassembler::Serialize(size_t index, const pandasm::LiteralArray &lit_array, std::ostream &os) const
+{
+    os << "literal_index " << index << " ";
+    os << SerializeLiteralArray(lit_array);
+    os << "\n";
 }
 
 std::string Disassembler::LiteralTagToString(const panda_file::LiteralTag &tag) const
@@ -1082,14 +1081,15 @@ std::string Disassembler::LiteralTagToString(const panda_file::LiteralTag &tag) 
             return "method_affiliate";
         case panda_file::LiteralTag::NULLVALUE:
             return "null_value";
+        case panda_file::LiteralTag::TAGVALUE:
+            return "tagvalue";
         default:
             UNREACHABLE();
     }
-
-    UNREACHABLE();
 }
 
-void Disassembler::SerializeValues(const pandasm::LiteralArray &lit_array, std::ostream &os) const
+template <typename T>
+void Disassembler::SerializeValues(const pandasm::LiteralArray &lit_array, T &os) const
 {
     switch (lit_array.literals_[0].tag_) {
         case panda_file::LiteralTag::ARRAY_U1: {
@@ -1300,11 +1300,6 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
         Serialize(*method.metadata, {}, os);
     }
 
-    if (!method.HasImplementation()) {
-        os << "\n\n";
-        return;
-    }
-
     auto method_info_it = prog_info_.methods_info.find(signature);
     bool print_method_info = print_information && method_info_it != prog_info_.methods_info.end();
     if (print_method_info) {
@@ -1489,43 +1484,18 @@ pandasm::Opcode Disassembler::BytecodeOpcodeToPandasmOpcode(uint8_t o) const
 std::string Disassembler::IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id) const
 {
     std::stringstream name;
+    const auto offset = file_->ResolveOffsetByIndex(method_id, bc_ins.GetId().AsIndex());
 
-    if (bc_ins.HasFlag(BytecodeInstruction::Flags::TYPE_ID)) {
-        auto idx = bc_ins.GetId().AsIndex();
-        auto id = file_->ResolveClassIndex(method_id, idx);
-        auto type = pandasm::Type::FromDescriptor(StringDataToString(file_->GetStringData(id)));
-
-        name.str("");
-        name << type.GetPandasmName();
-    } else if (bc_ins.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
-        auto idx = bc_ins.GetId().AsIndex();
-        auto id = file_->ResolveMethodIndex(method_id, idx);
-
-        name << GetMethodSignature(id);
+    if (bc_ins.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
+        name << GetMethodSignature(offset);
     } else if (bc_ins.HasFlag(BytecodeInstruction::Flags::STRING_ID)) {
         name << '\"';
-
-        if (skip_strings_ || quiet_) {
-            name << std::hex << "0x" << bc_ins.GetId().AsFileId();
-        } else {
-            name << StringDataToString(file_->GetStringData(bc_ins.GetId().AsFileId()));
-        }
-
+        name << StringDataToString(file_->GetStringData(offset));
         name << '\"';
-    } else if (bc_ins.HasFlag(BytecodeInstruction::Flags::FIELD_ID)) {
-        auto idx = bc_ins.GetId().AsIndex();
-        auto id = file_->ResolveFieldIndex(method_id, idx);
-        panda_file::FieldDataAccessor field_accessor(*file_, id);
-
-        name << GetFullRecordName(field_accessor.GetClassId());
-        name << '.';
-        name << StringDataToString(file_->GetStringData(field_accessor.GetNameId()));
     } else if (bc_ins.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
-        panda_file::LiteralDataAccessor lit_array_accessor(*file_, file_->GetLiteralArraysId());
-        auto idx = bc_ins.GetId().AsFileId();
-        auto index = lit_array_accessor.ResolveLiteralArrayIndex(idx);
-
-        name << "array_" << index;
+        pandasm::LiteralArray lit_array;
+        GetLiteralArrayByOffset(&lit_array, panda_file::File::EntityId(offset));
+        name << SerializeLiteralArray(lit_array);
     }
 
     return name.str();
