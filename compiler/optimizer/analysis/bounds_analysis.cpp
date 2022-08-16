@@ -721,7 +721,8 @@ void BoundsAnalysis::VisitPhi(GraphVisitor *v, Inst *inst)
                 upper_range.GetRight() - lower_range.GetLeft() < static_cast<int64_t>(loop_info_value.const_step)) {
                 range = BoundsRange(lower_range.GetLeft(), upper_range.GetRight());
             } else {
-                range = BoundsRange(lower_range.GetLeft(), upper_range.GetRight() - loop_info_value.const_step);
+                range = BoundsRange(lower_range.GetLeft(),
+                                    upper_range.GetRight() - static_cast<int64_t>(loop_info_value.const_step));
             }
             auto upper_len_array = upper_range.GetLenArray();
             if (cc != CC_LE) {
