@@ -395,8 +395,8 @@ File::File(std::string filename, os::mem::ConstBytePtr &&base)
     : base_(std::forward<os::mem::ConstBytePtr>(base)),
       FILENAME(std::move(filename)),
       FILENAME_HASH(CalcFilenameHash(FILENAME)),
+#ifdef ENABLE_FULL_FILE_FIELDS
       FULL_FILENAME(os::GetAbsolutePath(FILENAME)),
-#ifdef ENABLE_PANDA_CACHE
       panda_cache_(std::make_unique<PandaCache>()),
 #endif
       UNIQ_ID(merge_hashes(FILENAME_HASH, GetHash32(reinterpret_cast<const uint8_t *>(GetHeader()), sizeof(Header))))
