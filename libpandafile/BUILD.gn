@@ -35,7 +35,7 @@ config("arkfile_public_config") {
   }
 
   if (is_ohos && !is_standard_system) {
-    defines = [ "ENABLE_PANDA_CACHE" ]
+    defines = [ "ENABLE_FULL_FILE_FIELDS" ]
   }
 }
 
