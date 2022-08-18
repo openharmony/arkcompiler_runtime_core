@@ -1,0 +1,5 @@
+unittest/module_info_test.js 1
+unittest/define_info_test.js 1
+unittest/callee_info_test.js 1
+unittest/debug_info_test.js 0
+unittest/graph_test.js 1

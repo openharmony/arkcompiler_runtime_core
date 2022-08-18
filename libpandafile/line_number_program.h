@@ -23,14 +23,14 @@ namespace panda::panda_file {
 
 class LineProgramState {
 public:
-    LineProgramState(const File &pf, File::EntityId file, size_t line, Span<const uint8_t> constant_pool)
+    LineProgramState(const File &pf, File::EntityId file, int32_t line, Span<const uint8_t> constant_pool)
         : pf_(pf), file_(file), line_(line), constant_pool_(constant_pool)
     {
     }
 
     void AdvanceLine(int32_t v)
     {
-        line_ += static_cast<size_t>(v);
+        line_ += v;
     }
 
     void AdvancePc(uint32_t v)
@@ -68,7 +68,7 @@ public:
         return source_code_.IsValid();
     }
 
-    size_t GetLine() const
+    int32_t GetLine() const
     {
         return line_;
     }

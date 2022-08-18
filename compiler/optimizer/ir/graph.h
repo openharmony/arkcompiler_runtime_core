@@ -224,6 +224,11 @@ public:
     {
         return end_block_;
     }
+
+    BasicBlock *GetEndBlock() const
+    {
+        return end_block_;
+    }
     // set end block
     void SetEndBlock(BasicBlock *end_block)
     {

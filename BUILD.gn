@@ -294,3 +294,18 @@ group("bcopt_type_adapter_unit_test") {
     ]
   }
 }
+
+group("ark_host_linux_defectscanaux_lib") {
+  deps = []
+  if (host_os == "linux") {
+    deps += [ "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux(${host_toolchain})" ]
+  }
+}
+
+group("ark_defectscanaux_unittest") {
+  testonly = true
+  deps = []
+  if (host_os == "linux") {
+    deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_unittest(${host_toolchain})" ]
+  }
+}
