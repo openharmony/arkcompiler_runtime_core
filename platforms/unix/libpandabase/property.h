@@ -17,6 +17,7 @@
 #define PANDA_LIBPANDABASE_PBASE_OS_UNIX_PROP_H_
 
 #include <iosfwd>
+#include <string>
 
 namespace panda::os::unix::property {
 

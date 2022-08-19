@@ -128,7 +128,7 @@ if (is_mingw) {
     "$ark_root/platforms/unix/libpandabase/trace.cpp",
   ]
 
-  if (!is_mob) {
+  if (!is_mob || is_linux || current_os == "android") {
     libarkbase_sources +=
         [ "$ark_root/platforms/unix/libpandabase/library_loader_load.cpp" ]
   }
