@@ -874,6 +874,7 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                         ScalarValue::Create<Value::Type::U16>(std::get<uint16_t>(literal.value_)));
                     break;
                 case panda_file::LiteralTag::INTEGER:
+                case panda_file::LiteralTag::TYPEINDEX:
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::I32>(std::get<uint32_t>(literal.value_)));
                     break;

@@ -47,7 +47,8 @@ inline void LiteralDataAccessor::EnumerateLiteralVals(File::EntityId id, const C
     for (size_t i = 0; i < literal_vals_num; i += 2U) {
         auto tag = static_cast<LiteralTag>(helpers::Read<TAG_SIZE>(&sp));
         switch (tag) {
-            case LiteralTag::INTEGER: {
+            case LiteralTag::INTEGER:
+            case LiteralTag::TYPEINDEX: {
                 value = static_cast<uint32_t>(helpers::Read<sizeof(uint32_t)>(&sp));
                 break;
             }
