@@ -33,7 +33,6 @@ std::string Type::GetDescriptor(bool ignore_primitive) const
     }
 
     std::string res = std::string(rank_, '[') + "L" + component_name_ + ";";
-    std::replace(res.begin(), res.end(), '.', '/');
     return res;
 }
 
