@@ -30,7 +30,6 @@
 #include "libpandabase/events/events.h"
 #include "libpandabase/mem/mem_config.h"
 #include "libpandabase/mem/pool_manager.h"
-#include "libpandabase/os/mem_hooks.h"
 #include "libpandabase/os/native_stack.h"
 #include "libpandabase/os/thread.h"
 #include "libpandabase/utils/arena_containers.h"
@@ -517,11 +516,6 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
     signal_manager_ = new SignalManager(internal_allocator_);
 #endif
 
-    if (IsEnableMemoryHooks()) {
-        panda::os::mem_hooks::PandaHooks::Initialize();
-        panda::os::mem_hooks::PandaHooks::Enable();
-    }
-
     save_profiling_info_ = options_.IsCompilerEnableJit() && options_.IsProfilesaverEnabled();
 
 #ifdef PANDA_COMPILER_ENABLE
@@ -545,10 +539,6 @@ Runtime::~Runtime()
 {
     VerificationOptions_.Destroy();
     panda::verifier::debug::DebugContext::Destroy();
-
-    if (IsEnableMemoryHooks()) {
-        panda::os::mem_hooks::PandaHooks::Disable();
-    }
     trace::ScopedTrace scoped_trace("Delete state");
 
 #ifndef PANDA_TARGET_WINDOWS
@@ -579,14 +569,6 @@ Runtime::~Runtime()
 
     RuntimeInternalAllocator::Finalize();
     PoolManager::Finalize();
-}
-
-bool Runtime::IsEnableMemoryHooks() const
-{
-    auto log_level = Logger::IsInitialized() ? Logger::GetLevel() : Logger::Level::DEBUG;
-    return options_.IsLimitStandardAlloc() &&
-           (log_level == Logger::Level::FATAL || log_level == Logger::Level::ERROR) &&
-           (!options_.UseMallocForInternalAllocations());
 }
 
 static PandaVector<PandaString> GetPandaFilesList(const std::vector<std::string> &stdvec)
