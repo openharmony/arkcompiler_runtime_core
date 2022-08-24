@@ -350,8 +350,8 @@ public:
 #ifdef ENABLE_FULL_FILE_FIELDS
         return FULL_FILENAME;
 #else
-        LOG(WARNING, PANDAFILE) << "Not Support GetFullFileName from ohos side.";
-        return os::GetAbsolutePath(FILENAME);
+        LOG(FATAL, PANDAFILE) << "Not Support GetFullFileName from ohos side.";
+        return FILENAME;
 #endif
     }
 
