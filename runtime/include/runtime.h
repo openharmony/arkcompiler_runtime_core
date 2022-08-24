@@ -407,8 +407,6 @@ private:
 
     bool LoadBootPandaFiles(panda_file::File::OpenMode open_mode);
 
-    bool IsEnableMemoryHooks() const;
-
     static void CreateDfxController(const RuntimeOptions &options);
 
     static void BlockSignals();

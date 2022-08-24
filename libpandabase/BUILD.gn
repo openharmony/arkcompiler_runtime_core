@@ -91,7 +91,6 @@ if (is_mingw) {
     "$ark_root/platforms/windows/libpandabase/filesystem.cpp",
     "$ark_root/platforms/windows/libpandabase/library_loader.cpp",
     "$ark_root/platforms/windows/libpandabase/mem.cpp",
-    "$ark_root/platforms/windows/libpandabase/mem_hooks.cpp",
     "$ark_root/platforms/windows/libpandabase/thread.cpp",
     "$ark_root/platforms/windows/libpandabase/trace.cpp",
   ]
@@ -140,7 +139,6 @@ if (is_mingw) {
       "$ark_root/platforms/unix/libpandabase/exec.cpp",
       "$ark_root/platforms/unix/libpandabase/futex/fmutex.cpp",
       "$ark_root/platforms/unix/libpandabase/futex/mutex.cpp",
-      "$ark_root/platforms/unix/libpandabase/mem_hooks.cpp",
       "$ark_root/platforms/unix/libpandabase/pipe.cpp",
       "$ark_root/platforms/unix/libpandabase/sighook.cpp",
     ]
