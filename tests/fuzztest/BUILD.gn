@@ -11,6 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/ohos/config.gni")
+import("//build/templates/cxx/prebuilt.gni")
+
 group("fuzztest") {
   testonly = true
   deps = []
@@ -37,4 +40,8 @@ group("fuzztest") {
     "openuncompressedarchive_fuzzer:fuzztest",
     "resolvesymbol_fuzzer:fuzztest",
   ]
+}
+
+ohos_prebuilt_static_library("runtime_core_fuzz_rt") {
+  source = rebase_path(libclang_rt_file)
 }
