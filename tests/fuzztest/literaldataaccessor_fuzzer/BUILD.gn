@@ -31,6 +31,11 @@ ohos_fuzztest("LiteralDataAccessorFuzzTest") {
   ]
   sources = [ "literaldataaccessor_fuzzer.cpp" ]
   deps = [ "//arkcompiler/runtime_core/libpandafile:libarkfile_static" ]
+
+  # Temporary adaptation for fuzztest building without musl
+  if (!use_musl && (current_cpu == "arm64" || current_cpu == "arm")) {
+    deps += [ "//arkcompiler/runtime_core/tests/fuzztest:runtime_core_fuzz_rt" ]
+  }
 }
 
 ###############################################################################
