@@ -23,6 +23,8 @@
 
 namespace panda::panda_file {
 
+size_t IndexedItem::indexed_item_count_ = 0;
+
 template <class Tag, class Val>
 static bool WriteUlebTaggedValue(Writer *writer, Tag tag, Val v)
 {

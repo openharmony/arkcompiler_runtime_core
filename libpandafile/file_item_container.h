@@ -180,7 +180,7 @@ private:
                     }
                 }
 
-                return std::less<>()(item1, item2);
+                return item1->GetIndexedItemCount() < item2->GetIndexedItemCount();
             }
         };
 
