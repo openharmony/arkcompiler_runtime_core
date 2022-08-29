@@ -265,6 +265,11 @@ private:
 
 class IndexedItem : public BaseItem {
 public:
+    IndexedItem()
+    {
+        item_index_ = indexed_item_count_++;
+    }
+
     uint32_t GetIndex(const BaseItem *item) const
     {
         auto *idx = FindIndex(item);
@@ -309,6 +314,11 @@ public:
         return IndexType::NONE;
     }
 
+    size_t GetIndexedItemCount() const
+    {
+        return item_index_;
+    }
+
 private:
     struct Index {
         const BaseItem *start;
@@ -348,6 +358,8 @@ private:
 
     std::vector<Index> indexes_;
     size_t ref_count_ {1};
+    size_t item_index_ {0};
+    static size_t indexed_item_count_;
 };
 
 class TypeItem : public IndexedItem {
