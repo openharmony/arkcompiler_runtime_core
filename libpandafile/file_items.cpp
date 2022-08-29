@@ -23,6 +23,8 @@
 
 namespace panda::panda_file {
 
+size_t IndexedItem::indexed_item_count_ = 0;
+
 bool IsDynamicLanguage(panda::panda_file::SourceLang lang)
 {
     return lang == panda::panda_file::SourceLang::ECMASCRIPT;
