@@ -125,6 +125,27 @@ static panda_file::Type::TypeId GetTypeId(Value::Type type)
     }
 }
 
+uint32_t AsmEmitter::base_ = 0;
+
+// needed when correct literal array id, need to remove after isa refactoring
+/* static */
+uint32_t AsmEmitter::GetBase()
+{
+    return base_;
+}
+
+/* static */
+void AsmEmitter::IncreaseBase(uint32_t inc)
+{
+    base_ += inc;
+}
+
+/* static */
+void AsmEmitter::ResetBase()
+{
+    base_ = 0;
+}
+
 /* static */
 bool AsmEmitter::CheckValueType(Value::Type value_type, Type type, const Program &program)
 {
@@ -727,10 +748,32 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Ins &insn,
     }
 }
 
+static void IncreaseInsLiteralArrayIdByBase(panda::pandasm::Ins &insn, size_t base)
+{
+    switch (insn.opcode) {
+        case panda::pandasm::Opcode::ECMA_CREATEARRAYWITHBUFFER:
+        case panda::pandasm::Opcode::ECMA_CREATEOBJECTWITHBUFFER:
+        case panda::pandasm::Opcode::ECMA_CREATEOBJECTHAVINGMETHOD:
+        case panda::pandasm::Opcode::ECMA_DEFINECLASSWITHBUFFER:
+            insn.imms[0] = std::get<int64_t>(insn.imms[0]) + static_cast<int64_t>(base);
+            return;
+        case panda::pandasm::Opcode::ECMA_NEWLEXENVWITHNAMEDYN:
+            insn.imms[1] = std::get<int64_t>(insn.imms[1]) + static_cast<int64_t>(base);
+            return;
+        default:
+            return;
+    }
+}
+
 static void AddBytecodeIndexDependencies(MethodItem *method, const Function &func,
-                                         const AsmEmitter::AsmEntityCollections &entities)
+                                         const AsmEmitter::AsmEntityCollections &entities, uint32_t base)
 {
     for (const auto &insn : func.ins) {
+        // correct literal array id, need to remove after isa refactoring
+        if (base != 0) {
+            IncreaseInsLiteralArrayIdByBase(const_cast<pandasm::Ins &>(insn), base);
+        }
+
         if (insn.opcode == Opcode::INVALID) {
             continue;
         }
@@ -779,11 +822,20 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                                   AsmEmitter::AsmEntityCollections &entities)
 {
     for (const auto &[id, l] : program.literalarray_table) {
-        auto literal_array_item = items->GetOrCreateLiteralArrayItem(id);
+        // correct literal array id, need to remove after isa refactoring
+        const auto base = GetBase();
+        std::string corrected_id = base == 0 ? id : (std::to_string(GetBase()) + "_" + id);
+
+        auto literal_array_item = items->GetOrCreateLiteralArrayItem(corrected_id);
         std::vector<panda_file::LiteralItem> literal_array;
 
         for (auto &literal : l.literals_) {
             std::unique_ptr<ScalarValue> value;
+
+            // correct literal array id, need to remove after isa refactoring
+            if (literal.tag_ == panda_file::LiteralTag::LITERALBUFFERINDEX) {
+                const_cast<LiteralArray::Literal &>(literal).value_ = std::get<uint32_t>(literal.value_) + base;
+            }
 
             switch (literal.tag_) {
                 case panda_file::LiteralTag::ARRAY_U1: {
@@ -874,6 +926,7 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                         ScalarValue::Create<Value::Type::U16>(std::get<uint16_t>(literal.value_)));
                     break;
                 case panda_file::LiteralTag::INTEGER:
+                case panda_file::LiteralTag::LITERALBUFFERINDEX:
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::I32>(std::get<uint32_t>(literal.value_)));
                     break;
@@ -904,7 +957,7 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
         }
 
         literal_array_item->AddItems(literal_array);
-        entities.literalarray_items.insert({id, literal_array_item});
+        entities.literalarray_items.insert({corrected_id, literal_array_item});
     }
 }
 
@@ -996,6 +1049,13 @@ bool AsmEmitter::HandleFields(ItemContainer *items, const Program &program, AsmE
                               const std::string &name, const Record &rec, ClassItem *record)
 {
     for (const auto &f : rec.field_list) {
+        // correct literal array id, need to remove after isa refactoring
+        if (f.type.GetId() == panda_file::Type::TypeId::U32) {
+            const auto base = GetBase();
+            auto addedVal = base + f.metadata->GetValue().value().GetValue<uint32_t>();
+            f.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(addedVal));
+        }
+
         auto *field_name = items->GetOrCreateStringItem(pandasm::DeMangleName(f.name));
         std::string full_field_name = name + "." + f.name;
         auto *type_item = GetTypeItem(items, primitive_types, f.type, program);
@@ -1384,7 +1444,7 @@ bool AsmEmitter::MakeFunctionDebugInfoAndAnnotations(ItemContainer *items, const
 
         if (func.metadata->HasImplementation()) {
             SetCodeAndDebugInfo(items, method, func, emit_debug_info);
-            AddBytecodeIndexDependencies(method, func, entities);
+            AddBytecodeIndexDependencies(method, func, entities, GetBase());
         }
 
         SetMethodSourceLang(program, method, func, name);
@@ -1498,6 +1558,69 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
 }
 
 /* static */
+bool AsmEmitter::MakeItemsForSingleProgram(ItemContainer *items, const Program &program, bool emit_debug_info,
+    AsmEmitter::AsmEntityCollections &entities,
+    std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> primitive_types)
+{
+    MakeStringItems(items, program, entities);
+    MakeArrayTypeItems(items, program, entities);
+    if (!MakeRecordItems(items, program, entities, primitive_types)) {
+        return false;
+    }
+    if (!MakeFunctionItems(items, program, entities, primitive_types, emit_debug_info)) {
+        return false;
+    }
+    MakeLiteralItems(items, program, entities);
+    // Add annotations for records and fields
+    if (!MakeRecordAnnotations(items, program, entities)) {
+        return false;
+    }
+    return true;
+}
+
+bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info)
+{
+    auto items = ItemContainer {};
+    auto primitive_types = CreatePrimitiveTypes(&items);
+    auto entities = AsmEmitter::AsmEntityCollections {};
+    SetLastError("");
+
+    ResetBase();  // correct literal array id, need to remove after isa refactoring
+    for (const auto *prog : progs) {
+        if (!MakeItemsForSingleProgram(&items, *prog, emit_debug_info, entities, primitive_types)) {
+            return false;
+        }
+        // correct literal array id, need to remove after isa refactoring
+        IncreaseBase(prog->literalarray_table.size());
+    }
+
+    ResetBase();  // correct literal array id, need to remove after isa refactoring
+    for (const auto *prog : progs) {
+        if (!MakeFunctionDebugInfoAndAnnotations(&items, *prog, entities, emit_debug_info)) {
+            return false;
+        }
+        // correct literal array id, need to remove after isa refactoring
+        IncreaseBase(prog->literalarray_table.size());
+    }
+
+    items.ComputeLayout();
+
+    for (const auto *prog : progs) {
+        if (!EmitFunctions(&items, *prog, entities, emit_debug_info)) {
+            return false;
+        }
+    }
+
+    auto writer = FileWriter(filename);
+    if (!writer) {
+        SetLastError("Unable to open" + filename + " for writing");
+        return false;
+    }
+
+    return items.Write(&writer);
+}
+
+/* static */
 bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToPandaAsmMaps *maps, bool emit_debug_info,
                       panda::panda_file::pgo::ProfileOptimizer *profile_opt)
 {
@@ -1507,24 +1630,8 @@ bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToP
 
     SetLastError("");
 
-    MakeStringItems(items, program, entities);
-
-    MakeArrayTypeItems(items, program, entities);
-
-    if (!MakeRecordItems(items, program, entities, primitive_types)) {
-        return false;
-    }
-
-    if (!MakeFunctionItems(items, program, entities, primitive_types, emit_debug_info)) {
-        return false;
-    }
-
-    MakeLiteralItems(items, program, entities);
-
-    // Add annotations for records and fields
-    if (!MakeRecordAnnotations(items, program, entities)) {
-        return false;
-    }
+    ResetBase();  // correct literal array id, need to remove after isa refactoring
+    MakeItemsForSingleProgram(items, program, emit_debug_info, entities, primitive_types);
 
     // Add Code and DebugInfo items last due to they have variable size that depends on bytecode
     if (!MakeFunctionDebugInfoAndAnnotations(items, program, entities, emit_debug_info)) {
@@ -1655,34 +1762,37 @@ bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
     return true;
 }
 
-void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, ItemContainer *container,
-                                 std::vector<uint8_t> *constant_pool, uint32_t &pc_inc, size_t instruction_number) const
+static void TryEmitPc(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool,
+                      uint32_t &pc_inc)
 {
-    auto try_emit_pc = [program, constant_pool, &pc_inc]() -> void {
-        if (pc_inc) {
-            program->EmitAdvancePc(constant_pool, pc_inc);
-            pc_inc = 0;
+    if (pc_inc) {
+        program->EmitAdvancePc(constant_pool, pc_inc);
+        pc_inc = 0;
+    }
+}
+
+void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, ItemContainer *container,
+                                 std::vector<uint8_t> *constant_pool, uint32_t &pc_inc, size_t instruction_number,
+                                 size_t variable_index) const
+{
+    ASSERT(variable_index < local_variable_debug.size());
+    const auto &v = local_variable_debug[variable_index];
+    ASSERT(!IsParameter(v.reg));
+    if (instruction_number == v.start) {
+        TryEmitPc(program, constant_pool, pc_inc);
+        StringItem *variable_name = container->GetOrCreateStringItem(v.name);
+        StringItem *variable_type = container->GetOrCreateStringItem(v.signature);
+        if (v.signature_type.empty()) {
+            program->EmitStartLocal(constant_pool, v.reg, variable_name, variable_type);
+        } else {
+            StringItem *type_signature = container->GetOrCreateStringItem(v.signature_type);
+            program->EmitStartLocalExtended(constant_pool, v.reg, variable_name, variable_type, type_signature);
         }
-    };
-    for (auto &v : local_variable_debug) {
-        if (IsParameter(v.reg)) {
-            continue;
-        }
-        if (instruction_number == v.start) {
-            try_emit_pc();
-            StringItem *variable_name = container->GetOrCreateStringItem(v.name);
-            StringItem *variable_type = container->GetOrCreateStringItem(v.signature);
-            if (v.signature_type.empty()) {
-                program->EmitStartLocal(constant_pool, v.reg, variable_name, variable_type);
-            } else {
-                StringItem *type_signature = container->GetOrCreateStringItem(v.signature_type);
-                program->EmitStartLocalExtended(constant_pool, v.reg, variable_name, variable_type, type_signature);
-            }
-        }
-        if (instruction_number == (v.start + v.length)) {
-            try_emit_pc();
-            program->EmitEndLocal(v.reg);
-        }
+    }
+
+    if (instruction_number == (v.start + v.length)) {
+        TryEmitPc(program, constant_pool, pc_inc);
+        program->EmitEndLocal(v.reg);
     }
 }
 
@@ -1735,6 +1845,23 @@ void Function::EmitColumnNumber(panda_file::LineNumberProgramItem *program, std:
     }
 }
 
+void Function::CollectLocalVariable(std::vector<Function::LocalVariablePair> &local_variable_info) const
+{
+    for (size_t i = 0; i < local_variable_debug.size(); i++) {
+        const auto &v = local_variable_debug[i];
+        if (IsParameter(v.reg)) {
+            continue;
+        }
+        local_variable_info.emplace_back(v.start, i);
+        local_variable_info.emplace_back(v.start + v.length, i);
+    }
+
+    std::sort(local_variable_info.begin(), local_variable_info.end(),
+        [&](const Function::LocalVariablePair &a, const Function::LocalVariablePair &b) {
+        return a.insn_order < b.insn_order;
+    });
+}
+
 void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, const std::vector<uint8_t> &bytecode,
                                       ItemContainer *container, std::vector<uint8_t> *constant_pool,
                                       bool emit_debug_info) const
@@ -1752,25 +1879,37 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, con
     BytecodeInstruction bi(bytecode.data());
     debug_item->SetLineNumber(static_cast<uint32_t>(prev_line_number));
 
-    for (size_t i = 0; i < ins.size(); i++) {
-        if (emit_debug_info) {
-            EmitLocalVariable(program, container, constant_pool, pc_inc, i);
-        }
-        if (ins[i].opcode == Opcode::INVALID) {
-            continue;
-        }
-
-        if (emit_debug_info || ins[i].CanThrow()) {
-            EmitLineNumber(program, constant_pool, prev_line_number, pc_inc, i);
-        }
-
-        if (emit_debug_info) {
-            EmitColumnNumber(program, constant_pool, prev_column_number, pc_inc, i);
-        }
-
-        pc_inc += bi.GetSize();
-        bi = bi.GetNext();
+    std::vector<Function::LocalVariablePair> local_variable_info;
+    if (emit_debug_info) {
+        CollectLocalVariable(local_variable_info);
     }
+    const size_t num_ins = ins.size();
+    size_t start = 0;
+    auto iter = local_variable_info.begin();
+    do {
+        size_t end = emit_debug_info && iter != local_variable_info.end() ? iter->insn_order : num_ins;
+        for (size_t i = start; i < end; i++) {
+            if (ins[i].opcode == Opcode::INVALID) {
+                continue;
+            }
+            if (emit_debug_info || ins[i].CanThrow()) {
+                EmitLineNumber(program, constant_pool, prev_line_number, pc_inc, i);
+            }
+            if (emit_debug_info) {
+                EmitColumnNumber(program, constant_pool, prev_column_number, pc_inc, i);
+            }
+            pc_inc += bi.GetSize();
+            bi = bi.GetNext();
+        }
+        if (iter == local_variable_info.end()) {
+            break;
+        }
+        if (emit_debug_info) {
+            EmitLocalVariable(program, container, constant_pool, pc_inc, end, iter->variable_index);
+        }
+        start = end;
+        iter++;
+    } while (true);
 
     program->EmitEnd();
 }

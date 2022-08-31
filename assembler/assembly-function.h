@@ -140,8 +140,15 @@ struct Function {
 
     uint32_t GetColumnNumber(size_t i) const;
 
+    struct LocalVariablePair {
+        size_t insn_order;
+        size_t variable_index;
+        LocalVariablePair(size_t order, size_t index) : insn_order(order), variable_index(index) {}
+    };
+    void CollectLocalVariable(std::vector<LocalVariablePair> &local_variable_info) const;
     void EmitLocalVariable(panda_file::LineNumberProgramItem *program, panda_file::ItemContainer *container,
-                           std::vector<uint8_t> *constant_pool, uint32_t &pc_inc, size_t instruction_number) const;
+                           std::vector<uint8_t> *constant_pool, uint32_t &pc_inc, size_t instruction_number,
+                           size_t variable_index) const;
     void EmitNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool, uint32_t pc_inc,
                     int32_t line_inc) const;
     void EmitLineNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool,
