@@ -57,7 +57,6 @@ set(UNIX_SOURCES_COMMON
     ${PANDA_ROOT}/platforms/unix/libpandabase/filesystem.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/library_loader_resolve_symbol.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/mem.cpp
-    ${PANDA_ROOT}/platforms/unix/libpandabase/mem_hooks.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/sighook.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/trace.cpp
     ${ARKBASE_LTO_UNIX_SOURCES}
@@ -89,7 +88,6 @@ set(WINDOWS_SOURCES
     ${PANDA_ROOT}/platforms/windows/libpandabase/library_loader.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/file.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/mem.cpp
-    ${PANDA_ROOT}/platforms/windows/libpandabase/mem_hooks.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/thread.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/filesystem.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/trace.cpp

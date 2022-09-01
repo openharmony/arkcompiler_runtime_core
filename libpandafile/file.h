@@ -18,8 +18,10 @@
 
 #include <cstdint>
 #include "os/mem.h"
+#include "os/filesystem.h"
 #include "utils/span.h"
 #include "utils/utf.h"
+#include "utils/logger.h"
 
 #include <array>
 #include <iostream>
@@ -324,9 +326,10 @@ public:
 
     PandaCache *GetPandaCache() const
     {
-#ifdef ENABLE_PANDA_CACHE
+#ifdef ENABLE_FULL_FILE_FIELDS
         return panda_cache_.get();
 #else
+        LOG(WARNING, PANDAFILE) << "Not Support GetPandaCache from ohos side.";
         return nullptr;
 #endif
     }
@@ -344,7 +347,12 @@ public:
 
     const std::string &GetFullFileName() const
     {
+#ifdef ENABLE_FULL_FILE_FIELDS
         return FULL_FILENAME;
+#else
+        LOG(FATAL, PANDAFILE) << "Not Support GetFullFileName from ohos side.";
+        return FILENAME;
+#endif
     }
 
     static constexpr uint32_t GetFileBaseOffset()
@@ -384,8 +392,8 @@ private:
     os::mem::ConstBytePtr base_;
     const std::string FILENAME;
     const uint32_t FILENAME_HASH;
+#ifdef ENABLE_FULL_FILE_FIELDS
     const std::string FULL_FILENAME;
-#ifdef ENABLE_PANDA_CACHE
     std::unique_ptr<PandaCache> panda_cache_;
 #endif
     const uint32_t UNIQ_ID;

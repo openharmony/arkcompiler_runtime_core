@@ -53,6 +53,7 @@ enum class LiteralTag : uint8_t {
     ARRAY_F64 = 0x14,
     ARRAY_STRING = 0x15,
     ASYNCGENERATORMETHOD = 0x16,
+    LITERALBUFFERINDEX = 0x17,
     NULLVALUE = 0xff
 };
 

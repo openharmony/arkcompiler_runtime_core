@@ -533,7 +533,7 @@ public:
     size_t CountSpillSlots()
     {
         auto frame_slots = GetFrameSize() / PointerSize(RUNTIME_ARCH);
-        auto spills_count = frame_slots - (CFrameSlots::Start() + GetRegsCount(RUNTIME_ARCH) + 1U);
+        auto spills_count = frame_slots - (static_cast<size_t>(CFrameSlots::Start()) + GetRegsCount(RUNTIME_ARCH) + 1U);
         // Reverse 'CFrameLayout::AlignSpillCount' counting
         if (RUNTIME_ARCH == Arch::AARCH32) {
             spills_count = spills_count / 2U - 1;

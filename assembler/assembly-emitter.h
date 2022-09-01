@@ -31,7 +31,6 @@
 #include "pgo.h"
 
 namespace panda::pandasm {
-
 class AsmEmitter {
 public:
     struct PandaFileToPandaAsmMaps {
@@ -60,6 +59,8 @@ public:
     static bool Emit(const std::string &filename, const Program &program, std::map<std::string, size_t> *stat = nullptr,
                      PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true,
                      panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr);
+
+    static bool EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info);
 
     static std::unique_ptr<const panda_file::File> Emit(const Program &program,
                                                         PandaFileToPandaAsmMaps *maps = nullptr);
@@ -147,6 +148,10 @@ private:
         last_error = message;
     }
 
+    static bool MakeItemsForSingleProgram(panda_file::ItemContainer *items, const Program &program,
+        bool emit_debug_info, AsmEntityCollections &entities,
+        std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> primitive_types);
+
     static bool CheckValueType(Value::Type value_type, Type type, const Program &program);
 
     static bool CheckValueEnumCase(const Value *value, Type type, const Program &program);
@@ -233,6 +238,12 @@ private:
                                const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
                                const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
                                const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
+
+    // needed when correct literal array id, need to remove after isa refactoring
+    static uint32_t base_;
+    static uint32_t GetBase();
+    static void IncreaseBase(uint32_t inc);
+    static void ResetBase();
 
     // TODO(mgonopolsky): Refactor to introduce a single error-processing mechanism for parser and emitter
     static std::string last_error;

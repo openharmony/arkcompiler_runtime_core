@@ -133,6 +133,7 @@ bool BytecodeGen::RunImpl()
         }
         if (bb->NeedsJump()) {
             EmitJump(bb);
+            insn_order++;
         }
     }
     if (!GetStatus()) {

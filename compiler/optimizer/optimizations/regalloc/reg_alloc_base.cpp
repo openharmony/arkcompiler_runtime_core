@@ -234,8 +234,8 @@ void RegAllocBase::ReserveTempRegisters()
 {
     if (GetGraph()->IsBytecodeOptimizer()) {
         auto fixup =
-            static_cast<int32_t>(GetGraph()->GetRuntime()->GetMethodTotalArgumentsCount(GetGraph()->GetMethod()));
-        auto reserved_bit = GetRegMask().GetSize() - 1 - fixup;
+            static_cast<size_t>(GetGraph()->GetRuntime()->GetMethodTotalArgumentsCount(GetGraph()->GetMethod()));
+        auto reserved_bit = GetRegMask().GetSize() - 1U - fixup;
         GetRegMask().Reserve(reserved_bit);
         return;
     }

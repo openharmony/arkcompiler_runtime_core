@@ -266,7 +266,7 @@ void IrBuilder::BuildBasicBlocks(const BytecodeInstructions &instructions)
         }
         auto offset = InstBuilder::GetInstructionJumpOffset(&inst);
         if (offset != INVALID_OFFSET) {
-            auto target_pc = pc + offset;
+            auto target_pc = pc + static_cast<size_t>(offset);
             CreateBlock(target_pc);
             if (inst.HasFlag(BytecodeInstruction::CONDITIONAL)) {
                 fallthrough = true;
@@ -455,8 +455,8 @@ BasicBlock *IrBuilder::GetBlockToJump(BytecodeInstruction *inst, size_t pc)
 #endif
 
     if (auto offset = InstBuilder::GetInstructionJumpOffset(inst); offset != INVALID_OFFSET) {
-        ASSERT(blocks_[pc + offset] != nullptr);
-        return blocks_[pc + offset];
+        ASSERT(blocks_[pc + static_cast<size_t>(offset)] != nullptr);
+        return blocks_[pc + static_cast<size_t>(offset)];
     }
     return nullptr;
 }
