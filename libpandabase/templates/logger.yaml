@@ -60,6 +60,7 @@ components:
   - name: irtoc
   - name: hotreload
   - name: ECMASCRIPT
+  - name: defect_scan_aux
 
 dfx_components:
   - name: common

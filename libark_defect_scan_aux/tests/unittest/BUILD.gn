@@ -1,0 +1,49 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
+import("//arkcompiler/runtime_core/ark_config.gni")
+import("//build/ohos.gni")
+
+##############################unittest##########################################
+action("generate_abc_file") {
+  visibility = [ ":*" ]
+  script = "$ark_root/libark_defect_scan_aux/tests/generate_abc_file.py"
+  args = [
+    "--testcase-list",
+    rebase_path("$ark_root/libark_defect_scan_aux/tests/testcase-list.txt"),
+    "--build-dir",
+    rebase_path("$ts2abc_build_path"),
+    "--dst-dir",
+    rebase_path("$root_out_dir/ark/ark"),
+  ]
+
+  deps = [ "$ts2abc_root:ark_ts2abc_build" ]
+  outputs = [ "$ts2abc_build_path/output_not_specified_here" ]
+}
+
+ohos_executable("defect_scan_aux_unittest") {
+  sources = [ "defect_scan_aux_test.cpp" ]
+
+  configs = [ "$ark_root/libark_defect_scan_aux:defectscan_test_config" ]
+
+  deps = [
+    "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux_static_test",
+    sdk_libc_secshared_dep,
+  ]
+  deps += [ ":generate_abc_file" ]
+
+  relative_install_dir = "ark"
+  part_name = "ark"
+  subsystem_name = "ark"
+}
