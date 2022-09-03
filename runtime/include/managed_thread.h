@@ -653,6 +653,7 @@ public:
                 if (UNLIKELY(IsRuntimeTerminated())) {
                     suspend_lock_.Unlock();
                     OnRuntimeTerminated();
+                    UNREACHABLE();
                 }
             }
             ASSERT(!IsSuspended());
