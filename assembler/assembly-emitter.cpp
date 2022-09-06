@@ -824,7 +824,7 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
     for (const auto &[id, l] : program.literalarray_table) {
         // correct literal array id, need to remove after isa refactoring
         const auto base = GetBase();
-        std::string corrected_id = base == 0 ? id : (std::to_string(GetBase()) + "_" + id);
+        std::string corrected_id = base == 0 ? id : (std::to_string(GetBase() + std::atoi(id.c_str())));
 
         auto literal_array_item = items->GetOrCreateLiteralArrayItem(corrected_id);
         std::vector<panda_file::LiteralItem> literal_array;

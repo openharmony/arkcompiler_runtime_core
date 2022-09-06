@@ -31,11 +31,11 @@ namespace panda::pandasm {
 
 struct Program {
     panda::panda_file::SourceLang lang {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
-    std::unordered_map<std::string, panda::pandasm::Record> record_table;
-    std::unordered_map<std::string, panda::pandasm::Function> function_table;
+    std::map<std::string, panda::pandasm::Record> record_table;
+    std::map<std::string, panda::pandasm::Function> function_table;
     std::unordered_map<std::string, std::vector<std::string>> function_synonyms;
     std::map<std::string, panda::pandasm::LiteralArray> literalarray_table;
-    std::unordered_set<std::string> strings;
+    std::set<std::string> strings;
     std::unordered_set<Type> array_types;
 
     /*
