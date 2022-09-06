@@ -55,6 +55,7 @@ libarkfile_sources = [
   "literal_data_accessor.cpp",
   "method_data_accessor.cpp",
   "method_handle_data_accessor.cpp",
+  "module_data_accessor.cpp",
   "pgo.cpp",
 ]
 
