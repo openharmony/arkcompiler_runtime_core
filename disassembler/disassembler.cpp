@@ -23,7 +23,7 @@
 
 namespace panda::disasm {
 
-void Disassembler::Disassemble(const std::string &filename_in, bool quiet, bool skip_strings)
+void Disassembler::Disassemble(const std::string &filename_in, const bool quiet, const bool skip_strings)
 {
     auto file_new = panda_file::File::Open(filename_in);
     file_.swap(file_new);

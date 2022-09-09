@@ -78,7 +78,7 @@ bool Inspector::HandlePendingPause()
 
     std::for_each(pauseHandlers_.begin(), pauseHandlers_.end(), [](auto &handler) { handler(); });
 
-    auto addCallFrame = [&](JsonArrayBuilder &callFrames, const PtFrame &frame) {
+    auto addCallFrame = [&this](JsonArrayBuilder &callFrames, const PtFrame &frame) {
         auto &sourceFile = sourceManager_.GetOrLoadSourceFile(frame.GetMethod());
         auto &table = sourceFile.GetDebugInfo().GetLineNumberTable(frame.GetMethod()->GetFileId());
 

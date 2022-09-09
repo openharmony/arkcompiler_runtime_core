@@ -19,7 +19,7 @@
 #include <atomic>
 #include <memory>
 #include <string>
-#include <signal.h>  // NOLINTNEXTLINE(modernize-deprecated-headers)
+#include <csignal>
 #include <vector>
 
 #include "libpandabase/mem/arena_allocator.h"

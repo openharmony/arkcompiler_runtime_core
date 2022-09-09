@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_INST_H_
-#define COMPILER_OPTIMIZER_IR_INST_H_
+#ifndef COMPILER_OPTIMIZER_IR_INST_H
+#define COMPILER_OPTIMIZER_IR_INST_H
 
 #include <array>
 #include <vector>
@@ -5578,4 +5578,4 @@ OPCODE_LIST(INST_DEF)
 #undef INST_DEF
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_IR_INST_H_
+#endif  // COMPILER_OPTIMIZER_IR_INST_H

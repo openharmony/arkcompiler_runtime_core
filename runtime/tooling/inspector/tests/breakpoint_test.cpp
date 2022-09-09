@@ -172,8 +172,8 @@ TEST_F(BreakpointTest, RemovesBreakpoint)
 {
     auto breakpointId = CallSync(
         "Debugger.setBreakpoint",
-        [&](auto &params) {
-            params.AddProperty("location", [&](JsonObjectBuilder &location) {
+        [&this](auto &params) {
+            params.AddProperty("location", [&this](JsonObjectBuilder &location) {
                 location.AddProperty("scriptId", scriptId_);
                 location.AddProperty("lineNumber", 2);
             });

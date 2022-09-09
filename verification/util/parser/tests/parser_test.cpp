@@ -28,14 +28,17 @@ struct smth;
 static const auto FOO = [](action act, [[maybe_unused]] Context &, auto &it) {
     switch (act) {
         case action::START:
-            if (*it != 'f')
+            if (*it != 'f') {
                 return false;
+            }
             ++it;
-            if (*it != 'o')
+            if (*it != 'o') {
                 return false;
+            }
             ++it;
-            if (*it != 'o')
+            if (*it != 'o') {
                 return false;
+            }
             ++it;
             return true;
 
@@ -53,14 +56,17 @@ static const auto FOO = [](action act, [[maybe_unused]] Context &, auto &it) {
 static const auto BAR = [](action act, [[maybe_unused]] Context &, auto &it) {
     switch (act) {
         case action::START:
-            if (*it != 'b')
+            if (*it != 'b') {
                 return false;
+            }
             ++it;
-            if (*it != 'a')
+            if (*it != 'a') {
                 return false;
+            }
             ++it;
-            if (*it != 'r')
+            if (*it != 'r') {
                 return false;
+            }
             ++it;
             return true;
 

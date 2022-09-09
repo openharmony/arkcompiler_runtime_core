@@ -153,8 +153,9 @@ public:
 
     bool CheckInputs(Inst &inst, std::initializer_list<size_t> list) const
     {
-        if (inst.GetInputs().Size() != list.size())
+        if (inst.GetInputs().Size() != list.size()) {
             return false;
+        }
         auto it2 = list.begin();
         for (auto it = inst.GetInputs().begin(); it != inst.GetInputs().end(); ++it, ++it2) {
             if (it->GetInst() != &INS(*it2)) {

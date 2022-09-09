@@ -492,19 +492,19 @@ public:
     {
         switch (shift_type) {
             case ShiftType::LSL:
-                return (uint64_t)value << scale;
+                return static_cast<uint64_t>value << scale;
             case ShiftType::ROR:
-                return ((uint64_t)value >> scale) | (value << (type_size - scale));
+                return (static_cast<uint64_t>value >> scale) | (value << (type_size - scale));
             case ShiftType::LSR:
                 if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) {
-                    return ((uint32_t)value) >> (uint32_t)scale;
+                    return (static_cast<uint32_t>value) >> static_cast<uint32_t>scale;
                 }
                 if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) {
-                    return ((uint64_t)value) >> scale;
+                    return (static_cast<uint64_t>value) >> scale;
                 }
             /* fall-through */
             case ShiftType::ASR:
-                return (int64_t)value >> scale;
+                return static_cast<int64_t>value >> scale;
             default:
                 UNREACHABLE();
         }
@@ -650,8 +650,9 @@ public:
                 /* fall-through */
             case Opcode::Abs:
                 if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, int16_t> || std::is_same_v<T, int32_t> ||
-                              std::is_same_v<T, int64_t>)
+                              std::is_same_v<T, int64_t>) {
                     return std::abs(param_1);
+                }
             /* fall-through */
             default:
                 ASSERT_DO(false, std::cerr << "Unsupported!" << (int)opc << "\n");

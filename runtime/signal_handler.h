@@ -16,7 +16,7 @@
 #ifndef PANDA_RUNTIME_SIGNAL_HANDLER_H
 #define PANDA_RUNTIME_SIGNAL_HANDLER_H
 
-#include <signal.h>  // NOLINTNEXTLINE(modernize-deprecated-headers)
+#include <csignal>
 #include <cstdint>
 #include <iostream>
 #include <vector>

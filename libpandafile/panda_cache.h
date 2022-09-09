@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_PANDA_CACHE_H_
-#define LIBPANDAFILE_PANDA_CACHE_H_
+#ifndef LIBPANDAFILE_PANDA_CACHE_H
+#define LIBPANDAFILE_PANDA_CACHE_H
 
 #include "file.h"
 #include "os/mutex.h"
@@ -207,4 +207,4 @@ private:
 }  // namespace panda_file
 }  // namespace panda
 
-#endif
+#endif  // LIBPANDAFILE_PANDA_CACHE_H

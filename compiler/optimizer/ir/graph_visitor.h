@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_VISITOR_H_
-#define COMPILER_OPTIMIZER_IR_VISITOR_H_
+#ifndef COMPILER_OPTIMIZER_IR_GRAPH_VISITOR_H
+#define COMPILER_OPTIMIZER_IR_GRAPH_VISITOR_H
 
 #include "opcodes.h"
 #include "basicblock.h"
@@ -106,4 +106,4 @@ protected:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_IR_VISITOR_H_
+#endif  // COMPILER_OPTIMIZER_IR_GRAPH_VISITOR_H

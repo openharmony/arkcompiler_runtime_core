@@ -224,7 +224,7 @@ public:
     }
 
     // return true if the method is Jni with exception
-    virtual bool HasNativeException([[maybe_unused]] MethodPtr method) const override
+    bool HasNativeException([[maybe_unused]] MethodPtr method) const override
     {
         return false;
     }

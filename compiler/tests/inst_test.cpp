@@ -135,8 +135,9 @@ TEST_F(InstTest, Dataflow)
 
     // 3. Append additional inputs into PHI, thereby force it to reallocate inputs storage, dataflow is not valid  from
     // this moment
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i) {
         INS(6).AppendInput(&INS(0));
+    }
 }
 
 TEST_F(InstTest, Arithmetics)

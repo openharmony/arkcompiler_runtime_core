@@ -454,6 +454,8 @@ bool IsValidModifiedUTF8(const uint8_t *elems)
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 ++elems;
                 break;
+            default:
+                break;
         }
     }
     return true;

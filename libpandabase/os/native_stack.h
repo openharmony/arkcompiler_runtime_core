@@ -17,7 +17,7 @@
 #define PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H_
 
 #include <set>
-#include <signal.h>  // NOLINTNEXTLINE(modernize-deprecated-headers)
+#include <csignal>
 #include <string>
 
 #if defined(PANDA_TARGET_UNIX)
