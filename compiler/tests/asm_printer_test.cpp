@@ -26,7 +26,7 @@
 #include "os/filesystem.h"
 #include "target/asm_printer.h"
 
-const std::string output_dir = "asm_output";
+static const std::string output_dir = "asm_output";
 
 // Debug print to stdout
 // #define STDOUT_PRINT

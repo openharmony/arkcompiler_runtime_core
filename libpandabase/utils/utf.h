@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_UTF_H_
-#define PANDA_LIBPANDABASE_UTILS_UTF_H_
+#ifndef LIBPANDABASE_UTILS_UTF_H
+#define LIBPANDABASE_UTILS_UTF_H
 
 #include <cstdint>
 #include <cstddef>
@@ -148,4 +148,4 @@ static inline std::pair<uint16_t, uint16_t> SplitUtf16Pair(uint32_t pair)
 
 }  // namespace panda::utf
 
-#endif  // PANDA_LIBPANDABASE_UTILS_UTF_H_
+#endif  // LIBPANDABASE_UTILS_UTF_H

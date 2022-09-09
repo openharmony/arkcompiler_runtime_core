@@ -43,27 +43,27 @@ T CutValue(uint64_t data, DataType::Type type)
             ASSERT(false);
             return -1;
         case (DataType::BOOL):
-            return (T)((bool)(data));
+            return (T)(static_cast<bool>(data));
         case (DataType::UINT8):
-            return (T)((uint8_t)(data));
+            return (T)(static_cast<uint8_t>(data));
         case (DataType::INT8):
-            return (T)((int8_t)(data));
+            return (T)(static_cast<int8_t>(data));
         case (DataType::UINT16):
-            return (T)((uint16_t)(data));
+            return (T)(static_cast<uint16_t>(data));
         case (DataType::INT16):
-            return (T)((int16_t)(data));
+            return (T)(static_cast<int16_t>(data));
         case (DataType::UINT32):
-            return (T)((uint32_t)(data));
+            return (T)(static_cast<uint32_t>(data));
         case (DataType::INT32):
-            return (T)((int32_t)(data));
+            return (T)(static_cast<int32_t>(data));
         case (DataType::UINT64):
-            return (T)((uint64_t)(data));
+            return (T)(static_cast<uint64_t>(data));
         case (DataType::INT64):
-            return (T)((int64_t)(data));
+            return (T)(static_cast<int64_t>(data));
         case (DataType::FLOAT32):
-            return (T)((float)(data));
+            return (T)(static_cast<float>(data));
         case (DataType::FLOAT64):
-            return (T)((double)(data));
+            return (T)(static_cast<double>(data));
     }
     return 0;
 }
@@ -129,7 +129,7 @@ public:
     void *CreateArray(T *array, int size, ArenaAllocator *object_allocator)
     {
         void *arr_data = object_allocator->Alloc(size * sizeof(T) + runtime_info_->GetArrayDataOffset(Arch::AARCH64));
-        ASSERT(IsInObjectsAddressSpace((uintptr_t)arr_data));
+        ASSERT(IsInObjectsAddressSpace(static_cast<uintptr_t>arr_data));
         int *lenarr = reinterpret_cast<int *>(reinterpret_cast<char *>(arr_data) +
                                               runtime_info_->GetArrayLengthOffset(Arch::AARCH64));
         lenarr[0] = size;

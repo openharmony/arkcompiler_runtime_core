@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_SPILL_FILLS_RESOLVER_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_SPILL_FILLS_RESOLVER_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_SPILL_FILLS_RESOLVER_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_SPILL_FILLS_RESOLVER_H
 
 #include "compiler/optimizer/ir/graph_visitor.h"
 #include "optimizer/code_generator/registers_description.h"
@@ -144,4 +144,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_SPILL_FILLS_RESOLVER_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_SPILL_FILLS_RESOLVER_H

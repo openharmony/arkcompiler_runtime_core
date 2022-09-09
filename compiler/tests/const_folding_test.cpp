@@ -176,7 +176,7 @@ TEST_F(ConstFoldingTest, NegFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, (float)12);
+        CONSTANT(0, static_cast<float>12);
         BASIC_BLOCK(2, 1)
         {
             INST(1, Opcode::Neg).f32().Inputs(0);
@@ -253,7 +253,7 @@ TEST_F(ConstFoldingTest, AbsFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, (float)-12.0);
+        CONSTANT(0, static_cast<float>(-12.0));
         BASIC_BLOCK(2, 1)
         {
             INST(1, Opcode::Abs).f32().Inputs(0);
@@ -371,8 +371,8 @@ TEST_F(ConstFoldingTest, AddInt8Test)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, (uint8_t)0xffffffff);
-        CONSTANT(1, (uint8_t)1);
+        CONSTANT(0, static_cast<uint8_t>0xffffffff);
+        CONSTANT(1, static_cast<uint8_t>1);
         BASIC_BLOCK(2, 1)
         {
             INST(2, Opcode::Add).u8().Inputs(0, 1);
@@ -412,8 +412,8 @@ TEST_F(ConstFoldingTest, AddFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, (float)3.0);
-        CONSTANT(1, (float)-2.0);
+        CONSTANT(0, static_cast<float>3.0);
+        CONSTANT(1, static_cast<float>(-2.0));
         BASIC_BLOCK(2, 1)
         {
             INST(2, Opcode::Add).f32().Inputs(0, 1);
@@ -534,8 +534,8 @@ TEST_F(ConstFoldingTest, SubFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, (float)3.0);
-        CONSTANT(1, (float)2.0);
+        CONSTANT(0, static_cast<float>3.0);
+        CONSTANT(1, static_cast<float>2.0);
         BASIC_BLOCK(2, 1)
         {
             INST(2, Opcode::Sub).f32().Inputs(0, 1);
@@ -669,8 +669,8 @@ TEST_F(ConstFoldingTest, MulFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, (float)3.0);
-        CONSTANT(1, (float)2.0);
+        CONSTANT(0, static_cast<float>3.0);
+        CONSTANT(1, static_cast<float>2.0);
         BASIC_BLOCK(2, 1)
         {
             INST(2, Opcode::Mul).f32().Inputs(0, 1);
@@ -873,8 +873,8 @@ TEST_F(ConstFoldingTest, DivFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, (float)3.0);
-        CONSTANT(1, (float)2.0);
+        CONSTANT(0, static_cast<float>3.0);
+        CONSTANT(1, static_cast<float>2.0);
         BASIC_BLOCK(2, 1)
         {
             INST(2, Opcode::Div).f32().Inputs(0, 1);
@@ -933,8 +933,8 @@ TEST_F(ConstFoldingTest, MinFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, (float)3.0);
-        CONSTANT(1, (float)2.0);
+        CONSTANT(0, static_cast<float>3.0);
+        CONSTANT(1, static_cast<float>2.0);
         BASIC_BLOCK(2, 1)
         {
             INST(2, Opcode::Min).f32().Inputs(0, 1);
@@ -1087,8 +1087,8 @@ TEST_F(ConstFoldingTest, MaxFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, (float)3.0);
-        CONSTANT(1, (float)2.0);
+        CONSTANT(0, static_cast<float>3.0);
+        CONSTANT(1, static_cast<float>2.0);
         BASIC_BLOCK(2, 1)
         {
             INST(2, Opcode::Max).f32().Inputs(0, 1);
@@ -2612,8 +2612,8 @@ TEST_F(ConstFoldingTest, MulFloatZeroTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, (float)3.0);
-        CONSTANT(1, (float)0.0);
+        CONSTANT(0, static_cast<float>3.0);
+        CONSTANT(1, static_cast<float>0.0);
         BASIC_BLOCK(2, 1)
         {
             INST(2, Opcode::Mul).f32().Inputs(0, 1);

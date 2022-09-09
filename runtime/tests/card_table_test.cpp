@@ -121,8 +121,7 @@ TEST_F(CardTableTest, MarkTest)
     size_t markedCnt = 0;
 
     for (size_t i = 0; i < kAllocCount; i++) {
-        uintptr_t addr;
-        addr = GetRandomAddress();
+        uintptr_t addr = GetRandomAddress();
         if (!card_table_->IsMarked(addr)) {
             ++markedCnt;
             card_table_->MarkCard(addr);
@@ -162,8 +161,7 @@ TEST_F(CardTableTest, ClearTest)
 
     // Mark some cards not more than once
     while (addrSet.size() <= kAllocCount) {
-        uintptr_t addr;
-        addr = GetRandomCardAddress();
+        uintptr_t addr = GetRandomCardAddress();
         if (!addrSet.insert(addr).second) {
             continue;
         }
@@ -192,8 +190,7 @@ TEST_F(CardTableTest, ClearAllTest)
 
     // Mark some cards not more than once
     while (addrSet.size() < kAllocCount) {
-        uintptr_t addr;
-        addr = GetRandomCardAddress();
+        uintptr_t addr = GetRandomCardAddress();
         if (!addrSet.insert(addr).second) {
             continue;
         }
@@ -234,8 +231,7 @@ TEST_F(CardTableTest, VisitMarked)
     size_t markedCnt = 0;
 
     while (markedCnt < kAllocCount) {
-        uintptr_t addr;
-        addr = GetRandomAddress();
+        uintptr_t addr = GetRandomAddress();
         if (!card_table_->IsMarked(addr)) {
             ++markedCnt;
             card_table_->MarkCard(addr);

@@ -27,7 +27,7 @@
 #include "ark_version.h"
 #include "generated/verifier_options_gen.h"
 
-#include <signal.h>  // NOLINTNEXTLINE(modernize-deprecated-headers)
+#include <csignal>
 
 namespace panda::verifier {
 

@@ -42,7 +42,7 @@
 #include <vector>
 #include <chrono>
 #include <ctime>
-#include <signal.h>  // NOLINTNEXTLINE(modernize-deprecated-headers)
+#include <csignal>
 
 namespace panda {
 const panda_file::File *GetPandaFile(const ClassLinker &class_linker, std::string_view file_name)

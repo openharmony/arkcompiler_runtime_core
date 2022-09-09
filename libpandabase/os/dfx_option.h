@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_DFX_OPTION_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_DFX_OPTION_H_
+#ifndef LIBPANDABASE_OS_DFX_OPTION_H
+#define LIBPANDABASE_OS_DFX_OPTION_H
 
 #include <cstdint>
 #include <iosfwd>
@@ -80,4 +80,4 @@ public:
 };
 
 }  // namespace panda::os::dfx_option
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_DFX_OPTION_H_
+#endif  // LIBPANDABASE_OS_DFX_OPTION_H

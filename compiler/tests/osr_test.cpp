@@ -201,7 +201,7 @@ TEST_F(OsrTest, OsrAfterIFrameRestoreAccAfterVoid)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
 
     ScopeEvents scope_events;
-    runner.Run(OSR_AFTER_IFRAME_RESTORE_ACC_AFTER_VOID, (ssize_t)0);
+    runner.Run(OSR_AFTER_IFRAME_RESTORE_ACC_AFTER_VOID, static_cast<ssize_t>0);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
     ASSERT_EQ(osr_events.size(), 1);

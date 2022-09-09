@@ -99,7 +99,7 @@ public:
         bool GetNum();
         bool GetBool();
         bool GetArray();
-        bool InsertKeyValuePairIn(JsonObject *empty_obj);
+        bool InsertKeyValuePairIn(JsonObject *obj);
 
         char GetSymbol();
         char PeekSymbol();

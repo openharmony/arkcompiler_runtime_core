@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_DATATYPE_H_
-#define COMPILER_OPTIMIZER_IR_DATATYPE_H_
+#ifndef COMPILER_OPTIMIZER_IR_DATATYPE_H
+#define COMPILER_OPTIMIZER_IR_DATATYPE_H
 
 #include "macros.h"
 #include "utils/arch.h"
@@ -293,4 +293,4 @@ inline uint8_t GetTypeSize(Type type, Arch arch)
 }  // namespace DataType
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_IR_DATATYPE_H_
+#endif  // COMPILER_OPTIMIZER_IR_DATATYPE_H

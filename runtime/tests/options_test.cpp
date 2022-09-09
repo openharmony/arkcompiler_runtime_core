@@ -25,7 +25,7 @@ namespace panda::test {
 class RuntimeOptionsTest : public RuntimeOptionsTestBase {
 public:
     RuntimeOptionsTest() = default;
-    ~RuntimeOptionsTest() = default;
+    ~RuntimeOptionsTest() override = default;
 
 private:
     void LoadCorrectOptionsList() override;

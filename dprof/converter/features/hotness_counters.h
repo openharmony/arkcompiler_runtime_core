@@ -41,7 +41,7 @@ class HCountersFunctor : public FeaturesManager::Functor {
 
 public:
     explicit HCountersFunctor(std::ostream &out) : out_(out) {}
-    ~HCountersFunctor() = default;
+    ~HCountersFunctor() override = default;
 
     bool operator()(const AppData &appData, const std::vector<uint8_t> &data) override
     {
