@@ -38,8 +38,9 @@ void DoSta(compiler::Register reg, std::vector<pandasm::Ins> &result);
 
 class BytecodeGen : public compiler::Optimization, public compiler::GraphVisitor {
 public:
-    explicit BytecodeGen(compiler::Graph *graph, pandasm::Function *function, const BytecodeOptIrInterface *iface)
-        : compiler::Optimization(graph), function_(function), ir_interface_(iface)
+    explicit BytecodeGen(compiler::Graph *graph, pandasm::Function *function,
+        const BytecodeOptIrInterface *iface, pandasm::Program *prog)
+        : compiler::Optimization(graph), function_(function), ir_interface_(iface), program_(prog)
     {
     }
     ~BytecodeGen() override = default;
@@ -141,15 +142,21 @@ private:
     void VisitTryBegin(const compiler::BasicBlock *bb);
 
     // TypeInfoIndex typeinfo adaption
-    using ScalarValue = panda::pandasm::ScalarValue;
-    void AddTypeInfoIndexForArguments(std::vector<ScalarValue> *elements) const;
-    void AddOrderAndTypeInfoIndex(int32_t order, TypeInfoIndex type, std::vector<ScalarValue> *elements) const;
-    void AddTypeInfoIndexForIns(int32_t order, size_t id, std::vector<ScalarValue> *elements) const;
-    void UpdateTypeInfoIndexAnnotation(const std::vector<ScalarValue> *elements);
+    using Literal = panda::pandasm::LiteralArray::Literal;
+    using TypeInfoComponents = std::vector<Literal>;
+    void AddTypeInfoIndexForArguments(TypeInfoComponents *elements) const;
+    void AddOrderAndTypeInfoIndex(int32_t order, TypeInfoIndex type, TypeInfoComponents *elements) const;
+    void AddTypeInfoIndexForIns(int32_t order, size_t id, TypeInfoComponents *elements) const;
+    void UpdateTypeInfoIndexAnnotation(const TypeInfoComponents *elements);
+    pandasm::Program *GetProgram() const
+    {
+        return program_;
+    }
 
 private:
     pandasm::Function *function_;
     const BytecodeOptIrInterface *ir_interface_;
+    pandasm::Program *program_;
 
     std::vector<pandasm::Ins> res_;
     std::vector<pandasm::Function::CatchBlock> catch_blocks_;

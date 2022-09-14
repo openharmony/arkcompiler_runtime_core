@@ -65,7 +65,7 @@ public:
     void GetRecord(pandasm::Record *record, const panda_file::File::EntityId &record_id);
     void AddMethodToTables(const panda_file::File::EntityId &method_id);
     void GetMethod(pandasm::Function *method, const panda_file::File::EntityId &method_id);
-    void GetLiteralArray(pandasm::LiteralArray *lit_array, const size_t index) const;
+    void GetLiteralArray(pandasm::LiteralArray *lit_array, size_t index) const;
     template <typename T>
     void FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
                               const panda_file::LiteralDataAccessor::LiteralValue &value) const;
@@ -98,7 +98,7 @@ private:
 
     void GetMetaData(pandasm::Record *record, const panda_file::File::EntityId &record_id) const;
     void GetMetaData(pandasm::Function *method, const panda_file::File::EntityId &method_id) const;
-    void GetMetaData(pandasm::Field *field, const panda_file::File::EntityId &field_id) const;
+    void GetMetaData(pandasm::Field *field, const panda_file::File::EntityId &field_id);
 
     void GetLanguageSpecificMetadata();
 
@@ -115,9 +115,12 @@ private:
     void GetMethodInfo(const panda_file::File::EntityId &method_id, MethodInfo *method_info) const;
     void GetInsInfo(const panda_file::File::EntityId &code_id, MethodInfo *method_info) const;
 
-    void Serialize(size_t index, const pandasm::LiteralArray &lit_array, std::ostream &os) const;
     template <typename T>
     void SerializeValues(const pandasm::LiteralArray &lit_array, T &os) const;
+    std::string SerializeLiteralArray(const pandasm::LiteralArray &lit_array) const;
+    void Serialize(const std::string &key, const pandasm::LiteralArray &lit_array, std::ostream &os) const;
+    template <typename T>
+    void SerializeLiterals(const pandasm::LiteralArray &lit_array, T &os) const;
     std::string LiteralTagToString(const panda_file::LiteralTag &tag) const;
     void Serialize(const pandasm::Record &record, std::ostream &os, bool print_information = false) const;
     void SerializeFields(const pandasm::Record &record, std::ostream &os, bool print_information) const;
@@ -127,7 +130,7 @@ private:
     void SerializeLineNumberTable(const panda_file::LineNumberTable &line_number_table, std::ostream &os) const;
     void SerializeLocalVariableTable(const panda_file::LocalVariableTable &local_variable_table,
                                      const pandasm::Function &method, std::ostream &os) const;
-
+    bool IsModuleLiteralOffset(const panda_file::File::EntityId &id) const;
     inline void SerializeLanguage(std::ostream &os) const
     {
         os << ".language " << panda::panda_file::LanguageToString(file_language_) << "\n\n";
@@ -153,8 +156,6 @@ private:
 
     panda::panda_file::SourceLang GetRecordLanguage(panda_file::File::EntityId class_id) const;
 
-    std::string SerializeLiteralArray(const pandasm::LiteralArray &lit_array) const;
-
     void GetLiteralArrayByOffset(pandasm::LiteralArray *lit_array, panda_file::File::EntityId offset) const;
 
     std::unique_ptr<const panda_file::File> file_;
@@ -173,7 +174,7 @@ private:
 
     bool quiet_;
     bool skip_strings_;
-
+    std::unordered_set<uint32_t> module_literals_;
 #include "disasm_plugins.inc"
 };
 }  // namespace panda::disasm

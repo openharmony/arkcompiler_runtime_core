@@ -1571,7 +1571,7 @@ class LiteralArrayItem;
 
 class LiteralItem : public BaseItem {
 public:
-    enum class Type { B1, B2, B4, B8, STRING, METHOD };
+    enum class Type { B1, B2, B4, B8, STRING, METHOD, LITERALARRAY };
 
     explicit LiteralItem(uint8_t v) : type_(Type::B1), value_(v) {}
 
@@ -1584,6 +1584,8 @@ public:
     explicit LiteralItem(StringItem *v) : type_(Type::STRING), value_(v) {}
 
     explicit LiteralItem(MethodItem *v) : type_(Type::METHOD), value_(v) {}
+
+    explicit LiteralItem(LiteralArrayItem *v) : type_(Type::LITERALARRAY), value_(v) {}
 
     ~LiteralItem() override = default;
 
@@ -1615,6 +1617,8 @@ public:
         return File::EntityId(GetValue<StringItem *>()->GetOffset());
     }
 
+    File::EntityId GetLiteralArrayFileId() const;
+
     File::EntityId GetMethodId() const
     {
         return File::EntityId(GetValue<MethodItem *>()->GetFileId());
@@ -1624,7 +1628,7 @@ public:
 
 private:
     Type type_;
-    std::variant<uint8_t, uint16_t, uint32_t, uint64_t, StringItem *, MethodItem *> value_;
+    std::variant<uint8_t, uint16_t, uint32_t, uint64_t, StringItem *, MethodItem *, LiteralArrayItem *> value_;
 };
 
 class LiteralArrayItem : public ValueItem {

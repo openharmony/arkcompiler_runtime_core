@@ -5,6 +5,7 @@ This document describes change log with the following modifications:
 * ISA refactoring
 * Function Kind and Header index
 * MethodId, StringId and LiteralArrayId
+* LiteralArrayIndex refactoring
 
 ## ISA refactoring
 The bytecode size and runtime performance have been suffering for a long time as the all the
@@ -37,3 +38,10 @@ stringId and literalarrayId in a class should be put in a same index header.
 Instead, we only ask that all methodId, stringId and literalarrayId in a method should be put in one index header.
 As we use 16-bit to encode methodId, stringId and literalarrayId, the number of these Ids in one method cannot exceed 65536 for now.
 This released constraint suits for most of application scenarios.
+
+## LiteralArrayIndex refactoring
+1. We deprecate the usage of global literalarray index.
+2. We use offset to reference literalarray.
+3. In bytecode, we still use 16-bit literalarrayId rather than offset.
+4. The layout of literalarrays can be random.
+5. The literalarray which is referenced by TypeSummary contains the offsets of all type-literalarray.
