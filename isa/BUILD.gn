@@ -44,6 +44,10 @@ foreach(plugin, enabled_plugins) {
 action("isa_combine") {
   script = "$ark_root/isa/combine.rb"
   input_args = string_join(",", isa_paths)
+  inputs = [
+    "$ark_root/isa/isa.yaml",
+    "$ark_root/../ets_runtime/ecmascript/ecma_isa.yaml",
+  ]
   outputs = [ "$root_gen_dir/isa/isa.yaml" ]
   args = [
     "-d",
