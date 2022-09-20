@@ -132,7 +132,7 @@ public:
     std::mutex mutex_;
 
 protected:
-    panda::MTManagedThread *thread_;
+    panda::MTManagedThread *thread_ {nullptr};
 
     std::mutex pre_lock_;
     std::condition_variable pre_cv_;
@@ -140,7 +140,7 @@ protected:
     std::mutex post_lock_;
     std::condition_variable post_cv_;
     int counter_post_ = 0;
-    StringTable *table_;
+    StringTable *table_ {nullptr};
 
     std::atomic_flag lock_ {0};
     coretypes::String *string_ {nullptr};

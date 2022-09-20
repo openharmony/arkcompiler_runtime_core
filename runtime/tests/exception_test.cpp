@@ -86,7 +86,7 @@ protected:
         thread_->ManagedCodeBegin();
     }
 
-    panda::MTManagedThread *thread_;
+    panda::MTManagedThread *thread_ {nullptr};
     RuntimeOptions options_;
 };
 

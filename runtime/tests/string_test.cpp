@@ -66,7 +66,7 @@ public:
     }
 
 protected:
-    panda::MTManagedThread *thread_;
+    panda::MTManagedThread *thread_ {nullptr};
     static constexpr uint32_t SIMPLE_UTF8_STRING_LENGTH = 13;
     static constexpr char SIMPLE_UTF8_STRING[SIMPLE_UTF8_STRING_LENGTH + 1] = "Hello, world!";
     unsigned seed_;

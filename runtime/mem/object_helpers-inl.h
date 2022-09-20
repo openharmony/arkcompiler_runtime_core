@@ -56,6 +56,10 @@ void GCStaticObjectHelpers::TraverseClass(Class *cls, Handler &handler)
 template <typename Handler>
 void GCStaticObjectHelpers::TraverseObject(ObjectHeader *object, Class *cls, Handler &handler)
 {
+    if (cls == nullptr) {
+        return;
+    }
+
     ASSERT(!cls->IsDynamicClass());
     while (cls != nullptr) {
         // Iterate over instance fields
