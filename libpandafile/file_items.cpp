@@ -1467,10 +1467,8 @@ void LineNumberProgramItem::EmitStartLocal(std::vector<uint8_t> *constant_pool, 
 void LineNumberProgramItem::EmitStartLocalExtended(std::vector<uint8_t> *constant_pool, int32_t register_number,
                                                    StringItem *name, StringItem *type, StringItem *type_signature)
 {
-    if (name == nullptr || type == nullptr) {
-        return;
-    }
-
+    ASSERT(name != nullptr);
+    ASSERT(type != nullptr);
     EmitOpcode(type_signature == nullptr ? Opcode::START_LOCAL : Opcode::START_LOCAL_EXTENDED);
     EmitRegister(register_number);
     ASSERT(name->GetOffset() != 0);
