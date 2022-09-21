@@ -438,9 +438,9 @@ public:
 private:
     G1GCTest *test_;
     VMHandle<ObjectHeader> nonmovable_;
-    uintptr_t nonmovable_mark_bitmap_addr_;
+    uintptr_t nonmovable_mark_bitmap_addr_ {0};
     VMHandle<ObjectHeader> humongous_;
-    uintptr_t humongous_mark_bitmap_addr_;
+    uintptr_t humongous_mark_bitmap_addr_ {0};
 };
 
 // Test the new objects created during concurrent marking are alive

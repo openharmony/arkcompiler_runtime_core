@@ -1467,16 +1467,13 @@ void LineNumberProgramItem::EmitStartLocal(std::vector<uint8_t> *constant_pool, 
 void LineNumberProgramItem::EmitStartLocalExtended(std::vector<uint8_t> *constant_pool, int32_t register_number,
                                                    StringItem *name, StringItem *type, StringItem *type_signature)
 {
-    ASSERT(name->GetOffset() != 0);
-    ASSERT(type->GetOffset() != 0);
-
-    if (type == nullptr) {
-        return;
-    }
-
+    ASSERT(name != nullptr);
+    ASSERT(type != nullptr);
     EmitOpcode(type_signature == nullptr ? Opcode::START_LOCAL : Opcode::START_LOCAL_EXTENDED);
     EmitRegister(register_number);
+    ASSERT(name->GetOffset() != 0);
     EmitUleb128(constant_pool, name->GetOffset());
+    ASSERT(type->GetOffset() != 0);
     EmitUleb128(constant_pool, type->GetOffset());
 
     if (type_signature != nullptr) {
@@ -1526,11 +1523,10 @@ void LineNumberProgramItem::EmitSetFile(std::vector<uint8_t> *constant_pool, Str
 {
     EmitOpcode(Opcode::SET_FILE);
 
-    ASSERT(source_file->GetOffset() != 0);
-
     if (source_file == nullptr) {
         return;
     }
+    ASSERT(source_file->GetOffset() != 0);
     EmitUleb128(constant_pool, source_file->GetOffset());
 }
 

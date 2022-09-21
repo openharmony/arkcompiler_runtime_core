@@ -56,7 +56,7 @@ void GCStaticObjectHelpers::TraverseClass(Class *cls, Handler &handler)
 template <typename Handler>
 void GCStaticObjectHelpers::TraverseObject(ObjectHeader *object, Class *cls, Handler &handler)
 {
-    ASSERT(!cls->IsDynamicClass());
+    ASSERT(cls != nullptr && !cls->IsDynamicClass());
     while (cls != nullptr) {
         // Iterate over instance fields
         uint32_t ref_num = cls->GetRefFieldsNum<false>();
