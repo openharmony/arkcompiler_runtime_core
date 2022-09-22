@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_BOUNDSRANGE_ANALYSIS_H_
-#define COMPILER_OPTIMIZER_ANALYSIS_BOUNDSRANGE_ANALYSIS_H_
+#ifndef COMPILER_OPTIMIZER_ANALYSIS_BOUNDSRANGE_ANALYSIS_H
+#define COMPILER_OPTIMIZER_ANALYSIS_BOUNDSRANGE_ANALYSIS_H
 
 #include "optimizer/ir/graph_visitor.h"
 #include "optimizer/ir/datatype.h"
@@ -192,4 +192,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_BOUNDS_ANALYSIS_H_
+#endif  // COMPILER_OPTIMIZER_ANALYSIS_BOUNDS_ANALYSIS_H

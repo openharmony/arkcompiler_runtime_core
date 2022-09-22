@@ -58,7 +58,7 @@ public:
         options.SetCompilerRegex(default_compiler_regex_);
     }
 
-    virtual void SetUp() override
+    void SetUp() override
     {
 #ifndef PANDA_COMPILER_ENABLE
         GTEST_SKIP();

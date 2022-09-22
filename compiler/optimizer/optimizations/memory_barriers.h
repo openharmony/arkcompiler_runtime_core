@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_MEMORY_BARRIERS_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_MEMORY_BARRIERS_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_MEMORY_BARRIERS_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_MEMORY_BARRIERS_H
 
 #include "compiler_options.h"
 #include "optimizer/ir/analysis.h"
@@ -97,4 +97,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  //  COMPILER_OPTIMIZER_OPTIMIZATIONS_MEMORY_BARRIERS_H_
+#endif  //  COMPILER_OPTIMIZER_OPTIMIZATIONS_MEMORY_BARRIERS_H

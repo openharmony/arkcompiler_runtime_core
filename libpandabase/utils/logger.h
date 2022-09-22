@@ -38,7 +38,7 @@ namespace panda {
 #define LOG_COMPONENT_ELEM(D, NAME, STR) D(NAME, NAME, STR)
 
 using FUNC_MOBILE_LOG_PRINT = int (*)(int, int, const char *, const char *, const char *);
-static constexpr int LOG_ID_MAIN = 0;
+constexpr int LOG_ID_MAIN = 0;
 extern FUNC_MOBILE_LOG_PRINT mlog_buf_print;
 
 namespace base_options {

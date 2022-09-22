@@ -63,7 +63,7 @@ public:
     template <typename F>
     class GCHook : public GCListener {
     public:
-        GCHook(F hook) : hook_(hook) {};
+        explicit GCHook(F hook) : hook_(hook) {};
 
         void GCStarted([[maybe_unused]] size_t heap_size) override {}
 
@@ -329,8 +329,8 @@ TEST_F(G1GCFullGCTest, TestIntensiveAlloc)
         [[maybe_unused]] auto g1_alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(object_allocator_);
         [[maybe_unused]] size_t max_y_size = g1_alloc->GetYoungAllocMaxSize();
 
-        [[maybe_unused]] auto y_space_check = [&](uintptr_t addr) -> bool { return IsInYoung(addr); };
-        [[maybe_unused]] auto h_space_check = [&](uintptr_t addr) -> bool { return !IsInYoung(addr); };
+        [[maybe_unused]] auto y_space_check = [](uintptr_t addr) -> bool { return IsInYoung(addr); };
+        [[maybe_unused]] auto h_space_check = [](uintptr_t addr) -> bool { return !IsInYoung(addr); };
         [[maybe_unused]] auto t_free =
             reinterpret_cast<GenerationalSpaces *>(object_allocator_->GetHeapSpace())->GetCurrentFreeTenuredSize();
         const size_t y_obj_size = max_y_size / 10;
@@ -402,8 +402,8 @@ TEST_F(G1GCFullGCTest, TestExplicitFullNearLimit)
         [[maybe_unused]] auto g1_alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(object_allocator_);
         [[maybe_unused]] size_t max_y_size = g1_alloc->GetYoungAllocMaxSize();
 
-        [[maybe_unused]] auto y_space_check = [&](uintptr_t addr) -> bool { return IsInYoung(addr); };
-        [[maybe_unused]] auto h_space_check = [&](uintptr_t addr) -> bool { return !IsInYoung(addr); };
+        [[maybe_unused]] auto y_space_check = [](uintptr_t addr) -> bool { return IsInYoung(addr); };
+        [[maybe_unused]] auto h_space_check = [](uintptr_t addr) -> bool { return !IsInYoung(addr); };
         [[maybe_unused]] auto t_free =
             reinterpret_cast<GenerationalSpaces *>(object_allocator_->GetHeapSpace())->GetCurrentFreeTenuredSize();
         const size_t y_obj_size = max_y_size / 10;
@@ -462,8 +462,8 @@ TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
         [[maybe_unused]] auto g1_alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(object_allocator_);
         [[maybe_unused]] size_t max_y_size = g1_alloc->GetYoungAllocMaxSize();
 
-        [[maybe_unused]] auto y_space_check = [&](uintptr_t addr) -> bool { return IsInYoung(addr); };
-        [[maybe_unused]] auto h_space_check = [&](uintptr_t addr) -> bool { return !IsInYoung(addr); };
+        [[maybe_unused]] auto y_space_check = [](uintptr_t addr) -> bool { return IsInYoung(addr); };
+        [[maybe_unused]] auto h_space_check = [](uintptr_t addr) -> bool { return !IsInYoung(addr); };
         [[maybe_unused]] auto t_free =
             reinterpret_cast<GenerationalSpaces *>(object_allocator_->GetHeapSpace())->GetCurrentFreeTenuredSize();
         const size_t y_obj_size = max_y_size / 10;

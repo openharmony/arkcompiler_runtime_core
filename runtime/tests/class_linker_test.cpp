@@ -461,7 +461,6 @@ TEST_F(ClassLinkerTest, FieldLayout)
                                            {"if_u8", sizeof(uint8_t), 0}};
 
     size_t offset = klass->GetStaticFieldsOffset();
-
     if (!IsAligned<sizeof(double)>(offset + ClassHelper::OBJECT_POINTER_SIZE)) {
         FieldData data {"sf_i32", sizeof(int32_t), 0};
         sorted_sfields.erase(std::remove(sorted_sfields.begin(), sorted_sfields.end(), data));
@@ -471,7 +470,6 @@ TEST_F(ClassLinkerTest, FieldLayout)
     UpdateOffsets(&sorted_sfields, offset);
 
     offset = ObjectHeader::ObjectHeaderSize();
-
     if (!IsAligned<sizeof(double)>(offset + ClassHelper::OBJECT_POINTER_SIZE)) {
         FieldData data {"if_i32", sizeof(int32_t), 0};
         sorted_ifields.erase(std::remove(sorted_ifields.begin(), sorted_ifields.end(), data));

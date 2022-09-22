@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_CONSTANTS_H_
-#define COMPILER_OPTIMIZER_IR_CONSTANTS_H_
+#ifndef COMPILER_OPTIMIZER_IR_CONSTANTS_H
+#define COMPILER_OPTIMIZER_IR_CONSTANTS_H
 
 #include <cstdint>
 #include <limits>
@@ -65,4 +65,4 @@ constexpr TypeInfoIndex NO_EXPLICIT_TYPE = 0;
 constexpr const std::string_view TSTYPE_ANNO_RECORD_NAME = "_ESTypeAnnotation";
 constexpr const std::string_view TSTYPE_ANNO_ELEMENT_NAME = "_TypeOfInstruction";
 constexpr auto INVALID_TYPE_INDEX = std::numeric_limits<std::size_t>::max();
-#endif  // COMPILER_OPTIMIZER_IR_CONSTANTS_H_
+#endif  // COMPILER_OPTIMIZER_IR_CONSTANTS_H
