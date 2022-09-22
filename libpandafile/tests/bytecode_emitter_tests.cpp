@@ -413,7 +413,8 @@ TEST(BytecodeEmitter, JmpFwd_IMM32)
     ASSERT_EQ(expected, out);
 }
 
-static void JcmpBwd_V8_IMM8(Opcode opcode, std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> emit_jcmp)
+static void JcmpBwd_V8_IMM8(Opcode opcode,
+                            std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> emit_jcmp)
 {
     BytecodeEmitter emitter;
     Label label = emitter.CreateLabel();
@@ -434,7 +435,8 @@ static void JcmpBwd_V8_IMM8(Opcode opcode, std::function<void(BytecodeEmitter *,
     ASSERT_EQ(expected, out);
 }
 
-static void JcmpFwd_V8_IMM8(Opcode opcode, std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> emit_jcmp)
+static void JcmpFwd_V8_IMM8(Opcode opcode,
+                            std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> emit_jcmp)
 {
     BytecodeEmitter emitter;
     Label label = emitter.CreateLabel();
@@ -458,7 +460,8 @@ static void JcmpFwd_V8_IMM8(Opcode opcode, std::function<void(BytecodeEmitter *,
     ASSERT_EQ(expected, out);
 }
 
-static void JcmpBwd_V8_IMM16(Opcode opcode, std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> emit_jcmp)
+static void JcmpBwd_V8_IMM16(Opcode opcode,
+                             std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> emit_jcmp)
 {
     {
         // Test min imm value
@@ -501,7 +504,8 @@ static void JcmpBwd_V8_IMM16(Opcode opcode, std::function<void(BytecodeEmitter *
     }
 }
 
-static void JcmpFwd_V8_IMM16(Opcode opcode, std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> emit_jcmp)
+static void JcmpFwd_V8_IMM16(Opcode opcode,
+                             std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> emit_jcmp)
 {
     {
         // Test min imm
