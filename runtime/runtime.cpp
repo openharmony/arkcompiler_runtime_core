@@ -486,7 +486,6 @@ std::string GetMainRuntimeType(const RuntimeOptions &options)
         // Choose first non-core runtime.
         if (str_runtime != "core") {
             return str_runtime;
-            break;
         }
     }
 
