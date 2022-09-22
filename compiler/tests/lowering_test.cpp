@@ -2289,7 +2289,6 @@ TEST_F(LoweringTest, LowerUnsignedCast)
                 INST(18, Opcode::Return).u64().Inputs(17);
             }
         }
-
     } else {
         graph_expected = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
     }

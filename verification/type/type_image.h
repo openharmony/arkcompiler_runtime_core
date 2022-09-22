@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_TYPE_IMAGE_HPP
-#define _PANDA_TYPE_IMAGE_HPP
+#ifndef VERIFICATION_TYPE_TYPE_IMAGE_H
+#define VERIFICATION_TYPE_TYPE_IMAGE_H
 
 #include "type_type.h"
 #include "type_params.h"
@@ -93,4 +93,4 @@ public:
 };
 }  // namespace panda::verifier
 
-#endif  // !_PANDA_TYPE_SYSTEM_HPP
+#endif  // VERIFICATION_TYPE_TYPE_IMAGE_H

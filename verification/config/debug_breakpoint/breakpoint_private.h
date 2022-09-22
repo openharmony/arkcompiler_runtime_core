@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_DEBUG_BREAKPOINT_PRIVATE_H__
-#define PANDA_VERIFIER_DEBUG_BREAKPOINT_PRIVATE_H__
+#ifndef VERIFIER_CONFIG_DEBUG_BREAKPOINT_BREAKPOINT_PRIVATE_H
+#define VERIFIER_CONFIG_DEBUG_BREAKPOINT_BREAKPOINT_PRIVATE_H
 
 #include "breakpoint.h"
 #include "runtime/include/mem/panda_string.h"
@@ -27,4 +27,4 @@ inline void AddBreakpointConfig([[maybe_unused]] const PandaString &method_name,
 #endif
 }  // namespace panda::verifier::debug
 
-#endif  //! PANDA_VERIFIER_DEBUG_BREAKPOINT_PRIVATE_H__
+#endif  // VERIFIER_CONFIG_DEBUG_BREAKPOINT_BREAKPOINT_PRIVATE_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_ASM_PRINTER_H_
-#define COMPILER_OPTIMIZER_CODEGEN_TARGET_ASM_PRINTER_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_ASM_PRINTER_H
+#define COMPILER_OPTIMIZER_CODEGEN_TARGET_ASM_PRINTER_H
 
 #include "encode.h"
 #include "compiler/optimizer/code_generator/callconv.h"
@@ -414,4 +414,4 @@ using Amd64AssemblyLabelHolder = PrinterLabelHolder<Amd64Encoder>;
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_ASM_PRINTER_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_ASM_PRINTER_H

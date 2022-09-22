@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_REG_ACC_ALLOC_H_
-#define PANDA_REG_ACC_ALLOC_H_
+#ifndef BYTECODE_OPTIMIZER_REG_ACC_ALLOC_H
+#define BYTECODE_OPTIMIZER_REG_ACC_ALLOC_H
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/pass.h"
@@ -56,4 +56,4 @@ private:
 
 }  // namespace panda::bytecodeopt
 
-#endif  //  PANDA_REG_ACC_ALLOC_H_
+#endif  //  BYTECODE_OPTIMIZER_REG_ACC_ALLOC_H

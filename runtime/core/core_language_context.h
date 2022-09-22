@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_CORE_CORE_LANGUAGE_CONTEXT_H_
-#define PANDA_RUNTIME_CORE_CORE_LANGUAGE_CONTEXT_H_
+#ifndef RUNTIME_CORE_CORE_LANGUAGE_CONTEXT_H
+#define RUNTIME_CORE_CORE_LANGUAGE_CONTEXT_H
 
 #include "core/core_vm.h"
 #include "runtime/include/language_context.h"
@@ -295,4 +295,4 @@ public:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_CORE_CORE_LANGUAGE_CONTEXT_H_
+#endif  // RUNTIME_CORE_CORE_LANGUAGE_CONTEXT_H

@@ -4148,7 +4148,7 @@ private:
         auto &&arr_elt_type = GetArrayEltType(reg_type);
 
         auto find = [&expected_elt_types](const auto &type) {
-            return type.ExistsType([&](auto type1) {
+            return type.ExistsType([&expected_elt_types](auto type1) {
                 for (const auto &t : expected_elt_types) {
                     if (type1 == t) {
                         return true;

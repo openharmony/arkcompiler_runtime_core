@@ -14,7 +14,7 @@
  */
 
 #include <dlfcn.h>
-#include <errno.h>   // NOLINTNEXTLINE(modernize-deprecated-headers)
+#include <cerrno>
 #include <signal.h>  // NOLINTNEXTLINE(modernize-deprecated-headers)
 #include <stdio.h>   // NOLINTNEXTLINE(modernize-deprecated-headers)
 #include <stdlib.h>  // NOLINTNEXTLINE(modernize-deprecated-headers)

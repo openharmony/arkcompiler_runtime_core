@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_COMPILER_RUN_H_
-#define COMPILER_COMPILER_RUN_H_
+#ifndef COMPILER_OPTIMIZER_RUN_H
+#define COMPILER_OPTIMIZER_RUN_H
 
 namespace panda::compiler {
 class Graph;
@@ -22,4 +22,4 @@ class Graph;
 bool RunOptimizations(Graph *graph);
 
 }  // namespace panda::compiler
-#endif  // COMPILER_COMPILER_RUN_H_
+#endif  // COMPILER_OPTIMIZER_RUN_H

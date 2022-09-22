@@ -38,7 +38,7 @@ public:
         thread_->ManagedCodeBegin();
     }
 
-    virtual void SetUp() override
+    void SetUp() override
     {
 #ifndef PANDA_COMPILER_ENABLE
         GTEST_SKIP();

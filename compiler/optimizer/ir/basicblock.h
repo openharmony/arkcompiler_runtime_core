@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_BASICBLOCK_H_
-#define COMPILER_OPTIMIZER_IR_BASICBLOCK_H_
+#ifndef COMPILER_OPTIMIZER_IR_BASICBLOCK_H
+#define COMPILER_OPTIMIZER_IR_BASICBLOCK_H
 
 #include <iterator>
 #include "constants.h"
@@ -1050,4 +1050,4 @@ private:
 bool BlocksPathDfsSearch(Marker marker, BasicBlock *block, const BasicBlock *target_block,
                          const BasicBlock *exclude_block = nullptr);
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_IR_BASICBLOCK_H_
+#endif  // COMPILER_OPTIMIZER_IR_BASICBLOCK_H

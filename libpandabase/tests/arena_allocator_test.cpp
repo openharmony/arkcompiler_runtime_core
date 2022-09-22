@@ -191,8 +191,8 @@ TEST_F(ArenaAllocatorTest, AllocateTest)
     }
     ASSERT_NE(tmp = aa.Alloc(DEFAULT_ARENA_SIZE - AlignUp(sizeof(Arena), GetAlignmentInBytes(DEFAULT_ARENA_ALIGNMENT))),
               nullptr);
-    size_t maxAlignDrift;
-    maxAlignDrift = (DEFAULT_ALIGNMENT_IN_BYTES > alignof(Arena)) ? (DEFAULT_ALIGNMENT_IN_BYTES - alignof(Arena)) : 0;
+    size_t maxAlignDrift = (DEFAULT_ALIGNMENT_IN_BYTES > alignof(Arena)) ?
+                           (DEFAULT_ALIGNMENT_IN_BYTES - alignof(Arena)) : 0;
     ASSERT_EQ(tmp = aa.Alloc(DEFAULT_ARENA_SIZE + maxAlignDrift + 1), nullptr);
 }
 

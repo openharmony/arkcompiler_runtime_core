@@ -96,6 +96,8 @@ public:
                 break;
             case Arch::NONE:
                 break;
+            default:
+                break;
         }
     }
 

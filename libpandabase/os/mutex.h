@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_MACROS_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_MACROS_H_
+#ifndef LIBPANDABASE_OS_MUTEX_H
+#define LIBPANDABASE_OS_MUTEX_H
 
 #if defined(PANDA_USE_FUTEX)
 #include "platforms/unix/libpandabase/futex/mutex.h"
@@ -224,4 +224,4 @@ private:
 
 }  // namespace panda::os::memory
 
-#endif  // PAND_LIBPANDABASE_PBASE_OS_MACROS_H_
+#endif  // LIBPANDABASE_OS_MUTEX_H

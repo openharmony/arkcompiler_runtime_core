@@ -57,8 +57,9 @@ public:
 
     bool IsEqual(const List<TestNode> &list1, std::initializer_list<TestNode> list2) const
     {
-        if (GetListSize(list1) != list2.size())
+        if (GetListSize(list1) != list2.size()) {
             return false;
+        }
         return std::equal(list1.begin(), list1.end(), list2.begin());
     }
 
