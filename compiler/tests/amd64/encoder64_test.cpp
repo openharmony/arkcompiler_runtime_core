@@ -93,6 +93,8 @@ static T random_gen()
                     return panda::bit_cast<double, uint64_t>(gen & MASK_DENORMAL_DOUBLE);
                 }
             }
+            default:
+                break;
         }
 
         // Uniform distribution floating value

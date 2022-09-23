@@ -140,8 +140,9 @@ void *mmap([[maybe_unused]] void *addr, size_t len, uint32_t prot, int flags, in
 
 int munmap(void *addr, [[maybe_unused]] size_t len)
 {
-    if (UnmapViewOfFile(addr))
+    if (UnmapViewOfFile(addr)) {
         return 0;
+    }
 
     errno = mem_errno(GetLastError(), EPERM);
 
