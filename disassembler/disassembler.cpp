@@ -157,8 +157,8 @@ void Disassembler::AddMethodToTables(const panda_file::File::EntityId &method_id
     }
 
     method_name_to_id_.emplace(signature, method_id);
-    prog_.function_table.emplace(signature, std::move(new_method));
     prog_.function_synonyms[new_method.name].push_back(signature);
+    prog_.function_table.emplace(signature, std::move(new_method));
 }
 
 void Disassembler::GetMethod(pandasm::Function *method, const panda_file::File::EntityId &method_id)

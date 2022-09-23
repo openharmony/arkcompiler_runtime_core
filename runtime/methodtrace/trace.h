@@ -28,7 +28,7 @@
 #include "include/runtime_notification.h"
 #include "runtime/include/method.h"
 #include "runtime/include/language_context.h"
-#include "os/mutex.h"'
+#include "os/mutex.h"
 
 namespace panda {
 

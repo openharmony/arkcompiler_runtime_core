@@ -459,6 +459,7 @@ bool Codegen::VisitGraph()
     }
 
     EmitSlowPaths();
+    visitor_ = nullptr;
 
     return true;
 }

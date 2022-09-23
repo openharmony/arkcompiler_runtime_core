@@ -39,7 +39,7 @@ PandaString MemStatsAdditionalInfo::GetAdditionalStatistics(HeapManager *heap_ma
 
     PandaStringStream statistic;
     PandaMultiMap<uint64_t, Class *>::reverse_iterator rit;
-    for (rit = footprint_to_class.rbegin(); rit != footprint_to_class.rend(); rit++) {
+    for (rit = footprint_to_class.rbegin(); rit != footprint_to_class.rend(); ++rit) {
         if (rit->first == 0U) {
             break;
         }
