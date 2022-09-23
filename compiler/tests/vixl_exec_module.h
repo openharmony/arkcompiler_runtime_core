@@ -43,27 +43,27 @@ T CutValue(uint64_t data, DataType::Type type)
             ASSERT(false);
             return -1;
         case (DataType::BOOL):
-            return (T)(static_cast<bool>(data));
+            return static_cast<T>(static_cast<bool>(data));
         case (DataType::UINT8):
-            return (T)(static_cast<uint8_t>(data));
+            return static_cast<T>(static_cast<uint8_t>(data));
         case (DataType::INT8):
-            return (T)(static_cast<int8_t>(data));
+            return static_cast<T>(static_cast<int8_t>(data));
         case (DataType::UINT16):
-            return (T)(static_cast<uint16_t>(data));
+            return static_cast<T>(static_cast<uint16_t>(data));
         case (DataType::INT16):
-            return (T)(static_cast<int16_t>(data));
+            return static_cast<T>(static_cast<int16_t>(data));
         case (DataType::UINT32):
-            return (T)(static_cast<uint32_t>(data));
+            return static_cast<T>(static_cast<uint32_t>(data));
         case (DataType::INT32):
-            return (T)(static_cast<int32_t>(data));
+            return static_cast<T>(static_cast<int32_t>(data));
         case (DataType::UINT64):
-            return (T)(static_cast<uint64_t>(data));
+            return static_cast<T>(static_cast<uint64_t>(data));
         case (DataType::INT64):
-            return (T)(static_cast<int64_t>(data));
+            return static_cast<T>(static_cast<int64_t>(data));
         case (DataType::FLOAT32):
-            return (T)(static_cast<float>(data));
+            return static_cast<T>(static_cast<float>(data));
         case (DataType::FLOAT64):
-            return (T)(static_cast<double>(data));
+            return static_cast<T>(static_cast<double>(data));
     }
     return 0;
 }
