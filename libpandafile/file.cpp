@@ -588,7 +588,12 @@ File::EntityId File::GetClassId(const uint8_t *mutf8_name) const
 
 uint32_t File::CalcFilenameHash(const std::string &filename)
 {
-    return GetHash32String(reinterpret_cast<const uint8_t *>(filename.c_str()));
+    std::string hashString = filename;
+    std::size_t found = filename.find("ets/");
+    if (found != std::string::npos) {
+        hashString = filename.substr(found);
+    }
+    return GetHash32String(reinterpret_cast<const uint8_t *>(hashString.c_str()));
 }
 
 File::EntityId File::GetLiteralArraysId() const
