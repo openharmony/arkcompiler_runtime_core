@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_TYPE_CONVERTER_H_
-#define PANDA_LIBPANDABASE_UTILS_TYPE_CONVERTER_H_
+#ifndef LIBPANDABASE_UTILS_TYPE_CONVERTER_H
+#define LIBPANDABASE_UTILS_TYPE_CONVERTER_H
 
 #include <array>
 #include <cstddef>
@@ -111,4 +111,4 @@ ValueUnit ValueConverter(uint64_t value, ValueType type);
 
 WEAK_FOR_LTO_END
 
-#endif  // PANDA_LIBPANDABASE_UTILS_TYPE_CONVERTER_H_
+#endif  // LIBPANDABASE_UTILS_TYPE_CONVERTER_H
