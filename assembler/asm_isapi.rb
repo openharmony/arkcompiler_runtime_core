@@ -95,7 +95,7 @@ def assembler_signature(group, is_jump)
         o.type, o.name = is_jump ? ['const std::string &', 'label'] : ['int64_t', o.name]
       end
     elsif o.name.start_with?('id')
-      o.type, o.name = ['const std::string &', 'id']
+      o.type, o.name = ['const std::string &', o.name]
     else
       o.type = 'uint16_t'
     end

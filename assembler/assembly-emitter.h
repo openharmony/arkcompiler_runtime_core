@@ -45,7 +45,7 @@ public:
         std::unordered_map<std::string, panda_file::BaseMethodItem *> method_items;
         std::unordered_map<std::string, panda_file::BaseFieldItem *> field_items;
         std::unordered_map<std::string, panda_file::BaseClassItem *> class_items;
-        std::unordered_map<std::string_view, panda_file::StringItem *> string_items;
+        std::unordered_map<std::string, panda_file::StringItem *> string_items;
         std::unordered_map<std::string, panda_file::LiteralArrayItem *> literalarray_items;
     };
 
@@ -124,8 +124,6 @@ private:
                                       const AsmEntityCollections &entities);
     static void SetCodeAndDebugInfo(panda_file::ItemContainer *items, panda_file::MethodItem *method,
                                     const Function &func, bool emit_debug_info);
-    static void SetMethodSourceLang(const Program &program, panda_file::MethodItem *method, const Function &func,
-                                    const std::string &name);
     static bool AddMethodAndParamsAnnotations(panda_file::ItemContainer *items, const Program &program,
                                               const AsmEmitter::AsmEntityCollections &entities,
                                               panda_file::MethodItem *method, const Function &func);

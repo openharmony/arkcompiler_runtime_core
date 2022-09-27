@@ -1333,7 +1333,7 @@ void InstBuilder::BuildLoadFromPool(const BytecodeInstruction *bc_inst)
     } else {
         // NOLINTNEXTLINE(readability-magic-numbers)
         static_assert(opcode == Opcode::LoadString);
-        type_id = bc_inst->GetId(0).AsFileId().GetOffset();
+        type_id = GetRuntime()->ResolveOffsetByIndex(GetGraph()->GetMethod(), bc_inst->GetId(0).AsIndex());
         inst = GetGraph()->CreateInstLoadString(DataType::REFERENCE, GetPc(bc_inst->GetAddress()));
     }
     inst->SetTypeId(type_id);

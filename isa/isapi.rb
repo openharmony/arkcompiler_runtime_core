@@ -157,10 +157,25 @@ class Instruction < SimpleDelegator
     operands = operands.split(', ')
     ops_encoding = format.encoding
 
+    count = 0
+    operands.map do |operand|
+      name, srcdst, type = Util.parse_operand_signature(operand)
+      if name.end_with?('id')
+        count += 1
+      end
+    end
+
+    id_count = 1
     operands.map do |operand|
       name, srcdst, type = Util.parse_operand_signature(operand)
       key = name
-      key = 'id' if name.end_with?('id')
+      if name.end_with?('id')
+        key = 'id'
+        if count > 1
+          key += id_count.to_s
+          id_count = id_count + 1
+        end
+      end
       Operand.new(name, srcdst, type, ops_encoding[key].width, ops_encoding[key].offset)
     end
   end
@@ -189,6 +204,20 @@ class Instruction < SimpleDelegator
     add_props << 'acc_none' if acc_none?
     props + add_props
   end
+
+  cached def real_properties
+    filter = []
+    properties.each do |p|
+      if p != 'acc_write' && p != 'acc_read' && p != 'acc_none'
+        filter << p
+      end
+    end
+    filter << 'acc_write' if acc_write?
+    filter << 'acc_read' if acc_read?
+    filter << 'acc_none' if acc_none?
+    return filter
+  end
+
 
   def type(index)
     acc_and_operands.select(&:src?)[index].type || 'none'
@@ -263,7 +292,7 @@ class Format
   end
 
   cached def pretty
-    name.sub('op_', '').gsub(/imm[0-9]?/, 'imm').gsub(/v[0-9]?/, 'v').gsub(/_([0-9]+)/, '\1')
+    name.sub('op_', '').gsub(/id[0-9]?/, 'id').gsub(/imm[0-9]?/, 'imm').gsub(/v[0-9]?/, 'v').gsub(/_([0-9]+)/, '\1')
   end
 
   def prefixed?
@@ -333,6 +362,18 @@ class Operand
 
   def id?
     %i[method_id type_id field_id string_id literalarray_id].include?(@name)
+  end
+
+  def method_id?
+    %i[method_id].include?(@name)
+  end
+
+  def string_id?
+    %i[string_id].include?(@name)
+  end
+
+  def literalarray_id?
+    %i[literalarray_id].include?(@name)
   end
 
   def dst?

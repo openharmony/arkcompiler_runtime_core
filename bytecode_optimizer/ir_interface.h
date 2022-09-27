@@ -49,6 +49,14 @@ public:
         return std::string(it->second);
     }
 
+    virtual std::string GetLiteralArrayByOffset(uint32_t offset) const
+    {
+        auto it = maps_->literalarrays.find(offset);
+        ASSERT(it != maps_->strings.cend());
+
+        return std::string(it->second);
+    }
+
     std::optional<std::string> GetLiteralArrayIdByOffset(uint32_t offset) const
     {
         ASSERT(prog_ != nullptr);

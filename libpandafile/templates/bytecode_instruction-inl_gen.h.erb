@@ -102,9 +102,13 @@ inline BytecodeId BytecodeInst<Mode>::GetId() const {
     // Disable check due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if (format == Format::<%= fmt.pretty.upcase %>) {
-        constexpr std::array<uint8_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
-        constexpr std::array<uint8_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
+%   if offsets.length == 1 && widths.length == 1
+        return BytecodeId(static_cast<uint32_t>(Read<<%= offsets[0] %>, <%= widths[0] %>>()));
+%   else
+        constexpr std::array<size_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
         return BytecodeId(static_cast<uint32_t>(Read<OFFSETS[idx], WIDTHS[idx]>()));
+%   end
     }
 
 % end
@@ -132,8 +136,8 @@ inline void BytecodeInst<Mode>::UpdateId(BytecodeId new_id, uint32_t idx /* = 0 
     // Disable check due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if (format == Format::<%= fmt.pretty.upcase %>) {
-        constexpr std::array<uint8_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
-        constexpr std::array<uint8_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
         this->Write(new_id.AsRawValue(), OFFSETS[idx] / 8, WIDTHS[idx] / 8);
         return;
     }
@@ -162,8 +166,8 @@ inline BytecodeId BytecodeInst<Mode>::GetId(size_t idx /* = 0 */) const {
 %   widths = id_ops.map(&:width)
 %
     case Format::<%= fmt.pretty.upcase %>: {
-        constexpr std::array<uint8_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
-        constexpr std::array<uint8_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
         return BytecodeId(static_cast<uint32_t>(Read64(OFFSETS[idx], WIDTHS[idx])));
     }
 % end
@@ -193,8 +197,8 @@ ALWAYS_INLINE inline uint16_t BytecodeInst<Mode>::GetVReg() const {  // NOLINTNE
     // Disable check due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (format == Format::<%= fmt.pretty.upcase %>) {
-        constexpr std::array<uint8_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
-        constexpr std::array<uint8_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
         return static_cast<uint16_t>(Read<OFFSETS[idx], WIDTHS[idx]>());
     }
 
@@ -223,8 +227,8 @@ ALWAYS_INLINE inline uint16_t BytecodeInst<Mode>::GetVReg(size_t idx /* = 0 */) 
 %   widths = reg_ops.map(&:width)
 %
     case Format::<%= fmt.pretty.upcase %>: {
-        constexpr std::array<uint8_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
-        constexpr std::array<uint8_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
         if (idx > <%= n - 1 %>) {
             break;
         }
@@ -256,8 +260,8 @@ inline auto BytecodeInst<Mode>::GetImm() const {  // NOLINTNEXTLINE(readability-
     // Disable check due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (format == Format::<%= fmt.pretty.upcase %>) {
-        constexpr std::array<uint8_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
-        constexpr std::array<uint8_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
         return Read<OFFSETS[idx], WIDTHS[idx], true>();
     }
 
@@ -285,8 +289,8 @@ inline auto BytecodeInst<Mode>::GetImm64(size_t idx /* = 0 */) const {
 %   widths = imm_ops.map(&:width)
 %
     case Format::<%= fmt.pretty.upcase %>: {
-        constexpr std::array<uint8_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
-        constexpr std::array<uint8_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
+        constexpr std::array<size_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
         return Read64<true>(OFFSETS[idx], WIDTHS[idx]);
     }
 % end
@@ -327,7 +331,13 @@ inline bool BytecodeInst<Mode>::IsPrefixed() const {
 
 template <const BytecodeInstMode Mode>
 inline typename BytecodeInst<Mode>::Format BytecodeInst<Mode>::GetFormat() const {  // NOLINT(readability-function-size)
-    switch(GetOpcode()) {
+    return GetFormat(GetOpcode());
+}
+
+/* static */
+template <const BytecodeInstMode Mode>
+constexpr typename BytecodeInst<Mode>::Format BytecodeInst<Mode>::GetFormat(Opcode opcode) {  // NOLINT(readability-function-size)
+    switch(opcode) {
 % Panda::instructions.each do |i|
     case BytecodeInst<Mode>::Opcode::<%= i.opcode.upcase %>:
         return BytecodeInst<Mode>::Format::<%= i.format.pretty.upcase %>;
@@ -343,7 +353,7 @@ inline typename BytecodeInst<Mode>::Format BytecodeInst<Mode>::GetFormat() const
 template<const BytecodeInstMode Mode> inline bool BytecodeInst<Mode>::HasFlag(Flags flag) const {
     switch(GetOpcode()) {
 % Panda::instructions.each do |i|
-%   flag_array = i.properties.map {|prop| "Flags::" + prop.upcase}
+%   flag_array = i.real_properties.map {|prop| "Flags::" + prop.upcase}
 %   flag_array += ['0'] if flag_array.empty?
 %   flags = flag_array.join(' | ')
     case BytecodeInst<Mode>::Opcode::<%= i.opcode.upcase %>:

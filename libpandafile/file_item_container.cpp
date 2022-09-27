@@ -524,32 +524,34 @@ void ItemContainer::ReorderItems(panda::panda_file::pgo::ProfileOptimizer *profi
     profile_opt->ProfileGuidedRelayout(items_);
 }
 
-void ItemContainer::ProcessIndexDependecies(BaseItem *item)
+void ItemContainer::AddIndexDependecies(BaseItem *item)
 {
-    auto deps = item->GetIndexDependencies();
-
-    item->Visit([&deps](BaseItem *param_item) {
-        const auto &item_deps = param_item->GetIndexDependencies();
-        deps.insert(deps.end(), item_deps.cbegin(), item_deps.cend());
-        return true;
-    });
-
     if (index_section_item_.IsEmpty()) {
         index_section_item_.AddHeader();
         index_section_item_.GetCurrentHeader()->SetStart(item);
     }
-
-    if (index_section_item_.GetCurrentHeader()->Add(deps)) {
-        return;
+    const auto &item_deps = item->GetIndexDependencies();
+    if (!index_section_item_.GetCurrentHeader()->Add(item_deps)) {
+        index_section_item_.GetCurrentHeader()->SetEnd(item);
+        index_section_item_.AddHeader();
+        index_section_item_.GetCurrentHeader()->SetStart(item);
+        if (!index_section_item_.GetCurrentHeader()->Add(item_deps)) {
+            LOG(FATAL, PANDAFILE) << "Cannot add " << item_deps.size() << " items to index";
+            UNREACHABLE();
+        }
     }
-
-    index_section_item_.GetCurrentHeader()->SetEnd(item);
-    index_section_item_.AddHeader();
-    index_section_item_.GetCurrentHeader()->SetStart(item);
-
-    if (!index_section_item_.GetCurrentHeader()->Add(deps)) {
-        LOG(FATAL, PANDAFILE) << "Cannot add " << deps.size() << " items to index";
+    if (item->GetName() == "method_item") {
+        static_cast<BaseMethodItem *>(item)->SetHeaderIndex(index_section_item_.GetNumHeaders() - 1);
     }
+}
+
+void ItemContainer::ProcessIndexDependecies(BaseItem *item)
+{
+    AddIndexDependecies(item);
+    item->Visit([&](BaseItem *param_item) {
+        AddIndexDependecies(param_item);
+        return true;
+    });
 }
 
 bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
@@ -883,7 +885,7 @@ ItemTypes ItemContainer::IndexItem::GetItemType() const
     switch (type_) {
         case IndexType::CLASS:
             return ItemTypes::CLASS_INDEX_ITEM;
-        case IndexType::METHOD:
+        case IndexType::METHOD_STRING_LITERAL:
             return ItemTypes::METHOD_INDEX_ITEM;
         case IndexType::FIELD:
             return ItemTypes::FIELD_INDEX_ITEM;

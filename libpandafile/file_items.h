@@ -71,6 +71,16 @@ enum class FieldTag : uint8_t {
     TYPE_ANNOTATION = 0x06
 };
 
+enum class FunctionKind : uint8_t {
+    NONE = 0x0,
+    FUNCTION = 0x1,
+    NC_FUNCTION = 0x2,
+    GENERATOR_FUNCTION = 0x3,
+    ASYNC_FUNCTION = 0x4,
+    ASYNC_GENERATOR_FUNCTION = 0x5,
+    ASYNC_NC_FUNCTION = 0x6
+};
+
 bool IsDynamicLanguage(panda::panda_file::SourceLang lang);
 std::optional<panda::panda_file::SourceLang> LanguageFromString(std::string_view lang);
 const char *LanguageToString(panda::panda_file::SourceLang lang);
@@ -85,6 +95,10 @@ static constexpr uint32_t INVALID_OFFSET = std::numeric_limits<uint32_t>::max();
 static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
 static constexpr uint32_t MAX_INDEX_16 = std::numeric_limits<uint16_t>::max();
 static constexpr uint32_t MAX_INDEX_32 = std::numeric_limits<uint32_t>::max();
+static constexpr uint32_t FLAG_WIDTH = 8;
+static constexpr uint32_t FUNTION_KIND_WIDTH = 8;
+static constexpr uint32_t FUNCTION_KIND_MASK = 0xFF00;
+static constexpr uint32_t FLAG_MASK = 0xFF;
 
 constexpr uint32_t PGO_STRING_DEFAULT_COUNT = 5;
 constexpr uint32_t PGO_CLASS_DEFAULT_COUNT = 3;
@@ -128,11 +142,10 @@ constexpr std::string_view CODE_ITEM = "code_item";
 enum class IndexType {
     // 16-bit indexes
     CLASS = 0x0,
-    METHOD = 0x1,
+    METHOD_STRING_LITERAL = 0x1,
     FIELD = 0x2,
     PROTO = 0x3,
     LAST_16 = PROTO,
-
     // 32-bit indexes
     LINE_NUMBER_PROG = 0x04,
     LAST_32 = LINE_NUMBER_PROG,
@@ -419,7 +432,7 @@ public:
     DEFAULT_COPY_SEMANTIC(PrimitiveTypeItem);
 };
 
-class StringItem : public BaseItem {
+class StringItem : public IndexedItem {
 public:
     explicit StringItem(std::string str);
 
@@ -444,6 +457,11 @@ public:
     size_t GetUtf16Len() const
     {
         return utf16_length_;
+    }
+
+    IndexType GetIndexType() const override
+    {
+        return IndexType::METHOD_STRING_LITERAL;
     }
 
     DEFAULT_MOVE_SEMANTIC(StringItem);
@@ -723,7 +741,7 @@ public:
 
     IndexType GetIndexType() const override
     {
-        return IndexType::METHOD;
+        return IndexType::METHOD_STRING_LITERAL;
     }
 
     StringItem *GetNameItem() const
@@ -734,6 +752,18 @@ public:
     BaseClassItem *GetClassItem() const
     {
         return class_;
+    }
+
+    void SetFunctionKind(FunctionKind kind)
+    {
+        access_flags_ &= (~FUNCTION_KIND_MASK);
+        access_flags_ |= (static_cast<uint8_t>(kind) << FLAG_WIDTH);
+    }
+
+    void SetHeaderIndex(uint16_t idx)
+    {
+        access_flags_ &= (FUNCTION_KIND_MASK | FLAG_MASK);
+        access_flags_ |= (idx << (FUNTION_KIND_WIDTH + FLAG_WIDTH));
     }
 
     ~BaseMethodItem() override = default;
@@ -752,7 +782,7 @@ private:
     BaseClassItem *class_;
     StringItem *name_;
     ProtoItem *proto_;
-    uint32_t access_flags_;
+    uint32_t access_flags_;  // layout: |<- 16-bit header index ->|<- 8-bit FunctionKind ->|<- 8-bit flag ->|
 };
 
 class MethodParamItem {
@@ -1428,7 +1458,7 @@ private:
 class ScalarValueItem;
 class ArrayValueItem;
 
-class ValueItem : public BaseItem {
+class ValueItem : public IndexedItem {
 public:
     enum class Type { INTEGER, LONG, FLOAT, DOUBLE, ID, ARRAY };
 
@@ -1613,6 +1643,11 @@ public:
     void ComputeLayout() override;
 
     bool Write(Writer *writer) override;
+
+    IndexType GetIndexType() const override
+    {
+        return IndexType::METHOD_STRING_LITERAL;
+    }
 
     ItemTypes GetItemType() const override
     {

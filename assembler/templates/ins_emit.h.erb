@@ -21,7 +21,7 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
     const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
     const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
     const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
-    const std::unordered_map<std::string_view, panda_file::StringItem *> &strings,
+    const std::unordered_map<std::string, panda_file::StringItem *> &strings,
     const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays,
     const std::unordered_map<std::string_view, panda::Label>& labels) const {
     if (!IsValidToEmit()) {
@@ -47,6 +47,8 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 %   ops = []
 %   nr = 0
 %   ni = 0
+%   property_idx_start = 0
+%   num_id = 0
 %   insn.operands.each do |op|
 %     if op.reg?
 %       ops << "#{regs}[#{nr}]"
@@ -66,49 +68,57 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 %       end
 %       ni += 1
 %     elsif op.id?
-%       if insn.properties.include?('method_id')
-%         ops << 'methods.find(ids[0])->second->GetIndex(method)'
-%       elsif insn.properties.include?('field_id')
-%         ops << 'fields.find(ids[0])->second->GetIndex(method)'
-%       elsif insn.properties.include?('type_id')
-%         ops << 'classes.find(ids[0])->second->GetIndex(method)'
-%       elsif insn.properties.include?('string_id')
-%         ops << 'strings.find(ids[0])->second->GetOffset()'
-%       elsif insn.properties.include?('literalarray_id')
-%         ops << 'static_cast<uint32_t>(literalarrays.find(ids[0])->second->GetOffset())'
-%       else
-%         raise "Unexpected ID type"
+%       id_properties = insn.properties.slice(property_idx_start, insn.properties.length - property_idx_start)
+%       id_properties.each_with_index do |prop, prop_idx|
+%         if prop == 'method_id'
+%           ops << "methods.find(ids[#{num_id}])->second->GetIndex(method)"
+%           property_idx_start += prop_idx + 1
+%           num_id += 1
+%           break
+%         elsif prop == 'string_id'
+%           ops << "strings.find(ids[#{num_id}])->second->GetIndex(method)"
+%           property_idx_start += prop_idx + 1
+%           num_id += 1
+%           break
+%         elsif prop == 'literalarray_id'
+%           ops << "literalarrays.find(ids[#{num_id}])->second->GetIndex(method)"
+%           property_idx_start += prop_idx + 1
+%           num_id += 1
+%           break
+%         else
+%           next
+%         end
 %       end
 %     else
 %       raise "Unexpected operand type"
 %     end
 %   end
-%   if insn.call? && insn.properties.include?('method_id')
-%     ops << ops.shift
-%   end
 %   ops
 % end
     case Opcode::<%= insn.asm_token %>: {
-% if insn.properties.include?('method_id')
-        if ((ids.size() == 0) || (methods.find(ids[0]) == methods.cend())) {
-            return false;
-        }
-% elsif insn.properties.include?('field_id')
-        if ((ids.size() == 0) || (fields.find(ids[0]) == fields.cend())) {
-            return false;
-        }
-% elsif insn.properties.include?('type_id')
-        if ((ids.size() == 0) || (classes.find(ids[0]) == classes.cend())) {
-            return false;
-        }
-% elsif insn.properties.include?('string_id')
-        if ((ids.size() == 0) || (strings.find(ids[0]) == strings.cend())) {
-            return false;
-        }
-% elsif insn.jump?
+% if insn.jump?
         if ((ids.size() == 0) || (labels.find(ids[0]) == labels.cend())) {
             return false;
         }
+% end
+% num_id = 0
+% insn.properties.each do |prop|
+%   if prop == 'method_id'
+        if ((ids.size() == 0) || (methods.find(ids[<%= num_id %>]) == methods.cend())) {
+            return false;
+        }
+%     num_id += 1
+%   elsif prop == 'string_id'
+        if ((ids.size() == 0) || (strings.find(ids[<%= num_id %>]) == strings.cend())) {
+            return false;
+        }
+%     num_id += 1
+%   elsif prop == 'literalarray_id'
+        if ((ids.size() == 0) || (literalarrays.find(ids[<%= num_id %>]) == literalarrays.cend())) {
+            return false;
+        }
+%     num_id += 1
+%   end
 % end
 % regs_num = 0
 % imms_num = 0

@@ -402,7 +402,7 @@ bool OptimizePandaFile(pandasm::Program *prog, const pandasm::AsmEmitter::PandaF
 
         panda_file::ClassDataAccessor cda {*pfile, record_id};
         cda.EnumerateMethods([prog, maps, is_dynamic, &result](panda_file::MethodDataAccessor &mda) {
-            if (!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative()) {
+            if (!mda.IsExternal()) {
                 result = OptimizeFunction(prog, maps, mda, is_dynamic) && result;
             }
         });

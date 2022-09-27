@@ -34,19 +34,15 @@ void panda::bytecodeopt::BytecodeGen::VisitEcma(panda::compiler::GraphVisitor *v
 %     next if inst.properties.include?("jump")
 %     opcode = inst.opcode.upcase
 %     params_arr = inst.operands
-#ifdef ARK_INTRINSIC_SET
-        case compiler::RuntimeInterface::IntrinsicId::<%= intrinsic_name %>: {
-#else
 %     group.each do |i|
 %       intr_id = i.opcode.upcase
        case compiler::RuntimeInterface::IntrinsicId::<%= intr_id %>:
 %     end
        {
-#endif // ARK_INTRINSIC_SET 
 %     if inst.acc.include?("in")
             auto acc_src = inst->GetSrcReg(inst->GetInputsCount() - 2);
             if (acc_src != compiler::ACC_REG_ID) {
-                DoLdaDyn(acc_src, enc->result_);
+                DoLda(acc_src, enc->result_);
             }
 %     end
 %     params_str = ""
@@ -61,15 +57,20 @@ void panda::bytecodeopt::BytecodeGen::VisitEcma(panda::compiler::GraphVisitor *v
 %         vreg_index = vreg_index + 1
 %         input_index = input_index + 1
 %       elsif param.id?
-%         if inst.properties.include?("method_id")
+%         if param.method_id?
             ASSERT(inst->HasImms() && inst->GetImms().size() > <%= imm_index %>); // NOLINTNEXTLINE(readability-container-size-empty)
             auto ir_id<%= id_index %> = static_cast<uint32_t>(inst->GetImms()[<%= imm_index %>]);
             auto bc_id<%= id_index %> = enc->ir_interface_->GetMethodIdByOffset(ir_id<%= id_index %>);
 %           params_str = params_str + "bc_id#{id_index}, "
-%         elsif inst.properties.include?("string_id")
+%         elsif param.string_id?
             ASSERT(inst->HasImms() && inst->GetImms().size() > <%= imm_index %>); // NOLINTNEXTLINE(readability-container-size-empty)
             auto ir_id<%= id_index %> = static_cast<uint32_t>(inst->GetImms()[<%= imm_index %>]);
             auto bc_id<%= id_index %> = enc->ir_interface_->GetStringIdByOffset(ir_id<%= id_index %>);
+%           params_str = params_str + "bc_id#{id_index}, "
+%         elsif param.literalarray_id?
+            ASSERT(inst->HasImms() && inst->GetImms().size() > <%= imm_index %>); // NOLINTNEXTLINE(readability-container-size-empty)
+            auto ir_id<%= id_index %> = static_cast<uint32_t>(inst->GetImms()[<%= imm_index %>]);
+            auto bc_id<%= id_index %> = enc->ir_interface_->GetLiteralArrayByOffset(ir_id<%= id_index %>);
 %           params_str = params_str + "bc_id#{id_index}, "
 %         end
 %         id_index = id_index + 1
@@ -93,7 +94,7 @@ void panda::bytecodeopt::BytecodeGen::VisitEcma(panda::compiler::GraphVisitor *v
 %     if inst.acc.include?("out")
             auto acc_dst = inst->GetDstReg();
             if (acc_dst != compiler::ACC_REG_ID) {
-                DoStaDyn(inst->GetDstReg(), enc->result_);
+                DoSta(inst->GetDstReg(), enc->result_);
             }
 %     end
             break;

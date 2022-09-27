@@ -301,6 +301,12 @@ public:
         return index[idx];
     }
 
+    EntityId ResolveOffsetByIndex(EntityId id, Index idx) const
+    {
+        auto index = GetMethodIndex(id);
+        return index[idx];
+    }
+
     EntityId ResolveFieldIndex(EntityId id, Index idx) const
     {
         auto index = GetFieldIndex(id);

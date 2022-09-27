@@ -562,8 +562,6 @@ private:
 
 class FunctionMetadata : public ItemMetadata {
 public:
-    virtual bool HasImplementation() const;
-
     virtual bool IsCtor() const;
 
     virtual bool IsCctor() const;

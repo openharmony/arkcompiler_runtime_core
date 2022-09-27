@@ -391,7 +391,14 @@ public:
 
     static constexpr bool HasImm(Format format, size_t idx);
 
+    static constexpr Format GetFormat(Opcode opcode);
+
     static constexpr size_t Size(Format format);
+
+    static constexpr size_t Size(Opcode opcode)
+    {
+        return Size(GetFormat(opcode));
+    }
 };
 
 template <const BytecodeInstMode Mode>

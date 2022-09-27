@@ -185,6 +185,7 @@ ohos_shared_library("libarkcompiler") {
     ":irtoc_builder_cpp",
     ":irtoc_generate_ir_inline",
     ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
+    ":libarkcompiler_ecma_intrinsics_enum_inl",
     ":libarkcompiler_generate_ecma_inl",
     ":libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
@@ -256,6 +257,7 @@ ohos_static_library("libarkcompiler_frontend_static") {
     ":irtoc_builder_cpp",
     ":irtoc_generate_ir_inline",
     ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
+    ":libarkcompiler_ecma_intrinsics_enum_inl",
     ":libarkcompiler_generate_ecma_inl",
     ":libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
@@ -333,7 +335,10 @@ ark_gen("libarkcompiler_intrinsics_gen_inl") {
 }
 
 ark_isa_gen("libarkcompiler") {
-  template_files = [ "generate_ecma.inl.erb" ]
+  template_files = [
+    "generate_ecma.inl.erb",
+    "ecma_intrinsics_enum.inl.erb",
+  ]
   sources = "optimizer/templates"
   requires = [ "$ark_root//assembler/asm_isapi.rb" ]
   destination = "$target_gen_dir/generated"
