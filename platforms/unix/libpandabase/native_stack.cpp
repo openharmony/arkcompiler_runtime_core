@@ -125,7 +125,7 @@ void DumpUnattachedThread::Dump(std::ostream &os, bool dump_native_crash, FUNC_U
     set_difference(kernel_tid_.begin(), kernel_tid_.end(), thread_manager_tids_.begin(), thread_manager_tids_.end(),
                    inserter(dump_tid, dump_tid.begin()));
     std::set<int>::iterator tid;
-    for (tid = dump_tid.begin(); tid != dump_tid.end(); tid++) {
+    for (tid = dump_tid.begin(); tid != dump_tid.end(); ++tid) {
         // thread_manager tid may have wrong,check again
         if (kernel_tid_.count(*tid) == 0) {
             continue;
