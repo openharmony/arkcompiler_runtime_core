@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <limits>
 #include <string>
+#include <variant>
 
 namespace panda::compiler {
 constexpr int BITS_PER_BYTE = 8;
@@ -60,8 +61,9 @@ constexpr int MAX_SUCCS_NUM = 2;
 }  // namespace panda::compiler
 
 // TypeInfoIndex adaption
-using TypeInfoIndex = int32_t;
-constexpr TypeInfoIndex NO_EXPLICIT_TYPE = 0;
+using BuiltinIndexType = uint8_t;
+using TypeInfoIndex = std::variant<BuiltinIndexType, std::string>;
+const TypeInfoIndex NO_EXPLICIT_TYPE = static_cast<BuiltinIndexType>(0);
 constexpr const std::string_view TSTYPE_ANNO_RECORD_NAME = "_ESTypeAnnotation";
 constexpr const std::string_view TSTYPE_ANNO_ELEMENT_NAME = "_TypeOfInstruction";
 constexpr auto INVALID_TYPE_INDEX = std::numeric_limits<std::size_t>::max();

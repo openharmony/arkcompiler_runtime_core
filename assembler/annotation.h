@@ -94,6 +94,7 @@ public:
         ARRAY,
         VOID,
         METHOD_HANDLE,
+        LITERALARRAY,
         UNKNOWN
     };
 
@@ -160,6 +161,9 @@ public:
                 break;
             case Type::STRING_NULLPTR:
                 type = '*';
+                break;
+            case Type::LITERALARRAY:
+                type = '#';
                 break;
             case Type::UNKNOWN:
             default:
@@ -432,7 +436,9 @@ struct ValueTypeHelper {
                 std::conditional_t<value_type == Value::Type::ENUM, std::string_view,
                 // NOLINTNEXTLINE(readability-magic-numbers)
                 std::conditional_t<value_type == Value::Type::ANNOTATION, AnnotationData,
-                void>>>>>>>>>>>>>>>>>;
+                // NOLINTNEXTLINE(readability-magic-numbers)
+                std::conditional_t<value_type == Value::Type::LITERALARRAY, std::string_view,
+                void>>>>>>>>>>>>>>>>>>;
 };
 
 // clang-format on

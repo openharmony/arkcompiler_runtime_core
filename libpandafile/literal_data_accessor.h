@@ -54,6 +54,8 @@ enum class LiteralTag : uint8_t {
     ARRAY_STRING = 0x15,
     ASYNCGENERATORMETHOD = 0x16,
     LITERALBUFFERINDEX = 0x17,
+    LITERALARRAY = 0x18,
+    BUILTINTYPEINDEX = 0x19,
     NULLVALUE = 0xff
 };
 
@@ -70,8 +72,8 @@ public:
     template <class Callback>
     void EnumerateLiteralVals(File::EntityId id, const Callback &cb);
 
-    size_t GetLiteralValsNum(size_t index);
     size_t GetLiteralValsNum(File::EntityId id) const;
+    size_t GetLiteralValsNum(size_t index) const;
 
     uint32_t GetLiteralNum() const
     {

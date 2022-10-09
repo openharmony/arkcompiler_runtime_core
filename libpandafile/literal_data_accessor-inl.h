@@ -23,18 +23,16 @@
 
 namespace panda::panda_file {
 
-inline size_t LiteralDataAccessor::GetLiteralValsNum(size_t index)
-{
-    auto sp = panda_file_.GetSpanFromId(File::EntityId(
-        static_cast<uint32_t>(helpers::Read<sizeof(uint32_t)>(literal_data_sp_.SubSpan(index * ID_SIZE)))));
-    auto num = helpers::Read<ID_SIZE>(&sp);
-    return num;
-}
-
 inline size_t LiteralDataAccessor::GetLiteralValsNum(File::EntityId id) const
 {
     auto sp = panda_file_.GetSpanFromId(id);
-    return helpers::Read<LEN_SIZE>(&sp);
+    return helpers::Read<ID_SIZE>(&sp);
+}
+
+inline size_t LiteralDataAccessor::GetLiteralValsNum(size_t index) const
+{
+    return GetLiteralValsNum(File::EntityId(
+        static_cast<uint32_t>(helpers::Read<sizeof(uint32_t)>(literal_data_sp_.SubSpan(index * ID_SIZE)))));
 }
 
 template <class Callback>
@@ -76,6 +74,7 @@ inline void LiteralDataAccessor::EnumerateLiteralVals(File::EntityId id, const C
             }
             case LiteralTag::METHOD:
             case LiteralTag::GENERATORMETHOD:
+            case LiteralTag::LITERALARRAY:
             case LiteralTag::ASYNCGENERATORMETHOD: {
                 value = static_cast<uint32_t>(helpers::Read<sizeof(uint32_t)>(&sp));
                 break;
@@ -84,6 +83,7 @@ inline void LiteralDataAccessor::EnumerateLiteralVals(File::EntityId id, const C
                 value = static_cast<uint16_t>(helpers::Read<sizeof(uint16_t)>(&sp));
                 break;
             }
+            case LiteralTag::BUILTINTYPEINDEX:
             case LiteralTag::ACCESSOR:
             case LiteralTag::NULLVALUE: {
                 value = static_cast<uint8_t>(helpers::Read<sizeof(uint8_t)>(&sp));

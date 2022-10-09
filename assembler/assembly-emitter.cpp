@@ -58,6 +58,7 @@ using panda::panda_file::Type;
 using panda::panda_file::TypeItem;
 using panda::panda_file::ValueItem;
 using panda::panda_file::Writer;
+using panda::panda_file::LiteralArrayItem;
 
 std::unordered_map<Type::TypeId, PrimitiveTypeItem *> CreatePrimitiveTypes(ItemContainer *container)
 {
@@ -123,27 +124,6 @@ static panda_file::Type::TypeId GetTypeId(Value::Type type)
         default:
             return panda_file::Type::TypeId::REFERENCE;
     }
-}
-
-uint32_t AsmEmitter::base_ = 0;
-
-// needed when correct literal array id, need to remove after isa refactoring
-/* static */
-uint32_t AsmEmitter::GetBase()
-{
-    return base_;
-}
-
-/* static */
-void AsmEmitter::IncreaseBase(uint32_t inc)
-{
-    base_ += inc;
-}
-
-/* static */
-void AsmEmitter::ResetBase()
-{
-    base_ = 0;
 }
 
 /* static */
@@ -220,7 +200,7 @@ std::string AsmEmitter::GetMethodSignatureFromProgram(const std::string &name, c
 /* static */
 panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(
     ItemContainer *container, const Value *value, std::vector<panda_file::LiteralItem> *out,
-    const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods)
+    const AsmEmitter::AsmEntityCollections &entities)
 {
     ASSERT(out != nullptr);
 
@@ -270,8 +250,14 @@ panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(
         }
         case Value::Type::METHOD: {
             auto name = value->GetAsScalar()->GetValue<std::string>();
-            auto method_item = static_cast<panda::panda_file::MethodItem *>(Find(methods, name));
+            auto method_item = static_cast<panda::panda_file::MethodItem *>(Find(entities.method_items, name));
             out->emplace_back(method_item);
+            return &out->back();
+        }
+        case Value::Type::LITERALARRAY: {
+            auto key = value->GetAsScalar()->GetValue<std::string>();
+            auto lit_item = Find(entities.literalarray_items, key);
+            out->emplace_back(lit_item);
             return &out->back();
         }
         default:
@@ -483,6 +469,23 @@ ScalarValueItem *AsmEmitter::CreateScalarMethodValueItem(
 }
 
 /* static */
+ScalarValueItem *AsmEmitter::CreateScalarLiteralArrayItem(
+    ItemContainer *container, const Value *value, std::vector<ScalarValueItem> *out, const Program &program,
+    const std::unordered_map<std::string, LiteralArrayItem *> &literalarrays)
+{
+    auto name = value->GetAsScalar()->GetValue<std::string>();
+    auto it = literalarrays.find(name);
+    ASSERT(it != literalarrays.end());
+    auto *literalarray_item = it->second;
+    if (out != nullptr) {
+        out->emplace_back(literalarray_item);
+        return &out->back();
+    }
+
+    return container->CreateItem<ScalarValueItem>(literalarray_item);
+}
+
+/* static */
 ScalarValueItem *AsmEmitter::CreateScalarEnumValueItem(ItemContainer *container, const Value *value,
                                                        std::vector<ScalarValueItem> *out,
                                                        const std::unordered_map<std::string, BaseFieldItem *> &fields)
@@ -505,12 +508,10 @@ ScalarValueItem *AsmEmitter::CreateScalarEnumValueItem(ItemContainer *container,
 /* static */
 ScalarValueItem *AsmEmitter::CreateScalarAnnotationValueItem(
     ItemContainer *container, const Value *value, std::vector<ScalarValueItem> *out, const Program &program,
-    const std::unordered_map<std::string, BaseClassItem *> &classes,
-    const std::unordered_map<std::string, BaseFieldItem *> &fields,
-    const std::unordered_map<std::string, BaseMethodItem *> &methods)
+    const AsmEmitter::AsmEntityCollections &entities)
 {
     auto annotation = value->GetAsScalar()->GetValue<AnnotationData>();
-    auto *annotation_item = CreateAnnotationItem(container, annotation, program, classes, fields, methods);
+    auto *annotation_item = CreateAnnotationItem(container, annotation, program, entities);
     if (annotation_item == nullptr) {
         return nullptr;
     }
@@ -526,9 +527,7 @@ ScalarValueItem *AsmEmitter::CreateScalarAnnotationValueItem(
 /* static */
 ScalarValueItem *AsmEmitter::CreateScalarValueItem(ItemContainer *container, const Value *value,
                                                    std::vector<ScalarValueItem> *out, const Program &program,
-                                                   const std::unordered_map<std::string, BaseClassItem *> &classes,
-                                                   const std::unordered_map<std::string, BaseFieldItem *> &fields,
-                                                   const std::unordered_map<std::string, BaseMethodItem *> &methods)
+                                                   const AsmEmitter::AsmEntityCollections &entities)
 {
     auto value_type = value->GetType();
 
@@ -557,16 +556,19 @@ ScalarValueItem *AsmEmitter::CreateScalarValueItem(ItemContainer *container, con
             return CreateScalarStringValueItem(container, value, out);
         }
         case Value::Type::RECORD: {
-            return CreateScalarRecordValueItem(container, value, out, classes);
+            return CreateScalarRecordValueItem(container, value, out, entities.class_items);
         }
         case Value::Type::METHOD: {
-            return CreateScalarMethodValueItem(container, value, out, program, methods);
+            return CreateScalarMethodValueItem(container, value, out, program, entities.method_items);
         }
         case Value::Type::ENUM: {
-            return CreateScalarEnumValueItem(container, value, out, fields);
+            return CreateScalarEnumValueItem(container, value, out, entities.field_items);
         }
         case Value::Type::ANNOTATION: {
-            return CreateScalarAnnotationValueItem(container, value, out, program, classes, fields, methods);
+            return CreateScalarAnnotationValueItem(container, value, out, program, entities);
+        }
+        case Value::Type::LITERALARRAY: {
+            return CreateScalarLiteralArrayItem(container, value, out, program, entities.literalarray_items);
         }
         default: {
             UNREACHABLE();
@@ -577,16 +579,14 @@ ScalarValueItem *AsmEmitter::CreateScalarValueItem(ItemContainer *container, con
 
 /* static */
 ValueItem *AsmEmitter::CreateValueItem(ItemContainer *container, const Value *value, const Program &program,
-                                       const std::unordered_map<std::string, BaseClassItem *> &classes,
-                                       const std::unordered_map<std::string, BaseFieldItem *> &fields,
-                                       const std::unordered_map<std::string, BaseMethodItem *> &methods)
+                                       const AsmEmitter::AsmEntityCollections &entities)
 {
     switch (value->GetType()) {
         case Value::Type::ARRAY: {
             std::vector<ScalarValueItem> elements;
             for (const auto &elem_value : value->GetAsArray()->GetValues()) {
                 auto *item =
-                    CreateScalarValueItem(container, &elem_value, &elements, program, classes, fields, methods);
+                    CreateScalarValueItem(container, &elem_value, &elements, program, entities);
                 if (item == nullptr) {
                     return nullptr;
                 }
@@ -597,17 +597,14 @@ ValueItem *AsmEmitter::CreateValueItem(ItemContainer *container, const Value *va
                                                          std::move(elements));
         }
         default: {
-            return CreateScalarValueItem(container, value, nullptr, program, classes, fields, methods);
+            return CreateScalarValueItem(container, value, nullptr, program, entities);
         }
     }
 }
 
 /* static */
 AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const AnnotationData &annotation,
-                                                 const Program &program,
-                                                 const std::unordered_map<std::string, BaseClassItem *> &classes,
-                                                 const std::unordered_map<std::string, BaseFieldItem *> &fields,
-                                                 const std::unordered_map<std::string, BaseMethodItem *> &methods)
+    const Program &program, const AsmEmitter::AsmEntityCollections &entities)
 {
     auto record_name = annotation.GetName();
     auto it = program.record_table.find(record_name);
@@ -662,7 +659,7 @@ AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const
             }
         }
 
-        auto *item = CreateValueItem(container, value, program, classes, fields, methods);
+        auto *item = CreateValueItem(container, value, program, entities);
         if (item == nullptr) {
             SetLastError("Cannot create value item for annotation element " + function_name + ": " + GetLastError());
             return nullptr;
@@ -672,7 +669,7 @@ AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const
         tag_elements.emplace_back(tag_type);
     }
 
-    auto *cls = classes.find(record_name)->second;
+    auto *cls = entities.class_items.find(record_name)->second;
     return container->CreateItem<AnnotationItem>(cls, std::move(item_elements), std::move(tag_elements));
 }
 
@@ -707,12 +704,10 @@ MethodHandleItem *AsmEmitter::CreateMethodHandleItem(ItemContainer *container, c
 /* static */
 template <class T>
 bool AsmEmitter::AddAnnotations(T *item, ItemContainer *container, const AnnotationMetadata &metadata,
-                                const Program &program, const std::unordered_map<std::string, BaseClassItem *> &classes,
-                                const std::unordered_map<std::string, BaseFieldItem *> &fields,
-                                const std::unordered_map<std::string, BaseMethodItem *> &methods)
+                                const Program &program, const AsmEmitter::AsmEntityCollections &entities)
 {
     for (const auto &annotation : metadata.GetAnnotations()) {
-        auto *annotation_item = CreateAnnotationItem(container, annotation, program, classes, fields, methods);
+        auto *annotation_item = CreateAnnotationItem(container, annotation, program, entities);
         if (annotation_item == nullptr) {
             return false;
         }
@@ -746,7 +741,7 @@ static void AddDependencyByIndex(MethodItem *method, const Ins &insn,
 }
 
 static void AddBytecodeIndexDependencies(MethodItem *method, const Function &func,
-                                         const AsmEmitter::AsmEntityCollections &entities, uint32_t base)
+                                         const AsmEmitter::AsmEntityCollections &entities)
 {
     for (const auto &insn : func.ins) {
         if (insn.opcode == Opcode::INVALID) {
@@ -789,21 +784,15 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                                   AsmEmitter::AsmEntityCollections &entities)
 {
     for (const auto &[id, l] : program.literalarray_table) {
-        // correct literal array id, need to remove after isa refactoring
-        const auto base = GetBase();
-        std::string corrected_id = base == 0 ? id : (std::to_string(GetBase() + std::atoi(id.c_str())));
+        auto *literal_array_item = items->GetOrCreateLiteralArrayItem(id);
+        entities.literalarray_items.insert({id, literal_array_item});
+    }
 
-        auto literal_array_item = items->GetOrCreateLiteralArrayItem(corrected_id);
+    for (const auto &[id, l] : program.literalarray_table) {
+        auto *literal_array_item = entities.literalarray_items.find(id)->second;
         std::vector<panda_file::LiteralItem> literal_array;
-
         for (auto &literal : l.literals_) {
             std::unique_ptr<ScalarValue> value;
-
-            // correct literal array id, need to remove after isa refactoring
-            if (literal.tag_ == panda_file::LiteralTag::LITERALBUFFERINDEX) {
-                const_cast<LiteralArray::Literal &>(literal).value_ = std::get<uint32_t>(literal.value_) + base;
-            }
-
             switch (literal.tag_) {
                 case panda_file::LiteralTag::ARRAY_U1: {
                     ASSERT(program.array_types.find(Type("u1", 1)) != program.array_types.end());
@@ -881,6 +870,7 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                 case panda_file::LiteralTag::TAGVALUE:
                 case panda_file::LiteralTag::ACCESSOR:
                 case panda_file::LiteralTag::NULLVALUE:
+                case panda_file::LiteralTag::BUILTINTYPEINDEX:
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::U8>(static_cast<uint8_t>(std::get<uint8_t>(literal.value_))));
                     break;
@@ -915,16 +905,18 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                     value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::METHOD>(
                         std::string_view(std::get<std::string>(literal.value_))));
                     break;
+                case panda_file::LiteralTag::LITERALARRAY:
+                    value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::LITERALARRAY>(
+                        std::string_view(std::get<std::string>(literal.value_))));
+                    break;
                 default:
                     UNREACHABLE();
             }
 
             // the return pointer of vector element should not be rewrited
-            CreateLiteralItem(items, value.get(), &literal_array, entities.method_items);
+            CreateLiteralItem(items, value.get(), &literal_array, entities);
         }
-
         literal_array_item->AddItems(literal_array);
-        entities.literalarray_items.insert({corrected_id, literal_array_item});
     }
 }
 
@@ -1016,13 +1008,6 @@ bool AsmEmitter::HandleFields(ItemContainer *items, const Program &program, AsmE
                               const std::string &name, const Record &rec, ClassItem *record)
 {
     for (const auto &f : rec.field_list) {
-        // correct literal array id, need to remove after isa refactoring
-        if (f.type.GetId() == panda_file::Type::TypeId::U32) {
-            const auto base = GetBase();
-            auto addedVal = base + f.metadata->GetValue().value().GetValue<uint32_t>();
-            f.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(addedVal));
-        }
-
         auto *field_name = items->GetOrCreateStringItem(pandasm::DeMangleName(f.name));
         std::string full_field_name = name + "." + f.name;
         auto *type_item = GetTypeItem(items, primitive_types, f.type, program);
@@ -1290,8 +1275,7 @@ bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &prog
         }
 
         auto *class_item = static_cast<ClassItem *>(Find(entities.class_items, name));
-        if (!AddAnnotations(class_item, items, *record.metadata, program, entities.class_items, entities.field_items,
-                            entities.method_items)) {
+        if (!AddAnnotations(class_item, items, *record.metadata, program, entities)) {
             SetLastError("Cannot emit annotations for record " + record.name + ": " + GetLastError());
             return false;
         }
@@ -1299,8 +1283,7 @@ bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &prog
         for (const auto &field : record.field_list) {
             auto field_name = record.name + "." + field.name;
             auto *field_item = static_cast<FieldItem *>(Find(entities.field_items, field_name));
-            if (!AddAnnotations(field_item, items, *field.metadata, program, entities.class_items, entities.field_items,
-                                entities.method_items)) {
+            if (!AddAnnotations(field_item, items, *field.metadata, program, entities)) {
                 SetLastError("Cannot emit annotations for field " + field_name + ": " + GetLastError());
                 return false;
             }
@@ -1308,8 +1291,7 @@ bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &prog
             auto res = field.metadata->GetValue();
             if (res) {
                 auto value = res.value();
-                auto *item = CreateValueItem(items, &value, program, entities.class_items, entities.field_items,
-                                             entities.method_items);
+                auto *item = CreateValueItem(items, &value, program, entities);
                 field_item->SetValue(item);
             }
         }
@@ -1352,8 +1334,7 @@ bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Progr
                                                const AsmEmitter::AsmEntityCollections &entities, MethodItem *method,
                                                const Function &func)
 {
-    if (!AddAnnotations(method, items, *func.metadata, program, entities.class_items, entities.field_items,
-                        entities.method_items)) {
+    if (!AddAnnotations(method, items, *func.metadata, program, entities)) {
         SetLastError("Cannot emit annotations for function " + func.name + ": " + GetLastError());
         return false;
     }
@@ -1363,8 +1344,7 @@ bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Progr
         size_t param_idx = method->IsStatic() ? proto_idx : proto_idx + 1;
         auto &param = func.params[param_idx];
         auto &param_item = param_items[proto_idx];
-        if (!AddAnnotations(&param_item, items, *param.metadata, program, entities.class_items, entities.field_items,
-                            entities.method_items)) {
+        if (!AddAnnotations(&param_item, items, *param.metadata, program, entities)) {
             SetLastError("Cannot emit annotations for parameter a" + std::to_string(param_idx) + "of function " +
                          func.name + ": " + GetLastError());
             return false;
@@ -1395,7 +1375,7 @@ bool AsmEmitter::MakeFunctionDebugInfoAndAnnotations(ItemContainer *items, const
         auto *method = static_cast<MethodItem *>(Find(entities.method_items, name));
 
         SetCodeAndDebugInfo(items, method, func, emit_debug_info);
-        AddBytecodeIndexDependencies(method, func, entities, GetBase());
+        AddBytecodeIndexDependencies(method, func, entities);
 
         method->SetSourceLang(func.language);
 
@@ -1571,22 +1551,16 @@ bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Pro
     auto entities = AsmEmitter::AsmEntityCollections {};
     SetLastError("");
 
-    ResetBase();  // correct literal array id, need to remove after isa refactoring
     for (const auto *prog : progs) {
         if (!MakeItemsForSingleProgram(&items, *prog, emit_debug_info, entities, primitive_types)) {
             return false;
         }
-        // correct literal array id, need to remove after isa refactoring
-        IncreaseBase(prog->literalarray_table.size());
     }
 
-    ResetBase();  // correct literal array id, need to remove after isa refactoring
     for (const auto *prog : progs) {
         if (!MakeFunctionDebugInfoAndAnnotations(&items, *prog, entities, emit_debug_info)) {
             return false;
         }
-        // correct literal array id, need to remove after isa refactoring
-        IncreaseBase(prog->literalarray_table.size());
     }
 
     items.ComputeLayout();
@@ -1618,8 +1592,9 @@ bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToP
 
     SetLastError("");
 
-    ResetBase();  // correct literal array id, need to remove after isa refactoring
-    MakeItemsForSingleProgram(items, program, emit_debug_info, entities, primitive_types);
+    if (!MakeItemsForSingleProgram(items, program, emit_debug_info, entities, primitive_types)) {
+        return false;
+    }
 
     // Add Code and DebugInfo items last due to they have variable size that depends on bytecode
     if (!MakeFunctionDebugInfoAndAnnotations(items, program, entities, emit_debug_info)) {

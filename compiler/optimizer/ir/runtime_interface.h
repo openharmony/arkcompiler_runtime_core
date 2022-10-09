@@ -942,12 +942,12 @@ public:
         return false;
     }
 
-    virtual bool SetTypeAnnotationIndex([[maybe_unused]] size_t anno_idx, [[maybe_unused]] size_t elem_idx)
+    virtual bool SetTypeLiteralArrayKey([[maybe_unused]] std::string key)
     {
         return false;
     }
 
-    virtual const std::pair<size_t, size_t> *GetTypeAnnotationIndex() const
+    virtual const std::string *GetTypeLiteralArrayKey() const
     {
         return nullptr;
     }

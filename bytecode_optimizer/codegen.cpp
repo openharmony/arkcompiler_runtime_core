@@ -19,6 +19,8 @@
 
 namespace panda::bytecodeopt {
 
+using panda_file::LiteralTag;
+
 void DoLda(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
     if (reg != compiler::ACC_REG_ID) {
@@ -65,7 +67,7 @@ void BytecodeGen::VisitTryBegin(const compiler::BasicBlock *bb)
 bool BytecodeGen::RunImpl()
 {
     Reserve(function_->ins.size());
-    std::vector<ScalarValue> elements;
+    TypeInfoComponents elements;
     AddTypeInfoIndexForArguments(&elements);
     bool need_handle_ins_type = GetGraph()->GetRuntime()->HasInsTypeinfo();
     int32_t insn_order = 0;
@@ -108,11 +110,13 @@ bool BytecodeGen::RunImpl()
     }
     function_->ins = std::move(GetResult());
     function_->catch_blocks = catch_blocks_;
-    UpdateTypeInfoIndexAnnotation(&elements);
+    if (need_handle_ins_type) {
+        UpdateTypeInfoIndexAnnotation(&elements);
+    }
     return true;
 }
 
-void BytecodeGen::AddTypeInfoIndexForArguments(std::vector<ScalarValue> *elements) const
+void BytecodeGen::AddTypeInfoIndexForArguments(TypeInfoComponents *elements) const
 {
     std::unordered_map<int32_t, TypeInfoIndex> args_types_map;
     if (GetGraph()->GetRuntime()->FillArgTypePairs(&args_types_map)) {
@@ -123,15 +127,36 @@ void BytecodeGen::AddTypeInfoIndexForArguments(std::vector<ScalarValue> *element
     }
 }
 
-void BytecodeGen::AddOrderAndTypeInfoIndex(int32_t order, TypeInfoIndex type, std::vector<ScalarValue> *elements) const
+void BytecodeGen::AddOrderAndTypeInfoIndex(int32_t order, TypeInfoIndex type, TypeInfoComponents *elements) const
 {
-    ScalarValue insn_order(ScalarValue::Create<panda::pandasm::Value::Type::I32>(order));
-    elements->emplace_back(std::move(insn_order));
-    ScalarValue type_info_index(ScalarValue::Create<panda::pandasm::Value::Type::I32>(type));
-    elements->emplace_back(std::move(type_info_index));
+    pandasm::LiteralArray::Literal order_tag;
+    order_tag.tag_ = LiteralTag::TAGVALUE;
+    order_tag.value_ = static_cast<uint8_t>(LiteralTag::INTEGER);
+    elements->emplace_back(order_tag);
+
+    pandasm::LiteralArray::Literal order_lit;
+    order_lit.tag_ = LiteralTag::INTEGER;
+    order_lit.value_ = bit_cast<uint32_t>(order);
+    elements->emplace_back(order_lit);
+
+    pandasm::LiteralArray::Literal type_tag;
+    type_tag.tag_ = LiteralTag::TAGVALUE;
+    pandasm::LiteralArray::Literal type_lit;
+    if (std::holds_alternative<std::string>(type)) {
+        type_tag.value_ = static_cast<uint8_t>(LiteralTag::LITERALARRAY);
+        type_lit.tag_ = LiteralTag::LITERALARRAY;
+        type_lit.value_ = std::get<std::string>(type);
+    } else {
+        type_tag.value_ = static_cast<uint8_t>(LiteralTag::BUILTINTYPEINDEX);
+        type_lit.tag_ = LiteralTag::BUILTINTYPEINDEX;
+        type_lit.value_ = std::get<BuiltinIndexType>(type);
+    }
+
+    elements->emplace_back(type_tag);
+    elements->emplace_back(type_lit);
 }
 
-void BytecodeGen::AddTypeInfoIndexForIns(int32_t order, size_t id, std::vector<ScalarValue> *elements) const
+void BytecodeGen::AddTypeInfoIndexForIns(int32_t order, size_t id, TypeInfoComponents *elements) const
 {
     auto type = GetGraph()->GetRuntime()->GetTypeInfoIndexByInstId(id);
     if (type != NO_EXPLICIT_TYPE) {
@@ -139,27 +164,31 @@ void BytecodeGen::AddTypeInfoIndexForIns(int32_t order, size_t id, std::vector<S
     }
 }
 
-void BytecodeGen::UpdateTypeInfoIndexAnnotation(const std::vector<ScalarValue> *elements)
+void BytecodeGen::UpdateTypeInfoIndexAnnotation(const TypeInfoComponents *elements)
 {
 #ifndef NDEBUG
     LOG(DEBUG, BYTECODE_OPTIMIZER) << "Typeinfo after optimization for function : " << function_->name;
-    const size_t PAIR_GAP = 2;
-    for (size_t i = 0; i < elements->size(); i += PAIR_GAP) {
-        auto order = (*elements)[i].GetValue<int32_t>();
-        auto type = (*elements)[i + 1].GetValue<int32_t>();
-        LOG(DEBUG, BYTECODE_OPTIMIZER) << "[" << order << ", " << type << "], ";
+    const size_t PAIR_GAP = 4;  // 4: tag, order, tag, value, ...
+    ASSERT(elements->size() % PAIR_GAP == 0);
+    for (size_t i = 1; i < elements->size(); i += PAIR_GAP) {
+        auto order = bit_cast<int32_t>(std::get<uint32_t>((*elements)[i].value_));
+        const auto &element = (*elements)[i + 2];  // 2: gap between order and value
+        if (element.tag_ == LiteralTag::LITERALARRAY) {
+            auto type = std::get<std::string>(element.value_);
+            LOG(DEBUG, BYTECODE_OPTIMIZER) << "[" << order << ", " << type << "], ";
+        } else {
+            ASSERT(element.tag_ == LiteralTag::BUILTINTYPEINDEX);
+            auto type = std::get<BuiltinIndexType>(element.value_);
+            LOG(DEBUG, BYTECODE_OPTIMIZER) << "[" << order << ", " << type << "], ";
+        }
     }
 #endif
-    const auto *type_idx = GetGraph()->GetRuntime()->GetTypeAnnotationIndex();
-    ASSERT(type_idx != nullptr);
-    if (type_idx->first == INVALID_TYPE_INDEX || type_idx->second == INVALID_TYPE_INDEX) {
-        return;
-    }
-    ASSERT(type_idx->first < function_->metadata->GetAnnotations().size());
-    panda::pandasm::ArrayValue arr(panda::pandasm::Value::Type::I32, *elements);
-    panda::pandasm::AnnotationElement anno_elem(TSTYPE_ANNO_ELEMENT_NAME,
-                                                std::make_unique<panda::pandasm::ArrayValue>(arr));
-    function_->metadata->SetOrAddAnnotationElementByIndex(type_idx->first, type_idx->second, std::move(anno_elem));
+
+    const auto &key = *(GetGraph()->GetRuntime()->GetTypeLiteralArrayKey());
+    auto &litarr_table = GetProgram()->literalarray_table;
+    ASSERT(litarr_table.find(key) != litarr_table.end());
+    pandasm::LiteralArray array(*elements);
+    litarr_table[key] = array;
 }
 
 void BytecodeGen::EmitJump(const BasicBlock *bb)

@@ -471,13 +471,6 @@ private:
         };
     };
 
-    struct LiteralArrayCompare {
-        bool operator()(const std::string &lhs, const std::string &rhs) const
-        {
-            return lhs.length() < rhs.length() || (lhs.length() == rhs.length() && lhs < rhs);
-        }
-    };
-
     class EndItem : public BaseItem {
     public:
         EndItem()
@@ -525,7 +518,7 @@ private:
     size_t GetForeignSize() const;
 
     std::unordered_map<std::string, StringItem *> string_map_;
-    std::map<std::string, LiteralArrayItem *, LiteralArrayCompare> literalarray_map_;
+    std::unordered_map<std::string, LiteralArrayItem *> literalarray_map_;
 
     std::map<std::string, BaseClassItem *> class_map_;
 

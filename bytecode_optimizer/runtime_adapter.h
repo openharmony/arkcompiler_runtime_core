@@ -392,15 +392,15 @@ public:
         return !map->empty();
     }
 
-    bool SetTypeAnnotationIndex(size_t anno_idx, size_t elem_idx) override
+    bool SetTypeLiteralArrayKey(std::string key) override
     {
-        anno_elem_idx_ = { anno_idx, elem_idx };
-        return anno_idx != INVALID_TYPE_INDEX && elem_idx != INVALID_TYPE_INDEX;
+        literalarray_key = key;
+        return !literalarray_key.empty();
     }
 
-    const std::pair<size_t, size_t> *GetTypeAnnotationIndex() const override
+    const std::string *GetTypeLiteralArrayKey() const override
     {
-        return &anno_elem_idx_;
+        return &literalarray_key;
     }
 
 private:
@@ -460,6 +460,7 @@ private:
     const panda_file::File &panda_file_;
     std::unordered_map<size_t, TypeInfoIndex> instid_type_map_;
     std::unordered_map<int32_t, TypeInfoIndex> pc_type_map_;
+    std::string literalarray_key;
     std::pair<size_t, size_t> anno_elem_idx_ = std::make_pair(INVALID_TYPE_INDEX, INVALID_TYPE_INDEX);
 };
 }  // namespace panda
