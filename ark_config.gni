@@ -14,6 +14,12 @@
 import("//arkcompiler/runtime_core/ark_root.gni")
 import("//build/ohos.gni")
 
+if (target_os == "ios") {
+  is_ios = true
+} else {
+  is_ios = false
+}
+
 if (is_standard_system) {
   import("$ark_root/platforms/ohos/ark_config.gni")
 } else {
@@ -58,7 +64,7 @@ if (ark_standalone_build) {
   sdk_libc_secshared_config =
       "$ark_third_party_root/bounds_checking_function:libsec_public_config"
 
-  if (is_mingw || is_mac || is_linux) {
+  if (is_mingw || is_mac || is_linux || is_ios) {
     sdk_libc_secshared_dep =
         "$ark_third_party_root/bounds_checking_function:libsec_static"
   }

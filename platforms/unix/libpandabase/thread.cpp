@@ -41,7 +41,7 @@ ThreadId GetCurrentThreadId()
 #if defined(HAVE_GETTID)
     static_assert(sizeof(decltype(gettid())) == sizeof(ThreadId), "Incorrect alias for ThreadID");
     return static_cast<ThreadId>(gettid());
-#elif defined(PANDA_TARGET_MACOS)
+#elif defined(PANDA_TARGET_MACOS) || defined(PANDA_TARGET_IOS)
     uint64_t tid64;
     pthread_threadid_np(NULL, &tid64);
     return static_cast<ThreadId>(tid64);
@@ -73,7 +73,7 @@ int GetPriority(int thread_id)
 int SetThreadName(native_handle_type pthread_handle, const char *name)
 {
     ASSERT(pthread_handle != 0);
-#if defined(PANDA_TARGET_MACOS)
+#if defined(PANDA_TARGET_MACOS) || defined(PANDA_TARGET_IOS)
     return pthread_setname_np(name);
 #else
     return pthread_setname_np(pthread_handle, name);
@@ -119,7 +119,7 @@ int ThreadGetStackInfo(native_handle_type thread, void **stack_addr, size_t *sta
 {
     pthread_attr_t attr;
     int s = pthread_attr_init(&attr);
-#ifndef PANDA_TARGET_MACOS
+#if !defined(PANDA_TARGET_MACOS) && !defined(PANDA_TARGET_IOS)
     s += pthread_getattr_np(thread, &attr);
     if (s == 0) {
         s += pthread_attr_getguardsize(&attr, guard_size);

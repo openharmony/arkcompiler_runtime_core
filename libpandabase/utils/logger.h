@@ -22,6 +22,7 @@
 #include "os/thread.h"
 #include "utils/dfx.h"
 
+#include <array>
 #include <cstdint>
 
 #include <bitset>

@@ -128,12 +128,12 @@ if (is_mingw) {
     "$ark_root/platforms/unix/libpandabase/trace.cpp",
   ]
 
-  if (!is_mob || is_linux || current_os == "android") {
+  if (!is_mob || is_linux || current_os == "android" || is_ios) {
     libarkbase_sources +=
         [ "$ark_root/platforms/unix/libpandabase/library_loader_load.cpp" ]
   }
 
-  if (!is_mac) {
+  if (!is_mac || !is_ios) {
     libarkbase_sources += [
       "$ark_root/libpandabase/os/filesystem.cpp",
       "$ark_root/platforms/unix/libpandabase/exec.cpp",
@@ -151,7 +151,7 @@ if (is_debug) {
   libarkbase_sources += [ "$ark_root/libpandabase/utils/debug.cpp" ]
 }
 
-if (current_cpu == "arm64" && !is_mac) {
+if (current_cpu == "arm64" && !is_mac && !is_ios) {
   libarkbase_sources +=
       [ "$ark_root/libpandabase/arch/aarch64/cpu_features.cpp" ]
 } else {
