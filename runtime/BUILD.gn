@@ -334,7 +334,7 @@ source_set("libarkruntime_set_static") {
     ]
   }
 
-  if (!is_mob || is_ios) {
+  if (!is_mob || target_os == "ios") {
     sources += [
       "$ark_root/platforms/common/runtime/thread.cpp",
       "$ark_root/platforms/common/runtime/verify_app_install.cpp",

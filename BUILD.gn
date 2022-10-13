@@ -122,7 +122,7 @@ config("ark_config") {
       "PANDA_WITH_BYTECODE_OPTIMIZER",
       "PANDA_WITH_COMPILER",
     ]
-  } else if (is_ios) {
+  } else if (target_os == "ios") {
     defines += [
       "PANDA_TARGET_UNIX",
       "PANDA_TARGET_IOS",
