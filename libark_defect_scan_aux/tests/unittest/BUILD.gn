@@ -25,7 +25,7 @@ action("generate_abc_file") {
     "--build-dir",
     rebase_path("$ts2abc_build_path"),
     "--dst-dir",
-    rebase_path("$root_out_dir/ark/ark"),
+    rebase_path("$root_out_dir/arkcompiler/ets_frontend"),
   ]
 
   deps = [ "$ts2abc_root:ark_ts2abc_build" ]
@@ -44,6 +44,6 @@ ohos_executable("defect_scan_aux_unittest") {
   deps += [ ":generate_abc_file" ]
 
   relative_install_dir = "ark"
-  part_name = "ark"
-  subsystem_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }

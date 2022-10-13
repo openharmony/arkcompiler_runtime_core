@@ -101,8 +101,8 @@ ohos_shared_library("libarkassembler") {
     output_extension = "dll"
   }
 
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 source_set("libarkassembler_frontend_set_static") {
@@ -130,8 +130,8 @@ source_set("libarkassembler_frontend_set_static") {
 ohos_static_library("libarkassembler_frontend_static") {
   deps = [ ":libarkassembler_frontend_set_static" ]
 
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 source_set("ark_asm_static") {
@@ -167,9 +167,9 @@ source_set("ark_asm_static") {
 ohos_executable("ark_asm") {
   deps = [ ":ark_asm_static" ]
 
-  install_enable = true
-  subsystem_name = "ark"
-  part_name = "ark"
+  install_enable = false
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ark_isa_gen("isa_gen_libarkassembler") {

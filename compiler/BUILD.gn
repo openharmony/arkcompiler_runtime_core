@@ -229,7 +229,8 @@ ohos_shared_library("libarkcompiler") {
 
   output_extension = "so"
   relative_install_dir = "ark"
-  subsystem_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_static_library("libarkcompiler_frontend_static") {

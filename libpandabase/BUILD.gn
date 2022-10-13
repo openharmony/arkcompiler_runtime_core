@@ -196,8 +196,8 @@ ohos_shared_library("libarkbase") {
   if (!is_standard_system) {
     relative_install_dir = "ark"
   }
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 source_set("libarkbase_frontend_set_static") {
@@ -211,8 +211,8 @@ source_set("libarkbase_frontend_set_static") {
 ohos_static_library("libarkbase_frontend_static") {
   deps = [ ":libarkbase_frontend_set_static" ]
 
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 action("logger_yaml_gen") {

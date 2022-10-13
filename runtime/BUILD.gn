@@ -412,8 +412,8 @@ ohos_static_library("libarkruntime_static") {
   deps = [ ":libarkruntime_set_static" ]
 
   output_extension = "a"
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_shared_library("libarkruntime") {
@@ -428,8 +428,8 @@ ohos_shared_library("libarkruntime") {
   if (!is_standard_system) {
     relative_install_dir = "ark"
   }
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 config("arkruntime_interpreter_impl_config") {
@@ -497,8 +497,8 @@ source_set("arkruntime_interpreter_impl_static") {
 ohos_static_library("arkruntime_interpreter_impl") {
   deps = [ ":arkruntime_interpreter_impl_static" ]
 
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 template("gen_intrinsics_yaml") {
