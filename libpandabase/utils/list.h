@@ -18,6 +18,12 @@
 
 #include "macros.h"
 
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 namespace panda {
 
 template <typename T>

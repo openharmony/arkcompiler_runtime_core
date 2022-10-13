@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iosfwd>
-#if PANDA_TARGET_MACOS
+#if PANDA_TARGET_MACOS || PANDA_TARGET_IOS
 #include <mach-o/dyld.h>
 // Undefine the conflict Mac marco
 #undef BYTE_SIZE
@@ -93,7 +93,7 @@ public:
 
     Expected<size_t, Error> GetFileSize() const
     {
-#if PANDA_TARGET_MACOS
+#if PANDA_TARGET_MACOS || PANDA_TARGET_IOS
         struct stat st {
         };
         int r = fstat(fd_, &st);
@@ -141,7 +141,7 @@ public:
     {
         constexpr size_t BUFFER_SIZE = 1024;
         std::array<char, BUFFER_SIZE> buffer = {0};
-#if PANDA_TARGET_MACOS
+#if PANDA_TARGET_MACOS || PANDA_TARGET_IOS
         uint32_t size = BUFFER_SIZE;
         if (_NSGetExecutablePath(buffer.data(), &size) != 0) {
             return Unexpected(Error(errno));

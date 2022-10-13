@@ -34,7 +34,7 @@ std::string Error::ToString() const
     int err = std::get<int>(err_);
 
 #if (!_GNU_SOURCE && (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600)) || PANDA_TARGET_MOBILE || \
-    PANDA_TARGET_MACOS || defined(__MUSL__)
+    PANDA_TARGET_MACOS || PANDA_TARGET_IOS || defined(__MUSL__)
     std::string res;
     res.resize(BUFSIZE);
     strerror_r(err, res.data(), res.size());
