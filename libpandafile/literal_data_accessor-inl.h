@@ -68,10 +68,7 @@ inline void LiteralDataAccessor::EnumerateLiteralVals(File::EntityId id, const C
                 value = static_cast<float>(helpers::Read<sizeof(uint32_t)>(&sp));
                 break;
             }
-            case LiteralTag::STRING: {
-                value = static_cast<uint32_t>(helpers::Read<sizeof(uint32_t)>(&sp));
-                break;
-            }
+            case LiteralTag::STRING:
             case LiteralTag::METHOD:
             case LiteralTag::GENERATORMETHOD:
             case LiteralTag::LITERALARRAY:

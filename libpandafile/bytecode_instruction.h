@@ -371,6 +371,8 @@ public:
 
     bool HasFlag(Flags flag) const;
 
+    bool IsIdMatchFlag(size_t idx, Flags flag) const;  // idx-th id matches flag or not
+
     bool IsThrow(Exceptions exception) const;
 
     bool CanThrow() const;
