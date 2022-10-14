@@ -133,7 +133,7 @@ if (is_mingw) {
         [ "$ark_root/platforms/unix/libpandabase/library_loader_load.cpp" ]
   }
 
-  if (!is_mac || target_os != "ios") {
+  if (!is_mac && target_os != "ios") {
     libarkbase_sources += [
       "$ark_root/libpandabase/os/filesystem.cpp",
       "$ark_root/platforms/unix/libpandabase/exec.cpp",
