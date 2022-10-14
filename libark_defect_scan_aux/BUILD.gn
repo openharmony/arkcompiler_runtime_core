@@ -12,7 +12,10 @@
 import("//arkcompiler/runtime_core/ark_config.gni")
 
 config("defectscanaux_public_config") {
-  include_dirs = [ "$ark_root/libark_defect_scan_aux/include" ]
+  include_dirs = [
+    "$target_gen_dir/generated",
+    "$ark_root/libark_defect_scan_aux/include",
+  ]
 
   configs = [
     "$ark_root:ark_config",
@@ -23,7 +26,7 @@ config("defectscanaux_public_config") {
   ]
 }
 
-config("defectscan_test_config") {
+config("defectscanaux_test_config") {
   visibility = [ ":*" ]
 
   configs = [ ":defectscanaux_public_config" ]
@@ -38,11 +41,27 @@ libarkdefectscanaux_sources = [
   "$ark_root/libark_defect_scan_aux/module_record.cpp",
 ]
 
+ark_gen("defectscanaux_opcode") {
+  data = "$ark_root/compiler/optimizer/ir/instructions.yaml"
+  template_files = [ "opcode_map_table.h.erb" ]
+  sources = "templates"
+  destination = "$target_gen_dir/generated"
+  requires = [ "$ark_root/compiler/optimizer/templates/instructions.rb" ]
+}
+
+ark_isa_gen("defectscanaux_intrinsic") {
+  template_files = [ "intrinsic_map_table.h.erb" ]
+  sources = "templates"
+  destination = "$target_gen_dir/generated"
+}
+
 ohos_shared_library("libark_defect_scan_aux") {
   sources = libarkdefectscanaux_sources
   configs = [ ":defectscanaux_public_config" ]
 
   deps = [
+    ":defectscanaux_intrinsic_intrinsic_map_table_h",
+    ":defectscanaux_opcode_opcode_map_table_h",
     "$ark_root/compiler:libarkcompiler_frontend_static",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libpandafile:libarkfile_frontend_static",
@@ -60,6 +79,8 @@ ohos_static_library("libark_defect_scan_aux_static_test") {
   configs = [ ":defectscanaux_public_config" ]
 
   deps = [
+    ":defectscanaux_intrinsic_intrinsic_map_table_h",
+    ":defectscanaux_opcode_opcode_map_table_h",
     "$ark_root/compiler:libarkcompiler_frontend_static",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libpandafile:libarkfile_frontend_static",

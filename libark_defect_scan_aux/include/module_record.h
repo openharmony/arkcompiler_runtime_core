@@ -42,6 +42,13 @@ public:
     void SetRequestModules(std::vector<std::string> &request_modules);
     void AddImportEntry(const ImportEntry &import_entry);
     void AddExportEntry(const ExportEntry &export_entry);
+    void SetRegularImportNum(size_t regular_import_num);
+    void SetLocalExportNum(size_t local_export_num);
+    size_t GetRegularImportNum() const;
+    size_t GetLocalExportNum() const;
+    const std::string &GetImportInternalNameByIndex(size_t index) const;
+    const std::string &GetImportNamespaceNameByIndex(size_t index) const;
+    const std::string &GetExportNameByIndex(size_t index) const;
     std::string GetInternalNameByExportName(std::string_view export_name) const;
     std::string GetImportNameByExportName(std::string_view export_name) const;
     std::string GetModuleNameByExportName(std::string_view export_name) const;
@@ -50,6 +57,8 @@ public:
 
 private:
     std::string module_filename_;
+    size_t regular_import_num_ {0};
+    size_t local_export_num_ {0};
     std::vector<std::string> request_modules_;
     std::vector<ImportEntry> import_entries_;
     std::vector<ExportEntry> export_entries_;

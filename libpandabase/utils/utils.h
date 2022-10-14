@@ -15,6 +15,10 @@
 
 #ifndef PANDA_LIBPANDABASE_UTILS_UTILS_H_
 #define PANDA_LIBPANDABASE_UTILS_UTILS_H_
+
+#include <exception>
+#include <string>
+
 namespace panda {
 // ----------------------------------------------------------------------------
 // General helper functions
@@ -38,6 +42,20 @@ inline uint32_t HexValue(uint32_t c)
     }
     return -1;
 }
+
+// General helper class
+class UnreachableException : public std::exception {
+public:
+    explicit UnreachableException(const char *msg) : msg_(msg) {}
+    explicit UnreachableException(const std::string_view &msg) : msg_(msg) {}
+    const char *what() const noexcept override
+    {
+        return msg_.c_str();
+    }
+
+private:
+    std::string msg_;
+};
 
 }  // namespace panda
 #endif

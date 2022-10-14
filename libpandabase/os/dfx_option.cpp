@@ -16,6 +16,7 @@
 #include "dfx_option.h"
 
 #include "macros.h"
+#include "utils/utils.h"
 
 namespace panda::os::dfx_option {
 
@@ -42,7 +43,11 @@ DfxOptionHandler::DfxOption DfxOptionHandler::DfxOptionFromString(const std::str
     }
     DFX_OPTION_LIST(D)
 #undef D
+#ifndef SUPPORT_KNOWN_EXCEPTION
     UNREACHABLE();
+#else
+    throw panda::UnreachableException(INVALID_DFX_OPTION);
+#endif
 }
 
 /* static */

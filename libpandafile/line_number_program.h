@@ -60,6 +60,9 @@ public:
 
     const uint8_t *GetSourceCode() const
     {
+        if (UNLIKELY(!HasSourceCode())) {
+            return nullptr;
+        }
         return pf_.GetStringData(source_code_).data;
     }
 

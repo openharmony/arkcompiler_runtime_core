@@ -109,7 +109,9 @@ const Function *AbcFile::GetExportFunctionByExportName(std::string_view export_f
 
     std::string inter_func_name = GetInternalNameByExportName(export_func_name);
     for (auto export_func : export_func_list_) {
-        if (export_func->GetFunctionName() == inter_func_name) {
+        const std::string &ex_func_name = export_func->GetFunctionName();
+        std::string_view no_hashtag_name = GetNameWithoutHashtag(ex_func_name);
+        if (no_hashtag_name == inter_func_name) {
             return export_func;
         }
     }
@@ -215,35 +217,41 @@ std::string AbcFile::GetStringByInst(const Inst &inst) const
 {
     auto type = inst.GetType();
     switch (type) {
-        case InstType::Intrinsic_DefineFuncDyn:
-        case InstType::Intrinsic_DefineNcFuncDyn:
-        case InstType::Intrinsic_DefineGeneratorFunc:
-        case InstType::Intrinsic_DefineAsyncFunc:
-        case InstType::Intrinsic_DefineMethod:
-        case InstType::Intrinsic_DefineClassWithBuffer:
-        case InstType::Intrinsic_DefineAsyncGeneratorFunc: {
-            uint32_t m_id = inst.GetImms()[0];
-            return GetStringByMethodId(EntityId(m_id));
+        case InstType::DEFINEFUNC_IMM8_ID16_IMM8:
+        case InstType::DEFINEFUNC_IMM16_ID16_IMM8:
+        case InstType::DEFINEMETHOD_IMM8_ID16_IMM8:
+        case InstType::DEFINEMETHOD_IMM16_ID16_IMM8:
+        case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
+        case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
+            uint32_t method_id = inst.GetImms()[1];
+            return GetStringByMethodId(EntityId(method_id));
         }
-        case InstType::Intrinsic_LdObjByName:
-        case InstType::Intrinsic_GetModuleNamespace:
-        case InstType::Intrinsic_StModuleVar:
-        case InstType::Intrinsic_TryLdGlobalByName:
-        case InstType::Intrinsic_TryStGlobalByName:
-        case InstType::Intrinsic_LdGlobalVar:
-        case InstType::Intrinsic_StGlobalVar:
-        case InstType::Intrinsic_StObjByName:
-        case InstType::Intrinsic_StOwnByName:
-        case InstType::Intrinsic_LdSuperByName:
-        case InstType::Intrinsic_StSuperByName:
-        case InstType::Intrinsic_LdModuleVar:
-        case InstType::Intrinsic_CreateRegexpWithLiteral:
-        case InstType::Intrinsic_StConstToGlobalRecord:
-        case InstType::Intrinsic_StLetToGlobalRecord:
-        case InstType::Intrinsic_StClassToGlobalRecord:
-        case InstType::Intrinsic_StOwnByNameWithNameSet: {
-            auto str_id = EntityId(inst.GetImms()[0]);
-            return GetStringByStringId(str_id);
+        case InstType::TRYLDGLOBALBYNAME_IMM8_ID16:
+        case InstType::TRYSTGLOBALBYNAME_IMM8_ID16:
+        case InstType::TRYLDGLOBALBYNAME_IMM16_ID16:
+        case InstType::TRYSTGLOBALBYNAME_IMM16_ID16:
+        case InstType::STCONSTTOGLOBALRECORD_IMM16_ID16:
+        case InstType::STTOGLOBALRECORD_IMM16_ID16:
+        case InstType::LDGLOBALVAR_IMM16_ID16:
+        case InstType::STGLOBALVAR_IMM16_ID16:
+        case InstType::LDOBJBYNAME_IMM8_ID16:
+        case InstType::LDOBJBYNAME_IMM16_ID16:
+        case InstType::STOBJBYNAME_IMM8_ID16_V8:
+        case InstType::STOBJBYNAME_IMM16_ID16_V8:
+        case InstType::LDSUPERBYNAME_IMM8_ID16:
+        case InstType::LDSUPERBYNAME_IMM16_ID16:
+        case InstType::STSUPERBYNAME_IMM8_ID16_V8:
+        case InstType::STSUPERBYNAME_IMM16_ID16_V8:
+        case InstType::LDTHISBYNAME_IMM8_ID16:
+        case InstType::LDTHISBYNAME_IMM16_ID16:
+        case InstType::STTHISBYNAME_IMM8_ID16:
+        case InstType::STTHISBYNAME_IMM16_ID16:
+        case InstType::STOWNBYNAME_IMM8_ID16_V8:
+        case InstType::STOWNBYNAME_IMM16_ID16_V8:
+        case InstType::STOWNBYNAMEWITHNAMESET_IMM8_ID16_V8:
+        case InstType::STOWNBYNAMEWITHNAMESET_IMM16_ID16_V8: {
+            uint32_t string_id = inst.GetImms()[1];
+            return GetStringByStringId(EntityId(string_id));
         }
         default:
             return EMPTY_STR;
@@ -254,41 +262,35 @@ std::string AbcFile::GetStringByInst(const Inst &inst) const
 std::optional<FuncInstPair> AbcFile::GetStLexInstByLdLexInst(FuncInstPair func_inst_pair) const
 {
     const Function *func = func_inst_pair.first;
-    Inst &ld_lex_inst = func_inst_pair.second;
-    if (func == nullptr) {
+    const Inst &ld_lex_inst = func_inst_pair.second;
+    if (func == nullptr || !ld_lex_inst.IsInstLdLexVar()) {
         return std::nullopt;
     }
 
-    auto type = ld_lex_inst.GetType();
-    if (type == InstType::Intrinsic_LdLexVarDyn_Imm4 || type == InstType::Intrinsic_LdLexVarDyn_Imm8 ||
-        type == InstType::Intrinsic_LdLexVarDyn_Imm16) {
-        auto ld_imms = ld_lex_inst.GetImms();
-        uint32_t ld_level = ld_imms[0];
-        uint32_t ld_slot_id = ld_imms[1];
-        const Function *cur_func = func;
-        for (uint32_t i = 0; i < ld_level; ++i) {
-            cur_func = cur_func->GetParentFunction();
-            if (cur_func == nullptr) {
-                return std::nullopt;
+    auto ld_imms = ld_lex_inst.GetImms();
+    uint32_t ld_level = ld_imms[0];
+    uint32_t ld_slot_id = ld_imms[1];
+    const Function *cur_func = func;
+    for (uint32_t i = 0; i < ld_level; ++i) {
+        cur_func = cur_func->GetParentFunction();
+        if (cur_func == nullptr) {
+            return std::nullopt;
+        }
+    }
+    auto &graph = cur_func->GetGraph();
+    Inst st_lex_inst = ld_lex_inst;
+    graph.VisitAllInstructions([ld_slot_id, &st_lex_inst](const Inst &inst) {
+        if (inst.IsInstStLexVar()) {
+            auto st_imms = inst.GetImms();
+            uint32_t st_level = st_imms[0];
+            uint32_t st_slot_id = st_imms[1];
+            if (st_level == 0 && st_slot_id == ld_slot_id) {
+                st_lex_inst = inst;
             }
         }
-        auto &graph = cur_func->GetGraph();
-        Inst st_lex_inst = ld_lex_inst;
-        graph.VisitAllInstructions([ld_slot_id, &st_lex_inst](const Inst &inst) {
-            auto type = inst.GetType();
-            if (type == InstType::Intrinsic_StLexVarDyn_Imm4 || type == InstType::Intrinsic_StLexVarDyn_Imm8 ||
-                type == InstType::Intrinsic_StLexVarDyn_Imm16) {
-                auto st_imms = inst.GetImms();
-                uint32_t st_level = st_imms[0];
-                uint32_t st_slot_id = st_imms[1];
-                if (st_level == 0 && st_slot_id == ld_slot_id) {
-                    st_lex_inst = inst;
-                }
-            }
-        });
-        if (st_lex_inst != ld_lex_inst) {
-            return FuncInstPair(cur_func, st_lex_inst);
-        }
+    });
+    if (st_lex_inst != ld_lex_inst) {
+        return FuncInstPair(cur_func, st_lex_inst);
     }
 
     return std::nullopt;
@@ -297,30 +299,28 @@ std::optional<FuncInstPair> AbcFile::GetStLexInstByLdLexInst(FuncInstPair func_i
 std::optional<FuncInstPair> AbcFile::GetStGlobalInstByLdGlobalInst(FuncInstPair func_inst_pair) const
 {
     const Function *func = func_inst_pair.first;
-    Inst &ld_global_inst = func_inst_pair.second;
-    if (func == nullptr) {
+    const Inst &ld_global_inst = func_inst_pair.second;
+    if (func == nullptr || !ld_global_inst.IsInstLdGlobal()) {
         return std::nullopt;
     }
 
-    auto type = ld_global_inst.GetType();
-    if (type == InstType::Intrinsic_TryLdGlobalByName || type == InstType::Intrinsic_LdGlobalVar) {
-        uint32_t ld_str_id = ld_global_inst.GetImms()[0];
-        // TODO(wangyantian): only consider that func_main_0 has StGlobal inst for now, what about other cases?
-        const Function *func_main = def_func_list_[0].get();
-        auto &graph = func_main->GetGraph();
-        Inst st_global_inst = ld_global_inst;
-        graph.VisitAllInstructions([ld_str_id, &st_global_inst](const Inst &inst) {
-            if (inst.IsStGlobalInst()) {
-                uint32_t st_str_id = inst.GetImms()[0];
-                if (st_str_id == ld_str_id) {
-                    st_global_inst = inst;
-                }
+    uint32_t ld_str_id = ld_global_inst.GetImms()[0];
+    // TODO(wangyantian): only consider that func_main_0 has StGlobal inst for now, what about other cases?
+    const Function *func_main = def_func_list_[0].get();
+    auto &graph = func_main->GetGraph();
+    Inst st_global_inst = ld_global_inst;
+    graph.VisitAllInstructions([ld_str_id, &st_global_inst](const Inst &inst) {
+        if (inst.IsInstStGlobal()) {
+            uint32_t st_str_id = inst.GetImms()[0];
+            if (st_str_id == ld_str_id) {
+                st_global_inst = inst;
             }
-        });
-        if (st_global_inst != ld_global_inst) {
-            return FuncInstPair(func_main, st_global_inst);
         }
+    });
+    if (st_global_inst != ld_global_inst) {
+        return FuncInstPair(func_main, st_global_inst);
     }
+
     return std::nullopt;
 }
 
@@ -334,7 +334,7 @@ void AbcFile::ExtractDebugInfo()
 
 void AbcFile::ExtractModuleInfo()
 {
-    int module_idx = -1;
+    int module_offset = -1;
     for (uint32_t id : panda_file_->GetClasses()) {
         EntityId class_id(id);
         if (panda_file_->IsExternal(class_id)) {
@@ -347,26 +347,22 @@ void AbcFile::ExtractModuleInfo()
                 EntityId field_name_id = field_accessor.GetNameId();
                 StringData sd = panda_file_->GetStringData(field_name_id);
                 if (std::strcmp(utf::Mutf8AsCString(sd.data), filename_.data())) {
-                    module_idx = field_accessor.GetValue<int32_t>().value();
+                    module_offset = field_accessor.GetValue<int32_t>().value();
                     return;
                 }
             });
             break;
         }
     }
-    if (module_idx == -1) {
+    if (module_offset == -1) {
         return;
     }
-
-    EntityId literal_arrays_id = panda_file_->GetLiteralArraysId();
-    panda_file::LiteralDataAccessor lda(*panda_file_, literal_arrays_id);
-    EntityId module_id = lda.GetLiteralArrayId(static_cast<size_t>(module_idx));
 
     std::unique_ptr<ModuleRecord> module_record = std::make_unique<ModuleRecord>(filename_);
     if (module_record == nullptr) {
         LOG(FATAL, DEFECT_SCAN_AUX) << "Can not create ModuleRecord instance for '" << filename_ << "'";
     }
-    ExtractModuleRecord(module_id, module_record);
+    ExtractModuleRecord(EntityId(module_offset), module_record);
     module_record_ = std::move(module_record);
 }
 
@@ -380,6 +376,8 @@ void AbcFile::ExtractModuleRecord(EntityId module_id, std::unique_ptr<ModuleReco
     }
     module_record->SetRequestModules(request_modules);
 
+    size_t regular_import_num = 0;
+    size_t local_export_num = 0;
     mda.EnumerateModuleRecord([&](const ModuleTag &tag, uint32_t export_name_offset, uint32_t module_request_idx,
                                   uint32_t import_name_offset, uint32_t local_name_offset) {
         size_t request_num = request_modules.size();
@@ -390,6 +388,7 @@ void AbcFile::ExtractModuleRecord(EntityId module_id, std::unique_ptr<ModuleReco
         }
         switch (tag) {
             case ModuleTag::REGULAR_IMPORT: {
+                ++regular_import_num;
                 std::string local_name = GetStringByStringId(EntityId(local_name_offset));
                 std::string import_name = GetStringByStringId(EntityId(import_name_offset));
                 module_record->AddImportEntry({module_request, import_name, local_name});
@@ -405,6 +404,7 @@ void AbcFile::ExtractModuleRecord(EntityId module_id, std::unique_ptr<ModuleReco
                 break;
             }
             case ModuleTag::LOCAL_EXPORT: {
+                ++local_export_num;
                 std::string local_name = GetStringByStringId(EntityId(local_name_offset));
                 std::string export_name = GetStringByStringId(EntityId(export_name_offset));
                 module_record->AddExportEntry({export_name, EMPTY_STR, EMPTY_STR, local_name});
@@ -432,6 +432,8 @@ void AbcFile::ExtractModuleRecord(EntityId module_id, std::unique_ptr<ModuleReco
             }
         }
     });
+    module_record->SetRegularImportNum(regular_import_num);
+    module_record->SetLocalExportNum(local_export_num);
 }
 
 void AbcFile::InitializeAllDefinedFunction()
@@ -444,7 +446,7 @@ void AbcFile::InitializeAllDefinedFunction()
 
         panda_file::ClassDataAccessor cda {*panda_file_, class_id};
         cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-            if (!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative()) {
+            if (!mda.IsExternal()) {
                 std::string func_name = GetStringByStringId(mda.GetNameId());
                 EntityId m_id = mda.GetMethodId();
                 panda_file::CodeDataAccessor cda {*panda_file_, mda.GetCodeId().value()};
@@ -491,28 +493,30 @@ void AbcFile::ExtractClassAndFunctionInfo(Function *func)
     graph.VisitAllInstructions([&](const Inst &inst) {
         auto type = inst.GetType();
         switch (type) {
-            case InstType::Intrinsic_DefineFuncDyn:
-            case InstType::Intrinsic_DefineNcFuncDyn:
-            case InstType::Intrinsic_DefineGeneratorFunc:
-            case InstType::Intrinsic_DefineAsyncFunc: {
-                Function *def_func = ResolveDefineFuncInstCommon(func, inst);
-                BuildFunctionDefineChain(func, def_func);
-                break;
-            }
-            case InstType::Intrinsic_DefineClassWithBuffer: {
+            case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
+            case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
                 auto def_class = ResolveDefineClassWithBufferInst(func, inst);
                 AddDefinedClass(std::move(def_class));
                 break;
             }
-            case InstType::Intrinsic_DefineMethod: {
+            case InstType::DEFINEFUNC_IMM8_ID16_IMM8:
+            case InstType::DEFINEFUNC_IMM16_ID16_IMM8: {
+                Function *def_func = ResolveDefineFuncInstCommon(func, inst);
+                BuildFunctionDefineChain(func, def_func);
+                break;
+            }
+            case InstType::DEFINEMETHOD_IMM8_ID16_IMM8:
+            case InstType::DEFINEMETHOD_IMM16_ID16_IMM8: {
                 auto member_func = ResolveDefineFuncInstCommon(func, inst);
                 BuildFunctionDefineChain(func, member_func);
                 // resolve the class where it's defined
-                Inst def_method_input0 = inst.GetInputInsts()[1];
+                Inst def_method_input0 = inst.GetInputInsts()[0];
                 Inst ld_obj_input0 = def_method_input0.GetInputInsts()[0];
-                if (def_method_input0.GetType() == InstType::Intrinsic_LdObjByName &&
+                if ((def_method_input0.GetType() == InstType::LDOBJBYNAME_IMM8_ID16 ||
+                     def_method_input0.GetType() == InstType::LDOBJBYNAME_IMM16_ID16) &&
                     GetStringByInst(def_method_input0) == PROTOTYPE &&
-                    ld_obj_input0.GetType() == InstType::Intrinsic_DefineClassWithBuffer) {
+                    (ld_obj_input0.GetType() == InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8 ||
+                     ld_obj_input0.GetType() == InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8)) {
                     auto clazz = GetClassByNameImpl(GetStringByInst(ld_obj_input0));
                     if (clazz != nullptr) {
                         BuildClassAndMemberFuncRelation(clazz, member_func);
@@ -530,13 +534,14 @@ void AbcFile::ExtractClassInheritInfo(const Function *func) const
 {
     auto &graph = func->GetGraph();
     graph.VisitAllInstructions([&](const Inst &inst) {
-        if (inst.GetType() != InstType::Intrinsic_DefineClassWithBuffer) {
+        if (inst.GetType() != InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8 &&
+            inst.GetType() != InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8) {
             return;
         }
 
         Class *cur_class = GetClassByNameImpl(GetStringByInst(inst));
         ASSERT(cur_class != nullptr);
-        Inst def_class_input1 = inst.GetInputInsts()[1];
+        Inst def_class_input1 = inst.GetInputInsts()[0];
         auto [ret_ptr, ret_sym, ret_type] = ResolveInstCommon(func, def_class_input1);
         if (ret_ptr != nullptr && ret_type == ResolveType::CLASS_OBJECT) {
             auto par_class = reinterpret_cast<const Class *>(ret_ptr);
@@ -577,47 +582,97 @@ void AbcFile::ExtractFunctionCalleeInfo(Function *func)
     graph.VisitAllInstructions([&](const Inst &inst) {
         std::unique_ptr<CalleeInfo> callee_info {nullptr};
         switch (inst.GetType()) {
-            case InstType::Intrinsic_CallArg0Dyn: {
+            case InstType::CALLARG0_IMM8: {
                 callee_info = ResolveCallInstCommon(func, inst);
                 callee_info->SetCalleeArgCount(0);
                 break;
             }
-            case InstType::Intrinsic_CallArg1Dyn: {
-                callee_info = ResolveCallInstCommon(func, inst);
+            case InstType::CALLARG1_IMM8_V8: {
+                callee_info = ResolveCallInstCommon(func, inst, 1);
                 callee_info->SetCalleeArgCount(1);
                 break;
             }
-            case InstType::Intrinsic_CallArgs2Dyn: {
-                callee_info = ResolveCallInstCommon(func, inst);
+            case InstType::CALLARGS2_IMM8_V8_V8: {
                 constexpr int ARG_COUNT = 2;
+                callee_info = ResolveCallInstCommon(func, inst, ARG_COUNT);
                 callee_info->SetCalleeArgCount(ARG_COUNT);
                 break;
             }
-            case InstType::Intrinsic_CallArgs3Dyn: {
-                callee_info = ResolveCallInstCommon(func, inst);
+            case InstType::CALLARGS3_IMM8_V8_V8_V8: {
                 constexpr int ARG_COUNT = 3;
+                callee_info = ResolveCallInstCommon(func, inst, ARG_COUNT);
                 callee_info->SetCalleeArgCount(ARG_COUNT);
                 break;
             }
-            case InstType::Intrinsic_CallSpreadDyn: {
-                callee_info = ResolveCallInstCommon(func, inst);
+            case InstType::CALLRANGE_IMM8_IMM8_V8: {
+                uint32_t arg_count = inst.GetImms()[1];
+                callee_info = ResolveCallInstCommon(func, inst, arg_count);
+                callee_info->SetCalleeArgCount(arg_count);
                 break;
             }
-            case InstType::Intrinsic_CallIRangeDyn: {
-                callee_info = ResolveCallInstCommon(func, inst);
-                // 1 stands for the func obj
-                callee_info->SetCalleeArgCount(inst.GetInputInsts().size() - 1);
+            case InstType::WIDE_CALLRANGE_PREF_IMM16_V8: {
+                uint32_t arg_count = inst.GetImms()[0];
+                callee_info = ResolveCallInstCommon(func, inst, arg_count);
+                callee_info->SetCalleeArgCount(arg_count);
                 break;
             }
-            case InstType::Intrinsic_CallIThisRangeDyn: {
-                callee_info = ResolveCallInstCommon(func, inst);
-                // 2 stands for func obj and this pointer
-                callee_info->SetCalleeArgCount(inst.GetInputInsts().size() - 2);
+            case InstType::SUPERCALLSPREAD_IMM8_V8: {
+                callee_info = ResolveCallInstCommon(func, inst, 1);
                 break;
             }
-            case InstType::Intrinsic_SuperCall:
-            case InstType::Intrinsic_SuperCallSpread: {
+            case InstType::APPLY_IMM8_V8_V8: {
+                constexpr uint32_t FUNC_OBJ_INDEX = 2;
+                callee_info = ResolveCallInstCommon(func, inst, FUNC_OBJ_INDEX);
+                break;
+            }
+            case InstType::CALLTHIS0_IMM8_V8: {
+                callee_info = ResolveCallInstCommon(func, inst, 1);
+                callee_info->SetCalleeArgCount(0);
+                break;
+            }
+            case InstType::CALLTHIS1_IMM8_V8_V8: {
+                constexpr int ARG_COUNT = 1;
+                // 1 represents the this pointer
+                callee_info = ResolveCallInstCommon(func, inst, ARG_COUNT + 1);
+                callee_info->SetCalleeArgCount(ARG_COUNT);
+                break;
+            }
+            case InstType::CALLTHIS2_IMM8_V8_V8_V8: {
+                constexpr int ARG_COUNT = 2;
+                callee_info = ResolveCallInstCommon(func, inst, ARG_COUNT + 1);
+                callee_info->SetCalleeArgCount(ARG_COUNT);
+                break;
+            }
+            case InstType::CALLTHIS3_IMM8_V8_V8_V8_V8: {
+                constexpr int ARG_COUNT = 3;
+                callee_info = ResolveCallInstCommon(func, inst, ARG_COUNT + 1);
+                callee_info->SetCalleeArgCount(ARG_COUNT);
+                break;
+            }
+            case InstType::CALLTHISRANGE_IMM8_IMM8_V8: {
+                uint32_t arg_count = inst.GetImms()[1];
+                callee_info = ResolveCallInstCommon(func, inst, arg_count + 1);
+                callee_info->SetCalleeArgCount(arg_count);
+                break;
+            }
+            case InstType::WIDE_CALLTHISRANGE_PREF_IMM16_V8: {
+                uint32_t arg_count = inst.GetImms()[0];
+                callee_info = ResolveCallInstCommon(func, inst, arg_count + 1);
+                callee_info->SetCalleeArgCount(arg_count);
+                break;
+            }
+            case InstType::SUPERCALLTHISRANGE_IMM8_IMM8_V8:
+            case InstType::SUPERCALLARROWRANGE_IMM8_IMM8_V8: {
+                uint32_t arg_count = inst.GetImms()[1];
                 callee_info = ResolveSuperCallInst(func, inst);
+                callee_info->SetCalleeArgCount(arg_count);
+                break;
+            }
+            case InstType::WIDE_SUPERCALLTHISRANGE_PREF_IMM16_V8:
+            case InstType::WIDE_SUPERCALLARROWRANGE_PREF_IMM16_V8: {
+                uint32_t arg_count = inst.GetImms()[0];
+                callee_info = ResolveSuperCallInst(func, inst);
+                callee_info->SetCalleeArgCount(arg_count);
                 break;
             }
             default:
@@ -657,22 +712,21 @@ void AbcFile::ExtractClassAndFunctionExportList()
     auto &graph = func_main->GetGraph();
     graph.VisitAllInstructions([&](const Inst &inst) {
         auto type = inst.GetType();
-        if (type == InstType::Intrinsic_StModuleVar) {
+        if (type == InstType::STMODULEVAR_IMM8 || type == InstType::WIDE_STMODULEVAR_PREF_IMM16) {
             Inst st_module_input0 = inst.GetInputInsts()[0];
             switch (st_module_input0.GetType()) {
-                case InstType::Intrinsic_DefineFuncDyn:
-                case InstType::Intrinsic_DefineNcFuncDyn:
-                case InstType::Intrinsic_DefineGeneratorFunc:
-                case InstType::Intrinsic_DefineAsyncFunc: {
-                    auto export_func = ResolveDefineFuncInstCommon(func_main, inst);
+                case InstType::DEFINEFUNC_IMM8_ID16_IMM8:
+                case InstType::DEFINEFUNC_IMM16_ID16_IMM8: {
+                    auto export_func = ResolveDefineFuncInstCommon(func_main, st_module_input0);
                     ASSERT(export_func != nullptr);
                     export_func_list_.push_back(export_func);
                     break;
                 }
-                case InstType::Intrinsic_DefineClassWithBuffer: {
-                    Class *clazz = GetClassByNameImpl(GetStringByInst(st_module_input0));
-                    ASSERT(clazz != nullptr);
-                    export_class_list_.push_back(clazz);
+                case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
+                case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
+                    Class *export_clazz = GetClassByNameImpl(GetStringByInst(st_module_input0));
+                    ASSERT(export_clazz != nullptr);
+                    export_class_list_.push_back(export_clazz);
                     break;
                 }
                 default:
@@ -698,54 +752,83 @@ ResolveResult AbcFile::ResolveInstCommon(const Function *func, Inst inst) const
 {
     auto type = inst.GetType();
     switch (type) {
-        case InstType::Intrinsic_DefineFuncDyn:
-        case InstType::Intrinsic_DefineNcFuncDyn:
-        case InstType::Intrinsic_DefineGeneratorFunc:
-        case InstType::Intrinsic_DefineAsyncFunc: {
+        case InstType::DEFINEFUNC_IMM8_ID16_IMM8:
+        case InstType::DEFINEFUNC_IMM16_ID16_IMM8: {
             std::string func_name = GetStringByInst(inst);
             const Function *func = GetFunctionByName(func_name);
             ASSERT(func != nullptr);
             return std::make_tuple(func, EMPTY_STR, ResolveType::FUNCTION_OBJECT);
         }
-        case InstType::Intrinsic_DefineClassWithBuffer: {
+        case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
+        case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
             std::string class_name = GetStringByInst(inst);
             const Class *clazz = GetClassByName(class_name);
             ASSERT(clazz != nullptr);
             return std::make_tuple(clazz, EMPTY_STR, ResolveType::CLASS_OBJECT);
         }
-        case InstType::Intrinsic_NewObjSpreadDyn:
-        case InstType::Intrinsic_NewObjDynRange: {
+        case InstType::NEWOBJAPPLY_IMM8_V8:
+        case InstType::NEWOBJAPPLY_IMM16_V8:
+        case InstType::NEWOBJRANGE_IMM8_IMM8_V8:
+        case InstType::NEWOBJRANGE_IMM16_IMM8_V8:
+        case InstType::WIDE_NEWOBJRANGE_PREF_IMM16_V8: {
             Inst newobj_input0 = inst.GetInputInsts()[0];
             auto resolve_res = ResolveInstCommon(func, newobj_input0);
             return HandleNewObjInstResolveResultCommon(resolve_res);
         }
-        case InstType::Intrinsic_LdObjByName: {
+        case InstType::LDOBJBYNAME_IMM8_ID16:
+        case InstType::LDOBJBYNAME_IMM16_ID16: {
             Inst ld_obj_input0 = inst.GetInputInsts()[0];
             auto resolve_res = ResolveInstCommon(func, ld_obj_input0);
             return HandleLdObjByNameInstResolveResult(inst, resolve_res);
         }
-        case InstType::Intrinsic_LdLexVarDyn_Imm4:
-        case InstType::Intrinsic_LdLexVarDyn_Imm8:
-        case InstType::Intrinsic_LdLexVarDyn_Imm16: {
+        case InstType::LDLEXVAR_IMM4_IMM4:
+        case InstType::LDLEXVAR_IMM8_IMM8:
+        case InstType::WIDE_LDLEXVAR_PREF_IMM16_IMM16: {
             auto p = GetStLexInstByLdLexInst({func, inst});
             if (p == std::nullopt) {
                 return std::make_tuple(nullptr, EMPTY_STR, ResolveType::UNRESOLVED_OTHER);
             }
             return ResolveInstCommon(p.value().first, p.value().second);
         }
-        case InstType::Intrinsic_StLexVarDyn_Imm4:
-        case InstType::Intrinsic_StLexVarDyn_Imm8:
-        case InstType::Intrinsic_StLexVarDyn_Imm16: {
+        case InstType::STLEXVAR_IMM4_IMM4:
+        case InstType::STLEXVAR_IMM8_IMM8:
+        case InstType::WIDE_STLEXVAR_PREF_IMM16_IMM16: {
             Inst stlex_input0 = inst.GetInputInsts()[0];
             return ResolveInstCommon(func, stlex_input0);
         }
-        case InstType::Intrinsic_LdModuleVar:
-        case InstType::Intrinsic_GetModuleNamespace: {
-            std::string str = GetStringByInst(inst);
+        case InstType::LDLOCALMODULEVAR_IMM8:
+        case InstType::WIDE_LDLOCALMODULEVAR_PREF_IMM16: {
+            size_t index = inst.GetImms()[0];
+            const std::string &export_name = module_record_->GetExportNameByIndex(index);
+            const Function *func = GetExportFunctionByExportName(export_name);
+            if (func != nullptr) {
+                return std::make_tuple(func, EMPTY_STR, ResolveType::FUNCTION_OBJECT);
+            }
+            const Class *clazz = GetExportClassByExportName(export_name);
+            if (clazz != nullptr) {
+                return std::make_tuple(clazz, EMPTY_STR, ResolveType::CLASS_OBJECT);
+            }
+            return std::make_tuple(nullptr, EMPTY_STR, ResolveType::UNRESOLVED_OTHER);
+        }
+        case InstType::LDEXTERNALMODULEVAR_IMM8:
+        case InstType::WIDE_LDEXTERNALMODULEVAR_PREF_IMM16: {
+            size_t index = inst.GetImms()[0];
+            const std::string &inter_name = module_record_->GetImportInternalNameByIndex(index);
+            return std::make_tuple(nullptr, inter_name, ResolveType::UNRESOLVED_MODULE);
+        }
+        case InstType::GETMODULENAMESPACE_IMM8:
+        case InstType::WIDE_GETMODULENAMESPACE_PREF_IMM16: {
+            size_t index = inst.GetImms()[0];
+            const std::string &str = module_record_->GetImportNamespaceNameByIndex(index);
             return std::make_tuple(nullptr, str, ResolveType::UNRESOLVED_MODULE);
         }
-        case InstType::Intrinsic_LdGlobalVar:
-        case InstType::Intrinsic_TryLdGlobalByName: {
+        case InstType::LDGLOBAL: {
+            // TODO(wangyantian): load a specific global variable, namely 'globalThis'
+            return std::make_tuple(nullptr, EMPTY_STR, ResolveType::UNRESOLVED_OTHER);
+        }
+        case InstType::LDGLOBALVAR_IMM16_ID16:
+        case InstType::TRYLDGLOBALBYNAME_IMM8_ID16:
+        case InstType::TRYLDGLOBALBYNAME_IMM16_ID16: {
             std::string str = GetStringByInst(inst);
             auto p = GetStGlobalInstByLdGlobalInst({func, inst});
             if (p == std::nullopt) {
@@ -757,16 +840,15 @@ ResolveResult AbcFile::ResolveInstCommon(const Function *func, Inst inst) const
             }
             return std::make_tuple(nullptr, str, ResolveType::UNRESOLVED_GLOBAL_VAR);
         }
-        case InstType::Intrinsic_TryStGlobalByName:
-        case InstType::Intrinsic_StGlobalVar:
-        case InstType::Intrinsic_StGlobalLet:
-        case InstType::Intrinsic_StConstToGlobalRecord:
-        case InstType::Intrinsic_StLetToGlobalRecord:
-        case InstType::Intrinsic_StClassToGlobalRecord: {
+        case InstType::TRYSTGLOBALBYNAME_IMM8_ID16:
+        case InstType::TRYSTGLOBALBYNAME_IMM16_ID16:
+        case InstType::STGLOBALVAR_IMM16_ID16:
+        case InstType::STCONSTTOGLOBALRECORD_IMM16_ID16:
+        case InstType::STTOGLOBALRECORD_IMM16_ID16: {
             Inst stglobal_input0 = inst.GetInputInsts()[0];
             return ResolveInstCommon(func, stglobal_input0);
         }
-        case InstType::Phi: {
+        case InstType::OPCODE_PHI: {
             // TODO(wangyantian): only the first path is considered for now, what about other paths?
             Inst phi_input0 = inst.GetInputInsts()[0];
             return ResolveInstCommon(func, phi_input0);
@@ -840,7 +922,7 @@ Function *AbcFile::ResolveDefineFuncInstCommon(const Function *func, const Inst 
 std::unique_ptr<Class> AbcFile::ResolveDefineClassWithBufferInst(Function *func, const Inst &define_class_inst) const
 {
     auto imms = define_class_inst.GetImms();
-    auto m_id = EntityId(imms[0]);
+    auto m_id = EntityId(imms[1]);
     std::string class_name = GetStringByMethodId(m_id);
     std::unique_ptr<Class> def_class = std::make_unique<Class>(class_name, this, func);
     if (def_class == nullptr) {
@@ -853,11 +935,10 @@ std::unique_ptr<Class> AbcFile::ResolveDefineClassWithBufferInst(Function *func,
     std::string ctor_name = GetStringByInst(define_class_inst);
     HandleMemberFunctionFromClassBuf(ctor_name, func, def_class.get());
 
-    // handle member function defined in the class
-    uint32_t literal_array_idx = imms[1];
+    auto literal_array_id = EntityId(imms[2]);
     panda_file::LiteralDataAccessor lit_array_accessor(*panda_file_, panda_file_->GetLiteralArraysId());
     lit_array_accessor.EnumerateLiteralVals(
-        literal_array_idx, [&](const panda_file::LiteralDataAccessor::LiteralValue &value, const LiteralTag &tag) {
+        literal_array_id, [&](const panda_file::LiteralDataAccessor::LiteralValue &value, const LiteralTag &tag) {
             if (tag == LiteralTag::METHOD || tag == LiteralTag::GENERATORMETHOD ||
                 tag == LiteralTag::ASYNCGENERATORMETHOD) {
                 auto method_id = EntityId(std::get<uint32_t>(value));
@@ -869,14 +950,15 @@ std::unique_ptr<Class> AbcFile::ResolveDefineClassWithBufferInst(Function *func,
     return def_class;
 }
 
-std::unique_ptr<CalleeInfo> AbcFile::ResolveCallInstCommon(Function *func, const Inst &call_inst) const
+std::unique_ptr<CalleeInfo> AbcFile::ResolveCallInstCommon(Function *func, const Inst &call_inst,
+                                                           uint32_t func_obj_idx) const
 {
     std::unique_ptr<CalleeInfo> callee_info = std::make_unique<CalleeInfo>(call_inst, func);
     if (callee_info == nullptr) {
         LOG(FATAL, DEFECT_SCAN_AUX) << "Can not allocate memory when processing '" << filename_ << "'";
     }
 
-    Inst call_input0 = call_inst.GetInputInsts()[0];
+    Inst call_input0 = call_inst.GetInputInsts()[func_obj_idx];
     auto [ret_ptr, ret_sym, ret_type] = ResolveInstCommon(func, call_input0);
     if (ret_ptr != nullptr && ret_type == ResolveType::FUNCTION_OBJECT) {
         auto callee = reinterpret_cast<const Function *>(ret_ptr);

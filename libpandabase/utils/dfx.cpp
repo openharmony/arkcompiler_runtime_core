@@ -75,10 +75,18 @@ void DfxController::ResetOptionValueFromString(const std::string &s)
         last_pos = s.find_first_not_of(';', pos);
         pos = s.find(';', last_pos);
         std::string option_str = arg.substr(0, arg.find(':'));
-        uint8_t value = static_cast<uint8_t>(std::stoi(arg.substr(arg.find(':') + 1)));
+        std::string value_str = arg.substr(arg.find(':') + 1);
+        char *end_ptr = nullptr;
+        constexpr int DECIMAL = 10;
+        long value = strtol(value_str.c_str(), &end_ptr, DECIMAL);
+        if ((errno != 0 && value == 0) || end_ptr == value_str.c_str() || value > std::numeric_limits<uint8_t>::max() ||
+            value < std::numeric_limits<uint8_t>::min()) {
+            LOG(ERROR, DFX) << "Invalid argument: " << s;
+            return;
+        }
         auto dfx_option = DfxOptionHandler::DfxOptionFromString(option_str);
         if (dfx_option != DfxOptionHandler::END_FLAG) {
-            DfxController::SetOptionValue(dfx_option, value);
+            DfxController::SetOptionValue(dfx_option, static_cast<uint8_t>(value));
 #ifdef PANDA_TARGET_UNIX
             if (dfx_option == DfxOptionHandler::MOBILE_LOG) {
                 if (value == 0) {
