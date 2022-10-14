@@ -11,8 +11,8 @@
         "destPath": "arkcompiler/runtime_core"
     },
     "component": {
-        "name": "ark",
-        "subsystem": "ark",
+        "name": "runtime_core",
+        "subsystem": "arkcompiler",
         "syscap": [],
         "features": [],
         "adapted_system_type": [

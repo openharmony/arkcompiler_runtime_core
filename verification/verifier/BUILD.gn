@@ -43,7 +43,8 @@ ohos_executable("verifier_bin") {
 
   output_name = "verifier"
   install_enable = true
-  subsystem_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ark_gen_file("verifier_options_gen_h") {
@@ -57,5 +58,6 @@ ohos_prebuilt_etc("verifier.config") {
   source = "verifier.config"
 
   install_enable = true
-  subsystem_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }

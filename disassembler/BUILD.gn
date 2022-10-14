@@ -83,8 +83,8 @@ ohos_shared_library("arkdisassembler") {
     output_extension = "dll"
   }
 
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_static_library("arkdisassembler_frontend_static") {
@@ -110,8 +110,8 @@ ohos_static_library("arkdisassembler_frontend_static") {
     sdk_libc_secshared_dep,
   ]
 
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_executable("ark_disasm") {
@@ -146,9 +146,9 @@ ohos_executable("ark_disasm") {
     static_link = true
   }
 
-  install_enable = true
-  subsystem_name = "ark"
-  part_name = "ark"
+  install_enable = false
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ark_isa_gen("isa_gen_ark_disam") {

@@ -65,8 +65,8 @@ ohos_shared_library("libarkziparchive") {
     output_extension = "so"
   }
 
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 source_set("libarkziparchive_frontend_set_static") {
@@ -94,6 +94,6 @@ source_set("libarkziparchive_frontend_set_static") {
 ohos_static_library("libarkziparchive_frontend_static") {
   deps = [ ":libarkziparchive_frontend_set_static" ]
 
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }

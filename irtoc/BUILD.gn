@@ -135,8 +135,9 @@ ohos_executable("irtoc") {
   libs = platform_libs
   ldflags = platform_ldflags
 
-  install_enable = true
-  subsystem_name = "ark"
+  install_enable = false
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 action("irtoc_generate") {
@@ -145,7 +146,7 @@ action("irtoc_generate") {
   if (ark_standalone_build) {
     irtoc_cmd = "./irtoc"
   } else {
-    irtoc_cmd = "./clang_x64/ark/ark/irtoc"
+    irtoc_cmd = "./clang_x64/arkcompiler/runtmie_core/irtoc"
   }
   args = [
     "$irtoc_cmd",

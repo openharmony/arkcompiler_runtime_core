@@ -103,8 +103,8 @@ ohos_shared_library("libarkfile") {
     output_extension = "so"
   }
 
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 source_set("libarkfile_frontend_set_static") {
@@ -123,8 +123,8 @@ source_set("libarkfile_frontend_set_static") {
 ohos_static_library("libarkfile_frontend_static") {
   deps = [ ":libarkfile_frontend_set_static" ]
 
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ark_gen_file("libarkfile_type_gen_h") {

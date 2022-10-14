@@ -43,5 +43,6 @@ ohos_executable("ark_bin") {
 
   output_name = "ark"
   install_enable = true
-  subsystem_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }

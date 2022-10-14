@@ -35,13 +35,13 @@ ohos_static_library("asm_defines") {
   output_extension = "S"
   output_name = "libasm_defines"
   deps = [
-    "$ark_root/libpandafile:libarkfile",
+    "$ark_root/libpandafile:arkfile_header_deps",
     "$ark_root/runtime:arkruntime_header_deps",
     sdk_libc_secshared_dep,
   ]
 
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 action("asm_defines_generator") {

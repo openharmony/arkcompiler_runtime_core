@@ -42,6 +42,6 @@ source_set("libdprof_static") {
 ohos_static_library("libdprof") {
   deps = [ ":libdprof_static" ]
 
-  subsystem_name = "ark"
-  part_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }

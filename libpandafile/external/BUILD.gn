@@ -40,7 +40,8 @@ ohos_shared_library("libarkfileExt") {
     relative_install_dir = "ark"
   }
   output_extension = "so"
-  subsystem_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 config("libarksupport_config") {
@@ -69,5 +70,6 @@ ohos_shared_library("libarksupport") {
     relative_install_dir = "ark"
   }
   output_extension = "so"
-  subsystem_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }

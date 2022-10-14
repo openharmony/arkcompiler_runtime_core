@@ -52,8 +52,8 @@ ohos_shared_library("libark_defect_scan_aux") {
 
   output_extension = "so"
   relative_install_dir = "ark"
-  part_name = "ark"
-  subsystem_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_static_library("libark_defect_scan_aux_static_test") {
@@ -67,6 +67,6 @@ ohos_static_library("libark_defect_scan_aux_static_test") {
     sdk_libc_secshared_dep,
   ]
 
-  part_name = "ark"
-  subsystem_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }

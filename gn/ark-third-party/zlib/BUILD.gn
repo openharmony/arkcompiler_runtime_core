@@ -63,5 +63,6 @@ ohos_static_library("libz") {
     "$ark_root:ark_config",
   ]
 
-  subsystem_name = "ark"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }

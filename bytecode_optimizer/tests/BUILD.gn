@@ -59,6 +59,7 @@ ohos_executable("bcopt_type_adapter_unit_test") {
   }
 
   output_name = "bcopt_type_adapter_unit_test"
-  install_enable = true
-  subsystem_name = "ark"
+  install_enable = false
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
