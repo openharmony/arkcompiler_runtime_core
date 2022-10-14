@@ -14,6 +14,8 @@
  */
 
 #include "module_record.h"
+#include <algorithm>
+#include "libpandabase/macros.h"
 
 namespace panda::defect_scan_aux {
 void ModuleRecord::SetModuleFilename(std::string_view module_filename)
@@ -34,6 +36,48 @@ void ModuleRecord::AddImportEntry(const ImportEntry &import_entry)
 void ModuleRecord::AddExportEntry(const ExportEntry &export_entry)
 {
     export_entries_.push_back(export_entry);
+}
+
+void ModuleRecord::SetRegularImportNum(size_t regular_import_num)
+{
+    regular_import_num_ = regular_import_num;
+}
+
+void ModuleRecord::SetLocalExportNum(size_t local_export_num)
+{
+    local_export_num_ = local_export_num;
+}
+
+size_t ModuleRecord::GetRegularImportNum() const
+{
+    return regular_import_num_;
+}
+
+size_t ModuleRecord::GetLocalExportNum() const
+{
+    return local_export_num_;
+}
+
+const std::string &ModuleRecord::GetImportInternalNameByIndex(size_t index) const
+{
+    ASSERT(index < regular_import_num_);
+    return import_entries_[index].local_name_;
+}
+
+const std::string &ModuleRecord::GetImportNamespaceNameByIndex(size_t index) const
+{
+    ASSERT(index < request_modules_.size());
+    const std::string &module_name = request_modules_[index];
+    auto iter = std::find_if(import_entries_.begin() + regular_import_num_, import_entries_.end(),
+                             [&](const ImportEntry &entry) { return entry.module_request_ == module_name; });
+    ASSERT(iter != import_entries_.end());
+    return iter->local_name_;
+}
+
+const std::string &ModuleRecord::GetExportNameByIndex(size_t index) const
+{
+    ASSERT(index < local_export_num_);
+    return export_entries_[index].export_name_;
 }
 
 std::string ModuleRecord::GetInternalNameByExportName(std::string_view export_name) const

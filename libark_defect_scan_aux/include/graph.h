@@ -38,7 +38,10 @@ public:
     bool operator==(const Inst &inst) const;
     bool operator!=(const Inst &inst) const;
     InstType GetType() const;
-    bool IsStGlobalInst() const;
+    bool IsInstStLexVar() const;
+    bool IsInstLdLexVar() const;
+    bool IsInstStGlobal() const;
+    bool IsInstLdGlobal() const;
     uint16_t GetArgIndex() const;
     uint32_t GetPc() const;
     BasicBlock GetBasicBlock() const;

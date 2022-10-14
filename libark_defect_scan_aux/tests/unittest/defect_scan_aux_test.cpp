@@ -486,18 +486,30 @@ int main()
             auto type = inst.GetType();
             inst_cnt_table.insert_or_assign(type, inst_cnt_table[type] + 1);
         });
-        TestHelper::ExpectEqual(inst_cnt_table[InstType::Intrinsic_NewObjDynRange], 2);
-        uint32_t ldlex_cnt = inst_cnt_table[InstType::Intrinsic_LdLexVarDyn_Imm4] +
-                             inst_cnt_table[InstType::Intrinsic_LdLexVarDyn_Imm8] +
-                             inst_cnt_table[InstType::Intrinsic_LdLexVarDyn_Imm16];
+        uint32_t newobj_cnt = inst_cnt_table[InstType::NEWOBJRANGE_IMM8_IMM8_V8] +
+                              inst_cnt_table[InstType::NEWOBJRANGE_IMM16_IMM8_V8] +
+                              inst_cnt_table[InstType::WIDE_NEWOBJRANGE_PREF_IMM16_V8];
+        TestHelper::ExpectEqual(newobj_cnt, 2);
+        uint32_t ldlex_cnt = inst_cnt_table[InstType::LDLEXVAR_IMM4_IMM4] +
+                             inst_cnt_table[InstType::LDLEXVAR_IMM8_IMM8] +
+                             inst_cnt_table[InstType::WIDE_LDLEXVAR_PREF_IMM16_IMM16];
         TestHelper::ExpectEqual(ldlex_cnt, 7);
-        TestHelper::ExpectEqual(inst_cnt_table[InstType::Intrinsic_LdObjByName], 4);
-        TestHelper::ExpectEqual(inst_cnt_table[InstType::Intrinsic_CallIThisRangeDyn], 4);
-        TestHelper::ExpectEqual(inst_cnt_table[InstType::Intrinsic_DefineFuncDyn], 1);
-        TestHelper::ExpectEqual(inst_cnt_table[InstType::Intrinsic_CallArg0Dyn], 1);
-        TestHelper::ExpectEqual(inst_cnt_table[InstType::Intrinsic_CallArg1Dyn], 1);
-        TestHelper::ExpectEqual(inst_cnt_table[InstType::Intrinsic_LdModuleVar], 1);
-        TestHelper::ExpectEqual(inst_cnt_table[InstType::Parameter], 2);
+        TestHelper::ExpectEqual(
+            inst_cnt_table[InstType::LDOBJBYNAME_IMM8_ID16] + inst_cnt_table[InstType::LDOBJBYNAME_IMM16_ID16], 4);
+        TestHelper::ExpectEqual(inst_cnt_table[InstType::CALLTHIS1_IMM8_V8_V8], 3);
+        TestHelper::ExpectEqual(inst_cnt_table[InstType::CALLTHIS2_IMM8_V8_V8_V8], 1);
+        TestHelper::ExpectEqual(inst_cnt_table[InstType::DEFINEFUNC_IMM8_ID16_IMM8] +
+                                    inst_cnt_table[InstType::DEFINEFUNC_IMM16_ID16_IMM8],
+                                1);
+        TestHelper::ExpectEqual(inst_cnt_table[InstType::CALLARG0_IMM8], 1);
+        TestHelper::ExpectEqual(inst_cnt_table[InstType::CALLARG1_IMM8_V8], 1);
+        TestHelper::ExpectEqual(inst_cnt_table[InstType::LDEXTERNALMODULEVAR_IMM8] +
+                                    inst_cnt_table[InstType::WIDE_LDEXTERNALMODULEVAR_PREF_IMM16],
+                                1);
+        TestHelper::ExpectEqual(inst_cnt_table[InstType::GETMODULENAMESPACE_IMM8] +
+                                    inst_cnt_table[InstType::WIDE_GETMODULENAMESPACE_PREF_IMM16],
+                                0);
+        TestHelper::ExpectEqual(inst_cnt_table[InstType::OPCODE_PARAMETER], 2);
 
         // check api of basic block
         auto bb0 = graph.GetStartBasicBlock();
@@ -530,42 +542,49 @@ int main()
         auto call_inst0 = ci0->GetCallInst();
         auto call_inst0_ins = call_inst0.GetInputInsts();
         TestHelper::ExpectEqual(call_inst0_ins.size(), 4);
-        TestHelper::ExpectEqual(call_inst0_ins[0].GetType(), InstType::Intrinsic_LdObjByName);
-        TestHelper::ExpectEqual(call_inst0_ins[0].GetUserInsts().size(), 1);
-        TestHelper::ExpectEqual(call_inst0_ins[0].GetUserInsts()[0], call_inst0);
-        TestHelper::ExpectEqual(call_inst0_ins[2].GetType(), InstType::Intrinsic_CallArg0Dyn);
-        TestHelper::ExpectEqual(call_inst0_ins[2].GetUserInsts().size(), 1);
-        TestHelper::ExpectEqual(call_inst0_ins[2].GetUserInsts()[0], call_inst0);
-        TestHelper::ExpectEqual(call_inst0_ins[3].GetType(), InstType::Parameter);
-        TestHelper::ExpectEqual(call_inst0_ins[3].GetArgIndex(), 1);
-        auto param1_usrs = call_inst0_ins[3].GetUserInsts();
+        auto call_inst0_in1_type = call_inst0_ins[1].GetType();
+        TestHelper::ExpectEqual(call_inst0_in1_type, InstType::CALLARG0_IMM8);
+        TestHelper::ExpectEqual(call_inst0_ins[1].GetUserInsts().size(), 1);
+        TestHelper::ExpectEqual(call_inst0_ins[1].GetUserInsts()[0], call_inst0);
+        auto call_inst0_in2_type = call_inst0_ins[2].GetType();
+        TestHelper::ExpectEqual(call_inst0_in2_type, InstType::OPCODE_PARAMETER);
+        TestHelper::ExpectEqual(call_inst0_ins[2].GetArgIndex(), 1);
+        auto param1_usrs = call_inst0_ins[2].GetUserInsts();
         TestHelper::ExpectTrue(std::find(param1_usrs.begin(), param1_usrs.end(), call_inst0) != param1_usrs.end());
+        auto call_inst0_in3_type = call_inst0_ins[3].GetType();
+        TestHelper::ExpectTrue(call_inst0_in3_type == InstType::LDOBJBYNAME_IMM8_ID16 ||
+                                call_inst0_in3_type == InstType::LDOBJBYNAME_IMM16_ID16);
+        TestHelper::ExpectEqual(call_inst0_ins[3].GetUserInsts().size(), 1);
+        TestHelper::ExpectEqual(call_inst0_ins[3].GetUserInsts()[0], call_inst0);
+
         auto ci1 = f0->GetCalleeInfoByIndex(ci_cnt - 2);
         auto call_inst1 = ci1->GetCallInst();
         auto call_inst1_ins = call_inst1.GetInputInsts();
         TestHelper::ExpectEqual(call_inst1_ins.size(), 2);
-        TestHelper::ExpectEqual(call_inst1_ins[0].GetType(), InstType::Intrinsic_LdModuleVar);
-        TestHelper::ExpectEqual(call_inst1_ins[0].GetUserInsts().size(), 2);
-        TestHelper::ExpectTrue((call_inst1_ins[0].GetUserInsts()[0] == call_inst1) ||
-                               (call_inst1_ins[0].GetUserInsts()[1] == call_inst1));
-        auto phi_inst = call_inst1_ins[1];
-        TestHelper::ExpectEqual(phi_inst.GetType(), InstType::Phi);
+        auto call_inst1_in0_type = call_inst1_ins[1].GetType();
+        TestHelper::ExpectTrue(call_inst1_in0_type == InstType::LDEXTERNALMODULEVAR_IMM8 ||
+                                call_inst1_in0_type == InstType::WIDE_LDEXTERNALMODULEVAR_PREF_IMM16);
+        TestHelper::ExpectEqual(call_inst1_ins[1].GetUserInsts().size(), 2);
+        TestHelper::ExpectTrue((call_inst1_ins[1].GetUserInsts()[0] == call_inst1) ||
+                               (call_inst1_ins[1].GetUserInsts()[1] == call_inst1));
+        auto phi_inst = call_inst1_ins[0];
+        TestHelper::ExpectEqual(phi_inst.GetType(), InstType::OPCODE_PHI);
         auto phi_inst_ins = phi_inst.GetInputInsts();
         TestHelper::ExpectEqual(phi_inst_ins.size(), 2);
         auto phi_inst_in0 = phi_inst_ins[0];
         auto phi_inst_in1 = phi_inst_ins[1];
-        if (phi_inst_in0.GetType() != InstType::Parameter) {
+        if (phi_inst_in0.GetType() != InstType::OPCODE_PARAMETER) {
             std::swap(phi_inst_in0, phi_inst_in1);
         }
-        TestHelper::ExpectEqual(phi_inst_in0.GetType(), InstType::Parameter);
+        TestHelper::ExpectEqual(phi_inst_in0.GetType(), InstType::OPCODE_PARAMETER);
         TestHelper::ExpectEqual(phi_inst_in0.GetArgIndex(), 0);
         auto param0_usrs = phi_inst_in0.GetUserInsts();
         TestHelper::ExpectTrue(std::find(param0_usrs.begin(), param0_usrs.end(), phi_inst) != param0_usrs.end());
-        TestHelper::ExpectEqual(phi_inst_in1.GetType(), InstType::Intrinsic_Add2Dyn);
+        TestHelper::ExpectEqual(phi_inst_in1.GetType(), InstType::ADD2_IMM8_V8);
         auto add2_inst_ins = phi_inst_in1.GetInputInsts();
         TestHelper::ExpectEqual(add2_inst_ins.size(), 2);
-        TestHelper::ExpectEqual(add2_inst_ins[0].GetType(), InstType::Parameter);
-        TestHelper::ExpectEqual(add2_inst_ins[1].GetType(), InstType::Parameter);
+        TestHelper::ExpectEqual(add2_inst_ins[0].GetType(), InstType::OPCODE_PARAMETER);
+        TestHelper::ExpectEqual(add2_inst_ins[1].GetType(), InstType::OPCODE_PARAMETER);
         std::cout << "    --- Pass ---" << std::endl;
     }
     std::cout << "===== [libark_defect_scan_aux] Unittest Pass =====" << std::endl;
