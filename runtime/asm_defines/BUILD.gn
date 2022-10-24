@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//build/ohos.gni")
 
 config("asmdefines_public_config") {
   include_dirs = [ "$target_gen_dir/generated/" ]

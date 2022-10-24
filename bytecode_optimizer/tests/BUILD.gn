@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//build/ohos.gni")
 
 ohos_executable("bcopt_type_adapter_unit_test") {
   sources = [ "bcopt_type_adaption_test.cpp" ]
