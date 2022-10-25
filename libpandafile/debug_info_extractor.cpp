@@ -47,7 +47,7 @@ public:
 
     void ProcessBegin()
     {
-        lnt_.push_back({state_->GetAddress(), state_->GetLine()});
+        lnt_.push_back({state_->GetAddress(), static_cast<size_t>(state_->GetLine())});
     }
 
     void ProcessEnd()
@@ -133,7 +133,7 @@ public:
     {
         state_->AdvancePc(pc_offset);
         state_->AdvanceLine(line_offset);
-        lnt_.push_back({state_->GetAddress(), state_->GetLine()});
+        lnt_.push_back({state_->GetAddress(), static_cast<size_t>(state_->GetLine())});
         return true;
     }
 

@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_root.gni")
-import("//build/ohos.gni")
 
 if (is_standard_system) {
   import("$ark_root/platforms/ohos/ark_config.gni")
@@ -41,27 +40,14 @@ ark_enable_global_register_variables = true
 enable_bytecode_optimizer = true
 enable_relayout_profile = false
 
-sdk_libc_secshared_dep = ""
-sdk_libc_secshared_config = ""
+sdk_libc_secshared_dep =
+    "$ark_third_party_root/bounds_checking_function:libsec_shared"
+sdk_libc_secshared_config =
+    "$ark_third_party_root/bounds_checking_function:libsec_public_config"
 
-if (ark_standalone_build) {
-  sdk_libc_secshared_dep = "$ark_third_party_root/securec:libc_secshared"
-  sdk_libc_secshared_config =
-      "$ark_third_party_root/securec:libsec_public_config"
-
-  if (is_mingw || is_mac || is_linux) {
-    sdk_libc_secshared_dep = "$ark_third_party_root/securec:libc_secstatic"
-  }
-} else {
+if (is_mingw || is_mac || is_linux || target_os == "ios") {
   sdk_libc_secshared_dep =
-      "$ark_third_party_root/bounds_checking_function:libsec_shared"
-  sdk_libc_secshared_config =
-      "$ark_third_party_root/bounds_checking_function:libsec_public_config"
-
-  if (is_mingw || is_mac || is_linux || target_os == "ios") {
-    sdk_libc_secshared_dep =
-        "$ark_third_party_root/bounds_checking_function:libsec_static"
-  }
+      "$ark_third_party_root/bounds_checking_function:libsec_static"
 }
 
 is_mob = !is_standard_system && (current_cpu != "arm" || is_wearable_product)
