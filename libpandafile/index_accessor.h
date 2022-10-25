@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_INDEX_ACCESSOR_H_
-#define LIBPANDAFILE_INDEX_ACCESSOR_H_
+#ifndef LIBPANDAFILE_INDEX_ACCESSOR_H
+#define LIBPANDAFILE_INDEX_ACCESSOR_H
 
 #include "file.h"
 #include "file_items.h"
@@ -67,4 +67,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_INDEX_ACCESSOR_H_
+#endif  // LIBPANDAFILE_INDEX_ACCESSOR_H
