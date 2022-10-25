@@ -1067,6 +1067,7 @@ std::string Disassembler::LiteralTagToString(const panda_file::LiteralTag &tag) 
             return "i64";
         case panda_file::LiteralTag::ARRAY_F32:
             return "f32";
+        case panda_file::LiteralTag::DOUBLE:
         case panda_file::LiteralTag::ARRAY_F64:
             return "f64";
         case panda_file::LiteralTag::STRING:
@@ -1080,6 +1081,8 @@ std::string Disassembler::LiteralTagToString(const panda_file::LiteralTag &tag) 
             return "accessor";
         case panda_file::LiteralTag::METHODAFFILIATE:
             return "method_affiliate";
+        case panda_file::LiteralTag::LITERALBUFFERINDEX:
+            return "lit_index";
         case panda_file::LiteralTag::NULLVALUE:
             return "null_value";
         default:
