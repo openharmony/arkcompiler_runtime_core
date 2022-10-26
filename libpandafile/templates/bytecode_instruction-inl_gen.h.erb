@@ -367,6 +367,33 @@ template<const BytecodeInstMode Mode> inline bool BytecodeInst<Mode>::HasFlag(Fl
 }
 
 // NOLINTNEXTLINE(readability-function-size)
+template<const BytecodeInstMode Mode> inline bool BytecodeInst<Mode>::IsIdMatchFlag(size_t idx, Flags flag) const {
+    switch(GetOpcode()) {
+% Panda::instructions.each do |i|
+%   flag_array = i.real_properties.map {|prop| prop.upcase}
+%   flag_array = [] if flag_array.empty?
+%   ids = []
+%   flag_array.each do |f|
+%     if f == "STRING_ID" || f == "METHOD_ID" || f == "LITERALARRAY_ID"
+%       ids << "Flags::" + f
+%     end
+%   end
+    case BytecodeInst<Mode>::Opcode::<%= i.opcode.upcase %>: {
+%   if ids.empty?
+        return false;
+    }
+%   else
+        constexpr std::array<Flags, <%= ids.size %>> ids_array { <%= ids.join(', ') %> };
+        return ids_array[idx] == flag;
+    }
+%   end
+% end
+    default:
+        return false;
+    }
+}
+
+// NOLINTNEXTLINE(readability-function-size)
 template<const BytecodeInstMode Mode> inline bool BytecodeInst<Mode>::IsThrow(Exceptions exception) const {
     switch(GetOpcode()) {
 % Panda::instructions.each do |i|

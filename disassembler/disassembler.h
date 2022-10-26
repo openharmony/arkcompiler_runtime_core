@@ -152,7 +152,7 @@ private:
     pandasm::Ins BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
                                                          panda_file::File::EntityId method_id) const;
 
-    std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id) const;
+    std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id, size_t idx) const;
 
     panda::panda_file::SourceLang GetRecordLanguage(panda_file::File::EntityId class_id) const;
 
