@@ -14,7 +14,6 @@
  */
 
 #include "class_data_accessor.h"
-#include "helpers.h"
 
 #include "utils/leb128.h"
 #include "utils/utf.h"
@@ -29,7 +28,9 @@ ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId clas
     name_.utf16_length = helpers::ReadULeb128(&sp);
     name_.data = sp.data();
 
-    sp = sp.SubSpan(utf::Mutf8Size(name_.data) + 1);  // + 1 for null byte
+    size_t size = utf::Mutf8Size(name_.data) + 1;  // + 1 for null byte
+    THROW_IF(sp.Size() < size, File::INVALID_FILE_OFFSET);
+    sp = sp.SubSpan(size);
 
     super_class_off_ = helpers::Read<ID_SIZE>(&sp);
 
@@ -37,17 +38,23 @@ ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId clas
     num_fields_ = helpers::ReadULeb128(&sp);
     num_methods_ = helpers::ReadULeb128(&sp);
 
-    auto tag = static_cast<ClassTag>(sp[0]);
+    ClassTag tag = ClassTag::NOTHING;
+    THROW_IF(sp.Size() == 0U, File::INVALID_FILE_OFFSET);
+    tag = static_cast<ClassTag>(sp[0]);
 
     while (tag != ClassTag::NOTHING && tag < ClassTag::SOURCE_LANG) {
+        THROW_IF(sp.Size() == 0U, File::INVALID_FILE_OFFSET);
         sp = sp.SubSpan(1);
 
         if (tag == ClassTag::INTERFACES) {
             num_ifaces_ = helpers::ReadULeb128(&sp);
             ifaces_offsets_sp_ = sp;
-            sp = sp.SubSpan(IDX_SIZE * num_ifaces_);
+            size_t size = IDX_SIZE * num_ifaces_;
+            THROW_IF(sp.Size() < size, File::INVALID_FILE_OFFSET);
+            sp = sp.SubSpan(size);
         }
 
+        THROW_IF(sp.Size() == 0U, File::INVALID_FILE_OFFSET);
         tag = static_cast<ClassTag>(sp[0]);
     }
 
@@ -56,6 +63,7 @@ ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId clas
     if (tag == ClassTag::NOTHING) {
         annotations_sp_ = sp;
         source_file_sp_ = sp;
+        THROW_IF(sp.Size() < TAG_SIZE, File::INVALID_FILE_OFFSET);
         fields_sp_ = sp.SubSpan(TAG_SIZE);  // skip NOTHING tag
     }
 }
