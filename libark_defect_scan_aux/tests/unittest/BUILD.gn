@@ -24,7 +24,7 @@ action("generate_abc_file") {
     "--build-dir",
     rebase_path("$ts2abc_build_path"),
     "--dst-dir",
-    rebase_path("$root_out_dir/arkcompiler/ets_frontend"),
+    rebase_path("$root_out_dir/arkcompiler/runtime_core"),
   ]
 
   deps = [ "$ts2abc_root:ark_ts2abc_build" ]
@@ -34,7 +34,7 @@ action("generate_abc_file") {
 ohos_executable("defect_scan_aux_unittest") {
   sources = [ "defect_scan_aux_test.cpp" ]
 
-  configs = [ "$ark_root/libark_defect_scan_aux:defectscan_test_config" ]
+  configs = [ "$ark_root/libark_defect_scan_aux:defectscanaux_test_config" ]
 
   deps = [
     "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux_static_test",

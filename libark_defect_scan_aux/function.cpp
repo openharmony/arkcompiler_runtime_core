@@ -87,7 +87,7 @@ std::vector<Inst> Function::GetReturnInstList() const
     std::vector<Inst> ret_inst_list;
     graph_.VisitAllInstructions([&](const Inst &inst) {
         InstType type = inst.GetType();
-        if (type == InstType::Intrinsic_ReturnDyn) {
+        if (type == InstType::RETURN) {
             ret_inst_list.push_back(inst);
         }
     });
