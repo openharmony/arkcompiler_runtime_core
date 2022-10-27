@@ -44,6 +44,7 @@ CodeDataAccessor::CodeDataAccessor(const File &panda_file, File::EntityId code_i
     code_size_ = helpers::ReadULeb128(&sp);
     tries_size_ = helpers::ReadULeb128(&sp);
     instructions_ptr_ = sp.data();
+    THROW_IF(sp.Size() < code_size_, File::INVALID_FILE_OFFSET);
     sp = sp.SubSpan(code_size_);
     try_blocks_sp_ = sp;
 }

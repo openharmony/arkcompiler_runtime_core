@@ -28,7 +28,9 @@ AnnotationDataAccessor::AnnotationDataAccessor(const File &panda_file, File::Ent
     size_ = ID_SIZE + COUNT_SIZE + count_ * (ID_SIZE + VALUE_SIZE) + count_ * TYPE_TAG_SIZE;
 
     elements_sp_ = sp;
-    elements_tags_ = sp.SubSpan(count_ * (ID_SIZE + VALUE_SIZE));
+    size_t size = count_ * (ID_SIZE + VALUE_SIZE);
+    THROW_IF(sp.Size() < size, File::INVALID_FILE_OFFSET);
+    elements_tags_ = sp.SubSpan(size);
 }
 
 AnnotationDataAccessor::Elem AnnotationDataAccessor::GetElement(size_t i) const
