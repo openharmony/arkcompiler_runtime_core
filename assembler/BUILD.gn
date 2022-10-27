@@ -10,7 +10,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//build/ohos.gni")
 
 config("arkassembler_public_config") {
   include_dirs = [

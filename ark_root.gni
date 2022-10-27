@@ -15,10 +15,13 @@ if (!defined(ark_standalone_build)) {
   ark_standalone_build = false
 }
 
-if (ark_standalone_build) {
-  ark_root = "//"
-  ark_third_party_root = "//ark-third-party"
-} else {
-  ark_root = "//arkcompiler/runtime_core"
+if (!ark_standalone_build) {
   ark_third_party_root = "//third_party"
+  build_root = "//build"
+  import("$build_root/ohos.gni")
+} else {
+  ark_third_party_root = "//arkcompiler/toolchain/build/third_party_gn"
+  import("$build_root/ark.gni")
 }
+
+ark_root = "//arkcompiler/runtime_core"

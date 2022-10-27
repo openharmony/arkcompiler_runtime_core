@@ -10,7 +10,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//build/ohos.gni")
 
 config("defectscanaux_public_config") {
   include_dirs = [ "$ark_root/libark_defect_scan_aux/include" ]

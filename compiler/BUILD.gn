@@ -12,8 +12,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//build/ohos.gni")
-
 config("arkcompiler_public_config") {
   include_dirs = [
     "$ark_root/compiler",
@@ -302,10 +300,7 @@ ohos_static_library("libarkcompiler_frontend_static") {
 }
 
 ark_isa_gen("isa_gen_libarkcompiler") {
-  template_files = [
-    "inst_builder_gen.cpp.erb",
-    "ecma_instrinsics_id.h.erb",
-  ]
+  template_files = [ "inst_builder_gen.cpp.erb" ]
   sources = "optimizer/templates"
   destination = "$target_gen_dir/generated"
 }

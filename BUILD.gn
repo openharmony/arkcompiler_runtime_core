@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//build/ohos.gni")
 
 foreach(plugin, enabled_plugins) {
   print("plugin $plugin is enabled")
@@ -53,8 +52,8 @@ group("ark_host_windows_tools_packages") {
   deps = []
   if (host_os != "mac" && !ark_standalone_build) {
     deps += [
-      "$ark_root/assembler:ark_asm(//build/toolchain/mingw:mingw_x86_64)",
-      "$ark_root/disassembler:ark_disasm(//build/toolchain/mingw:mingw_x86_64)",
+      "$ark_root/assembler:ark_asm($build_root/toolchain/mingw:mingw_x86_64)",
+      "$ark_root/disassembler:ark_disasm($build_root/toolchain/mingw:mingw_x86_64)",
     ]
   }
 
@@ -68,19 +67,19 @@ group("ark_host_mac_tools_packages") {
   if (host_os == "mac") {
     if (host_cpu == "arm64") {
       deps += [
-        "$ark_root/assembler:ark_asm(//build/toolchain/mac:clang_arm64)",
-        "$ark_root/disassembler:ark_disasm(//build/toolchain/mac:clang_arm64)",
-        "$ark_root/libpandabase:libarkbase(//build/toolchain/mac:clang_arm64)",
-        "$ark_root/libpandafile:libarkfile(//build/toolchain/mac:clang_arm64)",
-        "$ark_root/libziparchive:libarkziparchive(//build/toolchain/mac:clang_arm64)",
+        "$ark_root/assembler:ark_asm($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/disassembler:ark_disasm($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/libpandabase:libarkbase($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/libpandafile:libarkfile($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/libziparchive:libarkziparchive($build_root/toolchain/mac:clang_arm64)",
       ]
     } else {
       deps += [
-        "$ark_root/assembler:ark_asm(//build/toolchain/mac:clang_x64)",
-        "$ark_root/disassembler:ark_disasm(//build/toolchain/mac:clang_x64)",
-        "$ark_root/libpandabase:libarkbase(//build/toolchain/mac:clang_x64)",
-        "$ark_root/libpandafile:libarkfile(//build/toolchain/mac:clang_x64)",
-        "$ark_root/libziparchive:libarkziparchive(//build/toolchain/mac:clang_x64)",
+        "$ark_root/assembler:ark_asm($build_root/toolchain/mac:clang_x64)",
+        "$ark_root/disassembler:ark_disasm($build_root/toolchain/mac:clang_x64)",
+        "$ark_root/libpandabase:libarkbase($build_root/toolchain/mac:clang_x64)",
+        "$ark_root/libpandafile:libarkfile($build_root/toolchain/mac:clang_x64)",
+        "$ark_root/libziparchive:libarkziparchive($build_root/toolchain/mac:clang_x64)",
       ]
     }
   }
@@ -287,32 +286,34 @@ merge_yamls("merge_runtime_options_yamls") {
   add_yamls = [ "$ark_root/runtime/options.yaml" ] + runtime_options_yamls
 }
 
-group("bcopt_type_adapter_unit_test") {
-  if (host_os == "mac") {
-    if (host_cpu == "arm64") {
-      deps = [ "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test(//build/toolchain/mac:clang_arm64)" ]
+if (!ark_standalone_build) {
+  group("bcopt_type_adapter_unit_test") {
+    if (host_os == "mac") {
+      if (host_cpu == "arm64") {
+        deps = [ "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test($build_root/toolchain/mac:clang_arm64)" ]
+      } else {
+        deps = [ "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test($build_root/toolchain/mac:clang_x64)" ]
+      }
     } else {
-      deps = [ "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test(//build/toolchain/mac:clang_x64)" ]
+      deps = [
+        "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test($build_root/toolchain/linux:clang_x64)",
+        "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test($build_root/toolchain/mingw:mingw_x86_64)",
+      ]
     }
-  } else {
-    deps = [
-      "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test(//build/toolchain/linux:clang_x64)",
-      "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test(//build/toolchain/mingw:mingw_x86_64)",
-    ]
   }
-}
 
-group("ark_host_linux_defectscanaux_lib") {
-  deps = []
-  if (host_os == "linux") {
-    deps += [ "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux(${host_toolchain})" ]
+  group("ark_host_linux_defectscanaux_lib") {
+    deps = []
+    if (host_os == "linux") {
+      deps += [ "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux(${host_toolchain})" ]
+    }
   }
-}
 
-group("ark_defectscanaux_unittest") {
-  testonly = true
-  deps = []
-  if (host_os == "linux") {
-    deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_unittest(${host_toolchain})" ]
+  group("ark_defectscanaux_unittest") {
+    testonly = true
+    deps = []
+    if (host_os == "linux") {
+      deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_unittest(${host_toolchain})" ]
+    }
   }
 }

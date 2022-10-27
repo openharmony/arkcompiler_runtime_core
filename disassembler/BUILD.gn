@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//build/ohos.gni")
 
 config("arkdisassembler_public_config") {
   defines = [ "PANDA_WITH_ECMASCRIPT" ]
