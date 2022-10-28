@@ -29,7 +29,7 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
 % insns_uniq_sort_fmts.each do |i| # Panda::formats.each do |fmt|
 %   imm_count = 0
 %   reg_count = 0
-%
+%   id_count = 0
     case BytecodeInstruction::Format::<%=i.format.pretty.upcase%>:
 %
 %   i.operands.each do |operand|
@@ -45,7 +45,8 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
         ins.regs.push_back(bc_ins.GetVReg(<%=reg_count%>));
 %         reg_count += 1
 %      elsif (i.operands.count(&:id?) != 0)
-        ins.ids.push_back(IDToString(bc_ins, method_id));
+        ins.ids.push_back(IDToString(bc_ins, method_id, <%=id_count%>));
+%         id_count += 1
 %      end   
 %   end
         break;

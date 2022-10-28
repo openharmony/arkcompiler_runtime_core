@@ -248,11 +248,15 @@ void Disassembler::FillLiteralData(pandasm::LiteralArray *lit_array,
             lit.value_ = std::get<double>(value);
             break;
         }
-        case panda_file::LiteralTag::STRING:
-        case panda_file::LiteralTag::METHOD:
-        case panda_file::LiteralTag::GENERATORMETHOD: {
+        case panda_file::LiteralTag::STRING: {
             auto str_data = file_->GetStringData(panda_file::File::EntityId(std::get<uint32_t>(value)));
             lit.value_ = StringDataToString(str_data);
+            break;
+        }
+        case panda_file::LiteralTag::METHOD:
+        case panda_file::LiteralTag::GENERATORMETHOD: {
+            panda_file::MethodDataAccessor mda(*file_, panda_file::File::EntityId(std::get<uint32_t>(value)));
+            lit.value_ = StringDataToString(file_->GetStringData(mda.GetNameId()));
             break;
         }
         case panda_file::LiteralTag::LITERALARRAY: {
@@ -730,6 +734,10 @@ void Disassembler::GetMetaData(pandasm::Field *field, const panda_file::File::En
         }
         field->metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(offset));
     }
+    if (field->type.GetId() == panda_file::Type::TypeId::U8) {
+        const auto val = field_accessor.GetValue<uint8_t>().value();
+        field->metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U8>(val));
+    }
 }
 
 std::string Disassembler::AnnotationTagToString(const char tag) const
@@ -972,10 +980,8 @@ void Disassembler::GetRecordInfo(const panda_file::File::EntityId &record_id, Re
     ss.str(std::string());
 
     class_accessor.EnumerateFields([&](panda_file::FieldDataAccessor &field_accessor) -> void {
-        const auto offset = field_accessor.GetValue<uint32_t>().value();
         ss << "offset: 0x" << std::setfill('0') << std::setw(DEFAULT_OFFSET_WIDTH) << std::hex
-           << field_accessor.GetFieldId() << ", type: 0x" << field_accessor.GetType()
-           << ", value: 0x" << std::hex << offset;
+           << field_accessor.GetFieldId();
 
         record_info->fields_info.push_back(ss.str());
 
@@ -1306,8 +1312,13 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
     std::stringstream ss;
     for (const auto &f : record.field_list) {
         ss << "\t" << f.type.GetPandasmName() << " " << f.name;
-        if (f.metadata->GetValue().has_value() && f.type.GetId() == panda_file::Type::TypeId::U32) {
-            ss << " = 0x" << std::hex << f.metadata->GetValue().value().GetValue<uint32_t>();
+        if (f.metadata->GetValue().has_value()) {
+            if (f.type.GetId() == panda_file::Type::TypeId::U32) {
+                ss << " = 0x" << std::hex << f.metadata->GetValue().value().GetValue<uint32_t>();
+            }
+            if (f.type.GetId() == panda_file::Type::TypeId::U8) {
+                ss << " = 0x" << std::hex << static_cast<uint32_t>(f.metadata->GetValue().value().GetValue<uint8_t>());
+            }
         }
         if (record_in_table) {
             const auto field_iter = record_iter->second.field_annotations.find(f.name);
@@ -1536,18 +1547,20 @@ pandasm::Opcode Disassembler::BytecodeOpcodeToPandasmOpcode(uint8_t o) const
     return BytecodeOpcodeToPandasmOpcode(BytecodeInstruction::Opcode(o));
 }
 
-std::string Disassembler::IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id) const
+std::string Disassembler::IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id,
+                                     size_t idx) const
 {
     std::stringstream name;
-    const auto offset = file_->ResolveOffsetByIndex(method_id, bc_ins.GetId().AsIndex());
+    const auto offset = file_->ResolveOffsetByIndex(method_id, bc_ins.GetId(idx).AsIndex());
 
-    if (bc_ins.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
+    if (bc_ins.IsIdMatchFlag(idx, BytecodeInstruction::Flags::METHOD_ID)) {
         name << GetMethodSignature(offset);
-    } else if (bc_ins.HasFlag(BytecodeInstruction::Flags::STRING_ID)) {
+    } else if (bc_ins.IsIdMatchFlag(idx, BytecodeInstruction::Flags::STRING_ID)) {
         name << '\"';
         name << StringDataToString(file_->GetStringData(offset));
         name << '\"';
-    } else if (bc_ins.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
+    } else {
+        ASSERT(bc_ins.IsIdMatchFlag(idx, BytecodeInstruction::Flags::LITERALARRAY_ID));
         pandasm::LiteralArray lit_array;
         GetLiteralArrayByOffset(&lit_array, panda_file::File::EntityId(offset));
         name << SerializeLiteralArray(lit_array);
