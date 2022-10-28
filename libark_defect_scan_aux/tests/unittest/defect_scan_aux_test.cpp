@@ -167,9 +167,9 @@ int main()
 
         // GetModuleNameByInternalName
         std::string mod_name0 = abc_file->GetModuleNameByInternalName("var1");
-        TestHelper::ExpectEqual(mod_name0, "mod1");
+        TestHelper::ExpectEqual(mod_name0, "./mod1");
         std::string mod_name1 = abc_file->GetModuleNameByInternalName("ns");
-        TestHelper::ExpectEqual(mod_name1, "mod2");
+        TestHelper::ExpectEqual(mod_name1, "./mod2");
         std::string mod_name2 = abc_file->GetModuleNameByInternalName("var3");
         TestHelper::ExpectEqual(mod_name2, "../mod3");
         std::string mod_name3 = abc_file->GetModuleNameByInternalName("local_var4");
@@ -189,7 +189,7 @@ int main()
         TestHelper::ExpectEqual(ind_im_name1, "foo");
         // GetModuleNameByExportName
         std::string ind_mod_name0 = abc_file->GetModuleNameByExportName("v");
-        TestHelper::ExpectEqual(ind_mod_name0, "mod5");
+        TestHelper::ExpectEqual(ind_mod_name0, "./mod5");
         std::string ind_mod_name1 = abc_file->GetModuleNameByExportName("foo");
         TestHelper::ExpectEqual(ind_mod_name1, "../../mod7");
         std::cout << "    --- Pass ---" << std::endl << std::endl;
@@ -211,7 +211,6 @@ int main()
         auto f0 = ds_test.CheckFunction("func_main_0");
         TestHelper::ExpectTrue(f0->GetClass() == nullptr);
         TestHelper::ExpectTrue(f0->GetParentFunction() == nullptr);
-        TestHelper::ExpectEqual(f0->GetArgCount(), 3);
         size_t dc_cnt0 = f0->GetDefinedClassCount();
         TestHelper::ExpectEqual(dc_cnt0, 2);
         TestHelper::ExpectEqual(f0->GetDefinedClassByIndex(0)->GetClassName(), "#1#Bar");
@@ -229,13 +228,13 @@ int main()
         TestHelper::ExpectTrue(ds_test.ContainDefinedFunction(f0, "func17"));
         // func2
         auto f1 = ds_test.CheckFunction("func2");
-        TestHelper::ExpectEqual(f1->GetArgCount(), 2);
+        TestHelper::ExpectEqual(f1->GetArgCount(), 5);
         size_t df_cnt1 = f1->GetDefinedFunctionCount();
         TestHelper::ExpectEqual(df_cnt1, 2);
         TestHelper::ExpectTrue(ds_test.ContainDefinedFunction(f1, "func4"));
         // func10
         auto f2 = ds_test.CheckFunction("func10");
-        TestHelper::ExpectEqual(f2->GetArgCount(), 0);
+        TestHelper::ExpectEqual(f2->GetArgCount(), 3);
         size_t dc_cnt2 = f2->GetDefinedClassCount();
         TestHelper::ExpectEqual(dc_cnt2, 2);
         TestHelper::ExpectEqual(f2->GetDefinedClassByIndex(0)->GetClassName(), "#2#Bar");
@@ -373,7 +372,7 @@ int main()
         auto ci3_0 = f3->GetCalleeInfoByIndex(0);
         TestHelper::ExpectFalse(ci3_0->IsCalleeDefinite());
         TestHelper::ExpectEqual(ci3_0->GetFunctionName(), "bar");
-        TestHelper::ExpectEqual(ci3_0->GetExternalModuleName(), "mod2");
+        TestHelper::ExpectEqual(ci3_0->GetExternalModuleName(), "./mod2");
         // func7
         auto f4 = abc_file->GetFunctionByName("func7");
         size_t ci_cnt4 = f4->GetCalleeInfoCount();
@@ -509,7 +508,7 @@ int main()
         TestHelper::ExpectEqual(inst_cnt_table[InstType::GETMODULENAMESPACE_IMM8] +
                                     inst_cnt_table[InstType::WIDE_GETMODULENAMESPACE_PREF_IMM16],
                                 0);
-        TestHelper::ExpectEqual(inst_cnt_table[InstType::OPCODE_PARAMETER], 2);
+        TestHelper::ExpectEqual(inst_cnt_table[InstType::OPCODE_PARAMETER], 5);
 
         // check api of basic block
         auto bb0 = graph.GetStartBasicBlock();
@@ -548,7 +547,7 @@ int main()
         TestHelper::ExpectEqual(call_inst0_ins[1].GetUserInsts()[0], call_inst0);
         auto call_inst0_in2_type = call_inst0_ins[2].GetType();
         TestHelper::ExpectEqual(call_inst0_in2_type, InstType::OPCODE_PARAMETER);
-        TestHelper::ExpectEqual(call_inst0_ins[2].GetArgIndex(), 1);
+        TestHelper::ExpectEqual(call_inst0_ins[2].GetArgIndex(), 4);
         auto param1_usrs = call_inst0_ins[2].GetUserInsts();
         TestHelper::ExpectTrue(std::find(param1_usrs.begin(), param1_usrs.end(), call_inst0) != param1_usrs.end());
         auto call_inst0_in3_type = call_inst0_ins[3].GetType();
@@ -577,7 +576,7 @@ int main()
             std::swap(phi_inst_in0, phi_inst_in1);
         }
         TestHelper::ExpectEqual(phi_inst_in0.GetType(), InstType::OPCODE_PARAMETER);
-        TestHelper::ExpectEqual(phi_inst_in0.GetArgIndex(), 0);
+        TestHelper::ExpectEqual(phi_inst_in0.GetArgIndex(), 3);
         auto param0_usrs = phi_inst_in0.GetUserInsts();
         TestHelper::ExpectTrue(std::find(param0_usrs.begin(), param0_usrs.end(), phi_inst) != param0_usrs.end());
         TestHelper::ExpectEqual(phi_inst_in1.GetType(), InstType::ADD2_IMM8_V8);
