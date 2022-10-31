@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//build/ohos.gni")
 
 config("arkfile_public_config") {
   include_dirs = [
@@ -22,17 +21,10 @@ config("arkfile_public_config") {
     "$target_gen_dir/include",
   ]
 
-  if (!ark_standalone_build) {
-    include_dirs += [
-      "//third_party/zlib",
-      "//third_party/zlib/contrib/minizip",
-    ]
-  } else {
-    include_dirs += [
-      "$ark_third_party_root/zlib",
-      "$ark_third_party_root/zlib/contrib/minizip",
-    ]
-  }
+  include_dirs += [
+    "//third_party/zlib",
+    "//third_party/zlib/contrib/minizip",
+  ]
 
   if (is_ohos && !is_standard_system) {
     defines = [ "ENABLE_FULL_FILE_FIELDS" ]
