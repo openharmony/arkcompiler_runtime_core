@@ -21,20 +21,20 @@
 namespace OHOS {
 void MethodDataAccessorFuzzTest(const uint8_t *data, size_t size)
 {
-    auto pf = panda::panda_file::OpenPandaFileFromMemory(data, size);
-    if (pf == nullptr) {
-        return;
-    }
-    auto classes = pf->GetClasses();
-    const auto &panda_file = *pf;
-    for (size_t i = 0; i < classes.Size(); i++) {
-        panda::panda_file::File::EntityId id(classes[i]);
-        if (panda_file.IsExternal(id)) {
-            continue;
+    try {
+        auto pf = panda::panda_file::OpenPandaFileFromMemory(data, size);
+        if (pf == nullptr) {
+            return;
         }
-
-        panda::panda_file::ClassDataAccessor cda(panda_file, id);
-        cda.EnumerateMethods([&](const panda::panda_file::MethodDataAccessor &mda) {});
+        const auto &panda_file = *pf;
+        for (const auto &header : panda_file.GetIndexHeaders()) {
+            const auto &methods = panda_file.GetMethodIndex(&header);
+            for (const auto &id : methods) {
+                panda::panda_file::MethodDataAccessor mda(panda_file, id);
+            }
+        }
+    } catch (panda::panda_file::helpers::FileAccessException &e) {
+        // Known exception, no need exposing
     }
 }
 }  // namespace OHOS

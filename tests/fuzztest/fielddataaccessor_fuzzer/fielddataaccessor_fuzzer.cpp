@@ -20,27 +20,25 @@
 #include "libpandafile/field_data_accessor-inl.h"
 
 namespace OHOS {
-    void FieldDataAccessorFuzzTest(const uint8_t* data, size_t size)
-    {
+void FieldDataAccessorFuzzTest(const uint8_t* data, size_t size)
+{
+    try {
         auto pf = panda::panda_file::OpenPandaFileFromMemory(data, size);
         if (pf == nullptr) {
             return;
         }
-        auto classes = pf->GetClasses();
         const auto &panda_file = *pf;
-        for (size_t i = 0; i < classes.Size(); i++) {
-            panda::panda_file::File::EntityId id(classes[i]);
-            if (panda_file.IsExternal(id)) {
-                continue;
+        for (const auto &header : panda_file.GetIndexHeaders()) {
+            const auto &fields = panda_file.GetFieldIndex(&header);
+            for (const auto &id : fields) {
+                panda::panda_file::FieldDataAccessor fda(panda_file, id);
             }
-
-            panda::panda_file::ClassDataAccessor cda(panda_file, id);
-            cda.EnumerateFields([&](panda::panda_file::FieldDataAccessor &data_accessor) {
-                return;
-            });
         }
+    } catch (panda::panda_file::helpers::FileAccessException &e) {
+        // Known exception, no need exposing
     }
 }
+}  // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
