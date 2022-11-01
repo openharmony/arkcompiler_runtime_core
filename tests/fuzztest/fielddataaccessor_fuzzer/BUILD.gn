@@ -28,9 +28,10 @@ ohos_fuzztest("FieldDataAccessorFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-DSUPPORT_KNOWN_EXCEPTION",
   ]
   sources = [ "fielddataaccessor_fuzzer.cpp" ]
-  deps = [ "//arkcompiler/runtime_core/libpandafile:libarkfile_static" ]
+  deps = [ "//arkcompiler/runtime_core/libpandafile:libarkfile_static_fuzz" ]
 
   # Temporary adaptation for fuzztest building without musl
   if (!use_musl && (current_cpu == "arm64" || current_cpu == "arm")) {

@@ -31,6 +31,11 @@ config("arkfile_public_config") {
   }
 }
 
+config("arkfile_fuzz_config") {
+  configs = [ "//build/config/compiler:exceptions" ]
+  defines = [ "SUPPORT_KNOWN_EXCEPTION" ]
+}
+
 libarkfile_sources = [
   "annotation_data_accessor.cpp",
   "bytecode_emitter.cpp",
@@ -76,6 +81,20 @@ source_set("libarkfile_static") {
   sources = libarkfile_sources
 
   public_configs = libarkfile_configs
+
+  deps = [
+    ":arkfile_header_deps",
+    "$ark_root/libpandabase:libarkbase_static",
+    "$ark_root/libziparchive:libarkziparchive_static",
+    sdk_libc_secshared_dep,
+  ]
+}
+
+source_set("libarkfile_static_fuzz") {
+  sources = libarkfile_sources
+
+  public_configs = libarkfile_configs
+  public_configs += [ ":arkfile_fuzz_config" ]
 
   deps = [
     ":arkfile_header_deps",

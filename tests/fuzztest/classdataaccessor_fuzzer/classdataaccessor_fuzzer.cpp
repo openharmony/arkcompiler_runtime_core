@@ -19,8 +19,9 @@
 #include "libpandafile/class_data_accessor-inl.h"
 
 namespace OHOS {
-    void ClassDataAccessorFuzzTest(const uint8_t* data, size_t size)
-    {
+void ClassDataAccessorFuzzTest(const uint8_t* data, size_t size)
+{
+    try {
         auto pf = panda::panda_file::OpenPandaFileFromMemory(data, size);
         if (pf == nullptr) {
             return;
@@ -35,8 +36,11 @@ namespace OHOS {
 
             panda::panda_file::ClassDataAccessor cda(panda_file, id);
         }
+    } catch (panda::panda_file::helpers::FileAccessException &e) {
+        // Known exception, no need exposing
     }
 }
+}  // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
