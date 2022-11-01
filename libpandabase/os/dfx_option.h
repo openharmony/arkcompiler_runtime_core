@@ -22,6 +22,7 @@
 
 namespace panda::os::dfx_option {
 
+constexpr const char *INVALID_DFX_OPTION = "Invalid dfx option";
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DFX_OPTION_ELEM(D, NAME, STR) D(NAME, DfxOptionHandler::DfxOptionId::NAME##_ID, STR)
 

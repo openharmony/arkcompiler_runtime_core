@@ -27,6 +27,11 @@ config("arkbase_public_config") {
   }
 }
 
+config("arkbase_fuzz_config") {
+  configs = [ "$build_root/config/compiler:exceptions" ]
+  defines = [ "SUPPORT_KNOWN_EXCEPTION" ]
+}
+
 ark_gen_file("events_gen") {
   template_file = "events/events_gen.h.erb"
   data_file = "events/events.yaml"
@@ -178,6 +183,15 @@ libarkbase_deps = [
   ":arkbase_header_deps",
   sdk_libc_secshared_dep,
 ]
+
+source_set("libarkbase_static_fuzz") {
+  sources = libarkbase_sources
+
+  public_configs = libarkbase_configs
+  public_configs += [ ":arkbase_fuzz_config" ]
+
+  deps = libarkbase_deps
+}
 
 source_set("libarkbase_static") {
   sources = libarkbase_sources

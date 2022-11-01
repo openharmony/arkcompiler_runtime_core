@@ -242,6 +242,9 @@ void DebugInfoExtractor::Extract(const File *pf)
             File::EntityId method_id = mda.GetMethodId();
             const char *source_file = utf::Mutf8AsCString(handler.GetFile());
             const char *source_code = utf::Mutf8AsCString(handler.GetSourceCode());
+            if (UNLIKELY(source_code == nullptr)) {
+                source_code = "";
+            }
             methods_.push_back({source_file, source_code, method_id, handler.GetLineNumberTable(),
                                 handler.GetLocalVariableTable(), std::move(param_info),
                                 handler.GetColumnNumberTable()});
