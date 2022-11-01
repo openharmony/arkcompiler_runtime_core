@@ -32,7 +32,7 @@ config("arkfile_public_config") {
 }
 
 config("arkfile_fuzz_config") {
-  configs = [ "//build/config/compiler:exceptions" ]
+  configs = [ "$build_root/config/compiler:exceptions" ]
   defines = [ "SUPPORT_KNOWN_EXCEPTION" ]
 }
 
