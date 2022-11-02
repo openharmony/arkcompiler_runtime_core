@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//build/ohos.gni")
 
 ohos_executable("ark_bin") {
   sources = [ "panda.cpp" ]
@@ -36,10 +35,8 @@ ohos_executable("ark_bin") {
     "$ark_root/runtime:libarkruntime",
   ]
 
-  if (!ark_standalone_build) {
-    deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
-    configs += [ "//arkcompiler/ets_runtime:ark_jsruntime_public_config" ]
-  }
+  deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
+  configs += [ "//arkcompiler/ets_runtime:ark_jsruntime_public_config" ]
 
   output_name = "ark"
   install_enable = true

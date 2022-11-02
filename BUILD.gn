@@ -50,7 +50,7 @@ group("ark_host_linux_tools_packages") {
 
 group("ark_host_windows_tools_packages") {
   deps = []
-  if (host_os != "mac" && !ark_standalone_build) {
+  if (host_os != "mac") {
     deps += [
       "$ark_root/assembler:ark_asm($build_root/toolchain/mingw:mingw_x86_64)",
       "$ark_root/disassembler:ark_disasm($build_root/toolchain/mingw:mingw_x86_64)",
@@ -91,9 +91,7 @@ group("ark_host_mac_tools_packages") {
 
 # Common config for ark source
 config("ark_config") {
-  if (!ark_standalone_build) {
-    visibility = [ ":*" ]
-  }
+  visibility = [ ":*" ]
 
   include_dirs = [ "$ark_root" ]
   defines = [ "PANDA_TARGET_MOBILE_WITH_MANAGED_LIBS=1" ]

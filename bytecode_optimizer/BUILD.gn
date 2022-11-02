@@ -18,7 +18,7 @@ config("bytecodeopt_public_config") {
     "$target_gen_dir",
     "$ark_root/bytecode_optimizer",
   ]
-  if (enable_bytecode_optimizer && !ark_standalone_build) {
+  if (enable_bytecode_optimizer) {
     defines = [ "ENABLE_BYTECODE_OPT" ]
   }
 }

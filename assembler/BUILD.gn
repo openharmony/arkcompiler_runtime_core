@@ -158,7 +158,7 @@ source_set("ark_asm_static") {
   ]
 
   libs = platform_libs
-  if (!is_mac && !is_mingw && !ark_standalone_build) {
+  if (!is_mac && !is_mingw) {
     ldflags = platform_ldflags
   }
 }
