@@ -506,11 +506,57 @@ std::unique_ptr<const File> File::OpenUncompressedArchive(int fd, const std::str
     return std::unique_ptr<File>(new File(filename.data(), std::move(ptr)));
 }
 
+template <typename T = uint32_t>
+bool CheckHeaderElementOffset(size_t offset, size_t number, size_t file_size)
+{
+    auto number_size = number * sizeof(T);
+    if (offset > file_size || number_size > file_size || offset > file_size - number_size) {
+        return false;
+    }
+    return true;
+}
+
 bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename)
 {
     auto header = reinterpret_cast<const File::Header *>(ptr.Get());
     if (header->magic != File::MAGIC) {
         LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "'";
+        return false;
+    }
+
+    if (header->file_size < sizeof(File::Header) || header->file_size > ptr.GetSize()) {
+        LOG(ERROR, PANDAFILE) << "Invalid panda file size " << header->file_size;
+        return false;
+    }
+
+    if (!CheckHeaderElementOffset<uint8_t>(header->foreign_off, header->foreign_size, header->file_size)) {
+        LOG(ERROR, PANDAFILE) << "Invalid panda file foreign_off " << header->foreign_off <<
+            " or foreign_size " << header->foreign_size;
+        return false;
+    }
+
+    if (!CheckHeaderElementOffset(header->class_idx_off, header->num_classes, header->file_size)) {
+        LOG(ERROR, PANDAFILE) << "Invalid panda file class_idx_off " << header->class_idx_off <<
+            " or num_classes " << header->num_classes;
+        return false;
+    }
+
+    if (!CheckHeaderElementOffset(header->lnp_idx_off, header->num_lnps, header->file_size)) {
+        LOG(ERROR, PANDAFILE) << "Invalid panda file lnp_idx_off " << header->lnp_idx_off <<
+            " or num_lnps " << header->num_lnps;
+        return false;
+    }
+
+    if (!CheckHeaderElementOffset(header->literalarray_idx_off, header->num_literalarrays, header->file_size)) {
+        LOG(ERROR, PANDAFILE) << "Invalid panda file literalarray_idx_off " << header->literalarray_idx_off <<
+            " or num_literalarrays " << header->num_literalarrays;
+        return false;
+    }
+
+    if (!CheckHeaderElementOffset<File::IndexHeader>(header->index_section_off, header->num_indexes,
+        header->file_size)) {
+        LOG(ERROR, PANDAFILE) << "Invalid panda file index_section_off " << header->index_section_off <<
+            " or num_indexes " << header->num_indexes;
         return false;
     }
 
