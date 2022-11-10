@@ -14,7 +14,6 @@
  */
 
 #include "field_data_accessor.h"
-#include "helpers.h"
 
 #include "utils/leb128.h"
 
@@ -49,14 +48,18 @@ FieldDataAccessor::FieldDataAccessor(const File &panda_file, File::EntityId fiel
 
 std::optional<FieldDataAccessor::FieldValue> FieldDataAccessor::GetValueInternal()
 {
+    THROW_IF(tagged_values_sp_.Size() == 0U, File::INVALID_FILE_OFFSET);
+
     auto sp = tagged_values_sp_;
     auto tag = static_cast<FieldTag>(sp[0]);
     FieldValue value;
 
     if (tag == FieldTag::INT_VALUE) {
+        THROW_IF(sp.Size() == 0U, File::INVALID_FILE_OFFSET);
         sp = sp.SubSpan(1);
         value = static_cast<uint32_t>(helpers::ReadLeb128(&sp));
     } else if (tag == FieldTag::VALUE) {
+        THROW_IF(sp.Size() == 0U, File::INVALID_FILE_OFFSET);
         sp = sp.SubSpan(1);
 
         switch (GetType()) {

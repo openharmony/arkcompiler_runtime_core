@@ -16,6 +16,7 @@
 #ifndef PANDA_LIBPANDAFILE_FILE_H_
 #define PANDA_LIBPANDAFILE_FILE_H_
 
+#include "helpers.h"
 #include "os/mem.h"
 #include "utils/span.h"
 #include "utils/utf.h"
@@ -160,6 +161,7 @@ public:
     {
         const Header *header = GetHeader();
         Span file(GetBase(), header->file_size);
+        THROW_IF(!id.IsValid() || id.GetOffset() >= file.size(), File::INVALID_FILE_OFFSET);
         return file.Last(file.size() - id.GetOffset());
     }
 
@@ -189,6 +191,9 @@ public:
 
     const IndexHeader *GetIndexHeader(EntityId id) const
     {
+        if (UNLIKELY(!id.IsValid() || id.GetOffset() >= GetHeader()->file_size)) {
+            return nullptr;
+        }
         auto headers = GetIndexHeaders();
         auto offset = id.GetOffset();
         for (const auto &header : headers) {
@@ -204,7 +209,11 @@ public:
         auto *header = GetHeader();
         auto *index_header = GetIndexHeader(id);
         ASSERT(index_header != nullptr);
+        THROW_IF(index_header == nullptr, "index_header is null");
         Span file(GetBase(), header->file_size);
+        auto class_idx_size = index_header->class_idx_size * EntityId::GetSize();
+        THROW_IF(index_header->class_idx_off > header->file_size || class_idx_size > header->file_size ||
+            index_header->class_idx_off > header->file_size - class_idx_size, "index_header is invalid");
         auto sp = file.SubSpan(index_header->class_idx_off, index_header->class_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->class_idx_size);
     }
@@ -214,7 +223,11 @@ public:
         auto *header = GetHeader();
         auto *index_header = GetIndexHeader(id);
         ASSERT(index_header != nullptr);
+        THROW_IF(index_header == nullptr, "index_header is null");
         Span file(GetBase(), header->file_size);
+        auto method_idx_size = index_header->method_idx_size * EntityId::GetSize();
+        THROW_IF(index_header->method_idx_off > header->file_size || method_idx_size > header->file_size ||
+            index_header->method_idx_off > header->file_size - method_idx_size, "index_header is invalid");
         auto sp = file.SubSpan(index_header->method_idx_off, index_header->method_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->method_idx_size);
     }
@@ -224,7 +237,11 @@ public:
         auto *header = GetHeader();
         auto *index_header = GetIndexHeader(id);
         ASSERT(index_header != nullptr);
+        THROW_IF(index_header == nullptr, "index_header is null");
         Span file(GetBase(), header->file_size);
+        auto field_idx_size = index_header->field_idx_size * EntityId::GetSize();
+        THROW_IF(index_header->field_idx_off > header->file_size || field_idx_size > header->file_size ||
+            index_header->field_idx_off > header->file_size - field_idx_size, "index_header is invalid");
         auto sp = file.SubSpan(index_header->field_idx_off, index_header->field_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->field_idx_size);
     }
@@ -234,7 +251,11 @@ public:
         auto *header = GetHeader();
         auto *index_header = GetIndexHeader(id);
         ASSERT(index_header != nullptr);
+        THROW_IF(index_header == nullptr, "index_header is null");
         Span file(GetBase(), header->file_size);
+        auto proto_idx_size = index_header->proto_idx_size * EntityId::GetSize();
+        THROW_IF(index_header->proto_idx_off > header->file_size || proto_idx_size > header->file_size ||
+            index_header->proto_idx_off > header->file_size - proto_idx_size, "index_header is invalid");
         auto sp = file.SubSpan(index_header->proto_idx_off, index_header->proto_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->proto_idx_size);
     }
@@ -250,30 +271,45 @@ public:
     EntityId ResolveClassIndex(EntityId id, Index idx) const
     {
         auto index = GetClassIndex(id);
+        if (UNLIKELY(idx >= index.Size())) {
+            return EntityId();
+        }
         return index[idx];
     }
 
     EntityId ResolveMethodIndex(EntityId id, Index idx) const
     {
         auto index = GetMethodIndex(id);
+        if (UNLIKELY(idx >= index.Size())) {
+            return EntityId();
+        }
         return index[idx];
     }
 
     EntityId ResolveFieldIndex(EntityId id, Index idx) const
     {
         auto index = GetFieldIndex(id);
+        if (UNLIKELY(idx >= index.Size())) {
+            return EntityId();
+        }
         return index[idx];
     }
 
     EntityId ResolveProtoIndex(EntityId id, Index idx) const
     {
         auto index = GetProtoIndex(id);
+        if (UNLIKELY(idx >= index.Size())) {
+            return EntityId();
+        }
         return index[idx];
     }
 
     EntityId ResolveLineNumberProgramIndex(Index32 idx) const
     {
         auto index = GetLineNumberProgramIndex();
+        if (UNLIKELY(idx >= index.Size())) {
+            return EntityId();
+        }
         return index[idx];
     }
 
@@ -307,6 +343,8 @@ public:
 
     static std::unique_ptr<const File> OpenUncompressedArchive(int fd, const std::string_view &filename, size_t size,
                                                                uint32_t offset, OpenMode open_mode = READ_ONLY);
+
+    static constexpr const char *INVALID_FILE_OFFSET = "Invalid file offset";
 
     ~File();
 
