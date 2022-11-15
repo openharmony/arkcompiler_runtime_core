@@ -330,7 +330,7 @@ groups:
         opcode_idx: [0x6f]
         format: [op_none]
       - sig: poplexenv
-        acc: out:top
+        acc: none
         opcode_idx: [0x69]
         format: [op_none]
       - sig: deprecated.poplexenv
