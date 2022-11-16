@@ -97,6 +97,11 @@ std::unique_ptr<ScalarValue> InitScalarValue(const ScalarValue &sc_val)
                 ScalarValue::Create<Value::Type::ANNOTATION>(sc_val.GetValue<AnnotationData>()));
             break;
         }
+        case Value::Type::LITERALARRAY: {
+            copy_val = std::make_unique<ScalarValue>(
+                ScalarValue::Create<Value::Type::LITERALARRAY>(sc_val.GetValue<std::string>()));
+            break;
+        }
         default: {
             UNREACHABLE();
             copy_val = nullptr;
@@ -126,7 +131,8 @@ std::unique_ptr<Value> making_value(const AnnotationElement &ann_elem)
         case Value::Type::RECORD:
         case Value::Type::METHOD:
         case Value::Type::ENUM:
-        case Value::Type::ANNOTATION: {
+        case Value::Type::ANNOTATION:
+        case Value::Type::LITERALARRAY: {
             copy_val = InitScalarValue(*static_cast<ScalarValue *>(ann_elem.GetValue()));
             break;
         }
