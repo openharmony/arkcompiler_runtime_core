@@ -261,10 +261,7 @@ source_set("libarkruntime_set_static") {
   ]
 
   if (!is_mingw) {
-    sources += [
-      "dprofiler/dprofiler.cpp",
-      "signal_handler.cpp",
-    ]
+    sources += [ "dprofiler/dprofiler.cpp" ]
   }
 
   # irtoc_lib is enabled only for arm64 target for now, because Realease build doesn't support

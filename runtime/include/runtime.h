@@ -37,9 +37,6 @@
 #include "runtime/include/runtime_options.h"
 #include "runtime/include/gc_task.h"
 #include "runtime/include/tooling/debug_interface.h"
-#ifndef PANDA_TARGET_WINDOWS
-#include "runtime/signal_handler.h"
-#endif
 #include "runtime/mem/allocator_adapter.h"
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/gc_trigger.h"
@@ -344,13 +341,6 @@ public:
         is_jit_enabled_ = false;
     }
 
-#ifndef PANDA_TARGET_WINDOWS
-    SignalManager *GetSignalManager()
-    {
-        return signal_manager_;
-    }
-#endif
-
     static mem::GCType GetGCType(const RuntimeOptions &options, panda_file::SourceLang lang);
 
     static void SetDaemonMemoryLeakThreshold(uint32_t daemon_memory_leak_threshold);
@@ -430,10 +420,6 @@ private:
     DProfiler *dprofiler_ = nullptr;
 
     PandaVM *panda_vm_ = nullptr;
-
-#ifndef PANDA_TARGET_WINDOWS
-    SignalManager *signal_manager_ {nullptr};
-#endif
 
     // For IDE is real connected.
     bool is_debug_mode_ {false};
