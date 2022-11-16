@@ -138,8 +138,6 @@ if (is_mingw) {
       "$ark_root/platforms/unix/libpandabase/exec.cpp",
       "$ark_root/platforms/unix/libpandabase/futex/fmutex.cpp",
       "$ark_root/platforms/unix/libpandabase/futex/mutex.cpp",
-      "$ark_root/platforms/unix/libpandabase/pipe.cpp",
-      "$ark_root/platforms/unix/libpandabase/sighook.cpp",
     ]
   } else {
     libarkbase_sources += [ "$ark_root/libpandabase/os/mutex.cpp" ]
