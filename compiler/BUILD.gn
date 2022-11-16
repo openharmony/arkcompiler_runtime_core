@@ -26,7 +26,7 @@ config("arkcompiler_public_config") {
 
   include_dirs += platform_include_dirs
 
-  if (enable_bytecode_optimizer && !ark_standalone_build) {
+  if (enable_bytecode_optimizer) {
     defines = [ "ENABLE_BYTECODE_OPT" ]
   }
 

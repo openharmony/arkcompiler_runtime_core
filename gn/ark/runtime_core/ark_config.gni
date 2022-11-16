@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_root.gni")
-import("//build/ohos.gni")
 
 if (is_standard_system) {
   import("$ark_root/platforms/ohos/ark_config.gni")
