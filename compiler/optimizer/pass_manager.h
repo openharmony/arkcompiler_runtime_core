@@ -35,10 +35,8 @@ class DominatorsTree;
 class Rpo;
 class LinearOrder;
 class BoundsAnalysis;
-class MonitorAnalysis;
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ObjectTypePropagation;
-class RegAllocVerifier;
 class TypesAnalysis;
 
 namespace details {
@@ -78,7 +76,7 @@ public:
 
 using PredefinedAnalyses =
     PassTypeList<LivenessAnalyzer, LoopAnalyzer, AliasAnalysis, DominatorsTree, Rpo, LinearOrder, BoundsAnalysis,
-                 MonitorAnalysis, LiveRegisters, ObjectTypePropagation, RegAllocVerifier, TypesAnalysis>;
+                 LiveRegisters, ObjectTypePropagation, TypesAnalysis>;
 }  // namespace details
 
 class PassManager {
@@ -122,8 +120,6 @@ public:
     std::string GetFileName(const char *pass_name = nullptr, const std::string &suffix = ".cfg");
     void DumpGraph(const char *pass_name);
     void DumpLifeIntervals(const char *pass_name);
-    void InitialDumpVisualizerGraph();
-    void DumpVisualizerGraph(const char *pass_name);
 
     Graph *GetGraph()
     {

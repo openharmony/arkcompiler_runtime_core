@@ -201,50 +201,6 @@ int64_t InstBuilder::GetInstructionJumpOffset(const BytecodeInstruction* inst) {
     return INVALID_OFFSET;
 }
 
-// NOLINTNEXTLINE(readability-function-size)
-bool IrBuilderInliningAnalysis::IsSuitableForInline(const BytecodeInstruction* inst) {
-    switch(inst->GetOpcode()) {
-% runtime_insts = [/^(div|mod)u?[2i]?/, /^call/, /^(f?)(ld|st|len|new)(arr|obj)/, /throw/, /^initobj/, /^checkcast/, /^ldstatic/, /^ststatic/, /^lda.type/, /^lda.str/, /^lda.const/, /^isinstance/, /^builtin/, /^monitor/]
-% Panda::instructions.each do |inst|
-    // NOLINTNEXTLINE(bugprone-branch-clone)
-    case BytecodeInstruction::Opcode::<%= inst.opcode.upcase %>:
-%   if runtime_insts.any? { |x| x.match?(inst.mnemonic) }
-        has_runtime_calls_ = true;
-        return !options.IsCompilerInlineSimpleOnly();
-%   else
-        return true;
-%   end
-% end
-    }
-    return false;
-}
-
-// NOLINTNEXTLINE(readability-function-size)
-bool IrBuilderExternalInliningAnalysis::IsSuitableForInline(const BytecodeInstruction* inst) {
-    switch(inst->GetOpcode()) {
-% acceptable_insts = [/^(f?)mov/, /^(f?)lda/, /^(f?)sta/, /^return/, /^(f?)add/, /^(f?)sub/, /^(f?)mul/, /^(x?)or/, /^and/, /^(f?)neg/, /^not/, /^(a?)shr/, /^shl/, /^inc/, /^(u|f)?cmp/, /^[ifu][813264]{1,2}to[ifu][813264]{1,2}$/]
-% object_insts = [/^ldobj/, /^stobj/]
-% Panda::instructions.each do |inst|
-    // NOLINTNEXTLINE(bugprone-branch-clone)
-    case BytecodeInstruction::Opcode::<%= inst.opcode.upcase %>:
-%   if acceptable_insts.any? { |x| x.match?(inst.mnemonic) }
-%     if runtime_insts.any? { |x| x.match?(inst.mnemonic) }
-        return false;
-%     else
-        return true;
-%     end
-%   elsif object_insts.any? { |x| x.match?(inst.mnemonic) }
-        return true;
-%   elsif inst.jump?
-        return true;
-%   else
-        return false;
-%   end
-% end
-    }
-    return false;
-}
-
 // TODO(vpukhov): Move this logic from core into plugins/ecmascript
 // Currently we support two strategies for building IR from ecma.* instructions:
 //   1) Each ecma.* instruction is translated to a corresponding intrinsic call.
@@ -267,11 +223,7 @@ void InstBuilder::BuildEcma([[maybe_unused]] const BytecodeInstruction* bc_inst)
             if (GetGraph()->IsBytecodeOptimizer()) {
                 BuildEcmaAsIntrinsics(bc_inst);
             } else {
-                if (options.IsCompilerInlineFullIntrinsics()) {
-                    BuildEcmaFromIrtoc(bc_inst);
-                } else {
-                    BuildEcmaAsIntrinsics<true>(bc_inst);
-                }
+                BuildEcmaAsIntrinsics<true>(bc_inst);
             }
 %   elsif inst.compilable?
             // +compilable, -inlinable: ecma.* -> intrinsics for all scenarios:
@@ -462,73 +414,4 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
             return;
   }
 }
-
-// NOLINTNEXTLINE(readability-function-size)
-void InstBuilder::BuildEcmaFromIrtoc([[maybe_unused]] const BytecodeInstruction* bc_inst)
-{
-#ifdef ENABLE_BYTECODE_OPT
-    ASSERT(!GetGraph()->IsBytecodeOptimizer());  // Not applicable for optimizing bytecode
-    switch (bc_inst->GetOpcode()) {
-% Panda::instructions.select{|b| b.namespace == "ecmascript"}.each do |inst|
-%   format = "BytecodeInstruction::Format::" + inst.format.pretty.upcase
-%   vreg_index = 0
-%   imm_index = 0
-%   id_index = 0
-%   inputs = []
-%
-%   # Corner case, no inlinable IRtoC handler found:
-%   unless inst.inlinable?
-        case BytecodeInstruction::Opcode::<%= inst.opcode.upcase %>: {
-            UNREACHABLE();  // Inlinable IRtoC handler is not implemented yet
-            break;
-        }
-%     next
-%   end
-%
-%   # Generate code for inlining IRtoC handler:
-        case BytecodeInstruction::Opcode::<%= inst.opcode.upcase %>: {
-%   inst.operands.each do |param|
-%     if param.reg?
-            auto vreg<%= vreg_index %> = GetDefinition(bc_inst->GetVReg<<%= format %>, <%= vreg_index %>>());
-%       inputs.push("vreg#{vreg_index}")
-%       vreg_index = vreg_index + 1
-%     elsif param.imm?
-            auto imm<%= imm_index %>_payload = static_cast<uint32_t>(bc_inst->GetImm<<%= format %>, <%= imm_index %>>());
-            auto imm<%= imm_index %> = GetGraph()->FindOrCreateConstant(imm<%= imm_index %>_payload);
-%       inputs.push("imm#{imm_index}")
-%       imm_index = imm_index + 1
-%     elsif param.id?
-            auto id<%= id_index %>_payload = static_cast<uint32_t>(bc_inst->template GetId<<%= format %>>().AsIndex());
-            auto id<%= id_index %> = GetGraph()->FindOrCreateConstant(id<%= id_index %>_payload);
-%       inputs.push("id#{id_index}")
-%       id_index = id_index + 1
-%     else
-%       abort 'Unexpected param type'
-%     end
-%   end
-%   if inst.acc.include?('in')
-            auto acc = GetDefinitionAcc();  // According to ecma.* convention, always goes last
-%     inputs.push('acc')
-%   end
-%   if inst.properties.include?('use_ic')
-%     inputs.push('GetGraph()->FindOrCreateConstant(GetPc(bc_inst->GetAddress()))')
-%   end
-%   builder = 'Build' + inst.opcode.split('_')[0..1].map do |_| _.capitalize end.join()
-            [[maybe_unused]] auto inst = <%= builder %>(GetGraph(), this, &current_bb_, <%= inputs.empty? ? '' : inputs.join(', ') + ', ' %>GetPc(bc_inst->GetAddress()), visited_block_marker_);
-%   if inst.acc.include?('out')
-            UpdateDefinitionAcc(inst);
-%   end
-            SyncWithGraph();
-            break;
-        }
-% end
-        default: {
-            failed_ = true;
-            LOG(ERROR, COMPILER) << "Unknown ecma.* opcode: " << static_cast<int>(bc_inst->GetOpcode());
-            return;
-        }
-    }
-#endif
-}
-
 }  // namespace panda::compiler

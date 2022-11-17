@@ -348,7 +348,7 @@ void RegEncoder::InsertSpillsForDynInputsInst(compiler::Inst *inst)
     RegContentVec spill_vec(GetGraph()->GetLocalAllocator()->Adapter());  // spill_vec is used to handle callrange
 
     auto nargs = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
-    auto start = GetStartInputIndex(inst);
+    auto start = 0;
     bool range = IsIntrinsicRange(inst) || (nargs - start > MAX_NUM_NON_RANGE_ARGS && CanHoldRange(inst));
 
     compiler::Register temp = range ? range_temps_start_ : 0;
@@ -387,33 +387,6 @@ void RegEncoder::InsertSpillsForDynInputsInst(compiler::Inst *inst)
     AddMoveBefore(inst, spill_vec);
 }
 
-size_t RegEncoder::GetStartInputIndex(compiler::Inst *inst)
-{
-    return inst->GetOpcode() == compiler::Opcode::InitObject ? 1 : 0;  // exclude LoadAndInitClass
-}
-
-static void AddMoveAfter(Inst *inst, compiler::Register src, RegContent dst)
-{
-    auto sf_inst = inst->GetBasicBlock()->GetGraph()->CreateInstSpillFill();
-    sf_inst->AddMove(src, dst.reg, dst.type);
-    LOG(DEBUG, BYTECODE_OPTIMIZER) << "RegEncoder: Move v" << static_cast<int>(dst.reg) << " <- v"
-                                   << static_cast<int>(src) << " was added";
-    inst->GetBasicBlock()->InsertAfter(sf_inst, inst);
-}
-
-static bool isMoveAfter(const compiler::Inst *inst)
-{
-    switch (inst->GetOpcode()) {
-        case compiler::Opcode::LoadObject:
-            // Special case for LoadObject, because it can be register instruction.
-            return inst->GetDstReg() != compiler::ACC_REG_ID;
-        case compiler::Opcode::NewArray:
-            return true;
-        default:
-            return false;
-    }
-}
-
 void RegEncoder::InsertSpillsForInst(compiler::Inst *inst)
 {
     ASSERT(state_ == RegEncoderState::INSERT_SPILLS);
@@ -427,10 +400,6 @@ void RegEncoder::InsertSpillsForInst(compiler::Inst *inst)
 
     compiler::Register temp = 0;
     for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-        // TODO(mbolshov): make a better solution to skip instructions, that are not relevant to bytecode_opt
-        if (inst->GetInput(i).GetInst()->GetOpcode() == Opcode::LoadAndInitClass) {
-            continue;
-        }
         auto reg = inst->GetSrcReg(i);
         if (RegNeedsRenumbering(reg) && reg >= NUM_COMPACTLY_ENCODED_REGS) {
             auto res = spill_map.emplace(reg, RegContent(temp, GetRegType(inst->GetInputType(i))));
@@ -447,13 +416,6 @@ void RegEncoder::InsertSpillsForInst(compiler::Inst *inst)
     }
 
     AddMoveBefore(inst, spill_map);
-    if (isMoveAfter(inst)) {
-        auto reg = inst->GetDstReg();
-        if (RegNeedsRenumbering(reg) && reg >= NUM_COMPACTLY_ENCODED_REGS) {
-            inst->SetDstReg(temp);
-            AddMoveAfter(inst, temp, RegContent(reg, GetRegType(inst->GetType())));
-        }
-    }
 }
 
 static void IncTempsIfNeeded(const compiler::Register reg, compiler::Register &num_temps)
@@ -476,7 +438,7 @@ void RegEncoder::CalculateNumNeededTempsForInst(compiler::Inst *inst)
         ASSERT(inst->IsStaticCall() || inst->IsVirtualCall() || inst->IsInitObject() || inst->IsIntrinsic());
 
         auto nargs = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
-        size_t start = inst->GetOpcode() == compiler::Opcode::InitObject ? 1 : 0;
+        size_t start = 0;
 
         if (nargs - start > MAX_NUM_NON_RANGE_ARGS) {  // is call.range
             return;
@@ -493,15 +455,7 @@ void RegEncoder::CalculateNumNeededTempsForInst(compiler::Inst *inst)
         }
     } else {
         for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-            // TODO(mbolshov): make a better solution to skip instructions, that are not relevant to bytecode_opt
-            if (inst->GetInput(i).GetInst()->GetOpcode() == Opcode::LoadAndInitClass) {
-                continue;
-            }
             IncTempsIfNeeded(inst->GetSrcReg(i), num_temps);
-        }
-
-        if (isMoveAfter(inst)) {
-            IncTempsIfNeeded(inst->GetDstReg(), num_temps);
         }
     }
 
@@ -531,21 +485,6 @@ void RegEncoder::Check8Width([[maybe_unused]] compiler::Inst *inst)
     // TODO(aantipina): implement after it became possible to use register numbers more than 256 (#2697)
 }
 
-void RegEncoder::VisitCallStatic(GraphVisitor *visitor, Inst *inst)
-{
-    CallHelper(visitor, inst);
-}
-
-void RegEncoder::VisitCallVirtual(GraphVisitor *visitor, Inst *inst)
-{
-    CallHelper(visitor, inst);
-}
-
-void RegEncoder::VisitInitObject(GraphVisitor *visitor, Inst *inst)
-{
-    CallHelper(visitor, inst);
-}
-
 void RegEncoder::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
 {
     auto re = static_cast<RegEncoder *>(visitor);
@@ -557,75 +496,5 @@ void RegEncoder::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
     re->Check8Width(inst->CastToIntrinsic());
 }
 
-void RegEncoder::VisitLoadObject(GraphVisitor *v, Inst *inst_base)
-{
-    bool is_acc_type = inst_base->GetDstReg() == compiler::ACC_REG_ID;
-
-    auto re = static_cast<RegEncoder *>(v);
-    auto inst = inst_base->CastToLoadObject();
-    switch (inst->GetType()) {
-        case compiler::DataType::BOOL:
-        case compiler::DataType::UINT8:
-        case compiler::DataType::INT8:
-        case compiler::DataType::UINT16:
-        case compiler::DataType::INT16:
-        case compiler::DataType::UINT32:
-        case compiler::DataType::INT32:
-        case compiler::DataType::INT64:
-        case compiler::DataType::UINT64:
-        case compiler::DataType::FLOAT32:
-        case compiler::DataType::FLOAT64:
-        case compiler::DataType::REFERENCE:
-            if (is_acc_type) {
-                re->Check8Width(inst);
-            } else {
-                re->Check4Width(inst);
-            }
-            break;
-        default:
-            LOG(ERROR, BYTECODE_OPTIMIZER)
-                << "Wrong DataType for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-            re->success_ = false;
-    }
-}
-
-void RegEncoder::VisitStoreObject(GraphVisitor *v, Inst *inst_base)
-{
-    bool is_acc_type = inst_base->GetSrcReg(1) == compiler::ACC_REG_ID;
-
-    auto re = static_cast<RegEncoder *>(v);
-    auto inst = inst_base->CastToStoreObject();
-    switch (inst->GetType()) {
-        case compiler::DataType::BOOL:
-        case compiler::DataType::UINT8:
-        case compiler::DataType::INT8:
-        case compiler::DataType::UINT16:
-        case compiler::DataType::INT16:
-        case compiler::DataType::UINT32:
-        case compiler::DataType::INT32:
-        case compiler::DataType::INT64:
-        case compiler::DataType::UINT64:
-        case compiler::DataType::FLOAT32:
-        case compiler::DataType::FLOAT64:
-        case compiler::DataType::REFERENCE:
-            if (is_acc_type) {
-                re->Check8Width(inst);
-            } else {
-                re->Check4Width(inst);
-            }
-            break;
-        default:
-            LOG(ERROR, BYTECODE_OPTIMIZER)
-                << "Wrong DataType for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-            re->success_ = false;
-    }
-}
-
-void RegEncoder::VisitSpillFill([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
-void RegEncoder::VisitConstant([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
-void RegEncoder::VisitLoadString([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
-void RegEncoder::VisitReturn([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
-void RegEncoder::VisitCatchPhi([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
-void RegEncoder::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
 #include "generated/check_width.cpp"
 }  // namespace panda::bytecodeopt

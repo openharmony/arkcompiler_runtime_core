@@ -360,26 +360,6 @@ void BytecodeGen::EncodeSta(compiler::Register reg, compiler::DataType::Type typ
     result_.emplace_back(sta);
 }
 
-void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst)
-{
-    UNREACHABLE();
-}
-
-void BytecodeGen::VisitCallStatic(GraphVisitor *visitor, Inst *inst)
-{
-    CallHandler(visitor, inst);
-}
-
-void BytecodeGen::VisitCallVirtual(GraphVisitor *visitor, Inst *inst)
-{
-    CallHandler(visitor, inst);
-}
-
-void BytecodeGen::VisitInitObject(GraphVisitor *visitor, Inst *inst)
-{
-    CallHandler(visitor, inst);
-}
-
 // NOLINTNEXTLINE(readability-function-size)
 void BytecodeGen::VisitIf(GraphVisitor *v, Inst *inst_base)
 {

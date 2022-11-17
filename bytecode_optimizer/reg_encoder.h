@@ -121,19 +121,7 @@ public:
         return GetGraph()->GetBlocksRPO();
     }
 
-    static void VisitSpillFill([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
-    static void VisitConstant([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
-    static void VisitCatchPhi([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
-    static void VisitCallStatic(GraphVisitor *v, Inst *inst);
-    static void VisitCallVirtual(GraphVisitor *v, Inst *inst);
-    static void VisitInitObject(GraphVisitor *v, Inst *inst);
     static void VisitIntrinsic(GraphVisitor *v, Inst *inst);
-    static void VisitLoadObject(GraphVisitor *v, Inst *inst_base);
-    static void VisitStoreObject(GraphVisitor *v, Inst *inst_base);
-    static void VisitLoadString([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
-    static void VisitReturn([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
-
-    static void VisitCastValueToAnyType(GraphVisitor *v, Inst *inst);
 
 #include "generated/reg_encoder_visitors.inc"
 
@@ -156,7 +144,6 @@ private:
     void InsertSpills();
     void InsertSpillsForInst(compiler::Inst *inst);
     void InsertSpillsForDynInputsInst(compiler::Inst *inst);
-    size_t GetStartInputIndex(compiler::Inst *inst);
 
     compiler::Register GetNumArgsFromGraph() const
     {

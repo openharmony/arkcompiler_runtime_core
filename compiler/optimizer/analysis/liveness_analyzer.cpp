@@ -19,7 +19,6 @@
 #include "liveness_analyzer.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
-#include "optimizer/optimizations/locations_builder.h"
 
 namespace panda::compiler {
 LivenessAnalyzer::LivenessAnalyzer(Graph *graph)
@@ -41,9 +40,6 @@ LivenessAnalyzer::LivenessAnalyzer(Graph *graph)
 
 bool LivenessAnalyzer::RunImpl()
 {
-    if (!RunLocationsBuilder(GetGraph())) {
-        return false;
-    }
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->RunPass<LoopAnalyzer>();
     ResetLiveness();
@@ -236,45 +232,10 @@ void LivenessAnalyzer::BuildInstLifeNumbers()
             }
             life_number += LIFE_NUMBER_GAP;
             SetInstLifeNumber(inst, life_number);
-            SetUsePositions(inst, life_number);
             insts_by_life_number_.push_back(inst);
         }
         life_number += LIFE_NUMBER_GAP;
         SetBlockLiveRange(block, {block_begin, life_number});
-    }
-}
-
-void LivenessAnalyzer::SetUsePositions(Inst *user_inst, LifeNumber life_number)
-{
-    if (GetGraph()->IsBytecodeOptimizer()) {
-        return;
-    }
-    if (user_inst->IsCatchPhi() || user_inst->IsSaveState()) {
-        return;
-    }
-    for (size_t i = 0; i < user_inst->GetInputsCount(); i++) {
-        auto location = user_inst->GetLocation(i);
-        if (!location.IsAnyRegister()) {
-            continue;
-        }
-        auto input_inst = user_inst->GetDataFlowInput(i);
-        auto li = GetInstLifeIntervals(input_inst);
-        if (location.IsRegisterValid()) {
-            use_table_.AddUseOnFixedLocation(input_inst, location, life_number);
-        } else if (location.IsUnallocatedRegister()) {
-            li->AddUsePosition(life_number);
-        }
-    }
-
-    // Constant can be defined without register
-    if (user_inst->IsConst() && options.IsCompilerRematConst()) {
-        return;
-    }
-
-    // If instruction required dst register, set use position in the beginning of the interval
-    auto li = GetInstLifeIntervals(user_inst);
-    if (!li->NoDest()) {
-        li->AddUsePosition(life_number);
     }
 }
 
@@ -369,8 +330,6 @@ void LivenessAnalyzer::ProcessBlockLiveInstructions(BasicBlock *block, InstLiveS
             auto current_live_range = LiveRange {GetBlockLiveRange(block).GetBegin(), inst_life_number};
             AdjustInputsLifetime(inst, current_live_range, live_set);
         }
-
-        BlockFixedRegisters(inst);
     }
 
     // The lifetime interval of phis instructions starts at the beginning of the block
@@ -615,32 +574,6 @@ void LivenessAnalyzer::DumpLocationsUsage(std::ostream &out) const
                 delim = "; ";
             }
             out << std::endl;
-        }
-    }
-}
-
-void LivenessAnalyzer::BlockFixedRegisters(Inst *inst)
-{
-    if (GetGraph()->IsBytecodeOptimizer() || GetGraph()->GetMode().IsFastPath()) {
-        return;
-    }
-
-    auto block_from = GetInstLifeNumber(inst);
-    if (IsCallBlockingRegisters(inst)) {
-        BlockPhysicalRegisters<false>(block_from);
-        BlockPhysicalRegisters<true>(block_from);
-    }
-    for (auto i = 0U; i < inst->GetInputsCount(); ++i) {
-        BlockFixedLocationRegister(inst->GetLocation(i), block_from);
-    }
-    BlockFixedLocationRegister(inst->GetDstLocation(), block_from);
-
-    if (inst->IsParameter()) {
-        BlockFixedLocationRegister(inst->CastToParameter()->GetLocationData().GetSrc(), block_from);
-        // Block second parameter register that contains number of actual arguments in case of
-        // dynamic methods as it is used in parameter's code generation
-        if (GetGraph()->GetMode().IsDynamicMethod()) {
-            BlockReg<false>(Target(GetGraph()->GetArch()).GetParamRegId(1), block_from);
         }
     }
 }

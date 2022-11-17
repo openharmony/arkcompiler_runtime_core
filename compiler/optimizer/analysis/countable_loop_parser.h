@@ -49,12 +49,7 @@ public:
     std::optional<CountableLoopInfo> Parse();
 
 private:
-    bool IsInstIncOrDec(Inst *inst);
-    bool SetUpdateAndTestInputs();
     Inst *SetIndexAndRetrunConstInst();
-    void SetNormalizedConditionCode();
-    bool IsConditionCodeAcceptable();
-    BasicBlock *FindLoopExitBlock();
 
 private:
     const Loop &loop_;

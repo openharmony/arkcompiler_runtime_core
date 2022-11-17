@@ -19,45 +19,6 @@
 #include "compiler_logger.h"
 
 namespace panda::compiler {
-
-/* static */
-DataType::Type InstBuilder::ConvertPbcType(panda_file::Type type)
-{
-    switch (type.GetId()) {
-        case panda_file::Type::TypeId::VOID:
-            return DataType::VOID;
-        case panda_file::Type::TypeId::U1:
-            return DataType::BOOL;
-        case panda_file::Type::TypeId::I8:
-            return DataType::INT8;
-        case panda_file::Type::TypeId::U8:
-            return DataType::UINT8;
-        case panda_file::Type::TypeId::I16:
-            return DataType::INT16;
-        case panda_file::Type::TypeId::U16:
-            return DataType::UINT16;
-        case panda_file::Type::TypeId::I32:
-            return DataType::INT32;
-        case panda_file::Type::TypeId::U32:
-            return DataType::UINT32;
-        case panda_file::Type::TypeId::I64:
-            return DataType::INT64;
-        case panda_file::Type::TypeId::U64:
-            return DataType::UINT64;
-        case panda_file::Type::TypeId::F32:
-            return DataType::FLOAT32;
-        case panda_file::Type::TypeId::F64:
-            return DataType::FLOAT64;
-        case panda_file::Type::TypeId::REFERENCE:
-            return DataType::REFERENCE;
-        case panda_file::Type::TypeId::TAGGED:
-        case panda_file::Type::TypeId::INVALID:
-        default:
-            UNREACHABLE();
-    }
-    UNREACHABLE();
-}
-
 void InstBuilder::Prepare(bool is_inlined_graph)
 {
     SetCurrentBlock(GetGraph()->GetStartBlock());
@@ -76,11 +37,6 @@ void InstBuilder::Prepare(bool is_inlined_graph)
         SetParamSpillFill(GetGraph(), param_inst, num_args, i, type);
 
         UpdateDefinition(reg_num, param_inst);
-    }
-
-    // We don't need to create SafePoint at the beginning of the callee graph
-    if (options.IsCompilerUseSafepoint() && !is_inlined_graph) {
-        GetGraph()->GetStartBlock()->AppendInst(CreateSafePoint(GetGraph()->GetStartBlock()));
     }
 }
 
@@ -350,26 +306,6 @@ SaveStateInst *InstBuilder::CreateSaveState(Opcode opc, size_t pc)
     return inst;
 }
 
-ClassInst *InstBuilder::CreateLoadAndInitClassGeneric(uint32_t class_id, size_t pc)
-{
-    auto class_ptr = GetRuntime()->ResolveType(GetGraph()->GetMethod(), class_id);
-    ClassInst *inst = nullptr;
-    if (class_ptr == nullptr) {
-        ASSERT(!graph_->IsBytecodeOptimizer());
-        inst = graph_->CreateInstUnresolvedLoadAndInitClass(DataType::REFERENCE, pc);
-        if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
-            GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), class_id,
-                                                             UnresolvedTypesInterface::SlotKind::CLASS);
-        }
-    } else {
-        inst = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc);
-    }
-    inst->SetTypeId(class_id);
-    inst->SetMethod(GetGraph()->GetMethod());
-    inst->SetClass(class_ptr);
-    return inst;
-}
-
 DataType::Type InstBuilder::GetCurrentMethodReturnType() const
 {
     return GetRuntime()->GetMethodReturnType(GetMethod());
@@ -466,17 +402,4 @@ void InstBuilder::CleanupCatchPhis()
         }
     }
 }
-
-void InstBuilder::SyncWithGraph()
-{
-    size_t idx = current_defs_ - &defs_[0];
-    size_t size = defs_.size();
-    defs_.resize(graph_->GetVectorBlocks().size(), InstVector(graph_->GetLocalAllocator()->Adapter()));
-    for (size_t i = size; i < defs_.size(); i++) {
-        defs_[i].resize(VREGS_AND_ARGS_COUNT + 1);
-        std::copy(defs_[idx].cbegin(), defs_[idx].cend(), defs_[i].begin());
-    }
-    current_defs_ = &defs_[current_bb_->GetId()];
-}
-
 }  // namespace panda::compiler
