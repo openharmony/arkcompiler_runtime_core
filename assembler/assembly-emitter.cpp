@@ -127,59 +127,6 @@ static panda_file::Type::TypeId GetTypeId(Value::Type type)
 }
 
 /* static */
-bool AsmEmitter::CheckValueType(Value::Type value_type, Type type, const Program &program)
-{
-    auto value_type_id = GetTypeId(value_type);
-    if (value_type_id != type.GetId()) {
-        SetLastError("Inconsistent element (" + AnnotationElement::TypeToString(value_type) +
-                     ") and function's return type (" + type.GetName() + ")");
-        return false;
-    }
-
-    switch (value_type) {
-        case Value::Type::STRING:
-        case Value::Type::RECORD:
-        case Value::Type::ANNOTATION:
-        case Value::Type::ENUM: {
-            auto it = program.record_table.find(type.GetName());
-            if (it == program.record_table.cend()) {
-                SetLastError("Record " + type.GetName() + " not found");
-                return false;
-            }
-
-            auto &record = it->second;
-            if (value_type == Value::Type::ANNOTATION && !record.metadata->IsAnnotation() &&
-                !record.metadata->IsRuntimeAnnotation() && !record.metadata->IsRuntimeTypeAnnotation() &&
-                !record.metadata->IsTypeAnnotation()) {
-                SetLastError("Record " + type.GetName() + " isn't annotation");
-                return false;
-            }
-
-            if (value_type == Value::Type::ENUM && (record.metadata->GetAccessFlags() & ACC_ENUM) == 0) {
-                SetLastError("Record " + type.GetName() + " isn't enum");
-                return false;
-            }
-
-            break;
-        }
-        case Value::Type::ARRAY: {
-            if (!type.IsArray()) {
-                SetLastError("Inconsistent element (" + AnnotationElement::TypeToString(value_type) +
-                             ") and function's return type (" + type.GetName() + ")");
-                return false;
-            }
-
-            break;
-        }
-        default: {
-            break;
-        }
-    }
-
-    return true;
-}
-
-/* static */
 std::string AsmEmitter::GetMethodSignatureFromProgram(const std::string &name, const Program &program)
 {
     if (IsSignatureOrMangled(name)) {
@@ -263,146 +210,6 @@ panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(
         default:
             return nullptr;
     }
-}
-
-/* static */
-bool AsmEmitter::CheckValueRecordCase(const Value *value, const Program &program)
-{
-    auto t = value->GetAsScalar()->GetValue<Type>();
-    if (!t.IsObject()) {
-        return true;
-    }
-
-    auto record_name = t.GetName();
-    bool is_found;
-    if (t.IsArray()) {
-        auto it = program.array_types.find(t);
-        is_found = it != program.array_types.cend();
-    } else {
-        auto it = program.record_table.find(record_name);
-        is_found = it != program.record_table.cend();
-    }
-
-    if (!is_found) {
-        SetLastError("Incorrect value: record " + record_name + " not found");
-        return false;
-    }
-
-    return true;
-}
-
-/* static */
-bool AsmEmitter::CheckValueMethodCase(const Value *value, const Program &program)
-{
-    auto function_name = value->GetAsScalar()->GetValue<std::string>();
-    auto it = program.function_table.find(function_name);
-    if (it == program.function_table.cend()) {
-        SetLastError("Incorrect value: function " + function_name + " not found");
-        return false;
-    }
-
-    return true;
-}
-
-/* static */
-bool AsmEmitter::CheckValueEnumCase(const Value *value, Type type, const Program &program)
-{
-    auto enum_value = value->GetAsScalar()->GetValue<std::string>();
-    auto record_name = GetOwnerName(enum_value);
-    auto field_name = GetItemName(enum_value);
-
-    if (record_name != type.GetName()) {
-        SetLastError("Incorrect value: Expected " + type.GetName() + " enum record");
-        return false;
-    }
-
-    const auto &record = program.record_table.find(record_name)->second;
-    auto it = std::find_if(record.field_list.cbegin(), record.field_list.cend(),
-                           [&field_name](const Field &field) { return field.name == field_name; });
-    if (it == record.field_list.cend()) {
-        SetLastError("Incorrect value: Enum field " + enum_value + " not found");
-        return false;
-    }
-
-    const auto &field = *it;
-    if ((field.metadata->GetAccessFlags() & ACC_ENUM) == 0) {
-        SetLastError("Incorrect value: Field " + enum_value + " isn't enum");
-        return false;
-    }
-
-    return true;
-}
-
-/* static */
-bool AsmEmitter::CheckValueArrayCase(const Value *value, Type type, const Program &program)
-{
-    auto component_type = type.GetComponentType();
-    auto value_component_type = value->GetAsArray()->GetComponentType();
-
-    if (value_component_type == Value::Type::VOID && value->GetAsArray()->GetValues().empty()) {
-        return true;
-    }
-
-    if (!CheckValueType(value_component_type, component_type, program)) {
-        SetLastError("Incorrect array's component type: " + GetLastError());
-        return false;
-    }
-
-    for (auto &elem_value : value->GetAsArray()->GetValues()) {
-        if (!CheckValue(&elem_value, component_type, program)) {
-            SetLastError("Incorrect array's element: " + GetLastError());
-            return false;
-        }
-    }
-
-    return true;
-}
-
-/* static */
-bool AsmEmitter::CheckValue(const Value *value, Type type, const Program &program)
-{
-    auto value_type = value->GetType();
-
-    if (!CheckValueType(value_type, type, program)) {
-        SetLastError("Incorrect type: " + GetLastError());
-        return false;
-    }
-
-    switch (value_type) {
-        case Value::Type::RECORD: {
-            if (!CheckValueRecordCase(value, program)) {
-                return false;
-            }
-
-            break;
-        }
-        case Value::Type::METHOD: {
-            if (!CheckValueMethodCase(value, program)) {
-                return false;
-            }
-
-            break;
-        }
-        case Value::Type::ENUM: {
-            if (!CheckValueEnumCase(value, type, program)) {
-                return false;
-            }
-
-            break;
-        }
-        case Value::Type::ARRAY: {
-            if (!CheckValueArrayCase(value, type, program)) {
-                return false;
-            }
-
-            break;
-        }
-        default: {
-            break;
-        }
-    }
-
-    return true;
 }
 
 /* static */
@@ -639,29 +446,9 @@ AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const
 
         ASSERT(tag_type != '0');
 
-        auto function_name = record.name + "." + name;
-
-        function_name = GetMethodSignatureFromProgram(function_name, program);
-
-        if (record.HasImplementation()) {
-            auto func_it = program.function_table.find(function_name);
-            if (func_it == program.function_table.cend()) {
-                // Definitions of the system annotations may be absent.
-                // So print message and continue if corresponding function isn't found.
-                LOG(INFO, ASSEMBLER) << "Function " << function_name << " not found";
-            } else {
-                auto &function = func_it->second;
-
-                if (!CheckValue(value, function.return_type, program)) {
-                    SetLastError("Incorrect annotation element " + function_name + ": " + GetLastError());
-                    return nullptr;
-                }
-            }
-        }
-
         auto *item = CreateValueItem(container, value, program, entities);
         if (item == nullptr) {
-            SetLastError("Cannot create value item for annotation element " + function_name + ": " + GetLastError());
+            SetLastError("Cannot create value item for annotation element " + name + ": " + GetLastError());
             return nullptr;
         }
 

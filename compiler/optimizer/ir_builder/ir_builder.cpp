@@ -61,9 +61,6 @@ bool IrBuilder::RunImpl()
     GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
     GetGraph()->RunPass<LoopAnalyzer>();
     inst_builder.FixInstructions();
-    if (GetGraph()->GetRuntime()->IsMemoryBarrierRequired(GetMethod())) {
-        SetMemoryBarrierFlag();
-    }
 
     if (options.IsCompilerPrintStats() || options.WasSetCompilerDumpStatsCsv()) {
         uint64_t pbc_inst_num = 0;
@@ -75,22 +72,6 @@ bool IrBuilder::RunImpl()
     COMPILER_LOG(INFO, IR_BUILDER) << "IR successfully built: " << GetGraph()->GetVectorBlocks().size()
                                    << " basic blocks, " << GetGraph()->GetCurrentInstructionId() << " instructions";
     return true;
-}
-
-void IrBuilder::SetMemoryBarrierFlag()
-{
-    for (auto pre_end : GetGraph()->GetEndBlock()->GetPredsBlocks()) {
-        if (pre_end->IsTryEnd()) {
-            ASSERT(pre_end->GetPredsBlocks().size() == 1U);
-            pre_end = pre_end->GetPredecessor(0);
-        }
-        auto last_inst = pre_end->GetLastInst();
-        ASSERT(last_inst != nullptr);
-        if (last_inst->GetOpcode() == Opcode::Return) {
-            ASSERT(last_inst->GetType() == DataType::VOID);
-            last_inst->SetFlag(inst_flags::MEM_BARRIER);
-        }
-    }
 }
 
 bool IrBuilder::CheckMethodLimitations(const BytecodeInstructions &instructions, size_t vregs_count)
@@ -140,31 +121,6 @@ bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *inst_builder, const
         auto ss = inst_builder->CreateSaveStateDeoptimize(bb->GetGuestPc());
         bb->AppendInst(ss);
         COMPILER_LOG(DEBUG, IR_BUILDER) << "Create save state deoptimize: " << *ss;
-    }
-
-    if (bb->IsLoopHeader() && !bb->GetLoop()->IsTryCatchLoop()) {
-        // Prepend SaveSateOSR as a first instruction in the loop header
-        // TODO (a.popov) Support osr-entry for loops with catch-block back-edge
-        if (GetGraph()->IsOsrMode()) {
-            auto backedges = bb->GetLoop()->GetBackEdges();
-            auto is_catch = [](BasicBlock *basic_block) { return basic_block->IsCatch(); };
-            bool has_catch_backedge = std::find_if(backedges.begin(), backedges.end(), is_catch) != backedges.end();
-            if (has_catch_backedge) {
-                COMPILER_LOG(WARNING, IR_BUILDER)
-                    << "Osr-entry for loops with catch-handler as back-edge is not supported";
-                return false;
-            }
-            bb->SetOsrEntry(true);
-            auto ss = inst_builder->CreateSaveStateOsr(bb);
-            bb->AppendInst(ss);
-            COMPILER_LOG(DEBUG, IR_BUILDER) << "create save state OSR: " << *ss;
-        }
-
-        if (options.IsCompilerUseSafepoint()) {
-            auto sp = inst_builder->CreateSafePoint(bb);
-            bb->AppendInst(sp);
-            COMPILER_LOG(DEBUG, IR_BUILDER) << "create safepoint: " << *sp;
-        }
     }
 
     ASSERT(bb->GetGuestPc() != INVALID_PC);
@@ -599,32 +555,5 @@ void IrBuilder::RestoreTryEnd(const TryCodeBlock &try_block)
             try_block.end_bb->AddSucc(succ);
         }
     }
-}
-
-bool IrBuilderInliningAnalysis::RunImpl()
-{
-    auto panda_file = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
-    panda_file::MethodDataAccessor mda(*panda_file,
-                                       panda_file::File::EntityId(GetGraph()->GetRuntime()->GetMethodId(GetMethod())));
-    auto code_id = mda.GetCodeId();
-    if (!code_id.has_value()) {
-        return false;
-    }
-    panda_file::CodeDataAccessor cda(*panda_file, code_id.value());
-
-    // TODO(msherstennikov): Support inlining methods with try/catch
-    if (cda.GetTriesSize() != 0) {
-        return false;
-    }
-
-    BytecodeInstructions instructions(GetGraph()->GetRuntime()->GetMethodCode(GetMethod()),
-                                      GetGraph()->GetRuntime()->GetMethodCodeSize(GetMethod()));
-
-    for (auto inst : instructions) {
-        if (!IsSuitableForInline(&inst)) {
-            return false;
-        }
-    }
-    return true;
 }
 }  // namespace panda::compiler

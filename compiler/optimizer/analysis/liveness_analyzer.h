@@ -583,9 +583,7 @@ private:
     LifeNumber GetLoopEnd(Loop *loop);
     LiveRange GetPropagatedLiveRange(Inst *inst, LiveRange live_range);
     void AdjustCatchPhiInputsLifetime(Inst *inst);
-    void SetUsePositions(Inst *user_inst, LifeNumber life_number);
 
-    void BlockFixedRegisters(Inst *inst);
     template <bool is_fp>
     void BlockReg(Register reg, LifeNumber block_from);
     template <bool is_fp>

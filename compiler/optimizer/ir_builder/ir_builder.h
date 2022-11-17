@@ -137,7 +137,6 @@ private:
     void MarkTryCatchBlocks(Marker marker);
     template <class Callback>
     void EnumerateTryBlocksCoveredPc(uint32_t pc, const Callback &callback);
-    void SetMemoryBarrierFlag();
     void ConnectTryCodeBlock(const TryCodeBlock &try_block, const ArenaMap<uint32_t, BasicBlock *> &catch_blocks);
     void ProcessThrowableInstructions(InstBuilder *inst_builder, Inst *throwable_inst);
     void RestoreTryEnd(const TryCodeBlock &try_block);
@@ -152,58 +151,6 @@ private:
     RuntimeInterface::MethodPtr method_ = nullptr;
     bool is_inlined_graph_ {false};
     CallInst *caller_inst_ {nullptr};
-};
-
-class IrBuilderInliningAnalysis : public Analysis {
-public:
-    IrBuilderInliningAnalysis(Graph *graph, RuntimeInterface::MethodPtr method) : Analysis(graph), method_(method) {}
-    ~IrBuilderInliningAnalysis() override = default;
-    NO_COPY_SEMANTIC(IrBuilderInliningAnalysis);
-    NO_MOVE_SEMANTIC(IrBuilderInliningAnalysis);
-
-    bool RunImpl() override;
-
-    const char *GetPassName() const override
-    {
-        return "IrBuilderInlineAnalysis";
-    }
-
-    auto GetMethod() const
-    {
-        return method_;
-    }
-
-    auto HasRuntimeCalls() const
-    {
-        return has_runtime_calls_;
-    }
-
-private:
-    virtual bool IsSuitableForInline(const BytecodeInstruction *inst);
-
-private:
-    RuntimeInterface::MethodPtr method_;
-    bool has_runtime_calls_ {false};
-};
-
-class IrBuilderExternalInliningAnalysis : public IrBuilderInliningAnalysis {
-public:
-    IrBuilderExternalInliningAnalysis(Graph *graph, RuntimeInterface::MethodPtr method)
-        : IrBuilderInliningAnalysis(graph, method)
-    {
-    }
-
-    NO_COPY_SEMANTIC(IrBuilderExternalInliningAnalysis);
-    NO_MOVE_SEMANTIC(IrBuilderExternalInliningAnalysis);
-    ~IrBuilderExternalInliningAnalysis() override = default;
-
-    const char *GetPassName() const override
-    {
-        return "IrBuilderExternalInliningAnalysis";
-    }
-
-private:
-    bool IsSuitableForInline(const BytecodeInstruction *inst) override;
 };
 
 }  // namespace panda::compiler

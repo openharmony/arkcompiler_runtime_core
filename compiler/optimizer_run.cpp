@@ -24,37 +24,28 @@
 #include "optimizer/code_generator/method_properties.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_checker.h"
-#include "optimizer/ir/visualizer_printer.h"
 #include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/analysis/bounds_analysis.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/linear_order.h"
 #include "optimizer/analysis/loop_analyzer.h"
-#include "optimizer/analysis/monitor_analysis.h"
 #include "optimizer/analysis/rpo.h"
 #include "optimizer/optimizations/balance_expressions.h"
-#include "optimizer/optimizations/branch_elimination.h"
-#include "optimizer/optimizations/checks_elimination.h"
 #include "optimizer/optimizations/code_sink.h"
 #include "optimizer/optimizations/deoptimize_elimination.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/if_conversion.h"
-#include "optimizer/optimizations/inlining.h"
-#include "optimizer/optimizations/licm.h"
 #include "optimizer/optimizations/loop_peeling.h"
 #include "optimizer/optimizations/loop_unroll.h"
 #include "optimizer/optimizations/lowering.h"
-#include "optimizer/optimizations/lse.h"
 #include "optimizer/optimizations/memory_barriers.h"
 #include "optimizer/optimizations/memory_coalescing.h"
-#include "optimizer/optimizations/peepholes.h"
 #include "optimizer/optimizations/redundant_loop_elimination.h"
 #include "optimizer/optimizations/regalloc/reg_alloc.h"
 #include "optimizer/optimizations/scheduler.h"
 #include "optimizer/optimizations/try_catch_resolving.h"
 #include "optimizer/optimizations/types_resolving.h"
 #include "optimizer/optimizations/vn.h"
-#include "optimizer/optimizations/cse.h"
 #include "optimizer/optimizations/move_constants.h"
 #include "optimizer/optimizations/adjust_arefs.h"
 
@@ -70,11 +61,6 @@ static inline bool RunCodegenPass(Graph *graph)
 
 bool RunOptimizations(Graph *graph)
 {
-#if !defined(NDEBUG) && !defined(PANDA_TARGET_MOBILE)
-    if (options.IsCompilerVisualizerDump()) {
-        graph->GetPassManager()->InitialDumpVisualizerGraph();
-    }
-#endif  // NDEBUG && PANDA_TARGET_MOBILE
     auto finalizer = [graph](void * /* unused */) { graph->GetPassManager()->Finalize(); };
     std::unique_ptr<void, decltype(finalizer)> pp(&finalizer, finalizer);
 
@@ -96,10 +82,6 @@ bool RunOptimizations(Graph *graph)
             graph->RunPass<Inlining>();
         }
         graph->RunPass<TryCatchResolving>();
-        if (!graph->RunPass<MonitorAnalysis>()) {
-            LOG(WARNING, COMPILER) << "Compiler detected incorrect monitor policy";
-            return false;
-        }
         graph->RunPass<Peepholes>();
         graph->RunPass<BranchElimination>();
         graph->RunPass<ValNum>();
@@ -122,7 +104,6 @@ bool RunOptimizations(Graph *graph)
         if (graph->IsAotMode()) {
             graph->RunPass<Cse>();
         }
-        graph->RunPass<ChecksElimination>();
         graph->RunPass<LoopUnroll>(options.GetCompilerLoopUnrollInstLimit(), options.GetCompilerLoopUnrollFactor());
         graph->RunPass<BalanceExpressions>();
         if (graph->RunPass<Peepholes>()) {
@@ -155,10 +136,6 @@ bool RunOptimizations(Graph *graph)
         // catch-handlers; After supporting catch-handlers' compilation, this pass can be run in the optimizing mode
         // only.
         graph->RunPass<TryCatchResolving>();
-        if (!graph->RunPass<MonitorAnalysis>()) {
-            LOG(WARNING, COMPILER) << "Compiler detected incorrect monitor policy";
-            return false;
-        }
     }
 
     bool fatal_on_err = !options.IsCompilerAllowBackendFailures();

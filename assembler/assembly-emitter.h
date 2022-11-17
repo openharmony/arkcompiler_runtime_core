@@ -150,13 +150,6 @@ private:
         bool emit_debug_info, AsmEntityCollections &entities,
         std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> primitive_types);
 
-    static bool CheckValueType(Value::Type value_type, Type type, const Program &program);
-
-    static bool CheckValueEnumCase(const Value *value, Type type, const Program &program);
-    static bool CheckValueArrayCase(const Value *value, Type type, const Program &program);
-    static bool CheckValueMethodCase(const Value *value, const Program &program);
-    static bool CheckValueRecordCase(const Value *value, const Program &program);
-    static bool CheckValue(const Value *value, Type type, const Program &program);
     static std::string GetMethodSignatureFromProgram(const std::string &name, const Program &program);
 
     static panda_file::LiteralItem *CreateLiteralItem(

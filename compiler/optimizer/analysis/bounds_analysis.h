@@ -46,8 +46,6 @@ public:
     DEFAULT_MOVE_SEMANTIC(BoundsRange);
     ~BoundsRange() = default;
 
-    void SetLenArray(const Inst *inst);
-
     const Inst *GetLenArray()
     {
         return len_array_;
@@ -57,20 +55,6 @@ public:
     int64_t GetRight() const;
 
     BoundsRange FitInType(DataType::Type type) const;
-
-    BoundsRange Neg() const;
-
-    BoundsRange Abs() const;
-
-    BoundsRange Add(const BoundsRange &range) const;
-
-    BoundsRange Sub(const BoundsRange &range) const;
-
-    BoundsRange Mul(const BoundsRange &range) const;
-
-    BoundsRange Div(const BoundsRange &range) const;
-
-    static BoundsRange Mod(const BoundsRange &range);
 
     bool IsConst() const;
 
@@ -105,12 +89,6 @@ public:
     static RangePair NarrowBoundsCase6(ConditionCode cc, RangePair const &ranges);
 
     static RangePair TryNarrowBoundsByCC(ConditionCode cc, RangePair const &ranges);
-
-    static int64_t AddWithOverflowCheck(int64_t left, int64_t right);
-
-    static int64_t MulWithOverflowCheck(int64_t left, int64_t right);
-
-    static int64_t DivWithOverflowCheck(int64_t left, int64_t right);
 
     static constexpr int64_t MAX_RANGE_VALUE = INT64_MAX;
     static constexpr int64_t MIN_RANGE_VALUE = INT64_MIN;
@@ -164,13 +142,6 @@ public:
         return &bounds_range_info_;
     }
 
-    static void VisitNeg(GraphVisitor *v, Inst *inst);
-    static void VisitAbs(GraphVisitor *v, Inst *inst);
-    static void VisitAdd(GraphVisitor *v, Inst *inst);
-    static void VisitSub(GraphVisitor *v, Inst *inst);
-    static void VisitMod(GraphVisitor *v, Inst *inst);
-    static void VisitDiv(GraphVisitor *v, Inst *inst);
-    static void VisitMul(GraphVisitor *v, Inst *inst);
     static void VisitIf([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitIfImm(GraphVisitor *v, Inst *inst);
     static void VisitPhi(GraphVisitor *v, Inst *inst);
@@ -179,14 +150,8 @@ public:
 private:
     static bool CheckTriangleCase(const BasicBlock *block, const BasicBlock *tgt_block);
 
-    static BoundsRange UpdateLenArray(BoundsRange range, const Inst *len_array, const Inst *upper);
     static void CalcNewBoundsRangeForCompare(GraphVisitor *v, BasicBlock *block, ConditionCode cc, Inst *left,
                                              Inst *right, BasicBlock *tgt_block);
-    template <Opcode opc>
-    static void CalcNewBoundsRangeUnary(GraphVisitor *v, const Inst *inst);
-    template <Opcode opc>
-    static void CalcNewBoundsRangeBinary(GraphVisitor *v, const Inst *inst);
-
 private:
     BoundsRangeInfo bounds_range_info_;
 };

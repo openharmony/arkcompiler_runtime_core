@@ -17,58 +17,14 @@
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "reg_alloc_graph_coloring.h"
-#include "reg_alloc_linear_scan.h"
 #include "reg_alloc_resolver.h"
 
 namespace panda::compiler {
-static constexpr size_t INST_LIMIT_FOR_GRAPH_COLORING = 5000;
-
-bool IsGraphColoringEnable(const Graph *graph)
-{
-    if (graph->GetArch() == Arch::AARCH32 || !graph->IsAotMode() || !options.IsCompilerAotRa()) {
-        return false;
-    }
-
-    size_t inst_count = 0;
-    for (auto bb : graph->GetBlocksRPO()) {
-        for ([[maybe_unused]] auto inst : bb->AllInsts()) {
-            ++inst_count;
-        }
-    }
-    return inst_count < INST_LIMIT_FOR_GRAPH_COLORING;
-}
-
-bool ShouldSkipAllocation(Graph *graph)
-{
-#ifndef PANDA_TARGET_WINDOWS
-    // Parameters spill-fills are empty
-    return graph->GetCallingConvention() == nullptr && !graph->IsBytecodeOptimizer();
-#else
-    return !graph->IsBytecodeOptimizer();
-#endif
-}
-
 bool RegAlloc(Graph *graph)
 {
-    if (ShouldSkipAllocation(graph)) {
-        return false;
-    }
-
     graph->RunPass<Cleanup>();
 
-    if (graph->IsBytecodeOptimizer()) {
-        RegAllocResolver(graph).ResolveCatchPhis();
-        return graph->RunPass<RegAllocGraphColoring>(VIRTUAL_FRAME_SIZE);
-    }
-
-    bool ra_passed = false;
-    if (IsGraphColoringEnable(graph)) {
-        ra_passed = graph->RunPass<RegAllocGraphColoring>();
-    }
-
-    if (!ra_passed) {
-        ra_passed = graph->RunPass<RegAllocLinearScan>();
-    }
-    return ra_passed;
+    RegAllocResolver(graph).ResolveCatchPhis();
+    return graph->RunPass<RegAllocGraphColoring>(VIRTUAL_FRAME_SIZE);
 }
 }  // namespace panda::compiler

@@ -102,9 +102,6 @@ public:
     }
     static void VisitSpillFill(GraphVisitor *v, Inst *inst);
     static void VisitConstant(GraphVisitor *v, Inst *inst);
-    static void VisitCallStatic(GraphVisitor *visitor, Inst *inst);
-    static void VisitCallVirtual(GraphVisitor *visitor, Inst *inst);
-    static void VisitInitObject(GraphVisitor *visitor, Inst *inst);
     static void VisitCatchPhi(GraphVisitor *visitor, Inst *inst);
 
     static void VisitIf(GraphVisitor *v, Inst *inst_base);
@@ -114,7 +111,6 @@ public:
     static void IfImmNonZero(GraphVisitor *v, Inst *inst_base);
     static void IfImm64(GraphVisitor *v, Inst *inst_base);
     static void VisitIntrinsic(GraphVisitor *v, Inst *inst_base);
-    static void CallHandler(GraphVisitor *visitor, Inst *inst);
     static void VisitLoadString(GraphVisitor *v, Inst *inst_base);
     static void VisitReturn(GraphVisitor *v, Inst *inst_base);
 

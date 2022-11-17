@@ -143,16 +143,12 @@ templates:
     %     end
     %   end
     % elsif inst.acc_and_operands[1].id?
-    %     if inst.opcode =~ /lda_const/
-    BuildLoadConstArray(instruction);
-    %     else
     BuildLoadFromPool<Opcode::<%= inst.opcode =~ /lda_type/ ? 'LoadType' : 'LoadString' %>>(instruction);
     %       if inst.opcode =~ /lda_str/
     if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
         TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), static_cast<int>(GetPc(instruction->GetAddress())));
     }
     %       end
-    %     end
     % else
     % raise "Unsupported instruction type" unless inst.acc_and_operands[1].reg?
     UpdateDefinitionAcc(GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>()));
@@ -190,19 +186,6 @@ templates:
     auto inst = graph_->CreateInst<%= opcode %>(GetCurrentMethodReturnType(), GetPc(instruction->GetAddress()));
     <%=template('operands', inst, '')-%>
     AddInstruction(inst);
-  call: |-
-    % is_range = inst.opcode.include? 'range'
-    % is_virtual = inst.opcode.include? 'virt'
-    % is_dynamic = inst.opcode.start_with? 'calli_dyn'
-    % if (is_dynamic)
-    BuildDynamicCall(instruction, <%= is_range ? 'true' : 'false' %>);
-    % else
-    %  acc_read = inst.acc_read?
-    BuildCall<Opcode::<%= is_virtual ? 'CallVirtual' : 'CallStatic' %>>(instruction, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>);
-    % end
-  monitor: |-
-    % is_enter = inst.mnemonic.end_with?('enter')
-    BuildMonitor(instruction, GetDefinitionAcc(), <%= is_enter %>);
   ecma: |-
     % name = inst.opcode.upcase.split('')[1]
     % case name
@@ -245,37 +228,6 @@ templates:
     }
     %     end
     % end
-  builtin: |-
-    BuildBuiltin(instruction);
-  newobj: |-
-    BuildNewObject(instruction);
-  initobj: |-
-    % is_range = inst.opcode.include? 'range'
-    BuildInitObject(instruction, <%= is_range ? 'true' : 'false' %>);
-  ldobj: |-
-    BuildLoadObject< <%= inst.acc_write? %> >(instruction, <%= get_type(inst.dtype) %>);
-  stobj: |-
-    BuildStoreObject< <%= inst.acc_read? %> >(instruction, <%= get_type(inst.type(0)) %>);
-  ldstatic: |-
-    BuildLoadStatic(instruction, <%= get_type(inst.dtype) %>);
-  ststatic: |-
-    BuildStoreStatic(instruction, <%= get_type(inst.type(0)) %>);
-  ldarr: |-
-    BuildLoadArray(instruction, <%= get_type(inst.type(1)) %>);
-  starr: |-
-    BuildStoreArray(instruction, <%= get_type(inst.type(1)) %>);
-  newarr: |-
-    BuildNewArray(instruction);
-  lda.const: |-
-    BuildLoadConstArray(instruction);
-  lenarr: |-
-    BuildLenArray(instruction);
-  checkcast: |-
-    BuildCheckCast(instruction);
-  isinstance: |-
-    BuildIsInstance(instruction);
-  throw: |-
-    BuildThrow(instruction);
   nop: |-
   unimplemented: |-
     // TODO(msherstennikov): implement

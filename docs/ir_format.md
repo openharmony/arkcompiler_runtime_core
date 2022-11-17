@@ -34,7 +34,6 @@ Second, we need to support the transfer of information between optimizations.
 * [Memory Coalescing](../compiler/docs/memory_coalescing_doc.md)
 * [Peepholes](../compiler/docs/peephole_doc.md)
 * [Redundant Loop Elimination](../compiler/docs/redundant_loop_elimination_doc.md)
-* [Register allocator](../compiler/docs/reg_alloc_linear_scan_doc.md)
 * [Scheduler](../compiler/docs/scheduler_doc.md)
 * [Value Numbering](../compiler/docs/vn_doc.md)
 

@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <cstddef>
 #include "assembler/assembly-literals.h"
+#include "constants.h"
 #include "cross_values.h"
 #include "datatype.h"
 #include "ir-dyn-base-types.h"
