@@ -57,7 +57,6 @@ set(UNIX_SOURCES_COMMON
     ${PANDA_ROOT}/platforms/unix/libpandabase/filesystem.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/library_loader_resolve_symbol.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/mem.cpp
-    ${PANDA_ROOT}/platforms/unix/libpandabase/sighook.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/trace.cpp
     ${ARKBASE_LTO_UNIX_SOURCES}
 )
@@ -147,8 +146,7 @@ if(PANDA_TARGET_UNIX)
     set(ARKBASE_LTO_SOURCES ${ARKBASE_LTO_SOURCES} ${ARKBASE_LTO_UNIX_SOURCES})
     if(NOT PANDA_TARGET_MACOS)
         set(SOURCES ${SOURCES}
-            ${PANDA_ROOT}/platforms/unix/libpandabase/exec.cpp
-            ${PANDA_ROOT}/platforms/unix/libpandabase/pipe.cpp)
+            ${PANDA_ROOT}/platforms/unix/libpandabase/exec.cpp)
     endif()
 elseif (PANDA_TARGET_WINDOWS)
     set(SOURCES ${WINDOWS_SOURCES})
