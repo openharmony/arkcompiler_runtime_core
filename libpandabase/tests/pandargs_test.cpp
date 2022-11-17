@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 
 namespace panda::test {
-TEST(libpandargs, TestAPI)
+HWTEST(libpandargs, TestAPI, testing::ext::TestSize.Level0)
 {
     static const bool ref_def_bool = false;
     static const int ref_def_int = 0;
@@ -274,7 +274,7 @@ TEST(libpandargs, TestAPI)
     // expect hex values processed right
     {
         static const uint64_t refUint64 = 274877906959;
-        static const int refInt = 64;
+        static const uint64_t refInt = 64;
         static const int argcUint64Int = 3;
         static const char* argvUint64Int[argcUint64Int];
         argvUint64Int[0] = "gtest_app";
@@ -317,7 +317,7 @@ TEST(libpandargs, TestAPI)
     // expect hex values processed right
     {
         static const uint64_t ref_uint64 = 274877906944;
-        static const int ref_int = 64;
+        static const uint64_t ref_int = 64;
         static const int argc_uint64_int = 3;
         static const char *argv_uint64_int[argc_uint64_int];
         argv_uint64_int[0] = "gtest_app";
@@ -465,8 +465,6 @@ TEST(libpandargs, TestAPI)
 
     // expect wrong positive and negative integer values with range processed right
     {
-        static const int ref_int_pos = 101;
-        static const int ref_int_neg = -101;
         static const int argc_int_only = 3;
         static const char *argv_int_only[argc_int_only];
         argv_int_only[0] = "gtest_app";
@@ -497,8 +495,6 @@ TEST(libpandargs, TestAPI)
 
     // expect wrong uint32_t values with range processed right
     {
-        static const uint32_t ref_int_min = -1;
-        static const uint32_t ref_int_max = 1000000001;
         static const int argc_int_only = 3;
         static const char *argv_int_only[argc_int_only];
         argv_int_only[0] = "gtest_app";
@@ -529,8 +525,6 @@ TEST(libpandargs, TestAPI)
 
     // expect wrong uint64_t values with range processed right
     {
-        static const uint64_t ref_int_min = -1;
-        static const uint64_t ref_int_max = 100000000001;
         static const int argc_int_only = 3;
         static const char *argv_int_only[argc_int_only];
         argv_int_only[0] = "gtest_app";
@@ -830,7 +824,7 @@ TEST(libpandargs, TestAPI)
     }
 }
 
-TEST(libpandargs, CompoundArgs)
+HWTEST(libpandargs, CompoundArgs, testing::ext::TestSize.Level0)
 {
     PandArg<bool> sub_bool_arg("bool", false, "Sample boolean argument");
     PandArg<int> sub_int_arg("int", 12, "Sample integer argument");

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ struct DuplicateFD {
     int stferrValue = ::dup(STDERR_VALUE);
 };
 
-TEST(UniqueFd, Construct)
+HWTEST(UniqueFd, Construct, testing::ext::TestSize.Level0)
 {
     DuplicateFD dupDF;
     auto fd_a = UniqueFd();
@@ -57,7 +57,7 @@ TEST(UniqueFd, Construct)
     EXPECT_EQ(fd_h.Get(), dupDF.stferrValue);
 }
 
-TEST(UniqueFd, Equal)
+HWTEST(UniqueFd, Equal, testing::ext::TestSize.Level0)
 {
     DuplicateFD dupDF;
     auto fd_a = UniqueFd();
@@ -84,7 +84,7 @@ TEST(UniqueFd, Equal)
     EXPECT_EQ(fd_h.Get(), dupDF.stferrValue);
 }
 
-TEST(UniqueFd, Release)
+HWTEST(UniqueFd, Release, testing::ext::TestSize.Level0)
 {
     DuplicateFD dupDF;
     auto fd_a = UniqueFd();
@@ -107,7 +107,7 @@ TEST(UniqueFd, Release)
     EXPECT_EQ(num_d, dupDF.stferrValue);
 }
 
-TEST(UniqueFd, Reset)
+HWTEST(UniqueFd, Reset, testing::ext::TestSize.Level0)
 {
     DuplicateFD dupDF;
 

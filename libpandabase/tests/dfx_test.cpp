@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ void MapDfxOption(std::map<DfxOptionHandler::DfxOption, uint8_t> &option_map, Df
     }
 }
 
-TEST(DfxController, Initialization)
+HWTEST(DfxController, Initialization, testing::ext::TestSize.Level0)
 {
     if (DfxController::IsInitialized()) {
         DfxController::Destroy();
@@ -85,7 +85,7 @@ TEST(DfxController, Initialization)
     EXPECT_FALSE(DfxController::IsInitialized());
 }
 
-TEST(DfxController, TestResetOptionValueFromString)
+HWTEST(DfxController, TestResetOptionValueFromString, testing::ext::TestSize.Level0)
 {
     if (DfxController::IsInitialized()) {
         DfxController::Destroy();
@@ -97,51 +97,6 @@ TEST(DfxController, TestResetOptionValueFromString)
 
     DfxController::ResetOptionValueFromString("dfx-log:1");
     EXPECT_EQ(DfxController::GetOptionValue(DfxOptionHandler::DFXLOG), 1);
-
-    DfxController::Destroy();
-    EXPECT_FALSE(DfxController::IsInitialized());
-}
-
-TEST(DfxController, TestPrintDfxOptionValues)
-{
-    if (DfxController::IsInitialized()) {
-        DfxController::Destroy();
-    }
-    EXPECT_FALSE(DfxController::IsInitialized());
-
-    Logger::InitializeStdLogging(Logger::Level::INFO, panda::LoggerComponentMaskAll);
-    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::DFX));
-
-    DfxController::Initialize();
-    EXPECT_TRUE(DfxController::IsInitialized());
-
-    testing::internal::CaptureStderr();
-
-    DfxController::PrintDfxOptionValues();
-
-    std::string err = testing::internal::GetCapturedStderr();
-    uint32_t tid = os::thread::GetCurrentThreadId();
-#ifdef PANDA_TARGET_UNIX
-    std::string res = helpers::string::Format(
-        "[TID %06x] E/dfx: DFX option: compiler-nullcheck, option values: 1\n"
-        "[TID %06x] E/dfx: DFX option: signal-catcher, option values: 1\n"
-        "[TID %06x] E/dfx: DFX option: signal-handler, option values: 1\n"
-        "[TID %06x] E/dfx: DFX option: sigquit, option values: 1\n"
-        "[TID %06x] E/dfx: DFX option: sigusr1, option values: 1\n"
-        "[TID %06x] E/dfx: DFX option: sigusr2, option values: 1\n"
-        "[TID %06x] E/dfx: DFX option: mobile-log, option values: 1\n"
-        "[TID %06x] E/dfx: DFX option: hung-update, option values: 0\n"
-        "[TID %06x] E/dfx: DFX option: reference-dump, option values: 1\n"
-        "[TID %06x] E/dfx: DFX option: dfx-log, option values: 0\n",
-        tid, tid, tid, tid, tid, tid, tid, tid, tid, tid, tid);
-#else
-    std::string res = helpers::string::Format(
-        "[TID %06x] E/dfx: DFX option: dfx-log, option values: 0\n", tid, tid);
-#endif
-    EXPECT_EQ(err, res);
-
-    Logger::Destroy();
-    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::DFX));
 
     DfxController::Destroy();
     EXPECT_FALSE(DfxController::IsInitialized());

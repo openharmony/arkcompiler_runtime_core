@@ -28,7 +28,8 @@
             "sub_component": [],
             "inner_kits": [],
             "test": [
-                "//arkcompiler/runtime_core/tests/fuzztest:fuzztest"
+                "//arkcompiler/runtime_core/tests/fuzztest:fuzztest",
+                "//arkcompiler/runtime_core:runtime_core_unittest"
             ]
         }
     }

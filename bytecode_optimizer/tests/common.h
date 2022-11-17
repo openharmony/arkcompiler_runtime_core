@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef BYTECODE_OPTIMIZER_TESTS_COMMON_H_
-#define BYTECODE_OPTIMIZER_TESTS_COMMON_H_
+#ifndef BYTECODE_OPTIMIZER_TESTS_COMMON_H
+#define BYTECODE_OPTIMIZER_TESTS_COMMON_H
 
 #include <gtest/gtest.h>
 #include <string>
@@ -812,4 +812,4 @@ public:
 
 }  // namespace panda::bytecodeopt
 
-#endif  // BYTECODE_OPTIMIZER_TESTS_COMMON_H_
+#endif  // BYTECODE_OPTIMIZER_TESTS_COMMON_H

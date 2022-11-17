@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ protected:
     }
 };
 
-TEST_F(BaseMemStatsTest, CodeStatistic)
+HWTEST_F(BaseMemStatsTest, CodeStatistic, testing::ext::TestSize.Level0)
 {
     static constexpr size_t N = 100;
     BaseMemStats stats;
@@ -51,7 +51,7 @@ TEST_F(BaseMemStatsTest, CodeStatistic)
     ASSERT_EQ(sum - N, stats.GetFootprint(SpaceType::SPACE_TYPE_CODE));
 }
 
-TEST_F(BaseMemStatsTest, AllocationsOverAllocator)
+HWTEST_F(BaseMemStatsTest, AllocationsOverAllocator, testing::ext::TestSize.Level0)
 {
     BaseMemStats stats;
     void *tmp;
@@ -66,7 +66,7 @@ TEST_F(BaseMemStatsTest, AllocationsOverAllocator)
     tmp = ca.AllocateCode(sizeof(buff2), static_cast<void *>(&buff2[0]));
 
     ASSERT_EQ(size1 + size2, stats.GetAllocated(SpaceType::SPACE_TYPE_CODE));
-    ASSERT_EQ(0, stats.GetFreed(SpaceType::SPACE_TYPE_CODE));
+    ASSERT_EQ(0U, stats.GetFreed(SpaceType::SPACE_TYPE_CODE));
     ASSERT_EQ(size1 + size2, stats.GetFootprint(SpaceType::SPACE_TYPE_CODE));
 
     stats.RecordFreeRaw(size2, SpaceType::SPACE_TYPE_CODE);
