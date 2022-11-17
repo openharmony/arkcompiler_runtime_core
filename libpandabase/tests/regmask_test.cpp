@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ void CompareWithBitset(RegMask mask, BitsetType base)
 {
     ASSERT_EQ(mask.Count(), base.count());
     if (base.any()) {
-        ASSERT_EQ(mask.GetMinRegister(), Ctz(base.to_ulong()));
+        ASSERT_EQ(mask.GetMinRegister(), static_cast<uint32_t>(Ctz(base.to_ulong())));
         ASSERT_EQ(mask.GetMaxRegister(), base.size() - Clz(static_cast<RegMask::ValueType>(base.to_ulong())) - 1);
     }
     ASSERT_EQ(mask.Size(), base.size());
@@ -64,7 +64,7 @@ void TestDistance(RegMask mask, size_t bit, size_t bits_before, size_t bits_afte
     ASSERT_EQ(mask.GetDistanceFromHead(bit), bits_after);
 }
 
-TEST(RegMask, Base)
+HWTEST(RegMask, Base, testing::ext::TestSize.Level0)
 {
     TestRegMask(MakeMask(0, 3, 2, 17, 25, 31));
     TestRegMask(MakeMask(1, 4, 8, 3, 24, 28, 30));

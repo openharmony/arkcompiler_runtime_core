@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,24 @@
 
 namespace panda::helpers::math::test {
 
-TEST(MathHelpers, GetIntLog2)
+HWTEST(MathHelpers, GetIntLog2, testing::ext::TestSize.Level0)
 {
-    for (int i = 1; i < 32; i++) {
-        uint64_t val = 1U << i;
+    uint64_t val = 0;
+    for (uint32_t i = 1; i < 32; i++) {
+        val = 1U << i;
         EXPECT_EQ(GetIntLog2(val), i);
         EXPECT_EQ(GetIntLog2(val), log2(static_cast<double>(val)));
     }
 
     for (int i = 1; i < 32; i++) {
-        uint64_t val = (1U << i) + (i == 31 ? -1 : 1);
+        val = (1U << i) + (i == 31 ? -1 : 1);
 #ifndef NDEBUG
         EXPECT_DEATH_IF_SUPPORTED(GetIntLog2(val), "");
 #endif
     }
 }
 
-TEST(MathHelpers, IsPowerOfTwo)
+HWTEST(MathHelpers, IsPowerOfTwo, testing::ext::TestSize.Level0)
 {
     EXPECT_TRUE(IsPowerOfTwo(1));
     EXPECT_TRUE(IsPowerOfTwo(2));
@@ -50,23 +51,32 @@ TEST(MathHelpers, IsPowerOfTwo)
     EXPECT_FALSE(IsPowerOfTwo(100));
 }
 
-TEST(MathHelpers, GetPowerOfTwoValue32)
+HWTEST(MathHelpers, GetPowerOfTwoValue32, testing::ext::TestSize.Level0)
 {
     for (int i = 0; i <= 1; i++) {
-        EXPECT_EQ(GetPowerOfTwoValue32(i), 1);
+        EXPECT_EQ(GetPowerOfTwoValue32(i), 1U);
     }
     for (int i = 2; i <= 2; i++) {
-        EXPECT_EQ(GetPowerOfTwoValue32(i), 2);
+        EXPECT_EQ(GetPowerOfTwoValue32(i), 2U);
     }
     for (int i = 9; i <= 16; i++) {
-        EXPECT_EQ(GetPowerOfTwoValue32(i), 16);
+        EXPECT_EQ(GetPowerOfTwoValue32(i), 16U);
     }
     for (int i = 33; i <= 64; i++) {
-        EXPECT_EQ(GetPowerOfTwoValue32(i), 64);
+        EXPECT_EQ(GetPowerOfTwoValue32(i), 64U);
     }
     for (int i = 1025; i <= 2048; i++) {
-        EXPECT_EQ(GetPowerOfTwoValue32(i), 2048);
+        EXPECT_EQ(GetPowerOfTwoValue32(i), 2048U);
     }
+}
+
+HWTEST(MathHelpers, MinAndMaxTest, testing::ext::TestSize.Level0)
+{
+    ASSERT_EQ(0.0, panda::helpers::math::min<float>(0.0, 0.0));
+    ASSERT_EQ(1.0, panda::helpers::math::min<float>(1.0, 2.0));
+
+    ASSERT_EQ(0.0, panda::helpers::math::max<float>(0.0, 0.0));
+    ASSERT_EQ(2.0, panda::helpers::math::max<float>(2.0, 1.0));
 }
 
 }  // namespace panda::helpers::math::test

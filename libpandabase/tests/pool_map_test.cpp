@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ private:
     PoolMap pool_map_;
 };
 
-TEST_F(PoolMapTest, TwoConsistentPoolsTest)
+HWTEST_F(PoolMapTest, TwoConsistentPoolsTest, testing::ext::TestSize.Level0)
 {
     static constexpr size_t FIRST_POOL_SIZE = 4 * MINIMAL_POOL_SIZE;
     static constexpr size_t SECOND_POOL_SIZE = 10 * MINIMAL_POOL_SIZE;
@@ -163,7 +163,7 @@ TEST_F(PoolMapTest, TwoConsistentPoolsTest)
     ResetPoolMap();
 }
 
-TEST_F(PoolMapTest, AddRemoveDifferentPoolsTest)
+HWTEST_F(PoolMapTest, AddRemoveDifferentPoolsTest, testing::ext::TestSize.Level0)
 {
     static constexpr size_t MAX_POOL_SIZE = 256 * MINIMAL_POOL_SIZE;
     static constexpr size_t ITERATIONS = 200;

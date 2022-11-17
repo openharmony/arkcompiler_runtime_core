@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 
 namespace panda::panda_file::test {
-TEST(File, TestGetVersion)
+HWTEST(File, TestGetVersion, testing::ext::TestSize.Level0)
 {
     std::string versionstr;
     for (size_t i = 0; i < File::VERSION_SIZE; i++) {
@@ -31,7 +31,7 @@ TEST(File, TestGetVersion)
     EXPECT_EQ(GetVersion(version), versionstr);
 }
 
-TEST(File, GetMinVersion)
+HWTEST(File, GetMinVersion, testing::ext::TestSize.Level0)
 {
     std::string versionstr;
     for (size_t i = 0; i < File::VERSION_SIZE; i++) {
