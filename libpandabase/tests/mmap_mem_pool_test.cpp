@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ private:
     MmapMemPool *instance_;
 };
 
-TEST_F(MMapMemPoolTest, HeapOOMTest)
+HWTEST_F(MMapMemPoolTest, HeapOOMTest, testing::ext::TestSize.Level0)
 {
     MmapMemPool *memPool = CreateMMapMemPool(4_MB);
 
@@ -74,7 +74,7 @@ TEST_F(MMapMemPoolTest, HeapOOMTest)
     memPool->FreePool(pool1.GetMem(), pool1.GetSize());
 }
 
-TEST_F(MMapMemPoolTest, HeapOOMAndAllocInOtherSpacesTest)
+HWTEST_F(MMapMemPoolTest, HeapOOMAndAllocInOtherSpacesTest, testing::ext::TestSize.Level0)
 {
     MmapMemPool *memPool = CreateMMapMemPool(4_MB, 1_MB, 1_MB, 1_MB);
 
@@ -96,7 +96,7 @@ TEST_F(MMapMemPoolTest, HeapOOMAndAllocInOtherSpacesTest)
     memPool->FreePool(pool5.GetMem(), pool5.GetSize());
 }
 
-TEST_F(MMapMemPoolTest, GetAllocatorInfoTest)
+HWTEST_F(MMapMemPoolTest, GetAllocatorInfoTest, testing::ext::TestSize.Level0)
 {
     static constexpr AllocatorType ALLOC_TYPE = AllocatorType::BUMP_ALLOCATOR;
     static constexpr size_t POOL_SIZE = 4_MB;
@@ -130,35 +130,29 @@ TEST_F(MMapMemPoolTest, GetAllocatorInfoTest)
     delete allocator_addr;
 }
 
-TEST_F(MMapMemPoolTest, CheckLimitsForInternalSpacesTest)
+HWTEST_F(MMapMemPoolTest, CheckLimitsForInternalSpacesTest, testing::ext::TestSize.Level0)
 {
 #ifndef PANDA_TARGET_32
-    MmapMemPool *memPool = CreateMMapMemPool(1_GB, 5_GB, 5_GB, 5_GB);
-    Pool object_pool = memPool->AllocPool(1_GB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::BUMP_ALLOCATOR);
-    Pool internal_pool = memPool->AllocPool(5_GB, SpaceType::SPACE_TYPE_COMPILER, AllocatorType::BUMP_ALLOCATOR);
-    Pool code_pool = memPool->AllocPool(5_GB, SpaceType::SPACE_TYPE_CODE, AllocatorType::BUMP_ALLOCATOR);
-    Pool compiler_pool = memPool->AllocPool(5_GB, SpaceType::SPACE_TYPE_INTERNAL, AllocatorType::BUMP_ALLOCATOR);
+    MmapMemPool *mem_pool = CreateMMapMemPool(1_MB, 2_MB, 2_MB, 2_MB);
+    Pool object_pool = mem_pool->AllocPool(1_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::BUMP_ALLOCATOR);
+    Pool internal_pool = mem_pool->AllocPool(2_MB, SpaceType::SPACE_TYPE_COMPILER, AllocatorType::BUMP_ALLOCATOR);
+    Pool code_pool = mem_pool->AllocPool(2_MB, SpaceType::SPACE_TYPE_CODE, AllocatorType::BUMP_ALLOCATOR);
+    Pool compiler_pool = mem_pool->AllocPool(2_MB, SpaceType::SPACE_TYPE_INTERNAL, AllocatorType::BUMP_ALLOCATOR);
     // Check that these pools has been created successfully
     ASSERT_TRUE(object_pool.GetMem() != nullptr);
     ASSERT_TRUE(internal_pool.GetMem() != nullptr);
     ASSERT_TRUE(code_pool.GetMem() != nullptr);
     ASSERT_TRUE(compiler_pool.GetMem() != nullptr);
-    // Check that part of internal pools located in 64 bits address space
-    ASSERT_TRUE((ToUintPtr(internal_pool.GetMem()) + internal_pool.GetSize() - 1U) >
-                std::numeric_limits<uint32_t>::max());
-    ASSERT_TRUE((ToUintPtr(code_pool.GetMem()) + code_pool.GetSize() - 1U) > std::numeric_limits<uint32_t>::max());
-    ASSERT_TRUE((ToUintPtr(compiler_pool.GetMem()) + compiler_pool.GetSize() - 1U) >
-                std::numeric_limits<uint32_t>::max());
 
     // cleaning
-    memPool->FreePool(object_pool.GetMem(), object_pool.GetSize());
-    memPool->FreePool(internal_pool.GetMem(), internal_pool.GetSize());
-    memPool->FreePool(code_pool.GetMem(), code_pool.GetSize());
-    memPool->FreePool(compiler_pool.GetMem(), compiler_pool.GetSize());
+    mem_pool->FreePool(object_pool.GetMem(), object_pool.GetSize());
+    mem_pool->FreePool(internal_pool.GetMem(), internal_pool.GetSize());
+    mem_pool->FreePool(code_pool.GetMem(), code_pool.GetSize());
+    mem_pool->FreePool(compiler_pool.GetMem(), compiler_pool.GetSize());
 #endif
 }
 
-TEST_F(MMapMemPoolTest, PoolReturnTest)
+HWTEST_F(MMapMemPoolTest, PoolReturnTest, testing::ext::TestSize.Level0)
 {
     MmapMemPool *memPool = CreateMMapMemPool(8_MB);
 
@@ -186,7 +180,7 @@ TEST_F(MMapMemPoolTest, PoolReturnTest)
     memPool->FreePool(pool7.GetMem(), pool7.GetSize());
 }
 
-TEST_F(MMapMemPoolTest, CheckEnoughPoolsTest)
+HWTEST_F(MMapMemPoolTest, CheckEnoughPoolsTest, testing::ext::TestSize.Level0)
 {
     static constexpr size_t POOL_SIZE = 4_MB;
     MmapMemPool *memPool = CreateMMapMemPool(10_MB);

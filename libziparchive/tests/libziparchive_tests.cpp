@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ static void GenerateZipfile(const char *data, const char *archivename, int N, ch
     // Append a bunch of text files to the test archive
     for (i = (N - 1); i >= 0; --i) {
         (void)sprintf_s(archive_filename, MAX_DIR_SIZE, "%d.txt", i);
-        (void)sprintf_s(buf, MAX_BUFFER_SIZE, "%d%s %d", (N - 1) - i, data, i);
+        (void)sprintf_s(buf, MAX_BUFFER_SIZE, "%d %s %d", (N - 1) - i, data, i);
         ret =
             CreateOrAddFileIntoZip(archivename, archive_filename, buf, strlen(buf) + 1, APPEND_STATUS_ADDINZIP, level);
         if (ret != 0) {
@@ -122,7 +122,7 @@ static void UnzipFileCheckDirectory(const char *archivename, char *filename, int
 
     uint32_t uncompressed_length = entry.GetUncompressedSize();
 
-    ASSERT_GT(entry.GetOffset(), 0);
+    ASSERT_GT(entry.GetOffset(), 0U);
     if (level == Z_NO_COMPRESSION) {
         ASSERT_FALSE(entry.IsCompressed());
     } else {
@@ -184,7 +184,7 @@ static void UnzipFileCheckTxt(const char *archivename, char *filename, const cha
             ASSERT_EQ(1, 0) << "Entry file has zero length! Readed bad data!";
             return;
         }
-        ASSERT_GT(entry.GetOffset(), 0);
+        ASSERT_GT(entry.GetOffset(), 0U);
         ASSERT_EQ(uncompressed_length, strlen(buf) + 1);
         if (level == Z_NO_COMPRESSION) {
             ASSERT_EQ(uncompressed_length, entry.GetCompressedSize());
@@ -297,7 +297,7 @@ static void UnzipFileCheckPandaFile(const char *archivename, char *filename, std
             ASSERT_EQ(1, 0) << "Entry file has zero length! Readed bad data!";
             return;
         }
-        ASSERT_GT(entry.GetOffset(), 0);
+        ASSERT_GT(entry.GetOffset(), 0U);
         ASSERT_EQ(uncompressed_length, pf_data.size());
         if (level == Z_NO_COMPRESSION) {
             ASSERT_EQ(uncompressed_length, entry.GetCompressedSize());
@@ -415,7 +415,7 @@ static void UnzipFileCheckInDirectory(const char *archivename, char *filename, c
             ASSERT_EQ(1, 0) << "Entry file has zero length! Readed bad data!";
             return;
         }
-        ASSERT_GT(entry.GetOffset(), 0);
+        ASSERT_GT(entry.GetOffset(), 0U);
         ASSERT_EQ(uncompressed_length, strlen(buf) + 1);
         if (level == Z_NO_COMPRESSION) {
             ASSERT_EQ(uncompressed_length, entry.GetCompressedSize());
@@ -485,7 +485,7 @@ static void UnzipFileCheckInDirectory(const char *archivename, char *filename, c
     }
 }
 
-TEST(LIBZIPARCHIVE, ZipFile)
+HWTEST(LIBZIPARCHIVE, ZipFile, testing::ext::TestSize.Level0)
 {
     static const char *data =
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras feugiat et odio ac sollicitudin. Maecenas "
@@ -561,7 +561,7 @@ TEST(LIBZIPARCHIVE, ZipFile)
     GTEST_COUT << "Success.\n";
 }
 
-TEST(LIBZIPARCHIVE, UnZipFile)
+HWTEST(LIBZIPARCHIVE, UnZipFile, testing::ext::TestSize.Level0)
 {
     static const char *data =
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras feugiat et odio ac sollicitudin. Maecenas "
@@ -616,7 +616,7 @@ TEST(LIBZIPARCHIVE, UnZipFile)
     GTEST_COUT << "Success.\n";
 }
 
-TEST(LIBZIPARCHIVE, UnZipUncompressedFile)
+HWTEST(LIBZIPARCHIVE, UnZipUncompressedFile, testing::ext::TestSize.Level0)
 {
     static const char *data =
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras feugiat et odio ac sollicitudin. Maecenas "
@@ -671,7 +671,7 @@ TEST(LIBZIPARCHIVE, UnZipUncompressedFile)
     GTEST_COUT << "Success.\n";
 }
 
-TEST(LIBZIPARCHIVE, UnZipUncompressedPandaFile)
+HWTEST(LIBZIPARCHIVE, UnZipUncompressedPandaFile, testing::ext::TestSize.Level0)
 {
     /*
      * creating an empty pandafile

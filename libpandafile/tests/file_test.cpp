@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,24 +93,7 @@ bool CheckAnonMemoryName([[maybe_unused]] const char *zip_archive_name)
 #endif
 }
 
-TEST(File, OpenMemory)
-{
-    {
-        auto data = GetEmptyPandaFileBytes();
-        auto ptr = GetPandaFile(&data);
-        EXPECT_NE(ptr, nullptr);
-    }
-
-    {
-        auto data = GetEmptyPandaFileBytes();
-        data[0] = 0x0;  // Corrupt magic
-
-        auto ptr = GetPandaFile(&data);
-        EXPECT_EQ(ptr, nullptr);
-    }
-}
-
-TEST(File, GetClassByName)
+HWTEST(File, GetClassByName, testing::ext::TestSize.Level0)
 {
     ItemContainer container;
 
@@ -137,7 +120,7 @@ TEST(File, GetClassByName)
     }
 }
 
-TEST(File, OpenPandaFile)
+HWTEST(File, OpenPandaFile, testing::ext::TestSize.Level0)
 {
     // Create ZIP
     auto data = GetEmptyPandaFileBytes();
@@ -157,7 +140,7 @@ TEST(File, OpenPandaFile)
     remove(zip_filename);
 }
 
-TEST(File, OpenPandaFileFromZipNameAnonMem)
+HWTEST(File, OpenPandaFileFromZipNameAnonMem, testing::ext::TestSize.Level0)
 {
     // Create ZIP
     auto data = GetEmptyPandaFileBytes();
@@ -175,7 +158,7 @@ TEST(File, OpenPandaFileFromZipNameAnonMem)
     remove(zip_filename);
 }
 
-TEST(File, OpenPandaFileOrZip)
+HWTEST(File, OpenPandaFileOrZip, testing::ext::TestSize.Level0)
 {
     // Create ZIP
     auto data = GetEmptyPandaFileBytes();
@@ -195,24 +178,4 @@ TEST(File, OpenPandaFileOrZip)
     remove(zip_filename);
 }
 
-TEST(File, OpenPandaFileUncompressed)
-{
-    // Create ZIP
-    auto data = GetEmptyPandaFileBytes();
-    std::cout << "pandafile size = " << data.size() << std::endl;
-    int ret;
-    const char *zip_filename = "__OpenPandaFileUncompressed__.zip";
-    const char *filename1 = ARCHIVE_FILENAME;
-    const char *filename2 = "class.abc";  // just for testing.
-    ret = CreateOrAddZipPandaFile(&data, zip_filename, filename2, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
-    ASSERT_EQ(ret, 0);
-    ret = CreateOrAddZipPandaFile(&data, zip_filename, filename1, APPEND_STATUS_ADDINZIP, Z_NO_COMPRESSION);
-    ASSERT_EQ(ret, 0);
-
-    // Open from ZIP
-    auto pf = OpenPandaFileOrZip(zip_filename);
-    EXPECT_NE(pf, nullptr);
-    EXPECT_STREQ((pf->GetFilename()).c_str(), zip_filename);
-    remove(zip_filename);
-}
 }  // namespace panda::panda_file::test

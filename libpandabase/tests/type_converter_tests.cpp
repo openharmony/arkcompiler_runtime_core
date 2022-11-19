@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ constexpr size_t ITERATION = 1024;
 
 namespace panda::helpers::test {
 
-TEST(TimeTest, RandomTimeConverterTest)
+HWTEST(TimeTest, RandomTimeConverterTest, testing::ext::TestSize.Level0)
 {
     std::mt19937 gen;
     std::uniform_int_distribution<time_t> distrib_nanos_right(0, 1e3 - 1);
@@ -52,7 +52,7 @@ TEST(TimeTest, RandomTimeConverterTest)
     }
 }
 
-TEST(TimeTest, RoundTimeConverterTest)
+HWTEST(TimeTest, RoundTimeConverterTest, testing::ext::TestSize.Level0)
 {
     ASSERT_EQ(TimeConverter(11'119'272), ValueUnit(11.119, "ms"));
     ASSERT_EQ(TimeConverter(11'119'472), ValueUnit(11.119, "ms"));
@@ -62,7 +62,7 @@ TEST(TimeTest, RoundTimeConverterTest)
     ASSERT_EQ(TimeConverter(11'119'999), ValueUnit(11.120, "ms"));
 }
 
-TEST(MemoryTest, RandomMemoryConverterTest)
+HWTEST(MemoryTest, RandomMemoryConverterTest, testing::ext::TestSize.Level0)
 {
     std::mt19937 gen;
     std::uniform_int_distribution<uint64_t> distrib_bytes(1, 1023);
@@ -84,7 +84,7 @@ TEST(MemoryTest, RandomMemoryConverterTest)
     }
 }
 
-TEST(MemoryTest, RoundMemoryConverterTest)
+HWTEST(MemoryTest, RoundMemoryConverterTest, testing::ext::TestSize.Level0)
 {
     ASSERT_EQ(MemoryConverter(11'119'272), ValueUnit(10.604, "MB"));
     ASSERT_EQ(MemoryConverter(11'120'149), ValueUnit(10.605, "MB"));

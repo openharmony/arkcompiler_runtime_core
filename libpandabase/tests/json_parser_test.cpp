@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ namespace panda::json_parser::test {
             }
         }
 */
-TEST(JsonParser, ParsePrimitive)
+HWTEST(JsonParser, ParsePrimitive, testing::ext::TestSize.Level0)
 {
     auto str = R"(
     {
@@ -60,7 +60,7 @@ TEST(JsonParser, ParsePrimitive)
     ASSERT_EQ(*obj.GetValue<JsonObject::StringT>("key_1"), "\"key_1\"\\. value\n");
 }
 
-TEST(JsonParser, Arrays)
+HWTEST(JsonParser, Arrays, testing::ext::TestSize.Level0)
 {
     auto str = R"(
     {
@@ -102,10 +102,10 @@ TEST(JsonParser, Arrays)
     auto &empty_array = *obj.GetValue<JsonObject::ArrayT>("key_1");
 
     // Check [3]:
-    ASSERT_EQ(empty_array.size(), 0);
+    ASSERT_EQ(empty_array.size(), 0U);
 }
 
-TEST(JsonParser, NestedObject)
+HWTEST(JsonParser, NestedObject, testing::ext::TestSize.Level0)
 {
     auto str = R"(
     {
@@ -160,10 +160,10 @@ TEST(JsonParser, NestedObject)
     const auto *empty_obj = obj.GetValue<JsonObject::JsonObjPointer>("key_2")->get();
     ASSERT_NE(empty_obj, nullptr);
     ASSERT_TRUE(empty_obj->IsValid());
-    ASSERT_EQ(empty_obj->GetSize(), 0);
+    ASSERT_EQ(empty_obj->GetSize(), 0U);
 }
 
-TEST(JsonParser, Numbers)
+HWTEST(JsonParser, Numbers, testing::ext::TestSize.Level0)
 {
     auto str = R"(
     {
@@ -198,7 +198,7 @@ TEST(JsonParser, Numbers)
     ASSERT_EQ(*obj.GetValue<JsonObject::NumT>("key_5"), -204.8);
 }
 
-TEST(JsonParser, Boolean)
+HWTEST(JsonParser, Boolean, testing::ext::TestSize.Level0)
 {
     auto str = R"(
     {
@@ -217,7 +217,7 @@ TEST(JsonParser, Boolean)
     ASSERT_EQ(*obj.GetValue<JsonObject::BoolT>("key_1"), false);
 }
 
-TEST(JsonParser, InvalidJson)
+HWTEST(JsonParser, InvalidJson, testing::ext::TestSize.Level0)
 {
     auto repeated_keys = R"(
     {
