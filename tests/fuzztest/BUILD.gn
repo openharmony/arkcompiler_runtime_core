@@ -28,17 +28,22 @@ group("fuzztest") {
     "fielddataaccessor_fuzzer:fuzztest",
     "int64tracepoint_fuzzer:fuzztest",
     "inttracepoint_fuzzer:fuzztest",
+    "jsonobjectctor1_fuzzer:fuzztest",
+    "jsonobjectctor2_fuzzer:fuzztest",
     "literaldataaccessor_fuzzer:fuzztest",
     "load_fuzzer:fuzztest",
     "methoddataaccessor_fuzzer:fuzztest",
     "open_fuzzer:fuzztest",
+    "openarchive_fuzzer:fuzztest",
     "openfrommemory1arg_fuzzer:fuzztest",
     "openfrommemory2arg_fuzzer:fuzztest",
     "openpandafile_fuzzer:fuzztest",
     "openpandafilefrommemory_fuzzer:fuzztest",
     "openpandafileorzip_fuzzer:fuzztest",
     "openuncompressedarchive_fuzzer:fuzztest",
+    "readosfile_fuzzer:fuzztest",
     "resolvesymbol_fuzzer:fuzztest",
+    "writebyte_fuzzer:fuzztest",
   ]
 }
 

@@ -19,10 +19,11 @@ namespace panda::defect_scan_aux {
 using Opcode = compiler::Opcode;
 using IntrinsicId = compiler::RuntimeInterface::IntrinsicId;
 
-static std::unordered_map<Opcode, InstType> OPCODE_INSTTYPE_MAP_TABLE = {OPCODE_INSTTYPE_MAP(BUILD_OPCODE_MAP)};
+static std::unordered_map<Opcode, InstType> OPCODE_INSTTYPE_MAP_TABLE = {
+    OPCODE_INSTTYPE_MAP_TABLE(BUILD_OPCODE_MAP_TABLE)};
 
 static std::unordered_map<IntrinsicId, InstType> INTRINSIC_INSTTYPE_MAP_TABLE = {
-    INTRINSIC_INSTTYPE_MAP(BUILD_INTRINSIC_MAP)};
+    INTRINSIC_INSTTYPE_MAP_TABLE(BUILD_INTRINSIC_MAP_TABLE)};
 
 bool Inst::operator==(const Inst &inst) const
 {
@@ -39,11 +40,29 @@ InstType Inst::GetType() const
     return type_;
 }
 
-bool Inst::IsStGlobalInst() const
+bool Inst::IsInstStLexVar() const
 {
-    return type_ == InstType::Intrinsic_TryStGlobalByName || type_ == InstType::Intrinsic_StGlobalVar ||
-           type_ == InstType::Intrinsic_StGlobalLet || type_ == InstType::Intrinsic_StConstToGlobalRecord ||
-           type_ == InstType::Intrinsic_StLetToGlobalRecord || type_ == InstType::Intrinsic_StClassToGlobalRecord;
+    return type_ == InstType::STLEXVAR_IMM4_IMM4 || type_ == InstType::STLEXVAR_IMM8_IMM8 ||
+           type_ == InstType::WIDE_STLEXVAR_PREF_IMM16_IMM16;
+}
+
+bool Inst::IsInstLdLexVar() const
+{
+    return type_ == InstType::LDLEXVAR_IMM4_IMM4 || type_ == InstType::LDLEXVAR_IMM8_IMM8 ||
+           type_ == InstType::WIDE_LDLEXVAR_PREF_IMM16_IMM16;
+}
+
+bool Inst::IsInstStGlobal() const
+{
+    return type_ == InstType::TRYSTGLOBALBYNAME_IMM8_ID16 || type_ == InstType::TRYSTGLOBALBYNAME_IMM16_ID16 ||
+           type_ == InstType::STGLOBALVAR_IMM16_ID16 || type_ == InstType::STCONSTTOGLOBALRECORD_IMM16_ID16 ||
+           type_ == InstType::STTOGLOBALRECORD_IMM16_ID16;
+}
+
+bool Inst::IsInstLdGlobal() const
+{
+    return type_ == InstType::LDGLOBALVAR_IMM16_ID16 || type_ == InstType::TRYLDGLOBALBYNAME_IMM8_ID16 ||
+           type_ == InstType::TRYLDGLOBALBYNAME_IMM16_ID16;
 }
 
 uint16_t Inst::GetArgIndex() const

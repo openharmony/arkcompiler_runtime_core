@@ -38,7 +38,7 @@ class FileAccessException : public std::exception {
 public:
     explicit FileAccessException(const char *msg) : msg_(msg) {}
     explicit FileAccessException(const std::string_view &msg) : msg_(msg) {}
-    virtual const char *what() const noexcept
+    const char *what() const noexcept override
     {
         return msg_.c_str();
     }

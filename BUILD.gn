@@ -309,7 +309,7 @@ if (!ark_standalone_build) {
     }
   }
 
-  group("ark_defectscanaux_unittest") {
+  group("ark_host_linux_defectscanaux_unittest") {
     testonly = true
     deps = []
     if (host_os == "linux") {
