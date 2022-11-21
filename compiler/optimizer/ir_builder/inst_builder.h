@@ -106,16 +106,6 @@ public:
 
     size_t GetPc(const uint8_t *inst_ptr) const;
 
-    auto CreateSafePoint(BasicBlock *bb)
-    {
-        return CreateSaveState(Opcode::SafePoint, bb->GetGuestPc());
-    }
-
-    auto CreateSaveStateOsr(BasicBlock *bb)
-    {
-        return CreateSaveState(Opcode::SaveStateOsr, bb->GetGuestPc());
-    }
-
     auto CreateSaveStateDeoptimize(uint32_t pc)
     {
         return CreateSaveState(Opcode::SaveStateDeoptimize, pc);
@@ -144,8 +134,6 @@ public:
         GetGraph()->GetRuntime()->FillInstIdTypePairByPc(id, pc);
     }
 private:
-    void SyncWithGraph();
-
     void UpdateDefsForCatch();
     void UpdateDefsForLoopHead();
 
@@ -161,23 +149,6 @@ private:
         COMPILER_LOG(DEBUG, IR_BUILDER)
 
             << *inst;
-    }
-
-    void AddInstructions(Inst *inst1, Inst *inst2, Inst *inst3, Inst *inst4)
-    {
-        AddInstruction(inst1);
-        AddInstruction(inst2);
-        AddInstruction(inst3);
-        AddInstruction(inst4);
-    }
-
-    void AddInstructions(Inst *inst1, Inst *inst2, Inst *inst3, Inst *inst4, Inst *inst5)
-    {
-        AddInstruction(inst1);
-        AddInstruction(inst2);
-        AddInstruction(inst3);
-        AddInstruction(inst4);
-        AddInstruction(inst5);
     }
 
     void UpdateDefinition(size_t vreg, Inst *inst)
@@ -257,23 +228,6 @@ private:
         return inst;
     }
 
-    auto FindOrCreateFloatConstant(float value)
-    {
-        auto inst = GetGraph()->FindOrCreateConstant<float>(value);
-        if (inst->GetId() == GetGraph()->GetCurrentInstructionId() - 1) {
-            COMPILER_LOG(DEBUG, IR_BUILDER) << "create new constant: value=" << value << ", inst=" << inst->GetId();
-        }
-        return inst;
-    }
-
-    enum SaveStateType {
-        CHECK = 0,  // side_exit = true,  move_to_side_exit = true
-        CALL,       // side_exit = false,  move_to_side_exit = false
-        VIRT_CALL   // side_exit = true,  move_to_side_exit = false
-    };
-
-    ClassInst *CreateLoadAndInitClassGeneric(uint32_t class_id, size_t pc);
-
     Inst *CreateCast(Inst *input, DataType::Type type, DataType::Type operands_type, size_t pc)
     {
         auto cast = GetGraph()->CreateInstCast(type, pc);
@@ -285,74 +239,10 @@ private:
         return cast;
     }
 
-    template <Opcode opcode>
-    void BuildCall(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildDynamicCall(const BytecodeInstruction *bc_inst, bool is_range);
-    template <Opcode opcode>
-    CallInst *BuildCallInst(RuntimeInterface::MethodPtr method, uint32_t method_id, size_t pc);
-    template <Opcode opcode>
-    CallInst *BuildUnresolvedCallInst(uint32_t method_id, size_t pc);
-    void BuildInitClassInstForCallStatic(RuntimeInterface::MethodPtr method, uint32_t class_id, size_t pc,
-                                         Inst *save_state);
-    template <typename T>
-    void SetInputsForCallInst(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read, T *inst,
-                              Inst *null_check, uint32_t method_id, bool has_implicit_arg, bool need_savestate);
-    Inst *GetArgDefinition(const BytecodeInstruction *bc_inst, size_t idx, bool acc_read);
-    template <bool is_virtual>
-    void AddArgNullcheckIfNeeded(RuntimeInterface::IntrinsicId intrinsic, Inst *inst, Inst *save_state, size_t bc_addr);
-    void BuildMonitor(const BytecodeInstruction *bc_inst, Inst *def, bool is_enter);
     void BuildEcma([[maybe_unused]] const BytecodeInstruction *bc_inst);
     template <bool with_speculative = false>
     void BuildEcmaAsIntrinsics([[maybe_unused]] const BytecodeInstruction *bc_inst);
-    void BuildEcmaFromIrtoc([[maybe_unused]] const BytecodeInstruction *bc_inst);
 
-    Inst *BuildFloatInst(const BytecodeInstruction *bc_inst);
-    void BuildIntrinsic(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildDefaultIntrinsic(bool is_virtual, const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildStaticCallIntrinsic(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildAbsIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    template <Opcode opcode>
-    void BuildBinaryOperationIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    void BuildSqrtIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    void BuildIsNanIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read);
-    void BuildMonitorIntrinsic(const BytecodeInstruction *bc_inst, bool is_enter, bool acc_read);
-    void BuildDefaultStaticIntrinsic(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildDefaultVirtualCallIntrinsic(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildVirtualCallIntrinsic(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
-    void BuildThrow(const BytecodeInstruction *bc_inst);
-    void BuildLenArray(const BytecodeInstruction *bc_inst);
-    void BuildNewArray(const BytecodeInstruction *bc_inst);
-    void BuildNewObject(const BytecodeInstruction *bc_inst);
-    void BuildLoadConstArray(const BytecodeInstruction *bc_inst);
-    template <typename T>
-    void BuildUnfoldLoadConstArray(const BytecodeInstruction *bc_inst, DataType::Type type,
-                                   const pandasm::LiteralArray &lit_array);
-    void BuildInitObject(const BytecodeInstruction *bc_inst, bool is_range);
-    CallInst *BuildCallStaticForInitObject(const BytecodeInstruction *bc_inst, uint32_t method_id);
-    void BuildMultiDimensionalArrayObject(const BytecodeInstruction *bc_inst, bool is_range);
-    void BuildInitObjectMultiDimensionalArray(const BytecodeInstruction *bc_inst, bool is_range);
-    template <bool is_acc_write>
-    void BuildLoadObject(const BytecodeInstruction *bc_inst, DataType::Type type);
-    template <bool is_acc_read>
-    void BuildStoreObject(const BytecodeInstruction *bc_inst, DataType::Type type);
-    Inst *BuildStoreObjectInst(const BytecodeInstruction *bc_inst, DataType::Type type,
-                               RuntimeInterface::FieldPtr field, size_t type_id);
-    void BuildLoadStatic(const BytecodeInstruction *bc_inst, DataType::Type type);
-    Inst *BuildLoadStaticInst(const BytecodeInstruction *bc_inst, DataType::Type type, size_t type_id,
-                              Inst *save_state);
-    void BuildStoreStatic(const BytecodeInstruction *bc_inst, DataType::Type type);
-    Inst *BuildStoreStaticInst(const BytecodeInstruction *bc_inst, DataType::Type type, size_t type_id,
-                               Inst *store_input, Inst *save_state);
-    void BuildCheckCast(const BytecodeInstruction *bc_inst);
-    void BuildIsInstance(const BytecodeInstruction *bc_inst);
-    Inst *BuildLoadClass(RuntimeInterface::IdType type_id, size_t pc, Inst *save_state);
-    void BuildLoadArray(const BytecodeInstruction *bc_inst, DataType::Type type);
-    void BuildStoreArray(const BytecodeInstruction *bc_inst, DataType::Type type);
-    template <bool create_ref_check>
-    void BuildStoreArrayInst(const BytecodeInstruction *bc_inst, DataType::Type type, Inst *array_ref, Inst *index,
-                             Inst *value);
-    void BuildChecksBeforeArray(const BytecodeInstruction *bc_inst, Inst *array_ref, Inst **ss, Inst **nc, Inst **al,
-                                Inst **bc);
     template <Opcode opcode>
     void BuildLoadFromPool(const BytecodeInstruction *bc_inst);
     void BuildCastToAnyString(const BytecodeInstruction *bc_inst);
@@ -401,9 +291,6 @@ private:
     }
 
     void SetTypeRec(Inst *inst, DataType::Type type);
-
-    /// Convert Panda bytecode type to COMPILER IR type
-    static DataType::Type ConvertPbcType(panda_file::Type type);
 
     /// Get return type of the method specified by id
     DataType::Type GetMethodReturnType(uintptr_t id) const;

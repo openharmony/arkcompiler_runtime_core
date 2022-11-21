@@ -23,54 +23,6 @@
 namespace panda::compiler {
 class BasicBlock;
 
-inline bool IsNotCommutativeInst(Inst *inst)
-{
-    return !inst->IsCommutative() || DataType::IsFloatType(inst->GetType());
-}
-
-static bool AddClassInst(Inst *inst, VnObject *obj)
-{
-    if (inst->GetOpcode() != Opcode::LoadAndInitClass && inst->GetOpcode() != Opcode::InitClass &&
-        inst->GetOpcode() != Opcode::LoadClass) {
-        return false;
-    }
-
-    obj->Add(static_cast<uint32_t>(Opcode::InitClass));
-    auto class_inst = static_cast<ClassInst *>(inst);
-    auto klass = class_inst->GetClass();
-    if (klass == nullptr) {
-        obj->Add(class_inst->GetTypeId());
-    } else {
-        obj->Add(reinterpret_cast<uint64_t>(klass));
-    }
-    inst->SetVnObject(obj);
-    return true;
-}
-
-static bool AddCommutativeInst(Inst *inst, VnObject *obj)
-{
-    if (IsNotCommutativeInst(inst)) {
-        return false;
-    }
-
-    [[maybe_unused]] constexpr auto INPUTS_NUM = 2;
-    ASSERT(inst->GetInputsCount() == INPUTS_NUM);
-    auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
-    auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
-    ASSERT(input0->GetVN() != INVALID_VN);
-    ASSERT(input1->GetVN() != INVALID_VN);
-    if (input0->GetId() > input1->GetId()) {
-        obj->Add(input0->GetVN());
-        obj->Add(input1->GetVN());
-    } else {
-        obj->Add(input1->GetVN());
-        obj->Add(input0->GetVN());
-    }
-
-    inst->SetVnObject(obj);
-    return true;
-}
-
 static void AddSpecialTraits(Inst *inst, VnObject *obj)
 {
     switch (inst->GetOpcode()) {
@@ -91,26 +43,12 @@ static void AddSpecialTraits(Inst *inst, VnObject *obj)
     }
 }
 
-static bool IsIrreducibleClassInst(Inst *inst, Inst *equiv_inst)
-{
-    return equiv_inst->GetOpcode() == Opcode::LoadClass &&
-           (inst->GetOpcode() == Opcode::InitClass || inst->GetOpcode() == Opcode::LoadAndInitClass);
-}
-
 void VnObject::Add(Inst *inst)
 {
-    if (AddClassInst(inst, this)) {
-        return;
-    }
-
     Add(static_cast<uint32_t>(inst->GetOpcode()));
     Add(static_cast<uint32_t>(inst->GetType()));
 
     AddSpecialTraits(inst, this);
-
-    if (AddCommutativeInst(inst, this)) {
-        return;
-    }
 
     for (auto input : inst->GetInputs()) {
         auto input_inst = inst->GetDataFlowInput(input.GetInst());
@@ -173,22 +111,12 @@ bool ValNum::TryToApplyCse(Inst *inst, InstVector *equiv_insts)
     auto block = inst->GetBasicBlock();
     for (auto equiv_inst : *equiv_insts) {
         COMPILER_LOG(DEBUG, VN_OPT) << " Equivalent instructions are found, id " << equiv_inst->GetId();
-        if ((block == equiv_inst->GetBasicBlock() ||
-             (equiv_inst->IsDominate(inst) && !HasOsrEntryBetween(equiv_inst, inst))) &&
-            !IsIrreducibleClassInst(inst, equiv_inst)) {
+        if (block == equiv_inst->GetBasicBlock() ||
+            (equiv_inst->IsDominate(inst) && !HasOsrEntryBetween(equiv_inst, inst))) {
             COMPILER_LOG(DEBUG, VN_OPT) << " CSE is applied for inst with id " << inst->GetId();
             GetGraph()->GetEventWriter().EventGvn(inst->GetId(), inst->GetPc(), equiv_inst->GetId(),
                                                   equiv_inst->GetPc());
             inst->ReplaceUsers(equiv_inst);
-            // TODO (ekudriashov): need more detailed analysis with Unresolved cases
-            if (equiv_inst->GetOpcode() == Opcode::InitClass &&
-                (inst->GetOpcode() == Opcode::LoadClass || inst->GetOpcode() == Opcode::LoadAndInitClass)) {
-                equiv_inst->SetOpcode(Opcode::LoadAndInitClass);
-                equiv_inst->SetType(DataType::REFERENCE);
-            }
-
-            // IsInstance, InitClass, LoadClass and LoadAndInitClass have attribute NO_DCE, so they can't be removed by
-            // DCE pass But we can remove the instructions after VN because there is dominate equal instruction
             inst->ClearFlag(compiler::inst_flags::NO_DCE);
             cse_is_appied_ = true;
             return true;

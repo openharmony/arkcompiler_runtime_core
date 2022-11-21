@@ -17,8 +17,9 @@
 #define COMPILER_OPTIMIZER_TEMPLATES_IR_DYN_BASE_TYPES_H
 
 #include "compiler/optimizer/ir/datatype.h"
-#include "compiler/optimizer/code_generator/encode.h"
 #include "source_languages.h"
+
+#include <optional>
 
 % Common::plugins.each_value do |plugin_opts|
 % next unless plugin_opts["compiler_base_types"]
@@ -33,13 +34,6 @@
 % end
 
 namespace panda::compiler {
-
-class CompareAnyTypeInst;
-class CastAnyTypeValueInst;
-class CastValueToAnyTypeInst;
-class AnyTypeCheckInst;
-class EncodeVisitor;
-
 inline AnyBaseType NumericDataTypeToAnyType([[maybe_unused]] panda::compiler::DataType::Type type,
                                             panda::compiler::SourceLanguage language) {
     ASSERT(type == panda::compiler::DataType::Type::UINT8 || type == panda::compiler::DataType::Type::INT8 ||
@@ -153,63 +147,6 @@ inline const char *AnyTypeTypeToString(AnyBaseType any_type)
     auto idx = static_cast<uint32_t>(any_type);
     ASSERT(idx < COUNT);
     return ANYBASETYPE_NAMES[idx];
-}
-
-inline bool TryCompareAnyTypePluginGen([[maybe_unused]] const panda::compiler::CompareAnyTypeInst *cati,
-                                       [[maybe_unused]] panda::compiler::EncodeVisitor *enc) {
-
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_compare_implementation_codegen"]
-    if (<%= plugin_opts["compiler_base_types"]["func_compare_implementation_codegen"] %>(cati, enc)) {
-        return true; // NOLINT(readability-simplify-boolean-expr)
-    }
-% end
-
-    return false;
-}
-
-inline bool TryCastAnyTypeValuePluginGen([[maybe_unused]] const panda::compiler::CastAnyTypeValueInst *cati,
-                                         [[maybe_unused]] panda::compiler::EncodeVisitor *enc) {
-
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_cast_implementation_codegen"]
-    if (<%= plugin_opts["compiler_base_types"]["func_cast_implementation_codegen"] %>(cati, enc)) {
-        return true; // NOLINT(readability-simplify-boolean-expr)
-    }
-% end
-
-    return false;
-}
-
-inline bool TryCastValueToAnyTypePluginGen([[maybe_unused]] const panda::compiler::CastValueToAnyTypeInst *cvai,
-                                           [[maybe_unused]] panda::compiler::EncodeVisitor *enc) {
-
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_cast_to_any_implementation_codegen"]
-    if (<%= plugin_opts["compiler_base_types"]["func_cast_to_any_implementation_codegen"] %>(cvai, enc)) {
-        return true; // NOLINT(readability-simplify-boolean-expr)
-    }
-% end
-
-    return false;
-}
-
-inline bool TryAnyTypeCheckPluginGen([[maybe_unused]] const panda::compiler::AnyTypeCheckInst *check_inst,
-                                     [[maybe_unused]] panda::compiler::EncodeVisitor *enc,
-                                     [[maybe_unused]] LabelHolder::LabelId id) {
-
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_any_type_check_implementation_codegen"]
-    if (<%= plugin_opts["compiler_base_types"]["func_any_type_check_implementation_codegen"] %>(check_inst, enc, id)) {
-        return true; // NOLINT(readability-simplify-boolean-expr)
-    }
-% end
-
-    return false;
 }
 
 } // namespace panda::compiler

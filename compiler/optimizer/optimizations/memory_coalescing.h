@@ -22,17 +22,7 @@
 
 namespace panda::compiler {
 class MemoryCoalescing : public Optimization {
-    using Optimization::Optimization;
-
 public:
-    struct CoalescedPair {
-        Inst *first;
-        Inst *second;
-        Inst *after_inst;
-    };
-
-    explicit MemoryCoalescing(Graph *graph, bool aligned = true) : Optimization(graph), aligned_only_(aligned) {}
-
     bool RunImpl() override;
 
     bool IsEnable() const override
@@ -68,18 +58,6 @@ public:
     NO_MOVE_SEMANTIC(MemoryCoalescing);
     NO_COPY_SEMANTIC(MemoryCoalescing);
     ~MemoryCoalescing() override = default;
-
-private:
-    void ReplacePairs(ArenaVector<CoalescedPair> const &pairs);
-    void ReplaceLoadByPair(Inst *load, Inst *paired_load, int32_t dst_idx);
-
-    Inst *ReplaceLoadArray(Inst *first, Inst *second, Inst *insert_after);
-    Inst *ReplaceLoadArrayI(Inst *first, Inst *second, Inst *insert_after);
-    Inst *ReplaceStoreArray(Inst *first, Inst *second, Inst *insert_after);
-    Inst *ReplaceStoreArrayI(Inst *first, Inst *second, Inst *insert_after);
-
-private:
-    bool aligned_only_;
 };
 }  // namespace panda::compiler
 

@@ -19,24 +19,14 @@
 #include "assembler/extensions/extensions.h"
 #include "bytecode_instruction.h"
 #include "bytecodeopt_options.h"
-#include "bytecodeopt_peepholes.h"
-#include "canonicalization.h"
-#include "check_resolver.h"
 #include "codegen.h"
 #include "common.h"
-#include "const_array_resolver.h"
 #include "compiler/optimizer/ir/constants.h"
 #include "compiler/optimizer/ir_builder/ir_builder.h"
 #include "compiler/optimizer/ir_builder/pbc_iterator.h"
-#include "compiler/optimizer/optimizations/branch_elimination.h"
-#include "compiler/optimizer/optimizations/code_sink.h"
-#include "compiler/optimizer/optimizations/cse.h"
 #include "compiler/optimizer/optimizations/cleanup.h"
-#include "compiler/optimizer/optimizations/licm.h"
 #include "compiler/optimizer/optimizations/lowering.h"
-#include "compiler/optimizer/optimizations/lse.h"
 #include "compiler/optimizer/optimizations/move_constants.h"
-#include "compiler/optimizer/optimizations/peepholes.h"
 #include "compiler/optimizer/optimizations/regalloc/reg_alloc.h"
 #include "compiler/optimizer/optimizations/vn.h"
 #include "libpandabase/mem/arena_allocator.h"
@@ -58,22 +48,7 @@ template <typename T>
 constexpr void RunOpts(compiler::Graph *graph, [[maybe_unused]] BytecodeOptIrInterface *iface)
 {
     graph->RunPass<compiler::Cleanup>();
-#ifndef NDEBUG
-    // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-    if constexpr (std::is_same_v<T, compiler::Lowering>) {
-        graph->SetLowLevelInstructionsEnabled();
-    }
-#endif  // NDEBUG
-    // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
-    if constexpr (std::is_same_v<T, compiler::Licm>) {
-        graph->RunPass<compiler::Licm>(compiler::options.GetCompilerLicmHoistLimit());
-        // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
-    } else if constexpr (std::is_same_v<T, ConstArrayResolver>) {
-        graph->RunPass<ConstArrayResolver>(iface);
-        // NOLINTNEXTLINE(readability-misleading-indentation)
-    } else {
-        graph->RunPass<T>();
-    }
+    graph->RunPass<T>();
 }
 
 template <typename First, typename Second, typename... Rest>
@@ -86,31 +61,14 @@ constexpr void RunOpts(compiler::Graph *graph, BytecodeOptIrInterface *iface = n
 bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
 {
     constexpr int OPT_LEVEL_0 = 0;
-    constexpr int OPT_LEVEL_1 = 1;
-    constexpr int OPT_LEVEL_2 = 2;
 
     if (panda::bytecodeopt::options.GetOptLevel() == OPT_LEVEL_0) {
         return false;
     }
 
-    graph->RunPass<CheckResolver>();
     graph->RunPass<compiler::Cleanup>();
-    // NB! Canonicalization and compiler::Lowering should be present in all levels
-    // since without Lowering pass, RegEncoder will not work for Compare instructions,
-    // and we will not be able to optimize functions where there is branching.
-    // Lowering can't work without Canonicalization pass.
-    if (graph->IsDynamicMethod()) {
-        RunOpts<compiler::ValNum, compiler::Lowering, compiler::MoveConstants>(graph);
-    } else if (panda::bytecodeopt::options.GetOptLevel() == OPT_LEVEL_1) {
-        RunOpts<Canonicalization, compiler::Lowering>(graph);
-    } else if (panda::bytecodeopt::options.GetOptLevel() == OPT_LEVEL_2) {
-        // ConstArrayResolver Pass is disabled as it requires fixes for stability
-        RunOpts<ConstArrayResolver, compiler::BranchElimination, compiler::ValNum, compiler::Cse, compiler::Peepholes,
-                compiler::Licm, compiler::Lse, compiler::ValNum, compiler::Cse, Canonicalization, compiler::Lowering,
-                compiler::MoveConstants, BytecodeOptPeepholes>(graph, iface);
-    } else {
-        UNREACHABLE();
-    }
+    ASSERT(graph->IsDynamicMethod());
+    RunOpts<compiler::ValNum, compiler::Lowering, compiler::MoveConstants>(graph);
 
     // this pass should run just before register allocator
     graph->RunPass<compiler::Cleanup>();

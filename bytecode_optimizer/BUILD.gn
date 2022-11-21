@@ -24,12 +24,8 @@ config("bytecodeopt_public_config") {
 }
 
 libarkbytecodeopt_sources = [
-  "$ark_root/bytecode_optimizer/bytecodeopt_peepholes.cpp",
-  "$ark_root/bytecode_optimizer/canonicalization.cpp",
-  "$ark_root/bytecode_optimizer/check_resolver.cpp",
   "$ark_root/bytecode_optimizer/codegen.cpp",
   "$ark_root/bytecode_optimizer/common.cpp",
-  "$ark_root/bytecode_optimizer/const_array_resolver.cpp",
   "$ark_root/bytecode_optimizer/optimize_bytecode.cpp",
   "$ark_root/bytecode_optimizer/reg_acc_alloc.cpp",
   "$ark_root/bytecode_optimizer/reg_encoder.cpp",

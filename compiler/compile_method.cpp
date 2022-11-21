@@ -27,7 +27,6 @@
 #include "code_info/code_info.h"
 #include "events/events.h"
 #include "trace/trace.h"
-#include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 #include "optimizer/code_generator/codegen.h"
 #include "compile_method.h"
 
