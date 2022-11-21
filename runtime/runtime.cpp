@@ -511,9 +511,6 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
     }
 
     class_linker_ = new ClassLinker(internal_allocator_, std::move(extensions));
-#ifndef PANDA_TARGET_WINDOWS
-    signal_manager_ = new SignalManager(internal_allocator_);
-#endif
 
     save_profiling_info_ = options_.IsCompilerEnableJit() && options_.IsProfilesaverEnabled();
 
@@ -540,10 +537,6 @@ Runtime::~Runtime()
     panda::verifier::debug::DebugContext::Destroy();
     trace::ScopedTrace scoped_trace("Delete state");
 
-#ifndef PANDA_TARGET_WINDOWS
-    signal_manager_->DeleteHandlersArray();
-    delete signal_manager_;
-#endif
     delete cha_;
     delete class_linker_;
     if (dprofiler_ != nullptr) {
@@ -732,15 +725,6 @@ bool Runtime::HandleAotOptions()
 
 void Runtime::HandleJitOptions()
 {
-#ifndef PANDA_TARGET_WINDOWS
-    auto signal_manager_flag = DfxController::GetOptionValue(DfxOptionHandler::SIGNAL_HANDLER);
-    if (signal_manager_flag == 1) {
-        signal_manager_->InitSignals();
-    } else {
-        LOG(ERROR, DFX) << "signal handler disabled, setprop ark.dfx.options to restart";
-    }
-#endif
-
     bool enable_np_handler = options_.IsCompilerEnableJit() && panda::compiler::options.IsCompilerImplicitNullCheck();
     if (GetClassLinker()->GetAotManager()->HasAotFiles()) {
         if (options_.IsNoAsyncJit()) {
@@ -748,17 +732,6 @@ void Runtime::HandleJitOptions()
         }
         enable_np_handler = true;
     }
-
-#ifndef PANDA_TARGET_WINDOWS
-    if (signal_manager_->IsInitialized() && enable_np_handler) {
-        auto *handler = signal_manager_->GetAllocator()->New<NullPointerHandler>();
-        signal_manager_->AddHandler(handler, true);
-    }
-    {
-        auto *handler = signal_manager_->GetAllocator()->New<StackOverflowHandler>();
-        signal_manager_->AddHandler(handler, true);
-    }
-#endif
 }
 
 bool Runtime::CheckOptionsConsistency()

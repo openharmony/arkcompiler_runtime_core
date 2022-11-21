@@ -110,7 +110,6 @@ set(SOURCES
     object_accessor.cpp
     osr.cpp
     arch/asm_support.cpp
-    signal_handler.cpp
     cha.cpp
     runtime_helpers.cpp
     handle_scope.cpp
