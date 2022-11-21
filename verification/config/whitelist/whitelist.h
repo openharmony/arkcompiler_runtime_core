@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_DEBUG_WHITELIST_H__
-#define PANDA_VERIFIER_DEBUG_WHITELIST_H__
+#ifndef VERIFICATION_CONFIG_WHITELIST_WHITELIST_H
+#define VERIFICATION_CONFIG_WHITELIST_WHITELIST_H
 
 #include "runtime/include/method.h"
 
@@ -37,4 +37,4 @@ inline bool SkipVerificationOfCall(Method::UniqId id)
 }
 }  // namespace panda::verifier::debug
 
-#endif  // !PANDA_VERIFIER_DEBUG_WHITELIST_H_
+#endif  // VERIFICATION_CONFIG_WHITELIST_WHITELIST_H

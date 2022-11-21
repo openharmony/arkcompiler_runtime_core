@@ -47,7 +47,7 @@ void ThreadFunc()
     }
 }
 
-TEST_F(ThreadTest, SetCurrentThreadPriorityTest)
+HWTEST_F(ThreadTest, SetCurrentThreadPriorityTest, testing::ext::TestSize.Level0)
 {
     // Since setting higher priority needs "sudo" right, we only test lower one here.
     auto ret1 = SetPriority(GetCurrentThreadId(), LOWER_PRIOIRITY);
@@ -67,7 +67,7 @@ TEST_F(ThreadTest, SetCurrentThreadPriorityTest)
 #endif
 }
 
-TEST_F(ThreadTest, SetOtherThreadPriorityTest)
+HWTEST_F(ThreadTest, SetOtherThreadPriorityTest, testing::ext::TestSize.Level0)
 {
     auto parent_pid = GetCurrentThreadId();
     auto parent_prio_before = GetPriority(parent_pid);
@@ -93,10 +93,10 @@ TEST_F(ThreadTest, SetOtherThreadPriorityTest)
     ASSERT_EQ(parent_prio_before, parent_prio_after);
 #ifdef PANDA_TARGET_UNIX
     ASSERT_EQ(ret, 0);
-    ASSERT(child_prio_before <= child_prio_after);
+    ASSERT_TRUE(child_prio_before <= child_prio_after);
 #elif defined(PANDA_TARGET_WINDOWS)
     ASSERT_NE(ret, 0);
-    ASSERT(child_prio_after <= child_prio_before);
+    ASSERT_TRUE(child_prio_after <= child_prio_before);
 #endif
 }
 }  // namespace panda::os::thread
