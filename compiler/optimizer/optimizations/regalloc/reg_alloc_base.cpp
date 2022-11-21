@@ -19,7 +19,6 @@
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/analysis/dominators_tree.h"
-#include "optimizer/optimizations/locations_builder.h"
 #include "split_resolver.h"
 #include "spill_fills_resolver.h"
 #include "reg_alloc_resolver.h"
@@ -135,12 +134,6 @@ bool RegAllocBase::Resolve()
         SpillFillsResolver(GetGraph()).Run();
     }
 
-#ifndef NDEBUG
-    if (!GetGraph()->IsBytecodeOptimizer() && options.IsCompilerVerifyRegalloc() &&
-        !GetGraph()->RunPass<RegAllocVerifier>()) {
-        LOG(FATAL, COMPILER) << "Regalloc verification failed";
-    }
-#endif  // NDEBUG
     return true;
 }
 

@@ -20,7 +20,6 @@
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_checker.h"
-#include "optimizer/ir/visualizer_printer.h"
 
 #include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/analysis/bounds_analysis.h"
@@ -29,9 +28,7 @@
 #include "optimizer/analysis/liveness_analyzer.h"
 #include "optimizer/analysis/live_registers.h"
 #include "optimizer/analysis/loop_analyzer.h"
-#include "optimizer/analysis/monitor_analysis.h"
 #include "optimizer/analysis/object_type_propagation.h"
-#include "optimizer/analysis/reg_alloc_verifier.h"
 #include "optimizer/analysis/rpo.h"
 #include "optimizer/analysis/types_analysis.h"
 #include "optimizer/optimizations/cleanup.h"
@@ -126,29 +123,6 @@ void PassManager::DumpLifeIntervals([[maybe_unused]] const char *pass_name)
     GetGraph()->GetAnalysis<LivenessAnalyzer>().DumpLifeIntervals(strm);
 #endif  // ENABLE_IR_DUMP && !PANDA_TARGET_MACOS
 }
-void PassManager::InitialDumpVisualizerGraph()
-{
-#if defined(ENABLE_IR_DUMP) && !defined(PANDA_TARGET_MACOS)
-    std::ofstream strm(GetFileName());
-    strm << "begin_compilation\n";
-    strm << "  name \"" << GetGraph()->GetRuntime()->GetClassNameFromMethod(GetGraph()->GetMethod()) << "_"
-         << GetGraph()->GetRuntime()->GetMethodName(GetGraph()->GetMethod()) << "\"\n";
-    strm << "  method \"" << GetGraph()->GetRuntime()->GetClassNameFromMethod(GetGraph()->GetMethod()) << "_"
-         << GetGraph()->GetRuntime()->GetMethodName(GetGraph()->GetMethod()) << "\"\n";
-    strm << "  date " << std::time(nullptr) << "\n";
-    strm << "end_compilation\n";
-    strm.close();
-#endif  // ENABLE_IR_DUMP && !PANDA_TARGET_MACOS
-}
-
-void PassManager::DumpVisualizerGraph([[maybe_unused]] const char *pass_name)
-{
-#if defined(ENABLE_IR_DUMP) && !defined(PANDA_TARGET_MACOS)
-    std::ofstream strm(GetFileName(), std::ios::app);
-    VisualizerPrinter(GetGraph(), &strm, pass_name).Print();
-    strm.close();
-#endif  // ENABLE_IR_DUMP && !PANDA_TARGET_MACOS
-}
 
 bool PassManager::RunPass(Pass *pass, size_t local_mem_size_before_pass)
 {
@@ -195,10 +169,6 @@ bool PassManager::RunPass(Pass *pass, size_t local_mem_size_before_pass)
         if (!options.IsCompilerDumpFinal() || is_codegen) {
             DumpGraph(pass->GetPassName());
         }
-    }
-
-    if (options.IsCompilerVisualizerDump() && pass->ShouldDump()) {
-        DumpVisualizerGraph(pass->GetPassName());
     }
 
 #ifndef NDEBUG

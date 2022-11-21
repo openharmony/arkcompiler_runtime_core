@@ -24,33 +24,13 @@
 namespace panda::compiler {
 BoundsRange::BoundsRange(int64_t val, DataType::Type type) : BoundsRange(val, val, nullptr, type) {}
 
-static bool IsStringLength(const Inst *inst)
-{
-    if (inst->GetOpcode() != Opcode::Shr || inst->GetInput(0).GetInst()->GetOpcode() != Opcode::LenArray) {
-        return false;
-    }
-    auto c = inst->GetInput(1).GetInst();
-    return c->IsConst() && c->CastToConstant()->GetInt64Value() == 1;
-}
-
-static bool IsLenArray(const Inst *inst)
-{
-    return inst->GetOpcode() == Opcode::LenArray || IsStringLength(inst);
-}
-
 BoundsRange::BoundsRange(int64_t left, int64_t right, const Inst *inst, [[maybe_unused]] DataType::Type type)
     : left_(left), right_(right), len_array_(inst)
 {
-    ASSERT(inst == nullptr || IsLenArray(inst));
+    ASSERT(inst == nullptr);
     ASSERT(left <= right);
     ASSERT(GetMin(type) <= left);
     ASSERT(right <= GetMax(type));
-}
-
-void BoundsRange::SetLenArray(const Inst *inst)
-{
-    ASSERT(inst != nullptr && IsLenArray(inst));
-    len_array_ = inst;
 }
 
 int64_t BoundsRange::GetLeft() const
@@ -61,106 +41,6 @@ int64_t BoundsRange::GetLeft() const
 int64_t BoundsRange::GetRight() const
 {
     return right_;
-}
-
-/**
- * Neg current range.  Type of current range is saved.
- * NEG([x1, x2]) = [-x2, -x1]
- */
-BoundsRange BoundsRange::Neg() const
-{
-    auto right = left_ == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : -left_;
-    auto left = right_ == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : -right_;
-    return BoundsRange(left, right);
-}
-
-/**
- * Abs current range.  Type of current range is saved.
- * 1. if (x1 >= 0 && x2 >= 0) -> ABS([x1, x2]) = [x1, x2]
- * 2. if (x1 < 0 && x2 < 0) -> ABS([x1, x2]) = [-x2, -x1]
- * 3. if (x1 * x2 < 0) -> ABS([x1, x2]) = [0, MAX(ABS(x1), ABS(x2))]
- */
-BoundsRange BoundsRange::Abs() const
-{
-    auto val1 = left_ == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : std::abs(left_);
-    auto val2 = right_ == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : std::abs(right_);
-    auto right = std::max(val1, val2);
-    auto left = 0;
-    // NOLINTNEXTLINE (hicpp-signed-bitwise)
-    if ((left_ ^ right_) >= 0) {
-        left = std::min(val1, val2);
-    }
-    return BoundsRange(left, right);
-}
-
-/**
- * Add to current range.  Type of current range is saved.
- * [x1, x2] + [y1, y2] = [x1 + y1, x2 + y2]
- */
-BoundsRange BoundsRange::Add(const BoundsRange &range) const
-{
-    auto left = AddWithOverflowCheck(left_, range.GetLeft());
-    auto right = AddWithOverflowCheck(right_, range.GetRight());
-    return BoundsRange(left, right);
-}
-
-/**
- * Subtract from current range.
- * [x1, x2] - [y1, y2] = [x1 - y2, x2 - y1]
- */
-BoundsRange BoundsRange::Sub(const BoundsRange &range) const
-{
-    auto neg_right = (range.GetRight() == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : -range.GetRight());
-    auto left = AddWithOverflowCheck(left_, neg_right);
-    auto neg_left = (range.GetLeft() == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : -range.GetLeft());
-    auto right = AddWithOverflowCheck(right_, neg_left);
-    return BoundsRange(left, right);
-}
-
-/**
- * Multiply current range.
- * [x1, x2] * [y1, y2] = [min(x1y1, x1y2, x2y1, x2y2), max(x1y1, x1y2, x2y1, x2y2)]
- */
-BoundsRange BoundsRange::Mul(const BoundsRange &range) const
-{
-    auto m1 = MulWithOverflowCheck(left_, range.GetLeft());
-    auto m2 = MulWithOverflowCheck(left_, range.GetRight());
-    auto m3 = MulWithOverflowCheck(right_, range.GetLeft());
-    auto m4 = MulWithOverflowCheck(right_, range.GetRight());
-    auto left = std::min(m1, std::min(m2, std::min(m3, m4)));
-    auto right = std::max(m1, std::max(m2, std::max(m3, m4)));
-    return BoundsRange(left, right);
-}
-
-/**
- * Division current range on constant range.
- * [x1, x2] / [y, y] = [min(x1/y, x2/y), max(x1/y, x2/y)]
- */
-BoundsRange BoundsRange::Div(const BoundsRange &range) const
-{
-    if (range.GetLeft() != range.GetRight() || range.GetLeft() == 0) {
-        return BoundsRange();
-    }
-    auto m1 = DivWithOverflowCheck(left_, range.GetLeft());
-    auto m2 = DivWithOverflowCheck(right_, range.GetLeft());
-    auto left = std::min(m1, m2);
-    auto right = std::max(m1, m2);
-    return BoundsRange(left, right);
-}
-
-/**
- * Modulus of current range.
- * [x1, x2] % [y1, y2] = [0, y2 - 1]
- */
-/* static */
-BoundsRange BoundsRange::Mod(const BoundsRange &range)
-{
-    if (range.GetRight() == 0) {
-        return BoundsRange();
-    }
-    auto left = 0;
-    auto right = (range.GetRight() < 0 ? -range.GetRight() : range.GetRight()) - 1;
-    return BoundsRange(left, right);
 }
 
 bool BoundsRange::IsConst() const
@@ -185,11 +65,7 @@ bool BoundsRange::IsLess(const BoundsRange &range) const
 
 bool BoundsRange::IsLess(const Inst *inst) const
 {
-    ASSERT(inst != nullptr);
-    if (!IsLenArray(inst)) {
-        return false;
-    }
-    return inst == len_array_;
+    return false;
 }
 
 bool BoundsRange::IsMore(const BoundsRange &range) const
@@ -481,60 +357,6 @@ BoundsRange::RangePair BoundsRange::TryNarrowBoundsByCC(ConditionCode cc, Bounds
     return ranges;
 }
 
-/**
- * Return (left + right) or if overflows or underflows return max or min of range type.
- */
-int64_t BoundsRange::AddWithOverflowCheck(int64_t left, int64_t right)
-{
-    if (right == 0) {
-        return left;
-    }
-    if (right > 0) {
-        if (left <= (MAX_RANGE_VALUE - right)) {
-            // No overflow.
-            return left + right;
-        }
-        return MAX_RANGE_VALUE;
-    }
-    if (left >= (MIN_RANGE_VALUE - right)) {
-        // No overflow.
-        return left + right;
-    }
-    return MIN_RANGE_VALUE;
-}
-
-/**
- * Return (left * right) or if overflows or underflows return max or min of range type.
- */
-int64_t BoundsRange::MulWithOverflowCheck(int64_t left, int64_t right)
-{
-    if (left == 0 || right == 0) {
-        return 0;
-    }
-    int64_t left_abs = (left == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : std::abs(left));
-    int64_t right_abs = (right == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : std::abs(right));
-    if (left_abs <= (MAX_RANGE_VALUE / right_abs)) {
-        // No overflow.
-        return left * right;
-    }
-    if ((right > 0 && left > 0) || (right < 0 && left < 0)) {
-        return MAX_RANGE_VALUE;
-    }
-    return MIN_RANGE_VALUE;
-}
-
-/**
- * Return (left / right) or MIN_RANGE VALUE for MIN_RANGE_VALUE / -1.
- */
-int64_t BoundsRange::DivWithOverflowCheck(int64_t left, int64_t right)
-{
-    ASSERT(right != 0);
-    if (left == MIN_RANGE_VALUE && right == -1) {
-        return MIN_RANGE_VALUE;
-    }
-    return left / right;
-}
-
 BoundsRange BoundsRangeInfo::FindBoundsRange(const BasicBlock *block, Inst *inst) const
 {
     ASSERT(block != nullptr && inst != nullptr);
@@ -606,41 +428,6 @@ const ArenaVector<BasicBlock *> &BoundsAnalysis::GetBlocksToVisit() const
     return GetGraph()->GetBlocksRPO();
 }
 
-void BoundsAnalysis::VisitNeg(GraphVisitor *v, Inst *inst)
-{
-    CalcNewBoundsRangeUnary<Opcode::Neg>(v, inst);
-}
-
-void BoundsAnalysis::VisitAbs(GraphVisitor *v, Inst *inst)
-{
-    CalcNewBoundsRangeUnary<Opcode::Abs>(v, inst);
-}
-
-void BoundsAnalysis::VisitAdd(GraphVisitor *v, Inst *inst)
-{
-    CalcNewBoundsRangeBinary<Opcode::Add>(v, inst);
-}
-
-void BoundsAnalysis::VisitSub(GraphVisitor *v, Inst *inst)
-{
-    CalcNewBoundsRangeBinary<Opcode::Sub>(v, inst);
-}
-
-void BoundsAnalysis::VisitMod(GraphVisitor *v, Inst *inst)
-{
-    CalcNewBoundsRangeBinary<Opcode::Mod>(v, inst);
-}
-
-void BoundsAnalysis::VisitDiv(GraphVisitor *v, Inst *inst)
-{
-    CalcNewBoundsRangeBinary<Opcode::Div>(v, inst);
-}
-
-void BoundsAnalysis::VisitMul(GraphVisitor *v, Inst *inst)
-{
-    CalcNewBoundsRangeBinary<Opcode::Mul>(v, inst);
-}
-
 void BoundsAnalysis::VisitIf([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     UNREACHABLE();
@@ -697,56 +484,11 @@ void BoundsAnalysis::VisitPhi(GraphVisitor *v, Inst *inst)
     auto phi = inst->CastToPhi();
     auto phi_block = inst->GetBasicBlock();
     auto phi_type = phi->GetType();
-    auto loop = phi_block->GetLoop();
-    auto loop_parser = CountableLoopParser(*loop);
-    auto loop_info = loop_parser.Parse();
-    // check that loop is countable and phi is index
-    if (loop_info && inst == loop_info.value().index) {
-        auto loop_info_value = loop_info.value();
-        ASSERT(loop_info_value.update->GetOpcode() == Opcode::Sub ||
-               loop_info_value.update->GetOpcode() == Opcode::Add);
-        auto lower = loop_info_value.init;
-        auto upper = loop_info_value.test;
-        auto cc = loop_info_value.normalized_cc;
-        ASSERT(cc == CC_LE || cc == CC_LT || cc == CC_GE || cc == CC_GT);
-        if (loop_info_value.update->GetOpcode() == Opcode::Sub) {
-            lower = loop_info_value.test;
-            upper = loop_info_value.init;
-        }
-        auto lower_range = bri->FindBoundsRange(phi_block, lower);
-        auto upper_range = bri->FindBoundsRange(phi_block, upper);
-        if (lower_range.GetLeft() <= upper_range.GetRight()) {
-            BoundsRange range;
-            if (cc == CC_LE || cc == CC_GE ||
-                upper_range.GetRight() - lower_range.GetLeft() < static_cast<int64_t>(loop_info_value.const_step)) {
-                range = BoundsRange(lower_range.GetLeft(), upper_range.GetRight());
-            } else {
-                range = BoundsRange(lower_range.GetLeft(),
-                                    upper_range.GetRight() - static_cast<int64_t>(loop_info_value.const_step));
-            }
-            auto upper_len_array = upper_range.GetLenArray();
-            if (cc != CC_LE) {
-                range = UpdateLenArray(range, upper_len_array, upper);
-            }
-            bri->SetBoundsRange(phi_block, phi, range.FitInType(phi_type));
-            return;
-        }
-    }
     ArenaVector<BoundsRange> ranges(phi_block->GetGraph()->GetLocalAllocator()->Adapter());
     for (auto &block : phi_block->GetPredsBlocks()) {
         ranges.emplace_back(bri->FindBoundsRange(block, phi->GetPhiInput(block)));
     }
     bri->SetBoundsRange(phi_block, phi, BoundsRange::Union(ranges).FitInType(phi_type));
-}
-
-BoundsRange BoundsAnalysis::UpdateLenArray(BoundsRange range, const Inst *len_array, const Inst *upper)
-{
-    if (IsLenArray(upper)) {
-        range.SetLenArray(upper);
-    } else if (len_array != nullptr) {
-        range.SetLenArray(len_array);
-    }
-    return range;
 }
 
 bool BoundsAnalysis::CheckTriangleCase(const BasicBlock *block, const BasicBlock *tgt_block)
@@ -786,93 +528,10 @@ void BoundsAnalysis::CalcNewBoundsRangeForCompare(GraphVisitor *v, BasicBlock *b
      */
     if (CheckTriangleCase(block, tgt_block)) {
         auto ranges = BoundsRange::TryNarrowBoundsByCC(cc, {left_range, right_range});
-        if (cc == ConditionCode::CC_LT && IsLenArray(right)) {
-            ranges.first.SetLenArray(right);
-        } else if (cc == ConditionCode::CC_GT && IsLenArray(left)) {
-            ranges.second.SetLenArray(left);
-        } else if (left_range.GetLenArray() != nullptr) {
-            ranges.first.SetLenArray(left_range.GetLenArray());
-        } else if (right_range.GetLenArray() != nullptr) {
-            ranges.second.SetLenArray(right_range.GetLenArray());
-        }
+        ASSERT(left_range.GetLenArray() == nullptr);
+        ASSERT(right_range.GetLenArray() == nullptr);
         bri->SetBoundsRange(tgt_block, left, ranges.first.FitInType(left->GetType()));
         bri->SetBoundsRange(tgt_block, right, ranges.second.FitInType(right->GetType()));
     }
 }
-
-template <Opcode opc>
-void BoundsAnalysis::CalcNewBoundsRangeUnary(GraphVisitor *v, const Inst *inst)
-{
-    if (IsFloatType(inst->GetType()) || inst->GetType() == DataType::REFERENCE || inst->GetType() == DataType::UINT64) {
-        return;
-    }
-    auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
-    auto input0 = inst->GetInput(0).GetInst();
-    auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
-    BoundsRange range;
-    // clang-format off
-        // NOLINTNEXTLINE(readability-braces-around-statements)
-        if constexpr (opc == Opcode::Neg) {
-            range = range0.Neg();
-        // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
-        } else if constexpr (opc == Opcode::Abs) {
-            range = range0.Abs();
-        } else {
-            UNREACHABLE();
-        }
-    // clang-format on
-    bri->SetBoundsRange(inst->GetBasicBlock(), inst, range.FitInType(inst->GetType()));
-}
-
-template <Opcode opc>
-void BoundsAnalysis::CalcNewBoundsRangeBinary(GraphVisitor *v, const Inst *inst)
-{
-    if (IsFloatType(inst->GetType()) || inst->GetType() == DataType::REFERENCE || inst->GetType() == DataType::UINT64) {
-        return;
-    }
-    auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
-    auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
-    auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
-    auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
-    auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
-    auto len_array0 = range0.GetLenArray();
-    auto len_array1 = range1.GetLenArray();
-    BoundsRange range;
-    // clang-format off
-        // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-branch-clone)
-        if constexpr (opc == Opcode::Add) {
-            range = range0.Add(range1);
-            if (!range1.IsNotNegative() && len_array0 != nullptr) {
-                range.SetLenArray(len_array0);
-            }
-        // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
-        } else if constexpr (opc == Opcode::Sub) {
-            range = range0.Sub(range1);
-            if (range1.IsNotNegative() && len_array0 != nullptr) {
-                range.SetLenArray(len_array0);
-            }
-        // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
-        } else if constexpr (opc == Opcode::Mod) {
-            range = range0.Mod(range1);
-            if (len_array1 != nullptr) {
-                range.SetLenArray(len_array1);
-            }
-        // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
-        } else if constexpr (opc == Opcode::Mul) {
-            if (!range0.IsMaxRange() || !range1.IsMaxRange()) {
-                range = range0.Mul(range1);
-            }
-        // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
-        } else if constexpr (opc == Opcode::Div) {
-            range = range0.Div(range1);
-            if (range0.IsNotNegative() && range1.IsNotNegative() && len_array0 != nullptr) {
-                range.SetLenArray(len_array0);
-            }
-        } else {
-            UNREACHABLE();
-        }
-    // clang-format on
-    bri->SetBoundsRange(inst->GetBasicBlock(), inst, range.FitInType(inst->GetType()));
-}
-
 }  // namespace panda::compiler
