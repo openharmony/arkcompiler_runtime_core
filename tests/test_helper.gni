@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
-import("//build/test.gni")
+import("//arkcompiler/runtime_core/ark_root.gni")
+import("$build_root/test.gni")
 
 module_output_path = "arkcompiler/runtime_core"
 
