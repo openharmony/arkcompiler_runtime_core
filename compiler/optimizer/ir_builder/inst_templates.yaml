@@ -222,11 +222,10 @@ templates:
     AddInstruction(jmp_inst);
     % else
     BuildEcma(instruction);
-    %     if inst.acc.include?("out")
-    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
-        TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), static_cast<int>(GetPc(instruction->GetAddress())));
+    auto pc = static_cast<int>(GetPc(instruction->GetAddress()));
+    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod() && GetGraph()->GetRuntime()->IsPcBindType(pc)) {
+        TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), pc);
     }
-    %     end
     % end
   nop: |-
   unimplemented: |-
