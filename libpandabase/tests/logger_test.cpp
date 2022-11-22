@@ -354,47 +354,4 @@ HWTEST_F(LoggerTest, LogOnce, testing::ext::TestSize.Level0)
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 }
 
-HWTEST_F(LoggerTest, LogDfx, testing::ext::TestSize.Level0)
-{
-    Logger::InitializeStdLogging(Logger::Level::ERROR, panda::LoggerComponentMaskAll);
-    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
-
-    DfxController::Initialize();
-    EXPECT_TRUE(DfxController::IsInitialized());
-    EXPECT_EQ(DfxController::GetOptionValue(DfxOptionHandler::DFXLOG), 0);
-
-    testing::internal::CaptureStderr();
-
-    LOG_DFX(COMMON) << "a";
-    LOG_DFX(COMMON) << "b";
-    LOG_DFX(COMMON) << "c";
-
-    std::string err = testing::internal::GetCapturedStderr();
-    EXPECT_EQ(err, "");
-
-    DfxController::ResetOptionValueFromString("dfx-log:1");
-    EXPECT_EQ(DfxController::GetOptionValue(DfxOptionHandler::DFXLOG), 1);
-
-    testing::internal::CaptureStderr();
-
-    LOG_DFX(COMMON) << "a";
-    LOG_DFX(COMMON) << "b";
-    LOG_DFX(COMMON) << "c";
-
-    err = testing::internal::GetCapturedStderr();
-    uint32_t tid = os::thread::GetCurrentThreadId();
-    std::string res = helpers::string::Format(
-        "[TID %06x] E/dfx: common log:a\n"
-        "[TID %06x] E/dfx: common log:b\n"
-        "[TID %06x] E/dfx: common log:c\n",
-        tid, tid, tid);
-    EXPECT_EQ(err, res);
-
-    Logger::Destroy();
-    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
-
-    DfxController::Destroy();
-    EXPECT_FALSE(DfxController::IsInitialized());
-}
-
 }  // namespace panda::test

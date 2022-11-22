@@ -24,8 +24,6 @@ WEAK_FOR_LTO_START
 
 namespace panda::os::time {
 
-uint64_t GetClockTimeInMicro();
-uint64_t GetClockTimeInMilli();
 uint64_t GetClockTimeInThreadCpuTime();
 
 }  // namespace panda::os::time

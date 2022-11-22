@@ -20,7 +20,6 @@
 #include "os/error.h"
 #include "os/mutex.h"
 #include "os/thread.h"
-#include "utils/dfx.h"
 
 #include <array>
 #include <cstdint>
@@ -199,14 +198,6 @@ public:
     static void LogNestingDec();
     static bool IsMessageSuppressed([[maybe_unused]] Level level, [[maybe_unused]] Component component);
 #endif
-
-    static bool IsLoggingDfxOn()
-    {
-        if (!DfxController::IsInitialized() || !IsInitialized()) {
-            return false;
-        }
-        return (DfxController::GetOptionValue(DfxOptionHandler::DFXLOG) == 1);
-    }
 
     static void Log(Level level, Component component, const std::string &str);
 
@@ -465,12 +456,6 @@ private:
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG(level, component) _LOG_##level(component, false)
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG_DFX(dfx_component)                                                                     \
-    panda::Logger::IsLoggingDfxOn() &&                                                             \
-        panda::Logger::Message(panda::Logger::Level::ERROR, panda::Logger::DFX, false).GetStream() \
-            << panda::Logger::StringfromDfxComponent(panda::Logger::LogDfxComponent::dfx_component) << " log:"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define GET_LOG_STREAM(level, component) \
