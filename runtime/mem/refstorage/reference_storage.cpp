@@ -16,7 +16,6 @@
 #include "runtime/mem/refstorage/reference_storage.h"
 
 #include "libpandabase/mem/mem.h"
-#include "libpandabase/utils/dfx.h"
 #include "runtime/include/thread.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
@@ -365,9 +364,6 @@ void ReferenceStorage::DumpLocalRefClasses()
 
 void ReferenceStorage::DumpLocalRef()
 {
-    if (DfxController::IsInitialized() && DfxController::GetOptionValue(DfxOptionHandler::REFERENCE_DUMP) != 1) {
-        return;
-    }
     LOG(ERROR, GC) << "--- local reference storage dump ---";
     LOG(ERROR, GC) << "Local reference storage addr: " << &local_storage_;
     LOG(ERROR, GC) << "Dump the last several local references info(max " << MAX_DUMP_LOCAL_NUMS << "):";

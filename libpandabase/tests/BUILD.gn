@@ -23,7 +23,6 @@ host_unittest_action("LibPandaBaseTest") {
     "base_thread_test.cpp",
     "bit_vector_test.cpp",
     "code_allocator_test.cpp",
-    "dfx_test.cpp",
     "error_test.cpp",
     "json_parser_test.cpp",
     "math_helpers_test.cpp",
