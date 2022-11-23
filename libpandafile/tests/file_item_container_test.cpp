@@ -42,7 +42,7 @@
 
 namespace panda::panda_file::test {
 
-TEST(ItemContainer, DeduplicationTest)
+HWTEST(ItemContainer, DeduplicationTest, testing::ext::TestSize.Level0)
 {
     ItemContainer container;
 
@@ -71,7 +71,7 @@ TEST(ItemContainer, DeduplicationTest)
     EXPECT_NE(double_item, float_item);
 }
 
-TEST(ItemContainer, TestFileOpen)
+HWTEST(ItemContainer, TestFileOpen, testing::ext::TestSize.Level0)
 {
     using panda::os::file::Mode;
     using panda::os::file::Open;
@@ -88,7 +88,7 @@ TEST(ItemContainer, TestFileOpen)
     EXPECT_NE(File::Open(file_name), nullptr);
 }
 
-TEST(ItemContainer, TestFileFormatVersionTooOld)
+HWTEST(ItemContainer, TestFileFormatVersionTooOld, testing::ext::TestSize.Level0)
 {
     const std::string file_name = "test_file_format_version_too_old.abc";
     {
@@ -96,7 +96,10 @@ TEST(ItemContainer, TestFileFormatVersionTooOld)
         auto writer = FileWriter(file_name);
 
         File::Header header;
-        memset(&header, 0, sizeof(header));
+        errno_t res = memset_s(&header, sizeof(header), 0, sizeof(header));
+        if (res != EOK) {
+            UNREACHABLE();
+        }
         header.magic = File::MAGIC;
 
         auto old = std::array<uint8_t, File::VERSION_SIZE>(minVersion);
@@ -113,7 +116,7 @@ TEST(ItemContainer, TestFileFormatVersionTooOld)
     EXPECT_EQ(File::Open(file_name), nullptr);
 }
 
-TEST(ItemContainer, TestFileFormatVersionTooNew)
+HWTEST(ItemContainer, TestFileFormatVersionTooNew, testing::ext::TestSize.Level0)
 {
     const std::string file_name = "test_file_format_version_too_new.abc";
     {
@@ -121,13 +124,12 @@ TEST(ItemContainer, TestFileFormatVersionTooNew)
         auto writer = FileWriter(file_name);
 
         File::Header header;
-        memset(&header, 0, sizeof(header));
+        errno_t res = memset_s(&header, sizeof(header), 0, sizeof(header));
+        if (res != EOK) {
+            UNREACHABLE();
+        }
         header.magic = File::MAGIC;
-
-        auto new_ = std::array<uint8_t, File::VERSION_SIZE>(minVersion);
-        ++new_[3];
-
-        header.version = new_;
+        header.version = {0, 0, 0, 4};
         header.file_size = sizeof(File::Header);
 
         for (uint8_t b : Span<uint8_t>(reinterpret_cast<uint8_t *>(&header), sizeof(header))) {
@@ -138,7 +140,7 @@ TEST(ItemContainer, TestFileFormatVersionTooNew)
     EXPECT_EQ(File::Open(file_name), nullptr);
 }
 
-TEST(ItemContainer, TestFileFormatVersionValid)
+HWTEST(ItemContainer, TestFileFormatVersionValid, testing::ext::TestSize.Level0)
 {
     const std::string file_name = "test_file_format_version_valid.abc";
     {
@@ -146,7 +148,10 @@ TEST(ItemContainer, TestFileFormatVersionValid)
         auto writer = FileWriter(file_name);
 
         File::Header header;
-        memset(&header, 0, sizeof(header));
+        errno_t res = memset_s(&header, sizeof(header), 0, sizeof(header));
+        if (res != EOK) {
+            UNREACHABLE();
+        }
         header.magic = File::MAGIC;
         header.version = {0, 0, 0, 2};
         header.file_size = sizeof(File::Header);
@@ -166,7 +171,7 @@ static std::unique_ptr<const File> GetPandaFile(std::vector<uint8_t> &data)
     return File::OpenFromMemory(std::move(ptr));
 }
 
-TEST(ItemContainer, TestClasses)
+HWTEST(ItemContainer, TestClasses, testing::ext::TestSize.Level0)
 {
     // Write panda file to memory
 
@@ -236,7 +241,7 @@ TEST(ItemContainer, TestClasses)
 
     ASSERT_NE(panda_file, nullptr);
 
-    EXPECT_THAT(panda_file->GetHeader()->version, ::testing::ElementsAre(0, 0, 0, 2));
+    EXPECT_THAT(panda_file->GetHeader()->version, ::testing::ElementsAre(0, 0, 0, 3));
     EXPECT_EQ(panda_file->GetHeader()->file_size, mem_writer.GetData().size());
     EXPECT_EQ(panda_file->GetHeader()->foreign_off, 0U);
     EXPECT_EQ(panda_file->GetHeader()->foreign_size, 0U);
@@ -337,7 +342,7 @@ TEST(ItemContainer, TestClasses)
     EXPECT_EQ(empty_class_data_accessor.GetSize(), empty_class_item->GetSize());
 }
 
-TEST(ItemContainer, TestMethods)
+HWTEST(ItemContainer, TestMethods, testing::ext::TestSize.Level0)
 {
     // Write panda file to memory
 
@@ -503,7 +508,7 @@ void TestProtos(size_t n)
     });
 }
 
-TEST(ItemContainer, TestProtos)
+HWTEST(ItemContainer, TestProtos, testing::ext::TestSize.Level0)
 {
     TestProtos(0);
     TestProtos(1);
@@ -511,7 +516,7 @@ TEST(ItemContainer, TestProtos)
     TestProtos(7);
 }
 
-TEST(ItemContainer, TestDebugInfo)
+HWTEST(ItemContainer, TestDebugInfo, testing::ext::TestSize.Level0)
 {
     // Write panda file to memory
 
@@ -612,7 +617,7 @@ TEST(ItemContainer, TestDebugInfo)
     });
 }
 
-TEST(ItemContainer, ForeignItems)
+HWTEST(ItemContainer, ForeignItems, testing::ext::TestSize.Level0)
 {
     ItemContainer container;
 
@@ -667,7 +672,7 @@ TEST(ItemContainer, ForeignItems)
     EXPECT_TRUE(field_data_accessor.IsExternal());
 }
 
-TEST(ItemContainer, EmptyContainerChecksum)
+HWTEST(ItemContainer, EmptyContainerChecksum, testing::ext::TestSize.Level0)
 {
     using panda::os::file::Mode;
     using panda::os::file::Open;
@@ -679,12 +684,12 @@ TEST(ItemContainer, EmptyContainerChecksum)
     auto writer = FileWriter(file_name);
 
     // Initial value of adler32
-    EXPECT_EQ(writer.GetChecksum(), 1);
+    EXPECT_EQ(writer.GetChecksum(), 1U);
     ASSERT_TRUE(container.Write(&writer));
 
     // At least header was written so the checksum should be changed
     auto container_checksum = writer.GetChecksum();
-    EXPECT_NE(container_checksum, 1);
+    EXPECT_NE(container_checksum, 1U);
 
     // Read panda file from disk
     auto file = File::Open(file_name);
@@ -696,7 +701,7 @@ TEST(ItemContainer, EmptyContainerChecksum)
     EXPECT_EQ(file->GetHeader()->checksum, checksum);
 }
 
-TEST(ItemContainer, ContainerChecksum)
+HWTEST(ItemContainer, ContainerChecksum, testing::ext::TestSize.Level0)
 {
     using panda::os::file::Mode;
     using panda::os::file::Open;
@@ -734,7 +739,7 @@ TEST(ItemContainer, ContainerChecksum)
     EXPECT_EQ(file->GetHeader()->checksum, checksum);
 }
 
-TEST(ItemContainer, TestProfileGuidedRelayout)
+HWTEST(ItemContainer, TestProfileGuidedRelayout, testing::ext::TestSize.Level0)
 {
     ItemContainer container;
 
@@ -924,7 +929,7 @@ TEST(ItemContainer, TestProfileGuidedRelayout)
     EXPECT_EQ(item, items.end());
 }
 
-TEST(ItemContainer, GettersTest)
+HWTEST(ItemContainer, GettersTest, testing::ext::TestSize.Level0)
 {
     ItemContainer container;
 

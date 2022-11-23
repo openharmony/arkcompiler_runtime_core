@@ -25,7 +25,7 @@
 
 namespace panda::panda_file::test {
 
-TEST(LineNumberProgramItem, EmitSpecialOpcode)
+HWTEST(LineNumberProgramItem, EmitSpecialOpcode, testing::ext::TestSize.Level0)
 {
     LineNumberProgramItem item;
 
@@ -49,6 +49,19 @@ TEST(LineNumberProgramItem, EmitSpecialOpcode)
     ASSERT_TRUE(item.Write(&writer));
 
     EXPECT_EQ(writer.GetData(), data);
+}
+
+HWTEST(LineNumberProgramItem, LanguageFromAndToString, testing::ext::TestSize.Level0)
+{
+    ASSERT_EQ(LanguageFromString("not ECMAScript"), static_cast<SourceLang>(1U));
+    ASSERT_STREQ(LanguageToString(SourceLang::ECMASCRIPT), "ECMAScript");
+    ASSERT_STREQ(LanguageToString(SourceLang::PANDA_ASSEMBLY), "PandaAssembly");
+}
+
+HWTEST(LineNumberProgramItem, GetStringClassDescriptor, testing::ext::TestSize.Level0)
+{
+    ASSERT_STREQ(GetStringClassDescriptor(SourceLang::ECMASCRIPT), "Lpanda/JSString;");
+    ASSERT_STREQ(GetStringClassDescriptor(SourceLang::PANDA_ASSEMBLY), "Lpanda/String;");
 }
 
 }  // namespace panda::panda_file::test

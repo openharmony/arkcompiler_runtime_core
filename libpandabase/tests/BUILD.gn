@@ -19,11 +19,12 @@ host_unittest_action("LibPandaBaseTest") {
 
   sources = [
     "arch_test.cpp",
+    "arena_allocator_test.cpp",
     "base_mem_stats_test.cpp",
     "base_thread_test.cpp",
     "bit_vector_test.cpp",
+    "cframe_layout_test.cpp",
     "code_allocator_test.cpp",
-    "dfx_test.cpp",
     "error_test.cpp",
     "json_parser_test.cpp",
     "math_helpers_test.cpp",

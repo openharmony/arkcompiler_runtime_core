@@ -238,7 +238,7 @@ bool JsonObject::Parser::GetBool()
 bool JsonObject::Parser::GetValue()
 {
     auto symbol = PeekSymbol();
-    size_t pos_start = istream_.tellg();
+    size_t pos_start = static_cast<size_t>(istream_.tellg());
     bool res = false;
     switch (symbol) {
         case 't':
@@ -283,7 +283,7 @@ bool JsonObject::Parser::GetValue()
     }
 
     // Save source string of parsed value:
-    size_t pos_end = istream_.tellg();
+    size_t pos_end = static_cast<size_t>(istream_.tellg());
     if (pos_end == static_cast<size_t>(-1)) {
         return false;
     }

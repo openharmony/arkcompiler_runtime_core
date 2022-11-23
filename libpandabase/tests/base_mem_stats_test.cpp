@@ -76,4 +76,26 @@ HWTEST_F(BaseMemStatsTest, AllocationsOverAllocator, testing::ext::TestSize.Leve
     ASSERT_EQ(sizeof(buff1), stats.GetFootprint(SpaceType::SPACE_TYPE_CODE));
 }
 
+HWTEST_F(BaseMemStatsTest, HeapAllocateTest, testing::ext::TestSize.Level0)
+{
+    BaseMemStats stats;
+    stats.RecordAllocateRaw(1U, SpaceType::SPACE_TYPE_CODE);
+    ASSERT_EQ(stats.GetAllocated(SpaceType::SPACE_TYPE_CODE), 1U);
+
+    stats.RecordAllocateRaw(2U, SpaceType::SPACE_TYPE_OBJECT);
+    ASSERT_EQ(stats.GetAllocated(SpaceType::SPACE_TYPE_OBJECT), 2U);
+
+    stats.RecordAllocateRaw(3U, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+    ASSERT_EQ(stats.GetAllocated(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT), 3U);
+
+    stats.RecordFreeRaw(4U, SpaceType::SPACE_TYPE_CODE);
+    ASSERT_EQ(stats.GetFreed(SpaceType::SPACE_TYPE_CODE), 4U);
+
+    stats.RecordFreeRaw(5U, SpaceType::SPACE_TYPE_OBJECT);
+    ASSERT_EQ(stats.GetFreed(SpaceType::SPACE_TYPE_OBJECT), 5U);
+
+    ASSERT_EQ(5U, stats.GetAllocatedHeap());
+    ASSERT_EQ(5U, stats.GetFreedHeap());
+}
+
 }  // namespace panda

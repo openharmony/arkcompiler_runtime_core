@@ -389,4 +389,34 @@ HWTEST(Utf, CompareUtf8ToUtf8, testing::ext::TestSize.Level0)
     }
 }
 
+HWTEST(Utf, IsMUtf8OnlySingleBytes, testing::ext::TestSize.Level0)
+{
+    const std::vector<uint8_t> v1 {0x02, 0x00};
+    EXPECT_TRUE(IsMUtf8OnlySingleBytes(v1.data()));
+
+    const std::vector<uint8_t> v2 {0x90, 0x00};
+    EXPECT_FALSE(IsMUtf8OnlySingleBytes(v2.data()));
+}
+
+HWTEST(Utf, IsValidModifiedUTF8, testing::ext::TestSize.Level0)
+{
+    const std::vector<uint8_t> v1 {0x31, 0x00};
+    EXPECT_TRUE(IsValidModifiedUTF8(v1.data()));
+
+    const std::vector<uint8_t> v2 {0x9f};
+    EXPECT_FALSE(IsValidModifiedUTF8(v2.data()));
+
+    const std::vector<uint8_t> v3 {0xf7};
+    EXPECT_FALSE(IsValidModifiedUTF8(v3.data()));
+
+    const std::vector<uint8_t> v4 {0xe0};
+    EXPECT_FALSE(IsValidModifiedUTF8(v4.data()));
+
+    const std::vector<uint8_t> v5 {0xd4};
+    EXPECT_FALSE(IsValidModifiedUTF8(v5.data()));
+
+    const std::vector<uint8_t> v6 {0x11, 0x31, 0x00};
+    EXPECT_TRUE(IsValidModifiedUTF8(v6.data()));
+}
+
 }  // namespace panda::utf::test
