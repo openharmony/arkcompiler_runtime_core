@@ -21,8 +21,6 @@ template("host_unittest_action") {
 
   # unittest for phone running
   ohos_unittest(_target_name_) {
-    resource_config_file =
-        "//arkcompiler/runtime_core/tests/resource/ohos_test.xml"
     forward_variables_from(invoker, "*")
   }
 
