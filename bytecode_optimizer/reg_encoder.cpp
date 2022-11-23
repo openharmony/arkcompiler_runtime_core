@@ -348,7 +348,7 @@ void RegEncoder::InsertSpillsForDynInputsInst(compiler::Inst *inst)
     RegContentVec spill_vec(GetGraph()->GetLocalAllocator()->Adapter());  // spill_vec is used to handle callrange
 
     auto nargs = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
-    auto start = 0;
+    size_t start = 0;
     bool range = IsIntrinsicRange(inst) || (nargs - start > MAX_NUM_NON_RANGE_ARGS && CanHoldRange(inst));
 
     compiler::Register temp = range ? range_temps_start_ : 0;

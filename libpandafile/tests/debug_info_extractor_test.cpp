@@ -324,7 +324,7 @@ public:
 std::unique_ptr<const panda_file::File> ExtractorTest::u_file {nullptr};
 std::vector<uint8_t> ExtractorTest::file_data;
 
-TEST_F(ExtractorTest, DebugInfoTest)
+HWTEST_F(ExtractorTest, DebugInfoTest, testing::ext::TestSize.Level0)
 {
     const panda_file::File *pf = u_file.get();
     ASSERT_TRUE(pf != nullptr);
@@ -341,14 +341,14 @@ TEST_F(ExtractorTest, DebugInfoTest)
     ASSERT_EQ(source_location.line, 5U);
 
     auto vars = GetLocalVariableInfoWrapper(extractor, method_id, 4);
-    EXPECT_EQ(vars.size(), 2);
+    EXPECT_EQ(vars.size(), 2U);
     ASSERT_EQ(vars[0].name, "local_1");
     ASSERT_EQ(vars[0].type, "I");
     ASSERT_EQ(vars[1].name, "local_2");
     ASSERT_EQ(vars[1].type, "I");
 }
 
-TEST_F(ExtractorTest, DebugInfoTestStaticWithRefArg)
+HWTEST_F(ExtractorTest, DebugInfoTestStaticWithRefArg, testing::ext::TestSize.Level0)
 {
     const panda_file::File *pf = u_file.get();
     ASSERT_TRUE(pf != nullptr);
@@ -360,10 +360,10 @@ TEST_F(ExtractorTest, DebugInfoTestStaticWithRefArg)
     ASSERT_TRUE(method_id.IsValid());
 
     auto vars = GetLocalVariableInfoWrapper(extractor, method_id, 14);
-    EXPECT_EQ(vars.size(), 0);
+    EXPECT_EQ(vars.size(), 0U);
 }
 
-TEST_F(ExtractorTest, DebugInfoTestNonStaticWithRefArg)
+HWTEST_F(ExtractorTest, DebugInfoTestNonStaticWithRefArg, testing::ext::TestSize.Level0)
 {
     const panda_file::File *pf = u_file.get();
     ASSERT_TRUE(pf != nullptr);
@@ -375,10 +375,10 @@ TEST_F(ExtractorTest, DebugInfoTestNonStaticWithRefArg)
     ASSERT_TRUE(method_id.IsValid());
 
     auto vars = GetLocalVariableInfoWrapper(extractor, method_id, 16);
-    EXPECT_EQ(vars.size(), 0);
+    EXPECT_EQ(vars.size(), 0U);
 }
 
-TEST_F(ExtractorTest, DebugInfoTestColumnNumber)
+HWTEST_F(ExtractorTest, DebugInfoTestColumnNumber, testing::ext::TestSize.Level0)
 {
     const panda_file::File *pf = u_file.get();
     ASSERT_TRUE(pf != nullptr);

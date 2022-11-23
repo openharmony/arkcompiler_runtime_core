@@ -18,7 +18,10 @@ host_unittest_action("LibPandaFileTest") {
   module_out_path = module_output_path
 
   sources = [
+    "debug_info_extractor_test.cpp",
     "file_format_version_test.cpp",
+    "file_item_container_test.cpp",
+    "file_items_test.cpp",
     "file_test.cpp",
   ]
 
@@ -34,6 +37,7 @@ host_unittest_action("LibPandaFileTest") {
   deps = [
     "$ark_root/assembler:libarkassembler_static",
     "$ark_root/libpandafile:libarkfile_static",
+    "//third_party/googletest:gmock_main",
     sdk_libc_secshared_dep,
   ]
 }
