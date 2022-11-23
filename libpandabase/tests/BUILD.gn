@@ -44,7 +44,7 @@ host_unittest_action("LibPandaBaseTest") {
   ]
 
   deps = [
-    "$ark_root/libpandabase:libarkbase",
+    "$ark_root/libpandabase:libarkbase_static",
     sdk_libc_secshared_dep,
   ]
 }

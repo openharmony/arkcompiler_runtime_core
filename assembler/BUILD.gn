@@ -81,8 +81,8 @@ source_set("libarkassembler_static") {
     ":isa_gen_libarkassembler_isa_h",
     ":isa_gen_libarkassembler_opcode_parsing_h",
     ":isa_gen_libarkassembler_operand_types_print_h",
-    "$ark_root/libpandabase:libarkbase",
-    "$ark_root/libpandafile:libarkfile",
+    "$ark_root/libpandabase:libarkbase_static",
+    "$ark_root/libpandafile:libarkfile_static",
     sdk_libc_secshared_dep,
   ]
 

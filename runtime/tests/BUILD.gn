@@ -28,7 +28,7 @@ host_unittest_action("RuntimeTest") {
 
   deps = [
     "$ark_root/assembler:libarkassembler_static",
-    "$ark_root/libpandabase:libarkbase",
+    "$ark_root/libpandabase:libarkbase_static",
     sdk_libc_secshared_dep,
   ]
 }
