@@ -169,7 +169,7 @@ private:
     std::string str_value_;
 };
 
-TEST_F(ArenaAllocatorTest, AllocateTest)
+HWTEST_F(ArenaAllocatorTest, AllocateTest, testing::ext::TestSize.Level0)
 {
     void *addr;
     void *tmp;
@@ -196,7 +196,7 @@ TEST_F(ArenaAllocatorTest, AllocateTest)
     ASSERT_EQ(tmp = aa.Alloc(DEFAULT_ARENA_SIZE + maxAlignDrift + 1), nullptr);
 }
 
-TEST_F(ArenaAllocatorTest, AllocateVectorTest)
+HWTEST_F(ArenaAllocatorTest, AllocateVectorTest, testing::ext::TestSize.Level0)
 {
     constexpr size_t SIZE = 2048;
     constexpr size_t SMALL_MAGIC_CONSTANT = 3;
@@ -217,7 +217,7 @@ TEST_F(ArenaAllocatorTest, AllocateVectorTest)
     }
 }
 
-TEST_F(ArenaAllocatorTest, AllocateVectorWithComplexTypeTest)
+HWTEST_F(ArenaAllocatorTest, AllocateVectorWithComplexTypeTest, testing::ext::TestSize.Level0)
 {
     constexpr size_t SIZE = 512;
     constexpr size_t MAGIC_CONSTANT_1 = std::numeric_limits<size_t>::max() / (SIZE + 2);
@@ -293,7 +293,7 @@ TEST_F(ArenaAllocatorTest, AllocateVectorWithComplexTypeTest)
     }
 }
 
-TEST_F(ArenaAllocatorTest, AllocateDequeWithComplexTypeTest)
+HWTEST_F(ArenaAllocatorTest, AllocateDequeWithComplexTypeTest, testing::ext::TestSize.Level0)
 {
     constexpr size_t SIZE = 2048;
     constexpr size_t MAGIC_CONSTANT_1 = std::numeric_limits<size_t>::max() / (SIZE + 2);
@@ -370,7 +370,7 @@ TEST_F(ArenaAllocatorTest, AllocateDequeWithComplexTypeTest)
     }
 }
 
-TEST_F(ArenaAllocatorTest, LongRandomTest)
+HWTEST_F(ArenaAllocatorTest, LongRandomTest, testing::ext::TestSize.Level0)
 {
     constexpr size_t SIZE = 3250000;
     constexpr size_t HALF_SIZE = SIZE >> 1;
@@ -438,7 +438,7 @@ TEST_F(ArenaAllocatorTest, LongRandomTest)
     }
 }
 
-TEST_F(ArenaAllocatorTest, LogAlignmentSmallSizesTest)
+HWTEST_F(ArenaAllocatorTest, LogAlignmentSmallSizesTest, testing::ext::TestSize.Level0)
 {
     constexpr size_t MAX_SMALL_SIZE = 32;
 
@@ -457,7 +457,7 @@ TEST_F(ArenaAllocatorTest, LogAlignmentSmallSizesTest)
     }
 }
 
-TEST_F(ArenaAllocatorTest, LogAlignmentBigSizeTest)
+HWTEST_F(ArenaAllocatorTest, LogAlignmentBigSizeTest, testing::ext::TestSize.Level0)
 {
     constexpr size_t SIZE = 0.3_KB;
     ArenaAllocator aa(SpaceType::SPACE_TYPE_INTERNAL);
@@ -473,37 +473,37 @@ TEST_F(ArenaAllocatorTest, LogAlignmentBigSizeTest)
     }
 }
 
-TEST_F(ArenaAllocatorTest, ArrayUINT16AlignmentTest)
+HWTEST_F(ArenaAllocatorTest, ArrayUINT16AlignmentTest, testing::ext::TestSize.Level0)
 {
     AllocateWithAlignment<uint16_t>();
 }
 
-TEST_F(ArenaAllocatorTest, ArrayUINT32AlignmentTest)
+HWTEST_F(ArenaAllocatorTest, ArrayUINT32AlignmentTest, testing::ext::TestSize.Level0)
 {
     AllocateWithAlignment<uint32_t>();
 }
 
-TEST_F(ArenaAllocatorTest, ArrayUINT64AlignmentTest)
+HWTEST_F(ArenaAllocatorTest, ArrayUINT64AlignmentTest, testing::ext::TestSize.Level0)
 {
     AllocateWithAlignment<uint64_t>();
 }
 
-TEST_F(ArenaAllocatorTest, ArrayUINT16WithDiffAlignmentTest)
+HWTEST_F(ArenaAllocatorTest, ArrayUINT16WithDiffAlignmentTest, testing::ext::TestSize.Level0)
 {
     AllocateWithDiffAlignment<uint16_t>();
 }
 
-TEST_F(ArenaAllocatorTest, ArrayUINT32WithDiffAlignmentTest)
+HWTEST_F(ArenaAllocatorTest, ArrayUINT32WithDiffAlignmentTest, testing::ext::TestSize.Level0)
 {
     AllocateWithDiffAlignment<uint32_t>();
 }
 
-TEST_F(ArenaAllocatorTest, ArrayUINT64WithDiffAlignmentTest)
+HWTEST_F(ArenaAllocatorTest, ArrayUINT64WithDiffAlignmentTest, testing::ext::TestSize.Level0)
 {
     AllocateWithDiffAlignment<uint64_t>();
 }
 
-TEST_F(ArenaAllocatorTest, FunctionNewTest)
+HWTEST_F(ArenaAllocatorTest, FunctionNewTest, testing::ext::TestSize.Level0)
 {
     ArenaAllocator aa(SpaceType::SPACE_TYPE_INTERNAL);
     std::array<ComplexClass *, ARRAY_SIZE> arr;
@@ -538,26 +538,7 @@ TEST_F(ArenaAllocatorTest, FunctionNewTest)
     }
 }
 
-TEST_F(ArenaAllocatorTest, ResizeTest)
-{
-    ArenaAllocator aa(SpaceType::SPACE_TYPE_INTERNAL);
-    static constexpr size_t alloc_count = 1000;
-    static constexpr size_t init_val = 0xdeadbeef;
-    void *tmp;
-    size_t *first_var = aa.New<size_t>(init_val);
-    {
-        size_t init_size = aa.GetAllocatedSize();
-        for (size_t i = 0; i < alloc_count; i++) {
-            tmp = aa.Alloc(sizeof(size_t));
-        }
-        EXPECT_DEATH(aa.Resize(aa.GetAllocatedSize() + 1), "");
-        aa.Resize(init_size);
-        ASSERT_EQ(aa.GetAllocatedSize(), init_size);
-    }
-    ASSERT_EQ(*first_var, init_val);
-}
-
-TEST_F(ArenaAllocatorTest, ResizeWrapperTest)
+HWTEST_F(ArenaAllocatorTest, ResizeWrapperTest, testing::ext::TestSize.Level0)
 {
     static constexpr size_t VECTOR_SIZE = 1000;
     ArenaAllocator aa(SpaceType::SPACE_TYPE_INTERNAL);
@@ -569,7 +550,7 @@ TEST_F(ArenaAllocatorTest, ResizeWrapperTest)
             vector.push_back(i);
         }
     }
-    ASSERT(old_size == aa.GetAllocatedSize());
+    ASSERT_TRUE(old_size == aa.GetAllocatedSize());
 }
 
 }  // namespace panda

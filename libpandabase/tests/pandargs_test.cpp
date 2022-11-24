@@ -42,6 +42,7 @@ HWTEST(libpandargs, TestAPI, testing::ext::TestSize.Level0)
     PandArg<uint64_t> paur64("ruint64", ref_def_uint64, "uint64 argument with range", 0, 100000000000);
 
     PandArgParser pa_parser;
+    EXPECT_FALSE(pa_parser.Add(nullptr));
     EXPECT_TRUE(pa_parser.Add(&pab));
     EXPECT_TRUE(pa_parser.Add(&pai));
     EXPECT_TRUE(pa_parser.Add(&pad));
@@ -150,6 +151,13 @@ HWTEST(libpandargs, TestAPI, testing::ext::TestSize.Level0)
         EXPECT_FALSE(pa_parser.PushBackTail(&t_pai));
         pa_parser.PopBackTail();
         EXPECT_EQ(pa_parser.GetTailSize(), 0U);
+    }
+
+    {
+        ASSERT_EQ(pa_parser.GetTailSize(), 0U);
+        ASSERT_FALSE(pa_parser.PushBackTail(nullptr));
+        ASSERT_EQ(pa_parser.GetTailSize(), 0U);
+        ASSERT_FALSE(pa_parser.PopBackTail());
     }
 
     // expect help string formed right
@@ -926,6 +934,30 @@ HWTEST(libpandargs, CompoundArgs, testing::ext::TestSize.Level0)
         static const char *argv[] = {"gtest_app", "--string=World"};
         ASSERT_FALSE(pa_parser.Parse(2, argv));
     }
+}
+
+HWTEST(libpandargs, GetHelpString, testing::ext::TestSize.Level0)
+{
+    PandArg<bool> pab("bool", false, "Sample boolean argument");
+    PandArg<int> pai("int", 0, "Sample integer argument");
+    PandArg<std::string> t_pas("tail_string", "arg", "Sample tail string argument");
+    PandArgCompound pac("compound", "Sample compound argument", {&pab, &pai});
+
+    PandArgParser pa_parser;
+    ASSERT_TRUE(pa_parser.Add(&pab));
+    ASSERT_TRUE(pa_parser.Add(&pai));
+    ASSERT_TRUE(pa_parser.PushBackTail(&t_pas));
+    ASSERT_TRUE(pa_parser.Add(&pac));
+    
+    std::string ref_string = "--" + pab.GetName() + ": " + pab.GetDesc() + "\n";
+    ref_string += "--" + pac.GetName() + ": " + pac.GetDesc() + "\n";
+    ref_string += "  Sub arguments:\n";
+    ref_string += "    " + pab.GetName() + ": " + pab.GetDesc() + "\n";
+    ref_string += "    " + pai.GetName() + ": " + pai.GetDesc() + "\n";
+    ref_string += "--" + pai.GetName() + ": " + pai.GetDesc() + "\n";
+    ref_string += "Tail arguments:\n";
+    ref_string += t_pas.GetName() + ": " + t_pas.GetDesc() + "\n";
+    ASSERT_EQ(pa_parser.GetHelpString(), ref_string);
 }
 
 }  // namespace panda::test

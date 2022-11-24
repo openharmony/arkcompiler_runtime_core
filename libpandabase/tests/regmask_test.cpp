@@ -86,4 +86,16 @@ HWTEST(RegMask, Base, testing::ext::TestSize.Level0)
     TestDistance(mask, 31, 5, 0);
 }
 
+HWTEST(RegMask, SetAndDumpTest, testing::ext::TestSize.Level0)
+{
+    RegMask mask(MakeMask(1, 2, 3));
+    ASSERT_EQ(mask.GetValue(), 14U);
+
+    mask.Set(1U, false);
+    ASSERT_EQ(mask.GetValue(), 12U);
+
+    mask.Set(5U, true);
+    ASSERT_EQ(mask.GetValue(), 44U);
+}
+
 }  // namespace panda::test

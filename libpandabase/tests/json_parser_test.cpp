@@ -58,6 +58,8 @@ HWTEST(JsonParser, ParsePrimitive, testing::ext::TestSize.Level0)
 
     ASSERT_NE(obj.GetValue<JsonObject::StringT>("key_1"), nullptr);
     ASSERT_EQ(*obj.GetValue<JsonObject::StringT>("key_1"), "\"key_1\"\\. value\n");
+
+    ASSERT_EQ(obj.GetValue<JsonObject::StringT>("key_2"), nullptr);
 }
 
 HWTEST(JsonParser, Arrays, testing::ext::TestSize.Level0)
