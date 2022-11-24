@@ -923,6 +923,11 @@ public:
         return NO_EXPLICIT_TYPE;
     }
 
+    virtual bool IsPcBindType([[maybe_unused]] int32_t pc) const
+    {
+        return false;
+    }
+
     virtual bool FillInstIdTypePairByPc([[maybe_unused]] size_t id, [[maybe_unused]] int32_t pc)
     {
         return false;

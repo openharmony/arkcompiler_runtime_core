@@ -356,6 +356,11 @@ public:
         return it->second;
     }
 
+    bool IsPcBindType(int32_t pc) const override
+    {
+        return pc_type_map_.find(pc) != pc_type_map_.end();
+    }
+
     bool FillInstIdTypePairByPc(size_t id, int32_t pc) override
     {
         const auto it = pc_type_map_.find(pc);
