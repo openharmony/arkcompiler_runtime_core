@@ -18,11 +18,13 @@ host_unittest_action("LibPandaFileTest") {
   module_out_path = module_output_path
 
   sources = [
+    "bytecode_emitter_tests.cpp",
     "debug_info_extractor_test.cpp",
     "file_format_version_test.cpp",
     "file_item_container_test.cpp",
     "file_items_test.cpp",
     "file_test.cpp",
+    "pgo_test.cpp",
   ]
 
   configs = [
