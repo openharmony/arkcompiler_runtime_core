@@ -27,7 +27,15 @@
 
 namespace panda::test {
 
-TEST(Logger, Initialization)
+class LoggerTest : public testing::Test {
+public:
+    static void SetUpTestSuite()
+    {
+        system("mount -o rw,remount /");
+    }
+};
+
+HWTEST_F(LoggerTest, Initialization, testing::ext::TestSize.Level0)
 {
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 
@@ -80,7 +88,7 @@ TEST(Logger, Initialization)
     EXPECT_DEATH_IF_SUPPORTED(LOG(FATAL, COMMON) << "4", "");
 }
 
-TEST(Logger, LoggingExceptionsFatal)
+HWTEST_F(LoggerTest, LoggingExceptionsFatal, testing::ext::TestSize.Level0)
 {
     testing::FLAGS_gtest_death_test_style = "fast";
 
@@ -111,7 +119,7 @@ TEST(Logger, LoggingExceptionsFatal)
     Logger::Destroy();
 }
 
-TEST(Logger, LoggingExceptionsError)
+HWTEST_F(LoggerTest, LoggingExceptionsError, testing::ext::TestSize.Level0)
 {
     testing::FLAGS_gtest_death_test_style = "fast";
 
@@ -144,7 +152,7 @@ TEST(Logger, LoggingExceptionsError)
     Logger::Destroy();
 }
 
-TEST(Logger, FilterInfo)
+HWTEST_F(LoggerTest, FilterInfo, testing::ext::TestSize.Level0)
 {
     Logger::InitializeStdLogging(Logger::Level::INFO, panda::LoggerComponentMaskAll);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
@@ -167,7 +175,7 @@ TEST(Logger, FilterInfo)
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 }
 
-TEST(Logger, FilterError)
+HWTEST_F(LoggerTest, FilterError, testing::ext::TestSize.Level0)
 {
     Logger::InitializeStdLogging(Logger::Level::ERROR, panda::LoggerComponentMaskAll);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
@@ -187,7 +195,7 @@ TEST(Logger, FilterError)
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 }
 
-TEST(Logger, FilterFatal)
+HWTEST_F(LoggerTest, FilterFatal, testing::ext::TestSize.Level0)
 {
     Logger::InitializeStdLogging(Logger::Level::FATAL, panda::LoggerComponentMaskAll);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
@@ -199,14 +207,13 @@ TEST(Logger, FilterFatal)
     LOG(ERROR, COMMON) << "c";
 
     std::string err = testing::internal::GetCapturedStderr();
-    uint32_t tid = os::thread::GetCurrentThreadId();
     EXPECT_EQ(err, "");
 
     Logger::Destroy();
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 }
 
-TEST(Logger, ComponentFilter)
+HWTEST_F(LoggerTest, ComponentFilter, testing::ext::TestSize.Level0)
 {
     panda::Logger::ComponentMask component_mask;
     component_mask.set(Logger::Component::COMPILER);
@@ -236,7 +243,7 @@ TEST(Logger, ComponentFilter)
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 }
 
-TEST(Logger, FileLogging)
+HWTEST_F(LoggerTest, FileLogging, testing::ext::TestSize.Level0)
 {
     uint32_t tid = os::thread::GetCurrentThreadId();
     std::string log_filename = helpers::string::Format("/tmp/gtest_panda_logger_file_%06x", tid);
@@ -276,7 +283,7 @@ TEST(Logger, FileLogging)
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 }
 
-TEST(Logger, Multiline)
+HWTEST_F(LoggerTest, Multiline, testing::ext::TestSize.Level0)
 {
     Logger::InitializeStdLogging(Logger::Level::INFO, panda::Logger::ComponentMask().set(Logger::Component::COMMON));
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
@@ -302,34 +309,7 @@ TEST(Logger, Multiline)
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 }
 
-TEST(Logger, PLog)
-{
-    Logger::InitializeStdLogging(Logger::Level::INFO, panda::LoggerComponentMaskAll);
-    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
-
-    testing::internal::CaptureStderr();
-
-    int errnum = errno;
-
-    errno = EEXIST;
-    PLOG(ERROR, COMMON) << "a";
-    errno = EACCES;
-    PLOG(INFO, COMPILER) << "b";
-    errno = errnum;
-
-    std::string err = testing::internal::GetCapturedStderr();
-    uint32_t tid = os::thread::GetCurrentThreadId();
-    std::string res = helpers::string::Format(
-        "[TID %06x] E/common: a: File exists\n"
-        "[TID %06x] I/compiler: b: Permission denied\n",
-        tid, tid, tid, tid);
-    EXPECT_EQ(err, res);
-
-    Logger::Destroy();
-    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
-}
-
-TEST(Logger, LogIf)
+HWTEST_F(LoggerTest, LogIf, testing::ext::TestSize.Level0)
 {
     Logger::InitializeStdLogging(Logger::Level::INFO, panda::LoggerComponentMaskAll);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
@@ -348,7 +328,7 @@ TEST(Logger, LogIf)
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 }
 
-TEST(Logger, LogOnce)
+HWTEST_F(LoggerTest, LogOnce, testing::ext::TestSize.Level0)
 {
     Logger::InitializeStdLogging(Logger::Level::INFO, panda::LoggerComponentMaskAll);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
@@ -374,7 +354,7 @@ TEST(Logger, LogOnce)
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 }
 
-TEST(Logger, LogDfx)
+HWTEST_F(LoggerTest, LogDfx, testing::ext::TestSize.Level0)
 {
     Logger::InitializeStdLogging(Logger::Level::ERROR, panda::LoggerComponentMaskAll);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));

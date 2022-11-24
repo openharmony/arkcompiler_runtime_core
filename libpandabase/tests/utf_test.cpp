@@ -103,6 +103,12 @@ HWTEST(Utf, Utf16ToMUtf8Size, testing::ext::TestSize.Level0)
         EXPECT_EQ(res, 2U);
     }
 
+    {
+        const std::vector<uint16_t> in {0x7f};
+        size_t res = Utf16ToMUtf8Size(in.data(), in.size());
+        EXPECT_EQ(res, 2U);
+    }
+
     // 2-byte mutf-8: 110xxxxx 10xxxxxx
     {
         const std::vector<uint16_t> in {0xa7, 0x33};
@@ -417,6 +423,43 @@ HWTEST(Utf, IsValidModifiedUTF8, testing::ext::TestSize.Level0)
 
     const std::vector<uint8_t> v6 {0x11, 0x31, 0x00};
     EXPECT_TRUE(IsValidModifiedUTF8(v6.data()));
+}
+
+HWTEST(Utf, ConvertMUtf8ToUtf16Pair, testing::ext::TestSize.Level0)
+{
+    const uint8_t data = 0x11;
+    std::pair<uint32_t, size_t> p1 = ConvertMUtf8ToUtf16Pair(&data, 2U);
+    ASSERT_EQ(17U, p1.first);
+    ASSERT_EQ(1U, p1.second);
+
+    std::pair<uint32_t, size_t> p2 = ConvertMUtf8ToUtf16Pair(&data, 3U);
+    ASSERT_EQ(17U, p2.first);
+    ASSERT_EQ(1U, p2.second);
+}
+
+HWTEST(Utf, IsEqualTest, testing::ext::TestSize.Level0)
+{
+    {
+        const std::vector<uint8_t> v1 {0x7f, 0x00};
+        const std::vector<uint8_t> v2 {0x7f, 0x00};
+        Span<const uint8_t> utf8_1(v1.data(), v1.size());
+        Span<const uint8_t> utf8_2(v2.data(), v2.size());
+        ASSERT_TRUE(IsEqual(utf8_1, utf8_2));
+    }
+
+    {
+        const std::vector<uint8_t> v1 {0x7f, 0x7f, 0x00};
+        const std::vector<uint8_t> v2 {0x7f, 0x00};
+        Span<const uint8_t> utf8_1(v1.data(), v1.size());
+        Span<const uint8_t> utf8_2(v2.data(), v2.size());
+        ASSERT_FALSE(IsEqual(utf8_1, utf8_2));
+    }
+
+    {
+        const std::vector<uint8_t> v1 {0xdf, 0xbf, 0x03, 0x00};
+        const std::vector<uint8_t> v2 {0xdf, 0xbf, 0x03, 0x00};
+        EXPECT_TRUE(IsEqual(v1.data(), v2.data()));
+    }
 }
 
 }  // namespace panda::utf::test

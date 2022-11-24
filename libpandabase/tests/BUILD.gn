@@ -27,6 +27,7 @@ host_unittest_action("LibPandaBaseTest") {
     "code_allocator_test.cpp",
     "error_test.cpp",
     "json_parser_test.cpp",
+    "logger_test.cpp",
     "math_helpers_test.cpp",
     "mem_space_test.cpp",
     "mmap_mem_pool_test.cpp",
