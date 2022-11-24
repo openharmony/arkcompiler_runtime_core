@@ -27,6 +27,7 @@ host_unittest_action("LibPandaBaseTest") {
     "code_allocator_test.cpp",
     "error_test.cpp",
     "json_parser_test.cpp",
+    "logger_test.cpp",
     "math_helpers_test.cpp",
     "mem_space_test.cpp",
     "mmap_mem_pool_test.cpp",
@@ -37,6 +38,14 @@ host_unittest_action("LibPandaBaseTest") {
     "unique_fd_test.cpp",
     "utf_test.cpp",
   ]
+
+  if (!is_mingw && !is_mac && target_os != "ios") {
+    sources += [
+      "genmc/mutex_test_2.cpp",
+      "unix_file_test.cpp",
+      "unix_native_stack_test.cpp",
+    ]
+  }
 
   configs = [
     "$ark_root:ark_config",

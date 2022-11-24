@@ -63,6 +63,11 @@ HWTEST_F(CodeAllocatorTest, AllocateBuffTest, testing::ext::TestSize.Level0)
         ASSERT_EQ(static_cast<uint8_t *>(code_buff)[i], 0xCC);
     }
     ASSERT_TRUE(IsAligned(code_buff, 4 * SIZE_1K));
+    
+    std::byte byte{0x00};
+    os::mem::MapRange<std::byte> map_range = ca.AllocateCodeUnprotected(8U);
+    ASSERT_EQ(map_range.GetSize(), 8U);
+    ASSERT_EQ(*(map_range.GetData()), byte);
 }
 
 }  // namespace panda
