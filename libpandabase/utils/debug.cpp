@@ -14,7 +14,6 @@
  */
 
 #include "debug.h"
-#include "terminate.h"
 #include "os/thread.h"
 #include "os/stacktrace.h"
 #include <iostream>
@@ -28,11 +27,7 @@ namespace panda::debug {
     std::cerr << "IN " << file << ":" << std::dec << line << ": " << function << std::endl;
     std::cerr << "Backtrace [tid=" << os::thread::GetCurrentThreadId() << "]:\n";
     PrintStack(std::cerr);
-#ifdef FUZZING_EXIT_ON_FAILED_ASSERT
-    panda::terminate::Terminate(file);
-#else
     std::abort();
-#endif
 }
 
 }  // namespace panda::debug

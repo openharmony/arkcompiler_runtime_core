@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "libpandabase/os/native_stack.h"
 #include "libpandabase/os/thread.h"
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/utf.h"
@@ -296,17 +295,6 @@ bool ThreadManager::UnregisterExitedThread(MTManagedThread *thread)
 void ThreadManager::RegisterSensitiveThread() const
 {
     LOG(INFO, RUNTIME) << __func__ << " is an empty implementation now.";
-}
-
-void ThreadManager::DumpUnattachedThreads(std::ostream &os)
-{
-    os::native_stack::DumpUnattachedThread dump;
-    dump.InitKernelTidLists();
-    os::memory::LockHolder lock(thread_lock_);
-    for (const auto &thread : threads_) {
-        dump.AddTid(static_cast<pid_t>(thread->GetId()));
-    }
-    dump.Dump(os, Runtime::GetCurrent()->IsDumpNativeCrash(), Runtime::GetCurrent()->GetUnwindStackFn());
 }
 
 MTManagedThread *ThreadManager::SuspendAndWaitThreadByInternalThreadId(uint32_t thread_id)

@@ -16,28 +16,8 @@
 #include "native_stack.h"
 
 namespace panda::os::native_stack {
+
 #if !defined(PANDA_TARGET_UNIX)
-void DumpUnattachedThread::AddTid([[maybe_unused]] pid_t tid_thread) {}
-
-bool DumpUnattachedThread::InitKernelTidLists()
-{
-    return true;
-}
-
-void DumpUnattachedThread::Dump([[maybe_unused]] std::ostream &os, [[maybe_unused]] bool dump_native_crash,
-                                [[maybe_unused]] FUNC_UNWINDSTACK call_unwindstack)
-{
-}
-void DumpKernelStack([[maybe_unused]] std::ostream &os, [[maybe_unused]] pid_t tid, [[maybe_unused]] const char *tag,
-                     [[maybe_unused]] bool count)
-{
-}
-
-std::string GetNativeThreadNameForFile([[maybe_unused]] pid_t tid)
-{
-    return "<unknown>";
-}
-
 bool ReadOsFile([[maybe_unused]] const std::string &file_name, [[maybe_unused]] std::string *result)
 {
     return false;
@@ -46,11 +26,6 @@ bool ReadOsFile([[maybe_unused]] const std::string &file_name, [[maybe_unused]] 
 bool WriterOsFile([[maybe_unused]] const void *buffer, [[maybe_unused]] size_t count, [[maybe_unused]] int fd)
 {
     return false;
-}
-
-std::string ChangeJaveStackFormat([[maybe_unused]] const char *descriptor)
-{
-    return "unknown";
 }
 #endif  // PANDA_TARGET_UNIX
 

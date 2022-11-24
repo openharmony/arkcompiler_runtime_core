@@ -29,22 +29,6 @@
 namespace panda::os::time {
 
 /**
- *  Return current time in nanoseconds
- */
-uint64_t GetClockTimeInMicro()
-{
-    return GetClockTime<std::chrono::microseconds>(CLOCK_MONOTONIC);
-}
-
-/**
- *  Return current time in milliseconds
- */
-uint64_t GetClockTimeInMilli()
-{
-    return GetClockTime<std::chrono::milliseconds>(CLOCK_MONOTONIC);
-}
-
-/**
  *  Return thread CPU time in nanoseconds
  */
 uint64_t GetClockTimeInThreadCpuTime()
