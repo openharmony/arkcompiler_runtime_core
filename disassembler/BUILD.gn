@@ -141,10 +141,6 @@ ohos_executable("ark_disasm") {
     ldflags = platform_ldflags
   }
 
-  if (is_standard_system && !is_mac) {
-    static_link = true
-  }
-
   install_enable = false
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
