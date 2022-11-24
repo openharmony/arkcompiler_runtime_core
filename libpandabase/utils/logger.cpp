@@ -212,11 +212,6 @@ void Logger::InitializeFileLogging(const std::string &log_file, Level level, Com
                                                   log_file.c_str(), os::Error(errno).ToString().c_str());
         logger->LogLineInternal(Level::ERROR, Component::COMMON, msg);
     }
-#ifdef PANDA_TARGET_UNIX
-    if (DfxController::IsInitialized() && DfxController::GetOptionValue(DfxOptionHandler::MOBILE_LOG) == 0) {
-        Logger::SetMobileLogOpenFlag(false);
-    }
-#endif
 }
 
 /* static */
@@ -234,11 +229,6 @@ void Logger::InitializeStdLogging(Level level, ComponentMask component_mask)
         }
 
         logger = new StderrLogger(level, component_mask);
-#ifdef PANDA_TARGET_UNIX
-        if (DfxController::IsInitialized() && DfxController::GetOptionValue(DfxOptionHandler::MOBILE_LOG) == 0) {
-            Logger::SetMobileLogOpenFlag(false);
-        }
-#endif
     }
 }
 

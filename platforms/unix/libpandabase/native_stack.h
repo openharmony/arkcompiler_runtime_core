@@ -23,24 +23,8 @@
 namespace panda::os::unix::native_stack {
 using FUNC_UNWINDSTACK = bool (*)(pid_t, std::ostream &, int);
 
-void DumpKernelStack(std::ostream &os, pid_t tid, const char *tag, bool count);
-
-std::string GetNativeThreadNameForFile(pid_t tid);
-
-class DumpUnattachedThread {
-public:
-    void AddTid(pid_t tid_thread);
-    bool InitKernelTidLists();
-    void Dump(std::ostream &os, bool dump_native_crash, FUNC_UNWINDSTACK call_unwindstack);
-
-private:
-    std::set<pid_t> kernel_tid_;
-    std::set<pid_t> thread_manager_tids_;
-};
-
 bool ReadOsFile(const std::string &file_name, std::string *result);
 bool WriterOsFile(const void *buffer, size_t count, int fd);
-std::string ChangeJaveStackFormat(const char *descriptor);
 
 }  // namespace panda::os::unix::native_stack
 

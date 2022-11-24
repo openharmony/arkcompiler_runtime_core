@@ -28,7 +28,6 @@
 #include "runtime/include/panda_vm.h"
 #include "reference.h"
 #include "utils/logger.h"
-#include "utils/dfx.h"
 
 namespace panda::mem::test {
 class ReferenceStorageTest;
@@ -332,10 +331,6 @@ private:
 
         void Dump() REQUIRES_SHARED(mutex_)
         {
-            if (DfxController::IsInitialized() &&
-                DfxController::GetOptionValue(DfxOptionHandler::REFERENCE_DUMP) != 1) {
-                return;
-            }
             static constexpr size_t DUMP_NUMS = 20;
             size_t num = 0;
             LOG(INFO, GC) << "Dump the last " << DUMP_NUMS << " global references info:";

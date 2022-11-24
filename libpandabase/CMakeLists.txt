@@ -35,13 +35,10 @@ set(SOURCES
     ${PANDA_ROOT}/libpandabase/mem/mem_config.cpp
     ${PANDA_ROOT}/libpandabase/utils/debug.cpp
     ${PANDA_ROOT}/libpandabase/utils/logger.cpp
-    ${PANDA_ROOT}/libpandabase/utils/dfx.cpp
-    ${PANDA_ROOT}/libpandabase/utils/terminate.cpp
     ${PANDA_ROOT}/libpandabase/trace/trace.cpp
     ${PANDA_ROOT}/libpandabase/os/filesystem.cpp
     ${PANDA_ROOT}/libpandabase/os/native_stack.cpp
     ${PANDA_ROOT}/libpandabase/os/property.cpp
-    ${PANDA_ROOT}/libpandabase/os/dfx_option.cpp
     ${ARKBASE_LTO_SOURCES}
 )
 
@@ -77,7 +74,6 @@ endif()
 set(WINDOWS_SOURCES
     ${PANDA_ROOT}/libpandabase/utils/logger.cpp
     ${PANDA_ROOT}/libpandabase/utils/debug.cpp
-    ${PANDA_ROOT}/libpandabase/utils/dfx.cpp
     ${PANDA_ROOT}/libpandabase/utils/time.cpp
     ${PANDA_ROOT}/libpandabase/utils/utf.cpp
     ${PANDA_ROOT}/libpandabase/utils/json_builder.cpp
@@ -90,7 +86,6 @@ set(WINDOWS_SOURCES
     ${PANDA_ROOT}/platforms/windows/libpandabase/thread.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/filesystem.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/trace.cpp
-    ${PANDA_ROOT}/libpandabase/os/dfx_option.cpp
     ${PANDA_ROOT}/libpandabase/os/filesystem.cpp
     ${PANDA_ROOT}/libpandabase/os/mutex.cpp
     ${PANDA_ROOT}/libpandabase/os/time.cpp
@@ -296,7 +291,6 @@ set(ARKBASE_TESTS_SOURCES
     tests/string_helpers_test.cpp
     tests/type_converter_tests.cpp
     tests/logger_test.cpp
-    tests/dfx_test.cpp
     tests/leb128_test.cpp
     tests/utf_test.cpp
     tests/arena_test.cpp

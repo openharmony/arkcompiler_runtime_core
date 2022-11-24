@@ -113,12 +113,9 @@ public:
                 }
             }
         }
-        DumpUnattachedThreads(os);
         Locks::mutator_lock->Unlock();
         ResumeAllThreads();
     }
-
-    void DumpUnattachedThreads(std::ostream &os);
 
     void RegisterThread(MTManagedThread *thread)
     {

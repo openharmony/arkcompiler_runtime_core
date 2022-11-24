@@ -34,7 +34,6 @@
 #include "libpandabase/os/thread.h"
 #include "libpandabase/utils/arena_containers.h"
 #include "libpandabase/utils/logger.h"
-#include "libpandabase/utils/dfx.h"
 #include "libpandabase/utils/utf.h"
 #include "libpandafile/file-inl.h"
 #include "libpandafile/literal_data_accessor-inl.h"
@@ -330,8 +329,6 @@ bool Runtime::Create(const RuntimeOptions &options)
 
     BlockSignals();
 
-    CreateDfxController(options);
-
     CreateInstance(options, internal_allocator);
 
     if (instance == nullptr) {
@@ -384,7 +381,6 @@ bool Runtime::DestroyUnderLockHolder()
      * Logger::Destroy();
      */
 
-    DfxController::Destroy();
     panda::Logger::Sync();
     delete instance;
     instance = nullptr;
@@ -1244,25 +1240,6 @@ void Runtime::UpdateProcessState([[maybe_unused]] int state)
 void Runtime::RegisterSensitiveThread() const
 {
     LOG(INFO, RUNTIME) << __func__ << " is an empty implementation now.";
-}
-
-void Runtime::CreateDfxController(const RuntimeOptions &options)
-{
-    DfxController::Initialize();
-    DfxController::SetOptionValue(DfxOptionHandler::COMPILER_NULLCHECK, options.GetCompilerNullcheck());
-    DfxController::SetOptionValue(DfxOptionHandler::REFERENCE_DUMP, options.GetReferenceDump());
-    DfxController::SetOptionValue(DfxOptionHandler::SIGNAL_CATCHER, options.GetSignalCatcher());
-    DfxController::SetOptionValue(DfxOptionHandler::SIGNAL_HANDLER, options.GetSignalHandler());
-    DfxController::SetOptionValue(DfxOptionHandler::ARK_SIGQUIT, options.GetSigquitFlag());
-    DfxController::SetOptionValue(DfxOptionHandler::ARK_SIGUSR1, options.GetSigusr1Flag());
-    DfxController::SetOptionValue(DfxOptionHandler::ARK_SIGUSR2, options.GetSigusr2Flag());
-    DfxController::SetOptionValue(DfxOptionHandler::MOBILE_LOG, options.GetMobileLogFlag());
-    DfxController::SetOptionValue(DfxOptionHandler::DFXLOG, options.GetDfxLog());
-
-    auto compiler_nullcheck_flag = DfxController::GetOptionValue(DfxOptionHandler::COMPILER_NULLCHECK);
-    if (compiler_nullcheck_flag == 0) {
-        panda::compiler::options.SetCompilerImplicitNullCheck(false);
-    }
 }
 
 void Runtime::BlockSignals()

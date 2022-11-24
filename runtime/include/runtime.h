@@ -25,7 +25,6 @@
 #include "libpandabase/mem/arena_allocator.h"
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/utils/expected.h"
-#include "libpandabase/utils/dfx.h"
 #include "libpandafile/file_items.h"
 #include "libpandafile/literal_data_accessor.h"
 #include "runtime/include/class_linker.h"
@@ -396,8 +395,6 @@ private:
     bool Shutdown();
 
     bool LoadBootPandaFiles(panda_file::File::OpenMode open_mode);
-
-    static void CreateDfxController(const RuntimeOptions &options);
 
     static void BlockSignals();
 

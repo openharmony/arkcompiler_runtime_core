@@ -29,31 +29,12 @@ namespace panda::os::native_stack {
 
 #if defined(PANDA_TARGET_UNIX)
 const auto g_PandaThreadSigmask = pthread_sigmask;  // NOLINT(readability-identifier-naming)
-using DumpUnattachedThread = panda::os::unix::native_stack::DumpUnattachedThread;
-const auto DumpKernelStack = panda::os::unix::native_stack::DumpKernelStack;  // NOLINT(readability-identifier-naming)
-const auto GetNativeThreadNameForFile =                                       // NOLINT(readability-identifier-naming)
-    panda::os::unix::native_stack::GetNativeThreadNameForFile;
 const auto ReadOsFile = panda::os::unix::native_stack::ReadOsFile;      // NOLINT(readability-identifier-naming)
 const auto WriterOsFile = panda::os::unix::native_stack::WriterOsFile;  // NOLINT(readability-identifier-naming)
-const auto ChangeJaveStackFormat =                                      // NOLINT(readability-identifier-naming)
-    panda::os::unix::native_stack::ChangeJaveStackFormat;
 #else
 using FUNC_UNWINDSTACK = bool (*)(pid_t, std::ostream &, int);
-class DumpUnattachedThread {
-public:
-    void AddTid(pid_t tid_thread);
-    bool InitKernelTidLists();
-    void Dump(std::ostream &os, bool dump_native_crash, FUNC_UNWINDSTACK call_unwindstack);
-
-private:
-    std::set<pid_t> kernel_tid_;
-    std::set<pid_t> thread_manager_tids_;
-};
-void DumpKernelStack(std::ostream &os, pid_t tid, const char *tag, bool count);
-std::string GetNativeThreadNameForFile(pid_t tid);
 bool ReadOsFile(const std::string &file_name, std::string *result);
 bool WriterOsFile(const void *buffer, size_t count, int fd);
-std::string ChangeJaveStackFormat(const char *descriptor);
 #endif  // PANDA_TARGET_UNIX
 
 }  // namespace panda::os::native_stack
