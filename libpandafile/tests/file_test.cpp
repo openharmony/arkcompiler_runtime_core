@@ -178,4 +178,22 @@ HWTEST(File, OpenPandaFileOrZip, testing::ext::TestSize.Level0)
     remove(zip_filename);
 }
 
+HWTEST(File, GetMode, testing::ext::TestSize.Level0)
+{
+    using panda::os::file::Mode;
+    using panda::os::file::Open;
+
+    // Write panda file to disk
+    ItemContainer container;
+
+    const std::string file_name = "test_file_open.panda";
+    auto writer = FileWriter(file_name);
+
+    ASSERT_TRUE(container.Write(&writer));
+
+    // Read panda file from disk
+    EXPECT_NE(File::Open(file_name), nullptr);
+    EXPECT_EQ(File::Open(file_name, File::OpenMode::WRITE_ONLY), nullptr);
+}
+
 }  // namespace panda::panda_file::test
