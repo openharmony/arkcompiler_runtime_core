@@ -155,6 +155,8 @@ HWTEST_F(PoolMapTest, TwoConsistentPoolsTest, testing::ext::TestSize.Level0)
     // Therefore it must return a pointer to the first pool byte.
     CheckRandomPoolAddress(second_pool, SECOND_SPACE_TYPE, SECOND_ALLOCATOR_TYPE, SECOND_POOL_ADDR);
 
+    ASSERT_FALSE(IsEmptyPoolMap());
+
     // Check that we remove elements from pool map correctly
     RemovePoolFromMap(first_pool);
     RemovePoolFromMap(second_pool);

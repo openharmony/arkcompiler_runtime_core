@@ -91,4 +91,23 @@ HWTEST(MemoryTest, RoundMemoryConverterTest, testing::ext::TestSize.Level0)
     ASSERT_EQ(MemoryConverter(11'121'092), ValueUnit(10.606, "MB"));
 }
 
+HWTEST(TypeConverterTest, OperatorEqualTest, testing::ext::TestSize.Level0)
+{
+    const uint64_t number_zero = 0UL;
+    const uint64_t number_one = 1UL;
+    ASSERT_TRUE(ValueUnit(10.27, "MB") == ValueUnit(10.27, "MB"));
+    ASSERT_FALSE(ValueUnit(10.27, "MB") == ValueUnit(10.27, "KB"));
+    ASSERT_TRUE(ValueUnit(number_zero, "MB") == ValueUnit(number_zero, "MB"));
+    ASSERT_FALSE(ValueUnit(number_zero, "MB") == ValueUnit(number_zero, "GB"));
+    ASSERT_FALSE(ValueUnit(number_one, "MB") == ValueUnit(number_one, "KB"));
+}
+
+HWTEST(TypeConverterTest, ValueConverterTest, testing::ext::TestSize.Level0)
+{
+    const uint64_t number = 10UL;
+    ASSERT_EQ(ValueConverter(11'119'272, ValueType::VALUE_TYPE_TIME), ValueUnit(11.119, "ms"));
+    ASSERT_EQ(ValueConverter(11'119'272, ValueType::VALUE_TYPE_MEMORY), ValueUnit(10.604, "MB"));
+    ASSERT_EQ(ValueConverter(number, ValueType::VALUE_TYPE_OBJECT), ValueUnit(number, ""));
+}
+
 }  // namespace panda::helpers::test
