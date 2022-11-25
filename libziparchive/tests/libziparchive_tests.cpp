@@ -723,4 +723,26 @@ HWTEST(LIBZIPARCHIVE, UnZipUncompressedPandaFile, testing::ext::TestSize.Level0)
     remove(archivename);
     GTEST_COUT << "Success.\n";
 }
+
+HWTEST(LIBZIPARCHIVE, IllegalPathTest, testing::ext::TestSize.Level0)
+{
+    static const char *archivename = "__LIBZIPARCHIVE__ILLEGALPATHTEST__.zip";
+    int ret = CreateOrAddFileIntoZip(archivename, "illegal_path.abc", nullptr, 0, APPEND_STATUS_ADDINZIP,
+                                     Z_NO_COMPRESSION);
+    ASSERT_EQ(ret, ZIPARCHIVE_ERR);
+    ZipArchiveHandle zipfile = nullptr;
+    ASSERT_EQ(OpenArchive(zipfile, archivename), ZIPARCHIVE_ERR);
+    GlobalStat gi = GlobalStat();
+    ASSERT_EQ(GetGlobalFileInfo(zipfile, &gi), ZIPARCHIVE_ERR);
+    ASSERT_EQ(GoToNextFile(zipfile), ZIPARCHIVE_ERR);
+    ASSERT_EQ(LocateFile(zipfile, "illegal_path.abc"), ZIPARCHIVE_ERR);
+    EntryFileStat entry = EntryFileStat();
+    ASSERT_EQ(GetCurrentFileInfo(zipfile, &entry), ZIPARCHIVE_ERR);
+    ASSERT_EQ(CloseArchive(zipfile), ZIPARCHIVE_ERR);
+
+    ASSERT_EQ(OpenArchiveFile(zipfile, nullptr), ZIPARCHIVE_ERR);
+    ASSERT_EQ(OpenCurrentFile(zipfile), ZIPARCHIVE_ERR);
+    ASSERT_EQ(CloseCurrentFile(zipfile), ZIPARCHIVE_ERR);
+    ASSERT_EQ(CloseArchiveFile(zipfile), ZIPARCHIVE_ERR);
+}
 }  // namespace panda::test
