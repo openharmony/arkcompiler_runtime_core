@@ -116,6 +116,7 @@ static void EmitImpl(Span<uint8_t> buf, Span<const uint8_t> offsets, Type arg, T
     EmitImpl(buf, offsets.SubSpan(1), args...);
 }
 
+#ifndef WITH_MOCK
 template <Format format, typename It, typename... Types>
 static size_t Emit(It out, Types... args);
 
@@ -285,5 +286,6 @@ BytecodeEmitter::ErrorCode BytecodeEmitter::CheckLabels()
 }
 
 #include <bytecode_emitter_gen.h>
+#endif  // WITH_MOCK
 
 }  // namespace panda

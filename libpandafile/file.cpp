@@ -137,12 +137,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandl
                                                                  EntryFileStat &entry, std::string_view archive_name)
 {
     uint32_t uncompressed_length = entry.GetUncompressedSize();
-    if (uncompressed_length == 0) {
-        CloseCurrentFile(handle);
-        OpenPandaFileFromZipErrorHandler(handle);
-        LOG(ERROR, PANDAFILE) << "Panda file has zero length!";
-        return nullptr;
-    }
+    ASSERT(uncompressed_length != 0U);
 
     size_t size_to_mmap = AlignUp(uncompressed_length, panda::os::mem::GetPageSize());
     void *mem = os::mem::MapRWAnonymousRaw(size_to_mmap, false);
