@@ -13,17 +13,21 @@
  * limitations under the License.
  */
 
-#include <pthread.h>
+#pragma clang diagnostic ignored "-Wc11-extensions"
+
 #include <cstdlib>
+
+#include <gtest/gtest.h>
+#include <pthread.h>
+
 #define MC_ON
 #include "../../../platforms/unix/libpandabase/futex/fmutex.cpp"
-
-// The tests checks mutex try lock
 
 pthread_t pthread_self(void);
 // Copy of mutex storage, after complete implementation should totally replace mutex::current_tid
 thread_local pthread_t current_tid;
 
+namespace panda::test {
 static struct fmutex g_x;
 static int g_shared;
 
@@ -35,19 +39,29 @@ static void *ThreadN(void *arg)
     do {
         ret = MutexLock(&g_x, true);
     } while (!ret);
+    EXPECT_EQ(g_x.recursiveCount, 1);
+
     g_shared = index;
     int r = g_shared;
-    ASSERT(r == index);
+    EXPECT_TRUE(r == index);
+
     MutexUnlock(&g_x);
+    EXPECT_EQ(g_x.recursiveCount, 0);
     return nullptr;
 }
 
-int main()
+HWTEST(FMutexTest, TryLockTest, testing::ext::TestSize.Level0)
 {
+    // The tests check mutex try lock
     constexpr int N = 2;
-    MutexInit(&g_x);
-    pthread_t t[N];
 
+    MutexInit(&g_x);
+    ASSERT_EQ(g_x.recursiveCount, 0);
+    ASSERT_EQ(g_x.state_and_waiters_, 0);
+    ASSERT_EQ(g_x.exclusive_owner_, 0U);
+    ASSERT_FALSE(g_x.recursive_mutex_);
+
+    pthread_t t[N];
     for (long i = 0u; i < N; i++) {
         pthread_create(&t[i], nullptr, ThreadN, reinterpret_cast<void *>(i));
     }
@@ -56,6 +70,10 @@ int main()
         pthread_join(t[i], nullptr);
     }
 
+    ASSERT_TRUE(MutexTryLockWithSpinning(&g_x));
+
     MutexDestroy(&g_x);
-    return 0;
+    ASSERT_FALSE(MutexDoNotCheckOnDeadlock());
+}
+
 }
