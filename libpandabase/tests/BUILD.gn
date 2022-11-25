@@ -39,6 +39,14 @@ host_unittest_action("LibPandaBaseTest") {
     "utf_test.cpp",
   ]
 
+  if (!is_mingw && !is_mac && target_os != "ios") {
+    sources += [
+      "genmc/mutex_test_2.cpp",
+      "unix_file_test.cpp",
+      "unix_native_stack_test.cpp",
+    ]
+  }
+
   configs = [
     "$ark_root:ark_config",
     "$ark_root/libpandabase:arkbase_public_config",

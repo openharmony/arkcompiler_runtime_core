@@ -409,20 +409,23 @@ HWTEST(Utf, IsValidModifiedUTF8, testing::ext::TestSize.Level0)
     const std::vector<uint8_t> v1 {0x31, 0x00};
     EXPECT_TRUE(IsValidModifiedUTF8(v1.data()));
 
-    const std::vector<uint8_t> v2 {0x9f};
+    const std::vector<uint8_t> v2 {0x9f, 0x00};
     EXPECT_FALSE(IsValidModifiedUTF8(v2.data()));
 
-    const std::vector<uint8_t> v3 {0xf7};
+    const std::vector<uint8_t> v3 {0xf7, 0x00};
     EXPECT_FALSE(IsValidModifiedUTF8(v3.data()));
 
-    const std::vector<uint8_t> v4 {0xe0};
+    const std::vector<uint8_t> v4 {0xe0, 0x00};
     EXPECT_FALSE(IsValidModifiedUTF8(v4.data()));
 
-    const std::vector<uint8_t> v5 {0xd4};
+    const std::vector<uint8_t> v5 {0xd4, 0x00};
     EXPECT_FALSE(IsValidModifiedUTF8(v5.data()));
 
     const std::vector<uint8_t> v6 {0x11, 0x31, 0x00};
     EXPECT_TRUE(IsValidModifiedUTF8(v6.data()));
+
+    const std::vector<uint8_t> v7 {0xf8, 0x00};
+    EXPECT_FALSE(IsValidModifiedUTF8(v7.data()));
 }
 
 HWTEST(Utf, ConvertMUtf8ToUtf16Pair, testing::ext::TestSize.Level0)
