@@ -40,6 +40,8 @@ constexpr static const int64_t IMM_7 = 7;
 constexpr static const int64_t IMM_8 = 8;
 constexpr static const int64_t IMM_9 = 9;
 constexpr static const int64_t IMM_11 = 11;
+constexpr static const int64_t IMM_12 = 12;
+constexpr static const int64_t IMM_15 = 15;
 constexpr static const int64_t IMM_16 = 16;
 constexpr static const int64_t IMM_24 = 24;
 constexpr static const int64_t IMM_32 = 32;
@@ -67,7 +69,7 @@ static std::vector<uint8_t> &operator<<(std::vector<uint8_t> &out, Tuple32 val)
                << std::get<globals::IMM_3>(val);
 }
 
-[[maybe_unused]] static std::vector<uint8_t> &operator<<(std::vector<uint8_t> &out, Tuple64 val)
+static std::vector<uint8_t> &operator<<(std::vector<uint8_t> &out, Tuple64 val)
 {
     return out << std::get<0>(val) << std::get<1>(val) << std::get<globals::IMM_2>(val) << std::get<globals::IMM_3>(val)
                << std::get<globals::IMM_4>(val) << std::get<globals::IMM_5>(val) << std::get<globals::IMM_6>(val)
@@ -85,7 +87,7 @@ static Tuple32 Split32(uint32_t val)
                     (val >> globals::IMM_24) & 0xFF};
 }
 
-[[maybe_unused]] static Tuple64 Split64(uint64_t val)
+static Tuple64 Split64(uint64_t val)
 {
     return Tuple64 {val & 0xFF,
                     (val >> globals::IMM_8) & 0xFF,
@@ -600,6 +602,60 @@ HWTEST(BytecodeEmitter, TwoJumpsToOneLabel, testing::ext::TestSize.Level0)
     emitter.Jmp(label);
     std::vector<uint8_t> out;
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
+}
+
+static void Jmpz_IMM8(Opcode opcode, std::function<void(BytecodeEmitter *, const Label &label)> emit_jcmp)
+{
+    BytecodeEmitter emitter;
+    Label label = emitter.CreateLabel();
+    emit_jcmp(&emitter, label);
+    emitter.Bind(label);
+    emitter.Return();
+}
+
+static void Jmpz_IMM16(Opcode opcode, std::function<void(BytecodeEmitter *, const Label &label)> emit_jcmp)
+{
+    BytecodeEmitter emitter;
+    Label label = emitter.CreateLabel();
+    emit_jcmp(&emitter, label);
+    for (int i = 0; i < std::numeric_limits<uint8_t>::max() - globals::IMM_2; ++i) {
+        emitter.Return();
+    }
+    emitter.Bind(label);
+    emitter.Return();
+}
+
+static void Jmp_V8_IMM8(Opcode opcode, std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> emit_jcmp)
+{
+    BytecodeEmitter emitter;
+    Label label = emitter.CreateLabel();
+    emit_jcmp(&emitter, globals::IMM_12, label);
+    emitter.Bind(label);
+    emitter.Return();
+}
+
+static void Jmp_V8_IMM16(Opcode opcode, std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> emit_jcmp)
+{
+    BytecodeEmitter emitter;
+    Label label = emitter.CreateLabel();
+    emit_jcmp(&emitter, globals::IMM_15, label);
+    for (int i = 0; i < std::numeric_limits<uint8_t>::max() - globals::IMM_2; ++i) {
+        emitter.Return();
+    }
+    emitter.Bind(label);
+    emitter.Return();
+}
+
+static void Jmpz_IMM32(Opcode opcode, std::function<void(BytecodeEmitter *, const Label &label)> emit_jcmp)
+{
+    BytecodeEmitter emitter;
+    Label label = emitter.CreateLabel();
+    emit_jcmp(&emitter, label);
+    for (int i = 0; i < std::numeric_limits<uint8_t>::max() - globals::IMM_2; ++i) {
+        emitter.Return();
+    }
+    emitter.Bind(label);
+    emitter.Return();
 }
 
 static void TestNoneFormat(Opcode opcode, std::function<void(BytecodeEmitter *)> emit)
