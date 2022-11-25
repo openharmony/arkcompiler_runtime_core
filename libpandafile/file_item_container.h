@@ -153,6 +153,11 @@ public:
         return &primitive_type_map_;
     }
 
+    std::list<std::unique_ptr<BaseItem>> &GetItems()
+    {
+        return items_;
+    }
+
     const std::list<std::unique_ptr<BaseItem>> &GetItems() const
     {
         return items_;
