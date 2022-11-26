@@ -271,7 +271,21 @@ std::optional<FuncInstPair> AbcFile::GetStLexInstByLdLexInst(FuncInstPair func_i
     uint32_t ld_level = ld_imms[0];
     uint32_t ld_slot_id = ld_imms[1];
     const Function *cur_func = func;
-    for (uint32_t i = 0; i < ld_level; ++i) {
+    uint32_t i = 0;
+    while (true) {
+        bool has_new_lexenv = false;
+        const auto &graph = cur_func->GetGraph();
+        graph.VisitAllInstructions([&has_new_lexenv](const Inst &inst) {
+            if (inst.GetType() == InstType::NEWLEXENV_IMM8 || inst.GetType() == InstType::WIDE_NEWLEXENV_PREF_IMM16) {
+                has_new_lexenv = true;
+            }
+        });
+        if (has_new_lexenv) {
+            i++;
+        }
+        if (i == ld_level + 1) {
+            break;
+        }
         cur_func = cur_func->GetParentFunction();
         if (cur_func == nullptr) {
             return std::nullopt;
