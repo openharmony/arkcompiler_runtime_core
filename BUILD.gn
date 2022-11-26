@@ -321,6 +321,7 @@ if (!ark_standalone_build) {
       "$ark_root/libpandabase/tests:unittest",
       "$ark_root/libpandafile/tests:unittest",
       "$ark_root/libziparchive/tests:unittest",
+      "$ark_root/plugins/ecmascript/tests:unittest",
       "$ark_root/runtime/tests:unittest",
     ]
   }
@@ -331,6 +332,7 @@ if (!ark_standalone_build) {
       "$ark_root/libpandabase/tests:host_unittest",
       "$ark_root/libpandafile/tests:host_unittest",
       "$ark_root/libziparchive/tests:host_unittest",
+      "$ark_root/plugins/ecmascript/tests:host_unittest",
       "$ark_root/runtime/tests:host_unittest",
     ]
   }

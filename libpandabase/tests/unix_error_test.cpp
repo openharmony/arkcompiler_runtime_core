@@ -21,8 +21,11 @@ namespace panda::test {
 
 HWTEST(ErrorTest, ToStringTest, testing::ext::TestSize.Level0)
 {
-    panda::os::Error err("error");
-    ASSERT_STREQ(err.ToString().c_str(), "error");
+    panda::os::Error err1("error");
+    ASSERT_EQ(err1.ToString(), "error");
+
+    panda::os::Error err2(1);
+    ASSERT_EQ(err2.ToString(), "Operation not permitted");
 }
 
 }  // namespace panda::test
