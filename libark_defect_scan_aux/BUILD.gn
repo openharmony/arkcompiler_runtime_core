@@ -19,7 +19,6 @@ config("defectscanaux_public_config") {
 
   configs = [
     "$ark_root:ark_config",
-    "$ark_root/runtime:arkruntime_public_config",
     "$ark_root/libpandabase:arkbase_public_config",
     "$ark_root/libpandafile:arkfile_public_config",
     "$ark_root/compiler:arkcompiler_public_config",

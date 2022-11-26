@@ -342,7 +342,7 @@ static bool IsAccReadPosition(compiler::Inst *inst, size_t pos)
 void RegEncoder::InsertSpillsForDynInputsInst(compiler::Inst *inst)
 {
     ASSERT(state_ == RegEncoderState::INSERT_SPILLS);
-    ASSERT(inst->IsStaticCall() || inst->IsVirtualCall() || inst->IsInitObject() || inst->IsIntrinsic());
+    ASSERT(inst->IsIntrinsic());
 
     RegContentMap spill_map(GetGraph()->GetLocalAllocator()->Adapter());  // src -> (dst, src_type), non-callrange
     RegContentVec spill_vec(GetGraph()->GetLocalAllocator()->Adapter());  // spill_vec is used to handle callrange
@@ -435,7 +435,7 @@ void RegEncoder::CalculateNumNeededTempsForInst(compiler::Inst *inst)
         if (IsIntrinsicRange(inst)) {
             return;
         }
-        ASSERT(inst->IsStaticCall() || inst->IsVirtualCall() || inst->IsInitObject() || inst->IsIntrinsic());
+        ASSERT(inst->IsIntrinsic());
 
         auto nargs = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
         size_t start = 0;

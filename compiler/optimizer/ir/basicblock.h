@@ -235,10 +235,6 @@ public:
     // Join single successor into single predecessor
     void JoinSuccessorBlock();
 
-    // Join successor block into the block, which have another successor;
-    // Used in if-conversion pass and fixes dataflow using Select instructions.
-    void JoinBlocksUsingSelect(BasicBlock *succ, BasicBlock *select_bb, bool swapped);
-
     // Add instruction to the end or begin of the BasicBlock
     template <bool to_end>
     void AddInst(Inst *inst);
@@ -272,8 +268,6 @@ public:
     void RemoveInst(Inst *inst);
     // Replace old_inst in BasicBlock to new_inst
     void ReplaceInst(Inst *old_inst, Inst *new_inst);
-    // Replace inst by deoptimization
-    void ReplaceInstByDeoptimize(Inst *inst);
     // Remove all instructions from bb
     void Clear();
 
@@ -613,8 +607,6 @@ private:
         Inst *if_input1;
     };
 
-    void GenerateSelect(Inst *phi, Inst *inst1, Inst *inst2, const saved_if_info *if_info);
-    void GenerateSelects(const saved_if_info *if_info);
     void SelectsFixLoopInfo(BasicBlock *select_bb, BasicBlock *other);
 
     Graph *graph_;

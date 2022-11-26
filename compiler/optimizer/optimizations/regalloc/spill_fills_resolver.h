@@ -17,7 +17,6 @@
 #define COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_SPILL_FILLS_RESOLVER_H
 
 #include "compiler/optimizer/ir/graph_visitor.h"
-#include "optimizer/code_generator/registers_description.h"
 #include "optimizer/ir/inst.h"
 #include "utils/arena_containers.h"
 

@@ -20,7 +20,6 @@
 #include "compiler_logger.h"
 #include "interference_graph.h"
 #include "optimizer/analysis/liveness_analyzer.h"
-#include "optimizer/code_generator/registers_description.h"
 #include "reg_map.h"
 #include "utils/arena_containers.h"
 #include "utils/small_vector.h"

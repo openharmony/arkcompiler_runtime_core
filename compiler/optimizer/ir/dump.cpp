@@ -24,7 +24,6 @@
 #include "optimizer/analysis/linear_order.h"
 #include "optimizer/analysis/rpo.h"
 #include "optimizer/analysis/loop_analyzer.h"
-#include "optimizer/code_generator/target_info.h"
 #include "dump.h"
 
 namespace panda::compiler {
@@ -165,20 +164,6 @@ void BBDependence(const char *type, const ArenaVector<BasicBlock *> &bb_vector, 
     (*out) << ']';
 }
 
-ArenaString FieldToString(RuntimeInterface *runtime, RuntimeInterface::FieldPtr field, ArenaAllocator *allocator)
-{
-    const auto &adapter = allocator->Adapter();
-    if (!runtime->HasFieldMetadata(field)) {
-        auto offset = runtime->GetFieldOffset(field);
-        return ArenaString("Unknown.Unknown", adapter) + ArenaString(std::to_string(offset), adapter);
-    }
-
-    ArenaString dot(".", adapter);
-    ArenaString cls_name(runtime->GetClassName(runtime->GetClassForField(field)), adapter);
-    ArenaString field_name(runtime->GetFieldName(field), adapter);
-    return cls_name + dot + field_name;
-}
-
 void DumpTypedFieldOpcode(std::ostream *out, Opcode opcode, uint32_t type_id, const ArenaString &field_name,
                           ArenaAllocator *allocator)
 {
@@ -237,37 +222,6 @@ bool SaveStateInst::DumpInputs(std::ostream *out) const
             sep = ", ";
         }
     }
-    if (GetCallerInst() != nullptr) {
-        (*out) << sep << "caller=" << GetCallerInst()->GetId();
-    }
-    return true;
-}
-
-bool BinaryImmOperation::DumpInputs(std::ostream *out) const
-{
-    Inst::DumpInputs(out);
-    (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    return true;
-}
-
-bool BinaryShiftedRegisterOperation::DumpInputs(std::ostream *out) const
-{
-    Inst::DumpInputs(out);
-    (*out) << ", " << GetShiftTypeStr(GetShiftType()) << " 0x" << std::hex << GetImm() << std::dec;
-    return true;
-}
-
-bool UnaryShiftedRegisterOperation::DumpInputs(std::ostream *out) const
-{
-    Inst::DumpInputs(out);
-    (*out) << ", " << GetShiftTypeStr(GetShiftType()) << " 0x" << std::hex << GetImm() << std::dec;
-    return true;
-}
-
-bool SelectImmInst::DumpInputs(std::ostream *out) const
-{
-    Inst::DumpInputs(out);
-    (*out) << ", 0x" << std::hex << GetImm() << std::dec;
     return true;
 }
 
@@ -380,48 +334,6 @@ void CastValueToAnyTypeInst::DumpOpcode(std::ostream *out) const
     DumpOpcodeAnyTypeMixin(*out, this);
 }
 
-void AnyTypeCheckInst::DumpOpcode(std::ostream *out) const
-{
-    auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
-    const auto &adapter = allocator->Adapter();
-    ArenaString space(" ", adapter);
-    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString any_base_type(AnyTypeTypeToString(GetAnyType()), adapter);
-    (*out) << std::setw(INDENT_OPCODE) << opcode + space + any_base_type + space;
-}
-
-void ClassImmediateInst::DumpOpcode(std::ostream *out) const
-{
-    const auto &adapter = GetBasicBlock()->GetGraph()->GetLocalAllocator()->Adapter();
-    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString open("(", adapter);
-    ArenaString close(")", adapter);
-    ArenaString class_name(GetBasicBlock()->GetGraph()->GetRuntime()->GetClassName(GetClassPtr()), adapter);
-    (*out) << std::setw(INDENT_OPCODE) << opcode + open + class_name + close;
-}
-
-void SelectInst::DumpOpcode(std::ostream *out) const
-{
-    auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
-    const auto &adapter = allocator->Adapter();
-    ArenaString space(" ", adapter);
-    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString cc(GetCondCodeToString(GetCc(), allocator), adapter);
-    ArenaString type(DataType::ToString(GetOperandsType()), adapter);
-    (*out) << std::setw(INDENT_OPCODE) << opcode + space + cc + space + type;
-}
-
-void SelectImmInst::DumpOpcode(std::ostream *out) const
-{
-    auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
-    const auto &adapter = allocator->Adapter();
-    ArenaString space(" ", adapter);
-    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString cc(GetCondCodeToString(GetCc(), allocator), adapter);
-    ArenaString type(DataType::ToString(GetOperandsType()), adapter);
-    (*out) << std::setw(INDENT_OPCODE) << opcode + space + cc + space + type;
-}
-
 void IfInst::DumpOpcode(std::ostream *out) const
 {
     auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
@@ -444,14 +356,6 @@ void IfImmInst::DumpOpcode(std::ostream *out) const
     (*out) << std::setw(INDENT_OPCODE) << opcode + space + cc + space + type;
 }
 
-void MonitorInst::DumpOpcode(std::ostream *out) const
-{
-    const auto &adapter = GetBasicBlock()->GetGraph()->GetLocalAllocator()->Adapter();
-    ArenaString suffix(IsExit() ? ".Exit" : ".Entry", adapter);
-    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    (*out) << std::setw(INDENT_OPCODE) << opcode + suffix;
-}
-
 void CmpInst::DumpOpcode(std::ostream *out) const
 {
     const auto &adapter = GetBasicBlock()->GetGraph()->GetLocalAllocator()->Adapter();
@@ -466,118 +370,7 @@ void CmpInst::DumpOpcode(std::ostream *out) const
     }
 }
 
-void CastInst::DumpOpcode(std::ostream *out) const
-{
-    const auto &adapter = GetBasicBlock()->GetGraph()->GetLocalAllocator()->Adapter();
-    ArenaString space(" ", adapter);
-    (*out) << std::setw(INDENT_OPCODE)
-           << ArenaString(GetOpcodeString(GetOpcode()), adapter) + space +
-                  ArenaString(DataType::ToString(GetOperandsType()), adapter);
-}
-
-void NewObjectInst::DumpOpcode(std::ostream *out) const
-{
-    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
-}
-
-void NewArrayInst::DumpOpcode(std::ostream *out) const
-{
-    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
-}
-
-void LoadConstArrayInst::DumpOpcode(std::ostream *out) const
-{
-    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
-}
-
-void FillConstArrayInst::DumpOpcode(std::ostream *out) const
-{
-    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
-}
-
-void LoadObjectInst::DumpOpcode(std::ostream *out) const
-{
-    auto graph = GetBasicBlock()->GetGraph();
-    auto field_name = FieldToString(graph->GetRuntime(), GetObjField(), graph->GetLocalAllocator());
-    DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), field_name, graph->GetLocalAllocator());
-}
-
-void LoadMemInst::DumpOpcode(std::ostream *out) const
-{
-    DumpTypedOpcode(out, GetOpcode(), GetType(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
-}
-
-void UnresolvedLoadObjectInst::DumpOpcode(std::ostream *out) const
-{
-    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
-}
-
-void StoreObjectInst::DumpOpcode(std::ostream *out) const
-{
-    auto graph = GetBasicBlock()->GetGraph();
-    auto field_name = FieldToString(graph->GetRuntime(), GetObjField(), graph->GetLocalAllocator());
-    DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), field_name, graph->GetLocalAllocator());
-}
-
-void UnresolvedStoreObjectInst::DumpOpcode(std::ostream *out) const
-{
-    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
-}
-
-void StoreMemInst::DumpOpcode(std::ostream *out) const
-{
-    DumpTypedOpcode(out, GetOpcode(), GetType(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
-}
-
-void LoadStaticInst::DumpOpcode(std::ostream *out) const
-{
-    auto graph = GetBasicBlock()->GetGraph();
-    auto field_name = FieldToString(graph->GetRuntime(), GetObjField(), graph->GetLocalAllocator());
-    DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), field_name, graph->GetLocalAllocator());
-}
-
-void UnresolvedLoadStaticInst::DumpOpcode(std::ostream *out) const
-{
-    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
-}
-
-void StoreStaticInst::DumpOpcode(std::ostream *out) const
-{
-    auto graph = GetBasicBlock()->GetGraph();
-    auto field_name = FieldToString(graph->GetRuntime(), GetObjField(), graph->GetLocalAllocator());
-    DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), field_name, graph->GetLocalAllocator());
-}
-
-void UnresolvedStoreStaticInst::DumpOpcode(std::ostream *out) const
-{
-    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
-}
-
 void LoadFromPool::DumpOpcode(std::ostream *out) const
-{
-    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
-}
-
-void ClassInst::DumpOpcode(std::ostream *out) const
-{
-    auto graph = GetBasicBlock()->GetGraph();
-    auto allocator = graph->GetLocalAllocator();
-    const auto &adapter = allocator->Adapter();
-
-    ArenaString space(" ", adapter);
-    ArenaString qt("'", adapter);
-    ArenaString opc(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString class_name(GetClass() == nullptr ? ArenaString("", adapter)
-                                                 : ArenaString(graph->GetRuntime()->GetClassName(GetClass()), adapter));
-    (*out) << std::setw(INDENT_OPCODE) << opc + space + qt + class_name + qt << " ";
-}
-
-void CheckCastInst::DumpOpcode(std::ostream *out) const
-{
-    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
-}
-
-void IsInstanceInst::DumpOpcode(std::ostream *out) const
 {
     DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
 }
@@ -585,8 +378,8 @@ void IsInstanceInst::DumpOpcode(std::ostream *out) const
 void IntrinsicInst::DumpOpcode(std::ostream *out) const
 {
     const auto &adapter = GetBasicBlock()->GetGraph()->GetLocalAllocator()->Adapter();
-    ArenaString intrinsic(IsBuiltin() ? ArenaString("BuiltinIntrinsic.", adapter) : ArenaString("Intrinsic.", adapter));
-    ArenaString opcode(GetIntrinsicName(intrinsic_id_), adapter);
+    ArenaString intrinsic(ArenaString("Intrinsic.", adapter));
+    ArenaString opcode("", adapter);
     (*out) << std::setw(INDENT_OPCODE) << intrinsic + opcode << " ";
 }
 
@@ -594,196 +387,6 @@ void Inst::DumpOpcode(std::ostream *out) const
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
     (*out) << std::setw(INDENT_OPCODE) << GetOpcodeString(opcode_);
-}
-
-void CallInst::DumpOpcode(std::ostream *out) const
-{
-    auto graph = GetBasicBlock()->GetGraph();
-    auto allocator = graph->GetLocalAllocator();
-    const auto &adapter = allocator->Adapter();
-    ArenaString space(" ", adapter);
-    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString inlined(IsInlined() ? ".Inlined " : " ", adapter);
-    ArenaString method_id(ToArenaString(GetCallMethodId(), allocator));
-    if (!IsUnresolved() && GetCallMethod() != nullptr) {
-        ArenaString method(graph->GetRuntime()->GetMethodFullName(GetCallMethod()), adapter);
-        (*out) << std::setw(INDENT_OPCODE) << opcode + inlined + method_id + ' ' + method << ' ';
-    } else {
-        (*out) << std::setw(INDENT_OPCODE) << opcode + inlined + method_id << ' ';
-    }
-}
-
-void DeoptimizeInst::DumpOpcode(std::ostream *out) const
-{
-    auto graph = GetBasicBlock()->GetGraph();
-    auto allocator = graph->GetLocalAllocator();
-    const auto &adapter = allocator->Adapter();
-    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString type(DeoptimizeTypeToString(GetDeoptimizeType()), adapter);
-    (*out) << std::setw(INDENT_OPCODE) << opcode + ArenaString(" ", adapter) + type << ' ';
-}
-
-void DeoptimizeIfInst::DumpOpcode(std::ostream *out) const
-{
-    auto graph = GetBasicBlock()->GetGraph();
-    auto allocator = graph->GetLocalAllocator();
-    const auto &adapter = allocator->Adapter();
-    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString type(DeoptimizeTypeToString(GetDeoptimizeType()), adapter);
-    (*out) << std::setw(INDENT_OPCODE) << opcode + ArenaString(" ", adapter) + type << ' ';
-}
-
-void DeoptimizeCompareInst::DumpOpcode(std::ostream *out) const
-{
-    auto graph = GetBasicBlock()->GetGraph();
-    auto allocator = graph->GetLocalAllocator();
-    const auto &adapter = allocator->Adapter();
-    ArenaString opcode(ArenaString(GetOpcodeString(GetOpcode()), adapter).append(" "));
-    ArenaString cc(ArenaString(GetCondCodeToString(GetCc(), allocator), adapter).append(" "));
-    ArenaString type(ArenaString(DeoptimizeTypeToString(GetDeoptimizeType()), adapter).append(" "));
-    ArenaString cmp_type(ArenaString(DataType::ToString(GetOperandsType()), adapter).append(" "));
-    (*out) << std::setw(INDENT_OPCODE) << opcode.append(cc).append(cmp_type).append(type);
-}
-
-void DeoptimizeCompareImmInst::DumpOpcode(std::ostream *out) const
-{
-    auto graph = GetBasicBlock()->GetGraph();
-    auto allocator = graph->GetLocalAllocator();
-    const auto &adapter = allocator->Adapter();
-    ArenaString opcode(ArenaString(GetOpcodeString(GetOpcode()), adapter).append(" "));
-    ArenaString cc(ArenaString(GetCondCodeToString(GetCc(), allocator), adapter).append(" "));
-    ArenaString type(ArenaString(DeoptimizeTypeToString(GetDeoptimizeType()), adapter).append(" "));
-    ArenaString cmp_type(ArenaString(DataType::ToString(GetOperandsType()), adapter).append(" "));
-    (*out) << std::setw(INDENT_OPCODE) << opcode.append(cc).append(cmp_type).append(type);
-}
-
-bool DeoptimizeCompareImmInst::DumpInputs(std::ostream *out) const
-{
-    Inst::DumpInputs(out);
-    (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    return true;
-}
-
-bool BoundsCheckInstI::DumpInputs(std::ostream *out) const
-{
-    Inst *len_input = GetInput(0).GetInst();
-    Inst *ss_input = GetInput(1).GetInst();
-    auto graph = GetBasicBlock()->GetGraph();
-    auto allocator = graph->GetLocalAllocator();
-
-    (*out) << InstId(len_input, allocator);
-    PrintIfValidLocation(GetLocation(0), graph->GetArch(), out, true);
-    (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    (*out) << ", " << InstId(ss_input, allocator);
-    return true;
-}
-
-bool StoreInstI::DumpInputs(std::ostream *out) const
-{
-    Inst *arr_input = GetInput(0).GetInst();
-    Inst *ss_input = GetInput(1).GetInst();
-    auto graph = GetBasicBlock()->GetGraph();
-    auto arch = graph->GetArch();
-    const auto &allocator = graph->GetLocalAllocator();
-
-    (*out) << InstId(arr_input, allocator);
-    PrintIfValidLocation(GetLocation(0), arch, out, true);
-    (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    (*out) << ", " << InstId(ss_input, allocator);
-    PrintIfValidLocation(GetLocation(1), arch, out, true);
-    return true;
-}
-
-bool StoreMemInstI::DumpInputs(std::ostream *out) const
-{
-    Inst *arr_input = GetInput(0).GetInst();
-    Inst *ss_input = GetInput(1).GetInst();
-    auto graph = GetBasicBlock()->GetGraph();
-    const auto &allocator = graph->GetLocalAllocator();
-
-    (*out) << InstId(arr_input, allocator);
-    PrintIfValidLocation(GetLocation(0), graph->GetArch(), out, true);
-    (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    (*out) << ", " << InstId(ss_input, allocator);
-    return true;
-}
-
-bool LoadInstI::DumpInputs(std::ostream *out) const
-{
-    Inst::DumpInputs(out);
-    (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    return true;
-}
-
-bool LoadMemInstI::DumpInputs(std::ostream *out) const
-{
-    Inst::DumpInputs(out);
-    (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    return true;
-}
-
-bool LoadMemInst::DumpInputs(std::ostream *out) const
-{
-    Inst::DumpInputs(out);
-    if (GetScale() != 0) {
-        (*out) << " Scale " << GetScale();
-    }
-    return true;
-}
-
-bool StoreMemInst::DumpInputs(std::ostream *out) const
-{
-    Inst::DumpInputs(out);
-    if (GetScale() != 0) {
-        (*out) << " Scale " << GetScale();
-    }
-    return true;
-}
-
-bool LoadPairPartInst::DumpInputs(std::ostream *out) const
-{
-    Inst *arr_input = GetInput(0).GetInst();
-    auto graph = GetBasicBlock()->GetGraph();
-    const auto &allocator = graph->GetLocalAllocator();
-
-    (*out) << InstId(arr_input, allocator);
-    PrintIfValidLocation(GetLocation(0), graph->GetArch(), out, true);
-    (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    return true;
-}
-
-bool LoadArrayPairInstI::DumpInputs(std::ostream *out) const
-{
-    Inst *arr_input = GetInput(0).GetInst();
-    auto graph = GetBasicBlock()->GetGraph();
-    const auto &allocator = graph->GetLocalAllocator();
-    (*out) << InstId(arr_input, allocator);
-    PrintIfValidLocation(GetLocation(0), graph->GetArch(), out, true);
-    (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    return true;
-}
-
-bool StoreArrayPairInstI::DumpInputs(std::ostream *out) const
-{
-    Inst *arr_input = GetInput(0).GetInst();
-    Inst *fss_input = GetInput(1).GetInst();
-    constexpr auto IMM_2 = 2;
-    Inst *sss_input = GetInput(IMM_2).GetInst();
-    auto graph = GetBasicBlock()->GetGraph();
-    auto allocator = graph->GetLocalAllocator();
-
-    (*out) << InstId(arr_input, allocator);
-    PrintIfValidLocation(GetLocation(0), graph->GetArch(), out, true);
-    (*out) << ", 0x" << std::hex << GetImm() << std::dec;
-    (*out) << ", " << InstId(fss_input, allocator);
-    (*out) << ", " << InstId(sss_input, allocator);
-    return true;
-}
-
-bool ReturnInstI::DumpInputs(std::ostream *out) const
-{
-    (*out) << "0x" << std::hex << GetImm() << std::dec;
-    return true;
 }
 
 void Inst::Dump(std::ostream *out, bool new_line) const
@@ -826,15 +429,6 @@ void Inst::Dump(std::ostream *out, bool new_line) const
     }
     if (new_line) {
         (*out) << '\n';
-    }
-    if (options.IsCompilerDumpBytecode()) {
-        if (pc_ != INVALID_PC) {
-            auto graph = GetBasicBlock()->GetGraph();
-            auto byte_code = graph->GetRuntime()->GetBytecodeString(graph->GetMethod(), pc_);
-            if (!byte_code.empty()) {
-                (*out) << byte_code << '\n';
-            }
-        }
     }
     if (GetOpcode() == Opcode::Parameter) {
         auto spill_fill = static_cast<const ParameterInst *>(this)->GetLocationData();
@@ -938,7 +532,7 @@ void Graph::Dump(std::ostream *out) const
     const auto &runtime = GetRuntime();
     const auto &method = GetMethod();
     const auto &adapter = GetLocalAllocator()->Adapter();
-    ArenaString return_type(DataType::ToString(runtime->GetMethodReturnType(method)), adapter);
+    ArenaString return_type(DataType::ToString(DataType::Type::ANY), adapter);
     (*out) << "Method: " << runtime->GetMethodFullName(method, true) << std::endl;
     if (IsOsrMode()) {
         (*out) << "OSR mode\n";

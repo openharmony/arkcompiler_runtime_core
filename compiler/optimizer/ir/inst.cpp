@@ -150,34 +150,7 @@ void DynamicOperands::Remove(unsigned index)
     }
 }
 
-void BinaryImmOperation::SetVnObject(VnObject *vn_obj)
-{
-    vn_obj->Add(GetImm());
-}
-
-void BinaryShiftedRegisterOperation::SetVnObject(VnObject *vn_obj)
-{
-    vn_obj->Add(GetImm());
-    vn_obj->Add(static_cast<uint64_t>(GetShiftType()));
-}
-
-void UnaryShiftedRegisterOperation::SetVnObject(VnObject *vn_obj)
-{
-    vn_obj->Add(GetImm());
-    vn_obj->Add(static_cast<uint64_t>(GetShiftType()));
-}
-
 void CompareInst::SetVnObject(VnObject *vn_obj)
-{
-    vn_obj->Add(static_cast<uint32_t>(GetCc()));
-}
-
-void SelectInst::SetVnObject(VnObject *vn_obj)
-{
-    vn_obj->Add(static_cast<uint32_t>(GetCc()));
-}
-
-void SelectImmInst::SetVnObject(VnObject *vn_obj)
 {
     vn_obj->Add(static_cast<uint32_t>(GetCc()));
 }
@@ -192,13 +165,6 @@ void IfImmInst::SetVnObject(VnObject *vn_obj)
     vn_obj->Add(static_cast<uint32_t>(GetCc()));
 }
 
-void UnaryOperation::SetVnObject(VnObject *vn_obj)
-{
-    if (GetOpcode() == Opcode::Cast) {
-        vn_obj->Add(static_cast<uint32_t>(GetInput(0).GetInst()->GetType()));
-    }
-}
-
 void CmpInst::SetVnObject(VnObject *vn_obj)
 {
     if (DataType::IsFloatType(GetOperandsType())) {
@@ -206,21 +172,6 @@ void CmpInst::SetVnObject(VnObject *vn_obj)
     }
     vn_obj->Add(static_cast<uint32_t>(GetInputType(0)));
 }
-
-void CastInst::SetVnObject(VnObject *vn_obj)
-{
-    vn_obj->Add(static_cast<uint32_t>(GetInputType(0)));
-}
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFINE_INST(TYPE)              \
-    void TYPE::Accept(GraphVisitor *v) \
-    {                                  \
-        v->VisitInst(this);            \
-    }
-// TODO(msherstennikov): There must be another way to generate this list
-OPCODE_CLASS_LIST(DEFINE_INST)
-#undef DEFINE_INST
 
 BasicBlock *PhiInst::GetPhiInputBb(unsigned index)
 {
@@ -274,32 +225,6 @@ Inst *SkipInstructions(Inst *input_inst)
  */
 Inst *Inst::GetDataFlowInput(Inst *input_inst) const
 {
-    auto opcode = input_inst->GetOpcode();
-    if (opcode == Opcode::NullCheck) {
-        return SkipInstructions<Opcode::NullCheck, 0>(input_inst);
-    }
-    if (opcode == Opcode::BoundsCheck) {
-        return SkipInstructions<Opcode::BoundsCheck, 1>(input_inst);
-    }
-    if (opcode == Opcode::BoundsCheckI) {
-        return SkipInstructions<Opcode::BoundsCheckI, 0>(input_inst);
-    }
-    if (opcode == Opcode::ZeroCheck) {
-        return SkipInstructions<Opcode::ZeroCheck, 0>(input_inst);
-    }
-    if (opcode == Opcode::NegativeCheck) {
-        return SkipInstructions<Opcode::NegativeCheck, 0>(input_inst);
-    }
-    if (opcode == Opcode::AnyTypeCheck) {
-        return SkipInstructions<Opcode::AnyTypeCheck, 0>(input_inst);
-    }
-    if (opcode == Opcode::RefTypeCheck) {
-        input_inst = SkipInstructions<Opcode::RefTypeCheck, 1>(input_inst);
-        if (input_inst->GetOpcode() == Opcode::NullCheck) {
-            return SkipInstructions<Opcode::NullCheck, 0>(input_inst);
-        }
-        return input_inst;
-    }
     return input_inst;
 }
 
@@ -366,34 +291,45 @@ Inst *FixedInputsInst<N>::Clone(const Graph *targetGraph) const
 template class FixedInputsInst<0>;
 template class FixedInputsInst<1>;
 template class FixedInputsInst<2U>;
-template class FixedInputsInst<3U>;
-template class FixedInputsInst<4U>;
 #endif
 
-Inst *CallInst::Clone(const Graph *targetGraph) const
+Inst *SpillFillInst::Clone(const Graph *targetGraph) const
 {
-    ASSERT(targetGraph != nullptr);
-    auto instClone = Inst::Clone(targetGraph);
-    auto callClone = static_cast<CallInst *>(instClone);
-    callClone->SetCallMethodId(GetCallMethodId());
-    callClone->SetCallMethod(GetCallMethod());
-    callClone->SetCanNativeException(GetCanNativeException());
-    CloneTypes(targetGraph->GetAllocator(), callClone);
-    return instClone;
+    auto clone = FixedInputsInst::Clone(targetGraph)->CastToSpillFill();
+    for (auto spill_fill : spill_fills_) {
+        clone->AddSpillFill(spill_fill);
+    }
+    return clone;
 }
 
-Inst *CallIndirectInst::Clone(const Graph *target_graph) const
+Inst *CompareInst::Clone(const Graph *targetGraph) const
 {
-    auto clone = Inst::Clone(target_graph)->CastToCallIndirect();
-    CloneTypes(target_graph->GetAllocator(), clone);
+    auto clone = FixedInputsInst::Clone(targetGraph);
+    clone->CastToCompare()->SetCc(GetCc());
+    clone->CastToCompare()->SetOperandsType(GetOperandsType());
+    return clone;
+}
+
+Inst *CmpInst::Clone(const Graph *targetGraph) const
+{
+    auto clone = FixedInputsInst::Clone(targetGraph);
+    clone->CastToCmp()->SetOperandsType(GetOperandsType());
+    return clone;
+}
+
+Inst *IfInst::Clone(const Graph *targetGraph) const
+{
+    auto clone = FixedInputsInst::Clone(targetGraph);
+    static_cast<IfInst *>(clone)->SetCc(GetCc());
+    static_cast<IfInst *>(clone)->SetOperandsType(GetOperandsType());
+    static_cast<IfInst *>(clone)->SetMethod(GetMethod());
     return clone;
 }
 
 Inst *IntrinsicInst::Clone(const Graph *targetGraph) const
 {
     ASSERT(targetGraph != nullptr);
-    auto intrinsicClone = (GetOpcode() == Opcode::Intrinsic ? Inst::Clone(targetGraph)->CastToIntrinsic()
-                                                            : Inst::Clone(targetGraph)->CastToBuiltin());
+    auto intrinsicClone = Inst::Clone(targetGraph)->CastToIntrinsic();
     intrinsicClone->SetIntrinsicId(GetIntrinsicId());
     CloneTypes(targetGraph->GetAllocator(), intrinsicClone);
     if (HasImms()) {
@@ -450,23 +386,6 @@ Inst *SaveStateInst::Clone(const Graph *targetGraph) const
         std::copy(immediates_->begin(), immediates_->end(), clone->immediates_->begin());
     }
     clone->method_ = method_;
-    clone->caller_inst_ = caller_inst_;
-    return clone;
-}
-
-Inst *BinaryShiftedRegisterOperation::Clone(const Graph *targetGraph) const
-{
-    auto clone = static_cast<BinaryShiftedRegisterOperation *>(FixedInputsInst::Clone(targetGraph));
-    clone->SetImm(GetImm());
-    clone->SetShiftType(GetShiftType());
-    return clone;
-}
-
-Inst *UnaryShiftedRegisterOperation::Clone(const Graph *targetGraph) const
-{
-    auto clone = static_cast<UnaryShiftedRegisterOperation *>(FixedInputsInst::Clone(targetGraph));
-    clone->SetImm(GetImm());
-    clone->SetShiftType(GetShiftType());
     return clone;
 }
 
@@ -571,17 +490,14 @@ bool Inst::IsPropagateLiveness() const
 
 bool Inst::RequireRegMap() const
 {
-    if (GetOpcode() == Opcode::SafePoint) {
-        return false;
-    }
-    return (CanThrow() && GetBasicBlock()->IsTry()) || GetOpcode() == Opcode::SaveStateOsr || CanDeoptimize();
+    return CanThrow() && GetBasicBlock()->IsTry();
 }
 
 bool Inst::IsZeroRegInst() const
 {
     ASSERT(GetBasicBlock() != nullptr);
     ASSERT(GetBasicBlock()->GetGraph() != nullptr);
-    return GetBasicBlock()->GetGraph()->GetZeroReg() != INVALID_REG && IsZeroConstantOrNullPtr(this);
+    return false;
 }
 
 bool Inst::IsAccRead() const
@@ -591,7 +507,7 @@ bool Inst::IsAccRead() const
 
 bool Inst::IsAccWrite() const
 {
-    if (GetBasicBlock()->GetGraph()->IsDynamicMethod() && IsConst()) {
+    if (IsConst()) {
         return true;
     }
     return GetFlag(inst_flags::ACC_WRITE);
@@ -615,15 +531,7 @@ TryInst *GetTryBeginInst(const BasicBlock *try_begin_bb)
  */
 bool IntrinsicInst::IsNativeCall() const
 {
-    ASSERT(GetBasicBlock() != nullptr);
-    ASSERT(GetBasicBlock()->GetGraph() != nullptr);
-    if (IsIrtocIntrinsic(intrinsic_id_)) {
-        return intrinsic_id_ == RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY;
-    }
-    auto graph = GetBasicBlock()->GetGraph();
-    auto arch = graph->GetArch();
-    auto runtime = graph->GetRuntime();
-    return !EncodesBuiltin(runtime, intrinsic_id_, arch) || IsRuntimeCall();
+    return false;
 }
 
 }  // namespace panda::compiler

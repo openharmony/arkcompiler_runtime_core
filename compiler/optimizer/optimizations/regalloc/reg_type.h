@@ -23,17 +23,16 @@ namespace panda::compiler {
 inline DataType::Type ConvertRegType(const Graph *graph, DataType::Type type)
 {
     if (DataType::IsFloatType(type)) {
-        return graph->IsBytecodeOptimizer() ? DataType::Type::UINT64 : type;
+        return DataType::Type::UINT64;
     }
 
     ASSERT(GetCommonType(type) == DataType::INT64 || type == DataType::REFERENCE || type == DataType::POINTER ||
            type == DataType::ANY);
-    if (graph->IsBytecodeOptimizer() && type == DataType::REFERENCE) {
+    if (type == DataType::REFERENCE) {
         return type;
     }
 
-    bool use_reg32 = graph->IsRegScalarMapped() || graph->IsBytecodeOptimizer();
-    if (use_reg32 && DataType::Is32Bits(type, graph->GetArch())) {
+    if (DataType::Is32Bits(type, graph->GetArch())) {
         return DataType::Type::UINT32;
     }
 

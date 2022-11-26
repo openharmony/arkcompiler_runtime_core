@@ -17,7 +17,7 @@
 #define COMPILER_OPTIMIZER_IR_SPILL_FILL_DATA_H
 
 #include "datatype.h"
-#include "optimizer/code_generator/target_info.h"
+#include "constants.h"
 #include "locations.h"
 
 namespace panda::compiler {

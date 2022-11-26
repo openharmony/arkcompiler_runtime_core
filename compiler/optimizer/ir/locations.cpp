@@ -25,30 +25,9 @@ LocationsInfo::LocationsInfo(ArenaAllocator *allocator, Inst *inst)
     static_cast<DynamicInputsInst *>(inst)->SetLocationsInfo(this);
 }
 
-void Location::Dump(std::ostream &stm, Arch arch)
+void Location::Dump(std::ostream &stm, [[maybe_unused]] Arch arch)
 {
-    Target target {arch};
-
-    switch (GetKind()) {
-        case Kind::REGISTER:
-        case Kind::FP_REGISTER:
-            if (IsUnallocatedRegister()) {
-                stm << GetName() << '?';
-            } else if (GetValue() == ACC_REG_ID) {
-                stm << "acc";
-            } else {
-                stm << target.GetRegName(GetValue(), IsFpRegister());
-            }
-            break;
-        case Kind::STACK:
-        case Kind::STACK_PARAMETER:
-        case Kind::STACK_ARGUMENT:
-            stm << GetName() << GetValue();
-            break;
-        default:
-            stm << GetName();
-            break;
-    }
+    stm << "";
 }
 
 std::string Location::ToString(Arch arch)

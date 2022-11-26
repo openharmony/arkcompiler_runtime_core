@@ -908,44 +908,4 @@ TEST_F(LivenessAnalyzerTest, NullCheckWithoutUsers)
     auto null_check = la.GetInstLifeIntervals(&INS(4));
     ASSERT_EQ(call->GetEnd(), null_check->GetBegin() + 1U);
 }
-
-TEST_F(LivenessAnalyzerTest, UseHints)
-{
-    if (GetGraph()->GetCallingConvention() == nullptr) {
-        return;
-    }
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0, 0).s32();
-
-        BASIC_BLOCK(2, -1)
-        {
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::CallStatic).s32().InputsAutoType(0, 1);
-            INST(3, Opcode::Add).s32().Inputs(2, 0);
-            INST(4, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::CallStatic).s32().InputsAutoType(3, 0, 4);
-            INST(6, Opcode::Add).s32().Inputs(2, 0);
-            INST(7, Opcode::Return).s32().Inputs(6);
-        }
-    }
-
-    auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    ASSERT_TRUE(la.Run());
-
-    auto call0 = la.GetInstLifeIntervals(&INS(2));
-    auto add0 = la.GetInstLifeIntervals(&INS(3));
-    auto call1 = la.GetInstLifeIntervals(&INS(5));
-    auto add1 = la.GetInstLifeIntervals(&INS(6));
-    auto constant = &INS(0);
-    auto &ut = la.GetUseTable();
-
-    EXPECT_TRUE(ut.HasUseOnFixedLocation(constant, call0->GetBegin()));
-    EXPECT_TRUE(ut.HasUseOnFixedLocation(constant, call1->GetBegin()));
-    EXPECT_FALSE(ut.HasUseOnFixedLocation(constant, add0->GetBegin()));
-    EXPECT_FALSE(ut.HasUseOnFixedLocation(constant, add1->GetBegin()));
-    EXPECT_EQ(ut.GetNextUseOnFixedLocation(constant, call0->GetBegin()), INS(2).GetLocation(0).GetRegister());
-    EXPECT_EQ(ut.GetNextUseOnFixedLocation(constant, call1->GetBegin()), INS(5).GetLocation(1).GetRegister());
-}
-
 }  // namespace panda::compiler

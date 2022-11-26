@@ -28,16 +28,11 @@ class Graph;
 class Pass;
 class Analysis;
 class LivenessAnalyzer;
-class LiveRegisters;
 class LoopAnalyzer;
-class AliasAnalysis;
 class DominatorsTree;
 class Rpo;
 class LinearOrder;
-class BoundsAnalysis;
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ObjectTypePropagation;
-class TypesAnalysis;
 
 namespace details {
 template <typename... Types>
@@ -75,8 +70,7 @@ public:
 };
 
 using PredefinedAnalyses =
-    PassTypeList<LivenessAnalyzer, LoopAnalyzer, AliasAnalysis, DominatorsTree, Rpo, LinearOrder, BoundsAnalysis,
-                 LiveRegisters, ObjectTypePropagation, TypesAnalysis>;
+    PassTypeList<LivenessAnalyzer, LoopAnalyzer, DominatorsTree, Rpo, LinearOrder>;
 }  // namespace details
 
 class PassManager {

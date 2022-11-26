@@ -17,10 +17,6 @@
 % Compiler::intrinsics.select(&:has_impl?).each do |intrinsic|
 %   # dynamic intrinsics doesn't support in inst_generator
 %   next if intrinsic.is_dynamic?
-if (EncodesBuiltin(GetGraph()->GetRuntime(), RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>, arch.first)) {
-    EXPECT_TRUE(TryEncode(DataType::<%= intrinsic.return_type %>, RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>, arch.first, true))
-        << "intrinsic <%= intrinsic.entrypoint_name %>" << ", arch " << arch.second;
-} else {
 % if intrinsic.respond_to? 'codegen_func'
     // cannot verify <%= intrinsic.entrypoint_name %> behavior because it is not supported by some encoders
 % else
@@ -33,5 +29,4 @@ if (EncodesBuiltin(GetGraph()->GetRuntime(), RuntimeInterface::IntrinsicId::<%= 
         << ", arch " << arch.second;
 #endif
 % end
-}
 % end

@@ -16,7 +16,6 @@
 #ifndef PANDA_LOCATIONS_H
 #define PANDA_LOCATIONS_H
 
-#include "compiler/optimizer/code_generator/target_info.h"
 #include "compiler/optimizer/ir/constants.h"
 #include "compiler/optimizer/ir/datatype.h"
 #include "utils/arena_containers.h"

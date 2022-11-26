@@ -19,10 +19,6 @@
 #include "compiler/optimizer/ir/constants.h"
 #include "compiler/optimizer/ir/inst.h"
 
-namespace panda::compiler {
-class BinaryImmOperation;
-}  // namespace panda::compiler
-
 namespace panda::bytecodeopt {
 static constexpr compiler::Register MIN_REGISTER_NUMBER = 0;
 static constexpr compiler::Register MAX_NUM_SHORT_CALL_ARGS = 2;
@@ -33,7 +29,6 @@ static constexpr panda::compiler::Register NUM_COMPACTLY_ENCODED_REGS = 16;
 // Get the position where accumulator read happens.
 uint8_t AccReadIndex(const compiler::Inst *inst);
 
-bool CanConvertToIncI(const compiler::BinaryImmOperation *binop);
 }  // namespace panda::bytecodeopt
 
 #endif  // PANDA_BYTECODE_OPTIMIZER_COMMON_H

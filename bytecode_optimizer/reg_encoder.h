@@ -127,12 +127,7 @@ public:
 
 #include "generated/check_width.h"
 
-    void VisitDefault(Inst *inst) override
-    {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Opcode " << compiler::GetOpcodeString(inst->GetOpcode())
-                                       << " not yet implemented in RegEncoder";
-        success_ = false;
-    }
+    void VisitDefault(Inst *inst) override {}
 
 #include "compiler/optimizer/ir/visitor.inc"
 

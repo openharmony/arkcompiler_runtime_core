@@ -320,21 +320,13 @@ SpillFillsResolver::LocationIndex SpillFillsResolver::GetResolver(DataType::Type
         GetGraph()->SetRegUsage(resolver_, type);
         return resolver_;
     }
-
     // There are no temp registers in the Arch::AARCH32, use stack slot to resolve
     if (GetGraph()->GetArch() == Arch::AARCH32) {
         return Map(Location::MakeStackSlot(0));
     }
-
     if (DataType::IsFloatType(type)) {
-        auto resolver_reg = GetGraph()->GetArchTempVReg();
-        ASSERT(resolver_reg != INVALID_REG);
-        return resolver_reg + VREGS_TABLE_OFFSET;
+        return VREGS_TABLE_OFFSET;
     }
-
-    auto resolver_reg = GetGraph()->GetArchTempReg();
-    ASSERT(resolver_reg != INVALID_REG);
-    return resolver_reg;
+    return 0;
 }
-
 }  // namespace panda::compiler

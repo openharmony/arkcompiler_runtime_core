@@ -16,8 +16,6 @@
 #include "cleanup.h"
 
 #include "compiler_logger.h"
-#include "optimizer/analysis/alias_analysis.h"
-#include "optimizer/analysis/bounds_analysis.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/linear_order.h"
 #include "optimizer/analysis/loop_analyzer.h"
@@ -209,8 +207,7 @@ bool Cleanup::ProcessBB(BasicBlock *bb, Marker dead_mrk, ArenaSet<BasicBlock *> 
         ASSERT(succ->GetPredsBlocks().size() >= PREDS_BLOCK_NUM);
 
         auto last = pred->GetLastInst();
-        if (last->GetOpcode() == Opcode::If || last->GetOpcode() == Opcode::IfImm ||
-            last->GetOpcode() == Opcode::AddOverflow || last->GetOpcode() == Opcode::SubOverflow) {
+        if (last->GetOpcode() == Opcode::If || last->GetOpcode() == Opcode::IfImm) {
             last->SetMarker(dead_mrk);
             dead_.push_back(last);
         } else {
@@ -654,7 +651,5 @@ bool Cleanup::PhiChecker()
 void Cleanup::InvalidateAnalyses()
 {
     GetGraph()->InvalidateAnalysis<LinearOrder>();
-    GetGraph()->InvalidateAnalysis<BoundsAnalysis>();
-    GetGraph()->InvalidateAnalysis<AliasAnalysis>();
 }
 }  // namespace panda::compiler

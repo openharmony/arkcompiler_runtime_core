@@ -228,10 +228,6 @@ def if_fcmpg?
   'static_cast<int>(inst->IsFcmpg())'
 end
 
-def if_inci?
-  "static_cast<int>(CanConvertToIncI(inst))"
-end
-
 # Operand printers
 def dst_r
   'inst->GetDstReg()'
@@ -313,9 +309,7 @@ end
 def call_me_from_template
   # Empty visitors for IR instructions we want to ignore
   # (Add missing IRs on demand)
-  %w[NullCheck BoundsCheck ZeroCheck NegativeCheck SafePoint
-     InitClass SaveStateDeoptimize RefTypeCheck Phi
-     Try SaveState LoadClass LoadAndInitClass Parameter].each do |op|
+  %w[Phi Try SaveState Parameter].each do |op|
     visit(op) do
       empty
     end

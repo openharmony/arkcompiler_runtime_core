@@ -18,10 +18,6 @@ config("arkcompiler_public_config") {
     "$ark_root/compiler/code_info",
     "$ark_root/compiler/optimizer/ir",
     "$target_gen_dir/generated",
-    get_label_info("$ark_root/cross_values:cross_values_getters_generate",
-                   "target_gen_dir"),
-    get_label_info("$ark_root/runtime:plugins_defines_h", "target_gen_dir") +
-        "/asm_defines/generated",
   ]
 
   include_dirs += platform_include_dirs
@@ -50,20 +46,11 @@ config("arkcompiler_public_config") {
 libarkcompiler_sources = [
   "compiler_logger.cpp",
   "compiler_options.cpp",
-  "optimizer/analysis/alias_analysis.cpp",
-  "optimizer/analysis/bounds_analysis.cpp",
-  "optimizer/analysis/countable_loop_parser.cpp",
   "optimizer/analysis/dominators_tree.cpp",
   "optimizer/analysis/linear_order.cpp",
-  "optimizer/analysis/live_registers.cpp",
   "optimizer/analysis/liveness_analyzer.cpp",
-  "optimizer/analysis/liveness_use_table.cpp",
   "optimizer/analysis/loop_analyzer.cpp",
-  "optimizer/analysis/object_type_propagation.cpp",
   "optimizer/analysis/rpo.cpp",
-  "optimizer/analysis/types_analysis.cpp",
-  "optimizer/ir/analysis.cpp",
-  "optimizer/ir/aot_data.cpp",
   "optimizer/ir/basicblock.cpp",
   "optimizer/ir/dump.cpp",
   "optimizer/ir/graph.cpp",
@@ -73,20 +60,9 @@ libarkcompiler_sources = [
   "optimizer/ir/locations.cpp",
   "optimizer/ir_builder/inst_builder.cpp",
   "optimizer/ir_builder/ir_builder.cpp",
-  "optimizer/optimizations/adjust_arefs.cpp",
-  "optimizer/optimizations/balance_expressions.cpp",
   "optimizer/optimizations/cleanup.cpp",
-  "optimizer/optimizations/code_sink.cpp",
-  "optimizer/optimizations/deoptimize_elimination.cpp",
-  "optimizer/optimizations/if_conversion.cpp",
-  "optimizer/optimizations/loop_peeling.cpp",
-  "optimizer/optimizations/loop_unroll.cpp",
   "optimizer/optimizations/lowering.cpp",
-  "optimizer/optimizations/memory_barriers.cpp",
-  "optimizer/optimizations/memory_coalescing.cpp",
   "optimizer/optimizations/move_constants.cpp",
-  "optimizer/optimizations/object_type_check_elimination.cpp",
-  "optimizer/optimizations/redundant_loop_elimination.cpp",
   "optimizer/optimizations/regalloc/interference_graph.cpp",
   "optimizer/optimizations/regalloc/reg_alloc.cpp",
   "optimizer/optimizations/regalloc/reg_alloc_base.cpp",
@@ -96,43 +72,11 @@ libarkcompiler_sources = [
   "optimizer/optimizations/regalloc/reg_map.cpp",
   "optimizer/optimizations/regalloc/spill_fills_resolver.cpp",
   "optimizer/optimizations/regalloc/split_resolver.cpp",
-  "optimizer/optimizations/scheduler.cpp",
-  "optimizer/optimizations/try_catch_resolving.cpp",
-  "optimizer/optimizations/types_resolving.cpp",
   "optimizer/optimizations/vn.cpp",
   "optimizer/pass.cpp",
   "optimizer/pass_manager.cpp",
   "optimizer/pass_manager_statistics.cpp",
 ]
-
-plugin_irts = []
-foreach(plugin, enabled_plugins) {
-  print("add compiler plugin: $plugin")
-  plugin_dir = "$ark_root/plugins/$plugin"
-
-  source_files = read_file("$plugin_dir/subproject_sources.gn", "scope")
-  if (defined(source_files.srcs_compiler_path)) {
-    source_file = "$plugin_dir/${source_files.srcs_compiler_path}"
-    src_scope = read_file(source_file, "scope")
-    if (defined(src_scope.srcs)) {
-      foreach(src, src_scope.srcs) {
-        libarkcompiler_sources += [ "$plugin_dir/compiler/$src" ]
-      }
-    }
-
-    if (defined(source_files.irtoc_plugins)) {
-      scripts = read_file("$plugin_dir/${source_files.irtoc_plugins}", "scope")
-      foreach(script, scripts.srcs) {
-        plugin_irts +=
-            [ rebase_path("$plugin_dir/irtoc_scripts/$script", ark_root) ]
-      }
-    }
-
-    src_scope = {
-    }
-  }
-  source_files = []
-}
 
 libarkcompiler_sources += [ "$target_gen_dir/generated/inst_builder_gen.cpp" ]
 
@@ -142,7 +86,6 @@ libarkcompiler_configs = [
   "$ark_root:ark_config",
   "$ark_root/libpandabase:arkbase_public_config",
   "$ark_root/libpandafile:arkfile_public_config",
-  "$ark_root/runtime:arkruntime_public_config",
 ]
 
 ohos_shared_library("libarkcompiler") {
@@ -157,7 +100,6 @@ ohos_shared_library("libarkcompiler") {
     ":compiler_logger_components_inc",
     ":compiler_options_gen_h",
     ":cpu_features_gen_inc",
-    ":intrinsics_can_encode_inl",
     ":intrinsics_codegen_ext_inl_h",
     ":intrinsics_inline_inl",
     ":intrinsics_ir_build_inl_h",
@@ -165,14 +107,10 @@ ohos_shared_library("libarkcompiler") {
     ":intrinsics_ir_build_virtual_call_inl",
     ":intrinsics_stub_inl",
     ":intrinsics_stub_inl_h",
-    ":intrinsics_types_resolving_inl_h",
     ":ir_dyn_base_types_h",
-    ":irtoc_builder_cpp",
-    ":irtoc_generate_ir_inline",
     ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
     ":libarkcompiler_ecma_intrinsics_enum_inl",
     ":libarkcompiler_generate_ecma_inl",
-    ":libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
     ":libarkcompiler_intrinsics_gen_inl_get_intrinsics_inl",
@@ -187,26 +125,14 @@ ohos_shared_library("libarkcompiler") {
     ":libarkcompiler_opcodes_h_IR-instructions_md",
     ":libarkcompiler_opcodes_h_arch_info_gen_h",
     ":libarkcompiler_opcodes_h_codegen_arm64_gen_inc",
-    ":libarkcompiler_opcodes_h_deoptimize_elimination_call_visitors_inl",
     ":libarkcompiler_opcodes_h_inst_checker_gen_h",
     ":libarkcompiler_opcodes_h_opcodes_h",
     ":source_languages_h",
-    "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarkbase",
     "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction-inl_gen_h",
     "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
     "$ark_root/libpandafile:libarkfile",
     "$ark_root/libpandafile:libarkfile_type_gen_h",
-    "$ark_root/runtime:arkruntime_gen_entrypoints_compiler_checksum_entrypoints_compiler_checksum_inl",
-    "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_compiler_inl",
-    "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_gen_S",
-    "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_gen_h",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_intrinsics_enum_h",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_intrinsics_gen_h",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_intrinsics_h",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_unimplemented_intrinsics-inl_cpp",
-    "$ark_root/runtime:plugins_entrypoints_gen_h",
-    "$ark_root/runtime/asm_defines:asm_defines_generator",
     sdk_libc_secshared_dep,
   ]
 
@@ -230,7 +156,6 @@ ohos_static_library("libarkcompiler_frontend_static") {
     ":compiler_logger_components_inc",
     ":compiler_options_gen_h",
     ":cpu_features_gen_inc",
-    ":intrinsics_can_encode_inl",
     ":intrinsics_codegen_ext_inl_h",
     ":intrinsics_inline_inl",
     ":intrinsics_ir_build_inl_h",
@@ -238,14 +163,10 @@ ohos_static_library("libarkcompiler_frontend_static") {
     ":intrinsics_ir_build_virtual_call_inl",
     ":intrinsics_stub_inl",
     ":intrinsics_stub_inl_h",
-    ":intrinsics_types_resolving_inl_h",
     ":ir_dyn_base_types_h",
-    ":irtoc_builder_cpp",
-    ":irtoc_generate_ir_inline",
     ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
     ":libarkcompiler_ecma_intrinsics_enum_inl",
     ":libarkcompiler_generate_ecma_inl",
-    ":libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
     ":libarkcompiler_intrinsics_gen_inl_get_intrinsics_inl",
@@ -260,26 +181,14 @@ ohos_static_library("libarkcompiler_frontend_static") {
     ":libarkcompiler_opcodes_h_IR-instructions_md",
     ":libarkcompiler_opcodes_h_arch_info_gen_h",
     ":libarkcompiler_opcodes_h_codegen_arm64_gen_inc",
-    ":libarkcompiler_opcodes_h_deoptimize_elimination_call_visitors_inl",
     ":libarkcompiler_opcodes_h_inst_checker_gen_h",
     ":libarkcompiler_opcodes_h_opcodes_h",
     ":source_languages_h",
-    "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction-inl_gen_h",
     "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
     "$ark_root/libpandafile:libarkfile_frontend_static",
     "$ark_root/libpandafile:libarkfile_type_gen_h",
-    "$ark_root/runtime:arkruntime_gen_entrypoints_compiler_checksum_entrypoints_compiler_checksum_inl",
-    "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_compiler_inl",
-    "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_gen_S",
-    "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_gen_h",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_intrinsics_enum_h",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_intrinsics_gen_h",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_intrinsics_h",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_unimplemented_intrinsics-inl_cpp",
-    "$ark_root/runtime:plugins_entrypoints_gen_h",
-    "$ark_root/runtime/asm_defines:asm_defines_generator",
     sdk_libc_secshared_dep,
   ]
 
@@ -293,7 +202,7 @@ ark_isa_gen("isa_gen_libarkcompiler") {
 }
 
 ark_gen("libarkcompiler_intrinsics_gen_inl") {
-  data = "$target_gen_dir/../runtime/intrinsics.yaml"
+  data = "intrinsics.yaml"
   template_files = [
     "intrinsics_enum.inl.erb",
     "get_intrinsics.inl.erb",
@@ -304,7 +213,6 @@ ark_gen("libarkcompiler_intrinsics_gen_inl") {
     "generate_operations_intrinsic_graph.inl.erb",
     "intrinsic_codegen_test.inl.erb",
     "intrinsic_flags_test.inl.erb",
-    "can_encode_builtin.inl.erb",
     "intrinsics_codegen.inl.h.erb",
     "intrinsics_codegen.inl.erb",
     "intrinsics_flags.inl.erb",
@@ -314,7 +222,6 @@ ark_gen("libarkcompiler_intrinsics_gen_inl") {
   requires = [
     "$ark_root/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb",
   ]
-  extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
 }
 
 ark_isa_gen("libarkcompiler") {
@@ -335,7 +242,6 @@ ark_gen("libarkcompiler_opcodes_h") {
     "inst_checker_gen.h.erb",
     "IR-instructions.md.erb",
     "codegen_arm64_gen.inc.erb",
-    "deoptimize_elimination_call_visitors.inl.erb",
   ]
   sources = "optimizer/templates"
   destination = "$target_gen_dir/generated"
@@ -399,14 +305,6 @@ ark_gen_file("intrinsics_inline_inl") {
   requires = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_inline.inl"
 }
-ark_gen_file("intrinsics_types_resolving_inl_h") {
-  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
-  template_file =
-      "optimizer/templates/intrinsics/intrinsics_types_resolving.inl.h.erb"
-  data_file = "$target_gen_dir/../plugin_options.yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
-  output_file = "$target_gen_dir/generated/intrinsics_types_resolving.inl.h"
-}
 ark_gen_file("intrinsics_ir_build_inl_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/intrinsics/intrinsics_ir_build.inl.h.erb"
@@ -429,13 +327,6 @@ ark_gen_file("intrinsics_ir_build_virtual_call_inl") {
   data_file = "$target_gen_dir/../plugin_options.yaml"
   requires = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_ir_build_virtual_call.inl"
-}
-ark_gen_file("intrinsics_can_encode_inl") {
-  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
-  template_file = "optimizer/templates/intrinsics/intrinsics_can_encode.inl.erb"
-  data_file = "$target_gen_dir/../plugin_options.yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
-  output_file = "$target_gen_dir/generated/intrinsics_can_encode.inl"
 }
 
 ark_gen_file("ir_dyn_base_types_h") {
@@ -468,65 +359,4 @@ ark_gen_file("compiler_interface_extensions_inl_h") {
   data_file = "$target_gen_dir/../plugin_options.yaml"
   requires = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/compiler_interface_extensions.inl.h"
-}
-
-irtoc_file_plugin = "$root_gen_dir/generated/irtoc_plugin_builder.txt"
-write_file(irtoc_file_plugin, plugin_irts)
-
-action("irtoc_builder_cpp") {
-  script = "$ark_root/irtoc/lang/irtoc.rb"
-  outputs = [ "$target_gen_dir/generated/irtoc_builder.cpp" ]
-  args = [
-    "--input",
-    rebase_path("$ark_root/irtoc/scripts/interpreter.irt", root_build_dir),
-    "--output",
-    rebase_path("$target_gen_dir/generated/irtoc_builder.cpp", root_build_dir),
-    "--ark_source_dir",
-    rebase_path("$ark_root", root_build_dir),
-    "--isa",
-    rebase_path("$root_gen_dir/isa/isa.yaml", root_build_dir),
-    "--definitions",
-    "NDEBUG",
-    "--arch",
-    target_cpu,
-    "--ir-api",
-    "ir-builder",
-    "--plugins",
-    rebase_path(irtoc_file_plugin, root_build_dir),
-  ]
-
-  deps = [
-    "$ark_root/isa:isa_combine",
-    "$ark_root/runtime:plugins_asm_defines_def",
-    "$ark_root/runtime:plugins_defines_h",
-  ]
-}
-
-action("irtoc_generate_ir_inline") {
-  script = "$ark_root/irtoc/lang/irtoc.rb"
-  outputs = [ "$target_gen_dir/generated/irtoc_ir_inline.h" ]
-  args = [
-    "--input",
-    rebase_path("$ark_root/irtoc/scripts/interpreter.irt", root_build_dir),
-    "--output",
-    rebase_path("$target_gen_dir/generated/irtoc_ir_inline.h", root_build_dir),
-    "--ark_source_dir",
-    rebase_path("$ark_root", root_build_dir),
-    "--isa",
-    rebase_path("$root_gen_dir/isa/isa.yaml", root_build_dir),
-    "--definitions",
-    "NDEBUG",
-    "--arch",
-    target_cpu,
-    "--ir-api",
-    "ir-inline",
-    "--plugins",
-    rebase_path(irtoc_file_plugin, root_build_dir),
-  ]
-
-  deps = [
-    "$ark_root/isa:isa_combine",
-    "$ark_root/runtime:plugins_asm_defines_def",
-    "$ark_root/runtime:plugins_defines_h",
-  ]
 }

@@ -17,7 +17,6 @@
 
 #include "optimizer/ir/inst.h"
 #include "optimizer/pass.h"
-#include "optimizer/analysis/countable_loop_parser.h"
 
 namespace panda::compiler {
 class BasicBlock;

@@ -21,16 +21,11 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_checker.h"
 
-#include "optimizer/analysis/alias_analysis.h"
-#include "optimizer/analysis/bounds_analysis.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/linear_order.h"
 #include "optimizer/analysis/liveness_analyzer.h"
-#include "optimizer/analysis/live_registers.h"
 #include "optimizer/analysis/loop_analyzer.h"
-#include "optimizer/analysis/object_type_propagation.h"
 #include "optimizer/analysis/rpo.h"
-#include "optimizer/analysis/types_analysis.h"
 #include "optimizer/optimizations/cleanup.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -164,9 +159,8 @@ bool PassManager::RunPass(Pass *pass, size_t local_mem_size_before_pass)
     if (pass->IsAnalysis()) {
         pass->SetValid(result);
     }
-    bool is_codegen = std::string("Codegen") == pass->GetPassName();
     if (options.IsCompilerDump() && pass->ShouldDump() && !IsCheckMode()) {
-        if (!options.IsCompilerDumpFinal() || is_codegen) {
+        if (!options.IsCompilerDumpFinal()) {
             DumpGraph(pass->GetPassName());
         }
     }
@@ -174,7 +168,7 @@ bool PassManager::RunPass(Pass *pass, size_t local_mem_size_before_pass)
 #ifndef NDEBUG
     bool checker_enabled = options.IsCompilerCheckGraph();
     if (options.IsCompilerCheckFinal()) {
-        checker_enabled = is_codegen;
+        checker_enabled = false;
     }
     if (result && !pass->IsAnalysis() && checker_enabled) {
         GraphChecker(graph_).Check();

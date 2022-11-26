@@ -930,9 +930,6 @@ void GraphCloner::BuildLoopCloneDataFlow(LoopClonerData *unroll_data)
     ASSERT(unroll_data != nullptr);
     for (const auto &block : *unroll_data->blocks) {
         for (const auto &inst : block->AllInsts()) {
-            if (inst->GetOpcode() == Opcode::NOP) {
-                continue;
-            }
             if (inst->IsMarked(clone_marker_)) {
                 SetCloneInputs<false>(inst);
                 UpdateCaller(inst);
@@ -979,14 +976,6 @@ void GraphCloner::BuildLoopCloneDataFlow(LoopClonerData *unroll_data)
 
 void GraphCloner::UpdateCaller(Inst *inst)
 {
-    if (inst->IsSaveState()) {
-        auto caller = static_cast<SaveStateInst *>(inst)->GetCallerInst();
-        if (caller != nullptr && caller->IsInlined() && HasClone(caller)) {
-            auto ss_clone = GetClone(inst);
-            auto caller_clone = GetClone(caller);
-            static_cast<SaveStateInst *>(ss_clone)->SetCallerInst(static_cast<CallInst *>(caller_clone));
-        }
-    }
 }
 
 bool GraphCloner::IsLoopClonable(Loop *loop, size_t inst_limit)

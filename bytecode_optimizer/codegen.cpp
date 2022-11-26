@@ -14,8 +14,8 @@
  */
 #include "codegen.h"
 #include "common.h"
-#include "runtime/include/coretypes/tagged_value.h"
 #include "generate_ecma.inl"
+#include "tagged_value.h"
 
 namespace panda::bytecodeopt {
 
@@ -251,11 +251,8 @@ void BytecodeGen::EncodeSpillFillData(const compiler::SpillFillData &sf)
     }
 
     pandasm::Ins move;
-    if (GetGraph()->IsDynamicMethod()) {
-        result_.emplace_back(pandasm::Create_MOV(sf.DstValue(), sf.SrcValue()));
-        return;
-    }
-    UNREACHABLE();
+    result_.emplace_back(pandasm::Create_MOV(sf.DstValue(), sf.SrcValue()));
+    return;
 }
 
 void BytecodeGen::VisitSpillFill(GraphVisitor *visitor, Inst *inst)
@@ -285,11 +282,9 @@ void BytecodeGen::VisitConstant(GraphVisitor *visitor, Inst *inst)
     auto type = inst->GetType();
 
     /* Do not emit unused code for Const -> CastValueToAnyType chains */
-    if (enc->GetGraph()->IsDynamicMethod()) {
-        if (!HasUserPredicate(inst,
-                              [](Inst const *i) { return i->GetOpcode() != compiler::Opcode::CastValueToAnyType; })) {
-            return;
-        }
+    if (!HasUserPredicate(inst,
+                          [](Inst const *i) { return i->GetOpcode() != compiler::Opcode::CastValueToAnyType; })) {
+        return;
     }
 
     pandasm::Ins movi;
@@ -297,42 +292,17 @@ void BytecodeGen::VisitConstant(GraphVisitor *visitor, Inst *inst)
     switch (type) {
         case compiler::DataType::INT64:
         case compiler::DataType::UINT64:
-            if (enc->GetGraph()->IsDynamicMethod()) {
-                enc->result_.emplace_back(pandasm::Create_LDAI(inst->CastToConstant()->GetInt64Value()));
-                DoSta(inst->GetDstReg(), enc->result_);
-            } else {
-                UNREACHABLE();
-            }
+            enc->result_.emplace_back(pandasm::Create_LDAI(inst->CastToConstant()->GetInt64Value()));
+            DoSta(inst->GetDstReg(), enc->result_);
             break;
         case compiler::DataType::FLOAT64:
-            if (enc->GetGraph()->IsDynamicMethod()) {
-                enc->result_.emplace_back(pandasm::Create_FLDAI(inst->CastToConstant()->GetDoubleValue()));
-                DoSta(inst->GetDstReg(), enc->result_);
-            } else {
-                UNREACHABLE();
-            }
+            enc->result_.emplace_back(pandasm::Create_FLDAI(inst->CastToConstant()->GetDoubleValue()));
+            DoSta(inst->GetDstReg(), enc->result_);
             break;
-        case compiler::DataType::BOOL:
-        case compiler::DataType::INT8:
-        case compiler::DataType::UINT8:
-        case compiler::DataType::INT16:
-        case compiler::DataType::UINT16:
         case compiler::DataType::INT32:
         case compiler::DataType::UINT32:
-            if (enc->GetGraph()->IsDynamicMethod()) {
-                enc->result_.emplace_back(pandasm::Create_LDAI(inst->CastToConstant()->GetInt32Value()));
-                DoSta(inst->GetDstReg(), enc->result_);
-            } else {
-                UNREACHABLE();
-            }
-            break;
-        case compiler::DataType::FLOAT32:
-            if (enc->GetGraph()->IsDynamicMethod()) {
-                enc->result_.emplace_back(pandasm::Create_FLDAI(inst->CastToConstant()->GetFloatValue()));
-                DoSta(inst->GetDstReg(), enc->result_);
-            } else {
-                UNREACHABLE();
-            }
+            enc->result_.emplace_back(pandasm::Create_LDAI(inst->CastToConstant()->GetInt32Value()));
+            DoSta(inst->GetDstReg(), enc->result_);
             break;
         default:
             UNREACHABLE();
@@ -367,21 +337,16 @@ void BytecodeGen::VisitIf(GraphVisitor *v, Inst *inst_base)
     auto inst = inst_base->CastToIf();
     switch (inst->GetInputType(0)) {
         case compiler::DataType::ANY: {
-            if (enc->GetGraph()->IsDynamicMethod()) {
 #if defined(ENABLE_BYTECODE_OPT) && defined(PANDA_WITH_ECMASCRIPT) && defined(ARK_INTRINSIC_SET)
-                IfEcma(v, inst);
-                break;
-#endif
-            }
-            LOG(ERROR, BYTECODE_OPTIMIZER)
-                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-            enc->success_ = false;
+            IfEcma(v, inst);
             break;
+#endif
         }
         default:
             LOG(ERROR, BYTECODE_OPTIMIZER)
                 << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
             enc->success_ = false;
+            break;
     }
 }
 
@@ -476,14 +441,12 @@ void BytecodeGen::VisitIfImm(GraphVisitor *v, Inst *inst_base)
         IfImmZero(v, inst_base);
         return;
     }
-    IfImmNonZero(v, inst_base);
 }
 
 void BytecodeGen::IfImmZero(GraphVisitor *v, Inst *inst_base)
 {
     auto enc = static_cast<BytecodeGen *>(v);
     auto inst = inst_base->CastToIfImm();
-    ASSERT(enc->GetGraph()->IsDynamicMethod());
     DoLda(inst->GetSrcReg(0), enc->result_);
     auto label = LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId());
     switch (inst->GetCc()) {
@@ -498,45 +461,20 @@ void BytecodeGen::IfImmZero(GraphVisitor *v, Inst *inst_base)
     }
 }
 
-// NOLINTNEXTLINE(readability-function-size)
-void BytecodeGen::IfImmNonZero(GraphVisitor *v, Inst *inst_base)
-{
-    UNREACHABLE();
-}
-
-// NOLINTNEXTLINE(readability-function-size)
-void BytecodeGen::IfImm64(GraphVisitor *v, Inst *inst_base)
-{
-    UNREACHABLE();
-}
-
-// NOLINTNEXTLINE(readability-function-size)
-void BytecodeGen::VisitCast(GraphVisitor *v, Inst *inst_base)
-{
-    UNREACHABLE();
-}
-
 void BytecodeGen::VisitLoadString(GraphVisitor *v, Inst *inst_base)
 {
     pandasm::Ins ins;
     auto enc = static_cast<BytecodeGen *>(v);
     auto inst = inst_base->CastToLoadString();
-
     /* Do not emit unused code for Str -> CastValueToAnyType chains */
-    if (enc->GetGraph()->IsDynamicMethod()) {
-        if (!HasUserPredicate(inst,
-                              [](Inst const *i) { return i->GetOpcode() != compiler::Opcode::CastValueToAnyType; })) {
-            return;
-        }
+    if (!HasUserPredicate(inst,
+                          [](Inst const *i) { return i->GetOpcode() != compiler::Opcode::CastValueToAnyType; })) {
+        return;
     }
 
     enc->result_.emplace_back(pandasm::Create_LDA_STR(enc->ir_interface_->GetStringIdByOffset(inst->GetTypeId())));
     if (inst->GetDstReg() != compiler::ACC_REG_ID) {
-        if (enc->GetGraph()->IsDynamicMethod()) {
-            enc->result_.emplace_back(pandasm::Create_STA(inst->GetDstReg()));
-        } else {
-            UNREACHABLE();
-        }
+        enc->result_.emplace_back(pandasm::Create_STA(inst->GetDstReg()));
     }
 }
 
@@ -628,17 +566,7 @@ void BytecodeGen::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[ma
 void BytecodeGen::VisitIntrinsic(GraphVisitor *visitor, Inst *inst_base)
 {
     ASSERT(inst_base->IsIntrinsic());
-    auto inst = inst_base->CastToIntrinsic();
-    auto enc = static_cast<BytecodeGen *>(visitor);
-
-    if (!enc->GetGraph()->IsDynamicMethod()) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-        enc->success_ = false;
-    } else {
-#ifdef ENABLE_BYTECODE_OPT
-        VisitEcma(visitor, inst_base);
-#endif
-    }
+    VisitEcma(visitor, inst_base);
 }
 
 void BytecodeGen::VisitCatchPhi(GraphVisitor *v, Inst *inst)

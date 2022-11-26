@@ -83,32 +83,6 @@ inline ConditionCode GetInverseConditionCode(ConditionCode code)
     switch (code) {
         case ConditionCode::CC_EQ:
             return ConditionCode::CC_NE;
-        case ConditionCode::CC_NE:
-            return ConditionCode::CC_EQ;
-
-        case ConditionCode::CC_LT:
-            return ConditionCode::CC_GE;
-        case ConditionCode::CC_LE:
-            return ConditionCode::CC_GT;
-        case ConditionCode::CC_GT:
-            return ConditionCode::CC_LE;
-        case ConditionCode::CC_GE:
-            return ConditionCode::CC_LT;
-
-        case ConditionCode::CC_B:
-            return ConditionCode::CC_AE;
-        case ConditionCode::CC_BE:
-            return ConditionCode::CC_A;
-        case ConditionCode::CC_A:
-            return ConditionCode::CC_BE;
-        case ConditionCode::CC_AE:
-            return ConditionCode::CC_B;
-
-        case ConditionCode::CC_TST_EQ:
-            return ConditionCode::CC_TST_NE;
-        case ConditionCode::CC_TST_NE:
-            return ConditionCode::CC_TST_EQ;
-
         default:
             UNREACHABLE();
     }
@@ -180,29 +154,6 @@ inline ConditionCode SwapOperandsConditionCode(ConditionCode code)
         case ConditionCode::CC_EQ:
         case ConditionCode::CC_NE:
             return code;
-
-        case ConditionCode::CC_LT:
-            return ConditionCode::CC_GT;
-        case ConditionCode::CC_LE:
-            return ConditionCode::CC_GE;
-        case ConditionCode::CC_GT:
-            return ConditionCode::CC_LT;
-        case ConditionCode::CC_GE:
-            return ConditionCode::CC_LE;
-
-        case ConditionCode::CC_B:
-            return ConditionCode::CC_A;
-        case ConditionCode::CC_BE:
-            return ConditionCode::CC_AE;
-        case ConditionCode::CC_A:
-            return ConditionCode::CC_B;
-        case ConditionCode::CC_AE:
-            return ConditionCode::CC_BE;
-
-        case ConditionCode::CC_TST_EQ:
-        case ConditionCode::CC_TST_NE:
-            return code;
-
         default:
             UNREACHABLE();
     }
@@ -680,9 +631,6 @@ private:
     ArenaAllocator *allocator_ {nullptr};
 };
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DECLARE_INST(TYPE) void Accept(GraphVisitor *v) override
-
 /**
  * Base class for all instructions, should not be instantiated directly
  */
@@ -694,8 +642,6 @@ public:
     virtual ~InstBase() = default;
 
 public:
-    virtual void Accept(GraphVisitor *v) = 0;
-
     ALWAYS_INLINE void operator delete([[maybe_unused]] void *unused, [[maybe_unused]] size_t size)
     {
         UNREACHABLE();
@@ -716,9 +662,6 @@ protected:
  * Base instruction class
  */
 class Inst : public MarkerSet, public InstBase {
-public:
-    DECLARE_INST(Inst);
-
 public:
     /**
      * Create new instruction. All instructions must be created with this method.
@@ -855,46 +798,10 @@ public:
     {
         return GetFlag(inst_flags::CF);
     }
-    bool IsVirtualCall() const
-    {
-        return GetOpcode() == Opcode::CallVirtual || GetOpcode() == Opcode::UnresolvedCallVirtual;
-    }
-    bool IsStaticCall() const
-    {
-        return GetOpcode() == Opcode::CallStatic || GetOpcode() == Opcode::UnresolvedCallStatic;
-    }
-    bool IsInitObject() const
-    {
-        return GetOpcode() == Opcode::InitObject;
-    }
-    bool IsMultiArray() const
-    {
-        return GetOpcode() == Opcode::MultiArray;
-    }
-    bool IsDynamicCall() const
-    {
-        return GetOpcode() == Opcode::CallDynamic;
-    }
-    bool IsIndirectCall() const
-    {
-        return GetOpcode() == Opcode::CallIndirect;
-    }
+
     bool IsIntrinsic() const
     {
-        /* Opcode::Builtin is left for backward compatibility, the compiler
-         * itself should never generate an instruction with such an opcode */
-        return GetOpcode() == Opcode::Intrinsic || GetOpcode() == Opcode::Builtin;
-    }
-
-    /* IsBuiltin actual meaning would be "it MAY be inlined by the CG"
-     * however, since we do not make guarantees about whether it will
-     * actually be inlined nor the safety of the intrinsic itself, just
-     * checking the instruction flags to see if it is suitable for any
-     * particular optimization seems to be a better approach
-     */
-    static bool IsBuiltin()
-    {
-        return false;
+        return GetOpcode() == Opcode::Intrinsic;
     }
 
     bool IsCall() const
@@ -907,53 +814,11 @@ public:
         return GetOpcode() == Opcode::SpillFill;
     }
 
-    bool IsNullCheck() const
-    {
-        return GetOpcode() == Opcode::NullCheck;
-    }
-
-    bool IsNullPtr() const
-    {
-        return GetOpcode() == Opcode::NullPtr;
-    }
-
-    bool IsUnresolved() const
-    {
-        switch (GetOpcode()) {
-            case Opcode::UnresolvedCallStatic:
-            case Opcode::UnresolvedCallVirtual:
-            case Opcode::UnresolvedLoadAndInitClass:
-            case Opcode::UnresolvedLoadType:
-            case Opcode::UnresolvedLoadStatic:
-            case Opcode::UnresolvedStoreStatic:
-            case Opcode::UnresolvedLoadObject:
-            case Opcode::UnresolvedStoreObject:
-                return true;
-            default:
-                return false;
-        }
-    }
-    bool IsLoad() const
-    {
-        return GetFlag(inst_flags::LOAD);
-    }
-    bool IsStore() const
-    {
-        return GetFlag(inst_flags::STORE);
-    }
     bool IsAccRead() const;
     bool IsAccWrite() const;
-    bool IsMemory() const
-    {
-        return IsLoad() || IsStore();
-    }
     bool CanThrow() const
     {
         return GetFlag(inst_flags::CAN_THROW);
-    }
-    bool IsCheck() const
-    {
-        return GetFlag(inst_flags::IS_CHECK);
     }
     bool RequireState() const
     {
@@ -1004,12 +869,6 @@ public:
         return GetFlag(inst_flags::NO_CSE);
     }
 
-    // Returns true if the instruction is a barrier
-    virtual bool IsBarrier() const
-    {
-        return GetFlag(inst_flags::BARRIER);
-    }
-
     // Returns true if opcode can not be moved throught runtime calls (REFERENCE type only)
     bool IsRefSpecial() const
     {
@@ -1024,30 +883,13 @@ public:
         return GetFlag(inst_flags::COMMUTATIVE);
     }
 
-    // Returns true if the instruction allocates a new object on the heap
-    bool IsAllocation() const
-    {
-        return GetFlag(inst_flags::ALLOC);
-    }
-
     // Returns true if the instruction can be used in if-conversion
     bool IsIfConvertable() const
     {
         return GetFlag(inst_flags::IFCVT);
     }
 
-    virtual bool IsRuntimeCall() const
-    {
-        return GetFlag(inst_flags::RUNTIME_CALL);
-    }
-
     virtual bool IsPropagateLiveness() const;
-
-    // Returns true if the instruction doesn't have side effects(call runtime, throw e.t.c.)
-    virtual bool IsSafeInst() const
-    {
-        return false;
-    }
 
     bool RequireRegMap() const;
 
@@ -1059,11 +901,6 @@ public:
     bool HasObjectTypeInfo() const
     {
         return object_type_info_.IsValid();
-    }
-
-    void SetObjectTypeInfo(ObjectTypeInfo o)
-    {
-        object_type_info_ = o;
     }
 
     Inst *GetDataFlowInput(int index) const
@@ -1092,13 +929,9 @@ public:
             return nullptr;
         }
         auto ss = GetInput(GetInputsCount() - 1).GetInst();
-        if (ss->GetOpcode() == Opcode::SaveStateDeoptimize) {
-            return ss->CastToSaveStateDeoptimize();
-        }
         if (ss->GetOpcode() != Opcode::SaveState) {
             return nullptr;
         }
-
         return ss->CastToSaveState();
     }
 
@@ -1240,26 +1073,6 @@ public:
         for (auto it = GetUsers().begin(); it != GetUsers().end(); it = GetUsers().begin()) {
             it->GetInst()->SetInput(it->GetIndex(), inst);
         }
-    }
-
-    /**
-     * Swap the operands of the instruction.
-     * NB! Don't swap inputs while iterating over instruction's users:
-     * for (auto user : instruction.GetUsers()) {
-     *     // Don't do this!
-     *     user.GetInst()->SwapInputs();
-     * }
-     */
-    void SwapInputs()
-    {
-#ifndef NDEBUG
-        constexpr auto INPUTS_COUNT_2 = 2;
-#endif
-        ASSERT(GetInputsCount() == INPUTS_COUNT_2);
-        auto input0 = GetInput(0).GetInst();
-        auto input1 = GetInput(1).GetInst();
-        SetInput(0, input1);
-        SetInput(1, input0);
     }
 
     /**
@@ -1413,17 +1226,6 @@ public:
         return Location::MakeRegister(GetDstReg(), GetType());
     }
 
-    virtual bool CanBeNull() const
-    {
-        ASSERT_PRINT(GetType() == DataType::Type::REFERENCE, "CanBeNull only applies to reference types");
-        return true;
-    }
-
-    virtual uint32_t Latency() const
-    {
-        return options.GetCompilerSchedLatency();
-    }
-
     template <typename Accessor>
     typename Accessor::ValueType GetField() const
     {
@@ -1468,20 +1270,7 @@ public:
 
     bool IsSaveState() const
     {
-        return opcode_ == Opcode::SaveState || opcode_ == Opcode::SafePoint || opcode_ == Opcode::SaveStateOsr ||
-               opcode_ == Opcode::SaveStateDeoptimize;
-    }
-
-    bool IsClassInst() const
-    {
-        return opcode_ == Opcode::InitClass || opcode_ == Opcode::LoadClass || opcode_ == Opcode::LoadAndInitClass ||
-               opcode_ == Opcode::UnresolvedLoadAndInitClass;
-    }
-
-    virtual size_t GetHashCode() const
-    {
-        // TODO (Aleksandr Popov) calculate hash code
-        return 0;
+        return opcode_ == Opcode::SaveState;
     }
 
     virtual void SetVnObject([[maybe_unused]] VnObject *vn_obj) {}
@@ -1719,117 +1508,6 @@ private:
 };
 
 /**
- * This mixin aims to implement type of klass.
- */
-template <typename T>
-class ClassTypeMixin : public T {
-public:
-    using T::T;
-
-    void SetClassType(ClassType class_type)
-    {
-        T::template SetField<ClassTypeField>(class_type);
-    }
-
-    ClassType GetClassType() const
-    {
-        return T::template GetField<ClassTypeField>();
-    }
-
-protected:
-    using ClassTypeField = typename T::LastField::template NextField<ClassType, MinimumBitsToStore(ClassType::COUNT)>;
-    using LastField = ClassTypeField;
-};
-
-/**
- * Mixin to check if null check inside CheckCast and IsInstance can be omitted.
- */
-template <typename T>
-class OmitNullCheckMixin : public T {
-public:
-    using T::T;
-
-    void SetOmitNullCheck(bool omit_null_check)
-    {
-        T::template SetField<OmitNullCheckFlag>(omit_null_check);
-    }
-
-    bool GetOmitNullCheck() const
-    {
-        return T::template GetField<OmitNullCheckFlag>();
-    }
-
-protected:
-    using OmitNullCheckFlag = typename T::LastField::NextFlag;
-    using LastField = OmitNullCheckFlag;
-};
-
-template <typename T>
-class ScaleMixin : public T {
-public:
-    using T::T;
-
-    void SetScale(uint32_t scale)
-    {
-        ASSERT(scale <= MAX_SCALE);
-        T::template SetField<ScaleField>(scale);
-    }
-
-    uint32_t GetScale() const
-    {
-        return T::template GetField<ScaleField>();
-    }
-
-protected:
-    using ScaleField = typename T::LastField::template NextField<uint32_t, MinimumBitsToStore(MAX_SCALE)>;
-    using LastField = ScaleField;
-};
-
-/**
- * This mixin aims to implement field accessors.
- */
-class FieldMixin {
-public:
-    FieldMixin() = default;
-    NO_COPY_SEMANTIC(FieldMixin);
-    NO_MOVE_SEMANTIC(FieldMixin);
-    virtual ~FieldMixin() = default;
-
-    void SetObjField(RuntimeInterface::FieldPtr field)
-    {
-        field_ = field;
-    }
-    auto GetObjField() const
-    {
-        return field_;
-    }
-
-private:
-    RuntimeInterface::FieldPtr field_ {nullptr};
-};
-
-/**
- * This mixin aims to implement volatile accessors.
- */
-template <typename T>
-class VolatileMixin : public T {
-public:
-    using T::T;
-
-    void SetVolatile(bool is_volatile)
-    {
-        T::template SetField<IsVolatileFlag>(is_volatile);
-    }
-    bool GetVolatile() const
-    {
-        return T::template GetField<IsVolatileFlag>();
-    }
-
-protected:
-    using IsVolatileFlag = typename T::LastField::NextFlag;
-    using LastField = IsVolatileFlag;
-};
-/**
  * Mixin for Inlined calls/returns.
  */
 template <typename T>
@@ -1849,39 +1527,6 @@ public:
 protected:
     using IsInlinedFlag = typename T::LastField::NextFlag;
     using LastField = IsInlinedFlag;
-};
-
-/**
- * Mixin for Array/String instruction
- */
-template <typename T>
-class ArrayInstMixin : public T {
-public:
-    using T::T;
-
-    void SetIsArray(bool v)
-    {
-        T::template SetField<IsStringFlag>(!v);
-    }
-
-    void SetIsString(bool v)
-    {
-        T::template SetField<IsStringFlag>(v);
-    }
-
-    bool IsArray() const
-    {
-        return !(T::template GetField<IsStringFlag>());
-    }
-
-    bool IsString() const
-    {
-        return T::template GetField<IsStringFlag>();
-    }
-
-protected:
-    using IsStringFlag = typename T::LastField::NextFlag;
-    using LastField = IsStringFlag;
 };
 
 /**
@@ -1972,93 +1617,6 @@ protected:
 };
 
 /**
- * Mixin for instrucion with ShiftType
- */
-class ShiftTypeMixin {
-public:
-    explicit ShiftTypeMixin(ShiftType shift_type) : shift_type_(shift_type) {}
-    NO_COPY_SEMANTIC(ShiftTypeMixin);
-    NO_MOVE_SEMANTIC(ShiftTypeMixin);
-    virtual ~ShiftTypeMixin() = default;
-
-    void SetShiftType(ShiftType shift_type)
-    {
-        shift_type_ = shift_type;
-    }
-
-    ShiftType GetShiftType() const
-    {
-        return shift_type_;
-    }
-
-protected:
-    ShiftTypeMixin() = default;
-
-private:
-    ShiftType shift_type_ {INVALID_SHIFT};
-};
-
-/**
- * Mixin for instructions with multiple return values
- */
-template <typename T, size_t N>
-class MultipleOutputMixin : public T {
-public:
-    using T::T;
-
-    Register GetDstReg(unsigned index) const override
-    {
-        ASSERT(index < N);
-        if (index == 0) {
-            return T::GetDstReg();
-        }
-        return dst_regs_[index - 1];
-    }
-
-    void SetDstReg(unsigned index, Register reg) override
-    {
-        ASSERT(index < N);
-        if (index == 0) {
-            T::SetDstReg(reg);
-        } else {
-            dst_regs_[index - 1] = reg;
-        }
-    }
-
-    size_t GetDstCount() const override
-    {
-        return N;
-    }
-
-private:
-    std::array<Register, N - 1> dst_regs_;
-};
-
-/**
- * Mixin for Deoptimize instructions
- */
-template <typename T>
-class DeoptimizeTypeMixin : public T {
-public:
-    using T::T;
-
-    void SetDeoptimizeType(DeoptimizeType deopt_type)
-    {
-        T::template SetField<DeoptimizeTypeField>(deopt_type);
-    }
-
-    DeoptimizeType GetDeoptimizeType() const
-    {
-        return T::template GetField<DeoptimizeTypeField>();
-    }
-
-protected:
-    using DeoptimizeTypeField =
-        typename T::LastField::template NextField<DeoptimizeType, MinimumBitsToStore(DeoptimizeType::COUNT)>;
-    using LastField = DeoptimizeTypeField;
-};
-
-/**
  * Instruction with fixed number of inputs.
  * Shall not be instantiated directly, only through derived classes.
  */
@@ -2105,7 +1663,6 @@ private:
         return std::array<T, sizeof...(Is)> {(static_cast<void>(Is), value)...};
     }
 
-private:
     std::array<Register, N> src_regs_ = CreateArray(INVALID_REG, std::make_index_sequence<INPUT_COUNT>());
 };
 
@@ -2116,7 +1673,6 @@ private:
  */
 class FixedInputsInst0 : public FixedInputsInst<0> {
 public:
-    DECLARE_INST(FixedInputsInst0);
     using FixedInputsInst::FixedInputsInst;
 
     NO_COPY_SEMANTIC(FixedInputsInst0);
@@ -2126,7 +1682,6 @@ public:
 
 class FixedInputsInst1 : public FixedInputsInst<1> {
 public:
-    DECLARE_INST(FixedInputsInst1);
     using FixedInputsInst::FixedInputsInst;
 
     NO_COPY_SEMANTIC(FixedInputsInst1);
@@ -2136,7 +1691,6 @@ public:
 
 class FixedInputsInst2 : public FixedInputsInst<2U> {
 public:
-    DECLARE_INST(FixedInputsInst2);
     using FixedInputsInst::FixedInputsInst;
 
     NO_COPY_SEMANTIC(FixedInputsInst2);
@@ -2144,24 +1698,11 @@ public:
     ~FixedInputsInst2() override = default;
 };
 
-class FixedInputsInst3 : public FixedInputsInst<3U> {
-public:
-    DECLARE_INST(FixedInputsInst3);
-    using FixedInputsInst::FixedInputsInst;
-};
-
-class FixedInputsInst4 : public FixedInputsInst<4U> {
-public:
-    DECLARE_INST(FixedInputsInst4);
-    using FixedInputsInst::FixedInputsInst;
-};
-
 /**
  * Instruction with variable inputs count
  */
 class DynamicInputsInst : public Inst {
 public:
-    DECLARE_INST(DynamicInputsInst);
     using Inst::Inst;
 
     static constexpr int INPUT_COUNT = MAX_STATIC_INPUTS;
@@ -2211,158 +1752,6 @@ public:
 
 private:
     LocationsInfo *locations_ {nullptr};
-};
-
-/**
- * Unary operation instruction
- */
-class UnaryOperation : public FixedInputsInst<1> {
-public:
-    DECLARE_INST(UnaryOperation);
-    using FixedInputsInst::FixedInputsInst;
-    UnaryOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input) : FixedInputsInst(opcode, type, pc)
-    {
-        SetInput(0, input);
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        if (GetOpcode() == Opcode::Cast) {
-            return GetInput(0).GetInst()->GetType();
-        }
-        return GetType();
-    }
-
-    bool IsSafeInst() const override
-    {
-        return true;
-    }
-
-    void SetVnObject(VnObject *vn_obj) override;
-
-    Inst *Evaluate();
-};
-
-/**
- * Binary operation instruction
- */
-class BinaryOperation : public FixedInputsInst<2U> {
-public:
-    DECLARE_INST(BinaryOperation);
-    using FixedInputsInst::FixedInputsInst;
-
-    uint32_t Latency() const override
-    {
-        if (GetOpcode() == Opcode::Div) {
-            return options.GetCompilerSchedLatencyLong();
-        }
-        return options.GetCompilerSchedLatency();
-    }
-
-    bool IsSafeInst() const override
-    {
-        return true;
-    }
-
-    Inst *Evaluate();
-};
-
-/**
- * Binary operation instruction with c immidiate
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class BinaryImmOperation : public FixedInputsInst<1>, public ImmediateMixin {
-public:
-    DECLARE_INST(BinaryImmOperation);
-    using FixedInputsInst::FixedInputsInst;
-
-    explicit BinaryImmOperation(Opcode opcode, uint64_t imm) : FixedInputsInst(opcode), ImmediateMixin(imm) {}
-    explicit BinaryImmOperation(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm)
-        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm)
-    {
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        return GetType();
-    }
-
-    void SetVnObject(VnObject *vn_obj) override;
-    bool DumpInputs(std::ostream * /* out */) const override;
-
-    bool IsSafeInst() const override
-    {
-        return true;
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        static_cast<BinaryImmOperation *>(clone)->SetImm(GetImm());
-        return clone;
-    }
-};
-
-/**
- * Unary operation that shifts its own operand prior the application.
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class UnaryShiftedRegisterOperation : public FixedInputsInst<1>, public ImmediateMixin, public ShiftTypeMixin {
-public:
-    DECLARE_INST(UnaryShiftedRegisterOperation);
-    using FixedInputsInst::FixedInputsInst;
-
-    explicit UnaryShiftedRegisterOperation(Opcode opcode, ShiftType shift_type, uint64_t imm)
-        : FixedInputsInst(opcode), ImmediateMixin(imm), ShiftTypeMixin(shift_type)
-    {
-    }
-    explicit UnaryShiftedRegisterOperation(Opcode opcode, DataType::Type type, uint32_t pc, ShiftType shift_type,
-                                           uint64_t imm)
-        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm), ShiftTypeMixin(shift_type)
-    {
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        return GetType();
-    }
-
-    void SetVnObject(VnObject *vn_obj) override;
-    bool DumpInputs(std::ostream * /* out */) const override;
-    Inst *Clone(const Graph *targetGraph) const override;
-};
-
-/**
- * Binary operation that shifts its second operand prior the application.
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class BinaryShiftedRegisterOperation : public FixedInputsInst<2U>, public ImmediateMixin, public ShiftTypeMixin {
-public:
-    DECLARE_INST(BinaryShiftedRegisterOperation);
-    using FixedInputsInst::FixedInputsInst;
-
-    explicit BinaryShiftedRegisterOperation(Opcode opcode, ShiftType shift_type, uint64_t imm)
-        : FixedInputsInst(opcode), ImmediateMixin(imm), ShiftTypeMixin(shift_type)
-    {
-    }
-    explicit BinaryShiftedRegisterOperation(Opcode opcode, DataType::Type type, uint32_t pc, ShiftType shift_type,
-                                            uint64_t imm)
-        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm), ShiftTypeMixin(shift_type)
-    {
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        return GetType();
-    }
-
-    void SetVnObject(VnObject *vn_obj) override;
-    bool DumpInputs(std::ostream * /* out */) const override;
-    Inst *Clone(const Graph *targetGraph) const override;
 };
 
 class SpillFillInst;
@@ -2442,134 +1831,11 @@ protected:
 };
 
 /**
- * Call instruction
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class CallInst : public InlinedInstMixin<DynamicInputsInst>, public InputTypesMixin {
-    static constexpr uint32_t INVALID_METHOD_ID = std::numeric_limits<uint32_t>::max();
-
-public:
-    DECLARE_INST(CallInst);
-    using Base = InlinedInstMixin<DynamicInputsInst>;
-    using Base::Base;
-
-    CallInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t method_id)
-        : Base(opcode, type, pc), method_id_(method_id)
-    {
-    }
-
-    void SetCallMethodId(uint32_t id)
-    {
-        method_id_ = id;
-    }
-    auto GetCallMethodId() const
-    {
-        return method_id_;
-    }
-    void SetCallMethod(RuntimeInterface::MethodPtr method)
-    {
-        method_ = method;
-    }
-    RuntimeInterface::MethodPtr GetCallMethod() const
-    {
-        return method_;
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(input_types_ != nullptr);
-        ASSERT(index < input_types_->size());
-        ASSERT(index < GetInputsCount());
-        return (*input_types_)[index];
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    void SetCanNativeException(bool is_native)
-    {
-        SetField<IsNativeExceptionFlag>(is_native);
-    }
-
-    bool GetCanNativeException() const
-    {
-        return GetField<IsNativeExceptionFlag>();
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override;
-
-    bool IsRuntimeCall() const override
-    {
-        return !IsInlined();
-    }
-
-protected:
-    using IsNativeExceptionFlag = LastField::NextFlag;
-    using LastField = IsNativeExceptionFlag;
-
-private:
-    uint32_t method_id_ {INVALID_METHOD_ID};
-    RuntimeInterface::MethodPtr method_ {nullptr};
-};
-
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class CallIndirectInst : public DynamicInputsInst, public InputTypesMixin {
-public:
-    DECLARE_INST(CallIndirectInst);
-    using Base = DynamicInputsInst;
-    using Base::Base;
-
-    CallIndirectInst(Opcode opcode, DataType::Type type, uint32_t pc) : Base(opcode, type, pc) {}
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(input_types_ != nullptr);
-        ASSERT(index < input_types_->size());
-        ASSERT(index < GetInputsCount());
-        return (*input_types_)[index];
-    }
-
-    Inst *Clone(const Graph *target_graph) const override;
-};
-
-/**
- * Length methods instruction
- */
-class LengthMethodInst : public ArrayInstMixin<FixedInputsInst1> {
-public:
-    DECLARE_INST(LengthMethodInst);
-    using Base = ArrayInstMixin<FixedInputsInst1>;
-    using Base::Base;
-
-    explicit LengthMethodInst(Opcode opcode, bool is_array = true) : Base(opcode)
-    {
-        SetIsArray(is_array);
-    }
-    LengthMethodInst(Opcode opcode, DataType::Type type, uint32_t pc, bool is_array = true) : Base(opcode, type, pc)
-    {
-        SetIsArray(is_array);
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        return DataType::REFERENCE;
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        static_cast<LengthMethodInst *>(clone)->SetIsArray(IsArray());
-        return clone;
-    }
-};
-
-/**
  * Compare instruction
  */
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class CompareInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst2>> {
 public:
-    DECLARE_INST(CompareInst);
     using BaseInst = InstWithOperandsType<ConditionMixin<FixedInputsInst2>>;
     using BaseInst::BaseInst;
 
@@ -2587,13 +1853,7 @@ public:
 
     void SetVnObject(VnObject *vn_obj) override;
 
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToCompare()->SetCc(GetCc());
-        clone->CastToCompare()->SetOperandsType(GetOperandsType());
-        return clone;
-    }
+    Inst *Clone(const Graph *targetGraph) const override;
 };
 
 /**
@@ -2625,7 +1885,6 @@ protected:
  */
 class CompareAnyTypeInst : public AnyTypeMixin<FixedInputsInst1> {
 public:
-    DECLARE_INST(CompareAnyTypeInst);
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
@@ -2655,7 +1914,6 @@ public:
  */
 class CastAnyTypeValueInst : public AnyTypeMixin<FixedInputsInst1> {
 public:
-    DECLARE_INST(CastAnyTypeValueInst);
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
@@ -2693,7 +1951,6 @@ public:
  */
 class CastValueToAnyTypeInst : public AnyTypeMixin<FixedInputsInst1> {
 public:
-    DECLARE_INST(CastValueToAnyTypeInst);
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
@@ -2718,36 +1975,6 @@ public:
 };
 
 /**
- * AnyTypeCheckInst instruction
- */
-class AnyTypeCheckInst : public AnyTypeMixin<FixedInputsInst2> {
-public:
-    DECLARE_INST(AnyTypeCheckInst);
-    using BaseInst = AnyTypeMixin<FixedInputsInst2>;
-    using BaseInst::BaseInst;
-
-    AnyTypeCheckInst(Opcode opcode, uint32_t pc, AnyBaseType any_type) : BaseInst(opcode, DataType::ANY, pc)
-    {
-        SetAnyType(any_type);
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        return (index == 0) ? DataType::ANY : DataType::NO_TYPE;
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToAnyTypeCheck()->SetAnyType(GetAnyType());
-        return clone;
-    }
-};
-
-/**
  * ConstantInst represent constant value.
  *
  * Available types: INT64, FLOAT32, FLOAT64, ANY. All integer types are stored as INT64 value.
@@ -2755,7 +1982,6 @@ public:
  */
 class ConstantInst : public Inst {
 public:
-    DECLARE_INST(ConstantInst);
     using Inst::Inst;
 
     template <typename T>
@@ -2780,11 +2006,6 @@ public:
         }
 
         SetType(GetTypeFromCType<T>(support_int32));
-    }
-
-    bool IsSafeInst() const override
-    {
-        return true;
     }
 
     uint64_t GetRawValue() const
@@ -2923,8 +2144,6 @@ enum SpillFillType {
 
 class SpillFillInst : public FixedInputsInst0 {
 public:
-    DECLARE_INST(SpillFillInst);
-
     explicit SpillFillInst(ArenaAllocator *allocator, Opcode opcode)
         : FixedInputsInst0(opcode), spill_fills_(allocator->Adapter())
     {
@@ -3013,16 +2232,7 @@ public:
 
     bool DumpInputs(std::ostream * /* out */) const override;
 
-#ifndef NDEBUG
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph)->CastToSpillFill();
-        for (auto spill_fill : spill_fills_) {
-            clone->AddSpillFill(spill_fill);
-        }
-        return clone;
-    }
-#endif
+    Inst *Clone(const Graph *targetGraph) const override;
 
 private:
     ArenaVector<SpillFillData> spill_fills_;
@@ -3032,7 +2242,6 @@ private:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ParameterInst : public Inst, public LocationDataMixin {
 public:
-    DECLARE_INST(ParameterInst);
     using Inst::Inst;
 
     explicit ParameterInst(Opcode /* unused */, uint16_t arg_number) : Inst(Opcode::Parameter), arg_number_(arg_number)
@@ -3063,7 +2272,7 @@ inline bool IsZeroConstant(const Inst *inst)
 
 inline bool IsZeroConstantOrNullPtr(const Inst *inst)
 {
-    return IsZeroConstant(inst) || inst->GetOpcode() == Opcode::NullPtr;
+    return IsZeroConstant(inst);
 }
 
 /**
@@ -3071,7 +2280,6 @@ inline bool IsZeroConstantOrNullPtr(const Inst *inst)
  */
 class PhiInst : public AnyTypeMixin<DynamicInputsInst> {
 public:
-    DECLARE_INST(PhiInst);
     using BaseInst = AnyTypeMixin<DynamicInputsInst>;
     using BaseInst::BaseInst;
     /// Get basic block corresponding to given input index. Returned pointer to basic block, can't be nullptr
@@ -3103,11 +2311,6 @@ public:
     AnyBaseType GetAssumedAnyType()
     {
         return GetAnyType();
-    }
-
-    void SetAssumedAnyType(AnyBaseType type)
-    {
-        SetAnyType(type);
     }
 
     /// Get input instruction corresponding to the given basic block, can't be null.
@@ -3142,7 +2345,6 @@ struct SaveStateImm {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class SaveStateInst : public DynamicInputsInst {
 public:
-    DECLARE_INST(SaveStateInst);
     using DynamicInputsInst::DynamicInputsInst;
 
     bool DumpInputs(std::ostream *out) const override;
@@ -3200,15 +2402,6 @@ public:
     auto SetMethod(void *method)
     {
         method_ = method;
-    }
-
-    auto GetCallerInst() const
-    {
-        return caller_inst_;
-    }
-    auto SetCallerInst(CallInst *inst)
-    {
-        caller_inst_ = inst;
     }
 
     void AppendImmediate(uint64_t imm, uint16_t vreg, DataType::Type type, bool is_acc);
@@ -3287,587 +2480,21 @@ private:
     ArenaVector<SaveStateImm> *immediates_ {nullptr};
     void *method_ {nullptr};
     /// If instruction is in the inlined graph, this variable points to the inliner's call instruction.
-    CallInst *caller_inst_ {nullptr};
     ArenaBitVector *roots_stack_mask_ {nullptr};
     std::bitset<BITS_PER_UINT32> roots_regs_mask_ {0};
 };
 
-/**
- * Load value from array or string
- */
-class LoadInst : public ArrayInstMixin<NeedBarrierMixin<FixedInputsInst2>> {
-public:
-    DECLARE_INST(LoadInst);
-    using Base = ArrayInstMixin<NeedBarrierMixin<FixedInputsInst2>>;
-    using Base::Base;
-
-    explicit LoadInst(Opcode opcode, bool is_array = true) : Base(opcode)
-    {
-        SetIsArray(is_array);
-    }
-    LoadInst(Opcode opcode, DataType::Type type, uint32_t pc, bool is_array = true) : Base(opcode, type, pc)
-    {
-        SetIsArray(is_array);
-    }
-
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
-    Inst *GetIndex()
-    {
-        return GetInput(1).GetInst();
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case 0:
-                return DataType::REFERENCE;
-            case 1:
-                return DataType::INT32;
-            default:
-                return DataType::NO_TYPE;
-        }
-    }
-
-    uint32_t Latency() const override
-    {
-        return options.GetCompilerSchedLatencyLong();
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = NeedBarrierMixin<FixedInputsInst2>::Clone(targetGraph);
-        static_cast<LoadInst *>(clone)->SetIsArray(IsArray());
-        return clone;
-    }
-};
-
-class LoadCompressedStringCharInst : public FixedInputsInst3 {
-public:
-    DECLARE_INST(LoadCompressedStringCharInst);
-    using Base = FixedInputsInst3;
-    using Base::Base;
-
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
-    Inst *GetIndex()
-    {
-        return GetInput(1).GetInst();
-    }
-    Inst *GetLength() const
-    {
-        return GetInput(2U).GetInst();
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case 0:
-                return DataType::REFERENCE;
-            case 1:
-                return DataType::INT32;
-            case 2U:
-                return DataType::INT32;
-            default:
-                return DataType::NO_TYPE;
-        }
-    }
-
-    uint32_t Latency() const override
-    {
-        return options.GetCompilerSchedLatencyLong();
-    }
-};
-
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadCompressedStringCharInstI : public FixedInputsInst2, public ImmediateMixin {
-public:
-    DECLARE_INST(LoadCompressedStringCharInstI);
-    using Base = FixedInputsInst2;
-    using Base::Base;
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case 0:
-                return DataType::REFERENCE;
-            case 1:
-                return DataType::INT32;
-            default:
-                return DataType::NO_TYPE;
-        }
-    }
-
-    uint32_t Latency() const override
-    {
-        return options.GetCompilerSchedLatencyLong();
-    }
-};
-/**
- * Store value into array element
- */
-class StoreInst : public NeedBarrierMixin<FixedInputsInst3> {
-public:
-    DECLARE_INST(StoreInst);
-    using Base = NeedBarrierMixin<FixedInputsInst3>;
-    using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
-    Inst *GetIndex()
-    {
-        return GetInput(1).GetInst();
-    }
-    Inst *GetStoredValue()
-    {
-        return GetInput(2U).GetInst();
-    }
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case 0:
-                return DataType::REFERENCE;
-            case 1:
-                return DataType::INT32;
-            case 2U:
-                return GetType();
-            default:
-                return DataType::NO_TYPE;
-        }
-    }
-
-    // StoreArray call barriers twice,so we need to save input register for second call
-    bool IsPropagateLiveness() const override
-    {
-        return GetType() == DataType::REFERENCE;
-    }
-};
-
-/**
- * Load value from array, using array index as immediate
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadInstI : public VolatileMixin<ArrayInstMixin<NeedBarrierMixin<FixedInputsInst1>>>, public ImmediateMixin {
-public:
-    DECLARE_INST(LoadInstI);
-    using Base = VolatileMixin<ArrayInstMixin<NeedBarrierMixin<FixedInputsInst1>>>;
-    using Base::Base;
-
-    LoadInstI(Opcode opcode, uint64_t imm, bool is_array = true) : Base(opcode), ImmediateMixin(imm)
-    {
-        SetIsArray(is_array);
-    }
-    LoadInstI(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm, bool is_array = true)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
-    {
-        SetIsArray(is_array);
-    }
-
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index == 0);
-        return DataType::REFERENCE;
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    bool DumpInputs(std::ostream * /* out */) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = static_cast<LoadInstI *>(FixedInputsInst::Clone(targetGraph));
-        clone->SetImm(GetImm());
-        clone->SetIsArray(IsArray());
-        clone->SetVolatile(GetVolatile());
-        return clone;
-    }
-
-    uint32_t Latency() const override
-    {
-        return options.GetCompilerSchedLatencyLong();
-    }
-};
-
-/**
- * Load value from pointer with offset
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadMemInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>, public ImmediateMixin {
-public:
-    DECLARE_INST(LoadMemInstI);
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
-    using Base::Base;
-
-    LoadMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-    LoadMemInstI(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
-    {
-    }
-
-    Inst *GetPointer()
-    {
-        return GetInput(0).GetInst();
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index == 0);
-        auto input_0_type = GetInput(0).GetInst()->GetType();
-        ASSERT(input_0_type == DataType::POINTER || input_0_type == DataType::REFERENCE);
-        return input_0_type;
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    bool DumpInputs(std::ostream * /* out */) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = static_cast<LoadInstI *>(FixedInputsInst::Clone(targetGraph));
-        clone->SetImm(GetImm());
-        clone->SetVolatile(GetVolatile());
-        return clone;
-    }
-
-    uint32_t Latency() const override
-    {
-        return options.GetCompilerSchedLatencyLong();
-    }
-};
-
-/**
- * Store value into array element, using array index as immediate
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>, public ImmediateMixin {
-public:
-    DECLARE_INST(StoreInstI);
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
-    using Base::Base;
-
-    StoreInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-    StoreInstI(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
-    {
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
-    Inst *GetStoredValue()
-    {
-        return GetInput(1).GetInst();
-    }
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case 0:
-                return DataType::REFERENCE;
-            case 1:
-                return GetType();
-            default:
-                UNREACHABLE();
-        }
-    }
-
-    bool DumpInputs(std::ostream * /* out */) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = static_cast<StoreInstI *>(FixedInputsInst::Clone(targetGraph));
-        clone->SetImm(GetImm());
-        clone->SetVolatile(GetVolatile());
-        return clone;
-    }
-
-    // StoreArrayI call barriers twice,so we need to save input register for second call
-    bool IsPropagateLiveness() const override
-    {
-        return GetType() == DataType::REFERENCE;
-    }
-};
-
-/**
- * Store value into pointer by offset
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreMemInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>, public ImmediateMixin {
-public:
-    DECLARE_INST(StoreMemInstI);
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
-    using Base::Base;
-
-    StoreMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-    StoreMemInstI(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
-    {
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    Inst *GetPointer()
-    {
-        return GetInput(0).GetInst();
-    }
-    Inst *GetStoredValue()
-    {
-        return GetInput(1).GetInst();
-    }
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case 0: {
-                auto input_0_type = GetInput(0).GetInst()->GetType();
-                ASSERT(input_0_type == DataType::POINTER || input_0_type == DataType::REFERENCE);
-                return input_0_type;
-            }
-            case 1:
-                return GetType();
-            default:
-                UNREACHABLE();
-        }
-    }
-
-    bool DumpInputs(std::ostream * /* out */) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = static_cast<StoreInstI *>(FixedInputsInst::Clone(targetGraph));
-        clone->SetImm(GetImm());
-        clone->SetVolatile(GetVolatile());
-        return clone;
-    }
-};
-
-/**
- * Bounds check, using array index as immediate
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class BoundsCheckInstI : public ArrayInstMixin<FixedInputsInst<2U>>, public ImmediateMixin {
-public:
-    DECLARE_INST(BoundsCheckInstI);
-    using Base = ArrayInstMixin<FixedInputsInst<2U>>;
-    using Base::Base;
-
-    BoundsCheckInstI(Opcode opcode, uint64_t imm, bool is_array = true) : Base(opcode), ImmediateMixin(imm)
-    {
-        SetIsArray(is_array);
-    }
-
-    BoundsCheckInstI(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm, bool is_array = true)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
-    {
-        SetIsArray(is_array);
-    }
-
-    bool DumpInputs(std::ostream * /* out */) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToBoundsCheckI()->SetImm(GetImm());
-        clone->CastToBoundsCheckI()->SetIsArray(IsArray());
-        return clone;
-    }
-};
-
-/**
- * Bounds check instruction
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class BoundsCheckInst : public ArrayInstMixin<FixedInputsInst<3U>> {
-public:
-    DECLARE_INST(BoundsCheckInst);
-    using Base = ArrayInstMixin<FixedInputsInst<3U>>;
-    using Base::Base;
-
-    explicit BoundsCheckInst(Opcode opcode, bool is_array = true) : Base(opcode)
-    {
-        SetIsArray(is_array);
-    }
-
-    BoundsCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, bool is_array = true) : Base(opcode, type, pc)
-    {
-        SetIsArray(is_array);
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToBoundsCheck()->SetIsArray(IsArray());
-        return clone;
-    }
-};
-
-class NullCheckInst : public FixedInputsInst2 {
-public:
-    DECLARE_INST(NullCheckInst);
-    using Base = FixedInputsInst2;
-    using Base::Base;
-
-    bool IsImplicit() const
-    {
-        return GetField<IsImplicitFlag>();
-    }
-
-    void SetImplicit(bool is_implicit = true)
-    {
-        SetField<IsImplicitFlag>(is_implicit);
-    }
-
-private:
-    using IsImplicitFlag = LastField::NextFlag;
-    using LastField = IsImplicitFlag;
-};
-
-/**
- * Return immediate
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ReturnInstI : public FixedInputsInst<0>, public ImmediateMixin {
-public:
-    DECLARE_INST(ReturnInstI);
-    using FixedInputsInst::FixedInputsInst;
-
-    ReturnInstI(Opcode opcode, uint64_t imm) : FixedInputsInst(opcode), ImmediateMixin(imm) {}
-    ReturnInstI(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm)
-        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm)
-    {
-    }
-
-    bool DumpInputs(std::ostream * /* out */) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToReturnI()->SetImm(GetImm());
-        return clone;
-    }
-};
-
-class ReturnInlinedInst : public FixedInputsInst<1> {
-public:
-    DECLARE_INST(ReturnInlinedInst);
-    using FixedInputsInst::FixedInputsInst;
-
-    bool IsExtendedLiveness() const
-    {
-        return GetField<IsExtendedLivenessFlag>();
-    }
-
-    void SetExtendedLiveness(bool is_extened_liveness = true)
-    {
-        SetField<IsExtendedLivenessFlag>(is_extened_liveness);
-    }
-
-private:
-    using IsExtendedLivenessFlag = LastField::NextFlag;
-    using LastField = IsExtendedLivenessFlag;
-};
-
-/**
- * Monitor instruction
- */
-class MonitorInst : public FixedInputsInst2 {
-public:
-    DECLARE_INST(MonitorInst);
-    using Base = FixedInputsInst2;
-    using Base::Base;
-
-    bool IsExit() const
-    {
-        return GetField<Exit>();
-    }
-
-    bool IsEntry() const
-    {
-        return !GetField<Exit>();
-    }
-
-    void SetExit()
-    {
-        SetField<Exit>(true);
-    }
-
-    void SetEntry()
-    {
-        SetField<Exit>(false);
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        return DataType::REFERENCE;
-    }
-
-    void DumpOpcode(std::ostream * /* unused */) const override;
-
-protected:
-    using Exit = LastField::NextFlag;
-    using LastField = Exit;
-};
-
-#include "intrinsics_flags.inl"
-
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class IntrinsicInst : public InlinedInstMixin<DynamicInputsInst>, public InputTypesMixin {
 public:
-    DECLARE_INST(IntrinsicInst);
     using Base = InlinedInstMixin<DynamicInputsInst>;
     using Base::Base;
     using IntrinsicId = RuntimeInterface::IntrinsicId;
 
-    IntrinsicInst(Opcode opcode, IntrinsicId intrinsic_id) : Base(opcode), intrinsic_id_(intrinsic_id)
-    {
-        AdjustFlags(intrinsic_id, this);
-    }
+    IntrinsicInst(Opcode opcode, IntrinsicId intrinsic_id) : Base(opcode), intrinsic_id_(intrinsic_id) {}
 
     IntrinsicInst(Opcode opcode, DataType::Type type, uint32_t pc, IntrinsicId intrinsic_id)
-        : Base(opcode, type, pc), intrinsic_id_(intrinsic_id)
-    {
-        AdjustFlags(intrinsic_id, this);
-    }
+        : Base(opcode, type, pc), intrinsic_id_(intrinsic_id) {}
 
     IntrinsicId GetIntrinsicId() const
     {
@@ -3951,43 +2578,13 @@ private:
     ArenaVector<uint32_t> *imms_ {nullptr};  // record imms appeared in intrinsics
 };
 
-#include <get_intrinsics_names.inl>
-#include <intrinsics_enum.inl>
-#include <can_encode_builtin.inl>
-
-/**
- *  Cast instruction
- */
-class CastInst : public InstWithOperandsType<FixedInputsInst1> {
-public:
-    DECLARE_INST(CastInst);
-    using BaseInst = InstWithOperandsType<FixedInputsInst1>;
-    using BaseInst::BaseInst;
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index == 0);
-        return GetOperandsType();
-    }
-
-    void SetVnObject(VnObject *vn_obj) override;
-
-    void DumpOpcode(std::ostream * /* out */) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToCast()->SetOperandsType(GetOperandsType());
-        return clone;
-    }
-};
+#include <ecma_intrinsics_enum.inl>
 
 /**
  * Cmp instruction
  */
 class CmpInst : public InstWithOperandsType<FixedInputsInst2> {
 public:
-    DECLARE_INST(CmpInst);
     using BaseInst = InstWithOperandsType<FixedInputsInst2>;
     using BaseInst::BaseInst;
 
@@ -4032,666 +2629,18 @@ public:
 
     void DumpOpcode(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToCmp()->SetOperandsType(GetOperandsType());
-        return clone;
-    }
+    Inst *Clone(const Graph *targetGraph) const override;
 
 protected:
     using Fcmpg = LastField::NextFlag;
     using LastField = Fcmpg;
 };
 
-/**
- * Load value from instance field
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadObjectInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>, public TypeIdMixin, public FieldMixin {
-public:
-    DECLARE_INST(LoadObjectInst);
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
-    using Base::Base;
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 1);
-        return DataType::REFERENCE;
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToLoadObject()->SetTypeId(GetTypeId());
-        clone->CastToLoadObject()->SetMethod(GetMethod());
-        clone->CastToLoadObject()->SetObjField(GetObjField());
-        clone->CastToLoadObject()->SetVolatile(GetVolatile());
-        return clone;
-    }
-
-    uint32_t Latency() const override
-    {
-        return options.GetCompilerSchedLatencyLong();
-    }
-};
-
-/**
- * Load value from memory by offset
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadMemInst : public ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>> {
-public:
-    DECLARE_INST(LoadMemInst);
-    using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>>;
-    using Base::Base;
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 2U);
-        if (index == 1U) {
-            return DataType::UINT32;
-        }
-
-        ASSERT(index == 0U);
-        auto input_0_type = GetInput(0).GetInst()->GetType();
-        ASSERT(input_0_type == DataType::POINTER || input_0_type == DataType::REFERENCE);
-        return input_0_type;
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream * /* unused */) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToLoad()->SetVolatile(GetVolatile());
-        clone->CastToLoad()->SetScale(GetScale());
-        return clone;
-    }
-
-    uint32_t Latency() const override
-    {
-        return options.GetCompilerSchedLatencyLong();
-    }
-};
-
-/**
- * Load value from unresolved instance field
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class UnresolvedLoadObjectInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
-public:
-    DECLARE_INST(UnresolvedLoadObjectInst);
-    using Base = NeedBarrierMixin<FixedInputsInst2>;
-    using Base::Base;
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 2U);
-        if (index == 1) {
-            // This is SaveState input
-            return DataType::NO_TYPE;
-        }
-        ASSERT(index == 0);
-        return DataType::REFERENCE;
-    }
-
-    bool IsBarrier() const override
-    {
-        return true;
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToUnresolvedLoadObject()->SetTypeId(GetTypeId());
-        clone->CastToUnresolvedLoadObject()->SetMethod(GetMethod());
-        return clone;
-    }
-
-    uint32_t Latency() const override
-    {
-        return options.GetCompilerSchedLatencyLong();
-    }
-};
-
-/**
- * Store value into instance field
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreObjectInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>,
-                        public TypeIdMixin,
-                        public FieldMixin {
-public:
-    DECLARE_INST(StoreObjectInst);
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
-    using Base::Base;
-    static constexpr size_t STORED_INPUT_INDEX = 1;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 2U);
-        return index == 0 ? DataType::REFERENCE : GetType();
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToStoreObject()->SetTypeId(GetTypeId());
-        clone->CastToStoreObject()->SetMethod(GetMethod());
-        clone->CastToStoreObject()->SetObjField(GetObjField());
-        clone->CastToStoreObject()->SetVolatile(GetVolatile());
-        return clone;
-    }
-
-    // StoreObject call barriers twice,so we need to save input register for second call
-    bool IsPropagateLiveness() const override
-    {
-        return GetType() == DataType::REFERENCE;
-    }
-};
-
-/**
- * Store value into unresolved instance field
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class UnresolvedStoreObjectInst : public NeedBarrierMixin<FixedInputsInst3>, public TypeIdMixin {
-public:
-    DECLARE_INST(UnresolvedStoreObjectInst);
-    using Base = NeedBarrierMixin<FixedInputsInst3>;
-    using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return true;
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 3U);
-        if (index == 2U) {
-            // This is SaveState input
-            return DataType::NO_TYPE;
-        }
-        return index == 0 ? DataType::REFERENCE : GetType();
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToUnresolvedStoreObject()->SetTypeId(GetTypeId());
-        clone->CastToUnresolvedStoreObject()->SetMethod(GetMethod());
-        return clone;
-    }
-};
-
-/**
- * Store value in memory by offset
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreMemInst : public ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>> {
-public:
-    DECLARE_INST(StoreMemInst);
-    using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>>;
-    using Base::Base;
-
-    static constexpr size_t STORED_INPUT_INDEX = 2;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 3U);
-        if (index == 1U) {
-            return DataType::UINT32;
-        }
-        if (index == 2U) {
-            return GetType();
-        }
-
-        ASSERT(index == 0U);
-        auto input_0_type = GetInput(0).GetInst()->GetType();
-        ASSERT(input_0_type == DataType::POINTER || input_0_type == DataType::REFERENCE);
-        return input_0_type;
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream * /* unused */) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToStore()->SetVolatile(GetVolatile());
-        clone->CastToStore()->SetScale(GetScale());
-        return clone;
-    }
-};
-
-/**
- * Load static field from class.
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>, public TypeIdMixin, public FieldMixin {
-public:
-    DECLARE_INST(LoadStaticInst);
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
-    using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        ASSERT(index == 0);
-        return DataType::REFERENCE;
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToLoadStatic()->SetTypeId(GetTypeId());
-        clone->CastToLoadStatic()->SetMethod(GetMethod());
-        clone->CastToLoadStatic()->SetObjField(GetObjField());
-        clone->CastToLoadStatic()->SetVolatile(GetVolatile());
-        return clone;
-    }
-
-    uint32_t Latency() const override
-    {
-        return options.GetCompilerSchedLatencyLong();
-    }
-};
-
-/**
- * Load unresolved static field from class.
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class UnresolvedLoadStaticInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
-public:
-    DECLARE_INST(UnresolvedLoadStaticInst);
-    using Base = NeedBarrierMixin<FixedInputsInst1>;
-    using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return true;
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        // This is SaveState input
-        return DataType::NO_TYPE;
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToUnresolvedLoadStatic()->SetTypeId(GetTypeId());
-        clone->CastToUnresolvedLoadStatic()->SetMethod(GetMethod());
-        return clone;
-    }
-
-    uint32_t Latency() const override
-    {
-        return options.GetCompilerSchedLatencyLong();
-    }
-};
-
-/**
- * Store value into static field.
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>,
-                        public TypeIdMixin,
-                        public FieldMixin {
-public:
-    DECLARE_INST(StoreStaticInst);
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
-    using Base::Base;
-    static constexpr size_t STORED_INPUT_INDEX = 1;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        if (index == 0) {
-            return DataType::REFERENCE;
-        }
-        return GetType();
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToStoreStatic()->SetTypeId(GetTypeId());
-        clone->CastToStoreStatic()->SetMethod(GetMethod());
-        clone->CastToStoreStatic()->SetObjField(GetObjField());
-        clone->CastToStoreStatic()->SetVolatile(GetVolatile());
-        return clone;
-    }
-
-    // StoreStatic call barriers twice,so we need to save input register for second call
-    bool IsPropagateLiveness() const override
-    {
-        return GetType() == DataType::REFERENCE;
-    }
-};
-
-/**
- * Store value into unresolved static field.
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class UnresolvedStoreStaticInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
-public:
-    DECLARE_INST(UnresolvedStoreStaticInst);
-    using Base = NeedBarrierMixin<FixedInputsInst2>;
-    using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return true;
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        if (index == 1) {
-            // This is SaveState input
-            return DataType::NO_TYPE;
-        }
-        ASSERT(index == 0);
-        return GetType();
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToUnresolvedStoreStatic()->SetTypeId(GetTypeId());
-        clone->CastToUnresolvedStoreStatic()->SetMethod(GetMethod());
-        return clone;
-    }
-};
-
-/**
- * Create new object
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class NewObjectInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
-public:
-    DECLARE_INST(NewObjectInst);
-    using Base = NeedBarrierMixin<FixedInputsInst2>;
-    using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        if (index == 0) {
-            return DataType::REFERENCE;
-        }
-        return DataType::NO_TYPE;
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToNewObject()->SetTypeId(GetTypeId());
-        clone->CastToNewObject()->SetMethod(GetMethod());
-        return clone;
-    }
-};
-
-/**
- * Create new array
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class NewArrayInst : public NeedBarrierMixin<FixedInputsInst3>, public TypeIdMixin {
-public:
-    DECLARE_INST(NewArrayInst);
-    using Base = NeedBarrierMixin<FixedInputsInst3>;
-    using Base::Base;
-
-    static constexpr size_t INDEX_CLASS = 0;
-    static constexpr size_t INDEX_SIZE = 1;
-    static constexpr size_t INDEX_SAVE_STATE = 2;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case INDEX_CLASS:
-                return GetInput(0).GetInst()->GetType();
-            case INDEX_SIZE:
-                return DataType::INT32;
-            case INDEX_SAVE_STATE:
-                // This is SaveState input
-                return DataType::NO_TYPE;
-            default:
-                UNREACHABLE();
-        }
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToNewArray()->SetTypeId(GetTypeId());
-        clone->CastToNewArray()->SetMethod(GetMethod());
-        return clone;
-    }
-};
-
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadConstArrayInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
-public:
-    DECLARE_INST(LoadConstArrayInst);
-    using Base = NeedBarrierMixin<FixedInputsInst1>;
-    using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        return DataType::NO_TYPE;
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToLoadConstArray()->SetTypeId(GetTypeId());
-        clone->CastToLoadConstArray()->SetMethod(GetMethod());
-        return clone;
-    }
-};
-
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class FillConstArrayInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin, public ImmediateMixin {
-public:
-    DECLARE_INST(FillConstArrayInst);
-    using Base = NeedBarrierMixin<FixedInputsInst2>;
-    using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        return index == 0 ? DataType::REFERENCE : DataType::NO_TYPE;
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToFillConstArray()->SetTypeId(GetTypeId());
-        clone->CastToFillConstArray()->SetMethod(GetMethod());
-        clone->CastToFillConstArray()->SetImm(GetImm());
-        return clone;
-    }
-};
-
-/**
- * Checkcast
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class CheckCastInst : public OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>,
-                      public TypeIdMixin {
-public:
-    DECLARE_INST(CheckCastInst);
-    using Base = OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>;
-    using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 3U);
-        if (index < 2U) {
-            return DataType::REFERENCE;
-        }
-        return DataType::NO_TYPE;
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToCheckCast()->SetTypeId(GetTypeId());
-        clone->CastToCheckCast()->SetMethod(GetMethod());
-        clone->CastToCheckCast()->SetClassType(GetClassType());
-        clone->CastToCheckCast()->SetOmitNullCheck(GetOmitNullCheck());
-        return clone;
-    }
-};
-
-/**
- * Is instance
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class IsInstanceInst : public OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>,
-                       public TypeIdMixin {
-public:
-    DECLARE_INST(IsInstanceInst);
-    using Base = OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>;
-    using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 3U);
-        if (index < 2U) {
-            return DataType::REFERENCE;
-        }
-        return DataType::NO_TYPE;
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToIsInstance()->SetTypeId(GetTypeId());
-        clone->CastToIsInstance()->SetMethod(GetMethod());
-        clone->CastToIsInstance()->SetClassType(GetClassType());
-        clone->CastToIsInstance()->SetOmitNullCheck(GetOmitNullCheck());
-        return clone;
-    }
-};
-
-/**
- * Load data from constant pool.
- */
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadFromPool : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
-    DECLARE_INST(LoadFromPool);
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -4711,160 +2660,11 @@ public:
 };
 
 /**
- * Initialization or loading of the class.
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ClassInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
-public:
-    DECLARE_INST(ClassInst);
-    using Base = NeedBarrierMixin<FixedInputsInst1>;
-    using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        static_cast<ClassInst *>(clone)->SetTypeId(GetTypeId());
-        static_cast<ClassInst *>(clone)->SetMethod(GetMethod());
-        static_cast<ClassInst *>(clone)->SetClass(GetClass());
-        return clone;
-    }
-
-    RuntimeInterface::ClassPtr GetClass() const
-    {
-        return klass_;
-    }
-
-    void SetClass(RuntimeInterface::ClassPtr klass)
-    {
-        klass_ = klass;
-    }
-
-private:
-    RuntimeInterface::ClassPtr klass_ {nullptr};
-};
-
-/**
- * Get class pointer from the specific source.
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ClassImmediateInst : public Inst {
-public:
-    DECLARE_INST(ClassImmediateInst);
-    using Base = Inst;
-    using Base::Base;
-
-    ClassImmediateInst(Opcode opcode, DataType::Type type, uint32_t pc, RuntimeInterface::ClassPtr cls)
-        : Base(opcode, type, pc), class_(cls)
-    {
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = Inst::Clone(targetGraph);
-        clone->CastToClassImmediate()->class_ = class_;
-        return clone;
-    }
-
-    RuntimeInterface::ClassPtr GetClassPtr() const
-    {
-        return class_;
-    }
-
-    void DumpOpcode(std::ostream * /* unused */) const override;
-
-private:
-    RuntimeInterface::ClassPtr class_ {nullptr};
-};
-
-/**
- * Select instruction
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class SelectInst : public ConditionMixin<InstWithOperandsType<FixedInputsInst<4U>>> {
-public:
-    DECLARE_INST(SelectInst);
-    using Base = ConditionMixin<InstWithOperandsType<FixedInputsInst<4U>>>;
-    using Base::Base;
-
-    SelectInst(Opcode opcode, DataType::Type type, uint32_t pc, ConditionCode cc) : Base(opcode, type, pc)
-    {
-        SetCc(cc);
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        if (index < 2U) {
-            return GetType();
-        }
-        return GetOperandsType();
-    }
-
-    void DumpOpcode(std::ostream * /* unused */) const override;
-    void SetVnObject(VnObject *vn_obj) override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToSelect()->SetCc(GetCc());
-        clone->CastToSelect()->SetOperandsType(GetOperandsType());
-        return clone;
-    }
-};
-
-/**
- * SelectImm with comparison with immediate
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class SelectImmInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst3>>, public ImmediateMixin {
-public:
-    DECLARE_INST(SelectImmInst);
-    using Base = InstWithOperandsType<ConditionMixin<FixedInputsInst3>>;
-    using Base::Base;
-
-    SelectImmInst(Opcode opcode, DataType::Type type, uint32_t pc, ConditionCode cc, uint64_t imm)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
-    {
-        SetCc(cc);
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        if (index < 2U) {
-            return GetType();
-        }
-        return GetOperandsType();
-    }
-
-    void DumpOpcode(std::ostream * /* unused */) const override;
-    bool DumpInputs(std::ostream * /* unused */) const override;
-    void SetVnObject(VnObject *vn_obj) override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToSelectImm()->SetCc(GetCc());
-        clone->CastToSelectImm()->SetImm(GetImm());
-        clone->CastToSelectImm()->SetOperandsType(GetOperandsType());
-        return clone;
-    }
-};
-
-/**
  * Conditional jump instruction
  */
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class IfInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst2>> {
 public:
-    DECLARE_INST(IfInst);
     using Base = InstWithOperandsType<ConditionMixin<FixedInputsInst2>>;
     using Base::Base;
 
@@ -4883,14 +2683,7 @@ public:
 
     void SetVnObject(VnObject *vn_obj) override;
 
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        static_cast<IfInst *>(clone)->SetCc(GetCc());
-        static_cast<IfInst *>(clone)->SetOperandsType(GetOperandsType());
-        static_cast<IfInst *>(clone)->SetMethod(GetMethod());
-        return clone;
-    }
+    Inst *Clone(const Graph *targetGraph) const override;
 
     void SetMethod(RuntimeInterface::MethodPtr method)
     {
@@ -4912,7 +2705,6 @@ private:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class IfImmInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst1>>, public ImmediateMixin {
 public:
-    DECLARE_INST(IfImmInst);
     using Base = InstWithOperandsType<ConditionMixin<FixedInputsInst1>>;
     using Base::Base;
 
@@ -4961,255 +2753,10 @@ private:
 };
 
 /**
- * Load element from a pair of values, using index as immediate
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadPairPartInst : public FixedInputsInst1, public ImmediateMixin {
-public:
-    DECLARE_INST(LoadPairPartInst);
-    using FixedInputsInst1::FixedInputsInst1;
-
-    explicit LoadPairPartInst(Opcode opcode, uint64_t imm) : FixedInputsInst1(opcode), ImmediateMixin(imm) {}
-
-    uint32_t GetSrcRegIndex() const override
-    {
-        return GetImm();
-    }
-
-    bool DumpInputs(std::ostream * /* out */) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToLoadPairPart()->SetImm(GetImm());
-        return clone;
-    }
-
-    uint32_t Latency() const override
-    {
-        return options.GetCompilerSchedLatencyLong();
-    }
-};
-
-/**
- * Load a pair of consecutive values from array
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadArrayPairInst : public NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>> {
-public:
-    DECLARE_INST(LoadArrayPairInst);
-    using Base = NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>>;
-    using Base::Base;
-
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
-    Inst *GetIndex()
-    {
-        return GetInput(1).GetInst();
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph)->CastToLoadArrayPair();
-#ifndef NDEBUG
-        for (size_t i = 0; i < GetDstCount(); ++i) {
-            clone->SetDstReg(i, GetDstReg(i));
-        }
-#endif
-        return clone;
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case 0:
-                return DataType::REFERENCE;
-            case 1:
-                return DataType::INT32;
-            default:
-                return DataType::NO_TYPE;
-        }
-    }
-
-    uint32_t Latency() const override
-    {
-        return 0;
-    }
-};
-
-/**
- * Store a pair of consecutive values to array
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreArrayPairInst : public NeedBarrierMixin<FixedInputsInst<4U>> {
-public:
-    DECLARE_INST(StoreVectorInst);
-    using Base = NeedBarrierMixin<FixedInputsInst<4U>>;
-    using Base::Base;
-
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
-    Inst *GetIndex()
-    {
-        return GetInput(1).GetInst();
-    }
-    Inst *GetStoredValue(uint64_t index)
-    {
-        return GetInput(2U + index).GetInst();
-    }
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case 0:
-                return DataType::REFERENCE;
-            case 1:
-                return DataType::INT32;
-            case 2U:
-            case 3U:
-                return GetType();
-            default:
-                return DataType::NO_TYPE;
-        }
-    }
-
-    // StoreArrayPair call barriers twice,so we need to save input register for second call
-    bool IsPropagateLiveness() const override
-    {
-        return GetType() == DataType::REFERENCE;
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-};
-
-/**
- * Load a pair of consecutive values from array, using array index as immediate
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadArrayPairInstI : public NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>, public ImmediateMixin {
-public:
-    DECLARE_INST(LoadArrayPairInstI);
-    using Base = NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>;
-    using Base::Base;
-
-    explicit LoadArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-    bool DumpInputs(std::ostream * /* out */) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph)->CastToLoadArrayPairI();
-        clone->SetImm(GetImm());
-#ifndef NDEBUG
-        for (size_t i = 0; i < GetDstCount(); ++i) {
-            clone->SetDstReg(i, GetDstReg(i));
-        }
-#endif
-        return clone;
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        if (index == 0) {
-            return DataType::REFERENCE;
-        }
-        return DataType::NO_TYPE;
-    }
-
-    uint32_t Latency() const override
-    {
-        return 0;
-    }
-};
-
-/**
- * Store a pair of consecutive values to array, using array index as immediate
- */
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreArrayPairInstI : public NeedBarrierMixin<FixedInputsInst3>, public ImmediateMixin {
-public:
-    DECLARE_INST(StoreArrayPairInstI);
-    using Base = NeedBarrierMixin<FixedInputsInst3>;
-    using Base::Base;
-
-    explicit StoreArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
-    Inst *GetFirstValue()
-    {
-        return GetInput(1).GetInst();
-    }
-    Inst *GetSecondValue()
-    {
-        return GetInput(2U).GetInst();
-    }
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case 0:
-                return DataType::REFERENCE;
-            case 1:
-            case 2U:
-                return GetType();
-            default:
-                return DataType::NO_TYPE;
-        }
-    }
-
-    // StoreArrayPairI call barriers twice,so we need to save input register for second call
-    bool IsPropagateLiveness() const override
-    {
-        return GetType() == DataType::REFERENCE;
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
-    bool DumpInputs(std::ostream * /* out */) const override;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToStoreArrayPairI()->SetImm(GetImm());
-        return clone;
-    }
-};
-
-/**
  * CatchPhiInst instruction
  */
 class CatchPhiInst : public DynamicInputsInst {
 public:
-    DECLARE_INST(CatchPhiInst);
     using DynamicInputsInst::DynamicInputsInst;
 
     const ArenaVector<const Inst *> *GetThrowableInsts() const
@@ -5256,7 +2803,6 @@ private:
 
 class TryInst : public FixedInputsInst0 {
 public:
-    DECLARE_INST(TryInst);
     using FixedInputsInst0::FixedInputsInst0;
 
     void AppendCatchTypeId(uint32_t id, uint32_t catch_edge_index);
@@ -5295,210 +2841,6 @@ private:
 };
 
 TryInst *GetTryBeginInst(const BasicBlock *try_begin_bb);
-
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class DeoptimizeInst : public DeoptimizeTypeMixin<FixedInputsInst1> {
-public:
-    DECLARE_INST(DeoptimizeInst);
-    using Base = DeoptimizeTypeMixin<FixedInputsInst1>;
-    using Base::Base;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToDeoptimize()->SetDeoptimizeType(GetDeoptimizeType());
-        return clone;
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-};
-
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class DeoptimizeIfInst : public DeoptimizeTypeMixin<FixedInputsInst2> {
-    DECLARE_INST(DeoptimizeInst);
-    using Base = DeoptimizeTypeMixin<FixedInputsInst2>;
-
-public:
-    using Base::Base;
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst::Clone(targetGraph);
-        clone->CastToDeoptimizeIf()->SetDeoptimizeType(GetDeoptimizeType());
-        return clone;
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case 0:
-                return GetInput(0).GetInst()->GetType();
-            case 1:
-                return DataType::NO_TYPE;
-            default:
-                UNREACHABLE();
-        }
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-};
-
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class DeoptimizeCompareInst : public InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst3>>> {
-public:
-    DECLARE_INST(DeoptimizeCompareInst);
-    using Base = InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst3>>>;
-    using Base::Base;
-
-    explicit DeoptimizeCompareInst(Opcode opcode, const DeoptimizeIfInst *deoptIf, const CompareInst *compare)
-        : Base(opcode, deoptIf->GetType(), deoptIf->GetPc())
-    {
-        SetDeoptimizeType(deoptIf->GetDeoptimizeType());
-        SetOperandsType(compare->GetOperandsType());
-        SetCc(compare->GetCc());
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst3::Clone(targetGraph);
-        clone->CastToDeoptimizeCompare()->SetDeoptimizeType(GetDeoptimizeType());
-        clone->CastToDeoptimizeCompare()->SetOperandsType(GetOperandsType());
-        clone->CastToDeoptimizeCompare()->SetCc(GetCc());
-        return clone;
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case 0:
-            case 1:
-                return GetInput(index).GetInst()->GetType();
-            case 2U:
-                return DataType::NO_TYPE;
-            default:
-                UNREACHABLE();
-        }
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-};
-
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class DeoptimizeCompareImmInst : public InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst2>>>,
-                                 public ImmediateMixin {
-public:
-    DECLARE_INST(DeoptimizeCompareImmInst);
-    using Base = InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst2>>>;
-    using Base::Base;
-
-    explicit DeoptimizeCompareImmInst(Opcode opcode, const DeoptimizeIfInst *deoptIf, const CompareInst *compare,
-                                      uint64_t imm)
-        : Base(opcode, deoptIf->GetType(), deoptIf->GetPc()), ImmediateMixin(imm)
-    {
-        SetDeoptimizeType(deoptIf->GetDeoptimizeType());
-        SetOperandsType(compare->GetOperandsType());
-        SetCc(compare->GetCc());
-    }
-
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst2::Clone(targetGraph);
-        clone->CastToDeoptimizeCompareImm()->SetDeoptimizeType(GetDeoptimizeType());
-        clone->CastToDeoptimizeCompareImm()->SetOperandsType(GetOperandsType());
-        clone->CastToDeoptimizeCompareImm()->SetCc(GetCc());
-        clone->CastToDeoptimizeCompareImm()->SetImm(GetImm());
-        return clone;
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        switch (index) {
-            case 0:
-                return GetInput(0).GetInst()->GetType();
-            case 1:
-                return DataType::NO_TYPE;
-            default:
-                UNREACHABLE();
-        }
-    }
-
-    void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream *out) const override;
-};
-
-class ThrowInst : public FixedInputsInst2 {
-public:
-    DECLARE_INST(ThrowInst);
-    using Base = FixedInputsInst2;
-    using Base::Base;
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        if (index == 0) {
-            return DataType::REFERENCE;
-        }
-        return DataType::NO_TYPE;
-    }
-};
-
-class BinaryOverflowInst : public IfInst {
-public:
-    DECLARE_INST(BinaryOverflowInst);
-    using Base = IfInst;
-    using Base::Base;
-
-    BinaryOverflowInst(Opcode opcode, DataType::Type type, uint32_t pc, ConditionCode cc) : Base(opcode, type, pc, cc)
-    {
-        SetOperandsType(type);
-    }
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        return GetType();
-    }
-
-    DataType::Type GetOperandsType() const override
-    {
-        return GetType();
-    }
-};
-
-inline bool IsVolatileMemInst(Inst *inst)
-{
-    switch (inst->GetOpcode()) {
-        case Opcode::LoadObject:
-            return inst->CastToLoadObject()->GetVolatile();
-        case Opcode::StoreObject:
-            return inst->CastToStoreObject()->GetVolatile();
-        case Opcode::LoadStatic:
-            return inst->CastToLoadStatic()->GetVolatile();
-        case Opcode::StoreStatic:
-            return inst->CastToStoreStatic()->GetVolatile();
-        case Opcode::UnresolvedLoadObject:
-        case Opcode::UnresolvedStoreObject:
-        case Opcode::UnresolvedLoadStatic:
-        case Opcode::UnresolvedStoreStatic:
-            return true;
-        default:
-            return false;
-    }
-}
-
-// Check if instruction is pseudo-user for mutli-output instruction
-inline bool IsPseudoUserOfMultiOutput(Inst *inst)
-{
-    switch (inst->GetOpcode()) {
-        case Opcode::LoadPairPart:
-            return true;
-        default:
-            return false;
-    }
-}
 
 template <typename InstType, typename... Args>
 InstType *Inst::New(ArenaAllocator *allocator, Args &&... args)

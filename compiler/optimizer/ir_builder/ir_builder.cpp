@@ -48,8 +48,8 @@ bool IrBuilder::RunImpl()
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->RunPass<LoopAnalyzer>();
 
-    InstBuilder inst_builder(GetGraph(), GetMethod(), caller_inst_);
-    inst_builder.Prepare(is_inlined_graph_);
+    InstBuilder inst_builder(GetGraph(), GetMethod());
+    inst_builder.Prepare();
     inst_defs_.resize(vregs_count);
     COMPILER_LOG(INFO, IR_BUILDER) << "Start instructions building...";
     for (auto bb : GetGraph()->GetBlocksRPO()) {
@@ -115,14 +115,6 @@ bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *inst_builder, const
 {
     inst_builder->SetCurrentBlock(bb);
     inst_builder->UpdateDefs();
-
-    if (bb->IsLoopPreHeader() && !GetGraph()->IsOsrMode()) {
-        ASSERT(bb->GetGuestPc() != INVALID_PC);
-        auto ss = inst_builder->CreateSaveStateDeoptimize(bb->GetGuestPc());
-        bb->AppendInst(ss);
-        COMPILER_LOG(DEBUG, IR_BUILDER) << "Create save state deoptimize: " << *ss;
-    }
-
     ASSERT(bb->GetGuestPc() != INVALID_PC);
     // If block is not in the `blocks_` vector, it's auxiliary block without instructions
     if (bb == blocks_[bb->GetGuestPc()]) {
@@ -181,9 +173,6 @@ void IrBuilder::ProcessThrowableInstructions(InstBuilder *inst_builder, Inst *th
     for (; throwable_inst != nullptr; throwable_inst = throwable_inst->GetNext()) {
         if (throwable_inst->IsSaveState()) {
             continue;
-        }
-        if (throwable_inst->IsCheck()) {
-            throwable_inst = throwable_inst->GetFirstUser()->GetInst();
         }
         COMPILER_LOG(DEBUG, IR_BUILDER) << "Throwable inst, Id = " << throwable_inst->GetId();
         catch_handlers_.clear();
@@ -279,17 +268,9 @@ void IrBuilder::CreateTryCatchBoundariesBlocks()
     panda_file::CodeDataAccessor cda(*panda_file, mda.GetCodeId().value());
 
     cda.EnumerateTryBlocks([this](panda_file::CodeDataAccessor::TryBlock &try_block) {
-        auto start_pc = try_block.GetStartPc();
-        auto end_pc = start_pc + try_block.GetLength();
-        auto try_info = InsertTryBlockInfo({start_pc, end_pc});
-        try_block.EnumerateCatchBlocks([this, try_info](panda_file::CodeDataAccessor::CatchBlock &catch_block) {
+        try_block.EnumerateCatchBlocks([this](panda_file::CodeDataAccessor::CatchBlock &catch_block) {
             auto pc = catch_block.GetHandlerPc();
             catches_pc_.insert(pc);
-            auto type_idx = catch_block.GetTypeIdx();
-            auto type_id = type_idx == panda_file::INVALID_INDEX
-                               ? 0
-                               : GetGraph()->GetRuntime()->ResolveTypeIndex(GetMethod(), type_idx);
-            try_info->catches->emplace_back(CatchCodeBlock {pc, type_id});
             return true;
         });
 

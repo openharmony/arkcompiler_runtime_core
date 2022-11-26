@@ -15,11 +15,10 @@
 
 #include "inst_builder.h"
 #include "phi_resolver.h"
-#include "optimizer/code_generator/encode.h"
 #include "compiler_logger.h"
 
 namespace panda::compiler {
-void InstBuilder::Prepare(bool is_inlined_graph)
+void InstBuilder::Prepare()
 {
     SetCurrentBlock(GetGraph()->GetStartBlock());
 #ifndef PANDA_TARGET_WINDOWS
@@ -29,7 +28,7 @@ void InstBuilder::Prepare(bool is_inlined_graph)
     // Create Parameter instructions for all arguments
     for (size_t i = 0; i < num_args; i++) {
         auto param_inst = GetGraph()->AddNewParameter(i);
-        auto type = GetCurrentMethodArgumentType(i);
+        auto type = DataType::Type::ANY;
         auto reg_num = GetRuntime()->GetMethodRegistersCount(GetMethod()) + i;
         ASSERT(!GetGraph()->IsBytecodeOptimizer() || reg_num != INVALID_REG);
 
@@ -159,10 +158,6 @@ void InstBuilder::SetParamSpillFill(Graph *graph, ParameterInst *param_inst, siz
         }
 
         param_inst->SetLocationData({LocationType::REGISTER, LocationType::REGISTER, reg_src, reg_src, reg_type});
-    } else {
-#ifndef PANDA_TARGET_WINDOWS
-        param_inst->SetLocationData(graph->GetDataForNativeParam(type));
-#endif
     }
 }
 
@@ -269,66 +264,12 @@ void InstBuilder::FixInstructions()
 
 SaveStateInst *InstBuilder::CreateSaveState(Opcode opc, size_t pc)
 {
-    ASSERT(opc == Opcode::SaveState || opc == Opcode::SafePoint || opc == Opcode::SaveStateOsr ||
-           opc == Opcode::SaveStateDeoptimize);
-    SaveStateInst *inst;
-    bool without_numeric_inputs = false;
-    auto live_vergs_count =
-        std::count_if(current_defs_->begin(), current_defs_->end(), [](Inst *p) { return p != nullptr; });
-    if (opc == Opcode::SaveState) {
-        inst = GetGraph()->CreateInstSaveState();
-    } else if (opc == Opcode::SaveStateOsr) {
-        inst = GetGraph()->CreateInstSaveStateOsr();
-    } else if (opc == Opcode::SafePoint) {
-        inst = GetGraph()->CreateInstSafePoint();
-        without_numeric_inputs = true;
-    } else {
-        inst = GetGraph()->CreateInstSaveStateDeoptimize();
-    }
-    inst->SetCallerInst(caller_inst_);
-
+    ASSERT(opc == Opcode::SaveState);
+    SaveStateInst *inst = GetGraph()->CreateInstSaveState();
     inst->SetPc(pc);
     inst->SetMethod(GetMethod());
-    if (GetGraph()->IsBytecodeOptimizer()) {
-        inst->ReserveInputs(0);
-        return inst;
-    }
-    inst->ReserveInputs(live_vergs_count);
-
-    VirtualRegister::ValueType reg_idx = 0;
-    for (auto def_inst : *current_defs_) {
-        if (def_inst != nullptr && (!without_numeric_inputs || !DataType::IsTypeNumeric(def_inst->GetType()))) {
-            auto input_idx {inst->AppendInput(def_inst)};
-            inst->SetVirtualRegister(input_idx, VirtualRegister(reg_idx, reg_idx == VREGS_AND_ARGS_COUNT));
-        }
-        ++reg_idx;
-    }
+    inst->ReserveInputs(0);
     return inst;
-}
-
-DataType::Type InstBuilder::GetCurrentMethodReturnType() const
-{
-    return GetRuntime()->GetMethodReturnType(GetMethod());
-}
-
-DataType::Type InstBuilder::GetCurrentMethodArgumentType(size_t index) const
-{
-    return GetRuntime()->GetMethodTotalArgumentType(GetMethod(), index);
-}
-
-size_t InstBuilder::GetCurrentMethodArgumentsCount() const
-{
-    return GetRuntime()->GetMethodTotalArgumentsCount(GetMethod());
-}
-
-DataType::Type InstBuilder::GetMethodReturnType(uintptr_t id) const
-{
-    return GetRuntime()->GetMethodReturnType(GetMethod(), id);
-}
-
-DataType::Type InstBuilder::GetMethodArgumentType(uintptr_t id, size_t index) const
-{
-    return GetRuntime()->GetMethodArgumentType(GetMethod(), id, index);
 }
 
 size_t InstBuilder::GetMethodArgumentsCount(uintptr_t id) const

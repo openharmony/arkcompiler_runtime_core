@@ -220,7 +220,6 @@ config("ark_config") {
 }
 
 plugins_yamls = []
-runtime_options_yamls = []
 foreach(plugin, enabled_plugins) {
   plugin_dir = "$ark_root/plugins/$plugin"
   source_files = read_file("$plugin_dir/subproject_sources.gn", "scope")
@@ -229,24 +228,14 @@ foreach(plugin, enabled_plugins) {
     plugins_yamls += [ "$plugin_dir/${source_files.option_yaml_path}" ]
   }
 
-  if (defined(source_files.runtime_option_yaml_path)) {
-    runtime_options_yamls +=
-        [ "$plugin_dir/${source_files.runtime_option_yaml_path}" ]
-  }
-
   source_files = {
   }
 }
 
-entrypoints_yamls = []
-foreach(plugin, enabled_plugins) {
-  plugin_dir = "$ark_root/plugins/$plugin"
-  source_files = read_file("$plugin_dir/subproject_sources.gn", "scope")
-  if (defined(source_files.entrypoints_yaml_path)) {
-    entrypoints_yamls += [ "$plugin_dir/${source_files.entrypoints_yaml_path}" ]
-  }
-  source_files = {
-  }
+concat_yamls("concat_plugins_yamls") {
+  output_file = "$target_gen_dir/plugin_options.yaml"
+  default_file = "$ark_root/templates/plugin_options.yaml"
+  add_yamls = plugins_yamls
 }
 
 inst_templates_yamls = []
@@ -261,27 +250,10 @@ foreach(plugin, enabled_plugins) {
   }
 }
 
-concat_yamls("concat_plugins_yamls") {
-  output_file = "$target_gen_dir/plugin_options.yaml"
-  default_file = "$ark_root/templates/plugin_options.yaml"
-  add_yamls = plugins_yamls
-}
-
-concat_yamls("concat_entrypoints_yamls") {
-  output_file = "$target_gen_dir/runtime/entrypoints.yaml"
-  default_file = "$ark_root/runtime/entrypoints/entrypoints.yaml"
-  add_yamls = entrypoints_yamls
-}
-
 concat_yamls("concat_inst_templates_yamls") {
   output_file = "$target_gen_dir/compiler/generated/inst_templates.yaml"
   default_file = "$ark_root/compiler/optimizer/ir_builder/inst_templates.yaml"
   add_yamls = inst_templates_yamls
-}
-
-merge_yamls("merge_runtime_options_yamls") {
-  output_file = "$target_gen_dir/runtime_options.yaml"
-  add_yamls = [ "$ark_root/runtime/options.yaml" ] + runtime_options_yamls
 }
 
 if (!ark_standalone_build) {
@@ -321,8 +293,6 @@ if (!ark_standalone_build) {
       "$ark_root/libpandabase/tests:unittest",
       "$ark_root/libpandafile/tests:unittest",
       "$ark_root/libziparchive/tests:unittest",
-      "$ark_root/plugins/ecmascript/tests:unittest",
-      "$ark_root/runtime/tests:unittest",
     ]
   }
 
@@ -332,8 +302,6 @@ if (!ark_standalone_build) {
       "$ark_root/libpandabase/tests:host_unittest",
       "$ark_root/libpandafile/tests:host_unittest",
       "$ark_root/libziparchive/tests:host_unittest",
-      "$ark_root/plugins/ecmascript/tests:host_unittest",
-      "$ark_root/runtime/tests:host_unittest",
     ]
   }
 }

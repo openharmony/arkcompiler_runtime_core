@@ -47,6 +47,11 @@ constexpr std::size_t CALLEE_THRESHOLD = 2;
 
 constexpr Register VIRTUAL_FRAME_SIZE = INVALID_REG - 1U;
 
+constexpr Register INVALID_REG_ID = std::numeric_limits<Register>::max();
+constexpr Register ACC_REG_ID = INVALID_REG_ID - 1U;
+constexpr uint8_t MAX_NUM_REGS = 32;
+constexpr uint8_t MAX_NUM_VREGS = 32;
+
 using LifeNumber = uint32_t;
 constexpr auto INVALID_LIFE_NUMBER = std::numeric_limits<LifeNumber>::max();
 constexpr auto LIFE_NUMBER_GAP = 2U;

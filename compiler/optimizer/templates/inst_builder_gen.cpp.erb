@@ -161,8 +161,6 @@ end
 #include "bytecode_instruction.h"
 #include "bytecode_instruction-inl.h"
 #include "optimizer/ir_builder/inst_builder-inl.h"
-#include "include/coretypes/tagged_value.h"
-#include "irtoc_builder.cpp"
 
 namespace panda::compiler {
 
@@ -329,10 +327,6 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
 %       elsif param.reg?
             {
                 auto input = GetDefinition(bc_inst->GetVReg<<%= format %>, <%= vreg_index %>>());
-                // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-                if constexpr (with_speculative) {
-                    input = BuildAnyTypeCheckInst(GetPc(bc_inst->GetAddress()), input, inst_save_state);
-                }
                 inst->AppendInput(input);
                 inst->AddInputType(DataType::ANY);
             }
@@ -354,17 +348,6 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
 %         id16_index = id16_index + 1
 %       end
 %     end
-%     if need_newtarget
-            if (!GetGraph()->IsBytecodeOptimizer()) {
-                auto input = GetDefinition(GetGraph()->GetRuntime()->GetMethodRegistersCount(GetMethod()) + 1);
-                // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-                if constexpr (with_speculative) {
-                    input = BuildAnyTypeCheckInst(GetPc(bc_inst->GetAddress()), input, inst_save_state);
-                }
-                inst->AppendInput(input);
-                inst->AddInputType(DataType::ANY);
-            }
-%     end
 %     if is_range_call
 %           range_reg_idx = (name.include? "CREATEOBJECTWITHEXCLUDEDKEYS") ? 1 : 0
 %           imm_arg_num = has_ic_slot ? 'imm1' : 'imm0'
@@ -372,10 +355,6 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
             size_t start_reg = bc_inst->GetVReg<<%= format %>, <%= range_reg_idx %>>();
             for (uint32_t i = 1; i < <%= num_actual_vregs %>; ++i) {
                 auto input = GetDefinition(start_reg + i);
-                // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-                if constexpr (with_speculative) {
-                    input = BuildAnyTypeCheckInst(GetPc(bc_inst->GetAddress()), input, inst_save_state);
-                }
                 inst->AppendInput(input);
                 inst->AddInputType(DataType::ANY);
             }
@@ -383,10 +362,6 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
 %     if acc_read
             {
                 auto input = GetDefinitionAcc();
-                // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-                if constexpr (with_speculative) {
-                    input = BuildAnyTypeCheckInst(GetPc(bc_inst->GetAddress()), input, inst_save_state);
-                }
                 inst->AppendInput(input);
                 inst->AddInputType(DataType::ANY);
                 inst->SetFlag(compiler::inst_flags::ACC_READ);

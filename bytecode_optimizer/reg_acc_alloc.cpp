@@ -88,14 +88,6 @@ bool RegAccAlloc::IsAccRead(compiler::Inst *inst) const
     return UNLIKELY(inst->IsPhi()) ? IsPhiOptimizable(inst) : inst->IsAccRead();
 }
 
-bool UserNeedSwapInputs(compiler::Inst *inst, compiler::Inst *user)
-{
-    if (!user->IsCommutative()) {
-        return false;
-    }
-    return user->GetInput(AccReadIndex(user)).GetInst() != inst;
-}
-
 /**
  * Return true if instruction can write the accumulator.
  */
@@ -164,21 +156,13 @@ bool RegAccAlloc::IsPhiAccReady(compiler::Inst *phi) const
         }
     }
 
-    std::unordered_set<compiler::Inst *> users_that_required_swap_inputs;
     for (auto &user : phi->GetUsers()) {
         compiler::Inst *uinst = user.GetInst();
 
         if (!CanUserReadAcc(phi, uinst)) {
             return false;
         }
-        if (UserNeedSwapInputs(phi, uinst)) {
-            users_that_required_swap_inputs.insert(uinst);
-        }
     }
-    for (auto uinst : users_that_required_swap_inputs) {
-        uinst->SwapInputs();
-    }
-
     return true;
 }
 
@@ -223,20 +207,8 @@ bool RegAccAlloc::RunImpl()
             }
             for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
                 inst->SetSrcReg(i, compiler::INVALID_REG);
-                if ((inst->GetOpcode() == compiler::Opcode::LoadObject) || (inst->IsConst())) {
+                if (inst->IsConst()) {
                     inst->SetDstReg(compiler::INVALID_REG);
-                }
-            }
-        }
-    }
-
-    // Drop the pass if the function contains unsupported opcodes
-    // TODO(rtakacs): support these opcodes.
-    if (!GetGraph()->IsDynamicMethod()) {
-        for (auto block : GetGraph()->GetBlocksRPO()) {
-            for (auto inst : block->AllInsts()) {
-                if (inst->GetOpcode() == compiler::Opcode::Builtin) {
-                    return false;
                 }
             }
         }
@@ -260,28 +232,21 @@ bool RegAccAlloc::RunImpl()
 
             bool use_acc_dst_reg = true;
 
-            std::unordered_set<compiler::Inst *> users_that_required_swap_inputs;
             for (auto &user : inst->GetUsers()) {
                 compiler::Inst *uinst = user.GetInst();
                 if (uinst->IsSaveState()) {
                     continue;
                 }
                 if (CanUserReadAcc(inst, uinst)) {
-                    if (UserNeedSwapInputs(inst, uinst)) {
-                        users_that_required_swap_inputs.insert(uinst);
-                    }
                     SetNeedLda(uinst, false);
                 } else {
                     use_acc_dst_reg = false;
                 }
             }
-            for (auto uinst : users_that_required_swap_inputs) {
-                uinst->SwapInputs();
-            }
 
             if (use_acc_dst_reg) {
                 inst->SetDstReg(compiler::ACC_REG_ID);
-            } else if ((inst->GetOpcode() == compiler::Opcode::LoadObject) || inst->IsConst()) {
+            } else if (inst->IsConst()) {
                 inst->ClearFlag(compiler::inst_flags::ACC_WRITE);
                 for (auto &user : inst->GetUsers()) {
                     compiler::Inst *uinst = user.GetInst();
@@ -308,7 +273,7 @@ bool RegAccAlloc::RunImpl()
                 input->SetDstReg(compiler::INVALID_REG);
                 SetNeedLda(inst, true);
 
-                if ((input->GetOpcode() == compiler::Opcode::LoadObject) || (input->IsConst())) {
+                if (input->IsConst()) {
                     input->ClearFlag(compiler::inst_flags::ACC_WRITE);
                     for (auto &user : input->GetUsers()) {
                         compiler::Inst *uinst = user.GetInst();

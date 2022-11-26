@@ -106,10 +106,7 @@ public:
 
     static void VisitIf(GraphVisitor *v, Inst *inst_base);
     static void VisitIfImm(GraphVisitor *v, Inst *inst_base);
-    static void VisitCast(GraphVisitor *v, Inst *inst_base);
     static void IfImmZero(GraphVisitor *v, Inst *inst_base);
-    static void IfImmNonZero(GraphVisitor *v, Inst *inst_base);
-    static void IfImm64(GraphVisitor *v, Inst *inst_base);
     static void VisitIntrinsic(GraphVisitor *v, Inst *inst_base);
     static void VisitLoadString(GraphVisitor *v, Inst *inst_base);
     static void VisitReturn(GraphVisitor *v, Inst *inst_base);
