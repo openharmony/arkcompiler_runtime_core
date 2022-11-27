@@ -42,6 +42,8 @@ host_unittest_action("LibPandaFileTest") {
     "//third_party/googletest:gmock_main",
     sdk_libc_secshared_dep,
   ]
+
+  cflags = [ "-DWITH_MOCK" ]
 }
 
 group("unittest") {
