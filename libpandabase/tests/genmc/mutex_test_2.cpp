@@ -71,6 +71,7 @@ HWTEST(FMutexTest, TryLockTest, testing::ext::TestSize.Level0)
     }
 
     ASSERT_TRUE(MutexTryLockWithSpinning(&g_x));
+    MutexUnlock(&g_x);
 
     MutexDestroy(&g_x);
     ASSERT_FALSE(MutexDoNotCheckOnDeadlock());
