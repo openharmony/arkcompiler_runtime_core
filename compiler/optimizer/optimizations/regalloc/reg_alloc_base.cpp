@@ -27,7 +27,7 @@
 namespace panda::compiler {
 
 RegAllocBase::RegAllocBase(Graph *graph)
-    : RegAllocBase(graph, graph->GetArchUsedRegs(), graph->GetArchUsedVRegs(), MAX_NUM_STACK_SLOTS)
+    : RegAllocBase(graph, 0, 0, MAX_NUM_STACK_SLOTS)
 {
 }
 
@@ -84,11 +84,6 @@ bool RegAllocBase::RunImpl()
 // Call required passes (likely will be the same)
 bool RegAllocBase::Prepare()
 {
-    // Set rzero is used for dynamic mask
-    if (auto rzero = GetGraph()->GetZeroReg(); rzero != INVALID_REG) {
-        GetRegMask().Set(rzero);
-    }
-
     // Apply pre-allocated registers on construction
     GetGraph()->InitUsedRegs<DataType::INT64>(&GetRegMask().GetVector());
     GetGraph()->InitUsedRegs<DataType::FLOAT64>(&GetVRegMask().GetVector());
@@ -197,7 +192,7 @@ void RegAllocBase::SetPreassignedRegisters(LifeIntervals *interval)
     }
 
     if (inst->IsZeroRegInst()) {
-        interval->SetPreassignedReg(GetGraph()->GetZeroReg());
+        interval->SetPreassignedReg(INVALID_REG);
     }
 }
 
@@ -207,9 +202,7 @@ bool RegAllocBase::PrepareIntervals()
     for (auto interval : la.GetLifeIntervals()) {
         if (!interval->IsPhysical()) {
             [[maybe_unused]] auto inst = interval->GetInst();
-            ASSERT(inst->IsPhi() || inst->IsCatchPhi() || la.GetInstByLifeNumber(interval->GetBegin()) == inst ||
-                   (IsPseudoUserOfMultiOutput(inst) &&
-                    la.GetInstByLifeNumber(interval->GetBegin()) == inst->GetInput(0).GetInst()));
+            ASSERT(inst->IsPhi() || inst->IsCatchPhi() || la.GetInstByLifeNumber(interval->GetBegin()) == inst);
             SetType(interval);
             SetPreassignedRegisters(interval);
         }
@@ -247,9 +240,6 @@ size_t RegAllocBase::GetTotalSlotsCount()
     auto param_slots = GetGraph()->GetStackSlotsCount();
     auto spill_slots_count = GetStackMask().GetUsedCount();
     size_t lang_ext_slots = 0U;
-    if (GetGraph()->GetArch() != Arch::NONE) {
-        lang_ext_slots = GetGraph()->GetRuntime()->GetLanguageExtensionSize() / PointerSize(GetGraph()->GetArch());
-    }
 
     GetGraph()->SetExtSlotsStart(param_slots + spill_slots_count);
     COMPILER_LOG(INFO, REGALLOC) << "Call parameters slots: " << param_slots;

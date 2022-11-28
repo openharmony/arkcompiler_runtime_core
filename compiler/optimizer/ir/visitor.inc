@@ -42,13 +42,6 @@ void VisitBlock(BasicBlock* bb) override {
 void VisitInstruction(Inst* inst) override {
     TABLE[static_cast<unsigned>(inst->GetOpcode())](this, inst);
 }
-void VisitGraphGrouped() override {
-    for (auto& bb : GetBlocksToVisit()) {
-        for (auto inst : bb->AllInsts()) {
-            inst->Accept(this);
-        }
-    }
-}
 
 private:
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)

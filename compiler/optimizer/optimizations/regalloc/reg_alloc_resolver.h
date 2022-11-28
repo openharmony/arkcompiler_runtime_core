@@ -44,8 +44,6 @@ private:
      * SaveStateInst's inputs were split between these users then SaveStateInst should be copied in
      * order to capture correct locations for each of its users.
      */
-    void ResolveSaveState(Inst *inst);
-
     void AddCatchPhiMoves(Inst *inst);
 
     Inst *SqueezeCatchPhiInputs(CatchPhiInst *catch_phi);

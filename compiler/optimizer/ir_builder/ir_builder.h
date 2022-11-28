@@ -66,9 +66,9 @@ class IrBuilder : public Optimization {
     };
 
 public:
-    explicit IrBuilder(Graph *graph) : IrBuilder(graph, graph->GetMethod(), nullptr) {}
+    explicit IrBuilder(Graph *graph) : IrBuilder(graph, graph->GetMethod()) {}
 
-    IrBuilder(Graph *graph, RuntimeInterface::MethodPtr method, CallInst *caller_inst)
+    IrBuilder(Graph *graph, RuntimeInterface::MethodPtr method)
         : Optimization(graph),
           blocks_(graph->GetLocalAllocator()->Adapter()),
           catches_pc_(graph->GetLocalAllocator()->Adapter()),
@@ -76,9 +76,7 @@ public:
           opened_try_blocks_(graph->GetLocalAllocator()->Adapter()),
           catch_handlers_(graph->GetLocalAllocator()->Adapter()),
           inst_defs_(graph->GetLocalAllocator()->Adapter()),
-          method_(method),
-          is_inlined_graph_(caller_inst != nullptr),
-          caller_inst_(caller_inst)
+          method_(method)
     {
     }
 
@@ -149,8 +147,6 @@ private:
     ArenaUnorderedSet<BasicBlock *> catch_handlers_;
     InstVector inst_defs_;
     RuntimeInterface::MethodPtr method_ = nullptr;
-    bool is_inlined_graph_ {false};
-    CallInst *caller_inst_ {nullptr};
 };
 
 }  // namespace panda::compiler

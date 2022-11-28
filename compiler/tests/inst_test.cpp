@@ -575,7 +575,6 @@ TEST_F(InstTest, Flags)
     ASSERT_TRUE(inst->IsLoad());
     inst->SetFlag(inst_flags::ALLOC);
     ASSERT_EQ(inst->GetFlagsMask(), initial_mask | inst_flags::ALLOC);
-    ASSERT_TRUE(inst->IsAllocation());
     inst->ClearFlag(inst_flags::LOAD);
     ASSERT_FALSE(inst->IsLoad());
     ASSERT_EQ(inst->GetFlagsMask(), (initial_mask | inst_flags::ALLOC) & ~inst_flags::LOAD);

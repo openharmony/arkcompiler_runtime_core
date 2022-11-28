@@ -24,20 +24,6 @@ public:
     template <typename Checker>
     void RunRegAllocatorsAndCheck(Graph *graph, Checker checker) const
     {
-        if (graph->GetCallingConvention() == nullptr) {
-            return;
-        }
-        auto graph_ls = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
-        ASSERT_TRUE(graph_ls->RunPass<RegAllocLinearScan>());
-        checker(graph_ls);
-
-        // RegAllocGraphColoring is not supported for AARCH32
-        if (GetGraph()->GetArch() == Arch::AARCH32) {
-            return;
-        }
-        auto graph_gc = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
-        ASSERT_TRUE(graph_gc->RunPass<RegAllocGraphColoring>());
-        checker(graph_gc);
     }
 
 protected:

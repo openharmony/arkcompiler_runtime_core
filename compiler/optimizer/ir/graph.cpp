@@ -16,19 +16,10 @@
 #include "graph.h"
 #include "basicblock.h"
 #include "inst.h"
-#include "bytecode_optimizer/bytecode_encoder.h"
-#include "optimizer/analysis/alias_analysis.h"
-#include "optimizer/analysis/bounds_analysis.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/rpo.h"
 #include "optimizer/analysis/linear_order.h"
 #include "optimizer/analysis/loop_analyzer.h"
-#if !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
-#include "optimizer/code_generator/callconv.h"
-#include "optimizer/code_generator/codegen.h"
-#include "optimizer/code_generator/encode.h"
-#include "optimizer/code_generator/registers_description.h"
-#endif
 
 namespace panda::compiler {
 static void MarkBlocksRec(Marker mrk, BasicBlock *block)
@@ -43,9 +34,6 @@ static void MarkBlocksRec(Marker mrk, BasicBlock *block)
 
 Graph::~Graph()
 {
-    if (encoder_ != nullptr) {
-        encoder_->~Encoder();
-    }
 }
 
 void Graph::RemoveUnreachableBlocks()
@@ -90,16 +78,6 @@ ParameterInst *Graph::AddNewParameter(uint16_t arg_number)
     ParameterInst *param = CreateInstParameter(arg_number);
     GetStartBlock()->AppendInst(param);
     return param;
-}
-
-Inst *Graph::GetOrCreateNullPtr()
-{
-    if (nullptr_inst_ == nullptr) {
-        nullptr_inst_ = CreateInstNullPtr();
-        nullptr_inst_->SetType(DataType::REFERENCE);
-        GetStartBlock()->AppendInst(nullptr_inst_);
-    }
-    return nullptr_inst_;
 }
 
 void Graph::RemoveConstFromList(ConstantInst *const_inst)
@@ -150,11 +128,6 @@ void Graph::AddBlock(BasicBlock *block, uint32_t id)
 }
 #endif
 
-const BoundsRangeInfo *Graph::GetBoundsRangeInfo() const
-{
-    return GetValidAnalysis<BoundsAnalysis>().GetBoundsRangeInfo();
-}
-
 const ArenaVector<BasicBlock *> &Graph::GetBlocksRPO() const
 {
     return GetValidAnalysis<Rpo>().GetBlocks();
@@ -173,11 +146,6 @@ void Graph::VisitAllInstructions(Callback callback)
             callback(inst);
         }
     }
-}
-
-AliasType Graph::CheckInstAlias(Inst *mem1, Inst *mem2)
-{
-    return GetValidAnalysis<AliasAnalysis>().CheckInstAlias(mem1, mem2);
 }
 
 BasicBlock *Graph::CreateEmptyBlock(uint32_t guest_pc)
@@ -267,8 +235,7 @@ void Graph::RemovePredecessors(BasicBlock *block, bool remove_last_inst)
         if (remove_last_inst && !pred->IsTryBegin() && !pred->IsTryEnd()) {
             if (pred->GetSuccsBlocks().size() == 2U) {
                 auto last = pred->GetLastInst();
-                ASSERT(last->GetOpcode() == Opcode::If || last->GetOpcode() == Opcode::IfImm ||
-                       last->GetOpcode() == Opcode::AddOverflow || last->GetOpcode() == Opcode::SubOverflow);
+                ASSERT(last->GetOpcode() == Opcode::If || last->GetOpcode() == Opcode::IfImm);
                 pred->RemoveInst(last);
             } else {
                 ASSERT(pred->GetSuccsBlocks().size() == 1 && pred->GetSuccessor(0) == block);
@@ -430,108 +397,10 @@ ConstantInst *Graph::FindOrAddConstant(ConstantInst *inst)
     return inst;
 }
 
-Encoder *Graph::GetEncoder()
-{
-    if (encoder_ == nullptr) {
-        if (IsBytecodeOptimizer()) {
-            return encoder_ = GetAllocator()->New<bytecodeopt::BytecodeEncoder>(GetAllocator());
-        }
-    }
-    return encoder_;
-}
-
-RegistersDescription *Graph::GetRegisters() const
-{
-    return registers_;
-}
-
-CallingConvention *Graph::GetCallingConvention()
-{
-    return callconv_;
-}
-
-const MethodProperties &Graph::GetMethodProperties()
-{
-    return method_properties_.value();
-}
-
 void Graph::ResetParameterInfo()
 {
     param_info_ = nullptr;
     return;
-}
-
-Register Graph::GetZeroReg() const
-{
-    auto regfile = GetRegisters();
-    if (regfile == nullptr) {
-        return INVALID_REG;
-    }
-    auto reg = regfile->GetZeroReg();
-    if (reg == INVALID_REGISTER) {
-        return INVALID_REG;
-    }
-    return reg.GetId();
-}
-
-Register Graph::GetArchTempReg() const
-{
-    auto temp_mask = Target(GetArch()).GetTempRegsMask();
-    for (ssize_t reg = RegMask::Size() - 1; reg >= 0; reg--) {
-        if (temp_mask[reg] && const_cast<Graph *>(this)->GetArchUsedRegs()[reg]) {
-            return reg;
-        }
-    }
-    return INVALID_REG;
-}
-
-Register Graph::GetArchTempVReg() const
-{
-    auto regfile = GetRegisters();
-    if (regfile == nullptr) {
-        return INVALID_REG;
-    }
-    auto reg_id = regfile->GetTempVReg();
-    if (reg_id == INVALID_REG_ID) {
-        return INVALID_REG;
-    }
-    return reg_id;
-}
-
-RegMask Graph::GetArchUsedRegs()
-{
-    auto regfile = GetRegisters();
-    if (regfile == nullptr && arch_used_regs_.None()) {
-        return RegMask();
-    }
-    if (arch_used_regs_.None()) {
-        arch_used_regs_ = regfile->GetRegMask();
-    }
-    return arch_used_regs_;
-}
-
-void Graph::SetArchUsedRegs(RegMask mask)
-{
-    arch_used_regs_ = mask;
-    GetRegisters()->SetRegMask(mask);
-}
-
-VRegMask Graph::GetArchUsedVRegs()
-{
-    auto regfile = GetRegisters();
-    if (regfile == nullptr) {
-        return VRegMask();
-    }
-    return regfile->GetVRegMask();
-}
-
-bool Graph::IsRegScalarMapped() const
-{
-    auto regfile = GetRegisters();
-    if (regfile == nullptr) {
-        return false;
-    }
-    return regfile->SupportMapping(RegMapping::SCALAR_SCALAR);
 }
 
 bool Graph::HasLoop() const
@@ -569,7 +438,7 @@ void MarkLoopExits(const Graph *graph, Marker marker)
                 block->SetMarker(marker);
             }
         } else if (block->GetSuccsBlocks().size() > MAX_SUCCS_NUM) {
-            ASSERT(block->IsTryEnd() || block->IsTryBegin() || block->GetLastInst()->GetOpcode() == Opcode::Throw);
+            ASSERT(block->IsTryEnd() || block->IsTryBegin());
             auto loop = block->GetSuccessor(0)->GetLoop();
             for (size_t i = 1; i < block->GetSuccsBlocks().size(); i++) {
                 if (loop != block->GetSuccessor(i)->GetLoop()) {
@@ -586,49 +455,6 @@ std::string GetMethodFullName(const Graph *graph, RuntimeInterface::MethodPtr me
     sstream << graph->GetRuntime()->GetClassNameFromMethod(method)
             << "::" << graph->GetRuntime()->GetMethodName(method);
     return sstream.str();
-}
-
-SpillFillData Graph::GetDataForNativeParam(DataType::Type type)
-{
-#if defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
-    (void)type;
-    return {};
-#else
-    // TODO(pishin) change to ASSERT
-    if (param_info_ == nullptr) {
-        // TODO(pishin) enable after fixing arch in tests - UNREACHABLE()
-        return {};
-    }
-
-    auto param = param_info_->GetNativeParam(Codegen::ConvertDataType(type, GetArch()));
-
-    if (std::holds_alternative<Reg>(param)) {
-        auto reg = std::get<Reg>(param);
-        // NOTE! Vector parameter can be put to scalar register in aarch32
-        DataType::Type reg_type;
-        if (reg.IsFloat()) {
-            reg_type = DataType::FLOAT64;
-        } else if (reg.GetType() == INT64_TYPE) {
-            reg_type = DataType::UINT64;
-        } else {
-            reg_type = DataType::UINT32;
-        }
-        auto loc = reg.IsFloat() ? LocationType::FP_REGISTER : LocationType::REGISTER;
-        return SpillFillData(SpillFillData {loc, LocationType::INVALID, reg.GetId(), INVALID_REG, reg_type});
-    }
-    ASSERT(std::holds_alternative<uint8_t>(param));
-    auto slot = std::get<uint8_t>(param);
-    DataType::Type reg_type;
-    if (DataType::IsFloatType(type)) {
-        reg_type = type;
-    } else if (DataType::Is32Bits(type, GetArch())) {
-        reg_type = DataType::UINT32;
-    } else {
-        reg_type = DataType::UINT64;
-    }
-    return SpillFillData(
-        SpillFillData {LocationType::STACK_PARAMETER, LocationType::INVALID, slot, INVALID_REG, reg_type});
-#endif
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming,-warnings-as-errors)
@@ -735,8 +561,7 @@ int64_t Graph::GetBranchCounter(const BasicBlock *block, bool true_succ)
         return 0;
     }
 
-    return block->IsInverted() == true_succ ? GetRuntime()->GetBranchNotTakenCounter(method, last_inst->GetPc())
-                                            : GetRuntime()->GetBranchTakenCounter(method, last_inst->GetPc());
+    return block->IsInverted() == 0;
 }
 
 uint32_t Graph::GetParametersSlotsCount() const

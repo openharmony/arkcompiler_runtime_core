@@ -37,10 +37,6 @@ void LinearOrder::HandleIfBlock(BasicBlock *if_true_block, BasicBlock *next_bloc
             if_inst->CastToIfImm()->InverseConditionCode();
         } else if (if_inst->GetOpcode() == Opcode::If) {
             if_inst->CastToIf()->InverseConditionCode();
-        } else if (if_inst->GetOpcode() == Opcode::AddOverflow) {
-            if_inst->CastToAddOverflow()->InverseConditionCode();
-        } else if (if_inst->GetOpcode() == Opcode::SubOverflow) {
-            if_inst->CastToSubOverflow()->InverseConditionCode();
         } else {
             LOG(FATAL, COMPILER) << "Unexpected `If` instruction: " << *if_inst;
         }
@@ -58,13 +54,8 @@ void LinearOrder::HandlePrevInstruction(BasicBlock *block, BasicBlock *prev_bloc
         switch (prev_inst->GetOpcode()) {
             case Opcode::IfImm:
             case Opcode::If:
-            case Opcode::AddOverflow:
-            case Opcode::SubOverflow:
                 ASSERT(prev_block->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
                 HandleIfBlock(prev_block, block);
-                break;
-
-            case Opcode::Throw:
                 break;
 
             default:

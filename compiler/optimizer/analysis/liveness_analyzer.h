@@ -17,7 +17,6 @@
 #define COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALIZER_H
 
 #include "utils/arena_containers.h"
-#include "optimizer/analysis/liveness_use_table.h"
 #include "optimizer/ir/constants.h"
 #include "optimizer/ir/inst.h"
 #include "optimizer/ir/marker.h"
@@ -331,9 +330,6 @@ public:
 
     bool NoDest() const
     {
-        if (IsPseudoUserOfMultiOutput(inst_)) {
-            return false;
-        }
         return inst_->NoDest();
     }
 
@@ -543,11 +539,6 @@ public:
     void DumpLifeIntervals(std::ostream &out = std::cout) const;
     void DumpLocationsUsage(std::ostream &out = std::cout) const;
 
-    const UseTable &GetUseTable() const
-    {
-        return use_table_;
-    }
-
 private:
     ArenaAllocator *GetAllocator()
     {
@@ -601,9 +592,6 @@ private:
     ArenaMultiMap<Inst *, Inst *> pending_catch_phi_inputs_;
     ArenaVector<LifeIntervals *> physical_general_intervals_;
     ArenaVector<LifeIntervals *> physical_vector_intervals_;
-    UseTable use_table_;
-    bool has_safepoint_during_call_;
-
     Marker marker_ {UNDEF_MARKER};
 };
 }  // namespace panda::compiler

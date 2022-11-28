@@ -23,7 +23,6 @@
 #include "compiler/optimizer/ir/constants.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/bit_utils.h"
-#include "optimizer/code_generator/operands.h"
 #include "utils/arena_containers.h"
 #include "utils/small_vector.h"
 #include "compiler_logger.h"

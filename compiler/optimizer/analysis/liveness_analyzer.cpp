@@ -32,9 +32,7 @@ LivenessAnalyzer::LivenessAnalyzer(Graph *graph)
       block_live_sets_(graph->GetLocalAllocator()->Adapter()),
       pending_catch_phi_inputs_(graph->GetAllocator()->Adapter()),
       physical_general_intervals_(graph->GetAllocator()->Adapter()),
-      physical_vector_intervals_(graph->GetAllocator()->Adapter()),
-      use_table_(graph->GetAllocator()),
-      has_safepoint_during_call_(graph->GetRuntime()->HasSafepointDuringCall())
+      physical_vector_intervals_(graph->GetAllocator()->Adapter())
 {
 }
 
@@ -224,12 +222,6 @@ void LivenessAnalyzer::BuildInstLifeNumbers()
         for (auto inst : block->Insts()) {
             inst->SetLinearNumber(linear_number++);
             CreateLifeIntervals(inst);
-            if (IsPseudoUserOfMultiOutput(inst)) {
-                // Should be the same life number as pseudo-user, since actually they have the same definition
-                SetInstLifeNumber(inst, life_number);
-                GetInstLifeIntervals(inst)->AddUsePosition(life_number);
-                continue;
-            }
             life_number += LIFE_NUMBER_GAP;
             SetInstLifeNumber(inst, life_number);
             insts_by_life_number_.push_back(inst);
@@ -324,9 +316,6 @@ void LivenessAnalyzer::ProcessBlockLiveInstructions(BasicBlock *block, InstLiveS
             interval->StartFrom(inst_life_number);
             AdjustCatchPhiInputsLifetime(inst);
         } else {
-            if (inst->GetOpcode() == Opcode::LiveOut) {
-                interval->AppendRange({inst_life_number, GetBlockLiveRange(GetGraph()->GetEndBlock()).GetBegin()});
-            }
             auto current_live_range = LiveRange {GetBlockLiveRange(block).GetBegin(), inst_life_number};
             AdjustInputsLifetime(inst, current_live_range, live_set);
         }
@@ -355,37 +344,11 @@ void LivenessAnalyzer::ProcessBlockLiveInstructions(BasicBlock *block, InstLiveS
 LiveRange LivenessAnalyzer::GetPropagatedLiveRange(Inst *inst, LiveRange live_range)
 {
     /*
-     * Implicit null check encoded as no-op and if the reference to check is null
-     * then SIGSEGV will be raised at the first (closest) user. Regmap generated for
-     * NullCheck's SaveState should be valid at that user so we need to extend
-     * life intervals of SaveState's inputs until NullCheck user.
-     */
-    if (inst->IsNullCheck() && !inst->GetUsers().Empty() && inst->CastToNullCheck()->IsImplicit()) {
-        auto extend_until = std::numeric_limits<LifeNumber>::max();
-        for (auto &user : inst->GetUsers()) {
-            auto li = GetInstLifeIntervals(user.GetInst());
-            ASSERT(li != nullptr);
-            extend_until = std::min<LifeNumber>(extend_until, li->GetBegin() + 1);
-        }
-        live_range.SetEnd(extend_until);
-        return live_range;
-    }
-    /*
      * We need to propagate liveness for instruction with CallRuntime to save registers before call;
      * Otherwise, we will not be able to restore the value of the virtual registers
      */
     if (inst->IsPropagateLiveness()) {
         live_range.SetEnd(live_range.GetEnd() + 1);
-    } else if (inst->GetOpcode() == Opcode::ReturnInlined && inst->CastToReturnInlined()->IsExtendedLiveness()) {
-        /*
-         * [ReturnInlined]
-         * [ReturnInlined]
-         * ...
-         * [Deoptimize/Throw]
-         *
-         * In this case we propagate ReturnInlined inputs liveness up to the end of basic block
-         */
-        live_range.SetEnd(GetBlockLiveRange(inst->GetBasicBlock()).GetEnd());
     }
     return live_range;
 }
@@ -428,13 +391,9 @@ void LivenessAnalyzer::AdjustInputsLifetime(Inst *inst, LiveRange live_range, In
  * Increase ref-input liveness in the 'no-async-jit' mode, since GC can be triggered and delete ref during callee-method
  * compilation
  */
-void LivenessAnalyzer::SetInputRange(const Inst *inst, const Inst *input, LiveRange live_range) const
+void LivenessAnalyzer::SetInputRange([[maybe_unused]] const Inst *inst, const Inst *input, LiveRange live_range) const
 {
-    if (has_safepoint_during_call_ && inst->IsCall() && DataType::IsReference(input->GetType())) {
-        GetInstLifeIntervals(input)->AppendRange(live_range.GetBegin(), live_range.GetEnd() + 1U);
-    } else {
-        GetInstLifeIntervals(input)->AppendRange(live_range);
-    }
+    GetInstLifeIntervals(input)->AppendRange(live_range);
 }
 
 /*
@@ -615,7 +574,7 @@ void LivenessAnalyzer::BlockReg(Register reg, LifeNumber block_from)
 
 bool LivenessAnalyzer::IsCallBlockingRegisters(Inst *inst) const
 {
-    if (inst->IsCall() && !static_cast<CallInst *>(inst)->IsInlined()) {
+    if (inst->IsCall()) {
         return true;
     }
     if (inst->IsIntrinsic() && inst->CastToIntrinsic()->IsNativeCall()) {

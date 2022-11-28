@@ -92,9 +92,7 @@ templates:
     AddInstruction(inst_jump);
   jump: |-
   mov: |-
-    % if inst.mnemonic.include? "null"
-    UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), graph_->GetOrCreateNullPtr());
-    % elsif inst.acc_and_operands[1].imm?
+    % if inst.acc_and_operands[1].imm?
     %   if inst.mnemonic == "movi"
     if (graph_->IsBytecodeOptimizer()) {
         UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), FindOrCreate32BitConstant(instruction->GetImm<<%=inst.get_format%>, 0>()));
@@ -124,9 +122,7 @@ templates:
     }
     % end
   lda: |-
-    % if inst.mnemonic.include? "null"
-    UpdateDefinitionAcc(graph_->GetOrCreateNullPtr());
-    % elsif inst.acc_and_operands[1].imm?
+    % if inst.acc_and_operands[1].imm?
     %   if inst.mnemonic == "ldai"
     if (graph_->IsBytecodeOptimizer()) {
         UpdateDefinitionAcc(FindOrCreate32BitConstant(instruction->GetImm<<%=inst.get_format%>, 0>()));

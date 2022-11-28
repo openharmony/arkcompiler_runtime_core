@@ -55,7 +55,6 @@ private:
 #include "optimizer/ir/visitor.inc"
 
     static bool ConstantFitsCompareImm(Inst *cst, uint32_t size, ConditionCode cc);
-    static bool LowerCastValueToAnyTypeWithConst(Inst *inst);
     // We'd like to swap only to make second operand immediate
     static bool BetterToSwapCompareInputs(Inst *cmp);
     // Optimize order of input arguments for decreasing using accumulator (Bytecodeoptimizer only).

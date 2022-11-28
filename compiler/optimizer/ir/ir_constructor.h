@@ -153,21 +153,11 @@ public:
                   std::cerr << "Instruction with same Id " << id << "already exists");
         Inst *inst = nullptr;
         auto to_start_bb = (CurrentBbIndex() == 0) || (CurrentBbIndex() == -1);
-        if constexpr (std::is_same<T, std::nullptr_t>()) {
-            if (to_start_bb) {
-                inst = graph_->GetOrCreateNullPtr();
-            } else {
-                inst = graph_->CreateInstNullPtr();
-                inst->SetType(DataType::REFERENCE);
-                CurrentBb()->AppendInst(inst);
-            }
+        if (to_start_bb) {
+            inst = graph_->FindOrCreateConstant(value);
         } else {
-            if (to_start_bb) {
-                inst = graph_->FindOrCreateConstant(value);
-            } else {
-                inst = graph_->CreateInstConstant(value, graph_->IsBytecodeOptimizer());
-                CurrentBb()->AppendInst(inst);
-            }
+            inst = graph_->CreateInstConstant(value, graph_->IsBytecodeOptimizer());
+            CurrentBb()->AppendInst(inst);
         }
         inst->SetId(id);
         inst_map_[id] = inst;
@@ -386,16 +376,6 @@ public:
     IrConstructor &Scale(uint64_t scale)
     {
         auto inst = CurrentInst();
-        switch (inst->GetOpcode()) {
-            case Opcode::Load:
-                inst->CastToLoad()->SetScale(scale);
-                break;
-            case Opcode::Store:
-                inst->CastToStore()->SetScale(scale);
-                break;
-            default:
-                UNREACHABLE();
-        }
         return *this;
     }
 
@@ -724,23 +704,6 @@ public:
 
     IrConstructor &ObjField(RuntimeInterface::FieldPtr field)
     {
-        auto inst = CurrentInst();
-        switch (inst->GetOpcode()) {
-            case Opcode::StoreStatic:
-                inst->CastToStoreStatic()->SetObjField(field);
-                break;
-            case Opcode::LoadStatic:
-                inst->CastToLoadStatic()->SetObjField(field);
-                break;
-            case Opcode::LoadObject:
-                inst->CastToLoadObject()->SetObjField(field);
-                break;
-            case Opcode::StoreObject:
-                inst->CastToStoreObject()->SetObjField(field);
-                break;
-            default:
-                UNREACHABLE();
-        }
         return *this;
     }
 
@@ -842,23 +805,8 @@ public:
             case Opcode::If:
                 inst->CastToIf()->SetOperandsType(type);
                 break;
-            case Opcode::AddOverflow:
-                inst->CastToAddOverflow()->SetOperandsType(type);
-                break;
-            case Opcode::SubOverflow:
-                inst->CastToSubOverflow()->SetOperandsType(type);
-                break;
             case Opcode::IfImm:
                 inst->CastToIfImm()->SetOperandsType(type);
-                break;
-            case Opcode::Select:
-                inst->CastToSelect()->SetOperandsType(type);
-                break;
-            case Opcode::SelectImm:
-                inst->CastToSelectImm()->SetOperandsType(type);
-                break;
-            case Opcode::Cast:
-                inst->CastToCast()->SetOperandsType(type);
                 break;
             default:
                 UNREACHABLE();

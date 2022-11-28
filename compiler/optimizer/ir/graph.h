@@ -18,11 +18,9 @@
 
 #include <algorithm>
 #include <optional>
-#include "aot_data.h"
 #include "compiler_events_gen.h"
 #include "inst.h"
 #include "marker.h"
-#include "optimizer/code_generator/method_properties.h"
 #include "optimizer/pass_manager.h"
 #include "utils/arena_containers.h"
 
@@ -39,17 +37,8 @@ class PassManager;
 class LivenessAnalyzer;
 class DominatorsTree;
 class Rpo;
-class BoundsRangeInfo;
 class Loop;
-class CodeInfoBuilder;
-
-class Encoder;
-class CallingConvention;
 class ParameterInfo;
-class RegistersDescription;
-class RelocationHandler;
-
-enum AliasType : uint8_t;
 
 /**
  * Specifies graph compilation mode.
@@ -179,7 +168,6 @@ public:
     {
         auto graph = GetAllocator()->New<Graph>(GetAllocator(), GetLocalAllocator(), GetArch(), method, GetRuntime(),
                                                 this, mode_);
-        graph->SetAotData(GetAotData());
         return graph;
     }
 
@@ -272,16 +260,12 @@ public:
         return &pass_manager_;
     }
 
-    const BoundsRangeInfo *GetBoundsRangeInfo() const;
-
     const ArenaVector<BasicBlock *> &GetBlocksRPO() const;
 
     const ArenaVector<BasicBlock *> &GetBlocksLinearOrder() const;
 
     template <class Callback>
     void VisitAllInstructions(Callback callback);
-
-    AliasType CheckInstAlias(Inst *mem1, Inst *mem2);
 
     /// Main allocator for graph, all related to Graph data should be allocated via this allocator.
     ArenaAllocator *GetAllocator() const
@@ -302,22 +286,9 @@ public:
         FlagDFConstruct::Set(true, &bit_fields_);
     }
 
-    void SetAotData(AotData *data)
-    {
-        aot_data_ = data;
-    }
-    AotData *GetAotData()
-    {
-        return aot_data_;
-    }
-    const AotData *GetAotData() const
-    {
-        return aot_data_;
-    }
-
     bool IsAotMode() const
     {
-        return aot_data_ != nullptr;
+        return false;
     }
 
     bool IsOfflineCompilationMode() const
@@ -495,19 +466,6 @@ public:
         std::copy(used_regs->begin(), used_regs->end(), graph_regs->begin());
     }
 
-    Register GetZeroReg() const;
-    Register GetArchTempReg() const;
-    Register GetArchTempVReg() const;
-    // Get registers mask which used in codegen, runtime e.t.c
-    RegMask GetArchUsedRegs();
-    void SetArchUsedRegs(RegMask mask);
-
-    // Get vector registers mask which used in codegen, runtime e.t.c
-    VRegMask GetArchUsedVRegs();
-
-    // Return true if one 64-bit scalar register can be split to 2 32-bit
-    bool IsRegScalarMapped() const;
-
     uint32_t GetStackSlotsCount() const
     {
         return stack_slot_count_;
@@ -564,7 +522,6 @@ public:
         ASSERT(HasNullPtrInst());
         nullptr_inst_ = nullptr;
     }
-    Inst *GetOrCreateNullPtr();
 
     /// Find constant in the list, return nullptr if not found
     ConstantInst *FindConstant(DataType::Type type, uint64_t value);
@@ -858,21 +815,11 @@ public:
         method_ = method;
     }
 
-    Encoder *GetEncoder();
-    RegistersDescription *GetRegisters() const;
-    CallingConvention *GetCallingConvention();
-    const MethodProperties &GetMethodProperties();
     void ResetParameterInfo();
-    SpillFillData GetDataForNativeParam(DataType::Type type);
 
     EventWriter &GetEventWriter()
     {
         return event_writer_;
-    }
-
-    void SetCodeBuilder(CodeInfoBuilder *builder)
-    {
-        ci_builder_ = builder;
     }
 
     // clang-format off
@@ -1015,16 +962,6 @@ public:
         return vregs_count_;
     }
 
-    RelocationHandler *GetRelocationHandler()
-    {
-        return relocation_handler_;
-    }
-
-    void SetRelocationHandler(RelocationHandler *handler)
-    {
-        relocation_handler_ = handler;
-    }
-
     int64_t GetBranchCounter(const BasicBlock *block, bool true_succ);
 
     /**
@@ -1104,8 +1041,6 @@ private:
 
     Loop *root_loop_ {nullptr};
 
-    AotData *aot_data_ {nullptr};
-
     uint32_t bit_fields_ {0};
     using FlagDFConstruct = BitField<bool, 0, 1>;
     using FlagNeedCleanup = FlagDFConstruct::NextFlag;
@@ -1130,8 +1065,6 @@ private:
     // TODO (a.popov) Replace by ArenaMap from throwable_inst* to try_inst*
     ArenaMap<const Inst *, ArenaVector<BasicBlock *>> throwable_insts_;
 
-    RegMask arch_used_regs_ {0};
-
     mutable size_t instr_current_id_ {0};
     // first constant instruction in graph !TODO rewrite it to hash-map
     ConstantInst *first_const_inst_ {nullptr};
@@ -1140,24 +1073,12 @@ private:
     RuntimeInterface *runtime_ {nullptr};
     RuntimeInterface::MethodPtr method_ {nullptr};
 
-    Encoder *encoder_ {nullptr};
-
-    mutable RegistersDescription *registers_ {nullptr};
-
-    CallingConvention *callconv_ {nullptr};
-
-    std::optional<MethodProperties> method_properties_ {std::nullopt};
-
     ParameterInfo *param_info_ {nullptr};
-
-    RelocationHandler *relocation_handler_ {nullptr};
 
     mutable PassManager pass_manager_;
     EventWriter event_writer_;
 
     GraphMode mode_;
-
-    CodeInfoBuilder *ci_builder_ {nullptr};
 
     ArenaVector<RuntimeInterface::MethodPtr> single_implementation_list_;
     ArenaVector<const BasicBlock *> try_begin_blocks_;

@@ -41,13 +41,6 @@ bool MoveConstants::RunImpl()
         const_inst = next_const;
     }
 
-    if (GetGraph()->HasNullPtrInst()) {
-        auto null_ptr = GetGraph()->GetNullPtrInst();
-        if (null_ptr->HasUsers()) {
-            MoveFromStartBlock(null_ptr);
-        }
-    }
-
     return moved_constants_counter_ > 0;
 }
 

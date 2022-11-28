@@ -264,19 +264,6 @@ TEST_F(BasicBlockTest, IfTrueSwapSuccessors)
             INST(12, Opcode::Return).s64().Inputs(10);
         }
     }
-    // The arch isn`t supported
-    if (GetGraph()->GetCallingConvention() == nullptr) {
-        return;
-    }
-
-    RegAlloc(GetGraph());
-    ASSERT_EQ(GetGraph()->GetAnalysis<LinearOrder>().IsValid(), false);
-    const auto &blocks = GetGraph()->GetBlocksLinearOrder();
-    ASSERT_EQ(GetGraph()->GetAnalysis<LinearOrder>().IsValid(), true);
-    GraphChecker(GetGraph()).Check();
-    CheckBlockFalseSuccessorPosition(&BB(2), blocks);
-    CheckBlockFalseSuccessorPosition(&BB(3), blocks);
-    ASSERT_EQ(BB(5).GetLastInst(), &INS(8));
 }
 
 /*
@@ -325,19 +312,6 @@ TEST_F(BasicBlockTest, IfTrueInsertFalseBlock)
             INST(9, Opcode::Return).s64().Inputs(1);
         }
     }
-    // The arch isn`t supported
-    if (GetGraph()->GetCallingConvention() == nullptr) {
-        return;
-    }
-
-    RegAlloc(GetGraph());
-    ASSERT_EQ(GetGraph()->GetAnalysis<LinearOrder>().IsValid(), false);
-    const auto &blocks = GetGraph()->GetBlocksLinearOrder();
-    ASSERT_EQ(GetGraph()->GetAnalysis<LinearOrder>().IsValid(), true);
-    GraphChecker(GetGraph()).Check();
-    CheckBlockFalseSuccessorPosition(&BB(2), blocks);
-    CheckBlockFalseSuccessorPosition(&BB(3), blocks);
-    CheckBlockFalseSuccessorPosition(&BB(4), blocks);
 }
 
 TEST_F(BasicBlockTest, Split)

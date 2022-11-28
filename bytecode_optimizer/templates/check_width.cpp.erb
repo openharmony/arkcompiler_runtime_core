@@ -50,11 +50,6 @@ void RegEncoder::VisitIfImm([[maybe_unused]] GraphVisitor* v, Inst* inst_base) {
         re->success_ = false;
     }
 }
-void RegEncoder::VisitCast([[maybe_unused]] GraphVisitor* v, Inst* inst_base) {
-    [[maybe_unused]] auto re = static_cast<RegEncoder*>(v);
-    [[maybe_unused]] auto inst = inst_base->CastToCast();
-    return;
-}
 % call_me_from_template
 
 % visitors.each do |visitor|

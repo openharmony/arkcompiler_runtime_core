@@ -21,7 +21,6 @@
 % end
 
 enum class IntrinsicId {
-#include "ecma_intrinsics_enum.inl"
 % Compiler::intrinsics.select{ |x| !x.is_irtoc? }.each do |intrinsic|
     <%= intrinsic.entrypoint_name %>,
 % end

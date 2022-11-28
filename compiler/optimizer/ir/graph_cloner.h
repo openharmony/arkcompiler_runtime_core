@@ -239,17 +239,6 @@ private:
     void CloneInstructions(const BasicBlock *block, BasicBlock *clone, size_t *inst_count)
     {
         for (auto inst : block->Insts()) {
-            if constexpr (skip_safepoints) {  // NOLINT
-                if (inst->GetOpcode() == Opcode::SafePoint) {
-                    continue;
-                }
-            }
-            if constexpr (type != InstCloneType::CLONE_ALL) {  // NOLINT
-                if (inst->GetOpcode() == Opcode::NOP) {
-                    continue;
-                }
-            }
-
             clone->AppendInst(CloneInstruction(inst, inst_count, clone->GetGraph()));
         }
 

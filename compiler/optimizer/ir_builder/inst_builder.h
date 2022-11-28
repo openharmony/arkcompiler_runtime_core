@@ -31,7 +31,7 @@ constexpr int64_t INVALID_OFFSET = std::numeric_limits<int64_t>::max();
 
 class InstBuilder {
 public:
-    InstBuilder(Graph *graph, RuntimeInterface::MethodPtr method, CallInst *caller_inst)
+    InstBuilder(Graph *graph, RuntimeInterface::MethodPtr method)
         : graph_(graph),
           runtime_(graph->GetRuntime()),
           defs_(graph->GetLocalAllocator()->Adapter()),
@@ -39,7 +39,6 @@ public:
           VREGS_AND_ARGS_COUNT(graph->GetRuntime()->GetMethodRegistersCount(method) +
                                graph->GetRuntime()->GetMethodTotalArgumentsCount(method)),
           instructions_buf_(GetGraph()->GetRuntime()->GetMethodCode(GetGraph()->GetMethod())),
-          caller_inst_(caller_inst),
           class_id_ {runtime_->GetClassIdForMethod(method_)}
     {
         no_type_marker_ = GetGraph()->NewMarker();
@@ -95,7 +94,7 @@ public:
         current_defs_ = &defs_[bb->GetId()];
     }
 
-    void Prepare(bool is_inlined_graph);
+    void Prepare();
 
     void FixInstructions();
     void ResolveConstants();
@@ -105,11 +104,6 @@ public:
     static void RemoveNotDominateInputs(SaveStateInst *save_state);
 
     size_t GetPc(const uint8_t *inst_ptr) const;
-
-    auto CreateSaveStateDeoptimize(uint32_t pc)
-    {
-        return CreateSaveState(Opcode::SaveStateDeoptimize, pc);
-    }
 
     void UpdateDefs();
 
@@ -228,17 +222,6 @@ private:
         return inst;
     }
 
-    Inst *CreateCast(Inst *input, DataType::Type type, DataType::Type operands_type, size_t pc)
-    {
-        auto cast = GetGraph()->CreateInstCast(type, pc);
-        cast->CastToCast()->SetOperandsType(operands_type);
-        cast->SetInput(0, input);
-        if (!input->HasType()) {
-            input->SetType(operands_type);
-        }
-        return cast;
-    }
-
     void BuildEcma([[maybe_unused]] const BytecodeInstruction *bc_inst);
     template <bool with_speculative = false>
     void BuildEcmaAsIntrinsics([[maybe_unused]] const BytecodeInstruction *bc_inst);
@@ -247,8 +230,6 @@ private:
     void BuildLoadFromPool(const BytecodeInstruction *bc_inst);
     void BuildCastToAnyString(const BytecodeInstruction *bc_inst);
     void BuildCastToAnyNumber(const BytecodeInstruction *bc_inst);
-    Inst *BuildAnyTypeCheckInst(size_t bc_addr, Inst *input, Inst *save_state,
-                                AnyBaseType type = AnyBaseType::UNDEFINED_TYPE);
 
     Graph *GetGraph()
     {
@@ -292,18 +273,7 @@ private:
 
     void SetTypeRec(Inst *inst, DataType::Type type);
 
-    /// Get return type of the method specified by id
-    DataType::Type GetMethodReturnType(uintptr_t id) const;
-    /// Get type of argument of the method specified by id
-    DataType::Type GetMethodArgumentType(uintptr_t id, size_t index) const;
-    /// Get count of arguments for the method specified by id
     size_t GetMethodArgumentsCount(uintptr_t id) const;
-    /// Get return type of currently compiling method
-    DataType::Type GetCurrentMethodReturnType() const;
-    /// Get type of argument of currently compiling method
-    DataType::Type GetCurrentMethodArgumentType(size_t index) const;
-    /// Get count of arguments of currently compiling method
-    size_t GetCurrentMethodArgumentsCount() const;
 
 private:
     static constexpr size_t INPUT_2 = 2;
@@ -331,7 +301,6 @@ private:
     // Pointer to start position of bytecode instructions buffer
     const uint8_t *instructions_buf_ {nullptr};
 
-    CallInst *caller_inst_ {nullptr};
     size_t class_id_;
 #include "intrinsics_ir_build.inl.h"
 };

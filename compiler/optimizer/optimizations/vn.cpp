@@ -13,10 +13,8 @@
  * limitations under the License.
  */
 
-#include "optimizer/analysis/alias_analysis.h"
-#include "optimizer/analysis/bounds_analysis.h"
-#include "optimizer/ir/analysis.h"
 #include "optimizer/ir/basicblock.h"
+#include "optimizer/ir/graph.h"
 #include "compiler_logger.h"
 #include "vn.h"
 
@@ -99,8 +97,6 @@ inline void ValNum::SetInstValNum(Inst *inst)
 
 void ValNum::InvalidateAnalyses()
 {
-    GetGraph()->InvalidateAnalysis<BoundsAnalysis>();
-    GetGraph()->InvalidateAnalysis<AliasAnalysis>();
 }
 
 bool ValNum::TryToApplyCse(Inst *inst, InstVector *equiv_insts)
@@ -111,8 +107,7 @@ bool ValNum::TryToApplyCse(Inst *inst, InstVector *equiv_insts)
     auto block = inst->GetBasicBlock();
     for (auto equiv_inst : *equiv_insts) {
         COMPILER_LOG(DEBUG, VN_OPT) << " Equivalent instructions are found, id " << equiv_inst->GetId();
-        if (block == equiv_inst->GetBasicBlock() ||
-            (equiv_inst->IsDominate(inst) && !HasOsrEntryBetween(equiv_inst, inst))) {
+        if (block == equiv_inst->GetBasicBlock() || equiv_inst->IsDominate(inst)) {
             COMPILER_LOG(DEBUG, VN_OPT) << " CSE is applied for inst with id " << inst->GetId();
             GetGraph()->GetEventWriter().EventGvn(inst->GetId(), inst->GetPc(), equiv_inst->GetId(),
                                                   equiv_inst->GetPc());

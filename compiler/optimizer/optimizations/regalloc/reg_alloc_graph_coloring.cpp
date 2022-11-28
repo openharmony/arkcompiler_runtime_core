@@ -18,7 +18,6 @@
 #include "compiler_logger.h"
 #include "interference_graph.h"
 #include "optimizer/analysis/dominators_tree.h"
-#include "optimizer/code_generator/callconv.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/graph.h"
@@ -348,7 +347,7 @@ void RegAllocGraphColoring::InitWorkingRanges(WorkingRanges *general_ranges, Wor
             continue;
         }
 
-        if (interval->IsPreassigned() && interval->GetReg() == GetGraph()->GetZeroReg()) {
+        if (interval->IsPreassigned() && interval->GetReg() == INVALID_REG) {
             ASSERT(interval->GetReg() != INVALID_REG);
             continue;
         }

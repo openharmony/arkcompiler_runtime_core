@@ -15,8 +15,6 @@
 
 #include <array>
 #include "optimizer/ir/basicblock.h"
-#include "optimizer/analysis/alias_analysis.h"
-#include "optimizer/analysis/bounds_analysis.h"
 #include "lowering.h"
 
 namespace panda::compiler {
@@ -35,25 +33,6 @@ bool Lowering::ConstantFitsCompareImm(Inst *cst, uint32_t size, ConditionCode cc
     }
     int64_t val = cst->CastToConstant()->GetRawValue();
     return (size == HALF_SIZE) && (val == 0);
-}
-
-bool Lowering::LowerCastValueToAnyTypeWithConst(Inst *inst)
-{
-    auto graph = inst->GetBasicBlock()->GetGraph();
-    auto any_type = inst->CastToCastValueToAnyType()->GetAnyType();
-    auto base_type = AnyBaseTypeToDataType(any_type);
-    if (!IsTypeNumeric(base_type) || base_type == DataType::POINTER) {
-        return false;
-    }
-    auto input_inst = inst->GetInput(0).GetInst();
-    if (!input_inst->IsConst()) {
-        return false;
-    }
-    auto imm = input_inst->CastToConstant()->GetRawValue();
-    auto pack_imm = graph->GetRuntime()->GetPackConstantByPrimitiveType(any_type, imm);
-    auto any_const = inst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(DataType::Any(pack_imm));
-    inst->ReplaceUsers(any_const);
-    return true;
 }
 
 // We'd like to swap only to make second operand immediate
@@ -172,8 +151,6 @@ void Lowering::InPlaceLowerIfImm(IfImmInst *inst, Inst *input, Inst *cst, Condit
 
 void Lowering::InvalidateAnalyses()
 {
-    GetGraph()->InvalidateAnalysis<BoundsAnalysis>();
-    GetGraph()->InvalidateAnalysis<AliasAnalysis>();
 }
 
 bool Lowering::RunImpl()

@@ -20,17 +20,6 @@
 
 namespace panda::compiler {
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-Inst *InstBuilder::BuildAnyTypeCheckInst(size_t bc_addr, Inst *input, Inst *save_state, AnyBaseType type)
-{
-    auto any_check = graph_->CreateInstAnyTypeCheck(DataType::ANY, bc_addr);
-    any_check->SetInput(0, input);
-    any_check->SetInput(1, save_state);
-    any_check->SetAnyType(type);
-    AddInstruction(any_check);
-
-    return any_check;
-}
-
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 template <Opcode opcode>
 void InstBuilder::BuildLoadFromPool(const BytecodeInstruction *bc_inst)
@@ -40,26 +29,10 @@ void InstBuilder::BuildLoadFromPool(const BytecodeInstruction *bc_inst)
     // Create SaveState instruction
     auto save_state = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
     LoadFromPool *inst;
-    // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements)
-    if constexpr (opcode == Opcode::LoadType) {
-        auto type_index = bc_inst->GetId(0).AsIndex();
-        type_id = GetRuntime()->ResolveTypeIndex(method, type_index);
-        if (GetRuntime()->ResolveType(method, type_id) == nullptr) {
-            inst = GetGraph()->CreateInstUnresolvedLoadType(DataType::REFERENCE, GetPc(bc_inst->GetAddress()));
-            if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
-                GetRuntime()->GetUnresolvedTypes()->AddTableSlot(method, type_id,
-                                                                 UnresolvedTypesInterface::SlotKind::MANAGED_CLASS);
-            }
-        } else {
-            inst = GetGraph()->CreateInstLoadType(DataType::REFERENCE, GetPc(bc_inst->GetAddress()));
-        }
-        // NOLINTNEXTLINE(readability-misleading-indentation)
-    } else {
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        static_assert(opcode == Opcode::LoadString);
-        type_id = GetRuntime()->ResolveOffsetByIndex(GetGraph()->GetMethod(), bc_inst->GetId(0).AsIndex());
-        inst = GetGraph()->CreateInstLoadString(DataType::REFERENCE, GetPc(bc_inst->GetAddress()));
-    }
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    static_assert(opcode == Opcode::LoadString);
+    type_id = GetRuntime()->ResolveOffsetByIndex(GetGraph()->GetMethod(), bc_inst->GetId(0).AsIndex());
+    inst = GetGraph()->CreateInstLoadString(DataType::REFERENCE, GetPc(bc_inst->GetAddress()));
     inst->SetTypeId(type_id);
     inst->SetMethod(method);
     inst->SetInput(0, save_state);
@@ -67,12 +40,7 @@ void InstBuilder::BuildLoadFromPool(const BytecodeInstruction *bc_inst)
     AddInstruction(save_state);
     AddInstruction(inst);
     UpdateDefinitionAcc(inst);
-    // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
-    if constexpr (opcode == Opcode::LoadString) {
-        if (GetGraph()->IsDynamicMethod()) {
-            BuildCastToAnyString(bc_inst);
-        }
-    }
+    BuildCastToAnyString(bc_inst);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)

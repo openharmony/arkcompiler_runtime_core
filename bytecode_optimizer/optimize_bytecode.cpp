@@ -45,17 +45,17 @@ namespace panda::bytecodeopt {
 panda::bytecodeopt::Options options("");
 
 template <typename T>
-constexpr void RunOpts(compiler::Graph *graph, [[maybe_unused]] BytecodeOptIrInterface *iface)
+constexpr void RunOpts(compiler::Graph *graph)
 {
     graph->RunPass<compiler::Cleanup>();
     graph->RunPass<T>();
 }
 
 template <typename First, typename Second, typename... Rest>
-constexpr void RunOpts(compiler::Graph *graph, BytecodeOptIrInterface *iface = nullptr)
+constexpr void RunOpts(compiler::Graph *graph)
 {
-    RunOpts<First>(graph, iface);
-    RunOpts<Second, Rest...>(graph, iface);
+    RunOpts<First>(graph);
+    RunOpts<Second, Rest...>(graph);
 }
 
 bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)

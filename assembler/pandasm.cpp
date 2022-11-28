@@ -25,9 +25,6 @@
 
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
-#ifdef PANDA_WITH_BYTECODE_OPTIMIZER
-#include "bytecode_optimizer/optimize_bytecode.h"
-#endif
 #include "file_format_version.h"
 #include "error.h"
 #include "lexer.h"
@@ -173,20 +170,6 @@ bool EmitProgramInBinary(panda::pandasm::Program &program, panda::PandArgParser 
         std::cerr << "Failed to emit binary data: " << panda::pandasm::AsmEmitter::GetLastError() << std::endl;
         return false;
     }
-
-#ifdef PANDA_WITH_BYTECODE_OPTIMIZER
-    if (optimize.GetValue()) {
-        bool is_optimized = panda::bytecodeopt::OptimizeBytecode(&program, mapsp, output_file.GetValue());
-        if (!panda::pandasm::AsmEmitter::Emit(output_file.GetValue(), program, statp, mapsp, emit_debug_info)) {
-            std::cerr << "Failed to emit binary data: " << panda::pandasm::AsmEmitter::GetLastError() << std::endl;
-            return false;
-        }
-        if (!is_optimized) {
-            std::cerr << "Bytecode optimizer reported internal errors" << std::endl;
-            return false;
-        }
-    }
-#endif
 
     if (size_stat.GetValue()) {
         size_t total_size = 0;

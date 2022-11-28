@@ -15,7 +15,6 @@
 
 #include "reg_alloc_resolver.h"
 #include "reg_type.h"
-#include "compiler/optimizer/code_generator/codegen.h"
 #include "compiler/optimizer/ir/inst.h"
 #include "compiler/optimizer/ir/graph.h"
 #include "compiler/optimizer/ir/basicblock.h"
@@ -34,7 +33,6 @@ void RegAllocResolver::Resolve()
     for (auto block : GetGraph()->GetBlocksRPO()) {
         for (auto inst : block->AllInstsSafe()) {
             if (inst->IsSaveState()) {
-                ResolveSaveState(inst);
                 continue;
             }
             ResolveInputs(inst);
@@ -80,7 +78,7 @@ void RegAllocResolver::AddCatchPhiMoves(Inst *inst)
 
 void RegAllocResolver::ResolveInputs(Inst *inst)
 {
-    if (inst->IsPhi() || inst->IsCatchPhi() || IsPseudoUserOfMultiOutput(inst)) {
+    if (inst->IsPhi() || inst->IsCatchPhi()) {
         return;
     }
 
@@ -145,10 +143,8 @@ void RegAllocResolver::AddMoveToFixedLocation(Inst *inst, Location input_locatio
 
 Inst *GetFirstUserOrInst(Inst *inst)
 {
-    for (auto &user : inst->GetUsers()) {
-        if (user.GetInst()->GetOpcode() != Opcode::ReturnInlined) {
-            return user.GetInst();
-        }
+    if (!inst->GetUsers().Empty()) {
+        return inst->GetFirstUser()->GetInst();
     }
     return inst;
 }
@@ -162,7 +158,7 @@ Inst *GetFirstUserOrInst(Inst *inst)
 // because null check either will be fired at it, or won't be fired at all.
 Inst *GetExplicitUser(Inst *inst)
 {
-    if (!inst->IsNullCheck() || !inst->CastToNullCheck()->IsImplicit() || inst->GetUsers().Empty()) {
+    if (inst->GetUsers().Empty()) {
         return inst;
     }
     if (inst->HasSingleUser()) {
@@ -170,20 +166,6 @@ Inst *GetExplicitUser(Inst *inst)
     }
 
     Inst *user_inst {nullptr};
-    for (auto &user : inst->GetUsers()) {
-        auto curr_inst = user.GetInst();
-        if (!IsSuitableForImplicitNullCheck(curr_inst)) {
-            continue;
-        }
-        if (curr_inst->GetInput(0).GetInst() != inst) {
-            continue;
-        }
-        if (!curr_inst->CanThrow()) {
-            continue;
-        }
-        user_inst = curr_inst;
-        break;
-    }
 #ifndef NDEBUG
     for (auto &user : inst->GetUsers()) {
         if (user.GetInst()->IsPhi()) {
@@ -202,11 +184,6 @@ void RegAllocResolver::PropagateCallerMasks(SaveStateInst *save_state)
     // Get location of save state inputs at the save state user (note that at this point
     // all inputs will have the same location at all users (excluding ReturnInlined that should be skipped)).
     FillSaveStateRootsMask(save_state, user, save_state);
-    for (auto caller_inst = save_state->GetCallerInst(); caller_inst != nullptr;
-         caller_inst = caller_inst->GetSaveState()->GetCallerInst()) {
-        auto caller_ss = caller_inst->GetSaveState();
-        FillSaveStateRootsMask(caller_ss, user, save_state);
-    }
 }
 
 void RegAllocResolver::FillSaveStateRootsMask(SaveStateInst *save_state, Inst *user, SaveStateInst *target_ss)
@@ -227,8 +204,7 @@ void RegAllocResolver::FillSaveStateRootsMask(SaveStateInst *save_state, Inst *u
         AddLocationToRoots(sibling->GetLocation(), target_ss, GetGraph());
 #ifndef NDEBUG
         for (auto &test_user : target_ss->GetUsers()) {
-            if (test_user.GetInst()->GetOpcode() == Opcode::ReturnInlined ||
-                test_user.GetInst()->GetId() == user->GetId()) {
+            if (test_user.GetInst()->GetId() == user->GetId()) {
                 continue;
             }
             auto explicit_test_user = GetExplicitUser(test_user.GetInst());
@@ -239,112 +215,11 @@ void RegAllocResolver::FillSaveStateRootsMask(SaveStateInst *save_state, Inst *u
     }
 }
 
-namespace {
-SaveStateInst *CopySaveState(Graph *graph, SaveStateInst *inst)
-{
-    auto copy = static_cast<SaveStateInst *>(inst->Clone(graph));
-    ASSERT(copy->GetCallerInst() == inst->GetCallerInst());
-    for (size_t input_idx = 0; input_idx < inst->GetInputsCount(); input_idx++) {
-        copy->AppendInput(inst->GetInput(input_idx));
-        copy->SetVirtualRegister(input_idx, inst->GetVirtualRegister(input_idx));
-    }
-    copy->SetLinearNumber(inst->GetLinearNumber());
-    return copy;
-}
-
-bool HasSameLocation(LifeIntervals *interval, LifeNumber pos1, LifeNumber pos2)
-{
-    auto sibling1 = interval->FindSiblingAt(pos1);
-    auto sibling2 = interval->FindSiblingAt(pos2);
-    ASSERT(sibling1 != nullptr);
-    ASSERT(sibling2 != nullptr);
-    return sibling1->SplitCover(pos1) && sibling1->SplitCover(pos2) &&
-           sibling1->GetLocation() == sibling2->GetLocation();
-}
-
-bool SaveStateCopyRequired(Inst *inst, User *curr_user, User *prev_user, const LivenessAnalyzer *la)
-{
-    ASSERT(inst->IsSaveState());
-    auto curr_user_ln = la->GetInstLifeIntervals(GetExplicitUser(curr_user->GetInst()))->GetBegin();
-    auto prev_user_ln = la->GetInstLifeIntervals(GetExplicitUser(prev_user->GetInst()))->GetBegin();
-    bool need_copy = false;
-    // If current save state is part of inlined method then we have to check location for all
-    // parent save states.
-    for (auto ss = static_cast<SaveStateInst *>(inst); ss != nullptr && !need_copy;) {
-        for (size_t input_idx = 0; input_idx < ss->GetInputsCount() && !need_copy; input_idx++) {
-            auto input_interval = la->GetInstLifeIntervals(ss->GetDataFlowInput(input_idx));
-            need_copy = !HasSameLocation(input_interval, curr_user_ln, prev_user_ln);
-        }
-        auto caller = ss->GetCallerInst();
-        if (caller == nullptr) {
-            ss = nullptr;
-        } else {
-            ss = caller->GetSaveState();
-        }
-    }
-    return need_copy;
-}
-}  // namespace
-
-void RegAllocResolver::ResolveSaveState(Inst *inst)
-{
-    if (GetGraph()->GetCallingConvention() == nullptr) {
-        return;
-    }
-    ASSERT(inst->IsSaveState());
-
-    bool handled_all_users = inst->HasSingleUser() || !inst->HasUsers();
-    while (!handled_all_users) {
-        size_t copy_users = 0;
-        auto user_it = inst->GetUsers().begin();
-        User *prev_user = &*user_it;
-        ++user_it;
-        bool need_copy = false;
-
-        // Find first user having different location for some of the save state inputs and use SaveState's
-        // copy for all preceding users.
-        for (; user_it != inst->GetUsers().end() && !need_copy; ++user_it, copy_users++) {
-            auto &curr_user = *user_it;
-            // ReturnInline's SaveState is required only for SaveState's inputs life range propagation,
-            // so it does not actually matter which interval will be actually used.
-            if (prev_user->GetInst()->GetOpcode() == Opcode::ReturnInlined) {
-                prev_user = &*user_it;
-                continue;
-            }
-            if (curr_user.GetInst()->GetOpcode() == Opcode::ReturnInlined) {
-                continue;
-            }
-            need_copy = SaveStateCopyRequired(inst, &curr_user, prev_user, liveness_);
-            prev_user = &*user_it;
-        }
-        if (need_copy) {
-            auto copy = CopySaveState(GetGraph(), static_cast<SaveStateInst *>(inst));
-            // Replace original SaveState with the copy for first N users (N = `copy_users` ).
-            while (copy_users > 0) {
-                auto user_inst = inst->GetUsers().Front().GetInst();
-                user_inst->ReplaceInput(inst, copy);
-                copy_users--;
-            }
-            inst->GetBasicBlock()->InsertAfter(copy, inst);
-            PropagateCallerMasks(copy);
-            handled_all_users = inst->HasSingleUser();
-        } else {
-            handled_all_users = !(user_it != inst->GetUsers().end());
-        }
-    }
-    // At this point inst either has single user or all its inputs have the same location at all users.
-    PropagateCallerMasks(static_cast<SaveStateInst *>(inst));
-}
-
 /*
  * Pop output on stack from reserved register
  */
 void RegAllocResolver::ResolveOutput(Inst *inst)
 {
-    // Don't process LiveOut, since it is instruction with pseudo destination
-    if (inst->GetOpcode() == Opcode::LiveOut) {
-        return;
-    }
     // Multi-output instructions' dst registers will be filled after procecssing theirs pseudo users
     if (inst->GetLinearNumber() == INVALID_LINEAR_NUM || inst->GetDstCount() > 1) {
         return;
@@ -365,9 +240,6 @@ void RegAllocResolver::ResolveOutput(Inst *inst)
     }
     // Process multi-output inst
     size_t dst_mum = inst->GetSrcRegIndex();
-    if (IsPseudoUserOfMultiOutput(inst)) {
-        inst = inst->GetInput(0).GetInst();
-    }
     // Wrtie dst
     auto reg_type = inst_interval->GetType();
     if (inst_interval->HasReg()) {

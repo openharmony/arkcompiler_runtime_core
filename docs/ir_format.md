@@ -20,21 +20,14 @@ Second, we need to support the transfer of information between optimizations.
 * [BranchElimination](../compiler/docs/branch_elimination_doc.md)
 * [ChecksElimination](../compiler/docs/check_elimination_doc.md)
 * [Cleanup](../compiler/docs/cleanup_doc.md)
-* [Codegen](../compiler/docs/codegen_doc.md)
-* [CodeSink](../compiler/docs/code_sink_doc.md)
 * [Constant Folding](../compiler/docs/constant_folding_doc.md)
-* [IfConversion](../compiler/docs/if_conversion_doc.md)
 * [Inlining](../compiler/docs/inlining.md)
 * Inlining
 * [LICM](../compiler/docs/licm_doc.md)
-* [Loop peeling](../compiler/docs/loop_peeling.md)
-* [Loop unrolling](../compiler/docs/loop_unrolling.md)
 * [Lowering](../compiler/docs/lowering_doc.md)
 * [Load Store Elimination (LSE)](../compiler/docs/lse_doc.md)
 * [Memory Coalescing](../compiler/docs/memory_coalescing_doc.md)
 * [Peepholes](../compiler/docs/peephole_doc.md)
-* [Redundant Loop Elimination](../compiler/docs/redundant_loop_elimination_doc.md)
-* [Scheduler](../compiler/docs/scheduler_doc.md)
 * [Value Numbering](../compiler/docs/vn_doc.md)
 
 ### Analyses
@@ -401,7 +394,6 @@ for (auto inst : block->InstsSafe()) {
 ....
     ExampleVisitor visitor(graph);
     visitor.VisitGraph();
-    visitor.VisitGraphGrouped();
 ```
 
 

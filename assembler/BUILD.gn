@@ -25,7 +25,6 @@ config("arkassembler_public_config") {
 }
 
 libarkassembler_sources = [
-  "$ark_root/plugins/ecmascript/assembler/extension/ecmascript_meta.cpp",
   "$target_gen_dir/ins_to_string.cpp",
   "annotation.cpp",
   "assembly-emitter.cpp",
@@ -34,6 +33,7 @@ libarkassembler_sources = [
   "assembly-program.cpp",
   "assembly-type.cpp",
   "context.cpp",
+  "extensions/ecmascript_meta.cpp",
   "extensions/extensions.cpp",
   "lexer.cpp",
   "meta.cpp",
@@ -147,12 +147,10 @@ source_set("ark_asm_static") {
     "$ark_root:ark_config",
     "$ark_root/libpandabase:arkbase_public_config",
     "$ark_root/libpandafile:arkfile_public_config",
-    "$ark_root/runtime:arkruntime_public_config",
   ]
 
   deps = [
     ":libarkassembler_frontend_static",
-    "$ark_root/bytecode_optimizer:libarkbytecodeopt_frontend_static",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libpandafile:libarkfile_frontend_static",
   ]
