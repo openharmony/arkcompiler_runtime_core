@@ -32,8 +32,14 @@ struct ThreadRWLockArgs {
     size_t *index;
 };
 
+struct ThreadMutexArgs {
+    os::memory::Mutex *lock;
+    size_t *index;
+};
+
 static void *TestThread1(void *input)
 {
+    ASSERT(input != nullptr);
     ThreadRWLockArgs *arg = reinterpret_cast<ThreadRWLockArgs *>(input);
     arg->rwlock->WriteLock();
     (*(arg->index))++;
@@ -44,6 +50,7 @@ static void *TestThread1(void *input)
 
 static void *TestThread2(void *input)
 {
+    ASSERT(input != nullptr);
     ThreadRWLockArgs *arg = reinterpret_cast<ThreadRWLockArgs *>(input);
     arg->rwlock->ReadLock();
     os::thread::NativeSleep(READ_LOCK_SLEEP_TIME);
@@ -51,8 +58,9 @@ static void *TestThread2(void *input)
     return nullptr;
 }
 
-static void *TestThrea3(void *input)
+static void *TestThread3(void *input)
 {
+    ASSERT(input != nullptr);
     ThreadRWLockArgs *arg = reinterpret_cast<ThreadRWLockArgs *>(input);
     bool res = arg->rwlock->TryReadLock();
     if (res) {
@@ -68,8 +76,21 @@ static void *TestThrea3(void *input)
     return nullptr;
 }
 
-static void *TestThrea4(void *input)
+static void *TestThread4(void *input)
 {
+    ASSERT(input != nullptr);
+    ThreadMutexArgs *arg = reinterpret_cast<ThreadMutexArgs *>(input);
+    bool res = arg->lock->TryLockWithSpinning();
+    if (res) {
+        (*(arg->index))++;
+        arg->lock->Unlock();
+    }
+    return nullptr;
+}
+
+static void *TestThread5(void *input)
+{
+    ASSERT(input != nullptr);
     ThreadRWLockArgs *arg = reinterpret_cast<ThreadRWLockArgs *>(input);
     arg->rwlock->WriteLock();
     arg->rwlock->Unlock();
@@ -111,7 +132,7 @@ HWTEST_F(MutexTest, TryLockTest, testing::ext::TestSize.Level0)
 
     pthread_t t1;
     rwlock->WriteLock();
-    pthread_create(&t1, nullptr, TestThrea3, reinterpret_cast<void *>(&arg));
+    pthread_create(&t1, nullptr, TestThread3, reinterpret_cast<void *>(&arg));
     pthread_join(t1, nullptr);
     rwlock->Unlock();
     ASSERT_EQ(res, 0U);
@@ -119,14 +140,14 @@ HWTEST_F(MutexTest, TryLockTest, testing::ext::TestSize.Level0)
     pthread_t t2;
     rwlock->ReadLock();
     res = 0;
-    pthread_create(&t2, nullptr, TestThrea3, reinterpret_cast<void *>(&arg));
+    pthread_create(&t2, nullptr, TestThread3, reinterpret_cast<void *>(&arg));
     pthread_join(t2, nullptr);
     rwlock->Unlock();
     ASSERT_EQ(res, 1U);
 
     pthread_t t3;
     res = 0;
-    pthread_create(&t3, nullptr, TestThrea3, reinterpret_cast<void *>(&arg));
+    pthread_create(&t3, nullptr, TestThread3, reinterpret_cast<void *>(&arg));
     pthread_join(t3, nullptr);
     ASSERT_EQ(res, 2U);
     delete rwlock;
@@ -137,7 +158,14 @@ HWTEST_F(MutexTest, TryLockWithSpiningTest, testing::ext::TestSize.Level0)
     auto *lock = new os::memory::Mutex();
     bool res = lock->TryLockWithSpinning();
     ASSERT_TRUE(res);
-    ASSERT_FALSE(lock->TryLockWithSpinning());
+
+    size_t index = 0;
+    ThreadMutexArgs arg = {lock, &index};
+    pthread_t t;
+    pthread_create(&t, nullptr, TestThread4, reinterpret_cast<void *>(&arg));
+    pthread_join(t, nullptr);
+    ASSERT_EQ(index, 0U);
+
     if (res) {
         lock->Unlock();
     }
@@ -151,7 +179,7 @@ HWTEST_F(MutexTest, LockForOtherTest, testing::ext::TestSize.Level0)
     rwlock->WriteLock();
     auto *lock = new os::memory::Mutex();
     pthread_t t;
-    pthread_create(&t, nullptr, TestThrea4, reinterpret_cast<void *>(&arg));
+    pthread_create(&t, nullptr, TestThread5, reinterpret_cast<void *>(&arg));
     lock->LockForOther(t);
     bool res = lock->TryLock();
     if (res) {
