@@ -14,50 +14,20 @@
 import("//arkcompiler/runtime_core/ark_config.gni")
 import("$ark_root/tests/test_helper.gni")
 
-host_unittest_action("LibPandaBaseTest") {
+host_unittest_action("PluginsTest") {
   module_out_path = module_output_path
 
-  sources = [
-    "arch_test.cpp",
-    "arena_allocator_test.cpp",
-    "base_mem_stats_test.cpp",
-    "base_thread_test.cpp",
-    "bit_vector_test.cpp",
-    "cframe_layout_test.cpp",
-    "code_allocator_test.cpp",
-    "json_parser_test.cpp",
-    "logger_test.cpp",
-    "math_helpers_test.cpp",
-    "mem_space_test.cpp",
-    "mmap_mem_pool_test.cpp",
-    "mutex_test.cpp",
-    "pandargs_test.cpp",
-    "pool_map_test.cpp",
-    "regmask_test.cpp",
-    "type_converter_tests.cpp",
-    "unique_fd_test.cpp",
-    "unix_thread_test.cpp",
-    "utf_test.cpp",
-  ]
-
-  if (is_linux) {
-    sources += [
-      "genmc/mutex_test_2.cpp",
-      "unix_error_test.cpp",
-      "unix_exec_test.cpp",
-      "unix_file_test.cpp",
-      "unix_library_loader_test.cpp",
-      "unix_native_stack_test.cpp",
-    ]
-  }
+  sources = [ "ecmascript_meta_test.cpp" ]
 
   configs = [
     "$ark_root:ark_config",
+    "$ark_root/assembler:arkassembler_public_config",
     "$ark_root/libpandabase:arkbase_public_config",
     sdk_libc_secshared_config,
   ]
 
   deps = [
+    "$ark_root/assembler:libarkassembler_static",
     "$ark_root/libpandabase:libarkbase_static",
     sdk_libc_secshared_dep,
   ]
@@ -65,10 +35,10 @@ host_unittest_action("LibPandaBaseTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":LibPandaBaseTest" ]
+  deps = [ ":PluginsTest" ]
 }
 
 group("host_unittest") {
   testonly = true
-  deps = [ ":LibPandaBaseTestAction" ]
+  deps = [ ":PluginsTestAction" ]
 }
