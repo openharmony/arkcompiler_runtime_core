@@ -61,10 +61,21 @@ HWTEST(Pgo, MarkProfileItem, testing::ext::TestSize.Level0)
     CreateItems(container);
     panda::panda_file::pgo::ProfileOptimizer profile_opt;
     for (auto &item : container.GetItems()) {
-        profile_opt.MarkProfileItem(item, true);
-        profile_opt.MarkProfileItem(item, false);
         if (item->GetName() == CLASS_ITEM) {
+            profile_opt.MarkProfileItem(item, true);
+            EXPECT_EQ(item->GetPGORank(), panda::panda_file::PGO_CLASS_DEFAULT_COUNT + 1U);  // 1 means set pgo
+            profile_opt.MarkProfileItem(item, false);
             EXPECT_EQ(item->GetPGORank(), panda::panda_file::PGO_CLASS_DEFAULT_COUNT);
+        } else if (item->GetName() == STRING_ITEM) {
+            profile_opt.MarkProfileItem(item, true);
+            EXPECT_EQ(item->GetPGORank(), panda::panda_file::PGO_STRING_DEFAULT_COUNT + 1U);  // 1 means set pgo
+            profile_opt.MarkProfileItem(item, false);
+            EXPECT_EQ(item->GetPGORank(), panda::panda_file::PGO_STRING_DEFAULT_COUNT);
+        } else if (item->GetName() == CODE_ITEM) {
+            profile_opt.MarkProfileItem(item, true);
+            EXPECT_EQ(item->GetPGORank(), panda::panda_file::PGO_CODE_DEFAULT_COUNT + 1U);  // 1 means set pgo
+            profile_opt.MarkProfileItem(item, false);
+            EXPECT_EQ(item->GetPGORank(), panda::panda_file::PGO_CODE_DEFAULT_COUNT);
         }
     }
 }
