@@ -17,6 +17,7 @@
 #include "class_data_accessor-inl.h"
 #include "code_data_accessor-inl.h"
 #include "debug_data_accessor-inl.h"
+#include "debug_info_extractor.h"
 #include "field_data_accessor-inl.h"
 #include "file.h"
 #include "file_item_container.h"
@@ -541,6 +542,18 @@ HWTEST(ItemContainer, TestDebugInfo, testing::ext::TestSize.Level0)
     DebugInfoItem *debug_info_item = container.CreateItem<DebugInfoItem>(line_number_program_item);
     method_item->SetDebugInfo(debug_info_item);
 
+    // Create foreign class
+    ForeignClassItem *class_item_foreign = container.GetOrCreateForeignClassItem("ForeignClass");
+
+    // Create foreign method
+    StringItem *method_name_foreign = container.GetOrCreateStringItem("ForeignMethod");
+    PrimitiveTypeItem *ret_type_foreign = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
+    std::vector<MethodParamItem> params_foreign;
+    params_foreign.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
+    ProtoItem *proto_item_foreign = container.GetOrCreateProtoItem(ret_type_foreign, params_foreign);
+    container.CreateItem<ForeignMethodItem>(class_item_foreign,
+        method_name_foreign, proto_item_foreign, 0);
+
     // Add debug info
 
     container.ComputeLayout();
@@ -615,6 +628,14 @@ HWTEST(ItemContainer, TestDebugInfo, testing::ext::TestSize.Level0)
 
         EXPECT_EQ(dda.GetSize(), debug_info_item->GetSize());
     });
+
+    DebugInfoExtractor extractor(panda_file.get());
+    const auto &methods = extractor.GetMethodIdList();
+    for (const auto &method_id : methods) {
+        for (const auto &info : extractor.GetParameterInfo(method_id)) {
+            EXPECT_EQ(info.name, "a0");
+        }
+    }
 }
 
 HWTEST(ItemContainer, ForeignItems, testing::ext::TestSize.Level0)
