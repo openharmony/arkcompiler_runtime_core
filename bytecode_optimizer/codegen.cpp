@@ -569,7 +569,7 @@ void BytecodeGen::VisitIntrinsic(GraphVisitor *visitor, Inst *inst_base)
     VisitEcma(visitor, inst_base);
 }
 
-void BytecodeGen::VisitCatchPhi(GraphVisitor *v, Inst *inst)
+void BytecodeGen::VisitCatchPhi(GraphVisitor *visitor, Inst *inst)
 {
     if (inst->CastToCatchPhi()->IsAcc()) {
         for (auto &user : inst->GetUsers()) {

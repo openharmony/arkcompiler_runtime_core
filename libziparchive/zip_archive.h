@@ -31,12 +31,12 @@ struct EntryFileStat {
 public:
     uint32_t GetUncompressedSize() const
     {
-        return (uint32_t)file_stat.uncompressed_size;
+        return static_cast<uint32_t>(file_stat.uncompressed_size);
     }
 
     uint32_t GetCompressedSize() const
     {
-        return (uint32_t)file_stat.compressed_size;
+        return static_cast<uint32_t>(file_stat.compressed_size);
     }
 
     inline uint32_t GetOffset() const
@@ -57,7 +57,7 @@ struct GlobalStat {
 public:
     uint32_t GetNumberOfEntry() const
     {
-        return (uint32_t)ginfo.number_entry;
+        return static_cast<uint32_t>(ginfo.number_entry);
     }
     unz_global_info ginfo;
 };

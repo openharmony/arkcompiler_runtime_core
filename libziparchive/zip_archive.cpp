@@ -26,7 +26,7 @@ constexpr size_t ZIP_MAGIC_OFFSET = 8U;
 
 bool IsZipMagic(uint32_t magic)
 {
-    return (('P' == ((magic >> 0U) & ZIP_MAGIC_MASK)) && ('K' == ((magic >> ZIP_MAGIC_OFFSET) & ZIP_MAGIC_MASK)));
+    return ((((magic >> 0U) & ZIP_MAGIC_MASK) == 'P') && (((magic >> ZIP_MAGIC_OFFSET) & ZIP_MAGIC_MASK) == 'K'));
 }
 
 int OpenArchive(ZipArchiveHandle &handle, const char *path)

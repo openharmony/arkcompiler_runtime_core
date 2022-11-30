@@ -121,7 +121,7 @@ public:
         return GetGraph()->GetBlocksRPO();
     }
 
-    static void VisitIntrinsic(GraphVisitor *v, Inst *inst);
+    static void VisitIntrinsic(GraphVisitor *visitor, Inst *inst);
 
 #include "generated/reg_encoder_visitors.inc"
 
