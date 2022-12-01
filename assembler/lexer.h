@@ -114,7 +114,7 @@ private:
 /*
  * Returns a string representation of a token type.
  */
-std::string_view TokenTypeWhat(Token::Type);
+std::string_view TokenTypeWhat(Token::Type t);
 
 }  // namespace panda::pandasm
 

@@ -41,7 +41,7 @@ inline ArenaT *MallocMemPool::AllocArenaImpl(size_t size, [[maybe_unused]] Space
     LOG_MALLOC_MEM_POOL(DEBUG) << "Try to get new arena with size " << std::dec << size << " for "
                                << SpaceTypeToString(space_type);
     size_t max_alignment_drift = 0;
-    if (DEFAULT_ALIGNMENT_IN_BYTES > alignof(ArenaT)) {
+    if (alignof(ArenaT) < DEFAULT_ALIGNMENT_IN_BYTES) {
         max_alignment_drift = DEFAULT_ALIGNMENT_IN_BYTES - alignof(ArenaT);
     }
     size_t max_size = size + sizeof(ArenaT) + max_alignment_drift;

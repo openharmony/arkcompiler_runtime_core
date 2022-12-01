@@ -82,7 +82,7 @@ private:
         const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitive_types,
         const std::string &name, const Record &rec);
     static bool HandleBaseRecord(panda_file::ItemContainer *items, const Program &program, const std::string &name,
-                                 const Record &rec, panda_file::ClassItem *record);
+                                 const Record &base_rec, panda_file::ClassItem *record);
     static bool HandleInterfaces(panda_file::ItemContainer *items, const Program &program, const std::string &name,
                                  const Record &rec, panda_file::ClassItem *record);
     static bool HandleFields(

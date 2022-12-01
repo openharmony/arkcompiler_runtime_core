@@ -100,14 +100,14 @@ public:
     {
         return GetGraph()->GetBlocksRPO();
     }
-    static void VisitSpillFill(GraphVisitor *v, Inst *inst);
-    static void VisitConstant(GraphVisitor *v, Inst *inst);
+    static void VisitSpillFill(GraphVisitor *visitor, Inst *inst);
+    static void VisitConstant(GraphVisitor *visitor, Inst *inst);
     static void VisitCatchPhi(GraphVisitor *visitor, Inst *inst);
 
     static void VisitIf(GraphVisitor *v, Inst *inst_base);
     static void VisitIfImm(GraphVisitor *v, Inst *inst_base);
     static void IfImmZero(GraphVisitor *v, Inst *inst_base);
-    static void VisitIntrinsic(GraphVisitor *v, Inst *inst_base);
+    static void VisitIntrinsic(GraphVisitor *visitor, Inst *inst_base);
     static void VisitLoadString(GraphVisitor *v, Inst *inst_base);
     static void VisitReturn(GraphVisitor *v, Inst *inst_base);
 
