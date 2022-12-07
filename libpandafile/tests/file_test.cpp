@@ -241,7 +241,7 @@ HWTEST(File, OpenPandaFileFromZipErrorHandler, testing::ext::TestSize.Level0)
 
     auto fp = fopen(file_name_zip_with_entry, "a");
     EXPECT_NE(fp, nullptr);
-    const char *append_str = "error";
+    const char append_str[] = "error";
     EXPECT_EQ(fwrite(append_str, sizeof(append_str), 1U, fp), 1U);
     fclose(fp);
     pf = OpenPandaFile(file_name_zip_with_entry);
@@ -320,7 +320,7 @@ HWTEST(File, Open, testing::ext::TestSize.Level0)
 
     auto fp = fopen(ABC_FILE, "w");
     EXPECT_NE(fp, nullptr);
-    const char *write_str = "error";
+    const char write_str[] = "error";
     EXPECT_EQ(fwrite(write_str, sizeof(write_str), 1U, fp), 1U);
     fclose(fp);
     EXPECT_EQ(File::Open(ABC_FILE), nullptr);
