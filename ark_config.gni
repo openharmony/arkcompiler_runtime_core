@@ -100,6 +100,9 @@ template("ark_gen_file") {
       invoker.template_file,
       invoker.data_file,
     ]
+    if (defined(invoker.requires)) {
+      inputs += invoker.requires
+    }
     outputs = [ invoker.output_file ]
     args = positional_argv + keyword_argv
     deps = extra_dependencies
