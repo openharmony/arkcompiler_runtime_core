@@ -20,7 +20,8 @@ module_output_path = "arkcompiler/runtime_core"
 ##############################fuzztest##########################################
 ohos_fuzztest("JsonObjectCtor2FuzzTest") {
   module_out_path = module_output_path
-
+  fuzz_config_file =
+      "//arkcompiler/runtime_core/tests/fuzztest/jsonobjectctor2_fuzzer"
   include_dirs = []
   cflags = [
     "-g",
