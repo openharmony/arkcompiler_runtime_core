@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_DEBUG_INFO_H_
-#define PANDA_DEBUG_INFO_H_
+#ifndef LIBPANDABASE_OS_DEBUG_INFO_H
+#define LIBPANDABASE_OS_DEBUG_INFO_H
 
 #include <set>
 #include <list>
@@ -179,4 +179,4 @@ private:
 };
 
 }  // namespace panda
-#endif  // PANDA_DEBUG_INFO_H_
+#endif  // LIBPANDABASE_OS_DEBUG_INFO_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_LINEAR_ORDER_H_
-#define COMPILER_OPTIMIZER_ANALYSIS_LINEAR_ORDER_H_
+#ifndef COMPILER_OPTIMIZER_ANALYSIS_LINEAR_ORDER_H
+#define COMPILER_OPTIMIZER_ANALYSIS_LINEAR_ORDER_H
 
 #include "optimizer/ir/marker.h"
 #include "optimizer/pass.h"
@@ -72,4 +72,4 @@ private:
     ArenaVector<BasicBlock *> reordered_blocks_;
 };
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_LINEAR_ORDER_H_
+#endif  // COMPILER_OPTIMIZER_ANALYSIS_LINEAR_ORDER_H

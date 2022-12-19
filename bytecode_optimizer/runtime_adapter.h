@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H_
-#define PANDA_BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H_
+#ifndef BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H
+#define BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H
 
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "libpandafile/bytecode_instruction.h"
@@ -245,4 +245,4 @@ private:
 };
 }  // namespace panda
 
-#endif  // PANDA_BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H_
+#endif  // BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H

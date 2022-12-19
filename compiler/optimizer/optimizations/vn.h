@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_VN_H_
-#define COMPILER_OPTIMIZER_ANALYSIS_VN_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_VN_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_VN_H
 
 #include <unordered_map>
 #include <array>
@@ -126,4 +126,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_VN_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_VN_H

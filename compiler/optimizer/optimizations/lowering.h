@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOWERING_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOWERING_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOWERING_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOWERING_H
 
 #include "compiler_logger.h"
 #include "compiler_options.h"
@@ -64,4 +64,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOWERING_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOWERING_H

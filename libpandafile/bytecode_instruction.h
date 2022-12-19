@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_BYTECODE_INSTRUCTION_H_
-#define LIBPANDAFILE_BYTECODE_INSTRUCTION_H_
+#ifndef LIBPANDAFILE_BYTECODE_INSTRUCTION_H
+#define LIBPANDAFILE_BYTECODE_INSTRUCTION_H
 
 #include "file.h"
 
@@ -411,4 +411,4 @@ using BytecodeInstructionSafe = BytecodeInst<BytecodeInstMode::SAFE>;
 
 }  // namespace panda
 
-#endif  // LIBANDAFILE_BYTECODE_INSTRUCTION_H_
+#endif  // LIBANDAFILE_BYTECODE_INSTRUCTION_H

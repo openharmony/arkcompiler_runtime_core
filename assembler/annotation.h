@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_ANNOTATION_H_
-#define PANDA_ASSEMBLER_ANNOTATION_H_
+#ifndef ASSEMBLER_ANNOTATION_H
+#define ASSEMBLER_ANNOTATION_H
 
 #include <cstddef>
 #include <memory>
@@ -560,4 +560,4 @@ private:
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_ANNOTATION_H_
+#endif  // ASSEMBLER_ANNOTATION_H

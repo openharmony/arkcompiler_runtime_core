@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_FILE_ITEM_CONTAINER_H_
-#define LIBPANDAFILE_FILE_ITEM_CONTAINER_H_
+#ifndef LIBPANDAFILE_FILE_ITEM_CONTAINER_H
+#define LIBPANDAFILE_FILE_ITEM_CONTAINER_H
 
 #include "file_items.h"
 #include "file_writer.h"
@@ -555,4 +555,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_FILE_ITEM_CONTAINER_H_
+#endif  // LIBPANDAFILE_FILE_ITEM_CONTAINER_H

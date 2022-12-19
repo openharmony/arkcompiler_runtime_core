@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H_
-#define LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H_
+#ifndef LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H
+#define LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H
 
 #include "helpers.h"
 
@@ -154,4 +154,4 @@ inline Type ProtoDataAccessor::GetArgType(size_t idx) const
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H_
+#endif  // LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H
