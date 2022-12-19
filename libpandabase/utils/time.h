@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_TIME_H_
-#define PANDA_LIBPANDABASE_UTILS_TIME_H_
+#ifndef LIBPANDABASE_UTILS_TIME_H
+#define LIBPANDABASE_UTILS_TIME_H
 
 #include <cstdint>
 
@@ -38,4 +38,4 @@ uint64_t GetCurrentTimeInNanos(bool need_system = false);
 
 WEAK_FOR_LTO_END
 
-#endif  // PANDA_LIBPANDABASE_UTILS_TIME_H_
+#endif  // LIBPANDABASE_UTILS_TIME_H

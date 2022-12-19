@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_DEFINE_HPP
-#define _PANDA_ASSEMBLER_DEFINE_HPP
+#ifndef ASSEMBLER_DEFINE_H
+#define ASSEMBLER_DEFINE_H
 
 /* Implementation-specific defines */
 
@@ -46,4 +46,4 @@ constexpr char PARSE_AREA_MARKER = '.';
     _(".array", ARR)         \
     _(".field", FLD)
 
-#endif /* !_PANDA_ASSEMBLER_DEFINE_HPP */
+#endif /* ASSEMBLER_DEFINE_H */

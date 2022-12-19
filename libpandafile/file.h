@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_FILE_H_
-#define LIBPANDAFILE_FILE_H_
+#ifndef LIBPANDAFILE_FILE_H
+#define LIBPANDAFILE_FILE_H
 
 #include <cstdint>
 #include "helpers.h"

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_MAP_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_MAP_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_REG_MAP_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_REG_MAP_H
 
 #include "utils/arena_containers.h"
 #include "location_mask.h"
@@ -64,4 +64,4 @@ private:
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_MAP_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_REG_MAP_H

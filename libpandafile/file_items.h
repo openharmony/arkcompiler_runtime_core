@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_FILE_ITEMS_H_
-#define LIBPANDAFILE_FILE_ITEMS_H_
+#ifndef LIBPANDAFILE_FILE_ITEMS_H
+#define LIBPANDAFILE_FILE_ITEMS_H
 
 #include "file.h"
 #include "file_writer.h"
@@ -1816,4 +1816,4 @@ enum class ArgumentType : uint8_t {
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_FILE_ITEMS_H_
+#endif  // LIBPANDAFILE_FILE_ITEMS_H
