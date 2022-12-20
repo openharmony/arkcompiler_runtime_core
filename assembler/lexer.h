@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_LEXER_HPP
-#define _PANDA_ASSEMBLER_LEXER_HPP
+#ifndef ASSEMBLER_LEXER_H
+#define ASSEMBLER_LEXER_H
 
 #include <array>
 #include <iostream>
@@ -118,4 +118,4 @@ std::string_view TokenTypeWhat(Token::Type t);
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_LEXER_HPP
+#endif  // ASSEMBLER_LEXER_H

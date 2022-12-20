@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_SPLIT_RESOLVER_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_SPLIT_RESOLVER_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_SPLIT_RESOLVER_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_SPLIT_RESOLVER_H
 
 #include "compiler/optimizer/analysis/liveness_analyzer.h"
 #include "compiler/optimizer/ir/graph.h"
@@ -57,4 +57,4 @@ private:
     LivenessAnalyzer *liveness_;
 };
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_SPLIT_RESOLVER_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_SPLIT_RESOLVER_H
