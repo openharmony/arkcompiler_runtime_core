@@ -21,10 +21,6 @@ config("arkbase_public_config") {
   ]
 
   include_dirs += platform_include_dirs
-
-  if (ark_standalone_build) {
-    ldflags = [ "-ldl" ]
-  }
 }
 
 config("arkbase_fuzz_config") {
