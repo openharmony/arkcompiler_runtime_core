@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_H
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_H
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_REG_ALLOC_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_REG_ALLOC_H
 
 #include "compiler/optimizer/ir/graph.h"
 
@@ -22,4 +22,4 @@ namespace panda::compiler {
 bool RegAlloc(Graph *graph);
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_H
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_REG_ALLOC_H

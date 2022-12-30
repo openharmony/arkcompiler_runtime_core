@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DISASM_ACCUMULATORS_H_INCLUDED
-#define DISASM_ACCUMULATORS_H_INCLUDED
+#ifndef DISASSEMBLER_ACCUMULATORS_H
+#define DISASSEMBLER_ACCUMULATORS_H
 
 #include <map>
 #include <string>
@@ -60,4 +60,4 @@ struct ProgAnnotations {
 };
 }  // namespace panda::disasm
 
-#endif
+#endif  // DISASSEMBLER_ACCUMULATORS_H

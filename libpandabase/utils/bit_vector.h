@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_BIT_VECTOR_H
-#define PANDA_BIT_VECTOR_H
+#ifndef LIBPANDABASE_UTILS_BIT_VECTOR_H
+#define LIBPANDABASE_UTILS_BIT_VECTOR_H
 
 #include "globals.h"
 #include "mem/arena_allocator.h"
@@ -665,4 +665,4 @@ inline void fill(panda::BitVectorIterator<IsConst> first, panda::BitVectorIterat
 
 }  // namespace std
 
-#endif  // PANDA_BIT_VECTOR_H
+#endif  // LIBPANDABASE_UTILS_BIT_VECTOR_H

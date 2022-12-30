@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H
 #define BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H
 

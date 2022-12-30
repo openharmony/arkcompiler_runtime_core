@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_UNIX_TIME_H
-#define PANDA_LIBPANDABASE_OS_UNIX_TIME_H
+#ifndef PLATFORMS_UNIX_LIBPANDABASE_TIME_H
+#define PLATFORMS_UNIX_LIBPANDABASE_TIME_H
 
 #include <chrono>
 
@@ -33,4 +33,4 @@ static uint64_t GetClockTime(clockid_t clock)
 
 }  // namespace panda::os::time
 
-#endif  // PANDA_LIBPANDABASE_OS_UNIX_TIME_H
+#endif  // PLATFORMS_UNIX_LIBPANDABASE_TIME_H

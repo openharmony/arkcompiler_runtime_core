@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_UNIQUE_FD_H_
-#define PANDA_LIBPANDABASE_OS_UNIQUE_FD_H_
+#ifndef LIBPANDABASE_OS_UNIQUE_FD_H
+#define LIBPANDABASE_OS_UNIQUE_FD_H
 
 #ifdef PANDA_TARGET_UNIX
 #include "platforms/unix/libpandabase//unique_fd.h"
@@ -94,4 +94,4 @@ private:
 
 }  // namespace panda::os::unique_fd
 
-#endif  // PANDA_LIBPANDABASE_OS_UNIQUE_FD_H_
+#endif  // LIBPANDABASE_OS_UNIQUE_FD_H

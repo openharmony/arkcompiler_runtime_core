@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H_
-#define LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H_
+#ifndef LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H
+#define LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H
 
 #include "class_data_accessor.h"
 #include "field_data_accessor-inl.h"
@@ -222,4 +222,4 @@ inline uint32_t ClassDataAccessor::GetRuntimeAnnotationsNumber()
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H_
+#endif  // LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H

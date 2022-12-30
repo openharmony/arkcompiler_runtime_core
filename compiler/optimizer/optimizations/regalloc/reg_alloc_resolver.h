@@ -87,4 +87,5 @@ private:
 };
 
 }  // namespace panda::compiler
+
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_REG_ALLOC_RESOLVER_H

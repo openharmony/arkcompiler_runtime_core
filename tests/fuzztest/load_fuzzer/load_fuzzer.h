@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef LOAD_FUZZER_H_
-#define LOAD_FUZZER_H_
+#ifndef TESTS_FUZZTEST_LOAD_FUZZER_LOAD_FUZZER_H
+#define TESTS_FUZZTEST_LOAD_FUZZER_LOAD_FUZZER_H
 
 #define FUZZ_PROJECT_NAME "load_fuzzer"
 
-#endif  // LOAD_FUZZER_H_
+#endif  // TESTS_FUZZTEST_LOAD_FUZZER_LOAD_FUZZER_H

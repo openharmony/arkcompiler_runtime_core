@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_RANGE_H_
-#define PANDA_LIBPANDABASE_UTILS_RANGE_H_
+#ifndef LIBPANDABASE_UTILS_RANGE_H
+#define LIBPANDABASE_UTILS_RANGE_H
+
 namespace panda {
 
 template <class It>
@@ -44,4 +45,4 @@ private:
 
 }  // namespace panda
 
-#endif
+#endif  // LIBPANDABASE_UTILS_RANGE_H

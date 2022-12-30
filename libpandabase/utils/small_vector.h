@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_SMALL_VECTOR_H
-#define PANDA_SMALL_VECTOR_H
+#ifndef LIBPANDABASE_UTILS_SMALL_VECTOR_H
+#define LIBPANDABASE_UTILS_SMALL_VECTOR_H
 
 #include "utils/arch.h"
 #include <algorithm>
@@ -627,4 +627,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_SMALL_VECTOR_H
+#endif  // LIBPANDABASE_UTILS_SMALL_VECTOR_H

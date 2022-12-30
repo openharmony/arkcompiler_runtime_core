@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_LITERAL_DATA_ACCESSOR_INL_H_
-#define LIBPANDAFILE_LITERAL_DATA_ACCESSOR_INL_H_
+#ifndef LIBPANDAFILE_LITERAL_DATA_ACCESSOR_INL_H
+#define LIBPANDAFILE_LITERAL_DATA_ACCESSOR_INL_H
 
 #include <string>
 #include "file_items.h"
@@ -115,4 +115,4 @@ inline void LiteralDataAccessor::EnumerateLiteralVals(File::EntityId id, const C
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_LITERAL_DATA_ACCESSOR_INL_H_
+#endif  // LIBPANDAFILE_LITERAL_DATA_ACCESSOR_INL_H

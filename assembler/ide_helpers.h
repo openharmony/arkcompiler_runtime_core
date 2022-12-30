@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_IDE_HELPERS_H
-#define PANDA_ASSEMBLER_IDE_HELPERS_H
+#ifndef ASSEMBLER_IDE_HELPERS_H
+#define ASSEMBLER_IDE_HELPERS_H
 
 #include <sstream>
 
@@ -83,4 +83,4 @@ std::string JsonSerializeProgramItems(const T &item_table)
 }
 }  // namespace panda::pandasm
 
-#endif  // PANDA_ASSEMBLER_IDE_HELPERS_H
+#endif  // ASSEMBLER_IDE_HELPERS_H

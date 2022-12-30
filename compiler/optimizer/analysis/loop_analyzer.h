@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYSIS_H_
-#define COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYSIS_H_
+
+#ifndef COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYZER_H
+#define COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYZER_H
 
 #include "optimizer/ir/inst.h"
 #include "optimizer/pass.h"
@@ -233,4 +234,4 @@ bool IsLoopSingleBackEdgeExitPoint(Loop *loop);
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYSIS_H_
+#endif  // COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYZER_H

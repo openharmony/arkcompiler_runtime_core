@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_SERIALIZER_FOR_EACH_TUPLE_H_
-#define PANDA_LIBPANDABASE_UTILS_SERIALIZER_FOR_EACH_TUPLE_H_
+#ifndef LIBPANDABASE_SERIALIZER_FOR_EACH_TUPLE_H
+#define LIBPANDABASE_SERIALIZER_FOR_EACH_TUPLE_H
 
 #include <tuple>
 
@@ -37,4 +37,4 @@ void ForEachTuple(Tuple &&tuple, F &&f)
 
 }  // namespace panda::serializer::internal
 
-#endif  // PANDA_LIBPANDABASE_UTILS_SERIALIZER_FOR_EACH_TUPLE_H_
+#endif  // LIBPANDABASE_SERIALIZER_FOR_EACH_TUPLE_H

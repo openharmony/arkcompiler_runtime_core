@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_TIME_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_TIME_H_
+#ifndef LIBPANDABASE_OS_TIME_H
+#define LIBPANDABASE_OS_TIME_H
 
 #include <macros.h>
 
@@ -30,4 +30,4 @@ uint64_t GetClockTimeInThreadCpuTime();
 
 WEAK_FOR_LTO_END
 
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_TIME_H_
+#endif  // LIBPANDABASE_OS_TIME_H

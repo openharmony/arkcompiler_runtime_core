@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef THREAD_SAFETY_ANALYSIS_MUTEX_H
-#define THREAD_SAFETY_ANALYSIS_MUTEX_H
+#ifndef LIBPANDABASE_CLANG_H
+#define LIBPANDABASE_CLANG_H
 
 // Based on Thread safety analysis annotations taken from https://clang.llvm.org/docs/ThreadSafetyAnalysis.html
 
@@ -93,4 +93,4 @@
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_THREAD_SAFETY_ANALYSIS THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)
 
-#endif  // THREAD_SAFETY_ANALYSIS_MUTEX_H
+#endif  // LIBPANDABASE_CLANG_H

@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_STACKTRACE_H_
-#define PANDA_STACKTRACE_H_
+
+#ifndef LIBPANDABASE_OS_STACKTRACE_H
+#define LIBPANDABASE_OS_STACKTRACE_H
 
 #include <vector>
 #include <iostream>
@@ -49,4 +50,5 @@ inline std::ostream &PrintStack(std::ostream &out)
 }
 
 }  // namespace panda
-#endif  // PANDA_STACKTRACE_H_
+
+#endif  // LIBPANDABASE_OS_STACKTRACE_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ARCH_H
-#define PANDA_ARCH_H
+#ifndef LIBPANDABASE_UTILS_ARCH_H
+#define LIBPANDABASE_UTILS_ARCH_H
 
 #include "macros.h"
 #include "utils/math_helpers.h"
@@ -324,4 +324,4 @@ std::enable_if_t<is_stringable_v<String>, String> GetStringFromArch(const Arch &
 
 }  // namespace panda
 
-#endif  // PANDA_ARCH_H
+#endif  // LIBPANDABASE_UTILS_ARCH_H

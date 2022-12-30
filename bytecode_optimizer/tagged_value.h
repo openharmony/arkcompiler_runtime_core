@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_CORETYPES_TAGGED_VALUE_H_
-#define PANDA_RUNTIME_INCLUDE_CORETYPES_TAGGED_VALUE_H_
+#ifndef BYTECODE_OPTIMIZER_TAGGED_VALUE_H
+#define BYTECODE_OPTIMIZER_TAGGED_VALUE_H
 
 #include <climits>
 #include <cstddef>
@@ -169,4 +169,5 @@ private:
     TaggedType value_;
 };
 }  // namespace panda::coretypes
-#endif  // PANDA_RUNTIME_INCLUDE_CORETYPES_TAGGED_VALUE_H_
+
+#endif  // BYTECODE_OPTIMIZER_TAGGED_VALUE_H

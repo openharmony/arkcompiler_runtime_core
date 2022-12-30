@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_TESTS_GRAPH_COMPARATOR_H_
-#define COMPILER_TESTS_GRAPH_COMPARATOR_H_
+#ifndef COMPILER_TESTS_GRAPH_COMPARATOR_H
+#define COMPILER_TESTS_GRAPH_COMPARATOR_H
 
 #include "optimizer/ir/ir_constructor.h"
 #include "optimizer/analysis/rpo.h"
@@ -292,4 +292,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_TESTS_GRAPH_COMPARATOR_H_
+#endif  // COMPILER_TESTS_GRAPH_COMPARATOR_H

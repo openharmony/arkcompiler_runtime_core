@@ -282,4 +282,5 @@ private:
     Params params_;
 };
 }  // namespace panda::compiler
+
 #endif  // COMPILER_TESTS_VIXL_EXEC_MODULE_H

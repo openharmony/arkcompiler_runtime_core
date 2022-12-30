@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef COMPILER_OPTIMIZER_IR_DUMP_H
 #define COMPILER_OPTIMIZER_IR_DUMP_H
 

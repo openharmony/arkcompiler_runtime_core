@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_REGMASK_H
-#define PANDA_REGMASK_H
+#ifndef LIBPANDABASE_UTILS_REGMASK_H
+#define LIBPANDABASE_UTILS_REGMASK_H
 
 #include <array>
 #include "utils/bit_utils.h"
@@ -300,4 +300,4 @@ inline std::ostream &operator<<(std::ostream &stream, const RegMask &mask)
 
 }  // namespace panda
 
-#endif  // PANDA_REGMASK_H
+#endif  // LIBPANDABASE_UTILS_REGMASK_H

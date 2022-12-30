@@ -105,4 +105,5 @@ inline auto ToString(const SpillFillData &sf, Arch arch)
 }  // namespace sf_data
 
 }  // namespace panda::compiler
+
 #endif  // COMPILER_OPTIMIZER_IR_SPILL_FILL_DATA_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_CFRAME_LAYOUT_H
-#define PANDA_CFRAME_LAYOUT_H
+#ifndef LIBPANDABASE_UTILS_CFRAME_LAYOUT_H
+#define LIBPANDABASE_UTILS_CFRAME_LAYOUT_H
 
 #include "arch.h"
 
@@ -356,4 +356,4 @@ using CFrameRegs = CFrameLayout::RegsRegion;
 
 }  // namespace panda
 
-#endif  // PANDA_CFRAME_LAYOUT_H
+#endif  // LIBPANDABASE_UTILS_CFRAME_LAYOUT_H

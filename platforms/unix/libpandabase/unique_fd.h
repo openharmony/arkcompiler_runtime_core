@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_UNIX_UNIQUE_FD_H_
-#define PANDA_LIBPANDABASE_OS_UNIX_UNIQUE_FD_H_
+#ifndef PLATFORMS_UNIX_LIBPANDABASE_UNIQUE_FD_H
+#define PLATFORMS_UNIX_LIBPANDABASE_UNIQUE_FD_H
 
 #include <fcntl.h>
 
@@ -27,4 +27,4 @@ inline int DupCloexec(int fd)
 
 }  // namespace panda::os::unique_fd
 
-#endif  // PANDA_LIBPANDABASE_OS_UNIX_UNIQUE_FD_H_
+#endif  // PLATFORMS_UNIX_LIBPANDABASE_UNIQUE_FD_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PBC_ITERATOR_H
-#define PANDA_PBC_ITERATOR_H
+#ifndef COMPILER_OPTIMIZER_IR_BUILDER_PBC_ITERATOR_H
+#define COMPILER_OPTIMIZER_IR_BUILDER_PBC_ITERATOR_H
 
 #include "bytecode_instruction.h"
 #include "bytecode_instruction-inl.h"
@@ -72,4 +72,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // PANDA_PBC_ITERATOR_H
+#endif  // COMPILER_OPTIMIZER_IR_BUILDER_PBC_ITERATOR_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_MEM_RANGE_H
-#define PANDA_LIBPANDABASE_MEM_MEM_RANGE_H
+#ifndef LIBPANDABASE_MEM_MEM_RANGE_H
+#define LIBPANDABASE_MEM_MEM_RANGE_H
 
 #include <ostream>
 
@@ -79,4 +79,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_LIBPANDABASE_MEM_MEM_RANGE_H
+#endif  // LIBPANDABASE_MEM_MEM_RANGE_H

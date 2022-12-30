@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_FILESYSTEM_H
-#define PANDA_FILESYSTEM_H
+#ifndef LIBPANDABASE_OS_FILESYSTEM_H
+#define LIBPANDABASE_OS_FILESYSTEM_H
 
 #include <iosfwd>
 #include <string_view>
@@ -35,4 +35,4 @@ void CreateDirectories(const std::string &folder_name);
 
 }  // namespace panda::os
 
-#endif  // PANDA_FILESYSTEM_H
+#endif  // LIBPANDABASE_OS_FILESYSTEM_H

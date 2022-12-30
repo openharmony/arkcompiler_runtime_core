@@ -17,8 +17,9 @@
 // From his gitlab (https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp):
 // - MurmurHash3 was written by Austin Appleby, and is placed in the public
 // - domain. The author hereby disclaims copyright to this source code.
-#ifndef LIBPANDABASE_UTILS_MURMUR3_HASH_H_
-#define LIBPANDABASE_UTILS_MURMUR3_HASH_H_
+
+#ifndef LIBPANDABASE_UTILS_MURMUR3_HASH_H
+#define LIBPANDABASE_UTILS_MURMUR3_HASH_H
 
 #include "hash_base.h"
 #include "logger.h"
@@ -198,4 +199,4 @@ private:
 
 }  // namespace panda
 
-#endif  // LIBPANDABASE_UTILS_MURMUR3_HASH_H_
+#endif  // LIBPANDABASE_UTILS_MURMUR3_HASH_H

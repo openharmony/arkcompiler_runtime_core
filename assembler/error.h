@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_ERROR_HPP
-#define _PANDA_ASSEMBLER_ERROR_HPP
+#ifndef ASSEMBLER_ERROR_H
+#define ASSEMBLER_ERROR_H
 
 #include <string>
 
@@ -130,4 +130,4 @@ struct Error {
 using ErrorList = std::vector<Error>;
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_ERROR_HPP
+#endif  // ASSEMBLER_ERROR_H

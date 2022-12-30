@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_ERROR_H_
-#define PANDA_LIBPANDABASE_UTILS_ERROR_H_
+#ifndef LIBPANDABASE_OS_ERROR_H
+#define LIBPANDABASE_OS_ERROR_H
 
 #include <string>
 #include <variant>
@@ -42,4 +42,4 @@ private:
 
 }  // namespace panda::os
 
-#endif  // PANDA_LIBPANDABASE_UTILS_ERROR_H_
+#endif  // LIBPANDABASE_OS_ERROR_H

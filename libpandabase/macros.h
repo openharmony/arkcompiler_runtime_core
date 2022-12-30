@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_MACROS_H_
-#define PANDA_LIBPANDABASE_PBASE_MACROS_H_
+#ifndef LIBPANDABASE_MACROS_H
+#define LIBPANDABASE_MACROS_H
 
 #include <cassert>
 #include <iostream>
@@ -319,4 +319,4 @@ extern "C" void AnnotateIgnoreWritesEnd(const char* f, int l);
 #define WEAK_FOR_LTO_END
 #endif
 
-#endif  // PANDA_LIBPANDABASE_PBASE_MACROS_H_
+#endif  // LIBPANDABASE_MACROS_H

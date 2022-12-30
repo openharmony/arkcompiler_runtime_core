@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBBASE_OS_LIBRARY_LOADER_H_
-#define PANDA_LIBBASE_OS_LIBRARY_LOADER_H_
+#ifndef LIBPANDABASE_OS_LIBRARY_LOADER_H
+#define LIBPANDABASE_OS_LIBRARY_LOADER_H
 
 #ifdef PANDA_TARGET_UNIX
 #include <dlfcn.h>
@@ -79,4 +79,4 @@ private:
 };
 }  // namespace panda::os::library_loader
 
-#endif  // PANDA_LIBBASE_OS_LIBRARY_LOADER_H_
+#endif  // LIBPANDABASE_OS_LIBRARY_LOADER_H

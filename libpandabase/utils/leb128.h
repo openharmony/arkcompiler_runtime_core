@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_LEB128_H_
-#define PANDA_LIBPANDABASE_UTILS_LEB128_H_
+#ifndef LIBPANDABASE_UTILS_LEB128_H
+#define LIBPANDABASE_UTILS_LEB128_H
 
 #include "bit_helpers.h"
 #include "bit_utils.h"
@@ -187,4 +187,4 @@ inline size_t SignedEncodingSize(T data)
 
 }  // namespace panda::leb128
 
-#endif  // PANDA_LIBPANDABASE_UTILS_LEB128_H_
+#endif  // LIBPANDABASE_UTILS_LEB128_H

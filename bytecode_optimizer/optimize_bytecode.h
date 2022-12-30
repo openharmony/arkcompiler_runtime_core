@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H_
-#define PANDA_BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H_
+#ifndef BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H
+#define BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H
 
 #include "assembler/assembly-emitter.h"
 #include "assembler/assembly-program.h"
@@ -27,4 +27,4 @@ bool OptimizeBytecode(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
                       const std::string &pandafile_name, bool is_dynamic = false, bool has_memory_pool = false);
 }  // namespace panda::bytecodeopt
 
-#endif  // PANDA_BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H_
+#endif  // BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H

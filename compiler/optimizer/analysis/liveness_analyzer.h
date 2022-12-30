@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALIZER_H
-#define COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALIZER_H
+#ifndef COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALYZER_H
+#define COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALYZER_H
 
 #include "utils/arena_containers.h"
 #include "optimizer/ir/constants.h"
@@ -596,4 +596,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALIZER_H
+#endif  // COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALYZER_H

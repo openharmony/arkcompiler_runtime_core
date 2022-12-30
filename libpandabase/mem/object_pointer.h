@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_OBJECT_POINTER_H
-#define PANDA_LIBPANDABASE_MEM_OBJECT_POINTER_H
+#ifndef LIBPANDABASE_MEM_OBJECT_POINTER_H
+#define LIBPANDABASE_MEM_OBJECT_POINTER_H
 
 #include "mem.h"
 
@@ -140,4 +140,4 @@ static_assert(sizeof(ObjectPointer<bool>) == sizeof(object_pointer_type));
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_MEM_OBJECT_POINTER_H
+#endif  // LIBPANDABASE_MEM_OBJECT_POINTER_H

@@ -134,4 +134,5 @@ private:
     int null_ptr_inst_counter_ = 0;
 };
 }  // namespace panda::compiler
+
 #endif  // COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_H

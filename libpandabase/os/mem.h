@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_MEM_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_MEM_H_
+#ifndef LIBPANDABASE_OS_MEM_H
+#define LIBPANDABASE_OS_MEM_H
 
 #include "file.h"
 #include "macros.h"
@@ -411,4 +411,4 @@ size_t GetNativeBytesFromMallinfo();
 
 }  // namespace panda::os::mem
 
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_MEM_H_
+#endif  // LIBPANDABASE_OS_MEM_H

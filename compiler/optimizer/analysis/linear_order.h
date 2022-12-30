@@ -72,4 +72,5 @@ private:
     ArenaVector<BasicBlock *> reordered_blocks_;
 };
 }  // namespace panda::compiler
+
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_LINEAR_ORDER_H

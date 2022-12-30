@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_NUMBERS_UTILS_H
-#define _PANDA_ASSEMBLER_NUMBERS_UTILS_H
+#ifndef ASSEMBLER_UTILS_NUMBER_UTILS_H
+#define ASSEMBLER_UTILS_NUMBER_UTILS_H
 
 namespace panda::pandasm {
 
@@ -192,4 +192,4 @@ inline size_t ToNumber(std::string_view p)
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_NUMBERS_UTILS_H
+#endif  // ASSEMBLER_UTILS_NUMBER_UTILS_H

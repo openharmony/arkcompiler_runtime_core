@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef LIBPANDAFILE_FILE_READER_H_
-#define LIBPANDAFILE_FILE_READER_H_
+
+#ifndef LIBPANDAFILE_FILE_READER_H
+#define LIBPANDAFILE_FILE_READER_H
 
 #include <type_traits>
 #include "annotation_data_accessor.h"
@@ -176,4 +177,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_FILE_READER_H_
+#endif  // LIBPANDAFILE_FILE_READER_H

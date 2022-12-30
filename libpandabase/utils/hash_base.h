@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef LIBPANDABASE_UTILS_HASH_BASE_H_
-#define LIBPANDABASE_UTILS_HASH_BASE_H_
+
+#ifndef LIBPANDABASE_UTILS_HASH_BASE_H
+#define LIBPANDABASE_UTILS_HASH_BASE_H
 
 #include <array>
 #include <cstdint>
@@ -70,4 +71,4 @@ public:
 
 }  // namespace panda
 
-#endif  // LIBPANDABASE_UTILS_HASH_BASE_H_
+#endif  // LIBPANDABASE_UTILS_HASH_BASE_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_UNIX__FUTEX_MUTEX_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_UNIX__FUTEX_MUTEX_H_
+#ifndef PLATFORMS_UNIX_LIBPANDABASE_FUTEX_MUTEX_H
+#define PLATFORMS_UNIX_LIBPANDABASE_FUTEX_MUTEX_H
 
 #include "clang.h"
 #include "macros.h"
@@ -303,4 +303,4 @@ static_assert(sizeof(RWLock) == ALL_STRUCTURES_SIZE);
 
 }  // namespace panda::os::unix::memory::futex
 
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX__FUTEX_MUTEX_H_
+#endif  // PLATFORMS_UNIX_LIBPANDABASE_FUTEX_MUTEX_H

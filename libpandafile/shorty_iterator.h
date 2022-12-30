@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_SHORTY_ITERATOR_H_
-#define LIBPANDAFILE_SHORTY_ITERATOR_H_
+#ifndef LIBPANDAFILE_SHORTY_ITERATOR_H
+#define LIBPANDAFILE_SHORTY_ITERATOR_H
 
 #include <cstdint>
 #include "file_items.h"
@@ -101,4 +101,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_SHORTY_ITERATOR_H_
+#endif  // LIBPANDAFILE_SHORTY_ITERATOR_H

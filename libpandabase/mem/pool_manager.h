@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_POOL_MANAGER_H
-#define PANDA_POOL_MANAGER_H
+
+#ifndef LIBPANDABASE_MEM_POOL_MANAGER_H
+#define LIBPANDABASE_MEM_POOL_MANAGER_H
 
 #include "malloc_mem_pool.h"
 #include "mmap_mem_pool.h"
@@ -46,4 +47,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_POOL_MANAGER_H
+#endif  // LIBPANDABASE_MEM_POOL_MANAGER_H

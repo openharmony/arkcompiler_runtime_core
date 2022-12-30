@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_INST_BUILDER_INL_H
-#define PANDA_INST_BUILDER_INL_H
+#ifndef COMPILER_OPTIMIZER_IR_BUILDER_INST_BUILDER_INL_H
+#define COMPILER_OPTIMIZER_IR_BUILDER_INST_BUILDER_INL_H
 
 #include "inst_builder.h"
 
@@ -89,4 +89,4 @@ void InstBuilder::BuildCastToAnyNumber(const BytecodeInstruction *bc_inst)
 
 }  // namespace panda::compiler
 
-#endif  // PANDA_INST_BUILDER_INL_H
+#endif  // COMPILER_OPTIMIZER_IR_BUILDER_INST_BUILDER_INL_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PANDASM_H
-#define PANDA_PANDASM_H
+#ifndef ASSEMBLER_PANDASM_H
+#define ASSEMBLER_PANDASM_H
 
 #include "utils/pandargs.h"
 
@@ -48,4 +48,4 @@ bool BuildFiles(panda::pandasm::Program &program, panda::PandArgParser &pa_parse
 
 }  // namespace panda::pandasm
 
-#endif  // PANDA_PANDASM_H
+#endif  // ASSEMBLER_PANDASM_H

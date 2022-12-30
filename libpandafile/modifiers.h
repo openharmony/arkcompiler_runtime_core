@@ -72,4 +72,4 @@ static constexpr uint32_t COMPILATION_STATUS_SHIFT = MinimumBitsToStore(ACC_COMP
 static constexpr uint32_t COMPILATION_STATUS_MASK = static_cast<uint32_t>(0x7) << COMPILATION_STATUS_SHIFT;
 }  // namespace panda
 
-#endif
+#endif  // LIBPANDAFILE_MODIFIERS_H

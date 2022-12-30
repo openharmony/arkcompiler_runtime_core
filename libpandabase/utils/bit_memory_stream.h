@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_BIT_MEMORY_STREAM_H
-#define PANDA_BIT_MEMORY_STREAM_H
+#ifndef LIBPANDABASE_UTILS_BIT_MEMORY_STREAM_H
+#define LIBPANDABASE_UTILS_BIT_MEMORY_STREAM_H
 
 #include "utils/bit_memory_region.h"
 #include "utils/bit_utils.h"
@@ -110,4 +110,4 @@ public:
 
 }  // namespace panda
 
-#endif  // PANDA_BIT_MEMORY_STREAM_H
+#endif  // LIBPANDABASE_UTILS_BIT_MEMORY_STREAM_H

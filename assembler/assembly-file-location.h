@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_FILE_LOCATION_HPP
-#define _PANDA_ASSEMBLER_FILE_LOCATION_HPP
+#ifndef ASSEMBLER_ASSEMBLY_FILE_LOCATION_H
+#define ASSEMBLER_ASSEMBLY_FILE_LOCATION_H
 
 namespace panda::pandasm {
 
@@ -40,4 +40,4 @@ public:
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_FILE_INFORMATION
+#endif  // ASSEMBLER_ASSEMBLY_FILE_LOCATION_H

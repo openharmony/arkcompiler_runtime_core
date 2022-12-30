@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_TESTS_INST_GENERATOR_H_
-#define COMPILER_TESTS_INST_GENERATOR_H_
+#ifndef COMPILER_TESTS_INST_GENERATOR_H
+#define COMPILER_TESTS_INST_GENERATOR_H
 
 #include "unit_test.h"
 
@@ -307,4 +307,4 @@ protected:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_TESTS_INST_GENERATOR_H_
+#endif  // COMPILER_TESTS_INST_GENERATOR_H

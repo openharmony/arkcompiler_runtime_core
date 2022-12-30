@@ -34,4 +34,5 @@ enum class InstType {
     INVALID_TYPE,
 };
 }  // namespace panda::defect_scan_aux
+
 #endif  // LIBARK_DEFECT_SCAN_AUX_INCLUDE_INST_TYPE_H

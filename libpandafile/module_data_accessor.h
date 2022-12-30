@@ -73,4 +73,5 @@ private:
     Span<const uint8_t> entry_data_sp_ {nullptr, nullptr};
 };
 }  // namespace panda::panda_file
+
 #endif  // LIBPANDAFILE_MODULE_DATA_ACCESSOR_H

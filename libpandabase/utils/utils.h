@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_UTILS_H_
-#define PANDA_LIBPANDABASE_UTILS_UTILS_H_
+#ifndef LIBPANDABASE_UTILS_UTILS_H
+#define LIBPANDABASE_UTILS_UTILS_H
 
 #include <exception>
 #include <string>
@@ -58,4 +58,5 @@ private:
 };
 
 }  // namespace panda
-#endif
+
+#endif  // LIBPANDABASE_UTILS_UTILS_H

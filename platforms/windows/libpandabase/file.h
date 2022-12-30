@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_WINDOWS_FILE_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_WINDOWS_FILE_H_
+#ifndef PLATFORMS_WINDOWS_LIBPANDABASE_FILE_H
+#define PLATFORMS_WINDOWS_LIBPANDABASE_FILE_H
 
 #include "os/error.h"
 #include "utils/expected.h"
@@ -186,4 +186,5 @@ private:
 };
 
 }  // namespace panda::os::windows::file
-#endif
+
+#endif  // PLATFORMS_WINDOWS_LIBPANDABASE_FILE_H

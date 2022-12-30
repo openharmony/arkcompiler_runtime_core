@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LOCATIONS_H
-#define PANDA_LOCATIONS_H
+#ifndef COMPILER_OPTIMIZER_IR_LOCATIONS_H
+#define COMPILER_OPTIMIZER_IR_LOCATIONS_H
 
 #include "compiler/optimizer/ir/constants.h"
 #include "compiler/optimizer/ir/datatype.h"
@@ -254,4 +254,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // PANDA_LOCATIONS_H
+#endif  // COMPILER_OPTIMIZER_IR_LOCATIONS_H

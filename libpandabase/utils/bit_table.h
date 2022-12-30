@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_BITTABLE_H
-#define PANDA_BITTABLE_H
+#ifndef LIBPANDABASE_UTILS_BIT_TABLE_H
+#define LIBPANDABASE_UTILS_BIT_TABLE_H
 
 #include "utils/arena_containers.h"
 #include "utils/bit_memory_region.h"
@@ -695,4 +695,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_BITTABLE_H
+#endif  // LIBPANDABASE_UTILS_BIT_TABLE_H

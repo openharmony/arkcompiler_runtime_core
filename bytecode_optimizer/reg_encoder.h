@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_REG_ENCODER_H
-#define PANDA_REG_ENCODER_H
+#ifndef BYTECODE_OPTIMIZER_REG_ENCODER_H
+#define BYTECODE_OPTIMIZER_REG_ENCODER_H
 
 #include "compiler/optimizer/ir/graph.h"
 #include "compiler/optimizer/pass.h"
@@ -190,4 +190,4 @@ private:
 };
 }  // namespace panda::bytecodeopt
 
-#endif  // PANDA_REG_ENCODER_H
+#endif  // BYTECODE_OPTIMIZER_REG_ENCODER_H

@@ -37,4 +37,4 @@ inline File::StringData File::GetStringData(EntityId id) const
 
 }  // namespace panda::panda_file
 
-#endif
+#endif  // LIBPANDAFILE_FILE_INL_H

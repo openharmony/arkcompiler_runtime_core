@@ -69,4 +69,5 @@ private:
     friend class AbcFile;
 };
 }  // namespace panda::defect_scan_aux
+
 #endif  // LIBARK_DEFECT_SCAN_AUX_INCLUDE_CLASS_H

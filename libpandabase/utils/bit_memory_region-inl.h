@@ -62,4 +62,5 @@ inline std::ostream &operator<<(std::ostream &os, const BitMemoryRegion<T> &regi
 }
 
 }  // namespace panda
+
 #endif  // LIBPANDABASE_UTILS_BIT_MEMORY_REGION_INL_H

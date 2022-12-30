@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_MEM_H
-#define LIBPANDABASE_MEM_H
+#ifndef LIBPANDABASE_MEM_MEM_H
+#define LIBPANDABASE_MEM_MEM_H
 
 #include "macros.h"
 #include "utils/math_helpers.h"
@@ -264,4 +264,4 @@ inline ObjectStatus GCKillEmAllVisitor([[maybe_unused]] const ObjectHeader *mem)
 
 }  // namespace panda
 
-#endif  // LIBPANDABASE_MEM_H
+#endif  // LIBPANDABASE_MEM_MEM_H

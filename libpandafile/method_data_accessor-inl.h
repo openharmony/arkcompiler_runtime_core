@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H_
-#define LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H_
+#ifndef LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H
+#define LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H
 
 #include "helpers.h"
 #include "method_data_accessor.h"
@@ -354,4 +354,4 @@ inline uint32_t MethodDataAccessor::GetNumericalAnnotation(uint32_t field_id)
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H_
+#endif  // LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H

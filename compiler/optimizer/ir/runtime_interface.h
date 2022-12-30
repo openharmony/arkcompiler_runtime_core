@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_RUNTIME_INTERFACE_H
-#define COMPILER_RUNTIME_INTERFACE_H
+#ifndef COMPILER_OPTIMIZER_IR_RUNTIME_INTERFACE_H
+#define COMPILER_OPTIMIZER_IR_RUNTIME_INTERFACE_H
 
 #include <cstdint>
 #include <cstddef>
@@ -198,4 +198,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_RUNTIME_INTERFACE_H
+#endif  // COMPILER_OPTIMIZER_IR_RUNTIME_INTERFACE_H

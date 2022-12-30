@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_GC_BARRIER_H
-#define PANDA_LIBPANDABASE_MEM_GC_BARRIER_H
+#ifndef LIBPANDABASE_MEM_GC_BARRIER_H
+#define LIBPANDABASE_MEM_GC_BARRIER_H
 
 #include "utils/bit_field.h"
 
@@ -207,4 +207,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_LIBPANDABASE_MEM_GC_BARRIER_H
+#endif  // LIBPANDABASE_MEM_GC_BARRIER_H

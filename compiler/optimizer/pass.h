@@ -123,4 +123,5 @@ public:
     }
 };
 }  // namespace panda::compiler
+
 #endif  // COMPILER_OPTIMIZER_PASS_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_COMPILER_OPTIONS_H_
-#define COMPILER_COMPILER_OPTIONS_H_
+#ifndef COMPILER_COMPILER_OPTIONS_H
+#define COMPILER_COMPILER_OPTIONS_H
 
 #include "utils/pandargs.h"
 #include "libpandabase/utils/arch.h"
@@ -139,4 +139,5 @@ private:
 };
 
 }  // namespace panda::compiler
-#endif  // COMPILER_COMPILER_OPTIONS_H_
+
+#endif  // COMPILER_COMPILER_OPTIONS_H

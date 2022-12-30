@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_FILE_DEBUG_HELPERS_
-#define PANDA_FILE_DEBUG_HELPERS_
+#ifndef LIBPANDAFILE_DEBUG_HELPERS_H
+#define LIBPANDAFILE_DEBUG_HELPERS_H
 
 #include "debug_data_accessor-inl.h"
 #include "file.h"
@@ -160,4 +160,4 @@ inline size_t GetLineNumber(panda::panda_file::MethodDataAccessor mda, uint32_t 
 
 }  // namespace panda::panda_file::debug_helpers
 
-#endif  // PANDA_FILE_DEBUG_HELPERS_
+#endif  // LIBPANDAFILE_DEBUG_HELPERS_H
