@@ -78,7 +78,8 @@ enum class FunctionKind : uint8_t {
     GENERATOR_FUNCTION = 0x3,
     ASYNC_FUNCTION = 0x4,
     ASYNC_GENERATOR_FUNCTION = 0x5,
-    ASYNC_NC_FUNCTION = 0x6
+    ASYNC_NC_FUNCTION = 0x6,
+    CONCURRENT_FUNCTION = 0x7
 };
 
 bool IsDynamicLanguage(panda::panda_file::SourceLang lang);
@@ -757,13 +758,13 @@ public:
     void SetFunctionKind(FunctionKind kind)
     {
         access_flags_ &= (~FUNCTION_KIND_MASK);
-        access_flags_ |= (static_cast<uint8_t>(kind) << FLAG_WIDTH);
+        access_flags_ |= (static_cast<uint32_t>(kind) << FLAG_WIDTH);
     }
 
     void SetHeaderIndex(uint16_t idx)
     {
         access_flags_ &= (FUNCTION_KIND_MASK | FLAG_MASK);
-        access_flags_ |= (idx << (FUNTION_KIND_WIDTH + FLAG_WIDTH));
+        access_flags_ |= (static_cast<uint32_t>(idx) << (FUNTION_KIND_WIDTH + FLAG_WIDTH));
     }
 
     ~BaseMethodItem() override = default;

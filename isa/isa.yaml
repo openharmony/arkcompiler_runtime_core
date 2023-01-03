@@ -251,7 +251,7 @@ isa_information:
       last_opcode_idx: 0xd5
       last_throw_prefixed_opcode_idx: 0x08
       last_wide_prefixed_opcode_idx: 0x13
-      last_deprecated_prefixed_opcode_idx: 0x2e
+      last_deprecated_prefixed_opcode_idx: 0x2f
 
 prefixes:
   - name: throw
@@ -1397,6 +1397,11 @@ groups:
         acc: out:top
         opcode_idx: [0x2e]
         format: [pref_op_v1_8_v2_8]
+        prefix: deprecated
+      - sig: deprecated.stlexenv
+        acc: none
+        opcode_idx: [0x2f]
+        format: [pref_op_none]
         prefix: deprecated
 
   - title: Load accumulator from string constant pool
