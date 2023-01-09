@@ -30,6 +30,10 @@
 
 namespace panda::os::windows::file {
 
+// In windows API, the length of a path has a limitation of MAX_PATH, which is defined as 260 characters,
+// the "\\?\" prefix is used to specify an extended-length path for a maximum length of 32,767 characters.
+static const std::string PREFIX_FOR_LONG_PATH = "\\\\?\\";
+
 class File {
 public:
     explicit File(int fd) : fd_(fd) {}
@@ -112,13 +116,23 @@ public:
 
     static Expected<std::string, Error> GetAbsolutePath(std::string_view relative_path)
     {
-        std::array<char, _MAX_PATH> buffer = {0};
+        constexpr size_t MAX_PATH_LEN = 2048;
+        std::array<char, MAX_PATH_LEN> buffer = {0};
         auto fp = _fullpath(buffer.data(), relative_path.data(), buffer.size() - 1);
         if (fp == nullptr) {
             return Unexpected(Error(errno));
         }
 
         return std::string(fp);
+    }
+
+    static const std::string GetExtendedLengthStylePath(const std::string &path)
+    {
+        // PREFIX_FOR_LONG_PATH is added to specify it's an extended-length path,
+        // and the path needs to be composed of names seperated by backslashes
+        std::string extendedPath = PREFIX_FOR_LONG_PATH + path;
+        std::replace(extendedPath.begin(), extendedPath.end(), '/', '\\');
+        return extendedPath;
     }
 
     static bool IsDirectory(const std::string &path)
@@ -177,7 +191,11 @@ private:
     {
         struct _stat s = {};
 
-        if (_stat(path.c_str(), &s) != 0) {
+        std::string tmp_path = path;
+        if (UNLIKELY(path.length() >= _MAX_PATH)) {
+            tmp_path = GetExtendedLengthStylePath(path);
+        }
+        if (_stat(tmp_path.c_str(), &s) != 0) {
             return false;
         }
 
