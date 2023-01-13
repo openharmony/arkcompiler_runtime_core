@@ -13,11 +13,7 @@
 
 import("//arkcompiler/runtime_core/ark_config.gni")
 
-isa_paths = [
-  rebase_path("$ark_root/isa/isa.yaml", root_build_dir),
-  #  rebase_path("$ark_root/../ets_runtime/ecmascript/ecma_isa.yaml",
-  #              root_build_dir),
-]
+isa_paths = [ rebase_path("$ark_root/isa/isa.yaml", root_build_dir) ]
 
 foreach(plugin, enabled_plugins) {
   print("add isa plugin: $plugin")
