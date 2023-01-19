@@ -219,6 +219,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
         auto open_error = OpenArchiveFile(zipfile, fp);
         if (open_error != ZIPARCHIVE_OK) {
             LOG(ERROR, PANDAFILE) << "Can't open archive " << location;
+            fclose(fp);
             return nullptr;
         }
         bool try_default = archive_filename.empty();
@@ -242,6 +243,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
         if (GetCurrentFileInfo(zipfile, &entry) != ZIPARCHIVE_OK) {
             OpenPandaFileFromZipErrorHandler(zipfile);
             LOG(ERROR, PANDAFILE) << "GetCurrentFileInfo error";
+            fclose(fp);
             return nullptr;
         }
         // check that file is not empty, otherwise crash at CloseArchiveFile
@@ -249,12 +251,14 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
             OpenPandaFileFromZipErrorHandler(zipfile);
             LOG(ERROR, PANDAFILE) << "Invalid panda file '" << (try_default ? ARCHIVE_FILENAME : archive_filename)
                                   << "'";
+            fclose(fp);
             return nullptr;
         }
         if (OpenCurrentFile(zipfile) != ZIPARCHIVE_OK) {
             CloseCurrentFile(zipfile);
             OpenPandaFileFromZipErrorHandler(zipfile);
             LOG(ERROR, PANDAFILE) << "Can't OpenCurrentFile!";
+            fclose(fp);
             return nullptr;
         }
         GetCurrentFileOffset(zipfile, &entry);
@@ -262,6 +266,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
         CloseCurrentFile(zipfile);
         if (panda::CloseArchiveFile(zipfile) != 0) {
             LOG(ERROR, PANDAFILE) << "CloseArchive failed!";
+            fclose(fp);
             return nullptr;
         }
     } else {

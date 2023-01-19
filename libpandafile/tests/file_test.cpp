@@ -295,6 +295,7 @@ HWTEST(File, CheckHeader, testing::ext::TestSize.Level0)
         os::mem::MMAP_FLAG_PRIVATE, writer.GetOffset()).ToConst();
     EXPECT_NE(ptr.Get(), nullptr);
     EXPECT_TRUE(CheckHeader(ptr, ABC_FILE));
+    fclose(fp);
 
     remove(ABC_FILE);
 }
