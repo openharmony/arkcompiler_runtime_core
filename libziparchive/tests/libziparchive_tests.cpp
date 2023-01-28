@@ -243,6 +243,7 @@ static void UnzipFileCheckTxt(const char *archivename, char *filename, const cha
                 os::mem::UnmapRaw(mem, size_to_mmap);
                 CloseCurrentFile(zipfile);
                 CloseArchive(zipfile);
+                (void)fclose(myfile);
                 printf("ExtractToMemory() failed!, uncompressed_length is %u, original strlen is %u\n",
                        static_cast<uint>(uncompressed_length) - 1, static_cast<uint>(dlen));
                 ASSERT_EQ(1, 0);
@@ -253,6 +254,7 @@ static void UnzipFileCheckTxt(const char *archivename, char *filename, const cha
                 os::mem::UnmapRaw(mem, size_to_mmap);
                 CloseCurrentFile(zipfile);
                 CloseArchive(zipfile);
+                (void)fclose(myfile);
                 printf("ExtractToMemory() memcmp failed!");
                 ASSERT_EQ(1, 0);
                 return;
@@ -491,6 +493,7 @@ static void UnzipFileCheckInDirectory(const char *archivename, char *filename, c
                 os::mem::UnmapRaw(mem, size_to_mmap);
                 CloseCurrentFile(zipfile);
                 CloseArchive(zipfile);
+                (void)fclose(myfile);
                 printf("ExtractToMemory() failed!, uncompressed_length is %u, original strlen is %u\n",
                        static_cast<uint>(uncompressed_length) - 1, static_cast<uint>(dlen));
                 ASSERT_EQ(1, 0);
@@ -501,6 +504,7 @@ static void UnzipFileCheckInDirectory(const char *archivename, char *filename, c
                 os::mem::UnmapRaw(mem, size_to_mmap);
                 CloseCurrentFile(zipfile);
                 CloseArchive(zipfile);
+                (void)fclose(myfile);
                 printf("ExtractToMemory() memcmp failed!");
                 ASSERT_EQ(1, 0);
                 return;
