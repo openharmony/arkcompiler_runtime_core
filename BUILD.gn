@@ -290,6 +290,7 @@ if (!ark_standalone_build) {
   group("runtime_core_unittest") {
     testonly = true
     deps = [
+      "$ark_root/bytecode_optimizer/tests:unittest",
       "$ark_root/libpandabase/tests:unittest",
       "$ark_root/libpandafile/tests:unittest",
       "$ark_root/libziparchive/tests:unittest",
@@ -299,6 +300,7 @@ if (!ark_standalone_build) {
   group("runtime_core_host_unittest") {
     testonly = true
     deps = [
+      "$ark_root/bytecode_optimizer/tests:host_unittest",
       "$ark_root/libpandabase/tests:host_unittest",
       "$ark_root/libpandafile/tests:host_unittest",
       "$ark_root/libziparchive/tests:host_unittest",
