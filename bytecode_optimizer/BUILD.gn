@@ -60,6 +60,7 @@ ohos_shared_library("libarkbytecodeopt") {
     "$ark_root/compiler:libarkcompiler",
     "$ark_root/libpandabase:libarkbase",
     "$ark_root/libpandafile:libarkfile",
+    sdk_libc_secshared_dep,
   ]
 
   relative_install_dir = "ark"
@@ -86,6 +87,7 @@ ohos_static_library("libarkbytecodeopt_frontend_static") {
     "$ark_root/compiler:libarkcompiler_frontend_static",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libpandafile:libarkfile_frontend_static",
+    sdk_libc_secshared_dep,
   ]
 }
 
