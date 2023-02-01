@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_TEMPLATES_IR_DYN_BASE_TYPES_H
-#define COMPILER_OPTIMIZER_TEMPLATES_IR_DYN_BASE_TYPES_H
+#ifndef COMPILER_OPTIMIZER_IR_IR_DYN_BASE_TYPES_H
+#define COMPILER_OPTIMIZER_IR_IR_DYN_BASE_TYPES_H
 
 #include "compiler/optimizer/ir/datatype.h"
 #include "source_languages.h"
@@ -91,4 +91,4 @@ inline const char *AnyTypeTypeToString(AnyBaseType any_type)
 
 } // namespace panda::compiler
 
-#endif // COMPILER_OPTIMIZER_TEMPLATES_IR_DYN_BASE_TYPES_H
+#endif  // COMPILER_OPTIMIZER_IR_IR_DYN_BASE_TYPES_H

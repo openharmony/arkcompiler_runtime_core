@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_JSON_BUILDER_H
-#define PANDA_LIBPANDABASE_UTILS_JSON_BUILDER_H
+#ifndef LIBPANDABASE_UTILS_JSON_BUILDER_H
+#define LIBPANDABASE_UTILS_JSON_BUILDER_H
 
 #include <cmath>
 #include <cstddef>
@@ -163,4 +163,4 @@ void JsonBuilderBase<startDelimiter, endDelimiter>::Stringify(T &&object)
 }
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_JSON_BUILDER_H
+#endif  // LIBPANDABASE_UTILS_JSON_BUILDER_H

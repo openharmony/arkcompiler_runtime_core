@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef ASSEMBLER_ASSEMBLER_RECORD_H
-#define ASSEMBLER_ASSEMBLER_RECORD_H
+#ifndef ASSEMBLER_ASSEMBLY_RECORD_H
+#define ASSEMBLER_ASSEMBLY_RECORD_H
 
 #include <memory>
 #include <optional>
@@ -61,4 +61,4 @@ struct Record {
 
 }  // namespace panda::pandasm
 
-#endif  // ASSEMBLER_ASSEMBLER_RECORD_H
+#endif  // ASSEMBLER_ASSEMBLY_RECORD_H

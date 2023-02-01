@@ -1151,4 +1151,5 @@ void MarkLoopExits(const Graph *graph, Marker marker);
 void RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rm_pred);
 std::string GetMethodFullName(const Graph *graph, RuntimeInterface::MethodPtr method);
 }  // namespace panda::compiler
+
 #endif  // COMPILER_OPTIMIZER_IR_GRAPH_H

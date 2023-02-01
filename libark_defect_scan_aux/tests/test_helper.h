@@ -56,4 +56,5 @@ public:
     }
 };
 }  // namespace panda::defect_scan_aux::test
+
 #endif  // LIBARK_DEFECT_SCAN_AUX_TESTS_TEST_HELPER_H

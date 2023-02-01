@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_INST_BUILDER_H
-#define PANDA_INST_BUILDER_H
+#ifndef COMPILER_OPTIMIZER_IR_BUILDER_INST_BUILDER_H
+#define COMPILER_OPTIMIZER_IR_BUILDER_INST_BUILDER_H
 
 #include "compiler_options.h"
 #include "optimizer/ir/graph.h"
@@ -306,4 +306,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // PANDA_INST_BUILDER_H
+#endif  // COMPILER_OPTIMIZER_IR_BUILDER_INST_BUILDER_H

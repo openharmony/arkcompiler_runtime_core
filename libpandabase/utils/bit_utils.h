@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_UTILS_BIT_UTILS_H_
-#define LIBPANDABASE_UTILS_BIT_UTILS_H_
+#ifndef LIBPANDABASE_UTILS_BIT_UTILS_H
+#define LIBPANDABASE_UTILS_BIT_UTILS_H
 
 #include <cmath>
 #include <cstdint>
@@ -356,4 +356,4 @@ inline constexpr To CastFloatToInt(From value)
 
 }  // namespace panda
 
-#endif  // LIBPANDABASE_UTILS_BIT_UTILS_H_
+#endif  // LIBPANDABASE_UTILS_BIT_UTILS_H

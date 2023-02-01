@@ -40,4 +40,5 @@ inline DataType::Type ConvertRegType(const Graph *graph, DataType::Type type)
 }
 
 }  // namespace panda::compiler
+
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_REG_TYPE_H

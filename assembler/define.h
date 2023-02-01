@@ -46,4 +46,4 @@ constexpr char PARSE_AREA_MARKER = '.';
     _(".array", ARR)         \
     _(".field", FLD)
 
-#endif /* ASSEMBLER_DEFINE_H */
+#endif  // ASSEMBLER_DEFINE_H

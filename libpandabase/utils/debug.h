@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_DEBUG_H
-#define PANDA_DEBUG_H
+#ifndef LIBPANDABASE_UTILS_DEBUG_H
+#define LIBPANDABASE_UTILS_DEBUG_H
 
 namespace panda::debug {
 
@@ -28,4 +28,4 @@ void PrintStackTrace(int skip = 1);
 
 }  // namespace panda::debug
 
-#endif  // PANDA_DEBUG_H
+#endif  // LIBPANDABASE_UTILS_DEBUG_H

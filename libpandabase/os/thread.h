@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_THREAD_H_
-#define PANDA_LIBPANDABASE_OS_THREAD_H_
+#ifndef LIBPANDABASE_OS_THREAD_H
+#define LIBPANDABASE_OS_THREAD_H
 
 #include "os/error.h"
 #include "utils/expected.h"
@@ -157,4 +157,4 @@ inline bool IsSetPriorityError(int res)
 }
 }  // namespace panda::os::thread
 
-#endif  // PANDA_LIBPANDABASE_OS_THREAD_H_
+#endif  // LIBPANDABASE_OS_THREAD_H

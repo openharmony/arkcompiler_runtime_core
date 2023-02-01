@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PASS_STATISTICS_H
-#define PANDA_PASS_STATISTICS_H
+#ifndef COMPILER_OPTIMIZER_PASS_MANAGER_STATISTICS_H
+#define COMPILER_OPTIMIZER_PASS_MANAGER_STATISTICS_H
 
 #include <chrono>
 #include "utils/arena_containers.h"
@@ -102,4 +102,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // PANDA_PASS_STATISTICS_H
+#endif  // COMPILER_OPTIMIZER_PASS_MANAGER_STATISTICS_H

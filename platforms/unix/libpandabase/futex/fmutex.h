@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_UNIX_FUTEX_FMUTEX_H
-#define PANDA_LIBPANDABASE_PBASE_OS_UNIX_FUTEX_FMUTEX_H
+#ifndef PLATFORMS_UNIX_LIBPANDABASE_FUTEX_FMUTEX_H
+#define PLATFORMS_UNIX_LIBPANDABASE_FUTEX_FMUTEX_H
 
 #include <unistd.h>
 
@@ -112,4 +112,4 @@ void MutexIgnoreChecksOnDeadlock();
 }  // namespace panda::os::unix::memory::futex
 #endif
 
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX_FUTEX_FMUTEX_H
+#endif  // PLATFORMS_UNIX_LIBPANDABASE_FUTEX_FMUTEX_H

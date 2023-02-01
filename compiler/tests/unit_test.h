@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_TESTS_UNIT_TEST_H_
-#define COMPILER_TESTS_UNIT_TEST_H_
+#ifndef COMPILER_TESTS_UNIT_TEST_H
+#define COMPILER_TESTS_UNIT_TEST_H
 
 #include <numeric>
 #include <unordered_map>
@@ -365,4 +365,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_TESTS_UNIT_TEST_H_
+#endif  // COMPILER_TESTS_UNIT_TEST_H

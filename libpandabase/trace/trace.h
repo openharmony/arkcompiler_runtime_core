@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_TRACE_H_
-#define PANDA_TRACE_H_
+#ifndef LIBPANDABASE_TRACE_TRACE_H
+#define LIBPANDABASE_TRACE_TRACE_H
 
 #include <cstdint>
 #include <iosfwd>
@@ -125,4 +125,4 @@ public:
 
 }  // namespace panda::trace
 
-#endif  // PANDA_TRACE_H_
+#endif  // LIBPANDABASE_TRACE_TRACE_H

@@ -56,4 +56,4 @@ private:
 
 }  // namespace panda::bytecodeopt
 
-#endif  //  BYTECODE_OPTIMIZER_REG_ACC_ALLOC_H
+#endif  // BYTECODE_OPTIMIZER_REG_ACC_ALLOC_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_ALIGNED_STORAGE_H_
-#define PANDA_LIBPANDABASE_UTILS_ALIGNED_STORAGE_H_
+#ifndef LIBPANDABASE_UTILS_ALIGNED_STORAGE_H
+#define LIBPANDABASE_UTILS_ALIGNED_STORAGE_H
 
 #include "libpandabase/utils/bit_utils.h"
 
@@ -50,4 +50,4 @@ struct alignas(StructAlign) AlignedStorage {
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_ALIGNED_STORAGE_H_
+#endif  // LIBPANDABASE_UTILS_ALIGNED_STORAGE_H

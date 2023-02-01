@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef BYTECODE_EMITTER_H
-#define BYTECODE_EMITTER_H
+#ifndef LIBPANDAFILE_BYTECODE_EMITTER_H
+#define LIBPANDAFILE_BYTECODE_EMITTER_H
 
 #include <bytecode_instruction.h>
 #include <cstdint>
@@ -129,4 +129,4 @@ private:
 };
 }  // namespace panda
 
-#endif  // BYTECODE_EMITTER_H
+#endif  // LIBPANDAFILE_BYTECODE_EMITTER_H

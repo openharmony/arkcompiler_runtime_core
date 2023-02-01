@@ -38,4 +38,5 @@ bool WriterOsFile(const void *buffer, size_t count, int fd);
 #endif  // PANDA_TARGET_UNIX
 
 }  // namespace panda::os::native_stack
+
 #endif  // LIBPANDABASE_OS_NATIVE_STACK_H

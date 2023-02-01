@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_LOGGER_H_
-#define PANDA_LIBPANDABASE_UTILS_LOGGER_H_
+#ifndef LIBPANDABASE_UTILS_LOGGER_H
+#define LIBPANDABASE_UTILS_LOGGER_H
 
 #include "macros.h"
 #include "os/error.h"
@@ -496,4 +496,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_LOGGER_H_
+#endif  // LIBPANDABASE_UTILS_LOGGER_H

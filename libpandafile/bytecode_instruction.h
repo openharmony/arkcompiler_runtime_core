@@ -411,4 +411,4 @@ using BytecodeInstructionSafe = BytecodeInst<BytecodeInstMode::SAFE>;
 
 }  // namespace panda
 
-#endif  // LIBANDAFILE_BYTECODE_INSTRUCTION_H
+#endif  // LIBPANDAFILE_BYTECODE_INSTRUCTION_H

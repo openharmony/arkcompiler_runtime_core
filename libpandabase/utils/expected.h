@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_EXPECTED_H_
-#define PANDA_LIBPANDABASE_UTILS_EXPECTED_H_
+#ifndef LIBPANDABASE_UTILS_EXPECTED_H
+#define LIBPANDABASE_UTILS_EXPECTED_H
 
 #include <type_traits>
 #include <variant>
@@ -158,4 +158,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_EXPECTED_H_
+#endif  // LIBPANDABASE_UTILS_EXPECTED_H

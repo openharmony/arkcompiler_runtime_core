@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PHI_RESOLVER_H
-#define PHI_RESOLVER_H
+
+#ifndef COMPILER_OPTIMIZER_IR_BUILDER_PHI_RESOLVER_H
+#define COMPILER_OPTIMIZER_IR_BUILDER_PHI_RESOLVER_H
 
 #include "inst_builder.h"
 #include "compiler_logger.h"
@@ -217,4 +218,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // PHI_RESOLVER_H
+#endif  // COMPILER_OPTIMIZER_IR_BUILDER_PHI_RESOLVER_H

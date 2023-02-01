@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_BYTECODE_OPTIMIZER_COMMON_H
-#define PANDA_BYTECODE_OPTIMIZER_COMMON_H
+#ifndef BYTECODE_OPTIMIZER_COMMON_H
+#define BYTECODE_OPTIMIZER_COMMON_H
 
 #include "compiler/optimizer/ir/constants.h"
 #include "compiler/optimizer/ir/inst.h"
@@ -31,4 +31,4 @@ uint8_t AccReadIndex(const compiler::Inst *inst);
 
 }  // namespace panda::bytecodeopt
 
-#endif  // PANDA_BYTECODE_OPTIMIZER_COMMON_H
+#endif  // BYTECODE_OPTIMIZER_COMMON_H

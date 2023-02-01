@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_EXEC_H_
-#define PANDA_LIBPANDABASE_OS_EXEC_H_
+#ifndef LIBPANDABASE_OS_EXEC_H
+#define LIBPANDABASE_OS_EXEC_H
 
 #include "utils/expected.h"
 #include "utils/span.h"
@@ -34,4 +34,4 @@ decltype(auto) Exec(Args... args)
 
 }  // namespace panda::os::exec
 
-#endif  // PANDA_LIBPANDABASE_OS_EXEC_H_
+#endif  // LIBPANDABASE_OS_EXEC_H

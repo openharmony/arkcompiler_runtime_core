@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_TYPE_HELPERS_H_
-#define PANDA_LIBPANDABASE_UTILS_TYPE_HELPERS_H_
+#ifndef LIBPANDABASE_UTILS_TYPE_HELPERS_H
+#define LIBPANDABASE_UTILS_TYPE_HELPERS_H
 
 #include <cstddef>
 #include <cstdint>
@@ -71,4 +71,4 @@ using int128 = struct int128_type {
 static_assert(sizeof(int128) == sizeof(std::int64_t) * 2U);
 #endif
 
-#endif  // PANDA_LIBPANDABASE_UTILS_STRING_HELPERS_H_
+#endif  // LIBPANDABASE_UTILS_TYPE_HELPERS_H

@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef OPEN_FUZZER_H
-#define OPEN_FUZZER_H
+#ifndef TESTS_FUZZTEST_OPEN_FUZZER_OPEN_FUZZER_H
+#define TESTS_FUZZTEST_OPEN_FUZZER_OPEN_FUZZER_H
 
 #define FUZZ_PROJECT_NAME "open_fuzzer"
 
-#endif
+#endif  // TESTS_FUZZTEST_OPEN_FUZZER_OPEN_FUZZER_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PANDA_RUNNER_H
-#define PANDA_PANDA_RUNNER_H
+#ifndef COMPILER_TESTS_PANDA_RUNNER_H
+#define COMPILER_TESTS_PANDA_RUNNER_H
 
 #include "unit_test.h"
 #include "assembler/assembly-emitter.h"
@@ -182,4 +182,4 @@ private:
 };
 }  // namespace panda::test
 
-#endif  // PANDA_PANDA_RUNNER_H
+#endif  // COMPILER_TESTS_PANDA_RUNNER_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_FILE_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_FILE_H_
+#ifndef LIBPANDABASE_OS_FILE_H
+#define LIBPANDABASE_OS_FILE_H
 
 #include "macros.h"
 
@@ -58,4 +58,4 @@ File Open(std::string_view filename, Mode mode);
 
 }  // namespace panda::os::file
 
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_FILE_H_
+#endif  // LIBPANDABASE_OS_FILE_H

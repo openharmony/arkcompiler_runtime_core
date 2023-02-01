@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_MEM_MALLOC_MEM_POOL_INLINE_H
-#define LIBPANDABASE_MEM_MALLOC_MEM_POOL_INLINE_H
+#ifndef LIBPANDABASE_MEM_MALLOC_MEM_POOL_INL_H
+#define LIBPANDABASE_MEM_MALLOC_MEM_POOL_INL_H
 
 #include "malloc_mem_pool.h"
 #include "mem.h"
@@ -116,4 +116,4 @@ inline void *MallocMemPool::GetStartAddrPoolForAddrImpl([[maybe_unused]] const v
 
 }  // namespace panda
 
-#endif  // LIBPANDABASE_MEM_MALLOC_MEM_POOL_INLINE_H
+#endif  // LIBPANDABASE_MEM_MALLOC_MEM_POOL_INL_H

@@ -136,4 +136,5 @@ private:
     std::unique_ptr<ArenaAllocator> local_allocator_ {nullptr};
 };
 }  // namespace panda::defect_scan_aux
+
 #endif  // LIBARK_DEFECT_SCAN_AUX_INCLUDE_ABC_FILE_H

@@ -1042,4 +1042,5 @@ private:
 bool BlocksPathDfsSearch(Marker marker, BasicBlock *block, const BasicBlock *target_block,
                          const BasicBlock *exclude_block = nullptr);
 }  // namespace panda::compiler
+
 #endif  // COMPILER_OPTIMIZER_IR_BASICBLOCK_H

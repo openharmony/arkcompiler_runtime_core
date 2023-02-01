@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_CONCEPTS_H_
-#define PANDA_LIBPANDABASE_CONCEPTS_H_
+#ifndef LIBPANDABASE_CONCEPTS_H
+#define LIBPANDABASE_CONCEPTS_H
 
 #include <iterator>
 
@@ -136,4 +136,4 @@ constexpr bool is_bounded_array_v = is_bounded_array<T>::value;
 
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_CONCEPTS_H_
+#endif  // LIBPANDABASE_CONCEPTS_H

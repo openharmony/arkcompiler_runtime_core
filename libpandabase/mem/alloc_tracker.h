@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_MEM_ALLOC_TRACKER_H
-#define PANDA_RUNTIME_MEM_ALLOC_TRACKER_H
+
+#ifndef LIBPANDABASE_MEM_ALLOC_TRACKER_H
+#define LIBPANDABASE_MEM_ALLOC_TRACKER_H
 
 #include <list>
 #include <map>
@@ -214,4 +215,4 @@ private:
 
 WEAK_FOR_LTO_END
 
-#endif  // PANDA_RUNTIME_MEM_ALLOC_TRACKER_H
+#endif  // LIBPANDABASE_MEM_ALLOC_TRACKER_H

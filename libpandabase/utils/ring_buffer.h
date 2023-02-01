@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_RING_BUFFER_H
-#define PANDA_LIBPANDABASE_UTILS_RING_BUFFER_H
+#ifndef LIBPANDABASE_UTILS_RING_BUFFER_H
+#define LIBPANDABASE_UTILS_RING_BUFFER_H
 
 #include <array>
 #include <limits>
@@ -460,4 +460,4 @@ private:
 };
 }  // namespace panda
 
-#endif  // PANDA_LIBPANDABASE_UTILS_RING_BUFFER_H
+#endif  // LIBPANDABASE_UTILS_RING_BUFFER_H

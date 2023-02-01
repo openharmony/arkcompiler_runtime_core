@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H_
-#define LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H_
+#ifndef LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H
+#define LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H
 
 #include "field_data_accessor.h"
 #include "helpers.h"
@@ -249,4 +249,4 @@ inline uint32_t FieldDataAccessor::GetTypeAnnotationsNumber()
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H_
+#endif  // LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_BYTECODE_OPT_CODEGEN_H
-#define PANDA_BYTECODE_OPT_CODEGEN_H
+#ifndef BYTECODE_OPTIMIZER_CODEGEN_H
+#define BYTECODE_OPTIMIZER_CODEGEN_H
 
 #include "assembler/annotation.h"
 #include "assembler/assembly-function.h"
@@ -160,4 +160,4 @@ private:
 
 }  // namespace panda::bytecodeopt
 
-#endif  // PANDA_BYTECODE_OPT_CODEGEN_H
+#endif  // BYTECODE_OPTIMIZER_CODEGEN_H

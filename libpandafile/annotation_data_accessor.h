@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_ANNOTATION_DATA_ACCESSOR_H_
-#define LIBPANDAFILE_ANNOTATION_DATA_ACCESSOR_H_
+#ifndef LIBPANDAFILE_ANNOTATION_DATA_ACCESSOR_H
+#define LIBPANDAFILE_ANNOTATION_DATA_ACCESSOR_H
 
 #include "file.h"
 #include "helpers.h"
@@ -120,4 +120,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_ANNOTATION_DATA_ACCESSOR_H_
+#endif  // LIBPANDAFILE_ANNOTATION_DATA_ACCESSOR_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H_
+#ifndef PLATFORMS_UNIX_LIBPANDABASE_UNIX_MEM_H
+#define PLATFORMS_UNIX_LIBPANDABASE_UNIX_MEM_H
 
 #include <sys/mman.h>
 
@@ -31,4 +31,5 @@ static constexpr uint32_t MMAP_FLAG_FIXED = MAP_FIXED;
 static constexpr uint32_t MMAP_FLAG_ANONYMOUS = MAP_ANONYMOUS;
 
 }  // namespace panda::os::mem
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H_
+
+#endif  // PLATFORMS_UNIX_LIBPANDABASE_UNIX_MEM_H

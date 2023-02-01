@@ -18,4 +18,4 @@
 
 #define FUZZ_PROJECT_NAME "openarchive_fuzzer"
 
-#endif
+#endif  // TESTS_FUZZTEST_OPENARCHIVE_FUZZER_OPENARCHIVE_FUZZER_H

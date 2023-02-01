@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_GLOBALS_H
-#define PANDA_GLOBALS_H
+#ifndef LIBPANDABASE_GLOBALS_H
+#define LIBPANDABASE_GLOBALS_H
 
 #include <cstdint>
 
@@ -39,4 +39,4 @@ static constexpr bool DEBUG_BUILD = false;
 
 }  // namespace panda
 
-#endif  // PANDA_GLOBALS_H
+#endif  // LIBPANDABASE_GLOBALS_H

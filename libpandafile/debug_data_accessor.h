@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H_
-#define LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H_
+#ifndef LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H
+#define LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H
 
 #include "file.h"
 
@@ -88,4 +88,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H_
+#endif  // LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H

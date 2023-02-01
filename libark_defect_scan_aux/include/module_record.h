@@ -64,4 +64,5 @@ private:
     std::vector<ExportEntry> export_entries_;
 };
 }  // namespace panda::defect_scan_aux
+
 #endif  // LIBARK_DEFECT_SCAN_AUX_INCLUDE_MODULE_RECORD_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_BYTECODE_OPTIMIZER_BYTECODE_ENCODER_H
-#define PANDA_BYTECODE_OPTIMIZER_BYTECODE_ENCODER_H
+#ifndef BYTECODE_OPTIMIZER_BYTECODE_ENCODER_H
+#define BYTECODE_OPTIMIZER_BYTECODE_ENCODER_H
 
 #include <stdint.h>
 
@@ -68,4 +68,4 @@ public:
 };  // BytecodeEncoder
 }  // namespace panda::bytecodeopt
 
-#endif  // PANDA_BYTECODE_OPTIMIZER_BYTECODE_ENCODER_H
+#endif  // BYTECODE_OPTIMIZER_BYTECODE_ENCODER_H

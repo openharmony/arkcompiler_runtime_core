@@ -63,4 +63,5 @@ inline void ModuleDataAccessor::EnumerateModuleRecord(const Callback &cb)
     }
 }
 }  // namespace panda::panda_file
+
 #endif  // LIBPANDAFILE_MODULE_DATA_ACCESSOR_INL_H

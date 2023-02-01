@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_UNIX_FILE_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_UNIX_FILE_H_
+#ifndef PLATFORMS_UNIX_LIBPANDABASE_FILE_H
+#define PLATFORMS_UNIX_LIBPANDABASE_FILE_H
 
 #include <array>
 #include <cerrno>
@@ -233,4 +233,4 @@ private:
 
 }  // namespace panda::os::unix::file
 
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX_FILE_H_
+#endif  // PLATFORMS_UNIX_LIBPANDABASE_FILE_H

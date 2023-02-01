@@ -72,4 +72,5 @@ const TypeInfoIndex NO_EXPLICIT_TYPE = static_cast<BuiltinIndexType>(0);
 constexpr const std::string_view TSTYPE_ANNO_RECORD_NAME = "_ESTypeAnnotation";
 constexpr const std::string_view TSTYPE_ANNO_ELEMENT_NAME = "_TypeOfInstruction";
 constexpr auto INVALID_TYPE_INDEX = std::numeric_limits<std::size_t>::max();
+
 #endif  // COMPILER_OPTIMIZER_IR_CONSTANTS_H

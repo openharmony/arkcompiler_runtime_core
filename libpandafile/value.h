@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_VALUE_H_
-#define LIBPANDAFILE_VALUE_H_
+#ifndef LIBPANDAFILE_VALUE_H
+#define LIBPANDAFILE_VALUE_H
 
 #include <type_traits>
 
@@ -121,4 +121,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_VALUE_H_
+#endif  // LIBPANDAFILE_VALUE_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_LABEL_HPP
-#define _PANDA_ASSEMBLER_LABEL_HPP
+#ifndef ASSEMBLER_ASSEMBLY_LABEL_H
+#define ASSEMBLER_ASSEMBLY_LABEL_H
 
 #include <string>
 #include "assembly-file-location.h"
@@ -35,4 +35,4 @@ struct Label {
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_LABEL_HPP
+#endif  // ASSEMBLER_ASSEMBLY_LABEL_H

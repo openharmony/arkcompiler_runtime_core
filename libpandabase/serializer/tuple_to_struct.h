@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_SERIALIZER_TUPLE_TO_STRUCT_H_
-#define PANDA_LIBPANDABASE_UTILS_SERIALIZER_TUPLE_TO_STRUCT_H_
+#ifndef LIBPANDABASE_SERIALIZER_TUPLE_TO_STRUCT_H
+#define LIBPANDABASE_SERIALIZER_TUPLE_TO_STRUCT_H
 
 #include <tuple>
 
@@ -37,4 +37,4 @@ Struct TupleToStruct(Tuple &&tup)
 
 }  // namespace panda::serializer::internal
 
-#endif  // PANDA_LIBPANDABASE_UTILS_SERIALIZER_TUPLE_TO_STRUCT_H_
+#endif  // LIBPANDABASE_SERIALIZER_TUPLE_TO_STRUCT_H

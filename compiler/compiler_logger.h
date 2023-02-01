@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_COMPILER_LOGGER_H_
-#define COMPILER_COMPILER_LOGGER_H_
+#ifndef COMPILER_COMPILER_LOGGER_H
+#define COMPILER_COMPILER_LOGGER_H
 
 #include <bitset>
 #include <vector>
@@ -78,4 +78,4 @@ private:
 #endif
 }  // namespace panda::compiler
 
-#endif  // COMPILER_COMPILER_LOGGER_H_
+#endif  // COMPILER_COMPILER_LOGGER_H

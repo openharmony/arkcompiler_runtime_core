@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef BYTECODEOPT_OPTIONS_H
-#define BYTECODEOPT_OPTIONS_H
+
+#ifndef BYTECODE_OPTIMIZER_BYTECODEOPT_OPTIONS_H
+#define BYTECODE_OPTIMIZER_BYTECODEOPT_OPTIONS_H
 
 #include "generated/bytecodeopt_options_gen.h"
 
@@ -21,4 +22,4 @@ namespace panda::bytecodeopt {
 extern panda::bytecodeopt::Options options;
 }  // namespace panda::bytecodeopt
 
-#endif  // BYTECODEOPT_OPTIONS_H
+#endif  // BYTECODE_OPTIMIZER_BYTECODEOPT_OPTIONS_H

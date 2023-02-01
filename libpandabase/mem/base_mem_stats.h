@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_BASE_MEM_STATS_H
-#define PANDA_BASE_MEM_STATS_H
+#ifndef LIBPANDABASE_MEM_BASE_MEM_STATS_H
+#define LIBPANDABASE_MEM_BASE_MEM_STATS_H
 
 #include "os/mutex.h"
 #include <cstdio>
@@ -66,4 +66,4 @@ private:
 
 WEAK_FOR_LTO_END
 
-#endif  // PANDA_BASE_MEM_STATS_H
+#endif  // LIBPANDABASE_MEM_BASE_MEM_STATS_H

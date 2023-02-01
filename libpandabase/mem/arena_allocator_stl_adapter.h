@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_MEM_STL_ADAPTER_H
-#define PANDA_RUNTIME_MEM_STL_ADAPTER_H
+#ifndef LIBPANDABASE_MEM_ARENA_ALLOCATOR_STL_ADAPTER_H
+#define LIBPANDABASE_MEM_ARENA_ALLOCATOR_STL_ADAPTER_H
 
 #include "arena_allocator.h"
 
@@ -171,4 +171,4 @@ inline ArenaAllocatorAdapter<void, use_oom_handler> ArenaAllocatorT<use_oom_hand
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_MEM_STL_ADAPTER_H
+#endif  // LIBPANDABASE_MEM_ARENA_ALLOCATOR_STL_ADAPTER_H

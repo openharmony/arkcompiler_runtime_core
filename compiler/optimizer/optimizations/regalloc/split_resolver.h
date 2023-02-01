@@ -57,4 +57,5 @@ private:
     LivenessAnalyzer *liveness_;
 };
 }  // namespace panda::compiler
+
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_SPLIT_RESOLVER_H

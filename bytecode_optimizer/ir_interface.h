@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_IR_INTERFACE_H
-#define PANDA_IR_INTERFACE_H
+#ifndef BYTECODE_OPTIMIZER_IR_INTERFACE_H
+#define BYTECODE_OPTIMIZER_IR_INTERFACE_H
 
 #include <string>
 
@@ -155,4 +155,4 @@ private:
 };
 }  // namespace panda::bytecodeopt
 
-#endif  // PANDA_IR_INTERFACE_H
+#endif  // BYTECODE_OPTIMIZER_IR_INTERFACE_H

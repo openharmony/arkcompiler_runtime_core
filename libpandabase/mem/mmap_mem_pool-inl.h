@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_MEM_MMAP_MEM_POOL_INLINE_H
-#define LIBPANDABASE_MEM_MMAP_MEM_POOL_INLINE_H
+#ifndef LIBPANDABASE_MEM_MMAP_MEM_POOL_INL_H
+#define LIBPANDABASE_MEM_MMAP_MEM_POOL_INL_H
 
 #include "mmap_mem_pool.h"
 #include "mem.h"
@@ -519,4 +519,4 @@ inline size_t MmapMemPool::GetObjectUsedBytes() const
 
 }  // namespace panda
 
-#endif  // LIBPANDABASE_MEM_MMAP_MEM_POOL_INLINE_H
+#endif  // LIBPANDABASE_MEM_MMAP_MEM_POOL_INL_H

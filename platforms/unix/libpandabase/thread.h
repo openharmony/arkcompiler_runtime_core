@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_UNIX_THREAD_H_
-#define PANDA_LIBPANDABASE_OS_UNIX_THREAD_H_
+#ifndef PLATFORMS_UNIX_LIBPANDABASE_THREAD_H
+#define PLATFORMS_UNIX_LIBPANDABASE_THREAD_H
 
 namespace panda::os::thread {
 constexpr int LOWEST_PRIORITY = 19;
@@ -23,4 +23,4 @@ int GetPriority(int thread_id);
 int SetPriority(int thread_id, int prio);
 }  // namespace panda::os::thread
 
-#endif  // PANDA_LIBPANDABASE_OS_UNIX_THREAD_H_
+#endif  // PLATFORMS_UNIX_LIBPANDABASE_THREAD_H

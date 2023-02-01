@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef ASSEMBLER_ASSEMBLER_TYPE_H
-#define ASSEMBLER_ASSEMBLER_TYPE_H
+#ifndef ASSEMBLER_ASSEMBLY_TYPE_H
+#define ASSEMBLER_ASSEMBLY_TYPE_H
 
 #include "define.h"
 #include "file_items.h"
@@ -192,4 +192,4 @@ public:
 
 }  // namespace std
 
-#endif  // ASSEMBLER_ASSEMBLER_TYPE_H
+#endif  // ASSEMBLER_ASSEMBLY_TYPE_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_MEM_MEM_CONFIG_H
-#define PANDA_RUNTIME_MEM_MEM_CONFIG_H
+#ifndef LIBPANDABASE_MEM_MEM_CONFIG_H
+#define LIBPANDABASE_MEM_MEM_CONFIG_H
 
 #include <cstddef>
 
@@ -100,4 +100,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_MEM_MEM_CONFIG_H
+#endif  // LIBPANDABASE_MEM_MEM_CONFIG_H

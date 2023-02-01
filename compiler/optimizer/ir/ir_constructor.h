@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_IR_CONSTRUCTOR_H
-#define PANDA_IR_CONSTRUCTOR_H
+#ifndef COMPILER_OPTIMIZER_IR_IR_CONSTRUCTOR_H
+#define COMPILER_OPTIMIZER_IR_IR_CONSTRUCTOR_H
 
 #include <memory>
 #include "graph.h"
@@ -1173,4 +1173,4 @@ private:
 #define BB(INDEX) builder_->GetBlock(INDEX)
 }  // namespace panda::compiler
 
-#endif  // PANDA_IR_CONSTRUCTOR_H
+#endif  // COMPILER_OPTIMIZER_IR_IR_CONSTRUCTOR_H

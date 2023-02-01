@@ -505,4 +505,4 @@ struct hash<panda::panda_file::File::EntityId> {
 
 }  // namespace std
 
-#endif
+#endif  // LIBPANDAFILE_FILE_H

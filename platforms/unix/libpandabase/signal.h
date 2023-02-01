@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_UNIX_SIGNAL_H_
-#define PANDA_LIBPANDABASE_OS_UNIX_SIGNAL_H_
+#ifndef PLATFORMS_UNIX_LIBPANDABASE_SIGNAL_H
+#define PLATFORMS_UNIX_LIBPANDABASE_SIGNAL_H
 
 #include <csignal>
 #include <functional>
@@ -211,4 +211,4 @@ private:
 
 }  // namespace panda::os::unix
 
-#endif  // PANDA_LIBPANDABASE_OS_UNIX_SIGNAL_H_
+#endif  // PLATFORMS_UNIX_LIBPANDABASE_SIGNAL_H

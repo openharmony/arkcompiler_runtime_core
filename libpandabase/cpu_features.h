@@ -12,11 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_CPU_FEATURES_H_
-#define PANDA_CPU_FEATURES_H_
+
+#ifndef LIBPANDABASE_CPU_FEATURES_H
+#define LIBPANDABASE_CPU_FEATURES_H
 
 namespace panda::compiler {
 bool CpuFeaturesHasCrc32();
 }  // namespace panda::compiler
 
-#endif  // PANDA_CPU_FEATURES_H_
+#endif  // LIBPANDABASE_CPU_FEATURES_H

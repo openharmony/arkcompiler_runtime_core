@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_BIT_MEMORY_REGION_H
-#define PANDA_BIT_MEMORY_REGION_H
+#ifndef LIBPANDABASE_UTILS_BIT_MEMORY_REGION_H
+#define LIBPANDABASE_UTILS_BIT_MEMORY_REGION_H
 
 #include "globals.h"
 #include "mem/mem.h"
@@ -282,4 +282,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_BIT_MEMORY_REGION_H
+#endif  // LIBPANDABASE_UTILS_BIT_MEMORY_REGION_H

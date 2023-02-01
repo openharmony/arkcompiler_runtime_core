@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_MEM_RING_BUF_LOCK_FREE_BUFFER
-#define PANDA_LIBPANDABASE_MEM_RING_BUF_LOCK_FREE_BUFFER
+#ifndef LIBPANDABASE_MEM_RINGBUF_LOCK_FREE_RING_BUFFER_H
+#define LIBPANDABASE_MEM_RINGBUF_LOCK_FREE_RING_BUFFER_H
 
 #include <thread>
 #include <atomic>
@@ -128,4 +128,5 @@ private:
     }
 };
 }  // namespace panda::mem
-#endif
+
+#endif  // LIBPANDABASE_MEM_RINGBUF_LOCK_FREE_RING_BUFFER_H

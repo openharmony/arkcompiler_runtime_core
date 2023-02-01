@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_BASE_H
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_BASE_H
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_REG_ALLOC_BASE_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_REG_ALLOC_BASE_H
 
 #include "compiler/optimizer/ir/graph.h"
 #include "optimizer/analysis/liveness_analyzer.h"
@@ -142,4 +142,4 @@ private:
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_BASE_H
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_REG_ALLOC_BASE_H

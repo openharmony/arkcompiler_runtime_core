@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOCATION_MASK_H
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOCATION_MASK_H
+
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_LOCATION_MASK_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_LOCATION_MASK_H
 
 #include "mem/arena_allocator.h"
 #include "utils/arena_containers.h"
@@ -135,4 +136,5 @@ private:
     std::optional<size_t> reserved_bit_ {std::nullopt};
 };
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOCATION_MASK_H
+
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REGALLOC_LOCATION_MASK_H

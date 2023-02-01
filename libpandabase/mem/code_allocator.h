@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_CODEALLOCATOR_H
-#define PANDA_CODEALLOCATOR_H
+#ifndef LIBPANDABASE_MEM_CODE_ALLOCATOR_H
+#define LIBPANDABASE_MEM_CODE_ALLOCATOR_H
 
 #include "utils/arena_containers.h"
 #include "os/mem.h"
@@ -73,4 +73,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_CODEALLOCATOR_H
+#endif  // LIBPANDABASE_MEM_CODE_ALLOCATOR_H

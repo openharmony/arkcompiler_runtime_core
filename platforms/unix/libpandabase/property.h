@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_UNIX_PROP_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_UNIX_PROP_H_
+#ifndef PLATFORMS_UNIX_LIBPANDABASE_PROPERTY_H
+#define PLATFORMS_UNIX_LIBPANDABASE_PROPERTY_H
 
 #include <iosfwd>
 #include <string>
@@ -28,4 +28,4 @@ bool GetPropertyBuffer(const char *ark_prop, std::string &out);  // NOLINT(googl
 
 }  // namespace panda::os::unix::property
 
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX_PROP_H_
+#endif  // PLATFORMS_UNIX_LIBPANDABASE_PROPERTY_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_SERIALIZER_SERIALIZER_H_
-#define PANDA_LIBPANDABASE_UTILS_SERIALIZER_SERIALIZER_H_
+#ifndef LIBPANDABASE_SERIALIZER_SERIALIZER_H
+#define LIBPANDABASE_SERIALIZER_SERIALIZER_H
 
 #include <securec.h>
 
@@ -323,4 +323,4 @@ bool BufferToStruct(const std::vector<uint8_t> &buffer, /* out */ Struct &str)
 
 }  // namespace panda::serializer
 
-#endif  // PANDA_LIBPANDABASE_UTILS_SERIALIZER_SERIALIZER_H_
+#endif  // LIBPANDABASE_SERIALIZER_SERIALIZER_H

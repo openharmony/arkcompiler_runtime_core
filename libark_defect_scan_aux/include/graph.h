@@ -90,4 +90,5 @@ private:
     const compiler::Graph *graph_ {nullptr};
 };
 }  // namespace panda::defect_scan_aux
+
 #endif  // LIBARK_DEFECT_SCAN_AUX_INCLUDE_GRAPH_H

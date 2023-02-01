@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DISASM_LIB_H_INCLUDED
-#define DISASM_LIB_H_INCLUDED
+#ifndef DISASSEMBLER_DISASSEMBLER_H
+#define DISASSEMBLER_DISASSEMBLER_H
 
 #include "macros.h"
 #include "utils/type_helpers.h"
@@ -179,4 +179,4 @@ private:
 };
 }  // namespace panda::disasm
 
-#endif
+#endif  // DISASSEMBLER_DISASSEMBLER_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_UTILS_LIST_H_
-#define LIBPANDABASE_UTILS_LIST_H_
+#ifndef LIBPANDABASE_UTILS_LIST_H
+#define LIBPANDABASE_UTILS_LIST_H
 
 #include "macros.h"
 
@@ -619,4 +619,4 @@ private:
 
 }  // namespace panda
 
-#endif  // LIBPANDABASE_UTILS_LIST_H_
+#endif  // LIBPANDABASE_UTILS_LIST_H

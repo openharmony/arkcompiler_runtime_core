@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef LIBPANDABASE_EVENTS_EVENTS_H
 #define LIBPANDABASE_EVENTS_EVENTS_H
 

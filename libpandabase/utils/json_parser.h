@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_TOOLS_PAOC_JSON_PARSER_H
-#define COMPILER_TOOLS_PAOC_JSON_PARSER_H
+#ifndef LIBPANDABASE_UTILS_JSON_PARSER_H
+#define LIBPANDABASE_UTILS_JSON_PARSER_H
 
 #include <string>
 #include <vector>
@@ -193,4 +193,4 @@ private:
 
 WEAK_FOR_LTO_END
 
-#endif  // COMPILER_TOOLS_PAOC_JSON_PARSER_H
+#endif  // LIBPANDABASE_UTILS_JSON_PARSER_H
