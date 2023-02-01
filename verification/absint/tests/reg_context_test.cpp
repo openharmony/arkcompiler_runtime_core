@@ -54,7 +54,8 @@ TEST_F(VerifierTest, AbsIntRegContext)
     AbstractTypedValue av2 {i32, nv()};
     AbstractTypedValue av3 {u16, nv()};
 
-    RegContext ctx1, ctx2;
+    RegContext ctx1;
+    RegContext ctx2;
 
     ctx1[-1] = av1;
     ctx2[0] = av2;

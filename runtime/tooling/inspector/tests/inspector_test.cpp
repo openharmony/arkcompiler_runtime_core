@@ -107,7 +107,11 @@ TEST_F(InspectorTest, InitialSequence)
                              "Runtime.getIsolateId", "Debugger.setBlackboxPatterns");
 
     // NOLINTNEXTLINE(readability-isolate-declaration)
-    MockFunction<void()> executionContextCreated, runtimeEnabled, debuggerEnabled, debuggerResumed, runIfWaiting;
+    MockFunction<void()> executionContextCreated;
+    MockFunction<void()> runtimeEnabled;
+    MockFunction<void()> debuggerEnabled;
+    MockFunction<void()> debuggerResumed;
+    MockFunction<void()> runIfWaiting;
     InSequence seq;
     EXPECT_CALL(executionContextCreated, Call);
     EXPECT_CALL(runtimeEnabled, Call);
@@ -145,7 +149,9 @@ TEST_F(InspectorTest, InitialSequence)
 TEST_F(InspectorTest, BreaksOnStart)
 {
     // NOLINTNEXTLINE(readability-isolate-declaration)
-    MockFunction<void()> debuggerPaused, debuggerResumed, debuggerResumeRepliedTo;
+    MockFunction<void()> debuggerPaused;
+    MockFunction<void()> debuggerResumed;
+    MockFunction<void()> debuggerResumeRepliedTo;
     InSequence seq;
     EXPECT_CALL(debuggerResumed, Call);
     EXPECT_CALL(debuggerPaused, Call);

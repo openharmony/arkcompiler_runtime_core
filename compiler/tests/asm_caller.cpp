@@ -62,10 +62,14 @@ EMITED_TWO_PARAM_INST_LIST(C_EXTERN_TWO_PARAM)
 
 TEST_F(AsmCaller, call_math)
 {
-    std::int8_t ui8 = 1, ui8_2 = -12;
-    std::int16_t ui16 = 6518, ui16_2 = 6;
-    std::int32_t ui32 = 3, ui32_2 = 0xecf27abf;
-    std::int64_t ui64 = 2423590325, ui64_2 = 8;
+    std::int8_t ui8 = 1;
+    std::int8_t ui8_2 = -12;
+    std::int16_t ui16 = 6518;
+    std::int16_t ui16_2 = 6;
+    std::int32_t ui32 = 3;
+    std::int32_t ui32_2 = 0xecf27abf;
+    std::int64_t ui64 = 2423590325;
+    std::int64_t ui64_2 = 8;
 
 #ifdef STDOUT_PRINT
 #define CALL_ONE_PARAM_OUTPUT(opc, param)                                                   \

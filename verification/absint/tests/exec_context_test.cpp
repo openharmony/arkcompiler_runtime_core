@@ -70,7 +70,9 @@ TEST_F(VerifierTest, AbsIntExecContext)
     // C I C I C I
     //   E     E
 
-    RegContext ctx1, ctx2, ctx3;
+    RegContext ctx1;
+    RegContext ctx2;
+    RegContext ctx3;
 
     ctx1[-1] = av1;
     ctx1[0] = av2;

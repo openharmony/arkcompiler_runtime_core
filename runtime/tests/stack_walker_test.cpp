@@ -169,7 +169,8 @@ private:
 NO_OPTIMIZE int PandaRunnerHook()
 {
     ASSERT(PandaRunner::callback_);
-    uintptr_t fp = 0, lr = 0;
+    uintptr_t fp = 0;
+    uintptr_t lr = 0;
     if constexpr (RUNTIME_ARCH == Arch::AARCH64) {
         ManagedThread::GetCurrent()->SetCurrentFrameIsCompiled(true);
         fp = reinterpret_cast<uintptr_t>(ManagedThread::GetCurrent()->GetCurrentFrame());

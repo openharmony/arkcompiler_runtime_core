@@ -221,7 +221,6 @@ TEST_F(RunSlotsAllocatorTest, AllocateReuse2)
     constexpr char char5 = 'e';
     constexpr char char6 = 'f';
     AddMemoryPoolToAllocatorProtected(allocator);
-    char *strA, *strB, *strC, *strD, *strE, *strF;
     auto fillStr = [](char *str, char c, size_t size) {
         for (size_t i = 0; i < size - 1; i++) {
             str[i] = c;
@@ -236,9 +235,9 @@ TEST_F(RunSlotsAllocatorTest, AllocateReuse2)
         }
         return true;
     };
-    strA = reinterpret_cast<char *>(allocator.Alloc(size1));
-    strB = reinterpret_cast<char *>(allocator.Alloc(size1));
-    strC = reinterpret_cast<char *>(allocator.Alloc(size1));
+    char *strA = reinterpret_cast<char *>(allocator.Alloc(size1));
+    char *strB = reinterpret_cast<char *>(allocator.Alloc(size1));
+    char *strC = reinterpret_cast<char *>(allocator.Alloc(size1));
     fillStr(strA, char1, size1);
     fillStr(strB, char2, size1);
     fillStr(strC, char3, size1);
@@ -248,9 +247,9 @@ TEST_F(RunSlotsAllocatorTest, AllocateReuse2)
     allocator.Free(static_cast<void *>(strA));
     allocator.Free(static_cast<void *>(strB));
     allocator.Free(static_cast<void *>(strC));
-    strD = reinterpret_cast<char *>(allocator.Alloc(size2));
-    strE = reinterpret_cast<char *>(allocator.Alloc(size2));
-    strF = reinterpret_cast<char *>(allocator.Alloc(size2));
+    char *strD = reinterpret_cast<char *>(allocator.Alloc(size2));
+    char *strE = reinterpret_cast<char *>(allocator.Alloc(size2));
+    char *strF = reinterpret_cast<char *>(allocator.Alloc(size2));
     fillStr(strD, char4, size2);
     fillStr(strE, char5, size2);
     fillStr(strF, char6, size2);
