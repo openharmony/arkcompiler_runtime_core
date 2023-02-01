@@ -143,7 +143,8 @@ private:
     {
         ASSERT(callback_);
         if constexpr (RUNTIME_ARCH == Arch::AARCH64) {
-            uintptr_t fp, lr;
+            uintptr_t fp;
+            uintptr_t lr;
             ManagedThread::GetCurrent()->SetCurrentFrameIsCompiled(true);
             asm("ldr %0, [fp, #0]" : "=r"(fp));
             asm("ldr %0, [fp, #8]" : "=r"(lr));
