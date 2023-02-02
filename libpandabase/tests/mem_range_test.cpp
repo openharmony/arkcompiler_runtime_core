@@ -44,9 +44,8 @@ static panda::mem::MemRange RandomMemRange(uintptr_t min_start, uintptr_t max_en
 {
     ASSERT(max_end > min_start);
 
-    uintptr_t rand_1, rand_2;
-    rand_1 = min_start + RandomUintptr() % (max_end - min_start + 1);
-    rand_2 = min_start + RandomUintptr() % (max_end - min_start + 1);
+    uintptr_t rand_1 = min_start + RandomUintptr() % (max_end - min_start + 1);
+    uintptr_t rand_2 = min_start + RandomUintptr() % (max_end - min_start + 1);
 
     if (rand_1 < rand_2) {
         return panda::mem::MemRange(rand_1, rand_2);
@@ -139,7 +138,8 @@ static void RandomTestInBounds(uintptr_t from, uintptr_t to, uint64_t num_iter =
 {
     ASSERT(from < to);
 
-    panda::mem::MemRange mem_range_1(0, 1), mem_range_2(0, 1);
+    panda::mem::MemRange mem_range_1(0, 1);
+    panda::mem::MemRange mem_range_2(0, 1);
     // check intersection via cycle
     for (uint64_t iter = 0; iter < num_iter; iter++) {
         mem_range_1 = RandomMemRange(from, to);
