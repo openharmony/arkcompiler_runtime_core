@@ -46,7 +46,7 @@ TEST_F(SpillFillEncoderTest, SpillFillDataSorting)
         GetAllocator()->Adapter()};
 
     ArenaVector<SpillFillData> expected_order {
-        {// reorder spills
+        {  // reorder spills
          {LocationType::REGISTER, LocationType::STACK, 0, 2, DataType::Type::INT64},
          {LocationType::REGISTER, LocationType::STACK, 1, 0, DataType::Type::INT64},
          // skip move

@@ -277,8 +277,10 @@ static std::vector<uint8_t> EmitJmpFwdBwd(size_t n1, size_t n2)
 
     std::vector<uint8_t> out;
 
-    size_t jmp_size1, jmp_size2;
-    int32_t imm_max1, imm_min2;
+    size_t jmp_size1;
+    size_t jmp_size2;
+    int32_t imm_max1;
+    int32_t imm_min2;
 
     for (const auto &t1 : jmps) {
         std::tie(jmp_size1, std::ignore, imm_max1) = t1;
