@@ -276,14 +276,13 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
 %     end
 %     params_arr = inst.operands
 %     format = "BytecodeInstruction::Format::" + inst.format.pretty.upcase
-%     range_should_exclude_last = (name.include? "NEWOBJRANGE") || (name.include? "SUPERCALLTHISRANGE") || (name.include? "CREATEOBJECTWITHEXCLUDEDKEYS") || (name.include? "SUPERCALLARROWRANGE") || (name.include? "CALLRANGE")
-%     is_range_call = (name.include? "CALLTHISRANGE") || range_should_exclude_last
+%     range_should_exclude_last = (name.include? "NEWOBJRANGE") || (name.include? "SUPERCALLTHISRANGE") || (name.include? "SUPERCALLARROWRANGE") || (name.include? "CALLRANGE")
+%     is_range_call = (name.include? "CALLTHISRANGE") || (name.include? "CREATEOBJECTWITHEXCLUDEDKEYS") || range_should_exclude_last
 %     need_newtarget = (name.include? "SUPERCALLSPREAD") || (name.include? "SUPERCALL")
 %     num_vregs = params_arr.select{|b| b.reg?}.length
 %     num_imms = params_arr.select{|b| b.imm?}.length
 %     num_ids = params_arr.select{|b| b.id?}.length
 %     num_inputs = acc_read ? num_vregs + 2 : num_vregs + 1
-%     use_ic = inst.properties.include? 'use_ic'
 %     if range_should_exclude_last
 %       num_inputs = num_inputs - 1
 %     end
@@ -299,12 +298,6 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
 %     if need_newtarget
             if (GetGraph()->IsBytecodeOptimizer()) {
                 --args_count;
-            }
-%     end
-%     if use_ic
-%       num_inputs = num_inputs + 1
-            if (!GetGraph()->IsBytecodeOptimizer()) {
-              args_count++;  // Instruction supports IC: +1 input for IC slot index
             }
 %     end
             inst->ReserveInputs(args_count);
@@ -365,12 +358,6 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
                 inst->AppendInput(input);
                 inst->AddInputType(DataType::ANY);
                 inst->SetFlag(compiler::inst_flags::ACC_READ);
-            }
-%     end
-%     if use_ic
-            if (!GetGraph()->IsBytecodeOptimizer()) {
-              inst->AppendInput(FindOrCreate32BitConstant(GetPc(bc_inst->GetAddress())));
-              inst->AddInputType(DataType::UINT16);
             }
 %     end
             inst->AppendInput(inst_save_state);
