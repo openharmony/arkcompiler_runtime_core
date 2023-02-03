@@ -25,9 +25,6 @@
 class AsmCaller : public ::testing::Test {
 };
 
-// Debug print to stdout
-// #define STDOUT_PRINT
-
 #define EMITED_ONE_PARAM_INST_LIST(DEF)                               \
     DEF(mov, [](auto param) { return param; })                        \
     DEF(neg, [](auto param) { return -param; })                       \
