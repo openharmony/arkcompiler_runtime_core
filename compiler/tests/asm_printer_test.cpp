@@ -28,9 +28,6 @@
 
 static const std::string output_dir = "asm_output";
 
-// Debug print to stdout
-// #define STDOUT_PRINT
-
 namespace panda::compiler {
 
 template <Arch arch>

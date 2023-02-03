@@ -19,28 +19,6 @@
 #include <gtest/gtest.h>
 
 namespace panda::json_parser::test {
-/*
-        "key_0" : "key_0.value",
-
-        "key_1" :
-        {
-            "key_1.0" : "key_1.0.value",
-            "key_1.1" :
-            {
-                "key_1.1.0" : "key_1.1.0.value",
-                "key_1.1.1" :
-                [
-                    "key_1.1.1[0]",
-                    {
-                        "key_1.1.1[1].0" : "key_1.1.1[1].0.value",
-                        "key_1.1.1[1].1" : 11111,
-                        "key_1.1.1[1].2" : "key_1.1.1[1].2.value",
-                    },
-                    "key_1.1.1[2]",
-                ]
-            }
-        }
-*/
 HWTEST(JsonParser, ParsePrimitive, testing::ext::TestSize.Level0)
 {
     auto str = R"(
