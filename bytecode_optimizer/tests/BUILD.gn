@@ -92,11 +92,6 @@ host_unittest_action("ExcludedKeysTest") {
   deps = bcopt_test_deps
 }
 
-group("unittest") {
-  testonly = true
-  deps = [ ":ExcludedKeysTest" ]
-}
-
 group("host_unittest") {
   testonly = true
   deps = [ ":ExcludedKeysTestAction" ]
