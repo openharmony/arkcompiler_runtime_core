@@ -40,10 +40,10 @@ source_set("libarkziparchive_static") {
     sdk_libc_secshared_dep,
   ]
 
-  if (!ark_standalone_build) {
+  if (ark_standalone_build) {
     deps += [ "$ark_third_party_root/zlib:libz" ]
   } else {
-    deps += [ "$ark_third_party_root/zlib:libz" ]
+    deps += [ "$ark_third_party_root/zlib:shared_libz" ]
   }
 }
 

@@ -44,7 +44,8 @@ template("host_unittest_action") {
       "--expect-output",
       "0",
       "--env-path",
-      rebase_path(_root_out_dir_) + "/arkcompiler/runtime_core:",
+      rebase_path(_root_out_dir_) + "/arkcompiler/runtime_core:" +
+          rebase_path(_root_out_dir_) + "/thirdparty/zlib:",
       "--timeout-limit",
       "1200",
     ]
