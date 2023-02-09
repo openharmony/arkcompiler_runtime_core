@@ -252,6 +252,7 @@ isa_information:
       last_throw_prefixed_opcode_idx: 0x09
       last_wide_prefixed_opcode_idx: 0x13
       last_deprecated_prefixed_opcode_idx: 0x2e
+      last_callruntime_prefixed_opcode_idx: 0x00
 
 prefixes:
   - name: throw
@@ -263,6 +264,9 @@ prefixes:
   - name: deprecated
     description: deprecated instructions but are keeped for compatibility.
     opcode_idx: 0xfc
+  - name: callruntime
+    description: call runtime methods.
+    opcode_idx: 0xfb
 
 groups:
   - title: constant object loaders
@@ -730,6 +734,27 @@ groups:
         opcode_idx: [0x28]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot]
+
+  - title: call runtime functions
+    description: instructions which call runtime functions
+    verification:
+      - none
+    exceptions:
+      - x_none
+    properties:
+      - acc_read
+      - acc_write
+    namespace: ecmascript
+    pseudo: |
+      acc = ecma_op(acc, operand_0, ..., operands_n)
+    semantics: |
+      skip
+    instructions:
+      - sig: callruntime.notifyconcurrentresult
+        acc: in:top
+        opcode_idx: [0x00]
+        format: [pref_op_none]
+        prefix: callruntime
 
   - title: throw instructions
     description: throw instructions
