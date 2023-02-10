@@ -40,7 +40,11 @@ source_set("libarkziparchive_static") {
     sdk_libc_secshared_dep,
   ]
 
-  deps += [ "$ark_third_party_root/zlib:libz" ]
+  if (ark_standalone_build) {
+    deps += [ "$ark_third_party_root/zlib:libz" ]
+  } else {
+    deps += [ "$ark_third_party_root/zlib:shared_libz" ]
+  }
 }
 
 ohos_shared_library("libarkziparchive") {
