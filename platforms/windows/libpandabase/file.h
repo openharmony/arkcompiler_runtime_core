@@ -110,6 +110,15 @@ public:
         return "\\";
     }
 
+    static const std::string GetExtendedFilePath(const std::string &path)
+    {
+        if (LIKELY(path.length() < _MAX_PATH)) {
+            return path;
+        } else {
+            return GetExtendedLengthStylePath(path);
+        }
+    }
+
     static Expected<std::string, Error> GetTmpPath();
 
     static Expected<std::string, Error> GetExecutablePath();
