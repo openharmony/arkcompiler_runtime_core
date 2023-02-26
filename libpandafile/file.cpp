@@ -542,9 +542,11 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
         LOG(ERROR, PANDAFILE) << "Unable to open file '" << filename << "' with bytecode version "
                               << VersionToString(file_version);
         if (file_version < minVersion) {
-            LOG(ERROR, PANDAFILE) << "Minimum supported version is " << VersionToString(minVersion);
+            LOG(ERROR, PANDAFILE) << "Minimum supported version is " << VersionToString(minVersion)
+                << ". Please try runtime of former version or generate byte code with SDK tools of supported version";
         } else {
-            LOG(ERROR, PANDAFILE) << "Maximum supported version is " << VersionToString(version);
+            LOG(ERROR, PANDAFILE) << "Maximum supported version is " << VersionToString(version)
+                << ". Please upgrade runtime to supported version or generate byte code with former SDK tools";
         }
         return false;
     }

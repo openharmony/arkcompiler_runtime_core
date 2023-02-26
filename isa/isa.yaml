@@ -107,7 +107,7 @@ chapters:
 
 # File format and ISA versioning
 min_version: 0.0.0.2
-version: 0.0.0.3
+version: 9.0.0.0
 
 properties:
   - tag: type_id
@@ -248,7 +248,7 @@ verification:
 
 isa_information:
     - description: The last encoding number of various ISA. It should be maintained as long as ISA changes.
-      last_opcode_idx: 0xd5
+      last_opcode_idx: 0xd7
       last_throw_prefixed_opcode_idx: 0x09
       last_wide_prefixed_opcode_idx: 0x13
       last_deprecated_prefixed_opcode_idx: 0x2e
@@ -393,6 +393,11 @@ groups:
         opcode_idx: [0x02]
         format: [pref_op_v1_8_v2_8]
         prefix: deprecated
+      - sig: getasynciterator imm
+        acc: inout:top
+        opcode_idx: [0xd7]
+        format: [op_imm_8]
+        properties: [ic_slot]
 
   - title: object creaters
     description: instructions which create objects
@@ -1429,6 +1434,10 @@ groups:
         opcode_idx: [0x2e]
         format: [pref_op_v1_8_v2_8]
         prefix: deprecated
+      - sig: setgeneratorstate imm
+        acc: in:top
+        opcode_idx: [0xd6]
+        format: [op_imm_8]
 
   - title: Load accumulator from string constant pool
     description: >
