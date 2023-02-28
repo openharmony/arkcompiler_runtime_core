@@ -15,6 +15,7 @@ import("//arkcompiler/runtime_core/ark_config.gni")
 
 config("arkbase_public_config") {
   include_dirs = [
+    "$ark_root",
     "$ark_root/libpandabase",
     "$target_gen_dir/include",
     "$target_gen_dir",
