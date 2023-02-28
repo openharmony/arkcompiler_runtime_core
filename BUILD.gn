@@ -157,6 +157,7 @@ config("ark_config") {
     "-Wno-gnu-statement-expression",
     "-Wno-unused-parameter",
     "-Wno-unused-result",
+    "-Wno-unused-but-set-variable",
   ]
 
   if (!is_mac && use_pbqp) {
