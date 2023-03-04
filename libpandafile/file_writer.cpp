@@ -18,7 +18,7 @@
 
 namespace panda::panda_file {
 
-FileWriter::FileWriter(const std::string &file_name) : offset_(0), checksum_(adler32(0, nullptr, 0))
+FileWriter::FileWriter(const std::string &file_name) : checksum_(adler32(0, nullptr, 0))
 {
 #ifdef PANDA_TARGET_WINDOWS
     constexpr char const *mode = "wb";
@@ -38,29 +38,38 @@ FileWriter::~FileWriter()
 
 bool FileWriter::WriteByte(uint8_t data)
 {
-    return WriteBytes({data});
+    if (LIKELY(count_checksum_)) {
+        checksum_ = adler32(checksum_, &data, 1u);
+    }
+    buffer_.push_back(data);
+    return true;
 }
 
 bool FileWriter::WriteBytes(const std::vector<uint8_t> &bytes)
 {
-    if (file_ == nullptr) {
-        return false;
-    }
-
-    if (bytes.empty()) {
+    if (UNLIKELY(bytes.empty())) {
         return true;
     }
 
-    if (count_checksum_) {
+    if (LIKELY(count_checksum_)) {
         checksum_ = adler32(checksum_, bytes.data(), bytes.size());
     }
 
-    if (fwrite(bytes.data(), sizeof(decltype(bytes.back())), bytes.size(), file_) != bytes.size()) {
+    buffer_.insert(buffer_.end(), bytes.begin(), bytes.end());
+    return true;
+}
+
+bool FileWriter::FinishWrite()
+{
+    if (file_ == nullptr) {
         return false;
     }
-
-    offset_ += bytes.size();
-    return true;
+    const auto &buf = GetBuffer();
+    auto length = buf.size();
+    bool ret = fwrite(buf.data(), sizeof(decltype(buf.back())), length, file_) == length;
+    fclose(file_);
+    file_ = nullptr;
+    return ret;
 }
 
 }  // namespace panda::panda_file

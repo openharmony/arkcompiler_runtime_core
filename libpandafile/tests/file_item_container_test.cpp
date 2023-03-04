@@ -116,9 +116,51 @@ HWTEST(ItemContainer, TestFileFormatVersionTooOld, testing::ext::TestSize.Level0
         for (uint8_t b : Span<uint8_t>(reinterpret_cast<uint8_t *>(&header), sizeof(header))) {
             writer.WriteByte(b);
         }
+        EXPECT_TRUE(writer.FinishWrite());
     }
 
     EXPECT_EQ(File::Open(file_name), nullptr);
+}
+
+HWTEST(ItemContainer, TestRewriteChecksum, testing::ext::TestSize.Level0)
+{
+    const std::string file_name = "test_rewrite_checksum.abc";
+    {
+        ItemContainer container;
+        auto writer = FileWriter(file_name);
+        File::Header header;
+        errno_t res = memset_s(&header, sizeof(header), 0, sizeof(header));
+        EXPECT_EQ(res, EOK);
+        header.magic = File::MAGIC;
+        header.version = std::array<uint8_t, File::VERSION_SIZE>(minVersion);
+        header.file_size = sizeof(File::Header);
+        EXPECT_EQ(header.checksum, 0u);
+        writer.CountChecksum(true);
+        for (uint8_t b : Span<uint8_t>(reinterpret_cast<uint8_t *>(&header), sizeof(header))) {
+            writer.WriteByte(b);
+        }
+        EXPECT_NE(writer.GetChecksum(), 0u);
+        writer.CountChecksum(false);
+        size_t offset = static_cast<size_t>(reinterpret_cast<uint8_t *>(&(header.checksum)) -
+            reinterpret_cast<uint8_t *>(&header));
+        EXPECT_TRUE(writer.RewriteChecksum(offset));
+        EXPECT_TRUE(writer.FinishWrite());
+    }
+    const auto &file = File::Open(file_name);
+    EXPECT_NE(file, nullptr);
+    EXPECT_NE(file->GetHeader()->checksum, 0u);
+}
+
+HWTEST(ItemContainer, TestReserveBufferCapacity, testing::ext::TestSize.Level0)
+{
+    const std::string file_name = "test_reserve_buffer_capacity.abc";
+    {
+        auto writer = FileWriter(file_name);
+        static constexpr size_t CAPACITY = 2000u;
+        EXPECT_LT(writer.GetBuffer().capacity(), CAPACITY);
+        writer.ReserveBufferCapacity(CAPACITY);
+        EXPECT_GE(writer.GetBuffer().capacity(), CAPACITY);
+    }
 }
 
 HWTEST(ItemContainer, TestFileFormatVersionTooNew, testing::ext::TestSize.Level0)
@@ -146,6 +188,7 @@ HWTEST(ItemContainer, TestFileFormatVersionTooNew, testing::ext::TestSize.Level0
         for (uint8_t b : Span<uint8_t>(reinterpret_cast<uint8_t *>(&header), sizeof(header))) {
             writer.WriteByte(b);
         }
+        EXPECT_TRUE(writer.FinishWrite());
     }
 
     EXPECT_EQ(File::Open(file_name), nullptr);
@@ -170,6 +213,7 @@ HWTEST(ItemContainer, TestFileFormatVersionValid, testing::ext::TestSize.Level0)
         for (uint8_t b : Span<uint8_t>(reinterpret_cast<uint8_t *>(&header), sizeof(header))) {
             writer.WriteByte(b);
         }
+        EXPECT_TRUE(writer.FinishWrite());
     }
 
     EXPECT_NE(File::Open(file_name), nullptr);
