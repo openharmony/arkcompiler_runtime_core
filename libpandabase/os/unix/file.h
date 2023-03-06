@@ -117,6 +117,11 @@ public:
         return "/";
     }
 
+    static const std::string GetExtendedFilePath(const std::string &path)
+    {
+        return path;
+    }
+
     static Expected<std::string, Error> GetTmpPath()
     {
 #if defined(PANDA_TARGET_MOBILE)
