@@ -134,8 +134,8 @@ HWTEST(ItemContainer, TestFileFormatVersionTooNew, testing::ext::TestSize.Level0
             UNREACHABLE();
         }
         header.magic = File::MAGIC;
-        if (ISA_VERSION_FIRST_NUMBER + 1 < 256) {
-            header.version = {ISA_VERSION_FIRST_NUMBER + 1, ISA_VERSION_SECOND_NUMBER,
+        if (ISA_VERSION_FIRST_NUMBER + 1 < 256 && ISA_VERSION_SECOND_NUMBER + 1 < 256) {
+            header.version = {ISA_VERSION_FIRST_NUMBER + 1, ISA_VERSION_SECOND_NUMBER + 1,
                 ISA_VERSION_THIRD_NUMBER, ISA_VERSION_FOURTH_NUMBER};
         } else {
             header.version = {ISA_VERSION_FIRST_NUMBER, ISA_VERSION_SECOND_NUMBER,
