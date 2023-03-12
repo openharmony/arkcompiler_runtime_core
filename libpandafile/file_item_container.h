@@ -86,7 +86,15 @@ public:
         static_assert(!std::is_same_v<T, MethodItem>, "Use ClassItem instance to create MethodItem");
         static_assert(!std::is_same_v<T, FieldItem>, "Use ClassItem instance to create FieldItem");
 
-        auto ptr = std::make_unique<T>(std::forward<Args>(args)...);
+        std::unique_ptr<T> ptr = nullptr;
+        if constexpr (std::is_same_v<T, ForeignFieldItem> || std::is_same_v<T, ForeignMethodItem> ||
+            std::is_same_v<T, ScalarValueItem> || std::is_same_v<T, ArrayValueItem> ||
+            std::is_same_v<T, LiteralArrayItem>) {
+            ptr = std::make_unique<T>(std::forward<Args>(args)..., this);
+        } else {
+            ptr = std::make_unique<T>(std::forward<Args>(args)...);
+        }
+
         auto ret = ptr.get();
         if (ptr->IsForeign()) {
             foreign_items_.emplace_back(std::move(ptr));
@@ -185,6 +193,16 @@ public:
 
     void DeduplicateDebugInfo(MethodItem *method, ItemDeduper *debug_info_deduper,
                               ItemDeduper *line_number_program_deduper);
+
+    size_t GetIndexedItemCount() const
+    {
+        return indexed_item_count_;
+    }
+
+    void IncIndexedItemCount()
+    {
+        indexed_item_count_++;
+    }
 
 private:
     template <class T>
@@ -551,6 +569,7 @@ private:
     std::list<std::unique_ptr<BaseItem>>::iterator debug_items_end_;
 
     BaseItem *end_;
+    size_t indexed_item_count_ {0};
 };
 
 }  // namespace panda::panda_file

@@ -1059,4 +1059,73 @@ HWTEST(ItemContainer, GettersTest, testing::ext::TestSize.Level0)
     rclass_item->VisitFields(cb_field);
 }
 
+HWTEST(ItemContainer, IndexedItemGlobalIndexTest, testing::ext::TestSize.Level0)
+{
+    ItemContainer container;
+    EXPECT_EQ(container.GetIndexedItemCount(), 0U);
+
+    // Create foreign class
+    ForeignClassItem *foreign_class_item = container.GetOrCreateForeignClassItem("foreign_class");
+    EXPECT_EQ(foreign_class_item->GetIndexedItemCount(), 0U);
+    // BaseClassItem will initialize one StringItem member, which will increase the count by 1.
+    EXPECT_EQ(container.GetIndexedItemCount(), foreign_class_item->GetIndexedItemCount() + 2);
+
+    // Create foreign field
+    StringItem *foreign_field_name = container.GetOrCreateStringItem("foreign_field");
+    PrimitiveTypeItem *foreign_field_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
+    ForeignFieldItem *foreign_field_item = container.CreateItem<ForeignFieldItem>(foreign_class_item,
+        foreign_field_name, foreign_field_type);
+    EXPECT_EQ(foreign_field_item->GetIndexedItemCount(), 4U);
+    EXPECT_EQ(container.GetIndexedItemCount(), foreign_field_item->GetIndexedItemCount() + 1);
+
+    // Create foreign method
+    StringItem *foreign_method_name = container.GetOrCreateStringItem("foreign_method");
+    PrimitiveTypeItem *foreign_ret_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
+    std::vector<MethodParamItem> foreign_params;
+    foreign_params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I64));
+    ProtoItem *foreign_proto_item = container.GetOrCreateProtoItem(foreign_ret_type, foreign_params);
+    ForeignMethodItem *foreign_method_item = container.CreateItem<ForeignMethodItem>(foreign_class_item,
+        foreign_method_name, foreign_proto_item, 0);
+    EXPECT_EQ(foreign_method_item->GetIndexedItemCount(), 9U);
+    EXPECT_EQ(container.GetIndexedItemCount(), foreign_method_item->GetIndexedItemCount() + 1);
+
+    // Create class
+    ClassItem *class_item = container.GetOrCreateClassItem("classA");
+    EXPECT_EQ(class_item->GetIndexedItemCount(), 10U);
+    EXPECT_EQ(container.GetIndexedItemCount(), class_item->GetIndexedItemCount() + 2);
+
+    // Create method
+    StringItem *method_name = container.GetOrCreateStringItem("a");
+    // TypeId::VOID is repeated, count won't increase
+    PrimitiveTypeItem *ret_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
+    std::vector<MethodParamItem> params;
+    ProtoItem *proto_item = container.GetOrCreateProtoItem(ret_type, params);
+    MethodItem *method_item = class_item->AddMethod(method_name, proto_item, ACC_PUBLIC | ACC_STATIC, params);
+    EXPECT_EQ(method_item->GetIndexedItemCount(), 14U);
+    EXPECT_EQ(container.GetIndexedItemCount(), method_item->GetIndexedItemCount() + 1);
+
+    // Create field
+    StringItem *field_name = container.GetOrCreateStringItem("field");
+    PrimitiveTypeItem *field_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
+    FieldItem *field_item = class_item->AddField(field_name, field_type, ACC_PUBLIC);
+    EXPECT_EQ(field_item->GetIndexedItemCount(), 16U);
+    EXPECT_EQ(container.GetIndexedItemCount(), field_item->GetIndexedItemCount() + 1);
+
+    // Create code, item count is not expected to increase
+    std::vector<uint8_t> instructions {1, 2, 3, 4};
+    CodeItem *code_item = container.CreateItem<CodeItem>(0, 2, instructions);
+    method_item->SetCode(code_item);
+    EXPECT_EQ(container.GetIndexedItemCount(), field_item->GetIndexedItemCount() + 1);
+
+    // Create line number program
+    LineNumberProgramItem *line_number_program_item = container.CreateLineNumberProgramItem();
+    EXPECT_EQ(line_number_program_item->GetIndexedItemCount(), 17U);
+    EXPECT_EQ(container.GetIndexedItemCount(), line_number_program_item->GetIndexedItemCount() + 1);
+
+    // Create value items
+    ScalarValueItem *scalarValueItem = container.CreateItem<ScalarValueItem>(1.0);
+    EXPECT_EQ(scalarValueItem->GetIndexedItemCount(), 18U);
+    EXPECT_EQ(container.GetIndexedItemCount(), scalarValueItem->GetIndexedItemCount() + 1);
+}
+
 }  // namespace panda::panda_file::test

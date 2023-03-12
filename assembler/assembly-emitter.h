@@ -164,7 +164,7 @@ private:
         static_assert(std::is_arithmetic<PrimType>::value);
         auto v = value->GetAsScalar()->GetValue<PrimType>();
         if (out != nullptr) {
-            out->emplace_back(v);
+            out->emplace_back(v, container);
             return &out->back();
         }
 
