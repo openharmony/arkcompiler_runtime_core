@@ -14,6 +14,7 @@
  */
 
 #include "file_items.h"
+#include "file_item_container.h"
 #include "macros.h"
 #include "utils/bit_utils.h"
 #include "utils/leb128.h"
@@ -22,8 +23,6 @@
 #include <iomanip>
 
 namespace panda::panda_file {
-
-size_t IndexedItem::indexed_item_count_ = 0;
 
 bool IsDynamicLanguage(panda::panda_file::SourceLang lang)
 {
@@ -182,7 +181,15 @@ std::string BaseItem::GetName() const
     return ItemTypeToString(GetItemType());
 }
 
-StringItem::StringItem(std::string str) : str_(std::move(str))
+IndexedItem::IndexedItem(ItemContainer *container)
+{
+    if (container != nullptr) {
+        item_global_index_ = container->GetIndexedItemCount();
+        container->IncIndexedItemCount();
+    }
+}
+
+StringItem::StringItem(std::string str, ItemContainer *container) : IndexedItem(container), str_(std::move(str))
 {
     str_.push_back(0);
     utf16_length_ = utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(str_.data()));
@@ -196,8 +203,8 @@ StringItem::StringItem(std::string str) : str_(std::move(str))
     }
 }
 
-StringItem::StringItem(File::StringData data)
-    : str_(reinterpret_cast<const char *>(data.data)), utf16_length_(data.utf16_length)
+StringItem::StringItem(File::StringData data, ItemContainer *container)
+    : IndexedItem(container),  str_(reinterpret_cast<const char *>(data.data)), utf16_length_(data.utf16_length)
 {
 }
 
@@ -485,7 +492,8 @@ bool ParamAnnotationsItem::Write(Writer *writer)
     return true;
 }
 
-ProtoItem::ProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params)
+ProtoItem::ProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params, ItemContainer *itemContainer)
+    : IndexedItem(itemContainer)
 {
     size_t n = 0;
     shorty_.push_back(0);
@@ -537,8 +545,9 @@ bool ProtoItem::Write(Writer *writer)
     return true;
 }
 
-BaseMethodItem::BaseMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags)
-    : class_(cls), name_(name), proto_(proto), access_flags_(access_flags)
+BaseMethodItem::BaseMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags,
+    ItemContainer *container)
+    : IndexedItem(container), class_(cls), name_(name), proto_(proto), access_flags_(access_flags)
 {
     AddIndexDependency(cls);
     AddIndexDependency(proto);
@@ -576,8 +585,8 @@ bool BaseMethodItem::Write(Writer *writer)
 }
 
 MethodItem::MethodItem(ClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags,
-                       std::vector<MethodParamItem> params)
-    : BaseMethodItem(cls, name, proto, access_flags),
+                       std::vector<MethodParamItem> params, ItemContainer *container)
+    : BaseMethodItem(cls, name, proto, access_flags, container),
       params_(std::move(params)),
       source_lang_(SourceLang::PANDA_ASSEMBLY),
       code_(nullptr),
@@ -1225,8 +1234,8 @@ bool LiteralArrayItem::Write(Writer *writer)
     return true;
 }
 
-BaseFieldItem::BaseFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type)
-    : class_(cls), name_(name), type_(type)
+BaseFieldItem::BaseFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type, ItemContainer *container)
+    : IndexedItem(container), class_(cls), name_(name), type_(type)
 {
     AddIndexDependency(cls);
     AddIndexDependency(type);
@@ -1255,8 +1264,8 @@ bool BaseFieldItem::Write(Writer *writer)
     return writer->Write(name_->GetOffset());
 }
 
-FieldItem::FieldItem(ClassItem *cls, StringItem *name, TypeItem *type, uint32_t access_flags)
-    : BaseFieldItem(cls, name, type), access_flags_(access_flags), value_(nullptr)
+FieldItem::FieldItem(ClassItem *cls, StringItem *name, TypeItem *type, uint32_t access_flags, ItemContainer *container)
+    : BaseFieldItem(cls, name, type, container), access_flags_(access_flags), value_(nullptr)
 {
 }
 

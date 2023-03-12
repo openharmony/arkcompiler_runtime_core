@@ -27,7 +27,7 @@ namespace panda::panda_file::test {
 
 HWTEST(LineNumberProgramItem, EmitSpecialOpcode, testing::ext::TestSize.Level0)
 {
-    LineNumberProgramItem item;
+    LineNumberProgramItem item(nullptr);
 
     constexpr int32_t LINE_MAX_INC = LineNumberProgramItem::LINE_RANGE + LineNumberProgramItem::LINE_BASE - 1;
     constexpr int32_t LINE_MIN_INC = LineNumberProgramItem::LINE_BASE;
