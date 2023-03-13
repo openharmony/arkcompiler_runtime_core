@@ -42,6 +42,10 @@
 #include <gmock/gmock.h>
 
 namespace panda::panda_file::test {
+constexpr uint8_t ISA_VERSION_FIRST_NUMBER = panda::panda_file::version[0];
+constexpr uint8_t ISA_VERSION_SECOND_NUMBER = panda::panda_file::version[1];
+constexpr uint8_t ISA_VERSION_THIRD_NUMBER = panda::panda_file::version[2]; // 2: the third number of ISA version
+constexpr uint8_t ISA_VERSION_FOURTH_NUMBER = panda::panda_file::version[3]; // 3: the fourth number of ISA version
 
 HWTEST(ItemContainer, DeduplicationTest, testing::ext::TestSize.Level0)
 {
@@ -130,7 +134,13 @@ HWTEST(ItemContainer, TestFileFormatVersionTooNew, testing::ext::TestSize.Level0
             UNREACHABLE();
         }
         header.magic = File::MAGIC;
-        header.version = {0, 0, 0, 4};
+        if (ISA_VERSION_FIRST_NUMBER + 1 < 256 && ISA_VERSION_SECOND_NUMBER + 1 < 256) {
+            header.version = {ISA_VERSION_FIRST_NUMBER + 1, ISA_VERSION_SECOND_NUMBER + 1,
+                ISA_VERSION_THIRD_NUMBER, ISA_VERSION_FOURTH_NUMBER};
+        } else {
+            header.version = {ISA_VERSION_FIRST_NUMBER, ISA_VERSION_SECOND_NUMBER,
+                ISA_VERSION_THIRD_NUMBER, ISA_VERSION_FOURTH_NUMBER};
+        }
         header.file_size = sizeof(File::Header);
 
         for (uint8_t b : Span<uint8_t>(reinterpret_cast<uint8_t *>(&header), sizeof(header))) {
@@ -242,7 +252,8 @@ HWTEST(ItemContainer, TestClasses, testing::ext::TestSize.Level0)
 
     ASSERT_NE(panda_file, nullptr);
 
-    EXPECT_THAT(panda_file->GetHeader()->version, ::testing::ElementsAre(0, 0, 0, 3));
+    EXPECT_THAT(panda_file->GetHeader()->version, ::testing::ElementsAre(ISA_VERSION_FIRST_NUMBER,
+        ISA_VERSION_SECOND_NUMBER, ISA_VERSION_THIRD_NUMBER, ISA_VERSION_FOURTH_NUMBER));
     EXPECT_EQ(panda_file->GetHeader()->file_size, mem_writer.GetData().size());
     EXPECT_EQ(panda_file->GetHeader()->foreign_off, 0U);
     EXPECT_EQ(panda_file->GetHeader()->foreign_size, 0U);
