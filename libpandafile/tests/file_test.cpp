@@ -166,6 +166,15 @@ HWTEST(File, OpenPandaFileFromMemory, testing::ext::TestSize.Level0)
     EXPECT_EQ(pf, nullptr);
 }
 
+HWTEST(File, OpenPandaFileFromSecureMemory, testing::ext::TestSize.Level0)
+{
+    auto pf = OpenPandaFileFromSecureMemory(nullptr, -1);
+    EXPECT_EQ(pf, nullptr);
+
+    pf = OpenPandaFileFromSecureMemory(nullptr, 1U);
+    EXPECT_EQ(pf, nullptr);
+}
+
 HWTEST(File, OpenPandaFileFromZipNameAnonMem, testing::ext::TestSize.Level0)
 {
     // Create ZIP
