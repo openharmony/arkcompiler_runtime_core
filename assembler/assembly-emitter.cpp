@@ -218,7 +218,7 @@ ScalarValueItem *AsmEmitter::CreateScalarStringValueItem(ItemContainer *containe
 {
     auto *string_item = container->GetOrCreateStringItem(value->GetAsScalar()->GetValue<std::string>());
     if (out != nullptr) {
-        out->emplace_back(string_item);
+        out->emplace_back(string_item, container);
         return &out->back();
     }
 
@@ -245,7 +245,7 @@ ScalarValueItem *AsmEmitter::CreateScalarRecordValueItem(
     }
 
     if (out != nullptr) {
-        out->emplace_back(class_item);
+        out->emplace_back(class_item, container);
         return &out->back();
     }
 
@@ -268,7 +268,7 @@ ScalarValueItem *AsmEmitter::CreateScalarMethodValueItem(
 
     auto *method_item = it->second;
     if (out != nullptr) {
-        out->emplace_back(method_item);
+        out->emplace_back(method_item, container);
         return &out->back();
     }
 
@@ -285,7 +285,7 @@ ScalarValueItem *AsmEmitter::CreateScalarLiteralArrayItem(
     ASSERT(it != literalarrays.end());
     auto *literalarray_item = it->second;
     if (out != nullptr) {
-        out->emplace_back(literalarray_item);
+        out->emplace_back(literalarray_item, container);
         return &out->back();
     }
 
@@ -305,7 +305,7 @@ ScalarValueItem *AsmEmitter::CreateScalarEnumValueItem(ItemContainer *container,
 
     auto *field_item = it->second;
     if (out != nullptr) {
-        out->emplace_back(field_item);
+        out->emplace_back(field_item, container);
         return &out->back();
     }
 
@@ -324,7 +324,7 @@ ScalarValueItem *AsmEmitter::CreateScalarAnnotationValueItem(
     }
 
     if (out != nullptr) {
-        out->emplace_back(annotation_item);
+        out->emplace_back(annotation_item, container);
         return &out->back();
     }
 

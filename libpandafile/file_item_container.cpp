@@ -174,12 +174,12 @@ ItemContainer::ItemContainer()
 
 ClassItem *ItemContainer::GetOrCreateClassItem(const std::string &str)
 {
-    return GetOrInsert<ClassItem>(class_map_, items_, items_end_, str, false, str);
+    return GetOrInsert<ClassItem>(class_map_, items_, items_end_, str, false, str, this);
 }
 
 ForeignClassItem *ItemContainer::GetOrCreateForeignClassItem(const std::string &str)
 {
-    return GetOrInsert<ForeignClassItem>(class_map_, foreign_items_, foreign_items_.end(), str, true, str);
+    return GetOrInsert<ForeignClassItem>(class_map_, foreign_items_, foreign_items_.end(), str, true, str, this);
 }
 
 StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
@@ -189,43 +189,43 @@ StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
         return it->second->GetNameItem();
     }
 
-    return GetOrInsert<StringItem>(string_map_, items_, items_end_, str, false, str);
+    return GetOrInsert<StringItem>(string_map_, items_, items_end_, str, false, str, this);
 }
 
 LiteralArrayItem *ItemContainer::GetOrCreateLiteralArrayItem(const std::string &id)
 {
-    return GetOrInsert<LiteralArrayItem>(literalarray_map_, items_, items_end_, id, false);
+    return GetOrInsert<LiteralArrayItem>(literalarray_map_, items_, items_end_, id, false, this);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateIntegerValueItem(uint32_t v)
 {
-    return GetOrInsert<ScalarValueItem>(int_value_map_, items_, items_end_, v, false, v);
+    return GetOrInsert<ScalarValueItem>(int_value_map_, items_, items_end_, v, false, v, this);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateLongValueItem(uint64_t v)
 {
-    return GetOrInsert<ScalarValueItem>(long_value_map_, items_, items_end_, v, false, v);
+    return GetOrInsert<ScalarValueItem>(long_value_map_, items_, items_end_, v, false, v, this);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateFloatValueItem(float v)
 {
-    return GetOrInsert<ScalarValueItem>(float_value_map_, items_, items_end_, bit_cast<uint32_t>(v), false, v);
+    return GetOrInsert<ScalarValueItem>(float_value_map_, items_, items_end_, bit_cast<uint32_t>(v), false, v, this);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateDoubleValueItem(double v)
 {
-    return GetOrInsert<ScalarValueItem>(double_value_map_, items_, items_end_, bit_cast<uint64_t>(v), false, v);
+    return GetOrInsert<ScalarValueItem>(double_value_map_, items_, items_end_, bit_cast<uint64_t>(v), false, v, this);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateIdValueItem(BaseItem *v)
 {
-    return GetOrInsert<ScalarValueItem>(id_value_map_, items_, items_end_, v, false, v);
+    return GetOrInsert<ScalarValueItem>(id_value_map_, items_, items_end_, v, false, v, this);
 }
 
 ProtoItem *ItemContainer::GetOrCreateProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params)
 {
     ProtoKey key(ret_type, params);
-    return GetOrInsert<ProtoItem>(proto_map_, items_, items_end_, key, false, ret_type, params);
+    return GetOrInsert<ProtoItem>(proto_map_, items_, items_end_, key, false, ret_type, params, this);
 }
 
 PrimitiveTypeItem *ItemContainer::GetOrCreatePrimitiveTypeItem(Type type)
@@ -235,12 +235,12 @@ PrimitiveTypeItem *ItemContainer::GetOrCreatePrimitiveTypeItem(Type type)
 
 PrimitiveTypeItem *ItemContainer::GetOrCreatePrimitiveTypeItem(Type::TypeId type)
 {
-    return GetOrInsert<PrimitiveTypeItem>(primitive_type_map_, items_, items_end_, type, false, type);
+    return GetOrInsert<PrimitiveTypeItem>(primitive_type_map_, items_, items_end_, type, false, type, this);
 }
 
 LineNumberProgramItem *ItemContainer::CreateLineNumberProgramItem()
 {
-    auto it = items_.insert(debug_items_end_, std::make_unique<LineNumberProgramItem>());
+    auto it = items_.insert(debug_items_end_, std::make_unique<LineNumberProgramItem>(this));
     auto *item = static_cast<LineNumberProgramItem *>(it->get());
     [[maybe_unused]] auto res = line_number_program_index_item_.Add(item);
     ASSERT(res);

@@ -157,6 +157,7 @@ enum class IndexType {
 static constexpr size_t INDEX_COUNT_16 = static_cast<size_t>(IndexType::LAST_16) + 1;
 
 class IndexedItem;
+class ItemContainer;
 
 class BaseItem {
 public:
@@ -279,10 +280,7 @@ private:
 
 class IndexedItem : public BaseItem {
 public:
-    IndexedItem()
-    {
-        item_index_ = indexed_item_count_++;
-    }
+    explicit IndexedItem(ItemContainer *itemContainer);
 
     uint32_t GetIndex(const BaseItem *item) const
     {
@@ -330,7 +328,7 @@ public:
 
     size_t GetIndexedItemCount() const
     {
-        return item_index_;
+        return item_global_index_;
     }
 
 private:
@@ -372,15 +370,14 @@ private:
 
     std::vector<Index> indexes_;
     size_t ref_count_ {1};
-    size_t item_index_ {0};
-    static size_t indexed_item_count_;
+    size_t item_global_index_ {0};
 };
 
 class TypeItem : public IndexedItem {
 public:
-    explicit TypeItem(Type type) : type_(type) {}
+    explicit TypeItem(Type type, ItemContainer *container) : IndexedItem(container), type_(type) {}
 
-    explicit TypeItem(Type::TypeId type_id) : type_(type_id) {}
+    explicit TypeItem(Type::TypeId type_id, ItemContainer *container) : IndexedItem(container), type_(type_id) {}
 
     ~TypeItem() override = default;
 
@@ -403,9 +400,9 @@ private:
 
 class PrimitiveTypeItem : public TypeItem {
 public:
-    explicit PrimitiveTypeItem(Type type) : PrimitiveTypeItem(type.GetId()) {}
+    explicit PrimitiveTypeItem(Type type, ItemContainer *container) : PrimitiveTypeItem(type.GetId(), container) {}
 
-    explicit PrimitiveTypeItem(Type::TypeId type_id) : TypeItem(type_id)
+    explicit PrimitiveTypeItem(Type::TypeId type_id, ItemContainer *container) : TypeItem(type_id, container)
     {
         ASSERT(GetType().IsPrimitive());
         SetNeedsEmit(false);
@@ -435,9 +432,9 @@ public:
 
 class StringItem : public IndexedItem {
 public:
-    explicit StringItem(std::string str);
+    explicit StringItem(std::string str, ItemContainer *container);
 
-    explicit StringItem(File::StringData data);
+    explicit StringItem(File::StringData data, ItemContainer *container);
 
     ~StringItem() override = default;
 
@@ -498,7 +495,7 @@ public:
     DEFAULT_COPY_SEMANTIC(BaseFieldItem);
 
 protected:
-    BaseFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type);
+    BaseFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type, ItemContainer *container);
 
     size_t CalculateSize() const override;
 
@@ -512,7 +509,7 @@ private:
 
 class FieldItem : public BaseFieldItem {
 public:
-    FieldItem(ClassItem *cls, StringItem *name, TypeItem *type, uint32_t access_flags);
+    FieldItem(ClassItem *cls, StringItem *name, TypeItem *type, uint32_t access_flags, ItemContainer *container);
 
     ~FieldItem() override = default;
 
@@ -609,6 +606,8 @@ public:
     static constexpr uint8_t OPCODE_BASE = static_cast<uint8_t>(Opcode::LAST);
     static constexpr int32_t LINE_RANGE = 15;
     static constexpr int32_t LINE_BASE = -4;
+
+    explicit LineNumberProgramItem(ItemContainer *container) : IndexedItem(container) {}
 
     void EmitEnd();
 
@@ -773,7 +772,8 @@ public:
     DEFAULT_COPY_SEMANTIC(BaseMethodItem);
 
 protected:
-    BaseMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags);
+    BaseMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags,
+        ItemContainer *container);
 
     size_t CalculateSize() const override;
 
@@ -854,7 +854,7 @@ class BaseClassItem;
 class MethodItem : public BaseMethodItem {
 public:
     MethodItem(ClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags,
-               std::vector<MethodParamItem> params);
+               std::vector<MethodParamItem> params, ItemContainer *container);
 
     ~MethodItem() override = default;
 
@@ -990,7 +990,8 @@ public:
     }
 
 protected:
-    explicit BaseClassItem(const std::string &name) : TypeItem(Type::TypeId::REFERENCE), name_(name) {}
+    explicit BaseClassItem(const std::string &name, ItemContainer *container)
+        : TypeItem(Type::TypeId::REFERENCE, container), name_(name, container) {}
 
     ~BaseClassItem() override = default;
 
@@ -1009,12 +1010,13 @@ private:
 
 class ClassItem : public BaseClassItem {
 public:
-    explicit ClassItem(const std::string &name)
-        : BaseClassItem(name),
+    explicit ClassItem(const std::string &name, ItemContainer *container)
+        : BaseClassItem(name, container),
           super_class_(nullptr),
           access_flags_(0),
           source_lang_(SourceLang::PANDA_ASSEMBLY),
-          source_file_(nullptr)
+          source_file_(nullptr),
+          container_(container)
     {
     }
 
@@ -1064,7 +1066,7 @@ public:
     template <class... Args>
     FieldItem *AddField(Args... args)
     {
-        fields_.emplace_back(std::make_unique<FieldItem>(this, std::forward<Args>(args)...));
+        fields_.emplace_back(std::make_unique<FieldItem>(this, std::forward<Args>(args)..., container_));
         return fields_.back().get();
     }
 
@@ -1072,7 +1074,7 @@ public:
     MethodItem *AddMethod(Args... args)
     {
         // insert new method to set ordered by method name
-        return methods_.insert(std::make_unique<MethodItem>(this, std::forward<Args>(args)...))->get();
+        return methods_.insert(std::make_unique<MethodItem>(this, std::forward<Args>(args)..., container_))->get();
     }
 
     void SetSourceFile(StringItem *item)
@@ -1170,11 +1172,12 @@ private:
     StringItem *source_file_;
     std::vector<std::unique_ptr<FieldItem>> fields_;
     std::multiset<std::unique_ptr<MethodItem>, MethodCompByName> methods_;
+    ItemContainer *container_;
 };
 
 class ForeignClassItem : public BaseClassItem {
 public:
-    explicit ForeignClassItem(const std::string &name) : BaseClassItem(name) {}
+    explicit ForeignClassItem(const std::string &name, ItemContainer *container) : BaseClassItem(name, container) {}
 
     ~ForeignClassItem() override = default;
 
@@ -1194,7 +1197,8 @@ public:
 
 class ForeignFieldItem : public BaseFieldItem {
 public:
-    ForeignFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type) : BaseFieldItem(cls, name, type) {}
+    ForeignFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type, ItemContainer *container)
+        : BaseFieldItem(cls, name, type, container) {}
 
     ~ForeignFieldItem() override = default;
 
@@ -1214,8 +1218,8 @@ public:
 
 class ForeignMethodItem : public BaseMethodItem {
 public:
-    ForeignMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags)
-        : BaseMethodItem(cls, name, proto, access_flags)
+    ForeignMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags,
+        ItemContainer *container) : BaseMethodItem(cls, name, proto, access_flags, container)
     {
     }
 
@@ -1261,7 +1265,7 @@ private:
 
 class ProtoItem : public IndexedItem {
 public:
-    ProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params);
+    ProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params, ItemContainer *itemContainer);
 
     ~ProtoItem() override = default;
 
@@ -1463,7 +1467,7 @@ class ValueItem : public IndexedItem {
 public:
     enum class Type { INTEGER, LONG, FLOAT, DOUBLE, ID, ARRAY };
 
-    explicit ValueItem(Type type) : type_(type) {}
+    explicit ValueItem(Type type, ItemContainer *container) : IndexedItem(container), type_(type) {}
 
     ~ValueItem() override = default;
 
@@ -1500,15 +1504,15 @@ private:
 
 class ScalarValueItem : public ValueItem {
 public:
-    explicit ScalarValueItem(uint32_t v) : ValueItem(Type::INTEGER), value_(v) {}
+    explicit ScalarValueItem(uint32_t v, ItemContainer *container) : ValueItem(Type::INTEGER, container), value_(v) {}
 
-    explicit ScalarValueItem(uint64_t v) : ValueItem(Type::LONG), value_(v) {}
+    explicit ScalarValueItem(uint64_t v, ItemContainer *container) : ValueItem(Type::LONG, container), value_(v) {}
 
-    explicit ScalarValueItem(float v) : ValueItem(Type::FLOAT), value_(v) {}
+    explicit ScalarValueItem(float v, ItemContainer *container) : ValueItem(Type::FLOAT, container), value_(v) {}
 
-    explicit ScalarValueItem(double v) : ValueItem(Type::DOUBLE), value_(v) {}
+    explicit ScalarValueItem(double v, ItemContainer *container) : ValueItem(Type::DOUBLE, container), value_(v) {}
 
-    explicit ScalarValueItem(BaseItem *v) : ValueItem(Type::ID), value_(v) {}
+    explicit ScalarValueItem(BaseItem *v, ItemContainer *container) : ValueItem(Type::ID, container), value_(v) {}
 
     ~ScalarValueItem() override = default;
 
@@ -1544,8 +1548,8 @@ private:
 
 class ArrayValueItem : public ValueItem {
 public:
-    ArrayValueItem(panda_file::Type component_type, std::vector<ScalarValueItem> items)
-        : ValueItem(Type::ARRAY), component_type_(component_type), items_(std::move(items))
+    ArrayValueItem(panda_file::Type component_type, std::vector<ScalarValueItem> items, ItemContainer *container)
+        : ValueItem(Type::ARRAY, container), component_type_(component_type), items_(std::move(items))
     {
     }
 
@@ -1634,7 +1638,7 @@ private:
 
 class LiteralArrayItem : public ValueItem {
 public:
-    explicit LiteralArrayItem() : ValueItem(Type::ARRAY) {}
+    explicit LiteralArrayItem(ItemContainer *container) : ValueItem(Type::ARRAY, container) {}
 
     ~LiteralArrayItem() override = default;
 
