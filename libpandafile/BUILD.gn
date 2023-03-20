@@ -147,6 +147,7 @@ ark_gen_file("libarkfile_type_gen_h") {
 
 ark_isa_gen("isa_gen_libarkfile") {
   template_files = [
+    "arkcompiler.para.erb",
     "bytecode_instruction_enum_gen.h.erb",
     "bytecode_instruction-inl_gen.h.erb",
     "bytecode_emitter_def_gen.h.erb",
@@ -165,4 +166,22 @@ ark_gen_file("source_lang_enum_h") {
   data_file = "$target_gen_dir/../plugin_options.yaml"
   requires = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/include/source_lang_enum.h"
+}
+
+group("arkcompiler_params") {
+  deps = []
+
+  if (!ark_standalone_build) {
+    deps += [ ":arkcompiler.para" ]
+  }
+}
+
+if (!ark_standalone_build) {
+  ohos_prebuilt_etc("arkcompiler.para") {
+    deps = [ ":isa_gen_libarkfile_arkcompiler_para" ]
+    source = "$target_gen_dir/include/arkcompiler.para"
+    relative_install_dir = "param"
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+  }
 }
