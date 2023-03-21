@@ -39,7 +39,7 @@ public:
 
     virtual void CountChecksum(bool /* counting */) {}
 
-    virtual bool WriteChecksum(size_t /* offset */)
+    virtual bool RewriteChecksum(size_t /* offset */)
     {
         return false;
     }
@@ -90,6 +90,13 @@ public:
         std::vector<uint8_t> out(n);
         leb128::EncodeSigned(v, out.data());
         return WriteBytes(out);
+    }
+
+    virtual void ReserveBufferCapacity([[maybe_unused]] size_t size) {}
+
+    virtual bool FinishWrite()
+    {
+        return true;
     }
 
     // default methods
@@ -181,12 +188,21 @@ public:
         count_checksum_ = counting;
     }
 
-    bool WriteChecksum(size_t offset) override
+    bool RewriteChecksum(size_t offset) override
     {
-        (void)fseek(file_, offset, SEEK_SET);
-        auto res = Write<uint32_t>(checksum_);
-        (void)fseek(file_, offset, SEEK_END);
-        return res;
+        static constexpr size_t MASK = 0xff;
+        static constexpr size_t WIDTH = std::numeric_limits<uint8_t>::digits;
+
+        size_t length = sizeof(uint32_t);
+        if (offset + length > buffer_.size()) {
+            return false;
+        }
+        uint32_t temp = checksum_;
+        for (size_t i = 0; i < length; i++) {
+            buffer_[offset + i] = temp & MASK;
+            temp >>= WIDTH;
+        }
+        return true;
     }
 
     bool WriteByte(uint8_t data) override;
@@ -195,7 +211,7 @@ public:
 
     size_t GetOffset() const override
     {
-        return offset_;
+        return buffer_.size();
     }
 
     uint32_t GetChecksum() const
@@ -208,11 +224,23 @@ public:
         return file_ != nullptr;
     }
 
+    void ReserveBufferCapacity(size_t size) override
+    {
+        buffer_.reserve(size);
+    }
+
+    const std::vector<uint8_t> &GetBuffer() const
+    {
+        return buffer_;
+    }
+
+    bool FinishWrite() override;
+
 private:
     FILE *file_;
-    size_t offset_;
     uint32_t checksum_;
     bool count_checksum_ {false};
+    std::vector<uint8_t> buffer_;
 };
 
 }  // namespace panda::panda_file
