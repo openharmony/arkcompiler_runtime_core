@@ -145,7 +145,7 @@ case BytecodeInstruction::Opcode::ADDI_IMM8: {
 
 [Panda IR builder source code](../optimizer/ir_builder/)    
 
-[Static Single Assignment Book](http://ssabook.gforge.inria.fr/latest/book.pdf)
+[Static Single Assignment Book](https://pfalcon.github.io/ssabook/latest/book-v1.pdf)
 
 [Simple and Efficient Construction of Static Single Assignment Form](https://pp.info.uni-karlsruhe.de/uploads/publikationen/braun13cc.pdf)
 
