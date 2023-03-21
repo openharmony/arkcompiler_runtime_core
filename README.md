@@ -123,11 +123,11 @@ Input file: ARK bytecodes in binary format
 Output file: ARK bytecodes in text format
 
 
-For more information, please see: [ARK Runtime Usage Guide](https://gitee.com/openharmony/arkcompiler_ets_runtime/blob/master/docs/ARK-Runtime-Usage-Guide.md).
+For more information, please see: [ARK Runtime Usage Guide](https://gitee.com/openharmony/arkcompiler_ets_runtime/blob/master/docs/README.md).
 
 ## Repositories Involved<a name="section1371113476307"></a>
 
-**[arkcompiler\_runtime\_core](https://gitee.com/openharmony/ark_runtime_core)**
+**[arkcompiler\_runtime\_core](https://gitee.com/openharmony/arkcompiler_runtime_core)**
 
 [arkcompiler\_ets\_runtime](https://gitee.com/openharmony/arkcompiler_ets_runtime)
 
