@@ -280,7 +280,7 @@ private:
 
 class IndexedItem : public BaseItem {
 public:
-    explicit IndexedItem(ItemContainer *itemContainer);
+    explicit IndexedItem(ItemContainer *container);
 
     uint32_t GetIndex(const BaseItem *item) const
     {
