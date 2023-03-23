@@ -340,6 +340,8 @@ void BytecodeGen::VisitIf(GraphVisitor *v, Inst *inst_base)
 #if defined(ENABLE_BYTECODE_OPT) && defined(PANDA_WITH_ECMASCRIPT) && defined(ARK_INTRINSIC_SET)
             IfEcma(v, inst);
             break;
+#else
+            [[fallthrough]];
 #endif
         }
         default:
