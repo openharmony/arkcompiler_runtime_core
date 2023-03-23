@@ -83,6 +83,8 @@ inline ConditionCode GetInverseConditionCode(ConditionCode code)
     switch (code) {
         case ConditionCode::CC_EQ:
             return ConditionCode::CC_NE;
+        case ConditionCode::CC_NE:
+            return ConditionCode::CC_EQ;
         default:
             UNREACHABLE();
     }
