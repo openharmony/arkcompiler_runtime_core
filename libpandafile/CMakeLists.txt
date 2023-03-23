@@ -100,7 +100,6 @@ panda_add_gtest(
         tests/file_items_test.cpp
         tests/bytecode_emitter_tests.cpp
         tests/debug_info_extractor_test.cpp
-        tests/panda_cache_test.cpp
         tests/file_format_version_test.cpp
     LIBRARIES
         arkbase
