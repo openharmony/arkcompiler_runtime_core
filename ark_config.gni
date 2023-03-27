@@ -50,7 +50,8 @@ if (is_mingw || is_mac || is_linux || target_os == "ios") {
       "$ark_third_party_root/bounds_checking_function:libsec_static"
 }
 
-is_mob = !is_standard_system && (current_cpu != "arm" || is_wearable_product)
+is_mob = !ark_standalone_build && !is_standard_system &&
+         (current_cpu != "arm" || is_wearable_product)
 
 ## TODO add other arch
 
