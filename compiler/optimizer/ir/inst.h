@@ -1275,6 +1275,11 @@ public:
         return opcode_ == Opcode::SaveState;
     }
 
+    bool IsTry() const
+    {
+        return opcode_ == Opcode::Try;
+    }
+
     virtual void SetVnObject([[maybe_unused]] VnObject *vn_obj) {}
 
     Register GetDstReg() const
@@ -2588,6 +2593,8 @@ protected:
     using LastField = Relocate;
 
 private:
+    std::string GetIntrinsicOpcodeName() const;
+
     IntrinsicId intrinsic_id_ {RuntimeInterface::IntrinsicId::COUNT};
     ArenaVector<uint32_t> *imms_ {nullptr};  // record imms appeared in intrinsics
 };

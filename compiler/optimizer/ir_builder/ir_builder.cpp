@@ -146,19 +146,19 @@ bool IrBuilder::BuildInstructionsForBB(BasicBlock *bb, InstBuilder *inst_builder
             COMPILER_LOG(WARNING, IR_BUILDER) << "Unsupported instruction";
             return false;
         }
-        if (inst.CanThrow()) {
-            // One PBC instruction can be expanded to the group of IR's instructions, find first built instruction in
-            // this group, and then mark all instructions as throwable; All instructions should be marked, since some of
-            // them can be deleted during optimizations, unnecessary catch-phi moves will be resolved before Register
-            // Allocator
-            auto throwable_inst = (current_last_inst == nullptr) ? bb->GetFirstInst() : current_last_inst->GetNext();
-            ProcessThrowableInstructions(inst_builder, throwable_inst);
 
-            auto &vb = GetGraph()->GetVectorBlocks();
-            for (size_t i = bb_count; i < vb.size(); i++) {
-                ProcessThrowableInstructions(inst_builder, vb[i]->GetFirstInst());
-            }
+        // One PBC instruction can be expanded to the group of IR's instructions, find first built instruction in
+        // this group, and then mark all instructions as throwable; All instructions should be marked, since some of
+        // them can be deleted during optimizations, unnecessary catch-phi moves will be resolved before Register
+        // Allocator
+        auto throwable_inst = (current_last_inst == nullptr) ? bb->GetFirstInst() : current_last_inst->GetNext();
+        ProcessThrowableInstructions(inst_builder, throwable_inst);
+
+        auto &vb = GetGraph()->GetVectorBlocks();
+        for (size_t i = bb_count; i < vb.size(); i++) {
+            ProcessThrowableInstructions(inst_builder, vb[i]->GetFirstInst());
         }
+
         // Break if we meet terminator instruction. If instruction in the middle of basic block we don't create
         // further dead instructions.
         if (inst.IsTerminator() && !inst.IsSuspend()) {
@@ -268,9 +268,13 @@ void IrBuilder::CreateTryCatchBoundariesBlocks()
     panda_file::CodeDataAccessor cda(*panda_file, mda.GetCodeId().value());
 
     cda.EnumerateTryBlocks([this](panda_file::CodeDataAccessor::TryBlock &try_block) {
-        try_block.EnumerateCatchBlocks([this](panda_file::CodeDataAccessor::CatchBlock &catch_block) {
+        auto start_pc = try_block.GetStartPc();
+        auto end_pc = start_pc + try_block.GetLength();
+        auto try_info = InsertTryBlockInfo({start_pc, end_pc});
+        try_block.EnumerateCatchBlocks([this, try_info](panda_file::CodeDataAccessor::CatchBlock &catch_block) {
             auto pc = catch_block.GetHandlerPc();
             catches_pc_.insert(pc);
+            try_info->catches->emplace_back(CatchCodeBlock {pc, 0u});
             return true;
         });
 
@@ -371,10 +375,8 @@ void IrBuilder::TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst)
         }
     }
 
-    if (inst.CanThrow()) {
-        for (auto &try_block : opened_try_blocks_) {
-            try_block->contains_throwable_inst = true;
-        }
+    for (auto &try_block : opened_try_blocks_) {
+        try_block->contains_throwable_inst = true;
     }
 }
 

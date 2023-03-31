@@ -376,4 +376,18 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
             return;
   }
 }
+
+std::string IntrinsicInst::GetIntrinsicOpcodeName() const
+{
+    switch(GetIntrinsicId()) {
+% Panda::instructions.select{|b| b.namespace == "ecmascript"}.each do |inst|
+        case compiler::RuntimeInterface::IntrinsicId::<%= inst.opcode.upcase %>: {
+            return "<%= inst.mnemonic%>";
+        }
+% end
+        default: {
+            return "";
+        }
+    }
+}
 }  // namespace panda::compiler
