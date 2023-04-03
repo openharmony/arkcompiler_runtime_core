@@ -42,8 +42,7 @@ void InspectorTestBase::SetUp()
 {
     // Check for unsupported methods on the server, i.e. with id.
     EXPECT_CALL(logger_, LogLineInternal(Logger::Level::WARNING, Logger::Component::DEBUGGER,
-                                         HasSubstr(R"(Unsupported method: {"id")")))
-        .Times(0);
+                                         HasSubstr(R"(Unsupported method: {"id")"))).Times(0);
 
     // Set up runtime.
     RuntimeOptions options;

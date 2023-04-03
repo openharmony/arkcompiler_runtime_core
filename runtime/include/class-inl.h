@@ -746,8 +746,7 @@ inline bool Class::CompareAndSetFieldObject(size_t offset, ObjectHeader *old_val
     ASSERT(ToUintPtr(object) < ToUintPtr(this) && ToUintPtr(this) < ToUintPtr(object) + object->ObjectSize());
     auto new_offset = offset + (ToUintPtr(this) - ToUintPtr(object));
     return ObjectAccessor::CompareAndSetFieldObject<need_write_barrier>(object, new_offset, old_value, new_value,
-                                                                        memory_order, strong)
-        .first;
+                                                                        memory_order, strong).first;
 }
 
 template <typename T>
@@ -766,8 +765,7 @@ inline ObjectHeader *Class::CompareAndExchangeFieldObject(size_t offset, ObjectH
     ASSERT(ToUintPtr(object) < ToUintPtr(this) && ToUintPtr(this) < ToUintPtr(object) + object->ObjectSize());
     auto new_offset = offset + (ToUintPtr(this) - ToUintPtr(object));
     return ObjectAccessor::CompareAndSetFieldObject<need_write_barrier>(object, new_offset, old_value, new_value,
-                                                                        memory_order, strong)
-        .second;
+                                                                        memory_order, strong).second;
 }
 
 template <typename T>

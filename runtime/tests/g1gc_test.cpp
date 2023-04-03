@@ -200,8 +200,8 @@ TEST_F(G1GCTest, NonMovable2YoungRef)
     static constexpr size_t array_length = 100;
     coretypes::Array *non_movable_obj = nullptr;
     uintptr_t prev_young_addr = 0;
-    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-                       ->GetClass(ctx.GetStringArrayClassDescriptor());
+    Class *klass = class_linker->GetExtension(
+        panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(ctx.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
     non_movable_obj = coretypes::Array::Create(klass, array_length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     coretypes::String *young_obj = coretypes::String::CreateEmptyString(ctx, runtime->GetPandaVM());
@@ -330,8 +330,8 @@ TEST_F(G1GCTest, CheckRemsetToHumongousAfterReclaimHumongousObject)
 
     Class *klass;
 
-    klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-                ->GetClass(ctx.GetStringArrayClassDescriptor());
+    klass = class_linker->GetExtension(
+        panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(ctx.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
 
     young_arr = coretypes::Array::Create(klass, young_array_length);
@@ -924,8 +924,8 @@ TEST_F(G1GCTest, NonMovableClearingDuringConcurrentPhaseTest)
     coretypes::Array *second_non_movable_obj = nullptr;
     uintptr_t prev_young_addr = 0;
 
-    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-                       ->GetClass(ctx.GetStringArrayClassDescriptor());
+    Class *klass = class_linker->GetExtension(
+        panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(ctx.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
     first_non_movable_obj = coretypes::Array::Create(klass, array_length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     second_non_movable_obj = coretypes::Array::Create(klass, array_length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
@@ -999,8 +999,8 @@ TEST_F(G1GCTest, HumongousClearingDuringConcurrentPhaseTest)
     coretypes::Array *second_humongous_obj = nullptr;
     uintptr_t prev_young_addr = 0;
 
-    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-                       ->GetClass(ctx.GetStringArrayClassDescriptor());
+    Class *klass = class_linker->GetExtension(
+        panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(ctx.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
     first_humongous_obj = coretypes::Array::Create(klass, array_length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     second_humongous_obj = coretypes::Array::Create(klass, array_length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);

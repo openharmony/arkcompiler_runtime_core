@@ -84,8 +84,8 @@ Class *GetClass()
 
     PandaString descriptor;
 
-    return class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-        ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
+    return class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+        ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
 }
 
 void CompileMethods(int initial_number_of_threads, size_t scaled_number_of_threads)

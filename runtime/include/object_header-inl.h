@@ -141,8 +141,7 @@ inline bool ObjectHeader::CompareAndSetFieldObject(size_t offset, ObjectHeader *
                                                    std::memory_order memory_order, bool strong)
 {
     return ObjectAccessor::CompareAndSetFieldObject<need_write_barrier, is_dyn>(this, offset, old_value, new_value,
-                                                                                memory_order, strong)
-        .first;
+                                                                                memory_order, strong).first;
 }
 
 template <typename T>
@@ -158,8 +157,7 @@ inline ObjectHeader *ObjectHeader::CompareAndExchangeFieldObject(size_t offset, 
                                                                  std::memory_order memory_order, bool strong)
 {
     return ObjectAccessor::CompareAndSetFieldObject<need_write_barrier, is_dyn>(this, offset, old_value, new_value,
-                                                                                memory_order, strong)
-        .second;
+                                                                                memory_order, strong).second;
 }
 
 template <typename T>

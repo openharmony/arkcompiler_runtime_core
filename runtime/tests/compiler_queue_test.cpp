@@ -77,8 +77,8 @@ static Class *TestClassPrepare()
 
     PandaString descriptor;
 
-    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-                       ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
+    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+        ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
     return klass;
 }
 

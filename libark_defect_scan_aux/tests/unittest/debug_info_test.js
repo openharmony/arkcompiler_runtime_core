@@ -13,64 +13,65 @@
  * limitations under the License.
  */
 
+
 function func1(o1, o2) {
-    console.log(o1 + o2);
+  console.log(o1 + o2);
 }
 
 async function func2() { }
 
-let func3 = (o1, o2, o3, o4, o5) => { }
+let func3 = (o1, o2, o3, o4, o5) => { };
 
 function foo(o1, o2) {
-    const a = 1;
-    const b = 2;
-    let c = 0;
-    if (o1.x > a + b) {
-        c = o1.x;
-    } else if (o2.x < a + b) {
-        c = o2.x;
-    } else {
-        c = a + b + func2();
-    }
+  const a = 1;
+  const b = 2;
+  let c = 0;
+  if (o1.x > a + b) {
+    c = o1.x;
+  } else if (o2.x < a + b) {
+    c = o2.x;
+  } else {
+    c = a + b + func2();
+  }
 
-    let arr = [a, b]
-    var m = "123"; func1(...arr);  // written on the same line for testing
+  let arr = [a, b];
+  let m = '123'; func1(...arr);  // written on the same line for testing
 
-    func3(a, b, c, c, m);
+  func3(a, b, c, c, m);
 }
 
 class DataBase {
-    constructor(x) {
-        this.x = x;
-    }
+  constructor(x) {
+    this.x = x;
+  }
 
-    add(o) {
-        this.x += o;
-    }
+  add(o) {
+    this.x += o;
+  }
 
-    sub(o) {
-        this.x -= o;
-    }
+  sub(o) {
+    this.x -= o;
+  }
 }
 
 function bar(o) {
-    class Data extends DataBase {
-        constructor(x, y) {
-            super(x);
-            this.y = y;
-        }
+  class Data extends DataBase {
+    constructor(x, y) {
+      super(x);
+      this.y = y;
     }
+  }
 
-    let data = new Data();
-    // multiple blank lines here are for testing
+  let data = new Data();
+  // multiple blank lines here are for testing
 
 
 
-    data.sub(o);
+  data.sub(o);
 
-    var b = data.x;
-    if (o) {
-        b += 1;
-        console.log(b);
-    }
+  let b = data.x;
+  if (o) {
+    b += 1;
+    console.log(b);
+  }
 }

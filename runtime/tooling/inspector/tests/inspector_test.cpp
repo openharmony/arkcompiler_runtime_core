@@ -62,12 +62,10 @@ protected:
     void ExpectUnsupportedMethods(MethodName... method)
     {
         EXPECT_CALL(logger_, LogLineInternal(Logger::Level::WARNING, Logger::Component::DEBUGGER,
-                                             HasSubstr("Unsupported method")))
-            .Times(0);
+                                             HasSubstr("Unsupported method"))).Times(0);
 
         (EXPECT_CALL(logger_, LogLineInternal(Logger::Level::WARNING, Logger::Component::DEBUGGER,
-                                              AllOf(HasSubstr("Unsupported method"), HasSubstr(method)))),
-         ...);
+                                              AllOf(HasSubstr("Unsupported method"), HasSubstr(method)))), ...);
     }
 };
 
