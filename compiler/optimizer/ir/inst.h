@@ -1668,6 +1668,18 @@ private:
     std::array<Register, N> src_regs_ = CreateArray(INVALID_REG, std::make_index_sequence<INPUT_COUNT>());
 };
 
+template <size_t N>
+Inst *FixedInputsInst<N>::Clone(const Graph *targetGraph) const
+{
+    auto clone = static_cast<FixedInputsInst *>(Inst::Clone(targetGraph));
+#ifndef NDEBUG
+    for (size_t i = 0; i < INPUT_COUNT; ++i) {
+        clone->SetSrcReg(i, GetSrcReg(i));
+    }
+#endif
+    return clone;
+}
+
 /**
  * Instructions with fixed static inputs
  * We need to explicitly declare these proxy classes because some code can't work with the templated inst classes, for

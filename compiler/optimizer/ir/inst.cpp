@@ -275,18 +275,6 @@ Inst *Inst::Clone(const Graph *targetGraph) const
     return clone;
 }
 
-template <size_t N>
-Inst *FixedInputsInst<N>::Clone(const Graph *targetGraph) const
-{
-    auto clone = static_cast<FixedInputsInst *>(Inst::Clone(targetGraph));
-#ifndef NDEBUG
-    for (size_t i = 0; i < INPUT_COUNT; ++i) {
-        clone->SetSrcReg(i, GetSrcReg(i));
-    }
-#endif
-    return clone;
-}
-
 #if PANDA_TARGET_MACOS
 template class FixedInputsInst<0>;
 template class FixedInputsInst<1>;
