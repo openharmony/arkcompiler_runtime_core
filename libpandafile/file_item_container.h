@@ -284,7 +284,6 @@ private:
             bool operator()(IndexedItem *item1, IndexedItem *item2) const noexcept
             {
                 auto index_type = item1->GetIndexType();
-
                 if (index_type == IndexType::CLASS) {
                     auto type_item1 = static_cast<TypeItem *>(item1);
                     auto type_item2 = static_cast<TypeItem *>(item2);
