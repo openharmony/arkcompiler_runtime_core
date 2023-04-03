@@ -172,7 +172,7 @@ int main()
         TestHelper::ExpectEqual(mod_name1, "./mod2");
         std::string mod_name2 = abc_file->GetModuleNameByInternalName("var3");
         TestHelper::ExpectEqual(mod_name2, "../mod3");
-        std::string mod_name3 = abc_file->GetModuleNameByInternalName("local_var4");
+        std::string mod_name3 = abc_file->GetModuleNameByInternalName("localVar4");
         TestHelper::ExpectEqual(mod_name3, "../../mod4");
 
         // GetImportNameByInternalName
@@ -180,7 +180,7 @@ int main()
         TestHelper::ExpectEqual(im_name0, "default");
         std::string im_name1 = abc_file->GetImportNameByInternalName("var3");
         TestHelper::ExpectEqual(im_name1, "var3");
-        std::string im_name2 = abc_file->GetImportNameByInternalName("local_var4");
+        std::string im_name2 = abc_file->GetImportNameByInternalName("localVar4");
         TestHelper::ExpectEqual(im_name2, "var4");
         // GetImportNameByExportName
         std::string ind_im_name0 = abc_file->GetImportNameByExportName("v");
@@ -443,28 +443,28 @@ int main()
         TestHelper::ExpectEqual(f0->GetCalleeInfoCount(), 3);
         auto ci0_0 = f0->GetCalleeInfoByIndex(0);
         // callarg0
-        TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f0, ci0_0->GetCallInst()), 33);
+        TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f0, ci0_0->GetCallInst()), 34);
         auto ci0_1 = f0->GetCalleeInfoByIndex(1);
         // callspread
-        TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f0, ci0_1->GetCallInst()), 37);
+        TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f0, ci0_1->GetCallInst()), 38);
         auto ci0_2 = f0->GetCalleeInfoByIndex(2);
         // callirange
-        TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f0, ci0_2->GetCallInst()), 39);
+        TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f0, ci0_2->GetCallInst()), 40);
         // ctor of Data
         auto f1 = abc_file->GetFunctionByName("#2#Data");
         TestHelper::ExpectEqual(f1->GetCalleeInfoCount(), 1);
         auto ci1_0 = f1->GetCalleeInfoByIndex(0);
         // supercall
-        TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f1, ci1_0->GetCallInst()), 59);
+        TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f1, ci1_0->GetCallInst()), 60);
         // bar
         auto f2 = abc_file->GetFunctionByName("bar");
         TestHelper::ExpectEqual(f2->GetCalleeInfoCount(), 2);
         auto ci2_0 = f2->GetCalleeInfoByIndex(0);
         // callithisrange
-        TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f2, ci2_0->GetCallInst()), 69);
+        TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f2, ci2_0->GetCallInst()), 70);
         auto ci2_1 = f2->GetCalleeInfoByIndex(1);
         // callithisrange
-        TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f2, ci2_1->GetCallInst()), 74);
+        TestHelper::ExpectEqual(abc_file->GetLineNumberByInst(f2, ci2_1->GetCallInst()), 75);
         std::cout << "    --- Pass ---" << std::endl << std::endl;
     }
 

@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
+
 import * as db from './database';
 import { UserInput } from './user_input';
 
 function getData(store, userInput) {
-    let name = userInput.getText();
-    let sql = "select * from user_data where name = '" + name + "'";
-    let result = store.querySql(sql);
-    return result;
+  let name = userInput.getText();
+  let sql = "select * from user_data where name = '" + name + "'";
+  let result = store.querySql(sql);
+  return result;
 }
 
-function FuncEntry() {
-    let store = db.getDatabaseInstance();
-    let user_input = new UserInput();
-    getData(store, user_input);
+function funcEntry() {
+  let store = db.getDatabaseInstance();
+  let userInput = new UserInput();
+  getData(store, userInput);
 }

@@ -13,46 +13,47 @@
  * limitations under the License.
  */
 
-import { doSomething } from './service'
-import * as util from '../utils'
+
+import { doSomething } from './service';
+import * as util from '../utils';
 
 class Data {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
 
-    Add(o) {
-        this.x = o.x;
-        this.y = o.y;
-    }
+  Add(o) {
+    this.x = o.x;
+    this.y = o.y;
+  }
 }
 
 function foo(o1, o2) {
-    var a = 0;
-    let c = new Data(1, 2);
-    if (o1 > o2) {
-        c.Add(o1);
-        a = o2;
-        return c;
-    } else if (o1 < o2) {
-        c.Add(o2);
-        a = o1;
-    } else {
-        a = o1 + o2;
-        c.Add(new Data(1, 2));
-    }
+  let a = 0;
+  let c = new Data(1, 2);
+  if (o1 > o2) {
+    c.Add(o1);
+    a = o2;
+    return c;
+  } else if (o1 < o2) {
+    c.Add(o2);
+    a = o1;
+  } else {
+    a = o1 + o2;
+    c.Add(new Data(1, 2));
+  }
 
-    let func1 = function (o) {
-        function func2(o1, o2) {
-            console.log(o1, o2);
-        }
-        let bar = func2;
-        bar(c, o);
-        return c;
+  let func1 = function (o) {
+    function func2(o1, o2) {
+      console.log(o1, o2);
     }
-    let res = func1();
+    let bar = func2;
+    bar(c, o);
+    return c;
+  };
+  let res = func1();
 
-    doSomething(a);
-    return util.sum(res, o2);
+  doSomething(a);
+  return util.sum(res, o2);
 }

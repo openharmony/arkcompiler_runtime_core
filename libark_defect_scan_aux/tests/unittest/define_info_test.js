@@ -13,68 +13,69 @@
  * limitations under the License.
  */
 
-import { BaseService } from '../base/service'
-import * as ns from '../mod1'
+
+import { BaseService } from '../base/service';
+import * as ns from '../mod1';
 
 async function func1() { }
 
 function func2(o1, o2) {
-    let func3 = function* () { }
-    var obj = {
-        "num": 3,
-        "func4": (n1) => { return n1 * n1 }
-    }
+  let func3 = function* () { };
+  let obj = {
+    'num': 3,
+    'func4': (n1) => { return n1 * n1 },
+  };
 }
 
 class Bar {
-    constructor(name, color) {
-        this.name = name;
-        this.color = color;
-    }
+  constructor(name, color) {
+    this.name = name;
+    this.color = color;
+  }
 
-    func6() { }
+  func6() { }
 
-    get getName() {
-        return this.name;
-    }
-    set setName(name) {
-        this.name = name;
-    }
+  get getName() {
+    return this.name;
+  }
+  set setName(name) {
+    this.name = name;
+  }
 
-    func9(o1, o2, o3) { }
+  func9(o1, o2, o3) { }
 }
 
-var a = "func7"
-var symbol = Symbol("func8");
+let a = 'func7';
+let symbol = Symbol('func8');
 function func10() {
-    class Bar {
-        baseFoo1() { }
-    }
+  class Bar {
+    baseFoo1() { }
+  }
 
-    class Bar2 extends Bar {
-        func12(o1) { }
-        [a]() { }
-        [symbol]() { }
-        func15(o1, o2) { }
-    }
+  class Bar2 extends Bar {
+    func12(o1) { }
+    [a]() { }
+    [symbol]() { }
+    func15(o1, o2) { }
+  }
 }
 
 class ExampleClass1 {
-    func17() { }
+  func17() { }
 }
 function func18() {
-    class ExampleClass1 {
-        func19() { }
-    }
+  class ExampleClass1 {
+    func19() { }
+  }
 
-    function func20() {
-        class ExampleClass2 extends ExampleClass1 { }
-    }
+  function func20() {
+    class ExampleClass2 extends ExampleClass1 { }
+  }
 }
 
 function func21() {
-    class ExtendService extends BaseService { }
-    class ExtendPhoneService extends ns.Phone.PhoneService { }
-    class ExtendDataSource extends globalvar.BasicDataSource { }
-    class ExtendDataItem extends globalvar2.Data.DataItem { }
+  class ExtendService extends BaseService { }
+  class ExtendPhoneService extends ns.Phone.PhoneService { }
+  class ExtendDataSource extends globalvar.BasicDataSource { }
+  class ExtendDataItem extends globalvar2.Data.DataItem { }
 }
