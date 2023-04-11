@@ -13,24 +13,25 @@
  * limitations under the License.
  */
 
+
 class Database {
-    addData(data) {
-        console.log("addData: ", data);
-    }
+  addData(data) {
+    console.log('addData: ', data);
+  }
 
-    removeData(data) {
-        console.log("removeData: ", data);
-    }
+  removeData(data) {
+    console.log('removeData: ', data);
+  }
 
-    querySql(sql) {
-        return "querySql: " + sql;
-    }
+  querySql(sql) {
+    return 'querySql: ' + sql;
+  }
 
-    updateData(old_data, new_data) {
-        console.log("updateData: ", old_data, "->", new_data);
-    }
+  updateData(oldData, newData) {
+    console.log('updateData: ', oldData, '->', newData);
+  }
 }
 
 export function getDatabaseInstance() {
-    return new Database();
+  return new Database();
 }

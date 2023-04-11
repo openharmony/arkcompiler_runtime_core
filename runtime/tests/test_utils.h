@@ -28,10 +28,8 @@ namespace panda::mem {
 {
     auto *vm = Runtime::GetCurrent()->GetPandaVM();
     ASSERT(vm != nullptr);
-    auto *string_class = Runtime::GetCurrent()
-                             ->GetClassLinker()
-                             ->GetExtension(vm->GetLanguageContext())
-                             ->GetClassRoot(ClassRoot::STRING);
+    auto *string_class = Runtime::GetCurrent()->GetClassLinker()->GetExtension(
+        vm->GetLanguageContext())->GetClassRoot(ClassRoot::STRING);
     ASSERT(string_class != nullptr);
     mem::HeapManager *heap_manager = vm->GetHeapManager();
     ASSERT(heap_manager != nullptr);

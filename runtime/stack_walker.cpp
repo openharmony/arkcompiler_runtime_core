@@ -30,8 +30,8 @@ StackWalker StackWalker::Create(const ManagedThread *thread, UnwindPolicy policy
 #ifndef NDEBUG
     ASSERT(thread->IsRuntimeCallEnabled());
     if (Runtime::GetOptions().IsVerifyCallStack()) {
-        StackWalker(thread->GetCurrentFrame(), thread->IsCurrentFrameCompiled(), thread->GetNativePc(), policy)
-            .Verify();
+        StackWalker(thread->GetCurrentFrame(), thread->IsCurrentFrameCompiled(),
+                    thread->GetNativePc(), policy).Verify();
     }
 #endif
     return StackWalker(thread->GetCurrentFrame(), thread->IsCurrentFrameCompiled(), thread->GetNativePc(), policy);

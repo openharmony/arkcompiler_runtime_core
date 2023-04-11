@@ -44,9 +44,9 @@ bool ProcessArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::stri
         return false;
     }
 
-    panda::Logger::InitializeStdLogging(panda::Logger::Level::ERROR, panda::Logger::ComponentMask()
-                                                                         .set(panda::Logger::Component::QUICKENER)
-                                                                         .set(panda::Logger::Component::PANDAFILE));
+    panda::Logger::InitializeStdLogging(
+        panda::Logger::Level::ERROR, panda::Logger::ComponentMask().set(
+            panda::Logger::Component::QUICKENER).set(panda::Logger::Component::PANDAFILE));
 
     return true;
 }

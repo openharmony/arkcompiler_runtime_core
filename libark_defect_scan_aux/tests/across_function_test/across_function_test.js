@@ -13,47 +13,48 @@
  * limitations under the License.
  */
 
+
 class Database {
-    addData(data) {
-        console.log("addData: ", data);
-    }
+  addData(data) {
+    console.log('addData: ', data);
+  }
 
-    removeData(data) {
-        console.log("removeData: ", data);
-    }
+  removeData(data) {
+    console.log('removeData: ', data);
+  }
 
-    querySql(sql) {
-        return "querySql: " + sql;
-    }
+  querySql(sql) {
+    return 'querySql: ' + sql;
+  }
 
-    updateData(old_data, new_data) {
-        console.log("updateData: ", old_data, new_data);
-    }
+  updateData(oldData, newData) {
+    console.log('updateData: ', oldData, newData);
+  }
 }
 
 class UserInput {
-    constructor(text) {
-        this.text = text;
-    }
+  constructor(text) {
+    this.text = text;
+  }
 
-    getText() {
-        return this.text;
-    }
+  getText() {
+    return this.text;
+  }
 
-    setText(text) {
-        this.text = text;
-    }
+  setText(text) {
+    this.text = text;
+  }
 }
 
-function getData(store, user_input) {
-    let name = user_input.getText();
-    let sql = "select * from user_data where name = '" + name + "'";
-    let result = store.querySql(sql);
-    return result;
+function getData(store, userInput) {
+  let name = userInput.getText();
+  let sql = "select * from user_data where name = '" + name + "'";
+  let result = store.querySql(sql);
+  return result;
 }
 
 function funcEntry() {
-    let store = new Database();
-    let user_input = new UserInput("UserInput");
-    getData(store, user_input);
+  let store = new Database();
+  let userInput = new UserInput('UserInput');
+  getData(store, userInput);
 }

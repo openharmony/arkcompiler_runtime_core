@@ -190,8 +190,8 @@ G1GCFullGCTest::ObjVec G1GCFullGCTest::MakeAllocations(size_t min_size, size_t m
 void G1GCFullGCTest::InitRoot()
 {
     ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-                       ->GetClass(ctx_.GetStringArrayClassDescriptor());
+    Class *klass = class_linker->GetExtension(
+        panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(ctx_.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
     root_ = coretypes::Array::Create(klass, ROOT_MAX_SIZE);
     root_size_ = 0;
@@ -322,9 +322,8 @@ TEST_F(G1GCFullGCTest, TestIntensiveAlloc)
         [[maybe_unused]] size_t bytes, raw_objects_size;
 
         [[maybe_unused]] size_t young_size =
-            reinterpret_cast<GenerationalSpaces *>(
-                reinterpret_cast<ObjectAllocatorGenBase *>(object_allocator_)->GetHeapSpace())
-                ->GetCurrentMaxYoungSize();
+            reinterpret_cast<GenerationalSpaces *>(reinterpret_cast<ObjectAllocatorGenBase *>(
+                object_allocator_)->GetHeapSpace())->GetCurrentMaxYoungSize();
         [[maybe_unused]] size_t heap_size = mem::MemConfig::GetHeapSizeLimit();
         [[maybe_unused]] auto g1_alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(object_allocator_);
         [[maybe_unused]] size_t max_y_size = g1_alloc->GetYoungAllocMaxSize();
@@ -368,8 +367,8 @@ TEST_F(G1GCFullGCTest, TestIntensiveAlloc)
                 ObjVec ov1 = MakeAllocations<decltype(y_space_check), 1>(y_obj_size, y_obj_size, 1, &bytes,
                                                                          &raw_objects_size, y_space_check);
                 MakeObjectsAlive(ov1, 1);
-                t_free = reinterpret_cast<GenerationalSpaces *>(object_allocator_->GetHeapSpace())
-                             ->GetCurrentFreeTenuredSize();
+                t_free = reinterpret_cast<GenerationalSpaces *>(
+                    object_allocator_->GetHeapSpace())->GetCurrentFreeTenuredSize();
                 allocated += bytes;
             }
             MakeObjectsGarbage(old_root_size, root_size_);
@@ -395,9 +394,8 @@ TEST_F(G1GCFullGCTest, TestExplicitFullNearLimit)
         [[maybe_unused]] size_t bytes, raw_objects_size;
 
         [[maybe_unused]] size_t young_size =
-            reinterpret_cast<GenerationalSpaces *>(
-                reinterpret_cast<ObjectAllocatorGenBase *>(object_allocator_)->GetHeapSpace())
-                ->GetCurrentMaxYoungSize();
+            reinterpret_cast<GenerationalSpaces *>(reinterpret_cast<ObjectAllocatorGenBase *>(
+                object_allocator_)->GetHeapSpace())->GetCurrentMaxYoungSize();
         [[maybe_unused]] size_t heap_size = mem::MemConfig::GetHeapSizeLimit();
         [[maybe_unused]] auto g1_alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(object_allocator_);
         [[maybe_unused]] size_t max_y_size = g1_alloc->GetYoungAllocMaxSize();
@@ -419,8 +417,8 @@ TEST_F(G1GCFullGCTest, TestExplicitFullNearLimit)
                 ObjVec ov1 = MakeAllocations<decltype(y_space_check), 1>(y_obj_size, y_obj_size, 1, &bytes,
                                                                          &raw_objects_size, y_space_check);
                 MakeObjectsAlive(ov1, 1);
-                t_free = reinterpret_cast<GenerationalSpaces *>(object_allocator_->GetHeapSpace())
-                             ->GetCurrentFreeTenuredSize();
+                t_free = reinterpret_cast<GenerationalSpaces *>(
+                    object_allocator_->GetHeapSpace())->GetCurrentFreeTenuredSize();
                 i++;
             }
             gc_->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
@@ -431,8 +429,8 @@ TEST_F(G1GCFullGCTest, TestExplicitFullNearLimit)
                 ObjVec ov1 = MakeAllocations<decltype(y_space_check), 1>(y_obj_size, y_obj_size, 1, &bytes,
                                                                          &raw_objects_size, y_space_check);
                 MakeObjectsAlive(ov1, 1);
-                t_free = reinterpret_cast<GenerationalSpaces *>(object_allocator_->GetHeapSpace())
-                             ->GetCurrentFreeTenuredSize();
+                t_free = reinterpret_cast<GenerationalSpaces *>(
+                    object_allocator_->GetHeapSpace())->GetCurrentFreeTenuredSize();
             }
             MakeObjectsGarbage(old_root_size, root_size_);
             gc_->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
@@ -455,9 +453,8 @@ TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
         [[maybe_unused]] size_t bytes, raw_objects_size;
 
         [[maybe_unused]] size_t young_size =
-            reinterpret_cast<GenerationalSpaces *>(
-                reinterpret_cast<ObjectAllocatorGenBase *>(object_allocator_)->GetHeapSpace())
-                ->GetCurrentMaxYoungSize();
+            reinterpret_cast<GenerationalSpaces *>(reinterpret_cast<ObjectAllocatorGenBase *>(
+                object_allocator_)->GetHeapSpace())->GetCurrentMaxYoungSize();
         [[maybe_unused]] size_t heap_size = mem::MemConfig::GetHeapSizeLimit();
         [[maybe_unused]] auto g1_alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(object_allocator_);
         [[maybe_unused]] size_t max_y_size = g1_alloc->GetYoungAllocMaxSize();
@@ -479,8 +476,8 @@ TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
                 ObjVec ov1 = MakeAllocations<decltype(y_space_check), 1>(y_obj_size, y_obj_size, 1, &bytes,
                                                                          &raw_objects_size, y_space_check);
                 MakeObjectsAlive(ov1, 1);
-                t_free = reinterpret_cast<GenerationalSpaces *>(object_allocator_->GetHeapSpace())
-                             ->GetCurrentFreeTenuredSize();
+                t_free = reinterpret_cast<GenerationalSpaces *>(
+                    object_allocator_->GetHeapSpace())->GetCurrentFreeTenuredSize();
                 i++;
             }
             MakeObjectsGarbage(old_root_size, root_size_);
@@ -490,8 +487,8 @@ TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
                 ObjVec ov1 = MakeAllocations<decltype(y_space_check), 1>(y_obj_size, y_obj_size, 1, &bytes,
                                                                          &raw_objects_size, y_space_check);
                 MakeObjectsAlive(ov1, 1);
-                t_free = reinterpret_cast<GenerationalSpaces *>(object_allocator_->GetHeapSpace())
-                             ->GetCurrentFreeTenuredSize();
+                t_free = reinterpret_cast<GenerationalSpaces *>(
+                    object_allocator_->GetHeapSpace())->GetCurrentFreeTenuredSize();
             }
             MakeObjectsGarbage(old_root_size, root_size_);
             gc_->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));

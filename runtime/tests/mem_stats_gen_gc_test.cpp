@@ -217,8 +217,8 @@ MemStatsGenGCTest::ObjVec MemStatsGenGCTest::MakeAllocationsWithRepeats(size_t m
 void MemStatsGenGCTest::InitRoot()
 {
     ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-                       ->GetClass(ctx_.GetStringArrayClassDescriptor());
+    Class *klass = class_linker->GetExtension(
+        panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(ctx_.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
     root_ = coretypes::Array::Create(klass, ROOT_MAX_SIZE);
     root_size_ = 0;
@@ -360,9 +360,8 @@ typename MemStatsGenGCTest::MemOpReport MemStatsGenGCTest::MakeAllocations()
     size_t min_size = 0;
     size_t max_size = 0;
     bool check_oom = false;
-    size_t young_size = reinterpret_cast<GenerationalSpaces *>(
-                            reinterpret_cast<ObjectAllocatorGenBase *>(object_allocator_)->GetHeapSpace())
-                            ->GetCurrentMaxYoungSize();
+    size_t young_size = reinterpret_cast<GenerationalSpaces *>(reinterpret_cast<ObjectAllocatorGenBase *>(
+        object_allocator_)->GetHeapSpace())->GetCurrentMaxYoungSize();
     switch (gc_type_) {
         case GCType::GEN_GC: {
             auto gen_alloc = reinterpret_cast<ObjectAllocatorGen<MT_MODE_MULTI> *>(object_allocator_);

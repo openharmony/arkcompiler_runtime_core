@@ -78,8 +78,7 @@ inline bool Array::CompareAndSetPrimitive(size_t offset, T old_value, T new_valu
                                           bool strong)
 {
     return ObjectAccessor::CompareAndSetFieldPrimitive(this, GetDataOffset() + offset, old_value, new_value,
-                                                       memory_order, strong)
-        .first;
+                                                       memory_order, strong).first;
 }
 
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
@@ -88,8 +87,7 @@ inline bool Array::CompareAndSetObject(size_t offset, ObjectHeader *old_value, O
 {
     auto field_offset = GetDataOffset() + offset;
     return ObjectAccessor::CompareAndSetFieldObject<need_write_barrier, is_dyn>(this, field_offset, old_value,
-                                                                                new_value, memory_order, strong)
-        .first;
+                                                                                new_value, memory_order, strong).first;
 }
 
 template <typename T>
@@ -97,8 +95,7 @@ inline T Array::CompareAndExchangePrimitive(size_t offset, T old_value, T new_va
                                             bool strong)
 {
     return ObjectAccessor::CompareAndSetFieldPrimitive(this, GetDataOffset() + offset, old_value, new_value,
-                                                       memory_order, strong)
-        .second;
+                                                       memory_order, strong).second;
 }
 
 template <bool need_write_barrier /* = true */, bool is_dyn /* = false */>
@@ -107,8 +104,7 @@ inline ObjectHeader *Array::CompareAndExchangeObject(size_t offset, ObjectHeader
 {
     auto field_offset = GetDataOffset() + offset;
     return ObjectAccessor::CompareAndSetFieldObject<need_write_barrier, is_dyn>(this, field_offset, old_value,
-                                                                                new_value, memory_order, strong)
-        .second;
+                                                                                new_value, memory_order, strong).second;
 }
 
 template <typename T>

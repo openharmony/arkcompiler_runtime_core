@@ -153,8 +153,8 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallShortINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -236,8 +236,8 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallShortJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -322,8 +322,8 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -408,8 +408,8 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -495,8 +495,8 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallRangeINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -582,8 +582,8 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallRangeJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -665,8 +665,8 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccShortINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -748,8 +748,8 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccShortJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -833,8 +833,8 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -918,8 +918,8 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -1001,8 +1001,8 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallShortINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -1084,8 +1084,8 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallShortJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -1170,8 +1170,8 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -1256,8 +1256,8 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -1343,8 +1343,8 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallRangeINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -1430,8 +1430,8 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallRangeJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -1513,8 +1513,8 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccShortINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -1596,8 +1596,8 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccShortJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -1681,8 +1681,8 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -1766,8 +1766,8 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -1844,8 +1844,8 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectShortINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -1922,8 +1922,8 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectShortJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -2004,8 +2004,8 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -2086,8 +2086,8 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -2169,8 +2169,8 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectRangeINT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -2252,8 +2252,8 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectRangeJIT)
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-            ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
+        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)->GetClass(
+            ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));

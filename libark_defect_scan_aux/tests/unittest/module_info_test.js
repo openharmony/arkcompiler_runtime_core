@@ -13,43 +13,44 @@
  * limitations under the License.
  */
 
+
 // default import
-import var1 from './mod1'
+import var1 from './mod1';
 let a = var1;
 
 // namespace import
-import * as ns from './mod2'
+import * as ns from './mod2';
 ns.add(2);
 
 // regular import
-import { var3 } from '../mod3'
+import { var3 } from '../mod3';
 a = var3;
 
 // rename import
-import { var4 as local_var4 } from '../../mod4'
-a = local_var4;
+import { var4 as localVar4 } from '../../mod4';
+a = localVar4;
 
 // export variable
-export var var5
-var var6 = 100
-export { var6 }
+export let var5;
+let var6 = 100;
+export { var6 };
 
 // export class
 class InnerUserInput {
-    getTextBase() { }
+  getTextBase() { }
 }
 class UserInput extends InnerUserInput {
-    getText() { }
+  getText() { }
 }
-export { UserInput as UInput }
+export { UserInput as UInput };
 
 // export function
 function func3() { }
-export { func3 as exFunc3 }
+export { func3 as exFunc3 };
 export default function func1() { }
 export function func2() { }
 
 // indirect export
-export { v5 as v } from './mod5'
-export * from './mod6'
-export { foo } from '../../mod7'
+export { v5 as v } from './mod5';
+export * from './mod6';
+export { foo } from '../../mod7';

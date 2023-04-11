@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
+
 export class UserInput {
-    constructor(text) {
-        this.text = text;
-    }
+  constructor(text) {
+    this.text = text;
+  }
 
-    getText() {
-        return this.text;
-    }
+  getText() {
+    return this.text;
+  }
 
-    setText(text) {
-        this.text = text;
-    }
+  setText(text) {
+    this.text = text;
+  }
 }
