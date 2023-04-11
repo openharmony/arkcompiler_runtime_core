@@ -35,7 +35,7 @@ function foo(o1, o2) {
   }
 
   let arr = [a, b];
-    let m = '123'; func1(...arr);  // written on the same line for testing
+  let m = '123'; func1(...arr);  // written on the same line for testing
 
   func3(a, b, c, c, m);
 }
