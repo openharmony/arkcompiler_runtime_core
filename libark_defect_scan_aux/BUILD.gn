@@ -27,6 +27,7 @@ config("defectscanaux_public_config") {
 
 config("defectscanaux_test_config") {
   visibility = [ ":*" ]
+  visibility += [ "./tests/unittest:*" ]
 
   configs = [ ":defectscanaux_public_config" ]
 }
