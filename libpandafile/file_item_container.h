@@ -289,7 +289,6 @@ private:
                     auto type_item2 = static_cast<TypeItem *>(item2);
                     auto type_id1 = static_cast<size_t>(type_item1->GetType().GetId());
                     auto type_id2 = static_cast<size_t>(type_item2->GetType().GetId());
-
                     if (type_id1 != type_id2) {
                         return type_id1 < type_id2;
                     }
@@ -298,7 +297,6 @@ private:
                 if (index_type == IndexType::LINE_NUMBER_PROG) {
                     auto ref_count1 = item1->GetRefCount();
                     auto ref_count2 = item2->GetRefCount();
-
                     if (ref_count1 != ref_count2) {
                         return ref_count1 > ref_count2;
                     }
