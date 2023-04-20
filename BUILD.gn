@@ -95,7 +95,10 @@ group("ark_host_mac_tools_packages") {
 
 # Common config for ark source
 config("ark_config") {
-  visibility = [ ":*" ]
+  visibility = [
+    "./*",
+    "//arkcompiler/ets_frontend/*",
+  ]
 
   include_dirs = [ "$ark_root" ]
   defines = [ "PANDA_TARGET_MOBILE_WITH_MANAGED_LIBS=1" ]
