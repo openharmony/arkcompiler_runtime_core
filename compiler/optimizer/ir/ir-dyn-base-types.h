@@ -80,13 +80,7 @@ inline panda::compiler::DataType::Type AnyBaseTypeToDataType([[maybe_unused]] An
 
 inline const char *AnyTypeTypeToString(AnyBaseType any_type)
 {
-    static constexpr auto COUNT = static_cast<uint32_t>(AnyBaseType::COUNT);
-    static constexpr std::array<const char *, COUNT> ANYBASETYPE_NAMES = {
-        "UNDEFINED_TYPE",
-    };
-    auto idx = static_cast<uint32_t>(any_type);
-    ASSERT(idx < COUNT);
-    return ANYBASETYPE_NAMES[idx];
+    return "UNDEFINED_TYPE";
 }
 
 } // namespace panda::compiler

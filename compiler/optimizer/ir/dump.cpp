@@ -379,7 +379,7 @@ void IntrinsicInst::DumpOpcode(std::ostream *out) const
 {
     const auto &adapter = GetBasicBlock()->GetGraph()->GetLocalAllocator()->Adapter();
     ArenaString intrinsic(ArenaString("Intrinsic.", adapter));
-    ArenaString opcode("", adapter);
+    ArenaString opcode(GetIntrinsicOpcodeName(), adapter);
     (*out) << std::setw(INDENT_OPCODE) << intrinsic + opcode << " ";
 }
 

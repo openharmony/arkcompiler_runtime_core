@@ -314,4 +314,9 @@ if (!ark_standalone_build) {
       "$ark_root/platforms/tests:host_unittest",
     ]
   }
+
+  group("compiler_host_unittest") {
+    testonly = true
+    deps = [ "$ark_root/compiler/tests:host_unittest" ]
+  }
 }
