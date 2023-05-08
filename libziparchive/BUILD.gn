@@ -48,6 +48,7 @@ source_set("libarkziparchive_static") {
 }
 
 ohos_shared_library("libarkziparchive") {
+  stack_protector_ret = false
   deps = [ ":libarkziparchive_static" ]
 
   if (!is_standard_system) {
@@ -80,6 +81,7 @@ source_set("libarkziparchive_frontend_set_static") {
 }
 
 ohos_static_library("libarkziparchive_frontend_static") {
+  stack_protector_ret = false
   deps = [ ":libarkziparchive_frontend_set_static" ]
 
   part_name = "runtime_core"

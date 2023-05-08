@@ -61,6 +61,7 @@ libsec_sources = [
 ]
 
 ohos_static_library("libc_secstatic") {
+  stack_protector_ret = false
   sources = libsec_sources
   public_configs = [ ":libsec_public_config" ]
   cflags = [
@@ -75,6 +76,7 @@ ohos_static_library("libc_secstatic") {
 }
 
 ohos_shared_library("libc_secshared") {
+  stack_protector_ret = false
   sources = libsec_sources
   public_configs = [ ":libsec_public_config" ]
   cflags = [

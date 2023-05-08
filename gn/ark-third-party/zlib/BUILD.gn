@@ -26,6 +26,7 @@ config("zlib_config") {
 }
 
 ohos_static_library("libz") {
+  stack_protector_ret = false
   sources = [
     "adler32.c",
     "compress.c",

@@ -52,6 +52,7 @@ foreach(plugin, enabled_plugins) {
 }
 
 ohos_shared_library("arkdisassembler") {
+  stack_protector_ret = false
   sources = arkdisassembler_sources
 
   include_dirs = [
@@ -87,6 +88,7 @@ ohos_shared_library("arkdisassembler") {
 }
 
 ohos_static_library("arkdisassembler_frontend_static") {
+  stack_protector_ret = false
   sources = arkdisassembler_sources
 
   include_dirs = [

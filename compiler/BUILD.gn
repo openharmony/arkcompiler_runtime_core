@@ -89,6 +89,7 @@ libarkcompiler_configs = [
 ]
 
 ohos_shared_library("libarkcompiler") {
+  stack_protector_ret = false
   sources = libarkcompiler_sources
 
   configs = libarkcompiler_configs
@@ -145,6 +146,7 @@ ohos_shared_library("libarkcompiler") {
 }
 
 ohos_static_library("libarkcompiler_frontend_static") {
+  stack_protector_ret = false
   sources = libarkcompiler_sources
 
   configs = libarkcompiler_configs

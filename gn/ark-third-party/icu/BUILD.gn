@@ -24,6 +24,7 @@ config("icu_config") {
 }
 
 ohos_static_library("static_icustubdata") {
+  stack_protector_ret = false
   configs = [
     ":icu_config",
     "//build/config/compiler:rtti",
@@ -489,6 +490,7 @@ icu_i18n_source = [
 ]
 
 ohos_shared_library("shared_icuuc") {
+  stack_protector_ret = false
   configs = [
     ":icu_config",
     "//build/config/compiler:rtti",
@@ -532,6 +534,7 @@ ohos_shared_library("shared_icuuc") {
 }
 
 ohos_shared_library("shared_icui18n") {
+  stack_protector_ret = false
   sources = icu_i18n_source
   configs = [
     ":icu_config",
@@ -577,6 +580,7 @@ ohos_shared_library("shared_icui18n") {
 }
 
 ohos_static_library("static_icuuc") {
+  stack_protector_ret = false
   configs = [
     ":icu_config",
     "//build/config/compiler:rtti",
@@ -626,6 +630,7 @@ ohos_static_library("static_icuuc") {
 }
 
 ohos_static_library("static_icui18n") {
+  stack_protector_ret = false
   sources = icu_i18n_source
   configs = [
     ":icu_config",

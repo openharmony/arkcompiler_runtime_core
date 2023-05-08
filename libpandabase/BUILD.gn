@@ -192,6 +192,7 @@ source_set("libarkbase_static") {
 }
 
 ohos_shared_library("libarkbase") {
+  stack_protector_ret = false
   deps = [ ":libarkbase_static" ]
   if (!is_mingw && !is_mac) {
     output_extension = "so"
@@ -212,6 +213,7 @@ source_set("libarkbase_frontend_set_static") {
 }
 
 ohos_static_library("libarkbase_frontend_static") {
+  stack_protector_ret = false
   deps = [ ":libarkbase_frontend_set_static" ]
 
   part_name = "runtime_core"
