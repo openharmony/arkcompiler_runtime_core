@@ -105,6 +105,7 @@ source_set("libarkfile_static_fuzz") {
 }
 
 ohos_shared_library("libarkfile") {
+  stack_protector_ret = false
   deps = [ ":libarkfile_static" ]
 
   if (!is_standard_system) {
@@ -132,6 +133,7 @@ source_set("libarkfile_frontend_set_static") {
 }
 
 ohos_static_library("libarkfile_frontend_static") {
+  stack_protector_ret = false
   deps = [ ":libarkfile_frontend_set_static" ]
 
   part_name = "runtime_core"

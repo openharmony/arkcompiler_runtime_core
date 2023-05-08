@@ -42,6 +42,7 @@ libarkbytecodeopt_configs = [
 ]
 
 ohos_shared_library("libarkbytecodeopt") {
+  stack_protector_ret = false
   sources = libarkbytecodeopt_sources
 
   configs = libarkbytecodeopt_configs
@@ -69,6 +70,7 @@ ohos_shared_library("libarkbytecodeopt") {
 }
 
 ohos_static_library("libarkbytecodeopt_frontend_static") {
+  stack_protector_ret = false
   sources = libarkbytecodeopt_sources
 
   configs = libarkbytecodeopt_configs

@@ -90,6 +90,7 @@ source_set("libarkassembler_static") {
 }
 
 ohos_shared_library("libarkassembler") {
+  stack_protector_ret = false
   deps = [ ":libarkassembler_static" ]
 
   if (!is_standard_system) {
@@ -127,6 +128,7 @@ source_set("libarkassembler_frontend_set_static") {
 }
 
 ohos_static_library("libarkassembler_frontend_static") {
+  stack_protector_ret = false
   deps = [ ":libarkassembler_frontend_set_static" ]
 
   part_name = "runtime_core"

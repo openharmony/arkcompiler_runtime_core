@@ -56,6 +56,7 @@ ark_isa_gen("defectscanaux_intrinsic") {
 }
 
 ohos_shared_library("libark_defect_scan_aux") {
+  stack_protector_ret = false
   sources = libarkdefectscanaux_sources
   configs = [ ":defectscanaux_public_config" ]
 
@@ -75,6 +76,7 @@ ohos_shared_library("libark_defect_scan_aux") {
 }
 
 ohos_static_library("libark_defect_scan_aux_static_test") {
+  stack_protector_ret = false
   sources = libarkdefectscanaux_sources
   configs = [ ":defectscanaux_public_config" ]
 
