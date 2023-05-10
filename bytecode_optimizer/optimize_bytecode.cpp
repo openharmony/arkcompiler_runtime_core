@@ -277,7 +277,7 @@ static void SetCompilerOptions(bool is_dynamic)
     compiler::options.SetCompilerUseSafepoint(false);
     compiler::options.SetCompilerSupportInitObjectInst(true);
     if (!compiler::options.WasSetCompilerMaxBytecodeSize()) {
-        compiler::options.SetCompilerMaxBytecodeSize(~0U);
+        compiler::options.SetCompilerMaxBytecodeSize(MAX_BYTECODE_SIZE);
     }
     if (is_dynamic) {
         panda::bytecodeopt::options.SetSkipMethodsWithEh(true);
