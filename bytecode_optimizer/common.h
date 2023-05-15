@@ -25,6 +25,7 @@ static constexpr compiler::Register MAX_NUM_SHORT_CALL_ARGS = 2;
 static constexpr compiler::Register MAX_NUM_NON_RANGE_ARGS = 4;
 static constexpr compiler::Register MAX_NUM_INPUTS = MAX_NUM_NON_RANGE_ARGS;
 static constexpr panda::compiler::Register NUM_COMPACTLY_ENCODED_REGS = 16;
+static constexpr uint32_t MAX_BYTECODE_SIZE = 100000U;
 
 // Get the position where accumulator read happens.
 uint8_t AccReadIndex(const compiler::Inst *inst);
