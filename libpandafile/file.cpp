@@ -298,6 +298,23 @@ std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t s
     return panda_file::File::OpenFromMemory(std::move(ptr), std::to_string(hash(mem)));
 }
 
+std::unique_ptr<const File> OpenPandaFileFromSecureMemory(uint8_t *buffer, size_t size)
+{
+    if (buffer == nullptr) {
+        return nullptr;
+    }
+
+    std::byte *mem = reinterpret_cast<std::byte *>(buffer);
+    os::mem::ConstBytePtr ptr(mem, size, nullptr);
+    if (ptr.Get() == nullptr) {
+        PLOG(ERROR, PANDAFILE) << "Failed to open panda file from secure memory'";
+        return nullptr;
+    }
+
+    std::hash<std::byte *> hash;
+    return panda_file::File::OpenFromMemory(std::move(ptr), std::to_string(hash(mem)));
+}
+
 class ClassIdxIterator {
 public:
     using value_type = const uint8_t *;
