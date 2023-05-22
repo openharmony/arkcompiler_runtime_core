@@ -137,6 +137,14 @@
 #define LIKELY(exp) (__builtin_expect((exp) != 0, true))  // NOLINT(cppcoreguidelines-macro-usage)
 #define UNLIKELY(exp) (__builtin_expect((exp) != 0, false))  // NOLINT(cppcoreguidelines-macro-usage)
 
+// NOLINT(cppcoreguidelines-macro-usage)
+#define ABORT_AND_UNREACHABLE()                                      \
+    do {                                                             \
+        std::cerr << "This line should be unreachable" << std::endl; \
+        std::abort();                                                \
+        __builtin_unreachable();                                     \
+    } while (0)
+
 #if !defined(NDEBUG)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -203,7 +211,7 @@
 #define ASSERT_DO(cond, func) static_cast<void>(0) // NOLINT(cppcoreguidelines-macro-usage)
 #define ASSERT_PRINT(cond, message) static_cast<void>(0) // NOLINT(cppcoreguidelines-macro-usage)
 #define ASSERT_RETURN(cond) static_cast<void>(cond) // NOLINT(cppcoreguidelines-macro-usage)
-#define UNREACHABLE __builtin_unreachable // NOLINT(cppcoreguidelines-macro-usage)
+#define UNREACHABLE() ABORT_AND_UNREACHABLE()  // NOLINT(cppcoreguidelines-macro-usage)
 #define ASSERT_OP(lhs, op, rhs)  // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHECK_LE(lhs, rhs)  // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHECK_LT(lhs, rhs)  // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -215,7 +223,7 @@
 
 // Due to the impossibility of using asserts in constexpr methods
 // we need an extra version of UNREACHABLE macro that can be used in such situations
-#define UNREACHABLE_CONSTEXPR() __builtin_unreachable()  // NOLINT(cppcoreguidelines-macro-usage)
+#define UNREACHABLE_CONSTEXPR()  ABORT_AND_UNREACHABLE()  // NOLINT(cppcoreguidelines-macro-usage)
 
 #define MERGE_WORDS_X(A, B) A ## B  // NOLINT(cppcoreguidelines-macro-usage)
 #define MERGE_WORDS(A, B) MERGE_WORDS_X(A, B)  // NOLINT(cppcoreguidelines-macro-usage)
