@@ -259,7 +259,6 @@ HWTEST_F(AnnotationDataTest, annotation_test_003, TestSize.Level1)
     type = Value::GetCharAsType('2');
     EXPECT_EQ(panda::pandasm::Value::Type::I8, type);
 
-
     type = Value::GetCharAsType('3');
     EXPECT_EQ(panda::pandasm::Value::Type::U8, type);
 

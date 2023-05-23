@@ -280,7 +280,6 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_003, TestSize.Level1)
     con.tokens.push_back(token2);
     EXPECT_EQ(con.Next(), Token::Type::ID_BAD);
     con.number = 3;
-    //EXPECT_EQ(con.Next(), Token::Type::ID_BAD);
     con.end = false;
     EXPECT_TRUE(con.NextMask());
     con.end = true;
