@@ -27,32 +27,11 @@ namespace panda::pandasm {
 using namespace panda::pandasm;
 
 class ParserTest : public testing::Test {
-public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
 };
-
-void ParserTest::SetUpTestCase(void)
-{
-}
-
-void ParserTest::TearDownTestCase(void)
-{
-}
-
-void ParserTest::SetUp(void)
-{
-}
-
-void ParserTest::TearDown(void)
-{
-}
 
 /**
  * @tc.name: parser_test_001
- * @tc.desc: Verify the opcode function.
+ * @tc.desc: Verify the ShowError function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -74,7 +53,7 @@ HWTEST_F(ParserTest, parser_test_001, TestSize.Level1)
 
 /**
  * @tc.name: parser_test_002
- * @tc.desc: Verify the set_label function.
+ * @tc.desc: Verify the ShowError function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -230,8 +209,8 @@ HWTEST_F(ParserTest, parser_test_009, TestSize.Level1)
     EXPECT_NE(it, program.function_table.end());
     auto &func = it->second;
     EXPECT_NE(func.ins[0].opcode, Opcode::NOP);
-    EXPECT_EQ(func.ins[3].regs[0], 4);
-    EXPECT_EQ(func.ins[1].regs[0], 1);
+    EXPECT_EQ(func.ins[3].regs[0], 4U);
+    EXPECT_EQ(func.ins[1].regs[0], 1U);
     EXPECT_EQ(func.ins[5].imms[0], Ins::IType(int64_t(0x1)));
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
@@ -464,22 +443,82 @@ HWTEST_F(ParserTest, parser_test_020, TestSize.Level1)
 
 /**
  * @tc.name: parser_test_021
- * @tc.desc: Verify the ShowError function.
+ * @tc.desc: Verify the ERR_BAD_ARRAY_SIZE function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
 HWTEST_F(ParserTest, parser_test_021, TestSize.Level1)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
-    Lexer l;
-    Parser p;
-    v.push_back(l.TokenizeString(".function u8 main(){").first);
-    v.push_back(l.TokenizeString("ashr2.64 v12}").first);
-    auto item = p.Parse(v);
+    {
+        std::vector<std::vector<panda::pandasm::Token>> v;
+        Lexer l;
+        Parser p;
+        v.push_back(l.TokenizeString(".record Asm }{").first);
+        v.push_back(l.TokenizeString("i64 asm1").first);
+        v.push_back(l.TokenizeString("}").first);
 
-    const auto sig_main = GetFunctionSignatureFromName("main", {});
+        auto item = p.Parse(v);
+        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_DEFINITION_METADATA);
+    }
+    {
+        std::vector<std::vector<panda::pandasm::Token>> v;
+        Lexer l;
+        Parser p;
 
-    EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_OPERATION_NAME) << "ERR_NONE expected";
+        v.push_back(l.TokenizeString(".record asm1 { i64 asm1{}").first);
+        v.push_back(l.TokenizeString("}").first);
+
+        auto item = p.Parse(v);
+        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_KEYWORD);
+    }
+
+    {
+        std::vector<std::vector<panda::pandasm::Token>> v;
+        Lexer l;
+        Parser p;
+
+        v.push_back(l.TokenizeString(".record asm1 { i64 asm1}").first);
+        v.push_back(l.TokenizeString("}").first);
+
+        auto item = p.Parse(v);
+        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_BOUND);
+    }
+
+    {
+        std::vector<std::vector<panda::pandasm::Token>> v;
+        Lexer l;
+        Parser p;
+
+        v.push_back(l.TokenizeString(".array array u8 3 { 1 2 }").first);
+        v.push_back(l.TokenizeString("}").first);
+
+        auto item = p.Parse(v);
+        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_ARRAY_SIZE);
+    }
+
+    {
+        std::vector<std::vector<panda::pandasm::Token>> v;
+        Lexer l;
+        Parser p;
+
+        v.push_back(l.TokenizeString(".array array u8 3 { 1 2 3 4").first);
+        v.push_back(l.TokenizeString("").first);
+
+        auto item = p.Parse(v);
+        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_END);
+    }
+
+    {
+        std::vector<std::vector<panda::pandasm::Token>> v;
+        Lexer l;
+        Parser p;
+
+        v.push_back(l.TokenizeString(".array array u8 3 { i32:0").first);
+        v.push_back(l.TokenizeString("}").first);
+
+        auto item = p.Parse(v);
+        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_ARRAY_ELEMENT_VALUE_INTEGER);
+    }
 }
 
 /**
@@ -518,30 +557,38 @@ HWTEST_F(ParserTest, parser_test_022, TestSize.Level1)
     const auto sig_m123 = GetFunctionSignatureFromName("m123", params1);
     const std::string sig_main = "main:()";
     auto it = item.Value().function_table.find(sig_main);
+    size_t num_size = 2U;
+
+    auto func_m123_at = item.Value().function_table.at(sig_m123).ins;
+    auto func_main_at = item.Value().function_table.at(sig_main).ins;
 
     EXPECT_NE(it, item.Value().function_table.end());
     EXPECT_EQ(item.Value().function_table.at(sig_main).name, sig_main);
     EXPECT_EQ(item.Value().function_table.at(sig_m123).name, sig_m123);
     EXPECT_EQ(item.Value().function_table.at(sig_main).GetParamsNum(), 0U);
-    EXPECT_EQ(item.Value().function_table.at(sig_m123).GetParamsNum(), 2U);
+    EXPECT_EQ(item.Value().function_table.at(sig_m123).GetParamsNum(), num_size);
     EXPECT_EQ(item.Value().function_table.at(sig_m123).params[0].type.GetId(), panda::panda_file::Type::TypeId::U1);
     EXPECT_EQ(item.Value().function_table.at(sig_m123).params[1].type.GetId(), panda::panda_file::Type::TypeId::F32);
     EXPECT_EQ(item.Value().function_table.at(sig_main).return_type.GetId(), panda::panda_file::Type::TypeId::I32);
     EXPECT_EQ(item.Value().function_table.at(sig_m123).return_type.GetId(), panda::panda_file::Type::TypeId::F64);
-    EXPECT_EQ(item.Value().function_table.at(sig_main).label_table.at("label").file_location->line_number, 5U);
-    EXPECT_EQ(item.Value().function_table.at(sig_main).label_table.at("label").file_location->is_defined, true);
-    EXPECT_EQ(item.Value().function_table.at(sig_m123).label_table.at("la1").file_location->line_number, 13U);
-    EXPECT_EQ(item.Value().function_table.at(sig_m123).label_table.at("la1").file_location->is_defined, true);
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[5].opcode, Opcode::INVALID);
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[5].label, "label");
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[1].regs[0], 0);
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[2].regs[0], 0);
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[3].set_label, false);
-    EXPECT_EQ(item.Value().function_table.at(sig_m123).ins[2].opcode, Opcode::LDAI);
-    EXPECT_EQ(item.Value().function_table.at(sig_m123).ins[0].opcode, Opcode::INVALID);
-    EXPECT_EQ(item.Value().function_table.at(sig_m123).ins[0].label, "la1");
-    EXPECT_EQ(item.Value().function_table.at(sig_m123).ins[1].set_label, false);
-    EXPECT_EQ(item.Value().function_table.at(sig_m123).ins[1].ids[0], "la1");
+
+   auto func_m123_table = item.Value().function_table.at(sig_m123).label_table.at("la1").file_location;
+   auto func_main_table = item.Value().function_table.at(sig_main).label_table.at("label").file_location;
+
+    EXPECT_EQ(func_main_table->line_number, 5U);
+    EXPECT_EQ(func_main_table->is_defined, true);
+    EXPECT_EQ(func_m123_table->line_number, 13U);
+    EXPECT_EQ(func_m123_table->is_defined, true);
+    EXPECT_EQ(func_main_at[5].opcode, Opcode::INVALID);
+    EXPECT_EQ(func_main_at[5].label, "label");
+    EXPECT_EQ(func_main_at[1].regs[0], 0U);
+    EXPECT_EQ(func_main_at[2].regs[0], 0U);
+    EXPECT_EQ(func_main_at[3].set_label, false);
+    EXPECT_EQ(func_m123_at[2].opcode, Opcode::LDAI);
+    EXPECT_EQ(func_m123_at[0].opcode, Opcode::INVALID);
+    EXPECT_EQ(func_m123_at[0].label, "la1");
+    EXPECT_EQ(func_m123_at[1].set_label, false);
+    EXPECT_EQ(func_m123_at[1].ids[0], "la1");
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -573,7 +620,6 @@ HWTEST_F(ParserTest, parser_test_023, TestSize.Level1)
     auto item = p.Parse(source);
     const std::string sig_main = "main:()";
     auto it = item.Value().function_table.find(sig_main);
-
     EXPECT_NE(it, item.Value().function_table.end());
     EXPECT_EQ(item.Value().function_table.at(sig_main).name, sig_main);
     EXPECT_EQ(item.Value().function_table.at(sig_main).GetParamsNum(), 0U);
@@ -585,39 +631,11 @@ HWTEST_F(ParserTest, parser_test_023, TestSize.Level1)
 
 /**
  * @tc.name: parser_test_024
- * @tc.desc: Verify the ShowError function.
+ * @tc.desc: Verify the TokenizeString function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
 HWTEST_F(ParserTest, parser_test_024, TestSize.Level1)
-{
-    std::vector<std::vector<panda::pandasm::Token>> v;
-    Lexer l;
-    Parser p;
-    v.push_back(l.TokenizeString(".record Asm {").first);
-    v.push_back(l.TokenizeString("i64 asm1").first);
-    v.push_back(l.TokenizeString("void asm2").first);
-    v.push_back(l.TokenizeString("i32 asm3").first);
-    v.push_back(l.TokenizeString("}").first);
-
-    auto item = p.Parse(v);
-
-    EXPECT_EQ(item.Value().record_table.at("Asm").name, "Asm");
-    EXPECT_EQ(item.Value().record_table.at("Asm").field_list[0].name, "asm1");
-    EXPECT_EQ(item.Value().record_table.at("Asm").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    EXPECT_EQ(item.Value().record_table.at("Asm").field_list[1].name, "asm2");
-    EXPECT_EQ(item.Value().record_table.at("Asm").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    EXPECT_EQ(item.Value().record_table.at("Asm").field_list[2].name, "asm3");
-    EXPECT_EQ(item.Value().record_table.at("Asm").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
-}
-
-/**
- * @tc.name: parser_test_025
- * @tc.desc: Verify the ShowError function.
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(ParserTest, parser_test_025, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -673,7 +691,7 @@ HWTEST_F(ParserTest, parser_test_025, TestSize.Level1)
 
 /**
  * @tc.name: parser_test_026
- * @tc.desc: Verify the ShowError function.
+ * @tc.desc: Verify the TokenizeString function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -695,103 +713,16 @@ HWTEST_F(ParserTest, parser_test_026, TestSize.Level1)
     auto item = p.Parse(v);
 
     const auto sig_niam = GetFunctionSignatureFromName("niam", {});
-
-    EXPECT_EQ(item.Value().record_table.at("Asm1").name, "Asm1");
-    EXPECT_EQ(item.Value().record_table.at("Asm1").field_list[0].name, "asm1");
-    EXPECT_EQ(item.Value().record_table.at("Asm1").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    EXPECT_EQ(item.Value().record_table.at("Asm1").field_list[1].name, "asm2");
-    EXPECT_EQ(item.Value().record_table.at("Asm1").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    EXPECT_EQ(item.Value().record_table.at("Asm1").field_list[2].name, "asm3");
-    EXPECT_EQ(item.Value().record_table.at("Asm1").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
     EXPECT_EQ(item.Value().function_table.at(sig_niam).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
 }
 
 /**
  * @tc.name: parser_test_027
- * @tc.desc: Verify the ShowError function.
+ * @tc.desc: Verify the TokenizeString function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
 HWTEST_F(ParserTest, parser_test_027, TestSize.Level1)
-{
-    std::vector<std::vector<panda::pandasm::Token>> v;
-    Lexer l;
-    Parser p;
-
-    v.push_back(l.TokenizeString(".record Asm1 {").first);
-    v.push_back(l.TokenizeString("i64 asm1").first);
-    v.push_back(l.TokenizeString("void asm2").first);
-    v.push_back(l.TokenizeString("i32 asm3").first);
-    v.push_back(l.TokenizeString("}").first);
-
-    v.push_back(l.TokenizeString(".function u8 niam1(){").first);
-    v.push_back(l.TokenizeString("ldai -1").first);
-    v.push_back(l.TokenizeString("}").first);
-
-    v.push_back(l.TokenizeString(".record Asm2 {").first);
-    v.push_back(l.TokenizeString("i64 asm1").first);
-    v.push_back(l.TokenizeString("void asm2").first);
-    v.push_back(l.TokenizeString("i32 asm3").first);
-    v.push_back(l.TokenizeString("}").first);
-
-    v.push_back(l.TokenizeString(".function u8 niam2(){").first);
-    v.push_back(l.TokenizeString("ldai -1").first);
-    v.push_back(l.TokenizeString("}").first);
-
-    v.push_back(l.TokenizeString(".record Asm3 {").first);
-    v.push_back(l.TokenizeString("i64 asm1").first);
-    v.push_back(l.TokenizeString("void asm2").first);
-    v.push_back(l.TokenizeString("i32 asm3").first);
-    v.push_back(l.TokenizeString("}").first);
-
-    v.push_back(l.TokenizeString(".function u8 niam3(){").first);
-    v.push_back(l.TokenizeString("ldai -1").first);
-    v.push_back(l.TokenizeString("}").first);
-
-    auto item = p.Parse(v);
-
-    const auto sig_niam1 = GetFunctionSignatureFromName("niam1", {});
-    const auto sig_niam2 = GetFunctionSignatureFromName("niam2", {});
-    const auto sig_niam3 = GetFunctionSignatureFromName("niam3", {});
-
-    EXPECT_EQ(item.Value().record_table.at("Asm1").name, "Asm1");
-    EXPECT_EQ(item.Value().record_table.at("Asm1").field_list[0].name, "asm1");
-    EXPECT_EQ(item.Value().record_table.at("Asm1").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    EXPECT_EQ(item.Value().record_table.at("Asm1").field_list[1].name, "asm2");
-    EXPECT_EQ(item.Value().record_table.at("Asm1").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    EXPECT_EQ(item.Value().record_table.at("Asm1").field_list[2].name, "asm3");
-    EXPECT_EQ(item.Value().record_table.at("Asm1").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
-
-    EXPECT_EQ(item.Value().function_table.at(sig_niam1).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
-
-    EXPECT_EQ(item.Value().record_table.at("Asm2").name, "Asm2");
-    EXPECT_EQ(item.Value().record_table.at("Asm2").field_list[0].name, "asm1");
-    EXPECT_EQ(item.Value().record_table.at("Asm2").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    EXPECT_EQ(item.Value().record_table.at("Asm2").field_list[1].name, "asm2");
-    EXPECT_EQ(item.Value().record_table.at("Asm2").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    EXPECT_EQ(item.Value().record_table.at("Asm2").field_list[2].name, "asm3");
-    EXPECT_EQ(item.Value().record_table.at("Asm2").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
-
-    EXPECT_EQ(item.Value().function_table.at(sig_niam2).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
-
-    EXPECT_EQ(item.Value().record_table.at("Asm3").name, "Asm3");
-    EXPECT_EQ(item.Value().record_table.at("Asm3").field_list[0].name, "asm1");
-    EXPECT_EQ(item.Value().record_table.at("Asm3").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    EXPECT_EQ(item.Value().record_table.at("Asm3").field_list[1].name, "asm2");
-    EXPECT_EQ(item.Value().record_table.at("Asm3").field_list[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    EXPECT_EQ(item.Value().record_table.at("Asm3").field_list[2].name, "asm3");
-    EXPECT_EQ(item.Value().record_table.at("Asm3").field_list[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
-
-    EXPECT_EQ(item.Value().function_table.at(sig_niam3).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
-}
-
-/**
- * @tc.name: parser_test_028
- * @tc.desc: Verify the ShowError function.
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(ParserTest, parser_test_028, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -831,12 +762,12 @@ HWTEST_F(ParserTest, parser_test_028, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_029
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_028
+ * @tc.desc: Verify the record line_of_def function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_029, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_028, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -885,12 +816,12 @@ HWTEST_F(ParserTest, parser_test_029, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_030
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_029
+ * @tc.desc: Verify the record GetName function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_030, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_029, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -924,12 +855,12 @@ HWTEST_F(ParserTest, parser_test_030, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_031
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_030
+ * @tc.desc: Verify the GetItemName function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_031, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_030, TestSize.Level1)
 {
     EXPECT_EQ(GetOwnerName("Asm.main"), "Asm");
 
@@ -941,12 +872,12 @@ HWTEST_F(ParserTest, parser_test_031, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_032
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_031
+ * @tc.desc: Verify the GetParamsNum function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_032, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_031, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -963,6 +894,7 @@ HWTEST_F(ParserTest, parser_test_032, TestSize.Level1)
     auto item = p.Parse(v);
 
     const auto sig_niam1 = GetFunctionSignatureFromName("niam1", {});
+    int64_t value_param = 4;
     std::vector<Function::Parameter> params;
     panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"u1", 0}, language);
@@ -974,51 +906,16 @@ HWTEST_F(ParserTest, parser_test_032, TestSize.Level1)
     EXPECT_EQ(item.Value().function_table.at(sig_niam1).value_of_first_param + 1, 0);
 
     EXPECT_EQ(item.Value().function_table.at(sig_niam2).GetParamsNum(), 3U);
-    EXPECT_EQ(item.Value().function_table.at(sig_niam2).value_of_first_param + 1, 4);
+    EXPECT_EQ(item.Value().function_table.at(sig_niam2).value_of_first_param + 1, value_param);
 }
 
 /**
- * @tc.name: parser_test_033
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_032
+ * @tc.desc: Verify the Opcode function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_033, TestSize.Level1)
-{
-    std::vector<std::vector<panda::pandasm::Token>> v;
-    Lexer l;
-    Parser p;
-
-    v.push_back(l.TokenizeString(".function u8 niam1(){").first);
-    v.push_back(l.TokenizeString("ldai -1").first);
-    v.push_back(l.TokenizeString("}").first);
-
-    v.push_back(l.TokenizeString(".function u8 niam2(u1 a0, i64 a1, i32 a2){").first);
-    v.push_back(l.TokenizeString("mov v0, v5").first);
-    v.push_back(l.TokenizeString("}").first);
-
-    auto item = p.Parse(v);
-
-    const auto sig_niam1 = GetFunctionSignatureFromName("niam1", {});
-    std::vector<Function::Parameter> params;
-    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
-    params.emplace_back(Type {"u1", 0}, language);
-    params.emplace_back(Type {"i64", 0}, language);
-    params.emplace_back(Type {"i32", 0}, language);
-    const auto sig_niam2 = GetFunctionSignatureFromName("niam2", params);
-
-    EXPECT_EQ(item.Value().function_table.at(sig_niam1).regs_num, 0U);
-
-    EXPECT_EQ(item.Value().function_table.at(sig_niam2).regs_num, 6U);
-}
-
-/**
- * @tc.name: parser_test_034
- * @tc.desc: Verify the ShowError function.
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(ParserTest, parser_test_034, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_032, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1109,12 +1006,12 @@ HWTEST_F(ParserTest, parser_test_034, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_035
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_033
+ * @tc.desc: Verify the GetId function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_035, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_033, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1155,12 +1052,12 @@ HWTEST_F(ParserTest, parser_test_035, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_036
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_034
+ * @tc.desc: Verify the ins.opcode function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_036, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_034, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1180,22 +1077,20 @@ HWTEST_F(ParserTest, parser_test_036, TestSize.Level1)
     const auto sig_nain1 = GetFunctionSignatureFromName("nain1", params);
     auto it = item.Value().function_table.find(sig_nain1);
     EXPECT_NE(it, item.Value().function_table.end());
-
-    EXPECT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[0].opcode), "reg");
-    EXPECT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[1].opcode), "reg_reg");
-    EXPECT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[2].opcode), "reg");
-    EXPECT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[3].opcode), "label");
-    EXPECT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[4].opcode), "none");
-    EXPECT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[5].opcode), "undefined");
+    auto func_table = item.Value().function_table.at(sig_nain1).ins;
+    EXPECT_EQ(OperandTypePrint(func_table[0].opcode), "reg");
+    EXPECT_EQ(OperandTypePrint(func_table[1].opcode), "reg_reg");
+    EXPECT_EQ(OperandTypePrint(func_table[2].opcode), "reg");
+    EXPECT_EQ(OperandTypePrint(func_table[3].opcode), "label");
 }
 
 /**
- * @tc.name: parser_test_037
+ * @tc.name: parser_test_035
  * @tc.desc: Verify the ShowError function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_037, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_035, TestSize.Level1)
 {
     {
         std::vector<std::vector<panda::pandasm::Token>> v;
@@ -1241,12 +1136,12 @@ HWTEST_F(ParserTest, parser_test_037, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_038
+ * @tc.name: parser_test_036
  * @tc.desc: Verify the ShowError function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_038, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_036, TestSize.Level1)
 {
     {
         std::vector<std::vector<panda::pandasm::Token>> v;
@@ -1289,12 +1184,12 @@ HWTEST_F(ParserTest, parser_test_038, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_039
+ * @tc.name: parser_test_037
  * @tc.desc: Verify the ShowError function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_039, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_037, TestSize.Level1)
 {
     {
         std::vector<std::vector<panda::pandasm::Token>> v;
@@ -1359,12 +1254,12 @@ HWTEST_F(ParserTest, parser_test_039, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_040
+ * @tc.name: parser_test_038
  * @tc.desc: Verify the ShowError function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_040, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_038, TestSize.Level1)
 {
     {
         std::vector<std::vector<panda::pandasm::Token>> v;
@@ -1380,75 +1275,9 @@ HWTEST_F(ParserTest, parser_test_040, TestSize.Level1)
         p.Parse(v);
 
         Error e = p.ShowError();
-
+        size_t line_nubmer = 2U;
         EXPECT_EQ(e.err, Error::ErrorType::ERR_BAD_STRING_INVALID_HEX_ESCAPE_SEQUENCE);
-        EXPECT_EQ(e.line_number, 2U);
-        size_t ret = op.find('\\');
-        EXPECT_EQ(e.pos, ret);
-        EXPECT_EQ(e.message, "Invalid \\x escape sequence");
-    }
-
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-
-        std::string op = "lda.str \"123\\xZZ\"";
-
-        v.push_back(l.TokenizeString(".function void f() {").first);
-        v.push_back(l.TokenizeString(op).first);
-        v.push_back(l.TokenizeString("}").first);
-
-        p.Parse(v);
-
-        Error e = p.ShowError();
-
-        EXPECT_EQ(e.err, Error::ErrorType::ERR_BAD_STRING_INVALID_HEX_ESCAPE_SEQUENCE);
-        EXPECT_EQ(e.line_number, 2U);
-        size_t ret = op.find('\\');
-        EXPECT_EQ(e.pos, ret);
-        EXPECT_EQ(e.message, "Invalid \\x escape sequence");
-    }
-
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-
-        std::string op = "lda.str \"123\\xAZ\"";
-
-        v.push_back(l.TokenizeString(".function void f() {").first);
-        v.push_back(l.TokenizeString(op).first);
-        v.push_back(l.TokenizeString("}").first);
-
-        p.Parse(v);
-
-        Error e = p.ShowError();
-
-        EXPECT_EQ(e.err, Error::ErrorType::ERR_BAD_STRING_INVALID_HEX_ESCAPE_SEQUENCE);
-        EXPECT_EQ(e.line_number, 2U);
-        size_t ret = op.find('\\');
-        EXPECT_EQ(e.pos, ret);
-        EXPECT_EQ(e.message, "Invalid \\x escape sequence");
-    }
-
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-
-        std::string op = "lda.str \"123\\xZA\"";
-
-        v.push_back(l.TokenizeString(".function void f() {").first);
-        v.push_back(l.TokenizeString(op).first);
-        v.push_back(l.TokenizeString("}").first);
-
-        p.Parse(v);
-
-        Error e = p.ShowError();
-
-        EXPECT_EQ(e.err, Error::ErrorType::ERR_BAD_STRING_INVALID_HEX_ESCAPE_SEQUENCE);
-        EXPECT_EQ(e.line_number, 2U);
+        EXPECT_EQ(e.line_number, line_nubmer);
         size_t ret = op.find('\\');
         EXPECT_EQ(e.pos, ret);
         EXPECT_EQ(e.message, "Invalid \\x escape sequence");
@@ -1473,36 +1302,12 @@ HWTEST_F(ParserTest, parser_test_040, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_041
+ * @tc.name: parser_test_039
  * @tc.desc: Verify the ShowError function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_041, TestSize.Level1)
-{
-    std::vector<std::vector<panda::pandasm::Token>> v;
-    Lexer l;
-    Parser p;
-
-    std::string op = "lda.str \"123\\1\\02\\00123\"";
-
-    v.push_back(l.TokenizeString(".function void f() {").first);
-    v.push_back(l.TokenizeString(op).first);
-    v.push_back(l.TokenizeString("}").first);
-
-    auto item = p.Parse(v);
-
-    EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-    EXPECT_TRUE(item.HasValue());
-}
-
-/**
- * @tc.name: parser_test_042
- * @tc.desc: Verify the ShowError function.
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(ParserTest, parser_test_042, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_039, TestSize.Level1)
 {
     {
         std::vector<std::vector<panda::pandasm::Token>> v;
@@ -1582,12 +1387,12 @@ HWTEST_F(ParserTest, parser_test_042, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_043
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_040
+ * @tc.desc: Verify the ERR_BAD_NUMBER_OPERANDS function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_043, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_040, TestSize.Level1)
 {
     {
         std::vector<std::vector<panda::pandasm::Token>> v;
@@ -1605,12 +1410,12 @@ HWTEST_F(ParserTest, parser_test_043, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_044
+ * @tc.name: parser_test_041
  * @tc.desc: Verify the ShowError function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_044, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_041, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1625,12 +1430,12 @@ HWTEST_F(ParserTest, parser_test_044, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_045
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_042
+ * @tc.desc: Verify the ERR_BAD_OPERAND function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_045, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_042, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1645,12 +1450,12 @@ HWTEST_F(ParserTest, parser_test_045, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_046
+ * @tc.name: parser_test_043
  * @tc.desc: Verify the ShowError function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_046, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_043, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1665,12 +1470,12 @@ HWTEST_F(ParserTest, parser_test_046, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_047
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_044
+ * @tc.desc: Verify the ERR_BAD_OPERATION_NAME function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_047, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_044, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1687,12 +1492,12 @@ HWTEST_F(ParserTest, parser_test_047, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_048
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_045
+ * @tc.desc: Verify the ERR_BAD_ID_FUNCTION function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_048, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_045, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1709,12 +1514,12 @@ HWTEST_F(ParserTest, parser_test_048, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_049
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_046
+ * @tc.desc: Verify the ERR_BAD_LABEL_EXT function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_049, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_046, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1729,12 +1534,12 @@ HWTEST_F(ParserTest, parser_test_049, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_050
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_047
+ * @tc.desc: Verify the lable function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_050, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_047, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1748,12 +1553,12 @@ HWTEST_F(ParserTest, parser_test_050, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_051
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_048
+ * @tc.desc: Verify the lable function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_051, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_048, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1767,50 +1572,12 @@ HWTEST_F(ParserTest, parser_test_051, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_052
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_049
+ * @tc.desc: Verify the mov lable function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_052, TestSize.Level1)
-{
-    std::vector<std::vector<panda::pandasm::Token>> v;
-    Lexer l;
-    Parser p;
-    v.push_back(l.TokenizeString(".function u1 nain(i64 a0) <> {").first);
-    v.push_back(l.TokenizeString("mov: mov v0, a0").first);
-    v.push_back(l.TokenizeString("}").first);
-
-    auto item = p.Parse(v);
-    EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-}
-
-/**
- * @tc.name: parser_test_053
- * @tc.desc: Verify the ShowError function.
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(ParserTest, parser_test_053, TestSize.Level1)
-{
-    std::vector<std::vector<panda::pandasm::Token>> v;
-    Lexer l;
-    Parser p;
-    v.push_back(l.TokenizeString(".function u1 mov(i64 a0) <> {").first);
-    v.push_back(l.TokenizeString("mov: mov v0, a0").first);
-    v.push_back(l.TokenizeString("}").first);
-
-    auto item = p.Parse(v);
-    EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-}
-
-/**
- * @tc.name: parser_test_054
- * @tc.desc: Verify the ShowError function.
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(ParserTest, parser_test_054, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_049, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1826,12 +1593,12 @@ HWTEST_F(ParserTest, parser_test_054, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_055
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_050
+ * @tc.desc: Verify the callargs2 function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_055, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_050, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -1845,12 +1612,12 @@ HWTEST_F(ParserTest, parser_test_055, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_056
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_051
+ * @tc.desc: Verify the ERR_BAD_NAME_REG function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_056, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_051, TestSize.Level1)
 {
     {
         std::vector<std::vector<panda::pandasm::Token>> v;
@@ -1925,62 +1692,12 @@ HWTEST_F(ParserTest, parser_test_056, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_057
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_052
+ * @tc.desc: Verify the ERR_BAD_ARRAY_TYPE_BOUND function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_057, TestSize.Level1)
-{
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function void f() {").first);
-        v.push_back(l.TokenizeString("sta v123").first);
-        v.push_back(l.TokenizeString("}").first);
-        auto item = p.Parse(v);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-    }
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function void f() {").first);
-        v.push_back(l.TokenizeString("sta v0").first);
-        v.push_back(l.TokenizeString("}").first);
-        auto item = p.Parse(v);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-    }
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function void f(i32 a0) {").first);
-        v.push_back(l.TokenizeString("sta a0").first);
-        v.push_back(l.TokenizeString("}").first);
-        auto item = p.Parse(v);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-    }
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function void f(i32 a0) {").first);
-        v.push_back(l.TokenizeString("mov v0, a0").first);
-        v.push_back(l.TokenizeString("}").first);
-        auto item = p.Parse(v);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-    }
-}
-
-/**
- * @tc.name: parser_test_058
- * @tc.desc: Verify the ShowError function.
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(ParserTest, parser_test_058, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_052, TestSize.Level1)
 {
     {
         std::vector<std::vector<panda::pandasm::Token>> v;
@@ -2065,12 +1782,12 @@ HWTEST_F(ParserTest, parser_test_058, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_059
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_053
+ * @tc.desc: Verify the ERR_BAD_OPERATION_NAME function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_059, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_053, TestSize.Level1)
 {
     {
         std::vector<std::vector<panda::pandasm::Token>> v;
@@ -2101,12 +1818,12 @@ HWTEST_F(ParserTest, parser_test_059, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_060
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_054
+ * @tc.desc: Verify the array function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_060, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_054, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -2122,46 +1839,55 @@ HWTEST_F(ParserTest, parser_test_060, TestSize.Level1)
     v.push_back(l.TokenizeString("u64 8000000").first);
     v.push_back(l.TokenizeString("i64 -90000000").first);
     v.push_back(l.TokenizeString("}").first);
+
     auto item = p.Parse(v);
     EXPECT_EQ(item.Value().literalarray_table.at("array").literals_[0].tag_, panda::panda_file::LiteralTag::ARRAY_U1);
     EXPECT_EQ(
         static_cast<uint64_t>(std::get<bool>(item.Value().literalarray_table.at("array").literals_[0].value_)), true);
     EXPECT_EQ(item.Value().literalarray_table.at("array").literals_[1].tag_, panda::panda_file::LiteralTag::ARRAY_U8);
+    int8_t u8 = 2;
+    int8_t i8 = -30;
     EXPECT_EQ(
-        static_cast<uint8_t>(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals_[1].value_)), 2);
+        static_cast<uint8_t>(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals_[1].value_)), u8);
     EXPECT_EQ(item.Value().literalarray_table.at("array").literals_[2].tag_, panda::panda_file::LiteralTag::ARRAY_I8);
     EXPECT_EQ(static_cast<int8_t>(std::get<uint8_t>(item.Value().literalarray_table.at("array").literals_[2].value_)),
-              -30);
+              i8);
     EXPECT_EQ(item.Value().literalarray_table.at("array").literals_[3].tag_, panda::panda_file::LiteralTag::ARRAY_U16);
+    uint16_t u16 = 400;
+    int16_t i16 = -5000;
     EXPECT_EQ(
         static_cast<uint16_t>(std::get<uint16_t>(item.Value().literalarray_table.at("array").literals_[3].value_)),
-        400);
+        u16);
     EXPECT_EQ(item.Value().literalarray_table.at("array").literals_[4].tag_, panda::panda_file::LiteralTag::ARRAY_I16);
     EXPECT_EQ(static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarray_table.at("array").literals_[4].value_)),
-              -5000);
+              i16);
     EXPECT_EQ(item.Value().literalarray_table.at("array").literals_[5].tag_, panda::panda_file::LiteralTag::ARRAY_U32);
+    uint32_t ui32 = 60000;
+    int32_t i32 = -700000;
     EXPECT_EQ(
         static_cast<uint32_t>(std::get<uint32_t>(item.Value().literalarray_table.at("array").literals_[5].value_)),
-       60000);
+       ui32);
     EXPECT_EQ(item.Value().literalarray_table.at("array").literals_[6].tag_, panda::panda_file::LiteralTag::ARRAY_I32);
     EXPECT_EQ(static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarray_table.at("array").literals_[6].value_)),
-             -700000);
+             i32);
     EXPECT_EQ(item.Value().literalarray_table.at("array").literals_[7].tag_, panda::panda_file::LiteralTag::ARRAY_U64);
+    uint64_t ui64 = 8000000;
+    int64_t i64 = -90000000;
     EXPECT_EQ(
         static_cast<uint64_t>(std::get<uint64_t>(item.Value().literalarray_table.at("array").literals_[7].value_)),
-        8000000);
+        ui64);
     EXPECT_EQ(item.Value().literalarray_table.at("array").literals_[8].tag_, panda::panda_file::LiteralTag::ARRAY_I64);
     EXPECT_EQ(static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarray_table.at("array").literals_[8].value_)),
-              -90000000);
+              i64);
 }
 
 /**
- * @tc.name: parser_test_061
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_055
+ * @tc.desc: Verify the TokenizeString function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_061, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_055, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -2171,20 +1897,21 @@ HWTEST_F(ParserTest, parser_test_061, TestSize.Level1)
     v.push_back(l.TokenizeString("f64 -1234.5").first);
     v.push_back(l.TokenizeString("}").first);
     auto item = p.Parse(v);
-
+    double f32 = -123.4;
+    double f64 = -1234.5;
     EXPECT_EQ(item.Value().literalarray_table.at("array").literals_[0].tag_, panda::panda_file::LiteralTag::ARRAY_F32);
-    EXPECT_NEAR(std::get<float>(item.Value().literalarray_table.at("array").literals_[0].value_), -123.4, 0.01f);
+    EXPECT_NEAR(std::get<float>(item.Value().literalarray_table.at("array").literals_[0].value_), f32, 0.01f);
     EXPECT_EQ(item.Value().literalarray_table.at("array").literals_[1].tag_, panda::panda_file::LiteralTag::ARRAY_F64);
-    EXPECT_NEAR(std::get<double>(item.Value().literalarray_table.at("array").literals_[1].value_), -1234.5, 0.01f);
+    EXPECT_NEAR(std::get<double>(item.Value().literalarray_table.at("array").literals_[1].value_), f64, 0.01f);
 }
 
 /**
- * @tc.name: parser_test_062
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_056
+ * @tc.desc: Verify the TokenizeString function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_062, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_056, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -2229,12 +1956,12 @@ HWTEST_F(ParserTest, parser_test_062, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_063
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_057
+ * @tc.desc: Verify the TokenizeString function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_063, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_057, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -2256,12 +1983,12 @@ HWTEST_F(ParserTest, parser_test_063, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_064
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_058
+ * @tc.desc: Verify the array_unsigned_byte function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_064, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_058, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -2283,7 +2010,9 @@ HWTEST_F(ParserTest, parser_test_064, TestSize.Level1)
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U8));
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_byte").literals_[1].tag_,
               panda::panda_file::LiteralTag::INTEGER);
-    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_byte").literals_[1].value_), 3);
+    uint32_t u8_value = 3;
+    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_byte").literals_[1].value_),
+              u8_value);
 
     // unsigned byte array elements
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_byte").literals_[2].tag_,
@@ -2291,10 +2020,14 @@ HWTEST_F(ParserTest, parser_test_064, TestSize.Level1)
     EXPECT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_byte").literals_[2].value_), 1);
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_byte").literals_[3].tag_,
               panda::panda_file::LiteralTag::ARRAY_U8);
-    EXPECT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_byte").literals_[3].value_), 2);
+    uint8_t u8_value1 = 2;
+    EXPECT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_byte").literals_[3].value_),
+              u8_value1);
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_byte").literals_[4].tag_,
               panda::panda_file::LiteralTag::ARRAY_U8);
-    EXPECT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_byte").literals_[4].value_), 3);
+    uint8_t u8_value2 = 3;
+    EXPECT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_byte").literals_[4].value_),
+              u8_value2);
 
     // byte intro literals
     EXPECT_EQ(item.Value().literalarray_table.at("array_byte").literals_[0].tag_,
@@ -2303,7 +2036,7 @@ HWTEST_F(ParserTest, parser_test_064, TestSize.Level1)
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_I8));
     EXPECT_EQ(item.Value().literalarray_table.at("array_byte").literals_[1].tag_,
               panda::panda_file::LiteralTag::INTEGER);
-    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_byte").literals_[1].value_), 3);
+    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_byte").literals_[1].value_), u8_value);
 
     // byte array elements
     EXPECT_EQ(item.Value().literalarray_table.at("array_byte").literals_[2].tag_,
@@ -2329,18 +2062,25 @@ HWTEST_F(ParserTest, parser_test_064, TestSize.Level1)
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U16));
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_short").literals_[1].tag_,
               panda::panda_file::LiteralTag::INTEGER);
-    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_short").literals_[1].value_), 3);
+    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_short").literals_[1].value_),
+              u8_value);
 
     // unsigned short array elements
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_short").literals_[2].tag_,
               panda::panda_file::LiteralTag::ARRAY_U16);
-    EXPECT_EQ(std::get<uint16_t>(item.Value().literalarray_table.at("array_unsigned_short").literals_[2].value_), 100);
+    uint16_t u16_value = 100;
+    EXPECT_EQ(std::get<uint16_t>(item.Value().literalarray_table.at("array_unsigned_short").literals_[2].value_),
+              u16_value);
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_short").literals_[3].tag_,
               panda::panda_file::LiteralTag::ARRAY_U16);
-    EXPECT_EQ(std::get<uint16_t>(item.Value().literalarray_table.at("array_unsigned_short").literals_[3].value_), 200);
+    u16_value = 200;
+    EXPECT_EQ(std::get<uint16_t>(item.Value().literalarray_table.at("array_unsigned_short").literals_[3].value_),
+              u16_value);
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_short").literals_[4].tag_,
               panda::panda_file::LiteralTag::ARRAY_U16);
-    EXPECT_EQ(std::get<uint16_t>(item.Value().literalarray_table.at("array_unsigned_short").literals_[4].value_), 300);
+    u16_value = 300;
+    EXPECT_EQ(std::get<uint16_t>(item.Value().literalarray_table.at("array_unsigned_short").literals_[4].value_),
+              u16_value);
 
     // short intro literals
     EXPECT_EQ(item.Value().literalarray_table.at("array_short").literals_[0].tag_,
@@ -2349,24 +2089,28 @@ HWTEST_F(ParserTest, parser_test_064, TestSize.Level1)
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_I16));
     EXPECT_EQ(item.Value().literalarray_table.at("array_short").literals_[1].tag_,
               panda::panda_file::LiteralTag::INTEGER);
-    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_short").literals_[1].value_), 3);
+    uint32_t u32_value = 3;
+    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_short").literals_[1].value_), u32_value);
 
     // short array elements
     EXPECT_EQ(item.Value().literalarray_table.at("array_short").literals_[2].tag_,
               panda::panda_file::LiteralTag::ARRAY_I16);
+    int16_t i16_value = 100;
     EXPECT_EQ(
         static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarray_table.at("array_short").literals_[2].value_)),
-        100);
+        i16_value);
     EXPECT_EQ(item.Value().literalarray_table.at("array_short").literals_[3].tag_,
               panda::panda_file::LiteralTag::ARRAY_I16);
+    i16_value = -200;
     EXPECT_EQ(
         static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarray_table.at("array_short").literals_[3].value_)),
-        -200);
+        i16_value);
     EXPECT_EQ(item.Value().literalarray_table.at("array_short").literals_[4].tag_,
               panda::panda_file::LiteralTag::ARRAY_I16);
+    i16_value = 300;
     EXPECT_EQ(
         static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarray_table.at("array_short").literals_[4].value_)),
-        300);
+        i16_value);
 
     // unsigned int intro literals
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_int").literals_[0].tag_,
@@ -2380,13 +2124,19 @@ HWTEST_F(ParserTest, parser_test_064, TestSize.Level1)
     // unsigned int array elements
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_int").literals_[2].tag_,
               panda::panda_file::LiteralTag::ARRAY_U32);
-    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_int").literals_[2].value_), 1000);
+    uint32_t lit_value = 1000;
+    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_int").literals_[2].value_),
+              lit_value);
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_int").literals_[3].tag_,
               panda::panda_file::LiteralTag::ARRAY_U32);
-    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_int").literals_[3].value_), 2000);
+    lit_value = 2000;
+    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_int").literals_[3].value_),
+              lit_value);
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_int").literals_[4].tag_,
               panda::panda_file::LiteralTag::ARRAY_U32);
-    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_int").literals_[4].value_), 3000);
+    lit_value = 3000;
+    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_int").literals_[4].value_),
+              lit_value);
 
     // int intro literals
     EXPECT_EQ(item.Value().literalarray_table.at("array_int").literals_[0].tag_,
@@ -2400,19 +2150,22 @@ HWTEST_F(ParserTest, parser_test_064, TestSize.Level1)
     // int array elements
     EXPECT_EQ(item.Value().literalarray_table.at("array_int").literals_[2].tag_,
               panda::panda_file::LiteralTag::ARRAY_I32);
+    int32_t lit_value1 = -1000;
     EXPECT_EQ(
         static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarray_table.at("array_int").literals_[2].value_)),
-        -1000);
+        lit_value1);
     EXPECT_EQ(item.Value().literalarray_table.at("array_int").literals_[3].tag_,
               panda::panda_file::LiteralTag::ARRAY_I32);
+    lit_value1 = 2000;
     EXPECT_EQ(
         static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarray_table.at("array_int").literals_[3].value_)),
-        2000);
+        lit_value1);
     EXPECT_EQ(item.Value().literalarray_table.at("array_int").literals_[4].tag_,
               panda::panda_file::LiteralTag::ARRAY_I32);
+    lit_value1 = -3000;
     EXPECT_EQ(
         static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarray_table.at("array_int").literals_[4].value_)),
-        -3000);
+        lit_value1);
 
     // unsigned long intro literals
     EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_long").literals_[0].tag_,
@@ -2441,33 +2194,37 @@ HWTEST_F(ParserTest, parser_test_064, TestSize.Level1)
               static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_I64));
     EXPECT_EQ(item.Value().literalarray_table.at("array_long").literals_[1].tag_,
               panda::panda_file::LiteralTag::INTEGER);
-    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_long").literals_[1].value_), 3);
+    uint32_t lit_value2 = 3;
+    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_long").literals_[1].value_), lit_value2);
 
     // long array elements
     EXPECT_EQ(item.Value().literalarray_table.at("array_long").literals_[2].tag_,
               panda::panda_file::LiteralTag::ARRAY_I64);
+    int64_t i64_value1 = 10000;
     EXPECT_EQ(
         static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarray_table.at("array_long").literals_[2].value_)),
-        10000);
+        i64_value1);
     EXPECT_EQ(item.Value().literalarray_table.at("array_long").literals_[3].tag_,
               panda::panda_file::LiteralTag::ARRAY_I64);
+    i64_value1 = -20000;
     EXPECT_EQ(
         static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarray_table.at("array_long").literals_[3].value_)),
-        -20000);
+        i64_value1);
     EXPECT_EQ(item.Value().literalarray_table.at("array_long").literals_[4].tag_,
               panda::panda_file::LiteralTag::ARRAY_I64);
+    i64_value1 = 30000;
     EXPECT_EQ(
         static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarray_table.at("array_long").literals_[4].value_)),
-        30000);
+        i64_value1);
 }
 
 /**
- * @tc.name: parser_test_065
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_059
+ * @tc.desc: Verify the array_float function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_065, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_059, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -2488,13 +2245,17 @@ HWTEST_F(ParserTest, parser_test_065, TestSize.Level1)
     // float array elements
     EXPECT_EQ(item.Value().literalarray_table.at("array_float").literals_[2].tag_,
               panda::panda_file::LiteralTag::ARRAY_F32);
-    ASSERT_NEAR(std::get<float>(item.Value().literalarray_table.at("array_float").literals_[2].value_), 12.3, 0.01f);
+    float f_value = 12.3;
+    double d_value = -12.34;
+    ASSERT_NEAR(std::get<float>(item.Value().literalarray_table.at("array_float").literals_[2].value_), f_value, 0.01f);
     EXPECT_EQ(item.Value().literalarray_table.at("array_float").literals_[3].tag_,
               panda::panda_file::LiteralTag::ARRAY_F32);
-    ASSERT_NEAR(std::get<float>(item.Value().literalarray_table.at("array_float").literals_[3].value_), -12.34, 0.001f);
+    ASSERT_NEAR(std::get<float>(item.Value().literalarray_table.at("array_float").literals_[3].value_), d_value,
+                0.001f);
     EXPECT_EQ(item.Value().literalarray_table.at("array_float").literals_[4].tag_,
               panda::panda_file::LiteralTag::ARRAY_F32);
-    ASSERT_NEAR(std::get<float>(item.Value().literalarray_table.at("array_float").literals_[4].value_), 12.345,
+    f_value = 12.345;
+    ASSERT_NEAR(std::get<float>(item.Value().literalarray_table.at("array_float").literals_[4].value_), f_value,
                 0.0001f);
 
     // double intro literals
@@ -2509,25 +2270,28 @@ HWTEST_F(ParserTest, parser_test_065, TestSize.Level1)
     // double array elements
     EXPECT_EQ(item.Value().literalarray_table.at("array_double").literals_[2].tag_,
               panda::panda_file::LiteralTag::ARRAY_F64);
-    ASSERT_NEAR(std::get<double>(item.Value().literalarray_table.at("array_double").literals_[2].value_), -120.3,
+    d_value = -120.3;
+    ASSERT_NEAR(std::get<double>(item.Value().literalarray_table.at("array_double").literals_[2].value_), d_value,
                 0.01f);
     EXPECT_EQ(item.Value().literalarray_table.at("array_double").literals_[3].tag_,
               panda::panda_file::LiteralTag::ARRAY_F64);
-    ASSERT_NEAR(std::get<double>(item.Value().literalarray_table.at("array_double").literals_[3].value_), 120.34,
+    d_value = 120.34;
+    ASSERT_NEAR(std::get<double>(item.Value().literalarray_table.at("array_double").literals_[3].value_), d_value,
                 0.001f);
     EXPECT_EQ(item.Value().literalarray_table.at("array_double").literals_[4].tag_,
               panda::panda_file::LiteralTag::ARRAY_F64);
-    ASSERT_NEAR(std::get<double>(item.Value().literalarray_table.at("array_double").literals_[4].value_), -120.345,
+    d_value = -120.345;
+    ASSERT_NEAR(std::get<double>(item.Value().literalarray_table.at("array_double").literals_[4].value_), d_value,
                 0.0001f);
 }
 
 /**
- * @tc.name: parser_test_066
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_060
+ * @tc.desc: Verify the panda.String function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_066, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_060, TestSize.Level1)
 {
     std::vector<std::vector<panda::pandasm::Token>> v;
     Lexer l;
@@ -2555,12 +2319,12 @@ HWTEST_F(ParserTest, parser_test_066, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_067
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_061
+ * @tc.desc: Verify the GetFunctionSignatureFromName function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_067, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_061, TestSize.Level1)
 {
     Parser p;
     std::string source = R"(
@@ -2585,12 +2349,12 @@ HWTEST_F(ParserTest, parser_test_067, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_068
+ * @tc.name: parser_test_062
  * @tc.desc: Verify the ShowError function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_068, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_062, TestSize.Level1)
 {
     Parser p;
     std::string source = R"(
@@ -2604,12 +2368,12 @@ HWTEST_F(ParserTest, parser_test_068, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_069
- * @tc.desc: Verify the ShowError function.
+ * @tc.name: parser_test_063
+ * @tc.desc: Verify the ldglobalvar function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_069, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_063, TestSize.Level1)
 {
     Parser p;
     std::string source = R"(
@@ -2628,12 +2392,12 @@ HWTEST_F(ParserTest, parser_test_069, TestSize.Level1)
 }
 
 /**
- * @tc.name: parser_test_070
+ * @tc.name: parser_test_064
  * @tc.desc: Verify the ShowError function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(ParserTest, parser_test_070, TestSize.Level1)
+HWTEST_F(ParserTest, parser_test_064, TestSize.Level1)
 {
     Parser p;
     std::string source = R"(
@@ -2653,89 +2417,5 @@ HWTEST_F(ParserTest, parser_test_070, TestSize.Level1)
     auto res = p.Parse(source);
 
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-}
-
-/**
- * @tc.name: parser_test_071
- * @tc.desc: Verify the ShowError function.
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(ParserTest, parser_test_071, TestSize.Level1)
-{
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".record Asm }{").first);
-        v.push_back(l.TokenizeString("i64 asm1").first);
-        v.push_back(l.TokenizeString("}").first);
-
-        auto item = p.Parse(v);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_DEFINITION_METADATA);
-    }
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-
-        v.push_back(l.TokenizeString(".record asm1 { i64 asm1{}").first);
-        v.push_back(l.TokenizeString("}").first);
-
-        auto item = p.Parse(v);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_KEYWORD);
-    }
-
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-
-        v.push_back(l.TokenizeString(".record asm1 { i64 asm1}").first);
-        v.push_back(l.TokenizeString("}").first);
-
-        auto item = p.Parse(v);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_BOUND);
-    }
-
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-
-        v.push_back(l.TokenizeString(".array array u8 3 { 1 2 }").first);
-        v.push_back(l.TokenizeString("}").first);
-
-        auto item = p.Parse(v);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_ARRAY_SIZE);
-    }
-
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-
-        v.push_back(l.TokenizeString(".array array u8 3 { 1 2 3 4").first);
-        v.push_back(l.TokenizeString("").first);
-
-        auto item = p.Parse(v);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_END);
-    }
-
-    {
-        std::vector<std::vector<panda::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-
-        v.push_back(l.TokenizeString(".array array u8 3 { i32:0").first);
-        v.push_back(l.TokenizeString("}").first);
-
-        auto item = p.Parse(v);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_ARRAY_ELEMENT_VALUE_INTEGER);
-    }
-    //EXPECT_TRUE(false);
-    // EXPECT_EQ(item.Value().record_table.at("Asm").name, "Asm");
-    // EXPECT_EQ(item.Value().record_table.at("Asm").field_list[0].name, "asm1");
-    // EXPECT_EQ(item.Value().record_table.at("Asm").field_list[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
 }
 }

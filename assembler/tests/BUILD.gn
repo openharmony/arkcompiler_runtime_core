@@ -40,6 +40,7 @@ host_unittest_action("AssemblerTest") {
     "assembler_lexer_test.cpp",
     "assembler_mangling_test.cpp",
     "assembler_parser_test.cpp",
+    "ecmascript_meta_test.cpp",
   ]
 
   configs = [

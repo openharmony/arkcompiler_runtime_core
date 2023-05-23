@@ -25,28 +25,7 @@ using namespace testing::ext;
 
 namespace panda::pandasm {
 class LexerTest : public testing::Test {
-public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
 };
-
-void LexerTest::SetUpTestCase(void)
-{
-}
-
-void LexerTest::TearDownTestCase(void)
-{
-}
-
-void LexerTest::SetUp(void)
-{
-}
-
-void LexerTest::TearDown(void)
-{
-}
 
 /**
  * @tc.name: lexer_test_001
@@ -242,7 +221,7 @@ HWTEST_F(LexerTest, lexer_test_011, TestSize.Level1)
 
 /**
  * @tc.name: lexer_test_012
- * @tc.desc: Verify the TokenTypeWhat function.
+ * @tc.desc: Verify the TokenizeString function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -299,7 +278,7 @@ HWTEST_F(LexerTest, lexer_test_012, TestSize.Level1)
 
 /**
  * @tc.name: lexer_test_013
- * @tc.desc: Verify the TokenTypeWhat function.
+ * @tc.desc: Verify the TokenizeString function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */

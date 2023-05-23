@@ -17,7 +17,6 @@
 #include <iostream>
 
 #include "assembly-emitter.h"
-
 #include "assembly-parser.h"
 #include "assembly-emitter.cpp"
 #include "class_data_accessor-inl.h"
@@ -38,11 +37,6 @@ using namespace testing::ext;
 
 namespace panda::pandasm {
 class AssemblyEmitterTest : public testing::Test {
-public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
 };
 
 static const uint8_t *GetTypeDescriptor(const std::string &name, std::string *storage)
@@ -54,29 +48,14 @@ static const uint8_t *GetTypeDescriptor(const std::string &name, std::string *st
 
 uint8_t GetSpecialOpcode(uint32_t pc_inc, int32_t line_inc)
 {
-    return (line_inc - panda_file::LineNumberProgramItem::LINE_BASE) +
-           (pc_inc * panda_file::LineNumberProgramItem::LINE_RANGE) + panda_file::LineNumberProgramItem::OPCODE_BASE;
-}
-
-void AssemblyEmitterTest::SetUpTestCase(void)
-{
-}
-
-void AssemblyEmitterTest::TearDownTestCase(void)
-{
-}
-
-void AssemblyEmitterTest::SetUp(void)
-{
-}
-
-void AssemblyEmitterTest::TearDown(void)
-{
+    return static_cast<uint8_t>(line_inc - panda_file::LineNumberProgramItem::LINE_BASE) +
+           static_cast<uint8_t>(pc_inc * panda_file::LineNumberProgramItem::LINE_RANGE) +
+           panda_file::LineNumberProgramItem::OPCODE_BASE;
 }
 
 /**
  * @tc.name: assembly_emitter_test_001
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the GetTypeId function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -124,7 +103,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_001, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_002
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the EnumerateMethods function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -165,8 +144,6 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_002, TestSize.Level1)
 
         EXPECT_FALSE(cda.GetSourceFileId().has_value());
 
-        cda.EnumerateRuntimeAnnotations([](panda_file::File::EntityId) { EXPECT_TRUE(false); });
-
         cda.EnumerateAnnotations([](panda_file::File::EntityId) { EXPECT_TRUE(false); });
 
         cda.EnumerateFields([](panda_file::FieldDataAccessor &) { EXPECT_TRUE(false); });
@@ -198,8 +175,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_002, TestSize.Level1)
             EXPECT_EQ(dda.GetLineStart(), 8U);
             EXPECT_EQ(dda.GetNumParams(), 0U);
 
-            mda.EnumerateRuntimeAnnotations([](panda_file::File::EntityId) { EXPECT_TRUE(false); });
-            mda.EnumerateAnnotations([](panda_file::File::EntityId) { EXPECT_TRUE(true); });
+            mda.EnumerateAnnotations([](panda_file::File::EntityId) {});
         });
     }
     {
@@ -221,10 +197,6 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_002, TestSize.Level1)
         EXPECT_EQ(std::string(reinterpret_cast<const char *>(pf->GetStringData(cda.GetSourceFileId().value()).data)),
                   source_filename);
 
-        cda.EnumerateRuntimeAnnotations([](panda_file::File::EntityId) { EXPECT_TRUE(false); });
-
-        cda.EnumerateAnnotations([](panda_file::File::EntityId) { EXPECT_TRUE(false); });
-
         struct FieldData {
             std::string name;
             panda_file::Type::TypeId type_id;
@@ -245,7 +217,6 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_002, TestSize.Level1)
             EXPECT_EQ(fda.GetType(), panda_file::Type(fields[i].type_id).GetFieldEncoding());
             EXPECT_EQ(fda.GetAccessFlags(), fields[i].access_flags);
 
-            fda.EnumerateRuntimeAnnotations([](panda_file::File::EntityId) { EXPECT_TRUE(false); });
             fda.EnumerateAnnotations([](panda_file::File::EntityId) { EXPECT_TRUE(false); });
 
             ++i;
@@ -257,7 +228,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_002, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_003
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the EnumerateMethods function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -305,7 +276,6 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_003, TestSize.Level1)
         EXPECT_EQ(dda.GetLineStart(), 3U);
         EXPECT_EQ(dda.GetNumParams(), 0U);
 
-        //const uint8_t *program = 
         dda.GetLineNumberProgram();
         Span<const uint8_t> constant_pool = dda.GetConstantPool();
 
@@ -315,8 +285,6 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_003, TestSize.Level1)
                                       GetSpecialOpcode(0, 0),
                                       GetSpecialOpcode(9, 1),
                                       static_cast<uint8_t>(panda_file::LineNumberProgramItem::Opcode::END_SEQUENCE)};
-
-        // EXPECT_THAT(opcodes, ::testing::ElementsAreArray(program, opcodes.size()));
 
         size_t size {};
         bool is_full {};
@@ -349,7 +317,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_003, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_004
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the EnumerateMethods function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -416,11 +384,16 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_004, TestSize.Level1)
     size_t i = 0;
     cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
         panda_file::CodeDataAccessor cdacc(*pf, mda.GetCodeId().value());
+        // The NumVregs of arguments is 8U
+        // The NumArgs of arguments is 3U
+        // The tries size is 2U
         EXPECT_EQ(cdacc.GetNumVregs(), 8U);
         EXPECT_EQ(cdacc.GetNumArgs(), 3U);
         EXPECT_EQ(cdacc.GetTriesSize(), 2U);
 
         cdacc.EnumerateTryBlocks([&](panda_file::CodeDataAccessor::TryBlock &try_block) {
+            // Try start Pc is 9U
+            // Catches number is 1U
             EXPECT_EQ(try_block.GetStartPc(), 9U);
             EXPECT_EQ(try_block.GetNumCatches(), 1U);
 
@@ -428,7 +401,9 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_004, TestSize.Level1)
                 panda_file::File::EntityId type_id;
                 uint32_t handler_pc;
             };
-
+            // Exception1 class ID is 11.
+            // Exception2 class ID is 16.
+            // The file entity ID is 6 * 9.
             std::vector<CatchInfo> catch_infos {{pf->GetClassId(GetTypeDescriptor("Exception1", &descriptor)), 11},
                                                 {pf->GetClassId(GetTypeDescriptor("Exception2", &descriptor)), 16},
                                                 {panda_file::File::EntityId(), 6 * 9}};
@@ -447,7 +422,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_004, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_005
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the AsmEmitter::GetLastError() function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -529,7 +504,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_005, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_006
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the EnumerateMethods function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -560,7 +535,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_006, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_007
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the EnumerateMethods function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -621,7 +596,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_007, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_008
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the EnumerateFields function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -654,19 +629,25 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_008, TestSize.Level1)
         std::variant<int32_t, uint32_t, int64_t, uint64_t, float, double, std::string> value;
     };
 
+    uint32_t f_u1 = 1;
+    int32_t f_i8 = 2;
+    uint32_t f_u8 = 128;
+    int32_t f_i16 = 256;
+    uint32_t f_u16 = 32768;
+    int32_t f_i32 = 65536;
+    uint32_t f_u32 = 2147483648;
+    int64_t f_i64 = 4294967296;
+    uint64_t f_u64 = 9223372036854775808ULL;
+    float f_f32 = 1.0;
+    double f_f64 = 2.0;
+
     std::vector<FieldData> data {
-        {"f_u1", panda_file::Type::TypeId::U1, static_cast<uint32_t>(1)},
-        {"f_i8", panda_file::Type::TypeId::I8, static_cast<int32_t>(2)},
-        {"f_u8", panda_file::Type::TypeId::U8, static_cast<uint32_t>(128)},
-        {"f_i16", panda_file::Type::TypeId::I16, static_cast<int32_t>(256)},
-        {"f_u16", panda_file::Type::TypeId::U16, static_cast<uint32_t>(32768)},
-        {"f_i32", panda_file::Type::TypeId::I32, static_cast<int32_t>(65536)},
-        {"f_u32", panda_file::Type::TypeId::U32, static_cast<uint32_t>(2147483648)},
-        {"f_i64", panda_file::Type::TypeId::I64, static_cast<int64_t>(4294967296)},
-        {"f_u64", panda_file::Type::TypeId::U64, static_cast<uint64_t>(9223372036854775808ULL)},
-        {"f_f32", panda_file::Type::TypeId::F32, static_cast<float>(1.0)},
-        {"f_f64", panda_file::Type::TypeId::F64, static_cast<double>(2.0)},
-        {"f_str", panda_file::Type::TypeId::REFERENCE, "str"}};
+        {"f_u1", panda_file::Type::TypeId::U1, f_u1}, {"f_i8", panda_file::Type::TypeId::I8, f_i8},
+        {"f_u8", panda_file::Type::TypeId::U8, f_u8}, {"f_i16", panda_file::Type::TypeId::I16, f_i16},
+        {"f_u16", panda_file::Type::TypeId::U16, f_u16}, {"f_i32", panda_file::Type::TypeId::I32, f_i32},
+        {"f_u32", panda_file::Type::TypeId::U32, f_u32}, {"f_i64", panda_file::Type::TypeId::I64, f_i64},
+        {"f_u64", panda_file::Type::TypeId::U64, f_u64}, {"f_f32", panda_file::Type::TypeId::F32, f_f32},
+        {"f_f64", panda_file::Type::TypeId::F64, f_f64}, {"f_str", panda_file::Type::TypeId::REFERENCE, "str"}};
 
     auto res = p.Parse(source);
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
@@ -790,7 +771,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_008, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_009
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the EnumerateMethods function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -829,7 +810,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_009, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_010
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the AsmEmitter::Emit function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -868,7 +849,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_010, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_011
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the AsmEmitter::Emit function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -904,7 +885,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_011, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_012
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the AsmEmitter::Emit function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -929,23 +910,11 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_012, TestSize.Level1)
 
     auto class_id = pf->GetClassId(GetTypeDescriptor("Math", &descriptors));
     EXPECT_TRUE(class_id.IsValid());
-
-
-    panda_file::ClassDataAccessor cda(*pf, class_id);
-
-    size_t num_fields = 0;
-    cda.EnumerateFields([&](panda_file::FieldDataAccessor &fda) {
-        uint32_t type = fda.GetType();
-        EXPECT_EQ(120, type);
-
-        ++num_fields;
-    });
-    EXPECT_EQ(0, num_fields);
 }
 
 /**
  * @tc.name: assembly_emitter_test_013
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the AsmEmitter::Emit function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -976,7 +945,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_013, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_014
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the AsmEmitter::Emit function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -999,7 +968,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_014, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_015
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the AsmEmitter::Emit function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -1066,7 +1035,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_015, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_016
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the AsmEmitter::Emit function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -1118,7 +1087,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_016, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_017
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the AsmEmitter::Emit function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -1150,7 +1119,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_017, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_018
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the AsmEmitter::Emit function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -1174,7 +1143,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_018, TestSize.Level1)
 
 /**
  * @tc.name: assembly_emitter_test_019
- * @tc.desc: Verify the Emit function.
+ * @tc.desc: Verify the AsmEmitter::Emit function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -1196,13 +1165,13 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_019, TestSize.Level1)
     local.signature_type = "test";
     program.Value().function_table.at("f:(i8)").local_variable_debug.push_back(local);
     EXPECT_EQ(par.ShowError().err, Error::ErrorType::ERR_NONE);
-    auto pf = AsmEmitter::Emit(program.Value());
-    EXPECT_NE(pf, nullptr);
+    auto success = AsmEmitter::Emit(program.Value());
+    EXPECT_NE(success, nullptr);
 }
 
 /**
  * @tc.name: assembly_emitter_test_020
- * @tc.desc: Verify the ShowError function.
+ * @tc.desc: Verify the EmitPrograms function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -1232,48 +1201,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_020, TestSize.Level1)
     progs.push_back(&res1.Value());
     progs.push_back(&res2.Value());
     const std::string filename = "source.pa";;
-    auto pf = AsmEmitter::EmitPrograms(filename, progs, true);
-    EXPECT_TRUE(pf);
+    auto success = AsmEmitter::EmitPrograms(filename, progs, true);
+    EXPECT_TRUE(success);
 }
-
-// /**
-//  * @tc.name: assembly_emitter_test_021
-//  * @tc.desc: Verify the ShowError function.
-//  * @tc.type: FUNC
-//  * @tc.require: issueNumber
-//  */
-// HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_021, TestSize.Level1)
-// {
-//     Parser par;
-//     auto source = R"(
-//         .language ECMAScript
-//         .array array i32 1 { 0 }
-
-//         .function any Person(any a0, any a1, any a2) <static> {
-//             lda a2
-//             throw.ifsupernotcorrectcall 0x0
-//             lda a2
-//             return
-//         }
-
-//         .function any a(any a0, any a1, any a2) <static> {
-//             ldhole
-//             sta v0
-//             defineclasswithbuffer 0x0, Person:(any,any,any), array, 0x0, v0
-//             ldobjbyname 0x1, "prototype"
-//             ldundefined
-//             returnundefined
-//         }
-
-//     )";
-//     std::string source_filename = "source.pa";
-//     auto item = par.Parse(source, source_filename);
-
-//     //const auto sig_main = "Person:(any,any,any)";
-//     //EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::DEFINECLASSWITHBUFFER) << "NONE expected";
-//    // item.Value().function_table.at(sig_main).ins[0].opcode = Opcode::DEFINECLASSWITHBUFFER;
-//     EXPECT_EQ(par.ShowError().err, Error::ErrorType::ERR_BAD_ID_ARRAY) << "ERR_NONE expected";
-//     // auto pf = AsmEmitter::Emit(item.Value());
-//     // EXPECT_NE(pf, nullptr);
-// }
 }

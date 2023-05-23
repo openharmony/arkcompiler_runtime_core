@@ -24,28 +24,7 @@ using namespace testing::ext;
 
 namespace panda::pandasm {
 class ManglingTest : public testing::Test {
-public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
 };
-
-void ManglingTest::SetUpTestCase(void)
-{
-}
-
-void ManglingTest::TearDownTestCase(void)
-{
-}
-
-void ManglingTest::SetUp(void)
-{
-}
-
-void ManglingTest::TearDown(void)
-{
-}
 
 /**
  * @tc.name: mangling_test_001

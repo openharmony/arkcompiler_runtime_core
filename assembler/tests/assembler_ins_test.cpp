@@ -27,32 +27,11 @@ using namespace testing::ext;
 
 namespace panda::pandasm {
 class AssemblerInsTest : public testing::Test {
-public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
 };
-
-void AssemblerInsTest::SetUpTestCase(void)
-{
-}
-
-void AssemblerInsTest::TearDownTestCase(void)
-{
-}
-
-void AssemblerInsTest::SetUp(void)
-{
-}
-
-void AssemblerInsTest::TearDown(void)
-{
-}
 
 /**
  * @tc.name: assembler_ins_test_001
- * @tc.desc: Verify the sub function.
+ * @tc.desc: Verify the Parse function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -76,27 +55,30 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_001, TestSize.Level1)
     const std::string func_name = "func:(any,any,any)";
     auto it = item.Value().function_table.find(func_name);
     EXPECT_NE(it, item.Value().function_table.end());
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[3].OperandListLength(), 2ULL);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[3].HasFlag(InstFlags::TYPE_ID), false);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[3].CanThrow(), true);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[3].IsJump(), false);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[3].IsConditionalJump(), false);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[3].IsCall(), false);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[3].IsCallRange(), false);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[3].IsPseudoCall(), false);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[7].IsReturn(), true);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[7].MaxRegEncodingWidth(), 0);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[7].HasDebugInfo(), true);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[7].Uses().size(), 6);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[7].Def(), std::nullopt);
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[7].IsValidToEmit(), true);
-    EXPECT_EQ(item.Value().JsonDump().size(), 280);
+    auto func_value = item.Value().function_table.at(func_name);
+    size_t user_size = 6;
+    size_t json_size = 280;
+    EXPECT_EQ(.ins[3].OperandListLength(), 2ULL);
+    EXPECT_EQ(func_value.ins[3].HasFlag(InstFlags::TYPE_ID), false);
+    EXPECT_EQ(func_value.ins[3].CanThrow(), true);
+    EXPECT_EQ(func_value.ins[3].IsJump(), false);
+    EXPECT_EQ(func_value.ins[3].IsConditionalJump(), false);
+    EXPECT_EQ(func_value.ins[3].IsCall(), false);
+    EXPECT_EQ(func_value.ins[3].IsCallRange(), false);
+    EXPECT_EQ(func_value.ins[3].IsPseudoCall(), false);
+    EXPECT_EQ(func_value.ins[7].IsReturn(), true);
+    EXPECT_EQ(func_value.ins[7].MaxRegEncodingWidth(), 0);
+    EXPECT_EQ(func_value.ins[7].HasDebugInfo(), true);
+    EXPECT_EQ(func_value.ins[7].Uses().size(), user_size);
+    EXPECT_EQ(func_value.ins[7].Def(), std::nullopt);
+    EXPECT_EQ(func_value.ins[7].IsValidToEmit(), true);
+    EXPECT_EQ(item.Value().JsonDump().size(), json_size);
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
 /**
  * @tc.name: assembler_ins_test_002
- * @tc.desc: Verify the ToString function.
+ * @tc.desc: Verify the Parse function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -116,21 +98,32 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_002, TestSize.Level1)
     const std::string func_name = "func:()";
     auto it = item.Value().function_table.find(func_name);
     EXPECT_NE(it, item.Value().function_table.end());
-    std::string ret = item.Value().function_table.at(func_name).ins[0].ToString("test", true, 0);
+    auto function_value = item.Value().function_table.at(func_name);
+    std::string ret = function_value.ins[0].ToString("test", true, 0);
     EXPECT_EQ(ret, "sta a4test");
-    ret = item.Value().function_table.at(func_name).ins[0].ToString("test", false, 0);
+    ret = function_value.ins[0].ToString("test", false, 0);
     EXPECT_EQ(ret, "sta v4test");
 
-    ret = item.Value().function_table.at(func_name).ins[1].ToString("test", true, 0);
+    ret = function_value.ins[1].ToString("test", true, 0);
     EXPECT_EQ(ret, "lda.str xxxtest");
-    ret = item.Value().function_table.at(func_name).ins[1].ToString("test", false, 0);
+    ret = function_value.ins[1].ToString("test", false, 0);
     EXPECT_EQ(ret, "lda.str xxxtest");
 
-    ret = item.Value().function_table.at(func_name).ins[2].ToString("test", true, 0);
+    ret = function_value.ins[2].ToString("test", true, 0);
     EXPECT_EQ(ret, "ldglobalvar 0x7, oDivtest");
-    ret = item.Value().function_table.at(func_name).ins[2].ToString("test", false, 0);
+    ret = function_value.ins[2].ToString("test", false, 0);
     EXPECT_EQ(ret, "ldglobalvar 0x7, oDivtest");
+}
 
+/**
+ * @tc.name: assembler_ins_test_003
+ * @tc.desc: Verify the ToString function.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblerInsTest, assembler_ins_test_003, TestSize.Level1)
+{
+    
     panda::pandasm::Ins ins;
     ins.opcode = Opcode::DEPRECATED_LDMODULEVAR;
     ins.regs.push_back(2U);
@@ -140,7 +133,7 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_002, TestSize.Level1)
     ins.set_label = false;
     ins.label = "label";
 
-    ret = ins.ToString("test", true, 0);
+    std::string ret = ins.ToString("test", true, 0);
     EXPECT_EQ(ret, "deprecated.ldmodulevar a1, 0x1test");
     ret = ins.ToString("test", false, 0);
     EXPECT_EQ(ret, "deprecated.ldmodulevar a1, 0x1test");
@@ -200,11 +193,20 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_002, TestSize.Level1)
 
     EXPECT_EQ(ins.Def(), std::nullopt);
 
-    ins.regs.push_back(100);
+    ins.regs.push_back(1);
     EXPECT_FALSE(ins.IsValidToEmit());
+}
 
+/**
+ * @tc.name: assembler_ins_test_004
+ * @tc.desc: Verify the JsonDump function.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblerInsTest, assembler_ins_test_004, TestSize.Level1)
+{
     panda::pandasm::Program pro;
-    ret = pro.JsonDump();
+    std::string ret = pro.JsonDump();
     EXPECT_EQ(ret, "{ \"functions\": [  ], \"records\": [  ] }");
 
     std::string_view component_name = "u8";
@@ -225,7 +227,8 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_002, TestSize.Level1)
     std::string name = "test";
     EXPECT_FALSE(panda::pandasm::Type::IsStringType(name, language));
     ins.opcode = Opcode::CALLRANGE;
-    EXPECT_EQ(ins.Def(), 65535);
+    size_t ins_def = 65535;
+    EXPECT_EQ(ins.Def(), ins_def);
     auto unit2 = ins.Uses();
     EXPECT_GT(unit2.size(), 0);
 
@@ -234,13 +237,22 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_002, TestSize.Level1)
     panda::pandasm::Type type1(component_name, rank);
     bo = type1.IsArrayContainsPrimTypes();
     EXPECT_FALSE(bo);
+}
 
+/**
+ * @tc.name: assembler_ins_test_005
+ * @tc.desc: Verify the JsonSerializeProgramItems function.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblerInsTest, assembler_ins_test_005, TestSize.Level1)
+{
     panda::panda_file::SourceLang language1 {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
     panda::pandasm::Function function("fun", language1);
     function.file_location->is_defined = false;
     panda::pandasm::Function function1("fun", language1, 0, 10, "func", false, 10);
 
-    ret = JsonSerializeItemBody(function);
+    std::string ret = JsonSerializeItemBody(function);
     EXPECT_EQ(ret, "{ \"name\": \"fun\" }");
 
     std::map<std::string, panda::pandasm::Function> function_table;
@@ -260,26 +272,29 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_002, TestSize.Level1)
 }
 
 /**
- * @tc.name: assembler_ins_test_003
- * @tc.desc: Verify the ToString function.
+ * @tc.name: assembler_ins_test_006
+ * @tc.desc: Verify the NextMask function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(AssemblerInsTest, assembler_ins_test_003, TestSize.Level1)
+HWTEST_F(AssemblerInsTest, assembler_ins_test_006, TestSize.Level1)
 {
     Context con;
     con.token = "test";
 
     EXPECT_GT(con.Len(), 0);
-    EXPECT_FALSE(con.ValidateParameterName(65536));
-    EXPECT_FALSE(con.ValidateParameterName(4));
+    size_t number_of_params_already_is = 65535;
+    EXPECT_FALSE(con.ValidateParameterName(number_of_params_already_is));
+    number_of_params_already_is = 4;
+    EXPECT_FALSE(con.ValidateParameterName(number_of_params_already_is));
 
     panda::pandasm::Token token1;
     con.tokens.push_back(token1);
     panda::pandasm::Token token2;
     con.tokens.push_back(token2);
     EXPECT_EQ(con.Next(), Token::Type::ID_BAD);
-    con.number = 3;
+    size_t line_size = 3;
+    con.number = line_size;
     con.end = false;
     EXPECT_TRUE(con.NextMask());
     con.end = true;

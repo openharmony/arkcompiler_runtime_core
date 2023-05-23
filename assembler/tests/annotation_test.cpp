@@ -22,11 +22,6 @@ using namespace testing::ext;
 
 namespace panda::pandasm {
 class AnnotationDataTest : public testing::Test {
-public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
 };
 
 namespace {
@@ -34,31 +29,15 @@ constexpr const std::string_view TSTYPE_ANNO_RECORD_NAME = "_TestAnnotation";
 constexpr const std::string_view TSTYPE_ANNO_ELEMENT_NAME = "_TestInstruction";
 }
 
-void AnnotationDataTest::SetUpTestCase(void)
-{
-}
-
-void AnnotationDataTest::TearDownTestCase(void)
-{
-}
-
-void AnnotationDataTest::SetUp(void)
-{
-}
-
-void AnnotationDataTest::TearDown(void)
-{
-}
-
 /**
  * @tc.name: annotation_test_001
- * @tc.desc: Verify the sub function.
+ * @tc.desc: Verify the SetOrAddElementByIndex function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
 HWTEST_F(AnnotationDataTest, annotation_test_001, TestSize.Level1)
 {
-    ScalarValue insn_order(ScalarValue::Create<panda::pandasm::Value::Type::I32>(-1));
+    ScalarValue insn_order(ScalarValue::Create<panda::pandasm::Value::Type::I32>(1));
     std::vector<panda::pandasm::ScalarValue> elements;
     elements.emplace_back(std::move(insn_order));
 
@@ -78,7 +57,7 @@ HWTEST_F(AnnotationDataTest, annotation_test_001, TestSize.Level1)
 
 /**
  * @tc.name: annotation_test_002
- * @tc.desc: Verify the GetTypeAsChar function.
+ * @tc.desc: Verify the GetArrayTypeAsChar function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -247,7 +226,7 @@ HWTEST_F(AnnotationDataTest, annotation_test_002, TestSize.Level1)
 
 /**
  * @tc.name: annotation_test_003
- * @tc.desc: Verify the InitScalarValue function.
+ * @tc.desc: Verify the GetCharAsType function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -373,7 +352,7 @@ HWTEST_F(AnnotationDataTest, annotation_test_003, TestSize.Level1)
 
 /**
  * @tc.name: annotation_test_004
- * @tc.desc: Verify the InitScalarValue function.
+ * @tc.desc: Verify the TypeToString function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -460,23 +439,23 @@ HWTEST_F(AnnotationDataTest, annotation_test_004, TestSize.Level1)
  */
 HWTEST_F(AnnotationDataTest, annotation_test_005, TestSize.Level1)
 {
-    ScalarValue insn_order(ScalarValue::Create<panda::pandasm::Value::Type::I32>(-1));
+    ScalarValue insn_order(ScalarValue::Create<panda::pandasm::Value::Type::I32>(1));
     std::unique_ptr<ScalarValue> value = panda::pandasm::InitScalarValue(insn_order);
     EXPECT_NE(value, nullptr);
 
-    ScalarValue insn_order_u8(ScalarValue::Create<panda::pandasm::Value::Type::U8>(1));
+    ScalarValue insn_order_u8(ScalarValue::Create<panda::pandasm::Value::Type::U8>(1U));
     value = panda::pandasm::InitScalarValue(insn_order_u8);
     EXPECT_NE(value, nullptr);
 
-    ScalarValue insn_order_u16(ScalarValue::Create<panda::pandasm::Value::Type::U16>(1));
+    ScalarValue insn_order_u16(ScalarValue::Create<panda::pandasm::Value::Type::U16>(1U));
     value = panda::pandasm::InitScalarValue(insn_order_u16);
     EXPECT_NE(value, nullptr);
 
-    ScalarValue insn_order_u32(ScalarValue::Create<panda::pandasm::Value::Type::U32>(1));
+    ScalarValue insn_order_u32(ScalarValue::Create<panda::pandasm::Value::Type::U32>(1U));
     value = panda::pandasm::InitScalarValue(insn_order_u32);
     EXPECT_NE(value, nullptr);
 
-    ScalarValue insn_order_u64(ScalarValue::Create<panda::pandasm::Value::Type::U64>(1));
+    ScalarValue insn_order_u64(ScalarValue::Create<panda::pandasm::Value::Type::U64>(1U));
     value = panda::pandasm::InitScalarValue(insn_order_u64);
     EXPECT_NE(value, nullptr);
 
@@ -521,7 +500,7 @@ HWTEST_F(AnnotationDataTest, annotation_test_005, TestSize.Level1)
     value = panda::pandasm::InitScalarValue(insn_order_enum);
     EXPECT_NE(value, nullptr);
 
-    ScalarValue insn_orders(ScalarValue::Create<panda::pandasm::Value::Type::I32>(-1));
+    ScalarValue insn_orders(ScalarValue::Create<panda::pandasm::Value::Type::I32>(1));
     std::vector<panda::pandasm::ScalarValue> elements;
     elements.emplace_back(std::move(insn_orders));
 
