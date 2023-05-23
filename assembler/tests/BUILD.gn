@@ -35,6 +35,7 @@ host_unittest_action("AssemblerTest") {
 
   sources = [
     "annotation_test.cpp",
+    "assembler_ins_test.cpp",
     "assembler_lexer_test.cpp",
   ]
 
