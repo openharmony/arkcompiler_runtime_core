@@ -90,6 +90,9 @@ ohos_static_library("libarkbytecodeopt_frontend_static") {
     "$ark_root/libpandafile:libarkfile_frontend_static",
     sdk_libc_secshared_dep,
   ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ark_isa_gen("isa_gen_arkbytecodeopt") {
