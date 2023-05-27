@@ -195,6 +195,9 @@ ohos_static_library("libarkcompiler_frontend_static") {
   ]
 
   include_dirs = [ "$ark_root/compiler/optimizer" ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ark_isa_gen("isa_gen_libarkcompiler") {

@@ -22,7 +22,9 @@
         "ram": "",
         "deps": {
             "components": [],
-            "third_party": []
+            "third_party": [
+                "bounds_checking_function"
+            ]
         },
         "build": {
             "sub_component": [
