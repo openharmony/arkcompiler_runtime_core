@@ -30,7 +30,29 @@
             "sub_component": [
                 "//arkcompiler/runtime_core:arkcompiler_params"
             ],
-            "inner_kits": [],
+            "inner_kits": [
+                {
+                    "name": "//arkcompiler/runtime_core/libpandafile:arkfile_header_deps",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/libpandafile"
+                    }
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/libpandafile:libarkfile_static",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/libpandafile"
+                    }
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/libpandabase:libarkbase_static",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/libpandabase"
+                    }
+                }
+            ],
             "test": [
                 "//arkcompiler/runtime_core/tests/fuzztest:fuzztest",
                 "//arkcompiler/runtime_core:runtime_core_unittest"
