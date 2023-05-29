@@ -21,6 +21,10 @@ config("arkbase_public_config") {
     "$target_gen_dir",
   ]
 
+  if (enable_hilog) {
+    include_dirs += [ "$hilog_root/include" ]
+  }
+
   include_dirs += platform_include_dirs
 }
 
@@ -194,6 +198,9 @@ source_set("libarkbase_static") {
 ohos_shared_library("libarkbase") {
   stack_protector_ret = false
   deps = [ ":libarkbase_static" ]
+  if (enable_hilog) {
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  }
   if (!is_mingw && !is_mac) {
     output_extension = "so"
   }

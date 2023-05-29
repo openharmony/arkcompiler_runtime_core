@@ -32,6 +32,10 @@
 
 #include <atomic>
 
+#ifdef ENABLE_HILOG
+#include <hilog/log.h>
+#endif
+
 namespace panda {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -131,6 +135,9 @@ public:
 
     static void InitializeFileLogging(const std::string &log_file, Level level, ComponentMask component_mask,
                                       bool is_fast_logging = false);
+#ifdef ENABLE_HILOG
+    static void InitializeHiLogging(Level level, ComponentMask component_mask);
+#endif
 
     static void InitializeStdLogging(Level level, ComponentMask component_mask);
 
@@ -368,6 +375,29 @@ private:
 
     friend Logger;
 };
+
+#ifdef ENABLE_HILOG
+class HiLogger : public Logger {
+protected:
+    HiLogger(Level level, ComponentMask component_mask) : Logger(level, component_mask) {}
+
+    void LogLineInternal(Level level, Component component, const std::string &str) override;
+    void SyncOutputResource() override {}
+
+    ~HiLogger() override = default;
+
+    NO_COPY_SEMANTIC(HiLogger);
+    NO_MOVE_SEMANTIC(HiLogger);
+
+private:
+    std::ostringstream stream_;
+    constexpr static unsigned int ARK_DOMAIN = 0xD003F00;
+    constexpr static auto TAG = "ArkCompiler";
+    constexpr static OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, ARK_DOMAIN, TAG};
+
+    friend Logger;
+};
+#endif
 
 class StderrLogger : public Logger {
 private:

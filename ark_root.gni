@@ -17,6 +17,7 @@ if (!defined(ark_standalone_build)) {
 
 if (!ark_standalone_build) {
   ark_third_party_root = "//third_party"
+  hilog_root = "//base/hiviewdfx/hilog/interfaces/native/innerkits"
   build_root = "//build"
   import("$build_root/ohos.gni")
 } else {
