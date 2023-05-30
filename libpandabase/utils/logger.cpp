@@ -69,6 +69,11 @@ void Logger::Initialize(const base_options::Options &options)
         level = Logger::LevelFromString(options.GetLogLevel());
     }
 
+#ifdef ENABLE_HILOG
+    Logger::InitializeHiLogging(level, component_mask);
+    return;
+#endif
+
     if (options.GetLogStream() == "std") {
         Logger::InitializeStdLogging(level, component_mask);
     } else if (options.GetLogStream() == "file" || options.GetLogStream() == "fast-file") {
@@ -214,6 +219,26 @@ void Logger::InitializeFileLogging(const std::string &log_file, Level level, Com
     }
 }
 
+#ifdef ENABLE_HILOG
+/* static */
+void Logger::InitializeHiLogging(Level level, ComponentMask component_mask)
+{
+    if (IsInitialized()) {
+        return;
+    }
+
+    {
+        os::memory::LockHolder<os::memory::Mutex> lock(mutex);
+
+        if (IsInitialized()) {
+            return;
+        }
+
+        logger = new HiLogger(level, component_mask);
+    }
+}
+#endif
+
 /* static */
 void Logger::InitializeStdLogging(Level level, ComponentMask component_mask)
 {
@@ -312,6 +337,33 @@ void FastFileLogger::LogLineInternal(Level level, Component component, const std
     std::string prefix = GetPrefix(level, component);
     stream_ << prefix << str << '\n';
 }
+
+#ifdef ENABLE_HILOG
+void HiLogger::LogLineInternal(Level level, Component component, const std::string &str)
+{
+    std::string prefix = GetPrefix(level, component);
+    stream_ << prefix << str;
+    switch (level) {
+        case Level::DEBUG:
+            OHOS::HiviewDFX::HiLog::Debug(LABEL, "%{public}s", stream_.str().c_str());
+            break;
+        case Level::INFO:
+            OHOS::HiviewDFX::HiLog::Info(LABEL, "%{public}s", stream_.str().c_str());
+            break;
+        case Level::ERROR:
+            OHOS::HiviewDFX::HiLog::Error(LABEL, "%{public}s", stream_.str().c_str());
+            break;
+        case Level::FATAL:
+            OHOS::HiviewDFX::HiLog::Fatal(LABEL, "%{public}s", stream_.str().c_str());
+            break;
+        case Level::WARNING:
+             OHOS::HiviewDFX::HiLog::Warn(LABEL, "%{public}s", stream_.str().c_str());
+            break;
+        default:
+            UNREACHABLE();
+    }
+}
+#endif
 
 void StderrLogger::LogLineInternal(Level level, Component component, const std::string &str)
 {
