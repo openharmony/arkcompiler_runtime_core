@@ -147,6 +147,10 @@ config("ark_config") {
     ]
   }
 
+  if (enable_hilog) {
+    defines += [ "ENABLE_HILOG" ]
+  }
+
   if (!is_debug) {
     defines += [ "NDEBUG" ]
   }
