@@ -28,7 +28,50 @@
             "sub_component": [
                 "//arkcompiler/runtime_core:arkcompiler_params"
             ],
-            "inner_kits": [],
+            "inner_kits": [
+                {
+                    "name": "//arkcompiler/runtime_core/assembler:libarkassembler_frontend_static",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/assembler"
+                    }
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/libpandabase:libarkbase_frontend_static",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/libpandabase"
+                    }
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/libpandafile:libarkfile_frontend_static",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/libpandafile"
+                    }
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/libziparchive:libarkziparchive_frontend_static",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/libziparchive"
+                    }
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/bytecode_optimizer:libarkbytecodeopt_frontend_static",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/bytecode_optimizer"
+                    }
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/compiler:libarkcompiler_frontend_static",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/compiler"
+                    }
+                }
+            ],
             "test": [
                 "//arkcompiler/runtime_core/tests/fuzztest:fuzztest",
                 "//arkcompiler/runtime_core:runtime_core_unittest"
