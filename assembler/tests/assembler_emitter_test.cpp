@@ -18,7 +18,6 @@
 
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
-#include "assembly-emitter.cpp"
 #include "class_data_accessor-inl.h"
 #include "code_data_accessor-inl.h"
 #include "debug_data_accessor-inl.h"
@@ -55,50 +54,35 @@ uint8_t GetSpecialOpcode(uint32_t pc_inc, int32_t line_inc)
 
 /**
  * @tc.name: assembly_emitter_test_001
- * @tc.desc: Verify the GetTypeId function.
+ * @tc.desc: Verify the EnumerateMethods function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
 HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_001, TestSize.Level1)
 {
-    panda_file::Type::TypeId ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::U1);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::U1);
+    Parser p;
+    auto source = R"(
+        .record R {}
+        .function void R.foo(R a0) <ctor> {}
+    )";
 
-    ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::I8);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::I8);
+    auto res = p.Parse(source);
+    EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
-    ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::U8);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::U8);
+    auto pf = AsmEmitter::Emit(res.Value());
+    EXPECT_NE(pf, nullptr);
 
-    ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::I16);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::I16);
+    std::string descriptor;
 
-    ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::U16);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::U16);
+    auto class_id = pf->GetClassId(GetTypeDescriptor("R", &descriptor));
+    EXPECT_TRUE(class_id.IsValid());
 
-    ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::I32);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::I32);
+    panda_file::ClassDataAccessor cda(*pf, class_id);
 
-    ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::U32);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::U32);
-
-    ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::I64);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::I64);
-
-    ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::U64);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::U64);
-
-    ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::F32);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::F32);
-
-    ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::F64);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::F64);
-
-    ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::VOID);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::VOID);
-
-    ret = panda::pandasm::GetTypeId(panda::pandasm::Value::Type::RECORD);
-    EXPECT_EQ(ret, panda_file::Type::TypeId::REFERENCE);
+    cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
+        auto *name = utf::Mutf8AsCString(pf->GetStringData(mda.GetNameId()).data);
+        EXPECT_STREQ(name, ".ctor");
+    });
 }
 
 /**
@@ -1133,7 +1117,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_018, TestSize.Level1)
     )";
     std::string source_filename = "source.pa";
     AsmEmitter::PandaFileToPandaAsmMaps *maps = nullptr;
-    auto items = ItemContainer {};
+    auto items = panda::panda_file::ItemContainer {};
     auto program = par.Parse(source, source_filename);
     program.Value().function_table.at("f:(i8)").metadata->SetAttribute("external");
     EXPECT_EQ(par.ShowError().err, Error::ErrorType::ERR_NONE);

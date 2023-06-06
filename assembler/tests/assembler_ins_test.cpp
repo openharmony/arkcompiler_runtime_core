@@ -55,23 +55,23 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_001, TestSize.Level1)
     const std::string func_name = "func:(any,any,any)";
     auto it = item.Value().function_table.find(func_name);
     EXPECT_NE(it, item.Value().function_table.end());
-    auto func_value = item.Value().function_table.at(func_name);
+    const auto &func_value = item.Value().function_table.at(func_name).ins;
     size_t user_size = 6;
     size_t json_size = 280;
-    EXPECT_EQ(.ins[3].OperandListLength(), 2ULL);
-    EXPECT_EQ(func_value.ins[3].HasFlag(InstFlags::TYPE_ID), false);
-    EXPECT_EQ(func_value.ins[3].CanThrow(), true);
-    EXPECT_EQ(func_value.ins[3].IsJump(), false);
-    EXPECT_EQ(func_value.ins[3].IsConditionalJump(), false);
-    EXPECT_EQ(func_value.ins[3].IsCall(), false);
-    EXPECT_EQ(func_value.ins[3].IsCallRange(), false);
-    EXPECT_EQ(func_value.ins[3].IsPseudoCall(), false);
-    EXPECT_EQ(func_value.ins[7].IsReturn(), true);
-    EXPECT_EQ(func_value.ins[7].MaxRegEncodingWidth(), 0);
-    EXPECT_EQ(func_value.ins[7].HasDebugInfo(), true);
-    EXPECT_EQ(func_value.ins[7].Uses().size(), user_size);
-    EXPECT_EQ(func_value.ins[7].Def(), std::nullopt);
-    EXPECT_EQ(func_value.ins[7].IsValidToEmit(), true);
+    EXPECT_EQ(func_value[3].OperandListLength(), 2ULL);
+    EXPECT_EQ(func_value[3].HasFlag(InstFlags::TYPE_ID), false);
+    EXPECT_EQ(func_value[3].CanThrow(), true);
+    EXPECT_EQ(func_value[3].IsJump(), false);
+    EXPECT_EQ(func_value[3].IsConditionalJump(), false);
+    EXPECT_EQ(func_value[3].IsCall(), false);
+    EXPECT_EQ(func_value[3].IsCallRange(), false);
+    EXPECT_EQ(func_value[3].IsPseudoCall(), false);
+    EXPECT_EQ(func_value[7].IsReturn(), true);
+    EXPECT_EQ(func_value[7].MaxRegEncodingWidth(), 0);
+    EXPECT_EQ(func_value[7].HasDebugInfo(), true);
+    EXPECT_EQ(func_value[7].Uses().size(), user_size);
+    EXPECT_EQ(func_value[7].Def(), std::nullopt);
+    EXPECT_EQ(func_value[7].IsValidToEmit(), true);
     EXPECT_EQ(item.Value().JsonDump().size(), json_size);
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
@@ -98,20 +98,20 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_002, TestSize.Level1)
     const std::string func_name = "func:()";
     auto it = item.Value().function_table.find(func_name);
     EXPECT_NE(it, item.Value().function_table.end());
-    auto function_value = item.Value().function_table.at(func_name);
-    std::string ret = function_value.ins[0].ToString("test", true, 0);
+    const auto &function_value = item.Value().function_table.at(func_name).ins;
+    std::string ret = function_value[0].ToString("test", true, 0);
     EXPECT_EQ(ret, "sta a4test");
-    ret = function_value.ins[0].ToString("test", false, 0);
+    ret = function_value[0].ToString("test", false, 0);
     EXPECT_EQ(ret, "sta v4test");
 
-    ret = function_value.ins[1].ToString("test", true, 0);
+    ret = function_value[1].ToString("test", true, 0);
     EXPECT_EQ(ret, "lda.str xxxtest");
-    ret = function_value.ins[1].ToString("test", false, 0);
+    ret = function_value[1].ToString("test", false, 0);
     EXPECT_EQ(ret, "lda.str xxxtest");
 
-    ret = function_value.ins[2].ToString("test", true, 0);
+    ret = function_value[2].ToString("test", true, 0);
     EXPECT_EQ(ret, "ldglobalvar 0x7, oDivtest");
-    ret = function_value.ins[2].ToString("test", false, 0);
+    ret = function_value[2].ToString("test", false, 0);
     EXPECT_EQ(ret, "ldglobalvar 0x7, oDivtest");
 }
 
@@ -123,11 +123,12 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_002, TestSize.Level1)
  */
 HWTEST_F(AssemblerInsTest, assembler_ins_test_003, TestSize.Level1)
 {
-    
     panda::pandasm::Ins ins;
+    uint16_t reg1 = 2U;
+    uint16_t reg2 = 2U;
     ins.opcode = Opcode::DEPRECATED_LDMODULEVAR;
-    ins.regs.push_back(2U);
-    ins.regs.push_back(3U);
+    ins.regs.push_back(reg1);
+    ins.regs.push_back(reg2);
     ins.imms.push_back(Ins::IType(int64_t(0x1)));
     ins.ids.push_back("a1");
     ins.set_label = false;
@@ -205,6 +206,16 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_003, TestSize.Level1)
  */
 HWTEST_F(AssemblerInsTest, assembler_ins_test_004, TestSize.Level1)
 {
+    panda::pandasm::Ins ins;
+    uint16_t reg1 = 2U;
+    uint16_t reg2 = 3U;
+    ins.opcode = Opcode::DEPRECATED_LDMODULEVAR;
+    ins.regs.push_back(reg1);
+    ins.regs.push_back(reg2);
+    ins.imms.push_back(Ins::IType(int64_t(0x1)));
+    ins.ids.push_back("a1");
+    ins.set_label = false;
+    ins.label = "label";
     panda::pandasm::Program pro;
     std::string ret = pro.JsonDump();
     EXPECT_EQ(ret, "{ \"functions\": [  ], \"records\": [  ] }");
@@ -247,6 +258,18 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_004, TestSize.Level1)
  */
 HWTEST_F(AssemblerInsTest, assembler_ins_test_005, TestSize.Level1)
 {
+    Parser p;
+    const auto source = R"(
+        .function any func() {
+            sta v4
+            lda.str "xxx"
+            ldglobalvar 0x7, "oDiv"
+            callarg1 0x1, v0
+            return
+        }
+    )";
+    auto item = p.Parse(source);
+    const std::string func_name = "func:()";
     panda::panda_file::SourceLang language1 {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
     panda::pandasm::Function function("fun", language1);
     function.file_location->is_defined = false;
