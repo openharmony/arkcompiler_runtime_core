@@ -1,5 +1,5 @@
 {
-    "name": "@ohos/arkcompiler_runtime_core",
+    "name": "@arkcompiler/runtime_core",
     "version": "",
     "description": "方舟运行时的公共组件",
     "homePage": "https://gitee.com/openharmony",
@@ -97,7 +97,8 @@
             ],
             "test": [
                 "//arkcompiler/runtime_core/tests/fuzztest:fuzztest",
-                "//arkcompiler/runtime_core:runtime_core_unittest"
+                "//arkcompiler/runtime_core:runtime_core_unittest",
+                "//arkcompiler/runtime_core:runtime_core_host_unittest"
             ]
         }
     }

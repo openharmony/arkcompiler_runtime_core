@@ -125,7 +125,7 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_003, TestSize.Level1)
 {
     panda::pandasm::Ins ins;
     uint16_t reg1 = 2U;
-    uint16_t reg2 = 2U;
+    uint16_t reg2 = 3U;
     ins.opcode = Opcode::DEPRECATED_LDMODULEVAR;
     ins.regs.push_back(reg1);
     ins.regs.push_back(reg2);
