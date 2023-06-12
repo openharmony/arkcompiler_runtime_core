@@ -45,7 +45,8 @@ sdk_libc_secshared_dep =
 sdk_libc_secshared_config =
     "$ark_third_party_root/bounds_checking_function:libsec_public_config"
 
-if (is_mingw || is_mac || is_linux || target_os == "ios") {
+if (is_mingw || is_mac || is_linux || target_os == "ios" ||
+    target_os == "android") {
   sdk_libc_secshared_dep =
       "$ark_third_party_root/bounds_checking_function:libsec_static"
 }
