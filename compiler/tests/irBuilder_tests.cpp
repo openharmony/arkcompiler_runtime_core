@@ -537,30 +537,30 @@ HWTEST_F(IrBuilderTest, nestedTryCatchAbc, testing::ext::TestSize.Level1)
                 EXPECT_TRUE(bb->GetPredsBlocks().size() == 1);
 
                 EXPECT_TRUE(bb->GetSuccsBlocks().size() == 2);
-                EXPECT_TRUE(bb->GetSuccessor(0)->IsTry());
-                EXPECT_TRUE(bb->GetSuccessor(1)->IsCatch());
-                EXPECT_TRUE(bb->GetSuccessor(1)->IsCatchBegin());
 
-                EXPECT_TRUE(bb->GetSuccessor(0)->GetTryId() == bb->GetTryId());
+                if (bb->GetTryId() == 0) {
+                    EXPECT_TRUE(bb->GetSuccessor(0)->IsTry());
+                    EXPECT_TRUE(bb->GetSuccessor(1)->IsCatch());
+                    EXPECT_TRUE(bb->GetSuccessor(1)->IsCatchBegin());
+                    EXPECT_TRUE(bb->GetSuccessor(0)->GetTryId() == bb->GetTryId());
+                }
+
+                if (bb->GetTryId() == 1) {
+                    EXPECT_TRUE(bb->GetSuccessor(0)->IsTryBegin());
+                    EXPECT_TRUE(bb->GetSuccessor(1)->IsCatch());
+                    EXPECT_TRUE(bb->GetSuccessor(1)->IsCatchBegin());
+                }
+
                 continue;
             }
 
             if (bb->IsTry()) {
                 EXPECT_TRUE(bb->GetPredsBlocks().size() == 1);
-                if (!bb->GetPredecessor(0)->IsTryBegin()) {
-                    EXPECT_TRUE(bb->GetPredecessor(0)->IsCatchBegin());
-                    EXPECT_TRUE(bb->GetPredecessor(0)->IsCatch());
+                if (bb->GetPredecessor(0)->IsTryBegin()) {
+                    EXPECT_TRUE(bb->GetPredecessor(0)->GetTryId() == bb->GetTryId());
+                    EXPECT_TRUE(bb->GetPredecessor(0)->GetTryId() == 0);
+                    EXPECT_TRUE(bb->GetPredecessor(0)->GetGuestPc() == bb->GetGuestPc());
 
-                    EXPECT_TRUE(bb->GetFirstInst()->IsSaveState());
-                    EXPECT_TRUE(bb->GetLastInst()->IsIntrinsic());
-                    EXPECT_TRUE((static_cast<IntrinsicInst *>(bb->GetLastInst()))->GetIntrinsicId() ==
-                                RuntimeInterface::IntrinsicId::TRYLDGLOBALBYNAME_IMM8_ID16);
-                    continue;
-                }
-
-                EXPECT_TRUE(bb->GetPredecessor(0)->GetTryId() == bb->GetTryId());
-                EXPECT_TRUE(bb->GetPredecessor(0)->GetGuestPc() == bb->GetGuestPc());
-                if (bb->GetPredecessor(0)->GetTryId() == 0) {
                     EXPECT_TRUE(bb->GetSuccsBlocks().size() == 1);
                     EXPECT_TRUE(bb->GetSuccessor(0)->IsTryEnd());
 
@@ -571,13 +571,27 @@ HWTEST_F(IrBuilderTest, nestedTryCatchAbc, testing::ext::TestSize.Level1)
                     continue;
                 }
 
-                EXPECT_TRUE(bb->GetPredecessor(0)->GetTryId() == 2);
-                EXPECT_TRUE(bb->GetSuccsBlocks().size() == 1);
-                EXPECT_TRUE(bb->IsEmpty());
+                if (bb->GetPredecessor(0)->IsTryEnd()) {
+                    EXPECT_FALSE(bb->GetPredecessor(0)->GetTryId() == bb->GetTryId());
+                    EXPECT_TRUE(bb->GetPredecessor(0)->GetGuestPc() == bb->GetGuestPc());
 
-                for (auto inst : bb->GetSuccessor(0)->AllInsts()) {
-                    EXPECT_TRUE(inst->IsPhi());
+                    EXPECT_TRUE(bb->GetSuccsBlocks().size() == 1);
+                    for (auto inst : bb->GetSuccessor(0)->AllInsts()) {
+                        EXPECT_TRUE(inst->IsPhi());
+                    }
+                    continue;
                 }
+
+                EXPECT_TRUE(bb->GetPredecessor(0)->IsCatchBegin());
+                EXPECT_TRUE(bb->GetPredecessor(0)->IsCatch());
+
+                EXPECT_TRUE(bb->GetSuccsBlocks().size() == 1);
+                EXPECT_TRUE(bb->GetSuccessor(0)->IsCatch());
+
+                EXPECT_TRUE(bb->GetFirstInst()->IsSaveState());
+                EXPECT_TRUE(bb->GetLastInst()->IsIntrinsic());
+                EXPECT_TRUE((static_cast<IntrinsicInst *>(bb->GetLastInst()))->GetIntrinsicId() ==
+                            RuntimeInterface::IntrinsicId::TRYLDGLOBALBYNAME_IMM8_ID16);
                 continue;
             }
 
@@ -590,7 +604,7 @@ HWTEST_F(IrBuilderTest, nestedTryCatchAbc, testing::ext::TestSize.Level1)
 
                 EXPECT_TRUE(bb->GetSuccsBlocks().size() == 2);
                 if (bb->GetTryId() == 0) {
-                    EXPECT_TRUE(bb->GetSuccessor(0)->IsTryBegin());
+                    EXPECT_TRUE(bb->GetSuccessor(0)->IsTry());
                     EXPECT_TRUE(bb->GetSuccessor(0)->GetGuestPc() == bb->GetGuestPc());
 
                     EXPECT_TRUE(bb->GetSuccessor(1)->IsCatchBegin());
@@ -602,7 +616,7 @@ HWTEST_F(IrBuilderTest, nestedTryCatchAbc, testing::ext::TestSize.Level1)
                     continue;
                 }
 
-                EXPECT_TRUE(bb->GetTryId() == 2);
+                EXPECT_TRUE(bb->GetTryId() == 1);
                 EXPECT_TRUE(bb->GetSuccessor(1)->IsCatchBegin());
                 EXPECT_TRUE(bb->GetSuccessor(1)->IsCatch());
                 for (auto inst : bb->GetSuccessor(0)->AllInsts()) {
