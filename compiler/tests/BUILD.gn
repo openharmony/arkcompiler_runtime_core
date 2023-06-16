@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
+import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//arkcompiler/runtime_core/ark_config.gni")
 import("$ark_root/tests/test_helper.gni")
 
@@ -42,7 +42,7 @@ test_js_files = [
 ]
 
 foreach(file, test_js_files) {
-  ts2abc_gen_abc("gen_${file}_abc") {
+  es2abc_gen_abc("gen_${file}_abc") {
     test_js = "${test_js_path}${file}.js"
     test_abc = "$target_out_dir/${file}.abc"
 
