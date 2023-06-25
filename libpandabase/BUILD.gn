@@ -187,20 +187,23 @@ source_set("libarkbase_static_fuzz") {
   deps = libarkbase_deps
 }
 
-source_set("libarkbase_static") {
+ohos_source_set("libarkbase_static") {
   sources = libarkbase_sources
 
   public_configs = libarkbase_configs
 
   deps = libarkbase_deps
+  external_deps = []
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_shared_library("libarkbase") {
   stack_protector_ret = false
   deps = [ ":libarkbase_static" ]
-  if (enable_hilog) {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-  }
   if (!is_mingw && !is_mac) {
     output_extension = "so"
   }
