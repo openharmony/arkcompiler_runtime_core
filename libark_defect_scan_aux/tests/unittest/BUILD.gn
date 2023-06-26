@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
+import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//arkcompiler/runtime_core/ark_config.gni")
 
 ##############################unittest##########################################
@@ -22,13 +22,13 @@ action("generate_abc_file") {
     "--testcase-list",
     rebase_path("$ark_root/libark_defect_scan_aux/tests/testcase-list.txt"),
     "--build-dir",
-    rebase_path("$ts2abc_build_path"),
+    rebase_path("$es2abc_build_path"),
     "--dst-dir",
     rebase_path("$root_out_dir/arkcompiler/runtime_core"),
   ]
 
-  deps = [ "$ts2abc_root:ark_ts2abc_build" ]
-  outputs = [ "$ts2abc_build_path/output_not_specified_here" ]
+  deps = [ "$es2abc_root:es2panda_build" ]
+  outputs = [ "$es2abc_build_path/output_not_specified_here" ]
 }
 
 ohos_executable("defect_scan_aux_unittest") {
