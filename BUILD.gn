@@ -147,6 +147,11 @@ config("ark_config") {
     ]
   }
 
+  if (current_os == "android" && defined(build_cross_platform_version) &&
+      build_cross_platform_version) {
+    defines += [ "PANDA_TARGET_ARKUI_X" ]
+  }
+
   if (enable_hilog) {
     defines += [ "ENABLE_HILOG" ]
   }
