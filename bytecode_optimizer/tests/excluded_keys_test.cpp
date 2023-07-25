@@ -35,7 +35,7 @@ public:
     {
         panda::pandasm::AsmEmitter::PandaFileToPandaAsmMaps panda_file_to_asm_maps {};
         EXPECT_TRUE(panda::pandasm::AsmEmitter::Emit(abc_file_name, program, nullptr, &panda_file_to_asm_maps, false));
-        EXPECT_TRUE(panda::bytecodeopt::OptimizeBytecode(&program, &panda_file_to_asm_maps, abc_file_name, false));
+        EXPECT_TRUE(panda::bytecodeopt::OptimizeBytecode(&program, &panda_file_to_asm_maps, abc_file_name, true));
     }
 };
 

@@ -274,21 +274,6 @@ concat_yamls("concat_inst_templates_yamls") {
 }
 
 if (!ark_standalone_build) {
-  group("bcopt_type_adapter_unit_test") {
-    if (host_os == "mac") {
-      if (host_cpu == "arm64") {
-        deps = [ "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test($build_root/toolchain/mac:clang_arm64)" ]
-      } else {
-        deps = [ "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test($build_root/toolchain/mac:clang_x64)" ]
-      }
-    } else {
-      deps = [
-        "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test($build_root/toolchain/linux:clang_x64)",
-        "$ark_root/bytecode_optimizer/tests:bcopt_type_adapter_unit_test($build_root/toolchain/mingw:mingw_x86_64)",
-      ]
-    }
-  }
-
   group("ark_host_linux_defectscanaux_lib") {
     deps = []
     if (host_os == "linux") {
