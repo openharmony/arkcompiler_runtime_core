@@ -36,12 +36,20 @@ compiler_test_deps = [
 
 test_js_path = "//arkcompiler/runtime_core/compiler/tests/js/"
 
-test_js_files = [
-  "simpleTryCatch",
+# graph interface unit tests
+graph_test_js_files = [
+  "cleanUpTest",
   "nestedTryCatch",
+  "regallocTest",
+  "regallocTryTest",
+  "simpleTryCatch",
+  "moduleTryCatch",
+  "styleTryCatch",
+  "dominatorsTryCatch",
+  "testTryCatch",
 ]
 
-foreach(file, test_js_files) {
+foreach(file, graph_test_js_files) {
   es2abc_gen_abc("gen_${file}_abc") {
     test_js = "${test_js_path}${file}.js"
     test_abc = "$target_out_dir/${file}.abc"
@@ -54,23 +62,35 @@ foreach(file, test_js_files) {
   }
 }
 
-host_unittest_action("IrBuilderTest") {
+host_unittest_action("GraphInterfaceTest") {
   module_out_path = module_output_path
-
-  sources = [ "irBuilder_tests.cpp" ]
+  sources = [
+    "compiler_basicblock_test.cpp",
+    "compiler_graph_test.cpp",
+    "compiler_inst_test.cpp",
+    "compiler_optimizations_test.cpp",
+    "compiler_regalloc_test.cpp",
+    "dominators_tree_new_test.cpp",
+    "dump_test.cpp",
+    "graph_checker_test.cpp",
+    "irBuilder_tests.cpp",
+    "linear_order_new_test.cpp",
+    "liveness_analyzer_new_test.cpp",
+    "loop_analyzer_new_test.cpp",
+  ]
   configs = compiler_test_configs
   deps = compiler_test_deps
 
   test_abc_dir = rebase_path(target_out_dir)
 
-  defines = [ "IRBUILDER_ABC_DIR=\"${test_abc_dir}/\"" ]
+  defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
 
-  foreach(file, test_js_files) {
+  foreach(file, graph_test_js_files) {
     deps += [ ":gen_${file}_abc" ]
   }
 }
 
 group("host_unittest") {
   testonly = true
-  deps = [ ":IrBuilderTestAction" ]
+  deps = [ ":GraphInterfaceTestAction" ]
 }
