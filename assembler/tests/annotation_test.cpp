@@ -53,6 +53,13 @@ HWTEST_F(AnnotationDataTest, annotation_test_001, TestSize.Level1)
     ele_idx = elements.size();
     annotationData.SetOrAddElementByIndex(ele_idx, std::move(anno_element));
     EXPECT_GT(annotationData.GetElements().size(), elements.size());
+
+    ScalarValue insn_order1(ScalarValue::Create<panda::pandasm::Value::Type::U1>(1U));
+    elements.emplace_back(std::move(insn_order1));
+    ArrayValue array_value_U1(panda::pandasm::Value::Type::U1, elements);
+    AnnotationElement anno_element_U1(TSTYPE_ANNO_ELEMENT_NAME, std::make_unique<ArrayValue>(array_value_U1));
+    anno_element = anno_element_U1;
+    EXPECT_EQ(anno_element.GetName(), "_TestInstruction");
 }
 
 /**
@@ -519,5 +526,11 @@ HWTEST_F(AnnotationDataTest, annotation_test_005, TestSize.Level1)
     AnnotationElement element(TSTYPE_ANNO_ELEMENT_NAME, std::make_unique<ArrayValue>(array_values));
     std::unique_ptr<Value> val = panda::pandasm::making_value(element);
     EXPECT_NE(val, nullptr);
+
+    elements.clear();
+    ArrayValue array_values1(panda::pandasm::Value::Type::LITERALARRAY, elements);
+    AnnotationElement element1(TSTYPE_ANNO_ELEMENT_NAME, std::make_unique<ArrayValue>(array_values1));
+    std::unique_ptr<Value> val1 = panda::pandasm::making_value(element1);
+    EXPECT_NE(val1, nullptr);
 }
 }

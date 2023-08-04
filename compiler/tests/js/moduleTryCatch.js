@@ -11,11 +11,24 @@
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
- */
+ */ 
 
 
 try {
     a = 1;
 } catch(e) {
     a;
+}
+
+function foo(x) {
+    return x == undefined ? 0 : 1;
+}
+
+function func2(a) {
+    var a = 1;
+    if (a) {
+        return a;
+    }
+    else
+        a += 1;
 }

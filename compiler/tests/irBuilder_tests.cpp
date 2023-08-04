@@ -442,7 +442,7 @@ HWTEST_F(IrBuilderTest, nestedTryCatchAsm, testing::ext::TestSize.Level1)
 
 HWTEST_F(IrBuilderTest, simpleTryCatchAbc, testing::ext::TestSize.Level1)
 {
-    std::string pFile = IRBUILDER_ABC_DIR "simpleTryCatch.abc";
+    std::string pFile = GRAPH_TEST_ABC_DIR "simpleTryCatch.abc";
     const char *testMethodName = "func_main_0";
     TestBuildGraphFromFile(pFile, [&testMethodName](Graph* graph, std::string &methodName) {
         if (testMethodName != methodName) {
@@ -520,7 +520,7 @@ HWTEST_F(IrBuilderTest, simpleTryCatchAbc, testing::ext::TestSize.Level1)
 
 HWTEST_F(IrBuilderTest, nestedTryCatchAbc, testing::ext::TestSize.Level1)
 {
-    std::string pFile = IRBUILDER_ABC_DIR "nestedTryCatch.abc";
+    std::string pFile = GRAPH_TEST_ABC_DIR "nestedTryCatch.abc";
     const char *testMethodName = "func_main_0";
     TestBuildGraphFromFile(pFile, [testMethodName](Graph* graph, std::string &methodName) {
         if (testMethodName != methodName) {
