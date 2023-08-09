@@ -13,114 +13,145 @@
  * limitations under the License.
  */
 
-#include "assembler/meta.h"
+#include <gtest/gtest.h>
+
 #include "assembler/assembly-parser.h"
+#include "assembler/meta.h"
 #include "bytecode_optimizer/optimize_bytecode.h"
 
-namespace panda::bytecodeopt::test {
+namespace panda::bytecodeopt {
 using ArrayValue = panda::pandasm::ArrayValue;
 using ScalarValue = panda::pandasm::ScalarValue;
 using AnnotationData = panda::pandasm::AnnotationData;
 using AnnotationElement = panda::pandasm::AnnotationElement;
+using TypeInfoMap = std::unordered_map<int32_t, TypeInfoIndex>;
 
-class TestBase {
+class TypeAdaptionTest : public testing::Test {
 public:
-    template <typename T1, typename T2>
-    inline void TestAssertEqual(const T1 &left, const T2 &right) const
-    {
-        if (left != static_cast<T1>(right)) {
-            std::cout << "assertion equal failed." << std::endl;
-            UNREACHABLE();
-        }
-    }
+    static void SetUpTestCase(void) {}
+    static void TearDownTestCase(void) {}
+    void SetUp() {}
+    void TearDown() {}
 
-    template <typename T1, typename T2>
-    inline void TestAssertNotEqual(const T1 &left, const T2 &right) const
+    TypeInfoMap ExtractTypeinfo(const panda::pandasm::Function &fun, const panda::pandasm::Program &prog) const
     {
-        if (left == static_cast<T1>(right)) {
-            std::cout << "assertion not equal failed." << std::endl;
-            UNREACHABLE();
-        }
-    }
-
-    inline void TestAssertTrue(bool val) const
-    {
-        if (!val) {
-            UNREACHABLE();
-        }
-    }
-
-    inline void TestAssertFalse(bool val) const
-    {
-        if (val) {
-            UNREACHABLE();
-        }
-    }
-};
-
-class BytecodeOptimizerTypeAdaptionTest : TestBase {
-public:
-    std::unordered_map<int32_t, int32_t> ExtractTypeinfo(const panda::pandasm::Function &fun) const
-    {
-        const auto *ele = fun.metadata->GetAnnotations()[0].GetElements()[0].GetValue();
-        const auto &values = ele->GetAsArray()->GetValues();
-        std::unordered_map<int32_t, int32_t> type_info;
-        const size_t PAIR_GAP = 2;
-        TestAssertEqual(values.size() % PAIR_GAP, 0);  // must be even as it consits of pairs
-        for (size_t i = 0; i < values.size(); i += PAIR_GAP) {
-            type_info.emplace(values[i].GetValue<int32_t>(), values[i + 1].GetValue<int32_t>());
+        const auto &annos = fun.metadata->GetAnnotations();
+        EXPECT_FALSE(annos.empty());
+        const auto &eles = annos[0].GetElements();
+        EXPECT_FALSE(eles.empty());
+        const auto *ele = eles[0].GetValue();
+        EXPECT_NE(ele, nullptr);
+        const auto key = ele->GetAsScalar()->GetValue<std::string>();
+        auto array_liter = prog.literalarray_table.find(key);
+        EXPECT_NE(array_liter, prog.literalarray_table.end());
+        const auto &array = array_liter->second.literals_;
+        // 4: size must be multiple of 4 because values consits of tuple of tag, order, tag, type
+        EXPECT_EQ(array.size() % 4u, 0u);
+        TypeInfoMap type_info;
+        size_t i = 1;  // 1: skip tag of order, so start from 1
+        while (i < array.size()) {
+            auto order = bit_cast<int32_t>(std::get<uint32_t>(array[i].value_));
+            i += 2;  // 2: skip tag between order and type
+            TypeInfoIndex type;
+            if (array[i].tag_ == panda_file::LiteralTag::LITERALARRAY) {
+                type = std::get<std::string>(array[i].value_);
+            } else {
+                EXPECT_EQ(array[i].tag_, panda_file::LiteralTag::BUILTINTYPEINDEX);
+                type = std::get<BuiltinIndexType>(array[i].value_);
+            }
+            type_info.emplace(order, type);
+            i += 2;  // 2: skip tag between order and type
         }
         return type_info;
     }
 
-    void CheckTypeExist(const std::unordered_map<int32_t, int32_t> &typeinfo, int32_t order, int32_t type) const
+    void CheckTypeExist(const TypeInfoMap &typeinfo, int32_t order, const TypeInfoIndex &type) const
     {
         auto type_it = typeinfo.find(order);
-        TestAssertNotEqual(type_it, typeinfo.end());
-        TestAssertEqual(type_it->second, type);
+        EXPECT_NE(type_it, typeinfo.end());
+        EXPECT_EQ(type_it->second, type);
     }
 
-    void AddTypeinfo(std::vector<ScalarValue> *elements, int32_t order, int32_t type) const
+    void AddTypeinfo(panda::pandasm::LiteralArray &lit_arr, int32_t order, TypeInfoIndex type) const
     {
-        ScalarValue insn_order(ScalarValue::Create<panda::pandasm::Value::Type::I32>(order));
-        elements->emplace_back(std::move(insn_order));
-        ScalarValue insn_type(ScalarValue::Create<panda::pandasm::Value::Type::I32>(type));
-        elements->emplace_back(std::move(insn_type));
+        auto &arr = lit_arr.literals_;
+
+        panda::pandasm::LiteralArray::Literal order_tag;
+        order_tag.tag_ = panda::panda_file::LiteralTag::TAGVALUE;
+        order_tag.value_ = static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER);
+        arr.emplace_back(order_tag);
+
+        panda::pandasm::LiteralArray::Literal order_val;
+        order_val.tag_ = panda::panda_file::LiteralTag::INTEGER;
+        order_val.value_ = static_cast<uint32_t>(order);
+        arr.emplace_back(order_val);
+
+        panda::pandasm::LiteralArray::Literal type_tag;
+        panda::pandasm::LiteralArray::Literal type_val;
+        type_tag.tag_ = panda::panda_file::LiteralTag::TAGVALUE;
+
+        if (std::holds_alternative<uint8_t>(type)) {
+            type_tag.value_ = static_cast<uint8_t>(panda::panda_file::LiteralTag::BUILTINTYPEINDEX);
+            type_val.tag_ = panda::panda_file::LiteralTag::BUILTINTYPEINDEX;
+            type_val.value_ = std::get<uint8_t>(type);
+        } else {
+            EXPECT_TRUE(std::holds_alternative<std::string>(type));
+            type_tag.value_ = static_cast<uint8_t>(panda::panda_file::LiteralTag::LITERALARRAY);
+            type_val.tag_ = panda::panda_file::LiteralTag::LITERALARRAY;
+            type_val.value_ = std::get<std::string>(type);
+        }
+        arr.emplace_back(type_tag);
+        arr.emplace_back(type_val);
     }
 
-    void SetTypeAnnotationForFunc(const std::vector<ScalarValue> &elements, panda::pandasm::Function &func, 
+    void SetTypeAnnotationForFunc(const panda::pandasm::LiteralArray &arr, panda::pandasm::Function &func,
                                   panda::pandasm::Program &program) const
     {
-        ArrayValue array_value(panda::pandasm::Value::Type::I32, elements);
-        AnnotationElement anno_element(TSTYPE_ANNO_ELEMENT_NAME, std::make_unique<ArrayValue>(array_value));
+        auto id = std::to_string(program.literalarray_table.size());
+        program.literalarray_table.emplace(id, arr);
+
+        AnnotationElement element(TSTYPE_ANNO_ELEMENT_NAME, std::make_unique<ScalarValue>(
+            ScalarValue::Create<panda::pandasm::Value::Type::LITERALARRAY>(id)));
         AnnotationData annotation(TSTYPE_ANNO_RECORD_NAME);
-        annotation.AddElement(std::move(anno_element));
+        annotation.AddElement(std::move(element));
         std::vector<AnnotationData> annos;
-        annos.emplace_back(std::move(annotation));
+        annos.emplace_back(annotation);
         func.metadata->SetAnnotations(std::move(annos));
         const auto iterator = program.record_table.find(TSTYPE_ANNO_RECORD_NAME.data());
-        TestAssertNotEqual(iterator, program.record_table.end());
+        EXPECT_NE(iterator, program.record_table.end());
         iterator->second.metadata->SetAccessFlags(panda::ACC_ANNOTATION);
-        TestAssertTrue(program.record_table.find(TSTYPE_ANNO_RECORD_NAME.data())->second.metadata->IsAnnotation());
+        EXPECT_TRUE(program.record_table.find(TSTYPE_ANNO_RECORD_NAME.data())->second.metadata->IsAnnotation());
     }
 
-    void EmitAndOptimize(const std::string &abc_file_name, panda::pandasm::Program &program) const
+    // add a literalarray as a type
+    TypeInfoIndex AddAnTypeLiteralArray(panda::pandasm::Program &program) const
+    {
+        panda::pandasm::LiteralArray arr;
+        panda::pandasm::LiteralArray::Literal tag;
+        tag.tag_ = panda::panda_file::LiteralTag::TAGVALUE;
+        tag.value_ = static_cast<uint8_t>(panda::panda_file::LiteralTag::BUILTINTYPEINDEX);
+        arr.literals_.emplace_back(tag);
+        panda::pandasm::LiteralArray::Literal val;
+        val.tag_ = panda::panda_file::LiteralTag::BUILTINTYPEINDEX;
+        val.value_ = static_cast<uint8_t>(0u);
+        arr.literals_.emplace_back(val);
+        const std::string litKey = std::to_string(program.literalarray_table.size());
+        program.literalarray_table.emplace(litKey, arr);
+        TypeInfoIndex ret = litKey;
+        return ret;
+    }
+
+    void EmitAndOptimize(const std::string &abcFileName, panda::pandasm::Program &program) const
     {
         std::map<std::string, size_t> *statp = nullptr;
         panda::pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps {};
         panda::pandasm::AsmEmitter::PandaFileToPandaAsmMaps *mapsp = &maps;
-        TestAssertTrue(panda::pandasm::AsmEmitter::Emit(abc_file_name, program, statp, mapsp, false));
-        TestAssertTrue(panda::bytecodeopt::OptimizeBytecode(&program, mapsp, abc_file_name, true));
+        EXPECT_TRUE(panda::pandasm::AsmEmitter::Emit(abcFileName, program, statp, mapsp, false));
+        EXPECT_TRUE(panda::bytecodeopt::OptimizeBytecode(&program, mapsp, abcFileName, true));
     }
-
-    void TypeAdaptionTest() const;
-    void TypeAdaptionTest_UnconditionalJump() const;
-
-    static constexpr int32_t NUM_TYPE = 1;
-    static constexpr int32_t STR_TYPE = 4;
 };
 
-void BytecodeOptimizerTypeAdaptionTest::TypeAdaptionTest() const
+HWTEST_F(TypeAdaptionTest, type_adaption_test_001, testing::ext::TestSize.Level1)
 {
     /* ts source code
     function foo(a:number, b:string, c:string):string
@@ -139,114 +170,114 @@ void BytecodeOptimizerTypeAdaptionTest::TypeAdaptionTest() const
     const auto source = R"(
         .language ECMAScript
         .record _ESTypeAnnotation <external>
-        .function any foo(any a0, any a1, any a2) <static> {
-            mov.dyn v2, a2
-            mov.dyn v1, a1
-            mov.dyn v0, a0
-            ecma.ldlexenvdyn
-            sta.dyn v6
-            ldai.dyn 0x64
-            sta.dyn v3
-            lda.dyn v0
-            sta.dyn v5
-            lda.dyn v3
-            ecma.greaterdyn v5
+        .function any foo(any a0, any a1, any a2, any a3, any a4, any a5) <static> {
+            mov v5, a5
+            mov v4, a4
+            mov v3, a3
+            mov v2, a2
+            mov v1, a1
+            mov v0, a0
+            ldai 0x64
+            sta v6
+            lda v3
+            sta v9
+            lda v6
+            greater 0x0, v9
             jeqz jump_label_0
-            lda.dyn v1
-            sta.dyn v5
-            lda.dyn v5
-            return.dyn
+            lda v4
+            return
         jump_label_0:
-            lda.dyn v0
-            sta.dyn v5
-            lda.dyn v3
-            ecma.lessdyn v5
+            lda v3
+            sta v9
+            lda v6
+            less 0x1, v9
             jeqz jump_label_1
-            lda.dyn v2
-            sta.dyn v5
-            lda.dyn v5
-            return.dyn
+            lda v5
+            return
         jump_label_1:
-            lda.dyn v1
-            sta.dyn v5
-            lda.dyn v2
-            ecma.add2dyn v5
-            sta.dyn v4
-            lda.dyn v4
-            sta.dyn v5
-            lda.dyn v5
-            return.dyn
+            lda v4
+            sta v9
+            lda v5
+            add2 0x2, v9
+            sta v7
+            lda v7
+            return
         }
     )";
     panda::pandasm::Parser parser;
     auto res = parser.Parse(source);
     auto &program = res.Value();
-    const std::string fun_name = "foo:(any,any,any)";
+    const std::string fun_name = "foo:(any,any,any,any,any,any)";
     auto it = program.function_table.find(fun_name);
-    TestAssertNotEqual(it, program.function_table.end());
+    EXPECT_NE(it, program.function_table.end());
 
     auto &func = it->second;
-    std::vector<panda::pandasm::ScalarValue> elements;
+    panda::pandasm::LiteralArray lit_arr;
+    static const TypeInfoIndex NUM_TYPE = static_cast<uint8_t>(1);
+    static const TypeInfoIndex STR_TYPE = static_cast<uint8_t>(4);
     // set arg type
-    AddTypeinfo(&elements, -1, NUM_TYPE);  // -1: first arg
-    AddTypeinfo(&elements, -2, STR_TYPE);  // -2: second arg
-    AddTypeinfo(&elements, -3, STR_TYPE);  // -3: third arg
+    const auto THIS_TYPE = AddAnTypeLiteralArray(program);
+    AddTypeinfo(lit_arr, -3, THIS_TYPE);  // -3: the arg "this"
+    AddTypeinfo(lit_arr, -4, NUM_TYPE);   // -4: the first arg
+    AddTypeinfo(lit_arr, -5, STR_TYPE);   // -5: the second arg
+    AddTypeinfo(lit_arr, -6, STR_TYPE);   // -6: the third arg
     // set ins type
-    const size_t LDAI_IDX = 5;
-    TestAssertEqual(func.ins[LDAI_IDX].opcode, panda::pandasm::Opcode::LDAI_DYN);
-    TestAssertEqual(func.ins[LDAI_IDX + 1].opcode, panda::pandasm::Opcode::STA_DYN);
-    AddTypeinfo(&elements, static_cast<int32_t>(LDAI_IDX + 1), NUM_TYPE);
-    const size_t ADD_IDX = 30;
-    TestAssertEqual(func.ins[ADD_IDX].opcode, panda::pandasm::Opcode::ECMA_ADD2DYN);
-    TestAssertEqual(func.ins[ADD_IDX + 1].opcode, panda::pandasm::Opcode::STA_DYN);
+    const size_t LDAI_IDX = 6;
+    EXPECT_EQ(func.ins[LDAI_IDX].opcode, panda::pandasm::Opcode::LDAI);
+    EXPECT_EQ(func.ins[LDAI_IDX + 1].opcode, panda::pandasm::Opcode::STA);
+    AddTypeinfo(lit_arr, static_cast<int32_t>(LDAI_IDX + 1), NUM_TYPE);
+    const size_t ADD_IDX = 27;
+    EXPECT_EQ(func.ins[ADD_IDX].opcode, panda::pandasm::Opcode::ADD2);
+    EXPECT_EQ(func.ins[ADD_IDX + 1].opcode, panda::pandasm::Opcode::STA);
     int32_t num_invalid = std::count_if(func.ins.begin(), func.ins.begin() + ADD_IDX,
                                         [](const auto &in) { return in.opcode == panda::pandasm::Opcode::INVALID; });
-    AddTypeinfo(&elements, ADD_IDX + 1 - num_invalid, STR_TYPE);  // exclude invalid insns because they do not emit
+    AddTypeinfo(lit_arr, ADD_IDX + 1 - num_invalid, STR_TYPE);  // exclude invalid insns because they do not emit
 
-    SetTypeAnnotationForFunc(elements, func, program);
+    SetTypeAnnotationForFunc(lit_arr, func, program);
 
     EmitAndOptimize("TypeAdaptionTest.abc", program);
 
     // check typeinfo after optimization
     it = program.function_table.find(fun_name);
-    TestAssertNotEqual(it, program.function_table.end());
+    EXPECT_NE(it, program.function_table.end());
     const auto &foo = it->second;
-    const auto typeinfo = ExtractTypeinfo(foo);
-    CheckTypeExist(typeinfo, -1, NUM_TYPE);  // -1: means first arg
-    CheckTypeExist(typeinfo, -2, STR_TYPE);  // -2: means second arg
-    CheckTypeExist(typeinfo, -3, STR_TYPE);  // -3: means third arg
+    const auto typeinfo = ExtractTypeinfo(foo, program);
+    CheckTypeExist(typeinfo, -3, THIS_TYPE);  // -3: the arg "this"
+    CheckTypeExist(typeinfo, -4, NUM_TYPE);   // -4: the first arg
+    CheckTypeExist(typeinfo, -5, STR_TYPE);   // -5: the second arg
+    CheckTypeExist(typeinfo, -6, STR_TYPE);   // -6: the third arg
     auto ldai_it = std::find_if(foo.ins.begin(), foo.ins.end(),
-                                [](const auto &in) { return in.opcode == panda::pandasm::Opcode::LDAI_DYN; });
-    TestAssertNotEqual(ldai_it, foo.ins.end());
+                                [](const auto &in) { return in.opcode == panda::pandasm::Opcode::LDAI; });
+    EXPECT_NE(ldai_it, foo.ins.end());
     const auto opt_ldai_idx = static_cast<size_t>(ldai_it - foo.ins.begin());
-    TestAssertEqual(foo.ins[opt_ldai_idx].opcode, panda::pandasm::Opcode::LDAI_DYN);
-    TestAssertTrue(opt_ldai_idx + 1 < foo.ins.size());
-    TestAssertEqual(foo.ins[opt_ldai_idx + 1].opcode, panda::pandasm::Opcode::STA_DYN);
+    EXPECT_EQ(foo.ins[opt_ldai_idx].opcode, panda::pandasm::Opcode::LDAI);
+    EXPECT_LT(opt_ldai_idx + 1, foo.ins.size());
+    EXPECT_EQ(foo.ins[opt_ldai_idx + 1].opcode, panda::pandasm::Opcode::STA);
 
     num_invalid = std::count_if(foo.ins.begin(), ldai_it,
                                 [](const auto &in) { return in.opcode == panda::pandasm::Opcode::INVALID; });
     int32_t ldai_type_idx = opt_ldai_idx - num_invalid;  // exclude invalid insns because they do not emit
 
-    CheckTypeExist(typeinfo, ldai_type_idx + 1, NUM_TYPE);  // type is on sta.dyn
+    CheckTypeExist(typeinfo, ldai_type_idx + 1, NUM_TYPE);  // type is on sta
 
     auto add_it = std::find_if(foo.ins.begin(), foo.ins.end(),
-                               [](const auto &in) { return in.opcode == panda::pandasm::Opcode::ECMA_ADD2DYN; });
-    TestAssertNotEqual(add_it, foo.ins.end());
+                               [](const auto &in) { return in.opcode == panda::pandasm::Opcode::ADD2; });
+    EXPECT_NE(add_it, foo.ins.end());
     const auto opt_add_idx = static_cast<size_t>(add_it - foo.ins.begin());
-    TestAssertEqual(foo.ins[opt_add_idx].opcode, panda::pandasm::Opcode::ECMA_ADD2DYN);
-    TestAssertTrue(opt_add_idx + 1 < foo.ins.size());
-    TestAssertNotEqual(foo.ins[opt_add_idx + 1].opcode, panda::pandasm::Opcode::STA_DYN);
+    EXPECT_EQ(foo.ins[opt_add_idx].opcode, panda::pandasm::Opcode::ADD2);
+    EXPECT_LT(opt_add_idx + 1, foo.ins.size());
+    EXPECT_NE(foo.ins[opt_add_idx + 1].opcode, panda::pandasm::Opcode::STA);
 
     num_invalid = std::count_if(foo.ins.begin(), add_it,
                                 [](const auto &in) { return in.opcode == panda::pandasm::Opcode::INVALID; });
     int32_t add_type_idx = opt_add_idx - num_invalid;  // exclude invalid insns because they do not emit
-    CheckTypeExist(typeinfo, add_type_idx, STR_TYPE);  // type is on ecma.add2dyn as it does not have sta.dyn
+    CheckTypeExist(typeinfo, add_type_idx, STR_TYPE);  // type is on add2 as it does not have sta
 }
 
-void BytecodeOptimizerTypeAdaptionTest::TypeAdaptionTest_UnconditionalJump() const
+HWTEST_F(TypeAdaptionTest, unconditional_jump_case_test_001, testing::ext::TestSize.Level1)
 {
     /* ts source code
-    function processResults(results: number) {
+    function foo(results: number) {
         for (let i = 0; i < 1; i++) {
             results *= i;
         }
@@ -257,93 +288,88 @@ void BytecodeOptimizerTypeAdaptionTest::TypeAdaptionTest_UnconditionalJump() con
     const auto source = R"(
         .language ECMAScript
         .record _ESTypeAnnotation <external>
-        .function any foo(any a0) <static> {
-            mov.dyn v0, a0
-            ecma.ldlexenvdyn
-            sta.dyn v6
-            ldai.dyn 0x0
-            sta.dyn v1
+        .function any foo(any a0, any a1, any a2, any a3) <static> {
+            mov v0, a0
+            mov v1, a1
+            mov v2, a2
+            mov v3, a3
+            ldai 0x0
+            sta v6
         jump_label_1:
-            lda.dyn v1
-            sta.dyn v4
-            ldai.dyn 0x1
-            ecma.lessdyn v4
+            lda v6
+            sta v7
+            ldai 0x1
+            less 0x0, v7
             jeqz jump_label_0
-            lda.dyn v0
-            sta.dyn v4
-            lda.dyn v1
-            ecma.mul2dyn v4
-            sta.dyn v0
-            lda.dyn v1
-            sta.dyn v4
-            ecma.incdyn v4
-            sta.dyn v1
-            ecma.tonumeric v4
+            lda v3
+            sta v7
+            lda v6
+            mul2 0x1, v7
+            sta v3
+            lda v6
+            sta v7
+            lda v7
+            inc 0x2
+            sta v6
+            lda v7
+            tonumeric 0x3
             jmp jump_label_1
         jump_label_0:
-            lda.dyn v0
-            sta.dyn v3
-            ldai.dyn 0x2
-            ecma.add2dyn v3
-            sta.dyn v2
-            lda.dyn v2
-            sta.dyn v3
-            lda.dyn v3
-            return.dyn
+            lda v3
+            sta v6
+            ldai 0x2
+            add2 0x4, v6
+            sta v4
+            lda v4
+            return
         }
     )";
     panda::pandasm::Parser parser;
     auto res = parser.Parse(source);
     auto &program = res.Value();
-    const std::string fun_name = "foo:(any)";
+    const std::string fun_name = "foo:(any,any,any,any)";
     auto it = program.function_table.find(fun_name);
-    TestAssertNotEqual(it, program.function_table.end());
+    EXPECT_NE(it, program.function_table.end());
 
     auto &func = it->second;
-    std::vector<panda::pandasm::ScalarValue> elements;
+    panda::pandasm::LiteralArray lit_arr;
+    static const TypeInfoIndex NUM_TYPE = static_cast<uint8_t>(1);
+    static const TypeInfoIndex STR_TYPE = static_cast<uint8_t>(4);
     // set arg type
-    AddTypeinfo(&elements, -1, NUM_TYPE);  // -1: first arg
+    const auto THIS_TYPE = AddAnTypeLiteralArray(program);
+    AddTypeinfo(lit_arr, -3, THIS_TYPE);  // -3: the arg "this"
+    AddTypeinfo(lit_arr, -4, NUM_TYPE);   // -4: the first arg
     // set ins type
-    const size_t ADD_IDX = 26;
-    TestAssertEqual(func.ins[ADD_IDX].opcode, panda::pandasm::Opcode::ECMA_ADD2DYN);
-    TestAssertEqual(func.ins[ADD_IDX + 1].opcode, panda::pandasm::Opcode::STA_DYN);
+    const size_t ADD_IDX = 29;
+    EXPECT_EQ(func.ins[ADD_IDX].opcode, panda::pandasm::Opcode::ADD2);
+    EXPECT_EQ(func.ins[ADD_IDX + 1].opcode, panda::pandasm::Opcode::STA);
     int32_t num_invalid = std::count_if(func.ins.begin(), func.ins.begin() + ADD_IDX,
                                         [](const auto &in) { return in.opcode == panda::pandasm::Opcode::INVALID; });
-    AddTypeinfo(&elements, ADD_IDX + 1 - num_invalid, STR_TYPE);  // exclude invalid insns because they do not emit
+    AddTypeinfo(lit_arr, ADD_IDX + 1 - num_invalid, STR_TYPE);  // exclude invalid insns because they do not emit
 
-    SetTypeAnnotationForFunc(elements, func, program);
+    SetTypeAnnotationForFunc(lit_arr, func, program);
 
     EmitAndOptimize("TypeAdaptionTest_UnconditionalJump.abc", program);
 
     // check typeinfo after optimization
     it = program.function_table.find(fun_name);
-    TestAssertNotEqual(it, program.function_table.end());
+    EXPECT_NE(it, program.function_table.end());
     const auto &foo = it->second;
-    const auto typeinfo = ExtractTypeinfo(foo);
-    CheckTypeExist(typeinfo, -1, NUM_TYPE);  // -1: first arg
+    const auto typeinfo = ExtractTypeinfo(foo, program);
+    CheckTypeExist(typeinfo, -3, THIS_TYPE);  // -3: the arg "this"
+    CheckTypeExist(typeinfo, -4, NUM_TYPE);   // -4: the first arg
     auto add_it = std::find_if(foo.ins.begin(), foo.ins.end(),
-                               [](const auto &in) { return in.opcode == panda::pandasm::Opcode::ECMA_ADD2DYN; });
-    TestAssertNotEqual(add_it, foo.ins.end());
+                               [](const auto &in) { return in.opcode == panda::pandasm::Opcode::ADD2; });
+    EXPECT_NE(add_it, foo.ins.end());
     const auto opt_add_idx = static_cast<size_t>(add_it - foo.ins.begin());
-    TestAssertEqual(foo.ins[opt_add_idx].opcode, panda::pandasm::Opcode::ECMA_ADD2DYN);
-    TestAssertTrue(opt_add_idx + 1 < foo.ins.size());
-    TestAssertNotEqual(foo.ins[opt_add_idx + 1].opcode, panda::pandasm::Opcode::STA_DYN);
+    EXPECT_EQ(foo.ins[opt_add_idx].opcode, panda::pandasm::Opcode::ADD2);
+    EXPECT_TRUE(opt_add_idx + 1 < foo.ins.size());
+    EXPECT_NE(foo.ins[opt_add_idx + 1].opcode, panda::pandasm::Opcode::STA);
 
     num_invalid = std::count_if(foo.ins.begin(), add_it,
                                 [](const auto &in) { return in.opcode == panda::pandasm::Opcode::INVALID; });
     int32_t add_type_idx = opt_add_idx - num_invalid;  // exclude invalid insns because they do not emit
-    CheckTypeExist(typeinfo, add_type_idx, STR_TYPE);  // type is on ecma.add2dyn as it does not have sta.dyn
+    CheckTypeExist(typeinfo, add_type_idx, STR_TYPE);  // type is on add2 as it does not have sta
 }
-}  // namespace panda::bytecodeopt::test
 
-int main()
-{
-    panda::bytecodeopt::test::BytecodeOptimizerTypeAdaptionTest test;
-    std::cout << "BytecodeOptimizerTypeAdaptionTest: " << std::endl;
-    test.TypeAdaptionTest();
-    std::cout << "PASS!" << std::endl;
-    std::cout << "BytecodeOptimizerTypeAdaptionTest_UnconditionalJump: " << std::endl;
-    test.TypeAdaptionTest_UnconditionalJump();
-    std::cout << "PASS!" << std::endl;
-    return 0;
-}
+}  // namespace panda::bytecodeopt::test
