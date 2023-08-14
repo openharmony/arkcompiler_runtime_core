@@ -267,7 +267,9 @@ public:
         uintptr_t addr = reinterpret_cast<uintptr_t>(ptr_) - page_offset_;
         // LINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         size_t size = size_ + page_offset_;
-        deleter_(reinterpret_cast<T *>(addr), size);
+        if (deleter_) {
+            deleter_(reinterpret_cast<T *>(addr), size);
+        }
     }
 
 private:
