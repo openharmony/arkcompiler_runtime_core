@@ -212,7 +212,7 @@ HWTEST_F(CompilerGraphTest,  graph_test_006, TestSize.Level1)
         ConstantInst first_constant(Opcode::Constant, 0, false);
         first_constant.SetType(DataType::Type::ANY);
         for (auto bb : graph->GetBlocksRPO()) {
-            for(auto inst : bb->AllInsts()) {
+            for (auto inst : bb->AllInsts()) {
                 if (inst->GetOpcode() != Opcode::Constant) {
                     continue;
                 }
@@ -239,19 +239,20 @@ HWTEST_F(CompilerGraphTest,  graph_test_007, TestSize.Level1)
     std::string pfile = GRAPH_TEST_ABC_DIR "moduleTryCatch.abc";
     const char *test_method_name = "func_main_0";
     bool status = false;
-    graph_test_.TestBuildGraphFromFile(pfile, [&test_method_name, &out, &status](Graph* graph, std::string &method_name) {
-        if (test_method_name != method_name) {
-            return;
-        }
-        status = true;
-        EXPECT_NE(graph, nullptr);
-        graph->DumpThrowableInsts(&out);
-        std::string str = "Throwable Inst   "
-                          "22.void Intrinsic.trystglobalbyname v21, v23"
-                          "                                                         bc: 0x0000001f\n"
-                          "Catch handlers: BB 9\n";
-        EXPECT_EQ(out.str(), str);
-    });
+    graph_test_.TestBuildGraphFromFile(pfile, 
+        [&test_method_name, &out, &status](Graph* graph, std::string &method_name) {
+            if (test_method_name != method_name) {
+                return;
+            }
+            status = true;
+            EXPECT_NE(graph, nullptr);
+            graph->DumpThrowableInsts(&out);
+            std::string str = "Throwable Inst   "
+                            "22.void Intrinsic.trystglobalbyname v21, v23"
+                            "                                                         bc: 0x0000001f\n"
+                            "Catch handlers: BB 9\n";
+            EXPECT_EQ(out.str(), str);
+        });
     EXPECT_TRUE(status);
 }
 
@@ -384,7 +385,7 @@ HWTEST_F(CompilerGraphTest,  graph_test_016, TestSize.Level1)
         EXPECT_NE(graph, nullptr);
         for (auto bb : graph->GetBlocksRPO()) {
             for (auto inst : bb->AllInsts()) {
-                if (inst->GetOpcode() != Opcode::CatchPhi){
+                if (inst->GetOpcode() != Opcode::CatchPhi) {
                     continue;
                 }
                 status = true;

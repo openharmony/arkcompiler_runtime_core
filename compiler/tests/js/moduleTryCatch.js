@@ -15,20 +15,20 @@
 
 
 try {
-    a = 1;
-} catch(e) {
-    a;
+  a = 1;
+} catch (e) {
+  a;
 }
 
 function foo(x) {
-    return x == undefined ? 0 : 1;
+  return x == undefined ? 0 : 1;
 }
 
 function func2(a) {
-    var a = 1;
-    if (a) {
-        return a;
-    }
-    else
-        a += 1;
+  var a = 1;
+  if (a) {
+    return a;
+  }
+  else
+    a += 1;
 }

@@ -386,7 +386,7 @@ HWTEST_F(LivenessAnalyzerTest, liveness_analyzer_test_008, TestSize.Level1)
             return;
         }
         status = true;
-        EXPECT_NE(graph, nullptr); 
+        EXPECT_NE(graph, nullptr);
         auto bb = graph->GetStartBlock();
         LifeNumber begin = 2;  // 2: It's a random number
         LiveRange live_range(begin, 1);

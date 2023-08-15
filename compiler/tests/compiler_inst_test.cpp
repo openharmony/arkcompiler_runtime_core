@@ -134,7 +134,7 @@ HWTEST_F(CompilerInstTest, compiler_inst_test_004, TestSize.Level1)
 
         EXPECT_NE(graph, nullptr);
         for (auto bb : graph->GetBlocksRPO()) {
-            for(auto inst : bb->AllInsts()) {
+            for (auto inst : bb->AllInsts()) {
                 if (inst->GetOpcode() != Opcode::Constant) {
                     continue;
                 }
@@ -203,7 +203,7 @@ HWTEST_F(CompilerInstTest, compiler_inst_test_006, TestSize.Level1)
 
         for (auto bb : graph->GetBlocksRPO()) {
             for (auto inst : bb->AllInsts()) {
-                if(firstInst->GetBasicBlock() != inst->GetBasicBlock()) {
+                if (firstInst->GetBasicBlock() != inst->GetBasicBlock()) {
                     continue;
                 }
                 status = true;
@@ -500,7 +500,7 @@ HWTEST_F(CompilerInstTest, compiler_inst_test_016, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(CompilerInstTest , compiler_inst_test_017, TestSize.Level1)
+HWTEST_F(CompilerInstTest, compiler_inst_test_017, TestSize.Level1)
 {
     std::string pfile = GRAPH_TEST_ABC_DIR "styleTryCatch.abc";
     const char *test_method_name = "func_main_0";

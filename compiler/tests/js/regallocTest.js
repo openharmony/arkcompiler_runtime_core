@@ -15,67 +15,67 @@
 
 
 function func(num) {
-    if (num > 0) {
-        num = 0;
-    } else {
-        num += 1;
-    }
-    return num;
+  if (num > 0) {
+    num = 0;
+  } else {
+    num += 1;
+  }
+  return num;
 }
 
 function func1(num1, num2) {
-    const num = 1;
-    try {
-        if(num1 > num2) {
-            num1 += num;
-            console.log('succes.');
-        }
-        else {
-            throw new Error('the number is low.');
-        }
+  const num = 1;
+  try {
+    if (num1 > num2) {
+      num1 += num;
+      console.log('succes.');
     }
-    catch(err) {
-        console.log('error message: ' + err);
+    else {
+      throw new Error('the number is low.');
     }
+  }
+  catch (err) {
+    console.log('error message: ' + err);
+  }
 }
 
 function func2(x, y) {
-    var car = ["B", "V", "p", "F", "A"];
-    var text = "";
-    var i;
-    for (i = 0; i < 5; i++) { 
-        text += car[i] + x + y;
-    }
-    return text;
+  var car = ["B", "V", "p", "F", "A"];
+  var text = "";
+  var i;
+  for (i = 0; i < 5; i++) { 
+    text += car[i] + x + y;
+  }
+  return text;
 }
 
 function func3(a, b, c, d, e) {
-    return a + b + c + d + e;
+  return a + b + c + d + e;
 }
 
 function func4(x, y) {
-    var a = x + y;
-    var b = x - y;
-    var c = x * y;
-    var d = x / y;
-    var e = x % y;
-    return func3(e, d, c, b, a);
+  var a = x + y;
+  var b = x - y;
+  var c = x * y;
+  var d = x / y;
+  var e = x % y;
+  return func3(e, d, c, b, a);
 }
 
 function func5() {
+  try {
     try {
-        try {
-            a = 1;
-        } catch(e) {
-            a;
-        }
-        if (a > 0) {
-            a += 1;
-        } else {
-            throw new Error('the number is low.');
-        }
-    } catch(e) {
-        print(e);
+      a = 1;
+    } catch (e) {
+      a;
     }
+    if (a > 0) {
+      a += 1;
+    } else {
+      throw new Error('the number is low.');
+    }
+  } catch (e) {
+    print(e);
+  }
 }
 

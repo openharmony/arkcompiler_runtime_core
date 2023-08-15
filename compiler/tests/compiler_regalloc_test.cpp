@@ -834,7 +834,6 @@ HWTEST_F(RegallocTest, regalloc_test_016, TestSize.Level1)
                 Location dst4(Location::Kind::FP_REGISTER, 0);
                 spill_fill_inst->AddSpillFill(src1, dst4, DataType::UINT64);
                 EXPECT_EQ(spill_fill_inst->GetSpillFills().size(), 9);  // It's spillfille size
-
             }
         }
     });
@@ -869,7 +868,7 @@ HWTEST_F(RegallocTest, regalloc_test_017, TestSize.Level1)
                 continue;
             }
             for (auto inst : block->AllInsts()) {
-                if (inst->GetOpcode() != Opcode::Phi ) {
+                if (inst->GetOpcode() != Opcode::Phi) {
                     continue;
                 }
                 if (index == index1 || index == index2) {

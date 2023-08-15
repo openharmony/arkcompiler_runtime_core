@@ -15,7 +15,7 @@
 
 
 try {
-    a = 1;
-} catch(e) {
-    a;
+  a = 1;
+} catch (e) {
+  a;
 }
