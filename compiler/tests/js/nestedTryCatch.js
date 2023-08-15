@@ -15,11 +15,11 @@
 
 
 try {
-    try {
-        a = 1;
-    } catch(e) {
-        a;
-    }
+  try {
+    a = 1;
+  } catch(e) {
+    a;
+  }
 } catch(e) {
-    print(e);
+  print(e);
 }

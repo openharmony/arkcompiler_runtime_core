@@ -148,7 +148,6 @@ HWTEST_F(DumpTest, dump_test_002, TestSize.Level1)
             if (block->IsCatchBegin() || block->IsCatchEnd()) {
                 BlockProps(block, &data);
             }
-
         }
         auto value1 = PcToString(graph->GetEndBlock()->GetGuestPc(), graph->GetLocalAllocator());
         std::string str = value1.data();
@@ -885,7 +884,7 @@ HWTEST_F(DumpTest, dump_test_019, TestSize.Level1)
                                 "succs: [bb 8]\n"
                                 "BB 8  preds: [bb 1]\n"
                                 "prop: end, bc: 0x0000002d\n";
-        for(auto bb : graph->GetBlocksRPO()) {
+        for (auto bb : graph->GetBlocksRPO()) {
             bb->Dump(&out);
         }
         EXPECT_EQ(out.str(), test_data);
@@ -951,7 +950,7 @@ HWTEST_F(DumpTest, dump_test_021, TestSize.Level1)
 
         std::stringstream out;
         std::string test_data = "v4(bb0), v5(bb2)";
-        for(auto bb : graph->GetBlocksRPO()) {
+        for (auto bb : graph->GetBlocksRPO()) {
             for (auto inst : bb->PhiInsts()) {
                 auto phi = inst->CastToPhi();
                 status = true;

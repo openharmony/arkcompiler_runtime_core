@@ -15,16 +15,16 @@
 
 
 try {
-    try {
-        a = 1;
-    } catch(e) {
-        a;
-    }
-    if (a > 0) {
-        a += 1;
-    } else {
-        throw new Error('the number is low.');
-    }
-} catch(e) {
-    print(e);
+  try {
+    a = 1;
+  } catch (e) {
+    a;
+  }
+  if (a > 0) {
+    a += 1;
+  } else {
+    throw new Error('the number is low.');
+  }
+} catch (e) {
+  print(e);
 }

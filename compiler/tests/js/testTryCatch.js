@@ -15,43 +15,43 @@
 
 
  try { 
-    try {
-        a = 1;
-    } catch(e) {
-        a;
-    }
-    if(a == "") {
-        throw "null";
-    }
-    if(x >  100) {
-        throw "max";
-    } else {
-        throw "min";
-    }
+  try {
+    a = 1;
+  } catch (e) {
+    a;
+  }
+  if (a == "") {
+    throw "null";
+  }
+  if (x > 100) {
+    throw "max";
+  } else {
+    throw "min";
+  }
 }
-catch(err) {
-    func0(a, 10);
+catch (err) {
+  func0(a, 10);
 }
 finally {
-    console.log("error");
+  console.log("error");
 }
 
 var car = ["B", "V", "p", "F", "A"];
 var text = "";
 var i;
 for (i = 0; i < 5; i++) { 
-    text += car[i] + x + y;
+  text += car[i] + x + y;
 }
 function func0(x, y) {
-    var a = x + y;
-    return a;
+  var a = x + y;
+  return a;
 }
 function func5(a) {
-    var a = 1;
-    if (a) {
-        return a;
-    }
-    else {
-        a += 1;
-    }
+  var a = 1;
+  if (a) {
+    return a;
+  }
+  else {
+    a += 1;
+  }
 }

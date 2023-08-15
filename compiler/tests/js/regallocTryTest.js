@@ -15,71 +15,71 @@
 
 
 try { 
-    try {
-        a = 1;
-    } catch(e) {
-        a;
-    }
-    if(a == "") {
-        throw "null";
-    }
-    if(x >  100) {
-        throw "max";
-    } else {
-        throw "min";
-    }
+  try {
+    a = 1;
+  } catch (e) {
+    a;
+  }
+  if (a == "") {
+    throw "null";
+  }
+  if (x > 100) {
+    throw "max";
+  } else {
+    throw "min";
+  }
 }
-catch(err) {
-    func0(a, 10);
+catch (err) {
+  func0(a, 10);
 }
 finally {
-    console.log("error");
+  console.log("error");
 }
 
 var car = ["B", "V", "p", "F", "A"];
 var text = "";
 var i;
 for (i = 0; i < 5; i++) { 
-    text += car[i] + x + y;
+  text += car[i] + x + y;
 }
 
 function func0(x, y) {
-    var a = x + y;
-    var text = "";
-    if (isNaN(x)) {
-        text = "number is invalid";
-    } else {
-        text = (x < 18) ? "young" : "old";
-    }
-    return a;
+  var a = x + y;
+  var text = "";
+  if (isNaN(x)) {
+    text = "number is invalid";
+  } else {
+    text = (x < 18) ? "young" : "old";
+  }
+  return a;
 }
 
-function func1(x, y){
-    var arr = ["B", "V", "p", "F", "A"];
-    let text = "";
-    for (let x of arr) {
-        text += x;
-    }
-    while (i < 5) {
-        text += "The number is " + i;
-        i++;
-    }
-    do {
-        text += "The number is " + i;
-        i++;
-     }
-    while (i < 5);
+function func1(x, y) {
+  var arr = ["B", "V", "p", "F", "A"];
+  let text = "";
+  for (let x of arr) {
+    text += x;
+  }
+  while (i < 5) {
+    text += "The number is " + i;
+    i++;
+  }
+  do {
+    text += "The number is " + i;
+    i++;
+  }
+  while (i < 5);
  }
 
- function func2(x, y){
-    var arr = ["B", "V", "p", "F", "A"];
-    for (let x of arr) {
-        y += x;
-    }
-    var arr = ["B", "V", "p", "F", "A"];
+ function func2(x, y) {
+  var arr = ["B", "V", "p", "F", "A"];
+  for (let x of arr) {
+    y += x;
+  }
+  var arr = ["B", "V", "p", "F", "A"];
 
-    for (let x of arr) {
-        y += x;
-    }
-    return y;
+  for (let x of arr) {
+    y += x;
+  }
+  return y;
  }
