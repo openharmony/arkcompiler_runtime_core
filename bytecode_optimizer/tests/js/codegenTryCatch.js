@@ -15,50 +15,51 @@
 
 
 function func1() {
-    let a = 1.5;
-    try {
-        a += 1;
-    } catch(e) {
-        a++;
-    }
+  let a = 1.5;
+  try {
+    a += 1;
+  } catch (e) {
     a++;
-    return a;
+  }
+  a++;
+  return a;
 }
 
 function func2(a, b, c) {
-    var a = 1;
-    if (a) {
-        return a;
-    }
-    else
-        a += 1;
+  var a = 1;
+  if (a) {
+    return a;
+  }
+  else {
+    a += 1;
+  }
 }
 
 function func3(a, b, c, d, e) {
-    return a + b + c + d + e;
+  return a + b + c + d + e;
 }
 
 function func4(x, y) {
-    var a = x + y;
-    var b = x - y;
-    var c = x * y;
-    var d = x / y;
-    var e = x % y;
-    return func3(e, d, c, b, a);
+  var a = x + y;
+  var b = x - y;
+  var c = x * y;
+  var d = x / y;
+  var e = x % y;
+  return func3(e, d, c, b, a);
 }
 
 function func5(i, j, l) {
-    for (var i = 0; i <= 4; i++) {
-        for (var j = 0; j <= 4; j++) {
-            for(var k = 1; k <= 2; k++){
-                System.out.printf(Loadstring);
-            }
-        }
-        func4(x, y);
+  for (var i = 0; i <= 4; i++) {
+    for (var j = 0; j <= 4; j++) {
+      for (var k = 1; k <= 2; k++) {
+        System.out.printf(Loadstring);
+      }
     }
+    func4(x, y);
+  }
 }
 
 function func6()
 {
-    return "hello world";
+  return 'hello world';
 }

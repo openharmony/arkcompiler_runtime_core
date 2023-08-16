@@ -239,7 +239,7 @@ HWTEST_F(CompilerGraphTest,  graph_test_007, TestSize.Level1)
     std::string pfile = GRAPH_TEST_ABC_DIR "moduleTryCatch.abc";
     const char *test_method_name = "func_main_0";
     bool status = false;
-    graph_test_.TestBuildGraphFromFile(pfile, 
+    graph_test_.TestBuildGraphFromFile(pfile,
         [&test_method_name, &out, &status](Graph* graph, std::string &method_name) {
             if (test_method_name != method_name) {
                 return;

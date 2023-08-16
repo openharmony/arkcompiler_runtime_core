@@ -14,7 +14,7 @@
  */
 
 
- try { 
+try {
   try {
     a = 1;
   } catch (e) {
@@ -39,7 +39,7 @@ finally {
 var car = ["B", "V", "p", "F", "A"];
 var text = "";
 var i;
-for (i = 0; i < 5; i++) { 
+for (i = 0; i < 5; i++) {
   text += car[i] + x + y;
 }
 function func0(x, y) {

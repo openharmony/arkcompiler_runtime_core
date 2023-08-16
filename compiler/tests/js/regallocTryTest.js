@@ -14,7 +14,7 @@
  */
 
 
-try { 
+try {
   try {
     a = 1;
   } catch (e) {
@@ -39,7 +39,7 @@ finally {
 var car = ["B", "V", "p", "F", "A"];
 var text = "";
 var i;
-for (i = 0; i < 5; i++) { 
+for (i = 0; i < 5; i++) {
   text += car[i] + x + y;
 }
 
@@ -69,9 +69,9 @@ function func1(x, y) {
     i++;
   }
   while (i < 5);
- }
+}
 
- function func2(x, y) {
+function func2(x, y) {
   var arr = ["B", "V", "p", "F", "A"];
   for (let x of arr) {
     y += x;
@@ -82,4 +82,4 @@ function func1(x, y) {
     y += x;
   }
   return y;
- }
+}

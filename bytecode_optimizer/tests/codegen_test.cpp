@@ -123,7 +123,7 @@ HWTEST_F(CodegenTest, codegen_test_003, TestSize.Level1)
  * @tc.name: codegen_test_004
  * @tc.desc: Verify the EmitJump function.
  * @tc.type: FUNC
- * @tc.require: issueNumber 
+ * @tc.require: issueNumber
  */
 HWTEST_F(CodegenTest, codegen_test_004, TestSize.Level1)
 {
@@ -139,8 +139,8 @@ HWTEST_F(CodegenTest, codegen_test_004, TestSize.Level1)
         EXPECT_NE(graph, nullptr);
         for (auto bb : graph->GetBlocksRPO()) {
             EXPECT_NE(bb, nullptr);
-            for(auto inst : bb->AllInsts()){         
-                if(inst->GetOpcode() == Opcode::IfImm){
+            for (auto inst : bb->AllInsts()) {
+                if (inst->GetOpcode() == Opcode::IfImm) {
                     status = true;
                     Function *function = nullptr;
                     BytecodeOptIrInterface *interface = nullptr;
@@ -175,7 +175,7 @@ HWTEST_F(CodegenTest, codegen_test_005, TestSize.Level1)
 
         EXPECT_NE(graph, nullptr);
         for (auto bb : graph->GetBlocksRPO()) {
-            for(auto inst : bb->AllInsts()) {
+            for (auto inst : bb->AllInsts()) {
                 if (inst->GetOpcode() != Opcode::Constant) {
                     continue;
                 }
@@ -214,7 +214,7 @@ HWTEST_F(CodegenTest, codegen_test_005, TestSize.Level1)
                 EXPECT_FALSE(graph_visitor.GetResult().empty());
                 EXPECT_EQ(graph_visitor.GetResult().back().opcode, panda::pandasm::Opcode::STA);
             }
-        } 
+        }
     });
     EXPECT_TRUE(status);
 }
@@ -275,7 +275,7 @@ HWTEST_F(CodegenTest, codegen_test_007, TestSize.Level1)
         EXPECT_NE(graph, nullptr);
         for (auto bb : graph->GetVectorBlocks()) {
             EXPECT_NE(bb, nullptr);
-            for(auto inst1 : bb->AllInsts()) {
+            for (auto inst1 : bb->AllInsts()) {
                 if (inst1->GetOpcode() != Opcode::LoadString) {
                     continue;
                 }
@@ -291,8 +291,8 @@ HWTEST_F(CodegenTest, codegen_test_007, TestSize.Level1)
                 auto inst = inst1->CastToLoadString();
                 inst->SetTypeId(2);
 
-                unsigned index = 5;  // 5: It's a random number 
-                unsigned size = 6;  // 6: It's a random number
+                unsigned index = 5; // 5: It's a random number
+                unsigned size = 6; // 6: It's a random number
                 User user(true, index, size);
                 inst->AddUser(&user);
 
@@ -432,7 +432,7 @@ HWTEST_F(CodegenTest, codegen_test_012, TestSize.Level1)
  * @tc.name: codegen_test_013
  * @tc.desc: Verify the GetMethodFullName function.
  * @tc.type: FUNC
- * @tc.require: issueNumber 
+ * @tc.require: issueNumber
  */
 HWTEST_F(CodegenTest, codegen_test_013, TestSize.Level1)
 {
@@ -536,7 +536,7 @@ HWTEST_F(CodegenTest, codegen_test_015, TestSize.Level1)
 
         for (auto bb : graph->GetBlocksRPO()) {
             EXPECT_NE(bb, nullptr);
-            if(bb->IsTryBegin()){
+            if (bb->IsTryBegin()) {
                 status = true;
                 graph->AppendTryBeginBlock(bb);
             }
