@@ -74,7 +74,7 @@ public:
     }
 
     template <class Callback>
-    void TestBuildGraphFromFunc(pandasm::Program &prog, const char *method_name, 
+    void TestBuildGraphFromFunc(pandasm::Program &prog, const char *method_name,
         pandasm::AsmEmitter::PandaFileToPandaAsmMaps &maps, bytecodeopt::BytecodeOptIrInterface &ir_interface,
         const Callback &cb)
     {

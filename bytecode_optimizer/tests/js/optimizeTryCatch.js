@@ -15,25 +15,23 @@
 
 
 try {
-    try {
-        a = 1;
-    } catch(e) {
-        a;
-    }
-    if(a == "") {
-        throw "null";
-    }
-    if(x >  100) {
-        throw "max";
-    } else {
-        throw "min";
-    }
+  try {
+    a = 1;
+  } catch (e) {
+    a;
+  }
+  if (a == '') {
+    throw 'null';
+  }
+  if (x > 100) {
+    throw 'max';
+  } else {
+    throw 'min';
+  }
 }
-catch(err) {
-    func0(a, 10);
+catch (err) {
+  func0(a, 10);
 }
 finally {
-    console.log("error");
+  console.log('error');
 }
-
-

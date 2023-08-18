@@ -43,7 +43,7 @@ function func2(x, y) {
   var car = ["B", "V", "p", "F", "A"];
   var text = "";
   var i;
-  for (i = 0; i < 5; i++) { 
+  for (i = 0; i < 5; i++) {
     text += car[i] + x + y;
   }
   return text;
