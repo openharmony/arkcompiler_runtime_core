@@ -81,6 +81,7 @@ void PassManagerStatistics::ProcessBeforeRun(const Pass &pass)
     if (!pass_stat_stack_.empty()) {
         auto top_pass = pass_stat_stack_.top();
         ASSERT(allocated_size >= last_allocated_ir_);
+        ASSERT(top_pass != nullptr);
         top_pass->mem_used_ir += allocated_size - last_allocated_ir_;
         if (!options.IsCompilerResetLocalAllocator()) {
             ASSERT(graph_->GetLocalAllocator()->GetAllocatedSize() >= last_allocated_local_);
