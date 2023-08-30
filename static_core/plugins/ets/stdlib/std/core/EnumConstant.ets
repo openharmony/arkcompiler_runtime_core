@@ -25,7 +25,7 @@ export final class EnumConstant {
     private constructor () {}
 
     public getType(): Type {
-        return Type.resolve(this.typ)
+        return Type.resolve(this.typ)!
     }
 
     public getName(): string {

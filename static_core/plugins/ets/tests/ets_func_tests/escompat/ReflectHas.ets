@@ -78,8 +78,7 @@ function reflectHas(): int {
     result += (Reflect.hasOwn(cl, "x") == true) ? 0 : 1
     result += (Reflect.hasOwn(cl, "y") == true) ? 0 : 1
     result += (Reflect.hasOwn(cl, "z") == true) ? 0 : 1
-    // TODO(kirill-mitkin): Investigate problem with setting static field, failed on heap_verifier 'ETS arm64 FastVerify JIT g1-gc opt 2 with repeats [func-tests]'
-    // result += (Reflect.hasOwn(cl, "axisnum") == false) ? 0 : 1
+    result += (Reflect.hasOwn(cl, "axisnum") == false) ? 0 : 1
     result += (Reflect.hasOwn(cl, "asdasd") == false) ? 0 : 1
     result += (Reflect.hasOwn(cl, 0) == false) ? 0 : 1
 

@@ -71,13 +71,8 @@ std/math/std_math_sqrt_double.ets
 std/math/std_math_tanh_double.ets
 std/math/std_math_trunc_double.ets
 ### Issue 11712 end
-### Issue 12527
-std/core/std_core_char_instance_Char_isWhiteSpace.ets
-std/core/std_core_char_instance_Char_isWhiteSpace_001.ets
-std/core/std_core_char_static_Char_isWhiteSpace.ets
-std/core/std_core_char_static_Char_isWhiteSpace_003.ets
-### Issue 12527 end
 ### Issue 12782 begin
+
 std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_byte_array_int_int.ets
 std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_byte_array_int.ets
 std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_char_array_int_int.ets

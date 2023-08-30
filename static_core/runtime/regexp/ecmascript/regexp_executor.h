@@ -26,7 +26,9 @@ struct RegExpMatchResult {
     uint32_t index = 0;
     // first value is true if result is undefined
     PandaVector<std::pair<bool, T>> captures;
+    PandaVector<std::pair<uint32_t, uint32_t>> indices;
     bool isSuccess = false;
+    bool isWide = false;
 };
 
 class RegExpExecutor {

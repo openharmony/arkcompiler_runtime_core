@@ -52,8 +52,7 @@ function reflectGetClass(): int {
     result += (Reflect.get(p, "y") as Number == 20) ? 0 : 1
     result += (Reflect.get(p, "z") as Number == 30) ? 0 : 1
 
-    // TODO(kirill-mitkin): Investigate problem with setting static field, failed on heap_verifier 'ETS arm64 FastVerify JIT g1-gc opt 2 with repeats [func-tests]'
-    // result += (Reflect.get(p, "axisnum") == undefined) ? 0 : 1
+    result += (Reflect.get(p, "axisnum") == undefined) ? 0 : 1
     result += (Reflect.get(p, "qwerty") == undefined) ? 0 : 1
     result += (Reflect.get(p, 1) == null) ? 0 : 1
 

@@ -28,7 +28,7 @@ export final class UnionCase {
     }
 
     public getType(): Type {
-        return Type.resolve(this.typ)
+        return Type.resolve(this.typ)!
     }
 
     public override toString(): string {

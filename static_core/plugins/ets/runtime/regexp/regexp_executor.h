@@ -24,7 +24,10 @@ namespace panda::ets {
 
 class RegExpExecutor : public panda::RegExpExecutor {
 public:
-    RegExpMatchResult<VMHandle<EtsString>> GetResult(bool isSuccess) const;
+    RegExpMatchResult<PandaString> GetResult(bool isSuccess, bool hasIndices) const;
+
+private:
+    std::pair<uint32_t, uint32_t> GetIndices(CaptureState *captureState) const;
 };
 }  // namespace panda::ets
 

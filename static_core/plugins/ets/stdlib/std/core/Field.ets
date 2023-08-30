@@ -15,6 +15,10 @@
 
 package std.core;
 
+/**
+ * Represents field of class or interface
+ *
+ */
 export final class Field extends Object {
     private td: TypeDesc
     private ownerTD: TypeDesc
@@ -24,12 +28,17 @@ export final class Field extends Object {
 
     private constructor () {}
 
+    /**
+     * Returns type of this field
+     *
+     * @returns {@link Type} of this field
+     */
     public getType(): Type {
-        return Type.resolve(this.td)
+        return Type.resolve(this.td)!
     }
 
     public getOwnerType(): Type {
-        return Type.resolve(this.ownerTD)
+        return Type.resolve(this.ownerTD)!
     }
 
     public getName(): String {

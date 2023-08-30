@@ -18,6 +18,8 @@ package std.core;
 const MAX_CODE_POINT = 0x10FFFF
 const MAX_CODE_UNIT = 0xFFFF
 
+type StringOrRegExp = String | RegExp
+
 /**
  * Unicode string
  */
@@ -580,6 +582,13 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns new String which is a concatenation of this + strings[0] + ... + strings[string.length - 1]
      */
     public concat(...strings: String[]): String {
+        let length = strings.length
+        if (length == 0) {
+            return this
+        }
+        if (length == 1) {
+            return StringBuilder.concatStrings(this, strings[0])
+        }
         let res = new StringBuilder(this);
         for (let i = 0; i < strings.length; i++) {
             res = res.append(strings[i])
@@ -653,103 +662,81 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         return this.indexOf(str, fromIndex) != -1;
     }
 
-    /**
-     * Splits this String by pattern and returns ordered array of substrings.
-     * The order of the resulted array corresponds to the order of the
-     * passage of this String from beginning to end. The pattern is
-     * excluded from substrings. The array is limited by some specified value.
-     *
-     * @param pattern String to split by
-     * @param limit max length of the returned array. If it's negative then there is no limit.
-     *
-     * @throws NullPointerException if pattern param is null
-     *
-     * @returns string array contains substrings from this String
-     */
-    public split(pattern: String, limit: number): String[] {
-        return this.split(pattern, limit as int)
-    }
-
-    /**
-     * Splits this String by pattern and returns ordered array of substrings.
-     * The order of the resulted array corresponds to the order of the
-     * passage of this String from beginning to end. The pattern is
-     * excluded from substrings. The array is limited by some specified value.
-     *
-     * @param pattern String to split by
-     * @param limit max length of the returned array. If it's negative then there is no limit.
-     *
-     * @throws NullPointerException if pattern param is null
-     *
-     * @returns string array contains substrings from this String
-     */
-    public split(pattern: String, limit: int): String[] {
-        if (limit == 0) {
-            return new String[0];
-        }
-        let size: int = limit < 0 || limit > this.getLength() ? this.getLength() : limit;
-        let offset: int = pattern.getLength() == 0 ? 1 : 0;
-        let tmpArr: String[] = new String[size];
-        let left: int = 0;
-        let counter: int;
-        for (counter = 0; counter < size; counter++) {
-            let right: int = this.indexOf(pattern, left);
-            if (right == -1) {
-                let nextSubstr: String = this.substring(left);
-                tmpArr[counter] = nextSubstr;
-                counter++;
-                break;
+    private static splitMatch(s: String, q: int, r: String): int {
+        let rLength = r.getLength();
+        if (q + rLength > s.getLength()) {
+            return -1;
+        } else {
+            for (let i = 0; i < rLength; ++i) {
+                if (s.codePointAt(q + i) != r.codePointAt(i)) {
+                    return -1;
+                }
             }
-            right += offset;
-            let nextSubstr: String = this.substring(left, right);
-            tmpArr[counter] = nextSubstr;
-            left = right + pattern.getLength();
+            return q + rLength;
         }
-        let resArr: String[] = new String[counter];
-        for (let i: int = 0; i < counter; i++) {
-            resArr[i] = tmpArr[i];
-        }
-        return resArr;
-    }
-
-    public split(separator: RegExp, limit: number): String[] {
-        return this.split(separator, limit as int)
-    }
-
-    public split(separator: RegExp, limit: int): String[] {
-        throw new Error("Not implemented")
     }
 
     /**
      * Splits this String by pattern and returns ordered array of substrings.
      * The order of the resulted array corresponds to the order of the
      * passage of this String from beginning to end. The pattern is
-     * excluded from substrings.
+     * excluded from substrings. The array is limited by some specified value.
      *
-     * @param pattern String to split by
+     * @param pattern String or RegExp to split by
+     * @param limit max length of the returned array. If it's negative then there is no limit.
      *
      * @throws NullPointerException if pattern param is null
      *
      * @returns string array contains substrings from this String
      */
-    public split(pattern: String): String[] {
-        return this.split(pattern, -1);
+    public split(separator: StringOrRegExp, limit?: Number): String[] {
+        if (separator instanceof RegExp) {
+            return (separator as RegExp).split(this, limit)
+        }
+        return this.split(separator as String, limit)
     }
 
-    /**
-     * Splits this String by pattern and returns ordered array of substrings.
-     * The order of the resulted array corresponds to the order of the
-     * passage of this String from beginning to end. The pattern is
-     * excluded from substrings.
-     *
-     * @param pattern String to split by
-     *
-     * @throws NullPointerException if pattern param is null
-     *
-     * @returns string array contains substrings from this String
-     */
-    public split(pattern: RegExp): String[] {
-        return this.split(pattern, -1);
+    public split(separator: RegExp, limit?: Number): String[] {
+        return separator.split(this, limit)
+    }
+
+    public split(separator: String, limit?: Number): String[] {
+        let lim : long
+        if (limit == undefined) {
+            lim = (1 << 32) - 1
+        } else if ((limit!) == 0) {
+            return new String[0]
+        } else {
+            lim = limit!.unboxed() as long
+        }
+        let s = this.getLength()
+        if (s == 0) {
+            let z = String.splitMatch(this, 0, separator )
+            if (z != -1) {
+                return new String[0]
+            }
+            return [(this)]
+        }
+        let splittedStrings = new ArrayAsListString()
+        let lastStart = 0
+        for (let lastEnd = 0; lastEnd < s;) {
+            let separatorRight = String.splitMatch(this, lastEnd, separator)
+            assert(separatorRight <= s)
+            if (separatorRight != -1 && separatorRight != lastStart) {
+                let substr = this.substring(lastStart, lastEnd)
+                splittedStrings.pushBack(substr)
+                if (splittedStrings.size() == lim) {
+                    return splittedStrings.toArray()
+                }
+                lastStart = separatorRight
+                lastEnd = lastStart
+            } else {
+                ++lastEnd
+            }
+        }
+        let substr = this.substring(lastStart, s)
+        splittedStrings.pushBack(substr)
+        return splittedStrings.toArray()
     }
 
     /**
@@ -803,13 +790,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @returns new string with all characters in lower case
      */
-    public toLowerCase(): String {
-        let resChars: char[] = this.getChars();
-        for (let i: int = 0; i < resChars.length; i++) {
-            resChars[i] = Char.toLowerCase(resChars[i]);
-        }
-        return new String(resChars);
-    }
+    public native toLowerCase(): String;
 
     /**
      * Creates new string similar to this String but with
@@ -817,13 +798,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @returns new string with all characters in upper case
      */
-    public toUpperCase(): String {
-        let resChars: char[] = this.getChars();
-        for (let i: int = 0; i < resChars.length; i++) {
-            resChars[i] = Char.toUpperCase(resChars[i]);
-        }
-        return new String(resChars);
-    }
+    public native toUpperCase(): String;
 
     /**
      * Trims all whitespaces from the beginning and end of this String.
@@ -1001,7 +976,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
             return new String();
         }
         if (count < 0) {
-            throw new ArgumentOutOfRangeException("repeat: count is negative")
+            throw new RangeError("repeat: count is negative")
         }
         let length: int = this.getLength();
         let resChars: char[] = new char[length * count];
@@ -1424,54 +1399,290 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         return this.substring(begin, end)
     }
 
-    public replace(w1: String, w2: String): String {
-        let n = this.indexOf(w1)
-        if (n == -1) {
-            return this;
+    //NOTE(kirill-mitkin): Replace namedCaptures type with record type when it will be possible
+    static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Object | undefined, replacement: String) {
+        let matchLength = matched.getLength()
+        let stringLength = str.getLength()
+        assert(position >= 0 && position <= stringLength)
+        let tailPos = position + matchLength
+        let m = captures.length
+        let result = ""
+        let doubleCapture = true;
+        for (let i: int = 0; i < replacement.getLength();) {
+            if (i + 1 < replacement.getLength()
+                        && replacement.charAt(i) == c'$'
+                        && replacement.charAt(i + 1) == c'$') {
+                result += c'$'
+                i += 2
+            } else if (i + 1 < replacement.getLength()
+                        && replacement.charAt(i) == c'$'
+                        && replacement.charAt(i + 1) == c'&') {
+                result += matched
+                i += 2
+            } else if (i + 1 < replacement.getLength()
+                        && replacement.charAt(i) == c'$'
+                        && replacement.charAt(i + 1) == c'`') {
+                if (position != 0) {
+                    result += str.substring(0, position)
+                }
+                i += 2
+            } else if (i + 1 < replacement.getLength()
+                        && replacement.charAt(i) == c'$'
+                        && replacement.charAt(i + 1) == c'\'') {
+                if (tailPos < stringLength) {
+                    result += str.substring(tailPos, stringLength)
+                }
+                i += 2
+            } else if (i + 2 < replacement.getLength()
+                            && doubleCapture
+                            && replacement.charAt(i) == c'$'
+                            && Char.isDecDigit(replacement.charAt(i + 1))
+                            && Char.isDecDigit(replacement.charAt(i + 2))) {
+                let firstDigit = replacement.charAt(i + 1) - c'0';
+                let secondDigit = replacement.charAt(i + 2) - c'0';
+                let digit = firstDigit * 10 + secondDigit;
+                if (digit == 0 || digit > m) {
+                    doubleCapture = false;
+                } else {
+                    result += captures[digit - 1];
+                    i += 3
+                }
+            } else if (i + 2 < replacement.getLength()
+                            && replacement.charAt(i) == c'$'
+                            && Char.isDecDigit(replacement.charAt(i + 1))
+                            && !Char.isDecDigit(replacement.charAt(i + 2))
+                        || i + 1 < replacement.getLength()
+                            && replacement.charAt(i) == c'$'
+                            && Char.isDecDigit(replacement.charAt(i + 1))) {
+                let digit = replacement.charAt(i + 1) - c'0';
+                if (digit == 0 || digit > m) {
+                    result += replacement.substring(i, i + 2)
+                } else {
+                    result += captures[digit - 1];
+                }
+                doubleCapture = true;
+                i += 2
+            } else if (replacement.charAt(i) == c'$' && replacement.charAt(i + 1) == c'<') {
+                if (namedCaptures == undefined) {
+                    result += "$<";
+                } else {
+                    let j = i + 2;
+                    for (; j < replacement.getLength() && replacement.charAt(j) != c'>'; ++j) {}
+                    if (j < replacement.getLength()) {
+                        let groupName = replacement.substring(i + 2, j);
+                        /*let capture = namedCaptures[groupName];
+                        if (capture != undefined) {
+                            result += capture
+                        }
+                        */
+                        i = j;
+                    } else {
+                        result += "$<";
+                        i += 2;
+                    }
+                }
+            } else {
+                result += replacement.charAt(i);
+                i += 1;
+            }
         }
-        return this.substring(0, n) + w2 + this.substring(n + w1.getLength())
+        return result
     }
-
-    /*
-     * Returns a new string with one, some, or all matches of a pattern replaced by a replacement.
-     * The pattern can be a string or a RegExp, and the replacement can be a string or a function called for each match.
-     * If pattern is a string, only the first occurrence will be replaced. The original string is left unchanged.
-     */
-    public replace(pattern: RegExp, replacement: String) : String {
-        throw new Error("Not implemented");
-    }
-
-    public replaceAll(w1: String, w2: String): String {
-        let n = this.indexOf(w1)
-        let str = new String(this)
-        while(n != -1) {
-            str = str.substring(0, n) + w2 + str.substring(n + w1.getLength())
-            n = str.indexOf(w1, n + w2.getLength())
-        }
-        return str
-    }
-
-    /*
-     * The replaceAll() method returns a new string with all matches of a pattern replaced by a replacement.
-     * The pattern can be a string or a RegExp, and the replacement can be a string or a function to be called for each match.
-     * The original string is left unchanged.
-     */
-    public replaceAll(patten: RegExp, replacement: String) : String {
-        throw new Error("Not implemented");
-    }
-
-    public native search(reg: String): int;
 
     /**
+     * Returns a new string with one, some, or all matches of a pattern replaced by a replacement
+     *
+     * @param searchValue is pattern which can be a String or RegExp
+     *
+     * @param replaceValue is replacement String
+     *
+     * @returns a new replaced string
+     */
+    public replace(searchValue: StringOrRegExp, replaceValue: String) : String {
+        if (searchValue instanceof RegExp) {
+            return (searchValue as RegExp).replace(this, replaceValue)
+        }
+        return this.replace(searchValue as String, replaceValue)
+    }
+
+    public replace(searchValue: RegExp, replaceValue: String) : String {
+        return searchValue.replace(this, replaceValue)
+    }
+
+    public replace(searchValue: String, replaceValue: String) : String {
+        let searchLength = searchValue.getLength()
+        let position = this.indexOf(searchValue)
+        if (position == -1) {
+            return this
+        }
+        let preceding = this.substring(0, position)
+        let following = this.substring(position + searchLength)
+        let captures = new ArrayAsListString()
+        let replacement = String.getSubstitution(searchValue, this, position as int, captures.toArray(), undefined, replaceValue)
+        return preceding + replacement + following
+    }
+
+    /**
+     * Returns a new string with one, some, or all matches of a pattern replaced by a replacement
+     *
+     * @param searchValue is pattern which can be a String or RegExp
+     *
+     * @param replacer is replacement function
+     *
+     * @returns a new replaced string
+     */
+    public replace(searchValue: StringOrRegExp, replacer: (substr: String, args: Object[]) => String): String {
+        if (searchValue instanceof RegExp) {
+            return (searchValue as RegExp).replace(this, replacer)
+        }
+        return this.replace(searchValue as String, replacer)
+    }
+
+    public replace(searchValue: RegExp, replacer: (substr: String, args: Object[]) => String): String {
+        return searchValue.replace(this, replacer)
+    }
+
+    public replace(searchValue: String, replacer: (substr: String, args: Object[]) => String): String {
+        let searchLength = searchValue.getLength()
+        let position = this.indexOf(searchValue)
+        if (position == -1) {
+            return this
+        }
+        let preceding = this.substring(0, position)
+        let following = this.substring(position + searchLength)
+        let replacement = replacer(searchValue, [new Double(position as double) as Object, this as Object] as Object[])
+        return preceding + replacement + following
+    }
+
+     /**
+     * Returns a new string with all matches of a pattern replaced by a replacement
+     *
+     * @param searchValue is pattern which can be a String or RegExp
+     *
+     * @param replaceValue is replacement String
+     *
+     * @returns a new replaced string
+     */
+    public replaceAll(searchValue: StringOrRegExp, replaceValue: String): String {
+        if (searchValue instanceof RegExp) {
+            const re = searchValue as RegExp
+            if (!re.global) {
+                throw new Error("Global flag expected for regexp")
+            }
+            return re.replace(this, replaceValue)
+        }
+        return this.replaceAll(searchValue as String, replaceValue)
+    }
+
+    public replaceAll(searchValue: RegExp, replaceValue: String): String {
+        if (!searchValue.global) {
+            throw new Error("Global flag expected for regexp")
+        }
+        return searchValue.replace(this, replaceValue)
+    }
+
+    public replaceAll(searchValue: String, replaceValue: String): String {
+        let searchLength = searchValue.getLength()
+        let advanceBy = max(1, searchLength)
+        let matchPositions = new ArrayAsListInt();
+        let position = this.indexOf(searchValue, 0)
+        while (position != -1) {
+            matchPositions.pushBack(position)
+            position = this.indexOf(searchValue, position + advanceBy)
+        }
+        let endOfLastMatch = 0
+        let result = ""
+        let arrayMatchPositions = matchPositions.toArray()
+        for (let i = 0; i < arrayMatchPositions.length; ++i) {
+            let p = arrayMatchPositions[i].unboxed()
+            let preserved = this.substring(endOfLastMatch, p)
+            let captures = new ArrayAsListString()
+            let replacement = String.getSubstitution(searchValue, this, p, captures.toArray(), undefined, replaceValue)
+            result = result + preserved + replacement
+            endOfLastMatch = p + searchLength
+        }
+        if (endOfLastMatch < this.getLength()) {
+            result += this.substring(endOfLastMatch)
+        }
+        return result
+    }
+
+    /**
+     * Returns a new string with all matches of a pattern replaced by a replacement
+     *
+     * @param searchValue is pattern which can be a String or RegExp
+     *
+     * @param replacer is replacement function
+     *
+     * @returns a new replaced string
+     */
+    public replaceAll(searchValue: StringOrRegExp, replacer: (substr: String, args: Object[]) => String): String {
+        if (searchValue instanceof RegExp) {
+            const re = searchValue as RegExp
+            if (!re.global) {
+                throw new Error("Global flag expected for regexp")
+            }
+            return re.replace(this, replacer)
+        }
+        return this.replaceAll(searchValue as String, replacer)
+    }
+
+    public replaceAll(searchValue: RegExp, replacer: (substr: String, args: Object[]) => String): String {
+        if (!searchValue.global) {
+            throw new Error("Global flag expected for regexp")
+        }
+        return searchValue.replace(this, replacer)
+    }
+
+    public replaceAll(searchValue: String, replacer: (substr: String, args: Object[]) => String): String {
+        let searchLength = searchValue.getLength()
+        let advanceBy = max(1, searchLength)
+        let matchPositions = new ArrayAsListInt();
+        let position = this.indexOf(searchValue, 0)
+        while (position != -1) {
+            matchPositions.pushBack(position)
+            position = this.indexOf(searchValue, position + advanceBy)
+        }
+        let endOfLastMatch = 0
+        let result = ""
+        let arrayMatchPositions = matchPositions.toArray()
+        for (let i = 0; i < arrayMatchPositions.length; ++i) {
+            let p = arrayMatchPositions[i].unboxed()
+            let preserved = this.substring(endOfLastMatch, p)
+            let args = new ArrayAsListObject()
+            args.pushBack(Double.valueOf(p))
+            args.pushBack(this)
+            let replacement = replacer(searchValue, args.toArray())
+            result = result + preserved + replacement
+            endOfLastMatch = p + searchLength
+        }
+        if (endOfLastMatch < this.getLength()) {
+            result += this.substring(endOfLastMatch)
+        }
+        return result
+    }
+
+      /**
      * Executes a search for a match between a regular expression and this String object.
      *
-     * @param regexp a regular expression object
+     * @param regexp a regular expression object or implicit regular expression
      *
      * @returns the index of the first match between the regular expression and the given string,
      * or -1 if no match was found.
      */
-    public search(regexp: RegExp) : int {
-        throw new Error("Not implemented");
+    public search(regexp: StringOrRegExp): number {
+        if (regexp instanceof String) {
+            return new RegExp(regexp as String).search(this)
+        }
+        return (regexp as RegExp).search(this)
+    }
+
+    public search(implicitRegExp: String): number {
+        return new RegExp(implicitRegExp).search(this)
+    }
+
+    public search(regexp: RegExp): number {
+        return regexp.search(this)
     }
 
     /*
@@ -1493,11 +1704,6 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
     public toLocaleUpperCase(): String {
         return this.toLocaleUpperCase("");
     }
-
-    public match(regexp: String) : String[] {
-        return this.match(new RegExp(regexp));
-    }
-
     /**
      * Retrieves the result of matching a string against a regular expression
      *
@@ -1508,26 +1714,11 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * but capturing groups are not included
      * Otherwise, only the first complete match and its related capturing groups are returned
      */
-    public match(regexp: RegExp) : String[] {
-        let isGlobal = regexp.global;
-        if (!isGlobal) {
-            return regexp.exec(this).result;
+    public match(regexp: StringOrRegExp): RegExpMatchArray | null {
+        if (regexp instanceof String) {
+            return new RegExp(regexp as String).match(this)
         }
-        regexp.lastIndex = 0;
-        let matches = new ArrayAsListString();
-        while (true) {
-            let result = regexp.exec(this);
-            if (!result.isCorrect) {
-                return matches.toArray();
-            }
-            else {
-                let matchStr = result.get(0);
-                matches.pushBack(matchStr);
-                if (matchStr == "") {
-                    regexp.lastIndex = RegExp.advanceStringIndex(this, regexp.lastIndex, regexp.unicode);
-                }
-            }
-        }
+        return (regexp as RegExp).match(this)
     }
 
     /**
@@ -1536,8 +1727,13 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @param regexp a regular expression object
      */
-    // public matchAll(reg: String): Iterator;
-
+    public matchAll(reg: RegExp): IterableIterator<RegExpMatchArray> {
+        let flags = reg.flags;
+        if (!reg.global) {
+            throw new Error("matchAll must be called with a global RegExp")
+        }
+        return reg.matchAll(this)
+    }
 
     public native normalizeNFC(): String;
 

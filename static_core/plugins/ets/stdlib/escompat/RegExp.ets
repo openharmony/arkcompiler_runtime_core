@@ -13,22 +13,25 @@
  * limitations under the License.
  */
 
-package escompat;
+package escompat
 
-// TODO(kirill-mitkin): change to inner class later
 /**
  * Regular expression result descriptor
  */
-export class RegExpExecResult extends Object {
+export class RegExpExecArray /*extends Array<String>*/ {
     /** true if match present */
-    readonly isCorrect: boolean;
+    readonly isCorrect: boolean
     /** The 0-based index of the match in the string */
-    readonly index: int;
+    readonly index: number
     /** The original string that was matched against */
-    readonly input: String;
+    readonly input: String
     /** result itself */
-    readonly result: String[];
-    // TODO(kirill-mitkin): add indices and groups fields
+    readonly result: String[]
+
+    // NOTE(shumilov-petr): Make nullable when #14813 will be fixed
+    readonly indices: number[][]
+
+    // NOTE(kirill-mitkin): add groups fields
 
     /**
      * Returns result string by index
@@ -38,7 +41,7 @@ export class RegExpExecResult extends Object {
      * @returns resulting string
      */
     public get(index: int): String {
-        return this.result[index];
+        return this.result[index]
     }
 
     /**
@@ -52,41 +55,82 @@ export class RegExpExecResult extends Object {
         return this.get(index as int);
     }
 
-    constructor(isCorrect: boolean, index: int, input: String, result: String[]) {
-        this.isCorrect = isCorrect;
-        this.index = index;
-        this.input = input;
-        this.result = result;
+    get length(): int {
+        return this.result.length;
     }
 
-    constructor(isCorrect: boolean, index: number, input: String, result: String[]) {
-        this(isCorrect, index as int, input, result)
+    constructor(index: int, input: String, result: String[], indices: number[][]) {
+        this.isCorrect = true
+        this.index = index
+        this.input = input
+        this.result = result
+        this.indices = indices
     }
 
-    public override equals(other: NullishType): boolean {
-        if (!(other instanceof RegExpExecResult)) {
-            return false;
+    constructor(index: number, input: String, result: String[]) {
+        this.isCorrect = true
+        this.index = index
+        this.input = input
+        this.result = result
+        this.indices = []
+    }
+
+    constructor(index: number, input: String, result: String[], indices: number[][]) {
+        this(index as int, input, result, indices)
+    }
+}
+
+export type RegExpMatchArray = RegExpExecArray;
+
+class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
+    private regexp: RegExp
+    private string: String
+
+    constructor(regexp: RegExp, string: String) {
+        this.regexp = regexp
+        this.string = string
+    }
+
+    override next(): IteratorResult<RegExpMatchArray> {
+        let match = this.regexp.exec(this.string)
+        if (match == null) {
+            return new IteratorResult<RegExpMatchArray>()
         }
-        let o: RegExpExecResult = other as RegExpExecResult;
-
-        let res =
-            (this.isCorrect == o.isCorrect) &&
-            (this.index == this.index) &&
-            (this.input.compareTo(o.input) == 0) &&
-            (this.result.length == o.result.length);
-
-        if (!res) {
-            return false;
+        let matchStr = match!.get(0)
+        if (matchStr == "") {
+            let nextIndex = RegExp.advanceStringIndex(this.string, this.regexp.lastIndex, this.regexp.unicode)
+            this.regexp.lastIndex = nextIndex
         }
+        return new IteratorResult<RegExpMatchArray>(false, match)
+    }
 
-        for (let i: int = 0; i < this.result.length; i++) {
-            res &= (this.result[i].compareTo(o.result[i]) == 0);
-            if (!res) {
-                return false;
-            }
+    override iterator(): IterableIterator<RegExpMatchArray> {
+        return this
+    }
+}
+
+class RegExpStringIterator implements IterableIterator<RegExpMatchArray> {
+    private regexp: RegExp
+    private string: String
+    private returned: boolean
+
+    constructor(regexp: RegExp, string: String) {
+        this.regexp = regexp
+        this.string = string
+        this.returned = false
+    }
+
+    override next(): IteratorResult<RegExpMatchArray> {
+        let match = this.regexp.exec(this.string)
+        if (match == null || this.returned) {
+            return new IteratorResult<RegExpMatchArray>()
         }
+        this.returned = true
+        return new IteratorResult<RegExpMatchArray>(false, match)
+    }
 
-        return true;
+    override iterator(): IterableIterator<RegExpMatchArray> {
+        return this
     }
 }
 
@@ -94,123 +138,205 @@ export class RegExpExecResult extends Object {
  * Regular expression
  */
 export class RegExp extends Object {
-    /**
-     * The string against which a regular expression is matched
-     */
-    readonly pattern: String;
+    private pattern_: String
+    public lastIndex: number
+    private source_: String
+    private flags_: String
+
+    private static input_: String
+    private static lastMatch_: String
+    private static lastParen_: String
+    private static leftContext_: String
+    private static rightContext_: String
+    private static $1_: String, $2_: String, $3_: String, $4_: String, $5_: String, $6_: String, $7_: String, $8_: String, $9_: String
+
+    private groupNames: String[]
+    private buffer: int[]
+
+    // NOTE(shumilov-petr): Removing the following setter leads to unspecified behaviour of es2panda
+    // The negative test '02.lexical_elements/07.keywords/types_n_12.ets' gets failed if remove this setter
+    set __removeMe(a: int) {}
 
     /** Flags */
-    readonly flags: String;
+    get flags(): String {
+        return this.flags_
+    }
 
-    // TODO(kirill-mitkin): change to properties
     /**
      * Has the value true if the regular expression should be tested against
      * all possible matches in a string
      */
-    readonly global: boolean;
+    get global(): boolean {
+        return this.flags_.contains("g", 0)
+    }
 
     /**
      * Has the value true if the dot special character (.) should additionally match
      * the line terminator characters in a string
      */
-    readonly dotAll: boolean;
+    get dotAll(): boolean {
+        return this.flags_.contains("s", 0)
+    }
 
     /**
      * Has the value true if the result of a regular expression match should contain
      * the start and end indices of the substrings of each capture group
      */
-    readonly hasIndices: boolean;
+    get hasIndices(): boolean {
+        return this.flags_.contains("d", 0)
+    }
 
     /**
      * Has the value true if case should be ignored while attempting a match in a string
      */
-    readonly ignoreCase: boolean;
+    get ignoreCase(): boolean {
+        return this.flags_.contains("i", 0)
+    }
 
     /**
      * Has the value true if a multiline input string should be treated as multiple lines
      */
-    readonly multiline: boolean;
+    get multiline(): boolean {
+        return this.flags_.contains("m", 0)
+    }
 
     /**
      * Has the value true if the regex attempts to match the target string only
      * from the index indicated by the lastIndex property
      */
-    readonly sticky: boolean;
+    get sticky(): boolean {
+        return this.flags_.contains("y", 0)
+    }
 
     /**
      * Has the value true if 'u' flag is used
      */
-    readonly unicode: boolean;
+    get unicode(): boolean {
+        return this.flags_.contains("u", 0)
+    }
 
     /**
      * Has the value true if 'v' flag is used
      */
-    readonly unicodeSets: boolean;
-
-    /**
-     * The index at which to start the next match
-     */
-    lastIndex: int;
+    get unicodeSets(): boolean {
+        return this.flags_.contains("v", 0)
+    }
 
     /**
      * Returns a string containing the source text of this regular expression
      */
-    readonly source: String;
+    get source(): String {
+        return this.source_
+    }
 
     /**
      * Returns the string against which a regular expression is matched
      */
-    readonly static input: String;
+    static get input(): String {
+        return RegExp.input_
+    }
 
     /**
-     * An alias for input
+     * Returns the string against which a regular expression is matched
      */
-    readonly static $_: String;
+    static get $_(): String {
+        return RegExp.input_
+    }
 
     /**
      * Returns the last matched substring
      */
-    readonly static lastMatch: String;
+    static get lastMatch(): String {
+        return RegExp.lastMatch_
+    }
 
     /**
      * An alias for lastMatch
      */
-    // readonly static $&: String;
+    // static get $&(): String {
+    //     return RegExp.lastMatch_
+    // }
 
     /**
      * Returns the last parenthesized substring match, if any
      */
-    readonly static lastParen: String
+    static get lastParen(): String {
+        return RegExp.lastParen_
+    }
 
     /**
-     * An alias for lastParen
+     * An alias for lastMatch
      */
-    // readonly static $+: String
+    // static get $+(): String {
+    //     return RegExp.lastParen_
+    // }
 
     /**
      * Returns the substring preceding the most recent match
      */
-    readonly static leftContext: String
+    static get leftContext(): String {
+        return RegExp.leftContext_
+    }
 
     /**
      * An alias for leftContext
      */
-    // readonly static $`: String
+    // static get $`(): String {
+    //     return RegExp.leftContext_
+    // }
 
     /**
      * Returns the substring following the most recent match
      */
-    readonly static rightContext: String
+    static get rightContext(): String {
+        return RegExp.rightContext_
+    }
 
     /**
      * An alias for rightContext
      */
-    // readonly static $': String
+    // static get $'(): String {
+    //     return RegExp.rightContext_
+    // }
 
     /**
      * Static accessor properties return parenthesized substring matches
      */
-    readonly static $1: String, $2: String, $3: String, $4: String, $5: String, $6: String, $7: String, $8: String, $9: String;
+    static get $1(): String {
+        return RegExp.$1_
+    }
+
+    static get $2(): String {
+        return RegExp.$2_
+    }
+
+    static get $3(): String {
+        return RegExp.$3_
+    }
+
+    static get $4(): String {
+        return RegExp.$4_
+    }
+
+    static get $5(): String {
+        return RegExp.$5_
+    }
+
+    static get $6(): String {
+        return RegExp.$6_
+    }
+
+    static get $7(): String {
+        return RegExp.$7_
+    }
+
+    static get $8(): String {
+        return RegExp.$8_
+    }
+
+    static get $9(): String {
+        return RegExp.$9_
+    }
 
     /**
      * Constructs a new RegExp using pattern
@@ -218,7 +344,7 @@ export class RegExp extends Object {
      * @param pattern description of a pattern
      */
     public constructor(pattern: String) {
-        this(pattern, "");
+        this(pattern, "")
     }
 
     /**
@@ -229,17 +355,16 @@ export class RegExp extends Object {
      * @param flags description of flags to be used
      */
     public constructor(pattern: String, flags: String) {
-        this.pattern = pattern;
-        this.flags = flags;
-        this.source = RegExp.escapePattern(pattern);
-        this.initializeFlags();
-        this.compile();
+        this.pattern_ = pattern
+        this.flags_ = flags
+        this.source_ = RegExp.escapePattern(pattern)
+        this.compile()
     }
 
     /**
      * Compiles a regular expression
      */
-    private native compile(): void;
+    public native compile(): RegExp;
 
     /**
      * Recompiles a regular expression with new source and flags after the RegExp object has already been created
@@ -248,14 +373,14 @@ export class RegExp extends Object {
      *
      * @param flags any combination of flag values
      */
-    public compile(pattern : String, flags: String) {
-        this.pattern = pattern;
-        this.flags = flags;
-        this.source = RegExp.escapePattern(pattern);
-        this.initializeFlags();
-        this.compile();
+    public compile(pattern : String, flags: String): RegExp {
+        this.pattern_ = pattern
+        this.flags_ = flags
+        this.source_ = RegExp.escapePattern(pattern)
+        return this.compile()
     }
 
+    private native execImpl(str: String): RegExpExecArray;
     /**
      * Executes a search for a match in a specified string and returns a result array
      *
@@ -263,9 +388,217 @@ export class RegExp extends Object {
      *
      * @returns RegExp result
      *
-     * @see RegExpExecResult
+     * @see RegExpExecArray
      */
-    public native exec(str: String): RegExpExecResult;
+    public exec(str: String): RegExpExecArray | null {
+        const res = this.execImpl(str)
+        if (res.isCorrect) {
+            return res
+        } else {
+            return null
+        }
+    }
+
+    public search(str: String): number {
+        let previousLastIndex = this.lastIndex
+        this.lastIndex = 0
+        let result = this.exec(str)
+        this.lastIndex = previousLastIndex
+        if (result == null) {
+            return -1
+        } else {
+            return result.index
+        }
+    }
+
+    public replace(str: String, replaceValue: String): String {
+        if (this.global) {
+            this.lastIndex = 0
+        }
+        let results = new Array<RegExpExecArray>()
+        let done = false
+        while (!done) {
+            let result = this.exec(str)
+            if (result == null) {
+                break;
+            }
+            results.push(result!)
+            if (!this.global) {
+                break;
+            }
+            let matchStr = result!.get(0)
+            if (matchStr == "") {
+                let thisIndex = this.lastIndex
+                let nextIndex = RegExp.advanceStringIndex(str, thisIndex, this.unicode)
+                this.lastIndex = nextIndex
+            }
+        }
+        let lengthS = str.getLength()
+        let accumulatedResult = ""
+        let nextSourcePosition = 0
+        for (let i = 0; i < results.length; ++i) {
+            let result = results.at(i)!;
+            let nCaptures = result.length;
+            let matched = result.get(0);
+            let matchLength = matched.getLength();
+            let position = max(min(result.index, lengthS), 0) as int;
+            let captures = new ArrayAsListString();
+            for (let n = 1; n < nCaptures; n++) {
+                let capN = result.get(n);
+                captures.pushBack(capN)
+            }
+            let namedCaptures = /*result.groups*/ undefined;
+            let replacement = String.getSubstitution(matched, str, position as int, captures.toArray(), namedCaptures, replaceValue)
+            if (position >= nextSourcePosition) {
+                accumulatedResult += str.substring(nextSourcePosition, position) + replacement
+                nextSourcePosition = position + matchLength
+            }
+        }
+        if (nextSourcePosition >= lengthS) {
+            return accumulatedResult
+        }
+        return accumulatedResult + str.substring(nextSourcePosition)
+    }
+
+    public replace(str: String, replacer: (substr: String, args: Object[]) => String): String {
+        if (this.global) {
+            this.lastIndex = 0
+        }
+        let results = new Array<RegExpExecArray>()
+        let done = false
+        while (!done) {
+            let result = this.exec(str)
+            if (result == null) {
+                break;
+            }
+            results.push(result!)
+            if (!this.global) {
+                break;
+            }
+            let matchStr = result!.get(0)
+            if (matchStr == "") {
+                let thisIndex = this.lastIndex
+                let nextIndex = RegExp.advanceStringIndex(str, thisIndex, this.unicode)
+                this.lastIndex = nextIndex
+            }
+        }
+        let lengthS = str.getLength()
+        let accumulatedResult = ""
+        let nextSourcePosition = 0
+        for (let i = 0; i < results.length; ++i) {
+            let result = results.at(i)!;
+            let nCaptures = result.length;
+            let matched = result.get(0);
+            let matchLength = matched.getLength();
+            let position = max(min(result.index, lengthS), 0) as int;
+            let args = new ArrayAsListObject();
+            for (let n = 1; n < nCaptures; n++) {
+                let capN = result.get(n);
+                args.pushBack(capN)
+            }
+            let namedCaptures = /*result.groups*/ undefined;
+            args.pushBack(new Double(position as double));
+            args.pushBack(str)
+            if (namedCaptures != undefined) {
+                args.pushBack(namedCaptures as Object)
+            }
+            let replacement = replacer(matched, args.toArray());
+            if (position >= nextSourcePosition) {
+                accumulatedResult += str.substring(nextSourcePosition, position) + replacement
+                nextSourcePosition = position + matchLength
+            }
+        }
+        if (nextSourcePosition >= lengthS) {
+            return accumulatedResult
+        }
+        return accumulatedResult + str.substring(nextSourcePosition)
+    }
+
+    public split(str: String, limit: Number | undefined): String[] {
+
+        let unicodeMatching = this.unicode
+        let newFlags = this.sticky ? this.flags : this.flags + "y";
+        let splitter = new RegExp(this.pattern_, newFlags)
+        let splittedStrings = new ArrayAsListString()
+        let lim: long;
+        if (limit == undefined) {
+            lim = (1 << 32) -1
+        } else if (limit! == 0) {
+            return splittedStrings.toArray()
+        } else {
+            lim = limit!.unboxed() as long
+        }
+        let size = str.getLength()
+        if (size == 0) {
+            let z = splitter.exec(str)
+            if (z != null) {
+                return splittedStrings.toArray()
+            }
+            splittedStrings.pushBack(str)
+            return splittedStrings.toArray()
+        }
+        let lastStart = 0
+        for (let lastEnd = 0; lastEnd < size;) {
+            splitter.lastIndex = lastEnd
+            let z = splitter.exec(str)
+            if (z == null) {
+                lastEnd = RegExp.advanceStringIndex(str, lastEnd, unicodeMatching)
+            } else {
+                let separatorRight = (splitter.lastIndex < size) ? splitter.lastIndex as int : size
+                if (separatorRight == lastStart) {
+                    lastEnd = RegExp.advanceStringIndex(str, lastEnd, unicodeMatching)
+                } else {
+                    let substr = str.substring(lastStart, lastEnd)
+                    splittedStrings.pushBack(substr)
+                    if (splittedStrings.size() == lim) {
+                        return splittedStrings.toArray()
+                    }
+                    lastStart = separatorRight
+                    let numberOfCaptures = z!.length;
+                    for (let i = 1; i < numberOfCaptures; ++i) {
+                        let nextCapture = z!.get(i);
+                        splittedStrings.pushBack(nextCapture)
+                        if (splittedStrings.size() == lim) {
+                            return splittedStrings.toArray()
+                        }
+                    }
+                    lastEnd = lastStart
+                }
+            }
+        }
+        let substr = str.substring(lastStart, size)
+        splittedStrings.pushBack(substr)
+        return splittedStrings.toArray()
+    }
+
+    public match(str: String): RegExpMatchArray | null {
+        if (!this.global) {
+            return this.exec(str);
+        }
+        this.lastIndex = 0;
+        let matches = new ArrayAsListString();
+        while (true) {
+            let result = this.exec(str);
+            if (result == null) {
+                return new RegExpMatchArray(-1, "", matches.toArray());
+            }
+            else {
+                let matchStr = result!.get(0);
+                matches.pushBack(matchStr);
+                if (matchStr == "") {
+                    this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode);
+                }
+            }
+        }
+    }
+
+    public matchAll(str: String): IterableIterator<RegExpMatchArray> {
+        if (this.global) {
+            return new GlobalRegExpStringIterator(this, str)
+        } else {
+            return new RegExpStringIterator(this, str)
+        }
+    }
 
     /**
      * Executes a search for a match between a regular expression and specified string
@@ -275,7 +608,7 @@ export class RegExp extends Object {
      * @returns true if match was found
      */
     public test(str: String): boolean {
-        return this.exec(str).isCorrect;
+        return this.execImpl(str).isCorrect
     }
 
     /**
@@ -284,7 +617,7 @@ export class RegExp extends Object {
      * @returns a string representing the given object
      */
     public override toString(): String {
-        return "/" + this.source + "/" + this.flags;
+        return "/" + this.source + "/" + this.flags_
     }
 
     /**
@@ -300,11 +633,11 @@ export class RegExp extends Object {
      */
     public static advanceStringIndex(s: String, index: int, unicode: boolean): int {
         if (!unicode) {
-            return index + 1;
+            return index + 1
         }
         let length = s.getLength();
         if (index + 1 >= length) {
-            return index + 1;
+            return index + 1
         }
         return index + s.codePointCount(index, index + 1);
     }
@@ -324,28 +657,11 @@ export class RegExp extends Object {
         return RegExp.advanceStringIndex(s, index as int, unicode)
     }
 
-    private initializeFlags() {
-        if (this.flags.isEmpty()) {
-            return;
-        }
-        this.global = this.flags.contains("g", 0);
-        this.hasIndices = this.flags.contains("d", 0);
-        this.ignoreCase = this.flags.contains("i", 0);
-        this.multiline = this.flags.contains("m", 0);
-        this.unicode = this.flags.contains("u", 0);
-        this.dotAll = this.flags.contains("s", 0);
-        this.sticky = this.flags.contains("y", 0);
-        this.unicodeSets = this.flags.contains("v", 0);
-    }
-
     private static escapePattern(pattern: String): String {
         if (pattern == "") {
-            return "(?:)";
+            return "(?:)"
         }
-        let s = pattern.replaceAll("/", "\\/");
-        return s.replaceAll("\\", "\\");
+        let s = pattern.replaceAll("/", "\\/")
+        return s.replaceAll("\\", "\\")
     }
-
-    private groupNames: String[];
-    private buffer: int[];
 }

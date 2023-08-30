@@ -1347,6 +1347,25 @@
   }
 
 - {
+    method_name: search,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_data: '["abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk",
+    "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk",
+    "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]',
+
+    param_init_data_types: {"param1": "String[]"},
+    param_types: {"param1": String},
+    param_nature: {"param1": object },
+    param_list: {"param1": '["ab", "ab", "ab", "ab", "ijk", "ijk", "ijk", "ijk", "ijk", "ijk", "", "", ""]'},
+    method_return_type: double,
+
+    expected_data_type: "double[]",
+    expected_test_data: "[0 as double, 0 as double, 0 as double, 0 as double,  8 as double, 8 as double, 8 as double, 8 as double, 8 as double, 8 as double, 0 as double, 0 as double, 0 as double]",
+    verify_test_result_function: compareFloatPointValue
+ }
+
+- {
     method_name: replace,
     object_type: String,
 
@@ -1393,10 +1412,10 @@
     init_object_data_type: "String[]",
     init_object_data: '["No pattern found", "value0->value1->value2->value3->value4", "\nvalue0\nvalue1\nvalue2\nvalue3\nvalue4\n", "empty", "abcd", "aaaaa"]',
 
-    param_types: {pattern: String},
-    param_nature: {pattern: primitive},
-    param_init_data_types: {pattern: "String[]"},
-    param_list: {pattern: [ "*", "->", "\n", "", "abcd", "aa"]},
+    param_types: {separator: String},
+    param_nature: {separator: primitive},
+    param_init_data_types: {separator: "String[]"},
+    param_list: {separator: [ "*", "->", "\n", "", "abcd", "aa"]},
 
     method_return_type: "String[]",
     result_nature: "array",
@@ -1413,10 +1432,10 @@
     init_object_data_type: "String[]",
     init_object_data: '["*value0*value1*value2*value3*value4*", "*value0*value1*value2*value3*value4*", "*value0*value1*value2*value3*value4*", "*value0*value1*value2*value3*value4*", "value0", "value0", "empty", "empty"]',
 
-    param_types: {pattern: String, limit: int},
-    param_nature: {pattern: primitive, limit: primitive},
-    param_init_data_types: {pattern: "String[]", limit: "int[]"},
-    param_list: {pattern: [ "*", "*", "*", "*", "8", "*", "", ""], limit: [0, 1, 2, -2, 1, 10, 3, 10]},
+    param_types: {separator: String, limit: Number},
+    param_nature: {separator: primitive, limit: object},
+    param_init_data_types: {separator: "String[]", limit: "Number[]"},
+    param_list: {separator: [ "*", "*", "*", "*", "8", "*", "", ""], limit: "[new Number(0), new Number(1), new Number(2), new Number(-2), new Number(1), new Number(10), new Number(3), new Number(10)]"},
 
     method_return_type: "String[]",
     result_nature: "array",

@@ -28,11 +28,11 @@ foreach(test ${strings_tests})
 
     if (PANDA_TARGET_ARM32)
         # failure in regalloc, see #13413
-        set(extra_options RUNTIME_EXTRA_OPTIONS "--compiler-inlining-blacklist=std.core.ETSGLOBAL::copyTo" "--compiler-regex='(?!std.core.ETSGLOBAL::copyTo).*'" "--compiler-ignore-failures=true")
+        set(extra_options RUNTIME_EXTRA_OPTIONS "--compiler-inlining-blacklist=std.core.ETSGLOBAL::copyTo,std.core.String::codePointAt" "--compiler-regex='(?!std.core.ETSGLOBAL::copyTo)&(?!std.core.String::codePointAt).*'" "--compiler-ignore-failures=true")
     endif()
 
     run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} ${extra_options})
-    add_dependencies(ets_test_suite_strings 
+    add_dependencies(ets_test_suite_strings
         ${target}-ets-jit
         ${target}-ets-int)
     if (NOT CMAKE_CROSSCOMPILING)

@@ -49,10 +49,11 @@ enum class EtsTypeAPIKind : EtsByte {
     NUL = 0x13U,
 
     ENUM = 0x14U
-
 };
 
 constexpr EtsByte ETS_TYPE_KIND_VALUE_MASK = 1U << 6U;
+
+constexpr EtsChar VOID_PRIMITIVE_TYPE_DESC = 'V';
 
 enum class EtsValueTypeDesc : EtsChar {
     BOOLEAN = 'Z',

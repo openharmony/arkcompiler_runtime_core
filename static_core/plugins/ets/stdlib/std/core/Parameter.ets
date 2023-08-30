@@ -15,6 +15,9 @@
 
 package std.core;
 
+/**
+ * Represents parameter of function type
+ */
 export final class Parameter extends Object {
     private td: TypeDesc
     private name: string
@@ -23,7 +26,7 @@ export final class Parameter extends Object {
     private constructor () {}
 
     public getType(): Type {
-        return Type.resolve(this.td)
+        return Type.resolve(this.td)!
     }
 
     public getName(): string {

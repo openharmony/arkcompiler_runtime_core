@@ -37,6 +37,7 @@ public:
     static constexpr auto FLAG_DOTALL = (1U << 3U);
     static constexpr auto FLAG_UTF16 = (1U << 4U);
     static constexpr auto FLAG_STICKY = (1U << 5U);
+    static constexpr auto FLAG_HASINDICES = (1U << 6U);
     static const uint32_t KEY_EOF = UINT32_MAX;
     static constexpr int CLASS_RANGE_BASE = 0x40000000;
     static constexpr uint32_t NUM_CAPTURE__OFFSET = 4;
