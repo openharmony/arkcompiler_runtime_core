@@ -1498,9 +1498,12 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
                 }
                 doubleCapture = true;
                 i += 2
-            } else if (replacement.charAt(i) == c'$' && replacement.charAt(i + 1) == c'<') {
+            } else if (i + 1 < replacement.getLength()
+                            && replacement.charAt(i) == c'$'
+                            && replacement.charAt(i + 1) == c'<') {
                 if (namedCaptures == undefined) {
                     result += "$<";
+                    i += 2;
                 } else {
                     let j = i + 2;
                     for (; j < replacement.getLength() && replacement.charAt(j) != c'>'; ++j) {}
@@ -1759,6 +1762,15 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         }
         return (regexp as RegExp).match(this)
     }
+
+    public match(implicitRegExp: String): RegExpMatchArray | null {
+        return new RegExp(implicitRegExp).match(this)
+    }
+
+    public match(regexp: RegExp): RegExpMatchArray | null {
+        return regexp.match(this)
+    }
+
 
     /**
      * Returns an iterator of all results matching a string against a regular expression,

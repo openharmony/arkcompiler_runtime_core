@@ -39,7 +39,7 @@ export final class Promise<out T> {
             }, (error: Object|null): void => {
                 this.rejectImpl(error as NullableType)
             });
-        } catch (error) {
+    } catch (error) {
             this.rejectImpl(error as NullableType);
         }
     }

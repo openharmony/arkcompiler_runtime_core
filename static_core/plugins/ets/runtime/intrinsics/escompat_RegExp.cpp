@@ -29,6 +29,7 @@
 #include "runtime/handle_scope-inl.h"
 #include "types/ets_object.h"
 #include "types/ets_primitives.h"
+#include <array>
 
 namespace ark::ets::intrinsics {
 using RegExpParser = ark::RegExpParser;
@@ -174,7 +175,9 @@ extern "C" EtsObject *EscompatRegExpCompile(EtsObject *regexpObj)
     auto flagsBits = static_cast<uint8_t>(CastToBitMask(flags));
 
     RegExpParser parser = RegExpParser();
-    parser.Init(reinterpret_cast<char *>(patternStr->GetDataMUtf8()), patternStr->GetLength(), flagsBits);
+    PandaString pattern = ConvertToString(patternStr->GetCoreType());
+
+    parser.Init(const_cast<char *>(reinterpret_cast<const char *>(pattern.c_str())), pattern.size(), flagsBits);
     parser.Parse();
 
     SetGroupNames(regexp.GetPtr(), parser);
@@ -216,7 +219,10 @@ void SetSuccessfulMatchLegacyProperties(EtsClass *type, const PandaVector<VMMuta
 
     EtsField *leftContextField = type->GetStaticFieldIDByName(LEFT_CONTEXT_FIELD_NAME);
     PandaString inputCopy = inputStr->GetMutf8();
+    auto old = inputCopy[index];
+    inputCopy[index] = 0;
     VMHandle<EtsString> prefix(coroutine, EtsString::CreateFromMUtf8(inputCopy.c_str(), index)->GetCoreType());
+    inputCopy[index] = old;
     type->SetStaticFieldObject(leftContextField, prefix->AsObject());
     const char *suffixBegin = std::next(inputCopy.c_str(), index + matches.front().GetPtr()->GetLength());
 

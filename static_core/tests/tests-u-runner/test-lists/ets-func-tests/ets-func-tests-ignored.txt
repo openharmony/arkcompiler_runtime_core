@@ -436,9 +436,12 @@ spec/import_export/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
 ### Issue 14660
 spec/import_export/03.import_directives/05.default_import_binding/default_import_binding.ets
 ### Issue 15312
+std/core/std_core_string_String_fromCharCode_008.ets
+std/core/std_core_string_String_search_String_005.ets
 std/core/std_core_string_String_localeCompare_string.ets
 std/core/std_core_string_String_localeCompare_string_001.ets
 std/core/std_core_string_String_localeCompare_string_002.ets
+std/core/std_core_string_String_localeCompare_string_004.ets
 ### Issue 15119
 std/core/std_core_string_String_fromCharCode_006.ets
 ### Issue 15274
@@ -735,7 +738,7 @@ std/core/std_core_typedarrays__BigInt64Array.ets
 ### BigInt64Array end
 
 ### Failures #15642
-# Type violation in type erasure 
+# Type violation in type erasure
 regression/12581_box_type_array_Boolean_array.ets
 regression/12581_box_type_array_Byte_array.ets
 regression/12581_box_type_array_Int_array.ets

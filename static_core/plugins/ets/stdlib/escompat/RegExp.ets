@@ -362,6 +362,16 @@ export class RegExp extends Object {
     }
 
     /**
+     * Constructs a new RegExp by other RegExp
+     *
+     * @param regexp other regexp
+     */
+    public constructor(regexp: RegExp) {
+        this(regexp.pattern_, regexp.flags)
+    }
+
+
+    /**
      * Compiles a regular expression
      */
     public native compile(): RegExp;
@@ -573,30 +583,37 @@ export class RegExp extends Object {
 
     public match(str: String): RegExpMatchArray | null {
         if (!this.global) {
-            return this.exec(str);
+            return this.exec(str)
         }
-        this.lastIndex = 0;
-        let matches = new ArrayAsListString();
+        this.lastIndex = 0
+        let matches = new ArrayAsListString()
+        let n = 0
         while (true) {
-            let result = this.exec(str);
+            let result = this.exec(str)
             if (result == null) {
-                return new RegExpMatchArray(-1, "", matches.toArray());
+                if (n == 0) {
+                    return null
+                }
+                return new RegExpMatchArray(-1, "", matches.toArray())
             }
             else {
-                let matchStr = result!.get(0);
-                matches.pushBack(matchStr);
+                let matchStr = result!.get(0)
+                matches.pushBack(matchStr)
                 if (matchStr == "") {
-                    this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode);
+                    this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
                 }
+                n++
             }
         }
     }
 
     public matchAll(str: String): IterableIterator<RegExpMatchArray> {
-        if (this.global) {
-            return new GlobalRegExpStringIterator(this, str)
+        let matcher = new RegExp(this)
+        matcher.lastIndex = this.lastIndex
+        if (matcher.global) {
+            return new GlobalRegExpStringIterator(matcher, str)
         } else {
-            return new RegExpStringIterator(this, str)
+            return new RegExpStringIterator(matcher, str)
         }
     }
 

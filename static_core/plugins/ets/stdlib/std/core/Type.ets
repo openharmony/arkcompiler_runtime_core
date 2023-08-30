@@ -1905,7 +1905,7 @@ export final class ClassType extends Type {
  */
 export final class InterfaceType extends Type {
     public constructor() {}
-    
+
     public constructor(td: TypeDesc) {
         this.td = td
     }
