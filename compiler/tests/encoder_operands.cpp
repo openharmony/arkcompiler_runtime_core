@@ -323,17 +323,4 @@ TEST(Operands, Imm)
     // Imm holds 2 uint64_t values (std::variant)
     ASSERT_LE(sizeof(Imm), sizeof(uint64_t) * 2);
 }
-
-TEST(Operands, MemRef)
-{
-    Reg r1(1, INT64_TYPE), r2(2, INT64_TYPE), r_i(INVALID_REG_ID, INVALID_TYPE);
-    ssize_t i1(0x0), i2(0x2);
-
-    MemRef arr[] {MemRef(r1), MemRef(r1, i1), MemRef(r1)};
-    // 1. Check constructors
-    //  for getters
-    //  for validness
-    //  for operator ==
-    // 2. Create mem with invalid_reg / invalid imm
-}
 }  // namespace panda::compiler
