@@ -287,12 +287,17 @@ function(panda_add_asm_file)
         if (NOT PANDA_MINIMAL_VIXL)
             list(APPEND aot_compile_depends "ark_aotdump")
         endif()
+        if (DEFINED ARG_DEPENDS)
+            list(APPEND aot_compile_depends ${ARG_DEPENDS})
+        endif()
 
-        add_custom_command(OUTPUT "${aot_file}"
+        add_custom_target(${ARG_TARGET}-compile-aot
                 COMMENT "Running aot compiler for ${ARG_TARGET}"
                 COMMAND . ${launch_aot_file} || (cat ${build_err} && echo "Command: " && cat ${launch_aot_file} && false)
                 COMMAND ${aotdump_command}
                 DEPENDS ${aot_compile_depends})
+        add_custom_command(OUTPUT "${aot_file}"
+                           DEPENDS ${ARG_TARGET}-compile-aot)
         list(APPEND ARG_RUNTIME_OPTIONS "--aot-file=${aot_file}")
 
         if (ARG_AOT_STATS)
@@ -317,6 +322,7 @@ function(panda_add_asm_file)
                               COMMENT "Gathering AOT-statistics for ${ARG_TARGET}"
                               COMMAND . ${launch_aot_stats_file}
                               DEPENDS ${aot_compiler} "${binary_file}" compiler_stats_dir)
+            add_dependencies(${ARG_TARGET}-stats ${ARG_TARGET}-compile-aot)
         endif()
     endif()
 
@@ -362,6 +368,10 @@ function(panda_add_asm_file)
                       COMMENT "Running ${ARG_TARGET}"
                       COMMAND . ${launch_file} || (cat ${error_file} && false)
                       DEPENDS ${panda_cli} "${binary_file}" ${aot_file})
+
+    if (ARG_AOT_MODE)
+        add_dependencies(${ARG_TARGET} ${ARG_TARGET}-compile-aot)
+    endif()
 
     if (DEFINED ARG_DEPENDS)
         add_dependencies(${ARG_TARGET} ${ARG_DEPENDS})

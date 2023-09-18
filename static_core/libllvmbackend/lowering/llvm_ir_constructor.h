@@ -175,7 +175,7 @@ private:
     llvm::Value *ToSSizeT(llvm::Value *value);
 
     ArenaVector<llvm::Value *> GetArgumentsForCall(llvm::Value *callee, CallInst *call, bool skipFirst = false);
-    ArenaVector<llvm::Value *> GetIntrinsicArguments(llvm::FunctionType *intrinsicFunctionType, Inst *inst);
+    ArenaVector<llvm::Value *> GetIntrinsicArguments(llvm::FunctionType *intrinsicFunctionType, IntrinsicInst *inst);
 
     llvm::StringRef GetRuntimeFunctionName(RuntimeCallId id);
     llvm::FunctionType *GetFunctionTypeForCall(CallInst *call);

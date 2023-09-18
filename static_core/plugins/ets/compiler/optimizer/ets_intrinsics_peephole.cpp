@@ -105,9 +105,9 @@ bool TryInsertFieldInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr kla
         return false;
     }
     Inst *memObj;
-    auto type = intrinsic->GetType();
     auto pc = intrinsic->GetPc();
     if constexpr (IS_STORE) {
+        auto type = intrinsic->GetInputType(1);
         auto storeField = graph->CreateInstStoreObject(type, pc);
         storeField->SetTypeId(fieldId);
         storeField->SetMethod(intrinsic->GetMethod());
@@ -121,6 +121,7 @@ bool TryInsertFieldInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr kla
         storeField->SetInput(1, intrinsic->GetInput(1).GetInst());
         memObj = storeField;
     } else {
+        auto type = intrinsic->GetType();
         auto loadField = graph->CreateInstLoadObject(type, pc);
         loadField->SetTypeId(fieldId);
         loadField->SetMethod(intrinsic->GetMethod());

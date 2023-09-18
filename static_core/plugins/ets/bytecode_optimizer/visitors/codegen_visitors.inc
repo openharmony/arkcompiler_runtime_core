@@ -115,35 +115,39 @@ static void VisitEtsLdObjByName(BytecodeGen *enc, compiler::IntrinsicInst *inst)
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_I32:
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_F32:
             enc->result_.emplace_back(pandasm::Create_ETS_LDOBJ_NAME(v0, bcId0));
+            DoSta(inst->GetDstReg(), enc->result_);
             break;
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_I64:
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_F64:
             enc->result_.emplace_back(pandasm::Create_ETS_LDOBJ_NAME_64(v0, bcId0));
+            DoSta64(inst->GetDstReg(), enc->result_);
             break;
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_OBJ:
             enc->result_.emplace_back(pandasm::Create_ETS_LDOBJ_NAME_OBJ(v0, bcId0));
+            DoStaObj(inst->GetDstReg(), enc->result_);
             break;
         default:
             UNREACHABLE();
     }
-    DoSta(inst->GetDstReg(), enc->result_);
 }
 
 static void VisitEtsStObjByName(BytecodeGen *enc, compiler::IntrinsicInst *inst)
 {
-    DoLda(inst->GetSrcReg(1U), enc->result_);
     auto v0 = inst->GetSrcReg(0);
     auto bcId0 = enc->irInterface_->GetFieldIdByOffset(static_cast<uint32_t>(inst->GetImms()[0]));
     switch (inst->GetIntrinsicId()) {
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I32:
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_F32:
+            DoLda(inst->GetSrcReg(1U), enc->result_);
             enc->result_.emplace_back(pandasm::Create_ETS_STOBJ_NAME(v0, bcId0));
             break;
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I64:
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_F64:
+            DoLda64(inst->GetSrcReg(1U), enc->result_);
             enc->result_.emplace_back(pandasm::Create_ETS_STOBJ_NAME_64(v0, bcId0));
             break;
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_OBJ:
+            DoLdaObj(inst->GetSrcReg(1U), enc->result_);
             enc->result_.emplace_back(pandasm::Create_ETS_STOBJ_NAME_OBJ(v0, bcId0));
             break;
         default:

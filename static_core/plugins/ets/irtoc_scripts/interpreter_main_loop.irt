@@ -32,3 +32,15 @@
   when "ETS_ISUNDEFINED_PREF_NONE"
     handle_ets_isundefined()
 
+  when "ETS_LDOBJ_NAME_PREF_V8_ID32"
+    handle_ets_ldobj_name_short(op[0], as_id(op[1]), i.format.size)
+  when "ETS_LDOBJ_NAME_64_PREF_V8_ID32"
+    handle_ets_ldobj_name_long(op[0], as_id(op[1]), i.format.size)
+  when "ETS_LDOBJ_NAME_OBJ_PREF_V8_ID32"
+    handle_ets_ldobj_name_obj(op[0], as_id(op[1]), i.format.size)
+  when "ETS_STOBJ_NAME_PREF_V8_ID32"
+    handle_ets_stobj_name_short(op[0], as_id(op[1]), i.format.size)
+  when "ETS_STOBJ_NAME_64_PREF_V8_ID32"
+    handle_ets_stobj_name_long(op[0], as_id(op[1]), i.format.size)
+  when "ETS_STOBJ_NAME_OBJ_PREF_V8_ID32"
+    handle_ets_stobj_name_obj(op[0], as_id(op[1]), i.format.size)

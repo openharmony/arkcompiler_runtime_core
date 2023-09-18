@@ -29,9 +29,9 @@ def llvm_type_getter(type, gc_space)
   }
   if @llvm_type_map.key? type
     return 'llvm::Type::get' + @llvm_type_map[type] + 'Ty(ctx)'
-  elsif type == 'void *'
+  elsif type == 'void *' || type == 'ark::Method *'
     return 'llvm::PointerType::get(ctx, 0)'
-  elsif  type.include? '*'
+  elsif type.include? '*'
     return 'llvm::PointerType::get(ctx, '+ gc_space + ')'
   else
     raise "Unexpected type required to lower into LLVM IR: #{type}"

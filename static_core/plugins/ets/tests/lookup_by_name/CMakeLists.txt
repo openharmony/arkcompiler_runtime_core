@@ -28,8 +28,13 @@ set(LOOKUP_BY_NAME_TEST_LIST
     "wrong_setter_args_case_4"
     "wrong_getter_args_case"
     "wrong_getter_args_case_2"
+    "field_case_8bit"
+    "field_case_32bit"
+    "field_case_64bit"
+    "field_case_ref"
 )
 add_custom_target(ets_tests_lookup_by_name)
+add_dependencies(ets_tests ets_tests_lookup_by_name)
 
 foreach(NAME ${LOOKUP_BY_NAME_TEST_LIST})
     panda_add_asm_file(
@@ -39,10 +44,9 @@ foreach(NAME ${LOOKUP_BY_NAME_TEST_LIST})
         LANGUAGE_CONTEXT ets
         ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
         ASSEMBLER_OPTIONS "--optimize"
-        RUNTIME_OPTIONS "--interpreter-type=cpp"
     )
     add_dependencies(ets_tests_lookup_by_name ets_lookup_by_name_${NAME})
-    if(PANDA_COMPILER_ENABLE)
+    if(PANDA_COMPILER_ENABLE AND NOT PANDA_TARGET_ARM32)
         panda_add_asm_file(
             FILE ${PANDA_ETS_PLUGIN_SOURCE}/tests/lookup_by_name/${NAME}.pa
             TARGET ets_lookup_by_name_${NAME}_enforce_jit
@@ -50,7 +54,7 @@ foreach(NAME ${LOOKUP_BY_NAME_TEST_LIST})
             LANGUAGE_CONTEXT ets
             ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
             ASSEMBLER_OPTIONS "--optimize"
-            RUNTIME_OPTIONS "--interpreter-type=cpp" "--compiler-enable-jit=true" "--compiler-hotness-threshold=0" "--no-async-jit"
+            RUNTIME_OPTIONS "--compiler-enable-jit=true" "--compiler-hotness-threshold=0" "--no-async-jit"
         )
         add_dependencies(ets_tests_lookup_by_name ets_lookup_by_name_${NAME}_enforce_jit)
 
@@ -63,7 +67,7 @@ foreach(NAME ${LOOKUP_BY_NAME_TEST_LIST})
                 AOT_MODE TRUE
                 ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
                 ASSEMBLER_OPTIONS "--optimize"
-                RUNTIME_OPTIONS "--interpreter-type=cpp" "--compiler-enable-jit=true"
+                RUNTIME_OPTIONS "--compiler-enable-jit=true"
             )
             add_dependencies(ets_tests_lookup_by_name ets_lookup_by_name_${NAME}_aot)
 
@@ -77,7 +81,7 @@ foreach(NAME ${LOOKUP_BY_NAME_TEST_LIST})
                     AOT_COMPILER "llvm"
                     ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
                     ASSEMBLER_OPTIONS "--optimize"
-                    RUNTIME_OPTIONS "--interpreter-type=cpp" "--compiler-enable-jit=true"
+                    RUNTIME_OPTIONS "--compiler-enable-jit=true"
                 )
                 add_dependencies(ets_tests_lookup_by_name ets_lookup_by_name_${NAME}_llvmaot)
             endif()
@@ -134,6 +138,10 @@ add_ets_verifier_test(FILE "correct_case_32bit")
 add_ets_verifier_test(FILE "correct_case_64bit")
 add_ets_verifier_test(FILE "correct_case_ref")
 add_ets_verifier_test(FILE "correct_case_ref_2")
+add_ets_verifier_test(FILE "field_case_8bit")
+add_ets_verifier_test(FILE "field_case_32bit")
+add_ets_verifier_test(FILE "field_case_64bit")
+add_ets_verifier_test(FILE "field_case_ref")
 add_ets_verifier_test(FILE "no_field_case" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad field name or bit width")
 add_ets_verifier_test(FILE "no_field_case_2" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad field name or bit width")
 add_ets_verifier_test(FILE "no_getter_case" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad field name or bit width")

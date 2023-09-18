@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
 #include "runtime/arch/helpers.h"
 #include "runtime/interpreter/vregister_iterator.h"
 
@@ -134,6 +135,115 @@ extern "C" ObjectHeader *LaunchFromInterpreterLong(Method *method, Frame *frame,
 extern "C" ObjectHeader *LaunchFromInterpreterRange(Method *method, Frame *frame, const uint8_t *pc)
 {
     return LaunchFromInterpreterImpl<BytecodeInstruction::Format::PREF_V8_ID16>(method, frame, pc);
+}
+
+extern "C" Field *LookupFieldByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
+                                              Method *caller, const uint8_t *pc)
+{
+    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    auto *field = klass->LookupFieldByName(rawField->GetName());
+    if (field != nullptr) {
+        *entry = {pc, caller, static_cast<void *>(field)};
+    }
+    return field;
+}
+
+constexpr static uint64_t METHOD_FLAG_MASK = 0x00000001;
+
+template <panda_file::Type::TypeId FORMAT>
+Method *LookupGetterByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id, Method *caller,
+                                     const uint8_t *pc)
+{
+    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    auto *method = klass->LookupGetterByName<FORMAT>(rawField->GetName());
+    auto mUint = reinterpret_cast<uint64_t>(method);
+    if (method != nullptr) {
+        *entry = {pc, caller, reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK)};
+    }
+    return method;
+}
+
+template <panda_file::Type::TypeId FORMAT>
+Method *LookupSetterByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id, Method *caller,
+                                     const uint8_t *pc)
+{
+    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    auto *method = klass->LookupSetterByName<FORMAT>(rawField->GetName());
+    auto mUint = reinterpret_cast<uint64_t>(method);
+    if (method != nullptr) {
+        *entry = {pc, caller, reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK)};
+    }
+    return method;
+}
+
+extern "C" Method *LookupGetterByNameShortEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
+                                                     Method *caller, const uint8_t *pc)
+{
+    return LookupGetterByNameEntrypoint<panda_file::Type::TypeId::I32>(entry, obj, id, caller, pc);
+}
+
+extern "C" Method *LookupGetterByNameLongEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
+                                                    Method *caller, const uint8_t *pc)
+{
+    return LookupGetterByNameEntrypoint<panda_file::Type::TypeId::I64>(entry, obj, id, caller, pc);
+}
+
+extern "C" Method *LookupGetterByNameObjEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
+                                                   Method *caller, const uint8_t *pc)
+{
+    return LookupGetterByNameEntrypoint<panda_file::Type::TypeId::REFERENCE>(entry, obj, id, caller, pc);
+}
+
+extern "C" Method *LookupSetterByNameShortEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
+                                                     Method *caller, const uint8_t *pc)
+{
+    return LookupSetterByNameEntrypoint<panda_file::Type::TypeId::I32>(entry, obj, id, caller, pc);
+}
+
+extern "C" Method *LookupSetterByNameLongEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
+                                                    Method *caller, const uint8_t *pc)
+{
+    return LookupSetterByNameEntrypoint<panda_file::Type::TypeId::I64>(entry, obj, id, caller, pc);
+}
+
+extern "C" Method *LookupSetterByNameObjEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
+                                                   Method *caller, const uint8_t *pc)
+{
+    return LookupSetterByNameEntrypoint<panda_file::Type::TypeId::REFERENCE>(entry, obj, id, caller, pc);
+}
+
+extern "C" void ThrowEtsExceptionNoSuchGetterEntrypoint(ObjectHeader *obj, uint32_t id, Method *caller)
+{
+    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) + " does not have field and getter with name " +
+                    utf::Mutf8AsCString(rawField->GetName().data);
+    ThrowEtsException(
+        EtsCoroutine::GetCurrent(),
+        utf::Mutf8AsCString(
+            Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS).GetNoSuchFieldErrorDescriptor()),
+        errorMsg);
+}
+
+extern "C" void ThrowEtsExceptionNoSuchSetterEntrypoint(ObjectHeader *obj, uint32_t id, Method *caller)
+{
+    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) + " does not have field and setter with name " +
+                    utf::Mutf8AsCString(rawField->GetName().data);
+    ThrowEtsException(
+        EtsCoroutine::GetCurrent(),
+        utf::Mutf8AsCString(
+            Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS).GetNoSuchFieldErrorDescriptor()),
+        errorMsg);
 }
 
 }  // namespace ark::ets
