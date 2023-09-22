@@ -15,6 +15,9 @@
 
 #include "pipeline.h"
 #include "compiler_options.h"
+#include "inplace_task_runner.h"
+#include "background_task_runner.h"
+#include "compiler_task_runner.h"
 
 #include "optimizer/code_generator/codegen.h"
 #include "optimizer/code_generator/codegen_native.h"
@@ -79,16 +82,20 @@ static inline bool RunCodegenPass(Graph *graph)
     return graph->RunPass<CodegenNative>();
 }
 
-bool Pipeline::Run()
+/* static */
+template <TaskRunnerMode RUNNER_MODE>
+void Pipeline::Run(CompilerTaskRunner<RUNNER_MODE> task_runner)
 {
-    auto graph = GetGraph();
+    auto pipeline = task_runner.GetContext().GetPipeline();
+    auto *graph = pipeline->GetGraph();
 #if !defined(NDEBUG) && !defined(PANDA_TARGET_MOBILE)
     if (OPTIONS.IsCompilerVisualizerDump()) {
         graph->GetPassManager()->InitialDumpVisualizerGraph();
     }
 #endif  // NDEBUG && PANDA_TARGET_MOBILE
-    auto finalizer = [graph](void * /* unused */) { graph->GetPassManager()->Finalize(); };
-    std::unique_ptr<void, decltype(finalizer)> pp(&finalizer, finalizer);
+
+    task_runner.AddFinalize(
+        [](CompilerContext<RUNNER_MODE> &compiler_ctx) { compiler_ctx.GetGraph()->GetPassManager()->Finalize(); });
 
     if (OPTIONS.WasSetCompilerRegallocRegMask()) {
         COMPILER_LOG(DEBUG, REGALLOC) << "Regalloc mask force set to " << std::hex
@@ -97,20 +104,30 @@ bool Pipeline::Run()
     }
 
     if (!OPTIONS.IsCompilerNonOptimizing()) {
-        if (!RunOptimizations()) {
-            return false;
-        }
-    } else {
-        // TryCatchResolving is needed in the non-optimizing mode since it removes unreachable for compiler
-        // catch-handlers; After supporting catch-handlers' compilation, this pass can be run in the optimizing mode
-        // only.
-        graph->RunPass<TryCatchResolving>();
-        if (!graph->RunPass<MonitorAnalysis>()) {
-            LOG(WARNING, COMPILER) << "Compiler detected incorrect monitor policy";
-            return false;
-        }
+        task_runner.SetTaskOnSuccess([](CompilerTaskRunner<RUNNER_MODE> next_runner) {
+            Pipeline::RunRegAllocAndCodeGenPass<RUNNER_MODE>(std::move(next_runner));
+        });
+        bool success = pipeline->RunOptimizations();
+        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), success);
+        return;
     }
+    // TryCatchResolving is needed in the non-optimizing mode since it removes unreachable for compiler
+    // catch-handlers; After supporting catch-handlers' compilation, this pass can be run in the optimizing mode
+    // only.
+    graph->template RunPass<TryCatchResolving>();
+    if (!graph->template RunPass<MonitorAnalysis>()) {
+        LOG(WARNING, COMPILER) << "Compiler detected incorrect monitor policy";
+        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), false);
+        return;
+    }
+    Pipeline::RunRegAllocAndCodeGenPass<RUNNER_MODE>(std::move(task_runner));
+}
 
+/* static */
+template <TaskRunnerMode RUNNER_MODE>
+void Pipeline::RunRegAllocAndCodeGenPass(CompilerTaskRunner<RUNNER_MODE> task_runner)
+{
+    auto *graph = task_runner.GetContext().GetPipeline()->GetGraph();
     bool fatal_on_err = !OPTIONS.IsCompilerAllowBackendFailures();
     // Do not try to encode too large graph
     auto inst_size = graph->GetCurrentInstructionId();
@@ -120,24 +137,25 @@ bool Pipeline::Run()
         if (fatal_on_err) {
             LOG(FATAL, COMPILER) << "RunOptimizations failed: code predicted size too big";
         }
-        return false;
+        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), false);
+        return;
     }
-    graph->RunPass<Cleanup>();
-    if (!RegAlloc(graph)) {
-        if (fatal_on_err) {
-            LOG(FATAL, COMPILER) << "RunOptimizations failed: register allocation error";
-        }
-        return false;
-    }
+    graph->template RunPass<Cleanup>();
 
-    if (!RunCodegenPass(graph)) {
-        if (fatal_on_err) {
-            LOG(FATAL, COMPILER) << "RunOptimizations failed: code generation error";
-        }
-        return false;
+    task_runner.SetTaskOnSuccess([fatal_on_err](CompilerTaskRunner<RUNNER_MODE> next_runner) {
+        next_runner.AddCallbackOnFail([fatal_on_err]([[maybe_unused]] CompilerContext<RUNNER_MODE> &compiler_ctx) {
+            if (fatal_on_err) {
+                LOG(FATAL, COMPILER) << "RunOptimizations failed: code generation error";
+            }
+        });
+        bool success = RunCodegenPass(next_runner.GetContext().GetPipeline()->GetGraph());
+        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(next_runner), success);
+    });
+    bool success = RegAlloc(graph);
+    if (!success && fatal_on_err) {
+        LOG(FATAL, COMPILER) << "RunOptimizations failed: register allocation error";
     }
-
-    return true;
+    CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), success);
 }
 
 bool Pipeline::RunOptimizations()
@@ -241,5 +259,10 @@ bool Pipeline::RunOptimizations()
 
     return true;
 }
+
+template void Pipeline::Run<BACKGROUND_MODE>(CompilerTaskRunner<BACKGROUND_MODE>);
+template void Pipeline::Run<INPLACE_MODE>(CompilerTaskRunner<INPLACE_MODE>);
+template void Pipeline::RunRegAllocAndCodeGenPass<BACKGROUND_MODE>(CompilerTaskRunner<BACKGROUND_MODE>);
+template void Pipeline::RunRegAllocAndCodeGenPass<INPLACE_MODE>(CompilerTaskRunner<INPLACE_MODE>);
 
 }  // namespace panda::compiler

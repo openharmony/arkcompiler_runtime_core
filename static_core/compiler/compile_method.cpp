@@ -82,7 +82,7 @@ static void EndCompilation(const std::string &method_name, bool is_osr, size_t b
     }
 }
 
-static Arch ChooseArch(Arch arch)
+Arch ChooseArch(Arch arch)
 {
     if (arch != Arch::NONE) {
         return arch;
@@ -165,57 +165,54 @@ static uint8_t *GetEntryPoint(Graph *graph, [[maybe_unused]] Method *method, con
     return entry_point;
 }
 
-bool JITCompileMethod(RuntimeInterface *runtime, Method *method, bool is_osr, CodeAllocator *code_allocator,
-                      ArenaAllocator *allocator, ArenaAllocator *local_allocator,
-                      ArenaAllocator *gdb_debug_info_allocator, JITStats *jit_stats)
+template <TaskRunnerMode RUNNER_MODE>
+static void RunOptimizations(CompilerTaskRunner<RUNNER_MODE> task_runner, JITStats *jit_stats)
 {
-    std::string method_name = runtime->GetMethodFullName(method, false);
-    SCOPED_TRACE_STREAM << "JIT compiling " << method_name;
+    auto &task_ctx = task_runner.GetContext();
+    task_ctx.GetGraph()->SetLanguage(task_ctx.GetMethod()->GetClass()->GetSourceLang());
 
-    if (!OPTIONS.MatchesRegex(method_name)) {
-        LOG(DEBUG, COMPILER) << "Skip the method due to regexp mismatch: " << method_name;
-        return false;
-    }
-
-    if (jit_stats != nullptr) {
-        jit_stats->SetCompilationStart();
-    }
-
-    Graph *graph {nullptr};
-    auto finalizer = [graph, jit_stats]([[maybe_unused]] void *ptr) {
-        if (jit_stats != nullptr) {
-            // Reset compilation start time in all cases for consistency
-            jit_stats->ResetCompilationStart();
+    task_runner.AddCallbackOnSuccess([]([[maybe_unused]] CompilerContext<RUNNER_MODE> &compiler_ctx) {
+        LOG(DEBUG, COMPILER) << "The method " << compiler_ctx.GetMethodName() << " is compiled";
+    });
+    task_runner.AddCallbackOnFail([jit_stats](CompilerContext<RUNNER_MODE> &compiler_ctx) {
+        if (!compiler::OPTIONS.IsCompilerIgnoreFailures()) {
+            LOG(FATAL, COMPILER) << "RunOptimizations failed!";
         }
-        if (graph != nullptr) {
-            graph->~Graph();
-        }
-    };
-    std::unique_ptr<void, decltype(finalizer)> fin(&finalizer, finalizer);
+        LOG(WARNING, COMPILER) << "RunOptimizations failed!";
+        EndCompilation(compiler_ctx.GetMethodName(), compiler_ctx.IsOsr(), compiler_ctx.GetMethod()->GetCodeSize(), 0,
+                       0, 0, events::CompilationStatus::FAILED, jit_stats);
+    });
 
-    auto arch {Arch::NONE};
-    bool is_dynamic = panda::panda_file::IsDynamicLanguage(method->GetClass()->GetSourceLang());
-    if (!CompileInGraph(runtime, method, is_osr, allocator, local_allocator, is_dynamic, &arch, method_name, &graph,
-                        jit_stats)) {
-        return false;
-    }
+    // Run compiler optimizations over created graph
+    RunOptimizations<RUNNER_MODE>(std::move(task_runner));
+}
+
+template <TaskRunnerMode RUNNER_MODE>
+static bool CheckCompilation(RuntimeInterface *runtime, CodeAllocator *code_allocator,
+                             ArenaAllocator *gdb_debug_info_allocator, JITStats *jit_stats, bool is_dynamic, Arch arch,
+                             CompilerContext<RUNNER_MODE> &compiler_ctx)
+{
+    auto *graph = compiler_ctx.GetGraph();
+
     ASSERT(graph != nullptr && graph->GetCode().data() != nullptr);
 
+    auto &name = compiler_ctx.GetMethodName();
+    auto is_osr = compiler_ctx.IsOsr();
+    auto *method = compiler_ctx.GetMethod();
+
     if (!is_dynamic && !CheckSingleImplementation(graph)) {
-        EndCompilation(method_name, is_osr, method->GetCodeSize(), 0, 0, 0,
-                       events::CompilationStatus::FAILED_SINGLE_IMPL, jit_stats);
+        EndCompilation(name, is_osr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::FAILED_SINGLE_IMPL,
+                       jit_stats);
         return false;
     }
 
     // Drop non-native code in any case
     if (arch != RUNTIME_ARCH) {
-        EndCompilation(method_name, is_osr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::DROPPED,
-                       jit_stats);
+        EndCompilation(name, is_osr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::DROPPED, jit_stats);
         return false;
     }
 
-    auto entry_point =
-        GetEntryPoint(graph, method, method_name, is_osr, code_allocator, gdb_debug_info_allocator, jit_stats);
+    auto entry_point = GetEntryPoint(graph, method, name, is_osr, code_allocator, gdb_debug_info_allocator, jit_stats);
     if (entry_point == nullptr) {
         return false;
     }
@@ -228,59 +225,120 @@ bool JITCompileMethod(RuntimeInterface *runtime, Method *method, bool is_osr, Co
     } else {
         runtime->SetCompiledEntryPoint(method, entry_point);
     }
-    ASSERT(graph != nullptr);
     return true;
 }
 
-bool CompileInGraph(RuntimeInterface *runtime, Method *method, bool is_osr, ArenaAllocator *allocator,
-                    ArenaAllocator *local_allocator, bool is_dynamic, Arch *arch, const std::string &method_name,
-                    Graph **graph, JITStats *jit_stats)
+template <TaskRunnerMode RUNNER_MODE>
+void JITCompileMethod(RuntimeInterface *runtime, CodeAllocator *code_allocator,
+                      ArenaAllocator *gdb_debug_info_allocator, JITStats *jit_stats,
+                      CompilerTaskRunner<RUNNER_MODE> task_runner)
 {
-    LOG(INFO, COMPILER) << "Compile method" << (is_osr ? "(OSR)" : "") << ": " << method_name << " ("
-                        << runtime->GetFileName(method) << ')';
-    *arch = ChooseArch(*arch);
-    if (*arch == Arch::NONE || !BackendSupport(*arch)) {
-        LOG(DEBUG, COMPILER) << "Compilation unsupported for this platform!";
-        return false;
+    auto &task_ctx = task_runner.GetContext();
+    auto *task_method = task_ctx.GetMethod();
+    task_ctx.SetMethodName(runtime->GetMethodFullName(task_method, false));
+    auto &method_name = task_ctx.GetMethodName();
+
+    SCOPED_TRACE_STREAM << "JIT compiling " << method_name;
+
+    if (!OPTIONS.MatchesRegex(method_name)) {
+        LOG(DEBUG, COMPILER) << "Skip the method due to regexp mismatch: " << method_name;
+        task_ctx.SetCompilationStatus(false);
+        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), false);
+        return;
     }
 
-    ASSERT(*graph == nullptr);
-    *graph = allocator->New<Graph>(allocator, local_allocator, *arch, method, runtime, is_osr, nullptr, is_dynamic);
-    if (*graph == nullptr) {
+    if (jit_stats != nullptr) {
+        jit_stats->SetCompilationStart();
+    }
+
+    task_runner.AddFinalize([jit_stats](CompilerContext<RUNNER_MODE> &compiler_ctx) {
+        if (jit_stats != nullptr) {
+            // Reset compilation start time in all cases for consistency
+            jit_stats->ResetCompilationStart();
+        }
+        auto *graph = compiler_ctx.GetGraph();
+        if (graph != nullptr) {
+            graph->~Graph();
+        }
+    });
+
+    auto arch = ChooseArch(Arch::NONE);
+    bool is_dynamic = panda::panda_file::IsDynamicLanguage(task_method->GetClass()->GetSourceLang());
+
+    task_runner.AddCallbackOnSuccess([runtime, code_allocator, gdb_debug_info_allocator, jit_stats, is_dynamic,
+                                      arch](CompilerContext<RUNNER_MODE> &compiler_ctx) {
+        bool compilation_status = CheckCompilation<RUNNER_MODE>(runtime, code_allocator, gdb_debug_info_allocator,
+                                                                jit_stats, is_dynamic, arch, compiler_ctx);
+        compiler_ctx.SetCompilationStatus(compilation_status);
+    });
+    task_runner.AddCallbackOnFail(
+        [](CompilerContext<RUNNER_MODE> &compiler_ctx) { compiler_ctx.SetCompilationStatus(false); });
+
+    CompileInGraph<RUNNER_MODE>(runtime, is_dynamic, arch, std::move(task_runner), jit_stats);
+}
+
+template <TaskRunnerMode RUNNER_MODE>
+void CompileInGraph(RuntimeInterface *runtime, bool is_dynamic, Arch arch, CompilerTaskRunner<RUNNER_MODE> task_runner,
+                    JITStats *jit_stats)
+{
+    auto &task_ctx = task_runner.GetContext();
+    auto is_osr = task_ctx.IsOsr();
+    auto *method = task_ctx.GetMethod();
+    auto &method_name = task_ctx.GetMethodName();
+
+    LOG(INFO, COMPILER) << "Compile method" << (is_osr ? "(OSR)" : "") << ": " << method_name << " ("
+                        << runtime->GetFileName(method) << ')';
+
+    if (arch == Arch::NONE || !BackendSupport(arch)) {
+        LOG(DEBUG, COMPILER) << "Compilation unsupported for this platform!";
+        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), false);
+        return;
+    }
+
+    auto *allocator = task_ctx.GetAllocator();
+    auto *local_allocator = task_ctx.GetLocalAllocator();
+    auto *graph =
+        allocator->template New<Graph>(allocator, local_allocator, arch, method, runtime, is_osr, nullptr, is_dynamic);
+    task_ctx.SetGraph(graph);
+    if (graph == nullptr) {
         LOG(ERROR, COMPILER) << "Creating graph failed!";
         EndCompilation(method_name, is_osr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::FAILED,
                        jit_stats);
-        return false;
+        CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), false);
+        return;
     }
 
-    if (!(*graph)->RunPass<IrBuilder>()) {
+    task_runner.SetTaskOnSuccess([jit_stats](CompilerTaskRunner<RUNNER_MODE> next_runner) {
+        RunOptimizations<RUNNER_MODE>(std::move(next_runner), jit_stats);
+    });
+
+    bool success = graph->template RunPass<IrBuilder>();
+    if (!success) {
         if (!compiler::OPTIONS.IsCompilerIgnoreFailures()) {
             LOG(FATAL, COMPILER) << "IrBuilder failed!";
         }
         LOG(WARNING, COMPILER) << "IrBuilder failed!";
         EndCompilation(method_name, is_osr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::FAILED,
                        jit_stats);
-        return false;
-    }
-
-    (*graph)->SetLanguage(method->GetClass()->GetSourceLang());
-
-    // Run compiler optimizations over created graph
-    bool res = RunOptimizations(*graph);
-    if (!res) {
-        if (!compiler::OPTIONS.IsCompilerIgnoreFailures()) {
-            LOG(FATAL, COMPILER) << "RunOptimizations failed!";
-        }
-        LOG(WARNING, COMPILER) << "RunOptimizations failed!";
-        EndCompilation(method_name, is_osr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::FAILED,
-                       jit_stats);
-        return false;
-    }
-
-    LOG(DEBUG, COMPILER) << "The method is compiled";
-
-    return true;
+    };
+    CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(task_runner), success);
 }
+
+template void JITCompileMethod<BACKGROUND_MODE>(RuntimeInterface *, CodeAllocator *, ArenaAllocator *, JITStats *,
+                                                CompilerTaskRunner<BACKGROUND_MODE>);
+template void JITCompileMethod<INPLACE_MODE>(RuntimeInterface *, CodeAllocator *, ArenaAllocator *, JITStats *,
+                                             CompilerTaskRunner<INPLACE_MODE>);
+template void CompileInGraph<BACKGROUND_MODE>(RuntimeInterface *, bool, Arch, CompilerTaskRunner<BACKGROUND_MODE>,
+                                              JITStats *);
+template void CompileInGraph<INPLACE_MODE>(RuntimeInterface *, bool, Arch, CompilerTaskRunner<INPLACE_MODE>,
+                                           JITStats *);
+template void RunOptimizations<BACKGROUND_MODE>(CompilerTaskRunner<BACKGROUND_MODE>, JITStats *);
+template void RunOptimizations<INPLACE_MODE>(CompilerTaskRunner<INPLACE_MODE>, JITStats *);
+template bool CheckCompilation<BACKGROUND_MODE>(RuntimeInterface *, CodeAllocator *, ArenaAllocator *, JITStats *, bool,
+                                                Arch, CompilerContext<BACKGROUND_MODE> &);
+template bool CheckCompilation<INPLACE_MODE>(RuntimeInterface *, CodeAllocator *, ArenaAllocator *, JITStats *, bool,
+                                             Arch, CompilerContext<INPLACE_MODE> &);
+
 }  // namespace panda::compiler
 
 #ifdef PANDA_COMPILER_DEBUG_INFO

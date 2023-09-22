@@ -73,6 +73,36 @@ Function::Result Function::Compile(Arch arch, ArenaAllocator *allocator, ArenaAl
     }
 #endif
 
+    if (GetGraph()->GetMode().IsNative()) {
+        compiler::InPlaceCompilerTaskRunner task_runner;
+        task_runner.GetContext().SetGraph(GetGraph());
+        bool success = true;
+        task_runner.AddCallbackOnFail(
+            [&success]([[maybe_unused]] compiler::InPlaceCompilerContext &compiler_ctx) { success = false; });
+        compiler::RunOptimizations<compiler::INPLACE_MODE>(std::move(task_runner));
+        if (!success) {
+            return Unexpected("RunOptimizations failed!");
+        }
+        llvm_compilation_result_ = LLVMCompilationResult::USE_ARK_AS_NO_SUFFIX;
+    } else {
+        LLVMCompilationResult compilation_result = LLVMCompilationResult::INVALID;
+        auto result = RunOptimizations(&runtime, allocator, compilation_result);
+        if (!result || result.Value() != 0) {
+            return result;
+        }
+        llvm_compilation_result_ = compilation_result;
+    }
+    builder_.reset(nullptr);
+
+    auto code = GetGraph()->GetCode();
+    SetCode(code);
+
+    return 0;
+}
+
+Function::Result Function::RunOptimizations(compiler::RuntimeInterface *runtime, ArenaAllocator *allocator,
+                                            LLVMCompilationResult &compilation_result)
+{
 #ifdef PANDA_LLVMAOT
     graph_mode_ = GetGraph()->GetMode();
     bool has_llvm = true;
@@ -81,66 +111,52 @@ Function::Result Function::Compile(Arch arch, ArenaAllocator *allocator, ArenaAl
 #endif
     bool has_llvm_suffix = std::string_view(GetName()).find(LLVM_SUFFIX) != std::string_view::npos;
 
-    if (GetGraph()->GetMode().IsNative()) {
-        if (!RunOptimizations(GetGraph())) {
-            return Unexpected("RunOptimizations failed!");
-        }
-        llvm_compilation_result_ = LLVMCompilationResult::USE_ARK_AS_NO_SUFFIX;
-    } else {
-        LLVMCompilationResult compilation_result = LLVMCompilationResult::INVALID;
-        if (GetGraph()->GetMode().IsInterpreter() || GetGraph()->GetMode().IsInterpreterEntry()) {
-            bool compile_by_ark = false;
-            if (has_llvm_suffix) {
-                // When build without LLVM, interpreter handlers with "_LLVM" suffix must be skipped
-                if (!has_llvm) {
-                    return 1;
-                }
-                compilation_result = CompileByLLVM(&runtime, &allocator_);
-                ASSERT(compilation_result == LLVMCompilationResult::USE_ARK_AS_SKIP_LIST ||
-                       compilation_result == LLVMCompilationResult::LLVM_COMPILED ||
-                       compilation_result == LLVMCompilationResult::LLVM_CAN_NOT_COMPILE);
-                compile_by_ark = compilation_result != LLVMCompilationResult::LLVM_COMPILED;
-            } else {
-                compilation_result = LLVMCompilationResult::USE_ARK_AS_NO_SUFFIX;
-                compile_by_ark = true;
+    if (GetGraph()->GetMode().IsInterpreter() || GetGraph()->GetMode().IsInterpreterEntry()) {
+        bool compile_by_ark = false;
+        if (has_llvm_suffix) {
+            // When build without LLVM, interpreter handlers with "_LLVM" suffix must be skipped
+            if (!has_llvm) {
+                return 1;
             }
-            if (compile_by_ark) {
-                ASSERT(GetGraph()->GetCode().Empty());
-                if (!RunIrtocInterpreterOptimizations(GetGraph())) {
-                    LOG(ERROR, IRTOC) << "RunIrtocInterpreterOptimizations failed for " << GetName();
-                    return Unexpected("RunIrtocInterpreterOptimizations failed!");
-                }
-            }
+            compilation_result = CompileByLLVM(runtime, allocator);
+            ASSERT(compilation_result == LLVMCompilationResult::USE_ARK_AS_SKIP_LIST ||
+                   compilation_result == LLVMCompilationResult::LLVM_COMPILED ||
+                   compilation_result == LLVMCompilationResult::LLVM_CAN_NOT_COMPILE);
+            compile_by_ark = compilation_result != LLVMCompilationResult::LLVM_COMPILED;
         } else {
-            LOG_IF(has_llvm_suffix, FATAL, IRTOC)
-                << "'" << GetName() << "' must not contain '" << LLVM_SUFFIX
-                << "' because only interpreter handlers are compiled by different compilers";
-            bool compile_by_ark = false;
-            if (has_llvm) {
-                compilation_result = CompileByLLVM(&runtime, &allocator_);
-                ASSERT(compilation_result == LLVMCompilationResult::USE_ARK_AS_SKIP_LIST ||
-                       compilation_result == LLVMCompilationResult::LLVM_COMPILED ||
-                       compilation_result == LLVMCompilationResult::LLVM_CAN_NOT_COMPILE);
-                compile_by_ark = compilation_result != LLVMCompilationResult::LLVM_COMPILED;
-            } else {
-                compilation_result = LLVMCompilationResult::USE_ARK_AS_SKIP_LIST;
-                compile_by_ark = true;
-            }
-            if (compile_by_ark) {
-                ASSERT(GetGraph()->GetCode().Empty());
-                if (!RunIrtocOptimizations(GetGraph())) {
-                    return Unexpected("RunOptimizations failed!");
-                }
+            compilation_result = LLVMCompilationResult::USE_ARK_AS_NO_SUFFIX;
+            compile_by_ark = true;
+        }
+        if (compile_by_ark) {
+            ASSERT(GetGraph()->GetCode().Empty());
+            if (!irtoc::RunIrtocInterpreterOptimizations(GetGraph())) {
+                LOG(ERROR, IRTOC) << "RunIrtocInterpreterOptimizations failed for " << GetName();
+                return Unexpected("RunIrtocInterpreterOptimizations failed!");
             }
         }
-        ASSERT(compilation_result != LLVMCompilationResult::INVALID);
-        llvm_compilation_result_ = compilation_result;
+    } else {
+        LOG_IF(has_llvm_suffix, FATAL, IRTOC)
+            << "'" << GetName() << "' must not contain '" << LLVM_SUFFIX
+            << "' because only interpreter handlers are compiled by different compilers";
+        bool compile_by_ark = false;
+        if (has_llvm) {
+            compilation_result = CompileByLLVM(runtime, allocator);
+            ASSERT(compilation_result == LLVMCompilationResult::USE_ARK_AS_SKIP_LIST ||
+                   compilation_result == LLVMCompilationResult::LLVM_COMPILED ||
+                   compilation_result == LLVMCompilationResult::LLVM_CAN_NOT_COMPILE);
+            compile_by_ark = compilation_result != LLVMCompilationResult::LLVM_COMPILED;
+        } else {
+            compilation_result = LLVMCompilationResult::USE_ARK_AS_SKIP_LIST;
+            compile_by_ark = true;
+        }
+        if (compile_by_ark) {
+            ASSERT(GetGraph()->GetCode().Empty());
+            if (!irtoc::RunIrtocOptimizations(GetGraph())) {
+                return Unexpected("RunOptimizations failed!");
+            }
+        }
     }
-    builder_.reset(nullptr);
-
-    auto code = GetGraph()->GetCode();
-    SetCode(code);
-
+    ASSERT(compilation_result != LLVMCompilationResult::INVALID);
     return 0;
 }
 

@@ -199,6 +199,9 @@ public:
 
     void SetCode(Span<uint8_t> code);
 
+    Result RunOptimizations(compiler::RuntimeInterface *runtime, ArenaAllocator *allocator,
+                            LLVMCompilationResult &compilation_result);
+
 protected:
     Arch GetArch() const
     {

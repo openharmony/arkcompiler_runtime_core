@@ -30,6 +30,10 @@
 #include "utils/span.h"
 #include "utils/arena_containers.h"
 
+namespace panda {
+class Thread;
+}  // namespace panda
+
 namespace panda::compiler {
 enum class ClassType {
     UNRESOLVED_CLASS = 0,
@@ -1293,6 +1297,11 @@ public:
     virtual void *GetConstantPool([[maybe_unused]] uintptr_t func_address)
     {
         return nullptr;
+    }
+
+    virtual void SetCurrentThread([[maybe_unused]] Thread *thread) const
+    {
+        UNREACHABLE();
     }
 
     NO_COPY_SEMANTIC(RuntimeInterface);

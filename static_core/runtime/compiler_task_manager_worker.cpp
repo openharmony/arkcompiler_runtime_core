@@ -15,6 +15,8 @@
 
 #include "runtime/compiler.h"
 #include "runtime/compiler_task_manager_worker.h"
+#include "compiler/background_task_runner.h"
+#include "compiler/compiler_task_runner.h"
 
 namespace panda {
 
@@ -29,67 +31,74 @@ CompilerTaskManagerWorker::CompilerTaskManagerWorker(mem::InternalAllocatorPtr i
 
 void CompilerTaskManagerWorker::JoinWorker()
 {
-    //  NOTE(molotkov): implement method in TaskManager to wait for tasks to finish (#13962)
-    os::memory::LockHolder lock(task_queue_lock_);
-    compiler_worker_joined_ = true;
-    while (!compiler_task_deque_.empty()) {
-        compiler_tasks_processed_.Wait(&task_queue_lock_);
+    {
+        os::memory::LockHolder lock(task_queue_lock_);
+        compiler_worker_joined_ = true;
     }
+    taskmanager::TaskScheduler::GetTaskScheduler()->WaitForFinishAllTasksWithProperties(JIT_TASK_PROPERTIES);
 }
 
 void CompilerTaskManagerWorker::AddTask(CompilerTask &&task)
 {
-    bool start_compile = false;
     {
         os::memory::LockHolder lock(task_queue_lock_);
         if (compiler_worker_joined_) {
             return;
         }
-        start_compile = compiler_task_deque_.empty();
-        if (start_compile) {
+        if (compiler_task_deque_.empty()) {
             CompilerTask empty_task;
             compiler_task_deque_.emplace_back(std::move(empty_task));
         } else {
             compiler_task_deque_.emplace_back(std::move(task));
+            return;
         }
     }
     // This means that this is first task in queue, so we can compile it in-place.
-    if (start_compile) {
-        // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
-        AddTaskInTaskManager(std::move(task));
-    }
+    BackgroundCompileMethod(std::move(task));
 }
 
-void CompilerTaskManagerWorker::AddTaskInTaskManager(CompilerTask &&ctx)
+void CompilerTaskManagerWorker::BackgroundCompileMethod(CompilerTask &&ctx)
 {
-    auto *ctx_ptr = internal_allocator_->New<CompilerTask>(std::move(ctx));
-    auto task_runner = [this, ctx_ptr] {
-        if (ctx_ptr->GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
-            compiler_->StartCompileMethod(std::move(*ctx_ptr));
-        }
-        internal_allocator_->Delete(ctx_ptr);
+    auto thread_deleter = [this](Thread *thread) { internal_allocator_->Delete(thread); };
+    compiler::BackgroundCompilerContext::CompilerThread compiler_thread(
+        internal_allocator_->New<Thread>(ctx.GetVM(), Thread::ThreadType::THREAD_TYPE_COMPILER),
+        std::move(thread_deleter));
+
+    auto task_deleter = [this](CompilerTask *task) { internal_allocator_->Delete(task); };
+    compiler::BackgroundCompilerContext::CompilerTask compiler_task(
+        internal_allocator_->New<CompilerTask>(std::move(ctx)), std::move(task_deleter));
+
+    compiler::BackgroundCompilerTaskRunner task_runner(compiler_task_manager_queue_, compiler_thread.get(),
+                                                       compiler_->GetRuntimeInterface());
+    auto &compiler_ctx = task_runner.GetContext();
+    compiler_ctx.SetCompilerThread(std::move(compiler_thread));
+    compiler_ctx.SetCompilerTask(std::move(compiler_task));
+
+    // Callback to compile next method from compiler_task_deque_
+    task_runner.AddFinalize([this]([[maybe_unused]] compiler::BackgroundCompilerContext &task_context) {
+        CompilerTask next_task;
         {
             os::memory::LockHolder lock(task_queue_lock_);
             ASSERT(!compiler_task_deque_.empty());
             // compilation of current task is complete
             compiler_task_deque_.pop_front();
-            CompileNextMethod();
+            if (compiler_task_deque_.empty()) {
+                return;
+            }
+            // now queue has empty task which will be popped at the end of compilation
+            next_task = std::move(compiler_task_deque_.front());
         }
-    };
-    compiler_task_manager_queue_->AddTask(taskmanager::Task::Create(JIT_TASK_PROPERTIES, std::move(task_runner)));
-}
+        BackgroundCompileMethod(std::move(next_task));
+    });
 
-void CompilerTaskManagerWorker::CompileNextMethod()
-{
-    if (!compiler_task_deque_.empty()) {
-        // now queue has empty task which will be popped at the end of compilation
-        auto next_task = std::move(compiler_task_deque_.front());
-        AddTaskInTaskManager(std::move(next_task));
-        return;
-    }
-    if (compiler_worker_joined_) {
-        compiler_tasks_processed_.Signal();
-    }
+    auto background_task = [this](compiler::BackgroundCompilerTaskRunner runner) {
+        if (runner.GetContext().GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
+            compiler_->StartCompileMethod<compiler::BACKGROUND_MODE>(std::move(runner));
+            return;
+        }
+        compiler::BackgroundCompilerTaskRunner::EndTask(std::move(runner), false);
+    };
+    compiler::BackgroundCompilerTaskRunner::StartTask(std::move(task_runner), std::move(background_task));
 }
 
 }  // namespace panda

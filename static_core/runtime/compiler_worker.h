@@ -65,7 +65,7 @@ public:
 
     /**
      * @brief Adds task in the compiler worker task queue.
-     * This method shoud be used after InitializeWorker and
+     * This method should be used after InitializeWorker and
      * it has no effect after JoinWorker.
      */
     virtual void AddTask(CompilerTask &&task) = 0;

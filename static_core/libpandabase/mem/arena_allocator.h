@@ -65,10 +65,8 @@ public:
                     bool limit_alloc_size_by_pool = false);
 
     PANDA_PUBLIC_API ~ArenaAllocatorT();
-    ArenaAllocatorT(const ArenaAllocatorT &) = delete;
-    ArenaAllocatorT(ArenaAllocatorT &&) = default;
-    ArenaAllocatorT &operator=(const ArenaAllocatorT &) = delete;
-    ArenaAllocatorT &operator=(ArenaAllocatorT &&) = default;
+    NO_COPY_SEMANTIC(ArenaAllocatorT);
+    NO_MOVE_SEMANTIC(ArenaAllocatorT);
 
     [[nodiscard]] PANDA_PUBLIC_API void *Alloc(size_t size, Alignment align = DEFAULT_ARENA_ALIGNMENT);
 
