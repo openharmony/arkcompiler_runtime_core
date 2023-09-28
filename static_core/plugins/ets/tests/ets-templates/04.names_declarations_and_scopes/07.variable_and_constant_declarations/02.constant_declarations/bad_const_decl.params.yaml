@@ -1,0 +1,13 @@
+--- # List of incorrect const declaration forms
+cases:
+    - { decl: 'const x;' }
+    - { decl: 'const y: int;' }
+    - { decl: 'const x = 1, y: int;' }
+    - { decl: 'const x = 1; const x = 2;' }
+    - { decl: 'let x = 1; const x = 2;' }
+    - { decl: 'const x = 1; let x = 2;' }
+    - { decl: 'const x = 1; let y = 2; const x = 3;' }
+    - { decl: 'const x:int = new Object();' }
+    - { decl: 'const x:Object = null;' }
+    - { decl: 'let y = "yes"; const x:boolean = y;' }
+    - { decl: 'const obj: Object|null = new Object();', use: 'obj = null;' }

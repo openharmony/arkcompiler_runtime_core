@@ -1,0 +1,5 @@
+--- # List of declarations
+declarations:
+  - "function foo(a: A|null): void {};"
+  - "function foo(): void {let a: A|null = null};"
+  - "function foo(a: A|null): void {let b: A|null = a};"

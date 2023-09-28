@@ -1,0 +1,16 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 0, right: 31, result: 0 }
+- { left: 1, right: 1, result: 0 }
+- { left: 1, right: 31, result: 0 }
+- { left: UInt.MIN_VALUE, right: 1, result: 0 }
+- { left: UInt.MIN_VALUE, right: 31, result: 0 }
+- { left: UInt.MAX_VALUE, right: 1, result: '0x7fffffff' }
+- { left: UInt.MAX_VALUE, right: 31, result: 1 }
+- { left: UInt.MAX_VALUE, right: 32, result: 0 }
+- { left: '0x7fffffff', right: 2, result: '0x1fffffff' }
+- { left: 1, right: 0, result: 1 }
+- { left: 42, right: 0, result: 42 }
+- { left: 1, right: -1, result: 0 }
+

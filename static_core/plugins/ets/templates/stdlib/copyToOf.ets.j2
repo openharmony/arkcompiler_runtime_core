@@ -1,0 +1,94 @@
+/**
+ * copies src array into dst with respect to passed indexes.
+ * dst must have enough space, otherwise out-of-bounds might occur
+ *
+ * @param src source array to be copied
+ *
+ * @param dst destination array
+ *
+ * @param dstStart index of dst to start from
+ *
+ * @param srcStart index of src to start from
+ *
+ * @param srcEnd last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
+ *
+ * @example: copy src to dst
+ * ```
+ * copyTo(src, dst, 0, 0, src.length)
+ * ```
+ */
+// TODO(petr-shumilov): make intrinsic
+export function copyTo(src: {{T}}[], dst: {{T}}[], dstStart: int, srcStart: int, srcEnd: int): void throws {
+    if (!checkRange(src.length, srcStart, srcEnd)) {
+        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
+    }
+    if (!checkRange(dst.length, dstStart, dst.length)) {
+        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
+    }
+    if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
+        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
+    }
+
+    let j: int = dstStart;
+    for (let i: int = srcStart; i < srcEnd; i++) {
+        dst[j] = src[i];
+        j++;
+    }
+}
+
+/**
+ * creates a copy of src array with respect to passed indexes.
+ *
+ * @param arr source array to be copied
+ *
+ * @param startIndex index of arr to start from
+ *
+ * @param endIndex last index of arr to copy, exclusive, i.e. arr[endIndex] is not copied
+ *
+ * @returns copy of arr[startIndex; endIndex)
+ *
+ * @example: create exact copy of arr
+ * ```
+ * copyOf(arr, 0, arr.length)
+ * ```
+ */
+export function copyOf(arr: {{T}}[], startIndex: int, endIndex: int): {{T}}[] throws {
+    let res: {{T}}[] = new {{T}}[endIndex - startIndex];
+    copyTo(arr, res, 0, startIndex, endIndex);
+    return res;
+}
+
+/*
+ * creates a copy of src array with respect to passed index
+ *
+ * @param arr source array to be copied
+ *
+ * @param startIndex index of src to start from
+ *
+ * @returns copy of arr[startIndex; src.length)
+ *
+ * @example: create copy of arr without first element
+ * ```
+ * copyOf(arr, 1)
+ * ```
+ */
+export function copyOf(arr: {{T}}[], startIndex: int): {{T}}[] throws {
+    return copyOf(arr, startIndex, arr.length);
+}
+
+/*
+ * copyOf(arr: {{T}}[]) creates a copy of src array
+ *
+ * @param arr source array to be copied
+ *
+ * @returns copy of arr
+ */
+export function copyOf(arr: {{T}}[]): {{T}}[] {
+    try {
+        return copyOf(arr, 0, arr.length);
+    } catch (e) {
+        // TODO(ivan-tyulyandin): code below is an overcheck, but will be helpful in case of strange exceptions
+        assert false : "copyOf: should be unreacheable since indicies have to be correct by design, " + e.toString()
+    }
+    return new {{T}}[0]
+}

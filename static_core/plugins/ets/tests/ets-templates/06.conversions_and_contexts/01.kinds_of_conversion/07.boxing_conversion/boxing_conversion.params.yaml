@@ -1,0 +1,10 @@
+--- # List of boxing conversions
+boxing_conversions:
+  - {origin: boolean, dest: Boolean,   value: "true"}
+  - {origin: byte,    dest: Byte,      value: 1}
+  - {origin: short,   dest: Short,     value: 1}
+  - {origin: char,    dest: Char, value: "c'a'"}
+  - {origin: int,     dest: Int,   value: 1}
+  - {origin: long,    dest: Long,      value: 1}
+  - {origin: float,   dest: Float,     value: 1.0}
+  - {origin: double,  dest: Double,    value: 1.0}

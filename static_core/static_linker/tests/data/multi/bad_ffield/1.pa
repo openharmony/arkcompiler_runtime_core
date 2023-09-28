@@ -1,0 +1,24 @@
+.record IO <external>
+.record panda.String <external>
+.function void IO.printString(panda.String a0) <external>
+
+.record Foo.Bar <external> {
+	panda.String name <external>
+	i32 noId <external>
+	Foo.Bar[] noArr <external>
+	i64[] noArr2 <external>
+}
+
+.function void Foo.Bar.do(Foo.Bar a0) <external>
+
+.function void main() {
+	initobj.short Foo.Bar.do
+	sta.obj v0
+	ldobj.obj v0, Foo.Bar.name
+	sta.obj v1
+	call.short IO.printString, v1
+	ldobj v0, Foo.Bar.noId
+	ldobj.obj v0, Foo.Bar.noArr
+	ldobj.obj v0, Foo.Bar.noArr2
+	return.void
+}

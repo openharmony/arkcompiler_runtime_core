@@ -1,0 +1,261 @@
+- {
+    method_name: map,
+    method_nature: function,
+    result_nature: array,
+    result_type: "boolean[]",
+    method_signature: { arr: "boolean[]", fn : "(value:boolean,index:int,self:boolean[])=>boolean" },
+    method_throws: "false",
+    method_signature_desc: {arr: "boolean_array", fn: "func_boolean_int_boolean_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]",
+            fn: '(value:boolean,index:int,self:boolean[]): boolean =>  {return !value}',
+          },
+        test1:
+          {
+            arr: "[]",
+            fn: '(value:boolean,index:int,self:boolean[]): boolean =>  {return !value}',
+          },  
+      },
+    method_expected_data:
+      {
+        test1: "[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]",
+        test2: "[]"
+      },
+  }
+- {
+    method_name: map,
+    method_nature: function,
+    result_nature: array,
+    result_type: "byte[]",
+    method_signature: { arr: "byte[]", fn : "(value:byte,index:int,self:byte[])=>byte" },
+    method_throws: "false",
+    method_signature_desc: {arr: "byte_array", fn: "func_byte_int_byte_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:byte,index:int,self:byte[]): byte =>  {return ((value * 2) as byte)}',
+          },
+          test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:byte,index:int,self:byte[]): byte =>  {return ((value + index) as byte)}',
+          },
+          test3:
+          {
+            arr: "[]",
+            fn: '(value:byte,index:int,self:byte[]): byte =>  {return ((value + index) as byte)}',
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test2: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test3: "[]"
+      },
+  }
+- {
+    method_name: map,
+    method_nature: function,
+    result_nature: array,
+    result_type: "short[]",
+    method_signature: { arr: "short[]", fn : "(value:short,index:int,self:short[])=>short" },
+    method_throws: "false",
+    method_signature_desc: {arr: "short_array", fn: "func_short_int_short_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:short,index:int,self:short[]): short =>  {return ((value * 2) as short)}',
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:short,index:int,self:short[]): short =>  {return ((value + index) as short)}',
+          },
+        test3:
+          {
+            arr: "[]",
+            fn: '(value:short,index:int,self:short[]): short =>  {return ((value + index) as short)}',
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test2: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test3: "[]"
+      },
+  }
+- {
+    method_name: map,
+    method_nature: function,
+    result_nature: array,
+    result_type: "int[]",
+    method_signature: { arr: "int[]", fn : "(value:int,index:int,self:int[])=>int" },
+    method_throws: "false",
+    method_signature_desc: {arr: "int_array", fn: "func_int_int_int_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:int,index:int,self:int[]): int =>  {return value * 2}',
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:int,index:int,self:int[]): int =>  {return (value + index)}',
+          },
+        test3:
+          {
+            arr: "[]",
+            fn: '(value:int,index:int,self:int[]): int =>  {return (value + index)}',
+          },
+
+      },
+    method_expected_data:
+      {
+        test1: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test2: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test3: "[]"
+      },
+  }
+- {
+    method_name: map,
+    method_nature: function,
+    result_nature: array,
+    result_type: "long[]",
+    method_signature: { arr: "long[]", fn : "(value:long,index:int,self:long[])=>long" },
+    method_throws: "false",
+    method_signature_desc: {arr: "long_array", fn: "func_long_int_long_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:long,index:int,self:long[]): long =>  {return value * 2}',
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:long,index:int,self:long[]): long =>  {return (value + index)}',
+          },
+        test3:
+          {
+            arr: "[]",
+            fn: '(value:long,index:int,self:long[]): long =>  {return (value + index)}',
+          },
+
+      },
+    method_expected_data:
+      {
+        test1: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test2: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test3: "[]"
+      },
+  }
+- {
+    method_name: map,
+    method_nature: function,
+    result_nature: array,
+    result_type: "float[]",
+    method_signature: { arr: "float[]", fn : "(value:float,index:int,self:float[])=>float" },
+    method_throws: "false",
+    method_signature_desc: {arr: "float_array", fn: "func_float_int_float_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:float,index:int,self:float[]): float =>  {return value * 2}',
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:float,index:int,self:float[]): float =>  {return (value + index)}',
+          },
+        test3:
+          {
+            arr: "[]",
+            fn: '(value:float,index:int,self:float[]): float =>  {return (value + index)}',
+          },
+
+      },
+    method_expected_data:
+      {
+        test1: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test2: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test3: "[]"
+      },
+  }
+- {
+    method_name: map,
+    method_nature: function,
+    result_nature: array,
+    result_type: "double[]",
+    method_signature: { arr: "double[]", fn : "(value:double,index:int,self:double[])=>double" },
+    method_throws: "false",
+    method_signature_desc: {arr: "double_array", fn: "func_double_int_double_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:double,index:int,self:double[]): double =>  {return value * 2}',
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:double,index:int,self:double[]): double =>  {return (value + index)}',
+          },
+        test3:
+          {
+            arr: "[]",
+            fn: '(value:double,index:int,self:double[]): double =>  {return (value + index)}',
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test2: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test3: "[]"
+      },
+  }
+- {
+    method_name: map,
+    method_nature: function,
+    result_nature: array,
+    result_type: "char[]",
+    method_signature: { arr: "char[]", fn : "(value:char,index:int,self:char[])=>char" },
+    method_throws: "false",
+    method_signature_desc: {arr: "char_array", fn: "func_char_int_char_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:char,index:int,self:char[]): char =>  {return ((value * 2) as char)}',
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:char,index:int,self:char[]): char =>  {return ((value + index) as char)}',
+          },
+        test3:
+          {
+            arr: "[]",
+            fn: '(value:char,index:int,self:char[]): char =>  {return ((value + index) as char)}',
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test2: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test3: "[]"
+      },
+  }

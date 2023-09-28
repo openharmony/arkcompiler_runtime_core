@@ -1,0 +1,63 @@
+---
+cases:
+    - use: |-
+        try {
+              if (t1 != t2) throw new F();
+              return 1;
+          } catch (e: Ex) {
+              return 1;
+          } catch (x: X) {
+              return 1;
+          } catch (f: F) {
+              return 0;  // expected
+          } catch (y: Y) {
+              return 1;
+          } catch (e) {
+              return 1;
+          }
+
+    - use: |-
+          // empty try block
+          try {} catch (e) { return 1; }
+          return 0;
+
+    - use: |-
+          // empty catch block
+          try {
+              if (t1 != t2) throw new Ex()
+          } catch (e) {
+          } finally {
+              return 0;
+          }
+
+    - use: |-
+          // empty finally block
+          try {
+              if (t1 != t2) throw new Ex()
+              return 1;
+          } catch (e) {
+              return 0;
+          } finally {
+          }
+
+    - defs: |-
+        function catch(e: Exception) throws { // catch is a soft keyword
+            throw e;
+        }
+      use: |-
+        let e: Exception = new Exception();
+        try {
+            try {
+                  if (t1 == t2) throw new F();
+              } catch (f: F) {
+                  return 1;
+              } catch (y: Y) {
+                  return 1;
+              } catch (e)   // function call
+              {
+                  // empty block
+              }
+        } catch (e1) {
+            return e1 === e ? 0 : 1;
+        }
+        return 1;

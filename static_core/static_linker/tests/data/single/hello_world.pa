@@ -1,0 +1,10 @@
+.record IO <external>
+.record panda.String <external>
+.function void IO.printString(panda.String a0) <external>
+
+.function void main() {
+	lda.str "abc\n"
+	sta.obj v0
+	call.short IO.printString, v0
+	return.void
+}

@@ -1,0 +1,32 @@
+/**
+ * updates element arr[i] using fn
+ *
+ * @param arr an array to run fn over
+ *
+ * @param fn a function to apply
+ * fn takes a value, index of some array and reference to it. Can be used, e.g., to write a function with use of adjacent elements
+ */
+export function map(arr: {{T}}[], fn: (value: {{T}}, index: int, self: {{T}}[]) => {{T}}): {{T}}[] {
+    let res: {{T}}[] = new {{T}}[arr.length];
+    for (let i: int = 0; i < arr.length; i++) {
+        res[i] = fn(arr[i], i, arr);
+    }
+    return res;
+}
+
+/**
+ * creates a new array using fn(arr[i])
+ *
+ * @param arr an array to run fn over
+ *
+ * @param fn a function to apply for each element of arr
+ *
+ * @returns {{T}}[] - a copy of arr where for each element fn was applied
+ */
+export function map(arr: {{T}}[], fn: (value: {{T}}) => {{T}}): {{T}}[] {
+    let res: {{T}}[] = new {{T}}[arr.length];
+    for (let i: int = 0; i < arr.length; i++) {
+        res[i] = fn(arr[i]);
+    }
+    return res;
+}

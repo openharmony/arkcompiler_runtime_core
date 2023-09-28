@@ -1,0 +1,5 @@
+--- # List of valid access modifiers
+modifiers:
+  - "public"
+  - "protected"
+  - "internal protected"

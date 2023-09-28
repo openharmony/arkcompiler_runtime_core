@@ -1,0 +1,23 @@
+test-suites:
+    - hermes
+general:
+    build: $panda_build
+#    verbose: one of: NONE, SHORT, ALL
+    verbose: NONE
+#    verbose-filter: one of NEW, IGNORED, ALL
+    verbose-filter: NEW
+es2panda:
+    timeout: 30
+    opt-level: 2
+ark_aot:
+    enable: True
+    timeout: 120
+    aot-args:
+        - '--compiler-check-final=true'
+        - '--compiler-inline-full-intrinsics=true'
+        - '--compiler-memory-size-limit=4294967296'
+        - '--compiler-max-bytecode-size=1000'
+ark:
+    timeout: 300
+    heap-verifier: fail_on_verification:pre:into:post
+

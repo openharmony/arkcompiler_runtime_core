@@ -1,0 +1,23 @@
+--- # list of values
+values:
+- left: "byte = 42"
+  right: >-
+    String = "str"
+  result: >-
+    "42str"
+- left: >-
+    String = "str"
+  right: "byte = 42"
+  result: >-
+    "str42"
+- left: "int = -42"
+  right: >-
+    String = "str"
+  result: >-
+    "-42str"
+- left: >-
+    String = "str"
+  right: "byte = -42"
+  result: >-
+    "str-42"
+

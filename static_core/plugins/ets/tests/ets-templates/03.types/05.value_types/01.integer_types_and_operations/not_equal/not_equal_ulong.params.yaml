@@ -1,0 +1,16 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: "false" }
+- { left: 0, right: 1, result: "true" }
+- { left: 1, right: 0, result: "true" }
+- { left: 1, right: 1, result: "false" }
+- { left: ULong.MIN_VALUE, right: 0, result: "false" }
+- { left: ULong.MIN_VALUE, right: 17838782673621786381, result: "true" }
+- { left: ULong.MIN_VALUE, right: ULong.MAX_VALUE, result: "true" }
+- { left: ULong.MIN_VALUE, right: ULong.MIN_VALUE, result: "false" }
+- { left: ULong.MAX_VALUE, right: 0, result: "true" }
+- { left: ULong.MAX_VALUE, right: 13232980767128367727, result: "true" }
+- { left: ULong.MAX_VALUE, right: ULong.MAX_VALUE, result: "false" }
+- { left: ULong.MAX_VALUE, right: ULong.MIN_VALUE, result: "true" }
+- { left: 11909302901998787881, right: 42131, result: "false" }
+

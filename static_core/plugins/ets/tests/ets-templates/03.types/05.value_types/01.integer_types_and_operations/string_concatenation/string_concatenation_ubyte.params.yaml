@@ -1,0 +1,13 @@
+--- # list of values
+values:
+- left: "ubyte = 249"
+  right: >-
+    String = "str"
+  result: >-
+    "249str"
+- left: >-
+    String = "str"
+  right: "ubyte = 249"
+  result: >-
+    "str249"
+

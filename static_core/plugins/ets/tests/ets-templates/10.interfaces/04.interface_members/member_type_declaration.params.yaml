@@ -1,0 +1,5 @@
+--- # List of valid class members
+interface_members:
+  - "class B {}"
+  - "interface I {}"
+  - "enum Color {Red, Green}"

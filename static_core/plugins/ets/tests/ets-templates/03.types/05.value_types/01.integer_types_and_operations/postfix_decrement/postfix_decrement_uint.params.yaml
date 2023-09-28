@@ -1,0 +1,8 @@
+--- # list of values
+values:
+- { value: 1, result: 0 }
+- { value: 2, result: 1 }
+- { value: UInt.MIN_VALUE, result: UInt.MAX_VALUE }
+- { value: UInt.MAX_VALUE, result: 4294967294 }
+- { value: 3234908978, result: 3234908977 }
+

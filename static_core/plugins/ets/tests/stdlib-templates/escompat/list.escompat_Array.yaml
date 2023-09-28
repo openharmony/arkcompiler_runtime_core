@@ -1,0 +1,43 @@
+- {
+    itemType: "String",
+    copySource: [1, 2, 3, 4, 5],
+    concatSource: ["6", "7", "8", "9", "0"],
+    fillValue: "11",
+    joinResult0: "6,7,8,9,0",
+    joinResult1: "6+7+8+9+0",
+    reduce: "67890",
+    reduceRight: "09876",
+  }
+
+- {
+    itemType: "Int",
+    copySource: ["1","2","3","4","5"],
+    concatSource: [6, 7, 8, 9, 0],
+    fillValue: 11,
+    joinResult0: "6,7,8,9,0",
+    joinResult1: "6+7+8+9+0",
+    reduceRight: "09876",
+
+  }
+
+- {
+    itemType: "Char",
+    copySource: [1.0, 2.0, 3.0, 4.0, 5.0],
+    concatSource: "[c'6', c'7', c'8', c'9', c'0']",
+    fillValue: "c'x'",
+    joinResult0: "6,7,8,9,0",
+    joinResult1: "6+7+8+9+0",
+    reduceRight: "09876",
+
+  }
+
+- {
+    itemType: "Boolean",
+    copySource: ["1","2","3","4","5"],
+    concatSource: "[true, false, true, false, true]",
+    fillValue: 0,
+    joinResult0: "true,false,true,false,true",
+    joinResult1: "true+false+true+false+true",
+    reduce: "truefalsetruefalsetrue",
+    reduceRight: "truefalsetruefalsetrue",
+  }

@@ -1,0 +1,38 @@
+--- # List of int equality operators
+numeric_eq:
+  - {left:  "5", right:  "5", op: "==", result:  "true"}
+  - {left:  "10", right: "5", op: "!=", result: "true"}
+  - {left:  "5", right:  "5", op: "!=", result:  "false"}
+  - {left:  "10", right: "5", op: "==", result: "false"}
+  - {left: "1", right:  "1.0", op: "==", result: "true"}
+  - {left: "0", right: "0.5", op: "!=", result:  "true"}
+  - {left: "0", right: "-0", op: "==", result:  "true"}
+
+  - {left: "0.1", right: "Double.POSITIVE_INFINITY", op: "!=", result:  "true"}
+  - {left: "0.1", right: "Double.POSITIVE_INFINITY", op: "==", result:  "false"}
+  - {left: "Double.POSITIVE_INFINITY", right: "0.1", op: "!=", result:  "true"}
+  - {left: "Double.POSITIVE_INFINITY", right: "0.1", op: "==", result:  "false"}
+  - {left: "Double.NEGATIVE_INFINITY", right: "0.1", op: "!=", result:  "true"}
+  - {left: "Double.NEGATIVE_INFINITY", right: "0.1", op: "==", result:  "false"}
+  - {left: "0.1", right: "Double.NEGATIVE_INFINITY", op: "!=", result:  "true"}
+  - {left: "0.1", right: "Double.NEGATIVE_INFINITY", op: "==", result:  "false"}
+
+  - {left: "Double.NEGATIVE_INFINITY", right: "Double.NEGATIVE_INFINITY", op: "==", result:  "true"}
+  - {left: "Double.NEGATIVE_INFINITY", right: "Double.NEGATIVE_INFINITY", op: "!=", result:  "false"}
+  - {left: "Double.POSITIVE_INFINITY", right: "Double.POSITIVE_INFINITY", op: "==", result:  "true"}
+  - {left: "Double.POSITIVE_INFINITY", right: "Double.POSITIVE_INFINITY", op: "!=", result:  "false"}
+  - {left: "Double.NEGATIVE_INFINITY", right: "Double.POSITIVE_INFINITY", op: "==", result:  "false"}
+  - {left: "Double.POSITIVE_INFINITY", right: "Double.NEGATIVE_INFINITY", op: "!=", result:  "true"}
+
+  - {left: "Double.NaN", right: "Double.NaN", op: "!=", result:  "true"}
+  - {left: "Double.NaN", right: "Double.NaN", op: "==", result:  "false"}
+  - {left: "Double.NaN", right: "0.1", op: "==", result:  "false"}
+  - {left: "Double.NaN", right: "0.1", op: "!=", result:  "true"}
+
+  - {left: "0.1", right: "0.0", op: "!=", result:  "true"}
+  - {left: "0.1", right: "0.0", op: "==", result:  "false"}
+  - {left: "+0.0", right: "-0.0", op: "==", result:  "true"}
+  - {left: "-0.0", right: "+0.0", op: "==", result:  "true"}
+  - {left: "+0.0", right: "-0.0", op: "!=", result:  "false"}
+  - {left: "-0.0", right: "+0.0", op: "!=", result:  "false"}
+

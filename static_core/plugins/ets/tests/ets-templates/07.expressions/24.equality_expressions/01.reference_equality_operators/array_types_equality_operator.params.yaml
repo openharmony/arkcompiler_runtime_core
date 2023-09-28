@@ -1,0 +1,10 @@
+--- # List of array equality operators
+reference_eq:
+  - {left:  "a", right:  "b", op: "==", result:  "false"}
+  - {left:  "a", right:  "b", op: "!=", result:  "true"}
+  - {left:  "a", right: "c", op: "==", result: "false"}
+  - {left:  "a", right: "c", op: "!=", result: "true"}
+  - {left:  "a", right: "d", op: "==", result: "false"}
+  - {left:  "a", right: "d", op: "!=", result: "true"}
+  - {left:  "a", right: "e", op: "==", result: "false"}
+  - {left:  "a", right: "e", op: "!=", result: "true"}

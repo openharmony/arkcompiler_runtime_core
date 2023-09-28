@@ -1,0 +1,13 @@
+--- # list of values
+values:
+- { left: 1, right: 0, result: 1 }
+- { left: 1, right: 1, result: 0 }
+- { left: 63881, right: 37912, result: 25969 }
+- { left: 37912, right: 63881, result: -25969 }
+- { left: "Char.MAX_VALUE as char", right: 0, result: "Char.MAX_VALUE as char" }
+- { left: "Char.MAX_VALUE as char", right: 1, result: 65534 }
+- { left: "Char.MIN_VALUE as char", right: 0, result: "Char.MIN_VALUE as char" }
+- { left: "Char.MIN_VALUE as char", right: 1, result: -1 }
+- { left: "Char.MIN_VALUE as char", right: "Char.MAX_VALUE as char", result: -65535 }
+- { left: "Char.MAX_VALUE as char", right: "Char.MIN_VALUE as char", result: "Char.MAX_VALUE as char" }
+

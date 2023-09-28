@@ -1,0 +1,16 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 1, right: 1, result: 0 }
+- { left: -1, right: 1, result: 0 }
+- { left: 1, right: -1, result: 0 }
+- { left: 1, right: Long.MAX_VALUE, result: 1 }
+- { left: 1, right: Long.MIN_VALUE, result: 1  }
+- { left: -1, right: Long.MAX_VALUE, result: -1 }
+- { left: -1, right: Long.MIN_VALUE, result: -1  }
+- { left: Long.MAX_VALUE, right: Long.MIN_VALUE, result: Long.MAX_VALUE }
+- { left: Long.MIN_VALUE, right: Long.MAX_VALUE, result: -1 }
+- { left: "0x7000000000000000", right: 2, result: 0 }
+- { left: "0x7000000000000001", right: 2, result: 1 }
+- { left: "0x7ffffffffffffffe", right: 3, result: 0 }
+

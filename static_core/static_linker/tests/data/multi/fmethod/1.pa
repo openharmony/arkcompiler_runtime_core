@@ -1,0 +1,6 @@
+.function void print() <external>
+
+.function void main() {
+	call.short print
+	return.void
+}

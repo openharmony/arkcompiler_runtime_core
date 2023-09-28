@@ -1,0 +1,13 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 1, right: 1, result: 1 }
+- { left: 18446744073703382788, right: 18446744073706782812, result: 17080275641712 }
+- { left: 5678707767, right: 3248405241, result: 18446744072430206847 }
+- { left: 0, right: ULong.MAX_VALUE, result: 0 }
+- { left: 1, right: ULong.MAX_VALUE, result: ULong.MAX_VALUE }
+- { left: 0, right: ULong.MIN_VALUE, result: 0 }
+- { left: 1, right: ULong.MIN_VALUE, result: ULong.MIN_VALUE }
+- { left: ULong.MAX_VALUE, right: ULong.MAX_VALUE, result: 1 }
+- { left: ULong.MIN_VALUE, right: ULong.MIN_VALUE, result: 0 }
+

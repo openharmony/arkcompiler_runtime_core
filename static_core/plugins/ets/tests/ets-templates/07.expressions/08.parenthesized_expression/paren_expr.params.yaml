@@ -1,0 +1,6 @@
+--- # List of parenthesis expression
+paren_expr:
+  - "(x)"
+  - "((x))"
+  - "(((x) + (x) - (x)))"
+  - "(((x))) + (((x))) - (((x)))"

@@ -1,0 +1,65 @@
+#ifndef PANDA_PROFILING_GEN_H
+#define PANDA_PROFILING_GEN_H
+
+#include "libpandafile/bytecode_instruction-inl.h"
+#include <array>
+
+namespace panda::profiling {
+
+% require 'set'
+% require_relative '../../templates/common.rb'
+
+enum class ProfilingKind {
+    NONE,
+% Panda::profiles.each do |name, _|
+    <%= name.snakecase.upcase %>,
+% end
+};
+
+inline constexpr const char* GetProfilingKindName(ProfilingKind kind)
+{
+    // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
+    switch (kind) {
+% Panda::profiles.each do |prof, _|
+        case ProfilingKind::<%= prof.snakecase.upcase %>:
+            return "<%= prof.snakecase.upcase %>";
+% end
+        default:
+            return "INVALID";
+    }
+}
+
+% sizes = Panda::profiles.values.map(&:size).uniq.sort
+inline constexpr std::array<uint8_t, <%= sizes.size %>> GetOrderedProfileSizes() {
+    return {<%= sizes.join(', ') %>};
+}
+
+inline size_t GetProfileSizeInBytes(BytecodeInstruction::Opcode opcode)
+{
+    // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
+    switch (opcode) {
+% Panda::instructions.select { |x| x.profiled? }.each do |inst|
+        case BytecodeInstruction::Opcode::<%= inst.opcode.upcase %>:
+            return <%= inst.profile.size %>;
+% end
+        default:
+            return 0;
+    }
+}
+
+inline ProfilingKind GetProfileKind(BytecodeInstruction::Opcode opcode)
+{
+    // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
+    switch (opcode) {
+% Panda::instructions.select { |x| x.profiled? }.each do |inst|
+        case BytecodeInstruction::Opcode::<%= inst.opcode.upcase %>:
+            return ProfilingKind::<%= inst.profile.name.snakecase.upcase %>;
+% end
+        default:
+            return ProfilingKind::NONE;
+    }
+}
+
+}  // namespace panda::profiling
+
+#endif  // PANDA_PROFILING_GEN_H

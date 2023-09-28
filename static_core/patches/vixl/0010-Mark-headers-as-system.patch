@@ -1,0 +1,24 @@
+From cb48eeaf51a888b8cb49c72f22d50eb1d9a169f3 Mon Sep 17 00:00:00 2001
+From: Aleksandr Semenov <smallcsf@gmail.com>
+Date: Tue, 18 Apr 2023 14:21:48 +0300
+Subject: [PATCH 10/10] Mark headers as system
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 249992e..d03fbab 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -109,7 +109,7 @@ set_property(TARGET vixl PROPERTY POSITION_INDEPENDENT_CODE ON)
+ set_property(TARGET vixl PROPERTY EXCLUDE_FROM_ALL TRUE)
+ 
+ target_include_directories(vixl
+-    INTERFACE src/
++    SYSTEM INTERFACE src/
+ )
+ 
+ panda_add_sanitizers(TARGET vixl SANITIZERS ${PANDA_SANITIZERS_LIST})
+-- 
+2.25.1
+

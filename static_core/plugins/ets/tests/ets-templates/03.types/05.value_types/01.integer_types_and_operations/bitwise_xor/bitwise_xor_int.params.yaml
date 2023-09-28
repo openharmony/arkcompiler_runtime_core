@@ -1,0 +1,13 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: 0 }
+- { left: 0, right: 1, result: 1 }
+- { left: 1, right: 1, result: 0 }
+- { left: -1, right: -1, result: 0 }
+- { left: Int.MIN_VALUE, right: Int.MIN_VALUE, result: 0 }
+- { left: Int.MAX_VALUE, right: Int.MAX_VALUE, result: 0 }
+- { left: Int.MIN_VALUE, right: Int.MAX_VALUE, result: -1 }
+- { left: 1123456789, right: 1123456789, result: 0 }
+- { left: 1123456789, right: -1123456789, result: -2 }
+- { left: "0x55555555", right: "0xaaaaaaaa", result: -1 }
+  

@@ -1,0 +1,39 @@
+.record A {
+    A a
+}
+
+.function i32 foo_i() <external>
+.function i32 foo_iA(A a0) <external>
+.function A foo_AA(A a0) <external>
+
+#! CHECKER      Definition with phi input in the same block
+#! RUN_LLVM     options: "--compiler-regex=_GLOBAL::liveness_0 \
+#!              --llvmaot-gc-check=true --llvmaot-dump-after"
+#! READ_FILE    "console.out"
+#! INST         /%v5[0-9]* = phi ptr addrspace\(1\).* \[ %v9[0-9]*.rel.*, .* \]/
+.function i32 liveness_0() {
+    newobj v0, A
+backedge:
+    call foo_AA, v0  # the definition and the phi input are in the same block
+    sta.obj v0
+    call foo_i       # a statepoint
+    jeqz backedge
+    return
+exit:
+    ldai 42
+    return
+}
+
+#! CHECKER      Do not propagate null value as a phi input
+#! RUN_LLVM     options: "--compiler-regex=_GLOBAL::liveness_1 \
+#!              --llvmaot-gc-check=true --llvmaot-dump-after"
+#! READ_FILE    "console.out"
+#! INST_NOT     "(null, null)"
+.function i32 liveness_1() {
+    newobj v0, A
+backedge:
+    call foo_iA, v0
+    mov.null v0
+    jeqz backedge
+    return
+}

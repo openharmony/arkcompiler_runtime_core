@@ -1,0 +1,12 @@
+---
+cases:
+  - types:
+      - { ptype: boolean, expr: 'true', rtype: Boolean }
+      - { ptype: boolean, expr: 'false', rtype: Boolean }
+      - { ptype: byte, expr: 0x55 as byte, rtype: Byte }
+      - { ptype: char, expr: "c'W'", rtype: Char }
+      - { ptype: short, expr: 0x5555 as short, rtype: Short }
+      - { ptype: int, expr: 0x12121212 as int, rtype: Int }
+      - { ptype: long, expr: 0x3434343456565656 as long, rtype: Long }
+      - { ptype: float, expr: 0.00001 as float, rtype: Float }
+      - { ptype: double, expr: 0.00000000001 as double, rtype: Double }

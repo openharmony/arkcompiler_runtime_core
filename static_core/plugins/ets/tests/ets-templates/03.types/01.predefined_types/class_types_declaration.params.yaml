@@ -1,0 +1,5 @@
+--- # List of predefined calss types
+default_value:
+  - Object
+  - String
+  - Never

@@ -1,0 +1,37 @@
+---
+cases:
+  # primitive
+  - { type: float, v: Float.POSITIVE_INFINITY, op: '-', q: Float.POSITIVE_INFINITY }
+  - { type: float, v: Float.NEGATIVE_INFINITY, op: '-', q: Float.NEGATIVE_INFINITY }
+  - { type: double, v: Double.POSITIVE_INFINITY, op: '-', q: Double.POSITIVE_INFINITY }
+  - { type: double, v: Double.NEGATIVE_INFINITY, op: '-', q: Double.NEGATIVE_INFINITY }
+  - { type: float, v: Float.POSITIVE_INFINITY, op: '/', q: Float.POSITIVE_INFINITY }
+  - { type: float, v: Float.NEGATIVE_INFINITY, op: '/', q: Float.NEGATIVE_INFINITY }
+  - { type: double, v: Double.POSITIVE_INFINITY, op: '/', q: Double.POSITIVE_INFINITY }
+  - { type: double, v: Double.NEGATIVE_INFINITY, op: '/', q: Double.NEGATIVE_INFINITY }
+  - { type: float, v: Float.POSITIVE_INFINITY, op: '%', q: Float.POSITIVE_INFINITY }
+  - { type: float, v: Float.NEGATIVE_INFINITY, op: '%', q: Float.NEGATIVE_INFINITY }
+  - { type: double, v: Double.POSITIVE_INFINITY, op: '%', q: Double.POSITIVE_INFINITY }
+  - { type: double, v: Double.NEGATIVE_INFINITY, op: '%', q: Double.NEGATIVE_INFINITY }
+  - { type: float, v: 0.0, op: '/', q: -0.0 }
+  - { type: double, v: 0.0, op: '/', q: -0.0 }
+  - { type: float, v: 0.0, op: '%', q: -0.0 }
+  - { type: double, v: 0.0, op: '%', q: -0.0 }
+
+  # boxed
+  - { type: Float, v: Float.POSITIVE_INFINITY, op: '-', q: Float.POSITIVE_INFINITY }
+  - { type: Float, v: Float.NEGATIVE_INFINITY, op: '-', q: Float.NEGATIVE_INFINITY }
+  - { type: Double, v: Double.POSITIVE_INFINITY, op: '-', q: Double.POSITIVE_INFINITY }
+  - { type: Double, v: Double.NEGATIVE_INFINITY, op: '-', q: Double.NEGATIVE_INFINITY }
+  - { type: Float, v: Float.POSITIVE_INFINITY, op: '/', q: Float.POSITIVE_INFINITY }
+  - { type: Float, v: Float.NEGATIVE_INFINITY, op: '/', q: Float.NEGATIVE_INFINITY }
+  - { type: Double, v: Double.POSITIVE_INFINITY, op: '/', q: Double.POSITIVE_INFINITY }
+  - { type: Double, v: Double.NEGATIVE_INFINITY, op: '/', q: Double.NEGATIVE_INFINITY }
+  - { type: Float, v: Float.POSITIVE_INFINITY, op: '%', q: Float.POSITIVE_INFINITY }
+  - { type: Float, v: Float.NEGATIVE_INFINITY, op: '%', q: Float.NEGATIVE_INFINITY }
+  - { type: Double, v: Double.POSITIVE_INFINITY, op: '%', q: Double.POSITIVE_INFINITY }
+  - { type: Double, v: Double.NEGATIVE_INFINITY, op: '%', q: Double.NEGATIVE_INFINITY }
+  - { type: Float, v: 0.0, op: '/', q: -0.0 }
+  - { type: Double, v: 0.0, op: '/', q: -0.0 }
+  - { type: Float, v: 0.0, op: '%', q: -0.0 }
+  - { type: Double, v: 0.0, op: '%', q: -0.0 }

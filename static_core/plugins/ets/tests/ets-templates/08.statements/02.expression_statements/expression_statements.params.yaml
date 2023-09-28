@@ -1,0 +1,5 @@
+--- # List of valid expression statements
+expression_statements:
+  - {expr: '"asd"'}
+  - {expr: 1 + 2}
+  - {expr: '["hello", "world"]'}

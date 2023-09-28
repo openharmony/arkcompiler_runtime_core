@@ -1,0 +1,27 @@
+---
+cases:
+    - types:
+        - Boolean?
+        - Byte?
+        - Char?
+        - Double?
+        - Float?
+        - Int?
+        - Long?
+        - Object?
+        - Short?
+        - StringBuilder?
+        - boolean[]?
+        - Byte[]?
+        - char[][][]?
+        - Double[]?
+        - Float[]?
+        - Int[]?
+        - long[]?
+        - Object[]?
+        - Short[]?
+        - StringBuilder[][]?
+        - Comparable<Long>?
+        - Comparable<StringBuilder>[]?
+        - Intfoo?
+        - Intfoo[]?

@@ -1,0 +1,10 @@
+--- # All possible qualified names 
+qualified_name:
+  - test.Clazz;
+  - test.instance;
+  - Clazz.staticField;
+  - Clazz.staticMethod();
+  - test.Clazz.staticField;
+  - test.Clazz.staticMethod();
+  - instance.field;
+  - instance.method();

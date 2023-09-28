@@ -1,0 +1,24 @@
+dataclasses==0.6
+python-dotenv==0.20.0
+Jinja2==3.1.2
+MarkupSafe==2.1.1
+PyYaml==6.0
+tqdm==4.64.0
+
+# mypy
+mypy==0.991
+mypy-extensions==0.4.3
+tomli==2.0.1
+typing-extensions==4.4.0
+types-PyYAML==6.0.12.4
+
+# pylint
+astroid==2.13.3
+dill==0.3.6
+isort==5.11.4
+lazy-object-proxy==1.9.0
+mccabe==0.7.0
+platformdirs==2.6.2
+pylint==2.15.0
+tomlkit==0.11.6
+wrapt==1.14.1

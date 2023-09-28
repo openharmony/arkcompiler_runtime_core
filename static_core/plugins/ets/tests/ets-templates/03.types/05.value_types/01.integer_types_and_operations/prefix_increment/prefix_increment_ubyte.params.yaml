@@ -1,0 +1,8 @@
+--- # list of values
+values:
+- { value: 0, result: 1 }
+- { value: 1, result: 2 }
+- { value: "UByte.MIN_VALUE as ubyte", result: 1 }
+- { value: "UByte.MAX_VALUE as ubyte", result: "UByte.MIN_VALUE as ubyte" }
+- { value: 42, result: 43 }
+

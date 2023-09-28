@@ -1,0 +1,10 @@
+--- # list of values
+values:
+- { value: 0, result: 1 }
+- { value: 1, result: 2 }
+- { value: -1, result: 0 }
+- { value: Int.MIN_VALUE, result: -2147483647 }
+- { value: Int.MAX_VALUE, result: Int.MIN_VALUE }
+- { value: 2098881231, result: 2098881232 }
+- { value: -2098881231, result: -2098881230 }
+

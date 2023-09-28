@@ -1,0 +1,246 @@
+{% if T != "Object" -%}
+// C++ semantics
+// (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
+//                                 ^        ^
+//                                 |        |
+//                                 |    upper bound
+//                             lower bound
+
+{% if T != "boolean" %}
+/**
+ * tries to find a lower bound of a key in sorted arr.
+ * The array has to be sorted before calling this function.
+ * Lower bound is an index of a first element, where (element < key) is false. If no such element is found than lower bound is endIndex
+ *
+ * @param arr array to find a lower bound of a key. Has to be sorted, otherwise the answer is implementation-defined and may be incorrect
+ *
+ * @param key a value to find lower bound of
+ *
+ * @param startIndex an index of arr to begin search with
+ *
+ * @param endIndex a last index to stop search in arr, i.e. arr[endIndex] is not checked
+ *
+ * @returns index such (arr[index] < key) is false. If no such index is found than endIndex
+ */
+export function lowerBoundSearch(arr: {{T}}[], key: {{T}}, startIndex: int, endIndex: int): int throws {
+    if (!checkRange(arr.length, startIndex, endIndex)){
+        throw new ArrayIndexOutOfBoundsException("lowerBoundSearch: bounds verification failed")
+    }
+
+    let left: int = startIndex;
+    let len: int = endIndex - startIndex;
+
+    while (len > 0) {
+        let half: int = len >>> 1;
+        let middle: int = left + half;
+
+        if (arr[middle] < key) {
+            left = middle + 1;
+            len -= half + 1;
+        } else {
+            len = half;
+        }
+    }
+
+    return left;
+}
+
+/**
+ *  tries to find a lower bound of a key in sorted arr.
+ * The array has to be sorted before calling this function.
+ * Lower bound is an index of a first element, where (element < key) is false. If no such element is found than lower bound is arr.length
+ *
+ * @param arr array to find a lower bound of a key. Has to be sorted, otherwise the answer is implementation-defined and may be incorrect
+ *
+ * @param key a value to find lower bound of
+ *
+ * @returns index such (arr[index] < key) is false. If no such index is found than arr.length
+ */
+export function lowerBoundSearch(arr: {{T}}[], key: {{T}}): int {
+    try {
+        return lowerBoundSearch(arr, key, 0, arr.length);
+    } catch (e) {
+        // TODO(ivan-tyulyandin): code below is an overcheck, but will be helpful in case of strange exceptions
+        assert false : "lowerBoundSearch: should be unreacheable since indicies have to be correct by design, " + e.toString()
+    }
+    return arr.length
+}
+
+/**
+ * tries to find an upper bound of a key in sorted arr.
+ * The array has to be sorted before calling this function.
+ * Upper bound is an index of a first element, where (key < element) is true. If no such element is found than upper bound is endIndex
+ *
+ * @param arr array to find a upper bound of a key. Has to be sorted, otherwise the answer is implementation-defined and may be incorrect
+ *
+ * @param key a value to find upper bound of. It may be not in arr, upper bound will present anyway
+ *
+ * @param startIndex an index of arr to begin search with
+ *
+ * @param endIndex a last index to stop search in arr, i.e. arr[endIndex] is not checked
+ *
+ * @returns index such (key < arr[index]) is true. If no such index is found than endIndex
+ */
+export function upperBoundSearch(arr: {{T}}[], key: {{T}}, startIndex: int, endIndex: int): int throws {
+    if (!checkRange(arr.length, startIndex, endIndex)) {
+        throw new ArrayIndexOutOfBoundsException("upperBoundSearch: bounds verification failed")
+    }
+
+    let left: int = startIndex;
+    let len: int = endIndex - startIndex;
+
+    while (len > 0) {
+        let half: int = len >>> 1;
+        let middle: int = left + half;
+
+        if (arr[middle] <= key) {
+            left = middle + 1;
+            len -= half + 1;
+        } else {
+            len = half;
+        }
+    }
+
+    return left;
+}
+
+/**
+ * tries to find an upper bound of a key in sorted arr.
+ * The array has to be sorted before calling this function.
+ * Upper bound is an index of a first element, where (key < element) is true. If no such element is found than upper bound is endIndex
+ *
+ * @param arr array to find a upper bound of a key. Has to be sorted, otherwise the answer is implementation-defined and may be incorrect
+ *
+ * @param key a value to find upper bound of. It may be not in arr, upper bound will present anyway
+ *
+ * @returns index such (key < arr[index]) is true. If no such index is found than arr.length
+ */
+export function upperBoundSearch(arr: {{T}}[], key: {{T}}): int {
+    try {
+        return upperBoundSearch(arr, key, 0, arr.length);
+    } catch (e) {
+        // TODO(ivan-tyulyandin): code below is an overcheck, but will be helpful in case of strange exceptions
+        assert false : "upperBoundSearch: should be unreacheable since indicies have to be correct by design, " + e.toString()
+    }
+    return arr.length
+}
+{% else %}
+/**
+ * tries to find a lower bound of a key in sorted arr.
+ * The array has to be sorted before calling this function.
+ * Lower bound is an index of a first element, where (element < key) is false. If no such element is found than lower bound is endIndex
+ *
+ * @param arr array to find a lower bound of a key. Has to be sorted, otherwise the answer is implementation-defined and may be incorrect
+ *
+ * @param key a value to find lower bound of. It may be not in arr, lower bound will present anyway
+ *
+ * @param startIndex an index of arr to begin search with
+ *
+ * @param endIndex a last index to stop search in arr, i.e. arr[endIndex] is not checked
+ *
+ * @returns index such (arr[index] < key) is false. If no such index is found than endIndex
+ */
+export function lowerBoundSearch(arr: boolean[], key: boolean, startIndex: int, endIndex: int): int throws {
+    if (!checkRange(arr.length, startIndex, endIndex)){
+        throw new ArrayIndexOutOfBoundsException("lowerBoundSearch: bounds verification failed")
+    }
+
+    let left: int = startIndex;
+    let len: int = endIndex - startIndex;
+
+    while (len > 0) {
+        let half: int = len >>> 1;
+        let middle: int = left + half;
+
+        if (arr[middle] == false && key == true) {
+            left = middle + 1;
+            len -= half + 1;
+        } else {
+            len = half;
+        }
+    }
+
+    return left;
+}
+
+/**
+ * tries to find a lower bound of a key in sorted arr.
+ * The array has to be sorted before calling this function.
+ * Lower bound is an index of a first element, where (element < key) is false. If no such element is found than lower bound is endIndex
+ *
+ * @param arr array to find a lower bound of a key. Has to be sorted, otherwise the answer is implementation-defined and may be incorrect
+ *
+ * @param key a value to find lower bound of. It may be not in arr, lower bound will present anyway
+ *
+ * @returns index such (arr[index] < key) is false. If no such index is found than arr.length
+ */
+export function lowerBoundSearch(arr: boolean[], key: boolean): int {
+    try {
+        return lowerBoundSearch(arr, key, 0, arr.length);
+    } catch (e) {
+        // TODO(ivan-tyulyandin): code below is an overcheck, but will be helpful in case of strange exceptions
+        assert false : "lowerBoundSearch: should be unreacheable since indicies have to be correct by design, " + e.toString()
+    }
+    return arr.length
+}
+
+/**
+ * tries to find an upper bound of a key in sorted arr.
+ * The array has to be sorted before calling this function.
+ * Upper bound is an index of a first element, where (key < element) is true. If no such element is found than upper bound is endIndex
+ *
+ * @param arr array to find a upper bound of a key. Has to be sorted, otherwise the answer is implementation-defined and may be incorrect
+ *
+ * @param key a value to find upper bound of. It may be not in arr, upper bound will present anyway
+ *
+ * @param startIndex an index of arr to begin search with
+ *
+ * @param endIndex a last index to stop search in arr, i.e. arr[endIndex] is not checked
+ *
+ * @returns index such (key < arr[index]) is true. If no such index is found than endIndex
+ */
+export function upperBoundSearch(arr: boolean[], key: boolean, startIndex: int, endIndex: int): int throws {
+    if (!checkRange(arr.length, startIndex, endIndex)) {
+        throw new ArrayIndexOutOfBoundsException("upperBoundSearch: bounds verification failed")
+    }
+
+    let left: int = startIndex;
+    let len: int = endIndex - startIndex;
+
+    while (len > 0) {
+        let half: int = len >>> 1;
+        let middle: int = left + half;
+
+        if (arr[middle] == false && key == true || arr[middle] == key) {
+            left = middle + 1;
+            len -= half + 1;
+        } else {
+            len = half;
+        }
+    }
+
+    return left;
+}
+
+/**
+ * tries to find an upper bound of a key in sorted arr.
+ * The array has to be sorted before calling this function.
+ * Upper bound is an index of a first element, where (key < element) is true. If no such element is found than upper bound is endIndex
+ *
+ * @param arr array to find a upper bound of a key. Has to be sorted, otherwise the answer is implementation-defined and may be incorrect
+ *
+ * @param key a value to find upper bound of. It may be not in arr, upper bound will present anyway
+ *
+ * @returns index such (key < arr[index]) is true. If no such index is found than arr.length
+ */
+export function upperBoundSearch(arr: boolean[], key: boolean): int {
+    try {
+        return upperBoundSearch(arr, key, 0, arr.length);
+    } catch (e) {
+        // TODO(ivan-tyulyandin): code below is an overcheck, but will be helpful in case of strange exceptions
+        assert false : "upperBoundSearch: should be unreacheable since indicies have to be correct by design, " + e.toString()
+    }
+    return arr.length
+}
+{% endif %}
+{% endif -%}

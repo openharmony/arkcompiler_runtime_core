@@ -1,0 +1,105 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "job_fill_gen.h"
+#include "runtime/include/thread_scopes.h"
+#include "verification/absint/absint.h"
+#include "verification/cflow/cflow_check.h"
+#include "verification/config/debug_breakpoint/breakpoint.h"
+#include "verification/jobs/job.h"
+#include "verification/public_internal.h"
+
+namespace panda::verifier {
+bool Job::UpdateTypes(TypeSystem *types) const
+{
+    bool result = true;
+    Job::ErrorHandler handler;
+
+    auto has_type = [&](Class const *klass) {
+        types->MentionClass(klass);
+        return true;
+    };
+    ForAllCachedTypes([&](Type type) {
+        if (type.IsClass()) {
+            result = result && has_type(type.GetClass());
+        }
+    });
+    ForAllCachedMethods([&](Method const *method) { types->GetMethodSignature(method); });
+    ForAllCachedFields([&](Field const *field) {
+        result = result && has_type(field->GetClass());
+        if (field->GetType().IsReference()) {
+            ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+            result = result && has_type(field->ResolveTypeClass(&handler));
+        }
+    });
+    return result;
+}
+
+bool Job::Verify(TypeSystem *types) const
+{
+    auto verif_context = PrepareVerificationContext(types, this);
+    auto result = VerifyMethod(verif_context);
+    return result != VerificationStatus::ERROR;
+}
+
+bool Job::DoChecks(TypeSystem *types)
+{
+    const auto &check = Options().Check();
+
+    if (check[MethodOption::CheckType::RESOLVE_ID]) {
+        if (!ResolveIdentifiers()) {
+            LOG(WARNING, VERIFIER) << "Failed to resolve identifiers for method " << method_->GetFullName(true);
+            return false;
+        }
+    }
+
+    if (check[MethodOption::CheckType::CFLOW]) {
+        auto cflow_info = CheckCflow(method_);
+        if (!cflow_info) {
+            LOG(WARNING, VERIFIER) << "Failed to check control flow for method " << method_->GetFullName(true);
+            return false;
+        }
+        cflow_info_ = std::move(cflow_info);
+    }
+
+    DBG_MANAGED_BRK(&service_->debug_ctx, method_->GetUniqId(), 0xFFFF);
+
+    if (check[MethodOption::CheckType::TYPING]) {
+        if (!UpdateTypes(types)) {
+            LOG(WARNING, VERIFIER) << "Cannot update types from cached classes for method "
+                                   << method_->GetFullName(true);
+            return false;
+        }
+    }
+
+    if (check[MethodOption::CheckType::ABSINT]) {
+        if (!Verify(types)) {
+            LOG(WARNING, VERIFIER) << "Abstract interpretation failed for method " << method_->GetFullName(true);
+            return false;
+        }
+    }
+
+    // Clean up temporary types
+    types->ResetTypeSpans();
+
+    return true;
+}
+
+void Job::ErrorHandler::OnError([[maybe_unused]] ClassLinker::Error error, PandaString const &message)
+{
+    LOG(ERROR, VERIFIER) << "Class linker error: " << message;
+}
+
+}  // namespace panda::verifier

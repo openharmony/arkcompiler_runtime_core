@@ -1,0 +1,16 @@
+# Assert that intrinsic Math.sin works fine
+.record Math <external>
+.function f32 Math.fsin (f32 a0) <external>
+
+.function u1 main(){
+    fmovi v0, 0.78539816  # Pi / 4
+    fmovi v1, 0.70710677  # Expected result
+    call.short Math.fsin, v0, v0
+    fcmpl v1
+    jnez exit_failure
+    ldai 0
+    return
+exit_failure:
+    ldai 1
+    return
+}

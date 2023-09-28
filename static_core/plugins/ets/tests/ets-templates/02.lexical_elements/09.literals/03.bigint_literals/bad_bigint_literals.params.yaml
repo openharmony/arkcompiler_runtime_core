@@ -1,0 +1,15 @@
+--- # List of invalid bigint literals
+
+bad_bigint_literals:
+    - '00n'
+    - '_123n'
+    - '123_n'
+    - '123n_'
+    - '0xFAFAn'
+    - '0o123377n'
+    - '0b01010101n'
+    - '0000000123n'
+    - '1N'
+    - '123456789abcn'
+    - '5.5n'
+    - '5.5e5n'

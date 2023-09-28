@@ -1,0 +1,20 @@
+/*---
+desc: class members
+assert: Members inherited from its direct superclass.
+---*/
+
+interface A {
+  fee(): int;
+}
+
+final class B implements A {
+  public override fee(): int {
+    return 5;
+  }
+}
+
+function main(): void {
+    let x: B = new B();
+
+    assert x.fee() == 5;
+}

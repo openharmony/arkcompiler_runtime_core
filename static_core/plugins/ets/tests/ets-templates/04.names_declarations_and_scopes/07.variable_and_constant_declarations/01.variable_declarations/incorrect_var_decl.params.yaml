@@ -1,0 +1,10 @@
+---
+var_decl:
+    - 'var x;  // Unknown token var'
+    - 'let x:int; let x = 1;  // The same variable declared twice'
+    - 'let x:int = new Object();  // Wrong type'
+    - 'let x:Object|null = 1;  // Wrong type'
+    - 'const v:Object|null = null; let x:Object = v;  // Wrong type'
+    - 'let x = "true", y:boolean = x;  // Wrong type'
+    - 'let y:boolean = new Object();  // Wrong type'
+    - 'let x:Object; let y:Object = x;  // Use before initialization'

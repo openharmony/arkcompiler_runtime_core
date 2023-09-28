@@ -1,0 +1,59 @@
+--- # Cases with use of function type alias
+function_decls:
+  # no args function type
+  - decl: |-
+      let res: int
+      type F = () => void
+
+      function bar() {
+          res = 200;
+      }
+
+      function foo(f: F): int {
+          f();
+          return 100;
+      }
+    call: |-
+      res = 0
+      if (res == 0 && foo(bar) == 100 && res == 200) return 0;
+
+  # several different args function type
+  - decl: |-
+      let res = ""
+      type F = (a: int, b: double, c: boolean) => boolean
+
+      function bar(x: int, y: double, z: boolean): boolean {
+          res = res + x + y + z;
+          return !z;
+      }
+
+      function foo(f: F, x: int, y: double, z: boolean): int {
+          if (f(x, y, z)) return 0;
+          return 1;
+      }
+    call: |-
+      res = ""
+      if (res == "" && foo(bar, 1, 1.5, false) == 0 && res == "11.5false") return 0;
+
+  # call variables of function types
+  - decl: |-
+      type BarType = (a: int) => int
+      type FooType = (a: BarType, b: int) => int
+      type BazType = (a: FooType, b: BarType, c: int) => int
+
+      function bar(a: int): int {
+          return a * 2;
+      }
+
+      function foo(a: BarType, b: int): int {
+          return a(b);
+      }
+
+      function baz(a: FooType, b: BarType, c: int): int {
+          return a(b, c);
+      }
+    call: |-
+      let vbar: BarType = bar
+      let vfoo: FooType = foo
+      let vbaz: BazType = baz
+      if (vbaz(vfoo, vbar, 42) == 84) return 0;

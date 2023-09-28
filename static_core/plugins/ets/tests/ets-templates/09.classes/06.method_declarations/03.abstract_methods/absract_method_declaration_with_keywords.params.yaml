@@ -1,0 +1,7 @@
+--- # List of valid method modifiers
+modifiers:
+  - "static"
+  - "override"
+  - "open"
+  - "native"
+  - "synchronized"

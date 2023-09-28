@@ -1,0 +1,6 @@
+--- # List of valid array literals
+array_literal:
+    - { array: [], type: int, assert: 'x.length == 0' }
+    - { array: [1], type: int, assert: 'x.length == 1 && x[0] == 1' }
+    - { array: [1, 2, 3], type: int, assert: 'x.length == 3 && x[2] == 3' }
+    - { array: [3.1415926, 35.56], type: double, assert: 'x.length == 2 && x[1] == 35.56' }

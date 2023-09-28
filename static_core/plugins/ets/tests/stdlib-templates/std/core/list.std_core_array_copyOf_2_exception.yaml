@@ -1,0 +1,151 @@
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "byte[]",
+    method_signature: { arr: "byte[]", startIndex: int },
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_byte_array", second: "int"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+          },
+         test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -10,
+          },
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "short[]",
+    method_signature: { arr: "short[]", startIndex: int },
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_short_array", second: "int"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -10,
+          },
+
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "int[]",
+    method_signature: { arr: "int[]", startIndex: int },
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_int_array", second: "int"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -10,
+          },
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "long[]",
+    method_signature: { arr: "long[]", startIndex: int },
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_long_array", second: "int"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -10,
+          },
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "float[]",
+    method_signature: { arr: "float[]", startIndex: int },
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_float_array", second: "int"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -10,
+          },
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "double[]",
+    method_signature: { arr: "double[]", startIndex: int },
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_double_array", second: "int"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -10,
+          },
+
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "char[]",
+    method_signature: { arr: "char[]", startIndex: int },
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_char_array", second: "int"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[c'0', c'1', c'2', c'3', c'4', c'5', c'6', c'7', c'8', c'9', c'a', c'b', c'd', c'e', c'f', c'j']",
+            startIndex: 32,
+          },
+        test2:
+          {
+            arr: "[c'0', c'1', c'2', c'3', c'4', c'5', c'6', c'7', c'8', c'9', c'a', c'b', c'd', c'e', c'f', c'j']",
+            startIndex: -10,
+          },
+
+      },
+  }
+

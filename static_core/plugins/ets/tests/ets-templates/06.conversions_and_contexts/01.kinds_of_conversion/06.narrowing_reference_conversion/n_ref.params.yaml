@@ -1,0 +1,225 @@
+---
+cases:
+  - { stype: 'Object', val: 'new Object[1]', dtype: 'Object[]' }
+
+  - { stype: 'Integral', val: 'new Long()', dtype: 'Long' }
+
+  - { stype: 'Exception', val: 'new ClassNotFoundException()', dtype: 'ClassNotFoundException' }
+
+  - defs: |-
+      class A {}
+      class B extends A {}
+    stype: A
+    val: new B()
+    dtype: B
+
+  - defs: |-
+      class A {}
+      class B extends A {}
+    stype: A[]
+    val: new B[1]
+    dtype: B[]
+
+  - defs: |-
+      class A {}
+      class B extends A {}
+    stype: Object
+    val: new B()
+    dtype: B
+
+  - defs: |-
+      class A {}
+      class B extends A {}
+    stype: Object[]
+    val: new B[1]
+    dtype: B[]
+
+  - defs: |-
+      class A {}
+      class B extends A {}
+    stype: Object
+    val: new B()
+    dtype: A
+
+  - defs: |-
+      class A {}
+      class B extends A {}
+    stype: Object[]
+    val: new B[1]
+    dtype: A[]
+
+  - defs: |-
+      class A {}
+      class B extends A {}
+      class C extends B {}
+    stype: A
+    val: new C()
+    dtype: B
+
+  - defs: |-
+      class A {}
+      class B extends A {}
+      class C extends B {}
+    stype: A[]
+    val: new C[1]
+    dtype: B[]
+
+  - defs: |-
+      interface J {}
+      class A implements J {}
+    stype: J
+    val: new A()
+    dtype: A
+
+  - defs: |-
+      interface J {}
+      class A implements J {}
+    stype: J[]
+    val: new A[1]
+    dtype: A[]
+
+  - defs: |-
+      interface J {}
+      class A implements J {}
+    stype: Object
+    val: new A()
+    dtype: J
+
+  - defs: |-
+      interface J {}
+      class A implements J {}
+    stype: Object[]
+    val: new A[1]
+    dtype: J[]
+
+  - defs: |-
+      interface I {}
+      interface J extends I {}
+      class A implements J {}
+    stype: I
+    val: new A()
+    dtype: J
+
+  - defs: |-
+      interface I {}
+      interface J extends I {}
+      class A implements J {}
+    stype: I[]
+    val: new A[1]
+    dtype: J[]
+
+  - defs: |-
+      interface I {}
+      class A {}
+      class B extends A implements I {}
+    stype: I
+    val: new B()
+    dtype: A
+
+  - defs: |-
+      interface I {}
+      class A {}
+      final class B extends A implements I {}
+    stype: I[]
+    val: new B[1]
+    dtype: A[]
+
+  - defs: |-
+      interface I {}
+      class A {}
+      final class B extends A implements I {}
+    stype: A
+    val: new B()
+    dtype: I
+
+  - defs: |-
+      interface I {}
+      class A {}
+      final class B extends A implements I {}
+    stype: A[]
+    val: new B[1]
+    dtype: I[]
+
+  - defs: |-
+      interface I {}
+      interface J {}
+      class A implements I, J {}
+    stype: I
+    val: new A()
+    dtype: J
+
+  - defs: |-
+      interface I {}
+      interface J {}
+      class A implements I, J {}
+    stype: I[]
+    val: new A[1]
+    dtype: J[]
+
+  - { stype: Serializable, val: 'new Boolean[1]', dtype: 'Boolean[]' }
+
+  - { stype: Cloneable, val: 'new Char[1]', dtype: 'Char[]' }
+
+  - stype: Serializable
+    val: '[(a: int): Int => { return new Int(a); }]'
+    dtype: Object[]
+
+  - defs: |-
+      class S<V> {}
+    stype: Serializable
+    val: new S<Long>[1]
+    dtype: S<Long>[]
+
+  - defs: |-
+      class S<V> {}
+    stype: Cloneable
+    val: new S<Long>[1]
+    dtype: S<Long>[]
+
+  - defs: |-
+      class S<V> {}
+      final class T<V> extends S<V> {}
+    stype: S<Int>[]
+    sval: new T<Int>[1]
+    dtype: T<Int>[]
+    dval: src as T<Int>[]
+
+  - defs: |-
+      type func = (a: int) => Int;
+    stype: Cloneable
+    val: 'new func[1][1]'
+    dtype: Object[]
+
+  - defs: |-
+      class A {}
+    stype: Object[]
+    val: new A[1]
+    dtype: A[]
+
+  - defs: |-
+      class A {}
+    stype: Object
+    val: new A[1]
+    dtype: A[]
+
+  - defs: |-
+      class A {}
+    stype: Object
+    val: new A[1][1][1]
+    dtype: Object[][]
+
+  - defs: |-
+      interface I {}
+      class A implements I {}
+      final class B extends A {}
+    stype: I
+    val: new B()
+    dtype: A
+
+  - defs: |-
+      interface I {}
+      class A implements I {}
+      final class B extends A {}
+    stype: I[]
+    val: new B[1]
+    dtype: A[]

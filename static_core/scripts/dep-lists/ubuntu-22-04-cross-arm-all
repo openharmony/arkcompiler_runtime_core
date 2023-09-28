@@ -1,0 +1,10 @@
+# Panda cross-compilation dependencies list to build for AArch32 and AArch64 on Ubuntu 22.04
+g++-aarch64-linux-gnu=4:11.2*
+g++-arm-linux-gnueabi=4:11.2*
+g++-arm-linux-gnueabihf=4:11.2*
+
+libglib2.0-bin=2.72.*                              # Need for QEMU
+
+qemu-efi-aarch64=2022.02-*                         # QEMU: EFI support, Aarch64
+qemu-efi-arm=2022.02-*                             # QEMU: EFI support, AArch32
+gdb-multiarch=12.*                                 # GDB with support for multiple architectures

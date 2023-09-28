@@ -1,0 +1,10 @@
+--- # List of unboxing conversions
+unboxing_conversions:
+    - { origin: Boolean, dest: boolean, value: 'true' }
+    - { origin: Byte, dest: byte, value: 1 }
+    - { origin: Short, dest: short, value: 1 }
+    - { origin: Char, dest: char, value: "c'a'" }
+    - { origin: Int, dest: int, value: 1 }
+    - { origin: Long, dest: long, value: new Long(1 as long) }
+    - { origin: Float, dest: float, value: new Float(1.0 as float) }
+    - { origin: Double, dest: double, value: 1.0 }

@@ -1,0 +1,157 @@
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_SHAREDMEM_H_
+#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_SHAREDMEM_H_
+
+#include <atomic>
+#include <cstdint>
+#include <optional>
+#include "include/mem/panda_containers.h"
+#include "libpandabase/macros.h"
+#include "libpandabase/mem/space.h"
+#include "libpandabase/os/mutex.h"
+#include "plugins/ets/runtime/types/ets_class.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/ets_class_root.h"
+#include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/types/ets_array.h"
+
+namespace panda::ets {
+
+class EtsSharedMemory : public ObjectHeader {
+public:
+    EtsSharedMemory() = delete;
+    ~EtsSharedMemory() = delete;
+
+    NO_COPY_SEMANTIC(EtsSharedMemory);
+    NO_MOVE_SEMANTIC(EtsSharedMemory);
+
+    class Waiter;
+
+    EtsObject *AsObject()
+    {
+        return EtsObject::FromCoreType(this);
+    }
+
+    const EtsObject *AsObject() const
+    {
+        return EtsObject::FromCoreType(this);
+    }
+
+    static EtsSharedMemory *Create(size_t length);
+
+    void Initialize(size_t length);
+
+    size_t GetLength();
+
+    Waiter *GetHeadWaiter()
+    {
+        return reinterpret_cast<Waiter *>(waiter_);
+    }
+
+    void SetHeadWaiter(Waiter *waiter)
+    {
+        waiter_ = reinterpret_cast<EtsLong>(waiter);
+    }
+
+    PandaVector<int8_t> *GetData()
+    {
+        return reinterpret_cast<PandaVector<int8_t> *>(data_);
+    }
+
+    void SetData(PandaVector<int8_t> *data)
+    {
+        data_ = reinterpret_cast<EtsLong>(data);
+    }
+
+    void LinkWaiter(Waiter &waiter);
+    void UnlinkWaiter(Waiter &waiter);
+
+    int8_t GetElement(int32_t index);
+    void SetElement(int32_t index, int8_t element);
+
+    template <typename F>
+    std::pair<int8_t, int8_t> ReadModifyWriteI8(int32_t index, const F &f);
+
+    enum class WaitResult { OK = 0, NOT_EQUAL = 1, TIMED_OUT = 2 };
+
+    WaitResult WaitI32(int32_t offset, int32_t expected_value, std::optional<uint64_t> timeout);
+
+    int32_t NotifyI32(int32_t offset, std::optional<uint32_t> count);
+
+    class Waiter {
+    public:
+        explicit Waiter(int32_t offset) : offset_(offset) {}
+
+        bool Wait(std::optional<uint64_t> timeout);
+
+        void SignalAll();
+
+        bool IsNotified()
+        {
+            // Atomic with seq_cst order reason: strong synchronization
+            return notified_.load(std::memory_order_seq_cst);
+        }
+
+        void SetNotified()
+        {
+            // Atomic with seq_cst order reason: strong synchronization
+            notified_.store(true, std::memory_order_seq_cst);
+        }
+
+        int32_t GetOffset()
+        {
+            return offset_;
+        }
+
+        Waiter *GetNext()
+        {
+            return next_;
+        }
+
+        void SetNext(Waiter *next)
+        {
+            next_ = next;
+        }
+
+        Waiter *GetPrev()
+        {
+            return prev_;
+        }
+
+        void SetPrev(Waiter *prev)
+        {
+            prev_ = prev;
+        }
+
+    private:
+        os::memory::ConditionVariable cv_ {os::memory::ConditionVariable()};
+        std::atomic<bool> notified_ {std::atomic<bool>(false)};
+        int32_t offset_;
+
+        Waiter *prev_ {nullptr};
+        Waiter *next_ {nullptr};
+    };
+
+private:
+    EtsLong data_;
+    EtsLong waiter_;
+};
+
+}  // namespace panda::ets
+
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_SHAREDMEM_H_

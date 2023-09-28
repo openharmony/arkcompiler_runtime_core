@@ -1,0 +1,7 @@
+--- # List of reference equality operators
+reference_eq:
+  - {left:  "a", right:  "b", op: "==="}
+  - {left:  "b", right:  "a", op: "==="}
+  - {left:  "10", right:  "b", op: "==="}
+  - {left:  "10", right:  "a", op: "==="}
+  - {left:  "10", right:  "10", op: "==="}

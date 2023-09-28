@@ -1,0 +1,5 @@
+--- # Self dependency tests
+generic_elements:
+  - <E>
+  - <E, T> 
+  - <E> extends A

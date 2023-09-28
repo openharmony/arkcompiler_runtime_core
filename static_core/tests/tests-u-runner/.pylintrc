@@ -1,0 +1,27 @@
+[MAIN]
+ignore=.git
+py-version=3.8
+recursive=yes
+
+[MESSAGES CONTROL]
+# C0114: Missing module docstring (missing-module-docstring)
+# C0115: Missing class docstring (missing-class-docstring)
+# C0116: Missing function or method docstring (missing-function-docstring)
+# R0801: Similar lines in ... files ... (duplicate-code)
+# R0902: Too many instance attributes (too-many-instance-attributes)
+# R0903: Too few public methods (too-few-public-methods)
+# R0913: Too many arguments (too-many-arguments)
+# R0914: Too many local variables (too-many-locals)
+# W1202: Use % formatting in logging functions and pass the % parameters as arguments (logging-format-interpolation)
+disable=missing-module-docstring,
+        missing-class-docstring,
+        missing-function-docstring,
+        too-many-instance-attributes,
+        too-many-arguments,
+        logging-format-interpolation,
+        logging-fstring-interpolation,
+        too-few-public-methods,
+        duplicate-code
+
+[FORMAT]
+max-line-length=120

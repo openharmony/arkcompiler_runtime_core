@@ -1,0 +1,8 @@
+--- # List of addition tests where INF is result
+inf:
+  - {x:  1.0, y:  "Double.POSITIVE_INFINITY", type: "double", result:  "Double.POSITIVE_INFINITY"}
+  - {x:  "Double.POSITIVE_INFINITY", y: 1.0, type: "double", result:  "Double.POSITIVE_INFINITY"}
+  - {x:  "Double.POSITIVE_INFINITY", y: "Double.POSITIVE_INFINITY", type: "double", result:  "Double.POSITIVE_INFINITY"}
+  - {x:  1.0, y:  "Double.NEGATIVE_INFINITY", type: "double", result:  "Double.NEGATIVE_INFINITY"}
+  - {x:  "Double.NEGATIVE_INFINITY", y: 1.0, type: "double", result:  "Double.NEGATIVE_INFINITY"}
+  - {x:  "Double.NEGATIVE_INFINITY", y: "Double.NEGATIVE_INFINITY", type: "double", result:  "Double.NEGATIVE_INFINITY"}

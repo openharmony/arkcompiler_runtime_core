@@ -1,0 +1,4 @@
+--- # List of predefined types
+default_value:
+  - { type: "boolean", value: "true" }
+  - { type: "boolean", value: "false" }

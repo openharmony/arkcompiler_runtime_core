@@ -1,0 +1,371 @@
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "byte[]",
+    method_signature:  { arr: "byte[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_byte_array", startIndex: int, endIndex: int},
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 3,
+            endIndex: 1,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+            endIndex: 64,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 128,
+          },
+        test4:
+          {
+            arr: "[]",
+            startIndex: 10,
+            endIndex: 20,
+          },
+        test5:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: 5,
+          },
+        test6:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: -5,
+          },
+        test7:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: -5,
+          },
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "short[]",
+    method_signature:  { arr: "short[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_short_array", startIndex: int, endIndex: int},
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 3,
+            endIndex: 1,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+            endIndex: 64,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 128,
+          },
+        test4:
+          {
+            arr: "[]",
+            startIndex: 10,
+            endIndex: 20,
+          },
+        test5:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: 5,
+          },
+        test6:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: -5,
+          },
+        test7:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: -5,
+          },
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "int[]",
+    method_signature:  { arr: "int[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_int_array", startIndex: int, endIndex: int},
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 3,
+            endIndex: 1,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+            endIndex: 64,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 128,
+          },
+        test4:
+          {
+            arr: "[]",
+            startIndex: 10,
+            endIndex: 20,
+          },
+        test5:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: 5,
+          },
+        test6:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: -5,
+          },
+        test7:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: -5,
+          },
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "long[]",
+    method_signature:  { arr: "long[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_long_array", startIndex: int, endIndex: int},
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 3,
+            endIndex: 1,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+            endIndex: 64,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 128,
+          },
+        test4:
+          {
+            arr: "[]",
+            startIndex: 10,
+            endIndex: 20,
+          },
+        test5:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: 5,
+          },
+        test6:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: -5,
+          },
+        test7:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: -5,
+          },
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "float[]",
+    method_signature:  { arr: "float[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_float_array", startIndex: int, endIndex: int},
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 3,
+            endIndex: 1,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+            endIndex: 64,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 128,
+          },
+        test4:
+          {
+            arr: "[]",
+            startIndex: 10,
+            endIndex: 20,
+          },
+        test5:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: 5,
+          },
+        test6:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: -5,
+          },
+        test7:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: -5,
+          },
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "double[]",
+    method_signature:  { arr: "double[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_double_array", startIndex: int, endIndex: int},
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 3,
+            endIndex: 1,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+            endIndex: 64,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 128,
+          },
+        test4:
+          {
+            arr: "[]",
+            startIndex: 10,
+            endIndex: 20,
+          },
+        test5:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: 5,
+          },
+        test6:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: -5,
+          },
+        test7:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: -5,
+          },
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_type: "char[]",
+    method_signature:  { arr: "char[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_char_array", startIndex: int, endIndex: int},
+    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 3,
+            endIndex: 1,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 32,
+            endIndex: 64,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 128,
+          },
+        test4:
+          {
+            arr: "[]",
+            startIndex: 10,
+            endIndex: 20,
+          },
+        test5:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: 5,
+          },
+        test6:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: -5,
+          },
+        test7:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: -2,
+            endIndex: -5,
+          },
+      },
+  }

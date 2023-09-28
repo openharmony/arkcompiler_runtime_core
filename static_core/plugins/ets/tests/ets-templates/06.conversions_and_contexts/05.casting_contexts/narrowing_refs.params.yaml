@@ -1,0 +1,18 @@
+---
+cases:
+  - types:
+      - { dtype: Boolean, stype: Object, pval: 'true' }
+      - { dtype: Boolean, stype: Object, pval: 'false' }
+      - { dtype: Byte, stype: Object, pval: 0x55 as byte }
+      - { dtype: Byte, stype: Integral, pval: 0x55 as byte }
+      - { dtype: Char, stype: Object, pval: "c'W'" }
+      - { dtype: Short, stype: Object, pval: 0x5555 as short }
+      - { dtype: Short, stype: Integral, pval: 0x5555 as short }
+      - { dtype: Int, stype: Object, pval: 0x12121212 as int }
+      - { dtype: Int, stype: Integral, pval: 0x12121212 as int }
+      - { dtype: Long, stype: Object, pval: 0x3434343456565656 as long }
+      - { dtype: Long, stype: Integral, pval: 0x3434343456565656 as long }
+      - { dtype: Float, stype: Object, pval: 0.00001 as float }
+      - { dtype: Float, stype: Floating, pval: 0.00001 as float }
+      - { dtype: Double, stype: Object, pval: 0.00000000001 as double }
+      - { dtype: Double, stype: Floating, pval: 0.00000000001 as double }

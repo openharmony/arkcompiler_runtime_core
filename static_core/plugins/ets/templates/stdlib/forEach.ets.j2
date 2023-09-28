@@ -1,0 +1,26 @@
+/**
+ * runs fn for elements of arr
+ *
+ * @param arr array to run fn over
+ *
+ * @param fn a function to apply
+ * fn takes a value to test, index of some array and reference to it. Can be used, e.g., to write a function with use of adjacent elements
+ */
+export function forEach(arr: {{T}}[], fn: (value: {{T}}, index: int, self: {{T}}[]) => void): void {
+    for (let i: int = 0; i < arr.length; i++) {
+        fn(arr[i], i, arr);
+    }
+}
+
+/**
+ * runs fn over all elements of arr
+ *
+ * @param arr array to run fn over
+ *
+ * @param fn a function to apply
+ */
+export function forEach(arr: {{T}}[], fn: (value: {{T}}) => void): void {
+    for (let i: int = 0; i < arr.length; i++) {
+        fn(arr[i]);
+    }
+}

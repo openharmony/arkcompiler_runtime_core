@@ -1,0 +1,87 @@
+.language eTS
+
+.record std.core.String <external>
+.function u1 std.core.String.equals(std.core.String a0, std.core.Object a1) <external>
+.record std.core.Object <external>
+.record escompat.NoSuchFieldError <external> {
+    std.core.String message <external>
+}
+.record A {}
+.record B {
+    i32 bar
+    i32 baz
+}
+.record C {
+    i32 foo
+}
+
+.function i32 A.baz(A a0) <access.function=public> {
+    ldai 42
+    return
+}
+
+.union_field i32 bar
+.union_field i32 baz
+
+.function i32 test(std.core.Object a0, std.core.Object a1) {
+    ets.ldobj.name a0, baz
+    movi v0, 5
+    add2 v0
+    ets.stobj.name a1, bar
+    return
+}
+
+.function i32 main() {
+    newobj v0, A
+    newobj v1, B
+    newobj v2, C
+    ldai 6
+    stobj v1, B.baz
+    call.short test, v0, v1
+    ldobj v1, B.bar
+    movi v3, 47
+    jne v3, error1
+try_begin:
+    call.short test, v1, v2
+try_end:
+    ldobj v2, C.foo
+    movi v3, 11
+    jne v3, error2
+    call.short test, v0, v2
+    ldobj v2, C.foo
+    movi v3, 47
+    jne v3, error3
+    call.short test, v1, v1
+    ldobj v1, B.bar
+    movi v3, 11
+    jne v3, error4
+    jmp try_end_handler
+try_begin_handler:
+    sta.obj v0
+    ldobj.v.obj v1, v0, escompat.NoSuchFieldError.message
+    lda.str "Class C does not have field and setter with name bar"
+    sta.obj v0
+    call.short std.core.String.equals, v0, v1
+    movi v0, 1
+    jne v0, handler_error
+    ldai 0
+    return
+handler_error:
+    ldai 5
+try_end_handler:
+    return
+error1:
+    ldai 1
+    return
+error2:
+    ldai 2
+    return
+error3:
+    ldai 3
+    return
+error4:
+    ldai 4
+    return
+}
+
+.catch escompat.NoSuchFieldError, try_begin, try_end, try_begin_handler

@@ -1,0 +1,184 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "include/tooling/debug_inf.h"
+
+//
+// Debuge interface for native tools(perf, libunwind).
+//
+
+namespace panda::tooling {
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+enum CodeAction {
+    CODE_NOACTION = 0,
+    CODE_ADDED,
+    CODE_REMOVE,
+};
+
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+struct PCodeItem {
+    std::atomic<PCodeItem *> next;
+    PCodeItem *prev;
+    const uint8_t *code_base;
+    uint64_t code_size;
+    uint64_t timestamp;
+};
+
+struct PCodeMetaInfo {
+    uint32_t version = 1;
+    uint32_t action = CODE_NOACTION;
+    PCodeItem *relevent_item = nullptr;
+    std::atomic<PCodeItem *> head {nullptr};
+
+    // Panda-specific fields
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    uint8_t magic[8] = {'P', 'a', 'n', 'd', 'a', 'r', 't', '1'};
+    uint32_t flags = 0;
+    uint32_t size_meta_info = sizeof(PCodeMetaInfo);
+    uint32_t size_codeitem = sizeof(PCodeItem);
+    std::atomic_uint32_t update_lock {0};
+    uint64_t timestamp = 1;
+};
+
+// perf currently use g_jitDebugDescriptor and g_dexDebugDescriptor
+// to find the jit code item and dexfiles.
+// for using the variable interface, we doesn't change the name in panda
+// NOLINTNEXTLINE(readability-identifier-naming, fuchsia-statically-constructed-objects)
+PCodeMetaInfo g_jitDebugDescriptor;
+// NOLINTNEXTLINE(readability-identifier-naming, fuchsia-statically-constructed-objects)
+PCodeMetaInfo g_dexDebugDescriptor;
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+std::map<const std::string, PCodeItem *> DebugInf::aex_item_map_;
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+panda::os::memory::Mutex DebugInf::jit_item_lock_;
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+panda::os::memory::Mutex DebugInf::aex_item_lock_;
+
+void DebugInf::AddCodeMetaInfo(const panda_file::File *file)
+{
+    panda::os::memory::LockHolder lock(aex_item_lock_);
+    ASSERT(file != nullptr);
+    auto it = aex_item_map_.find(file->GetFilename());
+    if (it != aex_item_map_.end()) {
+        return;
+    }
+
+    PCodeItem *item = AddCodeMetaInfoImpl(&g_dexDebugDescriptor, {file->GetBase(), file->GetHeader()->file_size});
+    aex_item_map_.emplace(file->GetFilename(), item);
+}
+
+void DebugInf::DelCodeMetaInfo(const panda_file::File *file)
+{
+    panda::os::memory::LockHolder lock(aex_item_lock_);
+    ASSERT(file != nullptr);
+    auto it = aex_item_map_.find(file->GetFilename());
+    if (it == aex_item_map_.end()) {
+        return;
+    }
+
+    DelCodeMetaInfoImpl(&g_dexDebugDescriptor, file);
+}
+
+void DebugInf::Lock(PCodeMetaInfo *mi)
+{
+    // Atomic with relaxed order reason: data race with update_lock_ with no synchronization or ordering constraints
+    // imposed on other reads or writes
+    mi->update_lock.fetch_add(1, std::memory_order_relaxed);
+    std::atomic_thread_fence(std::memory_order_release);
+}
+
+void DebugInf::UnLock(PCodeMetaInfo *mi)
+{
+    std::atomic_thread_fence(std::memory_order_release);
+    // Atomic with relaxed order reason: data race with update_lock_ with no synchronization or ordering constraints
+    // imposed on other reads or writes
+    mi->update_lock.fetch_add(1, std::memory_order_relaxed);
+}
+
+PCodeItem *DebugInf::AddCodeMetaInfoImpl(PCodeMetaInfo *meta_info, [[maybe_unused]] Span<const uint8_t> inss)
+{
+    uint64_t timestamp = std::max(meta_info->timestamp + 1, panda::time::GetCurrentTimeInNanos());
+
+    // Atomic with relaxed order reason: data race with metaInfo with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    auto *head = meta_info->head.load(std::memory_order_relaxed);
+
+    auto *code_item = new PCodeItem;
+    code_item->code_base = inss.begin();
+    code_item->code_size = inss.Size();
+    code_item->prev = nullptr;
+    // Atomic with relaxed order reason: data race with code_item with no synchronization or ordering constraints
+    // imposed on other reads or writes
+    code_item->next.store(head, std::memory_order_relaxed);
+    code_item->timestamp = timestamp;
+
+    // lock
+    Lock(meta_info);
+    if (head != nullptr) {
+        head->prev = code_item;
+    }
+
+    // Atomic with relaxed order reason: data race with metaInfo with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    meta_info->head.store(code_item, std::memory_order_relaxed);
+    meta_info->relevent_item = code_item;
+    meta_info->action = CODE_ADDED;
+
+    // unlock
+    UnLock(meta_info);
+
+    return code_item;
+}
+
+void DebugInf::DelCodeMetaInfoImpl(PCodeMetaInfo *meta_info, const panda_file::File *file)
+{
+    PCodeItem *code_item = aex_item_map_[file->GetFilename()];
+    ASSERT(code_item != nullptr);
+    uint64_t timestamp = std::max(meta_info->timestamp + 1, panda::time::GetCurrentTimeInNanos());
+    // lock
+    Lock(meta_info);
+
+    // Atomic with relaxed order reason: data race with code_item with no synchronization or ordering constraints
+    // imposed on other reads or writes
+    auto next = code_item->next.load(std::memory_order_relaxed);
+    if (code_item->prev != nullptr) {
+        // Atomic with relaxed order reason: data race with code_item with no synchronization or ordering constraints
+        // imposed on other reads or writes
+        code_item->prev->next.store(next, std::memory_order_relaxed);
+    } else {
+        // Atomic with relaxed order reason: data race with metaInfo with no synchronization or ordering constraints
+        // imposed on other reads or writes
+        meta_info->head.store(next, std::memory_order_relaxed);
+    }
+
+    if (next != nullptr) {
+        next->prev = code_item->prev;
+    }
+
+    meta_info->relevent_item = code_item;
+    meta_info->action = CODE_REMOVE;
+    meta_info->timestamp = timestamp;
+
+    // unlock
+    UnLock(meta_info);
+}
+}  // namespace panda::tooling

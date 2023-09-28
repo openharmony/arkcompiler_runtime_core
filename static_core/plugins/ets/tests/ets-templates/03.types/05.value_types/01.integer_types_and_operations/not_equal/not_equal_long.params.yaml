@@ -1,0 +1,19 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: "false" }
+- { left: 0, right: 1, result: "true" }
+- { left: 1, right: 0, result: "true" }
+- { left: 1, right: 1, result: "false" }
+- { left: -1, right: 0, result: "true" }
+- { left: -1, right: -1, result: "false" }
+- { left: -1, right: 1, result: "true" }
+- { left: Long.MIN_VALUE, right: 0, result: "true" }
+- { left: Long.MIN_VALUE, right: 42131, result: "true" }
+- { left: Long.MIN_VALUE, right: Long.MAX_VALUE, result: "true" }
+- { left: Long.MIN_VALUE, right: Long.MIN_VALUE, result: "false" }
+- { left: Long.MAX_VALUE, right: 0, result: "true" }
+- { left: Long.MAX_VALUE, right: 42131, result: "true" }
+- { left: Long.MAX_VALUE, right: Long.MAX_VALUE, result: "false" }
+- { left: Long.MAX_VALUE, right: Long.MIN_VALUE, result: "true" }
+- { left: 42131, right: 42131, result: "false" }
+

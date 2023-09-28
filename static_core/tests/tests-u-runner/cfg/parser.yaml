@@ -1,0 +1,11 @@
+test-suites:
+    - parser
+general:
+    build: $panda_build
+#    verbose: one of: NONE, SHORT, ALL
+    verbose: ALL
+#    verbose-filter: one of NEW, IGNORED, ALL
+    verbose-filter: NEW
+es2panda:
+    timeout: 30
+    opt-level: 2

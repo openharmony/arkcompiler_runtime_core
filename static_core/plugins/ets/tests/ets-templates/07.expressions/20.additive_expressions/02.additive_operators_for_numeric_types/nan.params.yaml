@@ -1,0 +1,13 @@
+--- # List of addition tests where NaN is result
+nan:
+  - {x:  "Double.NaN", y:  "Double.NaN", type: "double"}
+  - {x:  1.0, y:  "Double.NaN", type: "double"}
+  - {x:  "Double.NaN", y:  1.0, type: "double"}
+  - {x:  "Double.NEGATIVE_INFINITY", y: "Double.POSITIVE_INFINITY", type: "double"}
+  - {x:  "Double.POSITIVE_INFINITY", y: "Double.NEGATIVE_INFINITY", type: "double"}
+  - {x:  "Double.NaN", y: "Double.NEGATIVE_INFINITY", type: "double"}
+  - {x:  "Double.NEGATIVE_INFINITY", y: "Double.NaN", type: "double"}
+  - {x:  "Double.NaN", y: "Double.POSITIVE_INFINITY", type: "double"}
+  - {x:  "Double.POSITIVE_INFINITY", y: "Double.NaN", type: "double"}
+  - {x:  "Double.NEGATIVE_INFINITY", y: "Double.POSITIVE_INFINITY", type: "double"}
+  - {x:  "Double.POSITIVE_INFINITY", y: "Double.NEGATIVE_INFINITY", type: "double"}

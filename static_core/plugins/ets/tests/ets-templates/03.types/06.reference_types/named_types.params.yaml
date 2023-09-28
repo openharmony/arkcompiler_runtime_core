@@ -1,0 +1,5 @@
+--- # List of named type declarations
+named_types:
+  - class a {}
+  - interface b {}
+  - enum c {v1, v2}

@@ -1,0 +1,21 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 0, right: 31, result: 0 }
+- { left: 1, right: 1, result: 0 }
+- { left: 1, right: 31, result: 0 }
+- { left: -1, right: 1, result: -1 }
+- { left: -1, right: 31, result: -1 }
+- { left: "Byte.MIN_VALUE as byte", right: 1, result: -64 }
+- { left: "Byte.MIN_VALUE as byte", right: 31, result: -1 }
+- { left: "Byte.MAX_VALUE as byte", right: 1, result: 63 }
+- { left: "Byte.MAX_VALUE as byte", right: 6, result: 1 }
+- { left: "Byte.MAX_VALUE as byte", right: 7, result: 0 }
+- { left: 63, right: 2, result: 15 }
+- { left: 1, right: 0, result: 1 }
+- { left: -1, right: 0, result: -1 }
+- { left: 42, right: 0, result: 42 }
+- { left: 1, right: -1, result: 0 }
+- { left: -1, right: -1, result: -1 }
+- { left: -1, right: -2, result: -1 }
+

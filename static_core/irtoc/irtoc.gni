@@ -1,0 +1,3 @@
+import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+
+irtoc_plugins_file = "$ark_root_gen_dir/irtoc/plugins.txt"

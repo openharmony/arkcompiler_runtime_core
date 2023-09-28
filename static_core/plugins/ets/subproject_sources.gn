@@ -1,0 +1,123 @@
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# TODO(nsizov): Fix after PR480 is merged
+srcs_assembler = [ "assembler/extension/ets_meta.cpp" ]
+
+srcs_compiler = [
+  "compiler/ir_build_intrinsics_ets.cpp",
+  "compiler/codegen_intrinsics_ets.cpp",
+  "compiler/optimizer/ir_builder/ets_inst_builder.cpp",
+  "compiler/optimizer/ets_codegen_extensions.cpp",
+  "compiler/optimizer/ets_intrinsics_peephole.cpp"
+]
+
+srcs_disassembler = [ "disassembler/disasm_ets_plugin.cpp" ]
+
+srcs_isa = [ "isa/isa.yaml" ]
+
+srcs_verification = [ "verification/ets_plugin.cpp" ]
+
+runtime_yamls = [
+  "runtime/ets_libbase_runtime.yaml",
+  "runtime/interop_js/intrinsics/std_js_jsruntime.yaml",
+  "runtime/ets_compiler_intrinsics.yaml"
+]
+
+option_yaml_path = "ets_plugin_options.yaml"
+
+runtime_option_yaml_path = "runtime_options.yaml"
+
+inst_templates_yaml_path =
+    "compiler/optimizer/ir_builder/ets_inst_templates.yaml"
+
+entrypoints_yaml_path = "runtime/ets_entrypoints.yaml"
+
+irtoc_plugins = [
+  "irtoc_scripts/interpreter_handlers.irt",
+  "irtoc_scripts/interpreter_main_loop.irt",
+]
+
+srcs_runtime = [
+  "runtime/ets_annotation.cpp",
+  "runtime/ets_class_linker.cpp",
+  "runtime/ets_class_linker_extension.cpp",
+  "runtime/ets_coroutine.cpp",
+  "runtime/ets_entrypoints.cpp",
+  "runtime/ets_exceptions.cpp",
+  "runtime/ets_itable_builder.cpp",
+  "runtime/ets_language_context.cpp",
+  "runtime/ets_napi_env.cpp",
+  "runtime/ets_native_library.cpp",
+  "runtime/ets_native_library_provider.cpp",
+  "runtime/ets_runtime_interface.cpp",
+  "runtime/ets_vm.cpp",
+  "runtime/ets_vm_api.cpp",  # TODO(nsizov): Take into account PR640, if needed
+  "runtime/ets_vtable_builder.cpp",
+  "runtime/intrinsics/escompat_ArrayBuffer.cpp",
+  "runtime/intrinsics/compiler_intrinsics.cpp",
+  "runtime/intrinsics/escompat_Date.cpp",
+  "runtime/intrinsics/escompat_RegExp.cpp",
+  "runtime/intrinsics/escompat_JSON.cpp",
+  "runtime/intrinsics/std_core.cpp",
+  "runtime/intrinsics/std_core_Char.cpp",
+  "runtime/intrinsics/std_core_Console.cpp",
+  "runtime/intrinsics/std_core_Double.cpp",
+  "runtime/intrinsics/std_core_Float.cpp",
+  "runtime/intrinsics/std_core_Promise.cpp",
+  "runtime/intrinsics/escompat_Atomics.cpp",
+  "runtime/intrinsics/std_core_Runtime.cpp",
+  "runtime/intrinsics/std_core_String.cpp",
+  "runtime/intrinsics/std_core_StringBuilder.cpp",
+  "runtime/intrinsics/std_core_Type.cpp",
+  "runtime/intrinsics/std_core_Value.cpp",
+  "runtime/intrinsics/std_core_gc.cpp",
+  "runtime/intrinsics/std_core_finalization_queue.cpp",
+  "runtime/intrinsics/std_math.cpp",
+  "runtime/intrinsics/helpers/ets_intrinsics_helpers.cpp",
+  "runtime/mem/ets_reference_processor.cpp",
+  "runtime/napi/ets_napi_helpers.cpp",
+  "runtime/napi/ets_napi_invoke_interface.cpp",
+  "runtime/napi/ets_napi_native_interface.cpp",
+  "runtime/napi/ets_mangle.cpp",
+  "runtime/regexp/regexp_executor.cpp",
+  "runtime/types/ets_class.cpp",
+  "runtime/types/ets_field.cpp",
+  "runtime/types/ets_method.cpp",
+  "runtime/types/ets_promise.cpp",
+  "runtime/types/ets_shared_memory.cpp",
+  "runtime/types/ets_object.cpp",
+  "runtime/types/ets_typeapi_parameter.cpp",
+  "runtime/types/ets_typeapi_method.cpp",
+  "runtime/types/ets_typeapi_field.cpp",
+  "runtime/lambda_utils.cpp",
+  "runtime/interop_js/intrinsics/std_js_jsruntime.cpp"
+]
+
+if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64") {
+  srcs_runtime += [
+    "runtime/napi/arch/amd64/ets_napi_entry_point_amd64.S",
+    "runtime/napi/arch/amd64/ets_async_entry_point_amd64.S"
+  ]
+} else if (current_cpu == "arm64") {
+  srcs_runtime += [
+    "runtime/napi/arch/arm64/ets_napi_entry_point_aarch64.S",
+    "runtime/napi/arch/arm64/ets_async_entry_point_aarch64.S"
+  ]
+} else if (current_cpu == "arm") {
+  srcs_runtime += [
+    "runtime/napi/arch/arm32/ets_napi_entry_point_arm32.S",
+    "runtime/napi/arch/arm32/ets_async_entry_point_arm32.S"
+  ]
+}
+# TODO(nsizov): Support 32-bit ARM

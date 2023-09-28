@@ -1,0 +1,57 @@
+.record IO <external>
+.record panda.String <external>
+.function void IO.printString(panda.String a0) <external>
+
+.array arrI32 i32 3 { 2 3 4 }
+
+.array arrStr panda.String 3 { "a" "b" "c\n"}
+
+.function void main() {
+	lda.const v0, arrI32
+	lenarr v0
+	movi v1, 3
+	jne v1, fail
+
+	ldai 0
+	ldarr v0
+	movi v1, 2
+	jne v1, fail
+
+	ldai 1
+	ldarr v0
+	movi v1, 3
+	jne v1, fail
+
+	ldai 2
+	ldarr v0
+	movi v1, 4
+	jne v1, fail
+
+	lda.str "ok\n"
+	sta.obj v0
+	call.short IO.printString, v0
+
+	lda.const v0, arrStr
+	lenarr v0
+	sta v1
+	movi v2, 0
+
+loop_print:
+	lda v2
+	jge v1, loop_print_end
+	ldarr.obj v0
+	sta.obj v3
+	call.short IO.printString, v3
+	inci v2, 1
+
+	jmp loop_print
+
+loop_print_end:
+	return.void
+
+fail:
+	lda.str "fail\n"
+	sta.obj v0
+	call.short IO.printString, v0
+	return.void
+}

@@ -1,0 +1,19 @@
+--- # Generic declarations and its wrong parameterization
+generic_types:
+  - {decl: "class OneGeneric<T> {}", bad_param: "OneGeneric"}
+  - {decl: "class OneGeneric<T> {}", bad_param: "OneGeneric<Object, String>"}
+  - {decl: "class TwoGenerics<T,U> {}", bad_param: "TwoGenerics"}
+  - {decl: "class TwoGenerics<T,U> {}", bad_param: "TwoGenerics<Object>"}
+  - {decl: "class TwoGenerics<T,U> {}", bad_param: "TwoGenerics<String, Object, String>"}
+
+  - {decl: "function OneGeneric<T>(): void {}", bad_param: "OneGeneric"}
+  - {decl: "function OneGeneric<T>(): void {}", bad_param: "OneGeneric<Object, String>"}
+  - {decl: "function TwoGenerics<T,U>(): void {}", bad_param: "TwoGenerics"}
+  - {decl: "function TwoGenerics<T,U>(): void {}", bad_param: "TwoGenerics<Object>"}
+  - {decl: "function TwoGenerics<T,U>(): void {}", bad_param: "TwoGenerics<String, Object, String>"}
+
+  - {decl: "interface OneGeneric<T> {}", bad_param: "OneGeneric"}
+  - {decl: "interface OneGeneric<T> {}", bad_param: "OneGeneric<Object, String>"}
+  - {decl: "interface TwoGenerics<T,U> {}", bad_param: "TwoGenerics"}
+  - {decl: "interface TwoGenerics<T,U> {}", bad_param: "TwoGenerics<Object>"}
+  - {decl: "interface TwoGenerics<T,U> {}", bad_param: "TwoGenerics<String, Object, String>"}

@@ -1,0 +1,4 @@
+--- # Declarations that are grouped into a list. These cannot be used as top level declarations
+groupedDeclarations:
+  - "let x: int[], y: double;"
+  - "let x: int = 5, y: double = 1.0;"

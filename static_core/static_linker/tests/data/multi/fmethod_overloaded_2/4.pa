@@ -1,0 +1,16 @@
+.record IO <external>
+.record panda.String <external>
+.function void IO.printString(panda.String a0) <external>
+
+.function void print(panda.String a0, i32 a1) {
+	ldai 30
+	jne a1, kill
+
+	call.short IO.printString, a0
+	return.void
+kill:
+	movi v0, 0
+	lda v0
+	div2 v0
+	return.void
+}

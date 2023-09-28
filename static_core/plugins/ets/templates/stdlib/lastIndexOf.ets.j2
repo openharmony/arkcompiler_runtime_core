@@ -1,0 +1,61 @@
+/*
+ * tries to find last entry of a key into arr with respect to passed indexes
+ *
+ * @param arr array to find a key
+ *
+ * @param key a value to find
+ *
+ * @param smallerIndex an index of arr to end search with
+ *
+ * @param largerIndex a last index to start search in arr
+ *
+ * @returns index of key if found in arr(smallerIndex; largerIndex], otherwise KEY_NOT_FOUND
+ */
+export function lastIndexOf(arr: {{T}}[], key: {{T}}, smallerIndex: int, largerIndex: int): int throws {
+    if (!checkRange(arr.length, smallerIndex + 1, largerIndex + 1)) {
+        throw new ArrayIndexOutOfBoundsException("lastIndexOf: bounds verification failed")
+    }
+
+    for (let i: int = largerIndex; i > smallerIndex; i--) {
+        {% if T != "Object" -%}
+        if (arr[i] == key) {
+            return i;
+        }{% else %}
+        if (arr[i].equals(key)) {
+            return i;
+        } {% endif %}
+    }
+    return KEY_NOT_FOUND;
+}
+
+/*
+ * tries to find last entry of key into arr
+ *
+ * @param arr array to find a key
+ *
+ * @param key a value to find
+ *
+ * @returns last index of key if found in arr, otherwise KEY_NOT_FOUND
+ */
+export function lastIndexOf(arr: {{T}}[], key: {{T}}): int {
+    try {
+        return lastIndexOf(arr, key, arr.length - 1)
+    } catch (e) {
+        assert false : "can't happen"
+    }
+}
+
+/*
+ * lastIndexOf(arr: {{T}}[], key: {{T}}, fromIndex: int) tries to find entry of key into arr which is not greater than fromIndex
+ *
+ * @param arr array to find a key
+ *
+ * @param key a value to find
+ *
+ * @param fromIndex an index of arr to begin search with (including, search is performed backwards)
+ *
+ * @returns last index of key if found in arr, otherwise KEY_NOT_FOUND
+ */
+function lastIndexOf(arr: {{T}}[], key: {{T}}, fromIndex: int): int throws {
+    return lastIndexOf(arr, key, -1, fromIndex)
+}

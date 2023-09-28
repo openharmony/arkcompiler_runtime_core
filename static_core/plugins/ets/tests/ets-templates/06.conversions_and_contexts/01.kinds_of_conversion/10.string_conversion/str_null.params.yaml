@@ -1,0 +1,4 @@
+---
+cases:
+  - { type: 'string|null', val: 'null' }
+  - { type: 'Exception|null', val: 'null' }

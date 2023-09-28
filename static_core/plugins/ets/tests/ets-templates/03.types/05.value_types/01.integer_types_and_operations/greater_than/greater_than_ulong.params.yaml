@@ -1,0 +1,11 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: "false" }
+- { left: 0, right: 1, result: "false" }
+- { left: 1, right: 0, result: "true" }
+- { left: Int.MAX_VALUE, right: 0, result: "true" }
+- { left: Int.MAX_VALUE, right: 1234567890420301, result: "true" }
+- { left: Int.MAX_VALUE, right: Int.MIN_VALUE, result: "true" }
+- { left: Int.MAX_VALUE, right: Int.MAX_VALUE, result: "false" }
+- { left: 987654321420301, right: 987654321420301, result: "false" }
+

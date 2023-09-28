@@ -1,0 +1,10 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 1, right: 1, result: 1 }
+- { left: 1, right: "Char.MAX_VALUE as char", result: 0 }
+- { left: "Char.MIN_VALUE as char", right: "Char.MAX_VALUE as char", result: 0 }
+- { left: "0x7000", right: 2, result: "0x3800" }
+- { left: "0x7001", right: 2, result: "0x3800" }
+- { left: "0x7ffe", right: 3, result: "0x2aaa" }
+

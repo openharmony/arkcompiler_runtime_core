@@ -1,0 +1,208 @@
+.. _Enumerations:
+
+Enumerations
+############
+
+.. meta:
+    frontend_status: Partly
+
+An enumeration type *enum* specifies a distinct type with an associated set
+of named constants that define its possible values:
+
+.. code-block:: abnf
+
+    enumDeclaration:
+        'enum' identifier '{' enumConstantList '}'
+        ;
+
+    enumConstantList:
+        enumConstant (',' enumConstant)*
+        ;
+
+    enumConstant:
+        identifier ('=' constantExpression)?
+        ;
+
+.. index::
+   enumeration
+   named constant
+
+Use the mandatory qualification by type to access the enumeration constant:
+
+.. code-block:: typescript
+   :linenos:
+
+    enum Color { Red, Green, Blue }
+    let c: Color = Color.Red
+
+If the enumeration type is exported, then all enumeration constants are
+exported along with the mandatory qualification.
+
+For example, all constants like *Color.Red* are exported along with the
+mandatory qualification *Color* if *Color* is exported.
+
+.. index::
+   qualification
+   access
+   enumeration constant
+   enumeration type
+   enum constant
+   numeric constant expression
+
+The value of an enum constant can be set explicitly to a numeric constant
+expression (expression of the ``int`` type) or to a constant expression
+of type ``string``, or can be set implicitly by omitting the constant
+expression. If the constant expression is omitted, then the value of the
+enum constant is set implicitly to a numeric value
+(see :ref:`Enumeration Integer Values`).
+
+A compile-time error occurs if integer and string type enumeration constants
+are mixed in one enumeration.
+
+.. code-block:: typescript
+   :linenos:
+
+    enum E1 { A, B = "hello" } // compile-time error
+    enum E2 { A = 5, B = "hello" } // compile-time error
+
+.. index::
+   enum constant
+   numeric constant expression
+   constant expression
+   enumeration constant
+   compile-time error
+   numeric value
+   enum constant
+   integer
+
+|
+
+.. _Enumeration Integer Values:
+
+Enumeration Integer Values
+**************************
+
+.. meta:
+    frontend_status: None
+
+The integer value of an *enum* constant is set implicitly if an enumeration
+constant specifies no value.
+
+A constant expression of the ``int`` type (signed 32-bit integer, see
+:ref:`Integer Types and Operations` for details) can be used to set
+the value explicitly:
+
+.. index::
+   enumeration integer value
+   integer value
+   enum constant
+   enumeration constant
+   integer type
+
+.. code-block:: typescript
+   :linenos:
+
+    enum Background { White = 0xFF, Grey = 0x7F, Black = 0x00 }
+
+If all constants have no value, then the first constant is assigned
+the value zero. The other constant is assigned the value of the
+immediately preceding constant plus one.
+
+If some but not all constants have their values set explicitly, then
+the values of the other constants are set by the following rules:
+
+-  The value of the first constant without an explicit value is assigned to
+   zero.
+-  A constant with an explicit value has that explicit value.
+-  A constant that is not first and has no explicit value takes the value of
+   the immediately preceding constant plus one.
+
+.. index::
+   constant
+   assignment
+
+In the following example:
+
+.. code-block:: typescript
+   :linenos:
+
+    enum Color { Red, Blue = 5, Green }
+
+the ``Red`` value is 0, the ``Blue`` value is 5, the ``Green`` value is 6.
+
+A compile-time error occurs if two constants have the same value.
+
+.. index::
+   compile-time error
+   constant
+
+|
+
+.. _Enumeration String Values:
+
+Enumeration String Values
+*************************
+
+.. meta:
+    frontend_status: Done
+
+A string value for enumeration constants must be set explicitly.
+
+.. code-block:: typescript
+   :linenos:
+
+    enum Commands { Open = "fopen", Close = "fclose" }
+
+.. index::
+   string value
+   enumeration string value
+   enumeration constant
+
+|
+
+.. _Enumeration Operations:
+
+Enumeration Operations
+**********************
+
+.. meta:
+    frontend_status: Partly
+
+The value of an enumeration constant can be converted to the type *string* by
+using the method ``toString``:
+
+.. index::
+   enumeration constant
+   method
+
+.. code-block:: typescript
+   :linenos:
+
+    enum Color { Red, Green = 10, Blue }
+    let c: Color = Color.Green
+    console.log(c.toString()) // prints: 10
+
+The name of enumeration type can be indexed by an enumeration constant
+to get the name of the constant:
+
+.. code-block:: typescript
+   :linenos:
+
+    enum Color { Red, Green = 10, Blue }
+    let c: Color = Color.Green
+    console.log(Color[c]) // prints: Green
+
+See :ref:`Enumeration Methods` in the experimental section for the additional
+methods available for enumeration types and constants.
+
+.. index::
+   enumeration constant
+   method
+   enumeration type
+   constant
+
+.. raw:: pdf
+
+   PageBreak
+
+

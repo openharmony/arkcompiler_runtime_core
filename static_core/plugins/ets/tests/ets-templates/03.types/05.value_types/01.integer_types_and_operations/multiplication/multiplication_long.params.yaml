@@ -1,0 +1,19 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 1, right: 1, result: 1 }
+- { left: 329089908882378, right: 190899239289876, result: 2308682859249980360 }
+- { left: 8098989823819883281, right: 2320908989123285601, result: -8811248971703501967 }
+- { left: 0, right: Long.MAX_VALUE, result: 0 }
+- { left: 1, right: Long.MAX_VALUE, result: Long.MAX_VALUE }
+- { left: 0, right: Long.MIN_VALUE, result: 0 }
+- { left: 1, right: Long.MIN_VALUE, result: Long.MIN_VALUE }
+- { left: -1, right: 0, result: 0 }
+- { left: -1, right: 1, result: -1 }
+- { left: -1, right: -1, result: 1 }
+- { left: -1, right: Long.MIN_VALUE, result: Long.MIN_VALUE }
+- { left: -1, right: Long.MAX_VALUE, result: -9223372036854775807 }
+- { left: Long.MAX_VALUE, right: Long.MAX_VALUE, result: 1 }
+- { left: Long.MIN_VALUE, right: Long.MIN_VALUE, result: 0 }
+- { left: 0x4000000000000000, right: 2, result: Long.MIN_VALUE }
+

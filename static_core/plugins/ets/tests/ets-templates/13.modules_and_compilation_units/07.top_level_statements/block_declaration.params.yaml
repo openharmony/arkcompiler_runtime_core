@@ -1,0 +1,44 @@
+--- # A list of top level statements
+statements:
+  - block: '["hello", "world"]'
+  - block: 'let i: int = 1;'
+  - block: |-
+          if (check())
+            assert();
+  - block: 'class Point {}'
+  - block: 'interface A {}'
+  - block: 'enum Enum { v1, v2 }'
+  - block: 'const b: int = 1;'
+  - block: 'function Dist(x: int, y: int): void {}'
+  - block: |- 
+          let i: int = 1;
+          do i++; while (i < 10)
+            x = i;
+  - block: |- 
+          let i: int = 1;
+          while (i < 10) i++
+            x = i;
+  - block: |- 
+          for (let i: int = 0; i < 10; i++) {
+            x = i;
+          }
+  - block: |-
+          let arr: int[] = new int[0]
+          for (let v: int of arr)
+            x = v;
+  - block: |-
+          switch (x) {
+            case 0: { assert x == 0; break; }
+            case 1: { assert x == 1; break; }
+            case 2: { assert x == 2; break; }
+          default: { assert false; break; }
+          }
+  - block: 'assert true;'
+  - block: |-
+          class Ex extends Exception {}
+          try {
+            throw new Exception();
+            x = 1;
+          } catch (e: Ex) {
+            x = 0;
+          }

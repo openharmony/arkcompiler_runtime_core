@@ -1,0 +1,17 @@
+--- # List of valid array creation expressions
+array_creation:
+  - "A[1]"
+  - "int[1]"
+  - "byte[1]"
+  - "short[1]"
+  - "long[1]"
+  - "float[1]"
+  - "double[1]"
+
+  - "A[1][1]"
+  - "int[1][1]"
+  - "byte[1][1]"
+  - "short[1][1]"
+  - "long[1][1]"
+  - "float[1][1]"
+  - "double[1][1]"

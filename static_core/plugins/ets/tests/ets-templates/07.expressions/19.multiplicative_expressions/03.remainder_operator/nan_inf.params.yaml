@@ -1,0 +1,42 @@
+--- # List of remainder tests where Double.NaN and INF involved
+nan_inf:
+  - {x: Double.NaN, y:  Double.NaN, result: Double.NaN}
+  - {x: Double.NaN, y:  1.0, result: Double.NaN}
+  - {x: 1.0, y:  Double.NaN, result: Double.NaN}
+  - {x: Double.NaN, y: -1.0, result: Double.NaN}
+  - {x: Double.NaN, y:  Double.POSITIVE_INFINITY, result: Double.NaN}
+  - {x: Double.POSITIVE_INFINITY, y:  Double.NaN, result: Double.NaN}
+  - {x: Double.NaN, y: Double.NEGATIVE_INFINITY, result: Double.NaN}
+  - {x: Double.NEGATIVE_INFINITY, y:  Double.NaN, result: Double.NaN}
+
+  - {x: Double.POSITIVE_INFINITY, y: 0.0, result: Double.NaN}
+  - {x: Double.NEGATIVE_INFINITY, y: 0.0, result: Double.NaN}
+  - {x: 0.0, y: Double.POSITIVE_INFINITY, result: Double.NaN}
+  - {x: 0.0, y: Double.NEGATIVE_INFINITY, result: Double.NaN}
+  - {x: Double.POSITIVE_INFINITY, y: Double.POSITIVE_INFINITY, result: Double.NaN}
+  - {x: Double.NEGATIVE_INFINITY, y: Double.NEGATIVE_INFINITY, result: Double.NaN}
+  - {x: Double.NEGATIVE_INFINITY, y: Double.NEGATIVE_INFINITY, result: Double.NaN}
+  - {x: Double.NEGATIVE_INFINITY, y: Double.POSITIVE_INFINITY, result: Double.NaN}
+  - {x: 0.0, y: 0.0, result:  Double.NaN}
+  - {x: 0.0, y: 0.0, result:  Double.NaN}
+  
+  - {x:  1.0, y: Double.POSITIVE_INFINITY, result:  1.0}
+  - {x: -1.0, y: Double.POSITIVE_INFINITY, result: -1.0}
+  - {x:  1.0, y: Double.NEGATIVE_INFINITY, result:  1.0}
+  - {x: -1.0, y: Double.NEGATIVE_INFINITY, result: -1.0}
+
+  - {x:  0.0, y:  1.0, result:  0.0}
+  - {x:  0.0, y: -1.0, result:  0.0}
+
+  - {x:  1.0, y:  0.0, result:  Double.NaN}
+  - {x: -1.0, y:  0.0, result:  Double.NaN}
+
+  - {x:  1.0, y:  1.0, result:  0.0}
+  - {x:  1.0, y: -1.0, result: -0.0}
+  - {x: -1.0, y:  1.0, result: -0.0}
+  - {x: -1.0, y: -1.0, result:  0.0}
+
+  - {x:  2.0, y:  0.5, result:  0.0}
+  - {x:  2.0, y: -0.5, result: -0.0}
+  - {x: -2.0, y:  0.5, result: -0.0}
+  - {x: -2.0, y: -0.5, result: -0.0}

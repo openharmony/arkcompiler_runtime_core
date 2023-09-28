@@ -1,0 +1,8 @@
+--- # list of values
+values:
+- { value: 0, result: 0 }
+- { value: 1, result: 1 }
+- { value: "UShort.MAX_VALUE as ushort", result: "UShort.MAX_VALUE as ushort" }
+- { value: "UShort.MIN_VALUE as ushort", result: "UShort.MIN_VALUE as ushort" }
+- { value: 52123, result: 52123 }
+

@@ -1,0 +1,23 @@
+--- # list of values
+values:
+- left: "long = 8991083928392890012"
+  right: >-
+    String = "str"
+  result: >-
+    "8991083928392890012str"
+- left: >-
+    String = "str"
+  right: "long = 8991083928392890012"
+  result: >-
+    "str8991083928392890012"
+- left: "long = -8991083928392890012"
+  right: >-
+    String = "str"
+  result: >-
+    "-8991083928392890012str"
+- left: >-
+    String = "str"
+  right: "long = -42"
+  result: >-
+    "str-42"
+

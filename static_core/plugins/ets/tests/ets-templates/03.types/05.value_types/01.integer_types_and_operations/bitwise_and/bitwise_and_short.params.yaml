@@ -1,0 +1,15 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: 0 }
+- { left: 0, right: 1, result: 0 }
+- { left: 1, right: 1, result: 1 }
+- { left: -1, right: -1, result: -1 }
+- { left: "Short.MIN_VALUE as short", right: "Short.MIN_VALUE as short", result: "Short.MIN_VALUE as short" }
+- { left: "Short.MAX_VALUE as short", right: "Short.MAX_VALUE as short", result: "Short.MAX_VALUE as short" }
+- { left: "Short.MIN_VALUE as short", right: "Short.MAX_VALUE as short", result: 0 }
+- { left: 42, right: 42, result: 42 }
+- { left: 42, right: -42, result: 2 }
+- { left: 40, right: -40, result: 8 }
+- { left: 48, right: -48, result: 16 }
+- { left: "0x5555", right: "0xaaaa as short", result: 0 }
+

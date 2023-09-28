@@ -1,0 +1,85 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef PANDA_TOOLS_SAMPLER_CONVERTER_IMPL_H
+#define PANDA_TOOLS_SAMPLER_CONVERTER_IMPL_H
+
+#include "libpandabase/os/filesystem.h"
+#include "libpandabase/utils/utf.h"
+
+#include "runtime/tooling/sampler/sample_info.h"
+#include "runtime/tooling/sampler/sample_reader-inl.h"
+#include "tools/sampler/trace_dumper.h"
+#include "tools/sampler/args_parser.h"
+
+#include <optional>
+
+namespace panda::tooling::sampler {
+
+struct SubstituteModules {
+    std::vector<std::string> source;
+    std::vector<std::string> destination;
+};
+
+class AsptConverter {
+public:
+    NO_COPY_SEMANTIC(AsptConverter);
+    NO_MOVE_SEMANTIC(AsptConverter);
+
+    using StackTraceMap = std::unordered_map<SampleInfo, size_t>;
+
+    explicit AsptConverter(const char *filename) : reader_(filename) {}
+    ~AsptConverter() = default;
+
+    size_t CollectTracesStats();
+
+    bool CollectModules();
+
+    bool BuildModulesMap();
+
+    void BuildMethodsMap();
+
+    void SubstituteDirectories(std::string *pathname) const;
+
+    bool DumpModulesToFile(const std::string &outname) const;
+
+    bool DumpResolvedTracesAsCSV(const char *filename);
+
+    bool RunWithOptions(const Options &cli_options);
+
+    bool RunDumpModulesMode(const std::string &outname);
+
+    bool RunDumpTracesInCsvMode(const std::string &outname);
+
+    static DumpType GetDumpTypeFromOptions(const Options &cli_options);
+
+private:
+    SampleReader reader_;
+
+    std::vector<FileInfo> modules_;
+
+    ModuleMap modules_map_;
+    MethodMap methods_map_;
+    StackTraceMap stack_traces_;
+
+    DumpType dump_type_ {DumpType::THREAD_SEPARATION_BY_TID};
+    bool build_cold_graph_ {false};
+
+    std::optional<SubstituteModules> substitute_directories_;
+};
+
+}  // namespace panda::tooling::sampler
+
+#endif  // PANDA_TOOLS_SAMPLER_CONVERTER_IMPL_H

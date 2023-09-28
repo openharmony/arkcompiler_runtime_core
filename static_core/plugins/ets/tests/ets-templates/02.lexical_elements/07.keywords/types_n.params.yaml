@@ -1,0 +1,15 @@
+--- # List of keywords, denoting data types
+types:
+  - boolean
+  - byte
+  - bigint
+  - char
+  - double
+  - float
+  - int
+  - long
+  - number
+  - short
+  - string
+  - undefined
+  - void

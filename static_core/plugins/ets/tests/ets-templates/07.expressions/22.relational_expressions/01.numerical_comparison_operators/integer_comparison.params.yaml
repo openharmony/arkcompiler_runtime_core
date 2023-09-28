@@ -1,0 +1,69 @@
+--- # List of integer comparison tests
+integer_comparison:
+  # >, no type promotion
+
+  - {xtype: int, xvalue:  0, ytype: int, yvalue:  1, op: ">", result: "false"}
+  - {xtype: int, xvalue:  1, ytype: int, yvalue:  0, op: ">", result: "true"}
+  - {xtype: int, xvalue: -1, ytype: int, yvalue:  0, op: ">", result: "false"}
+  - {xtype: int, xvalue:  0, ytype: int, yvalue: -1, op: ">", result: "true"}
+
+  # >, with type promotion
+
+  - {xtype: byte, xvalue:  0, ytype: byte, yvalue:  1, op: ">", result: "false"}
+  - {xtype: byte, xvalue:  1, ytype: byte, yvalue:  0, op: ">", result: "true"}
+  - {xtype: byte, xvalue: -1, ytype: byte, yvalue:  0, op: ">", result: "false"}
+  - {xtype: byte, xvalue:  0, ytype: byte, yvalue: -1, op: ">", result: "true"}
+
+  # <, no type promotion
+
+  - {xtype: int, xvalue:  0, ytype: int, yvalue:  1, op: "<", result: "true"}
+  - {xtype: int, xvalue:  1, ytype: int, yvalue:  0, op: "<", result: "false"}
+  - {xtype: int, xvalue: -1, ytype: int, yvalue:  0, op: "<", result: "true"}
+  - {xtype: int, xvalue:  0, ytype: int, yvalue: -1, op: "<", result: "false"}
+
+  # <, with type promotion
+
+  - {xtype: byte, xvalue:  0, ytype: byte, yvalue:  1, op: "<", result: "true"}
+  - {xtype: byte, xvalue:  1, ytype: byte, yvalue:  0, op: "<", result: "false"}
+  - {xtype: byte, xvalue: -1, ytype: byte, yvalue:  0, op: "<", result: "true"}
+  - {xtype: byte, xvalue:  0, ytype: byte, yvalue: -1, op: "<", result: "false"}
+
+  # >=, no type promotion
+
+  - {xtype: int, xvalue:  0, ytype: int, yvalue:  1, op: ">=", result: "false"}
+  - {xtype: int, xvalue:  1, ytype: int, yvalue:  0, op: ">=", result: "true"}
+  - {xtype: int, xvalue: -1, ytype: int, yvalue:  0, op: ">=", result: "false"}
+  - {xtype: int, xvalue:  0, ytype: int, yvalue: -1, op: ">=", result: "true"}
+
+  # >=, with type promotion
+
+  - {xtype: int, xvalue:  0, ytype: byte, yvalue:  1, op: ">=", result: "false"}
+  - {xtype: int, xvalue:  1, ytype: byte, yvalue:  0, op: ">=", result: "true"}
+  - {xtype: int, xvalue: -1, ytype: byte, yvalue:  0, op: ">=", result: "false"}
+  - {xtype: int, xvalue:  0, ytype: byte, yvalue: -1, op: ">=", result: "true"}
+
+  # <=, no type promotion
+
+  - {xtype: int, xvalue:  0, ytype: int, yvalue:  1, op: "<=", result: "true"}
+  - {xtype: int, xvalue:  1, ytype: int, yvalue:  0, op: "<=", result: "false"}
+  - {xtype: int, xvalue: -1, ytype: int, yvalue:  0, op: "<=", result: "true"}
+  - {xtype: int, xvalue:  0, ytype: int, yvalue: -1, op: "<=", result: "false"}
+
+  # <=, with type promotion
+
+  - {xtype: byte, xvalue:  0, ytype: byte, yvalue:  1, op: "<=", result: "true"}
+  - {xtype: byte, xvalue:  1, ytype: byte, yvalue:  0, op: "<=", result: "false"}
+  - {xtype: byte, xvalue: -1, ytype: byte, yvalue:  0, op: "<=", result: "true"}
+  - {xtype: byte, xvalue:  0, ytype: byte, yvalue: -1, op: "<=", result: "false"}
+
+  # >=, <=
+
+  - {xtype: int, xvalue: 0, ytype: int, yvalue: -0, op: ">=", result: "true"}
+  - {xtype: int, xvalue: 0, ytype: int, yvalue: -0, op: "<=", result: "true"}
+
+  - {xtype: int, xvalue: 1, ytype: int, yvalue: 1, op: ">=", result: "true"}
+  - {xtype: int, xvalue: 1, ytype: int, yvalue: 1, op: "<=", result: "true"}
+
+  - {xtype: int, xvalue: -1, ytype: int, yvalue: -1, op: ">=", result: "true"}
+  - {xtype: int, xvalue: -1, ytype: int, yvalue: -1, op: "<=", result: "true"}
+

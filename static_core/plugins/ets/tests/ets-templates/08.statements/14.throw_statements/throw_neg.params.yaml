@@ -1,0 +1,82 @@
+---
+cases:
+  # no 'throws' in foo function
+  - defs: |-
+      function foo(p: int): void {
+          if (p == 1) throw new Exception();
+      }
+    use: |-
+      foo(1);
+
+  - defs: |-
+      function foo(p: int): int {
+          try {
+              return p + 1;
+          } catch (e) {
+              if (p == 1) throw new Exception();
+          }
+      }
+    use: |-
+      foo(1);
+
+  - defs: |-
+      function foo(p: int): int {
+          try {
+              return p + 1;
+          } catch (e) {
+              return -1;
+          } finally {
+              if (p == 1) throw new Exception();
+          }
+      }
+    use: |-
+      foo(1);
+
+  # no 'throws' in main function
+  - defs: |-
+      function foo(p: int): void throws {
+          if (p == 1) throw new Exception();
+      }
+    use: |-
+      foo(1);
+
+  - defs: |-
+      function foo(p: int): int throws {
+          try {
+              return p + 1;
+          } catch (e) {
+              return -1;
+          } finally {
+              if (p == 1) throw new Exception();
+          }
+      }
+    use: |-
+      foo(1);
+
+  # not an exception class in throw
+  - defs: |-
+      class A {}
+    use: |-
+      let p: A = new A();
+      try {
+          throw p;
+      } catch (e) {
+          // ignore
+      }
+
+  - defs: |-
+      class A extends Exception {}
+    use: |-
+      let p: A|null = new A();
+      try {
+          throw p;
+      } catch (e) {
+          // ignore
+      }
+
+  - use: |-
+      try {
+          throw new Object();
+      } catch (e) {
+          // ignore
+      }

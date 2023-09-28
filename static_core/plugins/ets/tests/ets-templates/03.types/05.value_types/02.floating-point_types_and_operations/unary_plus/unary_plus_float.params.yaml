@@ -1,0 +1,12 @@
+--- # list of values
+values:
+- { value: 0.0, result: +0.0 }
+- { value: 1.0, result: 1.0 }
+- { value: -1.0, result: -1.0 }
+- { value: Float.NaN, result: Float.NaN }
+- { value: Float.MAX_VALUE, result: Float.MAX_VALUE }
+- { value: Float.MIN_VALUE, result: Float.MIN_VALUE }
+- { value: Float.POSITIVE_INFINITY, result: Float.POSITIVE_INFINITY }
+- { value: Float.NEGATIVE_INFINITY, result: Float.NEGATIVE_INFINITY }
+- { value: 3.1415927, result: 3.1415927 }
+- { value: -1.1754942E-38, result: -1.1754942E-38 }

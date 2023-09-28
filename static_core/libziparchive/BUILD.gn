@@ -1,0 +1,94 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("//build/ohos.gni")
+
+config("arkziparchive_config") {
+  include_dirs = [
+    "$ark_root/libziparchive",
+    "$ark_root/libpandabase",
+  ]
+
+  if (!ark_standalone_build) {
+    include_dirs += [
+      "//third_party/zlib",
+      "//third_party/zlib/contrib/minizip",
+    ]
+  } else {
+    include_dirs += [
+      "$ark_third_party_root/zlib",
+      "$ark_third_party_root/zlib/contrib/minizip",
+    ]
+  }
+}
+
+source_set("libarkziparchive_static") {
+  sources = [ "zip_archive.cpp" ]
+
+  public_configs = [
+    ":arkziparchive_config",
+    "$ark_root:ark_config",
+    "$ark_root/libpandabase:arkbase_public_config",
+    sdk_libc_secshared_config,
+  ]
+
+  deps = [
+    "$ark_root/libpandabase:libarktsbase",
+    sdk_libc_secshared_dep,
+  ]
+
+  if (!ark_standalone_build) {
+    deps += [ "//third_party/zlib:libz" ]
+  } else {
+    deps += [ "$ark_third_party_root/zlib:libz" ]
+  }
+}
+
+ohos_shared_library("libarktsziparchive") {
+  deps = [ ":libarkziparchive_static" ]
+
+  if (!is_mingw && !is_mac) {
+    output_extension = "so"
+  }
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
+}
+
+source_set("libarkziparchive_frontend_set_static") {
+  sources = [ "zip_archive.cpp" ]
+
+  public_configs = [
+    ":arkziparchive_config",
+    "$ark_root:ark_config",
+    "$ark_root/libpandabase:arkbase_public_config",
+    sdk_libc_secshared_config,
+  ]
+
+  deps = [
+    "$ark_root/libpandabase:logger_enum_gen_h",
+    sdk_libc_secshared_dep,
+  ]
+
+  if (!ark_standalone_build) {
+    deps += [ "//third_party/zlib:libz" ]
+  } else {
+    deps += [ "$ark_third_party_root/zlib:libz" ]
+  }
+}
+
+ohos_static_library("libarktsziparchive_frontend_static") {
+  deps = [ ":libarkziparchive_frontend_set_static" ]
+  part_name = ark_part_name
+  subsystem_name = ark_subsystem_name
+}

@@ -1,0 +1,16 @@
+--- # List of valid access modifiers
+modifiers:
+  - "private"
+  - "internal"
+  - "internal protected"
+  - "protected"
+  - "public"
+
+ # List of valid class members
+members:
+  - "x: int;"
+  - "foo(): void {}"
+  - "inner class B{}"
+  - "interface I{}"
+  - "enum Color {Red, Green}"
+  - "constructor() {}"

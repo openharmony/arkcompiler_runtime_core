@@ -1,0 +1,10 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 1, right: 1, result: 0 }
+- { left: 1, right: UInt.MAX_VALUE, result: 1 }
+- { left: UInt.MIN_VALUE, right: UInt.MAX_VALUE, result: 0 }
+- { left: "0xfffffffe", right: 2, result: 0 }
+- { left: "0xfffffffd", right: 2, result: 1 }
+- { left: "0xfffffffc", right: 3, result: 0 }
+

@@ -1,0 +1,13 @@
+.record panda.String <external>
+
+.record For {
+	i32 dummy
+	u64[] arr
+	panda.String name
+}
+
+.function void For.do(For a0) {
+	lda.str "ok\n"
+	stobj.obj a0, For.name
+	return.void
+}

@@ -1,0 +1,119 @@
+---
+cases:
+  # exception propagation to caller context
+  - defs: |-
+      class Ex extends Exception {}
+      function foo(e: Ex, cnt: int): Ex throws {
+          if (cnt > 0) throw foo(e, --cnt);
+          return e;
+      }
+    use: |-
+      try {
+          foo(new Ex(), 100);
+      } catch (e: Ex) {
+          return 0;
+      } catch (def) {
+          return 1;
+      }
+      return 1;
+
+  # error propagation to caller context
+  - defs: |-
+      class Ex extends Error {}
+      function foo(e: Ex, cnt: int): Ex {
+          if (cnt > 0) throw foo(e, --cnt);
+          return e;
+      }
+    use: |-
+      try {
+          foo(new Ex(), 100);
+      } catch (e: Ex) {
+          return 0;
+      } catch (def) {
+          return 1;
+      }
+      return 1;
+
+  # UncatchedExceptionError
+  - defs: |-
+      class Ex extends Exception {}
+      function foo(): void {
+          try {
+              if (1 != 2) throw new Exception();
+          } catch (e: Ex) {
+              return;
+          } catch (e: Error) {
+              return;
+          }
+      }
+    use: |-
+      try {
+          foo();
+      } catch (e: UncatchedExceptionError) {
+          return 0;
+      } catch (def) {
+          return 1;
+      }
+      return 1;
+
+# default catch for exceptions
+  - defs: |-
+      interface I {}
+      class Ex extends Exception implements I {}
+      class F extends Exception implements I {}
+    use: |-
+      let exc: I = new Ex();
+      try {
+          if (1 != 2) throw exc as Exception;
+      } catch (f: F) {
+          return 1;
+      } catch (def) {
+          return 0;
+      }
+      return 1;
+
+# default catch for errors
+  - defs: |-
+      interface I {}
+      class Ex extends Error implements I {}
+      class F extends Error implements I {}
+    use: |-
+      let err: I = new Ex();
+      try {
+          if (1 != 2) throw err as Error;
+      } catch (f: F) {
+          return 1;
+      } catch (def) {
+          return 0;
+      }
+      return 1;
+
+# assignment compatible to exception
+  - defs: |-
+      interface I {}
+      class Ex extends Exception implements I {}
+    use: |-
+      let exc: I = new Ex();
+      try {
+          if (1 != 2) throw exc as Exception;
+      } catch (e: Ex) {
+          return 0;
+      } catch (def) {
+          return 1;
+      }
+      return 1;
+
+# assignment compatible to error
+  - defs: |-
+      interface I {}
+      class Ex extends Error implements I {}
+    use: |-
+      let err: I = new Ex();
+      try {
+          if (1 != 2) throw err as Error;
+      } catch (e: Ex) {
+          return 0;
+      } catch (def) {
+          return 1;
+      }
+      return 1;

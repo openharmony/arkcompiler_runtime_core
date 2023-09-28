@@ -1,0 +1,95 @@
+---
+cases:
+  # type argument is class
+  - use: |-
+      let v = new X()
+      if (a.meth <X> (new X(), v) !== v) {
+          return 1;
+      }
+
+  - use: |-
+      let v = new Y<X>()
+      if (a.meth <X> (new X(), v) !== v) {
+          return 1;
+      }
+    bound: ' extends X'
+
+  - use: |-
+      if (a.meth <X|null> (new X(), null) !== null) {
+          return 1;
+      }
+
+  - use: |-
+      if (a.meth <Y<X>|null> (new X(), null) !== null) {
+          return 1;
+      }
+    bound: ' extends Object|null'
+
+  # type argument is interface
+  - use: |-
+      let v: I = new X()
+      if (a.meth <I> (v, v) !== v) {
+          return 1;
+      }
+
+  - use: |-
+      let v: I = new Y<X>()
+      if (a.meth <I> (new X(), v) !== v) {
+          return 1;
+      }
+    bound: ' extends Object'
+
+  # type argument is array of classes, interfaces, enums
+  - use: |-
+      let v = new X[0]
+      if (a.meth <X[]> (new X(), v) !== v) {
+          return 1;
+      }
+    bound: ' extends Object[]'
+
+  - use: |-
+      let v: I[] = new I[0]
+      if (a.meth <I[]> (new X(), v) !== v) {
+          return 1;
+      }
+
+  - use: |-
+      let v: Color[] = [Color.Red]
+      if (a.meth <Color[]> (new X(), v) !== v) {
+          return 1;
+      }
+    bound: ' extends Object'
+
+  # type argument is alias
+  - use: |-
+      let v = new X()
+      if (a.meth <B> (new X(), v) !== v) {
+          return 1;
+      }
+    decl: |-
+      type B = X
+
+  - use: |-
+      let v: B = null
+      if (a.meth <B> (new X(), v) !== v) {
+          return 1;
+      }
+    decl: |-
+      type B = X|null
+    bound: ' extends I|null'
+
+  - use: |-
+      let v: I = new X()
+      if (a.meth <B> (v, v) !== v) {
+          return 1;
+      }
+    decl: |-
+      type B = I
+
+  - use: |-
+      let v = new X[0]
+      if (a.meth <B> (new X(), v) !== v) {
+          return 1;
+      }
+    decl: |-
+      type B = X[]|null

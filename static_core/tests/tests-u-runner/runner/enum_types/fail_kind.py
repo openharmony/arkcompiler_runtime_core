@@ -1,0 +1,23 @@
+from enum import Enum
+
+
+class FailKind(Enum):
+    ES2PANDA_FAIL = 1
+    ES2PANDA_TIMEOUT = 4
+    ES2PANDA_OTHER = 7
+
+    RUNTIME_FAIL = 2
+    RUNTIME_TIMEOUT = 5
+    RUNTIME_OTHER = 8
+
+    AOT_FAIL = 3
+    AOT_TIMEOUT = 6
+    AOT_OTHER = 9
+
+    QUICK_FAIL = 10
+    QUICK_TIMEOUT = 11
+    QUICK_OTHER = 12
+
+    VERIFIER_FAIL = 13
+    VERIFIER_TIMEOUT = 14
+    VERIFIER_OTHER = 15

@@ -1,0 +1,5 @@
+--- # List of named type declarations
+named_types_generics:
+  - class a<G> {}
+  - interface b<G> {}
+# - enum c<G> {v1, v2} -- not implemented in grammar yet

@@ -1,0 +1,23 @@
+.record IO <external>
+.record panda.String <external>
+.function void IO.printString(panda.String a0) <external>
+
+.record For {
+	panda.String name
+}
+
+.function void do(For a0) <external>
+
+.function void main() {
+	newobj v0, For
+	lda.str "str"
+	stobj.obj v0, For.name
+	call.short do, v0
+	ldobj.obj v0, For.name
+	sta.obj v1
+	call.short IO.printString, v1
+	lda.str "\n"
+	sta.obj v1
+	call.short IO.printString, v1
+	return.void
+}

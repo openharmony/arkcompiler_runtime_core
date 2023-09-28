@@ -1,0 +1,12 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: "true" }
+- { left: 0, right: 1, result: "true" }
+- { left: 1, right: 0, result: "false" }
+- { left: 1, right: 1, result: "true" }
+- { left: ULong.MIN_VALUE, right: 0, result: "true" }
+- { left: ULong.MIN_VALUE, right: 425761234567, result: "true" }
+- { left: ULong.MIN_VALUE, right: ULong.MAX_VALUE, result: "true" }
+- { left: ULong.MIN_VALUE, right: ULong.MIN_VALUE, result: "true" }
+- { left: 1234567890, right: 1234567890, result: "true" }
+

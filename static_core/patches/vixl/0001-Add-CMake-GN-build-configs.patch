@@ -1,0 +1,313 @@
+From 78bf17efe591283a0a3a6509553232f353b39b2d Mon Sep 17 00:00:00 2001
+From: Aleksei Sidorov <>
+Date: Wed, 1 Jun 2022 19:41:12 +0300
+Subject: [PATCH 1/4] Add CMake/GN build configs
+
+---
+ BUILD.gn       | 175 +++++++++++++++++++++++++++++++++++++++++++++++++
+ CMakeLists.txt | 111 +++++++++++++++++++++++++++++++
+ 2 files changed, 286 insertions(+)
+ create mode 100644 BUILD.gn
+ create mode 100644 CMakeLists.txt
+
+diff --git a/BUILD.gn b/BUILD.gn
+new file mode 100644
+index 00000000..54222553
+--- /dev/null
++++ b/BUILD.gn
+@@ -0,0 +1,175 @@
++# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
++#
++# Redistribution and use in source and binary forms, with or without
++# modification, are permitted provided that the following conditions are met:
++#
++#   * Redistributions of source code must retain the above copyright notice,
++#     this list of conditions and the following disclaimer.
++#   * Redistributions in binary form must reproduce the above copyright notice,
++#     this list of conditions and the following disclaimer in the documentation
++#     and/or other materials provided with the distribution.
++#   * Neither the name of ARM Limited nor the names of its contributors may be
++#     used to endorse or promote products derived from this software without
++#     specific prior written permission.
++#
++# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS CONTRIBUTORS "AS IS" AND
++# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
++# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
++# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
++# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
++# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
++# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++
++import("//ark/runtime_core/ark_config.gni")
++import("//build/config/ohos/rules.gni")
++import("//build/ohos.gni")
++
++config("vixl_public_config") {
++  include_dirs = [
++    "$ark_third_party_root/vixl",
++    "$ark_third_party_root/vixl/src",
++  ]
++  if (current_cpu == "arm") {
++    include_dirs += [ "$ark_third_party_root/vixl/src/aarch32" ]
++  } else if (current_cpu == "arm64" || current_cpu == "amd64" ||
++             current_cpu == "x64" || current_cpu == "x86_64") {
++    include_dirs += [ "$ark_third_party_root/vixl/src/aarch64" ]
++  }
++}
++
++ohos_static_library("libvixl") {
++  sources = [
++    "src/code-buffer-vixl.cc",
++    "src/compiler-intrinsics-vixl.cc",
++    "src/cpu-features.cc",
++    "src/utils-vixl.cc",
++  ]
++
++  if (current_cpu == "arm") {
++    sources += [
++      "src/aarch32/assembler-aarch32.cc",
++      "src/aarch32/constants-aarch32.cc",
++      "src/aarch32/disasm-aarch32.cc",
++      "src/aarch32/instructions-aarch32.cc",
++      "src/aarch32/location-aarch32.cc",
++      "src/aarch32/macro-assembler-aarch32.cc",
++      "src/aarch32/operands-aarch32.cc",
++    ]
++    cflags_cc = [ "-DVIXL_INCLUDE_TARGET_A32" ]
++  } else if (current_cpu == "arm64" || current_cpu == "amd64" ||
++             current_cpu == "x64" || current_cpu == "x86_64") {
++    sources += [
++      "src/aarch64/assembler-aarch64.cc",
++      "src/aarch64/assembler-sve-aarch64.cc",
++      "src/aarch64/cpu-aarch64.cc",
++      "src/aarch64/cpu-features-auditor-aarch64.cc",
++      "src/aarch64/decoder-aarch64.cc",
++      "src/aarch64/disasm-aarch64.cc",
++      "src/aarch64/instructions-aarch64.cc",
++      "src/aarch64/logic-aarch64.cc",
++      "src/aarch64/macro-assembler-aarch64.cc",
++      "src/aarch64/macro-assembler-sve-aarch64.cc",
++      "src/aarch64/operands-aarch64.cc",
++      "src/aarch64/pointer-auth-aarch64.cc",
++      "src/aarch64/simulator-aarch64.cc",
++    ]
++    cflags_cc = [
++      "-DVIXL_INCLUDE_TARGET_A64",
++      "-DVIXL_INCLUDE_SIMULATOR_AARCH64",
++    ]
++  } else {
++    cflags_cc = []
++  }
++
++  cflags_cc += [ "-DVIXL_DEBUG" ]
++  if (is_mac) {
++    cflags_cc += [
++      "-DVIXL_CODE_BUFFER_MALLOC",
++      "-DPANDA_BUILD",
++    ]
++  } else {
++    cflags_cc += [
++      "-DVIXL_CODE_BUFFER_MMAP",
++      "-DPANDA_BUILD",
++    ]
++  }
++
++  configs = [
++    "$ark_root:ark_config",
++    "$ark_root/libpandabase:arkbase_public_config",
++    ":vixl_public_config",
++  ]
++
++  deps = [ "$ark_root/libpandabase:libarkbase" ]
++
++  subsystem_name = "ark"
++}
++
++ohos_static_library("libvixl_frontend_static") {
++  sources = [
++    "src/code-buffer-vixl.cc",
++    "src/compiler-intrinsics-vixl.cc",
++    "src/cpu-features.cc",
++    "src/utils-vixl.cc",
++  ]
++
++  if (current_cpu == "arm") {
++    sources += [
++      "src/aarch32/assembler-aarch32.cc",
++      "src/aarch32/constants-aarch32.cc",
++      "src/aarch32/disasm-aarch32.cc",
++      "src/aarch32/instructions-aarch32.cc",
++      "src/aarch32/location-aarch32.cc",
++      "src/aarch32/macro-assembler-aarch32.cc",
++      "src/aarch32/operands-aarch32.cc",
++    ]
++    cflags_cc = [ "-DVIXL_INCLUDE_TARGET_A32" ]
++  } else if (current_cpu == "arm64" || current_cpu == "amd64" ||
++             current_cpu == "x64" || current_cpu == "x86_64") {
++    sources += [
++      "src/aarch64/assembler-aarch64.cc",
++      "src/aarch64/cpu-aarch64.cc",
++      "src/aarch64/cpu-features-auditor-aarch64.cc",
++      "src/aarch64/decoder-aarch64.cc",
++      "src/aarch64/disasm-aarch64.cc",
++      "src/aarch64/instructions-aarch64.cc",
++      "src/aarch64/logic-aarch64.cc",
++      "src/aarch64/macro-assembler-aarch64.cc",
++      "src/aarch64/operands-aarch64.cc",
++      "src/aarch64/pointer-auth-aarch64.cc",
++      "src/aarch64/simulator-aarch64.cc",
++    ]
++    cflags_cc = [
++      "-DVIXL_INCLUDE_TARGET_A64",
++      "-DVIXL_INCLUDE_SIMULATOR_AARCH64",
++    ]
++  } else {
++    cflags_cc = []
++  }
++
++  cflags_cc += [ "-DVIXL_DEBUG" ]
++  if (is_mac) {
++    cflags_cc += [
++      "-DVIXL_CODE_BUFFER_MALLOC",
++      "-DPANDA_BUILD",
++    ]
++  } else {
++    cflags_cc += [
++      "-DVIXL_CODE_BUFFER_MMAP",
++      "-DPANDA_BUILD",
++    ]
++  }
++
++  configs = [
++    "$ark_root:ark_config",
++    "$ark_root/libpandabase:arkbase_public_config",
++    ":vixl_public_config",
++  ]
++
++  deps = [ "$ark_root/libpandabase:libarkbase_frontend_static" ]
++
++  subsystem_name = "ark"
++}
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 00000000..f2ac6c64
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,111 @@
++# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
++#
++# Redistribution and use in source and binary forms, with or without
++# modification, are permitted provided that the following conditions are met:
++#
++#   * Redistributions of source code must retain the above copyright notice,
++#     this list of conditions and the following disclaimer.
++#   * Redistributions in binary form must reproduce the above copyright notice,
++#     this list of conditions and the following disclaimer in the documentation
++#     and/or other materials provided with the distribution.
++#   * Neither the name of ARM Limited nor the names of its contributors may be
++#     used to endorse or promote products derived from this software without
++#     specific prior written permission.
++#
++# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS CONTRIBUTORS "AS IS" AND
++# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
++# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
++# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
++# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
++# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
++# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++
++cmake_minimum_required(VERSION 3.10)
++
++project(vixl)
++
++set(VIXL_SOURCES
++    src/code-buffer-vixl.cc
++    src/compiler-intrinsics-vixl.cc
++    src/cpu-features.cc
++    src/utils-vixl.cc )
++
++set(VIXL_DIR
++    .
++    src/ )
++
++if (PANDA_TARGET_MACOS)
++set(VIXL_FLAGS -DVIXL_CODE_BUFFER_MALLOC -DPANDA_BUILD)
++else()
++set(VIXL_FLAGS -DVIXL_CODE_BUFFER_MMAP -DPANDA_BUILD)
++endif()
++
++set(VIXL_AARCH32_SOURCES
++    src/aarch32/assembler-aarch32.cc
++    src/aarch32/disasm-aarch32.cc
++    src/aarch32/location-aarch32.cc
++    src/aarch32/operands-aarch32.cc
++    src/aarch32/constants-aarch32.cc
++    src/aarch32/instructions-aarch32.cc
++    src/aarch32/macro-assembler-aarch32.cc )
++
++set(VIXL_AARCH32_DIR src/aarch32/)
++
++set(VIXL_AARCH64_SOURCES
++    src/aarch64/assembler-aarch64.cc
++    src/aarch64/operands-aarch64.cc
++    src/aarch64/cpu-aarch64.cc
++    src/aarch64/instructions-aarch64.cc
++    src/aarch64/macro-assembler-aarch64.cc )
++
++if (NOT PANDA_MINIMAL_VIXL)
++    list(APPEND VIXL_AARCH64_SOURCES
++        #src/aarch64/assembler-sve-aarch64.cc
++        src/aarch64/decoder-aarch64.cc
++        src/aarch64/disasm-aarch64.cc
++        src/aarch64/logic-aarch64.cc
++        src/aarch64/pointer-auth-aarch64.cc
++        src/aarch64/cpu-features-auditor-aarch64.cc
++        #src/aarch64/macro-assembler-sve-aarch64.cc
++        src/aarch64/simulator-aarch64.cc )
++endif()
++
++set(VIXL_AARCH64_DIR src/aarch64/)
++
++if (NOT(CMAKE_BUILD_TYPE MATCHES Release OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo))
++    list(APPEND VIXL_FLAGS -DVIXL_DEBUG)
++endif()
++
++# !TODO Add test suite to check with PANDA_COMPILER_TARGET_AARCH32
++if ((PANDA_TARGET_ARM32) OR (PANDA_TARGET_AMD64))
++    list(APPEND VIXL_FLAGS -DVIXL_INCLUDE_TARGET_A32)
++    list(APPEND VIXL_SOURCES ${VIXL_AARCH32_SOURCES})
++    list(APPEND VIXL_DIR ${VIXL_AARCH32_DIR})
++endif()
++
++# !TODO Add  test suite to check with PANDA_COMPILER_TARGET_AARCH64
++if ((PANDA_TARGET_ARM64) OR (PANDA_TARGET_AMD64))
++    list(APPEND VIXL_FLAGS -DVIXL_INCLUDE_SIMULATOR_AARCH64 -DVIXL_INCLUDE_TARGET_A64)
++    list(APPEND VIXL_SOURCES ${VIXL_AARCH64_SOURCES})
++    list(APPEND VIXL_DIR ${VIXL_AARCH64_DIR})
++endif()
++
++include_directories(${VIXL_DIR})
++
++add_library(vixl STATIC ${VIXL_SOURCES})
++target_link_libraries(vixl arkbase)
++
++target_compile_options(vixl PUBLIC ${VIXL_FLAGS})
++target_compile_options(vixl PRIVATE -Wno-shadow)
++
++set_property(TARGET vixl PROPERTY POSITION_INDEPENDENT_CODE ON)
++set_property(TARGET vixl PROPERTY EXCLUDE_FROM_ALL TRUE)
++
++target_include_directories(vixl
++    INTERFACE src/
++)
++
++panda_add_sanitizers(TARGET vixl SANITIZERS ${PANDA_SANITIZERS_LIST})
+-- 
+2.17.1
+

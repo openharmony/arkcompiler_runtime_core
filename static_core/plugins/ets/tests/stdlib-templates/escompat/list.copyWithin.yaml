@@ -1,0 +1,81 @@
+- {
+  name: "testCopyWithinUnchanged0",
+  expected: [1, 2, 3, 4, 5],
+  params: [6, 2, 3]
+}
+- {
+  name: "testCopyWithinUnchanged1",
+  expected: [1, 2, 3, 4, 5],
+  params: [-3, 2, 3]
+}
+- {
+  name: "testCopyWithinUnchanged2",
+  expected: [1, 2, 3, 4, 5],
+  params: [0, 6, 3]
+}
+- {
+  name: "testCopyWithinUnchanged3",
+  expected: [1, 2, 3, 4, 5],
+  params: [0, 4, 2]
+}
+
+- {
+  name: "copyWithinTargetAndStart1",
+  expected: [4, 5, 3, 4, 5],
+  params: [0, 3]
+}
+- {
+  name: "copyWithinTargetAndStart2",
+  expected: [1, 4, 5, 4, 5],
+  params: [1, 3]
+}
+- {
+  name: "copyWithinTargetAndStart3",
+  expected: [1, 3, 4, 5, 5],
+  params: [1, 2]
+}
+- {
+  name: "copyWithinTargetAndStart4",
+  expected: [1, 2, 3, 4, 5],
+  params: [2, 2]
+}
+- {
+  name: "copyWithinTargetAndStartAndEnd1",
+  expected: [4, 2, 3, 4, 5],
+  params: [0, 3, 4]
+}
+- {
+  name: "copyWithinTargetAndStartAndEnd2",
+  expected: [1, 4, 3, 4, 5],
+  params: [1, 3, 4]
+}
+- {
+  name: "copyWithinTargetAndStartAndEnd3",
+  expected: [1, 3, 4, 4, 5],
+  params: [1, 2, 4]
+}
+- {
+  name: "copyWithinNegativeRelativeOffsets1",
+  expected: [4, 5, 3, 4, 5],
+  params: [0, -2]
+}
+- {
+  name: "copyWithinNegativeRelativeOffsets2",
+  expected: [4, 2, 3, 4, 5],
+  params: [0, -2, -1]
+}
+- {
+  name: "copyWithinNegativeRelativeOffsets3",
+  expected: [1, 3, 3, 4, 5],
+  params: [-4, -3, -2]
+}
+- {
+  name: "copyWithinNegativeRelativeOffsets4",
+  expected: [1, 3, 4, 4, 5],
+  params: [-4, -3, -1]
+}
+- {
+  name: "copyWithinNegativeRelativeOffsets5",
+  expected: [1, 3, 4, 5, 5],
+  params: [-4, -3]
+}

@@ -1,0 +1,22 @@
+--- # List of declarations
+nullables:
+  - {type: "Byte|null", value: "5"}
+  - {type: "Byte|null", value: "null"}
+  - {type: "Short|null", value: "5"}
+  - {type: "Short|null", value: "null"}
+  - {type: "Int|null", value: "5"}
+  - {type: "Int|null", value: "null"}
+  - {type: "Long|null", value: "5 as long"}
+  - {type: "Long|null", value: "null"}
+  - {type: "Float|null", value: "5.0"}
+  - {type: "Float|null", value: "null"}
+  - {type: "Double|null", value: "5.0"}
+  - {type: "Double|null", value: "null"}
+  - {type: "Char|null", value: "c's'"}
+  - {type: "Char|null", value: "null"}
+  - {type: "Boolean|null", value: "true"}
+  - {type: "Boolean|null", value: "null"}
+  - {type: "A|null", value: "null"}
+# redundant nullability
+  - {type: "Byte|null|null", value: "5"}
+  - {type: "Byte|null|null", value: "null"}

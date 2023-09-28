@@ -1,0 +1,3 @@
+# #9717
+built-ins/String/prototype/repeat/repeat-string-n-times.js
+built-ins/Array/prototype/reduce/callbackfn-resize-arraybuffer.js

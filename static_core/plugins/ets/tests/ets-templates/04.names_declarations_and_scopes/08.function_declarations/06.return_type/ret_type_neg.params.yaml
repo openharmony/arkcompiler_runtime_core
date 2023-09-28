@@ -1,0 +1,48 @@
+---
+function_decls:
+    - decl: |-
+        native function foo(); // CTE, native function without return type
+      call: |-
+        foo();
+
+    - decl: |-
+        let i = 1
+        function foo() {  // infer void
+            i += 1
+        }
+      call: |-
+        let x: number = foo();  // CTE, cannot assign void to number
+
+    - decl: |-
+        let i = 1
+        function foo() throws {  // infer void
+            i += 1
+            throw new Exception()
+            return i;   // CTE - unreachable stmt
+        }
+      call: |-
+        foo();
+
+    - decl: |-
+        let s = new Object()
+        function foo() {  // CTE, no LUB can be found
+            if (s != null)
+                return true;
+            else
+                return [true];
+        }
+      call: |-
+        let v = foo();
+
+    - decl: |-
+          class B<T, U> {}
+          let s = 1
+
+          function foo<T>() {  // CTE, no LUB can be found
+              if (s == 0)
+                  return new B<T, Long>();
+              else
+                  return new B<T, Error>();
+          }
+      call: |-
+          let v = foo<Boolean>();

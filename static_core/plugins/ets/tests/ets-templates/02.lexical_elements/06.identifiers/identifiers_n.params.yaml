@@ -1,0 +1,16 @@
+--- # List of possible ident start symbols
+ids:
+    - '\u200Dabc' # Zero Width Joiner
+    - '\u200Cabc' # Zero Width Non-Joiner
+    - '0abc' # digit
+    - '9abc' # digit
+    - '\nabc' # newline
+    - '\u093Babc' # spacing mark
+    - '\u0302abc' # non-spacing mark
+    - "'abc" # punctuation
+    - ',abc' # punctuation
+    - '.abc' # punctuation
+    - 'a:bc' # punctuation
+    - '+abc' # punctuation
+    - 'a%bc' # punctuation
+    - '&abc' # punctuation

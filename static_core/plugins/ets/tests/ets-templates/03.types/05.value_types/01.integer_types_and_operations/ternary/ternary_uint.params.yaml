@@ -1,0 +1,4 @@
+--- # list of values
+values:
+- { condition: 0, ifTrue: 1, ifFalse: 2, result: 2 }
+- { condition: 1, ifTrue: 1, ifFalse: 2, result: 1 }

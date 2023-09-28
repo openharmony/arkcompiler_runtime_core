@@ -1,0 +1,37 @@
+--- # List of boolean equality operators
+boolean_eq:
+  - {left:  "true", right:  "true", op: "==", result:  "true"}
+  - {left:  "true", right: "false", op: "==", result: "false"}
+  - {left: "false", right:  "true", op: "==", result: "false"}
+  - {left: "false", right: "false", op: "==", result:  "true"}
+
+  - {left:  "true", right:  "true", op: "!=", result: "false"}
+  - {left:  "true", right: "false", op: "!=", result:  "true"}
+  - {left: "false", right:  "true", op: "!=", result:  "true"}
+  - {left: "false", right: "false", op: "!=", result: "false"}
+
+  - {left:  "true", right: "new Boolean(true)", op: "==", result: "true"}
+  - {left:  "true", right: "new Boolean(false)", op: "==", result: "false"}
+  - {left: "false", right: "new Boolean(true)", op: "==", result: "false"}
+  - {left: "false", right: "new Boolean(false)", op: "==", result:  "true"}
+
+  - {left:  "true", right: "new Boolean(true)", op: "!=", result: "false"}
+  - {left:  "true", right: "new Boolean(false)", op: "!=", result:  "true"}
+  - {left: "false", right: "new Boolean(true)", op: "!=", result:  "true"}
+  - {left: "false", right: "new Boolean(false)", op: "!=", result: "false"}
+
+  - {left: "new Boolean(true)", right: "new Boolean(true)", op: "!=", result: "false"}
+  - {left: "new Boolean(true)", right: "new Boolean(false)", op: "!=", result:  "true"}
+  - {left: "new Boolean(false)", right: "new Boolean(true)", op: "!=", result:  "true"}
+  - {left: "new Boolean(false)", right: "new Boolean(false)", op: "!=", result: "false"}
+
+  - {left: "new Boolean(true)", right: "new Boolean(true)", op: "==", result: "true"}
+  - {left: "new Boolean(true)", right: "new Boolean(false)", op: "==", result:  "false"}
+  - {left: "new Boolean(false)", right: "new Boolean(true)", op: "==", result:  "false"}
+  - {left: "new Boolean(false)", right: "new Boolean(false)", op: "==", result: "true"}
+
+  - {left: "(true==false)==false", right:  "false==(false==true)", op: "==", result:  "true"}
+  - {left: "(true!=false)==true", right:  "true==(false!=true)", op: "==", result:  "true"}
+
+
+

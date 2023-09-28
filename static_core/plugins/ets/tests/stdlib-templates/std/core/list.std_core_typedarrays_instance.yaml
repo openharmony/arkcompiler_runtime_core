@@ -1,0 +1,46 @@
+- {
+  objectType: "Int8Array",
+  primitiveType: "byte",
+  primitiveSizeBytes: 1,
+  data: "[Byte.MIN_VALUE as byte, -120 as byte, -77 as byte, -1 as byte, 0 as byte, 1 as byte, 77 as byte, 120 as byte, Byte.MAX_VALUE as byte]"
+
+}
+- {
+  objectType: "Int16Array",
+  primitiveType: "short",
+  primitiveSizeBytes: 2,
+  data: "[Short.MIN_VALUE as short, -12345 as short, -777 as short, -1 as short, 0 as short, 1 as short, 777 as short, 12345 as short, Short.MAX_VALUE as short]"
+}
+- {
+  objectType: "Int32Array",
+  primitiveType: "int",
+  primitiveSizeBytes: 4,
+  data: "[Int.MIN_VALUE, -1234567, -7777, -1, 0, 1, 7777, 1234567, Int.MAX_VALUE]"
+}
+- {
+  objectType: "BigInt64Array",
+  primitiveType: "long",
+  primitiveSizeBytes: 8,
+  data: "[Long.MIN_VALUE as long, -123456789 as long, -77777 as long, -1 as long, 0 as long, 1 as long, 77777 as long, 123456789 as long, Long.MAX_VALUE as long]"
+}
+
+- {
+  objectType: "Float64Array",
+  primitiveType: "double",
+  primitiveSizeBytes: 8,
+  data: "[Double.MIN_VALUE, Double.MAX_VALUE, 0.0, -0.0, Double.POSITIVE_INFINITY, -Double.NEGATIVE_INFINITY, 1e10, 3.141592653589793, 30, 0.5]"
+}
+
+- {
+  objectType: "Float64Array",
+  primitiveType: "double",
+  primitiveSizeBytes: 8,
+  data: "[0.1, 0.2, 1e10]"
+}
+
+- {
+  objectType: "Float32Array",
+  primitiveType: "float",
+  primitiveSizeBytes: 4,
+  data: "[Float.MIN_VALUE, Float.MAX_VALUE, 0.0, -0.0, Float.POSITIVE_INFINITY, -Float.NEGATIVE_INFINITY, 1e10 as float, 3.141592653589793, 30, 0.5]"
+}

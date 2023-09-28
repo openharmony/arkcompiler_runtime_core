@@ -1,0 +1,18 @@
+test-suites:
+    - hermes
+general:
+    build: $panda_build
+#    verbose: one of: NONE, SHORT, ALL
+    verbose: NONE
+#    verbose-filter: one of NEW, IGNORED, ALL
+    verbose-filter: NEW
+    coverage:
+        use-llvm-cov: true
+        llvm-cov-profdata-out-path: /tmp/hermes/coverage/profdata_files
+        llvm-cov-html-out-path: /tmp/hermes/coverage/html_report
+es2panda:
+    timeout: 30
+    opt-level: 2
+ark:
+    timeout: 180
+    heap-verifier: fail_on_verification

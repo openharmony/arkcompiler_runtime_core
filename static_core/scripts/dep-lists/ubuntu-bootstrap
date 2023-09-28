@@ -1,0 +1,7 @@
+# Dependencies for the bootstrapping script itself
+autoconf
+coreutils
+curl
+make
+tar
+zip

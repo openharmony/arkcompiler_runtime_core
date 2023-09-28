@@ -1,0 +1,45 @@
+---
+cases:
+  # not the last parameter
+  - sig: |-
+      foo(y: boolean, ...p: int[], x: int): int[]
+    def: |-
+      return p;
+
+  - sig: |-
+      foo(...q: int[], ...p: int[]): int
+    def: |-
+      return q.length + p.length;
+
+  - sig: |-
+      foo(...q: int[], p: int[]): int
+    def: |-
+      return q.length + p.length;
+
+  # not array
+  - sig: |-
+      foo(...p: Object): Object
+    def: |-
+      return new Object();
+
+  - sig: |-
+      foo(...p: int): int
+    def: |-
+      return 1;
+
+  # missing type
+  - sig: |-
+      foo(a: int, ...p:): int
+    def: |-
+      return a;
+
+  - sig: |-
+      foo(a: int, ...p): int
+    def: |-
+      return a;
+
+  # same name parameters
+  - sig: |-
+      foo(p: char, ...p: int[]): char
+    def: |-
+      return p;

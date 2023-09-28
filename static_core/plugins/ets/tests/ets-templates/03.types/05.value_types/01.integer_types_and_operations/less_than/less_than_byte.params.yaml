@@ -1,0 +1,15 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: "false" }
+- { left: 0, right: 1, result: "true" }
+- { left: 1, right: 0, result: "false" }
+- { left: -1, right: 0, result: "true" }
+- { left: 0, right: -1, result: "false" }
+- { left: "Byte.MIN_VALUE as byte", right: 0, result: "true" }
+- { left: "Byte.MIN_VALUE as byte", right: 42, result: "true" }
+- { left: "Byte.MIN_VALUE as byte", right: "Byte.MAX_VALUE as byte", result: "true" }
+- { left: "Byte.MIN_VALUE as byte", right: "Byte.MIN_VALUE as byte", result: "false" }
+- { left: "Byte.MIN_VALUE as byte", right: -1, result: "true" }
+- { left: -32, right: 32, result: "true" }
+- { left: 32, right: 32, result: "false" }
+

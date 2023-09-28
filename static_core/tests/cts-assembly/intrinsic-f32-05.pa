@@ -1,0 +1,10 @@
+# Assert that intrinsic IO.printF32 works in a corner case
+.record IO <external>
+.function void IO.printF32(f32 a0) <external>
+
+.function u1 main(){
+    fmovi v0, 0.78539816
+    call.short IO.printF32, v0, v0
+    ldai 0
+    return
+}

@@ -1,0 +1,8 @@
+--- # List of operands
+operands:
+ - {first: "true", second: "10", third: "20", type: ": int", check: "x == 10" }
+ - {first: "false", second: "10", third: "20", type: ": int", check: "x == 20" }
+ - {first: "true", second: "new Int(10)", third: "new Int(20)", type: "", check: "x instanceof Int" }
+ - {first: "true", second: "new Int(10)", third: "20", type: "", check: "x instanceof Int" }
+ - {first: "true", second: "10 as short", third: "5 as byte", type: "", check: "(x + (5 as short)) == 15" }
+ - {first: "true", second: "new Short(10 as short)", third: "new Byte(5 as byte)", type: "", check: "x instanceof Short" } 

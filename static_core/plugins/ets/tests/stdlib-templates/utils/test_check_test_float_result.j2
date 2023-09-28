@@ -1,0 +1,46 @@
+const DBL_EPSILON : double = 1.0e-6;
+const doubleEpsilon: double = 2.22045e-16
+function checkTestResult(actual : {{.item.result_type}}, expected : {{.item.result_type}}) : int {
+
+{%- if item.result_type_nature == "Float" or item.result_type == "Double" or item.result_type == "double" or item.result_type == "float"%}
+{%- if item.result_type == "Float" or item.result_type == "Double" %}
+    if(expected.isNan()) {
+    if (actual.isNan())) return 0;
+    else return 1;
+  }
+{% else %}
+  if({{.item.result_type|capitalize}}.isNan(expected)) {
+    if ({{.item.result_type|capitalize}}.isNan(actual)) return 0;
+    else return 1;
+  }
+{% endif %}
+
+  if(expected == {{.item.result_type|capitalize}}.POSITIVE_INFINITY) {
+    if (actual == {{.item.result_type|capitalize}}.POSITIVE_INFINITY) return 0;
+    else return 1;
+  }
+
+  if(expected == {{.item.result_type|capitalize}}.NEGATIVE_INFINITY) {
+    if (actual == {{.item.result_type|capitalize}}.NEGATIVE_INFINITY) return 0;
+    else return 1;
+  }
+  if (actual == expected) {
+    return 0;
+  }
+  let diff : double;
+  if (actual > expected) {
+    diff = actual - expected;
+  } else {
+   diff = expected - actual;
+  }
+  if (diff < DBL_EPSILON) {
+    return 0;
+  } else {
+    return 1; 
+}
+{% else %}
+  if (actual == expected) return 0;
+  return 1;
+{% endif %}
+
+}

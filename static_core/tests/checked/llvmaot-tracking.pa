@@ -1,0 +1,19 @@
+.function void foo() <external>
+
+#! CHECKER        Do not lose tracking aot-experiments#92
+#! RUN_LLVM       options: "--llvmaot-dump-after"
+#! READ_FILE      "console.out"
+#! INST           /llvm.experimental.gc.statepoint.*void \(ptr\).* #6 /
+#! INST_NEXT_NOT  /llvm.experimental.gc.statepoint.*void \(ptr\).* #6 /
+#! INST_NEXT      /attributes #6 =.*needs-frame-adaptation.*/
+.function i32 bar(i32 a0) {
+    lda a0
+    jeqz first
+    call foo
+    jmp second
+first:
+    call foo
+second:
+    ldai 42
+    return
+}

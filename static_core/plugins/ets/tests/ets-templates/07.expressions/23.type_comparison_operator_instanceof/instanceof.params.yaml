@@ -1,0 +1,8 @@
+--- # List of instanceof tests
+instanceof:
+  - {left: a, right: A, negation: ""}
+  - {left: a, right: B, negation: "!"}
+  - {left: b, right: A, negation: "!"}
+  - {left: b, right: B, negation: ""}
+  - {left: с, right: A, negation: "!"}
+  - {left: с, right: B, negation: "!"}

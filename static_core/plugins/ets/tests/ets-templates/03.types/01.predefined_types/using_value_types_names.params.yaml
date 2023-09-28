@@ -1,0 +1,14 @@
+--- # List of predefined types
+default_value:
+  - byte
+  - short
+  - int
+  - long
+  - ubyte
+  - ushort
+  - uint
+  - ulong
+  - float
+  - double
+  - char
+  - boolean

@@ -1,0 +1,3 @@
+declare_args() {
+  system_base_dir = "/dev/null"
+}

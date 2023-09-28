@@ -1,0 +1,13 @@
+--- # list of values
+values:
+- left: "char = c'\u0041'"
+  right: >-
+    String = "str"
+  result: >-
+    'Astr'
+- left: >-
+    String = "str"
+  right: "char = c'\u0041'"
+  result: >-
+    'strA'
+

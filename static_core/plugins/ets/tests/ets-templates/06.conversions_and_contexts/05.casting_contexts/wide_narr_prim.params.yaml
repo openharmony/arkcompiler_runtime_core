@@ -1,0 +1,8 @@
+---
+cases:
+  - types:
+      - { src_type: byte, src_val: 32, dst_type: char, dst_val: "c' '" }
+      - { src_type: byte, src_val: 0, dst_type: char, dst_val: "c'\\u0000'" }
+      - { src_type: byte, src_val: 127, dst_type: char, dst_val: "c'\\u007F'" }
+      - { src_type: byte, src_val: -1, dst_type: char, dst_val: "c'\\uFFFF'" }
+      - { src_type: byte, src_val: -128, dst_type: char, dst_val: "c'\\uFF80'" }

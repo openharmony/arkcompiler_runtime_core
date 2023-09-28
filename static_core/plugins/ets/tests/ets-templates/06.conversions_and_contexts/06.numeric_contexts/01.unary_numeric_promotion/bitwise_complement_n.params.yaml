@@ -1,0 +1,11 @@
+---
+cases:
+  - { type: boolean, val: 'true' }
+  - { type: Boolean, val: new Boolean(true) }
+  - { type: float, val: 1.0 }
+  - { type: double, val: 1.00 }
+  - { type: Integral, val: new Int(1) }
+  - { type: Floating, val: new Double(1.000 as double) }
+  - { type: String, val: "\"0\"" }
+  - { type: Float, val: new Float(1.0 as float) }
+  - { type: Double, val: new Double(1.00 as double) }

@@ -1,0 +1,32 @@
+---
+cases:
+  - defs: |-
+      let v = 1;
+      let w = v * 12;
+    exp: v + w
+    res: 4
+
+  - defs: |-
+      let v: long = 1;
+      let w: int = 12;
+    exp: v = w / 2 + (v as short) - (42 as byte)
+    res: 5
+
+  - exp: '[1 as short, 2, 3]'
+    res: 102
+
+  - exp: '[new Object(), "abc"]'
+    res: 132
+
+  - exp: '[new Int(1), 2, 3]'
+    res: 124
+
+  - defs: |-
+      let d: Double[];
+    exp: '14 + (d = [1.0, 2.0, 3.0])[1]'
+    res: 7
+
+  - defs: |-
+      let k = new Long[3];
+    exp: '14 + (k[2] = 2 as long) + k[2] * (k[1] = 1 as long)'
+    res: 5

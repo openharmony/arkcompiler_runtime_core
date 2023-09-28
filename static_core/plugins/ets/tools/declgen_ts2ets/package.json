@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "commander": "^10.0.1",
+    "fs": "^0.0.1-security",
+    "json5": "^2.2.3",
+    "path": "^0.12.7",
+    "typescript": "^5.1.6"
+  },
+  "scripts": {
+    "compile": "../../../../third_party/typescript/bin/tsc --m commonjs",
+    "declgen": "node ./build/declGen.js --file=${FNAME?} --out=${OUT_PATH?}"
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.5"
+  }
+}

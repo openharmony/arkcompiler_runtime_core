@@ -1,0 +1,2 @@
+# List of dependencies for cross-compiling Panda for x86 under Ubuntu 22.04 x86-64
+g++-multilib=4:11.2.0-*

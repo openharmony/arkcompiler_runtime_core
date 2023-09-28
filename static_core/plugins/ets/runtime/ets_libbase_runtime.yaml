@@ -1,0 +1,2466 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+coretypes:
+- managed_class: panda.String
+  mirror_class: coretypes::String
+
+- managed_class: std.core.Object
+  mirror_class: panda::ets::EtsObject
+
+- managed_class: std.core.void
+  mirror_class: panda::ets::EtsVoid
+
+- managed_class: std.core.String
+  mirror_class: panda::ets::EtsString
+
+- managed_class: std.core.Promise
+  mirror_class: panda::ets::EtsPromise
+
+- managed_class: Array
+  mirror_class: panda::ets::EtsCharArray
+
+- managed_class: std.core.Field
+  mirror_class: panda::ets::EtsTypeAPIField
+
+- managed_class: std.core.Method
+  mirror_class: panda::ets::EtsTypeAPIMethod
+
+- managed_class: std.core.Parameter
+  mirror_class: panda::ets::EtsTypeAPIParameter
+
+- managed_class: escompat.SharedMemory
+  mirror_class: panda::ets::EtsSharedMemory
+
+intrinsics_namespace: panda::ets::intrinsics
+
+intrinsics:
+  - name: StdMathSin
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: sin
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::intrinsics::SinF64
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathCos
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: cos
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::intrinsics::CosF64
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathPower
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: power
+    static: true
+    signature:
+      ret: f64
+      args: [ f64, f64 ]
+    impl: panda::intrinsics::PowF64
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathSqrt
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: sqrt
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::intrinsics::SqrtF64
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathAbs
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: abs
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::intrinsics::AbsF64
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathMaxI32
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: max
+    static: true
+    signature:
+      ret: i32
+      args: [ i32, i32 ]
+    impl: panda::intrinsics::MaxI32
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathMaxI64
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: max
+    static: true
+    signature:
+      ret: i64
+      args: [ i64, i64 ]
+    impl: panda::intrinsics::MaxI64
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathMaxF32
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: max
+    static: true
+    signature:
+      ret: f32
+      args: [ f32, f32 ]
+    impl: panda::intrinsics::MaxF32
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathMaxF64
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: max
+    static: true
+    signature:
+      ret: f64
+      args: [ f64, f64 ]
+    impl: panda::intrinsics::MaxF64
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathMinI32
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: min
+    static: true
+    signature:
+      ret: i32
+      args: [ i32, i32 ]
+    impl: panda::intrinsics::MinI32
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathMinI64
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: min
+    static: true
+    signature:
+      ret: i64
+      args: [ i64, i64 ]
+    impl: panda::intrinsics::MinI64
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathMinF32
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: min
+    static: true
+    signature:
+      ret: f32
+      args: [ f32, f32 ]
+    impl: panda::intrinsics::MinF32
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathMinF64
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: min
+    static: true
+    signature:
+      ret: f64
+      args: [ f64, f64 ]
+    impl: panda::intrinsics::MinF64
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathRandom
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: random
+    static: true
+    signature:
+      ret: f64
+      args: [ ]
+    impl: panda::ets::intrinsics::StdMathRandom
+    clear_flags: [ ]
+
+  - name: StdMathAcos
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: acos
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathAcos
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathAcosh
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: acosh
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathAcosh
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathAsin
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: asin
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathAsin
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathAsinh
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: asinh
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathAsinh
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathAtan2
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: atan2
+    static: true
+    signature:
+      ret: f64
+      args: [ f64, f64 ]
+    impl: panda::ets::intrinsics::StdMathAtan2
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathAtanh
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: atanh
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathAtanh
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathAtan
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: atan
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathAtan
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathSinh
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: sinh
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathSinh
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathCosh
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: cosh
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathCosh
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathFloor
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: floor
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathFloor
+    codegen_func: CreateMathFloor
+    can_encode_func: CheckSSE42
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathRound
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: round
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathRound
+    codegen_func: CreateMathRoundAway
+    can_encode_func: CheckSSE42
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathTrunc
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: trunc
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathTrunc
+    codegen_func: CreateMathTrunc
+    can_encode_func: CheckSSE42
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathCeil
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: ceil
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathCeil
+    codegen_func: CreateMathCeil
+    can_encode_func: CheckSSE42
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathLog
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: log
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathLog
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathRem
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: rem
+    static: true
+    signature:
+      ret: f64
+      args: [ f64, f64 ]
+    impl: panda::ets::intrinsics::StdMathRem
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathMod
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: mod
+    static: true
+    signature:
+      ret: f64
+      args: [ f64, f64 ]
+    impl: panda::ets::intrinsics::StdMathMod
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathClz64
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: clz64
+    static: true
+    signature:
+      ret: i32
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdMathClz64
+    codegen_func: CreateCountLeadingZeroBits
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathClz32
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: clz32
+    static: true
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: panda::ets::intrinsics::StdMathClz32
+    codegen_func: CreateCountLeadingZeroBits
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathSignbit
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: signbit
+    static: true
+    signature:
+      ret: u1
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathSignbit
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdMathImul
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: imul
+    static: true
+    signature:
+      ret: i32
+      args: [ f32, f32 ]
+    impl: panda::ets::intrinsics::StdMathImul
+    clear_flags: [ ]
+
+  - name: StdMathFround
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: fround
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdMathFround
+    clear_flags: [ ]
+
+####################
+# std.core.Console #
+####################
+  - name: StdConsolePrintString
+    space: ets
+    class_name: std.core.Console
+    method_name: print
+    static: false
+    signature:
+      ret: std.core.void
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::StdConsolePrintString
+    clear_flags: [ ]
+
+  - name: StdConsolePrintU1
+    space: ets
+    class_name: std.core.Console
+    method_name: print
+    static: false
+    signature:
+      ret: std.core.void
+      args: [ u1 ]
+    impl: panda::ets::intrinsics::StdConsolePrintBool
+    clear_flags: [ ]
+
+  - name: StdConsolePrintI8
+    space: ets
+    class_name: std.core.Console
+    method_name: print
+    static: false
+    signature:
+      ret: std.core.void
+      args: [ i8 ]
+    impl: panda::ets::intrinsics::StdConsolePrintI8
+    clear_flags: [ ]
+
+  - name: StdConsolePrintI16
+    space: ets
+    class_name: std.core.Console
+    method_name: print
+    static: false
+    signature:
+      ret: std.core.void
+      args: [ i16 ]
+    impl: panda::ets::intrinsics::StdConsolePrintI16
+    clear_flags: [ ]
+
+  - name: StdConsolePrintU16
+    space: ets
+    class_name: std.core.Console
+    method_name: print
+    static: false
+    signature:
+      ret: std.core.void
+      args: [ u16 ]
+    impl: panda::ets::intrinsics::StdConsolePrintChar
+    clear_flags: [ ]
+
+  - name: StdConsolePrintI32
+    space: ets
+    class_name: std.core.Console
+    method_name: print
+    static: false
+    signature:
+      ret: std.core.void
+      args: [ i32 ]
+    impl: panda::ets::intrinsics::StdConsolePrintI32
+    clear_flags: [ ]
+
+  - name: StdConsolePrintI64
+    space: ets
+    class_name: std.core.Console
+    method_name: print
+    static: false
+    signature:
+      ret: std.core.void
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdConsolePrintI64
+    clear_flags: [ ]
+
+  - name: StdConsolePrintF32
+    space: ets
+    class_name: std.core.Console
+    method_name: print
+    static: false
+    signature:
+      ret: std.core.void
+      args: [ f32 ]
+    impl: panda::ets::intrinsics::StdConsolePrintF32
+    clear_flags: [ ]
+
+  - name: StdConsolePrintF64
+    space: ets
+    class_name: std.core.Console
+    method_name: print
+    static: false
+    signature:
+      ret: std.core.void
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdConsolePrintF64
+    clear_flags: [ ]
+
+  - name: StdConsolePrintln
+    space: ets
+    class_name: std.core.Console
+    method_name: println
+    static: false
+    signature:
+      ret: std.core.void
+      args: []
+    impl: panda::ets::intrinsics::StdConsolePrintln
+    clear_flags: [ ]
+
+  - name: StdCoreLoadLibrary
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: loadLibrary
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::LoadLibrary
+    clear_flags: [ ]
+
+###################
+# std.core.String #
+###################
+  - name: StdCoreStringGetChars
+    space: ets
+    class_name: std.core.String
+    method_name: getChars
+    static: false
+    signature:
+      ret: u16\\[
+      args:
+        - i32
+        - i32
+    impl: panda::ets::intrinsics::StdCoreStringGetChars
+    clear_flags: [ ]
+
+  - name: StdCoreStringLength
+    space: ets
+    class_name: std.core.String
+    method_name: length
+    static: false
+    signature:
+      ret: i32
+      args: [ ]
+    impl: panda::ets::intrinsics::StdCoreStringLength
+    clear_flags: [ ]
+
+  - name: StdCoreStringIsEmpty
+    space: ets
+    class_name: std.core.String
+    method_name: isEmpty
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: panda::ets::intrinsics::StdCoreStringIsEmpty
+    clear_flags: [ ]
+
+  - name: StdCoreStringCharAt
+    space: ets
+    class_name: std.core.String
+    method_name: charAt
+    static: false
+    signature:
+      ret: u16
+      args: [ i32 ]
+    impl: panda::ets::intrinsics::StdCoreStringCharAt
+    set_flags: [ can_throw ]
+
+  - name: StdCoreStringEquals
+    space: ets
+    class_name: std.core.String
+    method_name: equals
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: panda::ets::intrinsics::StdCoreStringEquals
+    codegen_func: CreateStringEquals
+    codegen_arch: [arm64, amd64]
+    peephole_func: PeepholeStringEquals
+    need_param_locations: true
+    clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+
+  - name: StdCoreStringLocaleCmp
+    space: ets
+    class_name: std.core.String
+    method_name: localeCompare
+    static: false
+    signature:
+      ret: i16
+      args: [ std.core.String, std.core.String ]
+    impl: panda::ets::intrinsics::StdCoreStringLocaleCmp
+    clear_flags: [ ]
+
+  - name: StdCoreStringSearch
+    space: ets
+    class_name: std.core.String
+    method_name: search
+    static: false
+    signature:
+      ret: i32
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::StdCoreStringSearch
+    clear_flags: [ ]
+
+  - name: StdCoreStringNormalize
+    space: ets
+    class_name: std.core.String
+    method_name: normalize
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: panda::ets::intrinsics::StdCoreStringNormalize
+    clear_flags: [ ]
+
+  - name: StdCoreStringToLocaleLowerCase
+    space: ets
+    class_name: std.core.String
+    method_name: toLocaleLowerCase
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::StdCoreStringToLocaleLowerCase
+    clear_flags: [ ]
+
+  - name: StdCoreStringToLocaleUpperCase
+    space: ets
+    class_name: std.core.String
+    method_name: toLocaleUpperCase
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::StdCoreStringToLocaleUpperCase
+    clear_flags: [ ]
+
+  - name: StdCoreStringIsWellFormed
+    space: ets
+    class_name: std.core.String
+    method_name: isWellFormed
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: panda::ets::intrinsics::StdCoreStringIsWellFormed
+    clear_flags: [ ]
+
+  - name: StdCoreStringIndexOf
+    space: ets
+    class_name: std.core.String
+    method_name: indexOf
+    static: false
+    signature:
+      ret: i32
+      args: [u16]
+    impl: panda::ets::intrinsics::StdCoreStringIndexOf
+    clear_flags: [require_state, runtime_call]
+
+  - name: StdCoreStringIndexOfAfter
+    space: ets
+    class_name: std.core.String
+    method_name: indexOf
+    static: false
+    signature:
+      ret: i32
+      args: [u16, i32]
+    impl: panda::ets::intrinsics::StdCoreStringIndexOfAfter
+    clear_flags: [require_state, runtime_call]
+
+  - name: StdCoreStringIndexOfString
+    space: ets
+    class_name: std.core.String
+    method_name: indexOf
+    static: false
+    signature:
+      ret: i32
+      args: [std.core.String, i32]
+    impl: panda::ets::intrinsics::StdCoreStringIndexOfString
+    clear_flags: [require_state, runtime_call]
+
+  - name: StdCoreStringLastIndexOfString
+    space: ets
+    class_name: std.core.String
+    method_name: lastIndexOf
+    static: false
+    signature:
+      ret: i32
+      args: [std.core.String, i32]
+    impl: panda::ets::intrinsics::StdCoreStringLastIndexOfString
+    clear_flags: [require_state, runtime_call]
+
+##########################
+# std.core.StringBuilder #
+##########################
+  - name: StdCoreStringBuilderConcatStrings
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: concatStrings
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.String, std.core.String ]
+    impl: panda::ets::intrinsics::StdCoreStringBuilderConcatStrings
+    clear_flags: [ ]
+
+  - name: StdCoreToStringBoolean
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: toString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ u1 ]
+    impl: panda::ets::intrinsics::StdCoreToStringBoolean
+    clear_flags: [ ]
+
+  - name: StdCoreToStringByte
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: toString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ i8 ]
+    impl: panda::ets::intrinsics::StdCoreToStringByte
+    clear_flags: [ ]
+
+  - name: StdCoreToStringChar
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: toString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ u16 ]
+    impl: panda::ets::intrinsics::StdCoreToStringChar
+    clear_flags: [ ]
+
+  - name: StdCoreToStringShort
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: toString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ i16 ]
+    impl: panda::ets::intrinsics::StdCoreToStringShort
+    clear_flags: [ ]
+
+  - name: StdCoreToStringInt
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: toString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ i32 ]
+    impl: panda::ets::intrinsics::StdCoreToStringInt
+    clear_flags: [ ]
+
+  - name: StdCoreToStringLong
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: toString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdCoreToStringLong
+    clear_flags: [ ]
+
+  - name: StdCoreToStringFloat
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: toString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ f32 ]
+    impl: panda::ets::intrinsics::StdCoreToStringFloat
+    clear_flags: [ ]
+
+  - name: StdCoreToStringDouble
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: toString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ f64 ]
+    impl: panda::ets::intrinsics::StdCoreToStringDouble
+    clear_flags: [ ]
+
+  - name: StdCoreSbAppendLong
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    set_flags: [heap_inv]
+    signature:
+      ret: std.core.StringBuilder
+      args: [i64]
+    impl: panda::ets::intrinsics::StdCoreStringBuilderLong
+
+  - name: StdCoreSbAppendInt
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    set_flags: [heap_inv]
+    signature:
+      ret: std.core.StringBuilder
+      args: [i32]
+    impl: panda::ets::intrinsics::StdCoreStringBuilderInt
+
+  - name: StdCoreSbAppendChar
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    set_flags: [heap_inv]
+    signature:
+      ret: std.core.StringBuilder
+      args: [u16]
+    impl: panda::ets::intrinsics::StdCoreStringBuilderChar
+    codegen_func: CreateStringBuilderChar
+    codegen_arch: [arm64, amd64]
+
+  - name: StdCoreSbAppendBool
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    set_flags: [heap_inv]
+    signature:
+      ret: std.core.StringBuilder
+      args: [u1]
+    impl: panda::ets::intrinsics::StdCoreStringBuilderBool
+    codegen_func: CreateStringBuilderBool
+    codegen_arch: [arm64, amd64]
+
+  - name: StdCoreSbAppendString
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    set_flags: [heap_inv]
+    signature:
+      ret: std.core.StringBuilder
+      args: [std.core.String]
+    impl: panda::ets::intrinsics::StdCoreStringBuilderString
+    codegen_func: CreateStringBuilderString
+    codegen_arch: [arm64, amd64]
+
+#################
+# escompat.Date #
+#################
+  - name: EscompatDateNow
+    space: ets
+    class_name: escompat.Date
+    method_name: now
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: panda::ets::intrinsics::EscompatDateNow
+    clear_flags: [ ]
+
+  - name: EscompatDateGetLocalTimezoneOffset
+    space: ets
+    class_name: escompat.Date
+    method_name: getLocalTimezoneOffset
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: panda::ets::intrinsics::EscompatDateGetLocalTimezoneOffset
+    clear_flags: [ ]
+
+  - name: EscompatDateGetTimezoneName
+    space: ets
+    class_name: escompat.Date
+    method_name: getTimezoneName
+    static: true
+    signature:
+      ret: std.core.String
+      args: []
+    impl: panda::ets::intrinsics::EscompatDateGetTimezoneName
+    clear_flags: [ ]
+
+  - name: EscompatDateGetLocaleString
+    space: ets
+    class_name: escompat.Date
+    method_name: getLocaleString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.String, std.core.String, i64, u1 ]
+    impl: panda::ets::intrinsics::EscompatDateGetLocaleString
+    clear_flags: [ ]
+
+########################
+# escompat.ArrayBuffer #
+########################
+  - name: EscompatArrayBufferFrom
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: from
+    static: true
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [std.core.Object]
+    impl: panda::ets::intrinsics::EtsArrayBufferFrom
+
+###################
+# std.time.Chrono #
+###################
+
+  - name: StdTimeDateNanoNow
+    space: ets
+    class_name: std.time.Chrono
+    method_name: nanoNow
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: panda::intrinsics::NanoTime
+    clear_flags: [ require_state, runtime_call ]
+
+##################
+# std.core.Float #
+##################
+  - name: StdFloatToString
+    space: ets
+    class_name: std.core.Float
+    method_name: toString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [f32, i32]
+    impl: panda::ets::intrinsics::StdCoreFloatToString
+
+  - name: StdFloatIsNan
+    space: ets
+    class_name: std.core.Float
+    method_name: isNaN
+    static: true
+    signature:
+      ret: u1
+      args: [f32]
+    impl: panda::ets::intrinsics::StdCoreFloatIsNan
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdFloatIsFinite
+    space: ets
+    class_name: std.core.Float
+    method_name: isFinite
+    static: true
+    signature:
+      ret: u1
+      args: [f32]
+    impl: panda::ets::intrinsics::StdCoreFloatIsFinite
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+  - name: StdFloatBitCastFromInt
+    space: ets
+    class_name: std.core.Float
+    method_name: bitCastFromInt
+    static: true
+    signature:
+      ret: f32
+      args: [i32]
+    impl: panda::ets::intrinsics::StdCoreFloatBitCastFromInt
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+  - name: StdFloatBitCastToInt
+    space: ets
+    class_name: std.core.Float
+    method_name: bitCastToInt
+    static: true
+    signature:
+      ret: i32
+      args: [f32]
+    impl: panda::ets::intrinsics::StdCoreFloatBitCastToInt
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdFloatIsInteger
+    space: ets
+    class_name: std.core.Float
+    method_name: isInteger
+    static: true
+    signature:
+      ret: u1
+      args: [f32]
+    impl: panda::ets::intrinsics::StdCoreFloatIsInteger
+    codegen_func: CreateFloatIsInteger
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdFloatIsSafeInteger
+    space: ets
+    class_name: std.core.Float
+    method_name: isSafeInteger
+    static: true
+    signature:
+      ret: u1
+      args: [f32]
+    impl: panda::ets::intrinsics::StdCoreFloatIsSafeInteger
+    codegen_func: CreateFloatIsSafeInteger
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+###################
+# std.core.Double #
+###################
+  - name: StdDoubleToString
+    space: ets
+    class_name: std.core.Double
+    method_name: toString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ f64, i32 ]
+    impl: panda::ets::intrinsics::StdCoreDoubleToString
+
+  - name: StdCoreDoubleToLocaleString
+    space: ets
+    class_name: std.core.Double
+    method_name: toLocaleString
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::StdCoreDoubleToLocaleString
+
+  - name: StdCoreDoubleParseFloat
+    space: ets
+    class_name: std.core.Double
+    method_name: parseFloat
+    static: true
+    signature:
+      ret: f64
+      args: [std.core.String]
+    impl: panda::ets::intrinsics::StdCoreDoubleParseFloat
+
+  - name: StdCoreDoubleParseInt
+    space: ets
+    class_name: std.core.Double
+    method_name: parseInt
+    static: true
+    signature:
+      ret: f64
+      args: [std.core.String, i32]
+    impl: panda::ets::intrinsics::StdCoreDoubleParseInt
+
+  - name: StdCoreDoubleToExponential
+    space: ets
+    class_name: std.core.Double
+    method_name: toExponential
+    static: false
+    signature:
+      ret: std.core.String
+      args: [f64]
+    impl: panda::ets::intrinsics::StdCoreDoubleToExponential
+
+  - name: StdCoreDoubleToPrecision
+    space: ets
+    class_name: std.core.Double
+    method_name: toPrecision
+    static: false
+    signature:
+      ret: std.core.String
+      args: [f64]
+    impl: panda::ets::intrinsics::StdCoreDoubleToPrecision
+
+  - name: StdCoreDoubleToFixed
+    space: ets
+    class_name: std.core.Double
+    method_name: toFixed
+    static: false
+    signature:
+      ret: std.core.String
+      args: [f64]
+    impl: panda::ets::intrinsics::StdCoreDoubleToFixed
+
+  - name: StdDoubleIsNan
+    space: ets
+    class_name: std.core.Double
+    method_name: isNaN
+    static: true
+    signature:
+      ret: u1
+      args: [f64]
+    impl: panda::ets::intrinsics::StdCoreDoubleIsNan
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdDoubleIsFinite
+    space: ets
+    class_name: std.core.Double
+    method_name: isFinite
+    static: true
+    signature:
+      ret: u1
+      args: [f64]
+    impl: panda::ets::intrinsics::StdCoreDoubleIsFinite
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdDoubleBitCastFromLong
+    space: ets
+    class_name: std.core.Double
+    method_name: bitCastFromLong
+    static: true
+    signature:
+      ret: f64
+      args: [i64]
+    impl: panda::ets::intrinsics::StdCoreDoubleBitCastFromLong
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+  - name: StdDoubleBitCastToLong
+    space: ets
+    class_name: std.core.Double
+    method_name: bitCastToLong
+    static: true
+    signature:
+      ret: i64
+      args: [f64]
+    impl: panda::ets::intrinsics::StdCoreDoubleBitCastToLong
+
+  - name: StdDoubleIsInteger
+    space: ets
+    class_name: std.core.Double
+    method_name: isInteger
+    static: true
+    signature:
+      ret: u1
+      args: [f64]
+    impl: panda::ets::intrinsics::StdCoreDoubleIsInteger
+    codegen_func: CreateFloatIsInteger
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+  - name: StdDoubleIsSafeInteger
+    space: ets
+    class_name: std.core.Double
+    method_name: isSafeInteger
+    static: true
+    signature:
+      ret: u1
+      args: [f64]
+    impl: panda::ets::intrinsics::StdCoreDoubleIsSafeInteger
+    codegen_func: CreateFloatIsSafeInteger
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
+############
+# std.core #
+############
+  - name: StdCorePrintStackTrace
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: printStackTrace
+    static: true
+    signature:
+      ret: std.core.void
+      args: []
+    impl: panda::ets::intrinsics::StdCorePrintStackTrace
+
+  - name: StdCoreStackTraceLines
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: stackTraceLines
+    static: true
+    signature:
+      ret: std.core.String[]
+      args: []
+    impl: panda::ets::intrinsics::StdCoreStackTraceLines
+
+######################
+# std.core.GC #
+######################
+  - name: StdGCStartGC
+    space: ets
+    class_name: std.core.GC
+    method_name: startGCImpl
+    static: true
+    signature:
+      ret: i64
+      args: [ i32, std.core.Object ]
+    impl: panda::ets::intrinsics::StdGCStartGC
+
+  - name: StdGCWaitForFinishGC
+    space: ets
+    class_name: std.core.GC
+    method_name: waitForFinishGC
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdGCWaitForFinishGC
+
+  - name: StdGCScheduleGCAfterNthAlloc
+    space: ets
+    class_name: std.core.GC
+    method_name: scheduleGcAfterNthAlloc
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ i32, i32 ]
+    impl: panda::ets::intrinsics::StdGCScheduleGCAfterNthAlloc
+
+  - name: StdGCIsScheduledGCTriggered
+    space: ets
+    class_name: std.core.GC
+    method_name: isScheduledGCTriggered
+    static: true
+    signature:
+      ret: u1
+      args: []
+    impl: panda::ets::intrinsics::StdGCIsScheduledGCTriggered
+
+  - name: StdGCPostponeGCStart
+    space: ets
+    class_name: std.core.GC
+    method_name: postponeGCStart
+    static: true
+    signature:
+      ret: std.core.void
+      args: []
+    impl: panda::ets::intrinsics::StdGCPostponeGCStart
+
+  - name: StdGCPostponeGCEnd
+    space: ets
+    class_name: std.core.GC
+    method_name: postponeGCEnd
+    static: true
+    signature:
+      ret: std.core.void
+      args: []
+    impl: panda::ets::intrinsics::StdGCPostponeGCEnd
+
+  - name: StdGCAllocatePinnedBooleanArray
+    space: ets
+    class_name: std.core.GC
+    method_name: allocatePinnedBooleanArray
+    static: true
+    signature:
+      ret: u1[]
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdGCAllocatePinnedBooleanArray
+
+  - name: StdGCAllocatePinnedByteArray
+    space: ets
+    class_name: std.core.GC
+    method_name: allocatePinnedByteArray
+    static: true
+    signature:
+      ret: i8[]
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdGCAllocatePinnedByteArray
+
+  - name: StdGCAllocatePinnedCharArray
+    space: ets
+    class_name: std.core.GC
+    method_name: allocatePinnedCharArray
+    static: true
+    signature:
+      ret: u16[]
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdGCAllocatePinnedCharArray
+
+  - name: StdGCAllocatePinnedShortArray
+    space: ets
+    class_name: std.core.GC
+    method_name: allocatePinnedShortArray
+    static: true
+    signature:
+      ret: i16[]
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdGCAllocatePinnedShortArray
+
+  - name: StdGCAllocatePinnedIntArray
+    space: ets
+    class_name: std.core.GC
+    method_name: allocatePinnedIntArray
+    static: true
+    signature:
+      ret: i32[]
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdGCAllocatePinnedIntArray
+
+  - name: StdGCAllocatePinnedLongArray
+    space: ets
+    class_name: std.core.GC
+    method_name: allocatePinnedLongArray
+    static: true
+    signature:
+      ret: i64[]
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdGCAllocatePinnedLongArray
+
+  - name: StdGCAllocatePinnedFloatArray
+    space: ets
+    class_name: std.core.GC
+    method_name: allocatePinnedFloatArray
+    static: true
+    signature:
+      ret: f32[]
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdGCAllocatePinnedFloatArray
+
+  - name: StdGCAllocatePinnedDoubleArray
+    space: ets
+    class_name: std.core.GC
+    method_name: allocatePinnedDoubleArray
+    static: true
+    signature:
+      ret: f64[]
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdGCAllocatePinnedDoubleArray
+
+  - name: StdGCGetObjectSpaceType
+    space: ets
+    class_name: std.core.GC
+    method_name: getObjectSpaceType
+    static: true
+    signature:
+      ret: i32
+      args: [ std.core.Object ]
+    impl: panda::ets::intrinsics::StdGCGetObjectSpaceType
+
+  - name: StdGCGetObjectAddress
+    space: ets
+    class_name: std.core.GC
+    method_name: getObjectAddress
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Object ]
+    impl: panda::ets::intrinsics::StdGCGetObjectAddress
+
+  - name: StdGCPinObject
+    space: ets
+    class_name: std.core.GC
+    method_name: pinObject
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object ]
+    impl: panda::ets::intrinsics::StdGCPinObject
+
+  - name: StdGCUnpinObject
+    space: ets
+    class_name: std.core.GC
+    method_name: unpinObject
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object ]
+    impl: panda::ets::intrinsics::StdGCUnpinObject
+
+  - name: StdGetFreeHeapSize
+    space: ets
+    class_name: std.core.GC
+    method_name: getFreeHeapSize
+    static: true
+    signature:
+      ret: i64
+      args: [ ]
+    impl: panda::ets::intrinsics::StdGetFreeHeapSize
+
+  - name: StdGetUsedHeapSize
+    space: ets
+    class_name: std.core.GC
+    method_name: getUsedHeapSize
+    static: true
+    signature:
+      ret: i64
+      args: [ ]
+    impl: panda::ets::intrinsics::StdGetUsedHeapSize
+
+  - name: StdGetReservedHeapSize
+    space: ets
+    class_name: std.core.GC
+    method_name: getReservedHeapSize
+    static: true
+    signature:
+      ret: i64
+      args: [ ]
+    impl: panda::ets::intrinsics::StdGetReservedHeapSize
+
+  - name: StdGCRegisterNativeAllocation
+    space: ets
+    class_name: std.core.GC
+    method_name: registerNativeAllocation
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdGCRegisterNativeAllocation
+
+  - name: StdGCRegisterNativeFree
+    space: ets
+    class_name: std.core.GC
+    method_name: registerNativeFree
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::StdGCRegisterNativeFree
+
+##############################
+# std.core.FinalizationQueue #
+##############################
+  - name: StdFinalizationQueueRegisterInstance
+    space: ets
+    class_name: std.core.FinalizationQueue
+    method_name: registerInstance
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object ]
+    impl: panda::ets::intrinsics::StdFinalizationQueueRegisterInstance
+
+######################
+# std.core.Promise #
+######################
+  - name: StdPromiseResolve
+    space: ets
+    class_name: std.core.Promise
+    method_name: resolveImpl
+    static: false
+    signature:
+      ret: std.core.void
+      args: [std.core.Object]
+    impl: panda::ets::intrinsics::EtsPromiseResolve
+
+  - name: StdPromiseReject
+    space: ets
+    class_name: std.core.Promise
+    method_name: rejectImpl
+    static: false
+    signature:
+      ret: std.core.void
+      args: [std.core.Object]
+    impl: panda::ets::intrinsics::EtsPromiseReject
+
+  - name: StdPromiseAddToJobQueue
+    space: ets
+    class_name: std.core.Promise
+    method_name: addToJobQueue
+    static: true
+    signature:
+      ret: std.core.void
+      args: [std.core.Object]
+    impl: panda::ets::intrinsics::EtsPromiseAddToJobQueue
+
+  - name: StdPromiseAwait
+    space: ets
+    class_name: std.core.Promise
+    method_name: awaitResolution
+    static: false
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: panda::ets::intrinsics::EtsAwaitPromise
+
+######################
+# std.core.Coroutine #
+######################
+  - name: StdCoroutineSchedule
+    space: ets
+    class_name: std.core.Coroutine
+    method_name: Schedule
+    static: true
+    signature:
+      ret: std.core.void
+      args: []
+    impl: panda::ets::intrinsics::StdSystemScheduleCoroutine
+    set_flags: [heap_inv]
+  
+############################
+#   escompat.SharedMemory  #
+############################
+
+  - name: SharedMemoryCreate
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: create
+    static: true
+    signature:
+      ret: escompat.SharedMemory
+      args: [ i32 ]
+    impl: panda::ets::intrinsics::SharedMemoryCreate
+
+  - name: SharedMemoryAt
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: at
+    static: false
+    signature:
+      ret: i8
+      args: [ i32 ]
+    impl: panda::ets::intrinsics::SharedMemoryAt
+
+  - name: SharedMemorySet
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: set
+    static: false
+    signature:
+      ret: std.core.void
+      args: [ i32, i8 ]
+    impl: panda::ets::intrinsics::SharedMemorySet
+
+  - name: SharedMemoryGetByteLength
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: getByteLength
+    static: false
+    signature:
+      ret: i32
+      args: [ ]
+    impl: panda::ets::intrinsics::SharedMemoryGetByteLength
+
+  - name: SharedMemoryAddI8
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicAddI8
+    static: false
+    signature:
+      ret: i8
+      args: [ i32, i8 ]
+    impl: panda::ets::intrinsics::SharedMemoryAddI8
+
+  - name: SharedMemoryAndI8
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicAndI8
+    static: false
+    signature:
+      ret: i8
+      args: [ i32, i8 ]
+    impl: panda::ets::intrinsics::SharedMemoryAndI8
+
+  - name: SharedMemoryCompareExchangeI8
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicCompareExchangeI8
+    static: false
+    signature:
+      ret: i8
+      args: [ i32, i8, i8 ]
+    impl: panda::ets::intrinsics::SharedMemoryCompareExchangeI8
+
+  - name: SharedMemoryExchangeI8
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicExchangeI8
+    static: false
+    signature:
+      ret: i8
+      args: [ i32, i8 ]
+    impl: panda::ets::intrinsics::SharedMemoryExchangeI8
+
+  - name: SharedMemoryLoadI8
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicLoadI8
+    static: false
+    signature:
+      ret: i8
+      args: [ i32 ]
+    impl: panda::ets::intrinsics::SharedMemoryLoadI8
+
+  - name: SharedMemoryOrI8
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicOrI8
+    static: false
+    signature:
+      ret: i8
+      args: [ i32, i8 ]
+    impl: panda::ets::intrinsics::SharedMemoryOrI8
+  
+  - name: SharedMemoryStoreI8
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicStoreI8
+    static: false
+    signature:
+      ret: i8
+      args: [ i32, i8 ]
+    impl: panda::ets::intrinsics::SharedMemoryStoreI8
+  
+  - name: SharedMemorySubI8
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicSubI8
+    static: false
+    signature:
+      ret: i8
+      args: [ i32, i8 ]
+    impl: panda::ets::intrinsics::SharedMemorySubI8
+
+  - name: SharedMemoryXorI8
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicXorI8
+    static: false
+    signature:
+      ret: i8
+      args: [ i32, i8 ]
+    impl: panda::ets::intrinsics::SharedMemoryXorI8
+
+  - name: SharedMemoryWaitI32
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicWaitI32
+    static: false
+    signature:
+      ret: i32
+      args: [ i32, i32 ]
+    impl: panda::ets::intrinsics::SharedMemoryWaitI32
+
+  - name: SharedMemoryTimedWaitI32
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicTimedWaitI32
+    static: false
+    signature:
+      ret: i32
+      args: [ i32, i32, i64 ]
+    impl: panda::ets::intrinsics::SharedMemoryTimedWaitI32
+
+  - name: SharedMemoryNotify
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicNotify
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: panda::ets::intrinsics::SharedMemoryNotify
+  
+  - name: SharedMemoryBoundedNotify
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicBoundedNotify
+    static: false
+    signature:
+      ret: i32
+      args: [ i32, i32 ]
+    impl: panda::ets::intrinsics::SharedMemoryBoundedNotify
+
+  - name: StdCoroutineGetWorkerId
+    space: ets
+    class_name: std.core.CoroutineExtras
+    method_name: GetWorkerId
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: panda::intrinsics::SystemCoroutineGetWorkerId
+
+####################
+# std.core.Runtime #
+####################
+
+  - name: StdRuntimeEquals
+    space: ets
+    class_name: std.core.Runtime
+    method_name: equals
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.Object, std.core.Object ]
+    impl: panda::ets::intrinsics::StdCoreRuntimeEquals
+    clear_flags: [ ]
+
+##########################
+# std.serialization.JSON #
+##########################
+
+  - name: escompatJSONStringifyObj
+    space: ets
+    class_name: escompat.JSON
+    method_name: stringifyObj
+    static: true
+    signature:
+      ret: std.core.String
+      args: [std.core.Object]
+    impl: panda::ets::intrinsics::EscompatJSONStringifyObj
+    clear_flags: [ ]
+
+###################
+# std.core.RegExp #
+###################
+  - name: EscompatRegExpCompile
+    space: ets
+    class_name: escompat.RegExp
+    method_name: compile
+    static: false
+    signature:
+      ret: std.core.void
+      args: []
+    impl: panda::ets::intrinsics::EscompatRegExpCompile
+
+  - name: EscompatRegExpExec
+    space: ets
+    class_name: escompat.RegExp
+    method_name: exec
+    static: false
+    signature:
+      ret: escompat.RegExpExecResult
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::EscompatRegExpExec
+
+###################
+# std.core.Type   #
+###################
+  - name: StdTypeGetTypeDescriptor
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetTypeDescriptor
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.Object ]
+    impl: panda::ets::intrinsics::TypeAPIGetTypeDescriptor
+    clear_flags: [ ]
+
+  - name: StdTypeGetTypeKind
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetTypeKind
+    static: true
+    signature:
+      ret: i8
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetTypeKind
+    clear_flags: [ ]
+
+  - name: StdTypeIsValueType
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIIsValueType
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIIsValueType
+    clear_flags: [ ]
+
+  - name: StdTypeGetTypeName
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetTypeName
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetTypeName
+    clear_flags: [ ]
+
+  - name: StdTypeGetFieldsNum
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetFieldsNum
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetFieldsNum
+    clear_flags: [ ]
+
+  - name: StdTypeGetField
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetField
+    static: true
+    signature:
+      ret: std.core.Field
+      args: [ std.core.String, i64 ]
+    impl: panda::ets::intrinsics::TypeAPIGetField
+    clear_flags: [ ]
+
+  - name: StdTypeGetFieldByName
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetFieldByName
+    static: true
+    signature:
+      ret: std.core.Field
+      args: [ std.core.String, std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetFieldByName
+    clear_flags: [ ]
+
+  - name: StdTypeGetMethodsNum
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetMethodsNum
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetMethodsNum
+    clear_flags: [ ]
+
+  - name: StdTypeGetMethod
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetMethod
+    static: true
+    signature:
+      ret: std.core.Method
+      args: [ std.core.String, i64 ]
+    impl: panda::ets::intrinsics::TypeAPIGetMethod
+    clear_flags: [ ]
+
+  - name: StdTypeGetConstructorsNum
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetConstructorsNum
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetConstructorsNum
+    clear_flags: [ ]
+
+  - name: StdTypeGetConstructor
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetConstructor
+    static: true
+    signature:
+      ret: std.core.Method
+      args: [ std.core.String, i64 ]
+    impl: panda::ets::intrinsics::TypeAPIGetConstructor
+    clear_flags: [ ]
+
+  - name: StdTypeGetParametersNum
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetParametersNum
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetParametersNum
+    clear_flags: [ ]
+
+  - name: StdTypeGetParameter
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetParameter
+    static: true
+    signature:
+      ret: std.core.Parameter
+      args: [ std.core.String, i64 ]
+    impl: panda::ets::intrinsics::TypeAPIGetParameter
+    clear_flags: [ ]
+
+  - name: StdTypeGetTypeId
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetTypeId
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetTypeId
+    clear_flags: [ ]
+
+  - name: StdTypeGetArrayElementType
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetArrayElementType
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetArrayElementType
+    clear_flags: [ ]
+
+  - name: StdTypeMakeClassInstance
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIMakeClassInstance
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIMakeClassInstance
+    clear_flags: [ ]
+
+  - name: StdTypeMakeArrayInstance
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIMakeArrayInstance
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.String, i64 ]
+    impl: panda::ets::intrinsics::TypeAPIMakeArrayInstance
+    clear_flags: [ ]
+
+  - name: StdTypeGetBaseType
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetBaseType
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetBaseType
+    clear_flags: [ ]
+
+  - name: StdTypeGetInterfacesNum
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetInterfacesNum
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetInterfacesNum
+    clear_flags: [ ]
+
+  - name: StdTypeGetInterface
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetInterface
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.String, i64 ]
+    impl: panda::ets::intrinsics::TypeAPIGetInterface
+    clear_flags: [ ]
+
+  - name: StdTypeGetResultType
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetResultType
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetResultType
+    clear_flags: [ ]
+
+  - name: StdTypeGetReceiverType
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetReceiverType
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetReceiverType
+    clear_flags: [ ]
+
+  - name: StdFunctionTypeIsMethod
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIIsMethod
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIIsMethod
+    clear_flags: [ ]
+
+#################
+# std.core.Char #
+#################
+  - name: StdCoreCharIsUpperCase
+    space: ets
+    class_name: std.core.Char
+    method_name: isUpperCase
+    static: true
+    signature:
+      ret: u1
+      args: [ u16 ]
+    impl: panda::ets::intrinsics::StdCoreCharIsUpperCase
+    clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+
+  - name: StdCoreCharToUpperCase
+    space: ets
+    class_name: std.core.Char
+    method_name: toUpperCase
+    static: true
+    signature:
+      ret: u16
+      args: [ u16 ]
+    impl: panda::ets::intrinsics::StdCoreCharToUpperCase
+    clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+
+  - name: StdCoreCharIsLowerCase
+    space: ets
+    class_name: std.core.Char
+    method_name: isLowerCase
+    static: true
+    signature:
+      ret: u1
+      args: [ u16 ]
+    impl: panda::ets::intrinsics::StdCoreCharIsLowerCase
+    clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+
+  - name: StdCoreCharToLowerCase
+    space: ets
+    class_name: std.core.Char
+    method_name: toLowerCase
+    static: true
+    signature:
+      ret: u16
+      args: [ u16 ]
+    impl: panda::ets::intrinsics::StdCoreCharToLowerCase
+    clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+
+###################
+# std.core.Value  #
+###################
+  - name: ValueAPIGetFieldObject
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldObject
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldObject
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldBoolean
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldBoolean
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldBoolean
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldByte
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldByte
+    static: true
+    signature:
+      ret: i8
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldByte
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldChar
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldChar
+    static: true
+    signature:
+      ret: u16
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldChar
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldShort
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldShort
+    static: true
+    signature:
+      ret: i16
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldShort
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldInt
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldInt
+    static: true
+    signature:
+      ret: i32
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldInt
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldLong
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldLong
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldLong
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldFloat
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldFloat
+    static: true
+    signature:
+      ret: f32
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldFloat
+    clear_flags: [ ]
+
+  - name: ValueAPIGetFieldDouble
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPIGetFieldDouble
+    static: true
+    signature:
+      ret: f64
+      args: [ std.core.Object, i64 ]
+    impl: panda::ets::intrinsics::ValueAPIGetFieldDouble
+    clear_flags: [ ]
+
+
+
+  - name: ValueAPISetFieldObject
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldObject
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, std.core.Object ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldObject
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldBoolean
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldBoolean
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, u1 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldBoolean
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldByte
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldByte
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, i8 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldByte
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldChar
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldChar
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, u16 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldChar
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldShort
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldShort
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, i16 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldShort
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldInt
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldInt
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, i32 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldInt
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldLong
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldLong
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, i64 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldLong
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldFloat
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldFloat
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, f32 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldFloat
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldDouble
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldDouble
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, f64 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldDouble
+    clear_flags: [ ]
+
+
+
+  - name: ValueAPISetFieldByNameObject
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldByNameObject
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, std.core.String, std.core.Object ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldByNameObject
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldByNameBoolean
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldByNameBoolean
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, std.core.String, u1 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldByNameBoolean
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldByNameByte
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldByNameByte
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, std.core.String, i8 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldByNameByte
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldByNameChar
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldByNameChar
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, std.core.String, u16 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldByNameChar
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldByNameShort
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldByNameShort
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, std.core.String, i16 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldByNameShort
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldByNameInt
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldByNameInt
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, std.core.String, i32 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldByNameInt
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldByNameLong
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldByNameLong
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, std.core.String, i64 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldByNameLong
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldByNameFloat
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldByNameFloat
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, std.core.String, f32 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldByNameFloat
+    clear_flags: [ ]
+
+  - name: ValueAPISetFieldByNameDouble
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetFieldByNameDouble
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, std.core.String, f64 ]
+    impl: panda::ets::intrinsics::ValueAPISetFieldByNameDouble
+    clear_flags: [ ]
+
+
+
+  - name: ValueAPISetElementObject
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetElementObject
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, std.core.Object ]
+    impl: panda::ets::intrinsics::ValueAPISetElementObject
+    clear_flags: [ ]
+
+  - name: ValueAPISetElementBoolean
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetElementBoolean
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, u1 ]
+    impl: panda::ets::intrinsics::ValueAPISetElementBoolean
+    clear_flags: [ ]
+
+  - name: ValueAPISetElementByte
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetElementByte
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, i8 ]
+    impl: panda::ets::intrinsics::ValueAPISetElementByte
+    clear_flags: [ ]
+
+  - name: ValueAPISetElementChar
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetElementChar
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, u16 ]
+    impl: panda::ets::intrinsics::ValueAPISetElementChar
+    clear_flags: [ ]
+
+  - name: ValueAPISetElementShort
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetElementShort
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, i16 ]
+    impl: panda::ets::intrinsics::ValueAPISetElementShort
+    clear_flags: [ ]
+
+  - name: ValueAPISetElementInt
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetElementInt
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, i32 ]
+    impl: panda::ets::intrinsics::ValueAPISetElementInt
+    clear_flags: [ ]
+
+  - name: ValueAPISetElementLong
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetElementLong
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, i64 ]
+    impl: panda::ets::intrinsics::ValueAPISetElementLong
+    clear_flags: [ ]
+
+  - name: ValueAPISetElementFloat
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetElementFloat
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, f32 ]
+    impl: panda::ets::intrinsics::ValueAPISetElementFloat
+    clear_flags: [ ]
+
+  - name: ValueAPISetElementDouble
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: ValueAPISetElementDouble
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object, i64, f64 ]
+    impl: panda::ets::intrinsics::ValueAPISetElementDouble
+    clear_flags: [ ]

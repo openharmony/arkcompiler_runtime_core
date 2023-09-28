@@ -1,0 +1,13 @@
+--- # List of predefined types
+default_value:
+  - { avalue: "true", bvalue: "false", operator: "==", result: "false"}
+  - { avalue: "true", bvalue: "false", operator: "!=", result: "true"}
+
+  - { avalue: "false", bvalue: "true", operator: "==", result: "false"}
+  - { avalue: "false", bvalue: "true", operator: "!=", result: "true"}
+
+  - { avalue: "false", bvalue: "false", operator: "==", result: "true"}
+  - { avalue: "false", bvalue: "false", operator: "!=", result: "false"}
+
+  - { avalue: "true", bvalue: "true", operator: "==", result: "true"}
+  - { avalue: "true", bvalue: "true", operator: "!=", result: "false"}

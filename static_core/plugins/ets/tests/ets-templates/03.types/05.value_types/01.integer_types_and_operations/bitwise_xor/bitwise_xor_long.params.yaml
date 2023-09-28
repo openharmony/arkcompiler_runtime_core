@@ -1,0 +1,13 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: 0 }
+- { left: 0, right: 1, result: 1 }
+- { left: 1, right: 1, result: 0 }
+- { left: -1, right: -1, result: 0 }
+- { left: Long.MIN_VALUE, right: Long.MIN_VALUE, result: 0 }
+- { left: Long.MAX_VALUE, right: Long.MAX_VALUE, result: 0 }
+- { left: Long.MIN_VALUE, right: Long.MAX_VALUE, result: -1 }
+- { left: 4123456789123456789, right: 4123456789123456789, result: 0 }
+- { left: 4123456789123456789, right: -4123456789123456789, result: -2 }
+- { left: "0x5555555555555555", right: "0xaaaaaaaaaaaaaaaa", result: -1 }
+  

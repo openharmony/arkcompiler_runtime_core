@@ -1,0 +1,8 @@
+---
+cases:
+  - types:
+      - { type: Object }
+      - { type: string }
+      - { type: Exception }
+      - { type: A }
+      - { type: B }

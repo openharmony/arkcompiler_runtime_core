@@ -1,0 +1,16 @@
+.function void bad (i64 a0) {
+    return.void
+}
+
+.function i32 bad_call () {
+    ldai 0
+    sta v0
+    call.short bad:(i64), v0
+    lda v0
+    return
+}
+
+.function i32 main () {
+    call.short bad_call:()
+    return
+}

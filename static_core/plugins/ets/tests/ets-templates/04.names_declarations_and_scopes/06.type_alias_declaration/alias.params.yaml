@@ -1,0 +1,48 @@
+---
+cases:
+  # primitives
+  - { aname: Rating, aval: double, val: 1.1, op: '!=' }
+
+  # boxed refs
+  - { aname: Weight, aval: Double, val: new Double(1.1), op: '!=' }
+  - { aname: Weight, aval: 'Double|null', val: 'null', op: '!==' }
+
+  # arrays
+  - { aname: IntArray, aval: 'int[]', val: '[1]', op: '!==' }
+  - { aname: NullableIntArray, aval: 'int[][]|null', val: '[[1]]', op: '!==' }
+
+  # functions
+  - { aname: Func, aval: '(p: int) => int', val: '(p: int): int => { return p + 1; }', op: '!==' }
+
+  - defs: |-
+      type ExFunc = (p: Exception) => Exception;
+    aname: NullableExFunc
+    aval: 'ExFunc|null'
+    val: 'null'
+    op: '!=='
+
+  - defs: |-
+      function foo(p: long): Long {
+          return new Long(p);
+      }
+    aname: Func
+    aval: '(p: long) => Long'
+    val: foo
+    op: '!=='
+
+  # classes
+  - defs: |-
+      class X {}
+    aname: X2
+    aval: X
+    val: new X2()
+    op: '!=='
+
+  # interfaces
+  - defs: |-
+      interface I {}
+      class A implements I {}
+    aname: Intf
+    aval: I
+    val: new A()
+    op: '!=='

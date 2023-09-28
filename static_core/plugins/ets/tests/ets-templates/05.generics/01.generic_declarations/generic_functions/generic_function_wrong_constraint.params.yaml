@@ -1,0 +1,19 @@
+--- # Wrong type constraints for generic parameters
+wrong_constraints:
+  - boolean
+  - byte
+  - char
+  - double
+  - float
+  - int
+  - int & Object
+  - int & Object & String
+  - long
+  - Object & int
+  - Object & int & String
+  - Object & String & int
+  - short
+  - void
+  - "enum Color { Red, Green, Blue }"
+  - "int[]"
+

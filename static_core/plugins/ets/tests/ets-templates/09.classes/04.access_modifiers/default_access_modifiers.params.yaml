@@ -1,0 +1,8 @@
+ # List of valid class members
+members:
+  - { body: "x: int;", call: "instance.x" }
+  - { body: "foo(): void {}", call: "instance.foo()" }
+  - { body: "inner class B{}", call: "let x: A.B = new A.B()" }
+  - { body: "interface I{}", call: "let x: A.I" }
+  - { body: "enum Color {Red, Green}", call: "instance.Color.Red" }
+  - { body: "constructor(int y) { this.y = y; }", call: "let x: A = new A(5)" }

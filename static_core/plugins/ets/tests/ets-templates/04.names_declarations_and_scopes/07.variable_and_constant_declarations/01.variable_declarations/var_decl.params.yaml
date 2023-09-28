@@ -1,0 +1,22 @@
+--- # List of all possible var declaration forms
+var_decl:
+  - decl: 'let Let: double;  // init with 0.0'
+    assert: Let == 0
+
+  - decl: 'let b = 1;  // type int inferred'
+    assert: b == 1
+
+  - decl: 'let c: double = 6, d = 1, e = "hello";  // multiple declarations in one stmt'
+    assert: c == 6 && d == 1 && e == "hello"
+
+  - decl: |-
+      let b = 1;
+      let f = (p: double) => b + p;  // function assigned
+    assert: f(42) == 43
+
+  - decl: 'let b = new Object(); // type Object inferred'
+    assert: b instanceof Object
+
+  - decl: let x:Object;
+    use:  x = new Number(42);  // assigned before first use
+    assert: x instanceof Number && (x as Number).unboxed() == 42

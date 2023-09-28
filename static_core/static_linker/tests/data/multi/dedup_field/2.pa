@@ -1,0 +1,9 @@
+.record A <external> {
+    i32 fld <external>
+}
+
+.function void use2(A a0) {
+    ldobj a0, A.fld
+    return.void
+}
+

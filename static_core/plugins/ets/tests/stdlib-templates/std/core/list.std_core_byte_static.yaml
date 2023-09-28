@@ -1,0 +1,14 @@
+- {
+    method_name: valueOf,
+    object_type: Byte,
+    param_init_data_types: {"param1":"byte[]"} ,
+    param_types: {"param1":byte},
+    param_nature: {"param1": primitive},
+    method_return_type: Byte,
+    expected_data_item_type: byte,
+    expected_data_type: "byte[]",
+    param_list: {"param1": "[(-1) as byte, 0 as byte, 1 as byte, Byte.MAX_VALUE as byte, Byte.MIN_VALUE as byte]"},
+    expected_test_data: "[(-1) as byte, 0 as byte, 1 as byte, Byte.MAX_VALUE as byte, Byte.MIN_VALUE as byte]",
+    verify_test_result_function: compareWrapperObjectValue,
+  }
+

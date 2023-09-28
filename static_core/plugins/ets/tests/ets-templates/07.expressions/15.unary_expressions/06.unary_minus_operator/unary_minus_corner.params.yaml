@@ -1,0 +1,7 @@
+--- # List of corner cases for unary minus
+unary_minus_corner:
+  - {origin: "sqrt (-1)", dest: "sqrt (-1)"}
+  - {origin: "1.0/0.0", dest: "log(0)"}
+  - {origin: "log(0)", dest: "1.0/0.0"}
+  - {origin: 0.0, dest: -0.0}
+  - {origin: -0.0, dest: 0.0}

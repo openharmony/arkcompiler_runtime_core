@@ -1,0 +1,7 @@
+.record A {}
+.record B <external>
+
+.record Foo.Bar {
+	B fld
+	u32 n
+}

@@ -1,0 +1,7 @@
+.function void foo() {
+	return.void
+}
+
+.function void main() {
+	return.void
+}

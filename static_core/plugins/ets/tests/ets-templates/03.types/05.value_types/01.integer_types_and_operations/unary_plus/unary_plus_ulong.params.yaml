@@ -1,0 +1,8 @@
+--- # list of values
+values:
+- { value: 0, result: 0 }
+- { value: 1, result: 1 }
+- { value: ULong.MAX_VALUE, result: ULong.MAX_VALUE }
+- { value: ULong.MIN_VALUE, result: ULong.MIN_VALUE }
+- { value: 12898991238987882323, result: 12898991238987882323 }
+

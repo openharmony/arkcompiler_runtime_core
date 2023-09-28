@@ -1,0 +1,8 @@
+--- # list of values
+values:
+- { value: 1, result: 0 }
+- { value: 2, result: 1 }
+- { value: "Char.MIN_VALUE as char", result: "Char.MAX_VALUE as char" }
+- { value: "Char.MAX_VALUE as char", result: 65534 }
+- { value: 50921, result: 50920 }
+

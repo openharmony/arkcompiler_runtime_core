@@ -1,0 +1,102 @@
+---
+cases:
+  # type argument is class
+  - use: |-
+      let v = new X()
+      if (a.meth<X>(v, new Y<X>()) !== v) {
+          return 1;
+      }
+
+  - use: |-
+      let v = new Y<X>()
+      if (a.meth<X>(v, new X()) !== v) {
+          return 1;
+      }
+    bound: ' extends X'
+
+  - use: |-
+      if (a.meth<X|null>(null, new X()) !== null) {
+          return 1;
+      }
+
+  - use: |-
+      if (a.meth<Y<X>|null>(null, new Y<X>()) !== null) {
+          return 1;
+      }
+    bound: ' extends Object|null'
+
+  # type argument is interface
+  - use: |-
+      let v: I = new X()
+      if (a.meth<I>(v, v) !== v) {
+          return 1;
+      }
+
+  - use: |-
+      let v: I = new Y<X>()
+      if (a.meth<I>(v, new Y<Long>()) !== v) {
+          return 1;
+      }
+    bound: ' extends Object'
+
+  # type argument is array of classes, interfaces, enums
+  - use: |-
+      let v = new X[0]
+      if (a.meth<X[]>(v, new Y<X>[0]) !== v) {
+          return 1;
+      }
+    bound: ' extends Object[]'
+
+  - use: |-
+      let v: I[] = new I[0]
+      if (a.meth<I[]>(v, v) !== v) {
+          return 1;
+      }
+
+  - use: |-
+      let v: Color[] = [Color.Red]
+      if (a.meth<Color[]>(v, [Color.Blue]) !== v) {
+          return 1;
+      }
+    bound: ' extends Object'
+
+  # type argument is alias
+  - use: |-
+      let v = new X()
+      if (a.meth<B>(v, new Y<X>()) !== v) {
+          return 1;
+      }
+    decl: |-
+      type B = X
+
+  - use: |-
+      let v: B = null
+      if (a.meth<B>(v, new Y<X>()) !== v) {
+          return 1;
+      }
+    decl: |-
+      type B = X|null
+    bound: ' extends I|null'
+
+  - use: |-
+      let v: I = new X()
+      if (a.meth<B>(v, v) !== v) {
+          return 1;
+      }
+    decl: |-
+      type B = I
+
+  - use: |-
+      let v = new X[0]
+      if (a.meth<B>(v, new Y<X>[0]) !== v) {
+          return 1;
+      }
+    decl: |-
+      type B = X[]|null
+
+  # Autoboxing of primitives
+  - use: |-
+      let v = 1
+      if (a.meth<int>(1, 2) != 2) {
+          return 1;
+      }

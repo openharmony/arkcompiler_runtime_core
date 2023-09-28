@@ -1,0 +1,67 @@
+ark:
+    ark-args: []
+    interpreter-type: null
+    jit:
+        compiler_threshold: 0
+        enable: false
+        num_repeats: 0
+    timeout: 10
+ark_aot:
+    aot-args: []
+    enable: false
+    timeout: 600
+es2panda:
+    arktsconfig: null
+    custom-path: null
+    opt-level: 2
+    timeout: 60
+ets:
+    force-generate: false
+general:
+    bco: true
+    build: $panda_build
+    coverage:
+        use-llvm-cov: false
+        llvm-cov-profdata-out-path: null
+        llvm-cov-html-out-path: null
+    ets-stdlib-root: null
+    force-download: false
+    full-gc-bombing-frequency: 0
+    gc_type: g1-gc
+    work-dir: null
+    heap-verifier: fail_on_verification
+    list-root: null
+    processes: 1
+    qemu: NONE
+    report-format: LOG
+    report-root: null
+    run_gc_in_place: false
+    show-progress: false
+    test-root: null
+    verbose: ''
+    verbose-filter: NEW
+quick:
+    enable: false
+test-lists:
+    architecture: ''
+    explicit-file: null
+    explicit-list: null
+    filter: '*'
+    sanitizer: ''
+    skip-test-lists: false
+    update-excluded: false
+    update-expected: false
+test-suites:
+# hermes is not a default value but without specifying any test-suite
+# the config generation does not work
+- hermes
+time-report:
+    enable: false
+    time-edges:
+    - 1
+    - 5
+    - 10
+verifier:
+    config: null
+    enable: true
+    timeout: 60

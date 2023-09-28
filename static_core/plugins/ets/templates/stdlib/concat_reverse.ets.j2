@@ -1,0 +1,34 @@
+/**
+ * concatenates two arrays into a single one
+ *
+ * @param a first array to concatenate
+ *
+ * @param b second array to concatenate
+ *
+ * @returns concatenation of the arguments
+ */
+export function concat(a: {{T}}[], b: {{T}}[]): {{T}}[] {
+    let res: {{T}}[] = new {{T}}[a.length + b.length]
+    try {
+        copyTo(a, res, 0, 0, a.length);
+        copyTo(b, res, a.length, 0, b.length);
+    } catch (e) {
+        // TODO(ivan-tyulyandin): code below is an overcheck, but will be helpful in case of strange exceptions
+        assert false : "concat: should be unreacheable since indicies have to be correct by design, " + e.toString()
+    }
+    return res;
+}
+
+/**
+ * takes an array and reverses it in-place
+ *
+ * @param arr an array to be reversed
+ */
+export function reverse(arr: {{T}}[]): void {
+    let arrLen: int = arr.length;
+    for (let i: int = 0; i < arrLen / 2; i++) {
+        let tmp: {{T}} = arr[i];
+        arr[i] = arr[arrLen - i - 1];
+        arr[arrLen - i - 1] = tmp;
+    }
+}

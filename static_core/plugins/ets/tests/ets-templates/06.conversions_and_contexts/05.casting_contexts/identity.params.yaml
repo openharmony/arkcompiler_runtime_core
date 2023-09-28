@@ -1,0 +1,21 @@
+---
+cases:
+  - types:
+      - { type: byte, expr: 0x55 as byte, op: '!=' }
+      - { type: char, expr: "c'W'", op: '!=' }
+      - { type: short, expr: 0x5555 as short, op: '!=' }
+      - { type: int, expr: 0x12121212 as int, op: '!=' }
+      - { type: long, expr: 0x3434343456565656 as long, op: '!=' }
+      - { type: float, expr: 0.00001 as float, op: '!=' }
+      - { type: double, expr: 0.00000000001 as double, op: '!=' }
+      - { type: Boolean, expr: new Boolean(true), op: '!==' }
+      - { type: Byte, expr: new Byte(new Int(1).byteValue()), op: '!==' }
+      - { type: Char, expr: new Char(c'A'), op: '!==' }
+      - { type: ClassNotFoundException, expr: new ClassNotFoundException("msg"), op: '!==' }
+      - { type: 'char[]', expr: "[c'A', c'B']", op: '!==' }
+      - { type: '(x: Char): char', expr: '(p: Char): char => { return p.unboxed(); }', op: '!==' }
+      - { type: '((x: Char): char)[]', expr: '[(p: Char): char => { return p.unboxed(); }]', op: '!==' }
+      - { type: Foo, expr: '(p: Char): char => { return p.unboxed(); }', op: '!==' }
+      - { type: 'Foo[]', expr: '[(p: Char): char => { return p.unboxed(); }]', op: '!==' }
+      - { type: 'Color', expr: Color.Red, op: '!==' }
+      - { type: 'Color[]', expr: '[Color.Blue]', op: '!==' }

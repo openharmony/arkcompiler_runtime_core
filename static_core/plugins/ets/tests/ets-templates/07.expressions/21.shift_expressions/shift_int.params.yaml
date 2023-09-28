@@ -1,0 +1,7 @@
+--- # List of shift operators and numeric errors
+shift_errors:
+  - {type: int,  shift: "<<", value: "0x20"}
+  - {type: int,  shift: ">>", value: "0x20"}
+
+  - {type: long, shift: "<<", value: "0x40"}
+  - {type: long, shift: ">>", value: "0x40"}

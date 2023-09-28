@@ -1,0 +1,68 @@
+---
+cases:
+    - use: |-
+          // wrong type
+          while (1) {}
+
+    - use: |-
+          // wrong type
+          do {} while (1)
+
+    - use: |-
+          // wrong type
+          while (i & j) {}
+
+    - use: |-
+          // wrong type
+          do {} while (i & j)
+
+    - use: |-
+          // missing parentheses
+          while i > j {}
+
+    - use: |-
+          // missing right parenthesis
+          while (i > j {}
+
+    - use: |-
+          // missing left parenthesis
+          while i > j) {}
+
+    - use: |-
+          // missing parentheses
+          do {} while i > j
+
+    - use: |-
+          // missing right parenthesis
+          do {} while (i > j
+
+    - use: |-
+          // missing left parenthesis
+          do {} while i > j)
+
+    - use: |-
+          // missing statement
+          do while (i > j)
+
+    - use: |-
+          // missing right curly bracket
+          do {{} while (i > j)
+
+    - use: |-
+          // missing left curly bracket
+          do {}} while (i > j)
+
+    - use: |-
+          // missing curly braces, multiple statements
+          do
+              i += j;
+              j = i * 2;
+          while (i < 5)
+
+    - use: |-
+          // missing right curly bracket
+          while (i > j) {{}
+
+    - use: |-
+          // missing left curly bracket
+          while (i > j) {}}

@@ -1,0 +1,14 @@
+--- # List of primitive types
+types:
+  - byte
+  - short
+  - int
+  - long
+  - float
+  - double
+  - char
+  - boolean
+  - ubyte
+  - ushort
+  - uint
+  - ulong

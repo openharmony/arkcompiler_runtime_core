@@ -1,0 +1,33 @@
+.record panda.ArrayIndexOutOfBoundsException <external>
+
+.function i32 check() {
+        movi v0, 10
+        newarr v0, v0, i32[]
+        movi v1, 11
+        movi v2, 0
+try_begin_label_0:
+        call.short can_throw, v0, v1
+try_end_label_0:
+        movi v2, 0
+        jmp jump_label
+catch_block1_begin:
+jump_label:
+        lda v2
+        return
+
+.catch panda.ArrayIndexOutOfBoundsException, try_begin_label_0, try_end_label_0, catch_block1_begin
+}
+
+.function void can_throw(i32[] a0, i32 a1) {
+        mov.obj v0, a0
+        mov v1, a1
+        movi v2, 0x0
+        lda v2
+        starr v0, v1
+        return.void
+}
+
+.function i32 main() {
+        call.short check
+        return
+}

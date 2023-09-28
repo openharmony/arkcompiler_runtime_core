@@ -1,0 +1,13 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 1, right: 1, result: 1 }
+- { left: 2689891232, right: 4194832912, result: 318306816 }
+- { left: 329001238, right: 998392390, result: 2390157316 }
+- { left: 0, right: UInt.MAX_VALUE, result: 0 }
+- { left: 1, right: UInt.MAX_VALUE, result: UInt.MAX_VALUE }
+- { left: 0, right: UInt.MIN_VALUE, result: 0 }
+- { left: 1, right: UInt.MIN_VALUE, result: UInt.MIN_VALUE }
+- { left: UInt.MAX_VALUE, right: UInt.MAX_VALUE, result: 1 }
+- { left: UInt.MIN_VALUE, right: UInt.MIN_VALUE, result: 0 }
+

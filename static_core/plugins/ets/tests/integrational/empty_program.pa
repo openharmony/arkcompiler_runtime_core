@@ -1,0 +1,8 @@
+.language eTS
+
+.function i32 main()
+{
+    ldai 0
+    return
+}
+

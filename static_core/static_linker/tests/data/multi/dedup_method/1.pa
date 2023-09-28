@@ -1,0 +1,12 @@
+.record A <external>
+
+.function void A.extf() <external>
+
+.function void use() {
+    call.short A.extf
+    return.void
+}
+
+.function void main() {
+    return.void
+}

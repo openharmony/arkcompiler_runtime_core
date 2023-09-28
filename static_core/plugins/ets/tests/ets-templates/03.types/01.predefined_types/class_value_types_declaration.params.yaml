@@ -1,0 +1,14 @@
+--- # List of predefined value types
+default_value:
+  - Byte
+  - Short
+  - Int
+  - Long
+  - UByte
+  - UShort
+  - UInt
+  - ULong
+  - Float
+  - Double
+  - Char
+  - Boolean

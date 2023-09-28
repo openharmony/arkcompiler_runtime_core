@@ -1,0 +1,12 @@
+---
+cases:
+  - types:
+      - { type: Boolean, val: 'true' }
+      - { type: Boolean, val: 'false' }
+      - { type: Byte, val: 0x77 as byte }
+      - { type: Char, val: "c'\\n'" }
+      - { type: Short, val: 0x5555 as short }
+      - { type: Int, val: 0x12121212 as int }
+      - { type: Long, val: 0x3434343456565656 as long }
+      - { type: Float, val: 0.00001 as float }
+      - { type: Double, val: 0.00000000001 as double }

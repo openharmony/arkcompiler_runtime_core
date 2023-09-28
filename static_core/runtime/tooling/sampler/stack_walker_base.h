@@ -1,0 +1,162 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef PANDA_RUNTIME_TOOLING_SAMPLER_STACK_WALKER__BASE_H
+#define PANDA_RUNTIME_TOOLING_SAMPLER_STACK_WALKER__BASE_H
+
+#include <variant>
+
+#include "runtime/include/cframe.h"
+#include "runtime/interpreter/frame.h"
+
+namespace panda {
+
+class StackWalkerBase {
+public:
+    using SlotType = std::conditional_t<ArchTraits<RUNTIME_ARCH>::IS_64_BITS, uint64_t, uint32_t>;
+    using FrameVariant = std::variant<Frame *, CFrame>;
+    using CFrameType = CFrame;
+
+    StackWalkerBase() = default;
+    StackWalkerBase(void *fp, bool is_frame_compiled);
+
+    virtual ~StackWalkerBase() = default;
+
+    NO_COPY_SEMANTIC(StackWalkerBase);
+    NO_MOVE_SEMANTIC(StackWalkerBase);
+
+    void NextFrame();
+
+    Frame *GetIFrame()
+    {
+        return std::get<Frame *>(frame_);
+    }
+
+    const Frame *GetIFrame() const
+    {
+        return std::get<Frame *>(frame_);
+    }
+
+    CFrameType &GetCFrame()
+    {
+        ASSERT(IsCFrame());
+        return std::get<CFrameType>(frame_);
+    }
+
+    const CFrameType &GetCFrame() const
+    {
+        ASSERT(IsCFrame());
+        return std::get<CFrameType>(frame_);
+    }
+
+    bool IsCFrame() const
+    {
+        return std::holds_alternative<CFrameType>(frame_);
+    }
+
+    bool HasFrame() const
+    {
+        return IsCFrame() || GetIFrame() != nullptr;
+    }
+
+    Method *GetMethod()
+    {
+        ASSERT(HasFrame());
+        return IsCFrame() ? GetCFrame().GetMethod() : GetIFrame()->GetMethod();
+    }
+
+    const Method *GetMethod() const
+    {
+        ASSERT(HasFrame());
+        return IsCFrame() ? GetCFrame().GetMethod() : GetIFrame()->GetMethod();
+    }
+
+    template <FrameKind KIND>
+    static bool IsBoundaryFrame(const void *ptr)
+    {
+        if constexpr (KIND == FrameKind::INTERPRETER) {  // NOLINT
+            return GetBoundaryFrameMethod<KIND>(ptr) == COMPILED_CODE_TO_INTERPRETER;
+        } else {  // NOLINT
+            return GetBoundaryFrameMethod<KIND>(ptr) == INTERPRETER_TO_COMPILED_CODE;
+        }
+    }
+
+    template <FrameKind KIND>
+    static uintptr_t GetBoundaryFrameMethod(const void *ptr)
+    {
+        auto frame_method = reinterpret_cast<uintptr_t>(GetMethodFromBoundary<KIND>(ptr));
+        return frame_method;
+    }
+
+    template <FrameKind KIND>
+    static Method *GetMethodFromBoundary(void *ptr)
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        return *(reinterpret_cast<Method **>(ptr) + BoundaryFrame<KIND>::METHOD_OFFSET);
+    }
+
+    template <FrameKind KIND>
+    static const Method *GetMethodFromBoundary(const void *ptr)
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        return *(reinterpret_cast<Method *const *>(ptr) + BoundaryFrame<KIND>::METHOD_OFFSET);
+    }
+
+    template <FrameKind KIND>
+    static SlotType *GetPrevFromBoundary(void *ptr)
+    {
+        // In current implementation fp must point to previous fp
+        static_assert(BoundaryFrame<KIND>::FP_OFFSET == 0);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        return *(reinterpret_cast<SlotType **>(ptr));
+    }
+
+    static bool IsMethodInBoundaryFrame(Method *method)
+    {
+        return IsMethodInI2CFrame(method) || IsMethodInC2IFrame(method) || IsMethodInBPFrame(method);
+    }
+
+    static bool IsMethodInI2CFrame(Method *method)
+    {
+        return method == reinterpret_cast<void *>(FrameBridgeKind::INTERPRETER_TO_COMPILED_CODE);
+    }
+
+    static bool IsMethodInC2IFrame(Method *method)
+    {
+        return method == reinterpret_cast<void *>(FrameBridgeKind::COMPILED_CODE_TO_INTERPRETER);
+    }
+
+    static bool IsMethodInBPFrame(Method *method)
+    {
+        return method == reinterpret_cast<void *>(FrameBridgeKind::BYPASS);
+    }
+
+private:
+    FrameVariant GetTopFrameFromFp(void *ptr, bool is_frame_compiled);
+
+    CFrameType CreateCFrame(SlotType *ptr);
+
+    CFrameType CreateCFrameForC2IBridge(Frame *frame);
+
+    void NextFromCFrame();
+
+    void NextFromIFrame();
+
+private:
+    FrameVariant frame_ {nullptr};
+};
+
+}  // namespace panda
+
+#endif  // PANDA_RUNTIME_TOOLING_SAMPLER_STACK_WALKER__BASE_H

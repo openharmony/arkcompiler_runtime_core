@@ -1,0 +1,58 @@
+---
+function_decls:
+    # arguments mismatch
+    - { decl: 'function f(a: int): void {}', call: 'f();' }
+    - { decl: 'function f(): void {}', call: 'f(42);' }
+
+    # missing parameter type
+    - { decl: 'function f(a): void {}', call: 'f(0);' }
+    - { decl: 'function f(a: int, b:): int { return 42; }', call: 'f(42, 0);' }
+
+    # same name parameters
+    - { decl: 'function f(a: int, a: boolean): void {}', call: 'f(0, false);' }
+
+    # mismatch in parameter types
+    - decl: |-
+          function foo<T>(a: U): U {
+              return a;
+          }
+      call: |-
+          let v: Error = foo<Error>(new Error())
+
+    # missing comma in parameter types
+    - decl: |-
+          function foo<T U>(a: T, b: U): U {
+              return b;
+          }
+      call: |-
+          foo<Error, Error>(new Error(), new Error())
+
+    # keyword as parameter type
+    - decl: |-
+          function foo<do, U>(a: do, b: U): U {
+              return b;
+          }
+      call: |-
+          foo<Long, Boolean>(new Long(), new Boolean(true))
+
+    - decl: |-
+          function foo<T, class>(a: T, b: class): T {
+              return a;
+          }
+      call: |-
+          foo<Long, Boolean>(new Long(), new Boolean(true))
+
+    # keyword as parameter name
+    - decl: |-
+          function foo<T, U>(do: T, b: U): U {
+              return b;
+          }
+      call: |-
+          foo<Long, Boolean>(new Long(), new Boolean(true))
+
+    - decl: |-
+          function foo<T, U>(a: T, case: U): T {
+              return a;
+          }
+      call: |-
+          foo<Long, Boolean>(new Long(), new Boolean(true))

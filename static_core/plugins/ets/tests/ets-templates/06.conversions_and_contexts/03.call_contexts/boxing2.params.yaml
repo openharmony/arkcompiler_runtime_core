@@ -1,0 +1,58 @@
+---
+cases:
+
+  - type: Object
+    prim_type: boolean
+    values: ['true', 'false']
+
+  - type: Object
+    prim_type: byte
+    values: [-128 as byte, 0 as byte, 127 as byte]
+
+  - type: Integral
+    prim_type: byte
+    values: [-128 as byte, 0 as byte, 127 as byte]
+
+  - type: Object
+    prim_type: char
+    values: ["c'\\u0000'", "c'X'", "c'\\uffff'"]
+
+  - type: Object
+    prim_type: short
+    values: [Short.MIN_VALUE as short, 255 as short]
+
+  - type: Integral
+    prim_type: short
+    values: [Short.MIN_VALUE as short, 255 as short]
+
+  - type: Object
+    prim_type: int
+    values: [127, 32767, Int.MAX_VALUE as int]
+
+  - type: Integral
+    prim_type: int
+    values: [127, 32767, Int.MAX_VALUE as int]
+
+  - type: Object
+    prim_type: long
+    values: [Long.MIN_VALUE as long, 9223372036854775807 as long]
+
+  - type: Integral
+    prim_type: long
+    values: [Long.MIN_VALUE as long, 9223372036854775807 as long]
+
+  - type: Object
+    prim_type: float
+    values: [1.401298464324817e-45 as float, Float.MAX_VALUE]
+
+  - type: Floating
+    prim_type: float
+    values: [1.401298464324817e-45 as float, Float.MAX_VALUE]
+
+  - type: Object
+    prim_type: double
+    values: [-1.401298464324817e-45, Double.MAX_VALUE]
+
+  - type: Floating
+    prim_type: double
+    values: [-1.401298464324817e-45, Double.MAX_VALUE]

@@ -1,0 +1,22 @@
+---
+cases:
+  - { ptype: [short, int, long, float, double], type: Short, val: "new Byte(42 as byte)" }
+  - { ptype: [short, int, long, float, double], type: Short, val: "new Char('X')" }
+
+  - { ptype: [int, long, float, double], type: Int, val: "new Byte(0x5A as byte)" }
+  - { ptype: [int, long, float, double], type: Int, val: "new Char('X')" }
+  - { ptype: [int, long, float, double], type: Int, val: "new Short(-128 as short)" }
+
+  - { ptype: [long, float, double], type: Long, val: "new Byte(0o177 as byte)" }
+  - { ptype: [long, float, double], type: Long, val: "new Short(0x0000 as short)" }
+  - { ptype: [long, float, double], type: Long, val: "new Int(0x7AFAFBFB)" }
+
+  - { ptype: [float, double], type: Float, val: "new Byte(127 as byte)" }
+  - { ptype: [float, double], type: Float, val: "new Short(128 as short)" }
+  - { ptype: [float, double], type: Float, val: "new Long(Long.MAX_VALUE)" }
+
+  - { ptype: [double], type: Double, val: "new Byte(42 as byte)" }
+  - { ptype: [double], type: Double, val: "new Char('X')" }
+  - { ptype: [double], type: Double, val: "new Short(127 as short)" }
+  - { ptype: [double], type: Double, val: "new Int(-0x5A5A5A5A)" }
+  - { ptype: [double], type: Double, val: "new Float(3.14)" }

@@ -1,0 +1,13 @@
+---
+cases:
+  - use: |-
+        let i: I<in X> = new A<X>(new X())
+        i.methIn(new X())
+
+  - use: |-
+        let i: I<out X> = new A<X>(new X())
+        let z: X = i.methOut()
+
+  - use: |-
+        let i: I<out> = new A<Object|null>(new X())
+        let z: Object|null = i.methOut()

@@ -1,0 +1,21 @@
+---
+cases:
+  # primitive
+  - { type: boolean, v: 'true', op: '+', q: 'false' }
+  - { type: 'int[]', v: '[1]', op: '+', q: '[2]' }
+  - { type: float, v: 3.4023235e+38, op: '<<', q: 1.0 }
+  - { type: double, v: 1.7976931348623157e+308, op: '>>', q: 0.0 }
+  - { type: float, v: 3.4023235e+38, op: '&', q: 3.4023235e+38 }
+  - { type: double, v: 0.0, op: '&', q: -0.0 }
+  - { type: float, v: 0.0, op: '|', q: -0.0 }
+  - { type: double, v: -1.7976931348623157e+308, op: '^', q: -1.0 }
+
+  # boxed
+  - { type: Boolean, v: 'true', op: '+', q: 'false' }
+  - { type: 'Int[]', v: '[1]', op: '+', q: '[2]' }
+  - { type: Float, v: 3.4023235e+38, op: '<<', q: 1.0 }
+  - { type: Double, v: 1.7976931348623157e+308, op: '>>', q: 0.0 }
+  - { type: Float, v: 3.4023235e+38, op: '&', q: 3.4023235e+38 }
+  - { type: Double, v: 0.0, op: '&', q: -0.0 }
+  - { type: Float, v: 0.0, op: '|', q: -0.0 }
+  - { type: Double, v: -1.7976931348623157e+308, op: '^', q: -1.0 }

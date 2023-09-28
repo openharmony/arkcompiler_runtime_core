@@ -1,0 +1,26 @@
+--- # Wrong type constraints for generic parameters
+wrong_constaints:
+  - byte
+  - short
+  - int
+  - long
+  - float
+  - double
+  - boolean
+  - void
+  - char
+  - "int[]"
+  - "enum Color { Red, Green, Blue}"
+  - Object & int
+  - int & Object
+  - Object & String & int
+  - Object & int & String
+  - int & Object & String
+  - "Object, extends int"
+  - "int, extends Object"
+
+# Top level class modifiers
+top_level_class_modifiers:
+  - ""
+  - abstract
+  - final

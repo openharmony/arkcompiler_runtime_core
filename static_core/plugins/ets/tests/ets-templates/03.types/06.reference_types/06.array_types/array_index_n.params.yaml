@@ -1,0 +1,9 @@
+---
+cases:
+    - index: 'true'
+    - index: 'null'
+    - index: 'void'
+    - index: '1.5 as float'
+    - index: '1.5 as double'
+    - index: 'Long.MAX_VALUE'
+    - index: 'new Object()'

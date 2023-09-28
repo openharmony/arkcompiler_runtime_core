@@ -1,0 +1,7 @@
+---
+cases:
+  - decl: |-
+      class A {}
+      class PA<> {}
+    use: |-
+      let x: A<> = new A<>();

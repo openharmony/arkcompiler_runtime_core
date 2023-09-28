@@ -1,0 +1,14 @@
+- {
+    method_name: valueOf,
+    object_type: Short,
+    param_init_data_types: {"param1":"short[]"} ,
+    param_types: {"param1":short},
+    param_nature: {"param1": primitive},
+    method_return_type: Short,
+    expected_data_item_type: short,
+    expected_data_type: "short[]",
+    param_list: {"param1": "[(-1) as short, 0 as short, 1 as short, Short.MAX_VALUE as short, Short.MIN_VALUE as short]"},
+    expected_test_data: "[(-1) as short, 0 as short, 1 as short, Short.MAX_VALUE as short, Short.MIN_VALUE as short]",
+    verify_test_result_function: compareWrapperObjectValue,
+  }
+

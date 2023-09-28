@@ -1,0 +1,16 @@
+--- # List of logical operations
+logical_ops:
+  - {xorigin: "false", yorigin: "false", op: "&", dest: "false"}
+  - {xorigin: "true",  yorigin: "false", op: "&", dest: "false"}
+  - {xorigin: "false", yorigin: "true",  op: "&", dest: "false"}
+  - {xorigin: "true",  yorigin: "true",  op: "&", dest: "true"}
+
+  - {xorigin: "false", yorigin: "false", op: "|", dest: "false"}
+  - {xorigin: "true",  yorigin: "false", op: "|", dest: "true"}
+  - {xorigin: "false", yorigin: "true",  op: "|", dest: "true"}
+  - {xorigin: "true",  yorigin: "true",  op: "|", dest: "true"}
+
+  - {xorigin: "false", yorigin: "false", op: "^", dest: "false"}
+  - {xorigin: "true",  yorigin: "false", op: "^", dest: "true"}
+  - {xorigin: "false", yorigin: "true",  op: "^", dest: "true"}
+  - {xorigin: "true",  yorigin: "true",  op: "^", dest: "false"}

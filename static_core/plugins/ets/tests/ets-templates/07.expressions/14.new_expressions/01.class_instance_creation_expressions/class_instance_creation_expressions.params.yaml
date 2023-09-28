@@ -1,0 +1,4 @@
+--- # List of valid class instance creation samples
+class_instance:
+  - {decl: "class A{}", init: "new A"}
+  - {decl: "", init: "new String"}

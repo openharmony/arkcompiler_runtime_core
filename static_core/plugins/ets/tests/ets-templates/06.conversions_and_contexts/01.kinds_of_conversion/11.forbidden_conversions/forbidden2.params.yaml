@@ -1,0 +1,52 @@
+---
+cases:
+  - { stype: Object, sval: new Int(), dtype: Boolean }
+
+  - defs: |-
+      final class A {}
+    stype: Object
+    sval: new A()
+    dtype: Double
+
+  - defs: |-
+      final class A {}
+    stype: Object
+    sval: new Object()
+    dtype: A
+
+  - defs: |-
+      class A {}
+      class B extends A {}
+    stype: A
+    sval: new A()
+    dtype: B
+
+  - defs: |-
+      interface I {}
+      class A {}
+      class B extends A implements I {}
+    stype: A
+    sval: new A()
+    dtype: I
+
+  - defs: |-
+      interface I {}
+      class A implements I {}
+      class B implements I {}
+    stype: I
+    sval: new A()
+    dtype: B
+
+  - defs: |-
+      class A {}
+    stype: Object
+    sval: new A[1]
+    dtype: A[][]
+
+  - defs: |-
+      interface I {}
+      interface J {}
+      class A implements I {}
+    stype: I
+    sval: new A()
+    dtype: J

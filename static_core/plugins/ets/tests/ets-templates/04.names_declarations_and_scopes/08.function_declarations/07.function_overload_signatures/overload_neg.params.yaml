@@ -1,0 +1,42 @@
+---
+function_decls:
+    - decl: |-
+          // CTE: implementation is missing
+          function foo(): string;
+          function foo(a: string): string;
+          function foo(a: string, b: string): string;
+      call: |-
+          foo();
+
+    - decl: |-
+          // CTE: implementation does not immediately follow the declarations
+          function foo(): string;
+          function foo(a: string, b: string): string;
+          function bar(): string {
+              return "";
+          }
+          function foo(a?: string, b?:string): string {
+              return ">>>" + a + b;
+          }
+      call: |-
+          foo()
+
+    - decl: |-
+          // CTE: implementation is not compatible with the declarations
+          function foo(): string;
+          function foo(a: string, b: string): string;
+          function foo(a?: string, b:string): string {
+              return ">>>" + a + b;
+          }
+      call: |-
+          foo()
+
+    - decl: |-
+          // CTE: implementation is not compatible with the declarations
+          function foo(): string;
+          function foo(a: string, b: string): string;
+          function foo(a?: string, b?:number): string {
+              return ">>>" + a + b;
+          }
+      call: |-
+          foo()

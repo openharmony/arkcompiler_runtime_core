@@ -1,0 +1,6 @@
+---
+cases:
+  - use: let v = new <in Int> A (new Int())
+  - use: let v = new <in> A (new Int())
+  - use: let v = new <out Int> A (new Int())
+  - use: let v = new <out> A (new Int())

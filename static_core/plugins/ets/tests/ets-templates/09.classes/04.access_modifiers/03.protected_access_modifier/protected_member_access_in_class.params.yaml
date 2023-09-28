@@ -1,0 +1,6 @@
+ # List of valid class members
+members:
+  - { body: "x: int;", type: "int", call: "x", value: "0" }
+  - { body: "getValue(): int { return 1; }", type: "int", call: "getValue()", value: "1" }
+  - { body: "inner class C { static x: int = 1; }", type: "int", call: "C.x", value: "1" }
+  - { body: "enum Color {Red, Green}", type: "int", call: "Color.Red.ordinal()", value: "1" }

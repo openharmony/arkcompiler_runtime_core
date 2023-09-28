@@ -1,0 +1,19 @@
+test-suites:
+    - ets_cts
+general:
+    build: $panda_build
+    report-root: /tmp/ets-cts
+#    verbose: one of: NONE, SHORT, ALL
+    verbose: NONE
+#    verbose-filter: one of NEW, IGNORED, ALL
+    verbose-filter: NEW
+    show-progress: True
+es2panda:
+    timeout: 30
+    opt-level: 2
+verifier:
+    enable: True
+    timeout: 30
+ark:
+    timeout: 180
+    heap-verifier: fail_on_verification

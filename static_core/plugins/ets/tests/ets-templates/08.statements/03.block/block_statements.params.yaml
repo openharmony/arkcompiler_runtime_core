@@ -1,0 +1,6 @@
+--- # List of valid expression statements
+block_statements:
+  - {expr: "5"}
+  - {expr: "1 + 2"}
+  - {expr: "let a: int"}
+  - {expr: "let b = 1"}

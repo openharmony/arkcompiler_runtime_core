@@ -1,0 +1,10 @@
+--- # List of variable types
+variable_types:
+  - byte
+  - short
+  - int
+  - long
+  - float
+  - double
+  - boolean
+  - String

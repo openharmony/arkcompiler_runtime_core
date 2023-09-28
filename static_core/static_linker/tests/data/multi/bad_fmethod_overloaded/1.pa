@@ -1,0 +1,10 @@
+.record panda.String <external>
+
+.function void print(panda.String a0) <external>
+
+.function void main() {
+	lda.str "1.pa\n"
+	sta.obj v0
+	call.short print, v0
+	return.void
+}

@@ -1,0 +1,37 @@
+/*---
+desc: >-
+    If the left-hand operand is an array access expression (§7.12), possibly enclosed in one or more pairs of parentheses, then:
+    - First, the array reference subexpression of the left-hand operand is evaluated.
+    If this evaluation completes abruptly, then the assignment expression completes
+    abruptly for the same reason; the index subexpression and the right-hand operand
+    are not evaluated and no assignment occurs.
+params: normal completion
+---*/
+
+let result: string = ""
+let x: int[] = [10, 20, 30]
+
+function ref(p: string): int[] {
+    result = result + p
+    return x;
+}
+
+function idx(i: int): int {
+    result = result + i
+    return i
+}
+
+function val(): int {
+    result = result + "V"
+    return 1
+}
+
+function main(): int {
+    result = "";  // reset due to jit mode warmup
+
+    let s: string = "" + ref("A")[idx(2)] = ref("B")[idx(1)] = ref("C")[idx(0)] = val()
+    if (result != "A2B1C0V" || s != "1") {
+        return 1
+    }
+    return 0
+}

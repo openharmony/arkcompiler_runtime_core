@@ -1,0 +1,156 @@
+.. _Errors Handling:
+
+Errors Handling
+###############
+
+.. meta:
+    frontend_status: Done
+
+|LANG| is designed to provide first-class support in responding to and
+recovering from different erroneous conditions in a program.
+
+Two kinds of situations can occur and interrupt normal program
+execution:
+
+-  Runtime errors, e.g., null pointer dereferencing, array bounds
+   checking or division by zero;
+
+-  Some operation completion failures; for example, the task of reading
+   and processing data from a file on disk can fail in a number of ways:
+   a file not existing at a specified path, not having read permissions,
+   or else.
+
+
+.. index::
+   execution
+   null pointer dereferencing
+   runtime error
+   array bounds checking
+   completion
+   normal execution
+   normal completion
+   completion failure
+
+This specification uses the terms as follows:
+
+-  ‘error’ to denote runtime errors, and
+
+-  ‘exception’ to denote failures.
+
+
+The difference between these two terms is that *exceptions* are the
+*normal* and expected way for an operation to complete. We expect a
+program to resolve some exceptions and inform the user if it cannot.
+
+On the contrary, *errors* indicate that there is a failure of the
+program logic or even of the hardware. The program can recover in
+some but not all cases.
+
+As a result, *exceptions* can be handled in a much more effective
+manner than *errors*.
+
+.. index::
+   error
+   exception
+   runtime
+
+Some modern programming languages support only *exceptions*; others
+support only *errors*. We are strongly convinced that it is necessary
+to support both, therefore |LANG| has ‘*Exception*’ and ‘*Error*’ as
+the predefined types to be discussed below.
+
+Exceptions are described in the Experimental section (see :ref:`Exceptions`).
+
+.. index::
+   exception
+   error
+   predefined type
+
+|
+
+Errors
+******
+
+*Error* is the base class of all errors. Defining a new error class is
+normally not required because error classes for various cases (e.g.,
+*DivideByZeroError*) are defined in the standard library (see
+:ref:`Standard Library`).
+
+However, a developer can define a new error by using *Error* or any
+derived class as the base of the new class. An example of the *error*
+handling is provided below:
+
+.. index::
+   error
+   derived class
+
+.. code-block:: typescript
+   :linenos:
+
+    class DivideByZeroError extends Error {}
+
+    function divide(a: number, b: number): Number | null {
+      try {
+        return a / b
+      }
+      catch (x) {
+        if (x instanceof DivideByZeroError)
+          return null
+        return 0
+      }
+    }
+
+
+A compile-time error occurs if a generic class is a subclass of *Error*
+(direct or indirect).
+
+In most cases, *errors* are caused by the Virtual Machine or the standard
+libraries.
+
+Although ``throw`` statements (see :ref:`Throw Statements`) allow to throw
+*exceptions* and *errors*, *exceptions* provide a structured way to handle
+a range of unexpected situations in application code, and throwing *errors*
+in such context is not recommended.
+
+Use ``try`` statements (see :ref:`Try Statements`) to handle *errors* in a
+manner similar to *exception* handling.
+
+Note that not every *error* can be recovered.
+
+.. index::
+   compile-time error
+   generic class
+   subclass
+   error
+   throw statement
+   exception
+   error
+   try statement
+
+.. code-block:: typescript
+   :linenos:
+
+    class Exception extends Error {}
+
+    function handleAll(
+      actions : () => void,
+      error_handling_actions : () => void,
+      exception_handling_actions : () => void)
+    {
+      try {
+        actions()
+      }
+      catch (x) {
+        if (x instanceof Exception)
+          exception_handling_actions()
+        else if (x instanceof Error)
+          error_handling_actions()
+      }
+    }
+
+
+.. raw:: pdf
+
+   PageBreak
+
+

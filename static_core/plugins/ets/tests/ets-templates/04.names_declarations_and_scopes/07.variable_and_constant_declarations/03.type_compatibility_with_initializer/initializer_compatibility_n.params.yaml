@@ -1,0 +1,15 @@
+--- # Type, TypeDecl and initializer
+type_and_initializer:
+    - { type: byte, value: 127e10 }
+    - { type: byte, value: '"1"' }
+    - { type: char, value: 127e10 }
+    - { type: char, value: '"0"' }
+    - { type: int, value: new Object() }
+    - { type: long, value: 'true' }
+    - { type: float, value: new Boolean() }
+    - { type: double, value: '"string"' }
+    - { type: Object|null, value: 1 }
+    - { type: Object, value: 'null' }
+    - { type: Boolean, value: 2 }
+    - { type: Boolean, value: new Object() }
+    - { type: string, value: 'null' }

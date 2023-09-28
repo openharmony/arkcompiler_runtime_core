@@ -1,0 +1,38 @@
+---
+cases:
+    - { totype: B, fromtype: C, fromval: new C() }
+    - { totype: A, fromtype: B, fromval: new B() }
+    - { totype: A, fromtype: C, fromval: new C() }
+    - { totype: J, fromtype: B, fromval: new B() }
+    - { totype: J, fromtype: C, fromval: new C() }
+    - { totype: I, fromtype: A, fromval: new A() }
+    - { totype: I, fromtype: B, fromval: new B() }
+    - { totype: I, fromtype: C, fromval: new C() }
+
+    - { totype: "B[]", fromtype: "C[]", fromval: "new C[1]" }
+    - { totype: "A[]", fromtype: "B[]", fromval: "new B[2]" }
+    - { totype: "A[][]", fromtype: "C[][]", fromval: "new C[3][3]" }
+    - { totype: "J[]", fromtype: "B[]", fromval: "new B[4]" }
+    - { totype: "J[][][][]", fromtype: "C[][][][]", fromval: "new C[5][5][5][5]" }
+    - { totype: "I[]", fromtype: "A[]", fromval: "new A[6]" }
+    - { totype: "I[]", fromtype: "B[]", fromval: "new B[7]" }
+    - { totype: "I[]", fromtype: "C[]", fromval: "new C[8]" }
+
+    - { totype: "Object[]", fromtype: "C[]", fromval: "new C[0]" }
+    - { totype: "Object[]", fromtype: "B[]", fromval: "new B[0]" }
+    - { totype: "Object[]", fromtype: "A[]", fromval: "new A[0]" }
+    - { totype: "Object[]", fromtype: "J[]", fromval: "new B[0]" }
+    - { totype: "Object[]", fromtype: "I[]", fromval: "new C[0]" }
+
+    - { totype: "Object", fromtype: "C[]", fromval: "new C[0]" }
+    - { totype: "Object", fromtype: "B[]", fromval: "new B[0]" }
+    - { totype: "Object", fromtype: "A[]", fromval: "new A[0]" }
+    - { totype: "Object", fromtype: "I[]", fromval: "new B[0]" }
+    - { totype: "Object", fromtype: "J[]", fromval: "new C[0]" }
+
+    - { totype: "Object", fromtype: "C[][][]", fromval: "new C[1][2][3]" }
+    - { totype: "Object[]", fromtype: "B[][][]", fromval: "new B[1][2][3]" }
+    - { totype: "Object[][]", fromtype: "A[][][]", fromval: "new A[1][2][3]" }
+    - { totype: "Object[][][]", fromtype: "C[][][]", fromval: "new C[1][2][3]" }
+    - { totype: "Object", fromtype: "Object[][][]", fromval: "new Object[1][2][3]" }
+    - { totype: "Object[]", fromtype: "Object[][][]", fromval: "new Object[1][2][3]" }

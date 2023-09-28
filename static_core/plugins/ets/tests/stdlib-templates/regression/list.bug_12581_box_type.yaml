@@ -1,0 +1,39 @@
+- {
+    box_type: Byte,
+    box_type_desc: Byte_array,
+    box_type_array_size: 5,
+    array_data: "[1,2,3,4,5]",
+    expected_data: "[1,2,3,4,5]",
+  }
+- {
+    box_type: Short,
+    box_type_desc: Short_array,
+    box_type_array_size: 5,
+    array_data: "[1,2,3,4,5]",
+    expected_data: "[1,2,3,4,5]",
+  }
+- {
+    box_type: Int,
+    box_type_desc: Int_array,
+    box_type_array_size: 5,
+    array_data: "[1,2,3,4,5]",
+    expected_data: "[1,2,3,4,5]",
+  }
+- {
+    box_type: Long,
+    box_type_desc: Long_array,
+    box_type_array_size: 5,
+    array_data: "[1,2,3,4,5]",
+    expected_data: "[1,2,3,4,5]",
+  }
+- {
+    box_type: Boolean,
+    box_type_desc: Boolean_array,
+    box_type_array_size: 5,
+    array_data: "[true,true,true,true,true]",
+    expected_data: "[true,true,true,true,true]",
+  }
+
+
+
+

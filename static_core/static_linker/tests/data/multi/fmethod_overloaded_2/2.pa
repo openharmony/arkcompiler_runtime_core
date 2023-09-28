@@ -1,0 +1,11 @@
+.record panda.String <external>
+
+.function void print(panda.String a0, i32 a1) <external>
+
+.function void test() {
+	lda.str "2.pa\n"
+	sta.obj v0
+	movi v1, 30
+	call.short print, v0, v1
+	return.void
+}

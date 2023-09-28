@@ -1,0 +1,11 @@
+---
+cases:
+  - { init: 'new A()', exc: A, fail: 0 }
+  - { init: 'new A()', exc: B, fail: 1 }
+  - { init: 'new A()', exc: C, fail: 1 }
+  - { init: 'new B()', exc: A, fail: 0 }
+  - { init: 'new B()', exc: B, fail: 0 }
+  - { init: 'new B()', exc: C, fail: 1 }
+  - { init: 'new C()', exc: A, fail: 0 }
+  - { init: 'new C()', exc: B, fail: 0 }
+  - { init: 'new C()', exc: C, fail: 0 }

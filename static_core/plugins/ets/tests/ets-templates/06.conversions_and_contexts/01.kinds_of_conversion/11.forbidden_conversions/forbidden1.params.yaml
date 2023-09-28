@@ -1,0 +1,131 @@
+---
+cases:
+  - { stype: boolean, sval: 'true', dtype: byte }
+  - { stype: boolean, sval: 'false', dtype: int }
+  - { stype: boolean, sval: 'true', dtype: double }
+  - { stype: short, sval: 1 as short, dtype: boolean }
+  - { stype: long, sval: 1 as long, dtype: boolean }
+  - { stype: float, sval: 1.0 as float, dtype: boolean }
+
+  - { stype: Boolean, sval: new Boolean(), dtype: short }
+  - { stype: Boolean, sval: new Boolean(), dtype: long }
+  - { stype: Boolean, sval: new Boolean(), dtype: float }
+  - { stype: byte, sval: 1 as byte, dtype: Boolean }
+  - { stype: int, sval: 1 as int, dtype: Boolean }
+  - { stype: double, sval: 1.0 as double, dtype: Boolean }
+
+  - { stype: int, sval: 1, dtype: string }
+  - { stype: string, sval: '"1"', dtype: int }
+  - { stype: Boolean, sval: new Boolean(), dtype: string }
+  - { stype: string, sval: '"true"', dtype: Boolean }
+
+  - { stype: Serializable, val: 'new Boolean[1]', dtype: 'Boolean' }
+  - { stype: Serializable, val: 'new Boolean[1]', dtype: 'Int[]' }
+  - { stype: Serializable, val: 'new Boolean[1]', dtype: 'Boolean[][]' }
+  - { stype: Cloneable, val: 'new Char[1]', dtype: 'Char' }
+  - { stype: Cloneable, val: 'new Char[1]', dtype: 'Boolean[]' }
+  - { stype: Cloneable, val: 'new Char[1]', dtype: 'Char[][]' }
+
+  - defs: |-
+      class A {}
+      final class B extends A {}
+      final class C extends A {}
+    stype: B
+    sval: new B()
+    dtype: C
+
+  - defs: |-
+      interface I {}
+      interface J extends I {}
+      interface K extends I {}
+      final class B implements J {}
+      final class C implements K {}
+    stype: B
+    sval: new B()
+    dtype: C
+
+  - defs: |-
+      interface I {}
+      interface J extends I {}
+      interface K extends I {}
+      final class B implements J {}
+      final class C implements K {}
+    stype: J
+    sval: new B()
+    dtype: K
+
+  - defs: |-
+      final class A {}
+      final class B {}
+    stype: B[]
+    sval: new B[1]
+    dtype: A[]
+
+  - defs: |-
+      type func = (a: int, b: int) => int;
+    stype: func
+    sval: '(a: int, b: int): int => { return a + b; }'
+    dtype: int
+
+  - defs: |-
+      type func = (a: int, b: int) => Int;
+      function foo(a: int, b: int): Int {
+        return new Int(a + b);
+      }
+    stype: Int
+    sval: foo(1, 2)
+    dtype: func
+
+  - defs: |-
+      type func = (a: int, b: int) => Int;
+      function foo(a: int, b: int): Int {
+        return new Int(a + b);
+      }
+    stype: func
+    sval: foo
+    dtype: Object[]
+
+  - defs: |-
+      type funcA = (a: int) => int;
+      type funcB = (a: int, b: int) => int;
+    stype: funcA[]
+    sval: new funcA[10]
+    dtype: funcB[]
+
+  - defs: |-
+      class A<T> {}
+    stype: A<Int>
+    sval: new A<Int>()
+    dtype: A<Long>
+
+  - defs: |-
+      class X {}
+      class Y extends X {}
+      class Box<T> {}
+    stype: Box<Y>
+    sval: new Box<Y>()
+    dtype: Box<X>
+
+  - defs: |-
+      class X {}
+      class Y extends X {}
+      class Box<T> {}
+    stype: Box<X>
+    sval: new Box<X>()
+    dtype: Box<Y>
+
+  - defs: |-
+      class X {}
+      class Y extends X {}
+      class Box<in T> {}
+    stype: Box<Y>
+    sval: new Box<Y>()
+    dtype: Box<X>
+
+  - defs: |-
+      class X {}
+      class Y extends X {}
+      class Box<out T> {}
+    stype: Box<X>
+    sval: new Box<X>()
+    dtype: Box<Y>

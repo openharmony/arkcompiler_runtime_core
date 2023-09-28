@@ -1,0 +1,15 @@
+---
+cases:
+  - expr: "1 = 0"
+  - expr: |-
+      let x = "abc"
+      "abc" = x
+  - expr: "let x: int = 12 += 13"
+  - expr: "let x: Object = new Object() = new Long()"
+  - expr: "let x: Object = [1, 2, 3] += 4"
+  - expr: "let x: Object = { a: 1, b: 2 } = { c: 3 }"
+  - expr: "(new Object()).hashCode() = 123"
+  - expr: |-
+      const x: int = 1
+      x = 2
+  - expr: "let x: null = new Object()"

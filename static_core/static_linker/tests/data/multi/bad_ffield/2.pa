@@ -1,0 +1,11 @@
+.record panda.String <external>
+
+.record Foo.Bar {
+	panda.String name2
+}
+
+.function void Foo.Bar.do(Foo.Bar a0) {
+	lda.str "ok\n"
+	stobj.obj a0, Foo.Bar.name2
+	return.void
+}

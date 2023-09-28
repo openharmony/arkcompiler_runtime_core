@@ -1,0 +1,18 @@
+---
+cases:
+  - { dtype: byte }
+  - { dtype: char }
+  - { dtype: short }
+  - { dtype: int }
+  - { dtype: long }
+  - { dtype: float }
+  - { dtype: double }
+  - { dtype: boolean }
+  - { dtype: Byte }
+  - { dtype: Char }
+  - { dtype: Short }
+  - { dtype: Int }
+  - { dtype: Long }
+  - { dtype: Float }
+  - { dtype: Double }
+  - { dtype: Boolean }

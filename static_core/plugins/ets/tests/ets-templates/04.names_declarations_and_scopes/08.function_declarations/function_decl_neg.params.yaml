@@ -1,0 +1,25 @@
+--- # List of invalid function declarations
+function_decls:
+    # missing return type
+    - { decl: 'function f(): {}', call: 'f();' }
+
+    # missing name
+    - { decl: 'let f = function (): void {}', call: 'f();' }
+    - { decl: 'function (): void {}', call: '' }
+
+    # keyword as name
+    - { decl: 'function import() {}', call: '' }
+    - { decl: 'function case(): number { return 0.0 }', call: '' }
+
+    # missing parameters
+    - { decl: 'function f: void {}', call: 'f();' }
+    - { decl: 'function f(: void {}', call: 'f();' }
+    - { decl: 'function f): void {}', call: 'f();' }
+
+    # missing colon
+    - { decl: 'function f() void {}', call: 'f();' }
+
+    # missing body
+    - { decl: 'function f(): void', call: 'f();' }
+    - { decl: 'function f(): void {', call: 'f();' }
+    - { decl: 'function f(): void }', call: 'f();' }

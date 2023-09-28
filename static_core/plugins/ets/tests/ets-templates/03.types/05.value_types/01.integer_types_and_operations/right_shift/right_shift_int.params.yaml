@@ -1,0 +1,21 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 0, right: 31, result: 0 }
+- { left: 1, right: 1, result: 0 }
+- { left: 1, right: 31, result: 0 }
+- { left: -1, right: 1, result: -1 }
+- { left: -1, right: 31, result: -1 }
+- { left: Int.MIN_VALUE, right: 1, result: -1073741824 }
+- { left: Int.MIN_VALUE, right: 31, result: -1 }
+- { left: Int.MAX_VALUE, right: 1, result: 0x3fffffff }
+- { left: Int.MAX_VALUE, right: 30, result: 1 }
+- { left: Int.MAX_VALUE, right: 31, result: 0 }
+- { left: 0x3ffffff, right: 2, result: 0x00ffffff }
+- { left: 1, right: 0, result: 1 }
+- { left: -1, right: 0, result: -1 }
+- { left: 42, right: 0, result: 42 }
+- { left: 1, right: -1, result: 0 }
+- { left: -1, right: -1, result: -1 }
+- { left: -1, right: -2, result: -1 }
+

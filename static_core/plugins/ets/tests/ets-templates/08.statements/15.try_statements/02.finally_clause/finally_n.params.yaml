@@ -1,0 +1,35 @@
+---
+cases:
+    - use: |-
+        try {
+            if (t1 == t2) throw new Ex()
+            return 1;
+        } catch (e: Ex) {
+            return 1;
+        } finally {  // not the last block
+            return 0;
+        } catch (e) {
+            return 1;
+        }
+
+    - use: |-
+        try {
+            if (t1 == t2) throw new Ex()
+            return 1;
+        } catch (e: Ex) {
+            return 1;
+        } catch (e) {
+            return 1;
+        } finally {
+            return 0;
+        } finally {
+            return 0;  // another finally block
+        }
+
+    - use: |-
+        try {
+            if (t1 == t2) throw new Ex()
+            return 1;
+        } finally
+            // not a block
+            return 0;

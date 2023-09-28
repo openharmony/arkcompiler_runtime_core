@@ -1,0 +1,5 @@
+---
+cases:
+  - { type: String, val: '""', call: "foo<String>(v)", res: 1 }
+  - { type: String, val: '""', call: "foo<String, String>(v, v)", res: 2 }
+  - { type: String, val: '""', call: "foo<String, String, String>(v, v, v)", res: 3 }

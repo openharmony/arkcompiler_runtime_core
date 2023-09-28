@@ -1,0 +1,17 @@
+--- # All possible qualified names
+qualified_name:
+  - new test.Clazz() instanceof test.Clazz;
+  - new test.Clazz() instanceof Clazz;
+
+  - test.instance instanceof test.Clazz;
+  - test.instance instanceof Clazz;
+
+  - Clazz.staticField == 1;
+  - Clazz.staticMethod() == 2;
+  - test.Clazz.staticField == 1;
+  - test.Clazz.staticMethod() == 2;
+
+  - instance.field == 3;
+  - instance.method() == 4;
+  - test.instance.field == 3;
+  - test.instance.method() == 4;

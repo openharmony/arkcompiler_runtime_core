@@ -1,0 +1,14 @@
+---
+function_decls:
+    - decl: |-
+          function foo(): string;
+          function foo(a: string): string;
+          function foo(a: string, b: string): string;
+          function foo(a?: string, b?:string): string {
+              return ">>>" + a + b;
+          }
+      call: |-
+          assert foo() == ">>>undefinedundefined";
+          assert foo("X") == ">>>Xundefined"
+          assert foo("A", "B") == ">>>AB"
+

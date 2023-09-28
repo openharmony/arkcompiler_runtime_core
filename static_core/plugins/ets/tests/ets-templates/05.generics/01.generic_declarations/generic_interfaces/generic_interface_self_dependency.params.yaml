@@ -1,0 +1,9 @@
+--- # Self dependency tests
+self_dependency:
+  - T extends T
+  - U<T extends T>
+  - U<W<T extends T>>
+  - U<U<T extends T>>
+  - T extends U, U extends T
+  - T extends U, U extends W, W extends T
+

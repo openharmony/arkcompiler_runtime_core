@@ -1,0 +1,46 @@
+/**
+ * fills arr in-place by specified value with respect to passed indexes
+ *
+ * @param arr source array to be filled
+ *
+ * @param value a value to fill arr with
+ *
+ * @param startIndex index of arr to start from
+ *
+ * @param endIndex last index of arr, exclusive, i.e. arr[endIndex] is not changed
+ *
+ * @example: fill all content of arr with value
+ * ```
+ * fill(arr, value, 0, arr.length)
+ * ```
+ */
+export function fill(arr: {{T}}[], value: {{T}}, startIndex: int, endIndex: int): void throws {
+    if (!checkRange(arr.length, startIndex, endIndex)){
+        throw new ArrayIndexOutOfBoundsException("fill: bounds verification failed")
+    }
+
+    for (let i: int = startIndex; i < endIndex; i++) {
+        arr[i] = value;
+    }
+}
+
+/**
+ * fills arr in-place by specified value
+ *
+ * @param arr source array to be filled
+ *
+ * @param value a value to fill arr with
+ *
+ * @example: fill all content of arr with value
+ * ```
+ * fill(arr, value)
+ * ```
+ */
+export function fill(arr: {{T}}[], value: {{T}}): void {
+    try {
+        fill(arr, value, 0, arr.length);
+    } catch (e) {
+        // TODO(ivan-tyulyandin): code below is an overcheck, but will be helpful in case of strange exceptions
+        assert false : "fill: should be unreacheable since indicies have to be correct by design, " + e.toString()
+    }
+}

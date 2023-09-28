@@ -1,0 +1,122 @@
+---
+cases:
+    - use: |-
+          if (ct())
+              return retcode("T");
+          else
+              return i;
+
+    - use: |-
+          if (((ct() && ct() && ct())))
+              return retcode("TTT");
+          else
+              return i;
+
+    - use: |-
+          if (cf())
+              {}
+          else
+              return retcode("F");
+          return 1;
+
+    - use: |-
+          if (cf())
+              ;
+          else
+              return retcode("F");
+          return 1;
+
+    - use: |-
+          if (cf())
+              {}
+          else
+              ;
+          return 0;
+
+    - use: |-
+          if (cf())
+              if (ct())
+                  return j;
+              else
+                  return i;
+          else
+              return retcode("F");
+
+    - use: |-
+          if (cf() && ct()) {
+            if (ct())
+                return i;
+            }
+          else
+              if (ct())
+                  return retcode("FT");
+              else
+                  return j;
+          return 1;
+
+    - use: |-
+          if (cf() || ct())
+              if (ct())
+                  return retcode("FTT");
+              else
+                  return i;
+          return j;
+
+    - use: |-
+          if (cf()) {
+              if (ct())
+                  return i;
+          }
+          else
+              return retcode("F")
+          return i;
+
+    - use: |-
+          if (ct())
+              if (ct())
+                  if (ct())
+                      if (ct())
+                          if (cf())
+                              return i;
+                          else
+                              return retcode("TTTTF");
+                      else
+                          return j;
+                  else
+                      return i;
+              else
+                  return i;
+          else
+              return j;
+
+    - use: |-
+          if (cf())
+              return i;
+          else
+              if (cf())
+                  return j;
+              else
+                  if (cf())
+                      return i;
+                  else
+                      if (cf())
+                          return j;
+                      else
+                          return retcode("FFFF");
+
+    - use: |-
+          if (ct())
+              return retcode("T");
+          else
+              {}
+          return 1;
+
+    - use: |-
+          if (cf())
+              return i;
+          else {
+              if (cf())
+                  return j;
+              else
+                  return retcode("FF")
+          }

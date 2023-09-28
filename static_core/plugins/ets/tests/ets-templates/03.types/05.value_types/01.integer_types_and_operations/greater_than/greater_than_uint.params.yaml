@@ -1,0 +1,11 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: "false" }
+- { left: 0, right: 1, result: "false" }
+- { left: 1, right: 0, result: "true" }
+- { left: UInt.MAX_VALUE, right: 0, result: "true" }
+- { left: UInt.MAX_VALUE, right: 41234567, result: "true" }
+- { left: UInt.MAX_VALUE, right: UInt.MIN_VALUE, result: "true" }
+- { left: UInt.MAX_VALUE, right: UInt.MAX_VALUE, result: "false" }
+- { left: 2134567890, right: 2134567890, result: "false" }
+

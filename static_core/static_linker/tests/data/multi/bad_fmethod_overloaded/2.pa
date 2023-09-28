@@ -1,0 +1,8 @@
+.record IO <external>
+.record panda.String <external>
+.function void IO.printString(panda.String a0) <external>
+
+.function void print(panda.String a0, i32 a1) {
+	call.short IO.printString, a0
+	return.void
+}

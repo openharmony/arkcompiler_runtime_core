@@ -1,0 +1,47 @@
+---
+cases:
+  - { type: long, expr: Long.MAX_VALUE, op: '!=' }
+  - { type: float, expr: Float.POSITIVE_INFINITY, op: '!=' }
+  - { type: '(a: Boolean) => Object[]', expr: '(a: Boolean): Object[] => { return [a]; }', op: '!==' }
+  - { type: 'String?', expr: 'null', op: '!==' }
+  - { type: 'ClassNotFoundException[]', expr: 'new ClassNotFoundException[100]', op: '!==' }
+  - { type: '((a: Promise): Object)[]?', expr: '[]', op: '!==' }
+  - { type: 'Double?[][]', expr: 'new Double[1][]', op: '!==' }
+
+  - defs: |-
+      interface I {}
+      class A implements I {}
+    type: I
+    expr: new A()
+    op: '!=='
+
+  - defs: |-
+      enum Color {Red, Green, Blue}
+    type: Color
+    expr: Color.Red
+    op: '!=='
+
+  - defs: |-
+      class A {}
+      class B<A> {}
+    type: B<A>
+    expr: new B<A>()
+    op: '!=='
+
+  - defs: |-
+      class A {}
+      class B<T extends A> {}
+    type: B<A>
+    expr: new B<A>()
+    op: '!=='
+
+  - defs: |-
+      interface I {}
+      interface J {}
+      class A {}
+      class B {}
+      class C implements I, J {}
+      class Klazz<in T, out U, V extends I & J> {}
+    type: Klazz<A, B, C>
+    expr: new Klazz<A, B, C>()
+    op: '!=='

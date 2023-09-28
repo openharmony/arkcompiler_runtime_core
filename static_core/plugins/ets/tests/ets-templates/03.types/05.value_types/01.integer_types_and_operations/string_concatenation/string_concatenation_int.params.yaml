@@ -1,0 +1,23 @@
+--- # list of values
+values:
+- left: "int = 2139093645"
+  right: >-
+    String = "str"
+  result: >-
+    "2139093645str"
+- left: >-
+    String = "str"
+  right: "int = 2139093645"
+  result: >-
+    "str2139093645"
+- left: "int = -2139093645"
+  right: >-
+    String = "str"
+  result: >-
+    "-2139093645str"
+- left: >-
+    String = "str"
+  right: "int = -42"
+  result: >-
+    "str-42"
+

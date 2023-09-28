@@ -1,0 +1,423 @@
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_nature: array,
+    result_type: "boolean[]",
+    method_signature: { arr: "boolean[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "boolean_array", second: "boolean_array"},
+    method_throws: "true",
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]",
+            startIndex: 0,
+            endIndex: 3,
+          },
+        test2:
+          {
+            arr: "[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]",
+            startIndex: 13,
+            endIndex: 15,
+          },
+        test3:
+          {
+            arr: "[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]",
+            startIndex: 2,
+            endIndex: 5,
+          },
+        test4:
+          {
+            arr: "[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]",
+            startIndex: 0,
+            endIndex: arr.length,
+          },
+        test5:
+          {
+            arr: "[true, false, true, false, true, false, true, false, true, false, true, false, true, false]",
+            startIndex: 0,
+            endIndex: arr.length,
+          },
+        test6:
+          {
+            arr: "[]",
+            startIndex: 0,
+            endIndex: arr.length
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[true, true, true]",
+        test2: "[true, true]",
+        test3: "[true, true, true]",
+        test4: "[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]",
+        test5: "[true, false, true, false, true, false, true, false, true, false, true, false, true, false]",
+        test6: "[]"
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_nature: array,
+    result_type: "byte[]",
+    method_signature:  { arr: "byte[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "byte_array", second: "byte_array"},
+    method_throws: "true",
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: 3,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 10,
+            endIndex: 15,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 5,
+          },
+        test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: arr.length,
+          },
+        test5:
+          {
+            arr: "[]",
+            startIndex: 0,
+            endIndex: arr.length
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[0, 1, 2]",
+        test2: "[10, 11, 12, 13, 14]",
+        test3: "[2, 3, 4]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test5: "[]"
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_nature: array,
+    result_type: "short[]",
+    method_signature:  { arr: "short[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "short_array", second: "short_array"},
+    method_throws: "true",
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: 3,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 10,
+            endIndex: 15,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 5,
+          },
+        test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: arr.length,
+          },
+        test5:
+          {
+            arr: "[]",
+            startIndex: 0,
+            endIndex: arr.length
+          },
+      },
+    method_expected_data:
+     {
+        test1: "[0, 1, 2]",
+        test2: "[10, 11, 12, 13, 14]",
+        test3: "[2, 3, 4]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test5: "[]"
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_nature: array,
+    result_type: "int[]",
+    method_signature: { arr: "int[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "int_array", second: "int_array"},
+    method_throws: "true",
+    method_test_index_data:
+        {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: 3,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 10,
+            endIndex: 15,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 5,
+          },
+        test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: arr.length,
+          },
+        test5:
+          {
+            arr: "[]",
+            startIndex: 0,
+            endIndex: arr.length
+          },
+      },
+    method_expected_data:
+       {
+        test1: "[0, 1, 2]",
+        test2: "[10, 11, 12, 13, 14]",
+        test3: "[2, 3, 4]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test5: "[]"
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_nature: array,
+    result_type: "long[]",
+    method_signature: { arr: "long[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "long_array", second: "long_array"},
+    method_throws: "true",
+    method_test_index_data:
+        {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: 3,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 10,
+            endIndex: 15,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 5,
+          },
+        test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: arr.length,
+          },
+        test5:
+          {
+            arr: "[]",
+            startIndex: 0,
+            endIndex: arr.length
+          },
+      },
+    method_expected_data:
+       {
+        test1: "[0, 1, 2]",
+        test2: "[10, 11, 12, 13, 14]",
+        test3: "[2, 3, 4]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test5: "[]"
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_nature: array,
+    result_type: "float[]",
+    method_signature:{ arr: "float[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "float_array", second: "float_array"},
+    method_throws: "true",
+    method_test_index_data:
+         {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: 3,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 10,
+            endIndex: 15,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 5,
+          },
+        test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: arr.length,
+          },
+        test5:
+          {
+            arr: "[0.1, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.77, 8.88, 9.99, 10.10101, 11.11111, 12.1212, 13.1313, 14.1414, 15.1515]",
+            startIndex: 0,
+            endIndex: arr.length,
+          },
+        test6:
+          {
+            arr: "[]",
+            startIndex: 0,
+            endIndex: arr.length
+          },
+      },
+    method_expected_data:
+     {
+        test1: "[0, 1, 2]",
+        test2: "[10, 11, 12, 13, 14]",
+        test3: "[2, 3, 4]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test5: "[0.1, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.77, 8.88, 9.99, 10.10101, 11.11111, 12.1212, 13.1313, 14.1414, 15.1515]",
+        test6: "[]"
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_nature: array,
+    result_type: "double[]",
+    method_signature: { arr: "double[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "double_array", second: "double_array"},
+    method_throws: "true",
+    method_test_index_data:
+         {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: 3,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 10,
+            endIndex: 15,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 5,
+          },
+        test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: arr.length,
+          },
+        test5:
+          {
+            arr: "[0.1, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.77, 8.88, 9.99, 10.10101, 11.11111, 12.1212, 13.1313, 14.1414, 15.1515]",
+            startIndex: 0,
+            endIndex: arr.length,
+          },
+        test6:
+          {
+            arr: "[]",
+            startIndex: 0,
+            endIndex: arr.length
+          },
+      },
+    method_expected_data:
+     {
+        test1: "[0, 1, 2]",
+        test2: "[10, 11, 12, 13, 14]",
+        test3: "[2, 3, 4]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test5: "[0.1, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.77, 8.88, 9.99, 10.10101, 11.11111, 12.1212, 13.1313, 14.1414, 15.1515]",
+        test6: "[]"
+      },
+  }
+- {
+    method_name: copyOf,
+    method_nature: function,
+    result_nature: array,
+    result_type: "char[]",
+    method_signature:  { arr: "char[]", startIndex: int, endIndex: int },
+    method_signature_desc: {first: "char_array", second: "char_array"},
+    method_throws: "true",
+    method_test_index_data:
+         {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: 3,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 10,
+            endIndex: 15,
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 2,
+            endIndex: 5,
+          },
+        test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            startIndex: 0,
+            endIndex: arr.length,
+          },
+        test5:
+          {
+            arr: "[]",
+            startIndex: 0,
+            endIndex: arr.length
+          },
+      },
+    method_expected_data:
+     {
+        test1: "[0, 1, 2]",
+        test2: "[10, 11, 12, 13, 14]",
+        test3: "[2, 3, 4]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test5: "[]"
+      },
+  }
+
+

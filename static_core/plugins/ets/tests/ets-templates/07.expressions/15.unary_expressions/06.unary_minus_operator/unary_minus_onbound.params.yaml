@@ -1,0 +1,7 @@
+--- # List of valid on-bound integer unary tests
+unary_minus_onbound:
+  - {type: byte,  origin:                    -127, dest:                    127}
+  - {type: short, origin:                  -32767, dest:                  32767}
+  - {type: int,   origin:             -2147483647, dest:             2147483647}
+  - {type: long,  origin: -9223372036854775807, dest: 9223372036854775807}
+

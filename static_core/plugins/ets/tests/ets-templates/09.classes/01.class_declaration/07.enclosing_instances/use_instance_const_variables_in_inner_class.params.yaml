@@ -1,0 +1,5 @@
+--- # List of valid class members
+class_members:
+  - {decl: "x: int = 5", call: "let y = x"}
+  - {decl: "x: int = 5", call: "foo(x)"}
+

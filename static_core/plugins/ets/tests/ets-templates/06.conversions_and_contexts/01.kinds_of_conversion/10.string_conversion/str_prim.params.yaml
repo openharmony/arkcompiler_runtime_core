@@ -1,0 +1,10 @@
+---
+cases:
+  - types:
+      - { type: byte, val: -123 }
+      - { type: short, val: -123 }
+      - { type: char, val: "c'X'" }
+      - { type: int, val: -123 }
+      - { type: long, val: -123 }
+      - { type: float, val: -123.0 }
+      - { type: double, val: -123.0 }

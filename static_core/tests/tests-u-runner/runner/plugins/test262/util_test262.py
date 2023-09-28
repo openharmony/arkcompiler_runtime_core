@@ -1,0 +1,162 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import logging
+import re
+from glob import glob
+from os import path, getenv, makedirs
+from typing import Optional, Tuple
+
+from runner.descriptor import Descriptor
+from runner.logger import Log
+from runner.options.config import Config
+from runner.utils import generate, wrap_with_function
+from runner.plugins.work_dir import WorkDir
+
+TEST262_URL = "TEST262_URL"
+TEST262_REVISION = "TEST262_REVISION"
+
+_LOGGER = logging.getLogger("runner.plugins.test262.util_test262")
+
+
+class UtilTest262:
+    def __init__(self, config: Config, work_dir: WorkDir):
+        self.async_ok = re.compile(r"Test262:AsyncTestComplete")
+        self.force_download = config.general.force_download
+        self.jit = config.ark.jit.enable
+        self.jit_preheat_repeats = config.ark.jit.num_repeats
+        self.show_progress = config.general.show_progress
+        self.work_dir = work_dir
+        self.test262_url: Optional[str] = getenv(TEST262_URL)
+        self.test262_revision: Optional[str] = getenv(TEST262_REVISION)
+        if self.test262_url is None:
+            Log.exception_and_raise(_LOGGER, f"No {TEST262_URL} environment variable set", EnvironmentError)
+        if self.test262_revision is None:
+            Log.exception_and_raise(_LOGGER, f"No {TEST262_REVISION} environment variable set", EnvironmentError)
+
+    def generate(self, harness_path):
+        stamp_name = f"test262-{self.test262_revision}"
+        if self.jit and self.jit_preheat_repeats > 1:
+            stamp_name += f"-jit-{self.jit_preheat_repeats}"
+        assert self.test262_url is not None
+        assert self.test262_revision is not None
+        return generate(
+            name="test262",
+            stamp_name=stamp_name,
+            url=self.test262_url,
+            revision=self.test262_revision,
+            generated_root=self.work_dir.gen,
+            test_subdir="test",
+            show_progress=self.show_progress,
+            process_copy=lambda src, dst: self.prepare_tests(src, dst, harness_path, path.dirname(src)),
+            force_download=self.force_download
+        )
+
+    def prepare_tests(self, src_path, dest_path, harness_path, test262_path) -> None:
+        glob_expression = path.join(src_path, "**/*.js")
+        files = glob(glob_expression, recursive=True)
+        files = [file for file in files if not file.endswith("FIXTURE.js")]
+
+        with open(harness_path, 'r', encoding="utf-8") as file_handler:
+            harness = file_handler.read()
+
+        harness = harness.replace('$SOURCE', f'`{harness}`')
+
+        for src_file in files:
+            dest_file = src_file.replace(src_path, dest_path)
+            makedirs(path.dirname(dest_file), exist_ok=True)
+            self.create_file(src_file, dest_file, harness, test262_path)
+
+    def create_file(self, input_file, output_file, harness, test262_dir):
+        descriptor = Descriptor(input_file)
+        desc = UtilTest262.process_descriptor(descriptor)
+
+        out_str = descriptor.get_header()
+        out_str += "\n"
+        out_str += harness
+
+        for include in desc['includes']:
+            out_str += f"//------------ {include} start ------------\n"
+            include_file = path.join(test262_dir, 'harness', include)
+            with open(include_file, 'r', encoding="utf-8") as file_handler:
+                harness_str = file_handler.read()
+            out_str += harness_str
+            out_str += f"//------------ {include} end ------------\n"
+            out_str += "\n"
+
+        if self.jit and self.jit_preheat_repeats > 1:
+            out_str += wrap_with_function(descriptor.get_content(), self.jit_preheat_repeats)
+        else:
+            out_str += descriptor.get_content()
+
+        with open(output_file, 'w', encoding="utf-8") as output:
+            output.write(out_str)
+
+    @staticmethod
+    def process_descriptor(descriptor: Descriptor):
+        desc = descriptor.parse_descriptor()
+
+        includes = []
+
+        if "includes" in desc:
+            includes.extend(desc["includes"])
+            includes.extend(['assert.js', 'sta.js'])
+
+        if 'flags' in desc and 'async' in desc["flags"]:
+            includes.extend(['doneprintHandle.js'])
+
+        negative_phase = desc["negative_phase"] if 'negative_phase' in desc else 'pass'
+        negative_type = desc["negative_type"] if 'negative_type' in desc else ''
+
+        # negative_phase: pass, parse, resolution, runtime
+        return {
+            'flags': desc["flags"] if 'flags' in desc else [],
+            'negative_phase': negative_phase,
+            'negative_type': negative_type,
+            'includes': includes,
+        }
+
+    @staticmethod
+    def validate_parse_result(return_code, _, desc, out) -> Tuple[bool, bool]:
+        is_negative = (desc['negative_phase'] == 'parse')
+
+        if return_code == 0:  # passed
+            if is_negative:
+                return False, False  # negative test passed
+
+            return True, True  # positive test passed
+
+        if return_code == 1:  # failed
+            return is_negative and (desc['negative_type'] in out), False
+
+        return False, False  # abnormal
+
+    def validate_runtime_result(self, return_code, std_err, desc, out) -> bool:
+        is_negative = (desc['negative_phase'] == 'runtime') or \
+                      (desc['negative_phase'] == 'resolution')
+
+        if return_code == 0:  # passed
+            if is_negative:
+                return False  # negative test passed
+
+            passed = (len(std_err) == 0)
+            if 'async' in desc['flags']:
+                passed = passed and bool(self.async_ok.match(out))
+            return passed  # positive test passed?
+
+        if return_code == 1:  # failed
+            return is_negative and bool(desc['negative_type'] in std_err)
+
+        return False  # abnormal

@@ -1,0 +1,12 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: "true" }
+- { left: 0, right: 1, result: "false" }
+- { left: 1, right: 0, result: "true" }
+- { left: 1, right: 1, result: "true" }
+- { left: "UByte.MAX_VALUE as ubyte", right: 0, result: "true" }
+- { left: "UByte.MAX_VALUE as ubyte", right: 244, result: "true" }
+- { left: "UByte.MAX_VALUE as ubyte", right: "UByte.MAX_VALUE as ubyte", result: "true" }
+- { left: "UByte.MAX_VALUE as ubyte", right: "UByte.MIN_VALUE as ubyte", result: "true" }
+- { left: 242, right: 242, result: "true" }
+

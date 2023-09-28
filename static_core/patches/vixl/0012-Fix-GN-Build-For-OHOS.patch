@@ -1,0 +1,70 @@
+From 8085c69a7a6dbc156da94bc3a772c3f7fae56bfe Mon Sep 17 00:00:00 2001
+From: Artem Udovichenko <artem.udovichenko@example.com>
+Date: Tue, 12 Sep 2023 15:35:38 +0300
+Subject: [PATCH] Fix OHOS build
+
+---
+ BUILD.gn | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/BUILD.gn b/BUILD.gn
+index 30b2091..741d55d 100644
+--- a/BUILD.gn
++++ b/BUILD.gn
+@@ -39,10 +39,10 @@ config("vixl_public_config") {
+     "$ark_third_party_root/vixl",
+     "$ark_third_party_root/vixl/src",
+   ]
+-  if (current_cpu == "arm") {
++  if (target_cpu == "arm") {
+     include_dirs += [ "$ark_third_party_root/vixl/src/aarch32" ]
+-  } else if (current_cpu == "arm64" || current_cpu == "amd64" ||
+-             current_cpu == "x64" || current_cpu == "x86_64") {
++  } else if (target_cpu == "arm64" || target_cpu == "amd64" ||
++             target_cpu == "x64" || target_cpu == "x86_64") {
+     include_dirs += [ "$ark_third_party_root/vixl/src/aarch64" ]
+   }
+ }
+@@ -55,7 +55,7 @@ ohos_static_library("libvixl") {
+     "src/utils-vixl.cc",
+   ]
+ 
+-  if (current_cpu == "arm") {
++  if (target_cpu == "arm") {
+     sources += [
+       "src/aarch32/assembler-aarch32.cc",
+       "src/aarch32/constants-aarch32.cc",
+@@ -66,8 +66,8 @@ ohos_static_library("libvixl") {
+       "src/aarch32/operands-aarch32.cc",
+     ]
+     cflags_cc = [ "-DVIXL_INCLUDE_TARGET_A32" ]
+-  } else if (current_cpu == "arm64" || current_cpu == "amd64" ||
+-             current_cpu == "x64" || current_cpu == "x86_64") {
++  } else if (target_cpu == "arm64" || target_cpu == "amd64" ||
++             target_cpu == "x64" || target_cpu == "x86_64") {
+     sources += [
+       "src/aarch64/assembler-aarch64.cc",
+       "src/aarch64/assembler-sve-aarch64.cc",
+@@ -123,7 +123,7 @@ ohos_static_library("libvixl_frontend_static") {
+     "src/utils-vixl.cc",
+   ]
+ 
+-  if (current_cpu == "arm") {
++  if (target_cpu == "arm") {
+     sources += [
+       "src/aarch32/assembler-aarch32.cc",
+       "src/aarch32/constants-aarch32.cc",
+@@ -134,8 +134,8 @@ ohos_static_library("libvixl_frontend_static") {
+       "src/aarch32/operands-aarch32.cc",
+     ]
+     cflags_cc = [ "-DVIXL_INCLUDE_TARGET_A32" ]
+-  } else if (current_cpu == "arm64" || current_cpu == "amd64" ||
+-             current_cpu == "x64" || current_cpu == "x86_64") {
++  } else if (target_cpu == "arm64" || target_cpu == "amd64" ||
++             target_cpu == "x64" || target_cpu == "x86_64") {
+     sources += [
+       "src/aarch64/assembler-aarch64.cc",
+       "src/aarch64/cpu-aarch64.cc",
+-- 
+2.25.1
+

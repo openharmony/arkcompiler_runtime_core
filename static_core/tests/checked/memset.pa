@@ -1,0 +1,21 @@
+#! CHECKER        Memset
+#! RUN_LLVM       options: ""
+#! EVENT          "Paoc,Trying to compile method: _GLOBAL::main"
+#! EVENT          "Paoc,Lowering @llvm.memset"
+#! EVENT          "Paoc,Compiling _GLOBAL::main using llvm"
+
+.function i32[] main(){
+    movi v0, 4096
+    newarr v1, v0, i32[]
+    movi v2, 0
+    ldai 0
+loop:
+    ldai 4294967295
+    starr v1, v2
+    inci v2, 1
+    lda v2
+    jne v0, loop
+
+    lda.obj v1
+    return.obj
+}

@@ -1,0 +1,6 @@
+--- # List of valid method modifiers
+modifiers:
+  - "abstract"
+  - "override"
+  - "open"
+  - "synchronized"

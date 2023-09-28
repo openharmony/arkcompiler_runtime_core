@@ -1,0 +1,16 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 0, right: 63, result: 0 }
+- { left: 1, right: 1, result: 0 }
+- { left: 1, right: 63, result: 0 }
+- { left: ULong.MIN_VALUE, right: 1, result: 0 }
+- { left: ULong.MIN_VALUE, right: 31, result: 0 }
+- { left: ULong.MAX_VALUE, right: 1, result: '0x7fffffffffffffff' }
+- { left: ULong.MAX_VALUE, right: 30, result: 1 }
+- { left: ULong.MAX_VALUE, right: 31, result: 0 }
+- { left: '0x7fffffffffffffff', right: 2, result: '0x1fffffffffffffff' }
+- { left: 1, right: 0, result: 1 }
+- { left: 42, right: 0, result: 42 }
+- { left: 1, right: -1, result: 0 }
+

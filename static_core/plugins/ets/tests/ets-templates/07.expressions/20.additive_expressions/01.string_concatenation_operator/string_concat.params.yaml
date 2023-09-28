@@ -1,0 +1,8 @@
+--- # List of string concatenation operation tests
+string_concat:
+  - {x: '""', y: '""', result: '""'}
+  - {x: '""', y: '"a"', result: '"a"'}
+  - {x: '"a"', y: '""', result: '"a"'}
+  - {x: '"a"', y: '"a"', result: '"aa"'}
+  - {x: '"aaa"', y: '"AAA"', result: '"aaaAAA"'}
+  - {x: '"фыва"', y: '"ФЫВА"', result: '"фываФЫВА"'} # Text in Russian

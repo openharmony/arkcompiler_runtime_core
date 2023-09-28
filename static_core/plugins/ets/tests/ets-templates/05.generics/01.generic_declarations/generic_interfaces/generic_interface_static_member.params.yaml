@@ -1,0 +1,6 @@
+--- # Interfaces with static members and type parameters inside
+static_members_with_type_param:
+  - "static foo(): X"
+  - "static foo(): void {let x:X;}"
+  - "static inner class InnerC {innerVar: X}"
+

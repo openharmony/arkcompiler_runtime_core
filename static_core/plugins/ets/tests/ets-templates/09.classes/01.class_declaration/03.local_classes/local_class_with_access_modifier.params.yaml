@@ -1,0 +1,5 @@
+--- # List of access modifiers
+access_modifiers:
+  - public
+  - protected
+  - private

@@ -1,0 +1,15 @@
+--- # A list of top level declarations
+topLevelDeclarations:
+  - class Point {}
+  - interface A {}
+  - enum Enum { v1, v2 }
+  # Variable declarations
+  - let origin = 1;
+  - "let i: int = 1;"
+  - "let b: byte;"
+  # Constant declarations
+  - const b = 1;
+  - "const s = \"str\";"
+  - "const a: int = 1;"
+  # Function declarations
+  - "function Dist(x: int, y: int): void {}"

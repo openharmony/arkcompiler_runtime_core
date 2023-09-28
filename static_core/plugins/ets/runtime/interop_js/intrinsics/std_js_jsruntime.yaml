@@ -1,0 +1,601 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+coretypes:
+- managed_class: std.core.Object
+  mirror_class: panda::ets::EtsObject
+
+- managed_class: std.core.void
+  mirror_class: panda::ets::EtsVoid
+
+- managed_class: std.core.String
+  mirror_class: panda::ets::EtsString
+
+- managed_class: std.interop.js.JSValue
+  mirror_class: panda::ets::interop::js::JSValue
+
+
+intrinsics_namespace: panda::ets::interop::js::intrinsics
+
+
+####################
+# std.js.JSRuntime #
+####################
+intrinsics:
+  - name: JSRuntimeFinalizationQueueCallback
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: finalizationQueueCallback
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.Object ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeFinalizationQueueCallbackIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeNewJSValueDouble
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: newJSValueDouble
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ f64 ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeNewJSValueDoubleIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeNewJSValueString
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: newJSValueString
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ std.core.String ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeNewJSValueStringIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeGetValueDouble
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getValueDouble
+    static: true
+    signature:
+      ret: f64
+      args: [ std.interop.js.JSValue ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetValueDoubleIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeGetValueBoolean
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getValueBoolean
+    static: true
+    signature:
+      ret: u1
+      args: [ std.interop.js.JSValue ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetValueBooleanIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeGetValueString
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getValueString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.interop.js.JSValue ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetValueStringIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeGetPropertyJSValue
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getPropertyJSValue
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ std.interop.js.JSValue, std.core.String ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetPropertyJSValueIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeGetPropertyDouble
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getPropertyDouble
+    static: true
+    signature:
+      ret: f64
+      args: [ std.interop.js.JSValue, std.core.String ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetPropertyDoubleIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeGetPropertyString
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getPropertyString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.interop.js.JSValue, std.core.String ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetPropertyStringIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeSetPropertyJSValue
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: setPropertyJSValue
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.interop.js.JSValue, std.core.String, std.interop.js.JSValue ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeSetPropertyJSValueIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeSetPropertyDouble
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: setPropertyDouble
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.interop.js.JSValue, std.core.String, f64 ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeSetPropertyDoubleIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeSetPropertyString
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: setPropertyString
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.interop.js.JSValue, std.core.String, std.core.String ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeSetPropertyStringIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeGetUndefined
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getUndefined
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetUndefinedIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeGetNull
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getNull
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetNullIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeGetGlobal
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getGlobal
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetGlobalIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeCreateObject
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: createObject
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeCreateObjectIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeInstanceOf
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: instanceOf
+    static: true
+    signature:
+      ret: u1
+      args: [ std.interop.js.JSValue, std.interop.js.JSValue ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeInstanceOfIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeInitJSCallClass
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: __initJSCallClass
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.String ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeInitJSCallClassIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeInitJSNewClass
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: __initJSNewClass
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.String ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeInitJSNewClassIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeCreateLambdaProxy
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: __createLambdaProxy
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ std.core.Object ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeCreateLambdaProxyIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeLoadModule
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: loadModule
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ std.core.String ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeLoadModuleIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeStrictEqual
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: strictEqual
+    static: true
+    signature:
+      ret: u1
+      args: [ std.interop.js.JSValue, std.interop.js.JSValue ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeStrictEqualIntrinsic
+    clear_flags: [ ]
+
+#######################
+# Internal intrinsics #
+#######################
+  - name: CompilerGetJSNamedProperty
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [ptr, ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerGetJSNamedPropertyIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerResolveQualifiedJSCall
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [ptr, std.core.String]
+    impl: panda::ets::interop::js::intrinsics::CompilerResolveQualifiedJSCallIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerJSCallCheck
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerJSCallCheckIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerJSCallFunction
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [ptr, ptr, u32]
+      stackrange: true
+    impl: panda::ets::interop::js::intrinsics::CompilerJSCallFunctionIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerJSNewInstance
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [ptr, u32]
+      stackrange: true
+    impl: panda::ets::interop::js::intrinsics::CompilerJSNewInstanceIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerCreateLocalScope
+    space: ets
+    compiler_only: true
+    signature:
+      ret: void
+      args: [ ]
+    impl: panda::ets::interop::js::intrinsics::CompilerCreateLocalScopeIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerDestroyLocalScope
+    space: ets
+    compiler_only: true
+    signature:
+      ret: void
+      args: [ ]
+    impl: panda::ets::interop::js::intrinsics::CompilerDestroyLocalScopeIntrinsic
+    clear_flags: [ ]
+
+########################################################
+# Internal intrinsics, convert ets value to napi_value #
+########################################################
+  - name: CompilerConvertVoidToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: []
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertVoidToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertU1ToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [u1]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertU1ToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertU8ToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [u8]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertU8ToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertI8ToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [i8]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertI8ToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertU16ToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [u16]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertU16ToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertI16ToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [i16]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertI16ToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertU32ToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [u32]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertU32ToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertI32ToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [i32]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertI32ToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertU64ToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [u64]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertU64ToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertI64ToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [i64]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertI64ToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertF32ToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [f32]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertF32ToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertF64ToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [f64]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertF64ToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertRefTypeToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [std.core.Object]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertRefTypeToLocalIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertJSValueToLocal
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [std.interop.js.JSValue]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertJSValueToLocalIntrinsic
+    clear_flags: [ ]
+
+########################################################
+# Internal intrinsics, convert napi_value to ets value #
+########################################################
+  - name: CompilerConvertLocalToU1
+    space: ets
+    compiler_only: true
+    signature:
+      ret: u1
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToU1Intrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertLocalToU8
+    space: ets
+    compiler_only: true
+    signature:
+      ret: u8
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToU8Intrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertLocalToI8
+    space: ets
+    compiler_only: true
+    signature:
+      ret: i8
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToI8Intrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertLocalToU16
+    space: ets
+    compiler_only: true
+    signature:
+      ret: u16
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToU16Intrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertLocalToI16
+    space: ets
+    compiler_only: true
+    signature:
+      ret: i16
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToI16Intrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertLocalToU32
+    space: ets
+    compiler_only: true
+    signature:
+      ret: u32
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToU32Intrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertLocalToI32
+    space: ets
+    compiler_only: true
+    signature:
+      ret: i32
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToI32Intrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertLocalToU64
+    space: ets
+    compiler_only: true
+    signature:
+      ret: u64
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToU64Intrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertLocalToI64
+    space: ets
+    compiler_only: true
+    signature:
+      ret: i64
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToI64Intrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertLocalToF32
+    space: ets
+    compiler_only: true
+    signature:
+      ret: f32
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToF32Intrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertLocalToF64
+    space: ets
+    compiler_only: true
+    signature:
+      ret: f64
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToF64Intrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertLocalToJSValue
+    space: ets
+    compiler_only: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToJSValueIntrinsic
+    clear_flags: [ ]
+  
+  - name: CompilerConvertLocalToString
+    space: ets
+    compiler_only: true
+    signature:
+      ret: std.core.String
+      args: [ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToStringIntrinsic
+    clear_flags: [ ]
+
+  - name: CompilerConvertLocalToRefType
+    space: ets
+    compiler_only: true
+    signature:
+      ret: std.core.Object
+      args: [ptr, ptr]
+    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToRefTypeIntrinsic
+    clear_flags: [ ]

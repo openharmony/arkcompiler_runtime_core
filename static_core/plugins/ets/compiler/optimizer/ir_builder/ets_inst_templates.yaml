@@ -1,0 +1,20 @@
+  ets: |-
+    % name = inst.opcode.upcase.split('_')[1]
+    % case name
+    % when "LAUNCH"
+    %   is_range = inst.opcode.include? 'range'
+    %   is_virtual = inst.opcode.include? 'virt'
+    %   is_dynamic = inst.opcode.start_with? 'calli_dyn'
+    %   if (is_dynamic)
+    UNREACHABLE(); // Should use plugin-dependent implementation
+    %   else
+    %     acc_read = inst.acc_read?
+    BuildLaunch<Opcode::<%= is_virtual ? 'CallLaunchVirtual' : 'CallLaunchStatic' %>>(instruction, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>);
+    %   end
+    % when "LDOBJ"
+    BuildLdObjByName(instruction, <%= get_type(inst.dtype) %>);
+    % when "STOBJ"
+    BuildStObjByName(instruction, <%= get_type(inst.type(0)) %>);
+    % else
+    UNREACHABLE();
+    % end

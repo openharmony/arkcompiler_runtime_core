@@ -1,0 +1,54 @@
+---
+cases:
+  # classes
+  - use: |-
+      let v: A<X> = new <X> A<X>(new X(), new Y())  // Y is not X
+
+  - use: |-
+      let v: A<Int> = new <X|null> A<Int>(new Int(), new Object())  // Object is not X
+
+  - use: |-
+      let v: A<Int|null> = new <X> A<Int|null>(null, null)  // null is not X
+
+  - use: |-
+      let v: A<X> = new <X|null> A<X>(new X(), new X())  // out of bound
+    bound: ' extends X'
+
+  # interfaces
+  - use: |-
+      let v: A<I> = new <I> A<I>(new X(), null)  // null is not I
+
+  - use: |-
+      let v: A<I|null> = new <I|null> A<I|null>(null, new Object())  // Object is not I
+
+  - use: |-
+      let v: A<Y> = new <Object|null> A<Y>(new Y(), null)  // out of bound
+    bound: ' extends I|null'
+
+  # arrays
+  - use: |-
+      let v: A<int[]> = new <X[]> A<int[]>(new int[1], new int[1])  // int[] is not X[]
+
+  - use: |-
+      let v: A<int[]|null> = new <X[]|null> A<int[]|null>(null, new Object[0])  // Object[] is not X[]
+
+# aliases
+  - use: |-
+      let v: A<B> = new <B> A<B>([Color.Red], Color.Blue)  // Color.Blue is not array
+    decl: type B = Color[]
+
+  - use: |-
+      let v: A<B> = new <B> A<B>(null, new X[0])  // X[] is not X[][]
+    decl: type B = X[][]|null
+
+  - use: |-
+      let v: A<Y> = new <B> A<Y>(new Y(), new Y[0])  // out of bound
+    bound: ' extends Y[]'
+    decl: type B = X[]
+
+  - use: |-
+      let v: A<C|null> = new <B|null> A<C|null>(new Color[0], new X[0])  // X[] is not Y[]
+    bound: ' extends X[]|null'
+    decl: |-
+        type B = Y[]
+        type C = Color[]

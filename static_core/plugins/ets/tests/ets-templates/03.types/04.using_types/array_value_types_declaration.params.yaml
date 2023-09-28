@@ -1,0 +1,29 @@
+--- # List of predefined types
+default_value:
+  - byte
+  - short
+  - int
+  - long
+  - ubyte
+  - ushort
+  - uint
+  - ulong
+  - float
+  - double
+  - char
+  - boolean
+  - Byte
+  - Short
+  - Int
+  - Long
+  - UByte
+  - UShort
+  - UInt
+  - ULong
+  - Float
+  - Double
+  - Char
+  - Boolean
+  - Object
+  - String
+  - Never

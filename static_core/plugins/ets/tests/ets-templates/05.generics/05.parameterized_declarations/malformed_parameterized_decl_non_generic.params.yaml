@@ -1,0 +1,5 @@
+--- # Non generic declarations
+non_generics:
+  - "class NonGeneric {}"
+  - "interface NonGeneric {}"
+  - "function NonGeneric(): void {}"

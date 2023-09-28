@@ -1,0 +1,4 @@
+--- # List of logical complement operator values
+logical_complement:
+  - {origin: "true", dest: "false"}
+  - {origin: "false", dest: "true"}

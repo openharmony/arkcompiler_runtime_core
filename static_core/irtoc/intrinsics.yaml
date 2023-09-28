@@ -1,0 +1,141 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+# http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+intrinsics_namespace: irtoc
+
+# WARNING: 'class_name' field should be `Irtoc` for all Irtoc intrinsics. If it needs to be changed, fix `is_irtoc?`
+# method in `compiler_intrinsics.rb` file
+
+intrinsics:
+- name: SlowPathEntry
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [amd64, arm64, arm32]
+  codegen_func: "CreateIrtocIntrinsic"
+  signature:
+    ret: void
+    args: []
+  description: Invoke slow path of the entrypoint from the irtoc'ed entrypoint
+  clear_flags: [require_state]
+
+- name: SaveRegistersEp
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  codegen_arch: [amd64, arm64, arm32]
+  codegen_func: "CreateIrtocIntrinsic"
+  signature:
+    ret: void
+    args: []
+  description: Save registers before native call
+  clear_flags: [require_state]
+
+- name: RestoreRegistersEp
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  codegen_arch: [amd64, arm64, arm32]
+  codegen_func: "CreateIrtocIntrinsic"
+  signature:
+    ret: void
+    args: []
+  description: Restore registers after native call
+  clear_flags: [require_state]
+
+- name: Unreachable
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  codegen_arch: [amd64, arm64, arm32]
+  codegen_func: "CreateIrtocIntrinsic"
+  signature:
+    ret: void
+    args: []
+  description: Encode trap instruction
+  set_flags: [terminator]
+  clear_flags: [require_state]
+
+- name: TailCall
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  codegen_arch: [ amd64, arm64, arm32 ]
+  codegen_func: "CreateIrtocIntrinsic"
+  signature:
+    ret: void
+    args: []
+  description: Make a tail call
+  set_flags: [terminator, no_dst]
+  clear_flags: [require_state]
+
+- name: InterpreterReturn
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  codegen_arch: [amd64, arm64, arm32]
+  codegen_func: "CreateIrtocIntrinsic"
+  signature:
+    ret: void
+    args: []
+  clear_flags: [require_state]  
+  description: Restore registers on return bytecode
+
+- name: LoadAcquireMarkWordExclusive
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [arm64, arm32]
+  codegen_func: "CreateIrtocIntrinsic"
+  signature:
+      ret: void
+      args: []
+  clear_flags: [runtime_call, require_state]
+  description: Encode load mark word with acquire semantics for exclusive use
+
+- name: StoreReleaseMarkWordExclusive
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [arm64, arm32]
+  codegen_func: "CreateIrtocIntrinsic"
+  signature:
+      ret: void
+      args: []
+  clear_flags: [runtime_call, require_state]
+  description: Encode store mark word that was loaded for exclusive use with release semantics
+
+- name: CompareAndSetMarkWord
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [amd64]
+  codegen_func: "CreateIrtocIntrinsic"
+  signature:
+      ret: void
+      args: []
+  clear_flags: [runtime_call, require_state]
+  description: Encode store mark word using compare and swap

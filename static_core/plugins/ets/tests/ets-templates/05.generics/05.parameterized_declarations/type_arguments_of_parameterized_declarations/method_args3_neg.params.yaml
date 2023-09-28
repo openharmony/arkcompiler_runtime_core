@@ -1,0 +1,11 @@
+---
+cases:
+  - use: let v = a.meth1 <out> ()
+  - use: let v = a.meth1 <out X> ()
+  - use: let v = a.meth1 <in> ()
+  - use: let v = a.meth1 <in X> ()
+
+  - use: a.meth2 <out> (new X())
+  - use: a.meth2 <out X> (new X())
+  - use: a.meth2 <in> (new X())
+  - use: a.meth2 <in X> (new X())

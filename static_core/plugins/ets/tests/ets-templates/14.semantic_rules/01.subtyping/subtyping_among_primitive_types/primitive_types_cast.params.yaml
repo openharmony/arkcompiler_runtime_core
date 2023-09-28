@@ -1,0 +1,9 @@
+--- # List of supertype relation among the primitive types
+subtypes:
+  - {type: float,    cast: double}
+  - {type: long,    cast: float}
+  - {type: int,    cast: long}
+  - {type: char,    cast: int}
+  - {type: short,    cast: int}
+  - {type: byte,    cast: short}
+

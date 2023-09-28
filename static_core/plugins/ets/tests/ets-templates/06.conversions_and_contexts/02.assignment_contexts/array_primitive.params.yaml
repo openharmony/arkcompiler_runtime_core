@@ -1,0 +1,50 @@
+---
+cases:
+
+  - src_type: Boolean
+    dst_type: boolean
+
+  - src_type: Byte
+    dst_type: byte
+
+  - src_type: Char
+    dst_type: char
+
+  - src_type: Short
+    dst_type: short
+
+  - src_type: Int
+    dst_type: int
+
+  - src_type: Long
+    dst_type: long
+
+  - src_type: Float
+    dst_type: float
+
+  - src_type: Double
+    dst_type: double
+
+  - src_type: boolean
+    dst_type: Boolean
+
+  - src_type: byte
+    dst_type: Byte
+
+  - src_type: char
+    dst_type: Char
+
+  - src_type: short
+    dst_type: Short
+
+  - src_type: int
+    dst_type: Int
+
+  - src_type: long
+    dst_type: Long
+
+  - src_type: float
+    dst_type: Float
+
+  - src_type: double
+    dst_type: Double

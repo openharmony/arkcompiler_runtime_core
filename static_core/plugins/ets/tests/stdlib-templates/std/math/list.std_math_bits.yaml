@@ -1,0 +1,120 @@
+- {
+    method_name: sign,
+    method_nature: function, 
+    result_type: int,
+    method_signature:  {v: "double"},
+
+    method_test_index_data:
+      {
+        test1: { v: 0.0, },
+        test2: { v: PI,},
+        test3: { v: -PI },
+        test4: { v: -0.0 }
+      },
+    method_expected_data:
+      {
+        test1:  0.0,
+        test2:  1.0,
+        test3: -1.0,
+        test4:  0.0
+      },
+  }
+- {
+    method_name: signbit,
+    method_nature: function, 
+    result_type: boolean,
+    method_signature:  {v: "double"},
+
+    method_test_index_data:
+      {
+        test1: { v: 0.0, },
+        test2: { v: PI,},
+        test3: { v: -PI },
+        test4: { v: -0.0 }
+      },
+    method_expected_data:
+      {
+        test1:  "false",
+        test2:  "false",
+        test3:  "true",
+        test4:  "false"
+      },
+  }
+- {
+    method_name: clz32,
+    method_nature: function, 
+    result_type: int,
+    method_signature:  {v: "int"},
+
+    method_test_index_data:
+      {
+        test1: { v: 0xFFFFFFFF as int},
+        test2: { v: 0x0FFFFFFF as int},
+        test3: { v: 0x00FFFFFF as int},
+        test4: { v: 0x000FFFFF as int},
+        test5: { v: 0x0000FFFF as int},
+        test6: { v: 0x00000FFF as int},
+        test7: { v: 0x000000FF as int},
+        test8: { v: 0x0000000F as int},
+        test9: { v: 0x00000000 as int},
+      },
+    method_expected_data:
+      {
+        test1:  0,
+        test2:  4,
+        test3:  8,
+        test4:  12,
+        test5:  16,
+        test6:  20,
+        test7:  24,
+        test8:  28,
+        test9:  32,
+      }
+  }
+- {
+    method_name: clz64,
+    method_nature: function, 
+    result_type: int,
+    method_signature:  {v: "long"},
+
+    method_test_index_data:
+      {
+        test1:  {v: 0xFFFFFFFFFFFFFFFF as long },
+        test2:  {v: 0x0FFFFFFFFFFFFFFF as long },
+        test3:  {v: 0x00FFFFFFFFFFFFFF as long },
+        test4:  {v: 0x000FFFFFFFFFFFFF as long },
+        test5:  {v: 0x0000FFFFFFFFFFFF as long },
+        test6:  {v: 0x00000FFFFFFFFFFF as long },
+        test7:  {v: 0x000000FFFFFFFFFF as long },
+        test8:  {v: 0x0000000FFFFFFFFF as long },
+        test9:  {v: 0x00000000FFFFFFFF as long },
+        test10: {v: 0x000000000FFFFFFF as long },
+        test11: {v: 0x0000000000FFFFFF as long },
+        test12: {v: 0x00000000000FFFFF as long },
+        test13: {v: 0x000000000000FFFF as long },
+        test14: {v: 0x0000000000000FFF as long },
+        test15: {v: 0x00000000000000FF as long },
+        test16: {v: 0x000000000000000F as long },
+        test17: {v: 0x0000000000000000 as long },
+        },
+    method_expected_data:
+      {
+        test1:  0,
+        test2:  4,
+        test3:  8,
+        test4:  12,
+        test5:  16,
+        test6:  20,
+        test7:  24,
+        test8:  28,
+        test9:  32,
+        test10: 36,
+        test11: 40,
+        test12: 44,
+        test13: 48,
+        test14: 52,
+        test15: 56,
+        test16: 60,
+        test17: 64,
+      },
+  }

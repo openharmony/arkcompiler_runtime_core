@@ -1,0 +1,5 @@
+--- # List of declarations to be unique
+unique_decl:
+  - "class A{}"
+  - "enum En {V1, V2}"
+  - "function f(): void {}"

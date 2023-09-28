@@ -1,0 +1,16 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 0, right: 7, result: 0 }
+- { left: 1, right: 1, result: 0 }
+- { left: 1, right: 7, result: 0 }
+- { left: "UByte.MIN_VALUE as ubyte", right: 1, result: 0 }
+- { left: "UByte.MIN_VALUE as ubyte", right: 8, result: 0 }
+- { left: "UByte.MAX_VALUE as ubyte", right: 1, result: 128 }
+- { left: "UByte.MAX_VALUE as ubyte", right: 7, result: 1 }
+- { left: "UByte.MAX_VALUE as ubyte", right: 8, result: 0 }
+- { left: 63, right: 2, result: 15 }
+- { left: 1, right: 0, result: 1 }
+- { left: 42, right: 0, result: 42 }
+- { left: 1, right: -1, result: 0 }
+

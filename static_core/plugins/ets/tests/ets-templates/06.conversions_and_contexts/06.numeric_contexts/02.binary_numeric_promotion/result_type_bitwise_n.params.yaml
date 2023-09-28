@@ -1,0 +1,31 @@
+---
+cases:
+  - { type: byte, val: 1 as byte, rt: float, rv: 1.0 as float, op: '&' }
+  - { type: byte, val: 1 as byte, rt: double, rv: 1.0, op: '^' }
+
+  - { type: byte, val: 1 as byte, rt: Float, rv: new Float(1.0 as float), op: '|' }
+  - { type: byte, val: 1 as byte, rt: Double, rv: new Double(1.0), op: '&' }
+
+  - { type: short, val: 1 as short, rt: float, rv: 1.0 as float, op: '^' }
+  - { type: short, val: 1 as short, rt: double, rv: 1.0, op: '&' }
+
+  - { type: short, val: 1 as short, rt: Float, rv: new Float(1.0 as float), op: '^' }
+  - { type: short, val: 1 as short, rt: Double, rv: new Double(1.0), op: '|' }
+
+  - { type: char, val: "c'2'", rt: float, rv: 1.0 as float, op: '&' }
+  - { type: char, val: "c'2'", rt: double, rv: 1.0, op: '^' }
+
+  - { type: char, val: "c'2'", rt: Float, rv: new Float(1.0 as float), op: '|' }
+  - { type: char, val: "c'2'", rt: Double, rv: new Double(1.0), op: '&' }
+
+  - { type: int, val: 1, rt: float, rv: 1.0 as float, op: '^' }
+  - { type: int, val: 1, rt: double, rv: 1.0, op: '|' }
+
+  - { type: int, val: 1, rt: Float, rv: new Float(1.0 as float), op: '&' }
+  - { type: int, val: 1, rt: Double, rv: new Double(1.0), op: '^' }
+
+  - { type: long, val: 1 as long, rt: float, rv: 1.0 as float, op: '|' }
+  - { type: long, val: 1 as long, rt: double, rv: 1.0, op: '&' }
+
+  - { type: long, val: 1 as long, rt: Float, rv: new Float(1.0 as float), op: '&' }
+  - { type: long, val: 1 as long, rt: Double, rv: new Double(1.0), op: '^' }

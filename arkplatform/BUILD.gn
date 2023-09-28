@@ -1,0 +1,24 @@
+import("//arkcompiler/runtime_core/ark_config.gni")
+
+group("arkplatform_packages") {
+  deps = [ ":libarkplatform" ]
+}
+
+config("arkplatform_public_config") {
+  include_dirs = [
+    "include",
+  ]
+}
+
+ohos_shared_library("libarkplatform") {
+  sources = [ "src/arkplatform.cpp" ]
+  include_dirs = [
+    "$ark_root/arkplatform",
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include"
+  ]
+
+  output_extension = "so"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+  external_deps = [ "hilog:libhilog" ]
+}

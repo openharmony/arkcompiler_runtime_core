@@ -1,0 +1,7 @@
+ # List of valid class members
+members:
+  - "x: int;"
+  - "x(): int { return 1 }"
+  - "inner class x { static x: int = 1; }"
+  - "enum x {Red, Green}"
+  - "interface x { fee(): int }"

@@ -1,0 +1,36 @@
+@startuml
+left to right direction
+
+package "Task Queues" {
+  [GC queue(ECMA)]
+  [GC queue(ArkTS)]
+  [JIT queue]
+}
+
+[GC queue(ECMA)] -> TaskManager
+[GC queue(ArkTS)] -> TaskManager
+[JIT queue] -> TaskManager
+
+
+package "Worker threads pool" {
+  component "Worker thread 1" {
+    [TaskManager] --> [local queue 1]
+'    [GC queue(ArkTS)] --> [local queue 1]
+'    [JIT queue] --> [local queue 1]
+  }
+  component "Worker thread 2" {
+    [TaskManager] --> [local queue 2]
+'    [GC queue(ArkTS)] --> [local queue 2]
+'    [JIT queue] --> [local queue 2]
+  }
+  component "Worker thread 3" {
+    [TaskManager] --> [local queue 3]
+'    [GC queue(ArkTS)] --> [local queue 3]
+'    [JIT queue] --> [local queue 3]
+  } 
+}
+
+component TaskManager {
+}
+
+@enduml

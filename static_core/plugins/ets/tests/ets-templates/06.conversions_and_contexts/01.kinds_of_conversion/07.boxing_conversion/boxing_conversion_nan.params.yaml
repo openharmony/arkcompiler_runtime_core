@@ -1,0 +1,4 @@
+--- # List of boxing conversions (NaN)
+boxing_nan:
+  - {origin: float,   dest: Float}
+  - {origin: double,  dest: Double}

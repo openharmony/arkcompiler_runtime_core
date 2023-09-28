@@ -1,0 +1,17 @@
+--- # List of integer addition and multiplication associative tests
+int_assoc:
+  - {left: "2+3+4+5", right: "(2+3)+4+5"}
+  - {left: "2+3+4+5", right: "(2+3)+(4+5)"}
+  - {left: "2+3+4+5", right: "2+(3+4)+5"}
+  - {left: "2+3+4+5", right: "2+3+(4+5)"}
+  - {left: "2+3+4+5", right: "(((2+3)+4)+5)"}
+  - {left: "2+3+4+5", right: "((2+3)+4)+5"}
+
+  - {left: "2*3*4*5", right: "(2*3)*4*5"}
+  - {left: "2*3*4*5", right: "(2*3)*(4*5)"}
+  - {left: "2*3*4*5", right: "2*(3*4)*5"}
+  - {left: "2*3*4*5", right: "2*3*(4*5)"}
+  - {left: "2*3*4*5", right: "(((2*3)*4)*5)"}
+  - {left: "2*3*4*5", right: "((2*3)*4)*5"}
+
+

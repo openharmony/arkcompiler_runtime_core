@@ -1,0 +1,24 @@
+# List of dependencies for testing Panda on Ubuntu 18.04 and 20.04
+clang-14
+clang-format-14
+clang-tidy-14
+libstdc++6
+lib32stdc++6
+
+g++
+ninja-build
+
+lcov                                         # For coverage calculation
+libc++-dev:amd64                             # For clang-tidy to find standard headers
+python3                                      # For running multilingual benchmarks
+python3-matplotlib                           # For statistics visualization and plotting
+openjdk-8-jdk                                # For running Java benchmarks
+libasm-java                                  # For running legacy Java files compilation
+doxygen                                      # For generate documentation
+graphviz                                     # For graphs in documentation
+unzip                                        # For unpacking jar
+parallel                                     # For rt.jar test
+
+llvm                                         # For Thread Sanitizer
+
+postgresql-client-10                         # For pushing benchmark results to Grafana

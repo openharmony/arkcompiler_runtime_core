@@ -1,0 +1,11 @@
+function checkTestResult(actual : String, expected : String) : int {
+  console.print("\nACTUAL\n");
+  console.print(actual + " ");
+
+  console.print("\nEXPECTED\n");
+  console.print(expected + " ");
+  console.println();
+
+  if (actual.equals(expected))  return 0
+  return 1
+}

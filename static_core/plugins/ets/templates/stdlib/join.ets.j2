@@ -1,0 +1,34 @@
+/**
+ * Joins elements with delimeter
+ *
+ * @param arr array to be joined in String
+ *
+ * @param delimiter a string to insert between elements of arr
+ *
+ * @returns joined elements of arr with delimiter between
+ */
+{% if T != "boolean"%}
+export function join(arr: {{T}}[], delimiter: String): String {
+    let sb: StringBuilder = new StringBuilder();
+    let len: int = arr.length;
+    for (let i: int = 0; i < len; i++) {
+        sb.append(arr[i])
+        if (i != len - 1) {
+            sb.append(delimiter);
+        }
+    }
+    return sb.toString();
+}
+{% else %}
+export function join(arr: boolean[], delimiter: String): String {
+    let sb: StringBuilder = new StringBuilder();
+    let len: int = arr.length;
+    for (let i: int = 0; i < len; i++) {
+        sb.append(arr[i] ? "true" : "false")
+        if (i != len - 1) {
+            sb.append(delimiter);
+        }
+    }
+    return sb.toString();
+}
+{% endif %}

@@ -1,0 +1,16 @@
+function compare_array(left : {{.item.output_type}}, right : {{.item.output_type}}) : boolean {
+  if (left.length != right.length) return false
+  for (let i = 0; i< left.length; i++) {
+     if (left[i] != right[i]) return false;
+  }
+
+  return true;
+}
+
+function print_array(title: String, array : {{.item.output_type}}) : void {
+  console.print(title);
+  for (let i = 0; i< array.length; i++) {
+    console.print(array[i]+",");
+  }
+  console.print(";");
+}

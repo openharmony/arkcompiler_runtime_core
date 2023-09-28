@@ -1,0 +1,40 @@
+- {
+    itemType: "Object",
+    itemValue: '"World"',
+    initValue: '"Hello"'
+  }
+- {
+    itemType: "String",
+    itemValue: '"World"',
+    initValue: '"Hello"'
+  }
+- {
+    itemType: "Int",
+    itemValue: 10,
+    initValue: 9
+  }
+- {
+    itemType: "Long",
+    itemValue: "10 as long",
+    initValue: "9 as long"
+  }
+- {
+    itemType: "Boolean",
+    itemValue: 'true',
+    initValue: 'false'
+  }
+- {
+    itemType: "Float",
+    itemValue: '10.5 as float',
+    initValue: '9.5 as float'
+  }
+- {
+    itemType: "Double",
+    itemValue: '10.5 as double',
+    initValue: '9.5 as double'
+  }
+- {
+    itemType: "Char",
+    itemValue: "c'a'",
+    initValue: "c'b'"
+  }

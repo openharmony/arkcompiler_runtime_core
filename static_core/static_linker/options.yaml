@@ -1,0 +1,41 @@
+module:
+  name: static_linker
+  namespace: panda::static_linker
+
+options:
+
+- name: log-level
+  type: std::string
+  possible_values:
+    - debug
+    - info
+    - error
+    - fatal
+  description: Log level
+  default: error
+
+- name: output
+  type: std::string
+  description: Output location
+  default: ""
+
+- name: parital-classes
+  type: arg_list_t
+  default:
+    - _GLOBAL
+  description: Allow merging implementations together
+
+- name: remains-partial-classes
+  type: arg_list_t
+  default: []
+  description: Allow unresolved methods and fields for following classes, i.e. `_GLOBAL`
+
+- name: show-stats
+  type: bool
+  default: false
+  description: Show linking statistics
+
+- name: strip-debug-info
+  type: bool
+  default: false
+  description: Remove debug information from files

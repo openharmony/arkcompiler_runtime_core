@@ -1,0 +1,180 @@
+---
+cases:
+  # nothing to catch
+  - defs: |-
+      class Ex extends Exception {}
+      class F extends Exception {}
+
+    use: |-
+      let exc: F = new F();
+      try {
+          if (1 == 2) throw exc;
+          return 0;
+      } catch (e: Ex) {
+          return 1;
+      } catch (f: F) {
+          return 1;
+      } catch (def) {
+          return 1;
+      }
+
+  # catch by exact same class
+  - defs: |-
+      class Ex extends Exception {}
+      class F extends Exception {}
+
+    use: |-
+      let exc: F = new F();
+      try {
+          if (1 != 2) throw exc;
+          return 1;
+      } catch (e: Ex) {
+          return 1;
+      } catch (f: F) {
+          return 0;  // expected
+      } catch (def) {
+          return 1;
+      }
+
+  # catch by exact same class with type alias
+  - defs: |-
+      class Ex extends Exception {}
+      class F extends Exception {}
+      type E1 = Ex;
+      type F1 = F;
+
+    use: |-
+      let exc: F = new F();
+      try {
+          if (1 != 2) throw exc;
+          return 1;
+      } catch (e: E1) {
+          return 1;
+      } catch (f: F1) {
+          return 0;  // expected
+      } catch (def) {
+          return 1;
+      }
+
+  # catch by superclass
+  - defs: |-
+      class Ex extends Exception {}
+      class F extends Exception {}
+
+    use: |-
+      let exc: F = new F();
+      try {
+          if (1 != 2) throw exc;
+          return 1;
+      } catch (w: Exception) {
+          return 0;  // expected
+      } catch (f: F) {
+          return 1;
+      } catch (def) {
+          assert false : "Unexpected catch clause";
+      }
+      return 1;
+
+  - defs: |-
+      class Ex extends Exception {}
+      class F extends Ex {}
+
+    use: |-
+      let exc: F = new F();
+      try {
+          if (1 != 2) throw exc;
+          return 1;
+      } catch (e: Ex) {
+          return 0;  // expected
+      } catch (w: Exception) {
+          return 1;
+      } catch (f: F) {
+          return 1;
+      } catch (def) {
+          assert false : "Unexpected catch clause";
+      }
+      return 1;
+
+  # catch by superclass with type alias
+  - defs: |-
+      class Ex extends Exception {}
+      class F extends Exception {}
+      type Exception1 = Exception;
+      type F1 = F;
+
+    use: |-
+      let exc: F = new F();
+      try {
+          if (1 != 2) throw exc;
+          return 1;
+      } catch (w: Exception1) {
+          return 0;  // expected
+      } catch (f: F1) {
+          return 1;
+      } catch (def) {
+          assert false : "Unexpected catch clause";
+      }
+      return 1;
+
+  # catch by default clause
+  - defs: |-
+      class Ex extends Exception {}
+      class F extends Exception {}
+
+    use: |-
+      try {
+          if (1 != 2) throw new F();
+          return 1;
+      } catch (e: Ex) {
+          return 1;
+      } catch (def) {
+          return 0; // expected
+      }
+
+  # check passed value
+  - defs: |-
+      class F extends Error {}
+
+    use: |-
+      let exc: F = new F();
+      try {
+          if (1 != 2) throw exc;
+          return 1;
+      } catch (f: Error) {
+          if (f === exc) {
+              return 0;
+          }
+      } catch (def) {
+          assert false : "Unexpected catch clause";
+      }
+      return 1;
+
+  - defs: |-
+      class F extends Exception {
+          constructor() {
+              super();
+          }
+
+          constructor(s: String) {
+              super(s);
+          }
+
+          constructor(s: String, cause: Object) {
+              super(s, cause);
+          }
+      }
+
+    use: |-
+      let cause = new NullPointerError();
+      let exc: F = new F("msg", cause);
+      try {
+          if (1 != 2) throw exc;
+          return 1;
+      } catch (f: F) {
+          if (f.getCause() === cause) {
+              return 0;
+          }
+      } catch (def) {
+          assert false : "Unexpected catch clause";
+      }
+      return 1;

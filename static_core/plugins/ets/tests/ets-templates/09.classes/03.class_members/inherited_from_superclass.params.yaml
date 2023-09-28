@@ -1,0 +1,6 @@
+--- # List of valid class members
+class_members:
+  - {member: "public foo(): int { return 5; }", call: "this.foo();", result: "5" }
+  - {member: "protected foo(): int { return 5; }", call: "this.foo();", result: "5" }
+  - {member: "public result: int = 5;", call: "this.result;", result: "5" }
+  - {member: "protected result: int = 5;", call: "this.result;", result: "5" }

@@ -1,0 +1,4 @@
+--- # List of named type declarations
+named_types_generics:
+  - { type: "class A<G> {}", value: "A<String>" }
+  - { type: "interface A<G> {}", value: "A<String>" }

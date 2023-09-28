@@ -1,0 +1,150 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "global_object_storage.h"
+
+#include <libpandabase/os/mutex.h>
+#include "runtime/include/runtime.h"
+#include "runtime/include/mem/panda_containers.h"
+#include "runtime/include/object_header.h"
+#include "runtime/mem/object_helpers.h"
+#include "runtime/mem/gc/gc.h"
+#include "runtime/mem/gc/gc_root.h"
+#include "runtime/mem/gc/gc_phase.h"
+#include "runtime/include/class.h"
+#include "reference.h"
+#include "utils/logger.h"
+
+namespace panda::mem {
+
+GlobalObjectStorage::GlobalObjectStorage(mem::InternalAllocatorPtr allocator, size_t max_size, bool enable_size_check)
+    : allocator_(allocator)
+{
+    global_storage_ = allocator->New<ArrayStorage>(allocator, max_size, enable_size_check);
+    weak_storage_ = allocator->New<ArrayStorage>(allocator, max_size, enable_size_check);
+    global_fixed_storage_ = allocator->New<ArrayStorage>(allocator, max_size, enable_size_check, true);
+}
+
+GlobalObjectStorage::~GlobalObjectStorage()
+{
+    allocator_->Delete(global_storage_);
+    allocator_->Delete(weak_storage_);
+    allocator_->Delete(global_fixed_storage_);
+}
+
+bool GlobalObjectStorage::IsValidGlobalRef(const Reference *ref) const
+{
+    ASSERT(ref != nullptr);
+    Reference::ObjectType type = Reference::GetType(ref);
+    AssertType(type);
+    if (type == Reference::ObjectType::GLOBAL) {
+        if (!global_storage_->IsValidGlobalRef(ref)) {
+            return false;
+        }
+    } else if (type == Reference::ObjectType::WEAK) {
+        if (!weak_storage_->IsValidGlobalRef(ref)) {
+            return false;
+        }
+    } else {
+        if (!global_fixed_storage_->IsValidGlobalRef(ref)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+Reference *GlobalObjectStorage::Add(const ObjectHeader *object, Reference::ObjectType type) const
+{
+    AssertType(type);
+    if (object == nullptr) {
+        return nullptr;
+    }
+    Reference *ref = nullptr;
+    if (type == Reference::ObjectType::GLOBAL) {
+        ref = global_storage_->Add(object);
+    } else if (type == Reference::ObjectType::WEAK) {
+        ref = weak_storage_->Add(object);
+    } else {
+        ref = global_fixed_storage_->Add(object);
+    }
+    if (ref != nullptr) {
+        ref = Reference::SetType(ref, type);
+    }
+    return ref;
+}
+
+void GlobalObjectStorage::Remove(const Reference *reference)
+{
+    if (reference == nullptr) {
+        return;
+    }
+    auto type = reference->GetType();
+    AssertType(type);
+    reference = Reference::GetRefWithoutType(reference);
+    if (type == Reference::ObjectType::GLOBAL) {
+        global_storage_->Remove(reference);
+    } else if (type == Reference::ObjectType::WEAK) {
+        weak_storage_->Remove(reference);
+    } else {
+        global_fixed_storage_->Remove(reference);
+    }
+}
+
+PandaVector<ObjectHeader *> GlobalObjectStorage::GetAllObjects()
+{
+    auto objects = PandaVector<ObjectHeader *>(allocator_->Adapter());
+
+    auto global_objects = global_storage_->GetAllObjects();
+    objects.insert(objects.end(), global_objects.begin(), global_objects.end());
+
+    auto weak_objects = weak_storage_->GetAllObjects();
+    objects.insert(objects.end(), weak_objects.begin(), weak_objects.end());
+
+    auto fixed_objects = global_fixed_storage_->GetAllObjects();
+    objects.insert(objects.end(), fixed_objects.begin(), fixed_objects.end());
+
+    return objects;
+}
+
+void GlobalObjectStorage::VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType root_type)
+{
+    global_storage_->VisitObjects(gc_root_visitor, root_type);
+    global_fixed_storage_->VisitObjects(gc_root_visitor, root_type);
+}
+
+void GlobalObjectStorage::UpdateMovedRefs()
+{
+    LOG(DEBUG, GC) << "=== GlobalStorage Update moved. BEGIN ===";
+    global_storage_->UpdateMovedRefs();
+    weak_storage_->UpdateMovedRefs();
+    global_fixed_storage_->UpdateMovedRefs();
+    LOG(DEBUG, GC) << "=== GlobalStorage Update moved. END ===";
+}
+
+void GlobalObjectStorage::ClearUnmarkedWeakRefs(const GC *gc, const mem::GC::ReferenceClearPredicateT &pred)
+{
+    weak_storage_->ClearUnmarkedWeakRefs(gc, pred);
+}
+
+size_t GlobalObjectStorage::GetSize()
+{
+    return global_storage_->GetSizeWithLock() + weak_storage_->GetSizeWithLock() +
+           global_fixed_storage_->GetSizeWithLock();
+}
+
+void GlobalObjectStorage::Dump()
+{
+    global_storage_->DumpWithLock();
+}
+}  // namespace panda::mem

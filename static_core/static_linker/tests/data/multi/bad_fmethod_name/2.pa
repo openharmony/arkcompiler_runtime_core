@@ -1,0 +1,5 @@
+.record panda.String <external>
+
+.record Foo.Bar {}
+
+.function void Foo.Bar.fo0(Foo.Bar a0) {}

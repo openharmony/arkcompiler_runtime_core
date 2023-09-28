@@ -1,0 +1,22 @@
+--- # List of valid bigint functions
+bigint_functions:
+    - { func: 'BigInt("1n")', res: 1n }
+    - { func: 'BigInt("1234567890n")', res: 1234567890n }
+
+    - { func: 'BigInt("1")', res: 1n }
+    - { func: 'BigInt("1234567890")', res: 1234567890n }
+
+    - { func: 'BigInt(1 as long)', res: 1n }
+    - { func: 'BigInt(1234567890 as long)', res: 1234567890n }
+
+    - { func: 'BigInt.asIntN(32, 0n)', res: 0n }
+    - { func: 'BigInt.asIntN(0, 12345678901234567890n)', res: 0n }
+    - { func: 'BigInt.asIntN(4, 16n)', res: 0n }
+    - { func: 'BigInt.asIntN(4, 15n)', res: -1n }
+    - { func: 'BigInt.asIntN(32, 12345678901234567890n)', res: -350287150n }
+
+    - { func: 'BigInt.asUintN(32, 0n)', res: 0n }
+    - { func: 'BigInt.asUintN(0, 12345678901234567890n)', res: 0n }
+    - { func: 'BigInt.asUintN(4, 16n)', res: 0n }
+    - { func: 'BigInt.asUintN(4, 15n)', res: 15n }
+    - { func: 'BigInt.asUintN(32, 12345678901234567890n)', res: 3944680146n }

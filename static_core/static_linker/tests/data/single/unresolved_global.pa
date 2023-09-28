@@ -1,0 +1,17 @@
+.record IO <external>
+.record panda.String <external>
+.function void IO.printString(panda.String a0) <external>
+
+.function void neverResolves() <external>
+
+.function void neverCalled() {
+	call.short neverResolves
+	return.void
+}
+
+.function void main() {
+	lda.str "abc\n"
+	sta.obj v0
+	call.short IO.printString, v0
+	return.void
+}

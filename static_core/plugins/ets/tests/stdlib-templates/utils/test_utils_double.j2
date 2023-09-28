@@ -1,0 +1,37 @@
+function print_report(max_test : int, passed : int) : void {
+    console.print("TOTAL:" + max_test + ";")
+    console.print("PASSED:" + passed)
+    console.println();
+}
+
+function double_compare(left : double, right : double, epsilon : double) : boolean {
+    if (left == right) {
+      return true;
+    }
+    let diff : double;
+    if (left > right) {
+       diff = left - right;
+    } else {
+       diff = right -left;
+    }
+    if (diff < epsilon) {
+       return true;
+    } else {
+       return false;
+    }
+}
+
+function check_range_and_print(actual : double, start_range : double, end_range : double, row : int, passed : int) : int {
+    let counter : int = passed;
+    if (actual >= start_range && actual < end_range ) {
+       counter++;
+         console.print("PASSED;")
+    } else {
+        console.print("FAILED;");
+    }
+    console.print("ACTUAL:" + actual + ";" );
+    console.print("START_RANGE:" + start_range + ";");
+    console.print("END_RANGE:" + end_range + ";");
+    console.println();
+    return counter;
+}

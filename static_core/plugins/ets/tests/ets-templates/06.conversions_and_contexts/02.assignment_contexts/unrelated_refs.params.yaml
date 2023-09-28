@@ -1,0 +1,30 @@
+---
+cases:
+  - { src_type: 'A<X>', dst_type: 'A<Y>' }
+  - { src_type: 'A<Y>', dst_type: 'A<X>' }
+  - { src_type: 'A<X>', dst_type: 'A<out Y>' }
+  - { src_type: 'A<Y>', dst_type: 'A<in X>' }
+  - { src_type: 'Aout<X>', dst_type: 'Aout<Y>' }
+  - { src_type: 'Aout<X>', dst_type: 'Aout<out Y>' }
+  - { src_type: 'Ain<Y>', dst_type: 'Ain<X>' }
+  - { src_type: 'Ain<Y>', dst_type: 'Ain<in X>' }
+  - { src_type: 'A<X>', dst_type: 'B<X>' }
+  - { src_type: 'A<Y>', dst_type: 'B<X>' }
+  - { src_type: 'A<X>', dst_type: 'B<Y>' }
+  - { src_type: 'A<Y>', dst_type: 'B<Y>' }
+  - { src_type: 'A<X>', dst_type: 'B<out X>' }
+  - { src_type: 'A<Y>', dst_type: 'B<out X>' }
+  - { src_type: 'A<X>', dst_type: 'B<out Y>' }
+  - { src_type: 'A<Y>', dst_type: 'B<out Y>' }
+  - { src_type: 'A<X>', dst_type: 'B<in X>' }
+  - { src_type: 'A<Y>', dst_type: 'B<in X>' }
+  - { src_type: 'A<X>', dst_type: 'B<in Y>' }
+  - { src_type: 'A<Y>', dst_type: 'B<in Y>' }
+  - { src_type: 'B<Y>', dst_type: 'A<X>' }
+  - { src_type: 'B<Y>', dst_type: 'A<in X>' }
+  - { src_type: 'B<X>', dst_type: 'A<Y>' }
+  - { src_type: 'B<X>', dst_type: 'A<out Y>' }
+  - { src_type: 'Bout<X>', dst_type: 'Aout<Y>' }
+  - { src_type: 'Bout<X>', dst_type: 'Aout<out Y>' }
+  - { src_type: 'Bin<Y>', dst_type: 'Ain<X>' }
+  - { src_type: 'Bin<Y>', dst_type: 'Ain<in X>' }

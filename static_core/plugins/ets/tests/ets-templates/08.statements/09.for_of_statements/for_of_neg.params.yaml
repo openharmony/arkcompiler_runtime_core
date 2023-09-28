@@ -1,0 +1,62 @@
+---
+cases:
+    - use: |-
+          for (const v: int of [1,2,3,4]) {
+              res += v
+              v = 0   // shouldn't be allowed
+              res += v
+          }
+          if (res == "10203040") return 0;
+
+    - use: |-
+          const v: int = 0;
+          for (v of [1,2,3,4]) res += v  // shouldn't be allowed
+          if (res == "1234") return 0;
+
+    - use: |-
+          for (let v: int of []) res += v  // shouldn't be allowed
+          if (res == "") return 0;
+
+    - use: |-
+          for (const ch of "ABCD") {
+              res += ch
+              ch = ' '   // shouldn't be allowed
+              res += ch
+          }
+          if (res == "A B C D ") return 0;
+
+    - use: |-
+          const ch: char = ' ';
+          for (ch of "ABCD") res += ch  // shouldn't be allowed
+          if (res == "ABCD") return 0;
+
+    - use: |-
+          // wrong expr type
+          for (const ch: char of 123) res += ch
+          if (res == "123") return 0;
+
+    - use: |-
+          let obj: Object = new Object()
+          // wrong expr type
+          for (const v: Object of obj) res += v
+          if (res == "") return 0;
+
+    - use: |-
+          let arr: int[] = new int[0]
+          // missing right parenthesis
+          for (let v of arr res += v
+
+    - use: |-
+          let arr: int[] = new int[0]
+          // missing left parenthesis
+          for let v of arr) res += v
+
+    - use: |-
+          let arr: int[] = new int[0]
+          // missing both parentheses
+          for let v of arr res += v
+
+    - use: |-
+          let arr: int[] = new int[0]
+          // missing semicolon separating type
+          for (let v int of arr) res += v

@@ -1,0 +1,14 @@
+--- 
+# List of identifiers
+identifiers:
+  - debug
+  - test
+  - x
+  - y
+  - z
+# A list that contains comma separated identifiers
+identifiersList:
+  - A
+  - A, B
+  - A, B, C
+  - A, B, C, D

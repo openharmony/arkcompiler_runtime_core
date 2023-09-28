@@ -1,0 +1,16 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: "false" }
+- { left: 0, right: 1, result: "true" }
+- { left: 1, right: 0, result: "true" }
+- { left: 1, right: 1, result: "false" }
+- { left: "UShort.MIN_VALUE as ushort", right: 0, result: "false" }
+- { left: "UShort.MIN_VALUE as ushort", right: 42131, result: "true" }
+- { left: "UShort.MIN_VALUE as ushort", right: "UShort.MAX_VALUE as ushort", result: "true" }
+- { left: "UShort.MIN_VALUE as ushort", right: "UShort.MIN_VALUE as ushort", result: "false" }
+- { left: "UShort.MAX_VALUE as ushort", right: 0, result: "true" }
+- { left: "UShort.MAX_VALUE as ushort", right: 42131, result: "true" }
+- { left: "UShort.MAX_VALUE as ushort", right: "UShort.MAX_VALUE as ushort", result: "false" }
+- { left: "UShort.MAX_VALUE as ushort", right: "UShort.MIN_VALUE as ushort", result: "true" }
+- { left: 42131, right: 42131, result: "false" }
+

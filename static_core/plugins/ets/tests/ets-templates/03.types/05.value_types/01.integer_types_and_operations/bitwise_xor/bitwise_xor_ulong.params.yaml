@@ -1,0 +1,11 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: 0 }
+- { left: 0, right: 1, result: 1 }
+- { left: 1, right: 1, result: 0 }
+- { left: ULong.MIN_VALUE, right: ULong.MIN_VALUE, result: 0 }
+- { left: ULong.MAX_VALUE, right: ULong.MAX_VALUE, result: 0 }
+- { left: ULong.MIN_VALUE, right: ULong.MAX_VALUE, result: ULong.MAX_VALUE }
+- { left: 3123456789987654321, right: 3123456789987654321, result: 0 }
+- { left: "0x5555555555555555", right: "0xaaaaaaaaaaaaaaaa", result: ULong.MAX_VALUE }
+  

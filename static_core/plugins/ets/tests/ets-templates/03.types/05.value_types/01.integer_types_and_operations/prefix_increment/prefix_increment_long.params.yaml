@@ -1,0 +1,10 @@
+--- # list of values
+values:
+- { value: 0, result: 1 }
+- { value: 1, result: 2 }
+- { value: -1, result: 0 }
+- { value: Long.MIN_VALUE, result: -9223372036854775807 }
+- { value: Long.MAX_VALUE, result: Long.MIN_VALUE }
+- { value: 9190937881899789912, result: 9190937881899789913 }
+- { value: -9190937881899789912, result: -9190937881899789911 }
+

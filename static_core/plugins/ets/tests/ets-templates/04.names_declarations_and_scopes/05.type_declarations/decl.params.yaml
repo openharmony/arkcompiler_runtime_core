@@ -1,0 +1,40 @@
+---
+cases:
+    - defs: |-
+        enum Planet { Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune }
+      type: Planet
+      val: Planet.Mars
+      assert: v == Planet.Mars
+
+    - defs: |-
+        class Planet {
+            name: String;
+            public constructor(name: String) {
+                this.name = name;
+            }
+        }
+      type: Planet
+      val: new Planet("Jupiter")
+      assert: v instanceof Planet && v.name == "Jupiter"
+
+    - defs: |-
+        enum SolarSystem { Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune }
+
+        interface Inhabited {
+            isInhabited(): boolean;
+        }
+
+        class Planet implements Inhabited {
+            planet: SolarSystem;
+
+            public constructor(planet: SolarSystem) {
+                this.planet = planet;
+            }
+
+            public override isInhabited(): boolean {
+                return this.planet == SolarSystem.Earth;
+            }
+        }
+      type: Inhabited
+      val: new Planet(SolarSystem.Mars)
+      assert: v instanceof Inhabited && v.isInhabited() == false

@@ -1,0 +1,13 @@
+--- # List of reference equality operators
+reference_eq:
+  - {left:  "null", right:  "null", op: "==", result:  "true"}
+  - {left:  "null", right: "null", op: "!=", result: "false"}
+  - {left:  "a", right: "b", op: "!=", result: "true"}
+  - {left:  "a", right: "b", op: "==", result: "false"}
+  - {left:  "a", right: "a", op: "==", result: "true"}
+  - {left:  "a", right: "null", op: "==", result: "false"}
+
+
+
+
+

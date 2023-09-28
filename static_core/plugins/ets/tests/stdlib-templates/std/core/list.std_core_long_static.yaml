@@ -1,0 +1,14 @@
+- {
+    method_name: valueOf,
+    object_type: Long,
+    param_init_data_types: {"param1":"long[]"} ,
+    param_types: {"param1":long},
+    param_nature: {"param1": primitive},
+    method_return_type: Long,
+    expected_data_item_type: long,
+    expected_data_type: "long[]",
+    param_list: {"param1": "[(-1) as long, 0 as long, 1 as long, Long.MAX_VALUE as long, Long.MIN_VALUE as long]"},
+    expected_test_data: "[(-1) as long, 0 as long, 1 as long, Long.MAX_VALUE as long, Long.MIN_VALUE as long]",
+    verify_test_result_function: compareWrapperObjectValue,
+  }
+

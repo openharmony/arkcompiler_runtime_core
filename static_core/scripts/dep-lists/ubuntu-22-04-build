@@ -1,0 +1,6 @@
+# List of dependencies for building Panda on Ubuntu 22.04
+cmake=3.*
+g++=4:11.2.0-*
+make=4.3-*
+ruby=1:3.0*            # Needed for a framework for automatic code generation written in Ruby
+ccache=4.5.1-*

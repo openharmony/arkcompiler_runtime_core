@@ -1,0 +1,16 @@
+.record IO <external>
+
+.function void IO.printI32(i32 a0) <external>
+
+.record For {
+	i32 name
+}
+
+.function void do(For a0) {
+	ldai 30
+	stobj a0, For.name
+	ldobj a0, For.name
+	sta v0
+	call.short IO.printI32, v0
+	return.void
+}

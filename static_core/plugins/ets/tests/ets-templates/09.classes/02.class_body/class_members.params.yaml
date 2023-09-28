@@ -1,0 +1,7 @@
+--- # List of valid class members
+class_members:
+  - "f: int;"
+  - "m(): void {}"
+  - "inner class B{}"
+  - "interface I{}"
+  - "enum Color {Red, Green}"

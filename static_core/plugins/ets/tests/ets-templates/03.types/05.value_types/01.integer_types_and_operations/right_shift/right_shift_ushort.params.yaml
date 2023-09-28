@@ -1,0 +1,16 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 0, right: 15, result: 0 }
+- { left: 1, right: 1, result: 0 }
+- { left: 1, right: 15, result: 0 }
+- { left: "UShort.MIN_VALUE as ushort", right: 1, result: 0 }
+- { left: "UShort.MIN_VALUE as ushort", right: 15, result: -1 }
+- { left: "UShort.MAX_VALUE as ushort", right: 1, result: 32767 }
+- { left: "UShort.MAX_VALUE as ushort", right: 15, result: 1 }
+- { left: "UShort.MAX_VALUE as ushort", right: 16, result: 0 }
+- { left: 32767, right: 2, result: 8191 }
+- { left: 1, right: 0, result: 1 }
+- { left: 42, right: 0, result: 42 }
+- { left: 1, right: -1, result: 0 }
+

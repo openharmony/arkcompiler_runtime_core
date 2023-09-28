@@ -1,0 +1,66 @@
+---
+cases:
+  - use: |-
+      // wrong type
+      if (i) return 1;
+
+  - use: |-
+      // wrong type
+      if (new Object()) return 1;
+
+  - use: |-
+      // wrong type
+      if ("xyz") return 1;
+
+  - use: |-
+      // wrong type
+      if (!null) return 1;
+
+  - use: |-
+      // missing statement in then branch
+      if (i == j)
+          if (i + j > 0)
+          else i = j
+      else
+          return 1;
+
+  - use: |-
+      // missing statement in else branch
+      if (i == j)
+          if (i + j > 0) i = j
+          else
+      else
+          return 1;
+
+  - use: |-
+      // missing parentheses
+      if i > j return 1;
+
+  - use: |-
+      // missing right parenthesis
+      if (i != j return 1;
+
+  - use: |-
+      // missing left parenthesis
+      if i != j) return 1;
+
+  - use: |-
+      // multiple statements, missing curly braces
+      if (i > j) ;; else ;;
+      return 1;
+
+  - use: |-
+      // missing left curly bracket in then branch
+      if (i > j) {}} else {}
+
+  - use: |-
+      // missing left curly bracket in else branch
+      if (i > j) {} else {}}
+
+  - use: |-
+      // missing right curly bracket in then branch
+      if (i > j) {{} else {}
+
+  - use: |-
+      // missing right curly bracket in else branch
+      if (i > j) {} else {{}

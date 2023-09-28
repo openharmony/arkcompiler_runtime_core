@@ -1,0 +1,13 @@
+--- # list of values
+values:
+- left: "uint = 4132901321"
+  right: >-
+    String = "str"
+  result: >-
+    "4132901321str"
+- left: >-
+    String = "str"
+  right: "uint = 4132901321"
+  result: >-
+    "str4132901321"
+

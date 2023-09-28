@@ -1,0 +1,321 @@
+/*
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package std.core;
+
+/**
+ * Represents boxed short value and related operations
+ */
+export final class Short extends Integral implements Comparable<Short>, JSONable<Short> {
+    private value: short;
+
+    /**
+     * Constructs a new Short instance with initial value zero
+     */
+    public constructor() {
+        this.value = 0;
+    }
+
+    /**
+     * Constructs a new Short instance with provided initial value
+     *
+     * @param value the initial value
+     */
+    public constructor(value: short) {
+        this.value = value;
+    }
+
+    /**
+     * Constructs a new Short instance with provided initial value
+     *
+     * @param value the initial value
+     */
+    public constructor(value: Short) {
+        this.value = value.shortValue();
+    }
+
+    /**
+     * Returns value of this instance as a primitive
+     *
+     * @returns value of this instance
+     */
+    public unboxed(): short {
+        return this.value;
+    }
+
+    /**
+     * Returns boxed representation of the primitive
+     *
+     * @param value value to box
+     *
+     * @returns boxed value
+     */
+    public static valueOf(value: short): Short {
+        // TODO(ivan-tyulyandin): caching is possible
+        return new Short(value);
+    }
+
+    /**
+     * Minimal value that this type can have as an shortegral
+     */
+    public static MIN_VALUE: long = -32768;
+
+    /**
+     * Maximal value that this type can have as an shortegral
+     */
+    public static MAX_VALUE: long = 32767;
+
+    /**
+     * Size of this type in bits
+     */
+    public static BIT_SIZE: byte = 16;
+
+    /**
+     * Size of this type in bytes
+     */
+    public static BYTE_SIZE: byte = 2;
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as short
+     */
+    public override byteValue(): byte {
+        return this.value as byte;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as short
+     */
+    public override shortValue(): short {
+        return this.value;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as short
+     */
+    public override intValue(): int {
+        return this.value as int;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as long
+     */
+    public override longValue(): long {
+        return this.value as long;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as float
+     */
+    public override floatValue(): float {
+        return this.value as float;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as double
+     */
+    public override doubleValue(): double {
+        return this.value as double;
+    }
+
+    /**
+     * Compares this instance to other Short object
+     * The result is less than 0 if this instance lesser than provided object
+     * 0 if they are equal
+     * and greater than 0 otherwise.
+     *
+     * @param other Short object to compare with
+     *
+     * @returns result of the comparison
+     */
+    public override compareTo(other: Short): int {
+        return (this.value - other.unboxed()) as int;
+    }
+
+    /**
+     * Converts this object to a string
+     *
+     * @returns result of the conversion
+     */
+    public override toString(): String {
+        // Check for zero, log10 would go inf otherwise
+        if (this.value == 0) {
+            return "0";
+        }
+        let val = this.value;
+        let negative: boolean = (val < 0);
+        let digitsNum = (log10(abs(this.value)) + 1) as int;
+        if (negative) {
+            ++digitsNum;
+        }
+        let data = new char[digitsNum];
+        let curPlace = digitsNum - 1;
+        while (val != 0) {
+            let remainder = val % 10;
+            if (negative) {
+                remainder = -remainder;
+            }
+            data[curPlace] = (remainder + c'0') as char;
+            val /= 10;
+            curPlace -= 1;
+        }
+        if (negative) {
+            data[0] = c'-';
+        }
+        return new String(data);
+    }
+
+    /**
+     * Returns a hash code (shorteger representation) for this instance
+     *
+     * @returns representation of this instance
+     */
+    public override hashCode(): int {
+        return this.intValue();
+    }
+
+    /**
+     * Checks for equality this instance with provided object, treated as a Short
+     *
+     * @param other object to be checked against
+     *
+     * @returns true if provided object and this instance have same value, false otherwise
+     * Returns false if type of provided object is not the same as this type
+     */
+    public override equals(other: Object|null): boolean {
+        if (other instanceof Short) {
+            return this.value == (other as Short).shortValue();
+        }
+        return false;
+    }
+
+    /**
+     * Performs shortegral addition of this instance with provided one, returns the result as new instance
+     *
+     * @param other Right hand side of the addition
+     *
+     * @returns Result of the addition
+     */
+    public add(other: Short): Short {
+        return Short.valueOf((this.value + other.shortValue()) as short)
+    }
+
+    /**
+     * Performs shortegral subtraction of this instance with provided one, returns the result as new instance
+     *
+     * @param other Right hand side of the subtraction
+     *
+     * @returns Result of the subtraction
+     */
+    public sub(other: Short): Short {
+        return Short.valueOf((this.value - other.shortValue()) as short)
+    }
+
+    /**
+     * Performs shortegral multiplication of this instance with provided one, returns the result as new instance
+     *
+     * @param other Right hand side of the multiplication
+     *
+     * @returns Result of the multiplication
+     */
+    public mul(other: Short): Short {
+        return Short.valueOf((this.value * other.shortValue()) as short)
+    }
+
+    /**
+     * Performs shortegral division of this instance with provided one, returns the result as new instance
+     *
+     * @param other Right hand side of the division
+     *
+     * @returns Result of the division
+     */
+    public div(other: Short): Short {
+        return Short.valueOf((this.value / other.shortValue()) as short)
+    }
+
+    /**
+     * Checks if this instance value is less than value of provided instance
+     *
+     * @param other Right hand side of the comparison
+     *
+     * @returns true if this value is less than provided, false otherwise
+     */
+    public isLessThan(other: Short): boolean {
+        return this.value < other.shortValue();
+    }
+
+    /**
+     * Checks if this instance value is less than or equal to value of provided instance
+     *
+     * @param other Right hand side of the comparison
+     *
+     * @returns true if this value is less than or equal to provided, false otherwise
+     */
+    public isLessEqualThan(other: Short): boolean {
+        return this.value <= other.shortValue();
+    }
+
+    /**
+     * Checks if this instance value is greater than value of provided instance
+     *
+     * @param other Right hand side of the comparison
+     *
+     * @returns true if this value is greater than provided, false otherwise
+     */
+    public isGreaterThan(other: Short): boolean {
+        return this.value > other.shortValue();
+    }
+
+    /**
+     * Checks if this instance value is greater than or equal to value of provided instance
+     *
+     * @param other Right hand side of the comparison
+     *
+     * @returns true if this value is greater than or equal to provided, false otherwise
+     */
+    public isGreaterEqualThan(other: Short): boolean {
+        return this.value >= other.shortValue();
+    }
+
+    /**
+     * Creates a Short instance based on JSONValue
+     *
+     * @param json: JSONValue - a JSON representation
+     *
+     * @throws JSONTypeError if json does not encode a valid short
+     *
+     * @returns Short - short value decoded from JSON
+     */
+    static createFromJSONValue(json: JSONValue): Short {
+        if (json instanceof JSONNumber) {
+            let num = (json as JSONNumber).value
+            if (Double.isInteger(num) && Short.MIN_VALUE <= num && num <= Short.MAX_VALUE) {
+                return Short.valueOf(num as short)
+            }
+        }
+        throw new JSONTypeError("Cannot create Short from JSON", json)
+    }
+}

@@ -1,0 +1,633 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+#include "ets_coroutine.h"
+#include "types/ets_string.h"
+#include "types/ets_array.h"
+#include "libpandabase/utils/utf.h"
+
+// NOLINTBEGIN(readability-magic-numbers)
+
+namespace panda::ets::test {
+class EtsStringTest : public testing::Test {
+public:
+    EtsStringTest()
+    {
+        options_.SetShouldLoadBootPandaFiles(true);
+        options_.SetShouldInitializeIntrinsics(false);
+        options_.SetCompilerEnableJit(false);
+        options_.SetGcType("epsilon");
+        options_.SetLoadRuntimes({"ets"});
+
+        auto stdlib = std::getenv("PANDA_STD_LIB");
+        if (stdlib == nullptr) {
+            std::cerr << "PANDA_STD_LIB env variable should be set and point to mock_stdlib.abc" << std::endl;
+            std::abort();
+        }
+        options_.SetBootPandaFiles({stdlib});
+
+        Runtime::Create(options_);
+    }
+
+    ~EtsStringTest() override
+    {
+        Runtime::Destroy();
+    }
+
+    NO_COPY_SEMANTIC(EtsStringTest);
+    NO_MOVE_SEMANTIC(EtsStringTest);
+
+    void SetUp() override
+    {
+        coroutine_ = EtsCoroutine::GetCurrent();
+        coroutine_->ManagedCodeBegin();
+    }
+
+    void TearDown() override
+    {
+        coroutine_->ManagedCodeEnd();
+    }
+
+private:
+    RuntimeOptions options_;
+    EtsCoroutine *coroutine_ = nullptr;
+};
+
+TEST_F(EtsStringTest, CreateFromUtf16)
+{
+    std::vector<ets_char> data {0xffc3, 0x33, 0x00};
+
+    EtsString *first_ets_string = EtsString::CreateFromUtf16(data.data(), data.size());
+
+    auto *first_string = reinterpret_cast<coretypes::String *>(first_ets_string);
+    auto *second_string = reinterpret_cast<const uint16_t *>(data.data());
+
+    ASSERT_TRUE(coretypes::String::StringsAreEqualUtf16(first_string, second_string, data.size()));
+}
+
+TEST_F(EtsStringTest, CreateFromMUtf8)
+{
+    std::vector<uint8_t> data {0x01, 0x41, 0x24, 0x00};
+    auto *mutf8_data = reinterpret_cast<const char *>(data.data());
+
+    EtsString *first_ets_string = EtsString::CreateFromMUtf8(mutf8_data);
+
+    auto *first_string = reinterpret_cast<coretypes::String *>(first_ets_string);
+    auto *second_string = reinterpret_cast<const uint8_t *>(data.data());
+
+    ASSERT_TRUE(coretypes::String::StringsAreEqualMUtf8(
+        first_string, second_string, data.size() - 1));  // need to subtract 1 'cause of 0 in the end of Mutf8 string
+}
+
+TEST_F(EtsStringTest, CreateFromMUtf8WithLenArg)
+{
+    std::vector<uint8_t> data {0x01, 0x41, 0x24, 0x00};
+    auto *mutf8_data = reinterpret_cast<const char *>(data.data());
+
+    EtsString *first_ets_string = EtsString::CreateFromMUtf8(
+        mutf8_data, data.size() - 1);  // need to subtract 1 'cause of 0 in the end of Mutf8 string
+
+    auto *first_string = reinterpret_cast<coretypes::String *>(first_ets_string);
+    auto *second_string = reinterpret_cast<const uint8_t *>(data.data());
+
+    ASSERT_TRUE(coretypes::String::StringsAreEqualMUtf8(
+        first_string, second_string, data.size() - 1));  // need to subtract 1 'cause of 0 in the end of Mutf8 string
+}
+
+TEST_F(EtsStringTest, ToCharArray)
+{
+    std::vector<uint8_t> data {'a', 'b', 'c', 'd', 'e', 0};
+    auto *mutf8_data = reinterpret_cast<const char *>(data.data());
+    EtsString *utf8_string = EtsString::CreateFromMUtf8(mutf8_data, data.size() - 1);
+    EtsArray *new_array = utf8_string->ToCharArray();
+
+    for (uint32_t i = 0; i < new_array->GetLength(); ++i) {
+        ASSERT_EQ(data[i], new_array->GetCoreType()->Get<uint16_t>(i));
+    }
+
+    std::vector<ets_char> data1 {'f', 'g', 'h', 'a', 'b', 0x8ab, 0xdc, 'z', 0};
+    EtsString *utf16_string = EtsString::CreateFromUtf16(data1.data(), data1.size());
+    EtsArray *new_array1 = utf16_string->ToCharArray();
+
+    for (uint32_t i = 0; i < new_array1->GetLength(); ++i) {
+        ASSERT_EQ(data1[i], new_array1->GetCoreType()->Get<uint16_t>(i));
+    }
+}
+
+TEST_F(EtsStringTest, CreateFromUtf8)
+{
+    std::vector<uint8_t> data {0x01, 0x41, 0x24, 0x32, 0x16, 0x08};
+    size_t first_string_length = data.size();
+    auto *utf8_data = reinterpret_cast<const char *>(data.data());
+
+    EtsString *first_ets_string = EtsString::CreateFromUtf8(utf8_data, first_string_length);
+    auto *first_string = reinterpret_cast<const uint8_t *>(data.data());
+
+    // Test full string
+    ASSERT_TRUE(
+        utf::IsEqual({first_ets_string->GetDataMUtf8(), first_string_length}, {first_string, first_string_length}));
+    ASSERT_TRUE(utf::IsEqual({first_ets_string->GetDataMUtf8(), first_string_length - 2},
+                             {first_string, first_string_length - 2}));
+
+    size_t third_string_length = first_string_length / 2;
+    EtsString *third_ets_string = EtsString::CreateFromUtf8(utf8_data, third_string_length);
+    auto *third_string = reinterpret_cast<coretypes::String *>(third_ets_string);
+
+    // Utf8 format, no need to have \0 at the end, so check half string
+    ASSERT_TRUE(utf::IsEqual({first_ets_string->GetDataMUtf8(), third_string_length},
+                             {third_string->GetDataMUtf8(), third_string_length}));
+    ASSERT_TRUE(utf::IsEqual({first_ets_string->GetDataMUtf8(), third_string_length - 1},
+                             {third_string->GetDataMUtf8(), third_string_length - 1}));
+}
+
+TEST_F(EtsStringTest, CreateNewStringFromChars)
+{
+    std::vector<ets_char> data {0x8ab, 0xdc, 'h', 'e', 'l', 'l', 'o', 0};
+
+    EtsString *utf16_string = EtsString::CreateFromUtf16(data.data(), data.size());
+    EtsArray *char_array = utf16_string->ToCharArray();
+
+    uint32_t begin_offset = 2;
+    uint32_t length = data.size() - begin_offset;
+
+    // make char array from subdata
+    std::vector<ets_char> subdata {'h', 'e', 'l', 'l', 'o', 0};
+
+    EtsString *expected_string = EtsString::CreateFromUtf16(subdata.data(), subdata.size());
+
+    EtsString *string_from_char_array = EtsString::CreateNewStringFromChars(begin_offset, length, char_array);
+
+    ASSERT_TRUE(coretypes::String::StringsAreEqual(reinterpret_cast<coretypes::String *>(expected_string),
+                                                   reinterpret_cast<coretypes::String *>(string_from_char_array)));
+}
+
+TEST_F(EtsStringTest, CreateNewStringFromString)
+{
+    std::vector<ets_char> data {0xffc3, 0x33, 0x00};
+
+    EtsString *string1 = EtsString::CreateFromUtf16(data.data(), data.size());
+    EtsString *string2 = EtsString::CreateFromUtf16(data.data(), data.size() - 1);
+    EtsString *created_string = EtsString::CreateNewStringFromString(string1);
+
+    ASSERT_TRUE(coretypes::String::StringsAreEqual(reinterpret_cast<coretypes::String *>(string1),
+                                                   reinterpret_cast<coretypes::String *>(created_string)));
+
+    ASSERT_FALSE(coretypes::String::StringsAreEqual(reinterpret_cast<coretypes::String *>(string2),
+                                                    reinterpret_cast<coretypes::String *>(created_string)));
+}
+
+TEST_F(EtsStringTest, CreateNewEmptyString)
+{
+    ets_char data = 0;
+    EtsString *str1 = EtsString::CreateFromUtf16(&data, 0);
+    EtsString *str2 = EtsString::CreateFromUtf16(&data, 1);
+    EtsString *str3 = EtsString::CreateNewEmptyString();
+
+    ASSERT_TRUE(coretypes::String::StringsAreEqual(reinterpret_cast<coretypes::String *>(str1),
+                                                   reinterpret_cast<coretypes::String *>(str3)));
+    ASSERT_FALSE(coretypes::String::StringsAreEqual(reinterpret_cast<coretypes::String *>(str2),
+                                                    reinterpret_cast<coretypes::String *>(str3)));
+}
+
+TEST_F(EtsStringTest, Compare)
+{
+    // utf8 vs utf8
+    std::vector<uint8_t> data1 {'a', 'b', 'c', 'd', 'z', 0};
+    std::vector<uint8_t> data2 {'a', 'b', 'c', 'd', 'z', 'x', 0};
+    std::vector<uint16_t> data3 {'a', 'b', 'c', 'd', 'z', 0};
+    std::vector<uint16_t> data4 {'a', 'b', 'd', 'c', 'z', 0};
+
+    auto *mutf8_data1 = reinterpret_cast<const char *>(data1.data());
+    auto *mutf8_data2 = reinterpret_cast<const char *>(data2.data());
+
+    EtsString *string1 = EtsString::CreateFromMUtf8(mutf8_data1);
+    EtsString *string2 = EtsString::CreateFromMUtf8(mutf8_data2);
+    EtsString *string3 = EtsString::CreateFromUtf16(data3.data(), data3.size() - 1);
+    EtsString *string4 = EtsString::CreateFromUtf16(data4.data(), data4.size() - 1);
+
+    ASSERT_EQ(false, string1->IsUtf16());
+    ASSERT_EQ(false, string2->IsUtf16());
+    ASSERT_EQ(false, string3->IsUtf16());
+    ASSERT_EQ(false, string4->IsUtf16());
+    ASSERT_LT(string1->Compare(string2), 0);
+    ASSERT_GT(string2->Compare(string1), 0);
+    ASSERT_EQ(string1->Compare(string3), 0);
+    ASSERT_EQ(string3->Compare(string1), 0);
+    ASSERT_LT(string2->Compare(string4), 0);
+    ASSERT_GT(string4->Compare(string2), 0);
+
+    // utf8 vs utf16
+    std::vector<uint16_t> data5 {'a', 'b', 0xab, 0xdc, 'z', 0};
+    EtsString *string5 = EtsString::CreateFromUtf16(data5.data(), data5.size() - 1);
+
+    ASSERT_EQ(true, string5->IsUtf16());
+    ASSERT_LT(string2->Compare(string5), 0);
+    ASSERT_GT(string5->Compare(string2), 0);
+    ASSERT_LT(string4->Compare(string5), 0);
+    ASSERT_GT(string5->Compare(string4), 0);
+
+    // utf16 vs utf16
+    std::vector<uint16_t> data6 {'a', 0xab, 0xab, 0};
+    EtsString *string6 = EtsString::CreateFromUtf16(data6.data(), data6.size() - 1);
+    EtsString *string7 = EtsString::CreateFromUtf16(data6.data(), data6.size() - 1);
+
+    ASSERT_EQ(true, string6->IsUtf16());
+    ASSERT_EQ(true, string7->IsUtf16());
+    ASSERT_LT(string5->Compare(string6), 0);
+    ASSERT_GT(string6->Compare(string5), 0);
+    ASSERT_EQ(string6->Compare(string7), 0);
+    ASSERT_EQ(string7->Compare(string6), 0);
+
+    // compare with self
+    ASSERT_EQ(string1->Compare(string1), 0);
+    ASSERT_EQ(string2->Compare(string2), 0);
+    ASSERT_EQ(string3->Compare(string3), 0);
+    ASSERT_EQ(string4->Compare(string4), 0);
+    ASSERT_EQ(string5->Compare(string5), 0);
+    ASSERT_EQ(string6->Compare(string6), 0);
+    ASSERT_EQ(string7->Compare(string7), 0);
+}
+
+TEST_F(EtsStringTest, Concat)
+{
+    // utf8 + utf8
+    std::vector<uint8_t> data1 {'H', 'e', 'l', 'l', 'o', 0};
+    std::vector<uint8_t> data2 {'w', 'o', 'r', 'l', 'd', '!', 0};
+    std::vector<uint8_t> data3;
+
+    data3.insert(data3.end(), data1.begin(), data1.end() - 1);
+    data3.insert(data3.end(), data2.begin(), data2.end());
+
+    auto *mutf8_data1 = reinterpret_cast<const char *>(data1.data());
+    auto *mutf8_data2 = reinterpret_cast<const char *>(data2.data());
+    auto *mutf8_data3 = reinterpret_cast<const char *>(data3.data());
+
+    EtsString *str1 = EtsString::CreateFromMUtf8(mutf8_data1);
+    EtsString *str2 = EtsString::CreateFromMUtf8(mutf8_data2);
+    EtsString *str3 = EtsString::Concat(str1, str2);
+    EtsString *expected_str1 = EtsString::CreateFromMUtf8(mutf8_data3);
+
+    ASSERT_EQ(str3->Compare(expected_str1), 0);
+    ASSERT_EQ(expected_str1->Compare(str3), 0);
+
+    // utf16 + utf16
+    std::vector<uint16_t> data4 {'a', 'b', 'c', 'd', 0};
+    std::vector<uint16_t> data5 {'e', 'f', 'g', 0};
+    std::vector<uint16_t> data6;
+
+    data6.insert(data6.end(), data4.begin(), data4.end() - 1);
+    data6.insert(data6.end(), data5.begin(), data5.end());
+
+    EtsString *str4 = EtsString::CreateFromUtf16(data4.data(), data4.size() - 1);
+    EtsString *str5 = EtsString::CreateFromUtf16(data5.data(), data5.size());
+    EtsString *str6 = EtsString::Concat(str4, str5);
+    EtsString *expected_str2 = EtsString::CreateFromUtf16(data6.data(), data6.size());
+
+    ASSERT_EQ(str6->Compare(expected_str2), 0);
+    ASSERT_EQ(expected_str2->Compare(str6), 0);
+
+    // utf8 + utf16
+    std::vector<uint16_t> data7;
+    data7.insert(data7.end(), data1.begin(), data1.end() - 1);
+    data7.insert(data7.end(), data4.begin(), data4.end() - 1);
+
+    EtsString *str7 = EtsString::Concat(str1, str4);
+    EtsString *expected_str3 = EtsString::CreateFromUtf16(data7.data(), data7.size());
+
+    ASSERT_EQ(str7->Compare(expected_str3), 0);
+    ASSERT_EQ(expected_str3->Compare(str7), 0);
+}
+
+TEST_F(EtsStringTest, At)
+{
+    // utf8
+    std::vector<uint8_t> data1 {'a', 'b', 'c', 'd', 'z', 0};
+    auto *mutf8_data1 = reinterpret_cast<const char *>(data1.data());
+    EtsString *string = EtsString::CreateFromMUtf8(mutf8_data1, data1.size() - 1);
+    ASSERT_EQ(false, string->IsUtf16());
+    for (uint32_t i = 0; i < data1.size() - 1; i++) {
+        ASSERT_EQ(data1[i], string->At(i));
+    }
+
+    // utf16
+    std::vector<uint16_t> data2 {'a', 'b', 0xab, 0xdc, 'z', 0};
+    string = EtsString::CreateFromUtf16(data2.data(), data2.size() - 1);
+    ASSERT_EQ(true, string->IsUtf16());
+    for (uint32_t i = 0; i < data2.size() - 1; i++) {
+        ASSERT_EQ(data2[i], string->At(i));
+    }
+
+    // utf16 -> utf8
+    std::vector<uint16_t> data3 {'a', 'b', 121, 122, 'z', 0};
+    string = EtsString::CreateFromUtf16(data3.data(), data3.size() - 1);
+    ASSERT_EQ(false, string->IsUtf16());
+    for (uint32_t i = 0; i < data3.size() - 1; i++) {
+        ASSERT_EQ(data3[i], string->At(i));
+    }
+}
+
+TEST_F(EtsStringTest, DoReplace)
+{
+    uint32_t len = 10;
+    std::vector<char> data1(len + 1);
+    std::vector<char> data2(len + 1);
+
+    for (uint32_t i = 0; i < len; i++) {
+        data1[i] = 'A' + i;
+        data2[i] = 'A' + i;
+    }
+
+    data1.front() = 'Z';
+    data1.back() = '\0';
+    data2.back() = '\0';
+
+    EtsString *str1 = EtsString::CreateFromMUtf8(data1.data());
+    EtsString *str2 = EtsString::CreateFromMUtf8(data2.data());
+    EtsString *str3 = EtsString::DoReplace(str1, 'Z', 'A');
+
+    ASSERT_NE(str1->Compare(str2), 0);
+    ASSERT_EQ(str2->Compare(str3), 0);
+}
+
+TEST_F(EtsStringTest, FastSubString)
+{
+    uint32_t str_len = 10;
+    uint32_t sub_str_len = 5;
+    uint32_t sub_str_start = 1;
+
+    std::vector<char> data1(str_len + 1);
+    std::vector<char> data2(sub_str_len + 1);
+
+    for (uint32_t i = 0; i < str_len; i++) {
+        data1[i] = 'A' + i;
+    }
+    data1.back() = '\0';
+
+    for (uint32_t i = 0; i < sub_str_len; i++) {
+        data2[i] = data1[sub_str_start + i];
+    }
+    data2.back() = '\0';
+
+    EtsString *str1 = EtsString::CreateFromMUtf8(data1.data());
+    EtsString *str2 = EtsString::CreateFromMUtf8(data2.data());
+    EtsString *str3 = EtsString::FastSubString(str1, sub_str_start, sub_str_len);
+
+    ASSERT_EQ(str3->Compare(str2), 0);
+}
+
+TEST_F(EtsStringTest, GetLength)
+{
+    // utf16
+    std::vector<uint16_t> data1 {0xffc3, 0x33, 0x00};
+    EtsString *str = EtsString::CreateFromUtf16(data1.data(), data1.size());
+    ASSERT_EQ(str->GetLength(), data1.size());
+
+    // utf8
+    std::vector<char> data2 {'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!', 0};
+    str = EtsString::CreateFromMUtf8(data2.data());
+
+    ASSERT_EQ(false, str->IsUtf16());
+    ASSERT_EQ(str->GetLength(), data2.size() - 1);
+}
+
+TEST_F(EtsStringTest, GetMUtf8Length)
+{
+    std::vector<char> data2 {'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!', 0};
+    EtsString *str = EtsString::CreateFromMUtf8(data2.data());
+    ASSERT_EQ(false, str->IsUtf16());
+    ASSERT_EQ(str->GetMUtf8Length(), data2.size());
+    ASSERT_EQ(str->GetMUtf8Length(), str->GetLength() + 1);
+}
+
+TEST_F(EtsStringTest, GetUtf16Length)
+{
+    std::vector<uint16_t> data1 {0xffc3, 0x33, 'a', 'b', 'c', 0x00};
+    EtsString *str = EtsString::CreateFromUtf16(data1.data(), data1.size());
+    ASSERT_EQ(true, str->IsUtf16());
+    ASSERT_EQ(str->GetUtf16Length(), data1.size());
+    ASSERT_EQ(str->GetLength(), str->GetUtf16Length());
+}
+
+TEST_F(EtsStringTest, CopyDataMUtf8)
+{
+    std::vector<char> data {'a', 'b', 'c', 'd', 'z', 0};
+    std::vector<char> copied_data_mutf8(data.size());
+    EtsString *str = EtsString::CreateFromMUtf8(data.data());
+
+    ASSERT_EQ(str->CopyDataMUtf8(copied_data_mutf8.data(), copied_data_mutf8.size(), true), data.size());
+    ASSERT_EQ(copied_data_mutf8, data);
+}
+
+TEST_F(EtsStringTest, CopyDataUtf16)
+{
+    std::vector<char> data {'a', 'b', 'c', 'd', 'z', 0};
+    EtsString *str = EtsString::CreateFromMUtf8(data.data());
+    std::vector<uint16_t> res_utf16 {'a', 'b', 'c', 'd', 'z'};
+    std::vector<uint16_t> copied_data_utf16(res_utf16.size());
+
+    ASSERT_EQ(str->CopyDataUtf16(copied_data_utf16.data(), copied_data_utf16.size()), res_utf16.size());
+    ASSERT_EQ(copied_data_utf16, res_utf16);
+}
+
+TEST_F(EtsStringTest, CopyDataRegionMUtf8)
+{
+    std::vector<char> data {'a', 'b', 'h', 'e', 'l', 'l', 'o', 'c', 'd', 'z', 0};
+    std::vector<char> res {'h', 'e', 'l', 'l', 'o', 0};
+    std::vector<char> copied_data_mutf8(res.size());
+    size_t start = 2;
+    size_t len = 5;
+    EtsString *str = EtsString::CreateFromMUtf8(data.data());
+
+    ASSERT_EQ(str->CopyDataRegionMUtf8(copied_data_mutf8.data(), start, len, copied_data_mutf8.size()), res.size() - 1);
+    ASSERT_EQ(copied_data_mutf8, res);
+
+    std::vector<uint16_t> res16 {'h', 'e', 'l', 'l', 'o'};
+    std::vector<uint16_t> copied_data_utf16(res16.size());
+
+    ASSERT_EQ(str->CopyDataRegionUtf16(copied_data_utf16.data(), start, len, copied_data_utf16.size()), res16.size());
+    ASSERT_EQ(copied_data_utf16, res16);
+}
+
+TEST_F(EtsStringTest, CopyDataRegionUtf16)
+{
+    std::vector<uint16_t> data {0xb7, 0xc7, 0xa4, 'h', 'e', 'l', 'l', 'o', 0xa7, 0};
+    std::vector<uint8_t> res {'h', 'e', 'l', 'l', 'o', 0};
+    std::vector<uint8_t> copied_data_mutf8(res.size());
+    size_t start = 3;
+    size_t len = 5;
+    EtsString *str = EtsString::CreateFromUtf16(data.data(), data.size());
+
+    ASSERT_EQ(str->CopyDataRegionMUtf8(copied_data_mutf8.data(), start, len, copied_data_mutf8.size()), res.size() - 1);
+    ASSERT_EQ(copied_data_mutf8, res);
+
+    std::vector<uint16_t> res16 {'h', 'e', 'l', 'l', 'o'};
+    std::vector<uint16_t> copied_data_utf16(res16.size());
+
+    ASSERT_EQ(str->CopyDataRegionUtf16(copied_data_utf16.data(), start, len, copied_data_utf16.size()), res16.size());
+    ASSERT_EQ(copied_data_utf16, res16);
+}
+
+TEST_F(EtsStringTest, IsEqual)
+{
+    std::vector<char> data1 {'a', 'b', 'c', 'd', 'e', 0};
+    std::vector<char> data2 {'a', 'b', 'c', 'd', 'f', 0};
+    char data3 = 0;
+
+    EtsString *str1 = EtsString::CreateFromMUtf8(data1.data());
+    EtsString *str2 = EtsString::CreateFromMUtf8(data2.data());
+    EtsString *str3 = EtsString::CreateNewEmptyString();
+
+    ASSERT_TRUE(str1->IsEqual(data1.data()));
+    ASSERT_TRUE(str2->IsEqual(data2.data()));
+    ASSERT_TRUE(str3->IsEqual(&data3));
+    ASSERT_FALSE(str1->IsEqual(data2.data()));
+    ASSERT_FALSE(str2->IsEqual(data1.data()));
+    ASSERT_FALSE(str1->IsEqual(&data3));
+    ASSERT_FALSE(str2->IsEqual(&data3));
+    ASSERT_FALSE(str3->IsEqual(data1.data()));
+    ASSERT_FALSE(str3->IsEqual(data2.data()));
+}
+
+TEST_F(EtsStringTest, IsEmpty)
+{
+    std::vector<char> data {'a', 'f', 'a', 0};
+    EtsString *str1 = EtsString::CreateFromMUtf8(data.data());
+    EtsString *str2 = EtsString::CreateNewEmptyString();
+
+    ASSERT_FALSE(str1->IsEmpty());
+    ASSERT_TRUE(str2->IsEmpty());
+}
+
+TEST_F(EtsStringTest, StringsAreEqual)
+{
+    std::vector<char> data1 {'a', 'b', 's', 'r', 'd', 'r', 0};
+    std::vector<char> data2 {'a', 'b', 's', 0};
+
+    EtsString *str1 = EtsString::CreateFromMUtf8(data1.data(), data1.size() - 1);
+    EtsString *str2 = EtsString::CreateFromMUtf8(data1.data(), data1.size() - 4);
+    EtsString *str3 = EtsString::CreateFromMUtf8(data2.data());
+
+    ASSERT_TRUE(str1->StringsAreEqual(reinterpret_cast<EtsObject *>(str1)));
+    ASSERT_TRUE(str2->StringsAreEqual(reinterpret_cast<EtsObject *>(str2)));
+    ASSERT_TRUE(str3->StringsAreEqual(reinterpret_cast<EtsObject *>(str3)));
+    ASSERT_TRUE(str2->StringsAreEqual(reinterpret_cast<EtsObject *>(str3)));
+    ASSERT_TRUE(str3->StringsAreEqual(reinterpret_cast<EtsObject *>(str2)));
+
+    ASSERT_FALSE(str1->StringsAreEqual(reinterpret_cast<EtsObject *>(str2)));
+    ASSERT_FALSE(str2->StringsAreEqual(reinterpret_cast<EtsObject *>(str1)));
+}
+
+TEST_F(EtsStringTest, GetCoreType)
+{
+    std::vector<char> data {'a', 'b', 'c', 'd', 0};
+    EtsString *str = EtsString::CreateFromMUtf8(data.data());
+    EtsString *empty_str = EtsString::CreateNewEmptyString();
+
+    ASSERT_EQ(reinterpret_cast<coretypes::String *>(str), str->GetCoreType());
+    ASSERT_EQ(reinterpret_cast<coretypes::String *>(empty_str), empty_str->GetCoreType());
+}
+
+TEST_F(EtsStringTest, FromEtsObject)
+{
+    std::vector<char> data {'a', 'b', 'c', 'd', 'e', 0};
+
+    EtsString *str1 = EtsString::CreateFromMUtf8(data.data());
+    EtsString *str3 = EtsString::CreateNewEmptyString();
+
+    ASSERT_EQ(str1->Compare(EtsString::FromEtsObject(reinterpret_cast<EtsObject *>(str1))), 0);
+    ASSERT_EQ(str3->Compare(EtsString::FromEtsObject(reinterpret_cast<EtsObject *>(str3))), 0);
+}
+
+TEST_F(EtsStringTest, CreateNewStringFromBytes)
+{
+    std::vector<uint8_t> data {'f', 'g', 'h', 'a', 'b', 0xab, 0xdc, 'z', 0};
+    uint32_t byte_array_length = 5;
+    uint32_t byte_array_offset = 1;
+    uint32_t high_byte = 1;
+
+    std::vector<uint16_t> data1(byte_array_length);
+    for (uint32_t i = 0; i < byte_array_length; ++i) {
+        data1[i] = (high_byte << 8U) + (data[i + byte_array_offset]);
+    }
+
+    EtsString *string1 = EtsString::CreateFromUtf16(data1.data(), byte_array_length);
+    EtsByteArray *byte_array = EtsByteArray::Create(data.size() - 1);
+
+    Span<uint8_t> sp(data.data(), data.size() - 1);
+    for (uint32_t i = 0; i < data.size() - 1; i++) {
+        byte_array->Set(i, sp[i]);
+    }
+
+    EtsString *result =
+        EtsString::CreateNewStringFromBytes(byte_array, high_byte, byte_array_offset, byte_array_length);
+
+    ASSERT_TRUE(result->StringsAreEqual(reinterpret_cast<EtsObject *>(string1)));
+}
+
+TEST_F(EtsStringTest, GetDataUtf16)
+{
+    std::vector<uint16_t> data = {'a', 'b', 'c', 'd', 'e', 0xac, 0};
+
+    EtsString *string1 = EtsString::CreateFromUtf16(data.data(), data.size());
+    ASSERT_TRUE(string1->IsUtf16());
+    EtsString *string2 = EtsString::CreateFromUtf16(string1->GetDataUtf16(), data.size());
+    ASSERT_TRUE(string2->IsUtf16());
+
+    ASSERT_TRUE(string1->StringsAreEqual(reinterpret_cast<EtsObject *>(string2)));
+}
+
+TEST_F(EtsStringTest, GetDataMUtf8)
+{
+    std::vector<char> data = {'a', 'b', 'c', 'd', 'e', 0};
+
+    EtsString *string1 = EtsString::CreateFromMUtf8(data.data());
+    ASSERT_FALSE(string1->IsUtf16());
+
+    std::vector<uint8_t> data2(string1->GetDataMUtf8(), string1->GetDataMUtf8() + data.size() - 1);  // NOLINT
+    data2.push_back(0);  // GetDataMUtf8 return array without 0
+
+    EtsString *string2 = EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(data2.data()));
+    ASSERT_FALSE(string2->IsUtf16());
+
+    ASSERT_TRUE(string1->StringsAreEqual(reinterpret_cast<EtsObject *>(string2)));
+}
+
+TEST_F(EtsStringTest, GetMutf8)
+{
+    std::vector<char> data = {'h', 'e', 'l', 'l', 'o', 0};
+
+    EtsString *string = EtsString::CreateFromMUtf8(data.data());
+    PandaString panda_string = string->GetMutf8();
+
+    ASSERT_EQ(strcmp(panda_string.data(), "hello"), 0);
+}
+
+TEST_F(EtsStringTest, Resolve)
+{
+    std::vector<uint8_t> data {'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!', 0};
+
+    EtsString *string1 = EtsString::Resolve(data.data(), data.size() - 1);
+    EtsString *string2 = EtsString::Resolve(data.data(), data.size() - 1);
+    EtsString *string3 = EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(data.data()));
+
+    ASSERT_EQ(string1, string2);
+    ASSERT_TRUE(string1->StringsAreEqual(reinterpret_cast<EtsObject *>(string3)));
+    ASSERT_TRUE(string2->StringsAreEqual(reinterpret_cast<EtsObject *>(string3)));
+}
+
+}  // namespace panda::ets::test
+
+// NOLINTEND(readability-magic-numbers)

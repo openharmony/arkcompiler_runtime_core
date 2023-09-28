@@ -1,0 +1,11 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 1 }
+- { left: 1, right: 1, result: 2 }
+- { left: 42, right: 24, result: 66 }
+- { left: 0, right: UInt.MAX_VALUE, result: UInt.MAX_VALUE }
+- { left: 1, right: UInt.MAX_VALUE, result: 4294967296 }
+- { left: 0, right: UInt.MIN_VALUE, result: UInt.MIN_VALUE }
+- { left: 1, right: UInt.MIN_VALUE, result: 1 }
+- { left: UInt.MIN_VALUE, right: UInt.MAX_VALUE, result: UInt.MAX_VALUE }
+

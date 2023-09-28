@@ -1,0 +1,6 @@
+---
+cases:
+  - { type: A, val: new B(), res: 1 }
+  - { type: B, val: new C(), res: 2 }
+  - { type: C, val: new C(), res: 2 }
+  - { type: I, val: new C(), res: 3 }

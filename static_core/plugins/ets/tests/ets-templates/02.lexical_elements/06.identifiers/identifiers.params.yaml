@@ -1,0 +1,107 @@
+--- # List of possible ident start symbols
+id_start:
+    - '$'
+    - '_'
+
+    # lowercase letters
+    - 'ѩ' # Cyrillic Small Letter Iotified Little Yus, U+0469
+    - '\uFB17' # Armenian Small Ligature Men Xeh
+    - 'я' # Cyrillic Small Letter Ya, U+044F
+    - 'î' # Latin Small Letter I with Circumflex, U+00EE
+
+    # uppercase letters
+    - 'Ǣ' # Latin Capital Letter Ae with Macron, U+01E2
+    - '\u{10CA0}' # Old Hungarian Capital Letter Ep
+    - 'Î' # Latin Capital Letter I with Circumflex, U+00CE
+
+    # titlecase letters
+    - 'ǅ' # Latin Capital Letter D with Small Letter Z with Caron, U+01C5
+    - '\u1FAF' # Greek Capital Letter Omega with Dasia and Perispomeni and Prosgegrammeni
+
+    # modifier letters
+    - '𖭃' # Pahawh Hmong Sign Ib Yam, U+16B43
+    - '\u{1E94B}' # Adlam Nasalization Mark
+    - 'ʻ' # Modifier Letter Turned Comma, U+02BB
+
+    # other letters
+    - 'ڀ' # Arabic Letter Beheh, U+0680
+    - '\u0A9D' # Gujarati Letter Jha
+    - '𐊧' # Carian Letter A2, U+102A7
+    - '\u{102A8}' # Carian Letter Q
+    - 'ǂ' # Latin Letter Alveolar Click, U+01C2
+    - '生' # CJK Unified Ideograph-751F, U+751F
+    - 'ヷ' # Katakana Letter Va, U+30F7
+    - 'ט' # Hebrew Letter Tet,U+05D8
+
+    # letter numbers
+    - '𒑨' # Cuneiform Numeric Sign Elamite Fifty, U+12468
+    - '\u{103D1}' # Old Persian Number One
+    - 'ⅲ' # Small Roman Numeral Three, U+2172
+
+    # other_id_start
+    - '℘' # Script Capital P, U+2118
+    - '\u{309B}' # Katakana-Hiragana Voiced Sound Mark
+
+id_continue:
+    # ID_Continue
+    - '0123456789'
+
+    # joiners
+    - '\u200D' # Zero Width Joiner
+    - '\u200C' # Zero Width Non-Joiner
+    - '\u200D\u200C'
+    - '' # No continue character
+
+    # non-spacing marks
+    - '\u{11127}' # Chakma Vowel Sign A
+    - '\u06E7' # Arabic Small High Yeh
+
+    # spacing marks
+    - '\u093B' # Devanagari Vowel Sign Ooe
+
+    # RTL languages
+    - 'شمس' # arabic word sun
+    - 'שמש' # hebrew word sun
+
+    # ID_Start is a part of ID_Continue:
+    - '$'
+    - '_'
+
+    # lowercase letters
+    - 'ѩ' # Cyrillic Small Letter Iotified Little Yus, U+0469
+    - '\uFB17' # Armenian Small Ligature Men Xeh
+    - 'я' # Cyrillic Small Letter Ya, U+044F
+    - 'î' # Latin Small Letter I with Circumflex, U+00EE
+
+    # uppercase letters
+    - 'Ǣ' # Latin Capital Letter Ae with Macron, U+01E2
+    - '\u{10CA0}' # Old Hungarian Capital Letter Ep
+    - 'Î' # Latin Capital Letter I with Circumflex, U+00CE
+
+    # titlecase letters
+    - 'ǅ' # Latin Capital Letter D with Small Letter Z with Caron, U+01C5
+    - '\u1FAF' # Greek Capital Letter Omega with Dasia and Perispomeni and Prosgegrammeni
+
+    # modifier letters
+    - '𖭃' # Pahawh Hmong Sign Ib Yam, U+16B43
+    - '\u{1E94B}' # Adlam Nasalization Mark
+    - 'ʻ' # Modifier Letter Turned Comma, U+02BB
+
+    # other letters
+    - 'ڀ' # Arabic Letter Beheh, U+0680
+    - '\u0A9D' # Gujarati Letter Jha
+    - '𐊧' # Carian Letter A2, U+102A7
+    - '\u{102A8}' # Carian Letter Q
+    - 'ǂ' # Latin Letter Alveolar Click, U+01C2
+    - '生' # CJK Unified Ideograph-751F, U+751F
+    - 'ヷ' # Katakana Letter Va, U+30F7
+    - 'ט' # Hebrew Letter Tet,U+05D8
+
+    # letter numbers
+    - '𒑨' # Cuneiform Numeric Sign Elamite Fifty, U+12468
+    - '\u{103D1}' # Old Persian Number One
+    - 'ⅲ' # Small Roman Numeral Three, U+2172
+
+    # other_id_start
+    - '℘' # Script Capital P, U+2118
+    - '\u{309B}' # Katakana-Hiragana Voiced Sound Mark

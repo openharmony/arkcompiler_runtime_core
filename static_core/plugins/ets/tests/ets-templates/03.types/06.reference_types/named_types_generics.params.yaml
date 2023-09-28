@@ -1,0 +1,4 @@
+--- # List of named type declarations
+named_types_generics:
+  - class a<G> {}
+  - interface b<G> {}

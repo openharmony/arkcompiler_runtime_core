@@ -1,0 +1,13 @@
+--- # Self dependency tests
+self_dependency:
+  - T
+  - U<T>
+  - U<W<T>>
+  - U<U<T>>
+  - T<U>
+
+# Top level class modifiers
+top_level_class_modifiers:
+  - ""
+  - abstract
+  - final

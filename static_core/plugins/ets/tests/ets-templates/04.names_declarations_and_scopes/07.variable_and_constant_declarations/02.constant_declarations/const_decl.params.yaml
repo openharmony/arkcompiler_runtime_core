@@ -1,0 +1,40 @@
+---
+cases:
+  - decl: 'const Const: int = 1;'
+    assert: Const == 1
+
+  - decl: 'const b = 1;'
+    assert: b == 1
+
+  - use: 'const c: int = 6, d = 1, e = "hello";'
+    assert: c == 6 && d == 1 && e == "hello"
+
+  - use: 'let a = 1; const b = a; a = 2;'
+    assert: b == 1
+
+  - use: 'let a:int; const b = a; a = 2;'
+    assert: b == 0
+
+  - decl: 'let a: Object|null;'
+    use: const b = a;
+    assert: b == null
+
+  - use: 'let a:int = 42; const b:long = a * 2;'
+    assert: b == 84 as long
+
+  - decl: 'const x = 42, y = 2 * x, z = 2 + y;'
+    assert: x == 42 && y == 84 && z == 86
+
+  - use: |-
+        const arr: int[] = [1, 2, 3];
+        arr[0] *= 2;
+        arr[1] += 2;
+        arr[2] /= 2;
+    assert: arr[0] == 2 && arr[1] == 4 && arr[2] == 1
+
+  - decl: |-
+      class A {
+          public fld: int;
+      }
+    use: 'const obj: A = new A(); obj.fld = 42;'
+    assert: obj.fld == 42;

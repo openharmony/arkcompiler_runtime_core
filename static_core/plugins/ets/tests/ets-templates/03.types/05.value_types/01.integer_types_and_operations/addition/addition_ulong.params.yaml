@@ -1,0 +1,11 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 1 }
+- { left: 1, right: 1, result: 2 }
+- { left: 42, right: 24, result: 66 }
+- { left: 0, right: ULong.MAX_VALUE, result: ULong.MAX_VALUE }
+- { left: 1, right: ULong.MAX_VALUE, result: 18446744073709551616 }
+- { left: 0, right: ULong.MIN_VALUE, result: ULong.MIN_VALUE }
+- { left: 1, right: ULong.MIN_VALUE, result: 1 }
+- { left: ULong.MIN_VALUE, right: ULong.MAX_VALUE, result: ULong.MAX_VALUE }
+

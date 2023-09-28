@@ -1,0 +1,11 @@
+--- # list of values
+values:
+- { left: 0, right: 0, result: "false" }
+- { left: 0, right: 1, result: "true" }
+- { left: 1, right: 0, result: "false" }
+- { left: "Char.MIN_VALUE as char", right: 0, result: "true" }
+- { left: "Char.MIN_VALUE as char", right: 4203, result: "true" }
+- { left: "Char.MIN_VALUE as char", right: "Char.MAX_VALUE as char", result: "true" }
+- { left: "Char.MIN_VALUE as char", right: "Char.MIN_VALUE as char", result: "false" }
+- { left: 21234, right: 21234, result: "false" }
+

@@ -1,0 +1,9 @@
+---
+cases:
+  - { type: byte, val: 42, len: 42 }
+  - { type: short, val: '0xff', len: 255 }
+  - { type: char, val: "c'B'", len: 66 }
+  - { type: Byte, val: new Byte(127 as byte), len: 127 }
+  - { type: Short, val: new Short(0x1ff as short), len: 511 }
+  - { type: Char, val: new Char(c'\u0200'), len: 512 }
+  - { type: Int, val: new Int(129), len: 129 }

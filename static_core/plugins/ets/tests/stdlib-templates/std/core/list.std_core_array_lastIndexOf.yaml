@@ -1,0 +1,49 @@
+- {
+    method_name: lastIndexOf,
+    method_nature: function,
+    result_type: int,
+    method_signature: { arr: "boolean[]", key: "boolean", fromIndex: int },
+    method_signature_desc: {arr: boolean_array, key: boolean, fromIndex: int},
+    method_throws: "true",
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[false, true, false, true]",
+            key: "false",
+            fromIndex: 0,
+          },
+        test2:
+          {
+            arr: "[false, true, false, true]",
+            key: "false",
+            fromIndex: 1,
+          },
+        test3:
+          {
+            arr: "[false, true, false, true]",
+            key: "false",
+            fromIndex: 2,
+          },
+        test4:
+          {
+            arr: "[false, true, false, true]",
+            key: "false",
+            fromIndex: 3,
+          },
+        test5:
+          {
+            arr: "[false, false, false, false]",
+            key: "true",
+            fromIndex: 3,
+          },
+      },
+    method_expected_data:
+      {
+        test1: 0,
+        test2: 0,
+        test3: 2,
+        test4: 2,
+        test5: KEY_NOT_FOUND,
+      },
+  }

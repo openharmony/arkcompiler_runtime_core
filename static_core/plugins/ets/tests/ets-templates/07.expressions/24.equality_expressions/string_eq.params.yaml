@@ -1,0 +1,18 @@
+--- # List of boolean equality operators
+string_eq:
+  - {left:  '"a"',   right:  '"a"',   op: "==", result:  "true"}
+  - {left:  '"aa"',  right:  '"aa"',  op: "==", result:  "true"}
+  - {left:  '"aaa"', right:  '"aaa"', op: "==", result:  "true"}
+
+  - {left:  '"a"',   right:  '"b"',   op: "==", result:  "false"}
+  - {left:  '"aa"',  right:  '"ba"',  op: "==", result:  "false"}
+  - {left:  '"aaa"', right:  '"aba"', op: "==", result:  "false"}
+
+  - {left:  '"a"',   right:  '"a"',   op: "!=", result:  "false"}
+  - {left:  '"aa"',  right:  '"aa"',  op: "!=", result:  "false"}
+  - {left:  '"aaa"', right:  '"aaa"', op: "!=", result:  "false"}
+
+  - {left:  '"a"',   right:  '"b"',   op: "!=", result:  "true"}
+  - {left:  '"aa"',  right:  '"ba"',  op: "!=", result:  "true"}
+  - {left:  '"aaa"', right:  '"aba"', op: "!=", result:  "true"}
+

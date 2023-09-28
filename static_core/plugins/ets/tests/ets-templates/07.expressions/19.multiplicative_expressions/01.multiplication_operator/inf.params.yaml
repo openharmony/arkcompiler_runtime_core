@@ -1,0 +1,6 @@
+--- # List of multiplications where INF involved
+inf:
+  - {x: Double.POSITIVE_INFINITY, y:  1.0, result: Double.POSITIVE_INFINITY} 
+  - {x: Double.POSITIVE_INFINITY, y: -1.0, result: Double.NEGATIVE_INFINITY} 
+  - {x: Double.NEGATIVE_INFINITY, y: -1.0, result: Double.POSITIVE_INFINITY}
+  - {x: Double.NEGATIVE_INFINITY, y:  1.0, result: Double.NEGATIVE_INFINITY}

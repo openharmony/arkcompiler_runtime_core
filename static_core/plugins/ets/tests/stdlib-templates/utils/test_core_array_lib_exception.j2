@@ -1,0 +1,5 @@
+{%- for test_name, test_data in item.method_test_index_data.items() %}
+{% include 'utils/test_function_template_exception.j2' with context %}
+{% endfor %}
+{% include 'utils/test_main_function.j2' with context %}
+{% include 'utils/test_check_test_exception_result.j2' with context %}

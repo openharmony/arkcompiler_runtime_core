@@ -1,0 +1,11 @@
+---
+cases:
+  - use: foo1 <in> (new X())
+  - use: foo1 <in X> (new X())
+  - use: foo1 <out> (new X())
+  - use: foo1 <out X> (new X())
+
+  - use: let v = foo2 <in> (new X())
+  - use: let v = foo2 <in X> (new X())
+  - use: let v = foo2 <out> (new X())
+  - use: let v = foo2 <out X> (new X())

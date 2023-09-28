@@ -1,0 +1,15 @@
+--- # List of soft keywords
+keywords:
+    - 'catch'
+    - 'declare'
+    - 'default'
+    - 'finally'
+    - 'from'
+    - 'get'
+    - 'in'
+    - 'of'
+    - 'out'
+    - 'readonly'
+    - 'rethrows'
+    - 'set'
+    - 'throws'

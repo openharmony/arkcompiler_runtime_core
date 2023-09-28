@@ -1,0 +1,27 @@
+--- # List of invalid integer literals
+
+incorrect_int_literals:
+    - '0x'
+    - '0_xFFFF'
+    - '0x_FFFF'
+
+    - '0o'
+    - '0_o777'
+    - '0o_777'
+
+    - '0b'
+    - '0_b0111111111111'
+    - '0b_0111111111111'
+
+    - '0$'
+
+    - '_567'
+    - '567_'
+    - '5___6___7'
+
+    - '0xABCDEFGH'
+    - '0o0123456789'
+    - '0b0120120120'
+
+    - '00xABCDEFGH'
+    - 'xABCDEFGH'

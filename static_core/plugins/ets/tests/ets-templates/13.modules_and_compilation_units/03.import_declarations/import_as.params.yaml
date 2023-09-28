@@ -1,0 +1,11 @@
+--- # List of classes in package
+classes:
+  - sin
+  - PI
+  - abs
+
+  # List of simple words that can be used as identifiers
+words:
+  - x
+  - imported
+  - lib

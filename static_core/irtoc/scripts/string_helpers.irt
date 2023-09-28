@@ -1,0 +1,187 @@
+#!/usr/bin/env ruby
+
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+macro(:load_diff) do |ptr1, ptr2, offset|
+    Xor(LoadI(ptr1).Imm(Constants::STRING_DATA_OFFSET + " + " + offset.to_s).u64,
+        LoadI(ptr2).Imm(Constants::STRING_DATA_OFFSET + " + " + offset.to_s).u64).u64
+end
+
+macro(:unpack_length) do |compression, length_shift|
+    if compression
+        char_length := ShrI(length).Imm(length_shift).u64
+        not_compressed := AndI(length).Imm(1).u64
+        length := Shl(char_length, not_compressed).u64
+    elsif length_shift != 0
+        length := ShrI(length).Imm(length_shift).u64
+    end
+end
+
+def GenerateStringEquals(lang, dynamic, compression)
+    suffix = (compression ? "Compressed" : "")
+    length_shift = (dynamic ? 2 : 1)
+    mode = [:FastPath]
+    mode.push(:DynamicMethod, :DynamicStub) if dynamic
+    reg_mask = Options.arch == :arm64 ? RegMask.new($full_regmap, :arg0, :arg1, :tmp0, :tmp1, :callee0, :callee2) :
+        RegMask.new($full_regmap, :arg0, :arg1, :tmp0, :tmp1, :callee0, :caller1)
+
+    function("#{lang}StringEquals#{suffix}".to_sym,
+            params: {str1: 'ref', str2: 'ref'},
+            regmap: $full_regmap,
+            regalloc_set: reg_mask,
+            mode: mode,
+            lang: lang.empty? ? 'PANDA_ASSEMBLY' : lang.upcase) {
+        # Arm32 is not supported
+        # length shift should be from 0 to 2
+        if Options.arch == :arm32 || length_shift > 2
+            Intrinsic(:UNREACHABLE).void.Terminator
+            next
+        end
+        unless dynamic
+            If(str2, 0).CC(:CC_EQ).b {
+                Goto(:NotEqual)
+            }
+        end
+        If(str1, str2).CC(:CC_EQ).b {
+            Return(1).b
+        }
+        if dynamic
+            length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+            length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
+            length1 := AndI(length1).Imm("~(2U)").u32
+            length2 := AndI(length2).Imm("~(2U)").u32
+            If(length1, length2).CC(:CC_NE).b {
+                Goto(:NotEqual)
+            }
+            length := Cast(length1.u32).u64
+        else
+            # assume STRING_LENGTH_OFFSET == OBJECT_CLASS_OFFSET + 4
+            class_and_length1 := LoadI(str1).Imm(Constants::OBJECT_CLASS_OFFSET).u64
+            class_and_length2 := LoadI(str2).Imm(Constants::OBJECT_CLASS_OFFSET).u64
+            If(class_and_length1, class_and_length2).CC(:CC_NE).b {
+                Goto(:NotEqual)
+            }
+            length := Shr(class_and_length1, 32).u64
+        end
+        unpack_length(compression, length_shift)
+        If(length, 8).CC(:CC_GT).b {
+            Goto(:Long)
+        }
+        odd_bytes := Sub(8, length).u64
+        last_idx := Sub(Constants::STRING_DATA_OFFSET, odd_bytes).u64
+        buf1 := Load(str1, last_idx).u64
+        buf2 := Load(str2, last_idx).u64
+        odd_bits := Shl(odd_bytes, 3).u64
+        diff := Shr(Xor(buf1, buf2).u64, odd_bits).u64
+        res := Compare(diff, 0).CC(:CC_EQ).b
+        if dynamic
+            # If length is 0, odd_bits is 64 and Shr above does nothing, so we effectively compare last 8 bytes of two strings
+            # before their data (length and hash code). Hash code for empty string is always 0, but value stored in length field
+            # of equal strings can be different in dynamic implementation, so we check (length == 0) separately
+            res := Or(res, Compare(length, 0).CC(:CC_EQ).b).b
+        end
+        Return(res).b
+
+    Label(:Long)
+        unroll := Compare(length, 64).CC(:CC_GE).b
+        IfImm(unroll).Imm(0).SrcType("DataType::BOOL").CC(:CC_NE).b {
+            LiveOut(Cast(str1).SrcType("DataType::REFERENCE").ptr).DstReg(regmap[:arg0]).ptr
+            LiveOut(Cast(str2).SrcType("DataType::REFERENCE").ptr).DstReg(regmap[:arg1]).ptr
+            entrypoint_id = "#{lang.empty? ? '' : lang.upcase + '_'}STRING_EQUALS_UNROLL" + (compression ? "_COMPRESSED" : "");
+            entrypoint_offset = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::#{entrypoint_id})"
+            Intrinsic(:TAIL_CALL).AddImm(entrypoint_offset).Terminator.v0id
+        }
+        first_idx := Constants::STRING_DATA_OFFSET
+        last_idx := Sub(Add(first_idx, length).u64, 8).u64
+
+    Label(:Loop)
+        idx := Phi(first_idx, next_idx).u64
+        buf1 := Load(str1, idx).u64
+        buf2 := Load(str2, idx).u64
+        If(buf1, buf2).CC(:CC_NE).b {
+            Goto(:NotEqual)
+        }
+        next_idx := Add(idx, 8).u64
+        If(next_idx, last_idx).CC(:CC_GE).b {
+            buf1 := Load(str1, last_idx).u64
+            buf2 := Load(str2, last_idx).u64
+            res := Compare(buf1, buf2).CC(:CC_EQ).b
+            Return(res).b
+        }
+        Goto(:Loop)
+    Label(:NotEqual)
+        Return(0).b
+    }
+
+    reg_mask = Options.arch == :arm64 ?
+        RegMask.new($full_regmap, :arg0, :arg1, :callee0, :callee1, :callee2, :callee3, :callee4, :callee5, :callee6, :callee7, :tmp0, :tmp1) :
+        $panda_mask + :tmp0 + :tmp1 + :tr
+
+    function("#{lang}StringEqualsUnroll#{suffix}".to_sym,
+          params: {str1: 'ptr', str2: 'ptr'},
+          regmap: $full_regmap,
+          regalloc_set: reg_mask,
+          mode: mode,
+          lang: lang.empty? ? 'PANDA_ASSEMBLY' : lang.upcase) {
+        if Options.arch == :arm32
+            Intrinsic(:UNREACHABLE).void.Terminator
+            next
+        end
+        # Compare first 32 bytes
+        buf1 := LoadI(str1).Imm(Constants::STRING_DATA_OFFSET).u64
+        buf2 := LoadI(str2).Imm(Constants::STRING_DATA_OFFSET).u64
+        If(buf1, buf2).CC(:CC_NE).b {
+            Goto(:NotEqual)
+        }
+        diff := load_diff(str1, str2, 8)
+        diff := Or(diff, load_diff(str1, str2, 16)).u64
+        diff := Or(diff, load_diff(str1, str2, 24)).u64
+        If(diff, 0).CC(:CC_NE).b {
+            Goto(:NotEqual)
+        }
+        length := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        length := Cast(length).SrcType("DataType::UINT32").u64
+        unpack_length(compression, length_shift)
+        last_buf_index := SubI(length).Imm(32).u64
+        last_ptr1 := Add(str1, last_buf_index).ptr
+        last_ptr2 := Add(str2, last_buf_index).ptr
+        first_ptr1 := AddI(str1).Imm(32).ptr
+        first_ptr2 := AddI(str2).Imm(32).ptr
+    Label(:Loop)
+        ptr1 := Phi(first_ptr1, next_ptr1).ptr
+        ptr2 := Phi(first_ptr2, next_ptr2).ptr
+        diff := load_diff(ptr1, ptr2, 0)
+        diff := Or(diff, load_diff(ptr1, ptr2, 8)).u64
+        diff := Or(diff, load_diff(ptr1, ptr2, 16)).u64
+        diff := Or(diff, load_diff(ptr1, ptr2, 24)).u64
+        If(diff, 0).CC(:CC_NE).b {
+            Goto(:NotEqual)
+        }
+        next_ptr1 := Add(ptr1, 32).ptr
+        If(next_ptr1, last_ptr1).CC(:CC_GE).b {
+            diff := load_diff(last_ptr1, last_ptr2, 0)
+            diff := Or(diff, load_diff(last_ptr1, last_ptr2, 8)).u64
+            diff := Or(diff, load_diff(last_ptr1, last_ptr2, 16)).u64
+            diff := Or(diff, load_diff(last_ptr1, last_ptr2, 24)).u64
+            If(diff, 0).CC(:CC_NE).b {
+                Goto(:NotEqual)
+            }
+            Return(1).b
+        }
+        next_ptr2 := Add(ptr2, 32).ptr
+        Goto(:Loop)
+    Label(:NotEqual)
+        Return(0).b
+    }
+end

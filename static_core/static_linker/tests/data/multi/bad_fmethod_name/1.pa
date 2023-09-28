@@ -1,0 +1,13 @@
+.record IO <external>
+.record panda.String <external>
+.function void IO.printString(panda.String a0) <external>
+
+.record Foo.Bar <external>
+
+.function void Foo.Bar.foo(Foo.Bar a0) <external>
+
+.function void main() {
+	initobj.short Foo.Bar.foo
+	sta.obj v0
+	return.void
+}

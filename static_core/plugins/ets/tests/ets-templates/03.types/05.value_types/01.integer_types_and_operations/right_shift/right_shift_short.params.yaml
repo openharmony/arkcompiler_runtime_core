@@ -1,0 +1,21 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 0, right: 31, result: 0 }
+- { left: 1, right: 1, result: 0 }
+- { left: 1, right: 31, result: 0 }
+- { left: -1, right: 1, result: -1 }
+- { left: -1, right: 31, result: -1 }
+- { left: "Short.MIN_VALUE as short", right: 1, result: -16384 }
+- { left: "Short.MIN_VALUE as short", right: 31, result: -1 }
+- { left: "Short.MAX_VALUE as short", right: 1, result: 16383 }
+- { left: "Short.MAX_VALUE as short", right: 14, result: 1 }
+- { left: "Short.MAX_VALUE as short", right: 15, result: 0 }
+- { left: 16383, right: 2, result: 4095 }
+- { left: 1, right: 0, result: 1 }
+- { left: -1, right: 0, result: -1 }
+- { left: 42, right: 0, result: 42 }
+- { left: 1, right: -1, result: 0 }
+- { left: -1, right: -1, result: -1 }
+- { left: -1, right: -2, result: -1 }
+

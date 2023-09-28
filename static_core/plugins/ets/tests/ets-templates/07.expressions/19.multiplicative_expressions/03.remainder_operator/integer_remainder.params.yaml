@@ -1,0 +1,18 @@
+--- # List of integer remainder tests
+integer_mod:
+  - {x:  0, y:  1, result: 0}
+  - {x:  1, y:  1, result: 0}
+  - {x:  0, y: -1, result: 0}
+  - {x: -1, y: -1, result: 0}
+
+  - {x:  2, y:  2, result: 0}
+  - {x:  2, y:  1, result: 0}
+  - {x:  1, y:  2, result: 1}
+  - {x:  2, y: -1, result: 0}
+  - {x: -2, y:  1, result: 0}
+
+  - {x:  5, y:  2, result: 1}
+  - {x:  7, y:  2, result: 1}
+  - {x:  7, y:  3, result: 1}
+  - {x:  3, y:  7, result: 3}
+  - {x:  8, y:  3, result: 2}

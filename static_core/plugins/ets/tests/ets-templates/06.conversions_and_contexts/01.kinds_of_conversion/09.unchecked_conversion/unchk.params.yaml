@@ -1,0 +1,45 @@
+---
+cases:
+  - defs: |-
+      interface I {}
+      interface J extends I {}
+      interface K {}
+      class A {}
+      class B extends A implements K {}
+      class Klass<T, U, V> {}
+    stype: Klass<>
+    val: new Klass<B, A, I>()
+    dtype: Klass<B, A, I>
+
+  - defs: |-
+      interface I {}
+      interface J extends I {}
+      interface K {}
+      class A {}
+      class B extends A implements K {}
+      class Klass<T, U, V extends I> {}
+    stype: Klass<>[][]
+    val: new Klass<B, A, J>[2][2]
+    dtype: Klass<B, A, J>[][]
+
+  - defs: |-
+      interface I {}
+      interface J extends I {}
+      interface K {}
+      class A {}
+      class B extends A implements K {}
+      class Klass<T, U, V> {}
+    stype: Klass<>
+    val: new Klass<B, A, I>()
+    dtype: Klass<A, B, J>
+
+  - defs: |-
+      interface I {}
+      interface J extends I {}
+      interface K {}
+      class A {}
+      class B extends A implements K {}
+      class Klass<T, U, V extends I> {}
+    stype: Klass<>[][]
+    val: new Klass<B, A, J>[2][2]
+    dtype: Klass<A, B, I>[][]

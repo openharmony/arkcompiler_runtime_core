@@ -1,0 +1,14 @@
+.record A <external>
+.record B {}
+
+.record Foo.Bar <external> {
+	A fld <external>
+	i32 n <external>
+}
+
+.function void main() {
+	newobj v0, Foo.Bar
+	ldobj.obj v0, Foo.Bar.fld
+	ldobj v0, Foo.Bar.n
+	return.void
+}

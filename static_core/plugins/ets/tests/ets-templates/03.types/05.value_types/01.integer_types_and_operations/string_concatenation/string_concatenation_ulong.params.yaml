@@ -1,0 +1,13 @@
+--- # list of values
+values:
+- left: "ulong = 18232989891237899123"
+  right: >-
+    String = "str"
+  result: >-
+    "18232989891237899123str"
+- left: >-
+    String = "str"
+  right: "ulong = 18232989891237899123"
+  result: >-
+    "str18232989891237899123"
+

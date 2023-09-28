@@ -1,0 +1,10 @@
+--- # list of values
+values:
+- { left: 0, right: 1, result: 0 }
+- { left: 1, right: 1, result: 0 }
+- { left: 1, right: "UByte.MAX_VALUE as ubyte", result: 1 }
+- { left: "UByte.MIN_VALUE as ubyte", right: "UByte.MAX_VALUE as ubyte", result: 0 }
+- { left: "0xfe", right: 2, result: 0 }
+- { left: "0xfd", right: 2, result: 1 }
+- { left: "0xfc", right: 3, result: 0 }
+

@@ -1,0 +1,7 @@
+---
+cases:
+    - { totype: C, fromtype: B, fromval: new B() }
+    - { totype: J, fromtype: R, fromval: new R() }
+    - { totype: R, fromtype: C, fromval: new C() }
+    - { totype: "C[]", fromtype: "A[]", fromval: "new A[6]" }
+    - { totype: "R[][][]", fromtype: "C[][][]", fromval: "new C[1][2][3]" }

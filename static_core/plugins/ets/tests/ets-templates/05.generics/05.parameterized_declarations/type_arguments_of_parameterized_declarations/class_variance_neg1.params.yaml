@@ -1,0 +1,13 @@
+---
+cases:
+  - variance: "in "
+    use: |-
+        let v: A<out String> = new A<String>("AAA")
+
+  - variance: "in "
+    use: |-
+        let v: A<out> = new A<Object|null>(null)
+
+  - variance: "out "
+    use: |-
+        let v: A<in String> = new A<String>("AAA")

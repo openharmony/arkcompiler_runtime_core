@@ -1,0 +1,23 @@
+--- # list of values
+values:
+- left: "short = 32233"
+  right: >-
+    String = "str"
+  result: >-
+    "32233str"
+- left: >-
+    String = "str"
+  right: "short = 32233"
+  result: >-
+    "str32233"
+- left: "short = -29181"
+  right: >-
+    String = "str"
+  result: >-
+    "-29181str"
+- left: >-
+    String = "str"
+  right: "short = -42"
+  result: >-
+    "str-42"
+

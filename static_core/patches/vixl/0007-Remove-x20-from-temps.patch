@@ -1,0 +1,52 @@
+From a1273ddd21883cb5efd8408c12cc7a486950e44b Mon Sep 17 00:00:00 2001
+From: Aleksandr Popov <popov.aleksandr1@huawei.com>
+Date: Tue, 23 Aug 2022 17:00:59 +0300
+Subject: [PATCH] Remove x20 from temps
+
+---
+ src/aarch64/macro-assembler-aarch64.cc | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/aarch64/macro-assembler-aarch64.cc b/src/aarch64/macro-assembler-aarch64.cc
+index 0bc8268b..4ae68beb 100644
+--- a/src/aarch64/macro-assembler-aarch64.cc
++++ b/src/aarch64/macro-assembler-aarch64.cc
+@@ -363,7 +363,7 @@ MacroAssembler::MacroAssembler(panda::ArenaAllocator* allocator,
+ #endif
+       generate_simulator_code_(VIXL_AARCH64_GENERATE_SIMULATOR_CODE),
+       sp_(sp),
+-      tmp_list_(ip0, ip1, x20),
++      tmp_list_(ip0, ip1),
+       v_tmp_list_(d30, d31),
+       p_tmp_list_(CPURegList::Empty(CPURegister::kPRegister)),
+       current_scratch_scope_(NULL),
+@@ -394,7 +394,7 @@ MacroAssembler::MacroAssembler(size_t capacity,
+ #endif
+       generate_simulator_code_(VIXL_AARCH64_GENERATE_SIMULATOR_CODE),
+       sp_(sp),
+-      tmp_list_(ip0, ip1, x20),
++      tmp_list_(ip0, ip1),
+       v_tmp_list_(d30, d31),
+       p_tmp_list_(CPURegList::Empty(CPURegister::kPRegister)),
+       current_scratch_scope_(NULL),
+@@ -416,7 +416,7 @@ MacroAssembler::MacroAssembler(byte* buffer,
+ #endif
+       generate_simulator_code_(VIXL_AARCH64_GENERATE_SIMULATOR_CODE),
+       sp_(sp),
+-      tmp_list_(ip0, ip1, x20),
++      tmp_list_(ip0, ip1),
+       v_tmp_list_(d30, d31),
+       p_tmp_list_(CPURegList::Empty(CPURegister::kPRegister)),
+       current_scratch_scope_(NULL),
+@@ -436,7 +436,7 @@ MacroAssembler::MacroAssembler(panda::ArenaAllocator* allocator, byte* buffer,
+ #endif
+       generate_simulator_code_(VIXL_AARCH64_GENERATE_SIMULATOR_CODE),
+       sp_(sp),
+-      tmp_list_(ip0, ip1, x20),
++      tmp_list_(ip0, ip1),
+       v_tmp_list_(d30, d31),
+       p_tmp_list_(CPURegList::Empty(CPURegister::kPRegister)),
+       current_scratch_scope_(NULL),
+-- 
+2.25.1
+

@@ -1,0 +1,7 @@
+--- # List of valid array composites
+array_composite:
+  - {array: [], type: int}
+  - {array: [1], type: int}
+  - {array: [1, 2, 3], type: int}
+  - {array: [3.1415926], type: double}
+  - {array: '["aaa", "bbb"]', type: String}
