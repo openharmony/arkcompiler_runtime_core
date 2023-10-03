@@ -83,13 +83,13 @@ class Runner(ABC):
         self.panda_source_root = path.dirname(path.dirname(current_folder_parent))
         default_ets_arktsconfig = path.join(
             config.general.build,
-            "plugins", "ecmascript", "es2panda", "generated", "arktsconfig.json"
+            "plugins", "es2panda", "generated", "arktsconfig.json"
         )
         if not path.exists(default_ets_arktsconfig):
             default_ets_arktsconfig = path.join(
                 config.general.build,
                 "gen",  # for GN build
-                "plugins", "ecmascript", "es2panda", "generated", "arktsconfig.json"
+                "plugins", "es2panda", "generated", "arktsconfig.json"
             )
 
         # Roots:

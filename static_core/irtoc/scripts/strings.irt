@@ -18,3 +18,9 @@ include_relative 'string_helpers.irt'
 
 GenerateStringEquals(lang='', dynamic=false, compressed=true)
 GenerateStringEquals(lang='', dynamic=false, compressed=false)
+GenerateCreateStringFromStringTlab(string_compression_enabled=true)
+GenerateCreateStringFromStringTlab(string_compression_enabled=false)
+GenerateCreateStringFromCharArrayTlab(string_compression_enabled=true)
+GenerateCreateStringFromCharArrayTlab(string_compression_enabled=false)
+GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled=true)
+GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled=false)

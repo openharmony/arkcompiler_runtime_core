@@ -47,8 +47,6 @@ config("arkdisassembler_public_config") {
   ]
   include_dirs +=
       get_path_info(get_target_outputs(":disasm_plugins_inc"), "dir")
-
-  defines = [ "PANDA_WITH_ECMASCRIPT" ]
 }
 
 arkdisassembler_sources = [

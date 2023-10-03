@@ -23,8 +23,6 @@ config("arkassembler_public_config") {
   ]
 
   configs = [ "$ark_root/runtime:profiling_gen_public_config" ]
-
-  defines = [ "PANDA_WITH_ECMASCRIPT" ]
 }
 
 libarkassembler_sources = [

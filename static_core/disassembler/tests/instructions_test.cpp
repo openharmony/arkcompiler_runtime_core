@@ -127,7 +127,6 @@ TEST(InstructionsTest, TestCalls)
     call handler_long_ext, v0, v1, v2
     call handler_long2_ext, v0, v1, v2, v3
     call.range handler_range_ext, v0
-    calli.dyn.short 1, v0, v0, v0
     call.acc.short handler_short, v0, 0
     call.acc.short handler_short2, a0, 1
     return
@@ -197,8 +196,6 @@ TEST(InstructionsTest, TestCalls)
     EXPECT_EQ("\tcall handler_long2_ext:(i8,i16,i32,f64), v0, v1, v2, v3", line);
     std::getline(g, line);
     EXPECT_EQ("\tcall.range handler_range_ext:(i8,i16,i32,i8,i16,i32), v0", line);
-    std::getline(g, line);
-    EXPECT_EQ("\tcalli.dyn.short 0x1, v0, v0, v0", line);
     std::getline(g, line);
     EXPECT_EQ("\tcall.acc.short handler_short:(u1), v0, 0x0", line);
     std::getline(g, line);

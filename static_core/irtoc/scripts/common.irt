@@ -208,10 +208,15 @@ module Constants
     POST_INTER_REGION_BARRIER_SLOW = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::POST_INTER_REGION_BARRIER_SLOW)"
     POST_INTER_REGION_BARRIER_PAIR_UNALIGNED_SLOW = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::POST_INTER_REGION_BARRIER_PAIR_UNALIGNED_SLOW)"
 
-    STRING_LENGTH_OFFSET = "CORETYPES_STRING_LENGTH_OFFSET"
-    STRING_DATA_OFFSET = "CORETYPES_STRING_DATA_OFFSET"
+    STRING_CLASS_SIZE = "sizeof(coretypes::String)"
+    STRING_CLASS_SIZE_WITH_ALIGNMENT = "sizeof(coretypes::String) + TLAB_ALIGNMENT - 1"
+    STRING_MUTF8_1B_MAX = "0x7f"
+    STRING_LENGTH_OFFSET = "panda::coretypes::STRING_LENGTH_OFFSET"
+    STRING_HASHCODE_OFFSET = "panda::coretypes::STRING_HASHCODE_OFFSET"
+    STRING_DATA_OFFSET = "panda::coretypes::STRING_DATA_OFFSET"
     STRING_EQUALS_UNROLL = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::STRING_EQUALS_UNROLL)"
     STRING_EQUALS_UNROLL_COMPRESSED = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::STRING_EQUALS_UNROLL_COMPRESSED)"
+    ALIGNMENT_MASK = "~(TLAB_ALIGNMENT - 1)"
 
     # shift one bit less to keep ACC_INTRINSIC bit
     INTRINSIC_MASK_SHIFT = "INTRINSIC_SHIFT - VERIFICATION_STATUS_WIDTH - 1"
@@ -323,4 +328,9 @@ end
 
 macro(:set_bits) do |data, offset, mask, bits|
   Or(data, ShlI(AndI(bits).Imm(mask).i32).Imm(offset).i32).i32
+end
+
+macro(:nullptr) do
+  src_type = Options.arch_64_bits? ? 'DataType::INT64' : 'DataType::INT32'
+  Bitcast(0).SrcType(src_type).ptr
 end

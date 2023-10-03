@@ -1330,11 +1330,6 @@
 03.types/05.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_ushort_7.ets
 03.types/05.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_ushort_8.ets
 03.types/05.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_ushort_9.ets
-03.types/05.value_types/02.floating-point_types_and_operations/addition/addition_float_44.ets
-03.types/05.value_types/02.floating-point_types_and_operations/subtraction/subtraction_float_49.ets
-03.types/05.value_types/02.floating-point_types_and_operations/multiplication/multiplication_float_47.ets
-03.types/05.value_types/02.floating-point_types_and_operations/division/division_float_59.ets
-03.types/05.value_types/02.floating-point_types_and_operations/division/division_float_60.ets
 
 07.expressions/28.assignment/01.simple_assignment_operator/ord4.ets
 07.expressions/28.assignment/02.compound_assignment_operators/ops_105.ets

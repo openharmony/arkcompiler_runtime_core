@@ -51,22 +51,22 @@ Predefined Types
 
 The set of the predefined types includes the following:
 
--  basic numeric value type: ``number`` 
+-  Basic numeric value type: ``number`` 
 
--  additional numeric value types: ``byte``, ``short``, ``int``, ``long``,
+-  Additional numeric value types: ``byte``, ``short``, ``int``, ``long``,
    ``float``, and ``double``
 
--  boolean value type: ``boolean``
+-  Boolean value type: ``boolean``
 
--  character value type: ``char``
+-  Character value type: ``char``
 
--  predefined reference string type: ``string``
+-  Predefined reference string type: ``string``
 
--  predefined reference BigInt type: ``bigint``
+-  Predefined reference BigInt type: ``bigint``
 
--  predefined class types: ``Object``, ``String``, ``never``, and ``void``
+-  Predefined class types: ``Object``, ``String``, ``never``, and ``void``
 
--  each predefined value type corresponds to a predefined class type that wraps
+-  Each predefined value type corresponds to a predefined class type that wraps
    the value type: ``Number``, ``Byte``, ``Short``, ``Int``, ``Long``,
    ``Float``, ``Double``, ``Char``, and ``Boolean``.
 
@@ -75,7 +75,7 @@ The numeric value types, character, and boolean value types are called
 *primitive types*. Primitive type names are reserved, and cannot be used
 for user-defined type names.
 
-The type ``double`` is an alias to ``number``; the type ``Double`` is an alias
+Type ``double`` is an alias to ``number``; type ``Double`` is an alias
 to ``Number``.
 
 .. index::
@@ -99,17 +99,18 @@ User-Defined Types
 ******************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 The *user-defined* types include the following:
 
--  class types (see :ref:`Classes`),
--  interface types (see :ref:`Interfaces`),
--  enumeration types (see :ref:`Enumerations`),
--  array types (see :ref:`Array Types`),
--  function types (see :ref:`Function Types`),
--  union types (see :ref:`Union Types`), and
--  type parameters (see :ref:`Generic Parameters`).
+-  Class types (see :ref:`Classes`);
+-  Interface types (see :ref:`Interfaces`);
+-  Enumeration types (see :ref:`Enumerations`);
+-  Array types (see :ref:`Array Types`);
+-  Function types (see :ref:`Function Types`);
+-  Tuple types (see :ref:`Tuple Types`);
+-  Union types (see :ref:`Union Types`); and
+-  Type parameters (see :ref:`Generic Parameters`).
 
 .. index::
    user-defined type
@@ -144,9 +145,9 @@ The following table summarizes all |LANG| types:
 |  ``byte``, ``short``,   | ``Byte``, ``Short``,    |                | interface types, |
 |  ``int``, ``long``,     | ``Int``, ``Long``,      |                | array types,     |
 |  ``float``, ``double``, | ``Float``, ``Double``,  |                | function types,  |
-|  ``char``, ``boolean``  | ``Char``, ``Boolean``,  |                | union types,     |
-|                         | ``Object``, ``never``,  |                | type parameters  |
-|                         | ``void``, ``null``,     |                |                  |
+|  ``char``, ``boolean``  | ``Char``, ``Boolean``,  |                | tuple types,     |
+|                         | ``Object``, ``never``,  |                | union types,     |
+|                         | ``void``, ``null``,     |                | type parameters  |
 |                         | ``bigint``, ``string``, |                |                  |
 |                         | ``BigInt``, ``String``  |                |                  |
 +-------------------------+-------------------------+----------------+------------------+
@@ -159,6 +160,7 @@ The following table summarizes all |LANG| types:
    interface type
    array type
    union type
+   tuple type
    type parameter
 
 |
@@ -173,12 +175,12 @@ Using Types
 
 The following can refer to a type in a source code:
 
--  reserved name for a primitive type;
--  type reference for a named type (see :ref:`Named Types`) or a type alias
+-  A reserved name for a primitive type;
+-  A type reference for a named type (see :ref:`Named Types`), or a type alias
    (see :ref:`Type Alias Declaration`);
--  an in-place type definition for an array type (see :ref:`Array Types`), a
-   function type (see :ref:`Function Types`), or a union type (see
-   :ref:`Union Types`).
+-  An in-place type definition for an array type (see :ref:`Array Types`), a
+   function type (see :ref:`Function Types`), a tuple type (see :ref:`Tuple Types`),
+   or a union type (see :ref:`Union Types`).
 
 .. index::
    reserved name
@@ -195,6 +197,7 @@ The following can refer to a type in a source code:
         predefinedType
         | typeReference
         | arrayType
+        | tupleType
         | functionType
         | unionType
         | '(' type ')'
@@ -258,7 +261,7 @@ Named Types
 ***********
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 Classes, interfaces, enumerations, and unions are the named types that are
 introduced by class declarations (see :ref:`Classes`), interface
@@ -295,6 +298,9 @@ substituted for the type parameters of the named type.
 
 Type References
 ***************
+
+.. meta:
+    frontend_status: Done
 
 A type reference uses a type name (either *simple* or *qualified*, see
 :ref:`Names`), or a type alias (see :ref:`Type Alias Declaration`) to
@@ -365,6 +371,9 @@ Such types’ values do *not* share state with other values.
 Integer Types and Operations
 ============================
 
+.. meta:
+    frontend_status: Partly
+
 +-----------+--------------------------------------------------------------------+--------------------------+
 | Type      | Type's Set of Values                                               | Corresponding Class Type |
 +===========+====================================================================+==========================+
@@ -383,22 +392,22 @@ Integer Types and Operations
 
 -  Comparison operators that produce a value of type *boolean*:
 
-   +  Numerical comparison operators '<', '<=', '>' and '>=' (see :ref:`Numerical Comparison Operators`);
+   +  Numerical comparison operators '<', '<=', '>', and '>=' (see :ref:`Numerical Comparison Operators`);
    +  Numerical equality operators '==' and '!=' (see :ref:`Value Equality Operators`);
 
 -  Numerical operators that produce a value of type ``int`` or ``long``:
 
    + Unary plus '+' and minus '-' operators (see :ref:`Unary Plus` and :ref:`Unary Minus`);
-   + Multiplicative operators '\*', '/' and '%' (see :ref:`Multiplicative Expressions`);
+   + Multiplicative operators '\*', '/', and '%' (see :ref:`Multiplicative Expressions`);
    + Additive operators '+' and '-' (see :ref:`Additive Expressions`);
    + Increment operator '++' used as prefix (see :ref:`Prefix Increment`)
      or postfix (see :ref:`Postfix Increment`);
    + Decrement operator '--' used as prefix (see :ref:`Prefix Decrement`)
      or postfix (see :ref:`Postfix Decrement`);
-   + Signed and unsigned shift operators '<<', '>>' and '>>>' (see 
+   + Signed and unsigned shift operators '<<', '>>', and '>>>' (see 
      :ref:`Shift Expressions`);
    + Bitwise complement operator '~' (see :ref:`Bitwise Complement`);
-   + Integer bitwise operators '&', '^' and '\|' (see :ref:`Integer Bitwise Operators`);
+   + Integer bitwise operators '&', '^', and '\|' (see :ref:`Integer Bitwise Operators`);
 
 -  Conditional operator '?:' (see :ref:`Conditional Expressions`);
 -  Cast operator (see :ref:`Cast Expressions`), which converts an integer
@@ -406,7 +415,7 @@ Integer Types and Operations
 -  The string concatenation operator '+' (see :ref:`String Concatenation`),
    which (if a ``string`` operand and an integer operand are both available)
    converts the integer operand to a ``string`` (the character of a ``char``
-   operand, or the decimal form of a ``byte``, ``short``, ``int`` or ``long``
+   operand, or the decimal form of a ``byte``, ``short``, ``int``, or ``long``
    operand), and then creates a concatenation of two strings as a new ``string``.
 
 .. index::
@@ -464,8 +473,8 @@ it to type ``long``.
 
 If no operand is of type ``long``, then:
 
--  the operation implementation uses 32-bit precision;
--  the result of such numerical operator is of type ``int``.
+-  The operation implementation uses 32-bit precision;
+-  The result of the numerical operator is of type ``int``.
 
 
 If any operand is not ``int``, then the numeric promotion must be used
@@ -524,6 +533,9 @@ An integer operator can throw errors (see :ref:`Errors Handling`) as follows:
 Floating-Point Types and Operations
 ===================================
 
+.. meta:
+    frontend_status: Partly
+
 +-------------+--------------------------------------------------------+--------------------------+
 | Type        | Type's Set of Values                                   | Corresponding Class Type |
 +=============+========================================================+==========================+
@@ -537,7 +549,7 @@ A number of |LANG| operators act on the floating-point type values:
 
 -  Comparison operators that produce a type ``boolean`` value:
 
-   - Numerical comparison operators '<', '<=', '>' and '>=' (see
+   - Numerical comparison operators '<', '<=', '>', and '>=' (see
      :ref:`Numerical Comparison Operators`);
    - Numerical equality operators '==' and '!=' (see
      :ref:`Value Equality Operators`);
@@ -545,15 +557,15 @@ A number of |LANG| operators act on the floating-point type values:
 -  Numerical operators that produce values of type ``float`` or ``double``:
 
    + Unary plus '+' and minus '-' operators (see :ref:`Unary Plus` and :ref:`Unary Minus`);
-   + Multiplicative operators '\*', '/' and '%' (see :ref:`Multiplicative Expressions`);
+   + Multiplicative operators '\*', '/', and '%' (see :ref:`Multiplicative Expressions`);
    + Additive operators '+' and '-' (see :ref:`Additive Expressions`);
    + Increment operator '++' used both as prefix (see :ref:`Prefix Increment`)
      and postfix (see :ref:`Postfix Increment`);
    + Decrement operator '--' used both as prefix (see :ref:`Prefix Decrement`)
      and postfix (see :ref:`Postfix Decrement`);
-   + Signed and unsigned shift operators '<<', '>>' and '>>>' (see :ref:`Shift Expressions`);
+   + Signed and unsigned shift operators '<<', '>>', and '>>>' (see :ref:`Shift Expressions`);
    + Bitwise complement operator '~' (see :ref:`Bitwise Complement`);
-   + Integer bitwise operators '&', '^' and '\|' (see :ref:`Integer Bitwise Operators`);
+   + Integer bitwise operators '&', '^', and '\|' (see :ref:`Integer Bitwise Operators`);
    
 - Conditional operator '?:' (see :ref:`Conditional Expressions`);
 
@@ -731,6 +743,9 @@ memory is not sufficient to perform it.
 Numeric Types Hierarchies
 =========================
 
+.. meta:
+    frontend_status: Partly
+
 Integer types and floating-point types are the *numeric types*.
 
 Larger types include smaller types (of their values):
@@ -774,14 +789,17 @@ type values can be converted into *bigint* by using built-in functions
 Boolean Types and Operations
 ============================
 
-The type ``boolean`` represents logical values ``true`` and ``false`` that
+.. meta:
+    frontend_status: Done
+
+Type ``boolean`` represents logical values ``true`` and ``false`` that
 correspond to the class type ``Boolean``.
 
 The boolean operators are as follows:
 
 -  Relational operators '==' and '!=' (see :ref:`Relational Expressions`);
 -  Logical complement operator '!' (see :ref:`Logical Complement`);
--  Logical operators '&', '^' and '|' (see :ref:`Integer Bitwise Operators`);
+-  Logical operators '&', '^', and '|' (see :ref:`Integer Bitwise Operators`);
 -  Conditional-and operator '&&' (see :ref:`Conditional-And Expression`) and
    conditional-or operator '||' (see :ref:`Conditional-Or Expression`);
 -  Conditional operator '?:' (see :ref:`Conditional Expressions`);
@@ -817,6 +835,9 @@ type is always the same as the result of comparison *x != 0*.
 Character Types and Operations
 ==============================
 
+.. meta:
+    frontend_status: Done
+
 +-----------+--------------------------------------------------------------------+--------------------------+
 | Type      | Type's Set of Values                                               | Corresponding Class Type |
 +===========+====================================================================+==========================+
@@ -828,7 +849,7 @@ Character Types and Operations
 
 -  Comparison operators that produce a value of type *boolean*:
 
-   +  Character comparison operators '<', '<=', '>' and '>=' (see :ref:`Numerical Comparison Operators`);
+   +  Character comparison operators '<', '<=', '>', and '>=' (see :ref:`Numerical Comparison Operators`);
    +  Character equality operators '==' and '!=' (see :ref:`Value Equality Operators`);
 
 -  Character operators that produce a value of type ``char``;
@@ -880,16 +901,16 @@ Reference Types
 
 *Reference types* can be of the following kinds:
 
--  class types (see :ref:`Classes`);
--  interface types (see :ref:`Interfaces`);
--  array types (see :ref:`Array Types`);
--  function types (see :ref:`Function Types`);
--  union types (see :ref:`Union Types`);
--  string type (see :ref:`String Type`);
--  never type (see :ref:`never Type`), null type (see :ref:`null Type`), 
+-  Class types (see :ref:`Classes`);
+-  Interface types (see :ref:`Interfaces`);
+-  Array types (see :ref:`Array Types`);
+-  Function types (see :ref:`Function Types`);
+-  Union types (see :ref:`Union Types`);
+-  String types (see :ref:`String Type`);
+-  Never type (see :ref:`never Type`), null type (see :ref:`null Type`), 
    undefined type (see :ref:`undefined Type`), 
    void type (see :ref:`void Type`); and
--  type parameters (see :ref:`Generic Parameters`).
+-  Type parameters (see :ref:`Generic Parameters`).
 
 .. index::
    class type
@@ -909,6 +930,9 @@ Reference Types
 
 Objects
 =======
+
+.. meta:
+    frontend_status: Done
 
 An *object* can be a *class instance*, *function instance*, or an *array*.
 
@@ -1001,7 +1025,7 @@ other variable’s reference.
 =====================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 The class ``Object`` is a supertype of all other classes, interfaces, string,
 arrays, unions, function types, and enum types.
@@ -1049,7 +1073,7 @@ units.
 
 *String* is the predefined type.
 
-The type ``string`` includes all string literals, e.g., ``'abc'``. The value
+Type ``string`` includes all string literals, e.g., ``'abc'``. The value
 of a string object cannot be changed after it is created, i.e., a string
 object is immutable, and can be shared.
 
@@ -1111,8 +1135,8 @@ an error or exception).
 The ``void`` type has a single value, and is typically used as the return
 type if:
 
--  a function returns no value of another type (similarly to type ``Unit``
-   in some other languages), or
+-  A function returns no value of another type (similarly to type ``Unit``
+   in some other languages); or
 -  ``void`` is the type argument that instantiates a generic type where a
    specific type parameter argument value is irrelevant.
 
@@ -1156,12 +1180,12 @@ Array Types
 
 *Array type* is the built-in type which is characterized by the following:
 
--  any object of array type contains elements indexed by integer position
+-  Any object of array type contains elements indexed by integer position
    starting from 0;
--  access to any array element is performed at the same time;
--  while being passed to non-|LANG| environment, an array is represented
+-  Access to any array element is performed at the same time;
+-  While being passed to non-|LANG| environment, an array is represented
    as a contiguous memory location;
--  types of all arrays elements are upper-bounded by the element type
+-  Types of all arrays elements are upper-bounded by the element type
    specified in the array declaration.
 
 .. index::
@@ -1246,9 +1270,9 @@ Function Types
 A *function type* can be used to express the expected signature of a function.
 A function type consists of the following:
 
--  list of parameters (can be empty);
--  optional return type;
--  optional keyword ``throws``.
+-  List of parameters (can be empty);
+-  Optional return type;
+-  Optional keyword ``throws``.
 
 .. index::
    array element
@@ -1305,7 +1329,7 @@ A type alias can set a name for a function type (see :ref:`Type Alias Declaratio
     type BinaryOp = (x: number, y: number) => number
     let op: BinaryOp
 
-The type ``void`` (see :ref:`void Type`) is the implied return type of a
+Type ``void`` (see :ref:`void Type`) is the implied return type of a
 function type if *ftReturnType* is omitted.
 
 If the function type contains the '``throws``' mark (see
@@ -1332,7 +1356,7 @@ and conversions in :ref:`Function Types Conversions`.
 The ``null`` type’s single value is represented by the keyword  ``null``
 (see :ref:`Null Literal`).
 
-Using the type ``null`` as type annotation is not recommended, except in
+Using type ``null`` as type annotation is not recommended, except in
 nullish types (see :ref:`Nullish Types`).
 
 .. index::
@@ -1352,7 +1376,7 @@ nullish types (see :ref:`Nullish Types`).
 The ``undefined`` type’s single value is represented by the keyword
 ``undefined`` (see :ref:`Undefined Literal`).
 
-Using the type ``undefined`` as type annotation is not recommended,
+Using type ``undefined`` as type annotation is not recommended,
 except in nullish types, see :ref:`Nullish Types`.
 
 .. index::
@@ -1361,6 +1385,75 @@ except in nullish types, see :ref:`Nullish Types`.
    literal
    annotation
    nullish type
+
+|
+
+.. _Tuple Types:
+
+Tuple Types
+===========
+
+NOTE: *the text in this section is the subject of discussion*.
+
+
+.. code-block:: abnf
+
+    tupleType:
+        '[' (type (',' type)*)? ']' 
+        ;
+
+A *tuple* type is a reference type created as a fixed set of other types.
+Values of tuple types are groups of values of different types that comprise
+the tuple type. Such types are specifed in the same order as those types
+are declared within the tuple type declarartion. It implies that each tuple
+element has its own type.
+The operator ``[ ]`` (square brackets) is used to acess elements of a tuple
+in a manner similar to that used to access elements of an array. The index
+expression is of *integer* type, and the index of the 1st tuple element is *0*.
+
+
+.. code-block:: typescript
+   :linenos:
+
+   let tuple: [number, number, string, boolean, Object] = 
+              [     6,      7,  "abc",    true,    666]
+   tuple[0] = 666
+   console.log (tuple[0], tuple[4]) // `666 666` be printed
+
+Tuple type is compatible with an array type (see :ref:`Array Types`) when
+the type of array element is a super type for all tuple type elements' types.
+And of course *Object* (see :ref:`Object Class Type`) is a super type for
+any tuple type.
+
+.. code-block:: typescript
+   :linenos:
+
+   let tuple: [number, number, string, boolean, Object] = 
+              [     6,      7,  "abc",    true,    666]
+   let array: Object[] = tuple /* Object is a super type for number, string,
+                                  boolean and Object */
+
+   let object: Object = tuple // This works too
+
+An empty tuple is a corner case and is added to support compatibility with the
+|TS|.
+
+.. code-block:: typescript
+   :linenos:
+
+   let empty: [] = [] // empty tuple with no elements in it
+
+Tuple type has the same set of operations like arrays. So, not only ``[ ]``
+(square brackets) but length is available for tuples as well as all other
+operations. 
+
+.. code-block:: typescript
+   :linenos:
+
+   let empty: [] = []
+   console.log ("# of tuple elements is ", empty.length)
+
+
 
 |
 
@@ -1514,7 +1607,7 @@ another:
 -  If there are two types *T1* and *T2* within the union type, and *T1* is
    compatible (see :ref:`Compatible Types`) with *T2*, then only *T2* remains
    in the union type.
--  if *T2* is compatible (see :ref:`Compatible Types`) with *T1*, then *T1*
+-  If *T2* is compatible (see :ref:`Compatible Types`) with *T1*, then *T1*
    remains in the union type.
 -  The last step is performed recursively until no more mutually compatible
    types remain, or the union type is reduced to a single type.
@@ -1624,19 +1717,19 @@ that can potentially violate null safety (e.g., access to a property):
 
 -  Using safe operations:
 
-   -  safe method call (for details see :ref:`Method Call Expression`);
-   -  safe field access expression (for details see :ref:`Field Access Expressions`);
-   -  safe indexing expression (for details see :ref:``Indexing Expression``);
-   -  safe function call (for details see :ref:`Function Call Expression`);
+   -  Safe method call (for details see :ref:`Method Call Expression`);
+   -  Safe field access expression (for details see :ref:`Field Access Expressions`);
+   -  Safe indexing expression (for details see :ref:``Indexing Expression``);
+   -  Safe function call (for details see :ref:`Function Call Expression`);
 
 -  Downcasting from *T* \| ``null`` or *T* \| ``undefined`` to *T*:
 
-   -  cast expression (for details see :ref:`Cast Expressions`);
-   -  ensure-not-nullish expression (for details see :ref:`Ensure Not-Nullish Expressions`);
+   -  Cast expression (for details see :ref:`Cast Expressions`);
+   -  Ensure-not-nullish expression (for details see :ref:`Ensure-Not-Nullish Expressions`);
 
 -  Supplying a default value to use if a nullish value is present:
 
-   -  nullish-coalescing expression (for details see :ref:`Nullish-Coalescing Expression`).
+   -  Nullish-coalescing expression (for details see :ref:`Nullish-Coalescing Expression`).
 
 .. index::
    method call
@@ -1661,38 +1754,61 @@ DynamicObject Type
     frontend_status: None
 
 The interface *DynamicObject* is used to provide seamless interoperability
-with dynamic languages as Javascript and TypeScript and
+with dynamic languages as Javascript and TypeScript, and
 to support advanced language features such as *dynamic import*
-(see :ref:`Dynamic Import`).
+(see :ref:`Dynamic Import`). This interface is defined in the standard library
+(see :ref:`Standard Library`).
 
-This interface is defined in the standard library (see
-:ref:`Standard Library`). 
+It is a common interface for a set of wrappers (also defined in the standard
+library) that provide access to underlying objects.
+The *DynamicObject* instance cannot be created directly;
+only an instance of a specific wrapper object can be instantiated.
+For example, the result of the *dynamic import* expression (see
+:ref:`Dynamic Import Expression`) is an instance of the dynamic object
+implementation class that wraps an object containing exported entities
+of the imported module.
 
-It is a common interface for a set of wrappers 
-(also defined in the standard library) that provide access 
-to underlying objects. 
-The *DynamicObject* instance cannot be created directly,
-only an instance of a specific wrapper object can be instantiated. 
-For example, the result of *dynamic import* expression (see :ref:`Dynamic Import Expression`) 
-is the instance of dymanic object implementation class that wraps an object that contains 
-exported entities of the imported module.
+*DynamicObject* is a predefined type. When applied to objects of this type,
+the following operations are handled by the compiler in a special way:
 
-The DynamicObject is the predefined type and the compiler treats 
-some operations applied to an object of this type in a special way:
+- Field access;
+- Method call;
+- Indexing access;
+- New;
+- Cast.
 
-- field access
-- method call
-- indexing access
-- new
-- cast 
+.. index::
+   DynamicObject
+   interoperability
+   dynamic import
+   interface
+   wrapper
+   access
+   underlying object
+   instantiation
+   export
+   entity
+   import
+   predefined type
+   field access
+   indexing access
+   method call
+
+
+|
 
 .. _DynamicObject Field Access:
 
 DynamicObject Field Access
 --------------------------
 
-A field access expression *D.F* where *D* is of type DynamicObject is treated 
-as the access to property of underlying object.
+The field access expression *D.F*, where *D* is of type *DynamicObject*,
+is treated as an access to a property of the underlying object.
+
+If the value of a field access is used, then it is wrapped in the instance of
+*DynamicObject*, since the actual type of the field is not known at compile
+time.
+
 
 .. code-block:: typescript
    :linenos:
@@ -1700,12 +1816,91 @@ as the access to property of underlying object.
    function foo(d: DynamicObject) {
       console.log(d.f1) // access of the property named "f1" of underlying object
       d.f1 = 5 // set a value of the property named "f1"
+      let y = d.f1 // 'y' is of type DynamicObject
    }
 
-A wrapper can raise an error if a property with the specified name is not exist
-in the undefined object or if the type of assigned value is not compatible with
-the type of property.
+The wrapper can raise an error if:
 
+- No property with the specified name exists in the underlying object; or
+- The field access is in the right-hand side of the assignment, and the
+  type of the assigned value is not compatible with the type of the property.
+
+.. index::
+   DynamicObject
+   wrapper
+   dynamic import
+   underlying object
+   field access
+   property
+   instance
+   assignment
+   assigned value
+
+
+|
+
+.. _DynamicObject Method Call:
+
+DynamicObject Method Call
+-------------------------
+
+The method call expression *D.F()*, where *D* is of type *DynamicObject*,
+is treated as a call of the instance method of the underlying object.
+
+If the result of a method call is used, then it is wrapped in the instance
+of *DynamicObject*, since the actual type of the returned value is not known
+at compile time.
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(d: DynamicObject) {
+      d.foo() // call of a method "foo" of underlying object
+      let y = d.goo() // 'y' is of type DynamicObject
+   }
+
+The wrapper must raise an error if:
+
+- No method with the specified name exists in the underlying object; or
+- The signature of the method is not compatible with the types of the
+  call's arguments.
+
+.. index::
+   DynamicObject
+   wrapper
+   method
+   dynamic import
+   field access
+   property
+   instance
+   method
+   call argument
+
+|
+
+.. _DynamicObject Indexing Access:
+
+DynamicObject Indexing Access
+-----------------------------
+
+The indexing access expression *D[index]*, where *D* is of type *DynamicObject*,
+is treated as an indexing access to the underlying object.
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(d: DynamicObject) {
+      let x = d[0] // call of a method "foo" of underlying object
+   }
+
+TBD
+
+.. index::
+   DynamicObject
+   indexing access
+   underlying object
+
+|
 
     
 |
@@ -1723,8 +1918,8 @@ Default Values for Types
 Some types use so-called *default values* for variables without explicit
 initialization (see :ref:`Variable Declarations`), including the following:
 
--  all primitive types (see the table below).
--  nullable reference types with the default value ``null`` (see :ref:`Literals`).
+-  All primitive types (see the table below).
+-  Nullable reference types with the default value ``null`` (see :ref:`Literals`).
 
 
 All other types, including reference types and enumeration types, have no

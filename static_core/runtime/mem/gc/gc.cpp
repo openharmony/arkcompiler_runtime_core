@@ -34,6 +34,7 @@
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/gen-gc/gen-gc.h"
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
+#include "runtime/mem/gc/workers/gc_workers_task_queue.h"
 #include "runtime/mem/gc/workers/gc_workers_thread_pool.h"
 #include "runtime/mem/pygote_space_allocator-inl.h"
 #include "runtime/mem/heap_manager.h"
@@ -163,6 +164,24 @@ void GC::Initialize(PandaVM *vm)
     gc_queue_ = allocator->New<GCQueueWithTime>(this);
     this->SetPandaVM(vm);
     InitializeImpl();
+}
+
+void GC::CreateWorkersTaskPool()
+{
+    ASSERT(workers_pool_ == nullptr);
+    auto allocator = GetInternalAllocator();
+    if (this->IsWorkerThreadsExist()) {
+        GCWorkersTaskPool *gc_task_pool = nullptr;
+        if (this->GetSettings()->UseThreadPoolForGCWorkers()) {
+            // Use internal gc thread pool
+            gc_task_pool = allocator->New<GCWorkersThreadPool>(this, this->GetSettings()->GCWorkersCount());
+        } else {
+            // Use common TaskManager
+            gc_task_pool = allocator->New<GCWorkersTaskQueue>(this);
+        }
+        ASSERT(gc_task_pool != nullptr);
+        workers_pool_ = gc_task_pool;
+    }
 }
 
 void GC::StartGC()

@@ -39,18 +39,18 @@ class FooClass {
 
 /********** Array **********/
 
-function Array_TestJSSample(arr: Array): void {
-    assert(arr as Object) instanceof Array;
-    assert(arr.at(0) as FooClass).name == "zero";
-    assert arr.at(1).toString() == "{Foo named one}";
+function Array_TestJSSample(arr: Array<FooClass>): void {
+    assert (arr as Object) instanceof Array;
+    assert (arr.at(0)! as FooClass).name == "zero";
+    assert arr.at(1)!.toString() == "{Foo named one}";
 
     arr.push(new FooClass("two"));
-    assert arr.at(2).toString() == "{Foo named two}";
+    assert arr.at(2)!.toString() == "{Foo named two}";
     assert arr.toString() == "{Foo named zero},{Foo named one},{Foo named two}";
 }
 
-function Array_CreateEtsSample(): Array {
-    let arr = new Array();
+function Array_CreateEtsSample(): Array<Object> {
+    let arr = new Array<Object>();
     arr.push(123);
     arr.push("foo");
     return arr;

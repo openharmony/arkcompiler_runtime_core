@@ -38,8 +38,8 @@ Use the mandatory qualification by type to access the enumeration constant:
 If the enumeration type is exported, then all enumeration constants are
 exported along with the mandatory qualification.
 
-For example, all constants like *Color.Red* are exported along with the
-mandatory qualification *Color* if *Color* is exported.
+For example, if *Color* is exported, then all constants like *Color.Red*
+are exported along with the mandatory qualification *Color*.
 
 .. index::
    qualification
@@ -50,14 +50,13 @@ mandatory qualification *Color* if *Color* is exported.
    numeric constant expression
 
 The value of an enum constant can be set explicitly to a numeric constant
-expression (expression of the ``int`` type) or to a constant expression
-of type ``string``, or can be set implicitly by omitting the constant
-expression. If the constant expression is omitted, then the value of the
-enum constant is set implicitly to a numeric value
-(see :ref:`Enumeration Integer Values`).
+expression (expression of type ``int``) or to a constant expression
+of type ``string``, or implicitly by omitting the constant expression. If
+the constant expression is omitted, then the value of the enum constant
+is set implicitly to a numeric value (see :ref:`Enumeration Integer Values`).
 
-A compile-time error occurs if integer and string type enumeration constants
-are mixed in one enumeration.
+A compile-time error occurs if ``integer`` and ``string`` type enumeration
+constants are mixed in one enumeration.
 
 .. code-block:: typescript
    :linenos:
@@ -88,8 +87,8 @@ Enumeration Integer Values
 The integer value of an *enum* constant is set implicitly if an enumeration
 constant specifies no value.
 
-A constant expression of the ``int`` type (signed 32-bit integer, see
-:ref:`Integer Types and Operations` for details) can be used to set
+A constant expression of type ``int``---a signed 32-bit integer (see
+:ref:`Integer Types and Operations` for details)---can be used to set
 the value explicitly:
 
 .. index::
@@ -109,7 +108,7 @@ the value zero. The other constant is assigned the value of the
 immediately preceding constant plus one.
 
 If some but not all constants have their values set explicitly, then
-the values of the other constants are set by the following rules:
+the values of the constants are set by the following rules:
 
 -  The value of the first constant without an explicit value is assigned to
    zero.
@@ -128,7 +127,7 @@ In the following example:
 
     enum Color { Red, Blue = 5, Green }
 
-the ``Red`` value is 0, the ``Blue`` value is 5, the ``Green`` value is 6.
+the value of ``Red`` is 0, of ``Blue``, 5, and of ``Green``, 6.
 
 A compile-time error occurs if two constants have the same value.
 
@@ -168,7 +167,7 @@ Enumeration Operations
 .. meta:
     frontend_status: Partly
 
-The value of an enumeration constant can be converted to the type *string* by
+The value of an enumeration constant can be converted to type *string* by
 using the method ``toString``:
 
 .. index::
@@ -182,7 +181,7 @@ using the method ``toString``:
     let c: Color = Color.Green
     console.log(c.toString()) // prints: 10
 
-The name of enumeration type can be indexed by an enumeration constant
+The name of enumeration type can be indexed by a value of this enumeration type
 to get the name of the constant:
 
 .. code-block:: typescript

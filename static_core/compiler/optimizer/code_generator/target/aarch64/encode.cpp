@@ -16,8 +16,8 @@
 Encoder (implementation of math and mem Low-level emitters)
 */
 
-#include "encode.h"
-#include "target/aarch64/target.h"
+#include "compiler/optimizer/code_generator/target/aarch64/target.h"
+#include "compiler/optimizer/code_generator/encode.h"
 #include "compiler/optimizer/code_generator/relocations.h"
 
 #if defined(USE_VIXL_ARM64) && !defined(PANDA_MINIMAL_VIXL)
@@ -1021,6 +1021,20 @@ void Aarch64Encoder::IndexOfHandleUtf16NormalCaseMainLoop(
         GetMasm()->And(character_w, character_w, MAX_UTF16_CHAR);
     }
     GetMasm()->B(label_not_found);
+}
+
+void Aarch64Encoder::EncodeCompressEightUtf16ToUtf8CharsUsingSimd(Reg src_addr, Reg dst_addr)
+{
+    ScopedTmpReg tmp1(this, FLOAT64_TYPE);
+    ScopedTmpReg tmp2(this, FLOAT64_TYPE);
+    auto vixl_vreg1 = vixl::aarch64::VRegister(tmp1.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat8B);
+    ASSERT(vixl_vreg1.IsValid());
+    auto vixl_vreg2 = vixl::aarch64::VRegister(tmp2.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat8B);
+    ASSERT(vixl_vreg2.IsValid());
+    auto src = vixl::aarch64::MemOperand(VixlReg(src_addr));
+    auto dst = vixl::aarch64::MemOperand(VixlReg(dst_addr));
+    GetMasm()->Ld2(vixl_vreg1, vixl_vreg2, src);
+    GetMasm()->St1(vixl_vreg1, dst);
 }
 
 /**

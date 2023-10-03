@@ -30,15 +30,9 @@ add_custom_target(sampler_etsnapi_test_suite COMMENT "Running sampler etsnapi te
 
 if(CMAKE_CROSSCOMPILING)
     ExternalProject_Get_Property(panda_host_tools binary_dir)
-    set(sampler_es2panda_target panda_host_tools-build)
-    set(sampler_es2panda_bin "${binary_dir}/plugins/ecmascript/es2panda/aot/es2panda")
-
     set(aspt_converter_target panda_host_tools-build)
     set(aspt_converter_bin "${binary_dir}/tools/sampler/aspt_converter")
 else()
-    set(sampler_es2panda_target es2panda)
-    set(sampler_es2panda_bin  $<TARGET_FILE:${es2panda_target}>)
-
     set(aspt_converter_target aspt_converter)
     set(aspt_converter_bin  $<TARGET_FILE:${aspt_converter_target}>)
 endif()
@@ -66,9 +60,9 @@ set(testing_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Compile Ets tests
 add_custom_target(sampler_etsnapi_es2panda
-    COMMAND ${sampler_es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/SamplerNapiTest.abc ${CMAKE_CURRENT_SOURCE_DIR}/SamplerNapiTest.ets
+    COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/SamplerNapiTest.abc ${CMAKE_CURRENT_SOURCE_DIR}/SamplerNapiTest.ets
     WORKING_DIRECTORY "${testing_dir}"
-    DEPENDS ${sampler_es2panda_target}
+    DEPENDS ${es2panda_target}
 )
 add_dependencies(sampler_etsnapi_es2panda sampler_etsnapi_lib)
 

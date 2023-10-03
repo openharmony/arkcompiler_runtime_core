@@ -82,6 +82,17 @@ public:
 
     PANDA_PUBLIC_API static PandaEtsVM *GetCurrent();
 
+    /**
+     * @brief Create TaskManager if needed and set it to runtime
+     * @note It's temporary solution, TaskManager will be created outside VM in the future
+     *
+     * @param options runtime options
+     * @param source_lang used specific source language
+     *
+     * @return true if TaskManager was created, false - otherwise
+     */
+    static bool CreateTaskManagerIfNeeded(const RuntimeOptions &options, panda_file::SourceLang source_lang);
+
     bool Initialize() override;
     bool InitializeFinish() override;
 
@@ -297,8 +308,6 @@ public:
         return atomics_mutex_;
     }
 
-    PandaVector<int8_t> *AllocateAtomicsSharedMemory(size_t byte_length);
-
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,
@@ -359,8 +368,6 @@ private:
     std::function<void(Frame *)> clear_interop_handle_scopes_;
     // for JS Atomics
     os::memory::Mutex atomics_mutex_;
-    // Shared memory for SharedArrayBuffer
-    std::atomic<PandaVector<int8_t> *> atomics_shared_memory_ {std::atomic(nullptr)};
 
     ExternalData external_data_ {};
 

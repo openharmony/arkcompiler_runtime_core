@@ -334,7 +334,7 @@ export class JSON {
     }
 
     // TODO(kirill-mitkin): Map<Long, Long> blocked by internal issue
-    private static checkType(typ: Type, used: Array): boolean {
+    private static checkType(typ: Type, used: Array<TypeColor>): boolean {
         let id = typ.getId()
         let ind = used.indexOf(new TypeColor(id, 0))
         if (ind != -1) {
@@ -365,11 +365,11 @@ export class JSON {
 
     // TODO(kirill-mitkin): For testing purpose only, shpuld be replaced by error checking
     public static isCorrectForParsing(typ: Type): boolean {
-        return JSON.checkType(typ, new Array())
+        return JSON.checkType(typ, new Array<TypeColor>())
     }
 
     public static parse<T>(str: String, typ: Type): T | null {
-        if (!JSON.checkType(typ, new Array())) {
+        if (!JSON.checkType(typ, new Array<TypeColor>())) {
             throw new Error("Incorrect type: " + typ.toString())
         }
         let value = JSONParser.parse(str)
@@ -379,9 +379,9 @@ export class JSON {
     private static parseObject(jVal: JSONObject, cType: ClassType): Object {
         let object = cType.make()
         let cVal = Value.of(object) as ClassValue
-        let unboxString : (v: Object) => Object =
-            (v: Object): Object => { return (v as JSONString).value }
-        let fieldArray = jVal.keys.map(unboxString)
+        let unboxString : (v: JSONString) => String =
+            (v: JSONString): String => { return v.value }
+        let fieldArray = jVal.keys.map<String>(unboxString)
         for (let field_num = 0; field_num < cType.getFieldsNum(); field_num++) {
             let field : Field = cType.getField(field_num)
             let indexInJSON = fieldArray.indexOf(field.getName())
@@ -692,9 +692,8 @@ export class JSONParser {
 export class JSONValue extends Object {}
 
 export class JSONObject extends JSONValue {
-    // TODO(ivan-tyulyandin): replace with Map<JSONString, JSONValue>
-    keys: Array = new Array()
-    values: Array = new Array()
+    keys: Array<JSONString> = new Array<JSONString>()
+    values: Array<JSONValue> = new Array<JSONValue>()
     readonly static START_CHAR = c'{'
     readonly static END_CHAR = c'}'
     readonly static SEPARATOR = c':'
@@ -714,8 +713,7 @@ export class JSONObject extends JSONValue {
 }
 
 export class JSONArray extends JSONValue {
-    // TODO(ivan-tyulyandin): replace with Array<JSONValue>
-    values: Array = new Array()
+    values: Array<JSONValue> = new Array<JSONValue>()
     readonly static START_CHAR = c'['
     readonly static END_CHAR = c']'
     readonly static SEPARATOR = c','

@@ -92,10 +92,11 @@ public:
     }
 
     template <class T>
-    static T *CreateForPrimitive(EtsClassRoot root, uint32_t length)
+    static T *CreateForPrimitive(EtsClassRoot root, uint32_t length,
+                                 SpaceType space_type = SpaceType::SPACE_TYPE_OBJECT)
     {
         EtsClass *array_class = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(root);
-        return Create<T>(array_class, length);
+        return Create<T>(array_class, length, space_type);
     }
 
     NO_COPY_SEMANTIC(EtsArray);
@@ -165,11 +166,11 @@ private:
 template <class ClassType, EtsClassRoot ETS_CLASS_ROOT>
 class EtsPrimitiveArray : public EtsArray {
 public:
-    static EtsPrimitiveArray *Create(uint32_t length)
+    static EtsPrimitiveArray *Create(uint32_t length, SpaceType space_type = SpaceType::SPACE_TYPE_OBJECT)
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
         // NOLINTNEXTLINE(readability-magic-numbers)
-        return EtsArray::CreateForPrimitive<EtsPrimitiveArray>(ETS_CLASS_ROOT, length);
+        return EtsArray::CreateForPrimitive<EtsPrimitiveArray>(ETS_CLASS_ROOT, length, space_type);
     }
     void Set(uint32_t index, ClassType element)
     {

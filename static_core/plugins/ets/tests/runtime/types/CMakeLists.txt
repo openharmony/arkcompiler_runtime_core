@@ -26,6 +26,7 @@ panda_ets_add_gtest(
         ets_class_test.cpp
     LIBRARIES
         arkruntime
+        arkassembler
     INCLUDE_DIRS
         ${PANDA_ETS_PLUGIN_SOURCE}/runtime
     SANITIZERS
@@ -43,6 +44,7 @@ panda_ets_add_gtest(
         ets_promise_test.cpp
         ets_arraybuf_test.cpp
     LIBRARIES
+        arkassembler
         arkruntime
     INCLUDE_DIRS
         ${PANDA_ETS_PLUGIN_SOURCE}/runtime

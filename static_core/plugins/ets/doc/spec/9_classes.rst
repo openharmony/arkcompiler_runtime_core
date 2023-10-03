@@ -6,17 +6,17 @@ Classes
 .. meta:
     frontend_status: Done
 
-Class declarations introduce new reference types and describe the manner
+Class declarations introduce new reference types, and describe the manner
 of their implementation.
 
 Classes can be *top-level* and local (see :ref:`Local Classes`).
 
 A class body declares:
 
--  members,
--  instance,
--  static initializers, and
--  constructors.
+-  Members,
+-  Instance,
+-  Static initializers, and
+-  Constructors.
 
 
 The body of the declaration of a member (see :ref:`Class Members`)
@@ -24,9 +24,9 @@ comprises the scope of a declaration (see :ref:`Scopes`).
 
 Class members include:
 
--  fields,
--  methods, and
--  accessors.
+-  Fields,
+-  Methods, and
+-  Accessors.
 
 .. index::
    class declaration
@@ -46,19 +46,19 @@ Class members can be *declared* or *inherited*.
 
 Every member is associated with the class declaration it is declared in.
 
-Field, method, accessor and constructor declarations can have access modifiers
+Field, method, accessor, and constructor declarations can have access modifiers
 (see :ref:`Access Modifiers`):
 
--  *public*,
--  *protected*,
--  *internal*, or
--  *private*.
+-  *Public*,
+-  *Protected*,
+-  *Internal*, or
+-  *Private*.
 
 
 A newly declared field can hide a field declared in a superclass or
 superinterface.
 
-A newly declared method can hide, implement or override a method
+A newly declared method can hide, implement, or override a method
 declared in a superclass or superinterface.
 
 .. index::
@@ -74,6 +74,7 @@ declared in a superclass or superinterface.
    superclass
    superinterface
    
+
 |
 
 .. _Class Declarations:
@@ -89,7 +90,7 @@ reference type.
 
 The class name is specified by the *identifier* inside a class declaration.
 
-If *typeParameters* are defined in a class declaration, then such class
+If *typeParameters* are defined in a class declaration, then that class
 is a *generic class* (see :ref:`Generic Declarations`).
 
 .. index::
@@ -111,7 +112,7 @@ is a *generic class* (see :ref:`Generic Declarations`).
         'abstract' | 'final'
         ;
 
-The scope of a class declaration is specified in (:ref:`Scopes`).
+The scope of a class declaration is specified in :ref:`Scopes`.
 
 .. code-block:: typescript
    :linenos:
@@ -141,8 +142,8 @@ Class Modifiers: Abstract Classes
 
 A class that is incomplete or considered incomplete is *abstract*.
 
-A non-abstract subclass of an *abstract* class may be instantiated; as a
-result, a constructor for the *abstract* class and field initializers
+A non-abstract subclass of an *abstract* class can be instantiated; as a
+result, a constructor for the *abstract* class, and field initializers
 for non-static fields of that class are executed.
 
 A method that is declared but not yet implemented is *abstract*. Only
@@ -150,9 +151,9 @@ A method that is declared but not yet implemented is *abstract*. Only
 
 A :index:`compile-time error` occurs if:
 
--  an attempt is made to create an instance of an *abstract* class.
--  a non-*abstract* class has an *abstract* method.
--  both *abstract* and *final* modifiers are used on a class.
+-  An attempt is made to create an instance of an *abstract* class.
+-  A non-*abstract* class has an *abstract* method.
+-  Both *abstract* and *final* modifiers are used on a class.
 
 .. index::
    modifier
@@ -198,7 +199,7 @@ Local Classes
 =============
 
 Local classes are defined between balanced braces in a group of zero or more
-statements (i.e., in a *block* that is a *method body*, a ``for`` loop or an
+statements (i.e., in a *block* that is a *method body*, a ``for`` loop, or an
 ``if`` clause).
 
 A local interface can be a normal interface, but not an annotation interface.
@@ -219,7 +220,7 @@ Local classes have access to instance members of the enclosing class and local
 variables if such are declared *constant* (i.e., a variable or parameter whose
 value remains unchanged after initialization).
 
-A local class captures a local variable or parameter it accesses of the
+A local class captures a local variable, or the parameter it accesses of the
 enclosing function or method.
 
 .. index::
@@ -238,24 +239,25 @@ enclosing function or method.
 
 A local class can only:
 
--  declare members or initializers.
--  refer to a *static* member of the enclosing class in a *static* method
-   (static members must be *constant variables*, i.e., variables of primitive
-   type or the type *String* that is declared *constant* and initialized with a
-   compile-time constant expression).
--  be referred to by a simple name (not a qualified or canonical name), i.e.,
-   if a canonical name is required, then a local class cannot be considered.
+-  Declare members or initializers.
+-  Refer to a *static* member of the enclosing class in a *static* method
+   (static members must be *constant variables*, i.e., variables of a primitive
+   type, or the type *String* that is declared *constant* and initialized with
+   a compile-time constant expression).
+-  Be referred to by a simple name (neither a qualified nor a canonical
+   name), i.e., if a canonical name is required, then a local class cannot
+   be considered.
 
 
 A :index:`compile-time error` occurs if a local class or interface declaration
 has:
 
--  a variable that is not constant.
--  a member variable that is not defined as *static*.
--  a name that is used to declare a new local class or interface (unless such
+-  A variable that is not constant.
+-  A member variable that is not defined as *static*.
+-  A name that is used to declare a new local class or interface (unless that
    local class or interface is declared within a class or interface declaration).
--  a local class or interface declaration has the access modifier *public*,
-   *protected* or *private*.
+-  A local class or an interface declaration that has access modifier *public*,
+   *protected*, or *private*.
 
 .. index::
    local
@@ -274,12 +276,12 @@ has:
    declaration
    access modifier
    
-A :index:`compile-time error` occurs if direct superclass of a local class is
-*final*.
+A :index:`compile-time error` occurs if the direct superclass of a local
+class is *final*.
 
 A local class cannot be nested.
 
-A local class and interface declarations are not statements, but must also be
+A local class and interface declarations are not statements but must also be
 immediately contained by a block.
 
 .. index::
@@ -287,13 +289,13 @@ immediately contained by a block.
    final
    local
    
-The scope of a local class declaration encompasses its whole declaration (not
-only its body), i.e., the definition of the local class *Cyclic* is indeed
+The scope of a local class declaration encompasses its entire declaration (not
+its body only), i.e., the definition of the local class *Cyclic* is indeed
 cyclic because it extends itself rather than *Global.Cyclic*. Consequently,
 the declaration of the local class *Cyclic* is rejected at compile time.
 
 *Local* class names cannot be redeclared within the same method (constructor,
-initializer or function as the case may be); a :index:`compile-time error`
+initializer, or function as the case may be); a :index:`compile-time error`
 occurs if a method uses the declaration *local* more than once.
 
 .. index::
@@ -314,8 +316,8 @@ Class Extension Clause
     frontend_status: Done
 
 All classes except class *Object* can contain the *extends* clause which
-specifies the *base class* or *direct superclass* of the current class.
-A class that has no *extends* clause and is not *Object* is assumed to have
+specifies the *base class*, or the *direct superclass* of the current class.
+A class that has no *extends* clause, and is not *Object*, is assumed to have
 the *extends* *Object* clause.
 
 .. index::
@@ -334,17 +336,17 @@ the *extends* *Object* clause.
 
 A :index:`compile-time error` occurs if:
 
--  the *extends* clause appears in the definition of the class *Object*
-   which is the top of the types hierarchy and has no superclass.
+-  *extends* clause appears in the definition of the class *Object*
+   which is the top of the types hierarchy, and has no superclass.
 
--  the *typeReference* names a class type that is not accessible (see
+-  *typeReference* names a class type that is not accessible (see
    :ref:`Scopes`).
 
--  there is a cycle in the ‘extends’ graph.
+-  There is a cycle in the ‘extends’ graph.
 
 -  *typeReference* is an alias of a *primitive* or *enum* type.
 
--  any or the type arguments of the *typeReference* is a wildcard type argument.
+-  Any of the type arguments of *typeReference* is a wildcard type argument.
 
 
 Class extension implies that a class inherits all members of the direct
@@ -435,13 +437,13 @@ class are listed in the class declaration of the *implements* clause.
 
 A :index:`compile-time error` occurs if:
 
--  a *typeReference* fails to name an accessible interface type (see
+-  *typeReference* fails to name an accessible interface type (see
    :ref:`Scopes`).
 
--  any type argument of a *typeReference* is a wildcard type argument.
+-  Any type argument of *typeReference* is a wildcard type argument.
 
--  an interface is repeated as a direct superinterface in a single
-   *implements* clause (even if such interface is named differently).
+-  An interface is repeated as a direct superinterface in a single
+   *implements* clause (even if that interface is named differently).
 
 .. index::
    class declaration
@@ -456,14 +458,14 @@ A :index:`compile-time error` occurs if:
 For the class declaration *C* <*F*:sub:`1`,..., *F*:sub:`n`> (:math:`n\geq{}0`,
 :math:`C\neq{}Object`):
 
-- direct superinterfaces of the class type *C* <*F*:sub:`1`,..., *F*:sub:`n`>
+- Direct superinterfaces of the class type *C* <*F*:sub:`1`,..., *F*:sub:`n`>
   are the types specified in the *implements* clause of the declaration of *C*
   (if there is the *implements* clause).
 
 
 For a generic class declaration *C* <*F*:sub:`1`,..., *F*:sub:`n`> (*n* > *0*):
 
--  the *direct superinterfaces* of the parameterized class type *C*
+-  *Direct superinterfaces* of the parameterized class type *C*
    < *T*:sub:`1`,..., *T*:sub:`n`> are all types *I* <*U*:sub:`1`:math:`\theta{}`
    ,..., *U*:sub:`k`:math:`\theta{}`>, if:
 
@@ -482,21 +484,22 @@ For a generic class declaration *C* <*F*:sub:`1`,..., *F*:sub:`n`> (*n* > *0*):
 
 Interface type *I* is a superinterface of class type *C* if *I* is:
 
--  a direct superinterface of *C*; or
--  a superinterface (see :ref:`Superinterfaces and Subinterfaces` defines
+-  A direct superinterface of *C*; or
+-  A superinterface (see :ref:`Superinterfaces and Subinterfaces` defines
    superinterface of an interface) of *J* which is in turn a direct
    superinterface of *C*; or
--  a superinterface of the direct superclass of *C*.
+-  A superinterface of the direct superclass of *C*.
 
 
 A class *implements* all its superinterfaces.
 
-A :index:`compile-time error` occurs if a class is at the same time:
+A :index:`compile-time error` occurs if a class is at the same time a
+subtype of:
 
--  a subtype of two interface types that represent different instantiations
-   of the same generic interface (see :ref:`Generic Declarations`); or
--  a subtype of an instantiation of a generic interface and a raw type
-   that names such a generic interface.
+-  Two interface types that represent different instantiations of the same
+   generic interface (see :ref:`Generic Declarations`); or
+-  The instantiation of a generic interface, and a raw type that names the
+   a generic interface.
 
 .. index::
    class type
@@ -514,26 +517,26 @@ A :index:`compile-time error` occurs if a class is at the same time:
 Non-*abstract* classes are not allowed to have *abstract* methods (see
 :ref:`Abstract Methods`).
 
-If a class not declared *abstract*, then:
+If a class is not declared *abstract*, then:
 
--  any *abstract* member method of each direct superinterface is implemented
-   (see :ref:`Overriding by Instance Methods`) by a declaration in such class;
--  declaration of the existing method is inherited from a direct superclass
+-  Any *abstract* member method of each direct superinterface is implemented
+   (see :ref:`Overriding by Instance Methods`) by a declaration in that class;
+-  The declaration of the existing method is inherited from a direct superclass,
    or a direct superinterface.
 
 
 If a default method (see `Default Method Declarations`) of a class
-superinterface is not inherited, then such default method can:
+superinterface is not inherited, then that default method can:
 
--  be overridden by a class method, and
--  behave as specified in its default body.
+-  Be overridden by a class method, and
+-  Behave as specified in its default body.
 
 
 A single method declaration in a class is allowed to implement methods of one
 or more superinterfaces.
 
-A :index:`compile-time error` occurs if a class field has the same name as
-the method from one of superinterfaces class implements.
+A :index:`compile-time error` occurs if the names of a class field, and of
+the method from one of superinterfaces that class implements are the same.
 
 .. index::
    class type
@@ -561,9 +564,9 @@ Implementing Interface Properties
     frontend_status: Partly
 
 A class must implement all properties from all interfaces (see
-:ref:`Implementing Interface Properties`) which are defined as getter, setter
-or both. It is not necessary to provide implementation for the property in
-a field form.
+:ref:`Implementing Interface Properties`) which are defined as a getter, a
+setter, or both. Providing implementation for the property in the form of
+a field is not necessary.
 
 .. code-block:: typescript
    :linenos:
@@ -683,12 +686,12 @@ Class members declared *protected* or *public* are inherited by subclasses
 that are declared in a package other than the package containing the class
 declaration.
 
-Constructors and class initializers are not members and cannot be inherited.
+Constructors and class initializers are not members, and cannot be inherited.
 
 Members can be class field (see :ref:`Field Declarations`), method (see
-:ref:`Method Declarations`) and accessors (see :ref:`Accessor Declarations`).
+:ref:`Method Declarations`), and accessors (see :ref:`Accessor Declarations`).
 Method is an ordered 4-tuple consisting of type parameters, argument types,
-return type and *throws*/*rethrows* clause, where:
+return type, and *throws*/*rethrows* clause, where:
 
 #. Type parameter is the declaration of any type parameters of the
    method member.
@@ -698,7 +701,7 @@ return type and *throws*/*rethrows* clause, where:
 #. *throws* or *rethrows* clause is an indication of a member method’s
    ability to raise exception.
 
-   
+
 All names in the declaration scope (see :ref:`Scopes`) must be unique, i.e.,
 fields and methods cannot have the same name.
 
@@ -734,9 +737,9 @@ Access Modifiers
 .. meta:
     frontend_status: Partly
 
-Access modifiers define how a class member or constructor can be accessed.
+Access modifiers define how a class member or a constructor can be accessed.
 
-Modifiers *private*, *internal*, *internal protected*, *protected* or *public*
+Modifiers *private*, *internal*, *internal protected*, *protected*, or *public*
 explicitly specify the desired accessibility of class members and constructors.
 
 .. code-block:: abnf
@@ -748,7 +751,7 @@ explicitly specify the desired accessibility of class members and constructors.
         | 'public'
         ;
 
-If no explicit modifier is provided, then a class member or constructor
+If no explicit modifier is provided, then a class member or a constructor
 is implicitly declared *public* by default.
 
 .. index::
@@ -770,8 +773,8 @@ Private Access Modifier
     frontend_status: Done
     todo: only parsing is implemented, but checking isn't implemented yet, need libpandafile support too
 
-The modifier *private* indicates that a class member or constructor is
-accessible within their declaring class, i.e., a *private* member or
+The modifier *private* indicates that a class member or a constructor is
+accessible within their declaring class, i.e., *private* member or
 constructor *m* declared in a class *C* can be accessed only within the
 class body of *C*.
 
@@ -818,10 +821,10 @@ Protected Access Modifier
 .. meta:
     frontend_status: Done
 
-The modifier *protected* indicates that a class member or constructor is
-accessible only within their declaring class and classes derived from such
+The modifier *protected* indicates that a class member or a constructor is
+accessible only within its declaring class, and classes derived from that
 declaring class, i.e., a protected member *M* declared in a class *C* can be
-accessed only within the class body of *C* or of a class derived from *C*.
+accessed only within the class body of *C*, or of a class derived from *C*.
 
 .. code-block:: typescript
    :linenos:
@@ -851,9 +854,9 @@ accessed only within the class body of *C* or of a class derived from *C*.
    accessibility
    class body
    declaring class
-   
 
-A member or constructor with both *internal* (see above) and *protected*
+
+A member or a constructor with both *internal* (see above) and *protected*
 modifier can be accessed as *internal* or *protected*.
 
 |
@@ -867,8 +870,8 @@ Public Access Modifier
     frontend_status: Done
     todo: spec needs to be clarified - "The only exception and panic here is that the type the member or constructor belongs to must also be accessible"
 
-The modifier *public* indicates that a class member or constructor can be
-accessed everywhere, provided that the type that such member or constructor
+The modifier *public* indicates that a class member or a constructor can be
+accessed everywhere, provided that the type that member or constructor
 belongs to is also accessible.
 
 .. index::
@@ -907,11 +910,11 @@ Field Declarations
 
 A :index:`compile-time error` occurs if:
 
--  a field modifier is used more than once in a field declaration.
--  the name of a field declared in the body of a class declaration is already
+-  A field modifier is used more than once in a field declaration.
+-  The name of a field declared in the body of a class declaration is already
    used for another field or method in the same declaration.
 
-A field declared by a class with a certain name must *hide* any accessible
+A field declared by a class with a certain name *hides* any accessible
 declaration of fields if they have the same name in superclasses and
 superinterfaces of the class.
 
@@ -927,9 +930,10 @@ superinterfaces of the class.
    superinterface
    class declaration body
    
-A static qualified name can be used to access a hidden field it is *static*. 
-Otherwise, a field access expression with the keyword *super* (see
-:ref:`Field Access Expressions`) or a cast to a superclass type can be used.
+If a hidden field is *static*, then it can be accessed with a superclass or
+superinterface qualification. Otherwise, a field access expression with the
+keyword *super* (see :ref:`Field Access Expressions`), or a cast to a
+superclass type can be used.
 
 A class inherits all non-*private* fields of the superclass and superinterfaces
 from its direct superclass and direct superinterfaces if those are not hidden
@@ -940,13 +944,12 @@ A subclass can access a *private* field of a superclass if both classes are
 members of the same class. However, a subclass cannot inherit a private field.
 
 A class can inherit more than one field or property with the same name from
-its superinterfaces or from both its superclass and superinterfaces.
-
-However, a :index:`compile-time error` occurs if an attempt is made to refer
+its superinterfaces, or from both its superclass and superinterfaces. However,
+a :index:`compile-time error` occurs if an attempt is made to refer
 to such a field or property by its simple name within the body of the class.
 
 The same field or property declaration can be inherited from an interface in
-more than one way but if this is the case the field or property is considered
+more than one way. In that case, the field or property is considered
 to be inherited only once, and referring to it by its simple name causes no
 ambiguity.
 
@@ -981,9 +984,9 @@ always declared static. A *static field* can have only one instantiation,
 irrespective of how many instances of that class (even if zero) are
 eventually created.
 
-If a new field is created for and associated with a newly-created
-instance of a class or its superclasses, then it is called a non-*static*
-field. A non-*static* field is not declared *static*.
+A new field is called non-*static* if it is created for, and associated with
+a newly-created instance of a class or its superclasses. A non-*static* field
+is not declared *static*.
 
 .. index::
    static field
@@ -1004,17 +1007,17 @@ Readonly (Constant) Fields
 .. meta:
     frontend_status: Done
 
-A *readonly field* has *readonly* modifier and is initialized only once, and
-allows no change of its value after the initialization.
+A *readonly field* has *readonly* modifier, and is initialized only once. No
+change of its value is allowed after the initialization.
 
 Static fields and non-*static* fields can be declared *readonly*.
 
 A :index:`compile-time error` occurs unless:
 
--  a blank *readonly* field is initialized by a static field (see
+-  A blank *readonly* field is initialized by a static field (see
    :ref:`Class Initializer`) of its declared class, if any.
 
--  a blank *readonly* non-static field is initialized as a result of execution
+-  A blank *readonly* non-static field is initialized as a result of execution
    of every class constructor (see :ref:`Constructor Declaration`).
 
 A blank *readonly* non-static field is to be initialized as a result of
@@ -1048,9 +1051,9 @@ The following rules apply to an initializer in a *static* field declaration:
 
 -  A :index:`compile-time error` occurs if the initializer uses the keyword
    ``this`` or the keyword ``super`` while calling a method (see
-   :ref:`Method Call Expression`)    or accessing a field (see
+   :ref:`Method Call Expression`), or accessing a field (see
    :ref:`Field Access Expressions`).
--  The initializer is evaluated and the assignment is performed only once,
+-  The initializer is evaluated, and the assignment is performed only once
    when the class is initialized at runtime.
 
 
@@ -1061,9 +1064,9 @@ Constant fields initialization never uses default values (see
 
 An initializer in a non-*static* field declaration:
 
--  can use the keyword ``this`` to access or refer to the current object, and
+-  Can use the keyword ``this`` to access or refer to the current object, and
    the keyword ``super`` to access a superclass object.
--  is evaluated at runtime and has its assignment performed each time an
+-  Is evaluated at runtime, and has its assignment performed each time an
    instance of the class is created.
 
 .. index::
@@ -1096,13 +1099,13 @@ The rules applying to the restrictions on forward references to fields (if the
 reference textually precedes the field declaration) and self-references (if
 the field is used within its own initializer) are provided below.
 
-A :index:`compile-time error` occurs in a reference to a *static* field *f* declared
-in class or interface *C* if:
+A :index:`compile-time error` occurs in a reference to a *static* field *f*
+declared in class or interface *C* if:
 
 -  such reference is used in *C*’s *static* initializer (see
    :ref:`Class Initializer`) or *static* field initializer (see
    :ref:`Field Initialization`);
--  such reference is used before *f*’s declaration or within *f*’s own
+-  such reference is used before *f*’s declaration, or within *f*’s own
    declaration initializer;
 -  no such reference is present on the left-hand side of an assignment
    expression (see :ref:`Assignment`);
@@ -1113,7 +1116,7 @@ A :index:`compile-time error` occurs in a reference to a non-*static* field *f*
 declared in class *C* if:
 
 -  such reference is used in *C*’s non-*static* field initializer;
--  such reference is used before *f*’s declaration or within *f*’s own
+-  such reference is used before *f*’s declaration, or within *f*’s own
    declaration initializer;
 -  no such reference is present on the left-hand side of an assignment
    expression (see :ref:`Assignment`);
@@ -1166,17 +1169,17 @@ Method Declarations
         | 'native'
         ;
 
-Method *overload signatures* allow to call a method in different ways.
+Method *overload signatures* allow calling a method in different ways.
 
-The *identifier* of a *classMethodDeclaration* is the method name that can be
+The *identifier* of *classMethodDeclaration* is the method name that can be
 used to refer to the method (see :ref:`Method Call Expression`).
 
 A :index:`compile-time error` occurs if:
 
--  a method modifier appears more than once in a method declaration.
--  the body of a class declaration declares a method whose name is already
-   used in this declaration for a field.
--  the body of a class declaration declares two same-name methods with
+-  A method modifier appears more than once in a method declaration.
+-  The body of a class declaration declares a method if the method's name
+   is already used for a field in this declaration.
+-  The body of a class declaration declares two same-name methods with
    override-equivalent signatures (see :ref:`Override-Equivalent Signatures`)
    as its members.
 
@@ -1204,16 +1207,15 @@ A method declared static is a *class method*.
 
 A :index:`compile-time error` occurs if:
 
--  a method declaration contains another keyword (``abstract``, ``final`` or
+-  A method declaration contains another keyword (``abstract``, ``final``, or
    ``override``) along with the keyword ``static``.
--  the header or body of a class method includes the name of a surrounding
+-  The header or body of a class method includes the name of a surrounding
    declaration’s type parameter.
 
 
-Class methods are always called with no reference to a particular object.
-
-That is why a :index:`compile-time error` occurs if the keyword ``this`` or
-the keyword ``super`` is used inside a static method.
+Class methods are always called with no reference to a particular object. That
+is why a :index:`compile-time error` occurs if keywords ``this`` or ``super``
+are used inside a static method.
 
 .. index::
    static method
@@ -1237,7 +1239,7 @@ Instance Methods
 .. meta:
     frontend_status: Done
 
-A method that is not declared *static* is called an *instance method* or a
+A method that is not declared *static* is called an *instance method*, or a
 non-*static* method.
 
 An instance method is always called with respect to an object, which becomes
@@ -1268,16 +1270,16 @@ Non-*abstract* methods can be referred to as *concrete* methods.
 
 A :index:`compile-time error` occurs if:
 
--  an *abstract* method is marked as *private*.
--  a method declaration contains another keyword (``static``, ``final``,
+-  An *abstract* method is marked as *private*.
+-  A method declaration contains another keyword (``static``, ``final``, or
    ``native``) along with the keyword ``abstract``.
 
 
 A :index:`compile-time error` occurs unless:
 
--  the *abstract* method *m* declaration appears directly within an *abstract*
+-  The *abstract* method *m* declaration appears directly within an *abstract*
    class *A*.
--  every non-*abstract* subclass of *A* (see
+-  Every non-*abstract* subclass of *A* (see
    :ref:`Class Modifiers Abstract Classes`) provides an implementation for *m*.
 
 An *abstract* method can be overridden by another *abstract* method declaration
@@ -1332,8 +1334,8 @@ The use of ``override`` is optional.
 
 A :index:`compile-time error` occurs if:
 
--  method marked with ``override`` does not override a method from a superclass.
--  method declaration that contains the keyword ``override`` also contains
+-  Method marked with ``override`` does not override a method from a superclass.
+-  Method declaration that contains the keyword ``override`` also contains
    keywords ``abstract`` or ``static``.
 
 
@@ -1341,8 +1343,8 @@ If the signature of the overridden method contains parameters with default
 values (see :ref:`Optional Parameters`), then the overriding method always
 uses the default parameter values of the overridden method.
 
-A :index:`compile-time error` occurs if a parameter in an overriding methods
-contains default value.
+A :index:`compile-time error` occurs if a parameter in an overriding method
+contains the default value.
 
 See :ref:`Overriding by Instance Methods` for the specific rules of overriding.
 
@@ -1381,7 +1383,7 @@ Native methods are described in the experimental section (see
 Method Overload Signatures
 ==========================
 
-The |LANG| allows to specify a method that can be called in different ways by
+The |LANG| allows specifying a method that can be called in different ways by
 writing *overload signatures*. To do so, several method headers with the
 same name and different signatures are written, followed by the single
 implementation. See also :ref:`Function Overload Signatures` for *function
@@ -1401,8 +1403,8 @@ overload signatures*.
         methodModifier* identifier signature ';'
         ;
 
-A :index:`compile-time error` occurs if the method implementation is not present or does
-not immediately follow the declaration.
+A :index:`compile-time error` occurs if the method implementation is not
+present, or does not immediately follow the declaration.
 
 A call of a method with overload signatures is always a call of the
 implementation method.
@@ -1435,7 +1437,7 @@ the ``null`` argument, while the call of ``c.foo(x)`` is executed as a call of
 the implementation method with an argument.
 
 A :index:`compile-time error` occurs if the signature of method implementation
-is not *overload signature compatible* with each overload signature. It means
+is not *overload signature-compatible* with each overload signature. It means
 that a call of each overload signature must be replaceable for the correct
 call of the implementation method. Using optional parameters (see
 :ref:`Optional Parameters`) or *least upper bound* types (see
@@ -1446,7 +1448,7 @@ A :index:`compile-time error` occurs unless all of the following requirements
 are met:
 
 -  Overload signatures and the implementation method have the same access
-   modifier (*public*, *private* or *protected*).
+   modifier (*public*, *private*, or *protected*).
 -  All overload signatures and the implementation method are *static* or
    *non-static*.
 -  All overload signatures and the implementation method are *final* or
@@ -1459,7 +1461,7 @@ are met:
    execution
    call
    signature
-   overload signature compatible
+   overload signature-compatible
    overload signature
    access modifier
    public
@@ -1483,16 +1485,16 @@ Method Body
 .. meta:
     frontend_status: Done
 
-A *method body* is a block of code that implements a method. A semicolon or
+A *method body* is a block of code that implements a method. A semicolon, or
 an empty body (i.e., no body at all) indicate the lack of implementation.
 
-An abstract or native method must have an empty body.
+An *abstract* or *native* method must have an empty body.
 
 A :index:`compile-time error` particularly occurs if:
 
--  the body of an *abstract* or *native* method declaration is a block.
--  a method declaration is neither *abstract* nor *native*, but its body
-   is empty or is a semicolon.
+-  The body of an *abstract* or *native* method declaration is a block.
+-  A method declaration is neither *abstract* nor *native*, but its body
+   is empty, or is a semicolon.
 
 
 See :ref:`Return Statements` for the rules that apply to *return* statements
@@ -1519,30 +1521,33 @@ type, but its body can complete normally (see :ref:`Normal and Abrupt Statement 
 Inheritance
 ===========
 
+.. meta:
+    frontend_status: Done
+
 Class *C* inherits from its direct superclass all concrete methods *m* (both
 *static* and *instance*) that meet all of the following conditions:
 
--  *m* is a member of *C*’s direct superclass.
--  *m* is *public*, *protected* or *internal* in the same package as *C*.
+-  *m* is a member of *C*’s direct superclass;
+-  *m* is *public*, *protected*, or *internal* in the same package as *C*;
 -  No signature of a method declared in *C* is a subsignature (see
    :ref:`Override-Equivalent Signatures`) of the signature of *m*.
 
 
 Class *C* inherits from its direct superclass and direct superinterfaces all
-*abstract* and default methods *m* (see `Default Method Declarations`)
+*abstract* and *default* methods *m* (see `Default Method Declarations`)
 that meet the following conditions:
 
--  *m* is a member of *C*’s direct superclass or direct superinterface *D*.
--  *m* is *public*, *protected* or *internal* in the same package as *C*.
+-  *m* is a member of *C*’s direct superclass or direct superinterface *D*;
+-  *m* is *public*, *protected*, or *internal* in the same package as *C*;
 -  No method declared in *C* has a signature that is a subsignature (see
-   :ref:`Override-Equivalent Signatures`) of the signature of *m*.
+   :ref:`Override-Equivalent Signatures`) of the signature of *m*;
 -  No signature of a concrete method inherited by *C* from its direct
-   superclass is a subsignature of the signature of *m*.
+   superclass is a subsignature of the signature of *m*;
 -  No method :math:`m'` that is a member of *C*’s direct superclass or
-   *C*’s direct superinterface *D*' (:math:`m'` being distinct from *m*, and
-   :math:`D'` from *D*) overrides the declaration of the method *m* from
+   *C*’s direct superinterface *D*' (while :math:`m'` is distinct from *m*,
+   and :math:`D'` from *D*) overrides the declaration of the method *m* from
    :math:`D'` (see :ref:`Overriding by Instance Methods` for class method
-   overriding and :ref:`Overriding by Instance Methods in Interfaces` for
+   overriding, and :ref:`Overriding by Instance Methods in Interfaces` for
    interface method overriding).
 
 
@@ -1573,33 +1578,35 @@ No class can inherit *private* or *static* methods from its superinterfaces.
 Overriding by Instance Methods
 ==============================
 
-An instance method  *m*:sub:`C` (inherited by or declared in class
+.. meta:
+    frontend_status: Done
+
+The instance method  *m*:sub:`C` (inherited by, or declared in class
 *C*) overrides another method *m*:sub:`A` (declared in class *A*)
-if:
+if **all** the following is true:
 
 -  *C* is a subclass of *A*, and
 -  *C* does not inherit *m*:sub:`A`, and
--  the signature of *m*:sub:`C` is a subsignature of the signature
+-  The signature of *m*:sub:`C` is a subsignature of the signature
    of *m*:sub:`A`,
 
 
-and if one of the following is also true:
+and also if one of the following is also true:
 
 -  *m*:sub:`A` is *public*, or
 -  *m*:sub:`A` is *protected*, or
--  *m*:sub:`A` is *internal*
+-  *m*:sub:`A` is *internal* in the same package as *C*, while:
 
-   -  in the same package as *C*, and
+    -  Either *C* declares *m*:sub:`C`, or
+    -  *m*:sub:`A` is a member of the direct superclass of *C*,
 
-      -  *C* declares   *m*:sub:`C`, or
-      -  *C* has a direct superclass of which *m*:sub:`A` is a member,
+-  *m*:sub:`A` is declared  with package access, and *m*:sub:`C` overrides:
 
-   -  and *m*:sub:`C` overrides
+    -  *m*:sub:`A` from a superclass of *C*, or
+    -  method :math:`m'` from *C*, where :math:`m'` is distinct from both
+         *m*:sub:`C` and *m*:sub:`A` (i.e., :math:`m'` overrides *m*:sub:`A`
+         from a superclass of *C*).
 
-      -  *m*:sub:`A` from a superclass of *C*, or
-      -  method :math:`m'` from *C* (:math:`m'` is distinct from both
-         *m*:sub:`C` and *m*:sub:`A`), while :math:`m'` overrides *m*:sub:`A`
-         from a superclass of *C*.
 
 .. index::
    instance method
@@ -1617,39 +1624,39 @@ and if one of the following is also true:
 Non-*abstract* *m*:sub:`C` implements *m*:sub:`A` from *C* if it overrides an
 *abstract* method *m*:sub:`A`.
 
-A :index:`compile-time error` occurs if the overridden method *m*:sub:`A` is static.
+A :index:`compile-time error` occurs if the overridden method *m*:sub:`A` is
+static.
 
-An instance method *m*:sub:`C` (inherited by or declared in class *C*)
+An instance method *m*:sub:`C` (inherited by, or declared in class *C*)
 overrides another method *m*:sub:`I` (declared in interface *I*) from *C* if:
 
--  *I* is a superinterface of *C*, and
--  *m*:sub:`I` is not static, and
--  *C* does not inherit *m*:sub:`I`, and
--  the signature of *m*:sub:`C` is a subsignature of the signature (see
-   :ref:`Override-Equivalent Signatures`) of *m*:sub:`I`, and
+-  *I* is a superinterface of *C*; and
+-  *m*:sub:`I` is not static; and
+-  *C* does not inherit *m*:sub:`I`; and
+-  The signature of *m*:sub:`C` is a subsignature of the signature of
+   *m*:sub:`I` (see :ref:`Override-Equivalent Signatures`); and
 -  *m*:sub:`I` is *public*.
 
 
 A method call expression (see :ref:`Method Call Expression`) containing the
 keyword ``super`` can be used to access an overridden method.
 
-Accessing an overridden method with a qualified name or a cast to a superclass
+Accessing an overridden method with a qualified name, or a cast to a superclass
 type is not effective.
 
-Among the methods that override each other, return types may vary if they are
-reference types. The specialization of the return type to a subtype (i.e.,
-*covariant returns*) is based on the *return-type-substitutability* concept.
+Among the methods that override each other, return types can vary if they are
+reference types. The specialization of a return type to a subtype (i.e.,
+*covariant returns*) is based on the concept of *return-type-substitutability*.
 
-For example, a method declaration *d*:sub:`1` with return type *R*:sub:`1` is
+For example, the method declaration *d*:sub:`1` with return type *R*:sub:`1` is
 *return-type-substitutable* for another method *d*:sub:`2` with return type
-*R*:sub:`2`
-if:
+*R*:sub:`2` if:
 
--  *R*:sub:`1` is a primitive type, in which case *R*:sub:`2` is identical to
-   *R*:sub:`1`; or
+-  *R*:sub:`1` is a primitive type (*R*:sub:`2` is then identical to
+   *R*:sub:`1`); or
 
--  *R*:sub:`1` is a reference type, in which case *R*:sub:`1` adapted to the
-   type parameters of *d*:sub:`2` is a subtype of *R*:sub:`2`.
+-  *R*:sub:`1` is a reference type (*R*:sub:`1` adapted to type parameters
+   of *d*:sub:`2` is then a subtype of *R*:sub:`2`).
 
 .. index::
    abstract method
@@ -1681,13 +1688,16 @@ if:
 Hiding by Class Methods
 =======================
 
-A *static* method m declared in or inherited by a class *C* *hides* any method
-:math:`m'` (the signature of *m* being a subsignature of the signature of
-:math:`m'` as described in :ref:`Override-Equivalent Signatures`) in its
-superclasses and superinterfaces.
+.. meta:
+    frontend_status: Done
+
+A *static* method *m* declared in, or inherited by a class *C* *hides* any
+method :math:`m'` (where the signature of *m* is a subsignature of the
+signature of :math:`m'` as described in :ref:`Override-Equivalent Signatures`)
+in its superclasses and superinterfaces.
 
 A hidden method is not directly accessible (see :ref:`Scopes`) to code in *C*.
-However, a hidden method can be accessed by using a qualified name or a method
+However, a hidden method can be accessed by using a qualified name, or a method
 call expression (see :ref:`Method Call Expression`) that contains the keyword
 ``super`` or a cast to a superclass type.
 
@@ -1720,24 +1730,27 @@ method.
 Requirements in Overriding and Hiding
 =====================================
 
-A method declaration *d*:sub:`1` with return type *R*:sub:`1` can override or
+.. meta:
+    frontend_status: Done
+
+The method declaration *d*:sub:`1` with return type *R*:sub:`1` can override or
 hide the declaration of another method *d*:sub:`2` with return type *R*:sub:`2`
 if *d*:sub:`1` is return-type-substitutable (see
 :ref:`Requirements in Overriding and Hiding` and
 :ref:`Overriding by Instance Methods`) for *d*:sub:`2`. Otherwise, a
 :index:`compile-time error` occurs.
 
-A method that overrides or hides another method (including methods that
+A method that overrides or hides another method (including the methods that
 implement *abstract* methods defined in interfaces) cannot change *throws* or
 *rethrows* clauses of the overridden or hidden method.
 
 A :index:`compile-time error` occurs if a type declaration *T* has a member
-method *m*:sub:`1`, but there is a method *m*:sub:`2` declared in *T* or a
-supertype of *T*, for which all of the following is true:
+method *m*:sub:`1`, but there is also a method *m*:sub:`2`, declared in *T*
+or a supertype of *T*, for which all of the following is true:
 
--  *m*\ :sub:`1`\  and *m*\ :sub:`2`\  use the same name.
--  *m*\ :sub:`2`\  is accessible from *T* (see :ref:`Scopes`).
--  *m*\ :sub:`1`\’s signature of is not a subsignature (see
+-  *m*\ :sub:`1`\ and *m*\ :sub:`2`\ use the same name; and
+-  *m*\ :sub:`2`\ is accessible from *T* (see :ref:`Scopes`); and
+-  *m*\ :sub:`1`\’s signature is not a subsignature (see
    :ref:`Override-Equivalent Signatures`) of *m*\ :sub:`2`\’s signature.
 
 .. index::
@@ -1757,8 +1770,8 @@ supertype of *T*, for which all of the following is true:
    subsignature
    override-equivalent signature
 
-The overriding or hiding method’s access modifier must provide no less access
-as that of the overridden or hidden method.
+The access modifier of an overriding or hiding method must provide no less
+access than was provided in the overridden or hidden method.
 
 A :index:`compile-time error` occurs if:
 
@@ -1787,21 +1800,24 @@ A :index:`compile-time error` occurs if:
 Inheriting Methods with Override-Equivalent Signatures
 ======================================================
 
+.. meta:
+    frontend_status: Done
+
 A class can inherit multiple methods with override-equivalent signatures (see
 :ref:`Override-Equivalent Signatures`).
 
 A :index:`compile-time error` occurs if a class *C* inherits the following:
 
--  concrete method whose signature is override-equivalent with another
+-  Concrete method whose signature is override-equivalent with another
    method that *C* inherited; or
--  default method whose signature is override-equivalent with another method
-   that *C* inherited, unless there is an abstract method declared in a
+-  Default method whose signature is override-equivalent with another method
+   that *C* inherited, unless there is an abstract method, declared in a
    superclass of *C* and inherited by *C*, that is override-equivalent
    with both methods.
 
 
 An *abstract* class can inherit all the methods, assuming that a set of
-override-equivalent methods consists of at least one *abstract* method and
+override-equivalent methods consists of at least one *abstract* method, and
 zero or more default methods.
 
 A :index:`compile-time error` occurs unless one of the inherited methods is
@@ -1809,7 +1825,7 @@ return-type-substitutable for every other inherited method (except *throws*
 and *rethrows* clauses that cause no error in this case).
 
 The same method declaration can be inherited from an interface in a number
-of ways, which cannot cause a :index:`compile-time error` on its own.
+of ways, causing no :index:`compile-time error` on its own.
 
 .. index::
    inheriting method
@@ -1831,6 +1847,9 @@ of ways, which cannot cause a :index:`compile-time error` on its own.
 Accessor Declarations
 *********************
 
+.. meta:
+    frontend_status: Done
+
 Accessors are often used instead of fields to add additional control for
 operations of getting or setting a field value. An accessor can be either
 a getter or a setter.
@@ -1851,10 +1870,10 @@ a getter or a setter.
         | 'override'
         ;
 
-Accessor modifiers are a subset of method modifiers, the allowed accessor
+Accessor modifiers are a subset of method modifiers. The allowed accessor
 modifiers have exactly the same meaning as the corresponding method modifiers.
 See :ref:`Abstract Methods` for *abstract*, :ref:`Class Static Methods` for
-*static*, :ref:`Final Methods` for *final* and :ref:`Override Methods` for
+*static*, :ref:`Final Methods` for *final*, and :ref:`Override Methods` for
 *override*.
 
 .. index::
@@ -1886,8 +1905,9 @@ See :ref:`Abstract Methods` for *abstract*, :ref:`Class Static Methods` for
       }
     }
 
-Each get accessor (getter) must have no parameters and explicit return type.
-Each set accessor (setter) must have a single parameter and no return value.
+Each *get* accessor (getter) must have neither parameters nor an explicit
+return type.
+Each *set* accessor (setter) must have a single parameter and no return value.
 
 The use of getters and setters looks the same as the use of fields.
 
@@ -1909,11 +1929,12 @@ The use of getters and setters looks the same as the use of fields.
       // do something
     }
 
-A class can define a getter, a setter or both. If both a getter and a
+A class can define a getter, a setter, or both. If both a getter and a
 setter are defined, then they must have the same accessor modifiers.
 Otherwise, a :index:`compile-time error` occurs.
 
-Accessors can be backed by a private field (as in the example above) or not.
+Accessors can be backed by a private field (as in the example above),
+or have no such backing.
 
 .. index::
    accessor
@@ -1961,16 +1982,16 @@ fields receive their initial values before the first use.
 
 A :index:`compile-time error` occurs if a class initializer contains:
 
--  *return <expression>* statement (see :ref:`Return Statements`).
--  ``throw`` statement (see :ref:`Throw Statements`) with no ``try`` statement
-   (see :ref:`Try Statements`) which handles the case around it.
--  keywords ``this`` (see :ref:`this Expression`) or ``super`` (see
+-  A *return <expression>* statement (see :ref:`Return Statements`).
+-  A ``throw`` statement (see :ref:`Throw Statements`) with no ``try``
+   statement (see :ref:`Try Statements`) to handle the surrounding context.
+-  Keywords ``this`` (see :ref:`this Expression`) or ``super`` (see
    :ref:`Method Call Expression` and :ref:`Field Access Expressions`), or any
    type of a variable declared outside the class initializer.
 
 
 Restrictions of class initializers’ ability to refer to static fields (even
-those in the scope) are specified in :ref:`Exceptions and Errors Inside Field Initializers`.
+those within the scope) are specified in :ref:`Exceptions and Errors Inside Field Initializers`.
 Class initializers cannot throw exceptions for they are effectively
 non-throwing functions (see :ref:`Non-Throwing Functions`).
 
@@ -2004,7 +2025,7 @@ Constructor Declaration
     frontend_status: Done
     todo: Explicit Constructor Call - "Qualified superclass constructor calls" - not implemented, need more investigation (inner class)
 
-*Constructors* are used to create object that are instances of class.
+*Constructors* are used to create objects that are instances of class.
 
 .. code-block:: abnf
 
@@ -2012,25 +2033,24 @@ Constructor Declaration
         'constructor' '(' parameterList? ')' throwMark? constructorBody
         ;
 
-A constructor declaration starts with the keyword ``constructor`` and has no
+A constructor declaration starts with the keyword ``constructor``, and has no
 name. In any other respect, a constructor declaration is similar to a method
 declaration with no result.
 
 Constructors are called by class instance creation expressions (see
 :ref:`New Expressions`), by conversions and concatenations caused by the string
-concatenation operator ':math:`+`' (see :ref:`String Concatenation`)
-and by explicit constructor calls from other constructors (see
-:ref:`Constructor Body`).
+concatenation operator ':math:`+`' (see :ref:`String Concatenation`), and by
+explicit constructor calls from other constructors (see :ref:`Constructor Body`).
 
 Access to constructors is governed by access modifiers (see
-:ref:`Access Modifiers` and :ref:`Scopes`), and declaring a constructor
+:ref:`Access Modifiers` and :ref:`Scopes`). Declaring a constructor
 inaccessible can prevent class instantiation.
 
-A :index:`compile-time error` occurs if two constructors in a class are declared
-with identical signatures.
+A :index:`compile-time error` occurs if two constructors in a class are
+declared, and have identical signatures.
 
-See :ref:`Throwing Functions` for ``throws`` mark and :ref:`Rethrowing Functions`
-for ``rethrows`` mark.
+See :ref:`Throwing Functions` for ``throws`` mark, and
+:ref:`Rethrowing Functions` for ``rethrows`` mark.
 
 .. index::
    constructor
@@ -2147,17 +2167,17 @@ same-class constructor, or of the direct superclass (see
    direct superclass
 
 A :index:`compile-time error` occurs if a constructor calls itself, directly or
-indirectly, through a series of one or more explicit constructor calls
+indirectly---through a series of one or more explicit constructor calls---by
 using ``this``.
 
 The constructor body must implicitly begin with a superclass constructor
-call '``super()``' (a call of the constructor’s direct superclass that takes
+call '``super()``' (call of the constructor’s direct superclass that takes
 no argument), unless the constructor body begins with an explicit constructor
 call, and the constructor being declared is a part of the primordial class
 *Object*.
 
 A constructor body looks like a method body (see :ref:`Method Body`), except
-that explicit constructor calls are possible and explicit returning of a value
+that explicit constructor calls are possible, and explicit returning of a value
 (see :ref:`Return Statements`) is prohibited.
 
 However, a return statement (:ref:`Return Statements`) can be used in a
@@ -2189,30 +2209,30 @@ Explicit Constructor Call
 
 There are two kinds of explicit constructor call statements:
 
--  *Alternate constructor calls* that begin with the keyword ``this`` and
+-  *Alternate constructor calls* that begin with the keyword ``this``, and
    can be prefixed with explicit type arguments (used to call an alternate
    same-class constructor).
 -  *Superclass constructor calls* (used to call a direct superclass
    constructor) called *Unqualified superclass constructor calls* that
-   start with the keyword ``super`` and can be prefixed with explicit type
+   start with the keyword ``super``, and can be prefixed with explicit type
    arguments.
 
 
 A :index:`compile-time error` occurs if the constructor body of an explicit
 constructor call statement:
 
--  refers to any non-static field, instance method or inner class declared
+-  Refers to any non-static field, instance method, or inner class declared
    in this class or any superclass; or
--  uses ``this`` or ``super`` in any expression.
+-  Uses ``this`` or ``super`` in any expression.
 
 
 Where *C* is the class being instantiated, and *S* is its direct superclass,
 a :index:`compile-time error` occurs if:
 
--  *S* is an inner member class but is not a member of a class enclosing *C*
+-  *S* is an inner member class but not a member of a class enclosing *C*
    within a qualified superclass constructor call statement;
--  *S* is not an inner member class, or the declaration of *S* occurs in a
-   static context within a qualified superclass constructor call statement.
+-  *S* is neither an inner member class nor declared in a static context
+   within a qualified superclass constructor call statement.
 
 
 .. index::
@@ -2243,13 +2263,13 @@ Otherwise, where *e* is the *expression* that immediately precedes '``.super``'
 in a qualified superclass constructor call statement, a
 :index:`compile-time error` occurs if the type of *e* is:
 
--  neither *O*, nor a subclass of *O*; or
--  not accessible (see :ref:`Scopes`).
+-  Neither *O* nor a subclass of *O*; or
+-  Not accessible (see :ref:`Scopes`).
 
 
 An ordinary method call evaluates an alternate constructor call statement
-left-to-right, starting from the arguments and proceeding to the constructor,
-and then calls the constructor.
+left-to-right. The evaluation starts from arguments, proceeds to constructor,
+and then the constructor is called.
 
 The process of evaluation of a superclass constructor call statement is
 performed as follows:
@@ -2267,10 +2287,11 @@ performed as follows:
    constructor
    superclass constructor call statement
 
-#. If instance *i* is created, then *i*'s immediately enclosing instance with
-   respect to *S* (if available) is determined by the following procedure:
+#. If instance *i* is created, then the following procedure is used to
+   determine *i*'s immediately enclosing instance with respect to *S*
+   (if available):
 
-   -  If *S* is not an inner class, or the declaration of *S* occurs in a
+   -  If *S* is not an inner class, or if the declaration of *S* occurs in a
       static context, then *i* has no immediately enclosing instance with
       respect to *S*.
 
@@ -2280,15 +2301,15 @@ performed as follows:
       If *S* is a local class, then the immediately enclosing type declaration
       of *S* is *O*.
 
-      If *n* is an integer (:math:`n\geq{}1`) and *O* as the *n*’th
+      If *n* is an integer (:math:`n\geq{}1`), and *O* is the *n*’th
       lexically enclosing type declaration of *C*, then *i*'s immediately
       enclosing instance with respect to *S* is the *n*’th lexically enclosing
       instance of ``this``.
 
    -  If the superclass constructor call is qualified, then the *expression*
-      immediately preceding '``.super``' is *e*, which is evaluated. The
-      immediately enclosing instance of *i* with respect to *S* is the result
-      of such evaluation.
+      immediately preceding '``.super``' (i.e., *e*) is evaluated. The result
+      of that evaluation is the immediately enclosing instance of *i* with
+      respect to *S*.
 
 .. index::
    instance
@@ -2320,10 +2341,10 @@ performed as follows:
    Non-static field initializers are executed if the superclass constructor
    call:
    
-   -  has an explicit constructor call statement, or
-   -  is implicit.
-   
-   
+   -  Has an explicit constructor call statement; or
+   -  Is implicit.
+
+
    An alternate constructor call does not perform the implicit execution.
 
 .. index::
@@ -2353,7 +2374,7 @@ The default constructor for a top-level class or local class
 has the following form:
 
 -  The access modifier of the default constructor and of the class is the same
-   (if the class lacks an access modifier, then the default constructor has
+   (if the class has no access modifier, then the default constructor has the
    *internal* access (see :ref:`Scopes`).
 
 -  The default constructor has no *throws* or *rethrows* clauses.
@@ -2362,11 +2383,11 @@ has the following form:
    default constructor is empty. Otherwise, the default constructor only
    calls the superclass constructor with no arguments.
 
-A :index:`compile-time error` occurs if a default constructor is implicit but
+A :index:`compile-time error` occurs if a default constructor is implicit, but
 the superclass has no accessible constructor that:
 
--  takes no arguments; and
--  has no *throws* or *rethrows* clauses.
+-  Takes no argument; and
+-  Has no *throws* or *rethrows* clauses.
 
 .. index::
    default constructor

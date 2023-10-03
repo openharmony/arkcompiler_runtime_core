@@ -1558,7 +1558,10 @@ void BytecodeGen::VisitReturn(GraphVisitor *v, Inst *inst_base)
 #ifdef ARK_INTRINSIC_SET
             enc->result_.emplace_back(pandasm::Create_ECMA_RETURN_DYN());
 #else
-            enc->result_.emplace_back(pandasm::Create_RETURN_DYN());
+            // Do not support DataType::ANY in this case
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            enc->success_ = false;
 #endif  // ARK_INTRINSIC_SET
             break;
         }

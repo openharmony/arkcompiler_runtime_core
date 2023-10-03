@@ -3,6 +3,9 @@
 Lexical Elements
 ################
 
+.. meta:
+    frontend_status: Done
+
 This chapter discusses the lexical structure of the |LANG| programming language
 and the analytical conventions.
 
@@ -22,8 +25,8 @@ set [1]_ as its terminal symbols, and represents text in sequences of
 
 The term *Unicode code point* is used in this specification only where such
 representation is relevant to refer the reader to Unicode Character set and
-UTF-16 encoding. Where such reference is irrelevant to the discussion, the
-generic term *character* is used.
+UTF-16 encoding. Where such representation is irrelevant to the discussion,
+the generic term *character* is used.
 
 .. index::
    terminal symbol

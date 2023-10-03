@@ -837,11 +837,7 @@ bool Monitor::DeflateInternal()
 
     // Warning: AtomicSetMark is weak, retry
     while (!obj_->AtomicSetMark<false>(old_mark, new_mark)) {
-        MarkWord cur_mark = obj_->AtomicGetMark();
-        if (old_mark.GetValue() != cur_mark.GetValue()) {
-            old_mark = cur_mark;
-            new_mark = HasHashCode() ? old_mark.DecodeFromHash(GetHashCode()) : old_mark.DecodeFromUnlocked();
-        }
+        new_mark = HasHashCode() ? old_mark.DecodeFromHash(GetHashCode()) : old_mark.DecodeFromUnlocked();
     }
     lock_.Unlock();
     return true;

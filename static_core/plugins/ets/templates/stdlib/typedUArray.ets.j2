@@ -111,6 +111,28 @@ export class {{N}}Array
     {
         this(buf, 0, buf.byteLength / {{N}}Array.BYTES_PER_ELEMENT)
     }
+    
+     /**
+     * Creates an {{N}}Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int)
+    {
+        this.length = length
+        this.byteLength = length * {{N}}Array.BYTES_PER_ELEMENT
+        this.byteOffset = 0
+        this.buffer = new ArrayBuffer(this.byteLength)
+    }
+
+    /**
+     * Creates an {{N}}Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        this(length as int)
+    }
 
     /**
      * Creates a copy of {{N}}Array.

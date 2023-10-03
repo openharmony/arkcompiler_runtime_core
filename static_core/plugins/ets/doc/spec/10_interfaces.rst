@@ -220,10 +220,10 @@ The *direct superinterfaces* of the parameterized interface type *I*
 The transitive closure of the direct superinterface relationship results in
 the *superinterface* relationship.
 
-Wherever *K* is a superinterface of an interface *I*, *I* is a *subinterface*
+Wherever *K* is a superinterface of the interface *I*, *I* is a *subinterface*
 of *K*.
 
-An interface *K* is a superinterface of interface *I* if:
+An interface *K* is a superinterface of the interface *I* if:
 
 -  *I* is a direct subinterface of *K*; or
 -  *K* is a superinterface of some interface *J* to which *I* is in its turn
@@ -241,16 +241,16 @@ An interface *K* is a superinterface of interface *I* if:
 There is no single interface to which all interfaces are extensions (unlike
 class *Object* to which every class is an extension).
 
-If the *extends* clause of *I* mentions *T* as a superinterface or as a
+If the *extends* clause of *I* mentions *T* as a superinterface, or as a
 qualifier in the fully qualified form of a superinterface name, then the
-interface *I* *directly depends* on a type *T*.
+interface *I* *directly depends* on type *T*.
 
-Moreover, an interface *I* *depends* on a reference type *T* if:
+Moreover, the interface *I* *depends* on a reference type *T* if:
 
 -  *I* directly depends on *T*; or
--  *I* directly depends on a class *C* which depends on *T* (see
+-  *I* directly depends on the class *C* which depends on *T* (see
    :ref:`Classes`); or
--  *I* directly depends on an interface *J* which in its turn depends
+-  *I* directly depends on the interface *J* which in its turn depends
    on *T*.
 
 .. index::
@@ -287,7 +287,7 @@ properties (see :ref:`Interface Declarations`) and methods (see
         | interfaceMethodDeclaration
         ;
 
-The scope of a declaration of a member *m* that an interface type *I*
+The scope of declaration of a member *m* that an interface type *I*
 declares or inherits is specified in :ref:`Scopes`.
 
 .. index::
@@ -332,8 +332,8 @@ Interface type members are as follows:
 
    A compile-time error occurs if the interface explicitly declares:
 
-   -  a method *m* that *Object* declares as *final*.
-   -  a method with a signature that is override-equivalent (see
+   -  A method *m* that *Object* declares as *final*.
+   -  A method with a signature that is override-equivalent (see
       :ref:`Signatures`) to an *Object*’s *public* method, but is not
       *abstract*, has a different return type or an incompatible *throws* clause.
 
@@ -391,7 +391,7 @@ Interface Properties
 ********************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: None
 
 An interface property may be defined in the form of a field or an accessor
 (a getter or a setter).
@@ -429,7 +429,7 @@ As a result, the following definitions have the same effect:
         set color(s: string)
     }
 
-A class that implements an interface with properties may also use a field or
+A class that implements an interface with properties can also use a field, or
 an accessor notation (see :ref:`Implementing Interface Properties`).
 
 .. index::
@@ -477,9 +477,9 @@ The methods declared within interface bodies are implicitly *public*.
 
 A compile-time error occurs if the body of an interface declares:
 
--  a method with a name already used for a field in this declaration.
--  two methods (explicitly or implicitly) with override-equivalent signatures
-   (see :ref:`Signatures`), unless such signatures are inherited
+-  A method with a name already used for a field in this declaration.
+-  Two methods (overridden explicitly or implicitly) with override-equivalent
+   signatures (see :ref:`Signatures`), unless such signatures are inherited
    (see :ref:`Inheritance and Overriding`).
 
 .. index::
@@ -499,10 +499,10 @@ Interface Method Overload Signatures
 ====================================
 
 The |LANG| allows to specify a method that can be called in different ways by
-writing *overload signatures*. To do so, several method headers with the
-same name and different signatures are written.
+writing *overload signatures*. Writing *overload signatures* is writing several
+method headers that have the same name but different signatures.
 
-See :ref:`Methods Overload Signatures` for *method overload signatures*.
+For *method overload signatures* see :ref:`Methods Overload Signatures`.
 
 .. code-block:: abnf
 
@@ -510,8 +510,8 @@ See :ref:`Methods Overload Signatures` for *method overload signatures*.
         identifier signature ';'
         ;
 
-A call of a method with overload signatures is always a call of the
-the textually last method header.
+Calling a method with *overload signatures* always means calling the method
+header that is textually last.
 
 A compile-time error occurs if the signature of the last method header is not
 *overload signature compatible* with each previous overload signature. It means
@@ -544,12 +544,12 @@ Inheritance and Overriding
 .. meta:
     frontend_status: Done
 
-An interface *I* inherits any abstract and default method *m* from its
-direct superinterfaces if all the following is true:
+The interface *I* inherits any abstract and default method *m* from its
+direct superinterfaces if **all** of the following is true:
 
--  *m* is a member of *I*’s direct superinterface *J*.
+-  *m* is a member of *I*’s direct superinterface *J*;
 -  *I* declares no method with a signature that is a subsignature (see
-   :ref:`Signatures`) of *m*’s signature.
+   :ref:`Signatures`) of *m*’s signature;
 -  No method :math:`m'` that is a member of an *I*’s direct superinterface
    :math:`J'` (where *m* is distinct from :math:`m'`, and *J* from :math:`J'`)
    overrides the declaration of the method *m* from :math:`J'`.
@@ -596,6 +596,9 @@ A compile-time error occurs if:
 Overriding by Instance Methods
 ==============================
 
+.. meta:
+    frontend_status: Done
+
 An instance method *m*:sub:`I` (declared in or inherited by interface *I*)
 overrides another *I*’s instance method *m*:sub:J` (declared in interface *J*),
 if all of the following is true:
@@ -640,8 +643,8 @@ The relationship between the accessibility of an interface method and that of
 any overridden interface method is specified in :ref:`Requirements in Overriding and Hiding`.
 
 A compile-time error occurs if a default method is override-equivalent to a
-non-*private* method of the class *Object*. Any class implementing the interface
-must inherit its own implementation of the method.
+non-*private* method of the class *Object*. Any class that implements the interface
+must inherit the method's own implementation.
 
 .. index::
    overriding

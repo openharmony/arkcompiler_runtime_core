@@ -290,6 +290,12 @@ void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst
             ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
             GetEncoder()->EncodeCompareAndSwap(dst, src[0], src[SECOND_OPERAND], src[THIRD_OPERAND]);
             break;
+        case RuntimeInterface::IntrinsicId::INTRINSIC_DATA_MEMORY_BARRIER_FULL:
+            GetEncoder()->EncodeMemoryBarrier(memory_order::FULL);
+            break;
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPRESS_EIGHT_UTF16_TO_UTF8_CHARS_USING_SIMD:
+            GetEncoder()->EncodeCompressEightUtf16ToUtf8CharsUsingSimd(src[FIRST_OPERAND], src[SECOND_OPERAND]);
+            break;
         default:
             UNREACHABLE();
             break;
@@ -3453,6 +3459,11 @@ void EncodeVisitor::VisitStoreObject(GraphVisitor *visitor, Inst *inst)
     auto graph = enc->cg_->GetGraph();
     auto field = store_obj->GetObjField();
     size_t offset = GetObjectOffset(graph, store_obj->GetObjectType(), field, store_obj->GetTypeId());
+    if (!enc->GetCodegen()->OffsetFitReferenceTypeSize(offset)) {
+        // such code should not be executed
+        enc->GetEncoder()->EncodeAbort();
+        return;
+    }
     auto mem = MemRef(src0, offset);
     auto encoder = enc->GetEncoder();
     if (inst->CastToStoreObject()->GetNeedBarrier()) {
@@ -4562,6 +4573,55 @@ void Codegen::CreateStringBuilderString(IntrinsicInst *inst, [[maybe_unused]] Re
     CallFastPath(inst, entrypoint_id, dst, RegMask::GetZeroMask(), src[0], src[1U]);
 }
 
+void Codegen::CallFastCreateStringFromCharArrayTlab(Inst *inst, Reg dst, Reg offset, Reg count, Reg array,
+                                                    std::variant<Reg, TypedImm> klass)
+{
+    if (GetRegfile()->GetZeroReg().GetId() == offset.GetId()) {
+        auto entry_id = GetRuntime()->IsCompressedStringsEnabled()
+                            ? EntrypointId::CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_TLAB_COMPRESSED
+                            : EntrypointId::CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_TLAB;
+        if (std::holds_alternative<TypedImm>(klass)) {
+            CallFastPath(inst, entry_id, dst, RegMask::GetZeroMask(), count, array, std::get<TypedImm>(klass));
+        } else {
+            CallFastPath(inst, entry_id, dst, RegMask::GetZeroMask(), count, array, std::get<Reg>(klass));
+        }
+    } else {
+        auto entry_id = GetRuntime()->IsCompressedStringsEnabled()
+                            ? EntrypointId::CREATE_STRING_FROM_CHAR_ARRAY_TLAB_COMPRESSED
+                            : EntrypointId::CREATE_STRING_FROM_CHAR_ARRAY_TLAB;
+        if (std::holds_alternative<TypedImm>(klass)) {
+            CallFastPath(inst, entry_id, dst, RegMask::GetZeroMask(), offset, count, array, std::get<TypedImm>(klass));
+        } else {
+            CallFastPath(inst, entry_id, dst, RegMask::GetZeroMask(), offset, count, array, std::get<Reg>(klass));
+        }
+    }
+}
+
+void Codegen::CreateStringFromCharArrayTlab(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    auto runtime = GetGraph()->GetRuntime();
+    auto offset = src[FIRST_OPERAND];
+    auto count = src[SECOND_OPERAND];
+    auto array = src[THIRD_OPERAND];
+    if (GetGraph()->IsAotMode()) {
+        ScopedTmpReg klass_reg(GetEncoder());
+        GetEncoder()->EncodeLdr(klass_reg, false,
+                                MemRef(ThreadReg(), runtime->GetStringClassPointerTlsOffset(GetArch())));
+        CallFastCreateStringFromCharArrayTlab(inst, dst, offset, count, array, klass_reg);
+    } else {
+        auto klass_imm = TypedImm(reinterpret_cast<uintptr_t>(runtime->GetStringClass(GetGraph()->GetMethod())));
+        CallFastCreateStringFromCharArrayTlab(inst, dst, offset, count, array, klass_imm);
+    }
+}
+
+void Codegen::CreateStringFromStringTlab(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    auto entry_id = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::CREATE_STRING_FROM_STRING_TLAB_COMPRESSED
+                                                               : EntrypointId::CREATE_STRING_FROM_STRING_TLAB;
+    auto src_str = src[FIRST_OPERAND];
+    CallFastPath(inst, entry_id, dst, RegMask::GetZeroMask(), src_str);
+}
+
 #include "intrinsics_codegen.inl"
 
 void Codegen::CreateBuiltinIntrinsic(IntrinsicInst *inst)
@@ -4636,6 +4696,11 @@ void EncodeVisitor::VisitStoreArrayI(GraphVisitor *visitor, Inst *inst)
     auto index = inst->CastToStoreArrayI()->GetImm();
     int64_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
                      (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
+    if (!enc->GetCodegen()->OffsetFitReferenceTypeSize(offset)) {
+        // such code should not be executed
+        enc->GetEncoder()->EncodeAbort();
+        return;
+    }
     auto mem = MemRef(array_reg, offset);
     if (inst->CastToStoreArrayI()->GetNeedBarrier()) {
         enc->GetCodegen()->CreatePreWRB(inst, mem, MakeMask(array_reg.GetId(), value.GetId()));
@@ -4716,15 +4781,43 @@ void EncodeVisitor::VisitInitEmptyString(GraphVisitor *visitor, Inst *inst)
 
 void EncodeVisitor::VisitInitString(GraphVisitor *visitor, Inst *inst)
 {
-    auto codegen = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
-    auto str_init = inst->CastToInitString();
+    auto cg = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
+    auto init_str = inst->CastToInitString();
 
-    auto dst = codegen->ConvertRegister(str_init->GetDstReg(), str_init->GetType());
-    auto ctor_arg = codegen->ConvertRegister(str_init->GetSrcReg(0), str_init->GetInputType(0));
+    auto dst = cg->ConvertRegister(init_str->GetDstReg(), init_str->GetType());
+    auto ctor_arg = cg->ConvertRegister(init_str->GetSrcReg(0), init_str->GetInputType(0));
 
-    auto entry_id =
-        str_init->IsFromString() ? EntrypointId::CREATE_STRING_FROM_STRING : EntrypointId::CREATE_STRING_FROM_CHARS;
-    codegen->CallRuntime(str_init, entry_id, dst, RegMask::GetZeroMask(), ctor_arg);
+    if (cg->GetArch() == Arch::AARCH32) {
+        auto entry_id =
+            init_str->IsFromString() ? EntrypointId::CREATE_STRING_FROM_STRING : EntrypointId::CREATE_STRING_FROM_CHARS;
+        cg->CallRuntime(init_str, entry_id, dst, RegMask::GetZeroMask(), ctor_arg);
+        return;
+    }
+
+    if (init_str->IsFromString()) {
+        auto entry_id = cg->GetRuntime()->IsCompressedStringsEnabled()
+                            ? compiler::RuntimeInterface::EntrypointId::CREATE_STRING_FROM_STRING_TLAB_COMPRESSED
+                            : compiler::RuntimeInterface::EntrypointId::CREATE_STRING_FROM_STRING_TLAB;
+        cg->CallFastPath(init_str, entry_id, dst, RegMask::GetZeroMask(), ctor_arg);
+    } else {
+        auto enc = cg->GetEncoder();
+        auto runtime = cg->GetGraph()->GetRuntime();
+        auto mem = MemRef(ctor_arg, static_cast<int64_t>(runtime->GetArrayLengthOffset(cg->GetArch())));
+        ScopedTmpReg length_reg(enc);
+        enc->EncodeLdr(length_reg, IsTypeSigned(init_str->GetType()), mem);
+        if (cg->GetGraph()->IsAotMode()) {
+            auto klass_offs = runtime->GetStringClassPointerTlsOffset(cg->GetArch());
+            ScopedTmpReg klass_reg(enc);
+            enc->EncodeLdr(klass_reg, false, MemRef(cg->ThreadReg(), klass_offs));
+            cg->CallFastCreateStringFromCharArrayTlab(init_str, dst, cg->GetRegfile()->GetZeroReg(), length_reg,
+                                                      ctor_arg, klass_reg);
+        } else {
+            auto klass_ptr = runtime->GetStringClass(cg->GetGraph()->GetMethod());
+            auto klass_imm = TypedImm(reinterpret_cast<uintptr_t>(klass_ptr));
+            cg->CallFastCreateStringFromCharArrayTlab(init_str, dst, cg->GetRegfile()->GetZeroReg(), length_reg,
+                                                      ctor_arg, klass_imm);
+        }
+    }
 }
 
 void EncodeVisitor::VisitCallLaunchStatic(GraphVisitor *visitor, Inst *inst)
@@ -5068,6 +5161,11 @@ void EncodeVisitor::VisitStoreArrayPairI(GraphVisitor *visitor, Inst *inst)
     auto index = inst->CastToStoreArrayPairI()->GetImm();
     int64_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
                      (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
+    if (!enc->GetCodegen()->OffsetFitReferenceTypeSize(offset)) {
+        // such code should not be executed
+        enc->GetEncoder()->EncodeAbort();
+        return;
+    }
     auto mem = MemRef(src0, offset);
     if (inst->CastToStoreArrayPairI()->GetNeedBarrier()) {
         enc->GetCodegen()->CreatePreWRB(inst, mem, MakeMask(src0.GetId(), src1.GetId(), src2.GetId()), true);

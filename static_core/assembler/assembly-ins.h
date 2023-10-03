@@ -60,8 +60,6 @@ enum InstFlags {
 
 constexpr int INVALID_REG_IDX = -1;
 
-constexpr size_t MAX_NUMBER_OF_SRC_REGS = 5;  // TODO(mbolshov): auto-generate
-
 constexpr InstFlags operator|(InstFlags a, InstFlags b)
 {
     using Utype = std::underlying_type_t<InstFlags>;

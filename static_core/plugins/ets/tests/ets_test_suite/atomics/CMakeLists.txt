@@ -26,6 +26,8 @@ set(atomics_tests
     # --- Non-concurrent wait/notify tests
     nonconcurrent_notify_zero
     nonconcurrent_wait_not_equal
+    nonconcurrent_wait_i32_not_equal
+    nonconcurrent_wait_i64_not_equal
     
     # --- Concurrent wait/notify tests
     concurrent_wait_store_notify

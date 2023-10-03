@@ -156,6 +156,18 @@ public:
         zygote_no_threads_ = val;
     }
 
+    static void SetTaskScheduler(taskmanager::TaskScheduler *task_scheduler)
+    {
+        ASSERT(task_scheduler_ == nullptr);
+        ASSERT(task_scheduler != nullptr);
+        task_scheduler_ = task_scheduler;
+    }
+
+    static taskmanager::TaskScheduler *GetTaskScheduler()
+    {
+        return task_scheduler_;
+    }
+
     coretypes::String *ResolveString(PandaVM *vm, const Method &caller, panda_file::File::EntityId id);
 
     coretypes::String *ResolveStringFromCompiledCode(PandaVM *vm, const Method &caller, panda_file::File::EntityId id);

@@ -3,6 +3,9 @@
 Standard Library
 ################
 
+.. meta:
+    frontend_status: Partly
+
 Standard Library of the |LANG| language defines the required set of types,
 classes, variables, constants and functions that provide APIs for effective and
 convenient programming. 

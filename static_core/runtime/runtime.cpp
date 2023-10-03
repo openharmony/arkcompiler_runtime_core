@@ -328,13 +328,6 @@ bool Runtime::Create(const RuntimeOptions &options)
     const_cast<RuntimeOptions &>(options).InitializeRuntimeSpacesAndType();
     trace::ScopedTrace scoped_trace("Runtime::Create");
 
-    if (options.GetWorkersType() == "taskmanager") {
-        // TODO(ipetrov): make options for this
-        task_scheduler_ = taskmanager::TaskScheduler::Create(options.GetGcWorkersCount());
-        if (task_scheduler_ == nullptr) {
-            return false;
-        }
-    }
     os::CpuAffinityManager::Initialize();
 
     if (!CreateMemorySpaces(options)) {
@@ -441,10 +434,6 @@ bool Runtime::Destroy()
 
     instance_->GetNotificationManager()->VmDeathEvent();
 
-    if (task_scheduler_ != nullptr) {
-        task_scheduler_->Finalize();
-    }
-
     // Stop compiler first to make sure compile memleak doesn't occur
     auto compiler = instance_->GetPandaVM()->GetCompiler();
     if (compiler != nullptr) {
@@ -460,6 +449,10 @@ bool Runtime::Destroy()
      * @description Before starting to unitialize threads
      * */
     instance_->GetPandaVM()->UninitializeThreads();
+
+    if (task_scheduler_ != nullptr) {
+        task_scheduler_->Finalize();
+    }
     /* @sync 2
      * @description After uninitialization of threads all deamon threads should have gone into the termination loop and
      * all other threads should have finished.
@@ -477,8 +470,7 @@ bool Runtime::Destroy()
     RuntimeInternalAllocator::Destroy();
 
     os::CpuAffinityManager::Finalize();
-    if (instance_->GetOptions().GetWorkersType() == "taskmanager") {
-        ASSERT(task_scheduler_ != nullptr);
+    if (task_scheduler_ != nullptr) {
         taskmanager::TaskScheduler::Destroy();
         task_scheduler_ = nullptr;
     }

@@ -1078,7 +1078,7 @@ entrypoints:
     - panda::ObjectHeader*
     - panda::ObjectHeader*
     - uint16_t
-    
+
 - name: StringBuilderBoolSlowPath
   entrypoint: CoreStringBuilderBool
   bridge: slow_path
@@ -1115,3 +1115,118 @@ entrypoints:
     - panda::ObjectHeader*
     - int64_t
 
+- name: CreateStringFromStringTlab
+  entrypoint: CreateStringFromStringTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void*  # resulting string
+    - void*  # src string
+
+- name: CreateStringFromStringTlabCompressed
+  entrypoint: CreateStringFromStringTlabCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void*  # resulting string
+    - void*  # src string
+
+- name: CreateStringFromStringSlowPath
+  entrypoint: CreateStringFromStringEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - panda::ObjectHeader*  # resulting string
+    - panda::ObjectHeader*  # src string
+
+- name: CreateStringFromStringOddSaved
+  entrypoint: CreateStringFromStringEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - panda::ObjectHeader*  # resulting string
+    - panda::ObjectHeader*  # src string
+
+- name: CreateStringFromCharArrayTlab
+  entrypoint: CreateStringFromCharArrayTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void*     # resulting string
+    - uint32_t  # offset
+    - uint32_t  # length
+    - void*     # u16 array
+    - void*     # string class pointer
+
+- name: CreateStringFromCharArrayTlabCompressed
+  entrypoint: CreateStringFromCharArrayTlabCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void*     # resulting string
+    - uint32_t  # offset
+    - uint32_t  # length
+    - void*     # u16 array
+    - void*     # string class pointer
+
+- name: CreateStringFromCharArraySlowPath
+  entrypoint: CreateStringFromCharsWithOffsetEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - panda::coretypes::String*  # resulting string
+    - uint32_t                   # offset
+    - uint32_t                   # length
+    - panda::ObjectHeader*       # u16 array
+    - panda::ObjectHeader*       # string class pointer
+
+- name: CreateStringFromCharArrayOddSaved
+  entrypoint: CreateStringFromCharsWithOffsetEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - panda::coretypes::String*  # resulting string
+    - uint32_t                   # offset
+    - uint32_t                   # length
+    - panda::ObjectHeader*       # u16 array
+    - panda::ObjectHeader*       # string class pointer
+
+- name: CreateStringFromZeroBasedCharArrayTlab
+  entrypoint: CreateStringFromZeroBasedCharArrayTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void*    # resulting string
+    - uint32_t # length
+    - void*    # u16 array
+    - void*    # string class pointer
+
+- name: CreateStringFromZeroBasedCharArrayTlabCompressed
+  entrypoint: CreateStringFromZeroBasedCharArrayTlabCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void*    # resulting string
+    - uint32_t # length
+    - void*    # u16 array
+    - void*    # string class pointer
+
+- name: CreateStringFromZeroBasedCharArraySlowPath
+  entrypoint: CreateStringFromCharsZeroOffsetEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - panda::coretypes::String*  # resulting string
+    - uint32_t                   # length
+    - panda::ObjectHeader*       # u16 array
+    - panda::ObjectHeader*       # string class pointer
+
+- name: CreateStringFromZeroBasedCharArrayOddSaved
+  entrypoint: CreateStringFromCharsZeroOffsetEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - panda::coretypes::String*  # resulting string
+    - uint32_t                   # length
+    - panda::ObjectHeader*       # u16 array
+    - panda::ObjectHeader*       # string class pointer

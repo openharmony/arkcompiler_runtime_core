@@ -2,20 +2,24 @@ declare const exports: any;
 
 import { Lib2Class, Lib2Class2, DoubleAlias } from ".//lib2";
 
+export declare function _$init$_(): void;
+exports._$init$_ = (globalThis as any).Panda.getFunction('LETSGLOBAL;', '_$init$_');
+exports._$init$_();
+
 export declare function SumDouble(a: number, b: number): number;
-exports.SumDouble = (globalThis as any).Panda.getFunction('Llib1/ETSGLOBAL;', 'SumDouble');
+exports.SumDouble = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'SumDouble');
 
 export declare function SumString(a: string, b: string): string;
-exports.SumString = (globalThis as any).Panda.getFunction('Llib1/ETSGLOBAL;', 'SumString');
+exports.SumString = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'SumString');
 
 export declare function Identity<T>(x?: T): T;
-exports.Identity = (globalThis as any).Panda.getFunction('Llib1/ETSGLOBAL;', 'Identity');
+exports.Identity = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'Identity');
 
 export declare function ForEach<T extends Object>(a: T[], cb: (e: T, idx: number) => void): void;
-exports.ForEach = (globalThis as any).Panda.getFunction('Llib1/ETSGLOBAL;', 'ForEach');
+exports.ForEach = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'ForEach');
 
 export declare function ReplaceFirst(arr: Simple[], e: Simple): Simple[];
-exports.ReplaceFirst = (globalThis as any).Panda.getFunction('Llib1/ETSGLOBAL;', 'ReplaceFirst');
+exports.ReplaceFirst = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'ReplaceFirst');
 
 export declare class Fields {
     public readonlyBoolean_: boolean;
@@ -32,7 +36,7 @@ export declare class Fields {
     public uint32Array_: Uint32Array;
     constructor();
 };
-exports.Fields = (globalThis as any).Panda.getClass('Llib1/Fields;');
+exports.Fields = (globalThis as any).Panda.getClass('LFields;');
 
 export declare class Methods {
     public IsTrue(a: boolean): boolean;
@@ -42,7 +46,7 @@ export declare class Methods {
     public OptionalString(a?: string): string;
     constructor();
 };
-exports.Methods = (globalThis as any).Panda.getClass('Llib1/Methods;');
+exports.Methods = (globalThis as any).Panda.getClass('LMethods;');
 
 export enum ETSEnum {
     Val0 = 0,
@@ -62,7 +66,7 @@ export declare class Base {
     public a: number;
     constructor();
 };
-exports.Base = (globalThis as any).Panda.getClass('Llib1/Base;');
+exports.Base = (globalThis as any).Panda.getClass('LBase;');
 
 export declare class Derived extends Base implements I0, I1 {
     public I0Method(a: string): string;
@@ -70,7 +74,7 @@ export declare class Derived extends Base implements I0, I1 {
     public b: number;
     constructor();
 };
-exports.Derived = (globalThis as any).Panda.getClass('Llib1/Derived;');
+exports.Derived = (globalThis as any).Panda.getClass('LDerived;');
 
 export interface Interface0 {
     a(): void;
@@ -82,7 +86,7 @@ export declare class Simple {
     public constructor(x: number);
     public val: number;
 };
-exports.Simple = (globalThis as any).Panda.getClass('Llib1/Simple;');
+exports.Simple = (globalThis as any).Panda.getClass('LSimple;');
 
 export declare class External {
     public constructor();
@@ -90,13 +94,13 @@ export declare class External {
     public o2: Lib2Class;
     public o3: Lib2Class2;
 };
-exports.External = (globalThis as any).Panda.getClass('Llib1/External;');
+exports.External = (globalThis as any).Panda.getClass('LExternal;');
 
 export declare class GenericClass<T extends Object> {
     public identity(x: T): T;
     constructor();
 };
-exports.GenericClass = (globalThis as any).Panda.getClass('Llib1/GenericClass;');
+exports.GenericClass = (globalThis as any).Panda.getClass('LGenericClass;');
 
 export interface IGeneric0<T> {
     I0Method(a?: T): T;
@@ -111,18 +115,18 @@ export declare class BaseGeneric<T, U> {
     public d?: U;
     constructor();
 };
-exports.BaseGeneric = (globalThis as any).Panda.getClass('Llib1/BaseGeneric;');
+exports.BaseGeneric = (globalThis as any).Panda.getClass('LBaseGeneric;');
 
 export declare class DynObjWrapper {
     public dynObj_: any;
     constructor();
 };
-exports.DynObjWrapper = (globalThis as any).Panda.getClass('Llib1/DynObjWrapper;');
+exports.DynObjWrapper = (globalThis as any).Panda.getClass('LDynObjWrapper;');
 
 export declare class PromiseWrapper {
     public promise_: Promise<string>;
     constructor();
     public static lambda$invoke$0: any;
 };
-exports.PromiseWrapper = (globalThis as any).Panda.getClass('Llib1/PromiseWrapper;');
+exports.PromiseWrapper = (globalThis as any).Panda.getClass('LPromiseWrapper;');
 

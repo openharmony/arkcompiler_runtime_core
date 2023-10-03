@@ -426,7 +426,9 @@ public:
     void CreateCheckForTLABWithConstSize(Inst *inst, Reg reg_tlab_start, Reg reg_tlab_size, size_t size,
                                          LabelHolder::LabelId label);
     void CreateDebugRuntimeCallsForNewObject(Inst *inst, Reg reg_tlab_start, size_t alloc_size, RegMask preserved);
-    void CreateDebugRuntimeCallsForCreateString(Inst *inst, Reg dst);
+    void CreateDebugRuntimeCallsForObjectClone(Inst *inst, Reg dst);
+    void CallFastCreateStringFromCharArrayTlab(Inst *inst, Reg dst, Reg offset, Reg count, Reg array,
+                                               std::variant<Reg, TypedImm> klass);
     void CreateReturn(const Inst *inst);
     template <typename T>
     void CreateUnaryCheck(Inst *inst, RuntimeInterface::EntrypointId id, DeoptimizeType type, Condition cc)
@@ -533,6 +535,14 @@ public:
 
     Reg ConvertInstTmpReg(const Inst *inst, DataType::Type type) const;
     Reg ConvertInstTmpReg(const Inst *inst) const;
+
+    bool OffsetFitReferenceTypeSize(uint64_t offset) const
+    {
+        // -1 because some arch uses signed offset
+        // NOLINTNEXTLINE(hicpp-signed-bitwise)
+        uint64_t max_offset = 1ULL << (DataType::GetTypeSize(DataType::REFERENCE, GetArch()) - 1);
+        return offset < max_offset;
+    }
 
 protected:
     virtual void GeneratePrologue();

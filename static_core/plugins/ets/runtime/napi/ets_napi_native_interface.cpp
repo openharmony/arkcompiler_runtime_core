@@ -495,7 +495,7 @@ NO_UB_SANITIZE static ets_boolean ErrorCheck(EtsEnv *env)
     return static_cast<ets_boolean>(PandaEtsNapiEnv::ToPandaEtsEnv(env)->HasPendingException());
 }
 
-NO_UB_SANITIZE static ets_int ThrowError(EtsEnv *env, ets_throwable obj)
+NO_UB_SANITIZE static ets_int ThrowError(EtsEnv *env, ets_error obj)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     if (obj == nullptr) {
@@ -522,16 +522,16 @@ NO_UB_SANITIZE static ets_int ThrowErrorNew(EtsEnv *env, ets_class cls, const ch
     return ETS_OK;
 }
 
-NO_UB_SANITIZE static ets_throwable ErrorOccurred(EtsEnv *env)
+NO_UB_SANITIZE static ets_error ErrorOccurred(EtsEnv *env)
 {
     ETS_NAPI_DEBUG_TRACE(env);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsThrowable *throwable = PandaEtsNapiEnv::ToPandaEtsEnv(env)->GetThrowable();
-    if (throwable == nullptr) {
+    EtsThrowable *error = PandaEtsNapiEnv::ToPandaEtsEnv(env)->GetThrowable();
+    if (error == nullptr) {
         return nullptr;
     }
-    return reinterpret_cast<ets_throwable>(s.AddLocalRef(throwable));
+    return reinterpret_cast<ets_error>(s.AddLocalRef(error));
 }
 
 NO_UB_SANITIZE static void ErrorDescribe(EtsEnv *env)
@@ -2426,34 +2426,6 @@ NO_UB_SANITIZE static ets_int UnregisterNatives(EtsEnv *env, ets_class cls)
     return ETS_OK;
 }
 
-NO_UB_SANITIZE static ets_int MonitorEnter(EtsEnv *env, ets_object obj)
-{
-    ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(obj);
-
-    ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObject *object = s.ToInternalType(obj);
-    if (Monitor::MonitorEnter(object->GetCoreType()) == Monitor::State::OK) {
-        return ETS_OK;
-    }
-    return ETS_ERR;
-}
-
-NO_UB_SANITIZE static ets_int MonitorExit(EtsEnv *env, ets_object obj)
-{
-    ETS_NAPI_DEBUG_TRACE(env);
-    ETS_NAPI_ABORT_IF_NULL(obj);
-
-    ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    EtsObject *object = s.ToInternalType(obj);
-    auto state = Monitor::MonitorExit(object->GetCoreType());
-    if (state == Monitor::State::ILLEGAL) {
-        s.ThrowNewException(EtsNapiException::ILLEGAL_MONITOR_STATE, "Monitor is in illegal state");
-        return ETS_ERR;
-    }
-    return state == Monitor::State::OK ? ETS_OK : ETS_ERR;
-}
-
 NO_UB_SANITIZE static ets_int GetEtsVM([[maybe_unused]] EtsEnv *env, EtsVM **vm)
 {
     ETS_NAPI_DEBUG_TRACE(env);
@@ -2879,8 +2851,6 @@ const ETS_NativeInterface NATIVE_INTERFACE = {
     SetDoubleArrayRegion,
     RegisterNatives,
     UnregisterNatives,
-    MonitorEnter,
-    MonitorExit,
     GetEtsVM,
     GetStringRegion,
     GetStringUTFRegion,

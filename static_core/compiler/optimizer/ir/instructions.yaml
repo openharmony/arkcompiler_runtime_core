@@ -300,7 +300,7 @@ instructions:
   - opcode: InitString
     base: InitStringInst
     signature: [d-ref, ref, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, alloc, require_state, runtime_call, acc_write]
+    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, alloc, require_state, runtime_call, acc_write]
     description: Create and initialize string.
 
   - opcode: LoadArray
@@ -606,7 +606,7 @@ instructions:
     description: Get global var address
     fields:
       - type_id: TypeId
-  
+
     ##############################################################################
     # Check instructions
     #

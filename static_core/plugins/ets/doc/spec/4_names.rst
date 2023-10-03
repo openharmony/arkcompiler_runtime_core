@@ -3,6 +3,9 @@
 Names, Declarations and Scopes
 ##############################
 
+.. meta:
+    frontend_status: Partly
+
 This chapter introduces three mutually-related notions: names,
 declarations, and scopes.
 
@@ -49,9 +52,9 @@ A qualified name *N.x* (where *N* is a simple or qualified name, and ``x``
 is an identifier) can refer to a *member* of a package, or a reference type
 (see :ref:`Reference Types`). *N* can name:
 
--  a package, of which ``x`` is a member.
+-  A package, of which ``x`` is a member.
 
--  a reference type, or a variable of a reference type (see
+-  A reference type, or a variable of a reference type (see
    :ref:`Reference Types`), and then ``x`` names a member (a field or a
    method) of that type.
 
@@ -113,9 +116,9 @@ Declarations must be distinguishable in a declaration scope. A
 
 Declarations are distinguishable if they:
 
--  have different names;
+-  Have different names;
 
--  are distinguishable by signatures (see
+-  Are distinguishable by signatures (see
    :ref:`Declaration Distinguishable by Signatures`).
 
 .. index::
@@ -134,7 +137,7 @@ Example of declarations distinguishable by names:
     function Pi() {}
     type IP = number[]
 
-Example of declarations indistinguishable by names that cause a
+Example of declarations that are indistinguishable by names, and cause a
 :index:`compile-time error`:
 
 .. code-block:: typescript
@@ -175,7 +178,7 @@ declared by that name can be referred to without the qualification of the name.
 In other words, the name is accessible in some context if it can be used in this
 context by its *simple* name.
 
-The nature of its usage depends on the kind of the name.
+The nature of usage of a scope depends on the kind of the name.
 A type name can be used to declare variables or constants; a name of a function
 can be used to call that function.
 
@@ -287,7 +290,7 @@ The scope of a name depends on the context the name is declared in:
 
 -  The scope of a name declared immediately within the body of a function
    (method) declaration is the body of that function declaration (*method
-   or function scope*) from the place of declaration and up to the end of
+   or function scope*) from the place of declaration, and up to the end of
    the body.
 
 .. index::
@@ -300,7 +303,7 @@ The scope of a name depends on the context the name is declared in:
 .. _block-access:
 
 -  The scope of a name declared within a statement block is the body of
-   such statement block from the point of declaration and down to the end
+   such statement block from the point of declaration, and down to the end
    of the block (*block scope*).
 
 .. index::
@@ -380,11 +383,11 @@ Type Alias Declaration
 
 Type aliases enable using meaningful and concise notations by providing:
 
--  names for anonymous types (array, function, union types); or
--  alternative names for existing types.
+-  Names for anonymous types (array, function, union types); or
+-  Alternative names for existing types.
 
 
-Scopes of type aliases are package level, or module level scopes. Names
+Scopes of type aliases are package or module level scopes. Names
 of all type aliases must be unique across all types in the current
 context.
 
@@ -443,11 +446,77 @@ meaning remains the same as the original type’s.
         console.log(max(x)) // ok
     }
 
+Type aliases can be recursively referenced inside the right-hand side of a
+type alias declaration, see :ref:`Recursive Type Aliases`.
+
 
 .. index::
    anonymous type
    type alias
    generic type
+
+|
+
+.. _Recursive Type Aliases:
+
+Recursive Type Aliases
+======================
+
+For a type alias defined as *type A = something*, *A* can be used recursively
+if it is used as one of the following:
+
+-  Array element type: *type A = A[]*; or
+-  Type argument of some generic type: type A = C<A>.
+
+.. code-block:: typescript
+   :linenos:
+
+    type A = A[] // ok, used as element type
+
+    class C<G> { /*body*/}
+    type B = C<B> // ok, used as a type argument
+
+    type D = string | Array<D> // ok
+
+
+Any other usage causes a compile-time error, as the compiler
+does not have enough information about the defined alias:
+
+.. code-block:: typescript
+   :linenos:
+
+    type E = E // compile-time error
+    type F = string | E // compile-time error
+
+
+Exactly the same rules apply to a generic type alias defined as
+*type A<G> = something*.
+
+.. code-block:: typescript
+   :linenos:
+
+    type A<G> = Array<A<G>> // ok, A<G> is used as a type argument
+    type A<G> = string | Array<A<G>> // ok
+
+    type A<G> = A<G> // compile-time error
+
+
+A compile-time error occurs if a generic type alias is used without
+a type argument:
+
+.. code-block:: typescript
+   :linenos:
+   
+    type A<G> = Array<A> // compile-time error
+
+**Note**: there is no restriction on using a type parameter *G* in
+the right side of a type alias declaration, and the following code
+is valid:
+
+.. code-block:: typescript
+   :linenos:
+
+    type NodeValue<G> = G | Array<G> | Array<NodeValue<G>>; 
 
 |
 
@@ -486,7 +555,7 @@ with an initial value.
         ;
 
     variableDeclaration:
-        identifier ':' type initializer? 
+        identifier ('?')? ':' type initializer? 
         | identifier initializer
         ;
 
@@ -498,8 +567,9 @@ The type *T* of a variable introduced by a variable declaration is determined
 as follows:
 
 -  *T* is the type specified in a type annotation (if any) of the declaration.
-   If the declaration also has an initializer, then the initializer expression
-   must be compatible with that *T* (see :ref:`Type Compatibility with Initializer`).
+   If *'?'* is used after the name of the variable, then the variable's type is
+   *type | undefined.* If the declaration also has an initializer, then the
+   initializer expression must be compatible with *T* (see :ref:`Type Compatibility with Initializer`).
 
 -  If no type annotation is available, then *T* is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
@@ -527,20 +597,20 @@ as follows:
 
 Every variable in a program must have an initial value before its value is used.
 
-There are several ways to identify such an initial value:
+There are several ways to identify such initial value:
 
 -  An initial value is explicitly specified by using an *initializer*.
 -  Each method or function parameter is initialized to the corresponding
-   argument value provided by the caller of the method or function.
+   argument value provided by the caller of that method or function.
 -  Each constructor parameter is initialized to the corresponding
    argument value provided by:
    
-   + class instance creation expression (see :ref:`New Expressions`), or
-   + explicit constructor call (see :ref:`Explicit Constructor Call`).
+   + Class instance creation expression (see :ref:`New Expressions`), or
+   + Explicit constructor call (see :ref:`Explicit Constructor Call`).
 
 -  An exception parameter is initialized to the thrown object (see
    :ref:`Throw Statements`) that represents exception or error.
--  Each class, instance, local variable or array element is initialized with
+-  Each class, instance, local variable, or array element is initialized with
    a *default value* (see :ref:`Default Values for Types`) when it is created.
 
 Otherwise, a variable is not initialized, and a :index:`compile-time error`
@@ -611,6 +681,9 @@ The type *T* of a constant declaration is determined as follows:
    that *T* (see :ref:`Type Compatibility with Initializer`).
 -  If no type annotation is available, then *T* is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
+-  If *'?'* is used after the name of the constant, then the type of the
+   constant is *T | undefined*, regardless of whether *T* is identified
+   explicitly or via type inference.
 
 .. index::
    constant declaration
@@ -703,7 +776,7 @@ Type Inference from Initializer
 
 The type of a declared entity is:
 
--  the type of the initializer expression if a variable or constant
+-  The type of the initializer expression if a variable or constant
    declaration contains no explicit type annotation; or
 
 -  *Object \| null* if the initializer expression is a null literal
@@ -731,8 +804,8 @@ Function Declarations
 .. meta:
     frontend_status: Partly
 
-**Function declarations** specify names, signatures and bodies when introducing
-**named functions**.
+**Function declarations** specify names, signatures, and bodies when
+introducing **named functions**.
 
 .. code-block:: abnf
 
@@ -786,8 +859,8 @@ Signatures
 .. meta:
     frontend_status: Done
 
-A signature defines parameters and a return type (see :ref:`Return Type`) of a
-function, method or constructor.
+A signature defines parameters, and the return type (see :ref:`Return Type`)
+of a function, method, or constructor.
 
 .. code-block:: abnf
 
@@ -926,8 +999,8 @@ value of the parameter is default.
     pair(1, 2) // prints: 1 2
     pair(1) // prints: 1 7
 
-The second form is a short notation for a parameter of a union type *T* | ``undefined``
-with the default value ``undefined``. 
+The second form is a short notation for a parameter of a union type
+*T* | ``undefined`` with the default value ``undefined``. 
 It means that *identifier '?' ':' type* is equivalent to
 *identifier ':' type | undefined = undefined*.
 If a type is of the value type kind, then (similar to :ref:`Union Types`)
@@ -992,8 +1065,8 @@ of arguments.
 
 A :index:`compile-time error` occurs if a rest parameter:
 
--  is not the last parameter in a parameter list;
--  has a type that is not an array type.
+-  Is not the last parameter in a parameter list;
+-  Has a type that is not an array type.
 
 A function that has a rest parameter of type ``T[]`` can accept any
 number of arguments of type ``T``.
@@ -1056,8 +1129,8 @@ Shadowing Parameters
 
 If the name of the parameter is identical to the name of the top-level
 variable accessible within the body of a function or a method with that
-a parameter, then within the body of such a function or a method the name
-of that parameter shadows the name of the top-level variable.
+a parameter, then the name of the parameter shadows the name of the
+top-level variable within the body of that function or method.
 
 .. code-block:: typescript
    :linenos:
@@ -1096,7 +1169,7 @@ Return Type
 .. meta:
     frontend_status: Done
 
-An omitted function or method return type can be inferred from the function
+An omitted function, or method return type can be inferred from the function,
 or the method body. A :index:`compile-time error` occurs if a return type is
 omitted in a native function (see :ref:`Native Functions`).
 
@@ -1108,17 +1181,17 @@ the following conditions:
 -  If there is at least one return statement with an expression, and the
    type of each expression of each return statement is *R*, then the
    return type is *R*.
--  If there are *k* return statements (assuming that *k* is two or more)
+-  If there are *k* return statements (assuming that *k* is two, or more)
    with expressions of types (*T*:sub:`1`, ``...``, *T*:sub:`k`), and *R*
    is the *least upper bound* (see :ref:`Least Upper Bound`) of these types,
    then the return type is *R*.
--  if the function is *async*, the return type is inferred by using the rules
+-  If the function is *async*, the return type is inferred by using the rules
    above, and the type *T* is not *Promise* type, then the return type
    is *Promise<T>*.
 
-Future compiler implementation could infer return type in more cases. If
-the particular type inference case is not recognized by the compiler then 
-a corresponding :index:`compile-time error` is generated.
+Future compiler implementation can infer return type in more cases. If
+the particular type inference case is not recognized by the compiler,
+then a corresponding :index:`compile-time error` occurs.
 
 See the example below for an illustration of type inference:
 
@@ -1215,10 +1288,10 @@ with the ``null`` argument, while the call of ``foo(x)`` is executed as a call
 of the implementation function with the ``x`` argument.
 
 A :index:`compile-time error` occurs if the signature of function
-implementation is not *overload signature compatible* with each overload
+implementation is not *overload signature-compatible* with each overload
 signature. It means that a call of each overload signature must be replaceable
 for the correct call of the implementation function. This can be achieved by
-using optional parameters (see :ref:`Optional Parameters`) or *least upper
+using optional parameters (see :ref:`Optional Parameters`), or *least upper
 bound* types (see :ref:`Least Upper Bound`). See
 :ref:`Overload Signature Compatibility` for the exact semantic rules.
 

@@ -16,50 +16,6 @@
 package escompat;
 
 /**
- * Internal non-movable memory of a SharedArrayBuffer
- */
-class SharedMemory {
-    private dataPtr: long
-    private waiterPtr: long
-
-    private constructor() {}
-
-    internal native static create(byteLength: int): SharedMemory;
-
-    internal native at(i: int): byte;
-
-    internal native set(i: int, value: byte): void;
-
-    internal native getByteLength(): int;
-
-    internal native atomicAddI8(index: int, value: byte): byte;
-
-    internal native atomicAndI8(index: int, value: byte): byte;
-
-    internal native atomicCompareExchangeI8(index: int, expectedValue: byte, replacementValue: byte): byte;
-
-    internal native atomicExchangeI8(index: int, value: byte): byte;
-
-    internal native atomicLoadI8(index: int): byte;
-
-    internal native atomicOrI8(index: int, value: byte): byte;
-
-    internal native atomicStoreI8(index: int, value: byte): byte;
-
-    internal native atomicSubI8(index: int, value: byte): byte;
-
-    internal native atomicXorI8(index: int, value: byte): byte;
-
-    internal native atomicWaitI32(byteOffset: int, value: int): int;
-
-    internal native atomicTimedWaitI32(byteOffset: int, value: int, timeout: long): int;
-
-    internal native atomicNotify(byteOffset: int): int;
-
-    internal native atomicBoundedNotify(byteOffset: int, count: int): int;
-}
-
-/**
  * Either ArrayBuffer or SharedArrayBuffer
  */
 // TODO(kprokopenko): make abstract after abstract overloads get to work
@@ -236,6 +192,60 @@ export class ArrayBuffer extends Buffer
     private data: byte[]
     /** Length in bytes */
     public readonly byteLength: int
+}
+
+/**
+ * Internal non-movable memory of a SharedArrayBuffer  
+ */
+class SharedMemory {
+    private data: byte[]
+    private waiterPtr: long
+
+    private constructor() {}
+
+    internal native static create(byteLength: int): SharedMemory;
+
+    internal at(i: int): byte {
+        return this.data[i]
+    }
+
+    internal set(i: int, value: byte): void {
+        this.data[i] = value
+    }
+
+    internal getByteLength(): int {
+        return this.data.length
+    }
+
+    internal native atomicAddI8(index: int, value: byte): byte;
+    
+    internal native atomicAndI8(index: int, value: byte): byte;
+
+    internal native atomicCompareExchangeI8(index: int, expectedValue: byte, replacementValue: byte): byte;
+
+    internal native atomicExchangeI8(index: int, value: byte): byte;
+    
+    internal native atomicLoadI8(index: int): byte;
+
+    internal native atomicOrI8(index: int, value: byte): byte;
+
+    internal native atomicStoreI8(index: int, value: byte): byte;
+
+    internal native atomicSubI8(index: int, value: byte): byte;
+
+    internal native atomicXorI8(index: int, value: byte): byte;
+
+    internal native atomicWaitI32(byteOffset: int, value: int): int;
+
+    internal native atomicWaitI64(byteOffset: int, value: long): int;
+
+    internal native atomicTimedWaitI32(byteOffset: int, value: int, timeout: long): int;
+
+    internal native atomicTimedWaitI64(byteOffset: int, value: long, timeout: long): int;
+
+    internal native atomicNotify(byteOffset: int): int;
+
+    internal native atomicBoundedNotify(byteOffset: int, count: int): int;
 }
 
 export class SharedArrayBuffer extends Buffer {

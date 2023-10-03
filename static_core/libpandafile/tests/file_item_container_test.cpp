@@ -149,7 +149,7 @@ TEST(ItemContainer, TestFileFormatVersionValid)
         File::Header header {};
         memset(&header, 0, sizeof(header));
         header.magic = File::MAGIC;
-        header.version = {0, 0, 0, 3};
+        header.version = {0, 0, 0, 5};
         header.file_size = sizeof(File::Header);
 
         for (uint8_t b : Span<uint8_t>(reinterpret_cast<uint8_t *>(&header), sizeof(header))) {
@@ -236,7 +236,7 @@ TEST(ItemContainer, TestClasses)
 
     ASSERT_NE(panda_file, nullptr);
 
-    EXPECT_THAT(panda_file->GetHeader()->version, ::testing::ElementsAre(0, 0, 0, 4));
+    EXPECT_THAT(panda_file->GetHeader()->version, ::testing::ElementsAre(0, 0, 0, 5));
     EXPECT_EQ(panda_file->GetHeader()->file_size, mem_writer.GetData().size());
     EXPECT_EQ(panda_file->GetHeader()->foreign_off, 0U);
     EXPECT_EQ(panda_file->GetHeader()->foreign_size, 0U);

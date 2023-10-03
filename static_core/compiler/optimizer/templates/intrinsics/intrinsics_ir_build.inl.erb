@@ -33,7 +33,6 @@ void InstBuilder::AddArgNullcheckIfNeeded([[maybe_unused]] RuntimeInterface::Int
                                           [[maybe_unused]] Inst *inst, [[maybe_unused]] Inst *save_state,
                                           [[maybe_unused]] size_t bc_addr)
 {
-    static_assert(IS_VIRTUAL, "It is not implemented for static call");
 % if Compiler::intrinsics.any? {|intrinsic| !intrinsic.need_nullcheck.empty?}
     constexpr int ARG_OFFSET = IS_VIRTUAL ? 1 : 0;
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)

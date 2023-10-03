@@ -139,3 +139,31 @@ intrinsics:
       args: []
   clear_flags: [runtime_call, require_state]
   description: Encode store mark word using compare and swap
+
+- name: DataMemoryBarrierFull
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [arm64, amd64]
+  codegen_func: "CreateIrtocIntrinsic"
+  signature:
+      ret: void
+      args: []
+  clear_flags: [runtime_call, require_state]
+  description: InnerShareable Full (ACQUIRE + RELEASE) barrier. Ensures the order of memory accesses before and after the barrier.
+
+- name: CompressEightUtf16ToUtf8CharsUsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [arm64]
+  codegen_func: "CreateIrtocIntrinsic"
+  signature:
+      ret: void
+      args: []
+  clear_flags: [runtime_call, require_state]
+  description: Compresses eight Utf16 chars (16 bytes) to Utf8 chars (8 bytes) using SIMD instructions

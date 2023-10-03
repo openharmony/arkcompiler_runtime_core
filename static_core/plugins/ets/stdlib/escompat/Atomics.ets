@@ -36,6 +36,25 @@ export class Atomics {
         }
     }
 
+    private static requireSharedMemory(buffer: Buffer): SharedMemory {
+        if (buffer instanceof ArrayBuffer) {
+            throw new TypeError("This method accepts only TypedArrays that view SharedArrayBuffers")
+        } else {
+            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+            return mem
+        }
+    }
+
+    /**
+     * isLockFree(n) returns true if Atomic operations for typed arrays where "BYTER_PER_ELEMENT == n"
+     * use hardware atomics instructions instead of locks.
+     *
+     * Warning: currently, all Atomic operations use locks, but isLockFree(4) following the ECMA specification returns true.  
+     */
+    public isLockFree(byteSize: int): boolean {
+        return byteSize == 4
+    }
+
     // Int8Array
 
     public static add(typedArray: Int8Array, index: int, value: byte): byte {
@@ -236,38 +255,28 @@ export class Atomics {
     }
 
     /**
-     * If typedArray[offset] != value suspends the current thread until it is notified by Atomics.notify.
+     * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify.
      *
-     * Note: An Atomics.notify call will wake up this thread even if typedArray[offset] == value.  
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".  
      */
     public static wait(typedArray: Int32Array, offset: int, value: int): string {
         let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, offset)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            throw new TypeError("Atomics.wait can only operate on a TypedArray that views a SharedArrayBuffer")
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            let result = mem.atomicWaitI32(indexedPosition, value)
-            return Atomics.interpretWaitResult(result)
-        }
+        let mem = Atomics.requireSharedMemory(typedArray.buffer)
+        let result = mem.atomicWaitI32(indexedPosition, value)
+        return Atomics.interpretWaitResult(result)
     }
 
     /**
-     * If typedArray[offset] != value suspends the current thread until it is notified by Atomics.notify
+     * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify
      * or until the given timeout passes.
      *
-     * Note: An Atomics.notify call will wake up this thread even if typedArray[offset] == value.
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      */
     public static wait(typedArray: Int32Array, offset: int, value: int, timeout: long): string {
         let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, offset)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            throw new TypeError("Atomics.wait can only operate on a TypedArray that views a SharedArrayBuffer")
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            let result = mem.atomicTimedWaitI32(indexedPosition, value, timeout)
-            return Atomics.interpretWaitResult(result)
-        }
+        let mem = Atomics.requireSharedMemory(typedArray.buffer)
+        let result = mem.atomicTimedWaitI64(indexedPosition, value, timeout)
+        return Atomics.interpretWaitResult(result)
     }
 
     /**
@@ -340,12 +349,29 @@ export class Atomics {
         throw new Error("not implemented")
     }
 
+    /**
+     * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify.
+     *
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".  
+     */
     public static wait(typedArray: BigInt64Array, offset: int, value: long): string {
-        throw new Error("not implemented")
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, offset)
+        let mem = Atomics.requireSharedMemory(typedArray.buffer)
+        let result = mem.atomicWaitI64(indexedPosition, value)
+        return Atomics.interpretWaitResult(result)
     }
 
+    /**
+     * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify
+     * or until the given timeout passes.
+     *
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     */
     public static wait(typedArray: BigInt64Array, offset: int, value: long, timeout: long): string {
-        throw new Error("not implemented")
+        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset, Int32Array.BYTES_PER_ELEMENT, typedArray.length, offset)
+        let mem = Atomics.requireSharedMemory(typedArray.buffer)
+        let result = mem.atomicTimedWaitI64(indexedPosition, value, timeout)
+        return Atomics.interpretWaitResult(result)
     }
 
     /**

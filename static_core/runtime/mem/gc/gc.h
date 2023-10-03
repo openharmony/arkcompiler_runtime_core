@@ -254,11 +254,13 @@ public:
         return gc_barrier_set_;
     }
 
-    GCWorkersTaskPool *GetWorkersPool()
+    GCWorkersTaskPool *GetWorkersTaskPool() const
     {
         ASSERT(workers_pool_ != nullptr);
         return workers_pool_;
     }
+
+    void CreateWorkersTaskPool();
 
     // Additional NativeGC
     void NotifyNativeAllocations();
@@ -552,12 +554,6 @@ protected:
     {
         ASSERT(gc_barrier_set_ == nullptr);
         gc_barrier_set_ = barrier_set;
-    }
-
-    void SetWorkersPool(GCWorkersTaskPool *task_pool)
-    {
-        ASSERT(workers_pool_ == nullptr);
-        workers_pool_ = task_pool;
     }
 
     void ClearWorkersPool()

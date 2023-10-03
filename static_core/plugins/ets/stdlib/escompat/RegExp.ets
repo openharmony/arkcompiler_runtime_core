@@ -239,7 +239,7 @@ export class RegExp extends Object {
     /**
      * Compiles a regular expression
      */
-    private native compile();
+    private native compile(): void;
 
     /**
      * Recompiles a regular expression with new source and flags after the RegExp object has already been created

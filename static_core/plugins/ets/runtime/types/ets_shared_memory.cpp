@@ -49,12 +49,17 @@ void EtsSharedMemory::Waiter::SignalAll()
 
 EtsSharedMemory *EtsSharedMemory::Create(size_t length)
 {
-    auto cls = EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetSharedMemoryClass();
+    auto *current_coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(current_coro);
+
+    auto cls = current_coro->GetPandaVM()->GetClassLinker()->GetSharedMemoryClass();
     // Note: This object must be non-movable since the 'waiter_' pointer is shared between different threads
-    auto mem = reinterpret_cast<EtsSharedMemory *>(EtsObject::CreateNonMovable(cls));
-    mem->SetData(EtsCoroutine::GetCurrent()->GetPandaVM()->AllocateAtomicsSharedMemory(length));
-    mem->SetHeadWaiter(nullptr);
-    return mem;
+    EtsHandle<EtsSharedMemory> hmem(current_coro, EtsSharedMemory::FromEtsObject(EtsObject::CreateNonMovable(cls)));
+    auto *array_ptr = EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    ObjectAccessor::SetObject(current_coro, hmem.GetPtr(), MEMBER_OFFSET(EtsSharedMemory, array_),
+                              array_ptr->GetCoreType());
+    hmem->SetHeadWaiter(nullptr);
+    return hmem.GetPtr();
 }
 
 void EtsSharedMemory::LinkWaiter(Waiter &waiter)
@@ -82,20 +87,32 @@ void EtsSharedMemory::UnlinkWaiter(Waiter &waiter)
 
 size_t EtsSharedMemory::GetLength()
 {
-    return GetData()->size();
+    auto *current_coro = EtsCoroutine::GetCurrent();
+    auto *array_ptr = reinterpret_cast<EtsByteArray *>(
+        ObjectAccessor::GetObject(current_coro, this, MEMBER_OFFSET(EtsSharedMemory, array_)));
+    return array_ptr->GetLength();
 }
 
-int8_t EtsSharedMemory::GetElement(int32_t index)
+int8_t EtsSharedMemory::GetElement(uint32_t index)
 {
-    return GetData()->at(index);
+    auto *current_coro = EtsCoroutine::GetCurrent();
+    auto *array_ptr = reinterpret_cast<EtsByteArray *>(
+        ObjectAccessor::GetObject(current_coro, this, MEMBER_OFFSET(EtsSharedMemory, array_)));
+    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
+    return array_ptr->Get(index);
 }
 
-void EtsSharedMemory::SetElement(int32_t index, int8_t element)
+void EtsSharedMemory::SetElement(uint32_t index, int8_t element)
 {
-    GetData()->at(index) = element;
+    auto *current_coro = EtsCoroutine::GetCurrent();
+    auto *array_ptr = reinterpret_cast<EtsByteArray *>(
+        ObjectAccessor::GetObject(current_coro, this, MEMBER_OFFSET(EtsSharedMemory, array_)));
+    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
+    array_ptr->Set(index, element);
 }
 
 namespace {
+
 std::string PrintWaiters(EtsHandle<EtsSharedMemory> &buffer)
 {
     std::stringstream stream;
@@ -113,50 +130,56 @@ bool IsLittleEndian()
     return *reinterpret_cast<int8_t *>(&x) == static_cast<int8_t>(1);
 }
 
-int32_t GetInt32FromBytesBig(const PandaVector<int8_t> &bytes, size_t index)
+template <typename IntegerType, typename UIntegerType>
+IntegerType AssembleFromBytes(EtsSharedMemory &mem, uint32_t index, uint32_t (*get_byte_index)(uint32_t, uint32_t))
 {
-    uint32_t value = 0;
-    for (size_t i = 0; i < sizeof(int32_t); i++) {
-        auto cur_byte = bit_cast<uint32_t>(static_cast<int32_t>(bytes.at(index + 3 - i)));
+    UIntegerType value = 0;
+    for (uint32_t i = 0; i < sizeof(IntegerType); i++) {
+        auto cur_byte_index = get_byte_index(index, i);
+        auto cur_byte = bit_cast<UIntegerType>(static_cast<IntegerType>(mem.GetElement(cur_byte_index)));
         value |= cur_byte << (8U * i);
     }
-    return bit_cast<int32_t>(value);
+    return bit_cast<IntegerType>(value);
 }
 
-int32_t GetInt32FromBytesLittle(const PandaVector<int8_t> &bytes, size_t index)
+uint32_t LittleEndianGetByteIndex(uint32_t index, uint32_t i)
 {
-    uint32_t value = 0;
-    for (size_t i = 0; i < sizeof(int32_t); i++) {
-        auto cur_byte = bit_cast<uint32_t>(static_cast<int32_t>(bytes.at(index + i)));
-        value |= cur_byte << (8U * i);
-    }
-    return bit_cast<int32_t>(value);
+    return index + i;
 }
 
-int32_t GetInt32FromBytes(const PandaVector<int8_t> &bytes, size_t index)
+template <typename IntegerType>
+uint32_t BigEndianGetByteIndex(uint32_t index, uint32_t i)
 {
-    return IsLittleEndian() ? GetInt32FromBytesLittle(bytes, index) : GetInt32FromBytesBig(bytes, index);
+    return index + sizeof(IntegerType) - 1 - i;
 }
-}  // namespace
 
-EtsSharedMemory::WaitResult EtsSharedMemory::WaitI32(int32_t byte_offset, int32_t expected_value,
-                                                     std::optional<uint64_t> timeout)
+template <typename IntegerType, typename UIntegerType>
+IntegerType AssembleFromBytes(EtsSharedMemory &mem, uint32_t index)
+{
+    return IsLittleEndian()
+               ? AssembleFromBytes<IntegerType, UIntegerType>(mem, index, LittleEndianGetByteIndex)
+               : AssembleFromBytes<IntegerType, UIntegerType>(mem, index, BigEndianGetByteIndex<IntegerType>);
+}
+
+template <typename IntegerType, typename UIntegerType>
+EtsSharedMemory::WaitResult Wait(EtsSharedMemory *mem, uint32_t byte_offset, IntegerType expected_value,
+                                 std::optional<uint64_t> timeout)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coroutine);
-    EtsHandle<EtsSharedMemory> this_handle(coroutine, this);
+    EtsHandle<EtsSharedMemory> this_handle(coroutine, mem);
 
     ScopedNativeCodeThread n(coroutine);
     os::memory::LockHolder lock(coroutine->GetPandaVM()->GetAtomicsMutex());
     ScopedManagedCodeThread m(coroutine);
 
-    auto witnessed_value = GetInt32FromBytes(*this_handle->GetData(), byte_offset);
+    auto witnessed_value = AssembleFromBytes<IntegerType, UIntegerType>(*(this_handle.GetPtr()), byte_offset);
     LOG(DEBUG, ATOMICS) << "Wait: witnesseed_value=" << witnessed_value << ", expected_value=" << expected_value;
     if (witnessed_value == expected_value) {
         // Only stack allocations
 
         // 1. Add waiter
-        auto waiter = Waiter(byte_offset);
+        auto waiter = EtsSharedMemory::Waiter(byte_offset);
         this_handle->LinkWaiter(waiter);
         LOG(DEBUG, ATOMICS) << "Wait: added waiter: " << reinterpret_cast<size_t>(&waiter)
                             << ", list: " << PrintWaiters(this_handle);
@@ -174,14 +197,28 @@ EtsSharedMemory::WaitResult EtsSharedMemory::WaitI32(int32_t byte_offset, int32_
         this_handle->UnlinkWaiter(waiter);
         LOG(DEBUG, ATOMICS) << "Wait: removed waiter: " << reinterpret_cast<size_t>(&waiter)
                             << ", list: " << PrintWaiters(this_handle);
-        return timed_out ? WaitResult::TIMED_OUT : WaitResult::OK;
+        return timed_out ? EtsSharedMemory::WaitResult::TIMED_OUT : EtsSharedMemory::WaitResult::OK;
     }
 
     LOG(DEBUG, ATOMICS) << "Wait: not-equal, returning";
-    return WaitResult::NOT_EQUAL;
+    return EtsSharedMemory::WaitResult::NOT_EQUAL;
 }
 
-int32_t EtsSharedMemory::NotifyI32(int32_t byte_offset, std::optional<uint32_t> count)
+}  // namespace
+
+EtsSharedMemory::WaitResult EtsSharedMemory::WaitI32(uint32_t byte_offset, int32_t expected_value,
+                                                     std::optional<uint64_t> timeout)
+{
+    return Wait<int32_t, uint32_t>(this, byte_offset, expected_value, timeout);
+}
+
+EtsSharedMemory::WaitResult EtsSharedMemory::WaitI64(uint32_t byte_offset, int64_t expected_value,
+                                                     std::optional<uint64_t> timeout)
+{
+    return Wait<int64_t, uint64_t>(this, byte_offset, expected_value, timeout);
+}
+
+int32_t EtsSharedMemory::NotifyI32(uint32_t byte_offset, std::optional<uint32_t> count)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coroutine);

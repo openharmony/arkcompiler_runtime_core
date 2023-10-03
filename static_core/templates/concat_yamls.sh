@@ -24,4 +24,5 @@ for YAML_FILE_PATH in "${@}"
 do
     echo "Adding yaml file: ${YAML_FILE_PATH} to ${OUTPUT_FILE}"
     cat "${YAML_FILE_PATH}" >> "${OUTPUT_FILE}"
+    echo >> "${OUTPUT_FILE}"
 done

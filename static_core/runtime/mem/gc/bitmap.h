@@ -593,9 +593,7 @@ public:
                                           });
     }
 
-    /**
-     * \brief Call visitor for single allocated object in humongous region
-     */
+    /// @brief Call visitor for single allocated object in humongous region
     template <bool ATOMIC, typename MemVisitor>
     void CallForMarkedChunkInHumongousRegion(void *begin, const MemVisitor &visitor)
     {

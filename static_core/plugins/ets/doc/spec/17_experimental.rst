@@ -8,7 +8,7 @@ Experimental Features
 
 This Chapter introduces the |LANG| features that are considered a part of
 the language but do not have corresponding analogues in |TS|, and are
-therefore not recommended to those who need a single source code for Typescript
+therefore not recommended to those who need a single source code for |TS|
 and |LANG|.
 
 Some features introduced in this Chapter are still under discussion and can be
@@ -395,6 +395,9 @@ of type *Object*.
 
 Statements
 **********
+
+.. meta:
+    frontend_status: Done
 
 |
 
@@ -789,6 +792,9 @@ The constructor overloading behaves identically to the method overloading (see
 
 Declaration Distinguishable by Signatures
 =========================================
+
+.. meta:
+    frontend_status: Done
 
 Declarations with the same name are distinguishable by signatures if:
 
@@ -1191,7 +1197,7 @@ class.
 	  b = new Derived
       b.foo() // `Base.foo is called` to be printed
       let d: Derived = new Derived
-      b.foo() // `Derived.foo is called` to be printed
+      d.foo() // `Derived.foo is called` to be printed
 
 If extension function and type method have the same name and signature then 
 calls to this name are routed to the method.
@@ -1292,6 +1298,35 @@ compile-time error occurs otherwise.
 **Note**: If a call is followed by a block when the function or method
 being called has no last function type parameter, then such block is
 treated as an ordinary block of statements but not as a lambda function.
+Also in case of any other ambiguities when the function or method call has
+the last parameter, which may be optional, of function type the syntax
+production started with '{' which followes the function or method call is
+treated as the trailing lambda. If the other semantics is needed then
+separating semicolon ';' is to be used. It means that the function or method
+will be called with no last argument (see :ref:'Optional Parameters').
+
+.. code-block:: typescript
+   :linenos:
+
+      class A {
+          foo (p?: ()=>void) { ... } 
+      }
+      function foo (p?: ()=>void) { ... }
+
+      let a = new A
+      a.foo() { console.log ("method lambda argument is activated") }
+      // method foo receives last argument as an inline lambda
+
+      a.foo(); { console.log ("that is the block code") }
+      // method 'foo' is called with 'p' parameter set to 'undefined'
+      // ';' allows to specify expliclty that '{' starts the block
+
+
+      foo() { console.log ("function lambda argument is activated") }
+      // function 'foo' receives last argument as an inline lambda,
+      foo(); { console.log ("that is the block code") }
+      // function 'foo' is called with 'p' parameter set to 'undefined'
+
 
 .. index::
    trailing lambda
@@ -1328,7 +1363,7 @@ Enumeration Methods
 *******************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 There are several static methods available to handle each enumeration type:
 
@@ -1718,6 +1753,9 @@ See :ref:`Throwing Functions` and :ref:`Rethrowing Functions` for details.
 Coroutines
 **********
 
+.. meta:
+    frontend_status: Partly
+
 A function or lambda can be a *coroutine*. |LANG| supports **basic coroutines**,
 **structured coroutines** and communication **channels**.
 Use basic coroutines to create and launch a coroutine, and then wait for
@@ -1738,6 +1776,9 @@ the result.
 
 Create and Launch a Coroutine
 =============================
+
+.. meta:
+    frontend_status: Done
 
 The following expression is used to create and launch a coroutine:
 
@@ -1817,6 +1858,9 @@ from what scope to call the function *async*.
 Awaiting a Coroutine
 ====================
 
+.. meta:
+    frontend_status: Done
+
 The expressions *await* and *wait* are used while a previously launched
 coroutine finishes and returns a value.
 
@@ -1861,6 +1905,9 @@ If the coroutine result must be ignored, then the expression statement
 
 The Promise<T> Class
 ====================
+
+.. meta:
+    frontend_status: Partly
 
 The class  *Promise<T>* represents the values that the launch expressions
 return. The definition of type *Promise<T>* belongs the '*package std.core*'
@@ -1941,6 +1988,9 @@ the corouitnes related package of the standard library
 Async Functions
 ===============
 
+.. meta:
+    frontend_status: Partly
+
 The function *async* is implicitly a coroutine that can be called as a
 regular function.
 
@@ -1972,6 +2022,9 @@ functions is only supported for the sake of backward |TS| compatibility.
 
 Packages
 ********
+
+.. meta:
+    frontend_status: Partly
 
 One or more *package modules* form a package.
 
@@ -2046,6 +2099,9 @@ declared in all modules that constitute the package.
 
 Internal Access Modifier
 ========================
+
+.. meta:
+    frontend_status: Partly
 
 The modifier *internal* indicates that a class member or constructor is
 accessible within their compilation unit only. A compilation unit that is a
@@ -2275,6 +2331,9 @@ as simple names. This feature is to be used only for migration.
 Import and Overloading of Function Names
 ========================================
 
+.. meta:
+    frontend_status: Done
+
 While importing functions, situations can occur, where:
 
 -  different imported functions have the same name but different signatures,
@@ -2302,6 +2361,9 @@ While importing functions, situations can occur, where:
 
 Overloading of Function Names
 =============================
+
+.. meta:
+    frontend_status: Done
 
 **Overloading** is the situation when a compilation unit has access to
 several functions with the same names (with no regard to where such
@@ -2340,6 +2402,9 @@ override-equivalent):
 
 Shadowing of Function Names
 ===========================
+
+.. meta:
+    frontend_status: Done
 
 **Shadowing** is the :index:`compile-time error` that occurs if an imported
 function is identical to the function declared in the current compilation

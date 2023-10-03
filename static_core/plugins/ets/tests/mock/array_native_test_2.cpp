@@ -37,7 +37,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetBoolArrayRegionErrorTests)
     {
         env_->GetBooleanArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -45,7 +45,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetBoolArrayRegionErrorTests)
     {
         env_->GetBooleanArrayRegion(arr, 0, -2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -53,7 +53,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetBoolArrayRegionErrorTests)
     {
         env_->GetBooleanArrayRegion(arr, 2, 9, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -72,7 +72,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetByteArrayRegionErrorTests)
     {
         env_->GetByteArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -80,7 +80,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetByteArrayRegionErrorTests)
     {
         env_->GetByteArrayRegion(arr, 0, -2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -88,7 +88,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetByteArrayRegionErrorTests)
     {
         env_->GetByteArrayRegion(arr, 2, 9, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -107,7 +107,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetCharArrayRegionErrorTests)
     {
         env_->GetCharArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -115,7 +115,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetCharArrayRegionErrorTests)
     {
         env_->GetCharArrayRegion(arr, 0, -2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -123,7 +123,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetCharArrayRegionErrorTests)
     {
         env_->GetCharArrayRegion(arr, 2, 9, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -142,7 +142,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetShortArrayRegionErrorTests)
     {
         env_->GetShortArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -150,7 +150,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetShortArrayRegionErrorTests)
     {
         env_->GetShortArrayRegion(arr, 0, -2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -158,7 +158,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetShortArrayRegionErrorTests)
     {
         env_->GetShortArrayRegion(arr, 2, 9, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -177,7 +177,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetIntArrayRegionErrorTests)
     {
         env_->GetIntArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -185,7 +185,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetIntArrayRegionErrorTests)
     {
         env_->GetIntArrayRegion(arr, 0, -2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -193,7 +193,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetIntArrayRegionErrorTests)
     {
         env_->GetIntArrayRegion(arr, 2, 9, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -212,7 +212,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetLongArrayRegionErrorTests)
     {
         env_->GetLongArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -220,7 +220,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetLongArrayRegionErrorTests)
     {
         env_->GetLongArrayRegion(arr, 0, -2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -228,7 +228,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetLongArrayRegionErrorTests)
     {
         env_->GetLongArrayRegion(arr, 2, 9, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -247,7 +247,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetFloatArrayRegionErrorTests)
     {
         env_->GetFloatArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -255,7 +255,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetFloatArrayRegionErrorTests)
     {
         env_->GetFloatArrayRegion(arr, 0, -2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -263,7 +263,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetFloatArrayRegionErrorTests)
     {
         env_->GetFloatArrayRegion(arr, 2, 9, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -282,7 +282,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetDoubleArrayRegionErrorTests)
     {
         env_->GetDoubleArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -290,7 +290,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetDoubleArrayRegionErrorTests)
     {
         env_->GetDoubleArrayRegion(arr, 0, -2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -298,7 +298,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetDoubleArrayRegionErrorTests)
     {
         env_->GetDoubleArrayRegion(arr, 2, 9, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -316,7 +316,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetBoolArrayRegionErrorTests)
     {
         env_->SetBooleanArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -334,7 +334,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetByteArrayRegionErrorTests)
     {
         env_->SetByteArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -352,7 +352,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetCharArrayRegionErrorTests)
     {
         env_->SetCharArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -370,7 +370,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetShortArrayRegionErrorTests)
     {
         env_->SetShortArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -388,7 +388,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetIntArrayRegionErrorTests)
     {
         env_->SetIntArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -406,7 +406,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetLongArrayRegionErrorTests)
     {
         env_->SetLongArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -424,7 +424,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetFloatArrayRegionErrorTests)
     {
         env_->SetFloatArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -442,7 +442,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetDoubleArrayRegionErrorTests)
     {
         env_->SetDoubleArrayRegion(arr, -1, 2, buf);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -465,7 +465,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetObjectArrayElementErrorTest)
     {
         env_->GetObjectArrayElement(array, -1);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -473,7 +473,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetObjectArrayElementErrorTest)
     {
         env_->GetObjectArrayElement(array, 5);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -481,7 +481,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetObjectArrayElementErrorTest)
     {
         env_->GetObjectArrayElement(array, 15);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -508,7 +508,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetObjectArrayElementErrorTests)
     {
         env_->SetObjectArrayElement(str_array, -1, new_str);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -516,7 +516,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetObjectArrayElementErrorTests)
     {
         env_->SetObjectArrayElement(str_array, 5, new_str);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);
@@ -544,7 +544,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetObjectArrayElementErrorTests2)
     {
         env_->SetObjectArrayElement(str_array, 1, int_obj);
 
-        ets_throwable error = env_->ErrorOccurred();
+        ets_error error = env_->ErrorOccurred();
         ASSERT_NE(error, nullptr);
         env_->ErrorClear();
         ASSERT_EQ(env_->IsInstanceOf(static_cast<ets_object>(error), error_class), ETS_TRUE);

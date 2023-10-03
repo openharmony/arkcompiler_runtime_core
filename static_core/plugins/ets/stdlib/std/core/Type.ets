@@ -858,7 +858,7 @@ export final class ClassType extends Type {
             return false
         }
         if (other instanceof InterfaceType) {
-            let used = new Array()
+            let used = new Array<Object>()
             let lt = other as InterfaceType
             for (let i = 0; i < this.getInterfacesNum(); i++) {
                 if (this.getInterface(i).hasSuper(used, lt)) {
@@ -1028,7 +1028,7 @@ export final class InterfaceType extends Type {
     }
 
     // TODO(kirill-mitkin): change to Set<Long> when it will be possible
-    internal hasSuper(used: Array, expected: InterfaceType): boolean {
+    internal hasSuper(used: Array<Object>, expected: InterfaceType): boolean {
         if (this.equals(expected)) {
             return true;
         }
@@ -1053,7 +1053,7 @@ export final class InterfaceType extends Type {
             return true
         }
         if (other instanceof InterfaceType) {
-            let used = new Array()
+            let used = new Array<Object>()
             let lt = other as InterfaceType
             for (let i = 0; i < this.getInterfacesNum(); i++) {
                 if (this.getInterface(i).hasSuper(used, lt)) {

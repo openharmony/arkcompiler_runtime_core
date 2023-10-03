@@ -208,10 +208,21 @@ extern "C" coretypes::String *CreateEmptyStringEntrypoint()
     return str;
 }
 
+extern "C" coretypes::String *CreateStringFromStringEntrypoint(ObjectHeader *obj)
+{
+    BEGIN_ENTRYPOINT();
+    auto vm = ManagedThread::GetCurrent()->GetVM();
+    auto str = coretypes::String::CreateFromString(static_cast<coretypes::String *>(obj), vm->GetLanguageContext(), vm);
+    if (UNLIKELY(str == nullptr)) {
+        HandlePendingException();
+        UNREACHABLE();
+    }
+    return str;
+}
+
 extern "C" coretypes::String *CreateStringFromCharsEntrypoint(ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
-
     auto vm = ManagedThread::GetCurrent()->GetVM();
     auto array = static_cast<coretypes::Array *>(obj);
     auto str = coretypes::String::CreateNewStringFromChars(0, array->GetLength(), array, vm->GetLanguageContext(), vm);
@@ -222,12 +233,28 @@ extern "C" coretypes::String *CreateStringFromCharsEntrypoint(ObjectHeader *obj)
     return str;
 }
 
-extern "C" coretypes::String *CreateStringFromStringEntrypoint(ObjectHeader *obj)
+extern "C" coretypes::String *CreateStringFromCharsWithOffsetEntrypoint(uint32_t offset, uint32_t length,
+                                                                        ObjectHeader *obj,
+                                                                        [[maybe_unused]] ObjectHeader *string_klass)
 {
     BEGIN_ENTRYPOINT();
-
     auto vm = ManagedThread::GetCurrent()->GetVM();
-    auto str = coretypes::String::CreateFromString(static_cast<coretypes::String *>(obj), vm->GetLanguageContext(), vm);
+    auto array = static_cast<coretypes::Array *>(obj);
+    auto str = coretypes::String::CreateNewStringFromChars(offset, length, array, vm->GetLanguageContext(), vm);
+    if (UNLIKELY(str == nullptr)) {
+        HandlePendingException();
+        UNREACHABLE();
+    }
+    return str;
+}
+
+extern "C" coretypes::String *CreateStringFromCharsZeroOffsetEntrypoint(uint32_t length, ObjectHeader *obj,
+                                                                        [[maybe_unused]] ObjectHeader *string_klass)
+{
+    BEGIN_ENTRYPOINT();
+    auto vm = ManagedThread::GetCurrent()->GetVM();
+    auto array = static_cast<coretypes::Array *>(obj);
+    auto str = coretypes::String::CreateNewStringFromChars(0, length, array, vm->GetLanguageContext(), vm);
     if (UNLIKELY(str == nullptr)) {
         HandlePendingException();
         UNREACHABLE();

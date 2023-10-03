@@ -186,6 +186,38 @@ function bubbleSort(arr: boolean[], startIndex: int, endIndex: int): void {
     }
 }
 
+function insertionSort(arr: boolean[], startIndex: int, endIndex: int): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while (((tmp) ? 1 : 0) < ((arr[pos - 1]) ? 1 : 0)) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if (((tmp) ? 1 : 0) < ((arr[startIndex]) ? 1 : 0)) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while (((tmp) ? 1 : 0) < ((arr[pos - 1]) ? 1 : 0)) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+
 /**
  * sorts arr in-place
  *
@@ -221,6 +253,38 @@ function bubbleSort(arr: boolean[], startIndex: int, endIndex: int, mustPrecede:
                 arr[i] = tmp
                 was = true
             }
+        }
+    }
+}
+
+function insertionSort(arr: boolean[], startIndex: int, endIndex: int, mustPrecede: (lhs: boolean, rhs: boolean) => boolean): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if (mustPrecede(tmp, arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
         }
     }
 }
@@ -360,6 +424,10 @@ export function test_sortAllOn(arr: boolean[]) {
         bubbleSort(bubbled, 0, bubbled.length)
         sorts[lastSort++] = new test_SortDataboolean("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length)
+        sorts[lastSort++] = new test_SortDataboolean("insertion", insertion)
+
         
         const bcnt = test_sortCopy(arr)
         countSortBools(bcnt, 0, bcnt.length)
@@ -389,6 +457,10 @@ export function test_sortAllOn(arr: boolean[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDataboolean("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDataboolean("insertion", insertion)
+
         
         const bcnt = test_sortCopy(arr)
         countSortBools(bcnt, 0, bcnt.length)
@@ -417,6 +489,10 @@ export function test_sortAllOn(arr: boolean[]) {
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDataboolean("bubble", bubbled)
+
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDataboolean("insertion", insertion)
 
         
         const bcnt = test_sortCopy(arr)
@@ -1061,147 +1137,252 @@ function bubbleSort(arr: byte[], startIndex: int, endIndex: int): void {
         }
     }
 }
-function heapSortUp(arr: byte[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: byte[], startIndex: int, endIndex: int): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if ((tmp < arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: byte[], idxFromStart: int, startIndex: int, heapRoot: int): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if ((arr[startIndex + idxFromStart] < arr[startIndex + p])) {
+        if (!(arr[startIndex + p] < tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: byte[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && (arr[startIndex + best] < arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if ((arr[childIndex] < arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && (arr[startIndex + best] < arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
+}
+
+export function heapSort(arr: byte[], startIndex: int, endIndex: int): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: byte[], index1: int, index2: int, index3: int): void {
+    let swap_idx = index2
+    if ((arr[index1] < arr[index2])) {
+        if ((arr[index3] < arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: byte[], startIndex: int, endIndex: int): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i)
-    }
-}
-
-function quickSortSplit(arr: byte[], startIndex: int, endIndex: int): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while ((arr[i] < pivot)) {
-            i++
+        if ((arr[index3] < arr[index2])) {
+            swap_idx = index3
         }
-        while ((pivot < arr[j])) {
+    } else {
+        if (!(arr[index3] < arr[index1])) {
+            return
+        }
+        if ((arr[index2] < arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: byte[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((arr[i] < pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !(arr[j] < pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!(arr[j] < pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !(arr[i] < pivot) and (arr[j] < pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if ((arr[i] < pivot)) {
+        while ((arr[++i] < pivot)) {}
+        while (!(arr[--j] < pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: byte[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((pivot < arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !(pivot < arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!(pivot < arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here (pivot < arr[i]) and !(pivot < arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!(pivot < arr[++i])) {}
+        while ((pivot < arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: byte[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: byte[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex)
 }
-function quickSortImpl15(arr: byte[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: byte[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex)
 }
 
 function quickSort(arr: byte[], startIndex: int, endIndex: int): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3)
 }
 
 /**
@@ -1246,147 +1427,236 @@ function bubbleSort(arr: byte[], startIndex: int, endIndex: int, mustPrecede: (l
         }
     }
 }
-function heapSortUp(arr: byte[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: byte[], startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if (mustPrecede(tmp, arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: byte[], idxFromStart: int, startIndex: int, heapRoot: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if (mustPrecede(arr[startIndex + idxFromStart], arr[startIndex + p])) {
+        if (!mustPrecede(arr[startIndex + p], tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex, mustPrecede)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: byte[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if (mustPrecede(arr[childIndex], arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
+}
+
+export function heapSort(arr: byte[], startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i, mustPrecede)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: byte[], index1: int, index2: int, index3: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
+    let swap_idx = index2
+    if (mustPrecede(arr[index1], arr[index2])) {
+        if (mustPrecede(arr[index3], arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: byte[], startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1, mustPrecede)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i, mustPrecede)
-    }
-}
-
-function quickSortSplit(arr: byte[], startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while (mustPrecede(arr[i], pivot)) {
-            i++
+        if (mustPrecede(arr[index3], arr[index2])) {
+            swap_idx = index3
         }
-        while (mustPrecede(pivot, arr[j])) {
+    } else {
+        if (!mustPrecede(arr[index3], arr[index1])) {
+            return
+        }
+        if (mustPrecede(arr[index2], arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: byte[], startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(arr[i], pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !mustPrecede(arr[j], pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!mustPrecede(arr[j], pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !mustPrecede(arr[i], pivot) and mustPrecede(arr[j], pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if (mustPrecede(arr[i], pivot)) {
+        while (mustPrecede(arr[++i], pivot)) {}
+        while (!mustPrecede(arr[--j], pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: byte[], startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(pivot, arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !mustPrecede(pivot, arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!mustPrecede(pivot, arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here mustPrecede(pivot, arr[i]) and !mustPrecede(pivot, arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!mustPrecede(pivot, arr[++i])) {}
+        while (mustPrecede(pivot, arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: byte[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: byte[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
-function quickSortImpl15(arr: byte[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: byte[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex, mustPrecede)
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
 
 function quickSort(arr: byte[], startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits, mustPrecede)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3, mustPrecede)
 }
 
 /**
@@ -1504,6 +1774,10 @@ export function test_sortAllOn(arr: byte[]) {
         const bubbled = test_sortCopy(arr)
         bubbleSort(bubbled, 0, bubbled.length)
         sorts[lastSort++] = new test_SortDatabyte("bubble", bubbled)
+
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length)
+        sorts[lastSort++] = new test_SortDatabyte("insertion", insertion)
         const cnt = test_sortCopy(arr)
         countSort(cnt, 0, cnt.length)
         sorts[lastSort++] = new test_SortDatabyte("cnt()", cnt)
@@ -1514,12 +1788,12 @@ export function test_sortAllOn(arr: byte[]) {
         sorts[lastSort++] = new test_SortDatabyte("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
         sorts[lastSort++] = new test_SortDatabyte("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length)
-        sorts[lastSort++] = new test_SortDatabyte("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
+        sorts[lastSort++] = new test_SortDatabyte("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just)
@@ -1545,18 +1819,22 @@ export function test_sortAllOn(arr: byte[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatabyte("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDatabyte("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatabyte("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatabyte("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatabyte("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDatabyte("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
@@ -1582,18 +1860,22 @@ export function test_sortAllOn(arr: byte[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatabyte("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDatabyte("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatabyte("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatabyte("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatabyte("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDatabyte("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
@@ -2233,147 +2515,252 @@ function bubbleSort(arr: short[], startIndex: int, endIndex: int): void {
         }
     }
 }
-function heapSortUp(arr: short[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: short[], startIndex: int, endIndex: int): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if ((tmp < arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: short[], idxFromStart: int, startIndex: int, heapRoot: int): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if ((arr[startIndex + idxFromStart] < arr[startIndex + p])) {
+        if (!(arr[startIndex + p] < tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: short[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && (arr[startIndex + best] < arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if ((arr[childIndex] < arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && (arr[startIndex + best] < arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
+}
+
+export function heapSort(arr: short[], startIndex: int, endIndex: int): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: short[], index1: int, index2: int, index3: int): void {
+    let swap_idx = index2
+    if ((arr[index1] < arr[index2])) {
+        if ((arr[index3] < arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: short[], startIndex: int, endIndex: int): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i)
-    }
-}
-
-function quickSortSplit(arr: short[], startIndex: int, endIndex: int): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while ((arr[i] < pivot)) {
-            i++
+        if ((arr[index3] < arr[index2])) {
+            swap_idx = index3
         }
-        while ((pivot < arr[j])) {
+    } else {
+        if (!(arr[index3] < arr[index1])) {
+            return
+        }
+        if ((arr[index2] < arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: short[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((arr[i] < pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !(arr[j] < pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!(arr[j] < pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !(arr[i] < pivot) and (arr[j] < pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if ((arr[i] < pivot)) {
+        while ((arr[++i] < pivot)) {}
+        while (!(arr[--j] < pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: short[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((pivot < arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !(pivot < arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!(pivot < arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here (pivot < arr[i]) and !(pivot < arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!(pivot < arr[++i])) {}
+        while ((pivot < arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: short[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: short[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex)
 }
-function quickSortImpl15(arr: short[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: short[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex)
 }
 
 function quickSort(arr: short[], startIndex: int, endIndex: int): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3)
 }
 
 /**
@@ -2415,147 +2802,236 @@ function bubbleSort(arr: short[], startIndex: int, endIndex: int, mustPrecede: (
         }
     }
 }
-function heapSortUp(arr: short[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: short[], startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if (mustPrecede(tmp, arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: short[], idxFromStart: int, startIndex: int, heapRoot: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if (mustPrecede(arr[startIndex + idxFromStart], arr[startIndex + p])) {
+        if (!mustPrecede(arr[startIndex + p], tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex, mustPrecede)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: short[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if (mustPrecede(arr[childIndex], arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
+}
+
+export function heapSort(arr: short[], startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i, mustPrecede)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: short[], index1: int, index2: int, index3: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
+    let swap_idx = index2
+    if (mustPrecede(arr[index1], arr[index2])) {
+        if (mustPrecede(arr[index3], arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: short[], startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1, mustPrecede)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i, mustPrecede)
-    }
-}
-
-function quickSortSplit(arr: short[], startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while (mustPrecede(arr[i], pivot)) {
-            i++
+        if (mustPrecede(arr[index3], arr[index2])) {
+            swap_idx = index3
         }
-        while (mustPrecede(pivot, arr[j])) {
+    } else {
+        if (!mustPrecede(arr[index3], arr[index1])) {
+            return
+        }
+        if (mustPrecede(arr[index2], arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: short[], startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(arr[i], pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !mustPrecede(arr[j], pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!mustPrecede(arr[j], pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !mustPrecede(arr[i], pivot) and mustPrecede(arr[j], pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if (mustPrecede(arr[i], pivot)) {
+        while (mustPrecede(arr[++i], pivot)) {}
+        while (!mustPrecede(arr[--j], pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: short[], startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(pivot, arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !mustPrecede(pivot, arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!mustPrecede(pivot, arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here mustPrecede(pivot, arr[i]) and !mustPrecede(pivot, arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!mustPrecede(pivot, arr[++i])) {}
+        while (mustPrecede(pivot, arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: short[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: short[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
-function quickSortImpl15(arr: short[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: short[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex, mustPrecede)
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
 
 function quickSort(arr: short[], startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits, mustPrecede)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3, mustPrecede)
 }
 
 /**
@@ -2662,18 +3138,22 @@ export function test_sortAllOn(arr: short[]) {
         bubbleSort(bubbled, 0, bubbled.length)
         sorts[lastSort++] = new test_SortDatashort("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length)
+        sorts[lastSort++] = new test_SortDatashort("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
         sorts[lastSort++] = new test_SortDatashort("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
         sorts[lastSort++] = new test_SortDatashort("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length)
-        sorts[lastSort++] = new test_SortDatashort("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
+        sorts[lastSort++] = new test_SortDatashort("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just)
@@ -2699,18 +3179,22 @@ export function test_sortAllOn(arr: short[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatashort("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDatashort("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatashort("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatashort("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatashort("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDatashort("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
@@ -2736,18 +3220,22 @@ export function test_sortAllOn(arr: short[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatashort("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDatashort("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatashort("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatashort("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatashort("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDatashort("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
@@ -3387,147 +3875,252 @@ function bubbleSort(arr: int[], startIndex: int, endIndex: int): void {
         }
     }
 }
-function heapSortUp(arr: int[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: int[], startIndex: int, endIndex: int): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if ((tmp < arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: int[], idxFromStart: int, startIndex: int, heapRoot: int): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if ((arr[startIndex + idxFromStart] < arr[startIndex + p])) {
+        if (!(arr[startIndex + p] < tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: int[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && (arr[startIndex + best] < arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if ((arr[childIndex] < arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && (arr[startIndex + best] < arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
+}
+
+export function heapSort(arr: int[], startIndex: int, endIndex: int): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: int[], index1: int, index2: int, index3: int): void {
+    let swap_idx = index2
+    if ((arr[index1] < arr[index2])) {
+        if ((arr[index3] < arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: int[], startIndex: int, endIndex: int): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i)
-    }
-}
-
-function quickSortSplit(arr: int[], startIndex: int, endIndex: int): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while ((arr[i] < pivot)) {
-            i++
+        if ((arr[index3] < arr[index2])) {
+            swap_idx = index3
         }
-        while ((pivot < arr[j])) {
+    } else {
+        if (!(arr[index3] < arr[index1])) {
+            return
+        }
+        if ((arr[index2] < arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: int[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((arr[i] < pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !(arr[j] < pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!(arr[j] < pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !(arr[i] < pivot) and (arr[j] < pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if ((arr[i] < pivot)) {
+        while ((arr[++i] < pivot)) {}
+        while (!(arr[--j] < pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: int[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((pivot < arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !(pivot < arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!(pivot < arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here (pivot < arr[i]) and !(pivot < arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!(pivot < arr[++i])) {}
+        while ((pivot < arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: int[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: int[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex)
 }
-function quickSortImpl15(arr: int[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: int[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex)
 }
 
 function quickSort(arr: int[], startIndex: int, endIndex: int): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3)
 }
 
 /**
@@ -3569,147 +4162,236 @@ function bubbleSort(arr: int[], startIndex: int, endIndex: int, mustPrecede: (lh
         }
     }
 }
-function heapSortUp(arr: int[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: int[], startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if (mustPrecede(tmp, arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: int[], idxFromStart: int, startIndex: int, heapRoot: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if (mustPrecede(arr[startIndex + idxFromStart], arr[startIndex + p])) {
+        if (!mustPrecede(arr[startIndex + p], tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex, mustPrecede)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: int[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if (mustPrecede(arr[childIndex], arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
+}
+
+export function heapSort(arr: int[], startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i, mustPrecede)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: int[], index1: int, index2: int, index3: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
+    let swap_idx = index2
+    if (mustPrecede(arr[index1], arr[index2])) {
+        if (mustPrecede(arr[index3], arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: int[], startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1, mustPrecede)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i, mustPrecede)
-    }
-}
-
-function quickSortSplit(arr: int[], startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while (mustPrecede(arr[i], pivot)) {
-            i++
+        if (mustPrecede(arr[index3], arr[index2])) {
+            swap_idx = index3
         }
-        while (mustPrecede(pivot, arr[j])) {
+    } else {
+        if (!mustPrecede(arr[index3], arr[index1])) {
+            return
+        }
+        if (mustPrecede(arr[index2], arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: int[], startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(arr[i], pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !mustPrecede(arr[j], pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!mustPrecede(arr[j], pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !mustPrecede(arr[i], pivot) and mustPrecede(arr[j], pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if (mustPrecede(arr[i], pivot)) {
+        while (mustPrecede(arr[++i], pivot)) {}
+        while (!mustPrecede(arr[--j], pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: int[], startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(pivot, arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !mustPrecede(pivot, arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!mustPrecede(pivot, arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here mustPrecede(pivot, arr[i]) and !mustPrecede(pivot, arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!mustPrecede(pivot, arr[++i])) {}
+        while (mustPrecede(pivot, arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: int[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: int[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
-function quickSortImpl15(arr: int[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: int[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex, mustPrecede)
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
 
 function quickSort(arr: int[], startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits, mustPrecede)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3, mustPrecede)
 }
 
 /**
@@ -3816,18 +4498,22 @@ export function test_sortAllOn(arr: int[]) {
         bubbleSort(bubbled, 0, bubbled.length)
         sorts[lastSort++] = new test_SortDataint("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length)
+        sorts[lastSort++] = new test_SortDataint("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
         sorts[lastSort++] = new test_SortDataint("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
         sorts[lastSort++] = new test_SortDataint("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length)
-        sorts[lastSort++] = new test_SortDataint("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
+        sorts[lastSort++] = new test_SortDataint("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just)
@@ -3853,18 +4539,22 @@ export function test_sortAllOn(arr: int[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDataint("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDataint("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDataint("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDataint("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDataint("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDataint("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
@@ -3890,18 +4580,22 @@ export function test_sortAllOn(arr: int[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDataint("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDataint("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDataint("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDataint("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDataint("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDataint("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
@@ -4541,147 +5235,252 @@ function bubbleSort(arr: long[], startIndex: int, endIndex: int): void {
         }
     }
 }
-function heapSortUp(arr: long[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: long[], startIndex: int, endIndex: int): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if ((tmp < arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: long[], idxFromStart: int, startIndex: int, heapRoot: int): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if ((arr[startIndex + idxFromStart] < arr[startIndex + p])) {
+        if (!(arr[startIndex + p] < tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: long[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && (arr[startIndex + best] < arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if ((arr[childIndex] < arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && (arr[startIndex + best] < arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
+}
+
+export function heapSort(arr: long[], startIndex: int, endIndex: int): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: long[], index1: int, index2: int, index3: int): void {
+    let swap_idx = index2
+    if ((arr[index1] < arr[index2])) {
+        if ((arr[index3] < arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: long[], startIndex: int, endIndex: int): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i)
-    }
-}
-
-function quickSortSplit(arr: long[], startIndex: int, endIndex: int): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while ((arr[i] < pivot)) {
-            i++
+        if ((arr[index3] < arr[index2])) {
+            swap_idx = index3
         }
-        while ((pivot < arr[j])) {
+    } else {
+        if (!(arr[index3] < arr[index1])) {
+            return
+        }
+        if ((arr[index2] < arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: long[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((arr[i] < pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !(arr[j] < pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!(arr[j] < pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !(arr[i] < pivot) and (arr[j] < pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if ((arr[i] < pivot)) {
+        while ((arr[++i] < pivot)) {}
+        while (!(arr[--j] < pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: long[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((pivot < arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !(pivot < arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!(pivot < arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here (pivot < arr[i]) and !(pivot < arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!(pivot < arr[++i])) {}
+        while ((pivot < arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: long[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: long[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex)
 }
-function quickSortImpl15(arr: long[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: long[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex)
 }
 
 function quickSort(arr: long[], startIndex: int, endIndex: int): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3)
 }
 
 /**
@@ -4723,147 +5522,236 @@ function bubbleSort(arr: long[], startIndex: int, endIndex: int, mustPrecede: (l
         }
     }
 }
-function heapSortUp(arr: long[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: long[], startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if (mustPrecede(tmp, arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: long[], idxFromStart: int, startIndex: int, heapRoot: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if (mustPrecede(arr[startIndex + idxFromStart], arr[startIndex + p])) {
+        if (!mustPrecede(arr[startIndex + p], tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex, mustPrecede)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: long[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if (mustPrecede(arr[childIndex], arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
+}
+
+export function heapSort(arr: long[], startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i, mustPrecede)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: long[], index1: int, index2: int, index3: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
+    let swap_idx = index2
+    if (mustPrecede(arr[index1], arr[index2])) {
+        if (mustPrecede(arr[index3], arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: long[], startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1, mustPrecede)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i, mustPrecede)
-    }
-}
-
-function quickSortSplit(arr: long[], startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while (mustPrecede(arr[i], pivot)) {
-            i++
+        if (mustPrecede(arr[index3], arr[index2])) {
+            swap_idx = index3
         }
-        while (mustPrecede(pivot, arr[j])) {
+    } else {
+        if (!mustPrecede(arr[index3], arr[index1])) {
+            return
+        }
+        if (mustPrecede(arr[index2], arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: long[], startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(arr[i], pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !mustPrecede(arr[j], pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!mustPrecede(arr[j], pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !mustPrecede(arr[i], pivot) and mustPrecede(arr[j], pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if (mustPrecede(arr[i], pivot)) {
+        while (mustPrecede(arr[++i], pivot)) {}
+        while (!mustPrecede(arr[--j], pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: long[], startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(pivot, arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !mustPrecede(pivot, arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!mustPrecede(pivot, arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here mustPrecede(pivot, arr[i]) and !mustPrecede(pivot, arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!mustPrecede(pivot, arr[++i])) {}
+        while (mustPrecede(pivot, arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: long[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: long[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
-function quickSortImpl15(arr: long[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: long[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex, mustPrecede)
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
 
 function quickSort(arr: long[], startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits, mustPrecede)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3, mustPrecede)
 }
 
 /**
@@ -4970,18 +5858,22 @@ export function test_sortAllOn(arr: long[]) {
         bubbleSort(bubbled, 0, bubbled.length)
         sorts[lastSort++] = new test_SortDatalong("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length)
+        sorts[lastSort++] = new test_SortDatalong("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
         sorts[lastSort++] = new test_SortDatalong("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
         sorts[lastSort++] = new test_SortDatalong("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length)
-        sorts[lastSort++] = new test_SortDatalong("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
+        sorts[lastSort++] = new test_SortDatalong("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just)
@@ -5007,18 +5899,22 @@ export function test_sortAllOn(arr: long[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatalong("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDatalong("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatalong("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatalong("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatalong("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDatalong("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
@@ -5044,18 +5940,22 @@ export function test_sortAllOn(arr: long[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatalong("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDatalong("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatalong("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatalong("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatalong("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDatalong("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
@@ -5695,147 +6595,252 @@ function bubbleSort(arr: float[], startIndex: int, endIndex: int): void {
         }
     }
 }
-function heapSortUp(arr: float[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: float[], startIndex: int, endIndex: int): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if ((tmp < arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: float[], idxFromStart: int, startIndex: int, heapRoot: int): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if ((arr[startIndex + idxFromStart] < arr[startIndex + p])) {
+        if (!(arr[startIndex + p] < tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: float[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && (arr[startIndex + best] < arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if ((arr[childIndex] < arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && (arr[startIndex + best] < arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
+}
+
+export function heapSort(arr: float[], startIndex: int, endIndex: int): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: float[], index1: int, index2: int, index3: int): void {
+    let swap_idx = index2
+    if ((arr[index1] < arr[index2])) {
+        if ((arr[index3] < arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: float[], startIndex: int, endIndex: int): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i)
-    }
-}
-
-function quickSortSplit(arr: float[], startIndex: int, endIndex: int): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while ((arr[i] < pivot)) {
-            i++
+        if ((arr[index3] < arr[index2])) {
+            swap_idx = index3
         }
-        while ((pivot < arr[j])) {
+    } else {
+        if (!(arr[index3] < arr[index1])) {
+            return
+        }
+        if ((arr[index2] < arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: float[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((arr[i] < pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !(arr[j] < pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!(arr[j] < pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !(arr[i] < pivot) and (arr[j] < pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if ((arr[i] < pivot)) {
+        while ((arr[++i] < pivot)) {}
+        while (!(arr[--j] < pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: float[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((pivot < arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !(pivot < arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!(pivot < arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here (pivot < arr[i]) and !(pivot < arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!(pivot < arr[++i])) {}
+        while ((pivot < arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: float[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: float[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex)
 }
-function quickSortImpl15(arr: float[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: float[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex)
 }
 
 function quickSort(arr: float[], startIndex: int, endIndex: int): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3)
 }
 
 /**
@@ -5877,147 +6882,236 @@ function bubbleSort(arr: float[], startIndex: int, endIndex: int, mustPrecede: (
         }
     }
 }
-function heapSortUp(arr: float[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: float[], startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if (mustPrecede(tmp, arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: float[], idxFromStart: int, startIndex: int, heapRoot: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if (mustPrecede(arr[startIndex + idxFromStart], arr[startIndex + p])) {
+        if (!mustPrecede(arr[startIndex + p], tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex, mustPrecede)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: float[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if (mustPrecede(arr[childIndex], arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
+}
+
+export function heapSort(arr: float[], startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i, mustPrecede)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: float[], index1: int, index2: int, index3: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
+    let swap_idx = index2
+    if (mustPrecede(arr[index1], arr[index2])) {
+        if (mustPrecede(arr[index3], arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: float[], startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1, mustPrecede)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i, mustPrecede)
-    }
-}
-
-function quickSortSplit(arr: float[], startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while (mustPrecede(arr[i], pivot)) {
-            i++
+        if (mustPrecede(arr[index3], arr[index2])) {
+            swap_idx = index3
         }
-        while (mustPrecede(pivot, arr[j])) {
+    } else {
+        if (!mustPrecede(arr[index3], arr[index1])) {
+            return
+        }
+        if (mustPrecede(arr[index2], arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: float[], startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(arr[i], pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !mustPrecede(arr[j], pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!mustPrecede(arr[j], pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !mustPrecede(arr[i], pivot) and mustPrecede(arr[j], pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if (mustPrecede(arr[i], pivot)) {
+        while (mustPrecede(arr[++i], pivot)) {}
+        while (!mustPrecede(arr[--j], pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: float[], startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(pivot, arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !mustPrecede(pivot, arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!mustPrecede(pivot, arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here mustPrecede(pivot, arr[i]) and !mustPrecede(pivot, arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!mustPrecede(pivot, arr[++i])) {}
+        while (mustPrecede(pivot, arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: float[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: float[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
-function quickSortImpl15(arr: float[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: float[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex, mustPrecede)
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
 
 function quickSort(arr: float[], startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits, mustPrecede)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3, mustPrecede)
 }
 
 /**
@@ -6124,18 +7218,22 @@ export function test_sortAllOn(arr: float[]) {
         bubbleSort(bubbled, 0, bubbled.length)
         sorts[lastSort++] = new test_SortDatafloat("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length)
+        sorts[lastSort++] = new test_SortDatafloat("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
         sorts[lastSort++] = new test_SortDatafloat("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
         sorts[lastSort++] = new test_SortDatafloat("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length)
-        sorts[lastSort++] = new test_SortDatafloat("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
+        sorts[lastSort++] = new test_SortDatafloat("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just)
@@ -6161,18 +7259,22 @@ export function test_sortAllOn(arr: float[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatafloat("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDatafloat("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatafloat("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatafloat("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatafloat("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDatafloat("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
@@ -6198,18 +7300,22 @@ export function test_sortAllOn(arr: float[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatafloat("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDatafloat("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatafloat("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatafloat("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatafloat("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDatafloat("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
@@ -6849,147 +7955,252 @@ function bubbleSort(arr: double[], startIndex: int, endIndex: int): void {
         }
     }
 }
-function heapSortUp(arr: double[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: double[], startIndex: int, endIndex: int): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if ((tmp < arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: double[], idxFromStart: int, startIndex: int, heapRoot: int): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if ((arr[startIndex + idxFromStart] < arr[startIndex + p])) {
+        if (!(arr[startIndex + p] < tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: double[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && (arr[startIndex + best] < arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if ((arr[childIndex] < arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && (arr[startIndex + best] < arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
+}
+
+export function heapSort(arr: double[], startIndex: int, endIndex: int): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: double[], index1: int, index2: int, index3: int): void {
+    let swap_idx = index2
+    if ((arr[index1] < arr[index2])) {
+        if ((arr[index3] < arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: double[], startIndex: int, endIndex: int): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i)
-    }
-}
-
-function quickSortSplit(arr: double[], startIndex: int, endIndex: int): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while ((arr[i] < pivot)) {
-            i++
+        if ((arr[index3] < arr[index2])) {
+            swap_idx = index3
         }
-        while ((pivot < arr[j])) {
+    } else {
+        if (!(arr[index3] < arr[index1])) {
+            return
+        }
+        if ((arr[index2] < arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: double[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((arr[i] < pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !(arr[j] < pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!(arr[j] < pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !(arr[i] < pivot) and (arr[j] < pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if ((arr[i] < pivot)) {
+        while ((arr[++i] < pivot)) {}
+        while (!(arr[--j] < pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: double[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((pivot < arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !(pivot < arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!(pivot < arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here (pivot < arr[i]) and !(pivot < arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!(pivot < arr[++i])) {}
+        while ((pivot < arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: double[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: double[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex)
 }
-function quickSortImpl15(arr: double[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: double[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex)
 }
 
 function quickSort(arr: double[], startIndex: int, endIndex: int): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3)
 }
 
 /**
@@ -7031,147 +8242,236 @@ function bubbleSort(arr: double[], startIndex: int, endIndex: int, mustPrecede: 
         }
     }
 }
-function heapSortUp(arr: double[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: double[], startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if (mustPrecede(tmp, arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: double[], idxFromStart: int, startIndex: int, heapRoot: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if (mustPrecede(arr[startIndex + idxFromStart], arr[startIndex + p])) {
+        if (!mustPrecede(arr[startIndex + p], tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex, mustPrecede)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: double[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if (mustPrecede(arr[childIndex], arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
+}
+
+export function heapSort(arr: double[], startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i, mustPrecede)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: double[], index1: int, index2: int, index3: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
+    let swap_idx = index2
+    if (mustPrecede(arr[index1], arr[index2])) {
+        if (mustPrecede(arr[index3], arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: double[], startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1, mustPrecede)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i, mustPrecede)
-    }
-}
-
-function quickSortSplit(arr: double[], startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while (mustPrecede(arr[i], pivot)) {
-            i++
+        if (mustPrecede(arr[index3], arr[index2])) {
+            swap_idx = index3
         }
-        while (mustPrecede(pivot, arr[j])) {
+    } else {
+        if (!mustPrecede(arr[index3], arr[index1])) {
+            return
+        }
+        if (mustPrecede(arr[index2], arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: double[], startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(arr[i], pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !mustPrecede(arr[j], pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!mustPrecede(arr[j], pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !mustPrecede(arr[i], pivot) and mustPrecede(arr[j], pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if (mustPrecede(arr[i], pivot)) {
+        while (mustPrecede(arr[++i], pivot)) {}
+        while (!mustPrecede(arr[--j], pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: double[], startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(pivot, arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !mustPrecede(pivot, arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!mustPrecede(pivot, arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here mustPrecede(pivot, arr[i]) and !mustPrecede(pivot, arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!mustPrecede(pivot, arr[++i])) {}
+        while (mustPrecede(pivot, arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: double[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: double[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
-function quickSortImpl15(arr: double[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: double[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex, mustPrecede)
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
 
 function quickSort(arr: double[], startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits, mustPrecede)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3, mustPrecede)
 }
 
 /**
@@ -7278,18 +8578,22 @@ export function test_sortAllOn(arr: double[]) {
         bubbleSort(bubbled, 0, bubbled.length)
         sorts[lastSort++] = new test_SortDatadouble("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length)
+        sorts[lastSort++] = new test_SortDatadouble("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
         sorts[lastSort++] = new test_SortDatadouble("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
         sorts[lastSort++] = new test_SortDatadouble("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length)
-        sorts[lastSort++] = new test_SortDatadouble("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
+        sorts[lastSort++] = new test_SortDatadouble("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just)
@@ -7315,18 +8619,22 @@ export function test_sortAllOn(arr: double[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatadouble("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDatadouble("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatadouble("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatadouble("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatadouble("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDatadouble("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
@@ -7352,18 +8660,22 @@ export function test_sortAllOn(arr: double[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatadouble("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDatadouble("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatadouble("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatadouble("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatadouble("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDatadouble("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
@@ -8003,147 +9315,252 @@ function bubbleSort(arr: char[], startIndex: int, endIndex: int): void {
         }
     }
 }
-function heapSortUp(arr: char[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: char[], startIndex: int, endIndex: int): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if ((tmp < arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while ((tmp < arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: char[], idxFromStart: int, startIndex: int, heapRoot: int): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if ((arr[startIndex + idxFromStart] < arr[startIndex + p])) {
+        if (!(arr[startIndex + p] < tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: char[], idxFromStart: int, startIndex: int, endIndex: int): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && (arr[startIndex + best] < arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if ((arr[childIndex] < arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && (arr[startIndex + best] < arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
+}
+
+export function heapSort(arr: char[], startIndex: int, endIndex: int): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: char[], index1: int, index2: int, index3: int): void {
+    let swap_idx = index2
+    if ((arr[index1] < arr[index2])) {
+        if ((arr[index3] < arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: char[], startIndex: int, endIndex: int): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i)
-    }
-}
-
-function quickSortSplit(arr: char[], startIndex: int, endIndex: int): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while ((arr[i] < pivot)) {
-            i++
+        if ((arr[index3] < arr[index2])) {
+            swap_idx = index3
         }
-        while ((pivot < arr[j])) {
+    } else {
+        if (!(arr[index3] < arr[index1])) {
+            return
+        }
+        if ((arr[index2] < arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: char[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((arr[i] < pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !(arr[j] < pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!(arr[j] < pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !(arr[i] < pivot) and (arr[j] < pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if ((arr[i] < pivot)) {
+        while ((arr[++i] < pivot)) {}
+        while (!(arr[--j] < pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: char[], startIndex: int, endIndex: int): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while ((pivot < arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !(pivot < arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!(pivot < arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here (pivot < arr[i]) and !(pivot < arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!(pivot < arr[++i])) {}
+        while ((pivot < arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: char[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: char[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex)
 }
-function quickSortImpl15(arr: char[], startIndex: int, endIndex: int, bits: int): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: char[], startIndex: int, endIndex: int, maxDepth: int): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
+        if (startIndex > 0 && !(arr[startIndex - 1] < arr[startIndex])) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array 
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
         let p = quickSortSplit(arr, startIndex, endIndex)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex)
 }
 
 function quickSort(arr: char[], startIndex: int, endIndex: int): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3)
 }
 
 /**
@@ -8185,147 +9602,236 @@ function bubbleSort(arr: char[], startIndex: int, endIndex: int, mustPrecede: (l
         }
     }
 }
-function heapSortUp(arr: char[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: char[], startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if (mustPrecede(tmp, arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: char[], idxFromStart: int, startIndex: int, heapRoot: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if (mustPrecede(arr[startIndex + idxFromStart], arr[startIndex + p])) {
+        if (!mustPrecede(arr[startIndex + p], tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex, mustPrecede)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: char[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if (mustPrecede(arr[childIndex], arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
+}
+
+export function heapSort(arr: char[], startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i, mustPrecede)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: char[], index1: int, index2: int, index3: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
+    let swap_idx = index2
+    if (mustPrecede(arr[index1], arr[index2])) {
+        if (mustPrecede(arr[index3], arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: char[], startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1, mustPrecede)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i, mustPrecede)
-    }
-}
-
-function quickSortSplit(arr: char[], startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while (mustPrecede(arr[i], pivot)) {
-            i++
+        if (mustPrecede(arr[index3], arr[index2])) {
+            swap_idx = index3
         }
-        while (mustPrecede(pivot, arr[j])) {
+    } else {
+        if (!mustPrecede(arr[index3], arr[index1])) {
+            return
+        }
+        if (mustPrecede(arr[index2], arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: char[], startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(arr[i], pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !mustPrecede(arr[j], pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!mustPrecede(arr[j], pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !mustPrecede(arr[i], pivot) and mustPrecede(arr[j], pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if (mustPrecede(arr[i], pivot)) {
+        while (mustPrecede(arr[++i], pivot)) {}
+        while (!mustPrecede(arr[--j], pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: char[], startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(pivot, arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !mustPrecede(pivot, arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!mustPrecede(pivot, arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here mustPrecede(pivot, arr[i]) and !mustPrecede(pivot, arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!mustPrecede(pivot, arr[++i])) {}
+        while (mustPrecede(pivot, arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: char[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: char[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
-function quickSortImpl15(arr: char[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: char[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex, mustPrecede)
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
 
 function quickSort(arr: char[], startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits, mustPrecede)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3, mustPrecede)
 }
 
 /**
@@ -8432,18 +9938,22 @@ export function test_sortAllOn(arr: char[]) {
         bubbleSort(bubbled, 0, bubbled.length)
         sorts[lastSort++] = new test_SortDatachar("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length)
+        sorts[lastSort++] = new test_SortDatachar("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length)
         sorts[lastSort++] = new test_SortDatachar("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
         sorts[lastSort++] = new test_SortDatachar("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length)
-        sorts[lastSort++] = new test_SortDatachar("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
+        sorts[lastSort++] = new test_SortDatachar("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just)
@@ -8469,18 +9979,22 @@ export function test_sortAllOn(arr: char[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatachar("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDatachar("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatachar("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
         sorts[lastSort++] = new test_SortDatachar("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpFwd)
-        sorts[lastSort++] = new test_SortDatachar("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        sorts[lastSort++] = new test_SortDatachar("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpFwd)
@@ -8506,18 +10020,22 @@ export function test_sortAllOn(arr: char[]) {
         bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatachar("bubble", bubbled)
 
+        const insertion = test_sortCopy(arr)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDatachar("insertion", insertion)
+
         
         const heaped = test_sortCopy(arr)
         heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatachar("heap", heaped)
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl1(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
         sorts[lastSort++] = new test_SortDatachar("quick", quicked)
 
-        const quickedBuble = test_sortCopy(arr)
-        quickSortImpl15(quickedBuble, 0, quickedBuble.length, quickedBuble.length, test_sortAllOnCmpInv)
-        sorts[lastSort++] = new test_SortDatachar("quick with bubble", quickedBuble)
+        const quickedInsertion = test_sortCopy(arr)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        sorts[lastSort++] = new test_SortDatachar("quick with insertion", quickedInsertion)
 
         const just = test_sortCopy(arr)
         sort(just, test_sortAllOnCmpInv)
@@ -9157,147 +10675,236 @@ function bubbleSort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: 
         }
     }
 }
-function heapSortUp(arr: Object[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
-    while (idxFromStart != 0) {
+
+function insertionSort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+    if (startIndex != 0) {
+        // arr[startIndex - 1] exists and is less than or equal to all elements in range
+        for (let i = startIndex + 1; i < endIndex; i++) {
+            const tmp = arr[i]
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+        return
+    }
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if (mustPrecede(tmp, arr[startIndex])) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while (mustPrecede(tmp, arr[pos - 1])) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+function heapSortUp(arr: Object[], idxFromStart: int, startIndex: int, heapRoot: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+    const tmp = arr[startIndex + idxFromStart]
+    while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if (mustPrecede(arr[startIndex + idxFromStart], arr[startIndex + p])) {
+        if (!mustPrecede(arr[startIndex + p], tmp)) {
             break
         }
-        const tmp = arr[startIndex + idxFromStart]
         arr[startIndex + idxFromStart] = arr[startIndex + p]
-        arr[startIndex + p] = tmp
         idxFromStart = p
     }
-    heapSortDown(arr, idxFromStart, startIndex, endIndex, mustPrecede)
+    arr[startIndex + idxFromStart] = tmp
 }
 
+// Build max heap with root in startIndex given its children are roots of valid heaps
 function heapSortDown(arr: Object[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
-    while (true) {
-        const l = idxFromStart * 2 + 1
-        const r = idxFromStart * 2 + 2
-        let best = idxFromStart
-        if (startIndex + l < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + l])) {
-            best = l
+    let heapRoot = startIndex + idxFromStart
+    let arrIndex = heapRoot
+    let childIndex = startIndex + idxFromStart * 2 + 1
+    const tmp = arr[arrIndex]
+    // Walk heap to bottom and pull max child up on each level
+    while (childIndex + 1 < endIndex) {
+        if (mustPrecede(arr[childIndex], arr[childIndex + 1])) {
+            childIndex++
         }
-        if (startIndex + r < endIndex && mustPrecede(arr[startIndex + best], arr[startIndex + r])) {
-            best = r
-        }
-        if (best == idxFromStart) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+        childIndex = childIndex * 2 - startIndex + 1
+    }
+    if (childIndex < endIndex) {
+        arr[arrIndex] = arr[childIndex]
+        arrIndex = childIndex
+    }
+    arr[arrIndex] = tmp
+    // Now heap is valid in all positions but arrIndex
+    heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
+}
+
+export function heapSort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+    let len = endIndex - startIndex
+    for (let i = len / 2 - 1; i >= 0; i--) {
+        heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
+    }
+
+    for (let i = endIndex - 1; i > startIndex; i--) {
+        // move max element to the end of range
+        const tmp = arr[i]
+        arr[i] = arr[startIndex]
+        arr[startIndex] = tmp
+        heapSortDown(arr, 0, startIndex, i, mustPrecede)
+    }
+}
+
+// Put median of three array elements to arr[index1]
+function median3(arr: Object[], index1: int, index2: int, index3: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+    let swap_idx = index2
+    if (mustPrecede(arr[index1], arr[index2])) {
+        if (mustPrecede(arr[index3], arr[index1])) {
             return
         }
-        const tmp = arr[startIndex + idxFromStart]
-        arr[startIndex + idxFromStart] = arr[startIndex + best]
-        arr[startIndex + best] = tmp
-        idxFromStart = best
-    }
-}
-
-function heapSort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
-    let len = endIndex - startIndex
-    for (let i = 1; i < len; i++) {
-        heapSortUp(arr, i, startIndex, startIndex + i + 1, mustPrecede)
-    }
-    for (let i = len - 1; i >= 0; i--) {
-        const tmp = arr[startIndex + i]
-        arr[startIndex + i] = arr[startIndex]
-        arr[startIndex] = tmp
-        heapSortDown(arr, 0, startIndex, startIndex + i, mustPrecede)
-    }
-}
-
-function quickSortSplit(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): int {
-    const pivot = arr[startIndex + (endIndex - startIndex) / 2]
-    let i = startIndex
-    let j = endIndex - 1
-    while (i < j) {
-        while (mustPrecede(arr[i], pivot)) {
-            i++
+        if (mustPrecede(arr[index3], arr[index2])) {
+            swap_idx = index3
         }
-        while (mustPrecede(pivot, arr[j])) {
+    } else {
+        if (!mustPrecede(arr[index3], arr[index1])) {
+            return
+        }
+        if (mustPrecede(arr[index2], arr[index3])) {
+            swap_idx = index3
+        }
+    }
+    let tmp = arr[index1]
+    arr[index1] = arr[swap_idx]
+    arr[swap_idx] = tmp
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the right
+function quickSortSplit(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(arr[i], pivot)) {
+        i++
+    }
+    if (i == startIndex + 1) {
+        while (i < j && !mustPrecede(arr[j], pivot)) {
             j--
         }
-        if (i >= j) {
-            break
+    } else {
+        while (!mustPrecede(arr[j], pivot)) {
+            j--
         }
+    }
+    while (i < j) {
+        // Here !mustPrecede(arr[i], pivot) and mustPrecede(arr[j], pivot) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        // we must not leave pivot outside of [i, j] range
-        if (mustPrecede(arr[i], pivot)) {
+        while (mustPrecede(arr[++i], pivot)) {}
+        while (!mustPrecede(arr[--j], pivot)) {}
+    }
+    let pivotIndex = i - 1
+    arr[startIndex] = arr[pivotIndex]
+    arr[pivotIndex] = pivot
+
+    return pivotIndex
+}
+
+// Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
+// Elements equal to pivot go to the left
+function quickSortSplitLeft(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): int {
+    const pivot = arr[startIndex]
+    let i = startIndex + 1
+    let j = endIndex - 1
+    // No bounds check because pivot is median of three elements
+    while (mustPrecede(pivot, arr[j])) {
+        j--
+    }
+    if (j + 1 == endIndex) {
+        while (i < j && !mustPrecede(pivot, arr[i])) {
             i++
-        } else { // arr[i] == pivot
-            j--
+        }
+    } else {
+        while (!mustPrecede(pivot, arr[i])) {
+            i++
         }
     }
+    while (i < j) {
+        // Here mustPrecede(pivot, arr[i]) and !mustPrecede(pivot, arr[j]) holds
+        let tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+        while (!mustPrecede(pivot, arr[++i])) {}
+        while (mustPrecede(pivot, arr[--j])) {}
+    }
+    arr[startIndex] = arr[j]
+    arr[j] = pivot
 
     return j
 }
 
 
-function quickSortImpl1(arr: Object[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 1) {
-        if (iter++ > bits1) {
+function quickSortImpl3(arr: Object[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+    while (endIndex - startIndex > 3) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl1(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl1(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
-function quickSortImpl15(arr: Object[], startIndex: int, endIndex: int, bits: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
-    const bits1 = bits * 3
-
-    let iter = 0
-    while (endIndex - startIndex > 15) {
-        if (iter++ > bits1) {
+function quickSortImpl40(arr: Object[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+    while (endIndex - startIndex > 40) {
+        if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
             return
         }
 
+        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
         let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
+        // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl15(arr, startIndex, p, bits - 1, mustPrecede)
-            startIndex = p
+            quickSortImpl40(arr, startIndex, p, maxDepth, mustPrecede)
+            startIndex = p + 1
         } else {
-            quickSortImpl15(arr, p, endIndex, bits - 1, mustPrecede)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, mustPrecede)
             endIndex = p
         }
     }
-    bubbleSort(arr, startIndex, endIndex, mustPrecede)
+    insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
 
 function quickSort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
     let size = endIndex - startIndex
-    if (size == 0) {
+    if (size <= 1) {
         return
     }
     // find log of length to fall back into determenistic O(n logn) sort
-    size -= 1
-    size |= size >> 1
-    size |= size >> 2
-    size |= size >> 4
-    size |= size >> 8
-    size |= size >> 16
-    size += 1
-    let bits = -1
-    for (let i = 0; i < 31; i++) {
-        if ((size & 1 << i) != 0) {
+    let bits = 32
+    for (let i = 2; i < 31; i++) {
+        if ((size >> i) == 0) {
             bits = i
             break
         }
     }
-    assert bits != -1
-    quickSortImpl15(arr, startIndex, endIndex, bits, mustPrecede)
+    quickSortImpl40(arr, startIndex, endIndex, bits * 3, mustPrecede)
 }
 
 /**

@@ -104,8 +104,6 @@ public:
     {
     }
 
-#include "unimplemented_handlers-inl.h"
-
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleNop()
     {
@@ -2392,19 +2390,6 @@ public:
         LOG_INST() << "return.void";
     }
 
-    template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void DoReturnDyn()
-    {
-        this->GetFrame()->SetAcc((this->GetAcc()));
-    }
-
-    template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleReturnDyn()
-    {
-        LOG_INST() << "return.dyn";
-        DoReturnDyn<FORMAT>();
-    }
-
     NO_UB_SANITIZE ALWAYS_INLINE void HandleReturnStackless()
     {
         Frame *frame = this->GetFrame();
@@ -2676,32 +2661,6 @@ public:
         } else {
             this->MoveToExceptionHandler();
         }
-    }
-
-    template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleCalliDynRange()
-    {
-        auto actual_num_args = static_cast<uint16_t>(this->GetInst().template GetImm<FORMAT, 0>());
-        auto first_arg_reg_idx = static_cast<uint16_t>(this->GetInst().template GetVReg<FORMAT, 0>());
-
-        LOG_INST() << "calli.dyn.range " << actual_num_args << ", v" << first_arg_reg_idx;
-
-        auto vreg = this->GetFrameHandler().GetVReg(first_arg_reg_idx);
-
-        if (!vreg.HasObject()) {
-            RuntimeInterface::ThrowTypedErrorDyn("is not object");
-            this->MoveToExceptionHandler();
-            return;
-        }
-        auto obj = reinterpret_cast<ObjectHeader *>(vreg.GetLong());
-        auto ctx = this->GetThread()->GetLanguageContext();
-        if (!ctx.IsCallableObject(obj)) {
-            RuntimeInterface::ThrowTypedErrorDyn("is not callable");
-            this->MoveToExceptionHandler();
-            return;
-        }
-
-        HandleCall<FrameHelperDefault, FORMAT, true, true>(ctx.GetCallTarget(obj));
     }
 
     template <BytecodeInstruction::Format FORMAT>

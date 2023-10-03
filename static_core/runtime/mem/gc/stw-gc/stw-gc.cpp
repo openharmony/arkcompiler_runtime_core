@@ -51,18 +51,7 @@ void StwGC<LanguageConfig>::InitializeImpl()
     auto barrier_set = allocator->New<GCDummyBarrierSet>(allocator);
     ASSERT(barrier_set != nullptr);
     this->SetGCBarrierSet(barrier_set);
-    if (this->IsWorkerThreadsExist()) {
-        GCWorkersTaskPool *gc_task_pool = nullptr;
-        if (this->GetSettings()->UseThreadPoolForGCWorkers()) {
-            // Use internal gc thread pool
-            gc_task_pool = allocator->New<GCWorkersThreadPool>(this, this->GetSettings()->GCWorkersCount());
-        } else {
-            // Use common TaskManager
-            gc_task_pool = allocator->New<GCWorkersTaskQueue>(this);
-        }
-        ASSERT(gc_task_pool != nullptr);
-        this->SetWorkersPool(gc_task_pool);
-    }
+    this->CreateWorkersTaskPool();
     LOG_DEBUG_GC << "STW GC Initialized";
 }
 
@@ -127,7 +116,7 @@ void StwGC<LanguageConfig>::Mark(const GCTask &task)
     MarkStack(&objects_stack);
     ASSERT(objects_stack.Empty());
     if (use_gc_workers) {
-        this->GetWorkersPool()->WaitUntilTasksEnd();
+        this->GetWorkersTaskPool()->WaitUntilTasksEnd();
     }
     auto ref_clear_pred = [this]([[maybe_unused]] const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
     // NOLINTNEXTLINE(performance-unnecessary-value-param)

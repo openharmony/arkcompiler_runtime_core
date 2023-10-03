@@ -1870,10 +1870,19 @@ public:
         }
 
         if (is_volatile != field->IsVolatile()) {
-            SHOW_MSG(ExpectedVolatileOrInstanceField)
-            LOG_VERIFIER_EXPECTED_VOLATILE_OR_INSTANCE_FIELD(is_volatile);
+            // if the inst is volatile but the field is not
+            if (is_volatile) {
+                SHOW_MSG(ExpectedVolatileField)
+                LOG_VERIFIER_EXPECTED_VOLATILE_FIELD();
+                END_SHOW_MSG();
+                SET_STATUS_FOR_MSG(ExpectedVolatileField, WARNING);
+                return false;
+            }
+            // if the instruction is not volatile but the field is
+            SHOW_MSG(ExpectedInstanceField)
+            LOG_VERIFIER_EXPECTED_INSTANCE_FIELD();
             END_SHOW_MSG();
-            SET_STATUS_FOR_MSG(ExpectedVolatileOrInstanceField, WARNING);
+            SET_STATUS_FOR_MSG(ExpectedInstanceField, ERROR);
             return false;
         }
 

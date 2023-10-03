@@ -1,9 +1,0 @@
-Object
-================
-
-Construction
-------------
-
-Signature:
-
-* constructor()

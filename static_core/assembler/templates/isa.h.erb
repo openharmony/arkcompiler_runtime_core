@@ -12,6 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef _PANDA_ASSEMBLY_ISA_H
+#define _PANDA_ASSEMBLY_ISA_H
+
+ constexpr size_t MAX_NUMBER_OF_SRC_REGS = <%= max_number_of_src_regs %>;
+
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define PANDA_INSTRUCTION_LIST(_)  \
 % Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
@@ -58,3 +64,4 @@ _(<%= insn.asm_token %>, "<%= insn.mnemonic %>", <%= pretty_format %>, <%= max_w
 _(<%= insn.opcode %> , "<%= insn.opcode %>", NONE, 0, (<%= insn.flags.join(" | ") %>), <%= insn.dst_idx %>, <%= use_idxs %>, 0)  \
 % end
 
+#endif  // !_PANDA_ASSEMBLY_ISA_H

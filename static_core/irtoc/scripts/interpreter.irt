@@ -132,11 +132,6 @@ macro(:u32toword) do |arg|
   end
 end
 
-macro(:nullptr) do
-  src_type = Options.arch_64_bits? ? 'DataType::INT64' : 'DataType::INT32'
-  Bitcast(0).SrcType(src_type).ptr
-end
-
 macro(:bitcast_to_ref) do |value|
   set_no_hoist_flag(Bitcast(value).SrcType(Constants::REF_UINT).ref)
 end
@@ -2036,7 +2031,7 @@ end
   end
 end
 
-[:handle_return, :handle_return_64, :handle_return_obj, :handle_return_dyn].each do |handler|
+[:handle_return, :handle_return_64, :handle_return_obj].each do |handler|
   macro(handler) do
     generic_return(lambda { |prev_frame, _| copy_acc(acc_ptr_frame(prev_frame)) })
   end
@@ -2874,9 +2869,6 @@ Panda.instructions.each do |i|
       acc := i32toany(as_imm(op[0]).i32)
     when "FLDAI_DYN_IMM64"
       acc := f64toany(as_imm(op[0]).f64)
-    when "RETURN_DYN"
-      handle_return_dyn()
-
     # throw
     when "THROW_V8"
       handle_throw(vreg_value(op[0]).ref)

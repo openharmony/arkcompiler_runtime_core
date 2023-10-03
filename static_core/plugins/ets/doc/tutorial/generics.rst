@@ -20,7 +20,7 @@ type definition, like the type parameter ``Element`` in the following example:
         public pop(): Element {
             // ...
         }
-        public push(e: Element): void {
+        public push(e: Element) {
             // ...
         }
     }
@@ -38,14 +38,15 @@ See the example below:
 .. code-block:: typescript
 
     let s = new Stack<string>
-    s.push(55) // That will be a compile-time error
+    s.push(55) /* That will be a compile-time error as 55 is not compatible
+      with type string */
 
 |
 
 Generic Constraints
 -------------------
 
-Type parameters of generic types can be bounded. For example, the ``Key``
+Type parameters of generic types can have constraints. For example, the ``Key``
 type parameter in the ``HashMap<Key, Value>`` container must have a hash
 method (i.e., it must be hashable).
 

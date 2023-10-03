@@ -24,18 +24,17 @@ class FooClass {
     public name: String;
 };
 
-// TODO(vpukhov): add generic Array, console.log
-function FooFunction(arr: Array): String {
+// TODO(vpukhov): add console.log
+function FooFunction(arr: Array<FooClass>): String {
     console.println("FooFunction: check instanceof Array: " +
         ((arr as Object) instanceof Array));
-    console.println("FooFunction: " + (arr.at(0) as FooClass).name);
+    console.println("FooFunction: " + (arr.at(0)! as Object as FooClass).name);
     console.println("FooFunction: " + arr.at(1));
     return "FooFunction: " + arr;
 }
 
-// TODO(vpukhov): add generic
-function BarFunction(): Array {
-    let arr = new Array();
+function BarFunction(): Array<FooClass> {
+    let arr = new Array<FooClass>();
     arr.push(new FooClass("three"));
     arr.push(new FooClass("four"));
     arr.push(new FooClass("five"));

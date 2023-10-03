@@ -1169,6 +1169,7 @@ intrinsics:
       ret: i64
       args: [f64]
     impl: panda::ets::intrinsics::StdCoreDoubleBitCastToLong
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdDoubleIsInteger
     space: ets
@@ -1534,36 +1535,6 @@ intrinsics:
       args: [ i32 ]
     impl: panda::ets::intrinsics::SharedMemoryCreate
 
-  - name: SharedMemoryAt
-    space: ets
-    class_name: escompat.SharedMemory
-    method_name: at
-    static: false
-    signature:
-      ret: i8
-      args: [ i32 ]
-    impl: panda::ets::intrinsics::SharedMemoryAt
-
-  - name: SharedMemorySet
-    space: ets
-    class_name: escompat.SharedMemory
-    method_name: set
-    static: false
-    signature:
-      ret: std.core.void
-      args: [ i32, i8 ]
-    impl: panda::ets::intrinsics::SharedMemorySet
-
-  - name: SharedMemoryGetByteLength
-    space: ets
-    class_name: escompat.SharedMemory
-    method_name: getByteLength
-    static: false
-    signature:
-      ret: i32
-      args: [ ]
-    impl: panda::ets::intrinsics::SharedMemoryGetByteLength
-
   - name: SharedMemoryAddI8
     space: ets
     class_name: escompat.SharedMemory
@@ -1664,6 +1635,16 @@ intrinsics:
       args: [ i32, i32 ]
     impl: panda::ets::intrinsics::SharedMemoryWaitI32
 
+  - name: SharedMemoryWaitI64
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicWaitI64
+    static: false
+    signature:
+      ret: i32
+      args: [ i32, i64 ]
+    impl: panda::ets::intrinsics::SharedMemoryWaitI64
+
   - name: SharedMemoryTimedWaitI32
     space: ets
     class_name: escompat.SharedMemory
@@ -1673,6 +1654,16 @@ intrinsics:
       ret: i32
       args: [ i32, i32, i64 ]
     impl: panda::ets::intrinsics::SharedMemoryTimedWaitI32
+
+  - name: SharedMemoryTimedWaitI64
+    space: ets
+    class_name: escompat.SharedMemory
+    method_name: atomicTimedWaitI64
+    static: false
+    signature:
+      ret: i32
+      args: [ i32, i64, i64 ]
+    impl: panda::ets::intrinsics::SharedMemoryTimedWaitI64
 
   - name: SharedMemoryNotify
     space: ets

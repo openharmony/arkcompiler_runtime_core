@@ -15,17 +15,16 @@ function main(): int {
 
 
 function testCreateFromString(): int {
-                        
     let src: String = "Hello World";
-    let test: Array = Array.from(src);
+    let test: Array<String> = Array.from(src);
     if(test.length() != src.length()) {
         console.println("Array size mismatch");
         return 1;
     }
+
     for(let i: int = 0; i < src.length(); i++) {
         let cc: char = src.charAt(i);
-        let tmp: String = test.at(i) as String;
-        let ac: char = tmp.charAt(0);
+        let ac: char = (test.idx(i) as Object as String).charAt(0);
         if(ac == cc) continue;
         console.println("Array data mismatch");
         return 1;
@@ -35,15 +34,16 @@ function testCreateFromString(): int {
 
 function testCreateFromString1(): int {
     let src: String = "HELLO";
-    let test: Array = Array.from(src, (k: int, item: Object) => { return  (item as String).toLowerCase(); });
+
+    let test: Array<String> = Array.from<String>(src, (item: String, k: int): String => { return item.toLowerCase(); });
     if(test.length() != src.length()) {
         console.println("Array size mismatch");
         return 1;
     }
     let exp: String = "hello";
 
-    for(let i: int = 0; i < exp.length(); i++) {
-        let tmp: String = test.at(i) as String;
+    for (let i: int = 0; i < exp.length(); i++) {
+        let tmp: String = test.idx(i) as Object as String; // <- verifier fails otherwise
         let ac: char = tmp.charAt(0);
         let cc: char = exp.charAt(i);
 
@@ -56,13 +56,13 @@ function testCreateFromString1(): int {
 
 function testCreateFromString2(): int {
     let src: String = "Hello";
-    let test: Array = Array.from(src, (k: int, v: Object) => { return k; });
+    let test: Array<Int> = Array.from<Int>(src, (v: String, k: int): Int => { return k as Int; });
     if(test.length() != src.length()) {
         console.println("Array size mismatch");
         return 1;
     }
     for(let i: int = 0; i < src.length(); i++) {
-        let av: Int = test.at(i) as Int;
+        let av: Int = test.idx(i) as Object as Int; // <- verifier fails otherwise
         if(av == i) continue;
         console.println("Array data mismatch");
         return 1;
@@ -74,16 +74,15 @@ function testCreateFromString2(): int {
 function testFiltered(): int {
     let src: String = "HHeelllloo";
     let exp: String = "Hello";
-    let test: Array = Array.from(src).filter((k: int, v: Object) => { return k%2 == 0 });
+    let test: Array<String> = Array.from(src).filter((v: String, k: int): boolean => { return k%2 == 0 });
 
     if(test.length() != exp.length()) {
         console.println("Array size mismatch");
         return 1;
     }
-    
+
     for(let i: int = 0; i < exp.length(); i++) {
-        let tmp: String = test.at(i) as String;
-        let ac: char = tmp.charAt(0);
+        let ac: char = (test.idx(i) as Object as String).charAt(0);
         let cc: char = exp.charAt(i);
 
         if(ac == cc) continue;

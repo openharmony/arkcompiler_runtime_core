@@ -308,11 +308,11 @@ template("ark_asm_gen") {
 template("es2panda_gen") {
   action(target_name) {
     es2panda_root_out = get_label_info(
-            "$ark_root/plugins/ecmascript/es2panda/aot:es2panda(${host_toolchain})",
+            "$ark_es2panda_root/aot:es2panda(${host_toolchain})",
             "root_out_dir")
     script = es2panda_root_out + "/bin/es2panda"
     deps = [
-      "$ark_root/plugins/ecmascript/es2panda/aot:es2panda(${host_toolchain})",
+      "$ark_es2panda_root/aot:es2panda(${host_toolchain})",
     ]
 
     inputs = invoker.inputs

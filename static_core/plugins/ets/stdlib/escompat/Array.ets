@@ -18,21 +18,32 @@ package escompat;
 /**
  * Represents JS API-compatible Array
  */
-export final class Array {
-    private data: Object[];
+export final class Array<T> {
+    internal data: T[]; // TODO: make private
 
     /**
      * Creates a new empty instance of Array
      */
     public constructor() {
-        this.data = new Object[0];
+        this.data = new T[0];
+    }
+
+    private static objEquals<Y>(a: Y | null, b: Y | null): boolean {
+        if (a == null) {
+            return b == null
+        }
+        if (b == null) {
+            return false
+        }
+        // TODO: is a.equals(null) a valid code? in some language it is
+        return a.equals(b as Y)
     }
 
     /**
      * Helper function copying array elements from given primitive `Object[]` array.
      */
-    private initFromArray(d: Object[]): void {
-        this.data = new Object[d.length];
+    private initFromArray(d: T[]): void {
+        this.data = new T[d.length];
 
         for (let k: int = 0; k < d.length; k++) {
             this.data[k] = d[k];
@@ -44,7 +55,7 @@ export final class Array {
      *
      * @param d Array initializer
      */
-    public constructor(d: Object[]) {
+    public constructor(d: T[]) {
         this.initFromArray(d);
     }
 
@@ -59,7 +70,22 @@ export final class Array {
      * @returns The element in the array matching the given index.
      * Returns null if `index` < `-length()` or `index` >= `length()`.
      */
-    public at(index: int): Object | null {
+    public at(index: number): T | null {
+        return this.at(index as int)
+    }
+
+    /**
+     * Takes an integer value and returns the item at that index,
+     * allowing for positive and negative integers. Negative integers count back
+     * from the last item in the array.
+     *
+     * @param index Zero-based index of the array element to be returned.
+     * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
+     *
+     * @returns The element in the array matching the given index.
+     * Returns null if `index` < `-length()` or `index` >= `length()`.
+     */
+    public at(index: int): T | null {
         let len = this.data.length;
         let k: int;
         if (index >= 0) {
@@ -73,6 +99,15 @@ export final class Array {
         }
 
         return this.data[k];
+    }
+
+    // TODO: remove this method as it is not from common subset, but allows to omit checks
+    // it should be called []
+    public idx(index: int): T {
+        if (index < 0 || index >= this.length()) {
+            throw new RangeError("Out of bounds")
+        }
+        return this.data[index]
     }
 
     /**
@@ -91,10 +126,10 @@ export final class Array {
      *
      * @returns Primitive array of `Object`s, constructed from `this` and given `other` instances of `Array` class.
      */
-    private concatArray(other: Array): Object[] {
+    private concatArray(other: Array<T>): T[] {
         assert other != null : "Can't concat with null Array";
 
-        let res = new Object[this.data.length + other.data.length];
+        let res = new T[this.data.length + other.data.length];
         let idx = 0;
 
         for (let i = 0; i < this.data.length; i++) {
@@ -116,12 +151,12 @@ export final class Array {
      *
      * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
      */
-    public concat(other: Array): Array {
+    public concat(other: Array<T>): Array<T> {
         if (other == null) {
             return this;
         }
         let res = this.concatArray(other);
-        return new Array(res);
+        return new Array<T>(res);
     }
 
     /**
@@ -135,7 +170,22 @@ export final class Array {
      *
      * @returns this array after transformation
      */
-    public copyWithin(target: int, start: int, end: int): Array {
+    public copyWithin(target: number, start: number, end: number): Array<T> {
+        return this.copyWithin(target as int, start as int, end as int);
+    }
+
+    /**
+     * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+     *
+     * @param target index at which to copy the sequence
+     *
+     * @param start index at which to start copying elements from
+     *
+     * @param end index at which to end copying elements from
+     *
+     * @returns this array after transformation
+     */
+    public copyWithin(target: int, start: int, end: int): Array<T> {
         if (target >= this.data.length || start >= this.data.length) {
             return this;
         }
@@ -194,7 +244,20 @@ export final class Array {
      *
      * @returns this array after transformation
      */
-    public copyWithin(target: int, start: int): Array {
+    public copyWithin(target: number, start: number): Array<T> {
+        return this.copyWithin(target as int, start as int)
+    }
+
+    /**
+     * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+     *
+     * @param target index at which to copy the sequence
+     *
+     * @param start index at which to start copying elements from
+     *
+     * @returns this array after transformation
+     */
+    public copyWithin(target: int, start: int): Array<T> {
         return this.copyWithin(target, start, this.data.length);
     }
 
@@ -205,7 +268,18 @@ export final class Array {
      *
      * @returns this array after transformation
      */
-    public copyWithin(target: int): Array {
+    public copyWithin(target: number): Array<T> {
+        return this.copyWithin(target as int)
+    }
+
+    /**
+     * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+     *
+     * @param target index at which to copy the sequence
+     *
+     * @returns this array after transformation
+     */
+    public copyWithin(target: int): Array<T> {
         return this.copyWithin(target, 0, this.data.length);
     }
 
@@ -220,7 +294,22 @@ export final class Array {
      *
      * @returns this array after transformation
      */
-    public fill(value: Object, start: int, end: int): Array {
+    public fill(value: T, start: number, end: number): Array<T> {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Changes all elements in the Array to a static value, from a start index to an end index
+     *
+     * @param value to fill the array with
+     *
+     * @param start index at which to start filling
+     *
+     * @param end index at which to end filling, but not including
+     *
+     * @returns this array after transformation
+     */
+    public fill(value: T, start: int, end: int): Array<T> {
         if (start >= this.data.length) {
             return this;
         }
@@ -263,7 +352,7 @@ export final class Array {
      *
      * @returns this array after transformation
      */
-    public fill(value: Object): Array {
+    public fill(value: T): Array<T> {
         return this.fill(value, 0, this.data.length);
     }
 
@@ -274,7 +363,7 @@ export final class Array {
      *
      * @returns found element or null otherwise
      */
-    public find(fn: (elem: Object) => boolean): Object | null {
+    public find(fn: (elem: T) => boolean): T | null {
         for (let i = 0; i < this.data.length; i++) {
             if (fn(this.data[i])) {
                 return this.data[i];
@@ -292,7 +381,7 @@ export final class Array {
      *
      * @returns found element or null otherwise
      */
-    public static find(fn: (elem: Object) => boolean, thisArg: Array): Object | null {
+    public static find<T>(fn: (elem: T) => boolean, thisArg: Array<T>): T | null {
         for (let i = 0; i < thisArg.data.length; i++) {
             if (fn(thisArg.data[i])) {
                 return thisArg.data[i];
@@ -308,7 +397,7 @@ export final class Array {
      *
      * @returns found element index or -1 otherwise
      */
-    public findIndex(fn: (elem: Object) => boolean): int {
+    public findIndex(fn: (elem: T) => boolean): int {
         for (let i = 0; i < this.data.length; i++) {
             if (fn(this.data[i])) {
                 return i;
@@ -326,7 +415,7 @@ export final class Array {
      *
      * @returns found element index or -1 otherwise
      */
-    public static findIndex(fn: (elem: Object) => boolean, thisArg: Array): int {
+    public static findIndex<T>(fn: (elem: T) => boolean, thisArg: Array<T>): int {
         for (let i = 0; i < thisArg.data.length; i++) {
             if (fn(thisArg.data[i])) {
                 return i;
@@ -343,7 +432,7 @@ export final class Array {
      *
      * @returns found element or null otherwise
      */
-    public findLast(fn: (elem: Object) => boolean): Object | null {
+    public findLast(fn: (elem: T) => boolean): T | null {
         for (let i = this.data.length - 1; i >= 0; i--) {
             if (fn(this.data[i])) {
                 return this.data[i];
@@ -362,7 +451,7 @@ export final class Array {
      *
      * @returns found element or null otherwise
      */
-    public static findLast(fn: (elem: Object) => boolean, thisArg: Array): Object | null {
+    public static findLast<T>(fn: (elem: T) => boolean, thisArg: Array<T>): T | null {
         for (let i = thisArg.data.length - 1; i >= 0; i--) {
             if (fn(thisArg.data[i])) {
                 return thisArg.data[i];
@@ -380,12 +469,12 @@ export final class Array {
      *
      * @returns a new instance of an Array
      */
-    public static fromAsync(arrLike: Object[], mapFn: (a: Object, i: int) => Object): Array {
-        let mappedArr: Object[] = new Object[arrLike.length]
+    public static fromAsync<T, U>(arrLike: T[], mapFn: (a: T, i: number) => U): Array<U> {
+        let mappedArr: U[] = new U[arrLike.length]
         for (let i = 0; i < arrLike.length; ++i) {
             mappedArr[i] = mapFn(arrLike[i], i)
         }
-        return new Array(arrLike)
+        return new Array<U>(mappedArr)
     }
 
     /**
@@ -397,9 +486,26 @@ export final class Array {
      *
      * @returns a new instance of an Array
      */
-    public static fromAsync(arrLike: Object[], mapFn: (a: Object) => Object): Array {
-        let noIndexLambda: (a: Object, i: int) => Object = (a: Object, i: int): Object => {return mapFn(a)}
-        return Array.fromAsync(arrLike, noIndexLambda)
+    public static fromAsync<T, U>(arrLike: T[], mapFn: (a: T, i: int) => U): Array<U> {
+        let mappedArr: U[] = new U[arrLike.length]
+        for (let i = 0; i < arrLike.length; ++i) {
+            mappedArr[i] = mapFn(arrLike[i], i)
+        }
+        return new Array<U>(mappedArr)
+    }
+
+    /**
+     * Creates a new Array from array-like or iterable
+     *
+     * @param arrLike array-like or an iterable object
+     *
+     * @param mapFn a function to apply over all elements of arrLike
+     *
+     * @returns a new instance of an Array
+     */
+    public static fromAsync<T, U>(arrLike: T[], mapFn: (a: T) => U): Array<U> {
+        let noIndexLambda: (a: T, i: int) => U = (a: T, i: int): U => { return mapFn(a) }
+        return Array.fromAsync<T, U>(arrLike, noIndexLambda)
     }
 
     /**
@@ -409,9 +515,9 @@ export final class Array {
      *
      * @returns new instance of an Array
      */
-    public static fromAsync(arrLike: Object[]): Array {
-        let idLambda: (a: Object, i: int) => Object = (a: Object, i: int): Object => {return a}
-        return Array.fromAsync(arrLike, idLambda)
+    public static fromAsync<T>(arrLike: T[]): Array<T> {
+        let idLambda: (a: T, i: int) => T = (a: T, i: int): T => { return a }
+        return Array.fromAsync<T, T>(arrLike, idLambda)
     }
 
     /**
@@ -485,10 +591,10 @@ export final class Array {
      *
      * @returns Primitive array of `Object`s, constructed from `this` and given function.
      */
-    private mapArray(fn: (k: int, v: Object) => Object): Object[] {
-        let res = new Object[this.data.length];
+    private mapArray<U>(fn: (v: T, k: number) => U): U[] {
+        let res = new U[this.data.length];
         for (let i = 0; i < this.data.length; i++) {
-            res[i] = fn(i, this.data[i]);
+            res[i] = fn(this.data[i], i);
         }
         return res;
     }
@@ -501,8 +607,24 @@ export final class Array {
      *
      * @returns Primitive array of `Object`s, constructed from `this` and given function.
      */
-    private mapArray(fn: (v: Object) => Object): Object[] {
-        let res = new Object[this.data.length];
+    private mapArray<U>(fn: (v: T, k: int) => U): U[] {
+        let res = new U[this.data.length];
+        for (let i = 0; i < this.data.length; i++) {
+            res[i] = fn(this.data[i], i);
+        }
+        return res;
+    }
+
+    /**
+     * Creates a new `Object[]` primitive array and populates
+     * it with the results of calling a provided function on every element in the calling array.
+     *
+     * @param fn mapping function, applied to each element of an array.
+     *
+     * @returns Primitive array of `Object`s, constructed from `this` and given function.
+     */
+    private mapArray<U>(fn: (v: T) => U): U[] {
+        let res = new U[this.data.length];
         for (let i = 0; i < this.data.length; i++) {
             res[i] = fn(this.data[i]);
         }
@@ -517,9 +639,9 @@ export final class Array {
      *
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public map(fn: (k: int, v: Object) => Object): Array {
-        let res = this.mapArray(fn);
-        return new Array(res);
+    public map<U>(fn: (v: T, k: number) => U): Array<U> {
+        let res = this.mapArray<U>(fn);
+        return new Array<U>(res);
     }
 
     /**
@@ -530,9 +652,22 @@ export final class Array {
      *
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public map(fn: (v: Object) => Object): Array {
-        let res = this.mapArray(fn);
-        return new Array(res);
+    public map<U>(fn: (v: T, k: int) => U): Array<U> {
+        let res = this.mapArray<U>(fn);
+        return new Array<U>(res);
+    }
+
+    /**
+     * Creates a new `Array` object and populates
+     * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+     *
+     * @param fn mapping function, applied to each element of an array.
+     *
+     * @returns `Array` instance, constructed from `this` and given function.
+     */
+    public map<U>(fn: (v: T) => U): Array<U> {
+        let res = this.mapArray<U>(fn);
+        return new Array<U>(res);
     }
 
     /**
@@ -544,12 +679,13 @@ export final class Array {
      *
      * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public every(fn: (k: int, v: Object) => Boolean): Boolean {
-        let res: Boolean = true;
+    public every(fn: (v: T, k: number) => boolean): boolean {
         for (let i = 0; i < this.data.length; i++) {
-            res = res && fn(i, this.data[i]);
+            if (!fn(this.data[i], i)) {
+                return false
+            }
         }
-        return res;
+        return true;
     }
 
     /**
@@ -561,12 +697,31 @@ export final class Array {
      *
      * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public every(fn: (v: Object) => Boolean): Boolean {
-        let res: Boolean = true;
+    public every(fn: (v: T, k: int) => boolean): boolean {
         for (let i = 0; i < this.data.length; i++) {
-            res = res && fn(this.data[i]);
+            if (!fn(this.data[i], i)) {
+                return false
+            }
         }
-        return res;
+        return true;
+    }
+
+    /**
+     * Tests whether all elements in the array pass the test
+     * implemented by the provided function. It returns a Boolean value.
+     *
+     * @param fn function to execute for each element in the array.
+     * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+     *
+     * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+     */
+    public every(fn: (v: T) => boolean): boolean {
+        for (let i = 0; i < this.data.length; i++) {
+            if (!fn(this.data[i])) {
+                return false
+            }
+        }
+        return true;
     }
 
     /**
@@ -578,12 +733,11 @@ export final class Array {
      *
      * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
      */
-    public some(fn: (k: int, v: Object) => Boolean): Boolean {
-        let res: Boolean = false;
+    public some(fn: (v: T, k: number) => boolean): boolean {
         for (let i = 0; i < this.data.length; i++) {
-            res = res || fn(i, this.data[i]);
+            if (fn(this.data[i], i)) { return true }
         }
-        return res;
+        return false
     }
 
     /**
@@ -595,12 +749,27 @@ export final class Array {
      *
      * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
      */
-    public some(fn: (v: Object) => Boolean): Boolean {
-        let res: Boolean = false;
+    public some(fn: (v: T, k: int) => boolean): boolean {
         for (let i = 0; i < this.data.length; i++) {
-            res = res || fn(this.data[i]);
+            if (fn(this.data[i], i)) { return true }
         }
-        return res;
+        return false
+    }
+
+    /**
+     * Tests whether at least one element in the array pass the test
+     * implemented by the provided function. It returns a Boolean value.
+     *
+     * @param fn function to execute for each element in the array.
+     * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+     *
+     * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+     */
+    public some(fn: (v: T) => boolean): boolean {
+        for (let i = 0; i < this.data.length; i++) {
+            if (fn(this.data[i])) { return true }
+        }
+        return false
     }
 
     /**
@@ -609,8 +778,8 @@ export final class Array {
      *
      * @returns Primitive array of `Object`s, constructed from `this` in reverse order.
      */
-    private reverseArray(): Object[] {
-        let res = new Object[this.data.length];
+    private reverseArray(): T[] {
+        let res = new T[this.data.length];
         for (let i: int = 0; i < this.data.length; i++) {
             res[i] = this.data[this.data.length-i-1];
         }
@@ -635,8 +804,8 @@ export final class Array {
      *
      * @returns `Array` intance constructed from `Object[]` primitive array.
      */
-    public static from(arr: Object[]): Array {
-        return new Array(arr);
+    public static from<T>(arr: T[]): Array<T> {
+        return new Array<T>(arr);
     }
 
     /**
@@ -650,9 +819,9 @@ export final class Array {
      *
      * @returns `Array` intance constructed from `Object[]` primitive array and given function.
      */
-    public static from(arr: Object[], fn: (k: int, v: Object) => Object): Array {
-        let d = new Array(arr);
-        return d.map(fn);
+    public static from<T, U>(arr: T[], fn: (v: T, k: number) => U): Array<U> {
+        let d = new Array<T>(arr);
+        return d.map<U>(fn);
     }
 
     /**
@@ -666,9 +835,25 @@ export final class Array {
      *
      * @returns `Array` intance constructed from `Object[]` primitive array and given function.
      */
-    public static from(arr: Object[], fn: (v: Object) => Object): Array {
-        let d = new Array(arr);
-        return d.map(fn);
+    public static from<T, U>(arr: T[], fn: (v: T, k: int) => U): Array<U> {
+        let d = new Array<T>(arr);
+        return d.map<U>(fn);
+    }
+
+    /**
+     * Creates a new `Array` instance from `Object[]` primitive array.
+     *
+     * @param arr primitive 'Object' array, converted to `Array` instance.
+     *
+     * @param fn map function to call on every element of the array.
+     * Every value to be added to the array is first passed through this function, and `fn`'s return value
+     * is added to the array instead.
+     *
+     * @returns `Array` intance constructed from `Object[]` primitive array and given function.
+     */
+    public static from<T, U>(arr: T[], fn: (v: T) => U): Array<U> {
+        let d = new Array<T>(arr);
+        return d.map<U>(fn);
     }
 
     /**
@@ -697,10 +882,10 @@ export final class Array {
      *
      * @returns `Array` intance constructed from characters of source `String` and given function.
      */
-    public static from(str: String, fn: (k: int, v: Object) => Object): Array {
+    public static from<U>(str: String, fn: (v: String, k: number) => U): Array<U> {
         let strs = Array.charStrings(str);
-        let d = Array.from(strs);
-        return d.map(fn);
+        let d: Array<String> = Array.from<String>(strs);
+        return d.map<U>(fn);
     }
 
     /**
@@ -712,10 +897,25 @@ export final class Array {
      *
      * @returns `Array` intance constructed from characters of source `String` and given function.
      */
-    public static from(str: String, fn: (v: Object) => Object): Array {
+    public static from<U>(str: String, fn: (v: String, k: int) => U): Array<U> {
         let strs = Array.charStrings(str);
-        let d = Array.from(strs);
-        return d.map(fn);
+        let d: Array<String> = Array.from<String>(strs);
+        return d.map<U>(fn);
+    }
+
+    /**
+     * Creates a new `Array` instance from characters of `String` and mapping function.
+     *
+     * @param str source string to be converted to array of character's `String`
+     *
+     * @param fn map function to call on every character of source string.
+     *
+     * @returns `Array` intance constructed from characters of source `String` and given function.
+     */
+    public static from<U>(str: String, fn: (v: String) => U): Array<U> {
+        let strs = Array.charStrings(str);
+        let d = Array.from<String>(strs);
+        return d.map<U>(fn);
     }
 
     /**
@@ -725,9 +925,9 @@ export final class Array {
      *
      * @returns `Array` intance constructed from characters of source `String`.
      */
-    public static from(str: String): Array {
+    public static from(str: String): Array<String> {
         let strs = Array.charStrings(str);
-        return Array.from(strs);
+        return Array.from<String>(strs);
     }
 
     /**
@@ -738,26 +938,24 @@ export final class Array {
      *
      * @returns Primitive array of `Object`s, constructed from `this` and given filtering function.
      */
-    private filterArray(fn: (k: int, v: Object) => Boolean): Object[] {
+    private filterArray(fn: (v: T, k: int) => boolean): T[] {
         let resNum = 0;
         let indicator: boolean[] = new boolean[this.data.length];
 
         for (let i: int = 0; i < this.data.length; i++) {
-            // TODO Skip of '== true' may fail compilation.
-                if (fn(i, this.data[i]) == true) {
-            indicator[i] = true;
-            resNum++;
+            if (fn(this.data[i], i)) {
+                indicator[i] = true;
+                resNum++;
             }
         }
 
-        let res = new Object[resNum];
+        let res = new T[resNum];
         let j: int = 0;
         for (let i: int = 0; i < this.data.length; i++) {
-            // TODO Skip of '== true' may fail compilation.
-                if (indicator[i] == true) {
-            res[j] = this.data[i];
-            j++;
-                }
+            if (indicator[i]) {
+                res[j] = this.data[i];
+                j++;
+            }
         }
 
         return res;
@@ -771,30 +969,8 @@ export final class Array {
      *
      * @returns Primitive array of `Object`s, constructed from `this` and given filtering function.
      */
-    public filterArray(fn: (v: Object) => Boolean): Object[] {
-        // TODO Code duplication can be cleared by introducing of well-working lambdas.
-        let resNum = 0;
-        let indicator: boolean[] = new boolean[this.data.length];
-
-        for (let i: int = 0; i < this.data.length; i++) {
-            // TODO Skip of '== true' may fail compilation.
-                if (fn(this.data[i]) == true) {
-            indicator[i] = true;
-            resNum++;
-            }
-        }
-
-        let res = new Object[resNum];
-        let j: int = 0;
-        for (let i: int = 0; i < this.data.length; i++) {
-            // TODO Skip of '== true' may fail compilation.
-                if (indicator[i] == true) {
-            res[j] = this.data[i];
-            j++;
-                }
-        }
-
-        return res;
+    public filterArray(fn: (v: T) => boolean): T[] {
+        return this.filterArray((v: T, k: int): boolean => { return fn(v); });
     }
 
     /**
@@ -806,9 +982,25 @@ export final class Array {
      *
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
      */
-    public filter(fn: (k: int, v: Object) => Boolean): Array {
+    public filter(fn: (v: T, k: number) => boolean): Array<T> {
+        let fn1: (v: T, k: int) => boolean = (v: T, k: int): boolean => {
+            return fn(v, k)
+        }
+        return this.filter(fn1);
+    }
+
+    /**
+     * Constructs a new `Array` instance and populates it with
+     * portion of a given array, filtered down to just the elements from the
+     * given array that pass the test implemented by the provided function.
+     *
+     * @param fn test function, applied to each element of an array.
+     *
+     * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+     */
+    public filter(fn: (v: T, k: int) => boolean): Array<T> {
         let res = this.filterArray(fn);
-        return new Array(res);
+        return new Array<T>(res);
     }
 
     /**
@@ -820,9 +1012,9 @@ export final class Array {
      *
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
      */
-    public filter(fn: (v: Object) => Boolean): Array {
+    public filter(fn: (v: T) => boolean): Array<T> {
         let res = this.filterArray(fn);
-        return new Array(res);
+        return new Array<T>(res);
     }
 
     /**
@@ -836,7 +1028,7 @@ export final class Array {
      *
      * @returns Primitive array of `Object`s, constructed from `this` and containing extracted elements.
      */
-    private sliceArray(start: int, end: int): Object[] {
+    private sliceArray(start: int, end: int): T[] {
         let len: int = this.data.length;
         let relativeStart = start;
         let k: int;
@@ -866,7 +1058,7 @@ export final class Array {
         }
         let count = max(_final - k, 0);
 
-        let res = new Object[count];
+        let res = new T[count];
         let n = 0;
         while (k < _final) {
             res[n] = this.data[k];
@@ -887,8 +1079,22 @@ export final class Array {
      *
      * @returns `Array` instance, constructed from extracted elements of `this` instance.
      */
-    public slice(start: int, end: int): Array {
-        return new Array(this.sliceArray(start, end));
+    public slice(start: number, end: number): Array<T> {
+        return this.slice(start as int, end as int)
+    }
+
+    /**
+     * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
+     * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
+     *
+     * @param start zero-based index at which to start extraction
+     *
+     * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
+     *
+     * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     */
+    public slice(start: int, end: int): Array<T> {
+        return new Array<T>(this.sliceArray(start, end));
     }
 
     /**
@@ -899,8 +1105,20 @@ export final class Array {
      *
      * @returns `Array` instance, constructed from extracted elements of `this` instance.
      */
-    public slice(start: int): Array {
-        return new Array(this.sliceArray(start, Int.MAX_VALUE as int));
+    public slice(start: number): Array<T> {
+        return this.slice(start as number)
+    }
+
+    /**
+     * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
+     * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
+     *
+     * @param start zero-based index at which to start extraction
+     *
+     * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     */
+    public slice(start: int): Array<T> {
+        return new Array<T>(this.sliceArray(start, Int.MAX_VALUE as int));
     }
 
     /**
@@ -910,25 +1128,9 @@ export final class Array {
      *
      * @note This method creates full copy of original `Array` instance.
      */
-    public slice(): Array {
-        return new Array(this.sliceArray(Int.MIN_VALUE as int, Int.MAX_VALUE as int));
+    public slice(): Array<T> {
+        return new Array<T>(this.sliceArray(Int.MIN_VALUE as int, Int.MAX_VALUE as int));
     }
-
-    // TODO Move to math.ets?
-    /**
-     * Named value for _less_ value of `sign()` function.
-     */
-    private readonly COMPARE_LE = -1;
-
-    /**
-     * Named value for _equal_ value of `sign()` function.
-     */
-    private readonly COMPARE_EQ =  0;
-
-    /**
-     * Named value for _greater_ value of `sign()` function.
-     */
-    private readonly COMPARE_GT =  1;
 
     /**
      * Helper function for sorting given primitive `Object[]` array using comparator.
@@ -945,17 +1147,17 @@ export final class Array {
      *
      * @note Modifies array `a`.
      */
-    private doSort(a: Object[], lo0: int, hi0: int, comparator: (a: Object, b: Object) => int): void {
+    private doSort(a: T[], lo0: int, hi0: int, comparator: (a: T, b: T) => int): void {
         let lo = lo0;
         let hi = hi0;
 
         if (lo >= hi) {
             return;
         } else if (lo == (hi - 1)) {
-            if (comparator(a[lo], a[hi]) == this.COMPARE_GT) {
-            let t = a[lo];
-            a[lo] = a[hi];
-            a[hi] = t;
+            if (comparator(a[lo], a[hi]) > 0) {
+                let t = a[lo];
+                a[lo] = a[hi];
+                a[hi] = t;
             }
             return;
         }
@@ -965,20 +1167,18 @@ export final class Array {
         a[hi] = pivot;
 
         while (lo < hi) {
-
-            while ((comparator(a[lo], pivot) != this.COMPARE_GT) && (lo < hi)) {
-            lo++;
+            while ((comparator(a[lo], pivot) <= 0) && (lo < hi)) {
+                lo++;
             }
 
-            while ((comparator(pivot, a[hi]) != this.COMPARE_GT) && (lo < hi)) {
-            hi--;
+            while ((comparator(pivot, a[hi]) <= 0) && (lo < hi)) {
+                hi--;
             }
 
             if (lo < hi) {
-            let t = a[lo];
-            a[lo] = a[hi];
-            a[hi] = t;
-
+                let t = a[lo];
+                a[lo] = a[hi];
+                a[hi] = t;
             }
         }
 
@@ -1000,10 +1200,10 @@ export final class Array {
      *
      * @returns  Returns one of values -1, 0, 1 (_less_, _equal_, _greater_ respectively).
      */
-    private defaultComparator(a: Object, b: Object): int {
+    private static defaultComparator<T>(a: T, b: T): int {
         let sa = a.toString();
         let sb = b.toString();
-        return sign(sa.compareTo(sb));
+        return sa.compareTo(sb);
     }
 
     /**
@@ -1011,15 +1211,16 @@ export final class Array {
      *
      * @returns Copy of an `Array`'s primitive array data.
      */
-    private copyArray(): Object[] {
+    private copyArray(): T[] {
         let len: int = this.data.length;
-        let res = new Object[len];
+        let res = new T[len];
         for (let i = 0; i < len; i++) {
             res[i] = this.data[i];
         }
         return res;
     }
 
+    // TODO: can't distinguish `=> number` and `=> int`
     /**
      * Reorders elements of `this` using comparator function.
      *
@@ -1029,7 +1230,7 @@ export final class Array {
      *
      * TODO clarify UTF-16 or UTF-8
      */
-    public sort(comparator: (a: Object, b: Object) => int): void {
+    public sort(comparator: (a: T, b: T) => int): void {
         let res = this.copyArray();
         this.doSort(res, 0, res.length-1, comparator);
         this.data = res;
@@ -1046,7 +1247,7 @@ export final class Array {
      */
     public sort(): void {
         let res = this.copyArray();
-        this.doSort(res, 0, res.length-1, this.defaultComparator);
+        this.doSort(res, 0, res.length-1, Array.defaultComparator);
         this.data = res;
     }
 
@@ -1062,7 +1263,23 @@ export final class Array {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-    public lastIndexOf(element: Object, fromIndex: int): int {
+    public lastIndexOf(element: T, fromIndex: number): number {
+        return this.lastIndexOf(element, fromIndex)
+    }
+
+    /**
+     * Returns the last index at which a given element can be found in the array,
+     * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+     *
+     * @param element element to locate in the array.
+     * @param fromIndex zero-based index at which to start searching backwards.
+     * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
+     * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
+     * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
+     *
+     * @returns The last index of the element in the array; -1 if not found.
+     */
+    public lastIndexOf(element: T, fromIndex: int): int {
         if (this.data.length == 0) {
             return -1;
         }
@@ -1076,7 +1293,7 @@ export final class Array {
 
         while (k >= 0) {
             if (this.data[k].equals(element)) {
-            return k;
+                return k;
             }
             k--;
         }
@@ -1091,7 +1308,7 @@ export final class Array {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-    public lastIndexOf(element: Object): int {
+    public lastIndexOf(element: T): int {
         return this.lastIndexOf(element, this.data.length - 1);
     }
 
@@ -1104,9 +1321,9 @@ export final class Array {
      *
      * @returns a shallow copy of the underlying array and inserted data
      */
-    private insertValues(beforeIndex: int, values: Object[]): Object[] {
+    private insertValues(beforeIndex: int, values: T[]): T[] {
         let len = this.data.length + values.length;
-        let res = new Object[len];
+        let res = new T[len];
         let n = beforeIndex;
         let k: int;
 
@@ -1148,7 +1365,7 @@ export final class Array {
      *
      * @returns a shallow copy of the underlying array without removed data
      */
-    private removeMany(index: int, count: int): Object[] {
+    private removeMany(index: int, count: int): T[] {
         assert count > 0;
 
         let n = index;
@@ -1168,7 +1385,7 @@ export final class Array {
 
         let idx = 0;
 
-        let res = new Object[this.data.length - (m - k + 1)];
+        let res = new T[this.data.length - (m - k + 1)];
 
         for (let i = 0; i < k; i++) {
             res[idx] = this.data[i];
@@ -1195,22 +1412,14 @@ export final class Array {
         if (!(other instanceof Array)) {
             return false;
         }
-        let a = other as Array;
+        let a = other as Array<Object>;
         if (this.data.length != a.data.length) {
             return false;
         }
 
         for (let i = 0; i < this.data.length; i++) {
-            // Special cases for nullability
-            if ((this.data[i] == null && a.data[i] != null) || (this.data[i] != null && a.data[i] == null)) {
-            return false;
-            }
-            if (this.data[i] == null && a.data[i] == null) {
-            continue;
-            }
-
-            if (!this.data[i].equals(a.data[i])) {
-            return false;
+            if (!Array.objEquals<Object>(this.data[i], a.data[i])) {
+                return false
             }
         }
 
@@ -1225,9 +1434,14 @@ export final class Array {
     public override toString(): String {
         let str = new StringBuilder()
         for (let i = 0; i < this.data.length; i++) {
-            str.append(this.data[i])
+            const d: Object | null = this.data[i]
+            if (d == null) {
+                str.append("null")
+            } else {
+                str.append((d as Object).toString())
+            }
             if(i != this.data.length - 1) {
-                str.append(",")
+                str.append(c',')
             }
         }
         return str.toString()
@@ -1272,7 +1486,7 @@ export final class Array {
      *
      * @returns shifted element, i.e. that was at index zero
      */
-    public shift(): Object | null {
+    public shift(): T | null {
         if(this.data.length == 0) {
             return null
         }
@@ -1287,7 +1501,7 @@ export final class Array {
      *
      * @returns removed element
      */
-    public pop(): Object | null {
+    public pop(): T | null {
         if(this.data.length == 0) {
             return null
         }
@@ -1301,8 +1515,8 @@ export final class Array {
      *
      * @returns new length
      */
-    public push(val: Object): int {
-        let arr = new Object[this.data.length + 1]
+    public push(val: T): int {
+        let arr = new T[this.data.length + 1]
         for(let i = 0; i < this.data.length; i++) {
             arr[i] = this.data[i]
         }
@@ -1321,12 +1535,26 @@ export final class Array {
      *
      * @returns an Array with deleted elements
      */
-    public splice(start: int, delete: int): Array {
+    public splice(start: number, delete: number): Array<T> {
+        return this.splice(start as int, delete as int)
+    }
+
+    /**
+     * Changes the contents of an array by removing or replacing existing elements
+     * and/or adding new elements in place.
+     *
+     * @param start index
+     *
+     * @param delete number of items after start index
+     *
+     * @returns an Array with deleted elements
+     */
+    public splice(start: int, delete: int): Array<T> {
         if(start + delete > this.data.length){
             delete = this.data.length - start
         }
         let len = this.data.length - delete
-        let arr = new Object[len]
+        let arr = new T[len]
         let count: int = 0
             for(let i: int = 0; i < this.data.length; i++){
                 if(i >= start && i < start + delete){
@@ -1335,7 +1563,7 @@ export final class Array {
                 arr[count] = this.data[i]
                 count++
             }
-        return new Array(arr)
+        return new Array<T>(arr)
     }
 
     /**
@@ -1346,7 +1574,19 @@ export final class Array {
      *
      * @returns an Array with deleted elements from start to the last element of the current instance
      */
-    public splice(start: int): Array {
+    public splice(start: number): Array<T> {
+        return this.splice(start as int)
+    }
+
+    /**
+     * Changes the contents of an array by removing or replacing existing elements
+     * and/or adding new elements in place.
+     *
+     * @param start index
+     *
+     * @returns an Array with deleted elements from start to the last element of the current instance
+     */
+    public splice(start: int): Array<T> {
         return this.splice(start, this.data.length - start)
     }
 
@@ -1359,7 +1599,20 @@ export final class Array {
      *
      * @returns a new Array with some elements removed and/or replaced at a given index.
      */
-    public toSpliced(start: int, delete: int): Array {
+    public toSpliced(start: number, delete: number): Array<T> {
+        return this.toSpliced(start as int, delete as int)
+    }
+
+    /**
+     * Copying version of the splice() method.
+     *
+     * @param start index
+     *
+     * @param delete number of items after start index
+     *
+     * @returns a new Array with some elements removed and/or replaced at a given index.
+     */
+    public toSpliced(start: int, delete: int): Array<T> {
         return this.splice(start, delete)
     }
 
@@ -1370,7 +1623,18 @@ export final class Array {
      *
      * @returns a new Array with some elements removed and/or replaced at a given index.
      */
-    public toSpliced(start: int): Array {
+    public toSpliced(start: number): Array<T> {
+        return this.toSpliced(start as int)
+    }
+
+    /**
+     * Copying version of the splice() method.
+     *
+     * @param start index
+     *
+     * @returns a new Array with some elements removed and/or replaced at a given index.
+     */
+    public toSpliced(start: int): Array<T> {
         return this.splice(start)
     }
 
@@ -1382,13 +1646,8 @@ export final class Array {
      *
      * @returns true if val is in Array
      */
-    public includes(val: Object): boolean {
-        for(let i = 0; i < this.data.length; i++) {
-            if(val == this.data[i]){
-                return true
-            }
-        }
-        return false
+    public includes(val: T): boolean {
+        return this.indexOf(val) != -1
     }
 
     /**
@@ -1399,9 +1658,9 @@ export final class Array {
      *
      * @returns index of val, -1 otherwise
      */
-    public indexOf(val: Object): int {
+    public indexOf(val: T): int {
         for(let i = 0; i < this.data.length; i++) {
-            if(val == this.data[i]){
+            if (Array.objEquals<T>(val, this.data[i])) {
                 return i
             }
         }
@@ -1417,9 +1676,9 @@ export final class Array {
      *
      * @returns index of first element satisfying to fn, -1 if no such element
      */
-    public findLastIndex(fn: (element : Object) => boolean): int {
+    public findLastIndex(fn: (element : T) => boolean): int {
         for(let i = this.data.length - 1; i >= 0; i--) {
-            if(fn(this.data[i])){
+            if (fn(this.data[i])) {
                 return i
             }
         }
@@ -1432,9 +1691,9 @@ export final class Array {
      *
      * @returns sorted copy of hte current instance using default comparator
      */
-    public toSorted(): Array {
-        let arr = new Array(this.data)
-        arr.doSort(this.data, 0, this.data.length, this.defaultComparator)
+    public toSorted(): Array<T> {
+        let arr = new Array<T>(this.data)
+        arr.doSort(this.data, 0, this.data.length, Array.defaultComparator)
         return arr
     }
 
@@ -1446,8 +1705,8 @@ export final class Array {
      *
      * @returns sorted copy of the current instance comparator
      */
-    public toSorted(comparator: (a: Object, b: Object) => int): Array {
-        let arr = new Array(this.data)
+    public toSorted(comparator: (a: T, b: T) => int): Array<T> {
+        let arr = new Array<T>(this.data)
         arr.doSort(this.data, 0, this.data.length, comparator)
         return arr
     }
@@ -1457,7 +1716,7 @@ export final class Array {
      *
      * @returns the underlying Objects array
      */
-    private getData(): Object[] {
+    private getData(): T[] {
         return this.data
     }
 
@@ -1468,7 +1727,7 @@ export final class Array {
      *
      * @returns true is arr is a non-null array, false otherwise
      */
-    public static isArray(arr: Object[]): boolean {
+    public static isArray<T>(arr: T[]): boolean {
         if(arr == null){
             return false
         }
@@ -1482,7 +1741,7 @@ export final class Array {
      *
      * @returns true is arr is a non-null and non-empty array, false otherwise
      */
-    public static isArray(arr: Array): boolean {
+    public static isArray<T>(arr: Array<T>): boolean {
         if(arr.getData() == null){
             return false
         }
@@ -1495,14 +1754,14 @@ export final class Array {
      *
      * @returns reversed copy of the current Array
      */
-    public toReversed(): Array {
-        let arr = new Object[this.data.length]
+    public toReversed(): Array<T> {
+        let arr = new T[this.data.length]
         let count = this.data.length - 1
         for(let i = 0; i < this.data.length; i++) {
             arr[count] = this.data[i]
             count--
         }
-        return new Array(arr)
+        return new Array<T>(arr)
     }
 
     /**
@@ -1517,8 +1776,8 @@ export final class Array {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public reduce(fn: (a: Object, b: Object) => Object, initVal: Object): Object {
-        let acc: Object = initVal
+    public reduce<U>(fn: (a: U, b: T) => U, initVal: U): U {
+        let acc: U = initVal
         for(let i = 0; i < this.data.length; i++) {
             acc = fn(acc, this.data[i])
         }
@@ -1535,8 +1794,11 @@ export final class Array {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public reduce(fn: (a: Object, b: Object) => Object): Object {
-        let acc: Object = this.data[0]
+    public reduce(fn: (a: T, b: T) => T): T {
+        if (this.data.length == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
+        }
+        let acc: T = this.data[0]
         for(let i = 1; i < this.data.length; i++) {
             acc = fn(acc, this.data[i])
         }
@@ -1555,8 +1817,8 @@ export final class Array {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public reduceRight(fn: (a: Object, b: Object) => Object, initVal: Object): Object {
-        let acc: Object = initVal
+    public reduceRight<U>(fn: (a: U, b: T) => U, initVal: U): U {
+        let acc: U = initVal
         for(let i = this.data.length - 1; i >= 0; i--) {
             acc = fn(acc, this.data[i])
         }
@@ -1573,8 +1835,11 @@ export final class Array {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public reduceRight(fn: (a: Object, b: Object) => Object): Object {
-        let acc: Object = this.data[this.data.length - 1]
+    public reduceRight(fn: (a: T, b: T) => T): T {
+        if (this.data.length == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
+        }
+        let acc: T = this.data[this.data.length - 1]
         for(let i = this.data.length - 2; i >= 0; i--) {
             acc = fn(acc, this.data[i])
         }
@@ -1586,7 +1851,7 @@ export final class Array {
      *
      * @param fn to apply for each element of the Array
      */
-    public forEach(fn: (a: Object) => void): void {
+    public forEach(fn: (a: T) => void): void {
         for(let i = 0; i < this.data.length; i++) {
             fn(this.data[i])
         }
@@ -1600,11 +1865,9 @@ export final class Array {
      *
      * @returns a newly created Array
      */
-    /** TODO(mredkin): uncomment when #12735 will be fixed
-     * public of(...values: Object[]): Array {
-     *     return new Array(values)
-     * }
-     */
+    //public static of<T>(...values: T[]): Array<T> {
+    //    return new Array<T>(values)
+    //}
 
     /**
      * Adds the specified elements to the beginning of an Array
@@ -1614,7 +1877,7 @@ export final class Array {
      *
      * @returns new length of the Array
      */
-    /** TODO(mredkin): uncomment when #12735 will be fixed
+    /* // TODO(mredkin): uncomment when #12735 will be fixed
      * public unshift(...values: Object[]): int {
      *     let arr = new Object[values.length + this.data.length]
      *     for(let i: int = 0; i < values.length; i++) {
@@ -1637,13 +1900,27 @@ export final class Array {
      *
      * @returns a new Array with the element at the given index replaced with the given value
      */
-    public with(index: int, value: Object): Array {
-        let arr = new Object[this.data.length]
+    public with(index: number, value: T): Array<T> {
+        return this.with(index as int, value)
+    }
+
+    /**
+     * Copying version of using the bracket notation to change the value of a given index.
+     * It returns a new Array with the element at the given index replaced with the given value.
+     *
+     * @param index to replace
+     *
+     * @param value new value
+     *
+     * @returns a new Array with the element at the given index replaced with the given value
+     */
+    public with(index: int, value: T): Array<T> {
+        let arr = new T[this.data.length]
         for(let i: int = 0; i < this.data.length; i++) {
             arr[i] = this.data[i]
         }
         arr[index] = value
-        return new Array(arr)
+        return new Array<T>(arr)
     }
 
     /**
@@ -1654,16 +1931,39 @@ export final class Array {
      *
      * @returns a flattened Array with respect to depth
      */
-    public flat(depth: int): Array {
-        if((this.data.length > 0 && this.data[0] instanceof Object) || this.data.length == 0 || depth < 1) {
-            return new Array(this.data)
-        }
+    public flat(depth: number): Array<Object | null> {
+        return this.flat(depth as int)
+    }
 
-        let arr = new Array()
-        for(let i: int = 0; i < this.data.length; i++){
-            arr.concatArray(this.data[i] as Array)
-        }
-        return arr.flat(depth--)
+    /**
+     * Creates a new Array with all sub-array elements concatenated
+     * into it recursively up to the specified depth.
+     *
+     * @param depth
+     *
+     * @returns a flattened Array with respect to depth
+     */
+    public flat(depth: int): Array<Object | null> {
+        let ret = new Array<Object | null>()
+        this.flatImpl(depth, ret)
+        return ret
+    }
+
+    private flatImpl(depth: int, to: Array<Object | null>) {
+        throw new Error("not implemented");
+        //if (depth <= 0) {
+        //    to.push(this as Object)
+        //    return
+        //}
+        //for (let i = 0; i < this.data.length; i++) {
+        //    let e = this.data[i];
+        //    if (e instanceof Array) {
+        //        let eArr: Array<Object> = e as Object as Array<Object>;
+        //        eArr.flatImpl(depth - 1, to)
+        //    } else {
+        //        to.push(e)
+        //    }
+        //}
     }
 
     /**
@@ -1671,15 +1971,8 @@ export final class Array {
      *
      * @returns a flattened Array
      */
-    public flat(): Array {
-        if(this.data.length == 0) {
-            return new Array(this.data)
-        }
-        let arr = new Array(this.data)
-        while(!(arr.at(0) instanceof Object)){
-            arr = arr.flat(1)
-        }
-        return arr
+    public flat(): Array<Object | null> {
+        return this.flat(1)
     }
 
     /**
@@ -1689,9 +1982,9 @@ export final class Array {
      *
      * @return new Array after map and than flat
      */
-     public flatMap(fn: (v: Object, k: int) => Object): Array {
-        let lambda: (k: int, v: Object) => Object = (k: int, v: Object): Object => { return fn(v, k) }
-        return new Array(this.mapArray(lambda)).flat()
+     public flatMap(fn: (v: T, k: number) => Object): Array<Object | null> {
+        let mapped: Array<Object> = this.map<Object>(fn)
+        return mapped.flat()
      }
 
     /**
@@ -1701,9 +1994,21 @@ export final class Array {
      *
      * @return new Array after map and than flat
      */
-     public flatMap(fn: (v: Object) => Object): Array {
-        let lambda: (v: Object, k: int) => Object = (v: Object, k: int): Object => { return fn(v) }
-        return this.flatMap(lambda)
+     public flatMap(fn: (v: T, k: int) => Object): Array<Object | null> {
+        let mapped: Array<Object> = this.map<Object>(fn)
+        return mapped.flat()
+     }
+
+    /**
+     * Applies flat and than map
+     *
+     * fn a function to apply
+     *
+     * @return new Array after map and than flat
+     */
+     public flatMap(fn: (v: T) => Object): Array<Object | null> {
+        let mapped: Array<Object> = this.map<Object>(fn)
+        return mapped.flat()
      }
 
     /**
@@ -1720,8 +2025,8 @@ export final class Array {
     /**
      * Returns an iterator over all values
      */
-    public values(): ValuesIterator<Object> {
-        return new ValuesIterator<Object>(this.data);
+    public values(): ValuesIterator<T> {
+        return new ValuesIterator<T>(this.data);
     }
 
     /**

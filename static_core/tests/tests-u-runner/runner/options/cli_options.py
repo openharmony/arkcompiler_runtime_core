@@ -79,6 +79,10 @@ def get_args():  # pylint: disable=too-many-statements
         '--ets-runtime', action='store_true', dest='ets_runtime',
         default=None,
         help='run ETS runtime tests')
+    action.add_argument(
+        '--no-js', action='store_false', dest='with_js',
+        default=None,
+        help='disable JS-related tests')
     action.add_argument('--ets-cts', action='store_true', dest='ets_cts', default=None, help='run ets-templates tests')
     # ETS tests applied options
     parser.add_argument(

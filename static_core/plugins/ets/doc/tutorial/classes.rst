@@ -104,6 +104,99 @@ The class name is used to access ``static`` fields:
 
 |
 
+Field Initializers
+~~~~~~~~~~~~~~~~~~
+
+|LANG| requires that all fields are explicitly initialized with some values
+either when the field is declared or in the ``constructor``. This is similar
+to ``strictPropertyInitialization`` mode of the standard |TS|. Such behavior
+is enforced to minimize the number of unexpected runtime errors and achieve
+better performance.
+
+The follow code (invalid in |LANG|) is error-prone:
+
+.. code-block:: typescript
+
+    class Person {
+	    name: string // The compiler automatically sets to undefined
+
+        setName(n:string): void {
+            this.name = n
+        }
+
+	    getName(): string {
+            // Return type "string" hides from the developers the fact
+            // that name can be undefined. The most correct would be
+            // to write the return type as "string | undefined". By doing so
+            // we tell the users of our API about all possible return values.
+		    return this.name
+	    }
+    }
+
+    let jack = new Person()
+    // Let's assume that the developer forgets to call setName:
+    // jack.setName("Jack")
+    console.log(jack.getName().length); // runtime exception: name is undefined
+
+Here is how is should look in |LANG|:
+
+.. code-block:: typescript
+
+    class Person {
+        name: string = "" // The field always is defined
+
+        setName(n:string): void {
+            this.name = n
+        }
+
+        // The type is always string, no other "hidden options".
+        getName(): string {
+            return this.name
+        }
+    }
+
+    let jack = new Person()
+    // Let's assume that the developer forgets to call setName:
+    // jack.setName("Jack")
+    console.log(jack.getName().length); // 0, no runtime error
+
+And here how our code behaves if the field ``name`` can be ``undefined``
+
+.. code-block:: typescript
+
+    class Person {
+        name ?: string // The field may be undefined, great
+        // More explicit syntax may also be used:
+        // name: string | undefined = undefined
+
+        setName(n:string): void {
+            this.name = n
+        }
+
+        // Compile-time error:
+        // name can be "undefined", so we cannot say to those who use this API
+        // that it returns only strings:
+        getNameWrong(): string {
+            return this.name
+        }
+
+        getName(): string | undefined { // Return type matches the type of name
+            return this.name
+        }
+    }
+
+    let jack = new Person()
+    // Let's assume that the developer forgets to call setName:
+    // jack.setName("Jack")
+
+    // Compile-time(!) error: Compiler suspects that we
+    // may possibly access something undefined and won't build the code:
+    console.log(jack.getName().length); // The code won't build and run
+
+    console.log(jack.getName()?.length); // Builds ok, no runtime error
+
+|
+
 Getters and Setters
 ~~~~~~~~~~~~~~~~~~~
 
@@ -500,8 +593,8 @@ Object Literals
 ---------------
 
 An object literal is an expression that can be used to create a class instance,
-and provide some initial values. It can be used instead of the expression
-``new`` as it is more convenient in some cases.
+and provide initial values to instance fields. It can be used instead of the
+expression ``new`` as it is more convenient in some cases.
 
 A class composite is written as a comma-separated list of name-value pairs
 enclosed in '``{``' and '``}``'.

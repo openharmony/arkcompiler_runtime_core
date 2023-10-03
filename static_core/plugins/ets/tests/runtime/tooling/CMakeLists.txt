@@ -17,15 +17,6 @@ endif()
 
 add_subdirectory(sampler)
 
-if(CMAKE_CROSSCOMPILING)
-    ExternalProject_Get_Property(panda_host_tools binary_dir)
-    set(es2panda_target panda_host_tools-build)
-    set(es2panda_bin "${binary_dir}/plugins/ecmascript/es2panda/aot/es2panda")
-else()
-    set(es2panda_target es2panda)
-    set(es2panda_bin  $<TARGET_FILE:${es2panda_target}>)
-endif()
-
 # test that stdlib is generated successfully with debug info
 panda_ets_add_gtest(
     NO_CORES

@@ -4,18 +4,7 @@
 
 .. toctree::
    :numbered:
-   :maxdepth: 2
+   :maxdepth: 1
+   :glob:
 
-   /array
-   /arraybuffer
-   /boolean
-   /dataview
-   /date
-   /double
-   /error
-   /map
-   /math
-   /object
-   /set
-   /string
-   /typedarray
+   /packages/escompat.rst

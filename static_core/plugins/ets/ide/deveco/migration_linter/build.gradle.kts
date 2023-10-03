@@ -5,6 +5,7 @@ plugins {
 
 group = "com.huawei"
 version = "1.1.6"
+// TODO(vpukhov): adjust es2panda path
 val migrator = "../../../../ecmascript/es2panda/migrator"
 
 apply {

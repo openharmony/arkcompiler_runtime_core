@@ -183,7 +183,7 @@ elseif(PANDA_TARGET_ARM64)
     list(APPEND SOURCES
         fibers/arch/aarch64/get.S
         fibers/arch/aarch64/update.S
-        fibers/arch/aarch64/switch.S    
+        fibers/arch/aarch64/switch.S
         bridge/arch/aarch64/interpreter_to_compiled_code_bridge_aarch64.S
         bridge/arch/aarch64/compiled_code_to_interpreter_bridge_aarch64.S
         bridge/arch/aarch64/compiled_code_to_interpreter_bridge_dyn_aarch64.S
@@ -239,7 +239,6 @@ panda_set_lib_32bit_property(arkruntime_interpreter_impl)
 set(ISA_TEMPLATES
     interpreter-inl_gen.h.erb
     isa_constants_gen.h.erb
-    unimplemented_handlers-inl.h.erb
     irtoc_interpreter_utils.h.erb
     debug_test_interpreter-inl_gen.cpp.erb
 )
@@ -382,13 +381,15 @@ if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
         set(skip_fastpath_validation TRUE)
     endif()
     irtoc_compile(TARGET_NAME irtoc_fastpath
-                  INPUT_FILES ${IRTOC_SOURCE_DIR}/scripts/resolvers.irt
+                  INPUT_FILES ${IRTOC_SOURCE_DIR}/scripts/common.irt
+                              ${IRTOC_SOURCE_DIR}/scripts/resolvers.irt
                               ${IRTOC_SOURCE_DIR}/scripts/allocation.irt
                               ${IRTOC_SOURCE_DIR}/scripts/monitors.irt
                               ${IRTOC_SOURCE_DIR}/scripts/check_cast.irt
                               ${IRTOC_SOURCE_DIR}/scripts/gc.irt
                               ${IRTOC_SOURCE_DIR}/scripts/strings.irt
                               ${IRTOC_SOURCE_DIR}/scripts/string_builder.irt
+                              ${IRTOC_SOURCE_DIR}/scripts/string_helpers.irt
                   TARGET_VARIABLE IRTOC_FASTPATH_OBJ
                   TARGET_VARIABLE_LLVM IRTOC_FASTPATH_LLVM_OBJ
                   SKIP_VALIDATION ${skip_fastpath_validation})

@@ -247,14 +247,6 @@ options:
     - 1
   description: Dfx option for dfx log
 
-- name: workers-type
-  type: std::string
-  default: threadpool
-  possible_values:
-  - threadpool
-  - taskmanager
-  description: Set type of additional VM workers. VM uses these workers to speed up internal algorithms (JIT, GC, etc.)
-
 - name: gc-type
   type: std::string
   default: g1-gc

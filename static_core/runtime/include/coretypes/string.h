@@ -236,6 +236,11 @@ public:
         return MEMBER_OFFSET(String, data_utf16_);
     }
 
+    static constexpr uint32_t GetHashcodeOffset()
+    {
+        return MEMBER_OFFSET(String, hashcode_);
+    }
+
     static constexpr uint32_t GetStringCompressionMask()
     {
         return STRING_COMPRESSED_BIT;
@@ -336,6 +341,8 @@ private:
 
 constexpr uint32_t STRING_LENGTH_OFFSET = 8U;
 static_assert(STRING_LENGTH_OFFSET == panda::coretypes::String::GetLengthOffset());
+constexpr uint32_t STRING_HASHCODE_OFFSET = 12U;
+static_assert(STRING_HASHCODE_OFFSET == panda::coretypes::String::GetHashcodeOffset());
 constexpr uint32_t STRING_DATA_OFFSET = 16U;
 static_assert(STRING_DATA_OFFSET == panda::coretypes::String::GetDataOffset());
 

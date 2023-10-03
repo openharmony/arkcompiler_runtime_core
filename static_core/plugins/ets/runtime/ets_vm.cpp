@@ -78,9 +78,27 @@ void PandaEtsVM::PromiseListenerInfo::OnPromiseStateChanged(EtsHandle<EtsPromise
 }
 
 /* static */
+bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options, panda_file::SourceLang source_lang)
+{
+    auto lang_str = plugins::LangToRuntimeType(source_lang);
+    if (options.GetWorkersType(lang_str) == "taskmanager" && Runtime::GetTaskScheduler() == nullptr) {
+        auto *task_scheduler = taskmanager::TaskScheduler::Create(options.GetTaskmanagerWorkersCount(lang_str));
+        if (task_scheduler == nullptr) {
+            return false;
+        }
+        Runtime::SetTaskScheduler(task_scheduler);
+    }
+    return true;
+}
+
+/* static */
 Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const RuntimeOptions &options)
 {
     ASSERT(runtime != nullptr);
+
+    if (!PandaEtsVM::CreateTaskManagerIfNeeded(options, panda_file::SourceLang::ETS)) {
+        return Unexpected(PandaString("Cannot create TaskManager"));
+    }
 
     auto mm = CreateMM(runtime, options);
     if (mm == nullptr) {
@@ -176,8 +194,6 @@ PandaEtsVM::~PandaEtsVM()
     allocator->Delete(monitor_pool_);
     allocator->Delete(string_table_);
     allocator->Delete(compiler_);
-    // Atomic with seq_cst order reason: strong synchronization
-    allocator->Delete(atomics_shared_memory_.load(std::memory_order_seq_cst));
 
     ASSERT(mm_ != nullptr);
     mm_->Finalize();
@@ -718,18 +734,6 @@ void PandaEtsVM::FirePromiseStateChanged(EtsHandle<EtsPromise> &promise)
             ++it;
         }
     }
-}
-
-PandaVector<int8_t> *PandaEtsVM::AllocateAtomicsSharedMemory(size_t byte_length)
-{
-    // Atomic with seq_cst order reason: strong synchronization
-    [[maybe_unused]] auto current_ptr = atomics_shared_memory_.load(std::memory_order_seq_cst);
-    ASSERT_PRINT(current_ptr == nullptr, "Currently, only a single SharedArrayBuffer is supported");
-    // Note: the vector must be non-movable since it is shared between different threads
-    auto ptr = GetHeapManager()->GetInternalAllocator()->New<PandaVector<int8_t>>(byte_length, 0);
-    // Atomic with seq_cst order reason: strong synchronization
-    atomics_shared_memory_.store(ptr, std::memory_order_seq_cst);
-    return ptr;
 }
 
 }  // namespace panda::ets

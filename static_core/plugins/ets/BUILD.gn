@@ -31,7 +31,7 @@ foreach(plugin, ark_enabled_plugins) {
 }
 
 group("ark_packages") {
-  deps = []
+  deps = ["$ark_es2panda_root/aot:es2panda"]
   if (with_stdlib) {
     deps += [ ":etsstdlib" ]
   }
@@ -77,6 +77,11 @@ ark_gen_file("ark_asm_ets_meta_gen_h") {
 
 config("runtime") {
   include_dirs = [ "$ark_root/plugins/ets/runtime" ]
+  configs = [
+    "$ark_es2panda_root:libes2panda_public_config",
+    "$ark_root/assembler:arkassembler_public_config",
+    "$ark_root/libpandafile:arkfile_public_config"
+  ]
 }
 
 config("runtime_interpreter_impl") {
@@ -94,11 +99,12 @@ if (with_stdlib) {
                   "    \"paths\": {",
                   "      \"std\": [\"$abs_ark_root" + "/plugins/ets/stdlib/std\"],",
                   "      \"escompat\": [\"$abs_ark_root" + "/plugins/ets/stdlib/escompat\"],",
-                  "      \"import_tests\": [\"$abs_ark_root" + "/plugins/ecmascript/es2panda/test/parser/ets/import_tests\"]",
+                  "      \"import_tests\": [\"$abs_ark_root" + "$ark_es2panda_root/test/parser/ets/import_tests\"]",
                   "    }",
                   "  }",
                   "}"]
-    write_file("$root_gen_dir/plugins/ecmascript/es2panda/generated/arktsconfig.json", json_array, "list lines" )
+    # TODO(vpukhov): adjust es2panda path
+    write_file("$root_gen_dir/plugins/es2panda/generated/arktsconfig.json", json_array, "list lines" )
     sources = [
       "stdlib/escompat/Array.ets",
       "stdlib/escompat/ArrayBuffer.ets",

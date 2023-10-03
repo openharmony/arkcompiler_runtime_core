@@ -41,7 +41,7 @@ def get_file_list(panda_dir) -> list:
     return file_list
 
 # Additional check because regexps sometimes find correct comments
-def wrong_doxygen_comment(s: str) -> bool:
+def is_doxygen_comment(s: str) -> bool:
     # Helps not to raise warnings for fine comments
     # Examples of fine comments: /************/, /* ///////TEXT */
     fine_comments = [re.compile(r'///[^\n]*\*/[^\n]*'), re.compile(r'/\*\*[^\n]*\*/')]
@@ -106,24 +106,30 @@ def check_additional_slashes(src_path: str, strings: list) -> bool:
     lines = text.splitlines()
     found_wrong_comment = False
     found_wrong_keyword_sign = False
-    line_before_is_correct = False # Used to determine when '///' is used for multi-line comments
+    fine_comments_lines = []
+    strings = list(set(strings)) # Only unique strings left
     for i in range(0, len(strings)):
-        line_num = text[:text.find(strings[i])].count('\n') + 1
-        pattern_to_check = re.search(r' */// [^ ]+?[^\n]*', lines[line_num - 1])
-        if not pattern_to_check or pattern_to_check.group(0) != lines[line_num - 1]:
-            err_msg = "%s:%s" % (src_path, line_num)
+        str_indexes = [s.start() for s in re.finditer(re.escape(strings[i]), text)] # Used to find all occurencies of a given string
+        for j in range(0, len(str_indexes)):
+            line_num = text[:str_indexes[j]].count('\n') + 1
+            pattern_to_check = re.search(r' */// [^ ]+?[^\n]*', lines[line_num - 1])
+            if not pattern_to_check or pattern_to_check.group(0) != lines[line_num - 1]:
+                err_msg = "%s:%s" % (src_path, line_num)
+                print(err_msg)
+                print("Found doxygen comment with a wrong style:\n%s\n" % strings[i])
+                found_wrong_comment = True
+                continue
+            fine_comments_lines.append(line_num)
+            found_wrong_keyword_sign |= not check_keywords(src_path, strings[i].splitlines(), line_num)
+
+    fine_comments_lines.sort()
+    for i in range(0, len(fine_comments_lines) - 1):
+        if fine_comments_lines[i] + 1 == fine_comments_lines[i + 1]:
+            err_msg = "%s:%s" % (src_path, fine_comments_lines[i])
             print(err_msg)
-            print("Found doxygen comment with a wrong style:\n%s\n" % strings[i])
+            print("Please, use '///' only for single-line comments:\n%s\n%s\n" % (lines[fine_comments_lines[i] - 1], lines[fine_comments_lines[i + 1] - 1]))
             found_wrong_comment = True
-            line_before_is_correct = False
-            continue
-        if text[:text.find(strings[i - 1])].count('\n') + 1 == line_num - 1 and line_before_is_correct:
-            err_msg = "%s:%s" % (src_path, line_num)
-            print(err_msg)
-            print("Please, use '///' only for single-line comments:\n%s\n%s\n" % (lines[line_num - 2], lines[line_num - 1]))
-            found_wrong_comment = True
-        line_before_is_correct = True
-        found_wrong_keyword_sign |= not check_keywords(src_path, strings[i].splitlines(), line_num)
+            break
     if found_wrong_comment:
         print_correct_style()
     return not (found_wrong_comment or found_wrong_keyword_sign)
@@ -176,7 +182,7 @@ def run_doxygen_check(src_path: str, msg: str) -> bool:
         strings = regexp.findall(f.read())
         f.close()
         for s in strings:
-            if wrong_doxygen_comment(s):
+            if is_doxygen_comment(s):
                 wrong_patterns_found.append(s)
     line_num = 1
     f = open(src_path, 'r')
@@ -197,7 +203,7 @@ def run_doxygen_check(src_path: str, msg: str) -> bool:
         strings = regexps_for_fine_styles[i].findall(f.read())
         f.close()
         for s in strings:
-            if wrong_doxygen_comment(s):
+            if is_doxygen_comment(s):
                 fine_patterns_found[i].append(s)
 
     return check_all(src_path, fine_patterns_found, len(wrong_patterns_found))

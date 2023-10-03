@@ -331,29 +331,29 @@ endfunction()
 function(compile_stdlib TARGET_ARCH)
     add_custom_target(ets-compile-stdlib-aot-${TARGET_ARCH}
         COMMENT "Running ark_aot compilation for etsstdlib for ${TARGET_ARCH} with default options"
-        COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=aot -compiler-options=${COMPILER_OPTIONS} -paoc-output=etsstdlib_aot_${TARGET_ARCH}.an
+        COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=aot -compiler-options="${COMPILER_OPTIONS}" -paoc-output=etsstdlib_aot_${TARGET_ARCH}.an
         DEPENDS ark_aot etsstdlib
     )
     add_custom_target(ets-compile-stdlib-jit-${TARGET_ARCH}
         COMMENT "Running ark_aot compilation for etsstdlib for ${TARGET_ARCH} with jit mode"
-        COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=jit -compiler-options=${COMPILER_OPTIONS} -paoc-output=etsstdlib_jit_${TARGET_ARCH}.an
+        COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=jit -compiler-options="${COMPILER_OPTIONS}" -paoc-output=etsstdlib_jit_${TARGET_ARCH}.an
         DEPENDS ark_aot etsstdlib
     )
     add_custom_target(ets-compile-stdlib-aot-${TARGET_ARCH}-no-inline
         COMMENT "Running ark_aot compilation for etsstdlib for ${TARGET_ARCH} without inlining"
-        COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=aot -compiler-options=${COMPILER_OPTIONS_NO_INLINE} -paoc-output=etsstdlib_aot_${TARGET_ARCH}_no_inline.an
+        COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=aot -compiler-options="${COMPILER_OPTIONS_NO_INLINE}" -paoc-output=etsstdlib_aot_${TARGET_ARCH}_no_inline.an
         DEPENDS ark_aot etsstdlib
     )
     add_custom_target(ets-compile-stdlib-aot-${TARGET_ARCH}-stw
         COMMENT "Running ark_aot compilation for etsstdlib for ${TARGET_ARCH} with gc stw"
-        COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=aot -compiler-options=${COMPILER_OPTIONS_GC_STW} -paoc-output=etsstdlib_aot_${TARGET_ARCH}_stw.an
+        COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=aot -compiler-options="${COMPILER_OPTIONS_GC_STW}" -paoc-output=etsstdlib_aot_${TARGET_ARCH}_stw.an
         DEPENDS ark_aot etsstdlib
     )
     add_dependencies(ets-compile-stdlib ets-compile-stdlib-aot-${TARGET_ARCH} ets-compile-stdlib-jit-${TARGET_ARCH} ets-compile-stdlib-aot-${TARGET_ARCH}-no-inline ets-compile-stdlib-aot-${TARGET_ARCH}-stw)
     if (PANDA_LLVMAOT)
         add_custom_target(ets-compile-stdlib-llvm-${TARGET_ARCH}
             COMMENT "Running ark_aot compilation for etsstdlib for ${TARGET_ARCH} with llvm"
-            COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=llvm -compiler-options=${COMPILER_OPTIONS} -paoc-output=etsstdlib_aot_${TARGET_ARCH}.an
+            COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=llvm -compiler-options="${COMPILER_OPTIONS}" -paoc-output=etsstdlib_llvmaot_${TARGET_ARCH}.an
             DEPENDS ark_aot etsstdlib
         )
         add_dependencies(ets-compile-stdlib ets-compile-stdlib-llvm-${TARGET_ARCH})
@@ -361,7 +361,7 @@ function(compile_stdlib TARGET_ARCH)
     if (TARGET_ARCH STREQUAL "arm64")
         add_custom_target(ets-compile-stdlib-osr-${TARGET_ARCH}
             COMMENT "Running ark_aot compilation for etsstdlib for ${TARGET_ARCH} with osr mode"
-            COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=osr -compiler-options=${COMPILER_OPTIONS} -paoc-output=etsstdlib_osr_${TARGET_ARCH}.an
+            COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=osr -compiler-options="${COMPILER_OPTIONS}" -paoc-output=etsstdlib_osr_${TARGET_ARCH}.an
             DEPENDS ark_aot etsstdlib
         )
         add_dependencies(ets-compile-stdlib ets-compile-stdlib-osr-${TARGET_ARCH})
@@ -452,6 +452,9 @@ add_subdirectory(lookup_by_name)
 add_subdirectory(ets_test_suite)
 add_subdirectory(runtime)
 add_subdirectory(napi)
+if(NOT (PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER))
+    add_subdirectory(micro-benchmarks)
+endif()
 
 add_custom_target(ets_gtests)
 add_dependencies(ets_tests ets_gtests)

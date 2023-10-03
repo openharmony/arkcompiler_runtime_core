@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//ark/runtime_core/ark_root.gni")
+
 # TODO(nsizov): Fix after PR480 is merged
 srcs_assembler = [ "assembler/extension/ets_meta.cpp" ]
 
@@ -46,6 +48,12 @@ entrypoints_yaml_path = "runtime/ets_entrypoints.yaml"
 irtoc_plugins = [
   "irtoc_scripts/interpreter_handlers.irt",
   "irtoc_scripts/interpreter_main_loop.irt",
+]
+
+arkruntime_deps = [
+  "$ark_root/assembler:libarkassembler_frontend_static",
+  "$ark_root/libpandafile:libarkfile_frontend_static",
+  "$ark_es2panda_root:libes2panda_frontend_static",
 ]
 
 srcs_runtime = [

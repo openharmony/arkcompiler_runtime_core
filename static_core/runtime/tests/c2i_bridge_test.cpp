@@ -140,9 +140,6 @@ public:
         } else if (ret_type == TypeId::REFERENCE) {
             out << "lda.null\n";
             out << "return.obj\n";
-        } else if (ret_type == TypeId::TAGGED) {
-            out << "ldai.dyn " << ret << '\n';
-            out << "return.dyn\n";
         } else {
             out << "ldai " << ret << '\n';
             out << "return\n";
@@ -309,14 +306,6 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeObjNoArg)
 
     auto *res = InvokeEntryPoint<ObjectHeader *>(method);
     ASSERT_EQ(res, nullptr);
-}
-
-TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeTaggedNoArg)
-{
-    auto method = MakeNoArgsMethod(TypeId::TAGGED, 1);
-
-    auto res = InvokeEntryPoint<coretypes::TaggedValue>(method);
-    ASSERT_EQ(res.GetRawData(), coretypes::TaggedValue(1).GetRawData());
 }
 
 /// Args tests:

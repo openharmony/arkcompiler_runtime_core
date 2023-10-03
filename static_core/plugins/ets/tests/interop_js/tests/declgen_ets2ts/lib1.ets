@@ -46,7 +46,7 @@ export function ReplaceFirst(arr: Simple[], e: Simple): Simple[] {
 
 export class Fields {
     readonly readonlyBoolean_: boolean = true;
-    public static staticFloat_: float = 1.1;
+    public static staticFloat_: float = 0.0;
     public double_: double = 2.2;
     public doubleAlias_: DoubleAlias = 3.3;
     int_: int = 4;
@@ -58,6 +58,7 @@ export class Fields {
     uint16Array_: Uint16Array = new Uint16Array();
     uint32Array_: Uint32Array = new Uint32Array();
 };
+Fields.staticFloat_ = 1.1;
 
 // ================ Methods ================
 

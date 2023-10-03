@@ -19,6 +19,7 @@ ets:
     force-generate: false
 general:
     bco: true
+    with_js: true
     build: $panda_build
     coverage:
         use-llvm-cov: false

@@ -19,7 +19,7 @@ def jump_eq(target)
   return "je #{target}"
 end
 
-def handler_path(type, name)
-  return "bridge/arch/x86/handle_#{type}_#{name}_x86.S"
+def handler_path(type)
+  return "bridge/arch/x86/handle_#{type}_x86.S"
 end
 

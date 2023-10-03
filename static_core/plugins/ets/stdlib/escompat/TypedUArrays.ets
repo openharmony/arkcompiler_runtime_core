@@ -103,6 +103,28 @@ export class Uint8ClampedArray
     {
         this(buf, 0, buf.byteLength / Uint8ClampedArray.BYTES_PER_ELEMENT)
     }
+    
+     /**
+     * Creates an Uint8ClampedArray with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int)
+    {
+        this.length = length
+        this.byteLength = length * Uint8ClampedArray.BYTES_PER_ELEMENT
+        this.byteOffset = 0
+        this.buffer = new ArrayBuffer(this.byteLength)
+    }
+
+    /**
+     * Creates an Uint8ClampedArray with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        this(length as int)
+    }
 
     /**
      * Creates a copy of Uint8ClampedArray.
@@ -1810,6 +1832,28 @@ export class Uint8Array
     public constructor(buf: ArrayBuffer)
     {
         this(buf, 0, buf.byteLength / Uint8Array.BYTES_PER_ELEMENT)
+    }
+    
+     /**
+     * Creates an Uint8Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int)
+    {
+        this.length = length
+        this.byteLength = length * Uint8Array.BYTES_PER_ELEMENT
+        this.byteOffset = 0
+        this.buffer = new ArrayBuffer(this.byteLength)
+    }
+
+    /**
+     * Creates an Uint8Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        this(length as int)
     }
 
     /**
@@ -3519,6 +3563,28 @@ export class Uint16Array
     {
         this(buf, 0, buf.byteLength / Uint16Array.BYTES_PER_ELEMENT)
     }
+    
+     /**
+     * Creates an Uint16Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int)
+    {
+        this.length = length
+        this.byteLength = length * Uint16Array.BYTES_PER_ELEMENT
+        this.byteOffset = 0
+        this.buffer = new ArrayBuffer(this.byteLength)
+    }
+
+    /**
+     * Creates an Uint16Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        this(length as int)
+    }
 
     /**
      * Creates a copy of Uint16Array.
@@ -5227,6 +5293,28 @@ export class Uint32Array
     {
         this(buf, 0, buf.byteLength / Uint32Array.BYTES_PER_ELEMENT)
     }
+    
+     /**
+     * Creates an Uint32Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int)
+    {
+        this.length = length
+        this.byteLength = length * Uint32Array.BYTES_PER_ELEMENT
+        this.byteOffset = 0
+        this.buffer = new ArrayBuffer(this.byteLength)
+    }
+
+    /**
+     * Creates an Uint32Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        this(length as int)
+    }
 
     /**
      * Creates a copy of Uint32Array.
@@ -6934,6 +7022,28 @@ export class BigUint64Array
     public constructor(buf: ArrayBuffer)
     {
         this(buf, 0, buf.byteLength / BigUint64Array.BYTES_PER_ELEMENT)
+    }
+    
+     /**
+     * Creates an BigUint64Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int)
+    {
+        this.length = length
+        this.byteLength = length * BigUint64Array.BYTES_PER_ELEMENT
+        this.byteOffset = 0
+        this.buffer = new ArrayBuffer(this.byteLength)
+    }
+
+    /**
+     * Creates an BigUint64Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        this(length as int)
     }
 
     /**

@@ -76,7 +76,7 @@ class __ets_intArray : public __ets_array {};
 class __ets_longArray : public __ets_array {};
 class __ets_floatArray : public __ets_array {};
 class __ets_doubleArray : public __ets_array {};
-class __ets_throwable : public __ets_object {};
+class __ets_error : public __ets_object {};
 
 typedef __ets_object *ets_object;
 typedef __ets_void *ets_void;
@@ -92,7 +92,7 @@ typedef __ets_intArray *ets_intArray;
 typedef __ets_longArray *ets_longArray;
 typedef __ets_floatArray *ets_floatArray;
 typedef __ets_doubleArray *ets_doubleArray;
-typedef __ets_throwable *ets_throwable;
+typedef __ets_error *ets_error;
 typedef __ets_object *ets_weak;
 
 #else   // __cplusplus
@@ -101,7 +101,7 @@ struct __ets_object;
 typedef struct __ets_object *ets_object;
 typedef ets_object ets_class;
 typedef ets_object ets_string;
-typedef ets_object ets_throwable;
+typedef ets_object ets_error;
 typedef ets_object ets_weak;
 typedef ets_object ets_array;
 typedef ets_array ets_objectArray;
@@ -170,9 +170,9 @@ struct ETS_NativeInterface {
     ets_class (*GetSuperclass)(EtsEnv *env, ets_class cls);
     ets_boolean (*IsAssignableFrom)(EtsEnv *env, ets_class cls1, ets_class cls2);
     // ets_object (*ToReflectedField)(EtsEnv *env, ets_class cls, ets_field p_field, ets_boolean isStatic);
-    ets_int (*ThrowError)(EtsEnv *env, ets_throwable obj);
+    ets_int (*ThrowError)(EtsEnv *env, ets_error obj);
     ets_int (*ThrowErrorNew)(EtsEnv *env, ets_class cls, const char *message);
-    ets_throwable (*ErrorOccurred)(EtsEnv *env);
+    ets_error (*ErrorOccurred)(EtsEnv *env);
     void (*ErrorDescribe)(EtsEnv *env);
     void (*ErrorClear)(EtsEnv *env);
     void (*FatalError)(EtsEnv *env, const char *message);
@@ -397,8 +397,6 @@ struct ETS_NativeInterface {
                                  const ets_double *buf);
     ets_int (*RegisterNatives)(EtsEnv *env, ets_class cls, const EtsNativeMethod *methods, ets_int nMethods);
     ets_int (*UnregisterNatives)(EtsEnv *env, ets_class cls);
-    ets_int (*MonitorEnter)(EtsEnv *env, ets_object obj);
-    ets_int (*MonitorExit)(EtsEnv *env, ets_object obj);
     ets_int (*GetEtsVM)(EtsEnv *env, EtsVM **vm);
     void (*GetStringRegion)(EtsEnv *env, ets_string str, ets_size start, ets_size len, ets_char *buf);
     void (*GetStringUTFRegion)(EtsEnv *env, ets_string str, ets_size start, ets_size len, char *buf);
@@ -519,7 +517,7 @@ struct __EtsEnv {
         return native_interface->IsAssignableFrom(this, cls1, cls2);
     }
     // ToReflectedField,
-    ets_int ThrowError(ets_throwable obj)
+    ets_int ThrowError(ets_error obj)
     {
         return native_interface->ThrowError(this, obj);
     }
@@ -527,7 +525,7 @@ struct __EtsEnv {
     {
         return native_interface->ThrowErrorNew(this, cls, message);
     }
-    ets_throwable ErrorOccurred()
+    ets_error ErrorOccurred()
     {
         return native_interface->ErrorOccurred(this);
     }
@@ -1461,14 +1459,6 @@ struct __EtsEnv {
     ets_int UnregisterNatives(ets_class cls)
     {
         return native_interface->UnregisterNatives(this, cls);
-    }
-    ets_int MonitorEnter(ets_object obj)
-    {
-        return native_interface->MonitorEnter(this, obj);
-    }
-    ets_int MonitorExit(ets_object obj)
-    {
-        return native_interface->MonitorExit(this, obj);
     }
     ets_int GetEtsVM(EtsVM **vm)
     {

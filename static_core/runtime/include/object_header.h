@@ -155,8 +155,8 @@ public:
             return;
         }
         bool res;
+        MarkWord word = AtomicGetMark();
         do {
-            MarkWord word = AtomicGetMark();
             res = AtomicSetMark<false>(word, word.SetMarkedForGC());
         } while (!res);
     }
@@ -168,8 +168,8 @@ public:
             return;
         }
         bool res;
+        MarkWord word = AtomicGetMark();
         do {
-            MarkWord word = AtomicGetMark();
             res = AtomicSetMark<false>(word, word.SetUnMarkedForGC());
         } while (!res);
     }
@@ -185,7 +185,7 @@ public:
     inline void *FieldAddr(int offset) const;
 
     template <bool STRONG = true>
-    bool AtomicSetMark(MarkWord old_mark_word, MarkWord new_mark_word)
+    bool AtomicSetMark(MarkWord &old_mark_word, MarkWord new_mark_word)
     {
         // This is the way to operate with casting MarkWordSize <-> MarkWord and atomics
         auto ptr = reinterpret_cast<MarkWord *>(&mark_word_);

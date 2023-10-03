@@ -208,39 +208,6 @@ TEST_F(MethodTest, Invoke)
     EXPECT_EQ(ManagedThread::GetCurrent(), thread);
 }
 
-TEST_F(MethodTest, CheckTaggedReturnType)
-{
-    pandasm::Parser p;
-
-    auto source = R"(
-
-        .function any Foo(any a0) {
-            lda.dyn a0
-            return.dyn
-        }
-    )";
-
-    auto res = p.Parse(source);
-    auto pf = pandasm::AsmEmitter::Emit(res.Value());
-    ASSERT_NE(pf, nullptr);
-
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
-    PandaString descriptor;
-
-    Class *klass = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
-    ASSERT_NE(klass, nullptr);
-
-    Method *method = klass->GetDirectMethod(utf::CStringAsMutf8("Foo"));
-    ASSERT_NE(method, nullptr);
-
-    std::array args = {TaggedValue(1)};
-    TaggedValue v = method->InvokeDyn(ManagedThread::GetCurrent(), args.size(), args.data());
-
-    EXPECT_EQ(v.GetInt(), 1);
-}
-
 TEST_F(MethodTest, VirtualMethod)
 {
     pandasm::Parser p;

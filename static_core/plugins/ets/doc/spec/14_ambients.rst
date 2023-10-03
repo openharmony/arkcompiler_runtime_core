@@ -6,14 +6,14 @@ Ambient Declarations
 Ambient declarations are a way of specifying entities that are declared
 somewhere else.
 
-Ambient declarations do not introduce new entities as regular declarations
-do, but instead provide type information for the entities that are included
+Ambient declarations do not introduce new entities---as regular declarations
+do---but instead provide type information for the entities that are included
 in a program by external means.
 
-Ambient declarations cannot have the executed code, and consequently have
+Ambient declarations cannot include executable code, and consequently have
 no initializers.
 
-Ambient functions, methods and constructors have no body.
+Ambient functions, methods, and constructors have no body.
 
 .. index::
    ambient declaration
@@ -101,8 +101,8 @@ Ambient Function Declarations
 
 A compile-time error occurs if:
 
--  an explicit return type is not specified for an ambient function declaration;
--  not all overload signatures are marked as ambient in top-level ambient
+-  An explicit return type is not specified for an ambient function declaration;
+-  Not all overload signatures are marked as ambient in top-level ambient
    overload signatures.
 
 .. index::
@@ -179,7 +179,7 @@ Ambient field declarations have no initializers.
         fieldModifier* ('let' | 'const') identifier ':' type
         ;
 
-Ambient constructor, method and accessor declarations have no bodies.
+Ambient constructor, method, and accessor declarations have no bodies.
 
 .. code-block:: abnf
 

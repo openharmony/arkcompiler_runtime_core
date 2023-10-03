@@ -142,12 +142,33 @@ extern "C" int32_t SharedMemoryWaitI32(EtsSharedMemory *mem, int32_t byte_offset
     return static_cast<int32_t>(result);
 }
 
+extern "C" int32_t SharedMemoryWaitI64(EtsSharedMemory *mem, int32_t byte_offset, int64_t expected_value)
+{
+    auto result = mem->WaitI64(byte_offset, expected_value, std::nullopt);
+    return static_cast<int32_t>(result);
+}
+
 extern "C" int32_t SharedMemoryTimedWaitI32(EtsSharedMemory *mem, int32_t byte_offset, int32_t expected_value,
                                             int64_t ms)
 {
     ASSERT(ms >= 0);
     auto u_ms = static_cast<uint64_t>(ms);
     auto result = mem->WaitI32(byte_offset, expected_value, std::optional(u_ms));
+    return static_cast<int32_t>(result);
+}
+
+extern "C" int32_t SharedMemoryTimedWaitI64(EtsSharedMemory *mem, int32_t byte_offset, int64_t expected_value,
+                                            int64_t ms)
+{
+    auto *current_coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(current_coro);
+    EtsHandle<EtsSharedMemory> hmem(current_coro, mem);
+
+    ASSERT(ms >= 0);
+    auto u_ms = static_cast<uint64_t>(ms);
+    ScopedNativeCodeThread n(current_coro);
+
+    auto result = hmem->WaitI64(byte_offset, expected_value, std::optional(u_ms));
     return static_cast<int32_t>(result);
 }
 

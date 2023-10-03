@@ -190,7 +190,7 @@ public:
         size_t cycles = 0;
 #endif /* NDEBUG */
         while (!AtomicSetMark<false>(mw_expected, new_mw)) {
-            mw_expected = AtomicGetMark().DecodeFromUnlocked();
+            mw_expected = mw_expected.DecodeFromUnlocked();
             new_mw = mw_expected.DecodeFromLightLock(tid, 0);
 #ifndef NDEBUG
             ++cycles;
@@ -210,7 +210,6 @@ public:
         ASSERT(mw.GetState() == MarkWord::STATE_LIGHT_LOCKED);
         auto new_mw = mw.DecodeFromUnlocked();
         while (!AtomicSetMark<false>(mw, new_mw)) {
-            mw = AtomicGetMark();
             ASSERT(mw.GetState() == MarkWord::STATE_LIGHT_LOCKED);
             new_mw = mw.DecodeFromUnlocked();
         }

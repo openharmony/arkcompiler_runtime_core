@@ -99,6 +99,7 @@ std/core/std_core_string_String_toLocaleUpperCase_string.ets
 std/core/std_core_string_String_toWellFormed.ets
 ### Issue 12562 end
 ### Issue 12849
+escompat/escompat_Array_single_Test_escompat_Array.ets
 escompat/escompat_Array_Test_escompat_Array.ets
 escompat/escompat_Array_Test_escompat_Array_001.ets
 escompat/escompat_Array_Test_escompat_Array_002.ets

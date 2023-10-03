@@ -30,7 +30,7 @@ GCAdaptiveStack::GCAdaptiveStack(GC *gc, size_t stack_size_limit, size_t new_tas
 {
     initial_stack_size_limit_ = stack_size_limit_;
     auto allocator = gc_->GetInternalAllocator();
-    ASSERT((stack_size_limit == 0) || (gc->GetWorkersPool() != nullptr));
+    ASSERT((stack_size_limit == 0) || (gc->GetWorkersTaskPool() != nullptr));
     if (stack_src != nullptr) {
         stack_src_ = stack_src;
     } else {
@@ -87,13 +87,13 @@ void GCAdaptiveStack::PushToStack(ObjectHeader *element)
         // Create a new stack and send a new task to GC
         LOG(DEBUG, GC) << "GCAdaptiveStack: Try to add new task " << GCWorkersTaskTypesToString(task_type_)
                        << " for worker";
-        ASSERT(gc_->GetWorkersPool() != nullptr);
+        ASSERT(gc_->GetWorkersTaskPool() != nullptr);
         ASSERT(task_type_ != GCWorkersTaskTypes::TASK_EMPTY);
         auto allocator = gc_->GetInternalAllocator();
         // New tasks will be created with the same new_task_stack_size_limit_ and stack_size_limit_
         auto *new_stack = allocator->New<GCAdaptiveStack>(gc_, new_task_stack_size_limit_, new_task_stack_size_limit_,
                                                           task_type_, time_limit_for_new_task_creation_, stack_dst_);
-        if (gc_->GetWorkersPool()->AddTask(GCMarkWorkersTask(task_type_, new_stack))) {
+        if (gc_->GetWorkersTaskPool()->AddTask(GCMarkWorkersTask(task_type_, new_stack))) {
             LOG(DEBUG, GC) << "GCAdaptiveStack: Successfully add new task " << GCWorkersTaskTypesToString(task_type_)
                            << " for worker";
             stack_dst_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());

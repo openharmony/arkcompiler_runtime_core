@@ -145,6 +145,11 @@ class GeneralOptions:
         return True
 
     @cached_property
+    @value(yaml_path="general.with_js", cli_name="with_js", cast_to_type=_to_bool)
+    def with_js(self) -> bool:
+        return True
+
+    @cached_property
     @value(yaml_path="general.qemu", cli_name=["arm64_qemu", "arm32_qemu"], cast_to_type=_to_qemu)
     def qemu(self) -> QemuKind:
         return QemuKind.NONE

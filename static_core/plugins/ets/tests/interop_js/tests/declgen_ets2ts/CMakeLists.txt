@@ -49,7 +49,7 @@ file(WRITE ${ARKTSCONFIG}
 add_custom_command(
     OUTPUT ${MAIN_TS} ${MAIN_JS} ${LIB_1_ABC} ${LIB_2_ABC} ${LIB_LINKED_ABC} ${LIB_1_DECL_TS} ${LIB_2_DECL_TS}
     COMMENT "Compile interop project: ${MAIN_TS_INPUT} ${LIB_1_ETS_INPUT} ${LIB_2_ETS_INPUT} ${LIB_3_JS_INPUT}"
-    COMMAND $<TARGET_FILE:es2panda> --arktsconfig ${ARKTSCONFIG} --output ${LIB_1_ABC} --gen-ts-decl ${LIB_1_DECL_TS} ${LIB_1_ETS_INPUT} --ets-module
+    COMMAND $<TARGET_FILE:es2panda> --arktsconfig ${ARKTSCONFIG} --output ${LIB_1_ABC} --gen-ts-decl ${LIB_1_DECL_TS} ${LIB_1_ETS_INPUT}
     COMMAND $<TARGET_FILE:es2panda> --output ${LIB_2_ABC} --gen-ts-decl ${LIB_2_DECL_TS} ${LIB_2_ETS_INPUT} --ets-module
     COMMAND $<TARGET_FILE:ark_link> --output ${LIB_LINKED_ABC} -- ${LIB_1_ABC} ${LIB_2_ABC}
     COMMAND cp ${MAIN_TS_INPUT} ${CMAKE_CURRENT_BINARY_DIR}

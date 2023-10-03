@@ -19,6 +19,8 @@ set(intrinsics_tests
     string_equals
     string_length
     string_isempty
+    string_from_string
+    string_from_chars
     char_isuppercase
     abs
     min

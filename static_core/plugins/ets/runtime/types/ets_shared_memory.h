@@ -23,6 +23,7 @@
 #include "libpandabase/macros.h"
 #include "libpandabase/mem/space.h"
 #include "libpandabase/os/mutex.h"
+#include "libpandabase/mem/object_pointer.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_object.h"
@@ -52,6 +53,11 @@ public:
         return EtsObject::FromCoreType(this);
     }
 
+    static EtsSharedMemory *FromEtsObject(EtsObject *shared_mem)
+    {
+        return reinterpret_cast<EtsSharedMemory *>(shared_mem);
+    }
+
     static EtsSharedMemory *Create(size_t length);
 
     void Initialize(size_t length);
@@ -68,34 +74,26 @@ public:
         waiter_ = reinterpret_cast<EtsLong>(waiter);
     }
 
-    PandaVector<int8_t> *GetData()
-    {
-        return reinterpret_cast<PandaVector<int8_t> *>(data_);
-    }
-
-    void SetData(PandaVector<int8_t> *data)
-    {
-        data_ = reinterpret_cast<EtsLong>(data);
-    }
-
     void LinkWaiter(Waiter &waiter);
     void UnlinkWaiter(Waiter &waiter);
 
-    int8_t GetElement(int32_t index);
-    void SetElement(int32_t index, int8_t element);
+    int8_t GetElement(uint32_t index);
+    void SetElement(uint32_t index, int8_t element);
 
     template <typename F>
     std::pair<int8_t, int8_t> ReadModifyWriteI8(int32_t index, const F &f);
 
     enum class WaitResult { OK = 0, NOT_EQUAL = 1, TIMED_OUT = 2 };
 
-    WaitResult WaitI32(int32_t offset, int32_t expected_value, std::optional<uint64_t> timeout);
+    WaitResult WaitI32(uint32_t offset, int32_t expected_value, std::optional<uint64_t> timeout);
 
-    int32_t NotifyI32(int32_t offset, std::optional<uint32_t> count);
+    WaitResult WaitI64(uint32_t offset, int64_t expected_value, std::optional<uint64_t> timeout);
+
+    int32_t NotifyI32(uint32_t offset, std::optional<uint32_t> count);
 
     class Waiter {
     public:
-        explicit Waiter(int32_t offset) : offset_(offset) {}
+        explicit Waiter(uint32_t offset) : offset_(offset) {}
 
         bool Wait(std::optional<uint64_t> timeout);
 
@@ -113,7 +111,7 @@ public:
             notified_.store(true, std::memory_order_seq_cst);
         }
 
-        int32_t GetOffset()
+        uint32_t GetOffset()
         {
             return offset_;
         }
@@ -141,14 +139,14 @@ public:
     private:
         os::memory::ConditionVariable cv_ {os::memory::ConditionVariable()};
         std::atomic<bool> notified_ {std::atomic<bool>(false)};
-        int32_t offset_;
+        uint32_t offset_;
 
         Waiter *prev_ {nullptr};
         Waiter *next_ {nullptr};
     };
 
 private:
-    EtsLong data_;
+    ObjectPointer<EtsByteArray> array_;
     EtsLong waiter_;
 };
 

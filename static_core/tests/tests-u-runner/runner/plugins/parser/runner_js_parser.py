@@ -15,6 +15,7 @@ class RunnerJSParser(RunnerJS):
     def __init__(self, config: Config):
         super().__init__(config, "parser")
 
+        # TODO(vpukhov): adjust es2panda path
         es2panda_test = path.join(self.panda_source_root, "plugins", "ecmascript", "es2panda", "test")
 
         self.list_root = es2panda_test if self.list_root is None else self.list_root
@@ -26,9 +27,11 @@ class RunnerJSParser(RunnerJS):
         self.collect_excluded_test_lists()
         self.collect_ignored_test_lists()
 
-        self.add_directory("ark_tests/parser/js", "js", flags=["--parse-only"])
+        if self.config.general.with_js:
+            self.add_directory("ark_tests/parser/js", "js", flags=["--parse-only"])
 
-        self.add_directory("compiler/js", "js", flags=["--extension=js", "--output=/dev/null"])
+        if self.config.general.with_js:
+            self.add_directory("compiler/js", "js", flags=["--extension=js", "--output=/dev/null"])
         self.add_directory("compiler/ts", "ts", flags=["--extension=ts", ])
         self.add_directory("compiler/ets", "ets", flags=[
             "--extension=ets",
@@ -36,7 +39,8 @@ class RunnerJSParser(RunnerJS):
             f"--arktsconfig={self.arktsconfig}"
         ])
 
-        self.add_directory("parser/js", "js", flags=["--parse-only"])
+        if self.config.general.with_js:
+            self.add_directory("parser/js", "js", flags=["--parse-only"])
         self.add_directory("parser/ts", "ts", flags=["--parse-only", '--extension=ts'])
         self.add_directory("parser/as", "ts", flags=["--parse-only", "--extension=as"])
         self.add_directory("parser/ets", "ets", flags=[

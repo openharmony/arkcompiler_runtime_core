@@ -553,11 +553,17 @@ messages:
       Can not find field with name '${field}' in class '{class}'.
       Expected field bit width is '${expected_field_type}'.
 
-  ExpectedVolatileOrInstanceField:
+  ExpectedVolatileField:
     number: 69
-    args: is_volatile
+    level: warning
     short_message: >
-      Expected ${(is_volatile ? "volatile" : "instance")} field.
+      Expected volatile field.
+
+  ExpectedInstanceField:
+    number: 70
+    level: error
+    short_message: >
+      Expected instance field.
 
   CflowInvalidJumpOutsideMethodBody:
     number: 1000

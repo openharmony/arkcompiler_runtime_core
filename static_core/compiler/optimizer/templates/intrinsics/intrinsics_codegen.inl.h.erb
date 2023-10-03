@@ -23,6 +23,7 @@
 % codegen_funcs += ['CreateFloatIsInteger', 'CreateFloatIsSafeInteger', 'CreateDoubleIsInteger', 'CreateDoubleIsSafeInteger']
 % codegen_funcs += ['CreateCountLeadingZeroBits']
 % codegen_funcs += ['CreateStringBuilderBool', 'CreateStringBuilderChar','CreateStringBuilderString']
+% codegen_funcs += ['CreateStringFromStringTlab', 'CreateStringFromCharArrayTlab']
 % codegen_funcs.uniq.each do |codegen_func|
 void <%= codegen_func %>(IntrinsicInst *inst, Reg dst, SRCREGS src);
 % end

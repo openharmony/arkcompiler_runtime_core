@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "runtime/include/runtime.h"
 #include "runtime/include/runtime_options.h"
 #include "runtime/mem/gc/gc_settings.h"
 #include "libpandabase/globals.h"
@@ -47,8 +48,7 @@ GCSettings::GCSettings(const RuntimeOptions &options, panda_file::SourceLang lan
     gc_workers_count_ = options.GetGcWorkersCount();
     manage_gc_threads_affinity_ = options.IsManageGcThreadsAffinity();
     use_weak_cpu_for_gc_concurrent_ = options.IsUseWeakCpuForGcConcurrent();
-    // Only 2 possible values: 'threadpool' and 'taskmanager'
-    use_thread_pool_for_gc_workers_ = options.GetWorkersType() == "threadpool";
+    use_thread_pool_for_gc_workers_ = Runtime::GetTaskScheduler() == nullptr;
     gc_marking_stack_new_tasks_frequency_ = options.GetGcMarkingStackNewTasksFrequency();
     gc_root_marking_stack_max_size_ = options.GetGcRootMarkingStackMaxSize();
     gc_workers_marking_stack_max_size_ = options.GetGcWorkersMarkingStackMaxSize();

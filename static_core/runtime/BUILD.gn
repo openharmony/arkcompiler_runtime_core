@@ -82,7 +82,6 @@ group("arkruntime_header_deps") {
     ":isa_gen_libarkruntime_interpreter-inl_gen_h",
     ":isa_gen_libarkruntime_irtoc_interpreter_utils_h",
     ":isa_gen_libarkruntime_isa_constants_gen_h",
-    ":isa_gen_libarkruntime_unimplemented_handlers-inl_h",
     ":language_config_gen_inc",
     ":libarkruntime_options_gen_h",
     ":libarkruntime_shorty_values_h",
@@ -542,7 +541,6 @@ ark_isa_gen("isa_gen_libarkruntime") {
   template_files = [
     "interpreter-inl_gen.h.erb",
     "isa_constants_gen.h.erb",
-    "unimplemented_handlers-inl.h.erb",
     "irtoc_interpreter_utils.h.erb",
   ]
   sources = "interpreter/templates"
@@ -559,8 +557,6 @@ bridge_archs = [
   "armhf",
   "amd64",
   "x86",
-  "x86_64",
-  "x64",
 ]
 foreach(arch, bridge_archs) {
   ark_gen_file("bridge_dispatch_${arch}") {

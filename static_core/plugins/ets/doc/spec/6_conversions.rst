@@ -37,23 +37,23 @@ compatibility with its surrounding context:
 
 A compile-time error occurs if neither produces an appropriate expression type.
 
-The form of an expression and the kind of its context indicate what rules
-apply to determine whether that expression is non-standalone, and what such
-an expression’s type and compatibility are in a particular context. The
-target type can influence not only the expression type but, in some cases,
-also the expression’s runtime behavior in order to produce an appropriate
+The form of an expression, and the kind of its context indicate what rules
+apply to determine whether that expression is non-standalone, and what the
+type and compatibility of that expression are in a particular context. The
+*target type* can influence not only the type of the  expression but, in
+some cases, also its runtime behavior in order to produce an appropriate
 type of a value.
 
-The rules that determine whether a target type allows an implicit
-conversion vary for different kinds of context and expression types,
-and for one particular case of the constant expression value (see
+The rules that determine whether a *target type* allows an implicit
+conversion vary for different kinds of contexts and types of expressions,
+and, in one particular case, of the constant expression value (see
 :ref:`Constant Expressions`).
 
 The conversion from type *S* to type *T* causes a type *S* expression to
 be treated as a type *T* expression at compile time.
 
 Some cases of conversion can require a runtime action to check the
-conversion validity, or to translate the runtime expression value 
+conversion validity, or to translate the runtime expression value
 into a form that is appropriate for the new type *T*.
 
 .. index::
@@ -79,7 +79,7 @@ Kinds of Contexts
 
 Contexts can influence non-standalone expressions, and implicit conversions
 are possible in various kinds of *conversion contexts*. The following kinds
-of contexts have different rules for non-standalone expression typing and
+of contexts have different rules for non-standalone expression typing, and
 allow conversions in some, but not all expression types:
 
 -  Assignment and call contexts: expression type must be compatible with
@@ -101,8 +101,8 @@ allow conversions in some, but not all expression types:
       foo (expression1, expression2) /* Type of expression ->
           type of function parameter */
 
--  Operator contexts: ``string.+`` (concatenation) and all primitive numeric
-   type operators (`+`, `-` and so on).
+-  Operator contexts: ``string.+`` (concatenation), and all primitive numeric
+   type operators (`+`, `-`, and so on).
 
 .. code-block:: typescript
    :linenos:
@@ -140,13 +140,13 @@ Assignment and Call Contexts
     frontend_status: Done
 
 *Assignment contexts* allow assigning (see :ref:`Assignment`) a valid
-expression value to a named variable, while the expression type must be
-converted to the variable’s type. It implies that these types are to be
-compatible and exact definition of types compatibility semantics is given
-here (see :ref:`Compatible Types`).
+expression value to a named variable, while the type of the expression
+must be converted to the type of the  variable. It implies that these
+types must be compatible, and the exact definition of the semantics
+of types compatibility is given in :ref:`Compatible Types`.
 
-*Call contexts* reuse *assignment contexts* rules allowing assignment
-of an argument value of a method, constructor or function call (see
+*Call contexts* reuse the rules of *assignment contexts*, and allow
+assigning an argument value of a method, constructor, or function call (see
 :ref:`Explicit Constructor Call`, :ref:`New Expressions` and
 :ref:`Method Call Expression`) to a corresponding formal parameter.
 
@@ -170,7 +170,7 @@ of an argument value of a method, constructor or function call (see
 .. _Compatible Types:
 
 Compatible Types
----------------------------
+----------------
 
 .. meta:
     frontend_status: Done
@@ -178,12 +178,12 @@ Compatible Types
 Type *T1* is compatible with type *T2* if one of the following conversions
 can be successfully applied to type *T1* to receive type *T2* as a result:
 
--  identity conversion (see :ref:`Kinds of Conversion`);
--  predefined numeric types conversions (see :ref:`Predefined Numeric Types Conversions`);
--  reference types conversions (see :ref:`Reference Types Conversions`);
--  function types conversions (see :ref:`Function Types Conversions`);
--  enumeration types conversions - experimental feature (see :ref:`Enumeration Types Conversions`);
--  raw types conversions (see :ref:`Raw Type Conversions`).
+-  Identity conversion (see :ref:`Kinds of Conversion`);
+-  Predefined numeric types conversions (see :ref:`Predefined Numeric Types Conversions`);
+-  Reference types conversions (see :ref:`Reference Types Conversions`);
+-  Function types conversions (see :ref:`Function Types Conversions`);
+-  Enumeration types conversions -- experimental feature (see :ref:`Enumeration Types Conversions`);
+-  Raw types conversions (see :ref:`Raw Type Conversions`).
 
 .. index::
    compatible type
@@ -205,8 +205,8 @@ Operator Contexts
 .. meta:
     frontend_status: Done
 
-*String contexts* apply only to a non-*string* operand of the binary ``+``
-operator where the other operand is a *string*:
+*String context* applies only to a non-*string* operand of the binary ``+``
+operator if the other operand is a *string*. For example:
 
 .. code-block:: typescript
    :linenos:
@@ -215,7 +215,7 @@ operator where the other operand is a *string*:
     Operand types:    string     +  any_type
     Operand types:  any_type     +  string
 
-effectively transforms into
+effectively transforms into the following:
 
 .. code-block:: typescript
    :linenos:
@@ -226,20 +226,20 @@ effectively transforms into
 
 .. _string-conversion:
 
-The *string conversion* can be of the following kinds:
+*String conversion* can be of the following kinds:
 
--  Any reference type or enum type can convert directly to the *string* type,
+-  Any reference type, or enum type can convert directly to the *string* type,
    which is then performed as the *toString()* method call.
 
 -  Any primitive type must convert to a reference value (for boxing see
-   :ref:`Predefined Numeric Types Conversions`) before the *toString()* method
-   call is performed.
+   :ref:`Predefined Numeric Types Conversions`) before the method call
+   *toString()* is performed.
 
-These contexts always have the type *string* as the target type.
+These contexts always have *string* as the target type.
 
 *Numeric contexts* apply to the operands of an arithmetic operator.
 *Numeric contexts* use combinations of predefined numeric types conversions
-(see :ref:`Predefined Numeric Types Conversions`) and ensure that each
+(see :ref:`Predefined Numeric Types Conversions`), and ensure that each
 argument expression can convert to the target type *T* while the arithmetic
 operation for the values of type *T* is being defined.
 
@@ -307,8 +307,8 @@ Casting Contexts
     frontend_status: Done
     todo: Does not work for interfaces, eg. let x:iface1 = iface_2_inst as iface1; let x:iface1 = iface1_inst as iface1
 
-*Casting contexts* are applied to cast expressions (:ref:`Cast Expressions`)
-and they rely on application of *casting conversions* (:ref:`Casting Conversions`).
+*Casting contexts* are applied to cast expressions (:ref:`Cast Expressions`),
+and rely on the application of *casting conversions* (:ref:`Casting Conversions`).
 
 .. index::
    casting context
@@ -329,11 +329,11 @@ Kinds of Conversion
    todo: String Conversion - note: Inmplemented in a different but compatible way: spec - toString(), implementation: StringBuilder
    todo: Forbidden Conversion - note: Not exhaustively tested, should work
 
-The term ‘conversion’ also describes any conversions allowed in a particular
-context (for example, saying that an expression that initializes a local
-variable is subject to ‘assignment conversion’ means that the rules for the
-assignment context define what specific conversion is implicitly chosen for
-that expression).
+The term ‘conversion’ also describes any conversion that is allowed in a
+particular context (for example, saying that an expression that initializes
+a local variable is subject to ‘assignment conversion’ means that the rules
+for the assignment context define what specific conversion is implicitly
+chosen for that expression).
 
 The conversions allowed in |LANG| are broadly grouped into the following
 categories:
@@ -356,7 +356,7 @@ categories:
 -  String conversions (see :ref:`Operator Contexts`).
 -  Raw Types Conversion.
 
-Conversions that are not in one of the above categories are forbidden.
+Any other conversions are forbidden.
 
 .. index::
    identity conversion
@@ -382,7 +382,7 @@ Predefined Numeric Types Conversions
 of a numeric value (except conversions from integer to floating-point types
 that can lose some least significant bits of the value if the IEEE 754
 '*round-to-nearest*' mode is used correctly, and the resultant floating-point
-value is properly rounded to the integer value. Widening conversions never
+value is properly rounded to the integer value). Widening conversions never
 cause runtime errors.
 
 .. index::
@@ -419,7 +419,7 @@ cause runtime errors.
 
 *Narrowing conversions* (performed in compliance with IEEE 754 like in
 other programming languages) can lose information about the overall
-magnitude of a numeric value potentially resulting in the loss of precision
+magnitude of a numeric value, potentially resulting in the loss of precision
 and range. Narrowing conversions never cause runtime errors.
 
 .. index::
@@ -451,10 +451,10 @@ and range. Narrowing conversions never cause runtime errors.
 
 -  *byte* -> *char*.
 
-*Boxing and unboxing* conversion is converting reference into value and
-value into reference for predefined types.
+*Boxing and unboxing* conversions allow converting a reference into a value,
+and vice versa, for variables of predefined types.
 
-*Boxing conversions* treat primitive type expressions as expressions of a
+*Boxing conversions* handle primitive type expressions as expressions of a
 corresponding reference type.
 
 .. index::
@@ -468,17 +468,17 @@ corresponding reference type.
    expression
    reference type
 
-For example, the *boxing conversion* converts *p* (a value of type *t*)
-into a reference *r* of class and type *T* to have *r.unboxed()* == *p*.
+For example, a *boxing conversion* converts *p* of value type *t* into
+a reference *r* of class type *T*, i.e., *r.unboxed()* == *p*.
 
-An *OutOfMemoryError* can occur as a result of this conversion if the storage
+This conversion can result in an *OutOfMemoryError* thrown if the storage
 available for the creation of a new instance of the wrapper class *T* is
 insufficient.
 
-*Unboxing conversions* treat reference type expressions as expressions of
-a corresponding primitive type. The semantics of an unboxing conversion
-is the same as that of the corresponding reference type’s unboxed()
-function call.
+*Unboxing conversions* handle reference type expressions as expressions of
+a corresponding primitive type. The semantics of an unboxing conversion,
+and that of the corresponding reference type’s *unboxed() function call* is
+the same.
 
 .. index::
    boxing conversion
@@ -636,10 +636,10 @@ Function Types Conversions
     frontend_status: Partly
 
 A *function types conversion*, i.e., the conversion of one function type
-to another occurs if the below conditions are met.
+to another occurs if the following conditions are met:
 
-- parameters types are converted using contravariance
-- return types are converted using covariance (see :ref:`Compatible Types`)
+- Parameter types are converted using contravariance;
+- Return types are converted using covariance (see :ref:`Compatible Types`).
 
 .. index::
    function types conversion
@@ -763,14 +763,14 @@ Raw Types Conversion
 .. meta:
     frontend_status: Partly
 
-Assuming *G* is a generic type declaration with type parameters *n*,
+Assuming that *G* is a generic type declaration with type parameters *n*,
 
 .. code-block:: typescript
    :linenos:
 
     class|interface G<T1, T2, ... Tn> {}
 
-any instantiation of G (*G* < *Type*:sub:`1`, ``...``, *Type*:sub:`n` >) or
+any instantiation of G (*G* < *Type*:sub:`1`, ``...``, *Type*:sub:`n` >), or
 its derived types can convert into *G* <> as follows:
 
 .. code-block:: typescript

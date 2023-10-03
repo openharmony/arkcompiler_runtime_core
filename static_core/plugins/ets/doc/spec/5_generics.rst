@@ -3,6 +3,9 @@
 Generics
 ########
 
+.. meta:
+    frontend_status: Partly
+
 Class, interface, method, constructor and function are program entities
 that can be generalized in the |LANG| language. Generalization is
 parametrizing an entity by one or several types. A generalized
@@ -204,10 +207,10 @@ A type parameter of a generic can *depend* on some other type parameter
 of the same generic.
 
 If *S* constrains *T*, then the type parameter *T* *directly depends*
-on the type parameter *S*, while *T*:
+on the type parameter *S*, while *T* directly depends on:
 
--  directly depends on *S*; or
--  directly depends on a type parameter *U* that depends on *S*.
+-  *S*; or
+-  A type parameter *U* that depends on *S*.
 
 A compile-time error occurs if a type parameter in the type parameter
 section depends on itself.
@@ -474,9 +477,9 @@ equivalent.
 
 A compile-time error occurs if:
 
--  a wildcard is used in a parameterization of a function;
--  a covariant wildcard is specified for a contravariant type parameter;
--  a contravariant wildcard is specified for a covariant type parameter.
+-  A wildcard is used in a parameterization of a function;
+-  A covariant wildcard is specified for a contravariant type parameter;
+-  A contravariant wildcard is specified for a covariant type parameter.
 
 .. index::
    compile-time error

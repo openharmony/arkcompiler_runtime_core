@@ -261,16 +261,18 @@ void InstBuilder::BuildDefaultStaticIntrinsic(const BytecodeInstruction *bc_inst
     ASSERT(intrinsic_id != RuntimeInterface::IntrinsicId::COUNT);
     auto ret_type = GetMethodReturnType(method_id);
     auto pc = GetPc(bc_inst->GetAddress());
-    IntrinsicInst *inst = GetGraph()->CreateInstIntrinsic(ret_type, pc, intrinsic_id);
+    IntrinsicInst *call = GetGraph()->CreateInstIntrinsic(ret_type, pc, intrinsic_id);
     // If an intrinsic may call runtime then we need a SaveState
-    SaveStateInst *save_state = inst->RequireState() ? CreateSaveState(Opcode::SaveState, pc) : nullptr;
-    SetCallArgs(bc_inst, is_range, acc_read, nullptr, inst, nullptr, save_state, false, method_id);
+    SaveStateInst *save_state = call->RequireState() ? CreateSaveState(Opcode::SaveState, pc) : nullptr;
+    SetCallArgs(bc_inst, is_range, acc_read, nullptr, call, nullptr, save_state, false, method_id);
     if (save_state != nullptr) {
         AddInstruction(save_state);
     }
-    AddInstruction(inst);
-    if (inst->GetType() != DataType::VOID) {
-        UpdateDefinitionAcc(inst);
+    /* if there are reference type args to be checked for NULL ('need_nullcheck' intrinsic property) */
+    AddArgNullcheckIfNeeded<false>(intrinsic_id, call, save_state, pc);
+    AddInstruction(call);
+    if (call->GetType() != DataType::VOID) {
+        UpdateDefinitionAcc(call);
     } else {
         UpdateDefinitionAcc(nullptr);
     }

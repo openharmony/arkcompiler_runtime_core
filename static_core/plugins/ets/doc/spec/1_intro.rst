@@ -290,7 +290,6 @@ as used in other languages, application areas or industries.
      expression. Normally, an operator consists of an operator sign and of
      one or more operands.
 
-
      In unary operators that have a single operand, the operator sign can be
      placed either in front of an operand (*prefix* unary operator), or after
      the operand (*postfix* unary operator). If two operands are available,
@@ -310,7 +309,7 @@ as used in other languages, application areas or industries.
      where the operator sign plays the role of the function name, and the
      operands are function call arguments.
 
-   operator sign
+   operation sign
      -- a language token that signifies an operator and conventionally
      denotes a usual mathematical operator, for example, '+' for additional
      operator, '/' for division etc. However, some languages allow using
@@ -319,13 +318,13 @@ as used in other languages, application areas or industries.
      signs.
 
    operand
-     -- an argument of an operator. Syntactically, operands have the form of
+     -- an argument of an operation. Syntactically, operands have the form of
      simple or qualified identifiers that refer to variables or members of
      structured objects. In turn, operands can be operators whose preferences
      (“priorities”) are higher that the preference of the given operator.
 
    operation
-     -- the informal notion that means an action or a process of operator
+     -- the informal notion that means an action, or a process of operator
      evaluation.
 
    metasymbol
@@ -381,7 +380,6 @@ as used in other languages, application areas or industries.
    constant declaration
      -- declaration that introduces a new variable to which an inmutable
      initial value can be assigned only once at the time of instantiation.
-
 
 
 .. raw:: pdf

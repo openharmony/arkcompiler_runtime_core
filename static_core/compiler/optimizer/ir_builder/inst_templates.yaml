@@ -215,15 +215,10 @@ templates:
   call: |-
     % is_range = inst.opcode.include? 'range'
     % is_virtual = inst.opcode.include? 'virt'
-    % is_dynamic = inst.opcode.start_with? 'calli_dyn'
-    % if (is_dynamic)
-    UNREACHABLE(); // Should use plugin-dependent implementation
-    % else
-    %  acc_read = inst.acc_read?
+    % acc_read = inst.acc_read?
     if (!TryBuildInteropCall(instruction, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>)) {
       BuildCall<Opcode::<%= is_virtual ? 'CallVirtual' : 'CallStatic' %>>(instruction, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>);
     }
-    % end
   monitor: |-
     % is_enter = inst.mnemonic.end_with?('enter')
     BuildMonitor(instruction, GetDefinitionAcc(), <%= is_enter %>);

@@ -215,7 +215,7 @@ void G1GC<LanguageConfig>::DoRegionCompacting(Region *region, bool use_gc_worker
     if (use_gc_workers) {
         auto *storage =
             internal_allocator->template New<GCRegionCompactWorkersTask::RegionDataType>(region, moved_object_saver);
-        if (!this->GetWorkersPool()->AddTask(GCRegionCompactWorkersTask(storage))) {
+        if (!this->GetWorkersTaskPool()->AddTask(GCRegionCompactWorkersTask(storage))) {
             // We couldn't send a task to workers. Therefore, do it here.
             internal_allocator->Delete(storage);
             RegionCompactingImpl<true, REGION_TYPE>(region, moved_object_saver);
@@ -829,7 +829,7 @@ void G1GC<LanguageConfig>::RunFullGC(panda::GCTask &task)
         ScopedTiming release_pages("Release Pages in Free Pools", *this->GetTiming());
         bool use_gc_workers = this->GetSettings()->GCWorkersCount() != 0;
         if (use_gc_workers) {
-            if (!this->GetWorkersPool()->AddTask(GCWorkersTaskTypes::TASK_RETURN_FREE_PAGES_TO_OS)) {
+            if (!this->GetWorkersTaskPool()->AddTask(GCWorkersTaskTypes::TASK_RETURN_FREE_PAGES_TO_OS)) {
                 PoolManager::GetMmapMemPool()->ReleasePagesInFreePools();
             }
         } else {
@@ -940,18 +940,7 @@ void G1GC<LanguageConfig>::InitializeImpl()
     ASSERT(barrier_set != nullptr);
     this->SetGCBarrierSet(barrier_set);
 
-    if (this->IsWorkerThreadsExist()) {
-        GCWorkersTaskPool *gc_task_pool = nullptr;
-        if (this->GetSettings()->UseThreadPoolForGCWorkers()) {
-            // Use internal gc thread pool
-            gc_task_pool = allocator->New<GCWorkersThreadPool>(this, this->GetSettings()->GCWorkersCount());
-        } else {
-            // Use common TaskManager
-            gc_task_pool = allocator->New<GCWorkersTaskQueue>(this);
-        }
-        ASSERT(gc_task_pool != nullptr);
-        this->SetWorkersPool(gc_task_pool);
-    }
+    this->CreateWorkersTaskPool();
     {
         // to make TSAN happy because we access updated_refs_queue_ inside constructor of UpdateRemsetThread
         os::memory::LockHolder lock(queue_lock_);
@@ -1151,7 +1140,7 @@ MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const C
         this->MarkStackMixed(&objects_stack);
         ASSERT(objects_stack.Empty());
         if (use_gc_workers) {
-            this->GetWorkersPool()->WaitUntilTasksEnd();
+            this->GetWorkersTaskPool()->WaitUntilTasksEnd();
         }
     }
 
@@ -1235,7 +1224,7 @@ bool G1GC<LanguageConfig>::CollectAndMove(const CollectionSet &collection_set)
         }
 
         if (use_gc_workers) {
-            this->GetWorkersPool()->WaitUntilTasksEnd();
+            this->GetWorkersTaskPool()->WaitUntilTasksEnd();
         }
 
         analytics_.ReportEvacuationEnd(panda::time::GetCurrentTimeInNanos());
@@ -1344,7 +1333,7 @@ void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_G
                             range_begin, range_end);
                     range_begin = range_end;
                     GCUpdateRefsWorkersTask<false> gc_worker_task(moved_objects_range);
-                    if (this->GetWorkersPool()->AddTask(GCUpdateRefsWorkersTask<false>(gc_worker_task))) {
+                    if (this->GetWorkersTaskPool()->AddTask(GCUpdateRefsWorkersTask<false>(gc_worker_task))) {
                         continue;
                     }
                     // Couldn't add new task, so do task processing immediately
@@ -1375,7 +1364,7 @@ void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_G
                                         updated_ref_queue->end());
             this->GetInternalAllocator()->Delete(updated_ref_queue);
         }
-        this->GetWorkersPool()->WaitUntilTasksEnd();
+        this->GetWorkersTaskPool()->WaitUntilTasksEnd();
     }
     this->CommonUpdateRefsToMovedObjects();
 }
@@ -1396,7 +1385,7 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::OnPauseMark(GCTask &task, G
         // mark predicate
         CalcLiveBytesMarkPreprocess);
     if (use_gc_workers) {
-        this->GetWorkersPool()->WaitUntilTasksEnd();
+        this->GetWorkersTaskPool()->WaitUntilTasksEnd();
     }
     /**
      * We don't collect non-movable regions right now, if there was a reference from non-movable to
@@ -1585,7 +1574,7 @@ void G1GC<LanguageConfig>::Remark(panda::GCTask const &task)
         this->MarkStack(&marker_, &stack, CalcLiveBytesMarkPreprocess);
 
         if (use_gc_workers) {
-            this->GetWorkersPool()->WaitUntilTasksEnd();
+            this->GetWorkersTaskPool()->WaitUntilTasksEnd();
         }
 
         // ConcurrentMark doesn't visit young objects - so we can't clear references which are in young-space because we
@@ -1831,9 +1820,9 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::PreZygoteFork()
 {
     GC::PreZygoteFork();
-    if (this->GetWorkersPool() != nullptr) {
+    if (this->GetWorkersTaskPool() != nullptr) {
         auto allocator = this->GetInternalAllocator();
-        allocator->Delete(this->GetWorkersPool());
+        allocator->Delete(this->GetWorkersTaskPool());
         this->ClearWorkersPool();
     }
     this->DisableWorkerThreads();
@@ -1847,18 +1836,7 @@ void G1GC<LanguageConfig>::PostZygoteFork()
 {
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
     this->EnableWorkerThreads();
-    if (this->IsWorkerThreadsExist()) {
-        GCWorkersTaskPool *gc_task_pool = nullptr;
-        if (this->GetSettings()->UseThreadPoolForGCWorkers()) {
-            // Use internal gc thread pool
-            gc_task_pool = allocator->New<GCWorkersThreadPool>(this, this->GetSettings()->GCWorkersCount());
-        } else {
-            // Use common TaskManager
-            gc_task_pool = allocator->New<GCWorkersTaskQueue>(this);
-        }
-        ASSERT(gc_task_pool != nullptr);
-        this->SetWorkersPool(gc_task_pool);
-    }
+    this->CreateWorkersTaskPool();
     GC::PostZygoteFork();
     // use concurrent-option after zygote
     update_remset_thread_->SetUpdateConcurrent(this->GetSettings()->G1EnableConcurrentUpdateRemset());

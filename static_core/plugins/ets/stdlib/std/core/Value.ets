@@ -34,61 +34,61 @@ native function ValueAPIGetFieldLong(obj: Object, i: long): long
 native function ValueAPIGetFieldObject(obj: Object, i: long): Object
 
 
-native function ValueAPISetFieldBoolean(obj: Object, i: long, val: boolean)
+native function ValueAPISetFieldBoolean(obj: Object, i: long, val: boolean): void
 
-native function ValueAPISetFieldByte(obj: Object, i: long, val: byte)
+native function ValueAPISetFieldByte(obj: Object, i: long, val: byte): void
 
-native function ValueAPISetFieldShort(obj: Object, i: long, val: short)
+native function ValueAPISetFieldShort(obj: Object, i: long, val: short): void
 
-native function ValueAPISetFieldChar(obj: Object, i: long, val: char)
+native function ValueAPISetFieldChar(obj: Object, i: long, val: char): void
 
-native function ValueAPISetFieldInt(obj: Object, i: long, val: int)
+native function ValueAPISetFieldInt(obj: Object, i: long, val: int): void
 
-native function ValueAPISetFieldFloat(obj: Object, i: long, val: float)
+native function ValueAPISetFieldFloat(obj: Object, i: long, val: float): void
 
-native function ValueAPISetFieldDouble(obj: Object, i: long, val: double)
+native function ValueAPISetFieldDouble(obj: Object, i: long, val: double): void
 
-native function ValueAPISetFieldLong(obj: Object, i: long, val: long)
+native function ValueAPISetFieldLong(obj: Object, i: long, val: long): void
 
-native function ValueAPISetFieldObject(obj: Object, i: long, val: Object)
-
-
-native function ValueAPISetFieldByNameBoolean(obj: Object, name: String, val: boolean)
-
-native function ValueAPISetFieldByNameByte(obj: Object, name: String, val: byte)
-
-native function ValueAPISetFieldByNameShort(obj: Object, name: String, val: short)
-
-native function ValueAPISetFieldByNameChar(obj: Object, name: String, val: char)
-
-native function ValueAPISetFieldByNameInt(obj: Object, name: String, val: int)
-
-native function ValueAPISetFieldByNameFloat(obj: Object, name: String, val: float)
-
-native function ValueAPISetFieldByNameDouble(obj: Object, name: String, val: double)
-
-native function ValueAPISetFieldByNameLong(obj: Object, name: String, val: long)
-
-native function ValueAPISetFieldByNameObject(obj: Object, name: String, val: Object)
+native function ValueAPISetFieldObject(obj: Object, i: long, val: Object): void
 
 
-native function ValueAPISetElementBoolean(obj: Object, i: long, val: boolean)
+native function ValueAPISetFieldByNameBoolean(obj: Object, name: String, val: boolean): void
 
-native function ValueAPISetElementByte(obj: Object, i: long, val: byte)
+native function ValueAPISetFieldByNameByte(obj: Object, name: String, val: byte): void
 
-native function ValueAPISetElementShort(obj: Object, i: long, val: short)
+native function ValueAPISetFieldByNameShort(obj: Object, name: String, val: short): void
 
-native function ValueAPISetElementChar(obj: Object, i: long, val: char)
+native function ValueAPISetFieldByNameChar(obj: Object, name: String, val: char): void
 
-native function ValueAPISetElementInt(obj: Object, i: long, val: int)
+native function ValueAPISetFieldByNameInt(obj: Object, name: String, val: int): void
 
-native function ValueAPISetElementFloat(obj: Object, i: long, val: float)
+native function ValueAPISetFieldByNameFloat(obj: Object, name: String, val: float): void
 
-native function ValueAPISetElementDouble(obj: Object, i: long, val: double)
+native function ValueAPISetFieldByNameDouble(obj: Object, name: String, val: double): void
 
-native function ValueAPISetElementLong(obj: Object, i: long, val: long)
+native function ValueAPISetFieldByNameLong(obj: Object, name: String, val: long): void
 
-native function ValueAPISetElementObject(obj: Object, i: long, val: Object)
+native function ValueAPISetFieldByNameObject(obj: Object, name: String, val: Object): void
+
+
+native function ValueAPISetElementBoolean(obj: Object, i: long, val: boolean): void
+
+native function ValueAPISetElementByte(obj: Object, i: long, val: byte): void
+
+native function ValueAPISetElementShort(obj: Object, i: long, val: short): void
+
+native function ValueAPISetElementChar(obj: Object, i: long, val: char): void
+
+native function ValueAPISetElementInt(obj: Object, i: long, val: int): void
+
+native function ValueAPISetElementFloat(obj: Object, i: long, val: float): void
+
+native function ValueAPISetElementDouble(obj: Object, i: long, val: double): void
+
+native function ValueAPISetElementLong(obj: Object, i: long, val: long): void
+
+native function ValueAPISetElementObject(obj: Object, i: long, val: Object): void
 
 export abstract class Value extends Object {
     public static of(o: Object | null): Value {

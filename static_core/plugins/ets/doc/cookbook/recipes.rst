@@ -317,42 +317,7 @@ types explicitly.
 |CB_SEE|
 ~~~~~~~~
 
-* :ref:`R013`
 * :ref:`R145`
-
-.. _R013:
-
-|CB_R| Use ``Object[]`` instead of tuples
------------------------------------------
-
-|CB_RULE| ``arkts-no-tuples``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: TupleType, TupleLiteral
-
-|CB_ERROR|
-
-Currently, |LANG| does not support tuples. Use arrays of ``Object``
-(``Object[]``) to emulate tuples.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    var t: [number, string] = [3, "three"]
-    var n = t[0]
-    var s = t[1]
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    let t: Object[] = [3, "three"]
-    let n = t[0]
-    let s = t[1]
 
 .. _R014:
 
@@ -2190,8 +2155,8 @@ cannot change at runtime. For arrays, iterate with the regular ``for`` loop.
 
 .. _R082:
 
-|CB_R| ``for-of`` is supported only for arrays and strings
-----------------------------------------------------------
+|CB_R| ``for-of`` is supported only for arrays, strings, sets, maps and classes derived from them
+-------------------------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-for-of-str-arr``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2201,18 +2166,23 @@ cannot change at runtime. For arrays, iterate with the regular ``for`` loop.
 
 |CB_ERROR|
 
-|LANG| supports the iteration over arrays and strings by the ``for .. of`` loop,
-but does not support the iteration of objects content. All typed arrays from
-the standard library (for example, ``Int32Array``) are also supported.
+|LANG| supports the iteration over arrays, strings, sets, maps and classes
+derived from them by the ``for .. of`` loop, but does not support the
+iteration of objects content. All typed arrays from the standard
+library (for example, ``Int32Array``) are also supported.
 
 |CB_BAD|
 ~~~~~~~~
 
 .. code-block:: typescript
 
-    let a: Set<number> = new Set([1, 2, 3])
-    for (let s of a) {
-        console.log(s)
+    class A {
+        prop1: number;
+        prop2: number;
+    }
+    let a = new A()
+    for (let prop of a) {
+        console.log(prop)
     }
 
 |CB_OK|
@@ -2220,9 +2190,8 @@ the standard library (for example, ``Int32Array``) are also supported.
 
 .. code-block:: typescript
 
-    let a: Set<number> = new Set([1, 2, 3])
-    let numbers = Array.from(a.values())
-    for (let n of numbers) {
+    let a = new Set<number>([1, 2, 3])
+    for (let n of a) {
         console.log(n)
     }
 
@@ -2270,11 +2239,6 @@ classes to achieve that same behavior.
         n: boolean = false
         s: boolean = false
     }
-
-|CB_SEE|
-~~~~~~~~
-
-* :ref:`R097`
 
 .. _R084:
 
@@ -2706,73 +2670,10 @@ appropriate type with the ``as`` operator before use.
         doStuff(new Bar())
     }
 
-.. _R097:
-
-|CB_R| ``keyof`` operator is not supported
-------------------------------------------
-
-|CB_RULE| ``arkts-no-keyof``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: KeyOfOperator
-
-|CB_ERROR|
-
-|LANG| has no `keyof` operator because the object layout is defined
-at compile time, and cannot be changed at runtime. Object fields can only be
-accessed directly.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    class Point {
-        x: number = 1
-        y: number = 2
-    }
-
-    type PointKeys = keyof Point  // The type of PointKeys is "x" | "y"
-
-    function getPropertyValue(obj: Point, key: PointKeys) {
-        return obj[key]
-    }
-
-    let obj = new Point()
-    console.log(getPropertyValue(obj, "x"))  // prints "1"
-    console.log(getPropertyValue(obj, "y"))  // prints "2"
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    class Point {
-        x: number = 1
-        y: number = 2
-    }
-
-    function getPropertyValue(obj: Point, key: string): number {
-        if (key == "x") {
-            return obj.x
-        }
-        if (key == "y") {
-            return obj.y
-        }
-        throw new Error()  // No such property
-    }
-
-    function main(): void {
-        let obj = new Point()
-        console.log(getPropertyValue(obj, "x"))  // prints "1"
-        console.log(getPropertyValue(obj, "y"))  // prints "2"
-    }
-
 .. _R099:
 
-|CB_R| It is possible to spread only arrays into the rest parameter
--------------------------------------------------------------------
+|CB_R| It is possible to spread only arrays or classes derived from arrays into the rest parameter or array literals
+--------------------------------------------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-spread``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2782,10 +2683,11 @@ accessed directly.
 
 |CB_ERROR|
 
-The only supported scenario for the spread operator is to spread an array into
-the rest parameter. Otherwise, manually "unpack" data from arrays and objects,
-where necessary. All typed arrays from the standard library (for example,
-``Int32Array``) are also supported.
+The only supported scenario for the spread operator is to spread an array or
+class derived from array into the rest parameter or array literal.
+Otherwise, manually "unpack" data from arrays and objects, where necessary.
+All typed arrays from the standard library (for example, ``Int32Array``)
+are also supported.
 
 |CB_BAD|
 ~~~~~~~~
@@ -2842,6 +2744,13 @@ where necessary. All typed arrays from the standard library (for example,
 
     let p3d = new Point3D({x: 1, y: 2} as Point2D, 3)
     console.log(p3d.x, p3d.y, p3d.z)
+
+    class DerivedFromArray extends Uint16Array {};
+
+    let arr1 = [1, 2, 3];
+    let arr2 = new Uint16Array([4, 5, 6]);
+    let arr3 = new DerivedFromArray([7, 8, 9])
+    let arr4 = [...arr1, 10, ...arr2, 11, ...arr3]
 
 .. _R102:
 
@@ -3505,71 +3414,6 @@ Use regular ``import`` instead.
 
 * :ref:`R126`
 
-
-.. _R125:
-
-|CB_R| Re-exporting is supported with restrictions
---------------------------------------------------
-
-|CB_RULE| ``arkts-limited-reexport``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: LimitedReExporting
-
-|CB_ERROR|
-
-|LANG| supports re-exporting syntax which covers most common cases of re-export:
-re-exporting imported entities and re-exporting which is combined with renaming.
-Other syntax flavors like ``export * as ...`` are not supported.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    // module1
-    export class Class1 {
-        // ...
-    }
-    export class Class2 {
-        // ...
-    }
-
-    // module2
-    export * as utilities from "module1"
-
-    // consumer module
-    import { utilities } from "module2"
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    // module1
-    export class Class1 {
-        // ...
-    }
-    export class C2 {
-        // ...
-    }
-
-    // module2
-    export { Class1 } from "module1"
-    export { C2 as Class2 } from "module1"
-
-    // Re-exporting by wild-card is also supported:
-    // export * from "module1"
-
-    // consumer module
-    import { Class1, Class2 } from "module2"
-
-|CB_SEE|
-~~~~~~~~
-
-* :ref:`R126`
-
 .. _R126:
 
 |CB_R| ``export = ...`` assignment is not supported
@@ -3624,7 +3468,6 @@ Use regular ``export`` / ``import`` instead.
 ~~~~~~~~
 
 * :ref:`R121`
-* :ref:`R125`
 
 .. _R127:
 
@@ -3713,7 +3556,6 @@ own mechanisms for interoperating with |JS|.
 ~~~~~~~~
 
 * :ref:`R129`
-* :ref:`R131`
 
 .. _R129:
 
@@ -3765,7 +3607,6 @@ Use ordinary export syntax instead.
 
 * :ref:`R128`
 * :ref:`R130`
-* :ref:`R131`
 
 .. _R130:
 
@@ -3814,42 +3655,6 @@ Use ordinary syntax for ``export`` and ``import`` instead.
 |CB_SEE|
 ~~~~~~~~
 
-* :ref:`R129`
-
-.. _R131:
-
-|CB_R| ``.js`` extension is not allowed in module identifiers
--------------------------------------------------------------
-
-|CB_RULE| ``arkts-no-js-extension``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: JSExtensionInModuleIdent
-
-|CB_ERROR|
-
-|LANG| does not allow using ``.js`` extension in module identifiers because
-it has its own mechanisms for interoperating with |JS|.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    import { something } from "module.js"
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    import { something } from "module"
-
-|CB_SEE|
-~~~~~~~~
-
-* :ref:`R128`
 * :ref:`R129`
 
 .. _R132:
@@ -3948,49 +3753,6 @@ Use declaration with initialization instead.
     let x: number = initialize()
 
     console.log("x = " + x)
-
-.. _R135:
-
-|CB_R| IIFEs as namespace declarations are not supported
---------------------------------------------------------
-
-|CB_RULE| ``arkts-no-iife``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: IifeAsNamespace
-
-|CB_ERROR|
-
-|LANG| does not support IIFEs as namespace declarations because anonymous
-functions in the language cannot serve as namespaces.
-Use regular syntax for namespaces instead.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    const C = (function () {
-        class Cl {
-            static static_value = "static_value";
-            static any_value: any = "any_value";
-            string_field = "string_field";
-        }
-
-        return Cl;
-    })();
-
-    C.prop = 2;
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    namespace C {
-        // ...
-    }
 
 .. _R136:
 
@@ -4318,42 +4080,6 @@ Thus these functions are excessive.
 
 * :ref:`R093`
 
-.. _R141:
-
-|CB_R| ``readonly T[]`` syntax is not supported
------------------------------------------------
-
-|CB_RULE| ``arkts-no-readonly-params``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: ReadonlyArr
-    :fix: Remove 'readonly' keyword
-
-|CB_ERROR|
-
-Currently, |LANG| supports ``readonly`` for properties, but not for parameters.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    function foo(arr: readonly string[]) {
-        arr.slice()        // OK
-        arr.push("hello!") // Compile-time error
-    }
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    function foo(arr: string[]) {
-        arr.slice()        // OK
-        arr.push("hello!") // OK
-    }
-
 .. _R142:
 
 |CB_R| ``as const`` assertions are not supported
@@ -4470,14 +4196,14 @@ Properties and functions of the global object: ``eval``,
 ``__lookupGetter__``, ``__lookupSetter__``, ``assign``, ``create``,
 ``defineProperties``, ``defineProperty``, ``entries``, ``freeze``,
 ``fromEntries``, ``getOwnPropertyDescriptor``, ``getOwnPropertyDescriptors``,
-``getOwnPropertyNames``, ``getOwnPropertySymbols``, ``getPrototypeOf``,
-``hasOwn``, ``hasOwnProperty``, ``is``, ``isExtensible``, ``isFrozen``,
-``isPrototypeOf``, ``isSealed``, ``keys``, ``preventExtensions``,
-``propertyIsEnumerable``, ``seal``, ``setPrototypeOf``, ``values``
+``getOwnPropertySymbols``, ``getPrototypeOf``,
+``hasOwnProperty``, ``is``, ``isExtensible``, ``isFrozen``,
+``isPrototypeOf``, ``isSealed``, ``preventExtensions``,
+``propertyIsEnumerable``, ``seal``, ``setPrototypeOf``
 
 ``Reflect``: ``apply``, ``construct``, ``defineProperty``, ``deleteProperty``,
-``get``, ``getOwnPropertyDescriptor``, ``getPrototypeOf``, ``has``,
-``isExtensible``, ``ownKeys``, ``preventExtensions``, ``set``,
+``getOwnPropertyDescriptor``, ``getPrototypeOf``,
+``isExtensible``, ``preventExtensions``,
 ``setPrototypeOf``
 
 ``Proxy``: ``handler.apply()``, ``handler.construct()``,
@@ -4485,8 +4211,6 @@ Properties and functions of the global object: ``eval``,
 ``handler.getOwnPropertyDescriptor()``, ``handler.getPrototypeOf()``,
 ``handler.has()``, ``handler.isExtensible()``, ``handler.ownKeys()``,
 ``handler.preventExtensions()``, ``handler.set()``, ``handler.setPrototypeOf()``
-
-``Array``: ``isArray``
 
 ``ArrayBuffer``: ``isView``
 
@@ -4667,7 +4391,7 @@ direction are supported.
 .. meta:
     :keywords: UnsupportedDecorators
 
-|CB_ERROR|
+|CB_WARNING|
 
 Currently, only ArkUI decorators are allowed  in the |LANG|.
 Any other decorator will cause a compile-time error.

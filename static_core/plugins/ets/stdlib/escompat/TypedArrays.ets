@@ -101,6 +101,27 @@ export final class Int8Array {
     }
 
     /**
+     * Creates an Int8Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int) {
+        this.length = length
+        this.byteLength = length * Int8Array.BYTES_PER_ELEMENT
+        this.byteOffset = 0
+        this.buffer = new ArrayBuffer(this.byteLength)
+    }
+
+    /**
+     * Creates an Int8Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        this(length as int)
+    }
+
+    /**
      * Creates a copy of Int8Array.
      *
      * @param other data initializer
@@ -2002,6 +2023,27 @@ export final class Int16Array {
      */
     public constructor(buf: Buffer) {
         this(buf, 0, buf.getByteLength() / Int16Array.BYTES_PER_ELEMENT)
+    }
+
+    /**
+     * Creates an Int16Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int) {
+        this.length = length
+        this.byteLength = length * Int16Array.BYTES_PER_ELEMENT
+        this.byteOffset = 0
+        this.buffer = new ArrayBuffer(this.byteLength)
+    }
+
+    /**
+     * Creates an Int16Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        this(length as int)
     }
 
     /**
@@ -3910,6 +3952,27 @@ export final class Int32Array {
     }
 
     /**
+     * Creates an Int32Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int) {
+        this.length = length
+        this.byteLength = length * Int32Array.BYTES_PER_ELEMENT
+        this.byteOffset = 0
+        this.buffer = new ArrayBuffer(this.byteLength)
+    }
+
+    /**
+     * Creates an Int32Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        this(length as int)
+    }
+
+    /**
      * Creates a copy of Int32Array.
      *
      * @param other data initializer
@@ -5815,6 +5878,27 @@ export final class BigInt64Array {
     }
 
     /**
+     * Creates an BigInt64Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int) {
+        this.length = length
+        this.byteLength = length * BigInt64Array.BYTES_PER_ELEMENT
+        this.byteOffset = 0
+        this.buffer = new ArrayBuffer(this.byteLength)
+    }
+
+    /**
+     * Creates an BigInt64Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        this(length as int)
+    }
+
+    /**
      * Creates a copy of BigInt64Array.
      *
      * @param other data initializer
@@ -7577,6 +7661,27 @@ export final class Float32Array {
      */
     public constructor(buf: Buffer) {
         this(buf, 0, buf.getByteLength() / Float32Array.BYTES_PER_ELEMENT)
+    }
+
+    /**
+     * Creates an Float32Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int) {
+        this.length = length
+        this.byteLength = length * Float32Array.BYTES_PER_ELEMENT
+        this.byteOffset = 0
+        this.buffer = new ArrayBuffer(this.byteLength)
+    }
+
+    /**
+     * Creates an Float32Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        this(length as int)
     }
 
     /**
@@ -9482,6 +9587,27 @@ export final class Float64Array {
      */
     public constructor(buf: Buffer) {
         this(buf, 0, buf.getByteLength() / Float64Array.BYTES_PER_ELEMENT)
+    }
+
+    /**
+     * Creates an Float64Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int) {
+        this.length = length
+        this.byteLength = length * Float64Array.BYTES_PER_ELEMENT
+        this.byteOffset = 0
+        this.buffer = new ArrayBuffer(this.byteLength)
+    }
+
+    /**
+     * Creates an Float64Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        this(length as int)
     }
 
     /**
