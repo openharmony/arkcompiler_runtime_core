@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-default_ark_enabled_plugins = [ "ecmascript", "ets" ]
+default_ark_enabled_plugins = [ "ets" ]
 platform_libs = []
 platform_ldflags = []
 platform_include_dirs = []

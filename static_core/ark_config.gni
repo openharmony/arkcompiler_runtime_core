@@ -322,9 +322,9 @@ template("es2panda_gen") {
             "$ark_es2panda_root/aot:es2panda(${host_toolchain})",
             "root_out_dir")
     script =
-        es2panda_root_out + "/$ark_subsystem_name/$ark_part_name/es2panda"
+        es2panda_root_out + "/arkcompiler/ets_frontend/es2panda"
     deps = [
-      "$ark_es2panda_root/es2panda/aot:es2panda(${host_toolchain})",
+      "$ark_es2panda_root/aot:es2panda(${host_toolchain})",
     ]
 
     inputs = invoker.inputs

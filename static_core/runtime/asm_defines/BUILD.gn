@@ -36,6 +36,7 @@ ohos_static_library("asm_defines") {
   cflags_cc = [
     "-Wno-invalid-offsetof",
     "-S",
+    "-fno-lto"
   ]
   output_dir = "$target_gen_dir/generated"
   output_extension = "S"

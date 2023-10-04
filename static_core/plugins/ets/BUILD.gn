@@ -25,7 +25,7 @@ declare_args() {
 # NB! Standard library is built only if the front-end is available.
 with_stdlib = false
 foreach(plugin, ark_enabled_plugins) {
-  if (plugin == "ecmascript") {
+  if (plugin == "ecmascript" || plugin == "ets") {
     with_stdlib = true
   }
 }
