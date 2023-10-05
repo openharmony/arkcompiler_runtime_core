@@ -133,6 +133,8 @@ public:
     template <typename Callback>
     void EnumerateTypesInProto(Callback cb, bool skip_this = false);
 
+    Type GetReturnType() const;
+
     std::optional<File::EntityId> GetRuntimeParamAnnotationId();
 
     std::optional<File::EntityId> GetDebugInfoId();

@@ -44,7 +44,9 @@ public:
           name_(pf_->GetStringData(mda.GetNameId())),
           proto_(*pf_, mda.GetProtoId()),
           ctx_(ctx),
-          index_(index)
+          index_(index),
+          source_lang_(GetSourceLang()),
+          return_type_(mda.GetReturnType())
     {
     }
 
@@ -58,13 +60,25 @@ public:
           ctx_(method->GetClass()->GetLoadContext()),
           index_(index),
           needs_copy_(needs_copy),
-          is_base_(is_base)
+          is_base_(is_base),
+          source_lang_(GetSourceLang()),
+          return_type_(method->GetReturnType())
     {
     }
 
     bool IsEqualByNameAndSignature(const MethodInfo &other) const
     {
         return GetName() == other.GetName() && GetProtoId() == other.GetProtoId();
+    }
+
+    panda_file::SourceLang GetSourceLang() const
+    {
+        return source_lang_;
+    }
+
+    panda_file::Type GetReturnType() const
+    {
+        return return_type_;
     }
 
     const panda_file::File::StringData &GetName() const
@@ -163,6 +177,8 @@ private:
     size_t index_ {0};
     bool needs_copy_ {false};
     bool is_base_ {false};
+    panda_file::SourceLang source_lang_ {panda_file::SourceLang::INVALID};
+    panda_file::Type return_type_;
 };
 
 template <class SearchPred, class OverridePred>

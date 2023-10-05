@@ -26,7 +26,20 @@ namespace panda::ets {
 struct EtsVTableSearchBySignature {
     bool operator()(const MethodInfo &info1, const MethodInfo &info2) const
     {
-        return info1.IsEqualByNameAndSignature(info2);
+        if (info1.IsEqualByNameAndSignature(info2)) {
+            return true;
+        }
+        // NOTE: the best way is to check subtyping of return types.
+        // If true, check IsEqualByNameAndSignature with replaced return types.
+        // But now no way to check subtyping or casting for methods
+        if (info1.GetName() != info2.GetName()) {
+            return false;
+        }
+        if (((info1.IsAbstract() ^ info2.IsAbstract()) != 0) && (info1.GetReturnType() == info2.GetReturnType()) &&
+            (info1.GetSourceLang() == info2.GetSourceLang())) {
+            return true;
+        }
+        return false;
     }
 };
 
