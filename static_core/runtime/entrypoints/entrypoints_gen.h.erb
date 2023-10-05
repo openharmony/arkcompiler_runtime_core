@@ -51,7 +51,7 @@ extern <%= prefix %> <%= entrypoint.signature[0] %> <%= entrypoint.bridge_name %
 %   end
 %   if !entrypoint.properties.include?("intrinsic") && !entrypoints_map.include?(entrypoint.entrypoint)
 %     if entrypoint.properties.include?("irtoc")
-#if defined(PANDA_TARGET_AMD64) && !defined(PANDA_COMPILER_TARGET_X86_64)
+#if !defined(PANDA_WITH_IRTOC) || defined(PANDA_TARGET_AMD64) && !defined(PANDA_COMPILER_TARGET_X86_64)
 // NOLINTNEXTLINE(readability-named-parameter)
 static constexpr <%= entrypoint.signature[0] %> (*<%= entrypoint.entrypoint %>)(<%= entrypoint.signature[1.. - 1].join(', ') %>) = nullptr;
 #else

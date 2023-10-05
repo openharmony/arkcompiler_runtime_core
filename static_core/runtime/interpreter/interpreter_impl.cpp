@@ -18,7 +18,9 @@
 #include "libpandabase/macros.h"
 #include "runtime/interpreter/interpreter-inl.h"
 #include "runtime/interpreter/runtime_interface.h"
+#ifdef PANDA_WITH_IRTOC
 #include "irtoc_interpreter_utils.h"
+#endif
 #include "interpreter-inl_gen.h"
 
 extern "C" void ExecuteImplFast(void *, void *, void *, void *);
@@ -43,15 +45,23 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
     if (!frame->IsDynamic() || was_set) {
         auto interpreter_type_str = Runtime::GetOptions().GetInterpreterType();
         if (interpreter_type_str == "llvm") {
-#ifdef PANDA_LLVMAOT
             interpreter_type = InterpreterType::LLVM;
-#else
-            interpreter_type = was_set ? InterpreterType::LLVM : InterpreterType::IRTOC;
-#endif
         } else if (interpreter_type_str == "irtoc") {
             interpreter_type = InterpreterType::IRTOC;
         } else {
             ASSERT(interpreter_type_str == "cpp");
+        }
+        if (!was_set) {
+#ifndef PANDA_LLVMAOT
+            if (interpreter_type == InterpreterType::LLVM) {
+                interpreter_type = InterpreterType::IRTOC;
+            }
+#endif
+#ifndef PANDA_WITH_IRTOC
+            if (interpreter_type == InterpreterType::IRTOC) {
+                interpreter_type = InterpreterType::CPP;
+            }
+#endif
         }
     }
     if (interpreter_type > InterpreterType::CPP) {
@@ -85,6 +95,7 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
         LOG(FATAL, RUNTIME) << "--interpreter-type=llvm is not supported in this configuration";
 #endif
     } else if (interpreter_type == InterpreterType::IRTOC) {
+#ifdef PANDA_WITH_IRTOC
         LOG(DEBUG, RUNTIME) << "Setting up Irtoc dispatch table";
         auto dispath_table = SetupDispatchTableImpl();
         if (jump_to_eh) {
@@ -92,6 +103,9 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
         } else {
             ExecuteImplFast(thread, const_cast<uint8_t *>(pc), frame, dispath_table);
         }
+#else
+        LOG(FATAL, RUNTIME) << "--interpreter-type=irtoc is not supported in this configuration";
+#endif
     } else {
         if (frame->IsDynamic()) {
             if (thread->GetVM()->IsBytecodeProfilingEnabled()) {

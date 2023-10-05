@@ -5,16 +5,14 @@ group("arkplatform_packages") {
 }
 
 config("arkplatform_public_config") {
-  include_dirs = [
-    "include",
-  ]
+  include_dirs = [ "include" ]
 }
 
 ohos_shared_library("libarkplatform") {
   sources = [ "src/arkplatform.cpp" ]
   include_dirs = [
     "$ark_root/arkplatform",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include"
+    "$ark_root/include",
   ]
 
   output_extension = "so"

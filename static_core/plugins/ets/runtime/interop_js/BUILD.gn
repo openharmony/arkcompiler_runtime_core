@@ -83,7 +83,7 @@ ohos_shared_library("ets_interop_js_napi") {
     "$ark_root/compiler:libarktscompiler"
   ]
   if (is_ohos && is_standard_system) {
-    include_dirs += [ "//base/hiviewdfx/hilog/interfaces/native/innerkits/include" ]
+    include_dirs += [ "$hilog_root/include" ]
     defines = [ "PANDA_USE_OHOS_LOG" ]
     deps += [":etsstdlib_install"]
     external_deps = [

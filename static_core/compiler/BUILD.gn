@@ -46,7 +46,10 @@ config("arkcompiler_public_config") {
   } else if (target_cpu == "arm") {
     defines += [ "PANDA_COMPILER_TARGET_AARCH32" ]
   }
-  configs = [ "$ark_root/compiler/optimizer/code_generator:arkencoder_config" ]
+  configs = []
+  if (enable_codegen) {
+    configs += [ "$ark_root/compiler/optimizer/code_generator:arkencoder_config" ]
+  }
 }
 
 libarkcompiler_sources = [
@@ -169,7 +172,6 @@ ohos_shared_library("libarktscompiler") {
     ":compiler_interface_extensions_inl_h",
     ":inst_builder_extensions_inl_h",
     ":intrinsics_extensions_inl_h",
-    ":irtoc_interface_extensions_inl_h",
     ":compiler_logger_components_inc",
     ":compiler_options_gen_h",
     ":cpu_features_gen_inc",
@@ -184,8 +186,6 @@ ohos_shared_library("libarktscompiler") {
     ":intrinsics_inline_native_method_inl",
     ":intrinsics_peephole_inl_h",
     ":ir_dyn_base_types_h",
-    ":irtoc_builder_cpp",
-    ":irtoc_generate_ir_inline",
     ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
     ":libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
@@ -208,7 +208,6 @@ ohos_shared_library("libarktscompiler") {
     ":libarkcompiler_opcodes_h_inst_checker_gen_h",
     ":libarkcompiler_opcodes_h_opcodes_h",
     ":source_languages_h",
-    "$ark_root/compiler/optimizer/code_generator:libarkencoder",
     "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarktsbase",
     "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction-inl_gen_h",
@@ -227,6 +226,16 @@ ohos_shared_library("libarktscompiler") {
     "$ark_root/runtime/asm_defines:asm_defines_generator",
     sdk_libc_secshared_dep,
   ]
+  if (enable_irtoc) {
+    deps += [
+      ":irtoc_interface_extensions_inl_h",
+      ":irtoc_builder_cpp",
+      ":irtoc_generate_ir_inline"
+    ]
+  }
+  if (enable_codegen) {
+    deps += ["$ark_root/compiler/optimizer/code_generator:libarkencoder"]
+  }
 
   deps += plugin_compiler_deps
 
@@ -251,7 +260,6 @@ ohos_static_library("libarktscompiler_frontend_static") {
     ":compiler_interface_extensions_inl_h",
     ":inst_builder_extensions_inl_h",
     ":intrinsics_extensions_inl_h",
-    ":irtoc_interface_extensions_inl_h",
     ":compiler_logger_components_inc",
     ":compiler_options_gen_h",
     ":cpu_features_gen_inc",
@@ -266,8 +274,6 @@ ohos_static_library("libarktscompiler_frontend_static") {
     ":intrinsics_inline_native_method_inl",
     ":intrinsics_peephole_inl_h",
     ":ir_dyn_base_types_h",
-    ":irtoc_builder_cpp",
-    ":irtoc_generate_ir_inline",
     ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
     ":libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
@@ -290,7 +296,6 @@ ohos_static_library("libarktscompiler_frontend_static") {
     ":libarkcompiler_opcodes_h_inst_checker_gen_h",
     ":libarkcompiler_opcodes_h_opcodes_h",
     ":source_languages_h",
-    "$ark_root/compiler/optimizer/code_generator:libarkencoder_frontend_static",
     "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarktsbase_frontend_static",
     "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction-inl_gen_h",
@@ -309,7 +314,16 @@ ohos_static_library("libarktscompiler_frontend_static") {
     "$ark_root/runtime/asm_defines:asm_defines_generator",
     sdk_libc_secshared_dep,
   ]
-
+  if (enable_irtoc) {
+    deps += [
+      ":irtoc_interface_extensions_inl_h",
+      ":irtoc_builder_cpp",
+      ":irtoc_generate_ir_inline"
+    ]
+  }
+  if (enable_codegen) {
+    deps += ["$ark_root/compiler/optimizer/code_generator:libarkencoder_frontend_static"]
+  }
   deps += plugin_compiler_deps
 
   include_dirs = [
@@ -520,22 +534,6 @@ ark_gen_file("compiler_interface_extensions_inl_h") {
   output_file = "$target_gen_dir/generated/compiler_interface_extensions.inl.h"
 }
 
-ark_gen_file("irtoc_interface_extensions_inl_h") {
-  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
-  template_file = "optimizer/templates/irtoc_interface_extensions.inl.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
-  output_file = "$target_gen_dir/generated/irtoc_interface_extensions.inl.h"
-}
-
-ark_gen_file("irtoc_interface_extensions_includes_inl_h") {
-  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
-  template_file = "optimizer/templates/irtoc_interface_extensions_includes.inl.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
-  output_file = "$target_gen_dir/generated/irtoc_interface_extensions_includes.inl.h"
-}
-
 ark_gen_file("inst_builder_extensions_inl_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/inst_builder_extensions.inl.h.erb"
@@ -552,67 +550,85 @@ ark_gen_file("intrinsics_extensions_inl_h") {
   output_file = "$target_gen_dir/generated/intrinsics_extensions.inl.h"
 }
 
-action("irtoc_builder_cpp") {
-  script = "$ark_root/irtoc/lang/irtoc.rb"
-  outputs = [ "$target_gen_dir/generated/irtoc_builder.cpp" ]
-  working_dir = "$root_build_dir/irtoc_builder_cpp"
-  args = [
-    "--input",
-    rebase_path("$ark_root/irtoc/scripts/interpreter.irt", working_dir),
-    "--output",
-    rebase_path("$target_gen_dir/generated/irtoc_builder.cpp", working_dir),
-    "--ark_source_dir",
-    rebase_path("$ark_root", working_dir),
-    "--isa",
-    rebase_path("$ark_isa_yaml", working_dir),
-    "--definitions",
-    "NDEBUG",
-    "--arch",
-    target_cpu,
-    "--ir-api",
-    "ir-builder",
-    "--plugins",
-    rebase_path(irtoc_plugins_file, working_dir),
-    "--working-dir",
-    rebase_path(working_dir, root_build_dir),
-  ]
+if (enable_irtoc) {
+  ark_gen_file("irtoc_interface_extensions_inl_h") {
+    extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+    template_file = "optimizer/templates/irtoc_interface_extensions.inl.h.erb"
+    data_file = "$ark_plugin_options_yaml"
+    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    output_file = "$target_gen_dir/generated/irtoc_interface_extensions.inl.h"
+  }
 
-  deps = [
-    "$ark_root/isa:isa_combine",
-    "$ark_root/runtime:plugins_asm_defines_def",
-    "$ark_root/runtime:plugins_defines_h",
-    "$ark_root/irtoc:irtoc_plugins_file",
-  ]
-}
+  ark_gen_file("irtoc_interface_extensions_includes_inl_h") {
+    extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+    template_file = "optimizer/templates/irtoc_interface_extensions_includes.inl.h.erb"
+    data_file = "$ark_plugin_options_yaml"
+    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    output_file = "$target_gen_dir/generated/irtoc_interface_extensions_includes.inl.h"
+  }
 
-action("irtoc_generate_ir_inline") {
-  script = "$ark_root/irtoc/lang/irtoc.rb"
-  outputs = [ "$target_gen_dir/generated/irtoc_ir_inline.h" ]
-  working_dir = "$root_build_dir/irtoc_generate_ir_inline"
-  args = [
-    "--input",
-    rebase_path("$ark_root/irtoc/scripts/interpreter.irt", working_dir),
-    "--output",
-    rebase_path("$target_gen_dir/generated/irtoc_ir_inline.h", working_dir),
-    "--ark_source_dir",
-    rebase_path("$ark_root", working_dir),
-    "--isa",
-    rebase_path("$ark_isa_yaml", working_dir),
-    "--definitions",
-    "NDEBUG",
-    "--arch",
-    target_cpu,
-    "--ir-api",
-    "ir-inline",
-    "--plugins",
-    rebase_path(irtoc_plugins_file, working_dir),
-    "--working-dir",
-    rebase_path(working_dir, root_build_dir),
-  ]
+  action("irtoc_builder_cpp") {
+    script = "$ark_root/irtoc/lang/irtoc.rb"
+    outputs = [ "$target_gen_dir/generated/irtoc_builder.cpp" ]
+    working_dir = "$root_build_dir/irtoc_builder_cpp"
+    args = [
+      "--input",
+      rebase_path("$ark_root/irtoc/scripts/interpreter.irt", working_dir),
+      "--output",
+      rebase_path("$target_gen_dir/generated/irtoc_builder.cpp", working_dir),
+      "--ark_source_dir",
+      rebase_path("$ark_root", working_dir),
+      "--isa",
+      rebase_path("$ark_isa_yaml", working_dir),
+      "--definitions",
+      "NDEBUG",
+      "--arch",
+      target_cpu,
+      "--ir-api",
+      "ir-builder",
+      "--plugins",
+      rebase_path(irtoc_plugins_file, working_dir),
+      "--working-dir",
+      rebase_path(working_dir, root_build_dir),
+    ]
 
-  deps = [
-    "$ark_root/isa:isa_combine",
-    "$ark_root/runtime:plugins_asm_defines_def",
-    "$ark_root/runtime:plugins_defines_h",
-  ]
+    deps = [
+      "$ark_root/isa:isa_combine",
+      "$ark_root/runtime:plugins_asm_defines_def",
+      "$ark_root/runtime:plugins_defines_h",
+      "$ark_root/irtoc:irtoc_plugins_file",
+    ]
+  }
+
+  action("irtoc_generate_ir_inline") {
+    script = "$ark_root/irtoc/lang/irtoc.rb"
+    outputs = [ "$target_gen_dir/generated/irtoc_ir_inline.h" ]
+    working_dir = "$root_build_dir/irtoc_generate_ir_inline"
+    args = [
+      "--input",
+      rebase_path("$ark_root/irtoc/scripts/interpreter.irt", working_dir),
+      "--output",
+      rebase_path("$target_gen_dir/generated/irtoc_ir_inline.h", working_dir),
+      "--ark_source_dir",
+      rebase_path("$ark_root", working_dir),
+      "--isa",
+      rebase_path("$ark_isa_yaml", working_dir),
+      "--definitions",
+      "NDEBUG",
+      "--arch",
+      target_cpu,
+      "--ir-api",
+      "ir-inline",
+      "--plugins",
+      rebase_path(irtoc_plugins_file, working_dir),
+      "--working-dir",
+      rebase_path(working_dir, root_build_dir),
+    ]
+
+    deps = [
+      "$ark_root/isa:isa_combine",
+      "$ark_root/runtime:plugins_asm_defines_def",
+      "$ark_root/runtime:plugins_defines_h",
+    ]
+  }
 }

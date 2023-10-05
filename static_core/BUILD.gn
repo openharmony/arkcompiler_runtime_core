@@ -21,7 +21,6 @@ group("ark_packages") {
         deps += [
             "$ark_root/compiler:libarktscompiler",
             "$ark_root/compiler/aot:libarkaotmanager",
-            "$ark_root/compiler/optimizer/code_generator:libarkencoder",
             "$ark_root/libpandabase:libarktsbase",
             "$ark_root/libpandafile:libarktsfile",
             "$ark_root/libpandafile/external:libarkfileExt",
@@ -33,6 +32,9 @@ group("ark_packages") {
             "$ark_root/verification/verifier:verifier.config",
             "$ark_root/verification/verifier:verifier_bin",
         ]
+        if (enable_codegen) {
+          deps += ["$ark_root/compiler/optimizer/code_generator:libarkencoder"]
+        }
         # TODO: don't exclude these targets from OHOS build
         if (ark_standalone_build) {
             deps += [
@@ -49,7 +51,6 @@ group("ark_host_linux_tools_packages") {
             "$ark_root/assembler:arkts_asm(${host_toolchain})",
             "$ark_root/compiler:libarktscompiler(${host_toolchain})",
             "$ark_root/compiler/aot:libarkaotmanager(${host_toolchain})",
-            "$ark_root/compiler/optimizer/code_generator:libarkencoder(${host_toolchain})",
             "$ark_root/libpandabase:libarktsbase(${host_toolchain})",
             "$ark_root/libpandafile:libarktsfile(${host_toolchain})",
             "$ark_root/libpandafile/external:libarkfileExt(${host_toolchain})",
@@ -58,6 +59,9 @@ group("ark_host_linux_tools_packages") {
             "$ark_root/panda:arkts_bin(${host_toolchain})",
             "$ark_root/runtime:libarkruntime(${host_toolchain})",
         ]
+        if (enable_codegen) {
+          deps += ["$ark_root/compiler/optimizer/code_generator:libarkencoder(${host_toolchain})"]
+        }
         # TODO: don't exclude these targets from OHOS build
         if (ark_standalone_build) {
             deps += [
@@ -147,7 +151,7 @@ config("ark_config") {
     if (is_ohos && is_standard_system) {
       defines += [ "PANDA_TARGET_OHOS" ]
       include_dirs += [
-        "//base/hiviewdfx/hilog/interfaces/innerkits/include"
+        "$hilog_root/include"
       ]
     }
 
@@ -158,6 +162,12 @@ config("ark_config") {
             "PANDA_WITH_BYTECODE_OPTIMIZER",
             "PANDA_WITH_COMPILER",
         ]
+        if (enable_irtoc) {
+          defines += ["PANDA_WITH_IRTOC"]
+        }
+        if (enable_codegen) {
+          defines += ["PANDA_WITH_CODEGEN"]
+        }
         if (!is_asan) {
             defines += [ "PANDA_USE_FUTEX" ]
         }
@@ -169,6 +179,12 @@ config("ark_config") {
             "_CRTBLD",
             "__LIBMSVCRT__",
         ]
+        if (enable_irtoc) {
+          defines += ["PANDA_WITH_IRTOC"]
+        }
+        if (enable_codegen) {
+          defines += ["PANDA_WITH_CODEGEN"]
+        }
     } else if (is_mac) {
         defines += [
             "PANDA_TARGET_UNIX",
@@ -178,6 +194,12 @@ config("ark_config") {
 
             # "PANDA_USE_FUTEX",
         ]
+        if (enable_irtoc) {
+          defines += ["PANDA_WITH_IRTOC"]
+        }
+        if (enable_codegen) {
+          defines += ["PANDA_WITH_CODEGEN"]
+        }
     } else if (is_mob) {
         defines += [
             "PANDA_TARGET_UNIX",

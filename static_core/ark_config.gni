@@ -52,7 +52,14 @@ ark_plugin_options_yaml = "$concat_gen_dir/plugin_options.yaml"
 
 isa_gen_dir = get_label_info("$ark_root/isa:isa_combine", "target_gen_dir")
 ark_isa_yaml = "$isa_gen_dir/isa.yaml"
+enable_irtoc = false
+enable_codegen = false
 is_llvmaot = false
+if (ark_standalone_build) {
+  enable_irtoc = true
+  enable_codegen = true
+  is_llvmaot = true
+}
 ark_enable_global_register_variables = true
 enable_bytecode_optimizer = true
 enable_relayout_profile = false
@@ -78,6 +85,10 @@ if (ark_standalone_build) {
 
 is_mob = !is_ohos && !is_linux && !is_mingw && !is_mac &&
          (current_cpu != "arm" || is_wearable_product)
+
+if (is_ohos && is_standard_system) {
+  hilog_root = "//base/hiviewdfx/hilog/interfaces/native/innerkits"
+}
 
 ## TODO add other arch
 

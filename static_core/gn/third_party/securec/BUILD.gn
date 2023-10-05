@@ -72,6 +72,8 @@ ohos_static_library("libc_secstatic") {
     "-D_INC_STDLIB_S",
     "-D_INC_MEMORY_S",
   ]
+  part_name = ark_part_name
+  subsystem_name = ark_subsystem_name
 }
 
 ohos_shared_library("libc_secshared") {
@@ -88,4 +90,6 @@ ohos_shared_library("libc_secshared") {
   ]
 
   output_extension = "so"
+  part_name = ark_part_name
+  subsystem_name = ark_subsystem_name
 }

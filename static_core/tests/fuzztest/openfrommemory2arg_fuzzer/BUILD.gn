@@ -21,7 +21,7 @@ module_output_path = "ark/runtime_core"
 ohos_fuzztest("OpenFromMemory2ArgFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file =
-      "//ark/runtime_core/tests/fuzztest/openfrommemory2arg_fuzzer"
+      "$ark_root/tests/fuzztest/openfrommemory2arg_fuzzer"
   include_dirs = []
   cflags = [
     "-g",
@@ -30,7 +30,7 @@ ohos_fuzztest("OpenFromMemory2ArgFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "openfrommemory2arg_fuzzer.cpp" ]
-  deps = [ "//ark/runtime_core/libpandafile:libarkfile_static" ]
+  deps = [ "$ark_root/libpandafile:libarktsfile_static" ]
 }
 
 ###############################################################################

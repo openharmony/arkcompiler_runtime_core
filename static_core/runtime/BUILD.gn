@@ -17,9 +17,11 @@ import("$ark_root/verification/verification.gni")
 import("$ark_root/plugins/plugins.gni")
 
 runtime_yaml = [
-  "runtime.yaml",
-  "$ark_root/irtoc/intrinsics.yaml",
+  "runtime.yaml"
 ]
+if (enable_irtoc) {
+  runtime_yaml += ["$ark_root/irtoc/intrinsics.yaml"]
+}
 runtime_yaml += plugin_runtime_yamls
 
 config("arkruntime_public_config") {
@@ -80,7 +82,6 @@ group("arkruntime_header_deps") {
     ":arkruntime_gen_intrinsics_yaml",
     ":intrinsics_inl_h",
     ":isa_gen_libarkruntime_interpreter-inl_gen_h",
-    ":isa_gen_libarkruntime_irtoc_interpreter_utils_h",
     ":isa_gen_libarkruntime_isa_constants_gen_h",
     ":language_config_gen_inc",
     ":libarkruntime_options_gen_h",
@@ -102,6 +103,9 @@ group("arkruntime_header_deps") {
     "$ark_root/verification/gen:verification_verifier_messages_h",
     "$ark_root/verification/gen:verification_verifier_messages_data_cpp",
   ]
+  if (enable_irtoc) {
+    deps += [":isa_gen_libarkruntime_irtoc_interpreter_utils_h"]
+  }
 
   deps += plugin_arkruntime_header_plugin_deps
 }
@@ -246,9 +250,11 @@ source_set("libarkruntime_set_static") {
     ]
   }
 
-  sources += [ "$ark_root_gen_dir/generated/irtoc_lib.o" ]
-  if (is_llvmaot) {
-    sources += [ "$ark_root_gen_dir/generated/irtoc_llvm_lib.o" ]
+  if (enable_irtoc) {
+    sources += [ "$ark_root_gen_dir/generated/irtoc_lib.o" ]
+    if (is_llvmaot) {
+      sources += [ "$ark_root_gen_dir/generated/irtoc_llvm_lib.o" ]
+    }
   }
   if (current_cpu == "arm") {
     sources += [
@@ -365,7 +371,9 @@ source_set("libarkruntime_set_static") {
     deps += [ "$ark_root/dprof:libdprof" ]
   }
 
-  deps += [ "$ark_root/irtoc:irtoc_generate" ]
+  if (enable_irtoc) {
+    deps += [ "$ark_root/irtoc:irtoc_generate" ]
+  }
 
   if (current_cpu == "arm") {
     deps += [
@@ -386,7 +394,7 @@ source_set("libarkruntime_set_static") {
   }
   if (is_ohos && is_standard_system) {
     defines = [ "PANDA_USE_OHOS_LOG" ]
-    include_dirs = [ "//base/hiviewdfx/hilog/interfaces/native/innerkits/include" ]
+    include_dirs = [ "$hilog_root/include" ]
   }
 }
 
@@ -541,8 +549,10 @@ ark_isa_gen("isa_gen_libarkruntime") {
   template_files = [
     "interpreter-inl_gen.h.erb",
     "isa_constants_gen.h.erb",
-    "irtoc_interpreter_utils.h.erb",
   ]
+  if (enable_irtoc) {
+    template_files += ["irtoc_interpreter_utils.h.erb"]
+  }
   sources = "interpreter/templates"
   destination = gen_include_dir
 }
