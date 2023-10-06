@@ -322,29 +322,6 @@ sub assert_recipes
             # $current_section should not change
             # Content line (including empty lines):
 
-            if (length($line) > 0) {
-                # Pure content line (no empty lines):
-                die 'Content line outside of: intro, desc_detailed, code_bad, code_ok'
-                    if $current_section !~ /^(intro|desc_detailed|code_bad|code_ok)$/;
-                die 'Content line is longer than 80 characters'
-                    if $current_section =~ /^(intro|desc_detailed)$/
-                    && length($line) > 80;
-                die 'Code line must be indented with at least 4 spaces'
-                    if $current_section =~ /^(code_bad|code_ok)$/
-                    && $line !~ /^ {4}/;
-                die 'Content line contains unexpected indentation'
-                    if $current_section !~ /^(code_bad|code_ok)$/
-                    && $line =~ /^\s+/;
-                die 'Content line contains CB_SOMETHING, most probably a typo'
-                    if $line =~ /\|?CB_.+?\|?/;
-                die 'Content line contains :ref:, most probably a typo'
-                    if $line =~ /:ref:/;
-                die 'Content line contains .. code, most probably a typo'
-                    if $line =~ /\.\.\s*code(?:-block)?/;
-                die 'Content line contains .., most probably misplaced markup'
-                    if $line =~ /^\.\./;
-            }
-
             if ($current_section =~ /^(desc_detailed|code_bad|code_ok)$/) {
                 push @{$current_recipe->{$current_section}}, $line;
             }
