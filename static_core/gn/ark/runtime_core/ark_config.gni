@@ -307,13 +307,11 @@ template("ark_asm_gen") {
 # The same you would pass to action except script and deps.
 template("es2panda_gen") {
   action(target_name) {
-    es2panda_root_out = get_label_info(
-            "$ark_es2panda_root/aot:es2panda(${host_toolchain})",
-            "root_out_dir")
+    es2panda_root_out =
+        get_label_info("$ark_es2panda_root/aot:es2panda(${host_toolchain})",
+                       "root_out_dir")
     script = es2panda_root_out + "/bin/es2panda"
-    deps = [
-      "$ark_es2panda_root/aot:es2panda(${host_toolchain})",
-    ]
+    deps = [ "$ark_es2panda_root/aot:es2panda(${host_toolchain})" ]
 
     inputs = invoker.inputs
     outputs = invoker.outputs

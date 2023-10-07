@@ -68,7 +68,8 @@ foreach(plugin, ark_enabled_plugins) {
   _plugin_vars = read_file("$_plugin_dir/plugin.gn", "scope")
 
   if (defined(_plugin_vars.enable_bytecode_optimizer)) {
-    plugin_enable_bytecode_optimizer = plugin_enable_bytecode_optimizer || _plugin_vars.enable_bytecode_optimizer
+    plugin_enable_bytecode_optimizer = plugin_enable_bytecode_optimizer ||
+                                       _plugin_vars.enable_bytecode_optimizer
   }
 
   plugin_ark_host_linux_tools_packages +=

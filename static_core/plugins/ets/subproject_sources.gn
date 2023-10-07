@@ -21,7 +21,7 @@ srcs_compiler = [
   "compiler/codegen_intrinsics_ets.cpp",
   "compiler/optimizer/ir_builder/ets_inst_builder.cpp",
   "compiler/optimizer/ets_codegen_extensions.cpp",
-  "compiler/optimizer/ets_intrinsics_peephole.cpp"
+  "compiler/optimizer/ets_intrinsics_peephole.cpp",
 ]
 
 srcs_disassembler = [ "disassembler/disasm_ets_plugin.cpp" ]
@@ -33,7 +33,7 @@ srcs_verification = [ "verification/ets_plugin.cpp" ]
 runtime_yamls = [
   "runtime/ets_libbase_runtime.yaml",
   "runtime/interop_js/intrinsics/std_js_jsruntime.yaml",
-  "runtime/ets_compiler_intrinsics.yaml"
+  "runtime/ets_compiler_intrinsics.yaml",
 ]
 
 option_yaml_path = "ets_plugin_options.yaml"
@@ -51,9 +51,9 @@ irtoc_plugins = [
 ]
 
 arkruntime_deps = [
+  "$ark_es2panda_root:libes2panda_frontend_static",
   "$ark_root/assembler:libarktsassembler_frontend_static",
   "$ark_root/libpandafile:libarktsfile_frontend_static",
-  "$ark_es2panda_root:libes2panda_frontend_static",
 ]
 
 srcs_runtime = [
@@ -109,23 +109,23 @@ srcs_runtime = [
   "runtime/types/ets_typeapi_method.cpp",
   "runtime/types/ets_typeapi_field.cpp",
   "runtime/lambda_utils.cpp",
-  "runtime/interop_js/intrinsics/std_js_jsruntime.cpp"
+  "runtime/interop_js/intrinsics/std_js_jsruntime.cpp",
 ]
 
 if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64") {
   srcs_runtime += [
     "runtime/napi/arch/amd64/ets_napi_entry_point_amd64.S",
-    "runtime/napi/arch/amd64/ets_async_entry_point_amd64.S"
+    "runtime/napi/arch/amd64/ets_async_entry_point_amd64.S",
   ]
 } else if (current_cpu == "arm64") {
   srcs_runtime += [
     "runtime/napi/arch/arm64/ets_napi_entry_point_aarch64.S",
-    "runtime/napi/arch/arm64/ets_async_entry_point_aarch64.S"
+    "runtime/napi/arch/arm64/ets_async_entry_point_aarch64.S",
   ]
 } else if (current_cpu == "arm") {
   srcs_runtime += [
     "runtime/napi/arch/arm32/ets_napi_entry_point_arm32.S",
-    "runtime/napi/arch/arm32/ets_async_entry_point_arm32.S"
+    "runtime/napi/arch/arm32/ets_async_entry_point_arm32.S",
   ]
 }
 # TODO(nsizov): Support 32-bit ARM

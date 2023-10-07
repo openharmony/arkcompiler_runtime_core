@@ -70,8 +70,10 @@ ohos_shared_library("libarkinspector") {
     "$ark_root/runtime/include",
     "$ark_third_party_root/asio/asio/include",
     "$ark_third_party_root/websocketpp",
-    get_label_info("$ark_root/assembler:isa_gen_libarkassembler", "target_gen_dir"),
-    get_label_info("$ark_root/disassembler:disasm_plugins_inc", "target_gen_dir"),
+    get_label_info("$ark_root/assembler:isa_gen_libarkassembler",
+                   "target_gen_dir"),
+    get_label_info("$ark_root/disassembler:disasm_plugins_inc",
+                   "target_gen_dir"),
   ]
 
   if (!is_mingw && !is_mac) {

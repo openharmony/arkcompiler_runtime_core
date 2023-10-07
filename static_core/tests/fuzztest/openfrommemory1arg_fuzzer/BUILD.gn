@@ -20,8 +20,7 @@ module_output_path = "ark/runtime_core"
 ##############################fuzztest##########################################
 ohos_fuzztest("OpenFromMemory1ArgFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file =
-      "$ark_root/tests/fuzztest/openfrommemory1arg_fuzzer"
+  fuzz_config_file = "$ark_root/tests/fuzztest/openfrommemory1arg_fuzzer"
   include_dirs = []
   cflags = [
     "-g",

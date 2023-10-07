@@ -39,9 +39,7 @@ ark_isa_gen("isa_gen_verification_gen") {
   ]
   sources = "templates"  ## ark_root/templates
   destination = "$target_gen_dir/include"  ## target_gen_dir/include
-  extra_dependencies = [
-    ":verification_abs_int_inl_compat_checks_h",
-  ]
+  extra_dependencies = [ ":verification_abs_int_inl_compat_checks_h" ]
 }
 
 ark_gen_file("verification_verifier_messages_h") {
@@ -60,7 +58,8 @@ ark_gen_file("verification_gen_plugins_gen_inc") {
 }
 
 ark_gen_file("verification_verifier_messages_data_cpp") {
-  template_file = "$ark_root/verification/gen/templates/verifier_messages_data_gen.cpp.erb"
+  template_file =
+      "$ark_root/verification/gen/templates/verifier_messages_data_gen.cpp.erb"
   data_file = "$ark_root/verification/messages.yaml"
   requires = [ "$ark_root/templates/messages.rb" ]
   output_file = "$target_gen_dir/../verifier_messages_data_gen.cpp"

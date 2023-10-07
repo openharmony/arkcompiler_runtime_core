@@ -56,13 +56,13 @@ ohos_shared_library("libarktsbytecodeopt") {
 
   deps = [
     ":bytecodeopt_options_gen_h",
+    ":codegen_intrinsics_cpp",
     ":codegen_visitors_inc",
     ":isa_gen_arkbytecodeopt_check_width_cpp",
     ":isa_gen_arkbytecodeopt_check_width_h",
     ":isa_gen_arkbytecodeopt_insn_selection_cpp",
     ":isa_gen_arkbytecodeopt_insn_selection_h",
     ":reg_encoder_visitors_inc",
-    ":codegen_intrinsics_cpp",
     "$ark_root/assembler:libarktsassembler",
     "$ark_root/compiler:libarktscompiler",
     "$ark_root/libpandabase:libarktsbase",
@@ -83,13 +83,13 @@ ohos_static_library("libarktsbytecodeopt_frontend_static") {
 
   deps = [
     ":bytecodeopt_options_gen_h",
+    ":codegen_intrinsics_cpp",
     ":codegen_visitors_inc",
     ":isa_gen_arkbytecodeopt_check_width_cpp",
     ":isa_gen_arkbytecodeopt_check_width_h",
     ":isa_gen_arkbytecodeopt_insn_selection_cpp",
     ":isa_gen_arkbytecodeopt_insn_selection_h",
     ":reg_encoder_visitors_inc",
-    ":codegen_intrinsics_cpp",
     "$ark_root/assembler:libarktsassembler_frontend_static",
     "$ark_root/compiler:libarktscompiler_frontend_static",
     "$ark_root/libpandabase:libarktsbase_frontend_static",

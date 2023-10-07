@@ -31,7 +31,7 @@ foreach(plugin, ark_enabled_plugins) {
 }
 
 group("ark_packages") {
-  deps = ["$ark_es2panda_root/aot:es2panda"]
+  deps = [ "$ark_es2panda_root/aot:es2panda" ]
   if (with_stdlib) {
     deps += [ ":etsstdlib" ]
   }
@@ -80,7 +80,7 @@ config("runtime") {
   configs = [
     "$ark_es2panda_root:libes2panda_public_config",
     "$ark_root/assembler:arkassembler_public_config",
-    "$ark_root/libpandafile:arkfile_public_config"
+    "$ark_root/libpandafile:arkfile_public_config",
   ]
 }
 
@@ -93,18 +93,25 @@ if (with_stdlib) {
     inputs = [ "stdlib" ]
     outputs = [ "$target_gen_dir/etsstdlib.abc" ]
     abs_ark_root = rebase_path(ark_root)
-    json_array = ["{",
-                  "  \"compilerOptions\": {",
-                  "    \"baseUrl\": \"$abs_ark_root\",",
-                  "    \"paths\": {",
-                  "      \"std\": [\"$abs_ark_root" + "/plugins/ets/stdlib/std\"],",
-                  "      \"escompat\": [\"$abs_ark_root" + "/plugins/ets/stdlib/escompat\"],",
-                  "      \"import_tests\": [\"$abs_ark_root" + "$ark_es2panda_root/test/parser/ets/import_tests\"]",
-                  "    }",
-                  "  }",
-                  "}"]
+    json_array = [
+      "{",
+      "  \"compilerOptions\": {",
+      "    \"baseUrl\": \"$abs_ark_root\",",
+      "    \"paths\": {",
+      "      \"std\": [\"$abs_ark_root" + "/plugins/ets/stdlib/std\"],",
+      "      \"escompat\": [\"$abs_ark_root" +
+          "/plugins/ets/stdlib/escompat\"],",
+      "      \"import_tests\": [\"$abs_ark_root" +
+          "$ark_es2panda_root/test/parser/ets/import_tests\"]",
+      "    }",
+      "  }",
+      "}",
+    ]
+
     # TODO(vpukhov): adjust es2panda path
-    write_file("$root_gen_dir/plugins/es2panda/generated/arktsconfig.json", json_array, "list lines" )
+    write_file("$root_gen_dir/plugins/es2panda/generated/arktsconfig.json",
+               json_array,
+               "list lines")
     sources = [
       "stdlib/escompat/Array.ets",
       "stdlib/escompat/ArrayBuffer.ets",
@@ -112,12 +119,12 @@ if (with_stdlib) {
       "stdlib/escompat/Date.ets",
       "stdlib/escompat/Error.ets",
       "stdlib/escompat/Errors.ets",
-      "stdlib/escompat/TypedArrays.ets",
+      "stdlib/escompat/Map.ets",
       "stdlib/escompat/Math.ets",
       "stdlib/escompat/Number.ets",
-      "stdlib/escompat/Map.ets",
       "stdlib/escompat/RegExp.ets",
       "stdlib/escompat/Set.ets",
+      "stdlib/escompat/TypedArrays.ets",
       "stdlib/escompat/json.ets",
       "stdlib/std/containers/AVLTree.ets",
       "stdlib/std/containers/ArrayAsListInt.ets",

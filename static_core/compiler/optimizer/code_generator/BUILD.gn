@@ -2,9 +2,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,25 +19,25 @@ if (enable_codegen) {
     include_dirs = [ "$ark_root/compiler/optimizer/code_generator" ]
     cflags_cc = [ "-DPANDA_BUILD" ]
     if (ark_standalone_build) {
-      ldflags = ["-ldl"]
+      ldflags = [ "-ldl" ]
     }
-    if (target_cpu == "amd64" || target_cpu == "x64" || target_cpu == "x86_64") {
+    if (target_cpu == "amd64" || target_cpu == "x64" ||
+        target_cpu == "x86_64") {
       configs = [ "$ark_third_party_root/asmjit:asmjit_public_config" ]
     }
-    is_x64 = current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64"
+    is_x64 = current_cpu == "amd64" || current_cpu == "x64" ||
+             current_cpu == "x86_64"
     if (is_x64 || current_cpu == "arm64") {
       if (!is_mingw) {
-        include_dirs += [
-          "$ark_third_party_root/vixl/src",
-        ]
+        include_dirs += [ "$ark_third_party_root/vixl/src" ]
       }
     }
   }
 
   ohos_shared_library("libarkencoder") {
     sources = [
+      "target/asm_printer.cpp",
       "target/target.cpp",
-      "target/asm_printer.cpp"
     ]
     deps = []
     defines = []
@@ -48,11 +48,12 @@ if (enable_codegen) {
         "target/x86/encode.cpp",
         "target/x86/regfile.cpp",
       ]
-      include_dirs = [ "$ark_root/compiler/optimizer/code_generator/target/x86" ]
+      include_dirs =
+          [ "$ark_root/compiler/optimizer/code_generator/target/x86" ]
     } else if (target_cpu == "amd64" || target_cpu == "x64" ||
                target_cpu == "x86_64") {
       if (!is_mingw) {
-        deps = ["$ark_third_party_root/vixl:libvixl"]
+        deps = [ "$ark_third_party_root/vixl:libvixl" ]
 
         sources += [
           "target/amd64/callconv.cpp",
@@ -110,14 +111,14 @@ if (enable_codegen) {
     ]
 
     deps += [
+      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsic_codegen_test_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
+      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsic_codegen_test_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
       "$ark_root/libpandabase:libarktsbase",
     ]
 
@@ -128,8 +129,8 @@ if (enable_codegen) {
 
   ohos_static_library("libarkencoder_frontend_static") {
     sources = [
-      "target/target.cpp",
       "target/asm_printer.cpp",
+      "target/target.cpp",
     ]
     deps = []
     defines = []
@@ -140,8 +141,8 @@ if (enable_codegen) {
         "target/x86/encode.cpp",
         "target/x86/regfile.cpp",
       ]
-      include_dirs = [ "$ark_root/compiler/optimizer/code_generator/target/x86" ]
-
+      include_dirs =
+          [ "$ark_root/compiler/optimizer/code_generator/target/x86" ]
     } else if (target_cpu == "amd64" || target_cpu == "x64" ||
                target_cpu == "x86_64") {
       if (!is_mingw) {
@@ -203,13 +204,13 @@ if (enable_codegen) {
     ]
 
     deps += [
+      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
-      "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
       "$ark_root/compiler:libarkcompiler_opcodes_h_arch_info_gen_h",
       "$ark_root/libpandabase:libarktsbase_frontend_static",
     ]

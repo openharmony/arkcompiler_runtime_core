@@ -83,7 +83,17 @@ if (is_mingw) {
     "$ark_root/libpandabase/os/native_stack.cpp",
     "$ark_root/libpandabase/os/stacktrace_stub.cpp",
     "$ark_root/libpandabase/os/time.cpp",
-    "$ark_root/platforms/windowslibpandabase/cpu_affinity.cpp",
+    "$ark_root/libpandabase/taskmanager/task.cpp",
+    "$ark_root/libpandabase/taskmanager/task_queue.cpp",
+    "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
+    "$ark_root/libpandabase/taskmanager/worker_thread.cpp",
+    "$ark_root/libpandabase/utils/dfx.cpp",
+    "$ark_root/libpandabase/utils/json_builder.cpp",
+    "$ark_root/libpandabase/utils/json_parser.cpp",
+    "$ark_root/libpandabase/utils/logger.cpp",
+    "$ark_root/libpandabase/utils/time.cpp",
+    "$ark_root/libpandabase/utils/type_converter.cpp",
+    "$ark_root/libpandabase/utils/utf.cpp",
     "$ark_root/platforms/windows/libpandabase/error.cpp",
     "$ark_root/platforms/windows/libpandabase/file.cpp",
     "$ark_root/platforms/windows/libpandabase/filesystem.cpp",
@@ -92,17 +102,7 @@ if (is_mingw) {
     "$ark_root/platforms/windows/libpandabase/mem_hooks.cpp",
     "$ark_root/platforms/windows/libpandabase/thread.cpp",
     "$ark_root/platforms/windows/libpandabase/trace.cpp",
-    "$ark_root/libpandabase/utils/dfx.cpp",
-    "$ark_root/libpandabase/utils/json_builder.cpp",
-    "$ark_root/libpandabase/utils/json_parser.cpp",
-    "$ark_root/libpandabase/utils/logger.cpp",
-    "$ark_root/libpandabase/utils/time.cpp",
-    "$ark_root/libpandabase/utils/type_converter.cpp",
-    "$ark_root/libpandabase/utils/utf.cpp",
-    "$ark_root/libpandabase/taskmanager/worker_thread.cpp",
-    "$ark_root/libpandabase/taskmanager/task.cpp",
-    "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
-    "$ark_root/libpandabase/taskmanager/task_queue.cpp",
+    "$ark_root/platforms/windowslibpandabase/cpu_affinity.cpp",
   ]
 } else {
   libarkbase_sources = [
@@ -116,14 +116,23 @@ if (is_mingw) {
     "$ark_root/libpandabase/os/filesystem.cpp",
     "$ark_root/libpandabase/os/native_stack.cpp",
     "$ark_root/libpandabase/os/property.cpp",
-    "$ark_root/libpandabase/taskmanager/worker_thread.cpp",
     "$ark_root/libpandabase/taskmanager/task.cpp",
-    "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
     "$ark_root/libpandabase/taskmanager/task_queue.cpp",
+    "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
+    "$ark_root/libpandabase/taskmanager/worker_thread.cpp",
 
     # product build
     "$ark_root/libpandabase/os/stacktrace_stub.cpp",
     "$ark_root/libpandabase/os/time.cpp",
+    "$ark_root/libpandabase/trace/trace.cpp",
+    "$ark_root/libpandabase/utils/dfx.cpp",
+    "$ark_root/libpandabase/utils/json_builder.cpp",
+    "$ark_root/libpandabase/utils/json_parser.cpp",
+    "$ark_root/libpandabase/utils/logger.cpp",
+    "$ark_root/libpandabase/utils/terminate.cpp",
+    "$ark_root/libpandabase/utils/time.cpp",
+    "$ark_root/libpandabase/utils/type_converter.cpp",
+    "$ark_root/libpandabase/utils/utf.cpp",
     "$ark_root/platforms/unix/libpandabase/cpu_affinity.cpp",
     "$ark_root/platforms/unix/libpandabase/error.cpp",
     "$ark_root/platforms/unix/libpandabase/file.cpp",
@@ -134,25 +143,14 @@ if (is_mingw) {
     "$ark_root/platforms/unix/libpandabase/property.cpp",
     "$ark_root/platforms/unix/libpandabase/thread.cpp",
     "$ark_root/platforms/unix/libpandabase/trace.cpp",
-    "$ark_root/libpandabase/trace/trace.cpp",
-    "$ark_root/libpandabase/utils/dfx.cpp",
-    "$ark_root/libpandabase/utils/json_builder.cpp",
-    "$ark_root/libpandabase/utils/json_parser.cpp",
-    "$ark_root/libpandabase/utils/logger.cpp",
-    "$ark_root/libpandabase/utils/terminate.cpp",
-    "$ark_root/libpandabase/utils/time.cpp",
-    "$ark_root/libpandabase/utils/type_converter.cpp",
-    "$ark_root/libpandabase/utils/utf.cpp",
   ]
 
   if (is_mob) {
-    libarkbase_sources += [
-      "$ark_root/platforms/mobile/libpandabase/library_loader_load.cpp",
-    ]
+    libarkbase_sources +=
+        [ "$ark_root/platforms/mobile/libpandabase/library_loader_load.cpp" ]
   } else {
-    libarkbase_sources += [
-      "$ark_root/platforms/unix/libpandabase/library_loader_load.cpp",
-    ]
+    libarkbase_sources +=
+        [ "$ark_root/platforms/unix/libpandabase/library_loader_load.cpp" ]
   }
 
   if (!is_mac) {
@@ -190,12 +188,14 @@ if (current_cpu == "arm64") {
 
 if (is_mob) {
   copy("coherency_line_size_h") {
-    sources = [ "$ark_root/platforms/mobile/libpandabase/coherency_line_size.h" ]
+    sources =
+        [ "$ark_root/platforms/mobile/libpandabase/coherency_line_size.h" ]
     outputs = [ "$target_gen_dir/generated/coherency_line_size.h" ]
   }
 } else {
   copy("coherency_line_size_h") {
-    sources = [ "$ark_root/platforms/common/libpandabase/coherency_line_size.h" ]
+    sources =
+        [ "$ark_root/platforms/common/libpandabase/coherency_line_size.h" ]
     outputs = [ "$target_gen_dir/generated/coherency_line_size.h" ]
   }
 }
@@ -208,13 +208,13 @@ libarkbase_configs = [
 
 libarkbase_deps = [
   ":base_options_h",
+  ":coherency_line_size_h",
   ":events_gen",
   ":generate_version_file",
   ":logger_enum_gen_h",
   ":logger_impl_gen_h",
-  ":coherency_line_size_h",
-  ":source_language_gen",
   ":plugins_regmasks_gen",
+  ":source_language_gen",
   sdk_libc_secshared_dep,
 ]
 
@@ -266,9 +266,7 @@ action("logger_yaml_gen") {
     "-o",
     rebase_path(outputs[0], root_build_dir),
   ]
-  deps = [
-    "$ark_root:concat_plugins_yamls"
-  ]
+  deps = [ "$ark_root:concat_plugins_yamls" ]
 }
 
 ark_gen_file("logger_enum_gen_h") {

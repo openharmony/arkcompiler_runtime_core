@@ -25,7 +25,7 @@ ark_third_party_root = "//third_party"
 
 # TODO(vpukhov): adjust es2panda path
 if (ark_standalone_build) {
-    ark_es2panda_root = "$ark_root/plugins/ecmascript/es2panda"
+  ark_es2panda_root = "$ark_root/plugins/ecmascript/es2panda"
 } else {
-    ark_es2panda_root = "//arkcompiler/ets_frontend/ets2panda"
+  ark_es2panda_root = "//arkcompiler/ets_frontend/ets2panda"
 }

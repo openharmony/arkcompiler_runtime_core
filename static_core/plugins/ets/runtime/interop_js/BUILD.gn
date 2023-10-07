@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("//build/ohos.gni")
 
 declare_args() {
   if (is_ohos && is_standard_system) {
@@ -21,12 +21,13 @@ declare_args() {
     ark_napi_headers_path = ""
   }
 }
-assert(ark_napi_headers_path != "",  "ark_napi_headers_path is not set")
+assert(ark_napi_headers_path != "", "ark_napi_headers_path is not set")
 
 if (is_ohos && is_standard_system) {
   ohos_prebuilt_etc("etsstdlib_install") {
-    deps = ["$ark_root/plugins/ets:etsstdlib"]
-    stdlib_dir = get_label_info("$ark_root/plugins/ets:etsstdlib", "target_gen_dir")
+    deps = [ "$ark_root/plugins/ets:etsstdlib" ]
+    stdlib_dir =
+        get_label_info("$ark_root/plugins/ets:etsstdlib", "target_gen_dir")
     source = "$stdlib_dir/etsstdlib.abc"
     part_name = ark_part_name
     subsystem_name = ark_subsystem_name
@@ -34,61 +35,52 @@ if (is_ohos && is_standard_system) {
 }
 
 ohos_shared_library("ets_interop_js_napi") {
-  configs = [
-    "$ark_root:ark_config",
-  ]
+  configs = [ "$ark_root:ark_config" ]
 
-  include_dirs = [
-    "$ark_napi_headers_path",
-  ]
+  include_dirs = [ "$ark_napi_headers_path" ]
 
   sources = [
-    "ets_vm_plugin.cpp",
-    "js_value.cpp",
-    "js_refconvert.cpp",
     "ets_proxy/ets_class_wrapper.cpp",
     "ets_proxy/ets_field_wrapper.cpp",
     "ets_proxy/ets_method_wrapper.cpp",
+    "ets_proxy/ets_proxy.cpp",
     "ets_proxy/shared_reference.cpp",
     "ets_proxy/shared_reference_storage.cpp",
-    "ets_proxy/ets_proxy.cpp",
+    "ets_vm_plugin.cpp",
+    "interop_common.cpp",
     "interop_context.cpp",
     "intrinsics_api_impl.cpp",
+    "js_job_queue.cpp",
+    "js_proxy/js_proxy.cpp",
+    "js_refconvert.cpp",
+    "js_refconvert_builtin.cpp",
+    "js_value.cpp",
     "js_value_call.cpp",
-    "interop_common.cpp",
+    "pending_promise_listener.cpp",
     "ts2ets_copy.cpp",
     "ts2ets_tstype.cpp",
-    "js_job_queue.cpp",
-    "pending_promise_listener.cpp",
-    "js_refconvert_builtin.cpp",
-    "js_proxy/js_proxy.cpp"
   ]
-  if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64") {
-    sources += [
-      "arch/amd64/ts2ets_jscall_bridge_amd64.S",
-    ]
+  if (current_cpu == "amd64" || current_cpu == "x64" ||
+      current_cpu == "x86_64") {
+    sources += [ "arch/amd64/ts2ets_jscall_bridge_amd64.S" ]
   } else if (current_cpu == "arm64") {
-    sources += [
-      "arch/arm64/ts2ets_jscall_bridge_aarch64.S",
-    ]
+    sources += [ "arch/arm64/ts2ets_jscall_bridge_aarch64.S" ]
   } else if (current_cpu == "arm") {
-    sources += [
-      "arch/arm32/ts2ets_jscall_bridge_arm32.S",
-    ]
+    sources += [ "arch/arm32/ts2ets_jscall_bridge_arm32.S" ]
   }
 
   deps = [
-    "$ark_root/runtime:libarkruntime",
+    "$ark_root/compiler:libarktscompiler",
     "$ark_root/libpandabase:libarktsbase",
-    "$ark_root/compiler:libarktscompiler"
+    "$ark_root/runtime:libarkruntime",
   ]
   if (is_ohos && is_standard_system) {
     include_dirs += [ "$hilog_root/include" ]
     defines = [ "PANDA_USE_OHOS_LOG" ]
-    deps += [":etsstdlib_install"]
+    deps += [ ":etsstdlib_install" ]
     external_deps = [
+      "hilog:libhilog",
       "napi:ace_napi",
-      "hilog:libhilog"
     ]
   }
   relative_install_dir = "module"

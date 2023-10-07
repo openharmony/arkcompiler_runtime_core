@@ -25,7 +25,10 @@ if (enable_irtoc) {
       "$ark_third_party_root/elfio",
     ]
 
-    cflags_cc = ["-isystem", rebase_path("$ark_third_party_root/elfio", root_build_dir)]
+    cflags_cc = [
+      "-isystem",
+      rebase_path("$ark_third_party_root/elfio", root_build_dir),
+    ]
   }
 
   irtoc_scripts = [
@@ -149,11 +152,14 @@ if (enable_irtoc) {
   }
 
   action("irtoc_generate") {
-    irtoc_root_out_dir = get_label_info("$ark_root/irtoc:irtoc(${host_toolchain})", "root_out_dir")
+    irtoc_root_out_dir =
+        get_label_info("$ark_root/irtoc:irtoc(${host_toolchain})",
+                       "root_out_dir")
     if (ark_standalone_build) {
       irtoc_cmd = irtoc_root_out_dir + "/bin/irtoc"
     } else {
-      irtoc_cmd = irtoc_root_out_dir + "/$ark_subsystem_name/$ark_part_name/irtoc"
+      irtoc_cmd =
+          irtoc_root_out_dir + "/$ark_subsystem_name/$ark_part_name/irtoc"
     }
     script = irtoc_cmd
 

@@ -24,9 +24,9 @@ config("arklinker_public_config") {
 
 arklinker_sources = [
   "linker.cpp",
+  "linker_code_parser_context.cpp",
   "linker_context.cpp",
   "linker_context_misc.cpp",
-  "linker_code_parser_context.cpp",
 ]
 
 arklinker_configs = [

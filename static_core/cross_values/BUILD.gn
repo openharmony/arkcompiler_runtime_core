@@ -74,7 +74,9 @@ action("cross_values_getters_generate") {
   script = "$ark_root/cross_values/cross_values_getters_generator.rb"
   outputs = [ "$target_gen_dir/cross_values.h" ]
 
-  preprocessed_defines = get_path_info("$target_gen_dir/asm_defines_def.cpp", "out_dir") + "/asm_defines_def_cpp_gen/asm_defines_def.o"
+  preprocessed_defines =
+      get_path_info("$target_gen_dir/asm_defines_def.cpp", "out_dir") +
+      "/asm_defines_def_cpp_gen/asm_defines_def.o"
   args = [
     rebase_path(preprocessed_defines, root_build_dir),
     rebase_path("$target_gen_dir/generated_values", root_build_dir),

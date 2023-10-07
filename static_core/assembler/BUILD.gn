@@ -117,9 +117,7 @@ ohos_static_library("libarktsassembler_frontend_static") {
 source_set("ark_asm_static") {
   sources = [ "pandasm.cpp" ]
 
-  include_dirs = [
-    "$target_gen_dir",
-  ]
+  include_dirs = [ "$target_gen_dir" ]
 
   public_configs = [
     sdk_libc_secshared_config,

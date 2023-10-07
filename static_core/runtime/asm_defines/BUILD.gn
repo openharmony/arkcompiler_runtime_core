@@ -36,15 +36,15 @@ ohos_static_library("asm_defines") {
   cflags_cc = [
     "-Wno-invalid-offsetof",
     "-S",
-    "-fno-lto"
+    "-fno-lto",
   ]
   output_dir = "$target_gen_dir/generated"
   output_extension = "S"
   output_name = "libasm_defines"
   deps = [
+    "$ark_root/libpandabase:coherency_line_size_h",
     "$ark_root/libpandafile:libarktsfile",
     "$ark_root/runtime:arkruntime_header_deps",
-    "$ark_root/libpandabase:coherency_line_size_h",
     sdk_libc_secshared_dep,
   ]
   part_name = ark_part_name

@@ -53,8 +53,8 @@ arkdisassembler_sources = [
   "$target_gen_dir/bc_ins_to_pandasm_ins.cpp",
   "$target_gen_dir/opcode_translator.cpp",
   "$target_gen_dir/type_to_pandasm_type.cpp",
-  "disassembler.cpp",
   "disasm_backed_debug_info_extractor.cpp",
+  "disassembler.cpp",
 ]
 arkdisassembler_sources += plugin_arkdisassembler_sources
 
