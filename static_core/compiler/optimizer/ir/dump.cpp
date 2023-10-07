@@ -1180,8 +1180,13 @@ void Graph::Dump(std::ostream *out) const
 
     auto &blocks = GetAnalysis<LinearOrder>().IsValid() ? GetBlocksLinearOrder() : GetBlocksRPO();
     for (const auto &block_it : blocks) {
-        block_it->Dump(out);
-        (*out) << '\n';
+        if (!block_it->GetPredsBlocks().empty() || !block_it->GetSuccsBlocks().empty()) {
+            block_it->Dump(out);
+            (*out) << '\n';
+        } else {
+            // to print the dump before cleanup, still unconnected nodes exist
+            (*out) << "BB " << block_it->GetId() << " is unconnected\n\n";
+        }
     }
 }
 }  // namespace panda::compiler

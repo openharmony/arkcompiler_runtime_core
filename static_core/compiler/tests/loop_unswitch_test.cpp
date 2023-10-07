@@ -1133,22 +1133,15 @@ public:
     }
     Inst *CreateInstIfImm(Inst *input, uint64_t imm, ConditionCode cc)
     {
-        auto inst = GetGraph()->CreateInstIfImm();
-        inst->SetInput(0, input);
-        inst->SetImm(imm);
-        inst->SetCc(cc);
+        auto inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, input, imm, input->GetType(), cc);
         return inst;
     }
     Inst *CreateInstIfImm(Inst *input0, Inst *input1, ConditionCode compare_cc, uint64_t imm, ConditionCode if_cc)
     {
-        auto compare_inst = GetGraph()->CreateInstCompare();
-        compare_inst->SetInput(0, input0);
-        compare_inst->SetInput(1, input1);
-        compare_inst->SetCc(compare_cc);
-        auto inst = GetGraph()->CreateInstIfImm();
-        inst->SetInput(0, compare_inst);
-        inst->SetImm(imm);
-        inst->SetCc(if_cc);
+        auto compare_inst =
+            GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, input0, input1, input0->GetType(), compare_cc);
+        auto inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, compare_inst, imm,
+                                                compare_inst->GetType(), if_cc);
         return inst;
     }
 

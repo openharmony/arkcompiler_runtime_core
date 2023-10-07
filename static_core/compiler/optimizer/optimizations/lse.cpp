@@ -901,9 +901,7 @@ void Lse::DeleteInstruction(Inst *inst, Inst *value)
             COMPILER_LOG(DEBUG, LSE_OPT) << LogInst(inst) << " was not eliminated: requires an inappropriate cast";
             return;
         }
-        auto cast = GetGraph()->CreateInstCast(inst->GetType(), inst->GetPc());
-        cast->SetOperandsType(value->GetType());
-        cast->SetInput(0, value);
+        auto cast = GetGraph()->CreateInstCast(inst->GetType(), inst->GetPc(), value, value->GetType());
         inst->InsertAfter(cast);
         value = cast;
     }

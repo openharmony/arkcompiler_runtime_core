@@ -342,20 +342,11 @@ void CodegenTest::CheckStoreArrayPair(bool imm)
 
     Inst *stp_arr = nullptr;
     if (imm) {
-        stp_arr = graph->CreateInstStoreArrayPairI(2);
+        stp_arr = graph->CreateInstStoreArrayPairI(TYPE, INVALID_PC, array, val0, val1, 2);
         block->AppendInst(stp_arr);
-        stp_arr->SetType(TYPE);
-        stp_arr->SetInput(0, array);
-        stp_arr->SetInput(1, val0);
-        stp_arr->SetInput(2, val1);
     } else {
-        stp_arr = graph->CreateInstStoreArrayPair();
+        stp_arr = graph->CreateInstStoreArrayPair(TYPE, INVALID_PC, array, index, val0, val1);
         block->AppendInst(stp_arr);
-        stp_arr->SetType(TYPE);
-        stp_arr->SetInput(0, array);
-        stp_arr->SetInput(1, index);
-        stp_arr->SetInput(2, val0);
-        stp_arr->SetInput(3, val1);
     }
 
     auto ret = graph->CreateInst(Opcode::ReturnVoid);
@@ -426,27 +417,18 @@ void CodegenTest::CheckLoadArrayPair(bool imm)
 
     Inst *ldp_arr = nullptr;
     if (imm) {
-        ldp_arr = graph->CreateInstLoadArrayPairI(2);
+        ldp_arr = graph->CreateInstLoadArrayPairI(TYPE, INVALID_PC, array, 2);
         block->AppendInst(ldp_arr);
-        ldp_arr->SetType(TYPE);
-        ldp_arr->SetInput(0, array);
     } else {
-        ldp_arr = graph->CreateInstLoadArrayPair();
+        ldp_arr = graph->CreateInstLoadArrayPair(TYPE, INVALID_PC, array, index);
         block->AppendInst(ldp_arr);
-        ldp_arr->SetType(TYPE);
-        ldp_arr->SetInput(0, array);
-        ldp_arr->SetInput(1, index);
     }
 
-    auto load_high = graph->CreateInstLoadPairPart(0);
+    auto load_high = graph->CreateInstLoadPairPart(TYPE, INVALID_PC, ldp_arr, 0);
     block->AppendInst(load_high);
-    load_high->SetType(TYPE);
-    load_high->SetInput(0, ldp_arr);
 
-    auto load_low = graph->CreateInstLoadPairPart(1);
+    auto load_low = graph->CreateInstLoadPairPart(TYPE, INVALID_PC, ldp_arr, 1);
     block->AppendInst(load_low);
-    load_low->SetType(TYPE);
-    load_low->SetInput(0, ldp_arr);
 
     auto sum = graph->CreateInst(Opcode::Add);
     block->AppendInst(sum);

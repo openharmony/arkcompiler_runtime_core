@@ -248,6 +248,13 @@ bool PandaRuntimeInterface::CanThrowException(MethodPtr method) const
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*panda_method);
     return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->CanThrowException(panda_method);
 }
+
+uint32_t PandaRuntimeInterface::FindCatchBlock(MethodPtr m, ClassPtr cls, uint32_t pc) const
+{
+    ScopedMutatorLock lock;
+    return MethodCast(m)->FindCatchBlockInPandaFile(ClassCast(cls), pc);
+}
+
 bool PandaRuntimeInterface::IsInterfaceMethod(MethodPtr method) const
 {
     ScopedMutatorLock lock;

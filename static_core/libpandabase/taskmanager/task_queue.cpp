@@ -14,14 +14,14 @@
  */
 
 #include "libpandabase/taskmanager/task_queue.h"
-#include "libpandabase/globals.h"
 
 namespace panda::taskmanager {
 
-TaskQueue::TaskQueue(TaskType task_type, VMType vm_type, size_t priority)
+TaskQueue::TaskQueue(TaskType task_type, VMType vm_type, uint8_t priority)
     : priority_(priority), task_type_(task_type), vm_type_(vm_type)
 {
-    ASSERT(priority_ != 0);
+    ASSERT(priority >= MIN_PRIORITY);
+    ASSERT(priority <= MAX_PRIORITY);
 }
 
 Task TaskQueue::PopTaskFromQueue(std::queue<Task> &queue)
@@ -54,9 +54,8 @@ size_t TaskQueue::AddTask(Task &&task)
     {
         os::memory::LockHolder lock_holder(subscriber_lock_);
         // Notify subscriber about new task
-        if (outside_lock_ != nullptr) {
-            os::memory::LockHolder outside_lock_holder(*outside_lock_);
-            outside_cond_var_->Signal();
+        if (new_tasks_callback_ != nullptr) {
+            new_tasks_callback_(1);
         }
     }
     return size;
@@ -133,15 +132,17 @@ size_t TaskQueue::Size() const
     return SumSizeOfInternalQueues();
 }
 
-size_t TaskQueue::GetPriority() const
+uint8_t TaskQueue::GetPriority() const
 {
     // Atomic with acquire order reason: data race with priority_ with dependencies on reads after the
     // load which should become visible
     return priority_.load(std::memory_order_acquire);
 }
 
-void TaskQueue::SetPriority(size_t priority)
+void TaskQueue::SetPriority(uint8_t priority)
 {
+    ASSERT(priority >= MIN_PRIORITY);
+    ASSERT(priority <= MAX_PRIORITY);
     // Atomic with release order reason: data race with priority_ with no synchronization or ordering constraints
     // imposed on other reads or writes
     priority_.store(priority, std::memory_order_release);
@@ -157,18 +158,20 @@ VMType TaskQueue::GetVMType() const
     return vm_type_;
 }
 
-void TaskQueue::SubscribeCondVarToAddTask(os::memory::Mutex *lock, os::memory::ConditionVariable *cond_var)
+void TaskQueue::SubscribeCallbackToAddTask(NewTasksCallback callback)
 {
-    os::memory::LockHolder lock_holder(subscriber_lock_);
-    outside_lock_ = lock;
-    outside_cond_var_ = cond_var;
+    os::memory::LockHolder subscriber_lock_holder(subscriber_lock_);
+    new_tasks_callback_ = std::move(callback);
+    {
+        os::memory::LockHolder lock_holder(task_queue_lock_);
+        new_tasks_callback_(SumSizeOfInternalQueues());
+    }
 }
 
-void TaskQueue::UnsubscribeCondVarFromAddTask()
+void TaskQueue::UnsubscribeCallback()
 {
     os::memory::LockHolder lock_holder(subscriber_lock_);
-    outside_lock_ = nullptr;
-    outside_cond_var_ = nullptr;
+    new_tasks_callback_ = nullptr;
 }
 
 void TaskQueue::WaitForQueueEmptyAndFinish()
@@ -186,27 +189,4 @@ TaskQueue::~TaskQueue()
     WaitForQueueEmptyAndFinish();
 }
 
-TaskQueueTraits::TaskQueueTraits(TaskType tt, VMType vt)
-{
-    static_assert(sizeof(TaskType) == sizeof(TaskQueueTraits) / 2);
-    static_assert(sizeof(VMType) == sizeof(TaskQueueTraits) / 2);
-    // Multiply by BITS_IN_BYTE to convert bytes to bits
-    val_ = static_cast<uint32_t>(tt) | static_cast<uint32_t>(vt) << (BITS_PER_BYTE * sizeof(TaskQueueTraits) / 2);
-}
-
-TaskType TaskQueueTraits::GetTaskType() const
-{
-    return static_cast<TaskType>(val_);  // cuts first 16 bits with VMType info
-}
-
-VMType TaskQueueTraits::GetVMType() const
-{
-    // Multiply by BITS_IN_BYTE to convert bytes to bits
-    return static_cast<VMType>(val_ >> (BITS_PER_BYTE * sizeof(TaskQueueTraits) / 2));
-}
-
-bool operator<(const TaskQueueTraits &lv, const TaskQueueTraits &rv)
-{
-    return lv.val_ < rv.val_;
-}
 }  // namespace panda::taskmanager

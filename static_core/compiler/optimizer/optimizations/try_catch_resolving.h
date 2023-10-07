@@ -17,6 +17,7 @@
 #define COMPILER_OPTIMIZER_OPTIMIZATIONS_TRY_CATCH_RESOLVING_H_
 
 #include "optimizer/ir/graph.h"
+#include "optimizer/ir/inst.h"
 #include "optimizer/pass.h"
 
 namespace panda::compiler {
@@ -25,7 +26,15 @@ public:
     explicit TryCatchResolving(Graph *graph);
     NO_MOVE_SEMANTIC(TryCatchResolving);
     NO_COPY_SEMANTIC(TryCatchResolving);
-    ~TryCatchResolving() override = default;
+    ~TryCatchResolving() override
+    {
+        throw_insts_.clear();
+        catch_blocks_.clear();
+        try_blocks_.clear();
+        phi_insts_.clear();
+        cphi2phi_.clear();
+        catch2cphis_.clear();
+    }
 
     bool RunImpl() override;
 
@@ -36,16 +45,19 @@ public:
     void InvalidateAnalyses() override;
 
 private:
-    void VisitTry(TryInst *try_inst);
-    BasicBlock *TryFindResolvedCatchHandler(BasicBlock *try_begin, BasicBlock *try_end);
+    void VisitTryInst(TryInst *try_inst);
+    void ConnectThrowCatch();
     void DeleteTryCatchEdges(BasicBlock *try_begin, BasicBlock *try_end);
-    void ConnectCatchHandlerAfterThrow(BasicBlock *try_end, BasicBlock *catch_block);
-    void RemoveCatchPhis(BasicBlock *block, Inst *throw_inst);
-    std::optional<uint32_t> TryGetObjectId(const Inst *inst);
-    bool DFS(BasicBlock *block, Marker marker, uint32_t try_id);
+    void RemoveCatchPhis(BasicBlock *cphis_block, BasicBlock *catch_block, Inst *throw_inst, Inst *phi_inst);
 
 private:
     Marker marker_ {UNDEF_MARKER};
+    ArenaVector<Inst *> throw_insts_;
+    ArenaMap<uint32_t, BasicBlock *> catch_blocks_;
+    ArenaMap<uint32_t, PhiInst *> phi_insts_;
+    ArenaVector<BasicBlock *> try_blocks_;
+    ArenaMap<CatchPhiInst *, PhiInst *> cphi2phi_;
+    ArenaMap<BasicBlock *, BasicBlock *> catch2cphis_;
 };
 }  // namespace panda::compiler
 

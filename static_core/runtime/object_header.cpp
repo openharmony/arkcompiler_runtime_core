@@ -225,12 +225,8 @@ ObjectHeader *ObjectHeader::ShallowCopy(ObjectHeader *src)
     // Post barrier
     auto gc_post_barrier_type = barrier_set->GetPostType();
     if (!mem::IsEmptyBarrier(gc_post_barrier_type)) {
-        if (object_class->IsArrayClass()) {
-            if (object_class->IsObjectArrayClass()) {
-                barrier_set->PostBarrierArrayWrite(dst, obj_size);
-            }
-        } else {
-            barrier_set->PostBarrierEveryObjectFieldWrite(dst, obj_size);
+        if (!object_class->IsArrayClass() || !object_class->GetComponentType()->IsPrimitive()) {
+            barrier_set->PostBarrier(dst, 0, obj_size);
         }
     }
     return dst;

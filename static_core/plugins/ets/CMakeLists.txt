@@ -52,17 +52,6 @@ add_subdirectory(arkts_header)
 # TODO(nsizov): change this logic when ets compiler moved into ets plugin
 if(TARGET es2panda)
     add_custom_target(etsstdlib)
-
-    if(CMAKE_CROSSCOMPILING)
-        ExternalProject_Get_Property(panda_host_tools binary_dir)
-        set(es2panda_target panda_host_tools-build)
-        # TODO(vpukhov): adjust es2panda path
-        set(es2panda_bin "${binary_dir}/plugins/ets/es2panda/aot/es2panda")
-    else()
-        set(es2panda_target es2panda)
-        set(es2panda_bin $<TARGET_FILE:${es2panda_target}>)
-    endif()
-
     add_dependencies(etsstdlib ${es2panda_target})
 
     add_custom_command(TARGET etsstdlib

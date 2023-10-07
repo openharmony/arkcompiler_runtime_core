@@ -41,9 +41,7 @@ public:
         auto block = graph->CreateEmptyBlock();
         graph->GetStartBlock()->AddSucc(block);
         block->AddSucc(graph->GetEndBlock());
-        auto ret = graph->CreateInstReturn();
-        ret->SetType(type);
-        ret->SetInput(0, cnst);
+        auto ret = graph->CreateInstReturn(type, INVALID_PC, cnst);
         block->AppendInst(ret);
         graph->RunPass<LoopAnalyzer>();
         GraphChecker(graph).Check();

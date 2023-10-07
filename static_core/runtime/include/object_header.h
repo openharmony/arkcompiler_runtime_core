@@ -83,23 +83,23 @@ public:
         // should become visible acquire
         reinterpret_cast<std::atomic<ClassHelper::ClassWordSize> *>(&class_word_)
             ->store(static_cast<ClassHelper::ClassWordSize>(ToObjPtrType(klass)), std::memory_order_release);
-        ASSERT(AtomicClassAddr<BaseClass>() == klass);
+        ASSERT(ClassAddr<BaseClass>() == klass);
     }
 
     template <typename T>
     inline T *ClassAddr() const
-    {
-        return AtomicClassAddr<T>();
-    }
-
-    template <typename T>
-    inline T *AtomicClassAddr() const
     {
         auto ptr = const_cast<ClassHelper::ClassWordSize *>(&class_word_);
         // Atomic with acquire order reason: data race with classWord_ with dependecies on reads after the load which
         // should become visible
         return reinterpret_cast<T *>(
             reinterpret_cast<std::atomic<ClassHelper::ClassWordSize> *>(ptr)->load(std::memory_order_acquire));
+    }
+
+    template <typename T>
+    inline T *NotAtomicClassAddr() const
+    {
+        return reinterpret_cast<T *>(*const_cast<ClassHelper::ClassWordSize *>(&class_word_));
     }
 
     // Generate hash value for an object.

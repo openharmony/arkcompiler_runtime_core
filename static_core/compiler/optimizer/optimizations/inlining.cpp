@@ -306,17 +306,12 @@ bool Inlining::DoInlineMonomorphic(CallInst *call_inst, RuntimeInterface::ClassP
     }
 
     // Add type guard
-    auto get_cls_inst = GetGraph()->CreateInstGetInstanceClass(DataType::REFERENCE, call_inst->GetPc());
-    get_cls_inst->SetInput(0, obj_inst);
+    auto get_cls_inst = GetGraph()->CreateInstGetInstanceClass(DataType::REFERENCE, call_inst->GetPc(), obj_inst);
     auto load_cls_inst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, call_inst->GetPc(), receiver);
-    auto cmp_inst = GetGraph()->CreateInstCompare(DataType::BOOL, call_inst->GetPc(), ConditionCode::CC_NE);
-    cmp_inst->SetInput(0, get_cls_inst);
-    cmp_inst->SetInput(1, load_cls_inst);
-    cmp_inst->SetOperandsType(DataType::REFERENCE);
-    auto deopt_inst = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, call_inst->GetPc());
-    deopt_inst->SetDeoptimizeType(DeoptimizeType::INLINE_IC);
-    deopt_inst->SetInput(0, cmp_inst);
-    deopt_inst->SetSaveState(save_state);
+    auto cmp_inst = GetGraph()->CreateInstCompare(DataType::BOOL, call_inst->GetPc(), get_cls_inst, load_cls_inst,
+                                                  DataType::REFERENCE, ConditionCode::CC_NE);
+    auto deopt_inst = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, call_inst->GetPc(), cmp_inst, save_state,
+                                                         DeoptimizeType::INLINE_IC);
     if (IsIntrinsic(&ctx)) {
         call_inst->InsertBefore(load_cls_inst);
         call_inst->InsertBefore(get_cls_inst);
@@ -339,13 +334,10 @@ void Inlining::CreateCompareClass(CallInst *call_inst, Inst *get_cls_inst, Runti
                                   BasicBlock *call_bb)
 {
     auto load_cls_inst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, call_inst->GetPc(), receiver);
-    auto cmp_inst = GetGraph()->CreateInstCompare(DataType::BOOL, call_inst->GetPc(), ConditionCode::CC_EQ);
-    auto if_inst = GetGraph()->CreateInstIfImm(DataType::BOOL, call_inst->GetPc(), ConditionCode::CC_NE, 0);
-    cmp_inst->SetInput(0, load_cls_inst);
-    cmp_inst->SetInput(1, get_cls_inst);
-    cmp_inst->SetOperandsType(DataType::REFERENCE);
-    if_inst->SetInput(0, cmp_inst);
-    if_inst->SetOperandsType(DataType::BOOL);
+    auto cmp_inst = GetGraph()->CreateInstCompare(DataType::BOOL, call_inst->GetPc(), load_cls_inst, get_cls_inst,
+                                                  DataType::REFERENCE, ConditionCode::CC_EQ);
+    auto if_inst = GetGraph()->CreateInstIfImm(DataType::BOOL, call_inst->GetPc(), cmp_inst, 0, DataType::BOOL,
+                                               ConditionCode::CC_NE);
     call_bb->AppendInst(load_cls_inst);
     call_bb->AppendInst(cmp_inst);
     call_bb->AppendInst(if_inst);
@@ -363,10 +355,8 @@ void Inlining::InsertDeoptimizeInst(CallInst *call_inst, BasicBlock *call_bb, De
     ASSERT(compare_inst != nullptr && compare_inst->GetCc() == ConditionCode::CC_EQ);
     compare_inst->SetCc(ConditionCode::CC_NE);
 
-    auto deopt_inst = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, call_inst->GetPc());
-    deopt_inst->SetDeoptimizeType(deopt_type);
-    deopt_inst->SetInput(0, compare_inst);
-    deopt_inst->SetSaveState(call_inst->GetSaveState());
+    auto deopt_inst = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, call_inst->GetPc(), compare_inst,
+                                                         call_inst->GetSaveState(), deopt_type);
 
     call_bb->RemoveInst(if_inst);
     call_bb->AppendInst(deopt_inst);
@@ -599,9 +589,9 @@ bool Inlining::DoInlinePolymorphic(CallInst *call_inst, ArenaVector<RuntimeInter
 
         if (!return_inlined_block->GetPredsBlocks().empty()) {
             if (inl_graph.has_runtime_calls) {
-                auto inlined_return = GetGraph()->CreateInstReturnInlined(DataType::VOID, INVALID_PC);
+                auto inlined_return =
+                    GetGraph()->CreateInstReturnInlined(DataType::VOID, INVALID_PC, new_call_inst->GetSaveState());
                 return_inlined_block->PrependInst(inlined_return);
-                inlined_return->SetInput(0, new_call_inst->GetSaveState());
             }
             if (call_inst->GetType() != DataType::VOID) {
                 ASSERT(phi_inst);
@@ -981,7 +971,8 @@ void Inlining::ProcessCallReturnInstructions(CallInst *call_inst, BasicBlock *ca
         call_inst->AppendInput(save_state);
         call_inst->SetType(DataType::VOID);
         for (auto bb : return_blocks_) {
-            auto inlined_return = GetGraph()->CreateInstReturnInlined(DataType::VOID, INVALID_PC);
+            auto inlined_return =
+                GetGraph()->CreateInstReturnInlined(DataType::VOID, INVALID_PC, call_inst->GetSaveState());
             if (bb != call_cont_bb && (bb->IsEndWithThrowOrDeoptimize() ||
                                        (bb->IsEmpty() && bb->GetPredsBlocks()[0]->IsEndWithThrowOrDeoptimize()))) {
                 auto last_inst = !bb->IsEmpty() ? bb->GetLastInst() : bb->GetPredsBlocks()[0]->GetLastInst();
@@ -990,7 +981,6 @@ void Inlining::ProcessCallReturnInstructions(CallInst *call_inst, BasicBlock *ca
             } else {
                 bb->PrependInst(inlined_return);
             }
-            inlined_return->SetInput(0, call_inst->GetSaveState());
             if (need_barriers) {
                 inlined_return->SetFlag(inst_flags::MEM_BARRIER);
             }
@@ -1493,10 +1483,8 @@ void Inlining::InsertChaGuard(CallInst *call_inst)
 {
     auto save_state = call_inst->GetSaveState();
     auto check_deopt = GetGraph()->CreateInstIsMustDeoptimize(DataType::BOOL, call_inst->GetPc());
-    auto deopt = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, call_inst->GetPc());
-    deopt->SetDeoptimizeType(DeoptimizeType::INLINE_CHA);
-    deopt->SetInput(0, check_deopt);
-    deopt->SetInput(1, save_state);
+    auto deopt = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, call_inst->GetPc(), check_deopt, save_state,
+                                                    DeoptimizeType::INLINE_CHA);
     call_inst->InsertBefore(deopt);
     deopt->InsertBefore(check_deopt);
 }
@@ -1506,7 +1494,7 @@ bool Inlining::SkipBlock(const BasicBlock *block) const
     if (block == nullptr || block->IsEmpty()) {
         return true;
     }
-    if (!OPTIONS.IsCompilerInliningSkipThrowBlocks()) {
+    if (!OPTIONS.IsCompilerInliningSkipThrowBlocks() || (GetGraph()->GetThrowCounter(block) > 0)) {
         return false;
     }
     return block->IsEndWithThrowOrDeoptimize();

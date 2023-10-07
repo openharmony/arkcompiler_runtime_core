@@ -833,17 +833,9 @@ void ChecksElimination::InsertBoundsCheckDeoptimization(ConditionCode cc, Inst *
         InsertInstAfter(new_left, insert_after, block);
         insert_after = new_left;
     }
-    auto deopt_comp = GetGraph()->CreateInstCompare();
-    deopt_comp->SetType(DataType::BOOL);
-    deopt_comp->SetOperandsType(DataType::INT32);
-    deopt_comp->SetCc(cc);
-    deopt_comp->SetInput(0, new_left);
-    deopt_comp->SetInput(1, right);
-    auto deopt = GetGraph()->CreateInstDeoptimizeIf();
-    deopt->SetDeoptimizeType(DeoptimizeType::BOUNDS_CHECK);
-    deopt->SetInput(0, deopt_comp);
-    deopt->SetInput(1, ss);
-    deopt->SetPc(ss->GetPc());
+    auto deopt_comp = GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, new_left, right, DataType::INT32, cc);
+    auto deopt = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, ss->GetPc(), deopt_comp, ss,
+                                                    DeoptimizeType::BOUNDS_CHECK);
     InsertInstAfter(deopt_comp, insert_after, block);
     block->InsertAfter(deopt, deopt_comp);
 }
@@ -851,17 +843,8 @@ void ChecksElimination::InsertBoundsCheckDeoptimization(ConditionCode cc, Inst *
 Inst *ChecksElimination::InsertDeoptimization(ConditionCode cc, Inst *left, Inst *right, Inst *ss, Inst *insert_after,
                                               DeoptimizeType deopt_type)
 {
-    auto deopt_comp = GetGraph()->CreateInstCompare();
-    deopt_comp->SetType(DataType::BOOL);
-    deopt_comp->SetOperandsType(left->GetType());
-    deopt_comp->SetCc(cc);
-    deopt_comp->SetInput(0, left);
-    deopt_comp->SetInput(1, right);
-    auto deopt = GetGraph()->CreateInstDeoptimizeIf();
-    deopt->SetDeoptimizeType(deopt_type);
-    deopt->SetInput(0, deopt_comp);
-    deopt->SetInput(1, ss);
-    deopt->SetPc(ss->GetPc());
+    auto deopt_comp = GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, left, right, left->GetType(), cc);
+    auto deopt = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, ss->GetPc(), deopt_comp, ss, deopt_type);
     auto block = insert_after->GetBasicBlock();
     block->InsertAfter(deopt_comp, insert_after);
     block->InsertAfter(deopt, deopt_comp);
@@ -906,9 +889,7 @@ Inst *ChecksElimination::InsertNewLenArray(Inst *len_array, Inst *ss)
         auto ref = len_array->GetDataFlowInput(null_check);
         if (ref->IsDominate(ss)) {
             // Build nullcheck + lenarray before loop
-            auto nullcheck = GetGraph()->CreateInstNullCheck(DataType::REFERENCE, ss->GetPc());
-            nullcheck->SetInput(0, ref);
-            nullcheck->SetInput(1, ss);
+            auto nullcheck = GetGraph()->CreateInstNullCheck(DataType::REFERENCE, ss->GetPc(), ref, ss);
             nullcheck->SetFlag(inst_flags::CAN_DEOPTIMIZE);
             auto new_len_array = len_array->Clone(GetGraph());
             new_len_array->SetInput(0, nullcheck);
@@ -997,22 +978,14 @@ bool ChecksElimination::TryInsertDeoptimizationForLargeStep(ConditionCode cc, In
     }
     auto sub_value = lower;
     if (cc == CC_LT) {
-        sub_value = GetGraph()->CreateInstAdd();
-        sub_value->SetType(DataType::INT32);
-        sub_value->SetInput(0, lower);
-        sub_value->SetInput(1, GetGraph()->FindOrCreateConstant(1));
+        sub_value = GetGraph()->CreateInstAdd(DataType::INT32, INVALID_PC, lower, GetGraph()->FindOrCreateConstant(1));
         InsertInstAfter(sub_value, insert_deopt_after, block);
         insert_deopt_after = sub_value;
     }
-    auto sub = GetGraph()->CreateInstSub();
-    sub->SetType(DataType::INT32);
-    sub->SetInput(0, upper);
-    sub->SetInput(1, sub_value);
+    auto sub = GetGraph()->CreateInstSub(DataType::INT32, INVALID_PC, upper, sub_value);
     InsertInstAfter(sub, insert_deopt_after, block);
-    auto mod = GetGraph()->CreateInstMod();
-    mod->SetType(DataType::INT32);
-    mod->SetInput(1, GetGraph()->FindOrCreateConstant(const_step));
-    mod->SetInput(0, sub);
+    auto mod =
+        GetGraph()->CreateInstMod(DataType::INT32, INVALID_PC, sub, GetGraph()->FindOrCreateConstant(const_step));
     block->InsertAfter(mod, sub);
     if (result_len_array == upper) {
         auto max_add_const = GetGraph()->FindOrCreateConstant(max_add);
@@ -1020,10 +993,7 @@ bool ChecksElimination::TryInsertDeoptimizationForLargeStep(ConditionCode cc, In
         InsertBoundsCheckDeoptimization(cc, mod, 0, max_add_const, ss, mod, Opcode::NOP);
     } else {
         // result_len_array - max_add </<= upper - (upper - lower [- 1]) % step
-        auto max_index_value = GetGraph()->CreateInstSub();
-        max_index_value->SetType(DataType::INT32);
-        max_index_value->SetInput(0, upper);
-        max_index_value->SetInput(1, mod);
+        auto max_index_value = GetGraph()->CreateInstSub(DataType::INT32, INVALID_PC, upper, mod);
         block->InsertAfter(max_index_value, mod);
         auto opcode = max_add > 0 ? Opcode::Sub : Opcode::SubOverflowCheck;
         InsertBoundsCheckDeoptimization(cc, result_len_array, max_add, max_index_value, ss, max_index_value, opcode);

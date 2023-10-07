@@ -2002,6 +2002,8 @@ public:
     static constexpr uint32_t MEM_DYN_ELEMENTS_ID = MEM_PROMISE_CLASS_ID - ObjectType::MEM_DYN_ELEMENTS;
     static constexpr uint32_t MEM_DYN_ARRAY_LENGTH_ID = MEM_PROMISE_CLASS_ID - ObjectType::MEM_DYN_ARRAY_LENGTH;
 
+    TypeIdMixin(uint32_t type_id, RuntimeInterface::MethodPtr method) : type_id_(type_id), method_(method) {}
+
     TypeIdMixin() = default;
     NO_COPY_SEMANTIC(TypeIdMixin);
     NO_MOVE_SEMANTIC(TypeIdMixin);
@@ -2118,6 +2120,8 @@ protected:
 /// This mixin aims to implement field accessors.
 class FieldMixin {
 public:
+    explicit FieldMixin(RuntimeInterface::FieldPtr field) : field_(field) {}
+
     FieldMixin() = default;
     NO_COPY_SEMANTIC(FieldMixin);
     NO_MOVE_SEMANTIC(FieldMixin);
@@ -2429,6 +2433,10 @@ public:
     DECLARE_INST(FixedInputsInst0);
     using FixedInputsInst::FixedInputsInst;
 
+    FixedInputsInst0(Opcode opcode, DataType::Type type, uint32_t pc = INVALID_PC) : FixedInputsInst(opcode, type, pc)
+    {
+    }
+
     NO_COPY_SEMANTIC(FixedInputsInst0);
     NO_MOVE_SEMANTIC(FixedInputsInst0);
     ~FixedInputsInst0() override = default;
@@ -2438,6 +2446,12 @@ class FixedInputsInst1 : public FixedInputsInst<1> {
 public:
     DECLARE_INST(FixedInputsInst1);
     using FixedInputsInst::FixedInputsInst;
+
+    FixedInputsInst1(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input) : FixedInputsInst(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+    }
 
     NO_COPY_SEMANTIC(FixedInputsInst1);
     NO_MOVE_SEMANTIC(FixedInputsInst1);
@@ -2457,6 +2471,14 @@ public:
     DECLARE_INST(FixedInputsInst2);
     using FixedInputsInst::FixedInputsInst;
 
+    FixedInputsInst2(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1)
+        : FixedInputsInst(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+    }
+
     NO_COPY_SEMANTIC(FixedInputsInst2);
     NO_MOVE_SEMANTIC(FixedInputsInst2);
     ~FixedInputsInst2() override = default;
@@ -2466,12 +2488,32 @@ class FixedInputsInst3 : public FixedInputsInst<3U> {
 public:
     DECLARE_INST(FixedInputsInst3);
     using FixedInputsInst::FixedInputsInst;
+
+    FixedInputsInst3(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2)
+        : FixedInputsInst(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+    }
 };
 
 class FixedInputsInst4 : public FixedInputsInst<4U> {
 public:
     DECLARE_INST(FixedInputsInst4);
     using FixedInputsInst::FixedInputsInst;
+
+    FixedInputsInst4(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
+                     Inst *input3)
+        : FixedInputsInst(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+        SetInput(3, input3);
+    }
 };
 
 /// Instruction with variable inputs count
@@ -2550,6 +2592,7 @@ public:
     using FixedInputsInst::FixedInputsInst;
     UnaryOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input) : FixedInputsInst(opcode, type, pc)
     {
+        SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
     }
 
@@ -2577,6 +2620,14 @@ class BinaryOperation : public FixedInputsInst<2U> {
 public:
     DECLARE_INST(BinaryOperation);
     using FixedInputsInst::FixedInputsInst;
+
+    BinaryOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1)
+        : FixedInputsInst(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+    }
 
     uint32_t Latency() const override
     {
@@ -2630,6 +2681,13 @@ public:
     {
     }
 
+    BinaryImmOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm)
+        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+    }
+
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index < GetInputsCount());
@@ -2679,10 +2737,12 @@ public:
         : FixedInputsInst(opcode), ImmediateMixin(imm), ShiftTypeMixin(shift_type)
     {
     }
-    explicit UnaryShiftedRegisterOperation(Opcode opcode, DataType::Type type, uint32_t pc, ShiftType shift_type,
-                                           uint64_t imm)
+    explicit UnaryShiftedRegisterOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm,
+                                           ShiftType shift_type)
         : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm), ShiftTypeMixin(shift_type)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -2707,10 +2767,13 @@ public:
         : FixedInputsInst(opcode), ImmediateMixin(imm), ShiftTypeMixin(shift_type)
     {
     }
-    explicit BinaryShiftedRegisterOperation(Opcode opcode, DataType::Type type, uint32_t pc, ShiftType shift_type,
-                                            uint64_t imm)
+    explicit BinaryShiftedRegisterOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
+                                            uint64_t imm, ShiftType shift_type)
         : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm), ShiftTypeMixin(shift_type)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -2801,6 +2864,12 @@ class MethodDataMixin {
 public:
     static constexpr uint32_t INVALID_METHOD_ID = std::numeric_limits<uint32_t>::max();
 
+    MethodDataMixin(uint32_t id, RuntimeInterface::MethodPtr method)
+    {
+        method_id_ = id;
+        method_ = method;
+    }
+
     void SetCallMethodId(uint32_t id)
     {
         method_id_ = id;
@@ -2846,9 +2915,10 @@ public:
     using Base = FixedInputsInst1;
     using Base::Base;
 
-    ResolveStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t method_id) : Base(opcode, type, pc)
+    ResolveStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t method_id,
+                      RuntimeInterface::MethodPtr method)
+        : Base(opcode, type, pc), MethodDataMixin(method_id, method)
     {
-        MethodDataMixin::SetCallMethodId(method_id);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -2879,9 +2949,10 @@ public:
     using Base = FixedInputsInst2;
     using Base::Base;
 
-    ResolveVirtualInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t method_id) : Base(opcode, type, pc)
+    ResolveVirtualInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t method_id,
+                       RuntimeInterface::MethodPtr method)
+        : Base(opcode, type, pc), MethodDataMixin(method_id, method)
     {
-        MethodDataMixin::SetCallMethodId(method_id);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -2917,8 +2988,13 @@ public:
     using Base = FixedInputsInst2;
     using Base::Base;
 
-    InitStringInst(Opcode opcode, DataType::Type type, uint32_t pc, StringCtorType ctor_type) : Base(opcode, type, pc)
+    InitStringInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
+                   StringCtorType ctor_type)
+        : Base(opcode, type, pc)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
         SetStringCtorType(ctor_type);
     }
 
@@ -2972,9 +3048,10 @@ public:
     using Base = InlinedInstMixin<DynamicInputsInst>;
     using Base::Base;
 
-    CallInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t method_id) : Base(opcode, type, pc)
+    CallInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t method_id,
+             RuntimeInterface::MethodPtr method = nullptr)
+        : Base(opcode, type, pc), MethodDataMixin(method_id, method)
     {
-        MethodDataMixin::SetCallMethodId(method_id);
     }
 
     int GetObjectIndex() const
@@ -3050,8 +3127,11 @@ public:
     {
         SetIsArray(is_array);
     }
-    LengthMethodInst(Opcode opcode, DataType::Type type, uint32_t pc, bool is_array = true) : Base(opcode, type, pc)
+    LengthMethodInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, bool is_array = true)
+        : Base(opcode, type, pc)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
         SetIsArray(is_array);
     }
 
@@ -3079,6 +3159,16 @@ public:
 
     CompareInst(Opcode opcode, DataType::Type type, uint32_t pc, ConditionCode cc) : BaseInst(opcode, type, pc)
     {
+        SetCc(cc);
+    }
+    CompareInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, DataType::Type oper_type,
+                ConditionCode cc)
+        : BaseInst(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetOperandsType(oper_type);
         SetCc(cc);
     }
 
@@ -3171,9 +3261,18 @@ public:
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
-    CompareAnyTypeInst(Opcode opcode, uint32_t pc, AnyBaseType any_type) : BaseInst(opcode, DataType::Type::BOOL, pc)
+    CompareAnyTypeInst(Opcode opcode, uint32_t pc, AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+        : BaseInst(opcode, DataType::Type::BOOL, pc)
     {
         SetAnyType(any_type);
+    }
+
+    CompareAnyTypeInst(Opcode opcode, uint32_t pc, Inst *input0, AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+        : BaseInst(opcode, DataType::Type::BOOL, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetAnyType(any_type);
+        SetInput(0, input0);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -3200,7 +3299,8 @@ public:
     using BaseInst = AnyTypeMixin<FixedInputsInst0>;
     using BaseInst::BaseInst;
 
-    GetAnyTypeNameInst(Opcode opcode, uint32_t pc, AnyBaseType any_type) : BaseInst(opcode, DataType::Type::ANY, pc)
+    GetAnyTypeNameInst(Opcode opcode, uint32_t pc, AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+        : BaseInst(opcode, DataType::Type::ANY, pc)
     {
         SetAnyType(any_type);
     }
@@ -3223,10 +3323,17 @@ public:
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
-    CastAnyTypeValueInst(Opcode opcode, uint32_t pc, AnyBaseType any_type)
+    CastAnyTypeValueInst(Opcode opcode, uint32_t pc, AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
         : BaseInst(opcode, AnyBaseTypeToDataType(any_type), pc)
     {
+    }
+
+    CastAnyTypeValueInst(Opcode opcode, uint32_t pc, Inst *input0, AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+        : BaseInst(opcode, AnyBaseTypeToDataType(any_type), pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
         SetAnyType(any_type);
+        SetInput(0, input0);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -3260,6 +3367,14 @@ public:
 
     CastValueToAnyTypeInst(Opcode opcode, uint32_t pc) : BaseInst(opcode, DataType::ANY, pc) {}
 
+    CastValueToAnyTypeInst(Opcode opcode, uint32_t pc, AnyBaseType any_type, Inst *input0)
+        : BaseInst(opcode, DataType::ANY, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetAnyType(any_type);
+        SetInput(0, input0);
+    }
+
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(index < GetInputsCount());
@@ -3284,8 +3399,13 @@ public:
     using BaseInst = AnyTypeMixin<FixedInputsInst2>;
     using BaseInst::BaseInst;
 
-    AnyTypeCheckInst(Opcode opcode, uint32_t pc, AnyBaseType any_type) : BaseInst(opcode, DataType::ANY, pc)
+    AnyTypeCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
+                     AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+        : BaseInst(opcode, type, pc)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
         SetAnyType(any_type);
     }
 
@@ -3318,6 +3438,16 @@ public:
     DECLARE_INST(HclassCheckInst);
     using BaseInst = AnyTypeMixin<FixedInputsInst2>;
     using BaseInst::BaseInst;
+
+    HclassCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
+                    AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+        : BaseInst(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetAnyType(any_type);
+    }
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -3550,8 +3680,8 @@ class SpillFillInst : public FixedInputsInst0 {
 public:
     DECLARE_INST(SpillFillInst);
 
-    explicit SpillFillInst(ArenaAllocator *allocator, Opcode opcode)
-        : FixedInputsInst0(opcode), spill_fills_(allocator->Adapter())
+    explicit SpillFillInst(ArenaAllocator *allocator, Opcode opcode, SpillFillType type = UNKNOWN)
+        : FixedInputsInst0(opcode), spill_fills_(allocator->Adapter()), sf_type_(type)
     {
     }
 
@@ -3662,7 +3792,8 @@ public:
     using Inst::Inst;
     static constexpr uint16_t DYNAMIC_NUM_ARGS = std::numeric_limits<uint16_t>::max();
 
-    explicit ParameterInst(Opcode /* unused */, uint16_t arg_number) : Inst(Opcode::Parameter), arg_number_(arg_number)
+    explicit ParameterInst(Opcode /* unused */, uint16_t arg_number, DataType::Type type = DataType::NO_TYPE)
+        : Inst(Opcode::Parameter, type, INVALID_PC), arg_number_(arg_number)
     {
     }
     uint16_t GetArgNumber() const
@@ -3699,6 +3830,13 @@ public:
     DECLARE_INST(PhiInst);
     using BaseInst = AnyTypeMixin<DynamicInputsInst>;
     using BaseInst::BaseInst;
+
+    PhiInst(Opcode opcode, DataType::Type type, uint32_t pc, AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+        : BaseInst(opcode, type, pc)
+    {
+        SetAnyType(any_type);
+    }
+
     /// Get basic block corresponding to given input index. Returned pointer to basic block, can't be nullptr
     BasicBlock *GetPhiInputBb(unsigned index);
     const BasicBlock *GetPhiInputBb(unsigned index) const
@@ -3770,6 +3908,14 @@ class SaveStateInst : public DynamicInputsInst {
 public:
     DECLARE_INST(SaveStateInst);
     using DynamicInputsInst::DynamicInputsInst;
+
+    SaveStateInst(Opcode opcode, uint32_t pc, void *method, CallInst *inst, uint32_t inlining_depth)
+        : DynamicInputsInst(opcode, DataType::NO_TYPE, pc),
+          method_(method),
+          caller_inst_(inst),
+          inlining_depth_(inlining_depth)
+    {
+    }
 
     bool DumpInputs(std::ostream *out) const override;
 
@@ -3946,8 +4092,14 @@ public:
     {
         SetIsArray(is_array);
     }
-    LoadInst(Opcode opcode, DataType::Type type, uint32_t pc, bool is_array = true) : Base(opcode, type, pc)
+    LoadInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, bool need_barrier = false,
+             bool is_array = true)
+        : Base(opcode, type, pc)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetNeedBarrier(need_barrier);
         SetIsArray(is_array);
     }
 
@@ -4001,6 +4153,16 @@ public:
     using Base = FixedInputsInst3;
     using Base::Base;
 
+    LoadCompressedStringCharInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
+                                 Inst *input2)
+        : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+    }
+
     Inst *GetArray()
     {
         return GetInput(0).GetInst();
@@ -4042,6 +4204,15 @@ public:
     using Base = FixedInputsInst2;
     using Base::Base;
 
+    LoadCompressedStringCharInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
+                                  uint64_t imm)
+        : Base(opcode, type, pc), ImmediateMixin(imm)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+    }
+
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(index < GetInputsCount());
@@ -4066,6 +4237,17 @@ public:
     DECLARE_INST(StoreInst);
     using Base = NeedBarrierMixin<FixedInputsInst3>;
     using Base::Base;
+
+    StoreInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
+              bool need_barrier = false)
+        : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+        SetNeedBarrier(need_barrier);
+    }
 
     bool IsBarrier() const override
     {
@@ -4121,10 +4303,15 @@ public:
     {
         SetIsArray(is_array);
     }
-    LoadInstI(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm, bool is_array = true)
+    LoadInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm, bool is_volatile = false,
+              bool need_barrier = false, bool is_array = true)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
         SetIsArray(is_array);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
     }
 
     Inst *GetArray()
@@ -4171,9 +4358,14 @@ public:
     using Base::Base;
 
     LoadMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-    LoadMemInstI(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm)
+    LoadMemInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm, bool is_volatile = false,
+                 bool need_barrier = false)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
     }
 
     Inst *GetPointer()
@@ -4219,9 +4411,15 @@ public:
     using Base::Base;
 
     StoreInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-    StoreInstI(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm)
+    StoreInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint64_t imm,
+               bool is_volatile = false, bool need_barrier = false)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
     }
 
     bool IsBarrier() const override
@@ -4279,9 +4477,15 @@ public:
     using Base::Base;
 
     StoreMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-    StoreMemInstI(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm)
+    StoreMemInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint64_t imm,
+                  bool is_volatile = false, bool need_barrier = false)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
     }
 
     bool IsBarrier() const override
@@ -4337,9 +4541,13 @@ public:
         SetIsArray(is_array);
     }
 
-    BoundsCheckInstI(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm, bool is_array = true)
+    BoundsCheckInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint64_t imm,
+                     bool is_array = true)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
         SetIsArray(is_array);
     }
 
@@ -4367,8 +4575,14 @@ public:
         SetIsArray(is_array);
     }
 
-    BoundsCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, bool is_array = true) : Base(opcode, type, pc)
+    BoundsCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
+                    bool is_array = true)
+        : Base(opcode, type, pc)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
         SetIsArray(is_array);
     }
 
@@ -4393,6 +4607,13 @@ public:
     DECLARE_INST(NullCheckInst);
     using Base = FixedInputsInst2;
     using Base::Base;
+
+    NullCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1) : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+    }
 
     bool IsImplicit() const
     {
@@ -4445,6 +4666,12 @@ public:
     DECLARE_INST(ReturnInlinedInst);
     using FixedInputsInst::FixedInputsInst;
 
+    ReturnInlinedInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input) : FixedInputsInst(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+    }
+
     bool IsExtendedLiveness() const
     {
         return GetField<IsExtendedLivenessFlag>();
@@ -4466,6 +4693,13 @@ public:
     DECLARE_INST(MonitorInst);
     using Base = FixedInputsInst2;
     using Base::Base;
+
+    MonitorInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1) : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+    }
 
     bool IsExit() const
     {
@@ -4665,6 +4899,14 @@ public:
     using BaseInst = InstWithOperandsType<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
+    CastInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, DataType::Type oper_type)
+        : BaseInst(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetOperandsType(oper_type);
+    }
+
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index == 0);
@@ -4692,6 +4934,15 @@ public:
     DECLARE_INST(CmpInst);
     using BaseInst = InstWithOperandsType<FixedInputsInst2>;
     using BaseInst::BaseInst;
+
+    CmpInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, DataType::Type oper_type)
+        : BaseInst(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetOperandsType(oper_type);
+    }
 
     bool IsFcmpg() const
     {
@@ -4756,6 +5007,17 @@ public:
     using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>>;
     using Base::Base;
 
+    LoadObjectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t type_id,
+                   RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool is_volatile = false,
+                   bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method), FieldMixin(field)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
+    }
+
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index < GetInputsCount());
@@ -4796,6 +5058,17 @@ public:
     DECLARE_INST(LoadMemInst);
     using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>>;
     using Base::Base;
+
+    LoadMemInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, bool is_volatile = false,
+                bool need_barrier = false)
+        : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
+    }
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -4841,6 +5114,15 @@ public:
     using Base = DynObjectAccessMixin<FixedInputsInst3>;
     using Base::Base;
 
+    LoadObjectDynamicInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2)
+        : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+    }
+
     bool IsBarrier() const override
     {
         return true;
@@ -4853,6 +5135,17 @@ public:
     DECLARE_INST(StoreObjectDynamicInst);
     using Base = DynObjectAccessMixin<FixedInputsInst<4U>>;
     using Base::Base;
+
+    StoreObjectDynamicInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
+                           Inst *input3)
+        : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+        SetInput(3, input3);
+    }
 
     bool IsBarrier() const override
     {
@@ -4867,6 +5160,15 @@ public:
     DECLARE_INST(ResolveObjectFieldInst);
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
+
+    ResolveObjectFieldInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t type_id,
+                           RuntimeInterface::MethodPtr method, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetNeedBarrier(need_barrier);
+    }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -4899,6 +5201,18 @@ public:
     DECLARE_INST(LoadResolvedObjectFieldInst);
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
+
+    LoadResolvedObjectFieldInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
+                                uint32_t type_id, RuntimeInterface::MethodPtr method, bool is_volatile = false,
+                                bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
+    }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -4940,6 +5254,18 @@ public:
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
+    StoreObjectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t type_id,
+                    RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool is_volatile = false,
+                    bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method), FieldMixin(field)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
+    }
+
     bool IsBarrier() const override
     {
         return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
@@ -4980,6 +5306,19 @@ public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
+
+    StoreResolvedObjectFieldInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
+                                 Inst *input2, uint32_t type_id, RuntimeInterface::MethodPtr method,
+                                 bool is_volatile = false, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
+    }
 
     bool IsBarrier() const override
     {
@@ -5028,6 +5367,18 @@ public:
 
     static constexpr size_t STORED_INPUT_INDEX = 2;
 
+    StoreMemInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
+                 bool is_volatile = false, bool need_barrier = false)
+        : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
+    }
+
     bool IsBarrier() const override
     {
         return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
@@ -5070,6 +5421,17 @@ public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
     using Base::Base;
 
+    LoadStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t type_id,
+                   RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool is_volatile = false,
+                   bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method), FieldMixin(field)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
+    }
+
     bool IsBarrier() const override
     {
         return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
@@ -5108,6 +5470,15 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
+    ResolveObjectFieldStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t type_id,
+                                 RuntimeInterface::MethodPtr method, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetNeedBarrier(need_barrier);
+    }
+
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(GetInputsCount() == 1U);
@@ -5139,6 +5510,17 @@ public:
     DECLARE_INST(LoadResolvedObjectFieldStaticInst);
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
     using Base::Base;
+
+    LoadResolvedObjectFieldStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t type_id,
+                                      RuntimeInterface::MethodPtr method, bool is_volatile = false,
+                                      bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
+    }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -5179,6 +5561,18 @@ public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
+
+    StoreStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t type_id,
+                    RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool is_volatile = false,
+                    bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method), FieldMixin(field)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetVolatile(is_volatile);
+        SetNeedBarrier(need_barrier);
+    }
 
     bool IsBarrier() const override
     {
@@ -5221,6 +5615,16 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
 
+    UnresolvedStoreStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
+                              uint32_t type_id, RuntimeInterface::MethodPtr method, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetNeedBarrier(need_barrier);
+    }
+
     bool IsBarrier() const override
     {
         return true;
@@ -5256,6 +5660,16 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
 
+    StoreResolvedObjectFieldStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
+                                       uint32_t type_id, RuntimeInterface::MethodPtr method, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetNeedBarrier(need_barrier);
+    }
+
     bool IsBarrier() const override
     {
         return true;
@@ -5289,6 +5703,16 @@ public:
     DECLARE_INST(NewObjectInst);
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
+
+    NewObjectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t type_id,
+                  RuntimeInterface::MethodPtr method, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetNeedBarrier(need_barrier);
+    }
 
     bool IsBarrier() const override
     {
@@ -5325,6 +5749,18 @@ public:
     static constexpr size_t INDEX_CLASS = 0;
     static constexpr size_t INDEX_SIZE = 1;
     static constexpr size_t INDEX_SAVE_STATE = 2;
+
+    NewArrayInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input_class, Inst *input_size,
+                 Inst *input_save_state, uint32_t type_id, RuntimeInterface::MethodPtr method,
+                 bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(INDEX_CLASS, input_class);
+        SetInput(INDEX_SIZE, input_size);
+        SetInput(INDEX_SAVE_STATE, input_save_state);
+        SetNeedBarrier(need_barrier);
+    }
 
     bool IsBarrier() const override
     {
@@ -5365,6 +5801,15 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
+    LoadConstArrayInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t type_id,
+                       RuntimeInterface::MethodPtr method, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetNeedBarrier(need_barrier);
+    }
+
     bool IsBarrier() const override
     {
         return Inst::IsBarrier() || GetNeedBarrier();
@@ -5393,6 +5838,16 @@ public:
     DECLARE_INST(FillConstArrayInst);
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
+
+    FillConstArrayInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input0, Inst *input1, uint32_t type_id,
+                       RuntimeInterface::MethodPtr method, uint64_t imm, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method), ImmediateMixin(imm)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetNeedBarrier(need_barrier);
+    }
 
     bool IsBarrier() const override
     {
@@ -5425,6 +5880,18 @@ public:
     DECLARE_INST(CheckCastInst);
     using Base = OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>;
     using Base::Base;
+
+    CheckCastInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input0, Inst *input1, Inst *input2,
+                  uint32_t type_id, RuntimeInterface::MethodPtr method, ClassType class_type, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+        SetClassType(class_type);
+        SetNeedBarrier(need_barrier);
+    }
 
     bool IsBarrier() const override
     {
@@ -5463,6 +5930,19 @@ public:
     using Base = OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>;
     using Base::Base;
 
+    IsInstanceInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input0, Inst *input1, Inst *input2,
+                   uint32_t type_id, RuntimeInterface::MethodPtr method, ClassType class_type,
+                   bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+        SetClassType(class_type);
+        SetNeedBarrier(need_barrier);
+    }
+
     bool IsBarrier() const override
     {
         return Inst::IsBarrier() || GetNeedBarrier();
@@ -5499,6 +5979,15 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
+    LoadFromPool(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t type_id,
+                 RuntimeInterface::MethodPtr method, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetNeedBarrier(need_barrier);
+    }
+
     bool IsBarrier() const override
     {
         return Inst::IsBarrier() || GetNeedBarrier();
@@ -5528,6 +6017,15 @@ public:
     DECLARE_INST(LoadFromPoolDynamic);
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
+
+    LoadFromPoolDynamic(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t type_id,
+                        RuntimeInterface::MethodPtr method, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetNeedBarrier(need_barrier);
+    }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -5569,6 +6067,15 @@ public:
     DECLARE_INST(ClassInst);
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
+
+    ClassInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t type_id,
+              RuntimeInterface::MethodPtr method, RuntimeInterface::ClassPtr klass, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method), klass_(klass)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetNeedBarrier(need_barrier);
+    }
 
     bool IsBarrier() const override
     {
@@ -5613,6 +6120,13 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst0>;
     using Base::Base;
 
+    RuntimeClassInst(Opcode opcode, DataType::Type type, int32_t pc, uint32_t type_id,
+                     RuntimeInterface::MethodPtr method, RuntimeInterface::ClassPtr klass, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method), klass_(klass)
+    {
+        SetNeedBarrier(need_barrier);
+    }
+
     bool IsBarrier() const override
     {
         return Inst::IsBarrier() || GetNeedBarrier();
@@ -5656,6 +6170,16 @@ public:
     GlobalVarInst(Opcode opcode, DataType::Type type, uint32_t pc, uintptr_t address)
         : Base(opcode, type, pc), address_(address)
     {
+    }
+
+    GlobalVarInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t type_id,
+                  RuntimeInterface::MethodPtr method, uintptr_t address, bool need_barrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(type_id, method), address_(address)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetNeedBarrier(need_barrier);
     }
 
     bool IsBarrier() const override
@@ -5897,8 +6421,16 @@ public:
     using Base = ConditionMixin<InstWithOperandsType<FixedInputsInst<4U>>>;
     using Base::Base;
 
-    SelectInst(Opcode opcode, DataType::Type type, uint32_t pc, ConditionCode cc) : Base(opcode, type, pc)
+    SelectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2, Inst *input3,
+               DataType::Type oper_type, ConditionCode cc)
+        : Base(opcode, type, pc)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+        SetInput(3, input3);
+        SetOperandsType(oper_type);
         SetCc(cc);
         if (IsReferenceOrAny()) {
             SetFlag(inst_flags::REF_SPECIAL);
@@ -5937,9 +6469,15 @@ public:
     using Base = InstWithOperandsType<ConditionMixin<FixedInputsInst3>>;
     using Base::Base;
 
-    SelectImmInst(Opcode opcode, DataType::Type type, uint32_t pc, ConditionCode cc, uint64_t imm)
+    SelectImmInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
+                  uint64_t imm, DataType::Type oper_type, ConditionCode cc)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+        SetOperandsType(oper_type);
         SetCc(cc);
         if (IsReferenceOrAny()) {
             SetFlag(inst_flags::REF_SPECIAL);
@@ -5980,6 +6518,17 @@ public:
 
     IfInst(Opcode opcode, DataType::Type type, uint32_t pc, ConditionCode cc) : Base(opcode, type, pc)
     {
+        SetCc(cc);
+    }
+
+    IfInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, DataType::Type oper_type,
+           ConditionCode cc, RuntimeInterface::MethodPtr method = nullptr)
+        : Base(opcode, type, pc), method_(method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetOperandsType(oper_type);
         SetCc(cc);
     }
 
@@ -6030,6 +6579,16 @@ public:
         SetCc(cc);
     }
 
+    IfImmInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm, DataType::Type oper_type,
+              ConditionCode cc, RuntimeInterface::MethodPtr method = nullptr)
+        : Base(opcode, type, pc), ImmediateMixin(imm), method_(method)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetOperandsType(oper_type);
+        SetCc(cc);
+    }
+
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index < GetInputsCount());
@@ -6077,6 +6636,11 @@ public:
 
     explicit LoadPairPartInst(Opcode opcode, uint64_t imm) : FixedInputsInst1(opcode), ImmediateMixin(imm) {}
 
+    LoadPairPartInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm)
+        : FixedInputsInst1(opcode, type, pc, input), ImmediateMixin(imm)
+    {
+    }
+
     uint32_t GetSrcRegIndex() const override
     {
         return GetImm();
@@ -6104,6 +6668,16 @@ public:
     DECLARE_INST(LoadArrayPairInst);
     using Base = NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>>;
     using Base::Base;
+
+    LoadArrayPairInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
+                      bool need_barrier = false)
+        : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetNeedBarrier(need_barrier);
+    }
 
     Inst *GetArray()
     {
@@ -6157,6 +6731,18 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst<4U>>;
     using Base::Base;
 
+    StoreArrayPairInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
+                       Inst *input3, bool need_barrier = false)
+        : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+        SetInput(3, input3);
+        SetNeedBarrier(need_barrier);
+    }
+
     Inst *GetArray()
     {
         return GetInput(0).GetInst();
@@ -6207,6 +6793,15 @@ public:
 
     explicit LoadArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
 
+    LoadArrayPairInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm,
+                       bool need_barrier = false)
+        : Base(opcode, type, pc), ImmediateMixin(imm)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetNeedBarrier(need_barrier);
+    }
+
     Inst *GetArray()
     {
         return GetInput(0).GetInst();
@@ -6254,6 +6849,17 @@ public:
     using Base::Base;
 
     explicit StoreArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
+
+    StoreArrayPairInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
+                        uint64_t imm, bool need_barrier = false)
+        : Base(opcode, type, pc), ImmediateMixin(imm)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
+        SetNeedBarrier(need_barrier);
+    }
 
     Inst *GetArray()
     {
@@ -6308,6 +6914,8 @@ public:
     DECLARE_INST(CatchPhiInst);
     using DynamicInputsInst::DynamicInputsInst;
 
+    CatchPhiInst(Opcode opcode, DataType::Type type, uint32_t pc) : DynamicInputsInst(opcode, type, pc) {}
+
     const ArenaVector<const Inst *> *GetThrowableInsts() const
     {
         return throw_insts_;
@@ -6354,6 +6962,11 @@ class TryInst : public FixedInputsInst0 {
 public:
     DECLARE_INST(TryInst);
     using FixedInputsInst0::FixedInputsInst0;
+
+    explicit TryInst(Opcode opcode, BasicBlock *end_bb = nullptr)
+        : FixedInputsInst0(opcode, DataType::NO_TYPE, INVALID_PC), try_end_bb_(end_bb)
+    {
+    }
 
     void AppendCatchTypeId(uint32_t id, uint32_t catch_edge_index);
 
@@ -6463,6 +7076,15 @@ public:
     using Base = DeoptimizeTypeMixin<FixedInputsInst1>;
     using Base::Base;
 
+    DeoptimizeInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input,
+                   DeoptimizeType deopt_type = DeoptimizeType::NOT_PROFILED)
+        : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input);
+        SetDeoptimizeType(deopt_type);
+    }
+
     Inst *Clone(const Graph *target_graph) const override
     {
         auto clone = FixedInputsInst::Clone(target_graph);
@@ -6480,6 +7102,16 @@ class DeoptimizeIfInst : public DeoptimizeTypeMixin<FixedInputsInst2> {
 
 public:
     using Base::Base;
+
+    DeoptimizeIfInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
+                     DeoptimizeType deopt_type)
+        : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetDeoptimizeType(deopt_type);
+    }
 
     Inst *Clone(const Graph *target_graph) const override
     {
@@ -6515,6 +7147,19 @@ public:
         : Base(opcode, deopt_if->GetType(), deopt_if->GetPc())
     {
         SetDeoptimizeType(deopt_if->GetDeoptimizeType());
+        SetOperandsType(compare->GetOperandsType());
+        SetCc(compare->GetCc());
+    }
+
+    DeoptimizeCompareInst(Opcode opcode, const DeoptimizeIfInst *deopt_if, const CompareInst *compare, Inst *input0,
+                          Inst *input1, Inst *input2)
+        : Base(opcode, deopt_if->GetType(), deopt_if->GetPc())
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetDeoptimizeType(deopt_if->GetDeoptimizeType());
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetInput(2, input2);
         SetOperandsType(compare->GetOperandsType());
         SetCc(compare->GetCc());
     }
@@ -6562,6 +7207,18 @@ public:
         SetCc(compare->GetCc());
     }
 
+    DeoptimizeCompareImmInst(Opcode opcode, const DeoptimizeIfInst *deopt_if, const CompareInst *compare, Inst *input0,
+                             Inst *input1, uint64_t imm)
+        : Base(opcode, deopt_if->GetType(), deopt_if->GetPc()), ImmediateMixin(imm)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+        SetDeoptimizeType(deopt_if->GetDeoptimizeType());
+        SetOperandsType(compare->GetOperandsType());
+        SetCc(compare->GetCc());
+    }
+
     Inst *Clone(const Graph *target_graph) const override
     {
         auto clone = FixedInputsInst2::Clone(target_graph);
@@ -6589,11 +7246,19 @@ public:
     bool DumpInputs(std::ostream *out) const override;
 };
 
-class ThrowInst : public FixedInputsInst2 {
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+class ThrowInst : public FixedInputsInst2, public MethodDataMixin {
 public:
     DECLARE_INST(ThrowInst);
     using Base = FixedInputsInst2;
     using Base::Base;
+
+    ThrowInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1) : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(0, input0);
+        SetInput(1, input1);
+    }
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -6602,6 +7267,23 @@ public:
             return DataType::REFERENCE;
         }
         return DataType::NO_TYPE;
+    }
+
+    bool IsInlined() const
+    {
+        auto ss = GetSaveState();
+        ASSERT(ss != nullptr);
+        return ss->GetCallerInst() != nullptr;
+    }
+
+    Inst *Clone(const Graph *target_graph) const override
+    {
+        ASSERT(target_graph != nullptr);
+        auto inst_clone = FixedInputsInst2::Clone(target_graph);
+        auto throw_clone = static_cast<ThrowInst *>(inst_clone);
+        throw_clone->SetCallMethodId(GetCallMethodId());
+        throw_clone->SetCallMethod(GetCallMethod());
+        return inst_clone;
     }
 };
 
@@ -6690,13 +7372,13 @@ InstType *Inst::New(ArenaAllocator *allocator, Args &&...args)
         static_assert((OPERANDS_SIZE % alignof(InstType)) == 0);
         auto data = reinterpret_cast<uintptr_t>(allocator->Alloc(OPERANDS_SIZE + sizeof(InstType), ALIGNMENT));
         ASSERT(data != 0);
-        auto inst = new (reinterpret_cast<void *>(data + OPERANDS_SIZE)) InstType(std::forward<Args>(args)...);
         auto operands = new (reinterpret_cast<void *>(data)) Operands<InstType::INPUT_COUNT>;
-        static_cast<Inst *>(inst)->SetField<InputsCount>(InstType::INPUT_COUNT);
         unsigned idx = InstType::INPUT_COUNT - 1;
         for (auto &user : operands->users) {
             new (&user) User(true, idx--, InstType::INPUT_COUNT);
         }
+        auto inst = new (reinterpret_cast<void *>(data + OPERANDS_SIZE)) InstType(std::forward<Args>(args)...);
+        static_cast<Inst *>(inst)->SetField<InputsCount>(InstType::INPUT_COUNT);
         return inst;
     }
 }

@@ -436,10 +436,10 @@ void GenGC<LanguageConfig>::MarkRoots(GCMarkingStackType *objects_stack, CardTab
         ObjectHeader *from_object = gc_root.GetFromObjectHeader();
         LOG_DEBUG_GC << "Handle root " << GetDebugInfoAboutObject(root_object);
         if (UNLIKELY(from_object != nullptr) &&
-            this->IsReference(from_object->ClassAddr<BaseClass>(), from_object, ref_pred)) {
+            this->IsReference(from_object->NotAtomicClassAddr<BaseClass>(), from_object, ref_pred)) {
             LOG_DEBUG_GC << "Add reference: " << GetDebugInfoAboutObject(from_object) << " to stack";
             marker_.Mark(from_object);
-            this->ProcessReference(objects_stack, from_object->ClassAddr<BaseClass>(), from_object,
+            this->ProcessReference(objects_stack, from_object->NotAtomicClassAddr<BaseClass>(), from_object,
                                    GC::EmptyReferenceProcessPredicate);
         } else {
             // we should always add this object to the stack, because we could mark this object in InitialMark, but

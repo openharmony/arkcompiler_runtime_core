@@ -61,6 +61,14 @@ class ExampleClass {
         return new ExampleClass(obj.v0 + this.v1, this.v0 + obj.v1);
     }
 
+    GetV0() {
+        return this.v0
+    }
+
+    GetV1() {
+        return this.v1
+    }
+
     static EmptyMethod() {
         console.log("Hello from empty method");
     }
@@ -78,6 +86,14 @@ class ClassWithEmptyConstructor {
         } else {
             return 1;
         }
+    }
+
+    GetV0() {
+        return this.v0
+    }
+
+    GetV1() {
+        return this.v1
     }
 }
 

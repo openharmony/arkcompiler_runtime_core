@@ -407,6 +407,11 @@ public:
         return 0;
     }
 
+    virtual int64_t GetThrowTakenCounter([[maybe_unused]] MethodPtr method, [[maybe_unused]] uint32_t pc) const
+    {
+        return 0;
+    }
+
     virtual bool IsConstructor([[maybe_unused]] MethodPtr method, [[maybe_unused]] SourceLanguage lang)
     {
         return false;
@@ -467,6 +472,12 @@ public:
     virtual bool CanThrowException([[maybe_unused]] MethodPtr method) const
     {
         return true;
+    }
+
+    virtual uint32_t FindCatchBlock([[maybe_unused]] MethodPtr method, [[maybe_unused]] ClassPtr cls,
+                                    [[maybe_unused]] uint32_t pc) const
+    {
+        return panda_file::INVALID_OFFSET;
     }
 
     // Method offsets

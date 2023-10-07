@@ -29,7 +29,6 @@
                 "bounds_checking_function",
                 "icu",
                 "musl",
-                "vixl",
                 "zlib"
             ]
         },

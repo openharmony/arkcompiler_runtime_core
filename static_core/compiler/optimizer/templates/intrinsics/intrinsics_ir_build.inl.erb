@@ -42,9 +42,7 @@ void InstBuilder::AddArgNullcheckIfNeeded([[maybe_unused]] RuntimeInterface::Int
     case panda::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
 % intrinsic.need_nullcheck.each do |arg_num|
         {
-            auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, bc_addr);
-            null_check->SetInput(0, inst->GetInput(ARG_OFFSET + <%= arg_num %>).GetInst());
-            null_check->SetInput(1, save_state);
+            auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, bc_addr, inst->GetInput(ARG_OFFSET + <%= arg_num %>).GetInst(), save_state);
             inst->SetInput(ARG_OFFSET + <%= arg_num %>, null_check);
             AddInstruction(null_check);
         }

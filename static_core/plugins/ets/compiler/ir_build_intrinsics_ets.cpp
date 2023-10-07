@@ -41,20 +41,14 @@ void InstBuilder::BuildIsFiniteIntrinsic(const BytecodeInstruction *bc_inst, boo
     // NOLINTNEXTLINE(readability-magic-numbers)
     auto fp_exp_mask = type == DataType::FLOAT32 ? 0xff : 0x7ff;
 
-    auto bitcast = GetGraph()->CreateInstBitcast(itype, GetPc(bc_inst->GetAddress()));
-    auto shift = GetGraph()->CreateInstShr(itype, GetPc(bc_inst->GetAddress()));
-    auto mask = GetGraph()->CreateInstAnd(itype, GetPc(bc_inst->GetAddress()));
-    auto cmp = GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), ConditionCode::CC_NE);
-
-    bitcast->SetInput(0, GetArgDefinition(bc_inst, 0, acc_read));
-    bitcast->SetOperandsType(type);
-    shift->SetInput(0, bitcast);
-    shift->SetInput(1, FindOrCreateConstant(fp_fract_size));
-    mask->SetInput(0, shift);
-    mask->SetInput(1, FindOrCreateConstant(fp_exp_mask));
-    cmp->SetOperandsType(itype);
-    cmp->SetInput(0, mask);
-    cmp->SetInput(1, FindOrCreateConstant(fp_exp_mask));
+    auto bitcast = GetGraph()->CreateInstBitcast(itype, GetPc(bc_inst->GetAddress()),
+                                                 GetArgDefinition(bc_inst, 0, acc_read), type);
+    auto shift =
+        GetGraph()->CreateInstShr(itype, GetPc(bc_inst->GetAddress()), bitcast, FindOrCreateConstant(fp_fract_size));
+    auto mask =
+        GetGraph()->CreateInstAnd(itype, GetPc(bc_inst->GetAddress()), shift, FindOrCreateConstant(fp_exp_mask));
+    auto cmp = GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), mask,
+                                             FindOrCreateConstant(fp_exp_mask), itype, ConditionCode::CC_NE);
 
     AddInstruction(bitcast, shift, mask, cmp);
     UpdateDefinitionAcc(cmp);
@@ -62,11 +56,9 @@ void InstBuilder::BuildIsFiniteIntrinsic(const BytecodeInstruction *bc_inst, boo
 
 void InstBuilder::BuildStdRuntimeEquals(const BytecodeInstruction *bc_inst, bool acc_read)
 {
-    auto cmp = GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), ConditionCode::CC_EQ);
-    cmp->SetInput(0, GetArgDefinition(bc_inst, 1, acc_read));
-    cmp->SetInput(1, GetArgDefinition(bc_inst, 2, acc_read));
-    cmp->SetOperandsType(DataType::REFERENCE);
-
+    auto cmp = GetGraph()->CreateInstCompare(
+        DataType::BOOL, GetPc(bc_inst->GetAddress()), GetArgDefinition(bc_inst, 1, acc_read),
+        GetArgDefinition(bc_inst, 2, acc_read), DataType::REFERENCE, ConditionCode::CC_EQ);
     AddInstruction(cmp);
     UpdateDefinitionAcc(cmp);
 }

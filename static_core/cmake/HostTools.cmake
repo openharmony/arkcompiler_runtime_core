@@ -106,6 +106,8 @@ function(panda_configure_host_tools)
     add_custom_target(irtoc_interpreter)
     add_custom_target(irtoc_tests)
 
+    include(${PANDA_ROOT}/plugins/HostTools.cmake)
+
     foreach(plugin ${PLUGINS})
         string(TOUPPER ${plugin} plugin_name_upper)
         string(CONCAT PANDA_WITH_PLUGIN "PANDA_WITH_" ${plugin_name_upper})

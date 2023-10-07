@@ -10,6 +10,7 @@ from runner.options.options_coverage import CoverageOptions
 from runner.reports.report_format import ReportFormat
 
 
+# pylint: disable=too-many-public-methods
 @dataclass
 class GeneralOptions:
     def __str__(self) -> str:
@@ -35,6 +36,7 @@ class GeneralOptions:
             "force-download": self.force_download,
             "bco": self.bco,
             "qemu": self.qemu.value.upper(),
+            "with-js": self.with_js,
         }
 
     @cached_property

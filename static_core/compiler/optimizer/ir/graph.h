@@ -1130,6 +1130,8 @@ public:
 
     int64_t GetBranchCounter(const BasicBlock *block, bool true_succ);
 
+    int64_t GetThrowCounter(const BasicBlock *block);
+
     /// This class provides methods for ranged-based `for` loop over all parameters in the graph.
     class ParameterList {
     public:

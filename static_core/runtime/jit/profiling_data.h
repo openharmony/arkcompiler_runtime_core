@@ -196,10 +196,54 @@ private:
     std::atomic_llong not_taken_counter_;
 };
 
+class ThrowData {
+public:
+    static Span<ThrowData> From(void *mem, PandaVector<uint32_t> throws)
+    {
+        auto throw_data = reinterpret_cast<ThrowData *>(mem);
+        auto span = Span<ThrowData>(throw_data, throws.size());
+        for (size_t i = 0; i < throws.size(); i++) {
+            span[i].Init(throws[i]);
+        }
+        return span;
+    }
+
+    void Init(uintptr_t pc)
+    {
+        // Atomic with relaxed order reason: data race with pc_
+        pc_.store(pc, std::memory_order_relaxed);
+        // Atomic with relaxed order reason: data race with taken_counter_
+        taken_counter_.store(0, std::memory_order_relaxed);
+    }
+
+    uintptr_t GetPc() const
+    {
+        // Atomic with relaxed order reason: data race with pc_
+        return pc_.load(std::memory_order_relaxed);
+    }
+
+    int64_t GetTakenCounter() const
+    {
+        // Atomic with relaxed order reason: data race with taken_counter_
+        return taken_counter_.load(std::memory_order_relaxed);
+    }
+
+    void IncrementTaken()
+    {
+        // Atomic with relaxed order reason: data race with taken_counter_
+        taken_counter_.fetch_add(1, std::memory_order_relaxed);
+    }
+
+private:
+    std::atomic_uintptr_t pc_;
+    std::atomic_llong taken_counter_;
+};
+
 class ProfilingData {
 public:
-    explicit ProfilingData(Span<CallSiteInlineCache> inline_caches, Span<BranchData> branch_data)
-        : inline_caches_(inline_caches), branch_data_(branch_data)
+    explicit ProfilingData(Span<CallSiteInlineCache> inline_caches, Span<BranchData> branch_data,
+                           Span<ThrowData> throw_data)
+        : inline_caches_(inline_caches), branch_data_(branch_data), throw_data_(throw_data)
     {
     }
 
@@ -253,6 +297,20 @@ public:
         return branch->GetNotTakenCounter();
     }
 
+    void UpdateThrowTaken(uintptr_t pc)
+    {
+        auto thr0w = FindThrowData(pc);
+        ASSERT(thr0w != nullptr);
+        thr0w->IncrementTaken();
+    }
+
+    int64_t GetThrowTakenCounter(uintptr_t pc)
+    {
+        auto thr0w = FindThrowData(pc);
+        ASSERT(thr0w != nullptr);
+        return thr0w->GetTakenCounter();
+    }
+
 private:
     BranchData *FindBranchData(uintptr_t from_pc)
     {
@@ -264,9 +322,23 @@ private:
 
         return &*it;
     }
+    ThrowData *FindThrowData(uintptr_t from_pc)
+    {
+        if (throw_data_.empty()) {
+            return nullptr;
+        }
+        auto it = std::lower_bound(throw_data_.begin(), throw_data_.end(), from_pc,
+                                   [](const auto &a, uintptr_t counter) { return a.GetPc() < counter; });
+        if (it == throw_data_.end() || it->GetPc() != from_pc) {
+            return nullptr;
+        }
+
+        return &*it;
+    }
 
     Span<CallSiteInlineCache> inline_caches_;
     Span<BranchData> branch_data_;
+    Span<ThrowData> throw_data_;
 };
 
 }  // namespace panda

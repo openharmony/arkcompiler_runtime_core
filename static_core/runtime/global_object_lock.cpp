@@ -17,7 +17,7 @@
 
 namespace panda {
 // Use some global lock as fast solution.
-static os::memory::Mutex MTX;             // NOLINT(fuchsia-statically-constructed-objects)
+static os::memory::RecursiveMutex MTX;    // NOLINT(fuchsia-statically-constructed-objects)
 static os::memory::ConditionVariable CV;  // NOLINT(fuchsia-statically-constructed-objects)
 
 GlobalObjectLock::GlobalObjectLock([[maybe_unused]] const ObjectHeader *obj)

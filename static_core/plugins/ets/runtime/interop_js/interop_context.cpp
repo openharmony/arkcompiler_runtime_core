@@ -176,7 +176,7 @@ void InteropCtx::ThrowJSError(napi_env env, const std::string &msg)
 
 void InteropCtx::ThrowJSTypeError(napi_env env, const std::string &msg)
 {
-    INTEROP_LOG(INFO) << "ThrowJSError: " << msg;
+    INTEROP_LOG(INFO) << "ThrowJSTypeError: " << msg;
     ASSERT(!NapiIsExceptionPending(env));
     NAPI_CHECK_FATAL(napi_throw_type_error(env, nullptr, msg.c_str()));
 }

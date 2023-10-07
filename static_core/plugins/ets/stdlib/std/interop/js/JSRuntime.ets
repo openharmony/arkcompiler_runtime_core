@@ -28,27 +28,27 @@ export final class JSRuntime {
     }
 
     public static newJSValueByte(value: byte): JSValue {
-        JSRuntime.newJSValueInt(value);
+        return JSRuntime.newJSValueInt(value);
     }
 
     public static newJSValueChar(value: char): JSValue {
-        JSRuntime.newJSValueInt(value);
+        return JSRuntime.newJSValueInt(value);
     }
 
     public static newJSValueShort(value: short): JSValue {
-        JSRuntime.newJSValueInt(value);
+        return JSRuntime.newJSValueInt(value);
     }
 
     public static newJSValueInt(value: int): JSValue {
-        JSRuntime.newJSValueDouble(value as double);
+        return JSRuntime.newJSValueDouble(value as double);
     }
 
     public static newJSValueLong(value: long): JSValue {
-        JSRuntime.newJSValueDouble(value as double);
+        return JSRuntime.newJSValueDouble(value as double);
     }
 
     public static newJSValueFloat(value: float): JSValue {
-        JSRuntime.newJSValueDouble(value);
+        return JSRuntime.newJSValueDouble(value);
     }
 
     public static newJSValueDouble(value: double): JSValue {
@@ -56,6 +56,10 @@ export final class JSRuntime {
     }
 
     public static newJSValueString(value: String): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static newJSValueObject(value: Object): JSValue {
         JSRuntime.checkIntrinsicMethod();
     }
 
@@ -95,6 +99,10 @@ export final class JSRuntime {
     }
 
     public static getValueString(value: JSValue): String {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static getValueObject(value: JSValue, t: Type): Object {
         JSRuntime.checkIntrinsicMethod();
     }
 

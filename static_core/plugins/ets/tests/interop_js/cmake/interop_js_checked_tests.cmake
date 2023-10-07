@@ -44,6 +44,7 @@ function(panda_ets_interop_js_checked_test)
     set(ARK_ETS_INTEROP_JS_PACKAGE_PATH ${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip)
     set(RUN_COMMAND
                 "/usr/bin/env" "MODULE_PATH=${CMAKE_BINARY_DIR}/lib/module"
+                "NODE_PATH=${PANDA_BINARY_ROOT}/plugins/ets/tests/ets_interop_js/generated"
                 "ARK_ETS_INTEROP_JS_TEST_ABC_PATH=${ARK_ETS_INTEROP_JS_PACKAGE_PATH}"
                 "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
                 ${NODE_BINARY} ${JS_LAUNCHER})

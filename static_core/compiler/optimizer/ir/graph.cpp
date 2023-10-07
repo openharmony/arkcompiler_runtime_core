@@ -17,6 +17,7 @@
 #include "basicblock.h"
 #include "inst.h"
 #include "bytecode_optimizer/bytecode_encoder.h"
+#include "compiler_logger.h"
 #include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/analysis/bounds_analysis.h"
 #include "optimizer/analysis/dominators_tree.h"
@@ -74,6 +75,7 @@ void Graph::RemoveUnreachableBlocks()
                     RemoveThrowableInst(inst);
                 }
             }
+            COMPILER_LOG(DEBUG, CLEANUP) << "Erase unreachable block " << bb->GetId();
             EraseBlock(bb);
         }
     }
@@ -109,8 +111,7 @@ ParameterInst *Graph::FindParameter(uint16_t arg_number)
 Inst *Graph::GetOrCreateNullPtr()
 {
     if (nullptr_inst_ == nullptr) {
-        nullptr_inst_ = CreateInstNullPtr();
-        nullptr_inst_->SetType(DataType::REFERENCE);
+        nullptr_inst_ = CreateInstNullPtr(DataType::REFERENCE);
         GetStartBlock()->AppendInst(nullptr_inst_);
     }
     return nullptr_inst_;
@@ -792,6 +793,22 @@ int64_t Graph::GetBranchCounter(const BasicBlock *block, bool true_succ)
 
     return block->IsInverted() == true_succ ? GetRuntime()->GetBranchNotTakenCounter(method, last_inst->GetPc())
                                             : GetRuntime()->GetBranchTakenCounter(method, last_inst->GetPc());
+}
+
+int64_t Graph::GetThrowCounter(const BasicBlock *block)
+{
+    auto last_inst = block->GetLastInst();
+
+    if (last_inst == nullptr || last_inst->GetOpcode() != Opcode::Throw || last_inst->GetPc() == INVALID_PC) {
+        return 0;
+    }
+
+    auto method = last_inst->CastToThrow()->GetCallMethod();
+    if (method == nullptr) {
+        return 0;
+    }
+
+    return GetRuntime()->GetThrowTakenCounter(method, last_inst->GetPc());
 }
 
 uint32_t Graph::GetParametersSlotsCount() const

@@ -200,7 +200,7 @@ public:
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
         } else {
-            auto klass = static_cast<panda::Class *>(obj->AtomicClassAddr<panda::BaseClass>());
+            auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
             auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto raw_field = class_linker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
@@ -244,7 +244,7 @@ public:
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
         } else {
-            auto klass = static_cast<panda::Class *>(obj->AtomicClassAddr<panda::BaseClass>());
+            auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
             auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto raw_field = class_linker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
@@ -288,7 +288,7 @@ public:
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
         } else {
-            auto klass = static_cast<panda::Class *>(obj->AtomicClassAddr<panda::BaseClass>());
+            auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
             auto class_linker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto raw_field = class_linker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
@@ -334,7 +334,7 @@ public:
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
         } else {
-            auto klass = static_cast<panda::Class *>(obj->AtomicClassAddr<panda::BaseClass>());
+            auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
             auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto raw_field = class_linker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
@@ -378,7 +378,7 @@ public:
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
         } else {
-            auto klass = static_cast<panda::Class *>(obj->AtomicClassAddr<panda::BaseClass>());
+            auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
             auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto raw_field = class_linker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
@@ -422,7 +422,7 @@ public:
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
         } else {
-            auto klass = static_cast<panda::Class *>(obj->AtomicClassAddr<panda::BaseClass>());
+            auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
             auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto raw_field = class_linker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));

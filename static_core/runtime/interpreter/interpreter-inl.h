@@ -2677,6 +2677,8 @@ public:
             this->GetThread()->SetException(exception);
         }
 
+        this->UpdateThrowStatistics();
+
         this->MoveToExceptionHandler();
     }
 

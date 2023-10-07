@@ -337,19 +337,15 @@ SaveStateInst *InstBuilder::CreateSaveState(Opcode opc, size_t pc)
     auto live_vergs_count =
         std::count_if(current_defs_->begin(), current_defs_->end(), [](Inst *p) { return p != nullptr; });
     if (opc == Opcode::SaveState) {
-        inst = GetGraph()->CreateInstSaveState();
+        inst = GetGraph()->CreateInstSaveState(pc, GetMethod(), caller_inst_, inlining_depth_);
     } else if (opc == Opcode::SaveStateOsr) {
-        inst = GetGraph()->CreateInstSaveStateOsr();
+        inst = GetGraph()->CreateInstSaveStateOsr(pc, GetMethod(), caller_inst_, inlining_depth_);
     } else if (opc == Opcode::SafePoint) {
-        inst = GetGraph()->CreateInstSafePoint();
+        inst = GetGraph()->CreateInstSafePoint(pc, GetMethod(), caller_inst_, inlining_depth_);
         without_numeric_inputs = true;
     } else {
-        inst = GetGraph()->CreateInstSaveStateDeoptimize();
+        inst = GetGraph()->CreateInstSaveStateDeoptimize(pc, GetMethod(), caller_inst_, inlining_depth_);
     }
-    inst->SetCallerInst(caller_inst_);
-    inst->SetInliningDepth(inlining_depth_);
-    inst->SetPc(pc);
-    inst->SetMethod(GetMethod());
     if (GetGraph()->IsBytecodeOptimizer()) {
         inst->ReserveInputs(0);
         return inst;
@@ -388,17 +384,16 @@ ClassInst *InstBuilder::CreateLoadAndInitClassGeneric(uint32_t class_id, size_t 
     ClassInst *inst = nullptr;
     if (class_ptr == nullptr) {
         ASSERT(!graph_->IsBytecodeOptimizer());
-        inst = graph_->CreateInstUnresolvedLoadAndInitClass(DataType::REFERENCE, pc);
+        inst = graph_->CreateInstUnresolvedLoadAndInitClass(DataType::REFERENCE, pc, nullptr, class_id,
+                                                            GetGraph()->GetMethod(), class_ptr);
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), class_id,
                                                              UnresolvedTypesInterface::SlotKind::CLASS);
         }
     } else {
-        inst = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc);
+        inst = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, nullptr, class_id, GetGraph()->GetMethod(),
+                                                  class_ptr);
     }
-    inst->SetTypeId(class_id);
-    inst->SetMethod(GetGraph()->GetMethod());
-    inst->SetClass(class_ptr);
     return inst;
 }
 

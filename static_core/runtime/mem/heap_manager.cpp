@@ -238,7 +238,7 @@ ObjectHeader *HeapManager::InitObjectHeaderAtMem(BaseClass *cls, void *mem)
     auto object = static_cast<ObjectHeader *>(mem);
     // we need zeroed memory here according to ISA
     ASSERT(object->AtomicGetMark().GetValue() == 0);
-    ASSERT(object->AtomicClassAddr<BaseClass *>() == nullptr);
+    ASSERT(object->ClassAddr<BaseClass *>() == nullptr);
     // The order is crucial here - we need to have 0 class word to avoid data race with concurrent sweep.
     // Otherwise we can remove not initialized object.
     GetGC()->InitGCBits(object);

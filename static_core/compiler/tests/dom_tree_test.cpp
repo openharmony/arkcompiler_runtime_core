@@ -149,17 +149,10 @@ TEST_F(DomTreeTest, GraphNoCycles)
     auto g = GetGraph()->CreateEmptyBlock();
     auto return_void = GetGraph()->CreateInstReturnVoid();
     g->AppendInst(return_void);
-    auto cmp = GetGraph()->CreateInstCompare();
-    cmp->SetType(DataType::BOOL);
-    cmp->SetInput(0, &INS(0));
-    cmp->SetInput(1, &INS(1));
-    cmp->SetOperandsType(DataType::Type::INT64);
+    auto cmp =
+        GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, &INS(0), &INS(1), DataType::Type::INT64, CC_NE);
     c->AppendInst(cmp);
-    auto if_inst = GetGraph()->CreateInstIfImm();
-    if_inst->SetOperandsType(DataType::BOOL);
-    if_inst->SetCc(CC_NE);
-    if_inst->SetImm(0);
-    if_inst->SetInput(0, cmp);
+    auto if_inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0, DataType::BOOL, CC_NE);
     c->AppendInst(if_inst);
     c->AddSucc(g);
     g->AddSucc(exit);

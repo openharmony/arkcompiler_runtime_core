@@ -105,25 +105,25 @@ TEST_F(EtsInteropClassOperationsTest, TestJSCallStaticString)
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsInteropClassOperationsTest, DISABLED_TestJSCallArray)
+TEST_F(EtsInteropClassOperationsTest, TestJSCallArray)
 {
     auto ret = CallEtsMethod<int64_t>("jscall_array");
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsInteropClassOperationsTest, DISABLED_TestJSNewArray)
+TEST_F(EtsInteropClassOperationsTest, TestJSNewArray)
 {
     auto ret = CallEtsMethod<int64_t>("jsnew_array");
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsInteropClassOperationsTest, DISABLED_TestJSNewSetPropertyArray)
+TEST_F(EtsInteropClassOperationsTest, TestJSNewSetPropertyArray)
 {
     auto ret = CallEtsMethod<int64_t>("jsnew_setproperty_array");
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsInteropClassOperationsTest, DISABLED_TestJSCallStaticArray)
+TEST_F(EtsInteropClassOperationsTest, TestJSCallStaticArray)
 {
     auto ret = CallEtsMethod<int64_t>("jscall_static_method_array");
     ASSERT_EQ(ret, 0);

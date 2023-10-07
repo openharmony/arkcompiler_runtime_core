@@ -22,6 +22,7 @@ namespace panda::ets {
 class EtsObject;
 class EtsString;
 class EtsObject;
+class EtsClass;
 }  // namespace panda::ets
 
 namespace panda::ets::interop::js {
@@ -33,15 +34,19 @@ struct IntrinsicsAPI {
     void (*JSRuntimeFinalizationQueueCallback)(EtsObject *obj);
     JSValue *(*JSRuntimeNewJSValueDouble)(double v);
     JSValue *(*JSRuntimeNewJSValueString)(EtsString *v);
+    JSValue *(*JSRuntimeNewJSValueObject)(EtsObject *v);
     double (*JSRuntimeGetValueDouble)(JSValue *ets_js_value);
     uint8_t (*JSRuntimeGetValueBoolean)(JSValue *ets_js_value);
     EtsString *(*JSRuntimeGetValueString)(JSValue *ets_js_value);
+    EtsObject *(*JSRuntimeGetValueObject)(JSValue *ets_js_value, EtsClass *cls);
     JSValue *(*JSRuntimeGetPropertyJSValue)(JSValue *ets_js_value, EtsString *ets_prop_name);
     double (*JSRuntimeGetPropertyDouble)(JSValue *ets_js_value, EtsString *ets_prop_name);
     EtsString *(*JSRuntimeGetPropertyString)(JSValue *ets_js_value, EtsString *ets_prop_name);
     void (*JSRuntimeSetPropertyJSValue)(JSValue *ets_js_value, EtsString *ets_prop_name, JSValue *value);
     void (*JSRuntimeSetPropertyDouble)(JSValue *ets_js_value, EtsString *ets_prop_name, double value);
     void (*JSRuntimeSetPropertyString)(JSValue *ets_js_value, EtsString *ets_prop_name, EtsString *value);
+    JSValue *(*JSRuntimeGetElementJSValue)(JSValue *ets_js_value, int32_t index);
+    double (*JSRuntimeGetElementDouble)(JSValue *ets_js_value, int32_t index);
     JSValue *(*JSRuntimeGetUndefined)();
     JSValue *(*JSRuntimeGetNull)();
     JSValue *(*JSRuntimeGetGlobal)();

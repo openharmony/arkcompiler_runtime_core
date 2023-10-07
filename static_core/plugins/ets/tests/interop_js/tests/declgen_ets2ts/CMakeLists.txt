@@ -36,7 +36,7 @@ file(WRITE ${ARKTSCONFIG}
     "      \"escompat\": [\"${PANDA_ROOT}/plugins/ets/stdlib/escompat\"]\n"
     "    },\n"
     "    \"dynamicPaths\": {\n"
-    "      \"/plugins/ets/tests/interop_js/tests/declgen_ets2ts/lib3.js\": {\"language\": \"js\", \"hasDecl\": false}\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/declgen_ets2ts/lib3.js\": {\"language\": \"js\", \"hasDecl\": false}\n"
     "    }\n"
     "  }\n"
     "}\n"

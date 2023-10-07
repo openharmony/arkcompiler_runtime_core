@@ -1361,11 +1361,9 @@ void ScalarReplacement::MaterializeInEmptyBlock(BasicBlock *block, ArenaUnordere
 
 Inst *ScalarReplacement::CreateNewObject(Inst *original_inst, Inst *save_state)
 {
-    auto new_alloc = graph_->CreateInstNewObject(original_inst->GetType(), original_inst->GetPc());
-    new_alloc->SetInput(0, original_inst->GetInput(0).GetInst());
-    new_alloc->SetInput(1, save_state);
-    new_alloc->SetTypeId(original_inst->CastToNewObject()->GetTypeId());
-    new_alloc->SetMethod(original_inst->CastToNewObject()->GetMethod());
+    auto new_alloc = graph_->CreateInstNewObject(
+        original_inst->GetType(), original_inst->GetPc(), original_inst->GetInput(0).GetInst(), save_state,
+        original_inst->CastToNewObject()->GetTypeId(), original_inst->CastToNewObject()->GetMethod());
     save_state->GetBasicBlock()->InsertAfter(new_alloc, save_state);
     COMPILER_LOG(DEBUG, PEA) << "Materialized " << original_inst->GetId() << " at SavePoint " << save_state->GetId()
                              << " as " << *new_alloc;
@@ -1384,7 +1382,8 @@ CallInst *ScalarReplacement::FindCallerInst(BasicBlock *target, Inst *start)
             }
             if (inst->GetOpcode() == Opcode::ReturnInlined) {
                 depth++;
-            } else if (!inst->IsCall()) {
+            }
+            if (!inst->IsCall()) {
                 continue;
             }
             auto call_inst = static_cast<CallInst *>(inst);
@@ -1419,14 +1418,10 @@ void ScalarReplacement::InitializeObject(Inst *alloc, Inst *inst_before, Virtual
         }
 
         auto field_type = graph_->GetRuntime()->GetFieldType(field);
-        auto store = graph_->CreateInstStoreObject(field_type, alloc->GetPc());
-        store->SetMethod(graph_->GetMethod());
-        store->SetObjField(field);
-        store->SetNeedBarrier(DataType::IsReference(field_type));
-        store->SetInput(0, alloc);
-        store->SetInput(1, field_source_inst);
-        store->SetTypeId(graph_->GetRuntime()->GetFieldId(field));
-        store->SetVolatile(graph_->GetRuntime()->IsFieldVolatile(field));
+        auto store = graph_->CreateInstStoreObject(field_type, alloc->GetPc(), alloc, field_source_inst,
+                                                   graph_->GetRuntime()->GetFieldId(field), graph_->GetMethod(), field,
+                                                   graph_->GetRuntime()->IsFieldVolatile(field),
+                                                   DataType::IsReference(field_type));
         if (inst_before != nullptr) {
             inst_before->GetBasicBlock()->InsertBefore(store, inst_before);
         } else {
@@ -1487,9 +1482,7 @@ void ScalarReplacement::ReplaceAliases()
             // need to insert some casts back.
             replaced = true;
             for (auto user : replace_inputs) {
-                auto cast = graph_->CreateInstCast(inst->GetType(), inst->GetPc());
-                cast->SetOperandsType(replacement->GetType());
-                cast->SetInput(0, replacement);
+                auto cast = graph_->CreateInstCast(inst->GetType(), inst->GetPc(), replacement, replacement->GetType());
                 inst->InsertBefore(cast);
                 replacement = cast;
                 user->ReplaceInput(inst, replacement);
@@ -1647,9 +1640,7 @@ void ScalarReplacement::FixPhiInputTypes()
                 continue;
             }
             /* replace the wider-than-phi-type input with the cast */
-            auto cast = graph_->CreateInstCast(phi->GetType(), input->GetPc());
-            cast->SetOperandsType(input->GetType());
-            cast->SetInput(0, input);
+            auto cast = graph_->CreateInstCast(phi->GetType(), input->GetPc(), input, input->GetType());
             phi->ReplaceInput(input, cast);
             input->InsertAfter(cast);
         }

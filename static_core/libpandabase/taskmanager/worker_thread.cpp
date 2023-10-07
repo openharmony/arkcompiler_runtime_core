@@ -18,9 +18,8 @@
 
 namespace panda::taskmanager {
 
-WorkerThread::WorkerThread(os::memory::Mutex *outside_lock, os::memory::ConditionVariable *outside_cond_var,
-                           size_t tasks_count)
-    : outside_lock_(outside_lock), outside_cond_var_(outside_cond_var)
+WorkerThread::WorkerThread(FinishedTasksCallback callback, size_t tasks_count)
+    : finished_tasks_callback_(std::move(callback))
 {
     thread_ = new std::thread(&WorkerThread::WorkerLoop, this, tasks_count);
     os::thread::SetThreadName(thread_->native_handle(), "TaskSchedulerWorker");
@@ -38,7 +37,7 @@ void WorkerThread::AddTask(Task &&task)
 
 Task WorkerThread::PopTask()
 {
-    ASSERT(!(foreground_queue_.empty() && background_queue_.empty()));
+    ASSERT(!IsEmpty());
     std::queue<Task> *queue = nullptr;
     if (!foreground_queue_.empty()) {
         queue = &foreground_queue_;
@@ -65,29 +64,21 @@ void WorkerThread::WorkerLoop(size_t tasks_count)
 {
     while (true) {
         auto finish_cond = TaskScheduler::GetTaskScheduler()->FillWithTasks(this, tasks_count);
+        size_t task_count = size_;
         ExecuteTasks();
         if (finish_cond) {
             break;
         }
-        // Notify TaskScheduler that all tasks are done
-        os::memory::LockHolder lock_holder(*outside_lock_);
-        outside_cond_var_->Signal();
+        finished_tasks_callback_(task_count);
     }
-}
-
-bool WorkerThread::IsTasksRunning()
-{
-    return is_tasks_running_;
 }
 
 void WorkerThread::ExecuteTasks()
 {
-    is_tasks_running_ = true;
     while (!IsEmpty()) {
         auto task = PopTask();
         task.RunTask();
     }
-    is_tasks_running_ = false;
 }
 
 WorkerThread::~WorkerThread()

@@ -77,7 +77,7 @@ void ObjectAllocatorBase::ObjectMemoryInit(void *mem, size_t size) const
     }
     [[maybe_unused]] auto *object = static_cast<ObjectHeader *>(mem);
     ASSERT(object->AtomicGetMark().GetValue() == 0);
-    ASSERT(object->AtomicClassAddr<BaseClass *>() == nullptr);
+    ASSERT(object->ClassAddr<BaseClass *>() == nullptr);
     ASSERT(size >= ObjectHeader::ObjectHeaderSize());
     // zeroing according to newobj description in ISA
     size_t size_to_init = size - ObjectHeader::ObjectHeaderSize();

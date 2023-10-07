@@ -191,11 +191,10 @@ Inst *AdjustRefs::InsertPointerArithmetic(Inst *input, uint64_t imm, Inst *inser
     }
     Inst *new_inst;
     if (is_add) {
-        new_inst = GetGraph()->CreateInstAddI(DataType::POINTER, pc, imm);
+        new_inst = GetGraph()->CreateInstAddI(DataType::POINTER, pc, input, imm);
     } else {
-        new_inst = GetGraph()->CreateInstSubI(DataType::POINTER, pc, imm);
+        new_inst = GetGraph()->CreateInstSubI(DataType::POINTER, pc, input, imm);
     }
-    new_inst->SetInput(0, input);
     insert_before->InsertBefore(new_inst);
     return new_inst;
 }

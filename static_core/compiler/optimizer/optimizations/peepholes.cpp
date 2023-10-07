@@ -1770,31 +1770,18 @@ void Peepholes::TryReplaceDivByShrAndAshr(Inst *inst, uint64_t unsigned_val, Ins
     // "input0". "input0" is input of "inst", so we don't need check SaveStateOsr in this case
     if (n != -1) {
         auto type_size = DataType::GetTypeSize(inst->GetType(), graph->GetArch());
-        auto ashr = graph->CreateInstAShr();
-        ashr->SetType(inst->GetType());
-        ashr->SetInput(0, input0);
-        ashr->SetInput(1, graph->FindOrCreateConstant(type_size - 1));
+        auto ashr =
+            graph->CreateInstAShr(inst->GetType(), INVALID_PC, input0, graph->FindOrCreateConstant(type_size - 1));
         bb->InsertAfter(ashr, inst);
-        auto shr = graph->CreateInstShr();
-        shr->SetType(inst->GetType());
-        shr->SetInput(0, ashr);
-        shr->SetInput(1, graph->FindOrCreateConstant(type_size - n));
+        auto shr = graph->CreateInstShr(inst->GetType(), INVALID_PC, ashr, graph->FindOrCreateConstant(type_size - n));
         bb->InsertAfter(shr, ashr);
-        auto add = graph->CreateInstAdd();
-        add->SetType(inst->GetType());
-        add->SetInput(0, shr);
-        add->SetInput(1, input0);
+        auto add = graph->CreateInstAdd(inst->GetType(), INVALID_PC, shr, input0);
         bb->InsertAfter(add, shr);
-        Inst *result = graph->CreateInstAShr();
-        result->SetType(inst->GetType());
-        result->SetInput(0, add);
-        result->SetInput(1, graph->FindOrCreateConstant(n));
+        Inst *result = graph->CreateInstAShr(inst->GetType(), INVALID_PC, add, graph->FindOrCreateConstant(n));
         bb->InsertAfter(result, add);
         if (signed_val < 0) {
             auto div = result;
-            result = graph->CreateInstNeg();
-            result->SetType(inst->GetType());
-            result->SetInput(0, div);
+            result = graph->CreateInstNeg(inst->GetType(), INVALID_PC, div);
             bb->InsertAfter(result, div);
         }
         inst->ReplaceUsers(result);

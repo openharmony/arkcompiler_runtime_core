@@ -482,12 +482,13 @@ void GC::GCWorkerEntry(GC *gc, PandaVM *vm)
     }
 }
 
-void GC::JoinWorker()
+void GC::JoinWorker(bool continue_run_gc)
 {
     // Atomic with seq_cst order reason: data race with gc_running_ with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
     gc_running_.store(false, std::memory_order_seq_cst);
-    if (!gc_settings_.RunGCInPlace()) {
+    // TODO(ipetrov, #13816): remove unnecessary second check
+    if (!gc_settings_.RunGCInPlace() && gc_settings_.UseThreadPoolForGCWorkers()) {
         ASSERT(worker_ != nullptr);
     }
     if (worker_ != nullptr && !gc_settings_.RunGCInPlace()) {
@@ -498,6 +499,9 @@ void GC::JoinWorker()
         allocator->Delete(worker_);
         worker_ = nullptr;
     }
+    // Atomic with seq_cst order reason: data race with gc_running_ with requirement for sequentially consistent
+    // order where threads observe all modifications in the same order
+    gc_running_.store(continue_run_gc, std::memory_order_seq_cst);
     LOG_IF(gc_settings_.FullGCBombingFrequency() && gc_settings_.RunGCInPlace(), FATAL, GC)
         << "These options can't be used together";
 }

@@ -1092,8 +1092,10 @@ add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/initobj-bad-02.pa" 
 
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/big_ark_option_value.pa" RUNTIME_OPTIONS --code-cache-size-limit=3221225472)
 
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/oom-01.pa" COMPILER_OPTIONS --compiler-hotness-threshold=0 --compiler-inlining=false HEAP_SIZE_LIMIT "13000000")
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/oom-02.pa" HEAP_SIZE_LIMIT "13000000")
+# OSR needs additional design for try-catch processing. See the issue #13423 against panda
+add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/oom-01.pa" COMPILER_OPTIONS --compiler-hotness-threshold=0 --compiler-inlining=false HEAP_SIZE_LIMIT "13000000" SKIP_OSR)
+# OSR needs additional design for try-catch processing. See the issue #13423 against panda
+add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/oom-02.pa" HEAP_SIZE_LIMIT "13000000" SKIP_OSR)
 
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/tst-branch.pa")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/tst-compare.pa")

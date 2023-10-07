@@ -18,7 +18,6 @@
 
 #include "libpandabase/taskmanager/worker_thread.h"
 #include "libpandabase/taskmanager/task_queue.h"
-#include <optional>
 #include <vector>
 #include <map>
 
@@ -45,18 +44,19 @@ public:
      * @brief Returns the pointer to TaskScheduler. If you use it before the Create or after Destroy methods, it will
      * return nullptr.
      */
-    PANDA_PUBLIC_API static TaskScheduler *GetTaskScheduler();
+    [[nodiscard]] PANDA_PUBLIC_API static TaskScheduler *GetTaskScheduler();
 
     /// @brief Deletes the existed TaskScheduler. You should not use it if you didn't use Create before.
     PANDA_PUBLIC_API static void Destroy();
 
     /**
-     * @brief Registers a queue that was created outside. It should be valid until all workers finish, and the queue
+     * @brief Registers a queue that was created externally. It should be valid until all workers finish, and the queue
      * should have a unique set of TaskType and VMType fields. You can not use this method after Initialize() method
      * @param queue: pointer to a valid TaskQueue.
-     * @return true if queue was successfully registered
+     * @return TaskQueueId of queue that was added. If queue with same TaskType and VMType is already added, method
+     * returns INVALID_TASKQUEUE_ID
      */
-    PANDA_PUBLIC_API bool RegisterQueue(TaskQueue *queue);
+    PANDA_PUBLIC_API TaskQueueId RegisterQueue(TaskQueue *queue);
 
     /// @brief Creates and starts workers with registered queues. After this method, you can not register new queues.
     PANDA_PUBLIC_API void Initialize();
@@ -79,11 +79,19 @@ public:
     bool FillWithTasks(WorkerThread *worker, size_t tasks_count);
 
     /**
-     * @brief Method returns Task from specific queue with specific execution mode using @arg properties. If it has no
-     * tasks method will return nullopt.
-     * @param properties - properties of task that we want to get.
+     * @brief Method returns Task from specific queue with specific execution mode. If it has no tasks method will
+     * return nullopt.
+     * @param id - unique identifier of the queue from which we want to get a task.
+     * @param mode - TaskExecutionMode of task that we want to get.
      */
-    [[nodiscard]] PANDA_PUBLIC_API std::optional<Task> GetTaskByProperties(TaskProperties properties);
+    [[nodiscard]] PANDA_PUBLIC_API std::optional<Task> GetTaskFromQueue(TaskQueueId id, TaskExecutionMode mode);
+
+    /**
+     * @brief Method return Task with specified properties. If there are no tasks with that properties method will
+     * return nullopt.
+     * @param properties - TaskProperties of task we want to get.
+     */
+    [[nodiscard]] PANDA_PUBLIC_API std::optional<Task> GetTaskFromQueue(TaskProperties properties);
 
     /// @brief This method indicates that workers can no longer wait for new tasks and be completed.
     PANDA_PUBLIC_API void Finalize();
@@ -116,6 +124,18 @@ private:
     /// @brief Checks if there are no tasks in queues and workers
     bool AreNoMoreTasks() const REQUIRES(task_manager_lock_);
 
+    /**
+     * @brief Method increment counter of new tasks and signal worker
+     * @param ivalue - the value by which the counter will be increased
+     */
+    void IncrementNewTaskCounter(size_t ivalue);
+
+    /**
+     * @brief Method increment counter of finished tasks and signal Finalize waiter
+     * @param ivalue - the value by which the counter will be increased
+     */
+    void IncrementFinishedTaskCounter(size_t ivalue);
+
     static TaskScheduler *instance_;
 
     size_t workers_count_;
@@ -132,14 +152,15 @@ private:
      * Since we can change the map only before creating the workers, we do not need to synchronize access after
      * Initialize method
      */
-    std::map<TaskQueueTraits, TaskQueue *> task_queues_;
+    std::map<TaskQueueId, TaskQueue *> task_queues_;
 
     /**
-     * workers_lock_ is used in case of access to shared resources operated by the task manager:
+     * task_manager_lock_ is used in case of access to shared resources operated by the task manager:
      * - in RegisterQueue to synchronize modification of task_queues_ before Initialize method;
      * - in FillWithMethods to synchronize access for multiple workers;
+     * task_manager_lock_ is recursive.
      */
-    os::memory::Mutex task_manager_lock_;
+    os::memory::RecursiveMutex task_manager_lock_;
 
     /// queues_wait_cond_var_ is used when all registered queues are empty to wait until one of them will have a task
     os::memory::ConditionVariable queues_wait_cond_var_ GUARDED_BY(task_manager_lock_);
@@ -156,13 +177,16 @@ private:
     /// finish_ is true when TaskScheduler finish Workers and TaskQueues
     bool finish_ GUARDED_BY(task_manager_lock_) {false};
 
+    /// new_task_counter_ contains count of tasks that was add in registered queues.
+    size_t new_task_counter_ GUARDED_BY(task_manager_lock_) {0};
+
     /**
-     * This bool is true only in time period when:
-     *  - Task is popped from TaskQueue;
-     *  - Task still is not in WorkThread queue;
-     * If we don't use this atomic, Finalize() method can finish when one task still exist.
+     * finished_task_counter_ contains count of tasks that was finished.
+     * Task is finished if:
+     * - it was executed by Worker;
+     * - it was gotten by main thread;
      */
-    bool is_worker_queue_filling_ GUARDED_BY(task_manager_lock_) {false};
+    size_t finished_task_counter_ GUARDED_BY(task_manager_lock_) {0};
 };
 
 }  // namespace panda::taskmanager

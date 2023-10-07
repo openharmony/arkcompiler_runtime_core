@@ -122,17 +122,10 @@ TEST_F(RpoTest, GraphNoCycles)
     d->RemoveSucc(exit);
     d->RemoveInst(&INS(9));
     exit->RemovePred(d);
-    auto cmp = GetGraph()->CreateInstCompare();
-    cmp->SetType(DataType::BOOL);
-    cmp->SetInput(0, &INS(0));
-    cmp->SetInput(1, &INS(1));
-    cmp->SetOperandsType(DataType::Type::INT64);
+    auto cmp =
+        GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, &INS(0), &INS(1), DataType::Type::INT64, CC_NE);
     e->AppendInst(cmp);
-    auto if_inst = GetGraph()->CreateInstIfImm();
-    if_inst->SetOperandsType(DataType::BOOL);
-    if_inst->SetCc(CC_NE);
-    if_inst->SetImm(0);
-    if_inst->SetInput(0, cmp);
+    auto if_inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0, DataType::BOOL, CC_NE);
     e->AppendInst(if_inst);
     e->AddSucc(n);
     m->AddSucc(k);
@@ -242,17 +235,10 @@ TEST_F(RpoTest, GraphWithCycles)
     CheckSubsequence({a, c, e, m, l});
 
     auto n = GetGraph()->CreateEmptyBlock();
-    auto cmp = GetGraph()->CreateInstCompare();
-    cmp->SetType(DataType::BOOL);
-    cmp->SetInput(0, &INS(0));
-    cmp->SetInput(1, &INS(1));
-    cmp->SetOperandsType(DataType::Type::INT64);
+    auto cmp =
+        GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, &INS(0), &INS(1), DataType::Type::INT64, CC_NE);
     g->AppendInst(cmp);
-    auto if_inst = GetGraph()->CreateInstIfImm();
-    if_inst->SetOperandsType(DataType::BOOL);
-    if_inst->SetCc(CC_NE);
-    if_inst->SetImm(0);
-    if_inst->SetInput(0, cmp);
+    auto if_inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0, DataType::BOOL, CC_NE);
     g->AppendInst(if_inst);
     auto k = GetGraph()->CreateEmptyBlock();
     g->AddSucc(n);

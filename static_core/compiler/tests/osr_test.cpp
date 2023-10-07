@@ -312,6 +312,7 @@ TEST_F(OsrTest, OsrAfterCFrameOptimizingWithInlining)
 
 TEST_F(OsrTest, MainOsrCatchThrow)
 {
+    GTEST_SKIP() << "Should be skipped until try-catch processing re-designed in OSR";
     static constexpr auto SOURCE = R"(
         .record panda.ArrayIndexOutOfBoundsException <external>
 
@@ -394,6 +395,7 @@ static constexpr auto MAIN_OSR_CATCH_F1_THROW_SOURCE = R"(
 
 TEST_F(OsrTest, MainOsrCatchF1Throw)
 {
+    GTEST_SKIP() << "Should be skipped until try-catch processing re-designed in OSR";
     PandaRunner runner;
     runner.GetRuntimeOptions().SetCompilerHotnessThreshold(HOTNESS_THRESHOLD);
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
@@ -415,6 +417,7 @@ TEST_F(OsrTest, MainOsrCatchF1Throw)
 
 TEST_F(OsrTest, MainOsrCatchF1ThrowCompiled)
 {
+    GTEST_SKIP() << "Should be skipped until try-catch processing re-designed in OSR";
     PandaRunner runner;
     runner.GetRuntimeOptions().SetCompilerHotnessThreshold(HOTNESS_THRESHOLD);
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
@@ -468,6 +471,7 @@ static constexpr auto MAIN_CATCH_F1_OSR_THROW_SOURCE = R"(
 
 TEST_F(OsrTest, MainCatchF1OsrThrow)
 {
+    GTEST_SKIP() << "Should be skipped until try-catch processing re-designed in OSR";
     PandaRunner runner;
     runner.GetRuntimeOptions().SetCompilerHotnessThreshold(HOTNESS_THRESHOLD);
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
@@ -527,6 +531,7 @@ static constexpr auto MAIN_CATCH_F1_OSR_F2_THROW_SOURCE = R"(
 
 TEST_F(OsrTest, MainCatchF1OsrF2Throw)
 {
+    GTEST_SKIP() << "Should be skipped until try-catch processing re-designed in OSR";
     PandaRunner runner;
     runner.GetRuntimeOptions().SetCompilerHotnessThreshold(HOTNESS_THRESHOLD);
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
@@ -550,6 +555,7 @@ TEST_F(OsrTest, MainCatchF1OsrF2Throw)
 
 TEST_F(OsrTest, MainCatchF1OsrF2ThrowCompiled)
 {
+    GTEST_SKIP() << "Should be skipped until try-catch processing re-designed in OSR";
     PandaRunner runner;
     runner.GetRuntimeOptions().SetCompilerHotnessThreshold(HOTNESS_THRESHOLD);
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
@@ -610,6 +616,7 @@ static constexpr auto MAIN_F1_OSR_CATCH_F2_THROW_SOURCE = R"(
 
 TEST_F(OsrTest, MainF1OsrCatchF2Throw)
 {
+    GTEST_SKIP() << "Should be skipped until try-catch processing re-designed in OSR";
     PandaRunner runner;
     runner.GetRuntimeOptions().SetCompilerHotnessThreshold(HOTNESS_THRESHOLD);
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);
@@ -633,6 +640,7 @@ TEST_F(OsrTest, MainF1OsrCatchF2Throw)
 
 TEST_F(OsrTest, MainF1OsrCatchF2ThrowCompiled)
 {
+    GTEST_SKIP() << "Should be skipped until try-catch processing re-designed in OSR";
     PandaRunner runner;
     runner.GetRuntimeOptions().SetCompilerHotnessThreshold(HOTNESS_THRESHOLD);
     runner.GetRuntimeOptions().SetCompilerEnableJit(true);

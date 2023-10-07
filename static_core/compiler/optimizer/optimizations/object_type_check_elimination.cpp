@@ -23,6 +23,7 @@
 namespace panda::compiler {
 bool ObjectTypeCheckElimination::RunImpl()
 {
+    GetGraph()->RunPass<LoopAnalyzer>();
     GetGraph()->RunPass<ObjectTypePropagation>();
     GetGraph()->RunPass<DominatorsTree>();
     VisitGraph();

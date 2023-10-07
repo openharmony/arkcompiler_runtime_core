@@ -71,18 +71,12 @@ public:
     virtual void PostBarrier(const void *obj_addr, size_t offset, void *val_addr) = 0;
 
     /**
-     * Post barrier for array write. Used by interpeter.
-     * @param obj_addr - address of the array object
-     * @param size - size of the array object
+     * Post barrier for range write. Used by interpeter.
+     * @param obj_addr - address of the object
+     * @param offset - offset from obj_addr
+     * @param count - written bytes count
      */
-    virtual void PostBarrierArrayWrite(const void *obj_addr, size_t size) = 0;
-
-    /**
-     * Post barrier for writing in every field of an object. Used by interpeter.
-     * @param object_addr - address of the object
-     * @param size - size of the object
-     */
-    virtual void PostBarrierEveryObjectFieldWrite(const void *obj_addr, size_t size) = 0;
+    virtual void PostBarrier(const void *obj_addr, size_t offset, size_t count) = 0;
 
     /**
      * Get barrier operand (literal, function pointer, address etc. See enum BarrierType for details.
@@ -140,9 +134,8 @@ public:
     {
     }
 
-    void PostBarrierArrayWrite([[maybe_unused]] const void *obj_addr, [[maybe_unused]] size_t size) override {}
-
-    void PostBarrierEveryObjectFieldWrite([[maybe_unused]] const void *obj_addr, [[maybe_unused]] size_t size) override
+    void PostBarrier([[maybe_unused]] const void *obj_addr, [[maybe_unused]] size_t offset,
+                     [[maybe_unused]] size_t count) override
     {
     }
 };
@@ -174,9 +167,7 @@ public:
 
     void PostBarrier(const void *obj_addr, size_t offset, void *stored_val_addr) override;
 
-    void PostBarrierArrayWrite(const void *obj_addr, size_t size) override;
-
-    void PostBarrierEveryObjectFieldWrite(const void *obj_addr, size_t size) override;
+    void PostBarrier(const void *obj_addr, size_t offset, size_t count) override;
 
     ~GCGenBarrierSet() override = default;
 
@@ -244,9 +235,7 @@ public:
 
     void PostBarrier(const void *obj_addr, size_t offset, void *stored_val_addr) override;
 
-    void PostBarrierArrayWrite(const void *obj_addr, size_t size) override;
-
-    void PostBarrierEveryObjectFieldWrite(const void *obj_addr, size_t size) override;
+    void PostBarrier(const void *obj_addr, size_t offset, size_t count) override;
 
     void Enqueue(CardTable::CardPtr card);
 
@@ -261,7 +250,7 @@ public:
     NO_MOVE_SEMANTIC(GCG1BarrierSet);
 
 private:
-    void Invalidate(const void *begin, const void *last);
+    void Invalidate(uintptr_t begin, uintptr_t last);
     using PostFuncT = std::function<void(const void *, const void *)> *;
     // Store operands explicitly for interpreter perf
     // PRE BARRIER

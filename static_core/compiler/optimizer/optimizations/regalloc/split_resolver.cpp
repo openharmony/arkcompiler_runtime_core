@@ -150,8 +150,7 @@ SpillFillInst *SplitResolver::CreateSpillFillForSplitMove(BasicBlock *source_blo
     }
 
     if (iter == iter.end()) {
-        auto spill_fill = graph_->CreateInstSpillFill();
-        spill_fill->SetSpillFillType(SpillFillType::SPLIT_MOVE);
+        auto spill_fill = graph_->CreateInstSpillFill(SpillFillType::SPLIT_MOVE);
         source_block->PrependInst(spill_fill);
         return spill_fill;
     }
@@ -177,8 +176,7 @@ SpillFillInst *SplitResolver::CreateSpillFillForSplitMove(BasicBlock *source_blo
     }
 
     ASSERT(!inst->IsPhi());
-    auto spill_fill = graph_->CreateInstSpillFill();
-    spill_fill->SetSpillFillType(SpillFillType::SPLIT_MOVE);
+    auto spill_fill = graph_->CreateInstSpillFill(SpillFillType::SPLIT_MOVE);
     source_block->InsertAfter(spill_fill, inst);
     return spill_fill;
 }
@@ -195,8 +193,7 @@ SpillFillInst *SplitResolver::CreateSpillFillForSiblings(Inst *connect_at)
         connect_at = prev;
         prev = prev->GetPrev();
     }
-    auto spill_fill = graph_->CreateInstSpillFill();
-    spill_fill->SetSpillFillType(SpillFillType::CONNECT_SPLIT_SIBLINGS);
+    auto spill_fill = graph_->CreateInstSpillFill(SpillFillType::CONNECT_SPLIT_SIBLINGS);
     connect_at->InsertBefore(spill_fill);
     return spill_fill;
 }

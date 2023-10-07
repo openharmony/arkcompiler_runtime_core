@@ -381,14 +381,18 @@ int64_t Method::GetBranchNotTakenCounter(uint32_t pc)
     return profiling_data->GetBranchNotTakenCounter(pc);
 }
 
-uint32_t Method::FindCatchBlock(const Class *cls, uint32_t pc) const
+int64_t Method::GetThrowTakenCounter(uint32_t pc)
+{
+    auto profiling_data = GetProfilingData();
+    if (profiling_data == nullptr) {
+        return 0;
+    }
+    return profiling_data->GetThrowTakenCounter(pc);
+}
+
+uint32_t Method::FindCatchBlockInPandaFile(const Class *cls, uint32_t pc) const
 {
     ASSERT(!IsAbstract());
-
-    auto *thread = ManagedThread::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    VMHandle<ObjectHeader> exception(thread, thread->GetException());
-    thread->ClearException();
 
     panda_file::MethodDataAccessor mda(*(panda_file_), file_id_);
     panda_file::CodeDataAccessor cda(*(panda_file_), mda.GetCodeId().value());
@@ -415,6 +419,17 @@ uint32_t Method::FindCatchBlock(const Class *cls, uint32_t pc) const
         }
         return pc_offset == panda_file::INVALID_OFFSET;
     });
+    return pc_offset;
+}
+
+uint32_t Method::FindCatchBlock(const Class *cls, uint32_t pc) const
+{
+    auto *thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    VMHandle<ObjectHeader> exception(thread, thread->GetException());
+    thread->ClearException();
+
+    auto pc_offset = FindCatchBlockInPandaFile(cls, pc);
 
     thread->SetException(exception.GetPtr());
 
@@ -509,6 +524,7 @@ void Method::StartProfiling()
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
     PandaVector<uint32_t> vcalls;
     PandaVector<uint32_t> branches;
+    PandaVector<uint32_t> throws;
 
     Span<const uint8_t> instructions(GetInstructions(), GetCodeSize());
     for (BytecodeInstruction inst(instructions.begin()); inst.GetAddress() < instructions.end();
@@ -519,16 +535,21 @@ void Method::StartProfiling()
         if (inst.HasFlag(BytecodeInstruction::Flags::JUMP)) {
             branches.push_back(inst.GetAddress() - GetInstructions());
         }
+        if (inst.IsThrow(BytecodeInstruction::Exceptions::X_THROW)) {
+            throws.push_back(inst.GetAddress() - GetInstructions());
+        }
     }
-    if (vcalls.empty() && branches.empty()) {
+    if (vcalls.empty() && branches.empty() && throws.empty()) {
         return;
     }
     ASSERT(std::is_sorted(vcalls.begin(), vcalls.end()));
 
-    auto data = allocator->Alloc(RoundUp(RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache)) +
-                                             sizeof(CallSiteInlineCache) * vcalls.size(),
-                                         alignof(BranchData)) +
-                                 sizeof(BranchData) * branches.size());
+    auto data = allocator->Alloc(RoundUp(RoundUp(RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache)) +
+                                                     sizeof(CallSiteInlineCache) * vcalls.size(),
+                                                 alignof(BranchData)) +
+                                             sizeof(BranchData) * branches.size(),
+                                         alignof(ThrowData)) +
+                                 sizeof(ThrowData) * throws.size());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto vcalls_mem = reinterpret_cast<uint8_t *>(data) + RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache));
     auto branches_data_offset = RoundUp(RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache)) +
@@ -536,8 +557,14 @@ void Method::StartProfiling()
                                         alignof(BranchData));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto branches_mem = reinterpret_cast<uint8_t *>(data) + branches_data_offset;
-    auto profiling_data = new (data)
-        ProfilingData(CallSiteInlineCache::From(vcalls_mem, vcalls), BranchData::From(branches_mem, branches));
+
+    auto throws_data_offset = RoundUp(branches_data_offset + sizeof(BranchData) * branches.size(), alignof(ThrowData));
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto throws_mem = reinterpret_cast<uint8_t *>(data) + throws_data_offset;
+
+    auto profiling_data =
+        new (data) ProfilingData(CallSiteInlineCache::From(vcalls_mem, vcalls),
+                                 BranchData::From(branches_mem, branches), ThrowData::From(throws_mem, throws));
 
     ProfilingData *old_value = nullptr;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)

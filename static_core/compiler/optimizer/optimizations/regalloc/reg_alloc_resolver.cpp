@@ -49,8 +49,7 @@ void RegAllocResolver::Resolve()
 
 void RegAllocResolver::AddCatchPhiMoves(Inst *inst)
 {
-    auto spill_fill_inst = GetGraph()->CreateInstSpillFill();
-    spill_fill_inst->SetSpillFillType(SpillFillType::INPUT_FILL);
+    auto spill_fill_inst = GetGraph()->CreateInstSpillFill(SpillFillType::INPUT_FILL);
     auto handlers = GetGraph()->GetThrowableInstHandlers(inst);
 
     for (auto catch_handler : handlers) {
@@ -150,8 +149,7 @@ void RegAllocResolver::AddMoveToFixedLocation(Inst *inst, Location input_locatio
     if (inst->GetPrev() != nullptr && inst->GetPrev()->IsSpillFill()) {
         sf_inst = inst->GetPrev()->CastToSpillFill();
     } else {
-        sf_inst = GetGraph()->CreateInstSpillFill();
-        sf_inst->SetSpillFillType(SpillFillType::INPUT_FILL);
+        sf_inst = GetGraph()->CreateInstSpillFill(SpillFillType::INPUT_FILL);
         inst->InsertBefore(sf_inst);
     }
 

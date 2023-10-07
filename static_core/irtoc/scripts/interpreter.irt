@@ -822,7 +822,7 @@ macro(:handle_throw) do |vs|
   IfImm(vs).Imm(0).EQ.Unlikely {
     call_runtime("ThrowNullPointerExceptionFromInterpreter").void
   } Else {
-    call_runtime("ThrowExceptionFromInterpreter", %tr, vs).void
+    call_runtime("ThrowExceptionFromInterpreter", %tr, vs, %frame, %pc).void
   }
   pc := find_catch_block()
   frame := frame_eh

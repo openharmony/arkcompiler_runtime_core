@@ -43,7 +43,7 @@ bool GCWorkersTaskQueue::TryAddTask(GCWorkersTask &&task)
 
 void GCWorkersTaskQueue::RunInCurrentThread()
 {
-    auto possible_gc_task = taskmanager::TaskScheduler::GetTaskScheduler()->GetTaskByProperties(GC_TASK_PROPERTIES);
+    auto possible_gc_task = taskmanager::TaskScheduler::GetTaskScheduler()->GetTaskFromQueue(GC_TASK_PROPERTIES);
     if (!possible_gc_task.has_value()) {
         // No available gc task for execution
         return;

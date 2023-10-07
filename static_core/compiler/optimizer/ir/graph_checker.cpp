@@ -326,8 +326,9 @@ void GraphChecker::CheckDataFlow(BasicBlock *block)
                                   (GetGraph()->IsRegAllocApplied() &&
                                    IsTryCatchDomination(inst->GetBasicBlock(), user_inst->GetBasicBlock())),
                               std::cerr << "Instruction doesn't dominate its user\n"
-                                        << "input: " << *inst << std::endl
-                                        << "user:  " << *user_inst << std::endl);
+                                        << "input: bb " << inst->GetBasicBlock()->GetId() << *inst << std::endl
+                                        << "user: bb " << user_inst->GetBasicBlock()->GetId() << *user_inst
+                                        << std::endl);
             }
             auto arch = graph->GetArch();
             if (DataType::Is32Bits(inst->GetType(), arch)) {

@@ -321,8 +321,7 @@ PhiInst *LicmConditions::AddPhiInst(BasicBlock *bb, const ConditionChain *chain)
     auto graph = bb->GetGraph();
     auto one_cnst = graph->FindOrCreateConstant(1);
     auto zero_cnst = graph->FindOrCreateConstant(0);
-    auto phi_inst = graph->CreateInstPhi();
-    phi_inst->SetType(DataType::BOOL);
+    auto phi_inst = graph->CreateInstPhi(DataType::BOOL, INVALID_PC);
     bb->AppendPhi(phi_inst);
     for (auto pred : bb->GetPredsBlocks()) {
         phi_inst->AppendInput(chain->Contains(pred) ? one_cnst : zero_cnst);
@@ -333,10 +332,8 @@ PhiInst *LicmConditions::AddPhiInst(BasicBlock *bb, const ConditionChain *chain)
 void LicmConditions::AddSingleIfImmInst(BasicBlock *bb, const ConditionChain *chain, Inst *input)
 {
     auto orig_if_inst = chain->GetLastBlock()->GetLastInst()->CastToIfImm();
-    auto if_inst = bb->GetGraph()->CreateInstIfImm(DataType::NO_TYPE, 0, ConditionCode::CC_NE, 0);
-    if_inst->SetInput(0, input);
-    if_inst->SetOperandsType(DataType::BOOL);
-    if_inst->SetMethod(orig_if_inst->GetMethod());
+    auto if_inst = bb->GetGraph()->CreateInstIfImm(DataType::NO_TYPE, 0, input, 0, DataType::BOOL, ConditionCode::CC_NE,
+                                                   orig_if_inst->GetMethod());
     bb->AppendInst(if_inst);
 }
 

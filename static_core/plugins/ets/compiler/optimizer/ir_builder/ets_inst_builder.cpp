@@ -31,10 +31,8 @@ void InstBuilder::BuildLaunch(const BytecodeInstruction *bc_inst, bool is_range,
         return;
     }
     auto pc = GetPc(bc_inst->GetAddress());
-    auto inst = graph_->CreateInstLoadRuntimeClass(DataType::REFERENCE, pc);
-    inst->SetTypeId(TypeIdMixin::MEM_PROMISE_CLASS_ID);
-    inst->SetMethod(GetGraph()->GetMethod());
-    inst->SetClass(nullptr);
+    auto inst = graph_->CreateInstLoadRuntimeClass(DataType::REFERENCE, pc, TypeIdMixin::MEM_PROMISE_CLASS_ID,
+                                                   GetGraph()->GetMethod(), nullptr);
     auto save_state = CreateSaveState(Opcode::SaveState, pc);
     auto new_obj = CreateNewObjectInst(pc, TypeIdMixin::MEM_PROMISE_CLASS_ID, save_state, inst);
     AddInstruction(save_state, inst, new_obj);
@@ -54,9 +52,8 @@ void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bc_inst, DataType:
     auto save_state = CreateSaveState(Opcode::SaveState, pc);
 
     // Create NullCheck instruction
-    auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, pc);
-    null_check->SetInput(0, GetDefinition(bc_inst->GetVReg(0)));
-    null_check->SetInput(1, save_state);
+    auto null_check =
+        graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bc_inst->GetVReg(0)), save_state);
 
     auto runtime = GetRuntime();
     auto field_index = bc_inst->GetId(0).AsIndex();
@@ -121,9 +118,8 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bc_inst, DataType:
     auto save_state = CreateSaveState(Opcode::SaveState, pc);
 
     // Create NullCheck instruction
-    auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, pc);
-    null_check->SetInput(0, GetDefinition(bc_inst->GetVReg(0)));
-    null_check->SetInput(1, save_state);
+    auto null_check =
+        graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bc_inst->GetVReg(0)), save_state);
 
     auto runtime = GetRuntime();
     auto field_index = bc_inst->GetId(0).AsIndex();

@@ -14,6 +14,7 @@
  */
 
 #include "os/filesystem.h"
+#include "os/file.h"
 #include "utils/logger.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -64,6 +65,80 @@ bool IsDirExists(const std::string &dirpath)
     }
     struct stat info {};
     return (stat(dirpath.c_str(), &info) == 0) && ((info.st_mode & (unsigned int)S_IFDIR) != 0U);
+}
+
+std::string RemoveExtension(const std::string &filepath)
+{
+    auto pos = filepath.find_last_of('.');
+    if (pos != std::string::npos) {
+        return filepath.substr(0, pos);
+    }
+    return filepath;
+}
+
+std::string NormalizePath(const std::string &path)
+{
+    if (path.empty()) {
+        return path;
+    }
+
+    auto delim = file::File::GetPathDelim();
+    ASSERT(delim.length() == 1);
+    auto delim_char = delim[0];
+
+    std::vector<std::string_view> parts;
+    size_t begin = 0;
+    size_t length = 0;
+    size_t i = 0;
+    while (i < path.size()) {
+        if (path[i++] != delim_char) {
+            ++length;
+            continue;
+        }
+
+        std::string_view sv(&path[begin], length);
+
+        while (path[i] == delim_char) {
+            ++i;
+        }
+
+        begin = i;
+        length = 0;
+
+        if (sv == ".") {
+            continue;
+        }
+
+        if (sv == "..") {
+            if (parts.empty()) {
+                parts.emplace_back("");
+                continue;
+            }
+
+            if (!parts.back().empty()) {
+                parts.pop_back();
+            }
+            continue;
+        }
+
+        parts.push_back(sv);
+    }
+
+    std::string_view sv(&path[begin], length);
+    parts.push_back(sv);
+
+    std::stringstream ss;
+
+    ASSERT(!parts.empty());
+    i = 0;
+    ss << parts[i++];
+
+    while (i < parts.size()) {
+        ss << delim;
+        ss << parts[i++];
+    }
+
+    return ss.str();
 }
 
 }  // namespace panda::os

@@ -37,9 +37,8 @@ void InstBuilder::BuildCall(const BytecodeInstruction *bc_inst, bool is_range, b
     NullCheckInst *null_check = nullptr;
     uint32_t class_id = 0;
     if (has_implicit_arg) {
-        null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, pc);
-        null_check->SetInput(0, GetArgDefinition(bc_inst, 0, acc_read));
-        null_check->SetInput(1, save_state);
+        null_check =
+            graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetArgDefinition(bc_inst, 0, acc_read), save_state);
     } else if (method != nullptr) {
         if (graph_->IsAotMode()) {
             class_id = GetRuntime()->GetClassIdWithinFile(GetMethod(), GetRuntime()->GetClass(method));
@@ -141,11 +140,8 @@ void InstBuilder::BuildInitClassInstForCallStatic(RuntimeInterface::MethodPtr me
                                                   Inst *save_state)
 {
     if (GetClassId() != class_id) {
-        auto init_class = graph_->CreateInstInitClass(DataType::NO_TYPE, pc);
-        init_class->SetTypeId(class_id);
-        init_class->SetMethod(GetGraph()->GetMethod());
-        init_class->SetClass(GetRuntime()->GetClass(method));
-        init_class->SetInput(0, save_state);
+        auto init_class = graph_->CreateInstInitClass(DataType::NO_TYPE, pc, save_state, class_id,
+                                                      GetGraph()->GetMethod(), GetRuntime()->GetClass(method));
         AddInstruction(init_class);
     }
 }
@@ -164,61 +160,56 @@ CallInst *InstBuilder::BuildCallInst(RuntimeInterface::MethodPtr method, uint32_
     if constexpr (OPCODE == Opcode::CallStatic || OPCODE == Opcode::CallLaunchStatic) {
         if (method == nullptr || (runtime_->IsMethodStatic(GetMethod(), method_id) && class_id == 0) ||
             ForceUnresolved() || (OPCODE == Opcode::CallLaunchStatic && graph_->IsAotMode())) {
-            ResolveStaticInst *resolve_static = graph_->CreateInstResolveStatic(DataType::POINTER, pc, method_id);
-            resolve_static->SetCallMethod(nullptr);
+            ResolveStaticInst *resolve_static =
+                graph_->CreateInstResolveStatic(DataType::POINTER, pc, method_id, nullptr);
             *resolver = resolve_static;
             if constexpr (OPCODE == Opcode::CallStatic) {
                 call = graph_->CreateInstCallResolvedStatic(GetMethodReturnType(method_id), pc, method_id);
             } else {
                 call = graph_->CreateInstCallResolvedLaunchStatic(DataType::VOID, pc, method_id);
             }
-            call->SetCallMethod(nullptr);
             if (!graph_->IsAotMode() && !graph_->IsBytecodeOptimizer()) {
                 runtime_->GetUnresolvedTypes()->AddTableSlot(GetMethod(), method_id, SLOT_KIND);
             }
         } else {
             if constexpr (OPCODE == Opcode::CallStatic) {
-                call = graph_->CreateInstCallStatic(GetMethodReturnType(method_id), pc, method_id);
+                call = graph_->CreateInstCallStatic(GetMethodReturnType(method_id), pc, method_id, method);
             } else {
-                call = graph_->CreateInstCallLaunchStatic(DataType::VOID, pc, method_id);
+                call = graph_->CreateInstCallLaunchStatic(DataType::VOID, pc, method_id, method);
             }
-            call->SetCallMethod(method);
         }
     }
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
     if constexpr (OPCODE == Opcode::CallVirtual || OPCODE == Opcode::CallLaunchVirtual) {
         ASSERT(!runtime_->IsMethodStatic(GetMethod(), method_id));
         if (method != nullptr && (runtime_->IsInterfaceMethod(method) || graph_->IsAotNoChaMode())) {
-            ResolveVirtualInst *resolve_virtual = graph_->CreateInstResolveVirtual(DataType::POINTER, pc, method_id);
-            resolve_virtual->SetCallMethod(method);
+            ResolveVirtualInst *resolve_virtual =
+                graph_->CreateInstResolveVirtual(DataType::POINTER, pc, method_id, method);
             *resolver = resolve_virtual;
             if constexpr (OPCODE == Opcode::CallVirtual) {
-                call = graph_->CreateInstCallResolvedVirtual(GetMethodReturnType(method_id), pc, method_id);
+                call = graph_->CreateInstCallResolvedVirtual(GetMethodReturnType(method_id), pc, method_id, method);
             } else {
-                call = graph_->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc, method_id);
+                call = graph_->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc, method_id, method);
             }
-            call->SetCallMethod(method);
         } else if (method == nullptr || ForceUnresolved()) {
-            ResolveVirtualInst *resolve_virtual = graph_->CreateInstResolveVirtual(DataType::POINTER, pc, method_id);
-            resolve_virtual->SetCallMethod(nullptr);
+            ResolveVirtualInst *resolve_virtual =
+                graph_->CreateInstResolveVirtual(DataType::POINTER, pc, method_id, nullptr);
             *resolver = resolve_virtual;
             if constexpr (OPCODE == Opcode::CallVirtual) {
                 call = graph_->CreateInstCallResolvedVirtual(GetMethodReturnType(method_id), pc, method_id);
             } else {
                 call = graph_->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc, method_id);
             }
-            call->SetCallMethod(nullptr);
             if (!graph_->IsAotMode() && !graph_->IsBytecodeOptimizer()) {
                 runtime_->GetUnresolvedTypes()->AddTableSlot(GetMethod(), method_id, SLOT_KIND);
             }
         } else {
             ASSERT(method != nullptr);
             if constexpr (OPCODE == Opcode::CallVirtual) {
-                call = graph_->CreateInstCallVirtual(GetMethodReturnType(method_id), pc, method_id);
+                call = graph_->CreateInstCallVirtual(GetMethodReturnType(method_id), pc, method_id, method);
             } else {
-                call = graph_->CreateInstCallLaunchVirtual(DataType::VOID, pc, method_id);
+                call = graph_->CreateInstCallLaunchVirtual(DataType::VOID, pc, method_id, method);
             }
-            call->SetCallMethod(method);
         }
     }
     if (UNLIKELY(call == nullptr)) {
@@ -238,9 +229,8 @@ void InstBuilder::BuildMonitor(const BytecodeInstruction *bc_inst, Inst *def, bo
         inst->CastToMonitor()->SetExit();
     } else {
         // Create NullCheck instruction
-        auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, GetPc(bc_inst->GetAddress()));
-        null_check->SetInput(0, def);
-        null_check->SetInput(1, save_state);
+        auto null_check =
+            graph_->CreateInstNullCheck(DataType::REFERENCE, GetPc(bc_inst->GetAddress()), def, save_state);
         def = null_check;
         AddInstruction(null_check);
     }
@@ -351,10 +341,9 @@ void InstBuilder::BuildIsNanIntrinsic(const BytecodeInstruction *bc_inst, bool a
     auto method_id = GetRuntime()->ResolveMethodIndex(GetMethod(), method_index);
     // No need to create specialized node for isNaN. Since NaN != NaN, simple float compare node is fine.
     // Also, ensure that float comparison node is implemented for specific architecture
-    auto inst = GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), ConditionCode::CC_NE);
     auto vreg = GetArgDefinition(bc_inst, 0, acc_read);
-    inst->SetInput(0, vreg);
-    inst->SetInput(1, vreg);
+    auto inst = GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), vreg, vreg,
+                                              GetMethodArgumentType(method_id, 0), ConditionCode::CC_NE);
     inst->SetOperandsType(GetMethodArgumentType(method_id, 0));
     AddInstruction(inst);
     UpdateDefinitionAcc(inst);
@@ -366,12 +355,9 @@ void InstBuilder::BuildStringLengthIntrinsic(const BytecodeInstruction *bc_inst,
     auto bc_addr = GetPc(bc_inst->GetAddress());
     auto save_state = CreateSaveState(Opcode::SaveState, bc_addr);
 
-    auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, bc_addr);
-    null_check->SetInput(0, GetArgDefinition(bc_inst, 0, acc_read));
-    null_check->SetInput(1, save_state);
-
-    auto array_length = graph_->CreateInstLenArray(DataType::INT32, bc_addr, false);
-    array_length->SetInput(0, null_check);
+    auto null_check =
+        graph_->CreateInstNullCheck(DataType::REFERENCE, bc_addr, GetArgDefinition(bc_inst, 0, acc_read), save_state);
+    auto array_length = graph_->CreateInstLenArray(DataType::INT32, bc_addr, null_check, false);
 
     AddInstruction(save_state);
     AddInstruction(null_check);
@@ -380,10 +366,7 @@ void InstBuilder::BuildStringLengthIntrinsic(const BytecodeInstruction *bc_inst,
     Inst *string_length;
     if (graph_->GetRuntime()->IsCompressedStringsEnabled()) {
         auto const_one_inst = graph_->FindOrCreateConstant(1);
-        string_length = graph_->CreateInstShr(DataType::INT32, bc_addr);
-        string_length->SetInput(0, array_length);
-        string_length->SetInput(1, const_one_inst);
-
+        string_length = graph_->CreateInstShr(DataType::INT32, bc_addr, array_length, const_one_inst);
         AddInstruction(string_length);
     } else {
         string_length = array_length;
@@ -396,16 +379,12 @@ void InstBuilder::BuildStringIsEmptyIntrinsic(const BytecodeInstruction *bc_inst
 {
     auto bc_addr = GetPc(bc_inst->GetAddress());
     auto save_state = CreateSaveState(Opcode::SaveState, bc_addr);
-    auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, bc_addr);
-    null_check->SetInput(0, GetArgDefinition(bc_inst, 0, acc_read));
-    null_check->SetInput(1, save_state);
-    auto length = graph_->CreateInstLenArray(DataType::INT32, bc_addr, false);
-    length->SetInput(0, null_check);
+    auto null_check =
+        graph_->CreateInstNullCheck(DataType::REFERENCE, bc_addr, GetArgDefinition(bc_inst, 0, acc_read), save_state);
+    auto length = graph_->CreateInstLenArray(DataType::INT32, bc_addr, null_check, false);
     auto zero_const = graph_->FindOrCreateConstant(0);
-    auto check_zero_length = graph_->CreateInstCompare(DataType::BOOL, bc_addr, ConditionCode::CC_EQ);
-    check_zero_length->SetInput(0, length);
-    check_zero_length->SetInput(1, zero_const);
-    check_zero_length->SetOperandsType(DataType::INT32);
+    auto check_zero_length =
+        graph_->CreateInstCompare(DataType::BOOL, bc_addr, length, zero_const, DataType::INT32, ConditionCode::CC_EQ);
     AddInstruction(save_state);
     AddInstruction(null_check);
     AddInstruction(length);
@@ -422,19 +401,17 @@ void InstBuilder::BuildCharIsUpperCaseIntrinsic(const BytecodeInstruction *bc_in
 
     // Adding InstCast here as the aternative compiler backend requires inputs of InstSub to be of the same type.
     // The InstCast instructon makes no harm as normally they are removed by the following compiler stages.
-    auto arg = GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    arg->SetInput(0, GetArgDefinition(bc_inst, 0, acc_read));
-    auto const_a = GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    const_a->SetInput(0, graph_->FindOrCreateConstant('A'));
+    auto arg_input = GetArgDefinition(bc_inst, 0, acc_read);
+    auto const_input = graph_->FindOrCreateConstant('A');
+    auto arg =
+        GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()), arg_input, arg_input->GetType());
+    auto const_a =
+        GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()), const_input, const_input->GetType());
 
-    auto inst1 = GetGraph()->CreateInstSub(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    inst1->SetInput(0, arg);
-    inst1->SetInput(1, const_a);
-
-    auto inst2 = GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), ConditionCode::CC_BE);
-    inst2->SetInput(0, inst1);
-    inst2->SetInput(1, graph_->FindOrCreateConstant('Z' - 'A'));
-    inst2->SetOperandsType(DataType::UINT16);
+    auto inst1 = GetGraph()->CreateInstSub(DataType::UINT16, GetPc(bc_inst->GetAddress()), arg, const_a);
+    auto inst2 =
+        GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), inst1,
+                                      graph_->FindOrCreateConstant('Z' - 'A'), DataType::UINT16, ConditionCode::CC_BE);
 
     AddInstruction(arg);
     AddInstruction(const_a);
@@ -450,27 +427,20 @@ void InstBuilder::BuildCharToUpperCaseIntrinsic(const BytecodeInstruction *bc_in
 
     ASSERT(GetMethodArgumentsCount(GetRuntime()->ResolveMethodIndex(GetMethod(), bc_inst->GetId(0).AsIndex())) == 1);
 
-    auto arg = GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    arg->SetInput(0, GetArgDefinition(bc_inst, 0, acc_read));
-    auto const_a = GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    const_a->SetInput(0, graph_->FindOrCreateConstant('a'));
+    auto arg_input = GetArgDefinition(bc_inst, 0, acc_read);
+    auto const_input = graph_->FindOrCreateConstant('a');
+    auto arg =
+        GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()), arg_input, arg_input->GetType());
+    auto const_a =
+        GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()), const_input, const_input->GetType());
 
-    auto inst1 = GetGraph()->CreateInstSub(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    inst1->SetInput(0, arg);
-    inst1->SetInput(1, const_a);
-
-    auto inst2 = GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), ConditionCode::CC_BE);
-    inst2->SetInput(0, inst1);
-    inst2->SetInput(1, graph_->FindOrCreateConstant('z' - 'a'));
-    inst2->SetOperandsType(DataType::UINT16);
-
-    auto inst3 = GetGraph()->CreateInstMul(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    inst3->SetInput(0, inst2);
-    inst3->SetInput(1, graph_->FindOrCreateConstant('Z' - 'z'));
-
-    auto inst4 = GetGraph()->CreateInstAdd(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    inst4->SetInput(0, arg);
-    inst4->SetInput(1, inst3);
+    auto inst1 = GetGraph()->CreateInstSub(DataType::UINT16, GetPc(bc_inst->GetAddress()), arg, const_a);
+    auto inst2 =
+        GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), inst1,
+                                      graph_->FindOrCreateConstant('z' - 'a'), DataType::UINT16, ConditionCode::CC_BE);
+    auto inst3 = GetGraph()->CreateInstMul(DataType::UINT16, GetPc(bc_inst->GetAddress()), inst2,
+                                           graph_->FindOrCreateConstant('Z' - 'z'));
+    auto inst4 = GetGraph()->CreateInstAdd(DataType::UINT16, GetPc(bc_inst->GetAddress()), arg, inst3);
 
     AddInstruction(arg);
     AddInstruction(const_a);
@@ -486,19 +456,17 @@ void InstBuilder::BuildCharIsLowerCaseIntrinsic(const BytecodeInstruction *bc_in
 {
     ASSERT(GetMethodArgumentsCount(GetRuntime()->ResolveMethodIndex(GetMethod(), bc_inst->GetId(0).AsIndex())) == 1);
 
-    auto arg = GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    arg->SetInput(0, GetArgDefinition(bc_inst, 0, acc_read));
-    auto const_a = GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    const_a->SetInput(0, graph_->FindOrCreateConstant('a'));
+    auto arg_input = GetArgDefinition(bc_inst, 0, acc_read);
+    auto const_input = graph_->FindOrCreateConstant('a');
+    auto arg =
+        GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()), arg_input, arg_input->GetType());
+    auto const_a =
+        GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()), const_input, const_input->GetType());
 
-    auto inst1 = GetGraph()->CreateInstSub(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    inst1->SetInput(0, arg);
-    inst1->SetInput(1, const_a);
-
-    auto inst2 = GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), ConditionCode::CC_BE);
-    inst2->SetInput(0, inst1);
-    inst2->SetInput(1, graph_->FindOrCreateConstant('z' - 'a'));
-    inst2->SetOperandsType(DataType::UINT16);
+    auto inst1 = GetGraph()->CreateInstSub(DataType::UINT16, GetPc(bc_inst->GetAddress()), arg, const_a);
+    auto inst2 =
+        GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), inst1,
+                                      graph_->FindOrCreateConstant('z' - 'a'), DataType::UINT16, ConditionCode::CC_BE);
 
     AddInstruction(arg);
     AddInstruction(const_a);
@@ -512,27 +480,20 @@ void InstBuilder::BuildCharToLowerCaseIntrinsic(const BytecodeInstruction *bc_in
 {
     ASSERT(GetMethodArgumentsCount(GetRuntime()->ResolveMethodIndex(GetMethod(), bc_inst->GetId(0).AsIndex())) == 1);
 
-    auto arg = GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    arg->SetInput(0, GetArgDefinition(bc_inst, 0, acc_read));
-    auto const_a = GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    const_a->SetInput(0, graph_->FindOrCreateConstant('A'));
+    auto arg_input = GetArgDefinition(bc_inst, 0, acc_read);
+    auto const_input = graph_->FindOrCreateConstant('A');
+    auto arg =
+        GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()), arg_input, arg_input->GetType());
+    auto const_a =
+        GetGraph()->CreateInstCast(DataType::UINT16, GetPc(bc_inst->GetAddress()), const_input, const_input->GetType());
 
-    auto inst1 = GetGraph()->CreateInstSub(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    inst1->SetInput(0, arg);
-    inst1->SetInput(1, const_a);
-
-    auto inst2 = GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), ConditionCode::CC_BE);
-    inst2->SetInput(0, inst1);
-    inst2->SetInput(1, graph_->FindOrCreateConstant('Z' - 'A'));
-    inst2->SetOperandsType(DataType::UINT16);
-
-    auto inst3 = GetGraph()->CreateInstMul(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    inst3->SetInput(0, inst2);
-    inst3->SetInput(1, graph_->FindOrCreateConstant('z' - 'Z'));
-
-    auto inst4 = GetGraph()->CreateInstAdd(DataType::UINT16, GetPc(bc_inst->GetAddress()));
-    inst4->SetInput(0, arg);
-    inst4->SetInput(1, inst3);
+    auto inst1 = GetGraph()->CreateInstSub(DataType::UINT16, GetPc(bc_inst->GetAddress()), arg, const_a);
+    auto inst2 =
+        GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), inst1,
+                                      graph_->FindOrCreateConstant('Z' - 'A'), DataType::UINT16, ConditionCode::CC_BE);
+    auto inst3 = GetGraph()->CreateInstMul(DataType::UINT16, GetPc(bc_inst->GetAddress()), inst2,
+                                           graph_->FindOrCreateConstant('z' - 'Z'));
+    auto inst4 = GetGraph()->CreateInstAdd(DataType::UINT16, GetPc(bc_inst->GetAddress()), arg, inst3);
 
     AddInstruction(arg);
     AddInstruction(const_a);
@@ -677,9 +638,8 @@ void InstBuilder::BuildDefaultVirtualCallIntrinsic(const BytecodeInstruction *bc
     auto intrinsic_id = GetRuntime()->GetIntrinsicId(method);
     auto bc_addr = GetPc(bc_inst->GetAddress());
     auto save_state = CreateSaveState(Opcode::SaveState, bc_addr);
-    auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, bc_addr);
-    null_check->SetInput(0, GetArgDefinition(bc_inst, 0, acc_read));
-    null_check->SetInput(1, save_state);
+    auto null_check =
+        graph_->CreateInstNullCheck(DataType::REFERENCE, bc_addr, GetArgDefinition(bc_inst, 0, acc_read), save_state);
 
     auto call = GetGraph()->CreateInstIntrinsic(GetMethodReturnType(method_id), bc_addr, intrinsic_id);
     SetCallArgs(bc_inst, is_range, acc_read, nullptr, call, null_check, call->RequireState() ? save_state : nullptr,
@@ -711,10 +671,8 @@ void InstBuilder::BuildLoadObject(const BytecodeInstruction *bc_inst, DataType::
     auto save_state = CreateSaveState(Opcode::SaveState, pc);
 
     // Create NullCheck instruction
-    auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, pc);
-    null_check->SetInput(0, GetDefinition(bc_inst->GetVReg(IS_ACC_WRITE ? 0 : 1)));
-    null_check->SetInput(1, save_state);
-
+    auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, pc,
+                                                  GetDefinition(bc_inst->GetVReg(IS_ACC_WRITE ? 0 : 1)), save_state);
     auto runtime = GetRuntime();
     auto field_index = bc_inst->GetId(0).AsIndex();
     auto field_id = runtime->ResolveFieldIndex(GetMethod(), field_index);
@@ -732,26 +690,15 @@ void InstBuilder::BuildLoadObject(const BytecodeInstruction *bc_inst, DataType::
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), field_id,
                                                              UnresolvedTypesInterface::SlotKind::FIELD);
         }
-        resolve_field = graph_->CreateInstResolveObjectField(DataType::UINT32, pc);
-        resolve_field->SetInput(0, save_state);
-        resolve_field->SetTypeId(field_id);
-        resolve_field->SetMethod(GetGraph()->GetMethod());
+        resolve_field =
+            graph_->CreateInstResolveObjectField(DataType::UINT32, pc, save_state, field_id, GetGraph()->GetMethod());
         // 2. Create an instruction to load a value from the resolved field
-        auto load_field = graph_->CreateInstLoadResolvedObjectField(type, pc);
-        load_field->SetInput(0, null_check);
-        load_field->SetInput(1, resolve_field);
-        load_field->SetTypeId(field_id);
-        load_field->SetMethod(GetGraph()->GetMethod());
+        auto load_field = graph_->CreateInstLoadResolvedObjectField(type, pc, null_check, resolve_field, field_id,
+                                                                    GetGraph()->GetMethod());
         inst = load_field;
     } else {
-        auto load_field = graph_->CreateInstLoadObject(type, pc);
-        load_field->SetInput(0, null_check);
-        load_field->SetTypeId(field_id);
-        load_field->SetMethod(GetGraph()->GetMethod());
-        load_field->SetObjField(field);
-        if (runtime->IsFieldVolatile(field)) {
-            load_field->SetVolatile(true);
-        }
+        auto load_field = graph_->CreateInstLoadObject(type, pc, null_check, field_id, GetGraph()->GetMethod(), field,
+                                                       runtime->IsFieldVolatile(field));
         inst = load_field;
     }
 
@@ -779,35 +726,23 @@ Inst *InstBuilder::BuildStoreObjectInst(const BytecodeInstruction *bc_inst, Data
     if (field == nullptr || ForceUnresolved()) {
         // The field is unresolved, so we have to resolve it and then store
         // 1. Create an instruction to resolve an object's field
-        auto resolve_field = graph_->CreateInstResolveObjectField(DataType::UINT32, pc);
-        resolve_field->SetTypeId(field_id);
-        resolve_field->SetMethod(GetGraph()->GetMethod());
+        auto resolve_field =
+            graph_->CreateInstResolveObjectField(DataType::UINT32, pc, nullptr, field_id, GetGraph()->GetMethod());
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), field_id,
                                                              UnresolvedTypesInterface::SlotKind::FIELD);
         }
         // 2. Create an instruction to store a value to the resolved field
-        auto store_field = graph_->CreateInstStoreResolvedObjectField(type, pc);
-        store_field->SetTypeId(field_id);
-        store_field->SetMethod(GetGraph()->GetMethod());
-        if (type == DataType::REFERENCE) {
-            store_field->SetNeedBarrier(true);
-        }
+        auto store_field = graph_->CreateInstStoreResolvedObjectField(
+            type, pc, nullptr, nullptr, nullptr, field_id, GetGraph()->GetMethod(), false, type == DataType::REFERENCE);
         *resolve_inst = resolve_field;
         return store_field;
     }
 
     ASSERT(field != nullptr);
-    auto store_field = graph_->CreateInstStoreObject(type, pc);
-    store_field->SetTypeId(field_id);
-    store_field->SetMethod(GetGraph()->GetMethod());
-    store_field->SetObjField(field);
-    if (GetRuntime()->IsFieldVolatile(field)) {
-        store_field->SetVolatile(true);
-    }
-    if (type == DataType::REFERENCE) {
-        store_field->SetNeedBarrier(true);
-    }
+    auto store_field =
+        graph_->CreateInstStoreObject(type, pc, nullptr, nullptr, field_id, GetGraph()->GetMethod(), field,
+                                      GetRuntime()->IsFieldVolatile(field), type == DataType::REFERENCE);
     *resolve_inst = nullptr;  // resolver is not needed in this case
     return store_field;
 }
@@ -820,9 +755,8 @@ void InstBuilder::BuildStoreObject(const BytecodeInstruction *bc_inst, DataType:
     auto save_state = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
 
     // Create NullCheck instruction
-    auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, GetPc(bc_inst->GetAddress()));
-    null_check->SetInput(0, GetDefinition(bc_inst->GetVReg(IS_ACC_READ ? 0 : 1)));
-    null_check->SetInput(1, save_state);
+    auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, GetPc(bc_inst->GetAddress()),
+                                                  GetDefinition(bc_inst->GetVReg(IS_ACC_READ ? 0 : 1)), save_state);
 
     auto runtime = GetRuntime();
     auto field_index = bc_inst->GetId(0).AsIndex();
@@ -872,38 +806,24 @@ Inst *InstBuilder::BuildLoadStaticInst(const BytecodeInstruction *bc_inst, DataT
         // The static field is unresolved, so we have to resolve it and then load
         // 1. Create an instruction to resolve an object's static field.
         //    Its result is a static field memory address (not an offset as there is no object)
-        auto resolve_field = graph_->CreateInstResolveObjectFieldStatic(DataType::REFERENCE, pc);
-        resolve_field->SetTypeId(type_id);
-        resolve_field->SetMethod(GetGraph()->GetMethod());
-        resolve_field->SetInput(0, save_state);
+        auto resolve_field = graph_->CreateInstResolveObjectFieldStatic(DataType::REFERENCE, pc, save_state, type_id,
+                                                                        GetGraph()->GetMethod());
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), type_id,
                                                              UnresolvedTypesInterface::SlotKind::FIELD);
         }
         AddInstruction(resolve_field);
         // 2. Create an instruction to load a value from the resolved static field address
-        auto load_field = graph_->CreateInstLoadResolvedObjectFieldStatic(type, pc);
-        load_field->SetInput(0, resolve_field);
-        load_field->SetTypeId(type_id);
-        load_field->SetMethod(GetGraph()->GetMethod());
+        auto load_field =
+            graph_->CreateInstLoadResolvedObjectFieldStatic(type, pc, resolve_field, type_id, GetGraph()->GetMethod());
         return load_field;
     }
 
     ASSERT(field != nullptr);
-    auto init_class = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc);
-    init_class->SetTypeId(class_id);
-    init_class->SetClass(GetRuntime()->GetClassForField(field));
-    init_class->SetInput(0, save_state);
-    init_class->SetMethod(GetGraph()->GetMethod());
-
-    auto load_field = graph_->CreateInstLoadStatic(type, pc);
-    load_field->SetInput(0, init_class);
-    load_field->SetTypeId(type_id);
-    load_field->SetMethod(GetGraph()->GetMethod());
-    load_field->SetObjField(field);
-    if (GetRuntime()->IsFieldVolatile(field)) {
-        load_field->SetVolatile(true);
-    }
+    auto init_class = graph_->CreateInstLoadAndInitClass(
+        DataType::REFERENCE, pc, save_state, class_id, GetGraph()->GetMethod(), GetRuntime()->GetClassForField(field));
+    auto load_field = graph_->CreateInstLoadStatic(type, pc, init_class, type_id, GetGraph()->GetMethod(), field,
+                                                   GetRuntime()->IsFieldVolatile(field));
     AddInstruction(init_class);
     return load_field;
 }
@@ -912,10 +832,7 @@ Inst *InstBuilder::BuildLoadStaticInst(const BytecodeInstruction *bc_inst, DataT
 Inst *InstBuilder::BuildAnyTypeCheckInst(size_t bc_addr, Inst *input, Inst *save_state, AnyBaseType type,
                                          bool type_was_profiled, profiling::AnyInputType allowed_input_type)
 {
-    auto any_check = graph_->CreateInstAnyTypeCheck(DataType::ANY, bc_addr);
-    any_check->SetInput(0, input);
-    any_check->SetInput(1, save_state);
-    any_check->SetAnyType(type);
+    auto any_check = graph_->CreateInstAnyTypeCheck(DataType::ANY, bc_addr, input, save_state, type);
     any_check->SetAllowedInputType(allowed_input_type);
     any_check->SetIsTypeWasProfiled(type_was_profiled);
     AddInstruction(any_check);
@@ -953,28 +870,19 @@ Inst *InstBuilder::BuildStoreStaticInst(const BytecodeInstruction *bc_inst, Data
             // 2. GC Pre/Post write barriers may be needed.
             // Just call runtime EntrypointId::UNRESOLVED_STORE_STATIC_BARRIERED,
             // which performs all the necessary steps (see codegen.cpp for the details).
-            auto inst = graph_->CreateInstUnresolvedStoreStatic(type, pc);
-            inst->SetTypeId(type_id);
-            inst->SetMethod(GetGraph()->GetMethod());
-            inst->SetInput(0, store_input);
-            inst->SetInput(1, save_state);
-            inst->SetNeedBarrier(true);
+            auto inst = graph_->CreateInstUnresolvedStoreStatic(type, pc, store_input, save_state, type_id,
+                                                                GetGraph()->GetMethod(), true);
             return inst;
         }
         ASSERT(type != DataType::REFERENCE);
         // 1. Create an instruction to resolve an object's static field.
         //    Its result is a static field memory address (REFERENCE)
-        auto resolve_field = graph_->CreateInstResolveObjectFieldStatic(DataType::REFERENCE, pc);
-        resolve_field->SetTypeId(type_id);
-        resolve_field->SetMethod(GetGraph()->GetMethod());
-        resolve_field->SetInput(0, save_state);
+        auto resolve_field = graph_->CreateInstResolveObjectFieldStatic(DataType::REFERENCE, pc, save_state, type_id,
+                                                                        GetGraph()->GetMethod());
         AddInstruction(resolve_field);
         // 2. Create an instruction to store a value to the resolved static field address
-        auto store_field = graph_->CreateInstStoreResolvedObjectFieldStatic(type, pc);
-        store_field->SetTypeId(type_id);
-        store_field->SetInput(0, resolve_field);
-        store_field->SetInput(1, store_input);
-        store_field->SetMethod(GetGraph()->GetMethod());
+        auto store_field = graph_->CreateInstStoreResolvedObjectFieldStatic(type, pc, resolve_field, store_input,
+                                                                            type_id, GetGraph()->GetMethod());
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), type_id,
                                                              UnresolvedTypesInterface::SlotKind::FIELD);
@@ -983,24 +891,11 @@ Inst *InstBuilder::BuildStoreStaticInst(const BytecodeInstruction *bc_inst, Data
     }
 
     ASSERT(field != nullptr);
-    auto init_class = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc);
-    init_class->SetTypeId(class_id);
-    init_class->SetClass(GetRuntime()->GetClassForField(field));
-    init_class->SetInput(0, save_state);
-    init_class->SetMethod(GetGraph()->GetMethod());
-
-    auto store_field = graph_->CreateInstStoreStatic(type, pc);
-    store_field->SetInput(0, init_class);
-    store_field->SetInput(1, store_input);
-    store_field->SetTypeId(type_id);
-    store_field->SetMethod(GetGraph()->GetMethod());
-    store_field->SetObjField(field);
-    if (GetRuntime()->IsFieldVolatile(field)) {
-        store_field->SetVolatile(true);
-    }
-    if (type == DataType::REFERENCE) {
-        store_field->SetNeedBarrier(true);
-    }
+    auto init_class = graph_->CreateInstLoadAndInitClass(
+        DataType::REFERENCE, pc, save_state, class_id, GetGraph()->GetMethod(), GetRuntime()->GetClassForField(field));
+    auto store_field =
+        graph_->CreateInstStoreStatic(type, pc, init_class, store_input, type_id, GetGraph()->GetMethod(), field,
+                                      GetRuntime()->IsFieldVolatile(field), type == DataType::REFERENCE);
     AddInstruction(init_class);
     return store_field;
 }
@@ -1029,21 +924,16 @@ void InstBuilder::BuildChecksBeforeArray(size_t pc, Inst *array_ref, Inst **ss, 
     // Create NullCheck instruction
     Inst *null_check = nullptr;
     if (with_nullcheck) {
-        null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, pc);
-        null_check->CastToNullCheck()->SetInput(0, array_ref);
-        null_check->CastToNullCheck()->SetInput(1, save_state);
+        null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, pc, array_ref, save_state);
     } else {
         null_check = array_ref;
     }
 
     // Create LenArray instruction
-    auto array_length = graph_->CreateInstLenArray(DataType::INT32, pc);
-    array_length->SetInput(0, null_check);
+    auto array_length = graph_->CreateInstLenArray(DataType::INT32, pc, null_check);
 
     // Create BoundCheck instruction
-    auto bounds_check = graph_->CreateInstBoundsCheck(DataType::INT32, pc);
-    bounds_check->SetInput(0, array_length);
-    bounds_check->SetInput(2U, save_state);
+    auto bounds_check = graph_->CreateInstBoundsCheck(DataType::INT32, pc, array_length, nullptr, save_state);
 
     *ss = save_state;
     *nc = null_check;
@@ -1065,10 +955,8 @@ void InstBuilder::BuildLoadArray(const BytecodeInstruction *bc_inst, DataType::T
     ASSERT(save_state != nullptr && null_check != nullptr && array_length != nullptr && bounds_check != nullptr);
 
     // Create instruction
-    auto inst = graph_->CreateInstLoadArray(type, pc);
+    auto inst = graph_->CreateInstLoadArray(type, pc, null_check, bounds_check);
     bounds_check->SetInput(1, GetDefinitionAcc());
-    inst->SetInput(0, null_check);
-    inst->SetInput(1, bounds_check);
     AddInstruction(save_state, null_check, array_length, bounds_check, inst);
     UpdateDefinitionAcc(inst);
 }
@@ -1084,17 +972,12 @@ void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bc_inst, 
     // Create NewArray instruction
     auto size_inst = graph_->FindOrCreateConstant(array_size);
     auto save_state = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
-    auto neg_check = graph_->CreateInstNegativeCheck(DataType::INT32, GetPc(bc_inst->GetAddress()));
+    auto neg_check =
+        graph_->CreateInstNegativeCheck(DataType::INT32, GetPc(bc_inst->GetAddress()), size_inst, save_state);
     auto init_class = CreateLoadAndInitClassGeneric(type_id, GetPc(bc_inst->GetAddress()));
     init_class->SetInput(0, save_state);
-    neg_check->SetInput(0, size_inst);
-    neg_check->SetInput(1, save_state);
-    auto array_inst = graph_->CreateInstNewArray(DataType::REFERENCE, GetPc(bc_inst->GetAddress()));
-    array_inst->SetTypeId(type_id);
-    array_inst->SetMethod(GetGraph()->GetMethod());
-    array_inst->SetInput(NewArrayInst::INDEX_CLASS, init_class);
-    array_inst->SetInput(NewArrayInst::INDEX_SIZE, neg_check);
-    array_inst->SetInput(NewArrayInst::INDEX_SAVE_STATE, save_state);
+    auto array_inst = graph_->CreateInstNewArray(DataType::REFERENCE, GetPc(bc_inst->GetAddress()), init_class,
+                                                 neg_check, save_state, type_id, GetGraph()->GetMethod());
     AddInstruction(save_state);
     AddInstruction(init_class);
     AddInstruction(neg_check);
@@ -1104,12 +987,8 @@ void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bc_inst, 
     if (array_size > OPTIONS.GetCompilerUnfoldConstArrayMaxSize()) {
         // Create LoadConstArray instruction
         auto ss = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
-        auto inst = GetGraph()->CreateInstFillConstArray(type, GetPc(bc_inst->GetAddress()));
-        inst->SetTypeId(bc_inst->GetId(0).AsFileId().GetOffset());
-        inst->SetMethod(method);
-        inst->SetImm(array_size);
-        inst->SetInput(0, array_inst);
-        inst->SetInput(1, ss);
+        auto inst = GetGraph()->CreateInstFillConstArray(type, GetPc(bc_inst->GetAddress()), array_inst, ss,
+                                                         bc_inst->GetId(0).AsFileId().GetOffset(), method, array_size);
         AddInstruction(ss);
         AddInstruction(inst);
         return;
@@ -1141,10 +1020,8 @@ void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bc_inst, 
     for (size_t i = 0; i < array_size; i++) {
         auto index_inst = graph_->FindOrCreateConstant(i);
         auto save = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
-        auto load_string_inst = GetGraph()->CreateInstLoadString(DataType::REFERENCE, GetPc(bc_inst->GetAddress()));
-        load_string_inst->SetTypeId(std::get<T>(lit_array.literals[i].value));
-        load_string_inst->SetMethod(method);
-        load_string_inst->SetInput(0, save);
+        auto load_string_inst = GetGraph()->CreateInstLoadString(
+            DataType::REFERENCE, GetPc(bc_inst->GetAddress()), save, std::get<T>(lit_array.literals[i].value), method);
         AddInstruction(save);
         AddInstruction(load_string_inst);
         if (GetGraph()->IsDynamicMethod()) {
@@ -1204,10 +1081,8 @@ void InstBuilder::BuildLoadConstArray(const BytecodeInstruction *bc_inst)
                 // Create LoadConstArray instruction for String array, because we calls runtime for the case.
                 auto save_state = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
                 auto method = GetGraph()->GetMethod();
-                auto inst = GetGraph()->CreateInstLoadConstArray(DataType::REFERENCE, GetPc(bc_inst->GetAddress()));
-                inst->SetTypeId(literal_array_idx);
-                inst->SetMethod(method);
-                inst->SetInput(0, save_state);
+                auto inst = GetGraph()->CreateInstLoadConstArray(DataType::REFERENCE, GetPc(bc_inst->GetAddress()),
+                                                                 save_state, literal_array_idx, method);
                 AddInstruction(save_state);
                 AddInstruction(inst);
                 UpdateDefinition(bc_inst->GetVReg(0), inst);
@@ -1252,10 +1127,7 @@ void InstBuilder::BuildStoreArrayInst(const BytecodeInstruction *bc_inst, DataTy
     if (type == DataType::REFERENCE) {
         // NOLINTNEXTLINE(readability-braces-around-statements,bugprone-suspicious-semicolon)
         if constexpr (CREATE_REF_CHECK) {
-            ref_check = graph_->CreateInstRefTypeCheck(DataType::REFERENCE, pc);
-            ref_check->SetInput(0, null_check);
-            ref_check->SetInput(1, store_def);
-            ref_check->SetInput(2U, save_state);
+            ref_check = graph_->CreateInstRefTypeCheck(DataType::REFERENCE, pc, null_check, store_def, save_state);
             store_def = ref_check;
         }
         inst->CastToStoreArray()->SetNeedBarrier(true);
@@ -1277,8 +1149,7 @@ void InstBuilder::BuildLenArray(const BytecodeInstruction *bc_inst)
     auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, GetPc(bc_inst->GetAddress()));
     null_check->SetInput(0, GetDefinition(bc_inst->GetVReg(0)));
     null_check->SetInput(1, save_state);
-    auto inst = graph_->CreateInstLenArray(DataType::INT32, GetPc(bc_inst->GetAddress()));
-    inst->SetInput(0, null_check);
+    auto inst = graph_->CreateInstLenArray(DataType::INT32, GetPc(bc_inst->GetAddress()), null_check);
     AddInstruction(save_state);
     AddInstruction(null_check);
     AddInstruction(inst);
@@ -1289,10 +1160,8 @@ void InstBuilder::BuildLenArray(const BytecodeInstruction *bc_inst)
 void InstBuilder::BuildNewArray(const BytecodeInstruction *bc_inst)
 {
     auto save_state = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
-    auto neg_check = graph_->CreateInstNegativeCheck(DataType::INT32, GetPc(bc_inst->GetAddress()));
-    neg_check->SetInput(0, GetDefinition(bc_inst->GetVReg(1)));
-    neg_check->SetInput(1, save_state);
-    auto inst = graph_->CreateInstNewArray(DataType::REFERENCE, GetPc(bc_inst->GetAddress()));
+    auto neg_check = graph_->CreateInstNegativeCheck(DataType::INT32, GetPc(bc_inst->GetAddress()),
+                                                     GetDefinition(bc_inst->GetVReg(1)), save_state);
 
     auto type_index = bc_inst->GetId(0).AsIndex();
     auto type_id = GetRuntime()->ResolveTypeIndex(GetMethod(), type_index);
@@ -1300,11 +1169,8 @@ void InstBuilder::BuildNewArray(const BytecodeInstruction *bc_inst)
     auto init_class = CreateLoadAndInitClassGeneric(type_id, GetPc(bc_inst->GetAddress()));
     init_class->SetInput(0, save_state);
 
-    inst->SetTypeId(type_id);
-    inst->SetMethod(GetGraph()->GetMethod());
-    inst->SetInput(NewArrayInst::INDEX_CLASS, init_class);
-    inst->SetInput(NewArrayInst::INDEX_SIZE, neg_check);
-    inst->SetInput(NewArrayInst::INDEX_SAVE_STATE, save_state);
+    auto inst = graph_->CreateInstNewArray(DataType::REFERENCE, GetPc(bc_inst->GetAddress()), init_class, neg_check,
+                                           save_state, type_id, GetGraph()->GetMethod());
     AddInstruction(save_state, init_class, neg_check, inst);
     UpdateDefinition(bc_inst->GetVReg(0), inst);
 }
@@ -1346,18 +1212,15 @@ void InstBuilder::BuildMultiDimensionalArrayObject(const BytecodeInstruction *bc
     if (is_range) {
         auto start_reg = bc_inst->GetVReg(0);
         for (size_t i = 0; i < args_count; start_reg++, i++) {
-            auto neg_check = graph_->CreateInstNegativeCheck(DataType::INT32, pc);
-            neg_check->SetInput(0, GetDefinition(start_reg));
-            neg_check->SetInput(1, save_state);
+            auto neg_check = graph_->CreateInstNegativeCheck(DataType::INT32, pc, GetDefinition(start_reg), save_state);
             AddInstruction(neg_check);
             inst->AppendInput(neg_check);
             inst->AddInputType(DataType::INT32);
         }
     } else {
         for (size_t i = 0; i < args_count; i++) {
-            auto neg_check = graph_->CreateInstNegativeCheck(DataType::INT32, pc);
-            neg_check->SetInput(0, GetDefinition(bc_inst->GetVReg(i)));
-            neg_check->SetInput(1, save_state);
+            auto neg_check =
+                graph_->CreateInstNegativeCheck(DataType::INT32, pc, GetDefinition(bc_inst->GetVReg(i)), save_state);
             AddInstruction(neg_check);
             inst->AppendInput(neg_check);
             inst->AddInputType(DataType::INT32);
@@ -1377,15 +1240,13 @@ void InstBuilder::BuildInitObjectMultiDimensionalArray(const BytecodeInstruction
     auto method_id = GetRuntime()->ResolveMethodIndex(GetMethod(), method_index);
     auto class_id = GetRuntime()->GetClassIdForMethod(GetMethod(), method_id);
     auto save_state = CreateSaveState(Opcode::SaveState, pc);
-    auto init_class = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc);
+    auto init_class =
+        graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, save_state, class_id, GetGraph()->GetMethod(),
+                                           GetRuntime()->ResolveType(GetGraph()->GetMethod(), class_id));
     auto inst = GetGraph()->CreateInstInitObject(DataType::REFERENCE, pc, method_id);
 
     size_t args_count = GetMethodArgumentsCount(method_id);
 
-    init_class->SetInput(0, save_state);
-    init_class->SetTypeId(class_id);
-    init_class->SetMethod(GetGraph()->GetMethod());
-    init_class->SetClass(GetRuntime()->ResolveType(GetGraph()->GetMethod(), class_id));
     inst->ReserveInputs(ONE_FOR_OBJECT + args_count + ONE_FOR_SSTATE);
     inst->AllocateInputTypes(GetGraph()->GetAllocator(), ONE_FOR_OBJECT + args_count + ONE_FOR_SSTATE);
     inst->AppendInput(init_class);
@@ -1420,19 +1281,16 @@ CallInst *InstBuilder::BuildCallStaticForInitObject(const BytecodeInstruction *b
     auto method = GetRuntime()->GetMethodById(graph_->GetMethod(), method_id);
     CallInst *call = nullptr;
     if (method == nullptr || ForceUnresolved()) {
-        ResolveStaticInst *resolve_static = graph_->CreateInstResolveStatic(DataType::POINTER, pc, method_id);
-        resolve_static->SetCallMethod(nullptr);
+        ResolveStaticInst *resolve_static = graph_->CreateInstResolveStatic(DataType::POINTER, pc, method_id, nullptr);
         *resolver = resolve_static;
         call = graph_->CreateInstCallResolvedStatic(GetMethodReturnType(method_id), pc, method_id);
-        call->SetCallMethod(nullptr);
         if (!graph_->IsAotMode() && !graph_->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), method_id,
                                                              UnresolvedTypesInterface::SlotKind::METHOD);
         }
         inputs_count += 1;  // resolver
     } else {
-        call = graph_->CreateInstCallStatic(GetMethodReturnType(method_id), pc, method_id);
-        call->SetCallMethod(method);
+        call = graph_->CreateInstCallStatic(GetMethodReturnType(method_id), pc, method_id, method);
     }
     call->ReserveInputs(inputs_count);
     call->AllocateInputTypes(graph_->GetAllocator(), inputs_count);
@@ -1452,20 +1310,16 @@ void InstBuilder::BuildInitString(const BytecodeInstruction *bc_inst)
 
     Inst *inst = nullptr;
     if (args_count == 0) {
-        inst = GetGraph()->CreateInstInitEmptyString(DataType::REFERENCE, pc);
-        inst->SetInput(0, save_state);
+        inst = GetGraph()->CreateInstInitEmptyString(DataType::REFERENCE, pc, save_state);
     } else {
         ASSERT(args_count == 1);
-        auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, pc);
-        null_check->SetInput(0, GetDefinition(bc_inst->GetVReg(0)));
-        null_check->SetInput(1, save_state);
+        auto null_check =
+            graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bc_inst->GetVReg(0)), save_state);
         AddInstruction(null_check);
 
         auto ctor_method = GetRuntime()->GetMethodById(GetMethod(), ctor_method_id);
         auto ctor_type = GetRuntime()->GetStringCtorType(ctor_method);
-        inst = GetGraph()->CreateInstInitString(DataType::REFERENCE, pc, ctor_type);
-        inst->SetInput(0, null_check);
-        inst->SetInput(1, save_state);
+        inst = GetGraph()->CreateInstInitString(DataType::REFERENCE, pc, null_check, save_state, ctor_type);
     }
     AddInstruction(inst);
     UpdateDefinitionAcc(inst);
@@ -1538,17 +1392,9 @@ void InstBuilder::BuildCheckCast(const BytecodeInstruction *bc_inst)
     auto klass_type = GetRuntime()->GetClassType(GetGraph()->GetMethod(), type_id);
     auto pc = GetPc(bc_inst->GetAddress());
     auto save_state = CreateSaveState(Opcode::SaveState, pc);
-
     auto load_class = BuildLoadClass(type_id, pc, save_state);
-
-    auto inst = GetGraph()->CreateInstCheckCast(DataType::NO_TYPE, pc);
-    inst->SetClassType(klass_type);
-    inst->SetTypeId(type_id);
-    inst->SetMethod(GetGraph()->GetMethod());
-    inst->SetInput(0, GetDefinitionAcc());
-    inst->SetInput(1, load_class);
-    inst->SetInput(2U, save_state);
-
+    auto inst = GetGraph()->CreateInstCheckCast(DataType::NO_TYPE, pc, GetDefinitionAcc(), load_class, save_state,
+                                                type_id, GetGraph()->GetMethod(), klass_type);
     AddInstruction(save_state, load_class, inst);
 }
 
@@ -1560,16 +1406,9 @@ void InstBuilder::BuildIsInstance(const BytecodeInstruction *bc_inst)
     auto klass_type = GetRuntime()->GetClassType(GetGraph()->GetMethod(), type_id);
     auto pc = GetPc(bc_inst->GetAddress());
     auto save_state = CreateSaveState(Opcode::SaveState, pc);
-
     auto load_class = BuildLoadClass(type_id, pc, save_state);
-    auto inst = GetGraph()->CreateInstIsInstance(DataType::BOOL, pc);
-    inst->SetClassType(klass_type);
-    inst->SetTypeId(type_id);
-    inst->SetMethod(GetGraph()->GetMethod());
-    inst->SetInput(0, GetDefinitionAcc());
-    inst->SetInput(1, load_class);
-    inst->SetInput(2U, save_state);
-
+    auto inst = GetGraph()->CreateInstIsInstance(DataType::BOOL, pc, GetDefinitionAcc(), load_class, save_state,
+                                                 type_id, GetGraph()->GetMethod(), klass_type);
     AddInstruction(save_state, load_class, inst);
     UpdateDefinitionAcc(inst);
 }
@@ -1577,10 +1416,8 @@ void InstBuilder::BuildIsInstance(const BytecodeInstruction *bc_inst)
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 Inst *InstBuilder::BuildLoadClass(RuntimeInterface::IdType type_id, size_t pc, Inst *save_state)
 {
-    auto inst = GetGraph()->CreateInstLoadClass(DataType::REFERENCE, pc);
-    inst->SetTypeId(type_id);
-    inst->SetMethod(GetGraph()->GetMethod());
-    inst->SetInput(0, save_state);
+    auto inst =
+        GetGraph()->CreateInstLoadClass(DataType::REFERENCE, pc, save_state, type_id, GetGraph()->GetMethod(), nullptr);
     auto klass = GetRuntime()->ResolveType(GetGraph()->GetMethod(), type_id);
     if (klass != nullptr) {
         inst->SetClass(klass);
@@ -1595,9 +1432,9 @@ Inst *InstBuilder::BuildLoadClass(RuntimeInterface::IdType type_id, size_t pc, I
 void InstBuilder::BuildThrow(const BytecodeInstruction *bc_inst)
 {
     auto save_state = CreateSaveState(Opcode::SaveState, GetPc(bc_inst->GetAddress()));
-    auto inst = graph_->CreateInstThrow(DataType::NO_TYPE, GetPc(bc_inst->GetAddress()));
-    inst->SetInput(0, GetDefinition(bc_inst->GetVReg(0)));
-    inst->SetInput(1, save_state);
+    auto inst = graph_->CreateInstThrow(DataType::NO_TYPE, GetPc(bc_inst->GetAddress()),
+                                        GetDefinition(bc_inst->GetVReg(0)), save_state);
+    inst->SetCallMethod(GetMethod());
     AddInstruction(save_state);
     AddInstruction(inst);
 }
@@ -1667,9 +1504,7 @@ void InstBuilder::BuildCastToAnyString(const BytecodeInstruction *bc_inst)
     auto any_type = GetAnyStringType(language);
     ASSERT(any_type != AnyBaseType::UNDEFINED_TYPE);
 
-    auto box = graph_->CreateInstCastValueToAnyType(GetPc(bc_inst->GetAddress()));
-    box->SetAnyType(any_type);
-    box->SetInput(0, input);
+    auto box = graph_->CreateInstCastValueToAnyType(GetPc(bc_inst->GetAddress()), any_type, input);
     UpdateDefinitionAcc(box);
     AddInstruction(box);
 }
@@ -1694,9 +1529,7 @@ void InstBuilder::BuildCastToAnyNumber(const BytecodeInstruction *bc_inst)
     auto any_type = NumericDataTypeToAnyType(type, language);
     ASSERT(any_type != AnyBaseType::UNDEFINED_TYPE);
 
-    auto box = graph_->CreateInstCastValueToAnyType(GetPc(bc_inst->GetAddress()));
-    box->SetAnyType(any_type);
-    box->SetInput(0, input);
+    auto box = graph_->CreateInstCastValueToAnyType(GetPc(bc_inst->GetAddress()), any_type, input);
     UpdateDefinitionAcc(box);
     AddInstruction(box);
 }
@@ -1711,12 +1544,9 @@ bool InstBuilder::TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bc_in
         return false;
     }
     auto save_state_nullcheck = CreateSaveState(Opcode::SaveState, bc_addr);
-    auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, bc_addr);
-    null_check->SetInput(0, GetArgDefinition(bc_inst, 0, acc_read));
-    null_check->SetInput(1, save_state_nullcheck);
-
-    auto array_length = graph_->CreateInstLenArray(DataType::INT32, bc_addr, false);
-    array_length->SetInput(0, null_check);
+    auto null_check = graph_->CreateInstNullCheck(DataType::REFERENCE, bc_addr, GetArgDefinition(bc_inst, 0, acc_read),
+                                                  save_state_nullcheck);
+    auto array_length = graph_->CreateInstLenArray(DataType::INT32, bc_addr, null_check, false);
 
     AddInstruction(save_state_nullcheck);
     AddInstruction(null_check);
@@ -1725,30 +1555,23 @@ bool InstBuilder::TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bc_in
     Inst *string_length = nullptr;
     if (compression_enabled) {
         auto const_one_inst = graph_->FindOrCreateConstant(1);
-        string_length = graph_->CreateInstShr(DataType::INT32, bc_addr);
-        string_length->SetInput(0, array_length);
-        string_length->SetInput(1, const_one_inst);
+        string_length = graph_->CreateInstShr(DataType::INT32, bc_addr, array_length, const_one_inst);
         AddInstruction(string_length);
     } else {
         string_length = array_length;
     }
 
-    auto bounds_check = graph_->CreateInstBoundsCheck(DataType::INT32, bc_addr, false);
-    bounds_check->SetInput(0, string_length);
-    bounds_check->SetInput(1, GetArgDefinition(bc_inst, 1, acc_read));
-    bounds_check->SetInput(2U, save_state_nullcheck);
+    auto bounds_check = graph_->CreateInstBoundsCheck(
+        DataType::INT32, bc_addr, string_length, GetArgDefinition(bc_inst, 1, acc_read), save_state_nullcheck, false);
     AddInstruction(bounds_check);
 
     Inst *inst = nullptr;
     if (compression_enabled) {
-        inst = graph_->CreateInstLoadCompressedStringChar(DataType::UINT16, bc_addr);
-        inst->SetInput(2U, array_length);
+        inst = graph_->CreateInstLoadCompressedStringChar(DataType::UINT16, bc_addr, null_check, bounds_check,
+                                                          array_length);
     } else {
-        inst = graph_->CreateInstLoadArray(DataType::UINT16, bc_addr, false);
+        inst = graph_->CreateInstLoadArray(DataType::UINT16, bc_addr, null_check, bounds_check);
     }
-
-    inst->SetInput(0, null_check);
-    inst->SetInput(1, bounds_check);
 
     AddInstruction(inst);
     UpdateDefinitionAcc(inst);

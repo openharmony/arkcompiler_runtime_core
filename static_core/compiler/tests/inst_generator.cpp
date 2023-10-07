@@ -223,14 +223,8 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
             inst->SetInput(1, index);
         }
         block->AppendInst(inst);
-        auto load_pair_part0 = graph->CreateInstLoadPairPart()->CastToLoadPairPart();
-        auto load_pair_part1 = graph->CreateInstLoadPairPart()->CastToLoadPairPart();
-        load_pair_part0->SetType(inst->GetType());
-        load_pair_part0->SetImm(0);
-        load_pair_part0->SetInput(0, inst);
-        load_pair_part1->SetType(inst->GetType());
-        load_pair_part1->SetImm(1);
-        load_pair_part1->SetInput(0, inst);
+        auto load_pair_part0 = graph->CreateInstLoadPairPart(inst->GetType(), INVALID_PC, inst, 0);
+        auto load_pair_part1 = graph->CreateInstLoadPairPart(inst->GetType(), INVALID_PC, inst, 1);
         block->AppendInst(load_pair_part0);
         inst = load_pair_part1;
     } else if (opc == Opcode::StoreArrayPairI || opc == Opcode::StoreArrayPair) {
@@ -328,10 +322,8 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         auto save_state = graph->CreateInstSaveState()->CastToSaveState();
         save_state->AppendInput(param0);
         save_state->SetVirtualRegister(0, VirtualRegister(0, VRegType::VREG));
-        auto init_inst = graph->CreateInstLoadAndInitClass();
-        init_inst->SetTypeId(inst->CastToStoreStatic()->GetTypeId());
-        init_inst->SetType(DataType::REFERENCE);
-        init_inst->SetInput(0, save_state);
+        auto init_inst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, save_state,
+                                                           inst->CastToStoreStatic()->GetTypeId(), nullptr, nullptr);
         inst->SetInput(0, init_inst);
         block->PrependInst(init_inst);
         block->PrependInst(save_state);
@@ -339,11 +331,9 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         graph->SetVRegsCount(save_state->GetInputsCount() + 1);
     } else if (opc == Opcode::LoadStatic) {
         auto save_state = graph->CreateInstSaveState()->CastToSaveState();
-        auto init_inst = graph->CreateInstLoadAndInitClass();
+        auto init_inst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, save_state,
+                                                           inst->CastToLoadStatic()->GetTypeId(), nullptr, nullptr);
         inst->SetInput(0, init_inst);
-        init_inst->SetTypeId(inst->CastToLoadStatic()->GetTypeId());
-        init_inst->SetType(DataType::REFERENCE);
-        init_inst->SetInput(0, save_state);
         block->PrependInst(init_inst);
         block->PrependInst(save_state);
         SetNumVRegsArgs(0, save_state->GetInputsCount());
@@ -369,10 +359,8 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         auto save_state = graph->CreateInstSaveState()->CastToSaveState();
         save_state->AppendInput(param0);
         save_state->SetVirtualRegister(0, VirtualRegister(0, VRegType::VREG));
-        auto load_class = graph->CreateInstLoadClass();
-        load_class->SetType(DataType::REFERENCE);
-        load_class->SetInput(0, save_state);
-        load_class->SetClass(reinterpret_cast<RuntimeInterface::ClassPtr>(1));
+        auto load_class = graph->CreateInstLoadClass(DataType::REFERENCE, INVALID_PC, save_state, 0, nullptr,
+                                                     reinterpret_cast<RuntimeInterface::ClassPtr>(1));
         inst->SetInput(0, param0);
         inst->SetInput(1, load_class);
         inst->SetSaveState(save_state);
@@ -382,7 +370,7 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         graph->SetVRegsCount(save_state->GetInputsCount() + 1);
     } else if (opc == Opcode::NewArray) {
         ASSERT(n == -1);
-        auto init_inst = graph->CreateInstLoadAndInitClass();
+        auto init_inst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC);
         inst->SetInput(NewArrayInst::INDEX_CLASS, init_inst);
 
         auto param0 = CreateParamInst(graph, DataType::INT32, 0);
@@ -392,7 +380,6 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         save_state->SetVirtualRegister(0, VirtualRegister(0, VRegType::VREG));
 
         init_inst->SetTypeId(inst->CastToNewArray()->GetTypeId());
-        init_inst->SetType(DataType::REFERENCE);
         init_inst->SetInput(0, save_state);
 
         inst->SetInput(NewArrayInst::INDEX_SAVE_STATE, save_state);
@@ -403,11 +390,9 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
     } else if (opc == Opcode::NewObject) {
         ASSERT(n == -1);
         auto save_state = graph->CreateInstSaveState()->CastToSaveState();
-        auto init_inst = graph->CreateInstLoadAndInitClass();
+        auto init_inst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, save_state,
+                                                           inst->CastToNewObject()->GetTypeId(), nullptr, nullptr);
         inst->SetInput(0, init_inst);
-        init_inst->SetTypeId(inst->CastToNewObject()->GetTypeId());
-        init_inst->SetType(DataType::REFERENCE);
-        init_inst->SetInput(0, save_state);
         inst->SetInput(0, init_inst);
         inst->SetInput(1, save_state);
         block->PrependInst(init_inst);
@@ -432,10 +417,8 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
     }
     if (!inst->IsControlFlow()) {
         if (!inst->NoDest() || IsPseudoUserOfMultiOutput(inst)) {
-            auto ret = graph->CreateInstReturn();
-            ret->SetInput(0, inst);
+            auto ret = graph->CreateInstReturn(inst->GetType(), INVALID_PC, inst);
             block->AppendInst(ret);
-            ret->SetType(inst->GetType());
         } else {
             auto ret = graph->CreateInstReturnVoid();
             block->AppendInst(ret);
@@ -507,10 +490,9 @@ Graph *GraphCreator::GenerateCheckOperation(Inst *inst)
     inst->SetSaveState(save_state);
     inst->SetType(type);
     if (inst->GetOpcode() == Opcode::CheckCast) {
-        auto load_class = graph->CreateInstLoadClass();
-        load_class->SetType(DataType::REFERENCE);
+        auto load_class = graph->CreateInstLoadClass(DataType::REFERENCE, INVALID_PC, nullptr, 0, nullptr,
+                                                     reinterpret_cast<RuntimeInterface::ClassPtr>(1));
         load_class->SetSaveState(save_state);
-        load_class->SetClass(reinterpret_cast<RuntimeInterface::ClassPtr>(1));
         block->AppendInst(load_class);
         inst->SetInput(1, load_class);
     }
@@ -518,14 +500,11 @@ Graph *GraphCreator::GenerateCheckOperation(Inst *inst)
 
     Inst *ret = nullptr;
     if (inst->GetOpcode() == Opcode::CheckCast) {
-        ret = graph->CreateInstReturn();
-        ret->SetType(type);
-        ret->SetInput(0, param1);
+        ret = graph->CreateInstReturn(type, INVALID_PC, param1);
     } else {
         auto new_inst = graph->CreateInst(opcode);
         if (opcode == Opcode::NewArray || opcode == Opcode::NewObject) {
-            auto init_inst = graph->CreateInstLoadAndInitClass();
-            init_inst->SetType(DataType::REFERENCE);
+            auto init_inst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC);
             init_inst->SetSaveState(save_state);
             block->AppendInst(init_inst);
             if (opcode == Opcode::NewArray) {
@@ -585,9 +564,7 @@ Graph *GraphCreator::GenerateSSOperation(Inst *inst)
     inst->SetType(type);
     block->AppendInst(inst);
 
-    auto ret = graph->CreateInstReturn();
-    ret->SetType(type);
-    ret->SetInput(0, inst);
+    auto ret = graph->CreateInstReturn(type, INVALID_PC, inst);
     block->AppendInst(ret);
     return graph;
 }
@@ -608,9 +585,7 @@ Graph *GraphCreator::GenerateBoundaryCheckOperation(Inst *inst)
     }
     block->AppendInst(save_state);
 
-    auto len_arr = graph->CreateInstLenArray();
-    len_arr->SetInput(0, param1);
-    len_arr->SetType(DataType::INT32);
+    auto len_arr = graph->CreateInstLenArray(DataType::INT32, INVALID_PC, param1);
     block->AppendInst(len_arr);
     auto bounds_check = static_cast<FixedInputsInst3 *>(inst);
     bounds_check->SetInput(0, len_arr);
@@ -625,20 +600,13 @@ Graph *GraphCreator::GenerateBoundaryCheckOperation(Inst *inst)
 
     Inst *ld_arr = nullptr;
     if (inst->GetOpcode() == Opcode::BoundsCheck) {
-        ld_arr = graph->CreateInstLoadArray();
-        ld_arr->SetInput(1, bounds_check);
+        ld_arr = graph->CreateInstLoadArray(DataType::UINT32, INVALID_PC, param1, bounds_check);
     } else {
-        auto ld_arr_i = graph->CreateInstLoadArrayI();
-        ld_arr_i->SetImm(1);
-        ld_arr = ld_arr_i;
+        ld_arr = graph->CreateInstLoadArrayI(DataType::UINT32, INVALID_PC, param1, 1);
     }
-    ld_arr->SetInput(0, param1);
-    ld_arr->SetType(DataType::UINT32);
     block->AppendInst(ld_arr);
 
-    auto ret = graph->CreateInstReturn();
-    ret->SetType(DataType::UINT32);
-    ret->SetInput(0, ld_arr);
+    auto ret = graph->CreateInstReturn(DataType::UINT32, INVALID_PC, ld_arr);
     block->AppendInst(ret);
     SetNumVRegsArgs(0, save_state->GetInputsCount());
     graph->SetVRegsCount(save_state->GetInputsCount() + 1);
@@ -656,9 +624,8 @@ Graph *GraphCreator::GenerateMultiArrayOperation(Inst *inst)
     auto save_state = graph->CreateInstSaveState();
     block->AppendInst(save_state);
 
-    auto init_inst = graph->CreateInstLoadAndInitClass();
-    init_inst->SetType(DataType::REFERENCE);
-    init_inst->SetInput(0, save_state);
+    auto init_inst =
+        graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, save_state, 0, nullptr, nullptr);
     auto arrays_inst = inst->CastToMultiArray();
     arrays_inst->AllocateInputTypes(&allocator_, 4);
     inst->AppendInput(init_inst);
@@ -712,11 +679,7 @@ Graph *GraphCreator::GeneratePhiOperation(Inst *inst)
     auto param3 = CreateParamInst(graph, DataType::BOOL, 2);
     auto add = graph->CreateInstAdd();
     auto sub = graph->CreateInstSub();
-    auto if_inst = graph->CreateInstIfImm();
-    if_inst->SetOperandsType(DataType::BOOL);
-    if_inst->SetCc(CC_NE);
-    if_inst->SetImm(0);
-    if_inst->SetInput(0, param3);
+    auto if_inst = graph->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, param3, 0, DataType::BOOL, CC_NE);
     graph->GetVectorBlocks()[2]->AppendInst(if_inst);
     if (inst->GetType() != DataType::REFERENCE) {
         add->SetInput(0, param1);
@@ -736,9 +699,7 @@ Graph *GraphCreator::GeneratePhiOperation(Inst *inst)
         phi->AppendInput(param2);
     }
     graph->GetVectorBlocks()[5]->AppendPhi(phi);
-    auto ret = graph->CreateInstReturn();
-    ret->SetType(phi->GetType());
-    ret->SetInput(0, phi);
+    auto ret = graph->CreateInstReturn(phi->GetType(), INVALID_PC, phi);
     graph->GetVectorBlocks()[5]->AppendInst(ret);
     return graph;
 }
@@ -808,8 +769,7 @@ Graph *GraphCreator::CreateGraphWithFourBasicBlock()
 
 ParameterInst *GraphCreator::CreateParamInst(Graph *graph, DataType::Type type, uint8_t slot)
 {
-    auto param = graph->CreateInstParameter(slot);
-    param->SetType(type);
+    auto param = graph->CreateInstParameter(slot, type);
     graph->GetStartBlock()->AppendInst(param);
     return param;
 }

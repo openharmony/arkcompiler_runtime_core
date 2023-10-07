@@ -451,6 +451,10 @@ bool Runtime::Destroy()
     instance_->GetPandaVM()->UninitializeThreads();
 
     if (task_scheduler_ != nullptr) {
+        // TODO(ipetrov, #13816): temporary dirty hack. GC Thread can create new task after finalization of TaskManager,
+        // so explicitly join GC worker before TaskManager::Finalize. Will be fixed after implement GC Threshold as
+        // TaskManager task
+        instance_->GetPandaVM()->GetGC()->JoinWorker(true);
         task_scheduler_->Finalize();
     }
     /* @sync 2

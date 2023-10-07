@@ -323,6 +323,15 @@ protected:
         }
     }
 
+    ALWAYS_INLINE void UpdateThrowStatistics()
+    {
+        ProfilingData *prof_data = this->GetFrame()->GetMethod()->GetProfilingDataWithoutCheck();
+        if (prof_data != nullptr) {
+            auto pc = this->GetBytecodeOffset();
+            prof_data->UpdateThrowTaken(pc);
+        }
+    }
+
     ALWAYS_INLINE bool UpdateHotnessOSR(Method *method, int offset)
     {
         ASSERT(ArchTraits<RUNTIME_ARCH>::SUPPORT_OSR);

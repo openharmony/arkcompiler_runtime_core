@@ -346,6 +346,11 @@ public:
         return MethodCast(method)->GetBranchNotTakenCounter(pc);
     }
 
+    int64_t GetThrowTakenCounter(MethodPtr method, uint32_t pc) const override
+    {
+        return MethodCast(method)->GetThrowTakenCounter(pc);
+    }
+
     std::string GetMethodFullName(MethodPtr method, bool with_signature) const override
     {
         return std::string(MethodCast(method)->GetFullName(with_signature));
@@ -376,6 +381,8 @@ public:
     }
 
     bool CanThrowException(MethodPtr method) const override;
+
+    uint32_t FindCatchBlock(MethodPtr method, ClassPtr cls, uint32_t pc) const override;
 
     /**********************************************************************************/
     /// Thread information

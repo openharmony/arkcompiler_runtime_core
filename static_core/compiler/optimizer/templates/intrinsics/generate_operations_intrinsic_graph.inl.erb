@@ -51,9 +51,7 @@ Graph* GenerateIntrinsicOperation(Inst* inst) {
     if (inst->GetType() == DataType::VOID) {
         ret = graph->CreateInstReturnVoid();
     } else {
-        ret = graph->CreateInstReturn();
-        ret->SetType(inst->GetType());
-        ret->SetInput(0, inst);
+        ret = graph->CreateInstReturn(inst->GetType(), INVALID_PC, inst);
     }
     block->AppendInst(ret);
     return graph;

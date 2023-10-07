@@ -21,6 +21,9 @@ coretypes:
 - managed_class: std.core.String
   mirror_class: panda::ets::EtsString
 
+- managed_class: std.core.Type
+  mirror_class: panda::ets::EtsClass
+
 - managed_class: std.interop.js.JSValue
   mirror_class: panda::ets::interop::js::JSValue
 
@@ -65,6 +68,17 @@ intrinsics:
     impl: panda::ets::interop::js::intrinsics::JSRuntimeNewJSValueStringIntrinsic
     clear_flags: [ ]
 
+  - name: JSRuntimeNewJSValueObject
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: newJSValueObject
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ std.core.Object ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeNewJSValueObjectIntrinsic
+    clear_flags: [ ]
+
   - name: JSRuntimeGetValueDouble
     space: ets
     class_name: std.interop.js.JSRuntime
@@ -96,6 +110,17 @@ intrinsics:
       ret: std.core.String
       args: [ std.interop.js.JSValue ]
     impl: panda::ets::interop::js::intrinsics::JSRuntimeGetValueStringIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeGetValueObject
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getValueObject
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.interop.js.JSValue, std.core.Type ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetValueObjectIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetPropertyJSValue
@@ -162,6 +187,28 @@ intrinsics:
       ret: std.core.void
       args: [ std.interop.js.JSValue, std.core.String, std.core.String ]
     impl: panda::ets::interop::js::intrinsics::JSRuntimeSetPropertyStringIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeGetElementJSValue
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getElementJSValue
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ std.interop.js.JSValue, i32 ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetElementJSValueIntrinsic
+    clear_flags: [ ]
+
+  - name: JSRuntimeGetElementDouble
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getElementDouble
+    static: true
+    signature:
+      ret: f64
+      args: [ std.interop.js.JSValue, i32 ]
+    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetElementDoubleIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetUndefined

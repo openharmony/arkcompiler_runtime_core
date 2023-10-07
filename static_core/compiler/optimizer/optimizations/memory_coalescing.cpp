@@ -604,12 +604,10 @@ private:
         ASSERT(first->GetOpcode() == Opcode::LoadArray);
         ASSERT(second->GetOpcode() == Opcode::LoadArray);
 
-        auto pload = graph_->CreateInstLoadArrayPair();
+        auto pload = graph_->CreateInstLoadArrayPair(first->GetType(), INVALID_PC, first->GetInput(0).GetInst(),
+                                                     first->GetInput(1).GetInst());
         pload->CastToLoadArrayPair()->SetNeedBarrier(first->CastToLoadArray()->GetNeedBarrier() ||
                                                      second->CastToLoadArray()->GetNeedBarrier());
-        pload->SetInput(0, first->GetInput(0).GetInst());
-        pload->SetInput(1, first->GetInput(1).GetInst());
-        pload->SetType(first->GetType());
         insert_after->InsertAfter(pload);
         if (first->CanThrow() || second->CanThrow()) {
             pload->SetFlag(compiler::inst_flags::CAN_THROW);
@@ -623,11 +621,10 @@ private:
         ASSERT(first->GetOpcode() == Opcode::LoadArrayI);
         ASSERT(second->GetOpcode() == Opcode::LoadArrayI);
 
-        auto pload = graph_->CreateInstLoadArrayPairI(first->CastToLoadArrayI()->GetImm());
+        auto pload = graph_->CreateInstLoadArrayPairI(first->GetType(), INVALID_PC, first->GetInput(0).GetInst(),
+                                                      first->CastToLoadArrayI()->GetImm());
         pload->CastToLoadArrayPairI()->SetNeedBarrier(first->CastToLoadArrayI()->GetNeedBarrier() ||
                                                       second->CastToLoadArrayI()->GetNeedBarrier());
-        pload->SetInput(0, first->GetInput(0).GetInst());
-        pload->SetType(first->GetType());
         insert_after->InsertAfter(pload);
         if (first->CanThrow() || second->CanThrow()) {
             pload->SetFlag(compiler::inst_flags::CAN_THROW);
@@ -641,16 +638,11 @@ private:
         ASSERT(first->GetOpcode() == Opcode::StoreArray);
         ASSERT(second->GetOpcode() == Opcode::StoreArray);
 
-        auto pstore = graph_->CreateInstStoreArrayPair();
+        auto pstore = graph_->CreateInstStoreArrayPair(
+            first->GetType(), INVALID_PC, first->GetInput(0).GetInst(), first->CastToStoreArray()->GetIndex(),
+            first->CastToStoreArray()->GetStoredValue(), second->CastToStoreArray()->GetStoredValue());
         pstore->CastToStoreArrayPair()->SetNeedBarrier(first->CastToStoreArray()->GetNeedBarrier() ||
                                                        second->CastToStoreArray()->GetNeedBarrier());
-        pstore->SetInput(0, first->GetInput(0).GetInst());
-        pstore->SetInput(1, first->CastToStoreArray()->GetIndex());
-        constexpr auto IMM_2 = 2;
-        pstore->SetInput(IMM_2, first->CastToStoreArray()->GetStoredValue());
-        constexpr auto IMM_3 = 3;
-        pstore->SetInput(IMM_3, second->CastToStoreArray()->GetStoredValue());
-        pstore->SetType(first->GetType());
         insert_after->InsertAfter(pstore);
         if (first->CanThrow() || second->CanThrow()) {
             pstore->SetFlag(compiler::inst_flags::CAN_THROW);
@@ -664,14 +656,11 @@ private:
         ASSERT(first->GetOpcode() == Opcode::StoreArrayI);
         ASSERT(second->GetOpcode() == Opcode::StoreArrayI);
 
-        auto pstore = graph_->CreateInstStoreArrayPairI(first->CastToStoreArrayI()->GetImm());
+        auto pstore = graph_->CreateInstStoreArrayPairI(
+            first->GetType(), INVALID_PC, first->GetInput(0).GetInst(), first->CastToStoreArrayI()->GetStoredValue(),
+            second->CastToStoreArrayI()->GetStoredValue(), first->CastToStoreArrayI()->GetImm());
         pstore->CastToStoreArrayPairI()->SetNeedBarrier(first->CastToStoreArrayI()->GetNeedBarrier() ||
                                                         second->CastToStoreArrayI()->GetNeedBarrier());
-        pstore->SetInput(0, first->GetInput(0).GetInst());
-        pstore->SetInput(1, first->CastToStoreArrayI()->GetStoredValue());
-        constexpr auto IMM_2 = 2;
-        pstore->SetInput(IMM_2, second->CastToStoreArrayI()->GetStoredValue());
-        pstore->SetType(first->GetType());
         insert_after->InsertAfter(pstore);
         if (first->CanThrow() || second->CanThrow()) {
             pstore->SetFlag(compiler::inst_flags::CAN_THROW);
@@ -705,9 +694,7 @@ private:
 static void ReplaceLoadByPair(Inst *load, Inst *paired_load, int32_t dst_idx)
 {
     auto graph = paired_load->GetBasicBlock()->GetGraph();
-    auto pair_getter = graph->CreateInstLoadPairPart(dst_idx);
-    pair_getter->SetInput(0, paired_load);
-    pair_getter->SetType(load->GetType());
+    auto pair_getter = graph->CreateInstLoadPairPart(load->GetType(), INVALID_PC, paired_load, dst_idx);
     load->ReplaceUsers(pair_getter);
     paired_load->InsertAfter(pair_getter);
 }

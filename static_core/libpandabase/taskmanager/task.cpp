@@ -17,13 +17,10 @@
 
 namespace panda::taskmanager {
 
-Task::Task(TaskProperties properties, std::function<void()> runner)
-    : properties_(properties), runner_(std::move(runner))
-{
-}
+Task::Task(TaskProperties properties, RunnerCallback runner) : properties_(properties), runner_(std::move(runner)) {}
 
 /* static */
-Task Task::Create(TaskProperties properties, std::function<void()> runner)
+Task Task::Create(TaskProperties properties, RunnerCallback runner)
 {
     Task task(properties, std::move(runner));
     return task;

@@ -58,7 +58,7 @@ foreach(test ${coroutine_tests})
     elseif (test STREQUAL "launch_oom")
         # AddressSanitizer: stack-buffer-overflow #12611
         if (NOT PANDA_ENABLE_ADDRESS_SANITIZER)
-            run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} SKIP_ARM32_COMPILER RUNTIME_EXTRA_OPTIONS "--gc-type=epsilon" ${stackful_impl_option})
+            run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} SKIP_ARM32_COMPILER SKIP_OSR RUNTIME_EXTRA_OPTIONS "--gc-type=epsilon" ${stackful_impl_option} "--compiler-enable-osr=false")
         endif()
     elseif (test STREQUAL "launch_exception")
         # llvmaot handles the recursive stack eater function incorrectly

@@ -60,8 +60,7 @@ public:
         for (auto bb : graph->GetBlocksRPO()) {
             if (bb->IsCatchBegin()) {
                 for (size_t vreg = 0; vreg < GetVRegsCount(); vreg++) {
-                    auto catch_phi = GetGraph()->CreateInstCatchPhi();
-                    catch_phi->SetPc(bb->GetGuestPc());
+                    auto catch_phi = GetGraph()->CreateInstCatchPhi(DataType::NO_TYPE, bb->GetGuestPc());
                     catch_phi->SetMarker(GetNoTypeMarker());
                     bb->AppendInst(catch_phi);
                     COMPILER_LOG(DEBUG, IR_BUILDER)
@@ -93,14 +92,10 @@ public:
     void InitEnv(BasicBlock *bb)
     {
         auto this_func = GetGraph()->FindParameter(0);
-        auto cp = GetGraph()->CreateInstLoadConstantPool();
-        cp->SetType(DataType::ANY);
-        cp->SetInput(0, this_func);
+        auto cp = GetGraph()->CreateInstLoadConstantPool(DataType::ANY, INVALID_PC, this_func);
         bb->AppendInst(cp);
 
-        auto lex_env = GetGraph()->CreateInstLoadLexicalEnv();
-        lex_env->SetType(DataType::ANY);
-        lex_env->SetInput(0, this_func);
+        auto lex_env = GetGraph()->CreateInstLoadLexicalEnv(DataType::ANY, INVALID_PC, this_func);
         bb->AppendInst(lex_env);
 
         defs_[bb->GetId()][vregs_and_args_count_ + 1 + THIS_FUNC_IDX] = this_func;
@@ -336,9 +331,7 @@ private:
 
     Inst *CreateCast(Inst *input, DataType::Type type, DataType::Type operands_type, size_t pc)
     {
-        auto cast = GetGraph()->CreateInstCast(type, pc);
-        cast->CastToCast()->SetOperandsType(operands_type);
-        cast->SetInput(0, input);
+        auto cast = GetGraph()->CreateInstCast(type, pc, input, operands_type);
         if (!input->HasType()) {
             input->SetType(operands_type);
         }
@@ -347,11 +340,8 @@ private:
 
     NewObjectInst *CreateNewObjectInst(size_t pc, uint32_t type_id, SaveStateInst *save_state, Inst *init_class)
     {
-        auto new_obj = graph_->CreateInstNewObject(DataType::REFERENCE, pc);
-        new_obj->SetInput(0, init_class);
-        new_obj->SetInput(1, save_state);
-        new_obj->SetTypeId(type_id);
-        new_obj->SetMethod(graph_->GetMethod());
+        auto new_obj =
+            graph_->CreateInstNewObject(DataType::REFERENCE, pc, init_class, save_state, type_id, graph_->GetMethod());
         return new_obj;
     }
 

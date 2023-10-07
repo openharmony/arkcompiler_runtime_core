@@ -1217,6 +1217,7 @@ intrinsics:
       ret: std.core.String[]
       args: []
     impl: panda::ets::intrinsics::StdCoreStackTraceLines
+    clear_flags: [ no_dce ]
 
 ######################
 # std.core.GC #

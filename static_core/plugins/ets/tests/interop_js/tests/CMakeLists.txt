@@ -23,18 +23,35 @@ file(WRITE ${ETS_CONFIG}
     "      \"std\": [\"${PANDA_ROOT}/plugins/ets/stdlib/std\"]\n"
     "    },\n"
     "    \"dynamicPaths\": {\n"
-    "      \"/plugins/ets/tests/interop_js/tests/test_intrins/test_intrins.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
-    "      \"/plugins/ets/tests/interop_js/tests/test_frontend/test_frontend_package.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
-    "      \"/plugins/ets/tests/interop_js/tests/number_subtypes/module.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
-    "      \"/plugins/ets/tests/interop_js/tests/strict_equality/strict_equality.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
-    "      \"/plugins/ets/tests/interop_js/tests/class_composite/class_composite.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
-    "      \"/plugins/ets/tests/interop_js/tests/dynamic_instanceof/dynamic_instanceof.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
-    "      \"/plugins/ets/tests/interop_js/tests/checked/example/strings.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
-    "      \"/plugins/ets/tests/interop_js/tests/checked/js_call/js_call.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
-    "      \"/plugins/ets/tests/interop_js/tests/checked/obj_call/obj_call.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
-    "      \"/plugins/ets/tests/interop_js/tests/dynamic_with_lambda/dynamic_with_lambda.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
-    "      \"/plugins/ets/tests/interop_js/tests/dynamic_enum/dynamic_enum.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
-    "      \"./convert.js\": {\"language\": \"js\", \"hasDecl\": false}\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/test_intrins/test_intrins.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/test_frontend/test_frontend_package.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/number_subtypes/module.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/strict_equality/strict_equality.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/class_composite/js/class_composite.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_instanceof/dynamic_instanceof.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/checked/example/strings.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/checked/js_call/js_call.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/checked/obj_call/obj_call.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_with_lambda/dynamic_with_lambda.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_enum/dynamic_enum.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"convert.js\": {\"language\": \"js\", \"hasDecl\": false}\n"
+    "    }\n"
+    "  }\n"
+    "}\n"
+)
+
+set(ETS_CONFIG_DECL "${PANDA_BINARY_ROOT}/tests/ets_interop_js/arktsconfigdecl.json")
+file(WRITE ${ETS_CONFIG_DECL}
+    "{\n"
+    "  \"compilerOptions\": {\n"
+    "    \"baseUrl\": \"${PANDA_ROOT}\",\n"
+    "    \"paths\": {\n"
+    "      \"escompat\": [\"${PANDA_ROOT}/plugins/ets/stdlib/escompat\"],\n"
+    "      \"std\": [\"${PANDA_ROOT}/plugins/ets/stdlib/std\"]\n"
+    "    },\n"
+    "    \"dynamicPaths\": {\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/number_subtypes/module\": {\"language\": \"js\", \"hasDecl\": true},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/class_composite/js/class_composite\": {\"language\": \"js\", \"hasDecl\": true}\n"
     "    }\n"
     "  }\n"
     "}\n"
@@ -89,6 +106,12 @@ panda_ets_interop_js_gtest(ets_interop_js_frontend_class_operations
     ETS_CONFIG ${ETS_CONFIG}
 )
 
+panda_ets_interop_js_gtest(ets_interop_js_class_operations_decl
+    CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.cpp
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations_decl.ets
+    ETS_CONFIG ${ETS_CONFIG_DECL}
+)
+
 panda_ets_interop_js_gtest(ets_interop_js_strict_equality
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/strict_equality/strict_equality.cpp
     ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/strict_equality/strict_equality.ets
@@ -99,6 +122,12 @@ panda_ets_interop_js_gtest(ets_interop_js_class_composite
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_composite/class_composite.cpp
     ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_composite/class_composite.ets
     ETS_CONFIG ${ETS_CONFIG}
+)
+
+panda_ets_interop_js_gtest(ets_interop_js_class_composite_decl
+    CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_composite/class_composite.cpp
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_composite/class_composite_decl.ets
+    ETS_CONFIG ${ETS_CONFIG_DECL}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_dynamic_instanceof

@@ -100,7 +100,7 @@ T CompilerEtsLdObjByName(panda::Method *method, int32_t id, uint32_t pc, panda::
         [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
         VMHandle<ObjectHeader> handle_obj(thread, obj);
         auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-        klass = static_cast<panda::Class *>(handle_obj.GetPtr()->AtomicClassAddr<panda::BaseClass>());
+        klass = static_cast<panda::Class *>(handle_obj.GetPtr()->ClassAddr<panda::BaseClass>());
         raw_field = class_linker->GetField(*method, panda_file::File::EntityId(id));
 
         auto field = TryGetField<FIELD_TYPE>(method, raw_field, pc, klass);
@@ -181,7 +181,7 @@ void CompilerEtsStObjByName(panda::Method *method, int32_t id, uint32_t pc, pand
         [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
         VMHandle<ObjectHeader> handle_obj(thread, obj);
         auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-        klass = static_cast<panda::Class *>(obj->AtomicClassAddr<panda::BaseClass>());
+        klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
         raw_field = class_linker->GetField(*method, panda_file::File::EntityId(id));
 
         auto field = TryGetField<FIELD_TYPE>(method, raw_field, pc, klass);
@@ -272,7 +272,7 @@ void CompilerEtsStObjByNameRef(panda::Method *method, int32_t id, uint32_t pc, p
         VMHandle<ObjectHeader> handle_obj(thread, obj);
         VMHandle<ObjectHeader> handle_store(thread, store_value);
         auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-        klass = static_cast<panda::Class *>(obj->AtomicClassAddr<panda::BaseClass>());
+        klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
         raw_field = class_linker->GetField(*method, panda_file::File::EntityId(id));
 
         auto field = TryGetField<panda_file::Type::TypeId::REFERENCE>(method, raw_field, pc, klass);

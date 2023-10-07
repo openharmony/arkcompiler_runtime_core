@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/napi_env_scope.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_void.h"
 #include "runtime/include/class_linker-inl.h"
 
 namespace panda::ets::interop::js {
@@ -54,6 +55,29 @@ static JSValue *JSRuntimeNewJSValueString(EtsString *v)
     return JSValue::CreateString(coro, ctx, std::move(str));
 }
 
+static JSValue *JSRuntimeNewJSValueObject(EtsObject *v)
+{
+    if (v == nullptr) {
+        return nullptr;
+    }
+
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    auto env = ctx->GetJSEnv();
+    NapiScope js_handle_scope(env);
+
+    auto refconv = JSRefConvertResolve(ctx, v->GetClass()->GetRuntimeClass());
+    auto result = refconv->Wrap(ctx, v);
+
+    auto res = JSConvertJSValue::UnwrapWithNullCheck(ctx, env, result);
+    if (!res) {
+        ctx->ForwardJSException(coro);
+        return {};
+    }
+
+    return res.value();
+}
+
 static double JSRuntimeGetValueDouble(JSValue *ets_js_value)
 {
     return ets_js_value->GetNumber();
@@ -83,6 +107,36 @@ static EtsString *JSRuntimeGetValueString(JSValue *ets_js_value)
     }
 
     return res.value();
+}
+
+static EtsObject *JSRuntimeGetValueObject(JSValue *ets_js_value, EtsClass *cls)
+{
+    if (ets_js_value == nullptr) {
+        return nullptr;
+    }
+
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+
+    if (cls->GetRuntimeClass() == ctx->GetVoidClass()) {
+        return reinterpret_cast<EtsObject *>(EtsVoid::GetInstance());
+    }
+
+    auto env = ctx->GetJSEnv();
+
+    NapiScope js_handle_scope(env);
+    napi_value js_val = ets_js_value->GetNapiValue(env);
+
+    auto refconv = JSRefConvertResolve<true>(ctx, cls->GetRuntimeClass());
+    if (UNLIKELY(refconv == nullptr)) {
+        if (NapiIsExceptionPending(env)) {
+            ctx->ForwardJSException(coro);
+        }
+        ASSERT(ctx->SanityETSExceptionPending());
+        return nullptr;
+    }
+
+    return refconv->Unwrap(ctx, js_val);
 }
 
 template <typename T>
@@ -115,6 +169,31 @@ static void JSValueNamedSetter(JSValue *ets_js_value, EtsString *ets_prop_name, 
     if (UNLIKELY(!res)) {
         ctx->ForwardJSException(coro);
     }
+}
+
+template <typename T>
+static typename T::cpptype JSValueIndexedGetter(JSValue *ets_js_value, int32_t index)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    auto env = ctx->GetJSEnv();
+    NapiScope js_handle_scope(env);
+
+    napi_value result;
+    napi_value js_val = ets_js_value->GetNapiValue(env);
+    auto rc = napi_get_element(env, js_val, index, &result);
+    if (UNLIKELY(NapiThrownGeneric(rc))) {
+        ctx->ForwardJSException(coro);
+        return {};
+    }
+
+    auto res = T::UnwrapWithNullCheck(ctx, env, result);
+    if (!res) {
+        ctx->ForwardJSException(coro);
+        return {};
+    }
+
+    return res.value();
 }
 
 static JSValue *JSRuntimeGetUndefined()
@@ -583,15 +662,19 @@ const IntrinsicsAPI G_INTRINSICS_API = {
     JSRuntimeFinalizationQueueCallback,
     JSRuntimeNewJSValueDouble,
     JSRuntimeNewJSValueString,
+    JSRuntimeNewJSValueObject,
     JSRuntimeGetValueDouble,
     JSRuntimeGetValueBoolean,
     JSRuntimeGetValueString,
+    JSRuntimeGetValueObject,
     JSValueNamedGetter<JSConvertJSValue>,
     JSValueNamedGetter<JSConvertF64>,
     JSValueNamedGetter<JSConvertString>,
     JSValueNamedSetter<JSConvertJSValue>,
     JSValueNamedSetter<JSConvertF64>,
     JSValueNamedSetter<JSConvertString>,
+    JSValueIndexedGetter<JSConvertJSValue>,
+    JSValueIndexedGetter<JSConvertF64>,
     JSRuntimeGetUndefined,
     JSRuntimeGetNull,
     JSRuntimeGetGlobal,

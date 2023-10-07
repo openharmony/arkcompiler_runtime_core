@@ -317,10 +317,8 @@ void LoopUnroll::FixCompareInst(const CountableLoopInfo &loop_info, BasicBlock *
     if (!loop_info.test->IsConst()) {
         auto cc = loop_info.is_inc ? CC_LT : CC_GT;
         // Create overflow_compare
-        auto overflow_compare = GetGraph()->CreateInstCompare(compiler::DataType::BOOL, pre_header_cmp->GetPc(), cc);
-        overflow_compare->CastToCompare()->SetOperandsType(loop_info.test->GetType());
-        overflow_compare->SetInput(0, new_test);
-        overflow_compare->SetInput(1, loop_info.test);
+        auto overflow_compare = GetGraph()->CreateInstCompare(compiler::DataType::BOOL, pre_header_cmp->GetPc(),
+                                                              new_test, loop_info.test, loop_info.test->GetType(), cc);
         // Create (pre_header_compare AND overflow_compare) inst
         auto and_inst = GetGraph()->CreateInstAnd(DataType::BOOL, pre_header_cmp->GetPc());
         and_inst->SetInput(0, pre_header_cmp);

@@ -354,7 +354,7 @@ public:
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (CONCURRENTLY) {
             // We may face a newly created object without live bitmap initialization.
-            if (object_header->template AtomicClassAddr<BaseClass>() == nullptr) {
+            if (object_header->template ClassAddr<BaseClass>() == nullptr) {
                 return ObjectStatus::ALIVE_OBJECT;
             }
         }
@@ -1110,10 +1110,10 @@ MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const C
         ObjectHeader *from_object = gc_root.GetFromObjectHeader();
         LOG_DEBUG_GC << "Handle root " << GetDebugInfoAboutObject(root_object) << " from: " << gc_root.GetType();
         if (UNLIKELY(from_object != nullptr) &&
-            this->IsReference(from_object->ClassAddr<BaseClass>(), from_object, ref_pred)) {
+            this->IsReference(from_object->NotAtomicClassAddr<BaseClass>(), from_object, ref_pred)) {
             LOG_DEBUG_GC << "Add reference: " << GetDebugInfoAboutObject(from_object) << " to stack";
             mixed_marker_.Mark(from_object);
-            this->ProcessReference(&objects_stack, from_object->ClassAddr<BaseClass>(), from_object,
+            this->ProcessReference(&objects_stack, from_object->NotAtomicClassAddr<BaseClass>(), from_object,
                                    GC::EmptyReferenceProcessPredicate);
         } else {
             // Skip non-collection-set roots

@@ -336,14 +336,10 @@ extern "C" ObjectHeader *PostBarrierWriteEntrypoint(ObjectHeader *obj, size_t si
 {
     LOG_ENTRYPOINT();
     AnnotateSanitizersEntrypoint(obj, size);
-    auto object_class = obj->ClassAddr<Class>();
+    auto *object_class = obj->ClassAddr<Class>();
     auto *barrier_set = ManagedThread::GetCurrent()->GetBarrierSet();
-    if (object_class->IsArrayClass()) {
-        if (object_class->IsObjectArrayClass()) {
-            barrier_set->PostBarrierArrayWrite(obj, size);
-        }
-    } else {
-        barrier_set->PostBarrierEveryObjectFieldWrite(obj, size);
+    if (!object_class->IsArrayClass() || !object_class->GetComponentType()->IsPrimitive()) {
+        barrier_set->PostBarrier(obj, 0, size);
     }
     return obj;
 }
@@ -1370,11 +1366,17 @@ extern "C" size_t GetNumVregsByMethod(const Method *method)
     return method->GetNumVregs();
 }
 
-extern "C" void ThrowExceptionFromInterpreter(ManagedThread *thread, ObjectHeader *exception)
+extern "C" void ThrowExceptionFromInterpreter(ManagedThread *thread, ObjectHeader *exception, Frame *frame,
+                                              const uint8_t *pc)
 {
     CHECK_STACK_WALKER;
     ASSERT(!thread->HasPendingException());
     ASSERT(IsAddressInObjectsHeap(exception));
+    Method *method = frame->GetMethod();
+    ProfilingData *prof_data = method->GetProfilingDataWithoutCheck();
+    if (prof_data != nullptr) {
+        prof_data->UpdateThrowTaken(pc - frame->GetInstruction());
+    }
     thread->SetException(exception);
 }
 

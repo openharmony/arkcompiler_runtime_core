@@ -130,7 +130,7 @@ void RootManager<LanguageConfig>::VisitCardTableRoots(CardTable *card_table, Obj
                         }
                     };
                     if (object_header->ClassAddr<BaseClass>() != nullptr && from_object_checker(object_header)) {
-                        // The class may be null in the situation when a new objct is allocated in the card
+                        // The class may be null in the situation when a new object is allocated in the card
                         // we are visiting now, but the class is not set yet.
                         ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object_header,
                                                                                      traverse_object_in_range);

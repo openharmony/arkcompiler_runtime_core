@@ -19,7 +19,6 @@ import {
     ClassWithEmptyConstructor,
     EvaluateObject,
     MyNamespace,
-    InstanceEvaluateNumber,
     EvaluateArray
 } from "/plugins/ets/tests/interop_js/tests/number_subtypes/module.js"
 
@@ -260,75 +259,75 @@ function jscall_static_method_string(): int {
     }
 }
 
-// function jscall_array(): int {
-//     let v0: int[] = new int[10];
-//     for (let i = 0; i < 10; ++i) {
-//         v0[i] = i * i;
-//     }
+function jscall_array(): int {
+    let v0: int[] = new int[10];
+    for (let i = 0; i < 10; ++i) {
+        v0[i] = i * i;
+    }
 
-//     let res = EvaluateArray(10);
-//     for (let i = 0; i < 10; ++i) {
-//         if (res[i] as int != 2 * i * i) {
-//             return 1;
-//         }
-//     }
+    let res = EvaluateArray(v0, 10);
+    for (let i = 0; i < 10; ++i) {
+        if (res[i] as int != 2 * i * i) {
+            return 1;
+        }
+    }
 
-//     return 0;
-// }
+    return 0;
+}
 
-// function jsnew_array(): int {
-//     let v0: int[] = new int[10];
-//     for (let i = 0; i < 10; ++i) {
-//         v0[i] = i * i;
-//     }
+function jsnew_array(): int {
+    let v0: int[] = new int[10];
+    for (let i = 0; i < 10; ++i) {
+        v0[i] = i * i;
+    }
 
-//     let res_obj = new ExampleClass(v0, v0);
-//     let res_get_v0 = res_obj.v0;
-//     let res_get_v1 = res_obj.v1;
+    let res_obj = new ExampleClass(v0, v0);
+    let res_get_v0 = res_obj.v0;
+    let res_get_v1 = res_obj.v1;
 
-//     for (let i = 0; i < 10; ++i) {
-//         if (res_get_v0[i] as int != v0[i] || res_get_v1[i] as int != v0[i]) {
-//             return 1;
-//         }
-//     }
-//     return 0;
-// }
+    for (let i = 0; i < 10; ++i) {
+        if (res_get_v0[i] as int != v0[i] || res_get_v1[i] as int != v0[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
-// function jsnew_setproperty_array(): int {
-//     let v0: int[] = new int[10];
-//     for (let i = 0; i < 10; ++i) {
-//         v0[i] = i * i;
-//     }
+function jsnew_setproperty_array(): int {
+    let v0: int[] = new int[10];
+    for (let i = 0; i < 10; ++i) {
+        v0[i] = i * i;
+    }
 
-//     let res_obj = new ClassWithEmptyConstructor();
+    let res_obj = new ClassWithEmptyConstructor();
 
-//     res_obj.v0 = v0;
-//     res_obj.v1 = v0;
-//     let res_get_v0 = res_obj.v0;
-//     let res_get_v1 = res_obj.v1;
+    res_obj.v0 = v0;
+    res_obj.v1 = v0;
+    let res_get_v0 = res_obj.v0;
+    let res_get_v1 = res_obj.v1;
 
-//     for (let i = 0; i < 10; ++i) {
-//         if (res_get_v0[i] as int != v0[i] || res_get_v1[i] as int != v0[i]) {
-//             return 1;
-//         }
-//     }
-//     return 0;
-// }
-//
-// function jscall_static_method_array(): int {
-//     let v0: int[] = new int[10];
-//     for (let i = 0; i < 10; ++i) {
-//         v0[i] = i * i;
-//     }
+    for (let i = 0; i < 10; ++i) {
+        if (res_get_v0[i] as int != v0[i] || res_get_v1[i] as int != v0[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
-//     let res = EvaluateArray(10);
-//     for (let i = 0; i < 10; ++i) {
-//         if (res[i] as int != 2 * i * i) {
-//             return 1;
-//         }
-//     }
-//     return 0;
-// }
+function jscall_static_method_array(): int {
+    let v0: int[] = new int[10];
+    for (let i = 0; i < 10; ++i) {
+        v0[i] = i * i;
+    }
+
+    let res = ExampleClass.EvaluateArray(v0, 10);
+    for (let i = 0; i < 10; ++i) {
+        if (res[i] as int != 2 * i * i) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 function test_namespace(): int {
     let v0: int = 1;

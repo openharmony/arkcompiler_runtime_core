@@ -59,9 +59,9 @@ templates:
     % opc = inst.stripped_mnemonic.match regex_arithm
     % raise "Wrong binop instruction" unless opc
     % opc = opc[1].chop.capitalize.gsub('Ashr', 'AShr')
-    auto inst = graph_->CreateInst<%= opc %>(<%= get_type(inst.dtype) %>, GetPc(instruction->GetAddress()));
-    inst->SetInput(0, GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>()));
-    inst->SetInput(1, GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 1>()));
+    auto inst = graph_->CreateInst<%= opc %>(<%= get_type(inst.dtype) %>, GetPc(instruction->GetAddress()), 
+                                             GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>()), 
+                                             GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 1>()));
     AddInstruction(inst);
     UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), inst);
   binop_v2: |-
@@ -69,9 +69,8 @@ templates:
     % opc = inst.stripped_mnemonic.match regex_arithm
     % raise "Wrong binop instruction" unless opc
     % opc = opc[1].capitalize.gsub('Ashr', 'AShr').gsub('Fdiv', 'Div').gsub('Fmod', 'Mod')
-    auto inst = graph_->CreateInst<%= opc %>(<%= get_type(inst.dtype) %>, GetPc(instruction->GetAddress()));
-    inst->SetInput(0, GetDefinitionAcc());
-    inst->SetInput(1, GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 1>()));
+    auto inst = graph_->CreateInst<%= opc %>(<%= get_type(inst.dtype) %>, GetPc(instruction->GetAddress()), GetDefinitionAcc(), 
+                                             GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 1>()));
     AddInstruction(inst);
     UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), inst);
   inci: |-
@@ -85,10 +84,8 @@ templates:
     AddInstruction(inst);
     UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), inst);
   cast: |-
-    auto inst = graph_->CreateInstCast(<%= get_type(inst.dtype) %>, GetPc(instruction->GetAddress()));
     auto input = GetDefinitionAcc();
-    inst->SetInput(0, input);
-    inst->SetOperandsType(<%= get_type(inst.type(0)) %>);
+    auto inst = graph_->CreateInstCast(<%= get_type(inst.dtype) %>, GetPc(instruction->GetAddress()), input, <%= get_type(inst.type(0)) %>);
     if (!input->HasType()) {
         input->SetType(<%= get_type(inst.type(0)) %>);
     }
@@ -96,13 +93,13 @@ templates:
     AddInstruction(inst);
   cmp: |-
     % if inst.mnemonic.include? "obj"
-    auto inst = graph_->CreateInstCompare(DataType::BOOL, GetPc(instruction->GetAddress()), ConditionCode::CC_NE);
+    auto inst = graph_->CreateInstCompare(DataType::BOOL, GetPc(instruction->GetAddress()), GetDefinitionAcc(), 
+                                          GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>()), 
+                                          <%= get_type(inst.type(0)) %>, ConditionCode::CC_NE);
     % else
-    auto inst = graph_->CreateInstCmp(<%= get_type(inst.dtype) %>, GetPc(instruction->GetAddress()));
+    auto inst = graph_->CreateInstCmp(<%= get_type(inst.dtype) %>, GetPc(instruction->GetAddress()), GetDefinitionAcc(), 
+                                      GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>()), <%= get_type(inst.type(0)) %>);
     % end
-    inst->SetInput(0, GetDefinitionAcc());
-    inst->SetInput(1, GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>()));
-    inst->SetOperandsType(<%= get_type(inst.type(0)) %>);
     % if inst.stripped_mnemonic.start_with? 'fcmp'
     inst->Set<%= inst.opcode =~ /^fcmpg/ ? 'Fcmpg' : 'Fcmpl' %>();
     % end
@@ -117,10 +114,8 @@ templates:
     inst->SetInput(1, FindOrCreateConstant(0));
     % end
     inst->SetInput(0, GetDefinitionAcc());
-    auto inst_jump = graph_->CreateInstIfImm(DataType::NO_TYPE, GetPc(instruction->GetAddress()), ConditionCode::CC_NE, 0);
-    inst_jump->SetOperandsType(DataType::BOOL);
-    inst_jump->SetInput(0, inst);
-    inst_jump->SetMethod(graph_->GetMethod());
+    auto inst_jump = graph_->CreateInstIfImm(DataType::NO_TYPE, GetPc(instruction->GetAddress()), inst, 0, 
+                                             DataType::BOOL, ConditionCode::CC_NE, graph_->GetMethod());
     AddInstruction(inst);
     AddInstruction(inst_jump);
   jump: |-

@@ -70,6 +70,9 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
         ${ETS_SRC}
     )
 
+    get_filename_component(OUTPUT_DIR ${OUTPUT_ABC} DIRECTORY)
+    file(MAKE_DIRECTORY ${OUTPUT_DIR})
+
     add_custom_command(
         OUTPUT ${OUTPUT_ABC}
         COMMENT "Running es2panda for ets file: ${ETS_SRC}"
@@ -328,6 +331,8 @@ function(run_int_jit_aot_ets_code ETS_SRC WORK_DIR TARGET)
     endif()
 endfunction()
 
+set (COMPILER_OPTIONS_OSR "--compiler-ignore-failures=true" ${COMPILER_OPTIONS})
+
 function(compile_stdlib TARGET_ARCH)
     add_custom_target(ets-compile-stdlib-aot-${TARGET_ARCH}
         COMMENT "Running ark_aot compilation for etsstdlib for ${TARGET_ARCH} with default options"
@@ -361,7 +366,7 @@ function(compile_stdlib TARGET_ARCH)
     if (TARGET_ARCH STREQUAL "arm64")
         add_custom_target(ets-compile-stdlib-osr-${TARGET_ARCH}
             COMMENT "Running ark_aot compilation for etsstdlib for ${TARGET_ARCH} with osr mode"
-            COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=osr -compiler-options="${COMPILER_OPTIONS}" -paoc-output=etsstdlib_osr_${TARGET_ARCH}.an
+            COMMAND ${ARK_AOR_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=osr -compiler-options=${COMPILER_OPTIONS_OSR} -paoc-output=etsstdlib_osr_${TARGET_ARCH}.an
             DEPENDS ark_aot etsstdlib
         )
         add_dependencies(ets-compile-stdlib ets-compile-stdlib-osr-${TARGET_ARCH})

@@ -130,9 +130,7 @@ void PhiTypeResolving::PropagateTypeToPhi()
                 }
             }
         }
-        auto *cast_to_any_inst = GetGraph()->CreateInstCastValueToAnyType(DataType::ANY, phi->GetPc());
-        cast_to_any_inst->SetAnyType(any_type_);
-
+        auto *cast_to_any_inst = GetGraph()->CreateInstCastValueToAnyType(phi->GetPc(), any_type_, nullptr);
         auto *bb = phi->GetBasicBlock();
         auto *first = bb->GetFirstInst();
         if (first == nullptr) {

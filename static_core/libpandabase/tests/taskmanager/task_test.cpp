@@ -52,7 +52,7 @@ TEST_F(TaskTest, TaskQueueSimpleTest)
 {
     size_t counter = 0;
     // Creation of TaskQueue
-    constexpr size_t QUEUE_PRIORITY = 100;
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::MAX_PRIORITY;
     TaskQueue queue(TaskType::GC, VMType::DYNAMIC_VM, QUEUE_PRIORITY);
     EXPECT_EQ(queue.GetTaskType(), TaskType::GC);
     EXPECT_TRUE(queue.IsEmpty());
@@ -83,7 +83,7 @@ TEST_F(TaskTest, TaskQueueSimpleTest)
     EXPECT_EQ(queue.Size(), COUNT_OF_TASKS - COUNT_OF_DONE_TASKS);
     EXPECT_EQ(queue.GetPriority(), QUEUE_PRIORITY);
     // Change priority of this queue
-    constexpr size_t NEW_QUEUE_PRIORITY = 50;
+    constexpr size_t NEW_QUEUE_PRIORITY = TaskQueue::MIN_PRIORITY;
     queue.SetPriority(NEW_QUEUE_PRIORITY);
     EXPECT_EQ(queue.GetTaskType(), TaskType::GC);
     EXPECT_EQ(queue.IsEmpty(), COUNT_OF_TASKS == COUNT_OF_DONE_TASKS);
@@ -98,7 +98,7 @@ TEST_F(TaskTest, TaskQueueSimpleTest)
     EXPECT_EQ(queue.GetTaskType(), TaskType::GC);
     EXPECT_FALSE(queue.IsEmpty());
     EXPECT_EQ(queue.Size(), 2 * COUNT_OF_TASKS - COUNT_OF_DONE_TASKS);
-    EXPECT_EQ(queue.GetPriority(), 50);
+    EXPECT_EQ(queue.GetPriority(), NEW_QUEUE_PRIORITY);
     // Pop and execute all tasks in queue.
     while (!queue.IsEmpty()) {
         auto next_task = queue.PopTask();
@@ -108,12 +108,12 @@ TEST_F(TaskTest, TaskQueueSimpleTest)
     EXPECT_EQ(counter, 3 * COUNT_OF_TASKS);
     EXPECT_EQ(queue.GetTaskType(), TaskType::GC);
     EXPECT_EQ(queue.Size(), 0);
-    EXPECT_EQ(queue.GetPriority(), 50);
+    EXPECT_EQ(queue.GetPriority(), NEW_QUEUE_PRIORITY);
 }
 
 TEST_F(TaskTest, TaskQueueMultithreadingOnePushOnePop)
 {
-    constexpr size_t QUEUE_PRIORITY = 100;
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::MAX_PRIORITY;
     TaskQueue queue(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::atomic_size_t counter = 0;
     constexpr size_t RESULT_COUNT = 10'000;
@@ -139,7 +139,7 @@ TEST_F(TaskTest, TaskQueueMultithreadingOnePushOnePop)
 
 TEST_F(TaskTest, TaskQueueMultithreadingNPushNPop)
 {
-    constexpr size_t QUEUE_PRIORITY = 100;
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::MAX_PRIORITY;
     TaskQueue queue(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::atomic_size_t counter = 0;
     constexpr size_t RESULT_COUNT = 100'000;
@@ -172,7 +172,7 @@ TEST_F(TaskTest, TaskQueueMultithreadingNPushNPop)
 
 TEST_F(TaskTest, TaskQueueWaitForQueueEmptyAndFinish)
 {
-    constexpr size_t QUEUE_PRIORITY = 100;
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::MAX_PRIORITY;
     TaskQueue queue(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::atomic_size_t counter = 0;
     constexpr size_t TASK_COUNT = 100'000;
@@ -203,7 +203,7 @@ TEST_F(TaskTest, TaskQueueWaitForQueueEmptyAndFinish)
 
 TEST_F(TaskTest, TaskQueueForegroundAndBackgroundTasks)
 {
-    constexpr size_t QUEUE_PRIORITY = 100;
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::MAX_PRIORITY;
     TaskQueue queue(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::queue<TaskExecutionMode> mode_queue;
     constexpr TaskProperties FOREGROUND_PROPERTIES(TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::FOREGROUND);
@@ -240,7 +240,7 @@ TEST_F(TaskTest, TaskQueueForegroundAndBackgroundTasks)
 
 TEST_F(TaskTest, PopTaskWithExecutionMode)
 {
-    constexpr size_t QUEUE_PRIORITY = 100;
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::MAX_PRIORITY;
     TaskQueue queue(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::queue<TaskExecutionMode> mode_queue;
     constexpr TaskProperties FOREGROUND_PROPERTIES(TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::FOREGROUND);

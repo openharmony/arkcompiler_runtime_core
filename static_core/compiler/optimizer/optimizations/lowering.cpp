@@ -307,41 +307,29 @@ void Lowering::ReplaceSignedModPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst
     uint32_t size = (inst->GetType() == DataType::UINT64 || inst->GetType() == DataType::INT64) ? WORD_SIZE : HALF_SIZE;
     Inst *add_inst;
     if (graph->GetEncoder()->CanEncodeImmAddSubCmp(value_minus_1, size, false)) {
-        add_inst = graph->CreateInstAddI(inst, value_minus_1);
+        add_inst = graph->CreateInstAddI(inst, input0, value_minus_1);
     } else {
         auto value_minus_1_cnst = graph->FindOrCreateConstant(value_minus_1);
-        add_inst = graph->CreateInstAdd(inst);
-        add_inst->SetInput(1U, value_minus_1_cnst);
+        add_inst = graph->CreateInstAdd(inst, input0, value_minus_1_cnst);
     }
-    add_inst->SetInput(0U, input0);
     Inst *select_inst;
     if (graph->GetEncoder()->CanEncodeImmAddSubCmp(0, size, true)) {
-        auto select = graph->CreateInstSelectImm(inst, ConditionCode::CC_LT, 0);
-        select->SetOperandsType(inst->GetType());
-        select_inst = select;
+        select_inst =
+            graph->CreateInstSelectImm(inst, add_inst, input0, input0, 0, inst->GetType(), ConditionCode::CC_LT);
     } else {
         auto zero_cnst = graph->FindOrCreateConstant(0);
-        auto select = graph->CreateInstSelect(inst, ConditionCode::CC_LT);
-        select->SetOperandsType(inst->GetType());
-        select->SetInput(3U, zero_cnst);
-        select_inst = select;
+        select_inst =
+            graph->CreateInstSelect(inst, add_inst, input0, input0, zero_cnst, inst->GetType(), ConditionCode::CC_LT);
     }
-    select_inst->SetInput(0U, add_inst);
-    select_inst->SetInput(1U, input0);
-    select_inst->SetInput(2U, input0);
     auto mask_value = ~static_cast<uint64_t>(value_minus_1);
     Inst *and_inst;
     if (graph->GetEncoder()->CanEncodeImmLogical(mask_value, size)) {
-        and_inst = graph->CreateInstAndI(inst, mask_value);
+        and_inst = graph->CreateInstAndI(inst, select_inst, mask_value);
     } else {
         auto mask = graph->FindOrCreateConstant(mask_value);
-        and_inst = graph->CreateInstAnd(inst);
-        and_inst->SetInput(1U, mask);
+        and_inst = graph->CreateInstAnd(inst, select_inst, mask);
     }
-    and_inst->SetInput(0U, select_inst);
-    auto sub_inst = graph->CreateInstSub(inst);
-    sub_inst->SetInput(0U, input0);
-    sub_inst->SetInput(1U, and_inst);
+    auto sub_inst = graph->CreateInstSub(inst, input0, and_inst);
 
     inst->InsertBefore(add_inst);
     inst->InsertBefore(select_inst);
@@ -356,14 +344,11 @@ void Lowering::ReplaceUnsignedModPowerOfTwo([[maybe_unused]] GraphVisitor *v, In
     uint32_t size = (inst->GetType() == DataType::UINT64 || inst->GetType() == DataType::INT64) ? WORD_SIZE : HALF_SIZE;
     Inst *and_inst;
     if (graph->GetEncoder()->CanEncodeImmLogical(value_minus_1, size)) {
-        and_inst = graph->CreateInstAndI(inst, value_minus_1);
+        and_inst = graph->CreateInstAndI(inst, inst->GetInput(0).GetInst(), value_minus_1);
     } else {
         auto value_minus_1_cnst = graph->FindOrCreateConstant(value_minus_1);
-        and_inst = graph->CreateInstAnd(inst);
-        and_inst->SetInput(1U, value_minus_1_cnst);
+        and_inst = graph->CreateInstAnd(inst, inst->GetInput(0).GetInst(), value_minus_1_cnst);
     }
-    auto input0 = inst->GetInput(0).GetInst();
-    and_inst->SetInput(0U, input0);
     InsertInstruction(inst, and_inst);
 }
 
@@ -389,9 +374,8 @@ void Lowering::VisitDeoptimizeIf([[maybe_unused]] GraphVisitor *v, Inst *inst)
 void Lowering::VisitLoadFromConstantPool([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     auto graph = inst->GetBasicBlock()->GetGraph();
-    auto new_inst = graph->CreateInstLoadArrayI(DataType::ANY, inst->GetPc());
-    new_inst->SetInput(0, inst->GetInput(0).GetInst());
-    new_inst->SetImm(inst->CastToLoadFromConstantPool()->GetTypeId());
+    auto new_inst = graph->CreateInstLoadArrayI(DataType::ANY, inst->GetPc(), inst->GetInput(0).GetInst(),
+                                                inst->CastToLoadFromConstantPool()->GetTypeId());
     inst->ReplaceUsers(new_inst);
     inst->RemoveInputs();
     inst->GetBasicBlock()->ReplaceInst(inst, new_inst);
@@ -483,16 +467,12 @@ void Lowering::LowerShift(Inst *inst)
 
     Inst *new_inst;
     if (opc == Opcode::Shr) {
-        new_inst = graph->CreateInstShrI(inst, val);
+        new_inst = graph->CreateInstShrI(inst, inst->GetInput(0).GetInst(), val);
     } else if (opc == Opcode::AShr) {
-        new_inst = graph->CreateInstAShrI(inst, val);
+        new_inst = graph->CreateInstAShrI(inst, inst->GetInput(0).GetInst(), val);
     } else {
-        new_inst = graph->CreateInstShlI(inst, val);
+        new_inst = graph->CreateInstShlI(inst, inst->GetInput(0).GetInst(), val);
     }
-
-    static_cast<BinaryImmOperation *>(new_inst)->SetImm(val);
-
-    new_inst->SetInput(0, inst->GetInput(0).GetInst());
     InsertInstruction(inst, new_inst);
 }
 
@@ -647,11 +627,10 @@ Inst *Lowering::LowerAddSub(Inst *inst)
 
     Inst *new_inst;
     if (is_add) {
-        new_inst = graph->CreateInstAddI(inst, static_cast<uint64_t>(val));
+        new_inst = graph->CreateInstAddI(inst, inst->GetInput(0).GetInst(), static_cast<uint64_t>(val));
     } else {
-        new_inst = graph->CreateInstSubI(inst, static_cast<uint64_t>(val));
+        new_inst = graph->CreateInstSubI(inst, inst->GetInput(0).GetInst(), static_cast<uint64_t>(val));
     }
-    new_inst->SetInput(0, inst->GetInput(0).GetInst());
     InsertInstruction(inst, new_inst);
     return new_inst;
 }
@@ -681,10 +660,10 @@ void Lowering::LowerMulDivMod(Inst *inst)
     Inst *new_inst;
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements, bugprone-branch-clone)
     if constexpr (OPCODE == Opcode::Mul) {
-        new_inst = graph->CreateInstMulI(inst, static_cast<uint64_t>(val));
+        new_inst = graph->CreateInstMulI(inst, inst->GetInput(0).GetInst(), static_cast<uint64_t>(val));
         // NOLINTNEXTLINE(readability-misleading-indentation,readability-braces-around-statements)
     } else if constexpr (OPCODE == Opcode::Div) {
-        new_inst = graph->CreateInstDivI(inst, static_cast<uint64_t>(val));
+        new_inst = graph->CreateInstDivI(inst, inst->GetInput(0).GetInst(), static_cast<uint64_t>(val));
         if (graph->IsBytecodeOptimizer()) {
             inst->ClearFlag(compiler::inst_flags::NO_DCE);  // In Bytecode Optimizer Div may have NO_DCE flag
             if (val == 0) {
@@ -693,7 +672,7 @@ void Lowering::LowerMulDivMod(Inst *inst)
         }
         // NOLINTNEXTLINE(readability-misleading-indentation)
     } else {
-        new_inst = graph->CreateInstModI(inst, static_cast<uint64_t>(val));
+        new_inst = graph->CreateInstModI(inst, inst->GetInput(0).GetInst(), static_cast<uint64_t>(val));
         if (graph->IsBytecodeOptimizer()) {
             inst->ClearFlag(compiler::inst_flags::NO_DCE);  // In Bytecode Optimizer Div may have NO_DCE flag
             if (val == 0) {
@@ -701,7 +680,6 @@ void Lowering::LowerMulDivMod(Inst *inst)
             }
         }
     }
-    new_inst->SetInput(0, inst->GetInput(0).GetInst());
     InsertInstruction(inst, new_inst);
 }
 
@@ -939,16 +917,12 @@ Inst *Lowering::LowerLogic(Inst *inst)
     }
     Inst *new_inst;
     if (opc == Opcode::Or) {
-        new_inst = graph->CreateInstOrI(inst, val);
+        new_inst = graph->CreateInstOrI(inst, inst->GetInput(0).GetInst(), val);
     } else if (opc == Opcode::And) {
-        new_inst = graph->CreateInstAndI(inst, val);
+        new_inst = graph->CreateInstAndI(inst, inst->GetInput(0).GetInst(), val);
     } else {
-        new_inst = graph->CreateInstXorI(inst, val);
+        new_inst = graph->CreateInstXorI(inst, inst->GetInput(0).GetInst(), val);
     }
-
-    static_cast<BinaryImmOperation *>(new_inst)->SetImm(val);
-
-    new_inst->SetInput(0, inst->GetInput(0).GetInst());
     InsertInstruction(inst, new_inst);
     return new_inst;
 }
@@ -1169,11 +1143,8 @@ void Lowering::JoinFcmpInst(IfImmInst *inst, CmpInst *input)
 
     // New instruction
     auto graph = input->GetBasicBlock()->GetGraph();
-    auto replace = graph->CreateInstIf(DataType::NO_TYPE, inst->GetPc(), cc);
-    replace->SetMethod(inst->GetMethod());
-    replace->SetOperandsType(input->GetOperandsType());
-    replace->SetInput(0, input->GetInput(0).GetInst());
-    replace->SetInput(1, input->GetInput(1).GetInst());
+    auto replace = graph->CreateInstIf(DataType::NO_TYPE, inst->GetPc(), input->GetInput(0).GetInst(),
+                                       input->GetInput(1).GetInst(), input->GetOperandsType(), cc, inst->GetMethod());
 
     // Replace IfImm instruction immediately because it's not removable by DCE
     inst->RemoveInputs();
@@ -1279,11 +1250,8 @@ void Lowering::LowerIfImmToIf(IfImmInst *inst, Inst *input, ConditionCode cc, Da
 {
     auto graph = inst->GetBasicBlock()->GetGraph();
     // New instruction
-    auto replace = graph->CreateInstIf(DataType::NO_TYPE, inst->GetPc(), cc);
-    replace->SetMethod(inst->GetMethod());
-    replace->SetOperandsType(input_type);
-    replace->SetInput(0, input->GetInput(0).GetInst());
-    replace->SetInput(1, input->GetInput(1).GetInst());
+    auto replace = graph->CreateInstIf(DataType::NO_TYPE, inst->GetPc(), input->GetInput(0).GetInst(),
+                                       input->GetInput(1).GetInst(), input_type, cc, inst->GetMethod());
     // Replace IfImm instruction immediately because it's not removable by DCE
     inst->RemoveInputs();
     inst->GetBasicBlock()->ReplaceInst(inst, replace);

@@ -488,6 +488,9 @@ public:
         GetObjectAllocator()->GetHeapSpace()->ComputeNewSize();
     }
 
+    // TODO(ipetrov, #13816): move to private
+    void JoinWorker(bool continue_run_gc = false);
+
 protected:
     /// @brief Runs all phases
     void RunPhases(GCTask &task);
@@ -686,7 +689,6 @@ private:
      */
     static void GCWorkerEntry(GC *gc, PandaVM *vm);
 
-    void JoinWorker();
     void CreateWorker();
 
     /// Move small objects to pygote space at first pygote fork

@@ -162,8 +162,7 @@ public:
             if (to_start_bb) {
                 inst = graph_->GetOrCreateNullPtr();
             } else {
-                inst = graph_->CreateInstNullPtr();
-                inst->SetType(DataType::REFERENCE);
+                inst = graph_->CreateInstNullPtr(DataType::REFERENCE);
                 CurrentBb()->AppendInst(inst);
             }
         } else {  // NOLINT(readability-misleading-indentation)

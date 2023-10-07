@@ -16,18 +16,22 @@
 #ifndef PANDA_LIBPANDABASE_TASKMANAGER_TASK_H
 #define PANDA_LIBPANDABASE_TASKMANAGER_TASK_H
 
-#include "macros.h"
+#include "libpandabase/macros.h"
 #include <functional>
 #include <ostream>
 
 namespace panda::taskmanager {
 
-enum class TaskType : uint16_t { GC = 0, JIT = 1 };
+enum class TaskType : uint16_t { UNKNOWN = 0, GC, JIT };
 
-enum class VMType : uint16_t { DYNAMIC_VM = 0, STATIC_VM = 1 };
+enum class VMType : uint16_t { UNKNOWN = 0, DYNAMIC_VM, STATIC_VM };
 
 enum class TaskExecutionMode { FOREGROUND, BACKGROUND };
 
+/**
+ * @brief TaskProperties is class that consider all enums that are related to Task. It's used to parameterize task
+ * creation.
+ */
 class TaskProperties {
 public:
     constexpr TaskProperties(TaskType task_type, VMType vm_type, TaskExecutionMode execution_mode)
@@ -61,12 +65,14 @@ public:
     NO_COPY_SEMANTIC(Task);
     DEFAULT_MOVE_SEMANTIC(Task);
 
+    using RunnerCallback = std::function<void()>;
+
     /**
      * @brief Tasks are created through this method with the specified arguments.
      * @param properties - properties of task, it contains TaskType, VMType and ExecutionMote.
      * @param runner - body of task, that will be executed.
      */
-    PANDA_PUBLIC_API static Task Create(TaskProperties properties, std::function<void()> runner);
+    [[nodiscard]] PANDA_PUBLIC_API static Task Create(TaskProperties properties, RunnerCallback runner);
 
     /// @brief Returns properties of task
     PANDA_PUBLIC_API TaskProperties GetTaskProperties() const;
@@ -74,13 +80,13 @@ public:
     /// @brief Executes body of task
     PANDA_PUBLIC_API void RunTask();
 
-    ~Task() = default;
+    PANDA_PUBLIC_API ~Task() = default;
 
 private:
-    Task(TaskProperties properties, std::function<void()> runner);
+    Task(TaskProperties properties, RunnerCallback runner);
 
     TaskProperties properties_;
-    std::function<void()> runner_;
+    RunnerCallback runner_;
 };
 
 PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, TaskType type);

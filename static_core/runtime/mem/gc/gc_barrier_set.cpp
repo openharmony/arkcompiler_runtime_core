@@ -97,13 +97,7 @@ void GCGenBarrierSet::PostBarrier(const void *obj_addr, [[maybe_unused]] size_t 
     ASSERT(CheckPostBarrier(card_table_, obj_addr));
 }
 
-void GCGenBarrierSet::PostBarrierArrayWrite(const void *obj_addr, [[maybe_unused]] size_t size)
-{
-    PostIntergenerationalBarrier(min_addr_, card_table_addr_, card_bits_, dirty_card_value_, obj_addr);
-    ASSERT(CheckPostBarrier(card_table_, obj_addr));
-}
-
-void GCGenBarrierSet::PostBarrierEveryObjectFieldWrite(const void *obj_addr, [[maybe_unused]] size_t size)
+void GCGenBarrierSet::PostBarrier(const void *obj_addr, [[maybe_unused]] size_t offset, [[maybe_unused]] size_t count)
 {
     // NOTE: We can improve an implementation here
     // because now we consider every field as an object reference field.
@@ -144,28 +138,24 @@ void GCG1BarrierSet::PostBarrier(const void *obj_addr, size_t offset, void *stor
            CheckPostBarrier(card_table_, obj_addr, false));
 }
 
-void GCG1BarrierSet::PostBarrierArrayWrite(const void *obj_addr, size_t size)
+void GCG1BarrierSet::PostBarrier(const void *obj_addr, size_t offset, size_t count)
 {
     // Force post inter-region barrier
-    Invalidate(obj_addr, ToVoidPtr(ToUintPtr(obj_addr) + size - 1));
-    ASSERT(CheckPostBarrier(card_table_, obj_addr, false));
-}
-
-void GCG1BarrierSet::PostBarrierEveryObjectFieldWrite(const void *obj_addr, size_t size)
-{
-    // Force post inter-region barrier
-    Invalidate(obj_addr, ToVoidPtr(ToUintPtr(obj_addr) + size - 1));
+    auto first_addr = ToUintPtr(obj_addr) + offset;
+    auto last_addr = first_addr + count - 1;
+    Invalidate(first_addr, last_addr);
     ASSERT(CheckPostBarrier(card_table_, obj_addr, false));
     // NOTE: We can improve an implementation here
     // because now we consider every field as an object reference field.
     // Maybe, it will be better to check it, but there can be possible performance degradation.
 }
 
-void GCG1BarrierSet::Invalidate(const void *begin, const void *last)
+void GCG1BarrierSet::Invalidate(uintptr_t begin, uintptr_t last)
 {
-    LOG(DEBUG, GC) << "GC Interregion barrier write for memory range from  " << begin << " to " << last;
-    auto *begin_card = card_table_->GetCardPtr(ToUintPtr(begin));
-    auto *last_card = card_table_->GetCardPtr(ToUintPtr(last));
+    LOG(DEBUG, GC) << "GC Interregion barrier write for memory range from  " << ToVoidPtr(begin) << " to "
+                   << ToVoidPtr(last);
+    auto *begin_card = card_table_->GetCardPtr(begin);
+    auto *last_card = card_table_->GetCardPtr(last);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (auto *card = begin_card; card <= last_card; ++card) {
         if (!card->IsYoung() && !card->IsMarked()) {

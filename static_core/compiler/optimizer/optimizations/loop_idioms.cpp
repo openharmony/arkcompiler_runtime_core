@@ -238,16 +238,12 @@ bool LoopIdioms::ReplaceArrayInitLoop(Loop *loop, CountableLoopInfo *loop_info, 
                                            << " inserted into the new block " << block->GetId();
     } else {
         auto guard_block = pre_header->InsertNewBlockToSuccEdge(header);
-        auto sub = GetGraph()->CreateInstSub(DataType::INT32, inst->GetPc());
-        sub->SetInput(0, loop_info->test);
-        sub->SetInput(1, loop_info->init);
-        auto cmp = GetGraph()->CreateInstCompare(DataType::BOOL, inst->GetPc(), ConditionCode::CC_LE);
-        cmp->SetInput(0, sub);
-        cmp->SetInput(1, GetGraph()->FindOrCreateConstant(ITERATIONS_THRESHOLD));
-        cmp->SetOperandsType(DataType::INT32);
-        auto if_imm = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, inst->GetPc(), ConditionCode::CC_NE, 0);
-        if_imm->SetInput(0, cmp);
-        if_imm->SetOperandsType(DataType::BOOL);
+        auto sub = GetGraph()->CreateInstSub(DataType::INT32, inst->GetPc(), loop_info->test, loop_info->init);
+        auto cmp = GetGraph()->CreateInstCompare(DataType::BOOL, inst->GetPc(), sub,
+                                                 GetGraph()->FindOrCreateConstant(ITERATIONS_THRESHOLD),
+                                                 DataType::INT32, ConditionCode::CC_LE);
+        auto if_imm =
+            GetGraph()->CreateInstIfImm(DataType::NO_TYPE, inst->GetPc(), cmp, 0, DataType::BOOL, ConditionCode::CC_NE);
         guard_block->AppendInst(sub);
         guard_block->AppendInst(cmp);
         guard_block->AppendInst(if_imm);

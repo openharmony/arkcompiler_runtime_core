@@ -16,7 +16,6 @@
 #ifndef PANDA_LIBPANDABASE_TASKMANAGER_WORKER_THREAD_H
 #define PANDA_LIBPANDABASE_TASKMANAGER_WORKER_THREAD_H
 
-#include "libpandabase/os/mutex.h"
 #include "libpandabase/taskmanager/task.h"
 #include <thread>
 #include <queue>
@@ -30,10 +29,15 @@ public:
     NO_COPY_SEMANTIC(WorkerThread);
     NO_MOVE_SEMANTIC(WorkerThread);
 
+    /**
+     * FinishedTasksCallback instance should be called after tasks finishing. As argument you should input count of
+     * finished tasks.
+     */
+    using FinishedTasksCallback = std::function<void(size_t)>;
+
     static constexpr size_t WORKER_QUEUE_SIZE = 10;
 
-    WorkerThread(os::memory::Mutex *outside_lock, os::memory::ConditionVariable *outside_cond_var,
-                 size_t tasks_count = WORKER_QUEUE_SIZE);
+    explicit WorkerThread(FinishedTasksCallback callback, size_t tasks_count = WORKER_QUEUE_SIZE);
     ~WorkerThread();
 
     /**
@@ -41,9 +45,6 @@ public:
      * @param task - task that will be added in internal queues
      */
     void AddTask(Task &&task);
-
-    /// @brief Returns true if tasks now are running
-    bool IsTasksRunning();
 
     /// @brief Waits for worker finish
     void Join();
@@ -63,12 +64,9 @@ private:
     std::queue<Task> background_queue_;
     std::queue<Task> foreground_queue_;
 
-    std::atomic_bool is_tasks_running_ {false};
+    size_t size_ {0};
 
-    std::atomic_size_t size_ {0};
-
-    os::memory::Mutex *outside_lock_;
-    os::memory::ConditionVariable *outside_cond_var_;
+    FinishedTasksCallback finished_tasks_callback_;
 };
 
 }  // namespace panda::taskmanager

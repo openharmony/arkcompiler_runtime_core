@@ -29,6 +29,7 @@ class jscall {
     native static any$(top: JSValue, qname: String, v0: JSValue): JSValue;
     native static any$(top: JSValue, qname: String, v0: String): JSValue;
     native static any$(top: JSValue, qname: String, v0: double, v1: String): JSValue;
+    native static any$(top: JSValue, qname: String, v0: int[], v1: int): JSValue;
     // Remove after JSValue cast fix
     native static any$a(top: JSValue, qname: String, v0: JSValue): JSValue;
 
@@ -44,6 +45,7 @@ class jsnew {
     native static $(top: JSValue, qname: String) : JSValue;
     native static $(top: JSValue, qname: String, a0: JSValue, a1: JSValue) : JSValue;
     native static $(top: JSValue, qname: String, a0: String, a1: String) : JSValue;
+    native static $(top: JSValue, qname: String, a0: int[], a1: int[]) : JSValue;
     // Remove after JSValue cast fix
     native static $aa(top: JSValue, qname: String, a0: JSValue, a1: JSValue) : JSValue;
     // Remove after JSValue cast fix
@@ -183,79 +185,76 @@ function jscall_static_method_string(): int {
     }
 }
 
-// function jscall_array(): int {
-//     let v0: int[] = new int[10];
-//     for (let i = 0; i < 10; ++i) {
-//         v0[i] = i * i;
-//     }
+function jscall_array(): int {
+    let v0: int[] = new int[10];
+    for (let i = 0; i < 10; ++i) {
+        v0[i] = i * i;
+    }
 
-//
-//     let res = jscall.any$(jsvars.m, ".EvaluateArray", 10);
-//     for (let i = 0; i < 10; ++i) {
-//         if (res[i] != 2 * i * i) {
-//             return 1;
-//         }
-//     }
+    let res = jscall.any$(jsvars.m, ".EvaluateArray", v0, 10);
+    for (let i = 0; i < 10; ++i) {
+        if (JSRuntime.getElementInt(res, i) != 2 * i * i) {
+            return 1;
+        }
+    }
 
-//     return 0;
-// }
+    return 0;
+}
 
-// function jsnew_array(): int {
-//     let v0: int[] = new int[10];
-//     for (let i = 0; i < 10; ++i) {
-//         v0[i] = i * i;
-//     }
+function jsnew_array(): int {
+    let v0: int[] = new int[10];
+    for (let i = 0; i < 10; ++i) {
+        v0[i] = i * i;
+    }
 
-//
-//     let res_obj = jsnew.$(JSRuntime.getPropertyJSValue(test_numbers, "ExampleClass"), test_numbers, v0, v0);
-//     let res_get_v0 = JSRuntime.getPropertyJSValue(res_obj, "v0") as int[];
-//     let res_get_v1 = JSRuntime.getPropertyJSValue(res_obj, "v1") as int[];
 
-//     for (let i = 0; i < 10; ++i) {
-//         if (res_get_v0[i] != v0[i] || res_get_v1[i] != v0[i]) {
-//             return 1;
-//         }
-//     }
-//     return 0;
-// }
+    let res_obj = jsnew.$(jsvars.m, ".ExampleClass", v0, v0);
+    let res_get_v0 = JSRuntime.getPropertyJSValue(res_obj, "v0");
+    let res_get_v1 = JSRuntime.getPropertyJSValue(res_obj, "v1");
 
-// function jsnew_setproperty_array(): int {
-//     let v0: int[] = new int[10];
-//     for (let i = 0; i < 10; ++i) {
-//         v0[i] = i * i;
-//     }
+    for (let i = 0; i < 10; ++i) {
+        if (JSRuntime.getElementInt(res_get_v0, i) != v0[i] || JSRuntime.getElementInt(res_get_v1, i) != v0[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
-//
-//     let res_obj = jsnew.$(JSRuntime.getPropertyJSValue(test_numbers, "ClassWithEmptyConstructor"), test_numbers);
+function jsnew_setproperty_array(): int {
+    let v0: int[] = new int[10];
+    for (let i = 0; i < 10; ++i) {
+        v0[i] = i * i;
+    }
 
-//     // TypeError: No matching call signature
-//     // JSRuntime.setPropertyJSValue(res_obj,"v0", v0);
-//     // JSRuntime.setPropertyJSValue(res_obj,"v1", v0);
-//     let res_get_v0 = JSRuntime.getPropertyJSValue(res_obj, "v0") as int[];
-//     let res_get_v1 = JSRuntime.getPropertyJSValue(res_obj, "v1") as int[];
+    let res_obj = jsnew.$(jsvars.m, ".ClassWithEmptyConstructor");
 
-//     for (let i = 0; i < 10; ++i) {
-//         if (res_get_v0[i] != v0[i] || res_get_v1[i] != v0[i]) {
-//             return 1;
-//         }
-//     }
-//     return 0;
-// }
+    JSRuntime.setPropertyJSValue(res_obj,"v0", JSRuntime.newJSValueObject(v0));
+    JSRuntime.setPropertyJSValue(res_obj,"v1", JSRuntime.newJSValueObject(v0));
+    let res_get_v0 = JSRuntime.getPropertyJSValue(res_obj, "v0");
+    let res_get_v1 = JSRuntime.getPropertyJSValue(res_obj, "v1");
 
-// function jscall_static_method_array(): int {
-//     let v0: int[] = new int[10];
-//     for (let i = 0; i < 10; ++i) {
-//         v0[i] = i * i;
-//     }
-//
-//     let res = jscall.any$(jsvars.m, ".EvaluateArray", 10);
-//     for (let i = 0; i < 10; ++i) {
-//         if (res[i] != 2 * i * i) {
-//             return 1;
-//         }
-//     }
-//     return 0;
-// }
+    for (let i = 0; i < 10; ++i) {
+        if (res_get_v0[i] as int != v0[i] || res_get_v1[i] as int != v0[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+function jscall_static_method_array(): int {
+    let v0: int[] = new int[10];
+    for (let i = 0; i < 10; ++i) {
+        v0[i] = i * i;
+    }
+
+    let res = jscall.any$(jsvars.m, ".ExampleClass.EvaluateArray", v0, 10);
+    for (let i = 0; i < 10; ++i) {
+        if (JSRuntime.getElementInt(res, i) != 2 * i * i) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 function test_namespace(): int {
     let v0: int = 1;

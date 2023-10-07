@@ -912,10 +912,8 @@ TEST_F(DeoptimizeEliminationTest, RemoveSafePoint2)
     auto block = GetGraph()->CreateEmptyBlock();
     GetGraph()->GetStartBlock()->AddSucc(block);
     block->AddSucc(GetGraph()->GetEndBlock());
-    auto param1 = GetGraph()->CreateInstParameter(0);
-    auto param2 = GetGraph()->CreateInstParameter(1);
-    param1->SetType(DataType::INT32);
-    param2->SetType(DataType::INT32);
+    auto param1 = GetGraph()->CreateInstParameter(0, DataType::INT32);
+    auto param2 = GetGraph()->CreateInstParameter(1, DataType::INT32);
     GetGraph()->GetStartBlock()->AppendInst(param1);
     GetGraph()->GetStartBlock()->AppendInst(param2);
     auto sp = GetGraph()->CreateInstSafePoint();
@@ -928,16 +926,11 @@ TEST_F(DeoptimizeEliminationTest, RemoveSafePoint2)
     insts.push_back(param1);
     insts.push_back(param2);
     for (uint64_t i = 2; i <= n + 1; i++) {
-        auto inst = GetGraph()->CreateInstAdd();
-        inst->SetType(DataType::INT32);
-        inst->SetInput(0, insts[i - 2]);
-        inst->SetInput(1, insts[i - 1]);
+        auto inst = GetGraph()->CreateInstAdd(DataType::INT32, INVALID_PC, insts[i - 2], insts[i - 1]);
         block->AppendInst(inst);
         insts.push_back(inst);
     }
-    auto ret = GetGraph()->CreateInstReturn();
-    ret->SetType(DataType::INT32);
-    ret->SetInput(0, insts[n + 1]);
+    auto ret = GetGraph()->CreateInstReturn(DataType::INT32, INVALID_PC, insts[n + 1]);
     block->AppendInst(ret);
     GraphChecker(GetGraph()).Check();
     auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();

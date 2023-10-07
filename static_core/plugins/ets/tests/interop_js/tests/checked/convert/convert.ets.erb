@@ -15,7 +15,7 @@
 
 % imports = ['deepEqual', 'js_set', 'js_check_set'] + @type_infos.map { |type_info| "js_get_#{type_info.name}" }
 import { <%= imports.join(', ') %> }
-    from "./convert.js"
+    from "convert.js"
 
 class EtsClass {
     int_value: int;

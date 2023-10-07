@@ -234,7 +234,7 @@ public:
     {
         if constexpr (!REVERSED_MARK) {  // NOLINTNEXTLINE(readability-braces-around-statements)
             // If ClassAddr is not set - it means object header initialization is in progress now
-            if (object->AtomicClassAddr<BaseClass>() == nullptr) {
+            if (object->ClassAddr<BaseClass>() == nullptr) {
                 return ObjectStatus::ALIVE_OBJECT;
             }
         }

@@ -41,6 +41,10 @@ PANDA_PUBLIC_API std::string GetParentDir(const std::string &filepath);
 
 PANDA_PUBLIC_API bool IsDirExists(const std::string &dirpath);
 
+PANDA_PUBLIC_API std::string RemoveExtension(const std::string &filepath);
+
+PANDA_PUBLIC_API std::string NormalizePath(const std::string &filepath);
+
 }  // namespace panda::os
 
 #endif  // PANDA_FILESYSTEM_H

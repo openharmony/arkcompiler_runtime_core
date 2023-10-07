@@ -144,6 +144,11 @@ bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *inst_builder, const
         inst_builder->InitEnv(bb);
     }
 
+    // OSR needs additional design for try-catch processing.
+    if ((bb->IsTryBegin() || bb->IsTryEnd()) && GetGraph()->IsOsrMode()) {
+        return false;
+    }
+
     if (bb->IsLoopHeader() && !bb->GetLoop()->IsTryCatchLoop()) {
         // Prepend SaveSateOSR as a first instruction in the loop header
         // TODO (a.popov) Support osr-entry for loops with catch-block back-edge
@@ -573,8 +578,7 @@ void IrBuilder::ConnectTryCodeBlock(const TryCodeBlock &try_block, const ArenaMa
     auto try_end = try_block.end_bb;
     ASSERT(try_end != nullptr);
     // Create auxiliary `Try` instruction
-    auto try_inst = GetGraph()->CreateInstTry();
-    try_inst->SetTryEndBlock(try_end);
+    auto try_inst = GetGraph()->CreateInstTry(try_end);
     try_begin->AppendInst(try_inst);
     // Insert `try_begin` and `try_end`
     auto first_try_bb = GetBlockForPc(try_block.boundaries.begin_pc);

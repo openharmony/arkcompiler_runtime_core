@@ -450,18 +450,16 @@ void BasicBlock::GenerateSelect(Inst *phi, Inst *inst1, Inst *inst2, const Saved
     Inst *select = nullptr;
     ASSERT(GetGraph()->GetEncoder()->CanEncodeFloatSelect() || !DataType::IsFloatType(phi->GetType()));
     if (if_info->if_opcode == Opcode::IfImm) {
-        select = GetGraph()->CreateInstSelectImm(phi->GetType(), if_info->if_pc, if_info->if_cc, if_info->if_imm);
-        select->CastToSelectImm()->SetOperandsType(if_info->if_type);
+        select = GetGraph()->CreateInstSelectImm(phi->GetType(), if_info->if_pc, if_info->swapped ? inst2 : inst1,
+                                                 if_info->swapped ? inst1 : inst2, if_info->if_input0, if_info->if_imm,
+                                                 if_info->if_type, if_info->if_cc);
     } else if (if_info->if_opcode == Opcode::If) {
-        select = GetGraph()->CreateInstSelect(phi->GetType(), if_info->if_pc, if_info->if_cc);
-        select->CastToSelect()->SetOperandsType(if_info->if_type);
-        select->SetInput(3U, if_info->if_input1);
+        select = GetGraph()->CreateInstSelect(phi->GetType(), if_info->if_pc, if_info->swapped ? inst2 : inst1,
+                                              if_info->swapped ? inst1 : inst2, if_info->if_input0, if_info->if_input1,
+                                              if_info->if_type, if_info->if_cc);
     } else {
         UNREACHABLE();
     }
-    select->SetInput(0, if_info->swapped ? inst2 : inst1);
-    select->SetInput(1, if_info->swapped ? inst1 : inst2);
-    select->SetInput(2U, if_info->if_input0);
 
     AppendInst(select);
 
@@ -758,16 +756,14 @@ void BasicBlock::ReplaceInstByDeoptimize(Inst *inst)
     while (call_inst != nullptr && call_inst->IsInlined()) {
         ss = call_inst->GetSaveState();
         ASSERT(ss != nullptr);
-        auto ret_inl = GetGraph()->CreateInstReturnInlined();
+        auto ret_inl = GetGraph()->CreateInstReturnInlined(DataType::NO_TYPE, INVALID_PC, ss);
         ret_inl->SetExtendedLiveness();
-        ret_inl->SetInput(0, ss);
         InsertBefore(ret_inl, inst);
         call_inst = ss->GetCallerInst();
     }
     // Replace Inst
-    auto deopt = GetGraph()->CreateInstDeoptimize(DataType::NO_TYPE, inst->GetPc());
+    auto deopt = GetGraph()->CreateInstDeoptimize(DataType::NO_TYPE, inst->GetPc(), inst->GetSaveState());
     deopt->SetDeoptimizeType(inst);
-    deopt->SetInput(0, inst->GetSaveState());
     inst->RemoveInputs();
     inst->RemoveUsers();
     ReplaceInst(inst, deopt);

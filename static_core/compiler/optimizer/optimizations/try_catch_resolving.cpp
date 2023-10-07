@@ -16,6 +16,7 @@
 #include "include/class.h"
 #include "runtime/include/class-inl.h"
 #include "compiler_logger.h"
+#include "compiler/optimizer/ir/runtime_interface.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/ir/basicblock.h"
@@ -24,17 +25,49 @@
 #include "optimizer/optimizations/try_catch_resolving.h"
 
 namespace panda::compiler {
-TryCatchResolving::TryCatchResolving(Graph *graph) : Optimization(graph) {}
+TryCatchResolving::TryCatchResolving(Graph *graph)
+    : Optimization(graph),
+      throw_insts_(graph->GetLocalAllocator()->Adapter()),
+      catch_blocks_(graph->GetLocalAllocator()->Adapter()),
+      phi_insts_(graph->GetLocalAllocator()->Adapter()),
+      try_blocks_(graph->GetLocalAllocator()->Adapter()),
+      cphi2phi_(graph->GetLocalAllocator()->Adapter()),
+      catch2cphis_(graph->GetLocalAllocator()->Adapter())
+{
+}
 
 bool TryCatchResolving::RunImpl()
 {
-    marker_ = GetGraph()->NewMarker();
-    for (auto block : GetGraph()->GetBlocksRPO()) {
-        if (!block->IsTryBegin()) {
-            continue;
+    COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Running try-catch-resolving";
+    for (auto bb : GetGraph()->GetBlocksRPO()) {
+        if (bb->IsCatch() && !(bb->IsCatchBegin() || bb->IsCatchEnd() || bb->IsTryBegin() || bb->IsTryEnd())) {
+            catch_blocks_.emplace(bb->GetGuestPc(), bb);
+            BasicBlock *cbl_pred = nullptr;
+            for (auto pred : bb->GetPredsBlocks()) {
+                if (pred->IsCatchBegin()) {
+                    cbl_pred = pred;
+                    break;
+                }
+            }
+            if (cbl_pred != nullptr) {
+                cbl_pred->RemoveSucc(bb);
+                bb->RemovePred(cbl_pred);
+                catch2cphis_.emplace(bb, cbl_pred);
+            }
+        } else if (bb->IsTry() && GetGraph()->GetThrowCounter(bb) > 0) {
+            auto throw_inst = bb->GetLastInst();
+            ASSERT(throw_inst != nullptr && throw_inst->GetOpcode() == Opcode::Throw);
+            throw_insts_.emplace_back(throw_inst);
+        } else if (bb->IsTryBegin()) {
+            try_blocks_.emplace_back(bb);
         }
-        COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Visit try-begin id = " << std::to_string(block->GetId());
-        VisitTry(GetTryBeginInst(block));
+    }
+    if (!catch_blocks_.empty() && !throw_insts_.empty()) {
+        ConnectThrowCatch();
+    }
+    for (auto bb : try_blocks_) {
+        COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Visit try-begin BB " << bb->GetId();
+        VisitTryInst(GetTryBeginInst(bb));
     }
     GetGraph()->RemoveUnreachableBlocks();
     GetGraph()->ClearTryCatchInfo();
@@ -44,79 +77,91 @@ bool TryCatchResolving::RunImpl()
     // Cleanup should be done inside pass, to satisfy GraphChecker
     GetGraph()->RunPass<Cleanup>();
 #endif
+    COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Finishing try-catch-resolving";
     return true;
+}
+
+void TryCatchResolving::ConnectThrowCatch()
+{
+    auto *graph = GetGraph();
+    auto *runtime = graph->GetRuntime();
+    auto *method = graph->GetMethod();
+    for (auto thr0w : throw_insts_) {
+        auto throw_block = thr0w->GetBasicBlock();
+        auto throw_inst = thr0w->CastToThrow();
+        // Inlined throws generate the problem with matching calls and returns now. TODO Should be fixed.
+        if (GetGraph()->GetThrowCounter(throw_block) == 0 || throw_inst->IsInlined()) {
+            continue;
+        }
+        auto new_obj = thr0w->GetInput(0).GetInst();
+        RuntimeInterface::ClassPtr cls = nullptr;
+        if (new_obj->GetOpcode() != Opcode::NewObject) {
+            continue;
+        }
+        auto init_class = new_obj->GetInput(0).GetInst();
+        if (init_class->GetOpcode() == Opcode::LoadAndInitClass) {
+            cls = init_class->CastToLoadAndInitClass()->GetClass();
+        } else {
+            ASSERT(init_class->GetOpcode() == Opcode::LoadImmediate);
+            cls = init_class->CastToLoadImmediate()->GetClass();
+        }
+        if (cls == nullptr) {
+            continue;
+        }
+        auto catch_pc = runtime->FindCatchBlock(method, cls, thr0w->GetPc());
+        if (catch_pc == panda_file::INVALID_OFFSET) {
+            continue;
+        }
+        auto cit = catch_blocks_.find(catch_pc);
+        if (cit == catch_blocks_.end()) {
+            continue;
+        }
+        auto catch_block = cit->second;
+        auto throw_block_succ = throw_block->GetSuccessor(0);
+        throw_block->RemoveSucc(throw_block_succ);
+        throw_block_succ->RemovePred(throw_block);
+        throw_block->AddSucc(catch_block);
+        PhiInst *phi_inst = nullptr;
+        auto pit = phi_insts_.find(catch_pc);
+        if (pit == phi_insts_.end()) {
+            phi_inst = GetGraph()->CreateInstPhi(new_obj->GetType(), catch_pc);
+            catch_block->AppendPhi(phi_inst);
+            phi_insts_.emplace(catch_pc, phi_inst);
+        } else {
+            phi_inst = pit->second;
+        }
+        phi_inst->AppendInput(new_obj);
+        auto cpit = catch2cphis_.find(catch_block);
+        ASSERT(cpit != catch2cphis_.end());
+        auto cphis_block = cpit->second;
+        RemoveCatchPhis(cphis_block, catch_block, thr0w, phi_inst);
+        COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING)
+            << "throw I " << thr0w->GetId() << " BB " << throw_block->GetId() << " is connected with catch BB "
+            << catch_block->GetId() << " and removed";
+        throw_block->RemoveInst(thr0w);
+    }
 }
 
 /**
  * Search throw instruction with known at compile-time `object_id`
  * and directly connect catch-handler for this `object_id` if it exists in the current graph
  */
-void TryCatchResolving::VisitTry(TryInst *try_inst)
+void TryCatchResolving::VisitTryInst(TryInst *try_inst)
 {
     auto try_begin = try_inst->GetBasicBlock();
     auto try_end = try_inst->GetTryEndBlock();
-    ASSERT(try_begin->IsTryBegin());
-    ASSERT(try_end->IsTryEnd());
-    // First of all, try to find catch-handler that can be directly connected to the block with `throw`
-    auto resolved_catch_handler = TryFindResolvedCatchHandler(try_begin, try_end);
+    ASSERT(try_begin != nullptr && try_begin->IsTryBegin());
+    ASSERT(try_end != nullptr && try_end->IsTryEnd());
+
     // Now, when catch-handler was searched - remove all edges from `try_begin` and `try_end` blocks
     DeleteTryCatchEdges(try_begin, try_end);
-    // If resolved catch-handler exists, connect it
-    if (resolved_catch_handler != nullptr) {
-        ConnectCatchHandlerAfterThrow(try_end, resolved_catch_handler);
-    }
-    // Clean-up lables and `try_inst`
+    // Clean-up labels and `try_inst`
+    COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Erase try-inst I " << try_inst->GetId();
     try_begin->EraseInst(try_inst);
+    COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Unset try-begin BB " << try_begin->GetId();
     try_begin->SetTryBegin(false);
+    COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Unset try-end BB " << try_end->GetId();
     try_end->SetTryEnd(false);
-}
-
-BasicBlock *TryCatchResolving::TryFindResolvedCatchHandler(BasicBlock *try_begin, BasicBlock *try_end)
-{
-    // `try_end` could be removed after inlining
-    if (try_end->GetPredsBlocks().size() != 1U) {
-        return nullptr;
-    }
-    auto throw_inst = try_end->GetPredecessor(0)->GetLastInst();
-    if (throw_inst == nullptr || throw_inst->GetOpcode() != Opcode::Throw) {
-        return nullptr;
-    }
-    auto object_id = TryGetObjectId(throw_inst);
-    if (!object_id) {
-        return nullptr;
-    }
-    // There should be no side-exits from try
-    auto holder = MarkerHolder(GetGraph());
-    auto marker = holder.GetMarker();
-    if (!DFS(try_begin->GetSuccessor(0), marker, try_begin->GetTryId())) {
-        return nullptr;
-    }
-    // We've got `object_id` which is thrown form try-block
-    // Let's find handler, which catches this `object_id`
-    BasicBlock *resolved_handler = nullptr;
-    try_begin->EnumerateCatchHandlers([this, object_id, &resolved_handler](BasicBlock *catch_handler, size_t type_id) {
-        // We don't connect catch-handlers which are related to more than one try-block.
-        // So that we skip blocks that:
-        // - have more than 2 predecessors (one try-begin/end pair);
-        // - were already visited from another try-block and were marked;
-        if (catch_handler->GetPredsBlocks().size() > 2U || catch_handler->IsMarked(marker_)) {
-            return true;
-        }
-        static constexpr size_t CATCH_ALL_ID = 0;
-        if (type_id == CATCH_ALL_ID) {
-            resolved_handler = catch_handler;
-            return false;
-        }
-        auto runtime = GetGraph()->GetRuntime();
-        auto *cls = runtime->ResolveType(GetGraph()->GetMethod(), object_id.value());
-        auto *handler_cls = runtime->ResolveType(GetGraph()->GetMethod(), type_id);
-        if (static_cast<Class *>(cls)->IsSubClassOf(static_cast<Class *>(handler_cls))) {
-            resolved_handler = catch_handler;
-            return false;
-        }
-        return true;
-    });
-    return resolved_handler;
 }
 
 /// Disconnect auxiliary `try_begin` and `try_end`. That means all related catch-handlers become unreachable
@@ -127,107 +172,64 @@ void TryCatchResolving::DeleteTryCatchEdges(BasicBlock *try_begin, BasicBlock *t
         ASSERT(catch_succ->IsCatchBegin());
         try_begin->RemoveSucc(catch_succ);
         catch_succ->RemovePred(try_begin);
+        COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING)
+            << "Remove edge between try_begin BB " << try_begin->GetId() << " and BB " << catch_succ->GetId();
         if (try_end->GetGraph() != nullptr) {
             ASSERT(try_end->GetSuccessor(1) == catch_succ);
             try_end->RemoveSucc(catch_succ);
             catch_succ->RemovePred(try_end);
+            COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING)
+                << "Remove edge between try_end BB " << try_end->GetId() << " and BB " << catch_succ->GetId();
         }
-        // Mark that catch-handler was visited
-        catch_succ->SetMarker(marker_);
     }
-}
-
-/// Add edge between catch-handler and `try_end` follows `throw` instruction
-void TryCatchResolving::ConnectCatchHandlerAfterThrow(BasicBlock *try_end, BasicBlock *catch_block)
-{
-    ASSERT(try_end != nullptr && try_end->IsTryEnd());
-    ASSERT(catch_block != nullptr && catch_block->IsCatchBegin());
-    ASSERT(try_end->GetPredsBlocks().size() == 1U);
-    auto throw_inst = try_end->GetPredecessor(0)->GetLastInst();
-    ASSERT(throw_inst != nullptr && throw_inst->GetOpcode() == Opcode::Throw);
-
-    COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING)
-        << "Connect blocks: " << std::to_string(try_end->GetId()) << " -> " << std::to_string(catch_block->GetId());
-
-    auto succ = try_end->GetSuccessor(0);
-    try_end->ReplaceSucc(succ, catch_block);
-    succ->RemovePred(try_end);
-    RemoveCatchPhis(catch_block, throw_inst);
-
-    auto save_state = throw_inst->GetInput(1).GetInst();
-    ASSERT(save_state->GetOpcode() == Opcode::SaveState);
-    auto throw_block = throw_inst->GetBasicBlock();
-    throw_block->RemoveInst(throw_inst);
-    throw_block->RemoveInst(save_state);
 }
 
 /**
  * Replace all catch-phi instructions with their inputs
  * Replace accumulator's catch-phi with exception's object
  */
-void TryCatchResolving::RemoveCatchPhis(BasicBlock *block, Inst *throw_inst)
+void TryCatchResolving::RemoveCatchPhis(BasicBlock *cphis_block, BasicBlock *catch_block, Inst *throw_inst,
+                                        Inst *phi_inst)
 {
-    ASSERT(block->IsCatchBegin());
-    for (auto inst : block->AllInstsSafe()) {
+    ASSERT(cphis_block->IsCatchBegin());
+    for (auto inst : cphis_block->AllInstsSafe()) {
         if (!inst->IsCatchPhi()) {
             break;
         }
         auto catch_phi = inst->CastToCatchPhi();
         if (catch_phi->IsAcc()) {
-            auto throw_obj = throw_inst->GetInput(0).GetInst();
-            catch_phi->ReplaceUsers(throw_obj);
+            catch_phi->ReplaceUsers(phi_inst);
         } else {
             auto throw_insts = catch_phi->GetThrowableInsts();
             auto it = std::find(throw_insts->begin(), throw_insts->end(), throw_inst);
             if (it != throw_insts->end()) {
                 auto input_index = std::distance(throw_insts->begin(), it);
                 auto input_inst = catch_phi->GetInput(input_index).GetInst();
-                catch_phi->ReplaceUsers(input_inst);
+                PhiInst *phi = nullptr;
+                auto cit = cphi2phi_.find(catch_phi);
+                if (cit == cphi2phi_.end()) {
+                    phi = GetGraph()->CreateInstPhi(catch_phi->GetType(), catch_block->GetGuestPc())->CastToPhi();
+                    catch_block->AppendPhi(phi);
+                    catch_phi->ReplaceUsers(phi);
+                    cphi2phi_.emplace(catch_phi, phi);
+                } else {
+                    phi = cit->second;
+                }
+                phi->AppendInput(input_inst);
             } else {
-                // Virtual register related to the catch-phi is undefined, so that there should be no real users
-                auto users = catch_phi->GetUsers();
-                while (!users.Empty()) {
-                    auto &user = users.Front();
-                    ASSERT(user.GetInst()->IsSaveState() || user.GetInst()->IsCatchPhi());
-                    user.GetInst()->RemoveInput(user.GetIndex());
+                while (!catch_phi->GetUsers().Empty()) {
+                    auto &user = catch_phi->GetUsers().Front();
+                    auto user_inst = user.GetInst();
+                    if (user_inst->IsSaveState() || user_inst->IsCatchPhi()) {
+                        user_inst->RemoveInput(user.GetIndex());
+                    } else {
+                        auto input_inst = catch_phi->GetInput(0).GetInst();
+                        user_inst->ReplaceInput(catch_phi, input_inst);
+                    }
                 }
             }
         }
-        block->RemoveInst(catch_phi);
     }
-    block->SetCatch(false);
-    block->SetCatchBegin(false);
-}
-
-/// Return object's id if `Throw` has `NewObject` input
-std::optional<uint32_t> TryCatchResolving::TryGetObjectId(const Inst *inst)
-{
-    ASSERT(inst->GetOpcode() == Opcode::Throw);
-    auto ref_input = inst->GetInput(0).GetInst();
-    if (ref_input->GetOpcode() == Opcode::NewObject) {
-        return ref_input->CastToNewObject()->GetTypeId();
-    }
-    return std::nullopt;
-}
-
-bool TryCatchResolving::DFS(BasicBlock *block, Marker marker, uint32_t try_id)
-{
-    if (block->GetTryId() != try_id) {
-        return false;
-    }
-    if (block->IsTryEnd() && block->GetTryId() == try_id) {
-        return true;
-    }
-    block->SetMarker(marker);
-    for (auto succ : block->GetSuccsBlocks()) {
-        if (succ->IsMarked(marker)) {
-            continue;
-        }
-        if (!DFS(succ, marker, try_id)) {
-            return false;
-        }
-    }
-    return true;
 }
 
 void TryCatchResolving::InvalidateAnalyses()

@@ -75,14 +75,16 @@ catch_block2_begin:
     auto expected_graph = CreateGraphWithDefaultRuntime();
     GRAPH(expected_graph)
     {
-        CONSTANT(1, 0);
-
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2, 3)
         {
-            INST(2, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(5, Opcode::Return).Inputs(1).b();
+            INST(5, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(6, Opcode::LoadAndInitClass).ref().Inputs(5);
+            INST(7, Opcode::NewObject).ref().Inputs(6, 5);
+        }
+        BASIC_BLOCK(3, -1)
+        {
+            INST(8, Opcode::SaveState).Inputs(7).SrcVregs({0});
+            INST(9, Opcode::Throw).Inputs(7, 8);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));

@@ -355,6 +355,8 @@ public:
     PANDA_PUBLIC_API int64_t GetBranchTakenCounter(uint32_t pc);
     PANDA_PUBLIC_API int64_t GetBranchNotTakenCounter(uint32_t pc);
 
+    int64_t GetThrowTakenCounter(uint32_t pc);
+
     const void *GetCompiledEntryPoint()
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
@@ -653,6 +655,7 @@ public:
         return shorty_;
     }
 
+    uint32_t FindCatchBlockInPandaFile(const Class *cls, uint32_t pc) const;
     uint32_t FindCatchBlock(const Class *cls, uint32_t pc) const;
 
     PANDA_PUBLIC_API panda_file::Type GetEffectiveArgType(size_t idx) const;
