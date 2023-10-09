@@ -29,6 +29,7 @@
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/interop_js/pending_promise_listener.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "types/ets_void.h"
 
 namespace panda::ets::interop::js {
 
@@ -408,6 +409,18 @@ JSCONVERT_UNWRAP(String)
     }
     std::string value = GetString(env, js_val);
     return EtsString::CreateFromUtf8(value.data(), value.length());
+}
+
+JSCONVERT_DEFINE_TYPE(Void, EtsVoid *)
+JSCONVERT_WRAP(Void)
+{
+    napi_value js_val;
+    NAPI_CHECK_FATAL(napi_get_undefined(env, &js_val));
+    return js_val;
+}
+JSCONVERT_UNWRAP(Void)
+{
+    return EtsVoid::GetInstance();
 }
 
 JSCONVERT_DEFINE_TYPE(JSValue, JSValue *)

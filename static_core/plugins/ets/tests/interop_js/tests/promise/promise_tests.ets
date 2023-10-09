@@ -437,3 +437,7 @@ async function testAsyncDouble(): Promise<double> {
 async function testAsyncString(): Promise<String> {
     return "Panda";
 }
+
+async function testAsyncVoid(): Promise<void> { return Void }
+async function testAsyncVoidEmpty(): Promise<void> {}
+async function testAsyncVoidNothing() {}
