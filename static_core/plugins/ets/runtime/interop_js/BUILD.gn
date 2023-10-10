@@ -34,8 +34,11 @@ if (is_ohos && is_standard_system) {
   }
 }
 
-ohos_shared_library("ets_interop_js_napi") {
-  configs = [ "$ark_root:ark_config" ]
+ohos_source_set("ets_interop_js_napi_static") {
+  configs = [
+    "$ark_root:ark_config",
+    "$ark_root/runtime:arkruntime_public_config",
+  ]
 
   include_dirs = [ "$ark_napi_headers_path" ]
 
@@ -83,6 +86,12 @@ ohos_shared_library("ets_interop_js_napi") {
       "napi:ace_napi",
     ]
   }
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
+}
+
+ohos_shared_library("ets_interop_js_napi") {
+  deps = [ ":ets_interop_js_napi_static" ]
   relative_install_dir = "module"
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"

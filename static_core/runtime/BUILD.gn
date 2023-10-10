@@ -108,7 +108,7 @@ group("arkruntime_header_deps") {
   deps += plugin_arkruntime_header_plugin_deps
 }
 
-source_set("libarkruntime_set_static") {
+ohos_source_set("libarkruntime_set_static") {
   sources = [
     "arch/asm_support.cpp",
     "assert_gc_scope.cpp",
@@ -394,6 +394,15 @@ source_set("libarkruntime_set_static") {
     defines = [ "PANDA_USE_OHOS_LOG" ]
     include_dirs = [ "$hilog_root/include" ]
   }
+  if (current_cpu == "amd64" || current_cpu == "x64" ||
+      current_cpu == "x86_64") {
+    ldflags = [ "-latomic" ]
+  }
+  if (is_ohos && is_standard_system) {
+    external_deps = [ "hilog:libhilog" ]
+  }
+  part_name = ark_part_name
+  subsystem_name = ark_subsystem_name
 }
 
 ohos_static_library("libarkruntime_static") {
@@ -404,16 +413,7 @@ ohos_static_library("libarkruntime_static") {
 }
 
 ohos_shared_library("libarkruntime") {
-  public_configs = [ ":arkruntime_public_config" ]
-  deps = [ ":libarkruntime_static" ]
-  if (is_ohos && is_standard_system) {
-    external_deps = [ "hilog:libhilog" ]
-  }
-
-  if (current_cpu == "amd64" || current_cpu == "x64" ||
-      current_cpu == "x86_64") {
-    ldflags = [ "-latomic" ]
-  }
+  deps = [ ":libarkruntime_set_static" ]
 
   output_extension = "so"
   part_name = ark_part_name

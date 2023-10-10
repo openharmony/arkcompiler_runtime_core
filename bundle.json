@@ -34,7 +34,9 @@
         },
         "build": {
             "sub_component": [
-                "//arkcompiler/runtime_core:arkcompiler_params"
+                "//arkcompiler/runtime_core:arkcompiler_params",
+                "//arkcompiler/runtime_core/arkplatform:arkplatform_packages",
+                "//arkcompiler/runtime_core/static_core:ark_packages"
             ],
             "inner_kits": [
                 {
@@ -101,21 +103,21 @@
                     }
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/arkplatform:libarkplatform",
+                    "name": "//arkcompiler/runtime_core/arkplatform:arkplatform_static",
                     "header": {
                         "header_files": [],
                         "header_base": "//arkcompiler/runtime_core/arkplatform/include"
                     }
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/runtime:libarkruntime",
+                    "name": "//arkcompiler/runtime_core/static_core/runtime:libarkruntime_set_static",
                     "header": {
                         "header_files": [],
                         "header_base": "//arkcompiler/runtime_core/static_core/runtime/include"
                     }
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/interop_js:ets_interop_js_napi",
+                    "name": "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/interop_js:ets_interop_js_napi_static",
                     "header": {
                         "header_files": [],
                         "header_base": "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/interop_js"

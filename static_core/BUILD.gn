@@ -12,33 +12,38 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("//arkcompiler/runtime_core/static_vm_config.gni")
 import("//build/ohos.gni")
 import("$ark_root/plugins/plugins.gni")
 
 group("ark_packages") {
-  deps = plugin_ark_packages
-  if (host_os != "mac") {
-    deps += [
-      "$ark_root/compiler:libarktscompiler",
-      "$ark_root/compiler/aot:libarkaotmanager",
-      "$ark_root/libpandabase:libarktsbase",
-      "$ark_root/libpandafile:libarktsfile",
-      "$ark_root/libpandafile/external:libarkfileExt",
-      "$ark_root/libpandafile/external:libarksupport",
-      "$ark_root/libziparchive:libarktsziparchive",
-      "$ark_root/panda:arkts_bin",
-      "$ark_root/runtime:libarkruntime",
-      "$ark_root/runtime/tooling/inspector:libarkinspector",
-      "$ark_root/verification/verifier:verifier.config",
-      "$ark_root/verification/verifier:verifier_bin",
-    ]
-    if (enable_codegen) {
-      deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
-    }
+  if (enable_static_vm) {
+    deps = plugin_ark_packages
+    if (host_os != "mac") {
+      deps += [
+        "$ark_root/compiler:libarktscompiler",
+        "$ark_root/compiler/aot:libarkaotmanager",
+        "$ark_root/libpandabase:libarktsbase",
+        "$ark_root/libpandafile:libarktsfile",
+        "$ark_root/libpandafile/external:libarkfileExt",
+        "$ark_root/libpandafile/external:libarksupport",
+        "$ark_root/libziparchive:libarktsziparchive",
+        "$ark_root/panda:arkts_bin",
+        "$ark_root/runtime:libarkruntime",
+        "$ark_root/verification/verifier:verifier.config",
+        "$ark_root/verification/verifier:verifier_bin",
+      ]
+      if (!is_ohos) {
+        deps += [ "$ark_root/runtime/tooling/inspector:libarkinspector" ]
+      }
+      if (enable_codegen) {
+        deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
+      }
 
-    # TODO: don't exclude these targets from OHOS build
-    if (ark_standalone_build) {
-      deps += [ "$ark_root/compiler/tools/paoc:ark_aot" ]
+      # TODO: don't exclude these targets from OHOS build
+      if (ark_standalone_build) {
+        deps += [ "$ark_root/compiler/tools/paoc:ark_aot" ]
+      }
     }
   }
 }
