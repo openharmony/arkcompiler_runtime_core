@@ -299,7 +299,7 @@ are any valid expressions):
 +---------+---------+--------+---------+
 
 The example below illustrates the ways this approach works in practice. A
-*non-zero* number is truthy, and the loop runs until it becomes *zero*, i.e.,
+*nonzero* number is truthy, and the loop runs until it becomes *zero*, i.e.,
 falsy.
 
 .. code-block:: typescript

@@ -259,6 +259,10 @@ Ambient Namespace Declarations
         ;
 
     ambentNamespaceElement:
+        ambentNamespaceDeclaration | selectiveExportDirective
+    ;
+
+    ambentNamespaceDeclaration:
         'export'? 
         ( ambientVariableDeclaration
         | ambientFunctionDeclaration
@@ -266,7 +270,7 @@ Ambient Namespace Declarations
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
         | enumDeclaration
-        | typeAlias 
+        | typeAlias
         )
         ;
 

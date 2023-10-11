@@ -23,13 +23,13 @@ declarations, and scopes.
 
 Each entity in a |LANG| program---a variable, a constant, a class,
 a type, a function, a method, etc.---is introduced via a *declaration*.
-An entity declaration assigns a *name* to the entity declared.
-Further in the program text, the name is used to refer to the entity.
+An entity declaration assigns a *name* to the entity declared. The name
+is used to refer to the entity further in the program text.
 
-Each declaration is valid (i.e., available and known) only within its
-*scope*. Informally, scope is the region of the program text where the
-entity is declared, and where it can be referred to by its simple
-(unqualified) name. See :ref:`Scopes` for more details.
+Each declaration is valid (i.e., available and known) only within its *scope*.
+Scope is the region of the program text where the entity is declared and can
+be referred to by its simple (unqualified) name (see :ref:`Scopes` for more
+details).
 
 .. index::
    variable
@@ -57,12 +57,12 @@ Names
 
 A name refers to any declared entity.
 
-*Simple* names consist of a single identifier; *qualified* names consist
+*Simple names* consist of a single identifier; *qualified names* consist
 of a sequence of identifiers with the '.' tokens as separators.
 
 A qualified name *N.x* (where *N* is a simple or qualified name, and ``x``
 is an identifier) can refer to a *member* of a package, or a reference type
-(see :ref:`Reference Types`). *N* can name:
+(see :ref:`Reference Types`). *N* can name the following:
 
 -  A package, of which ``x`` is a member.
 
@@ -101,9 +101,8 @@ Declarations
 .. meta:
     frontend_status: Done
 
-Declarations introduce named entities in appropriate **declaration scope**
-(see :ref:`Scopes`). Any declaration in its declaration scope must be
-*distinguishable*.
+A declaration introduces a named entity in an appropriate **declaration scope**
+(see :ref:`Scopes`).
 
 .. index::
    named entity
@@ -123,14 +122,14 @@ Distinguishable Declarations
     todo: const PI:()=>int = ():int=>{return 5};function PI():float{return 3.14};let a = PI(); error: a is 5
     todo: need scpec clarification
 
-Declarations must be distinguishable in a declaration scope. A
-:index:`compile-time error` occurs otherwise.
+Each declaration in the declaration scope must be *distinguishable*.
+A :index:`compile-time error` occurs otherwise.
 
-Declarations are distinguishable if they:
+Declarations are *distinguishable* if:
 
--  Have different names;
+-  They have different names;
 
--  Are distinguishable by signatures (see
+-  They are distinguishable by signatures (see
    :ref:`Declaration Distinguishable by Signatures`).
 
 .. index::
@@ -139,7 +138,7 @@ Declarations are distinguishable if they:
    name
    signature
 
-Example of declarations distinguishable by names:
+The examples below are declarations distinguishable by names:
 
 .. code-block:: typescript
    :linenos:
@@ -149,8 +148,8 @@ Example of declarations distinguishable by names:
     function Pi() {}
     type IP = number[]
 
-Example of declarations that are indistinguishable by names, and cause a
-:index:`compile-time error`:
+The examples below are declarations indistinguishable by names.
+Such declarations cause compile-time errors:
 
 .. code-block:: typescript
    :linenos:
@@ -173,6 +172,7 @@ Example of declarations that are indistinguishable by names, and cause a
 
 .. index::
    distinguishable declaration
+   compile-time error
 
 |
 
@@ -190,8 +190,8 @@ In other words, the name is accessible in some context if it can be used in this
 context by its *simple* name.
 
 The nature of usage of a scope depends on the kind of the name.
-A type name can be used to declare variables or constants; a name of a function
-can be used to call that function.
+A type name is used to declare variables or constants;
+a function name is used to call that function.
 
 .. index::
    scope
@@ -264,7 +264,7 @@ The scope of a name depends on the context the name is declared in:
 .. _enum-access:
 
 -  *Enum level scope*: as every enumeration defines a type inside a package or
-   module then its scope is identical to the package or module level scope.
+   module, then its scope is identical to the package or module level scope.
    All enumeration constants have the same scope as the enumeration itself.
 
 .. index::
@@ -301,7 +301,7 @@ The scope of a name depends on the context the name is declared in:
 
 -  The scope of a name declared immediately inside the body of a function
    (method) declaration is the body of that function declaration (*method*
-   or *function scope*) from the place of declaration, and up to the end of
+   or *function scope*) from the place of declaration and up to the end of
    the body.
 
 .. index::
@@ -314,7 +314,7 @@ The scope of a name depends on the context the name is declared in:
 .. _block-access:
 
 -  The scope of a name declared inside a statement block is the body of
-   such statement block from the point of declaration, and down to the end
+   the statement block from the point of declaration and down to the end
    of the block (*block scope*).
 
 .. index::
@@ -331,12 +331,16 @@ The scope of a name depends on the context the name is declared in:
         let y = 1
     }
 
-Scopes of two names can overlap (e.g., when statements are nested); in
-that case the name with the innermost declaration takes precedence, and
-access to the outer name is not accessible.
+Scopes of two names can overlap (e.g., when statements are nested). If scopes
+of two names overlap, then:
 
-Class, interface and enum members are not directly accessible in a scope;
-in order to access them, the dot operator '.' must be applied to an instance.
+-  The innermost declaration takes precedence; and
+-  Access to the outer name is impossible.
+
+
+Class, interface, and enum members can only be accessed by applying the dot
+operator '.' to an instance; accessing them otherwise is impossible.
+
 
 .. index::
    name
@@ -392,9 +396,10 @@ Type Alias Declaration
     todo: type alias can be as local declaration now, but the spec says it can be only topDeclaration
     todo: type alias name shouldn't be handled as variable name (eg: type foo = Double; let foo : int = 0 --> now error)
 
-Type aliases enable using meaningful and concise notations by providing:
+Type aliases enable using meaningful and concise notations by providing the
+following:
 
--  Names for anonymous types (array, function, union types); or
+-  Names for anonymous types (array, function, and union types); or
 -  Alternative names for existing types.
 
 
@@ -429,8 +434,8 @@ Meaningful names can be provided for anonymous types as follows:
     type Predicate<T> = (x: T) => Boolean
     type NullableNumber = Number | null
 
-If the existing type name is too long, then it is reasonable to introduce
-a shorter new name by using type alias, particularly for a generic type.
+If the existing type name is too long, then a shorter new name can be
+introduced by using type alias (particularly for a generic type).
 
 .. code-block:: typescript
    :linenos:
@@ -438,8 +443,8 @@ a shorter new name by using type alias, particularly for a generic type.
     type Dictionary = Map<string, string>
     type MapOfString<T> = Map<T, string>
 
-A type alias introduces no new type but acts only as a new name, while its
-meaning remains the same as the original type’s.
+A type alias acts only as a new name. It neither changes the meaning of the
+original type nor introduces a new type.
 
 .. code-block:: typescript
    :linenos:
@@ -473,11 +478,11 @@ type alias declaration, see :ref:`Recursive Type Aliases`.
 Recursive Type Aliases
 ======================
 
-For a type alias defined as *type A = something*, *A* can be used recursively
-if it is used as one of the following:
+In a type alias defined as *type A = something*, *A* can be used recursively
+if it is one of the following:
 
 -  Array element type: *type A = A[]*; or
--  Type argument of some generic type: type A = C<A>.
+-  Type argument of a generic type: type A = C<A>.
 
 .. code-block:: typescript
    :linenos:
@@ -490,7 +495,7 @@ if it is used as one of the following:
     type D = string | Array<D> // ok
 
 
-Any other usage causes a compile-time error, as the compiler
+Any other use causes a compile-time error, because the compiler
 does not have enough information about the defined alias:
 
 .. code-block:: typescript
@@ -500,8 +505,8 @@ does not have enough information about the defined alias:
     type F = string | E // compile-time error
 
 
-Exactly the same rules apply to a generic type alias defined as
-*type A<G> = something*.
+The same rules apply to a generic type alias defined as
+*type A<G> = something*:
 
 .. code-block:: typescript
    :linenos:
@@ -520,8 +525,8 @@ a type argument:
 
     type A<G> = Array<A> // compile-time error
 
-**Note**: there is no restriction on using a type parameter *G* in
-the right side of a type alias declaration, and the following code
+**Note**: There is no restriction on using a type parameter *G* in
+the right side of a type alias declaration. The following code
 is valid:
 
 .. code-block:: typescript
@@ -529,6 +534,7 @@ is valid:
 
     type NodeValue<G> = G | Array<G> | Array<NodeValue<G>>;
 
+|
 |
 
 .. _Variable and Constant Declarations:
@@ -552,8 +558,8 @@ Variable Declarations
     todo: es2panda bug: A local variable must be explicitly given a value before ifis used, by either
     todo: "Every variable in program must have a value before its value is used" - Can't be guaranteed in compile time that a non-nullable array component is initialized. initialization or assignment. But we got no error if don't init a primitive typed local var.
 
-A *variable declaration* introduces a new named variable, which can be assigned
-with an initial value.
+A *variable declaration* introduces a new named variable that can be assigned
+an initial value.
 
 .. code-block:: abnf
 
@@ -574,13 +580,14 @@ with an initial value.
         '=' expression
         ;
 
-The type *T* of a variable introduced by a variable declaration is determined
-as follows:
+When a variable is introduced by a variable declaration, type *T* of the
+variable is determined as follows:
 
 -  *T* is the type specified in a type annotation (if any) of the declaration.
-   If *'?'* is used after the name of the variable, then the variable's type is
-   *type | undefined.* If the declaration also has an initializer, then the
-   initializer expression must be compatible with *T* (see :ref:`Type Compatibility with Initializer`).
+   If *'?'* is used after the name of the variable, then the type of the
+   variable is *type | undefined.* If the declaration also has an initializer,
+   then the initializer expression must be compatible with *T* (see
+   :ref:`Type Compatibility with Initializer`).
 
 -  If no type annotation is available, then *T* is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
@@ -606,16 +613,15 @@ as follows:
     let f = (p: number) => b + p
     let x // compile-time error -- either type or initializer
 
-Every variable in a program must have an initial value before its value is used.
+Every variable in a program must have an initial value before it can be used.
+The initial value can be identified as follows:
 
-There are several ways to identify such initial value:
-
--  An initial value is explicitly specified by using an *initializer*.
+-  The initial value is explicitly specified by an *initializer*.
 -  Each method or function parameter is initialized to the corresponding
-   argument value provided by the caller of that method or function.
+   argument value provided by the caller of the method or function.
 -  Each constructor parameter is initialized to the corresponding
-   argument value provided by:
-
+   argument value as provided by:
+   
    + Class instance creation expression (see :ref:`New Expressions`), or
    + Explicit constructor call (see :ref:`Explicit Constructor Call`).
 
@@ -624,7 +630,7 @@ There are several ways to identify such initial value:
 -  Each class, instance, local variable, or array element is initialized with
    a *default value* (see :ref:`Default Values for Types`) when it is created.
 
-Otherwise, a variable is not initialized, and a :index:`compile-time error`
+Otherwise, the variable is not initialized, and a :index:`compile-time error`
 occurs.
 
 If an initializer expression is provided, then additional restrictions apply
@@ -667,7 +673,7 @@ Constant Declarations
 A *constant declaration* introduces a named variable with a mandatory
 explicit value.
 
-The value of a constant cannot be changed by using an assignment expression
+The value of a constant cannot be changed by an assignment expression
 (see :ref:`Assignment`). However, if the constant is an object or array, then
 its properties or items can be modified.
 
@@ -689,11 +695,11 @@ The type *T* of a constant declaration is determined as follows:
 
 -  If *T* is the type specified in a type annotation (if any) of the
    declaration, then the initializer expression must be compatible with
-   that *T* (see :ref:`Type Compatibility with Initializer`).
+   *T* (see :ref:`Type Compatibility with Initializer`).
 -  If no type annotation is available, then *T* is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
--  If *'?'* is used after the name of the constant, then the type of the
-   constant is *T | undefined*, regardless of whether *T* is identified
+-  If '*?*' is used after the name of the constant, then the type of the
+   constant is ``T | undefined``, regardless of whether *T* is identified
    explicitly or via type inference.
 
 .. index::
@@ -733,28 +739,28 @@ Type Compatibility with Initializer
     frontend_status: Done
 
 If a variable or constant declaration contains the type annotation *T* and the
-initializer expression *E*, then the type of *E* must be equal to that of *T*;
-otherwise, one of the following assertions must be true:
+initializer expression *E*, then the type of *E* must be equal to that of *T*.
+Otherwise, one of the following assertions must be true:
 
-+-----------------------+----------------------------------+-------------------------------------+
-| **T is**              | **E is**                         |  **Assertion**                      |
-+=======================+==================================+=====================================+
-| One of integer types  | integer literal or compile-time  | Value of *E* is in bound of         |
-|                       | constant expression of some      | type *T*                            |
-|                       | integer type                     |                                     |
-+-----------------------+----------------------------------+-------------------------------------+
-| Type *char*           | integer literal                  | Value of *E* is in bounds of type   |
-|                       |                                  | *T*                                 |
-+-----------------------+----------------------------------+-------------------------------------+
-| Float type (*float*   | floating-point literal or        | Value of *E* is in bounds of type   |
-| or *double*)          | compile-time constant expression | *T*. *This conversion can lead to   |
-|                       | of a float type                  | the loss of precision, see          |
-|                       |                                  | “Narrowing Primitive Conversion”.*  |
-+-----------------------+----------------------------------+-------------------------------------+
-| Class type            | of a class type                  | Type of *E* is derived class of *T* |
-+-----------------------+----------------------------------+-------------------------------------+
++-----------------------+----------------------------------+---------------------------------------+
+| **T is**              | **E is**                         |  **Assertion**                        |
++=======================+==================================+=======================================+
+| One of integer types  | integer literal or compile-time  | Value of *E* is in bound of           |
+|                       | constant expression of some      | type *T*                              |
+|                       | integer type                     |                                       |
++-----------------------+----------------------------------+---------------------------------------+
+| Type *char*           | integer literal                  | Value of *E* is in bounds of type     |
+|                       |                                  | *T*                                   |
++-----------------------+----------------------------------+---------------------------------------+
+| Float type (*float*   | floating-point literal or        | Value of *E* is in bounds of type     |
+| or *double*)          | compile-time constant expression | *T*. *This conversion can lead to     |
+|                       | of a float type                  | the loss of precision (see            |
+|                       |                                  | “Narrowing Primitive Conversion”).*   |
++-----------------------+----------------------------------+---------------------------------------+
+| Class type            | of a class type                  | Type of *E* is a derived class of *T* |
++-----------------------+----------------------------------+---------------------------------------+
 
-Unless at least one of these conditions is fulfilled, then an error is thrown.
+An error is thrown if at least one of these conditions is not fulfilled.
 
 .. index::
    compile-time error
@@ -785,13 +791,12 @@ Type Inference from Initializer
     frontend_status: Partly
     todo: spec issue: "If initializer expression is a null literal('null') the compiler error should be reported". Why is it striked out? "let a = null" should be CTE A: scpec will be changed, a will have "Object|null tyoe"
 
-The type of a declared entity is:
+The type of a declared entity is one of the following:
 
 -  The type of the initializer expression if a variable or constant
-   declaration contains no explicit type annotation; or
+   declaration contains no explicit type annotation.
 
--  *Object \| null* if the initializer expression is a null literal
-   (*null*).
+-  *Object \| null* if the initializer expression is the *null* literal.
 
 .. index::
    type
@@ -835,13 +840,13 @@ Function *overload signature* allows calling a function in different ways (see
 
 In a **native function** (see :ref:`Native Functions`), the body is omitted.
 
-If a function is declared as **generic** (see :ref:`Generics`), then type
-parameters must be  specified.
+If a function is declared as **generic** (see :ref:`Generics`), then its type
+parameters must be specified.
 
-Native functions are described in the experimental section (see
+Native functions are described in the chapter Experimental Features (see
 :ref:`Native Functions`).
 
-Functions must be declared on the top-level (see :ref:`Top-Level Statements`).
+Functions must be declared on the top level (see :ref:`Top-Level Statements`).
 
 Function expressions must be used to define lambdas (see
 :ref:`Lambda Expressions`).
@@ -919,9 +924,9 @@ Parameter List
 .. meta:
     frontend_status: Done
 
-A signature contains a *parameter list* that specifies an identifier as
-each parameter name and a type of each parameter. Every parameter’s type must
-be explicitly defined.
+A signature contains a *parameter list* that specifies an identifier of
+each parameter name, and the type of each parameter. The type of each
+parameter must be explicitly defined.
 
 .. code-block:: abnf
 
@@ -997,9 +1002,9 @@ There are two forms of *optional parameters*:
 
 
 The first form contains an expression that specifies a *default value*. That
-is called a *parameter with default value*. If the argument
-corresponding to that parameter is omitted in a function call, then the value
-of the parameter is set to the *default value*.
+is called a *parameter with default value*. The value of the parameter is set
+to the *default value* if the argument corresponding to that parameter is
+omitted in a function call.
 
 .. index::
    optional parameter
@@ -1021,11 +1026,11 @@ of the parameter is set to the *default value*.
     pair(1) // prints: 1 7
 
 The second form is a short notation for a parameter of a union type
-*T* | ``undefined`` with the default value ``undefined``.
-It means that *identifier '?' ':' type* is equivalent to
+``T | undefined`` with the default value ``undefined``. It means that
+*identifier '?' ':' type* is equivalent to
 *identifier ':' type | undefined = undefined*.
 If a type is of the value type kind, then (similar to :ref:`Union Types`)
-implicit boxing must be applied in the following manner:
+implicit boxing must be applied as follows:
 *identifier '?' ':' valueType* is equivalent to
 *identifier ':' referenceTypeForValueType | undefined = undefined*.
 
@@ -1042,6 +1047,10 @@ implicit boxing must be applied in the following manner:
    function
 
 For example, the following two functions can be used in the same way:
+
+|
+|
+|
 
 .. code-block:: typescript
    :linenos:
@@ -1075,7 +1084,7 @@ Rest Parameter
 A *rest parameter* allows functions or methods to take unbounded numbers
 of arguments.
 
-*Rest parameters* have the '``...``' symbol mark before a parameter name.
+*Rest parameters* have the '``...``' symbol mark before the parameter name.
 
 .. code-block:: typescript
    :linenos:
@@ -1122,6 +1131,8 @@ number of arguments of type ``T``.
 
 If an argument of type ``T[]`` is prefixed with the *spread* operator
 '``...``', then only one argument can be accepted.
+
+|
 
 .. code-block:: typescript
    :linenos:
@@ -1193,7 +1204,7 @@ Return Type
 .. meta:
     frontend_status: Done
 
-An omitted function, or method return type can be inferred from the function,
+An omitted function or method return type can be inferred from the function,
 or the method body. A :index:`compile-time error` occurs if a return type is
 omitted in a native function (see :ref:`Native Functions`).
 
@@ -1203,21 +1214,21 @@ the following conditions:
 -  If there is no return statement, or if all return statements have no
    expressions, then the return type is *void* (see :ref:`void Type`).
 -  If there is at least one return statement with an expression, and the
-   type of each expression of each return statement is *R*, then the
+   type of each expression in each return statement is *R*, then the
    return type is *R*.
--  If there are *k* return statements (assuming that *k* is two, or more)
-   with expressions of types (*T*:sub:`1`, ``...``, *T*:sub:`k`), and *R*
+-  If there are *k* return statements (where *k* is two or more) with
+   expressions of types (*T*:sub:`1`, ``...``, *T*:sub:`k`), and *R*
    is the *least upper bound* (see :ref:`Least Upper Bound`) of these types,
    then the return type is *R*.
 -  If the function is *async*, the return type is inferred by using the rules
    above, and the type *T* is not *Promise* type, then the return type
    is *Promise<T>*.
 
-Future compiler implementation can infer return type in more cases. If
+Future compiler implementation are to infer return type in more cases. If
 the particular type inference case is not recognized by the compiler,
 then a corresponding :index:`compile-time error` occurs.
 
-See the example below for an illustration of type inference:
+The example below is an illustration of type inference:
 
 .. index::
    return type
@@ -1246,9 +1257,9 @@ See the example below for an illustration of type inference:
 
     function bar (condition: boolean) {
         if (condition)
-            return new Derived1
+            return new Derived1()
         else
-            return new Derived2
+            return new Derived2()
     }
     /* Return type of bar will be inferred as Base which is
        LUB for Derived1 and Derived2 */
@@ -1264,10 +1275,10 @@ Function Overload Signatures
     frontend_status: None
 
 The |LANG| language allows specifying a function that can be called in
-different ways by writing *overload signatures*, i.e., by writing several
-function headers which have the same name and different signatures, and are
-followed by one implementation function. See also
-:ref:`Methods Overload Signatures` for *method overload signatures*.
+different ways by writing *overload signatures*. It means writing several
+function headers that have the same name but different signatures, and are
+followed by one implementation function (see :ref:`Methods Overload Signatures`
+for *method overload signatures*).
 
 .. code-block:: abnf
 
@@ -1283,7 +1294,7 @@ A call of a function with overload signatures is always a call of the
 implementation function.
 
 The example below has two overload signatures defined (one is parameterless,
-and the other has one parameter):
+and the other has a single parameter):
 
 .. index::
    function overload signature
@@ -1294,6 +1305,8 @@ and the other has one parameter):
    implementation function
    implementation
    method overload signature
+
+|
 
 .. code-block:: typescript
    :linenos:
@@ -1308,16 +1321,16 @@ and the other has one parameter):
     foo("aa") // ok, 2nd signature is used
 
 The call of ``foo()`` is executed as a call of the implementation function
-with the ``null`` argument, while the call of ``foo(x)`` is executed as a call
+with the ``null`` argument; the call of ``foo(x)`` is executed as a call
 of the implementation function with the ``x`` argument.
 
 A :index:`compile-time error` occurs if the signature of function
 implementation is not *overload signature-compatible* with each overload
 signature. It means that a call of each overload signature must be replaceable
-for the correct call of the implementation function. This can be achieved by
+for the correct call of the implementation function. That can be achieved by
 using optional parameters (see :ref:`Optional Parameters`), or *least upper
-bound* types (see :ref:`Least Upper Bound`). See
-:ref:`Overload Signature Compatibility` for the exact semantic rules.
+bound* types (see :ref:`Least Upper Bound`). The exact semantic rules can
+be found in :ref:`Overload Signature Compatibility`.
 
 A :index:`compile-time error` occurs unless all overload signatures are
 exported or non-exported.

@@ -19,12 +19,11 @@ Contexts and Conversions
     frontend_status: Done
 
 Every expression written in the |LANG| programming language has a type that
-is inferred at compile time. The *target type* of an expression is the type
-*compatible* with the types expected in most contexts that expression
-appears in.
+is inferred at compile time. The *target type* of an expression must be
+*compatible* with the types expected in most contexts the expression appears in.
 
-There are two ways to improve convenience by facilitating the expression's
-compatibility with its surrounding context:
+There are two ways to improve convenience by facilitating the compatibility
+of an expression with its surrounding context:
 
 #. The type of some non-standalone expressions can be inferred from the
    target type (the expression types can be different in different
@@ -191,11 +190,10 @@ Type *T1* is compatible with type *T2* if one of the following conversions
 can be successfully applied to type *T1* to receive type *T2* as a result:
 
 -  Identity conversion (see :ref:`Kinds of Conversion`);
--  Predefined numeric types conversions (see :ref:`Predefined Numeric Types Conversions`);
+-  Primitive types conversions (see :ref:`Primitive Types Conversions`);
 -  Reference types conversions (see :ref:`Reference Types Conversions`);
 -  Function types conversions (see :ref:`Function Types Conversions`);
 -  Enumeration types conversions -- experimental feature (see :ref:`Enumeration Types Conversions`);
--  Raw types conversions (see :ref:`Raw Type Conversions`).
 
 .. index::
    compatible type
@@ -205,7 +203,6 @@ can be successfully applied to type *T1* to receive type *T2* as a result:
    identity conversion
    function types conversion
    enumeration types conversion
-   raw types conversion   
 
 |
 
@@ -245,14 +242,14 @@ effectively transforms into the following:
    which is then performed as the *toString()* method call.
 
 -  Any primitive type must convert to a reference value (for boxing see
-   :ref:`Predefined Numeric Types Conversions`) before the method call
+   :ref:`Primitive Types Conversions`) before the method call
    *toString()* is performed.
 
 These contexts always have *string* as the target type.
 
 *Numeric contexts* apply to the operands of an arithmetic operator.
 *Numeric contexts* use combinations of predefined numeric types conversions
-(see :ref:`Predefined Numeric Types Conversions`), and ensure that each
+(see :ref:`Primitive Types Conversions`), and ensure that each
 argument expression can convert to the target type *T* while the arithmetic
 operation for the values of type *T* is being defined.
 
@@ -338,7 +335,6 @@ Kinds of Conversion
 .. meta:
    frontend_status: Done
    todo: Narrowing Reference Conversion - note: Only basic checking availiable, not full support of validation
-   todo: Unchecked Conversion - note: Generics raw types not implemented yet
    todo: String Conversion - note: Inmplemented in a different but compatible way: spec - toString(), implementation: StringBuilder
    todo: Forbidden Conversion - note: Not exhaustively tested, should work
 
@@ -367,7 +363,6 @@ categories:
    numeric types.
 -  Reference types conversions.
 -  String conversions (see :ref:`Operator Contexts`).
--  Raw Types Conversion.
 
 Any other conversions are forbidden.
 
@@ -378,25 +373,24 @@ Any other conversions are forbidden.
    numeric type
    reference type conversion
    string conversion
-   raw types conversion
    conversion
 
 |
 
-.. _Predefined Numeric Types Conversions:
+.. _Primitive Types Conversions:
 
-Predefined Numeric Types Conversions
-====================================
+Primitive Types Conversions
+===========================
 
 .. meta:
     frontend_status: Partly
 
-*Widening conversions* cause no loss of information about the overall magnitude
-of a numeric value (except conversions from integer to floating-point types
-that can lose some least significant bits of the value if the IEEE 754
-'*round-to-nearest*' mode is used correctly, and the resultant floating-point
-value is properly rounded to the integer value). Widening conversions never
-cause runtime errors.
+For numeric primitive types *widening conversions* cause no loss of
+information about the overall magnitude of a numeric value (except conversions
+from integer to floating-point types that can lose some least significant bits
+of the value if the IEEE 754 '*round-to-nearest*' mode is used correctly, and
+the resultant floating-point value is properly rounded to the integer value).
+Widening conversions never cause runtime errors.
 
 .. index::
    widening conversion
@@ -430,10 +424,10 @@ cause runtime errors.
 | *bigint* | *BigInt*                    |
 +----------+-----------------------------+
 
-*Narrowing conversions* (performed in compliance with IEEE 754 like in
-other programming languages) can lose information about the overall
-magnitude of a numeric value, potentially resulting in the loss of precision
-and range. Narrowing conversions never cause runtime errors.
+For numeric primitive types *narrowing conversions* (performed in compliance
+with IEEE 754 like in other programming languages) can lose information about
+the overall magnitude of a numeric value, potentially resulting in the loss of
+precision and range. Narrowing conversions never cause runtime errors.
 
 .. index::
    narrowing conversion
@@ -465,7 +459,7 @@ and range. Narrowing conversions never cause runtime errors.
 -  *byte* -> *char*.
 
 *Boxing and unboxing* conversions allow converting a reference into a value,
-and vice versa, for variables of predefined types.
+and vice versa, for variables of primitive types.
 
 *Boxing conversions* handle primitive type expressions as expressions of a
 corresponding reference type.
@@ -504,23 +498,25 @@ the same.
 
 The table below illustrates both conversions:
 
-+--------------------+--------------------+
-| Boxing             | Unboxing           |
-+====================+====================+
-|*byte* -> *Byte*    |*Byte* -> *byte*    |
-+--------------------+--------------------+
-|*short* -> *Short*  |*Short* -> *short*  |
-+--------------------+--------------------+
-|*char* -> *Char*    |*Char* -> *char*    |
-+--------------------+--------------------+
-|*int* -> *Int*      |*Int* -> *int*      |
-+--------------------+--------------------+
-|*long* -> *Long*    |*Long* -> *long*    |
-+--------------------+--------------------+
-|*float* -> *Float*  |*Float* -> *float*  |
-+--------------------+--------------------+
-|*double* -> *Double*|*Double* -> *double*|
-+--------------------+--------------------+
++----------------------+----------------------+
+| Boxing               | Unboxing             |
++======================+======================+
+|*byte* -> *Byte*      |*Byte* -> *byte*      |
++----------------------+----------------------+
+|*short* -> *Short*    |*Short* -> *short*    |
++----------------------+----------------------+
+|*char* -> *Char*      |*Char* -> *char*      |
++----------------------+----------------------+
+|*int* -> *Int*        |*Int* -> *int*        |
++----------------------+----------------------+
+|*long* -> *Long*      |*Long* -> *long*      |
++----------------------+----------------------+
+|*float* -> *Float*    |*Float* -> *float*    |
++----------------------+----------------------+
+|*double* -> *Double*  |*Double* -> *double*  |
++----------------------+----------------------+
+|*boolean* -> *Boolean*|*Boolean* -> *boolean*|
++----------------------+----------------------+
 
 |
 
@@ -604,39 +600,6 @@ See the example below for the illustration of it:
    type-safety
 
 |
-
-.. _Generic Types Conversions:
-
-..
-  Generic Types Conversions
-  =========================
-
-.. meta:
-    frontend_status: Partly
-
-..
-  The conversion of generic types (see :ref:`Generic Declarations`) follows the
-  widening style of type arguments.
-
-..
-  See the example below for the illustration of it:
-  .. code-block:: typescript
-  :linenos:
-  class Base {}
-  class Derived extends Base {}
-  class Generic <T> {}
-  function foo (d: Generic<Derived>) {
-  let b: Generic<Base> = d 
-  /* Generic<Derived> is assigned into Generic<Base> */
-  }
-  .. index::
-  conversion
-  generic types conversion
-  generic type
-  widening
-  argument
-  conversion
-  |
 
 .. _Function Types Conversions:
 
@@ -765,39 +728,6 @@ type:
    numeric type
 
 |
-
-.. _Raw Type Conversions:
-
-Raw Types Conversion
-====================
-
-.. meta:
-    frontend_status: Partly
-
-Assuming that *G* is a generic type declaration with type parameters *n*,
-
-.. code-block:: typescript
-   :linenos:
-
-    class|interface G<T1, T2, ... Tn> {}
-
-any instantiation of G (*G* < *Type*:sub:`1`, ``...``, *Type*:sub:`n` >), or
-its derived types can convert into *G* <> as follows:
-
-.. code-block:: typescript
-   :linenos:
-
-    class|interface H<T1, T2, ... Tn> extends G<T1, T2, ... Tn> {}
-    let raw: G<> = new G<Type1, Type2, ... TypeN>
-    raw = new H<Type1, Type2, ... TypeN>
-
-.. index::
-   raw types conversion
-   raw type
-   generic type
-   instantiation
-   derived type
-
 
 .. raw:: pdf
 
