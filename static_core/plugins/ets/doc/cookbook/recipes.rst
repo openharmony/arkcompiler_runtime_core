@@ -3734,8 +3734,8 @@ objects with dynamically changed layout are not supported.
 
 .. _R138:
 
-|CB_R| Some of utility types are not supported
-----------------------------------------------
+|CB_R| Some utility types are not supported
+-------------------------------------------
 
 |CB_RULE| ``arkts-no-utility-types``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3745,12 +3745,12 @@ objects with dynamically changed layout are not supported.
 
 |CB_ERROR|
 
-Currently |LANG| does not support utility types
-from |TS| extensions to the standard library, except following:
-``Partial``, ``Required``, ``Readonly``, ``Record``.
+Currently |LANG| does not support utility types from |TS| extensions to the
+standard library, except ``Partial``, ``Required``, ``Readonly``, and
+``Record``.
 
-For the type *Record<K, V>*, the type of an indexing expression *rec[index]* is
-of the type *V | undefined*.
+For type *Record<K, V>*, an indexing expression *rec[index]* is of type
+*V | undefined*.
 
 |CB_BAD|
 ~~~~~~~~
