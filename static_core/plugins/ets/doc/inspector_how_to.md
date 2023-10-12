@@ -21,7 +21,7 @@ ark --load-runtimes=ets \
     --debugger-break-on-start \
     /path/to/application.abc ETSGLOBAL::main
 ```
-4. Connect via Google Chrome with the following link:
+4. Connect via Browser with the following link:
 ```
 devtools://devtools/bundled/js_app.html?ws=//IP_ADDR:19015
 ```
