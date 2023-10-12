@@ -165,9 +165,17 @@ sub assert_recipes
     my $current_recipe;
     my $current_section = 'intro';
 
+    my $file_has_license = 0;
+
     open my $FH_r, '<', $fname or die "Cannot open file: $!";
-    while (my $line = <$FH_r>) {
+    LINE: while (my $line = <$FH_r>) {
         chomp $line;
+
+        if ($. eq 1 && $line =~ /^\.\./) {
+            $file_has_license = 1;
+        }
+
+        next LINE if ($file_has_license && $. < 13);
 
         # Common checks:
         die 'Line cannot consist of only white spaces' if $line =~ /^\s+$/;

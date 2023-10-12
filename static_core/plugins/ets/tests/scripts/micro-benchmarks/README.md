@@ -27,10 +27,10 @@
 
 ## Launch on device
 
-1. Load binaries (ark_asm, ark_aot, ark) and libraries to device `adb push ${ARK_BUILD_DIR}/bin ${ARK_BUILD_DIR}/lib ${DEVICE_TEST_DIR}`
+1. Load binaries (ark_asm, ark_aot, ark) and libraries (`${ARK_BUILD_DIR}/bin ${ARK_BUILD_DIR}/lib`) to device directory (`${DEVICE_TEST_DIR}`)
 
-2. Load stdlib to device library directory `adb push ${ARK_BUILD_DIR}/plugins/ets/etsstdlib.abc ${DEVICE_TEST_DIR}/lib/`
+2. Load stdlib (`${ARK_BUILD_DIR}/plugins/ets/etsstdlib.abc`) to device library directory (`${DEVICE_TEST_DIR}/lib/`)
 
-3. Load libdwarf.so and libunwind.so to device library directory `adb push <path_to_libdwarf.so> <path_to_libunwind.so> ${DEVICE_TEST_DIR}/lib/`
+3. Load libdwarf.so and libunwind.so to device library directory (`${DEVICE_TEST_DIR}/lib/`)
 
 4. Run benchmarks: `python3 run_micro_benchmarks.py --target device --bindir ${DEVICE_TEST_DIR}/bin --libdir ${DEVICE_TEST_DIR}/lib --host-builddir ${ARK_BUILD_DIR}`

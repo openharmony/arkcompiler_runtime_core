@@ -12,3 +12,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
+
+/*---
+desc: Class initializer with throws clause.
+assert: A class initializer cannot throw any exception and panic, as it effectively is a non-throwing function, see “Non-throwing Functions”.
+tags: [compile-only, negative]
+---*/
+
+class A {
+  public x: int;
+
+  static throws { 
+    this.x = 5;
+  }
+}

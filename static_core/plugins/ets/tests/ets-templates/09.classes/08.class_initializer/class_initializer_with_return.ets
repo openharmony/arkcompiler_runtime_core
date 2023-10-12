@@ -12,3 +12,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
+
+/*---
+desc: Class initializer with return statement.
+assert: It is a compile-time error if a return statement appears anywhere within a class initializer.
+tags: [compile-only, negative]
+---*/
+
+class A {
+  public static x: int;
+
+  static { 
+    x = 5;
+    return true;
+  }
+}
