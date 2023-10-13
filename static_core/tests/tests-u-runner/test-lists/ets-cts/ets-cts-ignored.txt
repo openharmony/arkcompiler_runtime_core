@@ -1819,10 +1819,6 @@
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_7.ets
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_8.ets
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_9.ets
-02.lexical_elements/09.literals/03.bigint_literals/bigint_literals_0.ets
-02.lexical_elements/09.literals/03.bigint_literals/bigint_literals_1.ets
-02.lexical_elements/09.literals/03.bigint_literals/bigint_literals_2.ets
-02.lexical_elements/09.literals/03.bigint_literals/bigint_literals_3.ets
 03.types/08.reference_types/07.function_types/function_type_2.ets
 03.types/08.reference_types/07.function_types/function_type_3.ets
 03.types/08.reference_types/07.function_types/function_type_4.ets

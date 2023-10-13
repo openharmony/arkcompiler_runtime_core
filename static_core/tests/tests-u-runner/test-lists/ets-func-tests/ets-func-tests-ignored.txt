@@ -679,3 +679,30 @@ spec/annotations/annotation_@Watch.ets
 spec/annotations/annotation_@Watch_2.ets
 ### End of Issue 14040
 ### End of Annotations
+### Issue 14738 begin
+spec/bigint/bigint-arithmetic-comparison-18.ets
+spec/bigint/bigint-arithmetic-comparison-19.ets
+### Issue 14738 end
+### Issue 14476 begin
+spec/bigint/bigint-arithmetic-dec-2.ets
+spec/bigint/bigint-arithmetic-inc-2.ets
+### Issue 14476 end
+### Issue I8MB96 begin
+spec/bigint/bigint-arithmetic-mul-3-operands.ets
+spec/bigint/bigint-arithmetic-mul-4-operands.ets
+spec/bigint/bigint-arithmetic-div-3-operands.ets
+spec/bigint/bigint-arithmetic-div-4-operands.ets
+spec/bigint/bigint-arithmetic-expr-4-operands.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-1.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-2.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-3.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-4.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-5.ets
+### Issue I8MB96 end
+### Issue 14907 begin
+spec/bigint/bigint-arithmetic-add-2-operands-union.ets
+spec/bigint/bigint-arithmetic-div-2-operands-union.ets
+spec/bigint/bigint-arithmetic-mul-2-operands-union.ets
+spec/bigint/bigint-arithmetic-sub-2-union.ets
+### Issue 14907 end
+
