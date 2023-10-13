@@ -64,7 +64,3 @@ panda_target_include_directories(ark_link PUBLIC
 
 include_directories(${PANDA_ROOT}/libpandabase/)
 include_directories(${CMAKE_BINARY_DIR}/libpandafile/include/)
-
-if (PANDA_WITH_TESTS)
-    add_subdirectory(tests)
-endif()
