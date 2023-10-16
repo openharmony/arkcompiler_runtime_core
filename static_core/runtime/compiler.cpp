@@ -773,7 +773,7 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecode_offset, bool osr
         auto status = method->GetCompilationStatus();
         for (; (status == Method::WAITING) || (status == Method::COMPILATION);
              status = method->GetCompilationStatus()) {
-            if (thread_pool_ == nullptr || !thread_pool_->IsActive()) {
+            if (jit_thread_joined_) {
                 // JIT thread is destroyed, wait makes no sence
                 return false;
             }
@@ -797,6 +797,7 @@ void Compiler::CompileMethodLocked(const CompilerTask &&ctx)
     method->ResetHotnessCounter();
 
     if (IsCompilationExpired(ctx)) {
+        ASSERT(!no_async_jit_);
         return;
     }
 
@@ -826,11 +827,55 @@ void Compiler::CompileMethodLocked(const CompilerTask &&ctx)
     method->AtomicSetCompilationStatus(Method::COMPILATION, Method::COMPILED);
 }
 
+void Compiler::AddTask(CompilerTask &&ctx, [[maybe_unused]] TaggedValue func)
+{
+    if (use_task_manager_) {
+        auto *ctx_ptr = internal_allocator_->New<CompilerTask>(std::move(ctx));
+        auto task_runner = [this, ctx_ptr] {
+            if (ctx_ptr->GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
+                CompileMethodLocked(std::move(*ctx_ptr));
+            }
+            internal_allocator_->Delete(ctx_ptr);
+            {
+                os::memory::LockHolder lock(jit_worker_finalization_lock_);
+                --unprocessed_tasks_;
+                if (jit_thread_joined_ && (unprocessed_tasks_ == 0)) {
+                    jit_tasks_processed_.Signal();
+                }
+            }
+        };
+        auto task = taskmanager::Task::Create(JIT_TASK_PROPERTIES, std::move(task_runner));
+        {
+            os::memory::LockHolder lock(jit_worker_finalization_lock_);
+            if (!jit_thread_joined_) {
+                ++unprocessed_tasks_;
+                jit_task_queue_->AddTask(std::move(task));
+            } else {
+                internal_allocator_->Delete(ctx_ptr);
+            }
+        }
+    } else {
+        thread_pool_->PutTask(std::move(ctx));
+    }
+}
+
 void Compiler::JoinWorker()
 {
     if (thread_pool_ != nullptr) {
         thread_pool_->Shutdown(true);
     }
+
+    {
+        //  TODO(molotkov): implement method in TaskManager to wait for tasks to finish (#13962)
+        os::memory::LockHolder lock(jit_worker_finalization_lock_);
+        jit_thread_joined_ = true;
+        if (use_task_manager_) {
+            while (unprocessed_tasks_ != 0) {
+                jit_tasks_processed_.Wait(&jit_worker_finalization_lock_);
+            }
+        }
+    }
+
 #ifdef PANDA_COMPILER_DEBUG_INFO
     if (!Runtime::GetOptions().IsArkAot() && compiler::OPTIONS.IsCompilerEmitDebugInfo()) {
         compiler::CleanJitDebugCode();

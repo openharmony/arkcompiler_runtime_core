@@ -41,11 +41,11 @@ class PandaEtsEnv;
 
 class EtsMethod {
 public:
-    static EtsMethod *FromTypeDescriptor(const PandaString &td);
+    PANDA_PUBLIC_API static EtsMethod *FromTypeDescriptor(const PandaString &td);
 
-    static bool IsMethod(const PandaString &td);
+    PANDA_PUBLIC_API static bool IsMethod(const PandaString &td);
 
-    EtsValue Invoke(napi::ScopedManagedCodeFix *s, Value *args);
+    PANDA_PUBLIC_API EtsValue Invoke(napi::ScopedManagedCodeFix *s, Value *args);
 
     void InvokeVoid(napi::ScopedManagedCodeFix *s, Value *args)
     {
@@ -65,7 +65,7 @@ public:
         return GetPandaMethod()->GetNumArgs();
     }
 
-    uint32_t GetNumArgSlots() const;
+    PANDA_PUBLIC_API uint32_t GetNumArgSlots() const;
 
     EtsType GetArgType(size_t idx) const
     {
@@ -128,14 +128,14 @@ public:
         return GetPandaMethod()->IsSynthetic();
     }
 
-    bool IsEqualParametersType(EtsArray *params) const;
+    PANDA_PUBLIC_API bool IsEqualParametersType(EtsArray *params) const;
 
     EtsClass *GetClass() const
     {
         return EtsClass::FromRuntimeClass(GetPandaMethod()->GetClass());
     }
 
-    EtsClass *ResolveArgType(uint32_t idx);
+    PANDA_PUBLIC_API EtsClass *ResolveArgType(uint32_t idx);
 
     EtsClass *ResolveReturnType()
     {
@@ -232,7 +232,7 @@ public:
         return GetPandaMethod()->GetFileId().GetOffset();
     }
 
-    EtsMethod *GetOverriddenMethod();
+    PANDA_PUBLIC_API EtsMethod *GetOverriddenMethod();
 
     int32_t GetLineNumFromBytecodeOffset(uint32_t bc_offset) const
     {
@@ -280,9 +280,9 @@ public:
         return GetPandaMethod()->GetProto().GetReturnTypeDescriptor();
     }
 
-    PandaString GetMethodSignature(bool include_return_type = true) const;
+    PANDA_PUBLIC_API PandaString GetMethodSignature(bool include_return_type = true) const;
 
-    PandaString GetDescriptor() const;
+    PANDA_PUBLIC_API PandaString GetDescriptor() const;
 
     NO_COPY_SEMANTIC(EtsMethod);
     NO_MOVE_SEMANTIC(EtsMethod);

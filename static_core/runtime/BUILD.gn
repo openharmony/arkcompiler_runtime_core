@@ -182,6 +182,7 @@ ohos_source_set("libarkruntime_set_static") {
     "mem/gc/heap-space-misc/crossing_map_singleton.cpp",
     "mem/gc/lang/gc_lang.cpp",
     "mem/gc/stw-gc/stw-gc.cpp",
+    "mem/gc/workers/gc_worker.cpp",
     "mem/gc/workers/gc_workers_task_pool.cpp",
     "mem/gc/workers/gc_workers_task_queue.cpp",
     "mem/gc/workers/gc_workers_thread_pool.cpp",

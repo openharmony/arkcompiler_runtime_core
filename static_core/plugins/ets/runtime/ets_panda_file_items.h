@@ -76,7 +76,7 @@ static constexpr std::string_view UNSUPPORTED_OPERATION_EXCEPTION      = "Lstd/c
 // Error classes
 static constexpr std::string_view ABSTRACT_METHOD_ERROR                = "Lescompat/AbstractMethodError;";
 static constexpr std::string_view CLASS_CIRCULARITY_ERROR              = "Lescompat/ClassCircularityError;";
-static constexpr std::string_view EXCEPTION_IN_INITIALIZER_ERROR       = "Lescompat/ExceptionInInitializerError;";
+static constexpr std::string_view EXCEPTION_IN_INITIALIZER_ERROR       = "Lstd/core/ExceptionInInitializerError;";
 static constexpr std::string_view INCOMPATIBLE_CLASS_CHANGE_ERROR      = "Lescompat/IncompatibleClassChangeError;";
 static constexpr std::string_view INSTANTIATION_ERROR                  = "Lescompat/InstantiationError;";
 static constexpr std::string_view NO_CLASS_DEF_FOUND_ERROR             = "Lescompat/NoClassDefFoundError;";

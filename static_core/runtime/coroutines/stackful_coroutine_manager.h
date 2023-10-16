@@ -67,6 +67,15 @@ public:
     /// called when a coroutine worker thread ends its execution
     void OnWorkerShutdown();
 
+    /* debugging tools */
+    /**
+     * For StackfulCoroutineManager implementation: a fatal error is issued if an attempt to switch coroutines on
+     * current worker is detected when coroutine switch is disabled.
+     */
+    void DisableCoroutineSwitch() override;
+    void EnableCoroutineSwitch() override;
+    bool IsCoroutineSwitchDisabled() override;
+
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int inc_mask,
                               unsigned int xor_mask) const override;

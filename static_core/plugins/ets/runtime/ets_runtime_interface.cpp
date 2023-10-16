@@ -31,6 +31,62 @@ compiler::RuntimeInterface::ClassPtr EtsRuntimeInterface::GetClass(MethodPtr met
     return PandaRuntimeInterface::GetClass(method, id);
 }
 
+compiler::RuntimeInterface::FieldPtr EtsRuntimeInterface::ResolveLookUpField(FieldPtr raw_field, ClassPtr klass)
+{
+    ScopedMutatorLock lock;
+    ASSERT(raw_field != nullptr);
+    ASSERT(klass != nullptr);
+    return ClassCast(klass)->LookupFieldByName(FieldCast(raw_field)->GetName());
+}
+
+template <panda_file::Type::TypeId FIELD_TYPE>
+compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::GetLookUpCall(FieldPtr raw_field, ClassPtr klass,
+                                                                         bool is_setter)
+{
+    if (is_setter) {
+        return ClassCast(klass)->LookupSetterByName<FIELD_TYPE>(FieldCast(raw_field)->GetName());
+    }
+    return ClassCast(klass)->LookupGetterByName<FIELD_TYPE>(FieldCast(raw_field)->GetName());
+}
+
+compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::ResolveLookUpCall(FieldPtr raw_field, ClassPtr klass,
+                                                                             bool is_setter)
+{
+    ScopedMutatorLock lock;
+    ASSERT(raw_field != nullptr);
+    ASSERT(klass != nullptr);
+    switch (FieldCast(raw_field)->GetTypeId()) {
+        case panda_file::Type::TypeId::U1:
+            return GetLookUpCall<panda_file::Type::TypeId::U1>(raw_field, klass, is_setter);
+        case panda_file::Type::TypeId::U8:
+            return GetLookUpCall<panda_file::Type::TypeId::U8>(raw_field, klass, is_setter);
+        case panda_file::Type::TypeId::I8:
+            return GetLookUpCall<panda_file::Type::TypeId::I8>(raw_field, klass, is_setter);
+        case panda_file::Type::TypeId::I16:
+            return GetLookUpCall<panda_file::Type::TypeId::I16>(raw_field, klass, is_setter);
+        case panda_file::Type::TypeId::U16:
+            return GetLookUpCall<panda_file::Type::TypeId::U16>(raw_field, klass, is_setter);
+        case panda_file::Type::TypeId::I32:
+            return GetLookUpCall<panda_file::Type::TypeId::I32>(raw_field, klass, is_setter);
+        case panda_file::Type::TypeId::U32:
+            return GetLookUpCall<panda_file::Type::TypeId::U32>(raw_field, klass, is_setter);
+        case panda_file::Type::TypeId::I64:
+            return GetLookUpCall<panda_file::Type::TypeId::I64>(raw_field, klass, is_setter);
+        case panda_file::Type::TypeId::U64:
+            return GetLookUpCall<panda_file::Type::TypeId::U64>(raw_field, klass, is_setter);
+        case panda_file::Type::TypeId::F32:
+            return GetLookUpCall<panda_file::Type::TypeId::F32>(raw_field, klass, is_setter);
+        case panda_file::Type::TypeId::F64:
+            return GetLookUpCall<panda_file::Type::TypeId::F64>(raw_field, klass, is_setter);
+        case panda_file::Type::TypeId::REFERENCE:
+            return GetLookUpCall<panda_file::Type::TypeId::REFERENCE>(raw_field, klass, is_setter);
+        default: {
+            UNREACHABLE();
+            break;
+        }
+    }
+    return nullptr;
+}
 compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallKind(MethodPtr method_ptr) const
 {
     auto class_name = GetClassNameFromMethod(method_ptr);

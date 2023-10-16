@@ -575,6 +575,9 @@ built-ins/Math/random/prop-desc.js
 built-ins/Math/round/length.js
 built-ins/Math/round/name.js
 built-ins/Math/round/prop-desc.js
+# #112861
+built-ins/Math/round/S15.8.2.15_A6.js
+###
 built-ins/Math/sign/length.js
 built-ins/Math/sign/name.js
 built-ins/Math/sign/prop-desc.js
@@ -776,7 +779,6 @@ built-ins/Object/isSealed/name.js
 built-ins/Object/keys/name.js
 built-ins/Object/preventExtensions/name.js
 built-ins/Object/prop-desc.js
-built-ins/Object/prototype/S15.2.4_A1_T1.js
 built-ins/Object/prototype/S15.2.4_A1_T2.js
 built-ins/Object/prototype/__defineGetter__/length.js
 built-ins/Object/prototype/__defineGetter__/name.js
@@ -1439,8 +1441,6 @@ intl402/Locale/prototype/script/prop-desc.js
 intl402/Locale/prototype/toString/prop-desc.js
 intl402/Locale/prototype/toStringTag/toStringTag.js
 intl402/Number/prototype/toLocaleString/length.js
-# #10150
-intl402/NumberFormat/constructor-unit.js
 intl402/NumberFormat/length.js
 intl402/NumberFormat/name.js
 intl402/NumberFormat/prop-desc.js
@@ -1448,6 +1448,7 @@ intl402/NumberFormat/prototype/constructor/prop-desc.js
 intl402/NumberFormat/prototype/format/length.js
 intl402/NumberFormat/prototype/format/name.js
 intl402/NumberFormat/prototype/format/prop-desc.js
+# #10607
 intl402/NumberFormat/prototype/format/units.js
 intl402/NumberFormat/prototype/formatToParts/length.js
 intl402/NumberFormat/prototype/formatToParts/name.js
@@ -3678,11 +3679,9 @@ language/statements/class/dstr/private-gen-meth-static-ary-ptrn-elem-id-iter-val
 built-ins/Function/prototype/call/S15.3.4.4_A3_T9.js
 # #10036
 intl402/DateTimeFormat/constructor-no-instanceof.js
-# #12801
-built-ins/TypedArray/prototype/reverse/get-lenght-uses-internal-arraylenght.js
+## #13126
+built-ins/TypedArray/prototype/reverse/get-length-uses-internal-arraylength.js
 # #12800
 built-ins/String/prototype/split/checking-if-deleting-the-string-prototype-split-length-property-fails.js
-# #10417
-intl402/String/prototype/toLocaleUpperCase/special_casing_Lithuanian.js
 # #11221
 built-ins/Array/S15.4_A1.1_T9.js

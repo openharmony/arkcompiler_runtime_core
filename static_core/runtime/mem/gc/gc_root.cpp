@@ -212,7 +212,7 @@ void RootManager<LanguageConfig>::UpdateAotStringRoots()
 {
     trace::ScopedTrace scoped_trace(__FUNCTION__);
     LOG(DEBUG, GC) << "=== AOT string slot roots update. BEGIN ===";
-    auto oa = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
+    auto oa = vm_->GetHeapManager()->GetObjectAllocator().AsObjectAllocator();
     Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->UpdateAotStringRoots(
         [](ObjectHeader **root) {
             auto root_value = *root;

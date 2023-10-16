@@ -62,13 +62,14 @@ The following major aspects characterize the |LANG| language as a whole:
 
    The |LANG| language supports the *component programming approach* which
    presumes that software is designed and implemented as a composition
-   of modules or packages. A package in |LANG| is a standalone, independently
-   compiled unit that combines various programming resources (types,
-   classes, functions and so on). A package can communicate with other
-   packages by exporting all or some of its resources to, or importing from
-   other packages. This feature provides a high level of software
-   development process and software maintainability, supports flexible
-   module reuse and efficient version control.
+   of compilation units. A compilation unit in |LANG| is a standalone, independently
+   compiled package or module that combines various programming resources (types,
+   classes, functions and so on). Package may combine several modules into one
+   logically consistent compilation unit. A module or package communicate with other
+   compilation units by exporting all or some of its resources to, or importing from
+   other units. This feature provides a high quality software development
+   process and software maintainability, supports flexible software reuse and
+   efficient version control.
 
 .. index::
    modularity
@@ -298,9 +299,10 @@ as used in other languages, application areas or industries.
      the order of calculation is determined by operator preferences.
 
    operator (in programming languages)
-     -- a syntactic construct that denotes an elementary calculation within an
-     expression. Normally, an operator consists of an operator sign and of
-     one or more operands.
+     -- (1) token that denotes the action to be performed on a value (addition,
+     subtraction, comparisons, etc.). (2) a syntactic construct that denotes
+     an elementary calculation within an expression. Normally, an operator
+     consists of an operator sign and of one or more operands.
 
      In unary operators that have a single operand, the operator sign can be
      placed either in front of an operand (*prefix* unary operator), or after
@@ -309,11 +311,9 @@ as used in other languages, application areas or industries.
      binary operator). A conditional operator with three operands is called
      *ternary*.
 
-
      Some operators have special notations; for example, the indexing
      operator, while formally being a binary operator, has a conventional
      form like a[i].
-
 
      Some languages treat operators as “syntactic sugar”---a conventional
      version of a more common construct, i.e., *function call*. Therefore,
@@ -351,7 +351,7 @@ as used in other languages, application areas or industries.
 
    token
      -- an elementary part of a programming language: identifier, keyword,
-     operator and punctuator, and literal. Tokens are lexical input elements
+     operator and punctuator, or literal. Tokens are lexical input elements
      that form the vocabulary of a language, and can act as terminal symbols
      of the language's syntactic grammar.
 
@@ -359,6 +359,62 @@ as used in other languages, application areas or industries.
      -- the establishing of tokens in the process of codebase reading by
      a machine. The process of tokenization presumes finding the longest
      sequence of characters that form a valid token.
+
+   punctuator
+     -- token that serves for separating, completing or otherwise organizing
+     program elements and parts: commas, semicolons, parentheses, square
+     brackets, etc.
+
+   literal
+     -- representation of a certain value type.
+
+   comment
+     -- a piece of text, insignificant for the syntactic grammar, added to
+     the stream in order to document and compliment the source code.
+
+   primitive type
+      -- numeric value types, character, and boolean value types whose names
+      are reserved, and cannot be used for user-defined type names.
+
+   generic type
+     -- named type (class or interface) that has type parameters.
+
+   generic
+     see *generic type*.
+
+   non-generic type
+     -- named type (class or interface) that has no type parameters.
+
+   non-generic
+     see *non-generic type*.
+
+   type reference
+     -- references that refer to named types by specifying their type names,
+     and (where applicable) type arguments to be substituted for the type
+     parameters of the named type.
+
+   nullable type 
+     -- variable declared to have the null value, or type T | null that can
+     hold values of type T and its derived types.
+
+   nullish value
+     -- reference which is null or undefined.
+
+   simple name
+     -- name that consists of a single identifier.
+     
+   qualified name
+     -- name that consists of a sequence of identifiers separated with the ‘.’
+     token.
+
+   scope of a name
+     -- region of the program code within which the entity---as declared by
+     that name---can be accessed or referred to by its simple name without
+     any qualification.
+
+   function declaration
+     -- declaration that specifies names, signatures, and bodies when
+     introducing a named function.
 
    terminal symbol
      -- a syntactically invariable token, i.e. a syntactic notation defined
@@ -379,6 +435,10 @@ as used in other languages, application areas or industries.
    nonterminal
      -- see *non-terminal symbol*.
 
+   keyword
+     -- one of the *reserved words* that have their meanings permanently
+     predefined in the language.
+
    variable
      -- see *variable declaration*.
 
@@ -392,6 +452,117 @@ as used in other languages, application areas or industries.
    constant declaration
      -- declaration that introduces a new variable to which an inmutable
      initial value can be assigned only once at the time of instantiation.
+
+   grammar
+     -- set of rules that describe what possible sequences of terminal and
+     non-terminal symbols a programming language interepretes as correct.
+
+     A grammar is a range of productions, each production comprised of an
+     abstract symbol (nonterminal) as its left-hand side, and a sequence
+     of non-terminal and terminal symbols as its right-hand side.
+     Each grammatical production has the character ‘:’ to separate its left-
+     and right-hand sides, and the character ‘;’ as the end marker.
+
+   production
+     -- a sequence of terminal and non-terminal symbols that a programming
+     language interpretes as correct.
+
+   white space
+     -- one of lexical input elements that separate tokens from one another
+     in order to improve the source code readability and avoid ambiguities.
+
+   overload signature
+      -- signatures that have several function (or method) headers with the same
+      name and different signatures, and are followed by one implementation.
+
+   widening conversion
+     -- conversion that causes no loss of information about the overall
+     magnitude of a numeric value.
+
+   narrowing conversion
+     -- conversion that can cause a loss information about the overall
+     magnitude of a numeric value, and potentially a loss of precision
+     and range.
+
+   function types conversion
+     -- conversion of one function type to another.
+
+   casting conversion
+     -- conversion of an operand of a cast expression to an explicitly
+     specified type.
+
+   method
+     -- ordered 4-tuple consisting of type parameters, argument types,
+     return type, and a *throws*/*rethrows* clause.
+
+   abstract declaration
+     -- ordinary interface method declaration that specifies the method’s name
+     and signature.
+
+   truthiness
+     -- concept that extends the Boolean logic to operands and results
+     of non-Boolean types, and allows treating the value of any valid
+     expression of a non-void type as *Truthy* or *Falsy*, depending on
+     the kind of the value type.
+
+   default catch clause
+     -- catch clause that has its exception parameter type omitted, and can
+     handle any exception or error that is not handled by a preceding clause.
+
+   overloading
+     -- situation where different imported functions, or a function(s) of
+     the current module and an imported function(s) have the same name but
+     different signatures.
+
+   shadowing
+     -- situation where a function(s) of the current module and an imported
+     function(s) have the same name and signature; shadowing causes a
+     compile-time error where function declarations are are duplicated, i.e.
+     the name and override-equivalent signatures of an imported function are
+     the same as those of a function declared in the current compilation unit.
+
+   package level scope
+      -- name that is declared on the package level, and accessible throughout
+      the entire package and in other packages if exported.
+
+   module level scope
+     -- name that is applicable for separate modules only, and accessible
+     throughout the entire module and in other packages if exported.
+
+   class level scope
+     -- name declared inside a class, and accessible inside and sometimes---by
+     means of an access modifier, or via a derived class---outside  that class.
+  
+   interface level scope
+     -- name declared inside an interface, and accessible inside and outside
+     that interface.
+
+   enum level scope
+     -- scope of enumeration that defines a type inside a package or module,
+     and is identical to a corresponding package or module level scope. An
+     enumeration constant scope is identical to the enumeration itself.
+
+   function parameter scope
+     -- scope of a type parameter name in a function declaration, that is
+     identical to that entire declaration.
+
+   method scope
+     -- scope of a name declared immediately inside the body of a method
+     (function) declaration, that is identical to the body of that method
+     (function) declaration from the place of declaration, and up to the
+     end of the body.
+
+   function scope
+     -- same as *method scope*.
+
+   type parameter scope
+     -- name of atype parameter declared in a class or an interface, that
+     is identical to that entire declaration (except static member declarations).
+
+   static member
+     -- a constant variable (variable of a primitive type, or type *String*)
+     that is declared constant and initialized with a compile-time constant
+     expression.
 
 
 .. raw:: pdf

@@ -1219,6 +1219,17 @@ intrinsics:
     impl: panda::ets::intrinsics::StdCoreStackTraceLines
     clear_flags: [ no_dce ]
 
+  - name: StdCoreExit
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: exit
+    static: true
+    signature:
+      ret: std.core.void
+      args: [i32]
+    impl: panda::intrinsics::SystemExit
+    clear_flags: [require_state, runtime_call]
+
 ######################
 # std.core.GC #
 ######################
@@ -1521,7 +1532,7 @@ intrinsics:
       args: []
     impl: panda::ets::intrinsics::StdSystemScheduleCoroutine
     set_flags: [heap_inv]
-  
+
 ############################
 #   escompat.SharedMemory  #
 ############################
@@ -1595,7 +1606,7 @@ intrinsics:
       ret: i8
       args: [ i32, i8 ]
     impl: panda::ets::intrinsics::SharedMemoryOrI8
-  
+
   - name: SharedMemoryStoreI8
     space: ets
     class_name: escompat.SharedMemory
@@ -1605,7 +1616,7 @@ intrinsics:
       ret: i8
       args: [ i32, i8 ]
     impl: panda::ets::intrinsics::SharedMemoryStoreI8
-  
+
   - name: SharedMemorySubI8
     space: ets
     class_name: escompat.SharedMemory
@@ -1675,7 +1686,7 @@ intrinsics:
       ret: i32
       args: [ i32 ]
     impl: panda::ets::intrinsics::SharedMemoryNotify
-  
+
   - name: SharedMemoryBoundedNotify
     space: ets
     class_name: escompat.SharedMemory
@@ -2003,6 +2014,33 @@ intrinsics:
       ret: u1
       args: [ std.core.String ]
     impl: panda::ets::intrinsics::TypeAPIIsMethod
+    clear_flags: [ ]
+
+  - name: StdMethodInvoke
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIMethodInvoke
+    static: true
+    signature:
+      ret: std.core.Object
+      args:
+        - std.core.String
+        - std.core.Object
+        - std.core.Object[]
+    impl: panda::ets::intrinsics::TypeAPIMethodInvoke
+    clear_flags: [ ]
+
+  - name: StdMethodInvokeConstructor
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIMethodInvokeConstructor
+    static: true
+    signature:
+      ret: std.core.Object
+      args:
+        - std.core.String
+        - std.core.Object[]
+    impl: panda::ets::intrinsics::TypeAPIMethodInvokeConstructor
     clear_flags: [ ]
 
 #################
@@ -2455,4 +2493,315 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, f64 ]
     impl: panda::ets::intrinsics::ValueAPISetElementDouble
+    clear_flags: [ ]
+
+###############################
+# std.core.TypeBuilderContext #
+###############################
+
+  - name: TypeAPITypeCreatorCtxCreate
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: createCtx
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxCreate
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxDestroy
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: destroyCtx
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ i64 ]
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxDestroy
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxCommit
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: commit
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - std.core.Object[]
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxCommit
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxGetError
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: getError
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxGetError
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxGetTypeDescFromPointer
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: getTypeDescFromPointer
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxGetTypeDescFromPointer
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxClassCreate
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: classCreate
+    static: true
+    signature:
+      ret: i64
+      args:
+        - i64
+        - std.core.String
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxClassCreate
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxClassSetBase
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: classSetBase
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - std.core.String
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxClassSetBase
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxClassAddIface
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: classAddIface
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - std.core.String
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxClassAddIface
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxClassAddField
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: classAddField
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - std.core.String
+        - std.core.String
+        - i32
+        - i32
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxClassAddField
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxInterfaceCreate
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: interfaceCreate
+    static: true
+    signature:
+      ret: i64
+      args:
+        - i64
+        - std.core.String
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxInterfaceCreate
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxInterfaceAddBase
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: interfaceAddBase
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - std.core.String
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxInterfaceAddBase
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxMethodCreate
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: methodCreate
+    static: true
+    signature:
+      ret: i64
+      args:
+        - i64
+        - std.core.String
+        - i32
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodCreate
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxMethodAddAccessMod
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: methodAddAccessMod
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - i32
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddAccessMod
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxMethodAddParam
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: methodAddParam
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - std.core.String
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddParam
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxMethodAddBodyFromMethod
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: methodAddBodyFromMethod
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - std.core.String
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromMethod
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxMethodAddBodyFromLambda
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: methodAddBodyFromLambda
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - i32
+        - std.core.String
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromLambda
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: methodAddBodyFromErasedLambda
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - i32
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxMethodAddBodyDefault
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: methodAddBodyDefault
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyDefault
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxMethodAddResult
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: methodAddResult
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - std.core.String
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddResult
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxMethodAdd
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: methodAdd
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAdd
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxLambdaTypeCreate
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: lambdaTypeCreate
+    static: true
+    signature:
+      ret: i64
+      args:
+        - i64
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeCreate
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxLambdaTypeAddParam
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: lambdaTypeAddParam
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - std.core.String
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAddParam
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxLambdaTypeAddResult
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: lambdaTypeAddResult
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+        - std.core.String
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAddResult
+    clear_flags: [ ]
+
+  - name: TypeAPITypeCreatorCtxLambdaTypeAdd
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: lambdaTypeAdd
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+        - i64
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAdd
     clear_flags: [ ]

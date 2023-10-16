@@ -1555,15 +1555,18 @@ export final class Array<T> {
         }
         let len = this.data.length - delete
         let arr = new T[len]
+        let ret = new Array<T>()
         let count: int = 0
-            for(let i: int = 0; i < this.data.length; i++){
-                if(i >= start && i < start + delete){
-                    continue
-                }
-                arr[count] = this.data[i]
-                count++
+        for( let i: int = 0; i < this.data.length; i++){
+            if(i >= start && i < start + delete){
+                ret.push(this.data[i])
+                continue
             }
-        return new Array<T>(arr)
+            arr[count] = this.data[i]
+            count++
+        }
+        this.data = arr
+        return ret
     }
 
     /**

@@ -78,9 +78,9 @@ void PandaEtsVM::PromiseListenerInfo::OnPromiseStateChanged(EtsHandle<EtsPromise
 }
 
 /* static */
-bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options, panda_file::SourceLang source_lang)
+bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options)
 {
-    auto lang_str = plugins::LangToRuntimeType(source_lang);
+    auto lang_str = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
     if (options.GetWorkersType(lang_str) == "taskmanager" && Runtime::GetTaskScheduler() == nullptr) {
         auto *task_scheduler = taskmanager::TaskScheduler::Create(options.GetTaskmanagerWorkersCount(lang_str));
         if (task_scheduler == nullptr) {
@@ -96,7 +96,7 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
 {
     ASSERT(runtime != nullptr);
 
-    if (!PandaEtsVM::CreateTaskManagerIfNeeded(options, panda_file::SourceLang::ETS)) {
+    if (!PandaEtsVM::CreateTaskManagerIfNeeded(options)) {
         return Unexpected(PandaString("Cannot create TaskManager"));
     }
 

@@ -33,10 +33,17 @@ public:
         static_assert(sizeof(TaskType) == sizeof(TaskQueueId) / 2);
         static_assert(sizeof(VMType) == sizeof(TaskQueueId) / 2);
     }
+
     friend constexpr bool operator==(const TaskQueueId &lv, const TaskQueueId &rv)
     {
         return lv.val_ == rv.val_;
     }
+
+    friend constexpr bool operator!=(const TaskQueueId &lv, const TaskQueueId &rv)
+    {
+        return lv.val_ != rv.val_;
+    }
+
     friend constexpr bool operator<(const TaskQueueId &lv, const TaskQueueId &rv)
     {
         return lv.val_ < rv.val_;

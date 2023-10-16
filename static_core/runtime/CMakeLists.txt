@@ -71,6 +71,7 @@ set(SOURCES
     mem/gc/bitmap.cpp
     mem/gc/gc_scope.cpp
     mem/gc/gc_scoped_phase.cpp
+    mem/gc/workers/gc_worker.cpp
     mem/gc/workers/gc_workers_task_pool.cpp
     mem/gc/workers/gc_workers_task_queue.cpp
     mem/gc/workers/gc_workers_thread_pool.cpp

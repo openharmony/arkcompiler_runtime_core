@@ -43,6 +43,7 @@ ohos_shared_library("libarkaotmanager") {
 
   deps = [
     "$ark_root/compiler:ir_dyn_base_types_h",
+    "$ark_root/compiler:libarktscompiler",
     "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
     "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
     "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_inl",
@@ -50,7 +51,6 @@ ohos_shared_library("libarkaotmanager") {
     "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsic_codegen_test_inl",
     "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
     "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
-    "$ark_root/compiler:libarktscompiler",
     "$ark_root/libpandabase:libarktsbase",
     "$ark_root/libpandafile:libarktsfile",
     "$ark_root/runtime:arkruntime_gen_entrypoints_compiler_checksum_entrypoints_compiler_checksum_inl",

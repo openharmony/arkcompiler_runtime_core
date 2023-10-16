@@ -259,12 +259,18 @@ Inst *LoopUnroll::CreateNewTestInst(const CountableLoopInfo &loop_info, Inst *co
 {
     Inst *test = nullptr;
     if (loop_info.is_inc) {
-        test = GetGraph()->CreateInstSub(pre_header_cmp->CastToCompare()->GetOperandsType(), pre_header_cmp->GetPc());
+        test = GetGraph()->CreateInstSub(pre_header_cmp->CastToCompare()->GetOperandsType(), pre_header_cmp->GetPc(),
+                                         loop_info.test, const_inst);
+#ifdef PANDA_COMPILER_DEBUG_INFO
+        test->SetCurrentMethod(pre_header_cmp->GetCurrentMethod());
+#endif
     } else {
-        test = GetGraph()->CreateInstAdd(pre_header_cmp->CastToCompare()->GetOperandsType(), pre_header_cmp->GetPc());
+        test = GetGraph()->CreateInstAdd(pre_header_cmp->CastToCompare()->GetOperandsType(), pre_header_cmp->GetPc(),
+                                         loop_info.test, const_inst);
+#ifdef PANDA_COMPILER_DEBUG_INFO
+        test->SetCurrentMethod(pre_header_cmp->GetCurrentMethod());
+#endif
     }
-    test->SetInput(0, loop_info.test);
-    test->SetInput(1, const_inst);
     pre_header_cmp->InsertBefore(test);
     return test;
 }
@@ -319,10 +325,15 @@ void LoopUnroll::FixCompareInst(const CountableLoopInfo &loop_info, BasicBlock *
         // Create overflow_compare
         auto overflow_compare = GetGraph()->CreateInstCompare(compiler::DataType::BOOL, pre_header_cmp->GetPc(),
                                                               new_test, loop_info.test, loop_info.test->GetType(), cc);
+#ifdef PANDA_COMPILER_DEBUG_INFO
+        overflow_compare->SetCurrentMethod(pre_header_cmp->GetCurrentMethod());
+#endif
         // Create (pre_header_compare AND overflow_compare) inst
-        auto and_inst = GetGraph()->CreateInstAnd(DataType::BOOL, pre_header_cmp->GetPc());
-        and_inst->SetInput(0, pre_header_cmp);
-        and_inst->SetInput(1, overflow_compare);
+        auto and_inst =
+            GetGraph()->CreateInstAnd(DataType::BOOL, pre_header_cmp->GetPc(), pre_header_cmp, overflow_compare);
+#ifdef PANDA_COMPILER_DEBUG_INFO
+        and_inst->SetCurrentMethod(pre_header_cmp->GetCurrentMethod());
+#endif
         pre_header_if->SetInput(0, and_inst);
         pre_header_if->InsertBefore(and_inst);
         and_inst->InsertBefore(overflow_compare);

@@ -28,6 +28,10 @@ language/statements/try/tco-finally.js
 language/statements/while/tco-body.js
 # #9970
 built-ins/RegExp/from-regexp-like-get-source-err.js
+# #9965
+built-ins/RegExp/from-regexp-like-get-flags-err.js
+# #9991
+built-ins/RegExp/from-regexp-like-get-ctor-err.js
 
 # fail precision #9110
 built-ins/Date/UTC/fp-evaluation-order.js

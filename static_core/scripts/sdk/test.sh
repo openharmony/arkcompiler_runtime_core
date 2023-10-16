@@ -73,6 +73,7 @@ build-sdk/sdk/linux_host_tools
 build-sdk/sdk/linux_host_tools/bin
 build-sdk/sdk/linux_host_tools/bin/ark
 build-sdk/sdk/linux_host_tools/bin/ark_aot
+build-sdk/sdk/linux_host_tools/bin/ark_disasm
 build-sdk/sdk/linux_host_tools/bin/ark_link
 build-sdk/sdk/linux_host_tools/bin/es2panda
 build-sdk/sdk/linux_host_tools/lib
@@ -81,6 +82,7 @@ build-sdk/sdk/linux_host_tools/lib/libarkassembler.so
 build-sdk/sdk/linux_host_tools/lib/libarkbase.so
 build-sdk/sdk/linux_host_tools/lib/libarkbytecodeopt.so
 build-sdk/sdk/linux_host_tools/lib/libarkcompiler.so
+build-sdk/sdk/linux_host_tools/lib/libarkdisassembler.so
 build-sdk/sdk/linux_host_tools/lib/libarkfile.so
 build-sdk/sdk/linux_host_tools/lib/libarkruntime.so
 build-sdk/sdk/linux_host_tools/lib/libarkziparchive.so

@@ -158,6 +158,8 @@ public:
 
     PANDA_PUBLIC_API static panda_file::Type::TypeId GetId(std::string_view name, bool ignore_primitive = false);
 
+    PANDA_PUBLIC_API static pandasm::Type FromPrimitiveId(panda_file::Type::TypeId id);
+
     bool operator==(const Type &type) const
     {
         return name_ == type.name_;

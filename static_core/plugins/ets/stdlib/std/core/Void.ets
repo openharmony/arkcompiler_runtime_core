@@ -16,7 +16,7 @@
 package std.core;
 
 export final class void {
-    static void_instance = new void();
+    static readonly void_instance = new void();
     private constructor() {}
 
 }

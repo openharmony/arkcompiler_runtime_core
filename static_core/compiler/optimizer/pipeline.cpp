@@ -149,6 +149,8 @@ bool Pipeline::RunOptimizations()
     if (!OPTIONS.IsCompilerLoopUnroll()) {
         graph->SetUnrollComplete();
     }
+    graph->RunPass<Peepholes>();
+    graph->RunPass<BranchElimination>();
 
     // The problem with inlining in OSR mode can be found in `bitops-nsieve-bits` benchmark and it is in the
     // following: we inline the method that has user X within a loop, then peepholes optimize datflow and def of

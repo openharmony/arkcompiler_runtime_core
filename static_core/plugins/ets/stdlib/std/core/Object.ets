@@ -54,3 +54,5 @@ export class Object {
     return runtime.equals(this, to);
   }
 }
+
+export type NullishType = Object | null

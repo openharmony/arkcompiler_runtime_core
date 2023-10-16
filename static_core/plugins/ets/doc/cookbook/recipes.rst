@@ -73,7 +73,6 @@ data by numeric indices.
 * :ref:`R059`
 * :ref:`R060`
 * :ref:`R066`
-* :ref:`R105`
 * :ref:`R144`
 
 .. _R002:
@@ -95,8 +94,7 @@ because its most popular use cases make no sense in the statically typed
 environment. In particular, the object layout is defined at compile time,
 and cannot be changed at runtime.
 
-``Symbol.iterator`` and iterable interfaces are not supported either.
-Use arrays and library-level containers to iterate over data.
+Use of ``Symbol.iterator`` in iterable interfaces is supported in |LANG|.
 
 |CB_BAD|
 ~~~~~~~~
@@ -106,26 +104,6 @@ Use arrays and library-level containers to iterate over data.
     const sym = Symbol()
     let o = {
        [sym]: "value"
-    }
-
-    let obj = {
-        data: ['a', 'b', 'c'],
-        [Symbol.iterator]() {
-            const this_ = this
-            let index = 0
-            return {
-                next() {
-                    return {
-                        done: index >= this_.data.length,
-                        value: 'name_' + this_.data[index++]
-                    }
-                }
-            }
-        }
-    }
-
-    for (let t of obj) {
-        console.log(t)
     }
 
 |CB_OK|
@@ -138,11 +116,6 @@ Use arrays and library-level containers to iterate over data.
     }
     let o = new SomeClass()
 
-    let arr:string[] = ['a', 'b', 'c']
-    for (let t of arr) {
-        console.log('name_' + t)
-    }
-
 |CB_SEE|
 ~~~~~~~~
 
@@ -151,7 +124,6 @@ Use arrays and library-level containers to iterate over data.
 * :ref:`R059`
 * :ref:`R060`
 * :ref:`R066`
-* :ref:`R105`
 * :ref:`R144`
 
 .. _R003:
@@ -303,6 +275,14 @@ and distinct from other names, e.g., variable names and function names.
 |LANG| does not support the types ``any`` and ``unknown``. Specify
 types explicitly.
 
+If your |LANG| code has to interoperate with the standard |TS| or |JS| code
+and no type information is available (or of the type information is impossible
+to obtain), you can use a special ``ESObject`` type for working with dynamic
+objects. Please note that such objects reduce type checking (which means less
+stable and more error-prone code) and have severe runtime overhead and
+should be avoided at all cost. Using ``ESObject`` will still produce a warning
+message.
+
 |CB_BAD|
 ~~~~~~~~
 
@@ -316,6 +296,11 @@ types explicitly.
     value2 = true
     value2 = 42
 
+    // Let's assume that we have no information for external_function
+    // because it is defined in JavaScript code:
+    let something : any = external_function()
+    console.log("someProperty of something:", something.someProperty)
+
 |CB_OK|
 ~~~~~~~
 
@@ -325,6 +310,11 @@ types explicitly.
     let value_n: number = 42 // OR: let value_n = 42
     let value_o1: Object = true
     let value_o2: Object = 42
+
+    // Let's assume that we have no information for external_function
+    // because it is defined in JavaScript code:
+    let something : ESObject = external_function()
+    console.log("someProperty of something:", something.someProperty)
 
 |CB_SEE|
 ~~~~~~~~
@@ -1777,7 +1767,6 @@ changed at runtime. Thus the operation of deleting a property makes no sense.
 * :ref:`R029`
 * :ref:`R060`
 * :ref:`R066`
-* :ref:`R105`
 
 .. _R060:
 
@@ -1827,7 +1816,6 @@ changed at runtime. Thus the operation of deleting a property makes no sense.
 * :ref:`R029`
 * :ref:`R059`
 * :ref:`R066`
-* :ref:`R105`
 * :ref:`R144`
 
 .. _R065:
@@ -1929,7 +1917,6 @@ to check whether certain class members exist.
 * :ref:`R029`
 * :ref:`R059`
 * :ref:`R060`
-* :ref:`R105`
 * :ref:`R144`
 
 .. _R069:
@@ -1994,6 +1981,10 @@ a temporary variable, where applicable) for replacement.
 
 |LANG| supports the comma operator ``,`` only in ``for`` loops. Otherwise,
 it is useless as it makes the execution order harder to understand.
+
+Please note that this rule is applied only to the "comma operator". Other
+cases, when comma is used to delimit variable declarations or parameters of
+a function call, are of course allowed.
 
 |CB_BAD|
 ~~~~~~~~
@@ -2159,58 +2150,6 @@ cannot change at runtime. For arrays, iterate with the regular ``for`` loop.
     for (let i = 0; i < a.length; ++i) {
         console.log(a[i])
     }
-
-|CB_SEE|
-~~~~~~~~
-
-* :ref:`R082`
-
-.. _R082:
-
-|CB_R| ``for-of`` is supported only for arrays, strings, sets, maps and classes derived from them
--------------------------------------------------------------------------------------------------
-
-|CB_RULE| ``arkts-for-of-str-arr``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: ForOfNonArray
-
-|CB_ERROR|
-
-|LANG| supports the iteration over arrays, strings, sets, maps and classes
-derived from them by the ``for .. of`` loop, but does not support the
-iteration of objects content. All typed arrays from the standard
-library (for example, ``Int32Array``) are also supported.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    class A {
-        prop1: number;
-        prop2: number;
-    }
-    let a = new A()
-    for (let prop of a) {
-        console.log(prop)
-    }
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    let a = new Set<number>([1, 2, 3])
-    for (let n of a) {
-        console.log(n)
-    }
-
-|CB_SEE|
-~~~~~~~~
-
-* :ref:`R080`
 
 .. _R083:
 
@@ -2960,82 +2899,6 @@ only interfaces.
         select(): void
     }
 
-.. _R105:
-
-|CB_R| Property-based runtime type checks are not supported
------------------------------------------------------------
-
-|CB_RULE| ``arkts-no-prop-existence-check``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: PropertyRuntimeCheck
-
-|CB_ERROR|
-
-|LANG| requires that object layout is determined at compile time, and cannot
-be changed at runtime. Therefore, property-based runtime checks are not
-supported.
-If you need to do a type cast, use the operator ``as`` with desired properties
-and methods.
-If some property does not exist, then an attempt to refer to it causes a
-compile-time error.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    class A {
-        foo() {}
-        bar() {}
-    }
-
-    function getSomeObject() {
-        return new A()
-    }
-
-    let obj: any = getSomeObject()
-    if (obj && obj.foo && obj.bar) {
-        console.log("Yes")  // prints "Yes" in this example
-    } else {
-        console.log("No")
-    }
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    class A {
-        foo(): void {}
-        bar(): void {}
-    }
-
-    function getSomeObject(): A {
-        return new A()
-    }
-
-    function main(): void {
-        let tmp: Object = getSomeObject()
-        let obj: A = tmp as A
-        obj.foo()       // OK
-        obj.bar()       // OK
-        obj.some_foo()  // Compile-time error: Method some_foo does not
-                        // exist on this type
-    }
-
-|CB_SEE|
-~~~~~~~~
-
-* :ref:`R001`
-* :ref:`R002`
-* :ref:`R029`
-* :ref:`R059`
-* :ref:`R060`
-* :ref:`R066`
-* :ref:`R144`
-
 .. _R106:
 
 |CB_R| Constructor function type is not supported
@@ -3732,7 +3595,7 @@ to static typing.
 .. meta:
     :keywords: DefiniteAssignment
 
-|CB_ERROR|
+|CB_WARNING|
 
 |LANG| does not support definite assignment assertions ``let v!: T`` because
 they are considered an excessive compiler hint.
@@ -3882,8 +3745,9 @@ objects with dynamically changed layout are not supported.
 
 |CB_ERROR|
 
-Currently |LANG| does not support utility types from |TS| extensions to the
-standard library, except following: ``Partial``, ``Record``.
+Currently |LANG| does not support utility types
+from |TS| extensions to the standard library, except following:
+``Partial``, ``Required``, ``Readonly``, ``Record``.
 
 For the type *Record<K, V>*, the type of an indexing expression *rec[index]* is
 of the type *V | undefined*.
@@ -4201,8 +4065,7 @@ dynamic manner, which is not compatible with static typing. The usage of
 the following APIs is prohibited:
 
 Properties and functions of the global object: ``eval``,
-``Infinity``, ``NaN``, ``isFinite``, ``isNaN``, ``parseFloat``, ``parseInt``,
-``Encode``, ``Decode``, ``ParseHexOctet``
+``Infinity``, ``NaN``, ``isFinite``, ``isNaN``, ``parseFloat``, ``parseInt``
 
 ``Object``: ``__proto__``, ``__defineGetter__``, ``__defineSetter__``,
 ``__lookupGetter__``, ``__lookupSetter__``, ``assign``, ``create``,
@@ -4234,7 +4097,6 @@ Properties and functions of the global object: ``eval``,
 * :ref:`R029`
 * :ref:`R060`
 * :ref:`R066`
-* :ref:`R105`
 * :ref:`R137`
 
 .. _R145:

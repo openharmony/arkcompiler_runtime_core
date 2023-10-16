@@ -183,7 +183,7 @@ PandaVector<EtsMethod *> EtsClass::GetConstructors()
     auto constructors = PandaVector<EtsMethod *>();
     auto methods = GetMethods();
     std::copy_if(methods.begin(), methods.end(), std::back_inserter(constructors),
-                 [](EtsMethod *method) { return method->IsConstructor(); });
+                 [this](EtsMethod *method) { return method->IsInstanceConstructor() && method->GetClass() == this; });
     return constructors;
 }
 

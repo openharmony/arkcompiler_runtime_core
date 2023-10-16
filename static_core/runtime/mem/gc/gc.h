@@ -23,7 +23,7 @@
 #include "libpandabase/os/cpu_affinity.h"
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/os/thread.h"
-#include "libpandabase/taskmanager/task.h"
+#include "libpandabase/taskmanager/task_queue.h"
 #include "libpandabase/trace/trace.h"
 #include "libpandabase/utils/expected.h"
 #include "runtime/include/gc_task.h"
@@ -45,6 +45,7 @@
 #include "runtime/mem/gc/gc_types.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "runtime/mem/gc/bitmap.h"
+#include "runtime/mem/gc/workers/gc_worker.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/timing.h"
 #include "runtime/mem/region_allocator.h"
@@ -206,11 +207,6 @@ public:
         return tlabs_supported_;
     }
 
-    static constexpr taskmanager::VMType GetVmType()
-    {
-        return taskmanager::VMType::STATIC_VM;
-    }
-
     /// @return true if GC supports object pinning (will not move pinned object), false otherwise
     virtual bool IsPinningSupported() const = 0;
 
@@ -256,11 +252,9 @@ public:
 
     GCWorkersTaskPool *GetWorkersTaskPool() const
     {
-        ASSERT(workers_pool_ != nullptr);
-        return workers_pool_;
+        ASSERT(workers_task_pool_ != nullptr);
+        return workers_task_pool_;
     }
-
-    void CreateWorkersTaskPool();
 
     // Additional NativeGC
     void NotifyNativeAllocations();
@@ -338,15 +332,10 @@ public:
         return vm_;
     }
 
-    virtual void PreZygoteFork()
-    {
-        JoinWorker();
-    }
+    virtual void PreZygoteFork();
 
-    virtual void PostZygoteFork()
-    {
-        CreateWorker();
-    }
+    virtual void PostZygoteFork();
+
     /**
      * Processes thread's remaining pre and post barrier buffer entries on its termination.
      *
@@ -488,18 +477,21 @@ public:
         GetObjectAllocator()->GetHeapSpace()->ComputeNewSize();
     }
 
-    // TODO(ipetrov, #13816): move to private
-    void JoinWorker(bool continue_run_gc = false);
+    /// @return GC specific settings based on runtime options and GC type
+    const GCSettings *GetSettings() const
+    {
+        return &gc_settings_;
+    }
 
 protected:
     /// @brief Runs all phases
     void RunPhases(GCTask &task);
 
     /**
-     * Add task to GC Queue to be run by GC thread (or run in place)
+     * Add task to GC Queue to be run by a GC worker (or run in place)
      * @return false if the task is discarded. Otherwise true.
      * The task may be discarded if the GC already executing a task with
-     * the same reason. The task may be discarded by other reasons.
+     * the same reason. The task may be discarded by other reasons (for example, task is invalid).
      */
     bool AddGCTask(bool is_managed, PandaUniquePtr<GCTask> task);
 
@@ -559,10 +551,14 @@ protected:
         gc_barrier_set_ = barrier_set;
     }
 
-    void ClearWorkersPool()
-    {
-        workers_pool_ = nullptr;
-    }
+    /**
+     * @brief Create GC workers task pool which runs some gc phases in parallel
+     * This pool can be based on internal thread pool or TaskManager workers
+     */
+    void CreateWorkersTaskPool();
+
+    /// @brief Destroy GC workers task pool if it was created
+    void DestroyWorkersTaskPool();
 
     /// Mark all references which we added by AddReference method
     virtual void MarkReferences(GCMarkingStackType *references, GCPhase gc_phase) = 0;
@@ -606,11 +602,6 @@ protected:
     bool IsExplicitFull(const panda::GCTask &task) const
     {
         return (task.reason == GCTaskCause::EXPLICIT_CAUSE) && !gc_settings_.IsExplicitConcurrentGcEnabled();
-    }
-
-    const GCSettings *GetSettings() const
-    {
-        return &gc_settings_;
     }
 
     const ReferenceProcessor *GetReferenceProcessor() const
@@ -683,13 +674,16 @@ private:
     bool NeedRunGCAfterWaiting(size_t counter_before_waiting, const GCTask &task) const;
 
     /**
-     * Entrypoint for GC worker thread
-     * @param gc pointer to GC structure
-     * @param vm pointer to VM structure
+     * @brief Create GC worker if needed and set gc status to running (gc_running_ variable)
+     * @see IsGCRunning
      */
-    static void GCWorkerEntry(GC *gc, PandaVM *vm);
-
     void CreateWorker();
+
+    /**
+     * @brief Join and destroy GC worker if needed and set gc status to non-running (gc_running_ variable)
+     * @see IsGCRunning
+     */
+    void DestroyWorker();
 
     /// Move small objects to pygote space at first pygote fork
     void MoveObjectsToPygoteSpace();
@@ -716,16 +710,21 @@ private:
     ReferenceProcessor *reference_processor_ {nullptr};
     std::atomic_bool allow_soft_reference_processing_ = false;
 
-    GCQueueInterface *gc_queue_ = nullptr;
-    std::thread *worker_ = nullptr;
+    // TODO(ipetrov): choose suitable priority
+    static constexpr size_t GC_TASK_QUEUE_PRIORITY = 6U;
+    taskmanager::TaskQueue *gc_workers_task_queue_ = nullptr;
+
+    /* GC worker specific variables */
+    GCWorker *gc_worker_ = nullptr;
     std::atomic_bool gc_running_ = false;
     std::atomic<bool> can_add_gc_task_ = true;
+
     bool tlabs_supported_ = false;
 
     // Additional data for extensions
     GCExtensionData *extension_data_ {nullptr};
 
-    GCWorkersTaskPool *workers_pool_ {nullptr};
+    GCWorkersTaskPool *workers_task_pool_ {nullptr};
     class PostForkGCTask;
 
     friend class ecmascript::EcmaReferenceProcessor;

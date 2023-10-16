@@ -15,7 +15,7 @@
 Recipes Summarized
 ==================
 
-This document provides an informal summary of |TS| features that |LANG| either
+This chapter provides an informal summary of |TS| features that |LANG| either
 can support with limitations, or cannot support. See :ref:`Recipes` for the
 full list with more detailed code examples and workaround suggestions.
 

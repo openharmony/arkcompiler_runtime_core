@@ -68,6 +68,21 @@ void StackfulCoroutineManager::OnWorkerShutdown()
                            << active_workers_count_;
 }
 
+void StackfulCoroutineManager::DisableCoroutineSwitch()
+{
+    GetCurrentWorker()->DisableCoroutineSwitch();
+}
+
+void StackfulCoroutineManager::EnableCoroutineSwitch()
+{
+    GetCurrentWorker()->EnableCoroutineSwitch();
+}
+
+bool StackfulCoroutineManager::IsCoroutineSwitchDisabled()
+{
+    return GetCurrentWorker()->IsCoroutineSwitchDisabled();
+}
+
 void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm)
 {
     coro_stack_size_bytes_ = Runtime::GetCurrent()->GetOptions().GetCoroutineStackSizePages() * os::mem::GetPageSize();

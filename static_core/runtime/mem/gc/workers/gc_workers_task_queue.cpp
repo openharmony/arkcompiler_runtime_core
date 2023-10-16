@@ -18,18 +18,9 @@
 
 namespace panda::mem {
 
-GCWorkersTaskQueue::GCWorkersTaskQueue(GC *gc) : GCWorkersTaskPool(gc)
-{
-    gc_task_queue_ = GetGC()->GetInternalAllocator()->New<taskmanager::TaskQueue>(
-        taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, GC_TASK_QUEUE_PRIORITY);
-    ASSERT(gc_task_queue_ != nullptr);
-    taskmanager::TaskScheduler::GetTaskScheduler()->RegisterQueue(gc_task_queue_);
-}
+GCWorkersTaskQueue::GCWorkersTaskQueue(GC *gc) : GCWorkersTaskPool(gc) {}
 
-GCWorkersTaskQueue::~GCWorkersTaskQueue()
-{
-    GetGC()->GetInternalAllocator()->Delete(gc_task_queue_);
-}
+GCWorkersTaskQueue::~GCWorkersTaskQueue() = default;
 
 bool GCWorkersTaskQueue::TryAddTask(GCWorkersTask &&task)
 {
@@ -37,7 +28,7 @@ bool GCWorkersTaskQueue::TryAddTask(GCWorkersTask &&task)
         this->RunGCWorkersTask(&gc_worker_task);
     };
     auto gc_task = taskmanager::Task::Create(GC_TASK_PROPERTIES, gc_task_runner);
-    gc_task_queue_->AddTask(std::move(gc_task));
+    taskmanager::TaskScheduler::GetTaskScheduler()->AddTask(std::move(gc_task));
     return true;
 }
 

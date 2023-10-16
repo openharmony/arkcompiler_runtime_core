@@ -22,22 +22,17 @@ void BytecodeGen::VisitIntrinsic(GraphVisitor *visitor, Inst *inst_base)
     auto inst = inst_base->CastToIntrinsic();
     auto enc = static_cast<BytecodeGen *>(visitor);
 
-    if (!enc->GetGraph()->IsDynamicMethod()) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-        enc->success_ = false;
-        return;
-    }
-
     switch (inst->GetIntrinsicId()) {
 % Common::plugins.each do |plugin_lang, plugin_opts|
-    // Lang <%= plugin_lang %> 
+    // Lang <%= plugin_lang %>
 % next unless plugin_opts["bytecodeopt"]
 % next unless plugin_opts["bytecodeopt"]["codegen_intrinsics_inc"]
-#include "<%= plugin_opts["bytecodeopt"]["codegen_intrinsics_inc"] %>"
+    #include "<%= plugin_opts["bytecodeopt"]["codegen_intrinsics_inc"] %>"
 % end
         default: {
             enc->success_ = false;
             LOG(ERROR,COMPILER) << "Unsupported intrinsic";
         }
     }
+    enc->success_ = true;
 }

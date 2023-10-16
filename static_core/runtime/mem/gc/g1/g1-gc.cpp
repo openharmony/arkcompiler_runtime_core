@@ -13,30 +13,26 @@
  * limitations under the License.
  */
 
-#include <atomic>
 #include "libpandabase/mem/space.h"
-#include "mem/gc/gc.h"
 #include "runtime/include/language_config.h"
 #include "runtime/include/class.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/gc/card_table-inl.h"
 #include "runtime/mem/gc/dynamic/gc_marker_dynamic-inl.h"
+#include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/g1/ref_cache_builder.h"
 #include "runtime/mem/gc/g1/update_remset_thread.h"
-#include "runtime/mem/gc/workers/gc_workers_task_queue.h"
-#include "runtime/mem/gc/workers/gc_workers_thread_pool.h"
+#include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 #include "runtime/mem/gc/generational-gc-base-inl.h"
 #include "runtime/mem/gc/static/gc_marker_static-inl.h"
 #include "runtime/mem/gc/reference-processor/reference_processor.h"
 #include "runtime/mem/object_helpers-inl.h"
-#include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/mem/rem_set-inl.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/mem/gc/g1/ref_updater.h"
-#include "runtime/mem/gc/g1/card_handler.h"
 #include "runtime/mem/region_space.h"
 
 namespace panda::mem {
@@ -720,7 +716,7 @@ void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
                 [[maybe_unused]] auto callback = [](ManagedThread *thread) {
                     return thread->GetPreWrbEntrypoint() == nullptr;
                 };
-                ASSERT(Thread::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(callback));
+                ASSERT(this->GetPandaVm()->GetThreadManager()->EnumerateThreads(callback));
 
                 if (NeedFullGC(task)) {
                     task.collection_type = GCCollectionType::FULL;
@@ -886,7 +882,7 @@ void G1GC<LanguageConfig>::RunConcurrentMark(panda::GCTask &task)
         thread->SetPreWrbEntrypoint(reinterpret_cast<void *>(pre_wrb_entrypoint));
         return true;
     };
-    Thread::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(callback);
+    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(callback);
 
     if (this->GetSettings()->BeforeG1ConcurrentHeapVerification()) {
         trace::ScopedTrace post_heap_verifier_trace("PostGCHeapVeriFier before concurrent");
@@ -1453,7 +1449,7 @@ void G1GC<LanguageConfig>::ConcurrentMarking(panda::GCTask &task)
         thread->SetPreWrbEntrypoint(nullptr);
         return true;
     };
-    Thread::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(set_entrypoint);
+    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(set_entrypoint);
     concurrent_marking_flag_ = false;
     if (!interrupt_concurrent_flag_) {
         Remark(task);
@@ -1820,11 +1816,7 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::PreZygoteFork()
 {
     GC::PreZygoteFork();
-    if (this->GetWorkersTaskPool() != nullptr) {
-        auto allocator = this->GetInternalAllocator();
-        allocator->Delete(this->GetWorkersTaskPool());
-        this->ClearWorkersPool();
-    }
+    this->DestroyWorkersTaskPool();
     this->DisableWorkerThreads();
     update_remset_thread_->DestroyThread();
     // don't use thread while we are in zygote
@@ -1870,7 +1862,7 @@ void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveStack *object_stack)
         pre_buff->clear();
         return true;
     };
-    Thread::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(callback);
+    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(callback);
 
     // Process satb buffers of the terminated threads
     os::memory::LockHolder lock(satb_and_newobj_buf_lock_);
@@ -1904,15 +1896,14 @@ void G1GC<LanguageConfig>::WaitForUpdateRemsetThread()
 
 #ifndef NDEBUG
     bool all_post_barrier_buffers_empty = true;
-    Thread::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(
-        [&all_post_barrier_buffers_empty](ManagedThread *thread) {
-            auto local_buffer = thread->GetG1PostBarrierBuffer();
-            if (local_buffer != nullptr && !local_buffer->IsEmpty()) {
-                all_post_barrier_buffers_empty = false;
-                return false;
-            }
-            return true;
-        });
+    this->GetPandaVm()->GetThreadManager()->EnumerateThreads([&all_post_barrier_buffers_empty](ManagedThread *thread) {
+        auto local_buffer = thread->GetG1PostBarrierBuffer();
+        if (local_buffer != nullptr && !local_buffer->IsEmpty()) {
+            all_post_barrier_buffers_empty = false;
+            return false;
+        }
+        return true;
+    });
     ASSERT(all_post_barrier_buffers_empty);
 #endif
 }
@@ -1955,7 +1946,7 @@ void G1GC<LanguageConfig>::ClearSatb()
         }
         return true;
     };
-    Thread::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(thread_callback);
+    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(thread_callback);
 
     // Process satb buffers of the terminated threads
     for (auto obj_vector : satb_buff_list_) {

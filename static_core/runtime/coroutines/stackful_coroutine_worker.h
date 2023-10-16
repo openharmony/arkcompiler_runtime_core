@@ -110,6 +110,12 @@ public:
     /// @brief call to delete the fake "schedule loop" coroutine
     void FinalizeFiberScheduleLoop();
 
+    /* debugging tools */
+    // See CoroutineManager/StackfulCoroutineManager for details
+    void DisableCoroutineSwitch();
+    void EnableCoroutineSwitch();
+    bool IsCoroutineSwitchDisabled();
+
 #ifndef NDEBUG
     void PrintRunnables(const PandaString &requester);
 #endif
@@ -157,6 +163,11 @@ private:
     void FinalizeTerminatedCoros();
     /// recalculate the load factor
     void UpdateLoadFactor() REQUIRES(runnables_lock_);
+    /**
+     * This checker is called on a coroutine switch attempt. Issues fatal error in case when coroutine switch is
+     * disabled.
+     */
+    void EnsureCoroutineSwitchEnabled();
 
     StackfulCoroutineManager *coro_manager_;
     Coroutine *schedule_loop_ctx_ = nullptr;
@@ -175,6 +186,12 @@ private:
 
     /// the moving average number of coroutines in the runnable queue
     std::atomic<double> load_factor_ = 0;
+
+    /**
+     * This counter is incremented on DisableCoroutineSwitch calls and decremented on EnableCoroutineSwitch calls.
+     * The value 0 means that coroutine switch is ENABLED.
+     */
+    uint32_t disable_coro_switch_counter_ = 0;
 
     PandaString name_;
 };

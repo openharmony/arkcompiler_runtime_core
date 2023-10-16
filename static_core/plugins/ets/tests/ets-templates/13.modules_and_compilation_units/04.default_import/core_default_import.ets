@@ -13,14 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for core_type in core_types %}
+
 /*---
 desc: A compilation unit automatically imports all entities exported from the predefined package ‘core’. 
+params: "{{core_type}}"
+tags: [compile-only]
 ---*/
 
-
-
 function main(): void {
-  // class Exception is defined in the `core' package
-  let myException = new Exception();
-  
+  let myObj {{core_type}}
 }
+
+{% endfor %}

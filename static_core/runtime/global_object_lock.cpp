@@ -14,6 +14,7 @@
  */
 
 #include "global_object_lock.h"
+#include "runtime/include/thread_scopes.h"
 
 namespace panda {
 // Use some global lock as fast solution.
@@ -22,17 +23,20 @@ static os::memory::ConditionVariable CV;  // NOLINT(fuchsia-statically-construct
 
 GlobalObjectLock::GlobalObjectLock([[maybe_unused]] const ObjectHeader *obj)
 {
+    ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_BLOCKED);
     MTX.Lock();
 }
 
 bool GlobalObjectLock::Wait([[maybe_unused]] bool ignore_interruption) const
 {
+    ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_WAITING);
     CV.Wait(&MTX);
     return true;
 }
 
 bool GlobalObjectLock::TimedWait(uint64_t timeout) const
 {
+    ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_TIMED_WAITING);
     CV.TimedWait(&MTX, timeout);
     return true;
 }

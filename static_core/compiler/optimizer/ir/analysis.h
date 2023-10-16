@@ -37,6 +37,9 @@ bool CheckObjectRec(Inst *object, const Inst *user, const BasicBlock *block, Ins
                     Inst **failed_ss = nullptr);
 std::optional<bool> IsIfInverted(BasicBlock *phi_block, IfImmInst *if_imm);
 
+// If object input has known class, return pointer to the class, else returns nullptr
+RuntimeInterface::ClassPtr GetClassPtrForObject(Inst *inst, size_t input_num = 0);
+
 static inline bool IsInstInDifferentBlocks(Inst *i1, Inst *i2)
 {
     return i1->GetBasicBlock() != i2->GetBasicBlock();

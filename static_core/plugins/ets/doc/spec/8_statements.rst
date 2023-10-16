@@ -355,6 +355,10 @@ The key difference is that *whileStatement* first evaluates and checks the
 
 A ``for-of`` loop iterates elements of *array* or *string*:
 
+.. or any class which implements interface *Iterable*, which is part of the |LANG| standard library
+   (see :ref:`Standard Library`)
+
+
 .. index::
    for-of statement
    loop
@@ -372,13 +376,20 @@ A ``for-of`` loop iterates elements of *array* or *string*:
         ;
 
 
-A compile-time error occurs if the type of an expression is neither an
-*array* nor *string*.
+A compile-time error occurs if the type of an expression is not
+*array* or *string*.
+
+.. or class implementing *Iterable*.
 
 The execution of the ``for-of`` loop starts with the evaluation of ``expression``.
-If the evaluation is successful, then the resultant *string* or *array* is
-used for loop iterations (execution of the ``statement``). On each iteration,
+If the evaluation is successful, then the resultant *string* or *array*
+
+.. or class which implements *Iterable*
+
+is used for loop iterations (execution of the ``statement``). On each iteration,
 *forVariable* is set to successive elements of the *array* or *string*.
+
+.. or result of class iterator advancing.
 
 .. index::
    compile-time error

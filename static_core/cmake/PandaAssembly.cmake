@@ -148,6 +148,9 @@ add_custom_target(compiler_stats_dir
 # COMPILER_OPTIONS
 #   Options for compiler, given both to panda and paoc
 #
+# ASSEMBLER_OPTIONS
+#   Options for assembler
+#
 # AOT_GC_OPTION
 #  Type of a gc
 #
@@ -168,7 +171,7 @@ function(panda_add_asm_file)
     set(prefix ARG)
     set(noValues RUNTIME_FAIL_TEST)
     set(singleValues FILE ENTRY TARGET SUBDIR OUTPUT_FILE_VARIABLE ERROR_FILE_VARIABLE SKIP_BUILD AOT_MODE AOT_STATS AOT_COMPILER TIMEOUT LANGUAGE_CONTEXT AOT_GC_OPTION)
-    set(multiValues DEPENDS RUNTIME_OPTIONS COMPILER_OPTIONS ENTRY_ARGUMENTS PRLIMIT_OPTIONS ADDITIONAL_STDLIBS LLVMAOT_OPTIONS)
+    set(multiValues DEPENDS RUNTIME_OPTIONS COMPILER_OPTIONS ENTRY_ARGUMENTS PRLIMIT_OPTIONS ADDITIONAL_STDLIBS LLVMAOT_OPTIONS ASSEMBLER_OPTIONS)
     cmake_parse_arguments(${prefix}
                           "${noValues}"
                           "${singleValues}"
@@ -212,7 +215,7 @@ function(panda_add_asm_file)
         set(assembler ark_asm)
         add_custom_command(OUTPUT "${binary_file}"
                           COMMENT "Building ${ARG_TARGET}"
-                          COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:${assembler}> --verbose --log-file "${build_log}" "${ARG_FILE}" "${binary_file}" 1>"${build_out}" 2>"${build_err}"
+                          COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:${assembler}> ${ARG_ASSEMBLER_OPTIONS} --verbose --log-file "${build_log}" "${ARG_FILE}" "${binary_file}" 1>"${build_out}" 2>"${build_err}"
                           DEPENDS ${assembler} "${ARG_FILE}")
     endif()
 

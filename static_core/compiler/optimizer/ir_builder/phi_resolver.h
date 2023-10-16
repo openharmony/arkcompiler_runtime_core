@@ -84,6 +84,32 @@ public:
                 }
             }
         }
+        // If any input of phi instruction is not defined then we assume that phi is dead.
+        // We move users to the input and remove the PHI
+        for (auto bb : graph_->GetBlocksRPO()) {
+            for (auto inst : bb->PhiInstsSafe()) {
+                // Skip catch phi
+                if (!inst->IsPhi()) {
+                    continue;
+                }
+                if (inst->GetInputsCount() != bb->GetPredsBlocks().size()) {
+                    // if the number of PHI inputs less then the number of block predecessor and all inputs are equal
+                    // Repleace users to the input
+                    if (inst->GetInputsCount() != 0) {
+                        auto input_inst = inst->GetInput(0).GetInst();
+#ifndef NDEBUG
+                        if (!inst->GetUsers().Empty()) {
+                            for ([[maybe_unused]] auto &input : inst->GetInputs()) {
+                                ASSERT(input.GetInst() == input_inst);
+                            }
+                        }
+#endif
+                        inst->ReplaceUsers(input_inst);
+                    }
+                    bb->RemoveInst(inst);
+                }
+            }
+        }
     }
 
 private:

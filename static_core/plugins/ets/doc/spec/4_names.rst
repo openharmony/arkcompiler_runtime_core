@@ -22,7 +22,7 @@ This chapter introduces three mutually-related notions: names,
 declarations, and scopes.
 
 Each entity in a |LANG| program---a variable, a constant, a class,
-a type, a function, a method, etc.---is introduced via *declaration*.
+a type, a function, a method, etc.---is introduced via a *declaration*.
 An entity declaration assigns a *name* to the entity declared.
 Further in the program text, the name is used to refer to the entity.
 
@@ -235,7 +235,7 @@ The scope of a name depends on the context the name is declared in:
 
 .. _class-access:
   
--  A name declared within a class (*class level scope*) is accessible in that
+-  A name declared inside a class (*class level scope*) is accessible in that
    class and sometimes, depending on the access modifier, outside the class or
    by methods of derived classes.
 
@@ -250,7 +250,7 @@ The scope of a name depends on the context the name is declared in:
    
 .. _interface-access:
 
--  A name declared within an interface (*interface level scope*) is accessible
+-  A name declared inside an interface (*interface level scope*) is accessible
    inside and outside that interface (default public).
    
 .. index::
@@ -264,7 +264,7 @@ The scope of a name depends on the context the name is declared in:
 
 .. _enum-access:
 
--  *Enum level scope*: as every enumeration defines a type within a package or
+-  *Enum level scope*: as every enumeration defines a type inside a package or
    module then its scope is identical to the package or module level scope.
    All enumeration constants have the same scope as the enumeration itself.
 
@@ -300,9 +300,9 @@ The scope of a name depends on the context the name is declared in:
 
 .. _function-access:
 
--  The scope of a name declared immediately within the body of a function
-   (method) declaration is the body of that function declaration (*method
-   or function scope*) from the place of declaration, and up to the end of
+-  The scope of a name declared immediately inside the body of a function
+   (method) declaration is the body of that function declaration (*method*
+   or *function scope*) from the place of declaration, and up to the end of
    the body.
 
 .. index::
@@ -314,7 +314,7 @@ The scope of a name depends on the context the name is declared in:
 
 .. _block-access:
 
--  The scope of a name declared within a statement block is the body of
+-  The scope of a name declared inside a statement block is the body of
    such statement block from the point of declaration, and down to the end
    of the block (*block scope*).
 
@@ -920,31 +920,32 @@ Parameter List
 .. meta:
     frontend_status: Partly
 
-A signature contains a *parameter list* that specifies an identifier and a
-type of each parameter. Every parameter’s type must be explicitly defined.
-The last parameter of a function can be a *rest parameter*
-(see :ref:`Rest Parameter`).
+A signature contains a *parameter list* that specifies an identifier as
+each parameter name and a type of each parameter. Every parameter’s type must
+be explicitly defined. 
 
 .. code-block:: abnf
 
     parameterList:
-        parameter (',' parameter)* (',' restParameter)?
+        parameter (',' parameter)* (',' optionalParameters|restParameter)? 
         | restParameter
+        | optionalParameters
         ;
 
     parameter:
         identifier ':' type
-        | optionalParameter
         ;
 
     restParameter:
         '...' parameter
         ;
 
-An *optional parameter* (see :ref:`Optional Parameters`) allows to omit the
-corresponding argument when calling a function. If a parameter is not
-*optional*, then each function call must contain an argument corresponding to
-that parameter. Non-optional parameters are called the *required parameters*.
+The last parameter of a function can be a *rest parameter*
+(see :ref:`Rest Parameter`) or a sequence of *optional parameters*
+(see :ref:`Optional Parameters`). Such construction allows to omit
+the corresponding argument when calling a function. If a parameter is not
+*optional*, then each function call must contain an argument corresponding
+to that parameter. Non-optional parameters are called the *required parameters*.
 
 The function below has *required parameters*:
 
@@ -982,15 +983,20 @@ There are two forms of *optional parameters*:
 
 .. code-block:: abnf
 
+    optionalParameters:
+        optionalParameter (',' optionalParameter)
+        ;
+    
     optionalParameter:
         identifier ':' type '=' expression
         | identifier '?' ':' type
         ;
 
-The first form contains an expression that specifies a *default value*. Such
-parameter is called a *parameter with default values*. If the argument
-corresponding to that parameter is omitted in a function call, then the
-value of the parameter is default.
+
+The first form contains an expression that specifies a *default value*. That
+is called a *parameter with default value*. If the argument
+corresponding to that parameter is omitted in a function call, then the value
+of the parameter is set to the *default value*.
 
 .. index::
    optional parameter
@@ -1253,9 +1259,9 @@ Function Overload Signatures
 
 The |LANG| language allows specifying a function that can be called in
 different ways by writing *overload signatures*, i.e., by writing several
-function headers that have the same name but different signatures followed
-by one implementation function. See also :ref:`Methods Overload Signatures`
-for *method overload signatures*.
+function headers which have the same name and different signatures, and are
+followed by one implementation function. See also
+:ref:`Methods Overload Signatures` for *method overload signatures*.
 
 .. code-block:: abnf
 

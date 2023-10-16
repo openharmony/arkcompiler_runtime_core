@@ -1,0 +1,19 @@
+# List of statements with super()
+statements:
+    - "this.childField1 = 1; super()"
+    - "this.childMethod1(); super()"
+    - "super.parentField = 1; super()"
+    - "super.parentMethod(); super()"
+    - "if (true) super() else super(\"\")"
+    - "super(this.childField2)"
+    - "super(this.childMethod2())"
+    - "this.childField1 = 1; this()"
+    - "this.childMethod1(); this()"
+    - "super.parentFiled = 1; this()"
+    - "super.parentMethod(); this()"
+    - "if (true) this() else this(\"\")"
+    - "this(super.parentField)"
+    - "this(super.parentMethod())"
+    - "this(this.childField2)"
+    - "this(this.childMethod2())"
+

@@ -32,6 +32,7 @@ intrinsics:
     impl: panda::ets::intrinsics::CompilerEtsLdObjByNameObj
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
+    peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsLdObjByNameI32
     space: ets
@@ -43,6 +44,7 @@ intrinsics:
     impl: panda::ets::intrinsics::CompilerEtsLdObjByNameI32
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
+    peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsLdObjByNameI64
     space: ets
@@ -54,6 +56,7 @@ intrinsics:
     impl: panda::ets::intrinsics::CompilerEtsLdObjByNameI64
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
+    peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsLdObjByNameF32
     space: ets
@@ -65,6 +68,7 @@ intrinsics:
     impl: panda::ets::intrinsics::CompilerEtsLdObjByNameF32
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
+    peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsLdObjByNameF64
     space: ets
@@ -76,6 +80,7 @@ intrinsics:
     impl: panda::ets::intrinsics::CompilerEtsLdObjByNameF64
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
+    peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsStObjByNameObj
     space: ets
@@ -87,6 +92,7 @@ intrinsics:
     impl: panda::ets::intrinsics::CompilerEtsStObjByNameObj
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
+    peephole_func: PeepholeStObjByName
 
   - name: CompilerEtsStObjByNameI32
     space: ets
@@ -98,6 +104,7 @@ intrinsics:
     impl: panda::ets::intrinsics::CompilerEtsStObjByNameI32
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
+    peephole_func: PeepholeStObjByName
 
   - name: CompilerEtsStObjByNameI64
     space: ets
@@ -109,6 +116,7 @@ intrinsics:
     impl: panda::ets::intrinsics::CompilerEtsStObjByNameI64
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
+    peephole_func: PeepholeStObjByName
 
   - name: CompilerEtsStObjByNameF32
     space: ets
@@ -120,6 +128,7 @@ intrinsics:
     impl: panda::ets::intrinsics::CompilerEtsStObjByNameF32
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
+    peephole_func: PeepholeStObjByName
 
   - name: CompilerEtsStObjByNameF64
     space: ets
@@ -131,3 +140,4 @@ intrinsics:
     impl: panda::ets::intrinsics::CompilerEtsStObjByNameF64
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
+    peephole_func: PeepholeStObjByName

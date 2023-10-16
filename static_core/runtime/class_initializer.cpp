@@ -25,6 +25,8 @@
 #include "runtime/monitor.h"
 #include "runtime/monitor_object_lock.h"
 #include "runtime/global_object_lock.h"
+#include "runtime/coroutines/coroutine.h"
+#include "runtime/coroutines/coroutine_manager.h"
 #include "verification/util/is_system.h"
 #include "verify_app_install.h"
 
@@ -39,10 +41,20 @@ public:
     using LockT = ObjectLock;
 };
 
+/// The "TASK" multithreading mode implies that M coroutines are running on N worker threads
 template <>
 class ObjectLockConfig<MT_MODE_TASK> {
 public:
-    // TODO(xuliang): it is fast solution which we can reconsider later if we will face some perf issues with it.
+    /**
+     * TODO(konstanting):
+     * For the sake of simplicity we use a global mutex-like lock for synchronization. We imply that there will be no
+     * coroutine switch during the class initialization and that assumption includes static constructor bodies too.
+     * With a global lock, coroutine switch during a class initialiation sequence will possibly lead to deadlocks and
+     * other failures, so expect various checkers to fire and warn you in case a coroutine switch is detected.
+     *
+     * In future, we probably we would like to have coroutine-friendly per-class locks as it is a more performant
+     * solution, which places less restrictions on the class initialization sequence.
+     */
     using LockT = GlobalObjectLock;
 };
 
@@ -68,6 +80,34 @@ public:
     };
 
     using LockT = DummyObjectLock;
+};
+
+/// Does nothing in MT_MODE_SINGLE and MT_MODE_MULTI
+template <MTModeT MODE>
+class ClassInitGuard {
+public:
+    using Guard = struct Dummy {
+        explicit Dummy(ThreadManager *tm)
+        {
+            // GCC 8 and below has a strange bug: it reports a false syntax error in case
+            // when [[maybe_unused]] is set for the first constructor argument.
+            // TODO(konstanting): revert to [[maybe_unused]] when we do not use GCC<=8
+            UNUSED_VAR(tm);
+        }
+    };
+};
+
+/// Disables coroutine switch in MT_MODE_TASK (required by the current synchronization scheme)
+template <>
+class ClassInitGuard<MT_MODE_TASK> {
+public:
+    using Guard = class Adapter {
+    public:
+        explicit Adapter(ThreadManager *tm) : s_(static_cast<CoroutineManager *>(tm)) {}
+
+    private:
+        ScopedDisableCoroutineSwitch s_;
+    };
 };
 
 static void WrapException(ClassLinker *class_linker, ManagedThread *thread)
@@ -175,6 +215,9 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *class_linker, ManagedThread
         return true;
     }
 
+    // embraces the class init sequence with some checkers in the MT_MODEs where it is required
+    [[maybe_unused]] typename ClassInitGuard<MODE>::Guard guard(thread->GetVM()->GetThreadManager());
+
     using ObjectLockT = typename ObjectLockConfig<MODE>::LockT;
 
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
@@ -217,8 +260,14 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *class_linker, ManagedThread
         }
 
         if (klass->IsInitializing()) {
-            if (klass->GetInitTid() == thread->GetId()) {
-                return true;
+            if constexpr (MODE == MT_MODE_TASK) {
+                if (klass->GetInitTid() == Coroutine::CastFromThread(thread)->GetCoroutineId()) {
+                    return true;
+                }
+            } else {
+                if (klass->GetInitTid() == thread->GetId()) {
+                    return true;
+                }
             }
 
             if constexpr ((MODE == MT_MODE_MULTI) || (MODE == MT_MODE_TASK)) {
@@ -228,7 +277,11 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *class_linker, ManagedThread
             UNREACHABLE();
         }
 
-        klass->SetInitTid(thread->GetId());
+        if constexpr (MODE == MT_MODE_TASK) {
+            klass->SetInitTid(Coroutine::CastFromThread(thread)->GetCoroutineId());
+        } else {
+            klass->SetInitTid(thread->GetId());
+        }
         klass->SetState(Class::State::INITIALIZING);
         if (!ClassInitializer::InitializeFields(klass)) {
             LOG(ERROR, CLASS_LINKER) << "Cannot initialize fields of class '" << klass->GetName() << "'";

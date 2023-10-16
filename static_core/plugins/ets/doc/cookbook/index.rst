@@ -19,6 +19,7 @@
    :maxdepth: 2
 
    /intro
+   /why
    /guide
    /summary
    /recipes

@@ -12,6 +12,10 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_root.gni")
+_plugin_dir = get_path_info(".", "abspath")
+assert(string_replace(_plugin_dir, "//", "") != _plugin_dir)
+
+enable_bytecode_optimizer = true
 
 # TODO(nsizov): Fix after PR480 is merged
 srcs_assembler = [ "assembler/extension/ets_meta.cpp" ]
@@ -49,6 +53,9 @@ irtoc_plugins = [
   "irtoc_scripts/interpreter_handlers.irt",
   "irtoc_scripts/interpreter_main_loop.irt",
 ]
+
+arkbytecodeopt_deps =
+    [ "$_plugin_dir:isa_gen_ets_bytecodeopt_ets_codegen_intrinsics_gen_inc" ]
 
 arkruntime_deps = [
   "$ark_es2panda_root:libes2panda_frontend_static",
@@ -88,6 +95,8 @@ srcs_runtime = [
   "runtime/intrinsics/std_core_String.cpp",
   "runtime/intrinsics/std_core_StringBuilder.cpp",
   "runtime/intrinsics/std_core_Type.cpp",
+  "runtime/intrinsics/std_core_TypeCreator.cpp",
+  "runtime/intrinsics/std_core_Method.cpp",
   "runtime/intrinsics/std_core_Value.cpp",
   "runtime/intrinsics/std_core_gc.cpp",
   "runtime/intrinsics/std_core_finalization_queue.cpp",
@@ -108,6 +117,7 @@ srcs_runtime = [
   "runtime/types/ets_typeapi_parameter.cpp",
   "runtime/types/ets_typeapi_method.cpp",
   "runtime/types/ets_typeapi_field.cpp",
+  "runtime/types/ets_typeapi_create.cpp",
   "runtime/lambda_utils.cpp",
   "runtime/interop_js/intrinsics/std_js_jsruntime.cpp",
 ]

@@ -109,6 +109,26 @@ void StackfulCoroutineWorker::FinalizeFiberScheduleLoop()
     }
 }
 
+void StackfulCoroutineWorker::DisableCoroutineSwitch()
+{
+    ++disable_coro_switch_counter_;
+    LOG(DEBUG, COROUTINES) << "Coroutine switch on " << GetName()
+                           << " has been disabled! Recursive ctr = " << disable_coro_switch_counter_;
+}
+
+void StackfulCoroutineWorker::EnableCoroutineSwitch()
+{
+    ASSERT(IsCoroutineSwitchDisabled());
+    --disable_coro_switch_counter_;
+    LOG(DEBUG, COROUTINES) << "Coroutine switch on " << GetName()
+                           << " has been enabled! Recursive ctr = " << disable_coro_switch_counter_;
+}
+
+bool StackfulCoroutineWorker::IsCoroutineSwitchDisabled()
+{
+    return disable_coro_switch_counter_ > 0;
+}
+
 #ifndef NDEBUG
 void StackfulCoroutineWorker::PrintRunnables(const PandaString &requester)
 {
@@ -307,6 +327,7 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
 {
     ASSERT(from != nullptr);
     ASSERT(to != nullptr);
+    EnsureCoroutineSwitchEnabled();
     from->SwitchTo(to);
 }
 
@@ -322,6 +343,15 @@ void StackfulCoroutineWorker::FinalizeTerminatedCoros()
 void StackfulCoroutineWorker::UpdateLoadFactor()
 {
     load_factor_ = (load_factor_ + runnables_.size()) / 2;
+}
+
+void StackfulCoroutineWorker::EnsureCoroutineSwitchEnabled()
+{
+    if (IsCoroutineSwitchDisabled()) {
+        LOG(FATAL, COROUTINES) << "ERROR ERROR ERROR >>> Trying to switch coroutines on " << GetName()
+                               << " when coroutine switch is DISABLED!!! <<< ERROR ERROR ERROR";
+        UNREACHABLE();
+    }
 }
 
 }  // namespace panda

@@ -41,12 +41,8 @@ intl402/PluralRules/supportedLocalesOf/arguments.js
 # #9381
 language/statements/class/dstr/private-gen-meth-static-ary-ptrn-elem-id-iter-val-array-prototype.js
 
-language/expressions/strict-does-not-equals/S11.9.5_A6.1.js
 # fail precision #9110
 built-ins/Date/UTC/fp-evaluation-order.js
-
-# new fails
-built-ins/RegExpStringIteratorPrototype/next/custom-regexpexec-not-callable.js
 
 # 11486
 language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-add.js

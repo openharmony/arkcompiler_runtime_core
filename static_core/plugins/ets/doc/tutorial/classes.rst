@@ -125,7 +125,7 @@ to ``strictPropertyInitialization`` mode of the standard |TS|. Such behavior
 is enforced to minimize the number of unexpected runtime errors and achieve
 better performance.
 
-The follow code (invalid in |LANG|) is error-prone:
+The following code (invalid in |LANG|) is error-prone:
 
 .. code-block:: typescript
 

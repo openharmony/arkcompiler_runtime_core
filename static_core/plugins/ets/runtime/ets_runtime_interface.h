@@ -33,6 +33,12 @@ public:
     char *GetFuncPropName(MethodPtr method_ptr, uint32_t str_id) const override;
     uint64_t GetFuncPropNameOffset(MethodPtr method_ptr, uint32_t str_id) const override;
 
+    FieldPtr ResolveLookUpField(FieldPtr raw_field, ClassPtr klass) override;
+    MethodPtr ResolveLookUpCall(FieldPtr raw_field, ClassPtr klass, bool is_setter) override;
+
+    template <panda_file::Type::TypeId FIELD_TYPE>
+    compiler::RuntimeInterface::MethodPtr GetLookUpCall(FieldPtr raw_field, ClassPtr klass, bool is_setter);
+
 #ifdef PANDA_ETS_INTEROP_JS
 #include "plugins/ets/runtime/interop_js/ets_interop_runtime_interface-inl.h"
 #endif

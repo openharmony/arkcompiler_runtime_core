@@ -703,7 +703,7 @@ Other import paths are **non-relative** as in the examples below:
     "/net/http"
     "std/components/treemap"
 
-Resolving a *non-relative path* depends on the compiler environment. The
+Resolving a *non-relative path* depends on the compilation environment. The
 definition of the compiler environment can be particularly provided in a
 configuration file or environment variables.
 
@@ -711,9 +711,19 @@ The *base URL* setting is used to resolve a path that starts with '/';
 *path mapping* is used in all other cases. Resolution details depend on
 the implementation.
 
-For a simple implementation, the configuration file *stsconfig.json*
-(file name, placement, and format are implementation-specific) is used.
-The file contains the following lines:
+For example the compilation configuration file may contain the following lines:
+(file name, placement, and format are implementation-specific)
+
+.. code-block:: typescript
+   :linenos:
+
+    "baseUrl": "/home/project",
+    "paths": {
+        "std": "/sts/stdlib"
+    }
+
+In the example above, '/net/http' is resolved to '/home/project/net/http',
+and 'std/components/treemap' to '/sts/stdlib/components/treemap'.
 
 .. index::
    relative import path
@@ -728,17 +738,6 @@ The file contains the following lines:
    path mapping
    resolution
    implementation
-
-.. code-block:: typescript
-   :linenos:
-
-    "baseUrl": "/home/project",
-    "paths": {
-    "std": "/sts/stdlib"
-    }
-
-In the example above, '/net/http' is resolved to '/home/project/net/http',
-and 'std/components/treemap' to '/sts/stdlib/components/treemap'.
 
 |
 

@@ -24,6 +24,10 @@
 #include "optimizer/ir/graph_visitor.h"
 
 namespace panda::compiler {
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define PEEPHOLE_IS_APPLIED(visitor, inst) visitor->SetIsApplied(inst, true, __FILE__, __LINE__)
+
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class Peepholes : public Optimization, public GraphVisitor {
     using Optimization::Optimization;

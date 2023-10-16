@@ -206,7 +206,7 @@ Example:
    :linenos:
 
     class Base {}
-    class Derived { }
+    class Derived extends Base { }
     class SomeType { }
     
     class G<T extends Base> { }

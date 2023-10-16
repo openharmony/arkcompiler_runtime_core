@@ -1,5 +1,6 @@
 bin/ark
 bin/ark_aot
+bin/ark_disasm
 bin/ark_link
 bin/es2panda
 lib/libarkaotmanager.so
@@ -7,6 +8,7 @@ lib/libarkassembler.so
 lib/libarkbase.so
 lib/libarkbytecodeopt.so
 lib/libarkcompiler.so
+lib/libarkdisassembler.so
 lib/libarkfile.so
 lib/libarkruntime.so
 lib/libarkziparchive.so

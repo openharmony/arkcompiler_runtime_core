@@ -22,6 +22,7 @@
 #include "intrinsics.h"
 #include "mem/mem.h"
 #include "mem/vm_handle.h"
+#include "modifiers.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -51,7 +52,7 @@ EtsByte TypeAPIGetTypeKind(EtsString *td)
 {
     auto type_desc = td->GetMutf8();
 
-    EtsByte kind = static_cast<EtsInt>(EtsTypeAPIKind::NONE);
+    auto kind = static_cast<EtsByte>(EtsTypeAPIKind::NONE);
 
     // Is Null?
     if (type_desc[0] == NULL_TYPE_PREFIX) {
@@ -65,6 +66,9 @@ EtsByte TypeAPIGetTypeKind(EtsString *td)
     // Is RefType?
     if (type_desc[0] == CLASS_TYPE_PREFIX || type_desc[0] == ARRAY_TYPE_PREFIX) {
         auto ref_type = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClass(type_desc.c_str());
+        ASSERT(ref_type != nullptr);
+        PandaEtsVM::GetCurrent()->GetClassLinker()->InitializeClass(EtsCoroutine::GetCurrent(), ref_type);
+
         if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
             kind = static_cast<EtsByte>(EtsTypeAPIKind::BOOLEAN);
         } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE) {
@@ -249,7 +253,12 @@ EtsTypeAPIMethod *CreateMethod(EtsMethod *method)
 
     // Set Type Descriptor
     typeapi_method.GetPtr()->SetTypeDesc(method->GetDescriptor().c_str());
-    auto name = method->GetNameString();
+    EtsString *name;
+    if (method->IsConstructor()) {
+        name = EtsString::CreateFromMUtf8("constructor");
+    } else {
+        name = method->GetNameString();
+    }
     typeapi_method.GetPtr()->SetName(name);
 
     // Set Access Modifier

@@ -157,8 +157,8 @@ function testNumericTypes(): int {
 
 function testNullishTypes(): int {
     let ot = Type.of(new Object())
-    let nt = NullType.getInstance() as Type
-    let ut = UndefinedType.getInstance() as Type
+    let nt = NullType.REF
+    let ut = UndefinedType.REF
     return test(!ot.assignableFrom(nt), "Object <\\- null") +
             test(!ot.assignableFrom(ut), "Object <\\- undefined")
 }

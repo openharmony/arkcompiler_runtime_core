@@ -12,11 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_LIBPANDABASE_MEM_STWGC_H
-#define PANDA_LIBPANDABASE_MEM_STWGC_H
+#ifndef PANDA_RUNTIME_MEM_GC_STW_GC_STW_GC_H
+#define PANDA_RUNTIME_MEM_GC_STW_GC_STW_GC_H
 
-#include "runtime/include/coretypes/array-inl.h"
-#include "runtime/include/mem/panda_containers.h"
 #include "runtime/mem/gc/lang/gc_lang.h"
 #include "runtime/mem/gc/gc_marker.h"
 #include "runtime/mem/gc/gc_root.h"
@@ -122,4 +120,4 @@ private:
 
 }  // namespace panda::mem
 
-#endif  // PANDA_LIBPANDABASE_MEM_STWGC_H
+#endif  // PANDA_RUNTIME_MEM_GC_STW_GC_STW_GC_H

@@ -45,12 +45,8 @@ private:
     void RunInCurrentThread() final;
 
     /* GC task queue (TaskManager) specific variables */
-    // TODO(ipetrov): choose suitable priority
-    static constexpr size_t GC_TASK_QUEUE_PRIORITY = 2U;
     static constexpr taskmanager::TaskProperties GC_TASK_PROPERTIES = {
         taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::FOREGROUND};
-
-    taskmanager::TaskQueue *gc_task_queue_ {nullptr};
 };
 
 }  // namespace panda::mem

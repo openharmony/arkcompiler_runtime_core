@@ -115,7 +115,10 @@ public:
     bool UseWeakCpuForGcConcurrent() const;
 
     /// @return true if thread pool is used, false - if task manager is used
-    bool UseThreadPoolForGCWorkers() const;
+    bool UseThreadPoolForGC() const;
+
+    /// @return true if task manager is used, false - if thread pool is used
+    bool UseTaskManagerForGC() const;
 
     /**
      * @brief Limit the creation rate of tasks during marking in nanoseconds.

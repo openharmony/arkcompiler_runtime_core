@@ -15,6 +15,9 @@
 
 package std.core;
 
+native function TypeAPIMethodInvoke(methodDesc: string, recv: NullishType, args: NullishType[]): NullishType
+native function TypeAPIMethodInvokeConstructor(methodDesc: string, args: NullishType[]): Object
+
 export final class Method extends Object {
     private td: string
     private name: string
@@ -27,5 +30,33 @@ export final class Method extends Object {
 
     public getName(): string {
         return this.name
+    }
+
+    internal getTD(): string {
+        return this.td
+    }
+
+    public invoke(recv: NullishType, args: NullishType[]): NullishType {
+        const isCtor = (this.attributes & Attributes.CONSTRUCTOR) != 0
+        const isStatic = (this.attributes & Attributes.STATIC) != 0
+        if ((isStatic || isCtor) != (recv == null)) {
+            throw new Error("reciever may be null only for static/ctor methods")
+        }
+        const thisType = this.getType()
+        if (thisType.getParametersNum() != args.length) {
+            throw new Error("arguments length mismatch " + thisType.getParametersNum() + " != " + args.length)
+        }
+        let convertedArgs: NullishType[] = new NullishType[args.length]
+        for (let i = 0; i < convertedArgs.length; i++) {
+            convertedArgs[i] = thisType.getParameter(i).getType().convertObject(args[i])
+        }
+        if (isCtor) {
+            return TypeAPIMethodInvokeConstructor(this.td, convertedArgs)
+        } else {
+            if (!isStatic) {
+                recv = thisType.getReceiverType().convertObject(recv)
+            }
+            return TypeAPIMethodInvoke(this.td, recv, convertedArgs)
+        }
     }
 }

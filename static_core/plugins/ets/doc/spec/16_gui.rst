@@ -16,16 +16,16 @@
 Support for GUI Programming
 ###########################
 
-This section describes built-in mechanisms that |LANG| provides for creating
+This section describes built-in mechanisms that |LANG| provides to create
 graphical user interface (GUI) programs. The section is based on the ArkUI
 Declarative Core Language Specification available at
-https://gitee.com/arkui-finland/arkui-edsl-core-spec/blob/master/arkui-core-spec.md>_.
+<https://gitee.com/arkui-finland/arkui-edsl-core-spec/blob/master/arkui-core-spec.md>.
 
 ArkUI provides a set of extensions of the standard to declaratively describe
 the programs’ GUI and the interaction between the GUI components. |LANG| aims
 to adopt ArkUI syntax and semantics as long as they do not contradict |LANG|.
 
-This section is under active development, and some of its parts can be still
+This section is actively under development, and some of its parts can be still
 underspecified. In such cases please refer to the original specification.
 
 .. index::
@@ -41,7 +41,7 @@ Annotations
 The term *annotations* as used further in this section denotes special
 language elements that alter the semantics of classes (*class-level
 annotations*), structs (*struct-level annotations*), struct fields
-(*field-level annotations*) or functions (*function-level annotations*) in a
+(*field-level annotations*), or functions (*function-level annotations*) in a
 predefined manner. The syntax and semantics of each annotation are defined in
 the below example that illustrates the idea in general:
 
@@ -81,7 +81,7 @@ GUI Structs
 ***********
 
 *GUI structs* are used to define program components. From the language
-perspective, a GUI struct is a restricted form of a non-primitive type type
+perspective, a GUI struct is a restricted form of a non-primitive type
 that is designed to define GUI expressively and efficiently.
 
 Each GUI struct is required to implement its *builder*, which is a method
@@ -175,22 +175,22 @@ Builder Function Syntax Conventions
 ***********************************
 
 The following syntax conventions apply to any builder function (component’s
-main builder, component’s custom builder or stand-alone global custom builder):
+main builder, component’s custom builder, or stand-alone global custom builder):
 
 -  The required result of :math:`C(\{...\})` for any predefined or
    custom component *C* is to initialize the component with the data
-   from the :math:`\{...\}` block and render it. Concrete semantics
-   depends on the implementation. For illustrative purpose, it may be
+   from the :math:`\{...\}` block, and to render it. Concrete semantics
+   depends on the implementation. For illustrative purposes, it can be
    expressed as :math:`(new C(\{...\})).build()`, where the object
    literal :math:`\{...\}` is handled as an initializer of the
    component’s fields.
 
 -  The required result of :math:`C() \{...\}` for any predefined or
-   custom component *C* is to initialize the component and render it
-   by passing data from the :math:`\{...\}` block to the component’s
+   custom component *C* is to initialize the component, and to render it
+   by passing the data from the :math:`\{...\}` block to the component’s
    builder function. Specific semantics depends on the implementation.
-   For the illustrative purpose, it may be expressed as
-   :math:`new C().build(\{...\})`, where the block :math:`\{...\}` is
+   For illustrative purposes, it can be expressed as
+   :math:`new C().build(\{...\})`, where the :math:`\{...\}` block is
    handled as a lambda to be passed as an argument to the builder.
 
 .. index::
@@ -212,7 +212,7 @@ Builder Function Restrictions
 *****************************
 
 Restrictions apply to any builder function (component’s main builder,
-component’s custom builder or stand-alone global custom builder), and
+component’s custom builder, or stand-alone global custom builder), and
 the following is not allowed:
 
 -  Declaring local variables.
@@ -223,13 +223,13 @@ the following is not allowed:
 
     -  Calling builders by name.
 
-    -  Calling builders by reference stored in an *@BuilderParam*
-       annotated struct field.
+    -  Calling builders by reference stored in the *@BuilderParam*-annotated
+       struct field.
 
     -  Calling a predefined builder *ForEach* for iterative rendering.
 
     -  Calling a function that does not mutate the program state (note that all
-       logging functions do mutate the state and are therefore prohibited).
+       logging functions are therefore prohibited as they mutate the state).
 
     - Using conditional *if ... else* syntax.
 
@@ -263,7 +263,7 @@ Annotations List
 
 *Function-level annotation for defining a custom builder* is applicable to:
 
--  Methods of GUI structs to define custom builder functions inside the
+-  Methods of GUI structs to define custom builder functions inside a
    GUI struct.
 
 -  Stand-alone functions to define global custom builders.
@@ -331,7 +331,8 @@ any struct as long as it complies with the limitations imposed onto GUI structs.
 ===================
 
 *@Consume* is a field-level annotation that establishes two-way synchronization
-between a child component *at an arbitrary nesting level* and a parent component.
+between a child component *at an arbitrary nesting level*, and a parent
+component.
 
 An *@Consume*-annotated field in a child component shares the same value with
 a field in the parent component; the parent component’s source field must be
@@ -389,7 +390,7 @@ between a child component and a parent component.
 
 An *@Link*-annotated field in a child component shares the same value with a
 field in the parent component; the parent component’s source field must be
-annotated with *@State*, *@StorageLink* or *@Link*.
+annotated with *@State*, *@StorageLink*, or *@Link*.
 
 The annotation *@Link* is applicable only to member fields of GUI structs.
 
@@ -498,7 +499,7 @@ The annotation *@ObjectLink* is applicable only to member fields of GUI structs.
 ====================
 
 *@Observed* is a class-level annotation that establishes two-way synchronization
-between instances of the *@Observed*-annotated class and *@ObjectLink*-annotated
+between instances of the *@Observed*-annotated class, and *@ObjectLink*-annotated
 member fields of GUI structs.
 
 The annotation *@Observed* is applicable only to non-GUI classes.
@@ -527,7 +528,7 @@ The annotation *@Prop* has the same semantics as *@State* and only differs in
 how the variable must be initialized and updated:
 
 -  An *@Prop*-annotated field must be initialized with a primitive or
-   reference type value provided by its parent component; it must not be
+   a reference type value provided by its parent component; it must not be
    initialized locally.
 
 -  An *@Prop*-annotated field can be modified locally, but the change
@@ -679,11 +680,11 @@ structs.
 @Watch Annotation
 =================
 
-*@StorageProp* is a field-level annotation, which specifies a callback that
-must be executed when the annotated field’s value changes.
+*@StorageProp* is a field-level annotation that specifies a callback to
+be executed when the annotated field’s value changes.
 
 The annotation *@StorageProp* is applicable only to member fields of GUI
-structs which are also annotated with:
+structs also annotated with:
 
 -  *@Consume*
 

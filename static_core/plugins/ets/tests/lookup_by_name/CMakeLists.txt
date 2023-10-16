@@ -38,6 +38,7 @@ foreach(NAME ${LOOKUP_BY_NAME_TEST_LIST})
         DEPENDS etsstdlib
         LANGUAGE_CONTEXT ets
         ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
+        ASSEMBLER_OPTIONS "--optimize"
         RUNTIME_OPTIONS "--interpreter-type=cpp"
     )
     add_dependencies(ets_tests_lookup_by_name ets_lookup_by_name_${NAME})
@@ -48,10 +49,11 @@ foreach(NAME ${LOOKUP_BY_NAME_TEST_LIST})
             DEPENDS etsstdlib
             LANGUAGE_CONTEXT ets
             ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
+            ASSEMBLER_OPTIONS "--optimize"
             RUNTIME_OPTIONS "--interpreter-type=cpp" "--compiler-enable-jit=true" "--compiler-hotness-threshold=0" "--no-async-jit"
         )
         add_dependencies(ets_tests_lookup_by_name ets_lookup_by_name_${NAME}_enforce_jit)
- 
+
         if (PANDA_TARGET_ARM64 OR PANDA_TARGET_AMD64)
             panda_add_asm_file(
                 FILE ${PANDA_ETS_PLUGIN_SOURCE}/tests/lookup_by_name/${NAME}.pa
@@ -60,6 +62,7 @@ foreach(NAME ${LOOKUP_BY_NAME_TEST_LIST})
                 LANGUAGE_CONTEXT ets
                 AOT_MODE TRUE
                 ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
+                ASSEMBLER_OPTIONS "--optimize"
                 RUNTIME_OPTIONS "--interpreter-type=cpp" "--compiler-enable-jit=true"
             )
             add_dependencies(ets_tests_lookup_by_name ets_lookup_by_name_${NAME}_aot)
@@ -73,6 +76,7 @@ foreach(NAME ${LOOKUP_BY_NAME_TEST_LIST})
                     AOT_MODE TRUE
                     AOT_COMPILER "llvm"
                     ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
+                    ASSEMBLER_OPTIONS "--optimize"
                     RUNTIME_OPTIONS "--interpreter-type=cpp" "--compiler-enable-jit=true"
                 )
                 add_dependencies(ets_tests_lookup_by_name ets_lookup_by_name_${NAME}_llvmaot)
