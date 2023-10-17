@@ -1,0 +1,57 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+panda_ets_add_gtest(
+    NO_CORES
+    NAME ets_internal_objects_mock_tests
+    SOURCES
+        get_test_class.cpp
+        ets_method_signature_test.cpp
+        ets_string_test.cpp
+        ets_string_builder_test.cpp
+        ets_field_test.cpp
+        ets_object_test.cpp
+        ets_array_test.cpp
+        ets_method_test.cpp
+        ets_class_test.cpp
+    LIBRARIES
+        arkruntime
+        arkassembler
+    INCLUDE_DIRS
+        ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    SANITIZERS
+        ${PANDA_SANITIZERS_LIST}
+    PANDA_STD_LIB
+        $<TARGET_PROPERTY:mock_stdlib,FILE>
+    DEPS_TARGETS
+        mock_stdlib
+)
+
+panda_ets_add_gtest(
+    NO_CORES
+    NAME ets_internal_objects_tests
+    SOURCES
+        ets_promise_test.cpp
+        ets_arraybuf_test.cpp
+    LIBRARIES
+        arkassembler
+        arkruntime
+    INCLUDE_DIRS
+        ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    SANITIZERS
+        ${PANDA_SANITIZERS_LIST}
+    PANDA_STD_LIB
+        $<TARGET_PROPERTY:etsstdlib,FILE>
+    DEPS_TARGETS
+        etsstdlib
+)

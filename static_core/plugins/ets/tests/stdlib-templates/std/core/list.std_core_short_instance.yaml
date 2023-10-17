@@ -1,0 +1,290 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- {
+    method_name: unboxed,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
+    param_init_data_types: {} ,
+    param_types: {},
+    method_return_type: short,
+    expected_data_item_type: short,
+    expected_data_type: "short[]",
+    param_list: {},
+    expected_test_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
+    verify_test_result_function: comparePrimitiveValue,
+  }
+- {
+    method_name: byteValue,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 1 as short, Byte.MIN_VALUE as short, Byte.MAX_VALUE as short]",
+    param_init_data_types: {} ,
+    param_types: {},
+    method_return_type: byte,
+    expected_data_item_type: byte,
+    expected_data_type: "byte[]",
+    param_list: {},
+    expected_test_data: "[0 as byte, 1 as byte, Byte.MIN_VALUE as byte, Byte.MAX_VALUE as byte]",
+    verify_test_result_function: comparePrimitiveValue,
+  }
+- {
+    method_name: shortValue,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
+    param_init_data_types: {} ,
+    param_types: {},
+    method_return_type: short,
+    expected_data_item_type: short,
+    expected_data_type: "short[]",
+    param_list: {},
+    expected_test_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
+    verify_test_result_function: comparePrimitiveValue,
+  }
+- {
+    method_name: intValue,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
+    param_init_data_types: {} ,
+    param_types: {},
+    method_return_type: int,
+    expected_data_item_type: int,
+    expected_data_type: "int[]",
+    param_list: {},
+    expected_test_data: "[0 as int, 1 as int, Short.MIN_VALUE as int, Short.MAX_VALUE as int]",
+    verify_test_result_function: comparePrimitiveValue,
+  }
+- {
+    method_name: longValue,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
+    param_init_data_types: {} ,
+    param_types: {},
+    method_return_type: long,
+    expected_data_item_type: long,
+    expected_data_type: "long[]",
+    param_list: {},
+    expected_test_data: "[0 as long, 1 as long, Short.MIN_VALUE as long, Short.MAX_VALUE as long]",
+    verify_test_result_function: comparePrimitiveValue,
+  }
+- {
+    method_name: floatValue,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
+    param_init_data_types: {} ,
+    param_types: {},
+    method_return_type: float,
+    expected_data_item_type: float,
+    expected_data_type: "float[]",
+    param_list: {},
+    expected_test_data: "[0 as float, 1 as float, Short.MIN_VALUE as float, Short.MAX_VALUE as float]",
+    verify_test_result_function: compareFloatPointValue
+  }
+- {
+    method_name: doubleValue,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
+    param_init_data_types: {} ,
+    param_types: {},
+    method_return_type: double,
+    expected_data_item_type: double,
+    expected_data_type: "double[]",
+    param_list: {},
+    expected_test_data: "[0 as double, 1 as double, Short.MIN_VALUE as double, Short.MAX_VALUE as double]",
+    verify_test_result_function: compareFloatPointValue
+  }
+- {
+    method_name: toString,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
+    param_init_data_types: {} ,
+    param_types: {},
+    method_return_type: String,
+    expected_data_item_type: String,
+    expected_data_type: "String[]",
+    param_list: {},
+    expected_test_data: '["0", "1", "-32768", "32767"]',
+    verify_test_result_function: compareStringTrivial
+  }
+- {
+    method_name: compareTo,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[125 as short, 126 as short, 124 as short, (-1) as short, (-10) as short, (-11) as short]",
+    param_init_data_types: {"param1": "short[]"} ,
+    param_types: {"param1": Short},
+    param_nature: {"param1": object},
+    method_return_type: int,
+    expected_data_item_type: int,
+    expected_data_type: "int[]",
+    param_list: {"param1" : "[125 as short, 125 as short, 125 as short, (-2) as short, (-10) as short, (-10) as short]" },
+    expected_test_data: '[0, 1, -1, 1, 0, -1]',
+    verify_test_result_function: compareCompareToResult
+  }
+- {
+    method_name: equals,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[125 as short, 126 as short, 124 as short, (-1) as short, (-10) as short, (-11) as short]",
+    param_init_data_types: {"param1": "short[]"} ,
+    param_types: {"param1": Short},
+    param_nature: {"param1": object},
+    method_return_type: boolean,
+    expected_data_item_type: boolean,
+    expected_data_type: "boolean[]",
+    param_list: {"param1" : "[125 as short, 125 as short, 125 as short, (-2) as short, (-10) as short, (-10) as short]" },
+    expected_test_data: '[true, false, false, false, true, false]',
+    verify_test_result_function: comparePrimitiveValue
+  }
+- {
+    method_name: add,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 1 as short, (-1) as short, 1 as short]",
+    param_list: {"param1" : "[0 as short, 1 as short, (-1) as short, (-1) as short]" },
+    param_init_data_types: {"param1": "short[]"} ,
+    param_types: {"param1": Short},
+    param_nature: {"param1": object},
+    method_return_type: Short,
+    expected_data_item_type: short,
+    expected_data_type: "short[]",
+    expected_test_data: '[0 as short, 2 as short, (-2) as short, 0 as short]',
+    verify_test_result_function: compareWrapperObjectValue
+  }
+- {
+    method_name: sub,
+    object_type: Short,
+    init_object_data_type: "byte[]",
+    init_object_data: "[0 as byte, 1 as byte, (-1) as byte, 1 as byte]",
+    param_list: {"param1" : "[0 as byte, 1 as byte, (-1) as byte, (-1) as byte]" },
+    param_init_data_types: {"param1": "byte[]"} ,
+    param_types: {"param1": Short},
+    param_nature: {"param1": object},
+    method_return_type: Short,
+    expected_data_item_type: int,
+    expected_data_type: "int[]",
+    expected_test_data: '[0 as int, 0 as int, 0 as int, 2 as int]',
+    verify_test_result_function: compareWrapperObjectValue
+  }
+- {
+    method_name: mul,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 1 as short, (-1) as short, 1 as short]",
+    param_list: {"param1" : "[0 as short, 1 as short, (-1) as short, (-1) as short]" },
+    param_init_data_types: {"param1": "short[]"} ,
+    param_types: {"param1": Short},
+    param_nature: {"param1": object},
+    method_return_type: Short,
+    expected_data_item_type: int,
+    expected_data_type: "int[]",
+    expected_test_data: '[0 as int, 1 as int, 1 as int, (-1) as int]',
+    verify_test_result_function: compareWrapperObjectValue
+  }
+- {
+    method_name: div,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 1 as short, (-1) as short, 1 as short]",
+    param_list: {"param1" : "[1 as short, 1 as short, (-1) as short, (-1) as short]" },
+    param_init_data_types: {"param1": "short[]"} ,
+    param_types: {"param1": Short},
+    param_nature: {"param1": object},
+    method_return_type: Short,
+    expected_data_item_type: int,
+    expected_data_type: "int[]",
+    expected_test_data: '[0 as short, 1 as short, 1 as short, (-1) as short]',
+    verify_test_result_function: compareWrapperObjectValue
+  }
+- {
+    method_name: isLessThan,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 2 as short, 1 as short, 2 as short, 1 as short, (-2) as short]",
+    param_list: {"param1" : "[1 as short, 1 as short, 2 as short, 2 as short, (-1) as short, (-1) as short]" },
+    param_init_data_types: {"param1": "short[]"} ,
+    param_types: {"param1": Short},
+    param_nature: {"param1": object},
+    method_return_type: boolean,
+    expected_data_item_type: boolean,
+    expected_data_type: "boolean[]",
+    expected_test_data: '[true, false, true, false, false, true]',
+    verify_test_result_function: comparePrimitiveValue
+  }
+- {
+    method_name: isLessThan,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 2 as short, 1 as short, 2 as short, 1 as short, (-2) as short]",
+    param_list: {"param1" : "[1 as short, 1 as short, 2 as short, 2 as short, (-1) as short, (-1) as short]" },
+    param_init_data_types: {"param1": "short[]"} ,
+    param_types: {"param1": Short},
+    param_nature: {"param1": object},
+    method_return_type: boolean,
+    expected_data_item_type: boolean,
+    expected_data_type: "boolean[]",
+    expected_test_data: '[true, false, true, false, false, true]',
+    verify_test_result_function: comparePrimitiveValue
+  }
+- {
+    method_name: isLessEqualThan,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 2 as short, 1 as short, 2 as short, 1 as short, (-2) as short, (-2) as short]",
+    param_list: {"param1" : "[1 as short, 1 as short, 2 as short, 2 as short, (-1) as short, (-1) as short, (-2) as short]" },
+    param_init_data_types: {"param1": "short[]"} ,
+    param_types: {"param1": Short},
+    param_nature: {"param1": object},
+    method_return_type: boolean,
+    expected_data_item_type: boolean,
+    expected_data_type: "boolean[]",
+    expected_test_data: '[true, false, true, true, false, true, true]',
+    verify_test_result_function: comparePrimitiveValue
+  }
+- {
+    method_name: isGreaterThan,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 2 as short, 1 as short, 2 as short, 1 as short, (-2) as short, (-2) as short]",
+    param_list: {"param1" : "[1 as short, 1 as short, 2 as short, 2 as short, (-1) as short, (-1) as short, (-2) as short]" },
+    param_init_data_types: {"param1": "short[]"} ,
+    param_types: {"param1": Short},
+    param_nature: {"param1": object},
+    method_return_type: boolean,
+    expected_data_item_type: boolean,
+    expected_data_type: "boolean[]",
+    expected_test_data: '[false, true, false, false, true, false, false]',
+    verify_test_result_function: comparePrimitiveValue
+  }
+- {
+    method_name: isGreaterEqualThan,
+    object_type: Short,
+    init_object_data_type: "short[]",
+    init_object_data: "[0 as short, 2 as short, 1 as short, 2 as short, 1 as short, (-2) as short, (-2) as short]",
+    param_list: {"param1" : "[1 as short, 1 as short, 2 as short, 2 as short, (-1) as short, (-1) as short, (-2) as short]" },
+    param_init_data_types: {"param1": "short[]"} ,
+    param_types: {"param1": Short},
+    param_nature: {"param1": object},
+    method_return_type: boolean,
+    expected_data_item_type: boolean,
+    expected_data_type: "boolean[]",
+    expected_test_data: '[false, true, false, true, true, false, true]',
+    verify_test_result_function: comparePrimitiveValue
+  }

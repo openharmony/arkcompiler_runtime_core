@@ -1,0 +1,88 @@
+From 46aed5f9ed68235b26c56c672b82adafae29931b Mon Sep 17 00:00:00 2001
+From: Aleksei Sidorov <>
+Date: Wed, 1 Jun 2022 19:48:08 +0300
+Subject: [PATCH 4/4] Patch for AssemblyPrinter
+
+---
+ src/aarch32/disasm-aarch32.cc | 6 ++++++
+ src/aarch32/disasm-aarch32.h  | 6 ++++--
+ src/aarch64/disasm-aarch64.cc | 8 ++++++++
+ 3 files changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/src/aarch32/disasm-aarch32.cc b/src/aarch32/disasm-aarch32.cc
+index 535f60c8..ad096f95 100644
+--- a/src/aarch32/disasm-aarch32.cc
++++ b/src/aarch32/disasm-aarch32.cc
+@@ -67230,10 +67230,14 @@ const uint16_t* PrintDisassembler::DecodeT32At(
+ void PrintDisassembler::DecodeT32(uint32_t instruction) {
+   PrintCodeAddress(GetCodeAddress());
+   if (T32Size(instruction) == 2) {
++#ifndef PANDA_BUILD
+     PrintOpcode16(instruction >> 16);
++#endif
+     Disassembler::DecodeT32(instruction);
+   } else {
++#ifndef PANDA_BUILD
+     PrintOpcode32(instruction);
++#endif
+     Disassembler::DecodeT32(instruction);
+   }
+   os() << "\n";
+@@ -67242,7 +67246,9 @@ void PrintDisassembler::DecodeT32(uint32_t instruction) {
+ 
+ void PrintDisassembler::DecodeA32(uint32_t instruction) {
+   PrintCodeAddress(GetCodeAddress());
++#ifndef PANDA_BUILD
+   PrintOpcode32(instruction);
++#endif
+   Disassembler::DecodeA32(instruction);
+   os() << "\n";
+ }
+diff --git a/src/aarch32/disasm-aarch32.h b/src/aarch32/disasm-aarch32.h
+index 6ce0442e..1568c400 100644
+--- a/src/aarch32/disasm-aarch32.h
++++ b/src/aarch32/disasm-aarch32.h
+@@ -2711,8 +2711,10 @@ class PrintDisassembler : public Disassembler {
+       : Disassembler(os, code_address) {}
+ 
+   virtual void PrintCodeAddress(uint32_t code_address) {
+-    os() << "0x" << std::hex << std::setw(8) << std::setfill('0')
+-         << code_address << "\t";
++    if (code_address != 0) {
++        os() << "0x" << std::hex << std::setw(8) << std::setfill('0')
++             << code_address << "\t";
++    }
+   }
+ 
+   virtual void PrintOpcode16(uint32_t opcode) {
+diff --git a/src/aarch64/disasm-aarch64.cc b/src/aarch64/disasm-aarch64.cc
+index 67b9a756..763a7e9b 100644
+--- a/src/aarch64/disasm-aarch64.cc
++++ b/src/aarch64/disasm-aarch64.cc
+@@ -9724,7 +9724,11 @@ int Disassembler::SubstituteImmediateField(const Instruction *instr,
+     }
+     case 'A': {  // IAddSub.
+       int64_t imm = instr->GetImmAddSub() << (12 * instr->GetImmAddSubShift());
++#ifndef PANDA_BUILD
+       AppendToOutput("#0x%" PRIx64 " (%" PRId64 ")", imm, imm);
++#else
++      AppendToOutput("#0x%" PRIx64 " // (%" PRId64 ")", imm, imm);
++#endif
+       return 7;
+     }
+     case 'F': {  // IFP, IFPNeon, IFPSve or IFPFBits.
+@@ -9750,7 +9754,11 @@ int Disassembler::SubstituteImmediateField(const Instruction *instr,
+           imm8 = instr->GetImmFP();
+           break;
+       }
++#ifndef PANDA_BUILD
+       AppendToOutput("#0x%" PRIx32 " (%.4f)",
++#else
++      AppendToOutput("#0x%" PRIx32 " // (%.4f)",
++#endif
+                      imm8,
+                      Instruction::Imm8ToFP32(imm8));
+       return len;
+-- 
+2.17.1
+

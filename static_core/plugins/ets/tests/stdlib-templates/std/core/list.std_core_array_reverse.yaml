@@ -1,0 +1,205 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- {
+    method_name: reverse,
+    method_nature: procedure,
+    result_nature: array,
+    result: arr,
+    result_type: "boolean[]", 
+    method_signature: { arr: "boolean[]" },
+    method_throws: "false",
+    method_signature_desc: {arr: "boolean_array"},
+    method_test_index_data:
+      {
+        test1: { arr: "[true]" },
+        test2: { arr: "[true, false]" },
+        test3: { arr: "[true, false, false]" },
+        test4: { arr: "[]" },
+      },
+    method_expected_data:
+      {
+        test1: "[true]",
+        test2: "[false, true]",
+        test3: "[false, false, true]",
+        test4: "[]",
+      },
+  }
+- {
+    method_name: reverse,
+    method_nature: procedure,
+    result_nature: array,
+    result: arr,
+    result_type: "byte[]", 
+    method_signature: { arr: "byte[]"},
+    method_throws: "false",
+    method_signature_desc: {arr: "byte_array"},
+    method_test_index_data:
+      {
+        test1: { arr: "[1 as byte]" },
+        test2: { arr: "[1 as byte, 2 as byte]" },
+        test3: { arr: "[1 as byte, 2 as byte, 3 as byte]" },
+        test4: { arr: "[]" },
+      },
+    method_expected_data:
+      {
+        test1: "[1 as byte]",
+        test2: "[2 as byte, 1 as byte]",
+        test3: "[3 as byte, 2 as byte, 1 as byte]",
+        test4: "[]",
+      },
+  }
+- {
+    method_name: reverse,
+    method_nature: procedure,
+    result_nature: array,
+    result: arr,
+    result_type: "short[]", 
+    method_signature: { arr: "short[]"},
+    method_signature_desc: {arr: "short_array"},
+    method_throws: "false", 
+    method_test_index_data:
+      {
+        test1: { arr: "[1 as short]" },
+        test2: { arr: "[1 as short, 2 as short]" },
+        test3: { arr: "[1 as short, 2 as short, 3 as short]" },
+        test4: { arr: "[]" },
+      },
+    method_expected_data:
+      {
+        test1: "[1 as short]",
+        test2: "[2 as short, 1 as short]",
+        test3: "[3 as short, 2 as short, 1 as short]",
+        test4: "[]",
+      },
+  }
+- {
+    method_name: reverse,
+    method_nature: procedure,
+    result_nature: array,
+    result: arr,
+    result_type: "int[]", 
+    method_signature: { arr: "int[]"},
+    method_signature_desc: {arr: "int_array"},
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test1: { arr: "[1 as int]" },
+        test2: { arr: "[1 as int, 2 as int]" },
+        test3: { arr: "[1 as int, 2 as int, 3 as int]" },
+        test4: { arr: "[]" },
+      },
+    method_expected_data:
+      {
+        test1: "[1 as int]",
+        test2: "[2 as int, 1 as int]",
+        test3: "[3 as int, 2 as int, 1 as int]",
+        test4: "[]",
+      },
+  }
+- {
+    method_name: reverse,
+    method_nature: procedure,
+    result_nature: array,
+    result: arr,
+    result_type: "long[]", 
+    method_signature: { arr: "long[]"},
+    method_signature_desc: {arr: "int_array"},
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test1: { arr: "[1 as int]" },
+        test2: { arr: "[1 as int, 2 as int]" },
+        test3: { arr: "[1 as int, 2 as int, 3 as int]" },
+        test4: { arr: "[]" },
+      },
+    method_expected_data:
+      {
+        test1: "[1 as int]",
+        test2: "[2 as int, 1 as int]",
+        test3: "[3 as int, 2 as int, 1 as int]",
+        test4: "[]",
+      },
+  }
+- {
+    method_name: reverse,
+    method_nature: procedure,
+    result_nature: array,
+    result: arr,
+    result_type: "float[]", 
+    method_signature: { arr: "float[]" },
+    method_signature_desc: {arr: "float_array"},
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test1: { arr: "[1.0 as float]" },
+        test2: { arr: "[1.0 as float, 2.0 as float]" },
+        test3: { arr: "[1.0 as float, 2.0 as float, 3.0 as float]" },
+        test4: { arr: "[]" },
+      },
+    method_expected_data:
+      {
+        test1: "[1.0 as float]",
+        test2: "[2.0 as float, 1.0 as float]",
+        test3: "[3.0 as float, 2.0 as float, 1.0 as float]",
+        test4: "[]",
+      },
+  }
+- {
+    method_name: reverse,
+    method_nature: procedure,
+    result_nature: array,
+    result: arr,
+    result_type: "double[]", 
+    method_signature: { arr: "double[]" },
+    method_signature_desc: {arr: "double_array"},
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test1: { arr: "[1.0 as double]" },
+        test2: { arr: "[1.0 as double, 2.0 as double]" },
+        test3: { arr: "[1.0 as double, 2.0 as double, 3.0 as double]" },
+        test4: { arr: "[]" },
+      },
+    method_expected_data:
+      {
+        test1: "[1.0 as double]",
+        test2: "[2.0 as double, 1.0 as double]",
+        test3: "[3.0 as double, 2.0 as double, 1.0 as double]",
+        test4: "[]",
+      },
+  }
+- {
+    method_name: reverse,
+    method_nature: procedure,
+    result_nature: array,
+    result: arr,
+    result_type: "char[]", 
+    method_signature: { arr: "char[]" },
+    method_signature_desc: {arr: "char_array"},
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test1: { arr: "[c'a']" },
+        test2: { arr: "[c'a', c'b']" },
+        test3: { arr: "[c'a', c'b', c'c']" },
+        test4: { arr: "[]" },
+      },
+    method_expected_data:
+      {
+        test1: "[c'a']",
+        test2: "[c'b', c'a']",
+        test3: "[c'c', c'b', c'a']",
+        test4: "[]",
+      },
+  }

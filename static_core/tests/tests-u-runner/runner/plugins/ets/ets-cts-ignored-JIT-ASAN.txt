@@ -1,0 +1,2 @@
+# panda#11534
+07.expressions/20.additive_operators/02.additive_operators_for_numeric_types/nan_inf_6.ets

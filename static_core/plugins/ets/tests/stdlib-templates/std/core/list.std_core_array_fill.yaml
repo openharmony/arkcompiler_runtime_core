@@ -1,0 +1,464 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- {
+    method_name: fill,
+    method_nature: procedure,
+    result: arr,
+    result_nature: array,
+    result_type: "boolean[]",
+    method_signature: { arr: "boolean[]", value: boolean, startIndex: "int", endIndex: "int" },
+    method_throws: "true",
+    method_signature_desc: {arr: "boolean_array", value: "boolean", startIndex: int, endIndex: int},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]",
+            value: "true",
+            startIndex: 0,
+            endIndex: 2,
+          },
+        test2:
+          {
+            arr: "[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]",
+            value: "true",
+            startIndex: 0,
+            endIndex: arr.length,
+          },
+        test3:
+          {
+            arr: "[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]",
+            value: "true",
+            startIndex: 14,
+            endIndex: 17,
+          },
+        test4:
+          {
+            arr: "[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]",
+            value: "true",
+            startIndex: 6,
+            endIndex: 8,
+          },
+          test5:
+          {
+            arr: "[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]",
+            value: "true",
+            startIndex: 8,
+            endIndex: 9,
+          },
+  
+
+
+      },
+      method_expected_data:
+      {
+        test1: "[true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]",
+        test2: "[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]",
+        test3: "[false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false]",
+        test4: "[false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false]",
+        test5: "[false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false]", 
+      },
+  }
+- {
+    method_name: fill,
+    method_nature: procedure,
+    result: arr,
+    result_nature: array,
+    result_type: "byte[]",
+    method_signature: { arr: "byte[]", value: byte, startIndex: "int", endIndex: "int" },
+    method_throws: "true",
+    method_signature_desc: {arr: "byte_array", value: "byte", startIndex: int, endIndex: int}, 
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: 4,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: arr.length
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 14,
+            endIndex: 16,
+          },
+        test4:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 12,
+          },
+          test5:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 9,
+          },          
+      },
+      method_expected_data:
+      {
+        test1: "[0, 0, 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+        test2: "[0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+        test3: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 0, 16]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 12, 13, 14, 15, 16]",
+        test5: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 9, 10, 11, 12, 13, 14, 15, 16]",
+      },
+  }
+- {
+    method_name: fill,
+    method_nature: procedure,
+    result: arr,
+    result_nature: array,
+    result_type: "short[]",
+    method_signature: { arr: "short[]", value: short, startIndex: "int", endIndex: "int" },
+    method_throws: "true",
+    method_signature_desc: {arr: "short_array", value: "short", startIndex: int, endIndex: int},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: 4,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: arr.length
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 14,
+            endIndex: 16,
+          },
+        test4:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 12,
+          },
+          test5:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 9,
+          },          
+      },
+      method_expected_data:
+        {
+        test1: "[0, 0, 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+        test2: "[0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+        test3: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 0, 16]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 12, 13, 14, 15, 16]",
+        test5: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 9, 10, 11, 12, 13, 14, 15, 16]",
+      },
+  }
+- {
+    method_name: fill,
+    method_nature: procedure,
+    result: arr,
+    result_nature: array,
+    result_type: "int[]",
+    method_signature: { arr: "int[]", value: int, startIndex: "int", endIndex: "int" },
+    method_throws: "true",
+    method_signature_desc: {arr: "int_array", value: "int", startIndex: int, endIndex: int},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: 4,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: arr.length
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 14,
+            endIndex: 16,
+          },
+        test4:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 12,
+          },
+          test5:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 9,
+          },          
+      },
+      method_expected_data:
+        {
+        test1: "[0, 0, 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+        test2: "[0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+        test3: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 0, 16]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 12, 13, 14, 15, 16]",
+        test5: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 9, 10, 11, 12, 13, 14, 15, 16]",
+      },
+  }
+- {
+    method_name: fill,
+    method_nature: procedure,
+    result: arr,
+    result_nature: array,
+    result_type: "long[]",
+    method_signature: { arr: "long[]", value: long, startIndex: "int", endIndex: "int" },
+    method_throws: "true",
+    method_signature_desc: {arr: "long_array", value: "long", startIndex: int, endIndex: int},
+    method_test_index_data:
+      {
+       test1:
+         {
+          arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+          value: 0,
+          startIndex: 0,
+          endIndex: 4,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: arr.length
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 14,
+            endIndex: 16,
+          },
+        test4:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 12,
+          },
+          test5:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 9,
+          },          
+      },
+      method_expected_data:
+        {
+        test1: "[0, 0, 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+        test2: "[0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+        test3: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 0, 16]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 12, 13, 14, 15, 16]",
+        test5: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 9, 10, 11, 12, 13, 14, 15, 16]",
+      },
+  }
+- {
+    method_name: fill,
+    method_nature: procedure,
+    result: arr,
+    result_nature: array,
+    result_type: "float[]",
+    method_signature: { arr: "float[]", value: float, startIndex: "int", endIndex: "int" },
+    method_throws: "true",
+    method_signature_desc: {arr: "float_array", value: "float", startIndex: int, endIndex: int},
+    method_test_index_data:
+       {
+        test1:
+          {
+            arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: 4,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: arr.length
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 14,
+            endIndex: 16,
+          },
+        test4:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 12,
+          },
+          test5:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 9,
+          },          
+      },
+      method_expected_data:
+        {
+        test1: "[0, 0, 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+        test2: "[0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+        test3: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 0, 16]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 12, 13, 14, 15, 16]",
+        test5: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 9, 10, 11, 12, 13, 14, 15, 16]",
+      },
+  }
+- {
+    method_name: fill,
+    method_nature: procedure,
+    result: arr,
+    result_nature: array,
+    result_type: "double[]",
+    method_signature: { arr: "double[]", value: double, startIndex: "int", endIndex: "int" },
+    method_throws: "true",
+    method_signature_desc: {arr: "double_array", value: "double", startIndex: int, endIndex: int},
+    method_test_index_data:
+       {
+        test1:
+          {
+            arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: 4,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: arr.length
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 14,
+            endIndex: 16,
+          },
+        test4:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 12,
+          },
+          test5:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 9,
+          },          
+      },
+      method_expected_data:
+        {
+        test1: "[0, 0, 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+        test2: "[0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+        test3: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 0, 16]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 12, 13, 14, 15, 16]",
+        test5: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 9, 10, 11, 12, 13, 14, 15, 16]",
+      },
+  }
+- {
+    method_name: fill,
+    method_nature: procedure,
+    result: arr,
+    result_nature: array,
+    result_type: "char[]",
+    method_signature: { arr: "char[]", value: char, startIndex: "int", endIndex: "int" },
+    method_throws: "true",
+    method_signature_desc: {arr: "char_array", value: "char", startIndex: int, endIndex: int},
+    method_test_index_data:
+       {
+        test1:
+          {
+            arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: 4,
+          },
+        test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 0,
+            endIndex: arr.length
+          },
+        test3:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 14,
+            endIndex: 16,
+          },
+        test4:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 12,
+          },
+          test5:
+          {
+            arr: "[0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+            value: 0,
+            startIndex: 8,
+            endIndex: 9,
+          },          
+      },
+      method_expected_data:
+        {
+        test1: "[0, 0, 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+        test2: "[0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+        test3: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 0, 16]",
+        test4: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 12, 13, 14, 15, 16]",
+        test5: "[0, 1, 2, 3, 4, 5, 6, 7, 0, 9, 10, 11, 12, 13, 14, 15, 16]",
+      },
+  }

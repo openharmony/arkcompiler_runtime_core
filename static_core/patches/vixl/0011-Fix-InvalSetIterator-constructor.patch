@@ -1,0 +1,34 @@
+From f8d7d3cb08e9feadd9053a4009093fbdff073631 Mon Sep 17 00:00:00 2001
+From: Andrey Efremov <efremov.andrey@huawei-partners.com>
+Date: Mon, 15 May 2023 19:40:20 +0300
+Subject: [PATCH] Fix InvalSetIterator constructor
+
+---
+ src/invalset-vixl.h | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/invalset-vixl.h b/src/invalset-vixl.h
+index 6c57f9c..e823744 100644
+--- a/src/invalset-vixl.h
++++ b/src/invalset-vixl.h
+@@ -282,6 +282,7 @@ class InvalSetIterator : public std::iterator<std::forward_iterator_tag,
+     swap(a.using_vector_, b.using_vector_);
+     swap(a.index_, b.index_);
+     swap(a.inval_set_, b.inval_set_);
++    swap(a.iterator_, b.iterator_);
+   }
+ 
+   // Return true if the iterator is at the end of the set.
+@@ -878,7 +879,8 @@ template <class S>
+ InvalSetIterator<S>::InvalSetIterator(const InvalSetIterator<S>& other)
+     : using_vector_(other.using_vector_),
+       index_(other.index_),
+-      inval_set_(other.inval_set_) {
++      inval_set_(other.inval_set_),
++      iterator_(other.iterator_) {
+ #ifdef VIXL_DEBUG
+   if (inval_set_ != NULL) inval_set_->Acquire();
+ #endif
+-- 
+2.25.1
+

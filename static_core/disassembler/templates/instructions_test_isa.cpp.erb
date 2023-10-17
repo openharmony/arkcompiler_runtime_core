@@ -1,0 +1,128 @@
+/*
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <iostream>
+#include <string>
+
+#include <gtest/gtest.h>
+#include "assembly-parser.h"
+#include "disassembler.h"
+
+% def gen_ins_examples(with_profile = false, escape_strings = false)
+% instructions = []
+% Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
+% insn = group.first
+% formats = group.map(&:format)
+% sig_split = insn["sig"].split(' ')
+% operands = insn.operands
+% properties = insn.properties
+% result = sig_split[0]
+% operands.each_with_index  do |op, index|
+%   result += (index > 0) ? ", " : " "
+%   if op.reg?
+%       result += "v0"
+%   elsif op.imm?
+%       if properties.include?("jump")
+%           result += "jump_label_0"
+%       else
+%           if properties.include?("float")
+%               result += "0x33333"
+%           else
+%               result += "0x1"
+%           end
+%       end
+%   elsif op.id?
+%       if properties.include?("type_id")
+%           if (insn.verification.include?("type_id_array"))
+%               result += "i32[]"
+%           else
+%               result += "A"
+%           end
+%       elsif properties.include?("string_id")
+%           result += (escape_strings) ?  "\\\"string_literal\\\"": "\"string_literal\""
+%       elsif properties.include?("method_id")
+%           result += "A.init:()"
+%       elsif properties.include?("literalarray_id")
+%           result += "array_0"
+%       elsif properties.include?("field_id")
+%           result += "A.fld"
+%       else
+%       end
+%   end
+% end
+% if (with_profile && insn.profiled?)
+%   result += " # [prof=0]"
+% end
+% instructions.append(result)
+% end
+% return instructions
+% end
+%
+%
+%
+
+TEST(InstructionsTest, TestInsIsa)
+{
+    auto program = panda::pandasm::Parser().Parse(R"(
+.record A {
+    u1 fld
+}
+
+.function A A.init() {
+    newobj v0, A
+    lda.obj v0
+    return.obj
+}
+
+.array array_0 f32 3 { 5.1 6.2 7.3 }
+
+.function u1 g() {
+    jump_label_0:
+% gen_ins_examples().each do |ins|
+    <%= ins%>
+% end
+
+}
+)");
+
+
+    ASSERT(program);
+    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    ASSERT(pf);
+
+    panda::disasm::Disassembler d {};
+    std::stringstream ss {};
+
+    d.Disassemble(*pf);
+    d.Serialize(ss);
+
+    size_t beg_g = ss.str().find("g() <static> {");
+    size_t end_g = ss.str().find('}', beg_g);
+
+    ASSERT_TRUE(beg_g != std::string::npos && end_g != std::string::npos) << "function g not found";
+
+    std::string line;
+    std::stringstream g{ss.str().substr(beg_g, end_g)};
+    std::getline(g, line);
+    ASSERT_EQ(line, "g() <static> {");
+    std::getline(g, line);
+    ASSERT_EQ(line, "jump_label_0:");
+% gen_ins_examples(true, true).each do |ins|
+    std::getline(g, line);
+    ASSERT_EQ(std::string("\t<%= ins%>").rfind(line, 0), 0);
+% end
+    std::getline(g, line);
+    ASSERT_EQ(line, "}");
+}

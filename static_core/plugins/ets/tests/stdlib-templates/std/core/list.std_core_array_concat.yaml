@@ -1,0 +1,215 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- {
+    method_name: concat,
+    method_nature: function,
+    result_nature: array,
+    result_type: "boolean[]",
+    method_signature: { first: "boolean[]", second: "boolean[]" },
+    method_signature_desc: { first: "boolean_array", second: "boolean_array" },
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test10: { first: "[true]", second: "[true]" },
+        test20: { first: "[true, true]", second: "[false, false]" },
+        test30: { first: "[]", second: "[]" },
+        test40: { first: "[true, false]", second: "[]" },
+        test50: { first: "[]", second: "[false, true, false]" },
+        test51: { first: "[true, false, true]", second: "[]"  },
+      },
+    method_expected_data:
+      {
+        test10: "[true, true]",
+        test20: "[true, true, false, false]",
+        test30: "[]",
+        test40: "[true, false]",
+        test50: "[false, true, false]",
+        test51: "[true, false, true]"
+      },
+  }
+- {
+    method_name: concat,
+    method_nature: function,
+    result_nature: array,
+    result_type: "byte[]",
+    method_signature: { first: "byte[]", second: "byte[]" },
+    method_signature_desc: { first: "byte_array", second: "byte_array" },
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test1: { first: "[1]", second: "[2]" },
+        test2: { first: "[127, (-128)]", second: "[(-128), 127]", },
+        test3: { first: "[]", second: "[]" },
+        test4: { first: "[111, 99]", second: "[]" },
+        test5: { first: "[]", second: "[33, 66, 33]" },
+      },
+    method_expected_data:
+      {
+        test1: "[1, 2]",
+        test2: "[127, (-128), (-128), 127]",
+        test3: "[]",
+        test4: "[111, 99]",
+        test5: "[33, 66, 33]",
+      },
+  }
+- {
+    method_name: concat,
+    method_nature: function,
+    result_nature: array,
+    result_type: "short[]",
+    method_signature: { first: "short[]", second: "short[]" },
+    method_signature_desc: { first: "short_array", second: "short_array" },
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test1: { first: "[1]", second: "[2]" },
+        test2: { first: "[127, (-128)]", second: "[(-128), 127]",},
+        test3: { first: "[]", second: "[]" },
+        test4: { first: "[111, 99]", second: "[]" },
+        test5: { first: "[]", second: "[33, 66, 33]" },
+      },
+    method_expected_data:
+      {
+        test1: "[1, 2]",
+        test2: "[127, (-128), (-128), 127]",
+        test3: "[]",
+        test4: "[111, 99]",
+        test5: "[33, 66, 33]",
+      },
+  }
+- {
+    method_name: concat,
+    method_nature: function,
+    result_nature: array,
+    result_type: "int[]",
+    method_signature: { first: "int[]", second: "int[]" },
+    method_signature_desc: { first: "int_array", second: "int_array" },
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test1: { first: "[1]", second: "[2]" },
+        test2: { first: "[127, -128]", second: "[-128, 127]",},
+        test3: { first: "[]", second: "[]" },
+        test4: { first: "[111, 99]", second: "[]" },
+        test5: { first: "[]", second: "[33, 66, 33]" },
+      },
+    method_expected_data:
+      {
+        test1: "[1, 2]",
+        test2: "[127, -128, -128, 127]",
+        test3: "[]",
+        test4: "[111, 99]",
+        test5: "[33, 66, 33]",
+      },
+  }
+- {
+    method_name: concat,
+    method_nature: function,
+    result_nature: array,
+    result_type: "long[]",
+    method_signature: { first: "long[]", second: "long[]" },
+    method_signature_desc: { first: "long_array", second: "long_array" },
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test1: { first: "[1]", second: "[2]" },
+        test2: { first: "[127, -128]", second: "[-128, 127]",},
+        test3: { first: "[]", second: "[]" },
+        test4: { first: "[111, 99]", second: "[]" },
+        test5: { first: "[]", second: "[33, 66, 33]" },
+      },
+    method_expected_data:
+      {
+        test1: "[1, 2]",
+        test2: "[127, -128, -128, 127]",
+        test3: "[]",
+        test4: "[111, 99]",
+        test5: "[33, 66, 33]",
+      },
+  }
+- {
+    method_name: concat,
+    method_nature: function,
+    result_nature: array,
+    result_type: "float[]",
+    method_signature: { first: "float[]", second: "float[]" },
+    method_signature_desc: { first: "float_array", second: "float_array" },
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test1: { first: "[1.0]", second: "[2.0]" },
+        test2: { first: "[127.0, -128.0]",  second: "[-128.0, 127.0]", },
+        test3: { first: "[]", second: "[]" },
+        test4: { first: "[111.0, 99.0]", second: "[]" },
+        test5: { first: "[]", second: "[33.0, 66.0, 33.0]",},
+      },
+    method_expected_data:
+      {
+        test1: "[1.0, 2.0]",
+        test2: "[127.0, -128.0, -128.0, 127.0]",
+        test3: "[]",
+        test4: "[111.0, 99.0]",
+        test5: "[33.0, 66.0, 33.0]",
+      },
+  }
+- {
+    method_name: concat,
+    method_nature: function,
+    result_nature: array,
+    result_type: "double[]",
+    method_signature: { first: "double[]", second: "double[]" },
+    method_signature_desc: { first: "double_array", second: "double_array" },
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test1: { first: "[1.0]", second: "[2.0]" },
+        test2: { first: "[127.0, -128.0]", second: "[-128.0, 127.0]",},
+        test3: { first: "[]", second: "[]" },
+        test4: { first: "[111.0, 99.0]", second: "[]" },
+        test5: { first: "[]", second: "[33.0, 66.0, 33.0]",},
+      },
+    method_expected_data:
+      {
+        test1: "[1.0, 2.0]",
+        test2: "[127.0, -128.0, -128.0, 127.0]",
+        test3: "[]",
+        test4: "[111.0, 99.0]",
+        test5: "[33.0, 66.0, 33.0]",
+      },
+  }
+- {
+    method_name: concat,
+    method_nature: function,
+    result_nature: array,
+    result_type: "char[]",
+    method_signature: { first: "char[]", second: "char[]" },
+    method_signature_desc: { first: "char_array", second: "char_array" },
+    method_throws: "false",
+    method_test_index_data:
+      {
+        test1: { first: "['a']", second: "['z']" },
+        test2: { first: "['a', 'b']", second: "['y', 'z']" },
+        test3: { first: "[]", second: "[]" },
+        test4: { first: "['x', 'y']", second: "[]" },
+        test5: { first: "[]", second: "['x', 'y', 'z']" },
+      },
+    method_expected_data:
+      {
+        test1: "['a', 'z']",
+        test2: "['a', 'b', 'y', 'z']",
+        test3: "[]",
+        test4: "['x', 'y']",
+        test5: "['x', 'y', 'z']",
+      },
+  }

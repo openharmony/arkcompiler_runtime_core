@@ -1,0 +1,106 @@
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ *  tries to find key in arr with respect of passed indexes
+ *
+ * @param arr array to find a key
+ *
+ * @param key a value to find
+ *
+ * @param startIndex an index of arr to begin search with
+ *
+ * @param endIndex a last index to stop search in arr, i.e. arr[endIndex] is not checked
+ *
+ * @returns index of key if found in arr[startIndex; endIndex), otherwise KEY_NOT_FOUND
+ *
+ * @example
+ * ```
+ * indexOf([1,2,3,4], 4, 0, 3) == KEY_NOT_FOUND // true since value 4 is not in half-open range [0,3)
+ * ```
+ */
+export function indexOf(arr: {{T}}[], key: {{T}}, startIndex: int, endIndex: int): int throws {
+    if (!checkRange(arr.length, startIndex, endIndex)) {
+        throw new ArrayIndexOutOfBoundsException("indexOf: bounds verification failed")
+    }
+
+    for (let i: int = startIndex; i < endIndex; i++) {
+        {% if T != "Object" -%}
+        if (arr[i] == key) {
+            return i;
+        }{% else %}
+        if (arr[i].equals(key)) {
+            return i;
+        } {% endif %}
+    }
+    return KEY_NOT_FOUND;
+}
+
+/*
+ * tries to find key in arr, starting from index
+ *
+ * @param arr array to find a key
+ *
+ * @param key a value to find
+ *
+ * @param fromIndex an index of arr to begin search with
+ *
+ * @returns index of key if found in arr, otherwise KEY_NOT_FOUND
+ */
+export function indexOf(arr: {{T}}[], key: {{T}}, fromIndex: int): int throws {
+    return indexOf(arr, key, fromIndex, arr.length)
+}
+
+/*
+ * tries to find key in arr
+ *
+ * @param arr array to find a key
+ *
+ * @param key a value to find
+ *
+ * @returns index of key if found in arr, otherwise KEY_NOT_FOUND
+ *
+ * @example
+ * ```
+ * indexOf([1,2,3,4], 4) == 3
+ * ```
+ */
+export function indexOf(arr: {{T}}[], key: {{T}}): int {
+    try {
+        return indexOf(arr, key, 0, arr.length)
+    } catch (e) {
+        // TODO(ivan-tyulyandin): code below is an overcheck, but will be helpful in case of strange exceptions
+        assert false : "indexOf: should be unreacheable since indicies have to be correct by design, " + e.toString()
+    }
+    return KEY_NOT_FOUND
+}
+
+/*
+ * checks whether key is in arr
+ *
+ * @param arr array to find a key
+ *
+ * @param key a value to find
+ *
+ * @returns true if key is in arr, false otherwise
+ *
+ * @example
+ * ```
+ * includes([1,2,3,4], 4) == true
+ * ```
+ */
+export function includes(arr: {{T}}[], key: {{T}}): boolean {
+    return indexOf(arr, key) != KEY_NOT_FOUND;
+}

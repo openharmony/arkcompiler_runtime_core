@@ -1,0 +1,213 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # optional with default value
+    - decl: |-
+          // primitive default
+          function pair(x: number, y: number = 7.0): number {
+              return x + y;
+          }
+      call: |-
+          assert pair(1.0, 2.0) == 3.0
+          assert pair(1.0) == 8.0
+
+    - decl: |-
+          // check primitive defaults
+          function foo(a: byte = 1, b: short = 2, c: int = 3, d: long = 4, e: float = 5.0, f: double = 6.0, g: boolean = true, h: char = c'W') {
+              assert a == 1
+              assert b == 2
+              assert c == 3
+              assert d == 4
+              assert e == 5.0
+              assert f == 6.0
+              assert g
+              assert h == c'W'
+          }
+      call: foo()
+
+    - decl: |-
+          // omitting different arguments
+          function foo(a: int = 1, b: int = 2, c: int = 3): int {
+              return a + b + c
+          }
+      call: |-
+          assert foo(11, 12, 13) == 36
+          assert foo(11) == 16
+          assert foo(, 11) == 15
+          assert foo(,, 11) == 14
+          assert foo(11,, 11) == 24
+          assert foo(,,) == 6
+          assert foo() == 6
+
+    - decl: |-
+          // expression as default value
+          let z = 9, y = 8, x = 7
+          function foo(a: int = z + y * x) {
+              assert a == 65
+          }
+      call: foo()
+
+    - decl: |-
+          // expressions as default values
+          let z: Object[] = [new Boolean(true)], y = "string", x = null
+          function foo(a: Object = z, b: string[] = [y], c: Object|null = x) {
+              assert a === z
+              assert b.length == 1 && b[0] == "string"
+              assert c === null
+          }
+      call: foo()
+
+    - decl: |-
+          // check that expression is not computed if argument is provided
+          let counter = 0
+          class A {
+              fld: number
+
+              constructor(p: number) {
+                  counter++;
+                  this.fld = p;
+              }
+
+              res(x: number): number {
+                  return this.fld + x;
+              }
+          }
+
+          function foo(a: number = new A(33.0).res(42.0)): number {
+              return a;
+          }
+      call: |-
+          assert foo(3.0) == 3.0
+          assert counter == 0
+
+    - decl: |-
+          // check that expression is computed if argument is not provided
+          let counter = 0
+          class A {
+              fld: number
+
+              constructor(p: number) {
+                  counter++;
+                  this.fld = p;
+              }
+
+              res(x: number): number {
+                  return this.fld + x;
+              }
+          }
+
+          function foo(a: number = new A(33.0).res(42.0)): number {
+              return a;
+          }
+      call: |-
+          assert foo() == 75.0
+          assert counter > 0
+
+    - decl: |-
+          // IIFE as default value
+          function foo(a: number = ((p: number): number => { return 2.0 * p })(42.0)): number {
+              return a;
+          }
+      call: |-
+          assert foo(33.0) == 33.0
+          assert foo() == 84.0
+
+    # optional with null
+    - decl: |-
+          // expect NPE if argument omitted
+          function foo(a: int, b?: Int): int {
+              return a + b
+          }
+      call: |-
+          assert foo(1, 2) == 3
+          try {
+              foo(1)
+              assert false
+          } catch (e: NullPointerError) {
+              // expected
+          }
+
+    - decl: |-
+          // check type of argument with default
+          function foo(a?: Object) {
+              assert a instanceof Object|null
+          }
+      call: |-
+          foo(new Object())
+          foo()
+
+    - decl: |-
+          // check type of argument with default
+          function foo(a: Object|null = null) {
+              assert a instanceof Object|null
+          }
+      call: |-
+          foo(new Object())
+          foo(null)
+          foo()
+
+    - decl: |-
+          // check that argument with null-default can be assigned a not null value
+          type f = (p: number) => number[]
+          function foo(a?: f) {
+              assert a === null
+              a = (t: number): number[] => { return [t]; }
+              let x = a(42.0)
+              assert x instanceof number[] && x[0] == 42.0
+          }
+      call: foo()
+
+    - decl: |-
+          // check that argument with null-default optional can be assigned a null value
+          type f = (p: number) => number[]
+          function foo(a?: f) {
+              let x = a(42.0)
+              assert x instanceof number[] && x[0] == 42.0
+              a = null
+              assert a === null
+          }
+      call: |-
+          foo((t: number): number[] => { return [t]; })
+
+    - decl: |-
+          // check that argument with null-default optional can be assigned a null value
+          function foo(s?: string) {
+              assert s == 'abc'
+              s = null
+              assert s === null
+          }
+      call: foo('abc')
+
+    - decl: |-
+          // check nullable type with null-default optional
+          function foo(s?: string|null): string {
+              return s === null ? 'null' : s;
+          }
+      call: |-
+          assert foo('') == ''
+          assert foo('abc') == 'abc'
+          assert foo() == 'null'
+          assert foo(null) == 'null'
+
+    # mixed optionality
+    - decl: |-
+          function boo(a: string, b: string = 'an', c?: string, d: string = 'ing'): string {
+              return a + b + c + d
+          }
+      call: |-
+          assert foo('') == 'annulling'
+          assert foo('c', 'lean', '') == 'cleaning'
+          assert foo('ark', ' ', 'compile', 'r') = 'ark compiler'
+          assert foo('underst',, 'd') == 'understanding'

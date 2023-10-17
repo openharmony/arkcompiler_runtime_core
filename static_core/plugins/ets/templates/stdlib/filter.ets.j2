@@ -1,0 +1,79 @@
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * creates an array only with elements of arr where fn applied to element returned true
+ *
+ * @param arr array to be filtered
+ *
+ * @param fn a filter condition
+ * fn takes a value to test, index of some array and reference to it. Can be used, e.g., to write a filter with use of adjacent elements
+ *
+ * @returns an array of elements from arr where fn returned true
+ */
+export function filter(arr: {{T}}[], fn: (value: {{T}}, index: int, self: {{T}}[]) => boolean): {{T}}[] {
+    let resNum: int = 0;
+    let indicator: boolean[] = new boolean[arr.length];
+
+    for (let i: int = 0; i < arr.length; i++) {
+        if (fn(arr[i], i, arr)) {
+            indicator[i] = true;
+            resNum++;
+        }
+    }
+
+    let res: {{T}}[] = new {{T}}[resNum];
+    let j: int = 0;
+    for (let i: int = 0; i < arr.length; i++) {
+        if (indicator[i]) {
+            res[j] = arr[i];
+            j++;
+        }
+    }
+
+    return res;
+}
+
+/**
+ * creates an array only with elements of arr where fn(arr[i]) returned true
+ *
+ * @param arr array to be filtered
+ *
+ * @param fn a filter condition for value
+ *
+ * @returns an array of elements from arr where fn(arr[i]) returned true
+ */
+export function filter(arr: {{T}}[], fn: (value: {{T}}) => boolean): {{T}}[] {
+    let resNum: int = 0;
+    let indicator: boolean[] = new boolean[arr.length];
+
+    for (let i: int = 0; i < arr.length; i++) {
+        if (fn(arr[i])) {
+            indicator[i] = true;
+            resNum++;
+        }
+    }
+
+    let res: {{T}}[] = new {{T}}[resNum];
+    let j: int = 0;
+    for (let i: int = 0; i < arr.length; i++) {
+        if (indicator[i]) {
+            res[j] = arr[i];
+            j++;
+        }
+    }
+
+    return res;
+}

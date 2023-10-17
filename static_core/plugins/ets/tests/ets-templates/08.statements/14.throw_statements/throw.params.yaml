@@ -1,0 +1,133 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - defs: |-
+      class Ex extends Exception {}
+    use: |-
+      let p: Object = new Ex();
+      try {
+          if (t1 != t2) throw p as Exception;
+          return 1;
+      } catch (e: Ex) {
+          // ok, expected
+          return 0;
+      } catch (e) {
+          assert false : "Unexpected catch clause";
+      }
+      return 1;
+
+  - defs: |-
+      interface Ie {}
+      class Ex extends Exception implements Ie {}
+    use: |-
+      let p: Ie = new Ex();
+      try {
+          if (t1 != t2) throw p as Exception;
+          return 1;
+      } catch (e: Ex) {
+          // ok, expected
+          return 0;
+      } catch (e) {
+          assert false : "Unexpected catch clause";
+      }
+      return 1;
+
+  - defs: |-
+      class Ex extends Exception {}
+    use: |-
+      try {
+          if (t1 != t2) throw new Ex();
+          return 1;
+      } catch (e) {
+          // ok, expected
+          return 0;
+      }
+
+  - defs: |-
+      class Ex extends Exception {}
+    use: |-
+      try {
+          if (t1 != t2) throw new Ex();
+          return 1;
+      } catch (e: NullPointerError) {
+          return 1;
+      } catch (e: Ex) {
+          // ok, expected
+          return 0;
+      } catch (e) {
+          return 1;
+      }
+
+  - defs: |-
+      class Ex extends Exception {}
+    use: |-
+      let v = 0;
+      try {
+          try {
+              if (t1 != t2) throw new Ex();
+              return 1;
+          } catch (e: NullPointerError) {
+              return 1;
+          } catch (e: Exception) {
+              // ok, expected
+              v++;
+              throw e;
+          }
+      } catch (e: NullPointerError) {
+          return 1;
+      } catch (e: Ex) {
+          // ok, expected
+          v++;
+      } catch (e) {
+          return 1;
+      }
+      if (v == 2) {
+          return 0;
+      }
+      return 1;
+
+  - defs: |-
+      class Ex extends Exception {}
+      let e: Ex = new Ex();
+      function foo(): void throws {
+          try {
+              bar();
+          } catch (f: Exception) {
+              throw f;
+          } catch (f: Error) {
+              return;
+          }
+      }
+      function bar(): void throws {
+          try {
+              throw e;
+          } catch (p: Ex) {
+              throw p;
+          } catch (p) {
+              return;
+          }
+      }
+    use: |-
+      try {
+          foo();
+          return 1;
+      } catch (e: Error) {
+          return 1;
+      } catch (e: Ex) {
+          // ok, expected
+          return 0;
+      } catch (e) {
+          return 1;
+      }

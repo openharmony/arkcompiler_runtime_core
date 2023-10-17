@@ -1,0 +1,41 @@
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * runs fn for elements of arr
+ *
+ * @param arr array to run fn over
+ *
+ * @param fn a function to apply
+ * fn takes a value to test, index of some array and reference to it. Can be used, e.g., to write a function with use of adjacent elements
+ */
+export function forEach(arr: {{T}}[], fn: (value: {{T}}, index: int, self: {{T}}[]) => void): void {
+    for (let i: int = 0; i < arr.length; i++) {
+        fn(arr[i], i, arr);
+    }
+}
+
+/**
+ * runs fn over all elements of arr
+ *
+ * @param arr array to run fn over
+ *
+ * @param fn a function to apply
+ */
+export function forEach(arr: {{T}}[], fn: (value: {{T}}) => void): void {
+    for (let i: int = 0; i < arr.length; i++) {
+        fn(arr[i]);
+    }
+}

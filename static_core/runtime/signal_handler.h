@@ -1,0 +1,182 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef PANDA_RUNTIME_SIGNAL_HANDLER_H
+#define PANDA_RUNTIME_SIGNAL_HANDLER_H
+
+#include <csignal>
+#include <cstdint>
+#include <iostream>
+#include <vector>
+#include <libpandabase/macros.h>
+#include "runtime/include/mem/panda_containers.h"
+#include "libpandabase/os/sighook.h"
+
+namespace panda {
+
+class Method;
+class SignalHandler;
+
+bool IsInvalidPointer(uintptr_t addr);
+bool InAllocatedCodeRange(uintptr_t pc);
+
+#ifdef PANDA_TARGET_ARM32
+#define CONTEXT_PC uc_->uc_mcontext.arm_pc  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_SP uc_->uc_mcontext.arm_sp  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_FP uc_->uc_mcontext.arm_fp  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_LR uc_->uc_mcontext.arm_lr  // NOLINT(cppcoreguidelines-macro-usage)
+#elif defined(PANDA_TARGET_ARM64)
+#define CONTEXT_PC uc_->uc_mcontext.pc        // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_FP uc_->uc_mcontext.regs[29]  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_LR uc_->uc_mcontext.regs[30]  // NOLINT(cppcoreguidelines-macro-usage)
+#elif defined(PANDA_TARGET_AMD64)
+#define CONTEXT_PC uc_->uc_mcontext.gregs[REG_RIP]  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_SP uc_->uc_mcontext.gregs[REG_RSP]  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_FP uc_->uc_mcontext.gregs[REG_RBP]  // NOLINT(cppcoreguidelines-macro-usage)
+#elif defined(PANDA_TARGET_X86)
+#define CONTEXT_PC uc_->uc_mcontext.gregs[REG_EIP]  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_SP uc_->uc_mcontext.gregs[REG_ESP]  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_FP uc_->uc_mcontext.gregs[REG_EBP]  // NOLINT(cppcoreguidelines-macro-usage)
+#endif
+
+class SignalContext {
+public:
+    explicit SignalContext(void *ucontext_raw)
+    {
+        uc_ = reinterpret_cast<ucontext_t *>(ucontext_raw);
+    }
+    uintptr_t GetPC()
+    {
+        return CONTEXT_PC;
+    }
+    void SetPC(uintptr_t pc)
+    {
+        CONTEXT_PC = pc;
+    }
+    uintptr_t GetSP()
+    {
+#if defined(PANDA_TARGET_ARM64)
+        auto sc = reinterpret_cast<struct sigcontext *>(&uc_->uc_mcontext);
+        return sc->sp;
+#else
+        return CONTEXT_SP;
+#endif
+    }
+    uintptr_t *GetFP()
+    {
+        return reinterpret_cast<uintptr_t *>(CONTEXT_FP);
+    }
+#if (defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_ARM32))
+    uintptr_t GetLR()
+    {
+        return CONTEXT_LR;
+    }
+    void SetLR(uintptr_t lr)
+    {
+        CONTEXT_LR = lr;
+    }
+#elif defined(PANDA_TARGET_AMD64)
+    void SetSP(uintptr_t sp)
+    {
+        CONTEXT_SP = sp;
+    }
+
+#endif
+
+private:
+    ucontext_t *uc_;
+};
+
+class SignalManager {
+public:
+    void InitSignals();
+
+    bool IsInitialized()
+    {
+        return is_init_;
+    }
+
+    bool SignalActionHandler(int sig, siginfo_t *info, void *context);
+    bool InOatCode(const siginfo_t *siginfo, const void *context, bool check_bytecode_pc) const;
+    bool InOtherCode(int sig, const siginfo_t *info, const void *context) const;
+
+    void AddHandler(SignalHandler *handler, bool oat_code);
+
+    void RemoveHandler(SignalHandler *handler);
+    void GetMethodAndReturnPcAndSp(const siginfo_t *siginfo, const void *context, const Method **out_method,
+                                   const uintptr_t *out_return_pc, const uintptr_t *out_sp);
+
+    mem::InternalAllocatorPtr GetAllocator()
+    {
+        return allocator_;
+    }
+
+    void DeleteHandlersArray();
+
+    explicit SignalManager(mem::InternalAllocatorPtr allocator) : allocator_(allocator) {}
+    SignalManager(SignalManager &&) = delete;
+    SignalManager &operator=(SignalManager &&) = delete;
+    virtual ~SignalManager() = default;
+
+private:
+    bool is_init_ {false};
+    mem::InternalAllocatorPtr allocator_;
+    PandaVector<SignalHandler *> oat_code_handler_;
+    PandaVector<SignalHandler *> other_handlers_;
+    NO_COPY_SEMANTIC(SignalManager);
+};
+
+class SignalHandler {
+public:
+    SignalHandler() = default;
+
+    virtual bool Action(int sig, siginfo_t *siginfo, void *context) = 0;
+
+    SignalHandler(SignalHandler &&) = delete;
+    SignalHandler &operator=(SignalHandler &&) = delete;
+    virtual ~SignalHandler() = default;
+
+private:
+    NO_COPY_SEMANTIC(SignalHandler);
+};
+
+class NullPointerHandler final : public SignalHandler {
+public:
+    NullPointerHandler() = default;
+
+    bool Action(int sig, siginfo_t *siginfo, void *context) override;
+
+    NullPointerHandler(NullPointerHandler &&) = delete;
+    NullPointerHandler &operator=(NullPointerHandler &&) = delete;
+    ~NullPointerHandler() override;
+
+private:
+    NO_COPY_SEMANTIC(NullPointerHandler);
+};
+
+class StackOverflowHandler final : public SignalHandler {
+public:
+    StackOverflowHandler() = default;
+    ~StackOverflowHandler() override = default;
+
+    NO_COPY_SEMANTIC(StackOverflowHandler);
+    NO_MOVE_SEMANTIC(StackOverflowHandler);
+
+    bool Action(int sig, siginfo_t *siginfo, void *context) override;
+};
+
+}  // namespace panda
+
+#endif  // PANDA_RUNTIME_SIGNAL_HANDLER_H

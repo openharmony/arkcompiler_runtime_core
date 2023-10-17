@@ -1,0 +1,111 @@
+### Issue 10945, 11969 begin
+std/core/std_core_char_static_Char_isPartOfSurrogatePair.ets
+std/core/std_core_char_static_Char_isValidCodePoint.ets
+### Issue 10285
+std/core/std_core_double_instance_Double_toString.ets
+### Issue 11484 11541 begin
+std/core/std_core_array_concat_char_array_char_array.ets
+### Issue 11468 begin
+std/core/std_core_array_forEach_int_array_func_int.ets
+std/core/std_core_array_forEach_char_array_func_char_int_char_array.ets
+std/core/std_core_array_forEach_boolean_array_func_boolean.ets
+std/core/std_core_array_forEach_byte_array_func_byte.ets
+std/core/std_core_array_forEach_char_array_func_char.ets
+std/core/std_core_array_forEach_double_array_func_double.ets
+std/core/std_core_array_forEach_float_array_func_float.ets
+std/core/std_core_array_forEach_long_array_func_long.ets
+std/core/std_core_array_forEach_short_array_func_short.ets
+### Issue 11468 end
+### Issue 11474 ###
+### Issue 11544 begin
+std/math/std_math_tan_double.ets
+std/math/std_math_asin_double.ets
+std/math/std_math_sinh_double.ets
+std/math/std_math_atan2_double_double.ets
+std/math/std_math_log10_int.ets
+std/math/std_math_cbrt_double.ets
+std/math/std_math_power_double_double.ets
+std/math/std_math_power2_double.ets
+std/math/std_math_hypot_double_double.ets
+std/math/std_math_mod_double_double.ets
+std/math/std_math_rem_double_double.ets
+std/math/std_math_imul_float_float.ets
+### Issue 11544 end
+### Issue 10874
+std/math/std_math_clz64_long.ets
+### Issue 11712 begin
+std/math/std_math_abs_double.ets
+std/math/std_math_acos_double.ets
+std/math/std_math_acosh_double.ets
+std/math/std_math_asinh_double.ets
+std/math/std_math_atan_double.ets
+std/math/std_math_atanh_double.ets
+std/math/std_math_ceil_double.ets
+std/math/std_math_clz32_int.ets
+std/math/std_math_cos_double.ets
+std/math/std_math_cosh_double.ets
+std/math/std_math_exp_double.ets
+std/math/std_math_expm1_double.ets
+std/math/std_math_floor_double.ets
+std/math/std_math_fround_double.ets
+std/math/std_math_log_double.ets
+std/math/std_math_log10_double.ets
+std/math/std_math_log1p_double.ets
+std/math/std_math_log2_double.ets
+std/math/std_math_max_double_double.ets
+std/math/std_math_min_double_double.ets
+std/math/std_math_max_int_int.ets
+std/math/std_math_round_double.ets
+std/math/std_math_scalbn_double_int.ets
+std/math/std_math_sign_double.ets
+std/math/std_math_signbit_double.ets
+std/math/std_math_sin_double.ets
+std/math/std_math_sqrt_double.ets
+std/math/std_math_tanh_double.ets
+std/math/std_math_trunc_double.ets
+### Issue 11712 end
+### Issue 12527
+std/core/std_core_char_instance_Char_isWhiteSpace.ets
+std/core/std_core_char_instance_Char_isWhiteSpace_001.ets
+std/core/std_core_char_static_Char_isWhiteSpace.ets
+std/core/std_core_char_static_Char_isWhiteSpace_003.ets
+### Issue 12527 end
+### Issue 12782 begin
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_byte_array_int_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_byte_array_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_char_array_int_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_char_array_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_double_array_int_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_double_array_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_float_array_int_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_float_array_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_int_array_int_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_int_array_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_long_array_int_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_long_array_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_short_array_int_int.ets
+std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_short_array_int.ets
+### Issue 12782 end
+### Issue 12784
+regression/12581_box_type_array_Long_array.ets
+### Issue 12581
+regression/12581_custom_class_Engine_array.ets
+### Issue 12562
+std/core/std_core_string_String_italics.ets
+std/core/std_core_string_String_normalize.ets
+std/core/std_core_string_String_toLocaleLowerCase.ets
+std/core/std_core_string_String_toLocaleLowerCase_string.ets
+std/core/std_core_string_String_toLocaleUpperCase_string.ets
+std/core/std_core_string_String_toWellFormed.ets
+### Issue 12562 end
+### Issue 12849
+escompat/escompat_Array_single_Test_escompat_Array.ets
+escompat/escompat_Array_Test_escompat_Array.ets
+escompat/escompat_Array_Test_escompat_Array_001.ets
+escompat/escompat_Array_Test_escompat_Array_002.ets
+escompat/escompat_Array_Test_escompat_Array_003.ets
+### Issue 12849
+### Issue 12989
+std/containers/BasicMapTest.ets
+std/containers/BasicSetTest.ets
+### Issue xxx end

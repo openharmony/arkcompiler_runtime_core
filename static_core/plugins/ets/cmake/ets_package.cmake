@@ -1,0 +1,143 @@
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+# Helped method for creating xx package
+#
+# Example usage:
+#   do_panda_ets_package(package_name
+#     ABC_FILE
+#       path/to/file0.abc
+#     ETS_SOURCE
+#       path/to/file0.ets
+#       path/to/file1.ets
+#     OUTPUT_DIRECTORY
+#       path/to/output_director
+#     ETS_CONFIG
+#       path/to/arktsconfig.json
+#   )
+function(do_panda_ets_package TARGET)
+    # Parse arguments
+    cmake_parse_arguments(
+        ARG
+        ""
+        "OUTPUT_DIRECTORY;ETS_CONFIG"
+        "ABC_FILE;ETS_SOURCES"
+        ${ARGN}
+    )
+
+    # Check arguments
+    if(NOT DEFINED ARG_OUTPUT_DIRECTORY)
+        message(FATAL_ERROR "OUTPUT_DIRECTORY is not set")
+    endif()
+
+    if(NOT DEFINED ARG_ETS_SOURCES AND NOT DEFINED ARG_ABC_FILE OR
+       DEFINED ARG_ETS_SOURCES AND DEFINED ARG_ABC_FILE)
+        message(FATAL_ERROR "One and only one of ETS_SOURCES or ABC_FILE should be set")
+    endif()
+
+    # Set variables
+    set(ES2PANDA_ARGUMENTS
+        --opt-level=0
+        --thread=0
+        --extension=ets
+    )
+
+    if(DEFINED ARG_ETS_CONFIG)
+        list(APPEND ES2PANDA_ARGUMENTS --arktsconfig=${ARG_ETS_CONFIG})
+    endif()
+
+    set(BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/${TARGET})
+
+    # Convert *.ets -> classes.abc
+    set(OUTPUT_ABC ${BUILD_DIR}/src/classes.abc)
+    if(DEFINED ARG_ETS_SOURCES)
+        add_custom_command(
+            OUTPUT ${OUTPUT_ABC}
+            COMMENT "${TARGET}: Convert ets files to ${OUTPUT_ABC}"
+            COMMAND rm -rf ${BUILD_DIR}/src
+            COMMAND mkdir -p ${BUILD_DIR}/src
+            COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --output=${OUTPUT_ABC} ${ARG_ETS_SOURCES}
+            DEPENDS etsstdlib ${es2panda_target} ${ARG_ETS_SOURCES}
+        )
+    else()
+        add_custom_command(
+                OUTPUT ${OUTPUT_ABC}
+                COMMENT "${TARGET}: Copy abc file to ${OUTPUT_ABC}"
+                COMMAND cp -rf ${ARG_ABC_FILE} ${OUTPUT_ABC}
+                DEPENDS etsstdlib ${ARG_ABC_FILE}
+            )
+    endif()
+
+    # Pack classes.abc to .zip archive
+    set(OUTPUT_ZIP ${BUILD_DIR}/out/${TARGET}.zip)
+    add_custom_command(
+        OUTPUT ${OUTPUT_ZIP}
+        COMMENT "Create ${OUTPUT_ZIP}"
+        COMMAND rm -rf ${BUILD_DIR}/out
+        COMMAND mkdir ${BUILD_DIR}/out
+        COMMAND cd ${BUILD_DIR}/src
+        COMMAND zip -r -0 ${OUTPUT_ZIP} *
+        DEPENDS ${OUTPUT_ABC}
+    )
+
+    # Copy .zip to <PANDA_BINARY_ROOT>/<ARG_OUTPUT_DIRECTORY>
+    set(RELEASE_ZIP ${PANDA_BINARY_ROOT}/${ARG_OUTPUT_DIRECTORY}/${TARGET}.zip)
+    add_custom_command(
+        OUTPUT ${RELEASE_ZIP}
+        COMMENT "Copy ${OUTPUT_ZIP} to ${RELEASE_ZIP}"
+        COMMAND cp ${OUTPUT_ZIP} ${RELEASE_ZIP}
+        DEPENDS ${OUTPUT_ZIP}
+    )
+    add_custom_target(${TARGET}
+        DEPENDS ${RELEASE_ZIP}
+    )
+endfunction(do_panda_ets_package)
+
+
+# Create ets package
+#
+# Example usage:
+#   panda_ets_package(package_name
+#     ABC_FILE
+#       path/to/file0.abc
+#     ETS_SOURCES
+#       path/to/file0.ets
+#       path/to/file1.ets
+#     ETS_CONFIG
+#       path/to/arktsconfig.json
+#   )
+function(panda_ets_package)
+    do_panda_ets_package(
+        ${ARGV}
+        OUTPUT_DIRECTORY abc
+    )
+endfunction(panda_ets_package)
+
+
+# Create ets package for tests
+#
+# Example usage:
+#   panda_ets_package_gtest(package_name
+#     ETS_SOURCES
+#       path/to/file0.ets
+#       path/to/file1.ets
+#     ETS_CONFIG
+#       path/to/arktsconfig.json
+#   )
+function(panda_ets_package_gtest)
+    do_panda_ets_package(
+        ${ARGV}
+        OUTPUT_DIRECTORY abc-gtests
+    )
+endfunction(panda_ets_package_gtest)

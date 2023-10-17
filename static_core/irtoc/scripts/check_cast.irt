@@ -1,0 +1,55 @@
+#!/usr/bin/env ruby
+
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+include_relative 'common.irt'
+
+$available_regs = RegMask.new($full_regmap, :tmp1, :arg0, :arg1, :callee0, :callee2, :callee3)
+if Options.arch == :arm64
+  $available_regs = $available_regs + :callee1
+else
+  $available_regs = $available_regs + :tmp2
+end
+
+function(:CheckCastInterfaceEntrypoint,
+          params: {obj: 'ptr', interface: 'ptr'},
+          regmap: $full_regmap,
+          regalloc_set: $available_regs,
+          mode: [:FastPath]) {
+    if Options.arch == :arm32
+        Intrinsic(:UNREACHABLE).Terminator.void
+        next
+    end
+
+    klass := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    size := LoadI(klass).Imm(Constants::CLASS_ITABLE_ENTRIES_SIZE_OFFSET).word
+    elements0 := LoadI(klass).Imm(Constants::CLASS_ITABLE_ENTRIES_DATA_OFFSET).ptr
+    i0 := 0
+Label(:Loop)
+    elements_phi := Phi(elements0, elements1).ptr
+    i_phi := Phi(i0, i1).word
+    If(i_phi, size).CC(:CC_EQ) {
+        Goto(:SlowPath)
+    }
+    implemented_interface := LoadI(elements_phi).Imm(Constants::CLASS_ITABLE_ENTRY_INTERFACE_OFFSET).ptr
+    If(implemented_interface, interface).CC(:CC_EQ).b {
+        ReturnVoid().void
+    }
+    elements1 := Add(elements_phi, Constants::CLASS_ITABLE_ENTRY_SIZE).ptr
+    i1 := Add(i_phi, 1).word
+    Goto(:Loop)
+Label(:SlowPath)
+    Intrinsic(:SLOW_PATH_ENTRY, obj, interface).AddImm(Constants::CHECK_CAST_USUAL_BRIDGE).AddImm(Constants::CHECK_CAST_USUAL_BRIDGE).Terminator.void
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}

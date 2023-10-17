@@ -1,0 +1,407 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "heap_manager.h"
+#include "mem/pool_manager.h"
+#include "mem/mmap_mem_pool-inl.h"
+#include "mem/internal_allocator-inl.h"
+#include "include/runtime.h"
+#include "include/locks.h"
+
+#include <string>
+
+#include "libpandabase/mem/mmap_mem_pool-inl.h"
+#include "libpandabase/mem/pool_manager.h"
+#include "runtime/include/runtime_notification.h"
+#include "runtime/include/thread_scopes.h"
+#include "runtime/handle_base-inl.h"
+#include "runtime/include/panda_vm.h"
+#include "runtime/mem/gc/g1/g1-gc.h"
+
+namespace panda::mem {
+
+bool HeapManager::Initialize(GCType gc_type, bool single_threaded, bool use_tlab, MemStatsType *mem_stats,
+                             InternalAllocatorPtr internal_allocator, bool create_pygote_space)
+{
+    trace::ScopedTrace scoped_trace("HeapManager::Initialize");
+    bool ret = false;
+    mem_stats_ = mem_stats;
+    internal_allocator_ = internal_allocator;
+    // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define FWD_GC_INIT(type, mem_stats)                                                \
+    case type:                                                                      \
+        if (single_threaded) {                                                      \
+            ret = Initialize<type, MT_MODE_SINGLE>(mem_stats, create_pygote_space); \
+        } else {                                                                    \
+            ret = Initialize<type, MT_MODE_MULTI>(mem_stats, create_pygote_space);  \
+        }                                                                           \
+        break
+
+    switch (gc_type) {
+        FWD_GC_INIT(GCType::EPSILON_GC, mem_stats);
+        FWD_GC_INIT(GCType::EPSILON_G1_GC, mem_stats);
+        FWD_GC_INIT(GCType::STW_GC, mem_stats);
+        FWD_GC_INIT(GCType::GEN_GC, mem_stats);
+        FWD_GC_INIT(GCType::G1_GC, mem_stats);
+        default:
+            LOG(FATAL, GC) << "Invalid init for gc_type = " << static_cast<int>(gc_type);
+            break;
+    }
+#undef FWD_GC_INIT
+    // We want to use common allocate scenario in AOT/JIT/Irtoc code with option run-gc-every-safepoint
+    // to check state of memory in TriggerGCIfNeeded
+    if (!object_allocator_.AsObjectAllocator()->IsTLABSupported() || Runtime::GetOptions().IsRunGcEverySafepoint()) {
+        use_tlab = false;
+    }
+    use_tlab_for_allocations_ = use_tlab;
+    // Now, USE_TLAB_FOR_ALLOCATIONS option is supported only for Generational GCs
+    ASSERT(IsGenerationalGCType(gc_type) || (!use_tlab_for_allocations_));
+    return ret;
+}
+
+void HeapManager::SetPandaVM(PandaVM *vm)
+{
+    vm_ = vm;
+    gc_ = vm_->GetGC();
+    notification_manager_ = Runtime::GetCurrent()->GetNotificationManager();
+}
+
+bool HeapManager::Finalize()
+{
+    delete code_allocator_;
+    object_allocator_->VisitAndRemoveAllPools(
+        [](void *mem, [[maybe_unused]] size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
+    delete static_cast<Allocator *>(object_allocator_);
+
+    return true;
+}
+
+ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment align, ManagedThread *thread,
+                                          ObjectAllocatorBase::ObjMemInitPolicy obj_init_type)
+{
+    ASSERT(size >= ObjectHeader::ObjectHeaderSize());
+    ASSERT(GetGC()->IsMutatorAllowed());
+    TriggerGCIfNeeded();
+    if (thread == nullptr) {
+        // TODO(dtrubenkov): try to avoid this
+        thread = ManagedThread::GetCurrent();
+        ASSERT(thread != nullptr);
+    }
+    void *mem = AllocateMemoryForObject(size, align, thread, obj_init_type);
+    if (UNLIKELY(mem == nullptr)) {
+        mem = TryGCAndAlloc(size, align, thread, obj_init_type);
+        if (UNLIKELY(mem == nullptr)) {
+            ThrowOutOfMemoryError("AllocateObject failed");
+            return nullptr;
+        }
+    }
+    LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc object at " << mem << " size: " << size;
+    ObjectHeader *object = InitObjectHeaderAtMem(cls, mem);
+    bool is_object_finalizable = IsObjectFinalized(cls);
+    if (UNLIKELY(is_object_finalizable || GetNotificationManager()->HasAllocationListeners())) {
+        // Use object handle here as RegisterFinalizedObject can trigger GC
+        [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+        VMHandle<ObjectHeader> handle(thread, object);
+        RegisterFinalizedObject(handle.GetPtr(), cls, is_object_finalizable);
+        GetNotificationManager()->ObjectAllocEvent(cls, handle.GetPtr(), thread, size);
+        object = handle.GetPtr();
+    }
+    return object;
+}
+
+void *HeapManager::TryGCAndAlloc(size_t size, Alignment align, ManagedThread *thread,
+                                 ObjectAllocatorBase::ObjMemInitPolicy obj_init_type)
+{
+    // do not try many times in case of OOM scenarios.
+    constexpr size_t ALLOC_RETRY = 4;
+    size_t alloc_try_cnt = 0;
+    void *mem = nullptr;
+    bool is_generational = GetGC()->IsGenerational();
+    ASSERT(!thread->HasPendingException());
+
+    while (mem == nullptr && alloc_try_cnt < ALLOC_RETRY) {
+        ++alloc_try_cnt;
+        GCTaskCause cause;
+        // add comment why -1
+        if (alloc_try_cnt == ALLOC_RETRY - 1 || !is_generational) {
+            cause = GCTaskCause::OOM_CAUSE;
+        } else {
+            cause = GCTaskCause::YOUNG_GC_CAUSE;
+        }
+        GetGC()->WaitForGCInManaged(GCTask(cause));
+        mem = AllocateMemoryForObject(size, align, thread, obj_init_type);
+        if (mem != nullptr) {
+            // we could set OOM in gc, but we need to clear it if next gc was successfully and we allocated memory
+            thread->ClearException();
+        } else {
+            auto freed_bytes = GetPandaVM()->GetGCStats()->GetObjectsFreedBytes();
+            auto last_young_moved_bytes = GetPandaVM()->GetMemStats()->GetLastYoungObjectsMovedBytes();
+            // if last GC freed or moved from young space some bytes - it means that we have a progress in VM,
+            // just this thread was unlucky to get some memory. We reset alloc_try_cnt to try again.
+            if (freed_bytes + last_young_moved_bytes != 0) {
+                alloc_try_cnt = 0;
+            }
+        }
+    }
+    return mem;
+}
+
+void *HeapManager::AllocateMemoryForObject(size_t size, Alignment align, ManagedThread *thread,
+                                           ObjectAllocatorBase::ObjMemInitPolicy obj_init_type)
+{
+    void *mem = nullptr;
+    if (UseTLABForAllocations() && size <= GetTLABMaxAllocSize()) {
+        ASSERT(thread != nullptr);
+        ASSERT(GetGC()->IsTLABsSupported());
+        // Try to allocate an object via TLAB
+        TLAB *current_tlab = thread->GetTLAB();
+        ASSERT(current_tlab != nullptr);  // A thread's TLAB must be initialized at least via some ZERO tlab values.
+        mem = current_tlab->Alloc(size);
+        if (mem == nullptr) {
+            // We couldn't allocate an object via current TLAB,
+            // Therefore, create a new one and allocate in it.
+            if (CreateNewTLAB(thread)) {
+                current_tlab = thread->GetTLAB();
+                mem = current_tlab->Alloc(size);
+            }
+        }
+        if (PANDA_TRACK_TLAB_ALLOCATIONS && (mem != nullptr)) {
+            mem_stats_->RecordAllocateObject(GetAlignedObjectSize(size), SpaceType::SPACE_TYPE_OBJECT);
+        }
+    }
+    if (mem == nullptr) {  // if mem == nullptr, try to use common allocate scenario
+        mem = object_allocator_.AsObjectAllocator()->Allocate(size, align, thread, obj_init_type);
+    }
+    return mem;
+}
+
+template <bool IS_FIRST_CLASS_CLASS>
+ObjectHeader *HeapManager::AllocateNonMovableObject(BaseClass *cls, size_t size, Alignment align, ManagedThread *thread,
+                                                    ObjectAllocatorBase::ObjMemInitPolicy obj_init_type)
+{
+    ASSERT(size >= ObjectHeader::ObjectHeaderSize());
+    ASSERT(GetGC()->IsMutatorAllowed());
+    TriggerGCIfNeeded();
+    void *mem = object_allocator_.AsObjectAllocator()->AllocateNonMovable(size, align, thread, obj_init_type);
+    if (UNLIKELY(mem == nullptr)) {
+        GCTaskCause cause = GCTaskCause::OOM_CAUSE;
+        GetGC()->WaitForGCInManaged(GCTask(cause));
+        mem = object_allocator_.AsObjectAllocator()->AllocateNonMovable(size, align, thread, obj_init_type);
+    }
+    if (UNLIKELY(mem == nullptr)) {
+        if (ManagedThread::GetCurrent() != nullptr) {
+            ThrowOutOfMemoryError("AllocateNonMovableObject failed");
+        }
+        return nullptr;
+    }
+    LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc non-movable object at " << mem << " size: " << size;
+    auto *object = InitObjectHeaderAtMem(cls, mem);
+    // cls can be null for first class creation, when we create ClassRoot::Class
+    // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
+    if constexpr (IS_FIRST_CLASS_CLASS) {
+        ASSERT(cls == nullptr);
+        // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
+    } else {
+        ASSERT(cls != nullptr);
+        bool is_object_finalizable = IsObjectFinalized(cls);
+        if (UNLIKELY(is_object_finalizable || GetNotificationManager()->HasAllocationListeners())) {
+            if (thread == nullptr) {
+                thread = ManagedThread::GetCurrent();
+            }
+            [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+            VMHandle<ObjectHeader> handle(thread, object);
+            RegisterFinalizedObject(handle.GetPtr(), cls, is_object_finalizable);
+            GetNotificationManager()->ObjectAllocEvent(cls, handle.GetPtr(), thread, size);
+            object = handle.GetPtr();
+        }
+    }
+    return object;
+}
+
+ObjectHeader *HeapManager::InitObjectHeaderAtMem(BaseClass *cls, void *mem)
+{
+    ASSERT(mem != nullptr);
+    ASSERT(GetGC()->IsMutatorAllowed());
+
+    auto object = static_cast<ObjectHeader *>(mem);
+    // we need zeroed memory here according to ISA
+    ASSERT(object->AtomicGetMark().GetValue() == 0);
+    ASSERT(object->ClassAddr<BaseClass *>() == nullptr);
+    // The order is crucial here - we need to have 0 class word to avoid data race with concurrent sweep.
+    // Otherwise we can remove not initialized object.
+    GetGC()->InitGCBits(object);
+    object->SetClass(cls);
+    return object;
+}
+
+void HeapManager::TriggerGCIfNeeded()
+{
+    vm_->GetGCTrigger()->TriggerGcIfNeeded(GetGC());
+}
+
+Frame *HeapManager::AllocateExtFrame(size_t size, size_t ext_sz)
+{
+    ASSERT(GetGC()->IsMutatorAllowed());
+    StackFrameAllocator *frame_allocator = GetCurrentStackFrameAllocator();
+    return Frame::FromExt(frame_allocator->Alloc(size), ext_sz);
+}
+
+bool HeapManager::CreateNewTLAB(ManagedThread *thread)
+{
+    ASSERT(GetGC()->IsMutatorAllowed());
+    ASSERT(thread != nullptr);
+    TLAB *new_tlab = object_allocator_.AsObjectAllocator()->CreateNewTLAB(thread);
+    if (new_tlab != nullptr) {
+        RegisterTLAB(thread->GetTLAB());
+        thread->UpdateTLAB(new_tlab);
+        return true;
+    }
+    return false;
+}
+
+void HeapManager::RegisterTLAB(const TLAB *tlab)
+{
+    ASSERT(tlab != nullptr);
+    if (!PANDA_TRACK_TLAB_ALLOCATIONS && (tlab->GetOccupiedSize() != 0)) {
+        mem_stats_->RecordAllocateObject(tlab->GetOccupiedSize(), SpaceType::SPACE_TYPE_OBJECT);
+    }
+}
+
+void HeapManager::FreeExtFrame(Frame *frame, size_t ext_sz)
+{
+    ASSERT(GetGC()->IsMutatorAllowed());
+    StackFrameAllocator *frame_allocator = GetCurrentStackFrameAllocator();
+    frame_allocator->Free(Frame::ToExt(frame, ext_sz));
+}
+
+CodeAllocator *HeapManager::GetCodeAllocator() const
+{
+    return code_allocator_;
+}
+
+InternalAllocatorPtr HeapManager::GetInternalAllocator()
+{
+    return internal_allocator_;
+}
+
+ObjectAllocatorPtr HeapManager::GetObjectAllocator()
+{
+    return object_allocator_;
+}
+
+StackFrameAllocator *HeapManager::GetCurrentStackFrameAllocator()
+{
+    return ManagedThread::GetCurrent()->GetStackFrameAllocator();
+}
+
+void HeapManager::PreZygoteFork()
+{
+    GetGC()->WaitForGCOnPygoteFork(GCTask(GCTaskCause::PYGOTE_FORK_CAUSE));
+}
+
+float HeapManager::GetTargetHeapUtilization() const
+{
+    return target_utilization_;
+}
+
+void HeapManager::SetTargetHeapUtilization(float target)
+{
+    ASSERT_PRINT(target > 0.0F && target < 1.0F, "Target heap utilization should be in the range (0,1)");
+    target_utilization_ = target;
+}
+
+size_t HeapManager::GetTotalMemory() const
+{
+    return vm_->GetMemStats()->GetFootprintHeap();
+}
+
+size_t HeapManager::GetFreeMemory() const
+{
+    return helpers::UnsignedDifference(GetTotalMemory(), vm_->GetMemStats()->GetFootprintHeap());
+}
+
+void HeapManager::ClampNewMaxHeapSize()
+{
+    object_allocator_.AsObjectAllocator()->GetHeapSpace()->ClampCurrentMaxHeapSize();
+}
+
+/**
+ * @brief Check whether the given object is an instance of the given class.
+ * @param obj - ObjectHeader pointer
+ * @param h_class - Class pointer
+ * @param assignable - whether the subclass of h_class counts
+ * @return true if obj is instanceOf h_class, otherwise false
+ */
+static bool MatchesClass(const ObjectHeader *obj, const Class *h_class, bool assignable)
+{
+    if (assignable) {
+        return obj->IsInstanceOf(h_class);
+    }
+    return obj->ClassAddr<Class>() == h_class;
+}
+
+void HeapManager::CountInstances(const PandaVector<Class *> &classes, bool assignable, uint64_t *counts)
+{
+    auto objects_checker = [&](ObjectHeader *obj) {
+        for (size_t i = 0; i < classes.size(); ++i) {
+            if (classes[i] == nullptr) {
+                continue;
+            }
+            if (MatchesClass(obj, classes[i], assignable)) {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                ++counts[i];
+            }
+        }
+    };
+    {
+        MTManagedThread *thread = MTManagedThread::GetCurrent();
+        ASSERT(thread != nullptr);
+        ScopedChangeThreadStatus sts(thread, ThreadStatus::RUNNING);
+        ScopedSuspendAllThreadsRunning ssatr(thread->GetVM()->GetRendezvous());
+        GetObjectAllocator().AsObjectAllocator()->IterateOverObjects(objects_checker);
+    }
+}
+
+void HeapManager::SetIsFinalizableFunc(IsObjectFinalizebleFunc func)
+{
+    is_object_finalizeble_func_ = func;
+}
+
+void HeapManager::SetRegisterFinalizeReferenceFunc(RegisterFinalizeReferenceFunc func)
+{
+    register_finalize_reference_func_ = func;
+}
+
+bool HeapManager::IsObjectFinalized(BaseClass *cls)
+{
+    return is_object_finalizeble_func_ != nullptr && is_object_finalizeble_func_(cls);
+}
+
+void HeapManager::RegisterFinalizedObject(ObjectHeader *object, BaseClass *cls, bool is_object_finalizable)
+{
+    if (is_object_finalizable) {
+        ASSERT(register_finalize_reference_func_ != nullptr);
+        register_finalize_reference_func_(object, cls);
+    }
+}
+
+template ObjectHeader *HeapManager::AllocateNonMovableObject<true>(BaseClass *cls, size_t size, Alignment align,
+                                                                   ManagedThread *thread,
+                                                                   ObjectAllocatorBase::ObjMemInitPolicy obj_init_type);
+
+template ObjectHeader *HeapManager::AllocateNonMovableObject<false>(
+    BaseClass *cls, size_t size, Alignment align, ManagedThread *thread,
+    ObjectAllocatorBase::ObjMemInitPolicy obj_init_type);
+}  // namespace panda::mem

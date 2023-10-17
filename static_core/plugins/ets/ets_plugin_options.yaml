@@ -1,0 +1,75 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+  - ETS:
+      bytecodeopt:
+        codegen_visitors_inc: plugins/ets/bytecode_optimizer/visitors/codegen_visitors.inc
+        reg_encoder_visitors_inc: plugins/ets/bytecode_optimizer/visitors/reg_encoder_visitors.inc
+      lang_enum_id: 5
+      lang_context_class: panda::ets::EtsLanguageContext
+      lang_context_header_path: plugins/ets/runtime/ets_language_context.h
+      additional_interpter_inl: plugins/ets/runtime/interpreter/interpreter-inl.h
+      language_config:
+        lang_type: static
+        mt_mode: multi
+        has_value_object_types: false
+      ctor_name: <ctor>
+      cctor_name: <cctor>
+
+      directive_name: eTS
+      string_class_descriptor: Lstd/core/String;
+
+      Intrinsics:
+        header: plugins/ets/runtime/intrinsics_declaration.h
+        ir_build_static_call_inl: plugins/ets/compiler/intrinsics_ir_build_static_call_ets.inl
+        ir_build_virtual_call_inl: plugins/ets/compiler/intrinsics_ir_build_virtual_call_ets.inl
+        ir_build_inl_h: plugins/ets/compiler/intrinsics_ir_build_ets.inl.h
+        intrinsics_peephole_inl_h: plugins/ets/compiler/intrinsics_peephole_ets.inl.h
+
+      Disasm:
+        language_interface_path: plugins/ets/disassembler/disasm_ets_plugin.inc
+
+      logger:
+        components:
+          - name: ets
+          - name: ets_napi
+          - name: ets_interop_js
+
+      Verification:
+        header: plugins/ets/verification/ets_plugin.h
+        plugin_class: panda::verifier::plugin::EtsPlugin
+
+      irtoc_files:
+        - plugins_interpreter_handlers: plugins/ets/irtoc_scripts/interpreter_handlers.irt
+        - plugins_main_loop: plugins/ets/irtoc_scripts/interpreter_main_loop.irt
+
+      Metadatas:
+        - RecordMetadata:
+            new_class_name: panda::pandasm::extensions::ets::RecordMetadata
+            header_path: plugins/ets/assembler/extension/ets_meta.h
+        - FieldMetadata:
+            new_class_name: panda::pandasm::extensions::ets::FieldMetadata
+            header_path: plugins/ets/assembler/extension/ets_meta.h
+        - FunctionMetadata:
+            new_class_name: panda::pandasm::extensions::ets::FunctionMetadata
+            header_path: plugins/ets/assembler/extension/ets_meta.h
+        - ParamMetadata:
+            new_class_name: panda::pandasm::extensions::ets::ParamMetadata
+            header_path: plugins/ets/assembler/extension/ets_meta.h
+      compiler_extensions:
+        header_path_compiler_inst_builder_extension: plugins/ets/compiler/optimizer/ir_builder/ets_inst_builder.h
+        header_path_implementation_codegen: plugins/ets/compiler/optimizer/ets_codegen_extensions.h
+        launch_call_codegen: LaunchCallCodegen
+      runtime_defines:
+        defines_header_path: plugins/ets/runtime/asm_defines/defines.h
+        asm_defines_def: plugins/ets/runtime/asm_defines/asm_defines.def

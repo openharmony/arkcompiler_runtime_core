@@ -1,0 +1,25 @@
+From b461de9a24b7158549e4018ab2e4174263da972d Mon Sep 17 00:00:00 2001
+From: vagin ivan <vagin.ivan1@huawei-partners.com>
+Date: Wed, 28 Dec 2022 17:34:33 +0300
+Subject: [PATCH] Remove redundant import from BUILD gn
+
+Signed-off-by: vagin ivan <vagin.ivan1@huawei-partners.com>
+---
+ BUILD.gn | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/BUILD.gn b/BUILD.gn
+index 6ca8809..81f63bd 100644
+--- a/BUILD.gn
++++ b/BUILD.gn
+@@ -24,7 +24,6 @@
+ # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ 
+ import("//ark/runtime_core/ark_config.gni")
+-import("//build/config/ohos/rules.gni")
+ import("//build/ohos.gni")
+ 
+ config("vixl_public_config") {
+-- 
+2.25.1
+

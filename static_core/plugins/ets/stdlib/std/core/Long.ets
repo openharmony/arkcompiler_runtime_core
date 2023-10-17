@@ -1,0 +1,321 @@
+/*
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package std.core;
+
+/**
+ * Represents boxed long value and related operations
+ */
+export final class Long extends Integral implements Comparable<Long>, JSONable<Int> {
+    private value: long;
+
+    /**
+     * Constructs a new Long instance with initial value zero
+     */
+    public constructor() {
+        this.value = 0;
+    }
+
+    /**
+     * Constructs a new Long instance with provided initial value
+     *
+     * @param value the initial value
+     */
+    public constructor(value: long) {
+        this.value = value;
+    }
+
+    /**
+     * Constructs a new Long instance with provided initial value
+     *
+     * @param value the initial value
+     */
+    public constructor(value: Long) {
+        this.value = value.longValue();
+    }
+
+    /**
+     * Returns value of this instance as a primitive
+     *
+     * @returns value of this instance
+     */
+    public unboxed(): long {
+        return this.value;
+    }
+
+    /**
+     * Returns boxed representation of the primitive
+     *
+     * @param value value to box
+     *
+     * @returns boxed value
+     */
+    public static valueOf(value: long): Long {
+        // TODO(ivan-tyulyandin): caching is possible
+        return new Long(value);
+    }
+
+    /**
+     * Minimal value that this type can have as a long
+     */
+    public static MIN_VALUE: long = -9223372036854775808;
+
+    /**
+     * Maximal value that this type can have as a long
+     */
+    public static MAX_VALUE: long = 9223372036854775807;
+
+    /**
+     * Size of this type in bits
+     */
+    public static BIT_SIZE: byte = 64;
+
+    /**
+     * Size of this type in bytes
+     */
+    public static BYTE_SIZE: byte = 8;
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as long
+     */
+    public override byteValue(): byte {
+        return this.value as byte;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as short
+     */
+    public override shortValue(): short {
+        return this.value as short;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as int
+     */
+    public override intValue(): int {
+        return this.value as int;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as long
+     */
+    public override longValue(): long {
+        return this.value;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as long
+     */
+    public override floatValue(): float {
+        return this.value as float;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as double
+     */
+    public override doubleValue(): double {
+        return this.value as double;
+    }
+
+    /**
+     * Compares this instance to other Long object
+     * The result is less than 0 if this instance lesser than provided object
+     * 0 if they are equal
+     * and greater than 0 otherwise.
+     *
+     * @param other Long object to compare with
+     *
+     * @returns result of the comparison
+     */
+    public override compareTo(other: Long): int {
+        return (this.value - other.unboxed()) as int;
+    }
+
+    /**
+     * Converts this object to a string
+     *
+     * @returns result of the conversion
+     */
+    public override toString(): String {
+        // Check for zero, log10 would go inf otherwise
+        if (this.value == 0) {
+            return "0";
+        }
+        let val = this.value;
+        let negative: boolean = (val < 0);
+        let digitsNum = (log10(abs(this.value)) + 1) as int;
+        if (negative) {
+            ++digitsNum;
+        }
+        let data = new char[digitsNum];
+        let curPlace = digitsNum - 1;
+        while (val != 0) {
+            let remainder = val % 10;
+            if (negative) {
+                remainder = -remainder;
+            }
+            data[curPlace] = (remainder + c'0') as char;
+            val /= 10;
+            curPlace -= 1;
+        }
+        if (negative) {
+            data[0] = c'-';
+        }
+        return new String(data);
+    }
+
+    /**
+     * Returns a hash code (integer representation) for this instance
+     *
+     * @returns representation of this instance
+     */
+    public override hashCode(): int {
+        return this.intValue();
+    }
+
+    /**
+     * Checks for equality this instance with provided object, treated as a Long
+     *
+     * @param other object to be checked against
+     *
+     * @returns true if provided object and this instance have same value, false otherwise
+     * Returns false if type of provided object is not the same as this type
+     */
+    public override equals(other: Object|null): boolean {
+        if (other instanceof Long) {
+            return this.value == (other as Long).longValue();
+        }
+        return false;
+    }
+
+    /**
+     * Performs integral addition of this instance with provided one, returns the result as new instance
+     *
+     * @param other Right hand side of the addition
+     *
+     * @returns Result of the addition
+     */
+    public add(other: Long): Long {
+        return Long.valueOf((this.value + other.longValue()) as long)
+    }
+
+    /**
+     * Performs integral subtraction of this instance with provided one, returns the result as new instance
+     *
+     * @param other Right hand side of the subtraction
+     *
+     * @returns Result of the subtraction
+     */
+    public sub(other: Long): Long {
+        return Long.valueOf((this.value - other.longValue()) as long)
+    }
+
+    /**
+     * Performs integral multiplication of this instance with provided one, returns the result as new instance
+     *
+     * @param other Right hand side of the multiplication
+     *
+     * @returns Result of the multiplication
+     */
+    public mul(other: Long): Long {
+        return Long.valueOf((this.value * other.longValue()) as long)
+    }
+
+    /**
+     * Performs integral division of this instance with provided one, returns the result as new instance
+     *
+     * @param other Right hand side of the division
+     *
+     * @returns Result of the division
+     */
+    public div(other: Long): Long {
+        return Long.valueOf((this.value / other.longValue()) as long)
+    }
+
+    /**
+     * Checks if this instance value is less than value of provided instance
+     *
+     * @param other Right hand side of the comparison
+     *
+     * @returns true if this value is less than provided, false otherwise
+     */
+    public isLessThan(other: Long): boolean {
+        return this.value < other.longValue();
+    }
+
+    /**
+     * Checks if this instance value is less than or equal to value of provided instance
+     *
+     * @param other Right hand side of the comparison
+     *
+     * @returns true if this value is less than or equal to provided, false otherwise
+     */
+    public isLessEqualThan(other: Long): boolean {
+        return this.value <= other.longValue();
+    }
+
+    /**
+     * Checks if this instance value is greater than value of provided instance
+     *
+     * @param other Right hand side of the comparison
+     *
+     * @returns true if this value is greater than provided, false otherwise
+     */
+    public isGreaterThan(other: Long): boolean {
+        return this.value > other.longValue();
+    }
+
+    /**
+     * Checks if this instance value is greater than or equal to value of provided instance
+     *
+     * @param other Right hand side of the comparison
+     *
+     * @returns true if this value is greater than or equal to provided, false otherwise
+     */
+    public isGreaterEqualThan(other: Long): boolean {
+        return this.value >= other.longValue();
+    }
+
+    /**
+     * Creates a Long instance based on JSONValue
+     *
+     * @param json: JSONValue - a JSON representation
+     *
+     * @throws JSONTypeError if json does not encode a valid long
+     *
+     * @returns Long - long value decoded from JSON
+     */
+    static createFromJSONValue(json: JSONValue): Long {
+        if (json instanceof JSONNumber) {
+            let num = (json as JSONNumber).value
+            if (Double.isInteger(num) && Long.MIN_VALUE <= num && num <= Long.MAX_VALUE) {
+                return Long.valueOf(num as long)
+            }
+        }
+        throw new JSONTypeError("Cannot create Long from JSON", json)
+    }
+}

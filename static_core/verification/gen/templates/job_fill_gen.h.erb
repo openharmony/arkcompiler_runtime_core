@@ -1,0 +1,339 @@
+/*
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "runtime/include/thread_scopes.h"
+#include "runtime/include/class.h"
+#include "runtime/include/class_linker.h"
+#include "runtime/include/class_linker-inl.h"
+#include "runtime/include/method.h"
+#include "runtime/include/runtime.h"
+#include "verification/jobs/job.h"
+
+namespace panda::verifier {
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LOG_INST()                                                                                              \
+    LOG(DEBUG, VERIFIER) << "JOBFILL: " << std::hex << std::setw(sizeof(inst.GetOffset())) << std::setfill('0') \
+                         << inst.GetOffset() << std::dec << ": " << inst
+
+// NOLINTNEXTLINE(readability-function-size)
+inline bool Job::ResolveIdentifiers() {
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvoid-ptr-dereference"
+#pragma clang diagnostic ignored "-Wgnu-label-as-value"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#endif
+
+    LOG(DEBUG, VERIFIER) << "JOBFILL: Filling Job cache for method '" << method_->GetFullName() << "'";
+
+constexpr std::size_t DISPATCH_TABLE_HANDLER_NAMES_SIZE = <%= Panda::dispatch_table.handler_names.size %>;
+std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatch_table{
+% Panda::dispatch_table.handler_names.each do |name|
+        &&HANDLE_<%= name %>,
+% end
+    };
+
+    ErrorHandler error_handler;
+    const uint8_t *start = method_->GetInstructions();
+    size_t code_size = method_->GetCodeSize();
+    if (code_size == 0) {
+        LOG(ERROR, VERIFIER) << "Zero code size is not valid. Function must contain return instruction";
+        return false;
+    }
+    const uint8_t *end = &start[code_size];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+    BytecodeInstructionSafe inst{start, start, end};
+    uint8_t secondary_opcode;
+
+    if (!inst.IsPrimaryOpcodeValid()) {
+        LOG(ERROR, VERIFIER) << "Incorrect opcode";
+        return false;
+    }
+    goto* dispatch_table[inst.GetPrimaryOpcode()];
+
+% dt_non_prefixed_min_minus = (Panda::dispatch_table.invalid_non_prefixed_interval.min - 1).to_s
+% dt_non_prefixed_max_plus = (Panda::dispatch_table.invalid_non_prefixed_interval.max + 1).to_s
+% dt_prefixed_min_plus = (Panda::dispatch_table.invalid_prefixes_interval.min + 1).to_s
+% dt_prefixed_max_plus = (Panda::dispatch_table.invalid_prefixes_interval.max + 1).to_s
+%
+% dispatch_table_hash = Hash.new()
+% Panda::instructions.each do |i|
+%   combination_flags = ""
+%   mnemonic = i.mnemonic.split('.').map { |p| p == '64' ? 'Wide' : p.capitalize }.join
+%   value_dispatch = "HANDLE_" + i.handler_name
+%   if i.properties.any? {  |prop| ['method_id', 'field_id', 'type_id', 'literalarray_id'].include?(prop)}
+%                           combination_flags += "Prop_"
+%   end
+%   if (['method_id', 'field_id', 'type_id', 'string_id', 'literalarray_id'] & i.properties).size > 1
+%       cache_api = "cache_api"
+%       combination_flags += "CacheApi_"
+%   else
+%       cache_api = "cache.FastAPI()"
+%       combination_flags += "CacheFastApi_"
+%   end
+%   if i.properties.include?('literalarray_id')
+%       combination_flags += "LiteralliId_"
+%   end
+%   if i.properties.include?('method_id')
+%       combination_flags += "MethodId_"
+%   end
+%   if i.properties.include?('field_id')
+%       combination_flags += "FieldId_"
+%   end
+%   if i.properties.include?('type_id')
+%       if i.verification.include?('type_id_class')
+%           combination_flags += "ClassId_"
+%       else
+%           combination_flags += "TypeId_"
+%       end
+%   end
+%   if i.properties.include?('string_id')
+%       combination_flags += "StringId_"
+%   end
+%   combination_flags += "GetNext_"
+%   flag = dispatch_table_hash.include?(combination_flags)
+%   if flag == false
+%       dispatch_table_hash[combination_flags] = []
+%   end
+%   dispatch_table_hash[combination_flags].push(value_dispatch)
+% end
+% body_gen_parts = Hash.new()
+% body_gen_parts = {
+%    "Prop_" => %(
+%        LOG_INST();
+%        [[maybe_unused]] auto id = inst.GetId();
+%    ),
+%    "CacheApi_" => %(),
+%    "CacheFastApi_" => %(),
+%    "LiteralliId_" => %({
+%        const auto& pf = *method_->GetPandaFile();
+%        panda_file::LiteralTag tag;
+%        panda_file::LiteralDataAccessor::LiteralValue value;
+%        if (!Runtime::GetLiteralTagAndValue(pf, pf.GetLiteralArrays()[id.AsIndex()], &tag, &value)) {
+%            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot get literal tag with id=" << std::hex << id << " for offset 0x" << std::hex << inst.GetOffset();
+%        } else {
+%            Class const *cached_class = nullptr;
+%            auto resolve_and_link = [&](const char *descr) {
+%                ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%                cached_class = class_linker_->GetClass(utf::CStringAsMutf8(descr), false, class_linker_ctx_, &error_handler);
+%            };
+%            // descriptors for primitive types get from libpandafile/templates/type
+%            switch (tag) {
+%                case panda_file::LiteralTag::ARRAY_U1:
+%                    resolve_and_link("[Z");
+%                    break;
+%                case panda_file::LiteralTag::ARRAY_U8:
+%                    resolve_and_link("[H");
+%                    break;
+%                case panda_file::LiteralTag::ARRAY_I8:
+%                    resolve_and_link("[B");
+%                    break;
+%                case panda_file::LiteralTag::ARRAY_I16:
+%                    resolve_and_link("[S");
+%                    break;
+%                case panda_file::LiteralTag::ARRAY_U16:
+%                    resolve_and_link("[C");
+%                    break;
+%                case panda_file::LiteralTag::ARRAY_U32:
+%                    resolve_and_link("[U");
+%                    break;
+%                case panda_file::LiteralTag::ARRAY_I32:
+%                    resolve_and_link("[I");
+%                    break;
+%                case panda_file::LiteralTag::ARRAY_U64:
+%                    resolve_and_link("[Q");
+%                    break;
+%                case panda_file::LiteralTag::ARRAY_I64:
+%                    resolve_and_link("[J");
+%                    break;
+%                case panda_file::LiteralTag::ARRAY_F32:
+%                    resolve_and_link("[F");
+%                    break;
+%                case panda_file::LiteralTag::ARRAY_F64:
+%                    resolve_and_link("[D");
+%                    break;
+%                case panda_file::LiteralTag::ARRAY_STRING: {
+%                    ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%                    cached_class = class_linker_->GetClass(lang_context_.GetStringArrayClassDescriptor(), false, class_linker_ctx_, &error_handler);
+%                    break;
+%                }
+%                default:
+%                    break;
+%            }
+%            if (cached_class != nullptr) {
+%                auto type = Type {cached_class};
+%                AddType(inst.GetOffset(), &type);
+%            } else {
+%                LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot find class for literal with id=" << std::hex << id << " for offset 0x" << std::hex << inst.GetOffset();
+%            }
+%        }
+%    }),
+%    "MethodId_" => %({
+%        auto method_id = method_->GetClass()->ResolveMethodIndex(id.AsIndex());
+%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        const auto *pf = method_->GetPandaFile();
+%        Method *called_method = pf->GetPandaCache()->GetMethodFromCache(method_id);
+%        // Special case for array constructors, which are fake methods that other
+%        // Panda code treats in a special way
+%        bool is_array_constructor_call = false;
+%        if (called_method == nullptr) {
+%            panda_file::MethodDataAccessor const mda(*pf, method_id);
+%            Class * cls = class_linker_->GetClass(*method_, mda.GetClassId());
+%
+%            auto opcode = inst.GetOpcode();
+%            if (UNLIKELY((opcode == BytecodeInstructionSafe::Opcode::INITOBJ_SHORT_V4_V4_ID16 ||
+%                          opcode == BytecodeInstructionSafe::Opcode::INITOBJ_V4_V4_V4_V4_ID16 ||
+%                          opcode == BytecodeInstructionSafe::Opcode::INITOBJ_RANGE_V8_ID16) &&
+%                         cls != nullptr && cls->IsArrayClass())) {
+%                is_array_constructor_call = true;
+%                Type tp = Type {cls};
+%                AddType(inst.GetOffset(), &tp);
+%            } else {
+%                called_method = class_linker_->GetMethod(*method_, method_id, &error_handler);
+%            }
+%        }
+%        if (called_method != nullptr) {
+%            AddMethod(inst.GetOffset(), called_method);
+%            auto class_type = Type {called_method->GetClass()};
+%            AddType(inst.GetOffset(), &class_type);
+%        } else if (!is_array_constructor_call) {
+%            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve method with id " << id << " in method "
+%                                 << method_->GetFullName();
+%        }
+%    }),
+%    "FieldId_" => %({
+%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        auto field_idx = method_->GetClass()->ResolveFieldIndex(id.AsIndex());
+%        auto *cached_field = class_linker_->GetField(*method_, field_idx, &error_handler);
+%        if (cached_field != nullptr) {
+%            AddField(inst.GetOffset(), cached_field);
+%            auto class_type = Type {cached_field->GetClass()};
+%            AddType(inst.GetOffset(), &class_type);
+%        } else {
+%            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve field with id " << id << " in method "
+%                                 << method_->GetFullName();
+%        }
+%    }),
+%    "TypeId_" => %({
+%        auto class_idx = method_->GetClass()->ResolveClassIndex(id.AsIndex());
+%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        auto *cached_class = class_linker_->GetClass(*method_, class_idx, &error_handler);
+%        if (cached_class != nullptr) {
+%            auto class_type = Type {cached_class};
+%            AddType(inst.GetOffset(), &class_type);
+%        } else {
+%            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve class with id " << id << " in method "
+%                                 << method_->GetFullName();
+%        }
+%    }),
+%    "StringId_" => %({
+%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        auto cached_string_class = class_linker_->GetClass(lang_context_.GetStringClassDescriptor(), false, class_linker_ctx_, &error_handler);
+%        if (cached_string_class != nullptr) {
+%            auto cached_string_type = Type {cached_string_class};
+%            AddType(inst.GetOffset(), &cached_string_type);
+%        } else {
+%            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve string class in method " << method_->GetFullName();
+%        }
+%    }),
+%    "ClassId_" => %({
+%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        // We are in lda.type bytecode handler. acc type is going to be java.lang.Class
+%        auto cached_class_class = class_linker_->GetClass(lang_context_.GetClassClassDescriptor(), false, class_linker_ctx_, &error_handler);
+%        if (cached_class_class != nullptr) {
+%            auto cached_class_type = Type {cached_class_class};
+%            AddType(inst.GetOffset(), &cached_class_type);
+%        } else {
+%            LOG(ERROR, VERIFIER) << "JOBFILL: Cannot resolve Class class in method " << method_->GetFullName();
+%        }
+%    }),
+%    "GetNext_" => %(
+%        if (inst.IsLast()) {
+%            return true;
+%        }
+%
+%        auto next_inst = inst.GetNext();
+%        if (!inst.IsPrimaryOpcodeValid()) {
+%            LOG(DEBUG, VERIFIER) << "Opcode value is out of range. "
+%                                 << "Current value is: " << static_cast<int>(inst.GetPrimaryOpcode())
+%                                 << ". Allowed value is in the interval: [0, ) + dt_non_prefixed_min_minus + %(] U "
+%                                 << "[) + dt_non_prefixed_max_plus + %(, ) + dt_prefixed_min_plus + %(] U "
+%                                 << "[) + dt_prefixed_max_plus + %(, 255]";
+%            return false;
+%        }
+%        if (!next_inst.IsValid()) {
+%            LOG(DEBUG, VERIFIER) << "Invalid instruction. "
+%                                 << "Offset of last valid instruction: " << inst.GetOffset() << ". "
+%                                 << "Last valid instrution: " << inst;
+%            return false;
+%        }
+%        inst = next_inst;
+%    }
+%    goto* dispatch_table[inst.GetPrimaryOpcode()];
+%    )
+%}
+%
+% full_code_hash = Hash.new("")
+% dispatch_table_hash.each { |key_comb, value_comb|
+%    body_gen_parts.each { |key_parts, value_parts|
+%        string_to_compare_with = key_comb.to_s
+%        flag_compare = string_to_compare_with.include?(key_parts.to_s)
+%        if flag_compare == true
+%            full_code_hash[key_comb] += value_parts
+%        end
+%    }
+% }
+%
+% full_code_hash.each { |key_full, code|
+%   dispatch_table_hash[key_full].each { |label|
+<%= label%>:;
+%   }
+    {
+<%= code %>
+% }
+%
+HANDLE_INVALID:
+    LOG(ERROR, VERIFIER) << "Incorrect opcode";
+    return false;
+
+% Panda::prefixes.each do |p|
+% dt_sec_opcode_bound = Panda::dispatch_table.secondary_opcode_bound(p)
+% dt_sec_opcode_offset = Panda::dispatch_table.secondary_opcode_offset(p)
+HANDLE_<%= p.handler_name %>:
+    secondary_opcode = inst.GetSecondaryOpcode();
+    LOG(DEBUG, VERIFIER) << "Prefix subdispatch: " << "<%= p.name %>, " << static_cast<int32_t>(secondary_opcode);
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    if (secondary_opcode > <%= dt_sec_opcode_bound %> ) {
+        LOG(ERROR, VERIFIER) << "Incorrect opcode";
+        return false;
+    }
+
+    // NOLINTNEXTLINE(readability-magic-numbers, cppcoreguidelines-avoid-goto)
+    goto *dispatch_table[<%= dt_sec_opcode_offset %> + secondary_opcode];
+
+% end
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+}
+
+}  // namespace panda::verifier

@@ -1,0 +1,4 @@
+# panda#11535
+07.expressions/19.multiplicative_operators/02.division_operator/nan_inf_17.ets
+# panda#11536
+07.expressions/20.additive_operators/02.additive_operators_for_numeric_types/nan_inf_17.ets

@@ -1,0 +1,50 @@
+From 668b289ee8676ef997c0f7bd72bbc28228dcb50b Mon Sep 17 00:00:00 2001
+From: Artem Udovichenko <artem.udovichenko@huawei.com>
+Date: Wed, 27 Sep 2023 12:28:49 +0300
+Subject: [PATCH] Fix ark path according to OHOS structure
+
+Signed-off-by: Artem Udovichenko <artem.udovichenko@huawei.com>
+---
+ BUILD.gn | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/BUILD.gn b/BUILD.gn
+index 741d55d..8cc2ca6 100644
+--- a/BUILD.gn
++++ b/BUILD.gn
+@@ -23,7 +23,7 @@
+ # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ 
+-import("//ark/runtime_core/ark_config.gni")
++import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+ import("//build/ohos.gni")
+ 
+ config("vixl_public_config") {
+@@ -110,9 +110,10 @@ ohos_static_library("libvixl") {
+ 
+   public_configs = [ ":vixl_public_config" ]
+ 
+-  deps = [ "$ark_root/libpandabase:libarkbase" ]
++  deps = [ "$ark_root/libpandabase:libarktsbase" ]
+ 
+-  subsystem_name = "ark"
++  part_name = ark_part_name
++  subsystem_name = ark_subsystem_name
+ }
+ 
+ ohos_static_library("libvixl_frontend_static") {
+@@ -176,7 +177,8 @@ ohos_static_library("libvixl_frontend_static") {
+ 
+   public_configs = [ ":vixl_public_config" ]
+ 
+-  deps = [ "$ark_root/libpandabase:libarkbase_frontend_static" ]
++  deps = [ "$ark_root/libpandabase:libarktsbase_frontend_static" ]
+ 
+-  subsystem_name = "ark"
++  part_name = ark_part_name
++  subsystem_name = ark_subsystem_name
+ }
+-- 
+2.25.1
+

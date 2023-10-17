@@ -1,0 +1,126 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef LIBPANDAFILE_LITERAL_DATA_ACCESSOR_H_
+#define LIBPANDAFILE_LITERAL_DATA_ACCESSOR_H_
+
+#include "file.h"
+#include "field_data_accessor.h"
+#include "helpers.h"
+
+#include "utils/span.h"
+
+namespace panda::panda_file {
+using StringData = File::StringData;
+
+/* LiteralTag could be extended by different language
+// For example, JAVA could use it to represent Array of Integer
+// by adding `INTARRAY` in the future
+*/
+enum class LiteralTag : uint8_t {
+    TAGVALUE = 0x00,
+    BOOL = 0x01,
+    INTEGER = 0x02,
+    FLOAT = 0x03,
+    DOUBLE = 0x04,
+    STRING = 0x05,
+    BIGINT = 0x06,
+    METHOD = 0x07,
+    GENERATORMETHOD = 0x08,
+    ACCESSOR = 0x09,
+    METHODAFFILIATE = 0x0a,
+    ARRAY_U1 = 0x0b,
+    ARRAY_U8 = 0x0c,
+    ARRAY_I8 = 0x0d,
+    ARRAY_U16 = 0x0e,
+    ARRAY_I16 = 0x0f,
+    ARRAY_U32 = 0x10,
+    ARRAY_I32 = 0x11,
+    ARRAY_U64 = 0x12,
+    ARRAY_I64 = 0x13,
+    ARRAY_F32 = 0x14,
+    ARRAY_F64 = 0x15,
+    ARRAY_STRING = 0x16,
+    ASYNCGENERATORMETHOD = 0x17,
+    ASYNCMETHOD = 0x18,
+    NULLVALUE = 0xff
+};
+
+class LiteralDataAccessor {
+public:
+    LiteralDataAccessor(const File &panda_file, File::EntityId literal_data_id);
+
+    template <class Callback>
+    void EnumerateObjectLiterals(size_t index, const Callback &cb);
+
+    template <class Callback>
+    void EnumerateLiteralVals(size_t index, const Callback &cb);
+
+    template <class Callback>
+    void EnumerateLiteralVals(File::EntityId id, const Callback &cb);
+
+    size_t GetLiteralValsNum(size_t index);
+
+    uint32_t GetLiteralNum() const
+    {
+        return literal_num_;
+    }
+
+    const File &GetPandaFile() const
+    {
+        return panda_file_;
+    }
+
+    File::EntityId GetLiteralDataId() const
+    {
+        return literal_data_id_;
+    }
+
+    File::EntityId GetLiteralArrayId(size_t index) const
+    {
+        ASSERT(index < literal_num_);
+        auto l_sp = literal_data_sp_.SubSpan(index * ID_SIZE);
+        return File::EntityId(static_cast<uint32_t>(helpers::Read<sizeof(uint32_t)>(&l_sp)));
+    }
+
+    size_t ResolveLiteralArrayIndex(File::EntityId id) const
+    {
+        auto offset = id.GetOffset();
+
+        size_t index = 0;
+        while (index < literal_num_) {
+            auto array_offset = helpers::Read<sizeof(uint32_t)>(literal_data_sp_.SubSpan(index * ID_SIZE));
+            if (array_offset == offset) {
+                break;
+            }
+            index++;
+        }
+        return index;
+    }
+
+    using LiteralValue = std::variant<bool, void *, uint8_t, uint16_t, uint32_t, uint64_t, float, double, StringData>;
+
+private:
+    static constexpr size_t LEN_SIZE = sizeof(uint32_t);
+
+    const File &panda_file_;
+    File::EntityId literal_data_id_;
+    uint32_t literal_num_;
+    Span<const uint8_t> literal_data_sp_ {nullptr, nullptr};
+};
+
+}  // namespace panda::panda_file
+
+#endif  // LIBPANDAFILE_Literal_DATA_ACCESSOR_H_

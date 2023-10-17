@@ -1,0 +1,178 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - defs: |-
+      class S<V> {}
+      final class T<V> extends S<V> {
+          public res: int = 42;
+      }
+    stype: S<Int>
+    sval: new T<Int>()
+    dtype: T<Int>
+    dval: src as T<Int>
+    tags: []
+
+  - defs: |-
+      interface S<V> {}
+      interface T<V> extends S<V> {
+          res: int = 42;
+      }
+      final class B<V> implements T<V> {}
+    stype: S<Long>
+    sval: new B<Long>()
+    dtype: T<Long>
+    dval: src as T<Long>
+    tags: []
+
+  - defs: |-
+      interface T<V> {
+          res: int = 42;
+      }
+      class S<V> {}
+      final class Z<V> extends S<V> implements T<V> {}
+    stype: S<Exception>
+    sval: new Z<Exception>()
+    dtype: T<Exception>
+    dval: src as T<Exception>
+    tags: []
+
+  - defs: |-
+      interface T<V> {
+          res: int = 42;
+      }
+      final class S<V> implements T<V> {}
+    stype: S<Byte>
+    sval: new S<Byte>()
+    dtype: T<Byte>
+    dval: src as T<Byte>
+    tags: []
+
+  - defs: |-
+      interface S<V> {}
+      class T<V> {
+          public res: int = 42;
+      }
+      final class Z<V> extends T<V> implements S<V> {}
+    stype: S<Int>
+    sval: new Z<Int>()
+    dtype: T<Int>
+    dval: src as T<Int>
+    tags: []
+
+  - defs: |-
+      interface S<V> {}
+      final class T<V> implements S<V> {
+          public res: int = 42;
+      }
+    stype: S<Int>
+    sval: new T<Int>()
+    dtype: T<Int>
+    dval: src as T<Int>
+    tags: []
+
+  - defs: |-
+      class A {}
+      class B extends A {}
+      final class C extends B {
+          public res: int = 42;
+      }
+      final class BBox<S extends A> {
+          public v: S = new C();
+      }
+    stype: BBox<A>
+    sval: new BBox<A>()
+    dtype: C
+    dval: src.v as C
+    tags: [compile-only, negative]
+
+  - defs: |-
+      final class C {
+          public res: int = 42;
+      }
+      final class BBox<S extends Object> {
+          public v: S = new C();
+      }
+    stype: BBox<Object>
+    sval: new BBox<Object>()
+    dtype: C
+    dval: src.v as C
+    tags: [compile-only, negative]
+
+  - defs: |-
+      interface I {}
+      class B implements I {}
+      final class C extends B {
+          public res: int = 42;
+      }
+      final class BBox<S extends I> {
+          public v: S = new C();
+      }
+    stype: BBox<B>
+    sval: new BBox<B>()
+    dtype: C
+    dval: src.v as C
+    tags: [compile-only, negative]
+
+  - defs: |-
+      interface I {}
+      class B implements I {}
+      final class C extends B {
+          public res: int = 42;
+      }
+      final class BBox<S extends I> {
+          public v: S = new C();
+      }
+    stype: BBox<I>
+    sval: new BBox<I>()
+    dtype: C
+    dval: src.v as C
+    tags: [compile-only, negative]
+
+  - defs: |-
+      interface I {}
+      interface J {}
+      class A {}
+      class B extends A implements I {}
+      class C extends B implements J {}
+      class D extends C {
+          public res: int = 42;
+      }
+      final class BBox<U extends A & J & I> {
+          public v: U = new D();
+      }
+    stype: BBox<C>
+    sval: new BBox<C>
+    dtype: D
+    dval: src.v as D
+    tags: [compile-only, negative]
+
+  - defs: |-
+      interface I {}
+      interface J {}
+      class A {}
+      class B extends A implements I {}
+      class C extends B implements J {
+          public res: int = 42;
+      }
+      class D extends C {}
+      final class BBox<U extends A & J & I> {
+          public v1: U = new C();
+          public v2: C = this.v1 as C;
+      }
+    stype: BBox<D>
+    sval: new BBox<D>
+    dtype: C
+    dval: src.v2
+    tags: [compile-only, negative]

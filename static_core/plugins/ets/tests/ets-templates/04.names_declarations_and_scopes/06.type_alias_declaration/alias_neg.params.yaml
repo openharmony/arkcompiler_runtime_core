@@ -1,0 +1,54 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - defs: |-
+      type 123 = int;
+
+  - defs: |-
+      type .X = Long;
+
+  - defs: |-
+      type null = byte;
+
+  - defs: |-
+      type this = Object;
+
+  - defs: |-
+      type int = Int;
+
+  - defs: |-
+      type Matrix<T> = (p: Matrix<Long>) => T;
+
+  - defs: |-
+      class A<T, U> {}
+      class B {}
+      type Stuff<T, U> = A<T, Stuff<B, U>>;
+
+  - defs: |-
+      interface Weight {}
+      class Body implements Weight {}
+      type Weight = Double;
+
+  - defs: |-
+      type self = this;
+
+  - defs: |-
+      type Func = (p: int, q: Func) => int;
+
+  - defs: |-
+      class A<T, V> {}
+      type Box<T> = A<Boolean, T>;
+    use: |-
+      let v: Box<Int> = new A<Int, Int>();

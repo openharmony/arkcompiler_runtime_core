@@ -1,0 +1,368 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- {
+    method_name: filter,
+    method_nature: function,
+    result_nature: array,
+    result_type: "boolean[]",
+    method_signature: { arr: "boolean[]", fn : "(value:boolean,index:int,self:boolean[])=>boolean" },
+    method_throws: "false",
+    method_signature_desc: {arr: "boolean_array", fn: "func_boolean_int_boolean_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]",
+            fn: '(value:boolean,index:int,self:boolean[]): boolean =>  {return true}',
+          },
+          test2:
+          {
+            arr: "[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]",
+            fn: '(value:boolean,index:int,self:boolean[]): boolean =>  {return false}',
+          },
+          test3:
+          {
+            arr: "[false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false]",
+            fn: '(value:boolean,index:int,self:boolean[]): boolean =>  {return (!value)}',
+          },
+          test4:
+          {
+            arr: "[]",
+            fn: '(value:boolean,index:int,self:boolean[]): boolean =>  {return (!value)}',
+          },
+
+      },
+    method_expected_data:
+      {
+        test1: "[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]",
+        test2: "[]",
+        test3: "[false, false]",
+        test4: "[]"
+      },
+  }
+- {
+    method_name: filter,
+    method_nature: function, 
+    result_nature: array,
+    result_type: "byte[]",
+    method_signature: { arr: "byte[]", fn : "(value:byte,index:int,self:byte[])=>boolean" },
+    method_throws: "false",
+    method_signature_desc: {arr: "byte_array", fn: "func_byte_int_byte_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:byte,index:int,self:byte[]): boolean =>  {return true}',
+          },
+          test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:byte,index:int,self:byte[]): boolean =>  {return false}',
+          },
+          test3:
+          {
+            arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
+            fn: '(value:byte,index:int,self:byte[]): boolean =>  {return (value > 1)}',
+          },
+          test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:byte,index:int,self:byte[]): boolean =>  {return ((index % 2) == 0)}',
+          },
+          test5:
+          {
+            arr: "[]",
+            fn: '(value:byte,index:int,self:byte[]): boolean =>  {return (value>1)}',
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test2: "[]",
+        test3: "[4, 5, 7, 8, 10, 11, 12, 13, 14]",
+        test4: "[0, 2, 4, 6, 8, 10, 12, 14]",
+        test5: "[]"
+      },
+  }
+- {
+    method_name: filter,
+    method_nature: function,
+    result_nature: array,
+    result_type: "short[]",
+    method_signature: { arr: "short[]", fn : "(value:short,index:int,self:short[])=>boolean" },
+    method_throws: "false",
+    method_signature_desc: {arr: "short_array", fn: "func_short_int_short_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:short,index:int,self:short[]): boolean =>  {return true}',
+          },
+          test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:short,index:int,self:short[]): boolean =>  {return false}',
+          },
+          test3:
+          {
+            arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
+            fn: '(value:short,index:int,self:short[]): boolean =>  {return (value > 1)}',
+          },
+          test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:short,index:int,self:short[]): boolean =>  {return ((index % 2) == 0)}',
+          },
+          test5:
+          {
+            arr: "[]",
+            fn: '(value:short,index:int,self:short[]): boolean =>  {return (value>1)}',
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test2: "[]",
+        test3: "[4, 5, 7, 8, 10, 11, 12, 13, 14]",
+        test4: "[0, 2, 4, 6, 8, 10, 12, 14]",
+        test5: "[]"
+      },
+  }
+- {
+    method_name: filter,
+    method_nature: function,
+    result_nature: array,
+    result_type: "int[]",
+    method_signature: { arr: "int[]", fn : "(value:int,index:int,self:int[])=>boolean" },
+    method_throws: "false",
+    method_signature_desc: {arr: "int_array", fn: "func_int_int_int_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:int,index:int,self:int[]): boolean =>  {return true}',
+          },
+          test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:int,index:int,self:int[]): boolean =>  {return false}',
+          },
+          test3:
+          {
+            arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
+            fn: '(value:int,index:int,self:int[]): boolean =>  {return (value > 1)}',
+          },
+          test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:int,index:int,self:int[]): boolean =>  {return ((index % 2) == 0)}',
+          },
+          test5:
+          {
+            arr: "[]",
+            fn: '(value:int,index:int,self:int[]): boolean =>  {return (value>1)}',
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test2: "[]",
+        test3: "[4, 5, 7, 8, 10, 11, 12, 13, 14]",
+        test4: "[0, 2, 4, 6, 8, 10, 12, 14]",
+        test5: "[]"
+      },
+  }
+- {
+    method_name: filter,
+    method_nature: function,
+    result_nature: array,
+    result_type: "long[]",
+    method_signature: { arr: "long[]", fn : "(value:long,index:int,self:long[])=>boolean" },
+    method_throws: "false",
+    method_signature_desc: {arr: "long_array", fn: "func_long_int_long_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:long,index:int,self:long[]): boolean =>  {return true}',
+          },
+          test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:long,index:int,self:long[]): boolean =>  {return false}',
+          },
+          test3:
+          {
+            arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
+            fn: '(value:long,index:int,self:long[]): boolean =>  {return (value > 1)}',
+          },
+          test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:long,index:int,self:long[]): boolean =>  {return ((index % 2) == 0)}',
+          },
+          test5:
+          {
+            arr: "[]",
+            fn: '(value:long,index:int,self:long[]): boolean =>  {return (value>1)}',
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test2: "[]",
+        test3: "[4, 5, 7, 8, 10, 11, 12, 13, 14]",
+        test4: "[0, 2, 4, 6, 8, 10, 12, 14]",
+        test5: "[]"
+      },
+  }
+- {
+    method_name: filter,
+    method_nature: function,
+    result_nature: array,
+    result_type: "float[]",
+    method_signature: { arr: "float[]", fn : "(value:float,index:int,self:float[])=>boolean" },
+    method_throws: "false",
+    method_signature_desc: {arr: "float_array", fn: "func_float_int_float_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:float,index:int,self:float[]): boolean =>  {return true}',
+          },
+          test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:float,index:int,self:float[]): boolean =>  {return false}',
+          },
+          test3:
+          {
+            arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
+            fn: '(value:float,index:int,self:float[]): boolean =>  {return (value > 1)}',
+          },
+          test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:float,index:int,self:float[]): boolean =>  {return ((index % 2) == 0)}',
+          },
+          test5:
+          {
+            arr: "[]",
+            fn: '(value:float,index:int,self:float[]): boolean =>  {return (value>1)}',
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test2: "[]",
+        test3: "[4, 5, 7, 8, 10, 11, 12, 13, 14]",
+        test4: "[0, 2, 4, 6, 8, 10, 12, 14]",
+        test5: "[]"
+      },
+  }
+- {
+    method_name: filter,
+    method_nature: function,
+    result_nature: array,
+    result_type: "double[]",
+    method_signature: { arr: "double[]", fn : "(value:double,index:int,self:double[])=>boolean" },
+    method_throws: "false",
+    method_signature_desc: {arr: "double_array", fn: "func_double_int_double_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:double,index:int,self:double[]): boolean =>  {return true}',
+          },
+          test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:double,index:int,self:double[]): boolean =>  {return false}',
+          },
+          test3:
+          {
+            arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
+            fn: '(value:double,index:int,self:double[]): boolean =>  {return (value > 1)}',
+          },
+          test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:double,index:int,self:double[]): boolean =>  {return ((index % 2) == 0)}',
+          },
+          test5:
+          {
+            arr: "[]",
+            fn: '(value:double,index:int,self:double[]): boolean =>  {return (value>1)}',
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test2: "[]",
+        test3: "[4, 5, 7, 8, 10, 11, 12, 13, 14]",
+        test4: "[0, 2, 4, 6, 8, 10, 12, 14]",
+        test5: "[]"
+      },
+  }
+- {
+    method_name: filter,
+    method_nature: function,
+    result_nature: array,
+    result_type: "char[]",
+    method_signature: { arr: "char[]", fn : "(value:char,index:int,self:char[])=>boolean" },
+    method_throws: "false",
+    method_signature_desc: {arr: "char_array", fn: "func_char_int_char_array"},
+    method_test_index_data:
+      {
+        test1:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:char,index:int,self:char[]): boolean =>  {return true}',
+          },
+          test2:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:char,index:int,self:char[]): boolean =>  {return false}',
+          },
+          test3:
+          {
+            arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
+            fn: '(value:char,index:int,self:char[]): boolean =>  {return (value > 1)}',
+          },
+          test4:
+          {
+            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            fn: '(value:char,index:int,self:char[]): boolean =>  {return ((index % 2) == 0)}',
+          },
+          test5:
+          {
+            arr: "[]",
+            fn: '(value:char,index:int,self:char[]): boolean =>  {return (value >1)}',
+          },
+      },
+    method_expected_data:
+      {
+        test1: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test2: "[]",
+        test3: "[4, 5, 7, 8, 10, 11, 12, 13, 14]",
+        test4: "[0, 2, 4, 6, 8, 10, 12, 14]",
+        test5: "[]"
+      },
+  }

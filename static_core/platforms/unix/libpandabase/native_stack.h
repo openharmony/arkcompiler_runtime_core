@@ -1,0 +1,43 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "os/thread.h"
+#include <string>
+#include <set>
+#include "libpandabase/macros.h"
+
+namespace panda::os::unix::native_stack {
+using FuncUnwindstack = bool (*)(pid_t, std::ostream &, int);
+
+PANDA_PUBLIC_API void DumpKernelStack(std::ostream &os, pid_t tid, const char *tag, bool count);
+
+PANDA_PUBLIC_API std::string GetNativeThreadNameForFile(pid_t tid);
+
+class DumpUnattachedThread {
+public:
+    PANDA_PUBLIC_API void AddTid(pid_t tid_thread);
+    PANDA_PUBLIC_API bool InitKernelTidLists();
+    PANDA_PUBLIC_API void Dump(std::ostream &os, bool dump_native_crash, FuncUnwindstack call_unwindstack);
+
+private:
+    std::set<pid_t> kernel_tid_;
+    std::set<pid_t> thread_manager_tids_;
+};
+
+PANDA_PUBLIC_API bool ReadOsFile(const std::string &file_name, std::string *result);
+PANDA_PUBLIC_API bool WriterOsFile(const void *buffer, size_t count, int fd);
+PANDA_PUBLIC_API std::string ChangeJaveStackFormat(const char *descriptor);
+
+}  // namespace panda::os::unix::native_stack

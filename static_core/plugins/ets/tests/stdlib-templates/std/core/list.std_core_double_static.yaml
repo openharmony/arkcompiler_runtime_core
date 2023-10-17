@@ -1,0 +1,113 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- {
+    method_name: valueOf,
+    object_type: Double,
+    param_init_data_types: {"param1":"double[]"} ,
+    param_types: {"param1":Double},
+    param_nature: {"param1": object},
+    param_list: {"param1": "[(-1) as double, 0 as double, 1 as double, Byte.MAX_VALUE as double, Byte.MIN_VALUE as double]"},
+    method_return_type: Double,
+    expected_data_item_type: double,
+    expected_data_type: "double[]",
+    expected_test_data: "[(-1) as double, 0 as double, 1 as double, Byte.MAX_VALUE as double, Byte.MIN_VALUE as double]",
+    verify_test_result_function: compareWrapperObjectValue
+  }
+
+- {
+    method_name: isSafeInteger,
+    object_type: Double,
+    param_init_data_types: {"param1":"double[]"},
+    param_types: {"param1":Double},
+    param_nature: {"param1": primitive},
+    param_list: {"param1": "[(-1) as double, 0 as double, 1 as double, Double.MAX_SAFE_INTEGER, Double.MAX_SAFE_INTEGER + 1, 12.5 as double, -Double.MAX_SAFE_INTEGER, (-Double.MAX_SAFE_INTEGER -1)]"},
+    method_return_type: boolean,
+    expected_data_item_type: boolean,
+    expected_data_type: "boolean[]",
+    expected_test_data: "[true, true, true, true, false, false, true, false]",
+    verify_test_result_function: comparePrimitiveValue
+  }  
+
+- {
+    method_name: parseFloat,
+    object_type: Double,
+
+    param_init_data_types: {"param1":"String[]"},
+    param_types: {"param1":String},
+    param_nature: {"param1": primitive},
+    param_list: {"param1": '["+Infinity", "-Infinity", "Infinity", "+0", "-0", "0000.0", "-00001.5", "-.12", "+.12", "-.6asdfe"]'},
+
+    method_return_type: Double,
+    
+    expected_data_item_type: Double,
+    expected_data_type: "double[]",
+    expected_test_data: "[Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 0, -0, 0, -1.5, -0.12, 0.12, -0.6]",
+    verify_test_result_function: compareWrapperObjectValue
+
+  } 
+
+- {
+    method_name: parseFloat,
+    object_type: Double,
+
+    param_init_data_types: {"param1":"String[]"},
+    param_types: {"param1":String},
+    param_nature: {"param1": primitive},
+    param_list: {"param1": '["abyrvalg"]'},
+
+    method_return_type: Double,
+    
+    expected_data_item_type: Double,
+    expected_data_type: "double[]",
+    expected_test_data: "[Double.NaN]",
+    verify_test_result_function: compareToNAN
+
+  }
+
+  # parseInt(String) parses from String an integer of radix 10
+- {
+    method_name: parseInt,
+    object_type: Double,
+
+    param_init_data_types: {"param1":"String[]"},
+    param_types: {"param1":String},
+    param_nature: {"param1": primitive},
+    param_list: {"param1": '["+0", "-0", "0.0", "-0.12", "+0.12", "10", "100"]'},
+
+    method_return_type: Double,
+    
+    expected_data_item_type: Double,
+    expected_data_type: "double[]",
+    expected_test_data: "[0, -0, 0, -0, 0, 10, 100]",
+    verify_test_result_function: compareWrapperObjectValue
+  }
+
+
+  # parseInt(String) parses from String an integer of given radix
+- {
+    method_name: parseInt,
+    object_type: Double,
+
+    param_init_data_types: {"param1":"String[]", "param2": "int[]"},
+    param_types: {"param1":String, "param2":"int"},
+    param_nature: {"param1": primitive, "param2": primitive},
+    param_list: {"param1": '["0", "0", "0", "10", "10", "10", "FF", "255", "1000", "11111111", "11"]', "param2": [2, 10, 16, 2, 10, 16, 16, 10, 2, 2, 16]},
+
+    method_return_type: Double,
+    
+    expected_data_item_type: Double,
+    expected_data_type: "double[]",
+    expected_test_data: "[0, 0, 0, 2, 10, 16, 255, 255, 8, 255, 17]",
+    verify_test_result_function: compareWrapperObjectValue
+  }

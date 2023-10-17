@@ -1,0 +1,27 @@
+# plugin interpreter_main_loop
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+  when "ETS_LAUNCH_SHORT_PREF_V4_V4_ID16"
+    handle_ets_launch_static_short(op[1], as_id(op[0]))
+  when "ETS_LAUNCH_PREF_V4_V4_V4_V4_ID16"
+    handle_ets_launch_static_long(op[1], as_id(op[0]))
+  when "ETS_LAUNCH_RANGE_PREF_V8_ID16"
+    handle_ets_launch_static_range(op[1], as_id(op[0]))
+  when "ETS_LAUNCH_VIRT_SHORT_PREF_V4_V4_ID16"
+    handle_ets_launch_virt_short(op[1], as_id(op[0]))
+  when "ETS_LAUNCH_VIRT_PREF_V4_V4_V4_V4_ID16"
+    handle_ets_launch_virt_long(op[1], as_id(op[0]))
+  when "ETS_LAUNCH_VIRT_RANGE_PREF_V8_ID16"
+    handle_ets_launch_virt_range(op[1], as_id(op[0]))
+

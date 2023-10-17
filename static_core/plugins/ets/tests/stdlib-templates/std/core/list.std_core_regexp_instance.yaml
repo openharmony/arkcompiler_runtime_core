@@ -1,0 +1,66 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- {
+    method_name: test,
+    object_type: RegExp,
+
+    init_object_data_type: "String[]",
+    init_object_data: '[
+    "foo*", "ab", "(((ab)|(cd)|(de))|((ef)|(gh)|(jk)))", "(aa|ba|b|c)*", "a*", "a?", "(z)((a+)?(b+)?(c))*", "^abc", "abc$", "er\\B",
+    "d\\b", ".", "abc", "a(?=a)", "a(?=a)", "a\\n", "a(?!a)", "^a(?!a)", "(?=(a+))", "a(?=a(?=b))",
+    ".+:", "(?<=(?<!b)a)a", "\\s", "()|"
+    ]',
+
+    param_init_data_types: {"param1": "String[]"},
+    param_types: {"param1": "String"},
+    param_nature: {"param1": object},
+    param_list: {"param1": '[
+    "table football", "abc", "cabd", "aabaac", "aabaac", "b", "zaacbbbcac", "ab\nabc", "ab\nabc", "erv",
+    "bad good", "\na", "ABC", "aabc", "ababc", "a\n", "ababc", "aa", "baaabac", "caab",
+    "aaaa:aa", "caab", "\n", ""
+    ]'},
+    method_return_type: boolean,
+
+    expected_data_type: "boolean[]",
+    expected_test_data: '[
+    true, true, true, true, true, true, true, false, true, true,
+    true, true, false, true, false, true, true, false, true, true,
+    true, true, true, true
+    ]',
+    verify_test_result_function: comparePrimitiveValue,
+  }
+- {
+    method_name: test,
+    object_type: RegExp,
+
+    init_object_complex_constructor: yes,
+    init_object_data_types: {"init1": "String[]", "init2": "String[]"},
+    init_object_param_types: {"init1": "String", "init2": "String"},
+    init_object_param_list: {
+      "init1": '[".", "abc", "[a-z]", "[^a-b]"]',
+      "init2": '["s", "i", "i", "i"]'
+      },
+    init_object_param_nature: {"init1": primitive, "init2": primitive},
+
+    param_init_data_types: {"param1": "String[]"},
+    param_types: {"param1": "String"},
+    param_nature: {"param1": object},
+    param_list: {
+      "param1": '["\n", "ABC", "A", "Z"]'},
+    method_return_type: boolean,
+
+    expected_data_type: "boolean[]",
+    expected_test_data: '[true, true, true, true]',
+    verify_test_result_function: comparePrimitiveValue,
+  }

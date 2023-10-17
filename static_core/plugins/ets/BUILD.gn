@@ -1,0 +1,173 @@
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("//build/ohos.gni")
+
+declare_args() {
+  if (is_ohos && is_standard_system) {
+    ark_ets_interop_js = true
+  } else {
+    ark_ets_interop_js = false
+  }
+}
+
+# NB! Standard library is built only if the front-end is available.
+with_stdlib = false
+foreach(plugin, ark_enabled_plugins) {
+  if (plugin == "ecmascript" || plugin == "ets") {
+    with_stdlib = true
+  }
+}
+
+group("ark_packages") {
+  deps = [ "$ark_es2panda_root/aot:es2panda" ]
+  if (with_stdlib) {
+    deps += [ ":etsstdlib" ]
+  }
+  if (ark_ets_interop_js) {
+    deps += [ "runtime/interop_js:ets_interop_js_napi" ]
+  }
+}
+
+group("ark_host_linux_tools_packages") {
+}
+
+group("ark_host_windows_tools_packages") {
+  # Required, but empty: nothing to add currently
+}
+
+group("ark_host_mac_tools_packages") {
+  # Required, but empty: nothing to add currently
+}
+
+config("ark_config") {
+  defines = [
+    "PANDA_WITH_ETS",
+    "USE_ETS_NAPI_CRITICAL_BY_DEFAULT",
+  ]
+}
+
+# TODO(nsizov): Fix and clean after PR480 is merged
+group("assembler_deps") {
+  deps = [ ":ark_asm_ets_meta_gen_h" ]
+}
+config("assembler") {
+  include_dirs = [
+    "$ark_root/plugins/ets/assembler/extension",
+    "$target_gen_dir",
+  ]
+}
+ark_gen_file("ark_asm_ets_meta_gen_h") {
+  template_file = "$ark_root/assembler/templates/meta_gen.cpp.erb"
+  data_file = "$ark_root/plugins/ets/assembler/extension/metadata.yaml"
+  requires = [ "$ark_root/assembler/asm_metadata.rb" ]
+  output_file = "$target_gen_dir/ets_meta_gen.h"
+}
+
+config("runtime") {
+  include_dirs = [ "$ark_root/plugins/ets/runtime" ]
+  configs = [
+    "$ark_es2panda_root:libes2panda_public_config",
+    "$ark_root/assembler:arkassembler_public_config",
+    "$ark_root/libpandafile:arkfile_public_config",
+  ]
+}
+
+config("runtime_interpreter_impl") {
+  # Required, but empty: nothing to add currently
+}
+
+if (with_stdlib) {
+  es2panda_gen("etsstdlib") {
+    inputs = [ "stdlib" ]
+    outputs = [ "$target_gen_dir/etsstdlib.abc" ]
+    abs_ark_root = rebase_path(ark_root)
+    json_array = [
+      "{",
+      "  \"compilerOptions\": {",
+      "    \"baseUrl\": \"$abs_ark_root\",",
+      "    \"paths\": {",
+      "      \"std\": [\"$abs_ark_root" + "/plugins/ets/stdlib/std\"],",
+      "      \"escompat\": [\"$abs_ark_root" +
+          "/plugins/ets/stdlib/escompat\"],",
+      "      \"import_tests\": [\"$abs_ark_root" +
+          "$ark_es2panda_root/test/parser/ets/import_tests\"]",
+      "    }",
+      "  }",
+      "}",
+    ]
+
+    # TODO(vpukhov): adjust es2panda path
+    write_file("$root_gen_dir/plugins/es2panda/generated/arktsconfig.json",
+               json_array,
+               "list lines")
+    sources = [
+      "stdlib/escompat/Array.ets",
+      "stdlib/escompat/ArrayBuffer.ets",
+      "stdlib/escompat/DataView.ets",
+      "stdlib/escompat/Date.ets",
+      "stdlib/escompat/Error.ets",
+      "stdlib/escompat/Errors.ets",
+      "stdlib/escompat/Map.ets",
+      "stdlib/escompat/Math.ets",
+      "stdlib/escompat/Number.ets",
+      "stdlib/escompat/RegExp.ets",
+      "stdlib/escompat/Set.ets",
+      "stdlib/escompat/TypedArrays.ets",
+      "stdlib/escompat/json.ets",
+      "stdlib/std/containers/AVLTree.ets",
+      "stdlib/std/containers/ArrayAsListInt.ets",
+      "stdlib/std/containers/ArrayAsListObject.ets",
+      "stdlib/std/containers/ListInt.ets",
+      "stdlib/std/containers/ListObject.ets",
+      "stdlib/std/core/Boolean.ets",
+      "stdlib/std/core/Byte.ets",
+      "stdlib/std/core/Char.ets",
+      "stdlib/std/core/Comparable.ets",
+      "stdlib/std/core/Console.ets",
+      "stdlib/std/core/Double.ets",
+      "stdlib/std/core/Exception.ets",
+      "stdlib/std/core/Field.ets",
+      "stdlib/std/core/FinalizationQueue.ets",
+      "stdlib/std/core/Float.ets",
+      "stdlib/std/core/Floating.ets",
+      "stdlib/std/core/GC.ets",
+      "stdlib/std/core/Int.ets",
+      "stdlib/std/core/Integral.ets",
+      "stdlib/std/core/Long.ets",
+      "stdlib/std/core/Method.ets",
+      "stdlib/std/core/Object.ets",
+      "stdlib/std/core/Parameter.ets",
+      "stdlib/std/core/Runtime.ets",
+      "stdlib/std/core/Short.ets",
+      "stdlib/std/core/StackTrace.ets",
+      "stdlib/std/core/StdExceptions.ets",
+      "stdlib/std/core/String.ets",
+      "stdlib/std/core/StringBuilder.ets",
+      "stdlib/std/core/System.ets",
+      "stdlib/std/core/Type.ets",
+      "stdlib/std/core/UnionCase.ets",
+      "stdlib/std/core/Value.ets",
+      "stdlib/std/core/WeakRef.ets",
+      "stdlib/std/math/consts/consts.ets",
+      "stdlib/std/math/math.ets",
+    ]
+    args = [
+      "--extension=ets",
+      "--opt-level=2",
+      "--gen-stdlib=true",
+      "--output=" + rebase_path(outputs[0], root_build_dir),
+    ]
+  }
+}

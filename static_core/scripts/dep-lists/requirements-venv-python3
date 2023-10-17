@@ -1,0 +1,37 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+dataclasses==0.6
+python-dotenv==0.20.0
+Jinja2==3.1.2
+MarkupSafe==2.1.1
+PyYaml==6.0
+tqdm==4.64.0
+
+# mypy
+mypy==0.991
+mypy-extensions==0.4.3
+tomli==2.0.1
+typing-extensions==4.4.0
+types-PyYAML==6.0.12.4
+
+# pylint
+astroid==2.13.3
+dill==0.3.6
+isort==5.11.4
+lazy-object-proxy==1.9.0
+mccabe==0.7.0
+platformdirs==2.6.2
+pylint==2.15.0
+tomlkit==0.11.6
+wrapt==1.14.1

@@ -22,15 +22,21 @@
         "ram": "",
         "deps": {
             "components": [
-                "hilog"
+                "hilog",
+                "napi"
             ],
             "third_party": [
-                "bounds_checking_function"
+                "bounds_checking_function",
+                "icu",
+                "musl",
+                "zlib"
             ]
         },
         "build": {
             "sub_component": [
-                "//arkcompiler/runtime_core:arkcompiler_params"
+                "//arkcompiler/runtime_core:arkcompiler_params",
+                "//arkcompiler/runtime_core/arkplatform:arkplatform_packages",
+                "//arkcompiler/runtime_core/static_core:ark_packages"
             ],
             "inner_kits": [
                 {

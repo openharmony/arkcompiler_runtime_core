@@ -1,0 +1,62 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("//build/ohos.gni")
+
+config("asmdefines_public_config") {
+  include_dirs = [
+    "$target_gen_dir/generated/",
+    "$ark_third_party_root/icu/icu4c/source/common",
+    "$ark_third_party_root/icu/icu4c/source/i18n",
+    "$ark_third_party_root/icu/icu4c/source",
+    "$ark_third_party_root/icu",
+  ]
+}
+
+ohos_static_library("asm_defines") {
+  sources = [ "defines.cpp" ]
+  configs = [
+    "$ark_root:ark_config",
+    "$ark_root/runtime:arkruntime_public_config",
+    "$ark_root/libpandabase:arkbase_public_config",
+    sdk_libc_secshared_config,
+    "$ark_root/libpandafile:arkfile_public_config",
+  ]
+  cflags_cc = [
+    "-Wno-invalid-offsetof",
+    "-S",
+    "-fno-lto",
+  ]
+  output_dir = "$target_gen_dir/generated"
+  output_extension = "S"
+  output_name = "libasm_defines"
+  deps = [
+    "$ark_root/libpandabase:coherency_line_size_h",
+    "$ark_root/libpandafile:libarktsfile",
+    "$ark_root/runtime:arkruntime_header_deps",
+    sdk_libc_secshared_dep,
+  ]
+  part_name = ark_part_name
+  subsystem_name = ark_subsystem_name
+}
+
+action("asm_defines_generator") {
+  script = "$ark_root/runtime/asm_defines/defines_generator.rb"
+  outputs = [ "$target_gen_dir/generated/asm_defines.h" ]
+  args = [
+    rebase_path("$target_gen_dir/generated/libasm_defines.S", root_build_dir),
+    rebase_path(outputs[0]),
+  ]
+  deps = [ ":asm_defines" ]
+}

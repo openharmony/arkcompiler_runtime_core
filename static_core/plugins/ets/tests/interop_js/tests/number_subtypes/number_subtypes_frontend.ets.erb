@@ -1,0 +1,177 @@
+/**
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {
+    EvaluateNumber,
+    ExampleClass,
+    ClassWithEmptyConstructor
+} from "/plugins/ets/tests/interop_js/tests/number_subtypes/module.js"
+
+% (@integral_primitives + @float_primitives).each do |primitive|
+//! CHECKER      jscall_<%= primitive.getName %> JIT
+//! RUN          force_jit: true, entry: "jscall_<%= primitive.getName %>", options: "--compiler-regex=ETSGLOBAL::jscall_<%= primitive.getName %>"
+//! METHOD       "jscall_<%= primitive.getName %>"
+//! PASS_AFTER   "IrBuilder"
+//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST    "Intrinsic.JSRuntimeGetValueDouble"
+
+//! CHECKER      jsnew_getproperty<%= primitive.getName %> JIT
+//! RUN          force_jit: true, entry: "jsnew_getproperty<%= primitive.getName %>", options: "--compiler-regex=ETSGLOBAL::jsnew_getproperty<%= primitive.getName %>"
+//! METHOD       "jsnew_getproperty<%= primitive.getName %>"
+//! PASS_AFTER   "IrBuilder"
+//! INST_NOT     /CallStatic.*jsnew::invoke/
+//! INST         "Intrinsic.JSRuntimeGetPropertyJSValue"
+//! INST_NEXT    "Intrinsic.JSRuntimeGetValueDouble"
+
+//! CHECKER      jsnew_setproperty<%= primitive.getName %> JIT
+//! RUN          force_jit: true, entry: "jsnew_setproperty<%= primitive.getName %>", options: "--compiler-regex=ETSGLOBAL::jsnew_setproperty<%= primitive.getName %>"
+//! METHOD       "jsnew_setproperty<%= primitive.getName %>"
+//! PASS_AFTER   "IrBuilder"
+//! INST_NOT     /CallStatic.*jsnew::invoke/
+% if primitive.getName == 'double'
+//! INST    "Intrinsic.JSRuntimeSetPropertyDouble"
+% else
+//! INST_NOT     "Intrinsic.JSRuntimeSetPropertyDouble"
+//! INST    /CallStatic.*JSRuntime::setProperty<%= primitive.getName.capitalize %>/
+% end
+//! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
+//! INST_NEXT    "Intrinsic.JSRuntimeGetValueDouble"
+
+//! CHECKER      jscall_static_method_<%= primitive.getName %> JIT
+//! RUN          force_jit: true, entry: "jscall_static_method_<%= primitive.getName %>", options: "--compiler-regex=ETSGLOBAL::jscall_static_method_<%= primitive.getName %>"
+//! METHOD       "jscall_static_method_<%= primitive.getName %>"
+//! PASS_AFTER   "IrBuilder"
+//! INST_NOT     /CallStatic.*jsnew::invoke/
+//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST    "Intrinsic.JSRuntimeGetValueDouble"
+
+% end
+
+% @integral_primitives.each do |primitive|
+function jscall_<%= primitive.getName() %>(): int {
+    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;
+    let res = EvaluateNumber(v0, v1) as double;
+    if (res == <%= primitive.getSum() %>) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+function jsnew_getproperty<%= primitive.getName() %>(): int {
+    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;
+    let res_obj = new ExampleClass(v0, v1);
+    let res_get_v0 = res_obj.v0 as double;
+    let res_get_v1 = res_obj.v1 as double;
+
+    if (res_get_v0 == v0 && res_get_v1 == v1) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+function jsnew_setproperty<%= primitive.getName() %>(): int {
+    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;
+    let res_obj = new ClassWithEmptyConstructor();
+    res_obj.v0 = v0;
+    res_obj.v1 = v1;
+
+    let check_js = res_obj.varify_properties(v0, v1) as int;
+    console.println(check_js);
+    if (check_js == 1) {
+        return 1;
+    }
+
+    let res_get_v0 = res_obj.v0 as double;
+    let res_get_v1 = res_obj.v1 as double;
+
+    if (res_get_v0 == v0 && res_get_v1 == v1) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+function jscall_static_method_<%= primitive.getName() %>(): int {
+    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;
+    let res = ExampleClass.EvaluateNumber(v0, v1) as double;
+    if (res == <%= primitive.getSum() %>) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+% end
+
+% @float_primitives.each do |primitive|
+function jscall_<%= primitive.getName() %>(): int {
+    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;
+    let res = ExampleClass.EvaluateNumber(v0, v1) as double;
+    if (abs(res - <%= primitive.getSum() %>) < 0.000001) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+function jsnew_getproperty<%= primitive.getName() %>(): int {
+    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;
+    let res_obj = new ExampleClass(v0, v1);
+    let res_get_v0 = res_obj.v0 as double;
+    let res_get_v1 = res_obj.v1 as double;
+
+    if (abs(res_get_v0 - v0) < 0.000001 && abs(res_get_v1 - v1) < 0.000001) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+function jsnew_setproperty<%= primitive.getName() %>(): int {
+    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;
+    let res_obj = new ClassWithEmptyConstructor();
+    res_obj.v0 = v0;
+    res_obj.v1 = v1;
+    let res_get_v0 = res_obj.v0 as double;
+    let res_get_v1 = res_obj.v1 as double;
+
+    if (res_get_v0 == v0 && res_get_v1 == v1) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+function jscall_static_method_<%= primitive.getName() %>(): int {
+    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;
+    let res = ExampleClass.EvaluateNumber(v0, v1) as double;
+    if (abs(res - <%= primitive.getSum() %>) < 0.000001) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+% end

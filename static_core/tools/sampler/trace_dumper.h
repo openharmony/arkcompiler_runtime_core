@@ -1,0 +1,116 @@
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef PANDA_TOOLS_SAMPLER_TRACE_DUMPER_H
+#define PANDA_TOOLS_SAMPLER_TRACE_DUMPER_H
+
+#include <unordered_map>
+#include <fstream>
+
+#include "libpandabase/macros.h"
+#include "libpandabase/utils/logger.h"
+#include "libpandafile/file-inl.h"
+#include "libpandafile/class_data_accessor-inl.h"
+
+#include "runtime/tooling/sampler/sample_info.h"
+
+namespace panda::tooling::sampler {
+
+using ModuleMap = std::unordered_map<uintptr_t, std::unique_ptr<const panda_file::File>>;
+using MethodMap = std::unordered_map<const panda_file::File *, std::unordered_map<uint32_t, std::string>>;
+
+enum class DumpType {
+    WITHOUT_THREAD_SEPARATION,  // Creates single csv file without separating threads
+    THREAD_SEPARATION_BY_TID,   // Creates single csv file with separating threads by thread_id
+    THREAD_SEPARATION_BY_CSV    // Creates csv file for each thread
+};
+
+class TraceDumper {
+public:
+    NO_COPY_SEMANTIC(TraceDumper);
+    NO_MOVE_SEMANTIC(TraceDumper);
+
+    explicit TraceDumper(ModuleMap *modules_map, MethodMap *methods_map)
+        : modules_map_(modules_map), methods_map_(methods_map)
+    {
+    }
+    virtual ~TraceDumper() = default;
+
+    void DumpTraces(const SampleInfo &sample, size_t count);
+
+protected:
+    static void WriteThreadId(std::ofstream &stream, uint32_t thread_id);
+    static void WriteThreadStatus(std::ofstream &stream, SampleInfo::ThreadStatus thread_status);
+
+private:
+    virtual std::ofstream &ResolveStream(const SampleInfo &sample) = 0;
+
+    std::string ResolveName(const panda_file::File *pf, uint64_t file_id) const;
+
+private:
+    ModuleMap *modules_map_ {nullptr};
+    MethodMap *methods_map_ {nullptr};
+};
+
+class SingleCSVDumper final : public TraceDumper {
+public:
+    NO_COPY_SEMANTIC(SingleCSVDumper);
+    NO_MOVE_SEMANTIC(SingleCSVDumper);
+
+    explicit SingleCSVDumper(const char *filename, DumpType option, ModuleMap *modules_map, MethodMap *methods_map,
+                             bool build_cold_graph)
+        : TraceDumper(modules_map, methods_map),
+          stream_(std::ofstream(filename)),
+          option_(option),
+          build_cold_graph_(build_cold_graph)
+    {
+    }
+    ~SingleCSVDumper() override = default;
+
+private:
+    std::ofstream &ResolveStream(const SampleInfo &sample) override;
+
+private:
+    std::ofstream stream_;
+    DumpType option_;
+    bool build_cold_graph_;
+};
+
+class MultipleCSVDumper final : public TraceDumper {
+public:
+    NO_COPY_SEMANTIC(MultipleCSVDumper);
+    NO_MOVE_SEMANTIC(MultipleCSVDumper);
+
+    explicit MultipleCSVDumper(const char *filename, ModuleMap *modules_map, MethodMap *methods_map,
+                               bool build_cold_graph)
+        : TraceDumper(modules_map, methods_map), filename_(filename), build_cold_graph_(build_cold_graph)
+    {
+    }
+    ~MultipleCSVDumper() override = default;
+
+private:
+    std::ofstream &ResolveStream(const SampleInfo &sample) override;
+
+    static std::string AddThreadIdToFilename(const std::string &filename, uint32_t thread_id);
+
+private:
+    std::string filename_;
+    std::unordered_map<size_t, std::ofstream> thread_id_map_;
+    bool build_cold_graph_;
+};
+
+}  // namespace panda::tooling::sampler
+
+#endif  // PANDA_TOOLS_SAMPLER_TRACE_DUMPER_H

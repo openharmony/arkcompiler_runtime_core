@@ -1,0 +1,72 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # Cases with use of function type alias
+function_decls:
+  # no args function type
+  - decl: |-
+      let res: int
+      type F = () => void
+
+      function bar() {
+          res = 200;
+      }
+
+      function foo(f: F): int {
+          f();
+          return 100;
+      }
+    call: |-
+      res = 0
+      if (res == 0 && foo(bar) == 100 && res == 200) return 0;
+
+  # several different args function type
+  - decl: |-
+      let res = ""
+      type F = (a: int, b: double, c: boolean) => boolean
+
+      function bar(x: int, y: double, z: boolean): boolean {
+          res = res + x + y + z;
+          return !z;
+      }
+
+      function foo(f: F, x: int, y: double, z: boolean): int {
+          if (f(x, y, z)) return 0;
+          return 1;
+      }
+    call: |-
+      res = ""
+      if (res == "" && foo(bar, 1, 1.5, false) == 0 && res == "11.5false") return 0;
+
+  # call variables of function types
+  - decl: |-
+      type BarType = (a: int) => int
+      type FooType = (a: BarType, b: int) => int
+      type BazType = (a: FooType, b: BarType, c: int) => int
+
+      function bar(a: int): int {
+          return a * 2;
+      }
+
+      function foo(a: BarType, b: int): int {
+          return a(b);
+      }
+
+      function baz(a: FooType, b: BarType, c: int): int {
+          return a(b, c);
+      }
+    call: |-
+      let vbar: BarType = bar
+      let vfoo: FooType = foo
+      let vbaz: BazType = baz
+      if (vbaz(vfoo, vbar, 42) == 84) return 0;

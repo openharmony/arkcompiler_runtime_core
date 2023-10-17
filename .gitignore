@@ -14,3 +14,9 @@ tags
 .byebug_history
 .cache
 *.swp
+static_core/plugins/accord
+static_core/plugins/java
+static_core/plugins/cangjie
+static_core/plugins/ecmascript
+static_core/plugins/hz_ecmascript
+static_core/plugins/tests_java_ecmascript

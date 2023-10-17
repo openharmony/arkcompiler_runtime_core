@@ -1,0 +1,230 @@
+/**
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "runtime/include/class.h"
+#include "runtime/include/coretypes/array-inl.h"
+#include "runtime/include/coretypes/string-inl.h"
+#include "runtime/include/object_header.h"
+#include "runtime/include/hclass.h"
+#include "runtime/mem/object_helpers-inl.h"
+#include "runtime/tooling/default_inspector_extension.h"
+
+namespace panda::tooling {
+
+static TypedValue GetArrayElementValueStatic(const coretypes::Array &array, size_t offset, panda_file::Type type)
+{
+    switch (type.GetId()) {
+        case panda_file::Type::TypeId::INVALID:
+            return TypedValue::Invalid();
+        case panda_file::Type::TypeId::VOID:
+            return TypedValue::Void();
+        case panda_file::Type::TypeId::U1:
+            return TypedValue::U1(array.GetPrimitive<uint8_t>(offset) != 0);
+        case panda_file::Type::TypeId::I8:
+            return TypedValue::I8(array.GetPrimitive<int8_t>(offset));
+        case panda_file::Type::TypeId::U8:
+            return TypedValue::U8(array.GetPrimitive<uint8_t>(offset));
+        case panda_file::Type::TypeId::I16:
+            return TypedValue::I16(array.GetPrimitive<int16_t>(offset));
+        case panda_file::Type::TypeId::U16:
+            return TypedValue::U16(array.GetPrimitive<uint16_t>(offset));
+        case panda_file::Type::TypeId::I32:
+            return TypedValue::I32(array.GetPrimitive<int32_t>(offset));
+        case panda_file::Type::TypeId::U32:
+            return TypedValue::U32(array.GetPrimitive<uint32_t>(offset));
+        case panda_file::Type::TypeId::F32:
+            return TypedValue::F32(array.GetPrimitive<float>(offset));
+        case panda_file::Type::TypeId::F64:
+            return TypedValue::F64(array.GetPrimitive<double>(offset));
+        case panda_file::Type::TypeId::I64:
+            return TypedValue::I64(array.GetPrimitive<int64_t>(offset));
+        case panda_file::Type::TypeId::U64:
+            return TypedValue::U64(array.GetPrimitive<uint64_t>(offset));
+        case panda_file::Type::TypeId::REFERENCE:
+            return TypedValue::Reference(array.GetObject(offset));
+        case panda_file::Type::TypeId::TAGGED:
+            UNREACHABLE();
+    }
+    UNREACHABLE();
+}
+
+template <typename T>
+static TypedValue GetFieldValueStatic(T object, const Field &field)
+{
+    switch (field.GetType().GetId()) {
+        case panda_file::Type::TypeId::INVALID:
+            return TypedValue::Invalid();
+        case panda_file::Type::TypeId::VOID:
+            return TypedValue::Void();
+        case panda_file::Type::TypeId::U1:
+            return TypedValue::U1(object->template GetFieldPrimitive<uint8_t>(field.GetOffset()) != 0);
+        case panda_file::Type::TypeId::I8:
+            return TypedValue::I8(object->template GetFieldPrimitive<int8_t>(field.GetOffset()));
+        case panda_file::Type::TypeId::U8:
+            return TypedValue::U8(object->template GetFieldPrimitive<uint8_t>(field.GetOffset()));
+        case panda_file::Type::TypeId::I16:
+            return TypedValue::I16(object->template GetFieldPrimitive<int16_t>(field.GetOffset()));
+        case panda_file::Type::TypeId::U16:
+            return TypedValue::U16(object->template GetFieldPrimitive<uint16_t>(field.GetOffset()));
+        case panda_file::Type::TypeId::I32:
+            return TypedValue::I32(object->template GetFieldPrimitive<int32_t>(field.GetOffset()));
+        case panda_file::Type::TypeId::U32:
+            return TypedValue::U32(object->template GetFieldPrimitive<uint32_t>(field.GetOffset()));
+        case panda_file::Type::TypeId::F32:
+            return TypedValue::F32(object->template GetFieldPrimitive<float>(field.GetOffset()));
+        case panda_file::Type::TypeId::F64:
+            return TypedValue::F64(object->template GetFieldPrimitive<double>(field.GetOffset()));
+        case panda_file::Type::TypeId::I64:
+            return TypedValue::I64(object->template GetFieldPrimitive<int64_t>(field.GetOffset()));
+        case panda_file::Type::TypeId::U64:
+            return TypedValue::U64(object->template GetFieldPrimitive<uint64_t>(field.GetOffset()));
+        case panda_file::Type::TypeId::REFERENCE:
+            return TypedValue::Reference(object->GetFieldObject(field.GetOffset()));
+        case panda_file::Type::TypeId::TAGGED:
+            UNREACHABLE();
+    }
+    UNREACHABLE();
+}
+
+std::string StaticDefaultInspectorExtension::GetClassName(const ObjectHeader *object)
+{
+    return ClassHelper::GetNameUndecorated(object->ClassAddr<Class>()->GetDescriptor());
+}
+
+std::optional<std::string> StaticDefaultInspectorExtension::GetAsString(const ObjectHeader *object)
+{
+    if (!object->ClassAddr<Class>()->IsStringClass()) {
+        return {};
+    }
+
+    std::string value;
+
+    auto string = coretypes::String::Cast(const_cast<ObjectHeader *>(object));
+    for (auto index = 0U; index < string->GetLength(); ++index) {
+        value.push_back(string->At(index));
+    }
+    return value;
+}
+
+std::optional<size_t> StaticDefaultInspectorExtension::GetLengthIfArray(const ObjectHeader *object)
+{
+    if (!object->ClassAddr<Class>()->IsArrayClass()) {
+        return {};
+    }
+    return coretypes::Array::Cast(const_cast<ObjectHeader *>(object))->GetLength();
+}
+
+void StaticDefaultInspectorExtension::EnumerateProperties(
+    const ObjectHeader *object, const std::function<void(const std::string &, TypedValue, bool, bool, bool)> &handler)
+{
+    auto cls = object->ClassAddr<Class>();
+    ASSERT(cls != nullptr);
+    if (cls->IsArrayClass()) {
+        auto &array = *coretypes::Array::Cast(const_cast<ObjectHeader *>(object));
+        auto type = cls->GetComponentType()->GetType();
+        for (auto index = 0U; index < array.GetLength(); ++index) {
+            auto offset = index * cls->GetComponentSize();
+            handler(std::to_string(index), GetArrayElementValueStatic(array, offset, type), true, false, false);
+        }
+    } else if (cls->IsClassClass()) {
+        auto runtime_cls = panda::Class::FromClassObject(object);
+        for (auto &field : runtime_cls->GetStaticFields()) {
+            handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(runtime_cls, field), false,
+                    field.IsFinal(), false);
+        }
+    } else {
+        for (const auto &field : cls->GetInstanceFields()) {
+            handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(object, field), false,
+                    field.IsFinal(), false);
+        }
+    }
+}
+
+void StaticDefaultInspectorExtension::EnumerateGlobals(const PropertyHandler &handler)
+{
+    auto class_linker_extension = Runtime::GetCurrent()->GetClassLinker()->GetExtension(lang_);
+    ASSERT(class_linker_extension != nullptr);
+    class_linker_extension->EnumerateClasses([&handler](auto cls) {
+        if (cls->IsInitialized() && cls->GetNumStaticFields() > 0) {
+            handler(cls->GetName(), TypedValue::Reference(cls->GetManagedObject()), false, false, false);
+        }
+        return true;
+    });
+}
+
+std::string DynamicDefaultInspectorExtension::GetClassName(const ObjectHeader *object)
+{
+    if (object->ClassAddr<HClass>()->IsString()) {
+        return "String object";
+    }
+    return "Dynamic object";
+}
+
+std::optional<std::string> DynamicDefaultInspectorExtension::GetAsString([[maybe_unused]] const ObjectHeader *object)
+{
+    return {};
+}
+
+std::optional<size_t> DynamicDefaultInspectorExtension::GetLengthIfArray(const ObjectHeader *object)
+{
+    if (!object->ClassAddr<HClass>()->IsArray()) {
+        return {};
+    }
+    auto length = coretypes::Array::Cast(const_cast<ObjectHeader *>(object))->GetLength();
+    return length;
+}
+
+void DynamicDefaultInspectorExtension::EnumerateProperties(
+    const ObjectHeader *object, const std::function<void(const std::string &, TypedValue, bool, bool, bool)> &handler)
+{
+    auto *cls = object->ClassAddr<HClass>();
+    ASSERT(cls != nullptr);
+    if (cls->IsNativePointer() || cls->IsString()) {
+        return;
+    }
+
+    if (cls->IsArray()) {
+        auto &array = *coretypes::Array::Cast(const_cast<ObjectHeader *>(object));
+        ArraySizeT array_length = array.GetLength();
+        for (coretypes::ArraySizeT i = 0; i < array_length; i++) {
+            TaggedValue array_element(array.Get<TaggedType, false, true>(i));
+            handler(std::to_string(i), TypedValue::Tagged(array_element), true, false, false);
+        }
+    } else if (cls->IsHClass()) {
+        auto data_offset = sizeof(ObjectHeader) + sizeof(HClass);
+        auto obj_body_size = cls->GetObjectSize() - data_offset;
+        ASSERT(obj_body_size % TaggedValue::TaggedTypeSize() == 0);
+        auto num_of_fields = obj_body_size / TaggedValue::TaggedTypeSize();
+        for (size_t i = 0; i < num_of_fields; i++) {
+            auto field_offset = data_offset + i * TaggedValue::TaggedTypeSize();
+            auto tagged_value = ObjectAccessor::GetDynValue<TaggedValue>(object, field_offset);
+            handler(std::to_string(i), TypedValue::Tagged(tagged_value), false, false, false);
+        }
+    } else {
+        uint32_t obj_body_size = cls->GetObjectSize() - ObjectHeader::ObjectHeaderSize();
+        ASSERT(obj_body_size % TaggedValue::TaggedTypeSize() == 0);
+        uint32_t num_of_fields = obj_body_size / TaggedValue::TaggedTypeSize();
+        size_t data_offset = ObjectHeader::ObjectHeaderSize();
+        for (uint32_t i = 0; i < num_of_fields; i++) {
+            size_t field_offset = data_offset + i * TaggedValue::TaggedTypeSize();
+            if (cls->IsNativeField(field_offset)) {
+                continue;
+            }
+            auto tagged_value = ObjectAccessor::GetDynValue<TaggedValue>(object, field_offset);
+            handler(std::to_string(i), TypedValue::Tagged(tagged_value), false, false, false);
+        }
+    }
+}
+}  // namespace panda::tooling

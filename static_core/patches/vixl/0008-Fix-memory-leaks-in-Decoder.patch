@@ -1,0 +1,2537 @@
+From 0a4ba535be59784af41fe1b2e0d748235107fa12 Mon Sep 17 00:00:00 2001
+From: Aleksei Sidorov <aleksei.sidorov@huawei.com>
+Date: Wed, 24 Aug 2022 18:08:53 +0300
+Subject: [PATCH] Fix memory leaks in Decoder
+
+---
+ src/aarch64/cpu-features-auditor-aarch64.cc |   60 +-
+ src/aarch64/cpu-features-auditor-aarch64.h  |    7 +-
+ src/aarch64/decoder-aarch64.cc              |   44 +-
+ src/aarch64/decoder-aarch64.h               |   89 +-
+ src/aarch64/disasm-aarch64.cc               | 1237 ++++++++++---------
+ src/aarch64/disasm-aarch64.h                |    7 +-
+ src/aarch64/simulator-aarch64.cc            |  682 +++++-----
+ src/aarch64/simulator-aarch64.h             |    7 +-
+ src/utils-vixl.h                            |   42 +
+ 9 files changed, 1128 insertions(+), 1047 deletions(-)
+
+diff --git a/src/aarch64/cpu-features-auditor-aarch64.cc b/src/aarch64/cpu-features-auditor-aarch64.cc
+index 72725c6..eec0f57 100644
+--- a/src/aarch64/cpu-features-auditor-aarch64.cc
++++ b/src/aarch64/cpu-features-auditor-aarch64.cc
+@@ -34,39 +34,39 @@
+ namespace vixl {
+ namespace aarch64 {
+ 
++const CPUFeaturesAuditor::FormToVisitorFnMap CPUFeaturesAuditor::FORM_TO_VISITOR = {
++    DEFAULT_FORM_TO_VISITOR_MAP(CPUFeaturesAuditor),
++    SIM_AUD_VISITOR_MAP(CPUFeaturesAuditor),
++    {"fcmla_asimdelem_c_h", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fcmla_asimdelem_c_s", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fmlal2_asimdelem_lh", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fmlal_asimdelem_lh", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fmla_asimdelem_rh_h", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fmla_asimdelem_r_sd", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fmlsl2_asimdelem_lh", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fmlsl_asimdelem_lh", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fmls_asimdelem_rh_h", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fmls_asimdelem_r_sd", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fmulx_asimdelem_rh_h", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fmulx_asimdelem_r_sd", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fmul_asimdelem_rh_h", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"fmul_asimdelem_r_sd", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"sdot_asimdelem_d", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"smlal_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"smlsl_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"smull_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"sqdmlal_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"sqdmlsl_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"sqdmull_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"udot_asimdelem_d", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"umlal_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"umlsl_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++    {"umull_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
++};
+ 
+ const CPUFeaturesAuditor::FormToVisitorFnMap*
+ CPUFeaturesAuditor::GetFormToVisitorFnMap() {
+-  static const FormToVisitorFnMap form_to_visitor = {
+-      DEFAULT_FORM_TO_VISITOR_MAP(CPUFeaturesAuditor),
+-      SIM_AUD_VISITOR_MAP(CPUFeaturesAuditor),
+-      {"fcmla_asimdelem_c_h", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fcmla_asimdelem_c_s", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fmlal2_asimdelem_lh", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fmlal_asimdelem_lh", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fmla_asimdelem_rh_h", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fmla_asimdelem_r_sd", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fmlsl2_asimdelem_lh", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fmlsl_asimdelem_lh", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fmls_asimdelem_rh_h", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fmls_asimdelem_r_sd", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fmulx_asimdelem_rh_h", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fmulx_asimdelem_r_sd", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fmul_asimdelem_rh_h", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"fmul_asimdelem_r_sd", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"sdot_asimdelem_d", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"smlal_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"smlsl_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"smull_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"sqdmlal_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"sqdmlsl_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"sqdmull_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"udot_asimdelem_d", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"umlal_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"umlsl_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-      {"umull_asimdelem_l", &CPUFeaturesAuditor::VisitNEONByIndexedElement},
+-  };
+-  return &form_to_visitor;
++  return &FORM_TO_VISITOR;
+ }
+ 
+ // Every instruction must update last_instruction_, even if only to clear it,
+diff --git a/src/aarch64/cpu-features-auditor-aarch64.h b/src/aarch64/cpu-features-auditor-aarch64.h
+index 7329def..2e53591 100644
+--- a/src/aarch64/cpu-features-auditor-aarch64.h
++++ b/src/aarch64/cpu-features-auditor-aarch64.h
+@@ -122,9 +122,10 @@ class CPUFeaturesAuditor : public DecoderVisitor {
+ 
+   Decoder* decoder_;
+ 
+-  using FormToVisitorFnMap = std::unordered_map<
+-      std::string,
+-      std::function<void(CPUFeaturesAuditor*, const Instruction*)>>;
++  using FormToVisitorFnMap = FormToVisitorFnMapT<CPUFeaturesAuditor>;
++
++  static const FormToVisitorFnMap FORM_TO_VISITOR;
++
+   static const FormToVisitorFnMap* GetFormToVisitorFnMap();
+ };
+ 
+diff --git a/src/aarch64/decoder-aarch64.cc b/src/aarch64/decoder-aarch64.cc
+index cec55f9..cf2ce25 100644
+--- a/src/aarch64/decoder-aarch64.cc
++++ b/src/aarch64/decoder-aarch64.cc
+@@ -57,12 +57,13 @@ void Decoder::AddDecodeNode(const DecodeNode& node) {
+   decode_nodes_.insert(std::make_pair(node.GetName(), node));
+ }
+ 
+-DecodeNode* Decoder::GetDecodeNode(std::string name) {
+-  if (decode_nodes_.count(name) != 1) {
+-    std::string msg = "Can't find decode node " + name + ".\n";
++DecodeNode* Decoder::GetDecodeNode(const String& name) {
++  auto elem{decode_nodes_.find(name)};
++  if (elem == decode_nodes_.end()) {
++    auto msg = String("Can't find decode node ", GetContainerAllocator(*this)) + name.data() + ".\n";
+     VIXL_ABORT_WITH_MSG(msg.c_str());
+   }
+-  return &decode_nodes_[name];
++  return &elem->second;
+ }
+ 
+ void Decoder::ConstructDecodeGraph() {
+@@ -77,7 +78,8 @@ void Decoder::ConstructDecodeGraph() {
+   }
+ 
+   // Compile the graph from the root.
+-  compiled_decoder_root_ = GetDecodeNode("Root")->Compile(this);
++  auto root_node{String("Root", GetContainerAllocator(*this))};
++  compiled_decoder_root_ = GetDecodeNode(root_node)->Compile(this);
+ }
+ 
+ void Decoder::AppendVisitor(DecoderVisitor* new_visitor) {
+@@ -167,7 +169,7 @@ void DecodeNode::SetSampledBits(const uint8_t* bits, int bit_count) {
+   }
+ }
+ 
+-std::vector<uint8_t> DecodeNode::GetSampledBits() const {
++const Vector<uint8_t>& DecodeNode::GetSampledBits() const {
+   return sampled_bits_;
+ }
+ 
+@@ -185,7 +187,7 @@ void DecodeNode::AddPatterns(const DecodePattern* patterns) {
+ }
+ 
+ void DecodeNode::CompileNodeForBits(Decoder* decoder,
+-                                    std::string name,
++                                    const String& name,
+                                     uint32_t bits) {
+   DecodeNode* n = decoder->GetDecodeNode(name);
+   VIXL_ASSERT(n != NULL);
+@@ -451,7 +453,7 @@ bool DecodeNode::TryCompileOptimisedDecodeTable(Decoder* decoder) {
+       // value test.
+       uint32_t single_decode_mask = 0;
+       uint32_t single_decode_value = 0;
+-      std::vector<uint8_t> bits = GetSampledBits();
++      const auto& bits = GetSampledBits();
+ 
+       // Construct the instruction mask and value from the pattern.
+       VIXL_ASSERT(bits.size() == strlen(pattern_table_[0].pattern));
+@@ -472,10 +474,10 @@ bool DecodeNode::TryCompileOptimisedDecodeTable(Decoder* decoder) {
+       // value.
+       const char* doesnt_match_handler =
+           (table_size == 1) ? "Visit_Unallocated" : pattern_table_[1].handler;
+-      CompileNodeForBits(decoder, doesnt_match_handler, 0);
++      CompileNodeForBits(decoder, String(doesnt_match_handler, GetContainerAllocator(*this)), 0);
+ 
+       // Set DecodeNode for when it does match.
+-      CompileNodeForBits(decoder, pattern_table_[0].handler, 1);
++      CompileNodeForBits(decoder, String(pattern_table_[0].handler, GetContainerAllocator(*this)), 1);
+ 
+       return true;
+     }
+@@ -490,17 +492,17 @@ CompiledDecodeNode* DecodeNode::Compile(Decoder* decoder) {
+     CreateVisitorNode();
+   } else if (!TryCompileOptimisedDecodeTable(decoder)) {
+     // The "otherwise" node is the default next node if no pattern matches.
+-    std::string otherwise = "Visit_Unallocated";
++    String otherwise("Visit_Unallocated", GetContainerAllocator(*this));
+ 
+     // For each pattern in pattern_table_, create an entry in matches that
+     // has a corresponding mask and value for the pattern.
+-    std::vector<MaskValuePair> matches;
++    Vector<MaskValuePair> matches(GetContainerAllocator(*this));
+     for (size_t i = 0; i < pattern_table_.size(); i++) {
+       if (strcmp(pattern_table_[i].pattern, "otherwise") == 0) {
+         // "otherwise" must be the last pattern in the list, otherwise the
+         // indices won't match for pattern_table_ and matches.
+         VIXL_ASSERT(i == pattern_table_.size() - 1);
+-        otherwise = pattern_table_[i].handler;
++        otherwise = String(pattern_table_[i].handler, GetContainerAllocator(*this));
+       } else {
+         matches.push_back(GenerateMaskValuePair(
+             GenerateOrderedPattern(pattern_table_[i].pattern)));
+@@ -523,7 +525,7 @@ CompiledDecodeNode* DecodeNode::Compile(Decoder* decoder) {
+           // Only one instruction class should match for each value of bits, so
+           // if we get here, the node pointed to should still be unallocated.
+           VIXL_ASSERT(compiled_node_->GetNodeForBits(bits) == NULL);
+-          CompileNodeForBits(decoder, pattern_table_[i].handler, bits);
++          CompileNodeForBits(decoder, String(pattern_table_[i].handler, GetContainerAllocator(*this)), bits);
+           break;
+         }
+       }
+@@ -532,7 +534,7 @@ CompiledDecodeNode* DecodeNode::Compile(Decoder* decoder) {
+       // instruction must be handled by the "otherwise" case, which by default
+       // is the Unallocated visitor.
+       if (compiled_node_->GetNodeForBits(bits) == NULL) {
+-        CompileNodeForBits(decoder, otherwise, bits);
++        CompileNodeForBits(decoder, String(otherwise, GetContainerAllocator(*this)), bits);
+       }
+     }
+   }
+@@ -557,7 +559,7 @@ void CompiledDecodeNode::Decode(const Instruction* instr) const {
+ }
+ 
+ DecodeNode::MaskValuePair DecodeNode::GenerateMaskValuePair(
+-    std::string pattern) const {
++    const String& pattern) const {
+   uint32_t mask = 0, value = 0;
+   for (size_t i = 0; i < pattern.size(); i++) {
+     mask |= ((pattern[i] == 'x') ? 0 : 1) << i;
+@@ -566,18 +568,18 @@ DecodeNode::MaskValuePair DecodeNode::GenerateMaskValuePair(
+   return std::make_pair(mask, value);
+ }
+ 
+-std::string DecodeNode::GenerateOrderedPattern(std::string pattern) const {
+-  std::vector<uint8_t> sampled_bits = GetSampledBits();
++String DecodeNode::GenerateOrderedPattern(const char* pattern) const {
++  const auto& sampled_bits = GetSampledBits();
+   // Construct a temporary 32-character string containing '_', then at each
+   // sampled bit position, set the corresponding pattern character.
+-  std::string temp(32, '_');
++  String temp(32, '_', GetContainerAllocator(*this));
+   for (size_t i = 0; i < sampled_bits.size(); i++) {
+     temp[sampled_bits[i]] = pattern[i];
+   }
+ 
+   // Iterate through the temporary string, filtering out the non-'_' characters
+   // into a new ordered pattern result string.
+-  std::string result;
++  String result(GetContainerAllocator(*this));
+   for (size_t i = 0; i < temp.size(); i++) {
+     if (temp[i] != '_') {
+       result.push_back(temp[i]);
+@@ -588,7 +590,7 @@ std::string DecodeNode::GenerateOrderedPattern(std::string pattern) const {
+ }
+ 
+ uint32_t DecodeNode::GenerateSampledBitsMask() const {
+-  std::vector<uint8_t> sampled_bits = GetSampledBits();
++  const auto& sampled_bits = GetSampledBits();
+   uint32_t mask = 0;
+   for (size_t i = 0; i < sampled_bits.size(); i++) {
+     mask |= 1 << sampled_bits[i];
+diff --git a/src/aarch64/decoder-aarch64.h b/src/aarch64/decoder-aarch64.h
+index 5f33e4e..554add8 100644
+--- a/src/aarch64/decoder-aarch64.h
++++ b/src/aarch64/decoder-aarch64.h
+@@ -2932,6 +2932,12 @@ class DecoderVisitor {
+     return const_cast<Instruction*>(instr);
+   }
+ 
++ protected:
++  template <typename T>
++  using FormToVisitorFnMapT = std::unordered_map<
++      std::string,
++      std::function<void(T*, const Instruction*)>>;
++
+  private:
+   const VisitorConstness constness_;
+ };
+@@ -3022,19 +3028,26 @@ class Decoder {
+   // of visitors stored by the decoder.
+   void RemoveVisitor(DecoderVisitor* visitor);
+ 
+-  class ScopedVisitors {
++#ifdef PANDA_BUILD
++  PandaAllocator* GetAllocator() const {
++    return allocator_;
++  }
++#endif
++
++  class ScopedAddVisitors {
+    public:
+-    ScopedVisitors(Decoder& decoder, std::initializer_list<DecoderVisitor*> visitors)
+-      : decoder_ {decoder} {
+-        decoder_.visitors_.assign(visitors);
++    ScopedAddVisitors(Decoder& decoder, std::initializer_list<DecoderVisitor*> visitors)
++      : visitors_(decoder.visitors_)
++      , old_end_(visitors_.insert(visitors_.end(), visitors)) {
+     }
+ 
+-    ~ScopedVisitors() {
+-      decoder_.visitors_.clear();
++    ~ScopedAddVisitors() {
++      visitors_.erase(old_end_, visitors_.end());
+     }
+ 
+    private:
+-    Decoder& decoder_;
++    List<DecoderVisitor*>& visitors_;
++    List<DecoderVisitor*>::iterator old_end_;
+   };
+ 
+ #define DECLARE(A) void Visit_##A(const Instruction* instr);
+@@ -3048,7 +3061,7 @@ class Decoder {
+ #endif
+ 
+   // Get a DecodeNode by name from the Decoder's map.
+-  DecodeNode* GetDecodeNode(std::string name);
++  DecodeNode* GetDecodeNode(const String& name);
+ 
+  private:
+   // Decodes an instruction and calls the visitor functions registered with the
+@@ -3058,17 +3071,14 @@ class Decoder {
+   // Add an initialised DecodeNode to the decode_node_ map.
+   void AddDecodeNode(const DecodeNode& node);
+ 
+-#ifndef PANDA_BUILD
++#ifdef PANDA_BUILD
++  PandaAllocator* allocator_{nullptr};
++#endif
++
+   // Visitors are registered in a list.
+-  std::list<DecoderVisitor*> visitors_;
++  List<DecoderVisitor*> visitors_;
+   // Map of node names to DecodeNodes.
+-  std::map<std::string, DecodeNode> decode_nodes_;
+-#else
+-  panda::ArenaAllocator* allocator_ {nullptr};
+-  panda::ArenaList<DecoderVisitor*> visitors_;
+-  // Map of node names to DecodeNodes.
+-  panda::ArenaMap<std::string, DecodeNode> decode_nodes_;
+-#endif
++  Map<String, DecodeNode> decode_nodes_;
+ 
+   // Compile the dynamically generated decode graph based on the static
+   // information in kDecodeMapping and kVisitorNodes.
+@@ -3202,21 +3212,30 @@ class CompiledDecodeNode {
+ 
+ class DecodeNode {
+  public:
+-  // Default constructor needed for map initialisation.
+-  DecodeNode() : compiled_node_(NULL) {}
+-
+   // Constructor for DecodeNode wrappers around visitor functions. These are
+   // marked as "compiled", as there is no decoding left to do.
+   explicit DecodeNode(const VisitorNode& visitor, Decoder* decoder)
+-      : name_(visitor.name),
++      :
++#ifdef PANDA_BUILD
++        allocator_(decoder->GetAllocator()),
++#endif
++        name_(visitor.name, GetContainerAllocator(*this)),
++        sampled_bits_(GetContainerAllocator(*this)),
+         visitor_fn_(visitor.visitor_fn),
++        pattern_table_(GetContainerAllocator(*this)),
+         decoder_(decoder),
+         compiled_node_(NULL) {}
+ 
+   // Constructor for DecodeNodes that map bit patterns to other DecodeNodes.
+   explicit DecodeNode(const DecodeMapping& map, Decoder* decoder)
+-      : name_(map.name),
++      :
++#ifdef PANDA_BUILD
++        allocator_(decoder->GetAllocator()),
++#endif
++        name_(map.name, GetContainerAllocator(*this)),
++        sampled_bits_(GetContainerAllocator(*this)),
+         visitor_fn_(NULL),
++        pattern_table_(GetContainerAllocator(*this)),
+         decoder_(decoder),
+         compiled_node_(NULL) {
+     // The length of the bit string in the first mapping determines the number
+@@ -3238,11 +3257,17 @@ class DecodeNode {
+ #endif
+   }
+ 
++#ifdef PANDA_BUILD
++  PandaAllocator* GetAllocator() const {
++    return allocator_;
++  }
++#endif
++
+   // Set the bits sampled from the instruction by this node.
+   void SetSampledBits(const uint8_t* bits, int bit_count);
+ 
+   // Get the bits sampled from the instruction by this node.
+-  std::vector<uint8_t> GetSampledBits() const;
++  const Vector<uint8_t>& GetSampledBits() const;
+ 
+   // Get the number of bits sampled from the instruction by this node.
+   size_t GetSampledBitsCount() const;
+@@ -3254,7 +3279,7 @@ class DecodeNode {
+   // identified instruction class.
+   bool IsLeafNode() const { return visitor_fn_ != NULL; }
+ 
+-  std::string GetName() const { return name_; }
++  const String& GetName() const { return name_; }
+ 
+   // Create a CompiledDecodeNode of specified table size that uses
+   // bit_extract_fn to sample bits from the instruction.
+@@ -3282,7 +3307,7 @@ class DecodeNode {
+ 
+   // Find and compile the DecodeNode named "name", and set it as the node for
+   // the pattern "bits".
+-  void CompileNodeForBits(Decoder* decoder, std::string name, uint32_t bits);
++  void CompileNodeForBits(Decoder* decoder, const String& name, uint32_t bits);
+ 
+   // Get a pointer to an instruction method that extracts the instruction bits
+   // specified by the mask argument, and returns those sampled bits as a
+@@ -3315,7 +3340,7 @@ class DecodeNode {
+   // (don't care) characters.
+   // For example "10x1" should return mask = 0b1101, value = 0b1001.
+   typedef std::pair<Instr, Instr> MaskValuePair;
+-  MaskValuePair GenerateMaskValuePair(std::string pattern) const;
++  MaskValuePair GenerateMaskValuePair(const String& pattern) const;
+ 
+   // Generate a pattern string ordered by the bit positions sampled by this
+   // node. The first character in the string corresponds to the lowest sampled
+@@ -3325,7 +3350,7 @@ class DecodeNode {
+   // This output makes comparisons easier between the pattern and bits sampled
+   // from an instruction using the fast "compress" algorithm. See
+   // Instruction::Compress().
+-  std::string GenerateOrderedPattern(std::string pattern) const;
++  String GenerateOrderedPattern(const char* pattern) const;
+ 
+   // Generate a mask with a bit set at each sample position.
+   uint32_t GenerateSampledBitsMask() const;
+@@ -3339,12 +3364,16 @@ class DecodeNode {
+   // to match after masking.
+   BitExtractFn GetBitExtractFunctionHelper(uint32_t x, uint32_t y);
+ 
++#ifdef PANDA_BUILD
++  PandaAllocator* allocator_{nullptr};
++#endif
++
+   // Name of this decoder node, used to construct edges in the decode graph.
+-  std::string name_;
++  String name_;
+ 
+   // Vector of bits sampled from an instruction to determine which node to look
+   // up next in the decode process.
+-  std::vector<uint8_t> sampled_bits_;
++  Vector<uint8_t> sampled_bits_;
+ 
+   // Visitor function that handles the instruction identified. Set only for leaf
+   // nodes, where no extra decoding is required. For non-leaf decoding nodes,
+@@ -3352,7 +3381,7 @@ class DecodeNode {
+   DecodeFnPtr visitor_fn_;
+ 
+   // Source mapping from bit pattern to name of next decode stage.
+-  std::vector<DecodePattern> pattern_table_;
++  Vector<DecodePattern> pattern_table_;
+ 
+   // Pointer to the decoder containing this node, used to call its visitor
+   // function for leaf nodes.
+diff --git a/src/aarch64/disasm-aarch64.cc b/src/aarch64/disasm-aarch64.cc
+index 763a7e9..f9f0817 100644
+--- a/src/aarch64/disasm-aarch64.cc
++++ b/src/aarch64/disasm-aarch64.cc
+@@ -24,627 +24,632 @@
+ // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ 
++#include <array>
+ #include <bitset>
+ #include <cstdlib>
+ #include <sstream>
+ 
+ #include "disasm-aarch64.h"
+ 
++#ifdef PANDA_BUILD
++#include "utils/span.h"
++#endif
++
+ namespace vixl {
+ namespace aarch64 {
+ 
++const Disassembler::FormToVisitorFnMap Disassembler::FORM_TO_VISITOR = {
++    DEFAULT_FORM_TO_VISITOR_MAP(Disassembler),
++    {"autia1716_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"autiasp_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"autiaz_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"autib1716_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"autibsp_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"autibz_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"axflag_m_pstate", &Disassembler::DisassembleNoArgs},
++    {"cfinv_m_pstate", &Disassembler::DisassembleNoArgs},
++    {"csdb_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"dgh_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"ssbb_only_barriers", &Disassembler::DisassembleNoArgs},
++    {"pssbb_only_barriers", &Disassembler::DisassembleNoArgs},
++    {"esb_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"isb_bi_barriers", &Disassembler::DisassembleNoArgs},
++    {"nop_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"pacia1716_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"paciasp_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"paciaz_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"pacib1716_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"pacibsp_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"pacibz_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"sev_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"sevl_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"wfe_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"wfi_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"xaflag_m_pstate", &Disassembler::DisassembleNoArgs},
++    {"xpaclri_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"yield_hi_hints", &Disassembler::DisassembleNoArgs},
++    {"abs_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"cls_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"clz_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"cnt_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"neg_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"rev16_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"rev32_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"rev64_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"sqabs_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"sqneg_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"suqadd_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"urecpe_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"ursqrte_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"usqadd_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
++    {"not_asimdmisc_r", &Disassembler::DisassembleNEON2RegLogical},
++    {"rbit_asimdmisc_r", &Disassembler::DisassembleNEON2RegLogical},
++    {"xtn_asimdmisc_n", &Disassembler::DisassembleNEON2RegExtract},
++    {"sqxtn_asimdmisc_n", &Disassembler::DisassembleNEON2RegExtract},
++    {"uqxtn_asimdmisc_n", &Disassembler::DisassembleNEON2RegExtract},
++    {"sqxtun_asimdmisc_n", &Disassembler::DisassembleNEON2RegExtract},
++    {"shll_asimdmisc_s", &Disassembler::DisassembleNEON2RegExtract},
++    {"sadalp_asimdmisc_p", &Disassembler::DisassembleNEON2RegAddlp},
++    {"saddlp_asimdmisc_p", &Disassembler::DisassembleNEON2RegAddlp},
++    {"uadalp_asimdmisc_p", &Disassembler::DisassembleNEON2RegAddlp},
++    {"uaddlp_asimdmisc_p", &Disassembler::DisassembleNEON2RegAddlp},
++    {"cmeq_asimdmisc_z", &Disassembler::DisassembleNEON2RegCompare},
++    {"cmge_asimdmisc_z", &Disassembler::DisassembleNEON2RegCompare},
++    {"cmgt_asimdmisc_z", &Disassembler::DisassembleNEON2RegCompare},
++    {"cmle_asimdmisc_z", &Disassembler::DisassembleNEON2RegCompare},
++    {"cmlt_asimdmisc_z", &Disassembler::DisassembleNEON2RegCompare},
++    {"fcmeq_asimdmisc_fz", &Disassembler::DisassembleNEON2RegFPCompare},
++    {"fcmge_asimdmisc_fz", &Disassembler::DisassembleNEON2RegFPCompare},
++    {"fcmgt_asimdmisc_fz", &Disassembler::DisassembleNEON2RegFPCompare},
++    {"fcmle_asimdmisc_fz", &Disassembler::DisassembleNEON2RegFPCompare},
++    {"fcmlt_asimdmisc_fz", &Disassembler::DisassembleNEON2RegFPCompare},
++    {"fcvtl_asimdmisc_l", &Disassembler::DisassembleNEON2RegFPConvert},
++    {"fcvtn_asimdmisc_n", &Disassembler::DisassembleNEON2RegFPConvert},
++    {"fcvtxn_asimdmisc_n", &Disassembler::DisassembleNEON2RegFPConvert},
++    {"fabs_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"fcvtas_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"fcvtau_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"fcvtms_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"fcvtmu_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"fcvtns_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"fcvtnu_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"fcvtps_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"fcvtpu_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"fcvtzs_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"fcvtzu_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"fneg_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frecpe_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frint32x_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frint32z_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frint64x_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frint64z_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frinta_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frinti_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frintm_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frintn_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frintp_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frintx_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frintz_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"frsqrte_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"fsqrt_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"scvtf_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"ucvtf_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
++    {"smlal_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
++    {"smlsl_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
++    {"smull_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
++    {"umlal_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
++    {"umlsl_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
++    {"umull_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
++    {"sqdmull_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
++    {"sqdmlal_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
++    {"sqdmlsl_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
++    {"sdot_asimdelem_d", &Disassembler::DisassembleNEONDotProdByElement},
++    {"udot_asimdelem_d", &Disassembler::DisassembleNEONDotProdByElement},
++    {"usdot_asimdelem_d", &Disassembler::DisassembleNEONDotProdByElement},
++    {"sudot_asimdelem_d", &Disassembler::DisassembleNEONDotProdByElement},
++    {"fmlal2_asimdelem_lh", &Disassembler::DisassembleNEONFPMulByElementLong},
++    {"fmlal_asimdelem_lh", &Disassembler::DisassembleNEONFPMulByElementLong},
++    {"fmlsl2_asimdelem_lh", &Disassembler::DisassembleNEONFPMulByElementLong},
++    {"fmlsl_asimdelem_lh", &Disassembler::DisassembleNEONFPMulByElementLong},
++    {"fcmla_asimdelem_c_h",
++      &Disassembler::DisassembleNEONComplexMulByElement},
++    {"fcmla_asimdelem_c_s",
++      &Disassembler::DisassembleNEONComplexMulByElement},
++    {"fmla_asimdelem_rh_h", &Disassembler::DisassembleNEONHalfFPMulByElement},
++    {"fmls_asimdelem_rh_h", &Disassembler::DisassembleNEONHalfFPMulByElement},
++    {"fmulx_asimdelem_rh_h",
++      &Disassembler::DisassembleNEONHalfFPMulByElement},
++    {"fmul_asimdelem_rh_h", &Disassembler::DisassembleNEONHalfFPMulByElement},
++    {"fmla_asimdelem_r_sd", &Disassembler::DisassembleNEONFPMulByElement},
++    {"fmls_asimdelem_r_sd", &Disassembler::DisassembleNEONFPMulByElement},
++    {"fmulx_asimdelem_r_sd", &Disassembler::DisassembleNEONFPMulByElement},
++    {"fmul_asimdelem_r_sd", &Disassembler::DisassembleNEONFPMulByElement},
++    {"mla_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"mls_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"mul_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"saba_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"sabd_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"shadd_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"shsub_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"smaxp_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"smax_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"sminp_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"smin_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"srhadd_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"uaba_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"uabd_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"uhadd_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"uhsub_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"umaxp_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"umax_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"uminp_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"umin_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"urhadd_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
++    {"and_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
++    {"bic_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
++    {"bif_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
++    {"bit_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
++    {"bsl_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
++    {"eor_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
++    {"orr_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
++    {"orn_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
++    {"pmul_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
++    {"fmlal2_asimdsame_f", &Disassembler::DisassembleNEON3SameFHM},
++    {"fmlal_asimdsame_f", &Disassembler::DisassembleNEON3SameFHM},
++    {"fmlsl2_asimdsame_f", &Disassembler::DisassembleNEON3SameFHM},
++    {"fmlsl_asimdsame_f", &Disassembler::DisassembleNEON3SameFHM},
++    {"sri_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
++    {"srshr_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
++    {"srsra_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
++    {"sshr_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
++    {"ssra_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
++    {"urshr_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
++    {"ursra_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
++    {"ushr_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
++    {"usra_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
++    {"scvtf_asimdshf_c", &Disassembler::DisassembleNEONShiftRightImm},
++    {"ucvtf_asimdshf_c", &Disassembler::DisassembleNEONShiftRightImm},
++    {"fcvtzs_asimdshf_c", &Disassembler::DisassembleNEONShiftRightImm},
++    {"fcvtzu_asimdshf_c", &Disassembler::DisassembleNEONShiftRightImm},
++    {"ushll_asimdshf_l", &Disassembler::DisassembleNEONShiftLeftLongImm},
++    {"sshll_asimdshf_l", &Disassembler::DisassembleNEONShiftLeftLongImm},
++    {"shrn_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
++    {"rshrn_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
++    {"sqshrn_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
++    {"sqrshrn_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
++    {"sqshrun_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
++    {"sqrshrun_asimdshf_n",
++      &Disassembler::DisassembleNEONShiftRightNarrowImm},
++    {"uqshrn_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
++    {"uqrshrn_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
++    {"sqdmlal_asisdelem_l",
++      &Disassembler::DisassembleNEONScalarSatMulLongIndex},
++    {"sqdmlsl_asisdelem_l",
++      &Disassembler::DisassembleNEONScalarSatMulLongIndex},
++    {"sqdmull_asisdelem_l",
++      &Disassembler::DisassembleNEONScalarSatMulLongIndex},
++    {"fmla_asisdelem_rh_h", &Disassembler::DisassembleNEONFPScalarMulIndex},
++    {"fmla_asisdelem_r_sd", &Disassembler::DisassembleNEONFPScalarMulIndex},
++    {"fmls_asisdelem_rh_h", &Disassembler::DisassembleNEONFPScalarMulIndex},
++    {"fmls_asisdelem_r_sd", &Disassembler::DisassembleNEONFPScalarMulIndex},
++    {"fmulx_asisdelem_rh_h", &Disassembler::DisassembleNEONFPScalarMulIndex},
++    {"fmulx_asisdelem_r_sd", &Disassembler::DisassembleNEONFPScalarMulIndex},
++    {"fmul_asisdelem_rh_h", &Disassembler::DisassembleNEONFPScalarMulIndex},
++    {"fmul_asisdelem_r_sd", &Disassembler::DisassembleNEONFPScalarMulIndex},
++    {"fabd_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
++    {"facge_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
++    {"facgt_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
++    {"fcmeq_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
++    {"fcmge_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
++    {"fcmgt_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
++    {"fmulx_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
++    {"frecps_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
++    {"frsqrts_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
++    {"sqrdmlah_asisdsame2_only", &Disassembler::VisitNEONScalar3Same},
++    {"sqrdmlsh_asisdsame2_only", &Disassembler::VisitNEONScalar3Same},
++    {"cmeq_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
++    {"cmge_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
++    {"cmgt_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
++    {"cmhi_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
++    {"cmhs_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
++    {"cmtst_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
++    {"add_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
++    {"sub_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
++    {"fmaxnmv_asimdall_only_h",
++      &Disassembler::DisassembleNEONFP16AcrossLanes},
++    {"fmaxv_asimdall_only_h", &Disassembler::DisassembleNEONFP16AcrossLanes},
++    {"fminnmv_asimdall_only_h",
++      &Disassembler::DisassembleNEONFP16AcrossLanes},
++    {"fminv_asimdall_only_h", &Disassembler::DisassembleNEONFP16AcrossLanes},
++    {"fmaxnmv_asimdall_only_sd", &Disassembler::DisassembleNEONFPAcrossLanes},
++    {"fminnmv_asimdall_only_sd", &Disassembler::DisassembleNEONFPAcrossLanes},
++    {"fmaxv_asimdall_only_sd", &Disassembler::DisassembleNEONFPAcrossLanes},
++    {"fminv_asimdall_only_sd", &Disassembler::DisassembleNEONFPAcrossLanes},
++    {"shl_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
++    {"sli_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
++    {"sri_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
++    {"srshr_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
++    {"srsra_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
++    {"sshr_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
++    {"ssra_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
++    {"urshr_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
++    {"ursra_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
++    {"ushr_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
++    {"usra_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
++    {"sqrshrn_asisdshf_n",
++      &Disassembler::DisassembleNEONScalarShiftRightNarrowImm},
++    {"sqrshrun_asisdshf_n",
++      &Disassembler::DisassembleNEONScalarShiftRightNarrowImm},
++    {"sqshrn_asisdshf_n",
++      &Disassembler::DisassembleNEONScalarShiftRightNarrowImm},
++    {"sqshrun_asisdshf_n",
++      &Disassembler::DisassembleNEONScalarShiftRightNarrowImm},
++    {"uqrshrn_asisdshf_n",
++      &Disassembler::DisassembleNEONScalarShiftRightNarrowImm},
++    {"uqshrn_asisdshf_n",
++      &Disassembler::DisassembleNEONScalarShiftRightNarrowImm},
++    {"cmeq_asisdmisc_z", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
++    {"cmge_asisdmisc_z", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
++    {"cmgt_asisdmisc_z", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
++    {"cmle_asisdmisc_z", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
++    {"cmlt_asisdmisc_z", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
++    {"abs_asisdmisc_r", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
++    {"neg_asisdmisc_r", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
++    {"fcmeq_asisdmisc_fz", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcmge_asisdmisc_fz", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcmgt_asisdmisc_fz", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcmle_asisdmisc_fz", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcmlt_asisdmisc_fz", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcvtas_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcvtau_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcvtms_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcvtmu_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcvtns_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcvtnu_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcvtps_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcvtpu_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcvtxn_asisdmisc_n", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcvtzs_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"fcvtzu_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"frecpe_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"frecpx_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"frsqrte_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"scvtf_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"ucvtf_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
++    {"adclb_z_zzz", &Disassembler::DisassembleSVEAddSubCarry},
++    {"adclt_z_zzz", &Disassembler::DisassembleSVEAddSubCarry},
++    {"addhnb_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
++    {"addhnt_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
++    {"addp_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"aesd_z_zz", &Disassembler::Disassemble_ZdnB_ZdnB_ZmB},
++    {"aese_z_zz", &Disassembler::Disassemble_ZdnB_ZdnB_ZmB},
++    {"aesimc_z_z", &Disassembler::Disassemble_ZdnB_ZdnB},
++    {"aesmc_z_z", &Disassembler::Disassemble_ZdnB_ZdnB},
++    {"bcax_z_zzz", &Disassembler::DisassembleSVEBitwiseTernary},
++    {"bdep_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
++    {"bext_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
++    {"bgrp_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
++    {"bsl1n_z_zzz", &Disassembler::DisassembleSVEBitwiseTernary},
++    {"bsl2n_z_zzz", &Disassembler::DisassembleSVEBitwiseTernary},
++    {"bsl_z_zzz", &Disassembler::DisassembleSVEBitwiseTernary},
++    {"cadd_z_zz", &Disassembler::DisassembleSVEComplexIntAddition},
++    {"cdot_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb_const},
++    {"cdot_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnH_ZmH_imm_const},
++    {"cdot_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnB_ZmB_imm_const},
++    {"cmla_z_zzz", &Disassembler::Disassemble_ZdaT_ZnT_ZmT_const},
++    {"cmla_z_zzzi_h", &Disassembler::Disassemble_ZdaH_ZnH_ZmH_imm_const},
++    {"cmla_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnS_ZmS_imm_const},
++    {"eor3_z_zzz", &Disassembler::DisassembleSVEBitwiseTernary},
++    {"eorbt_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
++    {"eortb_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
++    {"ext_z_zi_con", &Disassembler::Disassemble_ZdB_Zn1B_Zn2B_imm},
++    {"faddp_z_p_zz", &Disassembler::DisassembleSVEFPPair},
++    {"fcvtlt_z_p_z_h2s", &Disassembler::Disassemble_ZdS_PgM_ZnH},
++    {"fcvtlt_z_p_z_s2d", &Disassembler::Disassemble_ZdD_PgM_ZnS},
++    {"fcvtnt_z_p_z_d2s", &Disassembler::Disassemble_ZdS_PgM_ZnD},
++    {"fcvtnt_z_p_z_s2h", &Disassembler::Disassemble_ZdH_PgM_ZnS},
++    {"fcvtx_z_p_z_d2s", &Disassembler::Disassemble_ZdS_PgM_ZnD},
++    {"fcvtxnt_z_p_z_d2s", &Disassembler::Disassemble_ZdS_PgM_ZnD},
++    {"flogb_z_p_z", &Disassembler::DisassembleSVEFlogb},
++    {"fmaxnmp_z_p_zz", &Disassembler::DisassembleSVEFPPair},
++    {"fmaxp_z_p_zz", &Disassembler::DisassembleSVEFPPair},
++    {"fminnmp_z_p_zz", &Disassembler::DisassembleSVEFPPair},
++    {"fminp_z_p_zz", &Disassembler::DisassembleSVEFPPair},
++    {"fmlalb_z_zzz", &Disassembler::Disassemble_ZdaS_ZnH_ZmH},
++    {"fmlalb_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
++    {"fmlalt_z_zzz", &Disassembler::Disassemble_ZdaS_ZnH_ZmH},
++    {"fmlalt_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
++    {"fmlslb_z_zzz", &Disassembler::Disassemble_ZdaS_ZnH_ZmH},
++    {"fmlslb_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
++    {"fmlslt_z_zzz", &Disassembler::Disassemble_ZdaS_ZnH_ZmH},
++    {"fmlslt_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
++    {"histcnt_z_p_zz", &Disassembler::Disassemble_ZdT_PgZ_ZnT_ZmT},
++    {"histseg_z_zz", &Disassembler::Disassemble_ZdB_ZnB_ZmB},
++    {"ldnt1b_z_p_ar_d_64_unscaled",
++      &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1b_z_p_ar_s_x32_unscaled",
++      &Disassembler::Disassemble_ZtS_PgZ_ZnS_Xm},
++    {"ldnt1d_z_p_ar_d_64_unscaled",
++      &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1h_z_p_ar_d_64_unscaled",
++      &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1h_z_p_ar_s_x32_unscaled",
++      &Disassembler::Disassemble_ZtS_PgZ_ZnS_Xm},
++    {"ldnt1sb_z_p_ar_d_64_unscaled",
++      &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1sb_z_p_ar_s_x32_unscaled",
++      &Disassembler::Disassemble_ZtS_PgZ_ZnS_Xm},
++    {"ldnt1sh_z_p_ar_d_64_unscaled",
++      &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1sh_z_p_ar_s_x32_unscaled",
++      &Disassembler::Disassemble_ZtS_PgZ_ZnS_Xm},
++    {"ldnt1sw_z_p_ar_d_64_unscaled",
++      &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1w_z_p_ar_d_64_unscaled",
++      &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1w_z_p_ar_s_x32_unscaled",
++      &Disassembler::Disassemble_ZtS_PgZ_ZnS_Xm},
++    {"match_p_p_zz", &Disassembler::Disassemble_PdT_PgZ_ZnT_ZmT},
++    {"mla_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnD_ZmD_imm},
++    {"mla_z_zzzi_h", &Disassembler::Disassemble_ZdH_ZnH_ZmH_imm},
++    {"mla_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnS_ZmS_imm},
++    {"mls_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnD_ZmD_imm},
++    {"mls_z_zzzi_h", &Disassembler::Disassemble_ZdH_ZnH_ZmH_imm},
++    {"mls_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnS_ZmS_imm},
++    {"mul_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
++    {"mul_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnD_ZmD_imm},
++    {"mul_z_zzi_h", &Disassembler::Disassemble_ZdH_ZnH_ZmH_imm},
++    {"mul_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnS_ZmS_imm},
++    {"nbsl_z_zzz", &Disassembler::DisassembleSVEBitwiseTernary},
++    {"nmatch_p_p_zz", &Disassembler::Disassemble_PdT_PgZ_ZnT_ZmT},
++    {"pmul_z_zz", &Disassembler::Disassemble_ZdB_ZnB_ZmB},
++    {"pmullb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"pmullt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"raddhnb_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
++    {"raddhnt_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
++    {"rax1_z_zz", &Disassembler::Disassemble_ZdD_ZnD_ZmD},
++    {"rshrnb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"rshrnt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"rsubhnb_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
++    {"rsubhnt_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
++    {"saba_z_zzz", &Disassembler::Disassemble_ZdaT_ZnT_ZmT},
++    {"sabalb_z_zzz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"sabalt_z_zzz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"sabdlb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"sabdlt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"sadalp_z_p_z", &Disassembler::Disassemble_ZdaT_PgM_ZnTb},
++    {"saddlb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"saddlbt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"saddlt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"saddwb_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
++    {"saddwt_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
++    {"sbclb_z_zzz", &Disassembler::DisassembleSVEAddSubCarry},
++    {"sbclt_z_zzz", &Disassembler::DisassembleSVEAddSubCarry},
++    {"shadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"shrnb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"shrnt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"shsub_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"shsubr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"sli_z_zzi", &Disassembler::VisitSVEBitwiseShiftUnpredicated},
++    {"sm4e_z_zz", &Disassembler::Disassemble_ZdnS_ZdnS_ZmS},
++    {"sm4ekey_z_zz", &Disassembler::Disassemble_ZdS_ZnS_ZmS},
++    {"smaxp_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"sminp_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"smlalb_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"smlalb_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"smlalb_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"smlalt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"smlalt_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"smlalt_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"smlslb_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"smlslb_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"smlslb_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"smlslt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"smlslt_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"smlslt_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"smulh_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
++    {"smullb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"smullb_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"smullb_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"smullt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"smullt_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"smullt_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"splice_z_p_zz_con", &Disassembler::Disassemble_ZdT_Pg_Zn1T_Zn2T},
++    {"sqabs_z_p_z", &Disassembler::Disassemble_ZdT_PgM_ZnT},
++    {"sqadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"sqcadd_z_zz", &Disassembler::DisassembleSVEComplexIntAddition},
++    {"sqdmlalb_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"sqdmlalb_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnS_ZmS_imm},
++    {"sqdmlalb_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
++    {"sqdmlalbt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"sqdmlalt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"sqdmlalt_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnS_ZmS_imm},
++    {"sqdmlalt_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
++    {"sqdmlslb_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"sqdmlslb_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnS_ZmS_imm},
++    {"sqdmlslb_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
++    {"sqdmlslbt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"sqdmlslt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"sqdmlslt_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnS_ZmS_imm},
++    {"sqdmlslt_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
++    {"sqdmulh_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
++    {"sqdmulh_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnD_ZmD_imm},
++    {"sqdmulh_z_zzi_h", &Disassembler::Disassemble_ZdH_ZnH_ZmH_imm},
++    {"sqdmulh_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnS_ZmS_imm},
++    {"sqdmullb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"sqdmullb_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"sqdmullb_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"sqdmullt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"sqdmullt_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"sqdmullt_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"sqneg_z_p_z", &Disassembler::Disassemble_ZdT_PgM_ZnT},
++    {"sqrdcmlah_z_zzz", &Disassembler::Disassemble_ZdaT_ZnT_ZmT_const},
++    {"sqrdcmlah_z_zzzi_h", &Disassembler::Disassemble_ZdaH_ZnH_ZmH_imm_const},
++    {"sqrdcmlah_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnS_ZmS_imm_const},
++    {"sqrdmlah_z_zzz", &Disassembler::Disassemble_ZdaT_ZnT_ZmT},
++    {"sqrdmlah_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnD_ZmD_imm},
++    {"sqrdmlah_z_zzzi_h", &Disassembler::Disassemble_ZdaH_ZnH_ZmH_imm},
++    {"sqrdmlah_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnS_ZmS_imm},
++    {"sqrdmlsh_z_zzz", &Disassembler::Disassemble_ZdaT_ZnT_ZmT},
++    {"sqrdmlsh_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnD_ZmD_imm},
++    {"sqrdmlsh_z_zzzi_h", &Disassembler::Disassemble_ZdaH_ZnH_ZmH_imm},
++    {"sqrdmlsh_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnS_ZmS_imm},
++    {"sqrdmulh_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
++    {"sqrdmulh_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnD_ZmD_imm},
++    {"sqrdmulh_z_zzi_h", &Disassembler::Disassemble_ZdH_ZnH_ZmH_imm},
++    {"sqrdmulh_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnS_ZmS_imm},
++    {"sqrshl_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"sqrshlr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"sqrshrnb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"sqrshrnt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"sqrshrunb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"sqrshrunt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"sqshl_z_p_zi", &Disassembler::VisitSVEBitwiseShiftByImm_Predicated},
++    {"sqshl_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"sqshlr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"sqshlu_z_p_zi", &Disassembler::VisitSVEBitwiseShiftByImm_Predicated},
++    {"sqshrnb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"sqshrnt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"sqshrunb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"sqshrunt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"sqsub_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"sqsubr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"sqxtnb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb},
++    {"sqxtnt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb},
++    {"sqxtunb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb},
++    {"sqxtunt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb},
++    {"srhadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"sri_z_zzi", &Disassembler::VisitSVEBitwiseShiftUnpredicated},
++    {"srshl_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"srshlr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"srshr_z_p_zi", &Disassembler::VisitSVEBitwiseShiftByImm_Predicated},
++    {"srsra_z_zi", &Disassembler::VisitSVEBitwiseShiftUnpredicated},
++    {"sshllb_z_zi", &Disassembler::DisassembleSVEShiftLeftImm},
++    {"sshllt_z_zi", &Disassembler::DisassembleSVEShiftLeftImm},
++    {"ssra_z_zi", &Disassembler::VisitSVEBitwiseShiftUnpredicated},
++    {"ssublb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"ssublbt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"ssublt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"ssubltb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"ssubwb_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
++    {"ssubwt_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
++    {"stnt1b_z_p_ar_d_64_unscaled", &Disassembler::Disassemble_ZtD_Pg_ZnD_Xm},
++    {"stnt1b_z_p_ar_s_x32_unscaled",
++      &Disassembler::Disassemble_ZtS_Pg_ZnS_Xm},
++    {"stnt1d_z_p_ar_d_64_unscaled", &Disassembler::Disassemble_ZtD_Pg_ZnD_Xm},
++    {"stnt1h_z_p_ar_d_64_unscaled", &Disassembler::Disassemble_ZtD_Pg_ZnD_Xm},
++    {"stnt1h_z_p_ar_s_x32_unscaled",
++      &Disassembler::Disassemble_ZtS_Pg_ZnS_Xm},
++    {"stnt1w_z_p_ar_d_64_unscaled", &Disassembler::Disassemble_ZtD_Pg_ZnD_Xm},
++    {"stnt1w_z_p_ar_s_x32_unscaled",
++      &Disassembler::Disassemble_ZtS_Pg_ZnS_Xm},
++    {"subhnb_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
++    {"subhnt_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
++    {"suqadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"tbl_z_zz_2", &Disassembler::Disassemble_ZdT_Zn1T_Zn2T_ZmT},
++    {"tbx_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
++    {"uaba_z_zzz", &Disassembler::Disassemble_ZdaT_ZnT_ZmT},
++    {"uabalb_z_zzz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"uabalt_z_zzz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"uabdlb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"uabdlt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"uadalp_z_p_z", &Disassembler::Disassemble_ZdaT_PgM_ZnTb},
++    {"uaddlb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"uaddlt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"uaddwb_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
++    {"uaddwt_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
++    {"uhadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"uhsub_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"uhsubr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"umaxp_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"uminp_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"umlalb_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"umlalb_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"umlalb_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"umlalt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"umlalt_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"umlalt_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"umlslb_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"umlslb_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"umlslb_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"umlslt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
++    {"umlslt_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"umlslt_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"umulh_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
++    {"umullb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"umullb_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"umullb_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"umullt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"umullt_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
++    {"umullt_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
++    {"uqadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"uqrshl_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"uqrshlr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"uqrshrnb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"uqrshrnt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"uqshl_z_p_zi", &Disassembler::VisitSVEBitwiseShiftByImm_Predicated},
++    {"uqshl_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"uqshlr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"uqshrnb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"uqshrnt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
++    {"uqsub_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"uqsubr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"uqxtnb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb},
++    {"uqxtnt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb},
++    {"urecpe_z_p_z", &Disassembler::Disassemble_ZdS_PgM_ZnS},
++    {"urhadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"urshl_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"urshlr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"urshr_z_p_zi", &Disassembler::VisitSVEBitwiseShiftByImm_Predicated},
++    {"ursqrte_z_p_z", &Disassembler::Disassemble_ZdS_PgM_ZnS},
++    {"ursra_z_zi", &Disassembler::VisitSVEBitwiseShiftUnpredicated},
++    {"ushllb_z_zi", &Disassembler::DisassembleSVEShiftLeftImm},
++    {"ushllt_z_zi", &Disassembler::DisassembleSVEShiftLeftImm},
++    {"usqadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
++    {"usra_z_zi", &Disassembler::VisitSVEBitwiseShiftUnpredicated},
++    {"usublb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"usublt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
++    {"usubwb_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
++    {"usubwt_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
++    {"whilege_p_p_rr", &Disassembler::VisitSVEIntCompareScalarCountAndLimit},
++    {"whilegt_p_p_rr", &Disassembler::VisitSVEIntCompareScalarCountAndLimit},
++    {"whilehi_p_p_rr", &Disassembler::VisitSVEIntCompareScalarCountAndLimit},
++    {"whilehs_p_p_rr", &Disassembler::VisitSVEIntCompareScalarCountAndLimit},
++    {"whilerw_p_rr", &Disassembler::VisitSVEIntCompareScalarCountAndLimit},
++    {"whilewr_p_rr", &Disassembler::VisitSVEIntCompareScalarCountAndLimit},
++    {"xar_z_zzi", &Disassembler::Disassemble_ZdnT_ZdnT_ZmT_const},
++    {"fmmla_z_zzz_s", &Disassembler::Disassemble_ZdaT_ZnT_ZmT},
++    {"fmmla_z_zzz_d", &Disassembler::Disassemble_ZdaT_ZnT_ZmT},
++    {"smmla_z_zzz", &Disassembler::Disassemble_ZdaS_ZnB_ZmB},
++    {"ummla_z_zzz", &Disassembler::Disassemble_ZdaS_ZnB_ZmB},
++    {"usmmla_z_zzz", &Disassembler::Disassemble_ZdaS_ZnB_ZmB},
++    {"usdot_z_zzz_s", &Disassembler::Disassemble_ZdaS_ZnB_ZmB},
++    {"smmla_asimdsame2_g", &Disassembler::Disassemble_Vd4S_Vn16B_Vm16B},
++    {"ummla_asimdsame2_g", &Disassembler::Disassemble_Vd4S_Vn16B_Vm16B},
++    {"usmmla_asimdsame2_g", &Disassembler::Disassemble_Vd4S_Vn16B_Vm16B},
++    {"ld1row_z_p_bi_u32",
++      &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
++    {"ld1row_z_p_br_contiguous",
++      &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
++    {"ld1rod_z_p_bi_u64",
++      &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
++    {"ld1rod_z_p_br_contiguous",
++      &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
++    {"ld1rob_z_p_bi_u8",
++      &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
++    {"ld1rob_z_p_br_contiguous",
++      &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
++    {"ld1roh_z_p_bi_u16",
++      &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
++    {"ld1roh_z_p_br_contiguous",
++      &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
++    {"usdot_z_zzzi_s", &Disassembler::VisitSVEMulIndex},
++    {"sudot_z_zzzi_s", &Disassembler::VisitSVEMulIndex},
++    {"usdot_asimdsame2_d", &Disassembler::VisitNEON3SameExtra},
++};
+ 
+ const Disassembler::FormToVisitorFnMap *Disassembler::GetFormToVisitorFnMap() {
+-  static const FormToVisitorFnMap form_to_visitor = {
+-      DEFAULT_FORM_TO_VISITOR_MAP(Disassembler),
+-      {"autia1716_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"autiasp_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"autiaz_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"autib1716_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"autibsp_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"autibz_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"axflag_m_pstate", &Disassembler::DisassembleNoArgs},
+-      {"cfinv_m_pstate", &Disassembler::DisassembleNoArgs},
+-      {"csdb_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"dgh_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"ssbb_only_barriers", &Disassembler::DisassembleNoArgs},
+-      {"pssbb_only_barriers", &Disassembler::DisassembleNoArgs},
+-      {"esb_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"isb_bi_barriers", &Disassembler::DisassembleNoArgs},
+-      {"nop_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"pacia1716_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"paciasp_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"paciaz_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"pacib1716_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"pacibsp_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"pacibz_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"sev_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"sevl_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"wfe_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"wfi_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"xaflag_m_pstate", &Disassembler::DisassembleNoArgs},
+-      {"xpaclri_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"yield_hi_hints", &Disassembler::DisassembleNoArgs},
+-      {"abs_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"cls_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"clz_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"cnt_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"neg_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"rev16_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"rev32_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"rev64_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"sqabs_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"sqneg_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"suqadd_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"urecpe_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"ursqrte_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"usqadd_asimdmisc_r", &Disassembler::VisitNEON2RegMisc},
+-      {"not_asimdmisc_r", &Disassembler::DisassembleNEON2RegLogical},
+-      {"rbit_asimdmisc_r", &Disassembler::DisassembleNEON2RegLogical},
+-      {"xtn_asimdmisc_n", &Disassembler::DisassembleNEON2RegExtract},
+-      {"sqxtn_asimdmisc_n", &Disassembler::DisassembleNEON2RegExtract},
+-      {"uqxtn_asimdmisc_n", &Disassembler::DisassembleNEON2RegExtract},
+-      {"sqxtun_asimdmisc_n", &Disassembler::DisassembleNEON2RegExtract},
+-      {"shll_asimdmisc_s", &Disassembler::DisassembleNEON2RegExtract},
+-      {"sadalp_asimdmisc_p", &Disassembler::DisassembleNEON2RegAddlp},
+-      {"saddlp_asimdmisc_p", &Disassembler::DisassembleNEON2RegAddlp},
+-      {"uadalp_asimdmisc_p", &Disassembler::DisassembleNEON2RegAddlp},
+-      {"uaddlp_asimdmisc_p", &Disassembler::DisassembleNEON2RegAddlp},
+-      {"cmeq_asimdmisc_z", &Disassembler::DisassembleNEON2RegCompare},
+-      {"cmge_asimdmisc_z", &Disassembler::DisassembleNEON2RegCompare},
+-      {"cmgt_asimdmisc_z", &Disassembler::DisassembleNEON2RegCompare},
+-      {"cmle_asimdmisc_z", &Disassembler::DisassembleNEON2RegCompare},
+-      {"cmlt_asimdmisc_z", &Disassembler::DisassembleNEON2RegCompare},
+-      {"fcmeq_asimdmisc_fz", &Disassembler::DisassembleNEON2RegFPCompare},
+-      {"fcmge_asimdmisc_fz", &Disassembler::DisassembleNEON2RegFPCompare},
+-      {"fcmgt_asimdmisc_fz", &Disassembler::DisassembleNEON2RegFPCompare},
+-      {"fcmle_asimdmisc_fz", &Disassembler::DisassembleNEON2RegFPCompare},
+-      {"fcmlt_asimdmisc_fz", &Disassembler::DisassembleNEON2RegFPCompare},
+-      {"fcvtl_asimdmisc_l", &Disassembler::DisassembleNEON2RegFPConvert},
+-      {"fcvtn_asimdmisc_n", &Disassembler::DisassembleNEON2RegFPConvert},
+-      {"fcvtxn_asimdmisc_n", &Disassembler::DisassembleNEON2RegFPConvert},
+-      {"fabs_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"fcvtas_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"fcvtau_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"fcvtms_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"fcvtmu_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"fcvtns_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"fcvtnu_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"fcvtps_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"fcvtpu_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"fcvtzs_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"fcvtzu_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"fneg_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frecpe_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frint32x_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frint32z_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frint64x_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frint64z_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frinta_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frinti_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frintm_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frintn_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frintp_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frintx_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frintz_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"frsqrte_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"fsqrt_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"scvtf_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"ucvtf_asimdmisc_r", &Disassembler::DisassembleNEON2RegFP},
+-      {"smlal_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
+-      {"smlsl_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
+-      {"smull_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
+-      {"umlal_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
+-      {"umlsl_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
+-      {"umull_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
+-      {"sqdmull_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
+-      {"sqdmlal_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
+-      {"sqdmlsl_asimdelem_l", &Disassembler::DisassembleNEONMulByElementLong},
+-      {"sdot_asimdelem_d", &Disassembler::DisassembleNEONDotProdByElement},
+-      {"udot_asimdelem_d", &Disassembler::DisassembleNEONDotProdByElement},
+-      {"usdot_asimdelem_d", &Disassembler::DisassembleNEONDotProdByElement},
+-      {"sudot_asimdelem_d", &Disassembler::DisassembleNEONDotProdByElement},
+-      {"fmlal2_asimdelem_lh", &Disassembler::DisassembleNEONFPMulByElementLong},
+-      {"fmlal_asimdelem_lh", &Disassembler::DisassembleNEONFPMulByElementLong},
+-      {"fmlsl2_asimdelem_lh", &Disassembler::DisassembleNEONFPMulByElementLong},
+-      {"fmlsl_asimdelem_lh", &Disassembler::DisassembleNEONFPMulByElementLong},
+-      {"fcmla_asimdelem_c_h",
+-       &Disassembler::DisassembleNEONComplexMulByElement},
+-      {"fcmla_asimdelem_c_s",
+-       &Disassembler::DisassembleNEONComplexMulByElement},
+-      {"fmla_asimdelem_rh_h", &Disassembler::DisassembleNEONHalfFPMulByElement},
+-      {"fmls_asimdelem_rh_h", &Disassembler::DisassembleNEONHalfFPMulByElement},
+-      {"fmulx_asimdelem_rh_h",
+-       &Disassembler::DisassembleNEONHalfFPMulByElement},
+-      {"fmul_asimdelem_rh_h", &Disassembler::DisassembleNEONHalfFPMulByElement},
+-      {"fmla_asimdelem_r_sd", &Disassembler::DisassembleNEONFPMulByElement},
+-      {"fmls_asimdelem_r_sd", &Disassembler::DisassembleNEONFPMulByElement},
+-      {"fmulx_asimdelem_r_sd", &Disassembler::DisassembleNEONFPMulByElement},
+-      {"fmul_asimdelem_r_sd", &Disassembler::DisassembleNEONFPMulByElement},
+-      {"mla_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"mls_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"mul_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"saba_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"sabd_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"shadd_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"shsub_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"smaxp_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"smax_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"sminp_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"smin_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"srhadd_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"uaba_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"uabd_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"uhadd_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"uhsub_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"umaxp_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"umax_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"uminp_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"umin_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"urhadd_asimdsame_only", &Disassembler::DisassembleNEON3SameNoD},
+-      {"and_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
+-      {"bic_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
+-      {"bif_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
+-      {"bit_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
+-      {"bsl_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
+-      {"eor_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
+-      {"orr_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
+-      {"orn_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
+-      {"pmul_asimdsame_only", &Disassembler::DisassembleNEON3SameLogical},
+-      {"fmlal2_asimdsame_f", &Disassembler::DisassembleNEON3SameFHM},
+-      {"fmlal_asimdsame_f", &Disassembler::DisassembleNEON3SameFHM},
+-      {"fmlsl2_asimdsame_f", &Disassembler::DisassembleNEON3SameFHM},
+-      {"fmlsl_asimdsame_f", &Disassembler::DisassembleNEON3SameFHM},
+-      {"sri_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"srshr_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"srsra_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"sshr_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"ssra_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"urshr_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"ursra_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"ushr_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"usra_asimdshf_r", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"scvtf_asimdshf_c", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"ucvtf_asimdshf_c", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"fcvtzs_asimdshf_c", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"fcvtzu_asimdshf_c", &Disassembler::DisassembleNEONShiftRightImm},
+-      {"ushll_asimdshf_l", &Disassembler::DisassembleNEONShiftLeftLongImm},
+-      {"sshll_asimdshf_l", &Disassembler::DisassembleNEONShiftLeftLongImm},
+-      {"shrn_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
+-      {"rshrn_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
+-      {"sqshrn_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
+-      {"sqrshrn_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
+-      {"sqshrun_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
+-      {"sqrshrun_asimdshf_n",
+-       &Disassembler::DisassembleNEONShiftRightNarrowImm},
+-      {"uqshrn_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
+-      {"uqrshrn_asimdshf_n", &Disassembler::DisassembleNEONShiftRightNarrowImm},
+-      {"sqdmlal_asisdelem_l",
+-       &Disassembler::DisassembleNEONScalarSatMulLongIndex},
+-      {"sqdmlsl_asisdelem_l",
+-       &Disassembler::DisassembleNEONScalarSatMulLongIndex},
+-      {"sqdmull_asisdelem_l",
+-       &Disassembler::DisassembleNEONScalarSatMulLongIndex},
+-      {"fmla_asisdelem_rh_h", &Disassembler::DisassembleNEONFPScalarMulIndex},
+-      {"fmla_asisdelem_r_sd", &Disassembler::DisassembleNEONFPScalarMulIndex},
+-      {"fmls_asisdelem_rh_h", &Disassembler::DisassembleNEONFPScalarMulIndex},
+-      {"fmls_asisdelem_r_sd", &Disassembler::DisassembleNEONFPScalarMulIndex},
+-      {"fmulx_asisdelem_rh_h", &Disassembler::DisassembleNEONFPScalarMulIndex},
+-      {"fmulx_asisdelem_r_sd", &Disassembler::DisassembleNEONFPScalarMulIndex},
+-      {"fmul_asisdelem_rh_h", &Disassembler::DisassembleNEONFPScalarMulIndex},
+-      {"fmul_asisdelem_r_sd", &Disassembler::DisassembleNEONFPScalarMulIndex},
+-      {"fabd_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
+-      {"facge_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
+-      {"facgt_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
+-      {"fcmeq_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
+-      {"fcmge_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
+-      {"fcmgt_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
+-      {"fmulx_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
+-      {"frecps_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
+-      {"frsqrts_asisdsame_only", &Disassembler::DisassembleNEONFPScalar3Same},
+-      {"sqrdmlah_asisdsame2_only", &Disassembler::VisitNEONScalar3Same},
+-      {"sqrdmlsh_asisdsame2_only", &Disassembler::VisitNEONScalar3Same},
+-      {"cmeq_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
+-      {"cmge_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
+-      {"cmgt_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
+-      {"cmhi_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
+-      {"cmhs_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
+-      {"cmtst_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
+-      {"add_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
+-      {"sub_asisdsame_only", &Disassembler::DisassembleNEONScalar3SameOnlyD},
+-      {"fmaxnmv_asimdall_only_h",
+-       &Disassembler::DisassembleNEONFP16AcrossLanes},
+-      {"fmaxv_asimdall_only_h", &Disassembler::DisassembleNEONFP16AcrossLanes},
+-      {"fminnmv_asimdall_only_h",
+-       &Disassembler::DisassembleNEONFP16AcrossLanes},
+-      {"fminv_asimdall_only_h", &Disassembler::DisassembleNEONFP16AcrossLanes},
+-      {"fmaxnmv_asimdall_only_sd", &Disassembler::DisassembleNEONFPAcrossLanes},
+-      {"fminnmv_asimdall_only_sd", &Disassembler::DisassembleNEONFPAcrossLanes},
+-      {"fmaxv_asimdall_only_sd", &Disassembler::DisassembleNEONFPAcrossLanes},
+-      {"fminv_asimdall_only_sd", &Disassembler::DisassembleNEONFPAcrossLanes},
+-      {"shl_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
+-      {"sli_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
+-      {"sri_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
+-      {"srshr_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
+-      {"srsra_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
+-      {"sshr_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
+-      {"ssra_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
+-      {"urshr_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
+-      {"ursra_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
+-      {"ushr_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
+-      {"usra_asisdshf_r", &Disassembler::DisassembleNEONScalarShiftImmOnlyD},
+-      {"sqrshrn_asisdshf_n",
+-       &Disassembler::DisassembleNEONScalarShiftRightNarrowImm},
+-      {"sqrshrun_asisdshf_n",
+-       &Disassembler::DisassembleNEONScalarShiftRightNarrowImm},
+-      {"sqshrn_asisdshf_n",
+-       &Disassembler::DisassembleNEONScalarShiftRightNarrowImm},
+-      {"sqshrun_asisdshf_n",
+-       &Disassembler::DisassembleNEONScalarShiftRightNarrowImm},
+-      {"uqrshrn_asisdshf_n",
+-       &Disassembler::DisassembleNEONScalarShiftRightNarrowImm},
+-      {"uqshrn_asisdshf_n",
+-       &Disassembler::DisassembleNEONScalarShiftRightNarrowImm},
+-      {"cmeq_asisdmisc_z", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
+-      {"cmge_asisdmisc_z", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
+-      {"cmgt_asisdmisc_z", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
+-      {"cmle_asisdmisc_z", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
+-      {"cmlt_asisdmisc_z", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
+-      {"abs_asisdmisc_r", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
+-      {"neg_asisdmisc_r", &Disassembler::DisassembleNEONScalar2RegMiscOnlyD},
+-      {"fcmeq_asisdmisc_fz", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcmge_asisdmisc_fz", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcmgt_asisdmisc_fz", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcmle_asisdmisc_fz", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcmlt_asisdmisc_fz", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcvtas_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcvtau_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcvtms_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcvtmu_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcvtns_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcvtnu_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcvtps_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcvtpu_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcvtxn_asisdmisc_n", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcvtzs_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"fcvtzu_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"frecpe_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"frecpx_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"frsqrte_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"scvtf_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"ucvtf_asisdmisc_r", &Disassembler::DisassembleNEONFPScalar2RegMisc},
+-      {"adclb_z_zzz", &Disassembler::DisassembleSVEAddSubCarry},
+-      {"adclt_z_zzz", &Disassembler::DisassembleSVEAddSubCarry},
+-      {"addhnb_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
+-      {"addhnt_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
+-      {"addp_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"aesd_z_zz", &Disassembler::Disassemble_ZdnB_ZdnB_ZmB},
+-      {"aese_z_zz", &Disassembler::Disassemble_ZdnB_ZdnB_ZmB},
+-      {"aesimc_z_z", &Disassembler::Disassemble_ZdnB_ZdnB},
+-      {"aesmc_z_z", &Disassembler::Disassemble_ZdnB_ZdnB},
+-      {"bcax_z_zzz", &Disassembler::DisassembleSVEBitwiseTernary},
+-      {"bdep_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
+-      {"bext_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
+-      {"bgrp_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
+-      {"bsl1n_z_zzz", &Disassembler::DisassembleSVEBitwiseTernary},
+-      {"bsl2n_z_zzz", &Disassembler::DisassembleSVEBitwiseTernary},
+-      {"bsl_z_zzz", &Disassembler::DisassembleSVEBitwiseTernary},
+-      {"cadd_z_zz", &Disassembler::DisassembleSVEComplexIntAddition},
+-      {"cdot_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb_const},
+-      {"cdot_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnH_ZmH_imm_const},
+-      {"cdot_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnB_ZmB_imm_const},
+-      {"cmla_z_zzz", &Disassembler::Disassemble_ZdaT_ZnT_ZmT_const},
+-      {"cmla_z_zzzi_h", &Disassembler::Disassemble_ZdaH_ZnH_ZmH_imm_const},
+-      {"cmla_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnS_ZmS_imm_const},
+-      {"eor3_z_zzz", &Disassembler::DisassembleSVEBitwiseTernary},
+-      {"eorbt_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
+-      {"eortb_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
+-      {"ext_z_zi_con", &Disassembler::Disassemble_ZdB_Zn1B_Zn2B_imm},
+-      {"faddp_z_p_zz", &Disassembler::DisassembleSVEFPPair},
+-      {"fcvtlt_z_p_z_h2s", &Disassembler::Disassemble_ZdS_PgM_ZnH},
+-      {"fcvtlt_z_p_z_s2d", &Disassembler::Disassemble_ZdD_PgM_ZnS},
+-      {"fcvtnt_z_p_z_d2s", &Disassembler::Disassemble_ZdS_PgM_ZnD},
+-      {"fcvtnt_z_p_z_s2h", &Disassembler::Disassemble_ZdH_PgM_ZnS},
+-      {"fcvtx_z_p_z_d2s", &Disassembler::Disassemble_ZdS_PgM_ZnD},
+-      {"fcvtxnt_z_p_z_d2s", &Disassembler::Disassemble_ZdS_PgM_ZnD},
+-      {"flogb_z_p_z", &Disassembler::DisassembleSVEFlogb},
+-      {"fmaxnmp_z_p_zz", &Disassembler::DisassembleSVEFPPair},
+-      {"fmaxp_z_p_zz", &Disassembler::DisassembleSVEFPPair},
+-      {"fminnmp_z_p_zz", &Disassembler::DisassembleSVEFPPair},
+-      {"fminp_z_p_zz", &Disassembler::DisassembleSVEFPPair},
+-      {"fmlalb_z_zzz", &Disassembler::Disassemble_ZdaS_ZnH_ZmH},
+-      {"fmlalb_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
+-      {"fmlalt_z_zzz", &Disassembler::Disassemble_ZdaS_ZnH_ZmH},
+-      {"fmlalt_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
+-      {"fmlslb_z_zzz", &Disassembler::Disassemble_ZdaS_ZnH_ZmH},
+-      {"fmlslb_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
+-      {"fmlslt_z_zzz", &Disassembler::Disassemble_ZdaS_ZnH_ZmH},
+-      {"fmlslt_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
+-      {"histcnt_z_p_zz", &Disassembler::Disassemble_ZdT_PgZ_ZnT_ZmT},
+-      {"histseg_z_zz", &Disassembler::Disassemble_ZdB_ZnB_ZmB},
+-      {"ldnt1b_z_p_ar_d_64_unscaled",
+-       &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1b_z_p_ar_s_x32_unscaled",
+-       &Disassembler::Disassemble_ZtS_PgZ_ZnS_Xm},
+-      {"ldnt1d_z_p_ar_d_64_unscaled",
+-       &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1h_z_p_ar_d_64_unscaled",
+-       &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1h_z_p_ar_s_x32_unscaled",
+-       &Disassembler::Disassemble_ZtS_PgZ_ZnS_Xm},
+-      {"ldnt1sb_z_p_ar_d_64_unscaled",
+-       &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1sb_z_p_ar_s_x32_unscaled",
+-       &Disassembler::Disassemble_ZtS_PgZ_ZnS_Xm},
+-      {"ldnt1sh_z_p_ar_d_64_unscaled",
+-       &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1sh_z_p_ar_s_x32_unscaled",
+-       &Disassembler::Disassemble_ZtS_PgZ_ZnS_Xm},
+-      {"ldnt1sw_z_p_ar_d_64_unscaled",
+-       &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1w_z_p_ar_d_64_unscaled",
+-       &Disassembler::Disassemble_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1w_z_p_ar_s_x32_unscaled",
+-       &Disassembler::Disassemble_ZtS_PgZ_ZnS_Xm},
+-      {"match_p_p_zz", &Disassembler::Disassemble_PdT_PgZ_ZnT_ZmT},
+-      {"mla_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnD_ZmD_imm},
+-      {"mla_z_zzzi_h", &Disassembler::Disassemble_ZdH_ZnH_ZmH_imm},
+-      {"mla_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnS_ZmS_imm},
+-      {"mls_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnD_ZmD_imm},
+-      {"mls_z_zzzi_h", &Disassembler::Disassemble_ZdH_ZnH_ZmH_imm},
+-      {"mls_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnS_ZmS_imm},
+-      {"mul_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
+-      {"mul_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnD_ZmD_imm},
+-      {"mul_z_zzi_h", &Disassembler::Disassemble_ZdH_ZnH_ZmH_imm},
+-      {"mul_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnS_ZmS_imm},
+-      {"nbsl_z_zzz", &Disassembler::DisassembleSVEBitwiseTernary},
+-      {"nmatch_p_p_zz", &Disassembler::Disassemble_PdT_PgZ_ZnT_ZmT},
+-      {"pmul_z_zz", &Disassembler::Disassemble_ZdB_ZnB_ZmB},
+-      {"pmullb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"pmullt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"raddhnb_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
+-      {"raddhnt_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
+-      {"rax1_z_zz", &Disassembler::Disassemble_ZdD_ZnD_ZmD},
+-      {"rshrnb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"rshrnt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"rsubhnb_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
+-      {"rsubhnt_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
+-      {"saba_z_zzz", &Disassembler::Disassemble_ZdaT_ZnT_ZmT},
+-      {"sabalb_z_zzz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"sabalt_z_zzz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"sabdlb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"sabdlt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"sadalp_z_p_z", &Disassembler::Disassemble_ZdaT_PgM_ZnTb},
+-      {"saddlb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"saddlbt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"saddlt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"saddwb_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
+-      {"saddwt_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
+-      {"sbclb_z_zzz", &Disassembler::DisassembleSVEAddSubCarry},
+-      {"sbclt_z_zzz", &Disassembler::DisassembleSVEAddSubCarry},
+-      {"shadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"shrnb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"shrnt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"shsub_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"shsubr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"sli_z_zzi", &Disassembler::VisitSVEBitwiseShiftUnpredicated},
+-      {"sm4e_z_zz", &Disassembler::Disassemble_ZdnS_ZdnS_ZmS},
+-      {"sm4ekey_z_zz", &Disassembler::Disassemble_ZdS_ZnS_ZmS},
+-      {"smaxp_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"sminp_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"smlalb_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"smlalb_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"smlalb_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"smlalt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"smlalt_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"smlalt_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"smlslb_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"smlslb_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"smlslb_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"smlslt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"smlslt_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"smlslt_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"smulh_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
+-      {"smullb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"smullb_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"smullb_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"smullt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"smullt_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"smullt_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"splice_z_p_zz_con", &Disassembler::Disassemble_ZdT_Pg_Zn1T_Zn2T},
+-      {"sqabs_z_p_z", &Disassembler::Disassemble_ZdT_PgM_ZnT},
+-      {"sqadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"sqcadd_z_zz", &Disassembler::DisassembleSVEComplexIntAddition},
+-      {"sqdmlalb_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"sqdmlalb_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnS_ZmS_imm},
+-      {"sqdmlalb_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
+-      {"sqdmlalbt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"sqdmlalt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"sqdmlalt_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnS_ZmS_imm},
+-      {"sqdmlalt_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
+-      {"sqdmlslb_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"sqdmlslb_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnS_ZmS_imm},
+-      {"sqdmlslb_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
+-      {"sqdmlslbt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"sqdmlslt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"sqdmlslt_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnS_ZmS_imm},
+-      {"sqdmlslt_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnH_ZmH_imm},
+-      {"sqdmulh_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
+-      {"sqdmulh_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnD_ZmD_imm},
+-      {"sqdmulh_z_zzi_h", &Disassembler::Disassemble_ZdH_ZnH_ZmH_imm},
+-      {"sqdmulh_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnS_ZmS_imm},
+-      {"sqdmullb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"sqdmullb_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"sqdmullb_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"sqdmullt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"sqdmullt_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"sqdmullt_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"sqneg_z_p_z", &Disassembler::Disassemble_ZdT_PgM_ZnT},
+-      {"sqrdcmlah_z_zzz", &Disassembler::Disassemble_ZdaT_ZnT_ZmT_const},
+-      {"sqrdcmlah_z_zzzi_h", &Disassembler::Disassemble_ZdaH_ZnH_ZmH_imm_const},
+-      {"sqrdcmlah_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnS_ZmS_imm_const},
+-      {"sqrdmlah_z_zzz", &Disassembler::Disassemble_ZdaT_ZnT_ZmT},
+-      {"sqrdmlah_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnD_ZmD_imm},
+-      {"sqrdmlah_z_zzzi_h", &Disassembler::Disassemble_ZdaH_ZnH_ZmH_imm},
+-      {"sqrdmlah_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnS_ZmS_imm},
+-      {"sqrdmlsh_z_zzz", &Disassembler::Disassemble_ZdaT_ZnT_ZmT},
+-      {"sqrdmlsh_z_zzzi_d", &Disassembler::Disassemble_ZdaD_ZnD_ZmD_imm},
+-      {"sqrdmlsh_z_zzzi_h", &Disassembler::Disassemble_ZdaH_ZnH_ZmH_imm},
+-      {"sqrdmlsh_z_zzzi_s", &Disassembler::Disassemble_ZdaS_ZnS_ZmS_imm},
+-      {"sqrdmulh_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
+-      {"sqrdmulh_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnD_ZmD_imm},
+-      {"sqrdmulh_z_zzi_h", &Disassembler::Disassemble_ZdH_ZnH_ZmH_imm},
+-      {"sqrdmulh_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnS_ZmS_imm},
+-      {"sqrshl_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"sqrshlr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"sqrshrnb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"sqrshrnt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"sqrshrunb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"sqrshrunt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"sqshl_z_p_zi", &Disassembler::VisitSVEBitwiseShiftByImm_Predicated},
+-      {"sqshl_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"sqshlr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"sqshlu_z_p_zi", &Disassembler::VisitSVEBitwiseShiftByImm_Predicated},
+-      {"sqshrnb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"sqshrnt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"sqshrunb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"sqshrunt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"sqsub_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"sqsubr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"sqxtnb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb},
+-      {"sqxtnt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb},
+-      {"sqxtunb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb},
+-      {"sqxtunt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb},
+-      {"srhadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"sri_z_zzi", &Disassembler::VisitSVEBitwiseShiftUnpredicated},
+-      {"srshl_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"srshlr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"srshr_z_p_zi", &Disassembler::VisitSVEBitwiseShiftByImm_Predicated},
+-      {"srsra_z_zi", &Disassembler::VisitSVEBitwiseShiftUnpredicated},
+-      {"sshllb_z_zi", &Disassembler::DisassembleSVEShiftLeftImm},
+-      {"sshllt_z_zi", &Disassembler::DisassembleSVEShiftLeftImm},
+-      {"ssra_z_zi", &Disassembler::VisitSVEBitwiseShiftUnpredicated},
+-      {"ssublb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"ssublbt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"ssublt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"ssubltb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"ssubwb_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
+-      {"ssubwt_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
+-      {"stnt1b_z_p_ar_d_64_unscaled", &Disassembler::Disassemble_ZtD_Pg_ZnD_Xm},
+-      {"stnt1b_z_p_ar_s_x32_unscaled",
+-       &Disassembler::Disassemble_ZtS_Pg_ZnS_Xm},
+-      {"stnt1d_z_p_ar_d_64_unscaled", &Disassembler::Disassemble_ZtD_Pg_ZnD_Xm},
+-      {"stnt1h_z_p_ar_d_64_unscaled", &Disassembler::Disassemble_ZtD_Pg_ZnD_Xm},
+-      {"stnt1h_z_p_ar_s_x32_unscaled",
+-       &Disassembler::Disassemble_ZtS_Pg_ZnS_Xm},
+-      {"stnt1w_z_p_ar_d_64_unscaled", &Disassembler::Disassemble_ZtD_Pg_ZnD_Xm},
+-      {"stnt1w_z_p_ar_s_x32_unscaled",
+-       &Disassembler::Disassemble_ZtS_Pg_ZnS_Xm},
+-      {"subhnb_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
+-      {"subhnt_z_zz", &Disassembler::DisassembleSVEAddSubHigh},
+-      {"suqadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"tbl_z_zz_2", &Disassembler::Disassemble_ZdT_Zn1T_Zn2T_ZmT},
+-      {"tbx_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
+-      {"uaba_z_zzz", &Disassembler::Disassemble_ZdaT_ZnT_ZmT},
+-      {"uabalb_z_zzz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"uabalt_z_zzz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"uabdlb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"uabdlt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"uadalp_z_p_z", &Disassembler::Disassemble_ZdaT_PgM_ZnTb},
+-      {"uaddlb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"uaddlt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"uaddwb_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
+-      {"uaddwt_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
+-      {"uhadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"uhsub_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"uhsubr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"umaxp_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"uminp_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"umlalb_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"umlalb_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"umlalb_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"umlalt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"umlalt_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"umlalt_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"umlslb_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"umlslb_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"umlslb_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"umlslt_z_zzz", &Disassembler::Disassemble_ZdaT_ZnTb_ZmTb},
+-      {"umlslt_z_zzzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"umlslt_z_zzzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"umulh_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmT},
+-      {"umullb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"umullb_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"umullb_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"umullt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"umullt_z_zzi_d", &Disassembler::Disassemble_ZdD_ZnS_ZmS_imm},
+-      {"umullt_z_zzi_s", &Disassembler::Disassemble_ZdS_ZnH_ZmH_imm},
+-      {"uqadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"uqrshl_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"uqrshlr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"uqrshrnb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"uqrshrnt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"uqshl_z_p_zi", &Disassembler::VisitSVEBitwiseShiftByImm_Predicated},
+-      {"uqshl_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"uqshlr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"uqshrnb_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"uqshrnt_z_zi", &Disassembler::DisassembleSVEShiftRightImm},
+-      {"uqsub_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"uqsubr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"uqxtnb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb},
+-      {"uqxtnt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb},
+-      {"urecpe_z_p_z", &Disassembler::Disassemble_ZdS_PgM_ZnS},
+-      {"urhadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"urshl_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"urshlr_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"urshr_z_p_zi", &Disassembler::VisitSVEBitwiseShiftByImm_Predicated},
+-      {"ursqrte_z_p_z", &Disassembler::Disassemble_ZdS_PgM_ZnS},
+-      {"ursra_z_zi", &Disassembler::VisitSVEBitwiseShiftUnpredicated},
+-      {"ushllb_z_zi", &Disassembler::DisassembleSVEShiftLeftImm},
+-      {"ushllt_z_zi", &Disassembler::DisassembleSVEShiftLeftImm},
+-      {"usqadd_z_p_zz", &Disassembler::Disassemble_ZdnT_PgM_ZdnT_ZmT},
+-      {"usra_z_zi", &Disassembler::VisitSVEBitwiseShiftUnpredicated},
+-      {"usublb_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"usublt_z_zz", &Disassembler::Disassemble_ZdT_ZnTb_ZmTb},
+-      {"usubwb_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
+-      {"usubwt_z_zz", &Disassembler::Disassemble_ZdT_ZnT_ZmTb},
+-      {"whilege_p_p_rr", &Disassembler::VisitSVEIntCompareScalarCountAndLimit},
+-      {"whilegt_p_p_rr", &Disassembler::VisitSVEIntCompareScalarCountAndLimit},
+-      {"whilehi_p_p_rr", &Disassembler::VisitSVEIntCompareScalarCountAndLimit},
+-      {"whilehs_p_p_rr", &Disassembler::VisitSVEIntCompareScalarCountAndLimit},
+-      {"whilerw_p_rr", &Disassembler::VisitSVEIntCompareScalarCountAndLimit},
+-      {"whilewr_p_rr", &Disassembler::VisitSVEIntCompareScalarCountAndLimit},
+-      {"xar_z_zzi", &Disassembler::Disassemble_ZdnT_ZdnT_ZmT_const},
+-      {"fmmla_z_zzz_s", &Disassembler::Disassemble_ZdaT_ZnT_ZmT},
+-      {"fmmla_z_zzz_d", &Disassembler::Disassemble_ZdaT_ZnT_ZmT},
+-      {"smmla_z_zzz", &Disassembler::Disassemble_ZdaS_ZnB_ZmB},
+-      {"ummla_z_zzz", &Disassembler::Disassemble_ZdaS_ZnB_ZmB},
+-      {"usmmla_z_zzz", &Disassembler::Disassemble_ZdaS_ZnB_ZmB},
+-      {"usdot_z_zzz_s", &Disassembler::Disassemble_ZdaS_ZnB_ZmB},
+-      {"smmla_asimdsame2_g", &Disassembler::Disassemble_Vd4S_Vn16B_Vm16B},
+-      {"ummla_asimdsame2_g", &Disassembler::Disassemble_Vd4S_Vn16B_Vm16B},
+-      {"usmmla_asimdsame2_g", &Disassembler::Disassemble_Vd4S_Vn16B_Vm16B},
+-      {"ld1row_z_p_bi_u32",
+-       &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
+-      {"ld1row_z_p_br_contiguous",
+-       &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
+-      {"ld1rod_z_p_bi_u64",
+-       &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
+-      {"ld1rod_z_p_br_contiguous",
+-       &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
+-      {"ld1rob_z_p_bi_u8",
+-       &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
+-      {"ld1rob_z_p_br_contiguous",
+-       &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
+-      {"ld1roh_z_p_bi_u16",
+-       &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
+-      {"ld1roh_z_p_br_contiguous",
+-       &Disassembler::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
+-      {"usdot_z_zzzi_s", &Disassembler::VisitSVEMulIndex},
+-      {"sudot_z_zzzi_s", &Disassembler::VisitSVEMulIndex},
+-      {"usdot_asimdsame2_d", &Disassembler::VisitNEON3SameExtra},
+-  };
+-  return &form_to_visitor;
++  return &FORM_TO_VISITOR;
+ }  // NOLINT(readability/fn_size)
+ 
+ #ifndef PANDA_BUILD
+@@ -10361,13 +10366,13 @@ int Disassembler::SubstitutePrefetchField(const Instruction *instr,
+   int placeholder_length = is_sve ? 9 : 6;
+   static const char *stream_options[] = {"keep", "strm"};
+ 
+-  auto get_hints = [](bool want_sve_hint) -> std::vector<std::string> {
+-    static const std::vector<std::string> sve_hints = {"ld", "st"};
+-    static const std::vector<std::string> core_hints = {"ld", "li", "st"};
+-    return (want_sve_hint) ? sve_hints : core_hints;
++  auto get_hints = [](bool want_sve_hint) {
++    static constexpr std::array<const char* const, 2U> sve_hints = {"ld", "st"};
++    static constexpr std::array<const char* const, 3U> core_hints = {"ld", "li", "st"};
++    return (want_sve_hint) ? panda::Span(sve_hints) : panda::Span(core_hints);
+   };
+ 
+-  std::vector<std::string> hints = get_hints(is_sve);
++  auto hints = get_hints(is_sve);
+   unsigned hint =
+       is_sve ? instr->GetSVEPrefetchHint() : instr->GetPrefetchHint();
+   unsigned target = instr->GetPrefetchTarget() + 1;
+@@ -10385,7 +10390,7 @@ int Disassembler::SubstitutePrefetchField(const Instruction *instr,
+   } else {
+     VIXL_ASSERT(stream < ArrayLength(stream_options));
+     AppendToOutput("p%sl%d%s",
+-                   hints[hint].c_str(),
++                   hints[hint],
+                    target,
+                    stream_options[stream]);
+   }
+diff --git a/src/aarch64/disasm-aarch64.h b/src/aarch64/disasm-aarch64.h
+index 008adfc..d3f242a 100644
+--- a/src/aarch64/disasm-aarch64.h
++++ b/src/aarch64/disasm-aarch64.h
+@@ -126,9 +126,10 @@ class Disassembler : public DecoderVisitor {
+   VISITOR_LIST(DECLARE)
+ #undef DECLARE
+ 
+-  using FormToVisitorFnMap = std::unordered_map<
+-      std::string,
+-      std::function<void(Disassembler*, const Instruction*)>>;
++  using FormToVisitorFnMap = FormToVisitorFnMapT<Disassembler>;
++
++  static const FormToVisitorFnMap FORM_TO_VISITOR;
++
+   static const FormToVisitorFnMap* GetFormToVisitorFnMap();
+ 
+   std::string mnemonic_;
+diff --git a/src/aarch64/simulator-aarch64.cc b/src/aarch64/simulator-aarch64.cc
+index bc1811f..30ddc43 100644
+--- a/src/aarch64/simulator-aarch64.cc
++++ b/src/aarch64/simulator-aarch64.cc
+@@ -66,348 +66,348 @@ SimSystemRegister SimSystemRegister::DefaultValueFor(SystemRegister id) {
+   }
+ }
+ 
++const Simulator::FormToVisitorFnMap Simulator::FORM_TO_VISITOR = {
++    DEFAULT_FORM_TO_VISITOR_MAP(Simulator),
++    SIM_AUD_VISITOR_MAP(Simulator),
++    {"smlal_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
++    {"smlsl_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
++    {"smull_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
++    {"sqdmlal_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
++    {"sqdmlsl_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
++    {"sqdmull_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
++    {"umlal_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
++    {"umlsl_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
++    {"umull_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
++    {"fcmla_asimdelem_c_h", &Simulator::SimulateNEONComplexMulByElement},
++    {"fcmla_asimdelem_c_s", &Simulator::SimulateNEONComplexMulByElement},
++    {"fmlal2_asimdelem_lh", &Simulator::SimulateNEONFPMulByElementLong},
++    {"fmlal_asimdelem_lh", &Simulator::SimulateNEONFPMulByElementLong},
++    {"fmlsl2_asimdelem_lh", &Simulator::SimulateNEONFPMulByElementLong},
++    {"fmlsl_asimdelem_lh", &Simulator::SimulateNEONFPMulByElementLong},
++    {"fmla_asimdelem_rh_h", &Simulator::SimulateNEONFPMulByElement},
++    {"fmls_asimdelem_rh_h", &Simulator::SimulateNEONFPMulByElement},
++    {"fmulx_asimdelem_rh_h", &Simulator::SimulateNEONFPMulByElement},
++    {"fmul_asimdelem_rh_h", &Simulator::SimulateNEONFPMulByElement},
++    {"fmla_asimdelem_r_sd", &Simulator::SimulateNEONFPMulByElement},
++    {"fmls_asimdelem_r_sd", &Simulator::SimulateNEONFPMulByElement},
++    {"fmulx_asimdelem_r_sd", &Simulator::SimulateNEONFPMulByElement},
++    {"fmul_asimdelem_r_sd", &Simulator::SimulateNEONFPMulByElement},
++    {"sdot_asimdelem_d", &Simulator::SimulateNEONDotProdByElement},
++    {"udot_asimdelem_d", &Simulator::SimulateNEONDotProdByElement},
++    {"adclb_z_zzz", &Simulator::SimulateSVEAddSubCarry},
++    {"adclt_z_zzz", &Simulator::SimulateSVEAddSubCarry},
++    {"addhnb_z_zz", &Simulator::SimulateSVEAddSubHigh},
++    {"addhnt_z_zz", &Simulator::SimulateSVEAddSubHigh},
++    {"addp_z_p_zz", &Simulator::SimulateSVEIntArithPair},
++    {"bcax_z_zzz", &Simulator::SimulateSVEBitwiseTernary},
++    {"bdep_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
++    {"bext_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
++    {"bgrp_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
++    {"bsl1n_z_zzz", &Simulator::SimulateSVEBitwiseTernary},
++    {"bsl2n_z_zzz", &Simulator::SimulateSVEBitwiseTernary},
++    {"bsl_z_zzz", &Simulator::SimulateSVEBitwiseTernary},
++    {"cadd_z_zz", &Simulator::Simulate_ZdnT_ZdnT_ZmT_const},
++    {"cdot_z_zzz", &Simulator::SimulateSVEComplexDotProduct},
++    {"cdot_z_zzzi_d", &Simulator::SimulateSVEComplexDotProduct},
++    {"cdot_z_zzzi_s", &Simulator::SimulateSVEComplexDotProduct},
++    {"cmla_z_zzz", &Simulator::SimulateSVEComplexIntMulAdd},
++    {"cmla_z_zzzi_h", &Simulator::SimulateSVEComplexIntMulAdd},
++    {"cmla_z_zzzi_s", &Simulator::SimulateSVEComplexIntMulAdd},
++    {"eor3_z_zzz", &Simulator::SimulateSVEBitwiseTernary},
++    {"eorbt_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
++    {"eortb_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
++    {"ext_z_zi_con", &Simulator::Simulate_ZdB_Zn1B_Zn2B_imm},
++    {"faddp_z_p_zz", &Simulator::Simulate_ZdnT_PgM_ZdnT_ZmT},
++    {"fcvtlt_z_p_z_h2s", &Simulator::SimulateSVEFPConvertLong},
++    {"fcvtlt_z_p_z_s2d", &Simulator::SimulateSVEFPConvertLong},
++    {"fcvtnt_z_p_z_d2s", &Simulator::Simulate_ZdS_PgM_ZnD},
++    {"fcvtnt_z_p_z_s2h", &Simulator::Simulate_ZdH_PgM_ZnS},
++    {"fcvtx_z_p_z_d2s", &Simulator::Simulate_ZdS_PgM_ZnD},
++    {"fcvtxnt_z_p_z_d2s", &Simulator::Simulate_ZdS_PgM_ZnD},
++    {"flogb_z_p_z", &Simulator::Simulate_ZdT_PgM_ZnT},
++    {"fmaxnmp_z_p_zz", &Simulator::Simulate_ZdnT_PgM_ZdnT_ZmT},
++    {"fmaxp_z_p_zz", &Simulator::Simulate_ZdnT_PgM_ZdnT_ZmT},
++    {"fminnmp_z_p_zz", &Simulator::Simulate_ZdnT_PgM_ZdnT_ZmT},
++    {"fminp_z_p_zz", &Simulator::Simulate_ZdnT_PgM_ZdnT_ZmT},
++    {"fmlalb_z_zzz", &Simulator::Simulate_ZdaS_ZnH_ZmH},
++    {"fmlalb_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
++    {"fmlalt_z_zzz", &Simulator::Simulate_ZdaS_ZnH_ZmH},
++    {"fmlalt_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
++    {"fmlslb_z_zzz", &Simulator::Simulate_ZdaS_ZnH_ZmH},
++    {"fmlslb_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
++    {"fmlslt_z_zzz", &Simulator::Simulate_ZdaS_ZnH_ZmH},
++    {"fmlslt_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
++    {"histcnt_z_p_zz", &Simulator::Simulate_ZdT_PgZ_ZnT_ZmT},
++    {"histseg_z_zz", &Simulator::Simulate_ZdB_ZnB_ZmB},
++    {"ldnt1b_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1b_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_PgZ_ZnS_Xm},
++    {"ldnt1d_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1h_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1h_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_PgZ_ZnS_Xm},
++    {"ldnt1sb_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1sb_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_PgZ_ZnS_Xm},
++    {"ldnt1sh_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1sh_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_PgZ_ZnS_Xm},
++    {"ldnt1sw_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1w_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
++    {"ldnt1w_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_PgZ_ZnS_Xm},
++    {"match_p_p_zz", &Simulator::Simulate_PdT_PgZ_ZnT_ZmT},
++    {"mla_z_zzzi_d", &Simulator::SimulateSVEMlaMlsIndex},
++    {"mla_z_zzzi_h", &Simulator::SimulateSVEMlaMlsIndex},
++    {"mla_z_zzzi_s", &Simulator::SimulateSVEMlaMlsIndex},
++    {"mls_z_zzzi_d", &Simulator::SimulateSVEMlaMlsIndex},
++    {"mls_z_zzzi_h", &Simulator::SimulateSVEMlaMlsIndex},
++    {"mls_z_zzzi_s", &Simulator::SimulateSVEMlaMlsIndex},
++    {"mul_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
++    {"mul_z_zzi_d", &Simulator::SimulateSVEMulIndex},
++    {"mul_z_zzi_h", &Simulator::SimulateSVEMulIndex},
++    {"mul_z_zzi_s", &Simulator::SimulateSVEMulIndex},
++    {"nbsl_z_zzz", &Simulator::SimulateSVEBitwiseTernary},
++    {"nmatch_p_p_zz", &Simulator::Simulate_PdT_PgZ_ZnT_ZmT},
++    {"pmul_z_zz", &Simulator::Simulate_ZdB_ZnB_ZmB},
++    {"pmullb_z_zz", &Simulator::SimulateSVEIntMulLongVec},
++    {"pmullt_z_zz", &Simulator::SimulateSVEIntMulLongVec},
++    {"raddhnb_z_zz", &Simulator::SimulateSVEAddSubHigh},
++    {"raddhnt_z_zz", &Simulator::SimulateSVEAddSubHigh},
++    {"rshrnb_z_zi", &Simulator::SimulateSVENarrow},
++    {"rshrnt_z_zi", &Simulator::SimulateSVENarrow},
++    {"rsubhnb_z_zz", &Simulator::SimulateSVEAddSubHigh},
++    {"rsubhnt_z_zz", &Simulator::SimulateSVEAddSubHigh},
++    {"saba_z_zzz", &Simulator::Simulate_ZdaT_ZnT_ZmT},
++    {"sabalb_z_zzz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"sabalt_z_zzz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"sabdlb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"sabdlt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"sadalp_z_p_z", &Simulator::Simulate_ZdaT_PgM_ZnTb},
++    {"saddlb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"saddlbt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"saddlt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"saddwb_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
++    {"saddwt_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
++    {"sbclb_z_zzz", &Simulator::SimulateSVEAddSubCarry},
++    {"sbclt_z_zzz", &Simulator::SimulateSVEAddSubCarry},
++    {"shadd_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
++    {"shrnb_z_zi", &Simulator::SimulateSVENarrow},
++    {"shrnt_z_zi", &Simulator::SimulateSVENarrow},
++    {"shsub_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
++    {"shsubr_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
++    {"sli_z_zzi", &Simulator::Simulate_ZdT_ZnT_const},
++    {"smaxp_z_p_zz", &Simulator::SimulateSVEIntArithPair},
++    {"sminp_z_p_zz", &Simulator::SimulateSVEIntArithPair},
++    {"smlalb_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"smlalb_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"smlalb_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"smlalt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"smlalt_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"smlalt_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"smlslb_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"smlslb_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"smlslb_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"smlslt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"smlslt_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"smlslt_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"smulh_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
++    {"smullb_z_zz", &Simulator::SimulateSVEIntMulLongVec},
++    {"smullb_z_zzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"smullb_z_zzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"smullt_z_zz", &Simulator::SimulateSVEIntMulLongVec},
++    {"smullt_z_zzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"smullt_z_zzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"splice_z_p_zz_con", &Simulator::VisitSVEVectorSplice},
++    {"sqabs_z_p_z", &Simulator::Simulate_ZdT_PgM_ZnT},
++    {"sqadd_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
++    {"sqcadd_z_zz", &Simulator::Simulate_ZdnT_ZdnT_ZmT_const},
++    {"sqdmlalb_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"sqdmlalb_z_zzzi_d", &Simulator::Simulate_ZdaD_ZnS_ZmS_imm},
++    {"sqdmlalb_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
++    {"sqdmlalbt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"sqdmlalt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"sqdmlalt_z_zzzi_d", &Simulator::Simulate_ZdaD_ZnS_ZmS_imm},
++    {"sqdmlalt_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
++    {"sqdmlslb_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"sqdmlslb_z_zzzi_d", &Simulator::Simulate_ZdaD_ZnS_ZmS_imm},
++    {"sqdmlslb_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
++    {"sqdmlslbt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"sqdmlslt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"sqdmlslt_z_zzzi_d", &Simulator::Simulate_ZdaD_ZnS_ZmS_imm},
++    {"sqdmlslt_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
++    {"sqdmulh_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
++    {"sqdmulh_z_zzi_d", &Simulator::SimulateSVESaturatingMulHighIndex},
++    {"sqdmulh_z_zzi_h", &Simulator::SimulateSVESaturatingMulHighIndex},
++    {"sqdmulh_z_zzi_s", &Simulator::SimulateSVESaturatingMulHighIndex},
++    {"sqdmullb_z_zz", &Simulator::SimulateSVEIntMulLongVec},
++    {"sqdmullb_z_zzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"sqdmullb_z_zzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"sqdmullt_z_zz", &Simulator::SimulateSVEIntMulLongVec},
++    {"sqdmullt_z_zzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"sqdmullt_z_zzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"sqneg_z_p_z", &Simulator::Simulate_ZdT_PgM_ZnT},
++    {"sqrdcmlah_z_zzz", &Simulator::SimulateSVEComplexIntMulAdd},
++    {"sqrdcmlah_z_zzzi_h", &Simulator::SimulateSVEComplexIntMulAdd},
++    {"sqrdcmlah_z_zzzi_s", &Simulator::SimulateSVEComplexIntMulAdd},
++    {"sqrdmlah_z_zzz", &Simulator::SimulateSVESaturatingMulAddHigh},
++    {"sqrdmlah_z_zzzi_d", &Simulator::SimulateSVESaturatingMulAddHigh},
++    {"sqrdmlah_z_zzzi_h", &Simulator::SimulateSVESaturatingMulAddHigh},
++    {"sqrdmlah_z_zzzi_s", &Simulator::SimulateSVESaturatingMulAddHigh},
++    {"sqrdmlsh_z_zzz", &Simulator::SimulateSVESaturatingMulAddHigh},
++    {"sqrdmlsh_z_zzzi_d", &Simulator::SimulateSVESaturatingMulAddHigh},
++    {"sqrdmlsh_z_zzzi_h", &Simulator::SimulateSVESaturatingMulAddHigh},
++    {"sqrdmlsh_z_zzzi_s", &Simulator::SimulateSVESaturatingMulAddHigh},
++    {"sqrdmulh_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
++    {"sqrdmulh_z_zzi_d", &Simulator::SimulateSVESaturatingMulHighIndex},
++    {"sqrdmulh_z_zzi_h", &Simulator::SimulateSVESaturatingMulHighIndex},
++    {"sqrdmulh_z_zzi_s", &Simulator::SimulateSVESaturatingMulHighIndex},
++    {"sqrshl_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
++    {"sqrshlr_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
++    {"sqrshrnb_z_zi", &Simulator::SimulateSVENarrow},
++    {"sqrshrnt_z_zi", &Simulator::SimulateSVENarrow},
++    {"sqrshrunb_z_zi", &Simulator::SimulateSVENarrow},
++    {"sqrshrunt_z_zi", &Simulator::SimulateSVENarrow},
++    {"sqshl_z_p_zi", &Simulator::Simulate_ZdnT_PgM_ZdnT_const},
++    {"sqshl_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
++    {"sqshlr_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
++    {"sqshlu_z_p_zi", &Simulator::Simulate_ZdnT_PgM_ZdnT_const},
++    {"sqshrnb_z_zi", &Simulator::SimulateSVENarrow},
++    {"sqshrnt_z_zi", &Simulator::SimulateSVENarrow},
++    {"sqshrunb_z_zi", &Simulator::SimulateSVENarrow},
++    {"sqshrunt_z_zi", &Simulator::SimulateSVENarrow},
++    {"sqsub_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
++    {"sqsubr_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
++    {"sqxtnb_z_zz", &Simulator::SimulateSVENarrow},
++    {"sqxtnt_z_zz", &Simulator::SimulateSVENarrow},
++    {"sqxtunb_z_zz", &Simulator::SimulateSVENarrow},
++    {"sqxtunt_z_zz", &Simulator::SimulateSVENarrow},
++    {"srhadd_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
++    {"sri_z_zzi", &Simulator::Simulate_ZdT_ZnT_const},
++    {"srshl_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
++    {"srshlr_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
++    {"srshr_z_p_zi", &Simulator::Simulate_ZdnT_PgM_ZdnT_const},
++    {"srsra_z_zi", &Simulator::Simulate_ZdaT_ZnT_const},
++    {"sshllb_z_zi", &Simulator::SimulateSVEShiftLeftImm},
++    {"sshllt_z_zi", &Simulator::SimulateSVEShiftLeftImm},
++    {"ssra_z_zi", &Simulator::Simulate_ZdaT_ZnT_const},
++    {"ssublb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"ssublbt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"ssublt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"ssubltb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"ssubwb_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
++    {"ssubwt_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
++    {"stnt1b_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_Pg_ZnD_Xm},
++    {"stnt1b_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_Pg_ZnS_Xm},
++    {"stnt1d_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_Pg_ZnD_Xm},
++    {"stnt1h_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_Pg_ZnD_Xm},
++    {"stnt1h_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_Pg_ZnS_Xm},
++    {"stnt1w_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_Pg_ZnD_Xm},
++    {"stnt1w_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_Pg_ZnS_Xm},
++    {"subhnb_z_zz", &Simulator::SimulateSVEAddSubHigh},
++    {"subhnt_z_zz", &Simulator::SimulateSVEAddSubHigh},
++    {"suqadd_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
++    {"tbl_z_zz_2", &Simulator::VisitSVETableLookup},
++    {"tbx_z_zz", &Simulator::VisitSVETableLookup},
++    {"uaba_z_zzz", &Simulator::Simulate_ZdaT_ZnT_ZmT},
++    {"uabalb_z_zzz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"uabalt_z_zzz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"uabdlb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"uabdlt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"uadalp_z_p_z", &Simulator::Simulate_ZdaT_PgM_ZnTb},
++    {"uaddlb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"uaddlt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"uaddwb_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
++    {"uaddwt_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
++    {"uhadd_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
++    {"uhsub_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
++    {"uhsubr_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
++    {"umaxp_z_p_zz", &Simulator::SimulateSVEIntArithPair},
++    {"uminp_z_p_zz", &Simulator::SimulateSVEIntArithPair},
++    {"umlalb_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"umlalb_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"umlalb_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"umlalt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"umlalt_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"umlalt_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"umlslb_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"umlslb_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"umlslb_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"umlslt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
++    {"umlslt_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"umlslt_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"umulh_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
++    {"umullb_z_zz", &Simulator::SimulateSVEIntMulLongVec},
++    {"umullb_z_zzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"umullb_z_zzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"umullt_z_zz", &Simulator::SimulateSVEIntMulLongVec},
++    {"umullt_z_zzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"umullt_z_zzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
++    {"uqadd_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
++    {"uqrshl_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
++    {"uqrshlr_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
++    {"uqrshrnb_z_zi", &Simulator::SimulateSVENarrow},
++    {"uqrshrnt_z_zi", &Simulator::SimulateSVENarrow},
++    {"uqshl_z_p_zi", &Simulator::Simulate_ZdnT_PgM_ZdnT_const},
++    {"uqshl_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
++    {"uqshlr_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
++    {"uqshrnb_z_zi", &Simulator::SimulateSVENarrow},
++    {"uqshrnt_z_zi", &Simulator::SimulateSVENarrow},
++    {"uqsub_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
++    {"uqsubr_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
++    {"uqxtnb_z_zz", &Simulator::SimulateSVENarrow},
++    {"uqxtnt_z_zz", &Simulator::SimulateSVENarrow},
++    {"urecpe_z_p_z", &Simulator::Simulate_ZdS_PgM_ZnS},
++    {"urhadd_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
++    {"urshl_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
++    {"urshlr_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
++    {"urshr_z_p_zi", &Simulator::Simulate_ZdnT_PgM_ZdnT_const},
++    {"ursqrte_z_p_z", &Simulator::Simulate_ZdS_PgM_ZnS},
++    {"ursra_z_zi", &Simulator::Simulate_ZdaT_ZnT_const},
++    {"ushllb_z_zi", &Simulator::SimulateSVEShiftLeftImm},
++    {"ushllt_z_zi", &Simulator::SimulateSVEShiftLeftImm},
++    {"usqadd_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
++    {"usra_z_zi", &Simulator::Simulate_ZdaT_ZnT_const},
++    {"usublb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"usublt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
++    {"usubwb_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
++    {"usubwt_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
++    {"whilege_p_p_rr", &Simulator::VisitSVEIntCompareScalarCountAndLimit},
++    {"whilegt_p_p_rr", &Simulator::VisitSVEIntCompareScalarCountAndLimit},
++    {"whilehi_p_p_rr", &Simulator::VisitSVEIntCompareScalarCountAndLimit},
++    {"whilehs_p_p_rr", &Simulator::VisitSVEIntCompareScalarCountAndLimit},
++    {"whilerw_p_rr", &Simulator::Simulate_PdT_Xn_Xm},
++    {"whilewr_p_rr", &Simulator::Simulate_PdT_Xn_Xm},
++    {"xar_z_zzi", &Simulator::SimulateSVEExclusiveOrRotate},
++    {"smmla_z_zzz", &Simulator::SimulateMatrixMul},
++    {"ummla_z_zzz", &Simulator::SimulateMatrixMul},
++    {"usmmla_z_zzz", &Simulator::SimulateMatrixMul},
++    {"smmla_asimdsame2_g", &Simulator::SimulateMatrixMul},
++    {"ummla_asimdsame2_g", &Simulator::SimulateMatrixMul},
++    {"usmmla_asimdsame2_g", &Simulator::SimulateMatrixMul},
++    {"fmmla_z_zzz_s", &Simulator::SimulateSVEFPMatrixMul},
++    {"fmmla_z_zzz_d", &Simulator::SimulateSVEFPMatrixMul},
++    {"ld1row_z_p_bi_u32",
++      &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
++    {"ld1row_z_p_br_contiguous",
++      &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
++    {"ld1rod_z_p_bi_u64",
++      &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
++    {"ld1rod_z_p_br_contiguous",
++      &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
++    {"ld1rob_z_p_bi_u8",
++      &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
++    {"ld1rob_z_p_br_contiguous",
++      &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
++    {"ld1roh_z_p_bi_u16",
++      &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
++    {"ld1roh_z_p_br_contiguous",
++      &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
++    {"usdot_z_zzz_s", &Simulator::VisitSVEIntMulAddUnpredicated},
++    {"sudot_z_zzzi_s", &Simulator::VisitSVEMulIndex},
++    {"usdot_z_zzzi_s", &Simulator::VisitSVEMulIndex},
++    {"usdot_asimdsame2_d", &Simulator::VisitNEON3SameExtra},
++    {"sudot_asimdelem_d", &Simulator::SimulateNEONDotProdByElement},
++    {"usdot_asimdelem_d", &Simulator::SimulateNEONDotProdByElement},
++};
+ 
+ const Simulator::FormToVisitorFnMap* Simulator::GetFormToVisitorFnMap() {
+-  static const FormToVisitorFnMap form_to_visitor = {
+-      DEFAULT_FORM_TO_VISITOR_MAP(Simulator),
+-      SIM_AUD_VISITOR_MAP(Simulator),
+-      {"smlal_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
+-      {"smlsl_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
+-      {"smull_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
+-      {"sqdmlal_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
+-      {"sqdmlsl_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
+-      {"sqdmull_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
+-      {"umlal_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
+-      {"umlsl_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
+-      {"umull_asimdelem_l", &Simulator::SimulateNEONMulByElementLong},
+-      {"fcmla_asimdelem_c_h", &Simulator::SimulateNEONComplexMulByElement},
+-      {"fcmla_asimdelem_c_s", &Simulator::SimulateNEONComplexMulByElement},
+-      {"fmlal2_asimdelem_lh", &Simulator::SimulateNEONFPMulByElementLong},
+-      {"fmlal_asimdelem_lh", &Simulator::SimulateNEONFPMulByElementLong},
+-      {"fmlsl2_asimdelem_lh", &Simulator::SimulateNEONFPMulByElementLong},
+-      {"fmlsl_asimdelem_lh", &Simulator::SimulateNEONFPMulByElementLong},
+-      {"fmla_asimdelem_rh_h", &Simulator::SimulateNEONFPMulByElement},
+-      {"fmls_asimdelem_rh_h", &Simulator::SimulateNEONFPMulByElement},
+-      {"fmulx_asimdelem_rh_h", &Simulator::SimulateNEONFPMulByElement},
+-      {"fmul_asimdelem_rh_h", &Simulator::SimulateNEONFPMulByElement},
+-      {"fmla_asimdelem_r_sd", &Simulator::SimulateNEONFPMulByElement},
+-      {"fmls_asimdelem_r_sd", &Simulator::SimulateNEONFPMulByElement},
+-      {"fmulx_asimdelem_r_sd", &Simulator::SimulateNEONFPMulByElement},
+-      {"fmul_asimdelem_r_sd", &Simulator::SimulateNEONFPMulByElement},
+-      {"sdot_asimdelem_d", &Simulator::SimulateNEONDotProdByElement},
+-      {"udot_asimdelem_d", &Simulator::SimulateNEONDotProdByElement},
+-      {"adclb_z_zzz", &Simulator::SimulateSVEAddSubCarry},
+-      {"adclt_z_zzz", &Simulator::SimulateSVEAddSubCarry},
+-      {"addhnb_z_zz", &Simulator::SimulateSVEAddSubHigh},
+-      {"addhnt_z_zz", &Simulator::SimulateSVEAddSubHigh},
+-      {"addp_z_p_zz", &Simulator::SimulateSVEIntArithPair},
+-      {"bcax_z_zzz", &Simulator::SimulateSVEBitwiseTernary},
+-      {"bdep_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
+-      {"bext_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
+-      {"bgrp_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
+-      {"bsl1n_z_zzz", &Simulator::SimulateSVEBitwiseTernary},
+-      {"bsl2n_z_zzz", &Simulator::SimulateSVEBitwiseTernary},
+-      {"bsl_z_zzz", &Simulator::SimulateSVEBitwiseTernary},
+-      {"cadd_z_zz", &Simulator::Simulate_ZdnT_ZdnT_ZmT_const},
+-      {"cdot_z_zzz", &Simulator::SimulateSVEComplexDotProduct},
+-      {"cdot_z_zzzi_d", &Simulator::SimulateSVEComplexDotProduct},
+-      {"cdot_z_zzzi_s", &Simulator::SimulateSVEComplexDotProduct},
+-      {"cmla_z_zzz", &Simulator::SimulateSVEComplexIntMulAdd},
+-      {"cmla_z_zzzi_h", &Simulator::SimulateSVEComplexIntMulAdd},
+-      {"cmla_z_zzzi_s", &Simulator::SimulateSVEComplexIntMulAdd},
+-      {"eor3_z_zzz", &Simulator::SimulateSVEBitwiseTernary},
+-      {"eorbt_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
+-      {"eortb_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
+-      {"ext_z_zi_con", &Simulator::Simulate_ZdB_Zn1B_Zn2B_imm},
+-      {"faddp_z_p_zz", &Simulator::Simulate_ZdnT_PgM_ZdnT_ZmT},
+-      {"fcvtlt_z_p_z_h2s", &Simulator::SimulateSVEFPConvertLong},
+-      {"fcvtlt_z_p_z_s2d", &Simulator::SimulateSVEFPConvertLong},
+-      {"fcvtnt_z_p_z_d2s", &Simulator::Simulate_ZdS_PgM_ZnD},
+-      {"fcvtnt_z_p_z_s2h", &Simulator::Simulate_ZdH_PgM_ZnS},
+-      {"fcvtx_z_p_z_d2s", &Simulator::Simulate_ZdS_PgM_ZnD},
+-      {"fcvtxnt_z_p_z_d2s", &Simulator::Simulate_ZdS_PgM_ZnD},
+-      {"flogb_z_p_z", &Simulator::Simulate_ZdT_PgM_ZnT},
+-      {"fmaxnmp_z_p_zz", &Simulator::Simulate_ZdnT_PgM_ZdnT_ZmT},
+-      {"fmaxp_z_p_zz", &Simulator::Simulate_ZdnT_PgM_ZdnT_ZmT},
+-      {"fminnmp_z_p_zz", &Simulator::Simulate_ZdnT_PgM_ZdnT_ZmT},
+-      {"fminp_z_p_zz", &Simulator::Simulate_ZdnT_PgM_ZdnT_ZmT},
+-      {"fmlalb_z_zzz", &Simulator::Simulate_ZdaS_ZnH_ZmH},
+-      {"fmlalb_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
+-      {"fmlalt_z_zzz", &Simulator::Simulate_ZdaS_ZnH_ZmH},
+-      {"fmlalt_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
+-      {"fmlslb_z_zzz", &Simulator::Simulate_ZdaS_ZnH_ZmH},
+-      {"fmlslb_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
+-      {"fmlslt_z_zzz", &Simulator::Simulate_ZdaS_ZnH_ZmH},
+-      {"fmlslt_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
+-      {"histcnt_z_p_zz", &Simulator::Simulate_ZdT_PgZ_ZnT_ZmT},
+-      {"histseg_z_zz", &Simulator::Simulate_ZdB_ZnB_ZmB},
+-      {"ldnt1b_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1b_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_PgZ_ZnS_Xm},
+-      {"ldnt1d_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1h_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1h_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_PgZ_ZnS_Xm},
+-      {"ldnt1sb_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1sb_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_PgZ_ZnS_Xm},
+-      {"ldnt1sh_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1sh_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_PgZ_ZnS_Xm},
+-      {"ldnt1sw_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1w_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_PgZ_ZnD_Xm},
+-      {"ldnt1w_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_PgZ_ZnS_Xm},
+-      {"match_p_p_zz", &Simulator::Simulate_PdT_PgZ_ZnT_ZmT},
+-      {"mla_z_zzzi_d", &Simulator::SimulateSVEMlaMlsIndex},
+-      {"mla_z_zzzi_h", &Simulator::SimulateSVEMlaMlsIndex},
+-      {"mla_z_zzzi_s", &Simulator::SimulateSVEMlaMlsIndex},
+-      {"mls_z_zzzi_d", &Simulator::SimulateSVEMlaMlsIndex},
+-      {"mls_z_zzzi_h", &Simulator::SimulateSVEMlaMlsIndex},
+-      {"mls_z_zzzi_s", &Simulator::SimulateSVEMlaMlsIndex},
+-      {"mul_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
+-      {"mul_z_zzi_d", &Simulator::SimulateSVEMulIndex},
+-      {"mul_z_zzi_h", &Simulator::SimulateSVEMulIndex},
+-      {"mul_z_zzi_s", &Simulator::SimulateSVEMulIndex},
+-      {"nbsl_z_zzz", &Simulator::SimulateSVEBitwiseTernary},
+-      {"nmatch_p_p_zz", &Simulator::Simulate_PdT_PgZ_ZnT_ZmT},
+-      {"pmul_z_zz", &Simulator::Simulate_ZdB_ZnB_ZmB},
+-      {"pmullb_z_zz", &Simulator::SimulateSVEIntMulLongVec},
+-      {"pmullt_z_zz", &Simulator::SimulateSVEIntMulLongVec},
+-      {"raddhnb_z_zz", &Simulator::SimulateSVEAddSubHigh},
+-      {"raddhnt_z_zz", &Simulator::SimulateSVEAddSubHigh},
+-      {"rshrnb_z_zi", &Simulator::SimulateSVENarrow},
+-      {"rshrnt_z_zi", &Simulator::SimulateSVENarrow},
+-      {"rsubhnb_z_zz", &Simulator::SimulateSVEAddSubHigh},
+-      {"rsubhnt_z_zz", &Simulator::SimulateSVEAddSubHigh},
+-      {"saba_z_zzz", &Simulator::Simulate_ZdaT_ZnT_ZmT},
+-      {"sabalb_z_zzz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"sabalt_z_zzz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"sabdlb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"sabdlt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"sadalp_z_p_z", &Simulator::Simulate_ZdaT_PgM_ZnTb},
+-      {"saddlb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"saddlbt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"saddlt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"saddwb_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
+-      {"saddwt_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
+-      {"sbclb_z_zzz", &Simulator::SimulateSVEAddSubCarry},
+-      {"sbclt_z_zzz", &Simulator::SimulateSVEAddSubCarry},
+-      {"shadd_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
+-      {"shrnb_z_zi", &Simulator::SimulateSVENarrow},
+-      {"shrnt_z_zi", &Simulator::SimulateSVENarrow},
+-      {"shsub_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
+-      {"shsubr_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
+-      {"sli_z_zzi", &Simulator::Simulate_ZdT_ZnT_const},
+-      {"smaxp_z_p_zz", &Simulator::SimulateSVEIntArithPair},
+-      {"sminp_z_p_zz", &Simulator::SimulateSVEIntArithPair},
+-      {"smlalb_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"smlalb_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"smlalb_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"smlalt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"smlalt_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"smlalt_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"smlslb_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"smlslb_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"smlslb_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"smlslt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"smlslt_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"smlslt_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"smulh_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
+-      {"smullb_z_zz", &Simulator::SimulateSVEIntMulLongVec},
+-      {"smullb_z_zzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"smullb_z_zzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"smullt_z_zz", &Simulator::SimulateSVEIntMulLongVec},
+-      {"smullt_z_zzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"smullt_z_zzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"splice_z_p_zz_con", &Simulator::VisitSVEVectorSplice},
+-      {"sqabs_z_p_z", &Simulator::Simulate_ZdT_PgM_ZnT},
+-      {"sqadd_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
+-      {"sqcadd_z_zz", &Simulator::Simulate_ZdnT_ZdnT_ZmT_const},
+-      {"sqdmlalb_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"sqdmlalb_z_zzzi_d", &Simulator::Simulate_ZdaD_ZnS_ZmS_imm},
+-      {"sqdmlalb_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
+-      {"sqdmlalbt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"sqdmlalt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"sqdmlalt_z_zzzi_d", &Simulator::Simulate_ZdaD_ZnS_ZmS_imm},
+-      {"sqdmlalt_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
+-      {"sqdmlslb_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"sqdmlslb_z_zzzi_d", &Simulator::Simulate_ZdaD_ZnS_ZmS_imm},
+-      {"sqdmlslb_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
+-      {"sqdmlslbt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"sqdmlslt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"sqdmlslt_z_zzzi_d", &Simulator::Simulate_ZdaD_ZnS_ZmS_imm},
+-      {"sqdmlslt_z_zzzi_s", &Simulator::Simulate_ZdaS_ZnH_ZmH_imm},
+-      {"sqdmulh_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
+-      {"sqdmulh_z_zzi_d", &Simulator::SimulateSVESaturatingMulHighIndex},
+-      {"sqdmulh_z_zzi_h", &Simulator::SimulateSVESaturatingMulHighIndex},
+-      {"sqdmulh_z_zzi_s", &Simulator::SimulateSVESaturatingMulHighIndex},
+-      {"sqdmullb_z_zz", &Simulator::SimulateSVEIntMulLongVec},
+-      {"sqdmullb_z_zzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"sqdmullb_z_zzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"sqdmullt_z_zz", &Simulator::SimulateSVEIntMulLongVec},
+-      {"sqdmullt_z_zzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"sqdmullt_z_zzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"sqneg_z_p_z", &Simulator::Simulate_ZdT_PgM_ZnT},
+-      {"sqrdcmlah_z_zzz", &Simulator::SimulateSVEComplexIntMulAdd},
+-      {"sqrdcmlah_z_zzzi_h", &Simulator::SimulateSVEComplexIntMulAdd},
+-      {"sqrdcmlah_z_zzzi_s", &Simulator::SimulateSVEComplexIntMulAdd},
+-      {"sqrdmlah_z_zzz", &Simulator::SimulateSVESaturatingMulAddHigh},
+-      {"sqrdmlah_z_zzzi_d", &Simulator::SimulateSVESaturatingMulAddHigh},
+-      {"sqrdmlah_z_zzzi_h", &Simulator::SimulateSVESaturatingMulAddHigh},
+-      {"sqrdmlah_z_zzzi_s", &Simulator::SimulateSVESaturatingMulAddHigh},
+-      {"sqrdmlsh_z_zzz", &Simulator::SimulateSVESaturatingMulAddHigh},
+-      {"sqrdmlsh_z_zzzi_d", &Simulator::SimulateSVESaturatingMulAddHigh},
+-      {"sqrdmlsh_z_zzzi_h", &Simulator::SimulateSVESaturatingMulAddHigh},
+-      {"sqrdmlsh_z_zzzi_s", &Simulator::SimulateSVESaturatingMulAddHigh},
+-      {"sqrdmulh_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
+-      {"sqrdmulh_z_zzi_d", &Simulator::SimulateSVESaturatingMulHighIndex},
+-      {"sqrdmulh_z_zzi_h", &Simulator::SimulateSVESaturatingMulHighIndex},
+-      {"sqrdmulh_z_zzi_s", &Simulator::SimulateSVESaturatingMulHighIndex},
+-      {"sqrshl_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
+-      {"sqrshlr_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
+-      {"sqrshrnb_z_zi", &Simulator::SimulateSVENarrow},
+-      {"sqrshrnt_z_zi", &Simulator::SimulateSVENarrow},
+-      {"sqrshrunb_z_zi", &Simulator::SimulateSVENarrow},
+-      {"sqrshrunt_z_zi", &Simulator::SimulateSVENarrow},
+-      {"sqshl_z_p_zi", &Simulator::Simulate_ZdnT_PgM_ZdnT_const},
+-      {"sqshl_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
+-      {"sqshlr_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
+-      {"sqshlu_z_p_zi", &Simulator::Simulate_ZdnT_PgM_ZdnT_const},
+-      {"sqshrnb_z_zi", &Simulator::SimulateSVENarrow},
+-      {"sqshrnt_z_zi", &Simulator::SimulateSVENarrow},
+-      {"sqshrunb_z_zi", &Simulator::SimulateSVENarrow},
+-      {"sqshrunt_z_zi", &Simulator::SimulateSVENarrow},
+-      {"sqsub_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
+-      {"sqsubr_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
+-      {"sqxtnb_z_zz", &Simulator::SimulateSVENarrow},
+-      {"sqxtnt_z_zz", &Simulator::SimulateSVENarrow},
+-      {"sqxtunb_z_zz", &Simulator::SimulateSVENarrow},
+-      {"sqxtunt_z_zz", &Simulator::SimulateSVENarrow},
+-      {"srhadd_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
+-      {"sri_z_zzi", &Simulator::Simulate_ZdT_ZnT_const},
+-      {"srshl_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
+-      {"srshlr_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
+-      {"srshr_z_p_zi", &Simulator::Simulate_ZdnT_PgM_ZdnT_const},
+-      {"srsra_z_zi", &Simulator::Simulate_ZdaT_ZnT_const},
+-      {"sshllb_z_zi", &Simulator::SimulateSVEShiftLeftImm},
+-      {"sshllt_z_zi", &Simulator::SimulateSVEShiftLeftImm},
+-      {"ssra_z_zi", &Simulator::Simulate_ZdaT_ZnT_const},
+-      {"ssublb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"ssublbt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"ssublt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"ssubltb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"ssubwb_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
+-      {"ssubwt_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
+-      {"stnt1b_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_Pg_ZnD_Xm},
+-      {"stnt1b_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_Pg_ZnS_Xm},
+-      {"stnt1d_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_Pg_ZnD_Xm},
+-      {"stnt1h_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_Pg_ZnD_Xm},
+-      {"stnt1h_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_Pg_ZnS_Xm},
+-      {"stnt1w_z_p_ar_d_64_unscaled", &Simulator::Simulate_ZtD_Pg_ZnD_Xm},
+-      {"stnt1w_z_p_ar_s_x32_unscaled", &Simulator::Simulate_ZtS_Pg_ZnS_Xm},
+-      {"subhnb_z_zz", &Simulator::SimulateSVEAddSubHigh},
+-      {"subhnt_z_zz", &Simulator::SimulateSVEAddSubHigh},
+-      {"suqadd_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
+-      {"tbl_z_zz_2", &Simulator::VisitSVETableLookup},
+-      {"tbx_z_zz", &Simulator::VisitSVETableLookup},
+-      {"uaba_z_zzz", &Simulator::Simulate_ZdaT_ZnT_ZmT},
+-      {"uabalb_z_zzz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"uabalt_z_zzz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"uabdlb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"uabdlt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"uadalp_z_p_z", &Simulator::Simulate_ZdaT_PgM_ZnTb},
+-      {"uaddlb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"uaddlt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"uaddwb_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
+-      {"uaddwt_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
+-      {"uhadd_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
+-      {"uhsub_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
+-      {"uhsubr_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
+-      {"umaxp_z_p_zz", &Simulator::SimulateSVEIntArithPair},
+-      {"uminp_z_p_zz", &Simulator::SimulateSVEIntArithPair},
+-      {"umlalb_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"umlalb_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"umlalb_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"umlalt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"umlalt_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"umlalt_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"umlslb_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"umlslb_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"umlslb_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"umlslt_z_zzz", &Simulator::Simulate_ZdaT_ZnTb_ZmTb},
+-      {"umlslt_z_zzzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"umlslt_z_zzzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"umulh_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmT},
+-      {"umullb_z_zz", &Simulator::SimulateSVEIntMulLongVec},
+-      {"umullb_z_zzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"umullb_z_zzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"umullt_z_zz", &Simulator::SimulateSVEIntMulLongVec},
+-      {"umullt_z_zzi_d", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"umullt_z_zzi_s", &Simulator::SimulateSVESaturatingIntMulLongIdx},
+-      {"uqadd_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
+-      {"uqrshl_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
+-      {"uqrshlr_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
+-      {"uqrshrnb_z_zi", &Simulator::SimulateSVENarrow},
+-      {"uqrshrnt_z_zi", &Simulator::SimulateSVENarrow},
+-      {"uqshl_z_p_zi", &Simulator::Simulate_ZdnT_PgM_ZdnT_const},
+-      {"uqshl_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
+-      {"uqshlr_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
+-      {"uqshrnb_z_zi", &Simulator::SimulateSVENarrow},
+-      {"uqshrnt_z_zi", &Simulator::SimulateSVENarrow},
+-      {"uqsub_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
+-      {"uqsubr_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
+-      {"uqxtnb_z_zz", &Simulator::SimulateSVENarrow},
+-      {"uqxtnt_z_zz", &Simulator::SimulateSVENarrow},
+-      {"urecpe_z_p_z", &Simulator::Simulate_ZdS_PgM_ZnS},
+-      {"urhadd_z_p_zz", &Simulator::SimulateSVEHalvingAddSub},
+-      {"urshl_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
+-      {"urshlr_z_p_zz", &Simulator::VisitSVEBitwiseShiftByVector_Predicated},
+-      {"urshr_z_p_zi", &Simulator::Simulate_ZdnT_PgM_ZdnT_const},
+-      {"ursqrte_z_p_z", &Simulator::Simulate_ZdS_PgM_ZnS},
+-      {"ursra_z_zi", &Simulator::Simulate_ZdaT_ZnT_const},
+-      {"ushllb_z_zi", &Simulator::SimulateSVEShiftLeftImm},
+-      {"ushllt_z_zi", &Simulator::SimulateSVEShiftLeftImm},
+-      {"usqadd_z_p_zz", &Simulator::SimulateSVESaturatingArithmetic},
+-      {"usra_z_zi", &Simulator::Simulate_ZdaT_ZnT_const},
+-      {"usublb_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"usublt_z_zz", &Simulator::SimulateSVEInterleavedArithLong},
+-      {"usubwb_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
+-      {"usubwt_z_zz", &Simulator::Simulate_ZdT_ZnT_ZmTb},
+-      {"whilege_p_p_rr", &Simulator::VisitSVEIntCompareScalarCountAndLimit},
+-      {"whilegt_p_p_rr", &Simulator::VisitSVEIntCompareScalarCountAndLimit},
+-      {"whilehi_p_p_rr", &Simulator::VisitSVEIntCompareScalarCountAndLimit},
+-      {"whilehs_p_p_rr", &Simulator::VisitSVEIntCompareScalarCountAndLimit},
+-      {"whilerw_p_rr", &Simulator::Simulate_PdT_Xn_Xm},
+-      {"whilewr_p_rr", &Simulator::Simulate_PdT_Xn_Xm},
+-      {"xar_z_zzi", &Simulator::SimulateSVEExclusiveOrRotate},
+-      {"smmla_z_zzz", &Simulator::SimulateMatrixMul},
+-      {"ummla_z_zzz", &Simulator::SimulateMatrixMul},
+-      {"usmmla_z_zzz", &Simulator::SimulateMatrixMul},
+-      {"smmla_asimdsame2_g", &Simulator::SimulateMatrixMul},
+-      {"ummla_asimdsame2_g", &Simulator::SimulateMatrixMul},
+-      {"usmmla_asimdsame2_g", &Simulator::SimulateMatrixMul},
+-      {"fmmla_z_zzz_s", &Simulator::SimulateSVEFPMatrixMul},
+-      {"fmmla_z_zzz_d", &Simulator::SimulateSVEFPMatrixMul},
+-      {"ld1row_z_p_bi_u32",
+-       &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
+-      {"ld1row_z_p_br_contiguous",
+-       &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
+-      {"ld1rod_z_p_bi_u64",
+-       &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
+-      {"ld1rod_z_p_br_contiguous",
+-       &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
+-      {"ld1rob_z_p_bi_u8",
+-       &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
+-      {"ld1rob_z_p_br_contiguous",
+-       &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
+-      {"ld1roh_z_p_bi_u16",
+-       &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusImm},
+-      {"ld1roh_z_p_br_contiguous",
+-       &Simulator::VisitSVELoadAndBroadcastQOWord_ScalarPlusScalar},
+-      {"usdot_z_zzz_s", &Simulator::VisitSVEIntMulAddUnpredicated},
+-      {"sudot_z_zzzi_s", &Simulator::VisitSVEMulIndex},
+-      {"usdot_z_zzzi_s", &Simulator::VisitSVEMulIndex},
+-      {"usdot_asimdsame2_d", &Simulator::VisitNEON3SameExtra},
+-      {"sudot_asimdelem_d", &Simulator::SimulateNEONDotProdByElement},
+-      {"usdot_asimdelem_d", &Simulator::SimulateNEONDotProdByElement},
+-  };
+-  return &form_to_visitor;
++  return &FORM_TO_VISITOR;
+ }
+ 
+ #ifndef PANDA_BUILD
+@@ -1991,7 +1991,7 @@ void Simulator::PrintTakenBranch(const Instruction* target) {
+ 
+ void Simulator::Visit(Metadata* metadata, const Instruction* instr) {
+   VIXL_ASSERT(metadata->count("form") > 0);
+-  std::string form = (*metadata)["form"];
++  const std::string& form = (*metadata)["form"];
+   const FormToVisitorFnMap* fv = Simulator::GetFormToVisitorFnMap();
+   if ((fv->count(form) > 0) && fv->at(form)) {
+     form_hash_ = Hash(form.c_str());
+diff --git a/src/aarch64/simulator-aarch64.h b/src/aarch64/simulator-aarch64.h
+index 0740572..e5cccb5 100644
+--- a/src/aarch64/simulator-aarch64.h
++++ b/src/aarch64/simulator-aarch64.h
+@@ -4772,9 +4772,10 @@ class Simulator : public DecoderVisitor {
+   static const char* preg_names[];
+ 
+  private:
+-  using FormToVisitorFnMap =
+-      std::unordered_map<std::string,
+-                         std::function<void(Simulator*, const Instruction*)>>;
++  using FormToVisitorFnMap = FormToVisitorFnMapT<Simulator>;
++
++  static const FormToVisitorFnMap FORM_TO_VISITOR;
++
+   static const FormToVisitorFnMap* GetFormToVisitorFnMap();
+ 
+   uint32_t form_hash_;
+diff --git a/src/utils-vixl.h b/src/utils-vixl.h
+index 9a6d9ee..d19696a 100644
+--- a/src/utils-vixl.h
++++ b/src/utils-vixl.h
+@@ -36,10 +36,52 @@
+ #include "globals-vixl.h"
+ 
+ #ifdef PANDA_BUILD
++#include "mem/arena_allocator_stl_adapter.h"
++#include "mem/arena_allocator.h"
+ #include "utils/arena_containers.h"
++#else
++#include <list>
++#include <map>
++#include <memory>
++#include <string>
++#include <vector>
+ #endif
+ 
+ namespace vixl {
++#ifdef PANDA_BUILD
++using PandaAllocator = panda::ArenaAllocator;
++
++template <typename T>
++using List = panda::ArenaList<T>;
++
++template <typename K, typename V>
++using Map = panda::ArenaMap<K, V>;
++
++using String = panda::ArenaString;
++
++template <typename T>
++using Vector = panda::ArenaVector<T>;
++#else
++template <typename T>
++using List = std::list<T>;
++
++template <typename K, typename V>
++using Map = std::map<K, V>;
++
++using String = std::string;
++
++template <typename T>
++using Vector = std::vector<T>;
++#endif
++
++template <typename T>
++inline auto GetContainerAllocator(const T& obj) {
++#ifdef PANDA_BUILD
++  return obj.GetAllocator()->Adapter();
++#else
++  return std::allocator<void>();
++#endif
++}
+ 
+ // Macros for compile-time format checking.
+ #if GCC_VERSION_OR_NEWER(4, 4, 0)
+-- 
+2.25.1
+
