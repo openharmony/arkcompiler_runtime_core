@@ -451,14 +451,6 @@
 07.expressions/01.evaluation_of_expressions/02.normal_and_abrupt_completion_of_expression_evaluation/ase1.ets
 # end of verifier problems
 # runtime fails: panda#11542
-03.types/07.value_types/01.integer_types_and_operations/postfix_decrement/postfix_decrement_byte_3.ets
-03.types/07.value_types/01.integer_types_and_operations/postfix_decrement/postfix_decrement_short_3.ets
-03.types/07.value_types/01.integer_types_and_operations/postfix_increment/postfix_increment_byte_4.ets
-03.types/07.value_types/01.integer_types_and_operations/postfix_increment/postfix_increment_short_4.ets
-03.types/07.value_types/01.integer_types_and_operations/prefix_decrement/prefix_decrement_byte_3.ets
-03.types/07.value_types/01.integer_types_and_operations/prefix_decrement/prefix_decrement_short_3.ets
-03.types/07.value_types/01.integer_types_and_operations/prefix_increment/prefix_increment_byte_4.ets
-03.types/07.value_types/01.integer_types_and_operations/prefix_increment/prefix_increment_short_4.ets
 03.types/07.value_types/01.integer_types_and_operations/right_shift/right_shift_long_10.ets
 03.types/07.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_byte_7.ets
 03.types/07.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_short_7.ets
@@ -986,7 +978,6 @@
 03.types/07.value_types/01.integer_types_and_operations/not_equal/not_equal_ushort_7.ets
 03.types/07.value_types/01.integer_types_and_operations/not_equal/not_equal_ushort_8.ets
 03.types/07.value_types/01.integer_types_and_operations/not_equal/not_equal_ushort_9.ets
-03.types/07.value_types/01.integer_types_and_operations/postfix_decrement/postfix_decrement_char_2.ets
 03.types/07.value_types/01.integer_types_and_operations/postfix_decrement/postfix_decrement_ubyte_0.ets
 03.types/07.value_types/01.integer_types_and_operations/postfix_decrement/postfix_decrement_ubyte_1.ets
 03.types/07.value_types/01.integer_types_and_operations/postfix_decrement/postfix_decrement_ubyte_2.ets
@@ -1008,7 +999,6 @@
 03.types/07.value_types/01.integer_types_and_operations/postfix_decrement/postfix_decrement_ushort_2.ets
 03.types/07.value_types/01.integer_types_and_operations/postfix_decrement/postfix_decrement_ushort_3.ets
 03.types/07.value_types/01.integer_types_and_operations/postfix_decrement/postfix_decrement_ushort_4.ets
-03.types/07.value_types/01.integer_types_and_operations/postfix_increment/postfix_increment_char_3.ets
 03.types/07.value_types/01.integer_types_and_operations/postfix_increment/postfix_increment_ubyte_0.ets
 03.types/07.value_types/01.integer_types_and_operations/postfix_increment/postfix_increment_ubyte_1.ets
 03.types/07.value_types/01.integer_types_and_operations/postfix_increment/postfix_increment_ubyte_2.ets
@@ -1029,7 +1019,6 @@
 03.types/07.value_types/01.integer_types_and_operations/postfix_increment/postfix_increment_ushort_2.ets
 03.types/07.value_types/01.integer_types_and_operations/postfix_increment/postfix_increment_ushort_3.ets
 03.types/07.value_types/01.integer_types_and_operations/postfix_increment/postfix_increment_ushort_4.ets
-03.types/07.value_types/01.integer_types_and_operations/prefix_decrement/prefix_decrement_char_2.ets
 03.types/07.value_types/01.integer_types_and_operations/prefix_decrement/prefix_decrement_ubyte_0.ets
 03.types/07.value_types/01.integer_types_and_operations/prefix_decrement/prefix_decrement_ubyte_1.ets
 03.types/07.value_types/01.integer_types_and_operations/prefix_decrement/prefix_decrement_ubyte_2.ets
@@ -1050,7 +1039,6 @@
 03.types/07.value_types/01.integer_types_and_operations/prefix_decrement/prefix_decrement_ushort_2.ets
 03.types/07.value_types/01.integer_types_and_operations/prefix_decrement/prefix_decrement_ushort_3.ets
 03.types/07.value_types/01.integer_types_and_operations/prefix_decrement/prefix_decrement_ushort_4.ets
-03.types/07.value_types/01.integer_types_and_operations/prefix_increment/prefix_increment_char_3.ets
 03.types/07.value_types/01.integer_types_and_operations/prefix_increment/prefix_increment_ubyte_0.ets
 03.types/07.value_types/01.integer_types_and_operations/prefix_increment/prefix_increment_ubyte_1.ets
 03.types/07.value_types/01.integer_types_and_operations/prefix_increment/prefix_increment_ubyte_2.ets
@@ -1921,6 +1909,123 @@
 05.generics/05.parameterized_declarations/type_arguments_of_parameterized_declarations/method_args1_13.ets
 # end of verifier fails
 
+# es2panda fails: panda#14140
+03.types/07.value_types/05.character_types_and_operations/ch_n_0.ets
+03.types/07.value_types/05.character_types_and_operations/ch_n_1.ets
+03.types/07.value_types/05.character_types_and_operations/ch_n_10.ets
+03.types/07.value_types/05.character_types_and_operations/ch_n_2.ets
+03.types/07.value_types/05.character_types_and_operations/ch_n_3.ets
+03.types/07.value_types/05.character_types_and_operations/ch_n_4.ets
+03.types/07.value_types/05.character_types_and_operations/ch_n_5.ets
+03.types/07.value_types/05.character_types_and_operations/ch_n_6.ets
+03.types/07.value_types/05.character_types_and_operations/ch_n_8.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14110
+03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_ref_6.ets
+03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_ref_7.ets
+03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_ref_8.ets
+03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_ref_9.ets
+03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_val_6.ets
+03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_val_7.ets
+03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_val_8.ets
+03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_val_9.ets
+03.types/07.value_types/05.character_types_and_operations/increment/inc_arr_ref_3.ets
+03.types/07.value_types/05.character_types_and_operations/increment/inc_arr_ref_4.ets
+03.types/07.value_types/05.character_types_and_operations/increment/inc_arr_val_3.ets
+03.types/07.value_types/05.character_types_and_operations/increment/inc_arr_val_4.ets
+03.types/07.value_types/05.character_types_and_operations/increment/inc_func_ref_6.ets
+03.types/07.value_types/05.character_types_and_operations/increment/inc_func_ref_7.ets
+03.types/07.value_types/05.character_types_and_operations/increment/inc_func_ref_8.ets
+03.types/07.value_types/05.character_types_and_operations/increment/inc_func_ref_9.ets
+03.types/07.value_types/05.character_types_and_operations/increment/inc_func_val_6.ets
+03.types/07.value_types/05.character_types_and_operations/increment/inc_func_val_7.ets
+03.types/07.value_types/05.character_types_and_operations/increment/inc_func_val_8.ets
+03.types/07.value_types/05.character_types_and_operations/increment/inc_func_val_9.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14105
+03.types/07.value_types/05.character_types_and_operations/addition/add_arr_ref_0.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_arr_ref_1.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_arr_ref_2.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_arr_ref_3.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_arr_ref_4.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_arr_ref_5.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_arr_ref_6.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_arr_val_2.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_arr_val_3.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_arr_val_4.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_ref_0.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_ref_1.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_ref_2.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_ref_3.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_ref_4.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_ref_5.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_ref_6.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_val_0.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_val_1.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_val_2.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_val_3.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_val_4.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_val_5.ets
+03.types/07.value_types/05.character_types_and_operations/addition/add_func_val_6.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_ref_0.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_ref_1.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_ref_2.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_ref_3.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_ref_4.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_ref_5.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_ref_6.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_val_3.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_val_4.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_val_5.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_ref_0.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_ref_1.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_ref_2.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_ref_3.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_ref_4.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_ref_5.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_ref_6.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_val_0.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_val_1.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_val_2.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_val_3.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_val_4.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_val_5.ets
+03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_val_6.ets
+03.types/07.value_types/05.character_types_and_operations/concat/conc_ref_0.ets
+03.types/07.value_types/05.character_types_and_operations/concat/conc_ref_1.ets
+03.types/07.value_types/05.character_types_and_operations/concat/conc_ref_2.ets
+03.types/07.value_types/05.character_types_and_operations/concat/conc_ref_3.ets
+03.types/07.value_types/05.character_types_and_operations/concat/conc_ref_4.ets
+03.types/07.value_types/05.character_types_and_operations/concat/conc_val_0.ets
+03.types/07.value_types/05.character_types_and_operations/concat/conc_val_1.ets
+03.types/07.value_types/05.character_types_and_operations/concat/conc_val_2.ets
+03.types/07.value_types/05.character_types_and_operations/concat/conc_val_3.ets
+03.types/07.value_types/05.character_types_and_operations/concat/conc_val_4.ets
+03.types/07.value_types/05.character_types_and_operations/conditional/cond_exp_val_2.ets
+03.types/07.value_types/05.character_types_and_operations/conditional/cond_fld_val_2.ets
+03.types/07.value_types/05.character_types_and_operations/conditional/cond_func_ref_4.ets
+03.types/07.value_types/05.character_types_and_operations/conditional/cond_func_val_1.ets
+03.types/07.value_types/05.character_types_and_operations/conditional/cond_func_val_2.ets
+03.types/07.value_types/05.character_types_and_operations/conditional/cond_func_val_4.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_0.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_1.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_2.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_3.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_4.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_5.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_6.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_val_0.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_val_1.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_val_2.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_val_3.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_val_4.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_val_5.ets
+03.types/07.value_types/05.character_types_and_operations/unary/unary_val_6.ets
+03.types/07.value_types/05.character_types_and_operations/concat/conc2.ets
+# end of es2panda fails
+
 # es2panda fails: panda#13203
 09.classes/01.class_declaration/06.implementing_interface_properties/getter_setter_implementation.ets
 10.interfaces/05.interface_properties/getter_setter_form.ets
@@ -1928,10 +2033,3 @@
 10.interfaces/05.interface_properties/readonly_simple_form_0.ets
 10.interfaces/05.interface_properties/simple_form.ets
 # end of es2panda fails
-
-# es2panda fail: panda#13730
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_n_0.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_n_2.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_n_10.ets
-# end of es2panda fails
-
