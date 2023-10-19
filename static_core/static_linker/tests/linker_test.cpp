@@ -99,6 +99,31 @@ bool ReadFile(const std::string &path, std::conditional_t<IS_BINARY, std::vector
     return true;
 }
 
+// removes comments
+void NormalizeGold(std::string &gold)
+{
+    std::string_view in = gold;
+    std::string out;
+    out.reserve(gold.size());
+    while (!in.empty()) {
+        auto nxt_nl = in.find('\n');
+        if (in[0] == '#') {
+            if (nxt_nl == std::string::npos) {
+                break;
+            }
+            in = in.substr(nxt_nl + 1);
+            continue;
+        }
+        if (nxt_nl == std::string::npos) {
+            out += in;
+            break;
+        }
+        out += in.substr(0, nxt_nl + 1);
+        in = in.substr(nxt_nl + 1);
+    }
+    gold = std::move(out);
+}
+
 std::optional<std::string> Build(const std::string &path)
 {
     std::string prog;
@@ -132,6 +157,8 @@ void TestSingle(const std::string &path, bool is_good = true,
     ASSERT_EQ(Build(path_prefix + path), std::nullopt);
     auto gold = std::string {};
     ASSERT_TRUE(ReadFile<false>(path_prefix + path + ".gold", gold));
+
+    NormalizeGold(gold);
 
     const auto out = path_prefix + path + ".linked.abc";
     auto link_res = Link(conf, out, {path_prefix + path + ".abc"});
@@ -168,6 +195,7 @@ void TestMultiple(const std::string &path, std::vector<std::string> perms, bool 
 
     if (is_good) {
         ASSERT_TRUE(ReadFile<false>(path_prefix + "out.gold", gold));
+        NormalizeGold(gold);
     }
 
     auto out = std::string {};
