@@ -1063,7 +1063,7 @@ TEST(parsertests, test39_parse_operand_string)
 
         auto item = p.Parse(v);
 
-        std::unordered_set<std::string> strings = {" abc123 ", "zxcvb"};
+        Program::StringT strings = {" abc123 ", "zxcvb"};
 
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         ASSERT_TRUE(item.HasValue());
@@ -1109,7 +1109,7 @@ TEST(parsertests, test40_parse_operand_string_escape_seq)
 
         auto item = p.Parse(v);
 
-        std::unordered_set<std::string> strings = {" \" ' \\ \a \b \f \n \r \t \v "};
+        Program::StringT strings = {" \" ' \\ \a \b \f \n \r \t \v "};
 
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         ASSERT_TRUE(item.HasValue());
@@ -1216,7 +1216,7 @@ TEST(parsertests, test41_parse_operand_string_hex_escape_seq)
 
         auto item = p.Parse(v);
 
-        std::unordered_set<std::string> strings = {"123\xaa\x65"};
+        Program::StringT strings = {"123\xaa\x65"};
 
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         ASSERT_TRUE(item.HasValue());
@@ -1238,7 +1238,7 @@ TEST(parsertests, test42_parse_operand_string_octal_escape_seq)
 
     auto item = p.Parse(v);
 
-    std::unordered_set<std::string> strings = {"123\1\02\00123"};
+    Program::StringT strings = {"123\1\02\00123"};
 
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
     ASSERT_TRUE(item.HasValue());

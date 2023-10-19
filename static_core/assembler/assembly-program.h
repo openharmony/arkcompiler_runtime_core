@@ -31,13 +31,16 @@ namespace panda::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Program {
+    using StringT = std::set<std::string>;
+
     panda::panda_file::SourceLang lang {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
-    std::unordered_map<std::string, panda::pandasm::Record> record_table;
-    std::unordered_map<std::string, panda::pandasm::Function> function_table;
-    std::unordered_map<std::string, std::vector<std::string>> function_synonyms;
+    std::map<std::string, panda::pandasm::Record> record_table;
+    std::map<std::string, panda::pandasm::Function> function_table;
+    std::unordered_map<std::string, std::vector<std::string>>
+        function_synonyms;  // we might keep unordered, since we don't iterate over it
     std::map<std::string, panda::pandasm::LiteralArray> literalarray_table;
-    std::unordered_set<std::string> strings;
-    std::unordered_set<Type> array_types;
+    StringT strings;
+    std::set<Type> array_types;
 
     /*
      * Returns a JSON string with the program structure and scopes locations
