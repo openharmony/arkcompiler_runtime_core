@@ -728,10 +728,14 @@ public:
 
         // TODO(vdyadov): think of two-pass absint, where we can catch const-null cases
 
+        auto type = GetRegType(ACC);
+        SetAccAndOthersOfSameOrigin(null_ref_type_);
+
         if (!ProcessBranching(imm)) {
             return false;
         }
 
+        SetAccAndOthersOfSameOrigin(type);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -757,6 +761,7 @@ public:
             return false;
         }
 
+        SetAccAndOthersOfSameOrigin(null_ref_type_);
         MoveToNextInst<FORMAT>();
         return true;
     }

@@ -1813,8 +1813,6 @@
 04.names_declarations_and_scopes/08.function_declarations/function_decl_5.ets
 04.names_declarations_and_scopes/08.function_declarations/function_decl_8.ets
 04.names_declarations_and_scopes/08.function_declarations/function_decl_9.ets
-# es2panda fails: panda#12570
-07.expressions/12.array_access_expressions/safe_array_access2.ets
 # es2panda fails: panda#12554
 04.names_declarations_and_scopes/01.names/qualified_name_0.ets
 04.names_declarations_and_scopes/01.names/qualified_name_1.ets
@@ -1902,6 +1900,11 @@
 07.expressions/07.object_literal/03.object_literal_of_record_type/re_6.ets
 07.expressions/07.object_literal/03.object_literal_of_record_type/spec_ex1.ets
 07.expressions/07.object_literal/03.object_literal_of_record_type/spec_ex2.ets
+# end of es2panda fails
+
+# es2panda fails:#12570
+07.expressions/12.array_access_expressions/safe_array_access2.ets
+07.expressions/12.array_access_expressions/safe_array_access5.ets
 # end of es2panda fails
 
 # verifier fails: panda#13164
