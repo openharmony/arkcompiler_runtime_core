@@ -16,6 +16,7 @@ topLevelTypes:
   - class Point {}
   - interface A {}
   - enum Enum { v1, v2 }
+  - type Matrix = number[][]
   # Variable declarations
   - let origin = 1;
   - "let i: int = 1;"
@@ -26,3 +27,5 @@ topLevelTypes:
   - "const a: int = 1;"
   # Function declarations
   - "function Dist(x: int, y: int): void {}"
+  # Extension function declarations
+  - "static function Date.daysUntilTheNewYear(): int { return 0 ; // no implementation }"

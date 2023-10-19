@@ -52,7 +52,7 @@ function(:StringBuilderBool,
     length := Sub(length, Cast(tv).u32).u32
 
     new_count := Add(count, length).u32
-    If(size, new_count).CC(:CC_LT).b {
+    If(size, new_count).LT.Unlikely.b {
         Intrinsic(:SLOW_PATH_ENTRY, sb, tv).AddImm(Constants::SB_BOOL_SLOW_PATH).AddImm(Constants::SB_BOOL_USUAL_BRIDGE).Terminator.ref
         Intrinsic(:UNREACHABLE).Terminator.void
     }
@@ -60,8 +60,8 @@ function(:StringBuilderBool,
     buf := AddI(value).Imm(Constants::ARRAY_DATA_OFFSET).ptr
     buf := Add(buf, ShlI(count).Imm(1).u32).ptr
 
-    compare := Compare(tv, 1).CC(:CC_EQ).b
-    IfImm(compare).Imm(0).CC(:CC_NE).b {
+    compare := Compare(tv, 1).EQ.b
+    IfImm(compare).Imm(0).NE.b {
         v := Constants::TRUESTR
         StoreI(buf, v).Imm(0).u64
     } Else {
@@ -90,7 +90,7 @@ function(:StringBuilderChar,
     value := Cast(value).SrcType(Constants::COMPILER_REFERENCE).ptr
     count := LoadI(sb).Imm(Constants::SB_COUNT_OFFSET).u32
     size := LoadI(value).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
-    If(size, count).CC(:CC_LE).b {
+    If(size, count).LE.Unlikely.b {
         Intrinsic(:SLOW_PATH_ENTRY, sb, ch).AddImm(Constants::SB_CHAR_SLOW_PATH).AddImm(Constants::SB_CHAR_USUAL_BRIDGE).Terminator.ref
         Intrinsic(:UNREACHABLE).Terminator.void
     }
@@ -123,10 +123,10 @@ def GenerateStringBuilderString(compression)
     dst := AddI(value).Imm(Constants::ARRAY_DATA_OFFSET).ptr
 
     # str is nullptr, store the "null" string with the length of 4
-    compare := Compare(str, 0).SrcType(Constants::COMPILER_REFERENCE).CC(:CC_EQ).b
-    IfImm(compare).Imm(0).SrcType(Constants::COMPILER_BOOL).CC(:CC_NE).b {
+    compare := Compare(str, 0).SrcType(Constants::COMPILER_REFERENCE).EQ.b
+    IfImm(compare).Imm(0).SrcType(Constants::COMPILER_BOOL).NE.Unlikely.b {
         new_count := AddI(count).Imm(Constants::NULLSTR_LEN).u32
-        If(new_count, size).CC(:CC_GT).b {
+        If(new_count, size).GT.Unlikely.b {
             Goto(:CallCppIntrinsic)
         }
         nullstr := Constants::NULLSTR
@@ -135,8 +135,8 @@ def GenerateStringBuilderString(compression)
         StoreI(sb, new_count).Imm(Constants::SB_COUNT_OFFSET).Volatile.u32
     } Else {
         length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
-        compare := Compare(length, 0).CC(:CC_EQ).b
-        IfImm(compare).Imm(0).CC(:CC_NE).b {
+        compare := Compare(length, 0).EQ.b
+        IfImm(compare).Imm(0).NE.Unlikely.b {
             Goto(:Exit)
         }
 
@@ -148,17 +148,17 @@ def GenerateStringBuilderString(compression)
         end
 
         # do not do compressed string unpacking
-        If(utf16, 0).CC(:CC_EQ).b {
+        If(utf16, 0).EQ.Unlikely.b {
             Goto(:CallCppIntrinsic)
         }
 
         new_count := Add(count, length).u32
-        If(new_count, size).CC(:CC_GT).b {
+        If(new_count, size).GT.Unlikely.b {
             Goto(:CallCppIntrinsic)
         }
 
-        compare := Compare(length, 8).CC(:CC_GT).b
-        IfImm(compare).Imm(0).CC(:CC_NE).b {
+        compare := Compare(length, 8).GT.b
+        IfImm(compare).Imm(0).NE.Unlikely.b {
             Goto(:CallCppIntrinsic)
         }
 
@@ -167,28 +167,28 @@ def GenerateStringBuilderString(compression)
         src := AddI(src).Imm(Constants::STRING_DATA_OFFSET).ptr
         dst := Add(dst, count).ptr
 
-        compare := Compare(length, 4).CC(:CC_GT).b
-        IfImm(compare).Imm(0).CC(:CC_NE).b {
+        compare := Compare(length, 4).GT.b
+        IfImm(compare).Imm(0).NE.b {
             Goto(:SizeGT4)
         }
 
-        compare := Compare(length, 4).CC(:CC_EQ).b
-        IfImm(compare).Imm(0).CC(:CC_NE).b {
+        compare := Compare(length, 4).EQ.b
+        IfImm(compare).Imm(0).NE.b {
             b := LoadI(src).Imm(0).u64
             StoreI(dst, b).Imm(0).u64
             Goto(:StoreCount)
         }
 
-        compare := Compare(length, 1).CC(:CC_EQ).b
-        IfImm(compare).Imm(0).CC(:CC_NE).b {
+        compare := Compare(length, 1).EQ.b
+        IfImm(compare).Imm(0).NE.b {
             b := LoadI(src).Imm(0).u16
             StoreI(dst, b).Imm(0).u16
             Goto(:StoreCount)
         }
         
         b := LoadI(src).Imm(0).u32
-        compare := Compare(length, 2).CC(:CC_EQ).b
-        IfImm(compare).Imm(0).CC(:CC_NE).b {
+        compare := Compare(length, 2).EQ.b
+        IfImm(compare).Imm(0).NE.b {
             StoreI(dst, b).Imm(0).u32
             Goto(:StoreCount)
         }

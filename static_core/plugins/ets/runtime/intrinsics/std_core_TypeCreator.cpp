@@ -27,6 +27,7 @@
 
 #include "runtime/include/runtime.h"
 #include "runtime/mem/vm_handle.h"
+#include "source_lang_enum.h"
 #include "types/ets_array.h"
 #include "types/ets_class.h"
 #include "types/ets_field.h"
@@ -37,7 +38,6 @@
 #include "types/ets_void.h"
 #include "types/ets_type.h"
 #include "types/ets_typeapi.h"
-#include "types/ets_typeapi_feature.h"
 #include "types/ets_typeapi_create.h"
 
 namespace panda::ets::intrinsics {
@@ -116,23 +116,23 @@ PandasmMethodCreator CreateCopiedMethod(TypeCreatorCtx *ctx, const std::string &
     return fn;
 }
 
-void SetAccessFlags(pandasm::ItemMetadata *meta, EtsTypeAPIFeatureAccessModifier mod)
+void SetAccessFlags(pandasm::ItemMetadata *meta, EtsTypeAPIAccessModifier mod)
 {
     switch (mod) {
-        case EtsTypeAPIFeatureAccessModifier::PUBLIC:
+        case EtsTypeAPIAccessModifier::PUBLIC:
             meta->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS, typeapi_create_consts::ATTR_ACCESS_VAL_PUBLIC);
             break;
-        case EtsTypeAPIFeatureAccessModifier::PRIVATE:
+        case EtsTypeAPIAccessModifier::PRIVATE:
             meta->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS, typeapi_create_consts::ATTR_ACCESS_VAL_PRIVATE);
             break;
-        case EtsTypeAPIFeatureAccessModifier::PROTECTED:
+        case EtsTypeAPIAccessModifier::PROTECTED:
             meta->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS,
                                     typeapi_create_consts::ATTR_ACCESS_VAL_PROTECTED);
             break;
     }
 }
 
-bool HasFeatureAttribute(EtsInt where, EtsTypeAPIFeatureAttributes attr)
+bool HasFeatureAttribute(EtsInt where, EtsTypeAPIAttributes attr)
 {
     static_assert(sizeof(EtsInt) == sizeof(uint32_t));
     return (bit_cast<uint32_t>(static_cast<EtsInt>(attr)) & bit_cast<uint32_t>(where)) != 0;
@@ -274,21 +274,21 @@ EtsLong TypeAPITypeCreatorCtxMethodCreate(EtsLong containing_type_ptr, EtsString
     auto klass = PtrFromLong<ClassCreator>(containing_type_ptr);
     auto name_str = klass->GetRec()->name;
     name_str += ".";
-    if (HasFeatureAttribute(attrs, EtsTypeAPIFeatureAttributes::CONSTRUCTOR)) {
+    if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::CONSTRUCTOR)) {
         name_str += panda_file::GetCtorName(SourceLanguage::ETS);
     } else {
         name_str += name->GetMutf8();
     }
     auto ret = klass->GetCtx()->Alloc<PandasmMethodCreator>(std::move(name_str), klass->GetCtx());
-    if (HasFeatureAttribute(attrs, EtsTypeAPIFeatureAttributes::STATIC)) {
+    if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::STATIC)) {
         ret->GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_STATIC);
     } else {
         ret->GetFn().params.emplace_back(pandasm::Type {klass->GetRec()->name, 0}, SourceLanguage::ETS);
     }
-    if (HasFeatureAttribute(attrs, EtsTypeAPIFeatureAttributes::ABSTRACT)) {
+    if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::ABSTRACT)) {
         ret->GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_NOIMPL);
     }
-    if (HasFeatureAttribute(attrs, EtsTypeAPIFeatureAttributes::CONSTRUCTOR)) {
+    if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::CONSTRUCTOR)) {
         ret->GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_CTOR);
     }
     return PtrToLong(ret);
@@ -297,7 +297,7 @@ EtsLong TypeAPITypeCreatorCtxMethodCreate(EtsLong containing_type_ptr, EtsString
 EtsString *TypeAPITypeCreatorCtxMethodAddAccessMod(EtsLong method_ptr, EtsInt access)
 {
     auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
-    SetAccessFlags(m->GetFn().metadata.get(), static_cast<EtsTypeAPIFeatureAccessModifier>(access));
+    SetAccessFlags(m->GetFn().metadata.get(), static_cast<EtsTypeAPIAccessModifier>(access));
     return ErrorFromCtx(m->Ctx());
 }
 
@@ -434,7 +434,11 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyDefault(EtsLong method_ptr)
     if (ret.IsVoid()) {
         fn.AddInstruction(pandasm::Create_RETURN_VOID());
     } else if (ret.IsObject()) {
-        fn.AddInstruction(pandasm::Create_LDA_NULL());
+        if (ret.GetDescriptor() == panda_file_items::class_descriptors::VOID) {
+            fn.AddInstruction(pandasm::Create_LDSTATIC_OBJ(m->Ctx()->GetRefVoidInstanceName()));
+        } else {
+            fn.AddInstruction(pandasm::Create_LDA_NULL());
+        }
         fn.AddInstruction(pandasm::Create_RETURN_OBJ());
         // return EtsString::CreateFromMUtf8("can't make default return for object type");
     } else if (ret.IsFloat32()) {
@@ -503,15 +507,15 @@ EtsString *TypeAPITypeCreatorCtxClassAddField(EtsLong class_ptr, EtsString *name
     auto klass = PtrFromLong<ClassCreator>(class_ptr);
     auto type = GetPandasmTypeFromDescriptor(klass->GetCtx(), descr->GetMutf8());
     pandasm::Field fld {SourceLanguage::ETS};
-    if (HasFeatureAttribute(attrs, EtsTypeAPIFeatureAttributes::STATIC)) {
+    if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::STATIC)) {
         fld.metadata->SetAttribute(typeapi_create_consts::ATTR_STATIC);
     }
-    if (HasFeatureAttribute(attrs, EtsTypeAPIFeatureAttributes::READONLY)) {
+    if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::READONLY)) {
         fld.metadata->SetAttribute(typeapi_create_consts::ATTR_FINAL);
     }
     fld.name = name->GetMutf8();
     fld.type = pandasm::Type(type, 0);
-    SetAccessFlags(fld.metadata.get(), static_cast<EtsTypeAPIFeatureAccessModifier>(access));
+    SetAccessFlags(fld.metadata.get(), static_cast<EtsTypeAPIAccessModifier>(access));
     klass->GetRec()->field_list.emplace_back(std::move(fld));
     return ErrorFromCtx(klass->GetCtx());
 }

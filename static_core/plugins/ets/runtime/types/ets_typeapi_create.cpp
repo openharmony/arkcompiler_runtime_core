@@ -13,16 +13,19 @@
  * limitations under the License.
  */
 
+#include <cstdio>
+#include <string>
+
 #include "assembler/assembly-program.h"
 #include "assembler/assembly-function.h"
 #include "assembler/assembly-ins.h"
+#include "assembly-type.h"
 #include "ins_create_api.h"
 
 #include "runtime/include/runtime.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 
 #include "ets_typeapi_create.h"
-#include "ets_typeapi_create_panda_constants.h"
 #include "ets_object.h"
 #include "ets_array.h"
 
@@ -123,11 +126,29 @@ pandasm::Record &TypeCreatorCtx::GetTypeAPICtxDataRecord()
     return ctx_data_record_;
 }
 
-void TypeCreatorCtx::AddRefTypeAsExternal(const std::string &name)
+pandasm::Record &TypeCreatorCtx::AddRefTypeAsExternal(const std::string &name)
 {
     pandasm::Record object_rec {name, SourceLanguage::ETS};
     object_rec.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
-    prog_.record_table.emplace(object_rec.name, std::move(object_rec));
+    return prog_.record_table.emplace(object_rec.name, std::move(object_rec)).first->second;
+}
+
+std::string TypeCreatorCtx::GetRefVoidInstanceName()
+{
+    pandasm::Record object_rec {typeapi_create_consts::TYPE_VOID.data(), SourceLanguage::ETS};
+    object_rec.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
+    auto &void_record = prog_.record_table.emplace(object_rec.name, std::move(object_rec)).first->second;
+
+    if (void_record.field_list.empty()) {
+        pandasm::Field void_field {panda_file::SourceLang::ETS};
+        void_field.type = pandasm::Type {void_record.name, 0, true};
+        void_field.name = typeapi_create_consts::TYPE_VOID_FIELD;
+        void_field.metadata->SetAttribute(typeapi_create_consts::ATTR_STATIC);
+        void_field.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
+        void_record.field_list.emplace_back(std::move(void_field));
+    }
+
+    return void_record.name + '.' + void_record.field_list.front().name;
 }
 
 const std::pair<std::string, std::string> &TypeCreatorCtx::DeclarePrimitive(const std::string &prim_type_name)
@@ -229,6 +250,10 @@ void PandasmMethodCreator::AddParameter(pandasm::Type param)
 
 void PandasmMethodCreator::AddResult(pandasm::Type type)
 {
+    if (fn_.metadata->IsCtor()) {
+        fn_.return_type = pandasm::Type {"void", 0};
+        return;
+    }
     fn_.return_type = std::move(type);
 }
 

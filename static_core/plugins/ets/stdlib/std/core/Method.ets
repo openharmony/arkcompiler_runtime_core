@@ -19,26 +19,61 @@ native function TypeAPIMethodInvoke(methodDesc: string, recv: NullishType, args:
 native function TypeAPIMethodInvokeConstructor(methodDesc: string, args: NullishType[]): Object
 
 export final class Method extends Object {
-    private td: string
+    private td: TypeDesc
     private name: string
     private attributes: int
     private accessMod: byte
 
-    public getType(): FunctionType {
-        return Type.resolve(this.td) as FunctionType
+    private constructor () {}
+
+    public getType(): MethodType {
+        return Type.resolve(this.td) as MethodType
     }
 
     public getName(): string {
         return this.name
     }
 
-    internal getTD(): string {
+    internal getTD(): TypeDesc {
         return this.td
     }
 
+    public isInherited(): boolean {
+        return (this.attributes & Attributes.INHERITED) != 0
+    }
+
+    public isStatic(): boolean {
+        return (this.attributes & Attributes.STATIC) != 0
+    }
+
+    public isFinal(): boolean {
+        // TODO(shumilov-petr): not implemented in front-end
+        return (this.attributes & Attributes.FINAL) != 0
+    }
+
+    public isAbstract(): boolean {
+        return (this.attributes & Attributes.ABSTRACT) != 0
+    }
+
+    public isConstructor(): boolean {
+        return (this.attributes & Attributes.CONSTRUCTOR) != 0
+    }
+
+    public isGetter(): boolean {
+        return (this.attributes & Attributes.GETTER) != 0
+    }
+
+    public isSetter(): boolean {
+        return (this.attributes & Attributes.SETTER) != 0
+    }
+
+    public override toString(): string {
+        return this.getName() + ": " + this.getType().toString()
+    }
+
     public invoke(recv: NullishType, args: NullishType[]): NullishType {
-        const isCtor = (this.attributes & Attributes.CONSTRUCTOR) != 0
-        const isStatic = (this.attributes & Attributes.STATIC) != 0
+        const isCtor = this.isConstructor()
+        const isStatic = this.isStatic()
         if ((isStatic || isCtor) != (recv == null)) {
             throw new Error("reciever may be null only for static/ctor methods")
         }

@@ -54,11 +54,11 @@ def GenerateStringEquals(lang, dynamic, compression)
             next
         end
         unless dynamic
-            If(str2, 0).CC(:CC_EQ).b {
+            If(str2, 0).EQ.Unlikely.b {
                 Goto(:NotEqual)
             }
         end
-        If(str1, str2).CC(:CC_EQ).b {
+        If(str1, str2).EQ.Unlikely.b {
             Return(1).b
         }
         if dynamic
@@ -66,7 +66,7 @@ def GenerateStringEquals(lang, dynamic, compression)
             length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
             length1 := AndI(length1).Imm("~(2U)").u32
             length2 := AndI(length2).Imm("~(2U)").u32
-            If(length1, length2).CC(:CC_NE).b {
+            If(length1, length2).NE.Unlikely.b {
                 Goto(:NotEqual)
             }
             length := Cast(length1.u32).u64
@@ -74,13 +74,13 @@ def GenerateStringEquals(lang, dynamic, compression)
             # assume STRING_LENGTH_OFFSET == OBJECT_CLASS_OFFSET + 4
             class_and_length1 := LoadI(str1).Imm(Constants::OBJECT_CLASS_OFFSET).u64
             class_and_length2 := LoadI(str2).Imm(Constants::OBJECT_CLASS_OFFSET).u64
-            If(class_and_length1, class_and_length2).CC(:CC_NE).b {
+            If(class_and_length1, class_and_length2).NE.Unlikely.b {
                 Goto(:NotEqual)
             }
             length := Shr(class_and_length1, 32).u64
         end
         length := unpack_length(length, compression, length_shift)
-        If(length, 8).CC(:CC_GT).b {
+        If(length, 8).GT.b {
             Goto(:Long)
         }
         odd_bytes := Sub(8, length).u64
@@ -89,18 +89,18 @@ def GenerateStringEquals(lang, dynamic, compression)
         buf2 := Load(str2, last_idx).u64
         odd_bits := Shl(odd_bytes, 3).u64
         diff := Shr(Xor(buf1, buf2).u64, odd_bits).u64
-        res := Compare(diff, 0).CC(:CC_EQ).b
+        res := Compare(diff, 0).EQ.b
         if dynamic
             # If length is 0, odd_bits is 64 and Shr above does nothing, so we effectively compare last 8 bytes of two strings
             # before their data (length and hash code). Hash code for empty string is always 0, but value stored in length field
             # of equal strings can be different in dynamic implementation, so we check (length == 0) separately
-            res := Or(res, Compare(length, 0).CC(:CC_EQ).b).b
+            res := Or(res, Compare(length, 0).EQ.b).b
         end
         Return(res).b
 
     Label(:Long)
-        unroll := Compare(length, 64).CC(:CC_GE).b
-        IfImm(unroll).Imm(0).SrcType("DataType::BOOL").CC(:CC_NE).b {
+        unroll := Compare(length, 64).GE.b
+        IfImm(unroll).Imm(0).SrcType("DataType::BOOL").NE.b {
             LiveOut(Cast(str1).SrcType("DataType::REFERENCE").ptr).DstReg(regmap[:arg0]).ptr
             LiveOut(Cast(str2).SrcType("DataType::REFERENCE").ptr).DstReg(regmap[:arg1]).ptr
             entrypoint_id = "#{lang.empty? ? '' : lang.upcase + '_'}STRING_EQUALS_UNROLL" + (compression ? "_COMPRESSED" : "");
@@ -114,14 +114,14 @@ def GenerateStringEquals(lang, dynamic, compression)
         idx := Phi(first_idx, next_idx).u64
         buf1 := Load(str1, idx).u64
         buf2 := Load(str2, idx).u64
-        If(buf1, buf2).CC(:CC_NE).b {
+        If(buf1, buf2).NE.Unlikely.b {
             Goto(:NotEqual)
         }
         next_idx := Add(idx, 8).u64
-        If(next_idx, last_idx).CC(:CC_GE).b {
+        If(next_idx, last_idx).GE.Unlikely.b {
             buf1 := Load(str1, last_idx).u64
             buf2 := Load(str2, last_idx).u64
-            res := Compare(buf1, buf2).CC(:CC_EQ).b
+            res := Compare(buf1, buf2).EQ.b
             Return(res).b
         }
         Goto(:Loop)
@@ -146,13 +146,13 @@ def GenerateStringEquals(lang, dynamic, compression)
         # Compare first 32 bytes
         buf1 := LoadI(str1).Imm(Constants::STRING_DATA_OFFSET).u64
         buf2 := LoadI(str2).Imm(Constants::STRING_DATA_OFFSET).u64
-        If(buf1, buf2).CC(:CC_NE).b {
+        If(buf1, buf2).NE.Unlikely.b {
             Goto(:NotEqual)
         }
         diff := load_diff(str1, str2, 8)
         diff := Or(diff, load_diff(str1, str2, 16)).u64
         diff := Or(diff, load_diff(str1, str2, 24)).u64
-        If(diff, 0).CC(:CC_NE).b {
+        If(diff, 0).NE.Unlikely.b {
             Goto(:NotEqual)
         }
         length := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -170,16 +170,16 @@ def GenerateStringEquals(lang, dynamic, compression)
         diff := Or(diff, load_diff(ptr1, ptr2, 8)).u64
         diff := Or(diff, load_diff(ptr1, ptr2, 16)).u64
         diff := Or(diff, load_diff(ptr1, ptr2, 24)).u64
-        If(diff, 0).CC(:CC_NE).b {
+        If(diff, 0).NE.Unlikely.b {
             Goto(:NotEqual)
         }
         next_ptr1 := Add(ptr1, 32).ptr
-        If(next_ptr1, last_ptr1).CC(:CC_GE).b {
+        If(next_ptr1, last_ptr1).GE.Unlikely.b {
             diff := load_diff(last_ptr1, last_ptr2, 0)
             diff := Or(diff, load_diff(last_ptr1, last_ptr2, 8)).u64
             diff := Or(diff, load_diff(last_ptr1, last_ptr2, 16)).u64
             diff := Or(diff, load_diff(last_ptr1, last_ptr2, 24)).u64
-            If(diff, 0).CC(:CC_NE).b {
+            If(diff, 0).NE.Unlikely.b {
                 Goto(:NotEqual)
             }
             Return(1).b
@@ -209,7 +209,7 @@ macro(:allocate_string_tlab) do |string_klass, data_size|
   # Load pointer to the end address of free memory in the TLAB
   _end := LoadI(_tlab).Imm(Constants::TLAB_MEMORY_END_ADDR_OFFSET).ptr
   # Check if there is enough space
-  If(Sub(_end, _start).word, _size).CC(:CC_LT).Unlikely.b {
+  If(Sub(_end, _start).word, _size).LT.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
   if defines.DEBUG
@@ -257,23 +257,23 @@ def GenerateCreateStringFromStringTlab(string_compression_enabled)
     src_str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
     dst_str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
     offs := Cast(0).u64
-    If(data_size, 8).CC(:CC_GE).Likely.b {
+    If(data_size, 8).GE.Likely.b {
       stop := AndI(data_size).Imm(7).u64
     Label(:CopyLoop_8b)
       offs1 := Phi(offs, offs2).u64
       Store(dst_str_data, offs, Load(src_str_data, offs).u64).u64
       offs2 := AddI(offs1).Imm(8).u64
-      If(offs2, stop).CC(:CC_LT).Likely.b {
+      If(offs2, stop).LT.Likely.b {
         Goto(:CopyLoop_8b)
       }
     }
     offs3 := Phi(offs, offs2).u64
-    If(offs3, data_size).CC(:CC_LT).Likely.b {
+    If(offs3, data_size).LT.Likely.b {
     Label(:CopyLoop_1b)
       offs4 := Phi(offs3, offs5).u64
       Store(dst_str_data, offs4, Load(src_str_data, offs4).u8).u8
       offs5 := AddI(offs4).Imm(1).u64
-      If(offs5, data_size).CC(:CC_LT).Likely.b {
+      If(offs5, data_size).LT.Likely.b {
         Goto(:CopyLoop_1b)
       }
     }
@@ -300,7 +300,7 @@ end  # def GenerateCreateStringFromStringTlab
 scoped_macro(:is_array_of_compressable_chars) do |arr_data, char_count|
   # Check 4-chars block at once if it's possible
   n_blocks := ShrI(char_count).Imm(2).u64
-  If(n_blocks, 0).CC(:CC_GT).Likely.b {
+  If(n_blocks, 0).GT.Likely.b {
     # 0x007F is utf::UTF8_1B_MAX
     utf8_1b_max := Cast(0x007F007F007F007F).u64
     utf8_1b_max_mask := Not(utf8_1b_max).u64
@@ -309,32 +309,32 @@ scoped_macro(:is_array_of_compressable_chars) do |arr_data, char_count|
     i2 := Phi(i1, i3).u64
     four_chars := Load(arr_data, ShlI(i2).Imm(3).u64).u64
     # First: check if there are chars greater than utf::UTF8_1B_MAX
-    If(And(four_chars, utf8_1b_max_mask).u64, 0).CC(:CC_NE).Unlikely.b {
+    If(And(four_chars, utf8_1b_max_mask).u64, 0).NE.Unlikely.b {
         compressable1 := Cast(0).b
         Goto(:CanBeCompressedLoopDone)
     }
     # Second: check if there are chars equal to zero
-    If(And(SubI(four_chars).Imm(0x0001000100010001).u64, utf8_1b_max_mask).u64, 0).CC(:CC_NE).Unlikely.b {
+    If(And(SubI(four_chars).Imm(0x0001000100010001).u64, utf8_1b_max_mask).u64, 0).NE.Unlikely.b {
         compressable2 := Cast(0).b
         Goto(:CanBeCompressedLoopDone)
     }
     i3 := AddI(i2).Imm(1).u64
-    If(i3, n_blocks).CC(:CC_LT).Likely.b {
+    If(i3, n_blocks).LT.Likely.b {
         Goto(:CanBeCompressedLoop_4chars)
     }
   }
   # check the rest of the chars
-  If(AndI(char_count).Imm(3).u64, 0).CC(:CC_GT).Likely.b {
+  If(AndI(char_count).Imm(3).u64, 0).GT.Likely.b {
     i4 := ShlI(n_blocks).Imm(2).u64  # number of already copied chars if any
 Label(:CanBeCompressedLoop)
     i5 := Phi(i4, i6).u64
     ch := Load(arr_data, ShlI(i5).Imm(1).u64).u16
-    If(SubI(ch).Imm(1).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).CC(:CC_AE).Unlikely.b {
+    If(SubI(ch).Imm(1).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).AE.Unlikely.b {
       compressable3 := Cast(0).b
       Goto(:CanBeCompressedLoopDone)
     }
     i6 := AddI(i5).Imm(1).u64
-    If(i6, char_count).CC(:CC_LT).Likely.b {
+    If(i6, char_count).LT.Likely.b {
       Goto(:CanBeCompressedLoop)
     }
   }
@@ -351,7 +351,7 @@ scoped_macro(:copy_array_of_compressable_chars_to_string) do |arr_data, str_data
   # Array of chars contains 16-bits chars
 if Options.arch == :arm64
   # Copy 16-byte chunks compressing them into 8-byte chunks
-  If(char_count, 8).CC(:CC_GE).Likely.b {
+  If(char_count, 8).GE.Likely.b {
     stop := Add(arr_data, ShlI(ShrI(char_count).Imm(3).u64).Imm(4).u64).ptr
 Label(:CopyLoop_16b)
     arr_data1 := Phi(arr_data, arr_data2).ptr
@@ -359,7 +359,7 @@ Label(:CopyLoop_16b)
     Intrinsic(:COMPRESS_EIGHT_UTF16_TO_UTF8_CHARS_USING_SIMD, arr_data1, str_data1).void
     arr_data2 := AddI(arr_data1).Imm(16).ptr
     str_data2 := AddI(str_data1).Imm(8).ptr
-    If(arr_data2, stop).CC(:CC_LT).Likely.b {
+    If(arr_data2, stop).LT.Likely.b {
       Goto(:CopyLoop_16b)
     }
   }
@@ -367,20 +367,20 @@ Label(:CopyLoop_16b)
   str_data3 := Phi(str_data, str_data2).ptr
   # Copy 2-byte chunks compressing them into 1-byte
   n_2b := AndI(char_count).Imm(7).u64
-  If(n_2b, 0).CC(:CC_GT).Likely.b {
+  If(n_2b, 0).GT.Likely.b {
     j1 := Cast(0).u64
 Label(:CopyLoop_2b)
     j := Phi(j1, j2).u64
     Store(str_data3, j, Load(arr_data3, ShlI(j).Imm(1).u64).u8).u8
     j2 := AddI(j).Imm(1).u64
-    If(j2, n_2b).CC(:CC_LT).Likely.b {
+    If(j2, n_2b).LT.Likely.b {
       Goto(:CopyLoop_2b)
     }
   }
 else
   # Copy 8-byte chunks compressing them into 4-byte chunks
   n_8b := ShrI(char_count).Imm(2).u64
-  If(n_8b, 0).CC(:CC_GT).Likely.b {
+  If(n_8b, 0).GT.Likely.b {
     i1 := Cast(0).u64
 Label(:CopyLoop_8b)
     i := Phi(i1, i2).u64
@@ -389,18 +389,18 @@ Label(:CopyLoop_8b)
     chunk := Or(chunk, ShrI(chunk).Imm(16).u64).u64
     Store(str_data, ShlI(i).Imm(2).u64, Cast(chunk).u32).u32
     i2 := AddI(i).Imm(1).u64
-    If(i2, n_8b).CC(:CC_LT).Likely.b {
+    If(i2, n_8b).LT.Likely.b {
       Goto(:CopyLoop_8b)
     }
   }
   # Copy 2-byte chunks compressing them into 1-byte
-  If(AndI(char_count).Imm(3).u64, 0).CC(:CC_GT).Likely.b {
+  If(AndI(char_count).Imm(3).u64, 0).GT.Likely.b {
     j1 := ShlI(n_8b).Imm(2).u64  # number of already copied chars if any
 Label(:CopyLoop_2b)
     j := Phi(j1, j2).u64
     Store(str_data, j, Load(arr_data, ShlI(j).Imm(1).u64).u8).u8
     j2 := AddI(j).Imm(1).u64
-    If(j2, char_count).CC(:CC_LT).Likely.b {
+    If(j2, char_count).LT.Likely.b {
       Goto(:CopyLoop_2b)
     }
   }
@@ -415,24 +415,24 @@ scoped_macro(:copy_array_of_chars_to_string) do |arr_data, str_data, char_count|
   # Array of chars contains 16-bits chars
   # Copy 8-byte chunks
   n_8b := ShrI(char_count).Imm(2).u64
-  If(n_8b, 0).CC(:CC_GT).Likely.b {
+  If(n_8b, 0).GT.Likely.b {
     i1 := Cast(0).u64
 Label(:CopyLoop_8b)
     i := Phi(i1, i2).u64
     Store(str_data, ShlI(i).Imm(3).u64, Load(arr_data, ShlI(i).Imm(3).u64).u64).u64
     i2 := AddI(i).Imm(1).u64
-    If(i2, n_8b).CC(:CC_LT).Likely.b {
+    If(i2, n_8b).LT.Likely.b {
       Goto(:CopyLoop_8b)
     }
   }
   # Copy 2-byte chunks
-  If(AndI(char_count).Imm(3).u64, 0).CC(:CC_GT).Likely.b {
+  If(AndI(char_count).Imm(3).u64, 0).GT.Likely.b {
     j1 := ShlI(n_8b).Imm(2).u64  # number of already copied chars if any
 Label(:CopyLoop_2b)
     j := Phi(j1, j2).u64
     Store(str_data, ShlI(j).Imm(1).u64, Load(arr_data, ShlI(j).Imm(1).u64).u16).u16
     j2 := AddI(j).Imm(1).u64
-    If(j2, char_count).CC(:CC_LT).Likely.b {
+    If(j2, char_count).LT.Likely.b {
       Goto(:CopyLoop_2b)
     }
   }
@@ -462,7 +462,7 @@ def GenerateCreateStringFromCharArrayTlab(string_compression_enabled)
     # Allocate a new string
     if string_compression_enabled
       compressable := is_array_of_compressable_chars(arr_data, Cast(char_count).u64)
-      If(compressable, 1).CC(:CC_EQ).Likely.b {
+      If(compressable, 1).EQ.Likely.b {
         data_size1 := Cast(char_count).word
       } Else {
         data_size2 := Cast(ShlI(char_count).Imm(1).u32).word
@@ -477,7 +477,7 @@ def GenerateCreateStringFromCharArrayTlab(string_compression_enabled)
     # Copy data from char_array to the new string
     # String length field is set according to SetLength() from runtime/include/coretypes/string.h
     if string_compression_enabled
-      If(compressable, 1).CC(:CC_EQ).Likely.b {
+      If(compressable, 1).EQ.Likely.b {
         copy_array_of_compressable_chars_to_string(arr_data, str_data, Cast(char_count).u64)
         StoreI(new_str, ShlI(char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       } Else {
@@ -524,7 +524,7 @@ def GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled)
     # Allocate a new string
     if string_compression_enabled
       compressable := is_array_of_compressable_chars(arr_data, Cast(char_count).u64)
-      If(compressable, 1).CC(:CC_EQ).Likely.b {
+      If(compressable, 1).EQ.Likely.b {
         data_size1 := Cast(char_count).word
       } Else {
         data_size2 := Cast(ShlI(char_count).Imm(1).u32).word
@@ -539,7 +539,7 @@ def GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled)
     # Copy data from char_array to the new string
     # String length field is set according to SetLength() from runtime/include/coretypes/string.h
     if string_compression_enabled
-      If(compressable, 1).CC(:CC_EQ).Likely.b {
+      If(compressable, 1).EQ.Likely.b {
         copy_array_of_compressable_chars_to_string(arr_data, str_data, Cast(char_count).u64)
         StoreI(new_str, ShlI(char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       } Else {

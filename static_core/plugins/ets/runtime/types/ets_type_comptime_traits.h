@@ -20,6 +20,7 @@
 
 namespace panda::ets {
 
+class EtsObject;
 namespace detail {
 template <EtsType TYPE>
 struct EtsTypeEnumToCppTypeT;

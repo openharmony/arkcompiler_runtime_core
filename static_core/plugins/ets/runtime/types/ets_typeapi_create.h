@@ -18,6 +18,7 @@
 
 #include "assembly-function.h"
 #include "assembly-program.h"
+#include "ets_typeapi_create_panda_constants.h"
 
 namespace panda {
 template <typename T>
@@ -74,7 +75,9 @@ public:
      */
     pandasm::Record &GetTypeAPICtxDataRecord();
 
-    void AddRefTypeAsExternal(const std::string &name);
+    pandasm::Record &AddRefTypeAsExternal(const std::string &name);
+
+    std::string GetRefVoidInstanceName();
 
     /**
      * Lazily declares primitive reference wrapper
@@ -178,9 +181,11 @@ class LambdaTypeCreator final : public TypeCreator {
 public:
     explicit LambdaTypeCreator(TypeCreatorCtx *ctx) : TypeCreator(ctx)
     {
-        rec_.metadata->SetAttribute("ets.abstract");
-        rec_.metadata->SetAttribute("ets.interface");
-        rec_.metadata->SetAttributeValue("access.record", "public");
+        for (const auto &attr : typeapi_create_consts::ATTR_INTERFACE) {
+            rec_.metadata->SetAttribute(attr);
+        }
+        rec_.metadata->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS,
+                                         typeapi_create_consts::ATTR_ACCESS_VAL_PUBLIC);
     }
 
     TypeCreatorKind GetKind() const override

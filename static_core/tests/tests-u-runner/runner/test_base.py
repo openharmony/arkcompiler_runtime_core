@@ -67,6 +67,7 @@ class Test:
         if self.is_output_status():
             Log.default(_LOGGER, f"Finished {self.test_id} - {round(self.time, 2)} sec - {self.status().value}")
         if self.is_output_log():
+            self.reproduce += f"\nTo reproduce with URunner run:\n{self.get_command_line()}"
             Log.default(_LOGGER, f"{self.test_id}: steps: {self.reproduce}")
             if self.report:
                 Log.default(_LOGGER, f"{self.test_id}: expected output: {self.expected}")
@@ -90,6 +91,17 @@ class Test:
         if self.passed:
             return TestStatus.PASSED_IGNORED if self.ignored else TestStatus.PASSED
         return TestStatus.FAILURE_IGNORED if self.ignored else TestStatus.NEW_FAILURE
+
+    def get_command_line(self) -> str:
+        config_cmd = self.test_env.config.get_command_line()
+        reproduce_message = [
+            f'{self.test_env.config.general.panda_source_root}/tests/tests-u-runner/runner.sh',
+            self.test_env.config.general.panda_source_root,
+            config_cmd
+        ]
+        if config_cmd.find('--test-file') < 0:
+            reproduce_message.append(f" --test-file {self.test_id}")
+        return ' '.join(reproduce_message)
 
     def is_output_log(self) -> bool:
         """

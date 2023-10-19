@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_TYPE_H
-#define _PANDA_ASSEMBLER_TYPE_H
+#ifndef PANDA_ASSEMBLER_ASSEMBLY_TYPE_H
+#define PANDA_ASSEMBLER_ASSEMBLY_TYPE_H
 
 #include "define.h"
 #include "file_items.h"
@@ -196,4 +196,4 @@ public:
 
 }  // namespace std
 
-#endif  // !_PANDA_ASSEMBLER_TYPE_H
+#endif  // PANDA_ASSEMBLER_ASSEMBLY_TYPE_H

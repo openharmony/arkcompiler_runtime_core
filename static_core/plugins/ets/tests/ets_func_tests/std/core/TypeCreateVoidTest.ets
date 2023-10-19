@@ -1,7 +1,22 @@
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 function foo(): void {}
 
 function test(a: Object): void {
-	assert(a instanceof void);
+	assert(a instanceof Void);
 }
 
 class C {
@@ -23,14 +38,14 @@ function main(): void throws {
 			.addBase(Type.of(new C()) as ClassType)
 			.addMethod(
 				new MethodCreator("foo")
-					//.addResult(VoidType.REF)
-					.addResult(Type.of(Void))
+					.addResult(VoidType.REF)
+					//.addResult(Type.of(Void))
 					.addBody(new CallableBodyFunction(release))
 			)
 			.addMethod(
 				new MethodCreator("bar")
-					//.addResult(VoidType.REF)
-					.addResult(Type.of(Void))
+					.addResult(VoidType.REF)
+					//.addResult(Type.of(Void))
 					.addBody(new CallableBodyDefault())
 			)
 			.addMethod(
@@ -45,7 +60,7 @@ function main(): void throws {
 	const c1 = C1.make() as C
 
 	test(c1.foo())
-	//test(c1.bar())
+	test(c1.bar())
 
 	// TODO(kprokopenko): as this function is called multiple times,
 	// same class creation will lead to mismatched lambda context...

@@ -42,6 +42,9 @@ inline constexpr std::array<std::string_view, 2> ATTR_ABSTRACT_METHOD = {ATTR_AB
 
 inline constexpr std::string_view TYPE_OBJECT = "std.core.Object";
 inline constexpr std::string_view TYPE_BOXED_PREFIX = "std.core.";
+inline constexpr std::string_view TYPE_VOID = "std.core.void";
+inline constexpr std::string_view TYPE_VOID_FIELD = "void_instance";
+
 }  // namespace panda::ets::typeapi_create_consts
 
 #endif

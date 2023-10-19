@@ -60,7 +60,7 @@ function(:AllocateObjectTlab,
 
   tls_size := Sub(tls_end, start).word
 
-  If(tls_size, size).CC(:CC_LT).b {
+  If(tls_size, size).LT.Unlikely.b {
     Intrinsic(:SLOW_PATH_ENTRY, klass, size).AddImm(Constants::CREATE_OBJECT_BY_CLASS_SLOW_PATH).AddImm(Constants::CREATE_OBJECT_BY_CLASS_USUAL_BRIDGE).Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   } Else {
@@ -117,7 +117,7 @@ def AllocateArrayTlab(element_size)
 
     tls_size := Sub(tls_end, start).word
 
-    If(tls_size, size).CC(:CC_LT).b {
+    If(tls_size, size).LT.Unlikely.b {
       Intrinsic(:SLOW_PATH_ENTRY, klass, elements_num).AddImm(Constants::CREATE_ARRAY_SLOW_PATH).AddImm(Constants::CREATE_ARRAY_USUAL_BRIDGE).Terminator.ptr
       Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
     } Else {

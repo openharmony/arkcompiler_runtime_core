@@ -507,8 +507,8 @@ export final class LambdaTypeCreator extends TypeCreator {
 
     public constructor() {}
 
-    public override create(): FunctionType throws {
-        return super.create() as FunctionType
+    public override create(): LambdaType throws {
+        return super.create() as LambdaType
     }
 
     public addParameter(typ: Type): LambdaTypeCreator throws {
@@ -765,7 +765,7 @@ export final class CallableBodyFunction extends CallableBody {
 
     public constructor(m: Object) throws {
         super()
-        if (!(Type.of(m) instanceof FunctionType)) {
+        if (!(Type.of(m) instanceof LambdaType)) {
             throw new TypeAPICreateException("can't encapsulate non-functional type")
         }
         this.body = m

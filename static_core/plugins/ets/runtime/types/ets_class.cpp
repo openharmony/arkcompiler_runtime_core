@@ -39,6 +39,12 @@ uint32_t EtsClass::GetFieldsNumber()
     return fnumber;
 }
 
+// Without inherited fields
+uint32_t EtsClass::GetOwnFieldsNumber()
+{
+    return GetRuntimeClass()->GetFields().Size();
+}
+
 PandaVector<EtsField *> EtsClass::GetFields()
 {
     auto ets_fields = PandaVector<EtsField *>(Runtime::GetCurrent()->GetInternalAllocator()->Adapter());
@@ -67,6 +73,11 @@ EtsField *EtsClass::GetFieldByIndex(uint32_t i)
         return true;
     });
     return res;
+}
+
+EtsField *EtsClass::GetOwnFieldByIndex(uint32_t i)
+{
+    return EtsField::FromRuntimeField(&GetRuntimeClass()->GetFields()[i]);
 }
 
 EtsMethod *EtsClass::GetDirectMethod(const char *name, const char *signature)

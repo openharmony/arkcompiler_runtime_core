@@ -1,4 +1,5 @@
 import logging
+import re
 from dataclasses import dataclass
 from functools import cached_property
 from typing import Set, Dict
@@ -31,7 +32,8 @@ class Config:
     @cached_property
     @value(
         yaml_path="test-suites",
-        cli_name=["test_suites", "test262", "parser", "hermes", "ets_func_tests", "ets_runtime", "ets_cts"],
+        cli_name=["test_suites", "test262", "parser", "hermes",
+                  "ets_func_tests", "ets_runtime", "ets_cts", "ets_gc_stress"],
         cast_to_type=_to_test_suites,
         required=True
     )
@@ -67,3 +69,21 @@ class Config:
             return
         data = self._to_dict()
         YamlDocument.save(self.general.generate_config, data)
+
+    def get_command_line(self) -> str:
+        _test_suites = ['--' + suite.replace('_', '-') for suite in self.test_suites]
+        options = ' '.join([
+            ' '.join(_test_suites),
+            self.general.get_command_line(),
+            self.es2panda.get_command_line(),
+            self.verifier.get_command_line(),
+            self.quick.get_command_line(),
+            self.ark_aot.get_command_line(),
+            self.ark.get_command_line(),
+            self.time_report.get_command_line(),
+            self.test_lists.get_command_line(),
+            self.ets.get_command_line()
+        ])
+        options_str = re.sub(r'\s+', ' ', options, re.IGNORECASE | re.DOTALL)
+
+        return options_str

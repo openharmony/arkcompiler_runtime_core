@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_EMITTER_HPP
-#define _PANDA_ASSEMBLER_EMITTER_HPP
+#ifndef PANDA_ASSEMBLER_ASSEMBLY_EMITTER_H
+#define PANDA_ASSEMBLER_ASSEMBLY_EMITTER_H
 
 #include <memory>
 #include <type_traits>
@@ -249,4 +249,4 @@ std::string GetItemName(std::string name);
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_EMITTER_HPP
+#endif  // PANDA_ASSEMBLER_ASSEMBLY_EMITTER_H

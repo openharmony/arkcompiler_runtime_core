@@ -113,7 +113,7 @@ cases:
       for (let ch of p) res += ch
       return res;
     call: |-
-      let v = foo(1.5, false, 'A', 'B')
+      let v = foo(1.5, false, c'A', c'B')
       if (v == "1.5false2AB") return 0;
 
   # generic function
@@ -124,7 +124,9 @@ cases:
     call: |-
       let v: string[] = foo<string>("X", "A", "B", "C")
       let q: Int[] = foo<Int>(1, 2)
-      if (v.length == 3 && v[0] == "A" && v[1] == "B" && v[2] == "C" && q.length == 1 && q[0] == 2) return 0;
+      if (v.length == 3 && "A".equals(v[0]) && "B".equals(v[1]) && "C".equals(v[2]) && q.length == 1 && q[0] == new Int(2)) return 0;
+      // TODO: when the error with generic function return type will be fixed, the more usual form can be used:
+      // if (v.length == 3 && v[0] == "A" && v[1] == "B" && v[2] == "C" && q.length == 1 && q[0] == 2) return 0;
 
   # generic function with nullable argument
   - sig: |-

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_FUNCTION_HPP
-#define _PANDA_ASSEMBLER_FUNCTION_HPP
+#ifndef PANDA_ASSEMBLER_ASSEMBLY_FUNCTION_H
+#define PANDA_ASSEMBLER_ASSEMBLY_FUNCTION_H
 
 #include <memory>
 #include <optional>
@@ -189,4 +189,4 @@ struct Function {
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_FUNCTION_HPP
+#endif  // PANDA_ASSEMBLER_ASSEMBLY_FUNCTION_H

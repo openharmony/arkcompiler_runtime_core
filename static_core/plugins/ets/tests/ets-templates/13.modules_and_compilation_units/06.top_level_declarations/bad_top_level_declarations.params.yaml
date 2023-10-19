@@ -1,0 +1,5 @@
+--- # A list of top level declarations
+topLevelTypes:
+  - int
+  - 'test'
+  - () => { return }

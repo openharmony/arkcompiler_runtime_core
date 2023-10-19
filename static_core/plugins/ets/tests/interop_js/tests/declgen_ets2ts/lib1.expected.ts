@@ -12,7 +12,7 @@ exports.SumDouble = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'SumDou
 export declare function SumString(a: string, b: string): string;
 exports.SumString = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'SumString');
 
-export declare function Identity<T>(x?: T): T;
+export declare function Identity<T>(x: T): T;
 exports.Identity = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'Identity');
 
 export declare function ForEach<T extends Object>(a: T[], cb: (e: T, idx: number) => void): void;
@@ -103,16 +103,16 @@ export declare class GenericClass<T extends Object> {
 exports.GenericClass = (globalThis as any).Panda.getClass('LGenericClass;');
 
 export interface IGeneric0<T> {
-    I0Method(a?: T): T;
+    I0Method(a: T): T;
 }
 
 export interface IGeneric1<T> {
-    I1Method(a?: T): T;
+    I1Method(a: T): T;
 }
 
 export declare class BaseGeneric<T, U> {
-    public c?: T;
-    public d?: U;
+    public c: T;
+    public d: U;
     constructor();
 };
 exports.BaseGeneric = (globalThis as any).Panda.getClass('LBaseGeneric;');

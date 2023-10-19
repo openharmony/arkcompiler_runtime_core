@@ -27,3 +27,7 @@ class EtsTestDir:
     @property
     def stdlib_templates(self) -> Path:
         return self.tests / "stdlib-templates"
+
+    @property
+    def gc_stress(self) -> Path:
+        return self.tests / "ets_test_suite" / "gc" / "stress"

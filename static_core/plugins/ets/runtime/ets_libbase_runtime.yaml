@@ -1763,7 +1763,7 @@ intrinsics:
 ###################
 # std.core.Type   #
 ###################
-  - name: StdTypeGetTypeDescriptor
+  - name: TypeAPIGetTypeDescriptor
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetTypeDescriptor
@@ -1774,7 +1774,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetTypeDescriptor
     clear_flags: [ ]
 
-  - name: StdTypeGetTypeKind
+  - name: TypeAPIGetTypeKind
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetTypeKind
@@ -1785,7 +1785,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetTypeKind
     clear_flags: [ ]
 
-  - name: StdTypeIsValueType
+  - name: TypeAPIIsValueType
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIIsValueType
@@ -1796,7 +1796,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIIsValueType
     clear_flags: [ ]
 
-  - name: StdTypeGetTypeName
+  - name: TypeAPIGetTypeName
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetTypeName
@@ -1807,7 +1807,18 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetTypeName
     clear_flags: [ ]
 
-  - name: StdTypeGetFieldsNum
+  - name: TypeAPIGetClassAttributes
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetClassAttributes
+    static: true
+    signature:
+      ret: i32
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetClassAttributes
+    clear_flags: [ ]
+
+  - name: TypeAPIGetFieldsNum
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetFieldsNum
@@ -1818,7 +1829,18 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetFieldsNum
     clear_flags: [ ]
 
-  - name: StdTypeGetField
+  - name: TypeAPIGetOwnFieldsNum
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetOwnFieldsNum
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetOwnFieldsNum
+    clear_flags: [ ]
+
+  - name: TypeAPIGetField
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetField
@@ -1829,7 +1851,18 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetField
     clear_flags: [ ]
 
-  - name: StdTypeGetFieldByName
+  - name: TypeAPIGetOwnField
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetOwnField
+    static: true
+    signature:
+      ret: std.core.Field
+      args: [ std.core.String, i64 ]
+    impl: panda::ets::intrinsics::TypeAPIGetOwnField
+    clear_flags: [ ]
+
+  - name: TypeAPIGetFieldByName
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetFieldByName
@@ -1840,7 +1873,18 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetFieldByName
     clear_flags: [ ]
 
-  - name: StdTypeGetMethodsNum
+  - name: TypeAPIGetStaticFieldValue
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetStaticFieldValue
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.String, std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetStaticFieldValue
+    clear_flags: [ ]
+
+  - name: TypeAPIGetMethodsNum
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetMethodsNum
@@ -1851,7 +1895,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetMethodsNum
     clear_flags: [ ]
 
-  - name: StdTypeGetMethod
+  - name: TypeAPIGetMethod
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetMethod
@@ -1862,7 +1906,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetMethod
     clear_flags: [ ]
 
-  - name: StdTypeGetConstructorsNum
+  - name: TypeAPIGetConstructorsNum
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetConstructorsNum
@@ -1873,7 +1917,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetConstructorsNum
     clear_flags: [ ]
 
-  - name: StdTypeGetConstructor
+  - name: TypeAPIGetConstructor
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetConstructor
@@ -1884,7 +1928,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetConstructor
     clear_flags: [ ]
 
-  - name: StdTypeGetParametersNum
+  - name: TypeAPIGetParametersNum
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetParametersNum
@@ -1895,7 +1939,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetParametersNum
     clear_flags: [ ]
 
-  - name: StdTypeGetParameter
+  - name: TypeAPIGetParameter
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetParameter
@@ -1906,7 +1950,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetParameter
     clear_flags: [ ]
 
-  - name: StdTypeGetTypeId
+  - name: TypeAPIGetTypeId
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetTypeId
@@ -1917,7 +1961,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetTypeId
     clear_flags: [ ]
 
-  - name: StdTypeGetArrayElementType
+  - name: TypeAPIGetArrayElementType
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetArrayElementType
@@ -1928,7 +1972,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetArrayElementType
     clear_flags: [ ]
 
-  - name: StdTypeMakeClassInstance
+  - name: TypeAPIMakeClassInstance
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIMakeClassInstance
@@ -1939,7 +1983,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIMakeClassInstance
     clear_flags: [ ]
 
-  - name: StdTypeMakeArrayInstance
+  - name: TypeAPIMakeArrayInstance
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIMakeArrayInstance
@@ -1950,7 +1994,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIMakeArrayInstance
     clear_flags: [ ]
 
-  - name: StdTypeGetBaseType
+  - name: TypeAPIGetBaseType
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetBaseType
@@ -1961,7 +2005,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetBaseType
     clear_flags: [ ]
 
-  - name: StdTypeGetInterfacesNum
+  - name: TypeAPIGetInterfacesNum
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetInterfacesNum
@@ -1972,7 +2016,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetInterfacesNum
     clear_flags: [ ]
 
-  - name: StdTypeGetInterface
+  - name: TypeAPIGetInterface
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetInterface
@@ -1983,7 +2027,29 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetInterface
     clear_flags: [ ]
 
-  - name: StdTypeGetResultType
+  - name: TypeAPISetStaticFieldValue
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPISetStaticFieldValue
+    static: true
+    signature:
+      ret: std.core.void
+      args: [ std.core.String, std.core.String, std.core.Object ]
+    impl: panda::ets::intrinsics::TypeAPISetStaticFieldValue
+    clear_flags: [ ]
+
+  - name: TypeAPIGetFunctionAttributes
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIGetFunctionAttributes
+    static: true
+    signature:
+      ret: i32
+      args: [ std.core.String ]
+    impl: panda::ets::intrinsics::TypeAPIGetFunctionAttributes
+    clear_flags: [ ]
+
+  - name: TypeAPIGetResultType
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetResultType
@@ -1994,7 +2060,7 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetResultType
     clear_flags: [ ]
 
-  - name: StdTypeGetReceiverType
+  - name: TypeAPIGetReceiverType
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: TypeAPIGetReceiverType
@@ -2003,17 +2069,6 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String ]
     impl: panda::ets::intrinsics::TypeAPIGetReceiverType
-    clear_flags: [ ]
-
-  - name: StdFunctionTypeIsMethod
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIIsMethod
-    static: true
-    signature:
-      ret: u1
-      args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIIsMethod
     clear_flags: [ ]
 
   - name: StdMethodInvoke

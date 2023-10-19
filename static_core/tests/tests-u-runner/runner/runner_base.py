@@ -77,10 +77,7 @@ _LOGGER = logging.getLogger("runner.runner_base")
 
 class Runner(ABC):
     def __init__(self, config: Config, name):
-        # This file is expected to be located at path:
-        # $PANDA_SOURCE/tests/tests-u-runner/runner/runner_base.py
-        current_folder_parent = path.dirname(path.dirname(path.abspath(__file__)))
-        self.panda_source_root = path.dirname(path.dirname(current_folder_parent))
+        # TODO(vpukhov): adjust es2panda path
         default_ets_arktsconfig = path.join(
             config.general.build,
             "plugins", "es2panda", "generated", "arktsconfig.json"
@@ -263,6 +260,7 @@ class Runner(ABC):
         tests = [self.create_test(test, flags, test in self.ignored_tests)
                  for test in without_excluded]
         self.tests.update(tests)
+        Log.all(_LOGGER, f"Loaded {len(self.tests)} tests")
 
     def _search_both_excluded_and_ignored_tests(self):
         already_excluded = [test for test in self.ignored_tests if test in self.excluded_tests]

@@ -16,19 +16,48 @@
 package std.core;
 
 // TODO(shumilov-petr): Add runtime mirror
-export final class UnionCase {
+export final class EnumConstant {
     private name: string
     private typ: TypeDesc
-    private val: Object
+    private intVal: int
+    private strVal: string
 
     private constructor () {}
 
-    public isType(): boolean {
+    public getType(): Type {
+        return Type.resolve(this.typ)
+    }
+
+    public getName(): string {
+        return this.name
+    }
+
+    public getValue(): int {
+        return this.intVal
+    }
+
+    public getStringValue(): string {
+        return this.strVal
+    }
+
+    public hasValue(): boolean {
+        // TODO(shumilov-petr): not implemented
         return false
     }
 
-    public getType(): Type {
-        return Type.resolve(this.typ)
+    public hasStringValue(): boolean {
+        // TODO(shumilov-petr): not implemented
+        return false
+    }
+
+    public static create(name: string, typ: Type, v: int): EnumConstant {
+        // TODO(shumilov-petr): not implemented
+        throw new Error("not implemented")
+    }
+
+    public static create(name: string, typ: Type, v: string): EnumConstant {
+        // TODO(shumilov-petr): not implemented
+        throw new Error("not implemented")
     }
 
     public override toString(): string {

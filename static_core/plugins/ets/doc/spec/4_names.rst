@@ -234,8 +234,8 @@ The scope of a name depends on the context the name is declared in:
    declaration
 
 .. _class-access:
-  
--  A name declared inside a class (*class level scope*) is accessible in that
+
+-  A name declared within a class (*class level scope*) is accessible in that
    class and sometimes, depending on the access modifier, outside the class or
    by methods of derived classes.
 
@@ -247,12 +247,12 @@ The scope of a name depends on the context the name is declared in:
    modifier
    derived class
    declaration
-   
+
 .. _interface-access:
 
 -  A name declared inside an interface (*interface level scope*) is accessible
    inside and outside that interface (default public).
-   
+
 .. index::
    name
    declaration
@@ -518,7 +518,7 @@ a type argument:
 
 .. code-block:: typescript
    :linenos:
-   
+
     type A<G> = Array<A> // compile-time error
 
 **Note**: there is no restriction on using a type parameter *G* in
@@ -528,7 +528,7 @@ is valid:
 .. code-block:: typescript
    :linenos:
 
-    type NodeValue<G> = G | Array<G> | Array<NodeValue<G>>; 
+    type NodeValue<G> = G | Array<G> | Array<NodeValue<G>>;
 
 |
 
@@ -567,7 +567,7 @@ with an initial value.
         ;
 
     variableDeclaration:
-        identifier ('?')? ':' type initializer? 
+        identifier ('?')? ':' type initializer?
         | identifier initializer
         ;
 
@@ -616,7 +616,7 @@ There are several ways to identify such initial value:
    argument value provided by the caller of that method or function.
 -  Each constructor parameter is initialized to the corresponding
    argument value provided by:
-   
+
    + Class instance creation expression (see :ref:`New Expressions`), or
    + Explicit constructor call (see :ref:`Explicit Constructor Call`).
 
@@ -922,12 +922,12 @@ Parameter List
 
 A signature contains a *parameter list* that specifies an identifier as
 each parameter name and a type of each parameter. Every parameter’s type must
-be explicitly defined. 
+be explicitly defined.
 
 .. code-block:: abnf
 
     parameterList:
-        parameter (',' parameter)* (',' optionalParameters|restParameter)? 
+        parameter (',' parameter)* (',' optionalParameters|restParameter)?
         | restParameter
         | optionalParameters
         ;
@@ -979,6 +979,10 @@ A :index:`compile-time error` occurs if an *optional parameter* precedes a
 Optional Parameters
 ===================
 
+.. meta:
+    frontend_status: Partly
+    todo: support call with placeholders
+
 There are two forms of *optional parameters*:
 
 .. code-block:: abnf
@@ -986,7 +990,7 @@ There are two forms of *optional parameters*:
     optionalParameters:
         optionalParameter (',' optionalParameter)
         ;
-    
+
     optionalParameter:
         identifier ':' type '=' expression
         | identifier '?' ':' type
@@ -1018,7 +1022,7 @@ of the parameter is set to the *default value*.
     pair(1) // prints: 1 7
 
 The second form is a short notation for a parameter of a union type
-*T* | ``undefined`` with the default value ``undefined``. 
+*T* | ``undefined`` with the default value ``undefined``.
 It means that *identifier '?' ':' type* is equivalent to
 *identifier ':' type | undefined = undefined*.
 If a type is of the value type kind, then (similar to :ref:`Union Types`)
@@ -1065,6 +1069,9 @@ For example, the following two functions can be used in the same way:
 
 Rest Parameter
 ==============
+
+.. meta:
+    frontend_status: Done
 
 A *rest parameter* allows functions or methods to take unbounded numbers
 of arguments.
@@ -1244,7 +1251,7 @@ See the example below for an illustration of type inference:
         else
             return new Derived2
     }
-    /* Return type of bar will be inferred as Base which is 
+    /* Return type of bar will be inferred as Base which is
        LUB for Derived1 and Derived2 */
 
 |
@@ -1331,5 +1338,3 @@ exported or non-exported.
 .. raw:: pdf
 
    PageBreak
-
-

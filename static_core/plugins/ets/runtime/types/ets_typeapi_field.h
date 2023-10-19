@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "types/ets_primitives.h"
-#include "types/ets_typeapi_feature.h"
+#include "types/ets_typeapi.h"
 
 namespace panda::ets {
 
@@ -55,12 +55,17 @@ public:
         ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIField, td_), td->AsObject()->GetCoreType());
     }
 
+    void SetOwnerTypeDesc(EtsString *td)
+    {
+        ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIField, owner_td_), td->AsObject()->GetCoreType());
+    }
+
     void SetName(EtsString *name)
     {
         ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIField, name_), name->AsObject()->GetCoreType());
     }
 
-    void SetAccessMod(EtsTypeAPIFeatureAccessModifier access_mod)
+    void SetAccessMod(EtsTypeAPIAccessModifier access_mod)
     {
         ObjectAccessor::SetPrimitive(this, MEMBER_OFFSET(EtsTypeAPIField, access_mod_), access_mod);
     }
@@ -72,6 +77,7 @@ public:
 
 private:
     ObjectPointer<EtsString> td_;
+    ObjectPointer<EtsString> owner_td_;
     ObjectPointer<EtsString> name_;
     FIELD_UNUSED EtsInt attr_;  // note alignment
     FIELD_UNUSED EtsByte access_mod_;

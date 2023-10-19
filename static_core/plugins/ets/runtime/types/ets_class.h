@@ -73,6 +73,8 @@ public:
 
     uint32_t GetFieldsNumber();
 
+    uint32_t GetOwnFieldsNumber();  // Without inherited fields
+
     uint32_t GetStaticFieldsNumber()
     {
         return GetRuntimeClass()->GetStaticFields().size();
@@ -86,6 +88,8 @@ public:
     PandaVector<EtsField *> GetFields();
 
     EtsField *GetFieldByIndex(uint32_t i);
+
+    EtsField *GetOwnFieldByIndex(uint32_t i);
 
     EtsField *GetFieldIDByName(const char *name, const char *sig = nullptr)
     {
@@ -276,7 +280,7 @@ public:
         return GetRuntimeClass()->IsStringClass();
     }
 
-    bool IsFunctionClass() const
+    bool IsLambdaClass() const
     {
         // TODO(petr-shumilov): Make more clear
         return !GetRuntimeClass()->IsPrimitive() && GetRuntimeClass()->GetName().rfind(LAMBDA_PREFIX, 0) == 0;
@@ -304,6 +308,12 @@ public:
     bool IsArrayClass() const
     {
         return GetRuntimeClass()->IsArrayClass();
+    }
+
+    bool IsTupleClass() const
+    {
+        // TODO(petr-shumilov): Not implemented
+        return false;
     }
 
     bool IsBoxedClass() const

@@ -16,7 +16,7 @@ class RunnerJSParser(RunnerJS):
         super().__init__(config, "parser")
 
         # TODO(vpukhov): adjust es2panda path
-        es2panda_test = path.join(self.panda_source_root, "plugins", "ecmascript", "es2panda", "test")
+        es2panda_test = path.join(config.general.panda_source_root, "plugins", "ecmascript", "es2panda", "test")
 
         self.list_root = es2panda_test if self.list_root is None else self.list_root
         Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")

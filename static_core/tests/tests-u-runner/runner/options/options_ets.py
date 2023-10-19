@@ -19,3 +19,6 @@ class ETSOptions:
     @value(yaml_path="ets.force-generate", cli_name="is_force_generate", cast_to_type=_to_bool)
     def force_generate(self) -> bool:
         return False
+
+    def get_command_line(self) -> str:
+        return '--force-generate' if self.force_generate else ''

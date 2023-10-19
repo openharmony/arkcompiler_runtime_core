@@ -15,11 +15,15 @@
 
 #include <cstdint>
 #include <sstream>
+#include <string>
+#include <string_view>
+#include <utility>
 #include "file.h"
 #include "include/coretypes/class.h"
 #include "include/mem/panda_string.h"
 #include "include/mtmanaged_thread.h"
 #include "intrinsics.h"
+#include "macros.h"
 #include "mem/mem.h"
 #include "mem/vm_handle.h"
 #include "modifiers.h"
@@ -27,12 +31,14 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "types/ets_array.h"
+#include "types/ets_box_primitive-inl.h"
 #include "types/ets_class.h"
 #include "types/ets_method.h"
 #include "types/ets_primitives.h"
+#include "types/ets_void.h"
 #include "types/ets_type.h"
+#include "types/ets_type_comptime_traits.h"
 #include "types/ets_typeapi.h"
-#include "types/ets_typeapi_feature.h"
 #include "types/ets_typeapi_field.h"
 #include "types/ets_typeapi_method.h"
 #include "types/ets_typeapi_parameter.h"
@@ -55,12 +61,12 @@ EtsByte TypeAPIGetTypeKind(EtsString *td)
     auto kind = static_cast<EtsByte>(EtsTypeAPIKind::NONE);
 
     // Is Null?
-    if (type_desc[0] == NULL_TYPE_PREFIX) {
+    if (type_desc == NULL_TYPE_DESC) {
         return static_cast<EtsByte>(EtsTypeAPIKind::NUL);
     }
     // Is Function for methods, because currently there is no representation of them in runtime
     if (type_desc[0] == METHOD_PREFIX) {
-        return static_cast<EtsByte>(EtsTypeAPIKind::FUNCTION);
+        return static_cast<EtsByte>(EtsTypeAPIKind::METHOD);
     }
 
     // Is RefType?
@@ -89,14 +95,18 @@ EtsByte TypeAPIGetTypeKind(EtsString *td)
             kind = static_cast<EtsByte>(EtsTypeAPIKind::INTERFACE);
         } else if (ref_type->IsArrayClass()) {
             kind = static_cast<EtsByte>(EtsTypeAPIKind::ARRAY);
+        } else if (ref_type->IsTupleClass()) {
+            kind = static_cast<EtsByte>(EtsTypeAPIKind::TUPLE);
         } else if (ref_type->IsStringClass()) {
             kind = static_cast<EtsByte>(EtsTypeAPIKind::STRING);
-        } else if (ref_type->IsFunctionClass()) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::FUNCTION);
+        } else if (ref_type->IsLambdaClass()) {
+            kind = static_cast<EtsByte>(EtsTypeAPIKind::LAMBDA);
         } else if (ref_type->IsUnionClass()) {
             kind = static_cast<EtsByte>(EtsTypeAPIKind::UNION);
         } else if (ref_type->IsUndefined()) {  // TODO(shumilov-petr): think about it
             kind = static_cast<EtsByte>(EtsTypeAPIKind::UNDEFINED);
+        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::VOID) {
+            kind = static_cast<EtsByte>(EtsTypeAPIKind::VOID);
         } else {
             kind = static_cast<EtsByte>(EtsTypeAPIKind::CLASS);
         }
@@ -155,21 +165,36 @@ EtsString *TypeAPIGetTypeName(EtsString *td)
     return EtsClass::CreateEtsClassName(type->GetDescriptor());
 }
 
+EtsInt TypeAPIGetClassAttributes(EtsString *td)
+{
+    // TODO(shumilov-petr): Add td is valid check
+    auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto type = class_linker->GetClass(td->GetMutf8().c_str());
+
+    uint32_t attrs = 0;
+    attrs |= (type->IsFinal()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::FINAL) : 0U;
+
+    return static_cast<EtsInt>(attrs);
+}
+
 // Features
 EtsLong TypeAPIGetFieldsNum(EtsString *td)
 {
     // TODO(shumilov-petr): Add td is valid check
-
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto obj_type = class_linker->GetClass(td->GetMutf8().c_str());
-
-    return obj_type->GetFieldsNumber();
+    auto type = class_linker->GetClass(td->GetMutf8().c_str());
+    return type->GetFieldsNumber();
 }
 
-EtsTypeAPIField *CreateField(EtsField *field)
+EtsLong TypeAPIGetOwnFieldsNum(EtsString *td)
+{
+    // TODO(shumilov-petr): Add td is valid check
+    auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto type = class_linker->GetClass(td->GetMutf8().c_str());
+    return type->GetOwnFieldsNumber();
+}
+
+EtsTypeAPIField *CreateField(EtsField *field, EtsClass *type)
 {
     // TODO(shumilov-petr): Add td is valid check
 
@@ -181,27 +206,30 @@ EtsTypeAPIField *CreateField(EtsField *field)
 
     auto td = EtsString::CreateFromMUtf8(field->GetTypeDescriptor());
     VMHandle<EtsString> td_handle(coroutine, td->GetCoreType());
+    auto owner_td = EtsString::CreateFromMUtf8(field->GetDeclaringClass()->GetDescriptor());
+    VMHandle<EtsString> owner_td_handle(coroutine, owner_td->GetCoreType());
     auto name = field->GetNameString();
-    // Set values
+    // Set field's type, field's owner type and name
     typeapi_field->SetTypeDesc(td_handle.GetPtr());
+    typeapi_field->SetOwnerTypeDesc(owner_td_handle.GetPtr());
     typeapi_field->SetName(name);
 
     // Set Access Modifier
-    EtsTypeAPIFeatureAccessModifier access_mod;
+    EtsTypeAPIAccessModifier access_mod;
     if (field->IsPublic()) {
-        access_mod = EtsTypeAPIFeatureAccessModifier::PUBLIC;
+        access_mod = EtsTypeAPIAccessModifier::PUBLIC;
     } else if (field->IsPrivate()) {
-        access_mod = EtsTypeAPIFeatureAccessModifier::PRIVATE;
+        access_mod = EtsTypeAPIAccessModifier::PRIVATE;
     } else {
-        access_mod = EtsTypeAPIFeatureAccessModifier::PROTECTED;
+        access_mod = EtsTypeAPIAccessModifier::PROTECTED;
     }
     typeapi_field->SetAccessMod(access_mod);
 
     // Set specific attributes
     uint32_t attr = 0;
-    attr |= (field->IsStatic()) ? static_cast<uint32_t>(EtsTypeAPIFeatureAttributes::STATIC) : 0U;
-    attr |= (field->IsInherited()) ? static_cast<uint32_t>(EtsTypeAPIFeatureAttributes::INHERITED) : 0U;
-    attr |= (field->IsReadonly()) ? static_cast<uint32_t>(EtsTypeAPIFeatureAttributes::READONLY) : 0U;
+    attr |= (field->IsStatic()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::STATIC) : 0U;
+    attr |= (!field->IsDeclaredIn(type)) ? static_cast<uint32_t>(EtsTypeAPIAttributes::INHERITED) : 0U;
+    attr |= (field->IsReadonly()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::READONLY) : 0U;
 
     typeapi_field->SetAttributes(attr);
 
@@ -212,39 +240,121 @@ EtsTypeAPIField *TypeAPIGetField(EtsString *td, EtsLong idx)
 {
     // Resolve type by td
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto obj_type = class_linker->GetClass(td->GetMutf8().c_str());
-    EtsField *res = obj_type->GetFieldByIndex(idx);
-    ASSERT(res != nullptr);
-    return CreateField(res);
+    auto type = class_linker->GetClass(td->GetMutf8().c_str());
+    EtsField *field = type->GetFieldByIndex(idx);
+    ASSERT(field != nullptr);
+    return CreateField(field, type);
 }
 
-EtsTypeAPIField *TypeAPIGetFieldByName(EtsString *td, EtsString *str)
+EtsTypeAPIField *TypeAPIGetOwnField(EtsString *td, EtsLong idx)
+{
+    // Resolve type by td
+    auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto type = class_linker->GetClass(td->GetMutf8().c_str());
+    EtsField *field = type->GetOwnFieldByIndex(idx);
+    ASSERT(field != nullptr);
+    return CreateField(field, type);
+}
+
+EtsTypeAPIField *TypeAPIGetFieldByName(EtsString *td, EtsString *name)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    VMHandle<EtsString> fname_ptr(coroutine, str->GetCoreType());
+    VMHandle<EtsString> fname_ptr(coroutine, name->GetCoreType());
 
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto obj_type = class_linker->GetClass(td->GetMutf8().c_str());
-    return CreateField(obj_type->GetFieldIDByName(fname_ptr.GetPtr()->GetMutf8().c_str()));
+    auto type = class_linker->GetClass(td->GetMutf8().c_str());
+
+    auto instance_field = type->GetFieldIDByName(fname_ptr.GetPtr()->GetMutf8().c_str());
+    if (instance_field != nullptr) {
+        return CreateField(instance_field, type);
+    }
+    auto static_field = type->GetStaticFieldIDByName(fname_ptr.GetPtr()->GetMutf8().c_str());
+    return CreateField(static_field, type);
+}
+
+EtsObject *TypeAPIGetStaticFieldValue(EtsString *owner_td, EtsString *name)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsString> fname_ptr(coroutine, name->GetCoreType());
+
+    auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto owner_type = class_linker->GetClass(owner_td->GetMutf8().c_str());
+
+    auto field = owner_type->GetFieldIDByName(fname_ptr.GetPtr()->GetMutf8().c_str());
+    if (field == nullptr) {
+        field = owner_type->GetStaticFieldIDByName(fname_ptr.GetPtr()->GetMutf8().c_str());
+    }
+    ASSERT(field != nullptr && field->IsStatic());
+
+    if (!field->IsStatic()) {
+        UNREACHABLE();
+    }
+
+    if (field->GetType()->IsPrimitive()) {
+        return EtsPrimitiveTypeEnumToComptimeConstant(
+            ConvertPandaTypeToEtsType(field->GetCoreType()->GetType()), [&](auto type) -> EtsObject * {
+                using T = EtsTypeEnumToCppType<decltype(type)::value>;
+                auto val = owner_type->GetRuntimeClass()->GetFieldPrimitive<T>(*field->GetCoreType());
+                // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+                return EtsBoxPrimitive<T>::Create(EtsCoroutine::GetCurrent(), val);
+            });
+    }
+
+    return EtsObject::FromCoreType(owner_type->GetRuntimeClass()->GetFieldObject(*field->GetCoreType()));
+}
+
+EtsVoid *TypeAPISetStaticFieldValue(EtsString *owner_td, EtsString *name, EtsObject *v)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsString> fname_ptr(coroutine, name->GetCoreType());
+    VMHandle<EtsObject> value_ptr(coroutine, v->GetCoreType());
+
+    auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto owner_type = class_linker->GetClass(owner_td->GetMutf8().c_str());
+
+    auto field = owner_type->GetFieldIDByName(fname_ptr.GetPtr()->GetMutf8().c_str());
+    if (field == nullptr) {
+        field = owner_type->GetStaticFieldIDByName(fname_ptr.GetPtr()->GetMutf8().c_str());
+    }
+    ASSERT(field != nullptr && field->IsStatic());
+
+    if (!field->IsStatic()) {
+        UNREACHABLE();
+    }
+
+    if (field->GetType()->IsPrimitive()) {
+        EtsPrimitiveTypeEnumToComptimeConstant(
+            ConvertPandaTypeToEtsType(field->GetCoreType()->GetType()), [&](auto type) {
+                using T = EtsTypeEnumToCppType<decltype(type)::value>;
+                // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+                owner_type->GetRuntimeClass()->SetFieldPrimitive<T>(
+                    *field->GetCoreType(), EtsBoxPrimitive<T>::FromCoreType(value_ptr.GetPtr())->GetValue());
+            });
+    } else {
+        owner_type->GetRuntimeClass()->SetFieldObject(*field->GetCoreType(), value_ptr.GetPtr()->GetCoreType());
+    }
+    return EtsVoid::GetInstance();
 }
 
 EtsLong TypeAPIGetMethodsNum(EtsString *td)
 {
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto obj_type = class_linker->GetClass(td->GetMutf8().c_str());
-    return obj_type->GetMethodsNum();
+    auto type = class_linker->GetClass(td->GetMutf8().c_str());
+    return type->GetMethodsNum();
 }
 
 EtsLong TypeAPIGetConstructorsNum(EtsString *td)
 {
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto obj_type = class_linker->GetClass(td->GetMutf8().c_str());
-    auto methods = obj_type->GetConstructors();
+    auto type = class_linker->GetClass(td->GetMutf8().c_str());
+    auto methods = type->GetConstructors();
     return methods.size();
 }
 
-EtsTypeAPIMethod *CreateMethod(EtsMethod *method)
+EtsTypeAPIMethod *CreateMethod(EtsMethod *method, EtsClass *type)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -262,20 +372,24 @@ EtsTypeAPIMethod *CreateMethod(EtsMethod *method)
     typeapi_method.GetPtr()->SetName(name);
 
     // Set Access Modifier
-    EtsTypeAPIFeatureAccessModifier access_mod;
+    EtsTypeAPIAccessModifier access_mod;
     if (method->IsPublic()) {
-        access_mod = EtsTypeAPIFeatureAccessModifier::PUBLIC;
+        access_mod = EtsTypeAPIAccessModifier::PUBLIC;
     } else if (method->IsPrivate()) {
-        access_mod = EtsTypeAPIFeatureAccessModifier::PRIVATE;
+        access_mod = EtsTypeAPIAccessModifier::PRIVATE;
     } else {
-        access_mod = EtsTypeAPIFeatureAccessModifier::PROTECTED;
+        access_mod = EtsTypeAPIAccessModifier::PROTECTED;
     }
     typeapi_method.GetPtr()->SetAccessMod(access_mod);
 
     // Set specific attributes
     uint32_t attr = 0;
-    attr |= (method->IsStatic()) ? static_cast<uint32_t>(EtsTypeAPIFeatureAttributes::STATIC) : 0U;
-    attr |= (method->IsConstructor()) ? static_cast<uint32_t>(EtsTypeAPIFeatureAttributes::CONSTRUCTOR) : 0U;
+    attr |= (method->IsStatic()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::STATIC) : 0U;
+    attr |= (method->IsConstructor()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::CONSTRUCTOR) : 0U;
+    attr |= (method->IsAbstract()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::ABSTRACT) : 0U;
+    attr |= (method->IsDeclaredIn(type)) ? static_cast<uint32_t>(EtsTypeAPIAttributes::INHERITED) : 0U;
+    attr |= (method->IsGetter()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::GETTER) : 0U;
+    attr |= (method->IsSetter()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::SETTER) : 0U;
 
     typeapi_method.GetPtr()->SetAttributes(attr);
     return typeapi_method.GetPtr();
@@ -284,24 +398,24 @@ EtsTypeAPIMethod *CreateMethod(EtsMethod *method)
 EtsTypeAPIMethod *TypeAPIGetMethod(EtsString *td, EtsLong i)
 {
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto obj_type = class_linker->GetClass(td->GetMutf8().c_str());
-    return CreateMethod(obj_type->GetMethodByIndex(i));
+    auto type = class_linker->GetClass(td->GetMutf8().c_str());
+    return CreateMethod(type->GetMethodByIndex(i), type);
 }
 
 EtsTypeAPIMethod *TypeAPIGetConstructor(EtsString *td, EtsLong i)
 {
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto obj_type = class_linker->GetClass(td->GetMutf8().c_str());
-    auto constructors = obj_type->GetConstructors();
+    auto type = class_linker->GetClass(td->GetMutf8().c_str());
+    auto constructors = type->GetConstructors();
     ASSERT(0 <= i && i < (EtsLong)constructors.size());
-    return CreateMethod(constructors[i]);
+    return CreateMethod(constructors[i], type);
 }
 
 EtsLong TypeAPIGetInterfacesNum(EtsString *td)
 {
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto obj_type = class_linker->GetClass(td->GetMutf8().c_str());
-    return obj_type->GetRuntimeClass()->GetInterfaces().size();
+    auto type = class_linker->GetClass(td->GetMutf8().c_str());
+    return type->GetRuntimeClass()->GetInterfaces().size();
 }
 
 EtsString *TypeAPIGetInterface(EtsString *td, EtsLong i)
@@ -310,21 +424,26 @@ EtsString *TypeAPIGetInterface(EtsString *td, EtsLong i)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
 
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto obj_type = class_linker->GetClass(td->GetMutf8().c_str());
-    auto interfaces = obj_type->GetRuntimeClass()->GetInterfaces();
+    auto type = class_linker->GetClass(td->GetMutf8().c_str());
+    auto interfaces = type->GetRuntimeClass()->GetInterfaces();
     ASSERT(0 <= i && i <= (EtsLong)interfaces.size());
     auto inter_type = EtsClass::FromRuntimeClass(interfaces[i]);
     return EtsString::CreateFromMUtf8(inter_type->GetDescriptor());
 }
 
-EtsLong TypeAPIGetParametersNum(EtsString *td)
+EtsInt TypeAPIGetFunctionAttributes([[maybe_unused]] EtsString *td)
 {
-    auto type_desc = td->GetMutf8();
-    auto constructor = EtsMethod::FromTypeDescriptor(type_desc);
-    return constructor->GetParametersNum();
+    // TODO(shumilov-petr): Not implemented
+    return 0;
 }
 
-EtsTypeAPIParameter *CreateParameter(EtsClass *type)
+EtsLong TypeAPIGetParametersNum(EtsString *td)
+{
+    auto function = EtsMethod::FromTypeDescriptor(td->GetMutf8());
+    return function->GetParametersNum();
+}
+
+EtsTypeAPIParameter *CreateParameter(EtsClass *type, std::string_view name)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -335,8 +454,11 @@ EtsTypeAPIParameter *CreateParameter(EtsClass *type)
     auto td = EtsString::CreateFromMUtf8(type->GetDescriptor());
     VMHandle<EtsString> td_handle(coroutine, td->GetCoreType());
     typeapi_parameter.GetPtr()->SetTypeDesc(td_handle.GetPtr());
-    auto name = EtsClass::CreateEtsClassName(type->GetDescriptor());
-    typeapi_parameter.GetPtr()->SetName(name);
+
+    // TODO(shumilov-petr): It's a temporary solution, extra type info dumping required
+    auto pname = EtsString::CreateFromUtf8(name.data(), name.size());
+    VMHandle<EtsString> pname_handle(coroutine, pname->GetCoreType());
+    typeapi_parameter.GetPtr()->SetName(pname_handle.GetPtr());
 
     // Set specific attributes
     uint32_t attr = 0U;
@@ -355,7 +477,7 @@ EtsTypeAPIParameter *TypeAPIGetParameter(EtsString *td, EtsLong i)
         // 0 is recevier type
         type = function->ResolveArgType(i + 1);
     }
-    return CreateParameter(type);
+    return CreateParameter(type, std::to_string(i));
 }
 
 EtsString *TypeAPIGetResultType(EtsString *td)
@@ -373,16 +495,11 @@ EtsString *TypeAPIGetReceiverType(EtsString *td)
     return EtsString::CreateFromMUtf8(type->GetDescriptor());
 }
 
-EtsBoolean TypeAPIIsMethod(EtsString *td)
-{
-    return static_cast<panda::ets::EtsBoolean>(EtsMethod::IsMethod(td->GetMutf8()));
-}
-
 EtsLong TypeAPIGetTypeId(EtsString *td)
 {
     auto type_desc = td->GetMutf8();
     // Create Null class in runtime
-    if (type_desc[0] == NULL_TYPE_PREFIX) {
+    if (type_desc == NULL_TYPE_DESC) {
         return 0;
     }
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();

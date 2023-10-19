@@ -404,10 +404,10 @@
 09.classes/06.method_declarations/10.hiding_by_class_methods/hided_method_access_by_super.ets
 09.classes/06.method_declarations/10.hiding_by_class_methods/different_return_types.ets
 09.classes/06.method_declarations/10.hiding_by_class_methods/hided_method_access_by_cast.ets
+09.classes/06.method_declarations/11.requirements_in_overriding_and_hiding/throwing_in_abstract_method.ets
 09.classes/06.method_declarations/11.requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_5.ets
 09.classes/06.method_declarations/11.requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_2.ets
 09.classes/06.method_declarations/11.requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_3.ets
-09.classes/06.method_declarations/11.requirements_in_overriding_and_hiding/throwing_in_abstract_method.ets
 09.classes/06.method_declarations/12.inheriting_methods_with_override_equivalent_signatures/inheritance_multiple_methods_with_same_signatures.ets
 09.classes/06.method_declarations/13.class_method_overloading/method_overload_relatioship_1.ets
 09.classes/09.constructor_declaration/04.explicit_constructor_call/call_to_this_super_must_be_first_stmt_5.ets
@@ -440,6 +440,7 @@
 13.modules_and_compilation_units/04.default_import/core_default_import_0.ets
 13.modules_and_compilation_units/04.default_import/core_default_import_23.ets
 13.modules_and_compilation_units/04.default_import/core_default_import_25.ets
+13.modules_and_compilation_units/06.top_level_declarations/top_level_declarations_11.ets
 17.experimental_features/10.exceptions/01.throwing_functions/lambda_call_with_catch.ets
 17.experimental_features/10.exceptions/01.throwing_functions/lambda_call_with_default_catch.ets
 17.experimental_features/10.exceptions/02.non_throwing_functions/lambda_with_default_catch.ets
@@ -1710,42 +1711,18 @@
 03.types/08.reference_types/08.null_type/null3.ets
 03.types/08.reference_types/08.null_type/null4.ets
 03.types/08.reference_types/08.null_type/null6.ets
-04.names_declarations_and_scopes/08.function_declarations/04.rest_parameter/rest_parameter_0.ets
-04.names_declarations_and_scopes/08.function_declarations/04.rest_parameter/rest_parameter_1.ets
-04.names_declarations_and_scopes/08.function_declarations/04.rest_parameter/rest_parameter_10.ets
-04.names_declarations_and_scopes/08.function_declarations/04.rest_parameter/rest_parameter_11.ets
-04.names_declarations_and_scopes/08.function_declarations/04.rest_parameter/rest_parameter_2.ets
-04.names_declarations_and_scopes/08.function_declarations/04.rest_parameter/rest_parameter_3.ets
-04.names_declarations_and_scopes/08.function_declarations/04.rest_parameter/rest_parameter_4.ets
-04.names_declarations_and_scopes/08.function_declarations/04.rest_parameter/rest_parameter_5.ets
-04.names_declarations_and_scopes/08.function_declarations/04.rest_parameter/rest_parameter_6.ets
-04.names_declarations_and_scopes/08.function_declarations/04.rest_parameter/rest_parameter_7.ets
-04.names_declarations_and_scopes/08.function_declarations/04.rest_parameter/rest_parameter_8.ets
-04.names_declarations_and_scopes/08.function_declarations/04.rest_parameter/rest_parameter_9.ets
-17.experimental_features/05.statements/05.function_overloading/fn_overloading5_0.ets
-17.experimental_features/05.statements/05.function_overloading/fn_overloading5_1.ets
-17.experimental_features/05.statements/05.function_overloading/fn_overloading5_2.ets
-17.experimental_features/05.statements/05.function_overloading/fn_overloading5_3.ets
 17.experimental_features/05.statements/05.function_overloading/fn_overloading_30.ets
 04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_12.ets
-04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_13.ets
 04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_7.ets
 14.semantic_rules/03.override_equivalent_signatures/pos_1.ets
-14.semantic_rules/03.override_equivalent_signatures/pos_5.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_0.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_1.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_10.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_11.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_12.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_13.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_14.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_15.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_2.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_3.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_4.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_6.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_7.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_8.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_9.ets
 05.generics/05.parameterized_declarations/type_arguments_of_parameterized_declarations/class_args_22.ets
 05.generics/05.parameterized_declarations/type_arguments_of_parameterized_declarations/class_args_25.ets
@@ -1818,11 +1795,11 @@
 13.modules_and_compilation_units/03.import_declarations/04.several_bindings_for_one_import_path/explicitly_and_implicitly_import_3.ets
 13.modules_and_compilation_units/03.import_declarations/04.several_bindings_for_one_import_path/explicitly_and_implicitly_import_5.ets
 # end of runtime fails
-# es2panda fails panda#12189
-03.types/08.reference_types/08.null_type/null5.ets
+
 # es2panda fails: panda#11851
 # end of es2panda fails
 # es2panda fails: panda#12528
+
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_4.ets
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_5.ets
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_6.ets
@@ -1899,4 +1876,3 @@
 10.interfaces/05.interface_properties/readonly_simple_form_0.ets
 10.interfaces/05.interface_properties/simple_form.ets
 # end of es2panda fails
-

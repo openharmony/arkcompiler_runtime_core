@@ -6,9 +6,8 @@ from typing import Set
 
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.logger import Log
-from runner.options.cli_args_wrapper import CliArgsWrapper
 from runner.options.config import Config
-from runner.options.yaml_document import YamlDocument
+from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.ets.ets_templates.test_ets_cts import TestEtsCts
 from runner.plugins.ets.ets_test_suite import EtsTestSuite
 from runner.plugins.ets.test_ets import TestETS
@@ -32,16 +31,11 @@ class RunnerETS(RunnerFileBased):
 
         self._check_binary_artifacts()
 
-        # By default, opt_level=2, but for ETS tests we take 0, if the value is not set explicitly
-        cli = CliArgsWrapper.get_by_name("es2panda_opt_level")
-        yaml = YamlDocument.get_value_by_path("es2panda.opt-level")
-        opt_level = 0 if cli is None and yaml is None else self.config.es2panda.opt_level
-
         self.test_env.es2panda_args.extend([
             f"--arktsconfig={self.arktsconfig}",
             "--gen-stdlib=false",
             "--extension=ets",
-            f"--opt-level={opt_level}"
+            f"--opt-level={self.config.es2panda.opt_level}"
         ])
         load_runtime_ets = [f"--boot-panda-files={self.stdlib_path}", "--load-runtimes=ets"]
         self.test_env.runtime_args.extend(load_runtime_ets)
@@ -50,7 +44,7 @@ class RunnerETS(RunnerFileBased):
             self.aot_args.extend(load_runtime_ets)
 
         test_suite_class = EtsTestSuite.get_class(self.__ets_suite_name)
-        test_suite = test_suite_class(self.panda_source_root, self.config, self.work_dir)
+        test_suite = test_suite_class(self.config, self.work_dir)
         test_suite.process(self.config.ets.force_generate)
         self.test_root, self.list_root = test_suite.test_root, test_suite.list_root
 
@@ -76,11 +70,13 @@ class RunnerETS(RunnerFileBased):
     def get_ets_suite_name(self, test_suites: Set[str]) -> str:
         name = ""
         if "ets_func_tests" in test_suites:
-            name = "ets-func-tests"
+            name = EtsSuites.FUNC.value
         elif 'ets_cts' in test_suites:
-            name = "ets-cts"
+            name = EtsSuites.CTS.value
         elif 'ets_runtime' in test_suites:
-            name = "ets-runtime"
+            name = EtsSuites.RUNTIME.value
+        elif 'ets_gc_stress' in test_suites:
+            name = EtsSuites.GCSTRESS.value
         else:
             Log.exception_and_raise(_LOGGER, f"Unsupported test suite: {self.config.test_suites}")
         return name

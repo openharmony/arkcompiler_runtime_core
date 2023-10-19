@@ -264,7 +264,7 @@ macro(:u64tou32) do |arg|
 end
 
 macro(:i32toanychecked) do |arg|
-  If(arg, 0).CC(:CC_LT).b {
+  If(arg, 0).LT.b {
     cast_res0 := f64toany(i32tof64(arg))
   } Else {
     cast_res1 := i32toany(arg)

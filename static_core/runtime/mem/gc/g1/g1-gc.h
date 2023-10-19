@@ -156,7 +156,6 @@ protected:
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:
-    void WaitForUpdateRemsetThread();
     void ProcessDirtyCards();
     bool HaveGarbageRegions();
 

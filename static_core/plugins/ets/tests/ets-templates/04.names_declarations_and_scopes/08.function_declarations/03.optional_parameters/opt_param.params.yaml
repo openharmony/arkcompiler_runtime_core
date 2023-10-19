@@ -61,7 +61,7 @@ cases:
 
     - decl: |-
           // expressions as default values
-          let z: Object[] = [new Boolean(true)], y = "string", x = null
+          let z: Object[] = [new Boolean(true)], y = "string", x: Object|null = null
           function foo(a: Object = z, b: string[] = [y], c: Object|null = x) {
               assert a === z
               assert b.length == 1 && b[0] == "string"
@@ -135,7 +135,7 @@ cases:
           try {
               foo(1)
               assert false
-          } catch (e: NullPointerError) {
+          } catch (e: NullPointerException) {
               // expected
           }
 
@@ -192,8 +192,8 @@ cases:
 
     - decl: |-
           // check nullable type with null-default optional
-          function foo(s?: string|null): string {
-              return s === null ? 'null' : s;
+          function foo(s?: string|null): string|null {
+              return s === null ? 'null' : s
           }
       call: |-
           assert foo('') == ''
@@ -203,11 +203,36 @@ cases:
 
     # mixed optionality
     - decl: |-
-          function boo(a: string, b: string = 'an', c?: string, d: string = 'ing'): string {
-              return a + b + c + d
+          function foo(a: string, b: string = 'an', c?: string, d: string = 'ing'): string {
+              return a + b + (c === null ? 'null' : c) + d
           }
       call: |-
           assert foo('') == 'annulling'
           assert foo('c', 'lean', '') == 'cleaning'
-          assert foo('ark', ' ', 'compile', 'r') = 'ark compiler'
-          assert foo('underst',, 'd') == 'understanding'
+          assert foo('ark', ' ', 'compile', 'r') == 'ark compiler'
+          // TODO: function call with empty placeholders for optional parameters are not supported yet
+          //assert foo('underst', , 'd') == 'understanding'
+
+    - decl: |-
+          function foo(p?: int): int {
+              return 2 * p;
+          }
+      call: |-
+          assert foo() == 0
+          assert foo(1) == 2
+
+    - decl: |-
+          function foo(i: int, j: int, k?: boolean): boolean {
+              return !k;
+          }
+      call: |-
+          assert foo(1, 2) == true
+          assert foo(2, 1, true) == false
+
+    - decl: |-
+          function foo(e?: string): string | null {
+              return e
+          }
+      call: |-
+          assert foo() == null
+          assert foo('test') == 'test'

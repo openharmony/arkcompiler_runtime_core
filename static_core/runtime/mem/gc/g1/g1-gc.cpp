@@ -1885,30 +1885,6 @@ void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveStack *object_stack)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::WaitForUpdateRemsetThread()
-{
-    ScopedTiming scoped_timing(__FUNCTION__, *this->GetTiming());
-    LOG_DEBUG_GC << "Execute WaitForUpdateRemsetThread";
-
-    // we forced to call EnumerateThreads many times because it takes WriteLock and we block update_remset_thread
-    // can be done only once if EnumerateThreads will be implemented via ReadLock
-    update_remset_thread_->WaitUntilTasksEnd();
-
-#ifndef NDEBUG
-    bool all_post_barrier_buffers_empty = true;
-    this->GetPandaVm()->GetThreadManager()->EnumerateThreads([&all_post_barrier_buffers_empty](ManagedThread *thread) {
-        auto local_buffer = thread->GetG1PostBarrierBuffer();
-        if (local_buffer != nullptr && !local_buffer->IsEmpty()) {
-            all_post_barrier_buffers_empty = false;
-            return false;
-        }
-        return true;
-    });
-    ASSERT(all_post_barrier_buffers_empty);
-#endif
-}
-
-template <class LanguageConfig>
 void G1GC<LanguageConfig>::HandlePendingDirtyCards()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());

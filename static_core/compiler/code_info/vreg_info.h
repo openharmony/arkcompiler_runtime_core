@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_CODE_INFO_VREG_INFO_H
-#define COMPILER_CODE_INFO_VREG_INFO_H
+#ifndef PANDA_COMPILER_CODE_INFO_VREG_INFO_H
+#define PANDA_COMPILER_CODE_INFO_VREG_INFO_H
 
 #include "utils/bit_field.h"
 
@@ -250,4 +250,4 @@ inline std::ostream &operator<<(std::ostream &os, const VRegInfo &vreg)
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_CODE_INFO_VREG_INFO_H
+#endif  // PANDA_COMPILER_CODE_INFO_VREG_INFO_H

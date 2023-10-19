@@ -19,3 +19,6 @@ class QuickOptions:
     @value(yaml_path="quick.enable", cli_name="quick", cast_to_type=_to_bool)
     def enable(self) -> bool:
         return False
+
+    def get_command_line(self) -> str:
+        return '--quick' if self.enable else ''

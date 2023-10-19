@@ -41,7 +41,6 @@ std/math/std_math_asinh_double.ets
 std/math/std_math_atan_double.ets
 std/math/std_math_atanh_double.ets
 std/math/std_math_ceil_double.ets
-std/math/std_math_clz32_int.ets
 std/math/std_math_cos_double.ets
 std/math/std_math_cosh_double.ets
 std/math/std_math_exp_double.ets
@@ -54,7 +53,6 @@ std/math/std_math_log1p_double.ets
 std/math/std_math_log2_double.ets
 std/math/std_math_max_double_double.ets
 std/math/std_math_min_double_double.ets
-std/math/std_math_max_int_int.ets
 std/math/std_math_round_double.ets
 std/math/std_math_scalbn_double_int.ets
 std/math/std_math_sign_double.ets

@@ -148,6 +148,26 @@ cases:
       let i: int = foo()
 
   - defs: |-
+       function foo(...p: int[]): int {
+           return 1;
+       }
+       function foo(...p: boolean[]): int {
+           return 2;
+       }
+    use: |-
+      let i: int = foo()
+
+  - defs: |-
+       function foo(...p: int[]): int {
+           return 1;
+       }
+       function foo(a: int, ...p: int[]): int {
+           return 2;
+       }
+    use: |-
+      let i: int = foo()
+
+  - defs: |-
       function foo(...p: float[]): int {
           return 1;
       }

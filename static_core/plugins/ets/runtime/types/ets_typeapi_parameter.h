@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "types/ets_primitives.h"
-#include "types/ets_typeapi_feature.h"
+#include "types/ets_typeapi.h"
 
 namespace panda::ets {
 

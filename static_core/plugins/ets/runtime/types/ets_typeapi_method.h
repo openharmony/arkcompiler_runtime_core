@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "types/ets_primitives.h"
-#include "types/ets_typeapi_feature.h"
+#include "types/ets_typeapi.h"
 
 namespace panda::ets {
 
@@ -65,7 +65,7 @@ public:
         ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIMethod, name_), name->AsObject()->GetCoreType());
     }
 
-    void SetAccessMod(EtsTypeAPIFeatureAccessModifier access_mod)
+    void SetAccessMod(EtsTypeAPIAccessModifier access_mod)
     {
         ObjectAccessor::SetPrimitive(this, MEMBER_OFFSET(EtsTypeAPIMethod, access_mod_), access_mod);
     }

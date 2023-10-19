@@ -137,7 +137,7 @@ class RunnerFileBased(Runner):
     def _set_path_and_check(*path_parts) -> str:
         _path = path.join(*path_parts)
         if not path.isfile(_path):
-            Log.exception_and_raise(_LOGGER, f"Cannot find es2panda binary: {_path}", FileNotFoundError)
+            Log.exception_and_raise(_LOGGER, f"Cannot find binary file: {_path}", FileNotFoundError)
         return str(_path)
 
     @staticmethod

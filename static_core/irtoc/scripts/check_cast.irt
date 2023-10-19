@@ -39,11 +39,11 @@ function(:CheckCastInterfaceEntrypoint,
 Label(:Loop)
     elements_phi := Phi(elements0, elements1).ptr
     i_phi := Phi(i0, i1).word
-    If(i_phi, size).CC(:CC_EQ) {
+    If(i_phi, size).EQ.Unlikely {
         Goto(:SlowPath)
     }
     implemented_interface := LoadI(elements_phi).Imm(Constants::CLASS_ITABLE_ENTRY_INTERFACE_OFFSET).ptr
-    If(implemented_interface, interface).CC(:CC_EQ).b {
+    If(implemented_interface, interface).EQ.Unlikely.b {
         ReturnVoid().void
     }
     elements1 := Add(elements_phi, Constants::CLASS_ITABLE_ENTRY_SIZE).ptr

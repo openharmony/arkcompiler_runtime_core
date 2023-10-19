@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_PARSER_HPP
-#define _PANDA_ASSEMBLER_PARSER_HPP
+#ifndef PANDA_ASSEMBLER_ASSEMBLY_PARSER_H
+#define PANDA_ASSEMBLER_ASSEMBLY_PARSER_H
 
 #include <iostream>
 #include <memory>
@@ -277,4 +277,4 @@ inline auto Parser::TryEmplaceInTable(bool flag, std::unordered_map<std::string,
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_PARSER_HPP
+#endif  // PANDA_ASSEMBLER_ASSEMBLY_PARSER_H

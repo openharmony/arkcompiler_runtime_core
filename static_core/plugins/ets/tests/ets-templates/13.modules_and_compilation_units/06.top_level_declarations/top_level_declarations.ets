@@ -20,6 +20,6 @@ desc: Top-level declarations
 tags: [compile-only]
 ---*/
 
-export {{type}}
+export default {{type}}
 
 {% endfor %}

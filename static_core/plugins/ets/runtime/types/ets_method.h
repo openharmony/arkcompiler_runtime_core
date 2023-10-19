@@ -16,6 +16,7 @@
 #ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_METHOD_H_
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_METHOD_H_
 
+#include <string_view>
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/utf.h"
 #include "libpandafile/file_items.h"
@@ -194,6 +195,23 @@ public:
     bool IsAbstract() const
     {
         return GetPandaMethod()->IsAbstract();
+    }
+
+    bool IsDeclaredIn(const EtsClass *klass) const
+    {
+        return GetClass() == klass;
+    }
+
+    bool IsGetter()
+    {
+        auto name = GetNameString();
+        return name->GetMutf8().rfind(GETTER_BEGIN, 0) == 0;
+    }
+
+    bool IsSetter()
+    {
+        auto name = GetNameString();
+        return name->GetMutf8().rfind(SETTER_BEGIN, 0) == 0;
     }
 
     void RegisterNativeImpl(void *impl)

@@ -78,16 +78,12 @@ public:
         return false;
     }
 
-    bool IsInherited() const
-    {
-        // TODO(shumilov-petr): not implemented
-        return false;
-    }
-
     bool IsStatic() const
     {
         return GetCoreType()->IsStatic();
     }
+
+    bool IsDeclaredIn(const EtsClass *klass) const;
 
     static EtsField *FromRuntimeField(Field *field)
     {
