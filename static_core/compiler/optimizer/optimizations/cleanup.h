@@ -56,6 +56,8 @@ public:
     static bool SkipBasicBlock(BasicBlock *bb);
 
 private:
+    bool CanBeMerged(BasicBlock *bb);
+
     bool RunOnce(ArenaSet<BasicBlock *> *empty_blocks, ArenaSet<BasicBlock *> *new_empty_blocks, bool simple_dce);
     void RemoveDeadPhi(BasicBlock *bb, ArenaSet<BasicBlock *> *new_empty_blocks);
     bool ProcessBB(BasicBlock *bb, Marker dead_mrk, ArenaSet<BasicBlock *> *new_empty_blocks);

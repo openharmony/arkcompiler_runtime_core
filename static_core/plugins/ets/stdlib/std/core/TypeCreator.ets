@@ -179,6 +179,7 @@ class TypeCreatorCtx {
     private static native destroyCtx(ctxPtr: long): void
     private static native commit(ctxPtr: long, objects: Object[]): string | null
     private static native getError(ctxPtr: long): string | null
+    internal static native getObjectsArrayForCCtor(ctxPtr: long): Object[]
 
     internal static native getTypeDescFromPointer(ctxItemPtr: long): string
 

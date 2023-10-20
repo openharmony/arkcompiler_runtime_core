@@ -80,13 +80,13 @@ class Runner(ABC):
         # TODO(vpukhov): adjust es2panda path
         default_ets_arktsconfig = path.join(
             config.general.build,
-            "plugins", "es2panda", "generated", "arktsconfig.json"
+            "tools", "es2panda", "generated", "arktsconfig.json"
         )
         if not path.exists(default_ets_arktsconfig):
             default_ets_arktsconfig = path.join(
                 config.general.build,
                 "gen",  # for GN build
-                "plugins", "es2panda", "generated", "arktsconfig.json"
+                "tools", "es2panda", "generated", "arktsconfig.json"
             )
 
         # Roots:

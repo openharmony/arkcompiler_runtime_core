@@ -323,20 +323,20 @@ success_label:
 
 )";
 
-constexpr uint64_t CORUPT_SIZE = 0xFFF;
+constexpr uint64_t CORRUPT_SIZE = 0xFFF;
 // Allocated on stack check
 [[maybe_unused]] constexpr uint64_t HOOK_OFFSET = 0x10000;
-constexpr uint64_t CORUPT_DATA = 0xABCDEF0123456789;
+constexpr uint64_t CORRUPT_DATA = 0xABCDEF0123456789;
 
 NO_OPTIMIZE int Callback([[maybe_unused]] uintptr_t lr, [[maybe_unused]] uintptr_t fp)
 {
-    std::array<uint64_t, CORUPT_SIZE> tmp {};
+    std::array<uint64_t, CORRUPT_SIZE> tmp {};
     [[maybe_unused]] auto delta = bit_cast<uintptr_t>(fp) - bit_cast<uintptr_t>(&tmp);
     ASSERT(delta < HOOK_OFFSET);
-    delta = bit_cast<uintptr_t>(&tmp[CORUPT_SIZE]) - bit_cast<uintptr_t>(&tmp);
-    ASSERT(delta == CORUPT_SIZE * sizeof(uint64_t));
+    delta = std::distance(tmp.begin(), tmp.end()) * sizeof(uint64_t);
+    ASSERT(delta == CORRUPT_SIZE * sizeof(uint64_t));
     for (uint64_t &i : tmp) {
-        i = CORUPT_DATA;
+        i = CORRUPT_DATA;
     }
     return 0;
 }

@@ -18,8 +18,34 @@
 #include "compiler/optimizer/ir/runtime_interface.h"
 
 namespace panda::compiler {
-bool Peepholes::PeepholeStringEquals([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] IntrinsicInst *intrinsic)
+bool Peepholes::PeepholeStringEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
 {
+    // Replaces
+    //      Intrinsic.StdCoreStringEquals arg, NullPtr
+    // with
+    //      Compare EQ ref             arg, NullPtr
+
+    auto input0 = intrinsic->GetInput(0).GetInst();
+    auto input1 = intrinsic->GetInput(1).GetInst();
+
+    if (input0->IsNullPtr() || input1->IsNullPtr()) {
+        auto bb = intrinsic->GetBasicBlock();
+        auto graph = bb->GetGraph();
+
+        auto compare = graph->CreateInst(Opcode::Compare)->CastToCompare();
+        compare->SetCc(ConditionCode::CC_EQ);
+        compare->SetType(intrinsic->GetType());
+        ASSERT(input0->GetType() == input1->GetType());
+        compare->SetOperandsType(input0->GetType());
+
+        compare->SetInput(0, input0);
+        compare->SetInput(1, input1);
+        bb->InsertAfter(compare, intrinsic);
+        intrinsic->ReplaceUsers(compare);
+
+        return true;
+    }
+
     return false;
 }
 

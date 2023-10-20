@@ -45,6 +45,12 @@ inline constexpr std::string_view TYPE_BOXED_PREFIX = "std.core.";
 inline constexpr std::string_view TYPE_VOID = "std.core.void";
 inline constexpr std::string_view TYPE_VOID_FIELD = "void_instance";
 
+inline constexpr std::string_view FUNCTION_GET_OBJECTS_FOR_CCTOR = "std.core.TypeCreatorCtx.getObjectsArrayForCCtor";
+inline constexpr std::string_view TYPE_TYPE_CREATOR_CTX =
+    FUNCTION_GET_OBJECTS_FOR_CCTOR.substr(0, FUNCTION_GET_OBJECTS_FOR_CCTOR.rfind('.'));
+static_assert(TYPE_TYPE_CREATOR_CTX.back() != '.');
+
+inline constexpr std::string_view CREATOR_CTX_DATA_PREFIX = "TypeAPI$CtxData$";
 }  // namespace panda::ets::typeapi_create_consts
 
 #endif

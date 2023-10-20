@@ -15,7 +15,10 @@
 
 #include "macros.h"
 #include "optimizer/ir/datatype.h"
+#include "optimizer/ir/graph_checker.h"
+#include "optimizer/ir/inst.h"
 #include "optimizer/ir/ir_constructor.h"
+#include "optimizer/optimizations/try_catch_resolving.h"
 #include "tests/graph_comparator.h"
 #include "unit_test.h"
 #include "optimizer/optimizations/cleanup.h"
@@ -5051,7 +5054,7 @@ TEST_F(IrBuilderTest, SimpleTryCatch)
         CONSTANT(1, 1);
         CONSTANT(2, 0);
 
-        BASIC_BLOCK(2, 3, 5, 6)
+        BASIC_BLOCK(2, 3, 15, 16)  // Try-begin
         {
             INST(5, Opcode::Try).CatchTypeIds({0x0, 0xE1});
         }
@@ -5060,20 +5063,23 @@ TEST_F(IrBuilderTest, SimpleTryCatch)
             INST(14, Opcode::SaveState).Inputs().SrcVregs({});
             INST(15, Opcode::CallStatic).v0id().InputsAutoType(14);
         }
-        BASIC_BLOCK(4, 7, 5, 6) {}  // Try-end
+        BASIC_BLOCK(4, 7, 15, 16) {}  // Try-end
         BASIC_BLOCK(7, -1)
         {
             INST(12, Opcode::Return).b().Inputs(0);
         }
+        BASIC_BLOCK(15, 5) {}
         BASIC_BLOCK(5, -1)
         {
             INST(11, Opcode::Return).b().Inputs(2);
         }
+        BASIC_BLOCK(16, 6) {}
         BASIC_BLOCK(6, -1)
         {
             INST(13, Opcode::Return).b().Inputs(1);
         }
     }
+    GraphChecker(expected_graph).Check();
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
 }
 
@@ -5185,7 +5191,7 @@ TEST_F(IrBuilderTest, CatchPhis)
         PARAMETER(0, 0).s64();
         CONSTANT(1, 100);
 
-        BASIC_BLOCK(2, 3, 4, 5)
+        BASIC_BLOCK(2, 3, 14, 15)
         {
             INST(2, Opcode::Try).CatchTypeIds({0xE1, 0x0});
         }
@@ -5198,22 +5204,29 @@ TEST_F(IrBuilderTest, CatchPhis)
             INST(7, Opcode::ZeroCheck).s64().Inputs(0, 6);
             INST(8, Opcode::Div).s64().Inputs(5, 7);
         }
-        BASIC_BLOCK(6, 7, 4, 5) {}  // Try-end
+        BASIC_BLOCK(6, 7, 14, 15) {}  // Try-end
         BASIC_BLOCK(7, -1)
         {
             INST(9, Opcode::Return).s64().Inputs(8);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(14, 24)  // Catch-begin
         {
             INST(10, Opcode::CatchPhi).s64().Inputs(1, 5);
+        }
+        BASIC_BLOCK(24, -1)
+        {
             INST(11, Opcode::Return).s64().Inputs(10);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(15, 25)  // Catch-begin
         {
             INST(12, Opcode::CatchPhi).s64().Inputs(1, 5);
+        }
+        BASIC_BLOCK(25, -1)
+        {
             INST(13, Opcode::Return).s64().Inputs(12);
         }
     }
+    GraphChecker(expected_graph).Check();
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
 }
 
@@ -5253,6 +5266,7 @@ TEST_F(IrBuilderTest, NestedTryCatch)
     auto graph = CreateGraph();
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
     ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
+
     auto expected_graph = CreateGraphWithDefaultRuntime();
     GRAPH(expected_graph)
     {
@@ -5260,8 +5274,7 @@ TEST_F(IrBuilderTest, NestedTryCatch)
         PARAMETER(1, 1).s32();
         PARAMETER(2, 2).s32();
         CONSTANT(3, 1);
-
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2, 3, 4)  // Try-begin
         {
             INST(4, Opcode::Try).CatchTypeIds({0x0});
         }
@@ -5272,9 +5285,8 @@ TEST_F(IrBuilderTest, NestedTryCatch)
             INST(7, Opcode::Div).s32().Inputs(0, 6);
         }
         BASIC_BLOCK(10, 9, 4) {}  // Try-end
-
-        BASIC_BLOCK(4, 5) {}  // Catch-begin
-        BASIC_BLOCK(5, 6, 7)
+        BASIC_BLOCK(4, 5) {}      // Catch-begin
+        BASIC_BLOCK(5, 6, 17)     // Try-begin
         {
             INST(11, Opcode::Try).CatchTypeIds({0x0});
         }
@@ -5284,9 +5296,9 @@ TEST_F(IrBuilderTest, NestedTryCatch)
             INST(13, Opcode::ZeroCheck).s32().Inputs(2, 12);
             INST(14, Opcode::Div).s32().Inputs(0, 13);
         }
-        BASIC_BLOCK(11, 9, 7) {}  // Try-end
-
-        BASIC_BLOCK(7, 9)  // Catch-begin
+        BASIC_BLOCK(11, 9, 17) {}  // Try-end
+        BASIC_BLOCK(17, 7) {}
+        BASIC_BLOCK(7, 9)
         {
             INST(16, Opcode::Add).s32().Inputs(0, 3);
         }
@@ -5296,6 +5308,7 @@ TEST_F(IrBuilderTest, NestedTryCatch)
             INST(18, Opcode::Return).s32().Inputs(17);
         }
     }
+    GraphChecker(expected_graph).Check();
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
 }
 
@@ -5325,32 +5338,33 @@ TEST_F(IrBuilderTest, EmptyCatchBlock)
     // build IR with try-catch
     auto graph = CreateGraph();
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
+
     ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
 
     auto expected_graph = CreateGraphWithDefaultRuntime();
     GRAPH(expected_graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        CONSTANT(2, 1);
+        PARAMETER(4, 0).s32();
+        PARAMETER(5, 1).s32();
+        CONSTANT(13, 1);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2, 10, 7)
         {
-            INST(3, Opcode::Try).CatchTypeIds({0x0});
+            INST(10, Opcode::Try).CatchTypeIds({0x0});
         }
-        BASIC_BLOCK(3, 6)
+        BASIC_BLOCK(10, 3)
         {
-            INST(5, Opcode::SaveState).Inputs(0, 1, 0).SrcVregs({0, 1, 2});
-            INST(6, Opcode::ZeroCheck).s32().Inputs(1, 5);
-            INST(7, Opcode::Div).s32().Inputs(0, 6);
+            INST(6, Opcode::SaveState).Inputs(4, 5, 4).SrcVregs({0, 1, 2});
+            INST(7, Opcode::ZeroCheck).s32().Inputs(5, 6);
+            INST(8, Opcode::Div).s32().Inputs(4, 7);
         }
-        BASIC_BLOCK(6, 5, 4) {}  // Try-end
-        BASIC_BLOCK(4, 5) {}     // Catch-begin
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(3, 11, 7) {}  // Try-end
+        BASIC_BLOCK(7, 11) {}
+        BASIC_BLOCK(11, -1)
         {
-            INST(9, Opcode::Phi).s32().Inputs(7, 0);
-            INST(10, Opcode::Add).s32().Inputs(9, 2);
-            INST(11, Opcode::Return).s32().Inputs(10);
+            INST(9, Opcode::Phi).s32().Inputs(8, 4);
+            INST(12, Opcode::Add).s32().Inputs(9, 13);
+            INST(14, Opcode::Return).s32().Inputs(12);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
@@ -5446,7 +5460,7 @@ TEST_F(IrBuilderTest, CatchBlockWithCycle)
         CONSTANT(2, 0);
         CONSTANT(3, 1);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2, 3, 14)
         {
             INST(4, Opcode::Try).CatchTypeIds({0x0});
         }
@@ -5456,7 +5470,8 @@ TEST_F(IrBuilderTest, CatchBlockWithCycle)
             INST(6, Opcode::ZeroCheck).s32().Inputs(1, 5);
             INST(7, Opcode::Div).s32().Inputs(0, 6);
         }
-        BASIC_BLOCK(8, 5, 4) {}  // Try-end
+        BASIC_BLOCK(8, 5, 14) {}  // Try-end
+        BASIC_BLOCK(14, 4) {}
         BASIC_BLOCK(4, 6)
         {
             INST(16, Opcode::SaveStateDeoptimize).Inputs(0, 0).SrcVregs({0, 2});
@@ -5471,13 +5486,13 @@ TEST_F(IrBuilderTest, CatchBlockWithCycle)
         {
             INST(12, Opcode::Sub).s32().Inputs(9, 3);
         }
-
         BASIC_BLOCK(5, -1)
         {
             INST(13, Opcode::Phi).s32().Inputs(7, 9);
             INST(14, Opcode::Return).s32().Inputs(13);
         }
     }
+    GraphChecker(expected_graph).Check();
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
 }
 
@@ -5526,7 +5541,7 @@ ok:
             INST(10, Opcode::LoadAndInitClass).ref().Inputs(9);
             INST(2, Opcode::NewObject).ref().Inputs(10, 9);
         }
-        BASIC_BLOCK(6, 2, 11)
+        BASIC_BLOCK(6, 2, 12)
         {
             INST(1, Opcode::Try).CatchTypeIds({0xE1});
         }
@@ -5535,25 +5550,26 @@ ok:
             INST(3, Opcode::SaveState).Inputs(2).SrcVregs({1});
             INST(4, Opcode::Throw).Inputs(2, 3);
         }
-        BASIC_BLOCK(7, -1, 11) {}  // try_end block
-
-        BASIC_BLOCK(11, 3, 4)
+        BASIC_BLOCK(7, -1, 12) {}  // try_end block
+        BASIC_BLOCK(12, 11)
         {
             INST(6, Opcode::CatchPhi).ref().Inputs();  // catch-phi for acc, which holds exception-object
+        }
+        BASIC_BLOCK(11, 3, 4)
+        {
             INST(7, Opcode::Compare).b().CC(CC_EQ).Inputs(6, 2);
             INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
         }
-
         BASIC_BLOCK(4, -1)
         {
             INST(14, Opcode::Return).s32().Inputs(11);
         }
-
         BASIC_BLOCK(3, -1)
         {
             INST(15, Opcode::Return).s32().Inputs(13);
         }
     }
+    GraphChecker(expected_graph).Check();
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
 }
 
@@ -5595,55 +5611,57 @@ exit:
     auto expected_graph = CreateGraphWithDefaultRuntime();
     GRAPH(expected_graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        PARAMETER(2, 3).s32();
-        CONSTANT(3, 0);
-        CONSTANT(4, 1);
+        PARAMETER(6, 0).s32();
+        PARAMETER(7, 1).s32();
+        PARAMETER(8, 3).s32();
+        CONSTANT(13, 0);
+        CONSTANT(19, 1);
 
-        BASIC_BLOCK(2, 3, 10)
+        BASIC_BLOCK(4, 90, 14)  // Try-begin
         {
-            INST(5, Opcode::Try).CatchTypeIds({0x0});
+            INST(0, Opcode::Try).CatchTypeIds({0x0});
         }
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(90, 5)
         {
-            INST(6, Opcode::SaveState).Inputs(0, 1, 2, 0).SrcVregs({0, 1, 2, 3});
-            INST(7, Opcode::ZeroCheck).s32().Inputs(1, 6);
-            INST(8, Opcode::Div).s32().Inputs(0, 7);
+            INST(9, Opcode::SaveState).Inputs(6, 7, 8, 6).SrcVregs({0, 1, 2, 3});
+            INST(10, Opcode::ZeroCheck).s32().Inputs(7, 9);
+            INST(11, Opcode::Div).s32().Inputs(6, 10);
         }
-        BASIC_BLOCK(4, 5, 10) {}  // Try-end
-        BASIC_BLOCK(5, 6, 12)
+        BASIC_BLOCK(5, 8, 14) {}  // Try-end
+        BASIC_BLOCK(8, 91, 6)
         {
-            INST(9, Opcode::Compare).b().CC(CC_EQ).Inputs(8, 3);
-            INST(10, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(9);
+            INST(12, Opcode::Compare).b().CC(CC_EQ).Inputs(11, 13);
+            INST(14, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(12);
         }
-        BASIC_BLOCK(6, 7, 10)
+        BASIC_BLOCK(6, 9, 14)  // Try-begin
         {
-            INST(11, Opcode::Try).CatchTypeIds({0x0});
+            INST(1, Opcode::Try).CatchTypeIds({0x0});
         }
-        BASIC_BLOCK(7, 8)
+        BASIC_BLOCK(9, 7)  // Try
         {
-            INST(12, Opcode::SaveState).Inputs(0, 0, 2).SrcVregs({0, 3, 2});
-            INST(13, Opcode::ZeroCheck).s32().Inputs(2, 12);
-            INST(14, Opcode::Div).s32().Inputs(0, 13);
+            INST(15, Opcode::SaveState).Inputs(6, 6, 8).SrcVregs({0, 3, 2});
+            INST(16, Opcode::ZeroCheck).s32().Inputs(8, 15);
+            INST(17, Opcode::Div).s32().Inputs(6, 16);
         }
-        BASIC_BLOCK(8, 9, 10) {}  // Try-end
-        BASIC_BLOCK(9, 11, 12)
+        BASIC_BLOCK(7, 10, 14) {}  // Try-end
+        BASIC_BLOCK(14, 11) {}     // Catch-begin
+        BASIC_BLOCK(10, 91, 3)
         {
-            INST(15, Opcode::Compare).b().CC(CC_EQ).Inputs(14, 3);
-            INST(16, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(15);
+            INST(20, Opcode::Compare).b().CC(CC_EQ).Inputs(17, 13);
+            INST(21, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(20);
         }
-        BASIC_BLOCK(11, 12) {}
-        BASIC_BLOCK(10, 12)  // Catch-block
+        BASIC_BLOCK(3, 91) {}
+        BASIC_BLOCK(11, 91)  // Catch
         {
-            INST(18, Opcode::Add).s32().Inputs(0, 4);
+            INST(18, Opcode::Add).s32().Inputs(6, 19);
         }
-        BASIC_BLOCK(12, -1)
+        BASIC_BLOCK(91, -1)
         {
-            INST(19, Opcode::Phi).s32().Inputs(8, 14, 4, 18);
-            INST(20, Opcode::Return).s32().Inputs(19);
+            INST(25, Opcode::Phi).s32().Inputs(11, 17, 19, 18);
+            INST(26, Opcode::Return).s32().Inputs(25);
         }
     }
+    GraphChecker(expected_graph).Check();
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
 }
 
@@ -5689,7 +5707,7 @@ exit:
         CONSTANT(2, 0);
         CONSTANT(3, 1);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2, 3, 14)  // Try-begin
         {
             INST(4, Opcode::Try).CatchTypeIds({0xE1});
         }
@@ -5699,7 +5717,8 @@ exit:
             INST(6, Opcode::ZeroCheck).s32().Inputs(1, 5);
             INST(7, Opcode::Div).s32().Inputs(0, 6);
         }
-        BASIC_BLOCK(9, 8, 4) {}  // Try-end
+        BASIC_BLOCK(9, 8, 14) {}  // Try-end
+        BASIC_BLOCK(14, 4) {}
         BASIC_BLOCK(4, 6, 7)
         {
             INST(10, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 2);
@@ -5719,6 +5738,7 @@ exit:
             INST(15, Opcode::Return).s32().Inputs(14);
         }
     }
+    GraphChecker(expected_graph).Check();
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
 }
 
@@ -6178,7 +6198,7 @@ TEST_F(IrBuilderTest, InfiniteLoopInsideTryBlock)
         {
             INST(6, Opcode::SaveStateDeoptimize).Inputs(7, 7).SrcVregs({0, 2});
         }
-        BASIC_BLOCK(4, 3, 9)  // try_begin, loop
+        BASIC_BLOCK(4, 3, 19)  // try_begin, loop
         {
             INST(9, Opcode::Phi).s32().Inputs(7, 13);
             INST(0, Opcode::Try).CatchTypeIds({0xE});
@@ -6189,13 +6209,17 @@ TEST_F(IrBuilderTest, InfiniteLoopInsideTryBlock)
             INST(12, Opcode::CallStatic).v0id().InputsAutoType(11);
             INST(13, Opcode::Add).s32().Inputs(9, 14);
         }
-        BASIC_BLOCK(5, 4, 9) {}  // try_end, loop
-        BASIC_BLOCK(9, -1)       // catch
+        BASIC_BLOCK(5, 4, 19) {}  // try_end, loop
+        BASIC_BLOCK(19, 9)
         {
             INST(3, Opcode::CatchPhi).b().Inputs(9);
+        }
+        BASIC_BLOCK(9, -1)  // catch
+        {
             INST(15, Opcode::Return).b().Inputs(3);
         }
     }
+    GraphChecker(expected).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected));
 }
 
@@ -6225,7 +6249,7 @@ TEST_F(IrBuilderTest, ReturnInsideTryBlock)
     auto expected = CreateGraphWithDefaultRuntime();
     GRAPH(expected)
     {
-        BASIC_BLOCK(3, 2, 8)  // try_begin
+        BASIC_BLOCK(3, 2, 18)  // try_begin
         {
             INST(0, Opcode::Try).CatchTypeIds({0xE});
         }
@@ -6235,12 +6259,14 @@ TEST_F(IrBuilderTest, ReturnInsideTryBlock)
             INST(3, Opcode::CallStatic).v0id().InputsAutoType(2);
             INST(4, Opcode::ReturnVoid).v0id();
         }
-        BASIC_BLOCK(4, -1, 8) {}  // try_end
+        BASIC_BLOCK(4, -1, 18) {}  // try_end
+        BASIC_BLOCK(18, 8) {}
         BASIC_BLOCK(8, -1)
         {
             INST(5, Opcode::ReturnVoid).v0id();
         }
     }
+    GraphChecker(expected).Check();
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected));
 }
@@ -6274,7 +6300,7 @@ TEST_F(IrBuilderTest, JumpInsideTryBlock)
     auto expected = CreateGraphWithDefaultRuntime();
     GRAPH(expected)
     {
-        BASIC_BLOCK(4, 2, 9)  // try_begin
+        BASIC_BLOCK(4, 2, 19)  // try_begin
         {
             INST(0, Opcode::Try).CatchTypeIds({0xE});
         }
@@ -6283,8 +6309,9 @@ TEST_F(IrBuilderTest, JumpInsideTryBlock)
             INST(2, Opcode::SaveState).NoVregs();
             INST(3, Opcode::CallStatic).v0id().InputsAutoType(2);
         }
-        BASIC_BLOCK(5, 3, 9) {}  // try_end
-        BASIC_BLOCK(9, 3)        // catch
+        BASIC_BLOCK(5, 3, 19) {}  // try_end
+        BASIC_BLOCK(19, 9) {}
+        BASIC_BLOCK(9, 3)  // catch
         {
             INST(4, Opcode::SaveState).NoVregs();
             INST(5, Opcode::CallStatic).v0id().InputsAutoType(4);
@@ -6294,7 +6321,7 @@ TEST_F(IrBuilderTest, JumpInsideTryBlock)
             INST(7, Opcode::ReturnVoid).v0id();
         }
     }
-
+    GraphChecker(expected).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected));
 }
 

@@ -25,6 +25,10 @@ template <typename T>
 class VMHandle;
 }  // namespace panda
 
+namespace panda::coretypes {
+class Array;
+}  // namespace panda::coretypes
+
 namespace panda::ets {
 class EtsCoroutine;
 class EtsArray;
@@ -58,16 +62,21 @@ public:
     std::string AddInitField(uint32_t id, const pandasm::Type &type);
 
     /**
-     * Adds TypeAPI$CtxData$_ and TypeAPI$CtxData$_$init if records to program necessary
+     * Adds TypeAPI$CtxData$_ to program if it was used
      * also emplaces necessary cctors
      */
     void FlushTypeAPICtxDataRecordsToProgram();
 
     /**
-     * Initializes TypeAPI$CtxData$_$init with provided storage of runtime objects
-     * which then is lazily used in TypeAPI$CtxData$_ cctor
+     * Saves objects into current context to provide them to TypeAPI$CtxData$_.cctor
+     * @param objects must live until end of call to `InitializeCtxDataRecord` and may be changed inside this function
      */
-    void InitializeCtxDataRecord(EtsCoroutine *coro, VMHandle<EtsArray> &arr);
+    void SaveObjects(EtsCoroutine *coro, VMHandle<EtsArray> &objects);
+
+    EtsArray *GetObjects(EtsCoroutine *coro);
+
+    /// Initializes TypeAPI$CtxData$_
+    void InitializeCtxDataRecord(EtsCoroutine *coro);
 
     /**
      * Creates TypeAPI$CtxData record if it wasn't created before
@@ -101,12 +110,13 @@ public:
 private:
     pandasm::Program prog_;
     pandasm::Record ctx_data_record_ {"", panda_file::SourceLang::ETS};
-    pandasm::Record ctx_data_init_record_ {"", panda_file::SourceLang::ETS};
-    std::string ctx_data_init_record_name_;
-    pandasm::Function init_fn_ {"", panda_file::SourceLang::ETS};
+    std::string ctx_data_record_name_ {};
+    pandasm::Function ctx_data_record_cctor_ {"", panda_file::SourceLang::ETS};
     std::map<std::string, std::pair<std::string, std::string>> primitive_types_ctor_dtor_;
     std::vector<std::shared_ptr<void>> datas_;
     std::string error_;
+
+    coretypes::Array *init_arr_object_ {};
 };
 
 enum class TypeCreatorKind {

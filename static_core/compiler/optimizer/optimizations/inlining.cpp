@@ -1362,11 +1362,10 @@ void Inlining::UpdateControlflow(Graph *graph_inl, BasicBlock *call_bb, BasicBlo
 
     // Connect inlined graph as successor of the first part of call continuation block
     auto start_bb = graph_inl->GetStartBlock();
-    for (auto succ = start_bb->GetSuccsBlocks().back(); !start_bb->GetSuccsBlocks().empty();
-         succ = start_bb->GetSuccsBlocks().back()) {
-        succ->ReplacePred(start_bb, call_bb);
-        start_bb->GetSuccsBlocks().pop_back();
-    }
+    ASSERT(start_bb->GetSuccsBlocks().size() == 1);
+    auto succ = start_bb->GetSuccessor(0);
+    succ->ReplacePred(start_bb, call_bb);
+    start_bb->GetSuccsBlocks().clear();
 
     ASSERT(graph_inl->HasEndBlock());
     auto end_block = graph_inl->GetEndBlock();

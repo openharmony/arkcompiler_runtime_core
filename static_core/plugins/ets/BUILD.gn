@@ -122,8 +122,7 @@ if (with_stdlib) {
       "}",
     ]
 
-    # TODO(vpukhov): adjust es2panda path
-    write_file("$root_gen_dir/plugins/es2panda/generated/arktsconfig.json",
+    write_file("$root_gen_dir/tools/es2panda/generated/arktsconfig.json",
                json_array,
                "list lines")
     sources = [

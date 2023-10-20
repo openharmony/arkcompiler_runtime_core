@@ -145,6 +145,69 @@ TEST_F(TryCatchResolvingTest, RemoveAllCatchHandlers)
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
 }
+
+TEST_F(TryCatchResolvingTest, EmptyTryCatches)
+{
+    auto graph = CreateGraphWithDefaultRuntime();
+    GRAPH(graph)
+    {
+        CONSTANT(5, 2).i32();
+        CONSTANT(8, 10).i32();
+        BASIC_BLOCK(7, 2) {}
+        BASIC_BLOCK(2, 4, 9)
+        {
+            INST(1, Opcode::Try).CatchTypeIds({0});
+        }
+        BASIC_BLOCK(4, 3)
+        {
+            INST(6, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(7, Opcode::LoadType).ref().Inputs(6).TypeId(4646690);
+        }
+        BASIC_BLOCK(3, 5, 9) {}
+        BASIC_BLOCK(9, 6)
+        {
+            INST(2, Opcode::CatchPhi).i32().ThrowableInsts({}).Inputs(5);
+            INST(4, Opcode::CatchPhi).ref().ThrowableInsts({}).Inputs();
+        }
+        BASIC_BLOCK(5, 8) {}
+        BASIC_BLOCK(6, 8) {}
+        BASIC_BLOCK(8, -1)
+        {
+            INST(10, Opcode::Phi).i32().Inputs(8, 2);
+            INST(13, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(14, Opcode::LoadAndInitClass).ref().Inputs(13);
+            INST(15, Opcode::StoreStatic).s32().Inputs(14, 10);
+            INST(16, Opcode::ReturnVoid);
+        }
+    }
+    BB(2).SetTryBegin(true);
+    BB(4).SetTry(true);
+    BB(3).SetTryEnd(true);
+    INS(1).CastToTry()->SetTryEndBlock(&BB(3));
+    BB(9).SetCatchBegin(true);
+    BB(9).SetCatch(true);
+    BB(6).SetCatchEnd(true);
+    BB(6).SetCatch(true);
+    GraphChecker(graph).Check();
+
+    graph->RunPass<TryCatchResolving>();
+    auto expected_graph = CreateGraphWithDefaultRuntime();
+    GRAPH(expected_graph)
+    {
+        CONSTANT(8, 10).i32();
+        BASIC_BLOCK(8, -1)
+        {
+            INST(13, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(14, Opcode::LoadAndInitClass).ref().Inputs(13);
+            INST(15, Opcode::StoreStatic).s32().Inputs(14, 8);
+            INST(16, Opcode::ReturnVoid);
+        }
+    }
+    GraphChecker(expected_graph).Check();
+
+    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+}
+
 // NOLINTEND(readability-magic-numbers)
 
 }  // namespace panda::compiler

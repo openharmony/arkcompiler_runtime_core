@@ -147,8 +147,7 @@ ohos() {
 
 ts_linter() {
     echo "> Building tslinter..."
-    # TODO(vpukhov): adjust es2panda path
-    local LINTER_ROOT="$ARK_ROOT/plugins/ecmascript/es2panda/linter"
+    local LINTER_ROOT="$ARK_ROOT/tools/es2panda/linter"
     (cd "$LINTER_ROOT" && npm install)
     local TGZ="$(ls "$LINTER_ROOT"/bundle/panda-tslinter*tgz)"
     mkdir -p "$PANDA_SDK_PATH"/tslinter

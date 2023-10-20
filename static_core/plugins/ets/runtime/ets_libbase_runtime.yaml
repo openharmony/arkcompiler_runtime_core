@@ -2601,6 +2601,18 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxGetError
     clear_flags: [ ]
 
+  - name: TypeAPITypeCreatorCtxGetObjectsArrayForCCtor
+    space: ets
+    class_name: std.core.TypeCreatorCtx
+    method_name: getObjectsArrayForCCtor
+    static: true
+    signature:
+      ret: std.core.Object[]
+      args:
+        - i64
+    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxGetObjectsArrayForCCtor
+    clear_flags: [ ]
+
   - name: TypeAPITypeCreatorCtxGetTypeDescFromPointer
     space: ets
     class_name: std.core.TypeCreatorCtx

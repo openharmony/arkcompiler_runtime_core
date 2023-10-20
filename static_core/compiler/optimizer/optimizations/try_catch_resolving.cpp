@@ -27,10 +27,10 @@
 namespace panda::compiler {
 TryCatchResolving::TryCatchResolving(Graph *graph)
     : Optimization(graph),
+      try_blocks_(graph->GetLocalAllocator()->Adapter()),
       throw_insts_(graph->GetLocalAllocator()->Adapter()),
       catch_blocks_(graph->GetLocalAllocator()->Adapter()),
       phi_insts_(graph->GetLocalAllocator()->Adapter()),
-      try_blocks_(graph->GetLocalAllocator()->Adapter()),
       cphi2phi_(graph->GetLocalAllocator()->Adapter()),
       catch2cphis_(graph->GetLocalAllocator()->Adapter())
 {
@@ -39,6 +39,33 @@ TryCatchResolving::TryCatchResolving(Graph *graph)
 bool TryCatchResolving::RunImpl()
 {
     COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Running try-catch-resolving";
+    for (auto bb : GetGraph()->GetBlocksRPO()) {
+        if (bb->IsTryBegin()) {
+            try_blocks_.emplace_back(bb);
+        }
+    }
+    if (!OPTIONS.IsCompilerNonOptimizing()) {
+        CollectCandidates();
+        if (!catch_blocks_.empty() && !throw_insts_.empty()) {
+            ConnectThrowCatch();
+        }
+    }
+    for (auto bb : try_blocks_) {
+        COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Visit try-begin BB " << bb->GetId();
+        VisitTryInst(GetTryBeginInst(bb));
+    }
+    GetGraph()->RemoveUnreachableBlocks();
+    GetGraph()->ClearTryCatchInfo();
+    GetGraph()->EraseMarker(marker_);
+    InvalidateAnalyses();
+    // Cleanup should be done inside pass, to satisfy GraphChecker
+    GetGraph()->RunPass<Cleanup>();
+    COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Finishing try-catch-resolving";
+    return true;
+}
+
+void TryCatchResolving::CollectCandidates()
+{
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         if (bb->IsCatch() && !(bb->IsCatchBegin() || bb->IsCatchEnd() || bb->IsTryBegin() || bb->IsTryEnd())) {
             catch_blocks_.emplace(bb->GetGuestPc(), bb);
@@ -58,27 +85,8 @@ bool TryCatchResolving::RunImpl()
             auto throw_inst = bb->GetLastInst();
             ASSERT(throw_inst != nullptr && throw_inst->GetOpcode() == Opcode::Throw);
             throw_insts_.emplace_back(throw_inst);
-        } else if (bb->IsTryBegin()) {
-            try_blocks_.emplace_back(bb);
         }
     }
-    if (!catch_blocks_.empty() && !throw_insts_.empty()) {
-        ConnectThrowCatch();
-    }
-    for (auto bb : try_blocks_) {
-        COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Visit try-begin BB " << bb->GetId();
-        VisitTryInst(GetTryBeginInst(bb));
-    }
-    GetGraph()->RemoveUnreachableBlocks();
-    GetGraph()->ClearTryCatchInfo();
-    GetGraph()->EraseMarker(marker_);
-#ifndef NDEBUG
-    InvalidateAnalyses();
-    // Cleanup should be done inside pass, to satisfy GraphChecker
-    GetGraph()->RunPass<Cleanup>();
-#endif
-    COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Finishing try-catch-resolving";
-    return true;
 }
 
 void TryCatchResolving::ConnectThrowCatch()
@@ -172,14 +180,14 @@ void TryCatchResolving::DeleteTryCatchEdges(BasicBlock *try_begin, BasicBlock *t
         ASSERT(catch_succ->IsCatchBegin());
         try_begin->RemoveSucc(catch_succ);
         catch_succ->RemovePred(try_begin);
-        COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING)
-            << "Remove edge between try_begin BB " << try_begin->GetId() << " and BB " << catch_succ->GetId();
+        COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Remove edge between try_begin BB " << try_begin->GetId()
+                                                 << " and catch-begin BB " << catch_succ->GetId();
         if (try_end->GetGraph() != nullptr) {
             ASSERT(try_end->GetSuccessor(1) == catch_succ);
             try_end->RemoveSucc(catch_succ);
             catch_succ->RemovePred(try_end);
-            COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING)
-                << "Remove edge between try_end BB " << try_end->GetId() << " and BB " << catch_succ->GetId();
+            COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Remove edge between try_end BB " << try_end->GetId()
+                                                     << " and catch-begin BB " << catch_succ->GetId();
         }
     }
 }

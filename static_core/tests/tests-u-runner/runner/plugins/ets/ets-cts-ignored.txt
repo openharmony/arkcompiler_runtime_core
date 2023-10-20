@@ -236,7 +236,6 @@
 07.expressions/03.qualified_name/qualified_name_4.ets
 07.expressions/03.qualified_name/qualified_name_5.ets
 07.expressions/04.class_literal/class_literal.ets
-07.expressions/06.class_composite/protected_field_access_from_derived_class.ets
 07.expressions/09.this_expression/this_in_interface_method.ets
 07.expressions/09.this_expression/this_in_lambda.ets
 07.expressions/09.this_expression/this_in_lambda_negative.ets
@@ -1322,7 +1321,8 @@
 03.types/07.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_ushort_7.ets
 03.types/07.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_ushort_8.ets
 03.types/07.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_ushort_9.ets
-
+07.expressions/07.object_literal/04.object_literal_evaluation/ex1.ets
+07.expressions/07.object_literal/04.object_literal_evaluation/ex2.ets
 07.expressions/28.assignment/01.simple_assignment_operator/ord4.ets
 07.expressions/28.assignment/02.compound_assignment_operators/ops_105.ets
 07.expressions/28.assignment/02.compound_assignment_operators/ops_106.ets
@@ -1657,13 +1657,6 @@
 09.classes/04.access_modifiers/access_modifiers_4.ets
 09.classes/04.access_modifiers/access_modifiers_9.ets
 09.classes/08.member_type_declarations/interface_declaration.ets
-08.statements/11.continue_statements/continue_comb2.ets
-08.statements/11.continue_statements/continue_for_of1.ets
-08.statements/11.continue_statements/continue_for_of2.ets
-08.statements/11.continue_statements/continue_for_of3.ets
-08.statements/11.continue_statements/continue_for_of3l.ets
-08.statements/11.continue_statements/continue_for_of4.ets
-08.statements/11.continue_statements/continue_for_of5l.ets
 # end of es2panda fails
 #FailKind.ES2PANDA_FAIL not implemented yet
 02.lexical_elements/09.literals/07.null_literal/null_literal3.ets
@@ -1847,6 +1840,10 @@
 02.lexical_elements/07.keywords/types_n_8.ets
 # end of es2panda fails
 
+# es2panda fails: panda#14014
+07.expressions/07.object_literal/01.object_literal_of_class_type/cl_10.ets
+# end of es2panda fails
+
 # es2panda fails: panda#12868
 04.names_declarations_and_scopes/04.scopes/type_param_interface.ets
 # end of es2panda fails
@@ -1862,6 +1859,33 @@
 
 # es2panda fails: panda#13532
 17.experimental_features/05.statements/05.function_overloading/fn_overloading4_1.ets
+# end of es2panda fails
+
+# es2panda fails: 7.6.2 Object Literal of Interface Type is not implemented
+07.expressions/07.object_literal/02.object_literal_of_interface_type/in_0.ets
+07.expressions/07.object_literal/02.object_literal_of_interface_type/in_1.ets
+07.expressions/07.object_literal/02.object_literal_of_interface_type/in_10.ets
+07.expressions/07.object_literal/02.object_literal_of_interface_type/in_2.ets
+07.expressions/07.object_literal/02.object_literal_of_interface_type/in_3.ets
+07.expressions/07.object_literal/02.object_literal_of_interface_type/in_4.ets
+07.expressions/07.object_literal/02.object_literal_of_interface_type/in_5.ets
+07.expressions/07.object_literal/02.object_literal_of_interface_type/in_6.ets
+07.expressions/07.object_literal/02.object_literal_of_interface_type/in_7.ets
+07.expressions/07.object_literal/02.object_literal_of_interface_type/in_8.ets
+07.expressions/07.object_literal/02.object_literal_of_interface_type/in_9.ets
+07.expressions/07.object_literal/02.object_literal_of_interface_type/spec_ex1.ets
+# end of es2panda fails
+
+# es2panda fails:#13844 7.6.3 Object Literal of Record Type is not implemented
+07.expressions/07.object_literal/03.object_literal_of_record_type/re_0.ets
+07.expressions/07.object_literal/03.object_literal_of_record_type/re_1.ets
+07.expressions/07.object_literal/03.object_literal_of_record_type/re_2.ets
+07.expressions/07.object_literal/03.object_literal_of_record_type/re_3.ets
+07.expressions/07.object_literal/03.object_literal_of_record_type/re_4.ets
+07.expressions/07.object_literal/03.object_literal_of_record_type/re_5.ets
+07.expressions/07.object_literal/03.object_literal_of_record_type/re_6.ets
+07.expressions/07.object_literal/03.object_literal_of_record_type/spec_ex1.ets
+07.expressions/07.object_literal/03.object_literal_of_record_type/spec_ex2.ets
 # end of es2panda fails
 
 # verifier fails: panda#13164

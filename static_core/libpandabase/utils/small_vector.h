@@ -346,52 +346,52 @@ public:
     // NOLINTBEGIN(readability-identifier-naming,cppcoreguidelines-pro-bounds-pointer-arithmetic)
     const_iterator begin() const
     {
-        return const_iterator(&operator[](0));
+        return const_iterator(data());
     }
     iterator begin()
     {
-        return iterator(&operator[](0));
+        return iterator(data());
     }
     const_iterator cbegin() const
     {
-        return const_iterator(&operator[](0));
+        return const_iterator(data());
     }
     const_iterator end() const
     {
-        return const_iterator(&operator[](size()));
+        return begin() + size();
     }
     iterator end()
     {
-        return iterator(&operator[](size()));
+        return begin() + size();
     }
     const_iterator cend() const
     {
-        return const_iterator(&operator[](size()));
+        return begin() + size();
     }
 
     auto rbegin() const
     {
-        return const_reverse_iterator(&operator[](size() - 1));
+        return const_reverse_iterator(data() + size() - 1);
     }
     auto rbegin()
     {
-        return reverse_iterator(&operator[](size() - 1));
+        return reverse_iterator(data() + size() - 1);
     }
     auto crbegin() const
     {
-        return const_reverse_iterator(&operator[](size() - 1));
+        return const_reverse_iterator(data() + size() - 1);
     }
     auto rend() const
     {
-        return const_reverse_iterator(&operator[](0) - 1);
+        return const_reverse_iterator(data() - 1);
     }
     auto rend()
     {
-        return reverse_iterator(&operator[](0) - 1);
+        return reverse_iterator(data() - 1);
     }
     auto crend() const
     {
-        return const_reverse_iterator(&operator[](0) - 1);
+        return const_reverse_iterator(data() - 1);
     }
 
     bool empty() const
@@ -400,6 +400,12 @@ public:
     }
 
     const_pointer data() const
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        return IsStatic() ? buffer.data.data() : vector.data();
+    }
+
+    pointer data()
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return IsStatic() ? buffer.data.data() : vector.data();

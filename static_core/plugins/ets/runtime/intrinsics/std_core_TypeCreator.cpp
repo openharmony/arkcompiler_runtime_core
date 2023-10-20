@@ -189,9 +189,11 @@ EtsString *TypeAPITypeCreatorCtxCommit(EtsLong ctx_ptr, EtsArray *objects)
     auto &data = writer.GetData();
     auto file = panda_file::OpenPandaFileFromMemory(data.data(), data.size());
 
+    ctx->SaveObjects(coroutine, objects_handle);
+
     linker->AddPandaFile(std::move(file));
 
-    ctx->InitializeCtxDataRecord(coroutine, objects_handle);
+    ctx->InitializeCtxDataRecord(coroutine);
     return nullptr;
 }
 
@@ -230,6 +232,13 @@ EtsString *TypeAPITypeCreatorCtxGetError(EtsLong ctx_ptr)
 {
     auto ctx = PtrFromLong<TypeCreatorCtx>(ctx_ptr);
     return ErrorFromCtx(ctx);
+}
+
+EtsObject *TypeAPITypeCreatorCtxGetObjectsArrayForCCtor(EtsLong ctx_ptr)
+{
+    auto ctx = PtrFromLong<TypeCreatorCtx>(ctx_ptr);
+    auto coro = EtsCoroutine::GetCurrent();
+    return ctx->GetObjects(coro)->AsObject();
 }
 
 EtsString *TypeAPITypeCreatorCtxClassSetBase(EtsLong class_ptr, EtsString *base_td)

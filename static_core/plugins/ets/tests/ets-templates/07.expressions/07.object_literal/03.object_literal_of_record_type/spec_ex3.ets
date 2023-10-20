@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,24 +14,12 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Checking a protected field from a derived class inside a composite class
+desc: >-
+    If a key is a union type consisting of literals, then all variants must be listed in the object literal;
+    otherwise, a compile-time error occurs
+tags: [compile-only, negative]
 ---*/
 
-class Person {
-  protected name: String;
-  age: int;
-}
-
-class Child extends Person {
-  static factory(): Child {
-    let child: Child = {name:"Bob", age: 18};
-
-    return child;
-  }
-}
-
-function main(): void {
-  let obj: Child = Child.factory();
-
-  assert obj.name == "Bob";
-}
+let map: Record<"aa" | "bb", number> = {
+    "aa": 1,
+} // compile-time error: "bb" key is missing

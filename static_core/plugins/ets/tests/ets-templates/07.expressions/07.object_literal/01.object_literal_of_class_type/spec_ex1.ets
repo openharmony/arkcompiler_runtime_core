@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,17 +14,16 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Checking that two variables with the same expressions of the compound class are different objects
+desc: If the class type C is inferred from the context, then the type of object literal is C.
 tags: [compile-only]
 ---*/
 
 class Person {
-  height: Int;
-  age: Int;
+    name: string = ""
+    age: number = 0
 }
-  
-function main(): void {
-  let person: Person = {height:new Int(20), age: new Int(20)}
-  assert person.height !== person.age
-}
-  
+function foo(p: Person) { /*some code*/ }
+// ...
+let p: Person = {name: "Bob", age: 25} /* ok, variable type is
+used */
+foo({name: "Alice", age: 18}) // ok, parameter type is used

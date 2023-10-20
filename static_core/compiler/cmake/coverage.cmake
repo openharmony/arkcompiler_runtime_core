@@ -19,8 +19,8 @@ if(ENABLE_COMPILER_COVERAGE)
     add_custom_target(compiler_coverage DEPENDS cts-assembly tests benchmarks)
     collect_coverage_for_target(
         TARGET_NAME compiler_coverage
-        INCLUDE_DIR_PATTERN '*/compiler/*'
-        EXCLUDE_DIR_PATTERN '*/plugins/*' '*/runtime/*'
+        INCLUDE_DIR_PATTERN \"*/compiler/*\"
+        EXCLUDE_DIR_PATTERN \"/usr*\" \"*/third_party/*\" \"*/build/*\" \"*/plugins/*\" \"*/runtime/*\" \"*/bytecode_optimizer/*\" \"*/libpandabase/*\" 
     )
 else()
     message(STATUS "Coverage will not be calculated (may be enabled by -DENABLE_COMPILER_COVERAGE=true ).")
