@@ -88,6 +88,7 @@ build-sdk/sdk/linux_host_tools/lib/libarkruntime.so
 build-sdk/sdk/linux_host_tools/lib/libarkziparchive.so
 build-sdk/sdk/linux_host_tools/lib/libc_secshared.so
 build-sdk/sdk/linux_host_tools/lib/libes2panda-lib.so
+build-sdk/sdk/linux_host_tools/lib/libes2panda-public.so
 build-sdk/sdk/linux_host_tools/lib/libhmicui18n.z.so
 build-sdk/sdk/linux_host_tools/lib/libhmicuuc.z.so
 build-sdk/sdk/linux_host_tools/lib/libinit_icu.so

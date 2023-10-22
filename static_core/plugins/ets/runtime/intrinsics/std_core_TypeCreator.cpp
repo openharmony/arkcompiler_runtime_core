@@ -197,11 +197,16 @@ EtsString *TypeAPITypeCreatorCtxCommit(EtsLong ctx_ptr, EtsArray *objects)
     return nullptr;
 }
 
-EtsLong TypeAPITypeCreatorCtxClassCreate(EtsLong ctx_ptr, EtsString *name)
+EtsLong TypeAPITypeCreatorCtxClassCreate(EtsLong ctx_ptr, EtsString *name, EtsInt attrs)
 {
     auto ctx = PtrFromLong<TypeCreatorCtx>(ctx_ptr);
     pandasm::Record rec {std::string {name->GetMutf8()}, SourceLanguage::ETS};
     rec.conflict = true;
+
+    if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::FINAL)) {
+        rec.metadata->SetAttribute(typeapi_create_consts::ATTR_FINAL);
+    }
+
     auto name_str = rec.name;
     auto [iter, ok] = ctx->Program().record_table.emplace(name_str, std::move(rec));
     if (!ok) {
@@ -270,8 +275,10 @@ EtsString *TypeAPITypeCreatorCtxGetTypeDescFromPointer(EtsLong nptr)
     return EtsString::CreateFromMUtf8(type.GetDescriptor(!type.IsPrimitive()).c_str());
 }
 
-EtsString *TypeAPITypeCreatorCtxMethodAddParam(EtsLong method_ptr, EtsString *param_td)
+EtsString *TypeAPITypeCreatorCtxMethodAddParam(EtsLong method_ptr, EtsString *param_td,
+                                               [[maybe_unused]] EtsString *name, [[maybe_unused]] EtsInt attrs)
 {
+    // TODO(kprokopenko): dump meta info
     auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
     auto type = GetPandasmTypeFromDescriptor(m->Ctx(), param_td->GetMutf8());
     m->AddParameter(std::move(type));
@@ -286,6 +293,11 @@ EtsLong TypeAPITypeCreatorCtxMethodCreate(EtsLong containing_type_ptr, EtsString
     if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::CONSTRUCTOR)) {
         name_str += panda_file::GetCtorName(SourceLanguage::ETS);
     } else {
+        if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::GETTER)) {
+            name_str += GETTER_BEGIN;
+        } else if (HasFeatureAttribute(attrs, EtsTypeAPIAttributes::SETTER)) {
+            name_str += SETTER_BEGIN;
+        }
         name_str += name->GetMutf8();
     }
     auto ret = klass->GetCtx()->Alloc<PandasmMethodCreator>(std::move(name_str), klass->GetCtx());
@@ -380,31 +392,42 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda(EtsLong method_ptr
     m->Ctx()->AddRefTypeAsExternal(std::string {typeapi_create_consts::TYPE_OBJECT});
 
     LambdaTypeCreator lambda {m->Ctx()};
+    lambda.AddParameter(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 0});
     lambda.AddParameter(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1});
     lambda.AddResult(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 0});
     lambda.Create();
 
     auto saved_lambda_field = m->Ctx()->AddInitField(lambda_id, lambda.GetType());
 
+    constexpr int TMP_REG = 0;
     constexpr int LMB_REG = 0;
-    constexpr int ARR_REG = LMB_REG + 1;
+    constexpr int RECV_REG = LMB_REG + 1;
+    constexpr int ARR_REG = RECV_REG + 1;
 
-    constexpr int ARGS_REG_START = 2;
-    static_assert(ARR_REG < ARGS_REG_START);
+    constexpr int ARGS_REG_START = ARR_REG + 1;
 
     auto &fn = m->GetFn();
+    auto is_static = fn.metadata->GetAttribute(std::string {typeapi_create_consts::ATTR_STATIC});
     fn.regs_num = ARGS_REG_START;
     const auto &ret = fn.return_type;
     auto pars = fn.params.size();
-    fn.AddInstruction(pandasm::Create_MOVI(1, pars));
+    auto arr_len = pars - (is_static ? 0 : 1);
+    fn.AddInstruction(pandasm::Create_MOVI(TMP_REG, arr_len));
     fn.AddInstruction(
-        pandasm::Create_NEWARR(ARR_REG, 1, pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1}.GetName()));
+        pandasm::Create_NEWARR(ARR_REG, TMP_REG, pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1}.GetName()));
 
-    fn.AddInstruction(pandasm::Create_MOVI(0, 0));
+    fn.AddInstruction(pandasm::Create_MOVI(TMP_REG, 0));
+
+    if (is_static) {
+        fn.AddInstruction(pandasm::Create_LDA_NULL());
+        fn.AddInstruction(pandasm::Create_STA_OBJ(RECV_REG));
+    }
+
     for (size_t i = 0; i < fn.params.size(); i++) {
         auto &par = fn.params[i];
-        if (i != 0) {
-            fn.AddInstruction(pandasm::Create_INCI(0, 1));
+        // adjust array store index
+        if (i != 0 && (i != 1 || is_static)) {
+            fn.AddInstruction(pandasm::Create_INCI(TMP_REG, 1));
         }
         if (par.type.IsObject()) {
             fn.AddInstruction(pandasm::Create_LDA_OBJ(ARGS_REG_START + i));
@@ -412,13 +435,19 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda(EtsLong method_ptr
             auto ctor = m->Ctx()->DeclarePrimitive(par.type.GetComponentName()).first;
             fn.AddInstruction(pandasm::Create_INITOBJ_SHORT(ARGS_REG_START + i, 0, ctor));
         }
-        fn.AddInstruction(pandasm::Create_STARR_OBJ(ARR_REG, 0));
+        if (i == 0 && !is_static) {
+            // set recv
+            fn.AddInstruction(pandasm::Create_STA_OBJ(RECV_REG));
+        } else {
+            // set arg
+            fn.AddInstruction(pandasm::Create_STARR_OBJ(ARR_REG, TMP_REG));
+        }
     }
 
     fn.AddInstruction(pandasm::Create_LDSTATIC_OBJ(saved_lambda_field));
     fn.AddInstruction(pandasm::Create_STA_OBJ(LMB_REG));
 
-    fn.AddInstruction(pandasm::Create_CALL_VIRT_SHORT(LMB_REG, ARR_REG, lambda.GetFunctionName()));
+    fn.AddInstruction(pandasm::Create_CALL_VIRT(LMB_REG, RECV_REG, ARR_REG, 0, lambda.GetFunctionName()));
 
     fn.AddInstruction(pandasm::Create_STA_OBJ(0));
     if (!fn.return_type.IsObject()) {
@@ -439,6 +468,24 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyDefault(EtsLong method_ptr)
 {
     auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
     auto &fn = m->GetFn();
+
+    // call default constructor in case of constructor
+    if (fn.metadata->IsCtor()) {
+        auto self_name = m->GetFn().params.front().type.GetName();
+        auto &record_table = m->Ctx()->Program().record_table;
+        auto super_name = record_table.find(self_name)
+                              ->second.metadata->GetAttributeValue(std::string {typeapi_create_consts::ATTR_EXTENDS})
+                              .value();
+        m->Ctx()->AddRefTypeAsExternal(super_name);
+        PandasmMethodCreator super_ctor {super_name + "." + panda_file::GetCtorName(panda_file::SourceLang::ETS),
+                                         m->Ctx()};
+        super_ctor.AddParameter(pandasm::Type {super_name, 0, true});
+        super_ctor.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
+        super_ctor.Create();
+
+        fn.AddInstruction(pandasm::Create_CALL_SHORT(0, 0, super_ctor.GetFunctionName()));
+    }
+
     const auto &ret = fn.return_type;
     if (ret.IsVoid()) {
         fn.AddInstruction(pandasm::Create_RETURN_VOID());
@@ -474,15 +521,17 @@ EtsString *TypeAPITypeCreatorCtxMethodAddResult(EtsLong method_ptr, EtsString *d
     return ErrorFromCtx(m->Ctx());
 }
 
-EtsLong TypeAPITypeCreatorCtxLambdaTypeCreate(EtsLong ctx_ptr)
+EtsLong TypeAPITypeCreatorCtxLambdaTypeCreate(EtsLong ctx_ptr, [[maybe_unused]] EtsInt attrs)
 {
     auto ctx = PtrFromLong<TypeCreatorCtx>(ctx_ptr);
+    // TODO(kprokopenko): add attributes
     auto fn = ctx->Alloc<LambdaTypeCreator>(ctx);
     return PtrToLong(fn);
 }
 
-EtsString *TypeAPITypeCreatorCtxLambdaTypeAddParam(EtsLong ft_ptr, EtsString *td)
+EtsString *TypeAPITypeCreatorCtxLambdaTypeAddParam(EtsLong ft_ptr, EtsString *td, [[maybe_unused]] EtsInt attrs)
 {
+    // TODO(kprokopenko): dump meta info
     auto creator = PtrFromLong<LambdaTypeCreator>(ft_ptr);
     creator->AddParameter(GetPandasmTypeFromDescriptor(creator->GetCtx(), td->GetMutf8()));
     return ErrorFromCtx(creator->GetCtx());

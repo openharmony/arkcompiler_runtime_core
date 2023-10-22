@@ -16,7 +16,7 @@ Enumerations
 ############
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 An enumeration type *enum* specifies a distinct type with an associated set
 of named constants that define its possible values:

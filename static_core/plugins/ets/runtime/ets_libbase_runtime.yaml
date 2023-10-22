@@ -1972,17 +1972,6 @@ intrinsics:
     impl: panda::ets::intrinsics::TypeAPIGetArrayElementType
     clear_flags: [ ]
 
-  - name: TypeAPIMakeClassInstance
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIMakeClassInstance
-    static: true
-    signature:
-      ret: std.core.Object
-      args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIMakeClassInstance
-    clear_flags: [ ]
-
   - name: TypeAPIMakeArrayInstance
     space: ets
     class_name: std.core.ETSGLOBAL
@@ -2635,6 +2624,7 @@ intrinsics:
       args:
         - i64
         - std.core.String
+        - i32
     impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxClassCreate
     clear_flags: [ ]
 
@@ -2743,6 +2733,8 @@ intrinsics:
       args:
         - i64
         - std.core.String
+        - std.core.String
+        - i32
     impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddParam
     clear_flags: [ ]
 
@@ -2832,6 +2824,7 @@ intrinsics:
       ret: i64
       args:
         - i64
+        - i32
     impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeCreate
     clear_flags: [ ]
 
@@ -2845,6 +2838,7 @@ intrinsics:
       args:
         - i64
         - std.core.String
+        - i32
     impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAddParam
     clear_flags: [ ]
 

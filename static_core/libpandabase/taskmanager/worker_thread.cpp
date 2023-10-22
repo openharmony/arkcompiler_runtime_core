@@ -64,12 +64,12 @@ void WorkerThread::WorkerLoop(size_t tasks_count)
 {
     while (true) {
         auto finish_cond = TaskScheduler::GetTaskScheduler()->FillWithTasks(this, tasks_count);
-        size_t task_count = size_;
         ExecuteTasks();
         if (finish_cond) {
             break;
         }
-        finished_tasks_callback_(task_count);
+        finished_tasks_callback_(finished_tasks_counter_map_);
+        finished_tasks_counter_map_.clear();
     }
 }
 
@@ -78,6 +78,7 @@ void WorkerThread::ExecuteTasks()
     while (!IsEmpty()) {
         auto task = PopTask();
         task.RunTask();
+        finished_tasks_counter_map_[task.GetTaskProperties()]++;
     }
 }
 

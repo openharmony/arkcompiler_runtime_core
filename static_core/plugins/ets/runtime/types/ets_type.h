@@ -17,6 +17,7 @@
 
 #include "plugins/ets/runtime/napi/ets_napi.h"
 #include "libpandafile/file.h"
+#include "libpandafile/file_items.h"
 
 namespace panda::ets {
 

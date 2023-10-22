@@ -20,17 +20,21 @@ class C {
 	m(s: string): string {
 		return ""
 	}
+
+	dat: string = "DATA!"
 }
 
 
-function erasedM(args: Object[]): Object {
-	return (args[1] as string) + "123"
+function erasedM(recv: NullishType, args: NullishType[]): NullishType {
+	assert args.length == 1
+	return (args[0] as string) + "123" + (recv as C).dat
 }
 
-function erased(args: Object[]): Object {
-	const a1: int = args[1] as Int
-	const a2: long = args[2] as Long
-	const c: boolean = args[3] as Boolean
+function erased(recv: NullishType, args: NullishType[]): NullishType {
+	assert args.length == 3
+	const a1: int = args[0] as Int
+	const a2: long = args[1] as Long
+	const c: boolean = args[2] as Boolean
 	if (c) {
 		const r = a1 as long
 		return r as Long
@@ -41,19 +45,19 @@ function erased(args: Object[]): Object {
 
 function main(): void throws {
 	const c = Type.of(new C()) as ClassType
-	const creator = new ClassTypeCreator("C1").addBase(c)
+	const creator = new ClassTypeCreator("C1").addBaseType(c)
 	creator
 		.addMethod(
 			new MethodCreator("c")
-				.addParameter(IntType.VAL)
-				.addParameter(LongType.VAL)
-				.addParameter(BooleanType.VAL)
+				.addParameter(new ParameterCreator(IntType.VAL))
+				.addParameter(new ParameterCreator(LongType.VAL))
+				.addParameter(new ParameterCreator(BooleanType.VAL))
 				.addResult(LongType.VAL)
 				.addBody(new CallableBodyErasedFunction(erased))
 		)
 		.addMethod(
 			new MethodCreator("m")
-				.addParameter(StringType.REF)
+				.addParameter(new ParameterCreator(StringType.REF))
 				.addResult(StringType.REF)
 				.addBody(new CallableBodyErasedFunction(erasedM))
 		)
@@ -66,5 +70,5 @@ function main(): void throws {
 	const i = ty.make() as C
 	assert(i.c(10, 11, true) == 10)
 	assert(i.c(10, 11, false) == 11)
-	assert(i.m("abc") == "abc123")
+	assert(i.m("abc") == "abc123DATA!")
 }

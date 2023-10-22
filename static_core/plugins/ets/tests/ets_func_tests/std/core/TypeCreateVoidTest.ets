@@ -35,17 +35,15 @@ function main(): void throws {
 
 	const creator =
 		new ClassTypeCreator("C1")
-			.addBase(Type.of(new C()) as ClassType)
+			.addBaseType(Type.of(new C()) as ClassType)
 			.addMethod(
 				new MethodCreator("foo")
 					.addResult(VoidType.REF)
-					//.addResult(Type.of(Void))
 					.addBody(new CallableBodyFunction(release))
 			)
 			.addMethod(
 				new MethodCreator("bar")
 					.addResult(VoidType.REF)
-					//.addResult(Type.of(Void))
 					.addBody(new CallableBodyDefault())
 			)
 			.addMethod(

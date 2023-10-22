@@ -15,6 +15,18 @@
 
 package std.core;
 
+class AllowedAttributes {
+    internal static readonly FIELD = Attributes.STATIC | Attributes.INHERITED | Attributes.READONLY
+    internal static readonly METHOD = Attributes.STATIC | Attributes.INHERITED | Attributes.FINAL | Attributes.ABSTRACT | Attributes.CONSTRUCTOR | Attributes.THROWING | Attributes.NATIVE | Attributes.ASYNC | Attributes.GETTER | Attributes.SETTER
+    internal static readonly LAMBDA = Attributes.THROWING | Attributes.ASYNC
+    internal static readonly CLASS = Attributes.FINAL
+    internal static readonly PARAMETER = Attributes.REST | Attributes.OPTIONAL
+}
+
+/**
+ * Exception that is thrown when exception in create-api occurs
+ * @note both messages and causes may be different on each platforms
+ */
 export class TypeAPICreateException extends Exception {
     public constructor(msg: string) {
         super(msg)
@@ -89,12 +101,22 @@ final class MSet<T> {
     private elems: MArray<T> = new MArray<T>()
 }
 
+/**
+ * Type of function that collects all reachable types for creator context
+ */
 type CollectTypesCB = (tc: TypeOrCreator) => void
 
-export /* abstract */ class TypeCreator {
+/**
+ * Base for all type creators, supports creation of {@link Type}
+ */
+export abstract class TypeCreator {
     internal typ: Type | null = null // not null if already created
     internal ctxItemPtr: long = 0 // resides in ctx, no need to free
 
+    /**
+     * Forces creation of `this` creator and creators it depends on
+     * @returns created Type instance
+     */
     public create(): Type throws {
         if (this.typ == null) {
             const ctx = new TypeCreatorCtx()
@@ -107,23 +129,39 @@ export /* abstract */ class TypeCreator {
         return this.typ!
     }
 
-    internal /* abstract */ collectTypes(collector: CollectTypesCB): void throws {
-        throw new Error("es2panda doesn't allow two abstract classes in overload")
-    }
-    internal /* abstract */ declare(ctx: TypeCreatorCtx): void throws {
-        throw new Error("es2panda doesn't allow two abstract classes in overload")
-    }
-    internal /* abstract */ define(ctx: TypeCreatorCtx): void throws {
-        throw new Error("es2panda doesn't allow two abstract classes in overload")
-    }
+    /**
+     * Traverses all types on which this `TypeCreator` depends
+     * @param collector callback to be called with every type
+     */
+    internal abstract collectTypes(collector: CollectTypesCB): void throws
 
+    /**
+     * Must declare up to the point where future type descriptor is determinated
+     * @param ctx current context
+     */
+    internal abstract declare(ctx: TypeCreatorCtx): void throws
+
+    /**
+     * Defines rest of the body, called after {@link declare}
+     * @param ctx current context
+     */
+    internal abstract define(ctx: TypeCreatorCtx): void throws
+
+    /** Makes class sealed in stdlib */
     internal constructor() {}
 
+    /**
+     * Functions that verifies that this can be modified
+     */
     protected checkNotCreated(): void throws {
         if (this.typ != null) throw new TypeAPICreateException("type already created, no modifications allowed")
     }
 
-    internal descriptor(): string {
+    /**
+     * @returns type descriptor that created type will habe
+     * @note will be called only after {@link define}
+     */
+    internal getTypeDescriptor(): string {
         if (this.typ != null) {
             return this.typ!.td
         }
@@ -132,13 +170,25 @@ export /* abstract */ class TypeCreator {
     }
 }
 
+/**
+ * semantically same as Type | TypeCreator, but provides unified way to get descriptor
+ */
 abstract class TypeOrCreator {
-    abstract descriptor(): string
+    /**
+     * @returns type descriptor or future type descriptor
+     */
+    abstract getTypeDescriptor(): string
 
+    /**
+     * @returns created {@link TypeOrCreator_Type}
+     */
     static from(typ: Type): TypeOrCreator {
         return new TypeOrCreator_Type(typ)
     }
 
+    /**
+     * @returns created {@link TypeOrCreator_Creator} or TypeOrCreator_Type if it was already created
+     */
     static from(typ: TypeCreator): TypeOrCreator {
         if (typ.typ != null) {
             return new TypeOrCreator_Type(typ.typ!)
@@ -150,7 +200,7 @@ abstract class TypeOrCreator {
 final class TypeOrCreator_Type extends TypeOrCreator {
     private typ: Type
 
-    override descriptor(): string {
+    override getTypeDescriptor(): string {
         return this.typ.td
     }
 
@@ -162,8 +212,8 @@ final class TypeOrCreator_Type extends TypeOrCreator {
 final class TypeOrCreator_Creator extends TypeOrCreator {
     typ: TypeCreator
 
-    override descriptor(): string {
-        return this.typ.descriptor()
+    override getTypeDescriptor(): string {
+        return this.typ.getTypeDescriptor()
     }
 
     constructor(typ: TypeCreator) {
@@ -171,8 +221,9 @@ final class TypeOrCreator_Creator extends TypeOrCreator {
     }
 }
 
-class TypeCreatorCtx {
+final class TypeCreatorCtx {
     internal ctxPtr: long
+    /** all objects that were passed to cpp code as their ids (indexes in this `Array`) */
     private objects: MArray<Object> = new MArray<Object>();
 
     private static native createCtx(): long
@@ -183,7 +234,7 @@ class TypeCreatorCtx {
 
     internal static native getTypeDescFromPointer(ctxItemPtr: long): string
 
-    internal static native classCreate(ctxPtr: long, name: string): long
+    internal static native classCreate(ctxPtr: long, name: string, attrs: int): long
     internal static native classSetBase(classPtr: long, base: TypeDesc): string | null
     internal static native classAddIface(classPtr: long, iface: TypeDesc): string | null
     internal static native classAddField(classPtr: long, name: string, field: TypeDesc, attrs: int, access: int): string | null
@@ -191,14 +242,14 @@ class TypeCreatorCtx {
     internal static native interfaceCreate(ctxPtr: long, name: string): long
     internal static native interfaceAddBase(ifacePtr: long, base: TypeDesc): string | null
 
-    internal static native lambdaTypeCreate(ctxPtr: long): long
-    internal static native lambdaTypeAddParam(ftPtr: long, param: TypeDesc): string | null
+    internal static native lambdaTypeCreate(ctxPtr: long, attrs: int): long
+    internal static native lambdaTypeAddParam(ftPtr: long, param: TypeDesc, attrs: int): string | null
     internal static native lambdaTypeAddResult(ftPtr: long, result: TypeDesc): string | null
     internal static native lambdaTypeAdd(ftPtr: long): string | null
 
     internal static native methodCreate(ctxItemPtr: long, name: string, attrs: int): long
     internal static native methodAddAccessMod(methPtr: long, access: int): string | null
-    internal static native methodAddParam(methPtr: long, td: TypeDesc): string | null
+    internal static native methodAddParam(methPtr: long, td: TypeDesc, name: string, attrs: int): string | null
     internal static native methodAddResult(methPtr: long, result: TypeDesc): string | null
     internal static native methodAddBodyFromMethod(methPtr: long, meth: string): string | null
     internal static native methodAddBodyFromLambda(methPtr: long, id: int, lambdaType: TypeDesc): string | null
@@ -206,10 +257,19 @@ class TypeCreatorCtx {
     internal static native methodAddBodyDefault(methPtr: long): string | null
     internal static native methodAdd(methPtr: long): string | null
 
+    /**
+     * checks that context is errorneous
+     * used after long-returning types (that can't throw an exception explicitly)
+     */
     internal checkError(): void throws {
         this.checkError(TypeCreatorCtx.getError(this.ctxPtr))
     }
 
+    /**
+     * Checks for error if pointer is invalid
+     * @param ptr pointer to one of items allocated in the context
+     * @returns `ptr`
+     */
     internal checkCtxItemPtr(ptr: long): long throws {
         if (ptr == 0) {
             this.checkError()
@@ -217,22 +277,32 @@ class TypeCreatorCtx {
         return ptr
     }
 
+    /**
+     * Cleans up offheap memory for this context.
+     * Must be called.
+     */
     internal deinit(): void {
         assert this.ctxPtr != 0
         TypeCreatorCtx.destroyCtx(this.ctxPtr)
         this.ctxPtr = 0
     }
 
+    /** default constructor */
     internal constructor() {
         this.ctxPtr = TypeCreatorCtx.createCtx()
     }
 
+    /**
+     * Runs entire type creation routine, including all types collection
+     * @param first creator with must be created
+     */
     public create(first: TypeCreator): void throws {
         const all = new MSet<TypeCreator>()
         const visited = new MSet<TypeCreator>()
 
         const order = new MArray<TypeCreator>()
 
+        // bfs traverser
         const push: CollectTypesCB = (tc: TypeOrCreator): void => {
             if (tc instanceof TypeOrCreator_Type) {
                 return
@@ -250,6 +320,7 @@ class TypeCreatorCtx {
 
         push(new TypeOrCreator_Creator(first))
 
+        // bfs
         let was = true
         while (was) {
             was = false
@@ -265,6 +336,7 @@ class TypeCreatorCtx {
             }
         }
 
+        // reversing list
         for (let i = 0; i < order.length() / 2; i++) {
             const j = order.length() - 1 - i
             const tmp = order.at(i)
@@ -272,10 +344,12 @@ class TypeCreatorCtx {
             order.set(j, tmp)
         }
 
+        // forward declare all entities
         for (let i = 0; i < order.length(); i++) {
             order.at(i).declare(this)
         }
 
+        // defines all entities (i.e. provides bodies)
         for (let i = 0; i < order.length(); i++) {
             order.at(i).define(this)
         }
@@ -284,18 +358,28 @@ class TypeCreatorCtx {
 
         this.checkError(TypeCreatorCtx.commit(this.ctxPtr, this.objects.toArray() as Object[]))
 
+        // assignes actual runtime types to all creators
         for (let i = 0; i < order.length(); i++) {
             const tc = order.at(i)
             tc.typ = Type.resolve(TypeCreatorCtx.getTypeDescFromPointer(tc.ctxItemPtr))
         }
     }
 
+    /**
+     * Saves object that is used in generated code.
+     * Example: lambdas of body methods.
+     * @returns id of saved object that can be passed to runtime intrinsics
+     */
     internal registerObject(o: Object): int throws {
         const r = this.objects.length()
         this.objects.push(o)
         return r
     }
 
+    /**
+     * Checks if ctx function returned an error
+     * @throws TypeAPICreateException if error was found
+     */
     internal checkError(arg: string | null): void throws {
         if (arg != null) {
             throw new TypeAPICreateException(arg as string)
@@ -303,84 +387,87 @@ class TypeCreatorCtx {
     }
 }
 
-function addMethodToCtxItemPtr(ctx: TypeCreatorCtx, classPtr: long, m: MethodCreator): void throws {
-    const fptr = ctx.checkCtxItemPtr(TypeCreatorCtx.methodCreate(classPtr, m.name, m.attrs.get()))
-    ctx.checkError(TypeCreatorCtx.methodAddAccessMod(fptr, m.accessMod.get()))
-    for (let a = 0; a < m.params.length(); a++) {
-        ctx.checkError(TypeCreatorCtx.methodAddParam(fptr, m.params.at(a).descriptor()))
-    }
-    ctx.checkError(TypeCreatorCtx.methodAddResult(fptr, m.result.descriptor()))
-    const isAbstract = m.attrs.has(Attributes.ABSTRACT)
-    const hasBody = m.body != null
-    if (isAbstract == hasBody) {
-        ctx.checkError("only and only abstract methods don't have a body; abstract = " + isAbstract + "; body = " + (m.body == null ? "null" : m.body.toString()))
-    }
-    if (!isAbstract) {
-        const body = m.body!
-        if (body instanceof CallableBodyMethod) {
-            ctx.checkError(TypeCreatorCtx.methodAddBodyFromMethod(fptr, (body as CallableBodyMethod).body.getTD()))
-        } else if (body instanceof CallableBodyFunction) {
-            const bbody = (body as CallableBodyFunction).body
-            const id = ctx.registerObject(bbody as Object);
-            ctx.checkError(TypeCreatorCtx.methodAddBodyFromLambda(fptr, id, Type.of(bbody).td))
-        } else if (body instanceof CallableBodyErasedFunction) {
-            const bbody = (body as CallableBodyErasedFunction).body
-            const id = ctx.registerObject(bbody as Object);
-            ctx.checkError(TypeCreatorCtx.methodAddBodyFromErasedLambda(fptr, id))
-        } else if (body instanceof CallableBodyDefault) {
-            ctx.checkError(TypeCreatorCtx.methodAddBodyDefault(fptr))
-        } else {
-            throw new TypeAPICreateException("body not supported" + m.body)
-        }
-    }
-    ctx.checkError(TypeCreatorCtx.methodAdd(fptr))
-}
-
+/**
+ * Creator for {@link ClassType}
+ */
 export final class ClassTypeCreator extends TypeCreator {
     private base: TypeOrCreator = TypeOrCreator.from(ObjectType)
     private name: string
     private ifaces: MArray<TypeOrCreator> = new MArray<TypeOrCreator>()
     private fields: MArray<FieldCreator> = new MArray<FieldCreator>()
     private methods: MArray<MethodCreator> = new MArray<MethodCreator>()
+    private attrs: HasAttributes = new HasAttributes(new FreezableCreator(this), AllowedAttributes.CLASS)
 
+    /**
+     * @param name fully qualified name of class type, can include only [A-Za-z0-9_.]
+     */
     public constructor(name: string) {
         super()
         this.name = name
     }
 
+    /**
+     * Forces creation of `this` creator and creators it depends on
+     * @returns created Type instance
+     */
     public override create(): ClassType throws {
         return super.create() as ClassType
     }
 
-    public addBase(base: ClassType): ClassTypeCreator throws {
+    /**
+     * Sets base class (super, that in ets follows `extends` keyword)
+     * @param base new base
+     * @returns this
+     */
+    public addBaseType(base: ClassType): ClassTypeCreator throws {
         this.checkNotCreated()
         this.base = TypeOrCreator.from(base)
         return this;
     }
 
-    public addBase(base: ClassTypeCreator): ClassTypeCreator throws {
+    /**
+     * Sets base class (super, that in ets follows `extends` keyword)
+     * @param base new base
+     * @returns this
+     */
+    public addBaseType(base: ClassTypeCreator): ClassTypeCreator throws {
         this.checkNotCreated()
         this.base = TypeOrCreator.from(base)
         return this;
     }
 
+    /**
+     * Adds implemented interface (in ets it follows `implements` keyword)
+     * @param iface interface to implement
+     * @returns this
+     */
     public addInterface(iface: InterfaceType): ClassTypeCreator throws {
         this.ifaces.push(TypeOrCreator.from(iface))
         return this;
     }
 
+    /**
+     * Adds implemented interface (in ets it follows `implements` keyword)
+     * @param iface interface to implement
+     * @returns this
+     */
     public addInterface(iface: InterfaceTypeCreator): ClassTypeCreator throws {
         this.ifaces.push(TypeOrCreator.from(iface))
         return this;
     }
 
+    /**
+     * Adds field
+     * @param fld field to add
+     * @returns this
+     */
     public addField(fld: FieldCreator): ClassTypeCreator throws {
         fld.frozen.freeze()
         this.fields.push(fld)
         return this;
     }
 
-    internal /* override */ collectTypes(collector: CollectTypesCB): void throws {
+    internal override collectTypes(collector: CollectTypesCB): void throws {
         collector(this.base)
         for (let i = 0; i < this.ifaces.length(); i++) {
             collector(this.ifaces.at(i))
@@ -392,87 +479,142 @@ export final class ClassTypeCreator extends TypeCreator {
             const m = this.methods.at(i)
             collector(m.result)
             for (let i = 0; i < m.params.length(); i++) {
-                collector(m.params.at(i))
+                collector(m.params.at(i).typ)
             }
         }
     }
 
-    internal /* override */ declare(ctx: TypeCreatorCtx): void throws {
+    internal override declare(ctx: TypeCreatorCtx): void throws {
         assert this.ctxItemPtr == 0
-        this.ctxItemPtr = ctx.checkCtxItemPtr(TypeCreatorCtx.classCreate(ctx.ctxPtr, this.name))
+        this.ctxItemPtr = ctx.checkCtxItemPtr(TypeCreatorCtx.classCreate(ctx.ctxPtr, this.name, this.attrs.get()))
     }
 
-    internal /* override */ define(ctx: TypeCreatorCtx): void throws {
+    internal override define(ctx: TypeCreatorCtx): void throws {
         const classPtr = this.ctxItemPtr
-        ctx.checkError(TypeCreatorCtx.classSetBase(classPtr, this.base.descriptor()))
+        ctx.checkError(TypeCreatorCtx.classSetBase(classPtr, this.base.getTypeDescriptor()))
         for (let i = 0; i < this.ifaces.length(); i++) {
-            ctx.checkError(TypeCreatorCtx.classAddIface(classPtr, this.ifaces.at(i).descriptor()))
+            ctx.checkError(TypeCreatorCtx.classAddIface(classPtr, this.ifaces.at(i).getTypeDescriptor()))
         }
         for (let i = 0; i < this.fields.length(); i++) {
             const f = this.fields.at(i);
-            ctx.checkError(TypeCreatorCtx.classAddField(classPtr, f.name, f.typ.descriptor(), f.attrs.get(), f.accessMod.get()))
+            ctx.checkError(TypeCreatorCtx.classAddField(classPtr, f.name, f.typ.getTypeDescriptor(), f.attrs.get(), f.accessMod.get()))
         }
         for (let i = 0; i < this.methods.length(); i++) {
             const m = this.methods.at(i)
-            addMethodToCtxItemPtr(ctx, classPtr, m)
+            m.addToCtxItemPtr(ctx, classPtr)
         }
     }
 
+    /**
+     * Adds method
+     * @param mb method to add
+     * @returns this
+     * @note prevents future modifications of `mb`
+     */
     public addMethod(mb: MethodCreator): ClassTypeCreator throws {
         mb.frozen.freeze()
         this.methods.push(mb)
         return this;
     }
+
+    /**
+     * Sets all provided attributes to `true`
+     * @param attrs attribute to set
+     * @returns this
+     */
+    public addAttributes(attrs: int): ClassTypeCreator throws {
+        this.attrs.add(attrs)
+        return this;
+    }
+
+    /**
+     * Adds attribute with same name
+     * @returns this
+     */
+    public addFinal(): ClassTypeCreator throws {
+        this.attrs.add(Attributes.FINAL, true)
+    }
 }
 
+/**
+ * Creator for {@link InterfaceType}
+ */
 export final class InterfaceTypeCreator extends TypeCreator {
     private name: string
     private bases: MArray<TypeOrCreator> = new MArray<TypeOrCreator>()
     private methods: MArray<MethodCreator> = new MArray<MethodCreator>()
 
+    /**
+     * @param name name of interface
+     * @see ClassTypeCreator.constructor
+     */
     public constructor(name: string) {
         super()
         this.name = name
     }
 
+    /**
+     * Forces creation of `this` creator and creators it depends on
+     * @returns created Type instance
+     */
     public override create(): InterfaceType throws {
         return super.create() as InterfaceType
     }
 
-    public addBase(base: InterfaceType): InterfaceTypeCreator throws {
+    /**
+     * Adds implemented interface (in ets it follows `extends` keyword)
+     * @param iface interface to implement
+     * @returns this
+     */
+    public addInterface(base: InterfaceType): InterfaceTypeCreator throws {
         this.checkNotCreated()
         this.bases.push(TypeOrCreator.from(base))
         return this;
     }
 
-    public addBase(base: InterfaceTypeCreator): InterfaceTypeCreator throws {
+    /**
+     * Adds implemented interface (in ets it follows `extends` keyword)
+     * @param iface interface to implement
+     * @returns this
+     */
+    public addInterface(base: InterfaceTypeCreator): InterfaceTypeCreator throws {
         this.checkNotCreated()
         this.bases.push(TypeOrCreator.from(base))
         return this;
     }
 
+    /**
+     * Adds getter and optionally setter to `this` interface
+     * @param fld property description
+     * @returns this
+     */
     public addField(fld: FieldCreator): InterfaceTypeCreator throws {
-        const getter = new MethodCreator(fld.name).addResult(fld.typ)
+        const getter = new MethodCreator(fld.name).addResult(fld.typ).addGetter()
         this.addMethod(getter)
         if (!fld.attrs.has(Attributes.READONLY)) {
-            const setter = new MethodCreator(fld.name).addParameter(fld.typ)
+            const setter = new MethodCreator(fld.name).addParameter(new ParameterCreator(fld.typ)).addSetter()
             this.addMethod(setter)
         }
         return this;
     }
 
+    /**
+     * Adds method to `this` interface
+     * @param mc method to add
+     * @returns this
+     */
     public addMethod(mc: MethodCreator): InterfaceTypeCreator throws {
         if ((mc.attrs.has(Attributes.STATIC))) {
             throw new TypeAPICreateException("interface can't have static method " + mc)
         }
-        mc.addAttributes(Attributes.ABSTRACT)
+        mc.addAbstract()
         mc.addAccessModifier(AccessModifier.PUBLIC)
         mc.frozen.freeze()
         this.methods.push(mc)
         return this;
     }
 
-    internal /* override */ collectTypes(collector: CollectTypesCB): void throws {
+    internal override collectTypes(collector: CollectTypesCB): void throws {
         for (let i = 0; i < this.bases.length(); i++) {
             collector(this.bases.at(i))
         }
@@ -480,107 +622,199 @@ export final class InterfaceTypeCreator extends TypeCreator {
             const m = this.methods.at(i)
             collector(m.result)
             for (let i = 0; i < m.params.length(); i++) {
-                collector(m.params.at(i))
+                collector(m.params.at(i).typ)
             }
         }
     }
 
-    internal /* override */ define(ctx: TypeCreatorCtx): void throws {
+    internal override define(ctx: TypeCreatorCtx): void throws {
         const classPtr = this.ctxItemPtr
         for (let i = 0; i < this.bases.length(); i++) {
-            ctx.checkError(TypeCreatorCtx.interfaceAddBase(classPtr, this.bases.at(i).descriptor()))
+            ctx.checkError(TypeCreatorCtx.interfaceAddBase(classPtr, this.bases.at(i).getTypeDescriptor()))
         }
         for (let i = 0; i < this.methods.length(); i++) {
             const m = this.methods.at(i)
-            addMethodToCtxItemPtr(ctx, classPtr, m)
+            m.addToCtxItemPtr(ctx, classPtr)
         }
     }
 
-    internal /* override */ declare(ctx: TypeCreatorCtx): void throws {
+    internal override declare(ctx: TypeCreatorCtx): void throws {
         assert this.ctxItemPtr == 0
         this.ctxItemPtr = ctx.checkCtxItemPtr(TypeCreatorCtx.interfaceCreate(ctx.ctxPtr, this.name))
     }
 }
 
+/**
+ * Creator for {@link LambdaType}
+ */
 export final class LambdaTypeCreator extends TypeCreator {
-    internal params: MArray<TypeOrCreator> = new MArray<TypeOrCreator>();
+    internal params: MArray<ParameterCreator> = new MArray<ParameterCreator>();
     internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF)
+    private attrs: HasAttributes = new HasAttributes(new FreezableCreator(this), AllowedAttributes.LAMBDA)
 
+    /** default constructor */
     public constructor() {}
 
+    /**
+     * Forces creation of `this` creator and creators it depends on
+     * @returns created Type instance
+     */
     public override create(): LambdaType throws {
         return super.create() as LambdaType
     }
 
-    public addParameter(typ: Type): LambdaTypeCreator throws {
-        return this.addParameter(TypeOrCreator.from(typ));
-    }
-
-    public addParameter(typ: TypeCreator): LambdaTypeCreator throws {
-        return this.addParameter(TypeOrCreator.from(typ));
-    }
-
-    internal addParameter(typ: TypeOrCreator): LambdaTypeCreator throws {
+    /**
+     * Appends parameter to `this` type
+     * @param param parameter to add
+     * @returns this
+     */
+    public addParameter(param: ParameterCreator): LambdaTypeCreator throws {
         this.checkNotCreated()
-        this.params.push(typ)
+        param.frozen.freeze()
+        if (param.name != null && param.name != '' + this.params.length()) {
+            throw new TypeAPICreateException("can't have such lambda parameter name")
+        }
+        this.params.push(param)
         return this;
     }
 
+    /**
+     * Sets result
+     * @param typ type of result
+     * @returns this
+     */
     public addResult(typ: Type): LambdaTypeCreator throws {
         return this.addResult(TypeOrCreator.from(typ));
     }
 
+    /**
+     * Sets result
+     * @param typ type of result
+     * @returns this
+     */
     public addResult(typ: TypeCreator): LambdaTypeCreator throws {
         return this.addResult(TypeOrCreator.from(typ));
     }
 
+    /**
+     * Sets result
+     * @param typ type of result
+     * @returns this
+     */
     internal addResult(typ: TypeOrCreator): LambdaTypeCreator throws {
         this.checkNotCreated()
         this.result = typ
         return this;
     }
 
-    internal /* override */ collectTypes(collector: CollectTypesCB): void throws {
+    /**
+     * Sets all provided attributes to `true`
+     * @param attrs attribute to set
+     * @returns this
+     */
+    public addAttributes(attrs: int): LambdaTypeCreator throws {
+        this.attrs.add(attrs)
+        return this;
+    }
+
+    /**
+     * Adds attribute with same name
+     * @returns this
+     */
+    public addThrowing(): LambdaTypeCreator throws {
+        this.attrs.add(Attributes.THROWING, true)
+    }
+
+    /**
+     * Adds attribute with same name
+     * @returns this
+     */
+    public addAsync(): LambdaTypeCreator throws {
+        this.attrs.add(Attributes.ASYNC, true)
+    }
+
+    internal override collectTypes(collector: CollectTypesCB): void throws {
         collector(this.result)
         for (let i = 0; i < this.params.length(); i++) {
-            collector(this.params.at(i))
+            collector(this.params.at(i).typ)
         }
     }
 
-    internal /* override */ declare(ctx: TypeCreatorCtx): void throws {
+    internal override declare(ctx: TypeCreatorCtx): void throws {
         assert this.ctxItemPtr == 0
-        const ftPtr = TypeCreatorCtx.lambdaTypeCreate(ctx.ctxPtr)
+        const ftPtr = TypeCreatorCtx.lambdaTypeCreate(ctx.ctxPtr, this.attrs.get())
         this.ctxItemPtr = ftPtr
         for (let i = 0; i < this.params.length(); i++) {
-            const td = this.params.at(i).descriptor()
-            ctx.checkError(TypeCreatorCtx.lambdaTypeAddParam(ftPtr, td))
+            const par = this.params.at(i)
+            ctx.checkError(TypeCreatorCtx.lambdaTypeAddParam(ftPtr, par.typ.getTypeDescriptor(), par.attrs.get()))
         }
-        ctx.checkError(TypeCreatorCtx.lambdaTypeAddResult(ftPtr, this.result.descriptor()))
+        ctx.checkError(TypeCreatorCtx.lambdaTypeAddResult(ftPtr, this.result.getTypeDescriptor()))
         ctx.checkError(TypeCreatorCtx.lambdaTypeAdd(ftPtr))
     }
 
-    internal /* override */ define(ctx: TypeCreatorCtx): void throws {
+    internal override define(ctx: TypeCreatorCtx): void throws {
     }
 }
 
-class Freezable {
-    frozen: boolean = false
+/**
+ * interface that is used to freeze creators
+ */
+interface Freezable {
+    isFrozen(): boolean;
+}
+
+/**
+ * Checks if modificatiosn are allowed
+ * @param freezable to check if modifications are allowed
+ * @throws TypeAPICreateException if it is frozen
+ */
+function checkNotFrozen(freezable: Freezable): void throws {
+    if (freezable.isFrozen()) {
+        throw new TypeAPICreateException("modifying frozen entity")
+    }
+}
+
+final class FreezableCreator implements Freezable {
+    private creator: TypeCreator
+
+    constructor(creator: TypeCreator) {
+        this.creator = creator
+    }
+
+    override isFrozen(): boolean {
+        return this.creator.typ != null
+    }
+}
+
+/**
+ * Freezable used in features. It stores a boolean flag
+ */
+final class FreezableImpl implements Freezable {
+    private frozen: boolean = false
+
+    override isFrozen(): boolean {
+        return this.frozen
+    }
 
     freeze(): void {
         this.frozen = true
     }
-
-    checkNotFrozen(): void throws {
-        if (this.frozen) { throw new TypeAPICreateException("modifying frozen entity") }
-    }
 }
 
+/**
+ * Storage for attributes
+ */
 class HasAttributes {
-    frozen: Freezable
-    attrs: int = 0
+    /** Freezable that prevents modification */
+    private frozen: Freezable
+    /** attributes */
+    private attrs: int = 0
+    /** attributes that can be modified */
+    private readonly allowed: int
 
-    constructor(frozen: Freezable) {
+    constructor(frozen: Freezable, allowed: int) {
         this.frozen = frozen
+        this.allowed = allowed
     }
 
     get(): int {
@@ -591,7 +825,13 @@ class HasAttributes {
         return (this.attrs & attr) != 0
     }
 
+    /**
+     * @enabled flag if attribute should be set to `true` or `false`
+     */
     add(attr: int, enabled: boolean): void throws {
+        if ((attr & this.allowed) != attr) {
+            throw new TypeAPICreateException("disallowed attribute")
+        }
         let newAttributes = this.attrs
         if (enabled) {
             newAttributes |= attr
@@ -599,19 +839,28 @@ class HasAttributes {
             newAttributes &= ~attr
         }
         if (this.attrs != newAttributes) {
-            this.frozen.checkNotFrozen()
+            checkNotFrozen(this.frozen)
         }
         this.attrs = newAttributes
     }
 
+    /**
+     * @params attributes to be added
+     */
     add(attrs: int): void throws {
-        if ((this.attrs & attrs) != attrs) {
-            this.frozen.checkNotFrozen()
+        if ((attrs & this.allowed) != attrs) {
+            throw new TypeAPICreateException("disallowed attributes")
         }
-        this.attrs |= attrs
+        if ((this.attrs & attrs) != attrs) {
+            checkNotFrozen(this.frozen)
+        }
+        this.attrs = attrs
     }
 }
 
+/**
+ * Storage for access modifier
+ */
 class HasAccessMod {
     frozen: Freezable
     accessMod: int = AccessModifier.PUBLIC
@@ -628,132 +877,341 @@ class HasAccessMod {
         if (this.accessMod == accessMod) {
             return
         }
-        this.frozen.checkNotFrozen()
+        checkNotFrozen(this.frozen)
         this.accessMod = accessMod
     }
 }
 
+/**
+ * Creator for {@link Field}. Must be used as a part of {@link TypeCreator}.
+ */
 export final class FieldCreator {
     internal name: string
     internal typ: TypeOrCreator
-    internal frozen: Freezable = new Freezable()
-    internal attrs: HasAttributes = new HasAttributes(this.frozen)
+    internal frozen: FreezableImpl = new FreezableImpl()
+    internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.FIELD)
     internal accessMod: HasAccessMod = new HasAccessMod(this.frozen)
 
+    /**
+     * @param name new field name
+     * @param typ new field type
+     */
     public constructor(name: string, typ: Type) {
         this.name = name
         this.typ = TypeOrCreator.from(typ)
     }
 
+    /**
+     * @param name new field name
+     * @param typ new field type
+     */
     public constructor(name: string, typ: TypeCreator) {
         this.name = name
         this.typ = TypeOrCreator.from(typ)
     }
 
-    public addAttribute(attr: int, enabled: boolean): FieldCreator throws {
-        this.attrs.add(attr, enabled)
-        return this;
-    }
+    /**
+     * Sets all provided attributes to `true`
+     * @param attrs attribute to set
+     * @returns this
+     */
     public addAttributes(attrs: int): FieldCreator throws {
         this.attrs.add(attrs)
         return this;
     }
 
+    /**
+     * Sets access modifier to provided
+     * @param accessMod new access modifier
+     * @returns this
+     */
     public addAccessModifier(accessMod: int): FieldCreator throws {
         this.accessMod.set(accessMod);
         return this;
     }
 }
 
+/**
+ * Creator for {@link Parameter}. Must be used as a part of {@link MethodCreator}.
+ */
+export final class ParameterCreator {
+    internal typ: TypeOrCreator
+    internal name: string | null = null
+    internal frozen: FreezableImpl = new FreezableImpl()
+    internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.PARAMETER)
+
+    /**
+     * @param parameter type
+     */
+    public constructor(typ: Type) {
+        this(TypeOrCreator.from(typ))
+    }
+
+    /**
+     * @param parameter type
+     * @param name name of parameter
+     */
+    public constructor(typ: Type, name: string) {
+        this(TypeOrCreator.from(typ))
+        this.name = name
+    }
+
+    /**
+     * @param parameter type
+     */
+    public constructor(typ: TypeCreator) {
+        this(TypeOrCreator.from(typ))
+    }
+
+    /**
+     * @param parameter type
+     */
+    internal constructor(typ: TypeOrCreator) {
+        this.typ = typ
+    }
+
+    /**
+     * @param name sets parameter name
+     * @note by default name is index of parameter
+     */
+    public addName(name: string): ParameterCreator throws {
+        this.name = name
+        return this;
+    }
+
+    /**
+     * Sets all provided attributes to `true`
+     * @param attrs attribute to set
+     * @returns this
+     */
+    public addAttributes(attrs: int): ParameterCreator throws {
+        this.attrs.add(attrs)
+        return this;
+    }
+
+    /**
+     * Adds attribute with same name
+     * @returns this
+     */
+    public addRest(): ParameterCreator throws {
+        this.attrs.add(Attributes.REST, true)
+        return this;
+    }
+
+    /**
+     * Adds attribute with same name
+     * @returns this
+     */
+    public addOptional(): ParameterCreator throws {
+        this.attrs.add(Attributes.OPTIONAL, true)
+        return this;
+    }
+}
+
+/**
+ * Creator for {@link Method}. Must be used as a part of {@link ClassTypeCreator} or {@link InterfaceTypeCreatpr}.
+ */
 export final class MethodCreator {
     internal name: string
-    internal params: MArray<TypeOrCreator> = new MArray<TypeOrCreator>();
+    internal params: MArray<ParameterCreator> = new MArray<ParameterCreator>();
     internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF)
     internal body: CallableBody | null = null
-    internal frozen: Freezable = new Freezable()
-    internal attrs: HasAttributes = new HasAttributes(this.frozen)
+    internal frozen: FreezableImpl = new FreezableImpl()
+    internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.METHOD)
     internal accessMod: HasAccessMod = new HasAccessMod(this.frozen)
 
+    /**
+     * @param name method name, which can contain [a-zA-Z0-9] and be a valid identifier
+     */
     public constructor(name: string) {
         this.name = name
     }
 
+    /**
+     * Adds body to method
+     * @param body new body; null can be used in abstract methods
+     */
     public addBody(body: CallableBody | null): MethodCreator throws {
-        this.frozen.checkNotFrozen()
+        checkNotFrozen(this.frozen)
         this.body = body
         return this;
     }
 
-    public addParameter(typ: Type): MethodCreator throws {
-        return this.addParameter(TypeOrCreator.from(typ));
-    }
-
-    public addParameter(typ: TypeCreator): MethodCreator throws {
-        return this.addParameter(TypeOrCreator.from(typ));
-    }
-
-    public addParameter(typ: TypeOrCreator): MethodCreator throws {
-        this.frozen.checkNotFrozen()
-        this.params.push(typ)
+    /**
+     * Appends parameter to `this` method type
+     * @param param parameter to add
+     * @returns this
+     */
+    public addParameter(param: ParameterCreator): MethodCreator throws {
+        checkNotFrozen(this.frozen)
+        param.frozen.freeze()
+        this.params.push(param)
         return this;
     }
 
+    /**
+     * Sets result
+     * @param typ type of result
+     * @returns this
+     */
     public addResult(typ: Type): MethodCreator throws {
         return this.addResult(TypeOrCreator.from(typ))
     }
 
+    /**
+     * Sets result
+     * @param typ type of result
+     * @returns this
+     */
     public addResult(typ: TypeCreator): MethodCreator throws {
         return this.addResult(TypeOrCreator.from(typ))
     }
 
+    /**
+     * Sets result
+     * @param typ type of result
+     * @returns this
+     */
     internal addResult(typ: TypeOrCreator): MethodCreator throws {
-        this.frozen.checkNotFrozen()
+        checkNotFrozen(this.frozen)
         this.result = typ
         return this;
     }
 
-
-    public addAttribute(attr: int, enabled: boolean): MethodCreator throws {
-        this.attrs.add(attr, enabled)
-        return this;
-    }
-
+    /**
+     * Sets all provided attributes to `true`
+     * @param attrs attribute to set
+     * @returns this
+     */
     public addAttributes(attrs: int): MethodCreator throws {
         this.attrs.add(attrs)
         return this;
     }
 
+    /**
+     * Adds attribute with same name
+     * @returns this
+     */
     public addConstructor(): MethodCreator throws {
         return this.addConstructor(true)
     }
 
+    /**
+     * Adds attribute with same name
+     * @returns this
+     */
     public addConstructor(isCtor: boolean): MethodCreator throws {
-        return this.addAttribute(Attributes.CONSTRUCTOR, isCtor);
+        this.attrs.add(Attributes.CONSTRUCTOR, isCtor);
+        return this;
     }
 
+    /**
+     * Adds attribute with same name
+     * @returns this
+     */
     public addStatic(isStatic: boolean): MethodCreator throws {
-        return this.addAttribute(Attributes.STATIC, isStatic);
+        this.attrs.add(Attributes.STATIC, isStatic);
+        return this;
     }
 
+    /**
+     * Adds attribute with same name
+     * @returns this
+     */
+    public addGetter(): MethodCreator throws {
+        this.attrs.add(Attributes.GETTER, true)
+        return this;
+    }
 
+    /**
+     * Adds attribute with same name
+     * @returns this
+     */
+    public addSetter(): MethodCreator throws {
+        this.attrs.add(Attributes.SETTER, true)
+        return this;
+    }
+
+    /**
+     * Adds attribute with same name
+     * @returns this
+     */
+    public addAbstract(): MethodCreator throws {
+        this.attrs.add(Attributes.ABSTRACT, true)
+        return this;
+    }
+
+    /**
+     * Sets access modifier to provided
+     * @param accessMod new access modifier
+     * @returns this
+     */
     public addAccessModifier(accessMod: int): MethodCreator throws {
         this.accessMod.set(accessMod);
         return this;
     }
+
+    /**
+     * adds method to interface or class
+     */
+    internal addToCtxItemPtr(ctx: TypeCreatorCtx, classOrIfacePtr: long): void throws {
+        const fptr = ctx.checkCtxItemPtr(TypeCreatorCtx.methodCreate(classOrIfacePtr, this.name, this.attrs.get()))
+        ctx.checkError(TypeCreatorCtx.methodAddAccessMod(fptr, this.accessMod.get()))
+        for (let a = 0; a < this.params.length(); a++) {
+            const par = this.params.at(a)
+            let name = par.name == null ? '' + a : par.name
+            ctx.checkError(TypeCreatorCtx.methodAddParam(fptr, par.typ.getTypeDescriptor(), name, par.attrs.get()))
+        }
+        ctx.checkError(TypeCreatorCtx.methodAddResult(fptr, this.result.getTypeDescriptor()))
+        const isAbstract = this.attrs.has(Attributes.ABSTRACT)
+        const hasBody = this.body != null
+        if (isAbstract == hasBody) {
+            ctx.checkError("only and only abstract methods don't have a body; abstract = " + isAbstract + "; body = " + (this.body == null ? "null" : this.body.toString()))
+        }
+        if (!isAbstract) {
+            const body = this.body!
+            if (body instanceof CallableBodyMethod) {
+                ctx.checkError(TypeCreatorCtx.methodAddBodyFromMethod(fptr, (body as CallableBodyMethod).body.getTD()))
+            } else if (body instanceof CallableBodyFunction) {
+                const bbody = (body as CallableBodyFunction).body
+                const id = ctx.registerObject(bbody as Object);
+                ctx.checkError(TypeCreatorCtx.methodAddBodyFromLambda(fptr, id, Type.of(bbody).td))
+            } else if (body instanceof CallableBodyErasedFunction) {
+                const bbody = (body as CallableBodyErasedFunction).body
+                const id = ctx.registerObject(bbody as Object);
+                ctx.checkError(TypeCreatorCtx.methodAddBodyFromErasedLambda(fptr, id))
+            } else if (body instanceof CallableBodyDefault) {
+                ctx.checkError(TypeCreatorCtx.methodAddBodyDefault(fptr))
+            } else {
+                throw new TypeAPICreateException("body not supported" + this.body)
+            }
+        }
+        ctx.checkError(TypeCreatorCtx.methodAdd(fptr))
+    }
 }
 
+/**
+ * Type that abstracts all supported function/lambda/method body-types
+ */
 export class CallableBody {
+    /** Makes class package-sealed */
     internal constructor() {}
 }
 
+/**
+ * Represents default body: does nothing for regular constructors (returns default value).
+ */
 export final class CallableBodyDefault extends CallableBody {
     public static readonly INSTANCE = new CallableBodyDefault()
 
     public constructor() {}
 }
 
+/**
+ * Represents call to other method with forwarding all arguments as-is
+ */
 export final class CallableBodyMethod extends CallableBody {
-    internal body: Method
+    internal readonly body: Method
 
     public constructor(m: Method) {
         super()
@@ -761,9 +1219,17 @@ export final class CallableBodyMethod extends CallableBody {
     }
 }
 
+/**
+ * Represents call to lambda with forwarding all arguments as-is
+ */
 export final class CallableBodyFunction extends CallableBody {
-    internal body: Object
+    internal readonly body: Object
 
+    /**
+     * @param m lambda to call
+     * @example new CallableBodyFunction((self: Object, i: int): void {} as Object)
+     * @note in case of instance methods zero argument is a reciever
+     */
     public constructor(m: Object) throws {
         super()
         if (!(Type.of(m) instanceof LambdaType)) {
@@ -773,10 +1239,13 @@ export final class CallableBodyFunction extends CallableBody {
     }
 }
 
+/**
+ * Represents call to lambda with boxing all arguments
+ */
 export final class CallableBodyErasedFunction extends CallableBody {
-    internal body: (args: Object[]) => Object
+    internal /* readonly */ body: (recv: NullishType, args: NullishType[]) => NullishType
 
-    public constructor(m: (args: Object[]) => Object) {
+    public constructor(m: (recv: NullishType, args: NullishType[]) => NullishType) {
         super()
         this.body = m
     }

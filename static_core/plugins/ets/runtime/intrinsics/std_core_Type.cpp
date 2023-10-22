@@ -514,28 +514,6 @@ EtsString *TypeAPIGetArrayElementType(EtsString *td)
     return EtsString::CreateFromMUtf8(arr_class->GetComponentType()->GetDescriptor());
 }
 
-EtsObject *TypeAPIMakeClassInstance(EtsString *td)
-{
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-
-    auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto type_class = class_linker->GetClass(td->GetMutf8().c_str());
-    VMHandle<EtsObject> obj_handle(coroutine, EtsObject::Create(type_class)->GetCoreType());
-    auto has_default_constr = false;
-    type_class->EnumerateMethods([&](EtsMethod *method) {
-        if (method->IsConstructor() && method->GetParametersNum() == 0) {
-            std::array<Value, 1> args {Value(obj_handle.GetPtr()->GetCoreType())};
-            method->GetPandaMethod()->InvokeVoid(EtsCoroutine::GetCurrent(), args.data());
-            has_default_constr = true;
-            return true;
-        }
-        return false;
-    });
-    ASSERT(has_default_constr);
-    return obj_handle.GetPtr();
-}
-
 EtsObject *TypeAPIMakeArrayInstance(EtsString *td, EtsLong len)
 {
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();

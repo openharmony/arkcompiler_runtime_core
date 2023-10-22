@@ -33,7 +33,7 @@ function main(): void throws {
 	creator
 		.addMethod(
 			new MethodCreator("i")
-				.addParameter(i32)
+				.addParameter(new ParameterCreator(i32))
 				.addResult(i32)
 				.addBody(new CallableBodyFunction(foo1 as Object))
 		)

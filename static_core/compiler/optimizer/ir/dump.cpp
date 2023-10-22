@@ -734,6 +734,10 @@ void Inst::DumpOpcode(std::ostream *out) const
     if (CanDeoptimize()) {
         flags += "D";
     }
+    if (GetFlag(inst_flags::MEM_BARRIER)) {
+        static constexpr auto FENCE = "F";
+        flags += FENCE;
+    }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
     (*out) << std::setw(INDENT_OPCODE) << opcode + space + flags;
 }

@@ -182,8 +182,7 @@ Scopes
 ******
 
 .. meta:
-    frontend_status: Partly
-    todo: there are some TBD in spec
+    frontend_status: Done
 
 The **scope** of a name is the region of program code within which the entity
 declared by that name can be referred to without the qualification of the name.
@@ -918,7 +917,7 @@ Parameter List
 ==============
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A signature contains a *parameter list* that specifies an identifier as
 each parameter name and a type of each parameter. Every parameter’s type must

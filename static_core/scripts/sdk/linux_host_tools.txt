@@ -14,6 +14,7 @@ lib/libarkruntime.so
 lib/libarkziparchive.so
 lib/libc_secshared.so
 lib/libes2panda-lib.so
+lib/libes2panda-public.so
 lib/libhmicui18n.z.so
 lib/libhmicuuc.z.so
 lib/libinit_icu.so

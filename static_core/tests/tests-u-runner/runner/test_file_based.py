@@ -32,6 +32,14 @@ class TestFileBased(Test):
     def ark_timeout(self) -> int:
         return int(self.test_env.config.ark.timeout)
 
+    @property
+    def runtime_args(self) -> List[str]:
+        return self.test_env.runtime_args
+
+    @property
+    def verifier_args(self) -> List[str]:
+        return self.test_env.verifier_args
+
     # pylint: disable=too-many-locals
     def run_one_step(self, name, params: Params, result_validator: ResultValidatorLambda) -> \
             Tuple[bool, TestReport, Optional[FailKind]]:
@@ -109,7 +117,7 @@ class TestFileBased(Test):
     def run_runtime(self, test_an, test_abc, result_validator: ResultValidatorLambda):
         ark_flags = []
         ark_flags.extend(self.ark_extra_options())
-        ark_flags.extend(self.test_env.runtime_args)
+        ark_flags.extend(self.runtime_args)
         if self.test_env.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
             ark_flags.extend(["--aot-files", test_an])
 

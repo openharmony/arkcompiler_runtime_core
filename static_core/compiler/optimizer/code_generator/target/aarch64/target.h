@@ -566,9 +566,6 @@ public:
     void EncodeRoundAway([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
     void EncodeRoundToPInf([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
 
-    void EncodeStringIndexOfAfter(Reg dst, Reg str, Reg character, Reg idx, Reg tmp, bool compression,
-                                  uint32_t length_offset, uint32_t data_offset, int32_t char_const_value) override;
-
     void EncodeReverseBytes(Reg dst, Reg src) override;
     void EncodeReverseBits(Reg dst, Reg src) override;
     void EncodeRotate(Reg dst, Reg src1, Reg src2, bool is_ror) override;
@@ -798,35 +795,6 @@ private:
 
     void EncodeCastCheckNaN(Reg dst, Reg src, LabelHolder::LabelId exit_id);
 
-    // helpers to split generation logic
-    void IndexOfHandleLatin1Case(Reg str, Reg character, Reg idx, Reg tmp, bool compression, uint32_t data_offset,
-                                 const vixl::aarch64::Register &tmp1, const vixl::aarch64::Register &tmp2,
-                                 const vixl::aarch64::Register &tmp3, vixl::aarch64::Label *label_found,
-                                 vixl::aarch64::Label *label_not_found);
-    void IndexOfHandleUtf16NormalCase(Reg str, Reg character, Reg idx, Reg tmp, bool compression, uint32_t data_offset,
-                                      const vixl::aarch64::Register &tmp1, const vixl::aarch64::Register &tmp2,
-                                      const vixl::aarch64::Register &tmp3, vixl::aarch64::Label *label_found,
-                                      vixl::aarch64::Label *label_not_found);
-    void IndexOfHandleSurrogateCase(Reg str, Reg character, Reg idx, Reg tmp, bool compression, uint32_t data_offset,
-                                    const vixl::aarch64::Register &tmp1, const vixl::aarch64::Register &tmp2,
-                                    const vixl::aarch64::Register &tmp3, vixl::aarch64::Label *label_found,
-                                    vixl::aarch64::Label *label_not_found);
-
-    void IndexOfHandleLatin1CaseMainLoop(Reg str, Reg character, Reg tmp, uint32_t data_offset,
-                                         const vixl::aarch64::Register &tmp1, const vixl::aarch64::Register &tmp2,
-                                         const vixl::aarch64::Register &tmp3, vixl::aarch64::Label *label_found,
-                                         vixl::aarch64::Label *label_not_found, vixl::aarch64::Label *label_small_loop);
-
-    void IndexOfHandleUtf16NormalCaseMainLoop(Reg str, Reg character, Reg tmp, uint32_t data_offset,
-                                              const vixl::aarch64::Register &tmp1, const vixl::aarch64::Register &tmp2,
-                                              const vixl::aarch64::Register &tmp3, vixl::aarch64::Label *label_found,
-                                              vixl::aarch64::Label *label_not_found,
-                                              vixl::aarch64::Label *label_small_loop);
-
-    void EncodeStringIndexOfAfterMainCase(Reg dst, Reg str, Reg character, Reg idx, Reg tmp,
-                                          const vixl::aarch64::Register &tmp1, const vixl::aarch64::Register &tmp2,
-                                          const vixl::aarch64::Register &tmp3, bool compression, uint32_t data_offset,
-                                          int32_t char_const_value, vixl::aarch64::Label *label_not_found);
     void EncodeFMod(Reg dst, Reg src0, Reg src1);
     void HandleChar(int32_t ch, const vixl::aarch64::Register &tmp, vixl::aarch64::Label *label_not_found,
                     vixl::aarch64::Label *label_uncompressed_string);

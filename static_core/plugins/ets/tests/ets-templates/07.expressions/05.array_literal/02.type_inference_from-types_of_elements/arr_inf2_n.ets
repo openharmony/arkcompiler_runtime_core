@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,11 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
 /*---
-desc: If a function has the return type of never, it means that it never returns.
-tags: [compile-only]
+desc: >-
+  If the type of the expression cannot be determined, then the type of the array
+  literal cannot be inferred, and a compile-time error occurs.
+tags: [compile-only, negative]
 ---*/
 
-function f(): never {
-    throw new Exception("error");
+{{c.decl}}
+
+function main() {
+    {{c.use|indent}}
 }
+{% endfor %}

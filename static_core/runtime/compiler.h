@@ -19,9 +19,6 @@
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "libpandabase/mem/code_allocator.h"
 #include "libpandabase/os/mutex.h"
-#include "runtime/compiler_queue_aged_counter_priority.h"
-#include "runtime/compiler_queue_interface.h"
-#include "runtime/compiler_queue_simple.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/hclass.h"
 #include "runtime/include/compiler_interface.h"
@@ -34,8 +31,9 @@
 #include "runtime/interpreter/frame.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
 #include "runtime/mem/tlab.h"
+#include "runtime/compiler_thread_pool_worker.h"
+#include "runtime/compiler_task_manager_worker.h"
 
-#include "runtime/thread_pool.h"
 #include "runtime/osr.h"
 
 namespace panda {
@@ -50,17 +48,6 @@ inline panda::Method *MethodCast(RuntimeInterface::MethodPtr method)
 
 struct ScopedMutatorLock : public os::memory::ReadLockHolder<MutatorLock> {
     ScopedMutatorLock() : os::memory::ReadLockHolder<MutatorLock>(*PandaVM::GetCurrent()->GetMutatorLock()) {}
-};
-
-class Compiler;
-
-class CompilerProcessor : public ProcessorInterface<CompilerTask, Compiler *> {
-public:
-    explicit CompilerProcessor(Compiler *compiler);
-    bool Process(CompilerTask &&task) override;
-
-private:
-    Compiler *compiler_;
 };
 
 class PANDA_PUBLIC_API ClassHierarchyAnalysisWrapper : public compiler::IClassHierarchyAnalysis {
@@ -636,29 +623,17 @@ public:
           runtime_iface_(runtime_iface)
     {
         no_async_jit_ = options.IsNoAsyncJit();
-
-        thread_pool_ = nullptr;
         if (options.IsArkAot()) {
             return;
         }
 
-        // TODO(ipanferov): Fix compiler usage with task manager
-        use_task_manager_ = false;
-        if (use_task_manager_) {
-            jit_task_queue_ = internal_allocator_->New<taskmanager::TaskQueue>(
-                taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskQueue::DEFAULT_PRIORITY);
-            ASSERT(jit_task_queue_ != nullptr);
+        if ((Runtime::GetTaskScheduler() == nullptr) || no_async_jit_) {
+            compiler_worker_ =
+                internal_allocator_->New<CompilerThreadPoolWorker>(internal_allocator_, this, no_async_jit_, options);
         } else {
-            queue_ = CreateJITTaskQueue(no_async_jit_ ? "simple" : options.GetCompilerQueueType(),
-                                        options.GetCompilerQueueMaxLength(), options.GetCompilerTaskLifeSpan(),
-                                        options.GetCompilerDeathCounterValue(), options.GetCompilerEpochDuration());
-            if (queue_ == nullptr) {
-                // Because of problems (no memory) in allocator
-                LOG(ERROR, COMPILER) << "Cannot create a compiler queue";
-                no_async_jit_ = true;
-            }
+            compiler_worker_ = internal_allocator_->New<CompilerTaskManagerWorker>(internal_allocator_, this);
         }
-        CreateWorker();
+        InitializeWorker();
         if (compiler::OPTIONS.WasSetCompilerDumpJitStatsCsv()) {
             jit_stats_ = internal_allocator_->New<compiler::JITStats>(internal_allocator_);
         }
@@ -666,22 +641,19 @@ public:
 
     void PreZygoteFork() override
     {
-        Destroy();
+        FinalizeWorker();
     }
 
     void PostZygoteFork() override
     {
-        CreateWorker();
+        InitializeWorker();
     }
 
-    void Destroy() override
+    void FinalizeWorker() override
     {
-        if (thread_pool_ != nullptr) {
-            JoinWorker();
-            internal_allocator_->Delete(thread_pool_);
-            thread_pool_ = nullptr;
+        if (compiler_worker_ != nullptr) {
+            compiler_worker_->FinalizeWorker();
         }
-        jit_thread_joined_ = true;
     }
 
     void JoinWorker() override;
@@ -691,29 +663,30 @@ public:
     ~Compiler() override
     {
         // We need to join thread first if runtime initialization fails and Destroy is not called
-        Destroy();
-        if (queue_ != nullptr) {
-            queue_->Finalize();
-            internal_allocator_->Delete(queue_);
-        }
-        if (jit_task_queue_ != nullptr) {
-            internal_allocator_->Delete(jit_task_queue_);
-            jit_task_queue_ = nullptr;
+        FinalizeWorker();
+        if (compiler_worker_ != nullptr) {
+            internal_allocator_->Delete(compiler_worker_);
+            compiler_worker_ = nullptr;
         }
         internal_allocator_->Delete(jit_stats_);
     }
 
     bool CompileMethod(Method *method, uintptr_t bytecode_offset, bool osr, TaggedValue func) override;
 
-    virtual void AddTask(CompilerTask &&ctx, [[maybe_unused]] TaggedValue func);
+    virtual void AddTask(CompilerTask &&ctx, [[maybe_unused]] TaggedValue func)
+    {
+        compiler_worker_->AddTask(std::move(ctx));
+    }
+
+    void CompileMethodLocked(const CompilerTask &&ctx);
 
     /// Basic method, which starts compilation. Do not use.
-    void CompileMethodLocked(const CompilerTask &&ctx);
+    void StartCompileMethod(const CompilerTask &&ctx);
 
     void ScaleThreadPool(size_t number_of_threads)
     {
         // Required for testing
-        thread_pool_->Scale(number_of_threads);
+        GetThreadPool()->Scale(number_of_threads);
     }
 
     void *GetOsrCode(const Method *method) override
@@ -749,7 +722,11 @@ protected:
 
     ThreadPool<CompilerTask, CompilerProcessor, Compiler *> *GetThreadPool()
     {
-        return thread_pool_;
+        ASSERT(Runtime::GetTaskScheduler() == nullptr || no_async_jit_);
+        if (compiler_worker_ != nullptr) {
+            return static_cast<CompilerThreadPoolWorker *>(compiler_worker_)->GetThreadPool();
+        }
+        return nullptr;
     }
 
     compiler::RuntimeInterface *GetRuntimeInterface()
@@ -758,36 +735,11 @@ protected:
     }
 
 private:
-    CompilerQueueInterface *CreateJITTaskQueue(const std::string &queue_type, uint64_t max_length, uint64_t task_life,
-                                               uint64_t death_counter, uint64_t epoch_duration)
+    void InitializeWorker()
     {
-        LOG(DEBUG, COMPILER) << "Creating " << queue_type << " task queue";
-        if (queue_type == "simple") {
-            return internal_allocator_->New<CompilerQueueSimple>(internal_allocator_);
+        if (compiler_worker_ != nullptr) {
+            compiler_worker_->InitializeWorker();
         }
-        if (queue_type == "counter-priority") {
-            return internal_allocator_->New<CompilerPriorityCounterQueue>(internal_allocator_, max_length, task_life);
-        }
-        if (queue_type == "aged-counter-priority") {
-            return internal_allocator_->New<CompilerPriorityAgedCounterQueue>(internal_allocator_, task_life,
-                                                                              death_counter, epoch_duration);
-        }
-        LOG(FATAL, COMPILER) << "Unknown queue type";
-        return nullptr;
-    }
-
-    void CreateWorker()
-    {
-        if (use_task_manager_) {
-            [[maybe_unused]] taskmanager::TaskQueueId id = Runtime::GetTaskScheduler()->RegisterQueue(jit_task_queue_);
-            ASSERT(!(id == taskmanager::INVALID_TASKQUEUE_ID));
-        } else {
-            if (thread_pool_ == nullptr) {
-                thread_pool_ = internal_allocator_->New<ThreadPool<CompilerTask, CompilerProcessor, Compiler *>>(
-                    internal_allocator_, queue_, this, 1, "JIT Thread");
-            }
-        }
-        jit_thread_joined_ = false;
     }
 
     CodeAllocator *code_allocator_;
@@ -798,19 +750,9 @@ private:
     compiler::RuntimeInterface *runtime_iface_;
     // The lock is used for compiler thread synchronization
     os::memory::Mutex compilation_lock_;
-    taskmanager::TaskQueue *jit_task_queue_ {nullptr};
-    static constexpr taskmanager::TaskProperties JIT_TASK_PROPERTIES {
-        taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::BACKGROUND};
-    os::memory::Mutex jit_worker_finalization_lock_;
-    size_t unprocessed_tasks_ GUARDED_BY(jit_worker_finalization_lock_) {0};
-    os::memory::ConditionVariable jit_tasks_processed_ GUARDED_BY(jit_worker_finalization_lock_);
-    // This queue is used only in ThreadPool. Do not use it from this class.
-    CompilerQueueInterface *queue_ {nullptr};
     bool no_async_jit_;
-    bool use_task_manager_ {false};
-    ThreadPool<CompilerTask, CompilerProcessor, Compiler *> *thread_pool_;
+    CompilerWorker *compiler_worker_ {nullptr};
     compiler::JITStats *jit_stats_ {nullptr};
-    std::atomic<bool> jit_thread_joined_ {true};
     NO_COPY_SEMANTIC(Compiler);
     NO_MOVE_SEMANTIC(Compiler);
 };

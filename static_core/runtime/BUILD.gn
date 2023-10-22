@@ -240,6 +240,8 @@ ohos_source_set("libarkruntime_set_static") {
     "tooling/sampler/thread_communicator.cpp",
     "tooling/tools.cpp",
     "vtable_builder.cpp",
+    "compiler_thread_pool_worker.cpp",
+    "compiler_task_manager_worker.cpp",
   ]
 
   if (!is_mingw) {
@@ -266,7 +268,9 @@ ohos_source_set("libarkruntime_set_static") {
       "bridge/arch/arm/expand_compiled_code_args_dyn_arm.S",
       "bridge/arch/arm/interpreter_to_compiled_code_bridge_arm.S",
       "bridge/arch/arm/interpreter_to_compiled_code_bridge_dyn_arm.S",
-      "fibers/arch/arm/stubs.S",
+      "fibers/arch/arm/get.S",
+      "fibers/arch/arm/switch.S",
+      "fibers/arch/arm/update.S",
     ]
     #TODO add arm32 abi hard
   } else if (current_cpu == "arm64") {

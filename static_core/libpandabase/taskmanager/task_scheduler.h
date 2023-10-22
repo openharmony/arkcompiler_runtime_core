@@ -87,11 +87,17 @@ public:
     [[nodiscard]] PANDA_PUBLIC_API std::optional<Task> GetTaskFromQueue(TaskQueueId id, TaskExecutionMode mode);
 
     /**
-     * @brief Method return Task with specified properties. If there are no tasks with that properties method will
+     * @brief Method returns Task with specified properties. If there are no tasks with that properties method will
      * return nullopt.
      * @param properties - TaskProperties of task we want to get.
      */
     [[nodiscard]] PANDA_PUBLIC_API std::optional<Task> GetTaskFromQueue(TaskProperties properties);
+
+    /**
+     * @brief Method waits all tasks from specified queue
+     * @param properties - TaskProperties of tasks we will wait to be completed
+     */
+    PANDA_PUBLIC_API void WaitForFinishAllTasksWithProperties(TaskProperties properties);
 
     /// @brief This method indicates that workers can no longer wait for new tasks and be completed.
     PANDA_PUBLIC_API void Finalize();
@@ -106,7 +112,6 @@ private:
 
     /**
      * @brief Method puts one @arg task to @arg worker.
-     * Also, it makes is_worker_queue_filling_ = false to indicate that task transporting is finished.
      * @param worker - pointer on worker that should be fill will tasks
      * @param task - task that will be putted in worker
      */
@@ -126,15 +131,16 @@ private:
 
     /**
      * @brief Method increment counter of new tasks and signal worker
+     * @param properties - TaskProperties of task from queue that execute the callback
      * @param ivalue - the value by which the counter will be increased
      */
-    void IncrementNewTaskCounter(size_t ivalue);
+    void IncrementNewTaskCounter(TaskProperties properties, size_t ivalue);
 
     /**
      * @brief Method increment counter of finished tasks and signal Finalize waiter
-     * @param ivalue - the value by which the counter will be increased
+     * @param counter_map - map from id to count of finished tasks
      */
-    void IncrementFinishedTaskCounter(size_t ivalue);
+    void IncrementFinishedTaskCounter(const TaskPropertiesCounterMap &counter_map);
 
     static TaskScheduler *instance_;
 
@@ -177,16 +183,16 @@ private:
     /// finish_ is true when TaskScheduler finish Workers and TaskQueues
     bool finish_ GUARDED_BY(task_manager_lock_) {false};
 
-    /// new_task_counter_ contains count of tasks that was add in registered queues.
-    size_t new_task_counter_ GUARDED_BY(task_manager_lock_) {0};
+    /// new_tasks_count_ represents count of new tasks
+    TaskPropertiesCounterMap new_tasks_count_ GUARDED_BY(task_manager_lock_);
 
     /**
-     * finished_task_counter_ contains count of tasks that was finished.
+     * finished_tasks_count_ represents count of finished tasks;
      * Task is finished if:
      * - it was executed by Worker;
      * - it was gotten by main thread;
      */
-    size_t finished_task_counter_ GUARDED_BY(task_manager_lock_) {0};
+    TaskPropertiesCounterMap finished_tasks_count_ GUARDED_BY(task_manager_lock_);
 };
 
 }  // namespace panda::taskmanager

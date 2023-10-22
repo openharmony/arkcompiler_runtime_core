@@ -13,12 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for type in types %}
+
 /*---
 desc: The never class has no instances.
 tags: [negative, compile-only]
 ---*/
 
-let x: never = new Object();
+let x: never = new {{type}}();
 
 function main(): void {
 }
+
+{% endfor %}

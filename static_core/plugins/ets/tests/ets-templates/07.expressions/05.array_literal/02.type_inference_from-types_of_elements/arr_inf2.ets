@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,14 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for item in array_composite %}
-
+{% for c in cases %}
 /*---
-desc: Array composite
-params: {{item.array}}
+desc: >-
+  If the type of an array literal [ expr1, ... , exprN ] cannot be inferred from the context,
+  then it is inferred from the initialization expressions by using the following algorithm.
 ---*/
 
-let x: {{item.type}}[] = {{item.array}};
-function main(): void {}
+{{c.decl}}
 
+function main() {
+    {{c.use|indent}}
+}
 {% endfor %}

@@ -18,7 +18,6 @@
 
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/taskmanager/task.h"
-#include "libpandabase/globals.h"
 #include <atomic>
 #include <optional>
 #include <queue>
@@ -28,7 +27,8 @@ namespace panda::taskmanager {
 class TaskQueueId {
 public:
     constexpr TaskQueueId(TaskType tt, VMType vt)
-        : val_(static_cast<uint32_t>(tt) | static_cast<uint32_t>(vt) << (BITS_PER_BYTE * sizeof(TaskQueueId) / 2))
+        : val_(static_cast<uint16_t>(tt) |
+               static_cast<uint16_t>(static_cast<uint16_t>(vt) << (BITS_PER_BYTE * sizeof(TaskQueueId) / 2)))
     {
         static_assert(sizeof(TaskType) == sizeof(TaskQueueId) / 2);
         static_assert(sizeof(VMType) == sizeof(TaskQueueId) / 2);
@@ -50,7 +50,7 @@ public:
     }
 
 private:
-    uint32_t val_;
+    uint16_t val_;
 };
 
 constexpr TaskQueueId INVALID_TASKQUEUE_ID = TaskQueueId(TaskType::UNKNOWN, VMType::UNKNOWN);
@@ -68,7 +68,7 @@ public:
      * NewTasksCallback instance should be called after tasks adding. As argument you should input count of added
      * tasks.
      */
-    using NewTasksCallback = std::function<void(size_t)>;
+    using NewTasksCallback = std::function<void(TaskProperties, size_t)>;
 
     static constexpr uint8_t MAX_PRIORITY = 10;
     static constexpr uint8_t MIN_PRIORITY = 1;
@@ -150,12 +150,12 @@ private:
 
     /**
      * foreground_task_queue_ is queue that contains task with ExecutionMode::FOREGROUND. If method PopTask() is used,
-     * foreground_queue_ will be checked first and if it's not empty, Task will be gotten from it.
+     * foreground_task_queue_ will be checked first and if it's not empty, Task will be gotten from it.
      */
     std::queue<Task> foreground_task_queue_ GUARDED_BY(task_queue_lock_);
     /**
      * background_task_queue_ is queue that contains task with ExecutionMode::BACKGROUND. If method PopTask() is used,
-     * background_queue_ will be popped only if foreground_queue_ is empty.
+     * background_task_queue_ will be popped only if foreground_task_queue_ is empty.
      */
     std::queue<Task> background_task_queue_ GUARDED_BY(task_queue_lock_);
 

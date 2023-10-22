@@ -16,46 +16,24 @@
 #include "runtime/fibers/arch/asm_macros.h"
 #include "runtime/fibers/arch/arm/context_layout.h"
 
-.extern AsmUnreachable
+#define GPR_O(reg) FCTX_GPR_OFFSET_BYTES_ ## reg
+#define FP_O(reg) FCTX_FP_OFFSET_BYTES_ ## reg
+#include "runtime/fibers/arch/arm/helpers.S"
 
 /**
  * arguments:
  * r0: uint8_t* ctx_memory
  */
 FUNCTION_START(GetCurrentContext)
-    blx AsmUnreachable
+    STORE_CONTEXT tmp_regid=3
+
+    // return success
+    mov r0, #0
+    blx lr
 FUNCTION_END(GetCurrentContext)
 
-/**
- * arguments:
- * r0: uint8_t* ctx_memory_from
- * r1: uint8_t* ctx_memory_to
- */
-FUNCTION_START(SwitchContext)
-    blx AsmUnreachable
-FUNCTION_END(SwitchContext)
-
-/**
- * arguments:
- * r0: uint8_t* ctx_memory
- * r1: void (*func)(void)
- * r2: void* data
- * r3: void* stack
- * r4: size_t stack_size_bytes
- */
-FUNCTION_START(UpdateContext)
-    blx AsmUnreachable
-FUNCTION_END(UpdateContext)
-
-/**
- * arguments:
- * r0: uint8_t* ctx_memory
- * r1: void (*func)(void)
- * r2: void* data
- */
-FUNCTION_START(UpdateContextKeepStack)
-    blx AsmUnreachable
-FUNCTION_END(UpdateContextKeepStack)
+#undef GPR_O
+#undef FP_O
 
 // we don't need executable stack.
 .section .note.GNU-stack,"",%progbits

@@ -80,6 +80,9 @@ the below example that illustrates the idea in general:
 GUI Structs
 ***********
 
+.. meta:
+    frontend_status: Partly
+
 *GUI structs* are used to define program components. From the language
 perspective, a GUI struct is a restricted form of a non-primitive type
 that is designed to define GUI expressively and efficiently.

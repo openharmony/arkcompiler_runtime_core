@@ -55,8 +55,6 @@ native function TypeAPIGetConstructorsNum(td: TypeDesc): long
 
 native function TypeAPIGetConstructor(td: TypeDesc, i: long): Method
 
-native function TypeAPIMakeClassInstance(td: TypeDesc): Object
-
 native function TypeAPIGetBaseType(td: TypeDesc): TypeDesc
 
 native function TypeAPIGetInterfacesNum(td: TypeDesc): long
@@ -1416,7 +1414,7 @@ export final class TupleType extends Type {
 }
 
 
-export class FunctionType extends Type {
+export abstract class FunctionType extends Type {
     private readonly attrs: int
 
     protected constructor(td: TypeDesc) {
@@ -1481,14 +1479,6 @@ export class FunctionType extends Type {
         // TODO(shumilov-petr): not implemented
         throw new Error("not implemented")
     }
-
-    public override getLiteral(): string {
-        throw new Error("FunctionType doesn't have literal")
-    }
-
-    internal override convertObject(obj: NullishType): NullishType {
-        throw new Error("Only LambdaType can be converted")
-    }
 }
 
 
@@ -1542,7 +1532,6 @@ export final class LambdaType extends FunctionType {
         // TODO(shumilov-petr): Need to use Create API
         throw new Error("todo(kprokopenko): unequal labmda type conversion")
     }
-
 }
 
 
@@ -1562,6 +1551,10 @@ export final class MethodType extends FunctionType {
 
     public override assignableFrom(other: Type): boolean {
         return false
+    }
+
+    internal override convertObject(obj: NullishType): NullishType {
+        throw new Error("Only LambdaType can be converted")
     }
 }
 
@@ -1689,8 +1682,27 @@ export final class UnionType extends Type {
     }
 
     public override assignableFrom(other: Type): boolean {
-        // TODO(shumilov-petr): not implemented
-        throw new Error("Not implemented")
+        if (other instanceof UnionType) {
+            const otherUnion = other as UnionType
+            // all cases of other are assignable into this
+            const otherCasesN = this.getCasesNum()
+            for (let i = 0; i < otherCasesN; i++) {
+                let cas = otherUnion.getCase(i)
+                if (!this.assignableFrom(cas.getType())) {
+                    return false
+                }
+            }
+            return true
+        }
+        // assignable to any case
+        const selfCasesN = this.getCasesNum()
+        for (let i = 0; i < selfCasesN; i++) {
+            let cas = this.getCase(i)
+            if (cas.getType().assignableFrom(other)) {
+                return true
+            }
+        }
+        return false
     }
 
     public override isPrimitive(): boolean {

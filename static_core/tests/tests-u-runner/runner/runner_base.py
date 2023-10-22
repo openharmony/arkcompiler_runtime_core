@@ -13,6 +13,7 @@ from typing import List, Set
 from tqdm import tqdm
 
 from runner.enum_types.configuration_kind import ConfigurationKind
+from runner.plugins.ets.test_ets import TestETS
 from runner.logger import Log
 from runner.options.config import Config
 from runner.test_base import Test
@@ -245,21 +246,23 @@ class Runner(ABC):
         without_excluded = [test for test in test_files
                             if self.update_excluded or test not in self.excluded_tests]
 
+        self._search_both_excluded_and_ignored_tests()
+        self._search_not_used_ignored(without_excluded)
+
+        all_tests = {self.create_test(test, flags, test in self.ignored_tests) for test in without_excluded}
+        not_tests = {t for t in all_tests if isinstance(t, TestETS) and not t.is_valid_test}
+        valid_tests = all_tests - not_tests
+
         if self.config.test_lists.groups.quantity > 1:
             groups = self.config.test_lists.groups.quantity
             n_group = self.config.test_lists.groups.number
             n_group = n_group if n_group <= groups else groups
-            without_excluded = [
-                test for test in without_excluded
-                if get_group_number(test, groups) == n_group
-            ]
+            valid_tests = {
+                test for test in valid_tests
+                if get_group_number(test.path, groups) == n_group
+            }
 
-        self._search_both_excluded_and_ignored_tests()
-        self._search_not_used_ignored(without_excluded)
-
-        tests = [self.create_test(test, flags, test in self.ignored_tests)
-                 for test in without_excluded]
-        self.tests.update(tests)
+        self.tests.update(valid_tests)
         Log.all(_LOGGER, f"Loaded {len(self.tests)} tests")
 
     def _search_both_excluded_and_ignored_tests(self):
@@ -292,17 +295,11 @@ class Runner(ABC):
     def run(self):
         Log.all(_LOGGER, "Start test running")
         with multiprocessing.Pool(processes=self.config.general.processes) as pool:
-            result_iter = pool.imap_unordered(self.run_test, self.tests, chunksize=self.config.general.chunksize)
-            pool.close()
-
+            results = pool.imap_unordered(self.run_test, self.tests, chunksize=self.config.general.chunksize)
             if self.config.general.show_progress:
-                result_iter = tqdm(result_iter, total=len(self.tests))
-
-            results = []
-            for res in result_iter:
-                results.append(res)
-
-            self.results = results
+                results = tqdm(results, total=len(self.tests))
+            self.results = list(results)
+            pool.close()
             pool.join()
 
     @abstractmethod

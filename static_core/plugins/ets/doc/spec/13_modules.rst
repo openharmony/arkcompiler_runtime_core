@@ -1026,7 +1026,7 @@ Top-Level Statements
 ********************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A separate module can contain sequences of statements that logically
 comprise one sequence of statements:
@@ -1107,7 +1107,7 @@ Program Entry Point (`main`)
 ****************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A program (application) entry point is the top-level ``main`` function. The
 function must have either no parameters, or one parameter of the string ``[]``

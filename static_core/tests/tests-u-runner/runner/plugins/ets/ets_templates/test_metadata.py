@@ -48,6 +48,7 @@ class Tags:
 class TestMetadata:
     tags: Tags
     desc: Optional[str] = None
+    files: Optional[List[str]] = None
     assertion: Optional[str] = None
     params: Optional[Any] = None
     name: Optional[str] = None

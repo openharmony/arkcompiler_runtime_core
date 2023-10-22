@@ -152,12 +152,15 @@ set(SOURCES
     coroutines/stackful_coroutine_manager.cpp
     coroutines/stackful_coroutine_worker.cpp
     fibers/fiber_context.cpp
+    compiler_thread_pool_worker.cpp
+    compiler_task_manager_worker.cpp
 )
 
 if(PANDA_TARGET_ARM32_ABI_SOFT OR PANDA_TARGET_ARM32_ABI_SOFTFP)
     list(APPEND SOURCES
-        # TODO(konstanting, #I6WGRT): remove stubs and support ARM32
-        fibers/arch/arm/stubs.S
+        fibers/arch/arm/get.S
+        fibers/arch/arm/update.S
+        fibers/arch/arm/switch.S
         bridge/arch/arm/interpreter_to_compiled_code_bridge_arm.S
         bridge/arch/arm/compiled_code_to_interpreter_bridge_arm.S
         bridge/arch/arm/compiled_code_to_interpreter_bridge_dyn_arm.S
@@ -169,8 +172,9 @@ if(PANDA_TARGET_ARM32_ABI_SOFT OR PANDA_TARGET_ARM32_ABI_SOFTFP)
         arch/arm/interpreter_support.S)
 elseif (PANDA_TARGET_ARM32_ABI_HARD)
     list(APPEND SOURCES
-        # TODO(konstanting, #I6WGRT): remove stubs and support ARM32
-        fibers/arch/arm/stubs.S
+        fibers/arch/arm/get.S
+        fibers/arch/arm/update.S
+        fibers/arch/arm/switch.S
         bridge/arch/arm/interpreter_to_compiled_code_bridge_armhf.S
         bridge/arch/arm/compiled_code_to_interpreter_bridge_armhf.S
         bridge/arch/arm/compiled_code_to_interpreter_bridge_dyn_arm.S
@@ -667,10 +671,13 @@ SET(INVOKE_HELPER tests/arch/amd64/invokation_helper.S)
 endif()
 
 function(add_gtests test_name)
-    cmake_parse_arguments(ARG "" "TEST_GROUP;STASH_LIST" "" ${ARGN})
-
+    cmake_parse_arguments(ARG "NO_WARNING_FILTER" "TEST_GROUP;STASH_LIST" "" ${ARGN})
+    set(FLAGS_LIST NO_CORES)
+    if (ARG_NO_WARNING_FILTER)
+        set(FLAGS_LIST "${FLAGS_LIST};NO_WARNING_FILTER")
+    endif()
     panda_add_gtest(
-        NO_CORES
+        ${FLAGS_LIST}
         NAME ${test_name}
         SOURCES
             ${ARG_UNPARSED_ARGUMENTS}
@@ -761,13 +768,11 @@ add_gtests(
     tests/bitmap_page_alignment_test.cpp
 )
 
-# TODO(konstanting, #I6WGRT): support ARM32 and enable tests for this arch too
-if (NOT PANDA_TARGET_ARM32)
 add_gtests(
     arkruntime_fibers_test
     tests/fibers_test.cpp
+    NO_WARNING_FILTER
 )
-endif()
 
 add_gtests(
     arkruntime_core_layout_test

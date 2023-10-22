@@ -27,7 +27,7 @@ function fooType(): ClassType {
 
 function main(): void throws {
     const fooClass = fooType()
-    const creator = new ClassTypeCreator("MyClass").addBase(fooClass)
+    const creator = new ClassTypeCreator("MyClass").addBaseType(fooClass)
     assert fooClass.getConstructorsNum() == 1
     const ctor = fooClass.getConstructor(0)
     creator.addMethod(

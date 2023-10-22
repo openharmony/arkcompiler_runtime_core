@@ -40,7 +40,7 @@
     stmxcsr FP_O(MXCSR)(\ctx_baseaddr_reg)
     // do load-store because fnstenv blocks FP exceptions
     fnstenv (\tmp_reg)
-    fldenv  (\tmp_reg)    
+    fldenv  (\tmp_reg)
 .endm
 
 #endif /* PANDA_RUNTIME_FIBERS_ARCH_AMD64_HELPERS_S */

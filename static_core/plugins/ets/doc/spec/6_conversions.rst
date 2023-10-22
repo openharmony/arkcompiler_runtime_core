@@ -216,6 +216,7 @@ Operator Contexts
 
 .. meta:
     frontend_status: Done
+    todo: '$$' is an deprecated operator now, it can only be supported with ArkUI plugin, otherwise it will throw exception.
 
 *String context* applies only to a non-*string* operand of the binary ``+``
 operator if the other operand is a *string*. For example:

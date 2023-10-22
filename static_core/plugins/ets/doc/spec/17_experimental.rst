@@ -303,7 +303,7 @@ Runtime Evaluation of Array Creation Expressions
 ************************************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The evaluation of an array creation expression at runtime is performed
 as follows:
@@ -352,7 +352,7 @@ Enumeration Super Type
 **********************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: None
 
 Any *enum* type has class type *Object* as its supertype. This allows
 polymorphic assignments into *Object* type variables. The *instanceof*
@@ -993,7 +993,7 @@ Default and Static Interface Methods
 ************************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 |
 
@@ -1003,7 +1003,7 @@ Default Method Declarations
 ============================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 .. code-block:: abnf
 
@@ -1084,6 +1084,10 @@ A :index:`compile-time error` occurs if:
 
 Extension Functions
 *******************
+
+.. meta:
+    frontend_status: Partly
+    todo: support static extension function, import/export extension function, extension function for primitive type
 
 The *extension function* mechanism allows using a special form of top-level
 functions as class or interface extensions. Syntactically, *extension* is the
@@ -1307,6 +1311,9 @@ without a receiver as they have access to ``this``.
 
 Trailing Lambda
 ***************
+
+.. meta:
+    frontend_status: Done
 
 The *trailing lambda* mechanism allows using a special form of function
 or method call when the last parameter of a function or a method is of
@@ -1658,7 +1665,7 @@ Rethrowing Functions
 ====================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A *rethrowing function* is a function that accepts a *throwing function* as a
 parameter, and is marked with the keyword ``rethrows``.

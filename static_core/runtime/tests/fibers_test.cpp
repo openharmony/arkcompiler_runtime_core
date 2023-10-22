@@ -208,6 +208,10 @@ using FibersDeathTest = FibersTest;
  */
 TEST_F(FibersDeathTest, AbortOnFiberReturn)
 {
+    // Death test under qemu_arm32 is not compatible with 'threadsafe' death test style flag
+#if defined(PANDA_TARGET_ARM32) && defined(PANDA_QEMU_BUILD)
+    testing::FLAGS_gtest_death_test_style = "fast";
+#endif
     Fiber f_init(*this);
     Fiber f_aborts(*this, nullptr, EmptyEntry);
     EXPECT_EXIT(fibers::SwitchContext(f_init.GetContextPtr(), f_aborts.GetContextPtr()),

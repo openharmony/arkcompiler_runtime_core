@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from os import path, makedirs
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Sequence
 
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.enum_types.fail_kind import FailKind
@@ -49,8 +51,19 @@ class TestETS(TestFileBased):
         """
         return True
 
-    def do_run(self):
-        if not self.is_valid_test:
+    @property
+    def dependent_files(self) -> Sequence[TestETS]:
+        return []
+
+    def do_run(self) -> TestETS:
+        for test in self.dependent_files:
+            test.do_run()
+
+        if not self.is_valid_test and not self.is_compile_only:
+            return self
+
+        if not self.is_valid_test and self.is_compile_only:
+            self._run_compiler()
             return self
 
         self.passed, self.report, self.fail_kind = self._run_compiler()
@@ -91,6 +104,8 @@ class TestETS(TestFileBased):
 
     def _run_compiler(self) -> Tuple[bool, TestReport, Optional[FailKind]]:
         es2panda_flags = []
+        if not self.is_valid_test:
+            es2panda_flags.append('--ets-module')
         es2panda_flags.extend(self.test_env.es2panda_args)
         es2panda_flags.append(f"--output={self.test_abc}")
         es2panda_flags.append(self.path)
@@ -123,8 +138,7 @@ class TestETS(TestFileBased):
         if config_path is None:
             config_path = path.join(path.dirname(__file__), 'ets-verifier.config')
 
-        verifier_flags = []
-        verifier_flags.extend(self.test_env.verifier_args)
+        verifier_flags = list(self.verifier_args)
         verifier_flags.append(f"--config-file={config_path}")
         verifier_flags.append(test_abc)
 

@@ -44,9 +44,261 @@ function Array_TestJSSample(arr: Array<FooClass>): void {
     assert (arr.at(0)! as FooClass).name == "zero";
     assert arr.at(1)!.toString() == "{Foo named one}";
 
+    let idx: number = 0;
+    assert (arr.at(idx)! as FooClass).name == "zero";
+
     arr.push(new FooClass("two"));
     assert arr.at(2)!.toString() == "{Foo named two}";
     assert arr.toString() == "{Foo named zero},{Foo named one},{Foo named two}";
+}
+
+function Array_TestJSLength(arr: Array<FooClass>): void {
+    // TODO(oignatenko) uncomment this after interop will be supported in this direction
+    // let len: int = arr.length();
+    // assert len == 2;
+    // arr.push(new FooClass("two"));
+    // assert arr.length() == len + 1;
+}
+
+function Array_TestJSPop(arr: Array<FooClass>): void {
+    arr.push(new FooClass("two"));
+    let popped: FooClass = arr.pop() as FooClass;
+    assert popped.toString() == "{Foo named two}";
+}
+
+function Array_TestJSSort(arr: Array<FooClass>): void {
+    let comparator: (a: FooClass, b: FooClass) => int = (a: FooClass, b: FooClass): int => {
+        return a.toString().compareTo(b.toString());
+    }
+    arr.sort(comparator);
+    assert arr.at(1)!.toString() == "{Foo named zero}";
+}
+
+function Array_TestJSToSorted(arr: Array<FooClass>): void {
+    let comparator: (a: FooClass, b: FooClass) => int = (a: FooClass, b: FooClass): int => {
+        return a.toString().compareTo(b.toString());
+    }
+    let toSorted = arr.toSorted(comparator);
+    assert toSorted.at(1)!.toString() == "{Foo named zero}";
+}
+
+function Array_TestJSFill(arr: Array<FooClass>): void {
+    arr.fill(arr.at(0)! as FooClass);
+    assert arr.at(1)!.toString() == "{Foo named zero}";
+}
+
+function Array_TestJSJoin(arr: Array<FooClass>): void {
+    let joined: String = arr.join(",");
+    assert arr.toString() == "{Foo named zero},{Foo named one}"
+}
+
+function Array_TestJSSome(arr: Array<FooClass>): void {
+    let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
+    let fn1True: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return true; }
+    assert arr.some(fnTrue);
+    assert arr.some(fn1True);
+    let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
+    let fn1False: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return k < 0; }
+    assert !arr.some(fnFalse);
+    assert !arr.some(fn1False);
+}
+
+function Array_TestJSEvery(arr: Array<FooClass>): void {
+    let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
+    let fn1True: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return true; }
+    assert arr.every(fnTrue);
+    assert arr.every(fn1True);
+    let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
+    let fn1False: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return k < 0; }
+    assert !arr.every(fnFalse);
+    assert !arr.every(fn1False);
+}
+
+function Array_TestJSFilter(arr: Array<FooClass>): void {
+    let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
+    let fn1True: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return true; }
+    let filter = arr.filter(fnTrue);
+    let filter1 = arr.filter(fn1True);
+    assert arr.at(0) == filter.at(0);
+    assert arr.at(0) == filter1.at(0);
+    let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
+    let fn1False: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return k < 0; }
+    let filterFalse = arr.filter(fnFalse);
+    let filter1False = arr.filter(fn1False);
+    assert arr.at(0) != filterFalse.at(0);
+    assert arr.at(0) != filter1False.at(0);
+}
+
+function Array_TestJSFilterArray(arr: Array<FooClass>): void {
+    let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
+    let filter: FooClass[] = arr.filterArray(fnTrue) as FooClass[];
+    assert arr.at(0) == filter[0];
+    let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
+    let filterFalse = arr.filterArray(fnFalse) as FooClass[];
+    assert arr.at(0) != filterFalse[0];
+}
+
+function Array_TestJSShift(arr: Array<FooClass>): void {
+    let shifted: FooClass = arr.shift() as FooClass;
+    assert shifted.toString() == "{Foo named zero}";
+    assert arr.at(0).toString() == "{Foo named one}";
+}
+
+function Array_TestJSWith(arr: Array<FooClass>): void {
+    // TODO(oignatenko) uncomment this after interop will be supported in this direction
+    // let arr1: Array<FooClass> = arr.with(1, new FooClass("three"));
+    // assert arr1.at(1).toString() == "{Foo named three}";
+}
+
+function Array_TestJSSlice(arr: Array<FooClass>): void {
+    // TODO(oignatenko) uncomment this after interop will be supported in this direction
+    // assert (arr.slice(1) as Array<FooClass>).toString() == "{Foo named two}";
+    // assert (arr.slice(1, 2) as Array<FooClass>).toString() == "{Foo named two}";
+}
+
+function Array_TestJSSplice(arr: Array<FooClass>): void {
+    // TODO(oignatenko) uncomment this after interop will be supported in this direction
+    // arr.push(new FooClass("two"));
+    // arr.splice(2, 1);
+    // assert arr.toString() == "{Foo named zero},{Foo named two}";
+    // arr.splice(1);
+    // assert arr.toString() == "{Foo named zero}";
+}
+
+function Array_TestJSToSpliced(arr: Array<FooClass>): void {
+    // TODO(oignatenko) uncomment this after interop will be supported in this direction
+    // arr.push(new FooClass("two"));
+    // let spliced = arr.toSpliced(1, 1);
+    // assert spliced.toString() == "{Foo named zero},{Foo named two}";
+    // let spliced1 = arr.toSpliced(1);
+    // assert spliced1.toString() == "{Foo named zero}";
+}
+
+function Array_TestJSCopyWithin(arr: Array<FooClass>): void {
+    arr.push(new FooClass("two"));
+    assert arr.toString() == "{Foo named zero},{Foo named one},{Foo named two}";
+    arr.copyWithin(2, 0);
+    assert arr.toString() == "{Foo named zero},{Foo named one},{Foo named zero}";
+
+    // TODO(oignatenko) uncomment below after interop will be supported for this method signature
+    // arr.copyWithin(1);
+    // assert arr.toString() == "{Foo named zero},{Foo named zero},{Foo named one}";
+}
+
+function Array_TestJSLastIndexOf(arr: Array<FooClass>): void {
+    arr.push(arr.at(1) as FooClass);
+
+    assert arr.lastIndexOf(arr.at(1) as FooClass) == 2;
+    assert arr.lastIndexOf(new FooClass("not in array")) == -1;
+
+    // TODO(oignatenko) uncomment below after interop will be supported for this method signature
+    // assert arr.lastIndexOf(arr.at(1) as FooClass, 1) == 2;
+    // assert arr.lastIndexOf(new FooClass("not in array"), 1) == -1;
+}
+
+function Array_TestJSToReversed(arr: Array<FooClass>): void {
+    // TODO(oignatenko) uncomment this after interop will be supported in this direction
+    // let reversed_copy: Array<FooClass> = arr.toReversed() as Array<FooClass>;
+    // assert reversed_copy.toString() == "{Foo named one},{Foo named zero}";
+}
+
+function Array_TestJSMap(arr: Array<FooClass>): void {
+    let fn_map: (v: FooClass, k: int) => String = (v: FooClass, k: int): String => { return "String"; }
+    let fn_map1: (v: FooClass) => String = (v: FooClass): String => { return "String1"; }
+
+    // TODO(oignatenko) uncomment this after interop will be supported in this direction
+    // let mapped = arr.map(fn_map);
+    // assert mapped.toString() == "String,String";
+    //
+    // let mapped1 = arr.map(fn_map1);
+    // assert mapped1.toString() == "String1,String1";
+}
+
+function Array_TestJSFlatMap(arr: Array<FooClass>): void {
+    let fn_map: (v: FooClass, k: int) => String = (v: FooClass, k: int): String => { return "String"; }
+    let fn_map1: (v: FooClass) => String = (v: FooClass): String => { return "String1"; }
+
+    // TODO(oignatenko) uncomment this after interop will be supported in this direction
+    // let mapped = arr.flatMap(fn_map);
+    // assert mapped.toString() == "String,String";
+    //
+    // let mapped1 = arr.flatMap(fn_map1);
+    // assert mapped1.toString() == "String1,String1";
+}
+
+function Array_TestJSReduce(arr: Array<FooClass>): void {
+    let fn_reduce: (a: FooClass, b: FooClass) => FooClass = (a: FooClass, b: FooClass): FooClass => { return a; }
+    let reduced: FooClass = arr.reduce(fn_reduce) as FooClass;
+    assert reduced.toString() == "{Foo named zero}";
+
+    let fn_reduce2: (a: FooClass, b: FooClass) => FooClass = (a: FooClass, b: FooClass): FooClass => { return b; }
+    let reduced2: FooClass = arr.reduce(fn_reduce2, new FooClass("initVal")) as FooClass;
+    assert reduced2.toString() == "{Foo named initVal}";
+}
+
+function Array_TestJSReduceRight(arr: Array<FooClass>): void {
+    let fn_reduce: (a: FooClass, b: FooClass) => FooClass = (a: FooClass, b: FooClass): FooClass => { return a; }
+    let reduced: FooClass = arr.reduceRight(fn_reduce) as FooClass;
+    assert reduced.toString() == "{Foo named zero}";
+
+    let fn_reduce2: (a: FooClass, b: FooClass) => FooClass = (a: FooClass, b: FooClass): FooClass => { return b; }
+    let reduced2: FooClass = arr.reduceRight(fn_reduce2, new FooClass("initVal")) as FooClass;
+    assert reduced2.toString() == "{Foo named initVal}";
+}
+
+function Array_TestJSFindLast(arr: Array<FooClass>): void {
+    let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
+    let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
+
+    let last: FooClass = arr.findLast(fnTrue) as FooClass;
+    assert last.toString() == "{Foo named one}";
+    let last_static: FooClass = Array.findLast(fnTrue, arr) as FooClass;
+    assert last_static.toString() == "{Foo named one}";
+
+    let last_null: FooClass = arr.findLast(fnFalse) as FooClass;
+    assert last_null === null;
+    let last_null_static: FooClass = Array.findLast(fnFalse, arr) as FooClass;
+    assert last_null_static === null;
+}
+
+function Array_TestJSFindIndex(arr: Array<FooClass>): void {
+    let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
+    let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
+
+    let found: int = arr.findIndex(fnTrue) as int;
+    assert found == 0;
+    let found_static: int = Array.findIndex(fnTrue, arr) as int;
+    assert found_static == 0;
+
+    let not_found: int = arr.findIndex(fnFalse) as int;
+    assert not_found == -1;
+    let not_found_static: int = Array.findIndex(fnFalse, arr) as int;
+    assert not_found_static == -1;
+}
+
+function Array_TestJSFind(arr: Array<FooClass>): void {
+    let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
+    let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
+
+    let found: FooClass = arr.find(fnTrue) as FooClass;
+    assert found.toString() == "{Foo named zero}";
+
+    let found_null: FooClass = arr.find(fnFalse) as FooClass;
+    assert found_null === null;
+}
+
+function Array_TestJSIsArray(arr: Array<FooClass>): void {
+    assert Array.isArray(arr);
+}
+
+function Array_TestJSFromAsync(arr: Array<FooClass>): void {
+    let fn_map: (v: FooClass, k: int) => String = (v: FooClass, k: int): String => { return "String"; }
+    let fn_map1: (v: FooClass) => String = (v: FooClass): String => { return "String1"; }
+
+    // TODO(oignatenko) uncomment this after interop will be supported in this direction
+    // Array.fromAsync(arr).then((array) => { assert array.at(0).toString() == "{Foo named zero}" });
+    // Array.fromAsync(arr, fn_map).then((array) => { assert array.at(0).toString() == "String" });
+    // Array.fromAsync(arr, fn_map1).then((array) => { assert array.at(0).toString() == "String1" });
 }
 
 function Array_CreateEtsSample(): Array<Object> {

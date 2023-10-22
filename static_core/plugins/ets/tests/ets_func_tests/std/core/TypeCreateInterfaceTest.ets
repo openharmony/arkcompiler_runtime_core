@@ -41,8 +41,8 @@ function main(): void throws {
 	assert ifaces.length == 2
 	const intType = Type.of(0)
 	const I3 = new InterfaceTypeCreator("I3")
-		.addBase(ifaces[0])
-		.addBase(ifaces[1])
+		.addInterface(ifaces[0])
+		.addInterface(ifaces[1])
 	const CI3 = new ClassTypeCreator("CI3");
 	const i1Body: (self: I1) => int = (self: I1): int => { return 30 }
 	const i2Body: (self: I2, x: int) => int = (self: I2, x: int): int => { return x * x + 3 }
@@ -55,7 +55,7 @@ function main(): void throws {
 		)
 		.addMethod(
 			new MethodCreator("i")
-				.addParameter(intType)
+				.addParameter(new ParameterCreator(intType))
 				.addResult(intType)
 				.addBody(new CallableBodyFunction(i2Body as Object))
 		)

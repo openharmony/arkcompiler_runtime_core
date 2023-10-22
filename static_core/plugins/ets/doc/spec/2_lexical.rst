@@ -170,6 +170,7 @@ Identifiers
 
 .. meta:
     frontend_status: Done
+    todo: Identifier starting with '\$\$' is invalid now, double dollar is an operator now, but single dollar and double dollar in middle of the identifier is still valid.
 
 An identifier is a sequence of one or more valid Unicode characters. The
 Unicode grammar of identifiers is based on character properties

@@ -431,7 +431,7 @@ Class Implementation Clause
 ===========================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The names of interfaces that are direct superinterfaces of a declared
 class are listed in the class declaration of the *implements* clause.
@@ -1322,7 +1322,7 @@ Final Methods
 =============
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Final methods are described in the experimental section (see
 :ref:`Native Methods Experimental`).
@@ -1335,7 +1335,7 @@ Override Methods
 ================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The keyword ``override`` indicates that an instance method in a superclass is
 overridden by the corresponding instance method from a subclass (see

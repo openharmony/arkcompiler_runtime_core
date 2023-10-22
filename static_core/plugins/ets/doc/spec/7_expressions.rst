@@ -482,6 +482,7 @@ Operator Precedence
 
 .. meta:
     frontend_status: Done
+    todo: Add '\$\$' into unary operator
 
 The table below summarizes all information on the precedence and
 associativity of operators. Each section on a particular operator
@@ -2237,6 +2238,9 @@ A compile-time error occurs if:
 Step 2: Semantic Correctness Check
 ==================================
 
+.. meta:
+    frontend_status: Done
+
 The single function to call is known at this step, and the following
 semantic checks must be performed:
 
@@ -2579,6 +2583,7 @@ Unary Expressions
 
 .. meta:
     frontend_status: Done
+    todo: Add '\$\$' into unary operator, but it can only be supported with ArkUI plugin, otherwise it will throw an exception "$$ operator can only be used with ARKUI plugin".
 
 .. code-block:: abnf
 
@@ -4571,9 +4576,7 @@ Assignment
 **********
 
 .. meta:
-    frontend_status: Partly
-    todo: nullable field access
-    todo: nullable field access
+    frontend_status: Done
 
 All *assignment operators* group right-to-left (i.e., :math:`a=b=c` means
 :math:`a=(b=c)`---and thus assign the value of *c* to *b*, and then the value
@@ -4642,7 +4645,7 @@ Simple Assignment Operator
 ==========================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A compile-time error occurs if the type of the right-hand operand
 (*expression2*) is not compatible (see :ref:`Compatible Types`) with
@@ -4820,7 +4823,7 @@ Compound Assignment Operators
 =============================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A compound assignment expression in the form *E1 op= E2* is equivalent to
 *E1 = ((E1) op (E2)) as T* (where *T* is the type of *E1*, except that *E1*
