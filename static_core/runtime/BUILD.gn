@@ -121,6 +121,8 @@ ohos_source_set("libarkruntime_set_static") {
     "class_linker.cpp",
     "class_linker_extension.cpp",
     "compiler.cpp",
+    "compiler_task_manager_worker.cpp",
+    "compiler_thread_pool_worker.cpp",
     "coretypes/array.cpp",
     "coretypes/string.cpp",
     "coroutines/coroutine.cpp",
@@ -240,8 +242,6 @@ ohos_source_set("libarkruntime_set_static") {
     "tooling/sampler/thread_communicator.cpp",
     "tooling/tools.cpp",
     "vtable_builder.cpp",
-    "compiler_thread_pool_worker.cpp",
-    "compiler_task_manager_worker.cpp",
   ]
 
   if (!is_mingw) {
