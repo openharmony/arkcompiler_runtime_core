@@ -47,6 +47,11 @@
 17.experimental_features/08.default_and_static_interface_methods/02.static_method_declarations/static_interface_methods3.ets
 # end of es2panda fails
 
+# not implemented
+17.experimental_features/14.packages/07.shadowing_of_function_names/shadow_function_name.ets
+17.experimental_features/14.packages/07.shadowing_of_function_names/shadow_function_explicit_name.ets
+17.experimental_features/14.packages/07.shadowing_of_function_names/shadow_function_alias.ets
+
 03.types/01.predefined_types/class_types_declaration_2.ets
 03.types/01.predefined_types/class_value_types_declaration_4.ets
 03.types/01.predefined_types/class_value_types_declaration_5.ets
