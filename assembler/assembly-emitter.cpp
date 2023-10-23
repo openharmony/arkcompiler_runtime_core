@@ -1325,12 +1325,50 @@ static void MakeSlotNumberAnnotation(Program *prog)
     }
 }
 
+static void MakeConcurrentModuleRequestsRecord(Program *prog)
+{
+    static const std::string CONCURRENT_MODULE_REQUESTS = "_ESConcurrentModuleRequestsAnnotation";
+    pandasm::Record record(CONCURRENT_MODULE_REQUESTS, pandasm::extensions::Language::ECMASCRIPT);
+    record.metadata->SetAccessFlags(panda::ACC_ANNOTATION);
+    prog->record_table.emplace(CONCURRENT_MODULE_REQUESTS, std::move(record));
+}
+
+static void MakeConcurrentModuleRequestsAnnotation(Program *prog)
+{
+    static const std::string CONCURRENT_MODULE_REQUESTS = "_ESConcurrentModuleRequestsAnnotation";
+    static const std::string ELEMENT_NAME = "ConcurrentModuleRequest";
+    for (auto &[name, func] : prog->function_table) {
+        if (func.GetFunctionKind() != panda::panda_file::FunctionKind::CONCURRENT_FUNCTION) {
+            continue;
+        }
+
+        for (const auto &an : func.metadata->GetAnnotations()) {
+            if (an.GetName() == CONCURRENT_MODULE_REQUESTS) {
+                return;
+            }
+        }
+
+        pandasm::AnnotationData anno(CONCURRENT_MODULE_REQUESTS);
+        for (auto &it : func.concurrent_module_requests) {
+            panda::pandasm::AnnotationElement module_request(ELEMENT_NAME, std::make_unique<pandasm::ScalarValue>(
+                pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(static_cast<uint32_t>(it))));
+            anno.AddElement(std::move(module_request));
+        }
+
+        std::vector<pandasm::AnnotationData> annos;
+        annos.emplace_back(anno);
+        func.metadata->AddAnnotations(annos);
+    }
+}
+
 bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info)
 {
     ASSERT(!progs.empty());
     for (auto *prog : progs) {
         MakeSlotNumberRecord(prog);
         MakeSlotNumberAnnotation(prog);
+        MakeConcurrentModuleRequestsRecord(prog);
+        MakeConcurrentModuleRequestsAnnotation(prog);
     }
 
     auto items = ItemContainer {};

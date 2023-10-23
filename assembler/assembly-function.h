@@ -88,6 +88,7 @@ struct Function {
     std::optional<FileLocation> file_location;
     panda::panda_file::FunctionKind function_kind = panda::panda_file::FunctionKind::NONE;
     size_t slots_num = 0;
+    std::vector<int> concurrent_module_requests;
 
     void SetSlotsNum(size_t num)
     {
