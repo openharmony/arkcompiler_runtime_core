@@ -12,24 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef VERIFIER_VERIFY_H
+#define VERIFIER_VERIFY_H
 
 #include "verifier.h"
 
-#include "file.h"
+#include <string>
 
-namespace panda::verifier {
-
-bool Verifier::Verify(const std::string &filename_in)
+bool Verify([[maybe_unused]] const std::string &input_file)
 {
-    std::unique_ptr<const panda_file::File> file;
-    auto file_to_verify = panda_file::File::Open(filename_in);
-    file.swap(file_to_verify);
-
-    if (file == nullptr) {
-        return false;
+    panda::verifier::Verifier vf {};
+    if (vf.Verify(input_file)) {
+        return true;
     }
 
-    return true;
+    return false;
 }
 
-} // namespace panda::verifier
+#endif

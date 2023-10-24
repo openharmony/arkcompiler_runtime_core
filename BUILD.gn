@@ -21,8 +21,11 @@ group("arkcompiler_params") {
   deps = [ "libpandafile:arkcompiler_params" ]
 }
 
-group("ark_device_tools") {
-  deps = [ "$ark_root/verifier:ark_verifier" ]
+group("ark_device_packages") {
+  deps = [
+    "$ark_root/verifier:ark_verifier",
+    "$ark_root/verifier:libarkverifier",
+  ]
 }
 
 group("ark_packages") {
