@@ -23,10 +23,10 @@ the language, but have no counterpart in |TS|, and are therefore not
 recommended to those who need a single source code for Typescript
 and |LANG|.
 
-Some features introduced in this Chapter are still under discussion, and can be
-removed from the final version of the |LANG| specification. Once a feature
+Some features introduced in this Chapter are still under discussion. They can
+be removed from the final version of the |LANG| specification. Once a feature
 introduced in this Chapter is approved and/or implemented, the corresponding
-section will be moved to an appropriate place in the body of the specification.
+section will be moved appropriately to the body of the specification.
 
 The *array creation* feature introduced in :ref:`Array Creation Expressions`
 enables users to dynamically create objects of array types by using runtime
@@ -64,11 +64,11 @@ in many OOP languages provides a way to restrict class inheritance and method
 overriding.
 
 Making a class *final* prohibits defining classes derived from it, whereas
-making a method *final* prevents overriding it in derived classes.
+making a method *final* prevents it from overriding in derived classes.
 
-Section :ref:`Extension Functions` defines an ability to extend a class or an
-interface with new functionality without having to inherit from the class.
-Such feature can be used for GUI programming (:ref:`Support for GUI Programming`).
+Section :ref:`Extension Functions` defines the ability to extend a class or an
+interface with new functionality without having to inherit from the class. This
+feature can be used for GUI programming (:ref:`Support for GUI Programming`).
 
 Section :ref:`Enumeration Methods` adds methods to declarations of the
 enumeration types. Such methods can help in some kinds of manipulations
@@ -90,14 +90,14 @@ the ‘ordinary’ program logic. There are constructs to raise (‘throw’) ex
 Also, some support for exceptions is provided by the classes from the standard
 library (see :ref:`Standard Library`).
 
-**Note**: The exceptions mechanism is sometimes under criticism for being too
-time-consuming and unsafe, and some modern languages do not support the
+**Note**: The exceptions mechanism is sometimes deprecated for being too
+time-consuming and unsafe. Some modern languages do not support the
 exceptions mechanism as discussed in this section. That is why the expediency
 of adding this feature to the language is still under discussion.
 
 The |LANG| language supports writing concurrent applications in the form of
-*coroutines* (see :ref:`Coroutines`) that allow to execute functions
-concurrently while the *channels* through which the coroutines can produce
+*coroutines* (see :ref:`Coroutines`) that allow executing functions
+concurrently, while the *channels* through which the coroutines can produce
 results are asynchronous.
 
 There is a basic set of language constructs that support concurrency. A function
@@ -118,7 +118,7 @@ launched as a separate thread explicitly by using the launch expression.
 The ``await`` statement is introduced to synchronize functions launched as
 threads. The generic class ``Promise<T>`` from the standard library (see
 :ref:`Standard Library`) is used to exchange information between threads.
-The class can be treated as an implementation of the channel mechanism.
+The class can be handled as an implementation of the channel mechanism.
 The class provides a number of methods to manipulate the values produced
 by threads.
 
@@ -170,7 +170,7 @@ described below, and in greater detail in :ref:`Generics Declaration-Site Varian
    declaration-site variance
 
 Normally, two different argument types that specialize a generic class are
-treated as different and unrelated types (*invariance*). |LANG| proposes
+handled as different and unrelated types (*invariance*). |LANG| proposes
 to extend the rule, and to allow such specializations become base classes and
 derived classes (*covariance*), or vice versa (*contravariance*), depending on
 the relationship of inheritance between argument types.
@@ -180,8 +180,8 @@ The markers are to be added to generic parameter declarations.
 
 The practices of some languages (e.g., Scala) have proven the usefulness of
 this powerful mechanism. However, its practical usage can be relatively
-difficult. Therefore, it is still under consideration whether to add this
-feature to the language.
+difficult. Therefore, whether to add this feature to the language or not
+is still under consideration.
 
 .. index::
    generic class
@@ -209,7 +209,9 @@ A *char literal* represents the following:
 
 -  A value with a single character; or
 -  A single escape sequence preceded by the characters 'single quote' (U+0027)
-   and 'c' (U+0063), and followed by a single quote.
+   and 'c' (U+0063), and followed by a 'single quote' U+0027).
+
+|
 
 .. code-block:: abnf
 
@@ -232,7 +234,7 @@ Examples:
       c'\x7F'
       c'\u0000'
 
-Char literals are of type *char*.
+*Char literals* are of type *char*.
 
 .. index::
    char literal
@@ -259,7 +261,7 @@ provide some initial values (see :ref:`Array Literal`).
    :linenos:
 
       newArrayInstance:
-          'new' type dimensionExpression+
+          'new' typeReference dimensionExpression+
           ;
 
       dimensionExpression:
@@ -282,6 +284,25 @@ A numeric conversion (see :ref:`Primitive Types Conversions`) is
 performed on each *dimensionExpression* to ensure that the resultant type
 is *int*. A :index:`compile-time error` occurs otherwise.
 
+A :index:`compile-time error` occurs if any *dimensionExpression* is a
+constant expression that is evaluated at compile time to a negative integer
+value.
+
+.. code-block:: typescript
+   :linenos:
+
+      let x = new number[-3] // compile-time error
+
+A :index:`compile-time error` occurs if *typeReference* refers to a class
+that does not contain an accessible parameterless constructor, or if
+*typeReference* has no a default value.
+
+.. code-block:: typescript
+   :linenos:
+
+      let x = new string[3] // compile-time error: string has no default value
+
+
 .. index::
    array creation expression
    object
@@ -303,7 +324,7 @@ Runtime Evaluation of Array Creation Expressions
 ************************************************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 The evaluation of an array creation expression at runtime is performed
 as follows:
@@ -325,9 +346,7 @@ as follows:
    (:ref:`Default Values for Types`).
    If the default value for an element type is not defined, but the element
    type is a class type, then its *parameterless* constructor is used to
-   create each element’s value. A :index:`compile-time error` occurs if an
-   element type is a class that does not contain an accessible parameterless
-   constructor, or if the element type does not have a default value.
+   create each element’s value. 
 
 #. When a multi-dimensional array is created, the array creation effectively
    executes a set of nested loops of depth *n-1*, and creates an implied
@@ -352,7 +371,7 @@ Enumeration Super Type
 **********************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
 
 Any *enum* type has class type *Object* as its supertype. This allows
 polymorphic assignments into *Object* type variables. The *instanceof*
@@ -389,9 +408,9 @@ Enumeration Types Conversions
 .. meta:
     frontend_status: Done
 
-Every *enum* type is compatible with type *Object* (see
-:ref:`Enumeration SuperType`), and thus every variable of *enum* type can be
-assigned into a mutable variable of type *Object*.
+Every *enum* type is compatible (see :ref:`Compatible Types`) with type
+*Object* (see :ref:`Enumeration SuperType`). Every variable of *enum* type can
+thus be assigned into a variable of type *Object*.
 
 .. index::
    enum type
@@ -450,7 +469,7 @@ Multiple Clauses in Statements
 
 When an exception or an error is thrown in the ``try`` block, or in a *throwing*
 (see :ref:`Throwing Functions`) or *rethrowing* (:ref:`Rethrowing Functions`)
-function called from the ``try`` block, then the control is transferred to
+function called from the ``try`` block, the control is transferred to
 the first *catch* clause if the statement has at least one *catch* clause
 that can catch that exception or error. If no *catch* clause is found, then
 *exception* or *error* is propagated to the surrounding scope.
@@ -480,8 +499,8 @@ A *catch* clause has two parts:
    access
 
 *Default catch clause* is a *catch* clause with the exception parameter type
-omitted; such a *catch* clause handles any exception or error that is not
-handled by any previous clause. The type of such a parameter is of the class
+omitted. Such a *catch* clause handles any exception or error that is not
+handled by any previous clause. The type of that parameter is of the class
 *Object*.
 
 A :index:`compile-time error` occurs if:
@@ -534,7 +553,7 @@ the surrounding scope.
 
 **Note**: If a ``try`` statement (*default catch clause*) is placed inside
 a *non-throwing* function (see :ref:`Non-Throwing Functions`), then 
-*exception* never propagates.
+*exception* is never propagated.
 
 .. index::
    exception
@@ -547,12 +566,12 @@ a *non-throwing* function (see :ref:`Non-Throwing Functions`), then
 If a *catch* clause contains a block that corresponds to the *error*'s
 parameter, then it can only handle that *error*.
 
-In a *default catch clause* the type of the *catch* clause parameter is
-omitted, and the *catch* clause can handle any *exceptions* or *errors*
+The type of the *catch* clause parameter in a *default catch clause* is
+omitted. The *catch* clause can handle any *exceptions* or *errors*
 unhandled by the previous clauses.
 
-The type of a *catch* clause parameter (if any) must be of the class
-*Error* or *Exception*, or of another class derived from those.
+The type of a *catch* clause parameter (if any) must be of the class *Error*
+or *Exception*, or of another class derived from *Exception* or *Error*.
 
 .. index::
    exception
@@ -574,7 +593,7 @@ The type of a *catch* clause parameter (if any) must be of the class
       }
 
 A *catch* clause handles the *DivideByZeroError* at runtime. Other errors
-are propagated to the surrounding scope unless the *catch* clause is found.
+are propagated to the surrounding scope if no *catch* clause is found.
 
 .. index::
    catch clause
@@ -587,8 +606,8 @@ are propagated to the surrounding scope unless the *catch* clause is found.
 
 .. _Assert Statements Experimental:
 
-``Assert``  Statements
-======================
+``Assert`` Statements
+=====================
 
 .. meta:
     frontend_status: Done
@@ -613,12 +632,12 @@ language allows having assertions either *enabled* or *disabled*.
    boolean
    string
 
-The execution of an *enabled* assertion starts from the evaluation of the
+The execution of the *enabled* assertion starts from the evaluation of the
 *boolean* expression. An error is thrown if the expression evaluates to
-``false``. The second expression is then evaluated (if provided), and its
-value passes as the error argument.
+``false``. The second expression is then evaluated (if provided). Its
+value passes as the *error* argument.
 
-The execution of a *disabled* assertion has no effect whatsoever.
+The execution of the *disabled* assertion has no effect whatsoever.
 
 .. index::
    assertion
@@ -650,7 +669,7 @@ specifying several headers for a function or method with different signatures.
 Most other languages support a different form of overloading that specifies
 a separate body for each overloaded header.
 
-While both approaches have their advantages and disadvantages, |LANG|'s
+Both approaches have their advantages and disadvantages. The |LANG|
 experimental approach allows for improved performance as a specific body
 is executed at runtime.
 
@@ -717,7 +736,7 @@ Class Method Overloading
 .. meta:
     frontend_status: Done
 
-If two methods within a class have the same name and their signatures are not
+If two methods within a class have the same name, and their signatures are not
 *override-equivalent*, then the methods' name is considered *overloaded*.
 
 An *overloaded* method name cannot cause a :index:`compile-time error`
@@ -827,7 +846,7 @@ Declarations with the same name are distinguishable by signatures if:
    class method overloading
 
 
-An example of functions distinguishable by signatures is shown below:
+The example below is of functions distinguishable by signatures:
 
 .. code-block:: typescript
    :linenos:
@@ -837,8 +856,8 @@ An example of functions distinguishable by signatures is shown below:
       function foo(x: number[]) {}
       function foo(x: string) {}
 
-An example of functions undistinguishable by signatures that cause a
-:index:`compile-time error` is shown below:
+The example below is of functions undistinguishable by signatures that cause a
+:index:`compile-time error`:
 
 .. index::
    function
@@ -937,8 +956,8 @@ Final Classes
 .. meta:
     frontend_status: Done
 
-A class may be declared *final* to prevent its extension. A class that is
-*final* can have no subclass, and thus no method of a *final* class can be
+A class may be declared *final* to prevent its extension. A class declared
+*final* cannot have subclasses, and no method of a *final* class can be
 overridden.
 
 A :index:`compile-time error` occurs if the *extends* clause of a class
@@ -972,7 +991,7 @@ A :index:`compile-time error` occurs if:
 -  A method declaration contains the keyword ``abstract`` or ``static``
    along with the keyword ``final``.
 
--  A method that is *final* is overridden.
+-  A method declared *final* is overridden.
 
 .. index::
    final method
@@ -993,7 +1012,7 @@ Default and Static Interface Methods
 ************************************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 |
 
@@ -1003,7 +1022,7 @@ Default Method Declarations
 ============================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 .. code-block:: abnf
 
@@ -1014,7 +1033,7 @@ Default Method Declarations
 A default method can be explicitly declared *private* in an interface body.
 
 A block of code that represents the body of a default method in an interface
-provides a default implementation for any class unless such class overrides
+provides a default implementation for any class if such class does not override
 the method to implement the interface.
 
 .. index::
@@ -1063,7 +1082,7 @@ methods.
 A :index:`compile-time error` occurs if:
 
 -  The body of a *static* method attempts to use the keywords ``this`` or
-   ``super`` to reference the current or a supertype object.
+   ``super`` to refer to the current or a supertype object.
 
 -  The header or body of a *static* method of an interface contains the
    name of any surrounding declaration’s type parameter.
@@ -1087,18 +1106,18 @@ Extension Functions
 
 .. meta:
     frontend_status: Partly
-    todo: support static extension function, import/export extension function, extension function for primitive type
+    todo: static extension functions, import/export of them, extension function for primitive types
 
 The *extension function* mechanism allows using a special form of top-level
 functions as class or interface extensions. Syntactically, *extension* is the
 addition of a new functionality.
 
-*Extenions* can be called in the usual way as if they were methods of the
+*Extensions* can be called in the usual way as if they were methods of the
 original class. However, *extensions* do not actually modify the classes they
-extend. No new member is inserted into a class, only new *extension functions*
+extend. No new member is inserted into a class; only new *extension functions*
 are callable with the *dot-notation* on variables of the class.
 
-*Extension functions* are dispatched statically, and what *extension function*
+*Extension functions* are dispatched statically; what *extension function*
 is being called is already known at compile time based on the receiver type
 specified in the extension function declaration.
 
@@ -1116,7 +1135,7 @@ specified in the extension function declaration.
    receiver type
    extension function declaration
 
-*Extension functions* specify names, signatures and bodies.
+*Extension functions* specify names, signatures, and bodies:
 
 .. code-block:: abnf
 
@@ -1130,7 +1149,7 @@ object (i.e., *typeReference* before the dot).
 
 Class or interface referred by typeReference, and *private* or *protected*
 members are not accessible within the bodies of their *extension functions*.
-Only *public* members can be accessed.
+Only *public* members can be accessed:
 
 .. index::
    keyword this
@@ -1161,20 +1180,21 @@ Only *public* members can be accessed.
 .. code-block:: typescript
    :linenos:
 
-     function <G> B<G>.foo(p: G) {
+     function <T> B<T>.foo(p: T) {
           console.log (p)
      }
-     foo (new SomeClass())
-        // Type inference should determine the instantiating type
-     foo <BaseClass>(new DerivedClass())
-        // Explicit instantiation
-
+     function demo (p1: B<SomeClass>, p2: B<BaseClass>) {
+         p1.foo (new SomeClass())
+           // Type inference should determine the instantiating type
+         p2.foo <BaseClass>(new DerivedClass())
+          // Explicit instantiation
+     }
 
 *Extension functions* are top-level functions, and can call each other. The
 form of such calls depends on whether static was used while declaring or not.
 This affects the kind of receiver to be used for the call. A *static extension
-function* requires the name of the type (class or interface); a *non-static
-extension function* requires a variable as receiver.
+function* requires the name of the type (class or interface). A *non-static
+extension function* requires a variable as receiver:
 
 .. code-block:: typescript
    :linenos:
@@ -1182,28 +1202,30 @@ extension function* requires a variable as receiver.
       class A {
           foo () { ...
              this.bar() // non-static extension function is called with this.
-             A.goo() // static extension function is called with class name reciever
+             A.goo() // static extension function is called with class name receiver
              ...
-          } 
+          }
       }
       function A.bar () { ... 
          this.foo() // Method foo() is called
-         A.goo() // Other static extension function is called with class name reciever
+         A.goo() // Other static extension function is called with class name receiver
          ...
       }                              
       static function A.goo () { ... 
-         this.foo() // Compile-time error as instance memebrs are not acessible
+         this.foo() // Compile-time error as instance members are not accessible
          this.bar() // Compile-time error as instance extension functions are not acessible
          ...
-      }                              
+      }
       let a = new A()
       a.foo() // Ordinary class method is called
       a.bar() // Class instance extension function is called
       A.goo() // Static extension function is called
 
-As *extension functions* are dispatched statically, they remain active for all
+*Extension functions* are dispatched statically and remain active for all
 derived classes until the next definition of the *extension function* for the
-derived class is found.
+derived class is found:
+
+|
 
 .. code-block:: typescript
    :linenos:
@@ -1225,7 +1247,6 @@ derived class is found.
 -  Put into a compilation unit other than class or interface; and
 -  Imported by using a name of the *extension function*.
 
-
 .. code-block:: typescript
    :linenos:
 
@@ -1234,7 +1255,7 @@ derived class is found.
       class A {
           foo () { ...
              this.bar() // non-static extension function is called with this.
-             A.goo() // static extension function is called with class name reciever
+             A.goo() // static extension function is called with class name receiver
              ...
           } 
       }
@@ -1244,10 +1265,10 @@ derived class is found.
       function A.bar () { ... 
          this.foo() // Method foo() is called
          ...
-      }                              
+      }
 
 If an *extension function* and a type method have the same name and signature,
-then calls to that name are routed to the method.
+then calls to that name are routed to the method:
 
 .. code-block:: typescript
    :linenos:
@@ -1260,15 +1281,17 @@ then calls to that name are routed to the method.
       a.foo() // Method is called, `Method A.foo is called` to be printed out
 
 The precedence between methods and *extension functions* can be expressed
-by the formula below:
+by the following formula:
 
   derived type instance method <
   base type instance method <
   derived type extension function <
-  base type type extension function
+  base type extension function.
 
 In other words, the priority of standard object-oriented semantics is higher
-than that of type extension functions.
+than that of type extension functions:
+
+|
 
 .. code-block:: typescript
    :linenos:
@@ -1298,8 +1321,8 @@ without a receiver as they have access to ``this``.
    :linenos:
 
       class A { ... }
-      function A.foo () { console.log ("Extension A.foo is called") }                              
-      function foo () { console.log ("Top-level foo is called") }                              
+      function A.foo () { console.log ("Extension A.foo is called") }
+      function foo () { console.log ("Top-level foo is called") }
       let a = new A()
       a.foo() // Extension function is called, `Extension A.foo is called` to be printed out
       foo () // Top-level function is called, `Top-level foo is called` to be printed out
@@ -1344,9 +1367,11 @@ Syntactically, the *trailing lambda* looks as follows:
 
 The formal syntax of the *trailing lambda* is presented below:
 
+|
+
 .. code-block:: abnf
 
-    trailingLambdaCall: 
+    trailingLambdaCall:
         ( objectReference '.' identifier typeArguments? 
         | expression ('?.' | typeArguments)?
         )
@@ -1357,14 +1382,14 @@ The formal syntax of the *trailing lambda* is presented below:
 Currently, no parameter can be specified for the trailing lambda. A
 compile-time error occurs otherwise.
 
-**Note**: If a call is followed by a block when the function or method
+**Note**: If a call is followed by a block, and the function or method
 being called has no last function type parameter, then such block is
-treated as an ordinary block of statements but not as a lambda function.
+handled as an ordinary block of statements but not as a lambda function.
 
-In the case of other ambiguities---e.g., when a function or method call has
+In case of other ambiguities---e.g., when a function or method call has
 the last parameter, which can be optional, of a function type---the syntax
 production that starts with '{' following the function or method call is
-treated as the *trailing lambda*.
+handled as the *trailing lambda*.
 If other semantics is needed, then a separating semicolon ';' can be used.
 It means that the function or the method is to be called without the last
 argument (see :ref:`Optional Parameters`).
@@ -1382,7 +1407,7 @@ argument (see :ref:`Optional Parameters`).
 
       a.foo(); { console.log ("that is the block code") }
       // method 'foo' is called with 'p' parameter set to 'undefined'
-      // ';' allows to specify expliclty that '{' starts the block
+      // ';' allows to specify explicitly that '{' starts the block
 
       function bar(f: ()=>void) { ... }
 
@@ -1463,8 +1488,8 @@ There is an additional method for instances of any enumeration type:
       let c: Color = Color.Green
       console.log(c.getValue()) // prints 10
 
-**Note**: ``c.toString()`` returns the same value as ``c.getValue()`` but with
-its type converted to *string* for enumeration constants of a numeric type.
+**Note**: ``c.toString()`` returns the same value as ``c.getValue()``; its
+type must be converted to *string* for enumeration constants of a numeric type.
 
 .. index::
    instance
@@ -1487,7 +1512,7 @@ Exceptions
 
 *Exception* is the base class of all exceptions. *Exception* is used to
 define a new exception, or any class derived from the *Exception* as the
-base of a class.
+base of a class:
 
 .. code-block:: typescript
    :linenos:
@@ -1557,7 +1582,7 @@ throw an exception. A function ending with ``throws`` is called a
       function canThrow(x: int): int throws { ... }
 
 A *throwing function* can propagate exceptions to the scope from which
-it is called. Such propagation of an *exception* occurs if:
+it is called. The propagation of an *exception* occurs if:
 
 -  The call of a *throwing function* is not enclosed in a ``try`` statement; or
 
@@ -1584,8 +1609,8 @@ statement; any exception raised by *canThrow* function is propagated:
       }
 
 
-In the example below, the ``try`` statement can catch only ``this`` exceptions;
-any exception raised by *canThrow* function---but for *MyException* itself, and
+In the example below, the ``try`` statement can catch only ``this`` exceptions.
+Any exception raised by *canThrow* function---but for *MyException* itself, and
 any exception derived from *MyException*---is propagated:
 
 .. index::
@@ -1605,8 +1630,6 @@ any exception derived from *MyException*---is propagated:
           return 0
       }
 
-|
-
 .. _Non-Throwing Functions:
 
 Non-Throwing Functions
@@ -1619,8 +1642,8 @@ A *non-throwing function* is a function (this notion here includes methods,
 constructors, or lambdas) not marked as ``throws``. Any exceptions inside a
 *non-throwing function* must be handled inside the function.
 
-A :index:`compile-time error` occurs unless **all** of the following requirements
-are met:
+A :index:`compile-time error` occurs if not **all** of the following
+requirements are met:
 
 -  The call of a *throwing function* is enclosed in a ``try`` statement;
 
@@ -1662,7 +1685,7 @@ Rethrowing Functions
 ====================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 A *rethrowing function* is a function that accepts a *throwing function* as a
 parameter, and is marked with the keyword ``rethrows``.
@@ -1717,7 +1740,7 @@ A call is exception-free if:
 
 -  All actual arguments of the call to *foo* are non-throwing.
 
-However, the call can raise an exception, and is treated as any other
+However, the call can raise an exception, and is handled as any other
 *throwing function* call if at least one of the actual function arguments
 is *throwing*.
 
@@ -1766,7 +1789,7 @@ Exceptions and Initialization Expression
 A *variable declaration* (see :ref:`Variable Declarations`) or a *constant
 declaration* (see :ref:`Constant Declarations`) expression used to initialize
 a variable or constant must not have calls to functions that can *throw* or
-*rethrow* exceptions unless such declaration is within a statement that handles
+*rethrow* exceptions if the declaration is not within a statement that handles
 all exceptions.
 
 See :ref:`Throwing Functions` and :ref:`Rethrowing Functions` for details.
@@ -1849,8 +1872,10 @@ The following expression is used to create and launch a coroutine:
 
       launchExpression: 'launch' expression;
 
-A :index:`compile-time error` occurs unless the expression is a *function call
+A :index:`compile-time error` occurs if the expression is not a *function call
 expression* (see :ref:`Function Call Expression`).
+
+|
 
 .. code-block:: typescript
    :linenos:
@@ -1864,7 +1889,7 @@ expression* (see :ref:`Function Call Expression`).
         return res
       }
 
-Lambda is used in the launch expression:
+Lambda is used in the launch expression as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -1932,7 +1957,7 @@ coroutine finishes and returns a value.
         'await' expression
         ;
 
-A :index:`compile-time error` occurs unless the expression type is *Promise<T>*.
+A :index:`compile-time error` occurs if the expression type is not *Promise<T>*.
 
 .. index::
    expression await
@@ -1975,7 +2000,7 @@ The class  *Promise<T>* represents the values returned by launch expressions.
 The definition of type *Promise<T>* belongs the '*package std.core*'
 of the standard library (see :ref:`Standard Library`).
 
-Methods:
+The following methods are used:
 
 -  *then* takes two arguments (the first argument is the callback used if the
    promise is fulfilled, and the second if it is rejected), and returns
@@ -2059,10 +2084,10 @@ regular function.
 
 The return type of an *async* function must be *Promise<T>* (see
 :ref:`The Promise T Class`).
-It is allowed to return values of types *Promise<T>* and *T* from
-the function *async*.
+Returning values of types *Promise<T>* and *T* from the function *async*
+is allowed.
 
-It is allowed to use return statement without expression if the return type
+Using return statement without expression is allowed if the return type
 is *Promise<void>*.
 *No-argument* return statement can be implicitly added as the last statement
 of the function body if there is no explicit return statement in a function
@@ -2168,7 +2193,7 @@ Internal Access Modifier
 
 The modifier *internal* indicates that a class member or a constructor is
 accessible within their compilation unit only. A compilation unit that is a
-package can be used in any *package modules* (see :ref:`Packages`).
+package can be used in any *package module* (see :ref:`Packages`).
 
 .. index::
    modifier
@@ -2428,7 +2453,7 @@ Overloading of Function Names
 .. meta:
     frontend_status: Done
 
-**Overloading** is the situation that a compilation unit has access to several
+**Overloading** is the situation when a compilation unit has access to several
 functions with the same names (regardless of where such functions are declared).
 The code can use all such functions if they have distinguishable signatures
 (i.e., the functions are not override-equivalent):

@@ -15,19 +15,15 @@
 Ambient Declarations
 ####################
 
-.. meta:
-    frontend_status: Partly
-    todo: ambient variable, namespace, enum, type alias declarations
-
-Ambient declarations are a way of specifying entities that are declared
+Ambient declarations are the way to specify entities that are declared
 somewhere else.
 
 Ambient declarations do not introduce new entities---as regular declarations
 do---but instead provide type information for the entities that are included
 in a program by external means.
 
-Ambient declarations cannot include executable code, and consequently have
-no initializers.
+Ambient declarations cannot include executable code. As a consequence, they
+have no initializers.
 
 Ambient functions, methods, and constructors have no body.
 
@@ -56,7 +52,7 @@ Ambient functions, methods, and constructors have no body.
         )
         ;
 
-A compile-time error occurs if the modifier 'declare' is used in a context
+A compile-time error occurs if the modifier '*declare*' is used in a context
 that is already ambient:
 
 .. code-block:: typescript
@@ -76,9 +72,6 @@ that is already ambient:
 
 Ambient Variable Declarations
 *****************************
-
-.. meta:
-    frontend_status: None
 
 .. code-block:: abnf
 
@@ -104,9 +97,6 @@ The type annotation is mandatory for each ambient variable.
 
 Ambient Function Declarations
 *****************************
-
-.. meta:
-    frontend_status: Done
 
 .. code-block:: abnf
 
@@ -154,7 +144,7 @@ Ambient function declarations cannot specify function bodies.
     declare function bar(y: number = 1): void // compile-time error
     
 
-**Note**: 'async' modifier cannot be used in an ambient context.
+**Note**: The modifier 'async' cannot be used in an ambient context.
 
 .. index::
    ambient function
@@ -170,9 +160,6 @@ Ambient function declarations cannot specify function bodies.
 
 Ambient Class Declarations
 **************************
-
-.. meta:
-    frontend_status: Done
 
 .. code-block:: abnf
 
@@ -192,7 +179,7 @@ Ambient Class Declarations
         ;
     
 
-Ambient field declarations have no initializers.
+Ambient field declarations have no initializers:
 
 .. index::
    ambient field declaration
@@ -204,7 +191,7 @@ Ambient field declarations have no initializers.
         fieldModifier* ('let' | 'const') identifier ':' type
         ;
 
-Ambient constructor, method, and accessor declarations have no bodies.
+Ambient constructor, method, and accessor declarations have no bodies:
 
 .. code-block:: abnf
 
@@ -234,9 +221,6 @@ Ambient constructor, method, and accessor declarations have no bodies.
 Ambient Interface Declarations
 ******************************
 
-.. meta:
-    frontend_status: Done
-
 .. code-block:: abnf
 
     ambientInterfaceDeclaration:
@@ -248,9 +232,6 @@ Ambient Interface Declarations
 
 Ambient Namespace Declarations
 ******************************
-
-.. meta:
-    frontend_status: None
 
 .. code-block:: abnf
 

@@ -170,7 +170,6 @@ Identifiers
 
 .. meta:
     frontend_status: Done
-    todo: Identifier starting with '\$\$' is invalid now, double dollar is an operator now, but single dollar and double dollar in middle of the identifier is still valid.
 
 An identifier is a sequence of one or more valid Unicode characters. The
 Unicode grammar of identifiers is based on character properties
@@ -192,23 +191,23 @@ characters: '\$' (\\U+0024), 'Zero-Width Non-Joiner' (<ZWNJ>, \\U+200C), or
 .. code-block:: abnf
 
     Identifier:
-        IdentifierStart IdentifierPart \*
-        ;
+      IdentifierStart IdentifierPart \*
+      ;
 
     IdentifierStart:
-        UnicodeIDStart
-        | '$'
-        | '_'
-        | '\\' EscapeSequence
-        ;
+      UnicodeIDStart
+      | '$'
+      | '_'
+      | '\\' EscapeSequence
+      ;
 
     IdentifierPart:
-        UnicodeIDContinue
-        | '$'
-        | <ZWNJ>
-        | <ZWJ>
-        | '\\' EscapeSequence
-        ;
+      UnicodeIDContinue
+      | '$'
+      | <ZWNJ>
+      | <ZWJ>
+      | '\\' EscapeSequence
+      ;
 
 |
 
@@ -276,13 +275,13 @@ keywords*) but are valid identifiers elsewhere:
 +---------------+---------------+---------------+---------------+
 |               |               |               |               |
 +===============+===============+===============+===============+
-| catch         | from          | out           | struct        |
+| catch         | from          | of            | set           |
 +---------------+---------------+---------------+---------------+
-| declare       | get           | readonly      | throws        |
+| declare       | get           | out           | struct        |
 +---------------+---------------+---------------+---------------+
-| default       | in            | rethrows      |               |
+| default       | in            | readonly      | throws        |
 +---------------+---------------+---------------+---------------+
-| finally       | of            | set           |               |
+| finally       | keyof         | rethrows      |               |
 +---------------+---------------+---------------+---------------+
 
 The following words cannot be used as user-defined type names but are
@@ -374,6 +373,20 @@ Literals
 
 *Literals* are representations of certain value types.
 
+.. code-block:: abnf
+
+    Literal:
+      IntegerLiteral
+      | FloatLiteral
+      | BigIntLiteral
+      | BooleanLiteral
+      | StringLiteral
+      | TemplateLiteral
+      | NullLiteral
+      | UndefinedLiteral
+      | CharLiteral
+      ;
+
 See :ref:`Char Literals` for the experimental *char literal*.
 
 .. index::
@@ -390,7 +403,7 @@ Integer Literals
 
 .. meta:
     frontend_status: Done
-    todo: note: let number: long=0xFFFFFFFF --> 0xFFFFFFFF FFFFFFFF, because the int typed -1 is sign extended. 0xFFFFFFFF is not interpreted as 4294967295, decause it does not fit in an int
+    todo: note: let number: long=0xFFFFFFFF --> 0xFFFFFFFF FFFFFFFF, because the int typed -1 is sign extended. 0xFFFFFFFF is not interpreted as 4294967295, because it does not fit in an int
 
 *Integer literals* represent numbers that do not have a decimal point or
 an exponential part. Integer literals can be written with bases 16
@@ -406,6 +419,13 @@ an exponential part. Integer literals can be written with bases 16
    
    
 .. code-block:: abnf
+
+    IntegerLiteral:
+      DecimalIntegerLiteral
+      | HexIntegerLiteral
+      | OctalIntegerLiteral
+      | BinaryIntegerLiteral
+      ;
 
     DecimalIntegerLiteral:
       '0'
@@ -430,7 +450,7 @@ an exponential part. Integer literals can be written with bases 16
       '0' [bB] ( [01] | [01] [01_]* [01] )
       ;
 
-Examples:
+Examples are presented below:
 
 .. code-block:: typescript
    :linenos:
@@ -487,8 +507,8 @@ Floating-Point Literals
     todo: 'f' suffix
 
 *Floating-point literals* represent decimal numbers and consist of a
-whole-number part, a decimal point, a fraction part,
-an exponent, and a float type suffix.
+whole-number part, a decimal point, a fraction part, an exponent, and
+a float type suffix:
    
 .. code-block:: abnf
 
@@ -510,7 +530,9 @@ an exponent, and a float type suffix.
         'f'
         ;
 
-Examples:
+Examples are presented below:
+
+|
 
 .. code-block:: typescript
    :linenos:
@@ -528,11 +550,12 @@ Underscore characters in such positions do not change the values of literals.
 However, an underscore character must not be the very first and the very
 last symbol of an integer literal.
 
-A floating-point literal is of type *float* if *float type suffix* is present 
+A floating-point literal is of type *float* if *float type suffix* is present
 and is of type *double* otherwise (type *number* is an alias to
 *double*). 
 
-A :index:`compile-time error` occurs if a non-zero floating-point literal is too large for its type.
+A compile-time error occurs if a non-zero floating-point literal is
+too large for its type.
 
 A floating-point literal in variable and constant declarations
 can be implicitly converted to type *float* (see
@@ -540,6 +563,7 @@ can be implicitly converted to type *float* (see
 
 .. index::
    floating-point literal
+   compile-time error
    prefix
    underscore character
    implicit conversion
@@ -566,7 +590,7 @@ digits followed by the symbol 'n'.
       | [1-9] ('_'? [0-9])* 'n'
       ;
 
-Examples:
+Examples are presented below:
 
 .. code-block:: typescript
 
@@ -605,7 +629,7 @@ are possible:
     BigInt.asIntN(bitsCount: long, bigIntToCut: bigint): bigint
     BigInt.asUintN(bitsCount: long, bigIntToCut: bigint): bigint
 
-|
+
 
 .. _Boolean Literals:
 
@@ -654,7 +678,6 @@ type (see :ref:`String Type`).
    template literal
    predefined reference type
 
-|
 
 .. code-block:: abnf
 
@@ -699,40 +722,40 @@ others.
 An escape sequence always starts with the backslash character '``\``', followed
 by one of the following characters:
 
--  ``”`` (double quote, U+0022)
+-  ``”`` (double quote, U+0022),
 
 .. "
 
--  ``'`` (neutral single quote, U+0027)
+-  ``'`` (neutral single quote, U+0027),
 
 .. ’ U+2019
 
--  ``b`` (backspace, U+0008)
+-  ``b`` (backspace, U+0008),
 
--  ``f`` (form feed, U+000c)
+-  ``f`` (form feed, U+000c),
 
--  ``n`` (linefeed, U+000a)
+-  ``n`` (linefeed, U+000a),
 
--  ``r`` (carriage return, U+000d)
+-  ``r`` (carriage return, U+000d),
 
--  ``t`` (horizontal tab, U+0009)
+-  ``t`` (horizontal tab, U+0009),
 
--  ``v`` (vertical tab, U+000b)
+-  ``v`` (vertical tab, U+000b),
 
--  ``\`` (backslash, U+005c)
+-  ``\`` (backslash, U+005c),
 
--  ``x`` and two hexadecimal digits, like ``7F``
+-  ``x`` and two hexadecimal digits, like ``7F``,
 
 -  ``u`` and four hexadecimal digits, forming a fixed Unicode escape
-   sequence like ``\u005c``
+   sequence like ``\u005c``,
 
 -  ``u{`` and at least one hexadecimal digit, followed by ``}``, forming
-   a bounded Unicode escape sequence like ``\u{5c}``
+   a bounded Unicode escape sequence like ``\u{5c}``, and
 
 -  any single character except digits from ‘1’ to ‘9’ and characters ‘x’,
    ‘u’, CR, and LF.
 
-Examples:
+Examples are provided below:
 
 .. code-block:: typescript
    :linenos:
@@ -785,7 +808,9 @@ evaluated at compile time. The evaluation of a template string is called
 
 See :ref:`String Interpolation Expressions` for the grammar of *embeddedExpression*.
 
-Below is an example of a multi-line string:
+An example of a multi-line string is provided below:
+
+|
 
 .. code-block:: typescript
    :linenos:
@@ -871,7 +896,7 @@ the line.
 *Multi-line comments* start with the character sequence '/\*' and stop with
 the first subsequent character sequence '\*/'.
 
-Comments can be nested.
+A comment cannot start inside a comment.
 
 .. index::
    comment

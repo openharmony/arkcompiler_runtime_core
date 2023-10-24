@@ -16,7 +16,7 @@ Enumerations
 ############
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 An enumeration type *enum* specifies a distinct type with an associated set
 of named constants that define its possible values:
@@ -39,7 +39,7 @@ of named constants that define its possible values:
    enumeration
    named constant
 
-Use the mandatory qualification by type to access the enumeration constant:
+Qualification by type is mandatory to access the enumeration constant:
 
 .. code-block:: typescript
    :linenos:
@@ -47,7 +47,7 @@ Use the mandatory qualification by type to access the enumeration constant:
     enum Color { Red, Green, Blue }
     let c: Color = Color.Red
 
-If the enumeration type is exported, then all enumeration constants are
+If enumeration type is exported, then all enumeration constants are
 exported along with the mandatory qualification.
 
 For example, if *Color* is exported, then all constants like *Color.Red*
@@ -70,11 +70,16 @@ is set implicitly to a numeric value (see :ref:`Enumeration Integer Values`).
 A compile-time error occurs if ``integer`` and ``string`` type enumeration
 constants are mixed in one enumeration.
 
+In addition, all enumeration constant names are to be unique. Otherwise,
+a compile-time error occurs.
+
 .. code-block:: typescript
    :linenos:
 
     enum E1 { A, B = "hello" } // compile-time error
     enum E2 { A = 5, B = "hello" } // compile-time error
+    enum E3 { A = 5, A = 77 } // compile-time error
+    enum E4 { A = 5, B = 5 } // OK! values can be the same
 
 .. index::
    enum constant
@@ -94,7 +99,7 @@ Enumeration Integer Values
 **************************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: None
 
 The integer value of an *enum* constant is set implicitly if an enumeration
 constant specifies no value.
@@ -132,20 +137,14 @@ the values of the constants are set by the following rules:
    constant
    assignment
 
-In the following example:
+In the example below, the value of ``Red`` is 0, of ``Blue``, 5, and of
+``Green``, 6:
 
 .. code-block:: typescript
    :linenos:
 
     enum Color { Red, Blue = 5, Green }
 
-the value of ``Red`` is 0, of ``Blue``, 5, and of ``Green``, 6.
-
-A compile-time error occurs if two constants have the same value.
-
-.. index::
-   compile-time error
-   constant
 
 |
 
@@ -157,7 +156,7 @@ Enumeration String Values
 .. meta:
     frontend_status: Done
 
-A string value for enumeration constants must be set explicitly.
+A string value for enumeration constants must be set explicitly:
 
 .. code-block:: typescript
    :linenos:
@@ -178,7 +177,6 @@ Enumeration Operations
 
 .. meta:
     frontend_status: Partly
-    todo: access of enumeration name by idex is not supported yet
 
 The value of an enumeration constant can be converted to type *string* by
 using the method ``toString``:
@@ -204,8 +202,8 @@ to get the name of the constant:
     let c: Color = Color.Green
     console.log(Color[c]) // prints: Green
 
-See :ref:`Enumeration Methods` in the experimental section for the additional
-methods available for enumeration types and constants.
+The additional methods available for enumeration types and constants can be
+found in :ref:`Enumeration Methods` in the chapter Experimental Features.
 
 .. index::
    enumeration constant
@@ -216,3 +214,5 @@ methods available for enumeration types and constants.
 .. raw:: pdf
 
    PageBreak
+
+

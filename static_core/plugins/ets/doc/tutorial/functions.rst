@@ -90,7 +90,7 @@ functions or methods can take an unlimited number of arguments.
 Return Types
 ------------
 
-If the function return type is inferrable from the function body's content,
+If the function return type is inferable from the function body's content,
 then it can be omitted from the function declaration.
 
 .. code-block:: typescript

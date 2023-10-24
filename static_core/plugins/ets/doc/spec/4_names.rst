@@ -53,7 +53,7 @@ Names
 .. meta:
     frontend_status: Done
     todo: A qualified name N.x may be used to refer to a member of package... If N names a package, then x is member of that package
-    todo: Do we raeely want to support std.core.Double? If yes, it should be clariffied in 14.6 Import declaration section
+    todo: Do we rarely want to support std.core.Double? If yes, it should be clarified in 14.6 Import declaration section
 
 A name refers to any declared entity.
 
@@ -120,7 +120,7 @@ Distinguishable Declarations
     frontend_status: Partly
     todo: const PI = 3.14;function PI():float{return 3.14};let a = PI(); error: TypeError: Unresolved reference PI
     todo: const PI:()=>int = ():int=>{return 5};function PI():float{return 3.14};let a = PI(); error: a is 5
-    todo: need scpec clarification
+    todo: need spec clarification
 
 Each declaration in the declaration scope must be *distinguishable*.
 A :index:`compile-time error` occurs otherwise.
@@ -147,6 +147,12 @@ The examples below are declarations distinguishable by names:
     const pi = 3
     function Pi() {}
     type IP = number[]
+    class A {
+        static method() {}
+        method() {}
+        field: number = PI
+        static field: number = PI + pi
+    }
 
 The examples below are declarations indistinguishable by names.
 Such declarations cause compile-time errors:
@@ -182,7 +188,8 @@ Scopes
 ******
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: there are some TBD in spec
 
 The **scope** of a name is the region of program code within which the entity
 declared by that name can be referred to without the qualification of the name.
@@ -233,10 +240,15 @@ The scope of a name depends on the context the name is declared in:
    declaration
 
 .. _class-access:
-
--  A name declared within a class (*class level scope*) is accessible in that
+  
+-  A name declared inside a class (*class level scope*) is accessible in that
    class and sometimes, depending on the access modifier, outside the class or
-   by methods of derived classes.
+   by methods of derived classes. Access to such names inside the class is 
+   qualified with *this* for the names of instance entities and by the name of
+   the class for the static ones. Outside access is qualified by the
+   expression which value stores a reference to the class instance 
+   for the names of instance entities and by the name of
+   the class for the static ones.
 
 .. index::
    class level scope
@@ -246,12 +258,12 @@ The scope of a name depends on the context the name is declared in:
    modifier
    derived class
    declaration
-
+   
 .. _interface-access:
 
 -  A name declared inside an interface (*interface level scope*) is accessible
    inside and outside that interface (default public).
-
+   
 .. index::
    name
    declaration
@@ -384,7 +396,6 @@ declarations.
    class declaration
    enum declaration
 
-|
 
 .. _Type Alias Declaration:
 
@@ -481,7 +492,7 @@ Recursive Type Aliases
 In a type alias defined as *type A = something*, *A* can be used recursively
 if it is one of the following:
 
--  Array element type: *type A = A[]*; or
+-  Array element type: ``type A = A[]``; or
 -  Type argument of a generic type: type A = C<A>.
 
 .. code-block:: typescript
@@ -489,7 +500,7 @@ if it is one of the following:
 
     type A = A[] // ok, used as element type
 
-    class C<G> { /*body*/}
+    class C<T> { /*body*/}
     type B = C<B> // ok, used as a type argument
 
     type D = string | Array<D> // ok
@@ -506,15 +517,15 @@ does not have enough information about the defined alias:
 
 
 The same rules apply to a generic type alias defined as
-*type A<G> = something*:
+*type A<T> = something*:
 
 .. code-block:: typescript
    :linenos:
 
-    type A<G> = Array<A<G>> // ok, A<G> is used as a type argument
-    type A<G> = string | Array<A<G>> // ok
+    type A<T> = Array<A<T>> // ok, A<T> is used as a type argument
+    type A<T> = string | Array<A<T>> // ok
 
-    type A<G> = A<G> // compile-time error
+    type A<T> = A<T> // compile-time error
 
 
 A compile-time error occurs if a generic type alias is used without
@@ -522,19 +533,18 @@ a type argument:
 
 .. code-block:: typescript
    :linenos:
+   
+    type A<T> = Array<A> // compile-time error
 
-    type A<G> = Array<A> // compile-time error
-
-**Note**: There is no restriction on using a type parameter *G* in
+**Note**: There is no restriction on using a type parameter *T* in
 the right side of a type alias declaration. The following code
 is valid:
 
 .. code-block:: typescript
    :linenos:
 
-    type NodeValue<G> = G | Array<G> | Array<NodeValue<G>>;
+    type NodeValue<T> = T | Array<T> | Array<NodeValue<T>>; 
 
-|
 |
 
 .. _Variable and Constant Declarations:
@@ -545,8 +555,6 @@ Variable and Constant Declarations
 .. meta:
     frontend_status: Partly
 
-|
-
 .. _Variable Declarations:
 
 Variable Declarations
@@ -554,12 +562,14 @@ Variable Declarations
 
 .. meta:
     frontend_status: Done
-    todo: spec issue: missing the default value for unsigned types - but would be better to remove entirely, just reference to 3.6 Default Valuew
-    todo: es2panda bug: A local variable must be explicitly given a value before ifis used, by either
+    todo: spec issue: missing the default value for unsigned types - but would be better to remove entirely, just reference to 3.6 Default Value
+    todo: es2panda bug: A local variable must be explicitly given a value before if is used, by either
     todo: "Every variable in program must have a value before its value is used" - Can't be guaranteed in compile time that a non-nullable array component is initialized. initialization or assignment. But we got no error if don't init a primitive typed local var.
 
 A *variable declaration* introduces a new named variable that can be assigned
-an initial value.
+an initial value:
+
+|
 
 .. code-block:: abnf
 
@@ -572,7 +582,7 @@ an initial value.
         ;
 
     variableDeclaration:
-        identifier ('?')? ':' type initializer?
+        identifier ('?')? ':' type initializer? 
         | identifier initializer
         ;
 
@@ -659,7 +669,6 @@ to the content of such expression as described in :ref:`Exceptions and Initializ
    initializer expression
    restriction
 
-|
 
 .. _Constant Declarations:
 
@@ -789,7 +798,7 @@ Type Inference from Initializer
 
 .. meta:
     frontend_status: Partly
-    todo: spec issue: "If initializer expression is a null literal('null') the compiler error should be reported". Why is it striked out? "let a = null" should be CTE A: scpec will be changed, a will have "Object|null tyoe"
+    todo: spec issue: "If initializer expression is a null literal('null') the compiler error should be reported". Why is it striked out? "let a = null" should be CTE A: spec will be changed, a will have "Object|null tyoe"
 
 The type of a declared entity is one of the following:
 
@@ -865,7 +874,6 @@ Function expressions must be used to define lambdas (see
    top-level statement
    lambda
 
-|
 
 .. _Signatures:
 
@@ -922,7 +930,8 @@ Parameter List
 ==============
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: implement readonly parameters
 
 A signature contains a *parameter list* that specifies an identifier of
 each parameter name, and the type of each parameter. The type of each
@@ -931,22 +940,38 @@ parameter must be explicitly defined.
 .. code-block:: abnf
 
     parameterList:
-        parameter (',' parameter)* (',' optionalParameters|restParameter)?
+        parameter (',' parameter)* (',' optionalParameters|restParameter)? 
         | restParameter
         | optionalParameters
         ;
 
     parameter:
-        identifier ':' type
+        identifier ':' 'readonly'? type
         ;
 
     restParameter:
         '...' parameter
         ;
 
+If the parameter type is prefixed with *readonly*, then the type must be of
+array type *T[]*. Otherwise, a compile-time error occurs. The meaning of the
+parameter is that the function or method body cannot modify the array content.
+An operation that modifies array content causes a compile-time error.
+
+|
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(array: readonly number[]) {
+        let element = array[0] // OK, one can get array element
+        array[0] = element // Compile-time error, array is readonly
+    }
+
+
 The last parameter of a function can be a *rest parameter*
 (see :ref:`Rest Parameter`) or a sequence of *optional parameters*
-(see :ref:`Optional Parameters`). Such construction allows to omit
+(see :ref:`Optional Parameters`). Such a construction allows omitting
 the corresponding argument when calling a function. If a parameter is not
 *optional*, then each function call must contain an argument corresponding
 to that parameter. Non-optional parameters are called the *required parameters*.
@@ -983,10 +1008,6 @@ A :index:`compile-time error` occurs if an *optional parameter* precedes a
 Optional Parameters
 ===================
 
-.. meta:
-    frontend_status: Partly
-    todo: support call with placeholders
-
 There are two forms of *optional parameters*:
 
 .. code-block:: abnf
@@ -994,10 +1015,10 @@ There are two forms of *optional parameters*:
     optionalParameters:
         optionalParameter (',' optionalParameter)
         ;
-
+    
     optionalParameter:
-        identifier ':' type '=' expression
-        | identifier '?' ':' type
+        identifier ':' 'readonly'? type '=' expression
+        | identifier '?' ':' 'readonly'? type
         ;
 
 
@@ -1049,8 +1070,6 @@ implicit boxing must be applied as follows:
 For example, the following two functions can be used in the same way:
 
 |
-|
-|
 
 .. code-block:: typescript
    :linenos:
@@ -1077,9 +1096,6 @@ For example, the following two functions can be used in the same way:
 
 Rest Parameter
 ==============
-
-.. meta:
-    frontend_status: Done
 
 A *rest parameter* allows functions or methods to take unbounded numbers
 of arguments.
@@ -1131,8 +1147,6 @@ number of arguments of type ``T``.
 
 If an argument of type ``T[]`` is prefixed with the *spread* operator
 '``...``', then only one argument can be accepted.
-
-|
 
 .. code-block:: typescript
    :linenos:
@@ -1261,7 +1275,7 @@ The example below is an illustration of type inference:
         else
             return new Derived2()
     }
-    /* Return type of bar will be inferred as Base which is
+    /* Return type of bar will be inferred as Base which is 
        LUB for Derived1 and Derived2 */
 
 |
@@ -1306,8 +1320,6 @@ and the other has a single parameter):
    implementation
    method overload signature
 
-|
-
 .. code-block:: typescript
    :linenos:
 
@@ -1325,7 +1337,7 @@ with the ``null`` argument; the call of ``foo(x)`` is executed as a call
 of the implementation function with the ``x`` argument.
 
 A :index:`compile-time error` occurs if the signature of function
-implementation is not *overload signature-compatible* with each overload
+implementation is not *overload signature-compatible*  with each overload
 signature. It means that a call of each overload signature must be replaceable
 for the correct call of the implementation function. That can be achieved by
 using optional parameters (see :ref:`Optional Parameters`), or *least upper
@@ -1333,7 +1345,7 @@ bound* types (see :ref:`Least Upper Bound`). The exact semantic rules can
 be found in :ref:`Overload Signature Compatibility`.
 
 A :index:`compile-time error` occurs unless all overload signatures are
-exported or non-exported.
+either exported or non-exported.
 
 .. index::
    call
@@ -1350,3 +1362,5 @@ exported or non-exported.
 .. raw:: pdf
 
    PageBreak
+
+

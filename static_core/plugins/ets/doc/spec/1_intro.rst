@@ -62,18 +62,20 @@ The following major aspects characterize the |LANG| language as a whole:
 -  Modularity
 
    The |LANG| language supports the *component programming approach*. It
-   presumes that software is designed and implemented as a composition of
-   compilation units. A compilation unit in |LANG| is a standalone, independently
-   compiled package or module that combines various programming resources (types,
-   classes, functions, and so on). A package can combine several modules into a
-   single logically consistent compilation unit. A module or a package
-   communicates with other compilation units by exporting all or some of its
-   resources to, or importing from other units. This feature provides a
-   high-quality software development process and software maintainability,
-   while supporting flexible reuse of  software, and efficient version control.
+   presumes that software is designed and implemented as a composition
+   of *compilation units*.
+   A compilation unit is typically represented as a *module* or as a package.
+   A module in |LANG| is a standalone, independently compiled unit that
+   combines various programming resources (types, classes, functions, and so
+   on). A module can communicate with other modules by exporting all or some
+   of its resources to, or importing from other modules. This feature
+   provides a high level of software development process and software
+   maintainability, supports flexible module reuse and efficient version
+   control.
 
 .. index::
    modularity
+   compilation unit
    module
    package
 
@@ -247,7 +249,7 @@ with terminal and nonterminal symbols:
 -  Asterisk '\*' to mark a *terminal* or *nonterminal* that can occur zero
    or more times.
 
--  Brackets '(' and ')' to enclose any sequence of terminals and/or
+-  Parentheses '(' and ')' to enclose any sequence of terminals and/or
    nonterminals marked with the '?' or '\*' metasymbols.
 
 .. index::
@@ -458,12 +460,12 @@ as used in other languages, application areas, or industries.
      -- see *constant declaration*.
 
    constant declaration
-     -- declaration that introduces a new variable to which an inmutable
+     -- declaration that introduces a new variable to which an immutable
      initial value can be assigned only once at the time of instantiation.
 
    grammar
      -- set of rules that describe what possible sequences of terminal and
-     nonterminal symbols a programming language interepretes as correct.
+     nonterminal symbols a programming language interprets as correct.
 
      Grammar is a range of productions. Each production comprises an
      abstract symbol (nonterminal) as its left-hand side, and a sequence
@@ -473,7 +475,7 @@ as used in other languages, application areas, or industries.
 
    production
      -- a sequence of terminal and nonterminal symbols that a programming
-     language interpretes as correct.
+     language interprets as correct.
 
    white space
      -- one of lexical input elements that separate tokens from one another
@@ -573,6 +575,10 @@ as used in other languages, application areas, or industries.
      -- a constant variable (variable of a primitive type, or type *String*)
      that is declared constant and initialized with a compile-time constant
      expression.
+
+   linearization
+     -- de-nesting of all nested types in a union type to present them in
+     the form of a flat line that has no more union types included.
 
 
 .. raw:: pdf

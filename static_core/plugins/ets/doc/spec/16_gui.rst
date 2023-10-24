@@ -1,10 +1,9 @@
-..  Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+..
+    Copyright (c) 2021-2023 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
-                                                                    
     http://www.apache.org/licenses/LICENSE-2.0
-                                                                    
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -79,9 +78,6 @@ the below example that illustrates the idea in general:
 
 GUI Structs
 ***********
-
-.. meta:
-    frontend_status: Partly
 
 *GUI structs* are used to define UI components. From the language
 perspective, a GUI struct is a restricted form of a non-primitive type
@@ -764,7 +760,7 @@ valid for the methods '*invoke*' and '*instantiate*'.
     }
     let x = new C() // constructor is called
 
-The methods '*invoke*' and '*insantiate*' are similar but have differences as
+The methods '*invoke*' and '*instantiate*' are similar but have differences as
 discussed below.
 
 A :index:`compile-time error` occurs if a callable type contains both
@@ -806,8 +802,8 @@ returning some class or struct type*).
 The method can have or not have other parameters, and those parameters can
 be arbitrary.
 
-In a *type call expression*, the argument corresponding to the 'factory' parameter is
-passed implicitly:
+In a *type call expression*, the argument corresponding to the 'factory'
+parameter is passed implicitly:
 
 .. code-block:: typescript
    :linenos:
@@ -862,6 +858,54 @@ if:
 
 Additional Features
 *******************
+
+|
+
+.. _Methods Returning this:
+
+Methods Returning ``this``
+==========================
+
+A return type of an instance method of a class or a struct can be ``this``.
+It means that the return type is the class or struct type the method belongs to.
+ 
+The extended grammar for a method signature (see :ref:`Signatures`) is as
+follows:
+
+.. code-block:: abnf
+
+    returnType:
+        ':' (type | 'this')
+        ;
+
+
+The only result that is allowed to be returned from such a method is ``this``:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo(): this {
+            return this
+        }
+    }
+
+
+The return type of an overridden method in a subclass must also be ``this``:
+
+.. code-block:: typescript
+   :linenos:
+
+    class D extends C {
+        foo(): this {
+            return this
+        }
+    }
+
+    let x = new C().foo() // type of 'x' is 'C'
+    let y = new D().foo() // type of 'y' is 'D'
+
+Otherwise, compile-time error occurs.
 
 |
 
