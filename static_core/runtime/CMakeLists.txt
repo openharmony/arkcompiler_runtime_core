@@ -139,7 +139,9 @@ set(SOURCES
     mem/gc/g1/card_handler.cpp
     mem/gc/g1/g1_analytics.cpp
     plugins.cpp
+    mem/gc/g1/update_remset_worker.cpp
     mem/gc/g1/update_remset_thread.cpp
+    mem/gc/g1/update_remset_task_queue.cpp
     mem/gc/g1/g1_pause_tracker.cpp
     relayout_profiler.cpp
     loadable_agent.cpp

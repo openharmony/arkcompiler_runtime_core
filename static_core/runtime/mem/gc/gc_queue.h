@@ -18,7 +18,6 @@
 
 #include <memory>
 
-#include "runtime/include/locks.h"
 #include "runtime/include/gc_task.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
@@ -32,9 +31,11 @@ public:
     GCQueueInterface() = default;
     virtual ~GCQueueInterface() = default;
 
-    virtual PandaUniquePtr<GCTask> GetTask() = 0;
+    virtual PandaUniquePtr<GCTask> GetTask(bool need_wait_task) = 0;
 
     virtual bool AddTask(PandaUniquePtr<GCTask> task) = 0;
+
+    virtual bool IsEmpty() const = 0;
 
     virtual void Signal() = 0;
 
@@ -44,17 +45,20 @@ public:
     NO_MOVE_SEMANTIC(GCQueueInterface);
 };
 
-/**
- * GCQueueWithTime is an ascending priority queue ordered by target time.
- *
- */
+/// @class GCQueueWithTime is an ascending priority queue ordered by target time.
 class GCQueueWithTime : public GCQueueInterface {
 public:
     explicit GCQueueWithTime(GC *gc) : gc_(gc) {}
 
-    PandaUniquePtr<GCTask> GetTask() override;
+    PandaUniquePtr<GCTask> GetTask(bool need_wait_task) override;
 
     bool AddTask(PandaUniquePtr<GCTask> task) override;
+
+    bool IsEmpty() const override
+    {
+        os::memory::LockHolder lock(lock_);
+        return queue_.empty();
+    }
 
     void Signal() override
     {
@@ -78,7 +82,7 @@ private:
     };
 
     GC *gc_;
-    os::memory::Mutex lock_;
+    mutable os::memory::Mutex lock_;
     PandaPriorityQueue<PandaUniquePtr<GCTask>, PandaVector<PandaUniquePtr<GCTask>>, CompareByTime> queue_
         GUARDED_BY(lock_);
     os::memory::ConditionVariable cond_var_;

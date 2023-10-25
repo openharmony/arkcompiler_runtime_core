@@ -23,6 +23,7 @@
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/g1/ref_cache_builder.h"
+#include "runtime/mem/gc/g1/update_remset_task_queue.h"
 #include "runtime/mem/gc/g1/update_remset_thread.h"
 #include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 #include "runtime/mem/gc/generational-gc-base-inl.h"
@@ -160,7 +161,7 @@ G1GC<LanguageConfig>::~G1GC()
     ASSERT(unique_refs_from_remsets_.size() == 1);
     allocator->Delete(unique_refs_from_remsets_.front());
     unique_refs_from_remsets_.clear();
-    this->GetInternalAllocator()->Delete(update_remset_thread_);
+    this->GetInternalAllocator()->Delete(update_remset_worker_);
 }
 
 template <class LanguageConfig>
@@ -414,9 +415,9 @@ void G1GC<LanguageConfig>::CollectNonRegularObjects()
                   NonRegularObjectsDeathChecker<LanguageConfig, CONCURRENTLY, true>(&delete_size, &delete_count));
     auto region_visitor = [this](PandaVector<Region *> &regions) {
         if constexpr (CONCURRENTLY) {
-            update_remset_thread_->InvalidateRegions(&regions);
+            update_remset_worker_->InvalidateRegions(&regions);
         } else {
-            update_remset_thread_->GCInvalidateRegions(&regions);
+            update_remset_worker_->GCInvalidateRegions(&regions);
         }
     };
     this->GetG1ObjectAllocator()->CollectNonRegularRegions(region_visitor, death_checker);
@@ -446,9 +447,9 @@ void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *>
     {
         ScopedTiming t1("Region Invalidation", *this->GetTiming());
         if constexpr (CONCURRENTLY) {
-            update_remset_thread_->InvalidateRegions(empty_tenured_regions);
+            update_remset_worker_->InvalidateRegions(empty_tenured_regions);
         } else {
-            update_remset_thread_->GCInvalidateRegions(empty_tenured_regions);
+            update_remset_worker_->GCInvalidateRegions(empty_tenured_regions);
         }
     }
     size_t delete_size = 0;
@@ -699,7 +700,7 @@ bool G1GC<LanguageConfig>::NeedFullGC(const panda::GCTask &task)
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
 {
-    SuspendUpdateRemsetThreadScope urt_scope(update_remset_thread_);
+    SuspendUpdateRemsetWorkerScope stop_update_remset_worker_scope(update_remset_worker_);
     interrupt_concurrent_flag_ = false;
     LOG_DEBUG_GC << "G1GC start, reason: " << task.reason;
     LOG_DEBUG_GC << "Footprint before GC: " << this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
@@ -917,7 +918,28 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::ProcessDirtyCards()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
-    update_remset_thread_->GCProcessCards();
+    update_remset_worker_->GCProcessCards();
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::CreateUpdateRemsetWorker()
+{
+    InternalAllocatorPtr allocator = this->GetInternalAllocator();
+    // to make TSAN happy because we access updated_refs_queue_ inside constructor of UpdateRemsetWorker
+    os::memory::LockHolder lock(queue_lock_);
+    if (this->GetSettings()->UseThreadPoolForGC()) {
+        update_remset_worker_ = allocator->template New<UpdateRemsetThread<LanguageConfig>>(
+            this, updated_refs_queue_, &queue_lock_, this->GetG1ObjectAllocator()->GetRegionSize(),
+            this->GetSettings()->G1EnableConcurrentUpdateRemset(),
+            this->GetSettings()->G1MinConcurrentCardsToProcess());
+    } else {
+        ASSERT(this->GetSettings()->UseTaskManagerForGC());
+        update_remset_worker_ = allocator->template New<UpdateRemsetTaskQueue<LanguageConfig>>(
+            this, updated_refs_queue_, &queue_lock_, this->GetG1ObjectAllocator()->GetRegionSize(),
+            this->GetSettings()->G1EnableConcurrentUpdateRemset(),
+            this->GetSettings()->G1MinConcurrentCardsToProcess());
+    }
+    ASSERT(update_remset_worker_ != nullptr);
 }
 
 template <class LanguageConfig>
@@ -936,15 +958,7 @@ void G1GC<LanguageConfig>::InitializeImpl()
     this->SetGCBarrierSet(barrier_set);
 
     this->CreateWorkersTaskPool();
-    {
-        // to make TSAN happy because we access updated_refs_queue_ inside constructor of UpdateRemsetThread
-        os::memory::LockHolder lock(queue_lock_);
-        update_remset_thread_ = allocator->template New<UpdateRemsetThread<LanguageConfig>>(
-            this, this->GetPandaVm(), updated_refs_queue_, &queue_lock_, this->GetG1ObjectAllocator()->GetRegionSize(),
-            this->GetSettings()->G1EnableConcurrentUpdateRemset(), this->GetSettings()->G1MinConcurrentCardsToProcess(),
-            this->GetCardTable());
-    }
-    ASSERT(update_remset_thread_ != nullptr);
+    CreateUpdateRemsetWorker();
     LOG_DEBUG_GC << "G1GC initialized";
 }
 
@@ -1740,7 +1754,7 @@ CollectionSet G1GC<LanguageConfig>::GetFullCollectionSet()
 {
     ASSERT(this->IsFullGC());
     // FillRemSet should be always finished before GetCollectibleRegions
-    ASSERT(update_remset_thread_->GetQueueSize() == 0);
+    ASSERT(update_remset_worker_->GetQueueSize() == 0);
     auto g1_allocator = this->GetG1ObjectAllocator();
     g1_allocator->ClearCurrentTenuredRegion();
     CollectionSet collection_set(g1_allocator->GetYoungRegions());
@@ -1800,7 +1814,7 @@ void G1GC<LanguageConfig>::OnThreadTerminate(ManagedThread *thread, mem::Buffers
             while (!local_buffer->IsEmpty()) {
                 temp_buffer->push_back(local_buffer->Pop());
             }
-            update_remset_thread_->AddPostBarrierBuffer(temp_buffer);
+            update_remset_worker_->AddPostBarrierBuffer(temp_buffer);
         }
         if (keep_buffers == mem::BuffersKeepingFlag::DELETE) {
             thread->ResetG1PostBarrierBuffer();
@@ -1815,21 +1829,20 @@ void G1GC<LanguageConfig>::PreZygoteFork()
     GC::PreZygoteFork();
     this->DestroyWorkersTaskPool();
     this->DisableWorkerThreads();
-    update_remset_thread_->DestroyThread();
+    update_remset_worker_->DestroyWorker();
     // don't use thread while we are in zygote
-    update_remset_thread_->SetUpdateConcurrent(false);
+    update_remset_worker_->SetUpdateConcurrent(false);
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::PostZygoteFork()
 {
-    InternalAllocatorPtr allocator = this->GetInternalAllocator();
     this->EnableWorkerThreads();
     this->CreateWorkersTaskPool();
     GC::PostZygoteFork();
     // use concurrent-option after zygote
-    update_remset_thread_->SetUpdateConcurrent(this->GetSettings()->G1EnableConcurrentUpdateRemset());
-    update_remset_thread_->CreateThread(allocator);
+    update_remset_worker_->SetUpdateConcurrent(this->GetSettings()->G1EnableConcurrentUpdateRemset());
+    update_remset_worker_->CreateWorker();
 }
 
 template <class LanguageConfig>
@@ -1885,7 +1898,7 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::HandlePendingDirtyCards()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
-    update_remset_thread_->DrainAllCards(&dirty_cards_);
+    update_remset_worker_->DrainAllCards(&dirty_cards_);
     std::for_each(dirty_cards_.cbegin(), dirty_cards_.cend(), [](auto card) { card->Clear(); });
 }
 
@@ -2204,13 +2217,13 @@ void G1GC<LanguageConfig>::BuildCrossYoungRemSets(const Container &young)
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::StartConcurrentScopeRoutine() const
 {
-    update_remset_thread_->ResumeThread();
+    update_remset_worker_->ResumeWorkerAfterGCPause();
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::EndConcurrentScopeRoutine() const
 {
-    update_remset_thread_->SuspendThread();
+    update_remset_worker_->SuspendWorkerForGCPause();
 }
 
 template <class LanguageConfig>

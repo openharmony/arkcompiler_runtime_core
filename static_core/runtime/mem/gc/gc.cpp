@@ -200,6 +200,7 @@ void GC::DestroyWorkersTaskPool()
     if (workers_task_pool_ == nullptr) {
         return;
     }
+    workers_task_pool_->WaitUntilTasksEnd();
     auto allocator = this->GetInternalAllocator();
     allocator->Delete(workers_task_pool_);
     workers_task_pool_ = nullptr;
@@ -462,7 +463,7 @@ void GC::DestroyWorker()
     // Atomic with seq_cst order reason: data race with gc_running_ with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
     gc_running_.store(false, std::memory_order_seq_cst);
-    gc_worker_->DestroyThreadIfNeeded();
+    gc_worker_->FinalizeAndDestroyWorker();
 }
 
 void GC::CreateWorker()
@@ -471,7 +472,7 @@ void GC::CreateWorker()
     // where threads observe all modifications in the same order
     gc_running_.store(true, std::memory_order_seq_cst);
     ASSERT(gc_worker_ != nullptr);
-    gc_worker_->CreateThreadIfNeeded();
+    gc_worker_->CreateAndStartWorker();
 }
 
 void GC::DisableWorkerThreads()

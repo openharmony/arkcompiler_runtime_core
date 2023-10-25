@@ -744,8 +744,8 @@ TEST_F(G1GCTest, TestHandlePendingCards)
         array->Set(0, str);  // create dirty card
     }
 
-    // With high probability update_remset_thread could not process all dirty cards before GC
-    // so GC drains them from update_remset_thread and handles separately
+    // With high probability update_remset_worker could not process all dirty cards before GC
+    // so GC drains them from update_remset_worker and handles separately
     {
         ScopedNativeCodeThread sn(thread);
         GCTask task(GCTaskCause::YOUNG_GC_CAUSE);

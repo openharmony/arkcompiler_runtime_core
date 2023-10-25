@@ -37,10 +37,10 @@ class GCWorker {
 public:
     /**
      * @brief Create local gc tasks queue and structure for gc panda thread.
-     * Don't create gc thread if it needed
+     * Don't start gc worker
      * @see panda::Thread
-     * @see CreateThreadIfNeeded
-     * @see DestroyThreadIfNeeded
+     * @see CreateAndStartWorker
+     * @see FinalizeAndDestroyWorker
      *
      * @param gc poiner to used GC
      */
@@ -49,10 +49,10 @@ public:
     NO_MOVE_SEMANTIC(GCWorker);
     ~GCWorker();
 
-    /// @brief Create and start internal gc thread for tasks running if common task manager is not used for GC
-    void CreateThreadIfNeeded();
-    /// @brief Join and destroy internal gc thread for tasks running if it was created
-    void DestroyThreadIfNeeded();
+    /// @brief Create worker and start execution
+    void CreateAndStartWorker();
+    /// @brief Join (wait for) all worker tasks and destroy worker
+    void FinalizeAndDestroyWorker();
 
     /**
      * @brief Add new gc task to GC worker. Try to add the task to local queue and then run it on a worker
@@ -68,13 +68,24 @@ private:
     PandaUniquePtr<GCTask> GetTask();
     void RunGC(PandaUniquePtr<GCTask> task);
 
+    /* Internal thread specific functions */
+
     static void GCThreadLoop(GCWorker *gc_worker);
+
+    /* TaskManager specific functions */
+
+    void CreateAndAddTaskToTaskManager();
+    void GCTaskRunner();
 
     GC *gc_ {nullptr};
     GCQueueInterface *gc_task_queue_ {nullptr};
     Thread *gc_thread_ {nullptr};
-    std::thread *gc_internal_thread_ {nullptr};
     uint32_t collect_number_mod_ {1U};
+    /* Internal thread specific variables */
+    std::thread *gc_internal_thread_ {nullptr};
+    /* TaskManager specific variables */
+    taskmanager::Task::RunnerCallback gc_runner_ {nullptr};
+    std::atomic_bool need_to_finish_ {false};
     os::memory::Mutex gc_task_run_mutex_;
 };
 
