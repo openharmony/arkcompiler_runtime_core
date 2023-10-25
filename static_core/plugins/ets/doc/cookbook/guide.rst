@@ -54,7 +54,7 @@ must be rewritten as follows:
 Severity Levels
 ---------------
 
-Each recipe is marked with the the severity level. Supported values:
+Each recipe is marked with the severity level. Supported values:
 
 - |CB_ERROR|: The recipe should be followed, otherwise the program
   will fail to compile.

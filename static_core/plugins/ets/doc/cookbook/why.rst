@@ -20,32 +20,32 @@ This chapter explains why it makes sense to migrate from the standard |TS| to
 
 - Program stability. Dynamically typed languages like |JS| are very good at
   allowing programs to write code fast. At the same time, these languages are
-  notorious for unexpected runtime errors. For example, a developer may forget
-  to check some value for ``undefined``, and as a result of this, the program
-  may crash, which causes inconvenience to the users. Detecting such issues
-  during development time would be much more beneficial. |TS| helps greatly
-  here: It allows to annotate the code with types, and many errors will be
-  detected by the compiler, prior to deployment and usage of the code.
-  However, even |TS| has limitations and sometimes permits to annotate the code
-  with types "loosely", which still leaves a gap for runtime errors. |LANG|
-  tries to overcome this drawback: It enforces static typing for even stricter
+  notorious for unexpected runtime errors. For example, a developer can forget
+  to check some value for ``undefined``---as a result, the program would crash
+  causing inconvenience to users. Detecting such issues during the development
+  would be more beneficial. |TS| helps greatly here: it allows annotating code
+  with types and having many errors detected by the compiler prior to the
+  deployment and usage of the code.
+  However, even |TS| has limitations, and sometimes permits annotating code
+  with types 'loosely', thus leaving room for runtime errors. |LANG| tries
+  to overcome this drawback by enabling static typing for even stricter
   type checking and less runtime errors.
-- Program performance. To ensure correctness of the program, dynamically
+- Program performance. To ensure correctness of the program, dynamically-typed
   languages have to check actual types of objects when the program actually
-  runs. Back to our example, |JS| does not allow to read a property from
-  ``undefined``. But the only way to check if some value is ``undefined`` is to
-  perform a runtime check, whch all |JS| engines do: if the value is not
-  ``undefined``, the property is read, otherwise an exception is thrown. Modern
+  runs. Back to our example, |JS| does not allow reading a property from
+  ``undefined``. Yet the only way to check if a value is ``undefined`` is to
+  perform a runtime check, which all |JS| engines do: if the value is not
+  ``undefined``, the property is read; otherwise, an exception is thrown. Modern
   engines can optimize such checks greatly, but these checks cannot be
-  eliminated completely, which leads to code slowdown. Since the standard |TS|
-  compiles to |JS|, the code written in |TS| has exactly the same issues as
-  described above. |LANG| addresses this problem. Since static typing is
-  enforced in, |LANG| compiles the program not to |JS|, but to some special
-  execution format called bytecode, which is faster to execute and easier to
-  optimize even further.
+  eliminated completely, thus causing code to slowdown. Since the standard |TS|
+  compiles to |JS|, any code written in |TS| has exactly the same issues as
+  described above. |LANG| addresses this problem. Thanks to static typing,
+  |LANG| compiles the program not to |JS| but to a special execution format
+  called bytecode, which is faster to execute and easier to optimize even
+  further.
 
-Below there are a couple of examples that try to explain how |LANG| can help
-improve program stability and performance.
+The examples below are to explain how |LANG| can help to improve program
+stability and performance.
 
 |
 
@@ -54,28 +54,28 @@ improve program stability and performance.
 Explicit Initialization of Fields for Better Stability
 ------------------------------------------------------
 
-|LANG| requires that all fields are explicitly initialized with some values
-either when the field is declared or in the ``constructor``. This is similar
-to ``strictPropertyInitialization`` mode of the standard |TS|.
+|LANG| requires all fields to be initialized explicitly with some
+values---either when the field is declared or in the ``constructor``.
+It is similar to ``strictPropertyInitialization`` mode of the standard |TS|.
 
-Let's take a look at the following |TS| code:
+Consider the following |TS| code:
 
 .. code-block:: typescript
 
     class Person {
-	    name: string // Automatically is set to undefined
+        name: string // Automatically is set to undefined
 
         setName(n:string): void {
             this.name = n
         }
 
-	    getName(): string {
+        getName(): string {
             // Return type "string" hides from the developers the fact
             // that name can be undefined. The most correct would be
             // to write the return type as "string | undefined". By doing so
             // we tell the users of our API about all possible return values.
-		    return this.name
-	    }
+            return this.name
+        }
     }
 
     let buddy = new Person()
@@ -83,7 +83,7 @@ Let's take a look at the following |TS| code:
     // buddy.setName("John")
     console.log(buddy.getName().length); // runtime exception: name is undefined
 
-Since |LANG| requires explicit initialization, the code looks like this:
+It looks as follows in |LANG| due to the explicit initialization:
 
 .. code-block:: typescript
 
@@ -105,7 +105,7 @@ Since |LANG| requires explicit initialization, the code looks like this:
     // buddys.setName("John")
     console.log(buddy.getName().length); // 0, no runtime error
 
-If ``name`` can be ``undefined``, this is also should be specified explicitly:
+If ``name`` can be ``undefined``, then it also must be specified explicitly:
 
 .. code-block:: typescript
 
@@ -138,8 +138,8 @@ If ``name`` can be ``undefined``, this is also should be specified explicitly:
 
     console.log(buddy.getName()?.length); // Builds ok, no runtime error
 
-This case demonstrates how we can improve stability and correctness of our
-code by enforcing stricter type checking in |LANG|.
+This case demonstrates how the stability and correctness of code can be
+improved in |LANG| by enforcing stricter type checking.
 
 |
 
@@ -148,7 +148,7 @@ code by enforcing stricter type checking in |LANG|.
 Null Safety for Better Performance
 ----------------------------------
 
-Let's take a look at the following code:
+Consider the following code:
 
 .. code-block:: typescript
 
@@ -158,14 +158,14 @@ Let's take a look at the following code:
 
     notify("Jack", "You look great today")
 
-In most cases, the ``notify`` function will take two string variables as
-an input and produces a new string. However, what if we pass some "special"
-values to the function, for example ``notify(null, undefined)``? The program
-will continue to work, the output will be as expected
-(``Dear undefined, a message for you: null``), so from the first glance
-everything is fine. But please note that the engine that runs our code
-should always check for such special cases to ensure correct behavior. In
-pseudocode, something like this happens:
+In most cases, the function ``notify`` takes two string variables as input
+and produces a new string. However, some "special" values---e.g.,
+``notify(null, undefined)``---can be passed to the function. Then the program
+continues to run and produce output as expected
+(``Dear undefined, a message for you: null``). It looks quite fine at first,
+but note that the engine that runs the code must always check for such special
+cases to ensure the correct behavior. In pseudocode, something like the
+following happens:
 
 .. code-block:: typescript
 
@@ -179,19 +179,19 @@ pseudocode, something like this happens:
         // ...
     }
 
-Now imagine that our ``notify`` function is a part of some complex heavy-loaded
-system which sends real notifications instead of just writing to the log. In
-this scenario, executing all these checks from our ``__internal_tostring``
-function may turn into a performance problem.
+Now, imagine the function ``notify`` as a part of a complex, heavy-loaded
+system that sends real notifications instead of just writing to the log.
+In this scenario, executing all the checks from our ``__internal_tostring``
+function can turn into a performance problem.
 
-But what if we could somehow guarantee to our exectuion engine that the only
-values that are passed to the ``notify`` function are "real" strings, but not
-some "special" values like ``null`` or ``undefined``? In this case, checks like
-``__internal_tostring`` become redundant because when we execute the program
-we are 100% sure that there will be no corner cases. For this particular case
-this mechanism would be called "null-safety", i.e. guarantee that ``null`` is
-not a valid value of the ``string`` type. If we had such feature, the code
-would not simply build:
+However, if we can guarantee to the execution engine that the values passed
+to the ``notify`` function are only '*real*' strings and never some '*special*'
+values such as ``null`` or ``undefined``, then we are 100% sure that no corner
+cases can occur during the program execution, and the checks like
+``__internal_tostring`` become redundant. In this particular case,
+the mechanism can be called '*null-safety*', as it guarantees that ``null``
+is not a valid value of the ``string`` type. Whith this feature available,
+the code simply would not build:
 
 .. code-block:: typescript
 
@@ -202,15 +202,15 @@ would not simply build:
     notify("Jack", "You look great today")
     notify(null, undefined) // Compile-time error
 
-In |TS| such behavior can be turned on by a special compiler flag called
-``strictNullChecks``. But since the standard |TS| is compiled to |JS|, which
-does not have such feature, "strict null checks" work only in compile-time,
+In |TS|, such behavior can be turned on by a special compiler flag called
+``strictNullChecks``. As the standard |TS| is compiled to |JS|, which
+does not have such feature, '*strict null checks*' work only at compile-time
 for better type checking. However, |LANG| considers null-safety a very
-important feature from both stability and performance points of view. That's
-why it is enforced in the language and the example above always produces
-compile-time errors. In exchange, we give our running engine much more
-information and guarantees about possible type values, which helps better
-optimize performance.
+important feature from the perspectives of both stability and performance.
+That's why it is enabled in the language, and situations similar to that in
+the example above always cause compile-time errors. In exchange, we provide
+our running engine with more information that guarantees possible type values
+and helps optimizing the performance.
 
 |
 
