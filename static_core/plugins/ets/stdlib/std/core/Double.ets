@@ -135,7 +135,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
      * @returns value as byte
      */
-    public byteValue(): byte {
+    public override byteValue(): byte {
         return this.value as byte;
     }
 
@@ -144,7 +144,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
      * @returns value as short
      */
-    public shortValue(): short {
+    public override shortValue(): short {
         return this.value as short;
     }
 
@@ -153,7 +153,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
      * @returns value as int
      */
-    public intValue(): int {
+    public override intValue(): int {
         return this.value as int;
     }
 
@@ -162,7 +162,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
      * @returns value as long
      */
-    public longValue(): long {
+    public override longValue(): long {
         return this.value as long;
     }
 
@@ -171,7 +171,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
      * @returns value as float
      */
-    public floatValue(): float {
+    public override floatValue(): float {
         return this.value as float;
     }
 
@@ -180,7 +180,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
      * @returns value as double
      */
-    public doubleValue(): double {
+    public override doubleValue(): double {
         return this.value;
     }
 

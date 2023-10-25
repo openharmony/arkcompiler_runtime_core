@@ -65,6 +65,8 @@ GCSettings::GCSettings(const RuntimeOptions &options, panda_file::SourceLang lan
     g1_gc_pause_interval_ms_ = options.WasSetG1PauseTimeGoalGcPauseInterval()
                                    ? options.GetG1PauseTimeGoalGcPauseInterval()
                                    : g1_max_gc_pause_ms_ + 1;
+    LOG_IF(FullGCBombingFrequency() && RunGCInPlace(), FATAL, GC)
+        << "full-gc-bombimg-frequency and run-gc-in-place options can't be used together";
 }
 
 bool GCSettings::IsGcEnableTracing() const
@@ -182,9 +184,14 @@ void GCSettings::SetGCWorkersCount(size_t value)
     gc_workers_count_ = value;
 }
 
-bool GCSettings::UseThreadPoolForGCWorkers() const
+bool GCSettings::UseThreadPoolForGC() const
 {
     return use_thread_pool_for_gc_workers_;
+}
+
+bool GCSettings::UseTaskManagerForGC() const
+{
+    return !use_thread_pool_for_gc_workers_;
 }
 
 size_t GCSettings::GCMarkingStackNewTasksFrequency() const

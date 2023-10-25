@@ -237,3 +237,4 @@ panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/float_intrinsic.pa SUPPO
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/move_nullcheck_out_of_loop.pa SUPPORT_RELEASE true)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/check_verifier.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/xor_to_compare_to_xor.pa)
+panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory-barrier.pa)

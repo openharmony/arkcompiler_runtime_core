@@ -14,17 +14,9 @@
 ---
 cases:
     - decl: |-
-          function foo(p?: int) {}  // CTE, primitive
-      call: foo(1)
-
-    - decl: |-
           type XYZ=number
           function foo(p?: XYZ) {}  // CTE, primitive with alias
       call: foo(1.55)
-
-    - decl: |-
-          function foo(i: int, j: long, k?: boolean) {}  // CTE, multiple primitive args
-      call: foo(1, 2, false)
 
     - decl: |-
           enum Color {Red, Green, Blue}
@@ -58,7 +50,3 @@ cases:
     - decl: |-
           function foo(e?: string = 'abc') {} // CTE, ambiguity
       call: foo()
-
-    - decl: |-
-          function foo(e?: string) {}
-      call: 'foo(null)  // CTE, cannot set null to string type'

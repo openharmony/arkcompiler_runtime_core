@@ -25,7 +25,8 @@ add_custom_command(TARGET bytecode_optimizer_coverage POST_BUILD
 if(ENABLE_BYTECODE_OPTIMIZER_COVERAGE)
     collect_coverage_for_target(
         TARGET_NAME bytecode_optimizer_coverage
-        INCLUDE_DIR_PATTERN '*/bytecode_optimizer/*'
+        INCLUDE_DIR_PATTERN \"*/bytecode_optimizer/*\"
+        EXCLUDE_DIR_PATTERN \"/usr*\" \"*/third_party/*\" \"*/build/*\" \"*/plugins/*\" \"*/runtime/*\" \"*/compiler/*\" \"*/libpandabase/*\" 
     )
 else()
     message(STATUS "Coverage will not be calculated (may be enabled by -DENABLE_BYTECODE_OPTIMIZER_COVERAGE=true ).")

@@ -13,6 +13,7 @@
 
   - ETS:
       bytecodeopt:
+        codegen_intrinsics_inc: plugins/ets/bytecode_optimizer/visitors/ets_codegen_intrinsics.inc
         codegen_visitors_inc: plugins/ets/bytecode_optimizer/visitors/codegen_visitors.inc
         reg_encoder_visitors_inc: plugins/ets/bytecode_optimizer/visitors/reg_encoder_visitors.inc
       lang_enum_id: 5

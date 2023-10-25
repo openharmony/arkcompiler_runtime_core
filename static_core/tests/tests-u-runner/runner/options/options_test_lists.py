@@ -9,6 +9,10 @@ from runner.options.options_groups import GroupsOptions
 
 @dataclass
 class TestListsOptions:
+    __DEFAULT_ARCH = ArchitectureKind.AMD64
+    __DEFAULT_SAN = SanitizerKind.NONE
+    __DEFAULT_FILTER = "*"
+
     def __str__(self) -> str:
         return _to_str(self, TestListsOptions, 1)
 
@@ -34,7 +38,7 @@ class TestListsOptions:
         cast_to_type=lambda x: _to_enum(x, ArchitectureKind)
     )
     def architecture(self) -> ArchitectureKind:
-        return ArchitectureKind.AMD64
+        return TestListsOptions.__DEFAULT_ARCH
 
     @cached_property
     @value(
@@ -43,7 +47,7 @@ class TestListsOptions:
         cast_to_type=lambda x: _to_enum(x, SanitizerKind)
     )
     def sanitizer(self) -> SanitizerKind:
-        return SanitizerKind.NONE
+        return TestListsOptions.__DEFAULT_SAN
 
     @cached_property
     @value(yaml_path="test-lists.explicit-file", cli_name="test_file")
@@ -58,7 +62,7 @@ class TestListsOptions:
     @cached_property
     @value(yaml_path="test-lists.filter", cli_name="filter")
     def filter(self) -> str:
-        return "*"
+        return TestListsOptions.__DEFAULT_FILTER
 
     @cached_property
     @value(yaml_path="test-lists.skip-test-lists", cli_name="skip_test_lists", cast_to_type=_to_bool)
@@ -74,3 +78,18 @@ class TestListsOptions:
     @value(yaml_path="test-lists.update-expected", cli_name="update_expected", cast_to_type=_to_bool)
     def update_expected(self) -> bool:
         return False
+
+    def get_command_line(self) -> str:
+        options = [
+            f'--test-list-arch={self.architecture.value}'
+            if self.architecture != TestListsOptions.__DEFAULT_ARCH else '',
+            f'--test-list-san={self.sanitizer.value}'
+            if self.sanitizer != TestListsOptions.__DEFAULT_SAN else '',
+            f'--test-file="{self.explicit_file}"' if self.explicit_file is not None else '',
+            f'--test-list="{self.explicit_list}"' if self.explicit_list is not None else '',
+            f'--filter="{self.filter}"' if self.filter != TestListsOptions.__DEFAULT_FILTER else '',
+            '--skip-test-lists' if self.skip_test_lists else '',
+            '--update-excluded' if self.update_excluded else '',
+            '--update-expected' if self.update_expected else ''
+        ]
+        return ' '.join(options)

@@ -217,6 +217,9 @@ option(PANDA_WITH_BYTECODE_OPTIMIZER "Enable bytecode optimizer" true)
 option(PANDA_COMPILER_DEBUG_INFO "Support DWARF debug information in Compiler (JIT/AOT/IRtoC)" OFF)
 option(PANDA_ENABLE_RELAYOUT_PROFILE "Enable relayout profile" OFF)
 option(PANDA_ENABLE_CCACHE "Enable ccache" true)
+if (NOT DEFINED ES2PANDA_PATH)
+    set(ES2PANDA_PATH ${PANDA_ROOT}/tools/es2panda)
+endif()
 
 if(PANDA_TARGET_WINDOWS)
     set(PANDA_WITH_BENCHMARKS false)
@@ -248,10 +251,12 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
     add_definitions(-DPANDA_ENABLE_SLOW_DEBUG)
+    add_definitions(-D_GLIBCXX_ASSERTIONS)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL FastVerify)
     add_definitions(-DPANDA_FAST_VERIFY)
+    add_definitions(-D_GLIBCXX_ASSERTIONS)
 endif()
 
 # The define is set for the build which will be delivered to customers.
@@ -470,3 +475,4 @@ message(STATUS "PANDA_ENABLE_CCACHE                    = ${PANDA_ENABLE_CCACHE}"
 message(STATUS "PANDA_USE_CUSTOM_SIGNAL_STACK          = ${PANDA_USE_CUSTOM_SIGNAL_STACK}")
 message(STATUS "PANDA_USE_PREBUILT_TARGETS             = ${PANDA_USE_PREBUILT_TARGETS}")
 message(STATUS "CMAKE_NO_SYSTEM_FROM_IMPORTED          = ${CMAKE_NO_SYSTEM_FROM_IMPORTED}")
+message(STATUS "ES2PANDA_PATH                          = ${ES2PANDA_PATH}")

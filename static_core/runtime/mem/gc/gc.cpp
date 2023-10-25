@@ -30,7 +30,6 @@
 #include "runtime/mem/gc/epsilon-g1/epsilon-g1.h"
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/gc_root-inl.h"
-#include "runtime/mem/gc/gc_queue.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/gen-gc/gen-gc.h"
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
@@ -55,13 +54,23 @@ GC::GC(ObjectAllocatorBase *object_allocator, const GCSettings &settings)
       object_allocator_(object_allocator),
       internal_allocator_(InternalAllocator<>::GetInternalAllocatorFromRuntime())
 {
+    if (gc_settings_.UseTaskManagerForGC()) {
+        // Create gc task queue for task manager
+        gc_workers_task_queue_ = internal_allocator_->New<taskmanager::TaskQueue>(
+            taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, GC_TASK_QUEUE_PRIORITY);
+        ASSERT(gc_workers_task_queue_ != nullptr);
+        // Register created gc task queue in task manager
+        [[maybe_unused]] auto gc_queue_id =
+            taskmanager::TaskScheduler::GetTaskScheduler()->RegisterQueue(gc_workers_task_queue_);
+        ASSERT(gc_queue_id != taskmanager::INVALID_TASKQUEUE_ID);
+    }
 }
 
 GC::~GC()
 {
     InternalAllocatorPtr allocator = GetInternalAllocator();
-    if (gc_queue_ != nullptr) {
-        allocator->Delete(gc_queue_);
+    if (gc_worker_ != nullptr) {
+        allocator->Delete(gc_worker_);
     }
     if (gc_listeners_ptr_ != nullptr) {
         allocator->Delete(gc_listeners_ptr_);
@@ -75,8 +84,11 @@ GC::~GC()
     if (cleared_references_lock_ != nullptr) {
         allocator->Delete(cleared_references_lock_);
     }
-    if (workers_pool_ != nullptr) {
-        allocator->Delete(workers_pool_);
+    if (workers_task_pool_ != nullptr) {
+        allocator->Delete(workers_task_pool_);
+    }
+    if (gc_workers_task_queue_ != nullptr) {
+        allocator->Delete(gc_workers_task_queue_);
     }
 }
 
@@ -161,27 +173,38 @@ void GC::Initialize(PandaVM *vm)
     cleared_references_lock_ = allocator->New<os::memory::Mutex>();
     os::memory::LockHolder holder(*cleared_references_lock_);
     cleared_references_ = allocator->New<PandaVector<panda::mem::Reference *>>(allocator->Adapter());
-    gc_queue_ = allocator->New<GCQueueWithTime>(this);
     this->SetPandaVM(vm);
     InitializeImpl();
+    gc_worker_ = allocator->New<GCWorker>(this);
 }
 
 void GC::CreateWorkersTaskPool()
 {
-    ASSERT(workers_pool_ == nullptr);
-    auto allocator = GetInternalAllocator();
+    ASSERT(workers_task_pool_ == nullptr);
     if (this->IsWorkerThreadsExist()) {
+        auto allocator = GetInternalAllocator();
         GCWorkersTaskPool *gc_task_pool = nullptr;
-        if (this->GetSettings()->UseThreadPoolForGCWorkers()) {
+        if (this->GetSettings()->UseThreadPoolForGC()) {
             // Use internal gc thread pool
             gc_task_pool = allocator->New<GCWorkersThreadPool>(this, this->GetSettings()->GCWorkersCount());
         } else {
             // Use common TaskManager
+            ASSERT(this->GetSettings()->UseTaskManagerForGC());
             gc_task_pool = allocator->New<GCWorkersTaskQueue>(this);
         }
         ASSERT(gc_task_pool != nullptr);
-        workers_pool_ = gc_task_pool;
+        workers_task_pool_ = gc_task_pool;
     }
+}
+
+void GC::DestroyWorkersTaskPool()
+{
+    if (workers_task_pool_ == nullptr) {
+        return;
+    }
+    auto allocator = this->GetInternalAllocator();
+    allocator->Delete(workers_task_pool_);
+    workers_task_pool_ = nullptr;
 }
 
 void GC::StartGC()
@@ -191,13 +214,8 @@ void GC::StartGC()
 
 void GC::StopGC()
 {
-    JoinWorker();
-    ASSERT(gc_queue_ != nullptr);
-    if (workers_pool_ != nullptr) {
-        InternalAllocatorPtr allocator = GetInternalAllocator();
-        allocator->Delete(workers_pool_);
-        workers_pool_ = nullptr;
-    }
+    DestroyWorker();
+    DestroyWorkersTaskPool();
 }
 
 void GC::SetupCpuAffinity()
@@ -216,8 +234,8 @@ void GC::SetupCpuAffinity()
         affinity_before_gc_.Clear();
     }
     // Some GCs don't use GC Workers
-    if (workers_pool_ != nullptr && this->GetSettings()->UseThreadPoolForGCWorkers()) {
-        static_cast<GCWorkersThreadPool *>(workers_pool_)->SetAffinityForGCWorkers();
+    if (workers_task_pool_ != nullptr && this->GetSettings()->UseThreadPoolForGC()) {
+        static_cast<GCWorkersThreadPool *>(workers_task_pool_)->SetAffinityForGCWorkers();
     }
 }
 
@@ -232,8 +250,8 @@ void GC::SetupCpuAffinityAfterConcurrent()
         os::CpuAffinityManager::SetAffinityForCurrentThread(os::CpuPower::BEST | os::CpuPower::MIDDLE);
     }
     // Some GCs don't use GC Workers
-    if (workers_pool_ != nullptr && this->GetSettings()->UseThreadPoolForGCWorkers()) {
-        static_cast<GCWorkersThreadPool *>(workers_pool_)->SetAffinityForGCWorkers();
+    if (workers_task_pool_ != nullptr && this->GetSettings()->UseThreadPoolForGC()) {
+        static_cast<GCWorkersThreadPool *>(workers_task_pool_)->SetAffinityForGCWorkers();
     }
 }
 
@@ -251,8 +269,8 @@ void GC::ResetCpuAffinity(bool before_concurrent)
         }
     }
     // Some GCs don't use GC Workers
-    if (workers_pool_ != nullptr && this->GetSettings()->UseThreadPoolForGCWorkers()) {
-        static_cast<GCWorkersThreadPool *>(workers_pool_)->UnsetAffinityForGCWorkers();
+    if (workers_task_pool_ != nullptr && this->GetSettings()->UseThreadPoolForGC()) {
+        static_cast<GCWorkersThreadPool *>(workers_task_pool_)->UnsetAffinityForGCWorkers();
     }
 }
 
@@ -441,69 +459,12 @@ void GC::ProcessReferences(GCPhase gc_phase, const GCTask &task, const Reference
     }
 }
 
-void GC::GCWorkerEntry(GC *gc, PandaVM *vm)
-{
-    // We need to set VM to current_thread, since GC can call ObjectAccessor::GetBarrierSet() methods
-    Thread gc_thread(vm, Thread::ThreadType::THREAD_TYPE_GC);
-    ScopedCurrentThread sct(&gc_thread);
-    uint32_t full_gc_bombing_freq = gc->GetSettings()->FullGCBombingFrequency();
-    [[maybe_unused]] uint32_t collect_num = 1;
-    std::function<PandaUniquePtr<GCTask>()> get_task;
-
-    if (full_gc_bombing_freq == 0U) {
-        get_task = [gc]() { return gc->gc_queue_->GetTask(); };
-    } else {
-        get_task = [gc, full_gc_bombing_freq, &collect_num]() {
-            if (collect_num == full_gc_bombing_freq) {
-                collect_num = 1;
-                return MakePandaUnique<GCTask>(GCTaskCause::OOM_CAUSE, time::GetCurrentTimeInNanos());
-            }
-            collect_num++;
-            return gc->gc_queue_->GetTask();
-        };
-    }
-
-    while (true) {
-        auto task = get_task();
-        if (!gc->IsGCRunning()) {
-            LOG(DEBUG, GC) << "Stopping GC thread";
-            break;
-        }
-        if (task == nullptr || task->reason == GCTaskCause::INVALID_CAUSE) {
-            continue;
-        }
-        if (gc->IsPostponeEnabled() && task->reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) {
-            gc->gc_queue_->AddTask(std::move(task));
-            gc->gc_queue_->WaitForGCTask();
-            continue;
-        }
-        LOG(DEBUG, GC) << "Running GC task, reason " << task->reason;
-        task->Run(*gc);
-    }
-}
-
-void GC::JoinWorker(bool continue_run_gc)
+void GC::DestroyWorker()
 {
     // Atomic with seq_cst order reason: data race with gc_running_ with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
     gc_running_.store(false, std::memory_order_seq_cst);
-    // TODO(ipetrov, #13816): remove unnecessary second check
-    if (!gc_settings_.RunGCInPlace() && gc_settings_.UseThreadPoolForGCWorkers()) {
-        ASSERT(worker_ != nullptr);
-    }
-    if (worker_ != nullptr && !gc_settings_.RunGCInPlace()) {
-        ASSERT(gc_queue_ != nullptr);
-        gc_queue_->Signal();
-        worker_->join();
-        InternalAllocatorPtr allocator = GetInternalAllocator();
-        allocator->Delete(worker_);
-        worker_ = nullptr;
-    }
-    // Atomic with seq_cst order reason: data race with gc_running_ with requirement for sequentially consistent
-    // order where threads observe all modifications in the same order
-    gc_running_.store(continue_run_gc, std::memory_order_seq_cst);
-    LOG_IF(gc_settings_.FullGCBombingFrequency() && gc_settings_.RunGCInPlace(), FATAL, GC)
-        << "These options can't be used together";
+    gc_worker_->DestroyThreadIfNeeded();
 }
 
 void GC::CreateWorker()
@@ -511,19 +472,8 @@ void GC::CreateWorker()
     // Atomic with seq_cst order reason: data race with gc_running_ with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
     gc_running_.store(true, std::memory_order_seq_cst);
-    ASSERT(worker_ == nullptr);
-    if (!gc_settings_.RunGCInPlace()) {
-        ASSERT(gc_queue_ != nullptr);
-        InternalAllocatorPtr allocator = GetInternalAllocator();
-        worker_ = allocator->New<std::thread>(GC::GCWorkerEntry, this, this->GetPandaVm());
-        if (worker_ == nullptr) {
-            LOG(FATAL, COMPILER) << "Cannot create a GC thread";
-        }
-        int res = os::thread::SetThreadName(worker_->native_handle(), "GCThread");
-        if (res != 0) {
-            LOG(ERROR, RUNTIME) << "Failed to set a name for the gc thread";
-        }
-    }
+    ASSERT(gc_worker_ != nullptr);
+    gc_worker_->CreateThreadIfNeeded();
 }
 
 void GC::DisableWorkerThreads()
@@ -543,6 +493,20 @@ void GC::EnableWorkerThreads()
                                               (options.GetGcWorkersCount() != 0));
     gc_settings_.SetParallelRefUpdatingEnabled(options.IsGcParallelRefUpdatingEnabled() &&
                                                (options.GetGcWorkersCount() != 0));
+}
+
+void GC::PreZygoteFork()
+{
+    DestroyWorker();
+    if (gc_settings_.UseTaskManagerForGC()) {
+        ASSERT(gc_workers_task_queue_ != nullptr);
+        ASSERT(gc_workers_task_queue_->IsEmpty());
+    }
+}
+
+void GC::PostZygoteFork()
+{
+    CreateWorker();
 }
 
 class GC::PostForkGCTask : public GCTask {
@@ -594,10 +558,10 @@ bool GC::AddGCTask(bool is_managed, PandaUniquePtr<GCTask> task)
         if (triggered_by_threshold) {
             bool expect = true;
             if (can_add_gc_task_.compare_exchange_strong(expect, false, std::memory_order_seq_cst)) {
-                return gc_queue_->AddTask(std::move(task));
+                return gc_worker_->AddTask(std::move(task));
             }
         } else {
-            return gc_queue_->AddTask(std::move(task));
+            return gc_worker_->AddTask(std::move(task));
         }
     }
     return false;

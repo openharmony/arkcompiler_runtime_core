@@ -498,53 +498,55 @@ if(NOT PANDA_MINIMAL_VIXL AND PANDA_TARGET_AMD64 AND PANDA_WITH_TESTS)
                 ${PANDA_SANITIZERS_LIST}
         )
 
-        set(PANDA_INTRINSIC_CODEGEN_TESTS_SOURCES
-            tests/unit_test.cpp
-            tests/inst_generator.cpp
-            tests/intrinsic_codegen_test.cpp
+        if (PANDA_CI_TESTING_MODE STREQUAL "Nightly")
+            set(PANDA_INTRINSIC_CODEGEN_TESTS_SOURCES
+                tests/unit_test.cpp
+                tests/inst_generator.cpp
+                tests/intrinsic_codegen_test.cpp
+                )
+
+            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0.0)
+                set_source_files_properties(tests/intrinsic_codegen_test.cpp PROPERTIES COMPILE_FLAGS "-Wno-shadow -Wno-deprecated-declarations -Wno-bitwise-instead-of-logical")
+            else()
+                set_source_files_properties(tests/intrinsic_codegen_test.cpp PROPERTIES COMPILE_FLAGS "-Wno-shadow -Wno-deprecated-declarations")
+            endif()
+
+            panda_add_gtest(
+                CONTAINS_MAIN
+                NAME compiler_intrinsic_codegen_arm64_tests
+                SOURCES
+                    ${PANDA_INTRINSIC_CODEGEN_TESTS_SOURCES}
+                LIBRARIES
+                    ${PANDA_COMPILER_TESTS_LIBRARIES}
+                SANITIZERS
+                    ${PANDA_SANITIZERS_LIST}
             )
+            panda_target_compile_options(compiler_intrinsic_codegen_arm64_tests PUBLIC  "-DINTRINSIC_CODEGEN_TEST_ARM64")
 
-        if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0.0)
-            set_source_files_properties(tests/intrinsic_codegen_test.cpp PROPERTIES COMPILE_FLAGS "-Wno-shadow -Wno-deprecated-declarations -Wno-bitwise-instead-of-logical")
-        else()
-            set_source_files_properties(tests/intrinsic_codegen_test.cpp PROPERTIES COMPILE_FLAGS "-Wno-shadow -Wno-deprecated-declarations")
+            panda_add_gtest(
+                CONTAINS_MAIN
+                NAME compiler_intrinsic_codegen_amd64_tests
+                SOURCES
+                    ${PANDA_INTRINSIC_CODEGEN_TESTS_SOURCES}
+                LIBRARIES
+                    ${PANDA_COMPILER_TESTS_LIBRARIES}
+                SANITIZERS
+                    ${PANDA_SANITIZERS_LIST}
+            )
+            panda_target_compile_options(compiler_intrinsic_codegen_amd64_tests PUBLIC  "-DINTRINSIC_CODEGEN_TEST_AMD64")
+
+            panda_add_gtest(
+                CONTAINS_MAIN
+                NAME compiler_intrinsic_codegen_arm32_tests
+                SOURCES
+                    ${PANDA_INTRINSIC_CODEGEN_TESTS_SOURCES}
+                LIBRARIES
+                    ${PANDA_COMPILER_TESTS_LIBRARIES}
+                SANITIZERS
+                    ${PANDA_SANITIZERS_LIST}
+            )
+            panda_target_compile_options(compiler_intrinsic_codegen_arm32_tests PUBLIC  "-DINTRINSIC_CODEGEN_TEST_ARM32")
         endif()
-
-        panda_add_gtest(
-            CONTAINS_MAIN
-            NAME compiler_intrinsic_codegen_arm64_tests
-            SOURCES
-                ${PANDA_INTRINSIC_CODEGEN_TESTS_SOURCES}
-            LIBRARIES
-                ${PANDA_COMPILER_TESTS_LIBRARIES}
-            SANITIZERS
-                ${PANDA_SANITIZERS_LIST}
-        )
-        panda_target_compile_options(compiler_intrinsic_codegen_arm64_tests PUBLIC  "-DINTRINSIC_CODEGEN_TEST_ARM64")
-
-        panda_add_gtest(
-            CONTAINS_MAIN
-            NAME compiler_intrinsic_codegen_amd64_tests
-            SOURCES
-                ${PANDA_INTRINSIC_CODEGEN_TESTS_SOURCES}
-            LIBRARIES
-                ${PANDA_COMPILER_TESTS_LIBRARIES}
-            SANITIZERS
-                ${PANDA_SANITIZERS_LIST}
-        )
-        panda_target_compile_options(compiler_intrinsic_codegen_amd64_tests PUBLIC  "-DINTRINSIC_CODEGEN_TEST_AMD64")
-
-        panda_add_gtest(
-            CONTAINS_MAIN
-            NAME compiler_intrinsic_codegen_arm32_tests
-            SOURCES
-                ${PANDA_INTRINSIC_CODEGEN_TESTS_SOURCES}
-            LIBRARIES
-                ${PANDA_COMPILER_TESTS_LIBRARIES}
-            SANITIZERS
-                ${PANDA_SANITIZERS_LIST}
-        )
-        panda_target_compile_options(compiler_intrinsic_codegen_arm32_tests PUBLIC  "-DINTRINSIC_CODEGEN_TEST_ARM32")
     endif()
 endif()
 

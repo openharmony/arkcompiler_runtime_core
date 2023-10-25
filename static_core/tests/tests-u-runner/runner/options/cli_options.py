@@ -83,7 +83,13 @@ def get_args():  # pylint: disable=too-many-statements
         '--no-js', action='store_false', dest='with_js',
         default=None,
         help='disable JS-related tests')
-    action.add_argument('--ets-cts', action='store_true', dest='ets_cts', default=None, help='run ets-templates tests')
+    action.add_argument(
+        '--ets-gc-stress', action='store_true', dest='ets_gc_stress',
+        default=None,
+        help='run ETS GCStress tests')
+    action.add_argument(
+        '--ets-cts', action='store_true', dest='ets_cts',
+        default=None, help='run ets-templates tests')
     # ETS tests applied options
     parser.add_argument(
         '--force-generate', action='store_true', dest='is_force_generate', default=None,

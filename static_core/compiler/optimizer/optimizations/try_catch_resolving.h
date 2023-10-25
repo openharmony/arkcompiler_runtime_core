@@ -28,9 +28,9 @@ public:
     NO_COPY_SEMANTIC(TryCatchResolving);
     ~TryCatchResolving() override
     {
+        try_blocks_.clear();
         throw_insts_.clear();
         catch_blocks_.clear();
-        try_blocks_.clear();
         phi_insts_.clear();
         cphi2phi_.clear();
         catch2cphis_.clear();
@@ -45,6 +45,7 @@ public:
     void InvalidateAnalyses() override;
 
 private:
+    void CollectCandidates();
     void VisitTryInst(TryInst *try_inst);
     void ConnectThrowCatch();
     void DeleteTryCatchEdges(BasicBlock *try_begin, BasicBlock *try_end);
@@ -52,10 +53,10 @@ private:
 
 private:
     Marker marker_ {UNDEF_MARKER};
+    ArenaVector<BasicBlock *> try_blocks_;
     ArenaVector<Inst *> throw_insts_;
     ArenaMap<uint32_t, BasicBlock *> catch_blocks_;
     ArenaMap<uint32_t, PhiInst *> phi_insts_;
-    ArenaVector<BasicBlock *> try_blocks_;
     ArenaMap<CatchPhiInst *, PhiInst *> cphi2phi_;
     ArenaMap<BasicBlock *, BasicBlock *> catch2cphis_;
 };

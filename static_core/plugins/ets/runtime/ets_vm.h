@@ -87,11 +87,10 @@ public:
      * @note It's temporary solution, TaskManager will be created outside VM in the future
      *
      * @param options runtime options
-     * @param source_lang used specific source language
      *
      * @return true if TaskManager was created, false - otherwise
      */
-    static bool CreateTaskManagerIfNeeded(const RuntimeOptions &options, panda_file::SourceLang source_lang);
+    static bool CreateTaskManagerIfNeeded(const RuntimeOptions &options);
 
     bool Initialize() override;
     bool InitializeFinish() override;

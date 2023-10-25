@@ -74,7 +74,10 @@ include(cmake/toolchain/coverage/unit_tests_lcov.cmake)
 
 if(ENABLE_UNIT_TESTS_FULL_COVERAGE)
     add_custom_target(coverage_full DEPENDS cts-assembly tests benchmarks)
-    collect_coverage_for_target(TARGET_NAME coverage_full)
+    collect_coverage_for_target(
+        TARGET_NAME coverage_full
+        EXCLUDE_DIR_PATTERN \"/usr*\";\"*/third_party/*\";\"*/build/*\";
+    )
 else()
     message(STATUS "Full coverage will not be calculated (may be enabled by -DENABLE_UNIT_TESTS_FULL_COVERAGE=true ).")
 endif(ENABLE_UNIT_TESTS_FULL_COVERAGE)
@@ -355,6 +358,10 @@ if(PANDA_WITH_BENCHMARKS)
     add_subdirectory(tests/benchmarks)
 endif()
 
+# ----- Panda tools -----------------------------------------------
+
+add_subdirectory(tools)
+
 # ----- Plugins ----------------------------------------------------------------
 
 add_subdirectory(plugins)
@@ -371,10 +378,6 @@ add_subdirectory(extras)
 # ----- Quickening tool --------------------------------------------------------
 
 add_subdirectory(quickener)
-
-# ----- Panda tools -----------------------------------------------
-
-add_subdirectory(tools)
 
 # ----- Collecting core gtests paths for CI stash ---------------------------------
 # NB! This must be the last section!

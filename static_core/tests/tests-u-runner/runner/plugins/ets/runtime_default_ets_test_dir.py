@@ -16,8 +16,7 @@ class RuntimeDefaultEtsTestDir:
 
     @property
     def es2panda_test(self) -> Path:
-        # TODO(vpukhov): adjust es2panda path
-        return self.__panda_source_root / "plugins" / "ecmascript" / "es2panda" / "test"
+        return self.__panda_source_root / "tools" / "es2panda" / "test"
 
     @property
     def runtime_ets(self) -> Path:

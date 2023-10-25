@@ -23,6 +23,7 @@ built-ins/TypedArrayConstructors/ctors-bigint/typedarray-arg/src-typedarray-not-
 # #9964
 built-ins/parseInt/S15.1.2.2_A8.js
 intl402/RelativeTimeFormat/constructor/supportedLocalesOf/locales-invalid.js
+# #10417
 intl402/String/prototype/toLocaleUpperCase/special_casing_Lithuanian.js
 intl402/DateTimeFormat/date-time-options.js
 language/expressions/class/dstr/gen-meth-ary-ptrn-elem-id-init-throws.js

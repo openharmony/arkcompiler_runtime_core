@@ -14,7 +14,7 @@
 
 # The script runs update_master_and_branch.sh for arkcompiler_runtime_core, 
 # arkcompiler_runtime_core/plugins/ecmascript (fork https://gitee.com/openharmony-sig/arkcompiler_ets_runtime) and 
-# arkcompiler_runtime_core/plugins/ecmascript/es2panda (fork https://gitee.com/openharmony-sig/arkcompiler_ets_frontend).
+# arkcompiler_runtime_core/tools/es2panda (fork https://gitee.com/openharmony-sig/arkcompiler_ets_frontend).
 # The script can be run from any folder but for this you need to add path to arkcompiler_runtime_core repo
 
 set -euo pipefail

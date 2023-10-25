@@ -106,7 +106,7 @@ linux_tools() {
         -DTOOLCHAIN_SYSROOT=$OHOS_SDK_NATIVE/sysroot \
         -DTOOLCHAIN_CLANG_ROOT=$OHOS_SDK_NATIVE/llvm \
         -DPANDA_WITH_ECMASCRIPT=ON"
-    local LINUX_BUILD_TARGETS="ark ark_aot ark_link es2panda"
+    local LINUX_BUILD_TARGETS="ark ark_aot ark_disasm ark_link es2panda"
     build_panda "$LINUX_BUILD_DIR" "$LINUX_CMAKE_ARGS" "$LINUX_BUILD_TARGETS"
     copy_into_sdk "$LINUX_BUILD_DIR" "$PANDA_SDK_PATH/linux_host_tools" "$SCRIPT_DIR"/linux_host_tools.txt
 }
@@ -147,8 +147,7 @@ ohos() {
 
 ts_linter() {
     echo "> Building tslinter..."
-    # TODO(vpukhov): adjust es2panda path
-    local LINTER_ROOT="$ARK_ROOT/plugins/ecmascript/es2panda/linter"
+    local LINTER_ROOT="$ARK_ROOT/tools/es2panda/linter"
     (cd "$LINTER_ROOT" && npm install)
     local TGZ="$(ls "$LINTER_ROOT"/bundle/panda-tslinter*tgz)"
     mkdir -p "$PANDA_SDK_PATH"/tslinter

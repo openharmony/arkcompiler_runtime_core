@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_PROGRAM_HPP
-#define _PANDA_ASSEMBLER_PROGRAM_HPP
+#ifndef PANDA_ASSEMBLER_ASSEMBLY_PROGRAM_H
+#define PANDA_ASSEMBLER_ASSEMBLY_PROGRAM_H
 
 #include <string>
 #include <unordered_set>
@@ -48,4 +48,4 @@ struct Program {
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_PROGRAM_HPP
+#endif  // PANDA_ASSEMBLER_ASSEMBLY_PROGRAM_H

@@ -55,21 +55,21 @@
 #! PASS_AFTER   "Inline"
 #! INST         "CallStatic.Inlined"
 #! INST         "Monitor"
-#! INST         "LoadObject"
+#! INST_COUNT   /LoadObject/,3
 #! INST         "Monitor"
-#! PASS_AFTER   "LICM"
+#! PASS_AFTER   "LSE"
+#! INST_COUNT   /LoadObject/,1
+#! PASS_AFTER   "Lowering"
 #! INST_NOT     "CallStatic.Inlined"
 #! INST_NOT     "Monitor"
-#! INST         "LoadObject"
-#! PASS_AFTER   "LSE"
 #! INST_NOT     "LoadObject"
-
-#   Inlined function removed on first BranchElimination, but the checker checks second BranchElimination, so LICM is used
+#   Inlined function removed on second BranchElimination after LSE, so Lowering is used
 
 .function u1 main1() {
     newobj v0, Obj
     ldai 0
     stobj v0, Obj.data
+    ldobj v0, Obj.data
     jeqz lable
     call.short foo, v0
     return

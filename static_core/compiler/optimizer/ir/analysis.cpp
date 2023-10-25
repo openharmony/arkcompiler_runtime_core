@@ -67,6 +67,20 @@ bool FindBlockBetween(BasicBlock *dominate_bb, BasicBlock *current_bb, Marker ma
     return false;
 }
 
+RuntimeInterface::ClassPtr GetClassPtrForObject(Inst *inst, size_t input_num)
+{
+    auto obj_inst = inst->GetDataFlowInput(input_num);
+    if (obj_inst->GetOpcode() != Opcode::NewObject) {
+        return nullptr;
+    }
+    auto init_class = obj_inst->GetInput(0).GetInst();
+    if (init_class->GetOpcode() == Opcode::LoadAndInitClass) {
+        return init_class->CastToLoadAndInitClass()->GetClass();
+    }
+    ASSERT(init_class->GetOpcode() == Opcode::LoadImmediate);
+    return init_class->CastToLoadImmediate()->GetClass();
+}
+
 bool HasOsrEntryBetween(Inst *dominate_inst, Inst *inst)
 {
     ASSERT(dominate_inst->IsDominate(inst));
@@ -493,6 +507,10 @@ void SaveStateBridgesBuilder::SearchAndCreateMissingObjInSaveState(Graph *graph,
     ASSERT(graph != nullptr);
     ASSERT(source != nullptr);
     ASSERT(source->IsMovableObject());
+
+    if (graph->IsBytecodeOptimizer()) {
+        return;  // SaveState bridges useless when bytecode optimizer enabled.
+    }
 
     if (target_block == nullptr) {
         ASSERT(target != nullptr);

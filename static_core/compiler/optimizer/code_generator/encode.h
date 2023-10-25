@@ -437,16 +437,6 @@ public:
         SetFalseResult();
     }
 
-    virtual void EncodeStringIndexOfAfter([[maybe_unused]] Reg dst, [[maybe_unused]] Reg str,
-                                          [[maybe_unused]] Reg character, [[maybe_unused]] Reg idx,
-                                          [[maybe_unused]] Reg tmp, [[maybe_unused]] bool compression,
-                                          [[maybe_unused]] uint32_t length_offset,
-                                          [[maybe_unused]] uint32_t data_offset,
-                                          [[maybe_unused]] int32_t char_const_value)
-    {
-        SetFalseResult();
-    }
-
     virtual void EncodeSelect([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src0, [[maybe_unused]] Reg src1,
                               [[maybe_unused]] Reg src2, [[maybe_unused]] Imm imm, [[maybe_unused]] Condition cc)
     {

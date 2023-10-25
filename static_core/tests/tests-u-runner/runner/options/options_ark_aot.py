@@ -7,6 +7,8 @@ from runner.options.decorator_value import value, _to_bool, _to_int, _to_str
 
 @dataclass
 class ArkAotOptions:
+    __DEFAULT_TIMEOUT = 600
+
     def __str__(self) -> str:
         return _to_str(self, ArkAotOptions, 1)
 
@@ -25,9 +27,18 @@ class ArkAotOptions:
     @cached_property
     @value(yaml_path="ark_aot.timeout", cli_name="paoc_timeout", cast_to_type=_to_int)
     def timeout(self) -> int:
-        return 600
+        return ArkAotOptions.__DEFAULT_TIMEOUT
 
     @cached_property
     @value(yaml_path="ark_aot.aot-args", cli_name="aot_args")
     def aot_args(self) -> List[str]:
         return []
+
+    def get_command_line(self) -> str:
+        _aot_args = [f'--aot-args="{arg}"' for arg in self.aot_args]
+        options = [
+            '--aot' if self.enable else '',
+            f'--paoc-timeout={self.timeout}' if self.timeout != ArkAotOptions.__DEFAULT_TIMEOUT else '',
+            ' '.join(_aot_args)
+        ]
+        return ' '.join(options)

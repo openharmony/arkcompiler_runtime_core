@@ -24,13 +24,13 @@ function(:IrtocTestCfg, params: {"buf" => 'ptr', "size" => 'u64'}, mode: [:Nativ
 
     i0 := 0
     r0 := 0
-    While((i := (i_phi := Phi(i0, i1).u64)), size).CC(:CC_NE) {
+    While((i := (i_phi := Phi(i0, i1).u64)), size).NE {
         res := WhilePhi(r0, phi2).u64
 
         offset := Mul(i, 8).u64
         value := Load(buf, offset).u64
-        If(And(i, 1).u64, 0).CC(:CC_EQ) {
-            If(And(value, 1).u64, 0).CC(:CC_EQ) {
+        If(And(i, 1).u64, 0).EQ {
+            If(And(value, 1).u64, 0).EQ {
                 r1 := Add(res, 2).u64
                 v0 := Add(value, 2).u64
                 Store(buf, offset, v0).u64
@@ -64,15 +64,15 @@ function(:IrtocTestCfgLabels, params: {"buf" => 'ptr', "size" => 'u64'}, mode: [
     i_phi := Phi(i0, i1).u64
     res := Phi(r0, phi2).u64
     i := i_phi
-    If(i, size).CC(:CC_EQ) {
+    If(i, size).EQ.Unlikely {
       Goto(:Exit)
     }
 
     offset := Mul(i, 8).u64
     value := Load(buf, offset).u64
 
-    If(And(i, 1).u64, 0).CC(:CC_NE) { Goto(:Else1) }
-        If(And(value, 1).u64, 0).CC(:CC_NE) { Goto(:Else2) }
+    If(And(i, 1).u64, 0).NE { Goto(:Else1) }
+        If(And(value, 1).u64, 0).NE { Goto(:Else2) }
             r1 := Add(res, 2).u64
             v0 := Add(value, 2).u64
             Store(buf, offset, v0).u64
@@ -102,7 +102,7 @@ function(:IrtocTestAddValues, params: {a: 'i64', b: 'i64'}, mode: [:Native]) {
 }
 
 function(:IrtocTestIncMaxValue, params: {a: 'u64', b: 'u64'}, mode: [:Native]) {
-    If(a, b).CC(:CC_GE) {
+    If(a, b).GE {
         v1 := Add(a, 1).u64
     }
     Else {
@@ -113,7 +113,7 @@ function(:IrtocTestIncMaxValue, params: {a: 'u64', b: 'u64'}, mode: [:Native]) {
 }
 
 function(:IrtocTestIncMaxValueLabels, params: {a: 'u64', b: 'u64'}, mode: [:Native]) {
-    If(a, b).CC(:CC_GE) {
+    If(a, b).GE {
         Goto(:l1)
     } Else {
         Goto(:l2)
@@ -128,11 +128,11 @@ Label(:l3)
 }
 
 function(:IrtocTestSeqLabels, params: {a: 'u64'}, mode: [:Native]) {
-    If(a, 10).CC(:CC_LE) {
+    If(a, 10).LE {
        ret1 := AddI(a).Imm(1).u64
        Goto(:end)
     }
-    If(a, 100).CC(:CC_LE) {
+    If(a, 100).LE {
        ret2 := AddI(a).Imm(2).u64
        Goto(:end)
     }
@@ -183,7 +183,7 @@ Label(:Header)
 
     res_next := Add(res, i).word
     i_next := AddI(i).Imm(1).word
-    If(i_next, n).CC(:CC_GT).b {
+    If(i_next, n).GT.Unlikely.b {
         Goto(:Tail)
     }
     Goto(:Header)
@@ -192,7 +192,7 @@ Label(:Tail)
 }
 
 function(:IrtocTestReturnBeforeLabel, params: {n: 'word'}, mode: [:Native]) {
-    If(n, 100).CC(:CC_GT).b {
+    If(n, 100).GT.b {
         Goto(:Exit1)
     } Else {
         Goto(:Exit2)

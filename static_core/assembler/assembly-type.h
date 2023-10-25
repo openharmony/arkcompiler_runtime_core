@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_TYPE_H
-#define _PANDA_ASSEMBLER_TYPE_H
+#ifndef PANDA_ASSEMBLER_ASSEMBLY_TYPE_H
+#define PANDA_ASSEMBLER_ASSEMBLY_TYPE_H
 
 #include "define.h"
 #include "file_items.h"
@@ -158,6 +158,8 @@ public:
 
     PANDA_PUBLIC_API static panda_file::Type::TypeId GetId(std::string_view name, bool ignore_primitive = false);
 
+    PANDA_PUBLIC_API static pandasm::Type FromPrimitiveId(panda_file::Type::TypeId id);
+
     bool operator==(const Type &type) const
     {
         return name_ == type.name_;
@@ -194,4 +196,4 @@ public:
 
 }  // namespace std
 
-#endif  // !_PANDA_ASSEMBLER_TYPE_H
+#endif  // PANDA_ASSEMBLER_ASSEMBLY_TYPE_H

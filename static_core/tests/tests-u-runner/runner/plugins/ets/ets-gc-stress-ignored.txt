@@ -1,0 +1,2 @@
+# panda#13946: Verifier error: instruction is not implemented. method std.core.void TestHumongousStress::run(TestHumongousStress) failed to verify
+test_stress_gc_humongous.ets

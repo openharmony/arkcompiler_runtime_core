@@ -46,8 +46,17 @@ function(panda_add_checked_test_ets)
 
     file(MAKE_DIRECTORY "${TEST_DIR}")
     set(ABC_TARGET ${TEST_NAME}-ets-es2panda)
-
-    compile_ets_code(${ARG_FILE} ${BINARY_FILE} ${ABC_TARGET})
+    get_filename_component(TEST_TYPE "${ARG_FILE}" EXT)
+    if (${TEST_TYPE} MATCHES "ets")
+        compile_ets_code(${ARG_FILE} ${BINARY_FILE} ${ABC_TARGET})
+    else()
+    # Compile assembly file
+        add_custom_command(OUTPUT "${BINARY_FILE}"
+                COMMENT "Building ${TEST_NAME}"
+                COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark_asm> --log-file ${BUILD_LOG} ${ARG_FILE} ${BINARY_FILE}
+                DEPENDS ${assembler} "${ARG_FILE}"
+                WORKING_DIRECTORY "${ARG_WORKING_DIR}")
+    endif()
 
     set(EXT_FILES "")
     foreach(APP_FILE ${ARG_EXT_FILES})
@@ -60,7 +69,6 @@ function(panda_add_checked_test_ets)
         list(APPEND EXT_FILES "${APP_FILE_OUTPUT}")
     endforeach()
 
-    get_filename_component(TEST_TYPE "${ARG_FILE}" EXT)
     if (${TEST_TYPE} MATCHES "ets")
         set(COMMAND_TOKEN "//!")
     else()
@@ -154,6 +162,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_try_catch6.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_try_catch7.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_try_catch8.ets)
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_static_lookup.pa)
 endif()
 
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_array.ets)

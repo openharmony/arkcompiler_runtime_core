@@ -21,9 +21,6 @@
 
 namespace panda::compiler {
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define PEEPHOLE_IS_APPLIED(visitor, inst) visitor->SetIsApplied(inst, true, __FILE__, __LINE__)
-
 void Peepholes::InvalidateAnalyses()
 {
     GetGraph()->InvalidateAnalysis<BoundsAnalysis>();

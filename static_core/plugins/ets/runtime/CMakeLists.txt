@@ -44,6 +44,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_finalization_queue.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Promise.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Type.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_TypeCreator.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Method.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Value.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Atomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_math.cpp
@@ -62,6 +64,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise.cpp
     ${ETS_EXT_SOURCES}/types/ets_object.cpp
+    ${ETS_EXT_SOURCES}/types/ets_typeapi_create.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_field.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_parameter.cpp
@@ -96,6 +99,8 @@ panda_target_include_directories(arkruntime_obj PUBLIC
     ${PANDA_ETS_PLUGIN_SOURCE}/runtime/
     ${PANDA_BINARY_ROOT}/
 )
+
+panda_target_link_libraries(arkruntime_obj arkassembler)
 
 panda_target_compile_definitions(arkruntime_obj PRIVATE ${CURRENT_DEFS})
 add_dependencies(arkruntime_obj cross_values)

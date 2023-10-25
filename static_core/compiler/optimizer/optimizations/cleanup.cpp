@@ -25,6 +25,16 @@
 
 namespace panda::compiler {
 
+bool Cleanup::CanBeMerged(BasicBlock *bb)
+{
+    // TryCatchResolving for JIT mode needs separate CatchBegin with CatchPhis blocks
+    if (!GetGraph()->IsBytecodeOptimizer() && !GetGraph()->IsAotMode() && bb->IsCatchBegin()) {
+        return false;
+    }
+    return bb->GetSuccsBlocks().size() == 1 && bb->GetSuccessor(0)->GetPredsBlocks().size() == 1 &&
+           !bb->GetSuccessor(0)->IsPseudoControlFlowBlock() && bb->IsTry() == bb->GetSuccessor(0)->IsTry();
+}
+
 /* Cleanup pass works like dead code elimination (DCE) and removes code which does not affect the program results.
  * It also removes empty basic blocks when it is possible and merges a linear basic block sequence to one bigger
  * basic block, thus simplifying control flow graph.
@@ -79,8 +89,7 @@ bool Cleanup::RunImpl()
             continue;
         }
 
-        while (bb->GetSuccsBlocks().size() == 1 && bb->GetSuccessor(0)->GetPredsBlocks().size() == 1 &&
-               !bb->GetSuccessor(0)->IsPseudoControlFlowBlock() && bb->IsTry() == bb->GetSuccessor(0)->IsTry()) {
+        while (CanBeMerged(bb)) {
             ASSERT(!bb->GetSuccessor(0)->HasPhi());
             COMPILER_LOG(DEBUG, CLEANUP) << "Merged block " << bb->GetSuccessor(0)->GetId() << " into " << bb->GetId();
             bb->JoinSuccessorBlock();

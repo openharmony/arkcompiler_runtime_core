@@ -216,6 +216,7 @@ Operator Contexts
 
 .. meta:
     frontend_status: Done
+    todo: '$$' is an deprecated operator now, it can only be supported with ArkUI plugin, otherwise it will throw exception.
 
 *String context* applies only to a non-*string* operand of the binary ``+``
 operator if the other operand is a *string*. For example:
@@ -606,38 +607,36 @@ See the example below for the illustration of it:
 
 .. _Generic Types Conversions:
 
-Generic Types Conversions
-=========================
+..
+  Generic Types Conversions
+  =========================
 
 .. meta:
     frontend_status: Partly
 
-The conversion of generic types (see :ref:`Generic Declarations`) follows the
-widening style of type arguments.
+..
+  The conversion of generic types (see :ref:`Generic Declarations`) follows the
+  widening style of type arguments.
 
-See the example below for the illustration of it:
-
-.. code-block:: typescript
-   :linenos:
-
-    class Base {}
-    class Derived extends Base {}
-    class Generic <T> {}
-
-    function foo (d: Generic<Derived>) {
-      let b: Generic<Base> = d 
-         /* Generic<Derived> is assigned into Generic<Base> */
-    }
-
-.. index::
-   conversion
-   generic types conversion
-   generic type
-   widening
-   argument
-   conversion
-
-|
+..
+  See the example below for the illustration of it:
+  .. code-block:: typescript
+  :linenos:
+  class Base {}
+  class Derived extends Base {}
+  class Generic <T> {}
+  function foo (d: Generic<Derived>) {
+  let b: Generic<Base> = d 
+  /* Generic<Derived> is assigned into Generic<Base> */
+  }
+  .. index::
+  conversion
+  generic types conversion
+  generic type
+  widening
+  argument
+  conversion
+  |
 
 .. _Function Types Conversions:
 

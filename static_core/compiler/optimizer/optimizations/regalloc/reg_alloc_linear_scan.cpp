@@ -93,6 +93,7 @@ void RegAllocLinearScan::PrepareInterval(LifeIntervals *interval)
     auto &intervals = is_fp ? GetIntervals<true>() : GetIntervals<false>();
 
     if (interval->IsPhysical()) {
+        ASSERT(intervals.fixed.size() > interval->GetReg());
         ASSERT(intervals.fixed[interval->GetReg()] == nullptr);
         intervals.fixed[interval->GetReg()] = interval;
         return;
@@ -349,17 +350,21 @@ Register RegAllocLinearScan::GetFreeRegister(const LifeIntervals *current_interv
                 return;
             }
         }
+        ASSERT(regs_use_positions_.size() > interval->GetReg());
         regs_use_positions_[interval->GetReg()] = intersection;
     };
     auto set_inactive_usage = [this](const auto &interval, LifeNumber intersection) {
+        ASSERT(regs_use_positions_.size() > interval->GetReg());
         auto &reg_use = regs_use_positions_[interval->GetReg()];
         reg_use = std::min<size_t>(intersection, reg_use);
     };
 
     EnumerateIntersectedIntervals(working_intervals_.fixed, current_interval, set_fixed_usage);
     EnumerateIntersectedIntervals(working_intervals_.inactive, current_interval, set_inactive_usage);
-    EnumerateIntervals(working_intervals_.active,
-                       [this](const auto &interval) { regs_use_positions_[interval->GetReg()] = 0; });
+    EnumerateIntervals(working_intervals_.active, [this](const auto &interval) {
+        ASSERT(regs_use_positions_.size() > interval->GetReg());
+        regs_use_positions_[interval->GetReg()] = 0;
+    });
 
     BlockOverlappedRegisters(current_interval);
 
@@ -392,9 +397,11 @@ std::pair<Register, LifeNumber> RegAllocLinearScan::GetBlockedRegister(const Lif
                 return;
             }
         }
+        ASSERT(regs_use_positions_.size() > interval->GetReg());
         regs_use_positions_[interval->GetReg()] = intersection;
     };
     auto set_inactive_usage = [this](const auto &interval, LifeNumber intersection) {
+        ASSERT(regs_use_positions_.size() > interval->GetReg());
         auto &reg_use = regs_use_positions_[interval->GetReg()];
         reg_use = std::min<size_t>(interval->GetNextUsage(intersection), reg_use);
     };
@@ -402,6 +409,7 @@ std::pair<Register, LifeNumber> RegAllocLinearScan::GetBlockedRegister(const Lif
     EnumerateIntersectedIntervals(working_intervals_.fixed, current_interval, set_fixed_usage);
     EnumerateIntersectedIntervals(working_intervals_.inactive, current_interval, set_inactive_usage);
     EnumerateIntervals(working_intervals_.active, [this, &current_interval](const auto &interval) {
+        ASSERT(regs_use_positions_.size() > interval->GetReg());
         auto &reg_use = regs_use_positions_[interval->GetReg()];
         reg_use = std::min<size_t>(interval->GetNextUsage(current_interval->GetBegin()), reg_use);
     });
@@ -567,26 +575,19 @@ void RegAllocLinearScan::SplitBeforeUse(LifeIntervals *current_interval, LifeNum
 
 void RegAllocLinearScan::BlockOverlappedRegisters(const LifeIntervals *current_interval)
 {
-    auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-
-    if (current_interval->HasInst()) {
-        auto curr = current_interval->GetInst();
-        auto prev = curr->GetPrev();
-        // Two pseudo-users ot multi-output instruction must not have equal register
-        if (IsPseudoUserOfMultiOutput(curr) && IsPseudoUserOfMultiOutput(prev)) {
-            auto interval = la.GetInstLifeIntervals(prev);
-            regs_use_positions_[interval->GetReg()] = 0;
-        }
-        return;
+    if (!current_interval->HasInst()) {
+        // current_interval - is additional life interval for an instruction required temp, block fixed registers of
+        // that instruction
+        auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
+        la.EnumerateFixedLocationsOverlappingTemp(current_interval, [this](Location location) {
+            ASSERT(location.IsFixedRegister());
+            auto reg = reg_map_.CodegenToRegallocReg(location.GetValue());
+            if (reg_map_.IsRegAvailable(reg, GetGraph()->GetArch())) {
+                ASSERT(regs_use_positions_.size() > reg);
+                regs_use_positions_[reg] = 0;
+            }
+        });
     }
-
-    // current_interval - is additional life interval for an instruction required temp, block fixed registers of that
-    // instruction
-    la.EnumerateFixedLocationsOverlappingTemp(current_interval, [this](Location location) {
-        ASSERT(location.IsFixedRegister());
-        auto reg = reg_map_.CodegenToRegallocReg(location.GetValue());
-        regs_use_positions_[reg] = 0;
-    });
 }
 
 /// Returns true if the interval corresponds to Constant instruction and it could not be spilled to a stack.

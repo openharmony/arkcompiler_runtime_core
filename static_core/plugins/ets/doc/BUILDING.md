@@ -18,7 +18,7 @@ For bootstrapping steps see [bootstraping](https://gitee.com/openharmony-sig/ark
 ```
 git clone --branch ets-stdlib-dev https://gitee.com/aakmaev/arkcompiler_runtime_core.git panda
 git clone --branch ets-stdlib-dev https://gitee.com/aakmaev/arkcompiler_ets_runtime.git panda/plugins/ecmascript
-git clone --branch ets-stdlib-dev https://gitee.com/aakmaev/arkcompiler_ets_frontend.git panda/plugins/ecmascript/es2panda
+git clone --branch ets-stdlib-dev https://gitee.com/aakmaev/arkcompiler_ets_frontend.git panda/tools/es2panda
 git clone https://gitee.com/nsizov/ets panda/plugins/ets
 ```
 
@@ -52,7 +52,7 @@ git config --global user.email "<your_email@domain.com>"
 ```
 git clone --branch ets-stdlib-dev https://gitee.com/aakmaev/arkcompiler_runtime_core.git panda
 git clone --branch ets-stdlib-dev https://gitee.com/aakmaev/arkcompiler_ets_runtime.git panda/plugins/ecmascript
-git clone --branch ets-stdlib-dev https://gitee.com/aakmaev/arkcompiler_ets_frontend.git panda/plugins/ecmascript/es2panda
+git clone --branch ets-stdlib-dev https://gitee.com/aakmaev/arkcompiler_ets_frontend.git panda/tools/es2panda
 git clone https://gitee.com/nsizov/ets panda/plugins/ets
 ```
 

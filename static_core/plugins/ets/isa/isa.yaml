@@ -103,14 +103,21 @@ groups:
         acc: out:b32
         format: [pref_op_v_8_id_32]
         prefix: ets
+        intrinsic_name:
+            - INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_I32
+            - INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_F32
       - sig: ets.ldobj.name.64 v:in:ref, field_id
         acc: out:b64
         format: [pref_op_v_8_id_32]
         prefix: ets
+        intrinsic_name:
+            - INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_I64
+            - INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_F64
       - sig: ets.ldobj.name.obj v:in:ref, field_id
         acc: out:ref
         format: [pref_op_v_8_id_32]
         prefix: ets
+        intrinsic_name: INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_OBJ
 
   - title: Store accumulator content into object field by name
     description: >
@@ -148,11 +155,18 @@ groups:
         acc: in:b32
         format: [pref_op_v_8_id_32]
         prefix: ets
+        intrinsic_name:
+            - INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I32
+            - INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_F32
       - sig: ets.stobj.name.64 v:in:ref, field_id
         acc: in:b64
         format: [pref_op_v_8_id_32]
         prefix: ets
+        intrinsic_name:
+            - INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I64
+            - INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_F64
       - sig: ets.stobj.name.obj v:in:ref, field_id
         acc: in:ref
         format: [pref_op_v_8_id_32]
         prefix: ets
+        intrinsic_name: INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_OBJ

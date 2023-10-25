@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_LITERALARRAY_HPP
-#define _PANDA_ASSEMBLER_LITERALARRAY_HPP
+#ifndef PANDA_ASSEMBLER_ASSEMBLY_LITERALS_H
+#define PANDA_ASSEMBLER_ASSEMBLY_LITERALS_H
 
 #include <string>
 #include <vector>
@@ -241,4 +241,4 @@ struct LiteralArray {
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_LITERALARRAY_HPP
+#endif  // PANDA_ASSEMBLER_ASSEMBLY_LITERALS_H

@@ -18,7 +18,9 @@
 % Compiler::intrinsics.select {|intrinsic| intrinsic.respond_to? 'peephole_func'}.each do |intrinsic|
 case panda::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
 {
-    <%= intrinsic.peephole_func %>(v, intrinsic);
+    if (<%= intrinsic.peephole_func %>(v, intrinsic)) {
+        PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), intrinsic);
+    }
     return;
 }
 % end

@@ -15,6 +15,7 @@
 
 package std.core;
 
+// Class Value
 native function ValueAPIGetFieldBoolean(obj: Object, i: long): boolean
 
 native function ValueAPIGetFieldByte(obj: Object, i: long): byte
@@ -71,7 +72,7 @@ native function ValueAPISetFieldByNameLong(obj: Object, name: String, val: long)
 
 native function ValueAPISetFieldByNameObject(obj: Object, name: String, val: Object): void
 
-
+// Array Value
 native function ValueAPISetElementBoolean(obj: Object, i: long, val: boolean): void
 
 native function ValueAPISetElementByte(obj: Object, i: long, val: byte): void
@@ -91,34 +92,32 @@ native function ValueAPISetElementLong(obj: Object, i: long, val: long): void
 native function ValueAPISetElementObject(obj: Object, i: long, val: Object): void
 
 export abstract class Value extends Object {
-    public static of(o: Object | null): Value {
+    public static of(o: NullishType): Value {
         let t = Type.of(o)
         if (t instanceof NullType) {
-            return NullValue.getInstance()
-        }
-        let obj = o as Object
-        if (t instanceof ClassType) {
-            return new ClassValue(t as ClassType, obj)
+            return NullValue.INSTANCE
+        } else if (t instanceof ClassType) {
+            return new ClassValue(t as ClassType, o!)
         } else if (t instanceof ArrayType) {
-            return new ArrayValue(t as ArrayType, obj)
+            return new ArrayValue(t as ArrayType, o!)
         } else if (t instanceof StringType) {
-            return new StringValue(t as StringType, obj as String)
+            return new StringValue(t as StringType, o! as String)
         } else if (t instanceof BooleanType) {
-            return new BooleanValue(t as BooleanType, obj as Boolean)
+            return new BooleanValue(t as BooleanType, o! as Boolean)
         } else if (t instanceof ByteType) {
-            return new ByteValue(t as ByteType, obj as Byte)
+            return new ByteValue(t as ByteType, o! as Byte)
         } else if (t instanceof ShortType) {
-            return new ShortValue(t as ShortType, obj as Short)
+            return new ShortValue(t as ShortType, o! as Short)
         } else if (t instanceof CharType) {
-            return new CharValue(t as CharType, obj as Char)
+            return new CharValue(t as CharType, o! as Char)
         } else if (t instanceof IntType) {
-            return new IntValue(t as IntType, obj as Int)
+            return new IntValue(t as IntType, o! as Int)
         } else if (t instanceof FloatType) {
-            return new FloatValue(t as FloatType, obj as Float)
+            return new FloatValue(t as FloatType, o! as Float)
         } else if (t instanceof DoubleType) {
-            return new DoubleValue(t as DoubleType, obj as Double)
+            return new DoubleValue(t as DoubleType, o! as Double)
         } else if (t instanceof LongType) {
-            return new LongValue(t as LongType, obj as Long)
+            return new LongValue(t as LongType, o! as Long)
         } else {
             throw new Error("Not implemented")
         }
@@ -486,19 +485,21 @@ export final class StringValue extends Value {
 }
 
 export final class NullValue extends Value {
-    private typ: NullType
-    private static instance: NullValue | null = null
+    public static readonly INSTANCE = new NullValue()
 
     public override getType(): Type {
-        return this.typ as Type
+        return NullType.REF as Type
     }
 
     internal constructor() {}
+}
 
-    public static getInstance(): NullValue {
-        if (NullValue.instance == null) {
-            NullValue.instance = new NullValue()
-        }
-        return NullValue.instance!
+export final class UndefinedValue extends Value {
+    public static readonly INSTANCE = new UndefinedValue()
+
+    public override getType(): Type {
+        return UndefinedType.REF as Type
     }
+
+    internal constructor() {}
 }

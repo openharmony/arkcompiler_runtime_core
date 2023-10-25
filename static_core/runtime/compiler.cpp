@@ -48,19 +48,6 @@ bool Compiler::IsCompilationExpired(const CompilerTask &ctx)
            (!ctx.IsOsr() && ctx.GetMethod()->HasCompiledCode());
 }
 
-CompilerProcessor::CompilerProcessor(Compiler *compiler)
-{
-    compiler_ = compiler;
-}
-
-bool CompilerProcessor::Process(CompilerTask &&task)
-{
-    if (task.GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
-        compiler_->CompileMethodLocked(std::move(task));
-    }
-    return true;
-}
-
 /// Intrinsics fast paths are supported only for G1 GC.
 bool PandaRuntimeInterface::IsGcValidForFastPath(SourceLanguage lang) const
 {
@@ -773,7 +760,7 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecode_offset, bool osr
         auto status = method->GetCompilationStatus();
         for (; (status == Method::WAITING) || (status == Method::COMPILATION);
              status = method->GetCompilationStatus()) {
-            if (thread_pool_ == nullptr || !thread_pool_->IsActive()) {
+            if (compiler_worker_ == nullptr || compiler_worker_->IsWorkerJoined()) {
                 // JIT thread is destroyed, wait makes no sence
                 return false;
             }
@@ -790,13 +777,19 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecode_offset, bool osr
 
 void Compiler::CompileMethodLocked(const CompilerTask &&ctx)
 {
+    os::memory::LockHolder lock(compilation_lock_);
+    StartCompileMethod(std::move(ctx));
+}
+
+void Compiler::StartCompileMethod(const CompilerTask &&ctx)
+{
     ASSERT(runtime_iface_ != nullptr);
     auto method = ctx.GetMethod();
-    os::memory::LockHolder lock(compilation_lock_);
 
     method->ResetHotnessCounter();
 
     if (IsCompilationExpired(ctx)) {
+        ASSERT(!no_async_jit_);
         return;
     }
 
@@ -828,8 +821,8 @@ void Compiler::CompileMethodLocked(const CompilerTask &&ctx)
 
 void Compiler::JoinWorker()
 {
-    if (thread_pool_ != nullptr) {
-        thread_pool_->Shutdown(true);
+    if (compiler_worker_ != nullptr) {
+        compiler_worker_->JoinWorker();
     }
 #ifdef PANDA_COMPILER_DEBUG_INFO
     if (!Runtime::GetOptions().IsArkAot() && compiler::OPTIONS.IsCompilerEmitDebugInfo()) {

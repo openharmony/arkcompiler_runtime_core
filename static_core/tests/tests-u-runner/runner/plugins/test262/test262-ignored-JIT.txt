@@ -27,18 +27,15 @@ language/statements/try/tco-catch.js
 language/statements/try/tco-finally.js
 language/statements/while/tco-body.js
 
-# #10607
-intl402/NumberFormat/prototype/format/units.js
-
-# Fail #9962
-language/statements/throw/S12.13_A3_T1.js
+# #9964
+built-ins/parseInt/S15.1.2.2_A8.js
+# #9958
+built-ins/parseFloat/S15.1.2.3_A6.js
+# #9717
+built-ins/String/prototype/repeat/repeat-string-n-times.js
 
 # fail precision #9110
 built-ins/Date/UTC/fp-evaluation-order.js
-
-# ASSERTION FAILED: false
-# IN ../../plugins/ecmascript/runtime/global_dictionary-inl.h:37: Hash
-language/expressions/call/eval-spread-empty.js
 
 # 11486
 language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-add.js

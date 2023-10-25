@@ -43,4 +43,9 @@ const char *EtsField::GetTypeDescriptor() const
     return utf::Mutf8AsCString(GetCoreType()->ResolveTypeClass()->GetDescriptor());
 }
 
+bool EtsField::IsDeclaredIn(const EtsClass *klass) const
+{
+    return this->GetDeclaringClass() == klass;
+}
+
 }  // namespace panda::ets

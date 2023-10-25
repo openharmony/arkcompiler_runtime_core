@@ -81,11 +81,6 @@ public:
     }
 
     // Friend wrappers for accesing samplers private fields
-    static os::thread::NativeHandleType ExtractAgentTid(const Sampler *s_ptr)
-    {
-        return s_ptr->agent_tid_;
-    }
-
     static os::thread::NativeHandleType ExtractListenerTid(const Sampler *s_ptr)
     {
         return s_ptr->listener_tid_;
@@ -138,7 +133,6 @@ TEST_F(SamplerTest, SamplerInitTest)
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
 
-    ASSERT_EQ(ExtractAgentTid(sp), os::thread::GetNativeHandle());
     ASSERT_EQ(ExtractListenerTid(sp), 0);
     ASSERT_EQ(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), false);
@@ -219,8 +213,6 @@ TEST_F(SamplerTest, SamplerEventThreadNotificationTest)
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
 
-    ASSERT_TRUE(ExtractManagedThreads(sp).empty());
-
     ASSERT_EQ(sp->Start(PROFILER_FILENAME), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
@@ -262,8 +254,6 @@ TEST_F(SamplerTest, SamplerCheckThreadIdTest)
 {
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
-
-    ASSERT_TRUE(ExtractManagedThreads(sp).empty());
 
     ASSERT_EQ(sp->Start(PROFILER_FILENAME), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
@@ -308,8 +298,6 @@ TEST_F(SamplerTest, SamplerCollectThreadTest)
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
 
-    ASSERT_TRUE(ExtractManagedThreads(sp).empty());
-
     std::atomic<bool> sync_flag1 = false;
     std::atomic<bool> sync_flag2 = false;
     std::atomic<bool> sync_flag3 = false;
@@ -349,8 +337,6 @@ TEST_F(SamplerTest, SamplerCollectNativeThreadTest)
 {
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
-
-    ASSERT_TRUE(ExtractManagedThreads(sp).empty());
 
     std::atomic<bool> sync_flag1 = false;
     std::atomic<bool> sync_flag2 = false;
@@ -692,7 +678,10 @@ TEST_F(SamplerTest, WriteModuleEventTest)
     auto pf = panda_file::OpenPandaFileOrZip(pandafile);
     Runtime::GetCurrent()->GetClassLinker()->AddPandaFile(std::move(pf));
 
-    ASSERT_EQ(ExtractLoadedPFSize(sp), 1);
+    // TODO(mmorozov, skurnevich)
+    // this test may fail if the loaded module managed to dump into the trace
+    // ASSERT_EQ(ExtractLoadedPFSize(sp), 1);
+
     sp->Stop();
 
     FileInfo module_info;

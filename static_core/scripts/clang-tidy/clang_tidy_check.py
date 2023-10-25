@@ -396,6 +396,25 @@ def verify_args(panda_dir: str, build_dir: str) -> str:
 
     return ""
 
+def check_headers_in_es2panda_sources(panda_dir):
+    es2panda_dir = panda_dir + "/tools/es2panda"
+    result = []
+    for root, dirs, files in os.walk(es2panda_dir):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if ".h" not in file_path and ".cpp" not in file_path:
+                continue
+            source_file = open(file_path, "r")
+            for line in source_file.readlines():
+                line = line.replace(" ", "")
+                if (line.startswith("#include\"tools/es2panda")):
+                    result.append("Error: use of header starting with tools/es2panda in " + file_path)
+                    continue
+    if len(result) > 0:
+        for file in result:
+            print(file)
+        sys.exit(1)
+
 def check_file_list_for_system_headers_includes(file_list: list):
     system_headers = []
     regexp = re.compile("-I[^ ]*/third_party[^ ]*")
@@ -433,6 +452,7 @@ if __name__ == "__main__":
     if not file_list:
         sys.exit("Can't be prepaired source list. Please check availble in build `dir compile_commands.json` and correcting of parameter `--filename-filter` if you use it.")
 
+    check_headers_in_es2panda_sources(args.panda_dir)
     print('Checked for system headers: Starting')
     system_headers = check_file_list_for_system_headers_includes(file_list)
     if system_headers:

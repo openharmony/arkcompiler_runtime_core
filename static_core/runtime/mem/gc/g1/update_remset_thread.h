@@ -26,7 +26,7 @@
 
 namespace panda::mem {
 
-// template <typename T>
+// Forward declaration for UpdateRemsetThread
 class GC;
 
 constexpr bool REMSET_THREAD_USE_STATS = false;
@@ -98,13 +98,6 @@ public:
 
     void DestroyThread();
 
-    void StartThread();
-
-    /// Blocking call until all tasks are not processed
-    void WaitUntilTasksEnd();
-
-    void ThreadLoop();
-
     // only debug purpose
     size_t GetQueueSize() const
     {
@@ -118,20 +111,13 @@ public:
         update_concurrent_ = value;
     }
 
-    void InvalidateRegions(PandaVector<Region *> *regions)
-    {
-        ASSERT(!gc_pause_thread_);
-        need_invalidate_region_ = true;
-        {
-            os::memory::LockHolder holder(loop_lock_);
-            invalidate_regions_ = regions;
-            while (invalidate_regions_ != nullptr) {
-                Sleep();
-            }
-            need_invalidate_region_ = false;
-            thread_cond_var_.Signal();
-        }
-    }
+    using RegionVector = PandaVector<Region *>;
+
+    /**
+     * Force stop cards processing and do invalidate region in GC during concurrent sweep phase
+     * @param regions regions for invalidation
+     */
+    void InvalidateRegions(RegionVector *regions);
 
     void AddPostBarrierBuffer(PandaVector<mem::CardTable::CardPtr> *buffer)
     {
@@ -139,25 +125,33 @@ public:
         post_barrier_buffers_.push_back(buffer);
     }
 
-    // Interrupts card processing and returns all unprocessed cards
+    /**
+     * Return all unprocessed cards
+     * Can be called only if UpdateRemsetThread is suspended by GC
+     * @param cards set of cards for saving
+     */
     void DrainAllCards(PandaUnorderedSet<CardTable::CardPtr> *cards);
 
     /// Suspend UpdateRemsetThread to reduce CPU usage
     void SuspendThread();
     /// Resume UpdateRemsetThread execution loop
     void ResumeThread();
+
     /**
-     * Process all cards in the GC thread.
+     * Process all cards in the GC thread on pause
      * Can be called only if UpdateRemsetThread is suspended
      */
     void GCProcessCards();
+
     /**
      * Invalidate regions in the GC thread
      * Can be called only if UpdateRemsetThread is suspended
      */
-    void GCInvalidateRegions(PandaVector<Region *> *regions);
+    void GCInvalidateRegions(RegionVector *regions);
 
 private:
+    void ThreadLoop();
+
     void FillFromDefered(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(loop_lock_);
     void FillFromQueue(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(loop_lock_);
     void FillFromThreads(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(loop_lock_);
@@ -168,6 +162,8 @@ private:
                                    PandaUnorderedSet<CardTable::CardPtr> *cards);
 
     size_t ProcessAllCards() REQUIRES(loop_lock_);
+
+    void DoInvalidateRegions(RegionVector *regions) REQUIRES(loop_lock_);
 
     void Sleep() REQUIRES(loop_lock_)
     {
@@ -181,7 +177,6 @@ private:
     GCG1BarrierSet::ThreadLocalCardQueues *queue_ GUARDED_BY(queue_lock_) {nullptr};
     os::memory::Mutex *queue_lock_ {nullptr};
     PandaUnorderedSet<CardTable::CardPtr> cards_;
-    PandaVector<Region *> *invalidate_regions_ GUARDED_BY(loop_lock_) {nullptr};
     PandaVector<GCG1BarrierSet::ThreadLocalCardQueues *> post_barrier_buffers_ GUARDED_BY(post_barrier_buffers_lock_);
     os::memory::Mutex post_barrier_buffers_lock_;
 
@@ -195,12 +190,38 @@ private:
     size_t min_concurrent_cards_to_process_;
     std::thread *update_thread_ {nullptr};
     os::memory::ConditionVariable thread_cond_var_;
-    std::atomic<bool> stop_thread_ {false};
-    std::atomic<bool> gc_pause_thread_ {false};
-    std::atomic<bool> pause_thread_ {false};
+
+    /**
+     * @enum UpdateRemsetThreadFlags is special iteration flags in ThreadLoop
+     * @see ThreadLoop
+     */
+    enum class UpdateRemsetThreadFlags : uint32_t {
+        IS_PROCESS_CARD = 0U,               ///< Special value for main work (process cards) in update remset worker
+        IS_STOP_WORKER = 1U,                ///< Update remset worker is in destroying process
+        IS_PAUSED_BY_GC_THREAD = 1U << 1U,  ///< Update remset worker is paused by GCThread
+        IS_INVALIDATE_REGIONS = 1U << 2U,   ///< Update remset worker is invalidating regions
+    };
+
+    ALWAYS_INLINE bool IsFlag(UpdateRemsetThreadFlags value)
+    {
+        return iteration_flag_ == value;
+    }
+
+    ALWAYS_INLINE void SetFlag(UpdateRemsetThreadFlags value)
+    {
+        iteration_flag_ = value;
+    }
+
+    ALWAYS_INLINE void RemoveFlag([[maybe_unused]] UpdateRemsetThreadFlags value)
+    {
+        ASSERT(iteration_flag_ == value);
+        iteration_flag_ = UpdateRemsetThreadFlags::IS_PROCESS_CARD;
+    }
+
+    std::atomic<UpdateRemsetThreadFlags> iteration_flag_ {UpdateRemsetThreadFlags::IS_PROCESS_CARD};
+
     // We do not fully update remset during collection pause
     std::atomic<bool> defer_cards_ {false};
-    std::atomic<bool> need_invalidate_region_ {false};
 
     RemsetThreadStats stats_;
 #ifndef NDEBUG

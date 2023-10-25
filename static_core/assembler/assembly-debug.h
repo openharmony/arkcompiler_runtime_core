@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLY_DEBUG_H
-#define _PANDA_ASSEMBLY_DEBUG_H
+#ifndef PANDA_ASSEMBLER_ASSEMBLY_DEBUG_H
+#define PANDA_ASSEMBLER_ASSEMBLY_DEBUG_H
 
 #include <string>
 
@@ -57,4 +57,4 @@ struct LocalVariable {
 
 }  // namespace panda::pandasm::debuginfo
 
-#endif  // !_PANDA_ASSEMBLY_DEBUG_H
+#endif  // PANDA_ASSEMBLER_ASSEMBLY_DEBUG_H

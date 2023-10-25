@@ -260,17 +260,18 @@ Details are provided in the table below.
    falsy
    value type
 
-+------------------+--------------------+--------------------+-----------------------------+
-| Value type       | When Falsy         | When Truthy        | |LANG| code                 |
-+==================+====================+====================+=============================+
-| string           | "" empty string    | non-empty string   | if (stringExpr.length()==0) |
-+------------------+--------------------+--------------------+-----------------------------+
-| number           | 0 or NaN           | any other number   | if (numericExpr == 0)       |
-+------------------+--------------------+--------------------+-----------------------------+
-| nullishExpr      | == null            | != null            | if (nullishExpr == null)    |
-+------------------+--------------------+--------------------+-----------------------------+
-| nonNullishExpr   | never              | always             | n/a                         |
-+------------------+--------------------+--------------------+-----------------------------+
++------------------+--------------------+--------------------+-------------------------------+
+| Value type       | When Falsy         | When Truthy        | |LANG| code                   |
++==================+====================+====================+===============================+
+| string           | "" empty string    | non-empty string   | if (stringExpr.length()==0)   |
++------------------+--------------------+--------------------+-------------------------------+
+| number           | 0 or NaN           | any other number   | if (numericExpr == 0)         |
++------------------+--------------------+--------------------+-------------------------------+
+| nullishExpr      | == null or         | != null and        | if (nullishExpr == null)      |
+|                  | == undefined       | != undefined       | if (nullishExpr == undefined) |
++------------------+--------------------+--------------------+-------------------------------+
+| nonNullishExpr   | never              | always             | n/a                           |
++------------------+--------------------+--------------------+-------------------------------+
 
 The actual extended semantics of conditional-and and conditional-or expressions
 is described in the following truth tables (assuming that 'A' and 'B'

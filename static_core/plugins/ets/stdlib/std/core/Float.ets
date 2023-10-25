@@ -139,7 +139,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns value as byte
      */
-    public byteValue(): byte {
+    public override byteValue(): byte {
         return this.value as byte;
     }
 
@@ -148,7 +148,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns value as short
      */
-    public shortValue(): short {
+    public override shortValue(): short {
         return this.value as short;
     }
 
@@ -157,7 +157,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns value as int
      */
-    public intValue(): int {
+    public override intValue(): int {
         return this.value as int;
     }
 
@@ -166,7 +166,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns value as long
      */
-    public longValue(): long {
+    public override longValue(): long {
         return this.value as long;
     }
 
@@ -175,7 +175,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns value as float
      */
-    public floatValue(): float {
+    public override floatValue(): float {
         return this.value;
     }
 
@@ -184,7 +184,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns value as double
      */
-    public doubleValue(): double {
+    public override doubleValue(): double {
         return this.value as double;
     }
 

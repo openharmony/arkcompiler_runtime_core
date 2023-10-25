@@ -24,7 +24,7 @@ static bool IsIntrinsicRange(Inst *inst)
     if (inst->GetOpcode() != compiler::Opcode::Intrinsic) {
         return false;
     }
-#ifdef ENABLE_BYTECODE_OPT
+#if defined(ENABLE_BYTECODE_OPT) && defined(PANDA_WITH_ECMASCRIPT)
     switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
 #ifdef ARK_INTRINSIC_SET
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_CALLI_RANGE_DYN:

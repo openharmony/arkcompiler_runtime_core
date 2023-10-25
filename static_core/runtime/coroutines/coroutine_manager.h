@@ -144,6 +144,19 @@ public:
     /// mark the specified @param id as free
     virtual void FreeCoroutineId(uint32_t id);
 
+    /* debugging tools */
+    /**
+     * Disable coroutine switch for the current worker.
+     * If an attempt to switch the active coroutine is performed when coroutine switch is disabled, the exact actions
+     * are defined by the concrete CoroutineManager implementation (they could include no-op, program halt or something
+     * else).
+     */
+    virtual void DisableCoroutineSwitch() = 0;
+    /// Enable coroutine switch for the current worker.
+    virtual void EnableCoroutineSwitch() = 0;
+    /// @return true if coroutine switch for the current worker is disabled
+    virtual bool IsCoroutineSwitchDisabled() = 0;
+
 protected:
     /// Create native coroutine context instance (implementation dependent)
     virtual CoroutineContext *CreateCoroutineContext(bool coro_has_entrypoint) = 0;
@@ -180,6 +193,27 @@ private:
     os::memory::Mutex ids_lock_;
     std::bitset<MAX_COROUTINE_ID> coroutine_ids_ GUARDED_BY(ids_lock_);
     uint32_t last_coroutine_id_ GUARDED_BY(ids_lock_) = UNINITIALIZED_COROUTINE_ID;
+};
+
+/// Disables coroutine switch on the current worker for some scope. Can be used recursively.
+class ScopedDisableCoroutineSwitch {
+public:
+    explicit ScopedDisableCoroutineSwitch(CoroutineManager *coro_manager) : coro_manager_(coro_manager)
+    {
+        ASSERT(coro_manager_ != nullptr);
+        coro_manager_->DisableCoroutineSwitch();
+    }
+
+    ~ScopedDisableCoroutineSwitch()
+    {
+        coro_manager_->EnableCoroutineSwitch();
+    }
+
+private:
+    CoroutineManager *coro_manager_;
+
+    NO_COPY_SEMANTIC(ScopedDisableCoroutineSwitch);
+    NO_MOVE_SEMANTIC(ScopedDisableCoroutineSwitch);
 };
 
 }  // namespace panda

@@ -43,6 +43,9 @@
 %   end
   need_decl: <%= intrinsic.impl.start_with?(Runtime::intrinsics_namespace) %>
 % end
+% if intrinsic.respond_to?(:peephole_func)
+  peephole_func: <%= intrinsic.peephole_func %>
+% end
 % if intrinsic.respond_to?(:fast_path)
   fast_path: <%= intrinsic.fast_path %>
 % end
@@ -54,9 +57,6 @@
   codegen_arch: <%= intrinsic.respond_to?(:codegen_arch) ? intrinsic.codegen_arch : ['amd64', 'arm32', 'arm64'] %>
 % if intrinsic.respond_to?(:can_encode_func)
   can_encode_func: <%= intrinsic.can_encode_func %>
-% end
-% if intrinsic.respond_to?(:peephole_func)
-  peephole_func: <%= intrinsic.peephole_func %>
 % end
 %   else
   codegen_arch: <%= intrinsic.respond_to?(:codegen_arch) ? intrinsic.codegen_arch : [] %>

@@ -19,10 +19,13 @@
 #include "libpandabase/taskmanager/task.h"
 #include <thread>
 #include <queue>
+#include <unordered_map>
 
 namespace panda::taskmanager {
 
 class TaskScheduler;
+
+using TaskPropertiesCounterMap = std::unordered_map<TaskProperties, size_t, TaskProperties::Hash>;
 
 class WorkerThread {
 public:
@@ -33,7 +36,7 @@ public:
      * FinishedTasksCallback instance should be called after tasks finishing. As argument you should input count of
      * finished tasks.
      */
-    using FinishedTasksCallback = std::function<void(size_t)>;
+    using FinishedTasksCallback = std::function<void(TaskPropertiesCounterMap)>;
 
     static constexpr size_t WORKER_QUEUE_SIZE = 10;
 
@@ -65,6 +68,8 @@ private:
     std::queue<Task> foreground_queue_;
 
     size_t size_ {0};
+
+    TaskPropertiesCounterMap finished_tasks_counter_map_;
 
     FinishedTasksCallback finished_tasks_callback_;
 };

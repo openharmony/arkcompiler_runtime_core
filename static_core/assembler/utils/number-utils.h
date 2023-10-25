@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_NUMBERS_UTILS_H
-#define _PANDA_ASSEMBLER_NUMBERS_UTILS_H
+#ifndef PANDA_ASSEMBLER_UTILS_NUMBERS_UTILS_H
+#define PANDA_ASSEMBLER_UTILS_NUMBERS_UTILS_H
 
 namespace panda::pandasm {
 
@@ -105,6 +105,10 @@ inline int64_t IntegerNumber(std::string_view p)
         minus_shift++;
     }
 
+    if (p.size() == 2 && minus_shift != 0) {
+        return -1 * (p[1] - '0');
+    }
+
     if (p[minus_shift + 1] == 'b') {
         p.remove_prefix(GENERAL_SHIFT + minus_shift);
         return std::strtoull(p.data(), nullptr, BIN_BASE) * (minus_shift == 0 ? 1 : -1);
@@ -191,4 +195,4 @@ inline size_t ToNumber(std::string_view p)
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_NUMBERS_UTILS_H
+#endif  // PANDA_ASSEMBLER_UTILS_NUMBERS_UTILS_H

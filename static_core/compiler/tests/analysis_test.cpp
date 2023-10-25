@@ -186,6 +186,63 @@ TEST_F(AnalysisTest, FixSSInBBInside)
     ssb.FixSaveStatesInBB(GetGraph()->GetVectorBlocks().at(2));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
+
+TEST_F(AnalysisTest, FixBridgesInOptimizedGraph)
+{
+    GRAPH(GetGraph())
+    {
+        BASIC_BLOCK(2, -1)
+        {
+            INST(1, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
+            INST(2, Opcode::SaveState);
+            INST(3, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    auto bridge_example = CreateEmptyGraph();
+    GRAPH(bridge_example)
+    {
+        BASIC_BLOCK(2, -1)
+        {
+            INST(1, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
+            INST(2, Opcode::SaveState).Inputs(1).SrcVregs({VirtualRegister::BRIDGE});
+            INST(3, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    Graph *graph_bc = CreateEmptyBytecodeGraph();
+    graph_bc->SetRuntime(&runtime_);
+    GRAPH(graph_bc)
+    {
+        BASIC_BLOCK(2, -1)
+        {
+            INST(2, Opcode::SaveState).ref();
+            INST(3, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    Graph *example = CreateEmptyGraph();
+    GRAPH(example)
+    {
+        BASIC_BLOCK(2, -1)
+        {
+            INST(1, Opcode::SaveState).ref();
+            INST(2, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    SaveStateBridgesBuilder ssb;
+
+    const BasicBlock *bb = GetGraph()->GetVectorBlocks().at(2);
+    ssb.SearchAndCreateMissingObjInSaveState(GetGraph(), bb->GetFirstInst(), bb->GetLastInst());
+
+    const BasicBlock *bb_bc = graph_bc->GetVectorBlocks().at(2);
+    ssb.SearchAndCreateMissingObjInSaveState(graph_bc, bb_bc->GetFirstInst(), bb_bc->GetLastInst());
+
+    ASSERT_TRUE(GraphComparator().Compare(graph_bc, example));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), bridge_example));
+}
+
 // NOLINTEND(readability-magic-numbers)
 
 }  // namespace panda::compiler

@@ -89,7 +89,7 @@ function(:ClassResolver,
   klass := call_runtime(Constants::RESOLVE_CLASS, caller, class_id).ptr
 
   StoreI(slot, klass).Imm(0).ptr
-  If(LoadI(klass).Imm(Constants::CLASS_STATE_OFFSET).u32, "CLASS_STATE_INITIALIZED").CC(:CC_EQ) {
+  If(LoadI(klass).Imm(Constants::CLASS_STATE_OFFSET).u32, "CLASS_STATE_INITIALIZED").EQ {
     StoreI(slot, klass).Imm("-WordSize()").ptr
   }
 
@@ -120,7 +120,7 @@ function(:ClassInitResolver,
   # Second case occurs when class initialization is triggered again during static constructor execution.
   # In this case we can't write class into the cache, because other thread would mistakenly think
   # that the class is already initialized instead of waiting for its initialization.
-  If(LoadI(klass).Imm(Constants::CLASS_STATE_OFFSET).u32, "CLASS_STATE_INITIALIZED").CC(:CC_EQ) {
+  If(LoadI(klass).Imm(Constants::CLASS_STATE_OFFSET).u32, "CLASS_STATE_INITIALIZED").EQ {
     StoreI(slot, klass).Imm(0).ptr
   }
 
@@ -161,7 +161,7 @@ function(:IntfInlineCache,
 
     # METHOD_POINT_COMPRESS:in class.methods_, method points's low 3bit is 0(in AARCH64 or amd64).We can use the
     # offset/0x8 of the pointer to implement compression. means offset >> 3
-    If(klass_64, cache_64_2).CC(:CC_EQ).b {
+    If(klass_64, cache_64_2).EQ.Likely.b {
         # --> fast path
         method_1 := AShr(cache_64, 32).i64
         method_2 := Shl(method_1, 3).i64

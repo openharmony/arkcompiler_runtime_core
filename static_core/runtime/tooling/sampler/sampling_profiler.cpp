@@ -86,6 +86,25 @@ Sampler *Sampler::Create()
     ASSERT(instance_ == nullptr);
     instance_ = new Sampler;
 
+    /**
+     * As soon as the sampler is created, we subscribe to the events
+     * This is done so that start and stop do not depend on the runtime
+     * Internal issue #13780
+     */
+    ASSERT(Runtime::GetCurrent() != nullptr);
+
+    Runtime::GetCurrent()->GetNotificationManager()->AddListener(instance_,
+                                                                 RuntimeNotificationManager::Event::THREAD_EVENTS);
+    Runtime::GetCurrent()->GetNotificationManager()->AddListener(instance_,
+                                                                 RuntimeNotificationManager::Event::LOAD_MODULE);
+    /**
+     * Collect threads and modules which were created before sampler start
+     * If we collect them before add listeners then new thread can be created (or new module can be loaded)
+     * so we will lose this thread (or module)
+     */
+    instance_->CollectThreads();
+    instance_->CollectModules();
+
     return Sampler::instance_;
 }
 
@@ -94,13 +113,20 @@ void Sampler::Destroy(Sampler *sampler)
 {
     ASSERT(instance_ != nullptr);
     ASSERT(instance_ == sampler);
-    ASSERT(instance_->agent_tid_ == os::thread::GetNativeHandle());
     ASSERT(!sampler->is_active_);
 
     LOG(INFO, PROFILER) << "Total samples: " << S_TOTAL_SAMPLES << "\nLost samples: " << S_LOST_SAMPLES;
     LOG(INFO, PROFILER) << "Lost samples(Invalid method ptr): " << S_LOST_INVALID_SAMPLES
                         << "\nLost samples(Invalid pf ptr): " << S_LOST_NOT_FIND_SAMPLES;
     LOG(INFO, PROFILER) << "Lost samples(SIGSEGV occured): " << S_LOST_SEGV_SAMPLES;
+
+    Runtime::GetCurrent()->GetNotificationManager()->RemoveListener(instance_,
+                                                                    RuntimeNotificationManager::Event::THREAD_EVENTS);
+    Runtime::GetCurrent()->GetNotificationManager()->RemoveListener(instance_,
+                                                                    RuntimeNotificationManager::Event::LOAD_MODULE);
+
+    instance_->ClearManagedThreadSet();
+    instance_->ClearLoadedPfs();
 
     delete sampler;
     instance_ = nullptr;
@@ -109,9 +135,6 @@ void Sampler::Destroy(Sampler *sampler)
 Sampler::Sampler() : runtime_(Runtime::GetCurrent()), sample_interval_(DEFAULT_SAMPLE_INTERVAL_US)
 {
     ASSERT_NATIVE_CODE();
-
-    // Sampler constructor should be called in agent thread
-    agent_tid_ = os::thread::GetNativeHandle();
 }
 
 void Sampler::AddThreadHandle(ManagedThread *thread)
@@ -159,9 +182,6 @@ void Sampler::LoadModule(std::string_view name)
 
 bool Sampler::Start(const char *filename)
 {
-    ASSERT(agent_tid_ == os::thread::GetNativeHandle());
-    ASSERT(runtime_ != nullptr);
-
     if (is_active_) {
         LOG(ERROR, PROFILER) << "Attemp to start sampling profiler while it's already started";
         return false;
@@ -171,10 +191,6 @@ bool Sampler::Start(const char *filename)
         LOG(ERROR, PROFILER) << "Failed to create pipes for sampling listener. Profiler cannot be started";
         return false;
     }
-
-    runtime_->GetNotificationManager()->AddListener(this, RuntimeNotificationManager::Event::THREAD_EVENTS);
-    runtime_->GetNotificationManager()->AddListener(this, RuntimeNotificationManager::Event::LOAD_MODULE);
-    CollectThreads();
 
     is_active_ = true;
     // Creating std::string instead of sending pointer to avoid UB stack-use-after-scope
@@ -190,8 +206,6 @@ bool Sampler::Start(const char *filename)
 
 void Sampler::Stop()
 {
-    ASSERT(agent_tid_ == os::thread::GetNativeHandle());
-
     if (!is_active_) {
         LOG(ERROR, PROFILER) << "Attemp to stop sampling profiler, but it was not started";
         return;
@@ -214,33 +228,6 @@ void Sampler::Stop()
     listener_thread_.reset();
     sampler_tid_ = 0;
     listener_tid_ = 0;
-
-    runtime_->GetNotificationManager()->RemoveListener(this, RuntimeNotificationManager::Event::THREAD_EVENTS);
-    runtime_->GetNotificationManager()->RemoveListener(this, RuntimeNotificationManager::Event::LOAD_MODULE);
-
-    {
-        os::memory::LockHolder holder(managed_threads_lock_);
-        managed_threads_.clear();
-    }
-}
-
-void Sampler::WritePandaFiles(StreamWriter *writer_ptr)
-{
-    auto callback = [this, writer_ptr](const panda_file::File &pf) {
-        auto ptr_id = reinterpret_cast<uintptr_t>(&pf);
-        FileInfo pf_module;
-        pf_module.ptr = ptr_id;
-        pf_module.pathname = pf.GetFullFileName();
-        pf_module.checksum = pf.GetHeader()->checksum;
-        if (!loaded_pfs_queue_.FindValue(ptr_id)) {
-            loaded_pfs_queue_.Push(pf_module);
-        }
-        if (!writer_ptr->IsModuleWritten(pf_module)) {
-            writer_ptr->WriteModule(pf_module);
-        }
-        return true;
-    };
-    runtime_->GetClassLinker()->EnumeratePandaFiles(callback, false);
 }
 
 void Sampler::WriteLoadedPandaFiles(StreamWriter *writer_ptr)
@@ -272,6 +259,28 @@ void Sampler::CollectThreads()
             return true;
         },
         static_cast<unsigned int>(EnumerationFlag::ALL), static_cast<unsigned int>(EnumerationFlag::VM_THREAD));
+}
+
+void Sampler::CollectModules()
+{
+    auto callback = [this](const panda_file::File &pf) {
+        auto ptr_id = reinterpret_cast<uintptr_t>(&pf);
+        FileInfo pf_module;
+
+        pf_module.ptr = ptr_id;
+        pf_module.pathname = pf.GetFullFileName();
+        pf_module.checksum = pf.GetHeader()->checksum;
+
+        if (!loaded_pfs_queue_.FindValue(ptr_id)) {
+            loaded_pfs_queue_.Push(pf_module);
+        }
+
+        os::memory::LockHolder holder(loaded_pfs_lock_);
+        this->loaded_pfs_.push_back(pf_module);
+
+        return true;
+    };
+    runtime_->GetClassLinker()->EnumeratePandaFiles(callback, false);
 }
 
 void SigProfSamplingProfilerHandler([[maybe_unused]] int signum, [[maybe_unused]] siginfo_t *siginfo,
@@ -490,8 +499,8 @@ void Sampler::SamplerThreadEntry()
 void Sampler::ListenerThreadEntry(std::string output_file)
 {
     auto writer_ptr = std::make_unique<StreamWriter>(output_file.c_str());
-    // Writting panda files to .aspt in the same thread
-    WritePandaFiles(writer_ptr.get());
+    // Writing panda files that were loaded before sampler was created
+    WriteLoadedPandaFiles(writer_ptr.get());
 
     SampleInfo buffer_sample;
     // Atomic with relaxed order reason: data race with is_active_

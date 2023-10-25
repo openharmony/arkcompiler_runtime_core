@@ -13,18 +13,11 @@
 
 cmake_minimum_required(VERSION 3.5.2 FATAL_ERROR)
 
-# TODO(vpukhov): adjust es2panda path
-set(ES2PANDA_PATH ${PANDA_ROOT}/plugins/ecmascript/es2panda)
-
 if(PANDA_WITH_TOOLCHAIN AND (EXISTS ${ES2PANDA_PATH}))
-    add_subdirectory(${ES2PANDA_PATH} es2panda)
-    add_dependencies(panda_bins es2panda)
-
     if(CMAKE_CROSSCOMPILING)
         ExternalProject_Get_Property(panda_host_tools binary_dir)
         set(es2panda_target panda_host_tools-build)
-        # TODO(vpukhov): adjust es2panda path
-        set(es2panda_bin    "${binary_dir}/plugins/es2panda/aot/es2panda")
+        set(es2panda_bin    "${binary_dir}/tools/es2panda/aot/es2panda")
     else()
         set(es2panda_target es2panda)
         set(es2panda_bin    $<TARGET_FILE:${es2panda_target}>)

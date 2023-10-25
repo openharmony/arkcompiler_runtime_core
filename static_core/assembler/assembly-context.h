@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_CONTEXT_HPP
-#define _PANDA_ASSEMBLER_CONTEXT_HPP
+#ifndef PANDA_ASSEMBLER_ASSEMBLY_CONTEXT_H
+#define PANDA_ASSEMBLER_ASSEMBLY_CONTEXT_H
 
 #include <string>
 #include <string_view>
@@ -77,4 +77,4 @@ struct Context {
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_CONTEXT_HPP
+#endif  // PANDA_ASSEMBLER_ASSEMBLY_CONTEXT_H

@@ -44,6 +44,7 @@ size_t TaskQueue::AddTask(Task &&task)
 {
     ASSERT(task.GetTaskProperties().GetTaskType() == task_type_);
     ASSERT(task.GetTaskProperties().GetVMType() == vm_type_);
+    auto properties = task.GetTaskProperties();
     size_t size = 0;
     {
         os::memory::LockHolder lock_holder(task_queue_lock_);
@@ -55,7 +56,7 @@ size_t TaskQueue::AddTask(Task &&task)
         os::memory::LockHolder lock_holder(subscriber_lock_);
         // Notify subscriber about new task
         if (new_tasks_callback_ != nullptr) {
-            new_tasks_callback_(1);
+            new_tasks_callback_(properties, 1);
         }
     }
     return size;
@@ -164,7 +165,12 @@ void TaskQueue::SubscribeCallbackToAddTask(NewTasksCallback callback)
     new_tasks_callback_ = std::move(callback);
     {
         os::memory::LockHolder lock_holder(task_queue_lock_);
-        new_tasks_callback_(SumSizeOfInternalQueues());
+        if (!foreground_task_queue_.empty()) {
+            new_tasks_callback_({task_type_, vm_type_, TaskExecutionMode::FOREGROUND}, foreground_task_queue_.size());
+        }
+        if (!background_task_queue_.empty()) {
+            new_tasks_callback_({task_type_, vm_type_, TaskExecutionMode::BACKGROUND}, background_task_queue_.size());
+        }
     }
 }
 

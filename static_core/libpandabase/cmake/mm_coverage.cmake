@@ -26,7 +26,8 @@ if(ENABLE_LIBPANDABASE_COVERAGE)
     )
     collect_coverage_for_target(
         TARGET_NAME libpandabase_coverage
-        INCLUDE_DIR_PATTERN '*/libpandabase/*'
+        INCLUDE_DIR_PATTERN \"*/libpandabase/*\"
+        EXCLUDE_DIR_PATTERN \"/usr*\" \"*/third_party/*\" \"*/build/*\" \"*/plugins/*\" \"*/runtime/*\" \"*/compiler/*\" \"*/bytecode_optimizer/*\" 
     )
 else()
     message(STATUS "Coverage will not be calculated (may be enabled by -DENABLE_LIBPANDABASE_COVERAGE=true ).")

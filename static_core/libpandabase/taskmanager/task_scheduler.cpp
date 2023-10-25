@@ -54,7 +54,8 @@ TaskQueueId TaskScheduler::RegisterQueue(TaskQueue *queue)
         return INVALID_TASKQUEUE_ID;
     }
     task_queues_[id] = queue;
-    queue->SubscribeCallbackToAddTask([this](size_t count) { this->IncrementNewTaskCounter(count); });
+    queue->SubscribeCallbackToAddTask(
+        [this](TaskProperties properties, size_t count) { this->IncrementNewTaskCounter(properties, count); });
     return id;
 }
 
@@ -64,7 +65,8 @@ void TaskScheduler::Initialize()
     start_ = true;
     LOG(DEBUG, RUNTIME) << "TaskScheduler: creates " << workers_count_ << " threads";
     for (size_t i = 0; i < workers_count_; i++) {
-        workers_.push_back(new WorkerThread([this](size_t count) { this->IncrementFinishedTaskCounter(count); }));
+        workers_.push_back(new WorkerThread(
+            [this](const TaskPropertiesCounterMap &counter_map) { this->IncrementFinishedTaskCounter(counter_map); }));
     }
 }
 
@@ -156,7 +158,7 @@ bool TaskScheduler::AreQueuesEmpty() const
 
 bool TaskScheduler::AreNoMoreTasks() const
 {
-    return new_task_counter_ == finished_task_counter_;
+    return new_tasks_count_ == finished_tasks_count_;
 }
 
 std::optional<Task> TaskScheduler::GetTaskFromQueue(TaskQueueId id, TaskExecutionMode mode)
@@ -175,7 +177,7 @@ std::optional<Task> TaskScheduler::GetTaskFromQueue(TaskQueueId id, TaskExecutio
     if (!queue->HasTaskWithExecutionMode(mode)) {
         return std::nullopt;
     }
-    finished_task_counter_++;
+    finished_tasks_count_[{queue->GetTaskType(), queue->GetVMType(), mode}]++;
     return queue->PopTask();
 }
 
@@ -183,6 +185,14 @@ std::optional<Task> TaskScheduler::GetTaskFromQueue(TaskProperties properties)
 {
     TaskQueueId queue_id(properties.GetTaskType(), properties.GetVMType());
     return GetTaskFromQueue(queue_id, properties.GetTaskExecutionMode());
+}
+
+void TaskScheduler::WaitForFinishAllTasksWithProperties(TaskProperties properties)
+{
+    os::memory::LockHolder lock_holder(task_manager_lock_);
+    while (finished_tasks_count_[properties] != new_tasks_count_[properties]) {
+        finish_tasks_cond_var_.Wait(&task_manager_lock_);
+    }
 }
 
 void TaskScheduler::Finalize()
@@ -210,18 +220,20 @@ void TaskScheduler::Finalize()
     LOG(DEBUG, RUNTIME) << "TaskScheduler: Finalized";
 }
 
-void TaskScheduler::IncrementNewTaskCounter(size_t ivalue)
+void TaskScheduler::IncrementNewTaskCounter(TaskProperties properties, size_t ivalue)
 {
     os::memory::LockHolder outside_lock_holder(task_manager_lock_);
     queues_wait_cond_var_.Signal();
-    new_task_counter_ += ivalue;
+    new_tasks_count_[properties] += ivalue;
 }
 
-void TaskScheduler::IncrementFinishedTaskCounter(size_t ivalue)
+void TaskScheduler::IncrementFinishedTaskCounter(const TaskPropertiesCounterMap &counter_map)
 {
     os::memory::LockHolder outside_lock_holder(task_manager_lock_);
     finish_tasks_cond_var_.Signal();
-    finished_task_counter_ += ivalue;
+    for (const auto &[properties, count] : counter_map) {
+        finished_tasks_count_[properties] += count;
+    }
 }
 
 TaskScheduler::~TaskScheduler()

@@ -106,9 +106,11 @@ public:
         return static_cast<ObjectAllocatorG1<> *>(gc->GetObjectAllocator());
     }
 
-    void WaitForUpdateRemsetThread(G1GC<PandaAssemblyLanguageConfig> *gc)
+    void ProcessDirtyCards(G1GC<PandaAssemblyLanguageConfig> *gc)
     {
-        gc->WaitForUpdateRemsetThread();
+        gc->EndConcurrentScopeRoutine();
+        gc->ProcessDirtyCards();
+        gc->StartConcurrentScopeRoutine();
     }
 };
 
@@ -759,7 +761,7 @@ TEST_F(G1GCTest, TestHandlePendingCards)
     }
 
     // dirty cards corresponding to dirty_regions_objects should be reenqueued
-    WaitForUpdateRemsetThread(static_cast<G1GC<PandaAssemblyLanguageConfig> *>(gc));
+    ProcessDirtyCards(static_cast<G1GC<PandaAssemblyLanguageConfig> *>(gc));
     for (size_t i = 0; i < REGION_NUM; i++) {
         auto &array = arrays[i];
         auto &str = strings[i];
@@ -967,7 +969,7 @@ TEST_F(G1GCPromotionTest, TestPromotedRegionHasValidRemSets)
     ASSERT_TRUE(array_region == ObjectToRegion(array.GetPtr()));
 
     // remset is not fully updated during mixed collection
-    WaitForUpdateRemsetThread(static_cast<G1GC<PandaAssemblyLanguageConfig> *>(gc));
+    ProcessDirtyCards(static_cast<G1GC<PandaAssemblyLanguageConfig> *>(gc));
     // Check remsets
     ASSERT_TRUE(listener.CheckRemSets());
 }

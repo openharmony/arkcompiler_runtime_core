@@ -975,8 +975,9 @@ private:
             pos++;
         }
         // look for hex-style integer
-        if (str[0] == '0' && str[1] == 'x') {
+        if ((str.size() > pos + 2) && (str.compare(pos, 2, "0x") == 0)) {
             pos += HEX_PREFIX_WIDTH;
+            return str.find_first_not_of("0123456789abcdefABCDEF", pos) == std::string::npos;
         }
         return str.find_first_not_of("0123456789", pos) == std::string::npos;
     }
@@ -1004,7 +1005,7 @@ private:
         constexpr std::string_view CHAR_SEARCH_HEX = "0123456789abcdef";
         std::size_t pos = 0;
         // look for hex-style uint_t integer
-        if (str[0] == '0' && str[1] == 'x') {
+        if ((str.size() > 2) && (str.compare(0, 2, "0x") == 0)) {
             pos += HEX_PREFIX_WIDTH;
         }
         return str.find_first_not_of((pos != 0) ? CHAR_SEARCH_HEX.data() : CHAR_SEARCH.data(), pos) ==

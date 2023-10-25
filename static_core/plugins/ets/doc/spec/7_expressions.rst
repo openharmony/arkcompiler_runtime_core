@@ -37,6 +37,7 @@ see :ref:`Create and Launch a Coroutine` for ``launch`` expressions and
         | qualifiedName
         | arrayLiteral
         | objectLiteral
+        | spreadExpression
         | voidExpression
         | parenthesizedExpression
         | thisExpression
@@ -82,7 +83,7 @@ of expression productions:
 
     objectReference:
         typeReference
-        | (typeReference '.')? super
+        | super
         | potentiallyNullishExpression
         ;
 
@@ -481,6 +482,7 @@ Operator Precedence
 
 .. meta:
     frontend_status: Done
+    todo: Add '\$\$' into unary operator
 
 The table below summarizes all information on the precedence and
 associativity of operators. Each section on a particular operator
@@ -960,8 +962,8 @@ convenient in some cases.
        ;
 
 An *object literal* is written as a comma-separated list of *name-value pairs*
-enclosed in '{' and '}'. A trailing comma after the last pair is ignored. Each
-*name-value pair* consists of an identifier and an expression:
+enclosed in curly braces '{' and '}'. A trailing comma after the last pair is
+ignored. Each *name-value pair* consists of an identifier and an expression:
 
 .. index::
    object literal
@@ -1307,6 +1309,51 @@ initialized class instance if all name-value pairs complete normally.
 
 |
 
+.. _spread Expression:
+
+Spread Expression
+*****************
+
+.. code-block:: abnf
+
+    spreadExpression:
+        '...' expression
+        ;
+
+Such form of expression may be used only within the array literal
+(see :ref:`Array Literal`) or argument passing. The type of *expression* should
+be of array type (see :ref:`Array Types`) otherwise a compile-time error is
+generated.
+
+Evaluation of the spread expression for arrays can be performed by the compiler
+during compilation if *expression* is a constant one (see :ref:`Constant Expressions`)
+or during program execution otherwise. Evaluation breaks an array which is
+referred by *expression* into a sequence of values and this sequence is used in
+place where spread expression is used. It can be an assignment or call of
+function or method.
+
+.. code-block:: typescript
+   :linenos:
+   
+    let array1 = [1, 2, 3]
+    let array2 = [4, 5]   
+	let array3 = [...array1, ...array2] // spread array1 and array2 elements
+       // while building new array literal during compile-time
+    console.log(array3) // prints [1, 2, 3, 4, 5]
+
+    foo (...array2)  // spread array2 elements into arguments of the foo() call
+    function foo (...array: number[]) {
+      console.log (array)
+    }
+
+    run_time_spread_application (array1, array2) // prints [1, 2, 3, 666, 4, 5]
+    function run_time_spread_application (a1: number[], a2: number[]) {
+      console.log ([...a1, 666, ...a2])
+        // array literal will be built at rutime
+    }
+
+|
+
 .. _void Expression:
 
 ``void`` Expression
@@ -1367,7 +1414,7 @@ the contained expression.
 .. code-block:: abnf
 
     thisExpression:
-        (typeReference '.')? 'this'
+        'this'
         ;
 
 The keyword ``this`` can only be used as an expression in the body of an
@@ -1421,34 +1468,6 @@ is a class type, or a class that is a subtype of *T*.
    subtype
    class type
    class
-
-|
-
-.. _Qualified this:
-
-Qualified ``this``
-==================
-
-The value of a qualified expression in the form *typeReference.this* is the
-*n*’th lexically enclosing instance of ``this``, where *T* is the type of the
-expression denoted by *typeReference*, and *n* is an integer (provided that
-*T* is the *n*’th lexically enclosing type declaration of the class or
-interface that qualified expression appears in).
-
-A compile-time error occurs if the qualified ``this`` expression occurs in
-a class or interface other than class *T*.
-
-.. index::
-   qualified this
-   value
-   qualified expression
-   lexically enclosing instance
-   expression type
-   integer
-   lexically enclosing type declaration
-   class
-   interface
-   expression
 
 |
 
@@ -1535,8 +1554,6 @@ The following options must be considered:
 +----------------------------------+-----------------------------------------------+
 | *super.identifier*               | The superclass of the class that contains     |
 |                                  | the method call.                              |
-+----------------------------------+-----------------------------------------------+
-| *typeReference.super.identifier* | The superclass of *typeReference*.            |
 +----------------------------------+-----------------------------------------------+
 
 .. index::
@@ -1822,10 +1839,6 @@ rules as the meaning of a qualified name.
 The form *super.identifier* refers to the field named *identifier* of the
 current object, while such current object is viewed as an instance of the
 superclass of the current class).
-
-The form *T.super.identifier* refers to the field named *identifier* of the
-lexically enclosing instance corresponding to *T*, while such instance is
-viewed as an instance of the superclass of  *T*.
 
 The forms that use the keyword ``super`` are valid only in:
 
@@ -2225,6 +2238,9 @@ A compile-time error occurs if:
 Step 2: Semantic Correctness Check
 ==================================
 
+.. meta:
+    frontend_status: Done
+
 The single function to call is known at this step, and the following
 semantic checks must be performed:
 
@@ -2567,6 +2583,7 @@ Unary Expressions
 
 .. meta:
     frontend_status: Done
+    todo: Add '\$\$' into unary operator, but it can only be supported with ArkUI plugin, otherwise it will throw an exception "$$ operator can only be used with ARKUI plugin".
 
 .. code-block:: abnf
 
@@ -4559,9 +4576,7 @@ Assignment
 **********
 
 .. meta:
-    frontend_status: Partly
-    todo: nullable field access
-    todo: nullable field access
+    frontend_status: Done
 
 All *assignment operators* group right-to-left (i.e., :math:`a=b=c` means
 :math:`a=(b=c)`---and thus assign the value of *c* to *b*, and then the value
@@ -4630,7 +4645,7 @@ Simple Assignment Operator
 ==========================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A compile-time error occurs if the type of the right-hand operand
 (*expression2*) is not compatible (see :ref:`Compatible Types`) with
@@ -4808,7 +4823,7 @@ Compound Assignment Operators
 =============================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A compound assignment expression in the form *E1 op= E2* is equivalent to
 *E1 = ((E1) op (E2)) as T* (where *T* is the type of *E1*, except that *E1*
@@ -5269,7 +5284,7 @@ within expressions.
 .. code-block:: abnf
 
     lambdaExpression:
-        signature '=>' lambdaBody
+        'async'? signature '=>' lambdaBody
         ;
 
     lambdaBody:

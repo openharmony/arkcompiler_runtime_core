@@ -54,6 +54,18 @@ public:
     void ResumeAllThreads() override;
     bool IsRunningThreadExist() override;
 
+    /* debugging tools */
+    /**
+     * For ThreadedCoroutineManager implementation: no action performed if an attempt to switch coroutines on current
+     * worker is detected when coroutine switch is disabled.
+     */
+    void DisableCoroutineSwitch() override {};
+    void EnableCoroutineSwitch() override {};
+    bool IsCoroutineSwitchDisabled() override
+    {
+        return false;
+    };
+
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int inc_mask,
                               unsigned int xor_mask) const override;

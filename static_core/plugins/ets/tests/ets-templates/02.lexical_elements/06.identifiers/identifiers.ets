@@ -22,7 +22,9 @@ tags: [compile-only]
 
 {% for s in id_start %}
 {% for c in id_continue %}
+{% if s != '$' or c != '$' %} // Exclude $$, identifier starting with $$ is no longer valid
 let {{s}}{{c}} = 0;
+{%- endif %}
 {%- endfor %}
 {%- endfor %}
 

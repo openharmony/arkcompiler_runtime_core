@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_INS_HPP
-#define _PANDA_ASSEMBLER_INS_HPP
+#ifndef PANDA_ASSEMBLER_ASSEMBLY_INS_H
+#define PANDA_ASSEMBLER_ASSEMBLY_INS_H
 
 #include <array>
 #include <string>
@@ -254,4 +254,4 @@ private:
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_INS_HPP
+#endif  // PANDA_ASSEMBLER_ASSEMBLY_INS_H

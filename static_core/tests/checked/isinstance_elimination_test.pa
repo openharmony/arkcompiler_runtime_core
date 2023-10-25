@@ -14,7 +14,7 @@
 #! CHECKER      IsInstance Elimination applied
 #! RUN          force_jit: true, options: "--compiler-regex=_GLOBAL.*", entry: "_GLOBAL::main"
 #! METHOD       "_GLOBAL::main"
-#! PASS_AFTER   "Cleanup"
+#! PASS_AFTER   "TryCatchResolving"
 #! INST_NOT     "IsInstance"
 
 .record A1 {}

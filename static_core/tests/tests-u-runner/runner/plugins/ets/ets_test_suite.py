@@ -10,6 +10,7 @@ from typing import List, Any
 from runner.logger import Log
 from runner.options.config import Config
 from runner.options.options_jit import JitOptions
+from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.ets.ets_test_dir import EtsTestDir
 from runner.plugins.ets.ets_utils import ETSUtils
 from runner.plugins.ets.preparation_step import TestPreparationStep, CtsTestPreparationStep, \
@@ -35,9 +36,10 @@ class EtsTestSuite(ABC):
     @staticmethod
     def get_class(ets_suite_name: str) -> Any:
         name_to_class = {
-            "ets-func-tests": FuncEtsTestSuite,
-            "ets-cts": CtsEtsTestSuite,
-            "ets-runtime": RuntimeEtsTestSuite,
+            EtsSuites.FUNC.value: FuncEtsTestSuite,
+            EtsSuites.CTS.value: CtsEtsTestSuite,
+            EtsSuites.RUNTIME.value: RuntimeEtsTestSuite,
+            EtsSuites.GCSTRESS.value: GCStressEtsTestSuite,
         }
         return name_to_class[ets_suite_name]
 
@@ -79,10 +81,9 @@ class EtsTestSuite(ABC):
 
 
 class RuntimeEtsTestSuite(EtsTestSuite):
-    # pylint: disable=unused-argument
-    def __init__(self, panda_source_root: str, config: Config, work_dir: WorkDir):
-        super().__init__(config, work_dir, "ets-runtime")
-        self.__default_test_dir = RuntimeDefaultEtsTestDir(panda_source_root, config.general.test_root)
+    def __init__(self, config: Config, work_dir: WorkDir):
+        super().__init__(config, work_dir, EtsSuites.RUNTIME.value)
+        self.__default_test_dir = RuntimeDefaultEtsTestDir(config.general.panda_source_root, config.general.test_root)
         self.set_preparation_steps()
 
     @cached_property
@@ -104,10 +105,35 @@ class RuntimeEtsTestSuite(EtsTestSuite):
             ))
 
 
+class GCStressEtsTestSuite(EtsTestSuite):
+    def __init__(self, config: Config, work_dir: WorkDir):
+        super().__init__(config, work_dir, EtsSuites.GCSTRESS.value)
+        self._ets_test_dir = EtsTestDir(config.general.panda_source_root, config.general.test_root)
+        self.set_preparation_steps()
+
+    @cached_property
+    def list_root(self) -> Path:
+        return Path(self._list_root) if self._list_root else Path(__file__).parent
+
+    def set_preparation_steps(self) -> None:
+        self._preparation_steps.append(CopyStep(
+            test_source_path=self._ets_test_dir.gc_stress,
+            test_gen_path=self.test_root,
+            config=self.config
+        ))
+        if self._is_jit:
+            self._preparation_steps.append(JitStep(
+                test_source_path=self.test_root,
+                test_gen_path=self.test_root,
+                config=self.config,
+                num_repeats=self._jit.num_repeats
+            ))
+
+
 class CtsEtsTestSuite(EtsTestSuite):
-    def __init__(self, panda_source_root: str, config: Config, work_dir: WorkDir):
-        super().__init__(config, work_dir, "ets-cts")
-        self._ets_test_dir = EtsTestDir(panda_source_root, config.general.test_root)
+    def __init__(self, config: Config, work_dir: WorkDir):
+        super().__init__(config, work_dir, EtsSuites.CTS.value)
+        self._ets_test_dir = EtsTestDir(config.general.panda_source_root, config.general.test_root)
         self.set_preparation_steps()
 
     def set_preparation_steps(self) -> None:
@@ -130,9 +156,9 @@ class CtsEtsTestSuite(EtsTestSuite):
 
 
 class FuncEtsTestSuite(EtsTestSuite):
-    def __init__(self, panda_source_root: str, config: Config, work_dir: WorkDir):
-        super().__init__(config, work_dir, "ets-func-tests")
-        self._ets_test_dir = EtsTestDir(panda_source_root, config.general.test_root)
+    def __init__(self, config: Config, work_dir: WorkDir):
+        super().__init__(config, work_dir, EtsSuites.FUNC.value)
+        self._ets_test_dir = EtsTestDir(config.general.panda_source_root, config.general.test_root)
         self.set_preparation_steps()
 
     def set_preparation_steps(self) -> None:

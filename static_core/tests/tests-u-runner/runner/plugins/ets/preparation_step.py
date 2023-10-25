@@ -26,6 +26,7 @@ from typing import List
 from runner import utils
 from runner.logger import Log
 from runner.options.config import Config
+from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.ets.ets_templates.ets_templates_generator import EtsTemplatesGenerator
 from runner.plugins.ets.ets_templates.test_metadata import get_metadata
 from runner.plugins.ets.stdlib_templates.stdlib_templates_generator import StdlibTemplatesGenerator
@@ -62,7 +63,7 @@ class CtsTestPreparationStep(TestPreparationStep):
         return ets_templates_generator.generate()
 
     def __str__(self) -> str:
-        return "Test Generator for 'ets-cts' test suite"
+        return f"Test Generator for '{EtsSuites.CTS.value}' test suite"
 
 
 class FuncTestPreparationStep(TestPreparationStep):
@@ -87,7 +88,7 @@ class FuncTestPreparationStep(TestPreparationStep):
         return generated_tests
 
     def __str__(self) -> str:
-        return "Test Generator for 'ets-func-tests' test suite"
+        return f"Test Generator for '{EtsSuites.FUNC.value}' test suite"
 
 
 class CopyStep(TestPreparationStep):

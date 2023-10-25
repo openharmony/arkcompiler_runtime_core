@@ -8,13 +8,15 @@ from runner.options.options_jit import JitOptions
 
 @dataclass
 class ArkOptions:
+    __DEFAULT_TIMEOUT = 10
+
     def __str__(self) -> str:
         return _to_str(self, ArkOptions, 1)
 
     def to_dict(self) -> Dict[str, object]:
         return {
             "timeout": self.timeout,
-            "interpreter-type":self.interpreter_type,
+            "interpreter-type": self.interpreter_type,
             "jit": self.jit.to_dict(),
             "ark-args": self.ark_args
         }
@@ -22,7 +24,7 @@ class ArkOptions:
     @cached_property
     @value(yaml_path="ark.timeout", cli_name="timeout", cast_to_type=_to_int)
     def timeout(self) -> int:
-        return 10
+        return ArkOptions.__DEFAULT_TIMEOUT
 
     @cached_property
     @value(yaml_path="ark.interpreter-type", cli_name="interpreter_type")
@@ -35,3 +37,13 @@ class ArkOptions:
         return []
 
     jit = JitOptions()
+
+    def get_command_line(self) -> str:
+        _ark_args = [f'--ark-args="{arg}"' for arg in self.ark_args]
+        options = [
+            f'--timeout={self.timeout}' if self.timeout != ArkOptions.__DEFAULT_TIMEOUT else '',
+            f'--interpreter-type={self.interpreter_type}' if self.interpreter_type is not None else '',
+            ' '.join(_ark_args),
+            self.jit.get_command_line()
+        ]
+        return ' '.join(options)

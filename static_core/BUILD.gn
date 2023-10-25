@@ -120,6 +120,8 @@ config("ark_config") {
     visibility = [
       "$ark_es2panda_root:libes2panda",
       "$ark_es2panda_root:libes2panda_frontend_static",
+      "$ark_es2panda_root:libes2panda_public",
+      "$ark_es2panda_root:libes2panda_public_frontend_static",
       "$ark_es2panda_root/aot:es2panda",
       "$ark_third_party_root/asmjit:*",
       "$ark_third_party_root/vixl:*",

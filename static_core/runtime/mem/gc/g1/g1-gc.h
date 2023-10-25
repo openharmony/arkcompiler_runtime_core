@@ -17,20 +17,15 @@
 
 #include <functional>
 
-#include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/mem/gc/card_table.h"
 #include "runtime/mem/gc/gc.h"
-#include "runtime/mem/gc/workers/gc_workers_thread_pool.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
-#include "runtime/mem/gc/lang/gc_lang.h"
 #include "runtime/mem/gc/g1/g1-allocator.h"
 #include "runtime/mem/gc/g1/g1-marker.h"
 #include "runtime/mem/gc/g1/collection_set.h"
 #include "runtime/mem/gc/generational-gc-base.h"
 #include "runtime/mem/heap_verifier.h"
-#include "runtime/mem/gc/g1/card_handler.h"
 #include "runtime/mem/gc/g1/g1_pause_tracker.h"
-#include "libpandabase/utils/sequence.h"
 #include "runtime/mem/gc/g1/g1_analytics.h"
 
 namespace panda {
@@ -161,7 +156,6 @@ protected:
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:
-    void WaitForUpdateRemsetThread();
     void ProcessDirtyCards();
     bool HaveGarbageRegions();
 

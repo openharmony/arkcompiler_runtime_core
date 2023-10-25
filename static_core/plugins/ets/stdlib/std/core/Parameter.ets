@@ -16,9 +16,11 @@
 package std.core;
 
 export final class Parameter extends Object {
-    private td: string
+    private td: TypeDesc
     private name: string
     private attributes: int
+
+    private constructor () {}
 
     public getType(): Type {
         return Type.resolve(this.td)
@@ -26,5 +28,21 @@ export final class Parameter extends Object {
 
     public getName(): string {
         return this.name
+    }
+
+    public getAttributes(): int {
+        return this.attributes
+    }
+
+    public isRest(): boolean {
+        return (this.attributes & Attributes.REST) != 0
+    }
+
+    public isOptional(): boolean {
+        return (this.attributes & Attributes.OPTIONAL) != 0
+    }
+
+    public override toString(): string {
+        return this.getName() + ": " + this.getType().toString()
     }
 }

@@ -28,7 +28,6 @@
 #include "types/ets_primitives.h"
 #include "types/ets_type.h"
 #include "types/ets_typeapi.h"
-#include "types/ets_typeapi_feature.h"
 #include "types/ets_typeapi_field.h"
 
 namespace panda::ets::intrinsics {

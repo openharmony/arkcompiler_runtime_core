@@ -61,6 +61,22 @@ panda_file::Type::TypeId Type::GetId(std::string_view name, bool ignore_primitiv
 }
 
 /* static */
+pandasm::Type Type::FromPrimitiveId(panda_file::Type::TypeId id)
+{
+    static std::unordered_map<panda_file::Type::TypeId, std::string_view> panda_types = {
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define PANDATYPE(name, inst_code) {panda_file::Type::TypeId::inst_code, std::string_view(name)},
+        PANDA_ASSEMBLER_TYPES(PANDATYPE)
+#undef PANDATYPE
+    };
+    auto iter = panda_types.find(id);
+    ASSERT(iter != panda_types.end());
+    pandasm::Type ret {iter->second, 0};
+    ASSERT(ret.type_id_ == id);
+    return ret;
+}
+
+/* static */
 std::string Type::GetName(std::string_view component_name, size_t rank)
 {
     std::string name(component_name);

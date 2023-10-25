@@ -141,3 +141,9 @@ panda_ets_napi_add_gtest(
     CPP_SOURCE js_mode_launch.cpp
     ETS_SOURCE js_mode_launch.ets
 )
+
+panda_ets_napi_add_gtest(
+    NAME coroswitch_in_cctor
+    CPP_SOURCE coroswitch_in_cctor.cpp
+    ETS_SOURCE coroswitch_in_cctor.ets
+)

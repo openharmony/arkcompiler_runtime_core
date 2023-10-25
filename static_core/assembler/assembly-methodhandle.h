@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_METHODHANDLE
-#define _PANDA_ASSEMBLER_METHODHANDLE
+#ifndef PANDA_ASSEMBLER_ASSEMBLY_METHODHANDLE_H
+#define PANDA_ASSEMBLER_ASSEMBLY_METHODHANDLE_H
 
 #include <string>
 
@@ -28,4 +28,4 @@ struct MethodHandle {
 
 }  // namespace panda::pandasm
 
-#endif  // _PANDA_ASSEMBLER_METHODHANDLE
+#endif  // PANDA_ASSEMBLER_ASSEMBLY_METHODHANDLE_H

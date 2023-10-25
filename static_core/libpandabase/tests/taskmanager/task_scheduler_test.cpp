@@ -26,6 +26,8 @@ class TaskSchedulerTest : public testing::Test {
 public:
     static constexpr TaskProperties GC_STATIC_VM_BACKGROUND_PROPERTIES {TaskType::GC, VMType::STATIC_VM,
                                                                         TaskExecutionMode::BACKGROUND};
+    static constexpr TaskProperties GC_STATIC_VM_FOREGROUND_PROPERTIES {TaskType::GC, VMType::STATIC_VM,
+                                                                        TaskExecutionMode::FOREGROUND};
     static constexpr TaskProperties JIT_STATIC_VM_BACKGROUND_PROPERTIES {TaskType::JIT, VMType::STATIC_VM,
                                                                          TaskExecutionMode::BACKGROUND};
     TaskSchedulerTest()
@@ -505,6 +507,56 @@ TEST_F(TaskSchedulerTest, TaskSchedulerTaskGetTask)
     }
     tm->Finalize();
     ASSERT_TRUE(gc_queue.IsEmpty());
+    TaskScheduler::Destroy();
+}
+
+TEST_F(TaskSchedulerTest, TaskSchedulerWaitForFinishAllTaskFromQueue)
+{
+    srand(GetSeed());
+    // Create TaskScheduler
+    constexpr size_t THREADS_COUNT = 5;
+    auto *tm = TaskScheduler::Create(THREADS_COUNT);
+    // Create and register 2 queues
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueue::DEFAULT_PRIORITY;
+    TaskQueue gc_queue(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
+    TaskQueue jit_queue(TaskType::JIT, VMType::STATIC_VM, QUEUE_PRIORITY);
+    tm->RegisterQueue(&gc_queue);
+    tm->RegisterQueue(&jit_queue);
+    // Fill queues with tasks that increment counter with its type.
+    constexpr size_t COUNT_OF_TASK = 10'000;
+    std::array<std::atomic_size_t, 3> counters = {0, 0, 0};
+    for (size_t i = 0; i < COUNT_OF_TASK; i++) {
+        gc_queue.AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, [&counters]() {
+            constexpr size_t GC_BACKGROUND_COUNTER = 0;
+            // Atomic with relaxed order reason: data race with counters[GC_BACKGROUND_COUNTER] with no synchronization
+            // or ordering constraints
+            counters[GC_BACKGROUND_COUNTER].fetch_add(1, std::memory_order_relaxed);
+        }));
+        gc_queue.AddTask(Task::Create(GC_STATIC_VM_FOREGROUND_PROPERTIES, [&counters]() {
+            constexpr size_t GC_FOREGROUND_COUNTER = 1;
+            // Atomic with relaxed order reason: data race with counters[GC_FOREGROUND_COUNTER] with no synchronization
+            // or ordering constraints
+            counters[GC_FOREGROUND_COUNTER].fetch_add(1, std::memory_order_relaxed);
+        }));
+        jit_queue.AddTask(Task::Create(JIT_STATIC_VM_BACKGROUND_PROPERTIES, [&counters]() {
+            constexpr size_t JIT_COUNTER = 2;
+            // Atomic with relaxed order reason: data race with counters[JIT_COUNTER] with no synchronization or
+            // ordering constraints
+            counters[JIT_COUNTER].fetch_add(1, std::memory_order_relaxed);
+        }));
+    }
+    // Initialize tm workers
+    tm->Initialize();
+    tm->WaitForFinishAllTasksWithProperties(GC_STATIC_VM_FOREGROUND_PROPERTIES);
+    ASSERT_FALSE(gc_queue.HasTaskWithExecutionMode(TaskExecutionMode::FOREGROUND));
+    tm->WaitForFinishAllTasksWithProperties(GC_STATIC_VM_BACKGROUND_PROPERTIES);
+    ASSERT_TRUE(gc_queue.IsEmpty());
+    tm->WaitForFinishAllTasksWithProperties(JIT_STATIC_VM_BACKGROUND_PROPERTIES);
+    ASSERT_TRUE(jit_queue.IsEmpty());
+    tm->Finalize();
+    for (auto &counter : counters) {
+        ASSERT_EQ(counter, COUNT_OF_TASK) << "seed:" << GetSeed();
+    }
     TaskScheduler::Destroy();
 }
 

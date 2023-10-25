@@ -16,3 +16,8 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 # ----- Sampling profiler tools -----------------------------------------------
 
 add_subdirectory(sampler)
+
+if (PANDA_WITH_TOOLCHAIN AND (EXISTS ${ES2PANDA_PATH}))
+    add_subdirectory(${ES2PANDA_PATH} ${CMAKE_CURRENT_BINARY_DIR}/es2panda)
+    add_dependencies(panda_bins es2panda)
+endif()

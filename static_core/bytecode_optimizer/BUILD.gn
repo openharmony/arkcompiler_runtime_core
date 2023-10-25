@@ -49,6 +49,8 @@ libarkbytecodeopt_configs = [
   "$ark_root/runtime:arkruntime_public_config",
 ]
 
+libarkbytecodeopt_configs += plugin_bytecodeopt_configs
+
 ohos_shared_library("libarktsbytecodeopt") {
   sources = libarkbytecodeopt_sources
 

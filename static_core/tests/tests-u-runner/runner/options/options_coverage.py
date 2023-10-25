@@ -43,3 +43,13 @@ class CoverageOptions:
     )
     def llvm_cov_html_out_path(self) -> Optional[str]:
         return None
+
+    def get_command_line(self) -> str:
+        options = [
+            '--use-llvm-cov' if self.use_llvm_cov else '',
+            f'--llvm-profdata-out-path="{self.llvm_profdata_out_path}"'
+            if self.llvm_profdata_out_path is not None else '',
+            f'--llvm-cov-html-out-path="{self.llvm_cov_html_out_path}"'
+            if self.llvm_cov_html_out_path is not None else '',
+        ]
+        return ' '.join(options)

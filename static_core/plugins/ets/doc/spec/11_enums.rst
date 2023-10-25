@@ -16,7 +16,7 @@ Enumerations
 ############
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 An enumeration type *enum* specifies a distinct type with an associated set
 of named constants that define its possible values:
@@ -94,7 +94,7 @@ Enumeration Integer Values
 **************************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 The integer value of an *enum* constant is set implicitly if an enumeration
 constant specifies no value.
@@ -178,6 +178,7 @@ Enumeration Operations
 
 .. meta:
     frontend_status: Partly
+    todo: access of enumeration name by idex is not supported yet
 
 The value of an enumeration constant can be converted to type *string* by
 using the method ``toString``:
@@ -215,5 +216,3 @@ methods available for enumeration types and constants.
 .. raw:: pdf
 
    PageBreak
-
-

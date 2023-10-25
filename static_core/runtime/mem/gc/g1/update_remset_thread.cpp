@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "update_remset_thread.h"
+#include "runtime/mem/gc/g1/update_remset_thread.h"
+
 #include "libpandabase/utils/logger.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
@@ -67,9 +68,9 @@ void UpdateRemsetThread<LanguageConfig>::CreateThread(InternalAllocatorPtr inter
         LOG(DEBUG, GC) << "Start creating UpdateRemsetThread";
 
         os::memory::LockHolder holder(loop_lock_);
-        stop_thread_ = false;
-        // dont reset pause_thread_ here WaitUntilTasksEnd does it, and we can reset pause_thread_ by accident here,
-        // because we set it without lock
+        if (IsFlag(UpdateRemsetThreadFlags::IS_STOP_WORKER)) {
+            RemoveFlag(UpdateRemsetThreadFlags::IS_STOP_WORKER);
+        }
         ASSERT(update_thread_ == nullptr);
         update_thread_ = internal_allocator->New<std::thread>(&UpdateRemsetThread::ThreadLoop, this);
         int res = os::thread::SetThreadName(update_thread_->native_handle(), "UpdateRemset");
@@ -83,7 +84,7 @@ template <class LanguageConfig>
 void UpdateRemsetThread<LanguageConfig>::DestroyThread()
 {
     if (update_concurrent_) {
-        stop_thread_ = true;
+        SetFlag(UpdateRemsetThreadFlags::IS_STOP_WORKER);
         LOG(DEBUG, GC) << "Starting destroy UpdateRemsetThread";
         {
             os::memory::LockHolder holder(loop_lock_);
@@ -100,94 +101,30 @@ void UpdateRemsetThread<LanguageConfig>::DestroyThread()
 }
 
 template <class LanguageConfig>
-void UpdateRemsetThread<LanguageConfig>::StartThread()
-{
-    if (update_concurrent_) {
-        LOG(DEBUG, GC) << "Start UpdateRemsetThread";
-        {
-            os::memory::LockHolder holder(loop_lock_);
-            ASSERT(update_thread_ != nullptr);
-            pause_thread_ = false;
-            thread_cond_var_.Signal();
-        }
-    }
-}
-
-// TODO(alovkov): GC-thread can help to update-thread to process all cards concurrently
-template <class LanguageConfig>
-void UpdateRemsetThread<LanguageConfig>::WaitUntilTasksEnd()
-{
-    ASSERT(!gc_pause_thread_);
-    pause_thread_ = true;  // either ThreadLoop should set it to false, or this function if we don't have a thread
-    if (update_concurrent_ && !stop_thread_) {
-        LOG(DEBUG, GC) << "Starting pause UpdateRemsetThread";
-
-        os::memory::LockHolder holder(loop_lock_);
-        while (pause_thread_) {
-            // runtime is destroying, handle all refs anyway for now
-            if (stop_thread_ || update_thread_ == nullptr) {
-                ProcessAllCards();  // Process all cards inside gc
-                pause_thread_ = false;
-                break;
-            }
-            thread_cond_var_.Signal();
-            thread_cond_var_.Wait(&loop_lock_);
-        }
-        thread_cond_var_.Signal();
-        ASSERT(GetQueueSize() == 0);
-    } else {
-        os::memory::LockHolder holder(loop_lock_);
-        // we will handle all remsets even when thread is stopped (we are trying to destroy Runtime, but it's the last
-        // GC), try to eliminate it in the future for faster shutdown
-        ProcessAllCards();  // Process all cards inside gc
-        pause_thread_ = false;
-    }
-    stats_.PrintStats();
-    stats_.Reset();
-    ASSERT(GetQueueSize() == 0);
-    ASSERT(!pause_thread_);
-}
-
-template <class LanguageConfig>
 void UpdateRemsetThread<LanguageConfig>::ThreadLoop()
 {
     LOG(DEBUG, GC) << "Entering UpdateRemsetThread ThreadLoop";
 
     loop_lock_.Lock();
     while (true) {
-        if (stop_thread_) {
+        // Do one atomic load before checks
+        UpdateRemsetThreadFlags iteration_flag = iteration_flag_;
+        if (iteration_flag == UpdateRemsetThreadFlags::IS_STOP_WORKER) {
             LOG(DEBUG, GC) << "exit UpdateRemsetThread loop, because thread was stopped";
             break;
         }
-        if (gc_pause_thread_) {
+        if (iteration_flag == UpdateRemsetThreadFlags::IS_PAUSED_BY_GC_THREAD) {
+            // UpdateRemsetThread is paused by GC, wait until GC notifies to continue work
             thread_cond_var_.Wait(&loop_lock_);
             continue;
         }
-        if (pause_thread_) {
-            // gc is waiting for us to handle all updates
-            // possible improvements: let GC thread to help us to handle elements in queue in parallel, instead of
-            // waiting
-            ProcessAllCards();  // Process all cards inside gc
-            pause_thread_ = false;
-            thread_cond_var_.Signal();           // notify GC thread that we processed all updates
-            thread_cond_var_.Wait(&loop_lock_);  // let WaitUntilTasksEnd to finish
-            continue;
-        }
-        if (invalidate_regions_ != nullptr) {
-            for (auto *region : *invalidate_regions_) {
-                // don't need lock because only update_remset_thread changes remsets
-                RemSet<>::template InvalidateRegion<false>(region);
-            }
-            invalidate_regions_ = nullptr;
-            thread_cond_var_.Signal();
-            Sleep();
-            continue;
-        }
-        if (need_invalidate_region_) {
-            Sleep();
+        if (iteration_flag == UpdateRemsetThreadFlags::IS_INVALIDATE_REGIONS) {
+            // wait until GC-Thread invalidates regions
+            thread_cond_var_.Wait(&loop_lock_);
             continue;
         }
         ASSERT(!paused_by_gc_thread_);
+        ASSERT(iteration_flag == UpdateRemsetThreadFlags::IS_PROCESS_CARD);
         auto processed_cards = ProcessAllCards();
 
         if (processed_cards < min_concurrent_cards_to_process_) {
@@ -287,7 +224,7 @@ protected:
             ASSERT_DO(IsHeapSpace(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(to_obj)),
                       std::cerr << "Not suitable space for to_obj: " << to_obj << std::endl);
 
-            // don't need lock because only update_remset_thread changes remsets
+            // don't need lock because only one thread changes remsets
             RemSet<>::AddRefWithAddr<false>(from_obj, offset, to_obj);
             LOG(DEBUG, GC) << "fill rem set " << from_obj << " -> " << to_obj;
             // Atomic with relaxed order reason: memory order is not required
@@ -328,27 +265,19 @@ size_t UpdateRemsetThread<LanguageConfig>::ProcessAllCards()
 template <class LanguageConfig>
 void UpdateRemsetThread<LanguageConfig>::DrainAllCards(PandaUnorderedSet<CardTable::CardPtr> *cards)
 {
-    pause_thread_ = true;
-    // Atomic with relaxed order reason: memory order is not required
-    defer_cards_.store(true, std::memory_order_relaxed);
-
+    ASSERT(IsFlag(UpdateRemsetThreadFlags::IS_PAUSED_BY_GC_THREAD));
     os::memory::LockHolder holder(loop_lock_);
     FillFromDefered(cards);
     FillFromQueue(cards);
     FillFromThreads(cards);
     FillFromPostBarrierBuffers(cards);
-
-    pause_thread_ = false;
-    // Atomic with relaxed order reason: memory order is not required
-    defer_cards_.store(false, std::memory_order_relaxed);
-    thread_cond_var_.Signal();
 }
 
 template <class LanguageConfig>
 void UpdateRemsetThread<LanguageConfig>::SuspendThread()
 {
-    ASSERT(!gc_pause_thread_);
-    gc_pause_thread_ = true;
+    ASSERT(!IsFlag(UpdateRemsetThreadFlags::IS_PAUSED_BY_GC_THREAD));
+    SetFlag(UpdateRemsetThreadFlags::IS_PAUSED_BY_GC_THREAD);
     // Atomic with relaxed order reason: memory order is not required
     defer_cards_.store(true, std::memory_order_relaxed);
     // Aquare lock to be sure that UpdateRemsetThread has been stopped
@@ -364,31 +293,56 @@ void UpdateRemsetThread<LanguageConfig>::SuspendThread()
 template <class LanguageConfig>
 void UpdateRemsetThread<LanguageConfig>::GCProcessCards()
 {
-    ASSERT(gc_pause_thread_);
+    ASSERT(IsFlag(UpdateRemsetThreadFlags::IS_PAUSED_BY_GC_THREAD));
     os::memory::LockHolder holder(loop_lock_);
     ProcessAllCards();
 }
 
 template <class LanguageConfig>
-void UpdateRemsetThread<LanguageConfig>::GCInvalidateRegions(PandaVector<Region *> *regions)
+void UpdateRemsetThread<LanguageConfig>::DoInvalidateRegions(RegionVector *regions)
 {
-    ASSERT(gc_pause_thread_);
-    os::memory::LockHolder holder(loop_lock_);
     for (auto *region : *regions) {
-        // don't need lock because only update_remset_thread changes remsets
+        // don't need lock because only one thread changes remsets
         RemSet<>::template InvalidateRegion<false>(region);
     }
 }
 
 template <class LanguageConfig>
+void UpdateRemsetThread<LanguageConfig>::InvalidateRegions(RegionVector *regions)
+{
+    // Do invalidate region during concurrent sweep
+    ASSERT(IsFlag(UpdateRemsetThreadFlags::IS_PROCESS_CARD));
+    SetFlag(UpdateRemsetThreadFlags::IS_INVALIDATE_REGIONS);
+    // Atomic with relaxed order reason: memory order is not required
+    defer_cards_.store(true, std::memory_order_relaxed);
+    // Aquare lock to be sure that UpdateRemsetThread has been stopped
+    os::memory::LockHolder holder(loop_lock_);
+    DoInvalidateRegions(regions);
+    // Atomic with relaxed order reason: memory order is not required
+    defer_cards_.store(false, std::memory_order_relaxed);
+    RemoveFlag(UpdateRemsetThreadFlags::IS_INVALIDATE_REGIONS);
+    // Signal to continue UpdateRemsetThread
+    thread_cond_var_.Signal();
+}
+
+template <class LanguageConfig>
+void UpdateRemsetThread<LanguageConfig>::GCInvalidateRegions(RegionVector *regions)
+{
+    // Do invalidate region on pause in GCThread
+    ASSERT(IsFlag(UpdateRemsetThreadFlags::IS_PAUSED_BY_GC_THREAD));
+    os::memory::LockHolder holder(loop_lock_);
+    DoInvalidateRegions(regions);
+}
+
+template <class LanguageConfig>
 void UpdateRemsetThread<LanguageConfig>::ResumeThread()
 {
-    ASSERT(gc_pause_thread_);
+    ASSERT(IsFlag(UpdateRemsetThreadFlags::IS_PAUSED_BY_GC_THREAD));
     os::memory::LockHolder holder(loop_lock_);
 #ifndef NDEBUG
     paused_by_gc_thread_ = false;
 #endif
-    gc_pause_thread_ = false;
+    RemoveFlag(UpdateRemsetThreadFlags::IS_PAUSED_BY_GC_THREAD);
     thread_cond_var_.Signal();
 }
 

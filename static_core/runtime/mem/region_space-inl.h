@@ -133,7 +133,8 @@ void RegionSpace::FreeRegion(Region *region)
     if (region->IsYoung()) {
         // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
         // on other reads or writes
-        ASSERT(young_regions_in_use_.fetch_sub(1, std::memory_order_relaxed) > 0);
+        [[maybe_unused]] auto previous_regions_in_use = young_regions_in_use_.fetch_sub(1, std::memory_order_relaxed);
+        ASSERT(previous_regions_in_use > 0);
     }
     region->Destroy();
     // NOLINTNEXTLINE(readability-braces-around-statements)

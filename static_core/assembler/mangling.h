@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_ASSEMBLER_MANGLING_H
-#define _PANDA_ASSEMBLER_MANGLING_H
+#ifndef PANDA_ASSEMBLER_MANGLING_H
+#define PANDA_ASSEMBLER_MANGLING_H
 
 #include "assembly-function.h"
 
@@ -90,4 +90,4 @@ inline bool IsSignatureOrMangled(const std::string &str)
 
 }  // namespace panda::pandasm
 
-#endif  // !_PANDA_ASSEMBLER_MANGLING_HPP
+#endif  // PANDA_ASSEMBLER_MANGLING_H

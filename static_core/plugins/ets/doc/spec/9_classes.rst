@@ -165,7 +165,6 @@ A :index:`compile-time error` occurs if:
 
 -  An attempt is made to create an instance of an *abstract* class.
 -  A non-*abstract* class has an *abstract* method.
--  Both *abstract* and *final* modifiers are used on a class.
 
 .. index::
    modifier
@@ -254,7 +253,7 @@ A local class can only:
 -  Declare members or initializers.
 -  Refer to a *static* member of the enclosing class in a *static* method
    (static members must be *constant variables*, i.e., variables of a primitive
-   type, or the type *String* that is declared *constant* and initialized with
+   type, or type *String* that is declared *constant* and initialized with
    a compile-time constant expression).
 -  Be referred to by a simple name (neither a qualified nor a canonical
    name), i.e., if a canonical name is required, then a local class cannot
@@ -432,7 +431,7 @@ Class Implementation Clause
 ===========================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The names of interfaces that are direct superinterfaces of a declared
 class are listed in the class declaration of the *implements* clause.
@@ -1159,7 +1158,7 @@ Method Declarations
 *******************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
     todo: spec issue: synchronized isn't specified at all, consequently noyt supported yet
     todo: spec issue: native and override are mutually exclusive - shouldn't be and used in stdlib
     todo: some corner cases needs to be fixed (revealed by CTS tests)
@@ -1323,7 +1322,7 @@ Final Methods
 =============
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Final methods are described in the experimental section (see
 :ref:`Native Methods Experimental`).
@@ -1336,7 +1335,7 @@ Override Methods
 ================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The keyword ``override`` indicates that an instance method in a superclass is
 overridden by the corresponding instance method from a subclass (see
@@ -1396,10 +1395,10 @@ Method Overload Signatures
 ==========================
 
 The |LANG| allows specifying a method that can be called in different ways by
-writing *overload signatures*. To do so, several method headers with the
-same name and different signatures are written, followed by the single
-implementation. See also :ref:`Function Overload Signatures` for *function
-overload signatures*.
+writing *overload signatures*, i.e., by writing several method headers which
+have the same name and different signatures, and are followed by one
+implementation function. See also :ref:`Function Overload Signatures` for
+*function overload signatures*.
 
 .. index::
    native method
@@ -2146,7 +2145,6 @@ same-class constructor, or of the direct superclass (see
     constructorCall:
         'this' arguments
         | 'super' arguments
-        | expression '.' 'super' arguments
         ;
 
 .. code-block:: typescript
@@ -2233,19 +2231,8 @@ There are two kinds of explicit constructor call statements:
 A :index:`compile-time error` occurs if the constructor body of an explicit
 constructor call statement:
 
--  Refers to any non-static field, instance method, or inner class declared
-   in this class or any superclass; or
+-  Refers to any non-static field or instance method; or
 -  Uses ``this`` or ``super`` in any expression.
-
-
-Where *C* is the class being instantiated, and *S* is its direct superclass,
-a :index:`compile-time error` occurs if:
-
--  *S* is an inner member class but not a member of a class enclosing *C*
-   within a qualified superclass constructor call statement;
--  *S* is neither an inner member class nor declared in a static context
-   within a qualified superclass constructor call statement.
-
 
 .. index::
    constructor call
@@ -2261,23 +2248,13 @@ a :index:`compile-time error` occurs if:
    constructor body
    non-static field
    instance method
-   inner class
    superclass
    expression
    instantiation
-   inner member class
    enclosing
    qualified superclass constructor call statement
    static context
    
-
-Otherwise, where *e* is the *expression* that immediately precedes '``.super``'
-in a qualified superclass constructor call statement, a
-:index:`compile-time error` occurs if the type of *e* is:
-
--  Neither *O* nor a subclass of *O*; or
--  Not accessible (see :ref:`Scopes`).
-
 
 An ordinary method call evaluates an alternate constructor call statement
 left-to-right. The evaluation starts from arguments, proceeds to constructor,
@@ -2303,9 +2280,8 @@ performed as follows:
    determine *i*'s immediately enclosing instance with respect to *S*
    (if available):
 
-   -  If *S* is not an inner class, or if the declaration of *S* occurs in a
-      static context, then *i* has no immediately enclosing instance with
-      respect to *S*.
+   -  If the declaration of *S* occurs in a static context, then *i* has no
+      immediately enclosing instance with respect to *S*.
 
    -  If the superclass constructor call is unqualified, then *S* must be a
       local class.
@@ -2318,16 +2294,10 @@ performed as follows:
       enclosing instance with respect to *S* is the *n*’th lexically enclosing
       instance of ``this``.
 
-   -  If the superclass constructor call is qualified, then the *expression*
-      immediately preceding '``.super``' (i.e., *e*) is evaluated. The result
-      of that evaluation is the immediately enclosing instance of *i* with
-      respect to *S*.
-
 .. index::
    instance
    creation
    enclosing instance
-   inner class
    static context
    superclass constructor call
    qualified superclass constructor call

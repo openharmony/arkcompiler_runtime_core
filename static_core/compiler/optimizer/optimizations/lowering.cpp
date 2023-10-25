@@ -376,6 +376,9 @@ void Lowering::VisitLoadFromConstantPool([[maybe_unused]] GraphVisitor *v, Inst 
     auto graph = inst->GetBasicBlock()->GetGraph();
     auto new_inst = graph->CreateInstLoadArrayI(DataType::ANY, inst->GetPc(), inst->GetInput(0).GetInst(),
                                                 inst->CastToLoadFromConstantPool()->GetTypeId());
+#ifdef PANDA_COMPILER_DEBUG_INFO
+    new_inst->SetCurrentMethod(inst->GetCurrentMethod());
+#endif
     inst->ReplaceUsers(new_inst);
     inst->RemoveInputs();
     inst->GetBasicBlock()->ReplaceInst(inst, new_inst);
@@ -425,12 +428,10 @@ void Lowering::VisitCompare(GraphVisitor *v, Inst *inst)
     }
     auto graph = inst->GetBasicBlock()->GetGraph();
     auto cnst = graph->FindOrCreateConstant(1);
-    auto xor_inst = graph->CreateInstXor();
-    xor_inst->SetPc(inst->GetPc());
-    xor_inst->SetType(DataType::BOOL);
-    xor_inst->SetInput(0, input0);
-    xor_inst->SetInput(1, cnst);
-
+    auto xor_inst = graph->CreateInstXor(DataType::BOOL, inst->GetPc(), input0, cnst);
+#ifdef PANDA_COMPILER_DEBUG_INFO
+    xor_inst->SetCurrentMethod(inst->GetCurrentMethod());
+#endif
     InsertInstruction(inst, xor_inst);
     static_cast<Lowering *>(v)->VisitXor(v, xor_inst);
 }
@@ -826,6 +827,9 @@ Inst *Lowering::LowerOperationWithShiftedOperand(Inst *inst, OperandsCapture<MAX
     new_inst->SetPc(inst->GetPc());
     new_inst->SetImm(imm);
     new_inst->SetShiftType(shift_type);
+#ifdef PANDA_COMPILER_DEBUG_INFO
+    new_inst->SetCurrentMethod(inst->GetCurrentMethod());
+#endif
     SetInputsAndInsertInstruction(operands, inst, new_inst);
     return new_inst;
 }
@@ -985,6 +989,9 @@ void Lowering::LowerConstArrayIndex(Inst *inst, Opcode low_level_opcode)
         auto new_inst = graph->CreateInst(low_level_opcode);
         new_inst->SetType(inst->GetType());
         new_inst->SetPc(inst->GetPc());
+#ifdef PANDA_COMPILER_DEBUG_INFO
+        new_inst->SetCurrentMethod(inst->GetCurrentMethod());
+#endif
         static_cast<LowLevelType *>(new_inst)->SetImm(value);
 
         // StoreInst and BoundsCheckInst have 3 inputs, LoadInst - has 2 inputs
@@ -1068,6 +1075,9 @@ void Lowering::LowerReturnInst(FixedInputsInst1 *ret)
     if (input_inst->IsConst()) {
         uint64_t raw_value = input_inst->CastToConstant()->GetRawValue();
         auto ret_imm = graph->CreateInstReturnI(ret->GetType(), ret->GetPc(), raw_value);
+#ifdef PANDA_COMPILER_DEBUG_INFO
+        ret_imm->SetCurrentMethod(ret->GetCurrentMethod());
+#endif
 
         // Replace instruction immediately because it's not removable by DCE
         ret->RemoveInputs();
@@ -1145,6 +1155,9 @@ void Lowering::JoinFcmpInst(IfImmInst *inst, CmpInst *input)
     auto graph = input->GetBasicBlock()->GetGraph();
     auto replace = graph->CreateInstIf(DataType::NO_TYPE, inst->GetPc(), input->GetInput(0).GetInst(),
                                        input->GetInput(1).GetInst(), input->GetOperandsType(), cc, inst->GetMethod());
+#ifdef PANDA_COMPILER_DEBUG_INFO
+    replace->SetCurrentMethod(inst->GetCurrentMethod());
+#endif
 
     // Replace IfImm instruction immediately because it's not removable by DCE
     inst->RemoveInputs();
@@ -1252,6 +1265,9 @@ void Lowering::LowerIfImmToIf(IfImmInst *inst, Inst *input, ConditionCode cc, Da
     // New instruction
     auto replace = graph->CreateInstIf(DataType::NO_TYPE, inst->GetPc(), input->GetInput(0).GetInst(),
                                        input->GetInput(1).GetInst(), input_type, cc, inst->GetMethod());
+#ifdef PANDA_COMPILER_DEBUG_INFO
+    replace->SetCurrentMethod(inst->GetCurrentMethod());
+#endif
     // Replace IfImm instruction immediately because it's not removable by DCE
     inst->RemoveInputs();
     inst->GetBasicBlock()->ReplaceInst(inst, replace);
@@ -1291,6 +1307,9 @@ void Lowering::LowerToDeoptimizeCompare(Inst *inst)
     }
     deopt_cmp->SetInput(0, compare->GetInput(0).GetInst());
     deopt_cmp->SetSaveState(deopt_if->GetSaveState());
+#ifdef PANDA_COMPILER_DEBUG_INFO
+    deopt_cmp->SetCurrentMethod(inst->GetCurrentMethod());
+#endif
     deopt_if->ReplaceUsers(deopt_cmp);
     deopt_if->GetBasicBlock()->InsertAfter(deopt_cmp, deopt_if);
     deopt_if->ClearFlag(compiler::inst_flags::NO_DCE);

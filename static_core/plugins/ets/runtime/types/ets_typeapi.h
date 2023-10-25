@@ -16,7 +16,11 @@
 #ifndef PANDA_PLUGINS_ETS_TYPEAPI_H_
 #define PANDA_PLUGINS_ETS_TYPEAPI_H_
 
+#include <string>
+#include "type.h"
 #include "types/ets_primitives.h"
+#include "libpandafile/file.h"
+#include "types/ets_string.h"
 
 namespace panda::ets {
 
@@ -37,16 +41,49 @@ enum class EtsTypeAPIKind : EtsByte {
     STRING = 0xBU,
     INTERFACE = 0xCU,
     ARRAY = 0xDU,
-    FUNCTION = 0xEU,
-    UNION = 0xFU,
-    UNDEFINED = 0x10U,
-    NUL = 0x11U,
+    TUPLE = 0xEU,
+    LAMBDA = 0xFU,
+    METHOD = 0x10U,
+    UNION = 0x11U,
+    UNDEFINED = 0x12U,
+    NUL = 0x13U,
 
-    ENUM = 0x12U
+    ENUM = 0x14U
 
 };
 
 constexpr EtsByte ETS_TYPE_KIND_VALUE_MASK = 1U << 6U;
+
+enum class EtsValueTypeDesc : EtsChar {
+    BOOLEAN = 'Z',
+    BYTE = 'B',
+    SHORT = 'S',
+    CHAR = 'C',
+    INT = 'I',
+    LONG = 'J',
+    FLOAT = 'F',
+    DOUBLE = 'D',
+};
+
+// Type attributes "flat" representation
+enum class EtsTypeAPIAttributes : EtsInt {
+    STATIC = 1U << 0U,        // Field, Method
+    INHERITED = 1U << 1U,     // Field, Method
+    READONLY = 1U << 2U,      // Field
+    FINAL = 1U << 3U,         // Method, Class
+    ABSTRACT = 1U << 4U,      // Method
+    CONSTRUCTOR = 1U << 5U,   // Method
+    REST = 1U << 6U,          // Parameter
+    OPTIONAL = 1U << 7U,      // Parameter
+    THROWING = 1U << 8U,      // Method, Lambda
+    NATIVE = 1U << 9U,        // Method, Lambda
+    ASYNC = 1U << 10U,        // Method, Lambda
+    NEVERRESULT = 1U << 11U,  // Method, Lambda
+    GETTER = 1U << 12U,       // Method
+    SETTER = 1U << 13U        // Method
+};
+
+enum class EtsTypeAPIAccessModifier : EtsByte { PUBLIC = 0, PRIVATE = 1, PROTECTED = 2 };
 
 }  // namespace panda::ets
 

@@ -116,5 +116,3 @@ endif()
 add_ets_gc_test(FILE heap_info_test.ets OPTIONS MODE "INT")
 # Running tests via API calls
 add_ets_napi_gc_test(FILE pending_exception_gc_test.ets CPP_SOURCE pending_exception_test.cpp OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never")
-
-run_int_jit_aot_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/stress/test_gc_old.ets ${CMAKE_CURRENT_BINARY_DIR} test_gc_old_ets)

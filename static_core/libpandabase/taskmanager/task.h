@@ -17,16 +17,17 @@
 #define PANDA_LIBPANDABASE_TASKMANAGER_TASK_H
 
 #include "libpandabase/macros.h"
+#include "libpandabase/globals.h"
 #include <functional>
 #include <ostream>
 
 namespace panda::taskmanager {
 
-enum class TaskType : uint16_t { UNKNOWN = 0, GC, JIT };
+enum class TaskType : uint8_t { UNKNOWN = 0, GC, JIT };
 
-enum class VMType : uint16_t { UNKNOWN = 0, DYNAMIC_VM, STATIC_VM };
+enum class VMType : uint8_t { UNKNOWN = 0, DYNAMIC_VM, STATIC_VM };
 
-enum class TaskExecutionMode { FOREGROUND, BACKGROUND };
+enum class TaskExecutionMode : uint8_t { FOREGROUND, BACKGROUND };
 
 /**
  * @brief TaskProperties is class that consider all enums that are related to Task. It's used to parameterize task
@@ -53,6 +54,22 @@ public:
     {
         return execution_mode_;
     }
+
+    friend constexpr bool operator==(const TaskProperties &lv, const TaskProperties &rv)
+    {
+        return lv.task_type_ == rv.task_type_ && lv.vm_type_ == rv.vm_type_ && lv.execution_mode_ == rv.execution_mode_;
+    }
+
+    class Hash {
+    public:
+        constexpr Hash() = default;
+        constexpr uint32_t operator()(const TaskProperties &properties) const
+        {
+            return (static_cast<uint32_t>(properties.task_type_) << (2U * sizeof(uint8_t) * BITS_PER_BYTE)) |
+                   (static_cast<uint32_t>(properties.vm_type_) << (sizeof(uint8_t) * BITS_PER_BYTE)) |
+                   (static_cast<uint32_t>(properties.execution_mode_));
+        }
+    };
 
 private:
     TaskType task_type_;

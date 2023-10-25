@@ -35,15 +35,16 @@ bool EtsMethod::IsMethod(const PandaString &td)
 EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td)
 {
     EtsClassLinker *class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    size_t pos = td.find(TYPE_DESC_DELIMITER);
-    size_t next_pos = td.find(TYPE_DESC_DELIMITER, pos + 1);
     if (td[0] == METHOD_PREFIX) {
-        PandaString panda_file_name = td.substr(pos + 1, next_pos - pos - 1);
-        auto panda_file = panda_file::File::Open(panda_file_name, panda_file::File::READ_ONLY);
-        uint32_t id;
-        std::stringstream ss;
-        ss << td.substr(next_pos + 1);
-        ss >> id;
+        // here we resolve method in existing class, which is stored as pointer to panda file + entity id
+        uint64_t file_ptr;
+        uint64_t id;
+        // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg,cert-err34-c)
+        [[maybe_unused]] auto res =
+            sscanf(std::string_view {td}.substr(1).data(), "%" PRIu64 ";%" PRIu64 ";", &file_ptr, &id);
+        // NOLINTEND(cppcoreguidelines-pro-type-vararg,cert-err34-c)
+        ASSERT(res == 2);
+        auto panda_file = reinterpret_cast<const panda_file::File *>(file_ptr);
         return EtsMethod::FromRuntimeMethod(class_linker->GetMethod(*panda_file, panda_file::File::EntityId(id)));
     }
     ASSERT(td[0] == CLASS_TYPE_PREFIX);
@@ -177,10 +178,14 @@ PandaString EtsMethod::GetMethodSignature(bool include_return_type) const
 
 PandaString EtsMethod::GetDescriptor() const
 {
-    PandaOStringStream ss;
-    ss << METHOD_PREFIX << TYPE_DESC_DELIMITER << GetPandaMethod()->GetPandaFile()->GetFullFileName()
-       << TYPE_DESC_DELIMITER << GetPandaMethod()->GetFileId().GetOffset();
-    return ss.str();
+    constexpr size_t TD_MAX_SIZE = 256;
+    std::array<char, TD_MAX_SIZE> actual_td;  // NOLINT(cppcoreguidelines-pro-type-member-init)
+    // initialize in printf
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::snprintf(actual_td.data(), actual_td.size(), "%c%" PRIu64 ";%" PRIu64 ";", METHOD_PREFIX,
+                  reinterpret_cast<uint64_t>(GetPandaMethod()->GetPandaFile()),
+                  static_cast<uint64_t>(GetPandaMethod()->GetFileId().GetOffset()));
+    return {actual_td.data()};
 }
 
 }  // namespace panda::ets

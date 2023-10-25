@@ -76,6 +76,7 @@ bool IrBuilder::RunImpl()
 
 void IrBuilder::SetMemoryBarrierFlag()
 {
+    COMPILER_LOG(INFO, IR_BUILDER) << "Setting memory barrier flag";
     for (auto pre_end : GetGraph()->GetEndBlock()->GetPredsBlocks()) {
         if (pre_end->IsTryEnd()) {
             ASSERT(pre_end->GetPredsBlocks().size() == 1U);
@@ -83,9 +84,10 @@ void IrBuilder::SetMemoryBarrierFlag()
         }
         auto last_inst = pre_end->GetLastInst();
         ASSERT(last_inst != nullptr);
-        if (last_inst->GetOpcode() == Opcode::Return) {
-            ASSERT(last_inst->GetType() == DataType::VOID);
+        if (last_inst->IsReturn()) {
+            ASSERT(GetGraph()->GetRuntime()->IsInstanceConstructor(GetMethod()));
             last_inst->SetFlag(inst_flags::MEM_BARRIER);
+            COMPILER_LOG(INFO, IR_BUILDER) << "Set memory barrier flag to " << *last_inst;
         }
     }
 }

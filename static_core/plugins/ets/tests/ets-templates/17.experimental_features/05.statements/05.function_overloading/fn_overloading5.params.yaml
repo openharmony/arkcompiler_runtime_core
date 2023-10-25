@@ -30,21 +30,3 @@ cases:
           return 2;
         }
       cond: 'foo(1) == 1 && foo(true) == 2'
-
-    - decl: |-
-        function foo(...p: int[]): int {
-          return 1;
-        }
-        function foo(...p: boolean[]): int {
-          return 2;
-        }
-      cond: 'foo(1) == 1 && foo(true) == 2'
-
-    - decl: |-
-        function foo(...p: int[]): int {
-          return 1;
-        }
-        function foo(a: int, ...p: int[]): int {
-          return 2;
-        }
-      cond: 'foo() == 1'

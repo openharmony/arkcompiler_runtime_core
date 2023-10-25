@@ -16,17 +16,65 @@
 package std.core;
 
 export final class Field extends Object {
-    private td: string 
-    private name: string 
-    private accessMod: byte
+    private td: TypeDesc
+    private ownerTD: TypeDesc
+    private name: string
     private attributes: int
+    private accessMod: byte
 
+    private constructor () {}
 
     public getType(): Type {
         return Type.resolve(this.td)
     }
 
+    public getOwnerType(): Type {
+        return Type.resolve(this.ownerTD)
+    }
+
     public getName(): String {
         return this.name
+    }
+
+    public getAttributes(): int {
+        return this.attributes
+    }
+
+    public getAccessModifier(): int {
+        return this.accessMod
+    }
+
+    public getStaticValue(): NullishType {
+        if (!this.isStatic()) {
+            assert(false) // TODO(shumilov-petr): throw exception
+        }
+        return TypeAPIGetStaticFieldValue(this.ownerTD, this.name)
+    }
+
+    public setStaticValue(v: NullishType): void {
+        if (!this.isStatic()) {
+            assert(false) // TODO(shumilov-petr): throw exception
+        }
+        if (!this.getType().assignableFrom(Type.of(v))) {
+            assert(false) // TODO(shumilov-petr): throw exception
+        }
+        TypeAPISetStaticFieldValue(this.ownerTD, this.name, this.getType().convertObject(v))
+    }
+
+    public isInherited(): boolean {
+        return (this.attributes & Attributes.INHERITED) != 0
+    }
+
+    public isStatic(): boolean {
+        return (this.attributes & Attributes.STATIC) != 0
+    }
+
+    public isReadonly(): boolean {
+        // TODO(shumilov-petr): allways false due to extra type info dumping required
+        return (this.attributes & Attributes.READONLY) != 0
+    }
+
+    public override toString(): string {
+        return this.getName() + ": " + this.getType().toString()
     }
 }

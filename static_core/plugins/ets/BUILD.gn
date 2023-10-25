@@ -88,6 +88,20 @@ config("runtime_interpreter_impl") {
   # Required, but empty: nothing to add currently
 }
 
+config("bytecodeopt") {
+  include_dirs = [
+    "$ark_root/plugins/ets/bytecode_optimizer/",
+    "$target_gen_dir",
+  ]
+}
+
+ark_isa_gen("isa_gen_ets_bytecodeopt") {
+  template_files = [ "ets_codegen_intrinsics_gen.inc.erb" ]
+  sources = "$ark_root/plugins/ets/bytecode_optimizer/templates/"
+  destination = "$target_gen_dir/"
+  requires = [ "$ark_root/assembler/asm_isapi.rb" ]
+}
+
 if (with_stdlib) {
   es2panda_gen("etsstdlib") {
     inputs = [ "stdlib" ]
@@ -108,8 +122,7 @@ if (with_stdlib) {
       "}",
     ]
 
-    # TODO(vpukhov): adjust es2panda path
-    write_file("$root_gen_dir/plugins/es2panda/generated/arktsconfig.json",
+    write_file("$root_gen_dir/tools/es2panda/generated/arktsconfig.json",
                json_array,
                "list lines")
     sources = [
@@ -141,12 +154,11 @@ if (with_stdlib) {
       "stdlib/std/core/Field.ets",
       "stdlib/std/core/FinalizationQueue.ets",
       "stdlib/std/core/Float.ets",
-      "stdlib/std/core/Floating.ets",
       "stdlib/std/core/GC.ets",
       "stdlib/std/core/Int.ets",
-      "stdlib/std/core/Integral.ets",
       "stdlib/std/core/Long.ets",
       "stdlib/std/core/Method.ets",
+      "stdlib/std/core/Numeric.ets",
       "stdlib/std/core/Object.ets",
       "stdlib/std/core/Parameter.ets",
       "stdlib/std/core/Runtime.ets",

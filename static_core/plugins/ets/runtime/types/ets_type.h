@@ -17,17 +17,21 @@
 
 #include "plugins/ets/runtime/napi/ets_napi.h"
 #include "libpandafile/file.h"
+#include "libpandafile/file_items.h"
 
 namespace panda::ets {
 
+// Must be synchronized with
+// plugins/ecmascript/es2panda/compiler/scripts/signatures.yaml
 static constexpr char ARRAY_TYPE_PREFIX = '[';
 static constexpr char CLASS_TYPE_PREFIX = 'L';
-static constexpr char NULL_TYPE_PREFIX = 'N';
-static constexpr char METHOD_PREFIX = 'F';
+static constexpr char METHOD_PREFIX = 'M';
 static constexpr const char *NULL_TYPE_DESC = "Null";
 static constexpr const char *LAMBDA_PREFIX = "LambdaObject";
 static constexpr const char *LAMBDA_METHOD_NAME = "invoke";
 static constexpr char TYPE_DESC_DELIMITER = ';';
+static constexpr const char *GETTER_BEGIN = "<get>";
+static constexpr const char *SETTER_BEGIN = "<set>";
 
 enum class EtsType { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, OBJECT, UNKNOWN, VOID };
 

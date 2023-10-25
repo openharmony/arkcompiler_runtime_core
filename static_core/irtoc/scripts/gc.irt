@@ -94,33 +94,33 @@ def PostInterRegionBarrierFast(obj_num, check_null)
 
         if obj_num == 1
             if check_null
-                If(obj1, 0).CC(:CC_EQ) {
+                If(obj1, 0).EQ.Unlikely {
                     Goto(:Done)
                 }
             end
 
-            If(ShrI(Xor(mem, obj1).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).CC(:CC_EQ) {
+            If(ShrI(Xor(mem, obj1).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).EQ.Unlikely {
                 Goto(:Done)
             }
         elsif obj_num == 2
             if check_null
-                If(obj1, 0).CC(:CC_EQ) {
+                If(obj1, 0).EQ.Unlikely {
                     Goto(:Check2)
                 }
             end
 
-            If(ShrI(Xor(mem, obj1).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).CC(:CC_NE) {
+            If(ShrI(Xor(mem, obj1).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).NE {
                 Goto(:PushToBuffer)
             }
     
         Label(:Check2)
             if check_null
-                If(obj2, 0).CC(:CC_EQ) {
+                If(obj2, 0).EQ.Unlikely {
                     Goto(:Done)
                 }
             end
     
-            If(ShrI(Xor(mem, obj2).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).CC(:CC_EQ) {
+            If(ShrI(Xor(mem, obj2).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).EQ.Unlikely {
                 Goto(:Done)
             }
         end
@@ -131,7 +131,7 @@ def PostInterRegionBarrierFast(obj_num, check_null)
         if obj_num == 1
             Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_SLOW).Terminator.void
         elsif obj_num == 2
-            IfImm(AndI(ref_addr).Imm(Constants::REFERENCE_PAIR_ALIGNMENT_MASK).ref_uint).Imm(0).CC(:CC_EQ) {
+            IfImm(AndI(ref_addr).Imm(Constants::REFERENCE_PAIR_ALIGNMENT_MASK).ref_uint).Imm(0).EQ {
                 Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_SLOW).Terminator.void
             }
             Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_PAIR_UNALIGNED_SLOW).Terminator.void
@@ -148,8 +148,8 @@ scoped_macro(:push_dirty_card_to_buffer) do |cards, min_addr, mem|
     card := Add(cards, card_offset).ptr
     card_value := LoadI(card).Imm(Constants::CARD_VALUE_OFFSET).u8
 
-    is_card_clear := Compare(card_value, Constants::CARD_CLEAR_VALUE).CC(:CC_EQ).b
-    IfImm(is_card_clear).Imm(0).CC(:CC_EQ).b {
+    is_card_clear := Compare(card_value, Constants::CARD_CLEAR_VALUE).EQ.b
+    IfImm(is_card_clear).Imm(0).EQ.Unlikely.b {
         Goto(:Done)
     }
     StoreI(card, Constants::CARD_MARKED_VALUE).Imm(Constants::CARD_VALUE_OFFSET).u8
@@ -162,7 +162,7 @@ scoped_macro(:push_dirty_card_to_buffer) do |cards, min_addr, mem|
 
     Label(:TryPushLoop)
     head_index := LoadI(buffer).Imm(Constants::G1_LOCK_BUFFER_HEAD_OFFSET).Volatile.word
-    If(next_tail_index, head_index).CC(:CC_EQ) {
+    If(next_tail_index, head_index).EQ {
         Goto(:TryPushLoop)
     }
 

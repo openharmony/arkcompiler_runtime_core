@@ -106,7 +106,9 @@ function(panda_configure_host_tools)
     add_custom_target(irtoc_interpreter)
     add_custom_target(irtoc_tests)
 
-    include(${PANDA_ROOT}/plugins/HostTools.cmake)
+    if(EXISTS ${ES2PANDA_PATH})
+        list(APPEND HOST_TOOLS_TARGETS es2panda)
+    endif()
 
     foreach(plugin ${PLUGINS})
         string(TOUPPER ${plugin} plugin_name_upper)

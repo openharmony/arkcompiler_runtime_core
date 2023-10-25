@@ -34,12 +34,12 @@ function(:MonitorEnterFastPath,
 
     # Load native thread id, go to slow path if it is unknown
     ntid := Cast(LoadI(%tr).Imm(Constants::INTERNAL_THREAD_ID_OFFSET).u32).SrcType("DataType::Type::UINT32").mw
-    If(ntid, 0).CC(:CC_EQ).mw { Goto(:SlowPath) }
+    If(ntid, 0).EQ.mw.Unlikely { Goto(:SlowPath) }
 
     # Load MTManagedThread::local_objects_locked_ size and capacity, go to slow path if list should be extended
     locked_list_capacity := LoadI(%tr).Imm(Constants::LOCKED_OBJECTS_CAPACITY_OFFSET).u32
     locked_list_size := LoadI(%tr).Imm(Constants::LOCKED_OBJECTS_SIZE_OFFSET).u32
-    If(locked_list_capacity, locked_list_size).CC(:CC_LE).u32 { Goto(:SlowPath) }
+    If(locked_list_capacity, locked_list_size).LE.u32.Unlikely { Goto(:SlowPath) }
 
 Label(:CasLoop)
     if Options.arch == :x86_64
@@ -49,10 +49,10 @@ Label(:CasLoop)
     end
 
     # Go to slow path if mark word's state is neither Unlock, nor Lightweight lock
-    If(And(mark_word, Constants::MARK_WORD_STATUS_MASK).mw, 0).CC(:CC_NE).mw { Goto(:SlowPath) }
+    If(And(mark_word, Constants::MARK_WORD_STATUS_MASK).mw, 0).NE.mw.Unlikely { Goto(:SlowPath) }
 
     # If both thread id and locks count fields are zero then set thread id to current thread's id
-    If(And(mark_word, Constants::MARK_WORD_LWL_THREAD_ID_AND_COUNTER_MASK).mw, 0).CC(:CC_EQ).mw {
+    If(And(mark_word, Constants::MARK_WORD_LWL_THREAD_ID_AND_COUNTER_MASK).mw, 0).EQ.mw.Unlikely {
         shifted_ntid := Shl(ntid, Constants::MARK_WORD_LWL_THREAD_ID_OFFSET).mw
         new_mark_word := Or(mark_word, shifted_ntid).mw
     }
@@ -61,16 +61,16 @@ Label(:CasLoop)
     # Increment locks count by 1
     final_mark_word := Add(phi_mw, Constants::MARK_WORD_LWL_COUNTER_INC).mw
     # Check that locks count didn't overflow and go to slow path if it did
-    If(Shr(final_mark_word, Constants::MARK_WORD_LWL_THREAD_ID_OFFSET).mw, ntid).CC(:CC_NE).mw {
+    If(Shr(final_mark_word, Constants::MARK_WORD_LWL_THREAD_ID_OFFSET).mw, ntid).NE.mw.Unlikely {
         Goto(:SlowPath)
     }
     # Try to update mark word, retry on failure
     if Options.arch == :x86_64
-        If(Intrinsic(:COMPARE_AND_SET_MARK_WORD, monitor, mark_word, final_mark_word).b, 0).CC(:CC_EQ).b {
+        If(Intrinsic(:COMPARE_AND_SET_MARK_WORD, monitor, mark_word, final_mark_word).b, 0).EQ.b {
             Goto(:CasLoop)
         }
     else
-        If(Intrinsic(:STORE_RELEASE_MARK_WORD_EXCLUSIVE, monitor, final_mark_word).b, 0).CC(:CC_NE).b {
+        If(Intrinsic(:STORE_RELEASE_MARK_WORD_EXCLUSIVE, monitor, final_mark_word).b, 0).NE.b {
             Goto(:CasLoop)
         }
     end
@@ -111,7 +111,7 @@ function(:MonitorExitFastPath,
 
     # Load native thread id, go to slow path if it is unknown
     ntid := Cast(LoadI(%tr).Imm(Constants::INTERNAL_THREAD_ID_OFFSET).u32).SrcType("DataType::Type::UINT32").mw
-    If(ntid, 0).CC(:CC_EQ).mw { Goto(:SlowPath) }
+    If(ntid, 0).EQ.mw.Unlikely { Goto(:SlowPath) }
     shifted_ntid := Shl(ntid, Constants::MARK_WORD_LWL_THREAD_ID_OFFSET).mw
 
 Label(:CasLoop)
@@ -125,7 +125,7 @@ Label(:CasLoop)
     # 1) thread id is zero (that means that mark word's thread id equal to current thread id);
     # 2) mark word state is zero too (it corresponds to Lightweight lock in case of non-zero thread id).
     # If one of these conditions does not holds go to slow path.
-    If(And(Xor(mark_word, shifted_ntid).mw, Constants::MARK_WORD_STATUS_MASK_AND_LWL_THREAD_ID_MASK).mw, 0).CC(:CC_NE).mw {
+    If(And(Xor(mark_word, shifted_ntid).mw, Constants::MARK_WORD_STATUS_MASK_AND_LWL_THREAD_ID_MASK).mw, 0).NE.mw.Unlikely {
         Goto(:SlowPath)
     }
 
@@ -133,18 +133,18 @@ Label(:CasLoop)
     decremented_mw := SubI(mark_word).Imm(Constants::MARK_WORD_LWL_COUNTER_INC).mw
 
     # Clear the thread id field if locks count was decremented down to 0
-    If(And(decremented_mw, Constants::MARK_WORD_LWL_COUNTER_MASK).mw, 0).CC(:CC_EQ).mw {
+    If(And(decremented_mw, Constants::MARK_WORD_LWL_COUNTER_MASK).mw, 0).EQ.mw {
         new_mark_word := Xor(decremented_mw, shifted_ntid).mw
     }
     final_mark_word := Phi(decremented_mw, new_mark_word).mw
 
     # Try to update mark word, retry on failure
     if Options.arch == :x86_64
-        If(Intrinsic(:COMPARE_AND_SET_MARK_WORD, monitor, mark_word, final_mark_word).b, 0).CC(:CC_EQ).b {
+        If(Intrinsic(:COMPARE_AND_SET_MARK_WORD, monitor, mark_word, final_mark_word).b, 0).EQ.b {
             Goto(:CasLoop)
         }
     else
-        If(Intrinsic(:STORE_RELEASE_MARK_WORD_EXCLUSIVE, monitor, final_mark_word).b, 0).CC(:CC_NE).b {
+        If(Intrinsic(:STORE_RELEASE_MARK_WORD_EXCLUSIVE, monitor, final_mark_word).b, 0).NE.b {
             Goto(:CasLoop)
         }
     end

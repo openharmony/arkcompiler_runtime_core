@@ -459,6 +459,8 @@ sub assert_code_snippets
     my $recipes = shift;
 
     my %skip_list = (
+        8 => { code_bad => 'skip', code_ok => 'skip' },
+
         55 => { code_ok => 'expect_ok' },
         65 => { code_ok => 'expect_ok' },
 

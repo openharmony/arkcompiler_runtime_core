@@ -22,7 +22,7 @@ general:
     show-progress: True
 es2panda:
     timeout: 30
-    opt-level: 0
+    opt-level: 2
 verifier:
     enable: True
     timeout: 30

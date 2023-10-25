@@ -213,7 +213,7 @@ public:
 
     virtual void JoinWorker() = 0;
 
-    virtual void Destroy() = 0;
+    virtual void FinalizeWorker() = 0;
 
     virtual void PreZygoteFork() = 0;
 

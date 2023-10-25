@@ -99,8 +99,8 @@ function testArrayType(): int {
     let arrat = Type.of(new A[1])
     let arrbt = Type.of(new B[1])
     let arrct = Type.of(new C[1])
-    return test(rat.assignableFrom(pat), "double[] <- Double[]") +
-            test(pat.assignableFrom(rat), "Double[] <- double[]") +
+    return test(!rat.assignableFrom(pat), "double[] <- Double[]") +
+            test(!pat.assignableFrom(rat), "Double[] <- double[]") +
             test(arrat.assignableFrom(arrbt), "A[] <- B[]") +
             test(arrat.assignableFrom(arrct), "A[] <- C[]") +
             test(!arrbt.assignableFrom(arrct), "B[] <\\- C[]") +
@@ -157,8 +157,8 @@ function testNumericTypes(): int {
 
 function testNullishTypes(): int {
     let ot = Type.of(new Object())
-    let nt = NullType.getInstance() as Type
-    let ut = UndefinedType.getInstance() as Type
+    let nt = NullType.REF
+    let ut = UndefinedType.REF
     return test(!ot.assignableFrom(nt), "Object <\\- null") +
             test(!ot.assignableFrom(ut), "Object <\\- undefined")
 }

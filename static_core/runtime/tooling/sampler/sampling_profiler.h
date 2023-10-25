@@ -102,15 +102,26 @@ private:
     void EraseThreadHandle(ManagedThread *thread);
 
     void CollectThreads();
+    void CollectModules();
 
-    void WritePandaFiles(StreamWriter *writer_ptr);
     void WriteLoadedPandaFiles(StreamWriter *writer_ptr);
+
+    void ClearManagedThreadSet()
+    {
+        os::memory::LockHolder holder(managed_threads_lock_);
+        managed_threads_.clear();
+    }
+
+    void ClearLoadedPfs()
+    {
+        os::memory::LockHolder holder(loaded_pfs_lock_);
+        loaded_pfs_.clear();
+    }
 
     static Sampler *instance_;
 
     Runtime *runtime_ {nullptr};
     // Remember agent thread id for security
-    os::thread::NativeHandleType agent_tid_ {0};
     os::thread::NativeHandleType listener_tid_ {0};
     os::thread::NativeHandleType sampler_tid_ {0};
     std::unique_ptr<std::thread> sampler_thread_ {nullptr};

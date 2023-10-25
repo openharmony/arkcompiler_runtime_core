@@ -10,6 +10,8 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+.. _How to Use the Cookbook:
+
 How to Use the Cookbook
 =======================
 
@@ -22,6 +24,8 @@ a recipe will give you a suggestion on how to rewrite your code and work
 around an unsupported case.
 
 |
+
+.. _Recipe Explained:
 
 Recipe Explained
 ----------------
@@ -37,13 +41,28 @@ The original |TS| code containing the keyword ``var``:
 
 must be rewritten as follows:
 
-.. code:: typescript
+.. code-block:: typescript
 
     // Important! This is still valid TypeScript.
     function addTen(x: number): number {
         let ten = 10
         return x + ten
     }
+
+.. _Severity Levels:
+
+Severity Levels
+---------------
+
+Each recipe is marked with the the severity level. Supported values:
+
+- |CB_ERROR|: The recipe should be followed, otherwise the program
+  will fail to compile.
+- |CB_WARNING|: It is highly recommended to follow the recipe. Although
+  violating the recipe does not currently affect the compilation, in future
+  versions, it will cause compilation to fail.
+
+.. _Status of Unsupported Features:
 
 Status of Unsupported Features
 ------------------------------
@@ -61,9 +80,8 @@ and on more real-world data experiments.
 
 |
 
-
 .. raw:: pdf
 
-   PageBreak
+    PageBreak
 
 

@@ -15,17 +15,24 @@
 
 package std.core;
 
+// TODO(shumilov-petr): Add runtime mirror
 export final class UnionCase {
     private name: string
-    private typ: Type
-    private val: Value
+    private typ: TypeDesc
+    private val: Object
+
+    private constructor () {}
 
     public isType(): boolean {
         return false
     }
 
     public getType(): Type {
-        return this.typ
+        return Type.resolve(this.typ)
     }
 
+    public override toString(): string {
+        // TODO(shumilov-petr): not implemented
+        throw new Error("not implemented")
+    }
 }

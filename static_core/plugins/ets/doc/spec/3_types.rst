@@ -1114,6 +1114,9 @@ use ``string`` in all cases.
 ``never`` Type
 ==============
 
+.. meta:
+    frontend_status: Done
+
 The class ``never`` is a subclass (see :ref:`Subtyping`) of any other class.
 
 The ``never`` class has no instances, and is used to represent values that
@@ -1405,9 +1408,6 @@ except in nullish types, see :ref:`Nullish Types`.
 Tuple Types
 ===========
 
-NOTE: *the text in this section is the subject of discussion*.
-
-
 .. code-block:: abnf
 
     tupleType:
@@ -1422,7 +1422,7 @@ element has its own type.
 The operator ``[ ]`` (square brackets) is used to acess elements of a tuple
 in a manner similar to that used to access elements of an array. The index
 expression is of *integer* type, and the index of the 1st tuple element is *0*.
-
+Only constant expressions can be used as index to get access top tuple elements.
 
 .. code-block:: typescript
    :linenos:
@@ -1432,20 +1432,20 @@ expression is of *integer* type, and the index of the 1st tuple element is *0*.
    tuple[0] = 666
    console.log (tuple[0], tuple[4]) // `666 666` be printed
 
-Tuple type is compatible with an array type (see :ref:`Array Types`) when
-the type of array element is a super type for all tuple type elements' types.
-And of course *Object* (see :ref:`Object Class Type`) is a super type for
-any tuple type.
+*Object* (see :ref:`Object Class Type`) is a super type for any tuple type.
 
-.. code-block:: typescript
-   :linenos:
-
-   let tuple: [number, number, string, boolean, Object] = 
-              [     6,      7,  "abc",    true,    666]
-   let array: Object[] = tuple /* Object is a super type for number, string,
-                                  boolean and Object */
-
-   let object: Object = tuple // This works too
+..
+  Tuple type is compatible with an array type (see :ref:`Array Types`) when
+  the type of array element is a super type for all tuple type elements' types.
+  And of course *Object* (see :ref:`Object Class Type`) is a super type for
+  any tuple type.
+  .. code-block:: typescript
+  :linenos:
+  let tuple: [number, number, string, boolean, Object] = 
+  [     6,      7,  "abc",    true,    666]
+  let array: Object[] = tuple /* Object is a super type for number, string,
+  boolean and Object */
+  let object: Object = tuple // This works too
 
 An empty tuple is a corner case and is added to support compatibility with the
 |TS|.
@@ -1455,16 +1455,14 @@ An empty tuple is a corner case and is added to support compatibility with the
 
    let empty: [] = [] // empty tuple with no elements in it
 
-Tuple type has the same set of operations like arrays. So, not only ``[ ]``
-(square brackets) but length is available for tuples as well as all other
-operations. 
-
-.. code-block:: typescript
-   :linenos:
-
-   let empty: [] = []
-   console.log ("# of tuple elements is ", empty.length)
-
+..
+  Tuple type has the same set of operations like arrays. So, not only ``[ ]``
+  (square brackets) but length is available for tuples as well as all other
+  operations. 
+  .. code-block:: typescript
+  :linenos:
+  let empty: [] = []
+  console.log ("# of tuple elements is ", empty.length)
 
 
 |
@@ -1687,7 +1685,7 @@ Nullish Types
 All predefined and user-defined type declarations create non-nullish
 types that cannot have a ``null`` or ``undefined`` value at runtime.
 
-Use *T* \| ``null`` or *T* \| ``undefined`` as the type to specify a
+*T* \| ``null`` or *T* \| ``undefined`` can be used as the type to specify a
 nullish version of type *T*. 
 
 A variable declared to have the type *T* \| ``null`` can hold values of
@@ -1763,7 +1761,8 @@ DynamicObject Type
 ==================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
+    todo: now it supports only JSValue, need to add full abstract support
 
 The interface *DynamicObject* is used to provide seamless interoperability
 with dynamic languages as Javascript and TypeScript, and
@@ -1814,6 +1813,10 @@ the following operations are handled by the compiler in a special way:
 DynamicObject Field Access
 --------------------------
 
+.. meta:
+    frontend_status: Partly
+    todo: now it supports only JSValue, need to add full abstract support
+
 The field access expression *D.F*, where *D* is of type *DynamicObject*,
 is treated as an access to a property of the underlying object.
 
@@ -1856,6 +1859,10 @@ The wrapper can raise an error if:
 DynamicObject Method Call
 -------------------------
 
+.. meta:
+    frontend_status: Partly
+    todo: now it supports only JSValue, need to add full abstract support
+
 The method call expression *D.F()*, where *D* is of type *DynamicObject*,
 is treated as a call of the instance method of the underlying object.
 
@@ -1895,6 +1902,10 @@ The wrapper must raise an error if:
 DynamicObject Indexing Access
 -----------------------------
 
+.. meta:
+    frontend_status: Partly
+    todo: now it supports only JSValue, need to add full abstract support
+
 The indexing access expression *D[index]*, where *D* is of type *DynamicObject*,
 is treated as an indexing access to the underlying object.
 
@@ -1930,9 +1941,11 @@ Default Values for Types
 Some types use so-called *default values* for variables without explicit
 initialization (see :ref:`Variable Declarations`), including the following:
 
--  All primitive types (see the table below).
--  Nullable reference types with the default value ``null`` (see :ref:`Literals`).
+- All primitive types (see the table below).
+- All union types which have one nullish (see :ref:`Nullish Types`) value use
+  appropriate nullish value as default (see the table below).
 
+.. -  Nullable reference types with the default value ``null`` (see :ref:`Literals`).
 
 All other types, including reference types and enumeration types, have no
 default values.
@@ -1972,6 +1985,31 @@ The primitive types’ default values are as follows:
 +----------------+--------------------+
 | ``boolean``    | ``false``          |
 +----------------+--------------------+
+
+The nullish union types’ default values are as follows:
+
++----------------+--------------------+
+|    Data Type   |   Default Value    |
++================+====================+
+| type|null      | ``null``           |
++----------------+--------------------+
+| type|undefined | ``undefined``      |
++----------------+--------------------+
+| null|undefined | no default value!  |
++----------------+--------------------+
+
+.. code-block:: typescript
+   :linenos:
+
+   class A {
+     f1: number|null
+     f2: string|undefined
+     f3?: boolean
+   }
+   let a = new A
+   console.log (a.f1, a.f2, a.f3)
+   // Output: null, undefined, undefined
+
 
 .. index::
    number

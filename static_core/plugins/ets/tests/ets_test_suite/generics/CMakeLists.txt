@@ -15,3 +15,8 @@ run_int_jit_aot_ets_code(
     "${CMAKE_CURRENT_SOURCE_DIR}/generics_methods.ets"
     "${CMAKE_CURRENT_BINARY_DIR}"
     ets_test_suite_generics_methods)
+
+run_int_jit_aot_ets_code(
+    "${CMAKE_CURRENT_SOURCE_DIR}/generics_functions.ets"
+    "${CMAKE_CURRENT_BINARY_DIR}"
+    ets_test_suite_generics_functions)

@@ -27,8 +27,8 @@ class EtsCoroutine;
 // Private inheritance, because need to disallow implicit conversion to core type
 class EtsObject : private ObjectHeader {
 public:
-    static EtsObject *Create(EtsCoroutine *ets_coroutine, EtsClass *klass);
-    static EtsObject *CreateNonMovable(EtsClass *klass);
+    PANDA_PUBLIC_API static EtsObject *Create(EtsCoroutine *ets_coroutine, EtsClass *klass);
+    PANDA_PUBLIC_API static EtsObject *CreateNonMovable(EtsClass *klass);
 
     PANDA_PUBLIC_API static EtsObject *Create(EtsClass *klass);
 

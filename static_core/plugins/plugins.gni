@@ -22,6 +22,7 @@ plugin_ark_configs = []
 plugin_libarkassembler_configs = []
 plugin_runtime_configs = []
 plugin_runtime_interpreter_impl_configs = []
+plugin_bytecodeopt_configs = []
 
 plugin_arkruntime_header_plugin_deps = []
 plugin_arkruntime_stdlib_plugin_deps = []
@@ -68,6 +69,7 @@ foreach(plugin, ark_enabled_plugins) {
   _plugin_vars = read_file("$_plugin_dir/plugin.gn", "scope")
 
   if (defined(_plugin_vars.enable_bytecode_optimizer)) {
+    plugin_bytecodeopt_configs += [ "$_plugin_dir:bytecodeopt" ]
     plugin_enable_bytecode_optimizer = plugin_enable_bytecode_optimizer ||
                                        _plugin_vars.enable_bytecode_optimizer
   }
