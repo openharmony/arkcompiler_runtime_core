@@ -846,28 +846,6 @@
 03.types/04.value_types/01.integer_types_and_operations/subtraction/subtraction_ushort_7 # Not implemented
 03.types/04.value_types/01.integer_types_and_operations/subtraction/subtraction_ushort_8 # Not implemented
 03.types/04.value_types/01.integer_types_and_operations/subtraction/subtraction_ushort_9 # Not implemented
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_byte_0 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_byte_1 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_byte_2 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_char_0 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_char_1 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_int_0 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_int_1 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_int_2 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_long_0 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_long_1 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_long_2 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_short_0 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_short_1 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_short_2 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_ubyte_0 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_ubyte_1 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_uint_0 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_uint_1 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_ulong_0 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_ulong_1 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_ushort_0 # TypeError: Condition must be of type boolean
-03.types/04.value_types/01.integer_types_and_operations/ternary/ternary_ushort_1 # TypeError: Condition must be of type boolean
 03.types/04.value_types/01.integer_types_and_operations/unary_minus/unary_minus_char_2 # TypeError: Method MAX_VALUE does not exist on this type.
 03.types/04.value_types/01.integer_types_and_operations/unary_minus/unary_minus_char_3 # TypeError: Method MIN_VALUE does not exist on this type.
 03.types/04.value_types/01.integer_types_and_operations/unary_minus/unary_minus_ubyte_0 # Not implemented

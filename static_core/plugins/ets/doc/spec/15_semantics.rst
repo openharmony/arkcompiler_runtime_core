@@ -231,6 +231,9 @@ while doing the |LANG| programming.
 Extended Conditional Expressions
 ================================
 
+.. meta:
+    frontend_status: Done
+
 |LANG| provides extended semantics for conditional-and and conditional-or
 expressions for better alignment. It affects the semantics of conditional
 expressions (see :ref:`Conditional Expressions`), ``while`` statements and

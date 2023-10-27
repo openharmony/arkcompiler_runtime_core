@@ -13,10 +13,8 @@
 
 ---
 cases:
-    - exp: c'0' * c'2'
-    - exp: c'1' / c'1'
-    - exp: c'2' % c'2'
-    - exp: c'2' >> c'2'
-    - exp: c'2' >>> c'2'
-    - exp: c'2' << c'2'
-    - exp: c'2' ^ c'2'
+    - exp: c'2' & c'2'
+    - exp: c'2' && c'2'
+    - exp: c'2' | c'2'
+    - exp: c'2' || c'2'
+    - exp: "!c'2' && !c'2'"
