@@ -39,7 +39,8 @@ class PrinterTest : public ::testing::Test {
 public:
     PrinterTest()
     {
-        panda::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0, 0);  // NOLINT(readability-magic-numbers)
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        panda::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0U, 0U);
 #ifdef STDOUT_PRINT
         curr_stream_ = &std::cout;
 #else
@@ -150,16 +151,16 @@ public:
     }
 
     // Warning! Do not use multiply times with different types!
-    Reg GetParameter(TypeInfo type, int id = 0)
+    Reg GetParameter(TypeInfo type, size_t id = 0U)
     {
-        ASSERT(id < 4);
+        ASSERT(id < 4U);
         if (type.IsFloat()) {
             return Reg(id, type);
         }
         if constexpr (ARCH == Arch::AARCH32) {
             // special offset for double-reg param
-            if (id == 1 && type.GetSize() == DOUBLE_WORD_SIZE) {
-                return Target::Current().GetParamReg(2, type);
+            if (id == 1U && type.GetSize() == DOUBLE_WORD_SIZE) {
+                return Target::Current().GetParamReg(2U, type);
             }
         }
         return Target::Current().GetParamReg(id, type);
@@ -169,7 +170,7 @@ public:
     {
         // Curor need to encode multiply tests due one execution
         curr_cursor_ = 0;
-        encoder_->SetCursorOffset(0);
+        encoder_->SetCursorOffset(0U);
 
         [[maybe_unused]] std::string func_name = "test_" + GetTestName();
 #ifdef PANDA_COMPILER_TARGET_AARCH32
@@ -195,7 +196,7 @@ public:
 
     void PostWork()
     {
-        auto param = Target::Current().GetParamReg(0);
+        auto param = Target::Current().GetParamReg(0U);
         auto return_reg = Target::Current().GetReturnReg();
         if (param.GetId() != return_reg.GetId()) {
             GetEncoder()->EncodeMov(return_reg, param);
@@ -248,7 +249,7 @@ private:
     CallingConvention *callconv_ {nullptr};
     CodeAllocator *code_alloc_ {nullptr};
     BaseMemStats *mem_stats_ {nullptr};
-    size_t curr_cursor_ {0};
+    size_t curr_cursor_ {0U};
 #ifdef STDOUT_PRINT
     std::ostream *curr_stream_;
 #else

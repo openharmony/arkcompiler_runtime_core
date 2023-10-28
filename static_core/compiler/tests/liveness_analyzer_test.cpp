@@ -72,111 +72,112 @@ TEST_F(LivenessAnalyzerTest, LinearizeGraph)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, 4, 3)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, 4U, 3U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(3, 6) {}
-        BASIC_BLOCK(4, 5, 3)
+        BASIC_BLOCK(3U, 6U) {}
+        BASIC_BLOCK(4U, 5U, 3U)
         {
-            INST(5, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(5U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(5, 11) {}
-        BASIC_BLOCK(6, 7) {}
-        BASIC_BLOCK(7, 8) {}
-        BASIC_BLOCK(8, 14, 9)
+        BASIC_BLOCK(5U, 11U) {}
+        BASIC_BLOCK(6U, 7U) {}
+        BASIC_BLOCK(7U, 8U) {}
+        BASIC_BLOCK(8U, 14U, 9U)
         {
-            INST(10, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(11, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(10);
+            INST(10U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
         }
-        BASIC_BLOCK(9, 10) {}
-        BASIC_BLOCK(10, 6) {}
-        BASIC_BLOCK(11, 13, 12)
+        BASIC_BLOCK(9U, 10U) {}
+        BASIC_BLOCK(10U, 6U) {}
+        BASIC_BLOCK(11U, 13U, 12U)
         {
-            INST(14, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(15, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(14);
+            INST(14U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(15U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(14U);
         }
-        BASIC_BLOCK(12, 4) {}
-        BASIC_BLOCK(13, -1)
+        BASIC_BLOCK(12U, 4U) {}
+        BASIC_BLOCK(13U, -1L)
         {
-            INST(17, Opcode::ReturnVoid);
+            INST(17U, Opcode::ReturnVoid);
         }
-        BASIC_BLOCK(14, 15) {}
-        BASIC_BLOCK(15, 3) {}
+        BASIC_BLOCK(14U, 15U) {}
+        BASIC_BLOCK(15U, 3U) {}
     }
     EXPECT_TRUE(GetGraph()->RunPass<LivenessAnalyzer>());
 
     const auto &blocks = GetGraph()->GetAnalysis<LivenessAnalyzer>().GetLinearizedBlocks();
-    CheckSubsequence(blocks, GetBlocksById(GetGraph(), {0, 2, 4, 5, 11, 12, 13, 1, 3, 6, 7, 8, 9, 10, 14, 15}));
+    CheckSubsequence(blocks,
+                     GetBlocksById(GetGraph(), {0U, 2U, 4U, 5U, 11U, 12U, 13U, 1U, 3U, 6U, 7U, 8U, 9U, 10U, 14U, 15U}));
 }
 
 TEST_F(LivenessAnalyzerTest, LinearizeGraph2)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(100, 6) {}
-        BASIC_BLOCK(6, 2, 7)
+        BASIC_BLOCK(100U, 6U) {}
+        BASIC_BLOCK(6U, 2U, 7U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
 
-        BASIC_BLOCK(2, 5) {}
-        BASIC_BLOCK(5, 4, 3)
+        BASIC_BLOCK(2U, 5U) {}
+        BASIC_BLOCK(5U, 4U, 3U)
         {
-            INST(4, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
 
-        BASIC_BLOCK(4, 21) {}
-        BASIC_BLOCK(21, 17, 14)
+        BASIC_BLOCK(4U, 21U) {}
+        BASIC_BLOCK(21U, 17U, 14U)
         {
-            INST(6, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(6U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
 
-        BASIC_BLOCK(14, 5) {}
-        BASIC_BLOCK(3, 6) {}
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(14U, 5U) {}
+        BASIC_BLOCK(3U, 6U) {}
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(14, Opcode::ReturnVoid);
+            INST(14U, Opcode::ReturnVoid);
         }
 
-        BASIC_BLOCK(17, 18, 19)
+        BASIC_BLOCK(17U, 18U, 19U)
         {
-            INST(8, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(8U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
 
-        BASIC_BLOCK(18, 24, 31)
+        BASIC_BLOCK(18U, 24U, 31U)
         {
-            INST(10, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(11, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(10);
+            INST(10U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
         }
 
-        BASIC_BLOCK(19, 36, 43)
+        BASIC_BLOCK(19U, 36U, 43U)
         {
-            INST(12, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(13, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(12);
+            INST(12U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
         }
 
-        BASIC_BLOCK(24, 20) {}
-        BASIC_BLOCK(36, 20) {}
-        BASIC_BLOCK(20, 21) {}
-        BASIC_BLOCK(31, -1)
+        BASIC_BLOCK(24U, 20U) {}
+        BASIC_BLOCK(36U, 20U) {}
+        BASIC_BLOCK(20U, 21U) {}
+        BASIC_BLOCK(31U, -1L)
         {
-            INST(15, Opcode::ReturnVoid);
+            INST(15U, Opcode::ReturnVoid);
         }
-        BASIC_BLOCK(43, -1)
+        BASIC_BLOCK(43U, -1L)
         {
-            INST(16, Opcode::ReturnVoid);
+            INST(16U, Opcode::ReturnVoid);
         }
     }
     EXPECT_TRUE(GetGraph()->RunPass<LivenessAnalyzer>());
@@ -202,18 +203,18 @@ TEST_F(LivenessAnalyzerTest, LinearizeGraphWithoutLoops)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Compare).b().Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(4, 3) {}
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(4U, 3U) {}
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::ReturnVoid);
+            INST(5U, Opcode::ReturnVoid);
         }
     }
 
@@ -221,7 +222,7 @@ TEST_F(LivenessAnalyzerTest, LinearizeGraphWithoutLoops)
     CheckSubsequence(GetGraph()->GetAnalysis<LivenessAnalyzer>().GetLinearizedBlocks(),
                      GetBlocksById(GetGraph(), {0, 2, 4, 3, 1}));
 
-    BB(2).SwapTrueFalseSuccessors();
+    BB(2U).SwapTrueFalseSuccessors();
     EXPECT_TRUE(GetGraph()->RunPass<LivenessAnalyzer>());
     CheckSubsequence(GetGraph()->GetAnalysis<LivenessAnalyzer>().GetLinearizedBlocks(),
                      GetBlocksById(GetGraph(), {0, 2, 4, 3, 1}));
@@ -233,25 +234,25 @@ TEST_F(LivenessAnalyzerTest, LinearizeGraphWithoutLoops)
 TEST_F(LivenessAnalyzerTest, LifeIntervals)
 {
     LifeIntervals life_inter(GetAllocator());
-    life_inter.AppendRange({90, 100});
-    life_inter.AppendRange({80, 90});
-    life_inter.AppendRange({40, 50});
-    life_inter.AppendRange({35, 40});
-    EXPECT_EQ(life_inter.GetRanges(), LIVE_RANGES_VECTOR({80, 100}, {35, 50}));
+    life_inter.AppendRange({90U, 100U});
+    life_inter.AppendRange({80U, 90U});
+    life_inter.AppendRange({40U, 50U});
+    life_inter.AppendRange({35U, 40U});
+    EXPECT_EQ(life_inter.GetRanges(), LIVE_RANGES_VECTOR({80U, 100U}, {35U, 50U}));
 
-    life_inter.AppendRange({20, 34});
-    life_inter.StartFrom(30);
-    EXPECT_EQ(life_inter.GetRanges(), LIVE_RANGES_VECTOR({80, 100}, {35, 50}, {30, 34}));
+    life_inter.AppendRange({20U, 34U});
+    life_inter.StartFrom(30U);
+    EXPECT_EQ(life_inter.GetRanges(), LIVE_RANGES_VECTOR({80U, 100U}, {35U, 50U}, {30U, 34U}));
 
-    life_inter.AppendRange({10, 20});
-    life_inter.AppendGroupRange({10, 25});
-    EXPECT_EQ(life_inter.GetRanges(), LIVE_RANGES_VECTOR({80, 100}, {35, 50}, {30, 34}, {10, 25}));
+    life_inter.AppendRange({10U, 20U});
+    life_inter.AppendGroupRange({10U, 25U});
+    EXPECT_EQ(life_inter.GetRanges(), LIVE_RANGES_VECTOR({80U, 100U}, {35U, 50U}, {30U, 34U}, {10U, 25U}));
 
-    life_inter.AppendGroupRange({10, 79});
-    EXPECT_EQ(life_inter.GetRanges(), LIVE_RANGES_VECTOR({80, 100}, {10, 79}));
+    life_inter.AppendGroupRange({10U, 79U});
+    EXPECT_EQ(life_inter.GetRanges(), LIVE_RANGES_VECTOR({80U, 100U}, {10U, 79U}));
 
-    life_inter.AppendGroupRange({10, 95});
-    EXPECT_EQ(life_inter.GetRanges(), LIVE_RANGES_VECTOR({10, 100}));
+    life_inter.AppendGroupRange({10U, 95U});
+    EXPECT_EQ(life_inter.GetRanges(), LIVE_RANGES_VECTOR({10U, 100U}));
 }
 
 /*
@@ -300,124 +301,124 @@ TEST_F(LivenessAnalyzerTest, InstructionsLifetime)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 1);
-        CONSTANT(1, 10);
-        CONSTANT(2, 20);
+        CONSTANT(0U, 1U);
+        CONSTANT(1U, 10U);
+        CONSTANT(2U, 20U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Phi).u64().Inputs({{0, 0}, {3, 7}});
-            INST(4, Opcode::Phi).u64().Inputs({{0, 1}, {3, 8}});
-            INST(5, Opcode::Compare).b().Inputs(4, 0);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(3U, Opcode::Phi).u64().Inputs({{0U, 0U}, {3U, 7U}});
+            INST(4U, Opcode::Phi).u64().Inputs({{0U, 1U}, {3U, 8U}});
+            INST(5U, Opcode::Compare).b().Inputs(4U, 0U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
 
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(7, Opcode::Mul).u64().Inputs(3, 4);
-            INST(8, Opcode::Sub).u64().Inputs(4, 0);
+            INST(7U, Opcode::Mul).u64().Inputs(3U, 4U);
+            INST(8U, Opcode::Sub).u64().Inputs(4U, 0U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(9, Opcode::Add).u64().Inputs(2, 3);
-            INST(10, Opcode::ReturnVoid);
+            INST(9U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(10U, Opcode::ReturnVoid);
         }
     }
     auto liveness_analyzer = &GetGraph()->GetValidAnalysis<LivenessAnalyzer>();
 
-    auto const0 = liveness_analyzer->GetInstLifeIntervals(&INS(0));
-    auto const1 = liveness_analyzer->GetInstLifeIntervals(&INS(1));
-    auto const2 = liveness_analyzer->GetInstLifeIntervals(&INS(2));
-    auto phi0 = liveness_analyzer->GetInstLifeIntervals(&INS(3));
-    auto phi1 = liveness_analyzer->GetInstLifeIntervals(&INS(4));
-    auto cmp = liveness_analyzer->GetInstLifeIntervals(&INS(5));
-    auto mul = liveness_analyzer->GetInstLifeIntervals(&INS(7));
-    auto sub = liveness_analyzer->GetInstLifeIntervals(&INS(8));
-    auto add = liveness_analyzer->GetInstLifeIntervals(&INS(9));
+    auto const0 = liveness_analyzer->GetInstLifeIntervals(&INS(0U));
+    auto const1 = liveness_analyzer->GetInstLifeIntervals(&INS(1U));
+    auto const2 = liveness_analyzer->GetInstLifeIntervals(&INS(2U));
+    auto phi0 = liveness_analyzer->GetInstLifeIntervals(&INS(3U));
+    auto phi1 = liveness_analyzer->GetInstLifeIntervals(&INS(4U));
+    auto cmp = liveness_analyzer->GetInstLifeIntervals(&INS(5U));
+    auto mul = liveness_analyzer->GetInstLifeIntervals(&INS(7U));
+    auto sub = liveness_analyzer->GetInstLifeIntervals(&INS(8U));
+    auto add = liveness_analyzer->GetInstLifeIntervals(&INS(9U));
 
-    auto b0_lifetime = liveness_analyzer->GetBlockLiveRange(&BB(0));
-    auto b2_lifetime = liveness_analyzer->GetBlockLiveRange(&BB(2));
-    auto b3_lifetime = liveness_analyzer->GetBlockLiveRange(&BB(3));
-    auto b4_lifetime = liveness_analyzer->GetBlockLiveRange(&BB(4));
+    auto b0_lifetime = liveness_analyzer->GetBlockLiveRange(&BB(0U));
+    auto b2_lifetime = liveness_analyzer->GetBlockLiveRange(&BB(2U));
+    auto b3_lifetime = liveness_analyzer->GetBlockLiveRange(&BB(3U));
+    auto b4_lifetime = liveness_analyzer->GetBlockLiveRange(&BB(4U));
 
-    EXPECT_EQ(const0->GetRanges()[0], LiveRange(b0_lifetime.GetBegin() + 2, b3_lifetime.GetEnd()));
-    EXPECT_EQ(const1->GetRanges()[0], LiveRange(b0_lifetime.GetBegin() + 4, phi0->GetRanges()[1].GetBegin()));
-    EXPECT_EQ(const2->GetRanges()[0], LiveRange(b0_lifetime.GetBegin() + 6, add->GetRanges()[0].GetBegin()));
-    EXPECT_EQ(phi0->GetRanges()[1], LiveRange(b2_lifetime.GetBegin(), mul->GetRanges()[0].GetBegin()));
-    EXPECT_EQ(phi0->GetRanges()[0], LiveRange(b4_lifetime.GetBegin(), add->GetRanges()[0].GetBegin()));
-    EXPECT_EQ(phi1->GetRanges()[0], LiveRange(b2_lifetime.GetBegin(), sub->GetRanges()[0].GetBegin()));
-    EXPECT_EQ(cmp->GetRanges()[0], LiveRange(b2_lifetime.GetBegin() + 2, b2_lifetime.GetBegin() + 4));
-    EXPECT_EQ(mul->GetRanges()[0], LiveRange(b3_lifetime.GetBegin() + 2, b3_lifetime.GetEnd()));
-    EXPECT_EQ(sub->GetRanges()[0], LiveRange(b3_lifetime.GetBegin() + 4, b3_lifetime.GetEnd()));
-    EXPECT_EQ(add->GetRanges()[0], LiveRange(b4_lifetime.GetBegin() + 2, b4_lifetime.GetBegin() + 4));
+    EXPECT_EQ(const0->GetRanges()[0U], LiveRange(b0_lifetime.GetBegin() + 2U, b3_lifetime.GetEnd()));
+    EXPECT_EQ(const1->GetRanges()[0U], LiveRange(b0_lifetime.GetBegin() + 4U, phi0->GetRanges()[1U].GetBegin()));
+    EXPECT_EQ(const2->GetRanges()[0U], LiveRange(b0_lifetime.GetBegin() + 6U, add->GetRanges()[0U].GetBegin()));
+    EXPECT_EQ(phi0->GetRanges()[1U], LiveRange(b2_lifetime.GetBegin(), mul->GetRanges()[0U].GetBegin()));
+    EXPECT_EQ(phi0->GetRanges()[0U], LiveRange(b4_lifetime.GetBegin(), add->GetRanges()[0U].GetBegin()));
+    EXPECT_EQ(phi1->GetRanges()[0U], LiveRange(b2_lifetime.GetBegin(), sub->GetRanges()[0U].GetBegin()));
+    EXPECT_EQ(cmp->GetRanges()[0U], LiveRange(b2_lifetime.GetBegin() + 2U, b2_lifetime.GetBegin() + 4U));
+    EXPECT_EQ(mul->GetRanges()[0U], LiveRange(b3_lifetime.GetBegin() + 2U, b3_lifetime.GetEnd()));
+    EXPECT_EQ(sub->GetRanges()[0U], LiveRange(b3_lifetime.GetBegin() + 4U, b3_lifetime.GetEnd()));
+    EXPECT_EQ(add->GetRanges()[0U], LiveRange(b4_lifetime.GetBegin() + 2U, b4_lifetime.GetBegin() + 4U));
 }
 
 TEST_F(LivenessAnalyzerTest, LoadStoreArrayDataFlow)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();  // array
-        PARAMETER(1, 1).s64();  // index
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).ref();  // array
+        PARAMETER(1U, 1U).s64();  // index
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::NullCheck).ref().Inputs(0, 2);
-            INST(4, Opcode::LenArray).s32().Inputs(3);
-            INST(5, Opcode::BoundsCheck).s32().Inputs(4, 1, 2);
-            INST(6, Opcode::LoadArray).u64().Inputs(3, 5);
-            INST(7, Opcode::Add).s64().Inputs(6, 6);
-            INST(8, Opcode::StoreArray).u64().Inputs(3, 5, 7);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::NullCheck).ref().Inputs(0U, 2U);
+            INST(4U, Opcode::LenArray).s32().Inputs(3U);
+            INST(5U, Opcode::BoundsCheck).s32().Inputs(4U, 1U, 2U);
+            INST(6U, Opcode::LoadArray).u64().Inputs(3U, 5U);
+            INST(7U, Opcode::Add).s64().Inputs(6U, 6U);
+            INST(8U, Opcode::StoreArray).u64().Inputs(3U, 5U, 7U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(11, Opcode::Return).u64().Inputs(7);  // Some return value
+            INST(11U, Opcode::Return).u64().Inputs(7U);  // Some return value
         }
     }
 
     auto liveness_analyzer = &GetGraph()->GetAnalysis<LivenessAnalyzer>();
     liveness_analyzer->Run();
 
-    auto array = liveness_analyzer->GetInstLifeIntervals(&INS(0));
-    auto index = liveness_analyzer->GetInstLifeIntervals(&INS(1));
-    auto null_check = liveness_analyzer->GetInstLifeIntervals(&INS(3));
-    auto len_array = liveness_analyzer->GetInstLifeIntervals(&INS(4));
-    auto bounds_check = liveness_analyzer->GetInstLifeIntervals(&INS(5));
-    auto st_array = liveness_analyzer->GetInstLifeIntervals(&INS(8));
+    auto array = liveness_analyzer->GetInstLifeIntervals(&INS(0U));
+    auto index = liveness_analyzer->GetInstLifeIntervals(&INS(1U));
+    auto null_check = liveness_analyzer->GetInstLifeIntervals(&INS(3U));
+    auto len_array = liveness_analyzer->GetInstLifeIntervals(&INS(4U));
+    auto bounds_check = liveness_analyzer->GetInstLifeIntervals(&INS(5U));
+    auto st_array = liveness_analyzer->GetInstLifeIntervals(&INS(8U));
 
-    auto b0_lifetime = liveness_analyzer->GetBlockLiveRange(&BB(0));
+    auto b0_lifetime = liveness_analyzer->GetBlockLiveRange(&BB(0U));
 
-    EXPECT_EQ(array->GetRanges()[0], LiveRange(b0_lifetime.GetBegin() + 2, st_array->GetRanges()[0].GetBegin()));
-    EXPECT_EQ(index->GetRanges()[0], LiveRange(b0_lifetime.GetBegin() + 4, st_array->GetRanges()[0].GetBegin()));
+    EXPECT_EQ(array->GetRanges()[0U], LiveRange(b0_lifetime.GetBegin() + 2U, st_array->GetRanges()[0U].GetBegin()));
+    EXPECT_EQ(index->GetRanges()[0U], LiveRange(b0_lifetime.GetBegin() + 4U, st_array->GetRanges()[0U].GetBegin()));
 
-    EXPECT_EQ(null_check->GetRanges()[0].GetEnd() - null_check->GetRanges()[0].GetBegin(), 2U);
-    EXPECT_EQ(bounds_check->GetRanges()[0].GetEnd() - bounds_check->GetRanges()[0].GetBegin(), 2U);
-    EXPECT_EQ(len_array->GetRanges()[0].GetEnd() - len_array->GetRanges()[0].GetBegin(), 2U);
+    EXPECT_EQ(null_check->GetRanges()[0U].GetEnd() - null_check->GetRanges()[0U].GetBegin(), 2U);
+    EXPECT_EQ(bounds_check->GetRanges()[0U].GetEnd() - bounds_check->GetRanges()[0U].GetBegin(), 2U);
+    EXPECT_EQ(len_array->GetRanges()[0U].GetEnd() - len_array->GetRanges()[0U].GetBegin(), 2U);
 }
 
 TEST_F(LivenessAnalyzerTest, SaveStateInputs)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).u32();
-        PARAMETER(2, 2).u32();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).u32();
+        PARAMETER(2U, 2U).u32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(4, Opcode::NullCheck).ref().Inputs(0, 3);
-            INST(5, Opcode::StoreObject).u32().Inputs(4, 1);
-            INST(6, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(4U, Opcode::NullCheck).ref().Inputs(0U, 3U);
+            INST(5U, Opcode::StoreObject).u32().Inputs(4U, 1U);
+            INST(6U, Opcode::ReturnVoid).v0id();
         }
     }
     auto liveness_analyzer = &GetGraph()->GetAnalysis<LivenessAnalyzer>();
     liveness_analyzer->Run();
 
-    auto par0_lifetime = liveness_analyzer->GetInstLifeIntervals(&INS(0));
-    auto par1_lifetime = liveness_analyzer->GetInstLifeIntervals(&INS(1));
-    auto par2_lifetime = liveness_analyzer->GetInstLifeIntervals(&INS(2));
-    auto null_check_lifetime = liveness_analyzer->GetInstLifeIntervals(&INS(4));
+    auto par0_lifetime = liveness_analyzer->GetInstLifeIntervals(&INS(0U));
+    auto par1_lifetime = liveness_analyzer->GetInstLifeIntervals(&INS(1U));
+    auto par2_lifetime = liveness_analyzer->GetInstLifeIntervals(&INS(2U));
+    auto null_check_lifetime = liveness_analyzer->GetInstLifeIntervals(&INS(4U));
     EXPECT_TRUE(par0_lifetime->GetEnd() == null_check_lifetime->GetEnd());
     EXPECT_TRUE(par1_lifetime->GetEnd() == null_check_lifetime->GetEnd());
     EXPECT_TRUE(par2_lifetime->GetEnd() == null_check_lifetime->GetBegin());
@@ -441,45 +442,45 @@ TEST_F(LivenessAnalyzerTest, InnerLoops)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u32();  // a
-        PARAMETER(1, 1).u32();  // b
-        PARAMETER(2, 2).u32();  // c
-        CONSTANT(3, 1);         // d
+        PARAMETER(0U, 0U).u32();  // a
+        PARAMETER(1U, 1U).u32();  // b
+        PARAMETER(2U, 2U).u32();  // c
+        CONSTANT(3U, 1U);         // d
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(5, Opcode::Mul).u32().Inputs(0, 1);  // a * b
-            INST(6, Opcode::Add).u32().Inputs(0, 1);  // a + b
+            INST(5U, Opcode::Mul).u32().Inputs(0U, 1U);  // a * b
+            INST(6U, Opcode::Add).u32().Inputs(0U, 1U);  // a + b
         }
-        BASIC_BLOCK(3, 4, 7)
+        BASIC_BLOCK(3U, 4U, 7U)
         {
-            INST(9, Opcode::Phi).u32().Inputs(2, 12);
-            INST(10, Opcode::If).SrcType(DataType::UINT32).CC(CC_LT).Inputs(9, 5);  // if c < a * b
+            INST(9U, Opcode::Phi).u32().Inputs(2U, 12U);
+            INST(10U, Opcode::If).SrcType(DataType::UINT32).CC(CC_LT).Inputs(9U, 5U);  // if c < a * b
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(11, Opcode::Add).u32().Inputs(9, 3);  // c++
+            INST(11U, Opcode::Add).u32().Inputs(9U, 3U);  // c++
         }
-        BASIC_BLOCK(5, 6, 3)
+        BASIC_BLOCK(5U, 6U, 3U)
         {
-            INST(12, Opcode::Phi).u32().Inputs(11, 14);
-            INST(13, Opcode::If).SrcType(DataType::UINT32).CC(CC_LT).Inputs(12, 6);  // if c < a + b
+            INST(12U, Opcode::Phi).u32().Inputs(11U, 14U);
+            INST(13U, Opcode::If).SrcType(DataType::UINT32).CC(CC_LT).Inputs(12U, 6U);  // if c < a + b
         }
-        BASIC_BLOCK(6, 5)
+        BASIC_BLOCK(6U, 5U)
         {
-            INST(14, Opcode::Add).u32().Inputs(12, 3);  // c++
+            INST(14U, Opcode::Add).u32().Inputs(12U, 3U);  // c++
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(15, Opcode::ReturnVoid);
+            INST(15U, Opcode::ReturnVoid);
         }
     }
 
     auto liveness_analyzer = &GetGraph()->GetAnalysis<LivenessAnalyzer>();
     liveness_analyzer->Run();
-    auto mul = liveness_analyzer->GetInstLifeIntervals(&INS(5));
-    auto add = liveness_analyzer->GetInstLifeIntervals(&INS(6));
-    auto inner_loop_back = liveness_analyzer->GetBlockLiveRange(&BB(6));
+    auto mul = liveness_analyzer->GetInstLifeIntervals(&INS(5U));
+    auto add = liveness_analyzer->GetInstLifeIntervals(&INS(6U));
+    auto inner_loop_back = liveness_analyzer->GetBlockLiveRange(&BB(6U));
     EXPECT_EQ(mul->GetEnd(), inner_loop_back.GetEnd());
     EXPECT_EQ(add->GetEnd(), inner_loop_back.GetEnd());
 }
@@ -488,42 +489,42 @@ TEST_F(LivenessAnalyzerTest, UpdateExistingRanges)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(1, 1).u32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u32();
 
-        BASIC_BLOCK(2, 4, 3)
+        BASIC_BLOCK(2U, 4U, 3U)
         {
-            INST(2, Opcode::Add).u32().Inputs(0, 1);
-            INST(3, Opcode::Compare).b().Inputs(0, 2);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(2U, Opcode::Add).u32().Inputs(0U, 1U);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 2U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Cast).u32().SrcType(DataType::BOOL).Inputs(3);
-            INST(6, Opcode::Return).u32().Inputs(5);
+            INST(5U, Opcode::Cast).u32().SrcType(DataType::BOOL).Inputs(3U);
+            INST(6U, Opcode::Return).u32().Inputs(5U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(7, Opcode::ReturnI).u32().Imm(1);
+            INST(7U, Opcode::ReturnI).u32().Imm(1U);
         }
     }
 
     auto la = &GetGraph()->GetAnalysis<LivenessAnalyzer>();
     la->Run();
 
-    auto cmp = la->GetInstLifeIntervals(&INS(3));
-    EXPECT_EQ(cmp->GetRanges().size(), 2);
+    auto cmp = la->GetInstLifeIntervals(&INS(3U));
+    EXPECT_EQ(cmp->GetRanges().size(), 2U);
 
     auto first_interval = cmp->GetRanges().back();
-    auto add = la->GetInstLifeIntervals(&INS(2));
+    auto add = la->GetInstLifeIntervals(&INS(2U));
     EXPECT_EQ(first_interval.GetBegin(), add->GetEnd());
-    EXPECT_EQ(first_interval.GetEnd(), la->GetBlockLiveRange(&BB(2)).GetEnd());
+    EXPECT_EQ(first_interval.GetEnd(), la->GetBlockLiveRange(&BB(2U)).GetEnd());
 
     auto second_interval = cmp->GetRanges().front();
-    auto cast = la->GetInstLifeIntervals(&INS(5));
-    EXPECT_EQ(second_interval.GetBegin(), la->GetBlockLiveRange(&BB(3)).GetBegin());
+    auto cast = la->GetInstLifeIntervals(&INS(5U));
+    EXPECT_EQ(second_interval.GetBegin(), la->GetBlockLiveRange(&BB(3U)).GetBegin());
     EXPECT_EQ(second_interval.GetEnd(), cast->GetBegin());
 }
 
@@ -531,35 +532,35 @@ TEST_F(LivenessAnalyzerTest, ReturnInlinedLiveness)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        PARAMETER(20, 2).s32();
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        PARAMETER(20U, 2U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(20).SrcVregs({0});
-            INST(3, Opcode::CallStatic).v0id().Inlined().InputsAutoType(2);
-            INST(4, Opcode::ReturnInlined).s32().Inputs(2);
-            INST(5, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(6, Opcode::CallStatic).v0id().Inlined().InputsAutoType(5);
-            INST(7, Opcode::CallStatic).v0id().Inlined().InputsAutoType(5);
-            INST(8, Opcode::SaveStateDeoptimize).Inputs(6, 7).SrcVregs({0, 1});
-            INST(9, Opcode::ReturnInlined).s32().Inputs(5);
-            INST(10, Opcode::ReturnInlined).s32().Inputs(5);
-            INST(13, Opcode::NOP);
-            INST(14, Opcode::NOP);
-            INST(11, Opcode::Deoptimize).Inputs(8);
-            INST(12, Opcode::ReturnVoid).v0id();
+            INST(2U, Opcode::SaveState).Inputs(20U).SrcVregs({0U});
+            INST(3U, Opcode::CallStatic).v0id().Inlined().InputsAutoType(2U);
+            INST(4U, Opcode::ReturnInlined).s32().Inputs(2U);
+            INST(5U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::CallStatic).v0id().Inlined().InputsAutoType(5U);
+            INST(7U, Opcode::CallStatic).v0id().Inlined().InputsAutoType(5U);
+            INST(8U, Opcode::SaveStateDeoptimize).Inputs(6U, 7U).SrcVregs({0U, 1U});
+            INST(9U, Opcode::ReturnInlined).s32().Inputs(5U);
+            INST(10U, Opcode::ReturnInlined).s32().Inputs(5U);
+            INST(13U, Opcode::NOP);
+            INST(14U, Opcode::NOP);
+            INST(11U, Opcode::Deoptimize).Inputs(8U);
+            INST(12U, Opcode::ReturnVoid).v0id();
         }
     }
-    INS(10).CastToReturnInlined()->SetExtendedLiveness();
+    INS(10U).CastToReturnInlined()->SetExtendedLiveness();
 
     auto la = &GetGraph()->GetAnalysis<LivenessAnalyzer>();
     la->Run();
-    auto par0_lifetime = la->GetInstLifeIntervals(&INS(0));
-    auto par1_lifetime = la->GetInstLifeIntervals(&INS(1));
-    auto par2_lifetime = la->GetInstLifeIntervals(&INS(20));
-    auto deopt_lifetime = la->GetInstLifeIntervals(&INS(11));
+    auto par0_lifetime = la->GetInstLifeIntervals(&INS(0U));
+    auto par1_lifetime = la->GetInstLifeIntervals(&INS(1U));
+    auto par2_lifetime = la->GetInstLifeIntervals(&INS(20U));
+    auto deopt_lifetime = la->GetInstLifeIntervals(&INS(11U));
     // 5.SaveState's inputs' liveness should be propagated up to 11.Deoptimize
     EXPECT_GE(par0_lifetime->GetEnd(), deopt_lifetime->GetBegin());
     EXPECT_GE(par1_lifetime->GetEnd(), deopt_lifetime->GetBegin());
@@ -571,67 +572,67 @@ TEST_F(LivenessAnalyzerTest, LookupInstByLifeNumber)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(4, Opcode::Add).u64().Inputs(0, 1);
+            INST(4U, Opcode::Add).u64().Inputs(0U, 1U);
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(5, Opcode::Sub).u64().Inputs(0, 1);
+            INST(5U, Opcode::Sub).u64().Inputs(0U, 1U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(6, Opcode::Phi).u64().Inputs(4, 5);
-            INST(7, Opcode::Return).u64().Inputs(6);
+            INST(6U, Opcode::Phi).u64().Inputs(4U, 5U);
+            INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     la.Run();
 
-    EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(4))->GetBegin()), &INS(4));
-    EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(4))->GetBegin() + 1), &INS(4));
-    EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(6))->GetBegin()), nullptr);
+    EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(4U))->GetBegin()), &INS(4U));
+    EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(4U))->GetBegin() + 1U), &INS(4U));
+    EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(6U))->GetBegin()), nullptr);
 }
 
 TEST_F(LivenessAnalyzerTest, PhiDataFlowInput)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, nullptr).ref();
-        PARAMETER(1, 0).ref();
+        CONSTANT(0U, nullptr).ref();
+        PARAMETER(1U, 0U).ref();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(5, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(6, Opcode::NullCheck).ref().Inputs(1, 5);
-            INST(7, Opcode::LoadObject).s32().Inputs(6);
-            INST(8, Opcode::IfImm).SrcType(compiler::DataType::INT32).CC(compiler::CC_NE).Imm(0).Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::NullCheck).ref().Inputs(1U, 5U);
+            INST(7U, Opcode::LoadObject).s32().Inputs(6U);
+            INST(8U, Opcode::IfImm).SrcType(compiler::DataType::INT32).CC(compiler::CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(3, 5) {}
-        BASIC_BLOCK(4, 5) {}
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(3U, 5U) {}
+        BASIC_BLOCK(4U, 5U) {}
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(9, Opcode::Phi).ref().Inputs(0, 6);
-            INST(10, Opcode::Return).ref().Inputs(9);
+            INST(9U, Opcode::Phi).ref().Inputs(0U, 6U);
+            INST(10U, Opcode::Return).ref().Inputs(9U);
         }
     }
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     la.Run();
-    auto par0_lifetime = la.GetInstLifeIntervals(&INS(1));
-    auto phi_lifetime = la.GetInstLifeIntervals(&INS(9));
+    auto par0_lifetime = la.GetInstLifeIntervals(&INS(1U));
+    auto phi_lifetime = la.GetInstLifeIntervals(&INS(9U));
     EXPECT_EQ(par0_lifetime->GetEnd(), phi_lifetime->GetBegin());
 }
 
@@ -639,43 +640,43 @@ TEST_F(LivenessAnalyzerTest, CatchProcessing)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(1, Opcode::Try).CatchTypeIds({0x0});
+            INST(1U, Opcode::Try).CatchTypeIds({0x0U});
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(2, Opcode::Mul).u64().Inputs(0, 0);
-            INST(3, Opcode::Mul).u64().Inputs(0, 2);
+            INST(2U, Opcode::Mul).u64().Inputs(0U, 0U);
+            INST(3U, Opcode::Mul).u64().Inputs(0U, 2U);
         }
 
-        BASIC_BLOCK(5, 6, 4) {}  // try-end
+        BASIC_BLOCK(5U, 6U, 4U) {}  // try-end
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(5, Opcode::Return).u64().Inputs(2);
+            INST(5U, Opcode::Return).u64().Inputs(2U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(4, Opcode::Return).u64().Inputs(3);
+            INST(4U, Opcode::Return).u64().Inputs(3U);
         }
     }
-    BB(2).SetTryId(0);
-    BB(3).SetTryId(0);
-    BB(5).SetTryId(0);
+    BB(2U).SetTryId(0U);
+    BB(3U).SetTryId(0U);
+    BB(5U).SetTryId(0U);
 
-    GetGraph()->AppendThrowableInst(&INS(3), &BB(5));
-    INS(1).CastToTry()->SetTryEndBlock(&BB(5));
+    GetGraph()->AppendThrowableInst(&INS(3U), &BB(5U));
+    INS(1U).CastToTry()->SetTryEndBlock(&BB(5U));
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     la.Run();
 
-    EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(2))->GetBegin()), &INS(2));
-    EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(3))->GetBegin()), &INS(3));
+    EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(2U))->GetBegin()), &INS(2U));
+    EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(3U))->GetBegin()), &INS(3U));
 }
 
 TEST_F(LivenessAnalyzerTest, FirstIntersection)
@@ -684,101 +685,101 @@ TEST_F(LivenessAnalyzerTest, FirstIntersection)
     // other:           [21-25]         [45-100]
     // intersection: INVALID_LIFE_NUMBER
     LifeIntervals li(GetAllocator());
-    li.AppendRange({30, 40});
-    li.AppendRange({10, 20});
+    li.AppendRange({30U, 40U});
+    li.AppendRange({10U, 20U});
     LifeIntervals other_li(GetAllocator());
-    other_li.AppendRange({45, 100});
-    other_li.AppendRange({21, 25});
+    other_li.AppendRange({45U, 100U});
+    other_li.AppendRange({21U, 25U});
     EXPECT_EQ(li.GetFirstIntersectionWith(&other_li), INVALID_LIFE_NUMBER);
 
     // li:             [21-25] [30-40]
     // other:   [10-20]                 [45-100]
     // intersection: INVALID_LIFE_NUMBER
     li.Clear();
-    li.AppendRange({30, 40});
-    li.AppendRange({21, 25});
+    li.AppendRange({30U, 40U});
+    li.AppendRange({21U, 25U});
     other_li.Clear();
-    other_li.AppendRange({45, 100});
-    other_li.AppendRange({10, 20});
+    other_li.AppendRange({45U, 100U});
+    other_li.AppendRange({10U, 20U});
     EXPECT_EQ(li.GetFirstIntersectionWith(&other_li), INVALID_LIFE_NUMBER);
 
     // li:      [10-20]         [30-40]
     // other:       [15-25]         [35-100]
     // intersection: INVALID_LIFE_NUMBER
     li.Clear();
-    li.AppendRange({30, 40});
-    li.AppendRange({10, 20});
+    li.AppendRange({30U, 40U});
+    li.AppendRange({10U, 20U});
     other_li.Clear();
-    other_li.AppendRange({35, 100});
-    other_li.AppendRange({15, 25});
-    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li), LifeNumber(15));
+    other_li.AppendRange({35U, 100U});
+    other_li.AppendRange({15U, 25U});
+    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li), LifeNumber(15U));
 
     // li:          [15-25]         [35-100]
     // other:   [10-20]         [30-40]
     // intersection: INVALID_LIFE_NUMBER
     li.Clear();
-    li.AppendRange({35, 100});
-    li.AppendRange({15, 25});
+    li.AppendRange({35U, 100U});
+    li.AppendRange({15U, 25U});
     other_li.Clear();
-    other_li.AppendRange({30, 40});
-    other_li.AppendRange({10, 20});
-    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li), LifeNumber(15));
+    other_li.AppendRange({30U, 40U});
+    other_li.AppendRange({10U, 20U});
+    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li), LifeNumber(15U));
 
     // li:               [25-35] [45    -    100]
     // other:   [10-20]              [50-60]
     // intersection: INVALID_LIFE_NUMBER
     li.Clear();
-    li.AppendRange({45, 100});
-    li.AppendRange({25, 35});
+    li.AppendRange({45U, 100U});
+    li.AppendRange({25U, 35U});
     other_li.Clear();
-    other_li.AppendRange({50, 60});
-    other_li.AppendRange({10, 20});
-    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li), LifeNumber(50));
+    other_li.AppendRange({50U, 60U});
+    other_li.AppendRange({10U, 20U});
+    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li), LifeNumber(50U));
 
     // li:      [0-10]
     // other:     [6-12]
     // seach_from:   8
     // intersection: 8
     li.Clear();
-    li.AppendRange({0, 10});
+    li.AppendRange({0U, 10U});
     other_li.Clear();
-    other_li.AppendRange({6, 12});
-    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li, 8), LifeNumber(8));
+    other_li.AppendRange({6U, 12U});
+    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li, 8U), LifeNumber(8U));
 
     // li:      [0-10]     [20-30]
     // other:   [0-2]   [18-24]
     // search_from: 2
     // intersection: 20
     li.Clear();
-    li.AppendRange({20, 30});
-    li.AppendRange({0, 10});
+    li.AppendRange({20U, 30U});
+    li.AppendRange({0U, 10U});
     other_li.Clear();
-    other_li.AppendRange({18, 24});
-    other_li.AppendRange({0, 2});
-    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li, 2), LifeNumber(20));
+    other_li.AppendRange({18U, 24U});
+    other_li.AppendRange({0U, 2U});
+    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li, 2U), LifeNumber(20U));
 
     // li:         [10-20]
     // other:    [8-30]
     // search_from: 18
     // intersection: 18
     li.Clear();
-    li.AppendRange({10, 20});
+    li.AppendRange({10U, 20U});
     other_li.Clear();
-    other_li.AppendRange({8, 30});
-    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li, 18), LifeNumber(18));
+    other_li.AppendRange({8U, 30U});
+    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li, 18U), LifeNumber(18U));
 
     // li:      [0-10]  [20-22]       [24-26]
     // other:   [0-2]          [22-24]
     // search_from: 12
     // intersection: INVALID_LIFE_NUMBER
     li.Clear();
-    li.AppendRange({24, 26});
-    li.AppendRange({20, 22});
-    li.AppendRange({0, 10});
+    li.AppendRange({24U, 26U});
+    li.AppendRange({20U, 22U});
+    li.AppendRange({0U, 10U});
     other_li.Clear();
-    other_li.AppendRange({22, 24});
-    other_li.AppendRange({0, 2});
-    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li, 12), INVALID_LIFE_NUMBER);
+    other_li.AppendRange({22U, 24U});
+    other_li.AppendRange({0U, 2U});
+    EXPECT_EQ(li.GetFirstIntersectionWith(&other_li, 12U), INVALID_LIFE_NUMBER);
 }
 
 TEST_F(LivenessAnalyzerTest, IntersectionExistence)
@@ -787,103 +788,103 @@ TEST_F(LivenessAnalyzerTest, IntersectionExistence)
     // physical: [10-11]
     // no intersection: physical's [10-11] range was created for the interval's instruction to block dst register
     LifeIntervals interval(GetAllocator());
-    interval.AppendRange({10, 40});
+    interval.AppendRange({10U, 40U});
 
     LifeIntervals physical(GetAllocator());
-    physical.SetPhysicalReg(0, DataType::INT64);  // Make interval physical
-    physical.AppendRange({10, 11});
+    physical.SetPhysicalReg(0U, DataType::INT64);  // Make interval physical
+    physical.AppendRange({10U, 11U});
     EXPECT_FALSE(interval.IntersectsWith<true>(&physical));
 
     // interval: [10----------------40]
     // physical: [10-11]   [20-21]
     // intersection at point 20
     interval.Clear();
-    interval.AppendRange({10, 40});
+    interval.AppendRange({10U, 40U});
 
     physical.Clear();
-    physical.AppendRange({20, 21});
-    physical.AppendRange({10, 11});
+    physical.AppendRange({20U, 21U});
+    physical.AppendRange({10U, 11U});
     EXPECT_TRUE(interval.IntersectsWith<true>(&physical));
 }
 
 TEST_F(LivenessAnalyzerTest, NextUsePositions)
 {
     LifeIntervals li(GetAllocator());
-    li.AppendRange({0, 100});
-    li.AddUsePosition(20);
-    li.AddUsePosition(50);
-    li.AddUsePosition(75);
-    li.AddUsePosition(100);
+    li.AppendRange({0U, 100U});
+    li.AddUsePosition(20U);
+    li.AddUsePosition(50U);
+    li.AddUsePosition(75U);
+    li.AddUsePosition(100U);
     li.Finalize();
 
-    EXPECT_EQ(li.GetNextUsage(0), 20);
-    EXPECT_EQ(li.GetNextUsage(20), 20);
-    EXPECT_EQ(li.GetNextUsage(30), 50);
-    EXPECT_EQ(li.GetNextUsage(50), 50);
-    EXPECT_EQ(li.GetNextUsage(70), 75);
-    EXPECT_EQ(li.GetNextUsage(75), 75);
-    EXPECT_EQ(li.GetNextUsage(90), 100);
-    EXPECT_EQ(li.GetNextUsage(100), 100);
-    EXPECT_EQ(li.GetNextUsage(150), INVALID_LIFE_NUMBER);
+    EXPECT_EQ(li.GetNextUsage(0U), 20U);
+    EXPECT_EQ(li.GetNextUsage(20U), 20U);
+    EXPECT_EQ(li.GetNextUsage(30U), 50U);
+    EXPECT_EQ(li.GetNextUsage(50U), 50U);
+    EXPECT_EQ(li.GetNextUsage(70U), 75U);
+    EXPECT_EQ(li.GetNextUsage(75U), 75U);
+    EXPECT_EQ(li.GetNextUsage(90U), 100U);
+    EXPECT_EQ(li.GetNextUsage(100U), 100U);
+    EXPECT_EQ(li.GetNextUsage(150U), INVALID_LIFE_NUMBER);
 }
 
 TEST_F(LivenessAnalyzerTest, NoUsageUntil)
 {
     LifeIntervals li(GetAllocator());
-    li.AppendRange({0, 100});
-    li.AddUsePosition(20);
-    li.AddUsePosition(50);
+    li.AppendRange({0U, 100U});
+    li.AddUsePosition(20U);
+    li.AddUsePosition(50U);
     li.Finalize();
-    EXPECT_TRUE(li.NoUsageUntil(0));
-    EXPECT_TRUE(li.NoUsageUntil(19));
-    EXPECT_FALSE(li.NoUsageUntil(20));
-    EXPECT_FALSE(li.NoUsageUntil(21));
-    EXPECT_FALSE(li.NoUsageUntil(100));
+    EXPECT_TRUE(li.NoUsageUntil(0U));
+    EXPECT_TRUE(li.NoUsageUntil(19U));
+    EXPECT_FALSE(li.NoUsageUntil(20U));
+    EXPECT_FALSE(li.NoUsageUntil(21U));
+    EXPECT_FALSE(li.NoUsageUntil(100U));
 }
 
 TEST_F(LivenessAnalyzerTest, SplitUsePositions)
 {
     LifeIntervals li(GetAllocator());
-    li.AppendRange({0, 200});
-    li.AddUsePosition(20);
-    li.AddUsePosition(50);
-    li.AddUsePosition(75);
-    li.AddUsePosition(100);
+    li.AppendRange({0U, 200U});
+    li.AddUsePosition(20U);
+    li.AddUsePosition(50U);
+    li.AddUsePosition(75U);
+    li.AddUsePosition(100U);
     li.Finalize();
 
-    auto split = li.SplitAt(50, GetAllocator());
-    EXPECT_THAT(li.GetUsePositions(), ::testing::ElementsAre(20));
-    EXPECT_THAT(split->GetUsePositions(), ::testing::ElementsAre(50, 75, 100));
+    auto split = li.SplitAt(50U, GetAllocator());
+    EXPECT_THAT(li.GetUsePositions(), ::testing::ElementsAre(20U));
+    EXPECT_THAT(split->GetUsePositions(), ::testing::ElementsAre(50U, 75U, 100U));
 
-    auto next_spit = split->SplitAt(150, GetAllocator());
+    auto next_spit = split->SplitAt(150U, GetAllocator());
     EXPECT_TRUE(next_spit->GetUsePositions().empty());
-    EXPECT_THAT(split->GetUsePositions(), ::testing::ElementsAre(50, 75, 100));
+    EXPECT_THAT(split->GetUsePositions(), ::testing::ElementsAre(50U, 75U, 100U));
 }
 
 TEST_F(LivenessAnalyzerTest, PropagateLivenessForImplicitNullCheckSaveStateInputs)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s32();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::NullCheck).ref().Inputs(0, 2);
-            INST(4, Opcode::AddI).s32().Imm(1U).Inputs(1);
-            INST(5, Opcode::LenArray).s32().Inputs(3);
-            INST(6, Opcode::Add).s32().Inputs(4, 5);
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::NullCheck).ref().Inputs(0U, 2U);
+            INST(4U, Opcode::AddI).s32().Imm(1U).Inputs(1U);
+            INST(5U, Opcode::LenArray).s32().Inputs(3U);
+            INST(6U, Opcode::Add).s32().Inputs(4U, 5U);
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
-    INS(3).CastToNullCheck()->SetImplicit(true);
+    INS(3U).CastToNullCheck()->SetImplicit(true);
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     ASSERT_TRUE(la.Run());
 
-    auto param = la.GetInstLifeIntervals(&INS(1));
-    auto len = la.GetInstLifeIntervals(&INS(5));
+    auto param = la.GetInstLifeIntervals(&INS(1U));
+    auto len = la.GetInstLifeIntervals(&INS(5U));
     ASSERT_GE(param->GetEnd(), len->GetBegin());
 }
 
@@ -891,26 +892,26 @@ TEST_F(LivenessAnalyzerTest, PropagateLivenessForExplicitNullCheckSaveStateInput
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s32();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::NullCheck).ref().Inputs(0, 2);
-            INST(4, Opcode::AddI).s32().Imm(1U).Inputs(1);
-            INST(5, Opcode::LenArray).s32().Inputs(3);
-            INST(6, Opcode::Add).s32().Inputs(4, 5);
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::NullCheck).ref().Inputs(0U, 2U);
+            INST(4U, Opcode::AddI).s32().Imm(1U).Inputs(1U);
+            INST(5U, Opcode::LenArray).s32().Inputs(3U);
+            INST(6U, Opcode::Add).s32().Inputs(4U, 5U);
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
-    INS(3).CastToNullCheck()->SetImplicit(false);
+    INS(3U).CastToNullCheck()->SetImplicit(false);
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     ASSERT_TRUE(la.Run());
 
-    auto param = la.GetInstLifeIntervals(&INS(1));
-    auto addi = la.GetInstLifeIntervals(&INS(4));
+    auto param = la.GetInstLifeIntervals(&INS(1U));
+    auto addi = la.GetInstLifeIntervals(&INS(4U));
     ASSERT_EQ(param->GetEnd(), addi->GetBegin());
 }
 
@@ -918,26 +919,26 @@ TEST_F(LivenessAnalyzerTest, NullCheckWithoutUsers)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s32();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::CallStatic).ref().InputsAutoType(0, 20);
-            INST(3, Opcode::SaveState).Inputs(2).SrcVregs({0});
-            INST(4, Opcode::NullCheck).ref().Inputs(2, 3);
-            INST(5, Opcode::Return).s32().Inputs(1);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::CallStatic).ref().InputsAutoType(0U, 20U);
+            INST(3U, Opcode::SaveState).Inputs(2U).SrcVregs({0U});
+            INST(4U, Opcode::NullCheck).ref().Inputs(2U, 3U);
+            INST(5U, Opcode::Return).s32().Inputs(1U);
         }
     }
-    BB(2).SetTry(true);
-    INS(4).CastToNullCheck()->SetImplicit(true);
+    BB(2U).SetTry(true);
+    INS(4U).CastToNullCheck()->SetImplicit(true);
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     ASSERT_TRUE(la.Run());
 
-    auto call = la.GetInstLifeIntervals(&INS(2));
-    auto null_check = la.GetInstLifeIntervals(&INS(4));
+    auto call = la.GetInstLifeIntervals(&INS(2U));
+    auto null_check = la.GetInstLifeIntervals(&INS(4U));
     ASSERT_EQ(call->GetEnd(), null_check->GetBegin() + 1U);
 }
 
@@ -948,36 +949,36 @@ TEST_F(LivenessAnalyzerTest, UseHints)
     }
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0).s32();
+        CONSTANT(0U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::CallStatic).s32().InputsAutoType(0, 1);
-            INST(3, Opcode::Add).s32().Inputs(2, 0);
-            INST(4, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::CallStatic).s32().InputsAutoType(3, 0, 4);
-            INST(6, Opcode::Add).s32().Inputs(2, 0);
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::CallStatic).s32().InputsAutoType(0U, 1U);
+            INST(3U, Opcode::Add).s32().Inputs(2U, 0U);
+            INST(4U, Opcode::SaveState).NoVregs();
+            INST(5U, Opcode::CallStatic).s32().InputsAutoType(3U, 0U, 4U);
+            INST(6U, Opcode::Add).s32().Inputs(2U, 0U);
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     ASSERT_TRUE(la.Run());
 
-    auto call0 = la.GetInstLifeIntervals(&INS(2));
-    auto add0 = la.GetInstLifeIntervals(&INS(3));
-    auto call1 = la.GetInstLifeIntervals(&INS(5));
-    auto add1 = la.GetInstLifeIntervals(&INS(6));
-    auto constant = &INS(0);
+    auto call0 = la.GetInstLifeIntervals(&INS(2U));
+    auto add0 = la.GetInstLifeIntervals(&INS(3U));
+    auto call1 = la.GetInstLifeIntervals(&INS(5U));
+    auto add1 = la.GetInstLifeIntervals(&INS(6U));
+    auto constant = &INS(0U);
     auto &ut = la.GetUseTable();
 
     EXPECT_TRUE(ut.HasUseOnFixedLocation(constant, call0->GetBegin()));
     EXPECT_TRUE(ut.HasUseOnFixedLocation(constant, call1->GetBegin()));
     EXPECT_FALSE(ut.HasUseOnFixedLocation(constant, add0->GetBegin()));
     EXPECT_FALSE(ut.HasUseOnFixedLocation(constant, add1->GetBegin()));
-    EXPECT_EQ(ut.GetNextUseOnFixedLocation(constant, call0->GetBegin()), INS(2).GetLocation(0).GetRegister());
-    EXPECT_EQ(ut.GetNextUseOnFixedLocation(constant, call1->GetBegin()), INS(5).GetLocation(1).GetRegister());
+    EXPECT_EQ(ut.GetNextUseOnFixedLocation(constant, call0->GetBegin()), INS(2U).GetLocation(0U).GetRegister());
+    EXPECT_EQ(ut.GetNextUseOnFixedLocation(constant, call1->GetBegin()), INS(5U).GetLocation(1U).GetRegister());
 }
 // NOLINTEND(readability-magic-numbers)
 

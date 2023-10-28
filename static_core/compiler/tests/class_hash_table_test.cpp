@@ -28,8 +28,8 @@ public:
     {
         std::string exe_path = GetExecPath();
         auto pos = exe_path.rfind('/');
-        paoc_path_ = exe_path.substr(0, pos) + "/../bin/ark_aot";
-        aotdump_path_ = exe_path.substr(0, pos) + "/../bin/ark_aotdump";
+        paoc_path_ = exe_path.substr(0U, pos) + "/../bin/ark_aot";
+        aotdump_path_ = exe_path.substr(0U, pos) + "/../bin/ark_aotdump";
         pandastdlib_path_ = GetPaocDirectory() + "/../pandastdlib/arkstdlib.abc";
     }
 
@@ -51,7 +51,7 @@ public:
     std::string GetPaocDirectory() const
     {
         auto pos = paoc_path_.rfind('/');
-        return paoc_path_.substr(0, pos);
+        return paoc_path_.substr(0U, pos);
     }
 
     std::string GetSourceCode() const
@@ -171,11 +171,11 @@ TEST_F(ClassHashTableTest, GetClassHashTable)
                                   panda_fname1.GetFileName(), "--paoc-output", aot_fname.GetFileName(),
                                   "--boot-panda-files", GetPandaStdLibFile());
         ASSERT_TRUE(res);
-        ASSERT_EQ(res.Value(), 0);
+        ASSERT_EQ(res.Value(), 0U);
     }
 
     std::string filename = os::GetAbsolutePath(aot_fname.GetFileName());
-    auto aot_file_ret = AotFile::Open(filename, 0, true);
+    auto aot_file_ret = AotFile::Open(filename, 0U, true);
     ASSERT(aot_file_ret.Value() != nullptr);
     auto aot_file = std::move(aot_file_ret.Value());
 
@@ -217,14 +217,14 @@ TEST_F(ClassHashTableTest, DumpClassHashTable)
         auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_fname.GetFileName(), "--paoc-output",
                                   aot_fname.GetFileName(), "--boot-panda-files", GetPandaStdLibFile());
         ASSERT_TRUE(res);
-        ASSERT_EQ(res.Value(), 0);
+        ASSERT_EQ(res.Value(), 0U);
     }
 
     {
         std::string filename = os::GetAbsolutePath(aot_fname.GetFileName());
         auto res = os::exec::Exec(GetAotdumpFile(), "--show-code=disasm", filename.c_str());
         ASSERT_TRUE(res);
-        ASSERT_EQ(res.Value(), 0);
+        ASSERT_EQ(res.Value(), 0U);
     }
 }
 
@@ -250,15 +250,15 @@ TEST_F(ClassHashTableTest, LoadClassHashTableFromAnFileToAbcFile)
         auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_fname.GetFileName(), "--paoc-output",
                                   aot_fname.GetFileName(), "--boot-panda-files", GetPandaStdLibFile());
         ASSERT_TRUE(res);
-        ASSERT_EQ(res.Value(), 0);
+        ASSERT_EQ(res.Value(), 0U);
     }
 
     std::string filename = os::GetAbsolutePath(aot_fname.GetFileName());
-    auto aot_file_ret = AotFile::Open(filename, 0, true);
+    auto aot_file_ret = AotFile::Open(filename, 0U, true);
     ASSERT(aot_file_ret.Value() != nullptr);
     auto aot_file = std::move(aot_file_ret.Value());
 
-    auto file_header = aot_file->FileHeaders()[0];
+    auto file_header = aot_file->FileHeaders()[0U];
     AotPandaFile aot_panda_file(aot_file.get(), &file_header);
     pfile->SetClassHashTable(aot_panda_file.GetClassHashTable());
 
@@ -288,7 +288,7 @@ TEST_F(ClassHashTableTest, LoadAbcFileCanLoadClassHashTable)
         auto res = os::exec::Exec(GetPaocFile(), "--gc-type=epsilon", "--paoc-panda-files", panda_fname.GetFileName(),
                                   "--paoc-output", aot_fname.GetFileName(), "--boot-panda-files", GetPandaStdLibFile());
         ASSERT_TRUE(res);
-        ASSERT_EQ(res.Value(), 0);
+        ASSERT_EQ(res.Value(), 0U);
     }
 
     std::string filename = os::GetAbsolutePath(panda_fname.GetFileName());
@@ -341,7 +341,7 @@ TEST_F(ClassHashTableTest, GetClassIdFromClassHashTable)
         auto res = os::exec::Exec(GetPaocFile(), "--gc-type=epsilon", "--paoc-panda-files", panda_fname.GetFileName(),
                                   "--paoc-output", aot_fname.GetFileName(), "--boot-panda-files", GetPandaStdLibFile());
         ASSERT_TRUE(res);
-        ASSERT_EQ(res.Value(), 0);
+        ASSERT_EQ(res.Value(), 0U);
     }
 
     std::string filename = os::GetAbsolutePath(panda_fname.GetFileName());

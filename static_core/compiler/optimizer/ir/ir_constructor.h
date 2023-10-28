@@ -1361,8 +1361,10 @@ public:
     }
 
 private:
-    void AddInput(int v)
+    template <typename T>
+    void AddInput(T v)
     {
+        static_assert(std::is_integral_v<T>);
         inst_inputs_map_[CurrentInstIndex()].push_back(v);
     }
 

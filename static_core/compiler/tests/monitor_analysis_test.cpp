@@ -23,21 +23,21 @@ TEST_F(MonitorAnalysisTest, OneMonitorForOneBlock)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(1, Opcode::Monitor).v0id().Entry().Inputs(0, 4);
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::Monitor).v0id().Exit().Inputs(0, 5);
-            INST(3, Opcode::ReturnVoid);
+            INST(4U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(1U, Opcode::Monitor).v0id().Entry().Inputs(0U, 4U);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::Monitor).v0id().Exit().Inputs(0U, 5U);
+            INST(3U, Opcode::ReturnVoid);
         }
     }
     GetGraph()->RunPass<MonitorAnalysis>();
     EXPECT_TRUE(GetGraph()->IsAnalysisValid<MonitorAnalysis>());
-    EXPECT_TRUE(BB(2).GetMonitorEntryBlock());
-    EXPECT_TRUE(BB(2).GetMonitorExitBlock());
-    EXPECT_TRUE(BB(2).GetMonitorBlock());
+    EXPECT_TRUE(BB(2U).GetMonitorEntryBlock());
+    EXPECT_TRUE(BB(2U).GetMonitorExitBlock());
+    EXPECT_TRUE(BB(2U).GetMonitorBlock());
 
     EXPECT_FALSE(GetGraph()->GetStartBlock()->GetMonitorEntryBlock());
     EXPECT_FALSE(GetGraph()->GetStartBlock()->GetMonitorExitBlock());
@@ -53,42 +53,42 @@ TEST_F(MonitorAnalysisTest, OneMonitorForSeveralBlocks)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).ref();
-        CONSTANT(2, 10);
-        CONSTANT(3, 2);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).ref();
+        CONSTANT(2U, 10U);
+        CONSTANT(3U, 2U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(11, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(4, Opcode::Monitor).v0id().Entry().Inputs(1, 11);
-            INST(5, Opcode::Compare).b().Inputs(0, 2);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(11U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(4U, Opcode::Monitor).v0id().Entry().Inputs(1U, 11U);
+            INST(5U, Opcode::Compare).b().Inputs(0U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(7, Opcode::Mul).u64().Inputs(0, 3);
+            INST(7U, Opcode::Mul).u64().Inputs(0U, 3U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(8, Opcode::Phi).u64().Inputs({{2, 0}, {3, 7}});
-            INST(12, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(9, Opcode::Monitor).v0id().Exit().Inputs(1, 12);
-            INST(10, Opcode::Return).u64().Inputs(8);
+            INST(8U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 7U}});
+            INST(12U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(9U, Opcode::Monitor).v0id().Exit().Inputs(1U, 12U);
+            INST(10U, Opcode::Return).u64().Inputs(8U);
         }
     }
     GetGraph()->RunPass<MonitorAnalysis>();
     EXPECT_TRUE(GetGraph()->IsAnalysisValid<MonitorAnalysis>());
-    EXPECT_TRUE(BB(2).GetMonitorEntryBlock());
-    EXPECT_FALSE(BB(2).GetMonitorExitBlock());
-    EXPECT_TRUE(BB(2).GetMonitorBlock());
+    EXPECT_TRUE(BB(2U).GetMonitorEntryBlock());
+    EXPECT_FALSE(BB(2U).GetMonitorExitBlock());
+    EXPECT_TRUE(BB(2U).GetMonitorBlock());
 
-    EXPECT_FALSE(BB(3).GetMonitorEntryBlock());
-    EXPECT_FALSE(BB(3).GetMonitorExitBlock());
-    EXPECT_TRUE(BB(3).GetMonitorBlock());
+    EXPECT_FALSE(BB(3U).GetMonitorEntryBlock());
+    EXPECT_FALSE(BB(3U).GetMonitorExitBlock());
+    EXPECT_TRUE(BB(3U).GetMonitorBlock());
 
-    EXPECT_FALSE(BB(4).GetMonitorEntryBlock());
-    EXPECT_TRUE(BB(4).GetMonitorExitBlock());
-    EXPECT_TRUE(BB(4).GetMonitorBlock());
+    EXPECT_FALSE(BB(4U).GetMonitorEntryBlock());
+    EXPECT_TRUE(BB(4U).GetMonitorExitBlock());
+    EXPECT_TRUE(BB(4U).GetMonitorBlock());
 
     EXPECT_FALSE(GetGraph()->GetStartBlock()->GetMonitorEntryBlock());
     EXPECT_FALSE(GetGraph()->GetStartBlock()->GetMonitorExitBlock());
@@ -103,47 +103,47 @@ TEST_F(MonitorAnalysisTest, TwoMonitorForSeveralBlocks)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).ref();
-        PARAMETER(2, 3).ref();
-        CONSTANT(3, 10);
-        CONSTANT(4, 2);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).ref();
+        PARAMETER(2U, 3U).ref();
+        CONSTANT(3U, 10U);
+        CONSTANT(4U, 2U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(14, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(5, Opcode::Monitor).v0id().Entry().Inputs(1, 14);
-            INST(15, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(6, Opcode::Monitor).v0id().Entry().Inputs(2, 15);
-            INST(16, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(7, Opcode::Monitor).v0id().Exit().Inputs(1, 16);
-            INST(8, Opcode::Compare).b().Inputs(0, 3);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(14U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(5U, Opcode::Monitor).v0id().Entry().Inputs(1U, 14U);
+            INST(15U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(6U, Opcode::Monitor).v0id().Entry().Inputs(2U, 15U);
+            INST(16U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(7U, Opcode::Monitor).v0id().Exit().Inputs(1U, 16U);
+            INST(8U, Opcode::Compare).b().Inputs(0U, 3U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(10, Opcode::Mul).u64().Inputs(0, 4);
+            INST(10U, Opcode::Mul).u64().Inputs(0U, 4U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(11, Opcode::Phi).u64().Inputs({{2, 0}, {3, 10}});
-            INST(17, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(12, Opcode::Monitor).v0id().Exit().Inputs(2, 17);
-            INST(13, Opcode::Return).u64().Inputs(11);
+            INST(11U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 10U}});
+            INST(17U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(12U, Opcode::Monitor).v0id().Exit().Inputs(2U, 17U);
+            INST(13U, Opcode::Return).u64().Inputs(11U);
         }
     }
     GetGraph()->RunPass<MonitorAnalysis>();
     EXPECT_TRUE(GetGraph()->IsAnalysisValid<MonitorAnalysis>());
-    EXPECT_TRUE(BB(2).GetMonitorEntryBlock());
-    EXPECT_TRUE(BB(2).GetMonitorExitBlock());
-    EXPECT_TRUE(BB(2).GetMonitorBlock());
+    EXPECT_TRUE(BB(2U).GetMonitorEntryBlock());
+    EXPECT_TRUE(BB(2U).GetMonitorExitBlock());
+    EXPECT_TRUE(BB(2U).GetMonitorBlock());
 
-    EXPECT_FALSE(BB(3).GetMonitorEntryBlock());
-    EXPECT_FALSE(BB(3).GetMonitorExitBlock());
-    EXPECT_TRUE(BB(3).GetMonitorBlock());
+    EXPECT_FALSE(BB(3U).GetMonitorEntryBlock());
+    EXPECT_FALSE(BB(3U).GetMonitorExitBlock());
+    EXPECT_TRUE(BB(3U).GetMonitorBlock());
 
-    EXPECT_FALSE(BB(4).GetMonitorEntryBlock());
-    EXPECT_TRUE(BB(4).GetMonitorExitBlock());
-    EXPECT_TRUE(BB(4).GetMonitorBlock());
+    EXPECT_FALSE(BB(4U).GetMonitorEntryBlock());
+    EXPECT_TRUE(BB(4U).GetMonitorExitBlock());
+    EXPECT_TRUE(BB(4U).GetMonitorBlock());
 
     EXPECT_FALSE(GetGraph()->GetStartBlock()->GetMonitorEntryBlock());
     EXPECT_FALSE(GetGraph()->GetStartBlock()->GetMonitorExitBlock());
@@ -158,51 +158,51 @@ TEST_F(MonitorAnalysisTest, OneEntryMonitorAndTwoExitMonitors)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).ref();
-        CONSTANT(2, 10);
-        CONSTANT(3, 2);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).ref();
+        CONSTANT(2U, 10U);
+        CONSTANT(3U, 2U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(12, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(4, Opcode::Monitor).v0id().Entry().Inputs(1, 12);
-            INST(5, Opcode::Compare).b().Inputs(0, 2);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(12U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(4U, Opcode::Monitor).v0id().Entry().Inputs(1U, 12U);
+            INST(5U, Opcode::Compare).b().Inputs(0U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(13, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(7, Opcode::Monitor).v0id().Exit().Inputs(1, 13);
-            INST(8, Opcode::Mul).u64().Inputs(0, 3);
+            INST(13U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(7U, Opcode::Monitor).v0id().Exit().Inputs(1U, 13U);
+            INST(8U, Opcode::Mul).u64().Inputs(0U, 3U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(14, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(9, Opcode::Monitor).v0id().Exit().Inputs(1, 14);
+            INST(14U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(9U, Opcode::Monitor).v0id().Exit().Inputs(1U, 14U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(10, Opcode::Phi).u64().Inputs({{4, 0}, {3, 8}});
-            INST(11, Opcode::Return).u64().Inputs(10);
+            INST(10U, Opcode::Phi).u64().Inputs({{4U, 0U}, {3U, 8U}});
+            INST(11U, Opcode::Return).u64().Inputs(10U);
         }
     }
     GetGraph()->RunPass<MonitorAnalysis>();
     EXPECT_TRUE(GetGraph()->IsAnalysisValid<MonitorAnalysis>());
-    EXPECT_TRUE(BB(2).GetMonitorEntryBlock());
-    EXPECT_FALSE(BB(2).GetMonitorExitBlock());
-    EXPECT_TRUE(BB(2).GetMonitorBlock());
+    EXPECT_TRUE(BB(2U).GetMonitorEntryBlock());
+    EXPECT_FALSE(BB(2U).GetMonitorExitBlock());
+    EXPECT_TRUE(BB(2U).GetMonitorBlock());
 
-    EXPECT_FALSE(BB(3).GetMonitorEntryBlock());
-    EXPECT_TRUE(BB(3).GetMonitorExitBlock());
-    EXPECT_TRUE(BB(3).GetMonitorBlock());
+    EXPECT_FALSE(BB(3U).GetMonitorEntryBlock());
+    EXPECT_TRUE(BB(3U).GetMonitorExitBlock());
+    EXPECT_TRUE(BB(3U).GetMonitorBlock());
 
-    EXPECT_FALSE(BB(4).GetMonitorEntryBlock());
-    EXPECT_TRUE(BB(4).GetMonitorExitBlock());
-    EXPECT_TRUE(BB(4).GetMonitorBlock());
+    EXPECT_FALSE(BB(4U).GetMonitorEntryBlock());
+    EXPECT_TRUE(BB(4U).GetMonitorExitBlock());
+    EXPECT_TRUE(BB(4U).GetMonitorBlock());
 
-    EXPECT_FALSE(BB(5).GetMonitorEntryBlock());
-    EXPECT_FALSE(BB(5).GetMonitorExitBlock());
-    EXPECT_FALSE(BB(5).GetMonitorBlock());
+    EXPECT_FALSE(BB(5U).GetMonitorEntryBlock());
+    EXPECT_FALSE(BB(5U).GetMonitorExitBlock());
+    EXPECT_FALSE(BB(5U).GetMonitorBlock());
 
     EXPECT_FALSE(GetGraph()->GetStartBlock()->GetMonitorEntryBlock());
     EXPECT_FALSE(GetGraph()->GetStartBlock()->GetMonitorExitBlock());
@@ -233,32 +233,32 @@ TEST_F(MonitorAnalysisTest, KernalCase)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).ref();
-        CONSTANT(2, 10);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).ref();
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Compare).b().Inputs(0, 2);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().Inputs(0U, 2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(6, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(7, Opcode::Monitor).v0id().Entry().Inputs(1, 6);
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(7U, Opcode::Monitor).v0id().Entry().Inputs(1U, 6U);
         }
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(10, Opcode::Compare).b().Inputs(0, 2);
-            INST(11, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(10);
+            INST(10U, Opcode::Compare).b().Inputs(0U, 2U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
         }
-        BASIC_BLOCK(5, 6)
+        BASIC_BLOCK(5U, 6U)
         {
-            INST(12, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(13, Opcode::Monitor).v0id().Exit().Inputs(1, 12);
+            INST(12U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(13U, Opcode::Monitor).v0id().Exit().Inputs(1U, 12U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(15, Opcode::ReturnVoid);
+            INST(15U, Opcode::ReturnVoid);
         }
     }
     GetGraph()->RunPass<MonitorAnalysis>();
@@ -286,28 +286,28 @@ TEST_F(MonitorAnalysisTest, InconsistentMonitorsNumberCase1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).ref();
-        CONSTANT(2, 10);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).ref();
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Compare).b().Inputs(0, 2);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().Inputs(0U, 2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(6, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(7, Opcode::Monitor).v0id().Entry().Inputs(1, 6);
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(7U, Opcode::Monitor).v0id().Entry().Inputs(1U, 6U);
         }
-        BASIC_BLOCK(4, 5) {}
-        BASIC_BLOCK(5, 6)
+        BASIC_BLOCK(4U, 5U) {}
+        BASIC_BLOCK(5U, 6U)
         {
-            INST(12, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(13, Opcode::Monitor).v0id().Exit().Inputs(1, 12);
+            INST(12U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(13U, Opcode::Monitor).v0id().Exit().Inputs(1U, 12U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(15, Opcode::ReturnVoid);
+            INST(15U, Opcode::ReturnVoid);
         }
     }
     GetGraph()->RunPass<MonitorAnalysis>();
@@ -332,29 +332,29 @@ TEST_F(MonitorAnalysisTest, InconsistentMonitorsNumberCase2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).ref();
-        CONSTANT(2, 10);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).ref();
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(14, Opcode::Monitor).v0id().Entry().Inputs(1, 3);
-            INST(4, Opcode::Compare).b().Inputs(0, 2);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(14U, Opcode::Monitor).v0id().Entry().Inputs(1U, 3U);
+            INST(4U, Opcode::Compare).b().Inputs(0U, 2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(6, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(7, Opcode::Monitor).v0id().Exit().Inputs(1, 6);
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(7U, Opcode::Monitor).v0id().Exit().Inputs(1U, 6U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(8, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(9, Opcode::Monitor).v0id().Exit().Inputs(1, 8);
+            INST(8U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(9U, Opcode::Monitor).v0id().Exit().Inputs(1U, 8U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(15, Opcode::ReturnVoid);
+            INST(15U, Opcode::ReturnVoid);
         }
     }
     GetGraph()->RunPass<MonitorAnalysis>();
@@ -369,14 +369,14 @@ TEST_F(MonitorAnalysisTest, MonitorAndThrow)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).ref();
-        PARAMETER(1, 2).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).ref();
+        PARAMETER(1U, 2U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(4, Opcode::Monitor).v0id().Entry().Inputs(1, 3);
-            INST(5, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(6, Opcode::Throw).Inputs(0, 5);
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(4U, Opcode::Monitor).v0id().Entry().Inputs(1U, 3U);
+            INST(5U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::Throw).Inputs(0U, 5U);
         }
     }
     GetGraph()->RunPass<MonitorAnalysis>();

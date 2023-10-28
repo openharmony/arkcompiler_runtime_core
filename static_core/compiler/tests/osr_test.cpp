@@ -54,7 +54,7 @@ public:
     }
 
 protected:
-    static constexpr size_t HOTNESS_THRESHOLD = 4;
+    static constexpr size_t HOTNESS_THRESHOLD = 4U;
 
 private:
     bool default_compiler_non_optimizing_;
@@ -105,10 +105,10 @@ TEST_F(OsrTest, OsrInTopFrameNonOptimizing)
 
     ScopeEvents scope_events;
 
-    runner.Run(OSR_IN_TOP_FRAME_SOURCE, 435);
+    runner.Run(OSR_IN_TOP_FRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
+    ASSERT_EQ(osr_events.size(), 1U);
 }
 
 TEST_F(OsrTest, OsrInTopFrameOptimizing)
@@ -120,10 +120,10 @@ TEST_F(OsrTest, OsrInTopFrameOptimizing)
 
     ScopeEvents scope_events;
 
-    runner.Run(OSR_IN_TOP_FRAME_SOURCE, 435);
+    runner.Run(OSR_IN_TOP_FRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
+    ASSERT_EQ(osr_events.size(), 1U);
 }
 
 static constexpr auto OSR_AFTER_IFRAME_SOURCE = R"(
@@ -157,10 +157,10 @@ TEST_F(OsrTest, OsrAfterIFrameNonOptimizing)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
 
     ScopeEvents scope_events;
-    runner.Run(OSR_AFTER_IFRAME_SOURCE, 435);
+    runner.Run(OSR_AFTER_IFRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
+    ASSERT_EQ(osr_events.size(), 1U);
 }
 
 TEST_F(OsrTest, OsrAfterIFrameOptimizing)
@@ -171,10 +171,10 @@ TEST_F(OsrTest, OsrAfterIFrameOptimizing)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(false);
 
     ScopeEvents scope_events;
-    runner.Run(OSR_AFTER_IFRAME_SOURCE, 435);
+    runner.Run(OSR_AFTER_IFRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
+    ASSERT_EQ(osr_events.size(), 1U);
 }
 
 static constexpr auto OSR_AFTER_IFRAME_RESTORE_ACC_AFTER_VOID = R"(
@@ -208,10 +208,10 @@ TEST_F(OsrTest, OsrAfterIFrameRestoreAccAfterVoid)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
 
     ScopeEvents scope_events;
-    runner.Run(OSR_AFTER_IFRAME_RESTORE_ACC_AFTER_VOID, (ssize_t)0);
+    runner.Run(OSR_AFTER_IFRAME_RESTORE_ACC_AFTER_VOID, (ssize_t)0U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
+    ASSERT_EQ(osr_events.size(), 1U);
 }
 
 static constexpr auto OSR_AFTER_CFRAME_SOURCE = R"(
@@ -264,12 +264,12 @@ TEST_F(OsrTest, OsrAfterCFrameNonOptimizing)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
 
     ScopeEvents scope_events;
-    runner.Run(OSR_AFTER_CFRAME_SOURCE, 435);
+    runner.Run(OSR_AFTER_CFRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
-    ASSERT_EQ(osr_events[0]->kind, events::OsrEntryKind::AFTER_CFRAME);
-    ASSERT_EQ(osr_events[0]->result, events::OsrEntryResult::SUCCESS);
+    ASSERT_EQ(osr_events.size(), 1U);
+    ASSERT_EQ(osr_events[0U]->kind, events::OsrEntryKind::AFTER_CFRAME);
+    ASSERT_EQ(osr_events[0U]->result, events::OsrEntryResult::SUCCESS);
 }
 
 TEST_F(OsrTest, OsrAfterCFrameOptimizing)
@@ -281,12 +281,12 @@ TEST_F(OsrTest, OsrAfterCFrameOptimizing)
     runner.GetCompilerOptions().SetCompilerInlining(false);
 
     ScopeEvents scope_events;
-    runner.Run(OSR_AFTER_CFRAME_SOURCE, 435);
+    runner.Run(OSR_AFTER_CFRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
-    ASSERT_EQ(osr_events[0]->kind, events::OsrEntryKind::AFTER_CFRAME);
-    ASSERT_EQ(osr_events[0]->result, events::OsrEntryResult::SUCCESS);
+    ASSERT_EQ(osr_events.size(), 1U);
+    ASSERT_EQ(osr_events[0U]->kind, events::OsrEntryKind::AFTER_CFRAME);
+    ASSERT_EQ(osr_events[0U]->result, events::OsrEntryResult::SUCCESS);
 }
 
 TEST_F(OsrTest, OsrAfterCFrameOptimizingWithInlining)
@@ -299,15 +299,15 @@ TEST_F(OsrTest, OsrAfterCFrameOptimizingWithInlining)
     runner.GetCompilerOptions().SetCompilerInliningBlacklist({"_GLOBAL::f2"});
 
     ScopeEvents scope_events;
-    runner.Run(OSR_AFTER_CFRAME_SOURCE, 435);
+    runner.Run(OSR_AFTER_CFRAME_SOURCE, 435U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
     auto found = events->Find<events::EventsMemory::InlineEvent>(
         [](const auto &event) { return event.caller == "_GLOBAL::main" && event.callee == "_GLOBAL::f1"; });
     ASSERT_TRUE(found);
-    ASSERT_EQ(osr_events.size(), 1);
-    ASSERT_EQ(osr_events[0]->kind, events::OsrEntryKind::AFTER_CFRAME);
-    ASSERT_EQ(osr_events[0]->result, events::OsrEntryResult::SUCCESS);
+    ASSERT_EQ(osr_events.size(), 1U);
+    ASSERT_EQ(osr_events[0U]->kind, events::OsrEntryKind::AFTER_CFRAME);
+    ASSERT_EQ(osr_events[0U]->result, events::OsrEntryResult::SUCCESS);
 }
 
 TEST_F(OsrTest, MainOsrCatchThrow)
@@ -348,15 +348,15 @@ TEST_F(OsrTest, MainOsrCatchThrow)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
 
     ScopeEvents scope_events;
-    runner.Run(SOURCE, 123);
+    runner.Run(SOURCE, 123U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
-    ASSERT_EQ(osr_events[0]->kind, events::OsrEntryKind::TOP_FRAME);
-    ASSERT_EQ(osr_events[0]->result, events::OsrEntryResult::SUCCESS);
+    ASSERT_EQ(osr_events.size(), 1U);
+    ASSERT_EQ(osr_events[0U]->kind, events::OsrEntryKind::TOP_FRAME);
+    ASSERT_EQ(osr_events[0U]->result, events::OsrEntryResult::SUCCESS);
     auto deopt_events = events->Select<events::EventsMemory::DeoptimizationEvent>();
-    ASSERT_EQ(deopt_events.size(), 1);
-    ASSERT_EQ(deopt_events[0]->after, events::DeoptimizationAfter::TOP);
+    ASSERT_EQ(deopt_events.size(), 1U);
+    ASSERT_EQ(deopt_events[0U]->after, events::DeoptimizationAfter::TOP);
 }
 
 static constexpr auto MAIN_OSR_CATCH_F1_THROW_SOURCE = R"(
@@ -479,15 +479,15 @@ TEST_F(OsrTest, MainCatchF1OsrThrow)
     runner.GetCompilerOptions().SetCompilerInlining(false);
 
     ScopeEvents scope_events;
-    runner.Run(MAIN_CATCH_F1_OSR_THROW_SOURCE, 123);
+    runner.Run(MAIN_CATCH_F1_OSR_THROW_SOURCE, 123U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
-    ASSERT_EQ(osr_events.size(), 1);
-    ASSERT_EQ(osr_events[0]->kind, events::OsrEntryKind::AFTER_IFRAME);
-    ASSERT_EQ(osr_events[0]->result, events::OsrEntryResult::SUCCESS);
+    ASSERT_EQ(osr_events.size(), 1U);
+    ASSERT_EQ(osr_events[0U]->kind, events::OsrEntryKind::AFTER_IFRAME);
+    ASSERT_EQ(osr_events[0U]->result, events::OsrEntryResult::SUCCESS);
     auto exception_events = events->Select<events::EventsMemory::ExceptionEvent>();
-    ASSERT_EQ(exception_events.size(), 1);
-    ASSERT_EQ(exception_events[0]->type, events::ExceptionType::BOUND_CHECK);
+    ASSERT_EQ(exception_events.size(), 1U);
+    ASSERT_EQ(exception_events[0U]->type, events::ExceptionType::BOUND_CHECK);
 }
 
 static constexpr auto MAIN_CATCH_F1_OSR_F2_THROW_SOURCE = R"(

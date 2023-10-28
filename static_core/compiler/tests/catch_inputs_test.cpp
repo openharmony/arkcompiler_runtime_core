@@ -25,48 +25,48 @@ TEST_F(CatchInputsTest, MarkCatchInputs)
     // NOLINTBEGIN(readability-magic-numbers)
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).i32();
-        PARAMETER(1, 1).i32();
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
 
-        BASIC_BLOCK(2, 3, 4)  // try_begin
+        BASIC_BLOCK(2U, 3U, 4U)  // try_begin
         {
-            INST(3, Opcode::Try).CatchTypeIds({0});
+            INST(3U, Opcode::Try).CatchTypeIds({0U});
         }
 
-        BASIC_BLOCK(3, 7)  // try
+        BASIC_BLOCK(3U, 7U)  // try
         {
-            INST(4, Opcode::Mul).i32().Inputs(0, 0);
-            INST(5, Opcode::Mul).i32().Inputs(1, 1);
-            INST(ESCAPED_INST_ID, Opcode::Add).i32().Inputs(4, 5);
-            INST(7, Opcode::Mul).i32().Inputs(4, 5);
+            INST(4U, Opcode::Mul).i32().Inputs(0U, 0U);
+            INST(5U, Opcode::Mul).i32().Inputs(1U, 1U);
+            INST(ESCAPED_INST_ID, Opcode::Add).i32().Inputs(4U, 5U);
+            INST(7U, Opcode::Mul).i32().Inputs(4U, 5U);
         }
 
-        BASIC_BLOCK(7, 5, 4)  // try_end
+        BASIC_BLOCK(7U, 5U, 4U)  // try_end
         {
         }
 
-        BASIC_BLOCK(4, 6)  // catch_begin
+        BASIC_BLOCK(4U, 6U)  // catch_begin
         {
-            INST(8, Opcode::CatchPhi).i32().Inputs(ESCAPED_INST_ID);
+            INST(8U, Opcode::CatchPhi).i32().Inputs(ESCAPED_INST_ID);
         }
 
-        BASIC_BLOCK(6, -1)  // catch
+        BASIC_BLOCK(6U, -1L)  // catch
         {
-            INST(9, Opcode::Mul).i32().Inputs(8, 8);
-            INST(10, Opcode::Return).i32().Inputs(9);
+            INST(9U, Opcode::Mul).i32().Inputs(8U, 8U);
+            INST(10U, Opcode::Return).i32().Inputs(9U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(11, Opcode::Return).i32().Inputs(7);
+            INST(11U, Opcode::Return).i32().Inputs(7U);
         }
     }
 
-    BB(2).SetTryBegin(true);
-    BB(3).SetTry(true);
-    BB(7).SetTryEnd(true);
-    BB(4).SetCatchBegin(true);
-    BB(6).SetCatch(true);
+    BB(2U).SetTryBegin(true);
+    BB(3U).SetTry(true);
+    BB(7U).SetTryEnd(true);
+    BB(4U).SetCatchBegin(true);
+    BB(6U).SetCatch(true);
     // NOLINTEND(readability-magic-numbers)
 
     GetGraph()->RunPass<CatchInputs>();
@@ -90,44 +90,44 @@ TEST_F(CatchInputsTest, HandlePhi)
     // NOLINTBEGIN(readability-magic-numbers)
     GRAPH(GetGraph())
     {
-        PARAMETER(PARAM_ID, 0).ref();
+        PARAMETER(PARAM_ID, 0U).ref();
 
-        BASIC_BLOCK(2, 3, 8)
+        BASIC_BLOCK(2U, 3U, 8U)
         {
             INST(PHI_ID, Opcode::Phi).ref().Inputs(PARAM_ID, PHI_ID, LOAD_ID);
-            INST(3, Opcode::IfImm).SrcType(DataType::REFERENCE).Inputs(PHI_ID).Imm(0).CC(CC_NE);
+            INST(3U, Opcode::IfImm).SrcType(DataType::REFERENCE).Inputs(PHI_ID).Imm(0U).CC(CC_NE);
         }
 
-        BASIC_BLOCK(8, 2, 7)
+        BASIC_BLOCK(8U, 2U, 7U)
         {
-            INST(7, Opcode::IfImm).SrcType(DataType::REFERENCE).Inputs(PHI_ID).Imm(0).CC(CC_NE);
+            INST(7U, Opcode::IfImm).SrcType(DataType::REFERENCE).Inputs(PHI_ID).Imm(0U).CC(CC_NE);
         }
 
-        BASIC_BLOCK(3, 4) {}
+        BASIC_BLOCK(3U, 4U) {}
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
             INST(LOAD_ID, Opcode::LoadObject).ref().Inputs(PHI_ID);
         }
 
-        BASIC_BLOCK(5, 2, 6) {}
+        BASIC_BLOCK(5U, 2U, 6U) {}
 
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(5, Opcode::CatchPhi).ref().Inputs(PHI_ID);
+            INST(5U, Opcode::CatchPhi).ref().Inputs(PHI_ID);
         }
 
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(6, Opcode::ReturnVoid).v0id();
+            INST(6U, Opcode::ReturnVoid).v0id();
         }
     }
 
-    BB(3).SetTryBegin(true);
-    BB(4).SetTry(true);
-    BB(5).SetTryEnd(true);
-    BB(6).SetCatchBegin(true);
-    BB(6).SetCatch(true);
+    BB(3U).SetTryBegin(true);
+    BB(4U).SetTry(true);
+    BB(5U).SetTryEnd(true);
+    BB(6U).SetCatchBegin(true);
+    BB(6U).SetCatch(true);
     // NOLINTEND(readability-magic-numbers)
 
     GetGraph()->RunPass<CatchInputs>();

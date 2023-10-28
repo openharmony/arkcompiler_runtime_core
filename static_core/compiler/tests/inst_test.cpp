@@ -44,79 +44,79 @@ TEST_F(InstTest, Dataflow)
      */
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 12);
-        CONSTANT(1, 13);
+        CONSTANT(0U, 12U);
+        CONSTANT(1U, 13U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Add).u64().Inputs(0, 1);
-            INST(8, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(2U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(8U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(3, Opcode::Not).u64().Inputs(0);
+            INST(3U, Opcode::Not).u64().Inputs(0U);
         }
-        BASIC_BLOCK(4, 8, 6)
+        BASIC_BLOCK(4U, 8U, 6U)
         {
-            INST(4, Opcode::Not).u64().Inputs(1);
-            INST(11, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(12, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(11);
+            INST(4U, Opcode::Not).u64().Inputs(1U);
+            INST(11U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
         }
-        BASIC_BLOCK(5, 8)
+        BASIC_BLOCK(5U, 8U)
         {
-            INST(7, Opcode::Sub).u64().Inputs(3, 2);
+            INST(7U, Opcode::Sub).u64().Inputs(3U, 2U);
         }
-        BASIC_BLOCK(6, 7) {}
-        BASIC_BLOCK(7, 8)
+        BASIC_BLOCK(6U, 7U) {}
+        BASIC_BLOCK(7U, 8U)
         {
-            INST(5, Opcode::Not).u64().Inputs(4);
+            INST(5U, Opcode::Not).u64().Inputs(4U);
         }
-        BASIC_BLOCK(8, -1)
+        BASIC_BLOCK(8U, -1L)
         {
-            INST(6, Opcode::Phi).u64().Inputs({{5, 3}, {4, 4}, {7, 5}});
-            INST(16, Opcode::ReturnVoid);
+            INST(6U, Opcode::Phi).u64().Inputs({{5U, 3U}, {4U, 4U}, {7U, 5U}});
+            INST(16U, Opcode::ReturnVoid);
         }
     }
 
     // Check constructed dataflow
-    ASSERT_TRUE(CheckUsers(INS(0), {2, 3, 8, 11}));
-    ASSERT_TRUE(CheckUsers(INS(1), {2, 4, 8, 11}));
-    ASSERT_TRUE(CheckUsers(INS(2), {7}));
-    ASSERT_TRUE(CheckUsers(INS(3), {6, 7}));
-    ASSERT_TRUE(CheckUsers(INS(4), {5, 6}));
-    ASSERT_TRUE(CheckUsers(INS(5), {6}));
-    ASSERT_TRUE(CheckInputs(INS(2), {0, 1}));
-    ASSERT_TRUE(CheckInputs(INS(3), {0}));
-    ASSERT_TRUE(CheckInputs(INS(7), {3, 2}));
-    ASSERT_TRUE(CheckInputs(INS(4), {1}));
-    ASSERT_TRUE(CheckInputs(INS(5), {4}));
-    ASSERT_TRUE(CheckInputs(INS(6), {3, 4, 5}));
-    ASSERT_EQ(static_cast<PhiInst &>(INS(6)).GetPhiInput(&BB(5)), &INS(3));
-    ASSERT_EQ(static_cast<PhiInst &>(INS(6)).GetPhiInput(&BB(4)), &INS(4));
-    ASSERT_EQ(static_cast<PhiInst &>(INS(6)).GetPhiInput(&BB(7)), &INS(5));
+    ASSERT_TRUE(CheckUsers(INS(0U), {2U, 3U, 8U, 11U}));
+    ASSERT_TRUE(CheckUsers(INS(1U), {2U, 4U, 8U, 11U}));
+    ASSERT_TRUE(CheckUsers(INS(2U), {7U}));
+    ASSERT_TRUE(CheckUsers(INS(3U), {6U, 7U}));
+    ASSERT_TRUE(CheckUsers(INS(4U), {5U, 6U}));
+    ASSERT_TRUE(CheckUsers(INS(5U), {6U}));
+    ASSERT_TRUE(CheckInputs(INS(2U), {0U, 1U}));
+    ASSERT_TRUE(CheckInputs(INS(3U), {0U}));
+    ASSERT_TRUE(CheckInputs(INS(7U), {3U, 2U}));
+    ASSERT_TRUE(CheckInputs(INS(4U), {1U}));
+    ASSERT_TRUE(CheckInputs(INS(5U), {4U}));
+    ASSERT_TRUE(CheckInputs(INS(6U), {3U, 4U, 5U}));
+    ASSERT_EQ(static_cast<PhiInst &>(INS(6U)).GetPhiInput(&BB(5U)), &INS(3U));
+    ASSERT_EQ(static_cast<PhiInst &>(INS(6U)).GetPhiInput(&BB(4U)), &INS(4U));
+    ASSERT_EQ(static_cast<PhiInst &>(INS(6U)).GetPhiInput(&BB(7U)), &INS(5U));
 
     {  // Test iterating over users of constant instruction
-        const Inst *inst = &INS(2);
+        const Inst *inst = &INS(2U);
         for (auto &user : inst->GetUsers()) {
             ASSERT_EQ(inst, user.GetInput());
         }
     }
 
     {  // Test iterating over users of non-constant instruction
-        Inst *inst = &INS(2);
+        Inst *inst = &INS(2U);
         for (auto &user : inst->GetUsers()) {
             user.GetInst()->SetId(user.GetInst()->GetId());
         }
     }
 
     // 1. Remove instruction #3, replace its users by its input
-    INS(3).ReplaceUsers(INS(3).GetInput(0).GetInst());
-    INS(3).GetBasicBlock()->RemoveInst(&INS(3));
-    ASSERT_TRUE(INS(6).GetInput(0) == &INS(0));
-    ASSERT_TRUE(INS(3).GetInput(0) == nullptr);
-    ASSERT_TRUE(CheckUsers(INS(0), {2, 6, 7, 8, 11}));
-    ASSERT_EQ(static_cast<PhiInst &>(INS(6)).GetPhiInput(&BB(5)), &INS(0));
+    INS(3U).ReplaceUsers(INS(3U).GetInput(0U).GetInst());
+    INS(3U).GetBasicBlock()->RemoveInst(&INS(3U));
+    ASSERT_TRUE(INS(6U).GetInput(0U) == &INS(0U));
+    ASSERT_TRUE(INS(3U).GetInput(0U) == nullptr);
+    ASSERT_TRUE(CheckUsers(INS(0U), {2U, 6U, 7U, 8U, 11U}));
+    ASSERT_EQ(static_cast<PhiInst &>(INS(6U)).GetPhiInput(&BB(5U)), &INS(0U));
     GraphChecker(GetGraph()).Check();
 
     // TODO(A.Popov): refactor RemovePredsBlocks
@@ -131,8 +131,8 @@ TEST_F(InstTest, Dataflow)
 
     // 3. Append additional inputs into PHI, thereby force it to reallocate inputs storage, dataflow is not valid  from
     // this moment
-    for (int i = 0; i < 4; ++i) {
-        INS(6).AppendInput(&INS(0));
+    for (size_t i = 0; i < 4U; ++i) {
+        INS(6U).AppendInput(&INS(0U));
     }
 }
 
@@ -140,14 +140,14 @@ TEST_F(InstTest, Arithmetics)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 12);
-        CONSTANT(1, 17.23);
+        CONSTANT(0U, 12U);
+        CONSTANT(1U, 17.23);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Cast).u64().SrcType(DataType::FLOAT64).Inputs(1);
-            INST(3, Opcode::Add).u64().Inputs(0, 2);
-            INST(4, Opcode::ReturnVoid);
+            INST(2U, Opcode::Cast).u64().SrcType(DataType::FLOAT64).Inputs(1U);
+            INST(3U, Opcode::Add).u64().Inputs(0U, 2U);
+            INST(4U, Opcode::ReturnVoid);
         }
     }
 }
@@ -156,35 +156,35 @@ TEST_F(InstTest, Memory)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();  // array
-        PARAMETER(1, 1).u64();  // index
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();  // array
+        PARAMETER(1U, 1U).u64();  // index
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::NullCheck).ref().Inputs(0, 2);
-            INST(4, Opcode::LenArray).s32().Inputs(3);
-            INST(5, Opcode::BoundsCheck).s32().Inputs(4, 1, 2);
-            INST(6, Opcode::LoadArray).u64().Inputs(3, 5);
-            INST(7, Opcode::Add).u64().Inputs(6, 6);
-            INST(8, Opcode::StoreArray).u64().Inputs(3, 5, 7);
-            INST(9, Opcode::ReturnVoid);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::NullCheck).ref().Inputs(0U, 2U);
+            INST(4U, Opcode::LenArray).s32().Inputs(3U);
+            INST(5U, Opcode::BoundsCheck).s32().Inputs(4U, 1U, 2U);
+            INST(6U, Opcode::LoadArray).u64().Inputs(3U, 5U);
+            INST(7U, Opcode::Add).u64().Inputs(6U, 6U);
+            INST(8U, Opcode::StoreArray).u64().Inputs(3U, 5U, 7U);
+            INST(9U, Opcode::ReturnVoid);
         }
     }
 }
 
 TEST_F(InstTest, Const)
 {
-    std::array<int32_t, 3> int32_const {-5, 0, 5};
-    std::array<int64_t, 3> int64_const {-5, 0, 5};
+    std::array<int32_t, 3U> int32_const {-5L, 0U, 5U};
+    std::array<int64_t, 3U> int64_const {-5L, 0U, 5U};
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::ReturnVoid);
+            INST(0U, Opcode::ReturnVoid);
         }
     }
     auto start = GetGraph()->GetStartBlock();
-    for (auto i = 0; i < 3; i++) {
+    for (size_t i = 0; i < 3U; i++) {
         int32_t val = int32_const[i];
         auto const1 = GetGraph()->FindOrCreateConstant(val);
         ASSERT_EQ(const1->GetType(), DataType::INT64);
@@ -196,8 +196,8 @@ TEST_F(InstTest, Const)
         ASSERT_EQ(const1->GetIntValue(), val1);
     }
     GraphChecker(GetGraph()).Check();
-    std::array<float, 3> float_const {-5.5F, 0.1F, 5.2F};
-    for (auto i = 0; i < 3; i++) {
+    std::array<float, 3U> float_const {-5.5F, 0.1F, 5.2F};
+    for (size_t i = 0; i < 3U; i++) {
         float val = float_const[i];
         auto const1 = GetGraph()->FindOrCreateConstant(val);
         ASSERT_EQ(const1->GetType(), DataType::FLOAT32);
@@ -207,8 +207,8 @@ TEST_F(InstTest, Const)
         ASSERT_EQ(const1->GetFloatValue(), val);
     }
     GraphChecker(GetGraph()).Check();
-    std::array<double, 3> double_const {-5.5, 0.1, 5.2};
-    for (auto i = 0; i < 3; i++) {
+    std::array<double, 3U> double_const {-5.5, 0.1, 5.2};
+    for (size_t i = 0; i < 3U; i++) {
         double val = double_const[i];
         auto const1 = GetGraph()->FindOrCreateConstant(val);
         ASSERT_EQ(const1->GetType(), DataType::FLOAT64);
@@ -222,24 +222,24 @@ TEST_F(InstTest, Const)
          current_const = current_const->GetNextConst()) {
         i++;
     }
-    ASSERT_EQ(i, 9);
+    ASSERT_EQ(i, 9U);
 }
 
 TEST_F(InstTest, Const32)
 {
-    std::array<int32_t, 3> int32_const {-5, 0, 5};
-    std::array<int64_t, 3> int64_const {-5, 0, 5};
+    std::array<int32_t, 3U> int32_const {-5L, 0U, 5U};
+    std::array<int64_t, 3U> int64_const {-5L, 0U, 5U};
     auto graph = CreateEmptyBytecodeGraph();
 
     GRAPH(graph)
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::ReturnVoid);
+            INST(0U, Opcode::ReturnVoid);
         }
     }
     auto start = graph->GetStartBlock();
-    for (auto i = 0; i < 3; i++) {
+    for (size_t i = 0; i < 3L; i++) {
         // add first int32 constant
         int32_t val = int32_const[i];
         auto const1 = graph->FindOrCreateConstant(val);
@@ -265,9 +265,9 @@ TEST_F(InstTest, ReturnVoid)
 {
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::ReturnVoid);
+            INST(0U, Opcode::ReturnVoid);
         }
     }
 }
@@ -276,10 +276,10 @@ TEST_F(InstTest, ReturnFloat)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 1.1F);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 1.1F);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).f32().Inputs(0);
+            INST(1U, Opcode::Return).f32().Inputs(0U);
         }
     }
 }
@@ -288,10 +288,10 @@ TEST_F(InstTest, ReturnDouble)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 1.1);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 1.1);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).f64().Inputs(0);
+            INST(1U, Opcode::Return).f64().Inputs(0U);
         }
     }
 }
@@ -301,10 +301,10 @@ TEST_F(InstTest, ReturnLong)
     uint64_t i = 1;
     GRAPH(GetGraph())
     {
-        CONSTANT(0, i);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, i);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).u64().Inputs(0);
+            INST(1U, Opcode::Return).u64().Inputs(0U);
         }
     }
 }
@@ -314,10 +314,10 @@ TEST_F(InstTest, ReturnInt)
     int32_t i = 1;
     GRAPH(GetGraph())
     {
-        CONSTANT(0, i);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, i);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).u32().Inputs(0);
+            INST(1U, Opcode::Return).u32().Inputs(0U);
         }
     }
 }
@@ -326,18 +326,18 @@ TEST_F(InstTest, ArrayChecks)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();  // array
-        PARAMETER(1, 1).u64();  // index
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();  // array
+        PARAMETER(1U, 1U).u64();  // index
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::NullCheck).ref().Inputs(0, 2);
-            INST(4, Opcode::LenArray).s32().Inputs(3);
-            INST(5, Opcode::BoundsCheck).s32().Inputs(4, 1, 2);
-            INST(6, Opcode::LoadArray).u64().Inputs(3, 5);
-            INST(7, Opcode::Add).u64().Inputs(6, 6);
-            INST(8, Opcode::StoreArray).u64().Inputs(3, 5, 7);
-            INST(9, Opcode::ReturnVoid);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::NullCheck).ref().Inputs(0U, 2U);
+            INST(4U, Opcode::LenArray).s32().Inputs(3U);
+            INST(5U, Opcode::BoundsCheck).s32().Inputs(4U, 1U, 2U);
+            INST(6U, Opcode::LoadArray).u64().Inputs(3U, 5U);
+            INST(7U, Opcode::Add).u64().Inputs(6U, 6U);
+            INST(8U, Opcode::StoreArray).u64().Inputs(3U, 5U, 7U);
+            INST(9U, Opcode::ReturnVoid);
         }
     }
 }
@@ -346,15 +346,15 @@ TEST_F(InstTest, ZeroCheck)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::ZeroCheck).u64().Inputs(0, 2);
-            INST(4, Opcode::Div).u64().Inputs(1, 3);
-            INST(5, Opcode::Mod).u64().Inputs(1, 3);
-            INST(6, Opcode::ReturnVoid);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::ZeroCheck).u64().Inputs(0U, 2U);
+            INST(4U, Opcode::Div).u64().Inputs(1U, 3U);
+            INST(5U, Opcode::Mod).u64().Inputs(1U, 3U);
+            INST(6U, Opcode::ReturnVoid);
         }
     }
 }
@@ -363,22 +363,22 @@ TEST_F(InstTest, Parametr)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u32();
-        PARAMETER(2, 4).u16();
-        PARAMETER(3, 5).u8();
-        PARAMETER(4, 8).s64();
-        PARAMETER(5, 10).s32();
-        PARAMETER(6, 11).s16();
-        PARAMETER(7, 24).s8();
-        PARAMETER(8, 27).b();
-        PARAMETER(9, 28).f64();
-        PARAMETER(10, 29).f32();
-        PARAMETER(11, 40).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u32();
+        PARAMETER(2U, 4U).u16();
+        PARAMETER(3U, 5U).u8();
+        PARAMETER(4U, 8U).s64();
+        PARAMETER(5U, 10U).s32();
+        PARAMETER(6U, 11U).s16();
+        PARAMETER(7U, 24U).s8();
+        PARAMETER(8U, 27U).b();
+        PARAMETER(9U, 28U).f64();
+        PARAMETER(10U, 29U).f32();
+        PARAMETER(11U, 40U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(12, Opcode::Add).u32().Inputs(1, 5);
-            INST(13, Opcode::ReturnVoid);
+            INST(12U, Opcode::Add).u32().Inputs(1U, 5U);
+            INST(13U, Opcode::ReturnVoid);
         }
     }
 }
@@ -387,11 +387,11 @@ TEST_F(InstTest, LenArray)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 40).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 40U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::LenArray).s32().Inputs(0);
-            INST(2, Opcode::ReturnVoid);
+            INST(1U, Opcode::LenArray).s32().Inputs(0U);
+            INST(2U, Opcode::ReturnVoid);
         }
     }
 }
@@ -400,18 +400,18 @@ TEST_F(InstTest, Call)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).ref();
-        PARAMETER(1, 2).u32();
-        PARAMETER(2, 4).u16();
-        PARAMETER(3, 5).u8();
-        PARAMETER(4, 8).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).ref();
+        PARAMETER(1U, 2U).u32();
+        PARAMETER(2U, 4U).u16();
+        PARAMETER(3U, 5U).u8();
+        PARAMETER(4U, 8U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
             using namespace DataType;  // NOLINT(google-build-using-namespace)
-            INST(8, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::CallVirtual).s32().InputsAutoType(0, 2, 4, 8);
-            INST(6, Opcode::CallStatic).b().InputsAutoType(1, 3, 4, 5, 8);
-            INST(7, Opcode::ReturnVoid);
+            INST(8U, Opcode::SaveState).NoVregs();
+            INST(5U, Opcode::CallVirtual).s32().InputsAutoType(0U, 2U, 4U, 8U);
+            INST(6U, Opcode::CallStatic).b().InputsAutoType(1U, 3U, 4U, 5U, 8U);
+            INST(7U, Opcode::ReturnVoid);
         }
     }
 }
@@ -420,19 +420,19 @@ TEST_F(InstTest, BinaryImmOperation)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 4).s32();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 4U).s32();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::AddI).s32().Imm(10ULL).Inputs(1);
-            INST(3, Opcode::SubI).s32().Imm(15ULL).Inputs(2);
-            INST(4, Opcode::AndI).u64().Imm(15ULL).Inputs(0);
-            INST(5, Opcode::OrI).u64().Imm(1ULL).Inputs(4);
-            INST(6, Opcode::XorI).u64().Imm(10ULL).Inputs(5);
-            INST(7, Opcode::ShlI).u64().Imm(5ULL).Inputs(6);
-            INST(8, Opcode::ShrI).u64().Imm(5ULL).Inputs(7);
-            INST(9, Opcode::AShrI).s32().Imm(4ULL).Inputs(3);
-            INST(10, Opcode::ReturnVoid);
+            INST(2U, Opcode::AddI).s32().Imm(10ULL).Inputs(1U);
+            INST(3U, Opcode::SubI).s32().Imm(15ULL).Inputs(2U);
+            INST(4U, Opcode::AndI).u64().Imm(15ULL).Inputs(0U);
+            INST(5U, Opcode::OrI).u64().Imm(1ULL).Inputs(4U);
+            INST(6U, Opcode::XorI).u64().Imm(10ULL).Inputs(5U);
+            INST(7U, Opcode::ShlI).u64().Imm(5ULL).Inputs(6U);
+            INST(8U, Opcode::ShrI).u64().Imm(5ULL).Inputs(7U);
+            INST(9U, Opcode::AShrI).s32().Imm(4ULL).Inputs(3U);
+            INST(10U, Opcode::ReturnVoid);
         }
     }
 }
@@ -441,20 +441,20 @@ TEST_F(InstTest, Fcmp)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).f32();
-        PARAMETER(1, 1).f32();
-        PARAMETER(2, 2).f64();
-        PARAMETER(3, 3).f64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).f32();
+        PARAMETER(1U, 1U).f32();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Cmp).s32().Inputs(0, 1);
-            INST(5, Opcode::Cmp).s32().Inputs(2, 3);
-            INST(6, Opcode::ReturnVoid);
+            INST(4U, Opcode::Cmp).s32().Inputs(0U, 1U);
+            INST(5U, Opcode::Cmp).s32().Inputs(2U, 3U);
+            INST(6U, Opcode::ReturnVoid);
         }
     }
     GraphChecker(GetGraph()).Check();
-    auto inst4 = static_cast<CmpInst *>(&INS(4));
-    auto inst5 = static_cast<CmpInst *>(&INS(5));
+    auto inst4 = static_cast<CmpInst *>(&INS(4U));
+    auto inst5 = static_cast<CmpInst *>(&INS(5U));
     inst4->SetFcmpl();
     ASSERT_EQ(inst4->IsFcmpg(), false);
     ASSERT_EQ(inst4->IsFcmpl(), true);
@@ -494,30 +494,30 @@ TEST_F(InstTest, RemovePhiInput)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(2, 2);
-        BASIC_BLOCK(2, 3, 5)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        BASIC_BLOCK(2U, 3U, 5U)
         {
-            INST(5, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(5U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 5) {}
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(3U, 5U) {}
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(3, Opcode::Phi).u64().Inputs({{2, 0}, {3, 1}});
-            INST(4, Opcode::ReturnVoid);
+            INST(3U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 1U}});
+            INST(4U, Opcode::ReturnVoid);
         }
     }
-    auto init_inputs = INS(3).GetInputs();
-    auto init_preds = BB(5).GetPredsBlocks();
+    auto init_inputs = INS(3U).GetInputs();
+    auto init_preds = BB(5U).GetPredsBlocks();
 
-    auto pred_bb_idx = INS(3).CastToPhi()->GetPredBlockIndex(&BB(3));
-    BB(5).RemovePred(&BB(3));
-    INS(3).RemoveInput(pred_bb_idx);
+    auto pred_bb_idx = INS(3U).CastToPhi()->GetPredBlockIndex(&BB(3U));
+    BB(5U).RemovePred(&BB(3U));
+    INS(3U).RemoveInput(pred_bb_idx);
 
-    auto curr_inputs = INS(3).GetInputs();
-    auto curr_preds = BB(5).GetPredsBlocks();
+    auto curr_inputs = INS(3U).GetInputs();
+    auto curr_preds = BB(5U).GetPredsBlocks();
     for (size_t idx = 0; idx < curr_inputs.size(); idx++) {
         if (idx != pred_bb_idx) {
             ASSERT_EQ(init_inputs[idx].GetInst(), curr_inputs[idx].GetInst());

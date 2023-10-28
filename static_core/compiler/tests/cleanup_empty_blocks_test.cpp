@@ -32,31 +32,31 @@ TEST_F(CleanupEmptyBlocksTest, RemoveEmptyBlockAfterRegAlloc)
     // After RegAlloc inserts BB 7, BB 5 can be removed
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).i32();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        BASIC_BLOCK(2, 6, 3)
+        PARAMETER(0U, 0U).i32();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 6U, 3U)
         {
-            INST(3, Opcode::AndI).i32().Inputs(0).Imm(3);
-            INST(4, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::AndI).i32().Inputs(0U).Imm(3U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5, 4)
+        BASIC_BLOCK(3U, 5U, 4U)
         {
-            CONSTANT(5, 100);
-            INST(6, Opcode::Mod).i32().Inputs(0, 5);
-            INST(7, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0).Inputs(6);
+            CONSTANT(5U, 100U);
+            INST(6U, Opcode::Mod).i32().Inputs(0U, 5U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(4, 6, 5)
+        BASIC_BLOCK(4U, 6U, 5U)
         {
-            CONSTANT(8, 400);
-            INST(9, Opcode::Mod).i32().Inputs(0, 8);
-            INST(10, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0).Inputs(9);
+            CONSTANT(8U, 400U);
+            INST(9U, Opcode::Mod).i32().Inputs(0U, 8U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0U).Inputs(9U);
         }
-        BASIC_BLOCK(5, 6) {}
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(5U, 6U) {}
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(11, Opcode::Phi).b().Inputs({{2, 1}, {4, 1}, {5, 2}});
-            INST(12, Opcode::Return).b().Inputs(11);
+            INST(11U, Opcode::Phi).b().Inputs({{2U, 1U}, {4U, 1U}, {5U, 2U}});
+            INST(12U, Opcode::Return).b().Inputs(11U);
         }
     }
 
@@ -67,38 +67,38 @@ TEST_F(CleanupEmptyBlocksTest, RemoveEmptyBlockAfterRegAlloc)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).i32();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        BASIC_BLOCK(2, 8, 3)
+        PARAMETER(0U, 0U).i32();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 8U, 3U)
         {
-            INST(3, Opcode::AndI).i32().Inputs(0).Imm(3);
-            INST(4, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::AndI).i32().Inputs(0U).Imm(3U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 6, 4)
+        BASIC_BLOCK(3U, 6U, 4U)
         {
-            CONSTANT(5, 100);
-            INST(6, Opcode::Mod).i32().Inputs(0, 5);
-            INST(7, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0).Inputs(6);
+            CONSTANT(5U, 100U);
+            INST(6U, Opcode::Mod).i32().Inputs(0U, 5U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(4, 7, 6)
+        BASIC_BLOCK(4U, 7U, 6U)
         {
-            CONSTANT(8, 400);
-            INST(9, Opcode::Mod).i32().Inputs(0, 8);
-            INST(10, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0).Inputs(9);
+            CONSTANT(8U, 400U);
+            INST(9U, Opcode::Mod).i32().Inputs(0U, 8U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0U).Inputs(9U);
         }
-        BASIC_BLOCK(7, 6)
+        BASIC_BLOCK(7U, 6U)
         {
-            INST(13, Opcode::SpillFill);
+            INST(13U, Opcode::SpillFill);
         }
-        BASIC_BLOCK(8, 6)
+        BASIC_BLOCK(8U, 6U)
         {
-            INST(14, Opcode::SpillFill);
+            INST(14U, Opcode::SpillFill);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(11, Opcode::Phi).b().Inputs({{8, 1}, {7, 1}, {3, 2}, {4, 2}});
-            INST(12, Opcode::Return).b().Inputs(11);
+            INST(11U, Opcode::Phi).b().Inputs({{8U, 1U}, {7U, 1U}, {3U, 2U}, {4U, 2U}});
+            INST(12U, Opcode::Return).b().Inputs(11U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));

@@ -42,15 +42,15 @@ TEST_F(RegAllocResolverTest, ResolveFixedInputs)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).i32();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::AddI).u64().Inputs(2).Imm(1);
-            INST(3, Opcode::StoreArray).u64().Inputs(0, 1, 2);
-            INST(4, Opcode::Return).u64().Inputs(5);
+            INST(5U, Opcode::AddI).u64().Inputs(2U).Imm(1U);
+            INST(3U, Opcode::StoreArray).u64().Inputs(0U, 1U, 2U);
+            INST(4U, Opcode::Return).u64().Inputs(5U);
         }
     }
 
@@ -69,39 +69,39 @@ TEST_F(RegAllocResolverTest, ResolveFixedInputs)
      * - move v2 from r0 into r1;
      */
     Target target(GetGraph()->GetArch());
-    auto store_inst = &INS(3);
-    store_inst->SetLocation(0, Location::MakeRegister(target.GetParamRegId(0)));
-    store_inst->SetLocation(1, Location::MakeRegister(target.GetParamRegId(2)));
-    store_inst->SetLocation(2, Location::MakeRegister(target.GetParamRegId(1)));
+    auto store_inst = &INS(3U);
+    store_inst->SetLocation(0U, Location::MakeRegister(target.GetParamRegId(0U)));
+    store_inst->SetLocation(1U, Location::MakeRegister(target.GetParamRegId(2U)));
+    store_inst->SetLocation(2U, Location::MakeRegister(target.GetParamRegId(1U)));
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     ASSERT_TRUE(la.Run());
 
-    auto param_0 = &INS(0);
-    auto param_1 = &INS(1);
-    auto param_2 = &INS(2);
+    auto param_0 = &INS(0U);
+    auto param_1 = &INS(1U);
+    auto param_2 = &INS(2U);
 
     auto param_0_interval = la.GetInstLifeIntervals(param_0);
     auto param_1_interval = la.GetInstLifeIntervals(param_1);
     auto param_2_interval = la.GetInstLifeIntervals(param_2);
     auto store_interval = la.GetInstLifeIntervals(store_inst);
-    auto add_interval = la.GetInstLifeIntervals(&INS(5));
+    auto add_interval = la.GetInstLifeIntervals(&INS(5U));
 
-    param_0_interval->SetLocation(Location::MakeRegister(target.GetParamRegId(0)));
-    param_1_interval->SetLocation(Location::MakeRegister(target.GetParamRegId(1)));
-    param_2_interval->SetLocation(Location::MakeRegister(target.GetParamRegId(2)));
-    add_interval->SetLocation(Location::MakeRegister(target.GetParamRegId(3)));
+    param_0_interval->SetLocation(Location::MakeRegister(target.GetParamRegId(0U)));
+    param_1_interval->SetLocation(Location::MakeRegister(target.GetParamRegId(1U)));
+    param_2_interval->SetLocation(Location::MakeRegister(target.GetParamRegId(2U)));
+    add_interval->SetLocation(Location::MakeRegister(target.GetParamRegId(3U)));
 
     param_0_interval->SplitAt(store_interval->GetBegin() - 1U, GetGraph()->GetAllocator())
-        ->SetLocation(Location::MakeStackSlot(0));
+        ->SetLocation(Location::MakeStackSlot(0U));
     param_1_interval->SplitAt(add_interval->GetBegin() - 1U, GetGraph()->GetAllocator())
-        ->SetLocation(Location::MakeRegister(target.GetParamRegId(2)));
+        ->SetLocation(Location::MakeRegister(target.GetParamRegId(2U)));
     auto p2_split_1 = param_2_interval->SplitAt(add_interval->GetBegin() - 1U, GetGraph()->GetAllocator());
-    p2_split_1->SetLocation(Location::MakeRegister(6));
+    p2_split_1->SetLocation(Location::MakeRegister(6U));
     auto p2_split_2 = p2_split_1->SplitAt(store_interval->GetBegin() - 1U, GetGraph()->GetAllocator());
-    p2_split_2->SetLocation(Location::MakeRegister(target.GetParamRegId(0)));
-    la.GetInstLifeIntervals(&INS(4))->SetLocation(Location::MakeRegister(target.GetReturnRegId()));
-    la.GetTmpRegInterval(store_inst)->SetLocation(Location::MakeRegister(8));
+    p2_split_2->SetLocation(Location::MakeRegister(target.GetParamRegId(0U)));
+    la.GetInstLifeIntervals(&INS(4U))->SetLocation(Location::MakeRegister(target.GetReturnRegId()));
+    la.GetTmpRegInterval(store_inst)->SetLocation(Location::MakeRegister(8U));
 
     InitUsedRegs(GetGraph());
     RegAllocResolver resolver(GetGraph());
@@ -111,11 +111,11 @@ TEST_F(RegAllocResolverTest, ResolveFixedInputs)
     ASSERT_TRUE(prev != nullptr && prev->GetOpcode() == Opcode::SpillFill);
     auto sf = prev->CastToSpillFill();
     auto sf_data = sf->GetSpillFills();
-    ASSERT_EQ(sf_data.size(), 2);
+    ASSERT_EQ(sf_data.size(), 2U);
 
     std::vector<SpillFillData> expected_sf {
-        SpillFillData {LocationType::REGISTER, LocationType::REGISTER, 0, 1, DataType::UINT64},
-        SpillFillData {LocationType::STACK, LocationType::REGISTER, 0, 0,
+        SpillFillData {LocationType::REGISTER, LocationType::REGISTER, 0U, 1U, DataType::UINT64},
+        SpillFillData {LocationType::STACK, LocationType::REGISTER, 0U, 0U,
                        ConvertRegType(GetGraph(), DataType::REFERENCE)}};
 
     for (auto &exp_sf : expected_sf) {

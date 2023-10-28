@@ -48,16 +48,16 @@ public:
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            CONSTANT(0, 0);
-            PARAMETER(1, 0);
-            INS(1).SetType(param_type);
-            PARAMETER(2, 1);
-            INS(2).SetType(param_type);
-            BASIC_BLOCK(2, 1)
+            CONSTANT(0U, 0U);
+            PARAMETER(1U, 0U);
+            INS(1U).SetType(param_type);
+            PARAMETER(2U, 1U);
+            INS(2U).SetType(param_type);
+            BASIC_BLOCK(2U, 1U)
             {
-                INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-                INST(4, Opcode::Compare).b().CC(orig_cc).Inputs(3, 0);
-                INST(5, Opcode::Return).b().Inputs(4);
+                INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+                INST(4U, Opcode::Compare).b().CC(orig_cc).Inputs(3U, 0U);
+                INST(5U, Opcode::Return).b().Inputs(4U);
             }
         }
         graph1->RunPass<Peepholes>();
@@ -66,16 +66,16 @@ public:
         auto graph2 = CreateEmptyGraph();
         GRAPH(graph2)
         {
-            CONSTANT(0, 0);
-            PARAMETER(1, 0);
-            INS(1).SetType(param_type);
-            PARAMETER(2, 1);
-            INS(2).SetType(param_type);
-            BASIC_BLOCK(2, 1)
+            CONSTANT(0U, 0U);
+            PARAMETER(1U, 0U);
+            INS(1U).SetType(param_type);
+            PARAMETER(2U, 1U);
+            INS(2U).SetType(param_type);
+            BASIC_BLOCK(2U, 1U)
             {
-                INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-                INST(4, Opcode::Compare).b().CC(cc).Inputs(1, 2);
-                INST(5, Opcode::Return).b().Inputs(4);
+                INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+                INST(4U, Opcode::Compare).b().CC(cc).Inputs(1U, 2U);
+                INST(5U, Opcode::Return).b().Inputs(4U);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -86,35 +86,35 @@ public:
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            CONSTANT(0, cst);
-            PARAMETER(1, 0).b();
-            BASIC_BLOCK(2, 3, 4)
+            CONSTANT(0U, cst);
+            PARAMETER(1U, 0U).b();
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(3, Opcode::Compare).b().CC(cc).Inputs(1, 0);
-                INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+                INST(3U, Opcode::Compare).b().CC(cc).Inputs(1U, 0U);
+                INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(5, Opcode::ReturnVoid);
+                INST(5U, Opcode::ReturnVoid);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(6, Opcode::ReturnVoid);
+                INST(6U, Opcode::ReturnVoid);
             }
         }
         graph->RunPass<Peepholes>();
         GraphChecker(graph).Check();
 
-        EXPECT_FALSE(INS(3).HasUsers());
+        EXPECT_FALSE(INS(3U).HasUsers());
         if (exp_cst.has_value()) {
-            auto inst = INS(4).GetInput(0).GetInst();
+            auto inst = INS(4U).GetInput(0U).GetInst();
             EXPECT_EQ(inst->GetOpcode(), Opcode::Constant);
             EXPECT_EQ(inst->CastToConstant()->GetIntValue(), *exp_cst);
         } else {
-            EXPECT_EQ(INS(4).GetInput(0).GetInst(), &INS(1));
+            EXPECT_EQ(INS(4U).GetInput(0U).GetInst(), &INS(1U));
         }
-        EXPECT_EQ(INS(4).CastToIfImm()->GetImm(), 0);
-        EXPECT_EQ(INS(4).CastToIfImm()->GetCc() == CC_EQ, exp_inv);
+        EXPECT_EQ(INS(4U).CastToIfImm()->GetImm(), 0U);
+        EXPECT_EQ(INS(4U).CastToIfImm()->GetCc() == CC_EQ, exp_inv);
     }
 
     void CheckCast(DataType::Type src_type, DataType::Type tgt_type, bool applied)
@@ -125,41 +125,41 @@ public:
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            PARAMETER(0, 0);
-            INS(0).SetType(src_type);
-            BASIC_BLOCK(2, 1)
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(src_type);
+            BASIC_BLOCK(2U, 1U)
             {
-                INST(1, Opcode::Cast).SrcType(src_type).Inputs(0);
-                INS(1).SetType(tgt_type);
-                INST(2, Opcode::Return).Inputs(1);
-                INS(2).SetType(tgt_type);
+                INST(1U, Opcode::Cast).SrcType(src_type).Inputs(0U);
+                INS(1U).SetType(tgt_type);
+                INST(2U, Opcode::Return).Inputs(1U);
+                INS(2U).SetType(tgt_type);
             }
         }
         auto graph2 = CreateEmptyGraph();
         if (applied) {
             GRAPH(graph2)
             {
-                PARAMETER(0, 0);
-                INS(0).SetType(src_type);
-                BASIC_BLOCK(2, 1)
+                PARAMETER(0U, 0U);
+                INS(0U).SetType(src_type);
+                BASIC_BLOCK(2U, 1U)
                 {
-                    INST(1, Opcode::Cast).SrcType(src_type).Inputs(0);
-                    INS(1).SetType(tgt_type);
-                    INST(2, Opcode::Return).Inputs(0);
-                    INS(2).SetType(src_type);
+                    INST(1U, Opcode::Cast).SrcType(src_type).Inputs(0U);
+                    INS(1U).SetType(tgt_type);
+                    INST(2U, Opcode::Return).Inputs(0U);
+                    INS(2U).SetType(src_type);
                 }
             }
         } else {
             GRAPH(graph2)
             {
-                PARAMETER(0, 0);
-                INS(0).SetType(src_type);
-                BASIC_BLOCK(2, 1)
+                PARAMETER(0U, 0U);
+                INS(0U).SetType(src_type);
+                BASIC_BLOCK(2U, 1U)
                 {
-                    INST(1, Opcode::Cast).SrcType(src_type).Inputs(0);
-                    INS(1).SetType(tgt_type);
-                    INST(2, Opcode::Return).Inputs(1);
-                    INS(2).SetType(tgt_type);
+                    INST(1U, Opcode::Cast).SrcType(src_type).Inputs(0U);
+                    INS(1U).SetType(tgt_type);
+                    INST(2U, Opcode::Return).Inputs(1U);
+                    INS(2U).SetType(tgt_type);
                 }
             }
         }
@@ -176,16 +176,16 @@ public:
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            PARAMETER(0, 0);
-            INS(0).SetType(src_type);
-            BASIC_BLOCK(2, 1)
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(src_type);
+            BASIC_BLOCK(2U, 1U)
             {
-                INST(1, Opcode::Cast).SrcType(src_type).Inputs(0);
-                INS(1).SetType(mdl_type);
-                INST(2, Opcode::Cast).SrcType(mdl_type).Inputs(1);
-                INS(2).SetType(tgt_type);
-                INST(3, Opcode::Return).Inputs(2);
-                INS(3).SetType(tgt_type);
+                INST(1U, Opcode::Cast).SrcType(src_type).Inputs(0U);
+                INS(1U).SetType(mdl_type);
+                INST(2U, Opcode::Cast).SrcType(mdl_type).Inputs(1U);
+                INS(2U).SetType(tgt_type);
+                INST(3U, Opcode::Return).Inputs(2U);
+                INS(3U).SetType(tgt_type);
             }
         }
         auto graph2 = CreateEmptyGraph();
@@ -193,47 +193,47 @@ public:
             if (join_cast) {
                 GRAPH(graph2)
                 {
-                    PARAMETER(0, 0);
-                    INS(0).SetType(src_type);
-                    BASIC_BLOCK(2, 1)
+                    PARAMETER(0U, 0U);
+                    INS(0U).SetType(src_type);
+                    BASIC_BLOCK(2U, 1U)
                     {
-                        INST(1, Opcode::Cast).SrcType(src_type).Inputs(0);
-                        INS(1).SetType(mdl_type);
-                        INST(2, Opcode::Cast).SrcType(src_type).Inputs(0);
-                        INS(2).SetType(tgt_type);
-                        INST(3, Opcode::Return).Inputs(2);
-                        INS(3).SetType(tgt_type);
+                        INST(1U, Opcode::Cast).SrcType(src_type).Inputs(0U);
+                        INS(1U).SetType(mdl_type);
+                        INST(2U, Opcode::Cast).SrcType(src_type).Inputs(0U);
+                        INS(2U).SetType(tgt_type);
+                        INST(3U, Opcode::Return).Inputs(2U);
+                        INS(3U).SetType(tgt_type);
                     }
                 }
             } else {
                 GRAPH(graph2)
                 {
-                    PARAMETER(0, 0);
-                    INS(0).SetType(src_type);
-                    BASIC_BLOCK(2, 1)
+                    PARAMETER(0U, 0U);
+                    INS(0U).SetType(src_type);
+                    BASIC_BLOCK(2U, 1U)
                     {
-                        INST(1, Opcode::Cast).SrcType(src_type).Inputs(0);
-                        INS(1).SetType(mdl_type);
-                        INST(2, Opcode::Cast).SrcType(mdl_type).Inputs(1);
-                        INS(2).SetType(tgt_type);
-                        INST(3, Opcode::Return).Inputs(0);
-                        INS(3).SetType(src_type);
+                        INST(1U, Opcode::Cast).SrcType(src_type).Inputs(0U);
+                        INS(1U).SetType(mdl_type);
+                        INST(2U, Opcode::Cast).SrcType(mdl_type).Inputs(1U);
+                        INS(2U).SetType(tgt_type);
+                        INST(3U, Opcode::Return).Inputs(0U);
+                        INS(3U).SetType(src_type);
                     }
                 }
             }
         } else {
             GRAPH(graph2)
             {
-                PARAMETER(0, 0);
-                INS(0).SetType(src_type);
-                BASIC_BLOCK(2, 1)
+                PARAMETER(0U, 0U);
+                INS(0U).SetType(src_type);
+                BASIC_BLOCK(2U, 1U)
                 {
-                    INST(1, Opcode::Cast).SrcType(src_type).Inputs(0);
-                    INS(1).SetType(mdl_type);
-                    INST(2, Opcode::Cast).SrcType(mdl_type).Inputs(1);
-                    INS(2).SetType(tgt_type);
-                    INST(3, Opcode::Return).Inputs(2);
-                    INS(3).SetType(tgt_type);
+                    INST(1U, Opcode::Cast).SrcType(src_type).Inputs(0U);
+                    INS(1U).SetType(mdl_type);
+                    INST(2U, Opcode::Cast).SrcType(mdl_type).Inputs(1U);
+                    INS(2U).SetType(tgt_type);
+                    INST(3U, Opcode::Return).Inputs(2U);
+                    INS(3U).SetType(tgt_type);
                 }
             }
         }
@@ -263,15 +263,15 @@ public:
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            PARAMETER(1, 1).u64();
-            CONSTANT(2, constant);
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).u64();
+            CONSTANT(2U, constant);
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(3, Opcode::And).u64().Inputs(0, 1);
-                INST(4, Opcode::Compare).b().CC(cc).Inputs(3, 2);
-                INST(5, Opcode::Return).b().Inputs(4);
+                INST(3U, Opcode::And).u64().Inputs(0U, 1U);
+                INST(4U, Opcode::Compare).b().CC(cc).Inputs(3U, 2U);
+                INST(5U, Opcode::Return).b().Inputs(4U);
             }
         }
 
@@ -285,13 +285,13 @@ public:
         auto expected_graph = CreateEmptyGraph();
         GRAPH(expected_graph)
         {
-            PARAMETER(0, 0).u64();
-            PARAMETER(1, 1).u64();
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).u64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(4, Opcode::Compare).b().CC(expected_cc).Inputs(0, 1);
-                INST(5, Opcode::Return).b().Inputs(4);
+                INST(4U, Opcode::Compare).b().CC(expected_cc).Inputs(0U, 1U);
+                INST(5U, Opcode::Return).b().Inputs(4U);
             }
         }
 
@@ -304,24 +304,24 @@ public:
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            PARAMETER(1, 1).u64();
-            CONSTANT(2, constant);
-            CONSTANT(3, -1);
-            CONSTANT(4, -2);
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).u64();
+            CONSTANT(2U, constant);
+            CONSTANT(3U, -1L);
+            CONSTANT(4U, -2L);
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(5, Opcode::And).u64().Inputs(0, 1);
-                INST(6, Opcode::If).SrcType(DataType::UINT64).CC(cc).Inputs(5, 2);
+                INST(5U, Opcode::And).u64().Inputs(0U, 1U);
+                INST(6U, Opcode::If).SrcType(DataType::UINT64).CC(cc).Inputs(5U, 2U);
             }
 
-            BASIC_BLOCK(3, 4) {}
+            BASIC_BLOCK(3U, 4U) {}
 
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(7, Opcode::Phi).s64().Inputs(3, 4);
-                INST(8, Opcode::Return).s64().Inputs(7);
+                INST(7U, Opcode::Phi).s64().Inputs(3U, 4U);
+                INST(8U, Opcode::Return).s64().Inputs(7U);
             }
         }
 
@@ -335,22 +335,22 @@ public:
         auto expected_graph = CreateEmptyGraph();
         GRAPH(expected_graph)
         {
-            PARAMETER(0, 0).u64();
-            PARAMETER(1, 1).u64();
-            CONSTANT(3, -1);
-            CONSTANT(4, -2);
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).u64();
+            CONSTANT(3U, -1L);
+            CONSTANT(4U, -2L);
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(6, Opcode::If).SrcType(DataType::UINT64).CC(expected_cc).Inputs(0, 1);
+                INST(6U, Opcode::If).SrcType(DataType::UINT64).CC(expected_cc).Inputs(0U, 1U);
             }
 
-            BASIC_BLOCK(3, 4) {}
+            BASIC_BLOCK(3U, 4U) {}
 
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(7, Opcode::Phi).s64().Inputs(3, 4);
-                INST(8, Opcode::Return).s64().Inputs(7);
+                INST(7U, Opcode::Phi).s64().Inputs(3U, 4U);
+                INST(8U, Opcode::Return).s64().Inputs(7U);
             }
         }
 
@@ -363,17 +363,17 @@ public:
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).ref();
-            CONSTANT(1, constant);
-            BASIC_BLOCK(2, -1)
+            PARAMETER(0U, 0U).ref();
+            CONSTANT(1U, constant);
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(3, Opcode::LenArray).s32().Inputs(0);
+                INST(3U, Opcode::LenArray).s32().Inputs(0U);
                 if (swap) {
-                    INST(4, Opcode::Compare).b().CC(cc).Inputs(1, 3);
+                    INST(4U, Opcode::Compare).b().CC(cc).Inputs(1U, 3U);
                 } else {
-                    INST(4, Opcode::Compare).b().CC(cc).Inputs(3, 1);
+                    INST(4U, Opcode::Compare).b().CC(cc).Inputs(3U, 1U);
                 }
-                INST(5, Opcode::Return).b().Inputs(4);
+                INST(5U, Opcode::Return).b().Inputs(4U);
             }
         }
 
@@ -387,10 +387,10 @@ public:
         auto expected_graph = CreateEmptyGraph();
         GRAPH(expected_graph)
         {
-            CONSTANT(1, *expected_value);
-            BASIC_BLOCK(2, -1)
+            CONSTANT(1U, *expected_value);
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(2, Opcode::Return).b().Inputs(1);
+                INST(2U, Opcode::Return).b().Inputs(1U);
             }
         }
 
@@ -415,20 +415,20 @@ TEST_F(PeepholesTest, TestAnd1)
     // 1.i64 AND v5, v0
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        CONSTANT(1, 2);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        CONSTANT(1U, 2U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::And).u64().Inputs(1, 0);
-            INST(3, Opcode::Return).u64().Inputs(2);
+            INST(2U, Opcode::And).u64().Inputs(1U, 0U);
+            INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(INS(2).GetInput(0).GetInst(), &INS(0));
-    ASSERT_EQ(INS(2).GetInput(1).GetInst(), &INS(1));
-    ASSERT_EQ(INS(1).GetUsers().Front().GetIndex(), 1U);
-    ASSERT_EQ(INS(0).GetUsers().Front().GetIndex(), 0U);
+    ASSERT_EQ(INS(2U).GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_EQ(INS(2U).GetInput(1U).GetInst(), &INS(1U));
+    ASSERT_EQ(INS(1U).GetUsers().Front().GetIndex(), 1U);
+    ASSERT_EQ(INS(0U).GetUsers().Front().GetIndex(), 0U);
 }
 
 TEST_F(PeepholesTest, TestAnd2)
@@ -443,17 +443,17 @@ TEST_F(PeepholesTest, TestAnd2)
     // 2.i64 INS which use v5
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        CONSTANT(1, -1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        CONSTANT(1U, -1L);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::And).u64().Inputs(0, 1);
-            INST(3, Opcode::Return).u64().Inputs(2);
+            INST(2U, Opcode::And).u64().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(INS(3).GetInput(0).GetInst(), &INS(0));
+    ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), &INS(0U));
 }
 
 TEST_F(PeepholesTest, TestAnd2Addition)
@@ -461,19 +461,19 @@ TEST_F(PeepholesTest, TestAnd2Addition)
     // Case 1 + Case 2
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        CONSTANT(1, -1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        CONSTANT(1U, -1L);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::And).u64().Inputs(1, 0);
-            INST(3, Opcode::Return).u64().Inputs(2);
+            INST(2U, Opcode::And).u64().Inputs(1U, 0U);
+            INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(INS(3).GetInput(0).GetInst(), &INS(0));
-    ASSERT_EQ(INS(1).GetUsers().Front().GetIndex(), 1U);
-    ASSERT_EQ(INS(0).GetUsers().Front().GetIndex(), 0U);
+    ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_EQ(INS(1U).GetUsers().Front().GetIndex(), 1U);
+    ASSERT_EQ(INS(0U).GetUsers().Front().GetIndex(), 0U);
 }
 
 TEST_F(PeepholesTest, TestAnd3)
@@ -486,16 +486,16 @@ TEST_F(PeepholesTest, TestAnd3)
     // 2.i64 INS which use v5
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::And).u64().Inputs(0, 0);
-            INST(3, Opcode::Return).u64().Inputs(2);
+            INST(2U, Opcode::And).u64().Inputs(0U, 0U);
+            INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(INS(3).GetInput(0).GetInst(), &INS(0));
+    ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), &INS(0U));
 }
 
 TEST_F(PeepholesTest, TestAnd3Addition)
@@ -504,16 +504,16 @@ TEST_F(PeepholesTest, TestAnd3Addition)
     // but input's type not equal with and-inst's type
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).s32();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).s32();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::And).s16().Inputs(0, 0);
-            INST(3, Opcode::Return).s32().Inputs(2);
+            INST(2U, Opcode::And).s16().Inputs(0U, 0U);
+            INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(INS(3).GetInput(0).GetInst(), &INS(2));
+    ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), &INS(2U));
 }
 
 TEST_F(PeepholesTest, TestAnd4)
@@ -527,24 +527,24 @@ TEST_F(PeepholesTest, TestAnd4)
     // 6.i64 not v5
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).u64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).u64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Not).u64().Inputs(0);
-            INST(3, Opcode::Not).u64().Inputs(1);
-            INST(4, Opcode::And).u64().Inputs(2, 3);
-            INST(5, Opcode::Return).u64().Inputs(4);
+            INST(2U, Opcode::Not).u64().Inputs(0U);
+            INST(3U, Opcode::Not).u64().Inputs(1U);
+            INST(4U, Opcode::And).u64().Inputs(2U, 3U);
+            INST(5U, Opcode::Return).u64().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    auto not_inst = INS(5).GetInput(0).GetInst();
+    auto not_inst = INS(5U).GetInput(0U).GetInst();
     ASSERT_EQ(not_inst->GetOpcode(), Opcode::Not);
-    auto or_inst = not_inst->GetInput(0).GetInst();
+    auto or_inst = not_inst->GetInput(0U).GetInst();
     ASSERT_EQ(or_inst->GetOpcode(), Opcode::Or);
-    ASSERT_EQ(or_inst->GetInput(0).GetInst(), &INS(0));
-    ASSERT_EQ(or_inst->GetInput(1).GetInst(), &INS(1));
+    ASSERT_EQ(or_inst->GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_EQ(or_inst->GetInput(1U).GetInst(), &INS(1U));
 }
 
 TEST_F(PeepholesTest, TestAnd4Addition)
@@ -552,23 +552,23 @@ TEST_F(PeepholesTest, TestAnd4Addition)
     // Case 4, but NOT-inst have more than 1 user
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).u64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).u64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Not).u64().Inputs(0);
-            INST(3, Opcode::Not).u64().Inputs(1);
-            INST(4, Opcode::And).u64().Inputs(2, 3);
-            INST(5, Opcode::Not).u64().Inputs(2);
-            INST(6, Opcode::Not).u64().Inputs(3);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).u64().InputsAutoType(4, 5, 6, 20);
-            INST(8, Opcode::Return).u64().Inputs(7);
+            INST(2U, Opcode::Not).u64().Inputs(0U);
+            INST(3U, Opcode::Not).u64().Inputs(1U);
+            INST(4U, Opcode::And).u64().Inputs(2U, 3U);
+            INST(5U, Opcode::Not).u64().Inputs(2U);
+            INST(6U, Opcode::Not).u64().Inputs(3U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).u64().InputsAutoType(4U, 5U, 6U, 20U);
+            INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    auto and_inst = INS(7).GetInput(0).GetInst();
+    auto and_inst = INS(7U).GetInput(0U).GetInst();
     ASSERT_EQ(and_inst->GetOpcode(), Opcode::And);
 }
 
@@ -582,20 +582,20 @@ TEST_F(PeepholesTest, TestOr1)
     // 1.i64 Or v5, v0
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        CONSTANT(1, 2);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        CONSTANT(1U, 2U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Or).u64().Inputs(1, 0);
-            INST(3, Opcode::Return).u64().Inputs(2);
+            INST(2U, Opcode::Or).u64().Inputs(1U, 0U);
+            INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(INS(2).GetInput(0).GetInst(), &INS(0));
-    ASSERT_EQ(INS(2).GetInput(1).GetInst(), &INS(1));
-    ASSERT_EQ(INS(1).GetUsers().Front().GetIndex(), 1U);
-    ASSERT_EQ(INS(0).GetUsers().Front().GetIndex(), 0U);
+    ASSERT_EQ(INS(2U).GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_EQ(INS(2U).GetInput(1U).GetInst(), &INS(1U));
+    ASSERT_EQ(INS(1U).GetUsers().Front().GetIndex(), 1U);
+    ASSERT_EQ(INS(0U).GetUsers().Front().GetIndex(), 0U);
 }
 
 TEST_F(PeepholesTest, TestOr2)
@@ -610,287 +610,287 @@ TEST_F(PeepholesTest, TestOr2)
     // 2.i64 INS which use v5
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        CONSTANT(1, 0);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        CONSTANT(1U, 0U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Or).u64().Inputs(1, 0);
-            INST(3, Opcode::Return).u64().Inputs(2);
+            INST(2U, Opcode::Or).u64().Inputs(1U, 0U);
+            INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(INS(3).GetInput(0).GetInst(), &INS(0));
+    ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), &INS(0U));
 }
 
 TEST_F(PeepholesTest, AddConstantTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        CONSTANT(2, 1);
-        CONSTANT(3, 0);
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(2U, 1U);
+        CONSTANT(3U, 0U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Add).u64().Inputs(2, 0);
-            INST(5, Opcode::Add).u64().Inputs(3, 1);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).u64().InputsAutoType(4, 5, 20);
-            INST(7, Opcode::Return).u64().Inputs(6);
+            INST(4U, Opcode::Add).u64().Inputs(2U, 0U);
+            INST(5U, Opcode::Add).u64().Inputs(3U, 1U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).u64().InputsAutoType(4U, 5U, 20U);
+            INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_TRUE(CheckInputs(INS(4), {0, 2}));
-    ASSERT_TRUE(CheckInputs(INS(5), {1, 3}));
-    ASSERT_TRUE(CheckInputs(INS(6), {4, 1, 20}));
+    ASSERT_TRUE(CheckInputs(INS(4U), {0U, 2U}));
+    ASSERT_TRUE(CheckInputs(INS(5U), {1U, 3U}));
+    ASSERT_TRUE(CheckInputs(INS(6U), {4U, 1U, 20U}));
 
-    ASSERT_TRUE(CheckUsers(INS(0), {4}));
-    ASSERT_TRUE(CheckUsers(INS(2), {4}));
-    ASSERT_TRUE(CheckUsers(INS(3), {5}));
-    ASSERT_TRUE(INS(5).GetUsers().Empty());
+    ASSERT_TRUE(CheckUsers(INS(0U), {4U}));
+    ASSERT_TRUE(CheckUsers(INS(2U), {4U}));
+    ASSERT_TRUE(CheckUsers(INS(3U), {5U}));
+    ASSERT_TRUE(INS(5U).GetUsers().Empty());
 }
 
 TEST_F(PeepholesTest, AddConstantTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 5);
-        CONSTANT(2, 6);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 5U);
+        CONSTANT(2U, 6U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Add).u64().Inputs(0, 1);
-            INST(4, Opcode::Sub).u64().Inputs(0, 1);
+            INST(3U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Sub).u64().Inputs(0U, 1U);
 
-            INST(5, Opcode::Add).u64().Inputs(2, 3);
-            INST(6, Opcode::Add).u64().Inputs(2, 4);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).u64().InputsAutoType(5, 6, 20);
-            INST(8, Opcode::Return).u64().Inputs(7);
+            INST(5U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(6U, Opcode::Add).u64().Inputs(2U, 4U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).u64().InputsAutoType(5U, 6U, 20U);
+            INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    auto const3 = INS(2).GetNext();
+    auto const3 = INS(2U).GetNext();
     ASSERT_TRUE(const3 != nullptr);
     auto const4 = const3->GetNext();
     ASSERT_TRUE(const4 != nullptr && const4->GetNext() == nullptr);
 
-    ASSERT_TRUE(INS(5).GetInput(0) == &INS(0) && INS(5).GetInput(1) == const3);
-    ASSERT_TRUE(INS(6).GetInput(0) == &INS(0) && INS(6).GetInput(1) == const4);
+    ASSERT_TRUE(INS(5U).GetInput(0U) == &INS(0U) && INS(5U).GetInput(1U) == const3);
+    ASSERT_TRUE(INS(6U).GetInput(0U) == &INS(0U) && INS(6U).GetInput(1U) == const4);
 
-    ASSERT_TRUE(CheckUsers(INS(0), {3, 4, 5, 6}));
-    ASSERT_TRUE(CheckUsers(INS(1), {3, 4}));
-    ASSERT_TRUE(CheckUsers(*const3, {5}));
-    ASSERT_TRUE(CheckUsers(*const4, {6}));
-    ASSERT_TRUE(INS(2).GetUsers().Empty());
+    ASSERT_TRUE(CheckUsers(INS(0U), {3U, 4U, 5U, 6U}));
+    ASSERT_TRUE(CheckUsers(INS(1U), {3U, 4U}));
+    ASSERT_TRUE(CheckUsers(*const3, {5U}));
+    ASSERT_TRUE(CheckUsers(*const4, {6U}));
+    ASSERT_TRUE(INS(2U).GetUsers().Empty());
 }
 
 TEST_F(PeepholesTest, AddConstantTest3)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u32();
-        CONSTANT(1, 5);
-        CONSTANT(2, 6);
+        PARAMETER(0U, 0U).u32();
+        CONSTANT(1U, 5U);
+        CONSTANT(2U, 6U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Add).u16().Inputs(0, 1);
-            INST(4, Opcode::Sub).u16().Inputs(0, 1);
+            INST(3U, Opcode::Add).u16().Inputs(0U, 1U);
+            INST(4U, Opcode::Sub).u16().Inputs(0U, 1U);
 
-            INST(5, Opcode::Add).u32().Inputs(2, 3);
-            INST(6, Opcode::Add).u32().Inputs(2, 4);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).u64().InputsAutoType(5, 6, 20);
-            INST(8, Opcode::Return).u64().Inputs(7);
+            INST(5U, Opcode::Add).u32().Inputs(2U, 3U);
+            INST(6U, Opcode::Add).u32().Inputs(2U, 4U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).u64().InputsAutoType(5U, 6U, 20U);
+            INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(INS(2).GetNext() == nullptr);
+    ASSERT_TRUE(INS(2U).GetNext() == nullptr);
 
-    ASSERT_TRUE(CheckInputs(INS(3), {0, 1}));
-    ASSERT_TRUE(CheckInputs(INS(4), {0, 1}));
-    ASSERT_TRUE(CheckInputs(INS(5), {3, 2}));
-    ASSERT_TRUE(CheckInputs(INS(6), {4, 2}));
+    ASSERT_TRUE(CheckInputs(INS(3U), {0U, 1U}));
+    ASSERT_TRUE(CheckInputs(INS(4U), {0U, 1U}));
+    ASSERT_TRUE(CheckInputs(INS(5U), {3U, 2U}));
+    ASSERT_TRUE(CheckInputs(INS(6U), {4U, 2U}));
 
-    ASSERT_TRUE(CheckUsers(INS(0), {3, 4}));
-    ASSERT_TRUE(CheckUsers(INS(1), {3, 4}));
-    ASSERT_TRUE(CheckUsers(INS(2), {5, 6}));
-    ASSERT_TRUE(CheckUsers(INS(3), {5}));
-    ASSERT_TRUE(CheckUsers(INS(4), {6}));
+    ASSERT_TRUE(CheckUsers(INS(0U), {3U, 4U}));
+    ASSERT_TRUE(CheckUsers(INS(1U), {3U, 4U}));
+    ASSERT_TRUE(CheckUsers(INS(2U), {5U, 6U}));
+    ASSERT_TRUE(CheckUsers(INS(3U), {5U}));
+    ASSERT_TRUE(CheckUsers(INS(4U), {6U}));
 }
 
 TEST_F(PeepholesTest, AddNegTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Neg).u64().Inputs(0);
-            INST(3, Opcode::Neg).u64().Inputs(1);
+            INST(2U, Opcode::Neg).u64().Inputs(0U);
+            INST(3U, Opcode::Neg).u64().Inputs(1U);
 
-            INST(4, Opcode::Add).u64().Inputs(2, 3);
-            INST(5, Opcode::Return).u64().Inputs(4);
+            INST(4U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(5U, Opcode::Return).u64().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    auto new_neg = INS(4).GetNext();
+    auto new_neg = INS(4U).GetNext();
 
-    ASSERT_TRUE(CheckUsers(INS(0), {2, 4}));
-    ASSERT_TRUE(CheckUsers(INS(1), {3, 4}));
-    ASSERT_TRUE(INS(2).GetUsers().Empty());
-    ASSERT_TRUE(INS(3).GetUsers().Empty());
+    ASSERT_TRUE(CheckUsers(INS(0U), {2U, 4U}));
+    ASSERT_TRUE(CheckUsers(INS(1U), {3U, 4U}));
+    ASSERT_TRUE(INS(2U).GetUsers().Empty());
+    ASSERT_TRUE(INS(3U).GetUsers().Empty());
 
-    ASSERT(CheckInputs(INS(4), {0, 1}));
+    ASSERT(CheckInputs(INS(4U), {0U, 1U}));
 
-    auto user = INS(4).GetUsers().begin();
+    auto user = INS(4U).GetUsers().begin();
     ASSERT_TRUE(user->GetInst() == new_neg);
-    ASSERT_FALSE(++user != INS(4).GetUsers().end());
+    ASSERT_FALSE(++user != INS(4U).GetUsers().end());
 
-    ASSERT_TRUE(new_neg->GetInput(0) == &INS(4));
-    ASSERT_TRUE(CheckUsers(*new_neg, {5}));
+    ASSERT_TRUE(new_neg->GetInput(0U) == &INS(4U));
+    ASSERT_TRUE(CheckUsers(*new_neg, {5U}));
 
-    ASSERT_TRUE(INS(5).GetInput(0) == new_neg);
+    ASSERT_TRUE(INS(5U).GetInput(0U) == new_neg);
 }
 
 TEST_F(PeepholesTest, AddNegTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Neg).u64().Inputs(0);
-            INST(3, Opcode::Neg).u64().Inputs(1);
+            INST(2U, Opcode::Neg).u64().Inputs(0U);
+            INST(3U, Opcode::Neg).u64().Inputs(1U);
 
-            INST(4, Opcode::Add).u64().Inputs(2, 3);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).u64().InputsAutoType(2, 4, 20);
-            INST(5, Opcode::Return).u64().Inputs(6);
+            INST(4U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).u64().InputsAutoType(2U, 4U, 20U);
+            INST(5U, Opcode::Return).u64().Inputs(6U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(CheckUsers(INS(0), {2}));
-    ASSERT_TRUE(CheckUsers(INS(1), {3}));
+    ASSERT_TRUE(CheckUsers(INS(0U), {2U}));
+    ASSERT_TRUE(CheckUsers(INS(1U), {3U}));
 
-    ASSERT_TRUE(CheckInputs(INS(2), {0}));
-    ASSERT_TRUE(CheckUsers(INS(2), {4, 6}));
-    ASSERT_TRUE(CheckInputs(INS(3), {1}));
-    ASSERT_TRUE(CheckUsers(INS(3), {4}));
+    ASSERT_TRUE(CheckInputs(INS(2U), {0U}));
+    ASSERT_TRUE(CheckUsers(INS(2U), {4U, 6U}));
+    ASSERT_TRUE(CheckInputs(INS(3U), {1U}));
+    ASSERT_TRUE(CheckUsers(INS(3U), {4U}));
 
-    ASSERT_TRUE(CheckInputs(INS(4), {2, 3}));
+    ASSERT_TRUE(CheckInputs(INS(4U), {2U, 3U}));
 }
 
 TEST_F(PeepholesTest, AddNegTest3)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        CONSTANT(8, 1);
-        CONSTANT(9, 2);
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(8U, 1U);
+        CONSTANT(9U, 2U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Neg).u64().Inputs(0);
-            INST(3, Opcode::Neg).u64().Inputs(1);
+            INST(2U, Opcode::Neg).u64().Inputs(0U);
+            INST(3U, Opcode::Neg).u64().Inputs(1U);
 
-            INST(4, Opcode::Add).u64().Inputs(2, 8);
-            INST(5, Opcode::Add).u64().Inputs(3, 9);
+            INST(4U, Opcode::Add).u64().Inputs(2U, 8U);
+            INST(5U, Opcode::Add).u64().Inputs(3U, 9U);
 
-            INST(6, Opcode::Add).u64().Inputs(2, 3);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(10, Opcode::CallStatic).u64().InputsAutoType(4, 5, 6, 20);
-            INST(7, Opcode::Return).u64().Inputs(10);
+            INST(6U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(10U, Opcode::CallStatic).u64().InputsAutoType(4U, 5U, 6U, 20U);
+            INST(7U, Opcode::Return).u64().Inputs(10U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_TRUE(CheckUsers(INS(0), {2}));
-    ASSERT_TRUE(CheckUsers(INS(1), {3}));
-    ASSERT_TRUE(CheckUsers(INS(2), {4, 6}));
-    ASSERT_TRUE(CheckUsers(INS(3), {5, 6}));
+    ASSERT_TRUE(CheckUsers(INS(0U), {2U}));
+    ASSERT_TRUE(CheckUsers(INS(1U), {3U}));
+    ASSERT_TRUE(CheckUsers(INS(2U), {4U, 6U}));
+    ASSERT_TRUE(CheckUsers(INS(3U), {5U, 6U}));
 
-    ASSERT(CheckInputs(INS(4), {2, 8}));
-    ASSERT(CheckInputs(INS(5), {3, 9}));
+    ASSERT(CheckInputs(INS(4U), {2U, 8U}));
+    ASSERT(CheckInputs(INS(5U), {3U, 9U}));
 
-    ASSERT_TRUE(CheckInputs(INS(6), {2, 3}));
-    ASSERT_TRUE(CheckUsers(INS(6), {10}));
-    ASSERT_TRUE(INS(6).GetNext()->GetNext() == &INS(10));
+    ASSERT_TRUE(CheckInputs(INS(6U), {2U, 3U}));
+    ASSERT_TRUE(CheckUsers(INS(6U), {10U}));
+    ASSERT_TRUE(INS(6U).GetNext()->GetNext() == &INS(10U));
 
-    ASSERT_TRUE(CheckInputs(INS(7), {10}));
+    ASSERT_TRUE(CheckInputs(INS(7U), {10U}));
 }
 
 TEST_F(PeepholesTest, AddNegTest4)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Neg).u64().Inputs(0);
-            INST(3, Opcode::Neg).u64().Inputs(1);
+            INST(2U, Opcode::Neg).u64().Inputs(0U);
+            INST(3U, Opcode::Neg).u64().Inputs(1U);
 
-            INST(4, Opcode::Add).u64().Inputs(0, 3);
-            INST(5, Opcode::Add).u64().Inputs(2, 1);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).u64().InputsAutoType(4, 5, 20);
-            INST(6, Opcode::Return).u64().Inputs(7);
+            INST(4U, Opcode::Add).u64().Inputs(0U, 3U);
+            INST(5U, Opcode::Add).u64().Inputs(2U, 1U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).u64().InputsAutoType(4U, 5U, 20U);
+            INST(6U, Opcode::Return).u64().Inputs(7U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(CheckUsers(INS(0), {2, 4, 5}));
-    ASSERT_TRUE(CheckUsers(INS(1), {3, 4, 5}));
+    ASSERT_TRUE(CheckUsers(INS(0U), {2U, 4U, 5U}));
+    ASSERT_TRUE(CheckUsers(INS(1U), {3U, 4U, 5U}));
 
-    ASSERT_TRUE(INS(2).GetUsers().Empty());
-    ASSERT_TRUE(INS(3).GetUsers().Empty());
+    ASSERT_TRUE(INS(2U).GetUsers().Empty());
+    ASSERT_TRUE(INS(3U).GetUsers().Empty());
 
-    ASSERT_TRUE(CheckInputs(INS(4), {0, 1}));
-    ASSERT_TRUE(INS(4).GetOpcode() == Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(4U), {0U, 1U}));
+    ASSERT_TRUE(INS(4U).GetOpcode() == Opcode::Sub);
 
-    ASSERT_TRUE(CheckInputs(INS(5), {1, 0}));
-    ASSERT_TRUE(INS(5).GetOpcode() == Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(5U), {1U, 0U}));
+    ASSERT_TRUE(INS(5U).GetOpcode() == Opcode::Sub);
 }
 
 TEST_F(PeepholesTest, AddNegConstOne)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 1);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::CallStatic).b().InputsAutoType(1);
-            INST(3, Opcode::Neg).s32().Inputs(2);
-            INST(4, Opcode::Add).s32().Inputs(3, 0);
-            INST(5, Opcode::Return).s32().Inputs(4);
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::CallStatic).b().InputsAutoType(1U);
+            INST(3U, Opcode::Neg).s32().Inputs(2U);
+            INST(4U, Opcode::Add).s32().Inputs(3U, 0U);
+            INST(5U, Opcode::Return).s32().Inputs(4U);
         }
     }
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(6, 0);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(6U, 0U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::CallStatic).b().InputsAutoType(1);
-            INST(7, Opcode::Compare).s32().b().CC(ConditionCode::CC_EQ).SetType(DataType::BOOL).Inputs(2, 6);
-            INST(5, Opcode::Return).s32().Inputs(7);
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::CallStatic).b().InputsAutoType(1U);
+            INST(7U, Opcode::Compare).s32().b().CC(ConditionCode::CC_EQ).SetType(DataType::BOOL).Inputs(2U, 6U);
+            INST(5U, Opcode::Return).s32().Inputs(7U);
         }
     }
 
@@ -904,33 +904,33 @@ TEST_F(PeepholesTest, SameAddAndSubTest)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Sub).u64().Inputs(0, 1);
-            INST(3, Opcode::Add).u64().Inputs(2, 1);
-            INST(4, Opcode::Add).u64().Inputs(1, 2);
-            INST(5, Opcode::Add).u64().Inputs(3, 4);
+            INST(2U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(3U, Opcode::Add).u64().Inputs(2U, 1U);
+            INST(4U, Opcode::Add).u64().Inputs(1U, 2U);
+            INST(5U, Opcode::Add).u64().Inputs(3U, 4U);
 
-            INST(6, Opcode::Add).u32().Inputs(1, 2);
-            INST(7, Opcode::Add).u32().Inputs(2, 1);
-            INST(8, Opcode::Add).u32().Inputs(6, 7);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(10, Opcode::CallStatic).u64().InputsAutoType(5, 8, 20);
-            INST(9, Opcode::Return).u64().Inputs(10);
+            INST(6U, Opcode::Add).u32().Inputs(1U, 2U);
+            INST(7U, Opcode::Add).u32().Inputs(2U, 1U);
+            INST(8U, Opcode::Add).u32().Inputs(6U, 7U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(10U, Opcode::CallStatic).u64().InputsAutoType(5U, 8U, 20U);
+            INST(9U, Opcode::Return).u64().Inputs(10U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(INS(3).GetUsers().Empty());
-    ASSERT_TRUE(INS(4).GetUsers().Empty());
-    ASSERT_TRUE(CheckInputs(INS(5), {0, 0}));
+    ASSERT_TRUE(INS(3U).GetUsers().Empty());
+    ASSERT_TRUE(INS(4U).GetUsers().Empty());
+    ASSERT_TRUE(CheckInputs(INS(5U), {0U, 0U}));
 
-    ASSERT_TRUE(CheckInputs(INS(6), {1, 2}));
-    ASSERT_TRUE(CheckInputs(INS(7), {2, 1}));
-    ASSERT_TRUE(CheckInputs(INS(8), {6, 7}));
+    ASSERT_TRUE(CheckInputs(INS(6U), {1U, 2U}));
+    ASSERT_TRUE(CheckInputs(INS(7U), {2U, 1U}));
+    ASSERT_TRUE(CheckInputs(INS(8U), {6U, 7U}));
 }
 
 // (a - b) + (c + b) -> a + c
@@ -938,21 +938,21 @@ TEST_F(PeepholesTest, AddSubAndAddSameOperandTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Sub).u64().Inputs(0, 1);
-            INST(4, Opcode::Add).u64().Inputs(2, 1);
-            INST(5, Opcode::Add).u64().Inputs(3, 4);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(3U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Add).u64().Inputs(2U, 1U);
+            INST(5U, Opcode::Add).u64().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Add);
-    ASSERT_TRUE(CheckInputs(INS(5), {0, 2}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Add);
+    ASSERT_TRUE(CheckInputs(INS(5U), {0U, 2U}));
 }
 
 // (a - b) + (b + c) -> a + c
@@ -960,21 +960,21 @@ TEST_F(PeepholesTest, AddSubAndAddSameOperandTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Sub).u64().Inputs(0, 1);
-            INST(4, Opcode::Add).u64().Inputs(1, 2);
-            INST(5, Opcode::Add).u64().Inputs(3, 4);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(3U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Add).u64().Inputs(1U, 2U);
+            INST(5U, Opcode::Add).u64().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Add);
-    ASSERT_TRUE(CheckInputs(INS(5), {0, 2}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Add);
+    ASSERT_TRUE(CheckInputs(INS(5U), {0U, 2U}));
 }
 
 // (a + b) + (c - b) -> c + a
@@ -982,21 +982,21 @@ TEST_F(PeepholesTest, AddAddAndSubSameOperandTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Sub).u64().Inputs(2, 1);
-            INST(4, Opcode::Add).u64().Inputs(0, 1);
-            INST(5, Opcode::Add).u64().Inputs(4, 3);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(3U, Opcode::Sub).u64().Inputs(2U, 1U);
+            INST(4U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(5U, Opcode::Add).u64().Inputs(4U, 3U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Add);
-    ASSERT_TRUE(CheckInputs(INS(5), {2, 0}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Add);
+    ASSERT_TRUE(CheckInputs(INS(5U), {2U, 0U}));
 }
 
 // (b + a) + (c - b) -> c + a
@@ -1004,21 +1004,21 @@ TEST_F(PeepholesTest, AddAddAndSubSameOperandTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Sub).u64().Inputs(2, 1);
-            INST(4, Opcode::Add).u64().Inputs(1, 0);
-            INST(5, Opcode::Add).u64().Inputs(4, 3);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(3U, Opcode::Sub).u64().Inputs(2U, 1U);
+            INST(4U, Opcode::Add).u64().Inputs(1U, 0U);
+            INST(5U, Opcode::Add).u64().Inputs(4U, 3U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Add);
-    ASSERT_TRUE(CheckInputs(INS(5), {2, 0}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Add);
+    ASSERT_TRUE(CheckInputs(INS(5U), {2U, 0U}));
 }
 
 // (a - b) + (b - c) -> a - c
@@ -1026,21 +1026,21 @@ TEST_F(PeepholesTest, AddSubAndSubSameOperandTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Sub).u64().Inputs(0, 1);
-            INST(4, Opcode::Sub).u64().Inputs(1, 2);
-            INST(5, Opcode::Add).u64().Inputs(3, 4);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(3U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Sub).u64().Inputs(1U, 2U);
+            INST(5U, Opcode::Add).u64().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Sub);
-    ASSERT_TRUE(CheckInputs(INS(5), {0, 2}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(5U), {0U, 2U}));
 }
 
 // (a - b) + (c - a) -> c - b
@@ -1048,21 +1048,21 @@ TEST_F(PeepholesTest, AddSubAndSubSameOperandTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Sub).u64().Inputs(0, 1);
-            INST(4, Opcode::Sub).u64().Inputs(2, 0);
-            INST(5, Opcode::Add).u64().Inputs(3, 4);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(3U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Sub).u64().Inputs(2U, 0U);
+            INST(5U, Opcode::Add).u64().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Sub);
-    ASSERT_TRUE(CheckInputs(INS(5), {2, 1}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(5U), {2U, 1U}));
 }
 
 // a + (0 - b) -> a - b
@@ -1070,20 +1070,20 @@ TEST_F(PeepholesTest, AddSubLeftZeroOperandTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        PARAMETER(2, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        PARAMETER(2U, 1U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Sub).u64().Inputs(1, 2);
-            INST(4, Opcode::Add).u64().Inputs(0, 3);
-            INST(5, Opcode::Return).u64().Inputs(4);
+            INST(3U, Opcode::Sub).u64().Inputs(1U, 2U);
+            INST(4U, Opcode::Add).u64().Inputs(0U, 3U);
+            INST(5U, Opcode::Return).u64().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_EQ(INS(4).GetOpcode(), Opcode::Sub);
-    ASSERT_TRUE(CheckInputs(INS(4), {0, 2}));
+    ASSERT_EQ(INS(4U).GetOpcode(), Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(4U), {0U, 2U}));
 }
 
 // (0 - a) + b -> b - a
@@ -1091,20 +1091,20 @@ TEST_F(PeepholesTest, AddSubLeftZeroOperandTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        PARAMETER(2, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        PARAMETER(2U, 1U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Sub).u64().Inputs(1, 0);
-            INST(4, Opcode::Add).u64().Inputs(3, 2);
-            INST(5, Opcode::Return).u64().Inputs(4);
+            INST(3U, Opcode::Sub).u64().Inputs(1U, 0U);
+            INST(4U, Opcode::Add).u64().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).u64().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_EQ(INS(4).GetOpcode(), Opcode::Sub);
-    ASSERT_TRUE(CheckInputs(INS(4), {2, 0}));
+    ASSERT_EQ(INS(4U).GetOpcode(), Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(4U), {2U, 0U}));
 }
 
 // (x + a) - (x + b) -> a - b
@@ -1112,21 +1112,21 @@ TEST_F(PeepholesTest, SubAddSameOperandTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Add).u64().Inputs(0, 1);
-            INST(4, Opcode::Add).u64().Inputs(0, 2);
-            INST(5, Opcode::Sub).u64().Inputs(3, 4);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(3U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Add).u64().Inputs(0U, 2U);
+            INST(5U, Opcode::Sub).u64().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Sub);
-    ASSERT_TRUE(CheckInputs(INS(5), {1, 2}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(5U), {1U, 2U}));
 }
 
 // (a + x) - (x + b) -> a - b
@@ -1134,21 +1134,21 @@ TEST_F(PeepholesTest, SubAddSameOperandTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Add).u64().Inputs(1, 0);
-            INST(4, Opcode::Add).u64().Inputs(0, 2);
-            INST(5, Opcode::Sub).u64().Inputs(3, 4);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(3U, Opcode::Add).u64().Inputs(1U, 0U);
+            INST(4U, Opcode::Add).u64().Inputs(0U, 2U);
+            INST(5U, Opcode::Sub).u64().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Sub);
-    ASSERT_TRUE(CheckInputs(INS(5), {1, 2}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(5U), {1U, 2U}));
 }
 
 // (a + x) - (b + x) -> a - b
@@ -1156,21 +1156,21 @@ TEST_F(PeepholesTest, SubAddSameOperandTest3)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Add).u64().Inputs(1, 0);
-            INST(4, Opcode::Add).u64().Inputs(2, 0);
-            INST(5, Opcode::Sub).u64().Inputs(3, 4);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(3U, Opcode::Add).u64().Inputs(1U, 0U);
+            INST(4U, Opcode::Add).u64().Inputs(2U, 0U);
+            INST(5U, Opcode::Sub).u64().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Sub);
-    ASSERT_TRUE(CheckInputs(INS(5), {1, 2}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(5U), {1U, 2U}));
 }
 
 // (x + a) - (b + x) -> a - b
@@ -1178,55 +1178,55 @@ TEST_F(PeepholesTest, SubAddSameOperandTest4)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Add).u64().Inputs(0, 1);
-            INST(4, Opcode::Add).u64().Inputs(2, 0);
-            INST(5, Opcode::Sub).u64().Inputs(3, 4);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(3U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Add).u64().Inputs(2U, 0U);
+            INST(5U, Opcode::Sub).u64().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Sub);
-    ASSERT_TRUE(CheckInputs(INS(5), {1, 2}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(5U), {1U, 2U}));
 }
 
 TEST_F(PeepholesTest, SubZeroConstantTest)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(3, 0);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(3U, 0U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Sub).u64().Inputs(0, 3);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(9, Opcode::CallStatic).s32().InputsAutoType(6, 20);
-            INST(10, Opcode::Return).s32().Inputs(9);
+            INST(6U, Opcode::Sub).u64().Inputs(0U, 3U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(9U, Opcode::CallStatic).s32().InputsAutoType(6U, 20U);
+            INST(10U, Opcode::Return).s32().Inputs(9U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(INS(6).GetUsers().Empty());
-    ASSERT_TRUE(INS(9).GetInput(0) == &INS(0));
+    ASSERT_TRUE(INS(6U).GetUsers().Empty());
+    ASSERT_TRUE(INS(9U).GetInput(0U) == &INS(0U));
 }
 
 TEST_F(PeepholesTest, SubFromZeroConstantTest)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s64();
-        CONSTANT(1, 0);
+        PARAMETER(0U, 0U).s64();
+        CONSTANT(1U, 0U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Sub).s64().Inputs(1, 0);
-            INST(3, Opcode::Return).s64().Inputs(2);
+            INST(2U, Opcode::Sub).s64().Inputs(1U, 0U);
+            INST(3U, Opcode::Return).s64().Inputs(2U);
         }
     }
 
@@ -1235,12 +1235,12 @@ TEST_F(PeepholesTest, SubFromZeroConstantTest)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s64();
+        PARAMETER(0U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Neg).s64().Inputs(0);
-            INST(3, Opcode::Return).s64().Inputs(2);
+            INST(2U, Opcode::Neg).s64().Inputs(0U);
+            INST(3U, Opcode::Return).s64().Inputs(2U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -1250,13 +1250,13 @@ TEST_F(PeepholesTest, SubFromZeroConstantFPTest)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).f64();
-        CONSTANT(1, 0.0);
+        PARAMETER(0U, 0U).f64();
+        CONSTANT(1U, 0.0);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Sub).f64().Inputs(1, 0);
-            INST(3, Opcode::Return).f64().Inputs(2);
+            INST(2U, Opcode::Sub).f64().Inputs(1U, 0U);
+            INST(3U, Opcode::Return).f64().Inputs(2U);
         }
     }
 
@@ -1267,156 +1267,156 @@ TEST_F(PeepholesTest, SubConstantTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 5);
-        CONSTANT(2, 6);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 5U);
+        CONSTANT(2U, 6U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Add).u64().Inputs(0, 1);
-            INST(4, Opcode::Sub).u64().Inputs(0, 1);
+            INST(3U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Sub).u64().Inputs(0U, 1U);
 
-            INST(5, Opcode::Sub).u64().Inputs(3, 2);
-            INST(6, Opcode::Sub).u64().Inputs(4, 2);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).u64().InputsAutoType(5, 6, 20);
-            INST(7, Opcode::Return).u64().Inputs(8);
+            INST(5U, Opcode::Sub).u64().Inputs(3U, 2U);
+            INST(6U, Opcode::Sub).u64().Inputs(4U, 2U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).u64().InputsAutoType(5U, 6U, 20U);
+            INST(7U, Opcode::Return).u64().Inputs(8U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
-    auto const3 = static_cast<ConstantInst *>(INS(2).GetNext());
+    auto const3 = static_cast<ConstantInst *>(INS(2U).GetNext());
     ASSERT_TRUE(const3 != nullptr);
     auto const4 = static_cast<ConstantInst *>(const3->GetNext());
     ASSERT_TRUE(const4 != nullptr && const4->GetNext() == nullptr);
-    ASSERT_TRUE(const3->IsEqualConst(1));
-    ASSERT_TRUE(const4->IsEqualConst(11));
+    ASSERT_TRUE(const3->IsEqualConst(1U));
+    ASSERT_TRUE(const4->IsEqualConst(11U));
 
-    ASSERT_TRUE(INS(5).GetInput(0) == &INS(0) && INS(5).GetInput(1) == const3);
-    ASSERT_TRUE(INS(6).GetInput(0) == &INS(0) && INS(6).GetInput(1) == const4);
+    ASSERT_TRUE(INS(5U).GetInput(0U) == &INS(0U) && INS(5U).GetInput(1U) == const3);
+    ASSERT_TRUE(INS(6U).GetInput(0U) == &INS(0U) && INS(6U).GetInput(1U) == const4);
 
-    ASSERT_TRUE(CheckUsers(INS(0), {3, 4, 5, 6}));
-    ASSERT_TRUE(CheckUsers(INS(1), {3, 4}));
-    ASSERT_TRUE(INS(2).GetUsers().Empty());
-    ASSERT_TRUE(CheckUsers(*const3, {5}));
-    ASSERT_TRUE(CheckUsers(*const4, {6}));
+    ASSERT_TRUE(CheckUsers(INS(0U), {3U, 4U, 5U, 6U}));
+    ASSERT_TRUE(CheckUsers(INS(1U), {3U, 4U}));
+    ASSERT_TRUE(INS(2U).GetUsers().Empty());
+    ASSERT_TRUE(CheckUsers(*const3, {5U}));
+    ASSERT_TRUE(CheckUsers(*const4, {6U}));
 }
 
 TEST_F(PeepholesTest, SubConstantTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 5);
-        CONSTANT(2, 6);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 5U);
+        CONSTANT(2U, 6U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Add).u64().Inputs(0, 1);
-            INST(4, Opcode::Sub).u64().Inputs(0, 1);
+            INST(3U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Sub).u64().Inputs(0U, 1U);
 
-            INST(5, Opcode::Sub).u32().Inputs(3, 2);
-            INST(6, Opcode::Sub).u32().Inputs(4, 2);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).u64().InputsAutoType(5, 6, 20);
-            INST(7, Opcode::Return).u64().Inputs(8);
+            INST(5U, Opcode::Sub).u32().Inputs(3U, 2U);
+            INST(6U, Opcode::Sub).u32().Inputs(4U, 2U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).u64().InputsAutoType(5U, 6U, 20U);
+            INST(7U, Opcode::Return).u64().Inputs(8U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(INS(2).GetNext() == nullptr);
+    ASSERT_TRUE(INS(2U).GetNext() == nullptr);
 
-    ASSERT_TRUE(CheckInputs(INS(3), {0, 1}));
-    ASSERT_TRUE(CheckInputs(INS(4), {0, 1}));
-    ASSERT_TRUE(CheckInputs(INS(5), {3, 2}));
-    ASSERT_TRUE(CheckInputs(INS(6), {4, 2}));
+    ASSERT_TRUE(CheckInputs(INS(3U), {0U, 1U}));
+    ASSERT_TRUE(CheckInputs(INS(4U), {0U, 1U}));
+    ASSERT_TRUE(CheckInputs(INS(5U), {3U, 2U}));
+    ASSERT_TRUE(CheckInputs(INS(6U), {4U, 2U}));
 
-    ASSERT_TRUE(CheckUsers(INS(0), {3, 4}));
-    ASSERT_TRUE(CheckUsers(INS(1), {3, 4}));
-    ASSERT_TRUE(CheckUsers(INS(2), {5, 6}));
-    ASSERT_TRUE(CheckUsers(INS(3), {5}));
-    ASSERT_TRUE(CheckUsers(INS(4), {6}));
+    ASSERT_TRUE(CheckUsers(INS(0U), {3U, 4U}));
+    ASSERT_TRUE(CheckUsers(INS(1U), {3U, 4U}));
+    ASSERT_TRUE(CheckUsers(INS(2U), {5U, 6U}));
+    ASSERT_TRUE(CheckUsers(INS(3U), {5U}));
+    ASSERT_TRUE(CheckUsers(INS(4U), {6U}));
 }
 
 TEST_F(PeepholesTest, SubNegTest)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Neg).u64().Inputs(0);
-            INST(3, Opcode::Neg).u64().Inputs(1);
+            INST(2U, Opcode::Neg).u64().Inputs(0U);
+            INST(3U, Opcode::Neg).u64().Inputs(1U);
 
-            INST(4, Opcode::Sub).u64().Inputs(0, 3);
-            INST(5, Opcode::Sub).u64().Inputs(2, 0);
-            INST(6, Opcode::Sub).u64().Inputs(2, 3);
-            INST(7, Opcode::Sub).u64().Inputs(3, 2);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).u64().InputsAutoType(4, 5, 6, 7, 20);
-            INST(9, Opcode::Return).u64().Inputs(8);
+            INST(4U, Opcode::Sub).u64().Inputs(0U, 3U);
+            INST(5U, Opcode::Sub).u64().Inputs(2U, 0U);
+            INST(6U, Opcode::Sub).u64().Inputs(2U, 3U);
+            INST(7U, Opcode::Sub).u64().Inputs(3U, 2U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).u64().InputsAutoType(4U, 5U, 6U, 7U, 20U);
+            INST(9U, Opcode::Return).u64().Inputs(8U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(CheckInputs(INS(4), {0, 1}));
-    ASSERT_TRUE(INS(4).GetOpcode() == Opcode::Add);
-    ASSERT_TRUE(CheckInputs(INS(5), {2, 0}));
-    ASSERT_TRUE(INS(5).GetOpcode() == Opcode::Sub);
-    ASSERT_TRUE(CheckInputs(INS(6), {1, 0}));
-    ASSERT_TRUE(INS(6).GetOpcode() == Opcode::Sub);
-    ASSERT_TRUE(CheckInputs(INS(7), {0, 1}));
-    ASSERT_TRUE(INS(7).GetOpcode() == Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(4U), {0U, 1U}));
+    ASSERT_TRUE(INS(4U).GetOpcode() == Opcode::Add);
+    ASSERT_TRUE(CheckInputs(INS(5U), {2U, 0U}));
+    ASSERT_TRUE(INS(5U).GetOpcode() == Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(6U), {1U, 0U}));
+    ASSERT_TRUE(INS(6U).GetOpcode() == Opcode::Sub);
+    ASSERT_TRUE(CheckInputs(INS(7U), {0U, 1U}));
+    ASSERT_TRUE(INS(7U).GetOpcode() == Opcode::Sub);
 }
 
 TEST_F(PeepholesTest, SameSubAndAddTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Add).u64().Inputs(0, 1);
+            INST(2U, Opcode::Add).u64().Inputs(0U, 1U);
 
-            INST(4, Opcode::Sub).u64().Inputs(2, 0);
-            INST(5, Opcode::Sub).u64().Inputs(2, 1);
-            INST(6, Opcode::Add).u64().Inputs(4, 5);
-            INST(7, Opcode::Return).u64().Inputs(6);
+            INST(4U, Opcode::Sub).u64().Inputs(2U, 0U);
+            INST(5U, Opcode::Sub).u64().Inputs(2U, 1U);
+            INST(6U, Opcode::Add).u64().Inputs(4U, 5U);
+            INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
 
-    ASSERT_TRUE(INS(4).GetUsers().Empty());
-    ASSERT_TRUE(INS(5).GetUsers().Empty());
-    ASSERT_TRUE(CheckInputs(INS(6), {1, 0}));
+    ASSERT_TRUE(INS(4U).GetUsers().Empty());
+    ASSERT_TRUE(INS(5U).GetUsers().Empty());
+    ASSERT_TRUE(CheckInputs(INS(6U), {1U, 0U}));
 }
 
 TEST_F(PeepholesTest, SameSubAndAddTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Sub).u64().Inputs(0, 1);
-            INST(3, Opcode::Sub).u64().Inputs(1, 0);
+            INST(2U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(3U, Opcode::Sub).u64().Inputs(1U, 0U);
 
-            INST(4, Opcode::Sub).u64().Inputs(0, 2);
-            INST(5, Opcode::Sub).u64().Inputs(3, 1);
-            INST(6, Opcode::Add).u64().Inputs(4, 5);
-            INST(7, Opcode::Return).u64().Inputs(6);
+            INST(4U, Opcode::Sub).u64().Inputs(0U, 2U);
+            INST(5U, Opcode::Sub).u64().Inputs(3U, 1U);
+            INST(6U, Opcode::Add).u64().Inputs(4U, 5U);
+            INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(INS(4).GetUsers().Empty());
-    ASSERT_TRUE(CheckUsers(INS(5), {6}));
-    ASSERT_TRUE(CheckInputs(INS(6), {1, 5}));
+    ASSERT_TRUE(INS(4U).GetUsers().Empty());
+    ASSERT_TRUE(CheckUsers(INS(5U), {6U}));
+    ASSERT_TRUE(CheckInputs(INS(6U), {1U, 5U}));
 }
 
 TEST_F(PeepholesTest, TestOr2Addition1)
@@ -1424,19 +1424,19 @@ TEST_F(PeepholesTest, TestOr2Addition1)
     // Case 1 + Case 2
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        CONSTANT(1, 0);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        CONSTANT(1U, 0U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Or).u64().Inputs(0, 1);
-            INST(3, Opcode::Return).u64().Inputs(2);
+            INST(2U, Opcode::Or).u64().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(INS(3).GetInput(0).GetInst(), &INS(0));
-    ASSERT_EQ(INS(1).GetUsers().Front().GetIndex(), 1U);
-    ASSERT_EQ(INS(0).GetUsers().Front().GetIndex(), 0U);
+    ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_EQ(INS(1U).GetUsers().Front().GetIndex(), 1U);
+    ASSERT_EQ(INS(0U).GetUsers().Front().GetIndex(), 0U);
 }
 
 TEST_F(PeepholesTest, TestOr3)
@@ -1449,16 +1449,16 @@ TEST_F(PeepholesTest, TestOr3)
     // 2.i64 INS which use v5
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Or).u64().Inputs(0, 0);
-            INST(3, Opcode::Return).u64().Inputs(2);
+            INST(2U, Opcode::Or).u64().Inputs(0U, 0U);
+            INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(INS(3).GetInput(0).GetInst(), &INS(0));
+    ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), &INS(0U));
 }
 
 TEST_F(PeepholesTest, TestOr4)
@@ -1472,24 +1472,24 @@ TEST_F(PeepholesTest, TestOr4)
     // 6.i64 not v5
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).u64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).u64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Not).u64().Inputs(0);
-            INST(3, Opcode::Not).u64().Inputs(1);
-            INST(4, Opcode::Or).u64().Inputs(2, 3);
-            INST(5, Opcode::Return).u64().Inputs(4);
+            INST(2U, Opcode::Not).u64().Inputs(0U);
+            INST(3U, Opcode::Not).u64().Inputs(1U);
+            INST(4U, Opcode::Or).u64().Inputs(2U, 3U);
+            INST(5U, Opcode::Return).u64().Inputs(4U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
     GraphChecker(GetGraph()).Check();
-    auto not_inst = INS(5).GetInput(0).GetInst();
+    auto not_inst = INS(5U).GetInput(0U).GetInst();
     ASSERT_EQ(not_inst->GetOpcode(), Opcode::Not);
-    auto and_inst = not_inst->GetInput(0).GetInst();
+    auto and_inst = not_inst->GetInput(0U).GetInst();
     ASSERT_EQ(and_inst->GetOpcode(), Opcode::And);
-    ASSERT_EQ(and_inst->GetInput(0).GetInst(), &INS(0));
-    ASSERT_EQ(and_inst->GetInput(1).GetInst(), &INS(1));
+    ASSERT_EQ(and_inst->GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_EQ(and_inst->GetInput(1U).GetInst(), &INS(1U));
 }
 
 TEST_F(PeepholesTest, TestOr4Addition1)
@@ -1497,23 +1497,23 @@ TEST_F(PeepholesTest, TestOr4Addition1)
     // Case 4, but NOT-inst have more than 1 user
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).u64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).u64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Not).u64().Inputs(0);
-            INST(3, Opcode::Not).u64().Inputs(1);
-            INST(4, Opcode::Or).u64().Inputs(2, 3);
-            INST(5, Opcode::Not).u64().Inputs(2);
-            INST(6, Opcode::Not).u64().Inputs(3);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).u64().InputsAutoType(4, 5, 6, 20);
-            INST(7, Opcode::Return).u64().Inputs(8);
+            INST(2U, Opcode::Not).u64().Inputs(0U);
+            INST(3U, Opcode::Not).u64().Inputs(1U);
+            INST(4U, Opcode::Or).u64().Inputs(2U, 3U);
+            INST(5U, Opcode::Not).u64().Inputs(2U);
+            INST(6U, Opcode::Not).u64().Inputs(3U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).u64().InputsAutoType(4U, 5U, 6U, 20U);
+            INST(7U, Opcode::Return).u64().Inputs(8U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    auto or_inst = INS(8).GetInput(0).GetInst();
+    auto or_inst = INS(8U).GetInput(0U).GetInst();
     ASSERT_EQ(or_inst->GetOpcode(), Opcode::Or);
 }
 
@@ -1521,66 +1521,66 @@ TEST_F(PeepholesTest, NegTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Neg).s64().Inputs(0);
-            INST(5, Opcode::Neg).s64().Inputs(4);
-            INST(6, Opcode::Add).s64().Inputs(1, 5);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(11, Opcode::CallStatic).u32().InputsAutoType(6, 20);
-            INST(10, Opcode::Return).u32().Inputs(11);
+            INST(4U, Opcode::Neg).s64().Inputs(0U);
+            INST(5U, Opcode::Neg).s64().Inputs(4U);
+            INST(6U, Opcode::Add).s64().Inputs(1U, 5U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(11U, Opcode::CallStatic).u32().InputsAutoType(6U, 20U);
+            INST(10U, Opcode::Return).u32().Inputs(11U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(CheckInputs(INS(5), {4}));
-    ASSERT_TRUE(INS(5).GetUsers().Empty());
-    ASSERT_TRUE(CheckInputs(INS(6), {1, 0}));
-    ASSERT_EQ(INS(6).GetOpcode(), Opcode::Add);
+    ASSERT_TRUE(CheckInputs(INS(5U), {4U}));
+    ASSERT_TRUE(INS(5U).GetUsers().Empty());
+    ASSERT_TRUE(CheckInputs(INS(6U), {1U, 0U}));
+    ASSERT_EQ(INS(6U).GetOpcode(), Opcode::Add);
 }
 
 TEST_F(PeepholesTest, NegTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Sub).s64().Inputs(0, 1);
-            INST(3, Opcode::Neg).s64().Inputs(2);
-            INST(4, Opcode::Return).s64().Inputs(3);
+            INST(2U, Opcode::Sub).s64().Inputs(0U, 1U);
+            INST(3U, Opcode::Neg).s64().Inputs(2U);
+            INST(4U, Opcode::Return).s64().Inputs(3U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(INS(3).GetUsers().Empty());
-    ASSERT_NE(INS(3).GetNext(), &INS(4));
-    auto sub = INS(3).GetNext();
+    ASSERT_TRUE(INS(3U).GetUsers().Empty());
+    ASSERT_NE(INS(3U).GetNext(), &INS(4U));
+    auto sub = INS(3U).GetNext();
     ASSERT_EQ(sub->GetOpcode(), Opcode::Sub);
-    ASSERT_EQ(sub->GetType(), INS(3).GetType());
+    ASSERT_EQ(sub->GetType(), INS(3U).GetType());
 
-    ASSERT_EQ(sub->GetInput(0).GetInst(), &INS(1));
-    ASSERT_EQ(sub->GetInput(1).GetInst(), &INS(0));
+    ASSERT_EQ(sub->GetInput(0U).GetInst(), &INS(1U));
+    ASSERT_EQ(sub->GetInput(1U).GetInst(), &INS(0U));
 
-    ASSERT_EQ(INS(4).GetInput(0).GetInst(), sub);
+    ASSERT_EQ(INS(4U).GetInput(0U).GetInst(), sub);
 }
 
 TEST_F(PeepholesTest, NegationCompare)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        CONSTANT(5, 0x1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        CONSTANT(5U, 0x1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Compare).b().CC(CC_GT).Inputs(0, 1);
-            INST(3, Opcode::Neg).s32().Inputs(2);
-            INST(6, Opcode::Add).s32().Inputs(3, 5);
-            INST(4, Opcode::Return).b().Inputs(6);
+            INST(2U, Opcode::Compare).b().CC(CC_GT).Inputs(0U, 1U);
+            INST(3U, Opcode::Neg).s32().Inputs(2U);
+            INST(6U, Opcode::Add).s32().Inputs(3U, 5U);
+            INST(4U, Opcode::Return).b().Inputs(6U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -1589,12 +1589,12 @@ TEST_F(PeepholesTest, NegationCompare)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Compare).b().CC(CC_LE).Inputs(0, 1);
-            INST(4, Opcode::Return).b().Inputs(2);
+            INST(2U, Opcode::Compare).b().CC(CC_LE).Inputs(0U, 1U);
+            INST(4U, Opcode::Return).b().Inputs(2U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -1603,18 +1603,18 @@ TEST_F(PeepholesTest, NegationCompare)
     auto default_graph = CreateEmptyGraph();
     GRAPH(default_graph)
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        CONSTANT(5, 0x1);
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        CONSTANT(5U, 0x1U);
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::Compare).b().CC(CC_GT).Inputs(0, 1);
-            INST(3, Opcode::Neg).s32().Inputs(2);
-            INST(6, Opcode::Add).s32().Inputs(3, 5);
+            INST(2U, Opcode::Compare).b().CC(CC_GT).Inputs(0U, 1U);
+            INST(3U, Opcode::Neg).s32().Inputs(2U);
+            INST(6U, Opcode::Add).s32().Inputs(3U, 5U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(4, Opcode::Return).b().Inputs(6);
+            INST(4U, Opcode::Return).b().Inputs(6U);
         }
     }
     Graph *graph_osr =
@@ -1629,18 +1629,18 @@ TEST_F(PeepholesTest, NegationCompare)
     auto optimized_graph = CreateEmptyGraph();
     GRAPH(optimized_graph)
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        CONSTANT(5, 0x1);
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        CONSTANT(5U, 0x1U);
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::Compare).b().CC(CC_LE).Inputs(0, 1);
-            INST(3, Opcode::Neg).s32().Inputs(2);
-            INST(6, Opcode::Add).s32().Inputs(3, 5);
+            INST(2U, Opcode::Compare).b().CC(CC_LE).Inputs(0U, 1U);
+            INST(3U, Opcode::Neg).s32().Inputs(2U);
+            INST(6U, Opcode::Add).s32().Inputs(3U, 5U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(4, Opcode::Return).b().Inputs(2);
+            INST(4U, Opcode::Return).b().Inputs(2U);
         }
     }
     ASSERT_TRUE(default_graph->RunPass<Peepholes>());
@@ -1653,18 +1653,18 @@ TEST_F(PeepholesTest, TransformNegationToCompare)
     auto default_graph = CreateEmptyGraph();
     GRAPH(default_graph)
     {
-        PARAMETER(0, 0).s64();
-        CONSTANT(5, 0x1);
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).s64();
+        CONSTANT(5U, 0x1U);
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::CallStatic).b().InputsAutoType(1);
-            INST(3, Opcode::Neg).s32().Inputs(2);
-            INST(6, Opcode::Add).s32().Inputs(3, 5);
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::CallStatic).b().InputsAutoType(1U);
+            INST(3U, Opcode::Neg).s32().Inputs(2U);
+            INST(6U, Opcode::Add).s32().Inputs(3U, 5U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(4, Opcode::Return).b().Inputs(6);
+            INST(4U, Opcode::Return).b().Inputs(6U);
         }
     }
     Graph *graph_osr =
@@ -1679,20 +1679,20 @@ TEST_F(PeepholesTest, TransformNegationToCompare)
     auto optimized_graph = CreateEmptyGraph();
     GRAPH(optimized_graph)
     {
-        PARAMETER(0, 0).s64();
-        CONSTANT(5, 0x1);
-        CONSTANT(7, 0x0);
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).s64();
+        CONSTANT(5U, 0x1U);
+        CONSTANT(7U, 0x0U);
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::CallStatic).b().InputsAutoType(1);
-            INST(3, Opcode::Neg).s32().Inputs(2);
-            INST(6, Opcode::Add).s32().Inputs(3, 5);
-            INST(8, Opcode::Compare).b().Inputs(2, 7);
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::CallStatic).b().InputsAutoType(1U);
+            INST(3U, Opcode::Neg).s32().Inputs(2U);
+            INST(6U, Opcode::Add).s32().Inputs(3U, 5U);
+            INST(8U, Opcode::Compare).b().Inputs(2U, 7U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(4, Opcode::Return).b().Inputs(8);
+            INST(4U, Opcode::Return).b().Inputs(8U);
         }
     }
     ASSERT_TRUE(default_graph->RunPass<Peepholes>());
@@ -1703,14 +1703,14 @@ TEST_F(PeepholesTest, NegCompareNotWork)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Compare).b().CC(CC_GT).Inputs(0, 1);
-            INST(3, Opcode::Neg).b().Inputs(2);
-            INST(5, Opcode::Mul).b().Inputs(2, 3);
-            INST(4, Opcode::Return).b().Inputs(5);
+            INST(2U, Opcode::Compare).b().CC(CC_GT).Inputs(0U, 1U);
+            INST(3U, Opcode::Neg).b().Inputs(2U);
+            INST(5U, Opcode::Mul).b().Inputs(2U, 3U);
+            INST(4U, Opcode::Return).b().Inputs(5U);
         }
     }
     Graph *graph_clone =
@@ -1723,26 +1723,26 @@ TEST_F(PeepholesTest, CompareNegation)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).b();
-        CONSTANT(8, 0x1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        CONSTANT(8U, 0x1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Neg).i32().Inputs(0);
-            INST(9, Opcode::Add).i32().Inputs(2, 8);
-            INST(4, Opcode::Compare).b().CC(ConditionCode::CC_EQ).SrcType(DataType::BOOL).Inputs(1, 9);
-            INST(7, Opcode::Return).b().Inputs(4);
+            INST(2U, Opcode::Neg).i32().Inputs(0U);
+            INST(9U, Opcode::Add).i32().Inputs(2U, 8U);
+            INST(4U, Opcode::Compare).b().CC(ConditionCode::CC_EQ).SrcType(DataType::BOOL).Inputs(1U, 9U);
+            INST(7U, Opcode::Return).b().Inputs(4U);
         }
     }
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).b();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Compare).b().CC(ConditionCode::CC_NE).SrcType(DataType::BOOL).Inputs(1, 0);
-            INST(7, Opcode::Return).b().Inputs(4);
+            INST(4U, Opcode::Compare).b().CC(ConditionCode::CC_NE).SrcType(DataType::BOOL).Inputs(1U, 0U);
+            INST(7U, Opcode::Return).b().Inputs(4U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -1752,31 +1752,31 @@ TEST_F(PeepholesTest, CompareNegation)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).b();
-        CONSTANT(8, 0x1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        CONSTANT(8U, 0x1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Neg).i32().Inputs(0);
-            INST(9, Opcode::Add).i32().Inputs(2, 8);
-            INST(4, Opcode::Compare).b().CC(ConditionCode::CC_EQ).SrcType(DataType::BOOL).Inputs(1, 9);
-            INST(11, Opcode::Add).i32().Inputs(4, 9);
-            INST(7, Opcode::Return).b().Inputs(11);
+            INST(2U, Opcode::Neg).i32().Inputs(0U);
+            INST(9U, Opcode::Add).i32().Inputs(2U, 8U);
+            INST(4U, Opcode::Compare).b().CC(ConditionCode::CC_EQ).SrcType(DataType::BOOL).Inputs(1U, 9U);
+            INST(11U, Opcode::Add).i32().Inputs(4U, 9U);
+            INST(7U, Opcode::Return).b().Inputs(11U);
         }
     }
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).b();
-        CONSTANT(8, 0x1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        CONSTANT(8U, 0x1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Neg).i32().Inputs(0);
-            INST(9, Opcode::Add).i32().Inputs(2, 8);
-            INST(4, Opcode::Compare).b().CC(ConditionCode::CC_NE).SrcType(DataType::BOOL).Inputs(1, 0);
-            INST(11, Opcode::Add).i32().Inputs(4, 9);
-            INST(7, Opcode::Return).b().Inputs(11);
+            INST(2U, Opcode::Neg).i32().Inputs(0U);
+            INST(9U, Opcode::Add).i32().Inputs(2U, 8U);
+            INST(4U, Opcode::Compare).b().CC(ConditionCode::CC_NE).SrcType(DataType::BOOL).Inputs(1U, 0U);
+            INST(11U, Opcode::Add).i32().Inputs(4U, 9U);
+            INST(7U, Opcode::Return).b().Inputs(11U);
         }
     }
     GraphChecker(graph1).Check();
@@ -1790,19 +1790,19 @@ TEST_F(PeepholesTest, CompareNegationBoolOsr)
     GetGraph()->SetMode(GraphMode::Osr());
     GRAPH(GetGraph())
     {
-        PARAMETER(1, 1).b();
-        CONSTANT(3, 0x1);
-        BASIC_BLOCK(2, 3)
+        PARAMETER(1U, 1U).b();
+        CONSTANT(3U, 0x1U);
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(6, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).b().InputsAutoType(6);
+            INST(6U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).b().InputsAutoType(6U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(2, Opcode::Neg).s32().Inputs(7);
-            INST(8, Opcode::Add).s32().Inputs(2, 3);
-            INST(4, Opcode::Compare).b().CC(ConditionCode::CC_EQ).SrcType(DataType::BOOL).Inputs(8, 1);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(2U, Opcode::Neg).s32().Inputs(7U);
+            INST(8U, Opcode::Add).s32().Inputs(2U, 3U);
+            INST(4U, Opcode::Compare).b().CC(ConditionCode::CC_EQ).SrcType(DataType::BOOL).Inputs(8U, 1U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
@@ -1812,17 +1812,17 @@ TEST_F(PeepholesTest, CompareNegationBoolOsr)
     optimizable_graph->SetMode(GraphMode::Osr());
     GRAPH(optimizable_graph)
     {
-        PARAMETER(1, 1).b();
-        CONSTANT(3, 0x1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(1U, 1U).b();
+        CONSTANT(3U, 0x1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).b().InputsAutoType(6);
+            INST(6U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).b().InputsAutoType(6U);
 
-            INST(2, Opcode::Neg).s32().Inputs(7);
-            INST(8, Opcode::Add).s32().Inputs(2, 3);
-            INST(4, Opcode::Compare).b().CC(ConditionCode::CC_EQ).SrcType(DataType::BOOL).Inputs(8, 1);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(2U, Opcode::Neg).s32().Inputs(7U);
+            INST(8U, Opcode::Add).s32().Inputs(2U, 3U);
+            INST(4U, Opcode::Compare).b().CC(ConditionCode::CC_EQ).SrcType(DataType::BOOL).Inputs(8U, 1U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
 
@@ -1830,14 +1830,14 @@ TEST_F(PeepholesTest, CompareNegationBoolOsr)
     optimizable_graph_after->SetMode(GraphMode::Osr());
     GRAPH(optimizable_graph_after)
     {
-        PARAMETER(1, 1).b();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(1U, 1U).b();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).b().InputsAutoType(6);
+            INST(6U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).b().InputsAutoType(6U);
 
-            INST(4, Opcode::Compare).b().CC(ConditionCode::CC_NE).SrcType(DataType::BOOL).Inputs(7, 1);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(4U, Opcode::Compare).b().CC(ConditionCode::CC_NE).SrcType(DataType::BOOL).Inputs(7U, 1U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
     ASSERT_TRUE(optimizable_graph->RunPass<Peepholes>());
@@ -1848,28 +1848,28 @@ TEST_F(PeepholesTest, CompareNegationBoolOsr)
 TEST_F(PeepholesTest, IfImmNegation)
 {
     // ConditionCode in IfImm with bool src maybe not only CC_EQ or CC_NE
-    std::array<ConditionCode, 4> codes {ConditionCode::CC_NE, ConditionCode::CC_EQ, ConditionCode::CC_GE,
-                                        ConditionCode::CC_B};
+    std::array<ConditionCode, 4U> codes {ConditionCode::CC_NE, ConditionCode::CC_EQ, ConditionCode::CC_GE,
+                                         ConditionCode::CC_B};
     for (auto code : codes) {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).b();
-            PARAMETER(1, 1).b();
-            CONSTANT(8, 0x1);
-            BASIC_BLOCK(2, 3, 4)
+            PARAMETER(0U, 0U).b();
+            PARAMETER(1U, 1U).b();
+            CONSTANT(8U, 0x1U);
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(2, Opcode::Neg).b().Inputs(0);
-                INST(9, Opcode::Add).i32().Inputs(2, 8);
-                INST(4, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1).CC(code).Inputs(9);
+                INST(2U, Opcode::Neg).b().Inputs(0U);
+                INST(9U, Opcode::Add).i32().Inputs(2U, 8U);
+                INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1U).CC(code).Inputs(9U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(6, Opcode::Return).b().Inputs(0);
+                INST(6U, Opcode::Return).b().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(7, Opcode::Return).b().Inputs(0);
+                INST(7U, Opcode::Return).b().Inputs(0U);
             }
         }
 
@@ -1877,25 +1877,25 @@ TEST_F(PeepholesTest, IfImmNegation)
         final_graph = CreateEmptyGraph();
         GRAPH(final_graph)
         {
-            PARAMETER(0, 0).b();
-            PARAMETER(1, 1).b();
-            CONSTANT(8, 0x1);
-            CONSTANT(10, 0x0);
-            BASIC_BLOCK(2, 3, 4)
+            PARAMETER(0U, 0U).b();
+            PARAMETER(1U, 1U).b();
+            CONSTANT(8U, 0x1U);
+            CONSTANT(10U, 0x0U);
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(2, Opcode::Neg).b().Inputs(0);
-                INST(9, Opcode::Add).i32().Inputs(2, 8);
-                INST(11, Opcode::Compare).b().SrcType(DataType::BOOL).Inputs(0, 10);
+                INST(2U, Opcode::Neg).b().Inputs(0U);
+                INST(9U, Opcode::Add).i32().Inputs(2U, 8U);
+                INST(11U, Opcode::Compare).b().SrcType(DataType::BOOL).Inputs(0U, 10U);
                 // That optimized by combination Compare + IfImm
-                INST(4, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1).CC(GetInverseConditionCode(code)).Inputs(0);
+                INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1U).CC(GetInverseConditionCode(code)).Inputs(0U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(6, Opcode::Return).b().Inputs(0);
+                INST(6U, Opcode::Return).b().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(7, Opcode::Return).b().Inputs(0);
+                INST(7U, Opcode::Return).b().Inputs(0U);
             }
         }
         ASSERT_TRUE(graph->RunPass<Peepholes>());
@@ -1909,27 +1909,27 @@ TEST_F(PeepholesTest, IfImmNegationOsr)
     GetGraph()->SetMode(GraphMode::Osr());
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).b();
-        CONSTANT(3, 0x1);
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        CONSTANT(3U, 0x1U);
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(6, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).b().InputsAutoType(6);
+            INST(6U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).b().InputsAutoType(6U);
         }
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(2, Opcode::Neg).s32().Inputs(7);
-            INST(9, Opcode::Add).s32().Inputs(2, 3);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1).CC(ConditionCode::CC_EQ).Inputs(9);
+            INST(2U, Opcode::Neg).s32().Inputs(7U);
+            INST(9U, Opcode::Add).s32().Inputs(2U, 3U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1U).CC(ConditionCode::CC_EQ).Inputs(9U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(5, Opcode::Return).b().Inputs(0);
+            INST(5U, Opcode::Return).b().Inputs(0U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(8, Opcode::Return).b().Inputs(0);
+            INST(8U, Opcode::Return).b().Inputs(0U);
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
@@ -1939,25 +1939,25 @@ TEST_F(PeepholesTest, IfImmNegationOsr)
     optimizable_graph->SetMode(GraphMode::Osr());
     GRAPH(optimizable_graph)
     {
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).b();
-        CONSTANT(3, 0x1);
-        BASIC_BLOCK(2, 4, 5)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        CONSTANT(3U, 0x1U);
+        BASIC_BLOCK(2U, 4U, 5U)
         {
-            INST(6, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).b().InputsAutoType(6);
+            INST(6U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).b().InputsAutoType(6U);
 
-            INST(2, Opcode::Neg).s32().Inputs(7);
-            INST(9, Opcode::Add).s32().Inputs(2, 3);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1).CC(ConditionCode::CC_EQ).Inputs(9);
+            INST(2U, Opcode::Neg).s32().Inputs(7U);
+            INST(9U, Opcode::Add).s32().Inputs(2U, 3U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1U).CC(ConditionCode::CC_EQ).Inputs(9U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(5, Opcode::Return).b().Inputs(0);
+            INST(5U, Opcode::Return).b().Inputs(0U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(8, Opcode::Return).b().Inputs(0);
+            INST(8U, Opcode::Return).b().Inputs(0U);
         }
     }
 
@@ -1965,27 +1965,27 @@ TEST_F(PeepholesTest, IfImmNegationOsr)
     optimizable_graph_after->SetMode(GraphMode::Osr());
     GRAPH(optimizable_graph_after)
     {
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).b();
-        CONSTANT(3, 0x1);
-        CONSTANT(10, 0x0);
-        BASIC_BLOCK(2, 4, 5)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        CONSTANT(3U, 0x1U);
+        CONSTANT(10U, 0x0U);
+        BASIC_BLOCK(2U, 4U, 5U)
         {
-            INST(6, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).b().InputsAutoType(6);
+            INST(6U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).b().InputsAutoType(6U);
 
-            INST(2, Opcode::Neg).s32().Inputs(7);
-            INST(9, Opcode::Add).s32().Inputs(2, 3);
-            INST(11, Opcode::Compare).b().SrcType(DataType::BOOL).Inputs(7, 10);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1).CC(ConditionCode::CC_NE).Inputs(7);
+            INST(2U, Opcode::Neg).s32().Inputs(7U);
+            INST(9U, Opcode::Add).s32().Inputs(2U, 3U);
+            INST(11U, Opcode::Compare).b().SrcType(DataType::BOOL).Inputs(7U, 10U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1U).CC(ConditionCode::CC_NE).Inputs(7U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(5, Opcode::Return).b().Inputs(0);
+            INST(5U, Opcode::Return).b().Inputs(0U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(8, Opcode::Return).b().Inputs(0);
+            INST(8U, Opcode::Return).b().Inputs(0U);
         }
     }
     ASSERT_TRUE(optimizable_graph->RunPass<Peepholes>());
@@ -1997,25 +1997,25 @@ TEST_F(PeepholesTest, ShlZeroTest)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Shl).u64().Inputs(0, 1);
-            INST(4, Opcode::Shl).u64().Inputs(0, 2);
+            INST(3U, Opcode::Shl).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Shl).u64().Inputs(0U, 2U);
 
-            INST(5, Opcode::Add).u64().Inputs(3, 4);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(5U, Opcode::Add).u64().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(INS(3).GetUsers().Empty());
+    ASSERT_TRUE(INS(3U).GetUsers().Empty());
 
-    ASSERT_TRUE(CheckInputs(INS(5), {0, 4}));
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Add);
+    ASSERT_TRUE(CheckInputs(INS(5U), {0U, 4U}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Add);
 }
 
 // Checking repeated shifts for constants with the same types
@@ -2023,31 +2023,31 @@ TEST_F(PeepholesTest, ShlRepeatConstTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 5);
-        CONSTANT(2, 6);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 5U);
+        CONSTANT(2U, 6U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Shl).u64().Inputs(0, 1);
-            INST(4, Opcode::Shl).u64().Inputs(3, 2);
-            INST(5, Opcode::Return).u64().Inputs(4);
+            INST(3U, Opcode::Shl).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Shl).u64().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).u64().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_NE(INS(2).GetNext(), nullptr);
-    auto const3 = static_cast<ConstantInst *>(INS(2).GetNext());
-    ASSERT_TRUE(const3->IsEqualConst(11));
+    ASSERT_NE(INS(2U).GetNext(), nullptr);
+    auto const3 = static_cast<ConstantInst *>(INS(2U).GetNext());
+    ASSERT_TRUE(const3->IsEqualConst(11U));
 
-    ASSERT_TRUE(INS(3).GetUsers().Empty());
-    ASSERT_EQ(INS(3).GetOpcode(), Opcode::Shl);
-    ASSERT_TRUE(CheckUsers(INS(4), {5}));
-    ASSERT_EQ(INS(4).GetOpcode(), Opcode::Shl);
-    ASSERT_EQ(INS(4).GetInput(0).GetInst(), &INS(0));
-    ASSERT_EQ(INS(4).GetInput(1).GetInst(), const3);
+    ASSERT_TRUE(INS(3U).GetUsers().Empty());
+    ASSERT_EQ(INS(3U).GetOpcode(), Opcode::Shl);
+    ASSERT_TRUE(CheckUsers(INS(4U), {5U}));
+    ASSERT_EQ(INS(4U).GetOpcode(), Opcode::Shl);
+    ASSERT_EQ(INS(4U).GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_EQ(INS(4U).GetInput(1U).GetInst(), const3);
 
-    ASSERT_TRUE(CheckInputs(INS(5), {4}));
+    ASSERT_TRUE(CheckInputs(INS(5U), {4U}));
 }
 
 // Checking repeated shifts for constants with different types
@@ -2055,29 +2055,29 @@ TEST_F(PeepholesTest, ShlRepeatConstTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u32();
-        CONSTANT(1, 5);
-        CONSTANT(2, 6);
+        PARAMETER(0U, 0U).u32();
+        CONSTANT(1U, 5U);
+        CONSTANT(2U, 6U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Shl).u16().Inputs(0, 1);
-            INST(4, Opcode::Shl).u32().Inputs(3, 2);
-            INST(5, Opcode::Return).u32().Inputs(4);
+            INST(3U, Opcode::Shl).u16().Inputs(0U, 1U);
+            INST(4U, Opcode::Shl).u32().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).u32().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_EQ(INS(2).GetNext(), nullptr);
+    ASSERT_EQ(INS(2U).GetNext(), nullptr);
 
-    ASSERT_TRUE(CheckInputs(INS(3), {0, 1}));
-    ASSERT_TRUE(CheckUsers(INS(3), {4}));
-    ASSERT_EQ(INS(3).GetOpcode(), Opcode::Shl);
-    ASSERT_TRUE(CheckInputs(INS(4), {3, 2}));
-    ASSERT_TRUE(CheckUsers(INS(4), {5}));
-    ASSERT_EQ(INS(4).GetOpcode(), Opcode::Shl);
+    ASSERT_TRUE(CheckInputs(INS(3U), {0U, 1U}));
+    ASSERT_TRUE(CheckUsers(INS(3U), {4U}));
+    ASSERT_EQ(INS(3U).GetOpcode(), Opcode::Shl);
+    ASSERT_TRUE(CheckInputs(INS(4U), {3U, 2U}));
+    ASSERT_TRUE(CheckUsers(INS(4U), {5U}));
+    ASSERT_EQ(INS(4U).GetOpcode(), Opcode::Shl);
 
-    ASSERT_TRUE(CheckInputs(INS(5), {4}));
+    ASSERT_TRUE(CheckInputs(INS(5U), {4U}));
 }
 
 // Checking the shift for a constant greater than the type size
@@ -2085,56 +2085,56 @@ TEST_F(PeepholesTest, ShlBigConstTest)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u32();
-        PARAMETER(2, 2).u16();
-        PARAMETER(3, 3).u8();
-        CONSTANT(4, 127);
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u32();
+        PARAMETER(2U, 2U).u16();
+        PARAMETER(3U, 3U).u8();
+        CONSTANT(4U, 127U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::Shl).u64().Inputs(0, 4);
-            INST(6, Opcode::Shl).u32().Inputs(1, 4);
-            INST(7, Opcode::Shl).u16().Inputs(2, 4);
-            INST(8, Opcode::Shl).u8().Inputs(3, 4);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(10, Opcode::CallStatic).s64().InputsAutoType(5, 6, 7, 8, 20);
-            INST(9, Opcode::Return).s64().Inputs(10);
+            INST(5U, Opcode::Shl).u64().Inputs(0U, 4U);
+            INST(6U, Opcode::Shl).u32().Inputs(1U, 4U);
+            INST(7U, Opcode::Shl).u16().Inputs(2U, 4U);
+            INST(8U, Opcode::Shl).u8().Inputs(3U, 4U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(10U, Opcode::CallStatic).s64().InputsAutoType(5U, 6U, 7U, 8U, 20U);
+            INST(9U, Opcode::Return).s64().Inputs(10U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_NE(INS(4).GetNext(), nullptr);
-    auto const64 = static_cast<ConstantInst *>(INS(4).GetNext());
-    ASSERT_TRUE(const64->IsEqualConst(63));
+    ASSERT_NE(INS(4U).GetNext(), nullptr);
+    auto const64 = static_cast<ConstantInst *>(INS(4U).GetNext());
+    ASSERT_TRUE(const64->IsEqualConst(63U));
 
     ASSERT_NE(const64->GetNext(), nullptr);
     auto const32 = static_cast<ConstantInst *>(const64->GetNext());
-    ASSERT_TRUE(const32->IsEqualConst(31));
+    ASSERT_TRUE(const32->IsEqualConst(31U));
 
     ASSERT_NE(const32->GetNext(), nullptr);
     auto const16 = static_cast<ConstantInst *>(const32->GetNext());
-    ASSERT_TRUE(const16->IsEqualConst(15));
+    ASSERT_TRUE(const16->IsEqualConst(15U));
 
     ASSERT_NE(const16->GetNext(), nullptr);
     auto const8 = static_cast<ConstantInst *>(const16->GetNext());
-    ASSERT_TRUE(const8->IsEqualConst(7));
+    ASSERT_TRUE(const8->IsEqualConst(7U));
 
-    ASSERT_EQ(INS(5).GetInput(0).GetInst(), &INS(0));
-    ASSERT_EQ(INS(5).GetInput(1).GetInst(), const64);
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Shl);
+    ASSERT_EQ(INS(5U).GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_EQ(INS(5U).GetInput(1U).GetInst(), const64);
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Shl);
 
-    ASSERT_EQ(INS(6).GetInput(0).GetInst(), &INS(1));
-    ASSERT_EQ(INS(6).GetInput(1).GetInst(), const32);
-    ASSERT_EQ(INS(6).GetOpcode(), Opcode::Shl);
+    ASSERT_EQ(INS(6U).GetInput(0U).GetInst(), &INS(1U));
+    ASSERT_EQ(INS(6U).GetInput(1U).GetInst(), const32);
+    ASSERT_EQ(INS(6U).GetOpcode(), Opcode::Shl);
 
-    ASSERT_EQ(INS(7).GetInput(0).GetInst(), &INS(2));
-    ASSERT_EQ(INS(7).GetInput(1).GetInst(), const16);
-    ASSERT_EQ(INS(7).GetOpcode(), Opcode::Shl);
+    ASSERT_EQ(INS(7U).GetInput(0U).GetInst(), &INS(2U));
+    ASSERT_EQ(INS(7U).GetInput(1U).GetInst(), const16);
+    ASSERT_EQ(INS(7U).GetOpcode(), Opcode::Shl);
 
-    ASSERT_EQ(INS(8).GetInput(0).GetInst(), &INS(3));
-    ASSERT_EQ(INS(8).GetInput(1).GetInst(), const8);
-    ASSERT_EQ(INS(8).GetOpcode(), Opcode::Shl);
+    ASSERT_EQ(INS(8U).GetInput(0U).GetInst(), &INS(3U));
+    ASSERT_EQ(INS(8U).GetInput(1U).GetInst(), const8);
+    ASSERT_EQ(INS(8U).GetOpcode(), Opcode::Shl);
 }
 
 TEST_F(PeepholesTest, ShlPlusShrTest)
@@ -2142,14 +2142,14 @@ TEST_F(PeepholesTest, ShlPlusShrTest)
     // applied
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 0x18);
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x18U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::Shr).s32().Inputs(2, 1);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Shr).s32().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -2157,13 +2157,13 @@ TEST_F(PeepholesTest, ShlPlusShrTest)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(5, 0xff);
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(5U, 0xffU);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::And).s32().Inputs(0, 5);
-            INST(4, Opcode::Return).s32().Inputs(6);
+            INST(6U, Opcode::And).s32().Inputs(0U, 5U);
+            INST(4U, Opcode::Return).s32().Inputs(6U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -2174,30 +2174,30 @@ TEST_F(PeepholesTest, ShlPlusShrTest1)
     // not applied, different constants
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 0x18);
-        CONSTANT(5, 0x10);
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x18U);
+        CONSTANT(5U, 0x10U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::Shr).s32().Inputs(2, 5);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Shr).s32().Inputs(2U, 5U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 0x18);
-        CONSTANT(5, 0x10);
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x18U);
+        CONSTANT(5U, 0x10U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::Shr).s32().Inputs(2, 5);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Shr).s32().Inputs(2U, 5U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -2208,28 +2208,28 @@ TEST_F(PeepholesTest, ShlPlusShrTest2)
     // not applied, same inputs but not a constant
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::Shr).s32().Inputs(2, 1);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Shr).s32().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::Shr).s32().Inputs(2, 1);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Shr).s32().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -2240,25 +2240,25 @@ TEST_F(PeepholesTest, ShrZeroTest)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Shr).u64().Inputs(0, 1);
-            INST(4, Opcode::Shr).u64().Inputs(0, 2);
+            INST(3U, Opcode::Shr).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Shr).u64().Inputs(0U, 2U);
 
-            INST(5, Opcode::Add).u64().Inputs(3, 4);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(5U, Opcode::Add).u64().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(INS(3).GetUsers().Empty());
+    ASSERT_TRUE(INS(3U).GetUsers().Empty());
 
-    ASSERT_TRUE(CheckInputs(INS(5), {0, 4}));
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Add);
+    ASSERT_TRUE(CheckInputs(INS(5U), {0U, 4U}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Add);
 }
 
 // Checking repeated shifts for constants with the same types
@@ -2266,31 +2266,31 @@ TEST_F(PeepholesTest, ShrRepeatConstTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 5);
-        CONSTANT(2, 6);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 5U);
+        CONSTANT(2U, 6U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Shr).u64().Inputs(0, 1);
-            INST(4, Opcode::Shr).u64().Inputs(3, 2);
-            INST(5, Opcode::Return).u64().Inputs(4);
+            INST(3U, Opcode::Shr).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::Shr).u64().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).u64().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_NE(INS(2).GetNext(), nullptr);
-    auto const3 = static_cast<ConstantInst *>(INS(2).GetNext());
-    ASSERT_TRUE(const3->IsEqualConst(11));
+    ASSERT_NE(INS(2U).GetNext(), nullptr);
+    auto const3 = static_cast<ConstantInst *>(INS(2U).GetNext());
+    ASSERT_TRUE(const3->IsEqualConst(11U));
 
-    ASSERT_TRUE(INS(3).GetUsers().Empty());
-    ASSERT_EQ(INS(3).GetOpcode(), Opcode::Shr);
-    ASSERT_TRUE(CheckUsers(INS(4), {5}));
-    ASSERT_EQ(INS(4).GetOpcode(), Opcode::Shr);
-    ASSERT_EQ(INS(4).GetInput(0).GetInst(), &INS(0));
-    ASSERT_EQ(INS(4).GetInput(1).GetInst(), const3);
+    ASSERT_TRUE(INS(3U).GetUsers().Empty());
+    ASSERT_EQ(INS(3U).GetOpcode(), Opcode::Shr);
+    ASSERT_TRUE(CheckUsers(INS(4U), {5U}));
+    ASSERT_EQ(INS(4U).GetOpcode(), Opcode::Shr);
+    ASSERT_EQ(INS(4U).GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_EQ(INS(4U).GetInput(1U).GetInst(), const3);
 
-    ASSERT_TRUE(CheckInputs(INS(5), {4}));
+    ASSERT_TRUE(CheckInputs(INS(5U), {4U}));
 }
 
 // Checking repeated shifts for constants with different types
@@ -2298,29 +2298,29 @@ TEST_F(PeepholesTest, ShrRepeatConstTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u32();
-        CONSTANT(1, 5);
-        CONSTANT(2, 6);
+        PARAMETER(0U, 0U).u32();
+        CONSTANT(1U, 5U);
+        CONSTANT(2U, 6U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Shr).u16().Inputs(0, 1);
-            INST(4, Opcode::Shr).u32().Inputs(3, 2);
-            INST(5, Opcode::Return).u32().Inputs(4);
+            INST(3U, Opcode::Shr).u16().Inputs(0U, 1U);
+            INST(4U, Opcode::Shr).u32().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).u32().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_EQ(INS(2).GetNext(), nullptr);
+    ASSERT_EQ(INS(2U).GetNext(), nullptr);
 
-    ASSERT_TRUE(CheckInputs(INS(3), {0, 1}));
-    ASSERT_TRUE(CheckUsers(INS(3), {4}));
-    ASSERT_EQ(INS(3).GetOpcode(), Opcode::Shr);
-    ASSERT_TRUE(CheckInputs(INS(4), {3, 2}));
-    ASSERT_TRUE(CheckUsers(INS(4), {5}));
-    ASSERT_EQ(INS(4).GetOpcode(), Opcode::Shr);
+    ASSERT_TRUE(CheckInputs(INS(3U), {0U, 1U}));
+    ASSERT_TRUE(CheckUsers(INS(3U), {4U}));
+    ASSERT_EQ(INS(3U).GetOpcode(), Opcode::Shr);
+    ASSERT_TRUE(CheckInputs(INS(4U), {3U, 2U}));
+    ASSERT_TRUE(CheckUsers(INS(4U), {5U}));
+    ASSERT_EQ(INS(4U).GetOpcode(), Opcode::Shr);
 
-    ASSERT_TRUE(CheckInputs(INS(5), {4}));
+    ASSERT_TRUE(CheckInputs(INS(5U), {4U}));
 }
 
 // Checking the shift for a constant greater than the type size
@@ -2328,56 +2328,56 @@ TEST_F(PeepholesTest, ShrBigConstTest)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u32();
-        PARAMETER(2, 2).u16();
-        PARAMETER(3, 3).u8();
-        CONSTANT(4, 127);
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u32();
+        PARAMETER(2U, 2U).u16();
+        PARAMETER(3U, 3U).u8();
+        CONSTANT(4U, 127U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::Shr).u64().Inputs(0, 4);
-            INST(6, Opcode::Shr).u32().Inputs(1, 4);
-            INST(7, Opcode::Shr).u16().Inputs(2, 4);
-            INST(8, Opcode::Shr).u8().Inputs(3, 4);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(9, Opcode::CallStatic).u64().InputsAutoType(5, 6, 7, 8, 20);
-            INST(10, Opcode::Return).u64().Inputs(9);
+            INST(5U, Opcode::Shr).u64().Inputs(0U, 4U);
+            INST(6U, Opcode::Shr).u32().Inputs(1U, 4U);
+            INST(7U, Opcode::Shr).u16().Inputs(2U, 4U);
+            INST(8U, Opcode::Shr).u8().Inputs(3U, 4U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(9U, Opcode::CallStatic).u64().InputsAutoType(5U, 6U, 7U, 8U, 20U);
+            INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_NE(INS(4).GetNext(), nullptr);
-    auto const64 = static_cast<ConstantInst *>(INS(4).GetNext());
-    ASSERT_TRUE(const64->IsEqualConst(63));
+    ASSERT_NE(INS(4U).GetNext(), nullptr);
+    auto const64 = static_cast<ConstantInst *>(INS(4U).GetNext());
+    ASSERT_TRUE(const64->IsEqualConst(63U));
 
     ASSERT_NE(const64->GetNext(), nullptr);
     auto const32 = static_cast<ConstantInst *>(const64->GetNext());
-    ASSERT_TRUE(const32->IsEqualConst(31));
+    ASSERT_TRUE(const32->IsEqualConst(31U));
 
     ASSERT_NE(const32->GetNext(), nullptr);
     auto const16 = static_cast<ConstantInst *>(const32->GetNext());
-    ASSERT_TRUE(const16->IsEqualConst(15));
+    ASSERT_TRUE(const16->IsEqualConst(15U));
 
     ASSERT_NE(const16->GetNext(), nullptr);
     auto const8 = static_cast<ConstantInst *>(const16->GetNext());
-    ASSERT_TRUE(const8->IsEqualConst(7));
+    ASSERT_TRUE(const8->IsEqualConst(7U));
 
-    ASSERT_EQ(INS(5).GetInput(0).GetInst(), &INS(0));
-    ASSERT_EQ(INS(5).GetInput(1).GetInst(), const64);
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Shr);
+    ASSERT_EQ(INS(5U).GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_EQ(INS(5U).GetInput(1U).GetInst(), const64);
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Shr);
 
-    ASSERT_EQ(INS(6).GetInput(0).GetInst(), &INS(1));
-    ASSERT_EQ(INS(6).GetInput(1).GetInst(), const32);
-    ASSERT_EQ(INS(6).GetOpcode(), Opcode::Shr);
+    ASSERT_EQ(INS(6U).GetInput(0U).GetInst(), &INS(1U));
+    ASSERT_EQ(INS(6U).GetInput(1U).GetInst(), const32);
+    ASSERT_EQ(INS(6U).GetOpcode(), Opcode::Shr);
 
-    ASSERT_EQ(INS(7).GetInput(0).GetInst(), &INS(2));
-    ASSERT_EQ(INS(7).GetInput(1).GetInst(), const16);
-    ASSERT_EQ(INS(7).GetOpcode(), Opcode::Shr);
+    ASSERT_EQ(INS(7U).GetInput(0U).GetInst(), &INS(2U));
+    ASSERT_EQ(INS(7U).GetInput(1U).GetInst(), const16);
+    ASSERT_EQ(INS(7U).GetOpcode(), Opcode::Shr);
 
-    ASSERT_EQ(INS(8).GetInput(0).GetInst(), &INS(3));
-    ASSERT_EQ(INS(8).GetInput(1).GetInst(), const8);
-    ASSERT_EQ(INS(8).GetOpcode(), Opcode::Shr);
+    ASSERT_EQ(INS(8U).GetInput(0U).GetInst(), &INS(3U));
+    ASSERT_EQ(INS(8U).GetInput(1U).GetInst(), const8);
+    ASSERT_EQ(INS(8U).GetOpcode(), Opcode::Shr);
 }
 
 // Checking the shift with zero constant
@@ -2385,25 +2385,25 @@ TEST_F(PeepholesTest, AShrZeroTest)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::AShr).u64().Inputs(0, 1);
-            INST(4, Opcode::AShr).u64().Inputs(0, 2);
+            INST(3U, Opcode::AShr).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::AShr).u64().Inputs(0U, 2U);
 
-            INST(5, Opcode::Add).u64().Inputs(3, 4);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(5U, Opcode::Add).u64().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_TRUE(INS(3).GetUsers().Empty());
+    ASSERT_TRUE(INS(3U).GetUsers().Empty());
 
-    ASSERT_TRUE(CheckInputs(INS(5), {0, 4}));
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::Add);
+    ASSERT_TRUE(CheckInputs(INS(5U), {0U, 4U}));
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::Add);
 }
 
 // Checking repeated shifts for constants with the same types
@@ -2411,31 +2411,31 @@ TEST_F(PeepholesTest, AShrRepeatConstTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 5);
-        CONSTANT(2, 6);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 5U);
+        CONSTANT(2U, 6U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::AShr).u64().Inputs(0, 1);
-            INST(4, Opcode::AShr).u64().Inputs(3, 2);
-            INST(5, Opcode::Return).u64().Inputs(4);
+            INST(3U, Opcode::AShr).u64().Inputs(0U, 1U);
+            INST(4U, Opcode::AShr).u64().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).u64().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_NE(INS(2).GetNext(), nullptr);
-    auto const3 = static_cast<ConstantInst *>(INS(2).GetNext());
-    ASSERT_TRUE(const3->IsEqualConst(11));
+    ASSERT_NE(INS(2U).GetNext(), nullptr);
+    auto const3 = static_cast<ConstantInst *>(INS(2U).GetNext());
+    ASSERT_TRUE(const3->IsEqualConst(11U));
 
-    ASSERT_TRUE(INS(3).GetUsers().Empty());
-    ASSERT_EQ(INS(3).GetOpcode(), Opcode::AShr);
-    ASSERT_TRUE(CheckUsers(INS(4), {5}));
-    ASSERT_EQ(INS(4).GetOpcode(), Opcode::AShr);
-    ASSERT_EQ(INS(4).GetInput(0).GetInst(), &INS(0));
-    ASSERT_EQ(INS(4).GetInput(1).GetInst(), const3);
+    ASSERT_TRUE(INS(3U).GetUsers().Empty());
+    ASSERT_EQ(INS(3U).GetOpcode(), Opcode::AShr);
+    ASSERT_TRUE(CheckUsers(INS(4U), {5U}));
+    ASSERT_EQ(INS(4U).GetOpcode(), Opcode::AShr);
+    ASSERT_EQ(INS(4U).GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_EQ(INS(4U).GetInput(1U).GetInst(), const3);
 
-    ASSERT_TRUE(CheckInputs(INS(5), {4}));
+    ASSERT_TRUE(CheckInputs(INS(5U), {4U}));
 }
 
 // Checking repeated shifts for constants with different types
@@ -2443,29 +2443,29 @@ TEST_F(PeepholesTest, AShrRepeatConstTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u32();
-        CONSTANT(1, 5);
-        CONSTANT(2, 6);
+        PARAMETER(0U, 0U).u32();
+        CONSTANT(1U, 5U);
+        CONSTANT(2U, 6U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::AShr).u16().Inputs(0, 1);
-            INST(4, Opcode::AShr).u32().Inputs(3, 2);
-            INST(5, Opcode::Return).u32().Inputs(4);
+            INST(3U, Opcode::AShr).u16().Inputs(0U, 1U);
+            INST(4U, Opcode::AShr).u32().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).u32().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_EQ(INS(2).GetNext(), nullptr);
+    ASSERT_EQ(INS(2U).GetNext(), nullptr);
 
-    ASSERT_TRUE(CheckInputs(INS(3), {0, 1}));
-    ASSERT_TRUE(CheckUsers(INS(3), {4}));
-    ASSERT_EQ(INS(3).GetOpcode(), Opcode::AShr);
-    ASSERT_TRUE(CheckInputs(INS(4), {3, 2}));
-    ASSERT_TRUE(CheckUsers(INS(4), {5}));
-    ASSERT_EQ(INS(4).GetOpcode(), Opcode::AShr);
+    ASSERT_TRUE(CheckInputs(INS(3U), {0U, 1U}));
+    ASSERT_TRUE(CheckUsers(INS(3U), {4U}));
+    ASSERT_EQ(INS(3U).GetOpcode(), Opcode::AShr);
+    ASSERT_TRUE(CheckInputs(INS(4U), {3U, 2U}));
+    ASSERT_TRUE(CheckUsers(INS(4U), {5U}));
+    ASSERT_EQ(INS(4U).GetOpcode(), Opcode::AShr);
 
-    ASSERT_TRUE(CheckInputs(INS(5), {4}));
+    ASSERT_TRUE(CheckInputs(INS(5U), {4U}));
 }
 
 // Checking the shift for a constant greater than the type size
@@ -2473,70 +2473,70 @@ TEST_F(PeepholesTest, AShrBigConstTest)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u32();
-        PARAMETER(2, 2).u16();
-        PARAMETER(3, 3).u8();
-        CONSTANT(4, 127);
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u32();
+        PARAMETER(2U, 2U).u16();
+        PARAMETER(3U, 3U).u8();
+        CONSTANT(4U, 127U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::AShr).u64().Inputs(0, 4);
-            INST(6, Opcode::AShr).u32().Inputs(1, 4);
-            INST(7, Opcode::AShr).u16().Inputs(2, 4);
-            INST(8, Opcode::AShr).u8().Inputs(3, 4);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(10, Opcode::CallStatic).u64().InputsAutoType(5, 6, 7, 8, 20);
-            INST(9, Opcode::Return).u64().Inputs(10);
+            INST(5U, Opcode::AShr).u64().Inputs(0U, 4U);
+            INST(6U, Opcode::AShr).u32().Inputs(1U, 4U);
+            INST(7U, Opcode::AShr).u16().Inputs(2U, 4U);
+            INST(8U, Opcode::AShr).u8().Inputs(3U, 4U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(10U, Opcode::CallStatic).u64().InputsAutoType(5U, 6U, 7U, 8U, 20U);
+            INST(9U, Opcode::Return).u64().Inputs(10U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_NE(INS(4).GetNext(), nullptr);
-    auto const64 = static_cast<ConstantInst *>(INS(4).GetNext());
-    ASSERT_TRUE(const64->IsEqualConst(63));
+    ASSERT_NE(INS(4U).GetNext(), nullptr);
+    auto const64 = static_cast<ConstantInst *>(INS(4U).GetNext());
+    ASSERT_TRUE(const64->IsEqualConst(63U));
 
     ASSERT_NE(const64->GetNext(), nullptr);
     auto const32 = static_cast<ConstantInst *>(const64->GetNext());
-    ASSERT_TRUE(const32->IsEqualConst(31));
+    ASSERT_TRUE(const32->IsEqualConst(31U));
 
     ASSERT_NE(const32->GetNext(), nullptr);
     auto const16 = static_cast<ConstantInst *>(const32->GetNext());
-    ASSERT_TRUE(const16->IsEqualConst(15));
+    ASSERT_TRUE(const16->IsEqualConst(15U));
 
     ASSERT_NE(const16->GetNext(), nullptr);
     auto const8 = static_cast<ConstantInst *>(const16->GetNext());
-    ASSERT_TRUE(const8->IsEqualConst(7));
+    ASSERT_TRUE(const8->IsEqualConst(7U));
 
-    ASSERT_EQ(INS(5).GetInput(0).GetInst(), &INS(0));
-    ASSERT_EQ(INS(5).GetInput(1).GetInst(), const64);
-    ASSERT_EQ(INS(5).GetOpcode(), Opcode::AShr);
+    ASSERT_EQ(INS(5U).GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_EQ(INS(5U).GetInput(1U).GetInst(), const64);
+    ASSERT_EQ(INS(5U).GetOpcode(), Opcode::AShr);
 
-    ASSERT_EQ(INS(6).GetInput(0).GetInst(), &INS(1));
-    ASSERT_EQ(INS(6).GetInput(1).GetInst(), const32);
-    ASSERT_EQ(INS(6).GetOpcode(), Opcode::AShr);
+    ASSERT_EQ(INS(6U).GetInput(0U).GetInst(), &INS(1U));
+    ASSERT_EQ(INS(6U).GetInput(1U).GetInst(), const32);
+    ASSERT_EQ(INS(6U).GetOpcode(), Opcode::AShr);
 
-    ASSERT_EQ(INS(7).GetInput(0).GetInst(), &INS(2));
-    ASSERT_EQ(INS(7).GetInput(1).GetInst(), const16);
-    ASSERT_EQ(INS(7).GetOpcode(), Opcode::AShr);
+    ASSERT_EQ(INS(7U).GetInput(0U).GetInst(), &INS(2U));
+    ASSERT_EQ(INS(7U).GetInput(1U).GetInst(), const16);
+    ASSERT_EQ(INS(7U).GetOpcode(), Opcode::AShr);
 
-    ASSERT_EQ(INS(8).GetInput(0).GetInst(), &INS(3));
-    ASSERT_EQ(INS(8).GetInput(1).GetInst(), const8);
-    ASSERT_EQ(INS(8).GetOpcode(), Opcode::AShr);
+    ASSERT_EQ(INS(8U).GetInput(0U).GetInst(), &INS(3U));
+    ASSERT_EQ(INS(8U).GetInput(1U).GetInst(), const8);
+    ASSERT_EQ(INS(8U).GetOpcode(), Opcode::AShr);
 }
 
 TEST_F(PeepholesTest, ShlPlusAShrTest1)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 0x18);
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x18U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::AShr).s32().Inputs(2, 1);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::AShr).s32().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -2544,12 +2544,12 @@ TEST_F(PeepholesTest, ShlPlusAShrTest1)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
+        PARAMETER(0U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Cast).s8().SrcType(DataType::INT32).Inputs(0);
-            INST(4, Opcode::Return).s32().Inputs(6);
+            INST(6U, Opcode::Cast).s8().SrcType(DataType::INT32).Inputs(0U);
+            INST(4U, Opcode::Return).s32().Inputs(6U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -2559,14 +2559,14 @@ TEST_F(PeepholesTest, ShlPlusAShrTest2)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 0x10);
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x10U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::AShr).s32().Inputs(2, 1);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::AShr).s32().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -2574,12 +2574,12 @@ TEST_F(PeepholesTest, ShlPlusAShrTest2)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
+        PARAMETER(0U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Cast).s16().SrcType(DataType::INT32).Inputs(0);
-            INST(4, Opcode::Return).s32().Inputs(6);
+            INST(6U, Opcode::Cast).s16().SrcType(DataType::INT32).Inputs(0U);
+            INST(4U, Opcode::Return).s32().Inputs(6U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -2589,14 +2589,14 @@ TEST_F(PeepholesTest, ShlPlusAShrTest3)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s64();
-        CONSTANT(1, 0x8);
+        PARAMETER(0U, 0U).s64();
+        CONSTANT(1U, 0x8U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s64().Inputs(0, 1);
-            INST(3, Opcode::AShr).s64().Inputs(2, 1);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(2U, Opcode::Shl).s64().Inputs(0U, 1U);
+            INST(3U, Opcode::AShr).s64().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -2604,12 +2604,12 @@ TEST_F(PeepholesTest, ShlPlusAShrTest3)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s64();
+        PARAMETER(0U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Cast).s32().SrcType(DataType::INT64).Inputs(0);
-            INST(4, Opcode::Return).s32().Inputs(6);
+            INST(6U, Opcode::Cast).s32().SrcType(DataType::INT64).Inputs(0U);
+            INST(4U, Opcode::Return).s32().Inputs(6U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -2620,30 +2620,30 @@ TEST_F(PeepholesTest, ShlPlusAShrTest4)
     // not applied, different constants
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 0x18);
-        CONSTANT(5, 0x10);
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x18U);
+        CONSTANT(5U, 0x10U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::AShr).s32().Inputs(2, 5);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::AShr).s32().Inputs(2U, 5U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 0x18);
-        CONSTANT(5, 0x10);
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x18U);
+        CONSTANT(5U, 0x10U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::AShr).s32().Inputs(2, 5);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::AShr).s32().Inputs(2U, 5U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -2654,28 +2654,28 @@ TEST_F(PeepholesTest, ShlPlusAShrTest5)
     // not applied, same inputs but not a constant
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::Shr).s32().Inputs(2, 1);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Shr).s32().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::Shr).s32().Inputs(2, 1);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Shr).s32().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -2693,24 +2693,24 @@ TEST_F(PeepholesTest, TestMulCase1)
     // 2. INS v5
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(3, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(3U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Mul).u64().Inputs(0, 3);
-            INST(12, Opcode::Mul).u16().Inputs(0, 3);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(21, Opcode::CallStatic).u64().InputsAutoType(6, 12, 20);
-            INST(14, Opcode::Return).u64().Inputs(21);
+            INST(6U, Opcode::Mul).u64().Inputs(0U, 3U);
+            INST(12U, Opcode::Mul).u16().Inputs(0U, 3U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(21U, Opcode::CallStatic).u64().InputsAutoType(6U, 12U, 20U);
+            INST(14U, Opcode::Return).u64().Inputs(21U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
 
-    ASSERT_EQ(INS(21).GetInput(0).GetInst(), &INS(0));
-    ASSERT_TRUE(INS(6).GetUsers().Empty());
+    ASSERT_EQ(INS(21U).GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_TRUE(INS(6U).GetUsers().Empty());
 
-    ASSERT_EQ(INS(21).GetInput(1).GetInst(), &INS(0));
-    ASSERT_TRUE(INS(12).GetUsers().Empty());
+    ASSERT_EQ(INS(21U).GetInput(1U).GetInst(), &INS(0U));
+    ASSERT_TRUE(INS(12U).GetUsers().Empty());
 }
 
 TEST_F(PeepholesTest, TestMulCase2)
@@ -2726,14 +2726,14 @@ TEST_F(PeepholesTest, TestMulCase2)
     // 2. INS v3
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(3, -1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(3U, -1L);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Mul).u64().Inputs(0, 3);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).u64().InputsAutoType(6, 20);
-            INST(12, Opcode::Return).u64().Inputs(13);
+            INST(6U, Opcode::Mul).u64().Inputs(0U, 3U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).u64().InputsAutoType(6U, 20U);
+            INST(12U, Opcode::Return).u64().Inputs(13U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -2741,13 +2741,13 @@ TEST_F(PeepholesTest, TestMulCase2)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Neg).u64().Inputs(0);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).u64().InputsAutoType(6, 20);
-            INST(12, Opcode::Return).u64().Inputs(13);
+            INST(6U, Opcode::Neg).u64().Inputs(0U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).u64().InputsAutoType(6U, 20U);
+            INST(12U, Opcode::Return).u64().Inputs(13U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -2766,14 +2766,14 @@ TEST_F(PeepholesTest, TestMulCase3)
     // 2. INS v3
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(3, 2);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(3U, 2U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Mul).u64().Inputs(0, 3);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).u64().InputsAutoType(6, 20);
-            INST(12, Opcode::Return).u64().Inputs(13);
+            INST(6U, Opcode::Mul).u64().Inputs(0U, 3U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).u64().InputsAutoType(6U, 20U);
+            INST(12U, Opcode::Return).u64().Inputs(13U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -2781,13 +2781,13 @@ TEST_F(PeepholesTest, TestMulCase3)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Add).u64().Inputs(0, 0);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).u64().InputsAutoType(6, 20);
-            INST(12, Opcode::Return).u64().Inputs(13);
+            INST(6U, Opcode::Add).u64().Inputs(0U, 0U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).u64().InputsAutoType(6U, 20U);
+            INST(12U, Opcode::Return).u64().Inputs(13U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -2806,26 +2806,26 @@ TEST_F(PeepholesTest, TestMulCase4)
     // 2. INS v3
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).u16();
-        PARAMETER(13, 3).f32();
-        PARAMETER(14, 4).f64();
-        CONSTANT(3, 4);
-        CONSTANT(4, 16);
-        CONSTANT(5, 512);
-        CONSTANT(15, 4.0F);
-        CONSTANT(16, 16.0);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).u16();
+        PARAMETER(13U, 3U).f32();
+        PARAMETER(14U, 4U).f64();
+        CONSTANT(3U, 4U);
+        CONSTANT(4U, 16U);
+        CONSTANT(5U, 512U);
+        CONSTANT(15U, 4.0F);
+        CONSTANT(16U, 16.0);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Mul).u64().Inputs(0, 3);
-            INST(8, Opcode::Mul).s64().Inputs(1, 4);
-            INST(10, Opcode::Mul).u16().Inputs(2, 5);
-            INST(17, Opcode::Mul).f32().Inputs(13, 15);
-            INST(19, Opcode::Mul).f64().Inputs(14, 16);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(21, Opcode::CallStatic).u64().InputsAutoType(6, 8, 10, 17, 19, 20);
-            INST(22, Opcode::Return).u64().Inputs(21);
+            INST(6U, Opcode::Mul).u64().Inputs(0U, 3U);
+            INST(8U, Opcode::Mul).s64().Inputs(1U, 4U);
+            INST(10U, Opcode::Mul).u16().Inputs(2U, 5U);
+            INST(17U, Opcode::Mul).f32().Inputs(13U, 15U);
+            INST(19U, Opcode::Mul).f64().Inputs(14U, 16U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(21U, Opcode::CallStatic).u64().InputsAutoType(6U, 8U, 10U, 17U, 19U, 20U);
+            INST(22U, Opcode::Return).u64().Inputs(21U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -2833,26 +2833,26 @@ TEST_F(PeepholesTest, TestMulCase4)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).u16();
-        PARAMETER(13, 3).f32();
-        PARAMETER(14, 4).f64();
-        CONSTANT(3, 4);
-        CONSTANT(15, 4.0F);
-        CONSTANT(16, 16.0);
-        CONSTANT(23, 2);
-        CONSTANT(24, 9);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).u16();
+        PARAMETER(13U, 3U).f32();
+        PARAMETER(14U, 4U).f64();
+        CONSTANT(3U, 4U);
+        CONSTANT(15U, 4.0F);
+        CONSTANT(16U, 16.0);
+        CONSTANT(23U, 2U);
+        CONSTANT(24U, 9U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Shl).u64().Inputs(0, 23);
-            INST(8, Opcode::Shl).s64().Inputs(1, 3);
-            INST(10, Opcode::Shl).u16().Inputs(2, 24);
-            INST(17, Opcode::Mul).f32().Inputs(13, 15);
-            INST(19, Opcode::Mul).f64().Inputs(14, 16);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(21, Opcode::CallStatic).u64().InputsAutoType(6, 8, 10, 17, 19, 20);
-            INST(22, Opcode::Return).u64().Inputs(21);
+            INST(6U, Opcode::Shl).u64().Inputs(0U, 23U);
+            INST(8U, Opcode::Shl).s64().Inputs(1U, 3U);
+            INST(10U, Opcode::Shl).u16().Inputs(2U, 24U);
+            INST(17U, Opcode::Mul).f32().Inputs(13U, 15U);
+            INST(19U, Opcode::Mul).f64().Inputs(14U, 16U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(21U, Opcode::CallStatic).u64().InputsAutoType(6U, 8U, 10U, 17U, 19U, 20U);
+            INST(22U, Opcode::Return).u64().Inputs(21U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -2871,25 +2871,25 @@ TEST_F(PeepholesTest, TestDivCase1)
     // 2. INS v3
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(3, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(3U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Div).u64().Inputs(0, 3);
-            INST(12, Opcode::Div).u16().Inputs(0, 3);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(21, Opcode::CallStatic).u64().InputsAutoType(6, 12, 20);
-            INST(22, Opcode::Return).u64().Inputs(21);
+            INST(6U, Opcode::Div).u64().Inputs(0U, 3U);
+            INST(12U, Opcode::Div).u16().Inputs(0U, 3U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(21U, Opcode::CallStatic).u64().InputsAutoType(6U, 12U, 20U);
+            INST(22U, Opcode::Return).u64().Inputs(21U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
 
-    ASSERT_EQ(INS(21).GetInput(0).GetInst(), &INS(0));
-    ASSERT_TRUE(INS(6).GetUsers().Empty());
+    ASSERT_EQ(INS(21U).GetInput(0U).GetInst(), &INS(0U));
+    ASSERT_TRUE(INS(6U).GetUsers().Empty());
 
-    ASSERT_EQ(INS(21).GetInput(1).GetInst(), &INS(0));
-    ASSERT_TRUE(INS(12).GetUsers().Empty());
+    ASSERT_EQ(INS(21U).GetInput(1U).GetInst(), &INS(0U));
+    ASSERT_TRUE(INS(12U).GetUsers().Empty());
 }
 
 TEST_F(PeepholesTest, TestDivCase2)
@@ -2905,14 +2905,14 @@ TEST_F(PeepholesTest, TestDivCase2)
     // 2. INS v3
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(3, -1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(3U, -1L);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Div).u64().Inputs(0, 3);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(21, Opcode::CallStatic).u64().InputsAutoType(6, 20);
-            INST(22, Opcode::Return).u64().Inputs(21);
+            INST(6U, Opcode::Div).u64().Inputs(0U, 3U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(21U, Opcode::CallStatic).u64().InputsAutoType(6U, 20U);
+            INST(22U, Opcode::Return).u64().Inputs(21U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -2920,13 +2920,13 @@ TEST_F(PeepholesTest, TestDivCase2)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Neg).u64().Inputs(0);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).u64().InputsAutoType(6, 20);
-            INST(12, Opcode::Return).u64().Inputs(13);
+            INST(6U, Opcode::Neg).u64().Inputs(0U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).u64().InputsAutoType(6U, 20U);
+            INST(12U, Opcode::Return).u64().Inputs(13U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -2938,15 +2938,15 @@ TEST_F(PeepholesTest, TestDivCase3Unsigned)
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            PARAMETER(0, 0);
-            INS(0).SetType(type);
-            CONSTANT(1, 4);
-            BASIC_BLOCK(2, -1)
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            CONSTANT(1U, 4U);
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(2, Opcode::Div).Inputs(0, 1);
-                INS(2).SetType(type);
-                INST(3, Opcode::Return).Inputs(2);
-                INS(3).SetType(type);
+                INST(2U, Opcode::Div).Inputs(0U, 1U);
+                INS(2U).SetType(type);
+                INST(3U, Opcode::Return).Inputs(2U);
+                INS(3U).SetType(type);
             }
         }
         ASSERT_TRUE(graph1->RunPass<Peepholes>());
@@ -2954,15 +2954,15 @@ TEST_F(PeepholesTest, TestDivCase3Unsigned)
         auto graph2 = CreateEmptyGraph();
         GRAPH(graph2)
         {
-            PARAMETER(0, 0);
-            INS(0).SetType(type);
-            CONSTANT(1, 2);
-            BASIC_BLOCK(2, -1)
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            CONSTANT(1U, 2U);
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(2, Opcode::Shr).Inputs(0, 1);
-                INS(2).SetType(type);
-                INST(3, Opcode::Return).Inputs(2);
-                INS(3).SetType(type);
+                INST(2U, Opcode::Shr).Inputs(0U, 1U);
+                INS(2U).SetType(type);
+                INST(3U, Opcode::Return).Inputs(2U);
+                INS(3U).SetType(type);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -2975,15 +2975,15 @@ TEST_F(PeepholesTest, TestDivCase3SignedPositive)
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            PARAMETER(0, 0);
-            INS(0).SetType(type);
-            CONSTANT(1, 4);
-            BASIC_BLOCK(2, -1)
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            CONSTANT(1U, 4U);
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(2, Opcode::Div).Inputs(0, 1);
-                INS(2).SetType(type);
-                INST(3, Opcode::Return).Inputs(2);
-                INS(3).SetType(type);
+                INST(2U, Opcode::Div).Inputs(0U, 1U);
+                INS(2U).SetType(type);
+                INST(3U, Opcode::Return).Inputs(2U);
+                INS(3U).SetType(type);
             }
         }
 
@@ -2994,23 +2994,23 @@ TEST_F(PeepholesTest, TestDivCase3SignedPositive)
         auto graph2 = CreateEmptyGraph();
         GRAPH(graph2)
         {
-            PARAMETER(0, 0);
-            INS(0).SetType(type);
-            CONSTANT(1, type_size - 1);
-            CONSTANT(5, type_size - 2);  // type size - log2(4)
-            CONSTANT(8, 2);              // log2(4)
-            BASIC_BLOCK(2, -1)
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            CONSTANT(1U, type_size - 1L);
+            CONSTANT(5U, type_size - 2L);  // type size - log2(4)
+            CONSTANT(8U, 2U);              // log2(4)
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(2, Opcode::AShr).Inputs(0, 1);
-                INS(2).SetType(type);
-                INST(4, Opcode::Shr).Inputs(2, 5);
-                INS(4).SetType(type);
-                INST(6, Opcode::Add).Inputs(4, 0);
-                INS(6).SetType(type);
-                INST(7, Opcode::AShr).Inputs(6, 8);
-                INS(7).SetType(type);
-                INST(3, Opcode::Return).Inputs(7);
-                INS(3).SetType(type);
+                INST(2U, Opcode::AShr).Inputs(0U, 1U);
+                INS(2U).SetType(type);
+                INST(4U, Opcode::Shr).Inputs(2U, 5U);
+                INS(4U).SetType(type);
+                INST(6U, Opcode::Add).Inputs(4U, 0U);
+                INS(6U).SetType(type);
+                INST(7U, Opcode::AShr).Inputs(6U, 8U);
+                INS(7U).SetType(type);
+                INST(3U, Opcode::Return).Inputs(7U);
+                INS(3U).SetType(type);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -3023,15 +3023,15 @@ TEST_F(PeepholesTest, TestDivCase3SignedNegative)
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            PARAMETER(0, 0);
-            INS(0).SetType(type);
-            CONSTANT(1, -16);
-            BASIC_BLOCK(2, -1)
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            CONSTANT(1U, -16L);
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(2, Opcode::Div).Inputs(0, 1);
-                INS(2).SetType(type);
-                INST(3, Opcode::Return).Inputs(2);
-                INS(3).SetType(type);
+                INST(2U, Opcode::Div).Inputs(0U, 1U);
+                INS(2U).SetType(type);
+                INST(3U, Opcode::Return).Inputs(2U);
+                INS(3U).SetType(type);
             }
         }
 
@@ -3042,25 +3042,25 @@ TEST_F(PeepholesTest, TestDivCase3SignedNegative)
         auto graph2 = CreateEmptyGraph();
         GRAPH(graph2)
         {
-            PARAMETER(0, 0);
-            INS(0).SetType(type);
-            CONSTANT(1, type_size - 1);
-            CONSTANT(5, type_size - 4);  // type size - log2(16)
-            CONSTANT(8, 4);              // log2(16)
-            BASIC_BLOCK(2, -1)
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            CONSTANT(1U, type_size - 1L);
+            CONSTANT(5U, type_size - 4L);  // type size - log2(16)
+            CONSTANT(8U, 4U);              // log2(16)
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(2, Opcode::AShr).Inputs(0, 1);
-                INS(2).SetType(type);
-                INST(4, Opcode::Shr).Inputs(2, 5);
-                INS(4).SetType(type);
-                INST(6, Opcode::Add).Inputs(4, 0);
-                INS(6).SetType(type);
-                INST(7, Opcode::AShr).Inputs(6, 8);
-                INS(7).SetType(type);
-                INST(9, Opcode::Neg).Inputs(7);
-                INS(9).SetType(type);
-                INST(3, Opcode::Return).Inputs(9);
-                INS(3).SetType(type);
+                INST(2U, Opcode::AShr).Inputs(0U, 1U);
+                INS(2U).SetType(type);
+                INST(4U, Opcode::Shr).Inputs(2U, 5U);
+                INS(4U).SetType(type);
+                INST(6U, Opcode::Add).Inputs(4U, 0U);
+                INS(6U).SetType(type);
+                INST(7U, Opcode::AShr).Inputs(6U, 8U);
+                INS(7U).SetType(type);
+                INST(9U, Opcode::Neg).Inputs(7U);
+                INS(9U).SetType(type);
+                INST(3U, Opcode::Return).Inputs(9U);
+                INS(3U).SetType(type);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -3078,20 +3078,20 @@ TEST_F(PeepholesTest, TestLenArray1)
     // 3. LenArray v2
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 10);
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 10U);
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(1, Opcode::NewArray).ref().Inputs(44, 0);
-            INST(2, Opcode::LenArray).s32().Inputs(1);
-            INST(3, Opcode::Return).s32().Inputs(2);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(1U, Opcode::NewArray).ref().Inputs(44U, 0U);
+            INST(2U, Opcode::LenArray).s32().Inputs(1U);
+            INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    auto cnst = INS(3).GetInput(0).GetInst();
+    auto cnst = INS(3U).GetInput(0U).GetInst();
     ASSERT_EQ(cnst->GetOpcode(), Opcode::Constant);
-    ASSERT_TRUE(INS(2).GetUsers().Empty());
+    ASSERT_TRUE(INS(2U).GetUsers().Empty());
 }
 
 TEST_F(PeepholesTest, TestLenArray2)
@@ -3105,23 +3105,23 @@ TEST_F(PeepholesTest, TestLenArray2)
     // 3. LenArray v2
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 10);
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 10U);
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(10, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(1, Opcode::NegativeCheck).s32().Inputs(0, 10);
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs(10).TypeId(68);
-            INST(2, Opcode::NewArray).ref().Inputs(44, 1);
-            INST(3, Opcode::NullCheck).ref().Inputs(2, 10);
-            INST(4, Opcode::LenArray).s32().Inputs(3);
-            INST(5, Opcode::Return).s32().Inputs(4);
+            INST(10U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(1U, Opcode::NegativeCheck).s32().Inputs(0U, 10U);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(10U).TypeId(68U);
+            INST(2U, Opcode::NewArray).ref().Inputs(44U, 1U);
+            INST(3U, Opcode::NullCheck).ref().Inputs(2U, 10U);
+            INST(4U, Opcode::LenArray).s32().Inputs(3U);
+            INST(5U, Opcode::Return).s32().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    auto cnst = INS(5).GetInput(0).GetInst();
+    auto cnst = INS(5U).GetInput(0U).GetInst();
     ASSERT_EQ(cnst->GetOpcode(), Opcode::Constant);
-    ASSERT_TRUE(INS(4).GetUsers().Empty());
+    ASSERT_TRUE(INS(4U).GetUsers().Empty());
 }
 
 TEST_F(PeepholesTest, TestPhi1)
@@ -3134,58 +3134,58 @@ TEST_F(PeepholesTest, TestPhi1)
     // 3.type  Phi v0, v1
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::Sub).s32().Inputs(1, 0);
+            INST(7U, Opcode::Sub).s32().Inputs(1U, 0U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(9, Opcode::Phi).s32().Inputs(5, 7);
-            INST(10, Opcode::Phi).s32().Inputs(5, 7);
-            INST(11, Opcode::Add).s32().Inputs(9, 0);
-            INST(12, Opcode::Add).s32().Inputs(10, 1);
-            INST(13, Opcode::Add).s32().Inputs(11, 12);
-            INST(14, Opcode::Return).s32().Inputs(13);
+            INST(9U, Opcode::Phi).s32().Inputs(5U, 7U);
+            INST(10U, Opcode::Phi).s32().Inputs(5U, 7U);
+            INST(11U, Opcode::Add).s32().Inputs(9U, 0U);
+            INST(12U, Opcode::Add).s32().Inputs(10U, 1U);
+            INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
+            INST(14U, Opcode::Return).s32().Inputs(13U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::Sub).s32().Inputs(1, 0);
+            INST(7U, Opcode::Sub).s32().Inputs(1U, 0U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(9, Opcode::Phi).s32().Inputs(5, 7);
-            INST(10, Opcode::Phi).s32().Inputs(5, 7);
-            INST(11, Opcode::Add).s32().Inputs(9, 0);
-            INST(12, Opcode::Add).s32().Inputs(9, 1);
-            INST(13, Opcode::Add).s32().Inputs(11, 12);
-            INST(14, Opcode::Return).s32().Inputs(13);
+            INST(9U, Opcode::Phi).s32().Inputs(5U, 7U);
+            INST(10U, Opcode::Phi).s32().Inputs(5U, 7U);
+            INST(11U, Opcode::Add).s32().Inputs(9U, 0U);
+            INST(12U, Opcode::Add).s32().Inputs(9U, 1U);
+            INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
+            INST(14U, Opcode::Return).s32().Inputs(13U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3201,28 +3201,28 @@ TEST_F(PeepholesTest, PhiTestWithChecks)
     // 3.type  Phi v0, v1
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).ref();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::NullCheck).ref().Inputs(0);
+            INST(5U, Opcode::NullCheck).ref().Inputs(0U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::NullCheck).ref().Inputs(1);
+            INST(7U, Opcode::NullCheck).ref().Inputs(1U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(9, Opcode::Phi).ref().Inputs(5, 7);
-            INST(10, Opcode::Phi).ref().Inputs(0, 1);
-            INST(12, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(11, Opcode::CallStatic).s32().InputsAutoType(9, 10, 12);
-            INST(14, Opcode::Return).s32().Inputs(11);
+            INST(9U, Opcode::Phi).ref().Inputs(5U, 7U);
+            INST(10U, Opcode::Phi).ref().Inputs(0U, 1U);
+            INST(12U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(11U, Opcode::CallStatic).s32().InputsAutoType(9U, 10U, 12U);
+            INST(14U, Opcode::Return).s32().Inputs(11U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -3230,27 +3230,27 @@ TEST_F(PeepholesTest, PhiTestWithChecks)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).ref();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::NullCheck).ref().Inputs(0);
+            INST(5U, Opcode::NullCheck).ref().Inputs(0U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::NullCheck).ref().Inputs(1);
+            INST(7U, Opcode::NullCheck).ref().Inputs(1U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(9, Opcode::Phi).ref().Inputs(5, 7);
-            INST(10, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(11, Opcode::CallStatic).s32().InputsAutoType(9, 9, 10);
-            INST(14, Opcode::Return).s32().Inputs(11);
+            INST(9U, Opcode::Phi).ref().Inputs(5U, 7U);
+            INST(10U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(11U, Opcode::CallStatic).s32().InputsAutoType(9U, 9U, 10U);
+            INST(14U, Opcode::Return).s32().Inputs(11U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3266,67 +3266,67 @@ TEST_F(PeepholesTest, TestPhi2)
     // 3.type  Phi v0, v1
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::Sub).s32().Inputs(1, 0);
+            INST(7U, Opcode::Sub).s32().Inputs(1U, 0U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(9, Opcode::Phi).s32().Inputs(5, 7);
-            INST(10, Opcode::Phi).s32().Inputs(5, 7);
-            INST(11, Opcode::Add).s32().Inputs(9, 0);
-            INST(12, Opcode::Add).s32().Inputs(9, 10);
-            INST(13, Opcode::Add).s32().Inputs(10, 1);
-            INST(14, Opcode::Add).s32().Inputs(11, 12);
-            INST(15, Opcode::Add).s32().Inputs(13, 14);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(16, Opcode::CallStatic).v0id().InputsAutoType(9, 10, 15, 20);
+            INST(9U, Opcode::Phi).s32().Inputs(5U, 7U);
+            INST(10U, Opcode::Phi).s32().Inputs(5U, 7U);
+            INST(11U, Opcode::Add).s32().Inputs(9U, 0U);
+            INST(12U, Opcode::Add).s32().Inputs(9U, 10U);
+            INST(13U, Opcode::Add).s32().Inputs(10U, 1U);
+            INST(14U, Opcode::Add).s32().Inputs(11U, 12U);
+            INST(15U, Opcode::Add).s32().Inputs(13U, 14U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(16U, Opcode::CallStatic).v0id().InputsAutoType(9U, 10U, 15U, 20U);
             ;
-            INST(17, Opcode::Return).s32().Inputs(15);
+            INST(17U, Opcode::Return).s32().Inputs(15U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::Sub).s32().Inputs(1, 0);
+            INST(7U, Opcode::Sub).s32().Inputs(1U, 0U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(9, Opcode::Phi).s32().Inputs(5, 7);
-            INST(10, Opcode::Phi).s32().Inputs(5, 7);
-            INST(11, Opcode::Add).s32().Inputs(9, 0);
-            INST(12, Opcode::Add).s32().Inputs(9, 9);
-            INST(13, Opcode::Add).s32().Inputs(9, 1);
-            INST(14, Opcode::Add).s32().Inputs(11, 12);
-            INST(15, Opcode::Add).s32().Inputs(13, 14);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(16, Opcode::CallStatic).v0id().InputsAutoType(9, 9, 15, 20);
-            INST(17, Opcode::Return).s32().Inputs(15);
+            INST(9U, Opcode::Phi).s32().Inputs(5U, 7U);
+            INST(10U, Opcode::Phi).s32().Inputs(5U, 7U);
+            INST(11U, Opcode::Add).s32().Inputs(9U, 0U);
+            INST(12U, Opcode::Add).s32().Inputs(9U, 9U);
+            INST(13U, Opcode::Add).s32().Inputs(9U, 1U);
+            INST(14U, Opcode::Add).s32().Inputs(11U, 12U);
+            INST(15U, Opcode::Add).s32().Inputs(13U, 14U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(16U, Opcode::CallStatic).v0id().InputsAutoType(9U, 9U, 15U, 20U);
+            INST(17U, Opcode::Return).s32().Inputs(15U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3338,62 +3338,62 @@ TEST_F(PeepholesTest, TestPhi3)
     // Same types, different inputs.
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);  // Phi 11
-            INST(6, Opcode::Add).s32().Inputs(0, 1);  // Phi 12
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);  // Phi 11
+            INST(6U, Opcode::Add).s32().Inputs(0U, 1U);  // Phi 12
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(8, Opcode::Sub).s32().Inputs(1, 0);  // Phi 11
-            INST(9, Opcode::Add).s32().Inputs(0, 1);  // Phi 12
+            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);  // Phi 11
+            INST(9U, Opcode::Add).s32().Inputs(0U, 1U);  // Phi 12
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(11, Opcode::Phi).s32().Inputs(5, 8);
-            INST(12, Opcode::Phi).s32().Inputs(6, 9);
-            INST(13, Opcode::Add).s32().Inputs(11, 12);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).v0id().InputsAutoType(11, 12, 13, 20);
-            INST(15, Opcode::Return).s32().Inputs(13);
+            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
+            INST(12U, Opcode::Phi).s32().Inputs(6U, 9U);
+            INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 20U);
+            INST(15U, Opcode::Return).s32().Inputs(13U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);  // Phi 11
-            INST(6, Opcode::Add).s32().Inputs(0, 1);  // Phi 12
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);  // Phi 11
+            INST(6U, Opcode::Add).s32().Inputs(0U, 1U);  // Phi 12
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(8, Opcode::Sub).s32().Inputs(1, 0);  // Phi 11
-            INST(9, Opcode::Add).s32().Inputs(0, 1);  // Phi 12
+            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);  // Phi 11
+            INST(9U, Opcode::Add).s32().Inputs(0U, 1U);  // Phi 12
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(11, Opcode::Phi).s32().Inputs(5, 8);
-            INST(12, Opcode::Phi).s32().Inputs(6, 9);
-            INST(13, Opcode::Add).s32().Inputs(11, 12);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).v0id().InputsAutoType(11, 12, 13, 20);
-            INST(15, Opcode::Return).s32().Inputs(13);
+            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
+            INST(12U, Opcode::Phi).s32().Inputs(6U, 9U);
+            INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 20U);
+            INST(15U, Opcode::Return).s32().Inputs(13U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3405,58 +3405,58 @@ TEST_F(PeepholesTest, TestPhi4)
     // Different types, same inputs.
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(8, Opcode::Sub).s32().Inputs(1, 0);
+            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(11, Opcode::Phi).s16().Inputs(5, 8);
-            INST(12, Opcode::Phi).s32().Inputs(5, 8);
-            INST(13, Opcode::Add).s32().Inputs(11, 12);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).v0id().InputsAutoType(11, 12, 13, 20);
-            INST(15, Opcode::Return).s32().Inputs(13);
+            INST(11U, Opcode::Phi).s16().Inputs(5U, 8U);
+            INST(12U, Opcode::Phi).s32().Inputs(5U, 8U);
+            INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 20U);
+            INST(15U, Opcode::Return).s32().Inputs(13U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(8, Opcode::Sub).s32().Inputs(1, 0);
+            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(11, Opcode::Phi).s16().Inputs(5, 8);
-            INST(12, Opcode::Phi).s32().Inputs(5, 8);
-            INST(13, Opcode::Add).s32().Inputs(11, 12);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).v0id().InputsAutoType(11, 12, 13, 20);
-            INST(15, Opcode::Return).s32().Inputs(13);
+            INST(11U, Opcode::Phi).s16().Inputs(5U, 8U);
+            INST(12U, Opcode::Phi).s32().Inputs(5U, 8U);
+            INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 20U);
+            INST(15U, Opcode::Return).s32().Inputs(13U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3468,68 +3468,68 @@ TEST_F(PeepholesTest, TestPhi5)
     // Different types, different inputs.
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        PARAMETER(17, 2).f32();
-        PARAMETER(18, 3).f32();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        PARAMETER(17U, 2U).f32();
+        PARAMETER(18U, 3U).f32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);    // Phi 11
-            INST(6, Opcode::Add).f32().Inputs(18, 17);  // Phi 12
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);    // Phi 11
+            INST(6U, Opcode::Add).f32().Inputs(18U, 17U);  // Phi 12
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(8, Opcode::Sub).s32().Inputs(1, 0);    // Phi 11
-            INST(9, Opcode::Add).f32().Inputs(18, 17);  // Phi 12
+            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);    // Phi 11
+            INST(9U, Opcode::Add).f32().Inputs(18U, 17U);  // Phi 12
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(11, Opcode::Phi).s32().Inputs(5, 8);
-            INST(12, Opcode::Phi).f32().Inputs(6, 9);
-            INST(13, Opcode::Cast).f32().SrcType(DataType::INT32).Inputs(11);
-            INST(14, Opcode::Add).f32().Inputs(13, 12);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(15, Opcode::CallStatic).v0id().InputsAutoType(11, 12, 13, 14, 20);
-            INST(16, Opcode::Return).f32().Inputs(14);
+            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
+            INST(12U, Opcode::Phi).f32().Inputs(6U, 9U);
+            INST(13U, Opcode::Cast).f32().SrcType(DataType::INT32).Inputs(11U);
+            INST(14U, Opcode::Add).f32().Inputs(13U, 12U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(15U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 14U, 20U);
+            INST(16U, Opcode::Return).f32().Inputs(14U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        PARAMETER(17, 2).f32();
-        PARAMETER(18, 3).f32();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        PARAMETER(17U, 2U).f32();
+        PARAMETER(18U, 3U).f32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);    // Phi 11
-            INST(6, Opcode::Add).f32().Inputs(18, 17);  // Phi 12
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);    // Phi 11
+            INST(6U, Opcode::Add).f32().Inputs(18U, 17U);  // Phi 12
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(8, Opcode::Sub).s32().Inputs(1, 0);    // Phi 11
-            INST(9, Opcode::Add).f32().Inputs(18, 17);  // Phi 12
+            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);    // Phi 11
+            INST(9U, Opcode::Add).f32().Inputs(18U, 17U);  // Phi 12
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(11, Opcode::Phi).s32().Inputs(5, 8);
-            INST(12, Opcode::Phi).f32().Inputs(6, 9);
-            INST(13, Opcode::Cast).f32().SrcType(DataType::INT32).Inputs(11);
-            INST(14, Opcode::Add).f32().Inputs(13, 12);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(15, Opcode::CallStatic).v0id().InputsAutoType(11, 12, 13, 14, 20);
-            INST(16, Opcode::Return).f32().Inputs(14);
+            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
+            INST(12U, Opcode::Phi).f32().Inputs(6U, 9U);
+            INST(13U, Opcode::Cast).f32().SrcType(DataType::INT32).Inputs(11U);
+            INST(14U, Opcode::Add).f32().Inputs(13U, 12U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(15U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 14U, 20U);
+            INST(16U, Opcode::Return).f32().Inputs(14U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3539,26 +3539,26 @@ TEST_F(PeepholesTest, MultiplePeepholeTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 100);
-        CONSTANT(1, -46);
-        CONSTANT(2, 0);
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 100U);
+        CONSTANT(1U, -46L);
+        CONSTANT(2U, 0U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().SrcType(DataType::Type::INT64).CC(CC_LT).Inputs(1, 2);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().SrcType(DataType::Type::INT64).CC(CC_LT).Inputs(1U, 2U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(8, Opcode::Add).s32().Inputs(0, 1);
+            INST(8U, Opcode::Add).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(11, Opcode::Phi).s32().Inputs(5, 8);
-            INST(16, Opcode::Return).s32().Inputs(11);
+            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
+            INST(16U, Opcode::Return).s32().Inputs(11U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
@@ -3574,9 +3574,9 @@ TEST_F(PeepholesTest, MultiplePeepholeTest)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(16, Opcode::ReturnI).s32().Imm(146);
+            INST(16U, Opcode::ReturnI).s32().Imm(146U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3629,14 +3629,14 @@ TEST_F(PeepholesTest, CompareTest1)
     // applied case 2
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).u32();
-        PARAMETER(2, 1).u32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).u32();
+        PARAMETER(2U, 1U).u32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_LT).Inputs(3, 0);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(3U, 0U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
@@ -3644,14 +3644,14 @@ TEST_F(PeepholesTest, CompareTest1)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).u32();
-        PARAMETER(2, 1).u32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).u32();
+        PARAMETER(2U, 1U).u32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_B).Inputs(1, 2);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_B).Inputs(1U, 2U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3662,13 +3662,13 @@ TEST_F(PeepholesTest, CompareTest1Addition0)
     // cmp with zero and inputs are signed, compare operands are in normal order (constant is the second operand)
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 1).u32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 1U).u32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(2, Opcode::Cmp).s32().Inputs(0, 1);
-            INST(3, Opcode::Compare).b().CC(CC_LT).Inputs(2, 0);
-            INST(4, Opcode::Return).b().Inputs(3);
+            INST(2U, Opcode::Cmp).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Compare).b().CC(CC_LT).Inputs(2U, 0U);
+            INST(4U, Opcode::Return).b().Inputs(3U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
@@ -3676,13 +3676,13 @@ TEST_F(PeepholesTest, CompareTest1Addition0)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 1).u32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 1U).u32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(2, Opcode::Cmp).s32().Inputs(0, 1);
-            INST(3, Opcode::Compare).b().CC(CC_B).Inputs(0, 1);
-            INST(4, Opcode::Return).b().Inputs(3);
+            INST(2U, Opcode::Cmp).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Compare).b().CC(CC_B).Inputs(0U, 1U);
+            INST(4U, Opcode::Return).b().Inputs(3U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3693,14 +3693,14 @@ TEST_F(PeepholesTest, CompareTest1Addition1)
     // cmp inputs are unsigned, compare operands are in reverse order (constant is the first operand)
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).u32();
-        PARAMETER(2, 1).u32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).u32();
+        PARAMETER(2U, 1U).u32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_LT).Inputs(0, 3);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(0U, 3U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
@@ -3708,14 +3708,14 @@ TEST_F(PeepholesTest, CompareTest1Addition1)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).u32();
-        PARAMETER(2, 1).u32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).u32();
+        PARAMETER(2U, 1U).u32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_A).Inputs(1, 2);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_A).Inputs(1U, 2U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3726,14 +3726,14 @@ TEST_F(PeepholesTest, CompareTest1Addition2)
     // cmp inputs are signed and compare operands are in normal order
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).s32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).s32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_LT).Inputs(3, 0);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(3U, 0U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
@@ -3741,14 +3741,14 @@ TEST_F(PeepholesTest, CompareTest1Addition2)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).s32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).s32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_LT).Inputs(1, 2);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(1U, 2U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3759,14 +3759,14 @@ TEST_F(PeepholesTest, CompareTest1Addition3)
     // cmp inputs are signed and compare operands are in reverse order
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).s32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).s32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_LT).Inputs(0, 3);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(0U, 3U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
@@ -3774,14 +3774,14 @@ TEST_F(PeepholesTest, CompareTest1Addition3)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).s32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).s32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_GT).Inputs(1, 2);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_GT).Inputs(1U, 2U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3792,14 +3792,14 @@ TEST_F(PeepholesTest, CompareTest2)
     // not applied, Compare with non zero constant
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 1);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).s32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 1U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).s32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_LT).Inputs(3, 0);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(3U, 0U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
@@ -3807,14 +3807,14 @@ TEST_F(PeepholesTest, CompareTest2)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).s32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 1U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).s32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_LT).Inputs(3, 0);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(3U, 0U);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3825,22 +3825,22 @@ TEST_F(PeepholesTest, CompareTest3)
     // not applied, cmp have more than 1 users.
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 1);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 1U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_LT).Inputs(3, 0);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(3U, 0U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(3, 1)
+        BASIC_BLOCK(3U, 1U)
         {
-            INST(6, Opcode::Return).s32().Inputs(3);
+            INST(6U, Opcode::Return).s32().Inputs(3U);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(7, Opcode::Return).s32().Inputs(3);
+            INST(7U, Opcode::Return).s32().Inputs(3U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
@@ -3848,22 +3848,22 @@ TEST_F(PeepholesTest, CompareTest3)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 1U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_LT).Inputs(3, 0);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(3U, 0U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(3, 1)
+        BASIC_BLOCK(3U, 1U)
         {
-            INST(6, Opcode::Return).s32().Inputs(3);
+            INST(6U, Opcode::Return).s32().Inputs(3U);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(7, Opcode::Return).s32().Inputs(3);
+            INST(7U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3872,7 +3872,7 @@ TEST_F(PeepholesTest, CompareTest3)
 TEST_F(PeepholesTest, CompareTest4)
 {
     for (auto cc : {CC_EQ, CC_NE, CC_LT, CC_LE, CC_GT, CC_GE, CC_B, CC_BE, CC_A, CC_AE}) {
-        for (auto cst : {-2, -1, 0, 1, 2}) {
+        for (auto cst : {-2L, -1L, 0L, 1L, 2L}) {
             bool input_true = true;
             bool input_false = false;
             switch (cc) {
@@ -3920,9 +3920,9 @@ TEST_F(PeepholesTest, CompareTest4)
                     UNREACHABLE();
             }
             if (input_true && input_false) {
-                CheckCompare(cc, cst, {1}, false);
+                CheckCompare(cc, cst, {1U}, false);
             } else if (!input_true && !input_false) {
-                CheckCompare(cc, cst, {0}, false);
+                CheckCompare(cc, cst, {0U}, false);
             } else if (input_true && !input_false) {
                 CheckCompare(cc, cst, std::nullopt, false);
             } else {
@@ -3936,15 +3936,15 @@ TEST_F(PeepholesTest, CompareTestCmpMultipleUsers)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).s32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).s32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_LT).Inputs(3, 0);
-            INST(5, Opcode::Add).i32().Inputs(3, 4);
-            INST(6, Opcode::Return).b().Inputs(5);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(3U, 0U);
+            INST(5U, Opcode::Add).i32().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).b().Inputs(5U);
         }
     }
     GetGraph()->RunPass<Peepholes>();
@@ -3952,15 +3952,15 @@ TEST_F(PeepholesTest, CompareTestCmpMultipleUsers)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).s32();
-        BASIC_BLOCK(2, 1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).s32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Cmp).s32().Inputs(1, 2);
-            INST(4, Opcode::Compare).b().CC(CC_LT).Inputs(1, 2);
-            INST(5, Opcode::Add).i32().Inputs(3, 4);
-            INST(6, Opcode::Return).b().Inputs(5);
+            INST(3U, Opcode::Cmp).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(1U, 2U);
+            INST(5U, Opcode::Add).i32().Inputs(3U, 4U);
+            INST(6U, Opcode::Return).b().Inputs(5U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -3982,9 +3982,9 @@ TEST_F(PeepholesTest, CastTest1)
 // cast case 2
 TEST_F(PeepholesTest, CastTest2Addition1)
 {
-    for (int i = 1; i < DataType::LAST - 5; ++i) {
-        for (int j = 1; j < DataType::LAST - 5; ++j) {
-            for (int k = 1; k < DataType::LAST - 5; ++k) {
+    for (int i = 1; i < DataType::LAST - 5L; ++i) {
+        for (int j = 1; j < DataType::LAST - 5L; ++j) {
+            for (int k = 1; k < DataType::LAST - 5L; ++k) {
                 if ((i == DataType::FLOAT32 || i == DataType::FLOAT64) && j >= DataType::BOOL && j <= DataType::INT16) {
                     continue;
                 }
@@ -3996,9 +3996,9 @@ TEST_F(PeepholesTest, CastTest2Addition1)
 // cast case 2
 TEST_F(PeepholesTest, CastTest2Addition2)
 {
-    for (int i = DataType::LAST - 5; i < DataType::ANY; ++i) {
-        for (int j = DataType::LAST - 5; j < DataType::ANY; ++j) {
-            for (int k = DataType::LAST - 5; k < DataType::ANY; ++k) {
+    for (int i = DataType::LAST - 5L; i < DataType::ANY; ++i) {
+        for (int j = DataType::LAST - 5L; j < DataType::ANY; ++j) {
+            for (int k = DataType::LAST - 5L; k < DataType::ANY; ++k) {
                 CheckCast(i, j, k);
             }
         }
@@ -4010,27 +4010,27 @@ TEST_F(PeepholesTest, CastTest3)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).s32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(1, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(0);
-            INST(2, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(1);
-            INST(3, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(2);
-            INST(4, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(3);
-            INST(5, Opcode::Return).s32().Inputs(4);
+            INST(1U, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(0U);
+            INST(2U, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(1U);
+            INST(3U, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(2U);
+            INST(4U, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(3U);
+            INST(5U, Opcode::Return).s32().Inputs(4U);
         }
     }
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).s32();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(1, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(0);
-            INST(2, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(0);
-            INST(3, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(0);
-            INST(4, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(0);
-            INST(5, Opcode::Return).s32().Inputs(0);
+            INST(1U, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(0U);
+            INST(2U, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(0U);
+            INST(3U, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(0U);
+            INST(4U, Opcode::Cast).s32().SrcType(DataType::INT32).Inputs(0U);
+            INST(5U, Opcode::Return).s32().Inputs(0U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -4043,27 +4043,27 @@ TEST_F(PeepholesTest, DISABLED_CastTest4)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s16();
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).s16();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(1, Opcode::Cast).f32().SrcType(DataType::INT16).Inputs(0);
-            INST(2, Opcode::Cast).s16().SrcType(DataType::FLOAT32).Inputs(1);
-            INST(3, Opcode::Cast).f64().SrcType(DataType::INT16).Inputs(2);
-            INST(4, Opcode::Cast).s16().SrcType(DataType::FLOAT64).Inputs(3);
-            INST(5, Opcode::Return).s16().Inputs(4);
+            INST(1U, Opcode::Cast).f32().SrcType(DataType::INT16).Inputs(0U);
+            INST(2U, Opcode::Cast).s16().SrcType(DataType::FLOAT32).Inputs(1U);
+            INST(3U, Opcode::Cast).f64().SrcType(DataType::INT16).Inputs(2U);
+            INST(4U, Opcode::Cast).s16().SrcType(DataType::FLOAT64).Inputs(3U);
+            INST(5U, Opcode::Return).s16().Inputs(4U);
         }
     }
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s16();
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).s16();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(1, Opcode::Cast).f32().SrcType(DataType::INT16).Inputs(0);
-            INST(2, Opcode::Cast).s16().SrcType(DataType::FLOAT32).Inputs(1);
-            INST(3, Opcode::Cast).f64().SrcType(DataType::INT16).Inputs(0);
-            INST(4, Opcode::Cast).s16().SrcType(DataType::FLOAT64).Inputs(3);
-            INST(5, Opcode::Return).s16().Inputs(0);
+            INST(1U, Opcode::Cast).f32().SrcType(DataType::INT16).Inputs(0U);
+            INST(2U, Opcode::Cast).s16().SrcType(DataType::FLOAT32).Inputs(1U);
+            INST(3U, Opcode::Cast).f64().SrcType(DataType::INT16).Inputs(0U);
+            INST(4U, Opcode::Cast).s16().SrcType(DataType::FLOAT64).Inputs(3U);
+            INST(5U, Opcode::Return).s16().Inputs(0U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -4075,37 +4075,37 @@ TEST_F(PeepholesTest, CastTest5)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 0x18);
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x18U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::Shr).s32().Inputs(2, 1);
-            INST(4, Opcode::Shl).s32().Inputs(3, 1);
-            INST(5, Opcode::AShr).s32().Inputs(4, 1);
-            INST(6, Opcode::Return).s32().Inputs(5);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Shr).s32().Inputs(2U, 1U);
+            INST(4U, Opcode::Shl).s32().Inputs(3U, 1U);
+            INST(5U, Opcode::AShr).s32().Inputs(4U, 1U);
+            INST(6U, Opcode::Return).s32().Inputs(5U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 0x18);
-        CONSTANT(7, 0xff);
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x18U);
+        CONSTANT(7U, 0xffU);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Shl).s32().Inputs(0, 1);
-            INST(3, Opcode::Shr).s32().Inputs(2, 1);
-            INST(8, Opcode::And).s32().Inputs(0, 7);
+            INST(2U, Opcode::Shl).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Shr).s32().Inputs(2U, 1U);
+            INST(8U, Opcode::And).s32().Inputs(0U, 7U);
 
-            INST(4, Opcode::Shl).s32().Inputs(8, 1);
-            INST(5, Opcode::AShr).s32().Inputs(4, 1);
-            INST(9, Opcode::Cast).s8().SrcType(DataType::INT32).Inputs(0);
+            INST(4U, Opcode::Shl).s32().Inputs(8U, 1U);
+            INST(5U, Opcode::AShr).s32().Inputs(4U, 1U);
+            INST(9U, Opcode::Cast).s8().SrcType(DataType::INT32).Inputs(0U);
 
-            INST(6, Opcode::Return).s32().Inputs(9);
+            INST(6U, Opcode::Return).s32().Inputs(9U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -4117,24 +4117,24 @@ TEST_F(PeepholesTest, TrySwapInputsTest)
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            PARAMETER(0, 0).s32();
-            CONSTANT(1, 23);
-            BASIC_BLOCK(2, 1)
+            PARAMETER(0U, 0U).s32();
+            CONSTANT(1U, 23U);
+            BASIC_BLOCK(2U, 1U)
             {
-                INST(2, opc).s32().Inputs(1, 0);
-                INST(3, Opcode::Return).s32().Inputs(2);
+                INST(2U, opc).s32().Inputs(1U, 0U);
+                INST(3U, Opcode::Return).s32().Inputs(2U);
             }
         }
         ASSERT_TRUE(graph1->RunPass<Peepholes>());
         auto graph2 = CreateEmptyGraph();
         GRAPH(graph2)
         {
-            PARAMETER(0, 0).s32();
-            CONSTANT(1, 23);
-            BASIC_BLOCK(2, 1)
+            PARAMETER(0U, 0U).s32();
+            CONSTANT(1U, 23U);
+            BASIC_BLOCK(2U, 1U)
             {
-                INST(2, opc).s32().Inputs(0, 1);
-                INST(3, Opcode::Return).s32().Inputs(2);
+                INST(2U, opc).s32().Inputs(0U, 1U);
+                INST(3U, Opcode::Return).s32().Inputs(2U);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -4145,15 +4145,15 @@ TEST_F(PeepholesTest, ReplaceXorWithNot)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, -1);
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, -1L);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Xor).s32().Inputs(0, 1);
-            INST(3, Opcode::Xor).s32().Inputs(1, 0);
-            INST(4, Opcode::Add).s32().Inputs(2, 3);
-            INST(5, Opcode::Return).s32().Inputs(4);
+            INST(2U, Opcode::Xor).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Xor).s32().Inputs(1U, 0U);
+            INST(4U, Opcode::Add).s32().Inputs(2U, 3U);
+            INST(5U, Opcode::Return).s32().Inputs(4U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -4161,14 +4161,14 @@ TEST_F(PeepholesTest, ReplaceXorWithNot)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
+        PARAMETER(0U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Not).s32().Inputs(0);
-            INST(2, Opcode::Not).s32().Inputs(0);
-            INST(3, Opcode::Add).s32().Inputs(1, 2);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(1U, Opcode::Not).s32().Inputs(0U);
+            INST(2U, Opcode::Not).s32().Inputs(0U);
+            INST(3U, Opcode::Add).s32().Inputs(1U, 2U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -4178,15 +4178,15 @@ TEST_F(PeepholesTest, XorWithZero)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 0);
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Xor).s32().Inputs(0, 1);
-            INST(3, Opcode::Xor).s32().Inputs(1, 0);
-            INST(4, Opcode::Add).s32().Inputs(2, 3);
-            INST(5, Opcode::Return).s32().Inputs(4);
+            INST(2U, Opcode::Xor).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Xor).s32().Inputs(1U, 0U);
+            INST(4U, Opcode::Add).s32().Inputs(2U, 3U);
+            INST(5U, Opcode::Return).s32().Inputs(4U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -4194,12 +4194,12 @@ TEST_F(PeepholesTest, XorWithZero)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
+        PARAMETER(0U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Add).s32().Inputs(0, 0);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(3U, Opcode::Add).s32().Inputs(0U, 0U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -4209,23 +4209,23 @@ TEST_F(PeepholesTest, CleanupTrigger)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
-        CONSTANT(2, 2);
-        CONSTANT(3, 3);
-        CONSTANT(4, 4);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        CONSTANT(3U, 3U);
+        CONSTANT(4U, 4U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(5, Opcode::Add).u64().Inputs(1, 4);
-            INST(6, Opcode::Add).u64().Inputs(2, 3);
-            INST(7, Opcode::Compare).b().Inputs(0, 3);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
+            INST(5U, Opcode::Add).u64().Inputs(1U, 4U);
+            INST(6U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(7U, Opcode::Compare).b().Inputs(0U, 3U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(3, 4) {}
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(9, Opcode::Phi).u64().Inputs({{2, 6}, {3, 5}});
-            INST(10, Opcode::Return).u64().Inputs(9);
+            INST(9U, Opcode::Phi).u64().Inputs({{2U, 6U}, {3U, 5U}});
+            INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
 
@@ -4235,24 +4235,24 @@ TEST_F(PeepholesTest, CleanupTrigger)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
-        CONSTANT(2, 2);
-        CONSTANT(3, 3);
-        CONSTANT(4, 4);
-        CONSTANT(11, 5);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+        CONSTANT(3U, 3U);
+        CONSTANT(4U, 4U);
+        CONSTANT(11U, 5U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(5, Opcode::Add).u64().Inputs(1, 4);
-            INST(6, Opcode::Add).u64().Inputs(2, 3);
-            INST(7, Opcode::Compare).b().Inputs(0, 3);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
+            INST(5U, Opcode::Add).u64().Inputs(1U, 4U);
+            INST(6U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(7U, Opcode::Compare).b().Inputs(0U, 3U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(3, 4) {}
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(9, Opcode::Phi).u64().Inputs({{2, 11}, {3, 11}});
-            INST(10, Opcode::Return).u64().Inputs(9);
+            INST(9U, Opcode::Phi).u64().Inputs({{2U, 11U}, {3U, 11U}});
+            INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -4262,47 +4262,47 @@ TEST_F(PeepholesTest, TestAbsUnsigned)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Abs).u64().Inputs(0);
-            INST(3, Opcode::Return).u64().Inputs(2);
+            INST(2U, Opcode::Abs).u64().Inputs(0U);
+            INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(INS(3).GetInput(0).GetInst(), &INS(0));
+    ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), &INS(0U));
 }
 
 TEST_F(PeepholesTest, SafePoint)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).s32();
-        PARAMETER(2, 3).f64();
-        PARAMETER(3, 4).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).s32();
+        PARAMETER(2U, 3U).f64();
+        PARAMETER(3U, 4U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::SafePoint).Inputs(0, 1, 2, 3).SrcVregs({0, 1, 2, 3});
-            INST(5, Opcode::SaveState).Inputs(0, 1, 2, 3).SrcVregs({0, 1, 2, 3});
-            INST(6, Opcode::CallStatic).u64().InputsAutoType(0, 1, 2, 3, 5);
-            INST(7, Opcode::Return).u64().Inputs(6);
+            INST(4U, Opcode::SafePoint).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(5U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(6U, Opcode::CallStatic).u64().InputsAutoType(0U, 1U, 2U, 3U, 5U);
+            INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
     Graph *graph_et = CreateEmptyGraph();
     GRAPH(graph_et)
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).s32();
-        PARAMETER(2, 3).f64();
-        PARAMETER(3, 4).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).s32();
+        PARAMETER(2U, 3U).f64();
+        PARAMETER(3U, 4U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::SafePoint).Inputs(3).SrcVregs({3});
-            INST(5, Opcode::SaveState).Inputs(0, 1, 2, 3).SrcVregs({0, 1, 2, 3});
-            INST(6, Opcode::CallStatic).u64().InputsAutoType(0, 1, 2, 3, 5);
-            INST(7, Opcode::Return).u64().Inputs(6);
+            INST(4U, Opcode::SafePoint).Inputs(3U).SrcVregs({3U});
+            INST(5U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(6U, Opcode::CallStatic).u64().InputsAutoType(0U, 1U, 2U, 3U, 5U);
+            INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
 
@@ -4317,16 +4317,16 @@ TEST_F(PeepholesTest, SafePointWithRegMap)
 
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 2).s32();
-        PARAMETER(2, 3).f64();
-        PARAMETER(3, 4).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 2U).s32();
+        PARAMETER(2U, 3U).f64();
+        PARAMETER(3U, 4U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::SafePoint).Inputs(0, 1, 2, 3).SrcVregs({0, 1, 2, 3});
-            INST(5, Opcode::SaveState).Inputs(0, 1, 2, 3).SrcVregs({0, 1, 2, 3});
-            INST(6, Opcode::CallStatic).u64().InputsAutoType(0, 1, 2, 3, 5);
-            INST(7, Opcode::Return).u64().Inputs(6);
+            INST(4U, Opcode::SafePoint).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(5U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(6U, Opcode::CallStatic).u64().InputsAutoType(0U, 1U, 2U, 3U, 5U);
+            INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
     Graph *graph_et = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -4339,33 +4339,33 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(0, 3);
-            INST(6, Opcode::Add).i64().Inputs(4, 5);
-            INST(7, Opcode::Add).i64().Inputs(1, 6);
-            INST(8, Opcode::Return).i64().Inputs(7);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(0U, 3U);
+            INST(6U, Opcode::Add).i64().Inputs(4U, 5U);
+            INST(7U, Opcode::Add).i64().Inputs(1U, 6U);
+            INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
     Graph *graph_peepholed = CreateEmptyGraph();
     GRAPH(graph_peepholed)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(0, 3);
-            INST(6, Opcode::Add).i64().Inputs(1, 4);
-            INST(7, Opcode::Add).i64().Inputs(6, 5);
-            INST(8, Opcode::Return).i64().Inputs(7);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(0U, 3U);
+            INST(6U, Opcode::Add).i64().Inputs(1U, 4U);
+            INST(7U, Opcode::Add).i64().Inputs(6U, 5U);
+            INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
 
@@ -4378,19 +4378,19 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
     Graph *graph_not_optimizable = CreateEmptyGraph();
     GRAPH(graph_not_optimizable)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
             // shl4 !HasSingleUser()
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(0, 3);
-            INST(6, Opcode::Add).i64().Inputs(4, 5);
-            INST(7, Opcode::Add).i64().Inputs(1, 6);
-            INST(8, Opcode::Add).i64().Inputs(4, 7);
-            INST(9, Opcode::Return).i64().Inputs(8);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(0U, 3U);
+            INST(6U, Opcode::Add).i64().Inputs(4U, 5U);
+            INST(7U, Opcode::Add).i64().Inputs(1U, 6U);
+            INST(8U, Opcode::Add).i64().Inputs(4U, 7U);
+            INST(9U, Opcode::Return).i64().Inputs(8U);
         }
     }
     ASSERT_FALSE(graph_not_optimizable->RunPass<Peepholes>());
@@ -4398,19 +4398,19 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
     graph_not_optimizable = CreateEmptyGraph();
     GRAPH(graph_not_optimizable)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
             // shl5 !HasSingleUser()
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(0, 3);
-            INST(6, Opcode::Add).i64().Inputs(4, 5);
-            INST(7, Opcode::Add).i64().Inputs(1, 6);
-            INST(8, Opcode::Add).i64().Inputs(5, 7);
-            INST(9, Opcode::Return).i64().Inputs(8);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(0U, 3U);
+            INST(6U, Opcode::Add).i64().Inputs(4U, 5U);
+            INST(7U, Opcode::Add).i64().Inputs(1U, 6U);
+            INST(8U, Opcode::Add).i64().Inputs(5U, 7U);
+            INST(9U, Opcode::Return).i64().Inputs(8U);
         }
     }
     ASSERT_FALSE(graph_not_optimizable->RunPass<Peepholes>());
@@ -4418,19 +4418,19 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
     graph_not_optimizable = CreateEmptyGraph();
     GRAPH(graph_not_optimizable)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
             // add6 !HasSingleUser()
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(0, 3);
-            INST(6, Opcode::Add).i64().Inputs(4, 5);
-            INST(7, Opcode::Add).i64().Inputs(1, 6);
-            INST(8, Opcode::Add).i64().Inputs(0, 6);
-            INST(9, Opcode::Return).i64().Inputs(8);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(0U, 3U);
+            INST(6U, Opcode::Add).i64().Inputs(4U, 5U);
+            INST(7U, Opcode::Add).i64().Inputs(1U, 6U);
+            INST(8U, Opcode::Add).i64().Inputs(0U, 6U);
+            INST(9U, Opcode::Return).i64().Inputs(8U);
         }
     }
     ASSERT_FALSE(graph_not_optimizable->RunPass<Peepholes>());
@@ -4438,18 +4438,18 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
     graph_not_optimizable = CreateEmptyGraph();
     GRAPH(graph_not_optimizable)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
             // shl4 and shl5 have different input(0).
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(1, 3);
-            INST(6, Opcode::Add).i64().Inputs(4, 5);
-            INST(7, Opcode::Add).i64().Inputs(1, 6);
-            INST(8, Opcode::Return).i64().Inputs(7);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(1U, 3U);
+            INST(6U, Opcode::Add).i64().Inputs(4U, 5U);
+            INST(7U, Opcode::Add).i64().Inputs(1U, 6U);
+            INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
     ASSERT_FALSE(graph_not_optimizable->RunPass<Peepholes>());
@@ -4457,18 +4457,18 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
     graph_not_optimizable = CreateEmptyGraph();
     GRAPH(graph_not_optimizable)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        PARAMETER(2, 2).i64();
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        PARAMETER(2U, 2U).i64();
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
             // shl4->GetInput(1) is not constant.
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(1, 3);
-            INST(6, Opcode::Add).i64().Inputs(4, 5);
-            INST(7, Opcode::Add).i64().Inputs(1, 6);
-            INST(8, Opcode::Return).i64().Inputs(7);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(1U, 3U);
+            INST(6U, Opcode::Add).i64().Inputs(4U, 5U);
+            INST(7U, Opcode::Add).i64().Inputs(1U, 6U);
+            INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
     ASSERT_FALSE(graph_not_optimizable->RunPass<Peepholes>());
@@ -4476,18 +4476,18 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
     graph_not_optimizable = CreateEmptyGraph();
     GRAPH(graph_not_optimizable)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        PARAMETER(3, 2).i64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        PARAMETER(3U, 2U).i64();
+        BASIC_BLOCK(2U, -1L)
         {
             // shl5->GetInput(1) is not constant.
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(1, 3);
-            INST(6, Opcode::Add).i64().Inputs(4, 5);
-            INST(7, Opcode::Add).i64().Inputs(1, 6);
-            INST(8, Opcode::Return).i64().Inputs(7);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(1U, 3U);
+            INST(6U, Opcode::Add).i64().Inputs(4U, 5U);
+            INST(7U, Opcode::Add).i64().Inputs(1U, 6U);
+            INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
     ASSERT_FALSE(graph_not_optimizable->RunPass<Peepholes>());
@@ -4495,25 +4495,25 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
     graph_not_optimizable = CreateEmptyGraph();
     GRAPH(graph_not_optimizable)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(20, Opcode::Shl).i64().Inputs(0, 2);
-            INST(21, Opcode::Shl).i64().Inputs(0, 3);
-            INST(22, Opcode::Add).i64().Inputs(20, 21);
+            INST(20U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(21U, Opcode::Shl).i64().Inputs(0U, 3U);
+            INST(22U, Opcode::Add).i64().Inputs(20U, 21U);
         }
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(30, Opcode::Add).i64().Inputs(0, 1);
+            INST(30U, Opcode::Add).i64().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
             // add40: input(0) does not dominate input(1)
-            INST(40, Opcode::Add).i64().Inputs(30, 22);
-            INST(41, Opcode::Return).i64().Inputs(40);
+            INST(40U, Opcode::Add).i64().Inputs(30U, 22U);
+            INST(41U, Opcode::Return).i64().Inputs(40U);
         }
     }
     ASSERT_FALSE(graph_not_optimizable->RunPass<Peepholes>());
@@ -4523,33 +4523,33 @@ TEST_F(PeepholesTest, ShlShlAddSub)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(0, 3);
-            INST(6, Opcode::Add).i64().Inputs(4, 5);
-            INST(7, Opcode::Sub).i64().Inputs(1, 6);
-            INST(8, Opcode::Return).i64().Inputs(7);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(0U, 3U);
+            INST(6U, Opcode::Add).i64().Inputs(4U, 5U);
+            INST(7U, Opcode::Sub).i64().Inputs(1U, 6U);
+            INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
     Graph *graph_peepholed = CreateEmptyGraph();
     GRAPH(graph_peepholed)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(0, 3);
-            INST(6, Opcode::Sub).i64().Inputs(1, 4);
-            INST(7, Opcode::Sub).i64().Inputs(6, 5);
-            INST(8, Opcode::Return).i64().Inputs(7);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(0U, 3U);
+            INST(6U, Opcode::Sub).i64().Inputs(1U, 4U);
+            INST(7U, Opcode::Sub).i64().Inputs(6U, 5U);
+            INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
 
@@ -4563,33 +4563,33 @@ TEST_F(PeepholesTest, ShlShlSubAdd)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(0, 3);
-            INST(6, Opcode::Sub).i64().Inputs(4, 5);
-            INST(7, Opcode::Add).i64().Inputs(1, 6);
-            INST(8, Opcode::Return).i64().Inputs(7);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(0U, 3U);
+            INST(6U, Opcode::Sub).i64().Inputs(4U, 5U);
+            INST(7U, Opcode::Add).i64().Inputs(1U, 6U);
+            INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
     Graph *graph_peepholed = CreateEmptyGraph();
     GRAPH(graph_peepholed)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(0, 3);
-            INST(6, Opcode::Add).i64().Inputs(1, 4);
-            INST(7, Opcode::Sub).i64().Inputs(6, 5);
-            INST(8, Opcode::Return).i64().Inputs(7);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(0U, 3U);
+            INST(6U, Opcode::Add).i64().Inputs(1U, 4U);
+            INST(7U, Opcode::Sub).i64().Inputs(6U, 5U);
+            INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
 
@@ -4603,33 +4603,33 @@ TEST_F(PeepholesTest, ShlShlSubSub)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(0, 3);
-            INST(6, Opcode::Sub).i64().Inputs(4, 5);
-            INST(7, Opcode::Sub).i64().Inputs(1, 6);
-            INST(8, Opcode::Return).i64().Inputs(7);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(0U, 3U);
+            INST(6U, Opcode::Sub).i64().Inputs(4U, 5U);
+            INST(7U, Opcode::Sub).i64().Inputs(1U, 6U);
+            INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
     Graph *graph_peepholed = CreateEmptyGraph();
     GRAPH(graph_peepholed)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i64();
-        CONSTANT(2, 16);
-        CONSTANT(3, 17);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i64();
+        CONSTANT(2U, 16U);
+        CONSTANT(3U, 17U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Shl).i64().Inputs(0, 2);
-            INST(5, Opcode::Shl).i64().Inputs(0, 3);
-            INST(6, Opcode::Sub).i64().Inputs(1, 4);
-            INST(7, Opcode::Add).i64().Inputs(6, 5);
-            INST(8, Opcode::Return).i64().Inputs(7);
+            INST(4U, Opcode::Shl).i64().Inputs(0U, 2U);
+            INST(5U, Opcode::Shl).i64().Inputs(0U, 3U);
+            INST(6U, Opcode::Sub).i64().Inputs(1U, 4U);
+            INST(7U, Opcode::Add).i64().Inputs(6U, 5U);
+            INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
 
@@ -4641,78 +4641,78 @@ TEST_F(PeepholesTest, ShlShlSubSub)
 
 TEST_F(PeepholesTest, CompareAndWithZero)
 {
-    CheckCompareFoldIntoTest(0, CC_EQ, true, CC_TST_EQ);
-    CheckCompareFoldIntoTest(0, CC_NE, true, CC_TST_NE);
+    CheckCompareFoldIntoTest(0U, CC_EQ, true, CC_TST_EQ);
+    CheckCompareFoldIntoTest(0U, CC_NE, true, CC_TST_NE);
 
-    CheckCompareFoldIntoTest(1, CC_EQ, false);
-    CheckCompareFoldIntoTest(2, CC_NE, false);
+    CheckCompareFoldIntoTest(1U, CC_EQ, false);
+    CheckCompareFoldIntoTest(2U, CC_NE, false);
 
     // check comparision with zero for all CCs except CC_EQ and CC_NE
     for (int cc = CC_LT; cc <= CC_LAST; ++cc) {
-        CheckCompareFoldIntoTest(0, static_cast<ConditionCode>(cc), false);
+        CheckCompareFoldIntoTest(0U, static_cast<ConditionCode>(cc), false);
     }
 }
 
 TEST_F(PeepholesTest, IfAndComparedWithZero)
 {
-    CheckIfAndZeroFoldIntoIfTest(0, CC_EQ, true, CC_TST_EQ);
-    CheckIfAndZeroFoldIntoIfTest(0, CC_NE, true, CC_TST_NE);
+    CheckIfAndZeroFoldIntoIfTest(0U, CC_EQ, true, CC_TST_EQ);
+    CheckIfAndZeroFoldIntoIfTest(0U, CC_NE, true, CC_TST_NE);
 
-    CheckIfAndZeroFoldIntoIfTest(1, CC_EQ, false);
-    CheckIfAndZeroFoldIntoIfTest(2, CC_NE, false);
+    CheckIfAndZeroFoldIntoIfTest(1U, CC_EQ, false);
+    CheckIfAndZeroFoldIntoIfTest(2U, CC_NE, false);
 
     // check comparision with zero for all CCs except CC_EQ and CC_NE
     for (int cc = CC_LT; cc <= CC_LAST; ++cc) {
-        CheckCompareFoldIntoTest(0, static_cast<ConditionCode>(cc), false);
+        CheckCompareFoldIntoTest(0U, static_cast<ConditionCode>(cc), false);
     }
 }
 
 TEST_F(PeepholesTest, CompareLenArrayWithZero)
 {
-    CheckCompareLenArrayWithZeroTest(0, CC_GE, true);
-    CheckCompareLenArrayWithZeroTest(0, CC_LT, false);
-    CheckCompareLenArrayWithZeroTest(0, CC_LE, std::nullopt);
-    CheckCompareLenArrayWithZeroTest(1, CC_GE, std::nullopt);
-    CheckCompareLenArrayWithZeroTest(1, CC_LT, std::nullopt);
+    CheckCompareLenArrayWithZeroTest(0U, CC_GE, true);
+    CheckCompareLenArrayWithZeroTest(0U, CC_LT, false);
+    CheckCompareLenArrayWithZeroTest(0U, CC_LE, std::nullopt);
+    CheckCompareLenArrayWithZeroTest(1U, CC_GE, std::nullopt);
+    CheckCompareLenArrayWithZeroTest(1U, CC_LT, std::nullopt);
 }
 
 TEST_F(PeepholesTest, CompareLenArrayWithZeroSwapped)
 {
-    CheckCompareLenArrayWithZeroTest(0, CC_LE, true, true);
-    CheckCompareLenArrayWithZeroTest(0, CC_GT, false, true);
-    CheckCompareLenArrayWithZeroTest(0, CC_GE, std::nullopt, true);
-    CheckCompareLenArrayWithZeroTest(1, CC_LE, std::nullopt, true);
-    CheckCompareLenArrayWithZeroTest(1, CC_GT, std::nullopt, true);
+    CheckCompareLenArrayWithZeroTest(0U, CC_LE, true, true);
+    CheckCompareLenArrayWithZeroTest(0U, CC_GT, false, true);
+    CheckCompareLenArrayWithZeroTest(0U, CC_GE, std::nullopt, true);
+    CheckCompareLenArrayWithZeroTest(1U, CC_LE, std::nullopt, true);
+    CheckCompareLenArrayWithZeroTest(1U, CC_GT, std::nullopt, true);
 }
 
 TEST_F(PeepholesTest, TestEqualInputs)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Compare).b().CC(CC_TST_EQ).Inputs(0, 0);
-            INST(2, Opcode::Compare).b().CC(CC_TST_NE).Inputs(0, 0);
-            INST(3, Opcode::SaveState).NoVregs();
-            INST(4, Opcode::CallStatic).b().InputsAutoType(1, 2, 3);
-            INST(5, Opcode::ReturnVoid);
+            INST(1U, Opcode::Compare).b().CC(CC_TST_EQ).Inputs(0U, 0U);
+            INST(2U, Opcode::Compare).b().CC(CC_TST_NE).Inputs(0U, 0U);
+            INST(3U, Opcode::SaveState).NoVregs();
+            INST(4U, Opcode::CallStatic).b().InputsAutoType(1U, 2U, 3U);
+            INST(5U, Opcode::ReturnVoid);
         }
     }
     Graph *graph_peepholed = CreateEmptyGraph();
     GRAPH(graph_peepholed)
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0).s64();
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(3, Opcode::Compare).b().CC(CC_NE).Inputs(0, 1);
-            INST(4, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::CallStatic).b().InputsAutoType(2, 3, 4);
-            INST(6, Opcode::ReturnVoid);
+            INST(2U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(3U, Opcode::Compare).b().CC(CC_NE).Inputs(0U, 1U);
+            INST(4U, Opcode::SaveState).NoVregs();
+            INST(5U, Opcode::CallStatic).b().InputsAutoType(2U, 3U, 4U);
+            INST(6U, Opcode::ReturnVoid);
         }
     }
 
@@ -4726,82 +4726,82 @@ TEST_F(PeepholesTest, AndWithCast)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i32();
-        CONSTANT(2, 0xFFFFFFFF);
-        CONSTANT(3, 0xFFFF);
-        CONSTANT(4, 0xFF);
-        CONSTANT(5, 0xF7);
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i32();
+        CONSTANT(2U, 0xFFFFFFFFU);
+        CONSTANT(3U, 0xFFFFU);
+        CONSTANT(4U, 0xFFU);
+        CONSTANT(5U, 0xF7U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(10, Opcode::And).i32().Inputs(1, 2);
-            INST(11, Opcode::And).i32().Inputs(1, 3);
-            INST(12, Opcode::And).i32().Inputs(1, 4);
-            INST(13, Opcode::And).i32().Inputs(1, 5);
+            INST(10U, Opcode::And).i32().Inputs(1U, 2U);
+            INST(11U, Opcode::And).i32().Inputs(1U, 3U);
+            INST(12U, Opcode::And).i32().Inputs(1U, 4U);
+            INST(13U, Opcode::And).i32().Inputs(1U, 5U);
 
-            INST(22, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(10);
-            INST(23, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(11);
-            INST(24, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(12);
-            INST(25, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(13);
+            INST(22U, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(10U);
+            INST(23U, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(11U);
+            INST(24U, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(12U);
+            INST(25U, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(13U);
 
-            INST(26, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(10);
-            INST(27, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(11);
-            INST(28, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(12);
-            INST(29, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(13);
+            INST(26U, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(10U);
+            INST(27U, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(11U);
+            INST(28U, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(12U);
+            INST(29U, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(13U);
 
-            INST(30, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(10);
-            INST(31, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(11);
-            INST(32, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(12);
-            INST(33, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(13);
+            INST(30U, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(10U);
+            INST(31U, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(11U);
+            INST(32U, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(12U);
+            INST(33U, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(13U);
 
-            INST(34, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(10);
-            INST(35, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(11);
-            INST(36, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(12);
-            INST(37, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(13);
+            INST(34U, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(10U);
+            INST(35U, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(11U);
+            INST(36U, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(12U);
+            INST(37U, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(13U);
 
-            INST(38, Opcode::ReturnVoid).v0id();
+            INST(38U, Opcode::ReturnVoid).v0id();
         }
     }
 
     auto graph_expected = CreateEmptyGraph();
     GRAPH(graph_expected)
     {
-        PARAMETER(0, 0).i64();
-        PARAMETER(1, 1).i32();
-        CONSTANT(2, 0xFFFFFFFF);
-        CONSTANT(3, 0xFFFF);
-        CONSTANT(4, 0xFF);
-        CONSTANT(5, 0xF7);
+        PARAMETER(0U, 0U).i64();
+        PARAMETER(1U, 1U).i32();
+        CONSTANT(2U, 0xFFFFFFFFU);
+        CONSTANT(3U, 0xFFFFU);
+        CONSTANT(4U, 0xFFU);
+        CONSTANT(5U, 0xF7U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(10, Opcode::And).i32().Inputs(1, 2);
-            INST(11, Opcode::And).i32().Inputs(1, 3);
-            INST(12, Opcode::And).i32().Inputs(1, 4);
-            INST(13, Opcode::And).i32().Inputs(1, 5);
+            INST(10U, Opcode::And).i32().Inputs(1U, 2U);
+            INST(11U, Opcode::And).i32().Inputs(1U, 3U);
+            INST(12U, Opcode::And).i32().Inputs(1U, 4U);
+            INST(13U, Opcode::And).i32().Inputs(1U, 5U);
 
-            INST(22, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(1);
-            INST(23, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(1);
-            INST(24, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(12);
-            INST(25, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(13);
+            INST(22U, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(1U);
+            INST(23U, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(1U);
+            INST(24U, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(12U);
+            INST(25U, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(13U);
 
-            INST(26, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(1);
-            INST(27, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(1);
-            INST(28, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(12);
-            INST(29, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(13);
+            INST(26U, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(1U);
+            INST(27U, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(1U);
+            INST(28U, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(12U);
+            INST(29U, Opcode::Cast).u16().SrcType(DataType::INT32).Inputs(13U);
 
-            INST(30, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(1);
-            INST(31, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(1);
-            INST(32, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(1);
-            INST(33, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(13);
+            INST(30U, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(1U);
+            INST(31U, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(1U);
+            INST(32U, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(1U);
+            INST(33U, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(13U);
 
-            INST(34, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(1);
-            INST(35, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(1);
-            INST(36, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(1);
-            INST(37, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(13);
+            INST(34U, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(1U);
+            INST(35U, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(1U);
+            INST(36U, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(1U);
+            INST(37U, Opcode::Cast).u8().SrcType(DataType::INT32).Inputs(13U);
 
-            INST(38, Opcode::ReturnVoid).v0id();
+            INST(38U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(graph->RunPass<Peepholes>());
@@ -4813,101 +4813,101 @@ TEST_F(PeepholesTest, AndWithStore)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ptr();
-        PARAMETER(1, 1).u64();
-        CONSTANT(2, 0xFFFFFFFF);
-        CONSTANT(3, 0xFFFF);
-        CONSTANT(4, 0xFF);
-        CONSTANT(5, 0xF7);
+        PARAMETER(0U, 0U).ptr();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(2U, 0xFFFFFFFFU);
+        CONSTANT(3U, 0xFFFFU);
+        CONSTANT(4U, 0xFFU);
+        CONSTANT(5U, 0xF7U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::And).i32().Inputs(1, 2);
-            INST(7, Opcode::And).i32().Inputs(1, 3);
-            INST(8, Opcode::And).i32().Inputs(1, 4);
-            INST(9, Opcode::And).i32().Inputs(1, 5);
+            INST(6U, Opcode::And).i32().Inputs(1U, 2U);
+            INST(7U, Opcode::And).i32().Inputs(1U, 3U);
+            INST(8U, Opcode::And).i32().Inputs(1U, 4U);
+            INST(9U, Opcode::And).i32().Inputs(1U, 5U);
 
-            INST(10, Opcode::Store).i32().Inputs(0, 1, 6);
-            INST(11, Opcode::Store).i32().Inputs(0, 1, 7);
-            INST(12, Opcode::Store).i32().Inputs(0, 1, 8);
-            INST(13, Opcode::Store).i32().Inputs(0, 1, 9);
+            INST(10U, Opcode::Store).i32().Inputs(0U, 1U, 6U);
+            INST(11U, Opcode::Store).i32().Inputs(0U, 1U, 7U);
+            INST(12U, Opcode::Store).i32().Inputs(0U, 1U, 8U);
+            INST(13U, Opcode::Store).i32().Inputs(0U, 1U, 9U);
 
-            INST(14, Opcode::Store).u32().Inputs(0, 1, 6);
-            INST(15, Opcode::Store).u32().Inputs(0, 1, 7);
-            INST(16, Opcode::Store).u32().Inputs(0, 1, 8);
-            INST(17, Opcode::Store).u32().Inputs(0, 1, 9);
+            INST(14U, Opcode::Store).u32().Inputs(0U, 1U, 6U);
+            INST(15U, Opcode::Store).u32().Inputs(0U, 1U, 7U);
+            INST(16U, Opcode::Store).u32().Inputs(0U, 1U, 8U);
+            INST(17U, Opcode::Store).u32().Inputs(0U, 1U, 9U);
 
-            INST(18, Opcode::Store).i16().Inputs(0, 1, 6);
-            INST(19, Opcode::Store).i16().Inputs(0, 1, 7);
-            INST(20, Opcode::Store).i16().Inputs(0, 1, 8);
-            INST(21, Opcode::Store).i16().Inputs(0, 1, 9);
+            INST(18U, Opcode::Store).i16().Inputs(0U, 1U, 6U);
+            INST(19U, Opcode::Store).i16().Inputs(0U, 1U, 7U);
+            INST(20U, Opcode::Store).i16().Inputs(0U, 1U, 8U);
+            INST(21U, Opcode::Store).i16().Inputs(0U, 1U, 9U);
 
-            INST(22, Opcode::Store).u16().Inputs(0, 1, 6);
-            INST(23, Opcode::Store).u16().Inputs(0, 1, 7);
-            INST(24, Opcode::Store).u16().Inputs(0, 1, 8);
-            INST(25, Opcode::Store).u16().Inputs(0, 1, 9);
+            INST(22U, Opcode::Store).u16().Inputs(0U, 1U, 6U);
+            INST(23U, Opcode::Store).u16().Inputs(0U, 1U, 7U);
+            INST(24U, Opcode::Store).u16().Inputs(0U, 1U, 8U);
+            INST(25U, Opcode::Store).u16().Inputs(0U, 1U, 9U);
 
-            INST(26, Opcode::Store).i8().Inputs(0, 1, 6);
-            INST(27, Opcode::Store).i8().Inputs(0, 1, 7);
-            INST(28, Opcode::Store).i8().Inputs(0, 1, 8);
-            INST(29, Opcode::Store).i8().Inputs(0, 1, 9);
+            INST(26U, Opcode::Store).i8().Inputs(0U, 1U, 6U);
+            INST(27U, Opcode::Store).i8().Inputs(0U, 1U, 7U);
+            INST(28U, Opcode::Store).i8().Inputs(0U, 1U, 8U);
+            INST(29U, Opcode::Store).i8().Inputs(0U, 1U, 9U);
 
-            INST(30, Opcode::Store).u8().Inputs(0, 1, 6);
-            INST(31, Opcode::Store).u8().Inputs(0, 1, 7);
-            INST(32, Opcode::Store).u8().Inputs(0, 1, 8);
-            INST(33, Opcode::Store).u8().Inputs(0, 1, 9);
+            INST(30U, Opcode::Store).u8().Inputs(0U, 1U, 6U);
+            INST(31U, Opcode::Store).u8().Inputs(0U, 1U, 7U);
+            INST(32U, Opcode::Store).u8().Inputs(0U, 1U, 8U);
+            INST(33U, Opcode::Store).u8().Inputs(0U, 1U, 9U);
 
-            INST(34, Opcode::ReturnVoid).v0id();
+            INST(34U, Opcode::ReturnVoid).v0id();
         }
     }
     auto graph_expected = CreateEmptyGraph();
     GRAPH(graph_expected)
     {
-        PARAMETER(0, 0).ptr();
-        PARAMETER(1, 1).u64();
-        CONSTANT(2, 0xFFFFFFFF);
-        CONSTANT(3, 0xFFFF);
-        CONSTANT(4, 0xFF);
-        CONSTANT(5, 0xF7);
+        PARAMETER(0U, 0U).ptr();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(2U, 0xFFFFFFFFU);
+        CONSTANT(3U, 0xFFFFU);
+        CONSTANT(4U, 0xFFU);
+        CONSTANT(5U, 0xF7U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::And).i32().Inputs(1, 2);
-            INST(7, Opcode::And).i32().Inputs(1, 3);
-            INST(8, Opcode::And).i32().Inputs(1, 4);
-            INST(9, Opcode::And).i32().Inputs(1, 5);
+            INST(6U, Opcode::And).i32().Inputs(1U, 2U);
+            INST(7U, Opcode::And).i32().Inputs(1U, 3U);
+            INST(8U, Opcode::And).i32().Inputs(1U, 4U);
+            INST(9U, Opcode::And).i32().Inputs(1U, 5U);
 
-            INST(10, Opcode::Store).i32().Inputs(0, 1, 1);
-            INST(11, Opcode::Store).i32().Inputs(0, 1, 7);
-            INST(12, Opcode::Store).i32().Inputs(0, 1, 8);
-            INST(13, Opcode::Store).i32().Inputs(0, 1, 9);
+            INST(10U, Opcode::Store).i32().Inputs(0U, 1U, 1U);
+            INST(11U, Opcode::Store).i32().Inputs(0U, 1U, 7U);
+            INST(12U, Opcode::Store).i32().Inputs(0U, 1U, 8U);
+            INST(13U, Opcode::Store).i32().Inputs(0U, 1U, 9U);
 
-            INST(14, Opcode::Store).u32().Inputs(0, 1, 1);
-            INST(15, Opcode::Store).u32().Inputs(0, 1, 7);
-            INST(16, Opcode::Store).u32().Inputs(0, 1, 8);
-            INST(17, Opcode::Store).u32().Inputs(0, 1, 9);
+            INST(14U, Opcode::Store).u32().Inputs(0U, 1U, 1U);
+            INST(15U, Opcode::Store).u32().Inputs(0U, 1U, 7U);
+            INST(16U, Opcode::Store).u32().Inputs(0U, 1U, 8U);
+            INST(17U, Opcode::Store).u32().Inputs(0U, 1U, 9U);
 
-            INST(18, Opcode::Store).i16().Inputs(0, 1, 1);
-            INST(19, Opcode::Store).i16().Inputs(0, 1, 1);
-            INST(20, Opcode::Store).i16().Inputs(0, 1, 8);
-            INST(21, Opcode::Store).i16().Inputs(0, 1, 9);
+            INST(18U, Opcode::Store).i16().Inputs(0U, 1U, 1U);
+            INST(19U, Opcode::Store).i16().Inputs(0U, 1U, 1U);
+            INST(20U, Opcode::Store).i16().Inputs(0U, 1U, 8U);
+            INST(21U, Opcode::Store).i16().Inputs(0U, 1U, 9U);
 
-            INST(22, Opcode::Store).u16().Inputs(0, 1, 1);
-            INST(23, Opcode::Store).u16().Inputs(0, 1, 1);
-            INST(24, Opcode::Store).u16().Inputs(0, 1, 8);
-            INST(25, Opcode::Store).u16().Inputs(0, 1, 9);
+            INST(22U, Opcode::Store).u16().Inputs(0U, 1U, 1U);
+            INST(23U, Opcode::Store).u16().Inputs(0U, 1U, 1U);
+            INST(24U, Opcode::Store).u16().Inputs(0U, 1U, 8U);
+            INST(25U, Opcode::Store).u16().Inputs(0U, 1U, 9U);
 
-            INST(26, Opcode::Store).i8().Inputs(0, 1, 1);
-            INST(27, Opcode::Store).i8().Inputs(0, 1, 1);
-            INST(28, Opcode::Store).i8().Inputs(0, 1, 1);
-            INST(29, Opcode::Store).i8().Inputs(0, 1, 9);
+            INST(26U, Opcode::Store).i8().Inputs(0U, 1U, 1U);
+            INST(27U, Opcode::Store).i8().Inputs(0U, 1U, 1U);
+            INST(28U, Opcode::Store).i8().Inputs(0U, 1U, 1U);
+            INST(29U, Opcode::Store).i8().Inputs(0U, 1U, 9U);
 
-            INST(30, Opcode::Store).u8().Inputs(0, 1, 1);
-            INST(31, Opcode::Store).u8().Inputs(0, 1, 1);
-            INST(32, Opcode::Store).u8().Inputs(0, 1, 1);
-            INST(33, Opcode::Store).u8().Inputs(0, 1, 9);
+            INST(30U, Opcode::Store).u8().Inputs(0U, 1U, 1U);
+            INST(31U, Opcode::Store).u8().Inputs(0U, 1U, 1U);
+            INST(32U, Opcode::Store).u8().Inputs(0U, 1U, 1U);
+            INST(33U, Opcode::Store).u8().Inputs(0U, 1U, 9U);
 
-            INST(34, Opcode::ReturnVoid).v0id();
+            INST(34U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(graph->RunPass<Peepholes>());
@@ -4919,81 +4919,81 @@ TEST_F(PeepholesTest, CastWithStore)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ptr();
-        PARAMETER(1, 1).i64();
-        PARAMETER(2, 2).i32();
+        PARAMETER(0U, 0U).ptr();
+        PARAMETER(1U, 1U).i64();
+        PARAMETER(2U, 2U).i32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Cast).i32().SrcType(DataType::INT64).Inputs(1);
-            INST(7, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(2);
-            INST(8, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(2);
+            INST(6U, Opcode::Cast).i32().SrcType(DataType::INT64).Inputs(1U);
+            INST(7U, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(2U);
+            INST(8U, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(2U);
 
-            INST(9, Opcode::Store).i32().Inputs(0, 1, 6);
-            INST(10, Opcode::Store).i32().Inputs(0, 1, 7);
-            INST(11, Opcode::Store).i32().Inputs(0, 1, 8);
+            INST(9U, Opcode::Store).i32().Inputs(0U, 1U, 6U);
+            INST(10U, Opcode::Store).i32().Inputs(0U, 1U, 7U);
+            INST(11U, Opcode::Store).i32().Inputs(0U, 1U, 8U);
 
-            INST(12, Opcode::Store).u32().Inputs(0, 1, 6);
-            INST(13, Opcode::Store).u32().Inputs(0, 1, 7);
-            INST(14, Opcode::Store).u32().Inputs(0, 1, 8);
+            INST(12U, Opcode::Store).u32().Inputs(0U, 1U, 6U);
+            INST(13U, Opcode::Store).u32().Inputs(0U, 1U, 7U);
+            INST(14U, Opcode::Store).u32().Inputs(0U, 1U, 8U);
 
-            INST(15, Opcode::Store).i16().Inputs(0, 1, 6);
-            INST(16, Opcode::Store).i16().Inputs(0, 1, 7);
-            INST(17, Opcode::Store).i16().Inputs(0, 1, 8);
+            INST(15U, Opcode::Store).i16().Inputs(0U, 1U, 6U);
+            INST(16U, Opcode::Store).i16().Inputs(0U, 1U, 7U);
+            INST(17U, Opcode::Store).i16().Inputs(0U, 1U, 8U);
 
-            INST(18, Opcode::Store).u16().Inputs(0, 1, 6);
-            INST(19, Opcode::Store).u16().Inputs(0, 1, 7);
-            INST(20, Opcode::Store).u16().Inputs(0, 1, 8);
+            INST(18U, Opcode::Store).u16().Inputs(0U, 1U, 6U);
+            INST(19U, Opcode::Store).u16().Inputs(0U, 1U, 7U);
+            INST(20U, Opcode::Store).u16().Inputs(0U, 1U, 8U);
 
-            INST(21, Opcode::Store).i8().Inputs(0, 1, 6);
-            INST(22, Opcode::Store).i8().Inputs(0, 1, 7);
-            INST(23, Opcode::Store).i8().Inputs(0, 1, 8);
+            INST(21U, Opcode::Store).i8().Inputs(0U, 1U, 6U);
+            INST(22U, Opcode::Store).i8().Inputs(0U, 1U, 7U);
+            INST(23U, Opcode::Store).i8().Inputs(0U, 1U, 8U);
 
-            INST(24, Opcode::Store).u8().Inputs(0, 1, 6);
-            INST(25, Opcode::Store).u8().Inputs(0, 1, 7);
-            INST(26, Opcode::Store).u8().Inputs(0, 1, 8);
+            INST(24U, Opcode::Store).u8().Inputs(0U, 1U, 6U);
+            INST(25U, Opcode::Store).u8().Inputs(0U, 1U, 7U);
+            INST(26U, Opcode::Store).u8().Inputs(0U, 1U, 8U);
 
-            INST(27, Opcode::ReturnVoid).v0id();
+            INST(27U, Opcode::ReturnVoid).v0id();
         }
     }
     auto graph_expected = CreateEmptyGraph();
     GRAPH(graph_expected)
     {
-        PARAMETER(0, 0).ptr();
-        PARAMETER(1, 1).i64();
-        PARAMETER(2, 2).i32();
+        PARAMETER(0U, 0U).ptr();
+        PARAMETER(1U, 1U).i64();
+        PARAMETER(2U, 2U).i32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Cast).i32().SrcType(DataType::INT64).Inputs(1);
-            INST(7, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(2);
-            INST(8, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(2);
+            INST(6U, Opcode::Cast).i32().SrcType(DataType::INT64).Inputs(1U);
+            INST(7U, Opcode::Cast).i16().SrcType(DataType::INT32).Inputs(2U);
+            INST(8U, Opcode::Cast).i8().SrcType(DataType::INT32).Inputs(2U);
 
-            INST(9, Opcode::Store).i32().Inputs(0, 1, 1);
-            INST(10, Opcode::Store).i32().Inputs(0, 1, 7);
-            INST(11, Opcode::Store).i32().Inputs(0, 1, 8);
+            INST(9U, Opcode::Store).i32().Inputs(0U, 1U, 1U);
+            INST(10U, Opcode::Store).i32().Inputs(0U, 1U, 7U);
+            INST(11U, Opcode::Store).i32().Inputs(0U, 1U, 8U);
 
-            INST(12, Opcode::Store).u32().Inputs(0, 1, 1);
-            INST(13, Opcode::Store).u32().Inputs(0, 1, 7);
-            INST(14, Opcode::Store).u32().Inputs(0, 1, 8);
+            INST(12U, Opcode::Store).u32().Inputs(0U, 1U, 1U);
+            INST(13U, Opcode::Store).u32().Inputs(0U, 1U, 7U);
+            INST(14U, Opcode::Store).u32().Inputs(0U, 1U, 8U);
 
-            INST(15, Opcode::Store).i16().Inputs(0, 1, 1);
-            INST(16, Opcode::Store).i16().Inputs(0, 1, 2);
-            INST(17, Opcode::Store).i16().Inputs(0, 1, 8);
+            INST(15U, Opcode::Store).i16().Inputs(0U, 1U, 1U);
+            INST(16U, Opcode::Store).i16().Inputs(0U, 1U, 2U);
+            INST(17U, Opcode::Store).i16().Inputs(0U, 1U, 8U);
 
-            INST(18, Opcode::Store).u16().Inputs(0, 1, 1);
-            INST(19, Opcode::Store).u16().Inputs(0, 1, 2);
-            INST(20, Opcode::Store).u16().Inputs(0, 1, 8);
+            INST(18U, Opcode::Store).u16().Inputs(0U, 1U, 1U);
+            INST(19U, Opcode::Store).u16().Inputs(0U, 1U, 2U);
+            INST(20U, Opcode::Store).u16().Inputs(0U, 1U, 8U);
 
-            INST(21, Opcode::Store).i8().Inputs(0, 1, 1);
-            INST(22, Opcode::Store).i8().Inputs(0, 1, 2);
-            INST(23, Opcode::Store).i8().Inputs(0, 1, 2);
+            INST(21U, Opcode::Store).i8().Inputs(0U, 1U, 1U);
+            INST(22U, Opcode::Store).i8().Inputs(0U, 1U, 2U);
+            INST(23U, Opcode::Store).i8().Inputs(0U, 1U, 2U);
 
-            INST(24, Opcode::Store).u8().Inputs(0, 1, 1);
-            INST(25, Opcode::Store).u8().Inputs(0, 1, 2);
-            INST(26, Opcode::Store).u8().Inputs(0, 1, 2);
+            INST(24U, Opcode::Store).u8().Inputs(0U, 1U, 1U);
+            INST(25U, Opcode::Store).u8().Inputs(0U, 1U, 2U);
+            INST(26U, Opcode::Store).u8().Inputs(0U, 1U, 2U);
 
-            INST(27, Opcode::ReturnVoid).v0id();
+            INST(27U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(graph->RunPass<Peepholes>());
@@ -5005,15 +5005,15 @@ TEST_F(PeepholesTest, CastWithStoreSignMismatch)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ptr();
-        PARAMETER(1, 1).i64();
-        PARAMETER(2, 2).u8();
+        PARAMETER(0U, 0U).ptr();
+        PARAMETER(1U, 1U).i64();
+        PARAMETER(2U, 2U).u8();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Cast).i32().SrcType(DataType::INT8).Inputs(2);
-            INST(4, Opcode::Store).i32().Inputs(0, 1, 3);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Cast).i32().SrcType(DataType::INT8).Inputs(2U);
+            INST(4U, Opcode::Store).i32().Inputs(0U, 1U, 3U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
 #ifndef NDEBUG
@@ -5028,15 +5028,15 @@ TEST_F(PeepholesTest, CastWithStoreTypeMismatch)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ptr();
-        PARAMETER(1, 1).i64();
-        PARAMETER(2, 2).i16();
+        PARAMETER(0U, 0U).ptr();
+        PARAMETER(1U, 1U).i64();
+        PARAMETER(2U, 2U).i16();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Cast).i32().SrcType(DataType::INT8).Inputs(2);
-            INST(4, Opcode::Store).i32().Inputs(0, 1, 3);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::Cast).i32().SrcType(DataType::INT8).Inputs(2U);
+            INST(4U, Opcode::Store).i32().Inputs(0U, 1U, 3U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
 #ifndef NDEBUG
@@ -5051,26 +5051,26 @@ TEST_F(PeepholesTest, CastI64ToU16)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).i64();
-        CONSTANT(2, 0xFFFF);
+        PARAMETER(0U, 0U).i64();
+        CONSTANT(2U, 0xFFFFU);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Cast).i32().SrcType(DataType::INT64).Inputs(0);
-            INST(4, Opcode::And).i32().Inputs(3, 2);
-            INST(5, Opcode::Return).i32().Inputs(4);
+            INST(3U, Opcode::Cast).i32().SrcType(DataType::INT64).Inputs(0U);
+            INST(4U, Opcode::And).i32().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).i32().Inputs(4U);
         }
     }
 
     auto graph_expected = CreateEmptyGraph();
     GRAPH(graph_expected)
     {
-        PARAMETER(0, 0).i64();
+        PARAMETER(0U, 0U).i64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Cast).u16().SrcType(DataType::INT64).Inputs(0);
-            INST(5, Opcode::Return).i32().Inputs(6);
+            INST(6U, Opcode::Cast).u16().SrcType(DataType::INT64).Inputs(0U);
+            INST(5U, Opcode::Return).i32().Inputs(6U);
         }
     }
     ASSERT_TRUE(graph->RunPass<Peepholes>());
@@ -5083,26 +5083,26 @@ TEST_F(PeepholesTest, CastI8ToU16)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).i8();
-        CONSTANT(2, 0xFFFF);
+        PARAMETER(0U, 0U).i8();
+        CONSTANT(2U, 0xFFFFU);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Cast).i32().SrcType(DataType::INT8).Inputs(0);
-            INST(4, Opcode::And).i32().Inputs(3, 2);
-            INST(5, Opcode::Return).i32().Inputs(4);
+            INST(3U, Opcode::Cast).i32().SrcType(DataType::INT8).Inputs(0U);
+            INST(4U, Opcode::And).i32().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).i32().Inputs(4U);
         }
     }
 
     auto graph_expected = CreateEmptyGraph();
     GRAPH(graph_expected)
     {
-        PARAMETER(0, 0).i8();
+        PARAMETER(0U, 0U).i8();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Cast).u16().SrcType(DataType::INT8).Inputs(0);
-            INST(5, Opcode::Return).i32().Inputs(6);
+            INST(6U, Opcode::Cast).u16().SrcType(DataType::INT8).Inputs(0U);
+            INST(5U, Opcode::Return).i32().Inputs(6U);
         }
     }
     ASSERT_TRUE(graph->RunPass<Peepholes>());
@@ -5115,25 +5115,25 @@ TEST_F(PeepholesTest, CastI64ToB)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).i64();
+        PARAMETER(0U, 0U).i64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).i32().SrcType(DataType::INT64).Inputs(0);
-            INST(2, Opcode::Cast).b().SrcType(DataType::INT32).Inputs(1);
-            INST(3, Opcode::Return).b().Inputs(2);
+            INST(1U, Opcode::Cast).i32().SrcType(DataType::INT64).Inputs(0U);
+            INST(2U, Opcode::Cast).b().SrcType(DataType::INT32).Inputs(1U);
+            INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
 
     auto graph_expected = CreateEmptyGraph();
     GRAPH(graph_expected)
     {
-        PARAMETER(0, 0).i64();
+        PARAMETER(0U, 0U).i64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Cast).b().SrcType(DataType::INT64).Inputs(0);
-            INST(3, Opcode::Return).b().Inputs(2);
+            INST(2U, Opcode::Cast).b().SrcType(DataType::INT64).Inputs(0U);
+            INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
     ASSERT_TRUE(graph->RunPass<Peepholes>());
@@ -5146,13 +5146,13 @@ TEST_F(PeepholesTest, CastI64ToBSignMismatch)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).i64();
+        PARAMETER(0U, 0U).i64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).i32().SrcType(DataType::INT64).Inputs(0);
-            INST(2, Opcode::Cast).b().SrcType(DataType::UINT32).Inputs(1);
-            INST(3, Opcode::Return).b().Inputs(2);
+            INST(1U, Opcode::Cast).i32().SrcType(DataType::INT64).Inputs(0U);
+            INST(2U, Opcode::Cast).b().SrcType(DataType::UINT32).Inputs(1U);
+            INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
 
@@ -5168,13 +5168,13 @@ TEST_F(PeepholesTest, CastI64ToBTypeMismatch)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).i64();
+        PARAMETER(0U, 0U).i64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).i32().SrcType(DataType::INT64).Inputs(0);
-            INST(2, Opcode::Cast).b().SrcType(DataType::INT16).Inputs(1);
-            INST(3, Opcode::Return).b().Inputs(2);
+            INST(1U, Opcode::Cast).i32().SrcType(DataType::INT64).Inputs(0U);
+            INST(2U, Opcode::Cast).b().SrcType(DataType::INT16).Inputs(1U);
+            INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
 
@@ -5190,25 +5190,25 @@ TEST_F(PeepholesTest, ConstCombineAdd)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).i64();
-        CONSTANT(1, 3);
-        CONSTANT(2, 7);
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).i64();
+        CONSTANT(1U, 3U);
+        CONSTANT(2U, 7U);
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Add).s64().Inputs(0, 1);
-            INST(4, Opcode::Add).s64().Inputs(3, 2);
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(3U, Opcode::Add).s64().Inputs(0U, 1U);
+            INST(4U, Opcode::Add).s64().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).i64();
-        CONSTANT(6, 10);
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).i64();
+        CONSTANT(6U, 10U);
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(4, Opcode::Add).s64().Inputs(0, 6);
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(4U, Opcode::Add).s64().Inputs(0U, 6U);
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
     ASSERT_TRUE(graph1->RunPass<Peepholes>());
@@ -5221,25 +5221,25 @@ TEST_F(PeepholesTest, ConstCombineAddSub)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).i64();
-        CONSTANT(1, 3);
-        CONSTANT(2, 7);
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).i64();
+        CONSTANT(1U, 3U);
+        CONSTANT(2U, 7U);
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Sub).s64().Inputs(0, 1);
-            INST(4, Opcode::Add).s64().Inputs(3, 2);
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(3U, Opcode::Sub).s64().Inputs(0U, 1U);
+            INST(4U, Opcode::Add).s64().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).i64();
-        CONSTANT(6, 4);
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).i64();
+        CONSTANT(6U, 4U);
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(4, Opcode::Add).s64().Inputs(0, 6);
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(4U, Opcode::Add).s64().Inputs(0U, 6U);
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
     ASSERT_TRUE(graph1->RunPass<Peepholes>());
@@ -5252,25 +5252,25 @@ TEST_F(PeepholesTest, ConstCombineSubAdd)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).i64();
-        CONSTANT(1, 3);
-        CONSTANT(2, 7);
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).i64();
+        CONSTANT(1U, 3U);
+        CONSTANT(2U, 7U);
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Add).s64().Inputs(0, 1);
-            INST(4, Opcode::Sub).s64().Inputs(3, 2);
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(3U, Opcode::Add).s64().Inputs(0U, 1U);
+            INST(4U, Opcode::Sub).s64().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).i64();
-        CONSTANT(6, 4);
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).i64();
+        CONSTANT(6U, 4U);
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(4, Opcode::Sub).s64().Inputs(0, 6);
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(4U, Opcode::Sub).s64().Inputs(0U, 6U);
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
     ASSERT_TRUE(graph1->RunPass<Peepholes>());
@@ -5281,29 +5281,29 @@ TEST_F(PeepholesTest, ConstCombineSubAdd)
 TEST_F(PeepholesTest, ConstCombineShift)
 {
     for (auto opcode : {Opcode::Shr, Opcode::Shl, Opcode::AShr}) {
-        for (auto shift : {7, 71}) {
+        for (auto shift : {7U, 71U}) {
             auto graph1 = CreateEmptyGraph();
             GRAPH(graph1)
             {
-                PARAMETER(0, 0).i64();
-                CONSTANT(1, 3);
-                CONSTANT(2, shift);
-                BASIC_BLOCK(2, 1)
+                PARAMETER(0U, 0U).i64();
+                CONSTANT(1U, 3U);
+                CONSTANT(2U, shift);
+                BASIC_BLOCK(2U, 1U)
                 {
-                    INST(3, opcode).s64().Inputs(0, 1);
-                    INST(4, opcode).s64().Inputs(3, 2);
-                    INST(5, Opcode::Return).s64().Inputs(4);
+                    INST(3U, opcode).s64().Inputs(0U, 1U);
+                    INST(4U, opcode).s64().Inputs(3U, 2U);
+                    INST(5U, Opcode::Return).s64().Inputs(4U);
                 }
             }
             auto graph2 = CreateEmptyGraph();
             GRAPH(graph2)
             {
-                PARAMETER(0, 0).i64();
-                CONSTANT(6, 10);
-                BASIC_BLOCK(2, 1)
+                PARAMETER(0U, 0U).i64();
+                CONSTANT(6U, 10U);
+                BASIC_BLOCK(2U, 1U)
                 {
-                    INST(4, opcode).s64().Inputs(0, 6);
-                    INST(5, Opcode::Return).s64().Inputs(4);
+                    INST(4U, opcode).s64().Inputs(0U, 6U);
+                    INST(5U, Opcode::Return).s64().Inputs(4U);
                 }
             }
             ASSERT_TRUE(graph1->RunPass<Peepholes>());
@@ -5319,23 +5319,23 @@ TEST_F(PeepholesTest, ConstCombineShiftAlwaysZero)
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            PARAMETER(0, 0).i64();
-            CONSTANT(1, 31);
-            CONSTANT(2, 33);
-            BASIC_BLOCK(2, 1)
+            PARAMETER(0U, 0U).i64();
+            CONSTANT(1U, 31U);
+            CONSTANT(2U, 33U);
+            BASIC_BLOCK(2U, 1U)
             {
-                INST(3, opcode).s64().Inputs(0, 1);
-                INST(4, opcode).s64().Inputs(3, 2);
-                INST(5, Opcode::Return).s64().Inputs(4);
+                INST(3U, opcode).s64().Inputs(0U, 1U);
+                INST(4U, opcode).s64().Inputs(3U, 2U);
+                INST(5U, Opcode::Return).s64().Inputs(4U);
             }
         }
         auto graph2 = CreateEmptyGraph();
         GRAPH(graph2)
         {
-            CONSTANT(6, 0);
-            BASIC_BLOCK(2, 1)
+            CONSTANT(6U, 0U);
+            BASIC_BLOCK(2U, 1U)
             {
-                INST(5, Opcode::Return).s64().Inputs(6);
+                INST(5U, Opcode::Return).s64().Inputs(6U);
             }
         }
         ASSERT_TRUE(graph1->RunPass<Peepholes>());
@@ -5349,25 +5349,25 @@ TEST_F(PeepholesTest, ConstCombineAShrMax)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).i64();
-        CONSTANT(1, 31);
-        CONSTANT(2, 33);
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).i64();
+        CONSTANT(1U, 31U);
+        CONSTANT(2U, 33U);
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::AShr).s64().Inputs(0, 1);
-            INST(4, Opcode::AShr).s64().Inputs(3, 2);
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(3U, Opcode::AShr).s64().Inputs(0U, 1U);
+            INST(4U, Opcode::AShr).s64().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).i64();
-        CONSTANT(6, 63);
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).i64();
+        CONSTANT(6U, 63U);
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(4, Opcode::AShr).s64().Inputs(0, 6);
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(4U, Opcode::AShr).s64().Inputs(0U, 6U);
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
     ASSERT_TRUE(graph1->RunPass<Peepholes>());
@@ -5380,25 +5380,25 @@ TEST_F(PeepholesTest, ConstCombineMul)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).i64();
-        CONSTANT(1, 3);
-        CONSTANT(2, 7);
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).i64();
+        CONSTANT(1U, 3U);
+        CONSTANT(2U, 7U);
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(3, Opcode::Mul).s64().Inputs(0, 1);
-            INST(4, Opcode::Mul).s64().Inputs(3, 2);
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(3U, Opcode::Mul).s64().Inputs(0U, 1U);
+            INST(4U, Opcode::Mul).s64().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).i64();
-        CONSTANT(6, 21);
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).i64();
+        CONSTANT(6U, 21U);
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(4, Opcode::Mul).s64().Inputs(0, 6);
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(4U, Opcode::Mul).s64().Inputs(0U, 6U);
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
     ASSERT_TRUE(graph1->RunPass<Peepholes>());
@@ -5412,23 +5412,27 @@ TEST_F(PeepholesTest, ConditionalAssignment)
         auto graph = CreateEmptyBytecodeGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).b();
-            CONSTANT(2, 0x0).s64();
-            CONSTANT(4, 0x1).s32();
-            CONSTANT(5, 0x0).s32();
+            PARAMETER(0U, 0U).b();
+            CONSTANT(2U, 0x0U).s64();
+            CONSTANT(4U, 0x1U).s32();
+            CONSTANT(5U, 0x0U).s32();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(1, Opcode::Compare).b().SrcType(DataType::BOOL).CC(CC_NE).Inputs(0, 2);
-                INST(3, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(inverse ? CC_NE : CC_EQ).Imm(0).Inputs(1);
+                INST(1U, Opcode::Compare).b().SrcType(DataType::BOOL).CC(CC_NE).Inputs(0U, 2U);
+                INST(3U, Opcode::IfImm)
+                    .SrcType(compiler::DataType::BOOL)
+                    .CC(inverse ? CC_NE : CC_EQ)
+                    .Imm(0U)
+                    .Inputs(1U);
             }
 
-            BASIC_BLOCK(4, 3) {}
+            BASIC_BLOCK(4U, 3U) {}
 
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(6, Opcode::Phi).b().Inputs(5, 4);
-                INST(7, Opcode::Return).b().Inputs(6);
+                INST(6U, Opcode::Phi).b().Inputs(5U, 4U);
+                INST(7U, Opcode::Return).b().Inputs(6U);
             }
         }
 
@@ -5445,22 +5449,22 @@ TEST_F(PeepholesTest, ConditionalAssignment)
         if (inverse) {
             GRAPH(expected)
             {
-                PARAMETER(0, 0).b();
+                PARAMETER(0U, 0U).b();
 
-                BASIC_BLOCK(2, -1)
+                BASIC_BLOCK(2U, -1L)
                 {
-                    INST(10, Opcode::XorI).b().Inputs(0).Imm(1);
-                    INST(7, Opcode::Return).b().Inputs(10);
+                    INST(10U, Opcode::XorI).b().Inputs(0U).Imm(1U);
+                    INST(7U, Opcode::Return).b().Inputs(10U);
                 }
             }
         } else {
             GRAPH(expected)
             {
-                PARAMETER(0, 0).b();
+                PARAMETER(0U, 0U).b();
 
-                BASIC_BLOCK(2, -1)
+                BASIC_BLOCK(2U, -1L)
                 {
-                    INST(7, Opcode::Return).b().Inputs(0);
+                    INST(7U, Opcode::Return).b().Inputs(0U);
                 }
             }
         }
@@ -5474,26 +5478,30 @@ TEST_F(PeepholesTest, ConditionalAssignmentPreserveIf)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            CONSTANT(4, 1);
-            CONSTANT(5, 0);
+            PARAMETER(0U, 0U).u64();
+            CONSTANT(4U, 1U);
+            CONSTANT(5U, 0U);
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(1, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_GT).Inputs(0, 4);
-                INST(3, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(inverse ? CC_NE : CC_EQ).Imm(0).Inputs(1);
+                INST(1U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_GT).Inputs(0U, 4U);
+                INST(3U, Opcode::IfImm)
+                    .SrcType(compiler::DataType::BOOL)
+                    .CC(inverse ? CC_NE : CC_EQ)
+                    .Imm(0U)
+                    .Inputs(1U);
             }
 
-            BASIC_BLOCK(4, 3)
+            BASIC_BLOCK(4U, 3U)
             {
-                INST(8, Opcode::SaveState).NoVregs();
-                INST(9, Opcode::CallStatic).u64().InputsAutoType(8);
+                INST(8U, Opcode::SaveState).NoVregs();
+                INST(9U, Opcode::CallStatic).u64().InputsAutoType(8U);
             }
 
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(6, Opcode::Phi).b().Inputs(5, 4);
-                INST(7, Opcode::Return).b().Inputs(6);
+                INST(6U, Opcode::Phi).b().Inputs(5U, 4U);
+                INST(7U, Opcode::Return).b().Inputs(6U);
             }
         }
 
@@ -5504,31 +5512,35 @@ TEST_F(PeepholesTest, ConditionalAssignmentPreserveIf)
 
         GRAPH(expected)
         {
-            PARAMETER(0, 0).u64();
-            CONSTANT(4, 1);
+            PARAMETER(0U, 0U).u64();
+            CONSTANT(4U, 1U);
             if (inverse) {
-                CONSTANT(5, 0);
+                CONSTANT(5U, 0U);
             }
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(1, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_GT).Inputs(0, 4);
-                INST(3, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(inverse ? CC_NE : CC_EQ).Imm(0).Inputs(1);
+                INST(1U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_GT).Inputs(0U, 4U);
+                INST(3U, Opcode::IfImm)
+                    .SrcType(compiler::DataType::BOOL)
+                    .CC(inverse ? CC_NE : CC_EQ)
+                    .Imm(0U)
+                    .Inputs(1U);
             }
 
-            BASIC_BLOCK(4, 3)
+            BASIC_BLOCK(4U, 3U)
             {
-                INST(8, Opcode::SaveState).NoVregs();
-                INST(9, Opcode::CallStatic).u64().InputsAutoType(8);
+                INST(8U, Opcode::SaveState).NoVregs();
+                INST(9U, Opcode::CallStatic).u64().InputsAutoType(8U);
             }
 
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
                 if (inverse) {
-                    INST(11, Opcode::Compare).b().CC(ConditionCode::CC_EQ).SetType(DataType::BOOL).Inputs(1, 5);
-                    INST(7, Opcode::Return).b().Inputs(11);
+                    INST(11U, Opcode::Compare).b().CC(ConditionCode::CC_EQ).SetType(DataType::BOOL).Inputs(1U, 5U);
+                    INST(7U, Opcode::Return).b().Inputs(11U);
                 } else {
-                    INST(7, Opcode::Return).b().Inputs(1);
+                    INST(7U, Opcode::Return).b().Inputs(1U);
                 }
             }
         }
@@ -5544,22 +5556,22 @@ TEST_F(PeepholesTest, ConditionalAssignmentBytecodeCompare)
     auto graph = CreateEmptyBytecodeGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 0x0).s32();
-        CONSTANT(2, 0x1).s32();
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x0U).s32();
+        CONSTANT(2U, 0x1U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().SrcType(DataType::INT32).CC(CC_GT).Inputs(0, 2);
-            INST(4, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().SrcType(DataType::INT32).CC(CC_GT).Inputs(0U, 2U);
+            INST(4U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
 
-        BASIC_BLOCK(4, 3) {}
+        BASIC_BLOCK(4U, 3U) {}
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Phi).b().Inputs(1, 2);
-            INST(6, Opcode::Return).b().Inputs(5);
+            INST(5U, Opcode::Phi).b().Inputs(1U, 2U);
+            INST(6U, Opcode::Return).b().Inputs(5U);
         }
     }
 
@@ -5569,26 +5581,26 @@ TEST_F(PeepholesTest, ConditionalAssignmentBytecodeCompare)
 TEST_F(PeepholesTest, ConditionalAssignmentWrongConstants)
 {
     // Constants are the same or not equal to 0 and 1
-    for (auto constant : {0, 2}) {
+    for (auto constant : {0U, 2U}) {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).s32();
-            CONSTANT(1, 0).s32();
-            CONSTANT(2, constant).s32();
+            PARAMETER(0U, 0U).s32();
+            CONSTANT(1U, 0U).s32();
+            CONSTANT(2U, constant).s32();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(3, Opcode::Compare).b().SrcType(DataType::INT32).CC(CC_GT).Inputs(0, 2);
-                INST(4, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+                INST(3U, Opcode::Compare).b().SrcType(DataType::INT32).CC(CC_GT).Inputs(0U, 2U);
+                INST(4U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
             }
 
-            BASIC_BLOCK(4, 3) {}
+            BASIC_BLOCK(4U, 3U) {}
 
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(5, Opcode::Phi).b().Inputs(1, 2);
-                INST(6, Opcode::Return).b().Inputs(5);
+                INST(5U, Opcode::Phi).b().Inputs(1U, 2U);
+                INST(6U, Opcode::Return).b().Inputs(5U);
             }
         }
 
@@ -5602,26 +5614,30 @@ TEST_F(PeepholesTest, ConditionalAssignmentsTwoBranches)
         auto graph = CreateEmptyBytecodeGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).b();
-            CONSTANT(2, 0x0).s64();
-            CONSTANT(4, 0x1).s32();
-            CONSTANT(5, 0x0).s32();
+            PARAMETER(0U, 0U).b();
+            CONSTANT(2U, 0x0U).s64();
+            CONSTANT(4U, 0x1U).s32();
+            CONSTANT(5U, 0x0U).s32();
 
-            BASIC_BLOCK(2, 4, 5)
+            BASIC_BLOCK(2U, 4U, 5U)
             {
-                INST(1, Opcode::Compare).b().SrcType(DataType::BOOL).CC(CC_NE).Inputs(0, 2);
-                INST(3, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(inverse ? CC_NE : CC_EQ).Imm(0).Inputs(1);
+                INST(1U, Opcode::Compare).b().SrcType(DataType::BOOL).CC(CC_NE).Inputs(0U, 2U);
+                INST(3U, Opcode::IfImm)
+                    .SrcType(compiler::DataType::BOOL)
+                    .CC(inverse ? CC_NE : CC_EQ)
+                    .Imm(0U)
+                    .Inputs(1U);
             }
 
-            BASIC_BLOCK(4, 6) {}
-            BASIC_BLOCK(6, 3) {}
+            BASIC_BLOCK(4U, 6U) {}
+            BASIC_BLOCK(6U, 3U) {}
 
-            BASIC_BLOCK(5, 3) {}
+            BASIC_BLOCK(5U, 3U) {}
 
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(6, Opcode::Phi).b().Inputs(4, 5);
-                INST(7, Opcode::Return).b().Inputs(6);
+                INST(6U, Opcode::Phi).b().Inputs(4U, 5U);
+                INST(7U, Opcode::Return).b().Inputs(6U);
             }
         }
 
@@ -5638,22 +5654,22 @@ TEST_F(PeepholesTest, ConditionalAssignmentsTwoBranches)
         if (!inverse) {
             GRAPH(expected)
             {
-                PARAMETER(0, 0).b();
+                PARAMETER(0U, 0U).b();
 
-                BASIC_BLOCK(2, -1)
+                BASIC_BLOCK(2U, -1L)
                 {
-                    INST(10, Opcode::XorI).b().Inputs(0).Imm(1);
-                    INST(7, Opcode::Return).b().Inputs(10);
+                    INST(10U, Opcode::XorI).b().Inputs(0U).Imm(1U);
+                    INST(7U, Opcode::Return).b().Inputs(10U);
                 }
             }
         } else {
             GRAPH(expected)
             {
-                PARAMETER(0, 0).b();
+                PARAMETER(0U, 0U).b();
 
-                BASIC_BLOCK(2, -1)
+                BASIC_BLOCK(2U, -1L)
                 {
-                    INST(7, Opcode::Return).b().Inputs(0);
+                    INST(7U, Opcode::Return).b().Inputs(0U);
                 }
             }
         }
@@ -5680,30 +5696,30 @@ TEST_F(PeepholesTest, ConditionalAssignmentMixedBranches)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0, 1);
-            INST(5, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
 
-        BASIC_BLOCK(3, 5, 6)
+        BASIC_BLOCK(3U, 5U, 6U)
         {
-            INST(6, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0, 2);
-            INST(7, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(1);
+            INST(6U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0U, 2U);
+            INST(7U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(1U);
         }
 
-        BASIC_BLOCK(4, 5) {}
+        BASIC_BLOCK(4U, 5U) {}
 
-        BASIC_BLOCK(5, 6) {}
+        BASIC_BLOCK(5U, 6U) {}
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(8, Opcode::Phi).b().Inputs(1, 2);
-            INST(9, Opcode::Return).b().Inputs(8);
+            INST(8U, Opcode::Phi).b().Inputs(1U, 2U);
+            INST(9U, Opcode::Return).b().Inputs(8U);
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
@@ -5731,29 +5747,33 @@ TEST_F(PeepholesTest, ConditionalAssignmentLoopTriangle)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            PARAMETER(1, 1).u64();
-            CONSTANT(2, 0);
-            CONSTANT(3, 1);
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).u64();
+            CONSTANT(2U, 0U);
+            CONSTANT(3U, 1U);
 
-            BASIC_BLOCK(2, 4, 3)
+            BASIC_BLOCK(2U, 4U, 3U)
             {
-                INST(4, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0, 2);
-                INST(5, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0).Inputs(4);
+                INST(4U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0U, 2U);
+                INST(5U, Opcode::IfImm)
+                    .SrcType(compiler::DataType::BOOL)
+                    .CC(inverse ? CC_EQ : CC_NE)
+                    .Imm(0U)
+                    .Inputs(4U);
             }
 
-            BASIC_BLOCK(3, 4) {}
+            BASIC_BLOCK(3U, 4U) {}
 
-            BASIC_BLOCK(4, 5, 3)
+            BASIC_BLOCK(4U, 5U, 3U)
             {
-                INST(6, Opcode::Phi).b().Inputs(2, 3);
-                INST(7, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_LT).Inputs(1, 3);
-                INST(8, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
+                INST(6U, Opcode::Phi).b().Inputs(2U, 3U);
+                INST(7U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_LT).Inputs(1U, 3U);
+                INST(8U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
             }
 
-            BASIC_BLOCK(5, -1)
+            BASIC_BLOCK(5U, -1L)
             {
-                INST(9, Opcode::Return).b().Inputs(6);
+                INST(9U, Opcode::Return).b().Inputs(6U);
             }
         }
         EXPECT_FALSE(graph->RunPass<Peepholes>());
@@ -5783,35 +5803,39 @@ TEST_F(PeepholesTest, ConditionalAssignmentLoopDiamond)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            PARAMETER(1, 1).u64();
-            CONSTANT(2, 0);
-            CONSTANT(3, 1);
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).u64();
+            CONSTANT(2U, 0U);
+            CONSTANT(3U, 1U);
 
-            BASIC_BLOCK(2, 4, 3)
+            BASIC_BLOCK(2U, 4U, 3U)
             {
-                INST(4, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0, 2);
-                INST(5, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0).Inputs(4);
+                INST(4U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0U, 2U);
+                INST(5U, Opcode::IfImm)
+                    .SrcType(compiler::DataType::BOOL)
+                    .CC(inverse ? CC_EQ : CC_NE)
+                    .Imm(0U)
+                    .Inputs(4U);
             }
 
-            BASIC_BLOCK(3, 5) {}
+            BASIC_BLOCK(3U, 5U) {}
 
-            BASIC_BLOCK(4, 5)
+            BASIC_BLOCK(4U, 5U)
             {
-                INST(6, Opcode::SaveState).NoVregs();
-                INST(7, Opcode::CallStatic).u64().InputsAutoType(0, 6);
+                INST(6U, Opcode::SaveState).NoVregs();
+                INST(7U, Opcode::CallStatic).u64().InputsAutoType(0U, 6U);
             }
 
-            BASIC_BLOCK(5, 6, 3)
+            BASIC_BLOCK(5U, 6U, 3U)
             {
-                INST(8, Opcode::Phi).b().Inputs(2, 3);
-                INST(9, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_LT).Inputs(1, 3);
-                INST(10, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(9);
+                INST(8U, Opcode::Phi).b().Inputs(2U, 3U);
+                INST(9U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_LT).Inputs(1U, 3U);
+                INST(10U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
             }
 
-            BASIC_BLOCK(6, -1)
+            BASIC_BLOCK(6U, -1L)
             {
-                INST(11, Opcode::Return).b().Inputs(8);
+                INST(11U, Opcode::Return).b().Inputs(8U);
             }
         }
         EXPECT_FALSE(graph->RunPass<Peepholes>());
@@ -5842,66 +5866,66 @@ TEST_F(PeepholesTest, ConditionalAssignmentNestedIfs)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
+        PARAMETER(0U, 0U).s64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
 
-        BASIC_BLOCK(2, 7, 3)
+        BASIC_BLOCK(2U, 7U, 3U)
         {
-            INST(3, Opcode::Compare).b().SrcType(DataType::INT64).CC(CC_LT).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().SrcType(DataType::INT64).CC(CC_LT).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
 
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(5, Opcode::Compare).b().SrcType(DataType::INT64).CC(CC_GT).Inputs(0, 2);
-            INST(6, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(5U, Opcode::Compare).b().SrcType(DataType::INT64).CC(CC_GT).Inputs(0U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
 
-        BASIC_BLOCK(4, 6)
+        BASIC_BLOCK(4U, 6U)
         {
-            INST(7, Opcode::Add).s64().Inputs(0, 2);
+            INST(7U, Opcode::Add).s64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(5, 6)
+        BASIC_BLOCK(5U, 6U)
         {
-            INST(8, Opcode::Sub).s64().Inputs(0, 2);
-        }
-
-        BASIC_BLOCK(6, 7)
-        {
-            INST(9, Opcode::Phi).s64().Inputs(7, 8);
+            INST(8U, Opcode::Sub).s64().Inputs(0U, 2U);
         }
 
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(10, Opcode::Phi).b().Inputs(2, 1);
-            INST(11, Opcode::Phi).s64().Inputs(0, 9);
-            INST(12, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).u64().InputsAutoType(10, 11, 12);
-            INST(14, Opcode::Return).u64().Inputs(13);
+            INST(9U, Opcode::Phi).s64().Inputs(7U, 8U);
+        }
+
+        BASIC_BLOCK(7U, -1L)
+        {
+            INST(10U, Opcode::Phi).b().Inputs(2U, 1U);
+            INST(11U, Opcode::Phi).s64().Inputs(0U, 9U);
+            INST(12U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).u64().InputsAutoType(10U, 11U, 12U);
+            INST(14U, Opcode::Return).u64().Inputs(13U);
         }
     }
 
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
 
-    ASSERT_EQ(INS(13).GetInput(0).GetInst(), &INS(3));
+    ASSERT_EQ(INS(13U).GetInput(0U).GetInst(), &INS(3U));
 }
 
 TEST_F(PeepholesTest, OverflowChecksOptimize)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).s32();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).s32();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::AddOverflowCheck).s32().Inputs(1, 0, 2);
-            INST(4, Opcode::AddOverflowCheck).s32().Inputs(0, 1, 2);
-            INST(5, Opcode::SubOverflowCheck).s32().Inputs(1, 0, 2);
-            INST(6, Opcode::SubOverflowCheck).s32().Inputs(0, 1, 2);  // can't optimize (0 - x)
-            INST(7, Opcode::CallStatic).v0id().InputsAutoType(3, 4, 5, 6, 2);
-            INST(8, Opcode::ReturnVoid).v0id();
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::AddOverflowCheck).s32().Inputs(1U, 0U, 2U);
+            INST(4U, Opcode::AddOverflowCheck).s32().Inputs(0U, 1U, 2U);
+            INST(5U, Opcode::SubOverflowCheck).s32().Inputs(1U, 0U, 2U);
+            INST(6U, Opcode::SubOverflowCheck).s32().Inputs(0U, 1U, 2U);  // can't optimize (0 - x)
+            INST(7U, Opcode::CallStatic).v0id().InputsAutoType(3U, 4U, 5U, 6U, 2U);
+            INST(8U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -5909,14 +5933,14 @@ TEST_F(PeepholesTest, OverflowChecksOptimize)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).s32();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).s32();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(6, Opcode::SubOverflowCheck).s32().Inputs(0, 1, 2);  // can't optimize (0 - x)
-            INST(7, Opcode::CallStatic).v0id().InputsAutoType(1, 1, 1, 6, 2);
-            INST(8, Opcode::ReturnVoid).v0id();
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::SubOverflowCheck).s32().Inputs(0U, 1U, 2U);  // can't optimize (0 - x)
+            INST(7U, Opcode::CallStatic).v0id().InputsAutoType(1U, 1U, 1U, 6U, 2U);
+            INST(8U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, GetGraph()));
@@ -5944,34 +5968,34 @@ TEST_F(PeepholesTest, SubAddAddFromOtherBBInOsrMode)
 
     GRAPH(graph_osr)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(14, 2).u64();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(14U, 2U).u64();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(15, Opcode::Add).u64().Inputs(1, 0);
-            INST(16, Opcode::Add).u64().Inputs(0, 14);
+            INST(15U, Opcode::Add).u64().Inputs(1U, 0U);
+            INST(16U, Opcode::Add).u64().Inputs(0U, 14U);
 
-            INST(2, Opcode::Add).u64().Inputs(0, 1);
-            INST(3, Opcode::Compare).b().Inputs(0, 2);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(2U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 2U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 3, 4)
+        BASIC_BLOCK(3U, 3U, 4U)
         {
-            INST(5, Opcode::Phi).u64().Inputs({{2, 0}, {3, 6}});
-            INST(13, Opcode::SaveStateOsr).Inputs(0, 1, 5, 15, 16).SrcVregs({0, 1, 2, 3, 4});
-            INST(6, Opcode::Sub).u64().Inputs(5, 1);
+            INST(5U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 6U}});
+            INST(13U, Opcode::SaveStateOsr).Inputs(0U, 1U, 5U, 15U, 16U).SrcVregs({0U, 1U, 2U, 3U, 4U});
+            INST(6U, Opcode::Sub).u64().Inputs(5U, 1U);
             // This INST 17 will not change!
-            INST(17, Opcode::Sub).u64().Inputs(15, 16);
-            INST(7, Opcode::Compare).b().Inputs(6, 1);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
+            INST(17U, Opcode::Sub).u64().Inputs(15U, 16U);
+            INST(7U, Opcode::Compare).b().Inputs(6U, 1U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(9, Opcode::Phi).u64().Inputs({{2, 0}, {3, 6}});
-            INST(10, Opcode::Add).u64().Inputs(0, 1);
-            INST(11, Opcode::Add).u64().Inputs(9, 10);
-            INST(12, Opcode::Return).u64().Inputs(11);
+            INST(9U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 6U}});
+            INST(10U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(11U, Opcode::Add).u64().Inputs(9U, 10U);
+            INST(12U, Opcode::Return).u64().Inputs(11U);
         }
     }
 
@@ -6015,37 +6039,37 @@ TEST_F(PeepholesTest, SubAddAddSameBBInOsrMode)
     // (const0 + param) - (param + const1) = const0 - const1
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        CONSTANT(14, 0);
-        CONSTANT(19, 2);
+        CONSTANT(14U, 0U);
+        CONSTANT(19U, 2U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Add).u64().Inputs(0, 1);
-            INST(3, Opcode::Compare).b().Inputs(0, 2);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(2U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 2U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 3, 4)
+        BASIC_BLOCK(3U, 3U, 4U)
         {
-            INST(5, Opcode::Phi).u64().Inputs({{2, 0}, {3, 6}});
-            INST(13, Opcode::SaveStateOsr).Inputs(0, 1, 5).SrcVregs({0, 1, 2});
-            INST(6, Opcode::Sub).u64().Inputs(5, 1);
+            INST(5U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 6U}});
+            INST(13U, Opcode::SaveStateOsr).Inputs(0U, 1U, 5U).SrcVregs({0U, 1U, 2U});
+            INST(6U, Opcode::Sub).u64().Inputs(5U, 1U);
 
-            INST(15, Opcode::Add).u64().Inputs(14, 1);
-            INST(16, Opcode::Add).u64().Inputs(1, 19);
+            INST(15U, Opcode::Add).u64().Inputs(14U, 1U);
+            INST(16U, Opcode::Add).u64().Inputs(1U, 19U);
             // INST 17 will change
-            INST(17, Opcode::Sub).u64().Inputs(15, 16);
-            INST(7, Opcode::Compare).b().Inputs(6, 1);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
+            INST(17U, Opcode::Sub).u64().Inputs(15U, 16U);
+            INST(7U, Opcode::Compare).b().Inputs(6U, 1U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(9, Opcode::Phi).u64().Inputs({{2, 0}, {3, 6}});
-            INST(10, Opcode::Add).u64().Inputs(0, 1);
-            INST(11, Opcode::Add).u64().Inputs(9, 10);
-            INST(12, Opcode::Return).u64().Inputs(11);
+            INST(9U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 6U}});
+            INST(10U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(11U, Opcode::Add).u64().Inputs(9U, 10U);
+            INST(12U, Opcode::Return).u64().Inputs(11U);
         }
     }
 
@@ -6056,37 +6080,37 @@ TEST_F(PeepholesTest, SubAddAddSameBBInOsrMode)
     }
     GetGraph()->RunPass<Peepholes>();
     GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(INS(17).GetInput(0).GetInst(), &INS(14));
-    ASSERT_EQ(INS(17).GetInput(1).GetInst(), &INS(19));
+    ASSERT_EQ(INS(17U).GetInput(0U).GetInst(), &INS(14U));
+    ASSERT_EQ(INS(17U).GetInput(1U).GetInst(), &INS(19U));
 }
 
 TEST_F(PeepholesTest, GetInstanceClassTest)
 {
-    auto klass = reinterpret_cast<RuntimeInterface::ClassPtr>(2);
+    auto klass = reinterpret_cast<RuntimeInterface::ClassPtr>(2U);
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::SaveState).NoVregs();
-            INST(1, Opcode::LoadAndInitClass).ref().Inputs(0).TypeId(1).Class(klass);
-            INST(2, Opcode::NewObject).ref().Inputs(1, 0).TypeId(1);
-            INST(3, Opcode::GetInstanceClass).ref().Inputs(2);
-            INST(4, Opcode::Return).ref().Inputs(3);
+            INST(0U, Opcode::SaveState).NoVregs();
+            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U).TypeId(1U).Class(klass);
+            INST(2U, Opcode::NewObject).ref().Inputs(1U, 0U).TypeId(1U);
+            INST(3U, Opcode::GetInstanceClass).ref().Inputs(2U);
+            INST(4U, Opcode::Return).ref().Inputs(3U);
         }
     }
-    INS(2).SetObjectTypeInfo(ObjectTypeInfo(klass, true));
+    INS(2U).SetObjectTypeInfo(ObjectTypeInfo(klass, true));
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::SaveState).NoVregs();
-            INST(1, Opcode::LoadAndInitClass).ref().Inputs(0).TypeId(1).Class(klass);
-            INST(2, Opcode::NewObject).ref().Inputs(1, 0).TypeId(1);
-            INST(3, Opcode::LoadImmediate).ref().Class(klass);
-            INST(4, Opcode::Return).ref().Inputs(3);
+            INST(0U, Opcode::SaveState).NoVregs();
+            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U).TypeId(1U).Class(klass);
+            INST(2U, Opcode::NewObject).ref().Inputs(1U, 0U).TypeId(1U);
+            INST(3U, Opcode::LoadImmediate).ref().Class(klass);
+            INST(4U, Opcode::Return).ref().Inputs(3U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, GetGraph()));
@@ -6098,28 +6122,28 @@ TEST_F(PeepholesTest, NegOverflowAndZeroCheckShl)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0, 5);
-            INST(7, Opcode::Shl).s32().Inputs(6, 1);
-            INST(8, Opcode::Return).s32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0U, 5U);
+            INST(7U, Opcode::Shl).s32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).s32().Inputs(7U);
         }
     }
     ASSERT_TRUE(graph1->RunPass<Peepholes>());
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::Neg).s32().Inputs(0);
-            INST(7, Opcode::Shl).s32().Inputs(6, 1);
-            INST(8, Opcode::Return).s32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::Neg).s32().Inputs(0U);
+            INST(7U, Opcode::Shl).s32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).s32().Inputs(7U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -6130,28 +6154,28 @@ TEST_F(PeepholesTest, NegOverflowAndZeroCheckShr)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0, 5);
-            INST(7, Opcode::Shr).s32().Inputs(6, 1);
-            INST(8, Opcode::Return).s32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0U, 5U);
+            INST(7U, Opcode::Shr).s32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).s32().Inputs(7U);
         }
     }
     ASSERT_TRUE(graph1->RunPass<Peepholes>());
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::Neg).s32().Inputs(0);
-            INST(7, Opcode::Shr).s32().Inputs(6, 1);
-            INST(8, Opcode::Return).s32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::Neg).s32().Inputs(0U);
+            INST(7U, Opcode::Shr).s32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).s32().Inputs(7U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -6162,28 +6186,28 @@ TEST_F(PeepholesTest, NegOverflowAndZeroCheckAShr)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0, 5);
-            INST(7, Opcode::AShr).s32().Inputs(6, 1);
-            INST(8, Opcode::Return).s32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0U, 5U);
+            INST(7U, Opcode::AShr).s32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).s32().Inputs(7U);
         }
     }
     ASSERT_TRUE(graph1->RunPass<Peepholes>());
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::Neg).s32().Inputs(0);
-            INST(7, Opcode::AShr).s32().Inputs(6, 1);
-            INST(8, Opcode::Return).s32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::Neg).s32().Inputs(0U);
+            INST(7U, Opcode::AShr).s32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).s32().Inputs(7U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -6194,28 +6218,28 @@ TEST_F(PeepholesTest, NegOverflowAndZeroCheckAnd)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0, 5);
-            INST(7, Opcode::And).u32().Inputs(6, 1);
-            INST(8, Opcode::Return).u32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0U, 5U);
+            INST(7U, Opcode::And).u32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).u32().Inputs(7U);
         }
     }
     ASSERT_TRUE(graph1->RunPass<Peepholes>());
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::Neg).s32().Inputs(0);
-            INST(7, Opcode::And).u32().Inputs(6, 1);
-            INST(8, Opcode::Return).u32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::Neg).s32().Inputs(0U);
+            INST(7U, Opcode::And).u32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).u32().Inputs(7U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -6226,28 +6250,28 @@ TEST_F(PeepholesTest, NegOverflowAndZeroCheckOr)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0, 5);
-            INST(7, Opcode::Or).u32().Inputs(6, 1);
-            INST(8, Opcode::Return).u32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0U, 5U);
+            INST(7U, Opcode::Or).u32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).u32().Inputs(7U);
         }
     }
     ASSERT_TRUE(graph1->RunPass<Peepholes>());
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::Neg).s32().Inputs(0);
-            INST(7, Opcode::Or).u32().Inputs(6, 1);
-            INST(8, Opcode::Return).u32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::Neg).s32().Inputs(0U);
+            INST(7U, Opcode::Or).u32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).u32().Inputs(7U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -6258,28 +6282,28 @@ TEST_F(PeepholesTest, NegOverflowAndZeroCheckXor)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0, 5);
-            INST(7, Opcode::Xor).u32().Inputs(6, 1);
-            INST(8, Opcode::Return).u32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0U, 5U);
+            INST(7U, Opcode::Xor).u32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).u32().Inputs(7U);
         }
     }
     ASSERT_TRUE(graph1->RunPass<Peepholes>());
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::Neg).s32().Inputs(0);
-            INST(7, Opcode::Xor).u32().Inputs(6, 1);
-            INST(8, Opcode::Return).u32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::Neg).s32().Inputs(0U);
+            INST(7U, Opcode::Xor).u32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).u32().Inputs(7U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -6289,14 +6313,14 @@ TEST_F(PeepholesTest, NegOverflowAndZeroCheckNotApplied)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0, 5);
-            INST(7, Opcode::Add).s32().Inputs(6, 1);
-            INST(8, Opcode::Return).s32().Inputs(7);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::NegOverflowAndZeroCheck).s32().Inputs(0U, 5U);
+            INST(7U, Opcode::Add).s32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).s32().Inputs(7U);
         }
     }
     auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -6309,66 +6333,66 @@ TEST_F(PeepholesTest, OverflowCheckAsBitwiseInput)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        PARAMETER(2, 2).s32();
-        CONSTANT(3, 0);
-        BASIC_BLOCK(2, 4, 3)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        PARAMETER(2U, 2U).s32();
+        CONSTANT(3U, 0U);
+        BASIC_BLOCK(2U, 4U, 3U)
         {
-            INST(4, Opcode::SaveState).Inputs(0, 1, 2, 3).SrcVregs({0, 1, 2, 3});
-            INST(5, Opcode::AddOverflowCheck).s32().Inputs(0, 1, 4);
+            INST(4U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(5U, Opcode::AddOverflowCheck).s32().Inputs(0U, 1U, 4U);
 
-            INST(6, Opcode::SaveState).Inputs(0, 1, 2, 3, 5).SrcVregs({0, 1, 2, 3, 4});
-            INST(7, Opcode::SubOverflowCheck).s32().Inputs(5, 2, 6);
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U});
+            INST(7U, Opcode::SubOverflowCheck).s32().Inputs(5U, 2U, 6U);
 
-            INST(8, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::Type::INT32).Inputs(2, 0);
-            INST(9, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0).Inputs(8);
+            INST(8U, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::Type::INT32).Inputs(2U, 0U);
+            INST(9U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(8U);
         }
 
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(10, Opcode::SaveState).Inputs(0, 1, 2, 3, 5, 7).SrcVregs({0, 1, 2, 3, 4, 5});
-            INST(11, Opcode::NegOverflowAndZeroCheck).s32().Inputs(2, 10);
+            INST(10U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 5U, 7U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(11U, Opcode::NegOverflowAndZeroCheck).s32().Inputs(2U, 10U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(12, Opcode::Phi).s32().Inputs({{2, 7}, {4, 11}});
-            INST(13, Opcode::Or).s32().Inputs(12, 3);
-            INST(14, Opcode::Return).s32().Inputs(13);
+            INST(12U, Opcode::Phi).s32().Inputs({{2U, 7U}, {4U, 11U}});
+            INST(13U, Opcode::Or).s32().Inputs(12U, 3U);
+            INST(14U, Opcode::Return).s32().Inputs(13U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        PARAMETER(2, 2).s32();
-        CONSTANT(3, 0);
-        BASIC_BLOCK(2, 4, 3)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        PARAMETER(2U, 2U).s32();
+        CONSTANT(3U, 0U);
+        BASIC_BLOCK(2U, 4U, 3U)
         {
-            INST(4, Opcode::SaveState).Inputs(0, 1, 2, 3).SrcVregs({0, 1, 2, 3});
-            INST(5, Opcode::Add).s32().Inputs(0, 1);
+            INST(4U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(5U, Opcode::Add).s32().Inputs(0U, 1U);
 
-            INST(6, Opcode::SaveState).Inputs(0, 1, 2, 3, 5).SrcVregs({0, 1, 2, 3, 4});
-            INST(7, Opcode::Sub).s32().Inputs(5, 2);
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U});
+            INST(7U, Opcode::Sub).s32().Inputs(5U, 2U);
 
-            INST(8, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::Type::INT32).Inputs(2, 0);
-            INST(9, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0).Inputs(8);
+            INST(8U, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::Type::INT32).Inputs(2U, 0U);
+            INST(9U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(8U);
         }
 
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(10, Opcode::SaveState).Inputs(0, 1, 2, 3, 5, 7).SrcVregs({0, 1, 2, 3, 4, 5});
-            INST(11, Opcode::Neg).s32().Inputs(2);
+            INST(10U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 5U, 7U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
+            INST(11U, Opcode::Neg).s32().Inputs(2U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(12, Opcode::Phi).s32().Inputs({{2, 7}, {4, 11}});
-            INST(13, Opcode::Or).s32().Inputs(12, 3);
-            INST(14, Opcode::Return).s32().Inputs(12);
+            INST(12U, Opcode::Phi).s32().Inputs({{2U, 7U}, {4U, 11U}});
+            INST(13U, Opcode::Or).s32().Inputs(12U, 3U);
+            INST(14U, Opcode::Return).s32().Inputs(12U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -6378,17 +6402,17 @@ TEST_F(PeepholesTest, OverflowCheckAsBitwiseAndSSInput)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 255);
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 255U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::AddOverflowCheck).s32().Inputs(0, 1, 2);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::AddOverflowCheck).s32().Inputs(0U, 1U, 2U);
 
-            INST(6, Opcode::And).s32().Inputs(3, 1);
-            INST(7, Opcode::SaveState).Inputs(0, 1, 3, 6).SrcVregs({0, 1, 2, 3});
-            INST(8, Opcode::AddOverflowCheck).s32().Inputs(6, 1, 7);
-            INST(9, Opcode::Return).s32().Inputs(8);
+            INST(6U, Opcode::And).s32().Inputs(3U, 1U);
+            INST(7U, Opcode::SaveState).Inputs(0U, 1U, 3U, 6U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(8U, Opcode::AddOverflowCheck).s32().Inputs(6U, 1U, 7U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
         }
     }
     auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -6401,26 +6425,26 @@ TEST_F(PeepholesTest, ReplacingXorWithCompare)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 1);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::CallStatic).b().InputsAutoType(1);
-            INST(3, Opcode::Xor).s32().Inputs(0, 2);
-            INST(9, Opcode::Return).s32().Inputs(3);
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::CallStatic).b().InputsAutoType(1U);
+            INST(3U, Opcode::Xor).s32().Inputs(0U, 2U);
+            INST(9U, Opcode::Return).s32().Inputs(3U);
         }
     }
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(10, 0);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(10U, 0U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::CallStatic).b().InputsAutoType(1);
-            INST(11, Opcode::Compare).b().CC(ConditionCode::CC_EQ).Inputs(2, 10);
-            INST(9, Opcode::Return).s32().Inputs(11);
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::CallStatic).b().InputsAutoType(1U);
+            INST(11U, Opcode::Compare).b().CC(ConditionCode::CC_EQ).Inputs(2U, 10U);
+            INST(9U, Opcode::Return).s32().Inputs(11U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -6432,41 +6456,41 @@ TEST_F(PeepholesTest, ReplacingXorWithCompare)
 
 TEST_F(PeepholesTest, MultiArrayWithLenArrayFirstLayer)
 {
-    auto class1 = reinterpret_cast<RuntimeInterface::ClassPtr>(1);
+    auto class1 = reinterpret_cast<RuntimeInterface::ClassPtr>(1U);
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0x3);
-        CONSTANT(1, 0x2);
-        CONSTANT(7, 0x1);
+        CONSTANT(0U, 0x3U);
+        CONSTANT(1U, 0x2U);
+        CONSTANT(7U, 0x1U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::LoadImmediate).ref().Class(class1);
-            INST(4, Opcode::MultiArray)
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::LoadImmediate).ref().Class(class1);
+            INST(4U, Opcode::MultiArray)
                 .ref()
-                .InputsAutoType(3, 0, 1, 2);  // Will be create [ [ [][] ], [ [][] ], [ [][] ] ]
-            INST(5, Opcode::LenArray).Inputs(4).s32();
-            INST(10, Opcode::Return).s32().Inputs(5);
+                .InputsAutoType(3U, 0U, 1U, 2U);  // Will be create [ [ [][] ], [ [][] ], [ [][] ] ]
+            INST(5U, Opcode::LenArray).Inputs(4U).s32();
+            INST(10U, Opcode::Return).s32().Inputs(5U);
         }
     }
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0x3);
-        CONSTANT(1, 0x2);
-        CONSTANT(7, 0x1);
+        CONSTANT(0U, 0x3U);
+        CONSTANT(1U, 0x2U);
+        CONSTANT(7U, 0x1U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::LoadImmediate).ref().Class(class1);
-            INST(4, Opcode::MultiArray)
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::LoadImmediate).ref().Class(class1);
+            INST(4U, Opcode::MultiArray)
                 .ref()
-                .InputsAutoType(3, 0, 1, 2);  // Will be create [ [ [][] ], [ [][] ], [ [][] ] ]
-            INST(5, Opcode::LenArray).Inputs(4).s32();
-            INST(10, Opcode::Return).s32().Inputs(0);
+                .InputsAutoType(3U, 0U, 1U, 2U);  // Will be create [ [ [][] ], [ [][] ], [ [][] ] ]
+            INST(5U, Opcode::LenArray).Inputs(4U).s32();
+            INST(10U, Opcode::Return).s32().Inputs(0U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -6476,49 +6500,49 @@ TEST_F(PeepholesTest, MultiArrayWithLenArrayFirstLayer)
 
 TEST_F(PeepholesTest, MultiArrayWithLenArraySecondLayer)
 {
-    auto class1 = reinterpret_cast<RuntimeInterface::ClassPtr>(1);
+    auto class1 = reinterpret_cast<RuntimeInterface::ClassPtr>(1U);
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0x3).s32();
-        CONSTANT(1, 0x2);
-        CONSTANT(7, 0x1);
+        PARAMETER(0U, 0x3U).s32();
+        CONSTANT(1U, 0x2U);
+        CONSTANT(7U, 0x1U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::LoadImmediate).ref().Class(class1);
-            INST(4, Opcode::MultiArray)
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::LoadImmediate).ref().Class(class1);
+            INST(4U, Opcode::MultiArray)
                 .ref()
-                .InputsAutoType(3, 0, 1, 2);  // Will be create [ [ [][] ], [ [][] ], [ [][] ] ]
-            INST(5, Opcode::LenArray).Inputs(4).s32();
-            INST(11, Opcode::LoadArray).ref().Inputs(4, 7);
-            INST(12, Opcode::NullCheck).ref().Inputs(11, 2);
-            INST(13, Opcode::LenArray).Inputs(12).s32();
-            INST(14, Opcode::Add).Inputs(5, 13).s32();
-            INST(10, Opcode::Return).s32().Inputs(14);
+                .InputsAutoType(3U, 0U, 1U, 2U);  // Will be create [ [ [][] ], [ [][] ], [ [][] ] ]
+            INST(5U, Opcode::LenArray).Inputs(4U).s32();
+            INST(11U, Opcode::LoadArray).ref().Inputs(4U, 7U);
+            INST(12U, Opcode::NullCheck).ref().Inputs(11U, 2U);
+            INST(13U, Opcode::LenArray).Inputs(12U).s32();
+            INST(14U, Opcode::Add).Inputs(5U, 13U).s32();
+            INST(10U, Opcode::Return).s32().Inputs(14U);
         }
     }
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0x3).s32();
-        CONSTANT(1, 0x2);
-        CONSTANT(7, 0x1);
+        PARAMETER(0U, 0x3U).s32();
+        CONSTANT(1U, 0x2U);
+        CONSTANT(7U, 0x1U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::LoadImmediate).ref().Class(class1);
-            INST(4, Opcode::MultiArray)
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::LoadImmediate).ref().Class(class1);
+            INST(4U, Opcode::MultiArray)
                 .ref()
-                .InputsAutoType(3, 0, 1, 2);  // Will be create [ [ [][] ], [ [][] ], [ [][] ] ]
-            INST(5, Opcode::LenArray).Inputs(4).s32();
-            INST(11, Opcode::LoadArray).ref().Inputs(4, 7);
-            INST(12, Opcode::NullCheck).ref().Inputs(11, 2);
-            INST(13, Opcode::LenArray).Inputs(12).s32();
-            INST(14, Opcode::Add).Inputs(0, 1).s32();
-            INST(10, Opcode::Return).s32().Inputs(14);
+                .InputsAutoType(3U, 0U, 1U, 2U);  // Will be create [ [ [][] ], [ [][] ], [ [][] ] ]
+            INST(5U, Opcode::LenArray).Inputs(4U).s32();
+            INST(11U, Opcode::LoadArray).ref().Inputs(4U, 7U);
+            INST(12U, Opcode::NullCheck).ref().Inputs(11U, 2U);
+            INST(13U, Opcode::LenArray).Inputs(12U).s32();
+            INST(14U, Opcode::Add).Inputs(0U, 1U).s32();
+            INST(10U, Opcode::Return).s32().Inputs(14U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
@@ -6528,65 +6552,65 @@ TEST_F(PeepholesTest, MultiArrayWithLenArraySecondLayer)
 
 TEST_F(PeepholesTest, MultiArrayWithLenArrayOfString)
 {
-    auto class1 = reinterpret_cast<RuntimeInterface::ClassPtr>(1);
+    auto class1 = reinterpret_cast<RuntimeInterface::ClassPtr>(1U);
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0x1).s32();
-        CONSTANT(1, 0x3);
-        PARAMETER(2, 0x2).s32();  // Will think, that value is 0x2
+        PARAMETER(0U, 0x1U).s32();
+        CONSTANT(1U, 0x3U);
+        PARAMETER(2U, 0x2U).s32();  // Will think, that value is 0x2
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::SaveState);
-            INST(4, Opcode::LoadImmediate).ref().Class(class1);
-            INST(5, Opcode::MultiArray)
+            INST(3U, Opcode::SaveState);
+            INST(4U, Opcode::LoadImmediate).ref().Class(class1);
+            INST(5U, Opcode::MultiArray)
                 .ref()
                 .InputsAutoType(4, 1, 2,
-                                3);  // Will be create [ [ String, String ], [ String, String ], [ String, String ] ]
-            INST(6, Opcode::LenArray).Inputs(5).s32();
+                                3U);  // Will be create [ [ String, String ], [ String, String ], [ String, String ] ]
+            INST(6U, Opcode::LenArray).Inputs(5U).s32();
 
-            INST(7, Opcode::LoadArray).ref().Inputs(5, 0);  // Loaded: [ String, String ]
-            INST(8, Opcode::NullCheck).ref().Inputs(7, 3);
-            INST(9, Opcode::LenArray).Inputs(8).s32();
+            INST(7U, Opcode::LoadArray).ref().Inputs(5U, 0U);  // Loaded: [ String, String ]
+            INST(8U, Opcode::NullCheck).ref().Inputs(7U, 3U);
+            INST(9U, Opcode::LenArray).Inputs(8U).s32();
 
-            INST(10, Opcode::LoadArray).ref().Inputs(8, 0);  // Loaded: String
-            INST(11, Opcode::NullCheck).ref().Inputs(10, 3);
-            INST(12, Opcode::LenArray).Inputs(11).s32();  // Length of String
+            INST(10U, Opcode::LoadArray).ref().Inputs(8U, 0U);  // Loaded: String
+            INST(11U, Opcode::NullCheck).ref().Inputs(10U, 3U);
+            INST(12U, Opcode::LenArray).Inputs(11U).s32();  // Length of String
 
-            INST(13, Opcode::Add).Inputs(9, 6).s32();
-            INST(14, Opcode::Add).Inputs(13, 12).s32();
-            INST(15, Opcode::Return).s32().Inputs(14);
+            INST(13U, Opcode::Add).Inputs(9U, 6U).s32();
+            INST(14U, Opcode::Add).Inputs(13U, 12U).s32();
+            INST(15U, Opcode::Return).s32().Inputs(14U);
         }
     }
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0x1).s32();
-        CONSTANT(1, 0x3);
-        PARAMETER(2, 0x2).s32();  // Will think, that value is 0x2
+        PARAMETER(0U, 0x1U).s32();
+        CONSTANT(1U, 0x3U);
+        PARAMETER(2U, 0x2U).s32();  // Will think, that value is 0x2
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::SaveState);
-            INST(4, Opcode::LoadImmediate).ref().Class(class1);
-            INST(5, Opcode::MultiArray)
+            INST(3U, Opcode::SaveState);
+            INST(4U, Opcode::LoadImmediate).ref().Class(class1);
+            INST(5U, Opcode::MultiArray)
                 .ref()
                 .InputsAutoType(4, 1, 2,
-                                3);  // Will be create [ [ String, String ], [ String, String ], [ String, String ] ]
-            INST(6, Opcode::LenArray).Inputs(5).s32();
+                                3U);  // Will be create [ [ String, String ], [ String, String ], [ String, String ] ]
+            INST(6U, Opcode::LenArray).Inputs(5U).s32();
 
-            INST(7, Opcode::LoadArray).ref().Inputs(5, 0);  // Loaded: [ String, String ]
-            INST(8, Opcode::NullCheck).ref().Inputs(7, 3);
-            INST(9, Opcode::LenArray).Inputs(8).s32();
+            INST(7U, Opcode::LoadArray).ref().Inputs(5U, 0U);  // Loaded: [ String, String ]
+            INST(8U, Opcode::NullCheck).ref().Inputs(7U, 3U);
+            INST(9U, Opcode::LenArray).Inputs(8U).s32();
 
-            INST(10, Opcode::LoadArray).ref().Inputs(8, 0);  // Loaded: String
-            INST(11, Opcode::NullCheck).ref().Inputs(10, 3);
-            INST(12, Opcode::LenArray).Inputs(11).s32();  // Length of String
+            INST(10U, Opcode::LoadArray).ref().Inputs(8U, 0U);  // Loaded: String
+            INST(11U, Opcode::NullCheck).ref().Inputs(10U, 3U);
+            INST(12U, Opcode::LenArray).Inputs(11U).s32();  // Length of String
 
-            INST(13, Opcode::Add).Inputs(2, 1).s32();
-            INST(14, Opcode::Add).Inputs(13, 12).s32();
-            INST(15, Opcode::Return).s32().Inputs(14);
+            INST(13U, Opcode::Add).Inputs(2U, 1U).s32();
+            INST(14U, Opcode::Add).Inputs(13U, 12U).s32();
+            INST(15U, Opcode::Return).s32().Inputs(14U);
         }
     }
 

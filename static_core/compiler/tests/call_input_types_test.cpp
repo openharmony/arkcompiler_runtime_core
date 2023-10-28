@@ -48,9 +48,9 @@ TEST_F(CallInputTypesTest, CallStatic)
     )";
     ASSERT_TRUE(ParseToGraph(source, "main"));
     auto call_inst = GetCallInstruction(GetGraph());
-    ASSERT_EQ(call_inst->GetInputType(0), DataType::INT32);
-    ASSERT_EQ(call_inst->GetInputType(1), DataType::FLOAT64);
-    ASSERT_EQ(call_inst->GetInputType(2), DataType::NO_TYPE);  // SaveState instruction
+    ASSERT_EQ(call_inst->GetInputType(0U), DataType::INT32);
+    ASSERT_EQ(call_inst->GetInputType(1U), DataType::FLOAT64);
+    ASSERT_EQ(call_inst->GetInputType(2U), DataType::NO_TYPE);  // SaveState instruction
 }
 
 // Checks the build of a call of a function without arguments
@@ -70,7 +70,7 @@ TEST_F(CallInputTypesTest, NoArgs)
     )";
     ASSERT_TRUE(ParseToGraph(source, "main"));
     auto call_inst = GetCallInstruction(GetGraph());
-    ASSERT_EQ(call_inst->GetInputType(0), DataType::NO_TYPE);  // SaveState instruction
+    ASSERT_EQ(call_inst->GetInputType(0U), DataType::NO_TYPE);  // SaveState instruction
 }
 
 TEST_F(CallInputTypesTest, CallVirt)
@@ -94,9 +94,9 @@ TEST_F(CallInputTypesTest, CallVirt)
     )";
     ASSERT_TRUE(ParseToGraph(source, "main"));
     auto call_inst = GetCallInstruction(GetGraph());
-    ASSERT_EQ(call_inst->GetInputType(0), DataType::REFERENCE);
-    ASSERT_EQ(call_inst->GetInputType(1), DataType::INT32);
-    ASSERT_EQ(call_inst->GetInputType(2), DataType::NO_TYPE);  // SaveState instruction
+    ASSERT_EQ(call_inst->GetInputType(0U), DataType::REFERENCE);
+    ASSERT_EQ(call_inst->GetInputType(1U), DataType::INT32);
+    ASSERT_EQ(call_inst->GetInputType(2U), DataType::NO_TYPE);  // SaveState instruction
 }
 
 }  // namespace panda::compiler

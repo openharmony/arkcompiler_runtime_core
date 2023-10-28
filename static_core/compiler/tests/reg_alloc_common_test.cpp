@@ -63,61 +63,61 @@ void RegAllocCommonTest::TestParametersLocations() const
     if constexpr (DataType::UINT64 == REG_TYPE) {
         GRAPH(graph)
         {
-            PARAMETER(0, 0).ref();
-            PARAMETER(1, 1).u64();
-            PARAMETER(2, 2).u64();
-            PARAMETER(3, 3).u64();
-            PARAMETER(4, 4).u64();
-            PARAMETER(5, 5).u64();
-            PARAMETER(6, 6).u64();
-            PARAMETER(7, 7).u64();
-            PARAMETER(8, 8).u64();
-            PARAMETER(9, 9).u64();
+            PARAMETER(0U, 0U).ref();
+            PARAMETER(1U, 1U).u64();
+            PARAMETER(2U, 2U).u64();
+            PARAMETER(3U, 3U).u64();
+            PARAMETER(4U, 4U).u64();
+            PARAMETER(5U, 5U).u64();
+            PARAMETER(6U, 6U).u64();
+            PARAMETER(7U, 7U).u64();
+            PARAMETER(8U, 8U).u64();
+            PARAMETER(9U, 9U).u64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(30, Opcode::SaveState).Inputs(0).SrcVregs({0});
-                INST(11, Opcode::NullCheck).ref().Inputs(0, 30);
-                INST(12, Opcode::StoreObject).u64().Inputs(11, 1);
-                INST(13, Opcode::StoreObject).u64().Inputs(11, 2);
-                INST(14, Opcode::StoreObject).u64().Inputs(11, 3);
-                INST(15, Opcode::StoreObject).u64().Inputs(11, 4);
-                INST(16, Opcode::StoreObject).u64().Inputs(11, 5);
-                INST(17, Opcode::StoreObject).u64().Inputs(11, 6);
-                INST(18, Opcode::StoreObject).u64().Inputs(11, 7);
-                INST(19, Opcode::StoreObject).u64().Inputs(11, 8);
-                INST(20, Opcode::StoreObject).u64().Inputs(11, 9);
-                INST(31, Opcode::ReturnVoid).v0id();
+                INST(30U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+                INST(11U, Opcode::NullCheck).ref().Inputs(0U, 30U);
+                INST(12U, Opcode::StoreObject).u64().Inputs(11U, 1U);
+                INST(13U, Opcode::StoreObject).u64().Inputs(11U, 2U);
+                INST(14U, Opcode::StoreObject).u64().Inputs(11U, 3U);
+                INST(15U, Opcode::StoreObject).u64().Inputs(11U, 4U);
+                INST(16U, Opcode::StoreObject).u64().Inputs(11U, 5U);
+                INST(17U, Opcode::StoreObject).u64().Inputs(11U, 6U);
+                INST(18U, Opcode::StoreObject).u64().Inputs(11U, 7U);
+                INST(19U, Opcode::StoreObject).u64().Inputs(11U, 8U);
+                INST(20U, Opcode::StoreObject).u64().Inputs(11U, 9U);
+                INST(31U, Opcode::ReturnVoid).v0id();
             }
         }
     } else {
         GRAPH(graph)
         {
-            PARAMETER(0, 0).ref();
-            PARAMETER(1, 1).u32();
-            PARAMETER(2, 2).u32();
-            PARAMETER(3, 3).u32();
-            PARAMETER(4, 4).u32();
-            PARAMETER(5, 5).u32();
-            PARAMETER(6, 6).u32();
-            PARAMETER(7, 7).u32();
-            PARAMETER(8, 8).u32();
-            PARAMETER(9, 9).u32();
+            PARAMETER(0U, 0U).ref();
+            PARAMETER(1U, 1U).u32();
+            PARAMETER(2U, 2U).u32();
+            PARAMETER(3U, 3U).u32();
+            PARAMETER(4U, 4U).u32();
+            PARAMETER(5U, 5U).u32();
+            PARAMETER(6U, 6U).u32();
+            PARAMETER(7U, 7U).u32();
+            PARAMETER(8U, 8U).u32();
+            PARAMETER(9U, 9U).u32();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(30, Opcode::SaveState).Inputs(0).SrcVregs({0});
-                INST(11, Opcode::NullCheck).ref().Inputs(0, 30);
-                INST(12, Opcode::StoreObject).u32().Inputs(11, 1);
-                INST(13, Opcode::StoreObject).u32().Inputs(11, 2);
-                INST(14, Opcode::StoreObject).u32().Inputs(11, 3);
-                INST(15, Opcode::StoreObject).u32().Inputs(11, 4);
-                INST(16, Opcode::StoreObject).u32().Inputs(11, 5);
-                INST(17, Opcode::StoreObject).u32().Inputs(11, 6);
-                INST(18, Opcode::StoreObject).u32().Inputs(11, 7);
-                INST(19, Opcode::StoreObject).u32().Inputs(11, 8);
-                INST(20, Opcode::StoreObject).u32().Inputs(11, 9);
-                INST(31, Opcode::ReturnVoid).v0id();
+                INST(30U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+                INST(11U, Opcode::NullCheck).ref().Inputs(0U, 30U);
+                INST(12U, Opcode::StoreObject).u32().Inputs(11U, 1U);
+                INST(13U, Opcode::StoreObject).u32().Inputs(11U, 2U);
+                INST(14U, Opcode::StoreObject).u32().Inputs(11U, 3U);
+                INST(15U, Opcode::StoreObject).u32().Inputs(11U, 4U);
+                INST(16U, Opcode::StoreObject).u32().Inputs(11U, 5U);
+                INST(17U, Opcode::StoreObject).u32().Inputs(11U, 6U);
+                INST(18U, Opcode::StoreObject).u32().Inputs(11U, 7U);
+                INST(19U, Opcode::StoreObject).u32().Inputs(11U, 8U);
+                INST(20U, Opcode::StoreObject).u32().Inputs(11U, 9U);
+                INST(31U, Opcode::ReturnVoid).v0id();
             }
         }
     }
@@ -182,16 +182,16 @@ TEST_F(RegAllocCommonTest, LocationsNoSplits)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1).s32();
-        CONSTANT(1, 2).s32();
-        CONSTANT(2, 3).s32();
+        CONSTANT(0U, 1U).s32();
+        CONSTANT(1U, 2U).s32();
+        CONSTANT(2U, 3U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Add).u32().Inputs(0, 1);
-            INST(4, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(5, Opcode::CallStatic).InputsAutoType(3, 2, 0, 1, 4).u32();
-            INST(6, Opcode::Return).u32().Inputs(5);
+            INST(3U, Opcode::Add).u32().Inputs(0U, 1U);
+            INST(4U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(5U, Opcode::CallStatic).InputsAutoType(3U, 2U, 0U, 1U, 4U).u32();
+            INST(6U, Opcode::Return).u32().Inputs(5U);
         }
     }
 
@@ -219,24 +219,24 @@ TEST_F(RegAllocCommonTest, ImplicitNullCheckStackMap)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).ref();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::SaveState).NoVregs();
-            INST(4, Opcode::LoadAndInitClass).ref().Inputs(3);
-            INST(5, Opcode::NewObject).ref().Inputs(4, 3);
-            INST(6, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(7, Opcode::NullCheck).ref().Inputs(5, 6);
-            INST(8, Opcode::LoadObject).s32().Inputs(7);
-            INST(9, Opcode::Return).s32().Inputs(8);
+            INST(3U, Opcode::SaveState).NoVregs();
+            INST(4U, Opcode::LoadAndInitClass).ref().Inputs(3U);
+            INST(5U, Opcode::NewObject).ref().Inputs(4U, 3U);
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(7U, Opcode::NullCheck).ref().Inputs(5U, 6U);
+            INST(8U, Opcode::LoadObject).s32().Inputs(7U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
         }
     }
-    INS(7).CastToNullCheck()->SetImplicit(true);
+    INS(7U).CastToNullCheck()->SetImplicit(true);
 
     RunRegAllocatorsAndCheck(graph, [](Graph *check_graph) {
-        auto bb = check_graph->GetStartBlock()->GetSuccessor(0);
+        auto bb = check_graph->GetStartBlock()->GetSuccessor(0U);
         // Find null_check
         Inst *null_check = nullptr;
         for (auto inst : bb->AllInsts()) {
@@ -266,19 +266,21 @@ TEST_F(RegAllocCommonTest, DynMethodNargsParamReserve)
 #endif
     GRAPH(graph)
     {
-        PARAMETER(0, 0).any();
-        PARAMETER(1, 1).any();
+        PARAMETER(0U, 0U).any();
+        PARAMETER(1U, 1U).any();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).NoVregs();
-            INST(3, Opcode::Intrinsic).any().Inputs({{DataType::ANY, 1}, {DataType::ANY, 0}, {DataType::NO_TYPE, 2}});
-            INST(4, Opcode::Return).any().Inputs(3);
+            INST(2U, Opcode::SaveState).NoVregs();
+            INST(3U, Opcode::Intrinsic)
+                .any()
+                .Inputs({{DataType::ANY, 1U}, {DataType::ANY, 0U}, {DataType::NO_TYPE, 2U}});
+            INST(4U, Opcode::Return).any().Inputs(3U);
         }
     }
 
     RunRegAllocatorsAndCheck(graph, [](Graph *check_graph) {
-        auto reg = Target(check_graph->GetArch()).GetParamRegId(1);
+        auto reg = Target(check_graph->GetArch()).GetParamRegId(1U);
 
         for (auto inst : check_graph->GetStartBlock()->Insts()) {
             if (inst->IsSpillFill()) {
@@ -297,20 +299,20 @@ TEST_F(RegAllocCommonTest, TempRegisters)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1).s32().DstReg(10);
-        CONSTANT(1, 2).s32().DstReg(11);
-        CONSTANT(2, 3).s32().DstReg(12);
+        CONSTANT(0U, 1U).s32().DstReg(10U);
+        CONSTANT(1U, 2U).s32().DstReg(11U);
+        CONSTANT(2U, 3U).s32().DstReg(12U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(4, Opcode::CallStatic).InputsAutoType(0, 1, 2, 3).v0id().SetFlag(inst_flags::REQUIRE_TMP);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(4U, Opcode::CallStatic).InputsAutoType(0U, 1U, 2U, 3U).v0id().SetFlag(inst_flags::REQUIRE_TMP);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
 
     RunRegAllocatorsAndCheck(graph, RegMask {0xFFFFFFE1}, [](Graph *check_graph) {
-        auto bb = check_graph->GetStartBlock()->GetSuccessor(0);
+        auto bb = check_graph->GetStartBlock()->GetSuccessor(0U);
         Inst *call_inst = nullptr;
         for (auto inst : bb->Insts()) {
             if (inst->IsCall()) {

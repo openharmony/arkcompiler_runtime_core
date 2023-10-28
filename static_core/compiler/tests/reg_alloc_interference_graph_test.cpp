@@ -23,10 +23,11 @@ class RegAllocInterferenceTest : public GraphTest {};
 
 namespace {
 constexpr unsigned DEFAULT_CAPACITY1 = 10;
-unsigned TEST_EDGES1[2][2] = {{0, 1}, {7, 4}};  // NOLINT(modernize-avoid-c-arrays)
+unsigned TEST_EDGES1[2U][2U] = {{0U, 1U}, {7U, 4U}};  // NOLINT(modernize-avoid-c-arrays)
 auto IS_IN_SET = [](unsigned a, unsigned b) {
-    for (int i = 0; i < 2; i++) {  // NOLINT(modernize-loop-convert)
-        if ((a == TEST_EDGES1[i][0] && b == TEST_EDGES1[i][1]) || (b == TEST_EDGES1[i][0] && a == TEST_EDGES1[i][1])) {
+    for (size_t i = 0; i < 2U; i++) {  // NOLINT(modernize-loop-convert)
+        if ((a == TEST_EDGES1[i][0U] && b == TEST_EDGES1[i][1U]) ||
+            (b == TEST_EDGES1[i][0U] && a == TEST_EDGES1[i][1U])) {
             return true;
         }
     }
@@ -39,8 +40,8 @@ TEST_F(RegAllocInterferenceTest, Basic)
 {
     GraphMatrix matrix(GetLocalAllocator());
     matrix.SetCapacity(DEFAULT_CAPACITY1);
-    EXPECT_FALSE(matrix.AddEdge(0, 1));
-    EXPECT_FALSE(matrix.AddEdge(7, 4));
+    EXPECT_FALSE(matrix.AddEdge(0U, 1U));
+    EXPECT_FALSE(matrix.AddEdge(7U, 4U));
     for (unsigned i = 0; i < DEFAULT_CAPACITY1; i++) {
         for (unsigned j = 0; j < DEFAULT_CAPACITY1; j++) {
             ASSERT_EQ(matrix.HasEdge(i, j), IS_IN_SET(i, j));
@@ -53,8 +54,8 @@ TEST_F(RegAllocInterferenceTest, BasicAfinity)
 {
     GraphMatrix matrix(GetLocalAllocator());
     matrix.SetCapacity(DEFAULT_CAPACITY1);
-    EXPECT_FALSE(matrix.AddAffinityEdge(0, 1));
-    EXPECT_FALSE(matrix.AddAffinityEdge(7, 4));
+    EXPECT_FALSE(matrix.AddAffinityEdge(0U, 1U));
+    EXPECT_FALSE(matrix.AddAffinityEdge(7U, 4U));
     for (unsigned i = 0; i < DEFAULT_CAPACITY1; i++) {
         for (unsigned j = 0; j < DEFAULT_CAPACITY1; j++) {
             EXPECT_EQ(matrix.HasAffinityEdge(i, j), IS_IN_SET(i, j));
@@ -68,14 +69,14 @@ TEST_F(RegAllocInterferenceTest, BasicGraph)
     InterferenceGraph gr(GetLocalAllocator());
     gr.Reserve(DEFAULT_CAPACITY1);
 
-    EXPECT_EQ(gr.Size(), 0);
+    EXPECT_EQ(gr.Size(), 0U);
     auto *node1 = gr.AllocNode();
-    EXPECT_EQ(gr.Size(), 1);
-    EXPECT_EQ(node1->GetNumber(), 0);
+    EXPECT_EQ(gr.Size(), 1U);
+    EXPECT_EQ(node1->GetNumber(), 0U);
 
     auto *node2 = gr.AllocNode();
-    EXPECT_EQ(gr.Size(), 2);
-    EXPECT_EQ(node2->GetNumber(), 1);
+    EXPECT_EQ(gr.Size(), 2U);
+    EXPECT_EQ(node2->GetNumber(), 1U);
     EXPECT_NE(node1, node2);
 }
 
@@ -95,21 +96,21 @@ TEST_F(RegAllocInterferenceTest, GraphChordal)
     gr.AllocNode();
     EXPECT_TRUE(gr.IsChordal());
 
-    gr.AddEdge(0, 1);
+    gr.AddEdge(0U, 1U);
     EXPECT_TRUE(gr.IsChordal());
 
-    gr.AddEdge(1, 2);
+    gr.AddEdge(1U, 2U);
     EXPECT_TRUE(gr.IsChordal());
 
-    gr.AddEdge(0, 2);
+    gr.AddEdge(0U, 2U);
     EXPECT_TRUE(gr.IsChordal());
 
     // Make nonchordal
     gr.AllocNode();
     gr.AllocNode();
-    gr.AddEdge(3, 2);
-    gr.AddEdge(3, 4);
-    gr.AddEdge(0, 4);
+    gr.AddEdge(3U, 2U);
+    gr.AddEdge(3U, 4U);
+    gr.AddEdge(0U, 4U);
     EXPECT_FALSE(gr.IsChordal());
 }
 
@@ -117,7 +118,8 @@ namespace {
 const unsigned DEFAULT_CAPACITY2 = 5;
 const unsigned DEFAULT_EDGES2 = 6;
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-::std::pair<unsigned, unsigned> TEST_EDGES2[DEFAULT_EDGES2] = {{0, 1}, {1, 2}, {2, 0}, {0, 3}, {2, 3}, {3, 4}};
+::std::pair<unsigned, unsigned> TEST_EDGES2[DEFAULT_EDGES2] = {{0U, 1U}, {1U, 2U}, {2U, 0U},
+                                                               {0U, 3U}, {2U, 3U}, {3U, 4U}};
 
 // To prevent adding "remove edge" interfaces to main code, edge removing is simulated via building new graph without
 // it.
@@ -146,16 +148,16 @@ InterferenceGraph BuildSubgraph(InterferenceGraph &orig_gr, ArenaAllocator *allo
 TEST_F(RegAllocInterferenceTest, LexBFSSimple)
 {
     InterferenceGraph gr(GetLocalAllocator());
-    gr.Reserve(2);
+    gr.Reserve(2U);
 
     gr.AllocNode();
     gr.AllocNode();
-    gr.AddEdge(0, 1);
+    gr.AddEdge(0U, 1U);
 
     auto peo = gr.LexBFS();
-    EXPECT_EQ(peo.size(), 2);
-    EXPECT_EQ(peo[0], 0);
-    EXPECT_EQ(peo[1], 1);
+    EXPECT_EQ(peo.size(), 2U);
+    EXPECT_EQ(peo[0U], 0U);
+    EXPECT_EQ(peo[1U], 1U);
 }
 
 TEST_F(RegAllocInterferenceTest, LexBFS)
@@ -178,7 +180,7 @@ TEST_F(RegAllocInterferenceTest, LexBFS)
     EXPECT_EQ(peo.size(), DEFAULT_CAPACITY2);
     std::reverse(peo.begin(), peo.end());
 
-    for (unsigned i = 0; i < (DEFAULT_CAPACITY2 - 1); i++) {
+    for (unsigned i = 0; i < (DEFAULT_CAPACITY2 - 1L); i++) {
         auto gr2 = BuildSubgraph(gr, GetLocalAllocator(), TEST_EDGES2, DEFAULT_EDGES2, peo, i);
         EXPECT_TRUE(gr2.IsChordal());
     }
@@ -200,7 +202,7 @@ TEST_F(RegAllocInterferenceTest, AssignColorsSimple)
         gr.AddEdge(x, y);
     }
 
-    EXPECT_TRUE(gr.AssignColors<32>(3, 0));
+    EXPECT_TRUE(gr.AssignColors<32U>(3U, 0U));
     EXPECT_NE(nd0->GetColor(), nd1->GetColor());
     EXPECT_NE(nd0->GetColor(), nd2->GetColor());
     EXPECT_NE(nd0->GetColor(), nd3->GetColor());
@@ -217,10 +219,11 @@ TEST_F(RegAllocInterferenceTest, AssignColors)
     const unsigned default_edges = 12;
     const unsigned default_aedges = 4;
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    ::std::pair<unsigned, unsigned> test_edges[default_edges] = {{0, 1}, {1, 2}, {2, 0}, {0, 3}, {2, 3},  {3, 4},
-                                                                 {6, 5}, {5, 7}, {6, 7}, {9, 8}, {9, 10}, {8, 10}};
+    ::std::pair<unsigned, unsigned> test_edges[default_edges] = {{0U, 1U}, {1U, 2U}, {2U, 0U},  {0U, 3U},
+                                                                 {2U, 3U}, {3U, 4U}, {6U, 5U},  {5U, 7U},
+                                                                 {6U, 7U}, {9U, 8U}, {9U, 10U}, {8U, 10U}};
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    ::std::pair<unsigned, unsigned> test_aedges[default_aedges] = {{3, 6}, {6, 9}, {2, 5}, {7, 8}};
+    ::std::pair<unsigned, unsigned> test_aedges[default_aedges] = {{3U, 6U}, {6U, 9U}, {2U, 5U}, {7U, 8U}};
 
     InterferenceGraph gr(GetLocalAllocator());
     gr.Reserve(default_capacity);
@@ -251,15 +254,15 @@ TEST_F(RegAllocInterferenceTest, AssignColors)
     auto &bias1 = gr.AddBias();
     auto &bias2 = gr.AddBias();
 
-    nd3->SetBias(0);
-    nd6->SetBias(0);
-    nd9->SetBias(0);
-    nd2->SetBias(1);
-    nd5->SetBias(1);
-    nd7->SetBias(2);
-    nd8->SetBias(2);
+    nd3->SetBias(0U);
+    nd6->SetBias(0U);
+    nd9->SetBias(0U);
+    nd2->SetBias(1U);
+    nd5->SetBias(1U);
+    nd7->SetBias(2U);
+    nd8->SetBias(2U);
 
-    EXPECT_TRUE(gr.AssignColors<32>(3, 0));
+    EXPECT_TRUE(gr.AssignColors<32U>(3U, 0U));
 
     // Check nodes inequality
     EXPECT_NE(nd0->GetColor(), nd1->GetColor());

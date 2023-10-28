@@ -97,57 +97,57 @@ bool RunCodegen(Graph *graph)
 TEST_F(CodegenTest, SimpleProgramm)
 {
     /*
-    .function main()<main>{
-        movi.64 v0, 100000000           ##      0 -> 3      ##  bb0
-        movi.64 v1, 4294967296          ##      1 -> 4      ##  bb0
-        ldai 0                          ##      2 -> 5      ##  bb0
-    loop:                               ##                  ##
-        jeq v0, loop_exit               ##      6, 7, 8     ##  bb1
-                                        ##                  ##
-        sta.64 v2                       ##      9           ##  bb2
-        and.64 v1                       ##      10          ##  bb2
-        sta.64 v1                       ##      11          ##  bb2
-        lda.64 v2                       ##      12          ##  bb2
-        inc                             ##      13          ##  bb2
-        jmp loop                        ##      14          ##  bb2
-    loop_exit:                          ##                  ##
-        lda.64 v1                       ##      14          ##  bb3
-        return.64                       ##      15          ##  bb3
-    }
-    */
+   .function main()<main>{
+       movi.64 v0, 100000000           ##      0 -> 3      ##  bb0
+       movi.64 v1, 4294967296          ##      1 -> 4      ##  bb0
+       ldai 0                          ##      2 -> 5      ##  bb0
+   loop:                               ##                  ##
+       jeq v0, loop_exit               ##      6, 7, 8     ##  bb1
+                                       ##                  ##
+       sta.64 v2                       ##      9           ##  bb2
+       and.64 v1                       ##      10          ##  bb2
+       sta.64 v1                       ##      11          ##  bb2
+       lda.64 v2                       ##      12          ##  bb2
+       inc                             ##      13          ##  bb2
+       jmp loop                        ##      14          ##  bb2
+   loop_exit:                          ##                  ##
+       lda.64 v1                       ##      14          ##  bb3
+       return.64                       ##      15          ##  bb3
+   }
+   */
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 10UL);          // r1
-        CONSTANT(1, 4294967296UL);  // r2
-        CONSTANT(2, 0UL);           // r3 -> acc(3)
-        CONSTANT(3, 0x1UL);         // r20 -> 0x1 (for inc constant)
+        CONSTANT(0U, 10UL);          // r1
+        CONSTANT(1U, 4294967296UL);  // r2
+        CONSTANT(2U, 0UL);           // r3 -> acc(3)
+        CONSTANT(3U, 0x1UL);         // r20 -> 0x1 (for inc constant)
 
-        BASIC_BLOCK(2, 4, 3)
+        BASIC_BLOCK(2U, 4U, 3U)
         {
-            INST(16, Opcode::Phi).Inputs(2, 13).s64();  // PHI acc
-            INST(17, Opcode::Phi).Inputs(1, 10).s64();  // PHI  v1
-            INST(20, Opcode::Phi).Inputs(2, 10).s64();  // result to return
+            INST(16U, Opcode::Phi).Inputs(2U, 13U).s64();  // PHI acc
+            INST(17U, Opcode::Phi).Inputs(1U, 10U).s64();  // PHI  v1
+            INST(20U, Opcode::Phi).Inputs(2U, 10U).s64();  // result to return
 
             // TODO (igorban): support CMP instr
-            INST(18, Opcode::Compare).b().CC(CC_NE).Inputs(0, 16);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(18);
+            INST(18U, Opcode::Compare).b().CC(CC_NE).Inputs(0U, 16U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(18U);
         }
 
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(10, Opcode::And).Inputs(16, 17).s64();  // -> acc
-            INST(13, Opcode::Add).Inputs(16, 3).s64();   // -> acc
+            INST(10U, Opcode::And).Inputs(16U, 17U).s64();  // -> acc
+            INST(13U, Opcode::Add).Inputs(16U, 3U).s64();   // -> acc
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(19, Opcode::Return).Inputs(20).s64();
+            INST(19U, Opcode::Return).Inputs(20U).s64();
         }
     }
 
-    SetNumVirtRegs(0);
-    SetNumArgs(1);
+    SetNumVirtRegs(0U);
+    SetNumArgs(1U);
 
     RegAlloc(GetGraph());
 
@@ -186,9 +186,9 @@ void CodegenTest::CheckStoreArray()
     entry->AddSucc(block);
     block->AddSucc(exit);
 
-    auto array = graph->AddNewParameter(0, DataType::REFERENCE);
-    auto index = graph->AddNewParameter(1, DataType::INT32);
-    auto store_value = graph->AddNewParameter(2, TYPE);
+    auto array = graph->AddNewParameter(0U, DataType::REFERENCE);
+    auto index = graph->AddNewParameter(1U, DataType::INT32);
+    auto store_value = graph->AddNewParameter(2U, TYPE);
 
     graph->ResetParameterInfo();
     array->SetLocationData(graph->GetDataForNativeParam(DataType::REFERENCE));
@@ -198,14 +198,14 @@ void CodegenTest::CheckStoreArray()
     auto st_arr = graph->CreateInst(Opcode::StoreArray);
     block->AppendInst(st_arr);
     st_arr->SetType(TYPE);
-    st_arr->SetInput(0, array);
-    st_arr->SetInput(1, index);
-    st_arr->SetInput(2, store_value);
+    st_arr->SetInput(0U, array);
+    st_arr->SetInput(1U, index);
+    st_arr->SetInput(2U, store_value);
     auto ret = graph->CreateInst(Opcode::ReturnVoid);
     block->AppendInst(ret);
 
-    SetNumVirtRegs(0);
-    SetNumArgs(3);
+    SetNumVirtRegs(0U);
+    SetNumArgs(3U);
 
     RegAlloc(graph);
 
@@ -218,14 +218,14 @@ void CodegenTest::CheckStoreArray()
 
     GetExecModule().SetDump(false);
 
-    T array_data[4];
-    auto default_value = CutValue<T>(0, TYPE);
+    T array_data[4U];
+    auto default_value = CutValue<T>(0U, TYPE);
     for (auto &data : array_data) {
         data = default_value;
     }
-    auto param_1 = GetExecModule().CreateArray(array_data, 4, GetObjectAllocator());
-    auto param_2 = CutValue<int32_t>(2, DataType::INT32);
-    auto param_3 = CutValue<T>(10, TYPE);
+    auto param_1 = GetExecModule().CreateArray(array_data, 4U, GetObjectAllocator());
+    auto param_2 = CutValue<int32_t>(2U, DataType::INT32);
+    auto param_3 = CutValue<T>(10U, TYPE);
     GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
     GetExecModule().SetParameter(1U, param_2);
     GetExecModule().SetParameter(2U, param_3);
@@ -234,8 +234,8 @@ void CodegenTest::CheckStoreArray()
 
     GetExecModule().CopyArray(param_1, array_data);
 
-    for (auto i = 0; i < 4; i++) {
-        if (i == 2) {
+    for (size_t i = 0; i < 4U; i++) {
+        if (i == 2U) {
             EXPECT_EQ(array_data[i], param_3);
         } else {
             EXPECT_EQ(array_data[i], default_value);
@@ -260,8 +260,8 @@ void CodegenTest::CheckLoadArray()
     entry->AddSucc(block);
     block->AddSucc(exit);
 
-    auto array = graph->AddNewParameter(0, DataType::REFERENCE);
-    auto index = graph->AddNewParameter(1, DataType::INT32);
+    auto array = graph->AddNewParameter(0U, DataType::REFERENCE);
+    auto index = graph->AddNewParameter(1U, DataType::INT32);
 
     graph->ResetParameterInfo();
     array->SetLocationData(graph->GetDataForNativeParam(DataType::REFERENCE));
@@ -270,15 +270,15 @@ void CodegenTest::CheckLoadArray()
     auto ld_arr = graph->CreateInst(Opcode::LoadArray);
     block->AppendInst(ld_arr);
     ld_arr->SetType(TYPE);
-    ld_arr->SetInput(0, array);
-    ld_arr->SetInput(1, index);
+    ld_arr->SetInput(0U, array);
+    ld_arr->SetInput(1U, index);
     auto ret = graph->CreateInst(Opcode::Return);
     ret->SetType(TYPE);
-    ret->SetInput(0, ld_arr);
+    ret->SetInput(0U, ld_arr);
     block->AppendInst(ret);
 
-    SetNumVirtRegs(0);
-    SetNumArgs(2);
+    SetNumVirtRegs(0U);
+    SetNumArgs(2U);
 
     RegAlloc(graph);
 
@@ -290,12 +290,12 @@ void CodegenTest::CheckLoadArray()
 
     GetExecModule().SetDump(false);
 
-    T array_data[4];
-    for (auto i = 0; i < 4; i++) {
+    T array_data[4U];
+    for (size_t i = 0; i < 4U; i++) {
         array_data[i] = CutValue<T>((-i), TYPE);
     }
-    auto param_1 = GetExecModule().CreateArray(array_data, 4, GetObjectAllocator());
-    auto param_2 = CutValue<int32_t>(2, DataType::INT32);
+    auto param_1 = GetExecModule().CreateArray(array_data, 4U, GetObjectAllocator());
+    auto param_2 = CutValue<int32_t>(2U, DataType::INT32);
     GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
     GetExecModule().SetParameter(1U, param_2);
 
@@ -306,7 +306,7 @@ void CodegenTest::CheckLoadArray()
     GetExecModule().FreeArray(param_1);
 
     auto ret_data = GetExecModule().GetRetValue<T>();
-    EXPECT_EQ(ret_data, CutValue<T>(-2, TYPE));
+    EXPECT_EQ(ret_data, CutValue<T>(-2L, TYPE));
 }
 
 template <typename T>
@@ -329,10 +329,10 @@ void CodegenTest::CheckStoreArrayPair(bool imm)
     entry->AddSucc(block);
     block->AddSucc(exit);
 
-    auto array = graph->AddNewParameter(0, DataType::REFERENCE);
-    [[maybe_unused]] auto index = graph->AddNewParameter(1, DataType::INT32);
-    auto val0 = graph->AddNewParameter(2, TYPE);
-    auto val1 = graph->AddNewParameter(3, TYPE);
+    auto array = graph->AddNewParameter(0U, DataType::REFERENCE);
+    [[maybe_unused]] auto index = graph->AddNewParameter(1U, DataType::INT32);
+    auto val0 = graph->AddNewParameter(2U, TYPE);
+    auto val1 = graph->AddNewParameter(3U, TYPE);
 
     graph->ResetParameterInfo();
     array->SetLocationData(graph->GetDataForNativeParam(DataType::REFERENCE));
@@ -342,7 +342,7 @@ void CodegenTest::CheckStoreArrayPair(bool imm)
 
     Inst *stp_arr = nullptr;
     if (imm) {
-        stp_arr = graph->CreateInstStoreArrayPairI(TYPE, INVALID_PC, array, val0, val1, 2);
+        stp_arr = graph->CreateInstStoreArrayPairI(TYPE, INVALID_PC, array, val0, val1, 2U);
         block->AppendInst(stp_arr);
     } else {
         stp_arr = graph->CreateInstStoreArrayPair(TYPE, INVALID_PC, array, index, val0, val1);
@@ -354,8 +354,8 @@ void CodegenTest::CheckStoreArrayPair(bool imm)
 
     GraphChecker(graph).Check();
 
-    SetNumVirtRegs(0);
-    SetNumArgs(4);
+    SetNumVirtRegs(0U);
+    SetNumArgs(4U);
 
     RegAlloc(graph);
 
@@ -367,11 +367,11 @@ void CodegenTest::CheckStoreArrayPair(bool imm)
 
     GetExecModule().SetDump(false);
 
-    T array_data[6] = {0, 0, 0, 0, 0, 0};
-    auto param_1 = GetExecModule().CreateArray(array_data, 6, GetObjectAllocator());
-    auto param_2 = CutValue<int32_t>(2, DataType::INT32);
-    auto param_3 = CutValue<T>(3, TYPE);
-    auto param_4 = CutValue<T>(5, TYPE);
+    T array_data[6U] = {0U, 0U, 0U, 0U, 0U, 0U};
+    auto param_1 = GetExecModule().CreateArray(array_data, 6U, GetObjectAllocator());
+    auto param_2 = CutValue<int32_t>(2U, DataType::INT32);
+    auto param_3 = CutValue<T>(3U, TYPE);
+    auto param_4 = CutValue<T>(5U, TYPE);
     GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
     GetExecModule().SetParameter(1U, param_2);
     GetExecModule().SetParameter(2U, param_3);
@@ -381,9 +381,9 @@ void CodegenTest::CheckStoreArrayPair(bool imm)
     GetExecModule().CopyArray(param_1, array_data);
     GetExecModule().FreeArray(param_1);
 
-    T array_expected[6] = {0, 0, 3, 5, 0, 0};
+    T array_expected[6U] = {0U, 0U, 3U, 5U, 0U, 0U};
 
-    for (auto i = 0; i < 6; ++i) {
+    for (size_t i = 0; i < 6U; ++i) {
         EXPECT_EQ(array_data[i], array_expected[i]);
     }
 }
@@ -408,8 +408,8 @@ void CodegenTest::CheckLoadArrayPair(bool imm)
     entry->AddSucc(block);
     block->AddSucc(exit);
 
-    auto array = graph->AddNewParameter(0, DataType::REFERENCE);
-    [[maybe_unused]] auto index = graph->AddNewParameter(1, DataType::INT32);
+    auto array = graph->AddNewParameter(0U, DataType::REFERENCE);
+    [[maybe_unused]] auto index = graph->AddNewParameter(1U, DataType::INT32);
 
     graph->ResetParameterInfo();
     array->SetLocationData(graph->GetDataForNativeParam(DataType::REFERENCE));
@@ -417,34 +417,34 @@ void CodegenTest::CheckLoadArrayPair(bool imm)
 
     Inst *ldp_arr = nullptr;
     if (imm) {
-        ldp_arr = graph->CreateInstLoadArrayPairI(TYPE, INVALID_PC, array, 2);
+        ldp_arr = graph->CreateInstLoadArrayPairI(TYPE, INVALID_PC, array, 2U);
         block->AppendInst(ldp_arr);
     } else {
         ldp_arr = graph->CreateInstLoadArrayPair(TYPE, INVALID_PC, array, index);
         block->AppendInst(ldp_arr);
     }
 
-    auto load_high = graph->CreateInstLoadPairPart(TYPE, INVALID_PC, ldp_arr, 0);
+    auto load_high = graph->CreateInstLoadPairPart(TYPE, INVALID_PC, ldp_arr, 0U);
     block->AppendInst(load_high);
 
-    auto load_low = graph->CreateInstLoadPairPart(TYPE, INVALID_PC, ldp_arr, 1);
+    auto load_low = graph->CreateInstLoadPairPart(TYPE, INVALID_PC, ldp_arr, 1U);
     block->AppendInst(load_low);
 
     auto sum = graph->CreateInst(Opcode::Add);
     block->AppendInst(sum);
     sum->SetType(TYPE);
-    sum->SetInput(0, load_high);
-    sum->SetInput(1, load_low);
+    sum->SetInput(0U, load_high);
+    sum->SetInput(1U, load_low);
 
     auto ret = graph->CreateInst(Opcode::Return);
     ret->SetType(TYPE);
-    ret->SetInput(0, sum);
+    ret->SetInput(0U, sum);
     block->AppendInst(ret);
 
     GraphChecker(graph).Check();
 
-    SetNumVirtRegs(0);
-    SetNumArgs(2);
+    SetNumVirtRegs(0U);
+    SetNumArgs(2U);
 
     RegAlloc(graph);
 
@@ -456,13 +456,13 @@ void CodegenTest::CheckLoadArrayPair(bool imm)
 
     GetExecModule().SetDump(false);
 
-    T array_data[6];
+    T array_data[6U];
     // [ 1, 2, 3, 4, 5, 6] -> 7
-    for (auto i = 0; i < 6; i++) {
-        array_data[i] = CutValue<T>(i + 1, TYPE);
+    for (size_t i = 0; i < 6U; i++) {
+        array_data[i] = CutValue<T>(i + 1U, TYPE);
     }
-    auto param_1 = GetExecModule().CreateArray(array_data, 6, GetObjectAllocator());
-    auto param_2 = CutValue<int32_t>(2, DataType::INT32);
+    auto param_1 = GetExecModule().CreateArray(array_data, 6U, GetObjectAllocator());
+    auto param_2 = CutValue<int32_t>(2U, DataType::INT32);
     GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
     GetExecModule().SetParameter(1U, param_2);
 
@@ -470,7 +470,7 @@ void CodegenTest::CheckLoadArrayPair(bool imm)
     GetExecModule().FreeArray(param_1);
 
     auto ret_data = GetExecModule().GetRetValue<T>();
-    EXPECT_EQ(ret_data, CutValue<T>(7, TYPE));
+    EXPECT_EQ(ret_data, CutValue<T>(7U, TYPE));
 }
 
 template <typename T>
@@ -488,26 +488,26 @@ void CodegenTest::CheckBounds(uint64_t count)
     entry->AddSucc(block);
     block->AddSucc(exit);
 
-    auto param = graph->AddNewParameter(0, TYPE);
+    auto param = graph->AddNewParameter(0U, TYPE);
 
     graph->ResetParameterInfo();
     param->SetLocationData(graph->GetDataForNativeParam(TYPE));
 
     BinaryImmOperation *last_inst = nullptr;
     // instruction_count + parameter + return
-    for (uint64_t i = count - 1; i > 1; --i) {
-        auto add_inst = graph->CreateInstAddI(TYPE, 0, 1);
+    for (uint64_t i = count - 1U; i > 1U; --i) {
+        auto add_inst = graph->CreateInstAddI(TYPE, 0U, 1U);
         block->AppendInst(add_inst);
         if (last_inst == nullptr) {
-            add_inst->SetInput(0, param);
+            add_inst->SetInput(0U, param);
         } else {
-            add_inst->SetInput(0, last_inst);
+            add_inst->SetInput(0U, last_inst);
         }
         last_inst = add_inst;
     }
     auto ret = graph->CreateInst(Opcode::Return);
     ret->SetType(TYPE);
-    ret->SetInput(0, last_inst);
+    ret->SetInput(0U, last_inst);
     block->AppendInst(ret);
 
 #ifndef NDEBUG
@@ -516,8 +516,8 @@ void CodegenTest::CheckBounds(uint64_t count)
 #endif
     GraphChecker(graph).Check();
 
-    SetNumVirtRegs(0);
-    SetNumArgs(2);
+    SetNumVirtRegs(0U);
+    SetNumArgs(2U);
 
     RegAlloc(graph);
 
@@ -539,7 +539,7 @@ void CodegenTest::CheckBounds(uint64_t count)
         GetExecModule().Execute();
 
         auto ret_data = GetExecModule().GetRetValue<T>();
-        EXPECT_EQ(ret_data, CutValue<T>(count - 2, TYPE));
+        EXPECT_EQ(ret_data, CutValue<T>(count - 2L, TYPE));
     }
 }
 
@@ -560,8 +560,8 @@ void CodegenTest::CheckCmp(bool is_fcmpg)
     entry->AddSucc(block);
     block->AddSucc(exit);
 
-    auto param1 = graph->AddNewParameter(0, TYPE);
-    auto param2 = graph->AddNewParameter(1, TYPE);
+    auto param1 = graph->AddNewParameter(0U, TYPE);
+    auto param2 = graph->AddNewParameter(1U, TYPE);
 
     graph->ResetParameterInfo();
     param1->SetLocationData(graph->GetDataForNativeParam(TYPE));
@@ -570,19 +570,19 @@ void CodegenTest::CheckCmp(bool is_fcmpg)
     auto fcmp = graph->CreateInst(Opcode::Cmp);
     block->AppendInst(fcmp);
     fcmp->SetType(DataType::INT32);
-    fcmp->SetInput(0, param1);
-    fcmp->SetInput(1, param2);
+    fcmp->SetInput(0U, param1);
+    fcmp->SetInput(1U, param2);
     static_cast<CmpInst *>(fcmp)->SetOperandsType(TYPE);
     if (is_float) {
         static_cast<CmpInst *>(fcmp)->SetFcmpg(is_fcmpg);
     }
     auto ret = graph->CreateInst(Opcode::Return);
     ret->SetType(DataType::INT32);
-    ret->SetInput(0, fcmp);
+    ret->SetInput(0U, fcmp);
     block->AppendInst(ret);
 
-    SetNumVirtRegs(0);
-    SetNumArgs(2);
+    SetNumVirtRegs(0U);
+    SetNumArgs(2U);
 
     RegAlloc(graph);
 
@@ -593,22 +593,22 @@ void CodegenTest::CheckCmp(bool is_fcmpg)
     GetExecModule().SetInstructions(code_entry, code_exit);
 
     GetExecModule().SetDump(false);
-    T param_data[3];
+    T param_data[3U];
     if (TYPE == DataType::FLOAT32) {
-        param_data[0] = std::nanf("0");
+        param_data[0U] = std::nanf("0");
     } else if (TYPE == DataType::FLOAT64) {
-        param_data[0] = std::nan("0");
+        param_data[0U] = std::nan("0");
     } else {
-        param_data[0] = std::numeric_limits<T>::max();
-        param_data[2] = std::numeric_limits<T>::min();
+        param_data[0U] = std::numeric_limits<T>::max();
+        param_data[2U] = std::numeric_limits<T>::min();
     }
-    param_data[1] = CutValue<T>(2, TYPE);
+    param_data[1U] = CutValue<T>(2U, TYPE);
     if (is_float) {
-        param_data[2] = -param_data[1];
+        param_data[2U] = -param_data[1U];
     }
 
-    for (auto i = 0; i < 3; i++) {
-        for (auto j = 0; j < 3; j++) {
+    for (size_t i = 0; i < 3U; i++) {
+        for (size_t j = 0; j < 3U; j++) {
             auto param_1 = param_data[i];
             auto param_2 = param_data[j];
             GetExecModule().SetParameter(0U, param_1);
@@ -617,14 +617,14 @@ void CodegenTest::CheckCmp(bool is_fcmpg)
             GetExecModule().Execute();
 
             auto ret_data = GetExecModule().GetRetValue<int32_t>();
-            if ((i == 0 || j == 0) && is_float) {
-                EXPECT_EQ(ret_data, is_fcmpg ? 1 : -1);
+            if ((i == 0U || j == 0U) && is_float) {
+                EXPECT_EQ(ret_data, is_fcmpg ? 1U : -1L);
             } else if (i == j) {
-                EXPECT_EQ(ret_data, 0);
+                EXPECT_EQ(ret_data, 0U);
             } else if (i > j) {
-                EXPECT_EQ(ret_data, -1);
+                EXPECT_EQ(ret_data, -1L);
             } else {
-                EXPECT_EQ(ret_data, 1);
+                EXPECT_EQ(ret_data, 1U);
             }
         }
     }
@@ -633,7 +633,7 @@ void CodegenTest::CheckCmp(bool is_fcmpg)
 template <typename T>
 void CodegenTest::CheckReturnValue(Graph *graph, [[maybe_unused]] T expected_value)
 {
-    SetNumVirtRegs(0);
+    SetNumVirtRegs(0U);
     RegAlloc(graph);
     EXPECT_TRUE(RunCodegen(graph));
 
@@ -655,13 +655,13 @@ void CodegenTest::TestBinaryOperationWithShiftedOperand(Opcode opcode, uint32_t 
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, l);
-        CONSTANT(1, r);
+        CONSTANT(0U, l);
+        CONSTANT(1U, r);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, opcode).Shift(shift_type, shift).u32().Inputs(0, 1);
-            INST(3, Opcode::Return).u32().Inputs(2);
+            INST(2U, opcode).Shift(shift_type, shift).u32().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
 
@@ -700,18 +700,18 @@ TEST_F(CodegenTest, StoreArray)
 
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();  // array
-        PARAMETER(1, 1).u32();  // index
-        PARAMETER(2, 2).u32();  // store value
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();  // array
+        PARAMETER(1U, 1U).u32();  // index
+        PARAMETER(2U, 2U).u32();  // store value
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::StoreArray).u32().Inputs(0, 1, 2);
-            INST(4, Opcode::ReturnVoid);
+            INST(3U, Opcode::StoreArray).u32().Inputs(0U, 1U, 2U);
+            INST(4U, Opcode::ReturnVoid);
         }
     }
     auto graph = GetGraph();
-    SetNumVirtRegs(0);
-    SetNumArgs(3);
+    SetNumVirtRegs(0U);
+    SetNumArgs(3U);
 
     RegAlloc(graph);
 
@@ -723,10 +723,10 @@ TEST_F(CodegenTest, StoreArray)
 
     GetExecModule().SetDump(false);
 
-    ObjectPointerType array[4] = {0, 0, 0, 0};
-    auto param_1 = GetExecModule().CreateArray(array, 4, GetObjectAllocator());
-    auto param_2 = CutValue<int32_t>(2, DataType::INT32);
-    auto param_3 = CutValue<ObjectPointerType>(10, DataType::UINT64);
+    ObjectPointerType array[4U] = {0U, 0U, 0U, 0U};
+    auto param_1 = GetExecModule().CreateArray(array, 4U, GetObjectAllocator());
+    auto param_2 = CutValue<int32_t>(2U, DataType::INT32);
+    auto param_3 = CutValue<ObjectPointerType>(10U, DataType::UINT64);
     GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
     GetExecModule().SetParameter(1U, param_2);
     GetExecModule().SetParameter(2U, param_3);
@@ -735,8 +735,8 @@ TEST_F(CodegenTest, StoreArray)
 
     GetExecModule().CopyArray(param_1, array);
 
-    for (auto i = 0; i < 4; i++) {
-        if (i == 2) {
+    for (size_t i = 0; i < 4U; i++) {
+        if (i == 2U) {
             EXPECT_EQ(array[i], 10U) << "value of i: " << i;
         } else {
             EXPECT_EQ(array[i], 0U) << "value of i: " << i;
@@ -768,26 +768,26 @@ TEST_F(CodegenTest, Compare)
 
             GRAPH(graph)
             {
-                PARAMETER(0, 0).u64();
-                PARAMETER(1, 1).u64();
-                CONSTANT(2, 0);
-                CONSTANT(3, 1);
-                BASIC_BLOCK(2, 3, 4)
+                PARAMETER(0U, 0U).u64();
+                PARAMETER(1U, 1U).u64();
+                CONSTANT(2U, 0U);
+                CONSTANT(3U, 1U);
+                BASIC_BLOCK(2U, 3U, 4U)
                 {
-                    INST(4, Opcode::Compare).b().CC(cc).Inputs(0, 1);
-                    INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0).Inputs(4);
+                    INST(4U, Opcode::Compare).b().CC(cc).Inputs(0U, 1U);
+                    INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0U).Inputs(4U);
                 }
-                BASIC_BLOCK(3, -1)
+                BASIC_BLOCK(3U, -1L)
                 {
-                    INST(6, Opcode::Return).b().Inputs(3);
+                    INST(6U, Opcode::Return).b().Inputs(3U);
                 }
-                BASIC_BLOCK(4, -1)
+                BASIC_BLOCK(4U, -1L)
                 {
-                    INST(7, Opcode::Return).b().Inputs(2);
+                    INST(7U, Opcode::Return).b().Inputs(2U);
                 }
             }
-            SetNumVirtRegs(0);
-            SetNumArgs(2);
+            SetNumVirtRegs(0U);
+            SetNumArgs(2U);
 
             RegAlloc(graph);
 
@@ -800,8 +800,8 @@ TEST_F(CodegenTest, Compare)
             GetExecModule().SetDump(false);
 
             bool result;
-            auto param_1 = CutValue<uint64_t>(1, DataType::UINT64);
-            auto param_2 = CutValue<uint64_t>(-1, DataType::UINT64);
+            auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
+            auto param_2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
             GetExecModule().SetParameter(0U, param_1);
             GetExecModule().SetParameter(1U, param_2);
@@ -855,31 +855,31 @@ TEST_F(CodegenTest, GenIf)
 
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            PARAMETER(1, 1).u64();
-            CONSTANT(2, 0);
-            CONSTANT(3, 1);
-            BASIC_BLOCK(2, 3, 4)
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).u64();
+            CONSTANT(2U, 0U);
+            CONSTANT(3U, 1U);
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(4, Opcode::Compare).b().CC(cc).Inputs(0, 1);
-                INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+                INST(4U, Opcode::Compare).b().CC(cc).Inputs(0U, 1U);
+                INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(6, Opcode::Return).b().Inputs(3);
+                INST(6U, Opcode::Return).b().Inputs(3U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(7, Opcode::Return).b().Inputs(2);
+                INST(7U, Opcode::Return).b().Inputs(2U);
             }
         }
-        SetNumVirtRegs(0);
-        SetNumArgs(2);
+        SetNumVirtRegs(0U);
+        SetNumArgs(2U);
 #ifndef NDEBUG
         graph->SetLowLevelInstructionsEnabled();
 #endif
         EXPECT_TRUE(graph->RunPass<Lowering>());
-        ASSERT_EQ(INS(0).GetUsers().Front().GetInst()->GetOpcode(), Opcode::If);
+        ASSERT_EQ(INS(0U).GetUsers().Front().GetInst()->GetOpcode(), Opcode::If);
 
         RegAlloc(graph);
 
@@ -892,8 +892,8 @@ TEST_F(CodegenTest, GenIf)
         GetExecModule().SetDump(false);
 
         bool result;
-        auto param_1 = CutValue<uint64_t>(1, DataType::UINT64);
-        auto param_2 = CutValue<uint64_t>(-1, DataType::UINT64);
+        auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
+        auto param_2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
         GetExecModule().SetParameter(0U, param_1);
         GetExecModule().SetParameter(1U, param_2);
@@ -920,7 +920,7 @@ TEST_F(CodegenTest, GenIf)
 
 TEST_F(CodegenTest, GenIfImm)
 {
-    int32_t values[3] = {-1, 0, 1};
+    int32_t values[3U] = {-1L, 0U, 1U};
     for (auto value : values) {
         for (int ccint = ConditionCode::CC_FIRST; ccint != ConditionCode::CC_LAST; ccint++) {
             auto cc = static_cast<ConditionCode>(ccint);
@@ -933,24 +933,24 @@ TEST_F(CodegenTest, GenIfImm)
 
             GRAPH(graph)
             {
-                PARAMETER(0, 0).s32();
-                CONSTANT(1, 0);
-                CONSTANT(2, 1);
-                BASIC_BLOCK(2, 3, 4)
+                PARAMETER(0U, 0U).s32();
+                CONSTANT(1U, 0U);
+                CONSTANT(2U, 1U);
+                BASIC_BLOCK(2U, 3U, 4U)
                 {
-                    INST(3, Opcode::IfImm).SrcType(DataType::INT32).CC(cc).Imm(value).Inputs(0);
+                    INST(3U, Opcode::IfImm).SrcType(DataType::INT32).CC(cc).Imm(value).Inputs(0U);
                 }
-                BASIC_BLOCK(3, -1)
+                BASIC_BLOCK(3U, -1L)
                 {
-                    INST(4, Opcode::Return).b().Inputs(2);
+                    INST(4U, Opcode::Return).b().Inputs(2U);
                 }
-                BASIC_BLOCK(4, -1)
+                BASIC_BLOCK(4U, -1L)
                 {
-                    INST(5, Opcode::Return).b().Inputs(1);
+                    INST(5U, Opcode::Return).b().Inputs(1U);
                 }
             }
-            SetNumVirtRegs(0);
-            SetNumArgs(2);
+            SetNumVirtRegs(0U);
+            SetNumArgs(2U);
 
             RegAlloc(graph);
 
@@ -964,8 +964,8 @@ TEST_F(CodegenTest, GenIfImm)
 
             bool result;
             auto param_1 = CutValue<uint64_t>(value, DataType::INT32);
-            auto param_2 = CutValue<uint64_t>(value + 5, DataType::INT32);
-            auto param_3 = CutValue<uint64_t>(value - 5, DataType::INT32);
+            auto param_2 = CutValue<uint64_t>(value + 5U, DataType::INT32);
+            auto param_3 = CutValue<uint64_t>(value - 5L, DataType::INT32);
 
             GetExecModule().SetParameter(0U, param_1);
             result = Compare(cc, param_1, param_1);
@@ -998,25 +998,25 @@ TEST_F(CodegenTest, If)
 
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            PARAMETER(1, 1).u64();
-            CONSTANT(2, 0);
-            CONSTANT(3, 1);
-            BASIC_BLOCK(2, 3, 4)
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).u64();
+            CONSTANT(2U, 0U);
+            CONSTANT(3U, 1U);
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(4, Opcode::If).SrcType(DataType::UINT64).CC(cc).Inputs(0, 1);
+                INST(4U, Opcode::If).SrcType(DataType::UINT64).CC(cc).Inputs(0U, 1U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(5, Opcode::Return).b().Inputs(3);
+                INST(5U, Opcode::Return).b().Inputs(3U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(6, Opcode::Return).b().Inputs(2);
+                INST(6U, Opcode::Return).b().Inputs(2U);
             }
         }
-        SetNumVirtRegs(0);
-        SetNumArgs(2);
+        SetNumVirtRegs(0U);
+        SetNumArgs(2U);
 
         RegAlloc(graph);
 
@@ -1029,8 +1029,8 @@ TEST_F(CodegenTest, If)
         GetExecModule().SetDump(false);
 
         bool result;
-        auto param_1 = CutValue<uint64_t>(1, DataType::UINT64);
-        auto param_2 = CutValue<uint64_t>(-1, DataType::UINT64);
+        auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
+        auto param_2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
         GetExecModule().SetParameter(0U, param_1);
         GetExecModule().SetParameter(1U, param_2);
@@ -1063,24 +1063,24 @@ TEST_F(CodegenTest, AddOverflow)
 
     GRAPH(graph)
     {
-        PARAMETER(0, 0).i32();
-        PARAMETER(1, 1).i32();
-        CONSTANT(2, 0);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        CONSTANT(2U, 0U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::AddOverflow).i32().SrcType(DataType::INT32).CC(CC_EQ).Inputs(0, 1);
+            INST(4U, Opcode::AddOverflow).i32().SrcType(DataType::INT32).CC(CC_EQ).Inputs(0U, 1U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Return).b().Inputs(2);
+            INST(5U, Opcode::Return).b().Inputs(2U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(6, Opcode::Return).b().Inputs(4);
+            INST(6U, Opcode::Return).b().Inputs(4U);
         }
     }
-    SetNumVirtRegs(0);
-    SetNumArgs(2);
+    SetNumVirtRegs(0U);
+    SetNumArgs(2U);
 
     EXPECT_TRUE(RunOptimizations(graph));
     auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
@@ -1092,7 +1092,7 @@ TEST_F(CodegenTest, AddOverflow)
 
     int32_t min = std::numeric_limits<int32_t>::min();
     int32_t max = std::numeric_limits<int32_t>::max();
-    std::array<int32_t, 7> values = {0, 2, 5, -7, -10, max, min};
+    std::array<int32_t, 7U> values = {0U, 2U, 5U, -7L, -10L, max, min};
     for (uint32_t i = 0; i < values.size(); ++i) {
         for (uint32_t j = 0; j < values.size(); ++j) {
             int32_t a0 = values[i];
@@ -1124,24 +1124,24 @@ TEST_F(CodegenTest, SubOverflow)
 
     GRAPH(graph)
     {
-        PARAMETER(0, 0).i32();
-        PARAMETER(1, 1).i32();
-        CONSTANT(2, 0);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        CONSTANT(2U, 0U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::SubOverflow).i32().SrcType(DataType::INT32).CC(CC_EQ).Inputs(0, 1);
+            INST(4U, Opcode::SubOverflow).i32().SrcType(DataType::INT32).CC(CC_EQ).Inputs(0U, 1U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Return).b().Inputs(2);
+            INST(5U, Opcode::Return).b().Inputs(2U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(6, Opcode::Return).b().Inputs(4);
+            INST(6U, Opcode::Return).b().Inputs(4U);
         }
     }
-    SetNumVirtRegs(0);
-    SetNumArgs(2);
+    SetNumVirtRegs(0U);
+    SetNumArgs(2U);
 
     EXPECT_TRUE(RunOptimizations(graph));
     auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
@@ -1153,7 +1153,7 @@ TEST_F(CodegenTest, SubOverflow)
 
     int32_t min = std::numeric_limits<int32_t>::min();
     int32_t max = std::numeric_limits<int32_t>::max();
-    std::array<int32_t, 7> values = {0, 2, 5, -7, -10, max, min};
+    std::array<int32_t, 7U> values = {0U, 2U, 5U, -7L, -10L, max, min};
     for (uint32_t i = 0; i < values.size(); ++i) {
         for (uint32_t j = 0; j < values.size(); ++j) {
             int32_t a0 = values[i];
@@ -1187,26 +1187,26 @@ TEST_F(CodegenTest, GenSelect)
 
         GRAPH(graph)
         {
-            PARAMETER(0, 0).s64();
-            PARAMETER(1, 1).s64();
-            CONSTANT(2, 0);
-            CONSTANT(3, 1);
-            BASIC_BLOCK(2, 3, 4)
+            PARAMETER(0U, 0U).s64();
+            PARAMETER(1U, 1U).s64();
+            CONSTANT(2U, 0U);
+            CONSTANT(3U, 1U);
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(4, Opcode::If).SrcType(DataType::INT64).CC(cc).Inputs(0, 1);
+                INST(4U, Opcode::If).SrcType(DataType::INT64).CC(cc).Inputs(0U, 1U);
             }
-            BASIC_BLOCK(3, 4) {}
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(3U, 4U) {}
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(5, Opcode::Phi).b().Inputs({{3, 3}, {2, 2}});
-                INST(6, Opcode::Return).b().Inputs(5);
+                INST(5U, Opcode::Phi).b().Inputs({{3U, 3U}, {2U, 2U}});
+                INST(6U, Opcode::Return).b().Inputs(5U);
             }
         }
-        SetNumVirtRegs(0);
-        SetNumArgs(2);
+        SetNumVirtRegs(0U);
+        SetNumArgs(2U);
 
         EXPECT_TRUE(graph->RunPass<IfConversion>());
-        ASSERT_EQ(INS(6).GetInput(0).GetInst()->GetOpcode(), Opcode::Select);
+        ASSERT_EQ(INS(6U).GetInput(0U).GetInst()->GetOpcode(), Opcode::Select);
 
         RegAlloc(graph);
 
@@ -1219,8 +1219,8 @@ TEST_F(CodegenTest, GenSelect)
         GetExecModule().SetDump(false);
 
         bool result;
-        auto param_1 = CutValue<uint64_t>(1, DataType::UINT64);
-        auto param_2 = CutValue<uint64_t>(-1, DataType::UINT64);
+        auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
+        auto param_2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
         GetExecModule().SetParameter(0U, param_1);
         GetExecModule().SetParameter(1U, param_2);
@@ -1255,19 +1255,19 @@ TEST_F(CodegenTest, BoolSelectImm)
 
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            PARAMETER(1, 1).u64();
-            CONSTANT(2, 0);
-            CONSTANT(3, 1);
-            BASIC_BLOCK(2, -1)
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).u64();
+            CONSTANT(2U, 0U);
+            CONSTANT(3U, 1U);
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(4, Opcode::Compare).b().CC(cc).Inputs(0, 1);
-                INST(5, Opcode::SelectImm).b().SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3, 2, 4);
-                INST(6, Opcode::Return).b().Inputs(5);
+                INST(4U, Opcode::Compare).b().CC(cc).Inputs(0U, 1U);
+                INST(5U, Opcode::SelectImm).b().SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U, 2U, 4U);
+                INST(6U, Opcode::Return).b().Inputs(5U);
             }
         }
-        SetNumVirtRegs(0);
-        SetNumArgs(2);
+        SetNumVirtRegs(0U);
+        SetNumArgs(2U);
 
         RegAlloc(graph);
 
@@ -1278,8 +1278,8 @@ TEST_F(CodegenTest, BoolSelectImm)
         GetExecModule().SetInstructions(code_entry, code_exit);
         GetExecModule().SetDump(false);
 
-        auto param_1 = CutValue<uint64_t>(1, DataType::UINT64);
-        auto param_2 = CutValue<uint64_t>(-1, DataType::UINT64);
+        auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
+        auto param_2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
         GetExecModule().SetParameter(0U, param_1);
         GetExecModule().SetParameter(1U, param_2);
@@ -1314,18 +1314,18 @@ TEST_F(CodegenTest, Select)
 
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            PARAMETER(1, 1).u64();
-            CONSTANT(2, 0);
-            CONSTANT(3, 1);
-            BASIC_BLOCK(2, -1)
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).u64();
+            CONSTANT(2U, 0U);
+            CONSTANT(3U, 1U);
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(5, Opcode::Select).u64().SrcType(DataType::UINT64).CC(cc).Inputs(3, 2, 0, 1);
-                INST(6, Opcode::Return).u64().Inputs(5);
+                INST(5U, Opcode::Select).u64().SrcType(DataType::UINT64).CC(cc).Inputs(3U, 2U, 0U, 1U);
+                INST(6U, Opcode::Return).u64().Inputs(5U);
             }
         }
-        SetNumVirtRegs(0);
-        SetNumArgs(2);
+        SetNumVirtRegs(0U);
+        SetNumArgs(2U);
 
         RegAlloc(graph);
 
@@ -1336,8 +1336,8 @@ TEST_F(CodegenTest, Select)
         GetExecModule().SetInstructions(code_entry, code_exit);
         GetExecModule().SetDump(false);
 
-        auto param_1 = CutValue<uint64_t>(1, DataType::UINT64);
-        auto param_2 = CutValue<uint64_t>(-1, DataType::UINT64);
+        auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
+        auto param_2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
         GetExecModule().SetParameter(0U, param_1);
         GetExecModule().SetParameter(1U, param_2);
@@ -1369,17 +1369,17 @@ TEST_F(CodegenTest, CompareObj)
     graph->SetRuntime(&runtime);
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        CONSTANT(1, 0);
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(1U, 0U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::REFERENCE).CC(CC_NE).Inputs(0, 1);
-            INST(3, Opcode::Return).b().Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::REFERENCE).CC(CC_NE).Inputs(0U, 1U);
+            INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    SetNumVirtRegs(0);
-    SetNumArgs(1);
+    SetNumVirtRegs(0U);
+    SetNumArgs(1U);
 
     RegAlloc(graph);
 
@@ -1391,22 +1391,22 @@ TEST_F(CodegenTest, CompareObj)
 
     GetExecModule().SetDump(false);
 
-    auto param_1 = CutValue<uint64_t>(1, DataType::UINT64);
-    auto param_2 = CutValue<uint64_t>(0, DataType::UINT64);
+    auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
+    auto param_2 = CutValue<uint64_t>(0U, DataType::UINT64);
 
     GetExecModule().SetParameter(0U, param_1);
 
     GetExecModule().Execute();
 
     auto ret_data = GetExecModule().GetRetValue();
-    EXPECT_EQ(ret_data, 1);
+    EXPECT_EQ(ret_data, 1U);
 
     GetExecModule().SetParameter(0U, param_2);
 
     GetExecModule().Execute();
 
     ret_data = GetExecModule().GetRetValue();
-    EXPECT_EQ(ret_data, 0);
+    EXPECT_EQ(ret_data, 0U);
 }
 
 TEST_F(CodegenTest, LoadArray)
@@ -1425,17 +1425,17 @@ TEST_F(CodegenTest, LoadArray)
 
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();  // array
-        PARAMETER(1, 1).u32();  // index
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();  // array
+        PARAMETER(1U, 1U).u32();  // index
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::LoadArray).u32().Inputs(0, 1);
-            INST(3, Opcode::Return).u32().Inputs(2);
+            INST(2U, Opcode::LoadArray).u32().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
     auto graph = GetGraph();
-    SetNumVirtRegs(0);
-    SetNumArgs(2);
+    SetNumVirtRegs(0U);
+    SetNumArgs(2U);
 
     RegAlloc(graph);
 
@@ -1447,9 +1447,9 @@ TEST_F(CodegenTest, LoadArray)
 
     GetExecModule().SetDump(false);
 
-    ObjectPointerType array[4] = {0xffffaaaa, 0xffffbbbb, 0xffffcccc, 0xffffdddd};
-    auto param_1 = GetExecModule().CreateArray(array, 4, GetObjectAllocator());
-    auto param_2 = CutValue<int32_t>(2, DataType::INT32);
+    ObjectPointerType array[4U] = {0xffffaaaaU, 0xffffbbbbU, 0xffffccccU, 0xffffddddU};
+    auto param_1 = GetExecModule().CreateArray(array, 4U, GetObjectAllocator());
+    auto param_2 = CutValue<int32_t>(2U, DataType::INT32);
     GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
     GetExecModule().SetParameter(1U, param_2);
 
@@ -1459,7 +1459,7 @@ TEST_F(CodegenTest, LoadArray)
 
     GetExecModule().FreeArray(param_1);
     auto ret_data = GetExecModule().GetRetValue();
-    EXPECT_EQ(ret_data, array[2]);
+    EXPECT_EQ(ret_data, array[2U]);
 }
 
 TEST_F(CodegenTest, LoadArrayPair)
@@ -1482,10 +1482,10 @@ TEST_F(CodegenTest, CheckCodegenBounds)
     uint64_t max_bits_in_inst = GetInstructionSizeBits(GetGraph()->GetArch());
     uint64_t inst_count = OPTIONS.GetCompilerMaxGenCodeSize() / (insts_per_byte * max_bits_in_inst);
 
-    CheckBounds<uint32_t>(inst_count - 1);
-    CheckBounds<uint32_t>(inst_count + 1);
+    CheckBounds<uint32_t>(inst_count - 1L);
+    CheckBounds<uint32_t>(inst_count + 1U);
 
-    CheckBounds<uint32_t>(inst_count / 2);
+    CheckBounds<uint32_t>(inst_count / 2U);
 }
 #endif
 
@@ -1493,16 +1493,16 @@ TEST_F(CodegenTest, LenArray)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();  // array
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();  // array
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::LenArray).s32().Inputs(0);
-            INST(2, Opcode::Return).s32().Inputs(1);
+            INST(1U, Opcode::LenArray).s32().Inputs(0U);
+            INST(2U, Opcode::Return).s32().Inputs(1U);
         }
     }
     auto graph = GetGraph();
-    SetNumVirtRegs(0);
-    SetNumArgs(1);
+    SetNumVirtRegs(0U);
+    SetNumArgs(1U);
 
     RegAlloc(graph);
 
@@ -1514,8 +1514,8 @@ TEST_F(CodegenTest, LenArray)
 
     GetExecModule().SetDump(false);
 
-    uint64_t array[4] = {0, 0, 0, 0};
-    auto param_1 = GetExecModule().CreateArray(array, 4, GetObjectAllocator());
+    uint64_t array[4U] = {0U, 0U, 0U, 0U};
+    auto param_1 = GetExecModule().CreateArray(array, 4U, GetObjectAllocator());
     GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
 
     GetExecModule().Execute();
@@ -1529,18 +1529,18 @@ TEST_F(CodegenTest, Parameter)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).s16();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).s16();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Add).u64().Inputs(0, 0);
-            INST(8, Opcode::Add).s16().Inputs(1, 1);
-            INST(15, Opcode::Return).u64().Inputs(6);
+            INST(6U, Opcode::Add).u64().Inputs(0U, 0U);
+            INST(8U, Opcode::Add).s16().Inputs(1U, 1U);
+            INST(15U, Opcode::Return).u64().Inputs(6U);
             // Return parameter_0 + parameter_0
         }
     }
-    SetNumVirtRegs(0);
-    SetNumArgs(2);
+    SetNumVirtRegs(0U);
+    SetNumArgs(2U);
 
     auto graph = GetGraph();
 
@@ -1554,8 +1554,8 @@ TEST_F(CodegenTest, Parameter)
 
     GetExecModule().SetDump(false);
 
-    auto param_1 = CutValue<uint64_t>(1234, DataType::UINT64);
-    auto param_2 = CutValue<int16_t>(-1234, DataType::INT16);
+    auto param_1 = CutValue<uint64_t>(1234U, DataType::UINT64);
+    auto param_2 = CutValue<int16_t>(-1234L, DataType::INT16);
     GetExecModule().SetParameter(0U, param_1);
     GetExecModule().SetParameter(1U, param_2);
 
@@ -1574,36 +1574,36 @@ TEST_F(CodegenTest, RegallocTwoFreeRegs)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 1);   // const a = 1
-        CONSTANT(1, 10);  // const b = 10
-        CONSTANT(2, 20);  // const c = 20
+        CONSTANT(0U, 1U);   // const a = 1
+        CONSTANT(1U, 10U);  // const b = 10
+        CONSTANT(2U, 20U);  // const c = 20
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Phi).u64().Inputs({{0, 0}, {3, 7}});                        // var a' = a
-            INST(4, Opcode::Phi).u64().Inputs({{0, 1}, {3, 8}});                        // var b' = b
-            INST(5, Opcode::Compare).b().CC(CC_NE).Inputs(4, 0);                        // b' == 1 ?
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);  // if == (b' == 1) -> exit
+            INST(3U, Opcode::Phi).u64().Inputs({{0U, 0U}, {3U, 7U}});                      // var a' = a
+            INST(4U, Opcode::Phi).u64().Inputs({{0U, 1U}, {3U, 8U}});                      // var b' = b
+            INST(5U, Opcode::Compare).b().CC(CC_NE).Inputs(4U, 0U);                        // b' == 1 ?
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);  // if == (b' == 1) -> exit
         }
 
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(7, Opcode::Mul).u64().Inputs(3, 4);  // a' = a' * b'
-            INST(8, Opcode::Sub).u64().Inputs(4, 0);  // b' = b' - 1
+            INST(7U, Opcode::Mul).u64().Inputs(3U, 4U);  // a' = a' * b'
+            INST(8U, Opcode::Sub).u64().Inputs(4U, 0U);  // b' = b' - 1
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(10, Opcode::Add).u64().Inputs(2, 3);   // a' = c + a'
-            INST(11, Opcode::Return).u64().Inputs(10);  // return a'
+            INST(10U, Opcode::Add).u64().Inputs(2U, 3U);  // a' = c + a'
+            INST(11U, Opcode::Return).u64().Inputs(10U);  // return a'
         }
     }
     // Create reg_mask with 5 available general registers,
     // 3 of them will be reserved by Reg Alloc.
     {
         RegAllocLinearScan ra(GetGraph());
-        ra.SetRegMask(RegMask {0xFFFFF07F});
-        ra.SetVRegMask(VRegMask {0});
+        ra.SetRegMask(RegMask {0xFFFFF07FU});
+        ra.SetVRegMask(VRegMask {0U});
         EXPECT_TRUE(ra.Run());
     }
     GraphChecker(GetGraph()).Check();
@@ -1615,8 +1615,8 @@ TEST_F(CodegenTest, RegallocTwoFreeRegs)
 
     GetExecModule().SetDump(false);
 
-    auto param_1 = CutValue<uint64_t>(0x0, DataType::UINT64);
-    auto param_2 = CutValue<uint16_t>(0x0, DataType::INT32);
+    auto param_1 = CutValue<uint64_t>(0x0U, DataType::UINT64);
+    auto param_2 = CutValue<uint16_t>(0x0U, DataType::INT32);
 
     GetExecModule().SetParameter(0U, param_1);
     GetExecModule().SetParameter(1U, param_2);
@@ -1624,7 +1624,7 @@ TEST_F(CodegenTest, RegallocTwoFreeRegs)
     GetExecModule().Execute();
 
     auto ret_data = GetExecModule().GetRetValue();
-    EXPECT_TRUE(ret_data == 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1 + 20);
+    EXPECT_TRUE(ret_data == 10U * 9U * 8U * 7U * 6U * 5U * 4U * 3U * 2U * 1U + 20U);
 
     // Clear data for next execution
     while (auto current = GetGraph()->GetFirstConstInst()) {
@@ -1637,40 +1637,40 @@ TEST_F(CodegenTest, DISABLED_TwoFreeRegsAdditionSaveState)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(11, 0).f64();
-        PARAMETER(12, 0).f32();
-        CONSTANT(1, 12);
-        CONSTANT(2, -1);
-        CONSTANT(3, 100000000);
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(11U, 0U).f64();
+        PARAMETER(12U, 0U).f32();
+        CONSTANT(1U, 12U);
+        CONSTANT(2U, -1L);
+        CONSTANT(3U, 100000000U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::Add).u64().Inputs(0, 1);
-            INST(5, Opcode::Add).u64().Inputs(0, 2);
-            INST(6, Opcode::Add).u64().Inputs(0, 3);
-            INST(7, Opcode::Sub).u64().Inputs(0, 1);
-            INST(8, Opcode::Sub).u64().Inputs(0, 2);
-            INST(9, Opcode::Sub).u64().Inputs(0, 3);
-            INST(17, Opcode::Add).u64().Inputs(0, 0);
-            INST(18, Opcode::Sub).u64().Inputs(0, 0);
-            INST(19, Opcode::Add).u16().Inputs(0, 1);
-            INST(20, Opcode::Add).u16().Inputs(0, 2);
-            INST(10, Opcode::SaveState)
-                .Inputs(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 17, 18, 19, 20)
-                .SrcVregs({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14});
+            INST(4U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 2U);
+            INST(6U, Opcode::Add).u64().Inputs(0U, 3U);
+            INST(7U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(8U, Opcode::Sub).u64().Inputs(0U, 2U);
+            INST(9U, Opcode::Sub).u64().Inputs(0U, 3U);
+            INST(17U, Opcode::Add).u64().Inputs(0U, 0U);
+            INST(18U, Opcode::Sub).u64().Inputs(0U, 0U);
+            INST(19U, Opcode::Add).u16().Inputs(0U, 1U);
+            INST(20U, Opcode::Add).u16().Inputs(0U, 2U);
+            INST(10U, Opcode::SaveState)
+                .Inputs(0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 11U, 12U, 17U, 18U, 19U, 20U)
+                .SrcVregs({0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 14U});
         }
     }
     // NO RETURN value - will droped down to SaveState block!
 
-    SetNumVirtRegs(0);
-    SetNumArgs(3);
+    SetNumVirtRegs(0U);
+    SetNumArgs(3U);
     // Create reg_mask with 5 available general registers,
     // 3 of them will be reserved by Reg Alloc.
     {
         RegAllocLinearScan ra(GetGraph());
-        ra.SetRegMask(RegMask {0xFFFFF07F});
-        ra.SetVRegMask(VRegMask {0});
+        ra.SetRegMask(RegMask {0xFFFFF07FU});
+        ra.SetVRegMask(VRegMask {0U});
         EXPECT_TRUE(ra.Run());
     }
     GraphChecker(GetGraph()).Check();
@@ -1683,8 +1683,8 @@ TEST_F(CodegenTest, DISABLED_TwoFreeRegsAdditionSaveState)
 
     GetExecModule().SetDump(false);
 
-    auto param_1 = CutValue<uint64_t>(0x12345, DataType::UINT64);
-    auto param_2 = CutValue<float>(0x12345, DataType::FLOAT32);
+    auto param_1 = CutValue<uint64_t>(0x12345U, DataType::UINT64);
+    auto param_2 = CutValue<float>(0x12345U, DataType::FLOAT32);
 
     GetExecModule().SetParameter(0U, param_1);
     GetExecModule().SetParameter(1U, param_2);
@@ -1693,7 +1693,7 @@ TEST_F(CodegenTest, DISABLED_TwoFreeRegsAdditionSaveState)
     GetExecModule().Execute();
 
     // Main check - return value get from SaveState return DEOPTIMIZATION
-    EXPECT_EQ(GetExecModule().GetRetValue(), 1);
+    EXPECT_EQ(GetExecModule().GetRetValue(), 1U);
 
     // Clear data for next execution
     while (auto current = GetGraph()->GetFirstConstInst()) {
@@ -1705,27 +1705,27 @@ TEST_F(CodegenTest, SaveState)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();  // array
-        PARAMETER(1, 1).u64();  // index
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).ref();  // array
+        PARAMETER(1U, 1U).u64();  // index
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::NullCheck).ref().Inputs(0, 2);
-            INST(4, Opcode::LenArray).s32().Inputs(3);
-            INST(5, Opcode::BoundsCheck).s32().Inputs(4, 1, 2);
-            INST(6, Opcode::LoadArray).u64().Inputs(3, 5);
-            INST(7, Opcode::Add).u64().Inputs(6, 6);
-            INST(8, Opcode::StoreArray).u64().Inputs(3, 5, 7);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::NullCheck).ref().Inputs(0U, 2U);
+            INST(4U, Opcode::LenArray).s32().Inputs(3U);
+            INST(5U, Opcode::BoundsCheck).s32().Inputs(4U, 1U, 2U);
+            INST(6U, Opcode::LoadArray).u64().Inputs(3U, 5U);
+            INST(7U, Opcode::Add).u64().Inputs(6U, 6U);
+            INST(8U, Opcode::StoreArray).u64().Inputs(3U, 5U, 7U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(10, Opcode::Add).u64().Inputs(7, 7);  // Some return value
-            INST(11, Opcode::Return).u64().Inputs(10);
+            INST(10U, Opcode::Add).u64().Inputs(7U, 7U);  // Some return value
+            INST(11U, Opcode::Return).u64().Inputs(10U);
         }
     }
 
-    SetNumVirtRegs(0);
-    SetNumArgs(2);
+    SetNumVirtRegs(0U);
+    SetNumArgs(2U);
 
     auto graph = GetGraph();
 
@@ -1741,12 +1741,12 @@ TEST_F(CodegenTest, SaveState)
     // Enable dumping
     GetExecModule().SetDump(false);
 
-    uint64_t array_data[4];
-    for (auto i = 0; i < 4; i++) {
-        array_data[i] = i + 0x20;
+    uint64_t array_data[4U];
+    for (size_t i = 0; i < 4U; i++) {
+        array_data[i] = i + 0x20U;
     }
-    auto param_1 = GetExecModule().CreateArray(array_data, 4, GetObjectAllocator());
-    auto param_2 = CutValue<uint64_t>(1, DataType::UINT64);
+    auto param_1 = GetExecModule().CreateArray(array_data, 4U, GetObjectAllocator());
+    auto param_2 = CutValue<uint64_t>(1U, DataType::UINT64);
     GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
     GetExecModule().SetParameter(1U, param_2);
 
@@ -1756,7 +1756,7 @@ TEST_F(CodegenTest, SaveState)
 
     auto ret_data = GetExecModule().GetRetValue();
     // TODO (igorban) : really need to check array changes
-    EXPECT_EQ(ret_data, 4U * 0x21);
+    EXPECT_EQ(ret_data, 4U * 0x21U);
 
     // Clear data for next execution
     while (auto current = GetGraph()->GetFirstConstInst()) {
@@ -1769,12 +1769,12 @@ TEST_F(CodegenTest, DeoptimizeIf)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).b();
-        BASIC_BLOCK(2, 1)
+        PARAMETER(0U, 0U).b();
+        BASIC_BLOCK(2U, 1U)
         {
-            INST(2, Opcode::SaveStateDeoptimize).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::DeoptimizeIf).Inputs(0, 2);
-            INST(4, Opcode::Return).b().Inputs(0);
+            INST(2U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::DeoptimizeIf).Inputs(0U, 2U);
+            INST(4U, Opcode::Return).b().Inputs(0U);
         }
     }
     RegAlloc(GetGraph());
@@ -1798,19 +1798,19 @@ TEST_F(CodegenTest, ZeroCheck)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::ZeroCheck).s64().Inputs(0, 2);
-            INST(4, Opcode::Div).s64().Inputs(1, 3);
-            INST(5, Opcode::Mod).s64().Inputs(1, 3);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::ZeroCheck).s64().Inputs(0U, 2U);
+            INST(4U, Opcode::Div).s64().Inputs(1U, 3U);
+            INST(5U, Opcode::Mod).s64().Inputs(1U, 3U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(6, Opcode::Add).s64().Inputs(0, 1);  // Some return value
-            INST(7, Opcode::Return).s64().Inputs(6);
+            INST(6U, Opcode::Add).s64().Inputs(0U, 1U);  // Some return value
+            INST(7U, Opcode::Return).s64().Inputs(6U);
         }
     }
     RegAlloc(GetGraph());
@@ -1833,7 +1833,7 @@ TEST_F(CodegenTest, ZeroCheck)
 
     // param1 > 0 [OK]
     param_1 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
-    param_2 = CutValue<uint64_t>(0, DataType::INT64);
+    param_2 = CutValue<uint64_t>(0U, DataType::INT64);
     GetExecModule().SetParameter(0U, param_1);
     GetExecModule().SetParameter(1U, param_2);
     GetExecModule().Execute();
@@ -1846,17 +1846,17 @@ TEST_F(CodegenTest, NegativeCheck)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::NegativeCheck).s64().Inputs(0, 2);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::NegativeCheck).s64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(6, Opcode::Add).s64().Inputs(0, 1);  // Some return value
-            INST(7, Opcode::Return).s64().Inputs(6);
+            INST(6U, Opcode::Add).s64().Inputs(0U, 1U);  // Some return value
+            INST(7U, Opcode::Return).s64().Inputs(6U);
         }
     }
     RegAlloc(GetGraph());
@@ -1878,7 +1878,7 @@ TEST_F(CodegenTest, NegativeCheck)
     EXPECT_EQ(GetExecModule().GetRetValue(), param_1 + param_2);
 
     // param1 == 0 [OK]
-    param_1 = CutValue<uint64_t>(0, DataType::INT64);
+    param_1 = CutValue<uint64_t>(0U, DataType::INT64);
     param_2 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
     GetExecModule().SetParameter(0U, param_1);
     GetExecModule().SetParameter(1U, param_2);
@@ -1894,26 +1894,26 @@ TEST_F(CodegenTest, NullCheckBoundsCheck)
 
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();  // array
-        PARAMETER(1, 1).u64();  // index
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).ref();  // array
+        PARAMETER(1U, 1U).u64();  // index
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::NullCheck).ref().Inputs(0, 2);
-            INST(4, Opcode::LenArray).s32().Inputs(3);
-            INST(5, Opcode::BoundsCheck).s32().Inputs(4, 1, 2);
-            INST(6, Opcode::LoadArray).u64().Inputs(3, 5);
-            INST(7, Opcode::Add).u64().Inputs(6, 6);
-            INST(8, Opcode::StoreArray).u64().Inputs(3, 5, 7);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::NullCheck).ref().Inputs(0U, 2U);
+            INST(4U, Opcode::LenArray).s32().Inputs(3U);
+            INST(5U, Opcode::BoundsCheck).s32().Inputs(4U, 1U, 2U);
+            INST(6U, Opcode::LoadArray).u64().Inputs(3U, 5U);
+            INST(7U, Opcode::Add).u64().Inputs(6U, 6U);
+            INST(8U, Opcode::StoreArray).u64().Inputs(3U, 5U, 7U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(10, Opcode::Add).u64().Inputs(7, 7);  // Some return value
-            INST(11, Opcode::Return).u64().Inputs(10);
+            INST(10U, Opcode::Add).u64().Inputs(7U, 7U);  // Some return value
+            INST(11U, Opcode::Return).u64().Inputs(10U);
         }
     }
-    SetNumVirtRegs(0);
-    SetNumArgs(2);
+    SetNumVirtRegs(0U);
+    SetNumArgs(2U);
     RegAlloc(GetGraph());
 
     EXPECT_TRUE(RunCodegen(GetGraph()));
@@ -1926,66 +1926,66 @@ TEST_F(CodegenTest, NullCheckBoundsCheck)
 
     uint64_t array[ARRAY_LEN];
     for (auto i = 0U; i < ARRAY_LEN; i++) {
-        array[i] = i + 0x20;
+        array[i] = i + 0x20U;
     }
     auto param_1 = GetExecModule().CreateArray(array, ARRAY_LEN, GetObjectAllocator());
     GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
 
     // 0 <= index < ARRAY_LEN [OK]
-    auto index = CutValue<uint64_t>(1, DataType::UINT64);
+    auto index = CutValue<uint64_t>(1U, DataType::UINT64);
     GetExecModule().SetParameter(1U, index);
     GetExecModule().Execute();
-    EXPECT_EQ(GetExecModule().GetRetValue(), array[index] * 4);
+    EXPECT_EQ(GetExecModule().GetRetValue(), array[index] * 4U);
 
     /*
-    TODO (igorban) : fill Frame
-    // index < 0 [THROW]
-    */
+   TODO (igorban) : fill Frame
+   // index < 0 [THROW]
+   */
     GetExecModule().FreeArray(param_1);
 }
 
 TEST_F(CodegenTest, ResolveParamSequence)
 {
     ArenaVector<std::pair<uint8_t, uint8_t>> some_sequence(GetAllocator()->Adapter());
-    some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(0, 3));
-    some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(1, 0));
-    some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(2, 3));
-    some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(3, 2));
+    some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 3U));
+    some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 0U));
+    some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
+    some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 2U));
 
-    auto result = ResoveParameterSequence(&some_sequence, 13, GetAllocator());
+    auto result = ResoveParameterSequence(&some_sequence, 13U, GetAllocator());
     EXPECT_TRUE(some_sequence.empty());
     ArenaVector<std::pair<uint8_t, uint8_t>> result_sequence(GetAllocator()->Adapter());
-    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(1, 0));
-    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(0, 3));
-    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(13, 2));
-    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(2, 3));
-    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(3, 13));
+    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 0U));
+    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 3U));
+    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(13U, 2U));
+    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
+    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 13U));
 
     EXPECT_EQ(result, result_sequence);
 
     {
         // Special loop-only case
         ArenaVector<std::pair<uint8_t, uint8_t>> some_sequence(GetAllocator()->Adapter());
-        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(2, 3));
-        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(1, 2));
-        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(4, 1));
-        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(0, 4));
-        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(3, 0));
+        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
+        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 2U));
+        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(4U, 1U));
+        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 4U));
+        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 0U));
 
-        auto result = ResoveParameterSequence(&some_sequence, 13, GetAllocator());
+        auto result = ResoveParameterSequence(&some_sequence, 13U, GetAllocator());
         EXPECT_TRUE(some_sequence.empty());
         ArenaVector<std::pair<uint8_t, uint8_t>> result_sequence(GetAllocator()->Adapter());
-        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(13, 2));
-        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(2, 3));
-        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(3, 0));
-        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(0, 4));
-        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(4, 1));
-        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(1, 13));
+        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(13U, 2U));
+        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
+        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 0U));
+        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 4U));
+        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(4U, 1U));
+        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 13U));
 
         EXPECT_EQ(result, result_sequence);
     }
     const uint32_t reg_size = 30;
-    const uint8_t tmp_reg = reg_size + 5;
+    const uint8_t tmp_reg = reg_size + 5U;
     for (uint64_t i = 0; i < ITERATION; ++i) {
         EXPECT_TRUE(some_sequence.empty());
 
@@ -2012,9 +2012,9 @@ TEST_F(CodegenTest, ResolveParamSequence)
         // First analysis - there are no dst before src
         for (uint8_t j = 0; j < reg_size; ++j) {
             auto dst = result[j].first;
-            for (uint8_t k = j + 1; k < reg_size; ++k) {
+            for (uint8_t k = j + 1U; k < reg_size; ++k) {
                 if (result[k].second == dst && result[k].second != tmp_reg) {
-                    std::cerr << " first = " << result[k].first << " tmp = " << reg_size + 5 << "\n";
+                    std::cerr << " first = " << result[k].first << " tmp = " << reg_size + 5U << "\n";
                     std::cerr << " Before:\n";
                     for (auto &it : orig_vector) {
                         std::cerr << " " << (size_t)it.first << "<-" << (size_t)it.second << "\n";
@@ -2023,7 +2023,7 @@ TEST_F(CodegenTest, ResolveParamSequence)
                     for (auto &it : result) {
                         std::cerr << " " << (size_t)it.first << "<-" << (size_t)it.second << "\n";
                     }
-                    std::cerr << " Fault on " << (size_t)j << " and " << (size_t)k << "\n";
+                    std::cerr << "Fault on " << (size_t)j << " and " << (size_t)k << "\n";
                     EXPECT_NE(result[k].second, dst);
                 }
             }
@@ -2036,8 +2036,8 @@ TEST_F(CodegenTest, ResolveParamSequence)
 
 TEST_F(CodegenTest, BoundsCheckI)
 {
-    uint64_t array_data[4098];
-    for (unsigned i = 0; i < 4098; i++) {
+    uint64_t array_data[4098U];
+    for (unsigned i = 0; i < 4098U; i++) {
         array_data[i] = i;
     }
 
@@ -2045,20 +2045,20 @@ TEST_F(CodegenTest, BoundsCheckI)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).ref();  // array
-            BASIC_BLOCK(2, -1)
+            PARAMETER(0U, 0U).ref();  // array
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-                INST(2, Opcode::NullCheck).ref().Inputs(0, 1);
-                INST(3, Opcode::LenArray).s32().Inputs(2);
-                INST(4, Opcode::BoundsCheckI).s32().Inputs(3, 1).Imm(index);
-                INST(5, Opcode::LoadArrayI).u64().Inputs(2).Imm(index);
-                INST(6, Opcode::Return).u64().Inputs(5);
+                INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+                INST(2U, Opcode::NullCheck).ref().Inputs(0U, 1U);
+                INST(3U, Opcode::LenArray).s32().Inputs(2U);
+                INST(4U, Opcode::BoundsCheckI).s32().Inputs(3U, 1U).Imm(index);
+                INST(5U, Opcode::LoadArrayI).u64().Inputs(2U).Imm(index);
+                INST(6U, Opcode::Return).u64().Inputs(5U);
             }
         }
 
-        SetNumVirtRegs(0);
-        SetNumArgs(1);
+        SetNumVirtRegs(0U);
+        SetNumArgs(1U);
 
         RegAlloc(graph);
 
@@ -2072,7 +2072,7 @@ TEST_F(CodegenTest, BoundsCheckI)
         // Enable dumping
         GetExecModule().SetDump(false);
 
-        auto param = GetExecModule().CreateArray(array_data, index + 1, GetObjectAllocator());
+        auto param = GetExecModule().CreateArray(array_data, index + 1U, GetObjectAllocator());
         GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param));
 
         GetExecModule().Execute();
@@ -2094,18 +2094,18 @@ TEST_F(CodegenTest, MultiplyAddInteger)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 10);
-        CONSTANT(1, 42);
-        CONSTANT(2, 13);
+        CONSTANT(0U, 10U);
+        CONSTANT(1U, 42U);
+        CONSTANT(2U, 13U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::MAdd).s64().Inputs(0, 1, 2);
-            INST(4, Opcode::Return).s64().Inputs(3);
+            INST(3U, Opcode::MAdd).s64().Inputs(0U, 1U, 2U);
+            INST(4U, Opcode::Return).s64().Inputs(3U);
         }
     }
 
-    CheckReturnValue(GetGraph(), 433);
+    CheckReturnValue(GetGraph(), 433U);
 }
 
 TEST_F(CodegenTest, MultiplyAddFloat)
@@ -2116,14 +2116,14 @@ TEST_F(CodegenTest, MultiplyAddFloat)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 10.0);
-        CONSTANT(1, 42.0);
-        CONSTANT(2, 13.0);
+        CONSTANT(0U, 10.0);
+        CONSTANT(1U, 42.0);
+        CONSTANT(2U, 13.0);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::MAdd).f64().Inputs(0, 1, 2);
-            INST(4, Opcode::Return).f64().Inputs(3);
+            INST(3U, Opcode::MAdd).f64().Inputs(0U, 1U, 2U);
+            INST(4U, Opcode::Return).f64().Inputs(3U);
         }
     }
 
@@ -2138,18 +2138,18 @@ TEST_F(CodegenTest, MultiplySubtractInteger)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 10);
-        CONSTANT(1, 42);
-        CONSTANT(2, 13);
+        CONSTANT(0U, 10U);
+        CONSTANT(1U, 42U);
+        CONSTANT(2U, 13U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::MSub).s64().Inputs(0, 1, 2);
-            INST(4, Opcode::Return).s64().Inputs(3);
+            INST(3U, Opcode::MSub).s64().Inputs(0U, 1U, 2U);
+            INST(4U, Opcode::Return).s64().Inputs(3U);
         }
     }
 
-    CheckReturnValue(GetGraph(), -407);
+    CheckReturnValue(GetGraph(), -407L);
 }
 
 TEST_F(CodegenTest, MultiplySubtractFloat)
@@ -2160,14 +2160,14 @@ TEST_F(CodegenTest, MultiplySubtractFloat)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 10.0);
-        CONSTANT(1, 42.0);
-        CONSTANT(2, 13.0);
+        CONSTANT(0U, 10.0);
+        CONSTANT(1U, 42.0);
+        CONSTANT(2U, 13.0);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::MSub).f64().Inputs(0, 1, 2);
-            INST(4, Opcode::Return).f64().Inputs(3);
+            INST(3U, Opcode::MSub).f64().Inputs(0U, 1U, 2U);
+            INST(4U, Opcode::Return).f64().Inputs(3U);
         }
     }
 
@@ -2182,17 +2182,17 @@ TEST_F(CodegenTest, MultiplyNegateInteger)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 5);
-        CONSTANT(1, 5);
+        CONSTANT(0U, 5U);
+        CONSTANT(1U, 5U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::MNeg).s64().Inputs(0, 1);
-            INST(3, Opcode::Return).s64().Inputs(2);
+            INST(2U, Opcode::MNeg).s64().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).s64().Inputs(2U);
         }
     }
 
-    CheckReturnValue(GetGraph(), -25);
+    CheckReturnValue(GetGraph(), -25L);
 }
 
 TEST_F(CodegenTest, MultiplyNegateFloat)
@@ -2203,13 +2203,13 @@ TEST_F(CodegenTest, MultiplyNegateFloat)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 5.0);
-        CONSTANT(1, 5.0);
+        CONSTANT(0U, 5.0);
+        CONSTANT(1U, 5.0);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::MNeg).f64().Inputs(0, 1);
-            INST(3, Opcode::Return).f64().Inputs(2);
+            INST(2U, Opcode::MNeg).f64().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).f64().Inputs(2U);
         }
     }
 
@@ -2224,17 +2224,17 @@ TEST_F(CodegenTest, OrNot)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0x0000beef);
-        CONSTANT(1, 0x2152ffff);
+        CONSTANT(0U, 0x0000beefU);
+        CONSTANT(1U, 0x2152ffffU);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::OrNot).u32().Inputs(0, 1);
-            INST(3, Opcode::Return).u32().Inputs(2);
+            INST(2U, Opcode::OrNot).u32().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
 
-    CheckReturnValue(GetGraph(), 0xdeadbeef);
+    CheckReturnValue(GetGraph(), 0xdeadbeefU);
 }
 
 TEST_F(CodegenTest, AndNot)
@@ -2245,17 +2245,17 @@ TEST_F(CodegenTest, AndNot)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0xf0000003);
-        CONSTANT(1, 0x1);
+        CONSTANT(0U, 0xf0000003U);
+        CONSTANT(1U, 0x1U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::AndNot).u32().Inputs(0, 1);
-            INST(3, Opcode::Return).u32().Inputs(2);
+            INST(2U, Opcode::AndNot).u32().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
 
-    CheckReturnValue(GetGraph(), 0xf0000002);
+    CheckReturnValue(GetGraph(), 0xf0000002U);
 }
 
 TEST_F(CodegenTest, XorNot)
@@ -2266,17 +2266,17 @@ TEST_F(CodegenTest, XorNot)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0xf0f1ffd0);
-        CONSTANT(1, 0xcf0fc0f1);
+        CONSTANT(0U, 0xf0f1ffd0U);
+        CONSTANT(1U, 0xcf0fc0f1U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::XorNot).u32().Inputs(0, 1);
-            INST(3, Opcode::Return).u32().Inputs(2);
+            INST(2U, Opcode::XorNot).u32().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
 
-    CheckReturnValue(GetGraph(), 0xc001c0de);
+    CheckReturnValue(GetGraph(), 0xc001c0deU);
 }
 
 TEST_F(CodegenTest, AddSR)
@@ -2285,7 +2285,7 @@ TEST_F(CodegenTest, AddSR)
         GTEST_SKIP() << "AddSR instruction is only supported on Aarch64";
     }
 
-    TestBinaryOperationWithShiftedOperand(Opcode::AddSR, 10, 2, ShiftType::LSL, 1, 14);
+    TestBinaryOperationWithShiftedOperand(Opcode::AddSR, 10U, 2U, ShiftType::LSL, 1U, 14U);
 }
 
 TEST_F(CodegenTest, SubSR)
@@ -2294,7 +2294,7 @@ TEST_F(CodegenTest, SubSR)
         GTEST_SKIP() << "SubSR instruction is only supported on Aarch64";
     }
 
-    TestBinaryOperationWithShiftedOperand(Opcode::SubSR, 10, 4, ShiftType::LSR, 2, 9);
+    TestBinaryOperationWithShiftedOperand(Opcode::SubSR, 10U, 4U, ShiftType::LSR, 2U, 9U);
 }
 
 TEST_F(CodegenTest, AndSR)
@@ -2303,7 +2303,7 @@ TEST_F(CodegenTest, AndSR)
         GTEST_SKIP() << "AndSR instruction is only supported on Aarch64";
     }
 
-    TestBinaryOperationWithShiftedOperand(Opcode::AndSR, 1, 1, ShiftType::LSL, 1, 0);
+    TestBinaryOperationWithShiftedOperand(Opcode::AndSR, 1U, 1U, ShiftType::LSL, 1U, 0U);
 }
 
 TEST_F(CodegenTest, OrSR)
@@ -2312,7 +2312,7 @@ TEST_F(CodegenTest, OrSR)
         GTEST_SKIP() << "OrSR instruction is only supported on Aarch64";
     }
 
-    TestBinaryOperationWithShiftedOperand(Opcode::OrSR, 1, 1, ShiftType::LSL, 1, 3);
+    TestBinaryOperationWithShiftedOperand(Opcode::OrSR, 1U, 1U, ShiftType::LSL, 1U, 3U);
 }
 
 TEST_F(CodegenTest, XorSR)
@@ -2321,7 +2321,7 @@ TEST_F(CodegenTest, XorSR)
         GTEST_SKIP() << "XorSR instruction is only supported on Aarch64";
     }
 
-    TestBinaryOperationWithShiftedOperand(Opcode::XorSR, 3, 1, ShiftType::LSL, 1, 1);
+    TestBinaryOperationWithShiftedOperand(Opcode::XorSR, 3U, 1U, ShiftType::LSL, 1U, 1U);
 }
 
 TEST_F(CodegenTest, AndNotSR)
@@ -2330,7 +2330,7 @@ TEST_F(CodegenTest, AndNotSR)
         GTEST_SKIP() << "AndNotSR instruction is only supported on Aarch64";
     }
 
-    TestBinaryOperationWithShiftedOperand(Opcode::AndNotSR, 6, 12, ShiftType::LSR, 2, 4);
+    TestBinaryOperationWithShiftedOperand(Opcode::AndNotSR, 6U, 12U, ShiftType::LSR, 2U, 4U);
 }
 
 TEST_F(CodegenTest, OrNotSR)
@@ -2339,7 +2339,7 @@ TEST_F(CodegenTest, OrNotSR)
         GTEST_SKIP() << "OrNotSR instruction is only supported on Aarch64";
     }
 
-    TestBinaryOperationWithShiftedOperand(Opcode::OrNotSR, 1, 12, ShiftType::LSR, 2, 0xfffffffd);
+    TestBinaryOperationWithShiftedOperand(Opcode::OrNotSR, 1U, 12U, ShiftType::LSR, 2U, 0xfffffffdU);
 }
 
 TEST_F(CodegenTest, XorNotSR)
@@ -2348,7 +2348,7 @@ TEST_F(CodegenTest, XorNotSR)
         GTEST_SKIP() << "XorNotSR instruction is only supported on Aarch64";
     }
 
-    TestBinaryOperationWithShiftedOperand(Opcode::XorNotSR, -1, 12, ShiftType::LSR, 2, 3);
+    TestBinaryOperationWithShiftedOperand(Opcode::XorNotSR, -1L, 12U, ShiftType::LSR, 2U, 3U);
 }
 
 TEST_F(CodegenTest, NegSR)
@@ -2359,16 +2359,16 @@ TEST_F(CodegenTest, NegSR)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0x80000000);
+        CONSTANT(0U, 0x80000000U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::NegSR).Shift(ShiftType::ASR, 1).u32().Inputs(0);
-            INST(2, Opcode::Return).u32().Inputs(1);
+            INST(1U, Opcode::NegSR).Shift(ShiftType::ASR, 1U).u32().Inputs(0U);
+            INST(2U, Opcode::Return).u32().Inputs(1U);
         }
     }
 
-    CheckReturnValue(GetGraph(), 0x40000000);
+    CheckReturnValue(GetGraph(), 0x40000000U);
 }
 
 TEST_F(CodegenTest, LoadArrayPairLivenessInfo)
@@ -2377,30 +2377,30 @@ TEST_F(CodegenTest, LoadArrayPairLivenessInfo)
 
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s32();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::LoadArrayPair).s32().Inputs(0, 1);
-            INST(4, Opcode::LoadPairPart).s32().Inputs(2).Imm(0);
-            INST(5, Opcode::LoadPairPart).s32().Inputs(2).Imm(1);
-            INST(12, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(10, Opcode::LoadClass)
+            INST(2U, Opcode::LoadArrayPair).s32().Inputs(0U, 1U);
+            INST(4U, Opcode::LoadPairPart).s32().Inputs(2U).Imm(0U);
+            INST(5U, Opcode::LoadPairPart).s32().Inputs(2U).Imm(1U);
+            INST(12U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(10U, Opcode::LoadClass)
                 .ref()
-                .Inputs(12)
-                .TypeId(42)
-                .Class(reinterpret_cast<RuntimeInterface::ClassPtr>(1));
-            INST(3, Opcode::IsInstance).b().Inputs(0, 10, 12).TypeId(42);
-            INST(6, Opcode::Cast).s32().SrcType(DataType::BOOL).Inputs(3);
-            INST(7, Opcode::Add).s32().Inputs(4, 5);
-            INST(8, Opcode::Add).s32().Inputs(7, 6);
-            INST(9, Opcode::Return).s32().Inputs(8);
+                .Inputs(12U)
+                .TypeId(42U)
+                .Class(reinterpret_cast<RuntimeInterface::ClassPtr>(1U));
+            INST(3U, Opcode::IsInstance).b().Inputs(0U, 10U, 12U).TypeId(42U);
+            INST(6U, Opcode::Cast).s32().SrcType(DataType::BOOL).Inputs(3U);
+            INST(7U, Opcode::Add).s32().Inputs(4U, 5U);
+            INST(8U, Opcode::Add).s32().Inputs(7U, 6U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
         }
     }
 
-    SetNumVirtRegs(0);
-    SetNumArgs(2);
+    SetNumVirtRegs(0U);
+    SetNumArgs(2U);
     RegAlloc(graph);
     EXPECT_TRUE(RunCodegen(graph));
 
@@ -2410,8 +2410,8 @@ TEST_F(CodegenTest, LoadArrayPairLivenessInfo)
     for (auto &bb : graph->GetBlocksLinearOrder()) {
         for (auto inst : bb->AllInsts()) {
             if (inst->GetOpcode() == Opcode::LoadArrayPair) {
-                ldp_regs.set(inst->GetDstReg(0));
-                ldp_regs.set(inst->GetDstReg(1));
+                ldp_regs.set(inst->GetDstReg(0U));
+                ldp_regs.set(inst->GetDstReg(1U));
             } else if (inst->GetOpcode() == Opcode::IsInstance) {
                 auto live_regs = cg.GetLiveRegisters(inst).first;
                 // Both dst registers should be alive during IsInstance call
@@ -2428,17 +2428,17 @@ TEST_F(CodegenTest, CompareAnyTypeInst)
     graph->SetDynamicStub();
     GRAPH(graph)
     {
-        PARAMETER(0, 0);
-        INS(0).SetType(DataType::Type::ANY);
+        PARAMETER(0U, 0U);
+        INS(0U).SetType(DataType::Type::ANY);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::CompareAnyType).b().AnyType(AnyBaseType::UNDEFINED_TYPE).Inputs(0);
-            INST(3, Opcode::Return).b().Inputs(2);
+            INST(2U, Opcode::CompareAnyType).b().AnyType(AnyBaseType::UNDEFINED_TYPE).Inputs(0U);
+            INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
 
-    SetNumVirtRegs(0);
+    SetNumVirtRegs(0U);
     ASSERT_TRUE(RegAlloc(graph));
     ASSERT_TRUE(RunCodegen(graph));
 
@@ -2462,17 +2462,17 @@ TEST_F(CodegenTest, CastAnyTypeValueInst)
     graph->SetDynamicStub();
     GRAPH(graph)
     {
-        PARAMETER(0, 0);
-        INS(0).SetType(DataType::Type::ANY);
+        PARAMETER(0U, 0U);
+        INS(0U).SetType(DataType::Type::ANY);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::CastAnyTypeValue).b().AnyType(AnyBaseType::UNDEFINED_TYPE).Inputs(0);
-            INST(3, Opcode::Return).b().Inputs(2);
+            INST(2U, Opcode::CastAnyTypeValue).b().AnyType(AnyBaseType::UNDEFINED_TYPE).Inputs(0U);
+            INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
 
-    SetNumVirtRegs(0);
+    SetNumVirtRegs(0U);
     ASSERT_TRUE(RegAlloc(graph));
     ASSERT_TRUE(RunCodegen(graph));
 
@@ -2486,7 +2486,7 @@ TEST_F(CodegenTest, CastAnyTypeValueInst)
 
     GetExecModule().Execute();
     auto rv = GetExecModule().GetRetValue<uint32_t>();
-    EXPECT_EQ(rv, 0);
+    EXPECT_EQ(rv, 0U);
 }
 // NOLINTEND(readability-magic-numbers,modernize-avoid-c-arrays,cppcoreguidelines-pro-bounds-pointer-arithmetic)
 

@@ -37,8 +37,8 @@ public:
     {
         std::string exe_path = GetExecPath();
         auto pos = exe_path.rfind('/');
-        paoc_path_ = exe_path.substr(0, pos) + "/../bin/ark_aot";
-        aotdump_path_ = exe_path.substr(0, pos) + "/../bin/ark_aotdump";
+        paoc_path_ = exe_path.substr(0U, pos) + "/../bin/ark_aot";
+        aotdump_path_ = exe_path.substr(0U, pos) + "/../bin/ark_aotdump";
     }
 
     ~AotTest() override = default;
@@ -59,7 +59,7 @@ public:
     std::string GetPaocDirectory() const
     {
         auto pos = paoc_path_.rfind('/');
-        return paoc_path_.substr(0, pos);
+        return paoc_path_.substr(0U, pos);
     }
 
     const char *GetArchAsArgString() const
@@ -85,7 +85,7 @@ public:
         auto res = os::exec::Exec(GetAotdumpFile(), "--show-code=disasm", "--output-file", tmpfile.GetFileName(),
                                   aot_filename.c_str());
         ASSERT_TRUE(res) << "aotdump failed with error: " << res.Error().ToString();
-        ASSERT_EQ(res.Value(), 0) << "aotdump return error code: " << res.Value();
+        ASSERT_EQ(res.Value(), 0U) << "aotdump return error code: " << res.Value();
     }
 
 private:
@@ -127,7 +127,7 @@ TEST_F(AotTest, PaocBootPandaFiles)
                                   aot_fname.GetFileName(), "--paoc-location", LOCATION.c_str(), "--compiler-cross-arch",
                                   GetArchAsArgString(), "--boot-panda-files", pandastdlib_path.c_str());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
-        ASSERT_EQ(res.Value(), 0) << "Aot compiler failed with code " << res.Value();
+        ASSERT_EQ(res.Value(), 0U) << "Aot compiler failed with code " << res.Value();
         RunAotdump(aot_fname.GetFileName());
     }
 }
@@ -163,7 +163,7 @@ TEST_F(AotTest, PaocLocation)
                                   aot_fname.GetFileName(), "--paoc-location", LOCATION.c_str(),
                                   "--compiler-cross-arch=x86_64", "--gc-type=epsilon", "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
-        ASSERT_EQ(res.Value(), 0) << "Aot compiler failed with code " << res.Value();
+        ASSERT_EQ(res.Value(), 0U) << "Aot compiler failed with code " << res.Value();
     }
 
     AotManager aot_manager;
@@ -175,7 +175,7 @@ TEST_F(AotTest, PaocLocation)
 
     auto aot_file = aot_manager.GetFile(aot_fname.GetFileName());
     ASSERT_TRUE(aot_file);
-    ASSERT_EQ(aot_file->GetFilesCount(), 1);
+    ASSERT_EQ(aot_file->GetFilesCount(), 1U);
     ASSERT_TRUE(aot_file->FindPandaFile(PANDA_FILE_PATH));
 }
 #endif  // PANDA_COMPILER_TARGET_AARCH64
@@ -196,9 +196,9 @@ TEST_F(AotTest, BuildAndLoad)
     static constexpr uint32_t METHOD2_ID = 43;
     const std::string class_name("Foo");
     std::string method_name(class_name + "::method");
-    std::array<uint8_t, 4> x86_add = {
-        0x8d, 0x04, 0x37,  // lea    eax,[rdi+rdi*1]
-        0xc3               // ret
+    std::array<uint8_t, 4U> x86_add = {
+        0x8dU, 0x04U, 0x37U,  // lea    eax,[rdi+rdi*1]
+        0xc3U                 // ret
     };
 
     AotBuilder aot_builder;
@@ -207,7 +207,7 @@ TEST_F(AotTest, BuildAndLoad)
     RuntimeInterfaceMock iruntime;
     aot_builder.SetRuntime(&iruntime);
 
-    aot_builder.StartFile(TMPFILE_PF, 0x12345678);
+    aot_builder.StartFile(TMPFILE_PF, 0x12345678U);
 
     auto thread = MTManagedThread::GetCurrent();
     if (thread != nullptr) {
@@ -221,26 +221,26 @@ TEST_F(AotTest, BuildAndLoad)
         thread->ManagedCodeEnd();
     }
 
-    klass->SetFileId(panda_file::File::EntityId(13));
+    klass->SetFileId(panda_file::File::EntityId(13U));
     aot_builder.StartClass(*klass);
 
-    Method method1(klass, nullptr, File::EntityId(METHOD1_ID), File::EntityId(), 0, 1, nullptr);
+    Method method1(klass, nullptr, File::EntityId(METHOD1_ID), File::EntityId(), 0U, 1U, nullptr);
     {
         CodeInfoBuilder code_builder(RUNTIME_ARCH, GetAllocator());
         ArenaVector<uint8_t> data(GetAllocator()->Adapter());
         code_builder.Encode(&data);
-        CompiledMethod compiled_method1(RUNTIME_ARCH, &method1, 0);
-        compiled_method1.SetCode(Span(reinterpret_cast<const uint8_t *>(method_name.data()), method_name.size() + 1));
+        CompiledMethod compiled_method1(RUNTIME_ARCH, &method1, 0U);
+        compiled_method1.SetCode(Span(reinterpret_cast<const uint8_t *>(method_name.data()), method_name.size() + 1U));
         compiled_method1.SetCodeInfo(Span(data).ToConst());
         aot_builder.AddMethod(compiled_method1);
     }
 
-    Method method2(klass, nullptr, File::EntityId(METHOD2_ID), File::EntityId(), 0, 1, nullptr);
+    Method method2(klass, nullptr, File::EntityId(METHOD2_ID), File::EntityId(), 0U, 1U, nullptr);
     {
         CodeInfoBuilder code_builder(RUNTIME_ARCH, GetAllocator());
         ArenaVector<uint8_t> data(GetAllocator()->Adapter());
         code_builder.Encode(&data);
-        CompiledMethod compiled_method2(RUNTIME_ARCH, &method2, 1);
+        CompiledMethod compiled_method2(RUNTIME_ARCH, &method2, 1U);
         compiled_method2.SetCode(Span(reinterpret_cast<const uint8_t *>(x86_add.data()), x86_add.size()));
         compiled_method2.SetCodeInfo(Span(data).ToConst());
         aot_builder.AddMethod(compiled_method2);
@@ -248,8 +248,8 @@ TEST_F(AotTest, BuildAndLoad)
 
     aot_builder.EndClass();
     uint32_t hash = GetHash32String(reinterpret_cast<const uint8_t *>(class_name.data()));
-    aot_builder.InsertEntityPairHeader(hash, 13);
-    aot_builder.InsertClassHashTableSize(1);
+    aot_builder.InsertEntityPairHeader(hash, 13U);
+    aot_builder.InsertClassHashTableSize(1U);
     aot_builder.EndFile();
 
     aot_builder.Write(CMDLINE, tmpfile_pn);
@@ -266,22 +266,22 @@ TEST_F(AotTest, BuildAndLoad)
 
     auto pfile = aot_manager.FindPandaFile(TMPFILE_PF);
     ASSERT_NE(pfile, nullptr);
-    auto cls = pfile->GetClass(13);
+    auto cls = pfile->GetClass(13U);
     ASSERT_TRUE(cls.IsValid());
 
     {
-        auto code = cls.FindMethodCodeEntry(0);
+        auto code = cls.FindMethodCodeEntry(0U);
         ASSERT_FALSE(code == nullptr);
         ASSERT_EQ(method_name, reinterpret_cast<const char *>(code));
     }
 
     {
-        auto code = cls.FindMethodCodeEntry(1);
+        auto code = cls.FindMethodCodeEntry(1U);
         ASSERT_FALSE(code == nullptr);
-        ASSERT_EQ(std::memcmp(x86_add.data(), code, x86_add.size()), 0);
+        ASSERT_EQ(std::memcmp(x86_add.data(), code, x86_add.size()), 0U);
 #ifdef PANDA_TARGET_AMD64
         auto func_add = reinterpret_cast<int (*)(int, int)>(const_cast<void *>(code));
-        ASSERT_EQ(func_add(2, 3), 5);
+        ASSERT_EQ(func_add(2U, 3U), 5U);
 #endif
     }
 }
@@ -345,12 +345,12 @@ TEST_F(AotTest, PaocSpecifyMethods)
             os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_fname.GetFileName(), "--compiler-regex", "B::f1",
                            "--paoc-mode=jit", "--events-output=csv", "--events-file", paoc_output_name.GetFileName());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
-        ASSERT_EQ(res.Value(), 0);
+        ASSERT_EQ(res.Value(), 0U);
 
         std::ifstream infile(paoc_output_name.GetFileName());
         std::regex rgx("Compilation,B::f1.*,COMPILED");
         for (std::string line; std::getline(infile, line);) {
-            if (line.rfind("Compilation", 0) == 0) {
+            if (line.rfind("Compilation", 0U) == 0U) {
                 ASSERT_TRUE(std::regex_match(line, rgx));
             }
         }
@@ -404,7 +404,7 @@ TEST_F(AotTest, PaocMultipleFiles)
         auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_files.str().c_str(), "--paoc-output",
                                   aot_fname.GetFileName(), "--gc-type=epsilon", "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
-        ASSERT_EQ(res.Value(), 0);
+        ASSERT_EQ(res.Value(), 0U);
     }
 
     {
@@ -447,7 +447,7 @@ TEST_F(AotTest, PaocGcType)
         auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_fname.GetFileName(), "--paoc-output",
                                   aot_fname.GetFileName(), "--gc-type=epsilon", "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
-        ASSERT_EQ(res.Value(), 0);
+        ASSERT_EQ(res.Value(), 0U);
     }
 
     {
@@ -510,7 +510,7 @@ TEST_F(AotTest, FileManagerLoadAbc)
         auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", panda_fname.GetFileName(), "--paoc-output",
                                   aot_fname.GetFileName(), gc_type_name, "--paoc-use-cha=false");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
-        ASSERT_EQ(res.Value(), 0);
+        ASSERT_EQ(res.Value(), 0U);
     }
 
     {
@@ -519,7 +519,7 @@ TEST_F(AotTest, FileManagerLoadAbc)
         auto aot_manager = Runtime::GetCurrent()->GetClassLinker()->GetAotManager();
         auto aot_file = aot_manager->GetFile(aot_fname.GetFileName());
         ASSERT_TRUE(aot_file);
-        ASSERT_EQ(aot_file->GetFilesCount(), 1);
+        ASSERT_EQ(aot_file->GetFilesCount(), 1U);
     }
     RunAotdump(aot_fname.GetFileName());
 }
@@ -540,9 +540,9 @@ TEST_F(AotTest, FileManagerLoadAn)
     static constexpr uint32_t METHOD2_ID = 43;
     const std::string class_name("Foo");
     std::string method_name(class_name + "::method");
-    std::array<uint8_t, 4> x86_add = {
-        0x8d, 0x04, 0x37,  // lea    eax,[rdi+rdi*1]
-        0xc3               // ret
+    std::array<uint8_t, 4U> x86_add = {
+        0x8dU, 0x04U, 0x37U,  // lea    eax,[rdi+rdi*1]
+        0xc3U                 // ret
     };
 
     AotBuilder aot_builder;
@@ -553,7 +553,7 @@ TEST_F(AotTest, FileManagerLoadAn)
     auto gc_type = Runtime::GetGCType(runtime->GetOptions(), plugins::RuntimeTypeToLang(runtime->GetRuntimeType()));
     aot_builder.SetGcType(static_cast<uint32_t>(gc_type));
 
-    aot_builder.StartFile(TMPFILE_PF, 0x12345678);
+    aot_builder.StartFile(TMPFILE_PF, 0x12345678U);
 
     auto thread = MTManagedThread::GetCurrent();
     if (thread != nullptr) {
@@ -566,26 +566,26 @@ TEST_F(AotTest, FileManagerLoadAn)
         thread->ManagedCodeEnd();
     }
 
-    klass->SetFileId(panda_file::File::EntityId(13));
+    klass->SetFileId(panda_file::File::EntityId(13U));
     aot_builder.StartClass(*klass);
 
-    Method method1(klass, nullptr, File::EntityId(METHOD1_ID), File::EntityId(), 0, 1, nullptr);
+    Method method1(klass, nullptr, File::EntityId(METHOD1_ID), File::EntityId(), 0U, 1U, nullptr);
     {
         CodeInfoBuilder code_builder(RUNTIME_ARCH, GetAllocator());
         ArenaVector<uint8_t> data(GetAllocator()->Adapter());
         code_builder.Encode(&data);
-        CompiledMethod compiled_method1(RUNTIME_ARCH, &method1, 0);
-        compiled_method1.SetCode(Span(reinterpret_cast<const uint8_t *>(method_name.data()), method_name.size() + 1));
+        CompiledMethod compiled_method1(RUNTIME_ARCH, &method1, 0U);
+        compiled_method1.SetCode(Span(reinterpret_cast<const uint8_t *>(method_name.data()), method_name.size() + 1U));
         compiled_method1.SetCodeInfo(Span(data).ToConst());
         aot_builder.AddMethod(compiled_method1);
     }
 
-    Method method2(klass, nullptr, File::EntityId(METHOD2_ID), File::EntityId(), 0, 1, nullptr);
+    Method method2(klass, nullptr, File::EntityId(METHOD2_ID), File::EntityId(), 0U, 1U, nullptr);
     {
         CodeInfoBuilder code_builder(RUNTIME_ARCH, GetAllocator());
         ArenaVector<uint8_t> data(GetAllocator()->Adapter());
         code_builder.Encode(&data);
-        CompiledMethod compiled_method2(RUNTIME_ARCH, &method2, 1);
+        CompiledMethod compiled_method2(RUNTIME_ARCH, &method2, 1U);
         compiled_method2.SetCode(Span(reinterpret_cast<const uint8_t *>(x86_add.data()), x86_add.size()));
         compiled_method2.SetCodeInfo(Span(data).ToConst());
         aot_builder.AddMethod(compiled_method2);
@@ -593,8 +593,8 @@ TEST_F(AotTest, FileManagerLoadAn)
 
     aot_builder.EndClass();
     uint32_t hash = GetHash32String(reinterpret_cast<const uint8_t *>(class_name.data()));
-    aot_builder.InsertEntityPairHeader(hash, 13);
-    aot_builder.InsertClassHashTableSize(1);
+    aot_builder.InsertEntityPairHeader(hash, 13U);
+    aot_builder.InsertClassHashTableSize(1U);
     aot_builder.EndFile();
 
     aot_builder.Write(CMDLINE, tmpfile_pn);
@@ -612,22 +612,22 @@ TEST_F(AotTest, FileManagerLoadAn)
 
     auto pfile = aot_manager->FindPandaFile(TMPFILE_PF);
     ASSERT_NE(pfile, nullptr);
-    auto cls = pfile->GetClass(13);
+    auto cls = pfile->GetClass(13U);
     ASSERT_TRUE(cls.IsValid());
 
     {
-        auto code = cls.FindMethodCodeEntry(0);
+        auto code = cls.FindMethodCodeEntry(0U);
         ASSERT_FALSE(code == nullptr);
         ASSERT_EQ(method_name, reinterpret_cast<const char *>(code));
     }
 
     {
-        auto code = cls.FindMethodCodeEntry(1);
+        auto code = cls.FindMethodCodeEntry(1U);
         ASSERT_FALSE(code == nullptr);
-        ASSERT_EQ(std::memcmp(x86_add.data(), code, x86_add.size()), 0);
+        ASSERT_EQ(std::memcmp(x86_add.data(), code, x86_add.size()), 0U);
 #ifdef PANDA_TARGET_AMD64
         auto func_add = reinterpret_cast<int (*)(int, int)>(const_cast<void *>(code));
-        ASSERT_EQ(func_add(2, 3), 5);
+        ASSERT_EQ(func_add(2U, 3U), 5U);
 #endif
     }
 }
@@ -735,7 +735,7 @@ TEST_F(AotTest, PaocClusters)
                            paoc_clusters.GetFileName(), "--compiler-loop-unroll-factor=7",
                            "--compiler-enable-events=true", "--compiler-events-path", compiler_events.GetFileName());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
-        ASSERT_EQ(res.Value(), 0);
+        ASSERT_EQ(res.Value(), 0U);
 
         bool first_found = false;
         bool second_found = false;
@@ -816,7 +816,7 @@ TEST_F(AotTest, PandaFiles)
                                   panda_fname1.GetFileName(), "--events-output=csv", "--events-file",
                                   paoc_output_name.GetFileName());
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
-        ASSERT_EQ(res.Value(), 0);
+        ASSERT_EQ(res.Value(), 0U);
 
         std::ifstream infile(paoc_output_name.GetFileName());
         // Inlining attempt proofs that Z::zoo was available to inline

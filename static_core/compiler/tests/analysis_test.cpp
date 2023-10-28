@@ -25,47 +25,47 @@ TEST_F(AnalysisTest, FixSSInBBFromBlockToOut)
     GRAPH(GetGraph())
     {
         // SS will be fixed ONLY in BB2
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(1, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
+            INST(1U, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
             // This SS will fix
-            INST(2, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::SaveState).NoVregs();
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
             // This SS will not fix
-            INST(3, Opcode::SaveState).NoVregs();
-            INST(4, Opcode::Intrinsic)
+            INST(3U, Opcode::SaveState).NoVregs();
+            INST(4U, Opcode::Intrinsic)
                 .ref()
-                .Inputs({{DataType::REFERENCE, 1}})
+                .Inputs({{DataType::REFERENCE, 1U}})
                 .ClearFlag(compiler::inst_flags::REQUIRE_STATE);
             // This SS will not fix
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::ReturnVoid).v0id();
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::ReturnVoid).v0id();
         }
     }
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(1, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
-            INST(2, Opcode::SaveState).Inputs(1).SrcVregs({VirtualRegister::BRIDGE});
+            INST(1U, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
+            INST(2U, Opcode::SaveState).Inputs(1U).SrcVregs({VirtualRegister::BRIDGE});
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(3, Opcode::SaveState).NoVregs();
-            INST(4, Opcode::Intrinsic)
+            INST(3U, Opcode::SaveState).NoVregs();
+            INST(4U, Opcode::Intrinsic)
                 .ref()
-                .Inputs({{DataType::REFERENCE, 1}})
+                .Inputs({{DataType::REFERENCE, 1U}})
                 .ClearFlag(compiler::inst_flags::REQUIRE_STATE);
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::ReturnVoid).v0id();
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::ReturnVoid).v0id();
         }
     }
     SaveStateBridgesBuilder ssb;
-    ssb.FixSaveStatesInBB(GetGraph()->GetVectorBlocks().at(2));
+    ssb.FixSaveStatesInBB(GetGraph()->GetVectorBlocks().at(2U));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -73,48 +73,48 @@ TEST_F(AnalysisTest, FixSSInBBFromOutToBlock)
 {
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(1, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
+            INST(1U, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
             // This SS will not fix
-            INST(2, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::SaveState).NoVregs();
         }
         // SS will be fixed ONLY in BB3
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
             // This SS will fix
-            INST(3, Opcode::SaveState).NoVregs();
-            INST(4, Opcode::Intrinsic)
+            INST(3U, Opcode::SaveState).NoVregs();
+            INST(4U, Opcode::Intrinsic)
                 .v0id()
-                .Inputs({{DataType::REFERENCE, 1}})
+                .Inputs({{DataType::REFERENCE, 1U}})
                 .ClearFlag(compiler::inst_flags::REQUIRE_STATE);
             // This SS will not fix
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::ReturnVoid).v0id();
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::ReturnVoid).v0id();
         }
     }
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(1, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
-            INST(2, Opcode::SaveState).NoVregs();
+            INST(1U, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
+            INST(2U, Opcode::SaveState).NoVregs();
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(3, Opcode::SaveState).Inputs(1).SrcVregs({VirtualRegister::BRIDGE});
-            INST(4, Opcode::Intrinsic)
+            INST(3U, Opcode::SaveState).Inputs(1U).SrcVregs({VirtualRegister::BRIDGE});
+            INST(4U, Opcode::Intrinsic)
                 .v0id()
-                .Inputs({{DataType::REFERENCE, 1}})
+                .Inputs({{DataType::REFERENCE, 1U}})
                 .ClearFlag(compiler::inst_flags::REQUIRE_STATE);
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::ReturnVoid).v0id();
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::ReturnVoid).v0id();
         }
     }
     SaveStateBridgesBuilder ssb;
-    ssb.FixSaveStatesInBB(GetGraph()->GetVectorBlocks().at(3));
+    ssb.FixSaveStatesInBB(GetGraph()->GetVectorBlocks().at(3U));
     ASSERT(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -123,12 +123,12 @@ TEST_F(AnalysisTest, FixSSInBBUnrealInput)
     builder_->EnableGraphChecker(false);
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
             // After moving Intrinsic use before declare, so fix SaveState
-            INST(1, Opcode::SaveState).Inputs(2).SrcVregs({10});
-            INST(2, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
-            INST(3, Opcode::ReturnVoid).v0id();
+            INST(1U, Opcode::SaveState).Inputs(2U).SrcVregs({10U});
+            INST(2U, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
+            INST(3U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -136,15 +136,15 @@ TEST_F(AnalysisTest, FixSSInBBUnrealInput)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
-            INST(3, Opcode::ReturnVoid).v0id();
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
+            INST(3U, Opcode::ReturnVoid).v0id();
         }
     }
     SaveStateBridgesBuilder ssb;
-    ssb.FixSaveStatesInBB(GetGraph()->GetVectorBlocks().at(2));
+    ssb.FixSaveStatesInBB(GetGraph()->GetVectorBlocks().at(2U));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -152,38 +152,38 @@ TEST_F(AnalysisTest, FixSSInBBInside)
 {
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
+            INST(1U, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
             // This SS will fix
-            INST(2, Opcode::SaveState).NoVregs();
-            INST(3, Opcode::Intrinsic)
+            INST(2U, Opcode::SaveState).NoVregs();
+            INST(3U, Opcode::Intrinsic)
                 .ref()
-                .Inputs({{DataType::REFERENCE, 1}})
+                .Inputs({{DataType::REFERENCE, 1U}})
                 .ClearFlag(compiler::inst_flags::REQUIRE_STATE);
             // This SS will not fix
-            INST(4, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(4U, Opcode::SaveState).NoVregs();
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
-            INST(2, Opcode::SaveState).Inputs(1).SrcVregs({VirtualRegister::BRIDGE});
-            INST(3, Opcode::Intrinsic)
+            INST(1U, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
+            INST(2U, Opcode::SaveState).Inputs(1U).SrcVregs({VirtualRegister::BRIDGE});
+            INST(3U, Opcode::Intrinsic)
                 .ref()
-                .Inputs({{DataType::REFERENCE, 1}})
+                .Inputs({{DataType::REFERENCE, 1U}})
                 .ClearFlag(compiler::inst_flags::REQUIRE_STATE);
-            INST(4, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(4U, Opcode::SaveState).NoVregs();
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     SaveStateBridgesBuilder ssb;
-    ssb.FixSaveStatesInBB(GetGraph()->GetVectorBlocks().at(2));
+    ssb.FixSaveStatesInBB(GetGraph()->GetVectorBlocks().at(2U));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -191,22 +191,22 @@ TEST_F(AnalysisTest, FixBridgesInOptimizedGraph)
 {
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
-            INST(2, Opcode::SaveState);
-            INST(3, Opcode::ReturnVoid).v0id();
+            INST(1U, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::ReturnVoid).v0id();
         }
     }
 
     auto bridge_example = CreateEmptyGraph();
     GRAPH(bridge_example)
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
-            INST(2, Opcode::SaveState).Inputs(1).SrcVregs({VirtualRegister::BRIDGE});
-            INST(3, Opcode::ReturnVoid).v0id();
+            INST(1U, Opcode::Intrinsic).ref().ClearFlag(compiler::inst_flags::REQUIRE_STATE);
+            INST(2U, Opcode::SaveState).Inputs(1U).SrcVregs({VirtualRegister::BRIDGE});
+            INST(3U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -214,29 +214,29 @@ TEST_F(AnalysisTest, FixBridgesInOptimizedGraph)
     graph_bc->SetRuntime(&runtime_);
     GRAPH(graph_bc)
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).ref();
-            INST(3, Opcode::ReturnVoid).v0id();
+            INST(2U, Opcode::SaveState).ref();
+            INST(3U, Opcode::ReturnVoid).v0id();
         }
     }
 
     Graph *example = CreateEmptyGraph();
     GRAPH(example)
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).ref();
-            INST(2, Opcode::ReturnVoid).v0id();
+            INST(1U, Opcode::SaveState).ref();
+            INST(2U, Opcode::ReturnVoid).v0id();
         }
     }
 
     SaveStateBridgesBuilder ssb;
 
-    const BasicBlock *bb = GetGraph()->GetVectorBlocks().at(2);
+    const BasicBlock *bb = GetGraph()->GetVectorBlocks().at(2U);
     ssb.SearchAndCreateMissingObjInSaveState(GetGraph(), bb->GetFirstInst(), bb->GetLastInst());
 
-    const BasicBlock *bb_bc = graph_bc->GetVectorBlocks().at(2);
+    const BasicBlock *bb_bc = graph_bc->GetVectorBlocks().at(2U);
     ssb.SearchAndCreateMissingObjInSaveState(graph_bc, bb_bc->GetFirstInst(), bb_bc->GetLastInst());
 
     ASSERT_TRUE(GraphComparator().Compare(graph_bc, example));

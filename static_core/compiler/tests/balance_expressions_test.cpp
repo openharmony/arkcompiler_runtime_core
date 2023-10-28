@@ -25,14 +25,14 @@ TEST_F(BalanceExpressionsTest, AddMulParallel)
     // Check that independent expression are not mixed with each other and being considered sequentially:
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        PARAMETER(3, 3).u64();
-        PARAMETER(4, 4).u64();
-        PARAMETER(5, 5).u64();
-        PARAMETER(6, 6).u64();
-        PARAMETER(7, 7).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+        PARAMETER(4U, 4U).u64();
+        PARAMETER(5U, 5U).u64();
+        PARAMETER(6U, 6U).u64();
+        PARAMETER(7U, 7U).u64();
 
         /**
          * From:
@@ -42,49 +42,49 @@ TEST_F(BalanceExpressionsTest, AddMulParallel)
          *
          *  (Critical path is 8)
          */
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(8, Opcode::Add).u64().Inputs(0, 1);
-            INST(9, Opcode::Mul).u64().Inputs(0, 1);
+            INST(8U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(9U, Opcode::Mul).u64().Inputs(0U, 1U);
 
-            INST(10, Opcode::Add).u64().Inputs(8, 2);
-            INST(11, Opcode::Mul).u64().Inputs(9, 2);
+            INST(10U, Opcode::Add).u64().Inputs(8U, 2U);
+            INST(11U, Opcode::Mul).u64().Inputs(9U, 2U);
 
-            INST(12, Opcode::Add).u64().Inputs(10, 3);
-            INST(13, Opcode::Mul).u64().Inputs(11, 3);
+            INST(12U, Opcode::Add).u64().Inputs(10U, 3U);
+            INST(13U, Opcode::Mul).u64().Inputs(11U, 3U);
 
-            INST(14, Opcode::Add).u64().Inputs(12, 4);
-            INST(15, Opcode::Mul).u64().Inputs(13, 4);
+            INST(14U, Opcode::Add).u64().Inputs(12U, 4U);
+            INST(15U, Opcode::Mul).u64().Inputs(13U, 4U);
 
-            INST(16, Opcode::Add).u64().Inputs(14, 5);
-            INST(17, Opcode::Mul).u64().Inputs(15, 5);
+            INST(16U, Opcode::Add).u64().Inputs(14U, 5U);
+            INST(17U, Opcode::Mul).u64().Inputs(15U, 5U);
 
-            INST(18, Opcode::Add).u64().Inputs(16, 6);
-            INST(19, Opcode::Mul).u64().Inputs(17, 6);
+            INST(18U, Opcode::Add).u64().Inputs(16U, 6U);
+            INST(19U, Opcode::Mul).u64().Inputs(17U, 6U);
 
-            INST(20, Opcode::Add).u64().Inputs(18, 7);
-            INST(21, Opcode::Mul).u64().Inputs(19, 7);
+            INST(20U, Opcode::Add).u64().Inputs(18U, 7U);
+            INST(21U, Opcode::Mul).u64().Inputs(19U, 7U);
 
-            INST(22, Opcode::Mul).u64().Inputs(21, 20);
-            INST(23, Opcode::Return).u64().Inputs(22);
+            INST(22U, Opcode::Mul).u64().Inputs(21U, 20U);
+            INST(23U, Opcode::Return).u64().Inputs(22U);
         }
     }
 
     ASSERT_TRUE(GetGraph()->RunPass<BalanceExpressions>());
-    ASSERT_TRUE(CheckUsers(INS(20), {22}));
-    ASSERT_TRUE(CheckUsers(INS(22), {23}));
+    ASSERT_TRUE(CheckUsers(INS(20U), {22U}));
+    ASSERT_TRUE(CheckUsers(INS(22U), {23U}));
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        PARAMETER(3, 3).u64();
-        PARAMETER(4, 4).u64();
-        PARAMETER(5, 5).u64();
-        PARAMETER(6, 6).u64();
-        PARAMETER(7, 7).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+        PARAMETER(4U, 4U).u64();
+        PARAMETER(5U, 5U).u64();
+        PARAMETER(6U, 6U).u64();
+        PARAMETER(7U, 7U).u64();
 
         /**
          * To:
@@ -94,26 +94,26 @@ TEST_F(BalanceExpressionsTest, AddMulParallel)
          *
          *  (Critical path is 4)
          */
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(8, Opcode::Add).u64().Inputs(0, 1);
-            INST(10, Opcode::Add).u64().Inputs(2, 3);
-            INST(12, Opcode::Add).u64().Inputs(8, 10);
-            INST(14, Opcode::Add).u64().Inputs(4, 5);
-            INST(16, Opcode::Add).u64().Inputs(6, 7);
-            INST(18, Opcode::Add).u64().Inputs(14, 16);
-            INST(20, Opcode::Add).u64().Inputs(12, 18);
+            INST(8U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(10U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(12U, Opcode::Add).u64().Inputs(8U, 10U);
+            INST(14U, Opcode::Add).u64().Inputs(4U, 5U);
+            INST(16U, Opcode::Add).u64().Inputs(6U, 7U);
+            INST(18U, Opcode::Add).u64().Inputs(14U, 16U);
+            INST(20U, Opcode::Add).u64().Inputs(12U, 18U);
 
-            INST(9, Opcode::Mul).u64().Inputs(0, 1);
-            INST(11, Opcode::Mul).u64().Inputs(2, 3);
-            INST(13, Opcode::Mul).u64().Inputs(9, 11);
-            INST(15, Opcode::Mul).u64().Inputs(4, 5);
-            INST(17, Opcode::Mul).u64().Inputs(6, 7);
-            INST(19, Opcode::Mul).u64().Inputs(15, 17);
-            INST(21, Opcode::Mul).u64().Inputs(13, 19);
+            INST(9U, Opcode::Mul).u64().Inputs(0U, 1U);
+            INST(11U, Opcode::Mul).u64().Inputs(2U, 3U);
+            INST(13U, Opcode::Mul).u64().Inputs(9U, 11U);
+            INST(15U, Opcode::Mul).u64().Inputs(4U, 5U);
+            INST(17U, Opcode::Mul).u64().Inputs(6U, 7U);
+            INST(19U, Opcode::Mul).u64().Inputs(15U, 17U);
+            INST(21U, Opcode::Mul).u64().Inputs(13U, 19U);
 
-            INST(22, Opcode::Mul).u64().Inputs(21, 20);
-            INST(23, Opcode::Return).u64().Inputs(22);
+            INST(22U, Opcode::Mul).u64().Inputs(21U, 20U);
+            INST(23U, Opcode::Return).u64().Inputs(22U);
         }
     }
 
@@ -127,62 +127,62 @@ TEST_F(BalanceExpressionsTest, MultipleUsers)
     // Also checks that the last operator of an expression has the same users as before its optimization:
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        PARAMETER(3, 3).u64();
-        PARAMETER(4, 4).u64();
-        PARAMETER(5, 5).u64();
-        PARAMETER(6, 6).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+        PARAMETER(4U, 4U).u64();
+        PARAMETER(5U, 5U).u64();
+        PARAMETER(6U, 6U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(8, Opcode::Add).u64().Inputs(0, 1);
-            INST(9, Opcode::Add).u64().Inputs(2, 8);
+            INST(8U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(9U, Opcode::Add).u64().Inputs(2U, 8U);
 
             // Has multiple users:
-            INST(10, Opcode::Add).u64().Inputs(3, 9);
+            INST(10U, Opcode::Add).u64().Inputs(3U, 9U);
 
-            INST(11, Opcode::Add).u64().Inputs(4, 10);
-            INST(12, Opcode::Add).u64().Inputs(5, 6);
-            INST(13, Opcode::Add).u64().Inputs(11, 12);
-            INST(14, Opcode::Add).u64().Inputs(10, 13);
+            INST(11U, Opcode::Add).u64().Inputs(4U, 10U);
+            INST(12U, Opcode::Add).u64().Inputs(5U, 6U);
+            INST(13U, Opcode::Add).u64().Inputs(11U, 12U);
+            INST(14U, Opcode::Add).u64().Inputs(10U, 13U);
 
-            INST(15, Opcode::Return).u64().Inputs(14);
+            INST(15U, Opcode::Return).u64().Inputs(14U);
         }
     }
 
     ASSERT_TRUE(GetGraph()->RunPass<BalanceExpressions>());
 
     // The same users as we expect that the second expression would be unchanged
-    ASSERT_TRUE(CheckUsers(INS(10), {11, 14}));
-    ASSERT_TRUE(CheckUsers(INS(14), {15}));
+    ASSERT_TRUE(CheckUsers(INS(10U), {11U, 14U}));
+    ASSERT_TRUE(CheckUsers(INS(14U), {15U}));
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        PARAMETER(3, 3).u64();
-        PARAMETER(4, 4).u64();
-        PARAMETER(5, 5).u64();
-        PARAMETER(6, 6).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+        PARAMETER(4U, 4U).u64();
+        PARAMETER(5U, 5U).u64();
+        PARAMETER(6U, 6U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(8, Opcode::Add).u64().Inputs(3, 2);
-            INST(9, Opcode::Add).u64().Inputs(0, 1);
+            INST(8U, Opcode::Add).u64().Inputs(3U, 2U);
+            INST(9U, Opcode::Add).u64().Inputs(0U, 1U);
 
             // Has multiple users:
-            INST(10, Opcode::Add).u64().Inputs(8, 9);
+            INST(10U, Opcode::Add).u64().Inputs(8U, 9U);
 
-            INST(11, Opcode::Add).u64().Inputs(4, 10);
-            INST(12, Opcode::Add).u64().Inputs(5, 6);
-            INST(13, Opcode::Add).u64().Inputs(11, 12);
-            INST(14, Opcode::Add).u64().Inputs(10, 13);
+            INST(11U, Opcode::Add).u64().Inputs(4U, 10U);
+            INST(12U, Opcode::Add).u64().Inputs(5U, 6U);
+            INST(13U, Opcode::Add).u64().Inputs(11U, 12U);
+            INST(14U, Opcode::Add).u64().Inputs(10U, 13U);
 
-            INST(15, Opcode::Return).u64().Inputs(14);
+            INST(15U, Opcode::Return).u64().Inputs(14U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -193,32 +193,32 @@ TEST_F(BalanceExpressionsTest, SameSource)
     // Check that expression with repeated sources are handled correctly:
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Add).u64().Inputs(0, 0);
-            INST(2, Opcode::Add).u64().Inputs(0, 1);
-            INST(3, Opcode::Add).u64().Inputs(0, 2);
+            INST(1U, Opcode::Add).u64().Inputs(0U, 0U);
+            INST(2U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(3U, Opcode::Add).u64().Inputs(0U, 2U);
 
-            INST(4, Opcode::Return).u64().Inputs(3);
+            INST(4U, Opcode::Return).u64().Inputs(3U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<BalanceExpressions>());
-    ASSERT_TRUE(CheckUsers(INS(3), {4}));
+    ASSERT_TRUE(CheckUsers(INS(3U), {4U}));
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Add).u64().Inputs(0, 0);
-            INST(2, Opcode::Add).u64().Inputs(0, 0);
-            INST(3, Opcode::Add).u64().Inputs(1, 2);
+            INST(1U, Opcode::Add).u64().Inputs(0U, 0U);
+            INST(2U, Opcode::Add).u64().Inputs(0U, 0U);
+            INST(3U, Opcode::Add).u64().Inputs(1U, 2U);
 
-            INST(4, Opcode::Return).u64().Inputs(3);
+            INST(4U, Opcode::Return).u64().Inputs(3U);
         }
     }
 
@@ -230,11 +230,11 @@ TEST_F(BalanceExpressionsTest, OddSources)
     // Check that expression with odd number of sources are handled correctly:
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        PARAMETER(3, 3).u64();
-        PARAMETER(4, 4).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+        PARAMETER(4U, 4U).u64();
 
         /**
          * From:
@@ -242,27 +242,27 @@ TEST_F(BalanceExpressionsTest, OddSources)
          *
          *  (Critical path is 4)
          */
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::Add).u64().Inputs(2, 3);
-            INST(6, Opcode::Add).u64().Inputs(5, 1);
-            INST(7, Opcode::Add).u64().Inputs(4, 6);
-            INST(8, Opcode::Add).u64().Inputs(0, 7);
+            INST(5U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(6U, Opcode::Add).u64().Inputs(5U, 1U);
+            INST(7U, Opcode::Add).u64().Inputs(4U, 6U);
+            INST(8U, Opcode::Add).u64().Inputs(0U, 7U);
 
-            INST(9, Opcode::Return).u64().Inputs(8);
+            INST(9U, Opcode::Return).u64().Inputs(8U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<BalanceExpressions>());
-    ASSERT_TRUE(CheckUsers(INS(8), {9}));
+    ASSERT_TRUE(CheckUsers(INS(8U), {9U}));
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        PARAMETER(3, 3).u64();
-        PARAMETER(4, 4).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+        PARAMETER(4U, 4U).u64();
 
         /**
          * To:
@@ -270,14 +270,14 @@ TEST_F(BalanceExpressionsTest, OddSources)
          *
          *  (Critical path is 3)
          */
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 4);
-            INST(6, Opcode::Add).u64().Inputs(2, 3);
-            INST(7, Opcode::Add).u64().Inputs(5, 6);
-            INST(8, Opcode::Add).u64().Inputs(7, 1);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 4U);
+            INST(6U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(7U, Opcode::Add).u64().Inputs(5U, 6U);
+            INST(8U, Opcode::Add).u64().Inputs(7U, 1U);
 
-            INST(9, Opcode::Return).u64().Inputs(8);
+            INST(9U, Opcode::Return).u64().Inputs(8U);
         }
     }
 

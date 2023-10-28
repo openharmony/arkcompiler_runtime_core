@@ -29,41 +29,41 @@ bool operator==(const SpillFillData &left, const SpillFillData &right)
 TEST_F(SpillFillEncoderTest, SpillFillDataSorting)
 {
     ArenaVector<SpillFillData> spill_fills {
-        {{LocationType::REGISTER, LocationType::STACK, 1, 0, DataType::Type::INT64},
-         {LocationType::REGISTER, LocationType::STACK, 0, 2, DataType::Type::INT64},
-         {LocationType::REGISTER, LocationType::REGISTER, 0, 1, DataType::Type::INT64},
-         {LocationType::REGISTER, LocationType::REGISTER, 1, 2, DataType::Type::INT64},
-         {LocationType::IMMEDIATE, LocationType::REGISTER, 0, 0, DataType::Type::INT64},
-         {LocationType::IMMEDIATE, LocationType::REGISTER, 0, 1, DataType::Type::INT64},
-         {LocationType::STACK, LocationType::REGISTER, 0, 0, DataType::Type::INT64},
-         {LocationType::STACK, LocationType::REGISTER, 1, 1, DataType::Type::INT64},
-         {LocationType::STACK, LocationType::REGISTER, 2, 2, DataType::Type::INT64},
-         {LocationType::REGISTER, LocationType::REGISTER, 2, 4, DataType::Type::INT64},
-         {LocationType::STACK, LocationType::REGISTER, 3, 2, DataType::Type::INT64},
-         {LocationType::STACK, LocationType::STACK, 7, 9, DataType::Type::INT64},
-         {LocationType::STACK, LocationType::STACK, 8, 10, DataType::Type::INT64}},
+        {{LocationType::REGISTER, LocationType::STACK, 1U, 0U, DataType::Type::INT64},
+         {LocationType::REGISTER, LocationType::STACK, 0U, 2U, DataType::Type::INT64},
+         {LocationType::REGISTER, LocationType::REGISTER, 0U, 1U, DataType::Type::INT64},
+         {LocationType::REGISTER, LocationType::REGISTER, 1U, 2U, DataType::Type::INT64},
+         {LocationType::IMMEDIATE, LocationType::REGISTER, 0U, 0U, DataType::Type::INT64},
+         {LocationType::IMMEDIATE, LocationType::REGISTER, 0U, 1U, DataType::Type::INT64},
+         {LocationType::STACK, LocationType::REGISTER, 0U, 0U, DataType::Type::INT64},
+         {LocationType::STACK, LocationType::REGISTER, 1U, 1U, DataType::Type::INT64},
+         {LocationType::STACK, LocationType::REGISTER, 2U, 2U, DataType::Type::INT64},
+         {LocationType::REGISTER, LocationType::REGISTER, 2U, 4U, DataType::Type::INT64},
+         {LocationType::STACK, LocationType::REGISTER, 3U, 2U, DataType::Type::INT64},
+         {LocationType::STACK, LocationType::STACK, 7U, 9U, DataType::Type::INT64},
+         {LocationType::STACK, LocationType::STACK, 8U, 10U, DataType::Type::INT64}},
         GetAllocator()->Adapter()};
 
     ArenaVector<SpillFillData> expected_order {
         {// reorder spills
-         {LocationType::REGISTER, LocationType::STACK, 0, 2, DataType::Type::INT64},
-         {LocationType::REGISTER, LocationType::STACK, 1, 0, DataType::Type::INT64},
+         {LocationType::REGISTER, LocationType::STACK, 0U, 2U, DataType::Type::INT64},
+         {LocationType::REGISTER, LocationType::STACK, 1U, 0U, DataType::Type::INT64},
          // skip move
-         {LocationType::REGISTER, LocationType::REGISTER, 0, 1, DataType::Type::INT64},
-         {LocationType::REGISTER, LocationType::REGISTER, 1, 2, DataType::Type::INT64},
+         {LocationType::REGISTER, LocationType::REGISTER, 0U, 1U, DataType::Type::INT64},
+         {LocationType::REGISTER, LocationType::REGISTER, 1U, 2U, DataType::Type::INT64},
          // skip imm move
-         {LocationType::IMMEDIATE, LocationType::REGISTER, 0, 0, DataType::Type::INT64},
-         {LocationType::IMMEDIATE, LocationType::REGISTER, 0, 1, DataType::Type::INT64},
+         {LocationType::IMMEDIATE, LocationType::REGISTER, 0U, 0U, DataType::Type::INT64},
+         {LocationType::IMMEDIATE, LocationType::REGISTER, 0U, 1U, DataType::Type::INT64},
          // reorder fills
-         {LocationType::STACK, LocationType::REGISTER, 2, 2, DataType::Type::INT64},
-         {LocationType::STACK, LocationType::REGISTER, 1, 1, DataType::Type::INT64},
-         {LocationType::STACK, LocationType::REGISTER, 0, 0, DataType::Type::INT64},
+         {LocationType::STACK, LocationType::REGISTER, 2U, 2U, DataType::Type::INT64},
+         {LocationType::STACK, LocationType::REGISTER, 1U, 1U, DataType::Type::INT64},
+         {LocationType::STACK, LocationType::REGISTER, 0U, 0U, DataType::Type::INT64},
          // skip move
-         {LocationType::REGISTER, LocationType::REGISTER, 2, 4, DataType::Type::INT64},
-         {LocationType::STACK, LocationType::REGISTER, 3, 2, DataType::Type::INT64},
+         {LocationType::REGISTER, LocationType::REGISTER, 2U, 4U, DataType::Type::INT64},
+         {LocationType::STACK, LocationType::REGISTER, 3U, 2U, DataType::Type::INT64},
          // skip mem move
-         {LocationType::STACK, LocationType::STACK, 7, 9, DataType::Type::INT64},
-         {LocationType::STACK, LocationType::STACK, 8, 10, DataType::Type::INT64}},
+         {LocationType::STACK, LocationType::STACK, 7U, 9U, DataType::Type::INT64},
+         {LocationType::STACK, LocationType::STACK, 8U, 10U, DataType::Type::INT64}},
         GetAllocator()->Adapter()};
 
     SpillFillEncoder::SortSpillFillData(&spill_fills);
@@ -80,54 +80,54 @@ TEST_F(SpillFillEncoderTest, CanCombineSpillFills)
     }
 
     EXPECT_TRUE(SpillFillEncoder::CanCombineSpillFills(
-        {LocationType::STACK, LocationType::REGISTER, 2, 0, DataType::Type::INT64},
-        {LocationType::STACK, LocationType::REGISTER, 1, 0, DataType::Type::INT64}, graph));
+        {LocationType::STACK, LocationType::REGISTER, 2U, 0U, DataType::Type::INT64},
+        {LocationType::STACK, LocationType::REGISTER, 1U, 0U, DataType::Type::INT64}, graph));
 
     EXPECT_TRUE(SpillFillEncoder::CanCombineSpillFills(
-        {LocationType::REGISTER, LocationType::STACK, 0, 2, DataType::Type::INT64},
-        {LocationType::REGISTER, LocationType::STACK, 0, 1, DataType::Type::INT64}, graph));
+        {LocationType::REGISTER, LocationType::STACK, 0U, 2U, DataType::Type::INT64},
+        {LocationType::REGISTER, LocationType::STACK, 0U, 1U, DataType::Type::INT64}, graph));
 
     EXPECT_TRUE(SpillFillEncoder::CanCombineSpillFills(
-        {LocationType::STACK, LocationType::REGISTER, 2, 0, DataType::Type::INT32},
-        {LocationType::STACK, LocationType::REGISTER, 1, 0, DataType::Type::INT64}, graph));
+        {LocationType::STACK, LocationType::REGISTER, 2U, 0U, DataType::Type::INT32},
+        {LocationType::STACK, LocationType::REGISTER, 1U, 0U, DataType::Type::INT64}, graph));
 
     EXPECT_TRUE(SpillFillEncoder::CanCombineSpillFills(
-        {LocationType::STACK, LocationType::REGISTER, 2, 0, DataType::Type::INT32},
-        {LocationType::STACK, LocationType::REGISTER, 1, 0, DataType::Type::INT8}, graph));
+        {LocationType::STACK, LocationType::REGISTER, 2U, 0U, DataType::Type::INT32},
+        {LocationType::STACK, LocationType::REGISTER, 1U, 0U, DataType::Type::INT8}, graph));
 
     // different type of moves
     EXPECT_FALSE(SpillFillEncoder::CanCombineSpillFills(
-        {LocationType::REGISTER, LocationType::STACK, 2, 0, DataType::Type::INT32},
-        {LocationType::STACK, LocationType::REGISTER, 1, 0, DataType::Type::INT32}, graph));
+        {LocationType::REGISTER, LocationType::STACK, 2U, 0U, DataType::Type::INT32},
+        {LocationType::STACK, LocationType::REGISTER, 1U, 0U, DataType::Type::INT32}, graph));
 
     // illegal slots order
     EXPECT_FALSE(SpillFillEncoder::CanCombineSpillFills(
-        {LocationType::STACK, LocationType::REGISTER, 1, 0, DataType::Type::INT32},
-        {LocationType::STACK, LocationType::REGISTER, 2, 0, DataType::Type::INT32}, graph));
+        {LocationType::STACK, LocationType::REGISTER, 1U, 0U, DataType::Type::INT32},
+        {LocationType::STACK, LocationType::REGISTER, 2U, 0U, DataType::Type::INT32}, graph));
 
     EXPECT_FALSE(SpillFillEncoder::CanCombineSpillFills(
-        {LocationType::STACK, LocationType::REGISTER, 4, 0, DataType::Type::INT32},
-        {LocationType::STACK, LocationType::REGISTER, 0, 0, DataType::Type::INT32}, graph));
+        {LocationType::STACK, LocationType::REGISTER, 4U, 0U, DataType::Type::INT32},
+        {LocationType::STACK, LocationType::REGISTER, 0U, 0U, DataType::Type::INT32}, graph));
 
     // unaligned access
     EXPECT_TRUE(SpillFillEncoder::CanCombineSpillFills(
-        {LocationType::STACK, LocationType::REGISTER, 1, 0, DataType::Type::INT32},
-        {LocationType::STACK, LocationType::REGISTER, 0, 0, DataType::Type::INT32}, graph));
+        {LocationType::STACK, LocationType::REGISTER, 1U, 0U, DataType::Type::INT32},
+        {LocationType::STACK, LocationType::REGISTER, 0U, 0U, DataType::Type::INT32}, graph));
 
     // float 32 are unsupported
     EXPECT_FALSE(SpillFillEncoder::CanCombineSpillFills(
-        {LocationType::STACK, LocationType::REGISTER, 2, 0, DataType::Type::FLOAT32},
-        {LocationType::STACK, LocationType::REGISTER, 1, 0, DataType::Type::FLOAT32}, graph));
+        {LocationType::STACK, LocationType::REGISTER, 2U, 0U, DataType::Type::FLOAT32},
+        {LocationType::STACK, LocationType::REGISTER, 1U, 0U, DataType::Type::FLOAT32}, graph));
 
     // float 64 are supported
     EXPECT_TRUE(SpillFillEncoder::CanCombineSpillFills(
-        {LocationType::STACK, LocationType::REGISTER, 2, 0, DataType::Type::FLOAT64},
-        {LocationType::STACK, LocationType::REGISTER, 1, 0, DataType::Type::FLOAT64}, graph));
+        {LocationType::STACK, LocationType::REGISTER, 2U, 0U, DataType::Type::FLOAT64},
+        {LocationType::STACK, LocationType::REGISTER, 1U, 0U, DataType::Type::FLOAT64}, graph));
 
     // different types
     EXPECT_FALSE(SpillFillEncoder::CanCombineSpillFills(
-        {LocationType::STACK, LocationType::REGISTER, 2, 0, DataType::Type::INT64},
-        {LocationType::STACK, LocationType::REGISTER, 1, 0, DataType::Type::FLOAT64}, graph));
+        {LocationType::STACK, LocationType::REGISTER, 2U, 0U, DataType::Type::INT64},
+        {LocationType::STACK, LocationType::REGISTER, 1U, 0U, DataType::Type::FLOAT64}, graph));
 }
 // NOLINTEND(readability-magic-numbers)
 

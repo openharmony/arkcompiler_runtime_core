@@ -25,33 +25,33 @@ public:
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            CONSTANT(0, 10);
-            PARAMETER(1, 0).s32();
-            PARAMETER(2, 1).b();
-            BASIC_BLOCK(2, 3, 4)
+            CONSTANT(0U, 10U);
+            PARAMETER(1U, 0U).s32();
+            PARAMETER(2U, 1U).b();
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+                INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
             }
-            BASIC_BLOCK(3, 7)
+            BASIC_BLOCK(3U, 7U)
             {
-                INST(4, Opcode::Add).s32().Inputs(0, 1);
+                INST(4U, Opcode::Add).s32().Inputs(0U, 1U);
             }
-            BASIC_BLOCK(4, 5, 6)
+            BASIC_BLOCK(4U, 5U, 6U)
             {
-                INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+                INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
             }
-            BASIC_BLOCK(5, 7)
+            BASIC_BLOCK(5U, 7U)
             {
-                INST(6, Opcode::Sub).s32().Inputs(0, 1);
+                INST(6U, Opcode::Sub).s32().Inputs(0U, 1U);
             }
-            BASIC_BLOCK(6, 7)
+            BASIC_BLOCK(6U, 7U)
             {
-                INST(7, Opcode::Mul).s32().Inputs(0, 1);
+                INST(7U, Opcode::Mul).s32().Inputs(0U, 1U);
             }
-            BASIC_BLOCK(7, 1)
+            BASIC_BLOCK(7U, 1U)
             {
-                INST(8, Opcode::Phi).s32().Inputs(inputs);
-                INST(9, Opcode::Return).s32().Inputs(8);
+                INST(8U, Opcode::Phi).s32().Inputs(inputs);
+                INST(9U, Opcode::Return).s32().Inputs(8U);
             }
         }
         return graph;
@@ -65,29 +65,29 @@ TEST_F(GraphComparatorTest, CompareIDs)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        CONSTANT(0, 10);
-        PARAMETER(1, 0).s32();
-        BASIC_BLOCK(2, 3)
+        CONSTANT(0U, 10U);
+        PARAMETER(1U, 0U).s32();
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::Add).s32().Inputs(0, 1);
+            INST(2U, Opcode::Add).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(3, 1)
+        BASIC_BLOCK(3U, 1U)
         {
-            INST(4, Opcode::Return).s32().Inputs(2);
+            INST(4U, Opcode::Return).s32().Inputs(2U);
         }
     }
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        CONSTANT(23, 10);
-        PARAMETER(3, 0).s32();
-        BASIC_BLOCK(15, 25)
+        CONSTANT(23U, 10U);
+        PARAMETER(3U, 0U).s32();
+        BASIC_BLOCK(15U, 25U)
         {
-            INST(6, Opcode::Add).s32().Inputs(23, 3);
+            INST(6U, Opcode::Add).s32().Inputs(23U, 3U);
         }
-        BASIC_BLOCK(25, 1)
+        BASIC_BLOCK(25U, 1U)
         {
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -99,49 +99,49 @@ TEST_F(GraphComparatorTest, ComparePhi1)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        CONSTANT(0, 10);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).b();
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 10U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).b();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(4, Opcode::Add).s32().Inputs(0, 1);
+            INST(4U, Opcode::Add).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(6, Opcode::Phi).s32().Inputs({{3, 4}, {4, 5}});
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(6U, Opcode::Phi).s32().Inputs({{3U, 4U}, {4U, 5U}});
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        CONSTANT(0, 10);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).b();
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 10U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).b();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(4, Opcode::Add).s32().Inputs(0, 1);
+            INST(4U, Opcode::Add).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(6, Opcode::Phi).s32().Inputs({{4, 5}, {3, 4}});
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(6U, Opcode::Phi).s32().Inputs({{4U, 5U}, {3U, 4U}});
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -149,12 +149,12 @@ TEST_F(GraphComparatorTest, ComparePhi1)
 
 TEST_F(GraphComparatorTest, ComparePhi2)
 {
-    auto graph1 = CreateGraph({{3, 4}, {5, 6}, {6, 7}});
-    auto graph2 = CreateGraph({{3, 4}, {6, 7}, {5, 6}});
-    auto graph3 = CreateGraph({{5, 6}, {3, 4}, {6, 7}});
-    auto graph4 = CreateGraph({{5, 6}, {6, 7}, {3, 4}});
-    auto graph5 = CreateGraph({{6, 7}, {3, 4}, {5, 6}});
-    auto graph6 = CreateGraph({{6, 7}, {5, 6}, {3, 4}});
+    auto graph1 = CreateGraph({{3U, 4U}, {5U, 6U}, {6U, 7U}});
+    auto graph2 = CreateGraph({{3U, 4U}, {6U, 7U}, {5U, 6U}});
+    auto graph3 = CreateGraph({{5U, 6U}, {3U, 4U}, {6U, 7U}});
+    auto graph4 = CreateGraph({{5U, 6U}, {6U, 7U}, {3U, 4U}});
+    auto graph5 = CreateGraph({{6U, 7U}, {3U, 4U}, {5U, 6U}});
+    auto graph6 = CreateGraph({{6U, 7U}, {5U, 6U}, {3U, 4U}});
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph3));
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph4));
@@ -177,54 +177,54 @@ TEST_F(GraphComparatorTest, CompareDifferentInstCount)
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
-        CONSTANT(0, 10);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).b();
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 10U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).b();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(4, Opcode::Add).s32().Inputs(0, 1);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(20);
+            INST(4U, Opcode::Add).s32().Inputs(0U, 1U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(20U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(6, Opcode::Phi).s32().Inputs({{3, 4}, {4, 5}});
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(6U, Opcode::Phi).s32().Inputs({{3U, 4U}, {4U, 5U}});
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
 
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        CONSTANT(0, 10);
-        PARAMETER(1, 0).s32();
-        PARAMETER(2, 1).b();
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 10U);
+        PARAMETER(1U, 0U).s32();
+        PARAMETER(2U, 1U).b();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(4, Opcode::Add).s32().Inputs(0, 1);
+            INST(4U, Opcode::Add).s32().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(5, Opcode::Sub).s32().Inputs(0, 1);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(20);
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(20U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(6, Opcode::Phi).s32().Inputs({{3, 4}, {4, 5}});
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(6U, Opcode::Phi).s32().Inputs({{3U, 4U}, {4U, 5U}});
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
     ASSERT_FALSE(GraphComparator().Compare(graph1, graph2));
