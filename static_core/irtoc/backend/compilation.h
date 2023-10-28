@@ -60,7 +60,7 @@ private:
 #ifdef PANDA_COMPILER_DEBUG_INFO
     bool has_debug_info_ {false};
 #endif
-#if USE_VIXL_ARM64 && !PANDA_MINIMAL_VIXL && PANDA_LLVMAOT
+#ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
     UsedRegisters used_registers_;
 #endif
 };

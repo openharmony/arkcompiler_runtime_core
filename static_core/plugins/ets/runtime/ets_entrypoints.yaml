@@ -31,16 +31,6 @@
   - panda::ObjectHeader*
   - uint64_t*
 
-- name: CreateLaunchStaticCoroutineDirect
-  entrypoint: CreateLaunchStaticCoroutineEntrypoint
-  bridge: none
-  properties: []
-  signature:
-  - void
-  - panda::Method*
-  - panda::ObjectHeader*
-  - uint64_t*
-
 - name: CreateLaunchVirtualCoroutine
   entrypoint: CreateLaunchVirtualCoroutineEntrypoint
   bridge: entrypoint
@@ -52,13 +42,3 @@
   - uint64_t*
   - panda::ObjectHeader*
 
-- name: CreateLaunchVirtualCoroutineDirect
-  entrypoint: CreateLaunchVirtualCoroutineEntrypoint
-  bridge: none
-  properties: []
-  signature:
-  - void
-  - panda::Method*
-  - panda::ObjectHeader*
-  - uint64_t*
-  - panda::ObjectHeader*

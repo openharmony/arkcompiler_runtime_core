@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #! CHECKER        Broken IR for inline function is not fatal
-#! RUN_LLVM       options: "--llvmaot-break-ir-regex=.*foo.* --compiler-regex=.*main.* \
+#! RUN_LLVM       options: "--llvm-break-ir-regex=.*foo.* --compiler-regex=.*main.* \
 #!                          --llvm-options='--print-before=runtime-calls-lowering'"
 #! READ_FILE      "console.out"
 #! LLVM_METHOD    /define.*\"i32 _GLOBAL::main.*\d+\"/
@@ -20,7 +20,7 @@
 #! RUN            entry: "_GLOBAL::main"
 
 #! CHECKER        When AddGraph fails due to broken IR, then it is a fatal error for ark_aot
-#! RUN_LLVM       options: "--llvmaot-break-ir-regex=.*foo.* --compiler-regex=.*foo.*", abort: 6
+#! RUN_LLVM       options: "--llvm-break-ir-regex=.*foo.* --compiler-regex=.*foo.*", abort: 6
 
 .function i32 foo(i32 a0, i32 a1) {
     lda a0

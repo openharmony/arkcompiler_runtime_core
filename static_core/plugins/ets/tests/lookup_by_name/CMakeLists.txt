@@ -67,7 +67,7 @@ foreach(NAME ${LOOKUP_BY_NAME_TEST_LIST})
             )
             add_dependencies(ets_tests_lookup_by_name ets_lookup_by_name_${NAME}_aot)
 
-            if (PANDA_LLVMAOT)
+            if (PANDA_LLVM_AOT)
                 panda_add_asm_file(
                     FILE ${PANDA_ETS_PLUGIN_SOURCE}/tests/lookup_by_name/${NAME}.pa
                     TARGET ets_lookup_by_name_${NAME}_llvmaot

@@ -427,7 +427,7 @@ intrinsics:
       ret: i32
       args: [ f32, f32 ]
     impl: panda::ets::intrinsics::StdMathImul
-    clear_flags: [ ]
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathFround
     space: ets
@@ -438,7 +438,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: panda::ets::intrinsics::StdMathFround
-    clear_flags: [ ]
+    clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
 ####################
 # std.core.Console #

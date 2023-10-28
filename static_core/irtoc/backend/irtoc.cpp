@@ -27,8 +27,8 @@ int Run(int argc, const char **argv)
     base_options::Options base_options("");
     base_options.AddOptions(&pa_parser);
     panda::compiler::OPTIONS.AddOptions(&pa_parser);
-#ifdef PANDA_LLVMAOT
-    panda::llvmaot::OPTIONS.AddOptions(&pa_parser);
+#ifdef PANDA_LLVM_IRTOC
+    panda::llvmbackend::OPTIONS.AddOptions(&pa_parser);
 #endif
     if (!pa_parser.Parse(argc, argv)) {
         std::cerr << "Error: " << pa_parser.GetErrorString() << "\n";

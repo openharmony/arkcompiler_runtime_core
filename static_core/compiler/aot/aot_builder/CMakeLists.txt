@@ -14,7 +14,8 @@
 project(aot_builder)
 
 set(AOT_BUILDER_SOURCES aot_builder.cpp)
-if (PANDA_LLVMAOT)
+
+if (PANDA_LLVM_AOT)
     list(APPEND AOT_BUILDER_SOURCES llvm_aot_builder.cpp)
 endif()
 

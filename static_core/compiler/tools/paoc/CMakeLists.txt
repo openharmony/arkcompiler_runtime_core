@@ -28,7 +28,7 @@ add_dependencies(panda_gen_files arkcompiler_options)
 
 set(PAOC_SOURCES paoc.cpp)
 
-if (PANDA_LLVMAOT)
+if (PANDA_LLVM_AOT)
     list(APPEND PAOC_SOURCES paoc_llvm.cpp)
 endif()
 
@@ -38,10 +38,10 @@ add_dependencies(ark_aot arkcompiler_options)
 
 panda_target_link_libraries(ark_aot arkbase arkruntime aot_builder)
 
-if (PANDA_LLVMAOT)
+if (PANDA_LLVM_AOT)
     panda_target_include_directories(ark_aot SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
-    panda_target_link_libraries(ark_aot llvmaot)
-    panda_target_include_directories(ark_aot PUBLIC ${CMAKE_SOURCE_DIR}/libllvmaot)
+    panda_target_link_libraries(ark_aot llvmbackend)
+    panda_target_include_directories(ark_aot PUBLIC ${CMAKE_SOURCE_DIR}/libllvmbackend)
     add_dependencies(ark_aot copy-libLLVM.so)
 endif()
 

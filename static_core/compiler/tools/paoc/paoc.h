@@ -133,7 +133,7 @@ protected:
     virtual void Clear(panda::mem::InternalAllocatorPtr allocator);
     virtual void PrepareLLVM([[maybe_unused]] const panda::Span<const char *> &args)
     {
-        LOG(FATAL, COMPILER) << "--paoc-mode=llvm is not supported in this configuration";
+        LOG(FATAL, COMPILER) << "--paoc-mode=llvm is temporarily not available";
     }
     virtual LLVMCompilerStatus TryLLVM([[maybe_unused]] CompilingContext *ctx)
     {

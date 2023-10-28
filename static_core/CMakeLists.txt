@@ -148,23 +148,21 @@ if(NOT HOST_TOOLS)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PANDA_BINARY_ROOT}/bin)
 endif()
 
-
-if (PANDA_LLVMAOT AND NOT EXISTS "${PANDA_ROOT}/libllvmaot")
-    message(FATAL_ERROR "PANDA_LLVMAOT is ${PANDA_LLVMAOT}, but the libllvmaot dir does not exist")
-endif()
-
 # ----- Alias for source generating targets ------------------------------------
 add_custom_target(panda_gen_files COMMENT "Generate all sources")
 
 # ----- Panda CMake functions --------------------------------------------------
 include(cmake/PandaCmakeFunctions.cmake)
 
-if (PANDA_LLVMAOT)
-    # ----- Enable LLVM AOT compiler -------------------------------------------
-    include(libllvmaot/cmake/LLVM.cmake)
-
-    # ----- Enable LLVM Inline modules -----------------------------------------
-    include(libllvmaot/cmake/LLVMInlineModules.cmake)
+if (PANDA_LLVM_BACKEND)
+    if (PANDA_LLVM_INTERPRETER)
+        # ----- Enable LLVM Inline modules -------------------------------------
+        include(libllvmbackend/cmake/LLVMInlineModules.cmake)
+    endif()
+    # ----- Enable LLVM Backend compiler ---------------------------------------
+    if (PANDA_BUILD_LLVM_BACKEND)
+        include(libllvmbackend/cmake/LLVM.cmake)
+    endif()
 endif ()
 
 # ----- Bootstrapping (for parts of platform written in managed code ) ---------
@@ -268,8 +266,8 @@ if(PANDA_WITH_COMPILER)
         set(CMAKE_CXX_FLAGS "${PREV_CMAKE_CXX_FLAGS}")
     endif()
 
-    if (PANDA_LLVMAOT)
-        add_subdirectory(libllvmaot)
+    if (PANDA_BUILD_LLVM_BACKEND)
+        add_subdirectory(libllvmbackend)
     endif()
 
     set(PREV_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")

@@ -545,8 +545,6 @@ public:
     /// Entrypoints
     uintptr_t GetIntrinsicAddress(bool runtime_call, SourceLanguage lang, IntrinsicId id) const override;
 
-    uintptr_t GetIntrinsicDirectAddress(IntrinsicId id) const override;
-
     /**********************************************************************************/
     /// Dynamic object information
 

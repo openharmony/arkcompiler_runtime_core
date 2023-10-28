@@ -46,7 +46,7 @@ OptionParser.new do |opts|
   opts.on('-v', '--verbose', 'Verbose logging')
   opts.on('--arch=ARCHITECTURE', 'Architecture of system where start panda')
   opts.on("--keep-data", "Do not remove generated data from disk") { |v| options.keep_data = true }
-  opts.on("--with-llvm", "Tells checker that ARK was builded with LLVM support") do |v|
+  opts.on("--with-llvm", "Tells checker that ARK was built with LLVM support") do |v|
     options.with_llvm = true
   end
 end.parse!(into: options)

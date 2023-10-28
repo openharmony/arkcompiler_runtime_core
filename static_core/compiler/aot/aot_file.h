@@ -42,7 +42,6 @@ public:
         STRING_SLOT = 4,
         INLINECACHE_SLOT = 5,
         COMMON_SLOT = 6,
-        DIRECT_EP_SLOT = 7,
         COUNT
     };
 
