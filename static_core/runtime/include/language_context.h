@@ -276,6 +276,8 @@ public:
     {
         return 0;
     }
+
+    virtual void WrapClassInitializerException(ClassLinker *class_linker, ManagedThread *thread) const;
 };
 
 class LanguageContext {
@@ -643,6 +645,11 @@ public:
     uint64_t GetOsrEnv(const Frame *iframe, compiler::VRegInfo vreg_info) const
     {
         return base_->GetOsrEnv(iframe, vreg_info);
+    }
+
+    void WrapClassInitializerException(ClassLinker *class_linker, ManagedThread *thread) const
+    {
+        base_->WrapClassInitializerException(class_linker, thread);
     }
 
 private:

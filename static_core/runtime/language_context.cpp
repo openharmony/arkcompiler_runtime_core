@@ -91,4 +91,21 @@ void LanguageContextBase::SetExceptionToVReg(
 {
 }
 
+void LanguageContextBase::WrapClassInitializerException(ClassLinker *class_linker, ManagedThread *thread) const
+{
+    ASSERT(thread->HasPendingException());
+
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*thread->GetException()->ClassAddr<Class>());
+
+    auto *error_class = class_linker->GetExtension(ctx)->GetClass(ctx.GetErrorClassDescriptor(), false);
+    ASSERT(error_class != nullptr);
+
+    auto *cause = thread->GetException();
+    if (cause->IsInstanceOf(error_class)) {
+        return;
+    }
+
+    panda::ThrowException(ctx, thread, ctx.GetExceptionInInitializerErrorDescriptor(), nullptr);
+}
+
 }  // namespace panda

@@ -324,6 +324,11 @@ public:
     {
         return "std.core.Object";
     }
+
+    void WrapClassInitializerException([[maybe_unused]] ClassLinker *class_linker,
+                                       [[maybe_unused]] ManagedThread *thread) const override
+    {
+    }
 };
 
 }  // namespace panda::ets
