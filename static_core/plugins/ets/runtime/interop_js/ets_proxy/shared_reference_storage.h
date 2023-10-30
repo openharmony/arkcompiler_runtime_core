@@ -56,6 +56,8 @@ public:
         return SharedReferencePool::GetNextAlloc();
     }
 
+    static constexpr size_t MAX_POOL_SIZE = (sizeof(void *) > 4) ? 1_GB : 64_MB;
+
 private:
     SharedReferenceStorage(void *data, size_t size) : SharedReferencePool(data, size) {}
     NO_COPY_SEMANTIC(SharedReferenceStorage);

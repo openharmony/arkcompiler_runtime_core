@@ -1453,6 +1453,10 @@ with |TS|.
 Union Types
 ===========
 
+.. meta:
+   frontend_status: Partly
+   todo: support literal in union
+
 .. code-block:: abnf
 
     unionType:

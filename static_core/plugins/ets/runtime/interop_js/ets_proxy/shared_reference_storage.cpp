@@ -36,7 +36,7 @@ public:
 /*static*/
 std::unique_ptr<SharedReferenceStorage> SharedReferenceStorage::Create()
 {
-    size_t real_size = SharedReferencePool::MAX_POOL_SIZE;
+    size_t real_size = SharedReferenceStorage::MAX_POOL_SIZE;
 
     void *data = os::mem::MapRWAnonymousRaw(real_size);
     if (data == nullptr) {

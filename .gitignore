@@ -27,8 +27,8 @@ static_core/plugins/ets/tools/declgen_ts2ets/package-lock.json
 static_core/plugins/ets/doc/.gitignore/out/
 static_core/plugins/ets/doc/.gitignore/build/
 static_core/plugins/ets/doc/.gitignore/rst~
-static_core/tools/es2panda
 static_core/tools/sampler/scripts/package-lock.json
 static_core/tools/sampler/scripts/node_modules
 static_core/tools/sampler/scripts/fetch_modules_from_device.js
+static_core/tools/es2panda
 static_core/third_party
