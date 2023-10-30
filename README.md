@@ -6,7 +6,6 @@
   - [Building](#building)
   - [Guidelines](#guidelines)
     - [Usage Guidelines<a name="section1312121216216"></a>](#usage-guidelines)
-      - [Assembler ark\_asm](#assembler-ark_asm)
       - [Disassembler ark\_disasm](#disassembler-ark_disasm)
   - [Repositories Involved<a name="section1371113476307"></a>](#repositories-involved)
 
@@ -69,32 +68,6 @@ $ ./build.sh --product-name hispark_taurus_standard --build-target ark_host_mac_
 ## Guidelines
 
 ### Usage Guidelines<a name="section1312121216216"></a>
-
-#### Assembler ark\_asm
-
-The ark\_asm assembler converts the text ARK bytecode file into a bytecode file in binary format.
-
-Command:
-
-```
-ark_asm [Options] Input file Output file
-```
-
-Supported options:
-
-| Option        | Description                                                                                  |
-|---------------|----------------------------------------------------------------------------------------------|
-| --dump-scopes | Save the result to a JSON file to support the debug mode in Visual Studio Code.              |
-| --help        | Display help information.                                                                    |
-| --log-file    | Specify the log file output path after log printing is enabled.                              |
-| --optimize    | Enable compilation optimization.                                                             |
-| --size-stat   | Collect statistics and print ARK bytecode information after conversion.                      |
-| --verbose     | Enable log printing.                                                                         |
-| --version     | Print version info, including file format version and minimum supported file format version. |
-
-Input file: ARK bytecodes in text format
-
-Output file: ARK bytecodes in binary format
 
 #### Disassembler ark\_disasm
 
