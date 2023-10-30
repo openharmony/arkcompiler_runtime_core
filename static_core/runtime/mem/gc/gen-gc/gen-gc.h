@@ -26,6 +26,13 @@ class ManagedThread;
 }  // namespace panda
 namespace panda::mem {
 
+template <MTModeT MT_MODE>
+class AllocConfig<GCType::GEN_GC, MT_MODE> {
+public:
+    using ObjectAllocatorType = ObjectAllocatorGen<MT_MODE>;
+    using CodeAllocatorType = CodeAllocator;
+};
+
 /// @brief Generational GC
 template <class LanguageConfig>
 class GenGC : public GenerationalGC<LanguageConfig> {
