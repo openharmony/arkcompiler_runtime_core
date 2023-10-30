@@ -15,3 +15,11 @@
 cases:
     - use: |-
         let a = [{}, {},]  // CTE, type cannot be determined
+    - decl: |-
+        class A<T> {
+            dup(): T[] {
+                return [new T(), new T()]
+            }
+        }
+      use: |-
+        let a: Number[] = new A<Number>().dup()

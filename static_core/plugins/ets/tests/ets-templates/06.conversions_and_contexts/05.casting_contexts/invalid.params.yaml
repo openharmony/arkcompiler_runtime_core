@@ -101,16 +101,16 @@ cases:
   - { stype: Byte, sval: new Byte(0 as byte), dtype: Double }
   - { stype: Byte, sval: new Byte(0 as byte), dtype: Boolean }
 
-  - { stype: Char, sval: new Char('X'), dtype: byte }
-  - { stype: Char, sval: new Char('X'), dtype: short }
-  - { stype: Char, sval: new Char('X'), dtype: boolean }
-  - { stype: Char, sval: new Char('X'), dtype: Byte }
-  - { stype: Char, sval: new Char('X'), dtype: Short }
-  - { stype: Char, sval: new Char('X'), dtype: Int }
-  - { stype: Char, sval: new Char('X'), dtype: Long }
-  - { stype: Char, sval: new Char('X'), dtype: Float }
-  - { stype: Char, sval: new Char('X'), dtype: Double }
-  - { stype: Char, sval: new Char('X'), dtype: Boolean }
+  - { stype: Char, sval: new Char(c'X'), dtype: byte }
+  - { stype: Char, sval: new Char(c'X'), dtype: short }
+  - { stype: Char, sval: new Char(c'X'), dtype: boolean }
+  - { stype: Char, sval: new Char(c'X'), dtype: Byte }
+  - { stype: Char, sval: new Char(c'X'), dtype: Short }
+  - { stype: Char, sval: new Char(c'X'), dtype: Int }
+  - { stype: Char, sval: new Char(c'X'), dtype: Long }
+  - { stype: Char, sval: new Char(c'X'), dtype: Float }
+  - { stype: Char, sval: new Char(c'X'), dtype: Double }
+  - { stype: Char, sval: new Char(c'X'), dtype: Boolean }
 
   - { stype: Short, sval: new Short(0 as short), dtype: byte }
   - { stype: Short, sval: new Short(0 as short), dtype: char }

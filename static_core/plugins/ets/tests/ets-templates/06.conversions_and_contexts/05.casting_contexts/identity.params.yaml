@@ -26,8 +26,8 @@ cases:
       - { type: Char, expr: new Char(c'A'), op: '!==' }
       - { type: ClassNotFoundException, expr: new ClassNotFoundException("msg"), op: '!==' }
       - { type: 'char[]', expr: "[c'A', c'B']", op: '!==' }
-      - { type: '(x: Char): char', expr: '(p: Char): char => { return p.unboxed(); }', op: '!==' }
-      - { type: '((x: Char): char)[]', expr: '[(p: Char): char => { return p.unboxed(); }]', op: '!==' }
+      - { type: '(x: Char) => char', expr: '(p: Char): char => { return p.unboxed(); }', op: '!==' }
+      - { type: '((x: Char) => char)[]', expr: '[(p: Char): char => { return p.unboxed(); }]', op: '!==' }
       - { type: Foo, expr: '(p: Char): char => { return p.unboxed(); }', op: '!==' }
       - { type: 'Foo[]', expr: '[(p: Char): char => { return p.unboxed(); }]', op: '!==' }
       - { type: 'Color', expr: Color.Red, op: '!==' }

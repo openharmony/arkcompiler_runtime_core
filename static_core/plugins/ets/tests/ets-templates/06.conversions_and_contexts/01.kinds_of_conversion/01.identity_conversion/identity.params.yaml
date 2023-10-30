@@ -16,10 +16,10 @@ cases:
   - { type: long, expr: Long.MAX_VALUE, op: '!=' }
   - { type: float, expr: Float.POSITIVE_INFINITY, op: '!=' }
   - { type: '(a: Boolean) => Object[]', expr: '(a: Boolean): Object[] => { return [a]; }', op: '!==' }
-  - { type: 'String?', expr: 'null', op: '!==' }
+  - { type: 'String|null', expr: 'null', op: '!==' }
   - { type: 'ClassNotFoundException[]', expr: 'new ClassNotFoundException[100]', op: '!==' }
-  - { type: '((a: Promise): Object)[]?', expr: '[]', op: '!==' }
-  - { type: 'Double?[][]', expr: 'new Double[1][]', op: '!==' }
+  - { type: '((a: Object) => Object)[]|null', expr: '[]', op: '!==' }
+  - { type: '(Double|null)[][]', expr: 'new Double[1][1]', op: '!==' }
 
   - defs: |-
       interface I {}
@@ -32,7 +32,7 @@ cases:
       enum Color {Red, Green, Blue}
     type: Color
     expr: Color.Red
-    op: '!=='
+    op: '!='
 
   - defs: |-
       class A {}

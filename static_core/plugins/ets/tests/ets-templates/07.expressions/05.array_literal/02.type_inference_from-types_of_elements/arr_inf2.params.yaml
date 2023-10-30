@@ -83,7 +83,19 @@ cases:
           assert [new Boolean(true), "aaa", new Long()] instanceof Object[]
 
     - use: |-
-          assert ["aa", "bb", null, "cc", null] instanceof string|null
+          assert ["aa", "bb", null, "cc", null] instanceof (string|null)[]
 
     - use: |-
-          assert [0, 1, 2, "aaa", 3, "bbb"] instanceof string|number
+          assert [0, 1, 2, "aaa", 3, "bbb"] instanceof (string|number)[]
+
+    - use: |-
+          assert [null, null] instanceof null[]
+
+    - use: |-
+          assert [undefined, undefined] instanceof undefined[]
+
+    - use: |-
+          assert [null, undefined] instanceof (null|undefined)[]
+
+    - use: |-
+          assert [(p: string): number => { return p.length() }] instanceof ((p: string) => number)[]
