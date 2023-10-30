@@ -66,6 +66,10 @@ private:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define COMPILER_LOG(level, comp) \
     CompilerLogger::IsComponentEnabled(CompilerLoggerComponents::comp) && LOG(level, COMPILER) << "[" #comp "] "
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define COMPILER_LOG_IF(cond, level, comp)                                                              \
+    CompilerLogger::IsComponentEnabled(CompilerLoggerComponents::comp) && LOG_IF(cond, level, COMPILER) \
+                                                                              << "[" #comp "] "
 }  // namespace panda::compiler
 
 #endif  // COMPILER_COMPILER_LOGGER_H

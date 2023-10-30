@@ -251,9 +251,7 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         auto call_inst = static_cast<CallInst *>(graph->CreateInstCallStatic());
         call_inst->SetType(DataType::VOID);
         call_inst->SetInlined(true);
-        call_inst->AllocateInputTypes(&allocator_, 0U);
-        call_inst->AppendInput(save_state);
-        call_inst->AddInputType(DataType::NO_TYPE);
+        call_inst->SetInputs(&allocator_, {{save_state, DataType::NO_TYPE}});
         block->AppendInst(call_inst);
 
         inst->SetInput(0U, save_state);
@@ -264,20 +262,18 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         auto call_inst = static_cast<CallInst *>(inst);
         auto save_state = graph->CreateInstSaveState()->CastToSaveState();
         block->PrependInst(save_state);
-        call_inst->AllocateInputTypes(&allocator_, n);
+        call_inst->AllocateInputTypes(&allocator_, n + 1);
         for (int32_t i = 0; i < n; ++i) {
             auto param = CreateParamInst(graph, type, i);
-            call_inst->AppendInput(param);
-            call_inst->AddInputType(type);
+            call_inst->AppendInputAndType(param, type);
             save_state->AppendInput(param);
         }
         for (size_t i = 0; i < save_state->GetInputsCount(); ++i) {
             save_state->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
         }
-        call_inst->AppendInput(save_state);
-        call_inst->AddInputType(DataType::NO_TYPE);
-        SetNumVRegsArgs(0U, save_state->GetInputsCount());
-        graph->SetVRegsCount(save_state->GetInputsCount() + 1U);
+        call_inst->AppendInputAndType(save_state, DataType::NO_TYPE);
+        SetNumVRegsArgs(0, save_state->GetInputsCount());
+        graph->SetVRegsCount(save_state->GetInputsCount() + 1);
     } else if (opc == Opcode::LoadArray || opc == Opcode::StoreArray) {
         ASSERT(n == -1L);
         auto param1 = CreateParamInst(graph, DataType::REFERENCE, 0U);  // array
@@ -627,15 +623,10 @@ Graph *GraphCreator::GenerateMultiArrayOperation(Inst *inst)
     auto init_inst =
         graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, save_state, 0U, nullptr, nullptr);
     auto arrays_inst = inst->CastToMultiArray();
-    arrays_inst->AllocateInputTypes(&allocator_, 4U);
-    inst->AppendInput(init_inst);
-    arrays_inst->AddInputType(DataType::REFERENCE);
-    inst->AppendInput(param1);
-    arrays_inst->AddInputType(DataType::INT32);
-    inst->AppendInput(param2);
-    arrays_inst->AddInputType(DataType::INT32);
-    inst->AppendInput(save_state);
-    arrays_inst->AddInputType(DataType::NO_TYPE);
+    arrays_inst->SetInputs(&allocator_, {{init_inst, DataType::REFERENCE},
+                                         {param1, DataType::INT32},
+                                         {param2, DataType::INT32},
+                                         {save_state, DataType::NO_TYPE}});
 
     block->AppendInst(init_inst);
     block->AppendInst(inst);

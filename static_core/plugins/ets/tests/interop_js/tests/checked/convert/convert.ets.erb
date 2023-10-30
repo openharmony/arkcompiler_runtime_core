@@ -74,21 +74,28 @@ function test_deep_equal(): int {
 }
 
 % @type_infos.each do |type_info|
-% unless type_info.skip_cast
+% if type_info.unwrap
 //! CHECKER      call_js_get_<%= type_info.name %> compare INT and JIT
 //! RUN          entry: "test_js_get_<%= type_info.name %>", options: "--compiler-enable-jit=true --compiler-hotness-threshold=1 --no-async-jit true --compiler-regex=ETSGLOBAL::call_js_get_<%= type_info.name %>"
 //! EVENT        /Compilation,ETSGLOBAL::call_js_get_<%= type_info.name %>,.*,COMPILED/
 //! METHOD       "call_js_get_<%= type_info.name %>"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT         /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST         "Intrinsic.CompilerJSCallFunction"
+//! INST_NEXT    "Intrinsic.CompilerConvertLocalToJSValue"
 % if ["String","boolean"].include?(type_info.name)
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValue<%= type_info.name.capitalize %>"
 % else
 //! INST_NEXT    /CallStatic.*JSRuntime::getValue<%= type_info.name.capitalize %>/
+//! PASS_AFTER   "Inline"
+//! INST         "Intrinsic.JSRuntimeGetValueDouble"
 % end
+//! PASS_AFTER   "InteropIntrinsicOptimization"
+//! INST_NOT     /Intrinsic.JSRuntimeGetValue.*/
+//! INST         "Intrinsic.CompilerConvertLocalTo<%= type_info.unwrap.capitalize %>"
 
-function call_js_get_<%= type_info.name %>(): <%= type_info.etsType %> {
-    return js_get_<%= type_info.name %>() as <%= type_info.etsType %>;
+function call_js_get_<%= type_info.name %>(): <%= type_info.type %> {
+    return js_get_<%= type_info.name %>() as <%= type_info.type %>;
 }
 
 function test_js_get_<%= type_info.name %>(): int {
@@ -99,16 +106,18 @@ function test_js_get_<%= type_info.name %>(): int {
     }
     return 0;
 }
-% end
+% end # if type_info.unwrap
 
 //! CHECKER      call_js_get_jsvalue_<%= type_info.name %> compare INT and JIT
 //! RUN          entry: "test_js_get_jsvalue_<%= type_info.name %>", options: "--compiler-enable-jit=true --compiler-hotness-threshold=1 --no-async-jit true --compiler-regex=ETSGLOBAL::call_js_get_jsvalue_<%= type_info.name %>"
 //! EVENT        /Compilation,ETSGLOBAL::call_js_get_jsvalue_<%= type_info.name %>,.*,COMPILED/
 //! METHOD       "call_js_get_jsvalue_<%= type_info.name %>"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT         /CallStatic.*jscall::invoke/
-//! INST "Call"
-//! INST "Intrinsic"
+//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST         "Intrinsic.CompilerJSCallFunction"
+//! INST_NEXT    "Intrinsic.CompilerConvertLocalToJSValue"
+//! PASS_AFTER   "Codegen"
+//! INST_NEXT    "Intrinsic.CompilerConvertLocalToJSValue" # cannot be removed 
 
 function call_js_get_jsvalue_<%= type_info.name %>(): JSValue {
     return js_get_<%= type_info.name %>();
@@ -128,20 +137,21 @@ function test_js_get_jsvalue_<%= type_info.name %>(): int {
 //! EVENT        /Compilation,ETSGLOBAL::call_js_set_<%= type_info.name %>,.*,COMPILED/
 //! METHOD       "call_js_set_<%= type_info.name %>"
 //! PASS_AFTER   "IrBuilder"
-//! INST         /0\..*Parameter/
-//! INST         /1\..*Parameter/
-//! # 5 arguments, the 3rd and 4th are parameters of call_js_set_<%= type_info.name %>
-//! INST_NOT         /CallStatic.*jscall::invoke.* v.* v.* v0.* v1.* v.* ->/
+//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST         "Intrinsic.CompilerJSCallCheck"
+//! INST_NEXT    "Intrinsic.CompilerConvertI32ToLocal"
+//! INST_NEXT    "Intrinsic.CompilerConvert<%= type_info.wrap %>ToLocal"
+//! INST_NEXT    "Intrinsic.CompilerJSCallFunction"
 
-function call_js_set_<%= type_info.name %>(index: int, value: <%= type_info.etsType %>): int {
+function call_js_set_<%= type_info.name %>(index: int, value: <%= type_info.type %>): int {
     return js_set(index, value) as int;
 }
 
 function test_js_set_<%= type_info.name %>(): int {
-    if (call_js_set_<%= type_info.name %>(0, <%= type_info.value %> as <%= type_info.etsType %>) != 0) {
+    if (call_js_set_<%= type_info.name %>(0, <%= type_info.value %> as <%= type_info.type %>) != 0) {
         return -1;
     }
-    if (call_js_set_<%= type_info.name %>(1, <%= type_info.value %> as <%= type_info.etsType %>) != 1) {
+    if (call_js_set_<%= type_info.name %>(1, <%= type_info.value %> as <%= type_info.type %>) != 1) {
         return -2;
     }
     return js_check_set() as int;

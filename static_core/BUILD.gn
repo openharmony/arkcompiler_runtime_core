@@ -139,6 +139,10 @@ config("ark_config") {
       outputs = [ "$target_gen_dir/plugins/create_pipeline_includes.h" ]
       contents = ""
     }
+    generated_file("optimizations_after_unroll") {
+      outputs = [ "$target_gen_dir/plugins/optimizations_after_unroll.h" ]
+      contents = ""
+    }
 
     generated_file("clear_profile") {
       outputs = [ "$target_gen_dir/plugins/clear_profile.h" ]

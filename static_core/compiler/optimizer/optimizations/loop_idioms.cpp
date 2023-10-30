@@ -199,20 +199,13 @@ Inst *LoopIdioms::CreateArrayInitIntrinsic(StoreInst *store, CountableLoopInfo *
             return nullptr;
     }
 
-    constexpr size_t ARGS = 4;
     auto fill_array = GetGraph()->CreateInstIntrinsic(DataType::VOID, store->GetPc(), intrinsic_id);
     fill_array->ClearFlag(inst_flags::Flags::REQUIRE_STATE);
     fill_array->ClearFlag(inst_flags::Flags::RUNTIME_CALL);
-    fill_array->ReserveInputs(ARGS);
-    fill_array->AllocateInputTypes(GetGraph()->GetAllocator(), ARGS);
-    fill_array->AppendInput(store->GetArray());
-    fill_array->AddInputType(DataType::REFERENCE);
-    fill_array->AppendInput(store->GetStoredValue());
-    fill_array->AddInputType(store->GetStoredValue()->GetType());
-    fill_array->AppendInput(info->init);
-    fill_array->AddInputType(DataType::INT32);
-    fill_array->AppendInput(info->test);
-    fill_array->AddInputType(DataType::INT32);
+    fill_array->SetInputs(GetGraph()->GetAllocator(), {{store->GetArray(), DataType::REFERENCE},
+                                                       {store->GetStoredValue(), store->GetStoredValue()->GetType()},
+                                                       {info->init, DataType::INT32},
+                                                       {info->test, DataType::INT32}});
     return fill_array;
 }
 

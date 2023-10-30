@@ -2831,12 +2831,10 @@ private:
 };
 
 /// Mixin to hold input types of call instruction
-class InputTypesMixin {
+template <typename T>
+class InputTypesMixin : public T {
 public:
-    InputTypesMixin() = default;
-    NO_COPY_SEMANTIC(InputTypesMixin);
-    NO_MOVE_SEMANTIC(InputTypesMixin);
-    virtual ~InputTypesMixin() = default;
+    using T::T;
 
     void AllocateInputTypes(ArenaAllocator *allocator, size_t capacity)
     {
@@ -2856,7 +2854,7 @@ public:
     {
         return input_types_;
     }
-    void CloneTypes(ArenaAllocator *allocator, InputTypesMixin *target_inst) const
+    void CloneTypes(ArenaAllocator *allocator, InputTypesMixin<T> *target_inst) const
     {
         if (UNLIKELY(input_types_ == nullptr)) {
             return;
@@ -2865,6 +2863,29 @@ public:
         for (auto input_type : *input_types_) {
             target_inst->AddInputType(input_type);
         }
+    }
+    void AppendInputs(const std::initializer_list<std::pair<Inst *, DataType::Type>> &inputs)
+    {
+        static_assert(std::is_base_of_v<DynamicInputsInst, T>);
+        for (auto [input, type] : inputs) {
+            static_cast<Inst *>(this)->AppendInput(input);
+            AddInputType(type);
+        }
+    }
+
+    void AppendInputAndType(Inst *input, DataType::Type type)
+    {
+        static_assert(std::is_base_of_v<DynamicInputsInst, T>);
+        static_cast<Inst *>(this)->AppendInput(input);
+        AddInputType(type);
+    }
+
+    void SetInputs(ArenaAllocator *allocator, const std::initializer_list<std::pair<Inst *, DataType::Type>> &inputs)
+    {
+        static_assert(std::is_base_of_v<DynamicInputsInst, T>);
+        static_cast<Inst *>(this)->ReserveInputs(inputs.size());
+        AllocateInputTypes(allocator, inputs.size());
+        AppendInputs(inputs);
     }
 
 protected:
@@ -3055,10 +3076,10 @@ private:
 
 /// Call instruction
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class CallInst : public InlinedInstMixin<DynamicInputsInst>, public InputTypesMixin, public MethodDataMixin {
+class CallInst : public InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>, public MethodDataMixin {
 public:
     DECLARE_INST(CallInst);
-    using Base = InlinedInstMixin<DynamicInputsInst>;
+    using Base = InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>;
     using Base::Base;
 
     CallInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t method_id,
@@ -3110,10 +3131,10 @@ protected:
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class CallIndirectInst : public DynamicInputsInst, public InputTypesMixin {
+class CallIndirectInst : public InputTypesMixin<DynamicInputsInst> {
 public:
     DECLARE_INST(CallIndirectInst);
-    using Base = DynamicInputsInst;
+    using Base = InputTypesMixin<DynamicInputsInst>;
     using Base::Base;
 
     CallIndirectInst(Opcode opcode, DataType::Type type, uint32_t pc) : Base(opcode, type, pc) {}
@@ -4763,10 +4784,10 @@ protected:
 #include "intrinsics_flags.inl"
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class IntrinsicInst : public InlinedInstMixin<DynamicInputsInst>, public InputTypesMixin, public TypeIdMixin {
+class IntrinsicInst : public InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>, public TypeIdMixin {
 public:
     DECLARE_INST(IntrinsicInst);
-    using Base = InlinedInstMixin<DynamicInputsInst>;
+    using Base = InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>;
     using Base::Base;
     using IntrinsicId = RuntimeInterface::IntrinsicId;
 

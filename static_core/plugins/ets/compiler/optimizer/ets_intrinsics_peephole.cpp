@@ -111,8 +111,7 @@ bool TryInsertCallInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr klas
     call->ReserveInputs(num_inputs);
     call->AllocateInputTypes(graph->GetAllocator(), num_inputs);
     for (size_t i = 0; i < num_inputs; ++i) {
-        call->AppendInput(intrinsic->GetInput(i));
-        call->AddInputType(intrinsic->GetInputType(i));
+        call->AppendInputAndType(intrinsic->GetInput(i).GetInst(), intrinsic->GetInputType(i));
     }
     intrinsic->InsertAfter(call);
     intrinsic->ReplaceUsers(call);

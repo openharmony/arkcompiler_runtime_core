@@ -60,12 +60,10 @@ CallInst *CreateInitObject(compiler::GraphVisitor *v, compiler::ClassInst *load,
 
     auto input_types_count = call_init->GetInputsCount();
     init_object->AllocateInputTypes(graph->GetAllocator(), input_types_count);
-    init_object->AddInputType(compiler::DataType::REFERENCE);
-    init_object->AppendInput(load);
+    init_object->AppendInputAndType(load, compiler::DataType::REFERENCE);
     for (size_t i = 1; i < input_types_count; ++i) {
         auto input_inst = call_init->GetInput(i).GetInst();
-        init_object->AddInputType(input_inst->GetType());
-        init_object->AppendInput(input_inst);
+        init_object->AppendInputAndType(input_inst, input_inst->GetType());
     }
 
     init_object->SetCallMethodId(call_init->GetCallMethodId());

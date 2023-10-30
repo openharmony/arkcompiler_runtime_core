@@ -22,11 +22,6 @@ class EtsClass {
         this.int_value = value;
     }
 }
- class jsvars {
-    static global = JSRuntime.getGlobal();
-    static js_code = JSRuntime.getPropertyJSValue(jsvars.global, "hui");
-};
-
 class $jscall {
     static _init = JSRuntime.__initJSCallClass("L$jscall;");
 

@@ -227,6 +227,8 @@ void LoopAnalyzer::FindAndInsertPreHeaders(Loop *loop)
 void LoopAnalyzer::PopulateIrreducibleLoop(Loop *loop)
 {
     // Add back-edges to the loop for further analysis
+    // Note that other blocks of `loop` besides the header are not added to it,
+    // and outer loop of inner loops will be not `loop`, but its outer reducible (maybe root) loop
     for (auto back_edge : loop->GetBackEdges()) {
         if (back_edge->GetLoop() != loop) {
             loop->AppendBlock(back_edge);

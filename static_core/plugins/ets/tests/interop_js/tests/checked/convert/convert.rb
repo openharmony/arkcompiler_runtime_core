@@ -12,23 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-TypeInfo = Struct.new(:name, :value, :type, :skip_cast) do
-    def etsType
-        type || name
+TypeInfo = Struct.new(:name, :value, :type, :unwrap, :wrap, keyword_init: true) do
+    def initialize(*)
+        super
+        self.wrap ||= 'RefType'
+        self.type ||= name
     end
 end
 
 @type_infos = [
-    TypeInfo.new('String', '"abc"'),
-    TypeInfo.new('boolean', 'true'),
-    TypeInfo.new('byte', '127'),
-    TypeInfo.new('short', '32767'),
-    TypeInfo.new('int', '2147483647'),
-    TypeInfo.new('long', '9223372036854775'),
-    TypeInfo.new('char', '65535'),
-    TypeInfo.new('int_array', '[1, 2]', 'int[]', true),
-    TypeInfo.new('String_array', '["ab", "cd"]', 'String[]', true),
-    TypeInfo.new('const_object', 'const_obj', 'EtsClass', true),
-    TypeInfo.new('object', 'create_obj()', 'EtsClass | null', true),
-    TypeInfo.new('null_object', 'create_null_obj()', 'EtsClass | null', true),
+    TypeInfo.new(name: 'String', value: '"abc"', unwrap: 'String'),
+    TypeInfo.new(name: 'boolean', value: 'true', unwrap: 'U1', wrap: 'U1'),
+    TypeInfo.new(name: 'byte', value: '127', unwrap: 'F64', wrap: 'I8'),
+    TypeInfo.new(name: 'short', value: '32767', unwrap: 'F64', wrap: 'I16'),
+    TypeInfo.new(name: 'int', value: '2147483647', unwrap: 'F64', wrap: 'I32'), # TODO(aefremov): replace get_value_double -> f64toi32 with get_value_int32
+    TypeInfo.new(name: 'long', value: '9223372036854775', unwrap: 'F64', wrap: 'I64'),
+    TypeInfo.new(name: 'char', value: '65535', unwrap: 'F64', wrap: 'U16'),
+    TypeInfo.new(name: 'int_array', value: '[1, 2]', type: 'int[]'),
+    TypeInfo.new(name: 'String_array', value: '["ab", "cd"]', type: 'String[]'),
+    TypeInfo.new(name: 'const_object', value: 'const_obj', type: 'EtsClass'),
+    TypeInfo.new(name: 'object', value: 'create_obj()', type: 'EtsClass | null'),
+    TypeInfo.new(name: 'null_object', value: 'create_null_obj()', type: 'EtsClass | null'),
 ]
