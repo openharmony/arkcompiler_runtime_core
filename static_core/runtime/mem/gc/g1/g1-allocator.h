@@ -162,7 +162,6 @@ public:
     {
         LOG(FATAL, ALLOC) << "Not implemented";
         return 0;
-        // TODO(yyang): add verify for large/humongous allocator
     }
 
     [[nodiscard]] void *AllocateLocal([[maybe_unused]] size_t size, [[maybe_unused]] Alignment align,
@@ -218,7 +217,7 @@ public:
 
     static constexpr size_t GetYoungAllocMaxSize()
     {
-        // TODO(dtrubenkov): FIX to more meaningful value
+        // NOTE(dtrubenkov): FIX to more meaningful value
         return ObjectAllocator::GetMaxRegularObjectSize();
     }
 

@@ -26,7 +26,7 @@
 
 namespace panda::mem {
 
-// TODO(alovkov): remove check for null, create managed thread in test instead of std::thread
+// NOTE(alovkov): remove check for null, create managed thread in test instead of std::thread
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_THREAD_STATE() \
     ASSERT(MTManagedThread::GetCurrent() == nullptr || !MTManagedThread::GetCurrent()->IsInNativeCode())
@@ -84,7 +84,7 @@ bool ReferenceStorage::IsValidRef(const Reference *ref)
         res = global_storage_->IsValidGlobalRef(ref);
     } else {
         auto ref_without_type = Reference::GetRefWithoutType(ref);
-        // TODO(alovkov): can be optimized with mmap + make additional checks that we really have ref in slots,
+        // NOTE(alovkov): can be optimized with mmap + make additional checks that we really have ref in slots,
         // Issue 3645
         res = frame_allocator_->Contains(reinterpret_cast<void *>(ref_without_type));
     }
@@ -116,7 +116,7 @@ Reference *ReferenceStorage::NewRef(const ObjectHeader *object, Reference::Objec
         if (last_block->IsFull()) {
             cur_block = CreateBlock();
             if (cur_block == nullptr) {
-                // TODO(alovkov): make free-list of holes in all blocks. O(n) operations, but it will be done only once
+                // NOTE(alovkov): make free-list of holes in all blocks. O(n) operations, but it will be done only once
                 LOG(ERROR, GC) << "Can't allocate local ref for object: " << object
                                << ", cls: " << object->ClassAddr<panda::Class>()->GetName()
                                << " with type: " << static_cast<int>(type);

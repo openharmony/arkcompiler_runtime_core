@@ -216,7 +216,7 @@ inline MmapMemPool::~MmapMemPool()
 
     ASSERT(pool_map_.IsEmpty());
 
-    // TODO(dtrubenkov): consider madvise(mem, total_size_, MADV_DONTNEED); when possible
+    // NOTE(dtrubenkov): consider madvise(mem, total_size_, MADV_DONTNEED); when possible
     if (auto unmap_res = panda::os::mem::UnmapRaw(mmaped_mem_addr, mmaped_object_memory_size_)) {
         LOG_MMAP_MEM_POOL(FATAL) << "Destructor unnmap  error: " << unmap_res->ToString();
     }

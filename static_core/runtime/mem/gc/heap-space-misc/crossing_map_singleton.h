@@ -53,7 +53,7 @@ public:
 
     static size_t GetCrossingMapGranularity();
 
-    // TODO(dtrubenkov): move it to the more proper place
+    // NOTE(dtrubenkov): move it to the more proper place
     static void MarkCardsAsYoung(const MemRange &mem_range);
 
 private:

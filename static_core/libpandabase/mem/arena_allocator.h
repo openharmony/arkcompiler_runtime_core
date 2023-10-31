@@ -237,7 +237,7 @@ template <bool USE_OOM_HANDLER>
 template <typename T>
 T *ArenaAllocatorT<USE_OOM_HANDLER>::AllocArray(size_t arr_length)
 {
-    // TODO(Dmitrii Trubenkov): change to the proper implementation
+    // NOTE(Dmitrii Trubenkov): change to the proper implementation
     return static_cast<T *>(Alloc(sizeof(T) * arr_length));
 }
 

@@ -99,7 +99,7 @@ public:
     void VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType root_type);
 
     /// Update pointers to moved Objects in global storage.
-    // TODO(alovkov): take a closure from gc
+    // NOTE(alovkov): take a closure from gc
     void UpdateMovedRefs();
 
     void ClearUnmarkedWeakRefs(const GC *gc, const mem::GC::ReferenceClearPredicateT &pred);
@@ -248,7 +248,7 @@ private:
             if (enable_size_check_ && now_size >= max_size_ - GLOBAL_REF_SIZE_WARNING_LINE) {
                 LOG(INFO, GC) << "Global reference storage almost overflow. now size: " << now_size
                               << ", max size: " << max_size_;
-                // TODO(xucheng): Dump global reference storage info now. May use Thread::Dump() when it can be used.
+                // NOTE(xucheng): Dump global reference storage info now. May use Thread::Dump() when it can be used.
                 Dump();
             }
         }

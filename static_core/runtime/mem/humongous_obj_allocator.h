@@ -30,7 +30,7 @@ namespace panda::mem {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_HUMONGOUS_OBJ_ALLOCATOR(level) LOG(level, ALLOC) << "HumongousObjAllocator: "
 
-// TODO(aemelenko): Move this constants to compile options
+// NOTE(aemelenko): Move this constants to compile options
 static constexpr size_t PANDA_HUMONGOUS_OBJ_ALLOCATOR_RESERVED_MEM_MAX_POOLS_AMOUNT = 0;
 static constexpr size_t PANDA_HUMONGOUS_OBJ_ALLOCATOR_RESERVED_MEM_MAX_POOL_SIZE = 8_MB;
 

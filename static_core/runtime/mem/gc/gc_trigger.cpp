@@ -209,7 +209,7 @@ GCTrigger *CreateGCTrigger(MemStatsType *mem_stats, HeapSpace *heap_space, const
     GCTrigger *ret {nullptr};
     switch (trigger_type) {  // NOLINT(hicpp-multiway-paths-covered)
         case GCTriggerType::HEAP_TRIGGER_TEST:
-            // TODO(dtrubenkov): replace with permanent allocator when we get it
+            // NOTE(dtrubenkov): replace with permanent allocator when we get it
             ret = allocator->New<GCTriggerHeap>(mem_stats, heap_space);
             break;
         case GCTriggerType::HEAP_TRIGGER:

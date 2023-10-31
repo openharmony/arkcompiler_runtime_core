@@ -95,7 +95,7 @@ ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment
     ASSERT(GetGC()->IsMutatorAllowed());
     TriggerGCIfNeeded();
     if (thread == nullptr) {
-        // TODO(dtrubenkov): try to avoid this
+        // NOTE(dtrubenkov): try to avoid this
         thread = ManagedThread::GetCurrent();
         ASSERT(thread != nullptr);
     }

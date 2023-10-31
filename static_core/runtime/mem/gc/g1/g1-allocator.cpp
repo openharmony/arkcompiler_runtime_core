@@ -220,7 +220,7 @@ void *ObjectAllocatorG1<MT_MODE>::AllocateNonMovable(size_t size, Alignment alig
         size_t aligned_size;
         aligned_size = AlignUp(size, GetAlignmentInBytes(align));
         if (aligned_size <= ObjectAllocator::GetMaxRegularObjectSize()) {
-            // TODO(dtrubenkov): check if we don't need to handle OOM
+            // NOTE(dtrubenkov): check if we don't need to handle OOM
             mem = nonmovable_allocator_->Alloc(aligned_size, align);
         } else {
             // Humongous objects are non-movable
@@ -395,7 +395,7 @@ template <MTModeT MT_MODE>
 void ObjectAllocatorG1<MT_MODE>::FreeObjectsMovedToPygoteSpace()
 {
     // clear because we have move all objects in it to pygote space
-    // TODO(dtrubenkov): FIX clean object_allocator_
+    // NOTE(dtrubenkov): FIX clean object_allocator_
     object_allocator_.reset(new (std::nothrow) ObjectAllocator(mem_stats_, &heap_spaces_));
 }
 

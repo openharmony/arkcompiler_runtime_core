@@ -91,7 +91,7 @@ inline void *PygoteSpaceAllocator<AllocConfigT>::Alloc(size_t size, Alignment al
     ASSERT(state_ == STATE_PYGOTE_INIT || state_ == STATE_PYGOTE_FORKING);
 
     // alloc from runslots firstly, if failed, try to alloc from new arena
-    // TODO(yxr) : will optimzie this later, currently we use runslots as much as possible before we have crossing map
+    // NOTE(yxr) : will optimzie this later, currently we use runslots as much as possible before we have crossing map
     // or mark card table with object header, also it will reduce the bitmap count which will reduce the gc mark time.
     void *obj = runslots_alloc_.template Alloc<true, false>(size, align);
     if (obj == nullptr) {

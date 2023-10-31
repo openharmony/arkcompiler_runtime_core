@@ -90,13 +90,13 @@ extern "C" void PostWrbUpdateCardFuncEntrypoint(const void *from, const void *to
     auto card_table = barriers->GetCardTable();
     ASSERT(card_table != nullptr);
     // No need to keep remsets for young->young
-    // TODO(dtrubenkov): add assert that we do not have young -> young reference here
+    // NOTE(dtrubenkov): add assert that we do not have young -> young reference here
     auto *card = card_table->GetCardPtr(ToUintPtr(from));
     LOG(DEBUG, GC) << "G1GC post queue add ref: " << std::hex << from << " -> " << ToVoidPtr(ToObjPtr(to))
                    << " from_card: " << card_table->GetMemoryRange(card);
-    // TODO(dtrubenkov): remove !card->IsYoung() after it will be encoded in compiler barrier
+    // NOTE(dtrubenkov): remove !card->IsYoung() after it will be encoded in compiler barrier
     if ((card->IsClear()) && (!card->IsYoung())) {
-        // TODO(dtrubenkov): either encode this in compiler barrier or remove from Interpreter barrier (if move to
+        // NOTE(dtrubenkov): either encode this in compiler barrier or remove from Interpreter barrier (if move to
         // INT/JIT parts then don't check IsClear here cause it will be marked already)
         card->Mark();
         barriers->Enqueue(card);
@@ -928,7 +928,6 @@ void G1GC<LanguageConfig>::InitializeImpl()
     this->CreateCardTable(allocator, PoolManager::GetMmapMemPool()->GetMinObjectAddress(),
                           PoolManager::GetMmapMemPool()->GetTotalObjectSize());
 
-    // TODO(dtrubenkov): initialize barriers
     auto barrier_set =
         allocator->New<GCG1BarrierSet>(allocator, &PreWrbFuncEntrypoint, &PostWrbUpdateCardFuncEntrypoint,
                                        panda::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize()),
@@ -1056,7 +1055,6 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectible_
     LOG_DEBUG_GC << "GC start";
     uint64_t young_pause_time;
     {
-        // TODO(bwx983476) Measure only those that are on pause
         time::Timer timer(&young_pause_time, true);
         HandlePendingDirtyCards();
         MemRange dirty_cards_range = MixedMarkAndCacheRefs(task, collectible_regions);
@@ -1588,7 +1586,6 @@ void G1GC<LanguageConfig>::Remark(panda::GCTask const &task)
     auto g1_allocator = this->GetG1ObjectAllocator();
     auto all_regions = g1_allocator->GetAllRegions();
     for (const auto &region : all_regions) {
-        // TODO(alovkov): set IS_OLD for NON_MOVABLE region when we create it
         if (region->HasFlag(IS_OLD) || region->HasFlag(IS_NONMOVABLE)) {
             region->SwapMarkBitmap();
         }

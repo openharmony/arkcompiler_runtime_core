@@ -61,7 +61,7 @@ private:
 private:
     static const Alignment PAGE_LOG_ALIGN;
 
-    // TODO(dtrubenkov): Remove when some CodeCache space will be implemented, currently used for avoid memleak noise
+    // NOTE(dtrubenkov): Remove when some CodeCache space will be implemented, currently used for avoid memleak noise
     ArenaAllocator arena_allocator_;
     BaseMemStats *mem_stats_;
     os::memory::RWLock code_range_lock_;

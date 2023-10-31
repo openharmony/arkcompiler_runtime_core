@@ -153,7 +153,7 @@ public:
     static constexpr uint8_t DEFAULT_PERCENTAGE_THRESHOLD = 20;
 
 protected:
-    // TODO(dtrubenkov): change to the proper value when all triggers will be enabled
+    // NOTE(dtrubenkov): change to the proper value when all triggers will be enabled
     static constexpr size_t MIN_HEAP_SIZE_FOR_TRIGGER = 512;
     static constexpr size_t DEFAULT_MIN_TARGET_FOOTPRINT = 256;
     static constexpr size_t DEFAULT_MIN_EXTRA_HEAP_SIZE = 32;      // For heap-trigger-test

@@ -156,7 +156,6 @@ void GenGC<LanguageConfig>::RunYoungGC(GCTask &task)
     uint64_t young_pause_time;
     {
         NoAtomicGCMarkerScope scope(&this->marker_);
-        // TODO(bwx983476) Measure only those that are on pause
         time::Timer timer(&young_pause_time, true);
         // NOLINTNEXTLINE(performance-unnecessary-value-param)
         MarkYoung(task);
@@ -279,7 +278,7 @@ void GenGC<LanguageConfig>::CollectYoungAndMove()
 {
     GCScope<TRACE_TIMING_PHASE> scope(__FUNCTION__, this, GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE);
     LOG_DEBUG_GC << "== GenGC CollectYoungAndMove start ==";
-    // TODO(dtrubenkov): add assert that we in STW
+    // NOTE(dtrubenkov): add assert that we in STW
     PandaVector<ObjectHeader *> moved_objects;
     size_t prev_moved_size = this->GetPandaVm()->GetMemStats()->GetLastYoungObjectsMovedBytes();
     constexpr size_t MINIMAL_PREALLOC_MOVE_OBJ = 32U;
@@ -382,7 +381,7 @@ void GenGC<LanguageConfig>::RunTenuredGC(GCTask &task)
         {
             ScopedTiming un_mark_timing("UnMark", *this->GetTiming());
             // Unmark all because no filter out tenured when mark young
-            // TODO(dtrubenk): remove this
+            // NOTE(dtrubenk): remove this
             this->GetObjectAllocator()->IterateOverObjects([this](ObjectHeader *obj) { this->marker_.UnMark(obj); });
         }
         InitialMark(&objects_stack);
@@ -394,7 +393,6 @@ void GenGC<LanguageConfig>::RunTenuredGC(GCTask &task)
     ASSERT(objects_stack.Empty());
     {
         ScopedTiming un_mark_young_timing("UnMarkYoung", *this->GetTiming());
-        // TODO(yxr): remove this after not marking young objects in tenured gc
         this->GetObjectAllocator()->IterateOverYoungObjects([this](ObjectHeader *obj) { this->marker_.UnMark(obj); });
     }
     Sweep<true>();
@@ -501,7 +499,7 @@ void GenGC<LanguageConfig>::ReMark(GCMarkingStackType *objects_stack, const GCTa
     GCScope<TRACE_TIMING_PHASE> gc_scope(__FUNCTION__, this, GCPhase::GC_PHASE_REMARK);
     GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::REMARK_PAUSE);
 
-    // TODO(dtrubenkov): consider iterational concurrent marking of card table
+    // NOTE(dtrubenkov): consider iterational concurrent marking of card table
     {
         NoAtomicGCMarkerScope scope(&this->marker_);
         auto ref_pred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
@@ -598,7 +596,7 @@ NO_THREAD_SAFETY_ANALYSIS void GenGC<LanguageConfig>::Sweep()
     // NB! can't move block out of brace, we need to make sure GC_PHASE_SWEEP cleared
     {
         GCScopedPhase scoped_phase(this, GCPhase::GC_PHASE_SWEEP);
-        // TODO(dtrubenkov): make concurrent
+        // NOTE(dtrubenkov): make concurrent
         ASSERT(this->GetObjectAllocator()->GetYoungSpaceMemRanges().size() == 1);
         // new strings may be created in young space during tenured gc, we shouldn't collect them
         auto young_mem_range = this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
@@ -702,7 +700,7 @@ bool GenGC<LanguageConfig>::HaveEnoughSpaceToMove() const
     // hack for pools because we have 2 type of pools in tenures space, in bad cases objects can be moved to different
     // spaces. And move 4M objects in bump-allocator to other allocator, may need more than 4M space in other allocator
     // - so we need 3 empty pools.
-    // TODO(xucheng) : remove the checker when we can do part young collection.
+    // NOTE(xucheng) : remove the checker when we can do part young collection.
     // The min num that can guarantee that we move all objects in young space.
     constexpr size_t POOLS_NUM = 3;
     return this->GetObjectAllocator()->HaveEnoughPoolsInObjectSpace(POOLS_NUM);

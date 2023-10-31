@@ -58,8 +58,7 @@ ArenaAllocatorT<USE_OOM_HANDLER>::~ArenaAllocatorT()
 {
     Arena *cur = arenas_;
     while (cur != nullptr) {
-        Arena *tmp;
-        tmp = cur->GetNextArena();
+        Arena *tmp = cur->GetNextArena();
         PoolManager::FreeArena(cur);
         cur = tmp;
     }
@@ -117,7 +116,7 @@ template <bool USE_OOM_HANDLER>
 void ArenaAllocatorT<USE_OOM_HANDLER>::Resize(size_t new_size)
 {
     LOG(DEBUG, ALLOC) << "ArenaAllocator: resize to new size " << new_size;
-    // TODO(aemelenko): we have O(2n) here in the worst case
+    // NOTE(aemelenko): we have O(2n) here in the worst case
     size_t cur_size = GetAllocatedSize();
     if (cur_size <= new_size) {
         LOG_IF(cur_size < new_size, FATAL, ALLOC) << "ArenaAllocator: resize to bigger size than we have. Do nothing";

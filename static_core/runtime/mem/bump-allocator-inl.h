@@ -187,7 +187,7 @@ void BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::IterateOverObje
     const MemVisitor &mem_visitor, void *left_border, void *right_border)
 {
     ASSERT(ToUintPtr(right_border) >= ToUintPtr(left_border));
-    // TODO(ipetrov): These are temporary asserts because we can't do anything
+    // NOTE(ipetrov): These are temporary asserts because we can't do anything
     // if the range crosses different allocators memory pools
     ASSERT(ToUintPtr(right_border) - ToUintPtr(left_border) ==
            (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));

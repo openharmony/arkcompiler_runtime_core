@@ -62,7 +62,7 @@ static constexpr bool PANDA_TRACK_TLAB_ALLOCATIONS = true;
 //
 // Each TLAB is connected with certain thread:
 // (NOTE: In current implementation, we can reach max one TLAB from a thread metadata)
-// TODO(aemelenko): If we don't use links on next, prev TLABS,
+// NOTE(aemelenko): If we don't use links on next, prev TLABS,
 // it is better to remove these fields.
 // |------------------------|              |---------------|
 // | Thread Metainformation | ---------->  | Current  TLAB |----
@@ -291,7 +291,7 @@ private:
 
     TLAB *next_tlab_;
     TLAB *prev_tlab_;
-    // TODO(aemelenko): Maybe use OBJECT_POINTER_SIZE here for heap allocation.
+    // NOTE(aemelenko): Maybe use OBJECT_POINTER_SIZE here for heap allocation.
     void *memory_start_addr_ {nullptr};
     void *memory_end_addr_ {nullptr};
     void *cur_free_position_ {nullptr};

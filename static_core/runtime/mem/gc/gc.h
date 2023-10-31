@@ -710,7 +710,7 @@ private:
     ReferenceProcessor *reference_processor_ {nullptr};
     std::atomic_bool allow_soft_reference_processing_ = false;
 
-    // TODO(ipetrov): choose suitable priority
+    // NOTE(ipetrov): choose suitable priority
     static constexpr size_t GC_TASK_QUEUE_PRIORITY = 6U;
     taskmanager::TaskQueue *gc_workers_task_queue_ = nullptr;
 
@@ -733,7 +733,7 @@ private:
     friend class panda::mem::test::RemSetTest;
     friend class GCScopedPhase;
     friend class GlobalObjectStorage;
-    // TODO(maksenov): Avoid using specific ObjectHelpers class here
+    // NOTE(maksenov): Avoid using specific ObjectHelpers class here
     friend class GCDynamicObjectHelpers;
     friend class GCStaticObjectHelpers;
     friend class G1GCTest;
@@ -752,7 +752,7 @@ private:
     std::atomic<bool> is_postpone_enabled_ {false};
 };
 
-// TODO(dtrubenkov): move configs in more appropriate place
+// NOTE(dtrubenkov): move configs in more appropriate place
 template <MTModeT MT_MODE>
 class AllocConfig<GCType::STW_GC, MT_MODE> {
 public:

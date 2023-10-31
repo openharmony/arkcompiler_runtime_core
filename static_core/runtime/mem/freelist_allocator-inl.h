@@ -184,7 +184,7 @@ void FreeListAllocator<AllocConfigT, LockConfigT>::FreeUnsafe(void *mem)
     LOG_FREELIST_ALLOCATOR(DEBUG) << "Freed memory at addr " << std::hex << mem;
 }
 
-// TODO(aemelenko): We can create a mutex for each pool to increase performance,
+// NOTE(aemelenko): We can create a mutex for each pool to increase performance,
 // but it requires pool alignment restriction
 // (we must compute memory pool header addr from a memory block addr stored inside it)
 
@@ -224,7 +224,7 @@ template <typename AllocConfigT, typename LockConfigT>
 void FreeListAllocator<AllocConfigT, LockConfigT>::Collect(const GCObjectVisitor &death_checker_fn)
 {
     LOG_FREELIST_ALLOCATOR(DEBUG) << "Collecting started";
-    // TODO(aemelenko): Looks like we can unlock alloc_free_lock_ for not dead objects during collection
+    // NOTE(aemelenko): Looks like we can unlock alloc_free_lock_ for not dead objects during collection
     IterateOverObjects([&](ObjectHeader *mem) {
         if (death_checker_fn(mem) == ObjectStatus::DEAD_OBJECT) {
             LOG(DEBUG, GC) << "DELETE OBJECT " << GetDebugInfoAboutObject(mem);
@@ -386,7 +386,7 @@ void FreeListAllocator<AllocConfigT, LockConfigT>::IterateOverObjectsInRange(con
     LOG_FREELIST_ALLOCATOR(DEBUG) << "FreeListAllocator::IterateOverObjectsInRange for range [" << std::hex
                                   << left_border << ", " << right_border << "]";
     ASSERT(ToUintPtr(right_border) >= ToUintPtr(left_border));
-    // TODO(aemelenko): These are temporary asserts because we can't do anything
+    // NOTE(aemelenko): These are temporary asserts because we can't do anything
     // if the range crosses different allocators memory pools
     ASSERT(ToUintPtr(right_border) - ToUintPtr(left_border) ==
            (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));
@@ -506,7 +506,7 @@ bool FreeListAllocator<AllocConfigT, LockConfigT>::AllocatedByFreeListAllocator(
 template <typename AllocConfigT, typename LockConfigT>
 bool FreeListAllocator<AllocConfigT, LockConfigT>::AllocatedByFreeListAllocatorUnsafe(void *mem)
 {
-    // TODO(aemelenko): Create more complex solution
+    // NOTE(aemelenko): Create more complex solution
     MemoryPoolHeader *current_pool = mempool_head_;
     while (current_pool != nullptr) {
         // This assert means that we asked about memory inside MemoryPoolHeader
@@ -566,7 +566,7 @@ freelist::MemoryBlockHeader *FreeListAllocator<AllocConfigT, LockConfigT>::GetFr
                                   << align;
     size_t aligned_size = size;
     if (align != FREELIST_DEFAULT_ALIGNMENT) {
-        // TODO(aemelenko): This is raw but fast solution with bigger fragmentation.
+        // NOTE(aemelenko): This is raw but fast solution with bigger fragmentation.
         // It's better to add here this value, but I'm not 100% sure about all corner cases.
         // (GetAlignmentInBytes(align) + sizeof(MemoryBlockHeader) - GetAlignmentInBytes(FREELIST_DEFAULT_ALIGNMENT))
         aligned_size += (GetAlignmentInBytes(align) + sizeof(MemoryBlockHeader));

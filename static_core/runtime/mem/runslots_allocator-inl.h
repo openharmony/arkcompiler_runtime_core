@@ -52,7 +52,7 @@ inline void *RunSlotsAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Al
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Failed to allocate - size of object is null";
         return nullptr;
     }
-    // TODO(aemelenko): Do smth more memory flexible with alignment
+    // NOTE(aemelenko): Do smth more memory flexible with alignment
     size_t alignment_size = GetAlignmentInBytes(align);
     if (alignment_size > size) {
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Change size of allocation to " << alignment_size
@@ -99,7 +99,7 @@ inline void *RunSlotsAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Al
     {
         os::memory::LockHolder<typename LockConfigT::RunSlotsLock, NEED_LOCK> runslots_lock(*runslots->GetLock());
         if (used_from_freed_runslots_list) {
-            // TODO(aemelenko): if we allocate and free two different size objects,
+            // NOTE(aemelenko): if we allocate and free two different size objects,
             //                  we will have a perf issue here. Maybe it is better to delete free_runslots_?
             if (runslots->GetSlotsSize() != run_slot_size) {
                 runslots->Initialize(run_slot_size, runslots->GetPoolPointer(), false);
@@ -152,7 +152,7 @@ template <typename AllocConfigT, typename LockConfigT>
 inline bool RunSlotsAllocator<AllocConfigT, LockConfigT>::FreeUnsafeInternal(RunSlotsType *runslots, void *mem)
 {
     bool need_to_add_to_free_list = false;
-    // TODO(aemelenko): Here can be a performance issue when we allocate/deallocate one object.
+    // NOTE(aemelenko): Here can be a performance issue when we allocate/deallocate one object.
     const size_t run_slot_size = runslots->GetSlotsSize();
     size_t array_index = RunSlotsType::ConvertToPowerOfTwoUnsafe(run_slot_size);
     bool runslots_was_full = runslots->IsFull();
@@ -261,7 +261,7 @@ bool RunSlotsAllocator<AllocConfigT, LockConfigT>::AllocatedByRunSlotsAllocator(
 template <typename AllocConfigT, typename LockConfigT>
 bool RunSlotsAllocator<AllocConfigT, LockConfigT>::AllocatedByRunSlotsAllocatorUnsafe(void *object)
 {
-    // TODO(aemelenko): Add more complex and optimized solution for this method
+    // NOTE(aemelenko): Add more complex and optimized solution for this method
     return memory_pool_.IsInMemPools(object);
 }
 
@@ -290,7 +290,7 @@ inline bool RunSlotsAllocator<AllocConfigT, LockConfigT>::AddMemoryPool(void *me
         return false;
     }
     if (size > MIN_POOL_SIZE) {
-        // TODO(aemelenko): The size of the pool is fixed by now,
+        // NOTE(aemelenko): The size of the pool is fixed by now,
         // because it is requested for correct freed_runslots_bitmap_
         // workflow. Fix it in #4018
         LOG_RUNSLOTS_ALLOCATOR(DEBUG)
@@ -337,7 +337,7 @@ void RunSlotsAllocator<AllocConfigT, LockConfigT>::IterateOverObjectsInRange(con
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "This memory range is not covered by this allocator";
         return;
     }
-    // TODO(aemelenko): These are temporary asserts because we can't do anything
+    // NOTE(aemelenko): These are temporary asserts because we can't do anything
     // if the range crosses different allocators memory pools
     ASSERT(ToUintPtr(right_border) - ToUintPtr(left_border) ==
            (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));
