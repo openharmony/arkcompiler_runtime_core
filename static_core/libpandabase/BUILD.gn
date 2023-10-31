@@ -12,7 +12,15 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("//arkcompiler/runtime_core/static_vm_config.gni")
 import("//build/ohos.gni")
+
+group("libarktsbase_package") {
+  deps = []
+  if (enable_static_vm) {
+    deps += [ ":libarktsbase_frontend_static" ]
+  }
+}
 
 config("arkbase_public_config") {
   include_dirs = [
@@ -46,27 +54,14 @@ ark_gen_file("base_options_h") {
 }
 
 action("generate_version_file") {
-  script = "$ark_root/gn/build/cmake_configure_file.py"
-
+  script = "$ark_root/gn/build/make_version_file.sh"
   sources = [ "$ark_root/libpandabase/templates/ark_version.h.in" ]
   outputs = [ "$ark_root_gen_dir/libpandabase/ark_version.h" ]
-
-  hash = exec_script("$ark_root/gn/build/find_git.sh",
-                     [ rebase_path("${ark_root}", "$root_build_dir") ],
-                     "trim string")
-
-  if (hash == "") {
-    args = [
-      rebase_path(sources[0], "$root_build_dir"),
-      rebase_path(outputs[0], "$root_build_dir"),
-    ]
-  } else {
-    args = [
-      rebase_path(sources[0], "$root_build_dir"),
-      rebase_path(outputs[0], "$root_build_dir"),
-      "ARK_VERSION_GIT_HASH=${hash}",
-    ]
-  }
+  args = [
+    rebase_path("${ark_root}", "$root_build_dir"),
+    rebase_path(sources[0], "$root_build_dir"),
+    rebase_path(outputs[0], "$root_build_dir"),
+  ]
 }
 
 if (is_mingw) {
@@ -248,7 +243,7 @@ source_set("libarkbase_frontend_set_static") {
   deps = libarkbase_deps
 }
 
-ohos_static_library("libarktsbase_frontend_static") {
+ohos_source_set("libarktsbase_frontend_static") {
   deps = [ ":libarkbase_frontend_set_static" ]
   part_name = ark_part_name
   subsystem_name = ark_subsystem_name

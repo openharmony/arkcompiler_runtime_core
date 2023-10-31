@@ -10,8 +10,16 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("//arkcompiler/runtime_core/static_vm_config.gni")
 import("//build/ohos.gni")
 import("$ark_root/plugins/plugins.gni")
+
+group("libarktsassembler_package") {
+  deps = []
+  if (enable_static_vm) {
+    deps += [ ":libarktsassembler_frontend_static" ]
+  }
+}
 
 config("arkassembler_public_config") {
   include_dirs = [
