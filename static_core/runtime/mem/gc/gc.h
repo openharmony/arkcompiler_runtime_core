@@ -332,6 +332,11 @@ public:
         return vm_;
     }
 
+    taskmanager::TaskQueueInterface *GetWorkersTaskQueue() const
+    {
+        return gc_workers_task_queue_;
+    }
+
     virtual void PreZygoteFork();
 
     virtual void PostZygoteFork();
@@ -712,7 +717,7 @@ private:
 
     // NOTE(ipetrov): choose suitable priority
     static constexpr size_t GC_TASK_QUEUE_PRIORITY = 6U;
-    taskmanager::TaskQueue *gc_workers_task_queue_ = nullptr;
+    taskmanager::TaskQueueInterface *gc_workers_task_queue_ = nullptr;
 
     /* GC worker specific variables */
     GCWorker *gc_worker_ = nullptr;

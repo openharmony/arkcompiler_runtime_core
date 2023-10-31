@@ -28,7 +28,7 @@ bool GCWorkersTaskQueue::TryAddTask(GCWorkersTask &&task)
         this->RunGCWorkersTask(&gc_worker_task);
     };
     auto gc_task = taskmanager::Task::Create(GC_TASK_PROPERTIES, gc_task_runner);
-    taskmanager::TaskScheduler::GetTaskScheduler()->AddTask(std::move(gc_task));
+    GetGC()->GetWorkersTaskQueue()->AddTask(std::move(gc_task));
     return true;
 }
 

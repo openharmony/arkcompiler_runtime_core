@@ -21,8 +21,9 @@ namespace panda {
 CompilerTaskManagerWorker::CompilerTaskManagerWorker(mem::InternalAllocatorPtr internal_allocator, Compiler *compiler)
     : CompilerWorker(internal_allocator, compiler)
 {
-    compiler_task_manager_queue_ = internal_allocator_->New<taskmanager::TaskQueue>(
-        taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskQueue::DEFAULT_PRIORITY);
+    auto *tm = taskmanager::TaskScheduler::GetTaskScheduler();
+    compiler_task_manager_queue_ = tm->CreateAndRegisterTaskQueue<decltype(internal_allocator_->Adapter())>(
+        taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskQueueInterface::DEFAULT_PRIORITY);
     ASSERT(compiler_task_manager_queue_ != nullptr);
 }
 
