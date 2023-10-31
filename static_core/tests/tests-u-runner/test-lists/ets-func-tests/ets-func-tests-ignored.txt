@@ -165,6 +165,11 @@ spec/rest-params/Issue14111.ets
 spec/rest-params/Issue14187.ets
 spec/rest-params/BadTypeError.ets
 ### Issue 14111 end
+### Issue 14564
+spec/rest-params/RestParamsTest_PassInterfaceArgs.ets
+spec/rest-params/RestParamsTest_PassLambdas_0.ets
+spec/rest-params/RestParamsTest_PassLambdas_1.ets
+### Issue 14564 end
 ### End Of Feature: Rest Params
 ### undefined functionality is not implemented
 spec/conditional-expression/nullish_expr/expr/undefined-object-expression.ets
