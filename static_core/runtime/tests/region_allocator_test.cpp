@@ -15,6 +15,7 @@
 
 #include <sys/mman.h>
 #include <algorithm>
+#include <thread>
 
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/os/mem.h"
@@ -162,6 +163,12 @@ public:
         ASSERT_TRUE(allocator.Alloc(alloc_size) != nullptr);
         free_regions -= (alloc_size + Region::HeadSize() + RegionSize() - 1) / RegionSize();
         ASSERT_EQ(GetNumFreeRegions(allocator), free_regions);
+    }
+
+    void *AllocateYoungRegular(NonObjectRegionAllocator &allocator, size_t size)
+    {
+        auto align_size = AlignUp(size, GetAlignmentInBytes(DEFAULT_ALIGNMENT));
+        return allocator.AllocRegular<RegionFlag::IS_EDEN>(align_size);
     }
 
     static const int LOOP_COUNT = 100;
@@ -641,6 +648,52 @@ TEST_F(RegionAllocatorTest, MTAllocLargeTest)
                                            true);
         MtAllocTest<MIN_MT_ALLOC_SIZE, MAX_MT_ALLOC_SIZE, THREADS_COUNT>(&allocator, MIN_ELEMENTS_COUNT,
                                                                          MAX_ELEMENTS_COUNT);
+    }
+}
+
+TEST_F(RegionAllocatorTest, ConcurrentAllocRegular)
+{
+    mem::MemStatsType mem_stats;
+
+    constexpr size_t SPACE_SIZE = RegionSize() * 1024;
+    NonObjectRegionAllocator allocator(&mem_stats, &spaces_, SpaceType::SPACE_TYPE_OBJECT, SPACE_SIZE, true);
+
+    auto allocate_objects = [&allocator, this](std::vector<void *> &vec) {
+        constexpr size_t ITERATIONS = 100'500;
+        constexpr size_t OBJ_SIZE = DEFAULT_REGION_SIZE - Region::HeadSize();
+        vec.reserve(ITERATIONS);
+        [[maybe_unused]] volatile size_t cnt = 0;
+        for (size_t i = 0; i < ITERATIONS; ++i) {
+            // We need this loop to make the test longer and split threads on physical cores
+            // and increase the probability of the test failure
+            for (size_t j = 0; j < ITERATIONS; ++j) {
+                cnt += j;
+            }
+            void *mem = AllocateYoungRegular(allocator, OBJ_SIZE);
+            if (mem == nullptr) {
+                break;
+            }
+            vec.push_back(mem);
+        }
+    };
+
+    std::vector<void *> vec1;
+    std::vector<void *> vec2;
+
+    std::thread worker([&allocate_objects, &vec1] {
+        os::CpuAffinityManager::SetAffinityForCurrentThread(os::CpuPower::WEAK);
+        allocate_objects(vec1);
+    });
+
+    os::CpuAffinityManager::SetAffinityForCurrentThread(os::CpuPower::BEST);
+    allocate_objects(vec2);
+
+    worker.join();
+
+    for (auto &elem1 : vec1) {
+        for (auto &elem2 : vec2) {
+            ASSERT_TRUE(elem1 != elem2);
+        }
     }
 }
 
