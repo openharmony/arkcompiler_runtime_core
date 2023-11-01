@@ -2585,3 +2585,7 @@
 # es2panda fails: panda:14653 es2panda segfault when optional lambda is omitted
 17.experimental_features/10.trailing_lambda/trlambda_func_15.ets
 # end of es2panda fails
+
+# 14793
+13.modules_and_compilation_units/03.import_declarations/05.default_import_binding/default_import_function.et
+#end 14793
