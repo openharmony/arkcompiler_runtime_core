@@ -33,6 +33,8 @@ public:
     InteropCallKind GetInteropCallKind(MethodPtr method_ptr) const override;
     char *GetFuncPropName(MethodPtr method_ptr, uint32_t str_id) const override;
     uint64_t GetFuncPropNameOffset(MethodPtr method_ptr, uint32_t str_id) const override;
+    bool IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const override;
+    bool IsMethodStringBuilderToString(MethodPtr method) const override;
 
     FieldPtr ResolveLookUpField(FieldPtr raw_field, ClassPtr klass) override;
     MethodPtr ResolveLookUpCall(FieldPtr raw_field, ClassPtr klass, bool is_setter) override;

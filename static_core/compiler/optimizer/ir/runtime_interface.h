@@ -351,6 +351,16 @@ public:
         return false;
     }
 
+    virtual bool IsMethodStringBuilderConstructorWithStringArg([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual bool IsMethodStringBuilderToString([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
     virtual std::string GetFileName([[maybe_unused]] MethodPtr method) const
     {
         return "UnknownFile";

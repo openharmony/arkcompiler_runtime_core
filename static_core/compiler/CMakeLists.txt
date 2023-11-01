@@ -205,6 +205,7 @@ set(OPTIMIZER_SOURCES
         optimizer/optimizations/phi_type_resolving.cpp
         optimizer/optimizations/redundant_loop_elimination.cpp
         optimizer/optimizations/scheduler.cpp
+        optimizer/optimizations/simplify_string_builder.cpp
         optimizer/optimizations/try_catch_resolving.cpp
         optimizer/optimizations/inline_intrinsics.cpp
         optimizer/optimizations/vn.cpp
