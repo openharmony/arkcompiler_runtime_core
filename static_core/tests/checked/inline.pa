@@ -779,3 +779,73 @@ error_exit_14:
     call.virt NestedCalls.outer, v0
     return
 }
+
+#! CHECKER           Inline final class
+#! RUN               force_jit: true, options: "", entry: "Test5::main"
+#! EVENT             /Inline,B1::func__noinline__,B1::func,.*VIRTUAL,SUCCESS/
+#! EVENT_NEXT        /Inline,B1::func__noinline__,C1::func,.*VIRTUAL,SUCCESS/
+#! EVENT_NOT         /Inline,B1::func__noinline__,A1::func,.*VIRTUAL,SUCCESS/
+
+#! CHECKER           Inline final class AOT
+#! RUN_PAOC          options: ""
+#! EVENT             /Inline,B1::func__noinline__,B1::func,.*VIRTUAL,SUCCESS/
+#! EVENT_NEXT        /Inline,B1::func__noinline__,C1::func,.*VIRTUAL,SUCCESS/
+#! EVENT_NOT         /Inline,B1::func__noinline__,A1::func,.*VIRTUAL,SUCCESS/
+#! RUN               options: "", entry: "Test5::main"
+
+.record Test5 {}
+.record A1 {}
+.record B1 <extends=A1, final> {}
+.record C1 <final> {}
+
+.function i32 A1.func(A1 a0) {
+    ldai 1
+    return
+}
+
+.function i32 B1.func(B1 a0) {
+    ldai 2
+    return
+}
+
+.function i32 C1.func(C1 a0) {
+    ldai 3
+    return
+}
+
+.function i32 A1.func__noinline__(A1 a0, C1 a1, A1 a2) {
+    ldai 5
+    return
+}
+
+.function i32 B1.func__noinline__(B1 a0, C1 a1, A1 a2) {
+    call.virt A1.func, a0
+    movi v0, 0x2
+    jne v0, error_exit_1
+    call.virt C1.func, a1
+    movi v0, 0x3
+    jne v0, error_exit_2
+    call.virt A1.func, a2
+    movi v0, 0x1
+    jne v0, error_exit_3
+    ldai 0x0
+    return
+error_exit_1:
+    ldai 0x1
+    return
+error_exit_2:
+    ldai 0x2
+    return
+error_exit_3:
+    ldai 0x3
+    return
+}
+
+.function i32 Test5.main() {
+    newobj v0, A1
+    newobj v1, B1
+    newobj v2, C1
+
+    call.virt A1.func__noinline__, v1, v2, v0
+    return
+}

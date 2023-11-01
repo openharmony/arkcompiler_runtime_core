@@ -45,6 +45,7 @@ public:
 
 protected:
     static void VisitNewObject(GraphVisitor *v, Inst *inst);
+    static void VisitParameter(GraphVisitor *v, Inst *inst);
     static void VisitNewArray(GraphVisitor *v, Inst *inst);
     static void VisitLoadArray(GraphVisitor *v, Inst *inst);
     static void VisitLoadString(GraphVisitor *v, Inst *inst);

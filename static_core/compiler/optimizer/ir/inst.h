@@ -3791,6 +3791,7 @@ public:
     DECLARE_INST(ParameterInst);
     using Inst::Inst;
     static constexpr uint16_t DYNAMIC_NUM_ARGS = std::numeric_limits<uint16_t>::max();
+    static constexpr uint16_t INVALID_ARG_REF_NUM = std::numeric_limits<uint16_t>::max();
 
     explicit ParameterInst(Opcode /* unused */, uint16_t arg_number, DataType::Type type = DataType::NO_TYPE)
         : Inst(Opcode::Parameter, type, INVALID_PC), arg_number_(arg_number)
@@ -3805,13 +3806,22 @@ public:
     {
         arg_number_ = arg_number;
     }
+    uint16_t GetArgRefNumber() const
+    {
+        return arg_ref_number_;
+    }
 
+    void SetArgRefNumber(uint16_t arg_ref_number)
+    {
+        arg_ref_number_ = arg_ref_number;
+    }
     bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *target_graph) const override;
 
 private:
     uint16_t arg_number_ {0};
+    uint16_t arg_ref_number_ {INVALID_ARG_REF_NUM};
 };
 
 inline bool IsZeroConstant(const Inst *inst)
