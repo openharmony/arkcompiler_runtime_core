@@ -16,19 +16,20 @@
 /*---
 desc: >-
     03.08.11 Union types
-name: 03.types/08.reference_types/03.08.11.union_types/union_compare_02_03
+name: 03.types/08.reference_types/03.08.11.union_types/union_return_n_04
 tags: []
 ---*/
+type Margin = number | string
 
-class A {}
+function format_number(): Margin {
+    return 5
+}
 
-type Union1 = A | string
+function format_string(): Margin {
+    return "5 px"
+}
 
-function main(): int {
-    let a: Union1 = "hello"
-    let b: Union1 = "hello"
-    if (a === b) {
-        return 0
-    }
-    return -1
+function main(): void {
+    let a: Object = format_string()
+    assert a == "5 px"
 }

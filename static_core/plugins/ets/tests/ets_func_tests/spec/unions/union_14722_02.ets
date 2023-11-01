@@ -16,19 +16,15 @@
 /*---
 desc: >-
     03.08.11 Union types
-name: 03.types/08.reference_types/03.08.11.union_types/union_compare_02_03
-tags: []
+name: union_14722_02.ets
+tags: [compile-only]
 ---*/
 
-class A {}
+const flag = false
 
-type Union1 = A | string
+class A {
+    private static readonly map = flag ? new Map<int, Set<Object>>() : undefined;
+}
 
-function main(): int {
-    let a: Union1 = "hello"
-    let b: Union1 = "hello"
-    if (a === b) {
-        return 0
-    }
-    return -1
+function main(): void {
 }

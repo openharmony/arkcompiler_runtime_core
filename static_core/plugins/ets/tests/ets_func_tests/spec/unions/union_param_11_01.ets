@@ -16,19 +16,25 @@
 /*---
 desc: >-
     03.08.11 Union types
-name: 03.types/08.reference_types/03.08.11.union_types/union_return_n_04
-tags: [negative, compile-only]
+name: 03.types/08.reference_types/03.08.11.union_types/union_param_11_01
+tags: []
 ---*/
-type Margin = number | string
 
-function format_number(): Margin {
-    return 5
+class A {}
+class B extends A {}
+
+function callB(b: B, text: string) {
+    assert b instanceof B : text
 }
 
-function format_string(): Margin {
-    return "5 px"
+function callA(a: B | string, name?: string) {
+    if (a instanceof B){
+        callB(a as B, name ?? "")
+    }
 }
 
 function main(): void {
-    let a: Object = format_string()
+    callA(new B())
+    let a: B | string = new B()
+    callA(a)
 }

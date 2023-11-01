@@ -22,13 +22,14 @@ tags: []
 
 class A {}
 
-type Union1 = string | number
+type Union1 = A | string
 
 function main(): int {
-    let a: Union1 = "hello"
-    let b: A = new A()
+    let h: A = new A()
+    let a: Union1 = h
+    let b: Union1 = h
     if (a === b) {
-        return -1
+        return 0
     }
-    return 0
+    return -1
 }

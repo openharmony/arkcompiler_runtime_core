@@ -16,17 +16,18 @@
 /*---
 desc: >-
     03.08.11 Union types
-name: 03.types/08.reference_types/03.08.11.union_types/union_compare_02_03
+name: 03.types/08.reference_types/03.08.11.union_types/union_compare_05
 tags: []
 ---*/
 
 class A {}
 
-type Union1 = A | string
+type Union1 = A | number
 
 function main(): int {
-    let a: Union1 = "hello"
-    let b: Union1 = "hello"
+    let h: A = new A()
+    let a: Union1 = h
+    let b: A = h
     if (a === b) {
         return 0
     }
