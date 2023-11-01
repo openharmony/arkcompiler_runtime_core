@@ -23,7 +23,7 @@
 #! RUN_LLVM     options: "--compiler-regex=_GLOBAL::liveness_0 \
 #!              --llvm-gc-check=true --llvm-dump-after"
 #! READ_FILE    "console.out"
-#! INST         /%v5[0-9]* = phi ptr addrspace\(271\).* \[ %v9[0-9]*.rel.*, .* \]/
+#! INST         /%v[0-9]* = phi ptr addrspace\(271\).* \[ %v[0-9]*.rel.*, .* \]/
 .function i32 liveness_0() {
     newobj v0, A
 backedge:

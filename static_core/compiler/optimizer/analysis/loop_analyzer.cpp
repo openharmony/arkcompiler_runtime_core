@@ -391,6 +391,23 @@ void Loop::CheckInfinity()
     isInfinite_ = true;
 }
 
+bool Loop::IsPostExitBlock(const BasicBlock *block) const
+{
+    for (auto loopBlock : GetBlocks()) {
+        for (auto succ : loopBlock->GetSuccsBlocks()) {
+            if (succ->GetLoop() != GetOuterLoop()) {
+                continue;
+            }
+
+            if (succ == block) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 /*
  * Find outside block for the loop with single back-edge exit
  */

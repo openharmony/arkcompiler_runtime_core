@@ -29,10 +29,37 @@
 
 namespace ark::ets::intrinsics {
 
+static inline constexpr size_t NULL_BYTES_NUM = 5;
+
+EtsString *GetNullString()
+{
+    auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    auto vm = Runtime::GetCurrent()->GetPandaVM();
+
+    std::array<uint8_t, NULL_BYTES_NUM> nullBytes = {'n', 'u', 'l', 'l', '\0'};
+
+    return EtsString::FromCoreType(
+        vm->GetStringTable()->GetOrInternString(nullBytes.data(), nullBytes.size() - 1, ctx));
+}
+
 EtsString *StdCoreStringBuilderConcatStrings(EtsString *lhs, EtsString *rhs)
 {
-    ASSERT(lhs != nullptr && rhs != nullptr);
+    if (lhs == nullptr || rhs == nullptr) {
+        // GetNullString()-call below may trigger GC and move lhs/rhs args, need to hold them
+        auto thread = ManagedThread::GetCurrent();
+        [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+        VMHandle<EtsString> lhsHandle(thread, lhs == nullptr ? nullptr : lhs->GetCoreType());
+        VMHandle<EtsString> rhsHandle(thread, rhs == nullptr ? nullptr : rhs->GetCoreType());
 
+        EtsString *nullString = GetNullString();
+
+        // Restore args from handles
+        lhs = lhsHandle.GetPtr();
+        rhs = rhsHandle.GetPtr();
+
+        lhs = lhs == nullptr ? nullString : lhs;
+        rhs = rhs == nullptr ? nullString : rhs;
+    }
     return EtsString::Concat(lhs, rhs);
 }
 

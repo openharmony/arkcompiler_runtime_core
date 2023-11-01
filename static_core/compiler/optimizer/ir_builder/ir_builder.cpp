@@ -137,18 +137,15 @@ bool IrBuilder::CheckMethodLimitations(const BytecodeInstructions &instructions,
     return true;
 }
 
-bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *instBuilder, const uint8_t *instructionsBuf)
+bool IrBuilder::CreateSaveStateForLoopBlocks(BasicBlock *bb, InstBuilder *instBuilder)
 {
-    instBuilder->SetCurrentBlock(bb);
-    instBuilder->UpdateDefs();
-    if (GetGraph()->IsDynamicMethod() && !GetGraph()->IsBytecodeOptimizer() &&
-        bb == GetGraph()->GetStartBlock()->GetSuccessor(0)) {
-        instBuilder->InitEnv(bb);
-    }
-
-    // OSR needs additional design for try-catch processing.
-    if ((bb->IsTryBegin() || bb->IsTryEnd()) && GetGraph()->IsOsrMode()) {
-        return false;
+    if (GetGraph()->GetEndBlock() != bb && !GetGraph()->IsOsrMode() &&
+        (bb->IsLoopPostExit() || bb->IsLoopPreHeader())) {
+        // Prepend SaveState as a first instruction in the loop pre header and post exit
+        // Set NO_DCE flag, so Cleanup pass won't delete yet unused instruction
+        auto *ss = instBuilder->CreateSaveState(Opcode::SaveState, bb->GetGuestPc());
+        bb->AppendInst(ss);
+        ss->SetFlag(inst_flags::NO_DCE);
     }
 
     if (bb->IsLoopHeader() && !bb->GetLoop()->IsTryCatchLoop()) {
@@ -174,6 +171,27 @@ bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *instBuilder, const 
             bb->AppendInst(sp);
             COMPILER_LOG(DEBUG, IR_BUILDER) << "create safepoint: " << *sp;
         }
+    }
+
+    return true;
+}
+
+bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *instBuilder, const uint8_t *instructionsBuf)
+{
+    instBuilder->SetCurrentBlock(bb);
+    instBuilder->UpdateDefs();
+    if (GetGraph()->IsDynamicMethod() && !GetGraph()->IsBytecodeOptimizer() &&
+        bb == GetGraph()->GetStartBlock()->GetSuccessor(0)) {
+        instBuilder->InitEnv(bb);
+    }
+
+    // OSR needs additional design for try-catch processing.
+    if ((bb->IsTryBegin() || bb->IsTryEnd()) && GetGraph()->IsOsrMode()) {
+        return false;
+    }
+
+    if (!CreateSaveStateForLoopBlocks(bb, instBuilder)) {
+        return false;
     }
 
     ASSERT(bb->GetGuestPc() != INVALID_PC);
@@ -225,10 +243,10 @@ bool IrBuilder::BuildInstructionsForBB(BasicBlock *bb, InstBuilder *instBuilder,
             return false;
         }
         if (inst.CanThrow()) {
-            // One PBC instruction can be expanded to the group of IR's instructions, find first built instruction in
-            // this group, and then mark all instructions as throwable; All instructions should be marked, since some of
-            // them can be deleted during optimizations, unnecessary catch-phi moves will be resolved before Register
-            // Allocator
+            // One PBC instruction can be expanded to the group of IR's instructions, find first built instruction
+            // in this group, and then mark all instructions as throwable; All instructions should be marked, since
+            // some of them can be deleted during optimizations, unnecessary catch-phi moves will be resolved before
+            // Register Allocator
             auto throwableInst = (currentLastInst == nullptr) ? currentBb->GetFirstInst() : currentLastInst->GetNext();
             ProcessThrowableInstructions(instBuilder, throwableInst);
 
@@ -513,8 +531,8 @@ void IrBuilder::MarkTryCatchBlocks(Marker marker)
         }
     }
 
-    // Nested try-blocks can be removed, but referring to them basic blocks can be placed in the external try-blocks.
-    // So `try` marks are added after removing unreachable blocks
+    // Nested try-blocks can be removed, but referring to them basic blocks can be placed in the external
+    // try-blocks. So `try` marks are added after removing unreachable blocks
     for (auto it : tryBlocks_) {
         const auto &tryBlock = it.second;
         if (tryBlock.beginBb->GetGraph() != tryBlock.endBb->GetGraph()) {
@@ -603,8 +621,8 @@ void IrBuilder::ConnectTryCodeBlock(const TryCodeBlock &tryBlock, const ArenaMap
  * }
  *
  * Nested try doesn't contain throwable instructions and related catch-handler will not be connected to the graph.
- * As a result all `catch` basic blocks will be eliminated together with outer's `try_end`, since it was inserted just
- * after `catch`
+ * As a result all `catch` basic blocks will be eliminated together with outer's `try_end`, since it was inserted
+ * just after `catch`
  */
 void IrBuilder::RestoreTryEnd(const TryCodeBlock &tryBlock)
 {

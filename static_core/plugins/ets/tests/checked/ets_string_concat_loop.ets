@@ -1,0 +1,1531 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+//! CHECKER       AOT IR Builder, check String concatenation loop
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           entry: "ETSGLOBAL::main"
+//! RUN_PAOC      options: "--compiler-regex='.*concat_loop[0-9]*' --compiler-inlining=false"
+//!
+//! METHOD        "ETSGLOBAL::concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST          /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::concat_loop1"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST          /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::concat_loop2"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /head, loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST          /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /head, loop/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::concat_loop3"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST          /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::concat_loop4"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST          /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::concat_loop5"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::concat_loop7"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::equivalent_concat_loop7"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::concat_loop8"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,10
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,6
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//!
+//! METHOD        "ETSGLOBAL::nested_concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop 3/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST          /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 3/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 2/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 1/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::try_catch_concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,14
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,6
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,6
+//!
+//! METHOD        "ETSGLOBAL::try_catch_concat_loop1"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::try_catch_concat_loop2"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,2
+//!
+//! METHOD        "ETSGLOBAL::try_catch_concat_loop3"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::try_catch_concat_loop4"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::try_catch_concat_loop5"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,5
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,10
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,5
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,3
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,4
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop1"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop2"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,5
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop3"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,5
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop4"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop5"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop6"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop7"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop8"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop9"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop10"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop 1, depth 1, bc: 0x00000018/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 1, depth 1, bc: 0x00000018/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop11"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop 1, depth 1, bc: 0x00000018/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 1, depth 1, bc: 0x00000018/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//!
+//! METHOD        "ETSGLOBAL::switch_concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,8
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,6
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::switch_concat_loop1"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,8
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,6
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::reuse_concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,2
+//!
+//! METHOD        "ETSGLOBAL::reuse_concat_loop1"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::reuse_concat_loop2"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::reuse_concat_loop3"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,2
+//!
+//! METHOD        "ETSGLOBAL::reuse_concat_loop4"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::reuse_concat_loop5"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::args_concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendBool/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendChar/,1
+//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendBool/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendChar/,1
+//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+
+//! CHECKER       JIT IR Builder, check String concatenation loop
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, options: "--compiler-regex='.*concat_loop[0-9]+.*' --compiler-inlining=false", entry: "ETSGLOBAL::main"
+//!
+//! METHOD        "ETSGLOBAL::concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST          /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::concat_loop1"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST          /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::concat_loop2"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /head, loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST          /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /head, loop/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::concat_loop3"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST          /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::concat_loop4"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST          /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::concat_loop5"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::concat_loop7"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::equivalent_concat_loop7"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::concat_loop8"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,10
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,6
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//!
+//! METHOD        "ETSGLOBAL::nested_concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop 3/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST          /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 3/
+//! INST          /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 2/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 1/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /Intrinsic.StdCoreSbToString/
+//!
+//! METHOD        "ETSGLOBAL::try_catch_concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,14
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,6
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,6
+//!
+//! METHOD        "ETSGLOBAL::try_catch_concat_loop1"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::try_catch_concat_loop2"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,2
+//!
+//! METHOD        "ETSGLOBAL::try_catch_concat_loop3"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::try_catch_concat_loop4"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::try_catch_concat_loop5"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,5
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,10
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,5
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,3
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,4
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop1"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop2"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,5
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop3"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,5
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop4"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop5"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop6"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop7"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop8"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop9"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop10"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop 1, depth 1, bc: 0x00000018/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 1, depth 1, bc: 0x00000018/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//!
+//! METHOD        "ETSGLOBAL::if_concat_loop11"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop 1, depth 1, bc: 0x00000018/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 1, depth 1, bc: 0x00000018/
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//!
+//! METHOD        "ETSGLOBAL::switch_concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,8
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,6
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::switch_concat_loop1"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,8
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,6
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//!
+//! METHOD        "ETSGLOBAL::reuse_concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,2
+//!
+//! METHOD        "ETSGLOBAL::reuse_concat_loop1"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::reuse_concat_loop2"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::reuse_concat_loop3"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
+//! INST_NOT      /Intrinsic.StdCoreSbAppendInt/
+//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,2
+//!
+//! METHOD        "ETSGLOBAL::reuse_concat_loop4"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::reuse_concat_loop5"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
+//!
+//! METHOD        "ETSGLOBAL::args_concat_loop0"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendBool/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendChar/,1
+//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! PASS_AFTER    "ChecksElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendBool/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendChar/,1
+//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+
+function concat_loop0(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i)
+        str = str + a;                              // applied
+    return str;
+}
+
+function concat_loop1(a: String, n: int): String {
+    let str: String = "";
+    while (--n >= 0)
+        str += a;                                   // applied
+    return str;
+}
+
+function concat_loop2(a: String, n: int): String {
+    let str: String = "";
+    do
+        str += a;                                   // applied
+    while (--n > 0);
+    return str;
+}
+
+function concat_loop3(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i, str += a);          // applied
+    return str;
+}
+
+function concat_loop4(strings: String[]): String {
+    let str: String = "";
+    for (let i = 0; i < strings.length; ++i) {
+        str += strings[i];                          // applied
+    }
+    return str;
+}
+
+function concat_loop5(strings: String[]): String {
+    let str: String = "";
+    for (let i = 0; i < strings.length; ++i) {
+        str += strings[0] + strings[i];             // applied
+    }
+    return str;
+}
+
+function concat_loop7(a: String, b: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;                                   // applied
+        str += b;                                   // applied
+    }
+    return str;
+}
+
+function equivalent_concat_loop7(a: String, b: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        let sb0 = new StringBuilder();              // applied
+        sb0.append(str);
+        sb0.append(a);
+        let tmp1 = sb0.toString();
+
+        let sb1 = new StringBuilder();              // applied
+        sb1.append(tmp1);
+        sb1.append(b);
+        str = sb1.toString();
+    }
+    return str;
+}
+
+function concat_loop8(a: String, b: String, n: int): String {
+    let a1b: String = "";
+    let b2a: String = "";
+    for (let i = 0; i < n; ++i) {
+        a1b += a + 1;                               // applied
+        a1b += b;                                   // applied
+
+        b2a += b + 2;                               // applied
+        b2a += a;                                   // applied
+    }
+    return a1b + "." + b2a;
+}
+
+function nested_concat_loop0(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i)
+        for (let j = 0; j < n; ++j)
+            for (let k = 0; k < n; ++k)
+                str = str + a;                      // applied, instructions moved out of outermost loop
+    return str;
+}
+
+function try_catch_concat_loop0(a: String, n: int): String {
+    let str_try: String = "";
+    let str_catch: String = "";
+    let str_finally: String = "";
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;                                   // not applied due to loop containing try-catch-finally blocks
+                                                    // replaced by concat intrinsic
+        try {
+            str_try += a;                           // not applied due to being inside try-block
+                                                    // replaced by concat intrinsic
+        }
+        catch(ex) {
+            str_catch += a;                         // not applied due to being inside catch-block
+                                                    // replaced by concat intrinsic
+        }
+        finally {
+            str_finally += a;                       // not applied due to being inside finally-block
+                                                    // replaced by concat intrinsic
+        }
+    }
+    return str + str_try + str_catch + str_finally; // replaced by concat intrinsic
+}
+
+function try_catch_concat_loop1(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i)
+        try {
+            str = str + a;                          // not applied
+                                                    // replaced by concat intrinsic
+        }
+        catch(ex) {
+            str = str + a;                          // not applied
+                                                    // replaced by concat intrinsic
+        }
+    return str;
+}
+
+function try_catch_concat_loop2(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i)
+        try {
+            str = str + a;                          // not applied
+                                                    // replaced by concat intrinsic
+        }
+        finally {
+            str = str + a;                          // not applied
+                                                    // replaced by concat intrinsic
+        }
+    return str;
+}
+
+function try_catch_concat_loop3(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i)
+        try {
+            for (let j = 0; j < n; ++j) {
+                str += a;                       // not applied due to loop containing try-catch-finally blocks
+                                                // replaced by concat intrinsic
+            }
+        }
+        catch(ex) {
+            for (let j = 0; j < n; ++j) {
+                str += a;                       // not applied
+                                                // replaced by concat intrinsic
+            }
+        }
+    return str;
+}
+
+function try_catch_concat_loop4(a: String, n: int): String {
+    let str: String = "";
+    try {
+        for (let i = 0; i < n; ++i)
+            str += a;                           // not applied due to loop containing try-catch-finally blocks
+                                                // replaced by concat intrinsic
+    }
+    catch(ex) {}
+    return str;
+}
+
+function try_catch_concat_loop5(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;                   // applied due to loop containing try-catch-finally blocks
+                                    // replaced by concat intrinsic
+        try {
+            str += a;               // not applied due to being inside try-block
+                                    // replaced by concat intrinsic
+        }
+        catch(ex) {
+            str += a;               // not applied due to being inside catch-block
+                                    // replaced by concat intrinsic
+        }
+        finally {
+            str += a;               // not applied due to being inside finally-block
+                                    // replaced by concat intrinsic
+        }
+    }
+    return str;
+}
+
+function if_concat_loop0(a: String, b: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;                               // applied
+        if (i < n/2)
+            str += 1;                           // applied
+        else
+            str += 2;                           // applied
+        str += b;                               // applied
+    }
+    return str;
+}
+
+function if_concat_loop1(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;                               // applied
+        if (i < n/2)
+            str += 1;                           // applied
+        else
+            str += 2;                           // applied
+    }
+    return str;
+}
+
+function if_concat_loop2(a: String, b: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;                               // applied
+        if (i < n/2)
+            str += 1;                           // applied
+        str += b;                               // applied
+    }
+    return str;
+}
+
+function if_concat_loop3(a: String, b: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;                               // applied
+        if (i < n/2) {
+        }
+        else
+            str += 2;                           // applied
+        str += b;                               // applied
+    }
+    return str;
+}
+
+function if_concat_loop4(b: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        if (i < n/2)
+            str += 1;                           // applied
+        else
+            str += 2;                           // applied
+        str += b;                               // applied
+    }
+    return str;
+}
+
+function if_concat_loop5(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;                               // applied
+        if (i < n/2)
+            str += 1;                           // applied
+    }
+    return str;
+}
+
+function if_concat_loop6(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;                               // applied
+        if (i < n/2) {
+        }
+        else
+            str += 2;                           // applied
+    }
+    return str;
+}
+
+function if_concat_loop7(n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        if (i < n/2)
+            str += 1;                           // applied
+        else
+            str += 2;                           // applied
+    }
+    return str;
+}
+
+function if_concat_loop8(b: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        if (i < n/2) {
+        }
+        else
+            str += 2;                           // applied
+        str += b;                               // applied
+    }
+    return str;
+}
+
+function if_concat_loop9(b: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        if (i < n/2)
+            str += 1;                           // applied
+        str += b;                               // applied
+    }
+    return str;
+}
+
+function if_concat_loop10(n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        if (i < n/2)
+            str += 1;                           // applied
+    }
+    return str;
+}
+
+function if_concat_loop11(n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        if (i < n/2) {
+        }
+        else
+            str += 2;                           // applied
+    }
+    return str;
+}
+
+function switch_concat_loop0(a: String, b: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;                               // applied
+        switch (i) {
+            case 0:
+                str += 0;                       // applied
+                break;
+            case 1:
+                str += 1;                       // applied
+                break;
+            case 2:
+                str += 2;                       // applied
+                break;
+            default:
+                str += i;                       // applied
+                break;
+        }
+        str += b;                               // applied
+    }
+    return str;
+}
+
+function switch_concat_loop1(a: String, b: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;                               // applied
+        switch (i) {
+            case 0:
+                str += 0;                       // applied
+            case 1:
+                str += 1;                       // applied
+            case 2:
+                str += 2;                       // applied
+            default:
+                str += i;                       // applied
+        }
+        str += b;                               // applied
+    }
+    return str;
+}
+
+function reuse_concat_loop0(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += str;                             // not applied due to str reuse
+        str += a;
+    }
+    return str;
+}
+
+function reuse_concat_loop1(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += str.length;                      // not applied due to str reuse
+        str += a;
+    }
+    return str;
+}
+
+function reuse_concat_loop2(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += str.getLength();                 // not applied due to str reuse
+        str += a;
+    }
+    return str;
+}
+
+function reuse_concat_loop3(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;
+        str += str;                             // not applied due to str reuse
+    }
+    return str;
+}
+
+function reuse_concat_loop4(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;
+        str += str.length;                      // not applied due to str reuse
+    }
+    return str;
+}
+
+function reuse_concat_loop5(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i) {
+        str += a;
+        str += str.getLength();                 // not applied due to str reuse
+    }
+    return str;
+}
+
+function args_concat_loop0(x: double, y: boolean, ...p: char[]): string
+{
+    let res: string = "" + x + y + p.length;    // not replaced by intrinsic due to concatenating float, bool, int
+    for (let ch of p) res += ch;                // not applied due to exit block not dominated by preheader
+    return res;
+}
+
+function main() {
+    assert concat_loop0("a", 4) == "aaaa": "Wrong result at concat_loop0";
+    assert concat_loop1("a", 4) == "aaaa": "Wrong result at concat_loop1";
+    assert concat_loop2("a", 4) == "aaaa": "Wrong result at concat_loop2";
+    assert concat_loop3("a", 4) == "aaaa": "Wrong result at concat_loop3";
+    assert concat_loop4(["a", "b", "c", "d"]) == "abcd": "Wrong result at concat_loop4";
+    assert concat_loop5(["a", "b", "c", "d"]) == "aaabacad": "Wrong result at concat_loop5";
+    assert concat_loop7("a", "b", 4) == "abababab": "Wrong result at concat_loop7";
+    assert equivalent_concat_loop7("a", "b", 4) == "abababab": "Wrong result at equivalent_concat_loop7";
+    assert concat_loop8("a", "b", 4) == "a1ba1ba1ba1b.b2ab2ab2ab2a": "Wrong result at concat_loop8";
+    assert nested_concat_loop0("a", 2) == "aaaaaaaa": "Wrong result at nested_concat_loop0";
+    assert try_catch_concat_loop0("a", 4) == "aaaaaaaaaaaa": "Wrong result at try_catch_concat_loop0";
+    assert try_catch_concat_loop1("a", 4) == "aaaa": "Wrong result at try_catch_concat_loop1";
+    assert try_catch_concat_loop2("a", 4) == "aaaaaaaa": "Wrong result at try_catch_concat_loop2";
+    assert try_catch_concat_loop3("a", 2) == "aaaa": "Wrong result at try_catch_concat_loop3";
+    assert try_catch_concat_loop4("a", 4) == "aaaa": "Wrong result at try_catch_concat_loop4";
+    assert try_catch_concat_loop5("a", 4) == "aaaaaaaaaaaa": "Wrong result at try_catch_concat_loop5";
+    assert if_concat_loop0("a", "b", 4) == "a1ba1ba2ba2b": "Wrong result at if_concat_loop0";
+    assert if_concat_loop1("a", 4) == "a1a1a2a2": "Wrong result at if_concat_loop1";
+    assert if_concat_loop2("a", "b", 4) == "a1ba1babab": "Wrong result at if_concat_loop2";
+    assert if_concat_loop3("a", "b", 4) == "ababa2ba2b": "Wrong result at if_concat_loop3";
+    assert if_concat_loop4("b", 4) == "1b1b2b2b": "Wrong result at if_concat_loop4";
+    assert if_concat_loop5("a", 4) == "a1a1aa": "Wrong result at if_concat_loop5";
+    assert if_concat_loop6("a", 4) == "aaa2a2": "Wrong result at if_concat_loop6";
+    assert if_concat_loop7(4) == "1122": "Wrong result at if_concat_loop7";
+    assert if_concat_loop8("b", 4) == "bb2b2b": "Wrong result at if_concat_loop8";
+    assert if_concat_loop9("b", 4) == "1b1bbb": "Wrong result at if_concat_loop9";
+    assert if_concat_loop10(4) == "11": "Wrong result at if_concat_loop10";
+    assert if_concat_loop11(4) == "22": "Wrong result at if_concat_loop11";
+    assert switch_concat_loop0("a", "b", 4) == "a0ba1ba2ba3b": "Wrong result at switch_concat_loop0";
+    assert switch_concat_loop1("a", "b", 4) == "a0120ba121ba22ba3b": "Wrong result at switch_concat_loop1";
+    assert reuse_concat_loop0("a", 4) == "aaaaaaaaaaaaaaa": "Wrong result at reuse_concat_loop0";
+    assert reuse_concat_loop1("a", 4) == "0a2a4a6a": "Wrong result at reuse_concat_loop1";
+    assert reuse_concat_loop2("a", 4) == "0a2a4a6a": "Wrong result at reuse_concat_loop2";
+    assert reuse_concat_loop3("a", 4) == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": "Wrong result at reuse_concat_loop3";
+    assert reuse_concat_loop4("a", 4) == "a1a3a5a7": "Wrong result at reuse_concat_loop4";
+    assert reuse_concat_loop5("a", 4) == "a1a3a5a7": "Wrong result at reuse_concat_loop5";
+    assert args_concat_loop0(1.5, false, c'A', c'B') == "1.5false2AB": "Wrong result at args_concat_loop0";
+}
