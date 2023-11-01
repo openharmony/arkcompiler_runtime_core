@@ -73,8 +73,12 @@ void InstBuilder::Prepare(bool is_inlined_graph)
         param_inst->SetType(DataType::UINT32);
         param_inst->SetLocationData(GetGraph()->GetDataForNativeParam(DataType::UINT32));
     }
-
+    size_t arg_ref_num = 0;
+    if (GetRuntime()->GetMethodReturnType(GetMethod()) == DataType::REFERENCE) {
+        arg_ref_num = 1;
+    }
     auto num_args = GetRuntime()->GetMethodTotalArgumentsCount(GetMethod());
+    bool is_static = GetRuntime()->IsMethodStatic(GetMethod());
     // Create Parameter instructions for all arguments
     for (size_t i = 0; i < num_args; i++) {
         auto param_inst = GetGraph()->AddNewParameter(i);
@@ -83,6 +87,10 @@ void InstBuilder::Prepare(bool is_inlined_graph)
         ASSERT(!GetGraph()->IsBytecodeOptimizer() || reg_num != INVALID_REG);
 
         param_inst->SetType(type);
+        // This parameter in virtaul method is implicit, so skipped
+        if (type == DataType::REFERENCE && (is_static || i > 0)) {
+            param_inst->SetArgRefNumber(arg_ref_num++);
+        }
         SetParamSpillFill(GetGraph(), param_inst, num_args, i, type);
 
         UpdateDefinition(reg_num, param_inst);
