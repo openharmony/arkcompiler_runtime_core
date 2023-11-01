@@ -32,11 +32,11 @@ export final class Promise<T> {
         }
     }
 
-    constructor(callback: (resolve: (value: T) => void throws, reject: (error: Object) => void) => void throws) {
+    constructor(callback: (resolve: (value: T) => void throws, reject: (error: Object|null) => void) => void throws) {
         try {
             callback((value: T): void => {
                 this.resolveImpl(value);
-            }, (error: Object): void => {
+            }, (error: Object|null): void => {
                 this.rejectImpl(error)
             });
         } catch (error) {
@@ -99,7 +99,7 @@ export final class Promise<T> {
                 if (thisPromise.state == Promise.STATE_RESOLVED) {
                     promise.resolveImpl(onFulfilled(thisPromise.value!));
                 } else {
-                    promise.rejectImpl(onRejected(thisPromise.value!));
+                    promise.resolveImpl(onRejected(thisPromise.value!));
                 }
             } catch (e) {
                 promise.rejectImpl(e);
@@ -159,6 +159,12 @@ export final class Promise<T> {
         return promise;
     }
 
+    static resolve(): Promise<void> {
+        let p = new Promise<void>();
+        p.resolveImpl(Void);
+        return p;
+    }
+
     static resolve<U>(value: U): Promise<U> {
         let p = new Promise<U>();
         p.resolveImpl(value);
@@ -168,6 +174,39 @@ export final class Promise<T> {
     static reject<U>(value: U): Promise<U> {
         let p = new Promise<U>();
         p.rejectImpl(value);
+        return p;
+    }
+
+    // NOTE(audovichenko) Replace Promise<Object> by Promise<out Object> when it gets available
+    static all(promises: Promise<Object>[]): Promise<Object> {
+        let p = new Promise<Object>((resolve: (value: Object) => void, reject: (error: Object|null) => void): void => {
+            // This temp object is needed because es2panda cannot change captured primitives
+            new PromiseConcurrency(resolve, reject).all(promises);
+        });
+        return p;
+    }
+
+    static allSettled(promises: Promise<Object>[]): Promise<Object> {
+        let p = new Promise<Object>((resolve: (value: Object) => void, reject: (error: Object|null) => void): void => {
+            // This temp object is needed because es2panda cannot change captured primitives
+            new PromiseConcurrency(resolve, reject).allSettled(promises);
+        });
+        return p;
+    }
+
+    static any(promises: Promise<Object>[]): Promise<Object> {
+        let p = new Promise<Object>((resolve: (value: Object) => void, reject: (error: Object|null) => void): void => {
+            // This temp object is needed because es2panda cannot change captured primitives
+            new PromiseConcurrency(resolve, reject).any(promises);
+        });
+        return p;
+    }
+
+    static race(promises: Promise<Object>[]): Promise<Object> {
+        let p = new Promise<Object>((resolve: (value: Object) => void, reject: (error: Object|null) => void): void => {
+            // This temp object is needed because es2panda cannot change captured primitives
+            new PromiseConcurrency(resolve, reject).race(promises);
+        });
         return p;
     }
 
@@ -205,5 +244,110 @@ export final class Promise<T> {
     private eventPtr: long;
     private padding0: int;
     private state: int = Promise.STATE_PENDING;
+}
 
+class PromiseConcurrency {
+    constructor(resolve: (value: Object) => void, reject: (error: Object|null) => void) {
+        this.resolve = resolve;
+        this.reject = reject;
+    }
+
+    all(promises: Promise<Object>[]): void {
+        let values = new Object[promises.length];
+        if (promises.length == 0) {
+            this.resolve(values);
+            return;
+        }
+        for (let i = 0; i < promises.length; ++i) {
+            let idx = i;
+            let promise = promises[idx];
+            promise.then<Object>((value: Object): Object|null => {
+                values[idx] = value;
+                ++this.resolvedCnt;
+                if (this.resolvedCnt == values.length) {
+                    this.resolve(values as Object);
+                }
+                return null;
+            }, (error: Object|null): Object|null => {
+                this.reject(error);
+                return null;
+            });
+        }
+    }
+
+    allSettled(promises: Promise<Object>[]): void {
+        let values: (Object|null)[] = new Object[promises.length];
+        if (promises.length == 0) {
+            this.resolve(values);
+            return;
+        }
+        for (let i = 0; i < promises.length; ++i) {
+            let idx = i;
+            let promise = promises[idx];
+            promise.then<Object>((value: Object): Object|null => {
+                values[idx] = value;
+                ++this.resolvedCnt;
+                if (this.resolvedCnt == values.length) {
+                    this.resolve(values as Object);
+                }
+                return null;
+            }, (error: Object|null): Object|null => {
+                values[idx] = error;
+                ++this.resolvedCnt;
+                if (this.resolvedCnt == values.length) {
+                    this.resolve(values as Object);
+                }
+                return null;
+            });
+        }
+    }
+
+    any(promises: Promise<Object>[]): void {
+        let errors = new Error[promises.length];
+        if (promises.length == 0) {
+            this.reject(new AggregateError(errors, "All promises are rejected"));
+            return;
+        }
+        for (let i = 0; i < promises.length; ++i) {
+            let idx = i;
+            let promise = promises[idx];
+            promise.then<Object>((value: Object): Object|null => {
+                ++this.resolvedCnt;
+                if (this.resolvedCnt == 1) {
+                    this.resolve(value);
+                }
+                return null;
+            }, (error: Object|null): Object|null => {
+                ++this.rejectedCnt;
+                if (error == null || error instanceof Error) {
+                    errors[idx] = error as Error;
+                } else {
+                    errors[idx] = new Error(error.toString());
+                }
+                if (this.rejectedCnt == errors.length) {
+                    this.reject(new AggregateError(errors, "All promises are rejected"));
+                }
+                return null;
+            });
+        }
+    }
+
+    race(promises: Promise<Object>[]): void {
+        for (let i = 0; i < promises.length; ++i) {
+            let idx = i;
+            let promise = promises[idx];
+            promise.then<Object>((value: Object): Object|null => {
+                this.resolve(value)
+                return null;
+            }, (error: Object|null): Object|null => {
+                this.reject(error);
+                return null;
+            });
+        }
+    }
+
+    private resolvedCnt = 0;
+    private rejectedCnt = 0;
+    private resolve: (value: Object) => void;
+    private reject: (error: Object|null) => void;
 }
