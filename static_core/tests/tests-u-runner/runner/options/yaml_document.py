@@ -17,6 +17,10 @@ class YamlDocument:
         YamlDocument._document = YamlDocument.load(config_path)
 
     @staticmethod
+    def document() -> Optional[Dict[str, Any]]:
+        return YamlDocument._document
+
+    @staticmethod
     def load(config_path: Optional[str]) -> Dict[str, Any]:
         config_from_file = {}
         if config_path is not None:

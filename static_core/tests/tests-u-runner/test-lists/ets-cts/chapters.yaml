@@ -1,0 +1,81 @@
+#
+#     Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.
+#
+
+chapters:
+  - all:
+    - 02.lexical_elements
+    - 03.types
+    - 04.names_declarations_and_scopes
+    - 05.generics
+    - 06.conversions_and_contexts
+    - 07.expressions
+    - 08.statements
+    - 09.classes
+    - 10.interfaces
+    - 11.enumerations
+    - 12.errors
+    - 13.modules_and_compilation_units
+    - 14.semantic_rules
+    - 17.experimental_features
+
+  # One folder - one chapter
+  - chapter02:
+    - 02.lexical_elements
+  - chapter03:
+    - 03.types
+  - chapter04:
+    - 04.names_declarations_and_scopes
+  - chapter05:
+    - 05.generics
+  - chapter06:
+    - 06.conversions_and_contexts
+  - chapter07:
+    - 07.expressions
+  - chapter08:
+    - 08.statements
+  - chapter09:
+    - 09.classes
+  - chapter10:
+    - 10.interfaces
+  - chapter11:
+    - 11.enumerations
+  - chapter12:
+    - 12.errors
+  - chapter13:
+    - 13.modules_and_compilation_units
+  - chapter14:
+    - 14.semantic_rules
+  - chapter17:
+    - 17.experimental_features
+
+  # chapters by several folders
+  - chapters02-05:
+    - 02.lexical_elements
+    - 03.types
+    - 04.names_declarations_and_scopes
+    - 05.generics
+  - chapters06-09:
+    - 06.conversions_and_contexts
+    - 07.expressions
+    - 08.statements
+    - 09.classes
+  - chapters10-12:
+    - 10.interfaces
+    - 11.enumerations
+    - 12.errors
+  - chapters13-17:
+    - 13.modules_and_compilation_units
+    - 14.semantic_rules
+    - 17.experimental_features

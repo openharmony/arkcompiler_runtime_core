@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Dict
+from typing import Dict, List
 
 from runner.options.decorator_value import value, _to_str, _to_int
 
@@ -16,7 +16,9 @@ class GroupsOptions:
     def to_dict(self) -> Dict[str, object]:
         return {
             "quantity": self.quantity,
-            "number": self.number
+            "number": self.number,
+            "chapters": self.chapters,
+            "chapters-file": self.chapters_file
         }
 
     @cached_property
@@ -35,3 +37,13 @@ class GroupsOptions:
             f'--group-number={self.number}' if self.number != GroupsOptions.__DEFAULT_GROUP_NUMBER else ''
         ]
         return ' '.join(options)
+
+    @cached_property
+    @value(yaml_path="test-lists.groups.chapters", cli_name="chapters")
+    def chapters(self) -> List[str]:
+        return []
+
+    @cached_property
+    @value(yaml_path="test-lists.groups.chapters-file", cli_name="chapters_file")
+    def chapters_file(self) -> str:
+        return "chapters.yaml"

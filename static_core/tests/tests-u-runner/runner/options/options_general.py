@@ -74,7 +74,7 @@ class GeneralOptions:
         return None
 
     @cached_property
-    def panda_source_root(self) -> str:
+    def static_core_root(self) -> str:
         # This file is expected to be located at path:
         # $PANDA_SOURCE/tests/tests-u-runner/runner/options/options_general.py
         path_parts = __file__.split(path.sep)[:-5]
