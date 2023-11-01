@@ -16,13 +16,16 @@
 /*---
 desc: >-
     03.08.11 Union types
-name: 03.types/08.reference_types/03.08.11.union_types/union_assignment_01
+name: 03.types/08.reference_types/03.08.11.union_types/union_assignment_10
 tags: []
 ---*/
 class A {}
-type ANumber = A | number
+class B {}
+type Margin = A | B
+type Padding = Margin | null
 
 function main(): void {
-    let a1: ANumber = 5
-    assert a1 == 5
+    let a: A = new A()
+    let b: Padding = a
+    assert b as A == a
 }

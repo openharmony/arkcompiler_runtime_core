@@ -111,6 +111,9 @@ std/containers/BasicSetTest.ets
 ### Union issues
 ### literal types not supported yet
 spec/unions/union02.ets
+### generics + unions not everything supported yet
+spec/unions/union_generics_01.ets
+spec/unions/union_generics_02.ets
 ### Negative tests
 spec/unions/union01.ets
 spec/unions/union_assignment_n_01.ets
@@ -156,7 +159,9 @@ spec/unions/union_param_02.ets
 spec/unions/union_param_05.ets
 spec/unions/union_param_06.ets
 ### Issue 14217
-spec/unions/union_return_01.ets
+spec/unions/union_return_01_01.ets
+spec/unions/union_return_01_02.ets
+spec/unions/union_return_01_03.ets
 spec/unions/union_return_02.ets
 spec/unions/union_return_03.ets
 spec/unions/union_return_04.ets
@@ -175,4 +180,12 @@ spec/unions/union_cast_06.ets
 ### Issue 14441
 spec/unions/union_compare_03.ets
 spec/unions/union_compare_04.ets 
+### Issue 14259
+spec/unions/union_assignment_08.ets
+spec/unions/union_assignment_09.ets
+spec/unions/union_assignment_10.ets
+spec/unions/union_assignment_11.ets
+spec/unions/union_param_10_01.ets
+spec/unions/union_param_10_02.ets
+spec/unions/union_param_10_03.ets
 ### End of Unions
