@@ -189,3 +189,25 @@ spec/unions/union_param_10_01.ets
 spec/unions/union_param_10_02.ets
 spec/unions/union_param_10_03.ets
 ### End of Unions
+### Feature: Rest Params
+### Issue 14111
+spec/rest-params/Issue14111.ets
+spec/rest-params/Issue14187.ets
+spec/rest-params/BadTypeError.ets
+### Issue 14111 end
+### End Of Feature: Rest Params
+### undefined functionality is not implemented
+spec/conditional-expression/nullish_expr/expr/undefined-object-expression.ets
+spec/conditional-expression/nullish_expr/loop/undefined-expression-for-loop.ets
+spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-do-while.ets
+spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-while.ets
+### issue 14258
+spec/conditional-expression/string/expr/string-expression-assert.ets
+### issue 14299 (incorrect behavior for tests with boxed type like new Short(0))
+spec/conditional-expression/numeric/expr/numeric-byte-object-zero-expression.ets
+spec/conditional-expression/numeric/expr/numeric-double-object-zero-expression.ets
+spec/conditional-expression/numeric/expr/numeric-float-zero-object-expression.ets
+spec/conditional-expression/numeric/expr/numeric-long-zero-object-expression.ets
+spec/conditional-expression/numeric/expr/numeric-short-zero-object-expression.ets
+
+
