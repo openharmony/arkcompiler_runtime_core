@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_SIMPLIFY_STRING_BUILDER_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_SIMPLIFY_STRING_BUILDER_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_SIMPLIFY_STRING_BUILDER_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_SIMPLIFY_STRING_BUILDER_H
 
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/ir/analysis.h"
@@ -32,6 +32,11 @@ namespace ark::compiler {
  *
  * See compiler/docs/simplify_sb_doc.md for complete documentation
  */
+
+constexpr size_t ARGS_NUM_2 = 2;
+constexpr size_t ARGS_NUM_3 = 3;
+constexpr size_t ARGS_NUM_4 = 4;
+
 class SimplifyStringBuilder : public Optimization {
 public:
     explicit SimplifyStringBuilder(Graph *graph);
@@ -54,17 +59,7 @@ public:
     void InvalidateAnalyses() override;
 
 private:
-    constexpr static size_t ARGS_NUM_2 = 2;
-    constexpr static size_t ARGS_NUM_3 = 3;
-    constexpr static size_t ARGS_NUM_4 = 4;
-    constexpr static size_t ARG_IDX_0 = 0;
-    constexpr static size_t ARG_IDX_1 = 1;
-    constexpr static size_t ARG_IDX_2 = 2;
-    constexpr static size_t ARG_IDX_3 = 3;
-
     // 1. Removes unnecessary String Builder instances
-    bool IsMethodStringBuilderConstructorWithStringArg(Inst *inst) const;
-    bool IsMethodStringBuilderToString(Inst *inst) const;
     InstIter SkipToStringBuilderConstructorWithStringArg(InstIter begin, InstIter end);
     void OptimizeStringBuilderToString(BasicBlock *block);
 
@@ -78,9 +73,7 @@ private:
             appendIntrinsics {};  // NOLINT(misc-non-private-member-variables-in-classes)
     };
 
-    bool IsMethodStringBuilderDefaultConstructor(Inst *inst) const;
     InstIter SkipToStringBuilderDefaultConstructor(InstIter begin, InstIter end);
-    RuntimeInterface::IntrinsicId GetStringBuilderConcatStringsIntrinsicId() const;
     IntrinsicInst *CreateConcatIntrinsic(Inst *lhs, Inst *rhs, DataType::Type type, SaveStateInst *saveState);
     bool IsIntrinsicStringBuilderAppendString(Inst *inst) const;
     bool MatchConcatenation(InstIter &begin, const InstIter &end, ConcatenationMatch &match);
@@ -88,6 +81,7 @@ private:
     void Check(const ConcatenationMatch &match);
     void InsertIntrinsicAndFixSaveStates(IntrinsicInst *concatIntrinsic, Inst *lhs, Inst *rhs, Inst *before);
     void ReplaceWithIntrinsic(const ConcatenationMatch &match);
+    void RemoveStringBuilderInstance(Inst *instance);
     void Cleanup(const ConcatenationMatch &match);
     void OptimizeStringConcatenation(BasicBlock *block);
 
@@ -104,7 +98,7 @@ private:
                 let preheaderInstance: StringBuilder;               // preheader.instance
                 preheaderInstance = new StringBuilder();            // preheader.ctorCall
                 preheaderInstance.append(accValue);                 // preheader.appendAccValue
-                preheaderInstance.append(someArg0);                 // loop.appendIntrinsics[0]
+                preheaderInstance.append(someArg0);                 // loop.appendInstructions[0]
                     ... Zero or more append non-accValue-arg calls
                 let tempAccum0 = preheaderInstance.toString();      // temp[0].toStringCall
 
@@ -113,7 +107,7 @@ private:
                 let tempInstanceN: StringBuilder                    // temp[N].instance
                 tempInstanceN = new StringBuilder();                // temp[N].ctorCall
                 tempInstanceN.append(tempAccumN);                   // temp[N].appendAccValue
-                tempInstanceN.append(someArgN);                     // loop.appendIntrinsics[N]
+                tempInstanceN.append(someArgN);                     // loop.appendInstructions[N]
                     ... Zero or more append non-accValue-arg calls
                 accValue = tempInstanceN.toString();                // exit.toStringCall
 
@@ -147,22 +141,22 @@ private:
         Inst *initialValue {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
 
         struct {
-            Inst *instance {nullptr};                 // NOLINT(misc-non-private-member-variables-in-classes)
-            Inst *ctorCall {nullptr};                 // NOLINT(misc-non-private-member-variables-in-classes)
-            IntrinsicInst *appendAccValue {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
-        } preheader;                                  // NOLINT(misc-non-private-member-variables-in-classes)
+            Inst *instance {nullptr};        // NOLINT(misc-non-private-member-variables-in-classes)
+            Inst *ctorCall {nullptr};        // NOLINT(misc-non-private-member-variables-in-classes)
+            Inst *appendAccValue {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
+        } preheader;                         // NOLINT(misc-non-private-member-variables-in-classes)
 
         struct Loop {
-            explicit Loop(ArenaAllocator *allocator) : appendIntrinsics {allocator->Adapter()} {}
-            ArenaVector<IntrinsicInst *> appendIntrinsics;  // NOLINT(misc-non-private-member-variables-in-classes)
-        } loop;                                             // NOLINT(misc-non-private-member-variables-in-classes)
+            explicit Loop(ArenaAllocator *allocator) : appendInstructions {allocator->Adapter()} {}
+            ArenaVector<Inst *> appendInstructions;  // NOLINT(misc-non-private-member-variables-in-classes)
+        } loop;                                      // NOLINT(misc-non-private-member-variables-in-classes)
 
         struct TemporaryInstructions {
-            Inst *intermediateValue {nullptr};        // NOLINT(misc-non-private-member-variables-in-classes)
-            Inst *toStringCall {nullptr};             // NOLINT(misc-non-private-member-variables-in-classes)
-            Inst *instance {nullptr};                 // NOLINT(misc-non-private-member-variables-in-classes)
-            Inst *ctorCall {nullptr};                 // NOLINT(misc-non-private-member-variables-in-classes)
-            IntrinsicInst *appendAccValue {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
+            Inst *intermediateValue {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
+            Inst *toStringCall {nullptr};       // NOLINT(misc-non-private-member-variables-in-classes)
+            Inst *instance {nullptr};           // NOLINT(misc-non-private-member-variables-in-classes)
+            Inst *ctorCall {nullptr};           // NOLINT(misc-non-private-member-variables-in-classes)
+            Inst *appendAccValue {nullptr};     // NOLINT(misc-non-private-member-variables-in-classes)
 
             void Clear();
             bool IsEmpty() const;
@@ -182,25 +176,23 @@ private:
         StringBuilderUsage(Inst *pInstance, CallInst *pCtorCall, ArenaAllocator *allocator)
             : instance {pInstance},
               ctorCall {pCtorCall},
-              appendIntrinsics {allocator->Adapter()},
+              appendInstructions {allocator->Adapter()},
               toStringCalls {allocator->Adapter()}
         {
         }
-        Inst *instance {nullptr};                       // NOLINT(misc-non-private-member-variables-in-classes)
-        Inst *ctorCall {nullptr};                       // NOLINT(misc-non-private-member-variables-in-classes)
-        ArenaVector<IntrinsicInst *> appendIntrinsics;  // NOLINT(misc-non-private-member-variables-in-classes)
-        ArenaVector<Inst *> toStringCalls;              // NOLINT(misc-non-private-member-variables-in-classes)
+        Inst *instance {nullptr};                // NOLINT(misc-non-private-member-variables-in-classes)
+        Inst *ctorCall {nullptr};                // NOLINT(misc-non-private-member-variables-in-classes)
+        ArenaVector<Inst *> appendInstructions;  // NOLINT(misc-non-private-member-variables-in-classes)
+        ArenaVector<Inst *> toStringCalls;       // NOLINT(misc-non-private-member-variables-in-classes)
     };
 
-    bool IsIntrinsicStringBuilderAppend(Inst *inst) const;
-
-    IntrinsicInst *CreateStringBuilderAppendIntrinsic(Inst *instance, Inst *arg);
-    void NormalizeStringBuilderAppendIntrinsicUsers(Inst *instance, SaveStateInst *saveState);
-    ArenaVector<IntrinsicInst *> FindStringBuilderAppendIntrinsics(Inst *instance);
+    IntrinsicInst *CreateIntrinsicStringBuilderAppendString(Inst *instance, Inst *arg, SaveStateInst *saveState);
+    void NormalizeStringBuilderAppendInstructionUsers(Inst *instance, SaveStateInst *saveState);
+    ArenaVector<Inst *> FindStringBuilderAppendInstructions(Inst *instance);
 
     void RemoveFromSaveStateInputs(Inst *inst);
     void RemoveFromAllExceptPhiInputs(Inst *inst);
-    void ReconnectStringBuilderCascade(Inst *instance, Inst *inputInst, Inst *appendIntrinsic,
+    void ReconnectStringBuilderCascade(Inst *instance, Inst *inputInst, Inst *appendInstruction,
                                        SaveStateInst *saveState);
     void ReconnectStringBuilderCascades(const ConcatenationLoopMatch &match);
     void ReconnectInstructions(const ConcatenationLoopMatch &match);
@@ -224,29 +216,28 @@ private:
     void FixBrokenSaveStates(Loop *loop);
     void Cleanup(Loop *loop);
 
-    bool AllUsersAreVisitedAppendIntrinsics(Inst *inst, Marker visited);
+    bool AllUsersAreVisitedAppendInstructions(Inst *inst, Marker visited);
     Inst *UpdateIntermediateValue(const StringBuilderUsage &usage, Inst *intermediateValue,
-                                  Marker appendIntrinsicVisited);
+                                  Marker appendInstructionVisited);
     void MatchTemporaryInstructions(const StringBuilderUsage &usage, ConcatenationLoopMatch &match, Inst *accValue,
-                                    Inst *intermediateValue, Marker appendIntrinsicVisited);
+                                    Inst *intermediateValue, Marker appendInstructionVisited);
     Inst *MatchHoistableInstructions(const StringBuilderUsage &usage, ConcatenationLoopMatch &match,
-                                     Marker appendIntrinsicVisited);
+                                     Marker appendInstructionVisited);
     void MatchStringBuilderUsage(Inst *instance, StringBuilderUsage &usage);
     const ArenaVector<ConcatenationLoopMatch> &MatchLoopConcatenation(Loop *loop);
 
     bool HasInputFromPreHeader(PhiInst *phi) const;
     bool HasToStringCallInput(PhiInst *phi) const;
-    bool HasAppendIntrinsicUser(Inst *inst) const;
+    bool HasAppendInstructionUser(Inst *inst) const;
     bool HasPhiOrAppendUsersOnly(Inst *inst, Marker visited) const;
     bool HasAppendUsersOnly(Inst *inst) const;
     bool HasInputInst(Inst *inputInst, Inst *inst) const;
 
     bool IsInstanceHoistable(const ConcatenationLoopMatch &match) const;
-    bool IsToStringHoistable(const ConcatenationLoopMatch &match, Marker appendIntrinsicVisited) const;
+    bool IsToStringHoistable(const ConcatenationLoopMatch &match, Marker appendInstructionVisited) const;
 
     bool IsPhiAccumulatedValue(PhiInst *phi) const;
     ArenaVector<Inst *> GetPhiAccumulatedValues(Loop *loop);
-    void ResetMarkersDFS(Inst *inst, Loop *loop, Marker visited);
     void StringBuilderUsagesDFS(Inst *inst, Loop *loop, Marker visited);
     const ArenaVector<StringBuilderUsage> &GetStringBuilderUsagesPO(Inst *accValue);
 
@@ -264,4 +255,4 @@ private:
 
 }  // namespace ark::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_SIMPLIFY_STRING_BUILDER_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_SIMPLIFY_STRING_BUILDER_H

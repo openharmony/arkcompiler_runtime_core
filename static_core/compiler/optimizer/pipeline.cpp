@@ -51,6 +51,7 @@
 #include "optimizer/optimizations/phi_type_resolving.h"
 #include "optimizer/optimizations/redundant_loop_elimination.h"
 #include "optimizer/optimizations/regalloc/reg_alloc.h"
+#include "optimizer/optimizations/reserve_string_builder_buffer.h"
 #include "optimizer/optimizations/scheduler.h"
 #include "optimizer/optimizations/simplify_string_builder.h"
 #include "optimizer/optimizations/try_catch_resolving.h"
@@ -222,6 +223,7 @@ bool Pipeline::RunOptimizations()
     graph->RunPass<EscapeAnalysis>();
     graph->RunPass<LoopIdioms>();
     graph->RunPass<ChecksElimination>();
+    graph->RunPass<ReserveStringBuilderBuffer>();
     graph->RunPass<LoopUnroll>(g_options.GetCompilerLoopUnrollInstLimit(), g_options.GetCompilerLoopUnrollFactor());
     OptimizationsAfterUnroll(graph);
 

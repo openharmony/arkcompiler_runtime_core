@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -172,6 +172,20 @@ TEST_F(BoundsAnalysisTest, OverflowTest)
     ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MIN, 2U), std::nullopt);
 
     ASSERT_EQ(BoundsRange::DivWithOverflowCheck(INT64_MIN, -1L), std::nullopt);
+
+    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(UINT64_MAX, UINT64_MAX), std::nullopt);
+    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(UINT64_MAX, 1U), std::nullopt);
+    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(1U, UINT64_MAX), std::nullopt);
+    ASSERT_NE(BoundsRange::AddWithOverflowCheck(UINT64_MAX / 2U, UINT64_MAX / 2U), std::nullopt);
+    ASSERT_NE(BoundsRange::AddWithOverflowCheck(UINT64_MAX - 1U, 1U), std::nullopt);
+    ASSERT_NE(BoundsRange::AddWithOverflowCheck(1U, UINT64_MAX - 1U), std::nullopt);
+
+    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(0U, UINT64_MAX), 0U);
+    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(UINT64_MAX, 0U), 0U);
+
+    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(UINT64_MAX, UINT64_MAX), std::nullopt);
+    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(UINT64_MAX / 2U + 1, 2U), std::nullopt);
+    ASSERT_NE(BoundsRange::MulWithOverflowCheck(UINT64_MAX / 2U, 2U), std::nullopt);
 }
 
 TEST_F(BoundsAnalysisTest, BoundsNarrowing)

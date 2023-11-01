@@ -83,12 +83,25 @@ RuntimeInterface::ClassPtr GetClassPtrForObject(Inst *inst, size_t inputNum)
     if (objInst->GetOpcode() != Opcode::NewObject) {
         return nullptr;
     }
-    auto initClass = objInst->GetInput(0).GetInst();
-    if (initClass->GetOpcode() == Opcode::LoadAndInitClass) {
-        return initClass->CastToLoadAndInitClass()->GetClass();
+    return GetObjectClass(objInst->CastToNewObject());
+}
+
+RuntimeInterface::ClassPtr GetObjectClass(NewObjectInst *inst)
+{
+    ASSERT(inst->GetInputsCount() > 0);
+
+    RuntimeInterface::ClassPtr klass = nullptr;
+    auto inputInst = inst->GetDataFlowInput(0);
+    if (inputInst->IsClassInst()) {
+        klass = static_cast<ClassInst *>(inputInst)->GetClass();
+    } else if (inputInst->GetOpcode() == Opcode::LoadImmediate) {
+        klass = inputInst->CastToLoadImmediate()->GetClass();
+    } else if (inputInst->GetOpcode() == Opcode::LoadRuntimeClass) {
+        klass = inputInst->CastToLoadRuntimeClass()->GetClass();
+    } else {
+        UNREACHABLE();
     }
-    ASSERT(initClass->GetOpcode() == Opcode::LoadImmediate);
-    return initClass->CastToLoadImmediate()->GetClass();
+    return klass;
 }
 
 template bool HasOsrEntryBetween(Inst *dominate, Inst *current);

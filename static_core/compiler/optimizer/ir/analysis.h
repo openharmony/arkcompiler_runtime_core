@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@ std::optional<bool> IsIfInverted(BasicBlock *phiBlock, IfImmInst *ifImm);
 
 // If object input has known class, return pointer to the class, else returns nullptr
 RuntimeInterface::ClassPtr GetClassPtrForObject(Inst *inst, size_t inputNum = 0);
+RuntimeInterface::ClassPtr GetObjectClass(NewObjectInst *inst);
 
 inline bool IsInstInDifferentBlocks(Inst *i1, Inst *i2)
 {
