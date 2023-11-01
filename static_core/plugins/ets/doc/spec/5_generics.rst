@@ -184,6 +184,9 @@ Type Parameter Constraint
     todo: overloading functions with bound, and resolving call for correct overload
     todo: Checking of boundaries on call site
     todo: Further checks on multiple parameter bounds
+    todo: Implement union type support for constraints
+    todo: Adapt spec change: T without constraint doesn't mean "T extends Object|null" anymore.
+
 
 A type parameter can be restricted. In that case, the corresponding type
 argument in the generic instantiation must follow some restrictions, or

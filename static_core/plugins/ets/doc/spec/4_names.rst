@@ -53,7 +53,7 @@ Names
 .. meta:
     frontend_status: Done
     todo: A qualified name N.x may be used to refer to a member of package... If N names a package, then x is member of that package
-    todo: Do we rarely want to support std.core.Double? If yes, it should be clarified in 14.6 Import declaration section
+    todo: Do we really want to support std.core.Double? If yes, it should be clarified in 14.6 Import declaration section
 
 A name refers to any declared entity.
 
@@ -1008,6 +1008,10 @@ A :index:`compile-time error` occurs if an *optional parameter* precedes a
 Optional Parameters
 ===================
 
+.. meta:
+    frontend_status: Partly
+    todo: support call with placeholders
+    
 There are two forms of *optional parameters*:
 
 .. code-block:: abnf
@@ -1097,6 +1101,9 @@ For example, the following two functions can be used in the same way:
 Rest Parameter
 ==============
 
+.. meta:
+    frontend_status: Done
+    
 A *rest parameter* allows functions or methods to take unbounded numbers
 of arguments.
 

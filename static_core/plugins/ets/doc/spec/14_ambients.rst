@@ -15,6 +15,10 @@
 Ambient Declarations
 ####################
 
+.. meta:
+    frontend_status: Partly
+    todo: ambient variable, namespace, enum, type alias declarations
+    
 Ambient declarations are the way to specify entities that are declared
 somewhere else.
 
@@ -73,6 +77,9 @@ that is already ambient:
 Ambient Variable Declarations
 *****************************
 
+.. meta:
+    frontend_status: None
+    
 .. code-block:: abnf
 
     ambientVariableDeclaration:
@@ -98,6 +105,9 @@ The type annotation is mandatory for each ambient variable.
 Ambient Function Declarations
 *****************************
 
+.. meta:
+    frontend_status: Done
+    
 .. code-block:: abnf
 
     ambientFunctionDeclaration:
@@ -161,6 +171,9 @@ Ambient function declarations cannot specify function bodies.
 Ambient Class Declarations
 **************************
 
+.. meta:
+    frontend_status: Done
+    
 .. code-block:: abnf
 
     ambientClassDeclaration:
@@ -221,6 +234,9 @@ Ambient constructor, method, and accessor declarations have no bodies:
 Ambient Interface Declarations
 ******************************
 
+.. meta:
+    frontend_status: Done
+    
 .. code-block:: abnf
 
     ambientInterfaceDeclaration:
@@ -233,6 +249,9 @@ Ambient Interface Declarations
 Ambient Namespace Declarations
 ******************************
 
+.. meta:
+    frontend_status: None
+    
 .. code-block:: abnf
 
     ambientNamespaceDeclaration:

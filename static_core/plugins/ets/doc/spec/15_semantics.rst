@@ -133,6 +133,11 @@ A single type is LUB for itself.
 In a set (*T*:sub:`1`,..., *T*:sub:`k`) that contains at least two types,
 LUB is determined as follows:
 
+.. index::
+   least upper bound (LUB)
+   common supertype
+   subtype
+   
 -  The set of supertypes *ST*:sub:`i` is determined for each type in the set;
 
 -  The intersection of the *ST*:sub:`i` sets is calculated.

@@ -37,15 +37,15 @@ type definition, like the type parameter ``Element`` in the following example:
         }
     }
 
-To use type Stack, the type argument must be specified for each type parameter:
+To use type *Stack*, the type argument must be specified for each type
+parameter:
 
 .. code-block:: typescript
 
     let s = new Stack<string>
     s.push("hello")
 
-The compiler ensures type safety while working with generic types and functions.
-See the example below:
+The compiler ensures type safety while working with generic types and functions:
 
 .. code-block:: typescript
 
@@ -60,7 +60,7 @@ Generic Constraints
 
 Type parameters of generic types can have constraints. For example, the ``Key``
 type parameter in the ``HashMap<Key, Value>`` container must have a hash
-method (i.e., it must be hashable).
+method (i.e., it must be hashable):
 
 .. code-block:: typescript
 
@@ -121,9 +121,9 @@ Generic Defaults
 ----------------
 
 Type parameters of generic types can have defaults.
-It allows using just the generic type name rather than specifying the actual
-type arguments.
-The example below illustrates this for both classes and functions.
+It allows simply using the generic type name rather than specifying the actual
+type arguments. In the example below, it is illustrated for both classes and
+functions:
 
 .. code-block:: typescript
 

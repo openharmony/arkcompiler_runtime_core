@@ -16,14 +16,12 @@ Interfaces
 |
 
 An interface declaration introduces a new type. Interfaces are a common way
-of defining contracts between various parts of code.
+to define contracts between various parts of code.
 
 Interfaces are used to write polymorphic code applicable to any class
 instances that implement a particular interface.
 
-An interface usually contains properties, and method headers.
-
-Examples:
+An interface usually contains properties and method headers:
 
 .. code-block:: typescript
 
@@ -35,7 +33,7 @@ Examples:
         someMethod() : void;    // method header
     }
 
-Examples of a class implementing an interface:
+The examples below illustrate a class that implements an interface:
 
 .. code-block:: typescript
 
@@ -63,8 +61,7 @@ Examples of a class implementing an interface:
 Interface Properties
 --------------------
 
-An interface property can be in a form of a field, a getter, a setter, or both
-getter and setter.
+An interface property can be in a form of a field, a getter, a setter, or both.
 
 A property field is just a shortcut notation of a getter/setter pair, and
 the following notations are equal:
@@ -80,7 +77,7 @@ the following notations are equal:
         set color(x: string)
     }
 
-A class that implements an interface may also use a short or a long notation:
+A class that implements an interface can also use a short or a long notation:
 
 .. code-block:: typescript
 
@@ -92,7 +89,7 @@ A class that implements an interface may also use a short or a long notation:
         color: string = ""
     }
 
-The short notation implicitly defines a private field, and getter and setter:
+The short notation implicitly defines a private field, and a getter and setter:
 
 .. code-block:: typescript
 
@@ -111,7 +108,7 @@ The short notation implicitly defines a private field, and getter and setter:
 Interface Inheritance
 ---------------------
 
-An interface can extend other interfaces as presented in the example below:
+An interface can extend other interfaces as in the example below:
 
 .. code-block:: typescript
 
@@ -124,16 +121,7 @@ An interface can extend other interfaces as presented in the example below:
     }
 
 An extended interface contains all properties and methods of the
-interface it extends, and can also add its own properties and methods.
-
-|
-
-Interface Visibility Modifiers
-------------------------------
-
-Properties and methods are ``public``.
-
-Only methods with default implementation can be defined as ``private``.
+interface it extends. It also can add its own properties and methods.
 
 |
 |

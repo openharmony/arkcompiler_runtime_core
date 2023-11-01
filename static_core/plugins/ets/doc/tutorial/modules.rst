@@ -15,11 +15,11 @@ Modules
 
 |
 
-Programs are organized as sets of compilation units, or modules.
+Programs are organized as sets of compilation units or modules.
 
 Each module creates its own scope, i.e., any declarations (variables,
-functions, classes, etc.) declared in the module are not visible outside
-that module unless exported explicitly.
+functions, classes, etc.) declared in the module are only visible outside
+that module if exported explicitly.
 
 Conversely, a variable, function, class, interface, etc. exported from
 another module must first be imported to a module.
@@ -32,7 +32,7 @@ Export
 A top-level declaration can be exported by using the keyword ``export``.
 
 A declared name that is not exported is considered private, and can be used
-only in the module it is declared in.
+only in the module it is declared in:
 
 .. code-block:: typescript
 
@@ -56,18 +56,18 @@ Import
 
 Import declarations are used to import entities exported from other modules,
 and to provide their bindings in the current module. An import declaration
-consists of two parts:
+consists of the following two parts:
 
 * Import path that determines the module to import from;
 * Import bindings that define the set of usable entities in the imported
   module, and the form of use (i.e., qualified or unqualified use).
 
-Import bindings may have several forms.
+Import bindings can have several forms.
 
-Assuming that a module has the path '``./utils``', and export entities 'X' and
-'Y', an import binding of the form '``* as A``' binds the name '``A``', and
-then all entities exported from the module defined by the import path can be
-accessed by using the qualified name ``A.name``:
+If a module has the path '``./utils``', export entities 'X' and 'Y', and
+an import binding of the form '``* as A``' binds the name '``A``', then
+the qualified name ``A.name`` can be used to access all entities exported
+from the module defined by the import path:
 
 .. code-block:: typescript
 
@@ -104,9 +104,8 @@ ones.
 
 If a module contains a ``main`` function (program entry point), then
 top-level statements of the module are executed immediately before
-the body of that function.
-Otherwise, such statements are executed before the execution of any
-other function of the module.
+the body of that function. Otherwise, such statements are executed
+before the execution of any other function of the module.
 
 |
 

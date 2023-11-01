@@ -1268,7 +1268,7 @@ operator can be applied to variables of all array types and to their derived
 types. It is noteworthy that type ``T[]`` and type ``Array<T>`` are as follows:
 
 -  Equivalent if *T* is a reference type; and
--  Diffrent if *T* is a value type.
+-  Different if *T* is a value type.
 
 .. index::
    array type
@@ -1911,6 +1911,10 @@ the following operations are handled by the compiler in a special way:
 DynamicObject Field Access
 --------------------------
 
+.. meta:
+    frontend_status: Partly
+    todo: now it supports only JSValue, need to add full abstract support
+    
 The field access expression *D.F*, where *D* is of type *DynamicObject*,
 is handled as an access to a property of an underlying object.
 
@@ -1954,6 +1958,10 @@ The wrapper can raise an error if:
 DynamicObject Method Call
 -------------------------
 
+.. meta:
+    frontend_status: Partly
+    todo: now it supports only JSValue, need to add full abstract support
+    
 The method call expression *D.F()*, where *D* is of type *DynamicObject*,
 is handled as a call of the instance method of an underlying object.
 
@@ -1993,6 +2001,10 @@ The wrapper must raise an error if:
 DynamicObject Indexing Access
 -----------------------------
 
+.. meta:
+    frontend_status: Partly
+    todo: now it supports only JSValue, need to add full abstract support
+    
 The indexing access expression *D[index]*, where *D* is of type *DynamicObject*,
 is handled as an indexing access to an underlying object.
 

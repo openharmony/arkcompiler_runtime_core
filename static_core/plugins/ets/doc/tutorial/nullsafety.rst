@@ -16,9 +16,8 @@ Null Safety
 |
 
 All types in |LANG| are by default non-nullable, and the value of a type
-cannot be null.
-It is similar to the |TS| behavior in strict null checking mode
-(``strictNullChecks``), but the |LANG| rules are stricter.
+cannot be null. It is similar to the |TS| behavior in strict null checking
+mode (``strictNullChecks``), but the |LANG| rules are stricter.
 
 In the example below, all lines cause a compile-time error:
 
@@ -28,7 +27,7 @@ In the example below, all lines cause a compile-time error:
     let y: string = null    // ditto
     let z: number[] = null  // ditto
 
-A variable that can have a null value is defined with a union type ``T | null``.
+A variable that can have a null value is defined with a union type ``T | null``:
 
 .. code-block:: typescript
 
@@ -61,7 +60,7 @@ Null-Coalescing Operator
 
 The null-coalescing binary operator '``??``' checks whether the evaluation
 of the left-hand-side expression equals to null. If so, then the result of
-the expression is the right-hand-side expression; otherwise, it is the
+the expression is the right-hand-side expression. Otherwise, it is the
 left-hand-side expression.
 
 In other words, '``a ?? b``' equals the ternary operator '``a != null ? a : b``'.
@@ -85,7 +84,7 @@ Optional Chaining
 -----------------
 
 Optional chaining operator '``?.``' allows writing code where the evaluation
-stops at an expression that partially evaluates to ``null`` or ``undefined``.
+stops at an expression that partially evaluates to ``null`` or ``undefined``:
 
 .. code-block:: typescript
 
@@ -114,10 +113,9 @@ stops at an expression that partially evaluates to ``null`` or ``undefined``.
 An optional chain can be of any length and contain any number of '``?.``'
 operators.
 
-In the following sample, the output is the person's spouse's nickname if that
-person has a spouse, and the spouse has a nickname.
-
-Otherwise, the output is ``undefined``:
+In the following example, if a person has a spouse, and the spouse has a
+nickname, then the output is the nickname of the person's spouse; otherwise,
+the output is ``undefined``:
 
 .. code-block:: typescript
 
