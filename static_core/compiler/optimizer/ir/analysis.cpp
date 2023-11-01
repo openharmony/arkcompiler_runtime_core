@@ -152,6 +152,12 @@ Inst *InstStoredValue(Inst *inst, Inst **secondValue)
             *secondValue = inst->GetDataFlowInput(secondInst);
             break;
         }
+        case Opcode::StoreObjectPair: {
+            val = inst->GetInput(1).GetInst();
+            auto secondInst = inst->GetInput(2).GetInst();
+            *secondValue = inst->GetDataFlowInput(secondInst);
+            break;
+        }
         case Opcode::FillConstArray: {
             return nullptr;
         }
@@ -191,6 +197,28 @@ bool CanArrayAccessBeImplicit(T *array, RuntimeInterface *runtime)
     return offset < runtime->GetProtectedMemorySize();
 }
 
+bool CanLoadArrayIBeImplicit(const LoadInstI *inst, const Graph *graph, RuntimeInterface *runtime, size_t maxoffset)
+{
+    ASSERT(inst->CastToLoadArrayI()->IsArray() || !runtime->IsCompressedStringsEnabled());
+    auto arch = graph->GetArch();
+    size_t dataoffset = inst->IsArray() ? runtime->GetArrayDataOffset(arch) : runtime->GetStringDataOffset(arch);
+    size_t shift = DataType::ShiftByType(inst->GetType(), arch);
+    size_t offset = dataoffset + (inst->GetImm() << shift);
+    return offset < maxoffset;
+}
+
+template <typename T>
+bool CanObjectAccessBeImplicit(T *object, const Graph *graph, size_t maxoffset)
+{
+    return GetObjectOffset(graph, object->GetObjectType(), object->GetObjField(), object->GetTypeId()) < maxoffset;
+}
+
+template <typename T>
+bool CanObjectPairAccessBeImplicit(T *objpair, const Graph *graph, size_t maxoffset)
+{
+    return GetObjectOffset(graph, objpair->GetObjectType(), objpair->GetObjField1(), objpair->GetTypeId1()) < maxoffset;
+}
+
 bool IsSuitableForImplicitNullCheck(const Inst *inst)
 {
     auto graph = inst->GetBasicBlock()->GetGraph();
@@ -204,37 +232,24 @@ bool IsSuitableForImplicitNullCheck(const Inst *inst)
             // we don't know array index, so offset can be more than protected memory
             return false;
         }
-        case Opcode::LoadArrayI: {
-            ASSERT(inst->CastToLoadArrayI()->IsArray() || !runtime->IsCompressedStringsEnabled());
-
-            auto instLoadArrayI = inst->CastToLoadArrayI();
-            auto arch = graph->GetArch();
-
-            size_t dataOffset =
-                instLoadArrayI->IsArray() ? runtime->GetArrayDataOffset(arch) : runtime->GetStringDataOffset(arch);
-            size_t shift = DataType::ShiftByType(inst->GetType(), arch);
-            size_t offset = dataOffset + (instLoadArrayI->GetImm() << shift);
-            return offset < maxOffset;
-        }
+        case Opcode::LoadArrayI:
+            return CanLoadArrayIBeImplicit(inst->CastToLoadArrayI(), graph, runtime, maxOffset);
         case Opcode::LenArray:
             return true;
-        case Opcode::LoadObject: {
-            auto loadObj = inst->CastToLoadObject();
-            return GetObjectOffset(graph, loadObj->GetObjectType(), loadObj->GetObjField(), loadObj->GetTypeId()) <
-                   maxOffset;
-        }
-        case Opcode::StoreObject: {
-            auto storeObj = inst->CastToStoreObject();
-            return GetObjectOffset(graph, storeObj->GetObjectType(), storeObj->GetObjField(), storeObj->GetTypeId()) <
-                   maxOffset;
-        }
+        case Opcode::LoadObject:
+            return CanObjectAccessBeImplicit(inst->CastToLoadObject(), graph, maxOffset);
+        case Opcode::StoreObject:
+            return CanObjectAccessBeImplicit(inst->CastToStoreObject(), graph, maxOffset);
         case Opcode::StoreArrayI:
             return CanArrayAccessBeImplicit(inst->CastToStoreArrayI(), runtime);
         case Opcode::LoadArrayPairI:
             return CanArrayAccessBeImplicit(inst->CastToLoadArrayPairI(), runtime);
         case Opcode::StoreArrayPairI:
             return CanArrayAccessBeImplicit(inst->CastToStoreArrayPairI(), runtime);
-
+        case Opcode::LoadObjectPair:
+            return CanObjectPairAccessBeImplicit(inst->CastToLoadObjectPair(), graph, maxOffset);
+        case Opcode::StoreObjectPair:
+            return CanObjectPairAccessBeImplicit(inst->CastToStoreObjectPair(), graph, maxOffset);
         default:
             return false;
     }
@@ -516,8 +531,8 @@ void SaveStateBridgesBuilder::FixSaveStatesInBB(BasicBlock *block)
             if (!realSourceInst->IsMovableObject()) {
                 continue;
             }
-            // In case, when usege of object in loop and defenition is not in loop or usage's loop inside defenition's
-            // loop, we should check SaveStates till the end of BasicBlock
+            // In case, when usege of object in loop and definition is not in loop or usage's loop inside
+            // definition's loop, we should check SaveStates till the end of BasicBlock
             if (blockInLoop && (block->GetLoop()->IsInside(realSourceInst->GetBasicBlock()->GetLoop()))) {
                 COMPILER_LOG(DEBUG, BRIDGES_SS)
                     << " Check inputs: Try to do SSB for real source inst: " << *realSourceInst << "\n"

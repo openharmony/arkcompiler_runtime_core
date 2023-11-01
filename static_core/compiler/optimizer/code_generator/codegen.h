@@ -1062,9 +1062,13 @@ protected:
 
     static void VisitLoadPairPart(GraphVisitor *visitor, Inst *inst);
 
+    static void VisitLoadObjectPair(GraphVisitor *visitor, Inst *inst);
+
     static void VisitStoreArrayPair(GraphVisitor *visitor, Inst *inst);
 
     static void VisitStoreArrayPairI(GraphVisitor *visitor, Inst *inst);
+
+    static void VisitStoreObjectPair(GraphVisitor *visitor, Inst *inst);
 
     static void VisitLoadExclusive(GraphVisitor *visitor, Inst *inst);
 

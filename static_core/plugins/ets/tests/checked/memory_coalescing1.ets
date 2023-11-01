@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,8 @@
 //! INST         "LoadArrayPair"
 //! INST         "LoadPairPart"
 //! INST         "StoreArrayPair"
+//! INST_COUNT   /StoreObjectPair/, 2
+//! INST_COUNT   /LoadObjectPair/, 1
 //! METHOD       "Test::__noinline__fnSumMem"
 //! PASS_BEFORE  "MemoryCoalescing"
 //! INST_NOT     "LoadArrayPair"
@@ -39,6 +41,8 @@
 //! INST_NOT     "LoadArrayPair"
 //! INST_NOT     "LoadPairPart"
 //! INST_NOT     "StoreArrayPair"
+//! INST_COUNT   /StoreObjectPair/, 1
+//! INST_NOT     "LoadObjectPair"
 //! METHOD       "Test::__noinline__fnSumGC"
 //! PASS_BEFORE  "MemoryCoalescing"
 //! INST_NOT     "LoadArrayPair"
@@ -48,6 +52,8 @@
 //! INST_NOT     "LoadArrayPair"
 //! INST_NOT     "LoadPairPart"
 //! INST_NOT     "StoreArrayPair"
+//! INST_COUNT   /StoreObjectPair/, 1
+//! INST_NOT     "LoadObjectPair"
 //! METHOD       "Test::__noinline__fnSumCls"
 //! PASS_BEFORE  "MemoryCoalescing"
 //! INST_NOT     "LoadArrayPair"
@@ -57,22 +63,28 @@
 //! INST         "LoadArrayPair"
 //! INST         "LoadPairPart"
 //! INST_NOT     "StoreArrayPair"
+//! INST_COUNT   /StoreObjectPair/, 1
+//! INST_COUNT   /LoadObjectPair/, 1
 
 class A {
     public a : int;
+    public f : int;
+    public g : int;
 }
 
 export class Test {
 
     private static __noinline__fnSum(u: double[], v: double[]): void {
-        let t: double = 0;
+        let t: A = new A();
+        t.f = 0;
+        t.g = 0;
         for (let j: int = 0; j < u.length; j = j + 2) {
-            t += u[j];
-            t += u[j + 1];
+            t.f += u[j];
+            t.g += u[j + 1];
         }
         for (let i: int = 0; i < v.length; i = i + 2) {
-            v[i] = t;
-            v[i + 1] = t + 1;
+            v[i] = t.f;
+            v[i + 1] = t.g + 1;
         }
     }
 
@@ -82,32 +94,36 @@ export class Test {
 
     // memory coalescing can't be performed over CallStatic that is barrier
     private static __noinline__fnSumMem(u: double[], v: double[]): void {
-        let t: double = 0;
+        let t: A = new A();
+        t.f = 0;
+        t.g = 0;
         for (let j: int = 0; j < u.length; j = j + 2) {
-            t += u[j];
+            t.f += u[j];
             Test.__noinline__fnMem(u, v, j);
-            t += u[j + 1];
+            t.g += u[j + 1];
         }
         for (let i: int = 0; i < v.length; i = i + 2) {
-            v[i] = t;
+            v[i] = t.f;
             Test.__noinline__fnMem(u, v, i);
-            v[i + 1] = t + 1;
+            v[i + 1] = t.g + 1;
         }
     }
 
     // memory coalescing can't be performed over GC call that is barrier
     private static __noinline__fnSumGC(u: double[], v: double[]): void {
         try {
-            let t: double = 0;
+            let t: A = new A();
+            t.f = 0;
+            t.g = 0;
             for (let j: int = 0; j < u.length; j = j + 2) {
-                t += u[j];
+                t.f += u[j];
                 GC.startGC(GC.FULL_CAUSE);
-                t += u[j + 1];
+                t.g += u[j + 1];
             }
             for (let i: int = 0; i < v.length; i = i + 2) {
-                v[i] = t;
+                v[i] = t.f;
                 GC.startGC(GC.FULL_CAUSE);
-                v[i + 1] = t + 1;
+                v[i + 1] = t.g + 1;
             }
         } catch (exception) {
         }
@@ -115,16 +131,18 @@ export class Test {
 
     // memory coalescing over NullCheck can be performed for Load and can't for Store
     private static __noinline__fnSumCls(u: double[], v: double[], o: A, d: int): void {
-        let t: double = 0;
+        let t: A = new A();
+        t.f = 0;
+        t.g = 0;
         for (let j: int = 0; j < u.length; j = j + 2) {
-            t += u[j];
+            t.f += u[j];
             o.a += v.length/(j + d);
-            t += u[j + 1];
+            t.g += u[j + 1];
         }
         for (let i: int = 0; i < v.length; i = i + 2) {
-            v[i] = t;
+            v[i] = t.f;
             o.a += v.length/(i + d);
-            v[i + 1] = t + 1;
+            v[i + 1] = t.g + 1;
         }
     }
 

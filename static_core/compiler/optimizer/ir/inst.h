@@ -749,6 +749,8 @@ struct Operands {
     std::array<Input, N> inputs;
 };
 
+enum InputOrd { INP0 = 0, INP1 = 1, INP2 = 2, INP3 = 3 };
+
 /**
  * Specialized version for instructions with variable inputs count.
  * Users and inputs are stored outside of this class.
@@ -1092,6 +1094,11 @@ public:
             default:
                 return false;
         }
+    }
+    bool WithGluedInsts() const
+    {
+        return GetOpcode() == Opcode::LoadArrayPair || GetOpcode() == Opcode::LoadArrayPairI ||
+               GetOpcode() == Opcode::LoadObjectPair;
     }
     bool IsLoad() const
     {
@@ -2047,6 +2054,43 @@ private:
     RuntimeInterface::MethodPtr method_ {nullptr};
 };
 
+/// This mixin aims to implement two type id accessors.
+class TypeIdMixin2 : public TypeIdMixin {
+    using Base = TypeIdMixin;
+    using Base::Base;
+
+public:
+    TypeIdMixin2(uint32_t typeId0, uint32_t typeId1, RuntimeInterface::MethodPtr method)
+        : TypeIdMixin(typeId1, method), typeId0_(typeId0)
+    {
+    }
+
+    TypeIdMixin2() = default;
+    NO_COPY_SEMANTIC(TypeIdMixin2);
+    NO_MOVE_SEMANTIC(TypeIdMixin2);
+    ~TypeIdMixin2() override = default;
+
+    void SetTypeId0(uint32_t id)
+    {
+        typeId0_ = id;
+    }
+    auto GetTypeId0() const
+    {
+        return typeId0_;
+    }
+    void SetTypeId1(uint32_t id)
+    {
+        SetTypeId(id);
+    }
+    auto GetTypeId1() const
+    {
+        return GetTypeId();
+    }
+
+private:
+    uint32_t typeId0_ {0};
+};
+
 /// This mixin aims to implement type of klass.
 template <typename T>
 class ClassTypeMixin : public T {
@@ -2150,6 +2194,41 @@ public:
 
 private:
     RuntimeInterface::FieldPtr field_ {nullptr};
+};
+
+/// This mixin aims to implement 2 field accessors.
+class FieldMixin2 {
+public:
+    explicit FieldMixin2(RuntimeInterface::FieldPtr field0, RuntimeInterface::FieldPtr field1)
+        : field0_(field0), field1_(field1)
+    {
+    }
+
+    FieldMixin2() = default;
+    NO_COPY_SEMANTIC(FieldMixin2);
+    NO_MOVE_SEMANTIC(FieldMixin2);
+    virtual ~FieldMixin2() = default;
+
+    void SetObjField0(RuntimeInterface::FieldPtr field)
+    {
+        field0_ = field;
+    }
+    auto GetObjField0() const
+    {
+        return field0_;
+    }
+    void SetObjField1(RuntimeInterface::FieldPtr field)
+    {
+        field1_ = field;
+    }
+    auto GetObjField1() const
+    {
+        return field1_;
+    }
+
+private:
+    RuntimeInterface::FieldPtr field0_ {nullptr};
+    RuntimeInterface::FieldPtr field1_ {nullptr};
 };
 
 /// This mixin aims to implement volatile accessors.
@@ -6765,6 +6844,60 @@ public:
     bool DumpInputs(std::ostream * /* out */) const override;
 };
 
+/// Load a pair of consecutive values from object
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+class LoadObjectPairInst
+    : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>>>,
+      public TypeIdMixin2,
+      public FieldMixin2 {
+public:
+    DECLARE_INST(LoadObjectPairInst);
+    using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>>>;
+    using Base::Base;
+
+    LoadObjectPairInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input) : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetInput(InputOrd::INP0, input);
+        SetVolatile(false);
+        SetNeedBarrier(false);
+    }
+
+    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
+    {
+        ASSERT(index < GetInputsCount());
+        ASSERT(GetInputsCount() == 1);
+        auto inputType = GetInput(0).GetInst()->GetType();
+        ASSERT(inputType == DataType::REFERENCE || inputType == DataType::ANY);
+        return inputType;
+    }
+
+    bool IsBarrier() const override
+    {
+        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
+    }
+
+    Inst *Clone(const Graph *targetGraph) const override
+    {
+        auto clone = FixedInputsInst::Clone(targetGraph);
+        clone->CastToLoadObjectPair()->SetTypeId0(GetTypeId0());
+        clone->CastToLoadObjectPair()->SetTypeId1(GetTypeId1());
+        clone->CastToLoadObjectPair()->SetMethod(GetMethod());
+        clone->CastToLoadObjectPair()->SetObjField0(GetObjField0());
+        clone->CastToLoadObjectPair()->SetObjField1(GetObjField1());
+        ASSERT(clone->CastToLoadObjectPair()->GetVolatile() == GetVolatile());
+        ASSERT(clone->CastToLoadObjectPair()->GetObjectType() == GetObjectType());
+        return clone;
+    }
+
+    uint32_t Latency() const override
+    {
+        return g_options.GetCompilerSchedLatencyLong();
+    }
+
+    void DumpOpcode(std::ostream *out) const override;
+};
+
 /// Store a pair of consecutive values to array
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class StoreArrayPairInst : public NeedBarrierMixin<FixedInputsInst<4U>>, public ImmediateMixin {
@@ -6832,6 +6965,58 @@ public:
     }
 
     bool DumpInputs(std::ostream * /* out */) const override;
+};
+
+/// Store a pair of consecutive values to object
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+class StoreObjectPairInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>>,
+                            public TypeIdMixin2,
+                            public FieldMixin2 {
+public:
+    DECLARE_INST(StoreObjectPairInst);
+    using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>>;
+    using Base::Base;
+    static constexpr size_t STORED_INPUT_INDEX = 2;
+
+    StoreObjectPairInst(Opcode opcode, DataType::Type type, uint32_t pc) : Base(opcode, type, pc)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        SetVolatile(false);
+        SetNeedBarrier(false);
+    }
+
+    bool IsBarrier() const override
+    {
+        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
+    }
+
+    DataType::Type GetInputType(size_t index) const override
+    {
+        ASSERT(index < GetInputsCount());
+        ASSERT(GetInputsCount() == 3U);
+        return index == 0 ? DataType::REFERENCE : GetType();
+    }
+
+    Inst *Clone(const Graph *targetGraph) const override
+    {
+        auto clone = FixedInputsInst::Clone(targetGraph);
+        clone->CastToStoreObjectPair()->SetTypeId0(GetTypeId0());
+        clone->CastToStoreObjectPair()->SetTypeId1(GetTypeId1());
+        clone->CastToStoreObjectPair()->SetMethod(GetMethod());
+        clone->CastToStoreObjectPair()->SetObjField0(GetObjField0());
+        clone->CastToStoreObjectPair()->SetObjField1(GetObjField1());
+        ASSERT(clone->CastToStoreObjectPair()->GetVolatile() == GetVolatile());
+        ASSERT(clone->CastToStoreObjectPair()->GetObjectType() == GetObjectType());
+        return clone;
+    }
+
+    // StoreObject call barriers twice,so we need to save input register for second call
+    bool IsPropagateLiveness() const override
+    {
+        return GetType() == DataType::REFERENCE;
+    }
+
+    void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Load a pair of consecutive values from array, using array index as immediate
@@ -7366,8 +7551,12 @@ inline bool IsVolatileMemInst(Inst *inst)
     switch (inst->GetOpcode()) {
         case Opcode::LoadObject:
             return inst->CastToLoadObject()->GetVolatile();
+        case Opcode::LoadObjectPair:
+            return inst->CastToLoadObjectPair()->GetVolatile();
         case Opcode::StoreObject:
             return inst->CastToStoreObject()->GetVolatile();
+        case Opcode::StoreObjectPair:
+            return inst->CastToStoreObjectPair()->GetVolatile();
         case Opcode::LoadStatic:
             return inst->CastToLoadStatic()->GetVolatile();
         case Opcode::StoreStatic:

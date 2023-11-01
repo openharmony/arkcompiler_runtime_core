@@ -594,6 +594,64 @@ void LoadObjectInst::DumpOpcode(std::ostream *out) const
     DumpTypedFieldOpcode(out, GetOpcode(), GetTypeId(), fieldName, graph->GetLocalAllocator());
 }
 
+class ObjectPairParams {
+public:
+    const Graph *graph;
+    Opcode opc;
+    RuntimeInterface::FieldPtr field0;
+    RuntimeInterface::FieldPtr field1;
+    uint32_t typeId0;
+    uint32_t typeId1;
+};
+
+void DumpObjectPairOpcode(std::ostream *out, ObjectPairParams &params)
+{
+    auto graph = params.graph;
+    auto runtime = graph->GetRuntime();
+    auto *allocator = graph->GetLocalAllocator();
+    const auto &adapter = allocator->Adapter();
+
+    auto field0 = params.field0;
+    auto field1 = params.field1;
+
+    ArenaString space(" ", adapter);
+    ArenaString dot(".", adapter);
+
+    ArenaString clsName("", adapter);
+    ArenaString fieldName0("", adapter);
+    ArenaString fieldName1("", adapter);
+
+    ArenaString id0(IdToString(params.typeId0, allocator), adapter);
+    auto offset0 = space + ArenaString(std::to_string(runtime->GetFieldOffset(field0)), adapter);
+    ArenaString id1(IdToString(params.typeId1, allocator), adapter);
+    auto offset1 = space + ArenaString(std::to_string(runtime->GetFieldOffset(field1)), adapter);
+    if (!runtime->HasFieldMetadata(field0)) {
+        clsName = ArenaString("Unknown ", adapter);
+        fieldName0 = id0 + space + dot + ArenaString(".Unknown", adapter) + offset0;
+        fieldName1 = id1 + space + dot + ArenaString(".Unknown", adapter) + offset1;
+    } else {
+        clsName = ArenaString(runtime->GetClassName(runtime->GetClassForField(field0)), adapter) + space;
+        fieldName0 = id0 + space + dot + ArenaString(runtime->GetFieldName(field0), adapter) + offset0;
+        fieldName1 = id1 + space + dot + ArenaString(runtime->GetFieldName(field1), adapter) + offset1;
+    }
+    ArenaString opc(GetOpcodeString(params.opc), adapter);
+    (*out) << std::setw(INDENT_OPCODE) << opc + space + clsName + space + fieldName0 + space + fieldName1 + space;
+}
+
+void LoadObjectPairInst::DumpOpcode(std::ostream *out) const
+{
+    ObjectPairParams params {
+        GetBasicBlock()->GetGraph(), GetOpcode(), GetObjField0(), GetObjField1(), GetTypeId0(), GetTypeId1()};
+    DumpObjectPairOpcode(out, params);
+}
+
+void StoreObjectPairInst::DumpOpcode(std::ostream *out) const
+{
+    ObjectPairParams params {
+        GetBasicBlock()->GetGraph(), GetOpcode(), GetObjField0(), GetObjField1(), GetTypeId0(), GetTypeId1()};
+    DumpObjectPairOpcode(out, params);
+}
+
 void LoadMemInst::DumpOpcode(std::ostream *out) const
 {
     DumpTypedOpcode(out, GetOpcode(), GetType(), GetBasicBlock()->GetGraph()->GetLocalAllocator());

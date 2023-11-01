@@ -69,6 +69,7 @@ private:
     bool FinalizeBB(BasicBlock *bb, uint32_t cycle);
     void Cleanup();
 
+    void ScheduleBarrierInst(Inst **inst);
     uint32_t ScheduleInstsBetweenBarriers(Inst *first, Inst *last);
 
     using SchedulerPriorityQueue = std::priority_queue<Inst *, InstVector, std::function<bool(Inst *, Inst *)>>;

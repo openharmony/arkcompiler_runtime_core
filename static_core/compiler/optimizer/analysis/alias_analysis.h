@@ -194,6 +194,7 @@ private:
                     }
                     break;
                 case Opcode::StoreObject:
+                case Opcode::StoreObjectPair:
                 case Opcode::StoreArray:
                 case Opcode::StoreArrayI:
                 case Opcode::StoreArrayPair:
@@ -365,6 +366,8 @@ public:
     static void VisitGetAnyTypeName(GraphVisitor *v, Inst *inst);
     static void VisitLoadConstantPool(GraphVisitor *v, Inst *inst);
     static void VisitLoadLexicalEnv(GraphVisitor *v, Inst *inst);
+    static void VisitLoadObjectPair(GraphVisitor *v, Inst *inst);
+    static void VisitStoreObjectPair(GraphVisitor *v, Inst *inst);
 
     /// Dynamic instructions
     static void VisitLoadObjectDynamic(GraphVisitor *v, Inst *inst);
@@ -418,6 +421,8 @@ private:
                                                    const Pointer &p1, const Pointer &p2) const;
     void SolveConstraintsMainLoop(Pointer &ref, Pointer &edge, bool &added, PointerSet &sols);
     void DumpChains(std::ostream *out) const;
+    void DumpDirect(std::ostream *out) const;
+    void DumpCopy(std::ostream *out) const;
 
 private:
     PointerMap<PointerSet> pointsTo_;

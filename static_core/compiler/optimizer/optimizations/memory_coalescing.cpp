@@ -21,6 +21,7 @@
 #include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/analysis/rpo.h"
 #include "optimizer/analysis/loop_analyzer.h"
+#include "optimizer/ir/runtime_interface.h"
 #include "optimizer/optimizations/memory_coalescing.h"
 
 namespace panda::compiler {
@@ -227,6 +228,16 @@ public:
         static_cast<PairCreatorVisitor *>(v)->HandleArrayAccessI(inst);
     }
 
+    static void VisitLoadObject(GraphVisitor *v, Inst *inst)
+    {
+        static_cast<PairCreatorVisitor *>(v)->HandleObjectAccess(inst->CastToLoadObject());
+    }
+
+    static void VisitStoreObject(GraphVisitor *v, Inst *inst)
+    {
+        static_cast<PairCreatorVisitor *>(v)->HandleObjectAccess(inst->CastToStoreObject());
+    }
+
     static bool IsNotAcceptableForStore(Inst *inst)
     {
         if (inst->GetOpcode() == Opcode::SaveState) {
@@ -302,6 +313,8 @@ private:
             case Opcode::LoadArrayPairI:
             case Opcode::StoreArrayPair:
             case Opcode::StoreArrayPairI:
+            case Opcode::LoadObjectPair:
+            case Opcode::StoreObjectPair:
                 return true;
             default:
                 return false;
@@ -572,6 +585,67 @@ private:
         candidates_.push_back(inst);
     }
 
+    template <typename T>
+    void CheckForObjectCandidates(T *inst, uint8_t fieldSize, size_t fieldOffset)
+    {
+        Inst *obj = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+        /* Last candidates more likely to be coalesced */
+        for (auto iter = candidates_.rbegin(); iter != candidates_.rend(); iter++) {
+            auto cand = *iter;
+            if (cand->GetOpcode() != Opcode::LoadObject && cand->GetOpcode() != Opcode::StoreObject) {
+                continue;
+            }
+            Inst *candObj = cand->GetDataFlowInput(cand->GetInput(0).GetInst());
+            if (aliases_.CheckRefAlias(obj, candObj) != MUST_ALIAS) {
+                if (aliases_.CheckInstAlias(inst, cand) == MAY_ALIAS) {
+                    cand->SetMarker(mrkInvalid_);
+                    inst->SetMarker(mrkInvalid_);
+                    break;
+                }
+                continue;
+            }
+            if (cand->IsMarked(mrkInvalid_)) {
+                continue;
+            }
+            if (cand->GetOpcode() != inst->GetOpcode() || cand->GetType() != inst->GetType()) {
+                continue;
+            }
+            size_t candFieldOffset;
+            if constexpr (std::is_same_v<T, LoadObjectInst>) {
+                auto candLoadObj = cand->CastToLoadObject();
+                candFieldOffset = GetObjectOffset(graph_, candLoadObj->GetObjectType(), candLoadObj->GetObjField(),
+                                                  candLoadObj->GetTypeId());
+            } else {
+                auto candStoreObj = cand->CastToStoreObject();
+                candFieldOffset = GetObjectOffset(graph_, candStoreObj->GetObjectType(), candStoreObj->GetObjField(),
+                                                  candStoreObj->GetTypeId());
+            }
+            auto candFieldSize = GetTypeByteSize(cand->GetType(), graph_->GetArch());
+            if ((fieldOffset + fieldSize == candFieldOffset && TryAddCoalescedPair(inst, 0, cand, 1)) ||
+                (candFieldOffset + candFieldSize == fieldOffset && TryAddCoalescedPair(inst, 1, cand, 0))) {
+                break;
+            }
+        }
+    }
+
+    template <typename T>
+    void HandleObjectAccess(T *inst)
+    {
+        ObjectType objType = inst->GetObjectType();
+        auto fieldSize = GetTypeByteSize(inst->GetType(), graph_->GetArch());
+        size_t fieldOffset = GetObjectOffset(graph_, objType, inst->GetObjField(), inst->GetTypeId());
+        bool isVolatile = inst->GetVolatile();
+        if (isVolatile) {
+            inst->SetMarker(mrkInvalid_);
+        }
+        if (!MemoryCoalescing::AcceptedType(inst->GetType()) || objType != MEM_OBJECT || isVolatile) {
+            candidates_.push_back(inst);
+            return;
+        }
+        CheckForObjectCandidates(inst, fieldSize, fieldOffset);
+        candidates_.push_back(inst);
+    }
+
     void InsertPair(Inst *first, Inst *second, Inst *insertAfter)
     {
         COMPILER_LOG(DEBUG, MEMORY_COALESCING)
@@ -592,12 +666,19 @@ private:
             case Opcode::StoreArrayI:
                 paired = ReplaceStoreArrayI(first, second, insertAfter);
                 break;
+            case Opcode::LoadObject:
+                paired = ReplaceLoadObject(first, second, insertAfter);
+                break;
+            case Opcode::StoreObject:
+                paired = ReplaceStoreObject(first, second, insertAfter);
+                break;
             default:
                 UNREACHABLE();
         }
 
-        COMPILER_LOG(DEBUG, MEMORY_COALESCING)
-            << "Coalescing of {v" << first->GetId() << " v" << second->GetId() << "} is successful";
+        ASSERT(paired != nullptr);
+        COMPILER_LOG(DEBUG, MEMORY_COALESCING) << "Coalescing of {v" << first->GetId() << " v" << second->GetId()
+                                               << "} by " << paired->GetId() << " is successful";
         graph_->GetEventWriter().EventMemoryCoalescing(first->GetId(), first->GetPc(), second->GetId(), second->GetPc(),
                                                        paired->GetId(), paired->IsStore() ? "Store" : "Load");
 
@@ -623,6 +704,31 @@ private:
             pload->SetFlag(compiler::inst_flags::CAN_THROW);
         }
         MemoryCoalescing::RemoveAddI(pload);
+        return pload;
+    }
+
+    Inst *ReplaceLoadObject(Inst *first, Inst *second, Inst *insertAfter)
+    {
+        ASSERT(first->GetOpcode() == Opcode::LoadObject);
+        ASSERT(second->GetOpcode() == Opcode::LoadObject);
+        ASSERT(!first->CastToLoadObject()->GetVolatile());
+        ASSERT(!second->CastToLoadObject()->GetVolatile());
+
+        auto pload = graph_->CreateInstLoadObjectPair(first->GetType(), INVALID_PC);
+        pload->SetInput(InputOrd::INP0, first->GetInput(InputOrd::INP0).GetInst());
+        pload->SetType(first->GetType());
+        pload->SetTypeId0(first->CastToLoadObject()->GetTypeId());
+        pload->SetTypeId1(second->CastToLoadObject()->GetTypeId());
+        pload->SetObjField0(first->CastToLoadObject()->GetObjField());
+        pload->SetObjField1(second->CastToLoadObject()->GetObjField());
+
+        pload->CastToLoadObjectPair()->SetNeedBarrier(first->CastToLoadObject()->GetNeedBarrier() ||
+                                                      second->CastToLoadObject()->GetNeedBarrier());
+        if (first->CanThrow() || second->CanThrow()) {
+            pload->SetFlag(compiler::inst_flags::CAN_THROW);
+        }
+        insertAfter->InsertAfter(pload);
+
         return pload;
     }
 
@@ -658,6 +764,33 @@ private:
             pstore->SetFlag(compiler::inst_flags::CAN_THROW);
         }
         MemoryCoalescing::RemoveAddI(pstore);
+        return pstore;
+    }
+
+    Inst *ReplaceStoreObject(Inst *first, Inst *second, Inst *insertAfter)
+    {
+        ASSERT(first->GetOpcode() == Opcode::StoreObject);
+        ASSERT(second->GetOpcode() == Opcode::StoreObject);
+        ASSERT(!first->CastToStoreObject()->GetVolatile());
+        ASSERT(!second->CastToStoreObject()->GetVolatile());
+
+        auto pstore = graph_->CreateInstStoreObjectPair();
+        pstore->SetType(first->GetType());
+        pstore->SetTypeId0(first->CastToStoreObject()->GetTypeId());
+        pstore->SetTypeId1(second->CastToStoreObject()->GetTypeId());
+        pstore->SetInput(InputOrd::INP0, first->GetInput(InputOrd::INP0).GetInst());
+        pstore->SetInput(InputOrd::INP1, first->GetInput(InputOrd::INP1).GetInst());
+        pstore->SetInput(InputOrd::INP2, second->GetInput(InputOrd::INP1).GetInst());
+        pstore->CastToStoreObjectPair()->SetObjField0(first->CastToStoreObject()->GetObjField());
+        pstore->CastToStoreObjectPair()->SetObjField1(second->CastToStoreObject()->GetObjField());
+
+        pstore->CastToStoreObjectPair()->SetNeedBarrier(first->CastToStoreObject()->GetNeedBarrier() ||
+                                                        second->CastToStoreObject()->GetNeedBarrier());
+        if (first->CanThrow() || second->CanThrow()) {
+            pstore->SetFlag(compiler::inst_flags::CAN_THROW);
+        }
+        insertAfter->InsertAfter(pstore);
+
         return pstore;
     }
 
@@ -741,7 +874,7 @@ bool MemoryCoalescing::RunImpl()
         COMPILER_LOG(INFO, MEMORY_COALESCING) << "Skipping Memory Coalescing for unsupported architecture";
         return false;
     }
-
+    COMPILER_LOG(DEBUG, MEMORY_COALESCING) << "Memory Coalescing running";
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->RunPass<LoopAnalyzer>();
     GetGraph()->RunPass<AliasAnalysis>();
@@ -755,7 +888,6 @@ bool MemoryCoalescing::RunImpl()
         collector.Reset();
     }
     GetGraph()->EraseMarker(mrk);
-
     for (auto pair : collector.GetPairs()) {
         auto bb = pair.first->GetBasicBlock();
         if (pair.first->IsLoad()) {
@@ -774,7 +906,7 @@ bool MemoryCoalescing::RunImpl()
             }
         }
     }
-    COMPILER_LOG(DEBUG, MEMORY_COALESCING) << "Memory Coalescing complete";
+    COMPILER_LOG(DEBUG, MEMORY_COALESCING) << "Memory Coalescing completed";
     return !collector.GetPairs().empty();
 }
 }  // namespace panda::compiler

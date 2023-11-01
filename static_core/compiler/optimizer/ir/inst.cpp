@@ -312,8 +312,8 @@ Inst *SkipInstructions(Inst *inputInst)
 }
 /*
  * For instructions LoadArray, StoreArray, LoadArrayPair, StoreArrayPair, LoadArrayI, StoreArrayI, LoadArrayPairI,
- * StoreArrayPairI, LenArray, LoadObject, StoreObject, CallVirtual, Monitor with NullCheck input the dataflow user
- * is object, which is the first input of NullCheck instruction.
+ * StoreArrayPairI, LenArray, LoadObject, StoreObject, CallVirtual, Monitor, LoadObjectPair, StoreObjectPair with
+ * NullCheck input the dataflow user is object, which is the first input of NullCheck instruction.
  * For instructions LoadArray, StoreArray, LoadArrayPair, StoreArrayPair with BoundsCheck input the dataflow user is
  * array index, which is the second input of BoundsCheck instruction
  * For instructions Div and Mod with ZeroCheck input the dataflow user is the first input of ZeroCheck

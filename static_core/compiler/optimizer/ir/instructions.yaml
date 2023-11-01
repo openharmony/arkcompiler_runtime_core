@@ -1070,6 +1070,13 @@ instructions:
     modes: [jit_aot, irtoc]
     description: Load element from vector.
 
+  - opcode: LoadObjectPair
+    base: LoadObjectPairInst
+    signature: [d-real-any, ref-any-nc]
+    flags: [load, no_hoist, no_cse, low_level]
+    modes: [jit_aot, irtoc]
+    description: Load several values at a time from object.
+
   - opcode: StoreArrayPair
     base: StoreArrayPairInst
     signature: [ref-nc, int-bc, real-any, real-any]
@@ -1083,6 +1090,13 @@ instructions:
     flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read]
     modes: [jit_aot, irtoc]
     description: Store several values at a time to array at immediate index.
+
+  - opcode: StoreObjectPair
+    base: StoreObjectPairInst
+    signature: [ref-nc, real-any, real-any]
+    flags: [store, no_dce, no_hoist, no_cse, low_level, require_tmp]
+    modes: [jit_aot, irtoc]
+    description: Store several values at a time to object.
 
   - opcode: ReturnI
     base: ReturnInstI
