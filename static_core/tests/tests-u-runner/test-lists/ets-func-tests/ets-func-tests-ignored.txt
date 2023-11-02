@@ -246,3 +246,8 @@ spec/struct-type/test-use-struct-with-not-user-type_1.ets
 spec/struct-type/test-use-struct-with-not-user-type_2.ets
 ### EOF Negative tests
 ### EOF ArkUI struct
+
+### Start string enum
+### Issue 12947
+spec/string_enum/enumCallToStringFromAsyncLambda.ets
+### End string enum
