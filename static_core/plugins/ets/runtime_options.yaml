@@ -216,3 +216,14 @@ options:
   type: uint32_t
   default: 4
   description: Number of worker threads for the taskmanager. Option is used only for --worker-type=taskmanager
+
+- name: task-statistics-impl-type
+  lang:
+    - ets
+  type: std::string
+  default: simple
+  possible_values:
+  - simple
+  - lock-free
+  - fine-grained
+  description: Set type of implementation of task statistics that will be used to store information about tasks

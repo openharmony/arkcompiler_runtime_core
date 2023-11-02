@@ -27,10 +27,12 @@ public:
     NO_MOVE_SEMANTIC(SchedulableTaskQueueInterface);
 
     /**
-     * NewTasksCallback instance should be called after tasks adding. As argument you should input count of added
-     * tasks.
+     * NewTasksCallback instance should be called after tasks adding. It should have next arguments:
+     * 1. property of tasks you added
+     * 2. count of tasks you added
+     * 3. true of queue was empty before last tasks adding, otherwise false
      */
-    using NewTasksCallback = std::function<void(TaskProperties, size_t)>;
+    using NewTasksCallback = std::function<void(TaskProperties, size_t, bool)>;
 
     SchedulableTaskQueueInterface(TaskType task_type, VMType vm_type, uint8_t priority)
         : TaskQueueInterface(task_type, vm_type, priority)

@@ -20,14 +20,36 @@
 #include "libpandabase/globals.h"
 #include <functional>
 #include <ostream>
+#include <array>
 
 namespace panda::taskmanager {
 
-enum class TaskType : uint8_t { UNKNOWN = 0, GC, JIT };
+/*
+ * TaskType - represents all types of components that can use TaskManager.
+ * UNKNOWN type - is a service type, it should be the last one in the list.
+ */
+enum class TaskType : uint8_t { GC, JIT, UNKNOWN };
+constexpr auto ALL_TASK_TYPES = std::array {TaskType::GC, TaskType::JIT};
+static_assert(ALL_TASK_TYPES.size() == static_cast<size_t>(TaskType::UNKNOWN));
+static_assert(std::is_same<decltype(ALL_TASK_TYPES)::value_type, TaskType>::value);
 
-enum class VMType : uint8_t { UNKNOWN = 0, DYNAMIC_VM, STATIC_VM };
+/*
+ * VMType - represents all types of VM that can use TaskManager.
+ * UNKNOWN type - is a service type, it should be the last one in the list.
+ */
+enum class VMType : uint8_t { DYNAMIC_VM, STATIC_VM, UNKNOWN };
+constexpr auto ALL_VM_TYPES = std::array {VMType::DYNAMIC_VM, VMType::STATIC_VM};
+static_assert(ALL_VM_TYPES.size() == static_cast<size_t>(VMType::UNKNOWN));
+static_assert(std::is_same<decltype(ALL_VM_TYPES)::value_type, VMType>::value);
 
-enum class TaskExecutionMode : uint8_t { FOREGROUND, BACKGROUND };
+/*
+ * TaskExecutionMode - represents all possible modes of tasks execution.
+ * UNKNOWN type - is a service type, it should be the last one in the list.
+ */
+enum class TaskExecutionMode : uint8_t { FOREGROUND, BACKGROUND, UNKNOWN };
+constexpr auto ALL_TASK_EXECUTION_MODES = std::array {TaskExecutionMode::FOREGROUND, TaskExecutionMode::BACKGROUND};
+static_assert(ALL_TASK_EXECUTION_MODES.size() == static_cast<size_t>(TaskExecutionMode::UNKNOWN));
+static_assert(std::is_same<decltype(ALL_TASK_EXECUTION_MODES)::value_type, TaskExecutionMode>::value);
 
 /**
  * @brief TaskProperties is class that consider all enums that are related to Task. It's used to parameterize task

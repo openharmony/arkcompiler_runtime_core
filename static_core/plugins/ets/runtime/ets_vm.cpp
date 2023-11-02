@@ -83,7 +83,9 @@ bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options)
 {
     auto lang_str = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
     if (options.GetWorkersType(lang_str) == "taskmanager" && Runtime::GetTaskScheduler() == nullptr) {
-        auto *task_scheduler = taskmanager::TaskScheduler::Create(options.GetTaskmanagerWorkersCount(lang_str));
+        auto *task_scheduler = taskmanager::TaskScheduler::Create(
+            options.GetTaskmanagerWorkersCount(lang_str),
+            taskmanager::TaskStatisticsImplTypeFromString(options.GetTaskStatisticsImplType(lang_str)));
         if (task_scheduler == nullptr) {
             return false;
         }

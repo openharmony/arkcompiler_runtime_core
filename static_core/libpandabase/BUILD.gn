@@ -81,6 +81,10 @@ if (is_mingw) {
     "$ark_root/libpandabase/os/time.cpp",
     "$ark_root/libpandabase/taskmanager/task.cpp",
     "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
+    "$ark_root/libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.cpp",
+    "$ark_root/libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.cpp",
+    "$ark_root/libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.cpp",
+    "$ark_root/libpandabase/taskmanager/task_statistics/task_statistics.cpp",
     "$ark_root/libpandabase/taskmanager/worker_thread.cpp",
     "$ark_root/libpandabase/utils/dfx.cpp",
     "$ark_root/libpandabase/utils/json_builder.cpp",
@@ -113,6 +117,10 @@ if (is_mingw) {
     "$ark_root/libpandabase/os/property.cpp",
     "$ark_root/libpandabase/taskmanager/task.cpp",
     "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
+    "$ark_root/libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.cpp",
+    "$ark_root/libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.cpp",
+    "$ark_root/libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.cpp",
+    "$ark_root/libpandabase/taskmanager/task_statistics/task_statistics.cpp",
     "$ark_root/libpandabase/taskmanager/worker_thread.cpp",
 
     # product build
