@@ -57,7 +57,7 @@ std::string JsonSerializeItemBody(const T &item)
     std::string quoted_name = "\"" + item.name + "\"";
     ss << "{ "
        << "\"name\": " << quoted_name;
-    if (item.file_location->is_defined) {
+    if (item.file_location && item.file_location->is_defined) {
         ss << ", "
            << "\"bodyLocation\": " << item.body_location.JsonSerialize() << " }";
     } else {
