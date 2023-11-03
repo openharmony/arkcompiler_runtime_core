@@ -29,7 +29,7 @@ public:
     {
         ASSERT(param->IsParameter());
         ASSERT(param->GetNext()->IsSpillFill());
-        auto spill_fill = param->GetNext()->CastToSpillFill()->GetSpillFill(0);
+        auto spill_fill = param->GetNext()->CastToSpillFill()->GetSpillFill(0U);
         auto param_liveness = GetGraph()->GetAnalysis<LivenessAnalyzer>().GetInstLifeIntervals(param);
         EXPECT_EQ(param_liveness->GetReg(), spill_fill.SrcValue());
         EXPECT_EQ(param_liveness->GetSibling()->GetReg(), spill_fill.DstValue());
@@ -47,43 +47,43 @@ TEST_F(RegAllocGraphColoringTest, Simple)
 
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
-        CONSTANT(2, 10);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::Type::UINT64).Inputs(2, 0);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::Type::UINT64).Inputs(2U, 0U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 2);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 2U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(6, Opcode::Phi).u64().Inputs(2, 5);
-            INST(7, Opcode::Add).u64().Inputs(6, 1);
-            INST(8, Opcode::Return).u64().Inputs(7);
+            INST(6U, Opcode::Phi).u64().Inputs(2U, 5U);
+            INST(7U, Opcode::Add).u64().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
     auto result = GetGraph()->RunPass<RegAllocGraphColoring>();
     ASSERT_TRUE(result);
     GraphChecker(GetGraph()).Check();
-    EXPECT_NE(INS(0).GetDstReg(), INS(6).GetDstReg());
-    EXPECT_NE(INS(0).GetDstReg(), INS(1).GetDstReg());
-    EXPECT_NE(INS(0).GetDstReg(), INS(2).GetDstReg());
+    EXPECT_NE(INS(0U).GetDstReg(), INS(6U).GetDstReg());
+    EXPECT_NE(INS(0U).GetDstReg(), INS(1U).GetDstReg());
+    EXPECT_NE(INS(0U).GetDstReg(), INS(2U).GetDstReg());
 
     auto arch = GetGraph()->GetArch();
-    size_t first_callee = arch != Arch::NONE ? GetFirstCalleeReg(arch, false) : 0;
-    EXPECT_LT(INS(0).CastToParameter()->GetLocationData().DstValue(), first_callee);
-    EXPECT_LT(INS(1).GetDstReg(), first_callee);
-    EXPECT_LT(INS(2).GetDstReg(), first_callee);
-    EXPECT_LT(INS(5).GetDstReg(), first_callee);
-    EXPECT_LT(INS(6).GetDstReg(), first_callee);
-    EXPECT_LT(INS(7).GetDstReg(), first_callee);
+    size_t first_callee = arch != Arch::NONE ? GetFirstCalleeReg(arch, false) : 0U;
+    EXPECT_LT(INS(0U).CastToParameter()->GetLocationData().DstValue(), first_callee);
+    EXPECT_LT(INS(1U).GetDstReg(), first_callee);
+    EXPECT_LT(INS(2U).GetDstReg(), first_callee);
+    EXPECT_LT(INS(5U).GetDstReg(), first_callee);
+    EXPECT_LT(INS(6U).GetDstReg(), first_callee);
+    EXPECT_LT(INS(7U).GetDstReg(), first_callee);
 }
 
 TEST_F(RegAllocGraphColoringTest, AffineComponent)
@@ -95,61 +95,61 @@ TEST_F(RegAllocGraphColoringTest, AffineComponent)
 
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
-        CONSTANT(2, 10);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::Type::UINT64).Inputs(2, 0);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::Type::UINT64).Inputs(2U, 0U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
 
-        BASIC_BLOCK(3, 8)
+        BASIC_BLOCK(3U, 8U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 2);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 2U);
         }
 
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(7, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::Type::UINT64).Inputs(1, 0);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
+            INST(7U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::Type::UINT64).Inputs(1U, 0U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
 
-        BASIC_BLOCK(5, 7)
+        BASIC_BLOCK(5U, 7U)
         {
-            CONSTANT(9, 188);
+            CONSTANT(9U, 188U);
         }
 
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(6, Opcode::Add).u64().Inputs(0, 1);
+            INST(6U, Opcode::Add).u64().Inputs(0U, 1U);
         }
 
-        BASIC_BLOCK(7, 8)
+        BASIC_BLOCK(7U, 8U)
         {
-            INST(10, Opcode::Phi).u64().Inputs(9, 6);
+            INST(10U, Opcode::Phi).u64().Inputs(9U, 6U);
         }
 
-        BASIC_BLOCK(8, -1)
+        BASIC_BLOCK(8U, -1L)
         {
-            INST(11, Opcode::Phi).u64().Inputs(5, 10);
-            INST(12, Opcode::Add).u64().Inputs(11, 1);
-            INST(13, Opcode::Add).u64().Inputs(12, 0);
-            INST(14, Opcode::Return).u64().Inputs(13);
+            INST(11U, Opcode::Phi).u64().Inputs(5U, 10U);
+            INST(12U, Opcode::Add).u64().Inputs(11U, 1U);
+            INST(13U, Opcode::Add).u64().Inputs(12U, 0U);
+            INST(14U, Opcode::Return).u64().Inputs(13U);
         }
     }
     auto result = GetGraph()->RunPass<RegAllocGraphColoring>();
     ASSERT_TRUE(result);
     GraphChecker(GetGraph()).Check();
-    EXPECT_EQ(INS(0).GetDstReg(), INS(3).GetSrcReg(1));
-    EXPECT_EQ(INS(0).GetDstReg(), INS(7).GetSrcReg(1));
+    EXPECT_EQ(INS(0U).GetDstReg(), INS(3U).GetSrcReg(1U));
+    EXPECT_EQ(INS(0U).GetDstReg(), INS(7U).GetSrcReg(1U));
 
     // Check affinity group
-    EXPECT_EQ(INS(5).GetDstReg(), INS(6).GetDstReg());
-    EXPECT_EQ(INS(5).GetDstReg(), INS(9).GetDstReg());
-    EXPECT_EQ(INS(5).GetDstReg(), INS(10).GetDstReg());
-    EXPECT_EQ(INS(5).GetDstReg(), INS(11).GetDstReg());
+    EXPECT_EQ(INS(5U).GetDstReg(), INS(6U).GetDstReg());
+    EXPECT_EQ(INS(5U).GetDstReg(), INS(9U).GetDstReg());
+    EXPECT_EQ(INS(5U).GetDstReg(), INS(10U).GetDstReg());
+    EXPECT_EQ(INS(5U).GetDstReg(), INS(11U).GetDstReg());
 }
 
 TEST_F(RegAllocGraphColoringTest, SimpleCall)
@@ -161,46 +161,46 @@ TEST_F(RegAllocGraphColoringTest, SimpleCall)
 
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).u64();
-        CONSTANT(2, 1);
-        CONSTANT(3, 10);
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(2U, 1U);
+        CONSTANT(3U, 10U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::Type::UINT64).Inputs(3, 1);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::Type::UINT64).Inputs(3U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(6, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(7, Opcode::CallStatic).b().InputsAutoType(0, 1, 2, 6);
-            INST(8, Opcode::Add).u64().Inputs(1, 3);
+            INST(6U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(7U, Opcode::CallStatic).b().InputsAutoType(0U, 1U, 2U, 6U);
+            INST(8U, Opcode::Add).u64().Inputs(1U, 3U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(9, Opcode::Phi).u64().Inputs(3, 8);
-            INST(10, Opcode::Add).u64().Inputs(9, 1);
-            INST(11, Opcode::Return).u64().Inputs(10);
+            INST(9U, Opcode::Phi).u64().Inputs(3U, 8U);
+            INST(10U, Opcode::Add).u64().Inputs(9U, 1U);
+            INST(11U, Opcode::Return).u64().Inputs(10U);
         }
     }
     auto regalloc = RegAllocGraphColoring(GetGraph());
     auto arch = GetGraph()->GetArch();
-    size_t first_callee = arch != Arch::NONE ? GetFirstCalleeReg(arch, false) : 0;
+    size_t first_callee = arch != Arch::NONE ? GetFirstCalleeReg(arch, false) : 0U;
 
     auto result = regalloc.Run();
     ASSERT_TRUE(result);
     GraphChecker(GetGraph()).Check();
 
-    auto param1_sf = GetParameterSpillFilll(&INS(1));
-    EXPECT_NE(param1_sf.DstValue(), INS(8).GetDstReg());
-    EXPECT_NE(param1_sf.DstValue(), INS(2).GetDstReg());
-    EXPECT_NE(param1_sf.DstValue(), INS(3).GetDstReg());
+    auto param1_sf = GetParameterSpillFilll(&INS(1U));
+    EXPECT_NE(param1_sf.DstValue(), INS(8U).GetDstReg());
+    EXPECT_NE(param1_sf.DstValue(), INS(2U).GetDstReg());
+    EXPECT_NE(param1_sf.DstValue(), INS(3U).GetDstReg());
 
     // Check intervals in calle registers and splits
-    EXPECT_LT(INS(0).GetDstReg(), first_callee);
+    EXPECT_LT(INS(0U).GetDstReg(), first_callee);
     EXPECT_GE(param1_sf.DstValue(), first_callee);
 }
 
@@ -214,40 +214,40 @@ TEST_F(RegAllocGraphColoringTest, HighPressure)
 
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
-        CONSTANT(2, 10);
-        CONSTANT(3, 10);
-        CONSTANT(4, 10);
-        CONSTANT(5, 10);
-        CONSTANT(6, 10);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
+        CONSTANT(3U, 10U);
+        CONSTANT(4U, 10U);
+        CONSTANT(5U, 10U);
+        CONSTANT(6U, 10U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(7, Opcode::Add).u64().Inputs(0, 1);
-            INST(8, Opcode::Add).u64().Inputs(0, 2);
-            INST(9, Opcode::Add).u64().Inputs(0, 3);
-            INST(10, Opcode::Add).u64().Inputs(0, 4);
-            INST(11, Opcode::Add).u64().Inputs(0, 5);
-            INST(12, Opcode::Add).u64().Inputs(0, 6);
-            INST(13, Opcode::Add).u64().Inputs(0, 7);
-            INST(14, Opcode::Add).u64().Inputs(0, 8);
-            INST(15, Opcode::Add).u64().Inputs(8, 7);
-            INST(16, Opcode::Add).u64().Inputs(9, 8);
+            INST(7U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(8U, Opcode::Add).u64().Inputs(0U, 2U);
+            INST(9U, Opcode::Add).u64().Inputs(0U, 3U);
+            INST(10U, Opcode::Add).u64().Inputs(0U, 4U);
+            INST(11U, Opcode::Add).u64().Inputs(0U, 5U);
+            INST(12U, Opcode::Add).u64().Inputs(0U, 6U);
+            INST(13U, Opcode::Add).u64().Inputs(0U, 7U);
+            INST(14U, Opcode::Add).u64().Inputs(0U, 8U);
+            INST(15U, Opcode::Add).u64().Inputs(8U, 7U);
+            INST(16U, Opcode::Add).u64().Inputs(9U, 8U);
 
-            INST(17, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(18, Opcode::CallStatic).b().InputsAutoType(0, 1, 2, 17);
+            INST(17U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(18U, Opcode::CallStatic).b().InputsAutoType(0U, 1U, 2U, 17U);
 
-            INST(20, Opcode::Add).u64().Inputs(1, 2);
-            INST(21, Opcode::Add).u64().Inputs(3, 4);
-            INST(22, Opcode::Add).u64().Inputs(5, 6);
-            INST(23, Opcode::Add).u64().Inputs(7, 8);
-            INST(24, Opcode::Add).u64().Inputs(9, 10);
-            INST(25, Opcode::Add).u64().Inputs(11, 12);
-            INST(26, Opcode::Add).u64().Inputs(13, 14);
-            INST(27, Opcode::Add).u64().Inputs(15, 16);
+            INST(20U, Opcode::Add).u64().Inputs(1U, 2U);
+            INST(21U, Opcode::Add).u64().Inputs(3U, 4U);
+            INST(22U, Opcode::Add).u64().Inputs(5U, 6U);
+            INST(23U, Opcode::Add).u64().Inputs(7U, 8U);
+            INST(24U, Opcode::Add).u64().Inputs(9U, 10U);
+            INST(25U, Opcode::Add).u64().Inputs(11U, 12U);
+            INST(26U, Opcode::Add).u64().Inputs(13U, 14U);
+            INST(27U, Opcode::Add).u64().Inputs(15U, 16U);
 
-            INST(60, Opcode::Return).u64().Inputs(27);
+            INST(60U, Opcode::Return).u64().Inputs(27U);
         }
     }
     auto result = GetGraph()->RunPass<RegAllocGraphColoring>();

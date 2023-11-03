@@ -338,15 +338,15 @@ NO_OPTIMIZE int Callback([[maybe_unused]] uintptr_t lr, [[maybe_unused]] uintptr
     for (uint64_t &i : tmp) {
         i = CORRUPT_DATA;
     }
-    return 0;
+    return 0U;
 }
 
 // NOLINTBEGIN(readability-magic-numbers)
 TEST_F(CodegenRunnerTest, ObjectParams)
 {
     // hi-part is 1 - to do not rewrite fp, lr in arm64
-    std::array<uint64_t, 4> reg_masks {
-        0, 0xFFFFFFFFFFFFFFF0, 0xFFFFFFFFF0FFF000, 0xFFFFFFFFFFFFDFD6,
+    std::array<uint64_t, 4U> reg_masks {
+        0U, 0xFFFFFFFFFFFFFFF0U, 0xFFFFFFFFF0FFF000U, 0xFFFFFFFFFFFFDFD6U,
         // TODO (igorban): enable next variants:
         // 0xFFFFFFFFFF000FFF,
         // 0xFFFFFFFFF000000F,
@@ -359,7 +359,7 @@ TEST_F(CodegenRunnerTest, ObjectParams)
             panda::test::PandaRunner runner;
             runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
             runner.GetCompilerOptions().SetCompilerInlining(false);
-            runner.GetRuntimeOptions().SetCompilerHotnessThreshold(0);
+            runner.GetRuntimeOptions().SetCompilerHotnessThreshold(0U);
             runner.GetRuntimeOptions().SetShouldLoadBootPandaFiles(true);
             runner.GetRuntimeOptions().SetShouldInitializeIntrinsics(false);
             runner.GetCompilerOptions().SetCompilerRegallocRegMask(mask);
@@ -368,7 +368,7 @@ TEST_F(CodegenRunnerTest, ObjectParams)
                 runner.SetHook(Callback);
             }
 
-            runner.Run(CODEGEN_OBJECT_PARAMS_SOURCE, 123);
+            runner.Run(CODEGEN_OBJECT_PARAMS_SOURCE, 123U);
         }
     }
 }

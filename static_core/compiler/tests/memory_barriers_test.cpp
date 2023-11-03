@@ -25,58 +25,58 @@ TEST_F(MemoryBarrierTest, Test1)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0x2a).s64();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0x2aU).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(2, Opcode::NewArray).ref().Inputs(4, 0, 1);
-            INST(3, Opcode::SaveState).Inputs(0, 2).SrcVregs({0, 1});
-            INST(5, Opcode::NewObject).ref().Inputs(4, 3);
-            INST(6, Opcode::SaveState).Inputs(0, 2, 5).SrcVregs({0, 1, 2});
-            INST(7, Opcode::CallStatic).v0id().Inputs({{DataType::NO_TYPE, 6}});
-            INST(8, Opcode::SaveState).Inputs(0, 2, 5).SrcVregs({0, 1, 2});
-            INST(9, Opcode::LoadAndInitClass).ref().Inputs(8);
-            INST(10, Opcode::NewObject).ref().Inputs(9, 8);
-            INST(11, Opcode::SaveState).Inputs(0, 2, 5, 10).SrcVregs({0, 1, 2, 3});
-            INST(12, Opcode::CallVirtual)
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(2U, Opcode::NewArray).ref().Inputs(4U, 0U, 1U);
+            INST(3U, Opcode::SaveState).Inputs(0U, 2U).SrcVregs({0U, 1U});
+            INST(5U, Opcode::NewObject).ref().Inputs(4U, 3U);
+            INST(6U, Opcode::SaveState).Inputs(0U, 2U, 5U).SrcVregs({0U, 1U, 2U});
+            INST(7U, Opcode::CallStatic).v0id().Inputs({{DataType::NO_TYPE, 6U}});
+            INST(8U, Opcode::SaveState).Inputs(0U, 2U, 5U).SrcVregs({0U, 1U, 2U});
+            INST(9U, Opcode::LoadAndInitClass).ref().Inputs(8U);
+            INST(10U, Opcode::NewObject).ref().Inputs(9U, 8U);
+            INST(11U, Opcode::SaveState).Inputs(0U, 2U, 5U, 10U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(12U, Opcode::CallVirtual)
                 .s64()
-                .Inputs({{DataType::REFERENCE, 2}, {DataType::REFERENCE, 5}, {DataType::NO_TYPE, 6}});
-            INST(13, Opcode::Return).ref().Inputs(10);
+                .Inputs({{DataType::REFERENCE, 2U}, {DataType::REFERENCE, 5U}, {DataType::NO_TYPE, 6U}});
+            INST(13U, Opcode::Return).ref().Inputs(10U);
         }
     }
-    ASSERT_EQ(INS(0).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(1).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(2).GetFlag(inst_flags::MEM_BARRIER), true);
-    ASSERT_EQ(INS(3).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(4).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(5).GetFlag(inst_flags::MEM_BARRIER), true);
-    ASSERT_EQ(INS(6).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(7).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(8).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(9).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(10).GetFlag(inst_flags::MEM_BARRIER), true);
-    ASSERT_EQ(INS(11).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(12).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(13).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(0U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(1U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(2U).GetFlag(inst_flags::MEM_BARRIER), true);
+    ASSERT_EQ(INS(3U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(4U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(5U).GetFlag(inst_flags::MEM_BARRIER), true);
+    ASSERT_EQ(INS(6U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(7U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(8U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(9U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(10U).GetFlag(inst_flags::MEM_BARRIER), true);
+    ASSERT_EQ(INS(11U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(12U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(13U).GetFlag(inst_flags::MEM_BARRIER), false);
 
     ASSERT_TRUE(GetGraph()->RunPass<OptimizeMemoryBarriers>());
     GraphChecker(GetGraph()).Check();
 
-    ASSERT_EQ(INS(0).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(1).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(2).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(3).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(4).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(5).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(6).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(7).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(8).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(9).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(10).GetFlag(inst_flags::MEM_BARRIER), true);
-    ASSERT_EQ(INS(11).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(12).GetFlag(inst_flags::MEM_BARRIER), false);
-    ASSERT_EQ(INS(13).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(0U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(1U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(2U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(3U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(4U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(5U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(6U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(7U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(8U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(9U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(10U).GetFlag(inst_flags::MEM_BARRIER), true);
+    ASSERT_EQ(INS(11U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(12U).GetFlag(inst_flags::MEM_BARRIER), false);
+    ASSERT_EQ(INS(13U).GetFlag(inst_flags::MEM_BARRIER), false);
 }
 // NOLINTEND(readability-magic-numbers)
 

@@ -133,87 +133,87 @@ TEST_F(LoopAnalyzerTest, LoopAnalyzer)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, 3) {}
-        BASIC_BLOCK(3, 4) {}
-        BASIC_BLOCK(4, 5) {}
-        BASIC_BLOCK(5, 6, 7)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, 3U) {}
+        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(4U, 5U) {}
+        BASIC_BLOCK(5U, 6U, 7U)
         {
-            INST(5, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(5U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(6, 4) {}
-        BASIC_BLOCK(7, 8) {}
-        BASIC_BLOCK(8, 9, 18)
+        BASIC_BLOCK(6U, 4U) {}
+        BASIC_BLOCK(7U, 8U) {}
+        BASIC_BLOCK(8U, 9U, 18U)
         {
-            INST(9, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(10, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(9);
+            INST(9U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
         }
-        BASIC_BLOCK(9, 10, 15)
+        BASIC_BLOCK(9U, 10U, 15U)
         {
-            INST(11, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(12, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(11);
+            INST(11U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
         }
-        BASIC_BLOCK(10, 11, 12)
+        BASIC_BLOCK(10U, 11U, 12U)
         {
-            INST(13, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(14, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(13);
+            INST(13U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(14U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(13U);
         }
-        BASIC_BLOCK(11, 8) {}
-        BASIC_BLOCK(12, 13) {}
-        BASIC_BLOCK(13, 14, 20)
+        BASIC_BLOCK(11U, 8U) {}
+        BASIC_BLOCK(12U, 13U) {}
+        BASIC_BLOCK(13U, 14U, 20U)
         {
-            INST(17, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(18, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(17);
+            INST(17U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(18U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(17U);
         }
-        BASIC_BLOCK(14, 3) {}
-        BASIC_BLOCK(15, 16) {}
-        BASIC_BLOCK(16, 17) {}
-        BASIC_BLOCK(17, 3) {}
-        BASIC_BLOCK(18, 19) {}
-        BASIC_BLOCK(19, 3) {}
-        BASIC_BLOCK(20, -1)
+        BASIC_BLOCK(14U, 3U) {}
+        BASIC_BLOCK(15U, 16U) {}
+        BASIC_BLOCK(16U, 17U) {}
+        BASIC_BLOCK(17U, 3U) {}
+        BASIC_BLOCK(18U, 19U) {}
+        BASIC_BLOCK(19U, 3U) {}
+        BASIC_BLOCK(20U, -1L)
         {
-            INST(25, Opcode::ReturnVoid);
+            INST(25U, Opcode::ReturnVoid);
         }
     }
 
-    auto loop1 = BB(4).GetLoop();
-    auto loop2 = BB(8).GetLoop();
-    auto loop3 = BB(3).GetLoop();
+    auto loop1 = BB(4U).GetLoop();
+    auto loop2 = BB(8U).GetLoop();
+    auto loop3 = BB(3U).GetLoop();
     auto root_loop = GetGraph()->GetRootLoop();
 
     ASSERT_NE(loop1, nullptr);
     ASSERT_NE(loop2, nullptr);
     ASSERT_NE(loop3, nullptr);
 
-    ASSERT_EQ(loop1->GetHeader(), &BB(4));
-    ASSERT_EQ(loop1->GetPreHeader(), &BB(3));
-    CheckVectorEqualBlocksIdSet(loop1->GetBackEdges(), {6});
-    CheckVectorEqualBlocksIdSet(loop1->GetBlocks(), {4, 5, 6});
+    ASSERT_EQ(loop1->GetHeader(), &BB(4U));
+    ASSERT_EQ(loop1->GetPreHeader(), &BB(3U));
+    CheckVectorEqualBlocksIdSet(loop1->GetBackEdges(), {6U});
+    CheckVectorEqualBlocksIdSet(loop1->GetBlocks(), {4U, 5U, 6U});
     CheckVectorEqualSet(loop1->GetInnerLoops(), {});
     EXPECT_EQ(loop1->GetOuterLoop(), loop3);
     EXPECT_EQ(loop1->IsIrreducible(), false);
 
-    ASSERT_EQ(loop2->GetHeader(), &BB(8));
-    ASSERT_EQ(loop2->GetPreHeader(), &BB(7));
-    CheckVectorEqualBlocksIdSet(loop2->GetBackEdges(), {11});
-    CheckVectorEqualBlocksIdSet(loop2->GetBlocks(), {8, 9, 10, 11});
+    ASSERT_EQ(loop2->GetHeader(), &BB(8U));
+    ASSERT_EQ(loop2->GetPreHeader(), &BB(7U));
+    CheckVectorEqualBlocksIdSet(loop2->GetBackEdges(), {11U});
+    CheckVectorEqualBlocksIdSet(loop2->GetBlocks(), {8U, 9U, 10U, 11U});
     CheckVectorEqualSet(loop2->GetInnerLoops(), {});
     EXPECT_EQ(loop2->GetOuterLoop(), loop3);
     EXPECT_EQ(loop2->IsIrreducible(), false);
 
-    ASSERT_EQ(loop3->GetHeader(), &BB(3));
-    ASSERT_EQ(loop3->GetPreHeader(), &BB(2));
-    CheckVectorEqualBlocksIdSet(loop3->GetBackEdges(), {14, 17, 19});
-    CheckVectorEqualBlocksIdSet(loop3->GetBlocks(), {3, 7, 12, 13, 14, 15, 16, 17, 18, 19});
+    ASSERT_EQ(loop3->GetHeader(), &BB(3U));
+    ASSERT_EQ(loop3->GetPreHeader(), &BB(2U));
+    CheckVectorEqualBlocksIdSet(loop3->GetBackEdges(), {14U, 17U, 19U});
+    CheckVectorEqualBlocksIdSet(loop3->GetBlocks(), {3U, 7U, 12U, 13U, 14U, 15U, 16U, 17U, 18U, 19U});
     CheckVectorEqualSet(loop3->GetInnerLoops(), {loop1, loop2});
     EXPECT_EQ(loop3->GetOuterLoop(), root_loop);
     EXPECT_EQ(loop3->IsIrreducible(), false);
 
-    EXPECT_EQ(BB(2).GetLoop(), root_loop);
-    EXPECT_EQ(BB(20).GetLoop(), root_loop);
+    EXPECT_EQ(BB(2U).GetLoop(), root_loop);
+    EXPECT_EQ(BB(20U).GetLoop(), root_loop);
     CheckVectorEqualSet(root_loop->GetInnerLoops(), {loop3});
 }
 
@@ -269,58 +269,58 @@ TEST_F(LoopAnalyzerTest, PreheaderInsert)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 5).u64();
-        PARAMETER(2, 10).u64();
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 5U).u64();
+        PARAMETER(2U, 10U).u64();
 
-        BASIC_BLOCK(2, 4, 5)
+        BASIC_BLOCK(2U, 4U, 5U)
         {
-            INST(3, Opcode::Not).u64().Inputs(0);
-            INST(19, Opcode::Compare).b().Inputs(0, 1);
-            INST(20, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(19);
+            INST(3U, Opcode::Not).u64().Inputs(0U);
+            INST(19U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(20U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(19U);
         }
-        BASIC_BLOCK(4, 6)
+        BASIC_BLOCK(4U, 6U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 1);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(5, 6)
+        BASIC_BLOCK(5U, 6U)
         {
-            INST(6, Opcode::Add).u64().Inputs(0, 2);
+            INST(6U, Opcode::Add).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(7, Opcode::Phi).u64().Inputs({{4, 5}, {5, 6}, {8, 12}});
-            INST(8, Opcode::Phi).u64().Inputs({{4, 5}, {5, 6}, {8, 12}});
+            INST(7U, Opcode::Phi).u64().Inputs({{4U, 5U}, {5U, 6U}, {8U, 12U}});
+            INST(8U, Opcode::Phi).u64().Inputs({{4U, 5U}, {5U, 6U}, {8U, 12U}});
         }
-        BASIC_BLOCK(7, 8, 9)
+        BASIC_BLOCK(7U, 8U, 9U)
         {
-            INST(9, Opcode::Mul).u64().Inputs(7, 8);
-            INST(10, Opcode::Compare).b().Inputs(9, 2);
-            INST(11, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(10);
+            INST(9U, Opcode::Mul).u64().Inputs(7U, 8U);
+            INST(10U, Opcode::Compare).b().Inputs(9U, 2U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
         }
-        BASIC_BLOCK(8, 6)
+        BASIC_BLOCK(8U, 6U)
         {
-            INST(12, Opcode::Mul).u64().Inputs(9, 1);
+            INST(12U, Opcode::Mul).u64().Inputs(9U, 1U);
         }
-        BASIC_BLOCK(9, -1)
+        BASIC_BLOCK(9U, -1L)
         {
-            INST(18, Opcode::ReturnVoid);
+            INST(18U, Opcode::ReturnVoid);
         }
     }
 
-    auto loop = BB(6).GetLoop();
+    auto loop = BB(6U).GetLoop();
     ASSERT_NE(loop, nullptr);
-    EXPECT_EQ(loop->GetHeader(), &BB(6));
-    CheckVectorEqualBlocksIdSet(loop->GetBackEdges(), {8});
+    EXPECT_EQ(loop->GetHeader(), &BB(6U));
+    CheckVectorEqualBlocksIdSet(loop->GetBackEdges(), {8U});
 
     auto pre_header = loop->GetPreHeader();
     ASSERT_EQ(pre_header->GetLoop(), loop->GetOuterLoop());
-    CheckVectorEqualBlocksIdSet(pre_header->GetPredsBlocks(), {4, 5});
-    CheckVectorEqualBlocksIdSet(pre_header->GetSuccsBlocks(), {6});
+    CheckVectorEqualBlocksIdSet(pre_header->GetPredsBlocks(), {4U, 5U});
+    CheckVectorEqualBlocksIdSet(pre_header->GetSuccsBlocks(), {6U});
     EXPECT_EQ(loop->GetHeader()->GetDominator(), pre_header);
-    CheckVectorEqualBlocksIdSet(pre_header->GetDominatedBlocks(), {6});
+    CheckVectorEqualBlocksIdSet(pre_header->GetDominatedBlocks(), {6U});
 
-    CheckPhiInputs(&BB(6));
+    CheckPhiInputs(&BB(6U));
     CheckPhiInputs(pre_header);
 }
 
@@ -350,32 +350,32 @@ TEST_F(LoopAnalyzerTest, PreheaderInsert2)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, 3) {}
-        BASIC_BLOCK(3, 4, 2)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, 3U) {}
+        BASIC_BLOCK(3U, 4U, 2U)
         {
-            INST(3, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(4, 5) {}
-        BASIC_BLOCK(5, 6, 4)
+        BASIC_BLOCK(4U, 5U) {}
+        BASIC_BLOCK(5U, 6U, 4U)
         {
-            INST(6, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(6U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(8, Opcode::ReturnVoid);
+            INST(8U, Opcode::ReturnVoid);
         }
     }
 
-    auto loop1 = BB(2).GetLoop();
-    auto loop2 = BB(4).GetLoop();
-    CheckVectorEqualBlocksIdSet(loop1->GetPreHeader()->GetPredsBlocks(), {0});
-    CheckVectorEqualBlocksIdSet(loop1->GetPreHeader()->GetSuccsBlocks(), {2});
-    CheckVectorEqualBlocksIdSet(loop2->GetPreHeader()->GetPredsBlocks(), {3});
-    CheckVectorEqualBlocksIdSet(loop2->GetPreHeader()->GetSuccsBlocks(), {4});
+    auto loop1 = BB(2U).GetLoop();
+    auto loop2 = BB(4U).GetLoop();
+    CheckVectorEqualBlocksIdSet(loop1->GetPreHeader()->GetPredsBlocks(), {0U});
+    CheckVectorEqualBlocksIdSet(loop1->GetPreHeader()->GetSuccsBlocks(), {2U});
+    CheckVectorEqualBlocksIdSet(loop2->GetPreHeader()->GetPredsBlocks(), {3U});
+    CheckVectorEqualBlocksIdSet(loop2->GetPreHeader()->GetSuccsBlocks(), {4U});
 }
 
 TEST_F(LoopAnalyzerTest, CountableLoopTest)
@@ -383,32 +383,32 @@ TEST_F(LoopAnalyzerTest, CountableLoopTest)
     // Loop isn't countable because const_step is negative and condition is CC_LT
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);  // initial
-        CONSTANT(1, 1);  // increment
-        CONSTANT(2, -1);
-        PARAMETER(3, 0).ref();  // array
-        BASIC_BLOCK(2, 3, 5)
+        CONSTANT(0U, 0U);  // initial
+        CONSTANT(1U, 1U);  // increment
+        CONSTANT(2U, -1L);
+        PARAMETER(3U, 0U).ref();  // array
+        BASIC_BLOCK(2U, 3U, 5U)
         {
-            INST(16, Opcode::LenArray).s32().Inputs(3);
-            INST(5, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0, 16);  // 0 < len_array
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(16U, Opcode::LenArray).s32().Inputs(3U);
+            INST(5U, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0U, 16U);  // 0 < len_array
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 3, 5)
+        BASIC_BLOCK(3U, 3U, 5U)
         {
-            INST(4, Opcode::Phi).s32().Inputs(0, 10);
-            INST(7, Opcode::SaveState).Inputs(0, 1, 3).SrcVregs({0, 1, 2});
-            INST(8, Opcode::BoundsCheck).s32().Inputs(16, 4, 7);
-            INST(9, Opcode::StoreArray).s32().Inputs(3, 8, 0);       // a[i] = 0
-            INST(10, Opcode::Add).s32().Inputs(4, 2);                // i--
-            INST(13, Opcode::Compare).CC(CC_LT).b().Inputs(10, 16);  // i < len_array
-            INST(14, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(13);
+            INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);
+            INST(7U, Opcode::SaveState).Inputs(0U, 1U, 3U).SrcVregs({0U, 1U, 2U});
+            INST(8U, Opcode::BoundsCheck).s32().Inputs(16U, 4U, 7U);
+            INST(9U, Opcode::StoreArray).s32().Inputs(3U, 8U, 0U);      // a[i] = 0
+            INST(10U, Opcode::Add).s32().Inputs(4U, 2U);                // i--
+            INST(13U, Opcode::Compare).CC(CC_LT).b().Inputs(10U, 16U);  // i < len_array
+            INST(14U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(13U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(12, Opcode::Return).ref().Inputs(3);
+            INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
-    auto loop = BB(3).GetLoop();
+    auto loop = BB(3U).GetLoop();
     auto loop_parser = CountableLoopParser(*loop);
     ASSERT_EQ(loop_parser.Parse(), std::nullopt);
 }
@@ -418,42 +418,42 @@ TEST_F(LoopAnalyzerTest, CountableLoopTestNegativeStep)
     // Countable because with negative const_step
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);  // initial
-        CONSTANT(1, 1);  // increment
-        CONSTANT(2, -1);
-        PARAMETER(3, 0).ref();  // array
-        BASIC_BLOCK(2, 3, 5)
+        CONSTANT(0U, 0U);  // initial
+        CONSTANT(1U, 1U);  // increment
+        CONSTANT(2U, -1L);
+        PARAMETER(3U, 0U).ref();  // array
+        BASIC_BLOCK(2U, 3U, 5U)
         {
-            INST(16, Opcode::LenArray).s32().Inputs(3);
-            INST(5, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0, 16);  // 0 < len_array
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(16U, Opcode::LenArray).s32().Inputs(3U);
+            INST(5U, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0U, 16U);  // 0 < len_array
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 3, 5)
+        BASIC_BLOCK(3U, 3U, 5U)
         {
-            INST(4, Opcode::Phi).s32().Inputs(16, 10);
-            INST(7, Opcode::SaveState).Inputs(0, 1, 3).SrcVregs({0, 1, 2});
-            INST(10, Opcode::Add).s32().Inputs(4, 2);  // i--
-            INST(8, Opcode::BoundsCheck).s32().Inputs(10, 4, 7);
-            INST(9, Opcode::StoreArray).s32().Inputs(3, 8, 0);      // a[i] = 0
-            INST(13, Opcode::Compare).CC(CC_GT).b().Inputs(10, 0);  // i > 0
-            INST(14, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(13);
+            INST(4U, Opcode::Phi).s32().Inputs(16U, 10U);
+            INST(7U, Opcode::SaveState).Inputs(0U, 1U, 3U).SrcVregs({0U, 1U, 2U});
+            INST(10U, Opcode::Add).s32().Inputs(4U, 2U);  // i--
+            INST(8U, Opcode::BoundsCheck).s32().Inputs(10U, 4U, 7U);
+            INST(9U, Opcode::StoreArray).s32().Inputs(3U, 8U, 0U);     // a[i] = 0
+            INST(13U, Opcode::Compare).CC(CC_GT).b().Inputs(10U, 0U);  // i > 0
+            INST(14U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(13U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(12, Opcode::Return).ref().Inputs(3);
+            INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
-    auto loop = BB(3).GetLoop();
+    auto loop = BB(3U).GetLoop();
     auto loop_parser = CountableLoopParser(*loop);
     auto loop_info = loop_parser.Parse();
     ASSERT_NE(loop_info, std::nullopt);
     auto loop_info_value = loop_info.value();
-    ASSERT_EQ(loop_info_value.if_imm, &INS(14));
-    ASSERT_EQ(loop_info_value.init, &INS(16));
-    ASSERT_EQ(loop_info_value.test, &INS(0));
-    ASSERT_EQ(loop_info_value.update, &INS(10));
-    ASSERT_EQ(loop_info_value.index, &INS(4));
-    ASSERT_EQ(loop_info_value.const_step, 1);
+    ASSERT_EQ(loop_info_value.if_imm, &INS(14U));
+    ASSERT_EQ(loop_info_value.init, &INS(16U));
+    ASSERT_EQ(loop_info_value.test, &INS(0U));
+    ASSERT_EQ(loop_info_value.update, &INS(10U));
+    ASSERT_EQ(loop_info_value.index, &INS(4U));
+    ASSERT_EQ(loop_info_value.const_step, 1U);
     ASSERT_EQ(loop_info_value.normalized_cc, ConditionCode::CC_GT);
     ASSERT_FALSE(loop_info_value.is_inc);
 }
@@ -463,32 +463,32 @@ TEST_F(LoopAnalyzerTest, CountableLoopTestIndexInInnerLoop)
     // Loop isn't countable because const_step is negative and condition is CC_LT
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);  // initial
-        CONSTANT(1, 1);  // increment
-        CONSTANT(2, -1);
-        PARAMETER(3, 0).ref();  // array
-        BASIC_BLOCK(2, 3, 5)
+        CONSTANT(0U, 0U);  // initial
+        CONSTANT(1U, 1U);  // increment
+        CONSTANT(2U, -1L);
+        PARAMETER(3U, 0U).ref();  // array
+        BASIC_BLOCK(2U, 3U, 5U)
         {
-            INST(16, Opcode::LenArray).s32().Inputs(3);
-            INST(5, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0, 16);  // 0 < len_array
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(16U, Opcode::LenArray).s32().Inputs(3U);
+            INST(5U, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0U, 16U);  // 0 < len_array
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 3, 5)
+        BASIC_BLOCK(3U, 3U, 5U)
         {
-            INST(4, Opcode::Phi).s32().Inputs(0, 10);
-            INST(7, Opcode::SaveState).Inputs(0, 1, 3).SrcVregs({0, 1, 2});
-            INST(8, Opcode::BoundsCheck).s32().Inputs(16, 4, 7);
-            INST(9, Opcode::StoreArray).s32().Inputs(3, 8, 0);       // a[i] = 0
-            INST(10, Opcode::Add).s32().Inputs(4, 2);                // i--
-            INST(13, Opcode::Compare).CC(CC_LT).b().Inputs(10, 16);  // i < len_array
-            INST(14, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(13);
+            INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);
+            INST(7U, Opcode::SaveState).Inputs(0U, 1U, 3U).SrcVregs({0U, 1U, 2U});
+            INST(8U, Opcode::BoundsCheck).s32().Inputs(16U, 4U, 7U);
+            INST(9U, Opcode::StoreArray).s32().Inputs(3U, 8U, 0U);      // a[i] = 0
+            INST(10U, Opcode::Add).s32().Inputs(4U, 2U);                // i--
+            INST(13U, Opcode::Compare).CC(CC_LT).b().Inputs(10U, 16U);  // i < len_array
+            INST(14U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(13U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(12, Opcode::Return).ref().Inputs(3);
+            INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
-    auto loop = BB(3).GetLoop();
+    auto loop = BB(3U).GetLoop();
     auto loop_parser = CountableLoopParser(*loop);
     ASSERT_EQ(loop_parser.Parse(), std::nullopt);
 }
@@ -498,29 +498,29 @@ TEST_F(LoopAnalyzerTest, CountableLoopTest1)
     // fix case when loop's update inst in inner loop.
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(5, 5);
-        CONSTANT(10, 10);
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(5U, 5U);
+        CONSTANT(10U, 10U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Phi).s32().Inputs(0, 7);
-            INST(3, Opcode::Compare).b().CC(CC_GE).Inputs(2, 10);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(2U, Opcode::Phi).s32().Inputs(0U, 7U);
+            INST(3U, Opcode::Compare).b().CC(CC_GE).Inputs(2U, 10U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 3, 2)
+        BASIC_BLOCK(3U, 3U, 2U)
         {
-            INST(6, Opcode::Phi).s32().Inputs(2, 7);
-            INST(7, Opcode::Add).s32().Inputs(6, 1);
-            INST(8, Opcode::Compare).b().CC(CC_GE).Inputs(7, 5);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(6U, Opcode::Phi).s32().Inputs(2U, 7U);
+            INST(7U, Opcode::Add).s32().Inputs(6U, 1U);
+            INST(8U, Opcode::Compare).b().CC(CC_GE).Inputs(7U, 5U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(11, Opcode::Return).s32().Inputs(2);
+            INST(11U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    auto loop = BB(2).GetLoop();
+    auto loop = BB(2U).GetLoop();
     auto loop_parser = CountableLoopParser(*loop);
     ASSERT_EQ(loop_parser.Parse(), std::nullopt);
 }
@@ -530,37 +530,37 @@ TEST_F(LoopAnalyzerTest, CountableLoopTest2)
     // fix case when, last backedge inst isn't IfImm.
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(5, 5);
-        CONSTANT(10, 10);
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(5U, 5U);
+        CONSTANT(10U, 10U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Phi).s32().Inputs(0, 7);
-            INST(3, Opcode::Compare).b().CC(CC_LT).Inputs(2, 10);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(2U, Opcode::Phi).s32().Inputs(0U, 7U);
+            INST(3U, Opcode::Compare).b().CC(CC_LT).Inputs(2U, 10U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(7, Opcode::Add).s32().Inputs(2, 1);
-            INST(8, Opcode::NOP);
+            INST(7U, Opcode::Add).s32().Inputs(2U, 1U);
+            INST(8U, Opcode::NOP);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(11, Opcode::Return).s32().Inputs(2);
+            INST(11U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    auto loop = BB(2).GetLoop();
+    auto loop = BB(2U).GetLoop();
     auto loop_parser = CountableLoopParser(*loop);
     auto loop_info = loop_parser.Parse();
     ASSERT_NE(loop_info, std::nullopt);
     auto loop_info_value = loop_info.value();
-    ASSERT_EQ(loop_info_value.if_imm, &INS(4));
-    ASSERT_EQ(loop_info_value.init, &INS(0));
-    ASSERT_EQ(loop_info_value.test, &INS(10));
-    ASSERT_EQ(loop_info_value.update, &INS(7));
-    ASSERT_EQ(loop_info_value.index, &INS(2));
-    ASSERT_EQ(loop_info_value.const_step, 1);
+    ASSERT_EQ(loop_info_value.if_imm, &INS(4U));
+    ASSERT_EQ(loop_info_value.init, &INS(0U));
+    ASSERT_EQ(loop_info_value.test, &INS(10U));
+    ASSERT_EQ(loop_info_value.update, &INS(7U));
+    ASSERT_EQ(loop_info_value.index, &INS(2U));
+    ASSERT_EQ(loop_info_value.const_step, 1U);
     ASSERT_EQ(loop_info_value.normalized_cc, ConditionCode::CC_LT);
     ASSERT_TRUE(loop_info_value.is_inc);
 }
@@ -581,30 +581,30 @@ TEST_F(LoopAnalyzerTest, InfiniteLoop)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        CONSTANT(2, 1);
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        CONSTANT(2U, 1U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Phi).s32().Inputs(0, 6);
-            INST(4, Opcode::Compare).b().CC(CC_NE).Inputs(3, 1);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(3U, Opcode::Phi).s32().Inputs(0U, 6U);
+            INST(4U, Opcode::Compare).b().CC(CC_NE).Inputs(3U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(6, Opcode::Add).s32().Inputs(3, 2);
+            INST(6U, Opcode::Add).s32().Inputs(3U, 2U);
         }
-        BASIC_BLOCK(4, 5) {}
-        BASIC_BLOCK(5, 5)
+        BASIC_BLOCK(4U, 5U) {}
+        BASIC_BLOCK(5U, 5U)
         {
-            INST(7, Opcode::Phi).s32().Inputs(3, 8);
-            INST(8, Opcode::Add).s32().Inputs(7, 2);
+            INST(7U, Opcode::Phi).s32().Inputs(3U, 8U);
+            INST(8U, Opcode::Add).s32().Inputs(7U, 2U);
         }
     }
 
-    auto loop1 = BB(2).GetLoop();
-    auto loop2 = BB(5).GetLoop();
+    auto loop1 = BB(2U).GetLoop();
+    auto loop2 = BB(5U).GetLoop();
     ASSERT_FALSE(loop1->IsInfinite());
     ASSERT_TRUE(loop2->IsInfinite());
 }
@@ -666,32 +666,32 @@ TEST_F(LoopAnalyzerTest, LoopTest1)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(10, 11, 12)
+        BASIC_BLOCK(10U, 11U, 12U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(12, 13, 11)
+        BASIC_BLOCK(12U, 13U, 11U)
         {
-            INST(4, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(11, 11, 13)
+        BASIC_BLOCK(11U, 11U, 13U)
         {
-            INST(6, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(6U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(13, 11, 14)
+        BASIC_BLOCK(13U, 11U, 14U)
         {
-            INST(8, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(8U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
-        BASIC_BLOCK(14, -1)
+        BASIC_BLOCK(14U, -1L)
         {
-            INST(10, Opcode::ReturnVoid);
+            INST(10U, Opcode::ReturnVoid);
         }
     }
 
@@ -711,43 +711,43 @@ TEST_F(LoopAnalyzerTest, LoopDepth)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
 
-        BASIC_BLOCK(2, 3, 7)  // loop depth 1
+        BASIC_BLOCK(2U, 3U, 7U)  // loop depth 1
         {
-            INST(3, Opcode::If).CC(compiler::CC_GE).SrcType(DataType::INT32).Inputs(0, 1);
+            INST(3U, Opcode::If).CC(compiler::CC_GE).SrcType(DataType::INT32).Inputs(0U, 1U);
         }
-        BASIC_BLOCK(3, 4, 2)  // loop depth 2
+        BASIC_BLOCK(3U, 4U, 2U)  // loop depth 2
         {
-            INST(4, Opcode::If).CC(compiler::CC_GE).SrcType(DataType::INT32).Inputs(0, 1);
+            INST(4U, Opcode::If).CC(compiler::CC_GE).SrcType(DataType::INT32).Inputs(0U, 1U);
         }
-        BASIC_BLOCK(4, 4, 5)  // loop depth 3
+        BASIC_BLOCK(4U, 4U, 5U)  // loop depth 3
         {
-            INST(5, Opcode::If).CC(compiler::CC_GE).SrcType(DataType::INT32).Inputs(0, 1);
+            INST(5U, Opcode::If).CC(compiler::CC_GE).SrcType(DataType::INT32).Inputs(0U, 1U);
         }
-        BASIC_BLOCK(5, 5, 6)  // loop depth 3
+        BASIC_BLOCK(5U, 5U, 6U)  // loop depth 3
         {
-            INST(6, Opcode::If).CC(compiler::CC_GE).SrcType(DataType::INT32).Inputs(0, 1);
+            INST(6U, Opcode::If).CC(compiler::CC_GE).SrcType(DataType::INT32).Inputs(0U, 1U);
         }
-        BASIC_BLOCK(6, 6, 3)  // loop depth 3
+        BASIC_BLOCK(6U, 6U, 3U)  // loop depth 3
         {
-            INST(7, Opcode::If).CC(compiler::CC_GE).SrcType(DataType::INT32).Inputs(0, 1);
+            INST(7U, Opcode::If).CC(compiler::CC_GE).SrcType(DataType::INT32).Inputs(0U, 1U);
         }
-        BASIC_BLOCK(7, 7, 10)  // loop depth 1
+        BASIC_BLOCK(7U, 7U, 10U)  // loop depth 1
         {
-            INST(8, Opcode::If).CC(compiler::CC_GE).SrcType(DataType::INT32).Inputs(0, 1);
+            INST(8U, Opcode::If).CC(compiler::CC_GE).SrcType(DataType::INT32).Inputs(0U, 1U);
         }
-        BASIC_BLOCK(10, -1)
+        BASIC_BLOCK(10U, -1L)
         {
-            INST(10, Opcode::ReturnVoid);
+            INST(10U, Opcode::ReturnVoid);
         }
     }
 
     static constexpr unsigned MAX_DEPTH = 3;
     ArenaVector<Loop *> all_loops(GetGraph()->GetLocalAllocator()->Adapter());
     // Count loops number of each depth
-    ArenaVector<unsigned> loops_depth_counters(MAX_DEPTH + 1, 0, GetGraph()->GetLocalAllocator()->Adapter());
+    ArenaVector<unsigned> loops_depth_counters(MAX_DEPTH + 1U, 0U, GetGraph()->GetLocalAllocator()->Adapter());
 
     CollectLoopsDFS(&all_loops, GetGraph()->GetRootLoop());
     for (auto loop : all_loops) {
@@ -755,11 +755,11 @@ TEST_F(LoopAnalyzerTest, LoopDepth)
         loops_depth_counters[loop->GetDepth()]++;
     }
     // Root loop should be zero-depth
-    EXPECT_EQ(GetGraph()->GetRootLoop()->GetDepth(), 0);
-    EXPECT_EQ(loops_depth_counters[0], 1);
-    EXPECT_EQ(loops_depth_counters[1], 2);
-    EXPECT_EQ(loops_depth_counters[2], 1);
-    EXPECT_EQ(loops_depth_counters[3], 3);
+    EXPECT_EQ(GetGraph()->GetRootLoop()->GetDepth(), 0U);
+    EXPECT_EQ(loops_depth_counters[0U], 1U);
+    EXPECT_EQ(loops_depth_counters[1U], 2U);
+    EXPECT_EQ(loops_depth_counters[2U], 1U);
+    EXPECT_EQ(loops_depth_counters[3U], 3U);
 }
 // NOLINTEND(readability-magic-numbers)
 

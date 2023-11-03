@@ -49,7 +49,7 @@ public:
         PandaVM::GetCurrent()->GetMutatorLock()->Unlock();
     }
 
-    void UpdateBranchTaken(uint32_t pc, uint32_t count = 1)
+    void UpdateBranchTaken(uint32_t pc, uint32_t count = 1U)
     {
         auto method = reinterpret_cast<Method *>(GetGraph()->GetMethod());
         auto profiling_data = method->GetProfilingData();
@@ -58,7 +58,7 @@ public:
         }
     }
 
-    void UpdateBranchNotTaken(uint32_t pc, uint32_t count = 1)
+    void UpdateBranchNotTaken(uint32_t pc, uint32_t count = 1U)
     {
         auto method = reinterpret_cast<Method *>(GetGraph()->GetMethod());
         auto profiling_data = method->GetProfilingData();
@@ -90,7 +90,7 @@ public:
         Reset();
         const auto &blocks = GetGraph()->GetBlocksLinearOrder();
         auto actual_it =
-            std::find_if(std::begin(blocks), std::end(blocks), [id](BasicBlock *b) { return b->GetId() == id; }) + 1;
+            std::find_if(std::begin(blocks), std::end(blocks), [id](BasicBlock *b) { return b->GetId() == id; }) + 1U;
         auto expected_it = std::begin(expected);
         while (actual_it != std::end(blocks) && expected_it != std::end(expected)) {
             if ((*actual_it)->GetId() != *expected_it) {
@@ -136,12 +136,12 @@ TEST_F(LinearOrderTest, RareLoopSideExit)
     }
     )";
     ASSERT_TRUE(ParseToGraph(source, "foo"));
-    ASSERT_TRUE(CheckOrder(2, {4, 3})) << "Unexpected initial order";
+    ASSERT_TRUE(CheckOrder(2U, {4U, 3U})) << "Unexpected initial order";
 
     StartProfiling();
-    UpdateBranchTaken(0xF);
+    UpdateBranchTaken(0xFU);
 
-    ASSERT_TRUE(CheckOrder(2, {3, 4})) << "Unexpected order";
+    ASSERT_TRUE(CheckOrder(2U, {3U, 4U})) << "Unexpected order";
 }
 
 TEST_F(LinearOrderTest, FrequencyThreshold)
@@ -173,22 +173,22 @@ TEST_F(LinearOrderTest, FrequencyThreshold)
     }
     )";
     ASSERT_TRUE(ParseToGraph(source, "main"));
-    ASSERT_TRUE(CheckOrder(2, {4, 3, 5})) << "Unexpected initial order";
+    ASSERT_TRUE(CheckOrder(2U, {4U, 3U, 5U})) << "Unexpected initial order";
 
     StartProfiling();
-    UpdateBranchNotTaken(0xD, 90);
-    UpdateBranchTaken(0xD, 99);
+    UpdateBranchNotTaken(0xDU, 90U);
+    UpdateBranchTaken(0xDU, 99U);
 
-    ASSERT_TRUE(CheckOrder(2, {4, 3, 5})) << "Unexpected order, threshold was not exceeded";
+    ASSERT_TRUE(CheckOrder(2U, {4U, 3U, 5U})) << "Unexpected order, threshold was not exceeded";
 
-    UpdateBranchTaken(0xD);
-    ASSERT_TRUE(CheckOrder(2, {3, 5, 4})) << "Unexpected order, threshold was exceeded";
+    UpdateBranchTaken(0xDU);
+    ASSERT_TRUE(CheckOrder(2U, {3U, 5U, 4U})) << "Unexpected order, threshold was exceeded";
 
-    UpdateBranchNotTaken(0xD, 21);
-    ASSERT_TRUE(CheckOrder(2, {3, 4, 5})) << "Unexpected order, another branch didn't exceed threshold";
+    UpdateBranchNotTaken(0xDU, 21U);
+    ASSERT_TRUE(CheckOrder(2U, {3U, 4U, 5U})) << "Unexpected order, another branch didn't exceed threshold";
 
-    UpdateBranchNotTaken(0xD);
-    ASSERT_TRUE(CheckOrder(2, {4, 5, 3})) << "Unexpected order, another branch exceeded threshold";
+    UpdateBranchNotTaken(0xDU);
+    ASSERT_TRUE(CheckOrder(2U, {4U, 5U, 3U})) << "Unexpected order, another branch exceeded threshold";
 }
 
 TEST_F(LinearOrderTest, LoopTransform)
@@ -221,20 +221,21 @@ TEST_F(LinearOrderTest, LoopTransform)
     ASSERT_TRUE(ParseToGraph(source, "foo"));
     ASSERT_TRUE(GetGraph()->RunPass<LoopPeeling>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>(false));
-    ASSERT_TRUE(GetGraph()->RunPass<LoopUnroll>(100, 3));
+    ASSERT_TRUE(GetGraph()->RunPass<LoopUnroll>(100U, 3U));
 
-    ASSERT_TRUE(CheckOrder(20, {4, 3, 5, 22, 24, 25, 23, 26, 28, 29, 27, 21, 1})) << "Unexpected initial order";
+    ASSERT_TRUE(CheckOrder(20U, {4U, 3U, 5U, 22U, 24U, 25U, 23U, 26U, 28U, 29U, 27U, 21U, 1U}))
+        << "Unexpected initial order";
 
     StartProfiling();
-    UpdateBranchTaken(0x10, 10);
-    UpdateBranchNotTaken(0x10);
+    UpdateBranchTaken(0x10U, 10U);
+    UpdateBranchNotTaken(0x10U);
 
-    ASSERT_TRUE(CheckOrder(20, {3, 5, 22, 25, 23, 26, 29, 27, 21, 28, 24, 4, 1}))
+    ASSERT_TRUE(CheckOrder(20U, {3U, 5U, 22U, 25U, 23U, 26U, 29U, 27U, 21U, 28U, 24U, 4U, 1U}))
         << "Unexpected order, threshold was exceeded";
 
-    UpdateBranchNotTaken(0x10, 20);
+    UpdateBranchNotTaken(0x10U, 20U);
 
-    ASSERT_TRUE(CheckOrder(20, {4, 5, 22, 24, 23, 26, 28, 27, 21, 29, 25, 3, 1}))
+    ASSERT_TRUE(CheckOrder(20U, {4U, 5U, 22U, 24U, 23U, 26U, 28U, 27U, 21U, 29U, 25U, 3U, 1U}))
         << "Unexpected order, another branch threshold was exceeded";
 }
 
@@ -243,50 +244,50 @@ TEST_F(LinearOrderTest, ThrowBlock1)
     auto graph = CreateGraphWithDefaultRuntime();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).ref();
-        CONSTANT(2, 2);
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).ref();
+        CONSTANT(2U, 2U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0).Inputs(0);
+            INST(3U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0U).Inputs(0U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Return).i32().Inputs(0);
+            INST(5U, Opcode::Return).i32().Inputs(0U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(7, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(8, Opcode::Throw).Inputs(1, 7);
+            INST(7U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(8U, Opcode::Throw).Inputs(1U, 7U);
         }
     }
     const auto &blocks = graph->GetBlocksLinearOrder();
-    ASSERT_EQ(&BB(4), blocks.back());
+    ASSERT_EQ(&BB(4U), blocks.back());
 
     auto graph1 = CreateGraphWithDefaultRuntime();
     GRAPH(graph1)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).ref();
-        CONSTANT(2, 2);
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).ref();
+        CONSTANT(2U, 2U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_EQ).Imm(0).Inputs(0);
+            INST(3U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_EQ).Imm(0U).Inputs(0U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Return).i32().Inputs(0);
+            INST(5U, Opcode::Return).i32().Inputs(0U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(7, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(8, Opcode::Throw).Inputs(1, 7);
+            INST(7U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(8U, Opcode::Throw).Inputs(1U, 7U);
         }
     }
     const auto &blocks1 = graph1->GetBlocksLinearOrder();
-    ASSERT_EQ(&BB(4), blocks1.back());
+    ASSERT_EQ(&BB(4U), blocks1.back());
 }
 
 TEST_F(LinearOrderTest, ThrowBlock2)
@@ -294,51 +295,51 @@ TEST_F(LinearOrderTest, ThrowBlock2)
     auto graph2 = CreateGraphWithDefaultRuntime();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).ref();
-        CONSTANT(2, 2);
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).ref();
+        CONSTANT(2U, 2U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0).Inputs(0);
+            INST(3U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0U).Inputs(0U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(7, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(8, Opcode::Throw).Inputs(1, 7);
+            INST(7U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(8U, Opcode::Throw).Inputs(1U, 7U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Return).i32().Inputs(0);
+            INST(5U, Opcode::Return).i32().Inputs(0U);
         }
     }
     const auto &blocks2 = graph2->GetBlocksLinearOrder();
-    ASSERT_EQ(&BB(4), blocks2.back());
+    ASSERT_EQ(&BB(4U), blocks2.back());
 
     auto graph3 = CreateGraphWithDefaultRuntime();
     GRAPH(graph3)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).ref();
-        CONSTANT(2, 2);
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).ref();
+        CONSTANT(2U, 2U);
 
-        BASIC_BLOCK(2, 4, 3)
+        BASIC_BLOCK(2U, 4U, 3U)
         {
-            INST(3, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0).Inputs(0);
+            INST(3U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_NE).Imm(0U).Inputs(0U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(7, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(8, Opcode::Throw).Inputs(1, 7);
+            INST(7U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(8U, Opcode::Throw).Inputs(1U, 7U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Return).i32().Inputs(0);
+            INST(5U, Opcode::Return).i32().Inputs(0U);
         }
     }
     const auto &blocks3 = graph3->GetBlocksLinearOrder();
-    ASSERT_EQ(&BB(4), blocks3.back());
+    ASSERT_EQ(&BB(4U), blocks3.back());
 }
 
 TEST_F(LinearOrderTest, ConditionChainHoisting)
@@ -381,19 +382,19 @@ jump_label_0:
     GetGraph()->RunPass<Cleanup>();
     ASSERT_TRUE(RegAlloc(GetGraph()));
 
-    ASSERT_TRUE(CheckOrder(10, {5, 3, 6})) << "Unexpected initial order";
+    ASSERT_TRUE(CheckOrder(10U, {5U, 3U, 6U})) << "Unexpected initial order";
 
     StartProfiling();
 
-    UpdateBranchTaken(0x12, 10);
+    UpdateBranchTaken(0x12U, 10U);
 
-    ASSERT_TRUE(CheckOrder(10, {3, 6})) << "Unexpected order, threshold 1 was exceeded";
+    ASSERT_TRUE(CheckOrder(10U, {3U, 6U})) << "Unexpected order, threshold 1 was exceeded";
 
-    UpdateBranchTaken(0x16, 100);
-    ASSERT_TRUE(CheckOrder(10, {5, 6})) << "Unexpected order, threshold 2 was exceeded";
+    UpdateBranchTaken(0x16U, 100U);
+    ASSERT_TRUE(CheckOrder(10U, {5U, 6U})) << "Unexpected order, threshold 2 was exceeded";
 
-    UpdateBranchNotTaken(0x16, 200);
-    ASSERT_TRUE(CheckOrder(10, {3, 6})) << "Unexpected order, threshold 3 was exceeded";
+    UpdateBranchNotTaken(0x16U, 200U);
+    ASSERT_TRUE(CheckOrder(10U, {3U, 6U})) << "Unexpected order, threshold 3 was exceeded";
 }
 // NOLINTEND(readability-magic-numbers)
 

@@ -32,7 +32,7 @@ TEST_F(LiveRegistersTest, IntervalsWithoutRegisters)
 {
     auto alloc = GetGraph()->GetAllocator();
     auto intervals = ArenaVector<LifeIntervals *>(alloc->Adapter());
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0, 42)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0U, 42U)));
     ASSERT_EQ(LifeIntervalsTree::BuildIntervalsTree(intervals, GetGraph()), nullptr);
 }
 
@@ -40,14 +40,14 @@ TEST_F(LiveRegistersTest, IntervalsWithRegisters)
 {
     auto alloc = GetGraph()->GetAllocator();
     auto intervals = ArenaVector<LifeIntervals *>(alloc->Adapter());
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0, 10)));
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0, 2)));
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(2, 3)));
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(5, 6)));
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(6, 8)));
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(8, 10)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0U, 10U)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0U, 2U)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(2U, 3U)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(5U, 6U)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(6U, 8U)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(8U, 10U)));
 
-    Register reg {0};
+    Register reg {0U};
     for (auto &li : intervals) {
         li->SetType(DataType::UINT64);
         li->SetReg(reg++);
@@ -60,7 +60,7 @@ TEST_F(LiveRegistersTest, IntervalsWithRegisters)
         ASSERT_EQ(mask.test(li->GetReg()), false);
         mask.set(li->GetReg());
     });
-    ASSERT_EQ(RegMask {0b1001}, mask);
+    ASSERT_EQ(RegMask {0b1001U}, mask);
 
     mask.reset();
     tree->VisitIntervals(11, [&mask]([[maybe_unused]] const auto &li) {
@@ -74,14 +74,14 @@ TEST_F(LiveRegistersTest, IntervalsWithRegisters)
         ASSERT_EQ(mask.test(li->GetReg()), false);
         mask.set(li->GetReg());
     });
-    ASSERT_EQ(RegMask {0b110001}, mask);
+    ASSERT_EQ(RegMask {0b110001U}, mask);
 
     mask.reset();
     tree->VisitIntervals(4, [&mask]([[maybe_unused]] const auto &li) {
         ASSERT_EQ(mask.test(li->GetReg()), false);
         mask.set(li->GetReg());
     });
-    ASSERT_EQ(RegMask {0b1}, mask);
+    ASSERT_EQ(RegMask {0b1U}, mask);
 
     // Not-live splits at target life-position
     mask.reset();
@@ -89,17 +89,17 @@ TEST_F(LiveRegistersTest, IntervalsWithRegisters)
         ASSERT_EQ(mask.test(li->GetReg()), false);
         mask.set(li->GetReg());
     });
-    ASSERT_EQ(RegMask {0b100001}, mask);
+    ASSERT_EQ(RegMask {0b100001U}, mask);
 }
 
 TEST_F(LiveRegistersTest, IntervalsWithHole)
 {
     auto alloc = GetGraph()->GetAllocator();
     auto intervals = ArenaVector<LifeIntervals *>(alloc->Adapter());
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0, 2)));
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(8, 10)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0U, 2U)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(8U, 10U)));
 
-    Register reg {0};
+    Register reg {0U};
     for (auto &li : intervals) {
         li->SetType(DataType::UINT64);
         li->SetReg(reg++);
@@ -119,23 +119,23 @@ TEST_F(LiveRegistersTest, IntervalsWithHole)
         ASSERT_EQ(mask.test(li->GetReg()), false);
         mask.set(li->GetReg());
     });
-    ASSERT_EQ(RegMask {0b1}, mask);
+    ASSERT_EQ(RegMask {0b1U}, mask);
 
     mask.reset();
     tree->VisitIntervals(9, [&mask]([[maybe_unused]] const auto &li) {
         ASSERT_EQ(mask.test(li->GetReg()), false);
         mask.set(li->GetReg());
     });
-    ASSERT_EQ(RegMask {0b10}, mask);
+    ASSERT_EQ(RegMask {0b10U}, mask);
 }
 
 TEST_F(LiveRegistersTest, IntervalsOutOfRange)
 {
     auto alloc = GetGraph()->GetAllocator();
     auto intervals = ArenaVector<LifeIntervals *>(alloc->Adapter());
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(4, 6)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(4U, 6U)));
 
-    Register reg {0};
+    Register reg {0U};
     for (auto &li : intervals) {
         li->SetType(DataType::UINT64);
         li->SetReg(reg++);
@@ -144,25 +144,25 @@ TEST_F(LiveRegistersTest, IntervalsOutOfRange)
     ASSERT_NE(tree, nullptr);
 
     size_t count = 0;
-    tree->VisitIntervals(1, [&count]([[maybe_unused]] const auto &li) { count++; });
-    ASSERT_EQ(count, 0);
+    tree->VisitIntervals(1U, [&count]([[maybe_unused]] const auto &li) { count++; });
+    ASSERT_EQ(count, 0U);
 
     count = 0;
-    tree->VisitIntervals(42, [&count]([[maybe_unused]] const auto &li) { count++; });
-    ASSERT_EQ(count, 0);
+    tree->VisitIntervals(42U, [&count]([[maybe_unused]] const auto &li) { count++; });
+    ASSERT_EQ(count, 0U);
 }
 
 TEST_F(LiveRegistersTest, MultipleBranches)
 {
     auto alloc = GetGraph()->GetAllocator();
     auto intervals = ArenaVector<LifeIntervals *>(alloc->Adapter());
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0, 80)));
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0, 39)));
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(21, 39)));
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(21, 29)));
-    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(26, 29)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0U, 80U)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0U, 39U)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(21U, 39U)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(21U, 29U)));
+    intervals.push_back(alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(26U, 29U)));
 
-    Register reg {0};
+    Register reg {0U};
     for (auto &li : intervals) {
         li->SetType(DataType::UINT64);
         li->SetReg(reg++);
@@ -175,18 +175,18 @@ TEST_F(LiveRegistersTest, MultipleBranches)
         ASSERT_EQ(mask.test(li->GetReg()), false);
         mask.set(li->GetReg());
     });
-    ASSERT_EQ(RegMask {0b11111}, mask);
+    ASSERT_EQ(RegMask {0b11111U}, mask);
 }
 
 TEST_F(LiveRegistersTest, LiveRegisterForGraph)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 42);
+        CONSTANT(0U, 42U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).u64().Inputs(0);
+            INST(1U, Opcode::Return).u64().Inputs(0U);
         }
     }
 
@@ -194,7 +194,7 @@ TEST_F(LiveRegistersTest, LiveRegisterForGraph)
     ASSERT_TRUE(result);
     ASSERT_TRUE(GetGraph()->RunPass<LiveRegisters>());
 
-    auto con = &INS(0);
+    auto con = &INS(0U);
 
     auto &lr = GetGraph()->GetAnalysis<LiveRegisters>();
     lr.VisitIntervalsWithLiveRegisters(con, []([[maybe_unused]] const auto &li) { UNREACHABLE(); });
@@ -204,30 +204,30 @@ TEST_F(LiveRegistersTest, LiveRegisterForGraph)
         ASSERT_EQ(li->GetInst(), con);
         count++;
     });
-    ASSERT_EQ(count, 1);
+    ASSERT_EQ(count, 1U);
 }
 
 TEST_F(LiveRegistersTest, LiveSplits)
 {
     auto alloc = GetGraph()->GetAllocator();
     auto intervals = ArenaVector<LifeIntervals *>(alloc->Adapter());
-    auto interval = alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0, 30));
+    auto interval = alloc->New<LifeIntervals>(alloc, GetGraph()->CreateInstAdd(), LiveRange(0U, 30U));
     interval->Finalize();
     intervals.push_back(interval);
 
     interval->SetType(DataType::Type::UINT64);
-    interval->SetReg(0);
+    interval->SetReg(0U);
 
-    auto split0 = interval->SplitAt(9, alloc);
-    split0->SetLocation(Location::MakeStackSlot(0));
-    auto split1 = split0->SplitAt(19, alloc);
-    split1->SetReg(1);
+    auto split0 = interval->SplitAt(9U, alloc);
+    split0->SetLocation(Location::MakeStackSlot(0U));
+    auto split1 = split0->SplitAt(19U, alloc);
+    split1->SetReg(1U);
 
     auto tree = LifeIntervalsTree::BuildIntervalsTree(intervals, GetGraph());
     ASSERT_NE(tree, nullptr);
 
     std::vector<std::pair<LifeNumber, RegMask::ValueType>> ln2mask = {
-        {7, 0b1}, {9, 0b1}, {11, 0b0}, {19, 0b10}, {30, 0b10}};
+        {7U, 0b1U}, {9U, 0b1U}, {11U, 0b0U}, {19U, 0b10U}, {30U, 0b10U}};
 
     for (auto [ln, expected_mask] : ln2mask) {
         RegMask mask {};
@@ -248,34 +248,34 @@ TEST_F(LiveRegistersTest, IntervalWithLifetimeHole)
 
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        CONSTANT(2, 0);
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(2U, 0U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Mul).Inputs(0, 1).u64();
-            INST(4, Opcode::Compare).b().Inputs(3, 2);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(4).Imm(0);
+            INST(3U, Opcode::Mul).Inputs(0U, 1U).u64();
+            INST(4U, Opcode::Compare).b().Inputs(3U, 2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(4U).Imm(0U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(6, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
+            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
             // interval for inst 3 will have a lifetime hole at this call
-            INST(7, Opcode::CallStatic).InputsAutoType(6).v0id();
+            INST(7U, Opcode::CallStatic).InputsAutoType(6U).v0id();
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(8, Opcode::Mul).Inputs(3, 3).u64();
-            INST(9, Opcode::SaveState).Inputs(0, 1, 2, 8).SrcVregs({0, 1, 2, 8});
-            INST(10, Opcode::CallStatic).InputsAutoType(9).v0id();
+            INST(8U, Opcode::Mul).Inputs(3U, 3U).u64();
+            INST(9U, Opcode::SaveState).Inputs(0U, 1U, 2U, 8U).SrcVregs({0U, 1U, 2U, 8U});
+            INST(10U, Opcode::CallStatic).InputsAutoType(9U).v0id();
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(11, Opcode::Return).Inputs(0).u64();
+            INST(11U, Opcode::Return).Inputs(0U).u64();
         }
     }
 

@@ -75,16 +75,16 @@ catch_block2_begin:
     auto expected_graph = CreateGraphWithDefaultRuntime();
     GRAPH(expected_graph)
     {
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(5, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(6, Opcode::LoadAndInitClass).ref().Inputs(5);
-            INST(7, Opcode::NewObject).ref().Inputs(6, 5);
+            INST(5U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 5U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(8, Opcode::SaveState).Inputs(7).SrcVregs({0});
-            INST(9, Opcode::Throw).Inputs(7, 8);
+            INST(8U, Opcode::SaveState).Inputs(7U).SrcVregs({0U});
+            INST(9U, Opcode::Throw).Inputs(7U, 8U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
@@ -134,13 +134,13 @@ TEST_F(TryCatchResolvingTest, RemoveAllCatchHandlers)
     auto expected_graph = CreateGraphWithDefaultRuntime();
     GRAPH(expected_graph)
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(7, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(8, Opcode::LoadAndInitClass).ref().Inputs(7);
-            INST(9, Opcode::NewObject).ref().Inputs(8, 7);
-            INST(10, Opcode::SaveState).Inputs(9).SrcVregs({0});
-            INST(11, Opcode::Throw).Inputs(9, 10);
+            INST(7U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(8U, Opcode::LoadAndInitClass).ref().Inputs(7U);
+            INST(9U, Opcode::NewObject).ref().Inputs(8U, 7U);
+            INST(10U, Opcode::SaveState).Inputs(9U).SrcVregs({0U});
+            INST(11U, Opcode::Throw).Inputs(9U, 10U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
@@ -151,56 +151,56 @@ TEST_F(TryCatchResolvingTest, EmptyTryCatches)
     auto graph = CreateGraphWithDefaultRuntime();
     GRAPH(graph)
     {
-        CONSTANT(5, 2).i32();
-        CONSTANT(8, 10).i32();
-        BASIC_BLOCK(7, 2) {}
-        BASIC_BLOCK(2, 4, 9)
+        CONSTANT(5U, 2U).i32();
+        CONSTANT(8U, 10U).i32();
+        BASIC_BLOCK(7U, 2U) {}
+        BASIC_BLOCK(2U, 4U, 9U)
         {
-            INST(1, Opcode::Try).CatchTypeIds({0});
+            INST(1U, Opcode::Try).CatchTypeIds({0U});
         }
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(6, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(7, Opcode::LoadType).ref().Inputs(6).TypeId(4646690);
+            INST(6U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(7U, Opcode::LoadType).ref().Inputs(6U).TypeId(4646690U);
         }
-        BASIC_BLOCK(3, 5, 9) {}
-        BASIC_BLOCK(9, 6)
+        BASIC_BLOCK(3U, 5U, 9U) {}
+        BASIC_BLOCK(9U, 6U)
         {
-            INST(2, Opcode::CatchPhi).i32().ThrowableInsts({}).Inputs(5);
-            INST(4, Opcode::CatchPhi).ref().ThrowableInsts({}).Inputs();
+            INST(2U, Opcode::CatchPhi).i32().ThrowableInsts({}).Inputs(5U);
+            INST(4U, Opcode::CatchPhi).ref().ThrowableInsts({}).Inputs();
         }
-        BASIC_BLOCK(5, 8) {}
-        BASIC_BLOCK(6, 8) {}
-        BASIC_BLOCK(8, -1)
+        BASIC_BLOCK(5U, 8U) {}
+        BASIC_BLOCK(6U, 8U) {}
+        BASIC_BLOCK(8U, -1L)
         {
-            INST(10, Opcode::Phi).i32().Inputs(8, 2);
-            INST(13, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(14, Opcode::LoadAndInitClass).ref().Inputs(13);
-            INST(15, Opcode::StoreStatic).s32().Inputs(14, 10);
-            INST(16, Opcode::ReturnVoid);
+            INST(10U, Opcode::Phi).i32().Inputs(8U, 2U);
+            INST(13U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(14U, Opcode::LoadAndInitClass).ref().Inputs(13U);
+            INST(15U, Opcode::StoreStatic).s32().Inputs(14U, 10U);
+            INST(16U, Opcode::ReturnVoid);
         }
     }
-    BB(2).SetTryBegin(true);
-    BB(4).SetTry(true);
-    BB(3).SetTryEnd(true);
-    INS(1).CastToTry()->SetTryEndBlock(&BB(3));
-    BB(9).SetCatchBegin(true);
-    BB(9).SetCatch(true);
-    BB(6).SetCatchEnd(true);
-    BB(6).SetCatch(true);
+    BB(2U).SetTryBegin(true);
+    BB(4U).SetTry(true);
+    BB(3U).SetTryEnd(true);
+    INS(1U).CastToTry()->SetTryEndBlock(&BB(3U));
+    BB(9U).SetCatchBegin(true);
+    BB(9U).SetCatch(true);
+    BB(6U).SetCatchEnd(true);
+    BB(6U).SetCatch(true);
     GraphChecker(graph).Check();
 
     graph->RunPass<TryCatchResolving>();
     auto expected_graph = CreateGraphWithDefaultRuntime();
     GRAPH(expected_graph)
     {
-        CONSTANT(8, 10).i32();
-        BASIC_BLOCK(8, -1)
+        CONSTANT(8U, 10U).i32();
+        BASIC_BLOCK(8U, -1L)
         {
-            INST(13, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(14, Opcode::LoadAndInitClass).ref().Inputs(13);
-            INST(15, Opcode::StoreStatic).s32().Inputs(14, 8);
-            INST(16, Opcode::ReturnVoid);
+            INST(13U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(14U, Opcode::LoadAndInitClass).ref().Inputs(13U);
+            INST(15U, Opcode::StoreStatic).s32().Inputs(14U, 8U);
+            INST(16U, Opcode::ReturnVoid);
         }
     }
     GraphChecker(expected_graph).Check();

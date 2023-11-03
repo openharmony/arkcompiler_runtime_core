@@ -28,7 +28,7 @@ public:
     EncoderArm64VixlTest()
     {
         // NOLINTNEXTLINE(readability-magic-numbers)
-        panda::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0, 0);
+        panda::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0U, 0U);
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
         encoder_ = static_cast<aarch64::Aarch64Encoder *>(Encoder::Create(allocator_, Arch::AARCH64, false));
@@ -66,7 +66,7 @@ public:
         if (enabled) {
             auto size = GetEncoder()->GetCursorOffset();
             for (uint32_t i = 0; i < size;) {
-                i = encoder_->DisasmInstr(std::cout, i, 0);
+                i = encoder_->DisasmInstr(std::cout, i, 0U);
                 std::cout << std::endl;
             }
         }
@@ -91,12 +91,12 @@ public:
         // asan will complain about this.
         memcpy_s(data, sizeof(T), &good_value, sizeof(T));
 
-        GetEncoder()->SetCodeOffset(0);
+        GetEncoder()->SetCodeOffset(0U);
 
         buffer->Rewind(data_size);
-        Reg reg(0, TypeInfo(T(0)));
+        Reg reg(0U, TypeInfo(T(0U)));
         if (get_address) {
-            Reg addr(1, INT64_TYPE);
+            Reg addr(1U, INT64_TYPE);
             GetEncoder()->LoadPcRelative(reg, offset, addr);
         } else {
             GetEncoder()->LoadPcRelative(reg, offset);
@@ -117,7 +117,7 @@ public:
             auto inst = insts.begin();
             for (uint32_t i = data_size; i < buffer->GetCursorOffset() && inst != insts.end(); ++inst) {
                 std::stringstream ss;
-                i = encoder_->DisasmInstr(ss, i, 0);
+                i = encoder_->DisasmInstr(ss, i, 0U);
                 auto pos = ss.str().find(*inst);
                 EXPECT_NE(pos, std::string::npos) << *inst << " not found";
                 if (pos == std::string::npos) {
@@ -129,14 +129,14 @@ public:
         memcpy_s(data, sizeof(T), &bad_value, sizeof(T));
 
         if (get_address) {
-            EXPECT_EQ(exec_module_->GetSimulator()->ReadXRegister(1), reinterpret_cast<int64_t>(data));
+            EXPECT_EQ(exec_module_->GetSimulator()->ReadXRegister(1U), reinterpret_cast<int64_t>(data));
         }
         EXPECT_EQ(exec_module_->GetRetValue(), GetGoodValue<T>());
     }
 
     void TestOffset(size_t data_size, ssize_t offset)
     {
-        ASSERT((offset & 3) == 0);  // NOLINT(hicpp-signed-bitwise)
+        ASSERT((offset & 3U) == 0U);  // NOLINT(hicpp-signed-bitwise)
         if (vixl::IsInt21(offset)) {
             TestPcRelativeLoad<uint64_t>(data_size, offset, false, {"adr", "ldr"});
             TestPcRelativeLoad<uint64_t>(data_size, offset, true, {"adr", "ldr"});
@@ -147,7 +147,7 @@ public:
             TestPcRelativeLoad<uint32_t>(data_size, -offset, false, {"adr", "ldr"});
             TestPcRelativeLoad<uint32_t>(data_size, -offset, true, {"adr", "ldr"});
         } else {
-            if ((offset & 7) == 0) {  // NOLINT(hicpp-signed-bitwise)
+            if ((offset & 7U) == 0U) {  // NOLINT(hicpp-signed-bitwise)
                 TestPcRelativeLoad<uint64_t>(data_size, offset, false, {"adrp", "ldr"});
                 TestPcRelativeLoad<uint64_t>(data_size, offset, true, {"adrp", "add", "ldr"});
                 TestPcRelativeLoad<uint64_t>(data_size, -offset, false, {"adrp", "ldr"});
@@ -203,27 +203,27 @@ TEST_F(EncoderArm64VixlTest, LoadPcRelative)
     auto masm = encoder->GetMasm();
     auto buffer = masm->GetBuffer();
     static constexpr size_t CODE_OFFSET = 16;
-    static constexpr size_t BUF_SIZE = (MAX_INT21_VALUE - vixl::aarch64::kPageSize) * 2 + CODE_OFFSET;
+    static constexpr size_t BUF_SIZE = (MAX_INT21_VALUE - vixl::aarch64::kPageSize) * 2U + CODE_OFFSET;
 
     for (size_t i = 0; i < BUF_SIZE / sizeof(uint32_t); i++) {
         buffer->Emit32(GetBadValue<uint32_t>());
     }
     // Pre-allocate space for the code
-    for (size_t i = 0; i < 4; i++) {
-        buffer->Emit32(0);
+    for (size_t i = 0; i < 4U; i++) {
+        buffer->Emit32(0U);
     }
     for (size_t i = 0; i < BUF_SIZE / sizeof(uint32_t); i++) {
         buffer->Emit32(GetBadValue<uint32_t>());
     }
 
-    TestOffset(BUF_SIZE, 40);
-    TestOffset(BUF_SIZE, 44);
-    TestOffset(BUF_SIZE, 0x1374b8);
+    TestOffset(BUF_SIZE, 40U);
+    TestOffset(BUF_SIZE, 44U);
+    TestOffset(BUF_SIZE, 0x1374b8U);
     // Check for two pages addrp
-    TestOffset(BUF_SIZE, MAX_INT21_VALUE + vixl::aarch64::kPageSize + CODE_OFFSET + 8);
+    TestOffset(BUF_SIZE, MAX_INT21_VALUE + vixl::aarch64::kPageSize + CODE_OFFSET + 8U);
     // Check for one page addrp
-    TestOffset(BUF_SIZE, MAX_INT21_VALUE + vixl::aarch64::kPageSize + CODE_OFFSET - 8);
-    TestOffset(BUF_SIZE, 0x100404);
+    TestOffset(BUF_SIZE, MAX_INT21_VALUE + vixl::aarch64::kPageSize + CODE_OFFSET - 8L);
+    TestOffset(BUF_SIZE, 0x100404U);
 }
 // NOLINTEND(readability-magic-numbers)
 

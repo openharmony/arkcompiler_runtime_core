@@ -42,33 +42,33 @@ TEST_F(GraphCreationTest, OsrModeGraph)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Phi).u64().Inputs(1, 5);
-            INST(4, Opcode::Phi).u64().Inputs(2, 10);
-            INST(5, Opcode::Sub).u64().Inputs(3, 2);
-            INST(6, Opcode::SafePoint).Inputs(0, 3, 4).SrcVregs({0, 1, 2});
-            INST(7, Opcode::Compare).CC(CC_EQ).b().Inputs(5, 0);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
+            INST(3U, Opcode::Phi).u64().Inputs(1U, 5U);
+            INST(4U, Opcode::Phi).u64().Inputs(2U, 10U);
+            INST(5U, Opcode::Sub).u64().Inputs(3U, 2U);
+            INST(6U, Opcode::SafePoint).Inputs(0U, 3U, 4U).SrcVregs({0U, 1U, 2U});
+            INST(7U, Opcode::Compare).CC(CC_EQ).b().Inputs(5U, 0U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(9, Opcode::And).u64().Inputs(4, 5);
-            INST(10, Opcode::Add).u64().Inputs(9, 4);
+            INST(9U, Opcode::And).u64().Inputs(4U, 5U);
+            INST(10U, Opcode::Add).u64().Inputs(9U, 4U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(11, Opcode::Return).u64().Inputs(4);
+            INST(11U, Opcode::Return).u64().Inputs(4U);
         }
     }
-    BB(2).SetOsrEntry(true);
+    BB(2U).SetOsrEntry(true);
     auto clone_graph = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
 
     graph->RunPass<LoopPeeling>();
-    graph->RunPass<LoopUnroll>(1000, 4);
+    graph->RunPass<LoopUnroll>(1000U, 4U);
     EXPECT_TRUE(GraphComparator().Compare(graph, clone_graph));
 }
 // NOLINTEND(readability-magic-numbers)

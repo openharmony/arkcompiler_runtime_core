@@ -40,39 +40,39 @@ TEST_F(MemoryCoalescingTest, ImmidiateLoads)
     }
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0x2a).s64();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0x2aU).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(3, Opcode::NewArray).ref().Inputs(44, 0).TypeId(77);
-            INST(41, Opcode::SaveState).Inputs(3).SrcVregs({7});
-            INST(42, Opcode::NullCheck).ref().Inputs(3, 41);
-            INST(225, Opcode::LoadArrayI).s64().Inputs(42).Imm(0x0);
-            INST(227, Opcode::LoadArrayI).s64().Inputs(42).Imm(0x1);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(3U, Opcode::NewArray).ref().Inputs(44U, 0U).TypeId(77U);
+            INST(41U, Opcode::SaveState).Inputs(3U).SrcVregs({7U});
+            INST(42U, Opcode::NullCheck).ref().Inputs(3U, 41U);
+            INST(225U, Opcode::LoadArrayI).s64().Inputs(42U).Imm(0x0U);
+            INST(227U, Opcode::LoadArrayI).s64().Inputs(42U).Imm(0x1U);
 
-            INST(51, Opcode::Add).s64().Inputs(225, 227);
-            INST(229, Opcode::StoreArrayI).s64().Inputs(42, 51).Imm(0x0);
-            INST(230, Opcode::StoreArrayI).s64().Inputs(42, 51).Imm(0x1);
-            INST(40, Opcode::Return).s64().Inputs(51);
+            INST(51U, Opcode::Add).s64().Inputs(225U, 227U);
+            INST(229U, Opcode::StoreArrayI).s64().Inputs(42U, 51U).Imm(0x0U);
+            INST(230U, Opcode::StoreArrayI).s64().Inputs(42U, 51U).Imm(0x1U);
+            INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        CONSTANT(0, 0x2a).s64();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0x2aU).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(3, Opcode::NewArray).ref().Inputs(44, 0).TypeId(77);
-            INST(41, Opcode::SaveState).Inputs(3).SrcVregs({7});
-            INST(42, Opcode::NullCheck).ref().Inputs(3, 41);
-            INST(231, Opcode::LoadArrayPairI).s64().Inputs(42).Imm(0x0);
-            INST(232, Opcode::LoadPairPart).s64().Inputs(231).Imm(0x0);
-            INST(233, Opcode::LoadPairPart).s64().Inputs(231).Imm(0x1);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(3U, Opcode::NewArray).ref().Inputs(44U, 0U).TypeId(77U);
+            INST(41U, Opcode::SaveState).Inputs(3U).SrcVregs({7U});
+            INST(42U, Opcode::NullCheck).ref().Inputs(3U, 41U);
+            INST(231U, Opcode::LoadArrayPairI).s64().Inputs(42U).Imm(0x0U);
+            INST(232U, Opcode::LoadPairPart).s64().Inputs(231U).Imm(0x0U);
+            INST(233U, Opcode::LoadPairPart).s64().Inputs(231U).Imm(0x1U);
 
-            INST(51, Opcode::Add).s64().Inputs(232, 233);
-            INST(234, Opcode::StoreArrayPairI).s64().Inputs(42, 51, 51).Imm(0x0);
-            INST(40, Opcode::Return).s64().Inputs(51);
+            INST(51U, Opcode::Add).s64().Inputs(232U, 233U);
+            INST(234U, Opcode::StoreArrayPairI).s64().Inputs(42U, 51U, 51U).Imm(0x0U);
+            INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -88,56 +88,56 @@ TEST_F(MemoryCoalescingTest, LoopLoadCoalescing)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(5, 0).ref();
-        CONSTANT(6, 0x0).s64();
-        BASIC_BLOCK(2, 3)
+        PARAMETER(5U, 0U).ref();
+        CONSTANT(6U, 0x0U).s64();
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(35, Opcode::SaveState).Inputs(5).SrcVregs({1});
-            INST(36, Opcode::NullCheck).ref().Inputs(5, 35);
+            INST(35U, Opcode::SaveState).Inputs(5U).SrcVregs({1U});
+            INST(36U, Opcode::NullCheck).ref().Inputs(5U, 35U);
         }
-        BASIC_BLOCK(3, 3, 7)
+        BASIC_BLOCK(3U, 3U, 7U)
         {
-            INST(9, Opcode::Phi).s32().Inputs({{2, 6}, {3, 64}});
-            INST(10, Opcode::Phi).s64().Inputs({{2, 6}, {3, 28}});
-            INST(19, Opcode::LoadArray).s64().Inputs(36, 9);
-            INST(63, Opcode::AddI).s32().Inputs(9).Imm(0x1);
-            INST(26, Opcode::LoadArray).s64().Inputs(36, 63);
-            INST(27, Opcode::Add).s64().Inputs(26, 19);
-            INST(28, Opcode::Add).s64().Inputs(27, 10);
-            INST(64, Opcode::AddI).s32().Inputs(9).Imm(0x2);
-            INST(31, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_LT).Imm(0x4).Inputs(64);
+            INST(9U, Opcode::Phi).s32().Inputs({{2U, 6U}, {3U, 64U}});
+            INST(10U, Opcode::Phi).s64().Inputs({{2U, 6U}, {3U, 28U}});
+            INST(19U, Opcode::LoadArray).s64().Inputs(36U, 9U);
+            INST(63U, Opcode::AddI).s32().Inputs(9U).Imm(0x1U);
+            INST(26U, Opcode::LoadArray).s64().Inputs(36U, 63U);
+            INST(27U, Opcode::Add).s64().Inputs(26U, 19U);
+            INST(28U, Opcode::Add).s64().Inputs(27U, 10U);
+            INST(64U, Opcode::AddI).s32().Inputs(9U).Imm(0x2U);
+            INST(31U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_LT).Imm(0x4U).Inputs(64U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(33, Opcode::Return).s32().Inputs(28);
+            INST(33U, Opcode::Return).s32().Inputs(28U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(5, 0).ref();
-        CONSTANT(6, 0x0).s64();
-        BASIC_BLOCK(2, 3)
+        PARAMETER(5U, 0U).ref();
+        CONSTANT(6U, 0x0U).s64();
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(35, Opcode::SaveState).Inputs(5).SrcVregs({1});
-            INST(36, Opcode::NullCheck).ref().Inputs(5, 35);
+            INST(35U, Opcode::SaveState).Inputs(5U).SrcVregs({1U});
+            INST(36U, Opcode::NullCheck).ref().Inputs(5U, 35U);
         }
-        BASIC_BLOCK(3, 3, 7)
+        BASIC_BLOCK(3U, 3U, 7U)
         {
-            INST(9, Opcode::Phi).s32().Inputs({{2, 6}, {3, 64}});
-            INST(10, Opcode::Phi).s64().Inputs({{2, 6}, {3, 28}});
-            INST(65, Opcode::LoadArrayPair).s64().Inputs(36, 9);
-            INST(66, Opcode::LoadPairPart).s64().Inputs(65).Imm(0x0);
-            INST(67, Opcode::LoadPairPart).s64().Inputs(65).Imm(0x1);
-            INST(63, Opcode::AddI).s32().Inputs(9).Imm(0x1);
-            INST(27, Opcode::Add).s64().Inputs(67, 66);
-            INST(28, Opcode::Add).s64().Inputs(27, 10);
-            INST(64, Opcode::AddI).s32().Inputs(9).Imm(0x2);
-            INST(31, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_LT).Imm(0x4).Inputs(64);
+            INST(9U, Opcode::Phi).s32().Inputs({{2U, 6U}, {3U, 64U}});
+            INST(10U, Opcode::Phi).s64().Inputs({{2U, 6U}, {3U, 28U}});
+            INST(65U, Opcode::LoadArrayPair).s64().Inputs(36U, 9U);
+            INST(66U, Opcode::LoadPairPart).s64().Inputs(65U).Imm(0x0U);
+            INST(67U, Opcode::LoadPairPart).s64().Inputs(65U).Imm(0x1U);
+            INST(63U, Opcode::AddI).s32().Inputs(9U).Imm(0x1U);
+            INST(27U, Opcode::Add).s64().Inputs(67U, 66U);
+            INST(28U, Opcode::Add).s64().Inputs(27U, 10U);
+            INST(64U, Opcode::AddI).s32().Inputs(9U).Imm(0x2U);
+            INST(31U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_LT).Imm(0x4U).Inputs(64U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(33, Opcode::Return).s32().Inputs(28);
+            INST(33U, Opcode::Return).s32().Inputs(28U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -153,56 +153,56 @@ TEST_F(MemoryCoalescingTest, LoopStoreCoalescing)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        CONSTANT(4, 0x0).s64();
-        CONSTANT(5, 0x1).s64();
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(4U, 0x0U).s64();
+        CONSTANT(5U, 0x1U).s64();
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(3, Opcode::LenArray).s32().Inputs(0);
+            INST(3U, Opcode::LenArray).s32().Inputs(0U);
         }
-        BASIC_BLOCK(3, 3, 4)
+        BASIC_BLOCK(3U, 3U, 4U)
         {
-            INST(6, Opcode::Phi).s32().Inputs({{2, 4}, {3, 34}});
-            INST(7, Opcode::Phi).s32().Inputs({{2, 5}, {3, 24}});
-            INST(8, Opcode::Phi).s32().Inputs({{2, 5}, {3, 25}});
-            INST(17, Opcode::StoreArray).s32().Inputs(0, 6, 7);
-            INST(33, Opcode::AddI).s32().Inputs(6).Imm(0x1);
-            INST(23, Opcode::StoreArray).s32().Inputs(0, 33, 8);
-            INST(24, Opcode::Add).s32().Inputs(7, 8);
-            INST(25, Opcode::Add).s32().Inputs(8, 24);
-            INST(34, Opcode::AddI).s32().Inputs(6).Imm(0x2);
-            INST(35, Opcode::If).SrcType(DataType::INT32).CC(CC_LT).Inputs(34, 3);
+            INST(6U, Opcode::Phi).s32().Inputs({{2U, 4U}, {3U, 34U}});
+            INST(7U, Opcode::Phi).s32().Inputs({{2U, 5U}, {3U, 24U}});
+            INST(8U, Opcode::Phi).s32().Inputs({{2U, 5U}, {3U, 25U}});
+            INST(17U, Opcode::StoreArray).s32().Inputs(0U, 6U, 7U);
+            INST(33U, Opcode::AddI).s32().Inputs(6U).Imm(0x1U);
+            INST(23U, Opcode::StoreArray).s32().Inputs(0U, 33U, 8U);
+            INST(24U, Opcode::Add).s32().Inputs(7U, 8U);
+            INST(25U, Opcode::Add).s32().Inputs(8U, 24U);
+            INST(34U, Opcode::AddI).s32().Inputs(6U).Imm(0x2U);
+            INST(35U, Opcode::If).SrcType(DataType::INT32).CC(CC_LT).Inputs(34U, 3U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(29, Opcode::ReturnVoid).v0id();
+            INST(29U, Opcode::ReturnVoid).v0id();
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        CONSTANT(4, 0x0).s64();
-        CONSTANT(5, 0x1).s64();
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(4U, 0x0U).s64();
+        CONSTANT(5U, 0x1U).s64();
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(3, Opcode::LenArray).s32().Inputs(0);
+            INST(3U, Opcode::LenArray).s32().Inputs(0U);
         }
-        BASIC_BLOCK(3, 3, 4)
+        BASIC_BLOCK(3U, 3U, 4U)
         {
-            INST(6, Opcode::Phi).s32().Inputs({{2, 4}, {3, 34}});
-            INST(7, Opcode::Phi).s32().Inputs({{2, 5}, {3, 24}});
-            INST(8, Opcode::Phi).s32().Inputs({{2, 5}, {3, 25}});
-            INST(33, Opcode::AddI).s32().Inputs(6).Imm(0x1);
-            INST(36, Opcode::StoreArrayPair).s32().Inputs(0, 6, 7, 8);
-            INST(24, Opcode::Add).s32().Inputs(7, 8);
-            INST(25, Opcode::Add).s32().Inputs(8, 24);
-            INST(34, Opcode::AddI).s32().Inputs(6).Imm(0x2);
-            INST(35, Opcode::If).SrcType(DataType::INT32).CC(CC_LT).Inputs(34, 3);
+            INST(6U, Opcode::Phi).s32().Inputs({{2U, 4U}, {3U, 34U}});
+            INST(7U, Opcode::Phi).s32().Inputs({{2U, 5U}, {3U, 24U}});
+            INST(8U, Opcode::Phi).s32().Inputs({{2U, 5U}, {3U, 25U}});
+            INST(33U, Opcode::AddI).s32().Inputs(6U).Imm(0x1U);
+            INST(36U, Opcode::StoreArrayPair).s32().Inputs(0U, 6U, 7U, 8U);
+            INST(24U, Opcode::Add).s32().Inputs(7U, 8U);
+            INST(25U, Opcode::Add).s32().Inputs(8U, 24U);
+            INST(34U, Opcode::AddI).s32().Inputs(6U).Imm(0x2U);
+            INST(35U, Opcode::If).SrcType(DataType::INT32).CC(CC_LT).Inputs(34U, 3U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(29, Opcode::ReturnVoid).v0id();
+            INST(29U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -218,26 +218,26 @@ TEST_F(MemoryCoalescingTest, AliasedAccess)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(26, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(28, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(28, 26);
-            INST(22, Opcode::Return).s64().Inputs(21);
+            INST(26U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(28U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(28U, 26U);
+            INST(22U, Opcode::Return).s64().Inputs(21U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(29, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x0);
-            INST(30, Opcode::LoadPairPart).s64().Inputs(29).Imm(0x0);
-            INST(31, Opcode::LoadPairPart).s64().Inputs(29).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(31, 30);
-            INST(22, Opcode::Return).s64().Inputs(21);
+            INST(29U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x0U);
+            INST(30U, Opcode::LoadPairPart).s64().Inputs(29U).Imm(0x0U);
+            INST(31U, Opcode::LoadPairPart).s64().Inputs(29U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(31U, 30U);
+            INST(22U, Opcode::Return).s64().Inputs(21U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -253,32 +253,32 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescing)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(26, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(28, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
+            INST(26U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(28U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
 
-            INST(30, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(28, 26);
-            INST(22, Opcode::Add).s64().Inputs(30, 21);
-            INST(23, Opcode::Return).s64().Inputs(22);
+            INST(30U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(28U, 26U);
+            INST(22U, Opcode::Add).s64().Inputs(30U, 21U);
+            INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(31, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x0);
-            INST(33, Opcode::LoadPairPart).s64().Inputs(31).Imm(0x0);
-            INST(32, Opcode::LoadPairPart).s64().Inputs(31).Imm(0x1);
+            INST(31U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x0U);
+            INST(33U, Opcode::LoadPairPart).s64().Inputs(31U).Imm(0x0U);
+            INST(32U, Opcode::LoadPairPart).s64().Inputs(31U).Imm(0x1U);
 
-            INST(30, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(32, 33);
-            INST(22, Opcode::Add).s64().Inputs(30, 21);
-            INST(23, Opcode::Return).s64().Inputs(22);
+            INST(30U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(32U, 33U);
+            INST(22U, Opcode::Add).s64().Inputs(30U, 21U);
+            INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -294,29 +294,29 @@ TEST_F(MemoryCoalescingTest, PseudoParts)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(2, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
+            INST(1U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(2U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
 
-            INST(3, Opcode::StoreArrayI).s64().Inputs(0, 2).Imm(0x0);
-            INST(4, Opcode::StoreArrayI).s64().Inputs(0, 1).Imm(0x1);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::StoreArrayI).s64().Inputs(0U, 2U).Imm(0x0U);
+            INST(4U, Opcode::StoreArrayI).s64().Inputs(0U, 1U).Imm(0x1U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x0);
-            INST(7, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x0);
-            INST(8, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x1);
+            INST(6U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x0U);
+            INST(7U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x0U);
+            INST(8U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x1U);
 
-            INST(9, Opcode::StoreArrayPairI).s64().Inputs(0, 8, 7).Imm(0x0);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(9U, Opcode::StoreArrayPairI).s64().Inputs(0U, 8U, 7U).Imm(0x0U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -334,39 +334,39 @@ TEST_F(MemoryCoalescingTest, UnalignedStores)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).s64();
-        PARAMETER(3, 3).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).s64();
+        PARAMETER(3U, 3U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::AddI).s32().Inputs(1).Imm(0x4);
-            INST(5, Opcode::StoreArray).s32().Inputs(0, 4, 2);
-            INST(6, Opcode::AddI).s32().Inputs(1).Imm(0x5);
-            INST(7, Opcode::StoreArray).s32().Inputs(0, 6, 3);
+            INST(4U, Opcode::AddI).s32().Inputs(1U).Imm(0x4U);
+            INST(5U, Opcode::StoreArray).s32().Inputs(0U, 4U, 2U);
+            INST(6U, Opcode::AddI).s32().Inputs(1U).Imm(0x5U);
+            INST(7U, Opcode::StoreArray).s32().Inputs(0U, 6U, 3U);
 
-            INST(8, Opcode::StoreArray).s32().Inputs(0, 4, 3);
-            INST(9, Opcode::AddI).s32().Inputs(4).Imm(0x1);
-            INST(10, Opcode::StoreArray).s32().Inputs(0, 9, 2);
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(8U, Opcode::StoreArray).s32().Inputs(0U, 4U, 3U);
+            INST(9U, Opcode::AddI).s32().Inputs(4U).Imm(0x1U);
+            INST(10U, Opcode::StoreArray).s32().Inputs(0U, 9U, 2U);
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).s64();
-        PARAMETER(3, 3).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).s64();
+        PARAMETER(3U, 3U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::AddI).s32().Inputs(1).Imm(0x4);
-            INST(6, Opcode::AddI).s32().Inputs(1).Imm(0x5);
-            INST(12, Opcode::StoreArrayPair).s32().Inputs(0, 4, 2, 3);
+            INST(4U, Opcode::AddI).s32().Inputs(1U).Imm(0x4U);
+            INST(6U, Opcode::AddI).s32().Inputs(1U).Imm(0x5U);
+            INST(12U, Opcode::StoreArrayPair).s32().Inputs(0U, 4U, 2U, 3U);
 
-            INST(9, Opcode::AddI).s32().Inputs(4).Imm(0x1);
-            INST(13, Opcode::StoreArrayPair).s32().Inputs(0, 4, 3, 2);
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(9U, Opcode::AddI).s32().Inputs(4U).Imm(0x1U);
+            INST(13U, Opcode::StoreArrayPair).s32().Inputs(0U, 4U, 3U, 2U);
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -387,26 +387,26 @@ TEST_F(MemoryCoalescingTest, NoAlignmentTestI)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x2);
-            INST(2, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(3, Opcode::Add).s64().Inputs(2, 1);
-            INST(4, Opcode::Return).s64().Inputs(3);
+            INST(1U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x2U);
+            INST(2U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(3U, Opcode::Add).s64().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).s64().Inputs(3U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(5, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x1);
-            INST(6, Opcode::LoadPairPart).s64().Inputs(5).Imm(0x0);
-            INST(7, Opcode::LoadPairPart).s64().Inputs(5).Imm(0x1);
-            INST(3, Opcode::Add).s64().Inputs(6, 7);
-            INST(4, Opcode::Return).s64().Inputs(3);
+            INST(5U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x1U);
+            INST(6U, Opcode::LoadPairPart).s64().Inputs(5U).Imm(0x0U);
+            INST(7U, Opcode::LoadPairPart).s64().Inputs(5U).Imm(0x1U);
+            INST(3U, Opcode::Add).s64().Inputs(6U, 7U);
+            INST(4U, Opcode::Return).s64().Inputs(3U);
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -427,32 +427,32 @@ TEST_F(MemoryCoalescingTest, StoresRoundedByLoads)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x2);
-            INST(4, Opcode::StoreArrayI).s64().Inputs(0, 1).Imm(0x2);
-            INST(5, Opcode::StoreArrayI).s64().Inputs(0, 2).Imm(0x3);
-            INST(6, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x3);
-            INST(7, Opcode::Add).s64().Inputs(3, 6);
-            INST(8, Opcode::Return).s64().Inputs(7);
+            INST(3U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x2U);
+            INST(4U, Opcode::StoreArrayI).s64().Inputs(0U, 1U).Imm(0x2U);
+            INST(5U, Opcode::StoreArrayI).s64().Inputs(0U, 2U).Imm(0x3U);
+            INST(6U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x3U);
+            INST(7U, Opcode::Add).s64().Inputs(3U, 6U);
+            INST(8U, Opcode::Return).s64().Inputs(7U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x2);
-            INST(9, Opcode::StoreArrayPairI).s64().Inputs(0, 1, 2).Imm(0x2);
-            INST(6, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x3);
-            INST(7, Opcode::Add).s64().Inputs(3, 6);
-            INST(8, Opcode::Return).s64().Inputs(7);
+            INST(3U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x2U);
+            INST(9U, Opcode::StoreArrayPairI).s64().Inputs(0U, 1U, 2U).Imm(0x2U);
+            INST(6U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x3U);
+            INST(7U, Opcode::Add).s64().Inputs(3U, 6U);
+            INST(8U, Opcode::Return).s64().Inputs(7U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -468,34 +468,34 @@ TEST_F(MemoryCoalescingTest, LoadsRoundedByStores)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::StoreArrayI).s64().Inputs(0, 1).Imm(0x3);
-            INST(3, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x2);
-            INST(6, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x3);
-            INST(5, Opcode::StoreArrayI).s64().Inputs(0, 2).Imm(0x2);
-            INST(7, Opcode::Add).s64().Inputs(3, 6);
-            INST(8, Opcode::Return).s64().Inputs(7);
+            INST(4U, Opcode::StoreArrayI).s64().Inputs(0U, 1U).Imm(0x3U);
+            INST(3U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x2U);
+            INST(6U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x3U);
+            INST(5U, Opcode::StoreArrayI).s64().Inputs(0U, 2U).Imm(0x2U);
+            INST(7U, Opcode::Add).s64().Inputs(3U, 6U);
+            INST(8U, Opcode::Return).s64().Inputs(7U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::StoreArrayI).s64().Inputs(0, 1).Imm(0x3);
-            INST(9, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x2);
-            INST(10, Opcode::LoadPairPart).s64().Inputs(9).Imm(0x0);
-            INST(11, Opcode::LoadPairPart).s64().Inputs(9).Imm(0x1);
-            INST(5, Opcode::StoreArrayI).s64().Inputs(0, 2).Imm(0x2);
-            INST(7, Opcode::Add).s64().Inputs(10, 11);
-            INST(8, Opcode::Return).s64().Inputs(7);
+            INST(4U, Opcode::StoreArrayI).s64().Inputs(0U, 1U).Imm(0x3U);
+            INST(9U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x2U);
+            INST(10U, Opcode::LoadPairPart).s64().Inputs(9U).Imm(0x0U);
+            INST(11U, Opcode::LoadPairPart).s64().Inputs(9U).Imm(0x1U);
+            INST(5U, Opcode::StoreArrayI).s64().Inputs(0U, 2U).Imm(0x2U);
+            INST(7U, Opcode::Add).s64().Inputs(10U, 11U);
+            INST(8U, Opcode::Return).s64().Inputs(7U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -511,48 +511,48 @@ TEST_F(MemoryCoalescingTest, UnalignedInLoop)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        CONSTANT(3, 0xa).s64();
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        CONSTANT(3U, 0xaU).s64();
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(6, Opcode::NewArray).ref().Inputs(44, 3).TypeId(77);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(6U, Opcode::NewArray).ref().Inputs(44U, 3U).TypeId(77U);
         }
-        BASIC_BLOCK(3, 3, 4)
+        BASIC_BLOCK(3U, 3U, 4U)
         {
-            INST(7, Opcode::Phi).s32().Inputs({{2, 0}, {3, 33}});
-            INST(19, Opcode::StoreArray).s32().Inputs(6, 7, 7);
-            INST(33, Opcode::AddI).s32().Inputs(7).Imm(0x1);
-            INST(25, Opcode::StoreArray).s32().Inputs(6, 33, 7);
-            INST(34, Opcode::If).SrcType(DataType::INT32).CC(CC_GT).Inputs(1, 33);
+            INST(7U, Opcode::Phi).s32().Inputs({{2U, 0U}, {3U, 33U}});
+            INST(19U, Opcode::StoreArray).s32().Inputs(6U, 7U, 7U);
+            INST(33U, Opcode::AddI).s32().Inputs(7U).Imm(0x1U);
+            INST(25U, Opcode::StoreArray).s32().Inputs(6U, 33U, 7U);
+            INST(34U, Opcode::If).SrcType(DataType::INT32).CC(CC_GT).Inputs(1U, 33U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(29, Opcode::Return).s32().Inputs(33);
+            INST(29U, Opcode::Return).s32().Inputs(33U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        CONSTANT(3, 0xa).s64();
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        CONSTANT(3U, 0xaU).s64();
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(6, Opcode::NewArray).ref().Inputs(44, 3).TypeId(77);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(6U, Opcode::NewArray).ref().Inputs(44U, 3U).TypeId(77U);
         }
-        BASIC_BLOCK(3, 3, 4)
+        BASIC_BLOCK(3U, 3U, 4U)
         {
-            INST(7, Opcode::Phi).s32().Inputs({{2, 0}, {3, 33}});
-            INST(33, Opcode::AddI).s32().Inputs(7).Imm(0x1);
-            INST(35, Opcode::StoreArrayPair).s32().Inputs(6, 7, 7, 7);
-            INST(34, Opcode::If).SrcType(DataType::INT32).CC(CC_GT).Inputs(1, 33);
+            INST(7U, Opcode::Phi).s32().Inputs({{2U, 0U}, {3U, 33U}});
+            INST(33U, Opcode::AddI).s32().Inputs(7U).Imm(0x1U);
+            INST(35U, Opcode::StoreArrayPair).s32().Inputs(6U, 7U, 7U, 7U);
+            INST(34U, Opcode::If).SrcType(DataType::INT32).CC(CC_GT).Inputs(1U, 33U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(29, Opcode::Return).s32().Inputs(33);
+            INST(29U, Opcode::Return).s32().Inputs(33U);
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -573,31 +573,31 @@ TEST_F(MemoryCoalescingTest, IndexInference)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::AddI).s32().Inputs(1).Imm(0x1);
-            INST(7, Opcode::LoadArray).s32().Inputs(0, 1);
-            INST(8, Opcode::LoadArray).s32().Inputs(0, 6);
-            INST(9, Opcode::StoreArray).s32().Inputs(0, 1, 7);
-            INST(10, Opcode::StoreArray).s32().Inputs(0, 6, 8);
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(6U, Opcode::AddI).s32().Inputs(1U).Imm(0x1U);
+            INST(7U, Opcode::LoadArray).s32().Inputs(0U, 1U);
+            INST(8U, Opcode::LoadArray).s32().Inputs(0U, 6U);
+            INST(9U, Opcode::StoreArray).s32().Inputs(0U, 1U, 7U);
+            INST(10U, Opcode::StoreArray).s32().Inputs(0U, 6U, 8U);
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::AddI).s32().Inputs(1).Imm(0x1);
-            INST(12, Opcode::LoadArrayPair).s32().Inputs(0, 1);
-            INST(14, Opcode::LoadPairPart).s32().Inputs(12).Imm(0x0);
-            INST(13, Opcode::LoadPairPart).s32().Inputs(12).Imm(0x1);
-            INST(15, Opcode::StoreArrayPair).s32().Inputs(0, 1, 14, 13);
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(6U, Opcode::AddI).s32().Inputs(1U).Imm(0x1U);
+            INST(12U, Opcode::LoadArrayPair).s32().Inputs(0U, 1U);
+            INST(14U, Opcode::LoadPairPart).s32().Inputs(12U).Imm(0x0U);
+            INST(13U, Opcode::LoadPairPart).s32().Inputs(12U).Imm(0x1U);
+            INST(15U, Opcode::StoreArrayPair).s32().Inputs(0U, 1U, 14U, 13U);
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -618,30 +618,30 @@ TEST_F(MemoryCoalescingTest, SimplePlaceFinding)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(7, Opcode::LoadArray).s32().Inputs(0, 1);
-            INST(6, Opcode::SubI).s32().Inputs(1).Imm(1);
-            INST(8, Opcode::LoadArray).s32().Inputs(0, 6);
-            INST(9, Opcode::Add).s32().Inputs(7, 8);
-            INST(11, Opcode::Return).s32().Inputs(9);
+            INST(7U, Opcode::LoadArray).s32().Inputs(0U, 1U);
+            INST(6U, Opcode::SubI).s32().Inputs(1U).Imm(1U);
+            INST(8U, Opcode::LoadArray).s32().Inputs(0U, 6U);
+            INST(9U, Opcode::Add).s32().Inputs(7U, 8U);
+            INST(11U, Opcode::Return).s32().Inputs(9U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::SubI).s32().Inputs(1).Imm(1);
-            INST(12, Opcode::LoadArrayPair).s32().Inputs(0, 6);
-            INST(14, Opcode::LoadPairPart).s32().Inputs(12).Imm(0x0);
-            INST(13, Opcode::LoadPairPart).s32().Inputs(12).Imm(0x1);
-            INST(9, Opcode::Add).s32().Inputs(13, 14);
-            INST(11, Opcode::Return).s32().Inputs(9);
+            INST(6U, Opcode::SubI).s32().Inputs(1U).Imm(1U);
+            INST(12U, Opcode::LoadArrayPair).s32().Inputs(0U, 6U);
+            INST(14U, Opcode::LoadPairPart).s32().Inputs(12U).Imm(0x0U);
+            INST(13U, Opcode::LoadPairPart).s32().Inputs(12U).Imm(0x1U);
+            INST(9U, Opcode::Add).s32().Inputs(13U, 14U);
+            INST(11U, Opcode::Return).s32().Inputs(9U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>(false));
@@ -657,35 +657,35 @@ TEST_F(MemoryCoalescingTest, ObjectAccessesCoalescing)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        CONSTANT(1, 0x2).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(1U, 0x2U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(50, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs(50).TypeId(68);
-            INST(4, Opcode::NewArray).ref().Inputs(44, 1, 50).TypeId(88);
-            INST(38, Opcode::LoadArrayI).ref().Inputs(0).Imm(0x0);
-            INST(40, Opcode::LoadArrayI).ref().Inputs(0).Imm(0x1);
-            INST(41, Opcode::StoreArrayI).ref().Inputs(4, 38).Imm(0x0);
-            INST(42, Opcode::StoreArrayI).ref().Inputs(4, 40).Imm(0x1);
-            INST(27, Opcode::ReturnVoid).v0id();
+            INST(50U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(50U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 1U, 50U).TypeId(88U);
+            INST(38U, Opcode::LoadArrayI).ref().Inputs(0U).Imm(0x0U);
+            INST(40U, Opcode::LoadArrayI).ref().Inputs(0U).Imm(0x1U);
+            INST(41U, Opcode::StoreArrayI).ref().Inputs(4U, 38U).Imm(0x0U);
+            INST(42U, Opcode::StoreArrayI).ref().Inputs(4U, 40U).Imm(0x1U);
+            INST(27U, Opcode::ReturnVoid).v0id();
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        CONSTANT(1, 0x2).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(1U, 0x2U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(50, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(444, Opcode::LoadAndInitClass).ref().Inputs(50).TypeId(68);
-            INST(4, Opcode::NewArray).ref().Inputs(444, 1, 50).TypeId(88);
-            INST(43, Opcode::LoadArrayPairI).ref().Inputs(0).Imm(0x0);
-            INST(45, Opcode::LoadPairPart).ref().Inputs(43).Imm(0x0);
-            INST(44, Opcode::LoadPairPart).ref().Inputs(43).Imm(0x1);
-            INST(46, Opcode::StoreArrayPairI).ref().Inputs(4, 45, 44).Imm(0x0);
-            INST(27, Opcode::ReturnVoid).v0id();
+            INST(50U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(444U, Opcode::LoadAndInitClass).ref().Inputs(50U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(444U, 1U, 50U).TypeId(88U);
+            INST(43U, Opcode::LoadArrayPairI).ref().Inputs(0U).Imm(0x0U);
+            INST(45U, Opcode::LoadPairPart).ref().Inputs(43U).Imm(0x0U);
+            INST(44U, Opcode::LoadPairPart).ref().Inputs(43U).Imm(0x1U);
+            INST(46U, Opcode::StoreArrayPairI).ref().Inputs(4U, 45U, 44U).Imm(0x0U);
+            INST(27U, Opcode::ReturnVoid).v0id();
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -708,45 +708,45 @@ TEST_F(MemoryCoalescingTest, AllowedVolatileReordering)
     }
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0x2a).s64();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0x2aU).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::SaveState).SrcVregs({});
-            INST(5, Opcode::LoadAndInitClass).ref().Inputs(4).TypeId(0);
+            INST(4U, Opcode::SaveState).SrcVregs({});
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U).TypeId(0U);
 
-            INST(3, Opcode::NewArray).ref().Inputs(5, 0).TypeId(77);
+            INST(3U, Opcode::NewArray).ref().Inputs(5U, 0U).TypeId(77U);
             // Can reorder Volatile Store (v226) and Normal Load (v227)
-            INST(225, Opcode::LoadArrayI).s64().Inputs(3).Imm(0x0);
-            INST(226, Opcode::StoreStatic).s64().Volatile().Inputs(5, 225).TypeId(103);
-            INST(227, Opcode::LoadArrayI).s64().Inputs(3).Imm(0x1);
+            INST(225U, Opcode::LoadArrayI).s64().Inputs(3U).Imm(0x0U);
+            INST(226U, Opcode::StoreStatic).s64().Volatile().Inputs(5U, 225U).TypeId(103U);
+            INST(227U, Opcode::LoadArrayI).s64().Inputs(3U).Imm(0x1U);
 
-            INST(51, Opcode::Add).s64().Inputs(225, 227);
+            INST(51U, Opcode::Add).s64().Inputs(225U, 227U);
             // Can reorder Normal Store (v229) and Volatile Load (v230)
-            INST(229, Opcode::StoreArrayI).s64().Inputs(3, 51).Imm(0x0);
-            INST(230, Opcode::LoadStatic).s64().Inputs(5).Volatile().TypeId(107);
-            INST(231, Opcode::StoreArrayI).s64().Inputs(3, 230).Imm(0x1);
-            INST(40, Opcode::Return).s64().Inputs(51);
+            INST(229U, Opcode::StoreArrayI).s64().Inputs(3U, 51U).Imm(0x0U);
+            INST(230U, Opcode::LoadStatic).s64().Inputs(5U).Volatile().TypeId(107U);
+            INST(231U, Opcode::StoreArrayI).s64().Inputs(3U, 230U).Imm(0x1U);
+            INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        CONSTANT(0, 0x2a).s64();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0x2aU).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::SaveState).SrcVregs({});
-            INST(5, Opcode::LoadAndInitClass).ref().Inputs(4).TypeId(0);
+            INST(4U, Opcode::SaveState).SrcVregs({});
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U).TypeId(0U);
 
-            INST(3, Opcode::NewArray).ref().Inputs(5, 0).TypeId(77);
-            INST(232, Opcode::LoadArrayPairI).s64().Inputs(3).Imm(0x0);
-            INST(234, Opcode::LoadPairPart).s64().Inputs(232).Imm(0x0);
-            INST(233, Opcode::LoadPairPart).s64().Inputs(232).Imm(0x1);
-            INST(226, Opcode::StoreStatic).s64().Volatile().Inputs(5, 234).TypeId(103);
+            INST(3U, Opcode::NewArray).ref().Inputs(5U, 0U).TypeId(77U);
+            INST(232U, Opcode::LoadArrayPairI).s64().Inputs(3U).Imm(0x0U);
+            INST(234U, Opcode::LoadPairPart).s64().Inputs(232U).Imm(0x0U);
+            INST(233U, Opcode::LoadPairPart).s64().Inputs(232U).Imm(0x1U);
+            INST(226U, Opcode::StoreStatic).s64().Volatile().Inputs(5U, 234U).TypeId(103U);
 
-            INST(51, Opcode::Add).s64().Inputs(234, 233);
-            INST(230, Opcode::LoadStatic).s64().Inputs(5).Volatile().TypeId(107);
-            INST(235, Opcode::StoreArrayPairI).s64().Inputs(3, 51, 230).Imm(0x0);
-            INST(40, Opcode::Return).s64().Inputs(51);
+            INST(51U, Opcode::Add).s64().Inputs(234U, 233U);
+            INST(230U, Opcode::LoadStatic).s64().Inputs(5U).Volatile().TypeId(107U);
+            INST(235U, Opcode::StoreArrayPairI).s64().Inputs(3U, 51U, 230U).Imm(0x0U);
+            INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -762,45 +762,45 @@ TEST_F(MemoryCoalescingTest, AllowedVolatileReordering2)
     }
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0x2a).s64();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0x2aU).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::SaveState).SrcVregs({});
-            INST(5, Opcode::LoadAndInitClass).ref().Inputs(4).TypeId(0);
+            INST(4U, Opcode::SaveState).SrcVregs({});
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U).TypeId(0U);
 
-            INST(3, Opcode::NewArray).ref().Inputs(5, 0).TypeId(77);
+            INST(3U, Opcode::NewArray).ref().Inputs(5U, 0U).TypeId(77U);
             // We can reorder v225 and v226 but not v226 and v227
-            INST(225, Opcode::LoadArrayI).s64().Inputs(3).Imm(0x0);
-            INST(226, Opcode::LoadStatic).s64().Inputs(5).Volatile().TypeId(103);
-            INST(227, Opcode::LoadArrayI).s64().Inputs(3).Imm(0x1);
+            INST(225U, Opcode::LoadArrayI).s64().Inputs(3U).Imm(0x0U);
+            INST(226U, Opcode::LoadStatic).s64().Inputs(5U).Volatile().TypeId(103U);
+            INST(227U, Opcode::LoadArrayI).s64().Inputs(3U).Imm(0x1U);
 
-            INST(51, Opcode::Add).s64().Inputs(225, 227);
+            INST(51U, Opcode::Add).s64().Inputs(225U, 227U);
             // We can reorder v230 and v231 but not v229 and v230
-            INST(229, Opcode::StoreArrayI).s64().Inputs(3, 51).Imm(0x0);
-            INST(230, Opcode::StoreStatic).s64().Inputs(5).Volatile().Inputs(226).TypeId(105);
-            INST(231, Opcode::StoreArrayI).s64().Inputs(3, 51).Imm(0x1);
-            INST(40, Opcode::Return).s64().Inputs(51);
+            INST(229U, Opcode::StoreArrayI).s64().Inputs(3U, 51U).Imm(0x0U);
+            INST(230U, Opcode::StoreStatic).s64().Inputs(5U).Volatile().Inputs(226U).TypeId(105U);
+            INST(231U, Opcode::StoreArrayI).s64().Inputs(3U, 51U).Imm(0x1U);
+            INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        CONSTANT(0, 0x2a).s64();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0x2aU).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::SaveState).SrcVregs({});
-            INST(5, Opcode::LoadAndInitClass).ref().Inputs(4).TypeId(0);
+            INST(4U, Opcode::SaveState).SrcVregs({});
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U).TypeId(0U);
 
-            INST(3, Opcode::NewArray).ref().Inputs(5, 0).TypeId(77);
-            INST(226, Opcode::LoadStatic).s64().Inputs(5).Volatile().TypeId(103);
-            INST(235, Opcode::LoadArrayPairI).s64().Inputs(3).Imm(0x0);
-            INST(237, Opcode::LoadPairPart).s64().Inputs(235).Imm(0x0);
-            INST(236, Opcode::LoadPairPart).s64().Inputs(235).Imm(0x1);
+            INST(3U, Opcode::NewArray).ref().Inputs(5U, 0U).TypeId(77U);
+            INST(226U, Opcode::LoadStatic).s64().Inputs(5U).Volatile().TypeId(103U);
+            INST(235U, Opcode::LoadArrayPairI).s64().Inputs(3U).Imm(0x0U);
+            INST(237U, Opcode::LoadPairPart).s64().Inputs(235U).Imm(0x0U);
+            INST(236U, Opcode::LoadPairPart).s64().Inputs(235U).Imm(0x1U);
 
-            INST(51, Opcode::Add).s64().Inputs(237, 236);
-            INST(238, Opcode::StoreArrayPairI).s64().Inputs(3, 51, 51).Imm(0x0);
-            INST(230, Opcode::StoreStatic).s64().Inputs(5).Volatile().Inputs(226).TypeId(105);
-            INST(40, Opcode::Return).s64().Inputs(51);
+            INST(51U, Opcode::Add).s64().Inputs(237U, 236U);
+            INST(238U, Opcode::StoreArrayPairI).s64().Inputs(3U, 51U, 51U).Imm(0x0U);
+            INST(230U, Opcode::StoreStatic).s64().Inputs(5U).Volatile().Inputs(226U).TypeId(105U);
+            INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -816,65 +816,65 @@ TEST_F(MemoryCoalescingTest, UnrolledLoop)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).ref();
-        CONSTANT(3, 0x2a).s64();
-        CONSTANT(4, 0x0).s64();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).ref();
+        CONSTANT(3U, 0x2aU).s64();
+        CONSTANT(4U, 0x0U).s64();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(50, Opcode::SaveState).Inputs(1).SrcVregs({0});
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs(50).TypeId(68);
-            INST(2, Opcode::NewArray).ref().Inputs(44, 3, 50).TypeId(77);
-            INST(10, Opcode::IfImm).SrcType(DataType::INT64).CC(CC_LE).Imm(0x0).Inputs(0);
+            INST(50U, Opcode::SaveState).Inputs(1U).SrcVregs({0U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(50U).TypeId(68U);
+            INST(2U, Opcode::NewArray).ref().Inputs(44U, 3U, 50U).TypeId(77U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::INT64).CC(CC_LE).Imm(0x0U).Inputs(0U);
         }
-        BASIC_BLOCK(3, 3, 4)
+        BASIC_BLOCK(3U, 3U, 4U)
         {
-            INST(11, Opcode::Phi).s32().Inputs({{2, 4}, {3, 17}});
-            INST(12, Opcode::LoadArray).s32().Inputs(1, 11);
-            INST(13, Opcode::StoreArray).s32().Inputs(2, 11, 12);
-            INST(14, Opcode::AddI).s32().Inputs(11).Imm(1);
+            INST(11U, Opcode::Phi).s32().Inputs({{2U, 4U}, {3U, 17U}});
+            INST(12U, Opcode::LoadArray).s32().Inputs(1U, 11U);
+            INST(13U, Opcode::StoreArray).s32().Inputs(2U, 11U, 12U);
+            INST(14U, Opcode::AddI).s32().Inputs(11U).Imm(1U);
 
-            INST(15, Opcode::LoadArray).s32().Inputs(1, 14);
-            INST(16, Opcode::StoreArray).s32().Inputs(2, 14, 15);
-            INST(17, Opcode::AddI).s32().Inputs(11).Imm(2);
+            INST(15U, Opcode::LoadArray).s32().Inputs(1U, 14U);
+            INST(16U, Opcode::StoreArray).s32().Inputs(2U, 14U, 15U);
+            INST(17U, Opcode::AddI).s32().Inputs(11U).Imm(2U);
 
-            INST(30, Opcode::If).SrcType(DataType::INT32).CC(CC_GE).Inputs(17, 3);
+            INST(30U, Opcode::If).SrcType(DataType::INT32).CC(CC_GE).Inputs(17U, 3U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(40, Opcode::ReturnVoid);
+            INST(40U, Opcode::ReturnVoid);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).ref();
-        CONSTANT(3, 0x2a).s64();
-        CONSTANT(4, 0x0).s64();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).ref();
+        CONSTANT(3U, 0x2aU).s64();
+        CONSTANT(4U, 0x0U).s64();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(50, Opcode::SaveState).Inputs(1).SrcVregs({0});
-            INST(444, Opcode::LoadAndInitClass).ref().Inputs(50).TypeId(68);
-            INST(2, Opcode::NewArray).ref().Inputs(444, 3, 50).TypeId(77);
-            INST(10, Opcode::IfImm).SrcType(DataType::INT64).CC(CC_LE).Imm(0x0).Inputs(0);
+            INST(50U, Opcode::SaveState).Inputs(1U).SrcVregs({0U});
+            INST(444U, Opcode::LoadAndInitClass).ref().Inputs(50U).TypeId(68U);
+            INST(2U, Opcode::NewArray).ref().Inputs(444U, 3U, 50U).TypeId(77U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::INT64).CC(CC_LE).Imm(0x0U).Inputs(0U);
         }
-        BASIC_BLOCK(3, 3, 4)
+        BASIC_BLOCK(3U, 3U, 4U)
         {
-            INST(11, Opcode::Phi).s32().Inputs({{2, 4}, {3, 17}});
-            INST(44, Opcode::LoadArrayPair).s32().Inputs(1, 11);
-            INST(46, Opcode::LoadPairPart).s32().Inputs(44).Imm(0x0);
-            INST(45, Opcode::LoadPairPart).s32().Inputs(44).Imm(0x1);
-            INST(14, Opcode::AddI).s32().Inputs(11).Imm(1);
+            INST(11U, Opcode::Phi).s32().Inputs({{2U, 4U}, {3U, 17U}});
+            INST(44U, Opcode::LoadArrayPair).s32().Inputs(1U, 11U);
+            INST(46U, Opcode::LoadPairPart).s32().Inputs(44U).Imm(0x0U);
+            INST(45U, Opcode::LoadPairPart).s32().Inputs(44U).Imm(0x1U);
+            INST(14U, Opcode::AddI).s32().Inputs(11U).Imm(1U);
 
-            INST(47, Opcode::StoreArrayPair).s32().Inputs(2, 11, 46, 45);
-            INST(17, Opcode::AddI).s32().Inputs(11).Imm(2);
+            INST(47U, Opcode::StoreArrayPair).s32().Inputs(2U, 11U, 46U, 45U);
+            INST(17U, Opcode::AddI).s32().Inputs(11U).Imm(2U);
 
-            INST(30, Opcode::If).SrcType(DataType::INT32).CC(CC_GE).Inputs(17, 3);
+            INST(30U, Opcode::If).SrcType(DataType::INT32).CC(CC_GE).Inputs(17U, 3U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(40, Opcode::ReturnVoid);
+            INST(40U, Opcode::ReturnVoid);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -890,24 +890,24 @@ TEST_F(MemoryCoalescingTest, CoalescingOverSaveState)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({6});
-            INST(2, Opcode::NullCheck).ref().Inputs(0, 1);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({6U});
+            INST(2U, Opcode::NullCheck).ref().Inputs(0U, 1U);
 
-            INST(41, Opcode::SaveState).Inputs(0).SrcVregs({6});
-            INST(43, Opcode::LenArray).s32().Inputs(2);
-            INST(241, Opcode::BoundsCheckI).s32().Inputs(43, 41).Imm(0x0);
-            INST(242, Opcode::LoadArrayI).s64().Inputs(2).Imm(0x0);
+            INST(41U, Opcode::SaveState).Inputs(0U).SrcVregs({6U});
+            INST(43U, Opcode::LenArray).s32().Inputs(2U);
+            INST(241U, Opcode::BoundsCheckI).s32().Inputs(43U, 41U).Imm(0x0U);
+            INST(242U, Opcode::LoadArrayI).s64().Inputs(2U).Imm(0x0U);
 
-            INST(47, Opcode::SaveState).Inputs(242, 0).SrcVregs({3, 6});
-            INST(49, Opcode::LenArray).s32().Inputs(2);
-            INST(244, Opcode::BoundsCheckI).s32().Inputs(49, 47).Imm(0x1);
-            INST(245, Opcode::LoadArrayI).s64().Inputs(2).Imm(0x1);
+            INST(47U, Opcode::SaveState).Inputs(242U, 0U).SrcVregs({3U, 6U});
+            INST(49U, Opcode::LenArray).s32().Inputs(2U);
+            INST(244U, Opcode::BoundsCheckI).s32().Inputs(49U, 47U).Imm(0x1U);
+            INST(245U, Opcode::LoadArrayI).s64().Inputs(2U).Imm(0x1U);
 
-            INST(53, Opcode::Add).s64().Inputs(242, 245);
-            INST(40, Opcode::Return).s64().Inputs(53);
+            INST(53U, Opcode::Add).s64().Inputs(242U, 245U);
+            INST(40U, Opcode::Return).s64().Inputs(53U);
         }
     }
     GraphChecker(GetGraph()).Check();
@@ -917,27 +917,27 @@ TEST_F(MemoryCoalescingTest, CoalescingOverSaveState)
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({6});
-            INST(2, Opcode::NullCheck).ref().Inputs(0, 1);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({6U});
+            INST(2U, Opcode::NullCheck).ref().Inputs(0U, 1U);
 
-            INST(41, Opcode::SaveState).Inputs(0).SrcVregs({6});
-            INST(43, Opcode::LenArray).s32().Inputs(2);
-            INST(241, Opcode::BoundsCheckI).s32().Inputs(43, 41).Imm(0x0);
+            INST(41U, Opcode::SaveState).Inputs(0U).SrcVregs({6U});
+            INST(43U, Opcode::LenArray).s32().Inputs(2U);
+            INST(241U, Opcode::BoundsCheckI).s32().Inputs(43U, 41U).Imm(0x0U);
 
-            INST(246, Opcode::LoadArrayPairI).s64().Inputs(2).Imm(0x0);
-            INST(248, Opcode::LoadPairPart).s64().Inputs(246).Imm(0x0);
-            INST(247, Opcode::LoadPairPart).s64().Inputs(246).Imm(0x1);
+            INST(246U, Opcode::LoadArrayPairI).s64().Inputs(2U).Imm(0x0U);
+            INST(248U, Opcode::LoadPairPart).s64().Inputs(246U).Imm(0x0U);
+            INST(247U, Opcode::LoadPairPart).s64().Inputs(246U).Imm(0x1U);
 
-            INST(47, Opcode::SaveState).Inputs(248, 0).SrcVregs({3, 6});
-            INST(49, Opcode::LenArray).s32().Inputs(2);
-            INST(244, Opcode::BoundsCheckI).s32().Inputs(49, 47).Imm(0x1);
+            INST(47U, Opcode::SaveState).Inputs(248U, 0U).SrcVregs({3U, 6U});
+            INST(49U, Opcode::LenArray).s32().Inputs(2U);
+            INST(244U, Opcode::BoundsCheckI).s32().Inputs(49U, 47U).Imm(0x1U);
 
-            INST(53, Opcode::Add).s64().Inputs(248, 247);
-            INST(40, Opcode::Return).s64().Inputs(53);
+            INST(53U, Opcode::Add).s64().Inputs(248U, 247U);
+            INST(40U, Opcode::Return).s64().Inputs(53U);
         }
     }
     GraphChecker(opt_graph).Check();
@@ -952,13 +952,13 @@ TEST_F(MemoryCoalescingTest, AlignmentTest)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(26, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x2);
-            INST(28, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(28, 26);
-            INST(22, Opcode::Return).s64().Inputs(21);
+            INST(26U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x2U);
+            INST(28U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(28U, 26U);
+            INST(22U, Opcode::Return).s64().Inputs(21U);
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -975,18 +975,18 @@ TEST_F(MemoryCoalescingTest, AliasedStore)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(26, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(13, Opcode::StoreArray).s64().Inputs(0, 1, 2);
-            INST(28, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x5);
-            INST(29, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(28, 26);
-            INST(24, Opcode::Add).s64().Inputs(21, 29);
-            INST(22, Opcode::Return).s64().Inputs(24);
+            INST(26U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(13U, Opcode::StoreArray).s64().Inputs(0U, 1U, 2U);
+            INST(28U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x5U);
+            INST(29U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(28U, 26U);
+            INST(24U, Opcode::Add).s64().Inputs(21U, 29U);
+            INST(22U, Opcode::Return).s64().Inputs(24U);
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -999,20 +999,20 @@ TEST_F(MemoryCoalescingTest, TypeCheck)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::AddI).s32().Inputs(1).Imm(0x1);
-            INST(7, Opcode::LoadArray).s8().Inputs(0, 1);
-            INST(8, Opcode::LoadArray).s8().Inputs(0, 6);
-            INST(9, Opcode::LoadArrayI).s16().Inputs(0).Imm(0x4);
-            INST(10, Opcode::LoadArrayI).s16().Inputs(0).Imm(0x5);
-            INST(11, Opcode::StoreArray).s16().Inputs(0, 1, 9);
-            INST(12, Opcode::StoreArray).s16().Inputs(0, 6, 10);
-            INST(13, Opcode::StoreArrayI).s8().Inputs(0, 7).Imm(0x4);
-            INST(14, Opcode::StoreArrayI).s8().Inputs(0, 8).Imm(0x5);
-            INST(15, Opcode::ReturnVoid).v0id();
+            INST(6U, Opcode::AddI).s32().Inputs(1U).Imm(0x1U);
+            INST(7U, Opcode::LoadArray).s8().Inputs(0U, 1U);
+            INST(8U, Opcode::LoadArray).s8().Inputs(0U, 6U);
+            INST(9U, Opcode::LoadArrayI).s16().Inputs(0U).Imm(0x4U);
+            INST(10U, Opcode::LoadArrayI).s16().Inputs(0U).Imm(0x5U);
+            INST(11U, Opcode::StoreArray).s16().Inputs(0U, 1U, 9U);
+            INST(12U, Opcode::StoreArray).s16().Inputs(0U, 6U, 10U);
+            INST(13U, Opcode::StoreArrayI).s8().Inputs(0U, 7U).Imm(0x4U);
+            INST(14U, Opcode::StoreArrayI).s8().Inputs(0U, 8U).Imm(0x5U);
+            INST(15U, Opcode::ReturnVoid).v0id();
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -1029,26 +1029,26 @@ TEST_F(MemoryCoalescingTest, ProhibitedVolatileReordering)
     }
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0x2a).s64();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0x2aU).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(4, Opcode::SaveState).SrcVregs({});
-            INST(5, Opcode::LoadAndInitClass).ref().Inputs(4).TypeId(0);
+            INST(4U, Opcode::SaveState).SrcVregs({});
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U).TypeId(0U);
 
-            INST(3, Opcode::NewArray).ref().Inputs(5, 0).TypeId(77);
-            INST(225, Opcode::LoadArrayI).s64().Inputs(3).Imm(0x0);
+            INST(3U, Opcode::NewArray).ref().Inputs(5U, 0U).TypeId(77U);
+            INST(225U, Opcode::LoadArrayI).s64().Inputs(3U).Imm(0x0U);
             // v50 is needed to prevent reordering v225 with v226
-            INST(50, Opcode::Add).s64().Inputs(225, 225);
-            INST(226, Opcode::LoadStatic).s64().Inputs(5).Volatile().TypeId(103);
-            INST(227, Opcode::LoadArrayI).s64().Inputs(3).Imm(0x1);
+            INST(50U, Opcode::Add).s64().Inputs(225U, 225U);
+            INST(226U, Opcode::LoadStatic).s64().Inputs(5U).Volatile().TypeId(103U);
+            INST(227U, Opcode::LoadArrayI).s64().Inputs(3U).Imm(0x1U);
 
-            INST(51, Opcode::Add).s64().Inputs(50, 227);
-            INST(229, Opcode::StoreArrayI).s64().Inputs(3, 51).Imm(0x0);
-            INST(230, Opcode::StoreStatic).s64().Inputs(5).Volatile().Inputs(226).TypeId(105);
+            INST(51U, Opcode::Add).s64().Inputs(50U, 227U);
+            INST(229U, Opcode::StoreArrayI).s64().Inputs(3U, 51U).Imm(0x0U);
+            INST(230U, Opcode::StoreStatic).s64().Inputs(5U).Volatile().Inputs(226U).TypeId(105U);
             // v51 is needed to prevent reordering v231 and v230
-            INST(52, Opcode::Add).s64().Inputs(50, 51);
-            INST(231, Opcode::StoreArrayI).s64().Inputs(3, 52).Imm(0x1);
-            INST(40, Opcode::Return).s64().Inputs(51);
+            INST(52U, Opcode::Add).s64().Inputs(50U, 51U);
+            INST(231U, Opcode::StoreArrayI).s64().Inputs(3U, 52U).Imm(0x1U);
+            INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -1065,22 +1065,22 @@ TEST_F(MemoryCoalescingTest, LoweringDominance)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(8, Opcode::SubI).s32().Inputs(1).Imm(1);
+            INST(8U, Opcode::SubI).s32().Inputs(1U).Imm(1U);
 
-            INST(9, Opcode::LoadArray).s32().Inputs(0, 1);
-            INST(10, Opcode::ShlI).s32().Inputs(9).Imm(24);
-            INST(16, Opcode::StoreArray).s32().Inputs(0, 8, 10);
-            INST(11, Opcode::AShrI).s32().Inputs(9).Imm(28);
+            INST(9U, Opcode::LoadArray).s32().Inputs(0U, 1U);
+            INST(10U, Opcode::ShlI).s32().Inputs(9U).Imm(24U);
+            INST(16U, Opcode::StoreArray).s32().Inputs(0U, 8U, 10U);
+            INST(11U, Opcode::AShrI).s32().Inputs(9U).Imm(28U);
 
-            INST(12, Opcode::AddI).s64().Inputs(1).Imm(1);
-            INST(13, Opcode::LoadArray).s32().Inputs(0, 12);
+            INST(12U, Opcode::AddI).s64().Inputs(1U).Imm(1U);
+            INST(13U, Opcode::LoadArray).s32().Inputs(0U, 12U);
 
-            INST(14, Opcode::Add).s32().Inputs(10, 11);
-            INST(15, Opcode::Return).s32().Inputs(14);
+            INST(14U, Opcode::Add).s32().Inputs(10U, 11U);
+            INST(15U, Opcode::Return).s32().Inputs(14U);
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -1097,21 +1097,21 @@ TEST_F(MemoryCoalescingTest, LoweringDominance2)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).ref();
-        PARAMETER(2, 2).ref();
-        PARAMETER(3, 3).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        PARAMETER(2U, 2U).ref();
+        PARAMETER(3U, 3U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(8, Opcode::SubI).s32().Inputs(3).Imm(1);
+            INST(8U, Opcode::SubI).s32().Inputs(3U).Imm(1U);
 
-            INST(9, Opcode::LoadArrayI).s32().Inputs(0).Imm(0x0);
-            INST(10, Opcode::StoreArray).s32().Inputs(1, 8, 9);
+            INST(9U, Opcode::LoadArrayI).s32().Inputs(0U).Imm(0x0U);
+            INST(10U, Opcode::StoreArray).s32().Inputs(1U, 8U, 9U);
 
-            INST(11, Opcode::LoadArrayI).s32().Inputs(0).Imm(0x1);
-            INST(12, Opcode::StoreArray).s32().Inputs(2, 8, 11);
+            INST(11U, Opcode::LoadArrayI).s32().Inputs(0U).Imm(0x1U);
+            INST(12U, Opcode::StoreArray).s32().Inputs(2U, 8U, 11U);
 
-            INST(15, Opcode::Return).s32().Inputs(3);
+            INST(15U, Opcode::Return).s32().Inputs(3U);
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -1128,16 +1128,16 @@ TEST_F(MemoryCoalescingTest, CoalescingLoadsOverSaveState)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(9, Opcode::LoadArray).ref().Inputs(0, 1);
-            INST(10, Opcode::SaveState).SrcVregs({9});
-            INST(11, Opcode::AddI).s64().Inputs(1).Imm(1);
-            INST(12, Opcode::LoadArray).ref().Inputs(0, 11);
-            INST(13, Opcode::SaveState).SrcVregs({9, 12});
-            INST(15, Opcode::Return).s32().Inputs(1);
+            INST(9U, Opcode::LoadArray).ref().Inputs(0U, 1U);
+            INST(10U, Opcode::SaveState).SrcVregs({9U});
+            INST(11U, Opcode::AddI).s64().Inputs(1U).Imm(1U);
+            INST(12U, Opcode::LoadArray).ref().Inputs(0U, 11U);
+            INST(13U, Opcode::SaveState).SrcVregs({9U, 12U});
+            INST(15U, Opcode::Return).s32().Inputs(1U);
         }
     }
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -1154,21 +1154,21 @@ TEST_F(MemoryCoalescingTest, CoalescingPhiAsUser)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).ref();
-        PARAMETER(2, 2).s32();
-        PARAMETER(3, 3).s32();
-        BASIC_BLOCK(2, 3, 2)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        PARAMETER(2U, 2U).s32();
+        PARAMETER(3U, 3U).s32();
+        BASIC_BLOCK(2U, 3U, 2U)
         {
-            INST(9, Opcode::Phi).s32().Inputs({{0, 3}, {2, 10}});
-            INST(10, Opcode::LoadArray).s32().Inputs(0, 9);
-            INST(11, Opcode::AddI).s32().Inputs(9).Imm(1);
-            INST(12, Opcode::LoadArray).s32().Inputs(0, 11);
-            INST(18, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_EQ).Imm(0).Inputs(12);
+            INST(9U, Opcode::Phi).s32().Inputs({{0U, 3U}, {2U, 10U}});
+            INST(10U, Opcode::LoadArray).s32().Inputs(0U, 9U);
+            INST(11U, Opcode::AddI).s32().Inputs(9U).Imm(1U);
+            INST(12U, Opcode::LoadArray).s32().Inputs(0U, 11U);
+            INST(18U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_EQ).Imm(0U).Inputs(12U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(20, Opcode::Return).s32().Inputs(2);
+            INST(20U, Opcode::Return).s32().Inputs(2U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>(false));
@@ -1183,39 +1183,39 @@ TEST_F(MemoryCoalescingTest, NestedLoadCoalescing)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(26, Opcode::LoadArrayI).ref().Inputs(0).Imm(0x0);
-            INST(28, Opcode::LoadArrayI).ref().Inputs(0).Imm(0x1);
+            INST(26U, Opcode::LoadArrayI).ref().Inputs(0U).Imm(0x0U);
+            INST(28U, Opcode::LoadArrayI).ref().Inputs(0U).Imm(0x1U);
 
-            INST(30, Opcode::LoadArrayI).s64().Inputs(26).Imm(0x0);
-            INST(31, Opcode::LoadArrayI).s64().Inputs(26).Imm(0x1);
-            INST(32, Opcode::LoadArrayI).s64().Inputs(28).Imm(0x0);
+            INST(30U, Opcode::LoadArrayI).s64().Inputs(26U).Imm(0x0U);
+            INST(31U, Opcode::LoadArrayI).s64().Inputs(26U).Imm(0x1U);
+            INST(32U, Opcode::LoadArrayI).s64().Inputs(28U).Imm(0x0U);
 
-            INST(21, Opcode::Add).s64().Inputs(30, 31);
-            INST(22, Opcode::Add).s64().Inputs(21, 32);
-            INST(23, Opcode::Return).s64().Inputs(22);
+            INST(21U, Opcode::Add).s64().Inputs(30U, 31U);
+            INST(22U, Opcode::Add).s64().Inputs(21U, 32U);
+            INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(31, Opcode::LoadArrayPairI).ref().Inputs(0).Imm(0x0);
-            INST(32, Opcode::LoadPairPart).ref().Inputs(31).Imm(0x0);
-            INST(33, Opcode::LoadPairPart).ref().Inputs(31).Imm(0x1);
+            INST(31U, Opcode::LoadArrayPairI).ref().Inputs(0U).Imm(0x0U);
+            INST(32U, Opcode::LoadPairPart).ref().Inputs(31U).Imm(0x0U);
+            INST(33U, Opcode::LoadPairPart).ref().Inputs(31U).Imm(0x1U);
 
-            INST(34, Opcode::LoadArrayPairI).s64().Inputs(32).Imm(0x0);
-            INST(35, Opcode::LoadPairPart).s64().Inputs(34).Imm(0x0);
-            INST(36, Opcode::LoadPairPart).s64().Inputs(34).Imm(0x1);
-            INST(30, Opcode::LoadArrayI).s64().Inputs(33).Imm(0x0);
+            INST(34U, Opcode::LoadArrayPairI).s64().Inputs(32U).Imm(0x0U);
+            INST(35U, Opcode::LoadPairPart).s64().Inputs(34U).Imm(0x0U);
+            INST(36U, Opcode::LoadPairPart).s64().Inputs(34U).Imm(0x1U);
+            INST(30U, Opcode::LoadArrayI).s64().Inputs(33U).Imm(0x0U);
 
-            INST(21, Opcode::Add).s64().Inputs(35, 36);
-            INST(22, Opcode::Add).s64().Inputs(21, 30);
-            INST(23, Opcode::Return).s64().Inputs(22);
+            INST(21U, Opcode::Add).s64().Inputs(35U, 36U);
+            INST(22U, Opcode::Add).s64().Inputs(21U, 30U);
+            INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -1230,34 +1230,34 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSafePoint)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(26, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(27, Opcode::SafePoint).NoVregs();
-            INST(28, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
+            INST(26U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(27U, Opcode::SafePoint).NoVregs();
+            INST(28U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
 
-            INST(30, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(28, 26);
-            INST(22, Opcode::Add).s64().Inputs(30, 21);
-            INST(23, Opcode::Return).s64().Inputs(22);
+            INST(30U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(28U, 26U);
+            INST(22U, Opcode::Add).s64().Inputs(30U, 21U);
+            INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(31, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x0);
-            INST(33, Opcode::LoadPairPart).s64().Inputs(31).Imm(0x0);
-            INST(32, Opcode::LoadPairPart).s64().Inputs(31).Imm(0x1);
-            INST(27, Opcode::SafePoint).Inputs(0).SrcVregs({VirtualRegister::BRIDGE});
+            INST(31U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x0U);
+            INST(33U, Opcode::LoadPairPart).s64().Inputs(31U).Imm(0x0U);
+            INST(32U, Opcode::LoadPairPart).s64().Inputs(31U).Imm(0x1U);
+            INST(27U, Opcode::SafePoint).Inputs(0U).SrcVregs({VirtualRegister::BRIDGE});
 
-            INST(30, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(32, 33);
-            INST(22, Opcode::Add).s64().Inputs(30, 21);
-            INST(23, Opcode::Return).s64().Inputs(22);
+            INST(30U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(32U, 33U);
+            INST(22U, Opcode::Add).s64().Inputs(30U, 21U);
+            INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -1273,33 +1273,33 @@ TEST_F(MemoryCoalescingTest, PseudoPartsOverSafePoints)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(27, Opcode::SafePoint).NoVregs();
-            INST(2, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
+            INST(1U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(27U, Opcode::SafePoint).NoVregs();
+            INST(2U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
 
-            INST(3, Opcode::StoreArrayI).s64().Inputs(0, 2).Imm(0x0);
-            INST(28, Opcode::SafePoint).NoVregs();
-            INST(4, Opcode::StoreArrayI).s64().Inputs(0, 1).Imm(0x1);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::StoreArrayI).s64().Inputs(0U, 2U).Imm(0x0U);
+            INST(28U, Opcode::SafePoint).NoVregs();
+            INST(4U, Opcode::StoreArrayI).s64().Inputs(0U, 1U).Imm(0x1U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x0);
-            INST(7, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x0);
-            INST(8, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x1);
-            INST(27, Opcode::SafePoint).Inputs(0).SrcVregs({VirtualRegister::BRIDGE});
+            INST(6U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x0U);
+            INST(7U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x0U);
+            INST(8U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x1U);
+            INST(27U, Opcode::SafePoint).Inputs(0U).SrcVregs({VirtualRegister::BRIDGE});
 
-            INST(9, Opcode::StoreArrayPairI).s64().Inputs(0, 8, 7).Imm(0x0);
-            INST(28, Opcode::SafePoint).NoVregs();
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(9U, Opcode::StoreArrayPairI).s64().Inputs(0U, 8U, 7U).Imm(0x0U);
+            INST(28U, Opcode::SafePoint).NoVregs();
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -1315,34 +1315,34 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSaveState)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(26, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(2, Opcode::SaveState).NoVregs();
-            INST(28, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
+            INST(26U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(2U, Opcode::SaveState).NoVregs();
+            INST(28U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
 
-            INST(30, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(28, 26);
-            INST(22, Opcode::Add).s64().Inputs(30, 21);
-            INST(23, Opcode::Return).s64().Inputs(22);
+            INST(30U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(28U, 26U);
+            INST(22U, Opcode::Add).s64().Inputs(30U, 21U);
+            INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(31, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x0);
-            INST(33, Opcode::LoadPairPart).s64().Inputs(31).Imm(0x0);
-            INST(32, Opcode::LoadPairPart).s64().Inputs(31).Imm(0x1);
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({VirtualRegister::BRIDGE});
+            INST(31U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x0U);
+            INST(33U, Opcode::LoadPairPart).s64().Inputs(31U).Imm(0x0U);
+            INST(32U, Opcode::LoadPairPart).s64().Inputs(31U).Imm(0x1U);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({VirtualRegister::BRIDGE});
 
-            INST(30, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(32, 33);
-            INST(22, Opcode::Add).s64().Inputs(30, 21);
-            INST(23, Opcode::Return).s64().Inputs(22);
+            INST(30U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(32U, 33U);
+            INST(22U, Opcode::Add).s64().Inputs(30U, 21U);
+            INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -1358,33 +1358,33 @@ TEST_F(MemoryCoalescingTest, OverSaveState)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(11, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
+            INST(1U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(11U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
 
-            INST(3, Opcode::StoreArrayI).s64().Inputs(0, 2).Imm(0x0);
-            INST(12, Opcode::SaveState).NoVregs();
-            INST(4, Opcode::StoreArrayI).s64().Inputs(0, 1).Imm(0x1);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::StoreArrayI).s64().Inputs(0U, 2U).Imm(0x0U);
+            INST(12U, Opcode::SaveState).NoVregs();
+            INST(4U, Opcode::StoreArrayI).s64().Inputs(0U, 1U).Imm(0x1U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x0);
-            INST(7, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x0);
-            INST(8, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x1);
-            INST(27, Opcode::SaveState).Inputs(0).SrcVregs({VirtualRegister::BRIDGE});
+            INST(6U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x0U);
+            INST(7U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x0U);
+            INST(8U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x1U);
+            INST(27U, Opcode::SaveState).Inputs(0U).SrcVregs({VirtualRegister::BRIDGE});
 
-            INST(9, Opcode::StoreArrayPairI).s64().Inputs(0, 8, 7).Imm(0x0);
-            INST(28, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(9U, Opcode::StoreArrayPairI).s64().Inputs(0U, 8U, 7U).Imm(0x0U);
+            INST(28U, Opcode::SaveState).NoVregs();
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -1400,34 +1400,34 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSaveStateDeoptimize)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(26, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(2, Opcode::SaveStateDeoptimize).Inputs(0).SrcVregs({0});
-            INST(28, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
+            INST(26U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(2U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
+            INST(28U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
 
-            INST(30, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(28, 26);
-            INST(22, Opcode::Add).s64().Inputs(30, 21);
-            INST(23, Opcode::Return).s64().Inputs(22);
+            INST(30U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(28U, 26U);
+            INST(22U, Opcode::Add).s64().Inputs(30U, 21U);
+            INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(31, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x0);
-            INST(33, Opcode::LoadPairPart).s64().Inputs(31).Imm(0x0);
-            INST(32, Opcode::LoadPairPart).s64().Inputs(31).Imm(0x1);
-            INST(2, Opcode::SaveStateDeoptimize).Inputs(0).SrcVregs({0});
+            INST(31U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x0U);
+            INST(33U, Opcode::LoadPairPart).s64().Inputs(31U).Imm(0x0U);
+            INST(32U, Opcode::LoadPairPart).s64().Inputs(31U).Imm(0x1U);
+            INST(2U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
 
-            INST(30, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(32, 33);
-            INST(22, Opcode::Add).s64().Inputs(30, 21);
-            INST(23, Opcode::Return).s64().Inputs(22);
+            INST(30U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(32U, 33U);
+            INST(22U, Opcode::Add).s64().Inputs(30U, 21U);
+            INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -1443,17 +1443,17 @@ TEST_F(MemoryCoalescingTest, OverSaveStateDeoptimize)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(11, Opcode::SaveStateDeoptimize).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
+            INST(1U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(11U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
 
-            INST(3, Opcode::StoreArrayI).s64().Inputs(0, 2).Imm(0x0);
-            INST(12, Opcode::SaveStateDeoptimize).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::StoreArrayI).s64().Inputs(0, 1).Imm(0x1);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::StoreArrayI).s64().Inputs(0U, 2U).Imm(0x0U);
+            INST(12U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::StoreArrayI).s64().Inputs(0U, 1U).Imm(0x1U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -1462,18 +1462,18 @@ TEST_F(MemoryCoalescingTest, OverSaveStateDeoptimize)
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x0);
-            INST(7, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x0);
-            INST(8, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x1);
-            INST(27, Opcode::SaveStateDeoptimize).Inputs(0).SrcVregs({0});
+            INST(6U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x0U);
+            INST(7U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x0U);
+            INST(8U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x1U);
+            INST(27U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
 
-            INST(3, Opcode::StoreArrayI).s64().Inputs(0, 8).Imm(0x0);
-            INST(12, Opcode::SaveStateDeoptimize).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::StoreArrayI).s64().Inputs(0, 7).Imm(0x1);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::StoreArrayI).s64().Inputs(0U, 8U).Imm(0x0U);
+            INST(12U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::StoreArrayI).s64().Inputs(0U, 7U).Imm(0x1U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
@@ -1487,36 +1487,36 @@ TEST_F(MemoryCoalescingTest, OnlySingleCoalescingOverSaveStateWithCheckUser)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(26, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(28, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
+            INST(26U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(28U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
 
-            INST(30, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(28, 26);
-            INST(22, Opcode::Add).s64().Inputs(30, 21);
-            INST(3, Opcode::NullCheck).ref().Inputs(0, 2);
-            INST(23, Opcode::Return).s64().Inputs(22);
+            INST(30U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(28U, 26U);
+            INST(22U, Opcode::Add).s64().Inputs(30U, 21U);
+            INST(3U, Opcode::NullCheck).ref().Inputs(0U, 2U);
+            INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(31, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x0);
-            INST(33, Opcode::LoadPairPart).s64().Inputs(31).Imm(0x0);
-            INST(32, Opcode::LoadPairPart).s64().Inputs(31).Imm(0x1);
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
+            INST(31U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x0U);
+            INST(33U, Opcode::LoadPairPart).s64().Inputs(31U).Imm(0x0U);
+            INST(32U, Opcode::LoadPairPart).s64().Inputs(31U).Imm(0x1U);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
 
-            INST(30, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
-            INST(21, Opcode::Add).s64().Inputs(32, 33);
-            INST(22, Opcode::Add).s64().Inputs(30, 21);
-            INST(3, Opcode::NullCheck).ref().Inputs(0, 2);
-            INST(23, Opcode::Return).s64().Inputs(22);
+            INST(30U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
+            INST(21U, Opcode::Add).s64().Inputs(32U, 33U);
+            INST(22U, Opcode::Add).s64().Inputs(30U, 21U);
+            INST(3U, Opcode::NullCheck).ref().Inputs(0U, 2U);
+            INST(23U, Opcode::Return).s64().Inputs(22U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -1532,19 +1532,19 @@ TEST_F(MemoryCoalescingTest, OverSaveStateWithCheckUser)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(11, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
+            INST(1U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(11U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
 
-            INST(3, Opcode::StoreArrayI).s64().Inputs(0, 2).Imm(0x0);
-            INST(12, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::StoreArrayI).s64().Inputs(0, 1).Imm(0x1);
-            INST(13, Opcode::NullCheck).ref().Inputs(0, 11);
-            INST(14, Opcode::NullCheck).ref().Inputs(0, 12);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::StoreArrayI).s64().Inputs(0U, 2U).Imm(0x0U);
+            INST(12U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::StoreArrayI).s64().Inputs(0U, 1U).Imm(0x1U);
+            INST(13U, Opcode::NullCheck).ref().Inputs(0U, 11U);
+            INST(14U, Opcode::NullCheck).ref().Inputs(0U, 12U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -1553,20 +1553,20 @@ TEST_F(MemoryCoalescingTest, OverSaveStateWithCheckUser)
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x0);
-            INST(7, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x0);
-            INST(8, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x1);
-            INST(11, Opcode::SaveState).Inputs(0).SrcVregs({0});
+            INST(6U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x0U);
+            INST(7U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x0U);
+            INST(8U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x1U);
+            INST(11U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
 
-            INST(3, Opcode::StoreArrayI).s64().Inputs(0, 8).Imm(0x0);
-            INST(12, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::StoreArrayI).s64().Inputs(0, 7).Imm(0x1);
-            INST(13, Opcode::NullCheck).ref().Inputs(0, 11);
-            INST(14, Opcode::NullCheck).ref().Inputs(0, 12);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::StoreArrayI).s64().Inputs(0U, 8U).Imm(0x0U);
+            INST(12U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::StoreArrayI).s64().Inputs(0U, 7U).Imm(0x1U);
+            INST(13U, Opcode::NullCheck).ref().Inputs(0U, 11U);
+            INST(14U, Opcode::NullCheck).ref().Inputs(0U, 12U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
@@ -1580,19 +1580,19 @@ TEST_F(MemoryCoalescingTest, OverSaveStateWithDeoptimizeUser)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x0);
-            INST(11, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadArrayI).s64().Inputs(0).Imm(0x1);
+            INST(1U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x0U);
+            INST(11U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadArrayI).s64().Inputs(0U).Imm(0x1U);
 
-            INST(3, Opcode::StoreArrayI).s64().Inputs(0, 2).Imm(0x0);
-            INST(12, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::StoreArrayI).s64().Inputs(0, 1).Imm(0x1);
-            INST(13, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::NEGATIVE_CHECK).Inputs(11);
-            INST(14, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::NEGATIVE_CHECK).Inputs(12);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::StoreArrayI).s64().Inputs(0U, 2U).Imm(0x0U);
+            INST(12U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::StoreArrayI).s64().Inputs(0U, 1U).Imm(0x1U);
+            INST(13U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::NEGATIVE_CHECK).Inputs(11U);
+            INST(14U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::NEGATIVE_CHECK).Inputs(12U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
@@ -1601,20 +1601,20 @@ TEST_F(MemoryCoalescingTest, OverSaveStateWithDeoptimizeUser)
     Graph *opt_graph = CreateEmptyGraph();
     GRAPH(opt_graph)
     {
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::LoadArrayPairI).s64().Inputs(0).Imm(0x0);
-            INST(7, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x0);
-            INST(8, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x1);
-            INST(11, Opcode::SaveState).Inputs(0).SrcVregs({0});
+            INST(6U, Opcode::LoadArrayPairI).s64().Inputs(0U).Imm(0x0U);
+            INST(7U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x0U);
+            INST(8U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x1U);
+            INST(11U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
 
-            INST(3, Opcode::StoreArrayI).s64().Inputs(0, 8).Imm(0x0);
-            INST(12, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::StoreArrayI).s64().Inputs(0, 7).Imm(0x1);
-            INST(13, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::NEGATIVE_CHECK).Inputs(11);
-            INST(14, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::NEGATIVE_CHECK).Inputs(12);
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(3U, Opcode::StoreArrayI).s64().Inputs(0U, 8U).Imm(0x0U);
+            INST(12U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::StoreArrayI).s64().Inputs(0U, 7U).Imm(0x1U);
+            INST(13U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::NEGATIVE_CHECK).Inputs(11U);
+            INST(14U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::NEGATIVE_CHECK).Inputs(12U);
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));

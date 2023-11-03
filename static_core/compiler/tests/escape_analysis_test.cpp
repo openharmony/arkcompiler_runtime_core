@@ -50,24 +50,24 @@ public:
     }
 };
 
-const RuntimeInterface::FieldPtr EscapeAnalysisTest::OBJ_FIELD = reinterpret_cast<void *>(0xDEADBEEF);
-const RuntimeInterface::FieldPtr EscapeAnalysisTest::INT64_FIELD = reinterpret_cast<void *>(0xDEADFEED);
+const RuntimeInterface::FieldPtr EscapeAnalysisTest::OBJ_FIELD = reinterpret_cast<void *>(0xDEADBEEFU);
+const RuntimeInterface::FieldPtr EscapeAnalysisTest::INT64_FIELD = reinterpret_cast<void *>(0xDEADFEEDU);
 const RuntimeInterface::FieldPtr EscapeAnalysisTest::UINT64_FIELD = reinterpret_cast<void *>(0xDEAD64BU);
-const RuntimeInterface::FieldPtr EscapeAnalysisTest::INT32_FIELD = reinterpret_cast<void *>(0xDEAD5320);
-const RuntimeInterface::FieldPtr EscapeAnalysisTest::UINT8_FIELD = reinterpret_cast<void *>(0xB00B00L);
-const RuntimeInterface::FieldPtr EscapeAnalysisTest::INT8_FIELD = reinterpret_cast<void *>(0xB00B01L);
+const RuntimeInterface::FieldPtr EscapeAnalysisTest::INT32_FIELD = reinterpret_cast<void *>(0xDEAD5320U);
+const RuntimeInterface::FieldPtr EscapeAnalysisTest::UINT8_FIELD = reinterpret_cast<void *>(0xB00B00UL);
+const RuntimeInterface::FieldPtr EscapeAnalysisTest::INT8_FIELD = reinterpret_cast<void *>(0xB00B01UL);
 
 TEST_F(EscapeAnalysisTest, NewEmptyUnusedObject)
 {
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState);
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(1U, Opcode::SaveState);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -78,11 +78,11 @@ TEST_F(EscapeAnalysisTest, NewEmptyUnusedObject)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState);
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(1U, Opcode::SaveState);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -94,23 +94,23 @@ TEST_F(EscapeAnalysisTest, NewUnusedObjectAndControlFlow)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 42).s32();
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).SrcVregs({0}).Inputs(0);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(5, Opcode::IfImm).SrcType(DataType::INT32).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4) {}
+        BASIC_BLOCK(3U, 4U) {}
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(6, Opcode::Phi).Inputs(0, 1).s32();
-            INST(7, Opcode::Return).Inputs(6).s32();
+            INST(6U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(7U, Opcode::Return).Inputs(6U).s32();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -121,22 +121,22 @@ TEST_F(EscapeAnalysisTest, NewUnusedObjectAndControlFlow)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 42).s32();
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).SrcVregs({0}).Inputs(0);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(5, Opcode::IfImm).SrcType(DataType::INT32).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4) {}
+        BASIC_BLOCK(3U, 4U) {}
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(6, Opcode::Phi).Inputs(0, 1).s32();
-            INST(7, Opcode::Return).Inputs(6).s32();
+            INST(6U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(7U, Opcode::Return).Inputs(6U).s32();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -148,27 +148,27 @@ TEST_F(EscapeAnalysisTest, NewUnusedObjectsFromDifferentBranches)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 42).s32();
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).SrcVregs({0}).Inputs(0);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);  // virt
-            INST(5, Opcode::IfImm).SrcType(DataType::INT32).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);  // virt
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(6, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 4);
-            INST(7, Opcode::NewObject).ref().Inputs(3, 6);  // virt
+            INST(6U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(7U, Opcode::NewObject).ref().Inputs(3U, 6U);  // virt
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(8, Opcode::Phi).Inputs(0, 1).s32();
-            INST(9, Opcode::Return).Inputs(8).s32();
+            INST(8U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(9U, Opcode::Return).Inputs(8U).s32();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -179,22 +179,22 @@ TEST_F(EscapeAnalysisTest, NewUnusedObjectsFromDifferentBranches)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 42).s32();
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).SrcVregs({0}).Inputs(0);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(5, Opcode::IfImm).SrcType(DataType::INT32).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4) {}
+        BASIC_BLOCK(3U, 4U) {}
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(8, Opcode::Phi).Inputs(0, 1).s32();
-            INST(9, Opcode::Return).Inputs(8).s32();
+            INST(8U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(9U, Opcode::Return).Inputs(8U).s32();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -207,45 +207,45 @@ TEST_F(EscapeAnalysisTest, MergeDifferentMaterializedStatesForSameObject)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
 
-        BASIC_BLOCK(2, 3, 7)
+        BASIC_BLOCK(2U, 3U, 7U)
         {
-            INST(2, Opcode::SaveState).SrcVregs({0}).Inputs(0);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);  // virt
-            INST(5, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_NE).Inputs(0);
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);  // virt
+            INST(5U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(6, Opcode::IfImm).SrcType(DataType::UINT64).Imm(1).CC(CC_EQ).Inputs(0);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(1U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(4, 6)
+        BASIC_BLOCK(4U, 6U)
         {
-            INST(7, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 4);
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(4, 7);
+            INST(7U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(4U, 7U);
         }
 
-        BASIC_BLOCK(5, 6)
+        BASIC_BLOCK(5U, 6U)
         {
-            INST(9, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 4);
-            INST(10, Opcode::CallStatic).v0id().InputsAutoType(4, 9);
+            INST(9U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(10U, Opcode::CallStatic).v0id().InputsAutoType(4U, 9U);
         }
 
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(11, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 4);
-            INST(12, Opcode::NullCheck).ref().Inputs(4, 11);
-            INST(13, Opcode::LoadObject).u64().Inputs(12);
+            INST(11U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(12U, Opcode::NullCheck).ref().Inputs(4U, 11U);
+            INST(13U, Opcode::LoadObject).u64().Inputs(12U);
         }
 
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(14, Opcode::Phi).Inputs(1, 13).u64();
-            INST(15, Opcode::Return).Inputs(14).u64();
+            INST(14U, Opcode::Phi).Inputs(1U, 13U).u64();
+            INST(15U, Opcode::Return).Inputs(14U).u64();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -256,46 +256,46 @@ TEST_F(EscapeAnalysisTest, MergeDifferentMaterializedStatesForSameObject)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
 
-        BASIC_BLOCK(2, 3, 7)
+        BASIC_BLOCK(2U, 3U, 7U)
         {
-            INST(2, Opcode::SaveState).SrcVregs({0}).Inputs(0);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(5, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_NE).Inputs(0);
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(16, Opcode::SaveState);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 16);
-            INST(6, Opcode::IfImm).SrcType(DataType::UINT64).Imm(1).CC(CC_EQ).Inputs(0);
+            INST(16U, Opcode::SaveState);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 16U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(1U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(4, 6)
+        BASIC_BLOCK(4U, 6U)
         {
-            INST(7, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 4);
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(4, 7);
+            INST(7U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(4U, 7U);
         }
 
-        BASIC_BLOCK(5, 6)
+        BASIC_BLOCK(5U, 6U)
         {
-            INST(9, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 4);
-            INST(10, Opcode::CallStatic).v0id().InputsAutoType(4, 9);
+            INST(9U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(10U, Opcode::CallStatic).v0id().InputsAutoType(4U, 9U);
         }
 
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(11, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 4);
-            INST(12, Opcode::NullCheck).ref().Inputs(4, 11);
-            INST(13, Opcode::LoadObject).u64().Inputs(12);
+            INST(11U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(12U, Opcode::NullCheck).ref().Inputs(4U, 11U);
+            INST(13U, Opcode::LoadObject).u64().Inputs(12U);
         }
 
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(14, Opcode::Phi).Inputs(1, 13).u64();
-            INST(15, Opcode::Return).Inputs(14).u64();
+            INST(14U, Opcode::Phi).Inputs(1U, 13U).u64();
+            INST(15U, Opcode::Return).Inputs(14U).u64();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -308,12 +308,12 @@ TEST_F(EscapeAnalysisTest, ObjectEscapement)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState);
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);
-            INST(4, Opcode::Return).ref().Inputs(3);
+            INST(1U, Opcode::SaveState);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(4U, Opcode::Return).ref().Inputs(3U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -326,29 +326,29 @@ TEST_F(EscapeAnalysisTest, ObjectPartialEscapement)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 42).s32();
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).SrcVregs({0}).Inputs(0);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(10, Opcode::NullCheck).ref().Inputs(4, 2);
-            INST(11, Opcode::StoreObject).s32().Inputs(10, 1).ObjField(INT32_FIELD);
-            INST(5, Opcode::IfImm).SrcType(DataType::INT32).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(10U, Opcode::NullCheck).ref().Inputs(4U, 2U);
+            INST(11U, Opcode::StoreObject).s32().Inputs(10U, 1U).ObjField(INT32_FIELD);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(8, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 4);
-            INST(9, Opcode::CallStatic).v0id().InputsAutoType(4, 8);
+            INST(8U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(9U, Opcode::CallStatic).v0id().InputsAutoType(4U, 8U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(6, Opcode::Phi).Inputs(0, 1).s32();
-            INST(7, Opcode::Return).Inputs(6).s32();
+            INST(6U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(7U, Opcode::Return).Inputs(6U).s32();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -359,29 +359,29 @@ TEST_F(EscapeAnalysisTest, ObjectPartialEscapement)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 42).s32();
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).SrcVregs({0}).Inputs(0);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(5, Opcode::IfImm).SrcType(DataType::INT32).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(10, Opcode::SaveState).SrcVregs({0}).Inputs(0);
-            INST(11, Opcode::NewObject).ref().Inputs(3, 10);
-            INST(12, Opcode::StoreObject).s32().Inputs(11, 1).ObjField(INT32_FIELD);
-            INST(8, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 11);
-            INST(9, Opcode::CallStatic).v0id().InputsAutoType(11, 8);
+            INST(10U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(11U, Opcode::NewObject).ref().Inputs(3U, 10U);
+            INST(12U, Opcode::StoreObject).s32().Inputs(11U, 1U).ObjField(INT32_FIELD);
+            INST(8U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 11U);
+            INST(9U, Opcode::CallStatic).v0id().InputsAutoType(11U, 8U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(6, Opcode::Phi).Inputs(0, 1).s32();
-            INST(7, Opcode::Return).Inputs(6).s32();
+            INST(6U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(7U, Opcode::Return).Inputs(6U).s32();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -393,32 +393,32 @@ TEST_F(EscapeAnalysisTest, ObjectEscapementThroughPhi)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 42).s32();
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::IfImm).SrcType(DataType::INT32).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(4, Opcode::SaveState).SrcVregs({0}).Inputs(0);
-            INST(5, Opcode::LoadAndInitClass).ref().Inputs(4);
-            INST(6, Opcode::NewObject).ref().Inputs(5, 4);
+            INST(4U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U);
+            INST(6U, Opcode::NewObject).ref().Inputs(5U, 4U);
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::SaveState).SrcVregs({0}).Inputs(0);
-            INST(8, Opcode::LoadAndInitClass).ref().Inputs(7);
-            INST(9, Opcode::NewObject).ref().Inputs(8, 7);
+            INST(7U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(8U, Opcode::LoadAndInitClass).ref().Inputs(7U);
+            INST(9U, Opcode::NewObject).ref().Inputs(8U, 7U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(10, Opcode::Phi).Inputs(6, 9).ref();
-            INST(11, Opcode::Return).Inputs(10).ref();
+            INST(10U, Opcode::Phi).Inputs(6U, 9U).ref();
+            INST(11U, Opcode::Return).Inputs(10U).ref();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -431,18 +431,18 @@ TEST_F(EscapeAnalysisTest, ReturnField)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);
-            INST(4, Opcode::SaveState).Inputs(0, 3).SrcVregs({0, 1});
-            INST(5, Opcode::NullCheck).ref().Inputs(3, 4);
-            INST(6, Opcode::StoreObject).u64().Inputs(5, 0).ObjField(UINT64_FIELD);
-            INST(7, Opcode::LoadObject).u64().Inputs(5).ObjField(UINT64_FIELD);
-            INST(8, Opcode::Return).u64().Inputs(7);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
+            INST(5U, Opcode::NullCheck).ref().Inputs(3U, 4U);
+            INST(6U, Opcode::StoreObject).u64().Inputs(5U, 0U).ObjField(UINT64_FIELD);
+            INST(7U, Opcode::LoadObject).u64().Inputs(5U).ObjField(UINT64_FIELD);
+            INST(8U, Opcode::Return).u64().Inputs(7U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -453,13 +453,13 @@ TEST_F(EscapeAnalysisTest, ReturnField)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(8, Opcode::Return).u64().Inputs(0);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(8U, Opcode::Return).u64().Inputs(0U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -472,23 +472,23 @@ TEST_F(EscapeAnalysisTest, EscapeThroughAlias)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);  // should escape
-            INST(4, Opcode::SaveState).Inputs(0, 3).SrcVregs({0, 1});
-            INST(6, Opcode::NewObject).ref().Inputs(2, 4);  // should escape
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);  // should escape
+            INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::NewObject).ref().Inputs(2U, 4U);  // should escape
 
-            INST(7, Opcode::SaveState).Inputs(0, 3, 6).SrcVregs({0, 1, 2});
+            INST(7U, Opcode::SaveState).Inputs(0U, 3U, 6U).SrcVregs({0U, 1U, 2U});
 
-            INST(8, Opcode::NullCheck).ref().Inputs(3, 7);  // should escape
-            INST(9, Opcode::NullCheck).ref().Inputs(6, 7);  // should escape
+            INST(8U, Opcode::NullCheck).ref().Inputs(3U, 7U);  // should escape
+            INST(9U, Opcode::NullCheck).ref().Inputs(6U, 7U);  // should escape
 
-            INST(10, Opcode::CallStatic).v0id().InputsAutoType(3, 9, 7);
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(10U, Opcode::CallStatic).v0id().InputsAutoType(3U, 9U, 7U);
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -501,22 +501,22 @@ TEST_F(EscapeAnalysisTest, VirtualObjectsChain)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);  // should not escape
-            INST(4, Opcode::SaveState).Inputs(0, 3).SrcVregs({0, 1});
-            INST(6, Opcode::NewObject).ref().Inputs(2, 4);  // should not escape
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);  // should not escape
+            INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::NewObject).ref().Inputs(2U, 4U);  // should not escape
 
-            INST(7, Opcode::SaveState).Inputs(0, 3, 6).SrcVregs({0, 1, 2});
+            INST(7U, Opcode::SaveState).Inputs(0U, 3U, 6U).SrcVregs({0U, 1U, 2U});
 
-            INST(8, Opcode::NullCheck).ref().Inputs(3, 7);
+            INST(8U, Opcode::NullCheck).ref().Inputs(3U, 7U);
 
-            INST(9, Opcode::StoreObject).ref().Inputs(8, 6).ObjField(OBJ_FIELD);
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(9U, Opcode::StoreObject).ref().Inputs(8U, 6U).ObjField(OBJ_FIELD);
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -527,13 +527,13 @@ TEST_F(EscapeAnalysisTest, VirtualObjectsChain)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -545,27 +545,27 @@ TEST_F(EscapeAnalysisTest, VirtualObjectsChainDereference)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);  // should not escape
-            INST(4, Opcode::SaveState).Inputs(0, 3).SrcVregs({0, 1});
-            INST(6, Opcode::NewObject).ref().Inputs(2, 4);  // should not escape
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);  // should not escape
+            INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::NewObject).ref().Inputs(2U, 4U);  // should not escape
 
-            INST(7, Opcode::SaveState).Inputs(0, 3, 6).SrcVregs({0, 1, 2});
+            INST(7U, Opcode::SaveState).Inputs(0U, 3U, 6U).SrcVregs({0U, 1U, 2U});
 
-            INST(8, Opcode::NullCheck).ref().Inputs(3, 7);
+            INST(8U, Opcode::NullCheck).ref().Inputs(3U, 7U);
 
-            INST(9, Opcode::StoreObject).ref().Inputs(8, 6).ObjField(OBJ_FIELD);
-            INST(10, Opcode::LoadObject).ref().Inputs(8).ObjField(OBJ_FIELD);
+            INST(9U, Opcode::StoreObject).ref().Inputs(8U, 6U).ObjField(OBJ_FIELD);
+            INST(10U, Opcode::LoadObject).ref().Inputs(8U).ObjField(OBJ_FIELD);
 
-            INST(11, Opcode::SaveState).Inputs(0, 3, 10).SrcVregs({0, 1, 2});
-            INST(12, Opcode::NullCheck).ref().Inputs(10, 11);
-            INST(13, Opcode::LoadObject).u64().Inputs(12).ObjField(UINT64_FIELD);
-            INST(14, Opcode::Return).u64().Inputs(13);
+            INST(11U, Opcode::SaveState).Inputs(0U, 3U, 10U).SrcVregs({0U, 1U, 2U});
+            INST(12U, Opcode::NullCheck).ref().Inputs(10U, 11U);
+            INST(13U, Opcode::LoadObject).u64().Inputs(12U).ObjField(UINT64_FIELD);
+            INST(14U, Opcode::Return).u64().Inputs(13U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -576,14 +576,14 @@ TEST_F(EscapeAnalysisTest, VirtualObjectsChainDereference)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(15, 0);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(15U, 0U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(14, Opcode::Return).u64().Inputs(15);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(14U, Opcode::Return).u64().Inputs(15U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -595,23 +595,23 @@ TEST_F(EscapeAnalysisTest, VirtualLoadEscape)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);  // should not escape
-            INST(4, Opcode::SaveState).Inputs(0, 3).SrcVregs({0, 1});
-            INST(6, Opcode::NewObject).ref().Inputs(2, 4);  // escape through return after load
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);  // should not escape
+            INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::NewObject).ref().Inputs(2U, 4U);  // escape through return after load
 
-            INST(7, Opcode::SaveState).Inputs(0, 3, 6).SrcVregs({0, 1, 2});
+            INST(7U, Opcode::SaveState).Inputs(0U, 3U, 6U).SrcVregs({0U, 1U, 2U});
 
-            INST(8, Opcode::NullCheck).ref().Inputs(3, 7);
+            INST(8U, Opcode::NullCheck).ref().Inputs(3U, 7U);
 
-            INST(9, Opcode::StoreObject).ref().Inputs(8, 6).ObjField(OBJ_FIELD);
-            INST(10, Opcode::LoadObject).ref().Inputs(8).ObjField(OBJ_FIELD);
-            INST(14, Opcode::Return).ref().Inputs(10);
+            INST(9U, Opcode::StoreObject).ref().Inputs(8U, 6U).ObjField(OBJ_FIELD);
+            INST(10U, Opcode::LoadObject).ref().Inputs(8U).ObjField(OBJ_FIELD);
+            INST(14U, Opcode::Return).ref().Inputs(10U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -622,15 +622,15 @@ TEST_F(EscapeAnalysisTest, VirtualLoadEscape)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(4, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::NewObject).ref().Inputs(2, 4);
-            INST(14, Opcode::Return).ref().Inputs(6);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(4U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::NewObject).ref().Inputs(2U, 4U);
+            INST(14U, Opcode::Return).ref().Inputs(6U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -642,39 +642,39 @@ TEST_F(EscapeAnalysisTest, EscapeThroughAliasOnCfgMerge)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        PARAMETER(9, 1).ref();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(9U, 1U).ref();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(1, Opcode::SaveState).Inputs(0, 9).SrcVregs({0, 1});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);
-            INST(4, Opcode::SaveState).Inputs(0, 9, 3).SrcVregs({0, 1, 2});
-            INST(6, Opcode::NewObject).ref().Inputs(2, 4);
+            INST(1U, Opcode::SaveState).Inputs(0U, 9U).SrcVregs({0U, 1U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(4U, Opcode::SaveState).Inputs(0U, 9U, 3U).SrcVregs({0U, 1U, 2U});
+            INST(6U, Opcode::NewObject).ref().Inputs(2U, 4U);
 
-            INST(7, Opcode::SaveState).Inputs(0, 9, 3, 6).SrcVregs({0, 1, 2, 3});
-            INST(8, Opcode::NullCheck).ref().Inputs(3, 7);
-            INST(100, Opcode::IfImm).SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0).Imm(0);
+            INST(7U, Opcode::SaveState).Inputs(0U, 9U, 3U, 6U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(8U, Opcode::NullCheck).ref().Inputs(3U, 7U);
+            INST(100U, Opcode::IfImm).SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0U).Imm(0U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(10, Opcode::StoreObject).ref().Inputs(8, 9).ObjField(OBJ_FIELD);
+            INST(10U, Opcode::StoreObject).ref().Inputs(8U, 9U).ObjField(OBJ_FIELD);
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(11, Opcode::SaveState).Inputs(0, 3, 6).SrcVregs({0, 1, 2});
-            INST(12, Opcode::NullCheck).ref().Inputs(6, 11);
-            INST(13, Opcode::StoreObject).ref().Inputs(8, 12).ObjField(OBJ_FIELD);
+            INST(11U, Opcode::SaveState).Inputs(0U, 3U, 6U).SrcVregs({0U, 1U, 2U});
+            INST(12U, Opcode::NullCheck).ref().Inputs(6U, 11U);
+            INST(13U, Opcode::StoreObject).ref().Inputs(8U, 12U).ObjField(OBJ_FIELD);
         }
 
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(16, Opcode::SaveState).Inputs(3).SrcVregs({1});
-            INST(14, Opcode::NullCheck).ref().Inputs(3, 16);
-            INST(15, Opcode::ReturnVoid).v0id();
+            INST(16U, Opcode::SaveState).Inputs(3U).SrcVregs({1U});
+            INST(14U, Opcode::NullCheck).ref().Inputs(3U, 16U);
+            INST(15U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -685,25 +685,25 @@ TEST_F(EscapeAnalysisTest, EscapeThroughAliasOnCfgMerge)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        PARAMETER(9, 1).ref();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(9U, 1U).ref();
 
-        BASIC_BLOCK(2, 5, 4)
+        BASIC_BLOCK(2U, 5U, 4U)
         {
-            INST(1, Opcode::SaveState).Inputs(0, 9).SrcVregs({0, 1});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(100, Opcode::IfImm).SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0).Imm(0);
+            INST(1U, Opcode::SaveState).Inputs(0U, 9U).SrcVregs({0U, 1U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(100U, Opcode::IfImm).SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0U).Imm(0U);
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(13, Opcode::SaveState);
-            INST(14, Opcode::NewObject).ref().Inputs(2, 13);
+            INST(13U, Opcode::SaveState);
+            INST(14U, Opcode::NewObject).ref().Inputs(2U, 13U);
         }
 
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(15, Opcode::ReturnVoid).v0id();
+            INST(15U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -715,32 +715,32 @@ TEST_F(EscapeAnalysisTest, EscapeInsideLoop)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
         }
 
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(5, Opcode::Phi).u64().Inputs(0, 7);
-            INST(6, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_NE).Inputs(5);
+            INST(5U, Opcode::Phi).u64().Inputs(0U, 7U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(5U);
         }
 
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(7, Opcode::Sub).u64().Inputs(5, 1);
-            INST(8, Opcode::SaveState).Inputs(7, 4).SrcVregs({7, 4});
-            INST(9, Opcode::CallStatic).v0id().InputsAutoType(4, 7, 8);
+            INST(7U, Opcode::Sub).u64().Inputs(5U, 1U);
+            INST(8U, Opcode::SaveState).Inputs(7U, 4U).SrcVregs({7U, 4U});
+            INST(9U, Opcode::CallStatic).v0id().InputsAutoType(4U, 7U, 8U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(10, Opcode::ReturnVoid).v0id();
+            INST(10U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -753,40 +753,40 @@ TEST_F(EscapeAnalysisTest, PartialEscapeInsideLoop)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(2, 3, 6)
+        BASIC_BLOCK(2U, 3U, 6U)
         {
-            INST(2, Opcode::Phi).u64().Inputs(0, 11);
-            INST(3, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_NE).Inputs(2);
+            INST(2U, Opcode::Phi).u64().Inputs(0U, 11U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(2U);
         }
 
-        BASIC_BLOCK(3, 4, 7)
+        BASIC_BLOCK(3U, 4U, 7U)
         {
-            INST(4, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(5, Opcode::LoadAndInitClass).ref().Inputs(4);
-            INST(6, Opcode::NewObject).ref().Inputs(5, 4);
-            INST(7, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_NE).Inputs(2);
+            INST(4U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U);
+            INST(6U, Opcode::NewObject).ref().Inputs(5U, 4U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(2U);
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(8, Opcode::Sub).u64().Inputs(2, 1);
-            INST(9, Opcode::SaveState).Inputs(6).SrcVregs({1});
-            INST(10, Opcode::CallStatic).v0id().InputsAutoType(6, 9);
+            INST(8U, Opcode::Sub).u64().Inputs(2U, 1U);
+            INST(9U, Opcode::SaveState).Inputs(6U).SrcVregs({1U});
+            INST(10U, Opcode::CallStatic).v0id().InputsAutoType(6U, 9U);
         }
 
-        BASIC_BLOCK(7, 5) {}
+        BASIC_BLOCK(7U, 5U) {}
 
-        BASIC_BLOCK(5, 2)
+        BASIC_BLOCK(5U, 2U)
         {
-            INST(11, Opcode::Phi).u64().Inputs(8, 0);
+            INST(11U, Opcode::Phi).u64().Inputs(8U, 0U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(12, Opcode::ReturnVoid).v0id();
+            INST(12U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -799,36 +799,36 @@ TEST_F(EscapeAnalysisTest, PartialEscapeInsideLoop)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(2, 3) {}
+        BASIC_BLOCK(2U, 3U) {}
 
-        BASIC_BLOCK(3, 4, 6)
+        BASIC_BLOCK(3U, 4U, 6U)
         {
-            INST(2, Opcode::Phi).u64().Inputs(0, 0, 8);
-            INST(3, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_NE).Inputs(2);
+            INST(2U, Opcode::Phi).u64().Inputs(0U, 0U, 8U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(2U);
         }
 
-        BASIC_BLOCK(4, 5, 3)
+        BASIC_BLOCK(4U, 5U, 3U)
         {
-            INST(4, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(5, Opcode::LoadAndInitClass).ref().Inputs(4);
-            INST(7, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_NE).Inputs(2);
+            INST(4U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(2U);
         }
 
-        BASIC_BLOCK(5, 3)
+        BASIC_BLOCK(5U, 3U)
         {
-            INST(8, Opcode::Sub).u64().Inputs(2, 1);
-            INST(13, Opcode::SaveState);
-            INST(14, Opcode::NewObject).ref().Inputs(5, 13);
-            INST(9, Opcode::SaveState).Inputs(14).SrcVregs({1});
-            INST(10, Opcode::CallStatic).v0id().InputsAutoType(14, 9);
+            INST(8U, Opcode::Sub).u64().Inputs(2U, 1U);
+            INST(13U, Opcode::SaveState);
+            INST(14U, Opcode::NewObject).ref().Inputs(5U, 13U);
+            INST(9U, Opcode::SaveState).Inputs(14U).SrcVregs({1U});
+            INST(10U, Opcode::CallStatic).v0id().InputsAutoType(14U, 9U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(12, Opcode::ReturnVoid).v0id();
+            INST(12U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -840,34 +840,34 @@ TEST_F(EscapeAnalysisTest, MergeFieldInsideLoop)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        CONSTANT(1, 1);
-        CONSTANT(2, 100);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 100U);
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(3, Opcode::SaveState);
-            INST(4, Opcode::LoadAndInitClass).ref().Inputs(3);
-            INST(5, Opcode::NewObject).ref().Inputs(4, 3);
+            INST(3U, Opcode::SaveState);
+            INST(4U, Opcode::LoadAndInitClass).ref().Inputs(3U);
+            INST(5U, Opcode::NewObject).ref().Inputs(4U, 3U);
         }
 
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(6, Opcode::Phi).s32().Inputs(2, 11);
-            INST(7, Opcode::IfImm).SrcType(DataType::INT32).Imm(0).CC(CC_GE).Inputs(6);
+            INST(6U, Opcode::Phi).s32().Inputs(2U, 11U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_GE).Inputs(6U);
         }
 
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(8, Opcode::SaveState).Inputs(5).SrcVregs({0});
-            INST(9, Opcode::NullCheck).ref().Inputs(5, 8);
-            INST(10, Opcode::StoreObject).s32().Inputs(9, 6).ObjField(INT32_FIELD);
-            INST(11, Opcode::Sub).s32().Inputs(6, 1);
+            INST(8U, Opcode::SaveState).Inputs(5U).SrcVregs({0U});
+            INST(9U, Opcode::NullCheck).ref().Inputs(5U, 8U);
+            INST(10U, Opcode::StoreObject).s32().Inputs(9U, 6U).ObjField(INT32_FIELD);
+            INST(11U, Opcode::Sub).s32().Inputs(6U, 1U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(12, Opcode::LoadObject).s32().Inputs(5).ObjField(INT32_FIELD);
-            INST(13, Opcode::Return).s32().Inputs(12);
+            INST(12U, Opcode::LoadObject).s32().Inputs(5U).ObjField(INT32_FIELD);
+            INST(13U, Opcode::Return).s32().Inputs(12U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -877,31 +877,31 @@ TEST_F(EscapeAnalysisTest, MergeFieldInsideLoop)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        CONSTANT(1, 1);
-        CONSTANT(2, 100);
-        CONSTANT(5, 0);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 100U);
+        CONSTANT(5U, 0U);
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(3, Opcode::SaveState);
-            INST(4, Opcode::LoadAndInitClass).ref().Inputs(3);
+            INST(3U, Opcode::SaveState);
+            INST(4U, Opcode::LoadAndInitClass).ref().Inputs(3U);
         }
 
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(6, Opcode::Phi).s32().Inputs(2, 11);
-            INST(8, Opcode::Phi).s32().Inputs(5, 6);
-            INST(7, Opcode::IfImm).SrcType(DataType::INT32).Imm(0).CC(CC_GE).Inputs(6);
+            INST(6U, Opcode::Phi).s32().Inputs(2U, 11U);
+            INST(8U, Opcode::Phi).s32().Inputs(5U, 6U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_GE).Inputs(6U);
         }
 
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(11, Opcode::Sub).s32().Inputs(6, 1);
+            INST(11U, Opcode::Sub).s32().Inputs(6U, 1U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(12, Opcode::Return).s32().Inputs(8);
+            INST(12U, Opcode::Return).s32().Inputs(8U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -913,34 +913,34 @@ TEST_F(EscapeAnalysisTest, MergeObjectsInLoopHeader)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        CONSTANT(1, 1);
-        CONSTANT(2, 100);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 100U);
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(3, Opcode::SaveState);
-            INST(4, Opcode::LoadAndInitClass).ref().Inputs(3);
-            INST(5, Opcode::NewObject).ref().Inputs(4, 3);
+            INST(3U, Opcode::SaveState);
+            INST(4U, Opcode::LoadAndInitClass).ref().Inputs(3U);
+            INST(5U, Opcode::NewObject).ref().Inputs(4U, 3U);
         }
 
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(6, Opcode::Phi).ref().Inputs(5, 10);
-            INST(12, Opcode::Phi).s32().Inputs(2, 11);
-            INST(7, Opcode::IfImm).SrcType(DataType::INT32).Imm(0).CC(CC_GE).Inputs(12);
+            INST(6U, Opcode::Phi).ref().Inputs(5U, 10U);
+            INST(12U, Opcode::Phi).s32().Inputs(2U, 11U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_GE).Inputs(12U);
         }
 
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(8, Opcode::SaveState).Inputs(5, 6).SrcVregs({0, 1});
-            INST(9, Opcode::LoadAndInitClass).ref().Inputs(8);
-            INST(10, Opcode::NewObject).ref().Inputs(9, 8);
-            INST(11, Opcode::Sub).s32().Inputs(12, 1);
+            INST(8U, Opcode::SaveState).Inputs(5U, 6U).SrcVregs({0U, 1U});
+            INST(9U, Opcode::LoadAndInitClass).ref().Inputs(8U);
+            INST(10U, Opcode::NewObject).ref().Inputs(9U, 8U);
+            INST(11U, Opcode::Sub).s32().Inputs(12U, 1U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(13, Opcode::ReturnVoid).v0id();
+            INST(13U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -953,17 +953,17 @@ TEST_F(EscapeAnalysisTest, LoadDefaultValue)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);
-            INST(4, Opcode::SaveState).Inputs(0, 3).SrcVregs({0, 1});
-            INST(5, Opcode::NullCheck).ref().Inputs(3, 4);
-            INST(7, Opcode::LoadObject).u64().Inputs(5).ObjField(UINT64_FIELD);
-            INST(8, Opcode::Return).u64().Inputs(7);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
+            INST(5U, Opcode::NullCheck).ref().Inputs(3U, 4U);
+            INST(7U, Opcode::LoadObject).u64().Inputs(5U).ObjField(UINT64_FIELD);
+            INST(8U, Opcode::Return).u64().Inputs(7U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -974,14 +974,14 @@ TEST_F(EscapeAnalysisTest, LoadDefaultValue)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(9, 0);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(9U, 0U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(8, Opcode::Return).u64().Inputs(9);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(8U, Opcode::Return).u64().Inputs(9U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -994,27 +994,27 @@ TEST_F(EscapeAnalysisTest, VirtualLoadAfterMaterialization)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);  // escape through return
-            INST(6, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);  // escape through return
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(4, Opcode::SaveState).Inputs(0, 3).SrcVregs({0, 1});
-            INST(5, Opcode::NullCheck).ref().Inputs(3, 4);
-            INST(7, Opcode::LoadObject).u64().Inputs(5).ObjField(UINT64_FIELD);
+            INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
+            INST(5U, Opcode::NullCheck).ref().Inputs(3U, 4U);
+            INST(7U, Opcode::LoadObject).u64().Inputs(5U).ObjField(UINT64_FIELD);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(8, Opcode::Phi).u64().Inputs(0, 7);
-            INST(10, Opcode::SaveState).Inputs(3).SrcVregs({0});
-            INST(11, Opcode::CallStatic).v0id().InputsAutoType(8, 10);
-            INST(9, Opcode::Return).ref().Inputs(3);
+            INST(8U, Opcode::Phi).u64().Inputs(0U, 7U);
+            INST(10U, Opcode::SaveState).Inputs(3U).SrcVregs({0U});
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(8U, 10U);
+            INST(9U, Opcode::Return).ref().Inputs(3U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1026,24 +1026,24 @@ TEST_F(EscapeAnalysisTest, VirtualLoadAfterMaterialization)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(12, 0);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(12U, 0U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(6, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
-        BASIC_BLOCK(3, 4) {}
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(8, Opcode::Phi).u64().Inputs(0, 12);
-            INST(10, Opcode::SaveState);
-            INST(11, Opcode::CallStatic).v0id().InputsAutoType(8, 10);
-            INST(13, Opcode::SaveState);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 13);
-            INST(9, Opcode::Return).ref().Inputs(3);
+            INST(8U, Opcode::Phi).u64().Inputs(0U, 12U);
+            INST(10U, Opcode::SaveState);
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(8U, 10U);
+            INST(13U, Opcode::SaveState);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 13U);
+            INST(9U, Opcode::Return).ref().Inputs(3U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1056,35 +1056,35 @@ TEST_F(EscapeAnalysisTest, MergeVirtualFields)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
-        CONSTANT(2, 2);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::LoadAndInitClass).ref().Inputs(3);
-            INST(5, Opcode::NewObject).ref().Inputs(4, 3);
-            INST(6, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(3U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::LoadAndInitClass).ref().Inputs(3U);
+            INST(5U, Opcode::NewObject).ref().Inputs(4U, 3U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(7, Opcode::SaveState).Inputs(0, 5).SrcVregs({0, 1});
-            INST(8, Opcode::NullCheck).ref().Inputs(5, 7);
-            INST(9, Opcode::StoreObject).i64().Inputs(8, 1).ObjField(INT64_FIELD);
+            INST(7U, Opcode::SaveState).Inputs(0U, 5U).SrcVregs({0U, 1U});
+            INST(8U, Opcode::NullCheck).ref().Inputs(5U, 7U);
+            INST(9U, Opcode::StoreObject).i64().Inputs(8U, 1U).ObjField(INT64_FIELD);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(10, Opcode::SaveState).Inputs(0, 5).SrcVregs({0, 1});
-            INST(11, Opcode::NullCheck).ref().Inputs(5, 10);
-            INST(12, Opcode::StoreObject).i64().Inputs(11, 2).ObjField(INT64_FIELD);
+            INST(10U, Opcode::SaveState).Inputs(0U, 5U).SrcVregs({0U, 1U});
+            INST(11U, Opcode::NullCheck).ref().Inputs(5U, 10U);
+            INST(12U, Opcode::StoreObject).i64().Inputs(11U, 2U).ObjField(INT64_FIELD);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(13, Opcode::SaveState).Inputs(0, 5).SrcVregs({0, 1});
-            INST(14, Opcode::NullCheck).ref().Inputs(5, 13);
-            INST(15, Opcode::LoadObject).i64().Inputs(14).ObjField(INT64_FIELD);
-            INST(16, Opcode::Return).i64().Inputs(15);
+            INST(13U, Opcode::SaveState).Inputs(0U, 5U).SrcVregs({0U, 1U});
+            INST(14U, Opcode::NullCheck).ref().Inputs(5U, 13U);
+            INST(15U, Opcode::LoadObject).i64().Inputs(14U).ObjField(INT64_FIELD);
+            INST(16U, Opcode::Return).i64().Inputs(15U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1095,21 +1095,21 @@ TEST_F(EscapeAnalysisTest, MergeVirtualFields)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
-        CONSTANT(2, 2);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
 
-        BASIC_BLOCK(2, 5, 4)
+        BASIC_BLOCK(2U, 5U, 4U)
         {
-            INST(3, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::LoadAndInitClass).ref().Inputs(3);
-            INST(6, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(3U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::LoadAndInitClass).ref().Inputs(3U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
-        BASIC_BLOCK(4, 5) {}
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(4U, 5U) {}
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(17, Opcode::Phi).i64().Inputs(1, 2);
-            INST(16, Opcode::Return).i64().Inputs(17);
+            INST(17U, Opcode::Phi).i64().Inputs(1U, 2U);
+            INST(16U, Opcode::Return).i64().Inputs(17U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1121,35 +1121,35 @@ TEST_F(EscapeAnalysisTest, MergeVirtualObjFields)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::LoadAndInitClass).ref().Inputs(3);
-            INST(5, Opcode::NewObject).ref().Inputs(4, 3);
-            INST(17, Opcode::NewObject).ref().Inputs(4, 3);
-            INST(18, Opcode::NewObject).ref().Inputs(4, 3);
-            INST(6, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(3U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::LoadAndInitClass).ref().Inputs(3U);
+            INST(5U, Opcode::NewObject).ref().Inputs(4U, 3U);
+            INST(17U, Opcode::NewObject).ref().Inputs(4U, 3U);
+            INST(18U, Opcode::NewObject).ref().Inputs(4U, 3U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(7, Opcode::SaveState).Inputs(0, 5, 17).SrcVregs({0, 1, 2});
-            INST(8, Opcode::NullCheck).ref().Inputs(5, 7);
-            INST(9, Opcode::StoreObject).ref().Inputs(8, 17).ObjField(OBJ_FIELD);
+            INST(7U, Opcode::SaveState).Inputs(0U, 5U, 17U).SrcVregs({0U, 1U, 2U});
+            INST(8U, Opcode::NullCheck).ref().Inputs(5U, 7U);
+            INST(9U, Opcode::StoreObject).ref().Inputs(8U, 17U).ObjField(OBJ_FIELD);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(10, Opcode::SaveState).Inputs(0, 5, 18).SrcVregs({0, 1, 3});
-            INST(11, Opcode::NullCheck).ref().Inputs(5, 10);
-            INST(12, Opcode::StoreObject).ref().Inputs(11, 18).ObjField(OBJ_FIELD);
+            INST(10U, Opcode::SaveState).Inputs(0U, 5U, 18U).SrcVregs({0U, 1U, 3U});
+            INST(11U, Opcode::NullCheck).ref().Inputs(5U, 10U);
+            INST(12U, Opcode::StoreObject).ref().Inputs(11U, 18U).ObjField(OBJ_FIELD);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(13, Opcode::SaveState).Inputs(0, 5).SrcVregs({0, 1});
-            INST(14, Opcode::NullCheck).ref().Inputs(5, 13);
-            INST(15, Opcode::LoadObject).ref().Inputs(14).ObjField(OBJ_FIELD);
-            INST(16, Opcode::Return).ref().Inputs(15);
+            INST(13U, Opcode::SaveState).Inputs(0U, 5U).SrcVregs({0U, 1U});
+            INST(14U, Opcode::NullCheck).ref().Inputs(5U, 13U);
+            INST(15U, Opcode::LoadObject).ref().Inputs(14U).ObjField(OBJ_FIELD);
+            INST(16U, Opcode::Return).ref().Inputs(15U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1160,28 +1160,28 @@ TEST_F(EscapeAnalysisTest, MergeVirtualObjFields)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::LoadAndInitClass).ref().Inputs(3);
-            INST(6, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(3U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::LoadAndInitClass).ref().Inputs(3U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(21, Opcode::SaveState);
-            INST(17, Opcode::NewObject).ref().Inputs(4, 21);
+            INST(21U, Opcode::SaveState);
+            INST(17U, Opcode::NewObject).ref().Inputs(4U, 21U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(20, Opcode::SaveState);
-            INST(18, Opcode::NewObject).ref().Inputs(4, 20);
+            INST(20U, Opcode::SaveState);
+            INST(18U, Opcode::NewObject).ref().Inputs(4U, 20U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(19, Opcode::Phi).ref().Inputs(17, 18);
-            INST(16, Opcode::Return).ref().Inputs(19);
+            INST(19U, Opcode::Phi).ref().Inputs(17U, 18U);
+            INST(16U, Opcode::Return).ref().Inputs(19U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1194,36 +1194,36 @@ TEST_F(EscapeAnalysisTest, MultipleIterationsOverCfg)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::NullPtr).ref();
-            INST(3, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::LoadAndInitClass).ref().Inputs(3);
-            INST(5, Opcode::NewObject).ref().Inputs(4, 3);
-            INST(6, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::NullPtr).ref();
+            INST(3U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::LoadAndInitClass).ref().Inputs(3U);
+            INST(5U, Opcode::NewObject).ref().Inputs(4U, 3U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
-        BASIC_BLOCK(3, 5, 6)
+        BASIC_BLOCK(3U, 5U, 6U)
         {
-            INST(7, Opcode::SaveState).Inputs(0, 5).SrcVregs({0, 1});
-            INST(8, Opcode::NullCheck).ref().Inputs(5, 7);
-            INST(9, Opcode::StoreObject).u64().Inputs(8, 1).ObjField(UINT64_FIELD);
-            INST(11, Opcode::IfImm).SrcType(DataType::UINT64).Imm(1).CC(CC_EQ).Inputs(0);
+            INST(7U, Opcode::SaveState).Inputs(0U, 5U).SrcVregs({0U, 1U});
+            INST(8U, Opcode::NullCheck).ref().Inputs(5U, 7U);
+            INST(9U, Opcode::StoreObject).u64().Inputs(8U, 1U).ObjField(UINT64_FIELD);
+            INST(11U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(1U).CC(CC_EQ).Inputs(0U);
         }
-        BASIC_BLOCK(4, 5) {}
+        BASIC_BLOCK(4U, 5U) {}
 
-        BASIC_BLOCK(5, 7) {}
+        BASIC_BLOCK(5U, 7U) {}
 
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(16, Opcode::Return).ref().Inputs(5);
+            INST(16U, Opcode::Return).ref().Inputs(5U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(17, Opcode::Return).ref().Inputs(2);
+            INST(17U, Opcode::Return).ref().Inputs(2U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1235,35 +1235,35 @@ TEST_F(EscapeAnalysisTest, MultipleIterationsOverCfg)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
-        CONSTANT(22, 0);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+        CONSTANT(22U, 0U);
 
-        BASIC_BLOCK(2, 3, 7)
+        BASIC_BLOCK(2U, 3U, 7U)
         {
-            INST(2, Opcode::NullPtr).ref();
-            INST(3, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(4, Opcode::LoadAndInitClass).ref().Inputs(3);
-            INST(6, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::NullPtr).ref();
+            INST(3U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(4U, Opcode::LoadAndInitClass).ref().Inputs(3U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 7, 6)
+        BASIC_BLOCK(3U, 7U, 6U)
         {
-            INST(11, Opcode::IfImm).SrcType(DataType::UINT64).Imm(1).CC(CC_EQ).Inputs(0);
+            INST(11U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(1U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(18, Opcode::Phi).u64().Inputs(22, 1);
-            INST(19, Opcode::SaveState);
-            INST(5, Opcode::NewObject).ref().Inputs(4, 19);
-            INST(20, Opcode::StoreObject).u64().Inputs(5, 18);
-            INST(16, Opcode::Return).ref().Inputs(5);
+            INST(18U, Opcode::Phi).u64().Inputs(22U, 1U);
+            INST(19U, Opcode::SaveState);
+            INST(5U, Opcode::NewObject).ref().Inputs(4U, 19U);
+            INST(20U, Opcode::StoreObject).u64().Inputs(5U, 18U);
+            INST(16U, Opcode::Return).ref().Inputs(5U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(17, Opcode::Return).ref().Inputs(2);
+            INST(17U, Opcode::Return).ref().Inputs(2U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1276,39 +1276,39 @@ TEST_F(EscapeAnalysisTest, CarryNestedState)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(5, Opcode::SaveState).Inputs(0, 4).SrcVregs({0, 1});
-            INST(6, Opcode::LoadAndInitClass).ref().Inputs(5);
-            INST(7, Opcode::NewObject).ref().Inputs(6, 5);
-            INST(8, Opcode::SaveState).Inputs(0, 4, 7).SrcVregs({0, 1, 2});
-            INST(9, Opcode::NullCheck).ref().Inputs(7, 8);
-            INST(10, Opcode::StoreObject).ref().Inputs(9, 0).ObjField(OBJ_FIELD);
-            INST(11, Opcode::NullCheck).ref().Inputs(4, 8);
-            INST(12, Opcode::StoreObject).ref().Inputs(11, 7).ObjField(OBJ_FIELD);
-            INST(13, Opcode::IfImm).SrcType(DataType::REFERENCE).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::SaveState).Inputs(0U, 4U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 5U);
+            INST(8U, Opcode::SaveState).Inputs(0U, 4U, 7U).SrcVregs({0U, 1U, 2U});
+            INST(9U, Opcode::NullCheck).ref().Inputs(7U, 8U);
+            INST(10U, Opcode::StoreObject).ref().Inputs(9U, 0U).ObjField(OBJ_FIELD);
+            INST(11U, Opcode::NullCheck).ref().Inputs(4U, 8U);
+            INST(12U, Opcode::StoreObject).ref().Inputs(11U, 7U).ObjField(OBJ_FIELD);
+            INST(13U, Opcode::IfImm).SrcType(DataType::REFERENCE).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(14, Opcode::SaveState).Inputs(4).SrcVregs({1});
-            INST(15, Opcode::CallStatic).v0id().InputsAutoType(14);
+            INST(14U, Opcode::SaveState).Inputs(4U).SrcVregs({1U});
+            INST(15U, Opcode::CallStatic).v0id().InputsAutoType(14U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(16, Opcode::SaveState).Inputs(4).SrcVregs({1});
-            INST(17, Opcode::NullCheck).ref().Inputs(4, 16);
-            INST(18, Opcode::LoadObject).ref().Inputs(17).ObjField(OBJ_FIELD);
-            INST(19, Opcode::SaveState).Inputs(18).SrcVregs({0});
-            INST(20, Opcode::NullCheck).ref().Inputs(18, 19);
-            INST(21, Opcode::LoadObject).ref().Inputs(20).ObjField(OBJ_FIELD);
-            INST(22, Opcode::Return).ref().Inputs(21);
+            INST(16U, Opcode::SaveState).Inputs(4U).SrcVregs({1U});
+            INST(17U, Opcode::NullCheck).ref().Inputs(4U, 16U);
+            INST(18U, Opcode::LoadObject).ref().Inputs(17U).ObjField(OBJ_FIELD);
+            INST(19U, Opcode::SaveState).Inputs(18U).SrcVregs({0U});
+            INST(20U, Opcode::NullCheck).ref().Inputs(18U, 19U);
+            INST(21U, Opcode::LoadObject).ref().Inputs(20U).ObjField(OBJ_FIELD);
+            INST(22U, Opcode::Return).ref().Inputs(21U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1319,26 +1319,26 @@ TEST_F(EscapeAnalysisTest, CarryNestedState)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::LoadAndInitClass).ref().Inputs(5);
-            INST(13, Opcode::IfImm).SrcType(DataType::REFERENCE).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::REFERENCE).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(14, Opcode::SaveState).Inputs(0).SrcVregs({VirtualRegister::BRIDGE});
-            INST(15, Opcode::CallStatic).v0id().InputsAutoType(14);
+            INST(14U, Opcode::SaveState).Inputs(0U).SrcVregs({VirtualRegister::BRIDGE});
+            INST(15U, Opcode::CallStatic).v0id().InputsAutoType(14U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(22, Opcode::Return).ref().Inputs(0);
+            INST(22U, Opcode::Return).ref().Inputs(0U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1351,34 +1351,34 @@ TEST_F(EscapeAnalysisTest, RemoveVirtualObjectFromSaveStates)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u32();
+        PARAMETER(0U, 0U).u32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(1, Opcode::SaveState);
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);
+            INST(1U, Opcode::SaveState);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
 
-            INST(4, Opcode::IfImm).SrcType(DataType::UINT32).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(4U, Opcode::IfImm).SrcType(DataType::UINT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(6, Opcode::SaveState).Inputs(3).SrcVregs({0});
-            INST(7, Opcode::CallStatic).v0id().InputsAutoType(3, 6).Inlined();
-            INST(8, Opcode::SaveState).Inputs(3).SrcVregs({0}).Caller(7);
-            INST(9, Opcode::CallStatic).v0id().InputsAutoType(3, 8).Inlined();
-            INST(10, Opcode::SaveState).Inputs(3).SrcVregs({0}).Caller(9);
-            INST(11, Opcode::CallStatic).v0id().InputsAutoType(3, 10);
-            INST(12, Opcode::ReturnInlined).Inputs(8);
-            INST(13, Opcode::ReturnInlined).Inputs(6);
-            INST(14, Opcode::SaveState).Inputs(3).SrcVregs({0});
-            INST(15, Opcode::Throw).Inputs(3, 14);
+            INST(6U, Opcode::SaveState).Inputs(3U).SrcVregs({0U});
+            INST(7U, Opcode::CallStatic).v0id().InputsAutoType(3U, 6U).Inlined();
+            INST(8U, Opcode::SaveState).Inputs(3U).SrcVregs({0U}).Caller(7U);
+            INST(9U, Opcode::CallStatic).v0id().InputsAutoType(3U, 8U).Inlined();
+            INST(10U, Opcode::SaveState).Inputs(3U).SrcVregs({0U}).Caller(9U);
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(3U, 10U);
+            INST(12U, Opcode::ReturnInlined).Inputs(8U);
+            INST(13U, Opcode::ReturnInlined).Inputs(6U);
+            INST(14U, Opcode::SaveState).Inputs(3U).SrcVregs({0U});
+            INST(15U, Opcode::Throw).Inputs(3U, 14U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1389,35 +1389,35 @@ TEST_F(EscapeAnalysisTest, RemoveVirtualObjectFromSaveStates)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u32();
-        INST(18, Opcode::NullPtr).ref();
+        PARAMETER(0U, 0U).u32();
+        INST(18U, Opcode::NullPtr).ref();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(1, Opcode::SaveState);
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(4, Opcode::IfImm).SrcType(DataType::UINT32).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(1U, Opcode::SaveState);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::UINT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::ReturnVoid).v0id();
+            INST(5U, Opcode::ReturnVoid).v0id();
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(6, Opcode::SaveState);
-            INST(7, Opcode::CallStatic).v0id().InputsAutoType(18, 6).Inlined();
-            INST(8, Opcode::SaveState);
-            INST(9, Opcode::CallStatic).v0id().InputsAutoType(18, 8).Inlined();
-            INST(41, Opcode::SaveState);
-            INST(42, Opcode::NewObject).ref().Inputs(2, 41);
-            INST(10, Opcode::SaveState).Inputs(42).SrcVregs({0});
-            INST(11, Opcode::CallStatic).v0id().InputsAutoType(42, 10);
-            INST(12, Opcode::ReturnInlined).Inputs(8);
-            INST(13, Opcode::ReturnInlined).Inputs(6);
-            INST(14, Opcode::SaveState).Inputs(42).SrcVregs({0});
-            INST(15, Opcode::Throw).Inputs(42, 14);
+            INST(6U, Opcode::SaveState);
+            INST(7U, Opcode::CallStatic).v0id().InputsAutoType(18U, 6U).Inlined();
+            INST(8U, Opcode::SaveState);
+            INST(9U, Opcode::CallStatic).v0id().InputsAutoType(18U, 8U).Inlined();
+            INST(41U, Opcode::SaveState);
+            INST(42U, Opcode::NewObject).ref().Inputs(2U, 41U);
+            INST(10U, Opcode::SaveState).Inputs(42U).SrcVregs({0U});
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(42U, 10U);
+            INST(12U, Opcode::ReturnInlined).Inputs(8U);
+            INST(13U, Opcode::ReturnInlined).Inputs(6U);
+            INST(14U, Opcode::SaveState).Inputs(42U).SrcVregs({0U});
+            INST(15U, Opcode::Throw).Inputs(42U, 14U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1430,27 +1430,27 @@ TEST_F(EscapeAnalysisTest, CorrectlyHandleSingleBlockLoops)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
         }
 
-        BASIC_BLOCK(3, 3, 5)
+        BASIC_BLOCK(3U, 3U, 5U)
         {
-            INST(5, Opcode::Phi).u64().Inputs(0, 6);
-            INST(6, Opcode::Sub).u64().Inputs(5, 1);
-            INST(7, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_NE).Inputs(6);
+            INST(5U, Opcode::Phi).u64().Inputs(0U, 6U);
+            INST(6U, Opcode::Sub).u64().Inputs(5U, 1U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(6U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(9, Opcode::SaveState).Inputs(4).SrcVregs({0});
-            INST(10, Opcode::Throw).Inputs(4, 9);
+            INST(9U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(10U, Opcode::Throw).Inputs(4U, 9U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1461,28 +1461,28 @@ TEST_F(EscapeAnalysisTest, CorrectlyHandleSingleBlockLoops)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
         }
 
-        BASIC_BLOCK(3, 3, 5)
+        BASIC_BLOCK(3U, 3U, 5U)
         {
-            INST(5, Opcode::Phi).u64().Inputs(0, 6);
-            INST(6, Opcode::Sub).u64().Inputs(5, 1);
-            INST(7, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_NE).Inputs(6);
+            INST(5U, Opcode::Phi).u64().Inputs(0U, 6U);
+            INST(6U, Opcode::Sub).u64().Inputs(5U, 1U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(6U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(11, Opcode::SaveState);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 11);
-            INST(9, Opcode::SaveState).Inputs(4).SrcVregs({0});
-            INST(10, Opcode::Throw).Inputs(4, 9);
+            INST(11U, Opcode::SaveState);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 11U);
+            INST(9U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(10U, Opcode::Throw).Inputs(4U, 9U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1495,30 +1495,30 @@ TEST_F(EscapeAnalysisTest, MaterializeObjOnPhiInsideLoop)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
         }
 
-        BASIC_BLOCK(3, 3, 5)
+        BASIC_BLOCK(3U, 3U, 5U)
         {
-            INST(5, Opcode::Phi).u64().Inputs(0, 6);
-            INST(11, Opcode::Phi).ref().Inputs(4, 14);
-            INST(6, Opcode::Sub).u64().Inputs(5, 1);
-            INST(12, Opcode::SaveState).Inputs(4, 11).SrcVregs({0, 1});
-            INST(13, Opcode::LoadAndInitClass).ref().Inputs(12);
-            INST(14, Opcode::NewObject).ref().Inputs(13, 12);
-            INST(7, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0).CC(CC_NE).Inputs(6);
+            INST(5U, Opcode::Phi).u64().Inputs(0U, 6U);
+            INST(11U, Opcode::Phi).ref().Inputs(4U, 14U);
+            INST(6U, Opcode::Sub).u64().Inputs(5U, 1U);
+            INST(12U, Opcode::SaveState).Inputs(4U, 11U).SrcVregs({0U, 1U});
+            INST(13U, Opcode::LoadAndInitClass).ref().Inputs(12U);
+            INST(14U, Opcode::NewObject).ref().Inputs(13U, 12U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(6U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(15, Opcode::Return).ref().Inputs(11);
+            INST(15U, Opcode::Return).ref().Inputs(11U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1531,41 +1531,41 @@ TEST_F(EscapeAnalysisTest, NotMergingMaterializationPaths)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).s64();
+        PARAMETER(0U, 0U).s64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(10, Opcode::SaveState);
-            INST(11, Opcode::LoadAndInitClass).ref().Inputs(10);
-            INST(12, Opcode::NewObject).ref().Inputs(11, 10);
-            INST(13, Opcode::IfImm).SrcType(DataType::INT64).Imm(0).CC(CC_LE).Inputs(0);
+            INST(10U, Opcode::SaveState);
+            INST(11U, Opcode::LoadAndInitClass).ref().Inputs(10U);
+            INST(12U, Opcode::NewObject).ref().Inputs(11U, 10U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::INT64).Imm(0U).CC(CC_LE).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 5, 6)
+        BASIC_BLOCK(3U, 5U, 6U)
         {
-            INST(14, Opcode::IfImm).SrcType(DataType::INT64).Imm(-1).CC(CC_EQ).Inputs(0);
+            INST(14U, Opcode::IfImm).SrcType(DataType::INT64).Imm(-1L).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(15, Opcode::SaveState).Inputs(12).SrcVregs({0});
-            INST(16, Opcode::Throw).Inputs(12, 15);
+            INST(15U, Opcode::SaveState).Inputs(12U).SrcVregs({0U});
+            INST(16U, Opcode::Throw).Inputs(12U, 15U);
         }
 
-        BASIC_BLOCK(4, 7, 6)
+        BASIC_BLOCK(4U, 7U, 6U)
         {
-            INST(17, Opcode::IfImm).SrcType(DataType::INT64).Imm(1).CC(CC_EQ).Inputs(0);
+            INST(17U, Opcode::IfImm).SrcType(DataType::INT64).Imm(1U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(18, Opcode::SaveState).Inputs(12).SrcVregs({0});
-            INST(19, Opcode::Throw).Inputs(12, 18);
+            INST(18U, Opcode::SaveState).Inputs(12U).SrcVregs({0U});
+            INST(19U, Opcode::Throw).Inputs(12U, 18U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(20, Opcode::ReturnVoid).v0id();
+            INST(20U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1576,44 +1576,44 @@ TEST_F(EscapeAnalysisTest, NotMergingMaterializationPaths)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).s64();
+        PARAMETER(0U, 0U).s64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(10, Opcode::SaveState);
-            INST(11, Opcode::LoadAndInitClass).ref().Inputs(10);
-            INST(13, Opcode::IfImm).SrcType(DataType::INT64).Imm(0).CC(CC_LE).Inputs(0);
+            INST(10U, Opcode::SaveState);
+            INST(11U, Opcode::LoadAndInitClass).ref().Inputs(10U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::INT64).Imm(0U).CC(CC_LE).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 5, 6)
+        BASIC_BLOCK(3U, 5U, 6U)
         {
-            INST(14, Opcode::IfImm).SrcType(DataType::INT64).Imm(-1).CC(CC_EQ).Inputs(0);
+            INST(14U, Opcode::IfImm).SrcType(DataType::INT64).Imm(-1L).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(21, Opcode::SaveState);
-            INST(12, Opcode::NewObject).ref().Inputs(11, 21);
-            INST(15, Opcode::SaveState).Inputs(12).SrcVregs({0});
-            INST(16, Opcode::Throw).Inputs(12, 15);
+            INST(21U, Opcode::SaveState);
+            INST(12U, Opcode::NewObject).ref().Inputs(11U, 21U);
+            INST(15U, Opcode::SaveState).Inputs(12U).SrcVregs({0U});
+            INST(16U, Opcode::Throw).Inputs(12U, 15U);
         }
 
-        BASIC_BLOCK(4, 7, 6)
+        BASIC_BLOCK(4U, 7U, 6U)
         {
-            INST(17, Opcode::IfImm).SrcType(DataType::INT64).Imm(1).CC(CC_EQ).Inputs(0);
+            INST(17U, Opcode::IfImm).SrcType(DataType::INT64).Imm(1U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(22, Opcode::SaveState);
-            INST(23, Opcode::NewObject).ref().Inputs(11, 22);
-            INST(18, Opcode::SaveState).Inputs(23).SrcVregs({0});
-            INST(19, Opcode::Throw).Inputs(23, 18);
+            INST(22U, Opcode::SaveState);
+            INST(23U, Opcode::NewObject).ref().Inputs(11U, 22U);
+            INST(18U, Opcode::SaveState).Inputs(23U).SrcVregs({0U});
+            INST(19U, Opcode::Throw).Inputs(23U, 18U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(20, Opcode::ReturnVoid).v0id();
+            INST(20U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1626,37 +1626,37 @@ TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjects)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
         // obj.4 field0 = obj.7
         // obj.7 field0 = obj.4
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
 
-            INST(5, Opcode::SaveState).Inputs(0, 4).SrcVregs({0, 1});
-            INST(6, Opcode::LoadAndInitClass).ref().Inputs(5);
-            INST(7, Opcode::NewObject).ref().Inputs(6, 5);
+            INST(5U, Opcode::SaveState).Inputs(0U, 4U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 5U);
 
-            INST(8, Opcode::SaveState).Inputs(0, 4, 7).SrcVregs({0, 1, 2});
-            INST(9, Opcode::NullCheck).ref().Inputs(7, 8);
-            INST(10, Opcode::StoreObject).ref().Inputs(9, 4).ObjField(OBJ_FIELD);
-            INST(11, Opcode::NullCheck).ref().Inputs(4, 8);
-            INST(12, Opcode::StoreObject).ref().Inputs(11, 7).ObjField(OBJ_FIELD);
-            INST(13, Opcode::IfImm).SrcType(DataType::REFERENCE).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(8U, Opcode::SaveState).Inputs(0U, 4U, 7U).SrcVregs({0U, 1U, 2U});
+            INST(9U, Opcode::NullCheck).ref().Inputs(7U, 8U);
+            INST(10U, Opcode::StoreObject).ref().Inputs(9U, 4U).ObjField(OBJ_FIELD);
+            INST(11U, Opcode::NullCheck).ref().Inputs(4U, 8U);
+            INST(12U, Opcode::StoreObject).ref().Inputs(11U, 7U).ObjField(OBJ_FIELD);
+            INST(13U, Opcode::IfImm).SrcType(DataType::REFERENCE).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(14, Opcode::SaveState).Inputs(4, 7).SrcVregs({1, 2});
-            INST(15, Opcode::CallStatic).v0id().InputsAutoType(4, 7, 14);
+            INST(14U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({1U, 2U});
+            INST(15U, Opcode::CallStatic).v0id().InputsAutoType(4U, 7U, 14U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(22, Opcode::ReturnVoid).v0id();
+            INST(22U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1667,32 +1667,32 @@ TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjects)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::LoadAndInitClass).ref().Inputs(5);
-            INST(13, Opcode::IfImm).SrcType(DataType::REFERENCE).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::REFERENCE).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(16, Opcode::SaveState);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 16);
-            INST(17, Opcode::SaveState).Inputs(4).SrcVregs({1});
-            INST(7, Opcode::NewObject).ref().Inputs(6, 17);
-            INST(10, Opcode::StoreObject).ref().Inputs(7, 4).ObjField(OBJ_FIELD);
-            INST(12, Opcode::StoreObject).ref().Inputs(4, 7).ObjField(OBJ_FIELD);
-            INST(14, Opcode::SaveState).Inputs(4, 7).SrcVregs({1, 2});
-            INST(15, Opcode::CallStatic).v0id().InputsAutoType(4, 7, 14);
+            INST(16U, Opcode::SaveState);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 16U);
+            INST(17U, Opcode::SaveState).Inputs(4U).SrcVregs({1U});
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 17U);
+            INST(10U, Opcode::StoreObject).ref().Inputs(7U, 4U).ObjField(OBJ_FIELD);
+            INST(12U, Opcode::StoreObject).ref().Inputs(4U, 7U).ObjField(OBJ_FIELD);
+            INST(14U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({1U, 2U});
+            INST(15U, Opcode::CallStatic).v0id().InputsAutoType(4U, 7U, 14U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(22, Opcode::ReturnVoid).v0id();
+            INST(22U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1705,37 +1705,37 @@ TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjectsAtNewSaveState)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
         // obj.4 field0 = obj.7
         // obj.7 field0 = obj.4
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
 
-            INST(5, Opcode::SaveState).Inputs(0, 4).SrcVregs({0, 1});
-            INST(6, Opcode::LoadAndInitClass).ref().Inputs(5);
-            INST(7, Opcode::NewObject).ref().Inputs(6, 5);
+            INST(5U, Opcode::SaveState).Inputs(0U, 4U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 5U);
 
-            INST(8, Opcode::SaveState).Inputs(0, 4, 7).SrcVregs({0, 1, 2});
-            INST(9, Opcode::NullCheck).ref().Inputs(7, 8);
-            INST(10, Opcode::StoreObject).ref().Inputs(9, 4).ObjField(OBJ_FIELD);
-            INST(11, Opcode::NullCheck).ref().Inputs(4, 8);
-            INST(12, Opcode::StoreObject).ref().Inputs(11, 7).ObjField(OBJ_FIELD);
-            INST(13, Opcode::IfImm).SrcType(DataType::REFERENCE).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(8U, Opcode::SaveState).Inputs(0U, 4U, 7U).SrcVregs({0U, 1U, 2U});
+            INST(9U, Opcode::NullCheck).ref().Inputs(7U, 8U);
+            INST(10U, Opcode::StoreObject).ref().Inputs(9U, 4U).ObjField(OBJ_FIELD);
+            INST(11U, Opcode::NullCheck).ref().Inputs(4U, 8U);
+            INST(12U, Opcode::StoreObject).ref().Inputs(11U, 7U).ObjField(OBJ_FIELD);
+            INST(13U, Opcode::IfImm).SrcType(DataType::REFERENCE).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(14, Opcode::SaveState).Inputs(4, 7).SrcVregs({1, 2});
-            INST(15, Opcode::CallStatic).v0id().InputsAutoType(14);
+            INST(14U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({1U, 2U});
+            INST(15U, Opcode::CallStatic).v0id().InputsAutoType(14U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(22, Opcode::Return).ref().Inputs(7);
+            INST(22U, Opcode::Return).ref().Inputs(7U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1746,32 +1746,32 @@ TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjectsAtNewSaveState)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(5, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(6, Opcode::LoadAndInitClass).ref().Inputs(5);
-            INST(13, Opcode::IfImm).SrcType(DataType::REFERENCE).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::REFERENCE).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(14, Opcode::SaveState);
-            INST(15, Opcode::CallStatic).v0id().InputsAutoType(14);
+            INST(14U, Opcode::SaveState);
+            INST(15U, Opcode::CallStatic).v0id().InputsAutoType(14U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(16, Opcode::SaveState);
-            INST(7, Opcode::NewObject).ref().Inputs(6, 16);
-            INST(17, Opcode::SaveState).Inputs(7).SrcVregs({VirtualRegister::BRIDGE});
-            INST(4, Opcode::NewObject).ref().Inputs(3, 17);
-            INST(12, Opcode::StoreObject).ref().Inputs(4, 7).ObjField(OBJ_FIELD);
-            INST(10, Opcode::StoreObject).ref().Inputs(7, 4).ObjField(OBJ_FIELD);
-            INST(22, Opcode::Return).ref().Inputs(7);
+            INST(16U, Opcode::SaveState);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 16U);
+            INST(17U, Opcode::SaveState).Inputs(7U).SrcVregs({VirtualRegister::BRIDGE});
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 17U);
+            INST(12U, Opcode::StoreObject).ref().Inputs(4U, 7U).ObjField(OBJ_FIELD);
+            INST(10U, Opcode::StoreObject).ref().Inputs(7U, 4U).ObjField(OBJ_FIELD);
+            INST(22U, Opcode::Return).ref().Inputs(7U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1784,15 +1784,15 @@ TEST_F(EscapeAnalysisTest, HandleCompareObjects)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);
-            INST(4, Opcode::Compare).b().Inputs(0, 3).CC(CC_EQ).SrcType(DataType::REFERENCE);
-            INST(5, Opcode::Return).b().Inputs(4);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(4U, Opcode::Compare).b().Inputs(0U, 3U).CC(CC_EQ).SrcType(DataType::REFERENCE);
+            INST(5U, Opcode::Return).b().Inputs(4U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1803,14 +1803,14 @@ TEST_F(EscapeAnalysisTest, HandleCompareObjects)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).ref();
-        CONSTANT(6, 0);
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(6U, 0U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(5, Opcode::Return).b().Inputs(6);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(5U, Opcode::Return).b().Inputs(6U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1822,31 +1822,31 @@ TEST_F(EscapeAnalysisTest, MaterializeSaveStateInputsEscapingInSaveStateUser)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(2, 3, 5)
+        BASIC_BLOCK(2U, 3U, 5U)
         {
-            INST(2, Opcode::SaveState);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
             // Inst 4 escapes only in block 3, but it should be
             // materialized before corresponding save state.
-            INST(5, Opcode::SaveState).Inputs(4).SrcVregs({0});
-            INST(6, Opcode::CallStatic).u64().InputsAutoType(0, 5).Inlined();
-            INST(7, Opcode::IfImm).SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0).Imm(0);
+            INST(5U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(6U, Opcode::CallStatic).u64().InputsAutoType(0U, 5U).Inlined();
+            INST(7U, Opcode::IfImm).SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0U).Imm(0U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(4, 5);
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(4U, 5U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(10, Opcode::Phi).u64().Inputs(0, 1);
-            INST(11, Opcode::ReturnInlined).u64().Inputs(5);
-            INST(12, Opcode::Return).u64().Inputs(10);
+            INST(10U, Opcode::Phi).u64().Inputs(0U, 1U);
+            INST(11U, Opcode::ReturnInlined).u64().Inputs(5U);
+            INST(12U, Opcode::Return).u64().Inputs(10U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1859,18 +1859,18 @@ TEST_F(EscapeAnalysisTest, EliminateStoreToNarrowIntField)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u32();
-        CONSTANT(1, 1);
+        PARAMETER(0U, 0U).u32();
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(5, Opcode::StoreObject).u8().Inputs(4, 0).ObjField(UINT8_FIELD);
-            INST(6, Opcode::LoadObject).u8().Inputs(4).ObjField(UINT8_FIELD);
-            INST(7, Opcode::Add).u32().Inputs(6, 1);
-            INST(8, Opcode::Return).u32().Inputs(7);
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::StoreObject).u8().Inputs(4U, 0U).ObjField(UINT8_FIELD);
+            INST(6U, Opcode::LoadObject).u8().Inputs(4U).ObjField(UINT8_FIELD);
+            INST(7U, Opcode::Add).u32().Inputs(6U, 1U);
+            INST(8U, Opcode::Return).u32().Inputs(7U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1881,16 +1881,16 @@ TEST_F(EscapeAnalysisTest, EliminateStoreToNarrowIntField)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).u32();
-        CONSTANT(1, 1);
+        PARAMETER(0U, 0U).u32();
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::Cast).u8().SrcType(DataType::UINT32).Inputs(0);
-            INST(7, Opcode::Add).u32().Inputs(4, 1);
-            INST(8, Opcode::Return).u32().Inputs(7);
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::Cast).u8().SrcType(DataType::UINT32).Inputs(0U);
+            INST(7U, Opcode::Add).u32().Inputs(4U, 1U);
+            INST(8U, Opcode::Return).u32().Inputs(7U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1903,25 +1903,25 @@ TEST_F(EscapeAnalysisTest, PatchSaveStates)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).u32();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).u32();
 
-        BASIC_BLOCK(2, 5, 4)
+        BASIC_BLOCK(2U, 5U, 4U)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(5, Opcode::IfImm).SrcType(DataType::UINT32).CC(CC_EQ).Inputs(1).Imm(0);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::UINT32).CC(CC_EQ).Inputs(1U).Imm(0U);
         }
 
-        BASIC_BLOCK(4, 5) {}
+        BASIC_BLOCK(4U, 5U) {}
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(6, Opcode::Phi).ref().Inputs(0, 4);
-            INST(7, Opcode::SaveState).Inputs(0, 6).SrcVregs({0, 1});
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(0, 6, 7);
-            INST(9, Opcode::ReturnVoid).v0id();
+            INST(6U, Opcode::Phi).ref().Inputs(0U, 4U);
+            INST(7U, Opcode::SaveState).Inputs(0U, 6U).SrcVregs({0U, 1U});
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(0U, 6U, 7U);
+            INST(9U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1932,28 +1932,28 @@ TEST_F(EscapeAnalysisTest, PatchSaveStates)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).u32();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).u32();
 
-        BASIC_BLOCK(2, 5, 4)
+        BASIC_BLOCK(2U, 5U, 4U)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(5, Opcode::IfImm).SrcType(DataType::UINT32).CC(CC_EQ).Inputs(1).Imm(0);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::UINT32).CC(CC_EQ).Inputs(1U).Imm(0U);
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(10, Opcode::SaveState).Inputs(0).SrcVregs({VirtualRegister::BRIDGE});
-            INST(4, Opcode::NewObject).ref().Inputs(3, 10);
+            INST(10U, Opcode::SaveState).Inputs(0U).SrcVregs({VirtualRegister::BRIDGE});
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 10U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(6, Opcode::Phi).ref().Inputs(0, 4);
-            INST(7, Opcode::SaveState).Inputs(0, 6).SrcVregs({0, 1});
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(0, 6, 7);
-            INST(9, Opcode::ReturnVoid).v0id();
+            INST(6U, Opcode::Phi).ref().Inputs(0U, 4U);
+            INST(7U, Opcode::SaveState).Inputs(0U, 6U).SrcVregs({0U, 1U});
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(0U, 6U, 7U);
+            INST(9U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1965,35 +1965,35 @@ TEST_F(EscapeAnalysisTest, InverseMaterializationOrder)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).b();
+        PARAMETER(0U, 0U).b();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(5, Opcode::SaveState).Inputs(4).SrcVregs({0});
-            INST(6, Opcode::LoadAndInitClass).ref().Inputs(5);
-            INST(7, Opcode::NewObject).ref().Inputs(6, 5);
-            INST(8, Opcode::StoreObject).ref().Inputs(7, 4).ObjField(OBJ_FIELD);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 5U);
+            INST(8U, Opcode::StoreObject).ref().Inputs(7U, 4U).ObjField(OBJ_FIELD);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(10, Opcode::SaveState).Inputs(4, 7).SrcVregs({0, 1});
-            INST(11, Opcode::LoadAndInitClass).ref().Inputs(10);
-            INST(12, Opcode::NewObject).ref().Inputs(11, 10);
-            INST(13, Opcode::StoreObject).ref().Inputs(12, 7).ObjField(OBJ_FIELD);
-            INST(14, Opcode::SaveState).Inputs(4, 7, 12).SrcVregs({0, 1, 2});
-            INST(15, Opcode::NullCheck).ref().Inputs(4, 14);
-            INST(16, Opcode::CallStatic).v0id().InputsAutoType(15, 12, 14);
-            INST(17, Opcode::ReturnVoid).v0id();
+            INST(10U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(11U, Opcode::LoadAndInitClass).ref().Inputs(10U);
+            INST(12U, Opcode::NewObject).ref().Inputs(11U, 10U);
+            INST(13U, Opcode::StoreObject).ref().Inputs(12U, 7U).ObjField(OBJ_FIELD);
+            INST(14U, Opcode::SaveState).Inputs(4U, 7U, 12U).SrcVregs({0U, 1U, 2U});
+            INST(15U, Opcode::NullCheck).ref().Inputs(4U, 14U);
+            INST(16U, Opcode::CallStatic).v0id().InputsAutoType(15U, 12U, 14U);
+            INST(17U, Opcode::ReturnVoid).v0id();
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(18, Opcode::ReturnVoid).v0id();
+            INST(18U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -2007,38 +2007,38 @@ TEST_F(EscapeAnalysisTest, MaterializeObjectDuringItsFieldsMerge)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).b();
-        CONSTANT(1, 1);
+        PARAMETER(0U, 0U).b();
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(5, Opcode::StoreObject).u64().Inputs(4, 1).ObjField(UINT64_FIELD);
-            INST(6, Opcode::StoreObject).s64().Inputs(4, 1).ObjField(INT64_FIELD);
-            INST(7, Opcode::StoreObject).s32().Inputs(4, 1).ObjField(INT32_FIELD);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::StoreObject).u64().Inputs(4U, 1U).ObjField(UINT64_FIELD);
+            INST(6U, Opcode::StoreObject).s64().Inputs(4U, 1U).ObjField(INT64_FIELD);
+            INST(7U, Opcode::StoreObject).s32().Inputs(4U, 1U).ObjField(INT32_FIELD);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(9, Opcode::SaveState).Inputs(4).SrcVregs({1});
-            INST(10, Opcode::LoadAndInitClass).ref().Inputs(9);
-            INST(11, Opcode::NewObject).ref().Inputs(10, 9);
-            INST(12, Opcode::StoreObject).ref().Inputs(11, 4).ObjField(OBJ_FIELD);
-            INST(13, Opcode::StoreObject).ref().Inputs(4, 11).ObjField(OBJ_FIELD);
+            INST(9U, Opcode::SaveState).Inputs(4U).SrcVregs({1U});
+            INST(10U, Opcode::LoadAndInitClass).ref().Inputs(9U);
+            INST(11U, Opcode::NewObject).ref().Inputs(10U, 9U);
+            INST(12U, Opcode::StoreObject).ref().Inputs(11U, 4U).ObjField(OBJ_FIELD);
+            INST(13U, Opcode::StoreObject).ref().Inputs(4U, 11U).ObjField(OBJ_FIELD);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
             // We need to merge fields of the object (4), but during the merge we'll need to materialize
             // the object (11) as values of corresponding field diverged and require a phi.
             // Materialization of the object (11) will require materialization of the object (4) as it is
             // stored in 11's field. As a result materialization of the object (4) will be requested
             // during its fields merge.
-            INST(14, Opcode::LoadObject).ref().Inputs(4).ObjField(OBJ_FIELD);
-            INST(15, Opcode::Return).ref().Inputs(14);
+            INST(14U, Opcode::LoadObject).ref().Inputs(4U).ObjField(OBJ_FIELD);
+            INST(15U, Opcode::Return).ref().Inputs(14U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -2053,37 +2053,37 @@ TEST_F(EscapeAnalysisTest, MaterializeBeforeReferencedObjectMaterialization)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).b();
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(5, Opcode::SaveState).Inputs(4).SrcVregs({0});
-            INST(6, Opcode::LoadAndInitClass).ref().Inputs(5);
-            INST(7, Opcode::NewObject).ref().Inputs(6, 5);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1).Imm(0);
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 5U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(9, Opcode::SaveState).Inputs(4, 7).SrcVregs({0, 1});
-            INST(CALL_INST_ID, Opcode::CallStatic).v0id().InputsAutoType(9).Inlined();
-            INST(SS1_ID, Opcode::SaveState).Inputs(4, 7).SrcVregs({0, 1});
-            INST(12, Opcode::CallStatic).v0id().InputsAutoType(7, 11);
-            INST(SS2_ID, Opcode::SaveState).Inputs(4, 7).SrcVregs({0, 1});
+            INST(9U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(CALL_INST_ID, Opcode::CallStatic).v0id().InputsAutoType(9U).Inlined();
+            INST(SS1_ID, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(12U, Opcode::CallStatic).v0id().InputsAutoType(7U, 11U);
+            INST(SS2_ID, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
             // Due to deopt inst all its save state inputs should be materialized before the first inlined call.
             // So both inst 4 and 7 should be materialized before inst 10, but before we hit deopt inst the inst 7
             // will be materialized at save state 11 (due to call static 12).
-            INST(14, Opcode::DeoptimizeIf).Inputs(0, 13);
-            INST(15, Opcode::ReturnInlined).v0id().Inputs(9);
+            INST(14U, Opcode::DeoptimizeIf).Inputs(0U, 13U);
+            INST(15U, Opcode::ReturnInlined).v0id().Inputs(9U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(16, Opcode::ReturnVoid).v0id();
+            INST(16U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -2097,37 +2097,37 @@ TEST_F(EscapeAnalysisTest, MaterializeBeforeReferencedObjectMaterialization)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).b();
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(5, Opcode::SaveState);
-            INST(6, Opcode::LoadAndInitClass).ref().Inputs(5);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1).Imm(0);
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::SaveState);
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(17, Opcode::SaveState);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 17);
-            INST(18, Opcode::SaveState).Inputs(4).SrcVregs({0});
-            INST(7, Opcode::NewObject).ref().Inputs(6, 18);
+            INST(17U, Opcode::SaveState);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 17U);
+            INST(18U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 18U);
 
-            INST(9, Opcode::SaveState).Inputs(4, 7).SrcVregs({0, 1});
-            INST(10, Opcode::CallStatic).v0id().InputsAutoType(9).Inlined();
-            INST(11, Opcode::SaveState).Inputs(4, 7).SrcVregs({0, 1});
-            INST(12, Opcode::CallStatic).v0id().InputsAutoType(7, 11);
-            INST(13, Opcode::SaveState).Inputs(4, 7).SrcVregs({0, 1});
-            INST(14, Opcode::DeoptimizeIf).Inputs(0, 13);
-            INST(15, Opcode::ReturnInlined).v0id().Inputs(9);
+            INST(9U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(10U, Opcode::CallStatic).v0id().InputsAutoType(9U).Inlined();
+            INST(11U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(12U, Opcode::CallStatic).v0id().InputsAutoType(7U, 11U);
+            INST(13U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(14U, Opcode::DeoptimizeIf).Inputs(0U, 13U);
+            INST(15U, Opcode::ReturnInlined).v0id().Inputs(9U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(16, Opcode::ReturnVoid).v0id();
+            INST(16U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -2138,32 +2138,32 @@ TEST_F(EscapeAnalysisTest, FillSaveStateBetweenSaveState)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 42).s32();
-        PARAMETER(13, 2).ref();
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
+        PARAMETER(13U, 2U).ref();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).SrcVregs({0, 2}).Inputs(0, 13);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(10, Opcode::NullCheck).ref().Inputs(4, 2);
-            INST(11, Opcode::StoreObject).s32().Inputs(10, 1).ObjField(INT32_FIELD);
-            INST(5, Opcode::IfImm).SrcType(DataType::INT32).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState).SrcVregs({0U, 2U}).Inputs(0U, 13U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(10U, Opcode::NullCheck).ref().Inputs(4U, 2U);
+            INST(11U, Opcode::StoreObject).s32().Inputs(10U, 1U).ObjField(INT32_FIELD);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
             // Branch with BasicBlock 3 don't have 13(vr2) in SaveState
-            INST(8, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 4);
-            INST(9, Opcode::CallStatic).v0id().InputsAutoType(4, 8);
+            INST(8U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(9U, Opcode::CallStatic).v0id().InputsAutoType(4U, 8U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(6, Opcode::Phi).Inputs(0, 1).s32();
-            INST(14, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 13);
-            INST(7, Opcode::Return).Inputs(6).s32();
+            INST(6U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(14U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 13U);
+            INST(7U, Opcode::Return).Inputs(6U).s32();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -2174,30 +2174,30 @@ TEST_F(EscapeAnalysisTest, FillSaveStateBetweenSaveState)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).s32();
-        CONSTANT(1, 42).s32();
-        PARAMETER(13, 2).ref();
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
+        PARAMETER(13U, 2U).ref();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).SrcVregs({0, 2}).Inputs(0, 13);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(5, Opcode::IfImm).SrcType(DataType::INT32).Imm(0).CC(CC_EQ).Inputs(0);
+            INST(2U, Opcode::SaveState).SrcVregs({0U, 2U}).Inputs(0U, 13U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(15, Opcode::SaveState).SrcVregs({0, VirtualRegister::BRIDGE}).Inputs(0, 13);
-            INST(16, Opcode::NewObject).ref().Inputs(3, 15);
-            INST(17, Opcode::StoreObject).s32().Inputs(16, 1).ObjField(INT32_FIELD);
-            INST(8, Opcode::SaveState).SrcVregs({0, 1, VirtualRegister::BRIDGE}).Inputs(0, 16, 13);
-            INST(9, Opcode::CallStatic).v0id().InputsAutoType(16, 8);
+            INST(15U, Opcode::SaveState).SrcVregs({0U, VirtualRegister::BRIDGE}).Inputs(0U, 13U);
+            INST(16U, Opcode::NewObject).ref().Inputs(3U, 15U);
+            INST(17U, Opcode::StoreObject).s32().Inputs(16U, 1U).ObjField(INT32_FIELD);
+            INST(8U, Opcode::SaveState).SrcVregs({0U, 1U, VirtualRegister::BRIDGE}).Inputs(0U, 16U, 13U);
+            INST(9U, Opcode::CallStatic).v0id().InputsAutoType(16U, 8U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(6, Opcode::Phi).Inputs(0, 1).s32();
-            INST(7, Opcode::Return).Inputs(6).s32();
+            INST(6U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(7U, Opcode::Return).Inputs(6U).s32();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -2212,30 +2212,30 @@ TEST_F(EscapeAnalysisTest, FixPhiInputTypes)
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s8();
-        CONSTANT(20, 64).s32();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s8();
+        CONSTANT(20U, 64U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 1);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(4, Opcode::NewObject).ref().Inputs(3, 2);
-            INST(5, Opcode::StoreObject).s8().Inputs(4, 1).ObjField(INT8_FIELD);
-            INST(6, Opcode::IfImm).SrcType(DataType::INT8).Imm(0).CC(CC_EQ).Inputs(1);
+            INST(2U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 1U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::StoreObject).s8().Inputs(4U, 1U).ObjField(INT8_FIELD);
+            INST(6U, Opcode::IfImm).SrcType(DataType::INT8).Imm(0U).CC(CC_EQ).Inputs(1U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(7, Opcode::LoadObject).s8().Inputs(4).ObjField(INT8_FIELD);
-            INST(8, Opcode::Add).s32().Inputs(7, 20);
-            INST(9, Opcode::StoreObject).s8().Inputs(4, 8).ObjField(INT8_FIELD);
+            INST(7U, Opcode::LoadObject).s8().Inputs(4U).ObjField(INT8_FIELD);
+            INST(8U, Opcode::Add).s32().Inputs(7U, 20U);
+            INST(9U, Opcode::StoreObject).s8().Inputs(4U, 8U).ObjField(INT8_FIELD);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(10, Opcode::LoadObject).s8().Inputs(4).ObjField(INT8_FIELD);
-            INST(11, Opcode::Return).Inputs(10).s8();
+            INST(10U, Opcode::LoadObject).s8().Inputs(4U).ObjField(INT8_FIELD);
+            INST(11U, Opcode::Return).Inputs(10U).s8();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -2246,27 +2246,27 @@ TEST_F(EscapeAnalysisTest, FixPhiInputTypes)
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s8();
-        CONSTANT(20, 64).s32();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s8();
+        CONSTANT(20U, 64U).s32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::SaveState).SrcVregs({0, 1}).Inputs(0, 1);
-            INST(3, Opcode::LoadAndInitClass).ref().Inputs(2);
-            INST(5, Opcode::IfImm).SrcType(DataType::INT8).Imm(0).CC(CC_EQ).Inputs(1);
+            INST(2U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 1U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT8).Imm(0U).CC(CC_EQ).Inputs(1U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(8, Opcode::Add).s32().Inputs(1, 20);
-            INST(9, Opcode::Cast).s8().SrcType(DataType::INT32).Inputs(8);
+            INST(8U, Opcode::Add).s32().Inputs(1U, 20U);
+            INST(9U, Opcode::Cast).s8().SrcType(DataType::INT32).Inputs(8U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(10, Opcode::Phi).Inputs(1, 9).s8();
-            INST(11, Opcode::Return).Inputs(10).s8();
+            INST(10U, Opcode::Phi).Inputs(1U, 9U).s8();
+            INST(11U, Opcode::Return).Inputs(10U).s8();
         }
         // NOLINTEND(readability-magic-numbers)
     }

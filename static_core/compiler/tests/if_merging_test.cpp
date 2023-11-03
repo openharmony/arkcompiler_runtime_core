@@ -30,32 +30,32 @@ TEST_F(IfMergingTest, SameIfs)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            CONSTANT(1, 0);
-            CONSTANT(2, 1);
-            BASIC_BLOCK(2, 3, 4)
+            PARAMETER(0U, 0U).u64();
+            CONSTANT(1U, 0U);
+            CONSTANT(2U, 1U);
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-                INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+                INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+                INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
             }
-            BASIC_BLOCK(3, 4) {}
-            BASIC_BLOCK(4, 5, 6)
+            BASIC_BLOCK(3U, 4U) {}
+            BASIC_BLOCK(4U, 5U, 6U)
             {
-                INST(5, Opcode::Phi).u64().Inputs({{3, 1}, {2, 2}});
-                INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0).Inputs(3);
+                INST(5U, Opcode::Phi).u64().Inputs({{3U, 1U}, {2U, 2U}});
+                INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0U).Inputs(3U);
             }
-            BASIC_BLOCK(5, 7)
+            BASIC_BLOCK(5U, 7U)
             {
-                INST(8, Opcode::Add).u64().Inputs(5, 0);
+                INST(8U, Opcode::Add).u64().Inputs(5U, 0U);
             }
-            BASIC_BLOCK(6, 7)
+            BASIC_BLOCK(6U, 7U)
             {
-                INST(9, Opcode::Sub).u64().Inputs(5, 0);
+                INST(9U, Opcode::Sub).u64().Inputs(5U, 0U);
             }
-            BASIC_BLOCK(7, -1)
+            BASIC_BLOCK(7U, -1L)
             {
-                INST(10, Opcode::Phi).u64().Inputs({{5, 8}, {6, 9}});
-                INST(11, Opcode::Return).u64().Inputs(10);
+                INST(10U, Opcode::Phi).u64().Inputs({{5U, 8U}, {6U, 9U}});
+                INST(11U, Opcode::Return).u64().Inputs(10U);
             }
         }
 
@@ -65,26 +65,26 @@ TEST_F(IfMergingTest, SameIfs)
         auto graph_expected = CreateEmptyGraph();
         GRAPH(graph_expected)
         {
-            PARAMETER(0, 0).u64();
-            CONSTANT(1, 0);
-            CONSTANT(2, 1);
-            BASIC_BLOCK(2, 3, 4)
+            PARAMETER(0U, 0U).u64();
+            CONSTANT(1U, 0U);
+            CONSTANT(2U, 1U);
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-                INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+                INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+                INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
             }
-            BASIC_BLOCK(3, 5)
+            BASIC_BLOCK(3U, 5U)
             {
-                INST(8, inverse ? Opcode::Sub : Opcode::Add).u64().Inputs(1, 0);
+                INST(8U, inverse ? Opcode::Sub : Opcode::Add).u64().Inputs(1U, 0U);
             }
-            BASIC_BLOCK(4, 5)
+            BASIC_BLOCK(4U, 5U)
             {
-                INST(9, inverse ? Opcode::Add : Opcode::Sub).u64().Inputs(2, 0);
+                INST(9U, inverse ? Opcode::Add : Opcode::Sub).u64().Inputs(2U, 0U);
             }
-            BASIC_BLOCK(5, -1)
+            BASIC_BLOCK(5U, -1L)
             {
-                INST(10, Opcode::Phi).u64().Inputs({{3, 8}, {4, 9}});
-                INST(11, Opcode::Return).u64().Inputs(10);
+                INST(10U, Opcode::Phi).u64().Inputs({{3U, 8U}, {4U, 9U}});
+                INST(11U, Opcode::Return).u64().Inputs(10U);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
@@ -96,33 +96,33 @@ TEST_F(IfMergingTest, DifferentIfs)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 4) {}
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(5, Opcode::Phi).u64().Inputs({{3, 1}, {2, 2}});
-            INST(12, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 2);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(12);
+            INST(5U, Opcode::Phi).u64().Inputs({{3U, 1U}, {2U, 2U}});
+            INST(12U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 2U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
         }
-        BASIC_BLOCK(5, 7)
+        BASIC_BLOCK(5U, 7U)
         {
-            INST(8, Opcode::Add).u64().Inputs(5, 0);
+            INST(8U, Opcode::Add).u64().Inputs(5U, 0U);
         }
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(9, Opcode::Sub).u64().Inputs(5, 0);
+            INST(9U, Opcode::Sub).u64().Inputs(5U, 0U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(10, Opcode::Phi).u64().Inputs({{5, 8}, {6, 9}});
-            INST(11, Opcode::Return).u64().Inputs(10);
+            INST(10U, Opcode::Phi).u64().Inputs({{5U, 8U}, {6U, 9U}});
+            INST(11U, Opcode::Return).u64().Inputs(10U);
         }
     }
 
@@ -137,33 +137,33 @@ TEST_F(IfMergingTest, InstUsedInBothBranches)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 4) {}
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(5, Opcode::Phi).u64().Inputs({{3, 1}, {2, 2}});
-            INST(6, Opcode::Mul).u64().Inputs(5, 5);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(5U, Opcode::Phi).u64().Inputs({{3U, 1U}, {2U, 2U}});
+            INST(6U, Opcode::Mul).u64().Inputs(5U, 5U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(5, 7)
+        BASIC_BLOCK(5U, 7U)
         {
-            INST(8, Opcode::Add).u64().Inputs(6, 0);
+            INST(8U, Opcode::Add).u64().Inputs(6U, 0U);
         }
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(9, Opcode::Sub).u64().Inputs(6, 0);
+            INST(9U, Opcode::Sub).u64().Inputs(6U, 0U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(10, Opcode::Phi).u64().Inputs({{5, 8}, {6, 9}});
-            INST(11, Opcode::Return).u64().Inputs(10);
+            INST(10U, Opcode::Phi).u64().Inputs({{5U, 8U}, {6U, 9U}});
+            INST(11U, Opcode::Return).u64().Inputs(10U);
         }
     }
 
@@ -177,39 +177,39 @@ TEST_F(IfMergingTest, CheckInstsSplit)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).v0id().InputsAutoType(1, 5);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(2, 7);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
         }
-        BASIC_BLOCK(5, 6, 7)
+        BASIC_BLOCK(5U, 6U, 7U)
         {
-            INST(9, Opcode::Phi).u64().Inputs({{4, 1}, {3, 2}});
-            INST(10, Opcode::Mul).u64().Inputs(9, 9);
-            INST(11, Opcode::Add).u64().Inputs(10, 9);
-            INST(12, Opcode::Sub).u64().Inputs(0, 9);
-            INST(13, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(9U, Opcode::Phi).u64().Inputs({{4U, 1U}, {3U, 2U}});
+            INST(10U, Opcode::Mul).u64().Inputs(9U, 9U);
+            INST(11U, Opcode::Add).u64().Inputs(10U, 9U);
+            INST(12U, Opcode::Sub).u64().Inputs(0U, 9U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(14, Opcode::Return).u64().Inputs(11);
+            INST(14U, Opcode::Return).u64().Inputs(11U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(15, Opcode::Return).u64().Inputs(12);
+            INST(15U, Opcode::Return).u64().Inputs(12U);
         }
     }
 
@@ -219,28 +219,28 @@ TEST_F(IfMergingTest, CheckInstsSplit)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).v0id().InputsAutoType(1, 5);
-            INST(10, Opcode::Mul).u64().Inputs(2, 2);
-            INST(12, Opcode::Add).u64().Inputs(10, 2);
-            INST(15, Opcode::Return).u64().Inputs(12);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
+            INST(10U, Opcode::Mul).u64().Inputs(2U, 2U);
+            INST(12U, Opcode::Add).u64().Inputs(10U, 2U);
+            INST(15U, Opcode::Return).u64().Inputs(12U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(2, 7);
-            INST(11, Opcode::Sub).u64().Inputs(0, 1);
-            INST(14, Opcode::Return).u64().Inputs(11);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
+            INST(11U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(14U, Opcode::Return).u64().Inputs(11U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -277,25 +277,25 @@ TEST_F(IfMergingTest, SameIfsLoopBackEdge)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            CONSTANT(1, 0);
-            CONSTANT(2, 1);
-            BASIC_BLOCK(2, 3, 4)
+            PARAMETER(0U, 0U).u64();
+            CONSTANT(1U, 0U);
+            CONSTANT(2U, 1U);
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(3, Opcode::Phi).u64().Inputs({{0, 0}, {4, 4}});
-                INST(4, Opcode::Sub).u64().Inputs(3, 2);
-                INST(5, Opcode::Compare).b().CC(CC_EQ).Inputs(4, 1);
-                INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+                INST(3U, Opcode::Phi).u64().Inputs({{0U, 0U}, {4U, 4U}});
+                INST(4U, Opcode::Sub).u64().Inputs(3U, 2U);
+                INST(5U, Opcode::Compare).b().CC(CC_EQ).Inputs(4U, 1U);
+                INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
             }
-            BASIC_BLOCK(3, 4) {}
-            BASIC_BLOCK(4, 5, 2)
+            BASIC_BLOCK(3U, 4U) {}
+            BASIC_BLOCK(4U, 5U, 2U)
             {
-                INST(7, Opcode::Phi).u64().Inputs({{2, 0}, {3, 1}});
-                INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0).Inputs(5);
+                INST(7U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 1U}});
+                INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0U).Inputs(5U);
             }
-            BASIC_BLOCK(5, -1)
+            BASIC_BLOCK(5U, -1L)
             {
-                INST(9, Opcode::Return).u64().Inputs(7);
+                INST(9U, Opcode::Return).u64().Inputs(7U);
             }
         }
 
@@ -305,19 +305,19 @@ TEST_F(IfMergingTest, SameIfsLoopBackEdge)
         auto graph_expected = CreateEmptyGraph();
         GRAPH(graph_expected)
         {
-            PARAMETER(0, 0).u64();
-            CONSTANT(1, 0);
-            CONSTANT(2, 1);
-            BASIC_BLOCK(2, 3, 2)
+            PARAMETER(0U, 0U).u64();
+            CONSTANT(1U, 0U);
+            CONSTANT(2U, 1U);
+            BASIC_BLOCK(2U, 3U, 2U)
             {
-                INST(3, Opcode::Phi).u64().Inputs({{0, 0}, {2, 4}});
-                INST(4, Opcode::Sub).u64().Inputs(3, 2);
-                INST(5, Opcode::Compare).b().CC(CC_EQ).Inputs(4, 1);
-                INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+                INST(3U, Opcode::Phi).u64().Inputs({{0U, 0U}, {2U, 4U}});
+                INST(4U, Opcode::Sub).u64().Inputs(3U, 2U);
+                INST(5U, Opcode::Compare).b().CC(CC_EQ).Inputs(4U, 1U);
+                INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(9, Opcode::Return).u64().Inputs(inverse ? 0 : 1);
+                INST(9U, Opcode::Return).u64().Inputs(inverse ? 0U : 1U);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
@@ -344,40 +344,40 @@ TEST_F(IfMergingTest, SameIfsMixedBranches)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0, 1);
-            INST(5, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
 
-        BASIC_BLOCK(3, 5, 6)
+        BASIC_BLOCK(3U, 5U, 6U)
         {
-            INST(6, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0, 2);
-            INST(7, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(1);
+            INST(6U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0U, 2U);
+            INST(7U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(1U);
         }
 
-        BASIC_BLOCK(4, 5) {}
+        BASIC_BLOCK(4U, 5U) {}
 
-        BASIC_BLOCK(5, 6) {}
+        BASIC_BLOCK(5U, 6U) {}
 
-        BASIC_BLOCK(6, 7, 8)
+        BASIC_BLOCK(6U, 7U, 8U)
         {
-            INST(8, Opcode::Phi).b().Inputs(1, 2);
-            INST(9, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(8U, Opcode::Phi).b().Inputs(1U, 2U);
+            INST(9U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
 
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(10, Opcode::Return).u64().Inputs(1);
+            INST(10U, Opcode::Return).u64().Inputs(1U);
         }
 
-        BASIC_BLOCK(8, -1)
+        BASIC_BLOCK(8U, -1L)
         {
-            INST(11, Opcode::Return).u64().Inputs(0);
+            INST(11U, Opcode::Return).u64().Inputs(0U);
         }
     }
 
@@ -392,38 +392,38 @@ TEST_F(IfMergingTest, BlockWithThreePredecessors)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
 
-        BASIC_BLOCK(2, 5, 3)
+        BASIC_BLOCK(2U, 5U, 3U)
         {
-            INST(3, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
 
-        BASIC_BLOCK(3, 5, 4)
+        BASIC_BLOCK(3U, 5U, 4U)
         {
-            INST(6, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0, 2);
-            INST(7, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(1);
+            INST(6U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0U, 2U);
+            INST(7U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(1U);
         }
 
-        BASIC_BLOCK(4, 5) {}
+        BASIC_BLOCK(4U, 5U) {}
 
-        BASIC_BLOCK(5, 6, 7)
+        BASIC_BLOCK(5U, 6U, 7U)
         {
-            INST(8, Opcode::Phi).u64().Inputs({{2, 0}, {3, 1}, {4, 2}});
-            INST(9, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(8U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 1U}, {4U, 2U}});
+            INST(9U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(10, Opcode::Return).u64().Inputs(8);
+            INST(10U, Opcode::Return).u64().Inputs(8U);
         }
 
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(11, Opcode::Return).u64().Inputs(1);
+            INST(11U, Opcode::Return).u64().Inputs(1U);
         }
     }
 
@@ -438,35 +438,35 @@ TEST_F(IfMergingTest, BlockWithOnePredecessor)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Return).u64().Inputs(2);
+            INST(5U, Opcode::Return).u64().Inputs(2U);
         }
 
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(6, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0, 1);
-            INST(7, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(6U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_EQ).Inputs(0U, 1U);
+            INST(7U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(8, Opcode::Return).u64().Inputs(1);
+            INST(8U, Opcode::Return).u64().Inputs(1U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(9, Opcode::Return).u64().Inputs(1);
+            INST(9U, Opcode::Return).u64().Inputs(1U);
         }
     }
 
@@ -479,37 +479,37 @@ TEST_F(IfMergingTest, ConstPhiIf)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).v0id().InputsAutoType(1, 5);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(2, 7);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
         }
-        BASIC_BLOCK(5, 6, 7)
+        BASIC_BLOCK(5U, 6U, 7U)
         {
-            INST(9, Opcode::Phi).u64().Inputs({{3, 1}, {4, 2}});
-            INST(10, Opcode::Compare).b().CC(CC_EQ).Inputs(9, 2);
-            INST(11, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(10);
+            INST(9U, Opcode::Phi).u64().Inputs({{3U, 1U}, {4U, 2U}});
+            INST(10U, Opcode::Compare).b().CC(CC_EQ).Inputs(9U, 2U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(12, Opcode::Return).b().Inputs(1);
+            INST(12U, Opcode::Return).b().Inputs(1U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(13, Opcode::Return).b().Inputs(2);
+            INST(13U, Opcode::Return).b().Inputs(2U);
         }
     }
 
@@ -519,25 +519,25 @@ TEST_F(IfMergingTest, ConstPhiIf)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).v0id().InputsAutoType(1, 5);
-            INST(13, Opcode::Return).b().Inputs(2);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
+            INST(13U, Opcode::Return).b().Inputs(2U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(2, 7);
-            INST(12, Opcode::Return).b().Inputs(1);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
+            INST(12U, Opcode::Return).b().Inputs(1U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -547,37 +547,37 @@ TEST_F(IfMergingTest, ConstantEqualToAllPhiInputs)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).v0id().InputsAutoType(1, 5);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(2, 7);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
         }
-        BASIC_BLOCK(5, 6, 7)
+        BASIC_BLOCK(5U, 6U, 7U)
         {
-            INST(9, Opcode::Phi).u64().Inputs({{3, 1}, {4, 1}});
-            INST(10, Opcode::Compare).b().CC(CC_EQ).Inputs(9, 1);
-            INST(11, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(10);
+            INST(9U, Opcode::Phi).u64().Inputs({{3U, 1U}, {4U, 1U}});
+            INST(10U, Opcode::Compare).b().CC(CC_EQ).Inputs(9U, 1U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(12, Opcode::Return).b().Inputs(1);
+            INST(12U, Opcode::Return).b().Inputs(1U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(13, Opcode::Return).b().Inputs(2);
+            INST(13U, Opcode::Return).b().Inputs(2U);
         }
     }
 
@@ -587,27 +587,27 @@ TEST_F(IfMergingTest, ConstantEqualToAllPhiInputs)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).v0id().InputsAutoType(1, 5);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(2, 7);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(12, Opcode::Return).b().Inputs(1);
+            INST(12U, Opcode::Return).b().Inputs(1U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -617,38 +617,38 @@ TEST_F(IfMergingTest, ConstantNotEqualToPhiInputs)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        CONSTANT(14, 2);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        CONSTANT(14U, 2U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).v0id().InputsAutoType(1, 5);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(2, 7);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
         }
-        BASIC_BLOCK(5, 6, 7)
+        BASIC_BLOCK(5U, 6U, 7U)
         {
-            INST(9, Opcode::Phi).u64().Inputs({{3, 1}, {4, 2}});
-            INST(10, Opcode::Compare).b().CC(CC_EQ).Inputs(9, 14);
-            INST(11, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(10);
+            INST(9U, Opcode::Phi).u64().Inputs({{3U, 1U}, {4U, 2U}});
+            INST(10U, Opcode::Compare).b().CC(CC_EQ).Inputs(9U, 14U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(12, Opcode::Return).b().Inputs(1);
+            INST(12U, Opcode::Return).b().Inputs(1U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(13, Opcode::Return).b().Inputs(2);
+            INST(13U, Opcode::Return).b().Inputs(2U);
         }
     }
 
@@ -658,27 +658,27 @@ TEST_F(IfMergingTest, ConstantNotEqualToPhiInputs)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).v0id().InputsAutoType(1, 5);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(2, 7);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(13, Opcode::Return).b().Inputs(2);
+            INST(13U, Opcode::Return).b().Inputs(2U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -688,39 +688,39 @@ TEST_F(IfMergingTest, InstInPhiBlock)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).v0id().InputsAutoType(1, 5);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(2, 7);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
         }
-        BASIC_BLOCK(5, 6, 7)
+        BASIC_BLOCK(5U, 6U, 7U)
         {
-            INST(9, Opcode::Phi).u64().Inputs({{3, 1}, {4, 2}});
-            INST(10, Opcode::SaveState).NoVregs();
-            INST(11, Opcode::CallStatic).v0id().InputsAutoType(0, 10);
-            INST(12, Opcode::Compare).b().CC(CC_EQ).Inputs(9, 2);
-            INST(13, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(12);
+            INST(9U, Opcode::Phi).u64().Inputs({{3U, 1U}, {4U, 2U}});
+            INST(10U, Opcode::SaveState).NoVregs();
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(0U, 10U);
+            INST(12U, Opcode::Compare).b().CC(CC_EQ).Inputs(9U, 2U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(14, Opcode::Return).b().Inputs(1);
+            INST(14U, Opcode::Return).b().Inputs(1U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(15, Opcode::Return).b().Inputs(2);
+            INST(15U, Opcode::Return).b().Inputs(2U);
         }
     }
 
@@ -761,57 +761,57 @@ TEST_F(IfMergingTest, NestedIf)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        CONSTANT(3, 2);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        CONSTANT(3U, 2U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(3, 7)
+        BASIC_BLOCK(3U, 7U)
         {
-            INST(6, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).v0id().InputsAutoType(1, 6);
+            INST(6U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).v0id().InputsAutoType(1U, 6U);
         }
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(8, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 2);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(8U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 2U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
-        BASIC_BLOCK(5, 7)
+        BASIC_BLOCK(5U, 7U)
         {
-            INST(10, Opcode::SaveState).NoVregs();
-            INST(11, Opcode::CallStatic).v0id().InputsAutoType(2, 10);
+            INST(10U, Opcode::SaveState).NoVregs();
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(2U, 10U);
         }
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(12, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).v0id().InputsAutoType(3, 12);
+            INST(12U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).v0id().InputsAutoType(3U, 12U);
         }
-        BASIC_BLOCK(7, 8, 9)
+        BASIC_BLOCK(7U, 8U, 9U)
         {
-            INST(14, Opcode::Phi).u64().Inputs({{3, 1}, {5, 2}, {6, 3}});
-            INST(15, Opcode::Compare).b().CC(CC_EQ).Inputs(14, 2);
-            INST(16, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(15);
+            INST(14U, Opcode::Phi).u64().Inputs({{3U, 1U}, {5U, 2U}, {6U, 3U}});
+            INST(15U, Opcode::Compare).b().CC(CC_EQ).Inputs(14U, 2U);
+            INST(16U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(15U);
         }
-        BASIC_BLOCK(8, -1)
+        BASIC_BLOCK(8U, -1L)
         {
-            INST(17, Opcode::Return).b().Inputs(2);
+            INST(17U, Opcode::Return).b().Inputs(2U);
         }
-        BASIC_BLOCK(9, 10, 11)
+        BASIC_BLOCK(9U, 10U, 11U)
         {
-            INST(18, Opcode::Compare).b().CC(CC_EQ).Inputs(14, 1);
-            INST(19, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(18);
+            INST(18U, Opcode::Compare).b().CC(CC_EQ).Inputs(14U, 1U);
+            INST(19U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(18U);
         }
-        BASIC_BLOCK(10, -1)
+        BASIC_BLOCK(10U, -1L)
         {
-            INST(20, Opcode::Return).b().Inputs(1);
+            INST(20U, Opcode::Return).b().Inputs(1U);
         }
-        BASIC_BLOCK(11, -1)
+        BASIC_BLOCK(11U, -1L)
         {
-            INST(21, Opcode::Return).b().Inputs(3);
+            INST(21U, Opcode::Return).b().Inputs(3U);
         }
     }
 
@@ -821,37 +821,37 @@ TEST_F(IfMergingTest, NestedIf)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        CONSTANT(3, 2);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        CONSTANT(3U, 2U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(6, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).v0id().InputsAutoType(1, 6);
-            INST(20, Opcode::Return).b().Inputs(1);
+            INST(6U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).v0id().InputsAutoType(1U, 6U);
+            INST(20U, Opcode::Return).b().Inputs(1U);
         }
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(8, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 2);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(8U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 2U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(10, Opcode::SaveState).NoVregs();
-            INST(11, Opcode::CallStatic).v0id().InputsAutoType(2, 10);
-            INST(17, Opcode::Return).b().Inputs(2);
+            INST(10U, Opcode::SaveState).NoVregs();
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(2U, 10U);
+            INST(17U, Opcode::Return).b().Inputs(2U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(12, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).v0id().InputsAutoType(3, 12);
-            INST(21, Opcode::Return).b().Inputs(3);
+            INST(12U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).v0id().InputsAutoType(3U, 12U);
+            INST(21U, Opcode::Return).b().Inputs(3U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -861,48 +861,48 @@ TEST_F(IfMergingTest, DuplicatePhiInputs)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        CONSTANT(3, 2);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        CONSTANT(3U, 2U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(3, 7)
+        BASIC_BLOCK(3U, 7U)
         {
-            INST(6, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).v0id().InputsAutoType(1, 6);
+            INST(6U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).v0id().InputsAutoType(1U, 6U);
         }
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(8, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 2);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(8U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 2U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
-        BASIC_BLOCK(5, 7)
+        BASIC_BLOCK(5U, 7U)
         {
-            INST(10, Opcode::SaveState).NoVregs();
-            INST(11, Opcode::CallStatic).v0id().InputsAutoType(2, 10);
+            INST(10U, Opcode::SaveState).NoVregs();
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(2U, 10U);
         }
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(12, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).v0id().InputsAutoType(3, 12);
+            INST(12U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).v0id().InputsAutoType(3U, 12U);
         }
-        BASIC_BLOCK(7, 8, 9)
+        BASIC_BLOCK(7U, 8U, 9U)
         {
-            INST(14, Opcode::Phi).u64().Inputs({{3, 1}, {5, 2}, {6, 1}});
-            INST(15, Opcode::Compare).b().CC(CC_EQ).Inputs(14, 1);
-            INST(16, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(15);
+            INST(14U, Opcode::Phi).u64().Inputs({{3U, 1U}, {5U, 2U}, {6U, 1U}});
+            INST(15U, Opcode::Compare).b().CC(CC_EQ).Inputs(14U, 1U);
+            INST(16U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(15U);
         }
-        BASIC_BLOCK(8, -1)
+        BASIC_BLOCK(8U, -1L)
         {
-            INST(17, Opcode::Return).b().Inputs(1);
+            INST(17U, Opcode::Return).b().Inputs(1U);
         }
-        BASIC_BLOCK(9, -1)
+        BASIC_BLOCK(9U, -1L)
         {
-            INST(18, Opcode::Return).b().Inputs(2);
+            INST(18U, Opcode::Return).b().Inputs(2U);
         }
     }
 
@@ -912,39 +912,39 @@ TEST_F(IfMergingTest, DuplicatePhiInputs)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        CONSTANT(3, 2);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        CONSTANT(3U, 2U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(3, 7)
+        BASIC_BLOCK(3U, 7U)
         {
-            INST(6, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).v0id().InputsAutoType(1, 6);
+            INST(6U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).v0id().InputsAutoType(1U, 6U);
         }
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(8, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 2);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(8U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 2U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(10, Opcode::SaveState).NoVregs();
-            INST(11, Opcode::CallStatic).v0id().InputsAutoType(2, 10);
-            INST(18, Opcode::Return).b().Inputs(2);
+            INST(10U, Opcode::SaveState).NoVregs();
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(2U, 10U);
+            INST(18U, Opcode::Return).b().Inputs(2U);
         }
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(12, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).v0id().InputsAutoType(3, 12);
+            INST(12U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).v0id().InputsAutoType(3U, 12U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(17, Opcode::Return).b().Inputs(1);
+            INST(17U, Opcode::Return).b().Inputs(1U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -987,41 +987,41 @@ TEST_F(IfMergingTest, SplitPhiIntoTwo)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        CONSTANT(3, 2);
-        CONSTANT(4, 3);
-        BASIC_BLOCK(2, 6, 3)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        CONSTANT(3U, 2U);
+        CONSTANT(4U, 3U);
+        BASIC_BLOCK(2U, 6U, 3U)
         {
-            INST(5, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(5U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 6, 4)
+        BASIC_BLOCK(3U, 6U, 4U)
         {
-            INST(7, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 2);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
+            INST(7U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 2U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(4, 6, 5)
+        BASIC_BLOCK(4U, 6U, 5U)
         {
-            INST(9, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 3);
-            INST(10, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(9);
+            INST(9U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 3U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
         }
-        BASIC_BLOCK(5, 6) {}
-        BASIC_BLOCK(6, 7, 8)
+        BASIC_BLOCK(5U, 6U) {}
+        BASIC_BLOCK(6U, 7U, 8U)
         {
-            INST(11, Opcode::Phi).u64().Inputs({{2, 1}, {3, 3}, {4, 2}, {5, 4}});
-            INST(12, Opcode::Add).u64().Inputs(11, 0);
-            INST(13, Opcode::Compare).b().CC(CC_LT).Inputs(11, 3);
-            INST(14, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(13);
+            INST(11U, Opcode::Phi).u64().Inputs({{2U, 1U}, {3U, 3U}, {4U, 2U}, {5U, 4U}});
+            INST(12U, Opcode::Add).u64().Inputs(11U, 0U);
+            INST(13U, Opcode::Compare).b().CC(CC_LT).Inputs(11U, 3U);
+            INST(14U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(13U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(15, Opcode::Return).u64().Inputs(11);
+            INST(15U, Opcode::Return).u64().Inputs(11U);
         }
-        BASIC_BLOCK(8, -1)
+        BASIC_BLOCK(8U, -1L)
         {
-            INST(16, Opcode::Return).u64().Inputs(12);
+            INST(16U, Opcode::Return).u64().Inputs(12U);
         }
     }
 
@@ -1031,36 +1031,36 @@ TEST_F(IfMergingTest, SplitPhiIntoTwo)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
-        CONSTANT(2, 1);
-        CONSTANT(3, 2);
-        CONSTANT(4, 3);
-        BASIC_BLOCK(2, 7, 3)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        CONSTANT(3U, 2U);
+        CONSTANT(4U, 3U);
+        BASIC_BLOCK(2U, 7U, 3U)
         {
-            INST(5, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(5U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 8, 4)
+        BASIC_BLOCK(3U, 8U, 4U)
         {
-            INST(7, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 2);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
+            INST(7U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 2U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(4, 7, 8)
+        BASIC_BLOCK(4U, 7U, 8U)
         {
-            INST(9, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 3);
-            INST(10, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(9);
+            INST(9U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 3U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(17, Opcode::Phi).u64().Inputs({{2, 1}, {4, 2}});
-            INST(15, Opcode::Return).u64().Inputs(17);
+            INST(17U, Opcode::Phi).u64().Inputs({{2U, 1U}, {4U, 2U}});
+            INST(15U, Opcode::Return).u64().Inputs(17U);
         }
-        BASIC_BLOCK(8, -1)
+        BASIC_BLOCK(8U, -1L)
         {
-            INST(18, Opcode::Phi).u64().Inputs({{3, 3}, {4, 4}});
-            INST(12, Opcode::Add).u64().Inputs(18, 0);
-            INST(16, Opcode::Return).u64().Inputs(12);
+            INST(18U, Opcode::Phi).u64().Inputs({{3U, 3U}, {4U, 4U}});
+            INST(12U, Opcode::Add).u64().Inputs(18U, 0U);
+            INST(16U, Opcode::Return).u64().Inputs(12U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -1097,27 +1097,27 @@ TEST_F(IfMergingTest, ConstantPhiLoopBackEdge)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            CONSTANT(1, 0);
-            CONSTANT(2, 2);
-            CONSTANT(3, 1);
-            BASIC_BLOCK(2, 3, 4)
+            PARAMETER(0U, 0U).u64();
+            CONSTANT(1U, 0U);
+            CONSTANT(2U, 2U);
+            CONSTANT(3U, 1U);
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(4, Opcode::Phi).u64().Inputs({{0, 0}, {4, 5}});
-                INST(5, Opcode::Sub).u64().Inputs(4, 3);
-                INST(6, Opcode::Compare).b().CC(CC_EQ).Inputs(5, 1);
-                INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+                INST(4U, Opcode::Phi).u64().Inputs({{0U, 0U}, {4U, 5U}});
+                INST(5U, Opcode::Sub).u64().Inputs(4U, 3U);
+                INST(6U, Opcode::Compare).b().CC(CC_EQ).Inputs(5U, 1U);
+                INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
             }
-            BASIC_BLOCK(3, 4) {}
-            BASIC_BLOCK(4, 5, 2)
+            BASIC_BLOCK(3U, 4U) {}
+            BASIC_BLOCK(4U, 5U, 2U)
             {
-                INST(8, Opcode::Phi).u64().Inputs({{2, 1}, {3, 2}});
-                INST(9, Opcode::Compare).b().CC(CC_LE).Inputs(4, 3);
-                INST(10, Opcode::IfImm).SrcType(DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0).Inputs(6);
+                INST(8U, Opcode::Phi).u64().Inputs({{2U, 1U}, {3U, 2U}});
+                INST(9U, Opcode::Compare).b().CC(CC_LE).Inputs(4U, 3U);
+                INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0U).Inputs(6U);
             }
-            BASIC_BLOCK(5, -1)
+            BASIC_BLOCK(5U, -1L)
             {
-                INST(11, Opcode::Return).u64().Inputs(8);
+                INST(11U, Opcode::Return).u64().Inputs(8U);
             }
         }
 
@@ -1127,22 +1127,22 @@ TEST_F(IfMergingTest, ConstantPhiLoopBackEdge)
         auto graph_expected = CreateEmptyGraph();
         GRAPH(graph_expected)
         {
-            PARAMETER(0, 0).u64();
-            CONSTANT(1, 0);
+            PARAMETER(0U, 0U).u64();
+            CONSTANT(1U, 0U);
             if (!inverse) {
-                CONSTANT(2, 2);
+                CONSTANT(2U, 2U);
             }
-            CONSTANT(3, 1);
-            BASIC_BLOCK(2, 3, 2)
+            CONSTANT(3U, 1U);
+            BASIC_BLOCK(2U, 3U, 2U)
             {
-                INST(4, Opcode::Phi).u64().Inputs({{0, 0}, {2, 5}});
-                INST(5, Opcode::Sub).u64().Inputs(4, 3);
-                INST(6, Opcode::Compare).b().CC(CC_EQ).Inputs(5, 1);
-                INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+                INST(4U, Opcode::Phi).u64().Inputs({{0U, 0U}, {2U, 5U}});
+                INST(5U, Opcode::Sub).u64().Inputs(4U, 3U);
+                INST(6U, Opcode::Compare).b().CC(CC_EQ).Inputs(5U, 1U);
+                INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(11, Opcode::Return).u64().Inputs(inverse ? 1 : 2);
+                INST(11U, Opcode::Return).u64().Inputs(inverse ? 1U : 2U);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
@@ -1167,24 +1167,24 @@ TEST_F(IfMergingTest, ConstantPhiUnrollLoop)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
-        CONSTANT(2, 2);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Phi).u64().Inputs({{0, 1}, {3, 2}});
-            INST(5, Opcode::Compare).b().CC(CC_EQ).Inputs(4, 1);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(4U, Opcode::Phi).u64().Inputs({{0U, 1U}, {3U, 2U}});
+            INST(5U, Opcode::Compare).b().CC(CC_EQ).Inputs(4U, 1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(7);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(7U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -1194,11 +1194,11 @@ TEST_F(IfMergingTest, ConstantPhiUnrollLoop)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(7);
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(7U);
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -1228,24 +1228,24 @@ TEST_F(IfMergingTest, ConstantPhiRemoveLoopExit)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
-        CONSTANT(2, 2);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Phi).u64().Inputs({{0, 1}, {3, 2}});
-            INST(5, Opcode::Compare).b().CC(CC_GE).Inputs(4, 1);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(4U, Opcode::Phi).u64().Inputs({{0U, 1U}, {3U, 2U}});
+            INST(5U, Opcode::Compare).b().CC(CC_GE).Inputs(4U, 1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(7);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(7U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -1255,12 +1255,12 @@ TEST_F(IfMergingTest, ConstantPhiRemoveLoopExit)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        BASIC_BLOCK(2, 3) {}
+        BASIC_BLOCK(2U, 3U) {}
 
-        BASIC_BLOCK(3, 3)
+        BASIC_BLOCK(3U, 3U)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(7);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(7U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -1284,24 +1284,24 @@ TEST_F(IfMergingTest, ConstantPhiRemoveLoop)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
-        CONSTANT(2, 2);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Phi).u64().Inputs({{0, 1}, {3, 2}});
-            INST(5, Opcode::Compare).b().CC(CC_EQ).Inputs(4, 2);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(4U, Opcode::Phi).u64().Inputs({{0U, 1U}, {3U, 2U}});
+            INST(5U, Opcode::Compare).b().CC(CC_EQ).Inputs(4U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(7, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).v0id().InputsAutoType(7);
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(7U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -1311,9 +1311,9 @@ TEST_F(IfMergingTest, ConstantPhiRemoveLoop)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -1339,19 +1339,19 @@ TEST_F(IfMergingTest, ConstantPhiRemoveEmptyLoop)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            CONSTANT(1, 1);
-            CONSTANT(2, 2);
+            PARAMETER(0U, 0U).u64();
+            CONSTANT(1U, 1U);
+            CONSTANT(2U, 2U);
 
-            BASIC_BLOCK(2, 2, 3)
+            BASIC_BLOCK(2U, 2U, 3U)
             {
-                INST(4, Opcode::Phi).u64().Inputs({{0, 1}, {2, 2}});
-                INST(5, Opcode::Compare).b().CC(inverse ? CC_NE : CC_EQ).Inputs(4, 2);
-                INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0).Inputs(5);
+                INST(4U, Opcode::Phi).u64().Inputs({{0U, 1U}, {2U, 2U}});
+                INST(5U, Opcode::Compare).b().CC(inverse ? CC_NE : CC_EQ).Inputs(4U, 2U);
+                INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0U).Inputs(5U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(7, Opcode::ReturnVoid).v0id();
+                INST(7U, Opcode::ReturnVoid).v0id();
             }
         }
 
@@ -1361,9 +1361,9 @@ TEST_F(IfMergingTest, ConstantPhiRemoveEmptyLoop)
         auto graph_expected = CreateEmptyGraph();
         GRAPH(graph_expected)
         {
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(7, Opcode::ReturnVoid).v0id();
+                INST(7U, Opcode::ReturnVoid).v0id();
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
@@ -1390,21 +1390,21 @@ TEST_F(IfMergingTest, ConstantPhiDontRemoveLoop)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 1);
-        CONSTANT(2, 2);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
 
-        BASIC_BLOCK(2, 2, 3)
+        BASIC_BLOCK(2U, 2U, 3U)
         {
-            INST(4, Opcode::Phi).u64().Inputs({{0, 1}, {2, 2}});
-            INST(5, Opcode::SaveState).NoVregs();
-            INST(6, Opcode::CallStatic).v0id().InputsAutoType(5);
-            INST(7, Opcode::Compare).b().CC(CC_EQ).Inputs(4, 1);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
+            INST(4U, Opcode::Phi).u64().Inputs({{0U, 1U}, {2U, 2U}});
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(5U);
+            INST(7U, Opcode::Compare).b().CC(CC_EQ).Inputs(4U, 1U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
 

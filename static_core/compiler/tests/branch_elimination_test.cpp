@@ -94,51 +94,51 @@ void BranchEliminationTest::BuildTestGraph(Graph *graph)
 {
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        CONSTANT(3, CONST_VALUE);
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        CONSTANT(3U, CONST_VALUE);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(19, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(19);
+            INST(19U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(19U);
         }
-        BASIC_BLOCK(3, 7)
+        BASIC_BLOCK(3U, 7U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 1);
-            INST(6, Opcode::Add).u64().Inputs(5, 2);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(6U, Opcode::Add).u64().Inputs(5U, 2U);
         }
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(9, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 2);
-            INST(10, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(9);
+            INST(9U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 2U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
         }
-        BASIC_BLOCK(5, 7)
+        BASIC_BLOCK(5U, 7U)
         {
-            INST(11, Opcode::Sub).u64().Inputs(0, 1);
-            INST(12, Opcode::Sub).u64().Inputs(11, 2);
+            INST(11U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(12U, Opcode::Sub).u64().Inputs(11U, 2U);
         }
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(14, Opcode::Mul).u64().Inputs(0, 1);
-            INST(15, Opcode::Mul).u64().Inputs(14, 2);
+            INST(14U, Opcode::Mul).u64().Inputs(0U, 1U);
+            INST(15U, Opcode::Mul).u64().Inputs(14U, 2U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(17, Opcode::Phi).u64().Inputs(6, 12, 15);
-            INST(18, Opcode::Return).u64().Inputs(17);
+            INST(17U, Opcode::Phi).u64().Inputs(6U, 12U, 15U);
+            INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
 
     BB(CONST_CONDITION_BLOCK_ID).SetTry(true);
     auto inst_if = BB(CONST_CONDITION_BLOCK_ID).GetLastInst();
     ASSERT_TRUE(inst_if->GetOpcode() == Opcode::IfImm);
-    inst_if->SetInput(0, &INS(3));
+    inst_if->SetInput(0U, &INS(3U));
 
     if constexpr (SWAP_CC == SwapCC::TRUE) {
-        INS(4).CastToIfImm()->SetCc(CC_EQ);
-        INS(10).CastToIfImm()->SetCc(CC_EQ);
+        INS(4U).CastToIfImm()->SetCc(CC_EQ);
+        INS(10U).CastToIfImm()->SetCc(CC_EQ);
     }
 }
 
@@ -160,47 +160,47 @@ void BranchEliminationTest::BuildTestGraph2(Graph *graph)
 {
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        CONSTANT(3, CONST_VALUE);
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        CONSTANT(3U, CONST_VALUE);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(19, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(19);
+            INST(19U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(19U);
         }
-        BASIC_BLOCK(3, 7, 5)
+        BASIC_BLOCK(3U, 7U, 5U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 1);
-            INST(6, Opcode::Add).u64().Inputs(5, 2);
-            INST(20, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 2);
-            INST(21, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(20);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(6U, Opcode::Add).u64().Inputs(5U, 2U);
+            INST(20U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 2U);
+            INST(21U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(20U);
         }
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(9, Opcode::Compare).b().CC(CC_EQ).Inputs(1, 2);
-            INST(10, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(9);
+            INST(9U, Opcode::Compare).b().CC(CC_EQ).Inputs(1U, 2U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
         }
-        BASIC_BLOCK(5, 7)
+        BASIC_BLOCK(5U, 7U)
         {
-            INST(11, Opcode::Phi).u64().Inputs(0, 1);
-            INST(12, Opcode::Sub).u64().Inputs(11, 2);
+            INST(11U, Opcode::Phi).u64().Inputs(0U, 1U);
+            INST(12U, Opcode::Sub).u64().Inputs(11U, 2U);
         }
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(14, Opcode::Mul).u64().Inputs(0, 1);
-            INST(15, Opcode::Mul).u64().Inputs(14, 2);
+            INST(14U, Opcode::Mul).u64().Inputs(0U, 1U);
+            INST(15U, Opcode::Mul).u64().Inputs(14U, 2U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(17, Opcode::Phi).u64().Inputs(6, 12, 15);
-            INST(18, Opcode::Return).u64().Inputs(17);
+            INST(17U, Opcode::Phi).u64().Inputs(6U, 12U, 15U);
+            INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
     auto inst_if = BB(CONST_CONDITION_BLOCK_ID).GetLastInst();
     ASSERT_TRUE(inst_if->GetOpcode() == Opcode::IfImm);
-    inst_if->SetInput(0, &INS(3));
+    inst_if->SetInput(0U, &INS(3U));
 }
 
 /*
@@ -223,28 +223,28 @@ TEST_F(BranchEliminationTest, DisconnectFalseBranch)
     static constexpr uint64_t CONST_CONDITION_BLOCK_ID = 2;
     static constexpr uint64_t CONSTANT_VALUE = 1;
     BuildTestGraph<CONST_CONDITION_BLOCK_ID, CONSTANT_VALUE>(GetGraph());
-    InitBlockToBeDisconnected({&BB(4), &BB(5), &BB(6)});
+    InitBlockToBeDisconnected({&BB(4U), &BB(5U), &BB(6U)});
 
     GetGraph()->RunPass<BranchElimination>();
     CheckBlocksDisconnected();
-    EXPECT_EQ(BB(2).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(2).GetSuccessor(0), &BB(3));
-    EXPECT_FALSE(INS(17).HasUsers());
-    EXPECT_EQ(INS(18).GetInput(0).GetInst(), &INS(6));
+    EXPECT_EQ(BB(2U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(2U).GetSuccessor(0U), &BB(3U));
+    EXPECT_FALSE(INS(17U).HasUsers());
+    EXPECT_EQ(INS(18U).GetInput(0U).GetInst(), &INS(6U));
 
     auto graph = CreateEmptyGraph();
     BuildTestGraph<CONST_CONDITION_BLOCK_ID, CONSTANT_VALUE, SwapCC::TRUE>(graph);
-    InitBlockToBeDisconnected({&BB(3)});
+    InitBlockToBeDisconnected({&BB(3U)});
     graph->RunPass<BranchElimination>();
     CheckBlocksDisconnected();
-    EXPECT_EQ(BB(2).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(2).GetSuccessor(0), &BB(4));
+    EXPECT_EQ(BB(2U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(2U).GetSuccessor(0U), &BB(4U));
 
-    auto phi = &INS(17);
+    auto phi = &INS(17U);
     EXPECT_TRUE(phi->HasUsers());
     EXPECT_EQ(phi->GetInputsCount(), 2U);
-    EXPECT_EQ(INS(12).GetUsers().Front().GetInst(), phi);
-    EXPECT_EQ(INS(15).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(12U).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(15U).GetUsers().Front().GetInst(), phi);
 }
 
 /*
@@ -267,29 +267,29 @@ TEST_F(BranchEliminationTest, DisconnectTrueBranch)
     static constexpr uint64_t CONST_CONDITION_BLOCK_ID = 2;
     static constexpr uint64_t CONSTANT_VALUE = 0;
     BuildTestGraph<CONST_CONDITION_BLOCK_ID, CONSTANT_VALUE>(GetGraph());
-    InitBlockToBeDisconnected({&BB(3)});
+    InitBlockToBeDisconnected({&BB(3U)});
 
     GetGraph()->RunPass<BranchElimination>();
     CheckBlocksDisconnected();
-    EXPECT_EQ(BB(2).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(2).GetSuccessor(0), &BB(4));
+    EXPECT_EQ(BB(2U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(2U).GetSuccessor(0U), &BB(4U));
 
-    auto phi = &INS(17);
+    auto phi = &INS(17U);
     EXPECT_TRUE(phi->HasUsers());
     EXPECT_EQ(phi->GetInputsCount(), 2U);
-    EXPECT_EQ(INS(12).GetUsers().Front().GetInst(), phi);
-    EXPECT_EQ(INS(15).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(12U).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(15U).GetUsers().Front().GetInst(), phi);
 
     auto graph = CreateEmptyGraph();
     BuildTestGraph<CONST_CONDITION_BLOCK_ID, CONSTANT_VALUE, SwapCC::TRUE>(graph);
-    InitBlockToBeDisconnected({&BB(4), &BB(5), &BB(6)});
+    InitBlockToBeDisconnected({&BB(4U), &BB(5U), &BB(6U)});
 
     graph->RunPass<BranchElimination>();
     CheckBlocksDisconnected();
-    EXPECT_EQ(BB(2).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(2).GetSuccessor(0), &BB(3));
-    EXPECT_FALSE(INS(17).HasUsers());
-    EXPECT_EQ(INS(18).GetInput(0).GetInst(), &INS(6));
+    EXPECT_EQ(BB(2U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(2U).GetSuccessor(0U), &BB(3U));
+    EXPECT_FALSE(INS(17U).HasUsers());
+    EXPECT_EQ(INS(18U).GetInput(0U).GetInst(), &INS(6U));
 }
 
 /*
@@ -312,18 +312,18 @@ TEST_F(BranchEliminationTest, DisconnectInnerFalseBranch)
     static constexpr uint64_t CONST_CONDITION_BLOCK_ID = 4;
     static constexpr uint64_t CONSTANT_VALUE = 1;
     BuildTestGraph<CONST_CONDITION_BLOCK_ID, CONSTANT_VALUE>(GetGraph());
-    InitBlockToBeDisconnected({&BB(6)});
+    InitBlockToBeDisconnected({&BB(6U)});
 
     GetGraph()->RunPass<BranchElimination>();
     CheckBlocksDisconnected();
-    EXPECT_EQ(BB(4).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(4).GetSuccessor(0), &BB(5));
+    EXPECT_EQ(BB(4U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(4U).GetSuccessor(0U), &BB(5U));
 
-    auto phi = &INS(17);
+    auto phi = &INS(17U);
     EXPECT_TRUE(phi->HasUsers());
     EXPECT_EQ(phi->GetInputsCount(), 2U);
-    EXPECT_EQ(INS(6).GetUsers().Front().GetInst(), phi);
-    EXPECT_EQ(INS(12).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(6U).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(12U).GetUsers().Front().GetInst(), phi);
 }
 
 /*
@@ -346,18 +346,18 @@ TEST_F(BranchEliminationTest, DisconnectInnerTrueBranch)
     static constexpr uint64_t CONST_CONDITION_BLOCK_ID = 4;
     static constexpr uint64_t CONSTANT_VALUE = 0;
     BuildTestGraph<CONST_CONDITION_BLOCK_ID, CONSTANT_VALUE>(GetGraph());
-    InitBlockToBeDisconnected({&BB(5)});
+    InitBlockToBeDisconnected({&BB(5U)});
 
     GetGraph()->RunPass<BranchElimination>();
     CheckBlocksDisconnected();
-    EXPECT_EQ(BB(4).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(4).GetSuccessor(0), &BB(6));
+    EXPECT_EQ(BB(4U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(4U).GetSuccessor(0U), &BB(6U));
 
-    auto phi = &INS(17);
+    auto phi = &INS(17U);
     EXPECT_TRUE(phi->HasUsers());
     EXPECT_EQ(phi->GetInputsCount(), 2U);
-    EXPECT_EQ(INS(6).GetUsers().Front().GetInst(), phi);
-    EXPECT_EQ(INS(15).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(6U).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(15U).GetUsers().Front().GetInst(), phi);
 }
 
 /*
@@ -380,20 +380,20 @@ TEST_F(BranchEliminationTest, RemoveBranchPart)
     static constexpr uint64_t CONST_CONDITION_BLOCK_ID = 2;
     static constexpr uint64_t CONSTANT_VALUE = 1;
     BuildTestGraph2<CONST_CONDITION_BLOCK_ID, CONSTANT_VALUE>(GetGraph());
-    InitBlockToBeDisconnected({&BB(4), &BB(6)});
+    InitBlockToBeDisconnected({&BB(4U), &BB(6U)});
 
     GetGraph()->RunPass<BranchElimination>();
     CheckBlocksDisconnected();
-    EXPECT_EQ(BB(2).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(2).GetSuccessor(0), &BB(3));
-    EXPECT_EQ(BB(5).GetPredsBlocks().size(), 1U);
-    EXPECT_EQ(BB(5).GetPredBlockByIndex(0), &BB(3));
+    EXPECT_EQ(BB(2U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(2U).GetSuccessor(0U), &BB(3U));
+    EXPECT_EQ(BB(5U).GetPredsBlocks().size(), 1U);
+    EXPECT_EQ(BB(5U).GetPredBlockByIndex(0U), &BB(3U));
 
-    auto phi = &INS(17);
+    auto phi = &INS(17U);
     EXPECT_TRUE(phi->HasUsers());
     EXPECT_EQ(phi->GetInputsCount(), 2U);
-    EXPECT_EQ(INS(6).GetUsers().Front().GetInst(), phi);
-    EXPECT_EQ(INS(12).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(6U).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(12U).GetUsers().Front().GetInst(), phi);
 }
 
 /*
@@ -419,17 +419,17 @@ TEST_F(BranchEliminationTest, RemoveEdge)
 
     GetGraph()->RunPass<BranchElimination>();
 
-    EXPECT_EQ(BB(4).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(4).GetSuccessor(0), &BB(6));
-    EXPECT_EQ(BB(5).GetPredsBlocks().size(), 1U);
-    EXPECT_EQ(BB(5).GetPredBlockByIndex(0), &BB(3));
+    EXPECT_EQ(BB(4U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(4U).GetSuccessor(0U), &BB(6U));
+    EXPECT_EQ(BB(5U).GetPredsBlocks().size(), 1U);
+    EXPECT_EQ(BB(5U).GetPredBlockByIndex(0U), &BB(3U));
 
-    auto phi = &INS(17);
+    auto phi = &INS(17U);
     EXPECT_TRUE(phi->HasUsers());
     EXPECT_EQ(phi->GetInputsCount(), 3U);
-    EXPECT_EQ(INS(6).GetUsers().Front().GetInst(), phi);
-    EXPECT_EQ(INS(12).GetUsers().Front().GetInst(), phi);
-    EXPECT_EQ(INS(15).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(6U).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(12U).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(15U).GetUsers().Front().GetInst(), phi);
 }
 
 /*
@@ -462,18 +462,18 @@ TEST_F(BranchEliminationTest, RemoveEdgeAndWholeBlock)
     static constexpr uint64_t CONST_CONDITION_BLOCK_ID = 2;
     static constexpr uint64_t CONSTANT_VALUE = 0;
     BuildTestGraph2<CONST_CONDITION_BLOCK_ID, CONSTANT_VALUE>(GetGraph());
-    BB(4).GetLastInst()->SetInput(0, &INS(3));
-    InitBlockToBeDisconnected({&BB(3), &BB(5)});
+    BB(4U).GetLastInst()->SetInput(0U, &INS(3U));
+    InitBlockToBeDisconnected({&BB(3U), &BB(5U)});
 
     GetGraph()->RunPass<BranchElimination>();
     CheckBlocksDisconnected();
 
-    EXPECT_EQ(BB(0).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(2).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(4).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(6).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(0U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(2U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(4U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(6U).GetSuccsBlocks().size(), 1U);
 
-    auto phi = &INS(17);
+    auto phi = &INS(17U);
     EXPECT_FALSE(phi->HasUsers());
 }
 
@@ -498,60 +498,60 @@ TEST_F(BranchEliminationTest, DisconnectPredecessors)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        CONSTANT(3, 0);
-        CONSTANT(4, 1);
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        CONSTANT(3U, 0U);
+        CONSTANT(4U, 1U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(0);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(0U);
         }
-        BASIC_BLOCK(3, 5, 6)
+        BASIC_BLOCK(3U, 5U, 6U)
         {
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(4, 7, 8)
+        BASIC_BLOCK(4U, 7U, 8U)
         {
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(6, 9) {}
-        BASIC_BLOCK(7, 9) {}
-        BASIC_BLOCK(5, 10)
+        BASIC_BLOCK(6U, 9U) {}
+        BASIC_BLOCK(7U, 9U) {}
+        BASIC_BLOCK(5U, 10U)
         {
-            INST(10, Opcode::Add).u64().Inputs(1, 2);
+            INST(10U, Opcode::Add).u64().Inputs(1U, 2U);
         }
-        BASIC_BLOCK(8, 10)
+        BASIC_BLOCK(8U, 10U)
         {
-            INST(12, Opcode::Sub).u64().Inputs(1, 2);
+            INST(12U, Opcode::Sub).u64().Inputs(1U, 2U);
         }
-        BASIC_BLOCK(9, 10)
+        BASIC_BLOCK(9U, 10U)
         {
-            INST(14, Opcode::Mul).u64().Inputs(1, 2);
+            INST(14U, Opcode::Mul).u64().Inputs(1U, 2U);
         }
-        BASIC_BLOCK(10, -1)
+        BASIC_BLOCK(10U, -1L)
         {
-            INST(16, Opcode::Phi).u64().Inputs(10, 12, 14);
-            INST(17, Opcode::Return).u64().Inputs(16);
+            INST(16U, Opcode::Phi).u64().Inputs(10U, 12U, 14U);
+            INST(17U, Opcode::Return).u64().Inputs(16U);
         }
     }
 
-    InitBlockToBeDisconnected({&BB(6), &BB(7), &BB(9)});
+    InitBlockToBeDisconnected({&BB(6U), &BB(7U), &BB(9U)});
 
     GetGraph()->RunPass<BranchElimination>();
     CheckBlocksDisconnected();
 
-    EXPECT_EQ(BB(3).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(3).GetSuccessor(0), &BB(5));
-    EXPECT_EQ(BB(4).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(4).GetSuccessor(0), &BB(8));
-    EXPECT_EQ(BB(10).GetPredsBlocks().size(), 2U);
+    EXPECT_EQ(BB(3U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(3U).GetSuccessor(0U), &BB(5U));
+    EXPECT_EQ(BB(4U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(4U).GetSuccessor(0U), &BB(8U));
+    EXPECT_EQ(BB(10U).GetPredsBlocks().size(), 2U);
 
-    auto phi = &INS(16);
+    auto phi = &INS(16U);
     EXPECT_EQ(phi->GetInputsCount(), 2U);
-    EXPECT_EQ(INS(10).GetUsers().Front().GetInst(), phi);
-    EXPECT_EQ(INS(12).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(10U).GetUsers().Front().GetInst(), phi);
+    EXPECT_EQ(INS(12U).GetUsers().Front().GetInst(), phi);
 }
 
 /*
@@ -572,34 +572,34 @@ TEST_F(BranchEliminationTest, RemoveLoopBackEdge)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        CONSTANT(3, 0);
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        CONSTANT(3U, 0U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(5, Opcode::Phi).u64().Inputs(1, 9);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(5U, Opcode::Phi).u64().Inputs(1U, 9U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(8, Opcode::Add).u64().Inputs(5, 2);
-            INST(9, Opcode::Add).u64().Inputs(8, 2);
+            INST(8U, Opcode::Add).u64().Inputs(5U, 2U);
+            INST(9U, Opcode::Add).u64().Inputs(8U, 2U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(11, Opcode::Return).u64().Inputs(5);
+            INST(11U, Opcode::Return).u64().Inputs(5U);
         }
     }
 
-    InitBlockToBeDisconnected({&BB(3)});
+    InitBlockToBeDisconnected({&BB(3U)});
 
     GetGraph()->RunPass<BranchElimination>();
     CheckBlocksDisconnected();
-    EXPECT_EQ(BB(0).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(2).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(INS(11).GetInput(0).GetInst(), &INS(1));
+    EXPECT_EQ(BB(0U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(2U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(INS(11U).GetInput(0U).GetInst(), &INS(1U));
 }
 
 /*
@@ -622,33 +622,33 @@ TEST_F(BranchEliminationTest, RemoveOneBlockLoopExit)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        CONSTANT(3, 0);
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        CONSTANT(3U, 0U);
 
-        BASIC_BLOCK(2, 2, 4)
+        BASIC_BLOCK(2U, 2U, 4U)
         {
-            INST(5, Opcode::Phi).u64().Inputs(1, 9);
-            INST(8, Opcode::Add).u64().Inputs(5, 2);
-            INST(9, Opcode::Add).u64().Inputs(8, 2);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(5U, Opcode::Phi).u64().Inputs(1U, 9U);
+            INST(8U, Opcode::Add).u64().Inputs(5U, 2U);
+            INST(9U, Opcode::Add).u64().Inputs(8U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(11, Opcode::Return).u64().Inputs(9);
+            INST(11U, Opcode::Return).u64().Inputs(9U);
         }
     }
 
     GetGraph()->RunPass<BranchElimination>();
 
-    EXPECT_EQ(BB(0).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(2).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(0U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(2U).GetSuccsBlocks().size(), 1U);
 
-    EXPECT_FALSE(INS(5).HasUsers());
-    EXPECT_TRUE(INS(8).HasUsers());
-    EXPECT_TRUE(INS(9).HasUsers());
-    EXPECT_EQ(INS(8).GetInput(0).GetInst(), &INS(1));
+    EXPECT_FALSE(INS(5U).HasUsers());
+    EXPECT_TRUE(INS(8U).HasUsers());
+    EXPECT_TRUE(INS(9U).HasUsers());
+    EXPECT_EQ(INS(8U).GetInput(0U).GetInst(), &INS(1U));
 }
 
 /*
@@ -671,50 +671,50 @@ TEST_F(BranchEliminationTest, RemoveLoopExit)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).b();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        CONSTANT(3, 0);
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        CONSTANT(3U, 0U);
 
-        BASIC_BLOCK(2, 5, 6)
+        BASIC_BLOCK(2U, 5U, 6U)
         {
-            INST(5, Opcode::Phi).u64().Inputs(1, 9);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(7, Opcode::CallStatic).v0id().InputsAutoType(20);
-            INST(4, Opcode::If).SrcType(DataType::Type::UINT64).CC(CC_NE).Inputs(1, 2);
+            INST(5U, Opcode::Phi).u64().Inputs(1U, 9U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(7U, Opcode::CallStatic).v0id().InputsAutoType(20U);
+            INST(4U, Opcode::If).SrcType(DataType::Type::UINT64).CC(CC_NE).Inputs(1U, 2U);
         }
-        BASIC_BLOCK(5, 3)
+        BASIC_BLOCK(5U, 3U)
         {
-            INST(21, Opcode::SaveState).NoVregs();
-            INST(10, Opcode::CallStatic).v0id().InputsAutoType(21);
+            INST(21U, Opcode::SaveState).NoVregs();
+            INST(10U, Opcode::CallStatic).v0id().InputsAutoType(21U);
         }
-        BASIC_BLOCK(6, 3)
+        BASIC_BLOCK(6U, 3U)
         {
-            INST(22, Opcode::SaveState).NoVregs();
-            INST(11, Opcode::CallStatic).v0id().InputsAutoType(22);
+            INST(22U, Opcode::SaveState).NoVregs();
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(22U);
         }
-        BASIC_BLOCK(3, 2, 4)
+        BASIC_BLOCK(3U, 2U, 4U)
         {
-            INST(8, Opcode::Add).u64().Inputs(5, 2);
-            INST(9, Opcode::Add).u64().Inputs(8, 2);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(8U, Opcode::Add).u64().Inputs(5U, 2U);
+            INST(9U, Opcode::Add).u64().Inputs(8U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(12, Opcode::Return).u64().Inputs(9);
+            INST(12U, Opcode::Return).u64().Inputs(9U);
         }
     }
 
     GetGraph()->RunPass<BranchElimination>();
 
-    EXPECT_EQ(BB(0).GetSuccsBlocks().size(), 1U);
-    EXPECT_EQ(BB(2).GetSuccsBlocks().size(), 2U);
-    EXPECT_EQ(BB(3).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(0U).GetSuccsBlocks().size(), 1U);
+    EXPECT_EQ(BB(2U).GetSuccsBlocks().size(), 2U);
+    EXPECT_EQ(BB(3U).GetSuccsBlocks().size(), 1U);
 
-    EXPECT_FALSE(INS(5).HasUsers());
-    EXPECT_TRUE(INS(8).HasUsers());
-    EXPECT_TRUE(INS(9).HasUsers());
-    EXPECT_EQ(INS(8).GetInput(0).GetInst(), &INS(1));
+    EXPECT_FALSE(INS(5U).HasUsers());
+    EXPECT_TRUE(INS(8U).HasUsers());
+    EXPECT_TRUE(INS(9U).HasUsers());
+    EXPECT_EQ(INS(8U).GetInput(0U).GetInst(), &INS(1U));
 }
 
 /*
@@ -734,28 +734,28 @@ TEST_F(BranchEliminationTest, RemoveEdgeToLoop)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).b();
-        CONSTANT(3, 1);
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).b();
+        CONSTANT(3U, 1U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Phi).u64().Inputs(0, 7);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(5U, Opcode::Phi).u64().Inputs(0U, 7U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
-        BASIC_BLOCK(4, 5, 3)
+        BASIC_BLOCK(4U, 5U, 3U)
         {
-            INST(7, Opcode::Phi).u64().Inputs({{2, 0}, {5, 9}});
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(7U, Opcode::Phi).u64().Inputs({{2U, 0U}, {5U, 9U}});
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(5, 4)
+        BASIC_BLOCK(5U, 4U)
         {
-            INST(9, Opcode::Add).u64().Inputs(7, 0);
+            INST(9U, Opcode::Add).u64().Inputs(7U, 0U);
         }
     }
     /* Pretend loop unrolling is done to allow branch elimination to mutilate
@@ -769,10 +769,10 @@ TEST_F(BranchEliminationTest, RemoveEdgeToLoop)
     auto expected_graph = CreateEmptyGraph();
     GRAPH(expected_graph)
     {
-        PARAMETER(0, 0).u64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).u64().Inputs(0);
+            INST(1U, Opcode::Return).u64().Inputs(0U);
         }
     }
 
@@ -797,46 +797,46 @@ void BranchEliminationTest::BuildContitionsCheckGraph(Graph *graph, ConditionCod
 {
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(19, Opcode::Compare).b().CC(dominant_code).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(19);
+            INST(19U, Opcode::Compare).b().CC(dominant_code).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(19U);
         }
-        BASIC_BLOCK(3, 7)
+        BASIC_BLOCK(3U, 7U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 1);
-            INST(6, Opcode::Add).u64().Inputs(5, 2);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(6U, Opcode::Add).u64().Inputs(5U, 2U);
         }
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(9, Opcode::Compare).b().CC(code).Inputs(0, 1);
-            INST(10, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(9);
+            INST(9U, Opcode::Compare).b().CC(code).Inputs(0U, 1U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
         }
-        BASIC_BLOCK(5, 7)
+        BASIC_BLOCK(5U, 7U)
         {
-            INST(11, Opcode::Sub).u64().Inputs(0, 1);
-            INST(12, Opcode::Sub).u64().Inputs(11, 2);
+            INST(11U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(12U, Opcode::Sub).u64().Inputs(11U, 2U);
         }
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(14, Opcode::Mul).u64().Inputs(0, 1);
-            INST(15, Opcode::Mul).u64().Inputs(14, 2);
+            INST(14U, Opcode::Mul).u64().Inputs(0U, 1U);
+            INST(15U, Opcode::Mul).u64().Inputs(14U, 2U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(17, Opcode::Phi).u64().Inputs(6, 12, 15);
-            INST(18, Opcode::Return).u64().Inputs(17);
+            INST(17U, Opcode::Phi).u64().Inputs(6U, 12U, 15U);
+            INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
     if constexpr (DOM_RESULT == DominantCondResult::TRUE) {
-        BB(2).SwapTrueFalseSuccessors();
+        BB(2U).SwapTrueFalseSuccessors();
     }
     if constexpr (SWAP_INPUTS == SwapInputs::TRUE) {
-        INS(19).SwapInputs();
+        INS(19U).SwapInputs();
     }
 }
 
@@ -859,40 +859,40 @@ void BranchEliminationTest::BuildContitionsCheckGraphElimFalseSucc(Graph *graph,
 {
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(19, Opcode::Compare).b().CC(dominant_code).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(19);
+            INST(19U, Opcode::Compare).b().CC(dominant_code).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(19U);
         }
-        BASIC_BLOCK(3, 7)
+        BASIC_BLOCK(3U, 7U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 1);
-            INST(6, Opcode::Add).u64().Inputs(5, 2);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(6U, Opcode::Add).u64().Inputs(5U, 2U);
         }
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(9, Opcode::Compare).b().CC(code).Inputs(0, 1);
+            INST(9U, Opcode::Compare).b().CC(code).Inputs(0U, 1U);
         }
-        BASIC_BLOCK(5, 7)
+        BASIC_BLOCK(5U, 7U)
         {
-            INST(11, Opcode::Sub).u64().Inputs(0, 1);
-            INST(12, Opcode::Sub).u64().Inputs(11, 2);
+            INST(11U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(12U, Opcode::Sub).u64().Inputs(11U, 2U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(17, Opcode::Phi).u64().Inputs(6, 12);
-            INST(18, Opcode::Return).u64().Inputs(17);
+            INST(17U, Opcode::Phi).u64().Inputs(6U, 12U);
+            INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
     if constexpr (DOM_RESULT == DominantCondResult::TRUE) {
-        BB(2).SwapTrueFalseSuccessors();
+        BB(2U).SwapTrueFalseSuccessors();
     }
     if constexpr (SWAP_INPUTS == SwapInputs::TRUE) {
-        INS(19).SwapInputs();
+        INS(19U).SwapInputs();
     }
 }
 
@@ -915,40 +915,40 @@ void BranchEliminationTest::BuildContitionsCheckGraphElimTrueSucc(Graph *graph, 
 {
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(19, Opcode::Compare).b().CC(dominant_code).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(19);
+            INST(19U, Opcode::Compare).b().CC(dominant_code).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(19U);
         }
-        BASIC_BLOCK(3, 7)
+        BASIC_BLOCK(3U, 7U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 1);
-            INST(6, Opcode::Add).u64().Inputs(5, 2);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(6U, Opcode::Add).u64().Inputs(5U, 2U);
         }
-        BASIC_BLOCK(4, 6)
+        BASIC_BLOCK(4U, 6U)
         {
-            INST(9, Opcode::Compare).b().CC(code).Inputs(0, 1);
+            INST(9U, Opcode::Compare).b().CC(code).Inputs(0U, 1U);
         }
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(14, Opcode::Mul).u64().Inputs(0, 1);
-            INST(15, Opcode::Mul).u64().Inputs(14, 2);
+            INST(14U, Opcode::Mul).u64().Inputs(0U, 1U);
+            INST(15U, Opcode::Mul).u64().Inputs(14U, 2U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(17, Opcode::Phi).u64().Inputs(6, 15);
-            INST(18, Opcode::Return).u64().Inputs(17);
+            INST(17U, Opcode::Phi).u64().Inputs(6U, 15U);
+            INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
     if constexpr (DOM_RESULT == DominantCondResult::TRUE) {
-        BB(2).SwapTrueFalseSuccessors();
+        BB(2U).SwapTrueFalseSuccessors();
     }
     if constexpr (SWAP_INPUTS == SwapInputs::TRUE) {
-        INS(19).SwapInputs();
+        INS(19U).SwapInputs();
     }
 }
 
@@ -1153,45 +1153,45 @@ TEST_F(BranchEliminationTest, CascadeElimination)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 9)
+        BASIC_BLOCK(3U, 9U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 2);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(7, Opcode::Compare).b().CC(CC_EQ).Inputs(1, 0);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
+            INST(7U, Opcode::Compare).b().CC(CC_EQ).Inputs(1U, 0U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(5, 9)
+        BASIC_BLOCK(5U, 9U)
         {
-            INST(9, Opcode::Sub).u64().Inputs(0, 2);
+            INST(9U, Opcode::Sub).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(6, 7, 8)
+        BASIC_BLOCK(6U, 7U, 8U)
         {
-            INST(11, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(12, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(11);
+            INST(11U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
         }
-        BASIC_BLOCK(7, 9)
+        BASIC_BLOCK(7U, 9U)
         {
-            INST(13, Opcode::Mul).u64().Inputs(0, 2);
+            INST(13U, Opcode::Mul).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(8, 9)
+        BASIC_BLOCK(8U, 9U)
         {
-            INST(15, Opcode::Div).u64().Inputs(0, 2);
+            INST(15U, Opcode::Div).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(9, -1)
+        BASIC_BLOCK(9U, -1L)
         {
-            INST(17, Opcode::Phi).u64().Inputs(5, 9, 13, 15);
-            INST(18, Opcode::Return).u64().Inputs(17);
+            INST(17U, Opcode::Phi).u64().Inputs(5U, 9U, 13U, 15U);
+            INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
     graph->RunPass<BranchElimination>();
@@ -1200,27 +1200,27 @@ TEST_F(BranchEliminationTest, CascadeElimination)
     auto expected_graph = CreateEmptyGraph();
     GRAPH(expected_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, 3, 8)
+        BASIC_BLOCK(2U, 3U, 8U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 9)
+        BASIC_BLOCK(3U, 9U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 2);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(8, 9)
+        BASIC_BLOCK(8U, 9U)
         {
-            INST(15, Opcode::Div).u64().Inputs(0, 2);
+            INST(15U, Opcode::Div).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(9, -1)
+        BASIC_BLOCK(9U, -1L)
         {
-            INST(17, Opcode::Phi).u64().Inputs(5, 15);
-            INST(18, Opcode::Return).u64().Inputs(17);
+            INST(17U, Opcode::Phi).u64().Inputs(5U, 15U);
+            INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
@@ -1260,45 +1260,45 @@ TEST_F(BranchEliminationTest, CascadeElimination)
     auto graph_case2 = CreateEmptyGraph();
     GRAPH(graph_case2)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, 4, 3)
+        BASIC_BLOCK(2U, 4U, 3U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 9)
+        BASIC_BLOCK(3U, 9U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 2);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(7, Opcode::Compare).b().CC(CC_EQ).Inputs(1, 0);
-            INST(8, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7);
+            INST(7U, Opcode::Compare).b().CC(CC_EQ).Inputs(1U, 0U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(5, 9)
+        BASIC_BLOCK(5U, 9U)
         {
-            INST(9, Opcode::Sub).u64().Inputs(0, 2);
+            INST(9U, Opcode::Sub).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(6, 7, 8)
+        BASIC_BLOCK(6U, 7U, 8U)
         {
-            INST(11, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(12, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(11);
+            INST(11U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
         }
-        BASIC_BLOCK(7, 9)
+        BASIC_BLOCK(7U, 9U)
         {
-            INST(13, Opcode::Mul).u64().Inputs(0, 2);
+            INST(13U, Opcode::Mul).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(8, 9)
+        BASIC_BLOCK(8U, 9U)
         {
-            INST(15, Opcode::Div).u64().Inputs(0, 2);
+            INST(15U, Opcode::Div).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(9, -1)
+        BASIC_BLOCK(9U, -1L)
         {
-            INST(17, Opcode::Phi).u64().Inputs(5, 9, 13, 15);
-            INST(18, Opcode::Return).u64().Inputs(17);
+            INST(17U, Opcode::Phi).u64().Inputs(5U, 9U, 13U, 15U);
+            INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
     graph_case2->RunPass<BranchElimination>();
@@ -1307,27 +1307,27 @@ TEST_F(BranchEliminationTest, CascadeElimination)
     auto expected_graph2 = CreateEmptyGraph();
     GRAPH(expected_graph2)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, 5, 3)
+        BASIC_BLOCK(2U, 5U, 3U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 9)
+        BASIC_BLOCK(3U, 9U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 2);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(5, 9)
+        BASIC_BLOCK(5U, 9U)
         {
-            INST(9, Opcode::Sub).u64().Inputs(0, 2);
+            INST(9U, Opcode::Sub).u64().Inputs(0U, 2U);
         }
-        BASIC_BLOCK(9, -1)
+        BASIC_BLOCK(9U, -1L)
         {
-            INST(17, Opcode::Phi).u64().Inputs(5, 9);
-            INST(18, Opcode::Return).u64().Inputs(17);
+            INST(17U, Opcode::Phi).u64().Inputs(5U, 9U);
+            INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph_case2, expected_graph2));
@@ -1356,45 +1356,45 @@ TEST_F(BranchEliminationTest, ConditionEliminationNotApplied)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 6)
+        BASIC_BLOCK(3U, 6U)
         {
-            INST(5, Opcode::Add).u64().Inputs(1, 2);
+            INST(5U, Opcode::Add).u64().Inputs(1U, 2U);
         }
-        BASIC_BLOCK(4, 6)
+        BASIC_BLOCK(4U, 6U)
         {
-            INST(7, Opcode::Sub).u64().Inputs(1, 2);
+            INST(7U, Opcode::Sub).u64().Inputs(1U, 2U);
         }
-        BASIC_BLOCK(6, 7, 8)
+        BASIC_BLOCK(6U, 7U, 8U)
         {
-            INST(9, Opcode::Phi).Inputs(5, 7).u64();
-            INST(10, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(11, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(10);
+            INST(9U, Opcode::Phi).Inputs(5U, 7U).u64();
+            INST(10U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
         }
-        BASIC_BLOCK(7, 9)
+        BASIC_BLOCK(7U, 9U)
         {
-            INST(12, Opcode::Add).u64().Inputs(9, 1);
+            INST(12U, Opcode::Add).u64().Inputs(9U, 1U);
         }
-        BASIC_BLOCK(8, 9)
+        BASIC_BLOCK(8U, 9U)
         {
-            INST(14, Opcode::Sub).u64().Inputs(9, 1);
+            INST(14U, Opcode::Sub).u64().Inputs(9U, 1U);
         }
-        BASIC_BLOCK(9, -1)
+        BASIC_BLOCK(9U, -1L)
         {
-            INST(16, Opcode::Phi).u64().Inputs(12, 14);
-            INST(17, Opcode::Return).u64().Inputs(16);
+            INST(16U, Opcode::Phi).u64().Inputs(12U, 14U);
+            INST(17U, Opcode::Return).u64().Inputs(16U);
         }
     }
     graph->RunPass<BranchElimination>();
-    EXPECT_EQ(BB(6).GetSuccsBlocks().size(), 2U);
+    EXPECT_EQ(BB(6U).GetSuccsBlocks().size(), 2U);
 
     /*
      * Case 2
@@ -1415,41 +1415,41 @@ TEST_F(BranchEliminationTest, ConditionEliminationNotApplied)
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(5, Opcode::Add).u64().Inputs(1, 2);
+            INST(5U, Opcode::Add).u64().Inputs(1U, 2U);
         }
-        BASIC_BLOCK(4, 5, 6)
+        BASIC_BLOCK(4U, 5U, 6U)
         {
-            INST(7, Opcode::Phi).Inputs(1, 5).u64();
-            INST(8, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(7U, Opcode::Phi).Inputs(1U, 5U).u64();
+            INST(8U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
-        BASIC_BLOCK(5, 7)
+        BASIC_BLOCK(5U, 7U)
         {
-            INST(10, Opcode::Add).u64().Inputs(7, 1);
+            INST(10U, Opcode::Add).u64().Inputs(7U, 1U);
         }
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(12, Opcode::Sub).u64().Inputs(7, 1);
+            INST(12U, Opcode::Sub).u64().Inputs(7U, 1U);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(14, Opcode::Phi).u64().Inputs(10, 12);
-            INST(15, Opcode::Return).u64().Inputs(14);
+            INST(14U, Opcode::Phi).u64().Inputs(10U, 12U);
+            INST(15U, Opcode::Return).u64().Inputs(14U);
         }
     }
     graph2->RunPass<BranchElimination>();
-    EXPECT_EQ(BB(4).GetSuccsBlocks().size(), 2U);
+    EXPECT_EQ(BB(4U).GetSuccsBlocks().size(), 2U);
 }
 
 /*
@@ -1477,43 +1477,43 @@ TEST_F(BranchEliminationTest, DomBothSuccessorsReachTargetBlock)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(5, Opcode::Add).u64().Inputs(0, 0);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 0U);
         }
-        BASIC_BLOCK(4, 6, 7)
+        BASIC_BLOCK(4U, 6U, 7U)
         {
-            INST(7, Opcode::Phi).u64().Inputs({{2, 0}, {3, 5}});
-            INST(8, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(7U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 5U}});
+            INST(8U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
-        BASIC_BLOCK(6, 8)
+        BASIC_BLOCK(6U, 8U)
         {
-            INST(10, Opcode::Add).u64().Inputs(7, 1);
+            INST(10U, Opcode::Add).u64().Inputs(7U, 1U);
         }
-        BASIC_BLOCK(7, 8)
+        BASIC_BLOCK(7U, 8U)
         {
-            INST(12, Opcode::Sub).u64().Inputs(7, 1);
+            INST(12U, Opcode::Sub).u64().Inputs(7U, 1U);
         }
-        BASIC_BLOCK(8, -1)
+        BASIC_BLOCK(8U, -1L)
         {
-            INST(14, Opcode::Phi).u64().Inputs(10, 12);
-            INST(15, Opcode::Return).u64().Inputs(14);
+            INST(14U, Opcode::Phi).u64().Inputs(10U, 12U);
+            INST(15U, Opcode::Return).u64().Inputs(14U);
         }
     }
     graph->RunPass<BranchElimination>();
     // Elimination NOT applied
-    EXPECT_EQ(BB(4).GetGraph(), graph);
-    EXPECT_EQ(BB(4).GetSuccsBlocks().size(), 2U);
+    EXPECT_EQ(BB(4U).GetGraph(), graph);
+    EXPECT_EQ(BB(4U).GetSuccsBlocks().size(), 2U);
 }
 
 TEST_F(BranchEliminationTest, CreateInfiniteLoop)
@@ -1521,15 +1521,15 @@ TEST_F(BranchEliminationTest, CreateInfiniteLoop)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(1, 1);
+        CONSTANT(1U, 1U);
 
-        BASIC_BLOCK(2, 2, 3)
+        BASIC_BLOCK(2U, 2U, 3U)
         {
-            INST(2, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(1);
+            INST(2U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(1U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(4, Opcode::ReturnVoid);
+            INST(4U, Opcode::ReturnVoid);
         }
     }
     ASSERT_TRUE(graph->HasEndBlock());
@@ -1539,11 +1539,11 @@ TEST_F(BranchEliminationTest, CreateInfiniteLoop)
     auto expected_graph = CreateEmptyGraph();
     GRAPH(expected_graph)
     {
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, 3)
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, 3U)
         {  // pre-header
         }
-        BASIC_BLOCK(3, 3)
+        BASIC_BLOCK(3U, 3U)
         {  // infinite loop
         }
     }
@@ -1560,57 +1560,57 @@ TEST_F(BranchEliminationTest, CompareAndIfNotSameBlock)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).s64();
-        CONSTANT(3, 0);
-        BASIC_BLOCK(2, 3)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).s64();
+        CONSTANT(3U, 0U);
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(4, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
+            INST(4U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
         }
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(5, Opcode::Phi).s64().Inputs(2, 8);
-            INST(6, Opcode::Compare).b().CC(CC_LT).Inputs(5, 0);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(5U, Opcode::Phi).s64().Inputs(2U, 8U);
+            INST(6U, Opcode::Compare).b().CC(CC_LT).Inputs(5U, 0U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(8, Opcode::Add).s64().Inputs(5, 3);
+            INST(8U, Opcode::Add).s64().Inputs(5U, 3U);
         }
-        BASIC_BLOCK(5, 6, 7)
+        BASIC_BLOCK(5U, 6U, 7U)
         {
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }  // if INS(4) != 0 goto BB(6) else goto BB(7)
-        BASIC_BLOCK(6, 12)
+        BASIC_BLOCK(6U, 12U)
         {
-            INST(10, Opcode::Mul).u64().Inputs(0, 1);
+            INST(10U, Opcode::Mul).u64().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(7, 8, 9)
+        BASIC_BLOCK(7U, 8U, 9U)
         {
-            INST(11, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);  // equal to INS(4) -> INS(11) == 0
-            INST(12, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Imm(0).Inputs(11);
+            INST(11U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);  // equal to INS(4) -> INS(11) == 0
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Imm(0U).Inputs(11U);
         }  // INS(11) == 0 is true -> goto BB(8), remove BB(9)
-        BASIC_BLOCK(8, 10, 11)
+        BASIC_BLOCK(8U, 10U, 11U)
         {
-            INST(14, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(11);
+            INST(14U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
         }  // INS(11) == 1 is false -> goto BB(11), remove BB(10)
-        BASIC_BLOCK(9, 12)
+        BASIC_BLOCK(9U, 12U)
         {
-            INST(15, Opcode::Sub).u64().Inputs(0, 1);
+            INST(15U, Opcode::Sub).u64().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(10, 12)
+        BASIC_BLOCK(10U, 12U)
         {
-            INST(16, Opcode::Mul).u64().Inputs(1, 1);
+            INST(16U, Opcode::Mul).u64().Inputs(1U, 1U);
         }
-        BASIC_BLOCK(11, 12)
+        BASIC_BLOCK(11U, 12U)
         {
-            INST(17, Opcode::Add).u64().Inputs(2, 2);
+            INST(17U, Opcode::Add).u64().Inputs(2U, 2U);
         }
-        BASIC_BLOCK(12, -1)
+        BASIC_BLOCK(12U, -1L)
         {
-            INST(18, Opcode::Phi).u64().Inputs(10, 15, 16, 17);
-            INST(19, Opcode::Return).u64().Inputs(18);
+            INST(18U, Opcode::Phi).u64().Inputs(10U, 15U, 16U, 17U);
+            INST(19U, Opcode::Return).u64().Inputs(18U);
         }
     }
     graph->RunPass<BranchElimination>();
@@ -1619,41 +1619,41 @@ TEST_F(BranchEliminationTest, CompareAndIfNotSameBlock)
     auto expected_graph = CreateEmptyGraph();
     GRAPH(expected_graph)
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).s64();
-        CONSTANT(3, 0);
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).s64();
+        CONSTANT(3U, 0U);
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(4, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
+            INST(4U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
         }
-        BASIC_BLOCK(3, 4, 5)
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(5, Opcode::Phi).s64().Inputs(2, 8);
-            INST(6, Opcode::Compare).b().CC(CC_LT).Inputs(5, 0);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(5U, Opcode::Phi).s64().Inputs(2U, 8U);
+            INST(6U, Opcode::Compare).b().CC(CC_LT).Inputs(5U, 0U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(8, Opcode::Add).s64().Inputs(5, 3);
+            INST(8U, Opcode::Add).s64().Inputs(5U, 3U);
         }
-        BASIC_BLOCK(5, 6, 11)
+        BASIC_BLOCK(5U, 6U, 11U)
         {
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(4);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
         }
-        BASIC_BLOCK(6, 12)
+        BASIC_BLOCK(6U, 12U)
         {
-            INST(10, Opcode::Mul).u64().Inputs(0, 1);
+            INST(10U, Opcode::Mul).u64().Inputs(0U, 1U);
         }
-        BASIC_BLOCK(11, 12)
+        BASIC_BLOCK(11U, 12U)
         {
-            INST(17, Opcode::Add).u64().Inputs(2, 2);
+            INST(17U, Opcode::Add).u64().Inputs(2U, 2U);
         }
-        BASIC_BLOCK(12, -1)
+        BASIC_BLOCK(12U, -1L)
         {
-            INST(18, Opcode::Phi).u64().Inputs(10, 17);
-            INST(19, Opcode::Return).u64().Inputs(18);
+            INST(18U, Opcode::Phi).u64().Inputs(10U, 17U);
+            INST(19U, Opcode::Return).u64().Inputs(18U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
@@ -1664,42 +1664,42 @@ TEST_F(BranchEliminationTest, DisconnectPhiWithInputItself)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(2, 10);
-        PARAMETER(3, 0).s64();
-        BASIC_BLOCK(2, 10, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
+        PARAMETER(3U, 0U).s64();
+        BASIC_BLOCK(2U, 10U, 4U)
         {
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Imm(0).Inputs(0);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Imm(0U).Inputs(0U);
         }
-        BASIC_BLOCK(4, 7)
+        BASIC_BLOCK(4U, 7U)
         {
-            INST(5, Opcode::Mul).s64().Inputs(2, 2);
+            INST(5U, Opcode::Mul).s64().Inputs(2U, 2U);
         }
-        BASIC_BLOCK(7, 8, 10)
+        BASIC_BLOCK(7U, 8U, 10U)
         {
-            INST(6, Opcode::Phi).s64().Inputs(0, 12, 13);
-            INST(7, Opcode::Phi).s64().Inputs(5, 6, 7);
-            INST(8, Opcode::Compare).b().CC(CC_LT).Inputs(6, 7);
-            INST(9, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(6U, Opcode::Phi).s64().Inputs(0U, 12U, 13U);
+            INST(7U, Opcode::Phi).s64().Inputs(5U, 6U, 7U);
+            INST(8U, Opcode::Compare).b().CC(CC_LT).Inputs(6U, 7U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
-        BASIC_BLOCK(8, 5, 6)
+        BASIC_BLOCK(8U, 5U, 6U)
         {
-            INST(10, Opcode::Compare).b().CC(CC_LT).Inputs(6, 3);
-            INST(11, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(10);
+            INST(10U, Opcode::Compare).b().CC(CC_LT).Inputs(6U, 3U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
         }
-        BASIC_BLOCK(5, 7)
+        BASIC_BLOCK(5U, 7U)
         {
-            INST(12, Opcode::Add).s64().Inputs(6, 1);
+            INST(12U, Opcode::Add).s64().Inputs(6U, 1U);
         }
-        BASIC_BLOCK(6, 7)
+        BASIC_BLOCK(6U, 7U)
         {
-            INST(13, Opcode::Add).s64().Inputs(6, 2);
+            INST(13U, Opcode::Add).s64().Inputs(6U, 2U);
         }
-        BASIC_BLOCK(10, -1)
+        BASIC_BLOCK(10U, -1L)
         {
-            INST(20, Opcode::Phi).s64().Inputs(0, 6);
-            INST(21, Opcode::Return).s64().Inputs(20);
+            INST(20U, Opcode::Phi).s64().Inputs(0U, 6U);
+            INST(21U, Opcode::Return).s64().Inputs(20U);
         }
     }
     graph->RunPass<BranchElimination>();
@@ -1708,10 +1708,10 @@ TEST_F(BranchEliminationTest, DisconnectPhiWithInputItself)
     auto expected_graph = CreateEmptyGraph();
     GRAPH(expected_graph)
     {
-        CONSTANT(0, 0);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(21, Opcode::Return).s64().Inputs(0);
+            INST(21U, Opcode::Return).s64().Inputs(0U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));

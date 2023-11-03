@@ -66,71 +66,71 @@ TEST(Operands, TypeInfo)
     };
 
     for (uint64_t i = 0; i < sizeof(arr) / sizeof(TypeInfo); ++i) {
-        if (i >= 16) {  // NOLINT(readability-magic-numbers)
+        if (i >= 16U) {  // NOLINT(readability-magic-numbers)
             ASSERT_FALSE(arr[i].IsValid());
         } else {
             ASSERT_TRUE(arr[i].IsValid());
         }
     }
 
-    for (int i = 0; i < 4; ++i) {
-        ASSERT_EQ(arr[i], arr[4 + i]);
-        ASSERT_EQ(arr[i], arr[8 + i]);
-        ASSERT_EQ(arr[4 + i], arr[8 + i]);
+    for (size_t i = 0; i < 4U; ++i) {
+        ASSERT_EQ(arr[i], arr[4U + i]);
+        ASSERT_EQ(arr[i], arr[8U + i]);
+        ASSERT_EQ(arr[4U + i], arr[8U + i]);
 
-        ASSERT_EQ(arr[i].GetSize(), arr[4 + i].GetSize());
-        ASSERT_EQ(arr[i].GetSize(), arr[8 + i].GetSize());
-        ASSERT_EQ(arr[4 + i].GetSize(), arr[8 + i].GetSize());
+        ASSERT_EQ(arr[i].GetSize(), arr[4U + i].GetSize());
+        ASSERT_EQ(arr[i].GetSize(), arr[8U + i].GetSize());
+        ASSERT_EQ(arr[4U + i].GetSize(), arr[8U + i].GetSize());
 
         ASSERT_TRUE(arr[i].IsScalar());
-        ASSERT_TRUE(arr[4 + i].IsScalar());
-        ASSERT_TRUE(arr[8 + i].IsScalar());
+        ASSERT_TRUE(arr[4U + i].IsScalar());
+        ASSERT_TRUE(arr[8U + i].IsScalar());
 
         ASSERT_FALSE(arr[i].IsFloat());
-        ASSERT_FALSE(arr[4 + i].IsFloat());
-        ASSERT_FALSE(arr[8 + i].IsFloat());
+        ASSERT_FALSE(arr[4U + i].IsFloat());
+        ASSERT_FALSE(arr[8U + i].IsFloat());
 
-        ASSERT_NE(arr[i], arr[12]);
-        ASSERT_NE(arr[i], arr[13]);
-        ASSERT_NE(arr[4 + i], arr[12]);
-        ASSERT_NE(arr[4 + i], arr[13]);
-        ASSERT_NE(arr[8 + i], arr[12]);
-        ASSERT_NE(arr[8 + i], arr[13]);
+        ASSERT_NE(arr[i], arr[12U]);
+        ASSERT_NE(arr[i], arr[13U]);
+        ASSERT_NE(arr[4U + i], arr[12U]);
+        ASSERT_NE(arr[4U + i], arr[13U]);
+        ASSERT_NE(arr[8U + i], arr[12U]);
+        ASSERT_NE(arr[8U + i], arr[13U]);
 
-        ASSERT_NE(arr[i], arr[14]);
-        ASSERT_NE(arr[i], arr[15]);
-        ASSERT_NE(arr[4 + i], arr[14]);
-        ASSERT_NE(arr[4 + i], arr[15]);
-        ASSERT_NE(arr[8 + i], arr[14]);
-        ASSERT_NE(arr[8 + i], arr[15]);
-        ASSERT_NE(arr[i], arr[16]);
-        ASSERT_NE(arr[i], arr[17]);
-        ASSERT_NE(arr[4 + i], arr[16]);
-        ASSERT_NE(arr[4 + i], arr[17]);
-        ASSERT_NE(arr[8 + i], arr[16]);
-        ASSERT_NE(arr[8 + i], arr[17]);
+        ASSERT_NE(arr[i], arr[14U]);
+        ASSERT_NE(arr[i], arr[15U]);
+        ASSERT_NE(arr[4U + i], arr[14U]);
+        ASSERT_NE(arr[4U + i], arr[15U]);
+        ASSERT_NE(arr[8U + i], arr[14U]);
+        ASSERT_NE(arr[8U + i], arr[15U]);
+        ASSERT_NE(arr[i], arr[16U]);
+        ASSERT_NE(arr[i], arr[17U]);
+        ASSERT_NE(arr[4U + i], arr[16U]);
+        ASSERT_NE(arr[4U + i], arr[17U]);
+        ASSERT_NE(arr[8U + i], arr[16U]);
+        ASSERT_NE(arr[8U + i], arr[17U]);
     }
     // Float
-    ASSERT_EQ(arr[2].GetSize(), arr[12].GetSize());
-    ASSERT_EQ(arr[2].GetSize(), arr[14].GetSize());
+    ASSERT_EQ(arr[2U].GetSize(), arr[12U].GetSize());
+    ASSERT_EQ(arr[2U].GetSize(), arr[14U].GetSize());
 
-    ASSERT_TRUE(arr[12].IsValid());
-    ASSERT_TRUE(arr[14].IsValid());
-    ASSERT_TRUE(arr[12].IsFloat());
-    ASSERT_TRUE(arr[14].IsFloat());
+    ASSERT_TRUE(arr[12U].IsValid());
+    ASSERT_TRUE(arr[14U].IsValid());
+    ASSERT_TRUE(arr[12U].IsFloat());
+    ASSERT_TRUE(arr[14U].IsFloat());
     // Double
-    ASSERT_EQ(arr[3].GetSize(), arr[13].GetSize());
-    ASSERT_EQ(arr[3].GetSize(), arr[15].GetSize());
+    ASSERT_EQ(arr[3U].GetSize(), arr[13U].GetSize());
+    ASSERT_EQ(arr[3U].GetSize(), arr[15U].GetSize());
 
     // Check sizes:
-    ASSERT_EQ(BYTE_SIZE, HALF_SIZE / 2);
-    ASSERT_EQ(HALF_SIZE, WORD_SIZE / 2);
-    ASSERT_EQ(WORD_SIZE, DOUBLE_WORD_SIZE / 2);
+    ASSERT_EQ(BYTE_SIZE, HALF_SIZE / 2U);
+    ASSERT_EQ(HALF_SIZE, WORD_SIZE / 2U);
+    ASSERT_EQ(WORD_SIZE, DOUBLE_WORD_SIZE / 2U);
 
-    ASSERT_EQ(arr[0].GetSize(), BYTE_SIZE);
-    ASSERT_EQ(arr[1].GetSize(), HALF_SIZE);
-    ASSERT_EQ(arr[2].GetSize(), WORD_SIZE);
-    ASSERT_EQ(arr[3].GetSize(), DOUBLE_WORD_SIZE);
+    ASSERT_EQ(arr[0U].GetSize(), BYTE_SIZE);
+    ASSERT_EQ(arr[1U].GetSize(), HALF_SIZE);
+    ASSERT_EQ(arr[2U].GetSize(), WORD_SIZE);
+    ASSERT_EQ(arr[3U].GetSize(), DOUBLE_WORD_SIZE);
 
     ASSERT_EQ(sizeof(TypeInfo), sizeof(uint8_t));
 
@@ -166,22 +166,22 @@ TEST(Operands, Imm)
     //  Imm holds same data (static cast for un-signed)
 
     for (uint64_t i = 0; i < ITERATION; ++i) {
-        uint8_t u8 = RANDOM_GEN(), u8_z = 0, u8_min = std::numeric_limits<uint8_t>::min(),
+        uint8_t u8 = RANDOM_GEN(), u8_z = 0U, u8_min = std::numeric_limits<uint8_t>::min(),
                 u8_max = std::numeric_limits<uint8_t>::max();
-        uint16_t u16 = RANDOM_GEN(), u16_z = 0, u16_min = std::numeric_limits<uint16_t>::min(),
+        uint16_t u16 = RANDOM_GEN(), u16_z = 0U, u16_min = std::numeric_limits<uint16_t>::min(),
                  u16_max = std::numeric_limits<uint16_t>::max();
-        uint32_t u32 = RANDOM_GEN(), u32_z = 0, u32_min = std::numeric_limits<uint32_t>::min(),
+        uint32_t u32 = RANDOM_GEN(), u32_z = 0U, u32_min = std::numeric_limits<uint32_t>::min(),
                  u32_max = std::numeric_limits<uint32_t>::max();
-        uint64_t u64 = RANDOM_GEN(), u64_z = 0, u64_min = std::numeric_limits<uint64_t>::min(),
+        uint64_t u64 = RANDOM_GEN(), u64_z = 0U, u64_min = std::numeric_limits<uint64_t>::min(),
                  u64_max = std::numeric_limits<uint64_t>::max();
 
-        int8_t i8 = RANDOM_GEN(), i8_z = 0, i8_min = std::numeric_limits<int8_t>::min(),
+        int8_t i8 = RANDOM_GEN(), i8_z = 0U, i8_min = std::numeric_limits<int8_t>::min(),
                i8_max = std::numeric_limits<int8_t>::max();
-        int16_t i16 = RANDOM_GEN(), i16_z = 0, i16_min = std::numeric_limits<int16_t>::min(),
+        int16_t i16 = RANDOM_GEN(), i16_z = 0U, i16_min = std::numeric_limits<int16_t>::min(),
                 i16_max = std::numeric_limits<int16_t>::max();
-        int32_t i32 = RANDOM_GEN(), i32_z = 0, i32_min = std::numeric_limits<int32_t>::min(),
+        int32_t i32 = RANDOM_GEN(), i32_z = 0U, i32_min = std::numeric_limits<int32_t>::min(),
                 i32_max = std::numeric_limits<int32_t>::max();
-        int64_t i64 = RANDOM_GEN(), i64_z = 0, i64_min = std::numeric_limits<int64_t>::min(),
+        int64_t i64 = RANDOM_GEN(), i64_z = 0U, i64_min = std::numeric_limits<int64_t>::min(),
                 i64_max = std::numeric_limits<int64_t>::max();
 
         float f32 = RANDOM_GEN(), f32_z = 0.0, f32_min = std::numeric_limits<float>::min(),
@@ -325,7 +325,7 @@ TEST(Operands, Imm)
 
 #ifndef NDEBUG
     // Imm holds std::variant:
-    ASSERT_EQ(sizeof(Imm), sizeof(uint64_t) * 2);
+    ASSERT_EQ(sizeof(Imm), sizeof(uint64_t) * 2U);
 #else
     // Imm holds 64-bit storage only:
     ASSERT_EQ(sizeof(Imm), sizeof(uint64_t));
@@ -334,11 +334,11 @@ TEST(Operands, Imm)
 
 TEST(Operands, MemRef)
 {
-    Reg r1(1, INT64_TYPE), r2(2, INT64_TYPE), r_i(INVALID_REG_ID, INVALID_TYPE);
-    ssize_t i1(0x0), i2(0x2);
+    Reg r1(1U, INT64_TYPE), r2(2U, INT64_TYPE), r_i(INVALID_REG_ID, INVALID_TYPE);
+    ssize_t i1(0x0U), i2(0x2U);
 
     // NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)
-    std::array<MemRef, 3> arr {MemRef(r1), MemRef(r1, i1), MemRef(r1)};
+    std::array<MemRef, 3U> arr {MemRef(r1), MemRef(r1, i1), MemRef(r1)};
     // 1. Check constructors
     //  for getters
     //  for validness

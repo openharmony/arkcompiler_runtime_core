@@ -72,7 +72,7 @@ public:
 
     template <DataType::Type REG_TYPE>
     void TestPhiMovesOverwriting(Graph *graph, SpillFillInst *sf, SpillFillInst *expected_sf);
-    template <int CONSTANTS_NUM>
+    template <unsigned int CONSTANTS_NUM>
     bool FillGraphWithConstants(Graph *graph);
 
 protected:
@@ -126,28 +126,28 @@ TEST_F(RegAllocLinearScanTest, ARM64Regs)
     }
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 1);
-        CONSTANT(1, 10);
-        CONSTANT(2, 20);
+        CONSTANT(0U, 1U);
+        CONSTANT(1U, 10U);
+        CONSTANT(2U, 20U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Phi).u64().Inputs({{0, 0}, {3, 7}});
-            INST(4, Opcode::Phi).u64().Inputs({{0, 1}, {3, 8}});
-            INST(5, Opcode::Compare).b().Inputs(4, 0);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(3U, Opcode::Phi).u64().Inputs({{0U, 0U}, {3U, 7U}});
+            INST(4U, Opcode::Phi).u64().Inputs({{0U, 1U}, {3U, 8U}});
+            INST(5U, Opcode::Compare).b().Inputs(4U, 0U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
 
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(7, Opcode::Mul).u64().Inputs(3, 4);
-            INST(8, Opcode::Sub).u64().Inputs(4, 0);
+            INST(7U, Opcode::Mul).u64().Inputs(3U, 4U);
+            INST(8U, Opcode::Sub).u64().Inputs(4U, 0U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(10, Opcode::Add).u64().Inputs(2, 3);
-            INST(11, Opcode::Return).u64().Inputs(10);
+            INST(10U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(11U, Opcode::Return).u64().Inputs(10U);
         }
     }
     auto result = GetGraph()->RunPass<RegAllocLinearScan>();
@@ -157,12 +157,12 @@ TEST_F(RegAllocLinearScanTest, ARM64Regs)
     }
     ASSERT_TRUE(result);
     GraphChecker(GetGraph()).Check();
-    CheckInstRegNotEqualOthersInstRegs(0, {1, 2, 5, 7, 8});
-    CheckInstRegNotEqualOthersInstRegs(1, {2});
-    CheckInstRegNotEqualOthersInstRegs(2, {5, 7, 8});
-    CheckInstRegNotEqualOthersInstRegs(3, {5});
-    CheckInstRegNotEqualOthersInstRegs(4, {5, 7});
-    CheckInstRegNotEqualOthersInstRegs(7, {8});
+    CheckInstRegNotEqualOthersInstRegs(0U, {1U, 2U, 5U, 7U, 8U});
+    CheckInstRegNotEqualOthersInstRegs(1U, {2U});
+    CheckInstRegNotEqualOthersInstRegs(2U, {5U, 7U, 8U});
+    CheckInstRegNotEqualOthersInstRegs(3U, {5U});
+    CheckInstRegNotEqualOthersInstRegs(4U, {5U, 7U});
+    CheckInstRegNotEqualOthersInstRegs(7U, {8U});
 }
 
 /**
@@ -180,35 +180,35 @@ TEST_F(RegAllocLinearScanTest, DISABLED_TwoFreeRegs)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 1);
-        CONSTANT(1, 10);
-        CONSTANT(2, 20);
+        CONSTANT(0U, 1U);
+        CONSTANT(1U, 10U);
+        CONSTANT(2U, 20U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Phi).u64().Inputs({{0, 0}, {3, 7}});
-            INST(4, Opcode::Phi).u64().Inputs({{0, 1}, {3, 8}});
-            INST(5, Opcode::Compare).b().Inputs(4, 0);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(3U, Opcode::Phi).u64().Inputs({{0U, 0U}, {3U, 7U}});
+            INST(4U, Opcode::Phi).u64().Inputs({{0U, 1U}, {3U, 8U}});
+            INST(5U, Opcode::Compare).b().Inputs(4U, 0U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
 
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(7, Opcode::Mul).u64().Inputs(3, 4);
-            INST(8, Opcode::Sub).u64().Inputs(4, 0);
+            INST(7U, Opcode::Mul).u64().Inputs(3U, 4U);
+            INST(8U, Opcode::Sub).u64().Inputs(4U, 0U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(10, Opcode::Add).u64().Inputs(2, 3);
-            INST(11, Opcode::ReturnVoid);
+            INST(10U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(11U, Opcode::ReturnVoid);
         }
     }
     // Create reg_mask with 2 available general registers
     RegAllocLinearScan ra(GetGraph());
     uint32_t reg_mask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xF3FFFFFFU : 0xFABFFFFFU;
     ra.SetRegMask(RegMask {reg_mask});
-    ra.SetVRegMask(VRegMask {0});
+    ra.SetVRegMask(VRegMask {0U});
     auto result = ra.Run();
     if (GetGraph()->GetCallingConvention() == nullptr) {
         EXPECT_FALSE(result);
@@ -241,38 +241,38 @@ TEST_F(RegAllocLinearScanTest, InsertSpillFillsAfterSameBlock)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 1).u64();
-        PARAMETER(1, 10).u64();
-        PARAMETER(2, 20).u64();
+        PARAMETER(0U, 1U).u64();
+        PARAMETER(1U, 10U).u64();
+        PARAMETER(2U, 20U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().CC(CC_EQ).Inputs(0, 1);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
 
-        BASIC_BLOCK(3, 5, 6)
+        BASIC_BLOCK(3U, 5U, 6U)
         {
-            INST(5, Opcode::Mul).u64().Inputs(0, 1);
-            INST(6, Opcode::Compare).b().CC(CC_EQ).Inputs(1, 2);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(5U, Opcode::Mul).u64().Inputs(0U, 1U);
+            INST(6U, Opcode::Compare).b().CC(CC_EQ).Inputs(1U, 2U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
 
-        BASIC_BLOCK(4, 6)
+        BASIC_BLOCK(4U, 6U)
         {
-            INST(8, Opcode::Mul).u64().Inputs(0, 2);
+            INST(8U, Opcode::Mul).u64().Inputs(0U, 2U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(10, Opcode::Phi).u64().Inputs({{3, 5}, {6, 12}});
-            INST(11, Opcode::Return).u64().Inputs(10);
+            INST(10U, Opcode::Phi).u64().Inputs({{3U, 5U}, {6U, 12U}});
+            INST(11U, Opcode::Return).u64().Inputs(10U);
         }
 
-        BASIC_BLOCK(6, 5)
+        BASIC_BLOCK(6U, 5U)
         {
-            INST(12, Opcode::Phi).u64().Inputs({{3, 5}, {4, 8}});
-            INST(13, Opcode::Mul).u64().Inputs(12, 2);
+            INST(12U, Opcode::Phi).u64().Inputs({{3U, 5U}, {4U, 8U}});
+            INST(13U, Opcode::Mul).u64().Inputs(12U, 2U);
         }
     }
     auto result = GetGraph()->RunPass<RegAllocLinearScan>();
@@ -293,30 +293,30 @@ TEST_F(RegAllocLinearScanTest, RzeroAssigment)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 10);
-        CONSTANT(2, 20);
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 10U);
+        CONSTANT(2U, 20U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Phi).u64().Inputs(0, 7);
-            INST(4, Opcode::Phi).u64().Inputs(1, 8);
-            INST(5, Opcode::Compare).b().Inputs(4, 0);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(3U, Opcode::Phi).u64().Inputs(0U, 7U);
+            INST(4U, Opcode::Phi).u64().Inputs(1U, 8U);
+            INST(5U, Opcode::Compare).b().Inputs(4U, 0U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
 
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(7, Opcode::Mul).u64().Inputs(3, 4);
-            INST(8, Opcode::Sub).u64().Inputs(4, 0);
+            INST(7U, Opcode::Mul).u64().Inputs(3U, 4U);
+            INST(8U, Opcode::Sub).u64().Inputs(4U, 0U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(10, Opcode::Add).u64().Inputs(2, 3);
-            INST(13, Opcode::SaveState).Inputs(10).SrcVregs({0});
-            INST(11, Opcode::CallStatic).u64().InputsAutoType(0, 13);
-            INST(12, Opcode::Return).u64().Inputs(11);
+            INST(10U, Opcode::Add).u64().Inputs(2U, 3U);
+            INST(13U, Opcode::SaveState).Inputs(10U).SrcVregs({0U});
+            INST(11U, Opcode::CallStatic).u64().InputsAutoType(0U, 13U);
+            INST(12U, Opcode::Return).u64().Inputs(11U);
         }
     }
     auto result = GetGraph()->RunPass<RegAllocLinearScan>();
@@ -328,17 +328,17 @@ TEST_F(RegAllocLinearScanTest, RzeroAssigment)
     auto zero_reg = GetGraph()->GetZeroReg();
     // check for target arch, which has a zero register
     if (zero_reg != INVALID_REG) {
-        ASSERT_EQ(INS(0).GetDstReg(), zero_reg);
-        ASSERT_EQ(INS(5).GetSrcReg(1), zero_reg);
-        ASSERT_EQ(INS(8).GetSrcReg(1), zero_reg);
+        ASSERT_EQ(INS(0U).GetDstReg(), zero_reg);
+        ASSERT_EQ(INS(5U).GetSrcReg(1U), zero_reg);
+        ASSERT_EQ(INS(8U).GetSrcReg(1U), zero_reg);
 
         // Find spill-fill with moving zero constant -> phi destination register
-        auto phi_resolver = BB(2).GetPredBlockByIndex(0);
+        auto phi_resolver = BB(2U).GetPredBlockByIndex(0U);
         auto spill_fill_inst = phi_resolver->GetLastInst()->IsControlFlow() ? phi_resolver->GetLastInst()->GetPrev()
                                                                             : phi_resolver->GetLastInst();
         ASSERT_TRUE(spill_fill_inst->GetOpcode() == Opcode::SpillFill);
         auto spill_fills = spill_fill_inst->CastToSpillFill()->GetSpillFills();
-        auto phi_reg = INS(3).GetDstReg();
+        auto phi_reg = INS(3U).GetDstReg();
         ASSERT_TRUE(phi_reg != INVALID_REG);
         auto iter = std::find_if(spill_fills.begin(), spill_fills.end(), [zero_reg, phi_reg](const SpillFillData &sf) {
             return (sf.SrcValue() == zero_reg && sf.DstValue() == phi_reg);
@@ -354,64 +354,64 @@ void RegAllocLinearScanTest::TestPhiMovesOverwriting(Graph *graph, SpillFillInst
 
     // simple cyclical sf
     sf->ClearSpillFills();
-    sf->AddMove(4, 5, REG_TYPE);
-    sf->AddMove(5, 4, REG_TYPE);
+    sf->AddMove(4U, 5U, REG_TYPE);
+    sf->AddMove(5U, 4U, REG_TYPE);
     expected_sf->ClearSpillFills();
     if (graph->GetArch() != Arch::AARCH32) {  // temp is register
         Register temp_reg = DataType::IsFloatType(REG_TYPE) ? graph->GetArchTempVReg() : graph->GetArchTempReg();
-        expected_sf->AddMove(4, temp_reg, REG_TYPE);
-        expected_sf->AddMove(5, 4, REG_TYPE);
-        expected_sf->AddMove(temp_reg, 5, REG_TYPE);
+        expected_sf->AddMove(4U, temp_reg, REG_TYPE);
+        expected_sf->AddMove(5U, 4U, REG_TYPE);
+        expected_sf->AddMove(temp_reg, 5U, REG_TYPE);
     } else {  // temp is stack slot
-        auto temp_slot = StackSlot(0);
-        expected_sf->AddSpill(4, temp_slot, REG_TYPE);
-        expected_sf->AddMove(5, 4, REG_TYPE);
-        expected_sf->AddFill(temp_slot, 5, REG_TYPE);
+        auto temp_slot = StackSlot(0U);
+        expected_sf->AddSpill(4U, temp_slot, REG_TYPE);
+        expected_sf->AddMove(5U, 4U, REG_TYPE);
+        expected_sf->AddFill(temp_slot, 5U, REG_TYPE);
     }
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expected_sf);
 
     // cyclical sf with memcopy
     sf->ClearSpillFills();
-    sf->AddMemCopy(4, 5, REG_TYPE);
-    sf->AddMemCopy(5, 4, REG_TYPE);
+    sf->AddMemCopy(4U, 5U, REG_TYPE);
+    sf->AddMemCopy(5U, 4U, REG_TYPE);
     expected_sf->ClearSpillFills();
     if (graph->GetArch() != Arch::AARCH32) {  // temp is register
         Register temp_reg = DataType::IsFloatType(REG_TYPE) ? graph->GetArchTempVReg() : graph->GetArchTempReg();
-        expected_sf->AddFill(4, temp_reg, REG_TYPE);
-        expected_sf->AddMemCopy(5, 4, REG_TYPE);
-        expected_sf->AddSpill(temp_reg, 5, REG_TYPE);
+        expected_sf->AddFill(4U, temp_reg, REG_TYPE);
+        expected_sf->AddMemCopy(5U, 4U, REG_TYPE);
+        expected_sf->AddSpill(temp_reg, 5U, REG_TYPE);
     } else {  // temp is stack slot
-        auto temp_slot = StackSlot(0);
-        expected_sf->AddMemCopy(4, temp_slot, REG_TYPE);
-        expected_sf->AddMemCopy(5, 4, REG_TYPE);
-        expected_sf->AddMemCopy(temp_slot, 5, REG_TYPE);
+        auto temp_slot = StackSlot(0U);
+        expected_sf->AddMemCopy(4U, temp_slot, REG_TYPE);
+        expected_sf->AddMemCopy(5U, 4U, REG_TYPE);
+        expected_sf->AddMemCopy(temp_slot, 5U, REG_TYPE);
     }
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expected_sf);
 
     // cyclic sf with all move-types
     sf->ClearSpillFills();
-    sf->AddMove(4, 5, REG_TYPE);
-    sf->AddSpill(5, 10, REG_TYPE);
-    sf->AddMemCopy(10, 11, REG_TYPE);
-    sf->AddFill(11, 4, REG_TYPE);
+    sf->AddMove(4U, 5U, REG_TYPE);
+    sf->AddSpill(5U, 10U, REG_TYPE);
+    sf->AddMemCopy(10U, 11U, REG_TYPE);
+    sf->AddFill(11U, 4U, REG_TYPE);
     expected_sf->ClearSpillFills();
     expected_sf->ClearSpillFills();
     if (graph->GetArch() != Arch::AARCH32) {  // temp is register
         Register temp_reg = DataType::IsFloatType(REG_TYPE) ? graph->GetArchTempVReg() : graph->GetArchTempReg();
-        expected_sf->AddMove(4, temp_reg, REG_TYPE);
-        expected_sf->AddFill(11, 4, REG_TYPE);
-        expected_sf->AddMemCopy(10, 11, REG_TYPE);
-        expected_sf->AddSpill(5, 10, REG_TYPE);
-        expected_sf->AddMove(temp_reg, 5, REG_TYPE);
+        expected_sf->AddMove(4U, temp_reg, REG_TYPE);
+        expected_sf->AddFill(11U, 4U, REG_TYPE);
+        expected_sf->AddMemCopy(10U, 11U, REG_TYPE);
+        expected_sf->AddSpill(5U, 10U, REG_TYPE);
+        expected_sf->AddMove(temp_reg, 5U, REG_TYPE);
     } else {  // temp is stack slot
-        auto temp_slot = StackSlot(0);
-        expected_sf->AddSpill(4, temp_slot, REG_TYPE);
-        expected_sf->AddFill(11, 4, REG_TYPE);
-        expected_sf->AddMemCopy(10, 11, REG_TYPE);
-        expected_sf->AddSpill(5, 10, REG_TYPE);
-        expected_sf->AddFill(temp_slot, 5, REG_TYPE);
+        auto temp_slot = StackSlot(0U);
+        expected_sf->AddSpill(4U, temp_slot, REG_TYPE);
+        expected_sf->AddFill(11U, 4U, REG_TYPE);
+        expected_sf->AddMemCopy(10U, 11U, REG_TYPE);
+        expected_sf->AddSpill(5U, 10U, REG_TYPE);
+        expected_sf->AddFill(temp_slot, 5U, REG_TYPE);
     }
 
     resolver.Resolve(sf);
@@ -419,45 +419,45 @@ void RegAllocLinearScanTest::TestPhiMovesOverwriting(Graph *graph, SpillFillInst
 
     // not applied
     sf->ClearSpillFills();
-    sf->AddMove(4, 5, REG_TYPE);
-    sf->AddMove(6, 7, REG_TYPE);
+    sf->AddMove(4U, 5U, REG_TYPE);
+    sf->AddMove(6U, 7U, REG_TYPE);
     expected_sf->ClearSpillFills();
-    expected_sf->AddMove(4, 5, REG_TYPE);
-    expected_sf->AddMove(6, 7, REG_TYPE);
+    expected_sf->AddMove(4U, 5U, REG_TYPE);
+    expected_sf->AddMove(6U, 7U, REG_TYPE);
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expected_sf);
 
     // comlex sf
     sf->ClearSpillFills();
-    sf->AddFill(1, 15, REG_TYPE);
-    sf->AddMove(4, 5, REG_TYPE);
-    sf->AddFill(2, 16, REG_TYPE);
-    sf->AddMove(5, 6, REG_TYPE);
-    sf->AddMove(6, 7, REG_TYPE);
-    sf->AddMove(7, 9, REG_TYPE);
-    sf->AddMove(6, 4, REG_TYPE);
-    sf->AddMove(11, 12, REG_TYPE);
-    sf->AddMove(20, 19, REG_TYPE);
-    sf->AddMove(21, 20, REG_TYPE);
-    sf->AddSpill(15, 3, REG_TYPE);
-    sf->AddMove(10, 11, REG_TYPE);
+    sf->AddFill(1U, 15U, REG_TYPE);
+    sf->AddMove(4U, 5U, REG_TYPE);
+    sf->AddFill(2U, 16U, REG_TYPE);
+    sf->AddMove(5U, 6U, REG_TYPE);
+    sf->AddMove(6U, 7U, REG_TYPE);
+    sf->AddMove(7U, 9U, REG_TYPE);
+    sf->AddMove(6U, 4U, REG_TYPE);
+    sf->AddMove(11U, 12U, REG_TYPE);
+    sf->AddMove(20U, 19U, REG_TYPE);
+    sf->AddMove(21U, 20U, REG_TYPE);
+    sf->AddSpill(15U, 3U, REG_TYPE);
+    sf->AddMove(10U, 11U, REG_TYPE);
     expected_sf->ClearSpillFills();
-    expected_sf->AddMove(7, 9, REG_TYPE);
-    expected_sf->AddMove(6, 7, REG_TYPE);
-    expected_sf->AddMove(5, 6, REG_TYPE);
-    expected_sf->AddMove(4, 5, REG_TYPE);
-    expected_sf->AddMove(7, 4, REG_TYPE);
+    expected_sf->AddMove(7U, 9U, REG_TYPE);
+    expected_sf->AddMove(6U, 7U, REG_TYPE);
+    expected_sf->AddMove(5U, 6U, REG_TYPE);
+    expected_sf->AddMove(4U, 5U, REG_TYPE);
+    expected_sf->AddMove(7U, 4U, REG_TYPE);
 
-    expected_sf->AddMove(11, 12, REG_TYPE);
-    expected_sf->AddMove(10, 11, REG_TYPE);
+    expected_sf->AddMove(11U, 12U, REG_TYPE);
+    expected_sf->AddMove(10U, 11U, REG_TYPE);
 
-    expected_sf->AddFill(2, 16, REG_TYPE);
+    expected_sf->AddFill(2U, 16U, REG_TYPE);
 
-    expected_sf->AddMove(20, 19, REG_TYPE);
-    expected_sf->AddMove(21, 20, REG_TYPE);
+    expected_sf->AddMove(20U, 19U, REG_TYPE);
+    expected_sf->AddMove(21U, 20U, REG_TYPE);
 
-    expected_sf->AddSpill(15, 3, REG_TYPE);
-    expected_sf->AddFill(1, 15, REG_TYPE);
+    expected_sf->AddSpill(15U, 3U, REG_TYPE);
+    expected_sf->AddFill(1U, 15U, REG_TYPE);
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expected_sf);
 }
@@ -466,10 +466,10 @@ TEST_F(RegAllocLinearScanTest, PhiMovesOverwriting)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).u64().Inputs(0);
+            INST(1U, Opcode::Return).u64().Inputs(0U);
         }
     }
 
@@ -484,67 +484,67 @@ TEST_F(RegAllocLinearScanTest, PhiMovesOverwriting)
 
     // not applied
     sf->ClearSpillFills();
-    sf->AddMove(4, 5, DataType::UINT64);
-    sf->AddMove(5, 4, DataType::FLOAT64);
+    sf->AddMove(4U, 5U, DataType::UINT64);
+    sf->AddMove(5U, 4U, DataType::FLOAT64);
     expected_sf->ClearSpillFills();
-    expected_sf->AddMove(4, 5, DataType::UINT64);
-    expected_sf->AddMove(5, 4, DataType::FLOAT64);
+    expected_sf->AddMove(4U, 5U, DataType::UINT64);
+    expected_sf->AddMove(5U, 4U, DataType::FLOAT64);
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expected_sf);
 
     // not applied
     sf->ClearSpillFills();
-    sf->AddMemCopy(0, 1, DataType::UINT64);
+    sf->AddMemCopy(0U, 1U, DataType::UINT64);
     expected_sf->ClearSpillFills();
-    expected_sf->AddMemCopy(0, 1, DataType::UINT64);
+    expected_sf->AddMemCopy(0U, 1U, DataType::UINT64);
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expected_sf);
 
     // mixed reg-types sf
     sf->ClearSpillFills();
-    sf->AddFill(1, 5, DataType::FLOAT64);
-    sf->AddFill(2, 7, DataType::UINT32);
-    sf->AddMove(4, 5, DataType::UINT64);
-    sf->AddMove(5, 6, DataType::UINT64);
-    sf->AddSpill(2, 3, DataType::UINT64);
-    sf->AddSpill(7, 4, DataType::UINT64);
-    sf->AddMove(6, 4, DataType::UINT64);
-    sf->AddMove(6, 7, DataType::FLOAT64);
-    sf->AddMove(7, 9, DataType::FLOAT64);
-    sf->AddMove(10, 11, DataType::UINT64);
-    sf->AddMove(11, 12, DataType::FLOAT64);
-    sf->AddMove(21, 20, DataType::UINT64);
-    sf->AddMove(22, 21, DataType::FLOAT64);
-    sf->AddSpill(15, 5, DataType::FLOAT64);
+    sf->AddFill(1U, 5U, DataType::FLOAT64);
+    sf->AddFill(2U, 7U, DataType::UINT32);
+    sf->AddMove(4U, 5U, DataType::UINT64);
+    sf->AddMove(5U, 6U, DataType::UINT64);
+    sf->AddSpill(2U, 3U, DataType::UINT64);
+    sf->AddSpill(7U, 4U, DataType::UINT64);
+    sf->AddMove(6U, 4U, DataType::UINT64);
+    sf->AddMove(6U, 7U, DataType::FLOAT64);
+    sf->AddMove(7U, 9U, DataType::FLOAT64);
+    sf->AddMove(10U, 11U, DataType::UINT64);
+    sf->AddMove(11U, 12U, DataType::FLOAT64);
+    sf->AddMove(21U, 20U, DataType::UINT64);
+    sf->AddMove(22U, 21U, DataType::FLOAT64);
+    sf->AddSpill(15U, 5U, DataType::FLOAT64);
     expected_sf->ClearSpillFills();
-    expected_sf->AddMove(10, 11, DataType::UINT64);
-    expected_sf->AddMove(21, 20, DataType::UINT64);
-    expected_sf->AddFill(1, 5, DataType::FLOAT64);
+    expected_sf->AddMove(10U, 11U, DataType::UINT64);
+    expected_sf->AddMove(21U, 20U, DataType::UINT64);
+    expected_sf->AddFill(1U, 5U, DataType::FLOAT64);
 
-    expected_sf->AddMove(7, 9, DataType::FLOAT64);
-    expected_sf->AddMove(6, 7, DataType::FLOAT64);
+    expected_sf->AddMove(7U, 9U, DataType::FLOAT64);
+    expected_sf->AddMove(6U, 7U, DataType::FLOAT64);
 
-    expected_sf->AddMove(11, 12, DataType::FLOAT64);
-    expected_sf->AddMove(22, 21, DataType::FLOAT64);
-    expected_sf->AddSpill(2, 3, DataType::UINT64);
+    expected_sf->AddMove(11U, 12U, DataType::FLOAT64);
+    expected_sf->AddMove(22U, 21U, DataType::FLOAT64);
+    expected_sf->AddSpill(2U, 3U, DataType::UINT64);
 
-    expected_sf->AddSpill(7, 4, DataType::UINT64);
-    expected_sf->AddFill(2, 7, DataType::UINT32);
+    expected_sf->AddSpill(7U, 4U, DataType::UINT64);
+    expected_sf->AddFill(2U, 7U, DataType::UINT32);
 
-    expected_sf->AddSpill(15, 5, DataType::FLOAT64);
+    expected_sf->AddSpill(15U, 5U, DataType::FLOAT64);
 
     if (GetGraph()->GetArch() != Arch::AARCH32) {  // temp is register
         Register temp_reg = GetGraph()->GetArchTempReg();
-        expected_sf->AddMove(4, temp_reg, DataType::UINT64);
-        expected_sf->AddMove(6, 4, DataType::UINT64);
-        expected_sf->AddMove(5, 6, DataType::UINT64);
-        expected_sf->AddMove(temp_reg, 5, DataType::UINT64);
+        expected_sf->AddMove(4U, temp_reg, DataType::UINT64);
+        expected_sf->AddMove(6U, 4U, DataType::UINT64);
+        expected_sf->AddMove(5U, 6U, DataType::UINT64);
+        expected_sf->AddMove(temp_reg, 5U, DataType::UINT64);
     } else {  // temp is stack slot
-        auto temp_slot = StackSlot(0);
-        expected_sf->AddSpill(4, temp_slot, DataType::UINT64);
-        expected_sf->AddMove(6, 4, DataType::UINT64);
-        expected_sf->AddMove(5, 6, DataType::UINT64);
-        expected_sf->AddFill(temp_slot, 5, DataType::UINT64);
+        auto temp_slot = StackSlot(0U);
+        expected_sf->AddSpill(4U, temp_slot, DataType::UINT64);
+        expected_sf->AddMove(6U, 4U, DataType::UINT64);
+        expected_sf->AddMove(5U, 6U, DataType::UINT64);
+        expected_sf->AddFill(temp_slot, 5U, DataType::UINT64);
     }
 
     resolver.Resolve(sf);
@@ -552,51 +552,51 @@ TEST_F(RegAllocLinearScanTest, PhiMovesOverwriting)
 
     // zero-reg reordering
     sf->ClearSpillFills();
-    sf->AddMove(31, 5, DataType::UINT64);
-    sf->AddMove(5, 6, DataType::UINT64);
+    sf->AddMove(31U, 5U, DataType::UINT64);
+    sf->AddMove(5U, 6U, DataType::UINT64);
     expected_sf->ClearSpillFills();
-    expected_sf->AddMove(5, 6, DataType::UINT64);
-    expected_sf->AddMove(31, 5, DataType::UINT64);
+    expected_sf->AddMove(5U, 6U, DataType::UINT64);
+    expected_sf->AddMove(31U, 5U, DataType::UINT64);
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expected_sf);
 
     // find and resolve cycle in moves sequence starts with not-cycle move
     sf->ClearSpillFills();
-    sf->AddMove(18, 7, DataType::UINT64);
-    sf->AddMove(10, 18, DataType::UINT64);
-    sf->AddMove(18, 10, DataType::UINT64);
-    sf->AddSpill(7, 32, DataType::UINT64);
+    sf->AddMove(18U, 7U, DataType::UINT64);
+    sf->AddMove(10U, 18U, DataType::UINT64);
+    sf->AddMove(18U, 10U, DataType::UINT64);
+    sf->AddSpill(7U, 32U, DataType::UINT64);
     expected_sf->ClearSpillFills();
-    expected_sf->AddSpill(7, 32, DataType::UINT64);
-    expected_sf->AddMove(18, 7, DataType::UINT64);
-    expected_sf->AddMove(10, 18, DataType::UINT64);
-    expected_sf->AddMove(7, 10, DataType::UINT64);
+    expected_sf->AddSpill(7U, 32U, DataType::UINT64);
+    expected_sf->AddMove(18U, 7U, DataType::UINT64);
+    expected_sf->AddMove(10U, 18U, DataType::UINT64);
+    expected_sf->AddMove(7U, 10U, DataType::UINT64);
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expected_sf);
 
     // fix `moves_table_[dst].src != first_src'
     sf->ClearSpillFills();
-    sf->AddMove(8, 6, DataType::UINT64);
-    sf->AddMove(7, 8, DataType::UINT64);
-    sf->AddMove(8, 7, DataType::UINT64);
+    sf->AddMove(8U, 6U, DataType::UINT64);
+    sf->AddMove(7U, 8U, DataType::UINT64);
+    sf->AddMove(8U, 7U, DataType::UINT64);
     expected_sf->ClearSpillFills();
-    expected_sf->AddMove(8, 6, DataType::UINT64);
-    expected_sf->AddMove(7, 8, DataType::UINT64);
-    expected_sf->AddMove(6, 7, DataType::UINT64);
+    expected_sf->AddMove(8U, 6U, DataType::UINT64);
+    expected_sf->AddMove(7U, 8U, DataType::UINT64);
+    expected_sf->AddMove(6U, 7U, DataType::UINT64);
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expected_sf);
 
     // find and resolve cycle in moves sequence starts with not-cycle move
     sf->ClearSpillFills();
-    sf->AddMove(18, 7, DataType::UINT64);
-    sf->AddMove(10, 18, DataType::UINT64);
-    sf->AddMove(18, 10, DataType::UINT64);
-    sf->AddMove(7, 6, DataType::UINT64);
+    sf->AddMove(18U, 7U, DataType::UINT64);
+    sf->AddMove(10U, 18U, DataType::UINT64);
+    sf->AddMove(18U, 10U, DataType::UINT64);
+    sf->AddMove(7U, 6U, DataType::UINT64);
     expected_sf->ClearSpillFills();
-    expected_sf->AddMove(7, 6, DataType::UINT64);
-    expected_sf->AddMove(18, 7, DataType::UINT64);
-    expected_sf->AddMove(10, 18, DataType::UINT64);
-    expected_sf->AddMove(7, 10, DataType::UINT64);
+    expected_sf->AddMove(7U, 6U, DataType::UINT64);
+    expected_sf->AddMove(18U, 7U, DataType::UINT64);
+    expected_sf->AddMove(10U, 18U, DataType::UINT64);
+    expected_sf->AddMove(7U, 10U, DataType::UINT64);
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expected_sf);
 }
@@ -610,11 +610,11 @@ TEST_F(RegAllocLinearScanTest, DynPhiMovesOverwriting)
 
     GRAPH(graph)
     {
-        CONSTANT(0, 0xffff000000000000).any();
+        CONSTANT(0U, 0xffff000000000000U).any();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).any().Inputs(0);
+            INST(1U, Opcode::Return).any().Inputs(0U);
         }
     }
     InitUsedRegs(graph);
@@ -629,18 +629,18 @@ TEST_F(RegAllocLinearScanTest, BrokenTriangleWithEmptyBlock)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s64().DstReg(0);
-        PARAMETER(1, 1).s64().DstReg(2);
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).s64().DstReg(0U);
+        PARAMETER(1U, 1U).s64().DstReg(2U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::Type::INT64).Inputs(1, 0);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::Type::INT64).Inputs(1U, 0U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(3, 4) {}
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(4, Opcode::Phi).s64().Inputs({{2, 1}, {3, 0}}).DstReg(0);
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(4U, Opcode::Phi).s64().Inputs({{2U, 1U}, {3U, 0U}}).DstReg(0U);
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<Cleanup>());
@@ -658,21 +658,21 @@ TEST_F(RegAllocLinearScanTest, BrokenTriangleWithEmptyBlock)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        BASIC_BLOCK(2, 4, 5)
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        BASIC_BLOCK(2U, 4U, 5U)
         {
-            INST(2, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::Type::INT64).Inputs(1, 0);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().CC(CC_LT).SrcType(DataType::Type::INT64).Inputs(1U, 0U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(5, 4)
+        BASIC_BLOCK(5U, 4U)
         {
-            INST(6, Opcode::SpillFill);
+            INST(6U, Opcode::SpillFill);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(4, Opcode::Phi).s64().Inputs({{2, 0}, {5, 1}});
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(4U, Opcode::Phi).s64().Inputs({{2U, 0U}, {5U, 1U}});
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -683,21 +683,21 @@ TEST_F(RegAllocLinearScanTest, LoadArrayPair)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0x2a).s64();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 0x2aU).s64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(3, Opcode::NewArray).ref().Inputs(44, 0).TypeId(77);
-            INST(4, Opcode::SaveState).Inputs(3).SrcVregs({0});
-            INST(5, Opcode::NullCheck).ref().Inputs(3, 4);
-            INST(6, Opcode::LoadArrayPairI).s64().Inputs(5).Imm(0x0);
-            INST(7, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x0);
-            INST(8, Opcode::LoadPairPart).s64().Inputs(6).Imm(0x1);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(3U, Opcode::NewArray).ref().Inputs(44U, 0U).TypeId(77U);
+            INST(4U, Opcode::SaveState).Inputs(3U).SrcVregs({0U});
+            INST(5U, Opcode::NullCheck).ref().Inputs(3U, 4U);
+            INST(6U, Opcode::LoadArrayPairI).s64().Inputs(5U).Imm(0x0U);
+            INST(7U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x0U);
+            INST(8U, Opcode::LoadPairPart).s64().Inputs(6U).Imm(0x1U);
 
-            INST(9, Opcode::SaveState).Inputs(3).SrcVregs({0});
-            INST(10, Opcode::ZeroCheck).s64().Inputs(7, 9);
-            INST(11, Opcode::Div).s64().Inputs(10, 8);
-            INST(12, Opcode::Return).s64().Inputs(11);
+            INST(9U, Opcode::SaveState).Inputs(3U).SrcVregs({0U});
+            INST(10U, Opcode::ZeroCheck).s64().Inputs(7U, 9U);
+            INST(11U, Opcode::Div).s64().Inputs(10U, 8U);
+            INST(12U, Opcode::Return).s64().Inputs(11U);
         }
     }
     auto result = graph->RunPass<RegAllocLinearScan>();
@@ -707,13 +707,13 @@ TEST_F(RegAllocLinearScanTest, LoadArrayPair)
     }
     ASSERT_TRUE(result);
 
-    auto &div = INS(11);
-    auto &load_pair = INS(6);
+    auto &div = INS(11U);
+    auto &load_pair = INS(6U);
     for (size_t i = 0; i < div.GetInputsCount(); ++i) {
-        if (div.GetSrcReg(0) != load_pair.GetDstReg(0)) {
+        if (div.GetSrcReg(0U) != load_pair.GetDstReg(0U)) {
             auto prev = div.GetPrev();
             ASSERT_EQ(prev->GetOpcode(), Opcode::SpillFill);
-            ASSERT_EQ(prev->CastToSpillFill()->GetSpillFill(0).DstValue(), div.GetSrcReg(0));
+            ASSERT_EQ(prev->CastToSpillFill()->GetSpillFill(0U).DstValue(), div.GetSrcReg(0U));
         }
     }
 }
@@ -726,15 +726,15 @@ TEST_F(RegAllocLinearScanTest, CheckInputTypeInStore)
     }
     GRAPH(graph)
     {
-        CONSTANT(0, nullptr).ref();
-        CONSTANT(1, 0x2a).s64();
-        CONSTANT(2, 1.1).f64();
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, nullptr).ref();
+        CONSTANT(1U, 0x2aU).s64();
+        CONSTANT(2U, 1.1).f64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::SaveState).Inputs(0, 2).SrcVregs({0, 1});
-            INST(4, Opcode::NullCheck).ref().Inputs(0, 3);
-            INST(5, Opcode::StoreObject).f64().Inputs(4, 2);
-            INST(6, Opcode::Return).s64().Inputs(1);
+            INST(3U, Opcode::SaveState).Inputs(0U, 2U).SrcVregs({0U, 1U});
+            INST(4U, Opcode::NullCheck).ref().Inputs(0U, 3U);
+            INST(5U, Opcode::StoreObject).f64().Inputs(4U, 2U);
+            INST(6U, Opcode::Return).s64().Inputs(1U);
         }
     }
     auto result = graph->RunPass<RegAllocLinearScan>();
@@ -744,9 +744,9 @@ TEST_F(RegAllocLinearScanTest, CheckInputTypeInStore)
     }
     ASSERT_TRUE(result);
 
-    auto &store = INS(5);
+    auto &store = INS(5U);
     // check zero reg
-    ASSERT_EQ(store.GetSrcReg(0), 31);
+    ASSERT_EQ(store.GetSrcReg(0U), 31U);
 }
 
 TEST_F(RegAllocLinearScanTest, NullCheckAsPhiInput)
@@ -754,34 +754,34 @@ TEST_F(RegAllocLinearScanTest, NullCheckAsPhiInput)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).s64();
-        PARAMETER(3, 3).ref();
-        BASIC_BLOCK(2, 3, 4)
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).s64();
+        PARAMETER(3U, 3U).ref();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::If).SrcType(DataType::INT64).CC(CC_EQ).Inputs(1, 2);
+            INST(4U, Opcode::If).SrcType(DataType::INT64).CC(CC_EQ).Inputs(1U, 2U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(6, Opcode::SaveState).Inputs(1, 2).SrcVregs({0, 1});
-            INST(7, Opcode::NullCheck).ref().Inputs(0, 6);
+            INST(6U, Opcode::SaveState).Inputs(1U, 2U).SrcVregs({0U, 1U});
+            INST(7U, Opcode::NullCheck).ref().Inputs(0U, 6U);
         }
-        BASIC_BLOCK(4, 5) {}
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(4U, 5U) {}
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(11, Opcode::Phi).ref().Inputs(7, 3);
-            INST(12, Opcode::Return).ref().Inputs(11);
+            INST(11U, Opcode::Phi).ref().Inputs(7U, 3U);
+            INST(12U, Opcode::Return).ref().Inputs(11U);
         }
     }
 
     EXPECT_TRUE(graph->RunPass<RegAllocLinearScan>());
-    auto phi_location = Location::MakeRegister(INS(11).GetDstReg());
-    auto param_location = INS(0).CastToParameter()->GetLocationData().GetDst();
+    auto phi_location = Location::MakeRegister(INS(11U).GetDstReg());
+    auto param_location = INS(0U).CastToParameter()->GetLocationData().GetDst();
     if (phi_location != param_location) {
-        auto sf_inst = BB(3).GetLastInst();
+        auto sf_inst = BB(3U).GetLastInst();
         ASSERT_TRUE(sf_inst->IsSpillFill());
-        auto spill_fill = sf_inst->CastToSpillFill()->GetSpillFill(0);
+        auto spill_fill = sf_inst->CastToSpillFill()->GetSpillFill(0U);
         EXPECT_EQ(spill_fill.GetSrc(), param_location);
         EXPECT_EQ(spill_fill.GetDst(), phi_location);
     }
@@ -792,18 +792,18 @@ TEST_F(RegAllocLinearScanTest, MultiDestInstruction)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1000);
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 1000U);
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(2, Opcode::NewArray).ref().Inputs(44, 0).TypeId(1);
-            INST(3, Opcode::LoadArrayPairI).s32().Inputs(2).Imm(0x0);
-            INST(4, Opcode::LoadPairPart).s32().Inputs(3).Imm(0x0);
-            INST(5, Opcode::LoadPairPart).s32().Inputs(3).Imm(0x1);
-            INST(6, Opcode::Add).s32().Inputs(1, 4);
-            INST(7, Opcode::Add).s32().Inputs(6, 5);
-            INST(8, Opcode::Return).s32().Inputs(7);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(2U, Opcode::NewArray).ref().Inputs(44U, 0U).TypeId(1U);
+            INST(3U, Opcode::LoadArrayPairI).s32().Inputs(2U).Imm(0x0U);
+            INST(4U, Opcode::LoadPairPart).s32().Inputs(3U).Imm(0x0U);
+            INST(5U, Opcode::LoadPairPart).s32().Inputs(3U).Imm(0x1U);
+            INST(6U, Opcode::Add).s32().Inputs(1U, 4U);
+            INST(7U, Opcode::Add).s32().Inputs(6U, 5U);
+            INST(8U, Opcode::Return).s32().Inputs(7U);
         }
     }
     // Run regalloc without free regs to push all dst on the stack
@@ -814,10 +814,10 @@ TEST_F(RegAllocLinearScanTest, MultiDestInstruction)
     regalloc.SetVRegMask(VRegMask {});
     regalloc.Run();
 
-    auto load_pair = &INS(3);
-    ASSERT_NE(load_pair->GetDstReg(0), load_pair->GetDstReg(1));
-    ASSERT_EQ(INS(6).GetSrcReg(1), load_pair->GetDstReg(0));
-    ASSERT_EQ(INS(7).GetSrcReg(1), load_pair->GetDstReg(1));
+    auto load_pair = &INS(3U);
+    ASSERT_NE(load_pair->GetDstReg(0U), load_pair->GetDstReg(1U));
+    ASSERT_EQ(INS(6U).GetSrcReg(1U), load_pair->GetDstReg(0U));
+    ASSERT_EQ(INS(7U).GetSrcReg(1U), load_pair->GetDstReg(1U));
 }
 
 /// Create COUNT constants and assign COUNT registers for them
@@ -851,20 +851,20 @@ TEST_F(RegAllocLinearScanTest, MultiDestAsCallInput)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 1000);
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, -1)
+        CONSTANT(0U, 1000U);
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(2, Opcode::NewArray).ref().Inputs(44, 0).TypeId(1);
-            INST(3, Opcode::LoadArrayPairI).s32().Inputs(2).Imm(0x0);
-            INST(4, Opcode::LoadPairPart).s32().Inputs(3).Imm(0x0);
-            INST(5, Opcode::LoadPairPart).s32().Inputs(3).Imm(0x1);
-            INST(6, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(7, Opcode::CallStatic).s32().InputsAutoType(4, 5, 6);
-            INST(8, Opcode::ZeroCheck).s32().Inputs(5, 6);
-            INST(9, Opcode::Div).s32().Inputs(4, 8);
-            INST(10, Opcode::Return).s32().Inputs(9);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(2U, Opcode::NewArray).ref().Inputs(44U, 0U).TypeId(1U);
+            INST(3U, Opcode::LoadArrayPairI).s32().Inputs(2U).Imm(0x0U);
+            INST(4U, Opcode::LoadPairPart).s32().Inputs(3U).Imm(0x0U);
+            INST(5U, Opcode::LoadPairPart).s32().Inputs(3U).Imm(0x1U);
+            INST(6U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(7U, Opcode::CallStatic).s32().InputsAutoType(4U, 5U, 6U);
+            INST(8U, Opcode::ZeroCheck).s32().Inputs(5U, 6U);
+            INST(9U, Opcode::Div).s32().Inputs(4U, 8U);
+            INST(10U, Opcode::Return).s32().Inputs(9U);
         }
     }
     auto regalloc = RegAllocLinearScan(graph);
@@ -878,9 +878,9 @@ TEST_F(RegAllocLinearScanTest, MultiDestAsCallInput)
     }
     ASSERT_TRUE(result);
 
-    auto load_arr = &INS(3);
-    auto div = &INS(9);
-    auto call_inst = INS(7).CastToCallStatic();
+    auto load_arr = &INS(3U);
+    auto div = &INS(9U);
+    auto call_inst = INS(7U).CastToCallStatic();
     auto spill_fill = call_inst->GetPrev()->CastToSpillFill();
     // Check split before call
     for (auto i = 0U; i < 2U; i++) {
@@ -904,50 +904,50 @@ TEST_F(RegAllocLinearScanTest, MultiDestInLoop)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(2, 1000);
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 1000U);
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(5, Opcode::NewArray).ref().Inputs(44, 2).TypeId(1);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(5U, Opcode::NewArray).ref().Inputs(44U, 2U).TypeId(1U);
         }
-        BASIC_BLOCK(3, 5, 4)
+        BASIC_BLOCK(3U, 5U, 4U)
         {
-            INST(6, Opcode::Phi).s32().Inputs(0, 12);  // pair part
-            INST(7, Opcode::Phi).s32().Inputs(1, 13);  // pair part
-            INST(8, Opcode::Phi).s32().Inputs(0, 10);  // add
-            INST(9, Opcode::Phi).s32().Inputs(0, 15);  // add
-            INST(16, Opcode::SafePoint).Inputs(5, 6, 7).SrcVregs({0, 1, 2});
-            INST(10, Opcode::AddI).s32().Inputs(8).Imm(1);
-            INST(11, Opcode::LoadArrayPair).s32().Inputs(5, 10);
-            INST(12, Opcode::LoadPairPart).s32().Inputs(11).Imm(0);
-            INST(13, Opcode::LoadPairPart).s32().Inputs(11).Imm(1);
-            INST(14, Opcode::If).SrcType(DataType::INT32).CC(CC_EQ).Inputs(12, 13);
+            INST(6U, Opcode::Phi).s32().Inputs(0U, 12U);  // pair part
+            INST(7U, Opcode::Phi).s32().Inputs(1U, 13U);  // pair part
+            INST(8U, Opcode::Phi).s32().Inputs(0U, 10U);  // add
+            INST(9U, Opcode::Phi).s32().Inputs(0U, 15U);  // add
+            INST(16U, Opcode::SafePoint).Inputs(5U, 6U, 7U).SrcVregs({0U, 1U, 2U});
+            INST(10U, Opcode::AddI).s32().Inputs(8U).Imm(1U);
+            INST(11U, Opcode::LoadArrayPair).s32().Inputs(5U, 10U);
+            INST(12U, Opcode::LoadPairPart).s32().Inputs(11U).Imm(0U);
+            INST(13U, Opcode::LoadPairPart).s32().Inputs(11U).Imm(1U);
+            INST(14U, Opcode::If).SrcType(DataType::INT32).CC(CC_EQ).Inputs(12U, 13U);
         }
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(15, Opcode::SubI).s32().Inputs(9).Imm(2);
+            INST(15U, Opcode::SubI).s32().Inputs(9U).Imm(2U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(20, Opcode::Return).s32().Inputs(9);
+            INST(20U, Opcode::Return).s32().Inputs(9U);
         }
     }
     auto regalloc = RegAllocLinearScan(graph);
-    regalloc.SetRegMask(RegMask {0xFFFFAAAA});
+    regalloc.SetRegMask(RegMask {0xFFFFAAAAU});
     ASSERT_TRUE(regalloc.Run());
 
-    auto load_pair = &INS(11);
-    EXPECT_NE(load_pair->GetDstReg(0), INVALID_REG);
-    EXPECT_NE(load_pair->GetDstReg(1), INVALID_REG);
+    auto load_pair = &INS(11U);
+    EXPECT_NE(load_pair->GetDstReg(0U), INVALID_REG);
+    EXPECT_NE(load_pair->GetDstReg(1U), INVALID_REG);
     // LoadArrayPair, SubI and AddI should use unique registers
     std::set<Register> regs;
-    regs.insert(INS(10).GetDstReg());
-    regs.insert(INS(15).GetDstReg());
-    regs.insert(load_pair->GetDstReg(0));
-    regs.insert(load_pair->GetDstReg(1));
+    regs.insert(INS(10U).GetDstReg());
+    regs.insert(INS(15U).GetDstReg());
+    regs.insert(load_pair->GetDstReg(0U));
+    regs.insert(load_pair->GetDstReg(1U));
     EXPECT_EQ(regs.size(), 4U);
 }
 
@@ -956,32 +956,32 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedCallInputs)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::CallStatic).u64().Inputs({{DataType::UINT64, 0}, {DataType::NO_TYPE, 2}});
-            INST(4, Opcode::SaveState).Inputs(0, 3).SrcVregs({0, 3});
-            INST(5, Opcode::CallStatic)
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::CallStatic).u64().Inputs({{DataType::UINT64, 0U}, {DataType::NO_TYPE, 2U}});
+            INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 3U});
+            INST(5U, Opcode::CallStatic)
                 .u64()
-                .Inputs({{DataType::UINT64, 0}, {DataType::UINT64, 3}, {DataType::NO_TYPE, 4}});
-            INST(6, Opcode::Return).u64().Inputs(5);
+                .Inputs({{DataType::UINT64, 0U}, {DataType::UINT64, 3U}, {DataType::NO_TYPE, 4U}});
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
 
     graph->RunPass<LivenessAnalyzer>();
     auto &la = graph->GetAnalysis<LivenessAnalyzer>();
-    auto param0 = la.GetInstLifeIntervals(&INS(0));
-    auto call0 = (&INS(3))->CastToCallStatic();
-    auto call1 = (&INS(5))->CastToCallStatic();
+    auto param0 = la.GetInstLifeIntervals(&INS(0U));
+    auto call0 = (&INS(3U))->CastToCallStatic();
+    auto call1 = (&INS(5U))->CastToCallStatic();
     // split at save state to force usage of stack location as call's input
-    auto param_split0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(2))->GetBegin() - 1U, GetAllocator());
-    param_split0->SetLocation(Location::MakeStackSlot(42));
+    auto param_split0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(2U))->GetBegin() - 1U, GetAllocator());
+    param_split0->SetLocation(Location::MakeStackSlot(42U));
     param_split0->SetType(DataType::UINT64);
 
     auto param_split1 = param_split0->SplitAt(la.GetInstLifeIntervals(call1)->GetBegin() - 1U, GetAllocator());
-    param_split1->SetReg(6);
+    param_split1->SetReg(6U);
     param_split1->SetType(DataType::UINT64);
 
     graph->SetStackSlotsCount(MAX_NUM_STACK_SLOTS);
@@ -994,9 +994,9 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedCallInputs)
         return;
     }
     ASSERT_TRUE(result);
-    auto call0_sf = call0->GetPrev()->CastToSpillFill()->GetSpillFill(0);
+    auto call0_sf = call0->GetPrev()->CastToSpillFill()->GetSpillFill(0U);
     EXPECT_EQ(call0_sf.SrcType(), LocationType::STACK);
-    EXPECT_EQ(call0_sf.SrcValue(), 42);
+    EXPECT_EQ(call0_sf.SrcValue(), 42U);
 
     const auto &call1_sfs = call1->GetPrev()->CastToSpillFill()->GetSpillFills();
     auto it = std::find_if(call1_sfs.begin(), call1_sfs.end(),
@@ -1009,25 +1009,25 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedSaveStateInputs)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).ref();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).ref();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::NullCheck).ref().Inputs(1, 2);
-            INST(4, Opcode::CallVirtual).u64().Inputs({{DataType::REFERENCE, 3}, {DataType::NO_TYPE, 2}});
-            INST(5, Opcode::Add).u64().Inputs(0, 4);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::NullCheck).ref().Inputs(1U, 2U);
+            INST(4U, Opcode::CallVirtual).u64().Inputs({{DataType::REFERENCE, 3U}, {DataType::NO_TYPE, 2U}});
+            INST(5U, Opcode::Add).u64().Inputs(0U, 4U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
 
     graph->RunPass<LivenessAnalyzer>();
     auto &la = graph->GetAnalysis<LivenessAnalyzer>();
-    auto param0 = la.GetInstLifeIntervals(&INS(0));
-    auto call = &INS(4);
+    auto param0 = la.GetInstLifeIntervals(&INS(0U));
+    auto call = &INS(4U);
     auto param_split = param0->SplitAt(la.GetInstLifeIntervals(call)->GetBegin() - 1U, GetAllocator());
-    static constexpr auto REG_FOR_SPLIT = Register(20);
+    static constexpr auto REG_FOR_SPLIT = Register(20U);
     param_split->SetReg(REG_FOR_SPLIT);
     param_split->SetType(DataType::UINT64);
 
@@ -1043,9 +1043,9 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedSaveStateInputs)
     }
     ASSERT_TRUE(result);
 
-    auto null_check = &INS(3);
-    auto call_save_state = call->GetInput(call->GetInputsCount() - 1).GetInst()->CastToSaveState();
-    auto null_check_save_state = null_check->GetInput(null_check->GetInputsCount() - 1).GetInst()->CastToSaveState();
+    auto null_check = &INS(3U);
+    auto call_save_state = call->GetInput(call->GetInputsCount() - 1L).GetInst()->CastToSaveState();
+    auto null_check_save_state = null_check->GetInput(null_check->GetInputsCount() - 1L).GetInst()->CastToSaveState();
 
     ASSERT_NE(call_save_state, null_check_save_state);
 }
@@ -1055,21 +1055,21 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedInstInputs)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Add).u64().Inputs(0, 0);
-            INST(3, Opcode::Add).u64().Inputs(0, 2);
-            INST(4, Opcode::Return).u64().Inputs(3);
+            INST(2U, Opcode::Add).u64().Inputs(0U, 0U);
+            INST(3U, Opcode::Add).u64().Inputs(0U, 2U);
+            INST(4U, Opcode::Return).u64().Inputs(3U);
         }
     }
 
     graph->RunPass<LivenessAnalyzer>();
     auto &la = graph->GetAnalysis<LivenessAnalyzer>();
-    auto param0 = la.GetInstLifeIntervals(&INS(0));
-    auto param_split0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(3))->GetBegin() - 1U, GetAllocator());
-    static constexpr auto REG_FOR_SPLIT = Register(20);
+    auto param0 = la.GetInstLifeIntervals(&INS(0U));
+    auto param_split0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(3U))->GetBegin() - 1U, GetAllocator());
+    static constexpr auto REG_FOR_SPLIT = Register(20U);
     param_split0->SetReg(REG_FOR_SPLIT);
     param_split0->SetType(DataType::UINT64);
 
@@ -1083,13 +1083,13 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedInstInputs)
         return;
     }
     ASSERT_TRUE(result);
-    auto add_sf = INS(3).GetPrev();
+    auto add_sf = INS(3U).GetPrev();
     ASSERT_TRUE(add_sf->IsSpillFill());
 
-    EXPECT_EQ(INS(3).GetSrcReg(0), REG_FOR_SPLIT);
+    EXPECT_EQ(INS(3U).GetSrcReg(0U), REG_FOR_SPLIT);
     SpillFillData expected_sf {LocationType::REGISTER, LocationType::REGISTER, param0->GetReg(), REG_FOR_SPLIT,
                                DataType::UINT64};
-    EXPECT_EQ(add_sf->CastToSpillFill()->GetSpillFill(0), expected_sf);
+    EXPECT_EQ(add_sf->CastToSpillFill()->GetSpillFill(0U), expected_sf);
 }
 
 TEST_F(RegAllocLinearScanTest, ResolveSegmentedSafePointInput)
@@ -1097,25 +1097,25 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedSafePointInput)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SafePoint).Inputs(0).SrcVregs({0});
-            INST(3, Opcode::Return).u64().Inputs(0);
+            INST(2U, Opcode::SafePoint).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::Return).u64().Inputs(0U);
         }
     }
 
     graph->RunPass<LivenessAnalyzer>();
     auto &la = graph->GetAnalysis<LivenessAnalyzer>();
-    auto param0 = la.GetInstLifeIntervals(&INS(0));
-    auto sp = &INS(2);
+    auto param0 = la.GetInstLifeIntervals(&INS(0U));
+    auto sp = &INS(2U);
     auto param_split = param0->SplitAt(la.GetInstLifeIntervals(sp)->GetBegin() - 1U, GetAllocator());
-    static constexpr auto STACK_SLOT = StackSlot(1);
+    static constexpr auto STACK_SLOT = StackSlot(1U);
     param_split->SetLocation(Location::MakeStackSlot(STACK_SLOT));
     param_split->SetType(DataType::UINT64);
-    auto ret_split = param_split->SplitAt(la.GetInstLifeIntervals(&INS(3))->GetBegin() - 1U, GetAllocator());
-    ret_split->SetReg(0);
+    auto ret_split = param_split->SplitAt(la.GetInstLifeIntervals(&INS(3U))->GetBegin() - 1U, GetAllocator());
+    ret_split->SetReg(0U);
     ret_split->SetType(DataType::UINT64);
 
     graph->SetStackSlotsCount(MAX_NUM_STACK_SLOTS);
@@ -1137,39 +1137,39 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedPhiInput)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Compare).b().Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(4, Opcode::Add).u64().Inputs(0, 1);
+            INST(4U, Opcode::Add).u64().Inputs(0U, 1U);
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(5, Opcode::Sub).u64().Inputs(0, 1);
+            INST(5U, Opcode::Sub).u64().Inputs(0U, 1U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(6, Opcode::Phi).u64().Inputs(0, 5);
-            INST(7, Opcode::Phi).u64().Inputs(4, 1);
-            INST(8, Opcode::Mul).u64().Inputs(6, 7);
-            INST(9, Opcode::Return).u64().Inputs(8);
+            INST(6U, Opcode::Phi).u64().Inputs(0U, 5U);
+            INST(7U, Opcode::Phi).u64().Inputs(4U, 1U);
+            INST(8U, Opcode::Mul).u64().Inputs(6U, 7U);
+            INST(9U, Opcode::Return).u64().Inputs(8U);
         }
     }
 
     graph->RunPass<LivenessAnalyzer>();
     auto &la = graph->GetAnalysis<LivenessAnalyzer>();
-    auto param0 = la.GetInstLifeIntervals(&INS(0));
-    auto param_split0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(4))->GetBegin() - 1U, GetAllocator());
-    static constexpr auto REG_FOR_SPLIT = Register(20);
+    auto param0 = la.GetInstLifeIntervals(&INS(0U));
+    auto param_split0 = param0->SplitAt(la.GetInstLifeIntervals(&INS(4U))->GetBegin() - 1U, GetAllocator());
+    static constexpr auto REG_FOR_SPLIT = Register(20U);
     param_split0->SetReg(REG_FOR_SPLIT);
     param_split0->SetType(DataType::UINT64);
 
@@ -1184,10 +1184,10 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedPhiInput)
     }
     ASSERT_TRUE(result);
 
-    auto last_inst = INS(4).GetBasicBlock()->GetLastInst();
+    auto last_inst = INS(4U).GetBasicBlock()->GetLastInst();
     ASSERT_TRUE(last_inst->IsSpillFill());
     bool spill_fill_found = false;
-    SpillFillData expected_sf {LocationType::REGISTER, LocationType::REGISTER, REG_FOR_SPLIT, INS(6).GetDstReg(),
+    SpillFillData expected_sf {LocationType::REGISTER, LocationType::REGISTER, REG_FOR_SPLIT, INS(6U).GetDstReg(),
                                DataType::UINT64};
 
     for (auto &sf : last_inst->CastToSpillFill()->GetSpillFills()) {
@@ -1205,56 +1205,56 @@ TEST_F(RegAllocLinearScanTest, DISABLED_ResolveSegmentedCatchPhiInputs)
     auto graph = CreateEmptyBytecodeGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).ref();
-        PARAMETER(2, 2).b();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        PARAMETER(2U, 2U).b();
 
-        BASIC_BLOCK(2, 3, 5)
+        BASIC_BLOCK(2U, 3U, 5U)
         {
-            INST(3, Opcode::Try).CatchTypeIds({0});
+            INST(3U, Opcode::Try).CatchTypeIds({0U});
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(10, Opcode::SaveState).Inputs(0, 1, 2).SrcVregs({0, 1, 2});
-            INST(4, Opcode::CallStatic).b().InputsAutoType(0, 1, 2, 10);
-            INST(11, Opcode::SaveState).Inputs(0, 1, 2, 4).SrcVregs({0, 1, 2, 3});
-            INST(9, Opcode::CallStatic).b().InputsAutoType(0, 1, 2, 11);
-            INST(5, Opcode::And).b().Inputs(4, 9);
+            INST(10U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(4U, Opcode::CallStatic).b().InputsAutoType(0U, 1U, 2U, 10U);
+            INST(11U, Opcode::SaveState).Inputs(0U, 1U, 2U, 4U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(9U, Opcode::CallStatic).b().InputsAutoType(0U, 1U, 2U, 11U);
+            INST(5U, Opcode::And).b().Inputs(4U, 9U);
         }
 
-        BASIC_BLOCK(4, 6, 5) {}  // Try-end
+        BASIC_BLOCK(4U, 6U, 5U) {}  // Try-end
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(7, Opcode::CatchPhi).b().Inputs(2, 4);
-            INST(8, Opcode::Return).b().Inputs(7);
+            INST(7U, Opcode::CatchPhi).b().Inputs(2U, 4U);
+            INST(8U, Opcode::Return).b().Inputs(7U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(6, Opcode::Return).b().Inputs(5);
+            INST(6U, Opcode::Return).b().Inputs(5U);
         }
     }
 
-    BB(2).SetTryId(0);
-    BB(3).SetTryId(0);
-    BB(4).SetTryId(0);
+    BB(2U).SetTryId(0U);
+    BB(3U).SetTryId(0U);
+    BB(4U).SetTryId(0U);
 
-    auto catch_phi = (&INS(7))->CastToCatchPhi();
-    catch_phi->AppendThrowableInst(&INS(4));
-    catch_phi->AppendThrowableInst(&INS(9));
+    auto catch_phi = (&INS(7U))->CastToCatchPhi();
+    catch_phi->AppendThrowableInst(&INS(4U));
+    catch_phi->AppendThrowableInst(&INS(9U));
 
-    graph->AppendThrowableInst(&INS(4), &BB(5));
-    graph->AppendThrowableInst(&INS(9), &BB(5));
-    INS(3).CastToTry()->SetTryEndBlock(&BB(4));
+    graph->AppendThrowableInst(&INS(4U), &BB(5U));
+    graph->AppendThrowableInst(&INS(9U), &BB(5U));
+    INS(3U).CastToTry()->SetTryEndBlock(&BB(4U));
 
     graph->RunPass<LivenessAnalyzer>();
     auto &la = graph->GetAnalysis<LivenessAnalyzer>();
 
-    auto con = la.GetInstLifeIntervals(&INS(2));
-    auto streq = &INS(4);
-    auto con_split = con->SplitAt(la.GetInstLifeIntervals(streq)->GetBegin() - 1, GetAllocator());
+    auto con = la.GetInstLifeIntervals(&INS(2U));
+    auto streq = &INS(4U);
+    auto con_split = con->SplitAt(la.GetInstLifeIntervals(streq)->GetBegin() - 1L, GetAllocator());
 
     auto constexpr SPLIT_REG = 10;
     con_split->SetReg(SPLIT_REG);
@@ -1264,19 +1264,19 @@ TEST_F(RegAllocLinearScanTest, DISABLED_ResolveSegmentedCatchPhiInputs)
     auto result = regalloc.Run();
     ASSERT_TRUE(result);
 
-    auto catch_phi_reg = la.GetInstLifeIntervals(&INS(7))->GetReg();
-    auto sf_before_ins4 = (&INS(4))->GetPrev()->CastToSpillFill();
+    auto catch_phi_reg = la.GetInstLifeIntervals(&INS(7U))->GetReg();
+    auto sf_before_ins4 = (&INS(4U))->GetPrev()->CastToSpillFill();
     EXPECT_EQ(std::count(sf_before_ins4->GetSpillFills().begin(), sf_before_ins4->GetSpillFills().end(),
                          SpillFillData {LocationType::REGISTER, LocationType::REGISTER, SPLIT_REG, catch_phi_reg,
                                         DataType::UINT32}),
-              1);
+              1U);
 
-    auto ins4_reg = la.GetInstLifeIntervals(&INS(4))->GetReg();
-    auto sf_before_ins9 = (&INS(9))->GetPrev()->CastToSpillFill();
+    auto ins4_reg = la.GetInstLifeIntervals(&INS(4U))->GetReg();
+    auto sf_before_ins9 = (&INS(9U))->GetPrev()->CastToSpillFill();
     EXPECT_EQ(std::count(sf_before_ins9->GetSpillFills().begin(), sf_before_ins9->GetSpillFills().end(),
                          SpillFillData {LocationType::REGISTER, LocationType::REGISTER, ins4_reg, catch_phi_reg,
                                         DataType::UINT32}),
-              1);
+              1U);
 }
 
 TEST_F(RegAllocLinearScanTest, RematConstants)
@@ -1284,28 +1284,28 @@ TEST_F(RegAllocLinearScanTest, RematConstants)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s32();
-        CONSTANT(1, 1).s32();
-        CONSTANT(2, 2).s32();
-        CONSTANT(13, 1000).s32();
-        CONSTANT(3, 0.5).f64();
-        CONSTANT(4, 10.0).f64();
-        CONSTANT(5, 26.66).f64();
-        CONSTANT(14, 2.0).f64();
+        CONSTANT(0U, 0U).s32();
+        CONSTANT(1U, 1U).s32();
+        CONSTANT(2U, 2U).s32();
+        CONSTANT(13U, 1000U).s32();
+        CONSTANT(3U, 0.5).f64();
+        CONSTANT(4U, 10.0).f64();
+        CONSTANT(5U, 26.66).f64();
+        CONSTANT(14U, 2.0).f64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(6, Opcode::Add).s32().Inputs(0, 1);
-            INST(7, Opcode::Add).s32().Inputs(6, 2);
-            INST(15, Opcode::Add).s32().Inputs(7, 13);
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::CallStatic).f64().InputsAutoType(15, 3, 4, 20);
-            INST(9, Opcode::Add).f64().Inputs(4, 5);
-            INST(10, Opcode::Add).f64().Inputs(8, 3);
-            INST(16, Opcode::Add).f64().Inputs(10, 14);
-            INST(21, Opcode::SaveState).NoVregs();
-            INST(11, Opcode::CallStatic).f64().InputsAutoType(0, 1, 2, 3, 4, 5, 13, 14, 16, 21);
-            INST(12, Opcode::Return).f64().Inputs(11);
+            INST(6U, Opcode::Add).s32().Inputs(0U, 1U);
+            INST(7U, Opcode::Add).s32().Inputs(6U, 2U);
+            INST(15U, Opcode::Add).s32().Inputs(7U, 13U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).f64().InputsAutoType(15U, 3U, 4U, 20U);
+            INST(9U, Opcode::Add).f64().Inputs(4U, 5U);
+            INST(10U, Opcode::Add).f64().Inputs(8U, 3U);
+            INST(16U, Opcode::Add).f64().Inputs(10U, 14U);
+            INST(21U, Opcode::SaveState).NoVregs();
+            INST(11U, Opcode::CallStatic).f64().InputsAutoType(0U, 1U, 2U, 3U, 4U, 5U, 13U, 14U, 16U, 21U);
+            INST(12U, Opcode::Return).f64().Inputs(11U);
         }
     }
 
@@ -1321,12 +1321,12 @@ TEST_F(RegAllocLinearScanTest, RematConstants)
     ASSERT_TRUE(result);
 
     // Check inserted to the graph spill-fills
-    EXPECT_TRUE(CheckImmediateSpillFill(&INS(15), 1));
-    EXPECT_TRUE(CheckImmediateSpillFill(&INS(10), 1));
-    EXPECT_TRUE(CheckImmediateSpillFill(&INS(16), 1));
+    EXPECT_TRUE(CheckImmediateSpillFill(&INS(15U), 1U));
+    EXPECT_TRUE(CheckImmediateSpillFill(&INS(10U), 1U));
+    EXPECT_TRUE(CheckImmediateSpillFill(&INS(16U), 1U));
 
     // Check call instruction's spill-fills
-    auto call_inst = INS(11).CastToCallStatic();
+    auto call_inst = INS(11U).CastToCallStatic();
     auto spill_fill = call_inst->GetPrev()->CastToSpillFill();
     for (auto sf : spill_fill->GetSpillFills()) {
         if (sf.SrcType() == LocationType::IMMEDIATE) {
@@ -1344,20 +1344,20 @@ TEST_F(RegAllocLinearScanTest, LoadPairPartDiffRegisters)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(11, 1).s64();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(11U, 1U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::NullCheck).ref().Inputs(0, 1);
-            INST(3, Opcode::LoadArrayPairI).s64().Inputs(2).Imm(0x0);
-            INST(4, Opcode::LoadPairPart).s64().Inputs(3).Imm(0x0);
-            INST(5, Opcode::LoadPairPart).s64().Inputs(3).Imm(0x1);
-            INST(10, Opcode::Add).s64().Inputs(5, 11);
-            INST(6, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(7, Opcode::CallStatic).s64().InputsAutoType(4, 5, 10, 6);
-            INST(8, Opcode::Return).s64().Inputs(7);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::NullCheck).ref().Inputs(0U, 1U);
+            INST(3U, Opcode::LoadArrayPairI).s64().Inputs(2U).Imm(0x0U);
+            INST(4U, Opcode::LoadPairPart).s64().Inputs(3U).Imm(0x0U);
+            INST(5U, Opcode::LoadPairPart).s64().Inputs(3U).Imm(0x1U);
+            INST(10U, Opcode::Add).s64().Inputs(5U, 11U);
+            INST(6U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(7U, Opcode::CallStatic).s64().InputsAutoType(4U, 5U, 10U, 6U);
+            INST(8U, Opcode::Return).s64().Inputs(7U);
         }
     }
     auto regalloc = RegAllocLinearScan(GetGraph());
@@ -1369,35 +1369,35 @@ TEST_F(RegAllocLinearScanTest, LoadPairPartDiffRegisters)
         return;
     }
     ASSERT_TRUE(result);
-    auto load_pair_i = &INS(3);
-    EXPECT_NE(load_pair_i->GetDstReg(0), load_pair_i->GetDstReg(1));
+    auto load_pair_i = &INS(3U);
+    EXPECT_NE(load_pair_i->GetDstReg(0U), load_pair_i->GetDstReg(1U));
 }
 
 TEST_F(RegAllocLinearScanTest, SpillRegistersAroundCall)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(1, 1).f32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).f32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::CallStatic).u32().InputsAutoType(0, 1, 2);
-            INST(4, Opcode::Add).u32().Inputs(0, 3);
-            INST(5, Opcode::Return).u32().Inputs(4);
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::CallStatic).u32().InputsAutoType(0U, 1U, 2U);
+            INST(4U, Opcode::Add).u32().Inputs(0U, 3U);
+            INST(5U, Opcode::Return).u32().Inputs(4U);
         }
     }
     auto regalloc = RegAllocLinearScan(GetGraph());
     ASSERT_TRUE(regalloc.Run());
 
     // parameter 0 should be splitted before call and split should be used by add
-    auto spill_fill = (&INS(3))->GetPrev();
+    auto spill_fill = (&INS(3U))->GetPrev();
     EXPECT_TRUE(spill_fill->IsSpillFill());
-    auto sf = spill_fill->CastToSpillFill()->GetSpillFill(0);
-    auto param_dst = (&INS(0))->GetDstReg();
-    auto call_src = (&INS(3))->GetSrcReg(0);
-    auto add_src = (&INS(4))->GetSrcReg(0);
+    auto sf = spill_fill->CastToSpillFill()->GetSpillFill(0U);
+    auto param_dst = (&INS(0U))->GetDstReg();
+    auto call_src = (&INS(3U))->GetSrcReg(0U);
+    auto add_src = (&INS(4U))->GetSrcReg(0U);
     ASSERT_EQ(sf.SrcValue(), param_dst);
     if (call_src == param_dst) {
         // param -> R1 (caller-saved assigned)
@@ -1425,17 +1425,17 @@ TEST_F(RegAllocLinearScanTest, SplitCallIntervalAroundNextCall)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(1, 1).u32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::CallStatic).InputsAutoType(0, 1, 2).f64();
-            INST(4, Opcode::Add).Inputs(3, 3).f64();
-            INST(5, Opcode::SaveState).Inputs(3, 4).SrcVregs({3, 4});
-            INST(6, Opcode::CallStatic).InputsAutoType(5).u64();
-            INST(7, Opcode::Return).Inputs(3).f64();
+            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(3U, Opcode::CallStatic).InputsAutoType(0U, 1U, 2U).f64();
+            INST(4U, Opcode::Add).Inputs(3U, 3U).f64();
+            INST(5U, Opcode::SaveState).Inputs(3U, 4U).SrcVregs({3U, 4U});
+            INST(6U, Opcode::CallStatic).InputsAutoType(5U).u64();
+            INST(7U, Opcode::Return).Inputs(3U).f64();
         }
     }
 
@@ -1446,10 +1446,10 @@ TEST_F(RegAllocLinearScanTest, SplitCallIntervalAroundNextCall)
     ASSERT_TRUE(regalloc.Run());
 
     // Spill after last use before next call
-    auto spill = INS(4).GetNext()->CastToSpillFill()->GetSpillFill(0);
+    auto spill = INS(4U).GetNext()->CastToSpillFill()->GetSpillFill(0U);
     // Fill before firt use after call
-    auto fill = INS(7).GetPrev()->CastToSpillFill()->GetSpillFill(0);
-    auto call_reg = Location::MakeFpRegister(INS(3).GetDstReg());
+    auto fill = INS(7U).GetPrev()->CastToSpillFill()->GetSpillFill(0U);
+    auto call_reg = Location::MakeFpRegister(INS(3U).GetDstReg());
 
     EXPECT_EQ(spill.GetSrc(), call_reg);
     EXPECT_EQ(spill.GetDst(), fill.GetSrc());
@@ -1490,27 +1490,27 @@ TEST_F(RegAllocLinearScanTest, PreassignedRegisters)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(10, Opcode::SaveState).Inputs().SrcVregs({});
-                INST(0, Opcode::CallStatic).InputsAutoType(10).u32().DstReg(0);
-                INST(1, Opcode::CallStatic).InputsAutoType(10).u32().DstReg(1);
-                INST(2, Opcode::CallStatic).InputsAutoType(10).u32().DstReg(2);
-                INST(3, Opcode::Add).Inputs(0, 1).u32().DstReg(0);
-                INST(4, Opcode::Add).Inputs(1, 2).u32().DstReg(1);
-                INST(5, Opcode::Add).Inputs(0, 2).u32().DstReg(2);
-                INST(6, Opcode::Add).Inputs(4, 5).u32();
-                INST(7, Opcode::SaveState).Inputs().SrcVregs({});
-                INST(8, Opcode::CallStatic).InputsAutoType(0, 1, 2, 3, 4, 5, 6, 7).u32();
-                INST(9, Opcode::Return).Inputs(8).u32();
+                INST(10U, Opcode::SaveState).Inputs().SrcVregs({});
+                INST(0U, Opcode::CallStatic).InputsAutoType(10U).u32().DstReg(0U);
+                INST(1U, Opcode::CallStatic).InputsAutoType(10U).u32().DstReg(1U);
+                INST(2U, Opcode::CallStatic).InputsAutoType(10U).u32().DstReg(2U);
+                INST(3U, Opcode::Add).Inputs(0U, 1U).u32().DstReg(0U);
+                INST(4U, Opcode::Add).Inputs(1U, 2U).u32().DstReg(1U);
+                INST(5U, Opcode::Add).Inputs(0U, 2U).u32().DstReg(2U);
+                INST(6U, Opcode::Add).Inputs(4U, 5U).u32();
+                INST(7U, Opcode::SaveState).Inputs().SrcVregs({});
+                INST(8U, Opcode::CallStatic).InputsAutoType(0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U).u32();
+                INST(9U, Opcode::Return).Inputs(8U).u32();
             }
         }
         auto regalloc = RegAllocLinearScan(graph);
         regalloc.SetRegMask(mask);
         ASSERT_TRUE(regalloc.Run());
-        ASSERT_TRUE(CheckInstsDstRegs(&INS(0), &INS(3), Register(0)));
-        ASSERT_TRUE(CheckInstsDstRegs(&INS(1), &INS(4), Register(1)));
-        ASSERT_TRUE(CheckInstsDstRegs(&INS(2), &INS(5), Register(2)));
+        ASSERT_TRUE(CheckInstsDstRegs(&INS(0U), &INS(3U), Register(0U)));
+        ASSERT_TRUE(CheckInstsDstRegs(&INS(1U), &INS(4U), Register(1U)));
+        ASSERT_TRUE(CheckInstsDstRegs(&INS(2U), &INS(5U), Register(2U)));
     }
 }
 
@@ -1518,15 +1518,15 @@ TEST_F(RegAllocLinearScanTest, Select3Regs)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s64();
-        PARAMETER(1, 1).s64();
-        PARAMETER(2, 2).s64();
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        PARAMETER(2U, 2U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Add).s64().Inputs(0, 1);
-            INST(4, Opcode::Select).s64().SrcType(DataType::Type::INT64).CC(CC_LT).Inputs(0, 1, 2, 3);
-            INST(5, Opcode::Return).s64().Inputs(4);
+            INST(3U, Opcode::Add).s64().Inputs(0U, 1U);
+            INST(4U, Opcode::Select).s64().SrcType(DataType::Type::INT64).CC(CC_LT).Inputs(0U, 1U, 2U, 3U);
+            INST(5U, Opcode::Return).s64().Inputs(4U);
         }
     }
 
@@ -1546,58 +1546,58 @@ TEST_F(RegAllocLinearScanTest, TwoInstsWithZeroReg)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0).s64();
-        CONSTANT(1, nullptr).ref();
+        CONSTANT(0U, 0U).s64();
+        CONSTANT(1U, nullptr).ref();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(3, Opcode::CallStatic).InputsAutoType(1, 2).s64();
-            INST(4, Opcode::Add).s64().Inputs(0, 3);
-            INST(5, Opcode::Return).ref().Inputs(1);
+            INST(2U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(3U, Opcode::CallStatic).InputsAutoType(1U, 2U).s64();
+            INST(4U, Opcode::Add).s64().Inputs(0U, 3U);
+            INST(5U, Opcode::Return).ref().Inputs(1U);
         }
     }
 
     auto regalloc = RegAllocLinearScan(GetGraph());
     regalloc.Run();
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    auto const0 = la.GetInstLifeIntervals(&INS(0));
-    auto nullptr_inst = la.GetInstLifeIntervals(&INS(1));
+    auto const0 = la.GetInstLifeIntervals(&INS(0U));
+    auto nullptr_inst = la.GetInstLifeIntervals(&INS(1U));
     // Constant and Nullptr should not be split
     EXPECT_EQ(const0->GetSibling(), nullptr);
     EXPECT_EQ(nullptr_inst->GetSibling(), nullptr);
     // Intervals' regs and dst's regs should be 'zero_reg'
     EXPECT_EQ(const0->GetReg(), zero_reg);
     EXPECT_EQ(nullptr_inst->GetReg(), zero_reg);
-    EXPECT_EQ(INS(0).GetDstReg(), zero_reg);
-    EXPECT_EQ(INS(1).GetDstReg(), zero_reg);
+    EXPECT_EQ(INS(0U).GetDstReg(), zero_reg);
+    EXPECT_EQ(INS(1U).GetDstReg(), zero_reg);
     // Src's reg should be 'zero_reg'
-    EXPECT_EQ(INS(4).GetSrcReg(0), zero_reg);
-    if (INS(5).GetPrev()->IsSpillFill()) {
-        auto sf = INS(5).GetPrev()->CastToSpillFill();
-        EXPECT_EQ(sf->GetSpillFill(0).SrcValue(), zero_reg);
-        EXPECT_EQ(sf->GetSpillFill(0).DstValue(), INS(5).GetSrcReg(0));
+    EXPECT_EQ(INS(4U).GetSrcReg(0U), zero_reg);
+    if (INS(5U).GetPrev()->IsSpillFill()) {
+        auto sf = INS(5U).GetPrev()->CastToSpillFill();
+        EXPECT_EQ(sf->GetSpillFill(0U).SrcValue(), zero_reg);
+        EXPECT_EQ(sf->GetSpillFill(0U).DstValue(), INS(5U).GetSrcReg(0U));
     } else {
-        EXPECT_EQ(INS(5).GetSrcReg(0), zero_reg);
+        EXPECT_EQ(INS(5U).GetSrcReg(0U), zero_reg);
     }
 }
 
-template <int CONSTANTS_NUM>
+template <unsigned int CONSTANTS_NUM>
 bool RegAllocLinearScanTest::FillGraphWithConstants(Graph *graph)
 {
     GRAPH(graph)
     {
-        for (int i = 0; i < CONSTANTS_NUM; ++i) {
+        for (size_t i = 0; i < CONSTANTS_NUM; ++i) {
             CONSTANT(i, i);
         }
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(CONSTANTS_NUM, Opcode::Add).s64().Inputs(CONSTANTS_NUM - 1, CONSTANTS_NUM - 2);
-            for (int i = CONSTANTS_NUM - 3, j = 1; i >= 0; --i, ++j) {
-                INST(CONSTANTS_NUM + j, Opcode::Add).s64().Inputs(i, j - 1);
+            INST(CONSTANTS_NUM, Opcode::Add).s64().Inputs(CONSTANTS_NUM - 1L, CONSTANTS_NUM - 2L);
+            for (int i = CONSTANTS_NUM - 3L, j = 1; i >= 0; --i, ++j) {
+                INST(CONSTANTS_NUM + j, Opcode::Add).s64().Inputs(i, j - 1L);
             }
-            INST(2 * CONSTANTS_NUM + 2, Opcode::Return).s64().Inputs(2 * CONSTANTS_NUM - 2);
+            INST(2U * CONSTANTS_NUM + 2U, Opcode::Return).s64().Inputs(2U * CONSTANTS_NUM - 2L);
         }
     }
 
@@ -1609,7 +1609,7 @@ bool RegAllocLinearScanTest::FillGraphWithConstants(Graph *graph)
 TEST_F(RegAllocLinearScanTest, SpillConstantsGraph)
 {
     ASSERT_TRUE(compiler::OPTIONS.IsCompilerRematConst());
-    ASSERT_TRUE(FillGraphWithConstants<255>(GetGraph()));
+    ASSERT_TRUE(FillGraphWithConstants<255U>(GetGraph()));
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     for (auto interval : la.GetLifeIntervals()) {
@@ -1628,7 +1628,7 @@ TEST_F(RegAllocLinearScanTest, SpillConstantsGraph)
 TEST_F(RegAllocLinearScanTest, SpillConstantsGraphStack)
 {
     ASSERT_TRUE(compiler::OPTIONS.IsCompilerRematConst());
-    ASSERT_TRUE(FillGraphWithConstants<510>(GetGraph()));
+    ASSERT_TRUE(FillGraphWithConstants<510U>(GetGraph()));
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     for (auto interval : la.GetLifeIntervals()) {
@@ -1647,7 +1647,7 @@ TEST_F(RegAllocLinearScanTest, SpillConstantsGraphStack)
 TEST_F(RegAllocLinearScanTest, SpillConstantsLimit)
 {
     ASSERT_TRUE(compiler::OPTIONS.IsCompilerRematConst());
-    ASSERT_FALSE(FillGraphWithConstants<513>(GetGraph()));
+    ASSERT_FALSE(FillGraphWithConstants<513U>(GetGraph()));
 }
 
 TEST_F(RegAllocLinearScanTest, ParameterWithUnavailableRegister)
@@ -1657,15 +1657,15 @@ TEST_F(RegAllocLinearScanTest, ParameterWithUnavailableRegister)
     }
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(1, 1).u32();
-        PARAMETER(2, 2).u32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u32();
+        PARAMETER(2U, 2U).u32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(3, Opcode::Add).u32().Inputs(0, 1);
-            INST(4, Opcode::Add).u32().Inputs(3, 2);
-            INST(5, Opcode::Return).u32().Inputs(4);
+            INST(3U, Opcode::Add).u32().Inputs(0U, 1U);
+            INST(4U, Opcode::Add).u32().Inputs(3U, 2U);
+            INST(5U, Opcode::Return).u32().Inputs(4U);
         }
     }
 
@@ -1673,7 +1673,7 @@ TEST_F(RegAllocLinearScanTest, ParameterWithUnavailableRegister)
     // r1 is blocked (but param 0 resides there)
     uint32_t reg_mask = 0xFFFFFFF3U;
     ra.SetRegMask(RegMask {reg_mask});
-    ra.SetVRegMask(VRegMask {0});
+    ra.SetVRegMask(VRegMask {0U});
     // we can't assign a register to first parameter, so allocation will fail
     ASSERT_FALSE(ra.Run());
 }

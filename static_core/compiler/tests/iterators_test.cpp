@@ -25,7 +25,7 @@ public:
 public:
     void Check(std::vector<Inst *> &tested_instructions)
     {
-        auto block = &BB(0);
+        auto block = &BB(0U);
         PopulateBlock(block, tested_instructions);
         InitExpectData(tested_instructions);
 
@@ -189,9 +189,9 @@ TEST_F(IteratorsTest, EmptyBlock)
 {
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::ReturnVoid);
+            INST(0U, Opcode::ReturnVoid);
         }
     }
     std::vector<Inst *> instructions;
@@ -202,9 +202,9 @@ TEST_F(IteratorsTest, BlockPhisInstructions)
 {
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::ReturnVoid);
+            INST(0U, Opcode::ReturnVoid);
         }
     }
     std::vector<Inst *> instructions(IteratorsTest::INST_COUNT);
@@ -218,9 +218,9 @@ TEST_F(IteratorsTest, BlockNotPhisInstructions)
 {
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::ReturnVoid);
+            INST(0U, Opcode::ReturnVoid);
         }
     }
     std::vector<Inst *> instructions(IteratorsTest::INST_COUNT);
@@ -234,9 +234,9 @@ TEST_F(IteratorsTest, BlockAllInstructions)
 {
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::ReturnVoid);
+            INST(0U, Opcode::ReturnVoid);
         }
     }
     std::vector<Inst *> instructions(IteratorsTest::INST_COUNT);
@@ -244,7 +244,7 @@ TEST_F(IteratorsTest, BlockAllInstructions)
     // first instruction is phi
     size_t i = 0;
     for (auto &inst : instructions) {
-        if ((++i % 2) != 0U) {
+        if ((++i % 2U) != 0U) {
             inst = GetGraph()->CreateInst(Opcode::Phi);
         } else {
             inst = GetGraph()->CreateInst(Opcode::Add);
@@ -254,7 +254,7 @@ TEST_F(IteratorsTest, BlockAllInstructions)
     // first instruction is not phi
     i = 1;
     for (auto &inst : instructions) {
-        if ((++i % 2) != 0U) {
+        if ((++i % 2U) != 0U) {
             inst = GetGraph()->CreateInst(Opcode::Phi);
         } else {
             inst = GetGraph()->CreateInst(Opcode::Add);
@@ -265,7 +265,7 @@ TEST_F(IteratorsTest, BlockAllInstructions)
     // first instructions are phi
     i = 0;
     for (auto &inst : instructions) {
-        if (i < IteratorsTest::INST_COUNT / 2) {
+        if (i < IteratorsTest::INST_COUNT / 2U) {
             inst = GetGraph()->CreateInst(Opcode::Phi);
         } else {
             inst = GetGraph()->CreateInst(Opcode::Add);
@@ -276,7 +276,7 @@ TEST_F(IteratorsTest, BlockAllInstructions)
     // first instructions are not phi
     i = 0;
     for (auto &inst : instructions) {
-        if (i >= IteratorsTest::INST_COUNT / 2) {
+        if (i >= IteratorsTest::INST_COUNT / 2U) {
             inst = GetGraph()->CreateInst(Opcode::Phi);
         } else {
             inst = GetGraph()->CreateInst(Opcode::Add);

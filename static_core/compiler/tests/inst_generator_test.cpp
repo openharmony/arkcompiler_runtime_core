@@ -56,7 +56,7 @@ public:
             auto it = inst_generator_.Generate(op.first);
             FullInstStat full_inst_stat = tmplt_;
             for (auto &i : it) {
-                ASSERT(graph_creator_.GetAllocator()->GetAllocatedSize() == 0);
+                ASSERT(graph_creator_.GetAllocator()->GetAllocatedSize() == 0U);
                 auto graph = graph_creator_.GenerateGraph(i);
                 graph->RunPass<RegAllocLinearScan>();
                 bool status = graph->RunPass<Codegen>();
@@ -65,13 +65,13 @@ public:
                 positive_inst_number_ += static_cast<int>(status);
                 // To consume less memory
                 graph->~Graph();
-                graph_creator_.GetAllocator()->Resize(0);
+                graph_creator_.GetAllocator()->Resize(0U);
             }
             statistic_.first.insert({op.first, full_inst_stat});
         }
         auto intrinsics = inst_generator_.Generate(Opcode::Intrinsic);
         for (auto &intrinsic : intrinsics) {
-            ASSERT(graph_creator_.GetAllocator()->GetAllocatedSize() == 0);
+            ASSERT(graph_creator_.GetAllocator()->GetAllocatedSize() == 0U);
             auto graph = graph_creator_.GenerateGraph(intrinsic);
             graph->RunPass<RegAllocLinearScan>();
             bool status = graph->RunPass<Codegen>();
@@ -79,7 +79,7 @@ public:
             all_inst_number_++;
             positive_inst_number_ += static_cast<int>(status);
             graph->~Graph();
-            graph_creator_.GetAllocator()->Resize(0);
+            graph_creator_.GetAllocator()->Resize(0U);
         }
         for (auto i = 0; i != static_cast<int>(Opcode::NUM_OPCODES); ++i) {
             auto opc = static_cast<Opcode>(i);
@@ -221,10 +221,10 @@ public:
                     // shift parameters to prevent overflow
                     *param_1 >>= sizeof(T) * 4U;
                     *param_2 >>= (sizeof(T) * 4U + 1U);
-                    if (*param_2 == 0) {
+                    if (*param_2 == 0U) {
                         *param_2 = *param_1 + 1U;
                     }
-                    if (*param_2 == 0) {
+                    if (*param_2 == 0U) {
                         *param_2 = *param_2 + 1U;
                     };
                     return;
@@ -239,13 +239,13 @@ public:
                     *param_1 >>= sizeof(T) * 4U;
                     *param_2 >>= (sizeof(T) * 4U + 2U);
                     *param_3 >>= sizeof(T) * 4U;
-                    if (*param_2 == 0) {
+                    if (*param_2 == 0U) {
                         *param_2 = *param_1 + 1U;
                     }
-                    if (*param_2 == 0) {
+                    if (*param_2 == 0U) {
                         *param_2 = *param_2 + 1U;
                     };
-                    if (*param_3 == 0) {
+                    if (*param_3 == 0U) {
                         *param_3 = *param_3 + 1U;
                     }
                 }
@@ -279,7 +279,7 @@ public:
                     return;
                 }
             default:
-                ASSERT_DO(0, std::cerr << (int)opc << "\n");
+                ASSERT_DO(0U, std::cerr << (int)opc << "\n");
         }
     }
 
@@ -318,7 +318,7 @@ public:
     template <class ParamType>
     void Generate(Opcode opc, std::pair<ParamType, ParamType> vals)
     {
-        Generate(opc, std::make_tuple(vals.first, vals.second, static_cast<ParamType>(0)));
+        Generate(opc, std::make_tuple(vals.first, vals.second, static_cast<ParamType>(0U)));
     }
 
     template <class ParamType>
@@ -329,9 +329,9 @@ public:
             auto type = inst->GetType();
             auto shift_type = ShiftType::INVALID_SHIFT;
             if (VixlExecModule::GetType<ParamType>() == type) {
-                auto param_1 = std::get<0>(vals);
-                auto param_2 = std::get<1>(vals);
-                auto param_3 = std::get<2>(vals);
+                auto param_1 = std::get<0U>(vals);
+                auto param_2 = std::get<1U>(vals);
+                auto param_3 = std::get<2U>(vals);
                 FixParams<ParamType>(&param_1, &param_2, &param_3, opc);
                 if (IsImmOps(opc)) {
                     static_cast<BinaryImmOperation *>(inst)->SetImm(param_2);
@@ -384,7 +384,7 @@ public:
                 auto calc_data = DoLogic<ParamType>(opc, param_1, param_2, param_3, shift_type,
                                                     DataType::GetTypeSize(type, graph->GetArch()));
                 if (calc_data != ret_data) {
-                    std::cout << "  data " << ret_data << " sizeof type  " << (uint64_t)(sizeof(ParamType) * 8)
+                    std::cout << "  data " << ret_data << " sizeof type  " << (uint64_t)(sizeof(ParamType) * 8U)
                               << " \n";
                     std::cout << std::hex << "parameter_1 = " << param_1 << " parameter_2 = " << param_2
                               << "parameter_3 = " << param_3 << "\n";
@@ -469,7 +469,7 @@ public:
                     std::cout << " cast from " << DataType::ToString(VixlExecModule::GetType<ParamType>()) << " to "
                               << DataType::ToString(VixlExecModule::GetType<ResultType>()) << "\n";
 #endif
-                    std::cout << "  data " << ret_data << " sizeof type  " << (uint64_t)(sizeof(ParamType) * 8)
+                    std::cout << "  data " << ret_data << " sizeof type  " << (uint64_t)(sizeof(ParamType) * 8U)
                               << " \n";
                     inst->Dump(&std::cerr);
                     exec_module_.SetDump(true);
@@ -521,7 +521,7 @@ public:
             case Opcode::MSub:
                 return param_3 - param_1 * param_2;
             case Opcode::Not:
-                return (-param_1 - 1);
+                return (-param_1 - 1L);
             case Opcode::Add:
             case Opcode::AddI:
                 return (param_1 + param_2);
@@ -533,11 +533,11 @@ public:
             case Opcode::MNeg:
                 return -(param_1 * param_2);
             case Opcode::Div:
-                ASSERT_PRINT(param_2 != 0, "If you got this assert, you may change SEED");
+                ASSERT_PRINT(param_2 != 0U, "If you got this assert, you may change SEED");
                 return (param_1 / param_2);
             case Opcode::Mod:
                 if constexpr (ARITHMETIC_TYPE) {
-                    ASSERT_PRINT(param_2 != 0, "If you got this assert, you may change SEED");
+                    ASSERT_PRINT(param_2 != 0U, "If you got this assert, you may change SEED");
                     return param_1 % param_2;
                 } else {
                     return fmod(param_1, param_2);
@@ -559,7 +559,7 @@ public:
                 /* fall-through */
             case Opcode::Shl:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return DoShift(param_1, ShiftType::LSL, param_2 & (type_size - 1), type_size);
+                    return DoShift(param_1, ShiftType::LSL, param_2 & (type_size - 1L), type_size);
                 }
                 /* fall-through */
             case Opcode::ShrI:
@@ -569,12 +569,12 @@ public:
                 /* fall-through */
             case Opcode::Shr:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return DoShift(param_1, ShiftType::LSR, param_2 & (type_size - 1), type_size);
+                    return DoShift(param_1, ShiftType::LSR, param_2 & (type_size - 1L), type_size);
                 }
                 /* fall-through */
             case Opcode::AShr:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return DoShift(param_1, ShiftType::ASR, param_2 & (type_size - 1), type_size);
+                    return DoShift(param_1, ShiftType::ASR, param_2 & (type_size - 1L), type_size);
                 }
                 /* fall-through */
             case Opcode::AShrI:
@@ -653,7 +653,7 @@ public:
             /* fall-through */
             default:
                 ASSERT_DO(false, std::cerr << "Unsupported!" << (int)opc << "\n");
-                return -1;
+                return -1L;
         }
     }
     // NOLINTEND(hicpp-signed-bitwise)
@@ -799,23 +799,23 @@ void OneTestFP(ArithGenerator &gen, Opcode opc)
 // NOLINTBEGIN(readability-magic-numbers)
 void OneTestShift(ArithGenerator &gen, Opcode opc)
 {
-    gen.Generate<uint64_t>(opc, {0x8899aabbccddeeff, 32});
-    gen.Generate<uint64_t>(opc, {0x8899aabbccddeeff, 32 + 64});
-    gen.Generate<int64_t>(opc, {0x8899aabbccddeeff, 32});
-    gen.Generate<int64_t>(opc, {0x8899aabbccddeeff, 32 + 64});
-    gen.Generate<uint32_t>(opc, {0xccddeeff, 16});
-    gen.Generate<uint32_t>(opc, {0xccddeeff, 16 + 32});
-    gen.Generate<int32_t>(opc, {0xccddeeff, 0xffffffff});
-    gen.Generate<int32_t>(opc, {0xccddeeff, 16});
-    gen.Generate<int32_t>(opc, {0xccddeeff, 16 + 32});
-    gen.Generate<uint16_t>(opc, {0xeeff, 8});
-    gen.Generate<uint16_t>(opc, {0xeeff, 8 + 16});
-    gen.Generate<int16_t>(opc, {0xeeff, 8});
-    gen.Generate<int16_t>(opc, {0xeeff, 8 + 16});
-    gen.Generate<uint8_t>(opc, {0xff, 4});
-    gen.Generate<uint8_t>(opc, {0xff, 4 + 8});
-    gen.Generate<int8_t>(opc, {0xff, 4});
-    gen.Generate<int8_t>(opc, {0xff, 4 + 8});
+    gen.Generate<uint64_t>(opc, {0x8899aabbccddeeffU, 32U});
+    gen.Generate<uint64_t>(opc, {0x8899aabbccddeeffU, 32U + 64U});
+    gen.Generate<int64_t>(opc, {0x8899aabbccddeeffU, 32U});
+    gen.Generate<int64_t>(opc, {0x8899aabbccddeeffU, 32U + 64U});
+    gen.Generate<uint32_t>(opc, {0xccddeeffU, 16U});
+    gen.Generate<uint32_t>(opc, {0xccddeeffU, 16U + 32U});
+    gen.Generate<int32_t>(opc, {0xccddeeffU, 0xffffffffU});
+    gen.Generate<int32_t>(opc, {0xccddeeffU, 16U});
+    gen.Generate<int32_t>(opc, {0xccddeeffU, 16U + 32U});
+    gen.Generate<uint16_t>(opc, {0xeeffU, 8U});
+    gen.Generate<uint16_t>(opc, {0xeeffU, 8U + 16U});
+    gen.Generate<int16_t>(opc, {0xeeffU, 8U});
+    gen.Generate<int16_t>(opc, {0xeeffU, 8U + 16U});
+    gen.Generate<uint8_t>(opc, {0xffU, 4U});
+    gen.Generate<uint8_t>(opc, {0xffU, 4U + 8U});
+    gen.Generate<int8_t>(opc, {0xffU, 4U});
+    gen.Generate<int8_t>(opc, {0xffU, 4U + 8U});
 }
 // NOLINTEND(readability-magic-numbers)
 
@@ -906,10 +906,10 @@ void NotRandomTests()
     GraphCreator graph_creator(alloc, local_alloc);
     ArithGenerator stat_gen(inst_gen, graph_creator);
 
-    stat_gen.Generate<uint64_t>(Opcode::Min, {UINT64_MAX, 0});
-    stat_gen.Generate<uint64_t>(Opcode::Min, {0, UINT64_MAX});
-    stat_gen.Generate<int64_t>(Opcode::Min, {0, UINT64_MAX});
-    stat_gen.Generate<int64_t>(Opcode::Min, {0, UINT64_MAX});
+    stat_gen.Generate<uint64_t>(Opcode::Min, {UINT64_MAX, 0U});
+    stat_gen.Generate<uint64_t>(Opcode::Min, {0U, UINT64_MAX});
+    stat_gen.Generate<int64_t>(Opcode::Min, {0U, UINT64_MAX});
+    stat_gen.Generate<int64_t>(Opcode::Min, {0U, UINT64_MAX});
     OneTestShift(stat_gen, Opcode::Shl);
     OneTestShift(stat_gen, Opcode::Shr);
     OneTestShift(stat_gen, Opcode::AShr);

@@ -24,14 +24,14 @@ public:
     {
         GRAPH(GetGraph())
         {
-            PARAMETER(0, 0).ref();
-            BASIC_BLOCK(2, -1)
+            PARAMETER(0U, 0U).ref();
+            BASIC_BLOCK(2U, -1L)
             {
-                INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-                INST(2, Opcode::NullCheck).ref().Inputs(0, 1);
-                INST(5, Opcode::SaveState).NoVregs();
-                INST(3, opcode).v0id().Inputs({{DataType::REFERENCE, 2}, {DataType::NO_TYPE, 5}});
-                INST(4, Opcode::ReturnVoid).v0id();
+                INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+                INST(2U, Opcode::NullCheck).ref().Inputs(0U, 1U);
+                INST(5U, Opcode::SaveState).NoVregs();
+                INST(3U, opcode).v0id().Inputs({{DataType::REFERENCE, 2U}, {DataType::NO_TYPE, 5U}});
+                INST(4U, Opcode::ReturnVoid).v0id();
             }
         }
         MethodProperties props(GetGraph());
@@ -59,12 +59,12 @@ TEST_F(MethodPropertiesTest, SimpleMethod)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(1, 1).u32();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u32();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Add).u32().Inputs(0, 1);
-            INST(3, Opcode::Return).u32().Inputs(2);
+            INST(2U, Opcode::Add).u32().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
     MethodProperties props(GetGraph());
@@ -79,13 +79,13 @@ TEST_F(MethodPropertiesTest, SafePoint)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(1, 1).u32();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u32();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Add).u32().Inputs(0, 1);
-            INST(3, Opcode::SafePoint).Inputs(2).SrcVregs({0});
-            INST(4, Opcode::Return).u32().Inputs(2);
+            INST(2U, Opcode::Add).u32().Inputs(0U, 1U);
+            INST(3U, Opcode::SafePoint).Inputs(2U).SrcVregs({0U});
+            INST(4U, Opcode::Return).u32().Inputs(2U);
         }
     }
     MethodProperties props(GetGraph());
@@ -115,11 +115,11 @@ TEST_F(MethodPropertiesTest, Builtin)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).f64();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).f64();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Builtin).b().Inputs({{DataType::FLOAT64, 0}});
-            INST(2, Opcode::Return).b().Inputs(1);
+            INST(1U, Opcode::Builtin).b().Inputs({{DataType::FLOAT64, 0U}});
+            INST(2U, Opcode::Return).b().Inputs(1U);
         }
     }
     MethodProperties props(GetGraph());
@@ -134,11 +134,11 @@ TEST_F(MethodPropertiesTest, SaveState)
 {
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::SaveState).NoVregs();
-            INST(1, Opcode::LoadString).ref().Inputs(0).TypeId(42);
-            INST(2, Opcode::Return).ref().Inputs(1);
+            INST(0U, Opcode::SaveState).NoVregs();
+            INST(1U, Opcode::LoadString).ref().Inputs(0U).TypeId(42U);
+            INST(2U, Opcode::Return).ref().Inputs(1U);
         }
     }
     MethodProperties props(GetGraph());

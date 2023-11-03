@@ -81,30 +81,30 @@ TEST_F(RpoTest, GraphNoCycles)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(4, 3, 6)
+        BASIC_BLOCK(4U, 3U, 6U)
         {
-            INST(4, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(4U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(3, 5) {}
-        BASIC_BLOCK(6, 5) {}
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(3U, 5U) {}
+        BASIC_BLOCK(6U, 5U) {}
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(9, Opcode::ReturnVoid);
+            INST(9U, Opcode::ReturnVoid);
         }
     }
-    auto a = &BB(2);
-    auto b = &BB(3);
-    auto c = &BB(4);
-    auto d = &BB(5);
-    auto e = &BB(6);
+    auto a = &BB(2U);
+    auto b = &BB(3U);
+    auto c = &BB(4U);
+    auto d = &BB(5U);
+    auto e = &BB(6U);
     auto exit = GetGraph()->GetEndBlock();
 
     CheckSubsequence({a, b, d});
@@ -120,12 +120,12 @@ TEST_F(RpoTest, GraphNoCycles)
     k->AppendInst(ret2);
     d->AddSucc(m);
     d->RemoveSucc(exit);
-    d->RemoveInst(&INS(9));
+    d->RemoveInst(&INS(9U));
     exit->RemovePred(d);
     auto cmp =
-        GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, &INS(0), &INS(1), DataType::Type::INT64, CC_NE);
+        GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, &INS(0U), &INS(1U), DataType::Type::INT64, CC_NE);
     e->AppendInst(cmp);
-    auto if_inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0, DataType::BOOL, CC_NE);
+    auto if_inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0U, DataType::BOOL, CC_NE);
     e->AppendInst(if_inst);
     e->AddSucc(n);
     m->AddSucc(k);
@@ -193,40 +193,40 @@ TEST_F(RpoTest, GraphWithCycles)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(4, 6) {}
-        BASIC_BLOCK(6, 5, 7)
+        BASIC_BLOCK(4U, 6U) {}
+        BASIC_BLOCK(6U, 5U, 7U)
         {
-            INST(5, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(5U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(7, 4) {}
-        BASIC_BLOCK(3, 5) {}
-        BASIC_BLOCK(5, 9, 8)
+        BASIC_BLOCK(7U, 4U) {}
+        BASIC_BLOCK(3U, 5U) {}
+        BASIC_BLOCK(5U, 9U, 8U)
         {
-            INST(9, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(10, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(9);
+            INST(9U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
         }
-        BASIC_BLOCK(9, -1)
+        BASIC_BLOCK(9U, -1L)
         {
-            INST(11, Opcode::ReturnVoid);
+            INST(11U, Opcode::ReturnVoid);
         }
-        BASIC_BLOCK(8, 5) {}
+        BASIC_BLOCK(8U, 5U) {}
     }
-    auto a = &BB(2);
-    auto b = &BB(3);
-    auto c = &BB(4);
-    auto d = &BB(5);
-    auto e = &BB(6);
-    auto g = &BB(7);
-    auto m = &BB(8);
-    auto l = &BB(9);
+    auto a = &BB(2U);
+    auto b = &BB(3U);
+    auto c = &BB(4U);
+    auto d = &BB(5U);
+    auto e = &BB(6U);
+    auto g = &BB(7U);
+    auto m = &BB(8U);
+    auto l = &BB(9U);
     auto exit = GetGraph()->GetEndBlock();
 
     // FIXME {A, B, T, D, exit} doesn't work
@@ -236,9 +236,9 @@ TEST_F(RpoTest, GraphWithCycles)
 
     auto n = GetGraph()->CreateEmptyBlock();
     auto cmp =
-        GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, &INS(0), &INS(1), DataType::Type::INT64, CC_NE);
+        GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, &INS(0U), &INS(1U), DataType::Type::INT64, CC_NE);
     g->AppendInst(cmp);
-    auto if_inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0, DataType::BOOL, CC_NE);
+    auto if_inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0U, DataType::BOOL, CC_NE);
     g->AppendInst(if_inst);
     auto k = GetGraph()->CreateEmptyBlock();
     g->AddSucc(n);

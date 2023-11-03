@@ -60,15 +60,15 @@ static constexpr auto SOURCE = R"(
 TEST_F(ProfilingRunnerTest, BranchStatisticsCpp)
 {
     PandaRunner runner;
-    runner.GetRuntimeOptions().SetCompilerProfilingThreshold(1);
+    runner.GetRuntimeOptions().SetCompilerProfilingThreshold(1U);
     runner.GetRuntimeOptions().SetInterpreterType("cpp");
     auto runtime = runner.CreateRuntime();
     runner.Run(runtime, SOURCE, std::vector<std::string> {});
     auto method = runner.GetMethod("foo");
     auto profiling_data = method->GetProfilingData();
-    ASSERT_EQ(132, profiling_data->GetBranchTakenCounter(0x10));
-    ASSERT_EQ(199, profiling_data->GetBranchNotTakenCounter(0x09));
-    ASSERT_EQ(67, profiling_data->GetBranchNotTakenCounter(0x10));
+    ASSERT_EQ(132U, profiling_data->GetBranchTakenCounter(0x10U));
+    ASSERT_EQ(199U, profiling_data->GetBranchNotTakenCounter(0x09U));
+    ASSERT_EQ(67U, profiling_data->GetBranchNotTakenCounter(0x10U));
     Runtime::Destroy();
 }
 
@@ -76,14 +76,14 @@ TEST_F(ProfilingRunnerTest, BranchStatisticsCpp)
 TEST_F(ProfilingRunnerTest, BranchStatistics)
 {
     PandaRunner runner;
-    runner.GetRuntimeOptions().SetCompilerProfilingThreshold(1);
+    runner.GetRuntimeOptions().SetCompilerProfilingThreshold(1U);
     auto runtime = runner.CreateRuntime();
     runner.Run(runtime, SOURCE, std::vector<std::string> {});
     auto method = runner.GetMethod("foo");
     auto profiling_data = method->GetProfilingData();
-    ASSERT_EQ(132, profiling_data->GetBranchTakenCounter(0x10));
-    ASSERT_EQ(199, profiling_data->GetBranchNotTakenCounter(0x09));
-    ASSERT_EQ(67, profiling_data->GetBranchNotTakenCounter(0x10));
+    ASSERT_EQ(132U, profiling_data->GetBranchTakenCounter(0x10U));
+    ASSERT_EQ(199U, profiling_data->GetBranchNotTakenCounter(0x09U));
+    ASSERT_EQ(67U, profiling_data->GetBranchNotTakenCounter(0x10U));
     Runtime::Destroy();
 }
 #endif

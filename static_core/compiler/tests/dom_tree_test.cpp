@@ -53,9 +53,9 @@ TEST_F(DomTreeTest, OneBlock)
 {
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(0, Opcode::ReturnVoid);
+            INST(0U, Opcode::ReturnVoid);
         };
     }
 
@@ -105,40 +105,40 @@ TEST_F(DomTreeTest, GraphNoCycles)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(4, Opcode::ReturnVoid);
+            INST(4U, Opcode::ReturnVoid);
         }
-        BASIC_BLOCK(4, 5) {}
-        BASIC_BLOCK(5, 6, 7)
+        BASIC_BLOCK(4U, 5U) {}
+        BASIC_BLOCK(5U, 6U, 7U)
         {
-            INST(6, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(6U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(8, Opcode::ReturnVoid);
+            INST(8U, Opcode::ReturnVoid);
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(9, Opcode::ReturnVoid);
+            INST(9U, Opcode::ReturnVoid);
         }
     }
 
     auto entry = GetGraph()->GetStartBlock();
-    auto a = &BB(2);
-    auto b = &BB(3);
-    auto c = &BB(4);
-    auto d = &BB(5);
-    auto e = &BB(6);
-    auto f = &BB(7);
+    auto a = &BB(2U);
+    auto b = &BB(3U);
+    auto c = &BB(4U);
+    auto d = &BB(5U);
+    auto e = &BB(6U);
+    auto f = &BB(7U);
     auto exit = GetGraph()->GetEndBlock();
 
     // Check if DomTree is valid after building Dom tree
@@ -150,9 +150,9 @@ TEST_F(DomTreeTest, GraphNoCycles)
     auto return_void = GetGraph()->CreateInstReturnVoid();
     g->AppendInst(return_void);
     auto cmp =
-        GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, &INS(0), &INS(1), DataType::Type::INT64, CC_NE);
+        GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, &INS(0U), &INS(1U), DataType::Type::INT64, CC_NE);
     c->AppendInst(cmp);
-    auto if_inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0, DataType::BOOL, CC_NE);
+    auto if_inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, cmp, 0U, DataType::BOOL, CC_NE);
     c->AppendInst(if_inst);
     c->AddSucc(g);
     g->AddSucc(exit);
@@ -244,47 +244,47 @@ TEST_F(DomTreeTest, GraphWithCycles)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
-        BASIC_BLOCK(3, 4) {}
-        BASIC_BLOCK(4, 5) {}
-        BASIC_BLOCK(5, 6, 4)
+        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(4U, 5U) {}
+        BASIC_BLOCK(5U, 6U, 4U)
         {
-            INST(6, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(6U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(6, 8) {}
-        BASIC_BLOCK(8, 5, 9)
+        BASIC_BLOCK(6U, 8U) {}
+        BASIC_BLOCK(8U, 5U, 9U)
         {
-            INST(9, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(10, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(9);
+            INST(9U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
         }
-        BASIC_BLOCK(9, 10, 11)
+        BASIC_BLOCK(9U, 10U, 11U)
         {
-            INST(11, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
-            INST(12, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(11);
+            INST(11U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
         }
-        BASIC_BLOCK(10, 2) {}
-        BASIC_BLOCK(11, -1)
+        BASIC_BLOCK(10U, 2U) {}
+        BASIC_BLOCK(11U, -1L)
         {
-            INST(14, Opcode::ReturnVoid);
+            INST(14U, Opcode::ReturnVoid);
         }
     }
     auto entry = GetGraph()->GetStartBlock();
-    auto k = &BB(2);
-    auto a = &BB(3);
-    auto b = &BB(4);
-    auto c = &BB(5);
-    auto d = &BB(6);
-    auto f = &BB(8);
-    auto g = &BB(9);
-    auto h = &BB(10);
-    auto i = &BB(11);
+    auto k = &BB(2U);
+    auto a = &BB(3U);
+    auto b = &BB(4U);
+    auto c = &BB(5U);
+    auto d = &BB(6U);
+    auto f = &BB(8U);
+    auto g = &BB(9U);
+    auto h = &BB(10U);
+    auto i = &BB(11U);
     auto exit = GetGraph()->GetEndBlock();
 
     GraphChecker(GetGraph()).Check();
@@ -294,16 +294,16 @@ TEST_F(DomTreeTest, GraphWithCycles)
     GetGraph()->RunPass<DominatorsTree>();
     EXPECT_TRUE(GetGraph()->IsAnalysisValid<DominatorsTree>());
 
-    CheckImmediateDominators(GetGraph()->GetStartBlock(), {BB(2).GetLoop()->GetPreHeader()});
-    CheckImmediateDominators(&BB(2), {&BB(3), BB(4).GetLoop()->GetPreHeader()});
-    CheckImmediateDominatorsIdSet(3, {});
-    CheckImmediateDominatorsIdSet(4, {5});
-    CheckImmediateDominatorsIdSet(5, {6});
-    CheckImmediateDominatorsIdSet(6, {8});
-    CheckImmediateDominatorsIdSet(8, {9});
-    CheckImmediateDominatorsIdSet(9, {10, 11});
-    CheckImmediateDominatorsIdSet(10, {});
-    CheckImmediateDominatorsIdSet(11, {IrConstructor::ID_EXIT_BB});
+    CheckImmediateDominators(GetGraph()->GetStartBlock(), {BB(2U).GetLoop()->GetPreHeader()});
+    CheckImmediateDominators(&BB(2U), {&BB(3U), BB(4U).GetLoop()->GetPreHeader()});
+    CheckImmediateDominatorsIdSet(3U, {});
+    CheckImmediateDominatorsIdSet(4U, {5U});
+    CheckImmediateDominatorsIdSet(5U, {6U});
+    CheckImmediateDominatorsIdSet(6U, {8U});
+    CheckImmediateDominatorsIdSet(8U, {9U});
+    CheckImmediateDominatorsIdSet(9U, {10U, 11U});
+    CheckImmediateDominatorsIdSet(10U, {});
+    CheckImmediateDominatorsIdSet(11U, {IrConstructor::ID_EXIT_BB});
 
     CheckListDominators<true>(entry, {entry, k, a, b, c, d, f, g, h, i, exit});
     CheckListDominators<true>(k, {k, a, b, c, d, f, g, h, i, exit});

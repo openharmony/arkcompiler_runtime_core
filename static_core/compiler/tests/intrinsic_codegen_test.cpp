@@ -41,7 +41,7 @@ public:
         auto inst = GenerateIntrinsic(&alloc_, type, intrinsic_id);
         auto graph = graph_creator_.GenerateGraph(inst);
         Codegen codegen(graph);
-        codegen.GetCodeBuilder()->BeginMethod(0, 0);
+        codegen.GetCodeBuilder()->BeginMethod(0U, 0U);
         if (prepare_graph) {
             graph->GetAnalysis<LoopAnalyzer>().Run();
             GraphChecker(graph).Check();

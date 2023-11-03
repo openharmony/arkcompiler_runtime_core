@@ -37,36 +37,36 @@ TEST_F(RedundantLoopEliminationTest, SimpleLoopTest1)
     // applied
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(2, 10);
-        BASIC_BLOCK(3, 4, 5)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(20, Opcode::SafePoint).Inputs().SrcVregs({});
-            INST(4, Opcode::Phi).s32().Inputs(0, 10);
-            INST(5, Opcode::Compare).CC(CC_LT).b().Inputs(4, 2);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(20U, Opcode::SafePoint).Inputs().SrcVregs({});
+            INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);
+            INST(5U, Opcode::Compare).CC(CC_LT).b().Inputs(4U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(10, Opcode::Add).s32().Inputs(4, 1);
+            INST(10U, Opcode::Add).s32().Inputs(4U, 1U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(12, Opcode::ReturnVoid);
+            INST(12U, Opcode::ReturnVoid);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<RedundantLoopElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(2, 10);
-        BASIC_BLOCK(2, 5) {}
-        BASIC_BLOCK(5, 1)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(2U, 5U) {}
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(12, Opcode::ReturnVoid);
+            INST(12U, Opcode::ReturnVoid);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -77,44 +77,44 @@ TEST_F(RedundantLoopEliminationTest, SimpleLoopTest2)
     // not applied, insts from loop have user outside the loop.
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(2, 10);
-        BASIC_BLOCK(3, 4, 5)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(4, Opcode::Phi).s32().Inputs(0, 10);
-            INST(5, Opcode::Compare).CC(CC_LT).b().Inputs(4, 2);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);
+            INST(5U, Opcode::Compare).CC(CC_LT).b().Inputs(4U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(10, Opcode::Add).s32().Inputs(4, 1);
+            INST(10U, Opcode::Add).s32().Inputs(4U, 1U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(12, Opcode::Return).s32().Inputs(4);
+            INST(12U, Opcode::Return).s32().Inputs(4U);
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<RedundantLoopElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(2, 10);
-        BASIC_BLOCK(3, 4, 5)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(4, Opcode::Phi).s32().Inputs(0, 10);
-            INST(5, Opcode::Compare).CC(CC_LT).b().Inputs(4, 2);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);
+            INST(5U, Opcode::Compare).CC(CC_LT).b().Inputs(4U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(10, Opcode::Add).s32().Inputs(4, 1);
+            INST(10U, Opcode::Add).s32().Inputs(4U, 1U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(12, Opcode::Return).s32().Inputs(4);
+            INST(12U, Opcode::Return).s32().Inputs(4U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -125,48 +125,48 @@ TEST_F(RedundantLoopEliminationTest, SimpleLoopTest3)
     // not applied, loop contains not removable inst
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(2, 10);
-        BASIC_BLOCK(3, 4, 5)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(4, Opcode::Phi).s32().Inputs(0, 10);
-            INST(5, Opcode::Compare).CC(CC_LT).b().Inputs(4, 2);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);
+            INST(5U, Opcode::Compare).CC(CC_LT).b().Inputs(4U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).s32().InputsAutoType(20);
-            INST(10, Opcode::Add).s32().Inputs(4, 1);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).s32().InputsAutoType(20U);
+            INST(10U, Opcode::Add).s32().Inputs(4U, 1U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(12, Opcode::ReturnVoid);
+            INST(12U, Opcode::ReturnVoid);
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<RedundantLoopElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(2, 10);
-        BASIC_BLOCK(3, 4, 5)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(4, Opcode::Phi).s32().Inputs(0, 10);
-            INST(5, Opcode::Compare).CC(CC_LT).b().Inputs(4, 2);
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);
+            INST(5U, Opcode::Compare).CC(CC_LT).b().Inputs(4U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(4, 3)
+        BASIC_BLOCK(4U, 3U)
         {
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).s32().InputsAutoType(20);
-            INST(10, Opcode::Add).s32().Inputs(4, 1);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).s32().InputsAutoType(20U);
+            INST(10U, Opcode::Add).s32().Inputs(4U, 1U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(12, Opcode::ReturnVoid);
+            INST(12U, Opcode::ReturnVoid);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -177,47 +177,47 @@ TEST_F(RedundantLoopEliminationTest, InnerLoopsTest1)
     // applied
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        PARAMETER(3, 0).s32();
-        PARAMETER(4, 1).s32();
-        BASIC_BLOCK(2, 5, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(3U, 0U).s32();
+        PARAMETER(4U, 1U).s32();
+        BASIC_BLOCK(2U, 5U, 4U)
         {
-            INST(5, Opcode::Phi).s32().Inputs(0, 8);
-            INST(6, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5, 4);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(5U, Opcode::Phi).s32().Inputs(0U, 8U);
+            INST(6U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5U, 4U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(5, 6, 3)
+        BASIC_BLOCK(5U, 6U, 3U)
         {
-            INST(10, Opcode::Phi).s32().Inputs(0, 13);
-            INST(11, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(10, 3);
-            INST(12, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(11);
+            INST(10U, Opcode::Phi).s32().Inputs(0U, 13U);
+            INST(11U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(10U, 3U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
         }
-        BASIC_BLOCK(6, 5)
+        BASIC_BLOCK(6U, 5U)
         {
-            INST(13, Opcode::Add).s32().Inputs(10, 1);
+            INST(13U, Opcode::Add).s32().Inputs(10U, 1U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(8, Opcode::Add).s32().Inputs(5, 1);
+            INST(8U, Opcode::Add).s32().Inputs(5U, 1U);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(9, Opcode::ReturnVoid);
+            INST(9U, Opcode::ReturnVoid);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<RedundantLoopElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        PARAMETER(3, 0).s32();
-        PARAMETER(4, 1).s32();
-        BASIC_BLOCK(2, 5) {}
-        BASIC_BLOCK(5, 1)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(3U, 0U).s32();
+        PARAMETER(4U, 1U).s32();
+        BASIC_BLOCK(2U, 5U) {}
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(12, Opcode::ReturnVoid);
+            INST(12U, Opcode::ReturnVoid);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -228,70 +228,70 @@ TEST_F(RedundantLoopEliminationTest, InnerLoopsTest2)
     // not applied, inner loop contains not removable inst
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        PARAMETER(3, 0).s32();
-        PARAMETER(4, 1).s32();
-        BASIC_BLOCK(2, 5, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(3U, 0U).s32();
+        PARAMETER(4U, 1U).s32();
+        BASIC_BLOCK(2U, 5U, 4U)
         {
-            INST(5, Opcode::Phi).s32().Inputs(0, 8);
-            INST(6, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5, 4);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(5U, Opcode::Phi).s32().Inputs(0U, 8U);
+            INST(6U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5U, 4U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(5, 6, 3)
+        BASIC_BLOCK(5U, 6U, 3U)
         {
-            INST(10, Opcode::Phi).s32().Inputs(0, 13);
-            INST(11, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(10, 3);
-            INST(12, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(11);
+            INST(10U, Opcode::Phi).s32().Inputs(0U, 13U);
+            INST(11U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(10U, 3U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
         }
-        BASIC_BLOCK(6, 5)
+        BASIC_BLOCK(6U, 5U)
         {
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).s32().InputsAutoType(20);
-            INST(13, Opcode::Add).s32().Inputs(10, 1);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).s32().InputsAutoType(20U);
+            INST(13U, Opcode::Add).s32().Inputs(10U, 1U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(8, Opcode::Add).s32().Inputs(5, 1);
+            INST(8U, Opcode::Add).s32().Inputs(5U, 1U);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(9, Opcode::ReturnVoid);
+            INST(9U, Opcode::ReturnVoid);
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<RedundantLoopElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        PARAMETER(3, 0).s32();
-        PARAMETER(4, 1).s32();
-        BASIC_BLOCK(2, 5, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(3U, 0U).s32();
+        PARAMETER(4U, 1U).s32();
+        BASIC_BLOCK(2U, 5U, 4U)
         {
-            INST(5, Opcode::Phi).s32().Inputs(0, 8);
-            INST(6, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5, 4);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(5U, Opcode::Phi).s32().Inputs(0U, 8U);
+            INST(6U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5U, 4U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(5, 6, 3)
+        BASIC_BLOCK(5U, 6U, 3U)
         {
-            INST(10, Opcode::Phi).s32().Inputs(0, 13);
-            INST(11, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(10, 3);
-            INST(12, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(11);
+            INST(10U, Opcode::Phi).s32().Inputs(0U, 13U);
+            INST(11U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(10U, 3U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
         }
-        BASIC_BLOCK(6, 5)
+        BASIC_BLOCK(6U, 5U)
         {
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).s32().InputsAutoType(20);
-            INST(13, Opcode::Add).s32().Inputs(10, 1);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).s32().InputsAutoType(20U);
+            INST(13U, Opcode::Add).s32().Inputs(10U, 1U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(8, Opcode::Add).s32().Inputs(5, 1);
+            INST(8U, Opcode::Add).s32().Inputs(5U, 1U);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(9, Opcode::ReturnVoid);
+            INST(9U, Opcode::ReturnVoid);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -302,35 +302,35 @@ TEST_F(RedundantLoopEliminationTest, InnerLoopsTest3)
     // applied, outher loop contains not removable inst, but inner loop
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        PARAMETER(3, 0).s32();
-        PARAMETER(4, 1).s32();
-        BASIC_BLOCK(2, 5, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(3U, 0U).s32();
+        PARAMETER(4U, 1U).s32();
+        BASIC_BLOCK(2U, 5U, 4U)
         {
-            INST(5, Opcode::Phi).s32().Inputs(0, 8);
-            INST(6, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5, 4);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(5U, Opcode::Phi).s32().Inputs(0U, 8U);
+            INST(6U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5U, 4U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(5, 6, 3)
+        BASIC_BLOCK(5U, 6U, 3U)
         {
-            INST(10, Opcode::Phi).s32().Inputs(0, 13);
-            INST(11, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(10, 3);
-            INST(12, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(11);
+            INST(10U, Opcode::Phi).s32().Inputs(0U, 13U);
+            INST(11U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(10U, 3U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
         }
-        BASIC_BLOCK(6, 5)
+        BASIC_BLOCK(6U, 5U)
         {
-            INST(13, Opcode::Add).s32().Inputs(10, 1);
+            INST(13U, Opcode::Add).s32().Inputs(10U, 1U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).s32().InputsAutoType(20);
-            INST(8, Opcode::Add).s32().Inputs(5, 1);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).s32().InputsAutoType(20U);
+            INST(8U, Opcode::Add).s32().Inputs(5U, 1U);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(9, Opcode::ReturnVoid);
+            INST(9U, Opcode::ReturnVoid);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<RedundantLoopElimination>());
@@ -338,25 +338,25 @@ TEST_F(RedundantLoopEliminationTest, InnerLoopsTest3)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        PARAMETER(3, 0).s32();
-        PARAMETER(4, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(3U, 0U).s32();
+        PARAMETER(4U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(5, Opcode::Phi).s32().Inputs(0, 8);
-            INST(6, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5, 4);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(5U, Opcode::Phi).s32().Inputs(0U, 8U);
+            INST(6U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5U, 4U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).s32().InputsAutoType(20);
-            INST(8, Opcode::Add).s32().Inputs(5, 1);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).s32().InputsAutoType(20U);
+            INST(8U, Opcode::Add).s32().Inputs(5U, 1U);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(9, Opcode::ReturnVoid);
+            INST(9U, Opcode::ReturnVoid);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -368,60 +368,60 @@ TEST_F(RedundantLoopEliminationTest, InnerLoopsTestPhiInOuterBlock)
     // outer block of inner loop is head of outer loop, check that Phi inputs in it are updated correctly
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        PARAMETER(3, 0).s32();
-        PARAMETER(4, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(3U, 0U).s32();
+        PARAMETER(4U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(5, Opcode::Phi).s32().Inputs(0, 8);
-            INST(6, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5, 4);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(5U, Opcode::Phi).s32().Inputs(0U, 8U);
+            INST(6U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5U, 4U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).s32().InputsAutoType(20);
-            INST(8, Opcode::Add).s32().Inputs(5, 1);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).s32().InputsAutoType(20U);
+            INST(8U, Opcode::Add).s32().Inputs(5U, 1U);
         }
-        BASIC_BLOCK(5, 6, 2)
+        BASIC_BLOCK(5U, 6U, 2U)
         {
-            INST(10, Opcode::Phi).s32().Inputs(0, 13);
-            INST(11, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(10, 3);
-            INST(12, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(11);
+            INST(10U, Opcode::Phi).s32().Inputs(0U, 13U);
+            INST(11U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(10U, 3U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
         }
-        BASIC_BLOCK(6, 5)
+        BASIC_BLOCK(6U, 5U)
         {
-            INST(13, Opcode::Add).s32().Inputs(10, 1);
+            INST(13U, Opcode::Add).s32().Inputs(10U, 1U);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(9, Opcode::ReturnVoid);
+            INST(9U, Opcode::ReturnVoid);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<RedundantLoopElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        PARAMETER(3, 0).s32();
-        PARAMETER(4, 1).s32();
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(3U, 0U).s32();
+        PARAMETER(4U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(5, Opcode::Phi).s32().Inputs(0, 8);
-            INST(6, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5, 4);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(5U, Opcode::Phi).s32().Inputs(0U, 8U);
+            INST(6U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5U, 4U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(3, 2)
+        BASIC_BLOCK(3U, 2U)
         {
-            INST(20, Opcode::SaveState).NoVregs();
-            INST(14, Opcode::CallStatic).s32().InputsAutoType(20);
-            INST(8, Opcode::Add).s32().Inputs(5, 1);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).s32().InputsAutoType(20U);
+            INST(8U, Opcode::Add).s32().Inputs(5U, 1U);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(9, Opcode::ReturnVoid);
+            INST(9U, Opcode::ReturnVoid);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -431,46 +431,46 @@ TEST_F(RedundantLoopEliminationTest, SimpleLoopTestIncAfterPeeling)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(2, 10);
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(3, Opcode::NewArray).ref().Inputs(44, 2);
-            INST(5, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0, 2);  // 0 < len_array
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(3U, Opcode::NewArray).ref().Inputs(44U, 2U);
+            INST(5U, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0U, 2U);  // 0 < len_array
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 3, 4)
+        BASIC_BLOCK(3U, 3U, 4U)
         {
-            INST(4, Opcode::Phi).s32().Inputs({{2, 0}, {3, 10}});
-            INST(10, Opcode::Add).s32().Inputs(4, 1);               // i++
-            INST(13, Opcode::Compare).CC(CC_LT).b().Inputs(10, 2);  // i < len_array
-            INST(14, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(13);
+            INST(4U, Opcode::Phi).s32().Inputs({{2U, 0U}, {3U, 10U}});
+            INST(10U, Opcode::Add).s32().Inputs(4U, 1U);               // i++
+            INST(13U, Opcode::Compare).CC(CC_LT).b().Inputs(10U, 2U);  // i < len_array
+            INST(14U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(13U);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(12, Opcode::Return).ref().Inputs(3);
+            INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<RedundantLoopElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        CONSTANT(2, 10);
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(3, Opcode::NewArray).ref().Inputs(44, 2);
-            INST(5, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0, 2);  // 0 < len_array
-            INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(3U, Opcode::NewArray).ref().Inputs(44U, 2U);
+            INST(5U, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0U, 2U);  // 0 < len_array
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
-        BASIC_BLOCK(3, 4) {}
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(12, Opcode::Return).ref().Inputs(3);
+            INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -482,47 +482,47 @@ TEST_F(RedundantLoopEliminationTest, TestLoopWithPhiInOuterBlock)
     // check that inputs of Phi in outer block are updated correctly
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        PARAMETER(3, 0).s32();
-        BASIC_BLOCK(2, 3, 4)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(3U, 0U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(6, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(0, 3);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(6U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(0U, 3U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(9, Opcode::Phi).s32().Inputs(0, 8);
-            INST(8, Opcode::Add).s32().Inputs(9, 1);
+            INST(9U, Opcode::Phi).s32().Inputs(0U, 8U);
+            INST(8U, Opcode::Add).s32().Inputs(9U, 1U);
         }
-        BASIC_BLOCK(5, 3, 4)
+        BASIC_BLOCK(5U, 3U, 4U)
         {
-            INST(10, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(8, 3);
-            INST(11, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(10);
+            INST(10U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(8U, 3U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
         }
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(12, Opcode::Phi).s32().Inputs({{2, 0}, {5, 1}});
-            INST(13, Opcode::Return).s32().Inputs(12);
+            INST(12U, Opcode::Phi).s32().Inputs({{2U, 0U}, {5U, 1U}});
+            INST(13U, Opcode::Return).s32().Inputs(12U);
         }
     }
     EXPECT_TRUE(GetGraph()->RunPass<RedundantLoopElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0);
-        CONSTANT(1, 1);
-        PARAMETER(3, 0).s32();
-        BASIC_BLOCK(2, 4, 6)
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(3U, 0U).s32();
+        BASIC_BLOCK(2U, 4U, 6U)
         {
-            INST(6, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(0, 3);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(6U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(0U, 3U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(6, 4) {}
-        BASIC_BLOCK(4, 1)
+        BASIC_BLOCK(6U, 4U) {}
+        BASIC_BLOCK(4U, 1U)
         {
-            INST(12, Opcode::Phi).s32().Inputs({{6, 0}, {2, 1}});
-            INST(13, Opcode::Return).s32().Inputs(12);
+            INST(12U, Opcode::Phi).s32().Inputs({{6U, 0U}, {2U, 1U}});
+            INST(13U, Opcode::Return).s32().Inputs(12U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -532,7 +532,7 @@ TEST_F(RedundantLoopEliminationTest, InfiniteLoop)
 {
     GRAPH(GetGraph())
     {
-        BASIC_BLOCK(2, 2) {}
+        BASIC_BLOCK(2U, 2U) {}
     }
     auto clone_graph =
         GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -546,38 +546,38 @@ TEST_F(RedundantLoopEliminationTest, LoadObjectTest)
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            CONSTANT(0, 0);
-            CONSTANT(1, 1);
-            CONSTANT(2, 10);
-            PARAMETER(3, 0).ref();
-            BASIC_BLOCK(3, 4, 5)
+            CONSTANT(0U, 0U);
+            CONSTANT(1U, 1U);
+            CONSTANT(2U, 10U);
+            PARAMETER(3U, 0U).ref();
+            BASIC_BLOCK(3U, 4U, 5U)
             {
-                INST(4, Opcode::Phi).s32().Inputs(0, 10);
-                INST(5, Opcode::Compare).CC(CC_LT).b().Inputs(4, 2);
-                INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+                INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);
+                INST(5U, Opcode::Compare).CC(CC_LT).b().Inputs(4U, 2U);
+                INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
             }
-            BASIC_BLOCK(4, 3)
+            BASIC_BLOCK(4U, 3U)
             {
-                INST(9, Opcode::LoadObject).s32().Inputs(3).Volatile(volat);
-                INST(10, Opcode::Add).s32().Inputs(4, 1);
+                INST(9U, Opcode::LoadObject).s32().Inputs(3U).Volatile(volat);
+                INST(10U, Opcode::Add).s32().Inputs(4U, 1U);
             }
-            BASIC_BLOCK(5, 1)
+            BASIC_BLOCK(5U, 1U)
             {
-                INST(12, Opcode::ReturnVoid);
+                INST(12U, Opcode::ReturnVoid);
             }
         }
         ASSERT_TRUE(graph1->RunPass<RedundantLoopElimination>());
         auto graph2 = CreateEmptyGraph();
         GRAPH(graph2)
         {
-            CONSTANT(0, 0);
-            CONSTANT(1, 1);
-            CONSTANT(2, 10);
-            PARAMETER(3, 0).ref();
-            BASIC_BLOCK(2, 5) {}
-            BASIC_BLOCK(5, 1)
+            CONSTANT(0U, 0U);
+            CONSTANT(1U, 1U);
+            CONSTANT(2U, 10U);
+            PARAMETER(3U, 0U).ref();
+            BASIC_BLOCK(2U, 5U) {}
+            BASIC_BLOCK(5U, 1U)
             {
-                INST(12, Opcode::ReturnVoid);
+                INST(12U, Opcode::ReturnVoid);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -590,23 +590,23 @@ TEST_F(RedundantLoopEliminationTest, StoreObjectTest)
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
         {
-            CONSTANT(0, 0);
-            CONSTANT(2, 10);
-            PARAMETER(3, 0).ref();
-            BASIC_BLOCK(3, 4, 5)
+            CONSTANT(0U, 0U);
+            CONSTANT(2U, 10U);
+            PARAMETER(3U, 0U).ref();
+            BASIC_BLOCK(3U, 4U, 5U)
             {
-                INST(4, Opcode::Phi).s32().Inputs(0, 10);
-                INST(5, Opcode::Compare).CC(CC_LT).b().Inputs(4, 2);
-                INST(6, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5);
+                INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);
+                INST(5U, Opcode::Compare).CC(CC_LT).b().Inputs(4U, 2U);
+                INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
             }
-            BASIC_BLOCK(4, 3)
+            BASIC_BLOCK(4U, 3U)
             {
-                INST(9, Opcode::StoreObject).s32().Inputs(3, 2).Volatile(volat);
-                INST(10, Opcode::Add).s32().Inputs(4, 2);
+                INST(9U, Opcode::StoreObject).s32().Inputs(3U, 2U).Volatile(volat);
+                INST(10U, Opcode::Add).s32().Inputs(4U, 2U);
             }
-            BASIC_BLOCK(5, 1)
+            BASIC_BLOCK(5U, 1U)
             {
-                INST(12, Opcode::ReturnVoid);
+                INST(12U, Opcode::ReturnVoid);
             }
         }
         auto graph2 = GraphCloner(graph1, graph1->GetAllocator(), graph1->GetLocalAllocator()).CloneGraph();
@@ -619,23 +619,23 @@ TEST_F(RedundantLoopEliminationTest, LoopWithSeveralExits)
 {
     GRAPH(GetGraph())
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).s32();
-        BASIC_BLOCK(3, 4, 5)
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(3U, 4U, 5U)
         {
-            INST(4, Opcode::IfImm).b().CC(CC_NE).Inputs(0).Imm(0);
+            INST(4U, Opcode::IfImm).b().CC(CC_NE).Inputs(0U).Imm(0U);
         }
-        BASIC_BLOCK(4, 3, 6)
+        BASIC_BLOCK(4U, 3U, 6U)
         {
-            INST(5, Opcode::IfImm).b().CC(CC_NE).Inputs(1).Imm(0);
+            INST(5U, Opcode::IfImm).b().CC(CC_NE).Inputs(1U).Imm(0U);
         }
-        BASIC_BLOCK(5, 1)
+        BASIC_BLOCK(5U, 1U)
         {
-            INST(6, Opcode::Return).s32().Inputs(0);
+            INST(6U, Opcode::Return).s32().Inputs(0U);
         }
-        BASIC_BLOCK(6, 1)
+        BASIC_BLOCK(6U, 1U)
         {
-            INST(7, Opcode::Return).s32().Inputs(1);
+            INST(7U, Opcode::Return).s32().Inputs(1U);
         }
     }
     auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
@@ -651,16 +651,16 @@ TEST_F(RedundantLoopEliminationTest, PotentiallyInfinitLoop)
     // }
     GRAPH(GetGraph())
     {
-        CONSTANT(0, 0);
-        PARAMETER(1, 0).s32();
-        BASIC_BLOCK(2, 3, 2)
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 0U).s32();
+        BASIC_BLOCK(2U, 3U, 2U)
         {
-            INST(2, Opcode::Compare).b().CC(CC_EQ).Inputs(1, 0);
-            INST(3, Opcode::IfImm).CC(CC_NE).Inputs(2).Imm(0);
+            INST(2U, Opcode::Compare).b().CC(CC_EQ).Inputs(1U, 0U);
+            INST(3U, Opcode::IfImm).CC(CC_NE).Inputs(2U).Imm(0U);
         }
-        BASIC_BLOCK(3, 1)
+        BASIC_BLOCK(3U, 1U)
         {
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
     auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();

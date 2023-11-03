@@ -41,14 +41,14 @@ public:
 
     LifeIntervals *SplitAssignReg(LifeIntervals *source, LifeNumber position, Register reg)
     {
-        auto split = source->SplitAt(position - 1, GetAllocator());
+        auto split = source->SplitAt(position - 1L, GetAllocator());
         split->SetReg(reg);
         return split;
     }
 
     LifeIntervals *SplitAssignSlot(LifeIntervals *source, LifeNumber position, StackSlot slot)
     {
-        auto split = source->SplitAt(position - 1, GetAllocator());
+        auto split = source->SplitAt(position - 1L, GetAllocator());
         split->SetLocation(Location::MakeStackSlot(slot));
         return split;
     }
@@ -56,7 +56,7 @@ public:
     LifeIntervals *SplitAssignImmSlot(LifeIntervals *source, LifeNumber position, ImmTableSlot slot)
     {
         ASSERT(source->GetInst()->IsConst());
-        auto split = source->SplitAt(position - 1, GetAllocator());
+        auto split = source->SplitAt(position - 1L, GetAllocator());
         split->SetLocation(Location::MakeConstant(slot));
         return split;
     }
@@ -95,12 +95,12 @@ TEST_F(SplitResolverTest, ProcessIntervalsWithoutSplit)
     auto expected_graph = CreateEmptyGraph();
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Add).u64().Inputs(0, 0);
-            INST(2, Opcode::Return).u64().Inputs(1);
+            INST(1U, Opcode::Add).u64().Inputs(0U, 0U);
+            INST(2U, Opcode::Return).u64().Inputs(1U);
         }
     }
 
@@ -116,32 +116,32 @@ TEST_F(SplitResolverTest, ConnectSiblingsWithSameBlock)
     auto expected_graph = CreateEmptyGraph();
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            AFTER_SPLIT_RESOLUTION(INST(4, Opcode::SpillFill));
-            INST(1, Opcode::Add).u64().Inputs(0, 0);
-            AFTER_SPLIT_RESOLUTION(INST(5, Opcode::SpillFill));
-            INST(2, Opcode::Add).u64().Inputs(0, 1);
-            INST(3, Opcode::Return).u64().Inputs(2);
+            AFTER_SPLIT_RESOLUTION(INST(4U, Opcode::SpillFill));
+            INST(1U, Opcode::Add).u64().Inputs(0U, 0U);
+            AFTER_SPLIT_RESOLUTION(INST(5U, Opcode::SpillFill));
+            INST(2U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
 
-    auto param = la->GetInstLifeIntervals(&INS(0));
-    auto add = la->GetInstLifeIntervals(&INS(1));
-    param->SetReg(0);
+    auto param = la->GetInstLifeIntervals(&INS(0U));
+    auto add = la->GetInstLifeIntervals(&INS(1U));
+    param->SetReg(0U);
 
-    SplitAssignReg(SplitAssignSlot(param, add->GetBegin(), 0), add->GetEnd(), 1);
+    SplitAssignReg(SplitAssignSlot(param, add->GetBegin(), 0U), add->GetEnd(), 1U);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
-    CheckSpillFills(INS(1).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0}});
-    CheckSpillFills(INS(1).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 1}});
+    CheckSpillFills(INS(1U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0U, 0U}});
+    CheckSpillFills(INS(1U).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0U, 1U}});
 }
 
 TEST_F(SplitResolverTest, ConnectSiblingsInDifferentBlocks)
@@ -149,81 +149,82 @@ TEST_F(SplitResolverTest, ConnectSiblingsInDifferentBlocks)
     auto expected_graph = CreateEmptyGraph();
     GRAPH(expected_graph)
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, 3, 6)
+        BASIC_BLOCK(2U, 3U, 6U)
         {
-            INST(1, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 0);
-            INST(2, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(1);
+            INST(1U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 0U);
+            INST(2U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(1U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(3, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(8, Opcode::SpillFill);
-            INST(4, Opcode::CallStatic).v0id().InputsAutoType(3);
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(8U, Opcode::SpillFill);
+            INST(4U, Opcode::CallStatic).v0id().InputsAutoType(3U);
         }
 
-        BASIC_BLOCK(6, 4)
+        BASIC_BLOCK(6U, 4U)
         {
-            INST(9, Opcode::SpillFill);
+            INST(9U, Opcode::SpillFill);
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(5, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(6, Opcode::CallStatic).v0id().InputsAutoType(5);
+            INST(5U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(5U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(7, Opcode::Return).u64().Inputs(0);
+            INST(7U, Opcode::Return).u64().Inputs(0U);
         }
     }
 
     auto initial_graph = InitUsedRegs(CreateEmptyGraph());
     GRAPH(initial_graph)
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(1, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 0);
-            INST(2, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(1);
+            INST(1U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 0U);
+            INST(2U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(1U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(3, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(4, Opcode::CallStatic).v0id().InputsAutoType(3);
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(4U, Opcode::CallStatic).v0id().InputsAutoType(3U);
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(5, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(6, Opcode::CallStatic).v0id().InputsAutoType(5);
+            INST(5U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(5U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(7, Opcode::Return).u64().Inputs(0);
+            INST(7U, Opcode::Return).u64().Inputs(0U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
 
-    auto param = la->GetInstLifeIntervals(&INS(0));
-    auto call = la->GetInstLifeIntervals(&INS(4));
-    param->SetReg(0);
+    auto param = la->GetInstLifeIntervals(&INS(0U));
+    auto call = la->GetInstLifeIntervals(&INS(4U));
+    param->SetReg(0U);
 
-    SplitAssignSlot(param, call->GetBegin(), 0);
+    SplitAssignSlot(param, call->GetBegin(), 0U);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
-    CheckSpillFills(INS(4).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0}});
-    CheckSpillFills(BB(4).GetPredsBlocks()[0]->GetLastInst(), {{LocationType::REGISTER, LocationType::STACK, 0, 0}});
+    CheckSpillFills(INS(4U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0U, 0U}});
+    CheckSpillFills(BB(4U).GetPredsBlocks()[0U]->GetLastInst(),
+                    {{LocationType::REGISTER, LocationType::STACK, 0U, 0U}});
 }
 
 TEST_F(SplitResolverTest, ConnectSiblingsHavingCriticalEdgeBetweenBlocks)
@@ -232,62 +233,62 @@ TEST_F(SplitResolverTest, ConnectSiblingsHavingCriticalEdgeBetweenBlocks)
     auto expected_graph = CreateEmptyGraph();
     GRAPH(initial_graph)
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(1, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 0);
-            INST(2, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(1);
+            INST(1U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 0U);
+            INST(2U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(1U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(3, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(4, Opcode::CallStatic).v0id().InputsAutoType(3);
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(4U, Opcode::CallStatic).v0id().InputsAutoType(3U);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(5, Opcode::Return).u64().Inputs(0);
+            INST(5U, Opcode::Return).u64().Inputs(0U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
 
-    auto param = la->GetInstLifeIntervals(&INS(0));
-    auto call = la->GetInstLifeIntervals(&INS(4));
-    param->SetReg(0);
+    auto param = la->GetInstLifeIntervals(&INS(0U));
+    auto call = la->GetInstLifeIntervals(&INS(4U));
+    param->SetReg(0U);
 
-    SplitAssignSlot(param, call->GetBegin(), 0);
+    SplitAssignSlot(param, call->GetBegin(), 0U);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
 
     GRAPH(expected_graph)
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, 3, 5)
+        BASIC_BLOCK(2U, 3U, 5U)
         {
-            INST(1, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 0);
-            INST(2, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(1);
+            INST(1U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 0U);
+            INST(2U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(1U);
         }
 
-        BASIC_BLOCK(3, 4)
+        BASIC_BLOCK(3U, 4U)
         {
-            INST(3, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(6, Opcode::SpillFill);
-            INST(4, Opcode::CallStatic).v0id().InputsAutoType(3);
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::SpillFill);
+            INST(4U, Opcode::CallStatic).v0id().InputsAutoType(3U);
         }
 
-        BASIC_BLOCK(5, 4)
+        BASIC_BLOCK(5U, 4U)
         {
-            INST(7, Opcode::SpillFill);
+            INST(7U, Opcode::SpillFill);
         }
 
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(5, Opcode::Return).u64().Inputs(0);
+            INST(5U, Opcode::Return).u64().Inputs(0U);
         }
     }
 
@@ -299,12 +300,12 @@ TEST_F(SplitResolverTest, ConnectSiblingsHavingCriticalEdgeBetweenBlocks)
         }
         for (auto inst : block->AllInsts()) {
             if (inst->GetOpcode() == Opcode::SpillFill) {
-                CheckSpillFills(inst, {{LocationType::REGISTER, LocationType::STACK, 0, 0}});
+                CheckSpillFills(inst, {{LocationType::REGISTER, LocationType::STACK, 0U, 0U}});
                 spill_fills++;
             }
         }
     }
-    EXPECT_EQ(spill_fills, 2);
+    EXPECT_EQ(spill_fills, 2U);
 }
 
 TEST_F(SplitResolverTest, SplitAtTheEndOfBlock)
@@ -312,90 +313,91 @@ TEST_F(SplitResolverTest, SplitAtTheEndOfBlock)
     auto expected_graph = CreateEmptyGraph();
     GRAPH(expected_graph)
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, 3, 7)
+        BASIC_BLOCK(2U, 3U, 7U)
         {
-            INST(1, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 0);
-            INST(2, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(1);
+            INST(1U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 0U);
+            INST(2U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(1U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(3, Opcode::Add).u64().Inputs(0, 0);
-            INST(8, Opcode::SpillFill);
+            INST(3U, Opcode::Add).u64().Inputs(0U, 0U);
+            INST(8U, Opcode::SpillFill);
         }
 
-        BASIC_BLOCK(7, 4)
+        BASIC_BLOCK(7U, 4U)
         {
-            INST(9, Opcode::SpillFill);
+            INST(9U, Opcode::SpillFill);
         }
 
-        BASIC_BLOCK(4, 6)
+        BASIC_BLOCK(4U, 6U)
         {
-            INST(4, Opcode::Mul).u64().Inputs(0, 0);
+            INST(4U, Opcode::Mul).u64().Inputs(0U, 0U);
         }
 
-        BASIC_BLOCK(5, 6)
+        BASIC_BLOCK(5U, 6U)
         {
-            INST(7, Opcode::Add).u64().Inputs(3, 0);
+            INST(7U, Opcode::Add).u64().Inputs(3U, 0U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(5, Opcode::Phi).u64().Inputs(4, 7);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(5U, Opcode::Phi).u64().Inputs(4U, 7U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
 
     auto initial_graph = InitUsedRegs(CreateEmptyGraph());
     GRAPH(initial_graph)
     {
-        PARAMETER(0, 0).u64();
+        PARAMETER(0U, 0U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(1, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 0);
-            INST(2, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(1);
+            INST(1U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 0U);
+            INST(2U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(1U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(3, Opcode::Add).u64().Inputs(0, 0);
+            INST(3U, Opcode::Add).u64().Inputs(0U, 0U);
         }
 
-        BASIC_BLOCK(4, 6)
+        BASIC_BLOCK(4U, 6U)
         {
-            INST(4, Opcode::Mul).u64().Inputs(0, 0);
+            INST(4U, Opcode::Mul).u64().Inputs(0U, 0U);
         }
 
-        BASIC_BLOCK(5, 6)
+        BASIC_BLOCK(5U, 6U)
         {
-            INST(7, Opcode::Add).u64().Inputs(3, 0);
+            INST(7U, Opcode::Add).u64().Inputs(3U, 0U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(5, Opcode::Phi).u64().Inputs(4, 7);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(5U, Opcode::Phi).u64().Inputs(4U, 7U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
-    auto param = la->GetInstLifeIntervals(&INS(0));
-    auto bb3 = la->GetBlockLiveRange(&BB(3));
-    param->SetReg(0);
-    SplitAssignSlot(param, bb3.GetEnd(), 0);
+    auto param = la->GetInstLifeIntervals(&INS(0U));
+    auto bb3 = la->GetBlockLiveRange(&BB(3U));
+    param->SetReg(0U);
+    SplitAssignSlot(param, bb3.GetEnd(), 0U);
     // Assign reg to the phi and its inputs
-    la->GetInstLifeIntervals(&INS(4))->SetReg(1);
-    la->GetInstLifeIntervals(&INS(5))->SetReg(1);
-    la->GetInstLifeIntervals(&INS(7))->SetReg(1);
+    la->GetInstLifeIntervals(&INS(4U))->SetReg(1U);
+    la->GetInstLifeIntervals(&INS(5U))->SetReg(1U);
+    la->GetInstLifeIntervals(&INS(7U))->SetReg(1U);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
-    CheckSpillFills(INS(3).GetNext(), {{LocationType::REGISTER, LocationType::STACK, 0, 0}});
-    CheckSpillFills(BB(4).GetPredsBlocks()[0]->GetLastInst(), {{LocationType::REGISTER, LocationType::STACK, 0, 0}});
+    CheckSpillFills(INS(3U).GetNext(), {{LocationType::REGISTER, LocationType::STACK, 0U, 0U}});
+    CheckSpillFills(BB(4U).GetPredsBlocks()[0U]->GetLastInst(),
+                    {{LocationType::REGISTER, LocationType::STACK, 0U, 0U}});
 }
 
 // If we already inserted spill fill instruction for some spill
@@ -407,39 +409,39 @@ TEST_F(SplitResolverTest, ReuseExistingSpillFillWithinBlock)
 
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            AFTER_SPLIT_RESOLUTION(INST(6, Opcode::SpillFill));
-            INST(3, Opcode::CallStatic).v0id().InputsAutoType(2);
-            AFTER_SPLIT_RESOLUTION(INST(7, Opcode::SpillFill));
-            INST(4, Opcode::Add).u64().Inputs(0, 1);
-            INST(5, Opcode::Return).u64().Inputs(4);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            AFTER_SPLIT_RESOLUTION(INST(6U, Opcode::SpillFill));
+            INST(3U, Opcode::CallStatic).v0id().InputsAutoType(2U);
+            AFTER_SPLIT_RESOLUTION(INST(7U, Opcode::SpillFill));
+            INST(4U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(5U, Opcode::Return).u64().Inputs(4U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
 
-    auto param0 = la->GetInstLifeIntervals(&INS(0));
-    auto param1 = la->GetInstLifeIntervals(&INS(1));
-    auto call = la->GetInstLifeIntervals(&INS(3));
-    param0->SetReg(0);
-    param1->SetReg(1);
+    auto param0 = la->GetInstLifeIntervals(&INS(0U));
+    auto param1 = la->GetInstLifeIntervals(&INS(1U));
+    auto call = la->GetInstLifeIntervals(&INS(3U));
+    param0->SetReg(0U);
+    param1->SetReg(1U);
 
-    SplitAssignReg(SplitAssignSlot(param0, call->GetBegin(), 0), call->GetEnd(), 0);
-    SplitAssignReg(SplitAssignSlot(param1, call->GetBegin(), 1), call->GetEnd(), 1);
+    SplitAssignReg(SplitAssignSlot(param0, call->GetBegin(), 0U), call->GetEnd(), 0U);
+    SplitAssignReg(SplitAssignSlot(param1, call->GetBegin(), 1U), call->GetEnd(), 1U);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
     CheckSpillFills(INS(3).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 1, 1}});
+                                       {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
     CheckSpillFills(INS(3).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
-                                       {LocationType::STACK, LocationType::REGISTER, 1, 1}});
+                                       {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
 }
 
 // If there are spill fills inserted to load instn's operand or spill instn's result
@@ -451,56 +453,56 @@ TEST_F(SplitResolverTest, DontReuseInstructionSpillFills)
 
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            AFTER_SPLIT_RESOLUTION(INST(11, Opcode::SpillFill));
-            INST(4, Opcode::SpillFill);  // spill fill loading
-            INST(5, Opcode::AddI).u64().Imm(42).Inputs(2);
-            AFTER_SPLIT_RESOLUTION(INST(12, Opcode::SpillFill));
-            INST(7, Opcode::SpillFill);  // spill fill loading
-            INST(8, Opcode::Add).u64().Inputs(0, 5);
-            INST(9, Opcode::Add).u64().Inputs(8, 1);
-            INST(10, Opcode::Return).u64().Inputs(9);
+            AFTER_SPLIT_RESOLUTION(INST(11U, Opcode::SpillFill));
+            INST(4U, Opcode::SpillFill);  // spill fill loading
+            INST(5U, Opcode::AddI).u64().Imm(42U).Inputs(2U);
+            AFTER_SPLIT_RESOLUTION(INST(12U, Opcode::SpillFill));
+            INST(7U, Opcode::SpillFill);  // spill fill loading
+            INST(8U, Opcode::Add).u64().Inputs(0U, 5U);
+            INST(9U, Opcode::Add).u64().Inputs(8U, 1U);
+            INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
 
-    auto param0 = la->GetInstLifeIntervals(&INS(0));
-    auto param1 = la->GetInstLifeIntervals(&INS(1));
-    auto param2 = la->GetInstLifeIntervals(&INS(2));
-    auto addi = la->GetInstLifeIntervals(&INS(5));
-    auto add = la->GetInstLifeIntervals(&INS(8));
-    param0->SetReg(0);
-    param1->SetReg(1);
-    param2->SetLocation(Location::MakeStackSlot(4));
-    addi->SetLocation(Location::MakeStackSlot(3));
+    auto param0 = la->GetInstLifeIntervals(&INS(0U));
+    auto param1 = la->GetInstLifeIntervals(&INS(1U));
+    auto param2 = la->GetInstLifeIntervals(&INS(2U));
+    auto addi = la->GetInstLifeIntervals(&INS(5U));
+    auto add = la->GetInstLifeIntervals(&INS(8U));
+    param0->SetReg(0U);
+    param1->SetReg(1U);
+    param2->SetLocation(Location::MakeStackSlot(4U));
+    addi->SetLocation(Location::MakeStackSlot(3U));
 
-    INS(4).CastToSpillFill()->SetSpillFillType(SpillFillType::INPUT_FILL);
-    INS(7).CastToSpillFill()->SetSpillFillType(SpillFillType::INPUT_FILL);
+    INS(4U).CastToSpillFill()->SetSpillFillType(SpillFillType::INPUT_FILL);
+    INS(7U).CastToSpillFill()->SetSpillFillType(SpillFillType::INPUT_FILL);
 
-    SplitAssignReg(SplitAssignSlot(param0, addi->GetBegin(), 0), add->GetBegin(), 0);
-    SplitAssignReg(SplitAssignSlot(param1, addi->GetBegin(), 1), add->GetBegin(), 1);
+    SplitAssignReg(SplitAssignSlot(param0, addi->GetBegin(), 0U), add->GetBegin(), 0U);
+    SplitAssignReg(SplitAssignSlot(param1, addi->GetBegin(), 1U), add->GetBegin(), 1U);
 
-    INS(4).CastToSpillFill()->AddFill(param2->GetLocation().GetValue(), 11, DataType::Type::INT64);
-    INS(7).CastToSpillFill()->AddFill(addi->GetLocation().GetValue(), 11, DataType::Type::INT64);
-    INS(5).SetSrcReg(0, 11);
-    INS(5).SetDstReg(11);
-    INS(8).SetSrcReg(0, 0);
-    INS(8).SetSrcReg(1, 11);
+    INS(4U).CastToSpillFill()->AddFill(param2->GetLocation().GetValue(), 11U, DataType::Type::INT64);
+    INS(7U).CastToSpillFill()->AddFill(addi->GetLocation().GetValue(), 11U, DataType::Type::INT64);
+    INS(5U).SetSrcReg(0U, 11U);
+    INS(5U).SetDstReg(11U);
+    INS(8U).SetSrcReg(0U, 0U);
+    INS(8U).SetSrcReg(1U, 11U);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
     CheckSpillFills(INS(4).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 1, 1}});
+                                       {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
     CheckSpillFills(INS(7).GetPrev(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
-                                       {LocationType::STACK, LocationType::REGISTER, 1, 1}});
+                                       {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
 }
 
 TEST_F(SplitResolverTest, DoNotReuseExistingSpillFillBeforeInstruction)
@@ -509,36 +511,36 @@ TEST_F(SplitResolverTest, DoNotReuseExistingSpillFillBeforeInstruction)
     auto expected_graph = CreateEmptyGraph();
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Add).u64().Inputs(0, 1);
-            AFTER_SPLIT_RESOLUTION(INST(6, Opcode::SpillFill));
-            INST(5, Opcode::SpillFill);
-            INST(3, Opcode::Mul).u64().Inputs(0, 2);
-            INST(4, Opcode::Return).u64().Inputs(3);
+            INST(2U, Opcode::Add).u64().Inputs(0U, 1U);
+            AFTER_SPLIT_RESOLUTION(INST(6U, Opcode::SpillFill));
+            INST(5U, Opcode::SpillFill);
+            INST(3U, Opcode::Mul).u64().Inputs(0U, 2U);
+            INST(4U, Opcode::Return).u64().Inputs(3U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
 
-    auto param0 = la->GetInstLifeIntervals(&INS(0));
-    auto mul = la->GetInstLifeIntervals(&INS(3));
-    param0->SetReg(0);
-    SplitAssignSlot(param0, mul->GetBegin(), 0);
+    auto param0 = la->GetInstLifeIntervals(&INS(0U));
+    auto mul = la->GetInstLifeIntervals(&INS(3U));
+    param0->SetReg(0U);
+    SplitAssignSlot(param0, mul->GetBegin(), 0U);
 
-    auto mul_sf = INS(5).CastToSpillFill();
-    mul_sf->AddFill(0, 1, DataType::Type::UINT64);
+    auto mul_sf = INS(5U).CastToSpillFill();
+    mul_sf->AddFill(0U, 1U, DataType::Type::UINT64);
     mul_sf->SetSpillFillType(SpillFillType::INPUT_FILL);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
-    CheckSpillFills(INS(2).GetNext(), {{LocationType::REGISTER, LocationType::STACK, 0, 0}});
-    CheckSpillFills(&INS(5), {{LocationType::STACK, LocationType::REGISTER, 0, 1}});
+    CheckSpillFills(INS(2U).GetNext(), {{LocationType::REGISTER, LocationType::STACK, 0U, 0U}});
+    CheckSpillFills(&INS(5U), {{LocationType::STACK, LocationType::REGISTER, 0U, 1U}});
 }
 
 TEST_F(SplitResolverTest, ReuseExistingSpillFillAtTheEndOfBlock)
@@ -547,60 +549,60 @@ TEST_F(SplitResolverTest, ReuseExistingSpillFillAtTheEndOfBlock)
     auto expected_graph = CreateEmptyGraph();
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(4, Opcode::Add).u64().Inputs(0, 1);
-            INST(9, Opcode::SpillFill);  // SF generated for PHI
+            INST(4U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(9U, Opcode::SpillFill);  // SF generated for PHI
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            AFTER_SPLIT_RESOLUTION(INST(11, Opcode::SpillFill));
-            INST(5, Opcode::Mul).u64().Inputs(1, 1);
+            AFTER_SPLIT_RESOLUTION(INST(11U, Opcode::SpillFill));
+            INST(5U, Opcode::Mul).u64().Inputs(1U, 1U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(6, Opcode::Phi).u64().Inputs(4, 5);
-            INST(7, Opcode::Add).u64().Inputs(6, 0);
-            INST(8, Opcode::Return).u64().Inputs(7);
+            INST(6U, Opcode::Phi).u64().Inputs(4U, 5U);
+            INST(7U, Opcode::Add).u64().Inputs(6U, 0U);
+            INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
 
-    auto phi = la->GetInstLifeIntervals(&INS(6));
-    phi->SetReg(3);
-    auto mul = la->GetInstLifeIntervals(&INS(5));
-    mul->SetReg(3);
-    auto add = la->GetInstLifeIntervals(&INS(4));
-    add->SetReg(2);
+    auto phi = la->GetInstLifeIntervals(&INS(6U));
+    phi->SetReg(3U);
+    auto mul = la->GetInstLifeIntervals(&INS(5U));
+    mul->SetReg(3U);
+    auto add = la->GetInstLifeIntervals(&INS(4U));
+    add->SetReg(2U);
 
-    auto param0 = la->GetInstLifeIntervals(&INS(0));
-    param0->SetReg(1);
+    auto param0 = la->GetInstLifeIntervals(&INS(0U));
+    param0->SetReg(1U);
 
-    SplitAssignSlot(param0, mul->GetBegin(), 0);
+    SplitAssignSlot(param0, mul->GetBegin(), 0U);
 
-    auto phi_sf = INS(9).CastToSpillFill();
+    auto phi_sf = INS(9U).CastToSpillFill();
     // param0 still has r1 assigned at the end of BB3, so PHI's SF will move it from r1 to r3 assigned to PHI
-    phi_sf->AddMove(1, 3, DataType::Type::UINT64);
+    phi_sf->AddMove(1U, 3U, DataType::Type::UINT64);
     phi_sf->SetSpillFillType(SpillFillType::SPLIT_MOVE);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
-    CheckSpillFills(&INS(9), {{LocationType::REGISTER, LocationType::STACK, 1, 0}});
-    CheckSpillFills(INS(5).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 1, 0}});
+    CheckSpillFills(&INS(9U), {{LocationType::REGISTER, LocationType::STACK, 1U, 0U}});
+    CheckSpillFills(INS(5U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 1U, 0U}});
 }
 
 TEST_F(SplitResolverTest, ConnectSplitAtTheEndOfBlock)
@@ -608,97 +610,97 @@ TEST_F(SplitResolverTest, ConnectSplitAtTheEndOfBlock)
     auto expected_graph = CreateEmptyGraph();
     GRAPH(expected_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, 3, 6)
+        BASIC_BLOCK(2U, 3U, 6U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(4, Opcode::Add).u64().Inputs(0, 1);
+            INST(4U, Opcode::Add).u64().Inputs(0U, 1U);
             // Insert copy instruction before φ-move, because
             // inst 4 should be already copied at the end of block (where φ inserts move).
-            INST(10, Opcode::SpillFill);
-            INST(9, Opcode::SpillFill);  // SF generated for PHI
+            INST(10U, Opcode::SpillFill);
+            INST(9U, Opcode::SpillFill);  // SF generated for PHI
         }
 
-        BASIC_BLOCK(6, 4)
+        BASIC_BLOCK(6U, 4U)
         {
-            INST(11, Opcode::SpillFill);
+            INST(11U, Opcode::SpillFill);
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(5, Opcode::Mul).u64().Inputs(1, 1);
+            INST(5U, Opcode::Mul).u64().Inputs(1U, 1U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(6, Opcode::Phi).u64().Inputs(4, 5);
-            INST(7, Opcode::Add).u64().Inputs(6, 0);
-            INST(8, Opcode::Return).u64().Inputs(7);
+            INST(6U, Opcode::Phi).u64().Inputs(4U, 5U);
+            INST(7U, Opcode::Add).u64().Inputs(6U, 0U);
+            INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
 
     auto initial_graph = InitUsedRegs(CreateEmptyGraph());
     GRAPH(initial_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(4, Opcode::Add).u64().Inputs(0, 1);
-            INST(9, Opcode::SpillFill);  // SF generated for PHI
+            INST(4U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(9U, Opcode::SpillFill);  // SF generated for PHI
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(5, Opcode::Mul).u64().Inputs(1, 1);
+            INST(5U, Opcode::Mul).u64().Inputs(1U, 1U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(6, Opcode::Phi).u64().Inputs(4, 5);
-            INST(7, Opcode::Add).u64().Inputs(6, 0);
-            INST(8, Opcode::Return).u64().Inputs(7);
+            INST(6U, Opcode::Phi).u64().Inputs(4U, 5U);
+            INST(7U, Opcode::Add).u64().Inputs(6U, 0U);
+            INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
 
-    auto phi = la->GetInstLifeIntervals(&INS(6));
-    phi->SetReg(3);
-    auto add = la->GetInstLifeIntervals(&INS(4));
-    add->SetReg(1);
-    auto mul = la->GetInstLifeIntervals(&INS(5));
-    mul->SetReg(3);
+    auto phi = la->GetInstLifeIntervals(&INS(6U));
+    phi->SetReg(3U);
+    auto add = la->GetInstLifeIntervals(&INS(4U));
+    add->SetReg(1U);
+    auto mul = la->GetInstLifeIntervals(&INS(5U));
+    mul->SetReg(3U);
 
-    auto param0 = la->GetInstLifeIntervals(&INS(0));
-    param0->SetReg(1);
+    auto param0 = la->GetInstLifeIntervals(&INS(0U));
+    param0->SetReg(1U);
 
-    SplitAssignSlot(param0, add->GetBegin() + 2, 0);
+    SplitAssignSlot(param0, add->GetBegin() + 2U, 0U);
 
-    auto phi_sf = INS(9).CastToSpillFill();
+    auto phi_sf = INS(9U).CastToSpillFill();
     // param0 still has r1 assigned at the end of BB3, so PHI's SF will move it from r1 to r3 assigned to PHI
-    phi_sf->AddMove(1, 3, DataType::Type::UINT64);
+    phi_sf->AddMove(1U, 3U, DataType::Type::UINT64);
     phi_sf->SetSpillFillType(SpillFillType::SPLIT_MOVE);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
-    CheckSpillFills(INS(4).GetNext(), {{LocationType::REGISTER, LocationType::STACK, 1, 0}});
+    CheckSpillFills(INS(4U).GetNext(), {{LocationType::REGISTER, LocationType::STACK, 1U, 0U}});
 }
 
 TEST_F(SplitResolverTest, GracefullyHandlePhiResolverBlocks)
@@ -706,56 +708,56 @@ TEST_F(SplitResolverTest, GracefullyHandlePhiResolverBlocks)
     auto initial_graph = InitUsedRegs(CreateEmptyGraph());
     GRAPH(initial_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, 5, 3)
+        BASIC_BLOCK(2U, 5U, 3U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
 
-        BASIC_BLOCK(3, 5, 4)
+        BASIC_BLOCK(3U, 5U, 4U)
         {
-            INST(4, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 1);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_LE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_LE).Imm(0U).Inputs(4U);
         }
 
-        BASIC_BLOCK(5, 6)
+        BASIC_BLOCK(5U, 6U)
         {
-            INST(6, Opcode::Add).u64().Inputs(0, 1);
+            INST(6U, Opcode::Add).u64().Inputs(0U, 1U);
         }
 
-        BASIC_BLOCK(4, 6)
+        BASIC_BLOCK(4U, 6U)
         {
-            INST(7, Opcode::Sub).u64().Inputs(0, 1);
+            INST(7U, Opcode::Sub).u64().Inputs(0U, 1U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(8, Opcode::Phi).u64().Inputs(6, 7);
-            INST(9, Opcode::Add).u64().Inputs(0, 8);
-            INST(10, Opcode::Return).u64().Inputs(9);
+            INST(8U, Opcode::Phi).u64().Inputs(6U, 7U);
+            INST(9U, Opcode::Add).u64().Inputs(0U, 8U);
+            INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
-    auto pred = &BB(5);
-    auto succ = &BB(6);
+    auto pred = &BB(5U);
+    auto succ = &BB(6U);
     auto phi_resolver = pred->InsertNewBlockToSuccEdge(succ);
     auto sf0 = initial_graph->CreateInstSpillFill();
     sf0->SetSpillFillType(SpillFillType::SPLIT_MOVE);
     phi_resolver->PrependInst(sf0);
 
-    auto param0 = la->GetInstLifeIntervals(&INS(0));
-    param0->SetReg(0);
-    auto sub = la->GetInstLifeIntervals(&INS(7));
-    SplitAssignReg(param0, sub->GetBegin(), 4);
+    auto param0 = la->GetInstLifeIntervals(&INS(0U));
+    param0->SetReg(0U);
+    auto sub = la->GetInstLifeIntervals(&INS(7U));
+    SplitAssignReg(param0, sub->GetBegin(), 4U);
 
     // Assign reg to the phi and its inputs
-    la->GetInstLifeIntervals(&INS(6))->SetReg(1);
-    la->GetInstLifeIntervals(&INS(7))->SetReg(1);
-    la->GetInstLifeIntervals(&INS(8))->SetReg(1);
+    la->GetInstLifeIntervals(&INS(6U))->SetReg(1U);
+    la->GetInstLifeIntervals(&INS(7U))->SetReg(1U);
+    la->GetInstLifeIntervals(&INS(8U))->SetReg(1U);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
@@ -763,49 +765,49 @@ TEST_F(SplitResolverTest, GracefullyHandlePhiResolverBlocks)
     auto expected_graph = CreateEmptyGraph();
     GRAPH(expected_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, 5, 3)
+        BASIC_BLOCK(2U, 5U, 3U)
         {
-            INST(2, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 1);
-            INST(3, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(2);
+            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
         }
 
-        BASIC_BLOCK(3, 5, 4)
+        BASIC_BLOCK(3U, 5U, 4U)
         {
-            INST(4, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 1);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_LE).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_LE).Imm(0U).Inputs(4U);
         }
 
-        BASIC_BLOCK(5, 7)
+        BASIC_BLOCK(5U, 7U)
         {
-            INST(6, Opcode::Add).u64().Inputs(0, 1);
+            INST(6U, Opcode::Add).u64().Inputs(0U, 1U);
         }
 
-        BASIC_BLOCK(7, 6)
+        BASIC_BLOCK(7U, 6U)
         {
             // Single spill fill handling both split connection and φ-move
-            INST(12, Opcode::SpillFill);
+            INST(12U, Opcode::SpillFill);
         }
 
-        BASIC_BLOCK(4, 6)
+        BASIC_BLOCK(4U, 6U)
         {
-            INST(11, Opcode::SpillFill);  // resolve split
-            INST(7, Opcode::Sub).u64().Inputs(0, 1);
+            INST(11U, Opcode::SpillFill);  // resolve split
+            INST(7U, Opcode::Sub).u64().Inputs(0U, 1U);
         }
 
-        BASIC_BLOCK(6, -1)
+        BASIC_BLOCK(6U, -1L)
         {
-            INST(8, Opcode::Phi).u64().Inputs(6, 7);
-            INST(9, Opcode::Add).u64().Inputs(0, 8);
-            INST(10, Opcode::Return).u64().Inputs(9);
+            INST(8U, Opcode::Phi).u64().Inputs(6U, 7U);
+            INST(9U, Opcode::Add).u64().Inputs(0U, 8U);
+            INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
 
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
-    CheckSpillFills(sf0, {{LocationType::REGISTER, LocationType::REGISTER, 0, 4}});
-    CheckSpillFills(sub->GetInst()->GetPrev(), {{LocationType::REGISTER, LocationType::REGISTER, 0, 4}});
+    CheckSpillFills(sf0, {{LocationType::REGISTER, LocationType::REGISTER, 0U, 4U}});
+    CheckSpillFills(sub->GetInst()->GetPrev(), {{LocationType::REGISTER, LocationType::REGISTER, 0U, 4U}});
 }
 
 TEST_F(SplitResolverTest, ResolveSplitWithinLoop)
@@ -813,69 +815,69 @@ TEST_F(SplitResolverTest, ResolveSplitWithinLoop)
     auto expected_graph = CreateEmptyGraph();
     GRAPH(expected_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(4, Opcode::Add).u64().Inputs(0, 1);
-            INST(5, Opcode::Add).u64().Inputs(1, 4);
-            INST(12, Opcode::SpillFill);
-            INST(6, Opcode::Add).u64().Inputs(4, 5);
+            INST(4U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(5U, Opcode::Add).u64().Inputs(1U, 4U);
+            INST(12U, Opcode::SpillFill);
+            INST(6U, Opcode::Add).u64().Inputs(4U, 5U);
         }
 
-        BASIC_BLOCK(3, 6, 5)
+        BASIC_BLOCK(3U, 6U, 5U)
         {
-            INST(7, Opcode::Mul).u64().Inputs(4, 5);
-            INST(13, Opcode::SpillFill);
-            INST(8, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(6, 7);
-            INST(10, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(7U, Opcode::Mul).u64().Inputs(4U, 5U);
+            INST(13U, Opcode::SpillFill);
+            INST(8U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(6U, 7U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(11, Opcode::Return).u64().Inputs(7);
+            INST(11U, Opcode::Return).u64().Inputs(7U);
         }
 
-        BASIC_BLOCK(6, 3)
+        BASIC_BLOCK(6U, 3U)
         {
-            INST(14, Opcode::SpillFill);
+            INST(14U, Opcode::SpillFill);
         }
     }
 
     auto initial_graph = InitUsedRegs(CreateEmptyGraph());
     GRAPH(initial_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
 
-        BASIC_BLOCK(2, 3)
+        BASIC_BLOCK(2U, 3U)
         {
-            INST(4, Opcode::Add).u64().Inputs(0, 1);
-            INST(5, Opcode::Add).u64().Inputs(1, 4);
-            INST(6, Opcode::Add).u64().Inputs(4, 5);
+            INST(4U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(5U, Opcode::Add).u64().Inputs(1U, 4U);
+            INST(6U, Opcode::Add).u64().Inputs(4U, 5U);
         }
 
-        BASIC_BLOCK(3, 3, 5)
+        BASIC_BLOCK(3U, 3U, 5U)
         {
-            INST(7, Opcode::Mul).u64().Inputs(4, 5);
-            INST(8, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(6, 7);
-            INST(10, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(8);
+            INST(7U, Opcode::Mul).u64().Inputs(4U, 5U);
+            INST(8U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(6U, 7U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(11, Opcode::Return).u64().Inputs(7);
+            INST(11U, Opcode::Return).u64().Inputs(7U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
-    auto var0 = la->GetInstLifeIntervals(&INS(4));
-    var0->SetLocation(Location::MakeStackSlot(0));
+    auto var0 = la->GetInstLifeIntervals(&INS(4U));
+    var0->SetLocation(Location::MakeStackSlot(0U));
     SplitAssignSlot(SplitAssignReg(var0, la->GetInstLifeIntervals(&INS(6))->GetBegin(), 4),
                     la->GetInstLifeIntervals(&INS(8))->GetBegin(), 0);
-    auto var1 = la->GetInstLifeIntervals(&INS(5));
-    var1->SetLocation(Location::MakeStackSlot(1));
+    auto var1 = la->GetInstLifeIntervals(&INS(5U));
+    var1->SetLocation(Location::MakeStackSlot(1U));
     SplitAssignSlot(SplitAssignReg(var1, la->GetInstLifeIntervals(&INS(6))->GetBegin(), 5),
                     la->GetInstLifeIntervals(&INS(8))->GetBegin(), 1);
 
@@ -884,12 +886,12 @@ TEST_F(SplitResolverTest, ResolveSplitWithinLoop)
 
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
     CheckSpillFills(INS(6).GetPrev(), {{LocationType::STACK, LocationType::REGISTER, 0, 4},
-                                       {LocationType::STACK, LocationType::REGISTER, 1, 5}});
+                                       {LocationType::STACK, LocationType::REGISTER, 1U, 5U}});
     CheckSpillFills(INS(8).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 4, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 5, 1}});
+                                       {LocationType::REGISTER, LocationType::STACK, 5U, 1U}});
     auto resolver_block = initial_graph->GetVectorBlocks().back();
     CheckSpillFills(resolver_block->GetLastInst(), {{LocationType::STACK, LocationType::REGISTER, 0, 4},
-                                                    {LocationType::STACK, LocationType::REGISTER, 1, 5}});
+                                                    {LocationType::STACK, LocationType::REGISTER, 1U, 5U}});
 }
 
 TEST_F(SplitResolverTest, SkipIntervalsCoveringOnlyBlockStart)
@@ -898,30 +900,30 @@ TEST_F(SplitResolverTest, SkipIntervalsCoveringOnlyBlockStart)
     auto expected_graph = CreateEmptyGraph();
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        CONSTANT(2, 2);
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(2U, 2U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 0);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 0U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
 
-        BASIC_BLOCK(3, 5, 4)
+        BASIC_BLOCK(3U, 5U, 4U)
         {
-            INST(5, Opcode::Phi).u64().Inputs(1, 8);
-            INST(6, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(5, 5);
-            INST(7, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(6);
+            INST(5U, Opcode::Phi).u64().Inputs(1U, 8U);
+            INST(6U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(5U, 5U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
 
-        BASIC_BLOCK(5, 3)
+        BASIC_BLOCK(5U, 3U)
         {
             // split (r1)
-            AFTER_SPLIT_RESOLUTION(INST(11, Opcode::SpillFill));
-            INST(8, Opcode::Sub).u64().Inputs(5, 0);
+            AFTER_SPLIT_RESOLUTION(INST(11U, Opcode::SpillFill));
+            INST(8U, Opcode::Sub).u64().Inputs(5U, 0U);
             // copy to location @ begging BB 3 (r0)
-            AFTER_SPLIT_RESOLUTION(INST(12, Opcode::SpillFill));
+            AFTER_SPLIT_RESOLUTION(INST(12U, Opcode::SpillFill));
         }
 
         // Interval for parameter 0 is live in loop's header (BB 3), so its live range
@@ -933,25 +935,25 @@ TEST_F(SplitResolverTest, SkipIntervalsCoveringOnlyBlockStart)
         // so the move will corrupt Phi's value. If param0 is the Phi's input then it'll be copied
         // by the phi-move inserted during Phi resolution and the spill-fill connecting sibling intervals
         // is not required too.
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(9, Opcode::Phi).u64().Inputs(2, 5);
-            INST(10, Opcode::Return).u64().Inputs(9);
+            INST(9U, Opcode::Phi).u64().Inputs(2U, 5U);
+            INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
 
-    auto param0 = la->GetInstLifeIntervals(&INS(0));
-    param0->SetReg(0);
-    SplitAssignReg(param0, la->GetInstLifeIntervals(&INS(8))->GetBegin(), 1);
+    auto param0 = la->GetInstLifeIntervals(&INS(0U));
+    param0->SetReg(0U);
+    SplitAssignReg(param0, la->GetInstLifeIntervals(&INS(8U))->GetBegin(), 1U);
 
     // Assign reg to the phi and its inputs
-    la->GetInstLifeIntervals(&INS(1))->SetReg(1);
-    la->GetInstLifeIntervals(&INS(2))->SetReg(1);
-    la->GetInstLifeIntervals(&INS(5))->SetReg(1);
-    la->GetInstLifeIntervals(&INS(8))->SetReg(1);
-    la->GetInstLifeIntervals(&INS(9))->SetReg(1);
+    la->GetInstLifeIntervals(&INS(1U))->SetReg(1U);
+    la->GetInstLifeIntervals(&INS(2U))->SetReg(1U);
+    la->GetInstLifeIntervals(&INS(5U))->SetReg(1U);
+    la->GetInstLifeIntervals(&INS(8U))->SetReg(1U);
+    la->GetInstLifeIntervals(&INS(9U))->SetReg(1U);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
@@ -966,22 +968,22 @@ TEST_F(SplitResolverTest, ConnectIntervalsForConstantWithinBlock)
 
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        CONSTANT(0, 42);
+        CONSTANT(0U, 42U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::AddI).u64().Imm(1).Inputs(0);
-            INST(2, Opcode::Add).u64().Inputs(0, 1);
-            AFTER_SPLIT_RESOLUTION(INST(6, Opcode::SpillFill));
-            INST(3, Opcode::Add).u64().Inputs(0, 2);
-            INST(4, Opcode::Add).u64().Inputs(0, 3);
-            INST(5, Opcode::Return).u64().Inputs(4);
+            INST(1U, Opcode::AddI).u64().Imm(1U).Inputs(0U);
+            INST(2U, Opcode::Add).u64().Inputs(0U, 1U);
+            AFTER_SPLIT_RESOLUTION(INST(6U, Opcode::SpillFill));
+            INST(3U, Opcode::Add).u64().Inputs(0U, 2U);
+            INST(4U, Opcode::Add).u64().Inputs(0U, 3U);
+            INST(5U, Opcode::Return).u64().Inputs(4U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
-    auto con = la->GetInstLifeIntervals(&INS(0));
-    con->SetReg(0);
+    auto con = la->GetInstLifeIntervals(&INS(0U));
+    con->SetReg(0U);
     SplitAssignReg(SplitAssignImmSlot(SplitAssignImmSlot(con, la->GetInstLifeIntervals(&INS(1))->GetBegin(), 0),
                                       la->GetInstLifeIntervals(&INS(2))->GetBegin(), 0),
                    la->GetInstLifeIntervals(&INS(3))->GetBegin(), 0);
@@ -990,7 +992,7 @@ TEST_F(SplitResolverTest, ConnectIntervalsForConstantWithinBlock)
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
-    CheckSpillFills(INS(3).GetPrev(), {{LocationType::IMMEDIATE, LocationType::REGISTER, 0, 0}});
+    CheckSpillFills(INS(3U).GetPrev(), {{LocationType::IMMEDIATE, LocationType::REGISTER, 0U, 0U}});
 }
 
 TEST_F(SplitResolverTest, ConnectIntervalsForConstantBetweenBlock)
@@ -1000,54 +1002,54 @@ TEST_F(SplitResolverTest, ConnectIntervalsForConstantBetweenBlock)
 
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        CONSTANT(0, 42);
-        CONSTANT(1, 64);
-        PARAMETER(2, 0).u64();
+        CONSTANT(0U, 42U);
+        CONSTANT(1U, 64U);
+        PARAMETER(2U, 0U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(3, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(2, 2);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3);
+            INST(3U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(2U, 2U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            INST(5, Opcode::Add).u64().Inputs(2, 2);
-            AFTER_SPLIT_RESOLUTION(INST(11, Opcode::SpillFill));
+            INST(5U, Opcode::Add).u64().Inputs(2U, 2U);
+            AFTER_SPLIT_RESOLUTION(INST(11U, Opcode::SpillFill));
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            INST(6, Opcode::Mul).u64().Inputs(2, 2);
-            AFTER_SPLIT_RESOLUTION(INST(12, Opcode::SpillFill));
+            INST(6U, Opcode::Mul).u64().Inputs(2U, 2U);
+            AFTER_SPLIT_RESOLUTION(INST(12U, Opcode::SpillFill));
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(7, Opcode::Phi).u64().Inputs(5, 6);
-            INST(8, Opcode::Add).u64().Inputs(0, 7);
-            INST(9, Opcode::Add).u64().Inputs(1, 8);
-            INST(10, Opcode::Return).u64().Inputs(9);
+            INST(7U, Opcode::Phi).u64().Inputs(5U, 6U);
+            INST(8U, Opcode::Add).u64().Inputs(0U, 7U);
+            INST(9U, Opcode::Add).u64().Inputs(1U, 8U);
+            INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
-    auto con0 = la->GetInstLifeIntervals(&INS(0));
-    auto con1 = la->GetInstLifeIntervals(&INS(1));
-    con0->SetReg(0);
-    con1->SetReg(1);
-    SplitAssignImmSlot(con0, la->GetInstLifeIntervals(&INS(7))->GetBegin(), 0);
+    auto con0 = la->GetInstLifeIntervals(&INS(0U));
+    auto con1 = la->GetInstLifeIntervals(&INS(1U));
+    con0->SetReg(0U);
+    con1->SetReg(1U);
+    SplitAssignImmSlot(con0, la->GetInstLifeIntervals(&INS(7U))->GetBegin(), 0U);
     SplitAssignReg(SplitAssignImmSlot(con1, la->GetInstLifeIntervals(&INS(3))->GetBegin(), 0),
                    la->GetInstLifeIntervals(&INS(7))->GetBegin(), 2);
     // Assign reg to the phi and its inputs
-    la->GetInstLifeIntervals(&INS(5))->SetReg(2);
-    la->GetInstLifeIntervals(&INS(6))->SetReg(2);
-    la->GetInstLifeIntervals(&INS(7))->SetReg(2);
+    la->GetInstLifeIntervals(&INS(5U))->SetReg(2U);
+    la->GetInstLifeIntervals(&INS(6U))->SetReg(2U);
+    la->GetInstLifeIntervals(&INS(7U))->SetReg(2U);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
-    CheckSpillFills(INS(5).GetNext(), {{LocationType::IMMEDIATE, LocationType::REGISTER, 0, 2}});
-    CheckSpillFills(INS(6).GetNext(), {{LocationType::IMMEDIATE, LocationType::REGISTER, 0, 2}});
+    CheckSpillFills(INS(5U).GetNext(), {{LocationType::IMMEDIATE, LocationType::REGISTER, 0U, 2U}});
+    CheckSpillFills(INS(6U).GetNext(), {{LocationType::IMMEDIATE, LocationType::REGISTER, 0U, 2U}});
 }
 
 TEST_F(SplitResolverTest, DontReuseSpillFillForConstant)
@@ -1057,31 +1059,32 @@ TEST_F(SplitResolverTest, DontReuseSpillFillForConstant)
 
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        CONSTANT(0, 42);
+        CONSTANT(0U, 42U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::AddI).u64().Imm(1).Inputs(0);
-            INST(2, Opcode::Add).u64().Inputs(0, 1);
-            AFTER_SPLIT_RESOLUTION(INST(3, Opcode::SpillFill));
-            INST(4, Opcode::SpillFill);
-            INST(5, Opcode::Add).u64().Inputs(0, 2);
-            INST(6, Opcode::Return).u64().Inputs(5);
+            INST(1U, Opcode::AddI).u64().Imm(1U).Inputs(0U);
+            INST(2U, Opcode::Add).u64().Inputs(0U, 1U);
+            AFTER_SPLIT_RESOLUTION(INST(3U, Opcode::SpillFill));
+            INST(4U, Opcode::SpillFill);
+            INST(5U, Opcode::Add).u64().Inputs(0U, 2U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
-    la->GetInstLifeIntervals(&INS(0))->SetLocation(Location::MakeConstant(0));
-    la->GetInstLifeIntervals(&INS(2))->SetReg(1);
-    SplitAssignSlot(la->GetInstLifeIntervals(&INS(2)), la->GetInstLifeIntervals(&INS(5))->GetBegin(), 0);
-    INS(4).CastToSpillFill()->AddSpillFill(Location::MakeConstant(0), Location::MakeRegister(1), DataType::Type::INT64);
-    INS(4).CastToSpillFill()->SetSpillFillType(SpillFillType::INPUT_FILL);
+    la->GetInstLifeIntervals(&INS(0U))->SetLocation(Location::MakeConstant(0U));
+    la->GetInstLifeIntervals(&INS(2U))->SetReg(1U);
+    SplitAssignSlot(la->GetInstLifeIntervals(&INS(2U)), la->GetInstLifeIntervals(&INS(5U))->GetBegin(), 0U);
+    INS(4U).CastToSpillFill()->AddSpillFill(Location::MakeConstant(0U), Location::MakeRegister(1U),
+                                            DataType::Type::INT64);
+    INS(4U).CastToSpillFill()->SetSpillFillType(SpillFillType::INPUT_FILL);
 
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
-    CheckSpillFills(INS(2).GetNext(), {{LocationType::REGISTER, LocationType::STACK, 1, 0}});
+    CheckSpillFills(INS(2U).GetNext(), {{LocationType::REGISTER, LocationType::STACK, 1U, 0U}});
 }
 
 TEST_F(SplitResolverTest, AppendSpillFIllBeforeLoadArrayPairI)
@@ -1091,31 +1094,31 @@ TEST_F(SplitResolverTest, AppendSpillFIllBeforeLoadArrayPairI)
 
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        PARAMETER(0, 0).ref();
-        CONSTANT(1, 42);
-        CONSTANT(2, 24);
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(1U, 42U);
+        CONSTANT(2U, 24U);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            AFTER_SPLIT_RESOLUTION(INST(13, Opcode::SpillFill));
-            INST(6, Opcode::LoadArrayPairI).u64().Inputs(0).Imm(0x0);
-            INST(7, Opcode::LoadPairPart).u64().Inputs(6).Imm(0x0);
-            INST(8, Opcode::LoadPairPart).u64().Inputs(6).Imm(0x1);
-            INST(9, Opcode::Add).u64().Inputs(7, 8);
-            INST(10, Opcode::Add).u64().Inputs(1, 2);
-            INST(11, Opcode::Add).u64().Inputs(9, 10);
-            INST(12, Opcode::Return).u64().Inputs(11);
+            AFTER_SPLIT_RESOLUTION(INST(13U, Opcode::SpillFill));
+            INST(6U, Opcode::LoadArrayPairI).u64().Inputs(0U).Imm(0x0U);
+            INST(7U, Opcode::LoadPairPart).u64().Inputs(6U).Imm(0x0U);
+            INST(8U, Opcode::LoadPairPart).u64().Inputs(6U).Imm(0x1U);
+            INST(9U, Opcode::Add).u64().Inputs(7U, 8U);
+            INST(10U, Opcode::Add).u64().Inputs(1U, 2U);
+            INST(11U, Opcode::Add).u64().Inputs(9U, 10U);
+            INST(12U, Opcode::Return).u64().Inputs(11U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
-    la->GetInstLifeIntervals(&INS(1))->SetReg(1);
-    la->GetInstLifeIntervals(&INS(2))->SetReg(2);
+    la->GetInstLifeIntervals(&INS(1U))->SetReg(1U);
+    la->GetInstLifeIntervals(&INS(2U))->SetReg(2U);
     // Split constants before LoadPairParts
-    SplitAssignSlot(la->GetInstLifeIntervals(&INS(1)), la->GetInstLifeIntervals(&INS(7))->GetBegin(), 0);
-    SplitAssignSlot(la->GetInstLifeIntervals(&INS(2)), la->GetInstLifeIntervals(&INS(8))->GetBegin(), 0);
-    la->GetInstLifeIntervals(&INS(7))->SetReg(1);
-    la->GetInstLifeIntervals(&INS(8))->SetReg(1);
+    SplitAssignSlot(la->GetInstLifeIntervals(&INS(1U)), la->GetInstLifeIntervals(&INS(7U))->GetBegin(), 0U);
+    SplitAssignSlot(la->GetInstLifeIntervals(&INS(2U)), la->GetInstLifeIntervals(&INS(8U))->GetBegin(), 0U);
+    la->GetInstLifeIntervals(&INS(7U))->SetReg(1U);
+    la->GetInstLifeIntervals(&INS(8U))->SetReg(1U);
     SplitResolver resolver(initial_graph, la);
     resolver.Run();
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
@@ -1128,34 +1131,34 @@ TEST_F(SplitResolverTest, SplitAfterLastInstruction)
 
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        PARAMETER(0, 0).u64();
-        CONSTANT(1, 0);
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Phi).u64().Inputs(1, 6);
-            INST(3, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(2, 0);
-            INST(4, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Imm(0).Inputs(3);
+            INST(2U, Opcode::Phi).u64().Inputs(1U, 6U);
+            INST(3U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(2U, 0U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Imm(0U).Inputs(3U);
         }
 
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(5, Opcode::Return).u64().Inputs(2);
+            INST(5U, Opcode::Return).u64().Inputs(2U);
         }
 
-        BASIC_BLOCK(4, 2)
+        BASIC_BLOCK(4U, 2U)
         {
-            INST(6, Opcode::AddI).u64().Imm(1).Inputs(2);
+            INST(6U, Opcode::AddI).u64().Imm(1U).Inputs(2U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
-    la->GetInstLifeIntervals(&INS(0))->SetReg(0);
-    la->GetInstLifeIntervals(&INS(1))->SetReg(2);
-    la->GetInstLifeIntervals(&INS(2))->SetReg(2);
-    la->GetInstLifeIntervals(&INS(3))->SetReg(3);
-    la->GetInstLifeIntervals(&INS(6))->SetReg(2);
-    SplitAssignSlot(la->GetInstLifeIntervals(&INS(0)), la->GetInstLifeIntervals(&INS(6))->GetEnd(), 0);
+    la->GetInstLifeIntervals(&INS(0U))->SetReg(0U);
+    la->GetInstLifeIntervals(&INS(1U))->SetReg(2U);
+    la->GetInstLifeIntervals(&INS(2U))->SetReg(2U);
+    la->GetInstLifeIntervals(&INS(3U))->SetReg(3U);
+    la->GetInstLifeIntervals(&INS(6U))->SetReg(2U);
+    SplitAssignSlot(la->GetInstLifeIntervals(&INS(0U)), la->GetInstLifeIntervals(&INS(6U))->GetEnd(), 0U);
 
     InitUsedRegs(initial_graph);
     SplitResolver resolver(initial_graph, la);
@@ -1171,53 +1174,53 @@ TEST_F(SplitResolverTest, MultipleEndBlockMoves)
 
     INITIALIZE_GRAPHS(initial_graph, expected_graph)
     {
-        PARAMETER(0, 0).u64();
-        PARAMETER(1, 1).u64();
-        PARAMETER(2, 2).u64();
-        PARAMETER(3, 3).u64();
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0, 1);
-            INST(5, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Imm(0).Inputs(4);
+            INST(4U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Imm(0U).Inputs(4U);
         }
 
-        BASIC_BLOCK(3, 5)
+        BASIC_BLOCK(3U, 5U)
         {
-            AFTER_SPLIT_RESOLUTION(INST(12, Opcode::SpillFill));
-            INST(6, Opcode::Add).u64().Inputs(2, 3);
-            AFTER_SPLIT_RESOLUTION(INST(13, Opcode::SpillFill));
+            AFTER_SPLIT_RESOLUTION(INST(12U, Opcode::SpillFill));
+            INST(6U, Opcode::Add).u64().Inputs(2U, 3U);
+            AFTER_SPLIT_RESOLUTION(INST(13U, Opcode::SpillFill));
         }
 
-        BASIC_BLOCK(4, 5)
+        BASIC_BLOCK(4U, 5U)
         {
-            AFTER_SPLIT_RESOLUTION(INST(15, Opcode::SpillFill));
-            INST(7, Opcode::Mul).u64().Inputs(2, 3);
-            AFTER_SPLIT_RESOLUTION(INST(14, Opcode::SpillFill));
+            AFTER_SPLIT_RESOLUTION(INST(15U, Opcode::SpillFill));
+            INST(7U, Opcode::Mul).u64().Inputs(2U, 3U);
+            AFTER_SPLIT_RESOLUTION(INST(14U, Opcode::SpillFill));
         }
 
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(8, Opcode::Phi).u64().Inputs(6, 7);
-            INST(9, Opcode::Add).u64().Inputs(0, 1);
-            INST(10, Opcode::Add).u64().Inputs(8, 9);
-            INST(11, Opcode::Return).u64().Inputs(10);
+            INST(8U, Opcode::Phi).u64().Inputs(6U, 7U);
+            INST(9U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(10U, Opcode::Add).u64().Inputs(8U, 9U);
+            INST(11U, Opcode::Return).u64().Inputs(10U);
         }
     }
 
     auto la = RunLivenessAnalysis(initial_graph);
-    auto p0 = la->GetInstLifeIntervals(&INS(0));
-    auto p1 = la->GetInstLifeIntervals(&INS(1));
-    p0->SetReg(0);
-    p1->SetReg(1);
+    auto p0 = la->GetInstLifeIntervals(&INS(0U));
+    auto p1 = la->GetInstLifeIntervals(&INS(1U));
+    p0->SetReg(0U);
+    p1->SetReg(1U);
     SplitAssignReg(SplitAssignSlot(p0, la->GetInstLifeIntervals(&INS(5))->GetEnd(), 0),
                    la->GetInstLifeIntervals(&INS(8))->GetBegin(), 0);
     SplitAssignReg(SplitAssignSlot(p1, la->GetInstLifeIntervals(&INS(5))->GetEnd(), 1),
                    la->GetInstLifeIntervals(&INS(8))->GetBegin(), 1);
     // Assign reg to the phi and its inputs
-    la->GetInstLifeIntervals(&INS(6))->SetReg(2);
-    la->GetInstLifeIntervals(&INS(7))->SetReg(2);
-    la->GetInstLifeIntervals(&INS(8))->SetReg(2);
+    la->GetInstLifeIntervals(&INS(6U))->SetReg(2U);
+    la->GetInstLifeIntervals(&INS(7U))->SetReg(2U);
+    la->GetInstLifeIntervals(&INS(8U))->SetReg(2U);
 
     InitUsedRegs(initial_graph);
     SplitResolver resolver(initial_graph, la);
@@ -1225,13 +1228,13 @@ TEST_F(SplitResolverTest, MultipleEndBlockMoves)
     initial_graph->RunPass<Cleanup>();
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
     CheckSpillFills(INS(6).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 1, 1}});
+                                       {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
     CheckSpillFills(INS(6).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
-                                       {LocationType::STACK, LocationType::REGISTER, 1, 1}});
+                                       {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
     CheckSpillFills(INS(7).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 1, 1}});
+                                       {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
     CheckSpillFills(INS(7).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
-                                       {LocationType::STACK, LocationType::REGISTER, 1, 1}});
+                                       {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
 }
 
 TEST_F(SplitResolverTest, SwapCallInputs)
@@ -1243,31 +1246,31 @@ TEST_F(SplitResolverTest, SwapCallInputs)
 
     GRAPH(initial_graph)
     {
-        CONSTANT(0, 1).s32();
-        CONSTANT(1, 10).s32();
+        CONSTANT(0U, 1U).s32();
+        CONSTANT(1U, 10U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).NoVregs();
-            INST(4, Opcode::CallStatic).s32().InputsAutoType(0, 1, 2);
-            INST(5, Opcode::Return).s32().Inputs(4);
+            INST(2U, Opcode::SaveState).NoVregs();
+            INST(4U, Opcode::CallStatic).s32().InputsAutoType(0U, 1U, 2U);
+            INST(5U, Opcode::Return).s32().Inputs(4U);
         }
     }
 
     InitUsedRegs(initial_graph);
     auto la = RunLivenessAnalysis(initial_graph);
-    auto c0 = la->GetInstLifeIntervals(&INS(0));
-    auto c1 = la->GetInstLifeIntervals(&INS(1));
-    auto call = la->GetInstLifeIntervals(&INS(4));
+    auto c0 = la->GetInstLifeIntervals(&INS(0U));
+    auto c1 = la->GetInstLifeIntervals(&INS(1U));
+    auto call = la->GetInstLifeIntervals(&INS(4U));
     c0->SetType(DataType::INT32);
     c1->SetType(DataType::INT32);
     call->SetType(DataType::INT32);
 
-    c0->SetReg(11);
-    c1->SetReg(12);
-    call->SetReg(1);
-    constexpr Register SPLIT_CONST0_REG {12};
-    constexpr Register SPLIT_CONST1_REG {13};
+    c0->SetReg(11U);
+    c1->SetReg(12U);
+    call->SetReg(1U);
+    constexpr Register SPLIT_CONST0_REG {12U};
+    constexpr Register SPLIT_CONST1_REG {13U};
     SplitAssignReg(c0, call->GetBegin(), SPLIT_CONST0_REG);
     SplitAssignReg(c1, call->GetBegin(), SPLIT_CONST1_REG);
 
@@ -1276,20 +1279,20 @@ TEST_F(SplitResolverTest, SwapCallInputs)
 
     // Constants were splitted before the call, these moves must come first
     // r12 -> r13, r11 -> r12
-    auto split_sf = INS(2).GetNext();
+    auto split_sf = INS(2U).GetNext();
     EXPECT_TRUE(split_sf->IsSpillFill());
-    auto const1_move = split_sf->CastToSpillFill()->GetSpillFill(0);
-    auto const0_move = split_sf->CastToSpillFill()->GetSpillFill(1);
-    EXPECT_EQ(const1_move.GetSrc().GetRegister(), INS(1).GetDstReg());
+    auto const1_move = split_sf->CastToSpillFill()->GetSpillFill(0U);
+    auto const0_move = split_sf->CastToSpillFill()->GetSpillFill(1U);
+    EXPECT_EQ(const1_move.GetSrc().GetRegister(), INS(1U).GetDstReg());
     EXPECT_EQ(const1_move.GetDst().GetRegister(), SPLIT_CONST1_REG);
-    EXPECT_EQ(const0_move.GetSrc().GetRegister(), INS(0).GetDstReg());
+    EXPECT_EQ(const0_move.GetSrc().GetRegister(), INS(0U).GetDstReg());
     EXPECT_EQ(const0_move.GetDst().GetRegister(), SPLIT_CONST0_REG);
 
     // Then fill call inputs in the correct order
     auto fill_sf = split_sf->GetNext();
     EXPECT_TRUE(fill_sf->IsSpillFill());
-    auto const0_fill = fill_sf->CastToSpillFill()->GetSpillFill(0);
-    auto const1_fill = fill_sf->CastToSpillFill()->GetSpillFill(1);
+    auto const0_fill = fill_sf->CastToSpillFill()->GetSpillFill(0U);
+    auto const1_fill = fill_sf->CastToSpillFill()->GetSpillFill(1U);
     EXPECT_EQ(const0_fill.GetSrc().GetRegister(), SPLIT_CONST0_REG);
     EXPECT_EQ(const1_fill.GetSrc().GetRegister(), SPLIT_CONST1_REG);
 }
