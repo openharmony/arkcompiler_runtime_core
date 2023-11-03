@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,6 +89,33 @@ void TryCatchResolving::CollectCandidates()
     }
 }
 
+void TryCatchResolving::ConnectThrowCatchImpl(BasicBlock *catch_block, BasicBlock *throw_block, uint32_t catch_pc,
+                                              Inst *new_obj, Inst *thr0w)
+{
+    auto throw_block_succ = throw_block->GetSuccessor(0);
+    throw_block->RemoveSucc(throw_block_succ);
+    throw_block_succ->RemovePred(throw_block);
+    throw_block->AddSucc(catch_block);
+    PhiInst *phi_inst = nullptr;
+    auto pit = phi_insts_.find(catch_pc);
+    if (pit == phi_insts_.end()) {
+        phi_inst = GetGraph()->CreateInstPhi(new_obj->GetType(), catch_pc);
+        catch_block->AppendPhi(phi_inst);
+        phi_insts_.emplace(catch_pc, phi_inst);
+    } else {
+        phi_inst = pit->second;
+    }
+    phi_inst->AppendInput(new_obj);
+    auto cpit = catch2cphis_.find(catch_block);
+    ASSERT(cpit != catch2cphis_.end());
+    auto cphis_block = cpit->second;
+    RemoveCatchPhis(cphis_block, catch_block, thr0w, phi_inst);
+    COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING)
+        << "throw I " << thr0w->GetId() << " BB " << throw_block->GetId() << " is connected with catch BB "
+        << catch_block->GetId() << " and removed";
+    throw_block->RemoveInst(thr0w);
+}
+
 void TryCatchResolving::ConnectThrowCatch()
 {
     auto *graph = GetGraph();
@@ -124,29 +151,7 @@ void TryCatchResolving::ConnectThrowCatch()
         if (cit == catch_blocks_.end()) {
             continue;
         }
-        auto catch_block = cit->second;
-        auto throw_block_succ = throw_block->GetSuccessor(0);
-        throw_block->RemoveSucc(throw_block_succ);
-        throw_block_succ->RemovePred(throw_block);
-        throw_block->AddSucc(catch_block);
-        PhiInst *phi_inst = nullptr;
-        auto pit = phi_insts_.find(catch_pc);
-        if (pit == phi_insts_.end()) {
-            phi_inst = GetGraph()->CreateInstPhi(new_obj->GetType(), catch_pc);
-            catch_block->AppendPhi(phi_inst);
-            phi_insts_.emplace(catch_pc, phi_inst);
-        } else {
-            phi_inst = pit->second;
-        }
-        phi_inst->AppendInput(new_obj);
-        auto cpit = catch2cphis_.find(catch_block);
-        ASSERT(cpit != catch2cphis_.end());
-        auto cphis_block = cpit->second;
-        RemoveCatchPhis(cphis_block, catch_block, thr0w, phi_inst);
-        COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING)
-            << "throw I " << thr0w->GetId() << " BB " << throw_block->GetId() << " is connected with catch BB "
-            << catch_block->GetId() << " and removed";
-        throw_block->RemoveInst(thr0w);
+        ConnectThrowCatchImpl(cit->second, throw_block, catch_pc, new_obj, thr0w);
     }
 }
 
@@ -192,6 +197,38 @@ void TryCatchResolving::DeleteTryCatchEdges(BasicBlock *try_begin, BasicBlock *t
     }
 }
 
+void TryCatchResolving::RemoveCatchPhisImpl(CatchPhiInst *catch_phi, BasicBlock *catch_block, Inst *throw_inst)
+{
+    auto throw_insts = catch_phi->GetThrowableInsts();
+    auto it = std::find(throw_insts->begin(), throw_insts->end(), throw_inst);
+    if (it != throw_insts->end()) {
+        auto input_index = std::distance(throw_insts->begin(), it);
+        auto input_inst = catch_phi->GetInput(input_index).GetInst();
+        PhiInst *phi = nullptr;
+        auto cit = cphi2phi_.find(catch_phi);
+        if (cit == cphi2phi_.end()) {
+            phi = GetGraph()->CreateInstPhi(catch_phi->GetType(), catch_block->GetGuestPc())->CastToPhi();
+            catch_block->AppendPhi(phi);
+            catch_phi->ReplaceUsers(phi);
+            cphi2phi_.emplace(catch_phi, phi);
+        } else {
+            phi = cit->second;
+        }
+        phi->AppendInput(input_inst);
+    } else {
+        while (!catch_phi->GetUsers().Empty()) {
+            auto &user = catch_phi->GetUsers().Front();
+            auto user_inst = user.GetInst();
+            if (user_inst->IsSaveState() || user_inst->IsCatchPhi()) {
+                user_inst->RemoveInput(user.GetIndex());
+            } else {
+                auto input_inst = catch_phi->GetInput(0).GetInst();
+                user_inst->ReplaceInput(catch_phi, input_inst);
+            }
+        }
+    }
+}
+
 /**
  * Replace all catch-phi instructions with their inputs
  * Replace accumulator's catch-phi with exception's object
@@ -208,34 +245,7 @@ void TryCatchResolving::RemoveCatchPhis(BasicBlock *cphis_block, BasicBlock *cat
         if (catch_phi->IsAcc()) {
             catch_phi->ReplaceUsers(phi_inst);
         } else {
-            auto throw_insts = catch_phi->GetThrowableInsts();
-            auto it = std::find(throw_insts->begin(), throw_insts->end(), throw_inst);
-            if (it != throw_insts->end()) {
-                auto input_index = std::distance(throw_insts->begin(), it);
-                auto input_inst = catch_phi->GetInput(input_index).GetInst();
-                PhiInst *phi = nullptr;
-                auto cit = cphi2phi_.find(catch_phi);
-                if (cit == cphi2phi_.end()) {
-                    phi = GetGraph()->CreateInstPhi(catch_phi->GetType(), catch_block->GetGuestPc())->CastToPhi();
-                    catch_block->AppendPhi(phi);
-                    catch_phi->ReplaceUsers(phi);
-                    cphi2phi_.emplace(catch_phi, phi);
-                } else {
-                    phi = cit->second;
-                }
-                phi->AppendInput(input_inst);
-            } else {
-                while (!catch_phi->GetUsers().Empty()) {
-                    auto &user = catch_phi->GetUsers().Front();
-                    auto user_inst = user.GetInst();
-                    if (user_inst->IsSaveState() || user_inst->IsCatchPhi()) {
-                        user_inst->RemoveInput(user.GetIndex());
-                    } else {
-                        auto input_inst = catch_phi->GetInput(0).GetInst();
-                        user_inst->ReplaceInput(catch_phi, input_inst);
-                    }
-                }
-            }
+            RemoveCatchPhisImpl(catch_phi, catch_block, throw_inst);
         }
     }
 }

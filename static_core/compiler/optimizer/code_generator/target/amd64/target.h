@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -293,7 +293,6 @@ public:
                 mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), base_size));
             } else {
                 auto scale = mem.GetScale();
-
                 if (scale <= 3U) {
                     mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), base_size), scale);
                 } else {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -195,7 +195,6 @@ bool JITCompileMethod(RuntimeInterface *runtime, Method *method, bool is_osr, Co
 
     auto arch {Arch::NONE};
     bool is_dynamic = panda::panda_file::IsDynamicLanguage(method->GetClass()->GetSourceLang());
-
     if (!CompileInGraph(runtime, method, is_osr, allocator, local_allocator, is_dynamic, &arch, method_name, &graph,
                         jit_stats)) {
         return false;

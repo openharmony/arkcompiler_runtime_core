@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -705,17 +705,17 @@ private:
 inline ArenaVector<std::pair<uint8_t, uint8_t>> ResoveParameterSequence(
     ArenaVector<std::pair<uint8_t, uint8_t>> *moved_registers, uint8_t tmp, ArenaAllocator *allocator)
 {
-    constexpr uint8_t INVALID_FIST = -1;
+    constexpr uint8_t INVALID_FIRST = -1;
     constexpr uint8_t INVALID_SECOND = -2;
 
-    moved_registers->emplace_back(std::pair<uint8_t, uint8_t>(INVALID_FIST, INVALID_SECOND));
+    moved_registers->emplace_back(std::pair<uint8_t, uint8_t>(INVALID_FIRST, INVALID_SECOND));
     /*
         Example:
         1. mov x0 <- x3
         2. mov x1 <- x0
         3. mov x2 <- x3
         4. mov x3 <- x2
-        Agreement - in dst can't be multipy same registers (double move to one register)
+        Agreement - dst-s can't hold same registers multiple times (double move to one register)
                   - src for movs can hold same register multiply times
 
         Algorithm:
@@ -749,11 +749,10 @@ inline ArenaVector<std::pair<uint8_t, uint8_t>> ResoveParameterSequence(
     for (;;) {
         /* Need support single mov x1 <- x1:
            ASSERT(moved_registers->size() != 1);
-     */
+        */
 
         auto curr_pair = moved_registers->begin();
-
-        if (curr_pair->first == INVALID_FIST && curr_pair->second == INVALID_SECOND) {
+        if (curr_pair->first == INVALID_FIRST && curr_pair->second == INVALID_SECOND) {
             moved_registers->erase(curr_pair);
             break;
             // Finish algorithm - only marker in vector
@@ -766,22 +765,18 @@ inline ArenaVector<std::pair<uint8_t, uint8_t>> ResoveParameterSequence(
         auto curr_reg = curr_pair->second;
         moved_registers->erase(curr_pair);
 
-        for (; curr_pair != moved_registers->end();) {
+        while (curr_pair != moved_registers->end()) {
             curr_pair = std::find_if(moved_registers->begin(), moved_registers->end(),
                                      [curr_reg](auto in_pair) { return in_pair.first == curr_reg; });
-            if (curr_pair != moved_registers->end()) {
-                if (curr_pair->second == saved_reg) {
-                    result.emplace_back(std::pair<uint8_t, uint8_t>(curr_pair->first, tmp));
-                    moved_registers->erase(curr_pair);
-                    break;
-                    // exit from loop
-                };
-                result.emplace_back(*curr_pair);
-                curr_reg = curr_pair->second;
+            ASSERT(curr_pair != moved_registers->end());
+            if (curr_pair->second == saved_reg) {
+                result.emplace_back(std::pair<uint8_t, uint8_t>(curr_pair->first, tmp));
                 moved_registers->erase(curr_pair);
-            } else {
-                ASSERT(curr_pair != moved_registers->end());
-            }
+                break;
+            };
+            result.emplace_back(*curr_pair);
+            curr_reg = curr_pair->second;
+            moved_registers->erase(curr_pair);
         }
     }
     return result;
@@ -815,7 +810,7 @@ enum Condition {
     INVALID_COND
 };
 
-static inline bool IsTestCc(Condition cond)
+inline bool IsTestCc(Condition cond)
 {
     return cond == TST_EQ || cond == TST_NE;
 }

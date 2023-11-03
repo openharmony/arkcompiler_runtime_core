@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,7 @@ auto PopulateInstructionMap(Graph *graph)
 TEST_F(InliningTest, Simple)
 {
     auto source = R"(
-.function u1 main(u32 a0, u32 a1){
+.function u1 main(u32 a0, u32 a1) {
     movi v0, 1
     movi v1, 2
     or a0, v1
@@ -82,7 +82,7 @@ TEST_F(InliningTest, Simple)
     return
 }
 
-.function u32 inline(u32 a0, u32 a1){
+.function u32 inline(u32 a0, u32 a1) {
     movi v2, 2023
     movi v3, 2
     add a0, v2
@@ -100,7 +100,7 @@ TEST_F(InliningTest, Simple)
 TEST_F(InliningTest, TwoMethods)
 {
     auto source = R"(
-.function u1 main(u32 a0, u32 a1){
+.function u1 main(u32 a0, u32 a1) {
     movi v0, 1
     movi v1, 2
     or a0, v1
@@ -113,7 +113,7 @@ TEST_F(InliningTest, TwoMethods)
     return
 }
 
-.function u32 inline1(u32 a0, u32 a1){
+.function u32 inline1(u32 a0, u32 a1) {
     movi v2, 2023
     movi v3, 2
     add a0, v2
@@ -123,7 +123,7 @@ TEST_F(InliningTest, TwoMethods)
     return
 }
 
-.function u32 inline2(u32 a0, u32 a1){
+.function u32 inline2(u32 a0, u32 a1) {
     movi v2, 2023
     movi v3, 2
     add a0, v2
@@ -141,12 +141,12 @@ TEST_F(InliningTest, TwoMethods)
 TEST_F(InliningTest, MultipleReturns)
 {
     auto source = R"(
-.function f64 main(f64 a0, f64 a1){
+.function f64 main(f64 a0, f64 a1) {
     call.short inline, a0, a1
     return.64
 }
 
-.function f64 inline(f64 a0){
+.function f64 inline(f64 a0) {
     fldai.64 0.0
     fcmpl.64 a0
     jlez label
@@ -165,14 +165,14 @@ label:
 TEST_F(InliningTest, WithCalls)
 {
     auto source = R"(
-.function u32 main(u32 a0, u32 a1){
+.function u32 main(u32 a0, u32 a1) {
     sub a0, a1
     sta a0
     call.short inline, a0, a0
     addi 1
     return
 }
-.function u32 inline(u32 a0){
+.function u32 inline(u32 a0) {
     lda a0
     not
     jlez label
@@ -183,7 +183,7 @@ label:
     lda a0
     return
 }
-.function u32 fn(u32 a0){
+.function u32 fn(u32 a0) {
     ldai 14
     sub2 a0
     return
@@ -204,14 +204,14 @@ label:
 TEST_F(InliningTest, WithLoop)
 {
     auto source = R"(
-.function u32 main(u32 a0, u32 a1){
+.function u32 main(u32 a0, u32 a1) {
     sub a0, a1
     sta a0
     call.short inline, a0, a0
     addi 1
     return
 }
-.function u32 inline(u32 a0){
+.function u32 inline(u32 a0) {
     lda a0
     not
 loop:
@@ -240,14 +240,14 @@ exit:
 TEST_F(InliningTest, WithChecks)
 {
     auto source = R"(
-.function u32 main(u32 a0, u32 a1){
+.function u32 main(u32 a0, u32 a1) {
     sub a0, a1
     sta a0
     call.short inline, a0, a0
     addi 1
     return
 }
-.function u32 inline(u32 a0){
+.function u32 inline(u32 a0) {
     ldai 123
     div2 a0
     return
@@ -469,7 +469,7 @@ TEST_F(InliningTest, InliningToInfLoop)
     return;
 #endif
     auto source = R"(
-    .function u32 foo_inf(i32 a0){
+    .function u32 foo_inf(i32 a0) {
     loop:
         inci a0, 1
         call foo_throw

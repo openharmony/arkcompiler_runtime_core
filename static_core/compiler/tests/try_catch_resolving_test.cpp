@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,9 +50,8 @@ TEST_F(TryCatchResolvingTest, ThrowNewObject)
 try_begin:
     throw v0
     ldai 2
-try_end:    
+try_end:
     return
-
 
 catch_block1_begin:
     ldai 0
@@ -106,7 +105,6 @@ TEST_F(TryCatchResolvingTest, RemoveAllCatchHandlers)
     try_end:
         return
 
-
     catch_block1:
         ldai 0
         return
@@ -122,7 +120,6 @@ TEST_F(TryCatchResolvingTest, RemoveAllCatchHandlers)
     .catch E1, try_begin, try_end, catch_block1
     .catch E2, try_begin, try_end, catch_block2
     .catch E3, try_begin, try_end, catch_block3
-
     }
     )";
 

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1891,7 +1891,6 @@ void Aarch32Encoder::EncodeVorr(Reg dst, Reg src0, Reg src1)
                         vixl::aarch32::DRegister(src0.GetId() / 2U),
                         vixl::aarch32::DRegister(tmp_reg.GetReg().GetId() / 2U));
         GetMasm()->Vmov(VixlVReg(dst).S(), vixl::aarch32::SRegister(tmp_reg.GetReg().GetId() + (src0.GetId() & 1U)));
-
     } else {
         GetMasm()->Vorr(VixlVReg(dst).D(), VixlVReg(src0).D(), VixlVReg(src1).D());
     }
@@ -2782,7 +2781,7 @@ bool Aarch32Encoder::CanEncodeImmLogical(uint64_t imm, uint32_t size)
 #ifndef NDEBUG
     if (size < DOUBLE_WORD_SIZE) {
         // Test if the highest part is consistent:
-        ASSERT((imm >> size == 0) || ((~imm) >> size == 0));
+        ASSERT(((imm >> size) == 0) || (((~imm) >> size) == 0));
     }
 #endif  // NDEBUG
     return vixl::aarch32::ImmediateA32::IsImmediateA32(imm);

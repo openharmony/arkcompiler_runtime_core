@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -246,6 +246,17 @@ static bool IsSaveStateForGc(Inst *inst)
     return false;
 }
 
+bool FindAndRemindObjectInSaveState(Inst *object, Inst *inst, Inst **failed_ss)
+{
+    if (IsSaveStateForGc(inst) && !FindObjectInSaveState(object, inst)) {
+        if (failed_ss != nullptr) {
+            *failed_ss = inst;
+        }
+        return false;
+    }
+    return true;
+}
+
 // Checks if object is correctly used in SaveStates between it and user
 bool CheckObjectRec(Inst *object, const Inst *user, const BasicBlock *block, Inst *start_from, Marker visited,
                     Inst **failed_ss)
@@ -260,10 +271,7 @@ bool CheckObjectRec(Inst *object, const Inst *user, const BasicBlock *block, Ins
             if (inst->SetMarker(visited) || inst == object || inst == user) {
                 return true;
             }
-            if (IsSaveStateForGc(inst) && !FindObjectInSaveState(object, inst)) {
-                if (failed_ss != nullptr) {
-                    *failed_ss = inst;
-                }
+            if (!FindAndRemindObjectInSaveState(object, inst, failed_ss)) {
                 return false;
             }
         }

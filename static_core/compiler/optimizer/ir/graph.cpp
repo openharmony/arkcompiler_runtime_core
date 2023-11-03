@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -654,7 +654,6 @@ SpillFillData Graph::GetDataForNativeParam(DataType::Type type)
     }
 
     auto param = param_info_->GetNativeParam(Codegen::ConvertDataType(type, GetArch()));
-
     if (std::holds_alternative<Reg>(param)) {
         auto reg = std::get<Reg>(param);
         // NOTE! Vector parameter can be put to scalar register in aarch32
@@ -798,7 +797,6 @@ int64_t Graph::GetBranchCounter(const BasicBlock *block, bool true_succ)
 int64_t Graph::GetThrowCounter(const BasicBlock *block)
 {
     auto last_inst = block->GetLastInst();
-
     if (last_inst == nullptr || last_inst->GetOpcode() != Opcode::Throw || last_inst->GetPc() == INVALID_PC) {
         return 0;
     }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -411,7 +411,7 @@ TEST_F(BoundsAnalysisTest, NullCompare)
 
 TEST_F(BoundsAnalysisTest, InitMoreThenTest)
 {
-    // for (int i = 10, i < 0, i++) {}
+    // For (int i = 10, i < 0, i++) {}
     // this loop is counable, but init > test value.
     GRAPH(GetGraph())
     {
@@ -476,7 +476,7 @@ TEST_F(BoundsAnalysisTest, ModTest)
 
 TEST_F(BoundsAnalysisTest, LoopWithBigStep)
 {
-    // for (int i = 0, i < 5, i += 10) {}
+    // For (int i = 0, i < 5, i += 10) {}
     // this loop is countable, and init + step > test value.
     GRAPH(GetGraph())
     {
@@ -509,7 +509,7 @@ TEST_F(BoundsAnalysisTest, LoopWithBigStep)
 
 TEST_F(BoundsAnalysisTest, LoopWithBigStep2)
 {
-    // for (int i = 1, i < 6, i += 2) {}
+    // For (int i = 1, i < 6, i += 2) {}
     GRAPH(GetGraph())
     {
         CONSTANT(0U, 0U);

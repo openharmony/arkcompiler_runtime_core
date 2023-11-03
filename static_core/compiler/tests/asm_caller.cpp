@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,9 @@
 class AsmCaller : public ::testing::Test {};
 
 // Debug print to stdout
-// #define STDOUT_PRINT
+#ifdef ENABLE_DEBUG_STDOUT_PRINT
+#define STDOUT_PRINT
+#endif  // ENABLE_DEBUG_STDOUT_PRINT
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define EMITED_ONE_PARAM_INST_LIST(DEF)                               \
