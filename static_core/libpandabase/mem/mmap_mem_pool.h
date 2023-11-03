@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,6 +148,7 @@ class MmapMemPool : public MemPool<MmapMemPool> {
 public:
     NO_COPY_SEMANTIC(MmapMemPool);
     NO_MOVE_SEMANTIC(MmapMemPool);
+    void ClearNonObjectMmapedPools();
     ~MmapMemPool() override;
 
     /**
@@ -189,6 +190,7 @@ public:
     bool HaveEnoughPoolsInObjectSpace(size_t pools_num, size_t pool_size) const;
 
     /// Release pages in all cached free pools
+    void IterateOverFreePools();
     void ReleasePagesInFreePools();
 
     /// @return used bytes count in object space (so exclude bytes in free pools)

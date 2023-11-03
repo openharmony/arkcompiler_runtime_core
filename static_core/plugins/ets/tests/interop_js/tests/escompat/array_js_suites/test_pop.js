@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSPop = ets_mod.getFunction("Array_TestJSPop");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSPop = etsMod.getFunction('Array_TestJSPop');
 
-{   // Test JS Array<FooClass>
-    TestJSPop(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSPop(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    ASSERT_EQ(arr.length(), 2);
-    let something = {};
-    arr.push(something);
-    let popped = arr.pop();
-    ASSERT_EQ(popped, something);
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  ASSERT_EQ(arr.length(), 2);
+  let something = {};
+  arr.push(something);
+  let popped = arr.pop();
+  ASSERT_EQ(popped, something);
 }
 
 GCJSRuntimeCleanup();

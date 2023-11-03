@@ -54,68 +54,50 @@ EtsString *TypeAPIGetTypeDescriptor(EtsObject *object)
     return EtsString::CreateFromMUtf8(object->GetClass()->GetDescriptor());
 }
 
-EtsByte TypeAPIGetTypeKind(EtsString *td)
+static EtsByte DetermineEtsType(const PandaString &type_desc, const EtsClass *ref_type)
 {
-    auto type_desc = td->GetMutf8();
-
-    auto kind = static_cast<EtsByte>(EtsTypeAPIKind::NONE);
-
-    // Is Null?
-    if (type_desc == NULL_TYPE_DESC) {
-        return static_cast<EtsByte>(EtsTypeAPIKind::NUL);
+    auto result = static_cast<EtsByte>(EtsTypeAPIKind::NONE);
+    if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::BOOLEAN);
+    } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::BYTE);
+    } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_CHAR) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::CHAR);
+    } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_SHORT) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::SHORT);
+    } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_INT) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::INT);
+    } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_LONG) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::LONG);
+    } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::FLOAT);
+    } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::DOUBLE);
+    } else if (ref_type->IsInterface()) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::INTERFACE);
+    } else if (ref_type->IsArrayClass()) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::ARRAY);
+    } else if (ref_type->IsTupleClass()) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::TUPLE);
+    } else if (ref_type->IsStringClass()) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::STRING);
+    } else if (ref_type->IsLambdaClass()) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::LAMBDA);
+    } else if (ref_type->IsUnionClass()) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::UNION);
+    } else if (ref_type->IsUndefined()) {  // NOTE(shumilov-petr): think about it
+        result = static_cast<EtsByte>(EtsTypeAPIKind::UNDEFINED);
+    } else if (type_desc == panda::ets::panda_file_items::class_descriptors::VOID) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::VOID);
+    } else {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::CLASS);
     }
-    // Is Function for methods, because currently there is no representation of them in runtime
-    if (type_desc[0] == METHOD_PREFIX) {
-        return static_cast<EtsByte>(EtsTypeAPIKind::METHOD);
-    }
+    return result;
+}
 
-    // Is RefType?
-    if (type_desc[0] == CLASS_TYPE_PREFIX || type_desc[0] == ARRAY_TYPE_PREFIX) {
-        auto ref_type = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClass(type_desc.c_str());
-        ASSERT(ref_type != nullptr);
-        PandaEtsVM::GetCurrent()->GetClassLinker()->InitializeClass(EtsCoroutine::GetCurrent(), ref_type);
-
-        if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::BOOLEAN);
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::BYTE);
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_CHAR) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::CHAR);
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_SHORT) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::SHORT);
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_INT) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::INT);
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_LONG) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::LONG);
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::FLOAT);
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::DOUBLE);
-        } else if (ref_type->IsInterface()) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::INTERFACE);
-        } else if (ref_type->IsArrayClass()) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::ARRAY);
-        } else if (ref_type->IsTupleClass()) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::TUPLE);
-        } else if (ref_type->IsStringClass()) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::STRING);
-        } else if (ref_type->IsLambdaClass()) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::LAMBDA);
-        } else if (ref_type->IsUnionClass()) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::UNION);
-        } else if (ref_type->IsUndefined()) {  // NOTE(shumilov-petr): think about it
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::UNDEFINED);
-        } else if (type_desc == panda::ets::panda_file_items::class_descriptors::VOID) {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::VOID);
-        } else {
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::CLASS);
-        }
-
-        return kind;
-    }
-
-    // Is ValueType?
-    auto val_type = panda::panda_file::Type::GetTypeIdBySignature(type_desc[0]);
+static EtsByte DetermineTypeId(const panda::panda_file::Type &val_type)
+{
+    EtsByte kind;
     switch (val_type.GetId()) {
         case panda_file::Type::TypeId::VOID:
             kind = static_cast<EtsByte>(EtsTypeAPIKind::VOID);
@@ -148,6 +130,29 @@ EtsByte TypeAPIGetTypeKind(EtsString *td)
             kind = static_cast<EtsByte>(EtsTypeAPIKind::NONE);
     }
     return kind;
+}
+
+EtsByte TypeAPIGetTypeKind(EtsString *td)
+{
+    auto type_desc = td->GetMutf8();
+    // Is Null?
+    if (type_desc == NULL_TYPE_DESC) {
+        return static_cast<EtsByte>(EtsTypeAPIKind::NUL);
+    }
+    // Is Function for methods, because currently there is no representation of them in runtime
+    if (type_desc[0] == METHOD_PREFIX) {
+        return static_cast<EtsByte>(EtsTypeAPIKind::METHOD);
+    }
+    // Is RefType?
+    if (type_desc[0] == CLASS_TYPE_PREFIX || type_desc[0] == ARRAY_TYPE_PREFIX) {
+        auto ref_type = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClass(type_desc.c_str());
+        ASSERT(ref_type != nullptr);
+        PandaEtsVM::GetCurrent()->GetClassLinker()->InitializeClass(EtsCoroutine::GetCurrent(), ref_type);
+        return DetermineEtsType(type_desc, ref_type);
+    }
+    // Is ValueType?
+    auto val_type = panda::panda_file::Type::GetTypeIdBySignature(type_desc[0]);
+    return DetermineTypeId(val_type);
 }
 
 EtsBoolean TypeAPIIsValueType(EtsString *td)

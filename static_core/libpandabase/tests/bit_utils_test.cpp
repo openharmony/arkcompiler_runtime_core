@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,44 +24,44 @@ namespace panda::test {
 TEST(BitUtils, ReverseBytesUint32)
 {
     ASSERT_EQ(ReverseBytes(0x33221100U), 0x00112233U);
-    ASSERT_EQ(ReverseBytes(0U), 0);
+    ASSERT_EQ(ReverseBytes(0U), 0U);
     ASSERT_EQ(ReverseBytes(0xffffffffU), 0xffffffffU);
 }
 
 TEST(BitUtils, ReverseBytesUint64)
 {
     ASSERT_EQ(ReverseBytes(UINT64_C(0x7766554433221100)), UINT64_C(0x0011223344556677));
-    ASSERT_EQ(ReverseBytes(UINT64_C(0)), 0);
+    ASSERT_EQ(ReverseBytes(UINT64_C(0)), 0U);
     ASSERT_EQ(ReverseBytes(UINT64_C(0xffffffffffffffff)), UINT64_C(0xffffffffffffffff));
 }
 
 TEST(BitUtils, ReverseBitsUint32)
 {
     ASSERT_EQ(ReverseBits(0x33221100U), 0x008844ccU);
-    ASSERT_EQ(ReverseBits(0U), 0);
+    ASSERT_EQ(ReverseBits(0U), 0U);
     ASSERT_EQ(ReverseBits(0xffffffffU), 0xffffffffU);
 }
 
 TEST(BitUtils, ReverseBitsUint64)
 {
     ASSERT_EQ(ReverseBits(UINT64_C(0x7766554433221100)), UINT64_C(0x008844cc22aa66ee));
-    ASSERT_EQ(ReverseBits(UINT64_C(0)), 0);
+    ASSERT_EQ(ReverseBits(UINT64_C(0)), 0U);
     ASSERT_EQ(ReverseBits(UINT64_C(0xffffffffffffffff)), UINT64_C(0xffffffffffffffff));
 }
 
 TEST(BitUtils, RoundUp)
 {
-    ASSERT_EQ(RoundUp(0, 4), 0);
-    ASSERT_EQ(RoundUp(8, 4), 8);
-    ASSERT_EQ(RoundUp(7, 4), 8);
-    ASSERT_EQ(RoundUp(5, 8), 8);
+    ASSERT_EQ(RoundUp(0U, 4U), 0U);
+    ASSERT_EQ(RoundUp(8U, 4U), 8U);
+    ASSERT_EQ(RoundUp(7U, 4U), 8U);
+    ASSERT_EQ(RoundUp(5U, 8U), 8U);
 }
 
 TEST(BitUtils, RoundDown)
 {
-    ASSERT_EQ(RoundDown(0, 4), 0);
-    ASSERT_EQ(RoundDown(3, 4), 0);
-    ASSERT_EQ(RoundDown(8, 4), 8);
+    ASSERT_EQ(RoundDown(0U, 4U), 0U);
+    ASSERT_EQ(RoundDown(3U, 4U), 0U);
+    ASSERT_EQ(RoundDown(8U, 4U), 8U);
 }
 
 }  // namespace panda::test

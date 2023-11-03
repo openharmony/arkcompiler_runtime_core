@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,6 @@ EtsString *ErrorFromCtx(TypeCreatorCtx *ctx)
 pandasm::Type GetPandasmTypeFromDescriptor(TypeCreatorCtx *ctx, std::string_view descriptor)
 {
     auto ret = pandasm::Type::FromDescriptor(descriptor);
-
     if (ret.IsObject()) {
         auto pandasm_name = ret.GetPandasmName();
         ctx->AddRefTypeAsExternal(pandasm_name);
@@ -129,6 +128,8 @@ void SetAccessFlags(pandasm::ItemMetadata *meta, EtsTypeAPIAccessModifier mod)
             meta->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS,
                                     typeapi_create_consts::ATTR_ACCESS_VAL_PROTECTED);
             break;
+        default:
+            UNREACHABLE();
     }
 }
 
@@ -153,7 +154,6 @@ EtsLong PtrToLong(T *ptr)
 }  // namespace
 
 extern "C" {
-
 EtsLong TypeAPITypeCreatorCtxCreate()
 {
     auto ret = Runtime::GetCurrent()->GetInternalAllocator()->New<TypeCreatorCtx>();
@@ -385,26 +385,56 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromLambda(EtsLong method_ptr, EtsI
     return ErrorFromCtx(m->Ctx());
 }
 
+static LambdaTypeCreator PrepareLambdaTypeCreator(TypeCreatorCtx *ctx)
+{
+    LambdaTypeCreator lambda {ctx};
+    lambda.AddParameter(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 0});
+    lambda.AddParameter(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1});
+    lambda.AddResult(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 0});
+    lambda.Create();
+    return lambda;
+}
+
+static constexpr int TMP_REG = 0;
+static constexpr int LMB_REG = 0;
+static constexpr int RECV_REG = LMB_REG + 1;
+static constexpr int ARR_REG = RECV_REG + 1;
+static constexpr int ARGS_REG_START = ARR_REG + 1;
+
+static void AddLambdaParamInst(pandasm::Function &fn, TypeCreatorCtx *ctx)
+{
+    const auto is_static = fn.metadata->GetAttribute(std::string {typeapi_create_consts::ATTR_STATIC});
+    for (size_t i = 0; i < fn.params.size(); i++) {
+        // adjust array store index
+        const auto &par = fn.params[i];
+        if (i != 0 && (i != 1 || is_static)) {
+            fn.AddInstruction(pandasm::Create_INCI(TMP_REG, 1));
+        }
+        if (par.type.IsObject()) {
+            fn.AddInstruction(pandasm::Create_LDA_OBJ(ARGS_REG_START + i));
+        } else {
+            auto ctor = ctx->DeclarePrimitive(par.type.GetComponentName()).first;
+            fn.AddInstruction(pandasm::Create_INITOBJ_SHORT(ARGS_REG_START + i, 0, ctor));
+        }
+        if (i == 0 && !is_static) {
+            // set recv
+            fn.AddInstruction(pandasm::Create_STA_OBJ(RECV_REG));
+        } else {
+            // set arg
+            fn.AddInstruction(pandasm::Create_STARR_OBJ(ARR_REG, TMP_REG));
+        }
+    }
+}
+
 EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda(EtsLong method_ptr, EtsInt lambda_id)
 {
     auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
 
     m->Ctx()->AddRefTypeAsExternal(std::string {typeapi_create_consts::TYPE_OBJECT});
 
-    LambdaTypeCreator lambda {m->Ctx()};
-    lambda.AddParameter(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 0});
-    lambda.AddParameter(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1});
-    lambda.AddResult(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 0});
-    lambda.Create();
+    auto lambda = PrepareLambdaTypeCreator(m->Ctx());
 
     auto saved_lambda_field = m->Ctx()->AddInitField(lambda_id, lambda.GetType());
-
-    constexpr int TMP_REG = 0;
-    constexpr int LMB_REG = 0;
-    constexpr int RECV_REG = LMB_REG + 1;
-    constexpr int ARR_REG = RECV_REG + 1;
-
-    constexpr int ARGS_REG_START = ARR_REG + 1;
 
     auto &fn = m->GetFn();
     auto is_static = fn.metadata->GetAttribute(std::string {typeapi_create_consts::ATTR_STATIC});
@@ -423,26 +453,7 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda(EtsLong method_ptr
         fn.AddInstruction(pandasm::Create_STA_OBJ(RECV_REG));
     }
 
-    for (size_t i = 0; i < fn.params.size(); i++) {
-        auto &par = fn.params[i];
-        // adjust array store index
-        if (i != 0 && (i != 1 || is_static)) {
-            fn.AddInstruction(pandasm::Create_INCI(TMP_REG, 1));
-        }
-        if (par.type.IsObject()) {
-            fn.AddInstruction(pandasm::Create_LDA_OBJ(ARGS_REG_START + i));
-        } else {
-            auto ctor = m->Ctx()->DeclarePrimitive(par.type.GetComponentName()).first;
-            fn.AddInstruction(pandasm::Create_INITOBJ_SHORT(ARGS_REG_START + i, 0, ctor));
-        }
-        if (i == 0 && !is_static) {
-            // set recv
-            fn.AddInstruction(pandasm::Create_STA_OBJ(RECV_REG));
-        } else {
-            // set arg
-            fn.AddInstruction(pandasm::Create_STARR_OBJ(ARR_REG, TMP_REG));
-        }
-    }
+    AddLambdaParamInst(fn, m->Ctx());
 
     fn.AddInstruction(pandasm::Create_LDSTATIC_OBJ(saved_lambda_field));
     fn.AddInstruction(pandasm::Create_STA_OBJ(LMB_REG));

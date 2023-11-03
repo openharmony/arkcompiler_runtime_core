@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,9 +119,9 @@ TEST_F(BytecodeOptPeepholes, TryBlock)
     ASSERT_NE(method, nullptr);
 
     std::vector<Value> args;
-    args.emplace_back(Value(1));
+    args.emplace_back(Value(1U));
     Value v = method->Invoke(ManagedThread::GetCurrent(), args.data());
-    EXPECT_EQ(v.GetAsLong(), 0x2);
+    EXPECT_EQ(v.GetAsLong(), 0x2U);
 }
 
 }  // namespace panda::bytecodeopt::test

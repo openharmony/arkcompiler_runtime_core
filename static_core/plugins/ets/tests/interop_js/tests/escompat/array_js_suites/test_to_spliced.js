@@ -13,35 +13,35 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSToSpliced = ets_mod.getFunction("Array_TestJSToSpliced");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSToSpliced = etsMod.getFunction('Array_TestJSToSpliced');
 
-{   // Test JS Array<FooClass>
-    TestJSToSpliced(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSToSpliced(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    arr.push("spliced");
-    ASSERT_EQ(arr.length(), 3);
-    let to_spliced = arr.toSpliced(1, 1);
-    // TODO(oignatenko) uncomment below after recent regression making it work in place is fixed
-    // ASSERT_EQ(to_spliced.at(0), 123);
-    // ASSERT_EQ(to_spliced.at(1), "spliced");
-    // ASSERT_EQ(to_spliced.length(), 2);
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  arr.push('spliced');
+  ASSERT_EQ(arr.length(), 3);
+  let toSpliced = arr.toSpliced(1, 1);
+  // TODO(oignatenko) uncomment below after recent regression making it work in place is fixed
+  // ASSERT_EQ(toSpliced.at(0), 123);
+  // ASSERT_EQ(toSpliced.at(1), 'spliced');
+  // ASSERT_EQ(toSpliced.length(), 2);
 
-    let arr1 = CreateEtsSample();
-    arr1.push("spliced");
-    ASSERT_EQ(arr1.length(), 3);
-    // TODO(oignatenko) uncomment below after interop will be supported for this method signature
-    // let to_spliced1 = arr.toSpliced(1);
-    // ASSERT_EQ(to_spliced1.at(0), 123);
-    // ASSERT_EQ(to_spliced1.length(), 1);
+  let arr1 = CreateEtsSample();
+  arr1.push('spliced');
+  ASSERT_EQ(arr1.length(), 3);
+  // TODO(oignatenko) uncomment below after interop will be supported for this method signature
+  // let toSpliced1 = arr.toSpliced(1);
+  // ASSERT_EQ(toSpliced1.at(0), 123);
+  // ASSERT_EQ(toSpliced1.length(), 1);
 }
 
 GCJSRuntimeCleanup();

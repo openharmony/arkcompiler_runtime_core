@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ enum class ErrorCode { FIRST, SECOND };
 static Expected<int, ErrorCode> Helper(int v)
 {
     switch (v) {
-        case 0:
+        case 0U:
             return Unexpected {ErrorCode::FIRST};
-        case 1:
-            return {42};
+        case 1U:
+            return {42U};
         default:
             return Unexpected {ErrorCode::SECOND};
     }
@@ -49,9 +49,9 @@ TEST(Expected, Unexpected)
 {
     int e = 1;
     auto u = Unexpected(e);
-    EXPECT_EQ(Unexpected<int>(1).Value(), 1);
-    EXPECT_EQ(u.Value(), 1);
-    EXPECT_EQ(static_cast<const Unexpected<int> &>(u).Value(), 1);
+    EXPECT_EQ(Unexpected<int>(1U).Value(), 1U);
+    EXPECT_EQ(u.Value(), 1U);
+    EXPECT_EQ(static_cast<const Unexpected<int> &>(u).Value(), 1U);
 }
 
 TEST(Expected, Ctor)
@@ -59,14 +59,14 @@ TEST(Expected, Ctor)
     int v = 1;
     auto e = Expected<int, ErrorCode>(v);
     EXPECT_TRUE(e);
-    EXPECT_EQ(e.Value(), 1);
-    EXPECT_EQ(*e, 1);
+    EXPECT_EQ(e.Value(), 1U);
+    EXPECT_EQ(*e, 1U);
 
     auto e0 = Expected<int, ErrorCode>();
-    EXPECT_EQ(*e0, 0);
+    EXPECT_EQ(*e0, 0U);
 
-    auto e1 = Expected<int, ErrorCode>(2);
-    EXPECT_EQ(e1.Value(), 2);
+    auto e1 = Expected<int, ErrorCode>(2U);
+    EXPECT_EQ(e1.Value(), 2U);
 
     auto e2 = Expected<int, ErrorCode>(Unexpected(ErrorCode::FIRST));
     auto u = Unexpected(ErrorCode::SECOND);
@@ -84,20 +84,20 @@ TEST(Expected, Access)
     const auto e1 = Expected<int, ErrorCode>(Unexpected(ErrorCode::FIRST));
     EXPECT_EQ(e1.Error(), ErrorCode::FIRST);
     EXPECT_EQ((Expected<int, ErrorCode>(Unexpected(ErrorCode::SECOND)).Error()), ErrorCode::SECOND);
-    const auto e2 = Expected<int, ErrorCode>(1);
-    EXPECT_EQ(e2.Value(), 1);
-    EXPECT_EQ(*e2, 1);
-    EXPECT_EQ((*Expected<int, ErrorCode>(2)), 2);
-    EXPECT_EQ((Expected<int, ErrorCode>(3).Value()), 3);
+    const auto e2 = Expected<int, ErrorCode>(1U);
+    EXPECT_EQ(e2.Value(), 1U);
+    EXPECT_EQ(*e2, 1U);
+    EXPECT_EQ((*Expected<int, ErrorCode>(2U)), 2U);
+    EXPECT_EQ((Expected<int, ErrorCode>(3U).Value()), 3U);
 }
 
 TEST(Expected, Assignment)
 {
-    auto d = Default {1};
+    auto d = Default {1U};
     Expected<Default, ErrorCode> t = d;
-    t.Value() = Default {2};
+    t.Value() = Default {2U};
     EXPECT_TRUE(t);
-    EXPECT_EQ((*t).v, 2);
+    EXPECT_EQ((*t).v, 2U);
     t = Unexpected(ErrorCode::FIRST);
     EXPECT_FALSE(t);
     EXPECT_EQ(t.Error(), ErrorCode::FIRST);
@@ -105,25 +105,25 @@ TEST(Expected, Assignment)
 
 TEST(Expected, Basic)
 {
-    auto res1 = Helper(0);
-    auto res2 = Helper(1);
-    auto res3 = Helper(2);
+    auto res1 = Helper(0U);
+    auto res2 = Helper(1U);
+    auto res3 = Helper(2U);
     EXPECT_FALSE(res1);
     EXPECT_TRUE(res2);
     EXPECT_FALSE(res3);
     EXPECT_EQ(res1.Error(), ErrorCode::FIRST);
-    EXPECT_EQ(*res2, 42);
+    EXPECT_EQ(*res2, 42U);
     EXPECT_EQ(res3.Error(), ErrorCode::SECOND);
 }
 
 TEST(Expected, ValueOr)
 {
-    auto res1 = Helper(0).ValueOr(1);
+    auto res1 = Helper(0U).ValueOr(1U);
     auto res2 = Helper(res1).ValueOr(res1);
-    auto e = Expected<int, ErrorCode>(1);
-    EXPECT_EQ(res1, 1);
-    EXPECT_EQ(res2, 42);
-    EXPECT_EQ(e.ValueOr(0), 1);
+    auto e = Expected<int, ErrorCode>(1U);
+    EXPECT_EQ(res1, 1U);
+    EXPECT_EQ(res2, 42U);
+    EXPECT_EQ(e.ValueOr(0U), 1U);
 }
 // NOLINTEND(readability-magic-numbers)
 

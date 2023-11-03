@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSIsArray = ets_mod.getFunction("Array_TestJSIsArray");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSIsArray = etsMod.getFunction('Array_TestJSIsArray');
 
-{   // Test JS Array<FooClass>
-    TestJSIsArray(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSIsArray(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
 
-    // reference check for how this is supposed to behave:
-    ASSERT_TRUE(Array.isArray([1,2,3]));
+  // reference check for how this is supposed to behave:
+  ASSERT_TRUE(Array.isArray([1, 2, 3]));
 
-    // actual test code:
-    ASSERT_TRUE(Array.isArray(arr));
+  // actual test code:
+  ASSERT_TRUE(Array.isArray(arr));
 }
 
 GCJSRuntimeCleanup();

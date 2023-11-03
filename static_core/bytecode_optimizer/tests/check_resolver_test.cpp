@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,17 +25,17 @@ TEST_F(CommonTest, CheckResolverLenArray)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).s32();
-        PARAMETER(1, 1).ref();
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).ref();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::SaveState).NoVregs();
-            INST(3, Opcode::NullCheck).ref().Inputs(1, 2);
-            INST(4, Opcode::LenArray).s32().Inputs(3);
-            INST(5, Opcode::BoundsCheck).s32().Inputs(4, 0, 2);
-            INST(6, Opcode::LoadArray).s32().Inputs(3, 5);
-            INST(7, Opcode::Return).s32().Inputs(6);
+            INST(2U, Opcode::SaveState).NoVregs();
+            INST(3U, Opcode::NullCheck).ref().Inputs(1U, 2U);
+            INST(4U, Opcode::LenArray).s32().Inputs(3U);
+            INST(5U, Opcode::BoundsCheck).s32().Inputs(4U, 0U, 2U);
+            INST(6U, Opcode::LoadArray).s32().Inputs(3U, 5U);
+            INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
 

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,24 +37,24 @@ namespace panda::bytecodeopt::test {
 TEST(ToolTest, BytecodeOptIrInterfaceCommon)
 {
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
-    maps.methods.insert({0, std::string("method")});
-    maps.fields.insert({0, std::string("field")});
-    maps.classes.insert({0, std::string("class")});
-    maps.strings.insert({0, std::string("string")});
-    maps.literalarrays.insert({0, std::string("0")});
+    maps.methods.insert({0U, std::string("method")});
+    maps.fields.insert({0U, std::string("field")});
+    maps.classes.insert({0U, std::string("class")});
+    maps.strings.insert({0U, std::string("string")});
+    maps.literalarrays.insert({0U, std::string("0")});
 
     pandasm::Program prog;
     prog.literalarray_table.emplace("0", pandasm::LiteralArray());
 
     BytecodeOptIrInterface interface(&maps, &prog);
 
-    EXPECT_EQ(interface.GetMethodIdByOffset(0), std::string("method"));
-    EXPECT_EQ(interface.GetStringIdByOffset(0), std::string("string"));
-    EXPECT_EQ(interface.GetLiteralArrayIdByOffset(0), "0");
-    EXPECT_EQ(interface.GetTypeIdByOffset(0), std::string("class"));
-    EXPECT_EQ(interface.GetFieldIdByOffset(0), std::string("field"));
+    EXPECT_EQ(interface.GetMethodIdByOffset(0U), std::string("method"));
+    EXPECT_EQ(interface.GetStringIdByOffset(0U), std::string("string"));
+    EXPECT_EQ(interface.GetLiteralArrayIdByOffset(0U), "0");
+    EXPECT_EQ(interface.GetTypeIdByOffset(0U), std::string("class"));
+    EXPECT_EQ(interface.GetFieldIdByOffset(0U), std::string("field"));
     interface.StoreLiteralArray("1", pandasm::LiteralArray());
-    EXPECT_EQ(interface.GetLiteralArrayTableSize(), 2);
+    EXPECT_EQ(interface.GetLiteralArrayTableSize(), 2U);
 }
 
 TEST(ToolTest, BytecodeOptIrInterfacePcLineNumber)
@@ -67,22 +67,22 @@ TEST(ToolTest, BytecodeOptIrInterfacePcLineNumber)
     BytecodeOptIrInterface interface(&maps, &prog);
 
     auto map = interface.GetPcInsMap();
-    EXPECT_EQ(interface.GetLineNumberByPc(0), 0);
+    EXPECT_EQ(interface.GetLineNumberByPc(0U), 0U);
 
     auto ins = pandasm::Ins();
     ins.ins_debug.line_number = 1;
     ASSERT_NE(map, nullptr);
-    map->insert({0, &ins});
-    EXPECT_EQ(interface.GetLineNumberByPc(0), 1);
+    map->insert({0U, &ins});
+    EXPECT_EQ(interface.GetLineNumberByPc(0U), 1U);
     interface.ClearPcInsMap();
-    EXPECT_NE(interface.GetLineNumberByPc(0), 1);
+    EXPECT_NE(interface.GetLineNumberByPc(0U), 1U);
 }
 
 TEST(ToolTest, BytecodeOptIrInterfaceLiteralArray)
 {
     BytecodeOptIrInterface interface(nullptr, nullptr);
 #ifdef NDEBUG
-    EXPECT_EQ(interface.GetLiteralArrayIdByOffset(0), std::nullopt);
+    EXPECT_EQ(interface.GetLiteralArrayIdByOffset(0U), std::nullopt);
 #endif
 }
 
@@ -91,18 +91,18 @@ TEST_F(CommonTest, CodeGenBinaryImms)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u32();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).u32();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::AddI).s32().Inputs(0).Imm(2);
-            INST(2, Opcode::SubI).s32().Inputs(0).Imm(2);
-            INST(3, Opcode::MulI).s32().Inputs(0).Imm(2);
-            INST(4, Opcode::DivI).s32().Inputs(0).Imm(2);
-            INST(5, Opcode::ModI).s32().Inputs(0).Imm(2);
-            INST(6, Opcode::AndI).u32().Inputs(0).Imm(2);
-            INST(7, Opcode::OrI).s32().Inputs(0).Imm(2);
-            INST(8, Opcode::XorI).s32().Inputs(0).Imm(2);
-            INST(10, Opcode::Return).b().Inputs(1);
+            INST(1U, Opcode::AddI).s32().Inputs(0U).Imm(2U);
+            INST(2U, Opcode::SubI).s32().Inputs(0U).Imm(2U);
+            INST(3U, Opcode::MulI).s32().Inputs(0U).Imm(2U);
+            INST(4U, Opcode::DivI).s32().Inputs(0U).Imm(2U);
+            INST(5U, Opcode::ModI).s32().Inputs(0U).Imm(2U);
+            INST(6U, Opcode::AndI).u32().Inputs(0U).Imm(2U);
+            INST(7U, Opcode::OrI).s32().Inputs(0U).Imm(2U);
+            INST(8U, Opcode::XorI).s32().Inputs(0U).Imm(2U);
+            INST(10U, Opcode::Return).b().Inputs(1U);
         }
     }
 
@@ -117,25 +117,25 @@ TEST_F(CommonTest, CodeGenIfImm)
 
     GRAPH(graph)
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(1, 1).u32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(2, Opcode::Compare).b().CC(compiler::ConditionCode::CC_EQ).Inputs(0, 1);
-            INST(3, Opcode::IfImm)
+            INST(2U, Opcode::Compare).b().CC(compiler::ConditionCode::CC_EQ).Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm)
                 .SrcType(compiler::DataType::BOOL)
                 .CC(compiler::ConditionCode::CC_NE)
-                .Imm(0)
-                .Inputs(2);
+                .Imm(0U)
+                .Inputs(2U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(10, Opcode::Return).s32().Inputs(0);
+            INST(10U, Opcode::Return).s32().Inputs(0U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(11, Opcode::Return).s32().Inputs(0);
+            INST(11U, Opcode::Return).s32().Inputs(0U);
         }
     }
 
@@ -148,20 +148,20 @@ TEST_F(CommonTest, CodeGenIfImm)
     auto expected = CreateEmptyGraph();
     GRAPH(expected)
     {
-        PARAMETER(0, 0).u32();
-        PARAMETER(1, 1).u32();
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(1U, 1U).u32();
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(12, Opcode::If).CC(compiler::ConditionCode::CC_EQ).SrcType(compiler::DataType::UINT32).Inputs(1, 0);
+            INST(12U, Opcode::If).CC(compiler::ConditionCode::CC_EQ).SrcType(compiler::DataType::UINT32).Inputs(1U, 0U);
         }
-        BASIC_BLOCK(3, -1)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(10, Opcode::Return).s32().Inputs(0);
+            INST(10U, Opcode::Return).s32().Inputs(0U);
         }
-        BASIC_BLOCK(4, -1)
+        BASIC_BLOCK(4U, -1L)
         {
-            INST(11, Opcode::Return).s32().Inputs(0);
+            INST(11U, Opcode::Return).s32().Inputs(0U);
         }
     }
 
@@ -182,20 +182,20 @@ TEST_F(CommonTest, CodegenIf)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u32();
-            PARAMETER(1, 1).u32();
+            PARAMETER(0U, 0U).u32();
+            PARAMETER(1U, 1U).u32();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::If).CC(cond).SrcType(compiler::DataType::UINT32).Inputs(0, 1);
+                INST(12U, Opcode::If).CC(cond).SrcType(compiler::DataType::UINT32).Inputs(0U, 1U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).s32().Inputs(0);
+                INST(10U, Opcode::Return).s32().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).s32().Inputs(0);
+                INST(11U, Opcode::Return).s32().Inputs(0U);
             }
         }
 
@@ -215,20 +215,20 @@ TEST_F(CommonTest, CodegenIfDynamic)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u32();
-            PARAMETER(1, 1).u32();
+            PARAMETER(0U, 0U).u32();
+            PARAMETER(1U, 1U).u32();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::If).CC(cond).SrcType(compiler::DataType::UINT32).Inputs(0, 1);
+                INST(12U, Opcode::If).CC(cond).SrcType(compiler::DataType::UINT32).Inputs(0U, 1U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).s32().Inputs(0);
+                INST(10U, Opcode::Return).s32().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).s32().Inputs(0);
+                INST(11U, Opcode::Return).s32().Inputs(0U);
             }
         }
 
@@ -250,20 +250,20 @@ TEST_F(CommonTest, CodegenIfINT64)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).s64();
-            PARAMETER(1, 1).s64();
+            PARAMETER(0U, 0U).s64();
+            PARAMETER(1U, 1U).s64();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::If).CC(cond).SrcType(compiler::DataType::INT64).Inputs(0, 1);
+                INST(12U, Opcode::If).CC(cond).SrcType(compiler::DataType::INT64).Inputs(0U, 1U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).s64().Inputs(0);
+                INST(10U, Opcode::Return).s64().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).s64().Inputs(0);
+                INST(11U, Opcode::Return).s64().Inputs(0U);
             }
         }
 
@@ -283,20 +283,20 @@ TEST_F(CommonTest, CodegenIfINT64Dynamic)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).s64();
-            PARAMETER(1, 1).s64();
+            PARAMETER(0U, 0U).s64();
+            PARAMETER(1U, 1U).s64();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::If).CC(cond).SrcType(compiler::DataType::INT64).Inputs(0, 1);
+                INST(12U, Opcode::If).CC(cond).SrcType(compiler::DataType::INT64).Inputs(0U, 1U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).s64().Inputs(0);
+                INST(10U, Opcode::Return).s64().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).s64().Inputs(0);
+                INST(11U, Opcode::Return).s64().Inputs(0U);
             }
         }
 
@@ -318,20 +318,20 @@ TEST_F(CommonTest, CodegenIfUINT64)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            PARAMETER(1, 1).u64();
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).u64();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::If).CC(cond).SrcType(compiler::DataType::UINT64).Inputs(0, 1);
+                INST(12U, Opcode::If).CC(cond).SrcType(compiler::DataType::UINT64).Inputs(0U, 1U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).u64().Inputs(0);
+                INST(10U, Opcode::Return).u64().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).u64().Inputs(0);
+                INST(11U, Opcode::Return).u64().Inputs(0U);
             }
         }
 
@@ -351,20 +351,20 @@ TEST_F(CommonTest, CodegenIfUINT64Dynamic)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
-            PARAMETER(1, 1).u64();
+            PARAMETER(0U, 0U).u64();
+            PARAMETER(1U, 1U).u64();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::If).CC(cond).SrcType(compiler::DataType::UINT64).Inputs(0, 1);
+                INST(12U, Opcode::If).CC(cond).SrcType(compiler::DataType::UINT64).Inputs(0U, 1U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).u64().Inputs(0);
+                INST(10U, Opcode::Return).u64().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).u64().Inputs(0);
+                INST(11U, Opcode::Return).u64().Inputs(0U);
             }
         }
 
@@ -385,20 +385,20 @@ TEST_F(CommonTest, CodegenIfREFERENCE)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).ref();
-            PARAMETER(1, 1).ref();
+            PARAMETER(0U, 0U).ref();
+            PARAMETER(1U, 1U).ref();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(2, Opcode::If).SrcType(compiler::DataType::REFERENCE).CC(cond).Inputs(0, 1);
+                INST(2U, Opcode::If).SrcType(compiler::DataType::REFERENCE).CC(cond).Inputs(0U, 1U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(3, Opcode::ReturnVoid).v0id();
+                INST(3U, Opcode::ReturnVoid).v0id();
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(4, Opcode::ReturnVoid).v0id();
+                INST(4U, Opcode::ReturnVoid).v0id();
             }
         }
 
@@ -418,19 +418,19 @@ TEST_F(CommonTest, CodegenIfImmZero)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).s32();
+            PARAMETER(0U, 0U).s32();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::IfImm).CC(cond).Imm(0).SrcType(compiler::DataType::INT32).Inputs(0);
+                INST(12U, Opcode::IfImm).CC(cond).Imm(0U).SrcType(compiler::DataType::INT32).Inputs(0U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).s32().Inputs(0);
+                INST(10U, Opcode::Return).s32().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).s32().Inputs(0);
+                INST(11U, Opcode::Return).s32().Inputs(0U);
             }
         }
 
@@ -454,19 +454,19 @@ TEST_F(CommonTest, CodegenIfImmZeroDynamic)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).s32();
+            PARAMETER(0U, 0U).s32();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::IfImm).CC(cond).Imm(0).SrcType(compiler::DataType::INT32).Inputs(0);
+                INST(12U, Opcode::IfImm).CC(cond).Imm(0U).SrcType(compiler::DataType::INT32).Inputs(0U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).s32().Inputs(0);
+                INST(10U, Opcode::Return).s32().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).s32().Inputs(0);
+                INST(11U, Opcode::Return).s32().Inputs(0U);
             }
         }
 
@@ -491,19 +491,19 @@ TEST_F(CommonTest, CodegenIfImmZeroINT64)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).s64();
+            PARAMETER(0U, 0U).s64();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::IfImm).CC(cond).Imm(0).SrcType(compiler::DataType::INT64).Inputs(0);
+                INST(12U, Opcode::IfImm).CC(cond).Imm(0U).SrcType(compiler::DataType::INT64).Inputs(0U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).s64().Inputs(0);
+                INST(10U, Opcode::Return).s64().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).s64().Inputs(0);
+                INST(11U, Opcode::Return).s64().Inputs(0U);
             }
         }
 
@@ -527,19 +527,19 @@ TEST_F(CommonTest, CodegenIfImmZeroINT64Dynamic)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).s64();
+            PARAMETER(0U, 0U).s64();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::IfImm).CC(cond).Imm(0).SrcType(compiler::DataType::INT64).Inputs(0);
+                INST(12U, Opcode::IfImm).CC(cond).Imm(0U).SrcType(compiler::DataType::INT64).Inputs(0U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).s64().Inputs(0);
+                INST(10U, Opcode::Return).s64().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).s64().Inputs(0);
+                INST(11U, Opcode::Return).s64().Inputs(0U);
             }
         }
 
@@ -564,19 +564,19 @@ TEST_F(CommonTest, CodegenIfImmZeroUINT64)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
+            PARAMETER(0U, 0U).u64();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::IfImm).CC(cond).Imm(0).SrcType(compiler::DataType::UINT64).Inputs(0);
+                INST(12U, Opcode::IfImm).CC(cond).Imm(0U).SrcType(compiler::DataType::UINT64).Inputs(0U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).u64().Inputs(0);
+                INST(10U, Opcode::Return).u64().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).u64().Inputs(0);
+                INST(11U, Opcode::Return).u64().Inputs(0U);
             }
         }
 
@@ -600,19 +600,19 @@ TEST_F(CommonTest, CodegenIfImmZeroUINT64Dynamic)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
+            PARAMETER(0U, 0U).u64();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::IfImm).CC(cond).Imm(0).SrcType(compiler::DataType::UINT64).Inputs(0);
+                INST(12U, Opcode::IfImm).CC(cond).Imm(0U).SrcType(compiler::DataType::UINT64).Inputs(0U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).u64().Inputs(0);
+                INST(10U, Opcode::Return).u64().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).u64().Inputs(0);
+                INST(11U, Opcode::Return).u64().Inputs(0U);
             }
         }
 
@@ -636,19 +636,19 @@ TEST_F(CommonTest, CodegenIfImmZeroREFERENCE)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).ref();
+            PARAMETER(0U, 0U).ref();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::IfImm).CC(cond).Imm(0).SrcType(compiler::DataType::REFERENCE).Inputs(0);
+                INST(12U, Opcode::IfImm).CC(cond).Imm(0U).SrcType(compiler::DataType::REFERENCE).Inputs(0U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).ref().Inputs(0);
+                INST(10U, Opcode::Return).ref().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).ref().Inputs(0);
+                INST(11U, Opcode::Return).ref().Inputs(0U);
             }
         }
 
@@ -671,19 +671,19 @@ TEST_F(CommonTest, CodegenIfImmZeroREFERENCEDynamic)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).ref();
+            PARAMETER(0U, 0U).ref();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::IfImm).CC(cond).Imm(0).SrcType(compiler::DataType::REFERENCE).Inputs(0);
+                INST(12U, Opcode::IfImm).CC(cond).Imm(0U).SrcType(compiler::DataType::REFERENCE).Inputs(0U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).ref().Inputs(0);
+                INST(10U, Opcode::Return).ref().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).ref().Inputs(0);
+                INST(11U, Opcode::Return).ref().Inputs(0U);
             }
         }
 
@@ -708,19 +708,19 @@ TEST_F(CommonTest, CodegenIfImmNonZero)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).u64();
+            PARAMETER(0U, 0U).u64();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::IfImm).CC(cond).Imm(1).SrcType(compiler::DataType::UINT64).Inputs(0);
+                INST(12U, Opcode::IfImm).CC(cond).Imm(1U).SrcType(compiler::DataType::UINT64).Inputs(0U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).u64().Inputs(0);
+                INST(10U, Opcode::Return).u64().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).u64().Inputs(0);
+                INST(11U, Opcode::Return).u64().Inputs(0U);
             }
         }
 
@@ -744,19 +744,19 @@ TEST_F(CommonTest, CodegenIfImmNonZero32)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).s32();
+            PARAMETER(0U, 0U).s32();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::IfImm).CC(cond).Imm(1).SrcType(compiler::DataType::INT32).Inputs(0);
+                INST(12U, Opcode::IfImm).CC(cond).Imm(1U).SrcType(compiler::DataType::INT32).Inputs(0U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).s32().Inputs(0);
+                INST(10U, Opcode::Return).s32().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).s32().Inputs(0);
+                INST(11U, Opcode::Return).s32().Inputs(0U);
             }
         }
 
@@ -780,19 +780,19 @@ TEST_F(CommonTest, CodegenIfImmNonZero32Dynamic)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).s32();
+            PARAMETER(0U, 0U).s32();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                INST(12, Opcode::IfImm).CC(cond).Imm(1).SrcType(compiler::DataType::INT32).Inputs(0);
+                INST(12U, Opcode::IfImm).CC(cond).Imm(1U).SrcType(compiler::DataType::INT32).Inputs(0U);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1L)
             {
-                INST(10, Opcode::Return).s32().Inputs(0);
+                INST(10U, Opcode::Return).s32().Inputs(0U);
             }
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(4U, -1L)
             {
-                INST(11, Opcode::Return).s32().Inputs(0);
+                INST(11U, Opcode::Return).s32().Inputs(0U);
             }
         }
 
@@ -812,11 +812,11 @@ TEST_F(CommonTest, CodegenConstantINT64Dynamic)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s64();
+        CONSTANT(0U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).s64().Inputs(0);
+            INST(1U, Opcode::Return).s64().Inputs(0U);
         }
     }
 
@@ -832,11 +832,11 @@ TEST_F(CommonTest, CodegenConstantFLOAT64)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).f64();
+        CONSTANT(0U, 0U).f64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).f64().Inputs(0);
+            INST(1U, Opcode::Return).f64().Inputs(0U);
         }
     }
 
@@ -850,11 +850,11 @@ TEST_F(CommonTest, CodegenConstantFLOAT64Dynamic)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).f64();
+        CONSTANT(0U, 0U).f64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).f64().Inputs(0);
+            INST(1U, Opcode::Return).f64().Inputs(0U);
         }
     }
 
@@ -870,11 +870,11 @@ TEST_F(CommonTest, CodegenConstantINT32Dynamic)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s32();
+        CONSTANT(0U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).s32().Inputs(0);
+            INST(1U, Opcode::Return).s32().Inputs(0U);
         }
     }
 
@@ -890,12 +890,12 @@ TEST_F(CommonTest, CodegenCastInt2F64)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s32();
+        CONSTANT(0U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).f64().SrcType(compiler::DataType::INT32).Inputs(0);
-            INST(2, Opcode::Return).f64().Inputs(1);
+            INST(1U, Opcode::Cast).f64().SrcType(compiler::DataType::INT32).Inputs(0U);
+            INST(2U, Opcode::Return).f64().Inputs(1U);
         }
     }
 
@@ -909,12 +909,12 @@ TEST_F(CommonTest, CodegenCastInt2Uint)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s32();
+        CONSTANT(0U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).u32().SrcType(compiler::DataType::INT32).Inputs(0);
-            INST(2, Opcode::Return).u32().Inputs(1);
+            INST(1U, Opcode::Cast).u32().SrcType(compiler::DataType::INT32).Inputs(0U);
+            INST(2U, Opcode::Return).u32().Inputs(1U);
         }
     }
 
@@ -928,12 +928,12 @@ TEST_F(CommonTest, CodegenCastInt2Int16)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s32();
+        CONSTANT(0U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).s16().SrcType(compiler::DataType::INT32).Inputs(0);
-            INST(2, Opcode::Return).s16().Inputs(1);
+            INST(1U, Opcode::Cast).s16().SrcType(compiler::DataType::INT32).Inputs(0U);
+            INST(2U, Opcode::Return).s16().Inputs(1U);
         }
     }
 
@@ -947,12 +947,12 @@ TEST_F(CommonTest, CodegenCastInt2Uint16)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s32();
+        CONSTANT(0U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).u16().SrcType(compiler::DataType::INT32).Inputs(0);
-            INST(2, Opcode::Return).u16().Inputs(1);
+            INST(1U, Opcode::Cast).u16().SrcType(compiler::DataType::INT32).Inputs(0U);
+            INST(2U, Opcode::Return).u16().Inputs(1U);
         }
     }
 
@@ -966,12 +966,12 @@ TEST_F(CommonTest, CodegenCastInt2Int8)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s32();
+        CONSTANT(0U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).s8().SrcType(compiler::DataType::INT32).Inputs(0);
-            INST(2, Opcode::Return).s8().Inputs(1);
+            INST(1U, Opcode::Cast).s8().SrcType(compiler::DataType::INT32).Inputs(0U);
+            INST(2U, Opcode::Return).s8().Inputs(1U);
         }
     }
 
@@ -985,12 +985,12 @@ TEST_F(CommonTest, CodegenCastInt2Uint8)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s32();
+        CONSTANT(0U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).u8().SrcType(compiler::DataType::INT32).Inputs(0);
-            INST(2, Opcode::Return).u8().Inputs(1);
+            INST(1U, Opcode::Cast).u8().SrcType(compiler::DataType::INT32).Inputs(0U);
+            INST(2U, Opcode::Return).u8().Inputs(1U);
         }
     }
 
@@ -1004,12 +1004,12 @@ TEST_F(CommonTest, CodegenCastInt64ToInt32)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s64();
+        CONSTANT(0U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).s32().SrcType(compiler::DataType::INT64).Inputs(0);
-            INST(2, Opcode::Return).s32().Inputs(1);
+            INST(1U, Opcode::Cast).s32().SrcType(compiler::DataType::INT64).Inputs(0U);
+            INST(2U, Opcode::Return).s32().Inputs(1U);
         }
     }
 
@@ -1023,12 +1023,12 @@ TEST_F(CommonTest, CodegenCastInt64ToUint32)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s64();
+        CONSTANT(0U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).u32().SrcType(compiler::DataType::INT64).Inputs(0);
-            INST(2, Opcode::Return).u32().Inputs(1);
+            INST(1U, Opcode::Cast).u32().SrcType(compiler::DataType::INT64).Inputs(0U);
+            INST(2U, Opcode::Return).u32().Inputs(1U);
         }
     }
 
@@ -1042,12 +1042,12 @@ TEST_F(CommonTest, CodegenCastInt64ToF64)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s64();
+        CONSTANT(0U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).f64().SrcType(compiler::DataType::INT64).Inputs(0);
-            INST(2, Opcode::Return).f64().Inputs(1);
+            INST(1U, Opcode::Cast).f64().SrcType(compiler::DataType::INT64).Inputs(0U);
+            INST(2U, Opcode::Return).f64().Inputs(1U);
         }
     }
 
@@ -1061,12 +1061,12 @@ TEST_F(CommonTest, CodegenCastInt64ToInt16)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s64();
+        CONSTANT(0U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).s16().SrcType(compiler::DataType::INT64).Inputs(0);
-            INST(2, Opcode::Return).s16().Inputs(1);
+            INST(1U, Opcode::Cast).s16().SrcType(compiler::DataType::INT64).Inputs(0U);
+            INST(2U, Opcode::Return).s16().Inputs(1U);
         }
     }
 
@@ -1080,12 +1080,12 @@ TEST_F(CommonTest, CodegenCastInt64ToUint16)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s64();
+        CONSTANT(0U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).u16().SrcType(compiler::DataType::INT64).Inputs(0);
-            INST(2, Opcode::Return).u16().Inputs(1);
+            INST(1U, Opcode::Cast).u16().SrcType(compiler::DataType::INT64).Inputs(0U);
+            INST(2U, Opcode::Return).u16().Inputs(1U);
         }
     }
 
@@ -1099,12 +1099,12 @@ TEST_F(CommonTest, CodegenCastInt64ToInt8)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s64();
+        CONSTANT(0U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).s8().SrcType(compiler::DataType::INT64).Inputs(0);
-            INST(2, Opcode::Return).s8().Inputs(1);
+            INST(1U, Opcode::Cast).s8().SrcType(compiler::DataType::INT64).Inputs(0U);
+            INST(2U, Opcode::Return).s8().Inputs(1U);
         }
     }
 
@@ -1118,12 +1118,12 @@ TEST_F(CommonTest, CodegenCastInt64ToUint8)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s64();
+        CONSTANT(0U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).u8().SrcType(compiler::DataType::INT64).Inputs(0);
-            INST(2, Opcode::Return).u8().Inputs(1);
+            INST(1U, Opcode::Cast).u8().SrcType(compiler::DataType::INT64).Inputs(0U);
+            INST(2U, Opcode::Return).u8().Inputs(1U);
         }
     }
 
@@ -1137,12 +1137,12 @@ TEST_F(CommonTest, CodegenCastFloat64ToInt64)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).f64();
+        CONSTANT(0U, 0U).f64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).s64().SrcType(compiler::DataType::FLOAT64).Inputs(0);
-            INST(2, Opcode::Return).s64().Inputs(1);
+            INST(1U, Opcode::Cast).s64().SrcType(compiler::DataType::FLOAT64).Inputs(0U);
+            INST(2U, Opcode::Return).s64().Inputs(1U);
         }
     }
 
@@ -1156,12 +1156,12 @@ TEST_F(CommonTest, CodegenCastFloat64ToInt32)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).f64();
+        CONSTANT(0U, 0U).f64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).s32().SrcType(compiler::DataType::FLOAT64).Inputs(0);
-            INST(2, Opcode::Return).s32().Inputs(1);
+            INST(1U, Opcode::Cast).s32().SrcType(compiler::DataType::FLOAT64).Inputs(0U);
+            INST(2U, Opcode::Return).s32().Inputs(1U);
         }
     }
 
@@ -1175,12 +1175,12 @@ TEST_F(CommonTest, CodegenCastFloat64ToUint32)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).f64();
+        CONSTANT(0U, 0U).f64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Cast).u32().SrcType(compiler::DataType::FLOAT64).Inputs(0);
-            INST(2, Opcode::Return).u32().Inputs(1);
+            INST(1U, Opcode::Cast).u32().SrcType(compiler::DataType::FLOAT64).Inputs(0U);
+            INST(2U, Opcode::Return).u32().Inputs(1U);
         }
     }
 
@@ -1196,17 +1196,17 @@ TEST_F(AsmTest, CodegenLoadString)
     {
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
-        PARAMETER(0, 0).ref();
-        BASIC_BLOCK(2, -1)
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).NoVregs();
+            INST(1U, Opcode::SaveState).NoVregs();
 
-            INST(2, Opcode::LoadString).ref().TypeId(235).Inputs(1);
+            INST(2U, Opcode::LoadString).ref().TypeId(235U).Inputs(1U);
 
-            INST(3, Opcode::SaveState).NoVregs();
-            INST(4, Opcode::NullCheck).ref().Inputs(2, 3);
-            INST(5, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 4}, {NO_TYPE, 3}});
-            INST(6, Opcode::Return).s32().Inputs(5);
+            INST(3U, Opcode::SaveState).NoVregs();
+            INST(4U, Opcode::NullCheck).ref().Inputs(2U, 3U);
+            INST(5U, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 4U}, {NO_TYPE, 3U}});
+            INST(6U, Opcode::Return).s32().Inputs(5U);
         }
     }
 
@@ -1224,25 +1224,25 @@ TEST_F(CommonTest, CodegenStoreObject64)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        CONSTANT(7, 0).s64();
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(7U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
             // NOLINTNEXTLINE(google-build-using-namespace)
             using namespace compiler::DataType;
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);
-            INST(4, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::NullCheck).ref().Inputs(3, 4);
-            INST(6, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 5}, {NO_TYPE, 4}});
-            INST(8, Opcode::SaveState).NoVregs();
-            INST(9, Opcode::NullCheck).ref().Inputs(3, 8);
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(4U, Opcode::SaveState).NoVregs();
+            INST(5U, Opcode::NullCheck).ref().Inputs(3U, 4U);
+            INST(6U, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 5U}, {NO_TYPE, 4U}});
+            INST(8U, Opcode::SaveState).NoVregs();
+            INST(9U, Opcode::NullCheck).ref().Inputs(3U, 8U);
 
-            INST(10, Opcode::StoreObject).s64().Inputs(9, 7);
+            INST(10U, Opcode::StoreObject).s64().Inputs(9U, 7U);
 
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -1257,25 +1257,25 @@ TEST_F(CommonTest, CodegenStoreObjectReference)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        CONSTANT(7, 0).s64();
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(7U, 0U).s64();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
             // NOLINTNEXTLINE(google-build-using-namespace)
             using namespace compiler::DataType;
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(2, Opcode::LoadAndInitClass).ref().Inputs(1);
-            INST(3, Opcode::NewObject).ref().Inputs(2, 1);
-            INST(4, Opcode::SaveState).NoVregs();
-            INST(5, Opcode::NullCheck).ref().Inputs(3, 4);
-            INST(6, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 5}, {NO_TYPE, 4}});
-            INST(8, Opcode::SaveState).NoVregs();
-            INST(9, Opcode::NullCheck).ref().Inputs(3, 8);
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(4U, Opcode::SaveState).NoVregs();
+            INST(5U, Opcode::NullCheck).ref().Inputs(3U, 4U);
+            INST(6U, Opcode::CallStatic).v0id().Inputs({{REFERENCE, 5U}, {NO_TYPE, 4U}});
+            INST(8U, Opcode::SaveState).NoVregs();
+            INST(9U, Opcode::NullCheck).ref().Inputs(3U, 8U);
 
-            INST(10, Opcode::StoreObject).ref().Inputs(9, 5);
+            INST(10U, Opcode::StoreObject).ref().Inputs(9U, 5U);
 
-            INST(11, Opcode::ReturnVoid).v0id();
+            INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -1290,14 +1290,14 @@ TEST_F(CommonTest, CodegenLoadObjectInt)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::NullCheck).ref().Inputs(0, 1);
-            INST(3, Opcode::LoadObject).s32().Inputs(2);
-            INST(4, Opcode::Return).s32().Inputs(3);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::NullCheck).ref().Inputs(0U, 1U);
+            INST(3U, Opcode::LoadObject).s32().Inputs(2U);
+            INST(4U, Opcode::Return).s32().Inputs(3U);
         }
     }
 
@@ -1312,14 +1312,14 @@ TEST_F(CommonTest, CodegenLoadObjectInt64)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::NullCheck).ref().Inputs(0, 1);
-            INST(3, Opcode::LoadObject).s64().Inputs(2);
-            INST(4, Opcode::Return).s64().Inputs(3);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::NullCheck).ref().Inputs(0U, 1U);
+            INST(3U, Opcode::LoadObject).s64().Inputs(2U);
+            INST(4U, Opcode::Return).s64().Inputs(3U);
         }
     }
 
@@ -1334,14 +1334,14 @@ TEST_F(CommonTest, CodegenLoadObjectReference)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::SaveState).Inputs(0).SrcVregs({0});
-            INST(2, Opcode::NullCheck).ref().Inputs(0, 1);
-            INST(3, Opcode::LoadObject).ref().Inputs(2);
-            INST(4, Opcode::Return).ref().Inputs(3);
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::NullCheck).ref().Inputs(0U, 1U);
+            INST(3U, Opcode::LoadObject).ref().Inputs(2U);
+            INST(4U, Opcode::Return).ref().Inputs(3U);
         }
     }
 
@@ -1356,16 +1356,16 @@ TEST_F(CommonTest, CodegenInitObject)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
             // NOLINTNEXTLINE(google-build-using-namespace)
             using namespace compiler::DataType;
 
-            INST(0, Opcode::SaveState).NoVregs();
-            INST(1, Opcode::LoadAndInitClass).ref().Inputs(0).TypeId(68);
-            INST(3, Opcode::SaveState).NoVregs();
-            INST(8, Opcode::InitObject).ref().Inputs({{REFERENCE, 1}, {NO_TYPE, 3}});
-            INST(7, Opcode::ReturnVoid).v0id();
+            INST(0U, Opcode::SaveState).NoVregs();
+            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U).TypeId(68U);
+            INST(3U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::InitObject).ref().Inputs({{REFERENCE, 1U}, {NO_TYPE, 3U}});
+            INST(7U, Opcode::ReturnVoid).v0id();
         }
     }
 
@@ -1380,28 +1380,28 @@ TEST_F(CommonTest, CodegenEncodeSta64)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
+        PARAMETER(0U, 0U).ref();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
             // NOLINTNEXTLINE(google-build-using-namespace)
             using namespace compiler::DataType;
 
-            INST(1, Opcode::SaveState).NoVregs();
-            INST(3, Opcode::CallVirtual).f64().Inputs({{REFERENCE, 0}, {NO_TYPE, 1}});
-            INST(6, Opcode::LoadObject).s64().Inputs(0);
-            INST(7, Opcode::Cast).f64().SrcType(INT64).Inputs(6);
-            CONSTANT(15, 3.6e+06).f64();
-            INST(9, Opcode::Div).f64().Inputs(7, 15);
-            INST(10, Opcode::Add).f64().Inputs(9, 3);
-            CONSTANT(16, 24).f64();
-            INST(12, Opcode::SaveState).NoVregs();
-            INST(13, Opcode::CallStatic).f64().Inputs({{FLOAT64, 10}, {FLOAT64, 16}, {NO_TYPE, 12}});
-            INST(14, Opcode::ReturnVoid).v0id();
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(3U, Opcode::CallVirtual).f64().Inputs({{REFERENCE, 0U}, {NO_TYPE, 1U}});
+            INST(6U, Opcode::LoadObject).s64().Inputs(0U);
+            INST(7U, Opcode::Cast).f64().SrcType(INT64).Inputs(6U);
+            CONSTANT(15U, 3.6e+06).f64();
+            INST(9U, Opcode::Div).f64().Inputs(7U, 15U);
+            INST(10U, Opcode::Add).f64().Inputs(9U, 3U);
+            CONSTANT(16U, 24U).f64();
+            INST(12U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).f64().Inputs({{FLOAT64, 10U}, {FLOAT64, 16U}, {NO_TYPE, 12U}});
+            INST(14U, Opcode::ReturnVoid).v0id();
         }
     }
 
-    RuntimeInterfaceMock runtime(1);
+    RuntimeInterfaceMock runtime(1U);
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
     auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -1414,42 +1414,42 @@ TEST_F(CommonTest, CodegenBlockNeedsJump)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(0, 0).ref();
-        PARAMETER(1, 1).ref();
-        PARAMETER(4, 4).ref();
-        PARAMETER(7, 7).s32();
-        PARAMETER(13, 13).ref();
-        PARAMETER(19, 19).ref();
-        PARAMETER(35, 35).ref();
-        PARAMETER(43, 43).s32();
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        PARAMETER(4U, 4U).ref();
+        PARAMETER(7U, 7U).s32();
+        PARAMETER(13U, 13U).ref();
+        PARAMETER(19U, 19U).ref();
+        PARAMETER(35U, 35U).ref();
+        PARAMETER(43U, 43U).s32();
 
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace compiler::DataType;
 
-        BASIC_BLOCK(2, 3, 4)
+        BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(10, Opcode::IfImm).SrcType(INT32).CC(compiler::CC_NE).Imm(0).Inputs(7);
+            INST(10U, Opcode::IfImm).SrcType(INT32).CC(compiler::CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(4, 5, 7)
+        BASIC_BLOCK(4U, 5U, 7U)
         {
-            INST(39, Opcode::If).SrcType(REFERENCE).CC(compiler::CC_EQ).Inputs(13, 4);
+            INST(39U, Opcode::If).SrcType(REFERENCE).CC(compiler::CC_EQ).Inputs(13U, 4U);
         }
-        BASIC_BLOCK(3, 7, 8)
+        BASIC_BLOCK(3U, 7U, 8U)
         {
-            INST(40, Opcode::If).SrcType(REFERENCE).CC(compiler::CC_NE).Inputs(19, 4);
+            INST(40U, Opcode::If).SrcType(REFERENCE).CC(compiler::CC_NE).Inputs(19U, 4U);
         }
-        BASIC_BLOCK(8, 5, 7)
+        BASIC_BLOCK(8U, 5U, 7U)
         {
-            INST(41, Opcode::If).SrcType(INT32).CC(compiler::CC_EQ).Inputs(7, 43);
+            INST(41U, Opcode::If).SrcType(INT32).CC(compiler::CC_EQ).Inputs(7U, 43U);
         }
-        BASIC_BLOCK(5, -1)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(28, Opcode::ReturnVoid).v0id();
+            INST(28U, Opcode::ReturnVoid).v0id();
         }
-        BASIC_BLOCK(7, -1)
+        BASIC_BLOCK(7U, -1L)
         {
-            INST(37, Opcode::SaveState).NoVregs();
-            INST(38, Opcode::Throw).Inputs(35, 37);
+            INST(37U, Opcode::SaveState).NoVregs();
+            INST(38U, Opcode::Throw).Inputs(35U, 37U);
         }
     }
 
@@ -1464,15 +1464,15 @@ TEST_F(CommonTest, CodegenNotProduceUnsupportedCast)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        PARAMETER(1, 1).i16();
-        CONSTANT(3, 0xFFFF);
+        PARAMETER(1U, 1U).i16();
+        CONSTANT(3U, 0xFFFFU);
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(11, Opcode::And).u16().Inputs(1, 3);
-            INST(17, Opcode::Cast).i16().SrcType(compiler::DataType::INT32).Inputs(11);
+            INST(11U, Opcode::And).u16().Inputs(1U, 3U);
+            INST(17U, Opcode::Cast).i16().SrcType(compiler::DataType::INT32).Inputs(11U);
 
-            INST(24, Opcode::ReturnVoid).v0id();
+            INST(24U, Opcode::ReturnVoid).v0id();
         }
     }
     IrInterfaceTest interface(nullptr);
@@ -1485,11 +1485,11 @@ TEST_F(CommonTest, CodegenFloat32Constant)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0.0).f32();
+        CONSTANT(0U, 0.0).f32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(1, Opcode::Return).f32().Inputs(0);
+            INST(1U, Opcode::Return).f32().Inputs(0U);
         }
     }
 
@@ -1548,16 +1548,16 @@ TEST_F(AsmTest, Float32Regression1)
 {
     auto source = R"(
     .function f32 foo() <static> {
-      fldai 0x0
-      return
+        fldai 0x0
+        return
     }
 
     .function f32 bar() <static> {
-      call.short foo
-      sta v0
-      fldai 0x3f000000
-      fadd2 v0
-      return
+        call.short foo
+        sta v0
+        fldai 0x3f000000
+        fadd2 v0
+        return
     }
     )";
     panda::pandasm::Parser parser;
@@ -1622,18 +1622,18 @@ TEST_F(CommonTest, CodegenLdai)
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
-            PARAMETER(0, 0).s32();
-            BASIC_BLOCK(2, -1)
+            PARAMETER(0U, 0U).s32();
+            BASIC_BLOCK(2U, -1L)
             {
-                CONSTANT(1, 159).s32();
-                INST(2, Opcode::Add).s32().Inputs(0, 1);
-                INST(3, Opcode::Return).s32().Inputs(2);
+                CONSTANT(1U, 159U).s32();
+                INST(2U, Opcode::Add).s32().Inputs(0U, 1U);
+                INST(3U, Opcode::Return).s32().Inputs(2U);
             }
         }
-        INS(0).SetType(types[i]);
-        INS(1).SetType(types[i]);
-        INS(2).SetType(types[i]);
-        INS(3).SetType(types[i]);
+        INS(0U).SetType(types[i]);
+        INS(1U).SetType(types[i]);
+        INS(2U).SetType(types[i]);
+        INS(3U).SetType(types[i]);
         graph->RunPass<bytecodeopt::RegAccAlloc>();
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
         auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -1646,7 +1646,7 @@ TEST_F(CommonTest, CodegenLdai)
 TEST(TotalTest, OptimizeBytecode)
 {
     auto source = R"(
-    .function i8 main(){
+    .function i8 main() {
         ldai 1
         return
     }
@@ -1662,15 +1662,15 @@ TEST(TotalTest, OptimizeBytecode)
     EXPECT_TRUE(OptimizeBytecode(&prog, &maps, file_name));
     EXPECT_TRUE(OptimizeBytecode(&prog, &maps, file_name, true));
 
-    OPTIONS.SetOptLevel(0);
+    OPTIONS.SetOptLevel(0U);
     EXPECT_FALSE(OptimizeBytecode(&prog, &maps, file_name));
-    OPTIONS.SetOptLevel(1);
+    OPTIONS.SetOptLevel(1U);
     EXPECT_TRUE(OptimizeBytecode(&prog, &maps, file_name));
 #ifndef NDEBUG
-    OPTIONS.SetOptLevel(-1);
+    OPTIONS.SetOptLevel(-1L);
     EXPECT_DEATH_IF_SUPPORTED(OptimizeBytecode(&prog, &maps, file_name), "");
 #endif
-    OPTIONS.SetOptLevel(2);
+    OPTIONS.SetOptLevel(2U);
 
     OPTIONS.SetMethodRegex(std::string());
     EXPECT_FALSE(OptimizeBytecode(&prog, &maps, file_name));

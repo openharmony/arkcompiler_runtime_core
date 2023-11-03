@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,33 +31,33 @@ void DoIntTracePoint(const char *str, int32_t val);
 void DoInt64TracePoint(const char *str, int64_t val);
 }  // namespace internal
 
-static inline bool IsEnabled()
+inline bool IsEnabled()
 {
     return internal::G_TRACE_MARKER_FD != -1;
 }
 
-static inline void BeginTracePoint(const char *str)
+inline void BeginTracePoint(const char *str)
 {
     if (UNLIKELY(IsEnabled())) {
         internal::DoBeginTracePoint(str);
     }
 }
 
-static inline void EndTracePoint()
+inline void EndTracePoint()
 {
     if (UNLIKELY(IsEnabled())) {
         internal::DoEndTracePoint();
     }
 }
 
-static inline void IntTracePoint(const char *str, int32_t val)
+inline void IntTracePoint(const char *str, int32_t val)
 {
     if (UNLIKELY(IsEnabled())) {
         internal::DoIntTracePoint(str, val);
     }
 }
 
-static inline void Int64TracePoint(const char *str, int64_t val)
+inline void Int64TracePoint(const char *str, int64_t val)
 {
     if (UNLIKELY(IsEnabled())) {
         internal::DoInt64TracePoint(str, val);

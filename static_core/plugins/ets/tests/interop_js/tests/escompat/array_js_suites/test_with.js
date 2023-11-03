@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSWith = ets_mod.getFunction("Array_TestJSWith");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSWith = etsMod.getFunction('Array_TestJSWith');
 
-{   // Test JS Array<FooClass>
-    TestJSWith(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSWith(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    let arr1 = arr.with(1, "three");
-    ASSERT_EQ(arr1.at(1), "three");
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  let arr1 = arr.with(1, 'three');
+  ASSERT_EQ(arr1.at(1), 'three');
 }
 
 GCJSRuntimeCleanup();

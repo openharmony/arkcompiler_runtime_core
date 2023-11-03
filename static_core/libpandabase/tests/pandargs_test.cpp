@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,11 @@ TEST(libpandargs, TestAPI)
     PandArg<arg_list_t> pald("dlist", REF_DEF_DLIST, "Sample delimiter list argument", ":");
     PandArg<arg_list_t> pal("list", REF_DEF_LIST, "Sample list argument");
     // NOLINTNEXTLINE(readability-magic-numbers)
-    PandArg<int> pair("rint", REF_DEF_INT, "Integer argument with range", -100, 100);
+    PandArg<int> pair("rint", REF_DEF_INT, "Integer argument with range", -100L, 100U);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    PandArg<uint32_t> paur32("ruint32", REF_DEF_UINT64, "uint32 argument with range", 0, 1000000000);
+    PandArg<uint32_t> paur32("ruint32", REF_DEF_UINT64, "uint32 argument with range", 0U, 1000000000U);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    PandArg<uint64_t> paur64("ruint64", REF_DEF_UINT64, "uint64 argument with range", 0, 100000000000);
+    PandArg<uint64_t> paur64("ruint64", REF_DEF_UINT64, "uint64 argument with range", 0U, 100000000000U);
 
     PandArgParser pa_parser;
     EXPECT_TRUE(pa_parser.Add(&pab));
@@ -139,7 +139,7 @@ TEST(libpandargs, TestAPI)
 
     // expect false on duplicate argument
     {
-        PandArg<int> pai_dup("int", 0, "Integer number 0");
+        PandArg<int> pai_dup("int", 0U, "Integer number 0");
         EXPECT_TRUE(pa_parser.IsArgSet(pai_dup.GetName()));
         EXPECT_FALSE(pa_parser.Add(&pai_dup));
     }
@@ -204,19 +204,19 @@ TEST(libpandargs, TestAPI)
         static const char *false_values[] = {"false", "off", "0"};
         static const int ARGC_BOOL_ONLY = 3;
         static const char *argv_bool_only[ARGC_BOOL_ONLY];
-        argv_bool_only[0] = "gtest_app";
+        argv_bool_only[0U] = "gtest_app";
         std::string s = "--" + pab.GetName();
-        argv_bool_only[1] = s.c_str();
+        argv_bool_only[1U] = s.c_str();
 
         // NOLINTNEXTLINE(modernize-loop-convert)
-        for (int i = 0; i < 3; i++) {
-            argv_bool_only[2] = true_values[i];
+        for (size_t i = 0; i < 3U; i++) {
+            argv_bool_only[2U] = true_values[i];
             EXPECT_TRUE(pa_parser.Parse(ARGC_BOOL_ONLY, argv_bool_only));
             EXPECT_TRUE(pab.GetValue());
         }
         // NOLINTNEXTLINE(modernize-loop-convert)
-        for (int i = 0; i < 3; i++) {
-            argv_bool_only[2] = false_values[i];
+        for (size_t i = 0; i < 3U; i++) {
+            argv_bool_only[2U] = false_values[i];
             EXPECT_TRUE(pa_parser.Parse(ARGC_BOOL_ONLY, argv_bool_only));
             EXPECT_FALSE(pab.GetValue());
         }
@@ -226,9 +226,9 @@ TEST(libpandargs, TestAPI)
     {
         static const int ARGC_BOOL_ONLY = 2;
         static const char *argv_bool_only[ARGC_BOOL_ONLY];
-        argv_bool_only[0] = "gtest_app";
+        argv_bool_only[0U] = "gtest_app";
         std::string s = "--" + pab.GetName() + "=";
-        argv_bool_only[1] = s.c_str();
+        argv_bool_only[1U] = s.c_str();
         EXPECT_FALSE(pa_parser.Parse(ARGC_BOOL_ONLY, argv_bool_only));
     }
 
@@ -236,9 +236,9 @@ TEST(libpandargs, TestAPI)
     {
         static const int ARGC_BOOL_ONLY = 2;
         static const char *argv_bool_only[ARGC_BOOL_ONLY];
-        argv_bool_only[0] = "gtest_app";
+        argv_bool_only[0U] = "gtest_app";
         std::string s = "--" + pab.GetName();
-        argv_bool_only[1] = s.c_str();
+        argv_bool_only[1U] = s.c_str();
         EXPECT_TRUE(pa_parser.Parse(ARGC_BOOL_ONLY, argv_bool_only));
         EXPECT_TRUE(pab.GetValue());
     }
@@ -249,13 +249,13 @@ TEST(libpandargs, TestAPI)
         static const int REF_INT_NEG = -42422424;
         static const int ARGC_INT_ONLY = 3;
         static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0] = "gtest_app";
+        argv_int_only[0U] = "gtest_app";
         std::string s = "--" + pai.GetName();
-        argv_int_only[1] = s.c_str();
-        argv_int_only[2] = "42422424";
+        argv_int_only[1U] = s.c_str();
+        argv_int_only[2U] = "42422424";
         EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
         EXPECT_EQ(pai.GetValue(), REF_INT_POS);
-        argv_int_only[2] = "-42422424";
+        argv_int_only[2U] = "-42422424";
         EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
         EXPECT_EQ(pai.GetValue(), REF_INT_NEG);
     }
@@ -266,13 +266,13 @@ TEST(libpandargs, TestAPI)
         static const double REF_DOUBLE_NEG = -4242.2424;
         static const int ARGC_DOUBLE_ONLY = 3;
         static const char *argv_double_only[ARGC_DOUBLE_ONLY];
-        argv_double_only[0] = "gtest_app";
+        argv_double_only[0U] = "gtest_app";
         std::string s = "--" + pad.GetName();
-        argv_double_only[1] = s.c_str();
-        argv_double_only[2] = "4242.2424";
+        argv_double_only[1U] = s.c_str();
+        argv_double_only[2U] = "4242.2424";
         EXPECT_TRUE(pa_parser.Parse(ARGC_DOUBLE_ONLY, argv_double_only));
         EXPECT_EQ(pad.GetValue(), REF_DOUBLE_POS);
-        argv_double_only[2] = "-4242.2424";
+        argv_double_only[2U] = "-4242.2424";
         EXPECT_TRUE(pa_parser.Parse(ARGC_DOUBLE_ONLY, argv_double_only));
         EXPECT_EQ(pad.GetValue(), REF_DOUBLE_NEG);
     }
@@ -283,13 +283,13 @@ TEST(libpandargs, TestAPI)
         static const int REF_INT = 64;
         static const int ARGC_UINT64_INT = 3;
         static const char *argv_uint64_int[ARGC_UINT64_INT];
-        argv_uint64_int[0] = "gtest_app";
+        argv_uint64_int[0U] = "gtest_app";
         std::string s = "--" + pau64.GetName();
-        argv_uint64_int[1] = s.c_str();
-        argv_uint64_int[2] = "0x400000000f";
+        argv_uint64_int[1U] = s.c_str();
+        argv_uint64_int[2U] = "0x400000000f";
         EXPECT_TRUE(pa_parser.Parse(ARGC_UINT64_INT, argv_uint64_int));
         EXPECT_EQ(pau64.GetValue(), REF_UINT64);
-        argv_uint64_int[2] = "0x40";
+        argv_uint64_int[2U] = "0x40";
         EXPECT_TRUE(pa_parser.Parse(ARGC_UINT64_INT, argv_uint64_int));
         EXPECT_EQ(pau64.GetValue(), REF_INT);
     }
@@ -299,10 +299,10 @@ TEST(libpandargs, TestAPI)
         static const uint32_t REF_UINT32_POS = 4242422424;
         static const int ARGC_UINT32_ONLY = 3;
         static const char *argv_uint32_only[ARGC_UINT32_ONLY];
-        argv_uint32_only[0] = "gtest_app";
+        argv_uint32_only[0U] = "gtest_app";
         std::string s = "--" + pau32.GetName();
-        argv_uint32_only[1] = s.c_str();
-        argv_uint32_only[2] = "4242422424";
+        argv_uint32_only[1U] = s.c_str();
+        argv_uint32_only[2U] = "4242422424";
         EXPECT_TRUE(pa_parser.Parse(ARGC_UINT32_ONLY, argv_uint32_only));
         EXPECT_EQ(pau32.GetValue(), REF_UINT32_POS);
     }
@@ -312,10 +312,10 @@ TEST(libpandargs, TestAPI)
         static const uint64_t REF_UINT64_POS = 424242422424;
         static const int ARGC_UINT64_ONLY = 3;
         static const char *argv_uint64_only[ARGC_UINT64_ONLY];
-        argv_uint64_only[0] = "gtest_app";
+        argv_uint64_only[0U] = "gtest_app";
         std::string s = "--" + pau64.GetName();
-        argv_uint64_only[1] = s.c_str();
-        argv_uint64_only[2] = "424242422424";
+        argv_uint64_only[1U] = s.c_str();
+        argv_uint64_only[2U] = "424242422424";
         EXPECT_TRUE(pa_parser.Parse(ARGC_UINT64_ONLY, argv_uint64_only));
         EXPECT_EQ(pau64.GetValue(), REF_UINT64_POS);
     }
@@ -326,13 +326,13 @@ TEST(libpandargs, TestAPI)
         static const int REF_INT = 64;
         static const int ARGC_UINT64_INT = 3;
         static const char *argv_uint64_int[ARGC_UINT64_INT];
-        argv_uint64_int[0] = "gtest_app";
+        argv_uint64_int[0U] = "gtest_app";
         std::string s = "--" + pau64.GetName();
-        argv_uint64_int[1] = s.c_str();
-        argv_uint64_int[2] = "0x4000000000";
+        argv_uint64_int[1U] = s.c_str();
+        argv_uint64_int[2U] = "0x4000000000";
         EXPECT_TRUE(pa_parser.Parse(ARGC_UINT64_INT, argv_uint64_int));
         EXPECT_EQ(pau64.GetValue(), REF_UINT64);
-        argv_uint64_int[2] = "0x40";
+        argv_uint64_int[2U] = "0x40";
         EXPECT_TRUE(pa_parser.Parse(ARGC_UINT64_INT, argv_uint64_int));
         EXPECT_EQ(pau64.GetValue(), REF_INT);
     }
@@ -341,12 +341,12 @@ TEST(libpandargs, TestAPI)
     {
         static const int ARGC_UINT32_ONLY = 3;
         static const char *argv_uint32_only[ARGC_UINT32_ONLY];
-        argv_uint32_only[0] = "gtest_app";
+        argv_uint32_only[0U] = "gtest_app";
         std::string s = "--" + pau32.GetName();
-        argv_uint32_only[1] = s.c_str();
-        argv_uint32_only[2] = "424224244242242442422424";
+        argv_uint32_only[1U] = s.c_str();
+        argv_uint32_only[2U] = "424224244242242442422424";
         EXPECT_FALSE(pa_parser.Parse(ARGC_UINT32_ONLY, argv_uint32_only));
-        argv_uint32_only[2] = "0xffffffffffffffffffffffffff";
+        argv_uint32_only[2U] = "0xffffffffffffffffffffffffff";
         EXPECT_FALSE(pa_parser.Parse(ARGC_UINT32_ONLY, argv_uint32_only));
     }
 
@@ -354,12 +354,12 @@ TEST(libpandargs, TestAPI)
     {
         static const int ARGC_UINT64_ONLY = 3;
         static const char *argv_uint64_only[ARGC_UINT64_ONLY];
-        argv_uint64_only[0] = "gtest_app";
+        argv_uint64_only[0U] = "gtest_app";
         std::string s = "--" + pau64.GetName();
-        argv_uint64_only[1] = s.c_str();
-        argv_uint64_only[2] = "424224244242242442422424";
+        argv_uint64_only[1U] = s.c_str();
+        argv_uint64_only[2U] = "424224244242242442422424";
         EXPECT_FALSE(pa_parser.Parse(ARGC_UINT64_ONLY, argv_uint64_only));
-        argv_uint64_only[2] = "0xffffffffffffffffffffffffff";
+        argv_uint64_only[2U] = "0xffffffffffffffffffffffffff";
         EXPECT_FALSE(pa_parser.Parse(ARGC_UINT64_ONLY, argv_uint64_only));
     }
 
@@ -382,9 +382,9 @@ TEST(libpandargs, TestAPI)
     {
         static const int ARGC_STRING_ONLY = 2;
         static const char *argv_string_only[ARGC_STRING_ONLY];
-        argv_string_only[0] = "gtest_app";
+        argv_string_only[0U] = "gtest_app";
         std::string s = "--" + pas.GetName();
-        argv_string_only[1] = s.c_str();
+        argv_string_only[1U] = s.c_str();
         EXPECT_TRUE(pa_parser.Parse(ARGC_STRING_ONLY, argv_string_only));
         EXPECT_EQ(pas.GetValue(), "");
     }
@@ -458,13 +458,13 @@ TEST(libpandargs, TestAPI)
         static const int REF_INT_NEG = -99;
         static const int ARGC_INT_ONLY = 3;
         static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0] = "gtest_app";
+        argv_int_only[0U] = "gtest_app";
         std::string s = "--" + pair.GetName();
-        argv_int_only[1] = s.c_str();
-        argv_int_only[2] = "99";
+        argv_int_only[1U] = s.c_str();
+        argv_int_only[2U] = "99";
         EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
         EXPECT_EQ(pair.GetValue(), REF_INT_POS);
-        argv_int_only[2] = "-99";
+        argv_int_only[2U] = "-99";
         EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
         EXPECT_EQ(pair.GetValue(), REF_INT_NEG);
     }
@@ -475,12 +475,12 @@ TEST(libpandargs, TestAPI)
         static const int REF_INT_NEG = -101;
         static const int ARGC_INT_ONLY = 3;
         static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0] = "gtest_app";
+        argv_int_only[0U] = "gtest_app";
         std::string s = "--" + pair.GetName();
-        argv_int_only[1] = s.c_str();
-        argv_int_only[2] = "101";
+        argv_int_only[1U] = s.c_str();
+        argv_int_only[2U] = "101";
         EXPECT_FALSE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
-        argv_int_only[2] = "-101";
+        argv_int_only[2U] = "-101";
         EXPECT_FALSE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
     }
 
@@ -490,13 +490,13 @@ TEST(libpandargs, TestAPI)
         static const uint32_t REF_INT_MAX = 990000000;
         static const int ARGC_INT_ONLY = 3;
         static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0] = "gtest_app";
+        argv_int_only[0U] = "gtest_app";
         std::string s = "--" + paur32.GetName();
-        argv_int_only[1] = s.c_str();
-        argv_int_only[2] = "1";
+        argv_int_only[1U] = s.c_str();
+        argv_int_only[2U] = "1";
         EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
         EXPECT_EQ(paur32.GetValue(), REF_INT_MIN);
-        argv_int_only[2] = "990000000";
+        argv_int_only[2U] = "990000000";
         EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
         EXPECT_EQ(paur32.GetValue(), REF_INT_MAX);
     }
@@ -507,12 +507,12 @@ TEST(libpandargs, TestAPI)
         static const uint32_t REF_INT_MAX = 1000000001;
         static const int ARGC_INT_ONLY = 3;
         static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0] = "gtest_app";
+        argv_int_only[0U] = "gtest_app";
         std::string s = "--" + paur32.GetName();
-        argv_int_only[1] = s.c_str();
-        argv_int_only[2] = "-1";
+        argv_int_only[1U] = s.c_str();
+        argv_int_only[2U] = "-1";
         EXPECT_FALSE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
-        argv_int_only[2] = "1000000001";
+        argv_int_only[2U] = "1000000001";
         EXPECT_FALSE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
     }
 
@@ -522,13 +522,13 @@ TEST(libpandargs, TestAPI)
         static const uint64_t REF_INT_MAX = 99000000000;
         static const int ARGC_INT_ONLY = 3;
         static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0] = "gtest_app";
+        argv_int_only[0U] = "gtest_app";
         std::string s = "--" + paur64.GetName();
-        argv_int_only[1] = s.c_str();
-        argv_int_only[2] = "1";
+        argv_int_only[1U] = s.c_str();
+        argv_int_only[2U] = "1";
         EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
         EXPECT_EQ(paur64.GetValue(), REF_INT_MIN);
-        argv_int_only[2] = "99000000000";
+        argv_int_only[2U] = "99000000000";
         EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
         EXPECT_EQ(paur64.GetValue(), REF_INT_MAX);
     }
@@ -539,12 +539,12 @@ TEST(libpandargs, TestAPI)
         static const uint64_t REF_INT_MAX = 100000000001;
         static const int ARGC_INT_ONLY = 3;
         static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0] = "gtest_app";
+        argv_int_only[0U] = "gtest_app";
         std::string s = "--" + paur64.GetName();
-        argv_int_only[1] = s.c_str();
-        argv_int_only[2] = "-1";
+        argv_int_only[1U] = s.c_str();
+        argv_int_only[2U] = "-1";
         EXPECT_FALSE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
-        argv_int_only[2] = "100000000001";
+        argv_int_only[2U] = "100000000001";
         EXPECT_FALSE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
     }
 
@@ -554,9 +554,9 @@ TEST(libpandargs, TestAPI)
         static const arg_list_t REF_LIST = {""};
         static const int ARGC_LIST_ONLY = 2;
         static const char *argv_list_only[ARGC_LIST_ONLY];
-        argv_list_only[0] = "gtest_app";
+        argv_list_only[0U] = "gtest_app";
         std::string s = "--" + pald.GetName();
-        argv_list_only[1] = s.c_str();
+        argv_list_only[1U] = s.c_str();
         EXPECT_TRUE(pa_parser.Parse(ARGC_LIST_ONLY, argv_list_only));
         EXPECT_EQ(pald.GetValue(), REF_LIST);
     }
@@ -841,12 +841,12 @@ TEST(libpandargs, CompoundArgs)
 {
     PandArg<bool> sub_bool_arg("bool", false, "Sample boolean argument");
     // NOLINTNEXTLINE(readability-magic-numbers)
-    PandArg<int> sub_int_arg("int", 12, "Sample integer argument");
+    PandArg<int> sub_int_arg("int", 12U, "Sample integer argument");
     // NOLINTNEXTLINE(readability-magic-numbers)
     PandArg<double> sub_double_arg("double", 123.45, "Sample rational argument");
     PandArg<std::string> sub_string_arg("string", "Hello", "Sample string argument");
     // NOLINTNEXTLINE(readability-magic-numbers)
-    PandArg<int> int_arg("global_int", 123, "Global integer argument");
+    PandArg<int> int_arg("global_int", 123U, "Global integer argument");
     PandArgCompound parent("compound", "Sample boolean argument",
                            {&sub_bool_arg, &sub_int_arg, &sub_double_arg, &sub_string_arg});
 
@@ -858,10 +858,10 @@ TEST(libpandargs, CompoundArgs)
     {
         parent.ResetDefaultValue();
         static const char *argv[] = {"gtest_app", "--compound"};
-        ASSERT_TRUE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), true);
         ASSERT_EQ(sub_bool_arg.GetValue(), false);
-        ASSERT_EQ(sub_int_arg.GetValue(), 12);
+        ASSERT_EQ(sub_int_arg.GetValue(), 12U);
         ASSERT_EQ(sub_double_arg.GetValue(), 123.45);
         ASSERT_EQ(sub_string_arg.GetValue(), "Hello");
     }
@@ -869,10 +869,10 @@ TEST(libpandargs, CompoundArgs)
     {
         parent.ResetDefaultValue();
         static const char *argv[] = {"gtest_app", "--compound:bool,int=2,double=54.321,string=World"};
-        ASSERT_TRUE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), true);
         ASSERT_EQ(sub_bool_arg.GetValue(), true);
-        ASSERT_EQ(sub_int_arg.GetValue(), 2);
+        ASSERT_EQ(sub_int_arg.GetValue(), 2U);
         ASSERT_EQ(sub_double_arg.GetValue(), 54.321);
         ASSERT_EQ(sub_string_arg.GetValue(), "World");
     }
@@ -882,14 +882,14 @@ TEST(libpandargs, CompoundArgs)
         parent.ResetDefaultValue();
         ASSERT_EQ(parent.GetValue(), false);
         ASSERT_EQ(sub_bool_arg.GetValue(), false);
-        ASSERT_EQ(sub_int_arg.GetValue(), 12);
+        ASSERT_EQ(sub_int_arg.GetValue(), 12U);
         ASSERT_EQ(sub_double_arg.GetValue(), 123.45);
         ASSERT_EQ(sub_string_arg.GetValue(), "Hello");
     }
 
     {
         static const char *argv[] = {"gtest_app", "--compound:bool=true"};
-        ASSERT_TRUE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), true);
         ASSERT_EQ(sub_bool_arg.GetValue(), true);
     }
@@ -897,14 +897,14 @@ TEST(libpandargs, CompoundArgs)
     {
         parent.ResetDefaultValue();
         static const char *argv[] = {"gtest_app", "--compound:bool"};
-        ASSERT_TRUE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), true);
         ASSERT_EQ(sub_bool_arg.GetValue(), true);
     }
 
     {
         static const char *argv[] = {"gtest_app", "--compound:bool=false"};
-        ASSERT_TRUE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), true);
         ASSERT_EQ(sub_bool_arg.GetValue(), false);
     }
@@ -912,35 +912,35 @@ TEST(libpandargs, CompoundArgs)
     {
         parent.ResetDefaultValue();
         static const char *argv[] = {"gtest_app", "--global_int=321"};
-        ASSERT_TRUE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), false);
-        ASSERT_EQ(int_arg.GetValue(), 321);
+        ASSERT_EQ(int_arg.GetValue(), 321U);
     }
 
     {
         parent.ResetDefaultValue();
         static const char *argv[] = {"gtest_app", "--compound", "--global_int", "321"};
-        ASSERT_TRUE(pa_parser.Parse(4, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(pa_parser.Parse(4U, argv)) << pa_parser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), true);
-        ASSERT_EQ(int_arg.GetValue(), 321);
+        ASSERT_EQ(int_arg.GetValue(), 321U);
     }
 
     /* Test that sub arguments are not visible in the global space */
     {
         static const char *argv[] = {"gtest_app", "--bool"};
-        ASSERT_FALSE(pa_parser.Parse(2, argv));
+        ASSERT_FALSE(pa_parser.Parse(2U, argv));
     }
     {
         static const char *argv[] = {"gtest_app", "--int=2"};
-        ASSERT_FALSE(pa_parser.Parse(2, argv));
+        ASSERT_FALSE(pa_parser.Parse(2U, argv));
     }
     {
         static const char *argv[] = {"gtest_app", "--double=54.321"};
-        ASSERT_FALSE(pa_parser.Parse(2, argv));
+        ASSERT_FALSE(pa_parser.Parse(2U, argv));
     }
     {
         static const char *argv[] = {"gtest_app", "--string=World"};
-        ASSERT_FALSE(pa_parser.Parse(2, argv));
+        ASSERT_FALSE(pa_parser.Parse(2U, argv));
     }
 }
 
@@ -955,7 +955,7 @@ TEST(libpandargs, IncorrectCompoundArgs)
 
     /* Test that incorrect using of compound argument syntax for non-compound argument produces error*/
     static const char *argv[] = {"gtest_app", "--list:list_arg1:list_arg2"};
-    ASSERT_FALSE(pa_parser.Parse(2, argv)) << pa_parser.GetErrorString();
+    ASSERT_FALSE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
 }
 
 // NOLINTEND(modernize-avoid-c-arrays)

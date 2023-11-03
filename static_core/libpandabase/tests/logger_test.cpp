@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -272,7 +272,7 @@ DEATH_TEST(Logger, FileLogging)
     }
 #endif  // GTEST_HAS_DEATH_TEST
 
-    EXPECT_EQ(std::remove(log_filename.c_str()), 0);
+    EXPECT_EQ(std::remove(log_filename.c_str()), 0U);
 
     Logger::Destroy();
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
@@ -359,7 +359,7 @@ TEST(Logger, LogOnce)
 
     LOG_ONCE(INFO, COMMON) << "a";
     // NOLINTNEXTLINE(readability-magic-numbers)
-    for (int i = 0; i < 10; ++i) {
+    for (size_t i = 0; i < 10U; ++i) {
         LOG_ONCE(INFO, COMMON) << "b";
     }
     LOG_ONCE(INFO, COMMON) << "c";
@@ -384,7 +384,7 @@ TEST(Logger, LogDfx)
 
     DfxController::Initialize();
     EXPECT_TRUE(DfxController::IsInitialized());
-    EXPECT_EQ(DfxController::GetOptionValue(DfxOptionHandler::DFXLOG), 0);
+    EXPECT_EQ(DfxController::GetOptionValue(DfxOptionHandler::DFXLOG), 0U);
 
     testing::internal::CaptureStderr();
 
@@ -396,7 +396,7 @@ TEST(Logger, LogDfx)
     EXPECT_EQ(err, "");
 
     DfxController::ResetOptionValueFromString("dfx-log:1");
-    EXPECT_EQ(DfxController::GetOptionValue(DfxOptionHandler::DFXLOG), 1);
+    EXPECT_EQ(DfxController::GetOptionValue(DfxOptionHandler::DFXLOG), 1U);
 
     testing::internal::CaptureStderr();
 

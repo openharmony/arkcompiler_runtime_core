@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSJoin = ets_mod.getFunction("Array_TestJSJoin");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSJoin = etsMod.getFunction('Array_TestJSJoin');
 
-{   // Test JS Array<FooClass>
-    TestJSJoin(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSJoin(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    arr.join(",");
-    ASSERT_EQ(arr.toString(), "123,foo");
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  arr.join(',');
+  ASSERT_EQ(arr.toString(), '123,foo');
 }
 
 GCJSRuntimeCleanup();

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_CONCEPTS_H_
-#define PANDA_LIBPANDABASE_CONCEPTS_H_
+#ifndef PANDA_LIBPANDABASE_CONCEPTS_H
+#define PANDA_LIBPANDABASE_CONCEPTS_H
 
 #include <iterator>
 
@@ -149,4 +149,4 @@ constexpr bool is_bounded_array_v = is_bounded_array<T>::value;
 
 // NOLINTEND(readability-identifier-naming)
 
-#endif  // PANDA_LIBPANDABASE_CONCEPTS_H_
+#endif  // PANDA_LIBPANDABASE_CONCEPTS_H

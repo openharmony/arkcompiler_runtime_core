@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ protected:
 
     void SetUp() override
     {
-        panda::mem::MemConfig::Initialize(0, 32_MB, 0, 32_MB, 0, 0);
+        panda::mem::MemConfig::Initialize(0U, 32_MB, 0U, 32_MB, 0U, 0U);
         PoolManager::Initialize();
     }
 
@@ -62,14 +62,13 @@ TEST_F(CodeAllocatorTest, AllocateBuffTest)
     BaseMemStats stats;
     CodeAllocator ca(&stats);
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    uint8_t buff[] = {0xCC, 0xCC};
-    void *code_buff;
-    code_buff = ca.AllocateCode(sizeof(buff), static_cast<void *>(&buff[0]));
+    uint8_t buff[] = {0xCCU, 0xCCU};
+    void *code_buff = ca.AllocateCode(sizeof(buff), static_cast<void *>(&buff[0U]));
     for (size_t i = 0; i < sizeof(buff); i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        ASSERT_EQ(static_cast<uint8_t *>(code_buff)[i], 0xCC);
+        ASSERT_EQ(static_cast<uint8_t *>(code_buff)[i], 0xCCU);
     }
-    ASSERT_TRUE(IsAligned(code_buff, 4 * SIZE_1K));
+    ASSERT_TRUE(IsAligned(code_buff, 4U * SIZE_1K));
 }
 
 // NOLINTEND(readability-magic-numbers)

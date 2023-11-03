@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,8 +146,7 @@ inline bool MmapPoolMap::HaveEnoughFreePools(size_t pools_num, size_t pool_size)
         if (pool->first < pool_size) {
             return false;
         }
-        pools += pool->first / pool_size;
-        if (pools >= pools_num) {
+        if ((pools += pool->first / pool_size) >= pools_num) {
             return true;
         }
     }
@@ -194,7 +193,7 @@ inline MmapMemPool::MmapMemPool()
                              << object_space_size;
 }
 
-inline MmapMemPool::~MmapMemPool()
+inline void MmapMemPool::ClearNonObjectMmapedPools()
 {
     for (auto i : non_object_mmaped_pools_) {
         Pool pool = std::get<0>(i.second);
@@ -207,7 +206,11 @@ inline MmapMemPool::~MmapMemPool()
         FreeRawMemImpl(pool.GetMem(), pool.GetSize());
     }
     non_object_mmaped_pools_.clear();
+}
 
+inline MmapMemPool::~MmapMemPool()
+{
+    ClearNonObjectMmapedPools();
     void *mmaped_mem_addr = ToVoidPtr(min_object_memory_addr_);
     if (mmaped_mem_addr == nullptr) {
         ASSERT(mmaped_object_memory_size_ == 0);
@@ -554,9 +557,8 @@ inline size_t MmapMemPool::GetObjectUsedBytes() const
     return common_space_.GetOccupiedMemorySize() - common_space_pools_.GetAllSize();
 }
 
-inline void MmapMemPool::ReleasePagesInFreePools()
+inline void MmapMemPool::IterateOverFreePools()
 {
-    os::memory::LockHolder lk(lock_);
     common_space_pools_.IterateOverFreePools([](size_t pool_size, MmapPool *pool) {
         // Iterate over non returned to OS pools:
         if (!pool->IsReturnedToOS()) {
@@ -567,6 +569,12 @@ inline void MmapMemPool::ReleasePagesInFreePools()
             os::mem::ReleasePages(pool_start, pool_start + pool_size);
         }
     });
+}
+
+inline void MmapMemPool::ReleasePagesInFreePools()
+{
+    os::memory::LockHolder lk(lock_);
+    IterateOverFreePools();
     Pool main_pool = common_space_.GetAndClearUnreturnedToOSMemory();
     if (main_pool.GetSize() != 0) {
         auto pool_start = ToUintPtr(main_pool.GetMem());

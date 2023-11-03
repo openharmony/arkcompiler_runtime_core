@@ -13,32 +13,32 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSFindIndex = ets_mod.getFunction("Array_TestJSFindIndex");
+const etsMod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsMod.getClass('FooClass');
+const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
+const TestJSFindIndex = etsMod.getFunction('Array_TestJSFindIndex');
 
-{   // Test JS Array<FooClass>
-    TestJSFindIndex(new Array(new FooClass("zero"), new FooClass("one")));
+{ // Test JS Array<FooClass>
+  TestJSFindIndex(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    function fnTrue(v) { return true; }
-    function fnFalse(v) { return false; }
+{ // Test ETS Array<Object>
+  let arr = CreateEtsSample();
+  function fnTrue(v) { return true; }
+  function fnFalse(v) { return false; }
 
-    let found = arr.findIndex(fnTrue);
-    ASSERT_EQ(found, 0);
-    let found_static = Array.findIndex(fnTrue, arr);
-    ASSERT_EQ(found_static, "foo");
+  let found = arr.findIndex(fnTrue);
+  ASSERT_EQ(found, 0);
+  let foundStatic = Array.findIndex(fnTrue, arr);
+  ASSERT_EQ(foundStatic, 'foo');
 
-    let found_not = arr.findIndex(fnFalse);
-    ASSERT_TRUE(found_not == -1);
-    let found_not_static = Array.findIndex(fnFalse, arr);
-    ASSERT_TRUE(found_not_static == -1);
+  let foundNot = arr.findIndex(fnFalse);
+  ASSERT_TRUE(foundNot === -1);
+  let foundNotStatic = Array.findIndex(fnFalse, arr);
+  ASSERT_TRUE(foundNotStatic === -1);
 }
 
 GCJSRuntimeCleanup();

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 namespace panda {
 
-constexpr uint64_t SIZE_4G = (1ULL << 32);  // NOLINT(hicpp-signed-bitwise)
+constexpr uint64_t SIZE_4G = (1ULL << 32U);  // NOLINT(hicpp-signed-bitwise)
 
 // Integer overflow checking for memory literals
 static_assert(4194304_KB == SIZE_4G);  // NOLINT(readability-magic-numbers)
@@ -29,5 +29,5 @@ static_assert(4_GB == SIZE_4G);
 
 int main()
 {
-    return 0;
+    return 0U;
 }

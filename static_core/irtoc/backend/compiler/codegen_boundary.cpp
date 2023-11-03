@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,38 +18,47 @@
 
 namespace panda::compiler {
 
+static void PushStackRegister(Encoder *encoder, Target target, Reg thread_reg, size_t tls_frame_offset)
+{
+    static constexpr ssize_t FP_OFFSET = 2;
+    ASSERT(sizeof(FrameBridgeKind) <= target.WordSize());
+    encoder->EncodeSti(FrameBridgeKind::COMPILED_CODE_TO_INTERPRETER, target.WordSize(),
+                       MemRef(target.GetStackReg(), -1 * target.WordSize()));
+    encoder->EncodeStr(target.GetFrameReg(), MemRef(target.GetStackReg(), -FP_OFFSET * target.WordSize()));
+
+    {
+        ScopedTmpReg tmp(encoder);
+        encoder->EncodeSub(tmp, target.GetStackReg(), Imm(2U * target.WordSize()));
+        encoder->EncodeStr(tmp, MemRef(thread_reg, tls_frame_offset));
+    }
+}
+
+static void PushLinkAndStackRegister(Encoder *encoder, Target target, Reg thread_reg, size_t tls_frame_offset)
+{
+    ScopedTmpReg tmp(encoder);
+    static constexpr ssize_t FP_OFFSET = 3;
+    static constexpr ssize_t LR_OFFSET = 2;
+    encoder->EncodeMov(tmp, Imm(FrameBridgeKind::COMPILED_CODE_TO_INTERPRETER));
+    encoder->EncodeStp(tmp, target.GetLinkReg(), MemRef(target.GetStackReg(), -LR_OFFSET * target.WordSize()));
+    encoder->EncodeStr(target.GetFrameReg(), MemRef(target.GetStackReg(), -FP_OFFSET * target.WordSize()));
+
+    encoder->EncodeSub(target.GetLinkReg(), target.GetStackReg(), Imm(FP_OFFSET * target.WordSize()));
+    encoder->EncodeStr(target.GetLinkReg(), MemRef(thread_reg, tls_frame_offset));
+}
+
 void CodegenBoundary::GeneratePrologue()
 {
     SCOPED_DISASM_STR(this, "Boundary Prologue");
     auto encoder = GetEncoder();
     auto frame = GetFrameInfo();
+    auto target = GetTarget();
+    auto thread_reg = ThreadReg();
+    auto tls_frame_offset = GetRuntime()->GetTlsFrameOffset(GetArch());
 
-    if (GetTarget().SupportLinkReg()) {
-        ScopedTmpReg tmp(encoder);
-        static constexpr ssize_t FP_OFFSET = 3;
-        static constexpr ssize_t LR_OFFSET = 2;
-        encoder->EncodeMov(tmp, Imm(FrameBridgeKind::COMPILED_CODE_TO_INTERPRETER));
-        encoder->EncodeStp(tmp, GetTarget().GetLinkReg(),
-                           MemRef(GetTarget().GetStackReg(), -LR_OFFSET * GetTarget().WordSize()));
-        encoder->EncodeStr(GetTarget().GetFrameReg(),
-                           MemRef(GetTarget().GetStackReg(), -FP_OFFSET * GetTarget().WordSize()));
-
-        encoder->EncodeSub(GetTarget().GetLinkReg(), GetTarget().GetStackReg(),
-                           Imm(FP_OFFSET * GetTarget().WordSize()));
-        encoder->EncodeStr(GetTarget().GetLinkReg(), MemRef(ThreadReg(), GetRuntime()->GetTlsFrameOffset(GetArch())));
+    if (target.SupportLinkReg()) {
+        PushLinkAndStackRegister(encoder, target, thread_reg, tls_frame_offset);
     } else {
-        static constexpr ssize_t FP_OFFSET = 2;
-        ASSERT(sizeof(FrameBridgeKind) <= GetTarget().WordSize());
-        encoder->EncodeSti(FrameBridgeKind::COMPILED_CODE_TO_INTERPRETER, GetTarget().WordSize(),
-                           MemRef(GetTarget().GetStackReg(), -1 * GetTarget().WordSize()));
-        encoder->EncodeStr(GetTarget().GetFrameReg(),
-                           MemRef(GetTarget().GetStackReg(), -FP_OFFSET * GetTarget().WordSize()));
-
-        {
-            ScopedTmpReg tmp(GetEncoder());
-            encoder->EncodeSub(tmp, GetTarget().GetStackReg(), Imm(2U * GetTarget().WordSize()));
-            encoder->EncodeStr(tmp, MemRef(ThreadReg(), GetRuntime()->GetTlsFrameOffset(GetArch())));
-        }
+        PushStackRegister(encoder, target, thread_reg, tls_frame_offset);
     }
 
     encoder->EncodeSub(GetTarget().GetStackReg(), GetTarget().GetStackReg(), Imm(frame->GetFrameSize()));

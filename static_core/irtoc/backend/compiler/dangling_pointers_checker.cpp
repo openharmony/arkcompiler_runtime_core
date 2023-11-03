@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,12 +60,11 @@ static bool IsObjectDef(Inst *inst)
     if (inst->IsPhi()) {
         return false;
     }
-    if (inst->GetOpcode() == Opcode::AddI &&
-        static_cast<BinaryImmOperation *>(inst)->GetImm() ==
-            static_cast<uint64_t>(cross_values::GetFrameAccOffset(inst->GetBasicBlock()->GetGraph()->GetArch()))) {
-        return false;
+    if (inst->GetOpcode() != Opcode::AddI) {
+        return true;
     }
-    return true;
+    auto imm = static_cast<BinaryImmOperation *>(inst)->GetImm();
+    return imm != static_cast<uint64_t>(cross_values::GetFrameAccOffset(inst->GetBasicBlock()->GetGraph()->GetArch()));
 }
 
 void DanglingPointersChecker::InitLiveIns()
@@ -166,7 +165,6 @@ std::tuple<Inst *, Inst *> DanglingPointersChecker::GetAccAndFrameDefs(Inst *ins
     auto inst_input = inst->GetInput(0).GetInst();
     auto frame_acc_offset = static_cast<uint64_t>(cross_values::GetFrameAccOffset(arch));
     auto load_imm = static_cast<LoadInstI *>(inst)->GetImm();
-
     if (load_imm == frame_acc_offset && IsFrameDef(inst_input)) {
         return std::make_pair(inst, inst_input);
     }
@@ -199,7 +197,6 @@ bool DanglingPointersChecker::IsAccTagDef(Inst *inst)
     auto arch = GetGraph()->GetArch();
     auto acc_tag_offset = static_cast<uint64_t>(cross_values::GetFrameAccMirrorOffset(arch));
     auto load_imm = static_cast<LoadInstI *>(inst)->GetImm();
-
     if (load_imm == acc_tag_offset && IsAccPtr(inst_input)) {
         return true;
     }
@@ -247,6 +244,25 @@ bool DanglingPointersChecker::IsAccPtr(Inst *inst)
     return last_frame_def_ == frame_inst;
 }
 
+void DanglingPointersChecker::UpdateLastAccAndFrameDef(Inst *inst)
+{
+    auto [acc_def, frame_def] = GetAccAndFrameDefs(inst);
+    if (acc_def != nullptr) {
+        // inst is acc definition
+        if (last_acc_def_ == nullptr) {
+            // don't have acc definition before
+            last_acc_def_ = acc_def;
+            last_frame_def_ = frame_def;
+        }
+    } else {
+        // inst isn't acc definition
+        if (IsObjectDef(inst) && !IsPointerType(inst)) {
+            // objects defs should be only ref type
+            object_insts_.insert(inst);
+        }
+    }
+}
+
 void DanglingPointersChecker::GetLastAccDefinition(CallInst *runtime_call_inst)
 {
     auto block = runtime_call_inst->GetBasicBlock();
@@ -256,21 +272,7 @@ void DanglingPointersChecker::GetLastAccDefinition(CallInst *runtime_call_inst)
     object_insts_.clear();
     while (block != GetGraph()->GetStartBlock()) {
         while (prev_inst != nullptr) {
-            auto [acc_def, frame_def] = GetAccAndFrameDefs(prev_inst);
-            if (acc_def != nullptr) {
-                // inst is acc definition
-                if (last_acc_def_ == nullptr) {
-                    // don't have acc definition before
-                    last_acc_def_ = acc_def;
-                    last_frame_def_ = frame_def;
-                }
-            } else {
-                // inst isn't acc definition
-                if (IsObjectDef(prev_inst) && !IsPointerType(prev_inst)) {
-                    // objects defs should be only ref type
-                    object_insts_.insert(prev_inst);
-                }
-            }
+            UpdateLastAccAndFrameDef(prev_inst);
 
             if (last_acc_tag_def_ == nullptr && IsAccTagDef(prev_inst)) {
                 last_acc_tag_def_ = prev_inst;
@@ -379,7 +381,6 @@ Inst *DanglingPointersChecker::GetPhiAccTagDef()
         auto inputs_count = phi_inst->GetInputsCount();
         for (uint32_t input_idx = 0; input_idx < inputs_count; input_idx++) {
             auto input_inst = phi_inst->GetInput(input_idx).GetInst();
-
             auto is_acc_tag_def = IsAccTagDef(input_inst);
             if (is_acc_tag_def || input_inst->IsConst()) {
                 if (input_idx == inputs_count - 1) {
@@ -402,7 +403,6 @@ bool DanglingPointersChecker::IsAccTagDefInInputs(Inst *inst)
     auto inputs_count = inst->GetInputsCount();
     for (uint32_t input_idx = 0; input_idx < inputs_count; input_idx++) {
         auto input_inst = inst->GetInput(input_idx).GetInst();
-
         if (IsAccTagDef(input_inst)) {
             return true;
         }
@@ -418,51 +418,50 @@ bool DanglingPointersChecker::IsAccTagDefInInputs(Inst *inst)
     return false;
 }
 
+bool DanglingPointersChecker::IsSaveAcc(const Inst *inst)
+{
+    if (inst->GetOpcode() != Opcode::StoreI) {
+        return false;
+    }
+
+    auto arch = GetGraph()->GetArch();
+    auto frame_acc_offset = static_cast<uint64_t>(cross_values::GetFrameAccOffset(arch));
+    if (static_cast<const StoreInstI *>(inst)->GetImm() != frame_acc_offset) {
+        return false;
+    }
+    auto store_input_1 = inst->GetInput(1).GetInst();
+    if (store_input_1 != last_acc_def_) {
+        return false;
+    }
+    auto store_input_0 = inst->GetInput(0).GetInst();
+    if (last_frame_def_ == nullptr) {
+        if (IsFrameDef(store_input_0)) {
+            return true;
+        }
+    } else if (store_input_0 == last_frame_def_) {
+        return true;
+    }
+    return false;
+}
+
 // Accumulator is saved using the StoreI instruction:
 // StoreI(last_frame_def, last_acc_def).Imm(cross_values::GetFrameAccOffset(GetArch()))
 
 bool DanglingPointersChecker::CheckStoreAcc(CallInst *runtime_call_inst)
 {
-    bool is_save_acc = false;
-    auto arch = GetGraph()->GetArch();
     auto prev_inst = runtime_call_inst->GetPrev();
     auto block = runtime_call_inst->GetBasicBlock();
-    auto frame_acc_offset = static_cast<uint64_t>(cross_values::GetFrameAccOffset(arch));
-
     while (block != GetGraph()->GetStartBlock()) {
         while (prev_inst != nullptr && prev_inst != last_acc_def_) {
-            if (prev_inst->GetOpcode() != Opcode::StoreI) {
-                prev_inst = MoveToPrevInst(prev_inst, block);
-                continue;
-            }
-            if (static_cast<StoreInstI *>(prev_inst)->GetImm() != frame_acc_offset) {
-                prev_inst = MoveToPrevInst(prev_inst, block);
-                continue;
-            }
-            auto store_input_1 = prev_inst->GetInput(1).GetInst();
-            if (store_input_1 != last_acc_def_) {
-                prev_inst = MoveToPrevInst(prev_inst, block);
-                continue;
-            }
-            auto store_input_0 = prev_inst->GetInput(0).GetInst();
-            if (last_frame_def_ == nullptr) {
-                if (IsFrameDef(store_input_0)) {
-                    is_save_acc = true;
-                    break;
-                }
-            } else if (store_input_0 == last_frame_def_) {
-                is_save_acc = true;
-                break;
+            if (IsSaveAcc(prev_inst)) {
+                return true;
             }
             prev_inst = MoveToPrevInst(prev_inst, block);
-        }
-        if (is_save_acc) {
-            break;
         }
         block = block->GetDominator();
         prev_inst = block->GetLastInst();
     }
-    return is_save_acc;
+    return false;
 }
 
 // Accumulator tag is saved using the StoreI instruction:

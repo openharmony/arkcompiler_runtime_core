@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ TEST(TimeTest, RandomTimeConverterTest)
 {
     // NOLINTNEXTLINE(cert-msc51-cpp)
     std::mt19937 gen;
-    std::uniform_int_distribution<time_t> distrib_nanos_right(0, 1e3 - 1);
-    std::uniform_int_distribution<time_t> distrib_nanos_left(1, 23);
+    std::uniform_int_distribution<time_t> distrib_nanos_right(0U, 1e3 - 1L);
+    std::uniform_int_distribution<time_t> distrib_nanos_left(1U, 23U);
     for (size_t i = 0; i < ITERATION; i++) {
         uint64_t left_part_time = distrib_nanos_left(gen);
         uint64_t right_part_time = distrib_nanos_right(gen);
@@ -69,7 +69,7 @@ TEST(MemoryTest, RandomMemoryConverterTest)
 {
     // NOLINTNEXTLINE(cert-msc51-cpp)
     std::mt19937 gen;
-    std::uniform_int_distribution<uint64_t> distrib_bytes(1, 1023);
+    std::uniform_int_distribution<uint64_t> distrib_bytes(1U, 1023U);
     for (size_t i = 0; i < ITERATION; i++) {
         uint64_t left_part_bytes = distrib_bytes(gen);
         uint64_t right_part_bytes = distrib_bytes(gen);
@@ -80,7 +80,7 @@ TEST(MemoryTest, RandomMemoryConverterTest)
         ASSERT_EQ(MemoryConverter(right_part_bytes), ValueUnit(static_cast<double>(right_part_bytes), "B"));
 
         double expected = left_part_bytes + right_part_bytes * 1e-3;
-        uint64_t bytes = left_part_bytes * 1024 + right_part_bytes;
+        uint64_t bytes = left_part_bytes * 1024U + right_part_bytes;
         ASSERT_EQ(MemoryConverter(bytes), ValueUnit(expected, "KB"));
         ASSERT_EQ(MemoryConverter(bytes * (1UL << 10U)), ValueUnit(expected, "MB"));
         ASSERT_EQ(MemoryConverter(bytes * (1UL << 20U)), ValueUnit(expected, "GB"));

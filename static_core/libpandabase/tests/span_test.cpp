@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,15 +44,15 @@ Span<T> Double(Span<T> s)
 // NOLINTBEGIN(readability-magic-numbers,modernize-avoid-c-arrays)
 TEST(Span, Conversions)
 {
-    int c[] {1, 2, 3};
-    std::vector v {4, 5, 6};
-    const std::vector const_v {-4, -5, -6};
-    std::array a {7, 8, 9};
+    int c[] {1U, 2U, 3U};
+    std::vector v {4U, 5U, 6U};
+    const std::vector const_v {-4L, -5L, -6L};
+    std::array a {7U, 8U, 9U};
     size_t sz = 3;
     auto p = std::make_unique<int[]>(sz);
-    p[0] = 10;
-    p[1] = 11;
-    p[2] = 12;
+    p[0U] = 10;
+    p[1U] = 11;
+    p[2U] = 12;
     std::string s = " !\"";
 
     EXPECT_EQ(ToString(Double(Span(c))), "2 4 6 ");
@@ -60,16 +60,16 @@ TEST(Span, Conversions)
     EXPECT_EQ(ToString(Span(const_v)), "-4 -5 -6 ");
     EXPECT_EQ(ToString(Double(Span(a))), "14 16 18 ");
     EXPECT_EQ(ToString(Double(Span(p.get(), sz))), "20 22 24 ");
-    EXPECT_EQ(ToString(Double(Span(p.get(), p.get() + 2))), "40 44 ");
+    EXPECT_EQ(ToString(Double(Span(p.get(), p.get() + 2U))), "40 44 ");
     EXPECT_EQ(ToString(Double(Span(s))), "@ B D ");
 }
 
 TEST(Span, SubSpan)
 {
-    int c[] {1, 2, 3, 4, 5};
-    auto s = Span(c).SubSpan(1, 3);
-    auto f = s.First(2);
-    auto l = s.Last(2);
+    int c[] {1U, 2U, 3U, 4U, 5U};
+    auto s = Span(c).SubSpan(1U, 3U);
+    auto f = s.First(2U);
+    auto l = s.Last(2U);
 
     EXPECT_EQ(ToString(s), "2 3 4 ");
     EXPECT_EQ(ToString(f), "2 3 ");
@@ -79,48 +79,49 @@ TEST(Span, SubSpan)
 TEST(Span, SubSpanT)
 {
     {
-        uint8_t buf[] = {1, 1, 1, 1, 1, 0, 0, 0, 2, 0, 0, 0, 0x78, 0x56, 0x34, 0x12, 0xfe, 0xff, 0xff, 0xff};
+        uint8_t buf[] = {1U, 1U, 1U,   1U,   1U,   0U,   0U,   0U,   2U,   0U,
+                         0U, 0U, 0x78, 0x56, 0x34, 0x12, 0xfe, 0xff, 0xff, 0xff};
         struct Foo {
             uint32_t a;
             int32_t b;
         };
         auto sp = Span(buf);
 #ifndef NDEBUG
-        ASSERT_DEATH(sp.SubSpan<Foo>(4, 3), ".*");
-        ASSERT_DEATH(sp.SubSpan<Foo>(3, 2), ".*");
+        ASSERT_DEATH(sp.SubSpan<Foo>(4U, 3U), ".*");
+        ASSERT_DEATH(sp.SubSpan<Foo>(3U, 2U), ".*");
 #endif
-        auto sub_sp = sp.SubSpan<Foo>(4, 2);
+        auto sub_sp = sp.SubSpan<Foo>(4U, 2U);
         ASSERT_EQ(sub_sp.size(), 2U);
-        ASSERT_EQ(sub_sp[0].a, 1U);
-        ASSERT_EQ(sub_sp[0].b, 2);
-        ASSERT_EQ(sub_sp[1].a, 0x12345678U);
-        ASSERT_EQ(sub_sp[1].b, -2);
+        ASSERT_EQ(sub_sp[0U].a, 1U);
+        ASSERT_EQ(sub_sp[0U].b, 2U);
+        ASSERT_EQ(sub_sp[1U].a, 0x12345678U);
+        ASSERT_EQ(sub_sp[1U].b, -2L);
     }
     {
-        uint32_t buf[] = {0x01020304, 0x05060708, 0x090a0b0c};
+        uint32_t buf[] = {0x01020304U, 0x05060708U, 0x090a0b0cU};
         auto sp = Span(buf);
 #ifndef NDEBUG
-        ASSERT_DEATH(sp.SubSpan<uint16_t>(4, 1), ".*");
+        ASSERT_DEATH(sp.SubSpan<uint16_t>(4U, 1U), ".*");
 #endif
-        auto sub_sp = sp.SubSpan<uint16_t>(1, 4);
+        auto sub_sp = sp.SubSpan<uint16_t>(1U, 4U);
         ASSERT_EQ(sub_sp.size(), 4U);
-        ASSERT_EQ(sub_sp[0], 0x0708);
-        ASSERT_EQ(sub_sp[1], 0x0506);
-        ASSERT_EQ(sub_sp[2], 0x0b0c);
-        ASSERT_EQ(sub_sp[3], 0x090a);
+        ASSERT_EQ(sub_sp[0U], 0x0708U);
+        ASSERT_EQ(sub_sp[1U], 0x0506U);
+        ASSERT_EQ(sub_sp[2U], 0x0b0cU);
+        ASSERT_EQ(sub_sp[3U], 0x090aU);
     }
 }
 
 TEST(Span, AsBytes)
 {
-    const int c1[] {1, 2, 3};
-    int c2[] {4, 5, 6};
+    const int c1[] {1U, 2U, 3U};
+    int c2[] {4U, 5U, 6U};
     auto cs = Span(c1);
     auto s = Span(c2);
     EXPECT_EQ(cs.SizeBytes(), 12U);
-    EXPECT_EQ(AsBytes(cs)[sizeof(int)], static_cast<std::byte>(2));
-    AsWritableBytes(s)[4] = static_cast<std::byte>(1);
-    EXPECT_EQ(s[1], 1);
+    EXPECT_EQ(AsBytes(cs)[sizeof(int)], static_cast<std::byte>(2U));
+    AsWritableBytes(s)[4U] = static_cast<std::byte>(1U);
+    EXPECT_EQ(s[1U], 1U);
 }
 
 // NOLINTEND(readability-magic-numbers,modernize-avoid-c-arrays)

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,11 @@ TEST(StringHelpers, Format)
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     EXPECT_EQ(Format("abc"), "abc");
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    EXPECT_EQ(Format("%s %d %c", "a", 10, 0x31), "a 10 1");
+    EXPECT_EQ(Format("%s %d %c", "a", 10U, 0x31U), "a 10 1");
 
     std::stringstream ss;
     // NOLINTNEXTLINE(readability-magic-numbers)
-    for (size_t i = 0; i < 10000; i++) {
+    for (size_t i = 0; i < 10000U; i++) {
         ss << " ";
     }
 
@@ -55,25 +55,25 @@ TEST(StringHelpers, ParseInt)
     ASSERT_EQ(EINVAL, errno);
 
     ASSERT_TRUE(ParseInt("123", &i));
-    ASSERT_EQ(123, i);
-    ASSERT_EQ(0, errno);
+    ASSERT_EQ(123U, i);
+    ASSERT_EQ(0U, errno);
     i = 0;
     EXPECT_TRUE(ParseInt("  123", &i));
-    EXPECT_EQ(123, i);
+    EXPECT_EQ(123U, i);
     ASSERT_TRUE(ParseInt("-123", &i));
-    ASSERT_EQ(-123, i);
+    ASSERT_EQ(-123L, i);
     i = 0;
     EXPECT_TRUE(ParseInt("  -123", &i));
-    EXPECT_EQ(-123, i);
+    EXPECT_EQ(-123L, i);
 
     // NOLINTNEXTLINE(google-runtime-int)
     short s = 0;
     ASSERT_TRUE(ParseInt("1234", &s));
-    ASSERT_EQ(1234, s);
+    ASSERT_EQ(1234U, s);
 
     // check range
     ASSERT_TRUE(ParseInt("12", &i, 0, 15));
-    ASSERT_EQ(12, i);
+    ASSERT_EQ(12U, i);
     errno = 0;
     ASSERT_FALSE(ParseInt("-12", &i, 0, 15));
     ASSERT_EQ(ERANGE, errno);
@@ -91,23 +91,23 @@ TEST(StringHelpers, ParseInt)
 
     i = 0;
     ASSERT_TRUE(ParseInt("0123", &i));
-    ASSERT_EQ(123, i);
+    ASSERT_EQ(123U, i);
 
     i = 0;
     ASSERT_TRUE(ParseInt("0x123", &i));
-    ASSERT_EQ(0x123, i);
+    ASSERT_EQ(0x123U, i);
     i = 0;
     EXPECT_TRUE(ParseInt("  0x123", &i));
-    EXPECT_EQ(0x123, i);
+    EXPECT_EQ(0x123U, i);
 
     i = 0;
     ASSERT_TRUE(ParseInt(std::string("123"), &i));
-    ASSERT_EQ(123, i);
+    ASSERT_EQ(123U, i);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     i = 123;
     ASSERT_FALSE(ParseInt("456x", &i));
-    ASSERT_EQ(123, i);
+    ASSERT_EQ(123U, i);
 }
 
 }  // namespace panda::helpers::string::test

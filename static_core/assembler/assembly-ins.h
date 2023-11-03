@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,18 +73,18 @@ constexpr std::array<unsigned, static_cast<size_t>(Opcode::NUM_OPCODES)> INST_FL
 #undef OPLIST
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) width,
+#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) (width),
 constexpr std::array<size_t, static_cast<size_t>(Opcode::NUM_OPCODES)> INST_WIDTH_TABLE = {
     PANDA_INSTRUCTION_LIST(OPLIST)};
 #undef OPLIST
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) def_idx,
+#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) (def_idx),
 constexpr std::array<int, static_cast<size_t>(Opcode::NUM_OPCODES)> DEF_IDX_TABLE = {PANDA_INSTRUCTION_LIST(OPLIST)};
 #undef OPLIST
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) use_idxs,
+#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) (use_idxs),
 // clang-format off
 constexpr std::array<std::array<int, MAX_NUMBER_OF_SRC_REGS>, static_cast<size_t>(Opcode::NUM_OPCODES)> USE_IDXS_TABLE = {
     PANDA_INSTRUCTION_LIST(OPLIST)};
@@ -92,7 +92,7 @@ constexpr std::array<std::array<int, MAX_NUMBER_OF_SRC_REGS>, static_cast<size_t
 #undef OPLIST
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) prof_size,
+#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) (prof_size),
 constexpr std::array<unsigned, static_cast<size_t>(Opcode::NUM_OPCODES) + 1> INST_PROFILE_SIZES = {
     PANDA_INSTRUCTION_LIST(OPLIST) 0};
 #undef OPLIST

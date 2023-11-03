@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,14 +25,14 @@ TEST_F(CommonTest, CanonicalizationSwapCompareInputs)
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
-        CONSTANT(0, 0).s32();
-        CONSTANT(1, 0).s32();
+        CONSTANT(0U, 0U).s32();
+        CONSTANT(1U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Add).s32().Inputs(0, 1);
-            INST(3, Opcode::Compare).b().Inputs(0, 2);
-            INST(4, Opcode::Return).b().Inputs(3);
+            INST(2U, Opcode::Add).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Compare).b().Inputs(0U, 2U);
+            INST(4U, Opcode::Return).b().Inputs(3U);
         }
     }
 
@@ -41,14 +41,14 @@ TEST_F(CommonTest, CanonicalizationSwapCompareInputs)
     auto expected = CreateEmptyGraph();
     GRAPH(expected)
     {
-        CONSTANT(0, 0).s32();
-        CONSTANT(1, 0).s32();
+        CONSTANT(0U, 0U).s32();
+        CONSTANT(1U, 0U).s32();
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1L)
         {
-            INST(2, Opcode::Add).s32().Inputs(0, 1);
-            INST(3, Opcode::Compare).b().Inputs(2, 0);
-            INST(4, Opcode::Return).b().Inputs(3);
+            INST(2U, Opcode::Add).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Compare).b().Inputs(2U, 0U);
+            INST(4U, Opcode::Return).b().Inputs(3U);
         }
     }
 

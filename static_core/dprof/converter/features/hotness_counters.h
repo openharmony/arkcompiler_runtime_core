@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 
 namespace panda::dprof {
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-static const char HCOUNTERS_FEATURE_NAME[] = "hotness_counters.v1";
+inline const char HCOUNTERS_FEATURE_NAME[] = "hotness_counters.v1";
 
 class HCountersFunctor : public FeaturesManager::Functor {
     struct HCountersInfo {

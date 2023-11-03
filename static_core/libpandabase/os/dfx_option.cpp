@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ namespace panda::os::dfx_option {
 bool DfxOptionHandler::IsInOptionList(const std::string &s)
 {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, str) \
-    if (s == str) {  \
-        return true; \
+#define D(e, v, str)  \
+    if (s == (str)) { \
+        return true;  \
     }
     DFX_OPTION_LIST(D)
 #undef D
@@ -35,7 +35,7 @@ DfxOptionHandler::DfxOption DfxOptionHandler::DfxOptionFromString(const std::str
 {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define D(e, v, str)                           \
-    if (s == str) {                            \
+    if (s == (str)) {                          \
         return DfxOptionHandler::DfxOption::e; \
     }
     DFX_OPTION_LIST(D)
@@ -49,7 +49,7 @@ std::string DfxOptionHandler::StringFromDfxOption(DfxOptionHandler::DfxOption df
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define D(e, v, str)                                    \
     if (dfx_option == DfxOptionHandler::DfxOption::e) { \
-        return str;                                     \
+        return (str);                                   \
     }
     DFX_OPTION_LIST(D)
 #undef D

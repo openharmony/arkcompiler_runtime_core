@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_MACROS_H_
-#define PANDA_LIBPANDABASE_PBASE_MACROS_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_MACROS_H
+#define PANDA_LIBPANDABASE_PBASE_MACROS_H
 
 #include <cassert>
 #include <iostream>
@@ -63,7 +63,7 @@
 #if defined(__cplusplus)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define NO_COPY_CTOR(TypeName) TypeName(const TypeName &) = delete;
+#define NO_COPY_CTOR(TypeName) TypeName(const TypeName &) = delete
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_COPY_OPERATOR(TypeName) void operator=(const TypeName &) = delete
@@ -71,13 +71,13 @@
 // Disabling copy ctor and copy assignment operator.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_COPY_SEMANTIC(TypeName) \
-    NO_COPY_CTOR(TypeName)         \
+    NO_COPY_CTOR(TypeName);        \
     NO_COPY_OPERATOR(TypeName)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_MOVE_CTOR(TypeName)                   \
     /* NOLINTNEXTLINE(misc-macro-parentheses) */ \
-    TypeName(TypeName &&) = delete;
+    TypeName(TypeName &&) = delete
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_MOVE_OPERATOR(TypeName)               \
@@ -86,13 +86,13 @@
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_MOVE_SEMANTIC(TypeName) \
-    NO_MOVE_CTOR(TypeName)         \
+    NO_MOVE_CTOR(TypeName);        \
     NO_MOVE_OPERATOR(TypeName)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_MOVE_CTOR(TypeName)              \
     /* NOLINTNEXTLINE(misc-macro-parentheses) */ \
-    TypeName(TypeName &&) = default;
+    TypeName(TypeName &&) = default
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_MOVE_OPERATOR(TypeName)          \
@@ -101,11 +101,11 @@
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_MOVE_SEMANTIC(TypeName) \
-    DEFAULT_MOVE_CTOR(TypeName)         \
+    DEFAULT_MOVE_CTOR(TypeName);        \
     DEFAULT_MOVE_OPERATOR(TypeName)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFAULT_COPY_CTOR(TypeName) TypeName(const TypeName &) = default;
+#define DEFAULT_COPY_CTOR(TypeName) TypeName(const TypeName &) = default
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_COPY_OPERATOR(TypeName)          \
@@ -114,13 +114,13 @@
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_COPY_SEMANTIC(TypeName) \
-    DEFAULT_COPY_CTOR(TypeName)         \
+    DEFAULT_COPY_CTOR(TypeName);        \
     DEFAULT_COPY_OPERATOR(TypeName)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_NOEXCEPT_MOVE_CTOR(TypeName)     \
     /* NOLINTNEXTLINE(misc-macro-parentheses) */ \
-    TypeName(TypeName &&) noexcept = default;
+    TypeName(TypeName &&) noexcept = default
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_NOEXCEPT_MOVE_OPERATOR(TypeName) \
@@ -129,7 +129,7 @@
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_NOEXCEPT_MOVE_SEMANTIC(TypeName) \
-    DEFAULT_NOEXCEPT_MOVE_CTOR(TypeName)         \
+    DEFAULT_NOEXCEPT_MOVE_CTOR(TypeName);        \
     DEFAULT_NOEXCEPT_MOVE_OPERATOR(TypeName)
 
 #endif  // defined(__cplusplus)
@@ -333,4 +333,4 @@ extern "C" void AnnotateIgnoreWritesEnd(const char *file, int line);
 #define CONSTEXPR_IN_RELEASE constexpr
 #endif
 
-#endif  // PANDA_LIBPANDABASE_PBASE_MACROS_H_
+#endif  // PANDA_LIBPANDABASE_PBASE_MACROS_H

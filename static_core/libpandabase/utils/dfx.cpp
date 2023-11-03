@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,11 +81,7 @@ void DfxController::ResetOptionValueFromString(const std::string &s)
             DfxController::SetOptionValue(dfx_option, value);
 #ifdef PANDA_TARGET_UNIX
             if (dfx_option == DfxOptionHandler::MOBILE_LOG) {
-                if (value == 0) {
-                    Logger::SetMobileLogOpenFlag(false);
-                } else {
-                    Logger::SetMobileLogOpenFlag(true);
-                }
+                Logger::SetMobileLogOpenFlag(value != 0);
             }
 #endif
         } else {
