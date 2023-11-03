@@ -22,6 +22,7 @@
 #include "utils/logger.h"
 #include <cstdlib>
 #include <memory>
+#include <securec.h>
 
 namespace panda {
 
@@ -57,7 +58,7 @@ inline ArenaT *MallocMemPool::AllocArenaImpl(size_t size, [[maybe_unused]] Space
     LOG_MALLOC_MEM_POOL(DEBUG) << "Allocated new arena with size " << std::dec << size_for_buff
                                << " at addr = " << std::hex << buff << " for " << SpaceTypeToString(space_type);
     if (OS_ALLOC_POLICY == OSPagesAllocPolicy::ZEROED_MEMORY && ret != nullptr) {
-        memset(ret, 0, size_for_buff);
+        memset_s(ret, size_for_buff, 0, size_for_buff);
     }
     return static_cast<ArenaT *>(ret);
 }
@@ -84,7 +85,7 @@ inline Pool MallocMemPool::AllocPoolImpl(size_t size, [[maybe_unused]] SpaceType
     LOG_MALLOC_MEM_POOL(DEBUG) << "Allocated new pool with size " << std::dec << size << " at addr = " << std::hex
                                << mem << " for " << SpaceTypeToString(space_type);
     if (OS_ALLOC_POLICY == OSPagesAllocPolicy::ZEROED_MEMORY && mem != nullptr) {
-        memset(mem, 0, size);
+        memset_s(mem, size, 0, size);
     }
     return Pool(size, mem);
 }
@@ -101,7 +102,6 @@ inline void MallocMemPool::FreePoolImpl(void *mem, [[maybe_unused]] size_t size)
 /* static */
 inline AllocatorInfo MallocMemPool::GetAllocatorInfoForAddrImpl([[maybe_unused]] const void *addr)
 {
-    // TODO(aemelenko): Implement this method
     LOG(FATAL, ALLOC) << "Not implemented method";
     return AllocatorInfo(AllocatorType::UNDEFINED, nullptr);
 }
@@ -109,7 +109,6 @@ inline AllocatorInfo MallocMemPool::GetAllocatorInfoForAddrImpl([[maybe_unused]]
 /* static */
 inline SpaceType MallocMemPool::GetSpaceTypeForAddrImpl([[maybe_unused]] const void *addr)
 {
-    // TODO(aemelenko): Implement this method
     LOG(FATAL, ALLOC) << "Not implemented method";
     return SpaceType::SPACE_TYPE_UNDEFINED;
 }
@@ -117,7 +116,6 @@ inline SpaceType MallocMemPool::GetSpaceTypeForAddrImpl([[maybe_unused]] const v
 /* static */
 inline void *MallocMemPool::GetStartAddrPoolForAddrImpl([[maybe_unused]] const void *addr)
 {
-    // TODO(ipetrov): Implement this method
     LOG(FATAL, ALLOC) << "Not implemented method";
     return nullptr;
 }

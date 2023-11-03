@@ -130,7 +130,7 @@ private:
     void RemoveRefRegion(Region *region);
 
     LockConfigT rem_set_lock_;
-    // TODO(alovkov): make value a Set?
+    // NOTE(alovkov): make value a Set?
     PandaUnorderedMap<uintptr_t, Bitmap> bitmaps_;
     PandaUnorderedSet<Region *> ref_regions_;
 

@@ -71,7 +71,6 @@ PandaString GCStats::GetFinalStatistics(HeapManager *heap_manager)
     }
     PandaStringStream statistic;
 
-    // TODO(bwx983476) iteration for all GCs when they become multiple
     statistic << heap_manager->GetGC()->DumpStatistics() << "\n";
 
     statistic << "Total time spent in GC: " << total_time_gc << "\n";
@@ -104,7 +103,6 @@ PandaString GCStats::GetFinalStatistics(HeapManager *heap_manager)
     statistic << "Histogram of GC count per 10000 ms: " << duration_info.GetTopDump() << "\n";
     statistic << "Histogram of blocking GC count per 10000 ms: " << duration_info.GetTopDump() << "\n";
 
-    // TODO(bwx983476): add "native bytes total" and "native bytes total at last GC" with malloc function
     statistic << "Native bytes registered: " << heap_manager->GetGC()->GetNativeBytesRegistered() << "\n\n";
 
     statistic << "Max memory " << helpers::MemoryConverter(max_memory) << "\n";

@@ -441,7 +441,7 @@ template <typename AllocConfigT, typename LockConfigT>
 template <typename T>
 T *RunSlotsAllocator<AllocConfigT, LockConfigT>::AllocArray(size_t arr_length)
 {
-    // TODO(aemelenko): Very dirty hack. If you want to fix it, you must change RunSlotsAllocatorAdapter::max_size() too
+    // NOTE(aemelenko): Very dirty hack. If you want to fix it, you must change RunSlotsAllocatorAdapter::max_size() too
     return static_cast<T *>(Alloc(sizeof(T) * arr_length));
 }
 

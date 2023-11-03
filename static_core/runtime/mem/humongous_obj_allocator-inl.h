@@ -54,7 +54,7 @@ void *HumongousObjAllocator<AllocConfigT, LockConfigT>::Alloc(const size_t size,
         return nullptr;
     }
 
-    // TODO(aemelenko): this is quite raw approximation.
+    // NOTE(aemelenko): this is quite raw approximation.
     // We can save about sizeof(MemoryPoolHeader) / 2 bytes here
     // (BTW, it is not so much for MB allocations)
     size_t aligned_size = size + sizeof(MemoryPoolHeader) + GetAlignmentInBytes(align);
@@ -241,7 +241,7 @@ void HumongousObjAllocator<AllocConfigT, LockConfigT>::IterateOverObjectsInRange
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "HumongousObjAllocator::IterateOverObjectsInRange for range [" << std::hex
                                        << left_border << ", " << right_border << "]";
     ASSERT(ToUintPtr(right_border) >= ToUintPtr(left_border));
-    // TODO(aemelenko): These are temporary asserts because we can't do anything
+    // NOTE(aemelenko): These are temporary asserts because we can't do anything
     // if the range crosses different allocators memory pools
     ASSERT(ToUintPtr(right_border) - ToUintPtr(left_border) ==
            (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));
@@ -391,7 +391,7 @@ HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolList::FindSuitablePo
 template <typename AllocConfigT, typename LockConfigT>
 bool HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolList::IsInThisList(MemoryPoolHeader *pool)
 {
-    // TODO(aemelenko): Do it only in debug build
+    // NOTE(aemelenko): Do it only in debug build
     MemoryPoolHeader *cur_pool = head_;
     while (cur_pool != nullptr) {
         if (cur_pool == pool) {

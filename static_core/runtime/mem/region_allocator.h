@@ -566,7 +566,7 @@ public:
 
     constexpr static size_t GetMaxSize()
     {
-        // TODO(yxr) : get accurate max payload size in a freelist pool
+        // NOTE(yxr) : get accurate max payload size in a freelist pool
         return std::min(ObjectAllocator::GetMaxSize(), static_cast<size_t>(REGION_SIZE - 1_KB));
     }
 

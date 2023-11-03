@@ -130,7 +130,7 @@ private:
     PandaVector<RefBlock *> *local_storage_ {nullptr};
     StorageFrameAllocator *frame_allocator_ {nullptr};
     size_t blocks_count_ {0};
-    // TODO(alovkov): remove it when storage will be working over mmap
+    // NOTE(alovkov): remove it when storage will be working over mmap
     RefBlock *cached_block_ {nullptr};
 
     bool ref_check_validate_;

@@ -104,7 +104,7 @@ bool GenerationalGC<LanguageConfig>::Trigger(PandaUniquePtr<GCTask> task)
     // Check current heap size.
     // Collect Young gen.
     // If threshold for tenured gen - collect tenured gen.
-    // TODO(dtrubenkov): change for concurrent mode
+    // NOTE(dtrubenkov): change for concurrent mode
     return this->AddGCTask(true, std::move(task));
 }
 

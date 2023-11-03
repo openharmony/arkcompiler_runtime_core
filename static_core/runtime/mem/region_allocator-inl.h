@@ -300,7 +300,6 @@ TLAB *RegionAllocator<AllocConfigT, LockConfigT>::CreateTLABInRegion(Region *reg
 }
 
 template <typename AllocConfigT, typename LockConfigT>
-// TODO(agrebenkin) add set of flags from which to pick the regions and make it compile time
 template <bool INCLUDE_CURRENT_REGION>
 PandaPriorityQueue<std::pair<uint32_t, Region *>> RegionAllocator<AllocConfigT, LockConfigT>::GetTopGarbageRegions()
 {
@@ -340,7 +339,7 @@ void RegionAllocator<AllocConfigT, LockConfigT>::CompactAllSpecificRegions(const
 {
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (REGIONS_TYPE_FROM == REGIONS_TYPE_TO) {  // NOLINT(bugprone-suspicious-semicolon)
-        // TODO(aemelenko): Implement it if need to call this method with the same regions type.
+        // NOTE(aemelenko): Implement it if need to call this method with the same regions type.
         // There is an issue with IterateRegions during creating a new one.
         ASSERT(REGIONS_TYPE_FROM != REGIONS_TYPE_TO);
         ResetCurrentRegion<false, REGIONS_TYPE_TO>();
@@ -427,7 +426,6 @@ void RegionAllocator<AllocConfigT, LockConfigT>::CompactSpecificRegion(Region *r
     const std::function<void(ObjectHeader *)> visitor_functor(visitor);
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (USE_MARKED_BITMAP) {
-        // TODO(grebenkin): use live bitmap, remove CloneMarkBitmapToLiveBitmap, beware of young-regions
         region->GetMarkBitmap()->IterateOverMarkedChunks(
             [&](void *object_addr) { visitor_functor(static_cast<ObjectHeader *>(object_addr)); });
     } else {  // NOLINT(readability-misleading-indentation)

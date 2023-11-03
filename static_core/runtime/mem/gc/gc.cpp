@@ -132,7 +132,7 @@ NO_THREAD_SAFETY_ANALYSIS void GC::WaitForIdleGC()
         GetPandaVm()->GetRendezvous()->SafepointEnd();
         // Interrupt the running GC if possible
         OnWaitForIdleFail();
-        // TODO(dtrubenkov): resolve it more properly
+        // NOTE(dtrubenkov): resolve it more properly
         constexpr uint64_t WAIT_FINISHED = 100;
         // Use NativeSleep for all threads, as this thread shouldn't hold Mutator lock here
         os::thread::NativeSleepUS(std::chrono::microseconds(WAIT_FINISHED));
@@ -434,7 +434,7 @@ void GC::AddReference(ObjectHeader *from_obj, ObjectHeader *object)
 {
     ASSERT(IsMarked(object));
     GCMarkingStackType references(this);
-    // TODO(alovkov): support stack with workers here & put all refs in stack and only then process altogether for once
+    // NOTE(alovkov): support stack with workers here & put all refs in stack and only then process altogether for once
     ASSERT(!references.IsWorkersTaskSupported());
     references.PushToStack(from_obj, object);
     MarkReferences(&references, phase_);
@@ -454,7 +454,7 @@ void GC::ProcessReferences(GCPhase gc_phase, const GCTask &task, const Reference
     Reference *processed_ref = reference_processor_->CollectClearedReferences();
     if (processed_ref != nullptr) {
         os::memory::LockHolder holder(*cleared_references_lock_);
-        // TODO(alovkov): ged rid of cleared_references_ and just enqueue refs here?
+        // NOTE(alovkov): ged rid of cleared_references_ and just enqueue refs here?
         cleared_references_->push_back(processed_ref);
     }
 }
@@ -653,7 +653,7 @@ size_t GC::GetNativeBytesFromMallinfoAndRegister() const
 
 bool GC::WaitForGC(GCTask task)
 {
-    // TODO(maksenov): Notify only about pauses (#4681)
+    // NOTE(maksenov): Notify only about pauses (#4681)
     Runtime::GetCurrent()->GetNotificationManager()->GarbageCollectorStartEvent();
     // Atomic with acquire order reason: data race with gc_counter_ with dependecies on reads after the load which
     // should become visible

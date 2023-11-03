@@ -116,7 +116,7 @@ public:
     // NOLINTNEXTLINE(readability-identifier-naming)
     size_type max_size() const
     {
-        // TODO(aemelenko): This solution significantly limits max array size
+        // NOTE(aemelenko): This solution significantly limits max array size
         return RunSlots<>::MaxSlotSize() / sizeof(T);
     }
 

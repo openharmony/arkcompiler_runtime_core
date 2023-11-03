@@ -451,15 +451,14 @@ size_t ObjectAllocatorNoGen<MT_MODE>::GetLargeObjectMaxSize()
 template <MTModeT MT_MODE>
 TLAB *ObjectAllocatorNoGen<MT_MODE>::CreateNewTLAB([[maybe_unused]] panda::ManagedThread *thread)
 {
-    // TODO(aemelenko): Implement this method
-    LOG(FATAL, ALLOC) << "Unimplemented";
+    LOG(FATAL, ALLOC) << "TLAB is not supported for this allocator";
     return nullptr;
 }
 
 template <MTModeT MT_MODE>
 size_t ObjectAllocatorNoGen<MT_MODE>::GetTLABMaxAllocSize()
 {
-    // TODO(aemelenko): TLAB usage is not supported for non-gen GCs.
+    // NOTE(aemelenko): TLAB usage is not supported for non-gen GCs.
     return 0;
 }
 
@@ -499,7 +498,7 @@ ObjectAllocatorGen<MT_MODE>::ObjectAllocatorGen(MemStatsType *mem_stats, bool cr
     ASSERT(YOUNG_ALLOC_MAX_SIZE <= tlab_size_);
     ASSERT(tlabs_count_in_young_gen * tlab_size_ <= young_space_size);
 
-    // TODO(aemelenko): Missed an allocator pointer
+    // NOTE(aemelenko): Missed an allocator pointer
     // because we construct BumpPointer Allocator after calling AllocArena method
     auto young_pool = heap_spaces_.AllocAlonePoolForYoung(SpaceType::SPACE_TYPE_OBJECT,
                                                           YoungGenAllocator::GetAllocatorType(), &young_gen_allocator_);

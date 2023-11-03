@@ -296,7 +296,7 @@ inline ObjectStatus GCKillEmAllVisitor([[maybe_unused]] const ObjectHeader *mem)
 
 // If the OS has this macro, do not redefine it.
 #ifndef PAGE_SIZE
-static constexpr size_t PAGE_SIZE = panda::SIZE_1K * 4;
+constexpr size_t PAGE_SIZE = panda::SIZE_1K * 4;
 #endif
 
 #endif  // LIBPANDABASE_MEM_H

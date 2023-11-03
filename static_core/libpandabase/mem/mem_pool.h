@@ -89,7 +89,7 @@ public:
      * @param allocator_addr - address of the allocator header.
      * @return pointer to allocated arena
      */
-    // TODO(aemelenko): We must always define allocator_addr for AllocArena
+    // NOTE(aemelenko): We must always define allocator_addr for AllocArena
     // because we set up arena at the first bytes of the pool
     template <class ArenaT = Arena, OSPagesAllocPolicy OS_ALLOC_POLICY = OSPagesAllocPolicy::NO_POLICY>
     inline ArenaT *AllocArena(size_t size, SpaceType space_type, AllocatorType allocator_type,

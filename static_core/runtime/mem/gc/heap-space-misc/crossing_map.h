@@ -30,7 +30,7 @@ static constexpr uint64_t PANDA_CROSSING_MAP_COVERAGE = PANDA_MAX_HEAP_SIZE;
 // since now we dirty card by object header, so disable cross-border
 static constexpr bool PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER = false;
 static constexpr size_t PANDA_CROSSING_MAP_GRANULARITY = PAGE_SIZE;
-// TODO(aemelenko): Now, we can't change the granularity parameter here
+// NOTE(aemelenko): Now, we can't change the granularity parameter here
 // because IteratingOverObjectsInRange is depended on it
 static_assert(PANDA_CROSSING_MAP_GRANULARITY == PAGE_SIZE);
 

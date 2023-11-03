@@ -188,7 +188,7 @@ void RegionBlock::Init(uintptr_t regions_begin, uintptr_t regions_end)
 Region *RegionBlock::AllocRegion()
 {
     os::memory::LockHolder lock(lock_);
-    // TODO(yxr) : find a unused region, improve it
+    // NOTE(yxr) : find a unused region, improve it
     for (size_t i = 0; i < occupied_.Size(); ++i) {
         if (occupied_[i] == nullptr) {
             auto *region = RegionAt(i);
@@ -203,7 +203,7 @@ Region *RegionBlock::AllocRegion()
 Region *RegionBlock::AllocLargeRegion(size_t large_region_size)
 {
     os::memory::LockHolder lock(lock_);
-    // TODO(yxr) : search continuous unused regions, improve it
+    // NOTE(yxr) : search continuous unused regions, improve it
     size_t alloc_region_num = large_region_size / region_size_;
     size_t left = 0;
     while (left + alloc_region_num <= occupied_.Size()) {
@@ -256,7 +256,6 @@ Region *RegionPool::NewRegion(RegionSpace *space, SpaceType space_type, Allocato
     ASSERT(IsYoungRegionFlag(eden_or_old_or_nonmovable) || eden_or_old_or_nonmovable == RegionFlag::IS_OLD ||
            eden_or_old_or_nonmovable == RegionFlag::IS_NONMOVABLE);
 
-    // TODO(agrebenkin) Remove it as soon as Full gc doesn't rely on having any free regions
     // Ensure leaving enough space so there's always some free regions in heap which we can use for full gc
     if (eden_or_old_or_nonmovable == RegionFlag::IS_NONMOVABLE || region_size > region_size_) {
         if (!spaces_->CanAllocInSpace(false, region_size + region_size_)) {
@@ -296,7 +295,7 @@ Region *RegionPool::NewRegion(void *region, RegionSpace *space, size_t region_si
 
     ASAN_UNPOISON_MEMORY_REGION(region, Region::HeadSize());
     auto *ret = new (region) Region(space, ToUintPtr(region) + Region::HeadSize(), ToUintPtr(region) + region_size);
-    // TODO(dtrubenkov): remove this fast fixup
+    // NOTE(dtrubenkov): remove this fast fixup
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     ret->AddFlag(eden_or_old_or_nonmovable);
     ret->AddFlag(properties);

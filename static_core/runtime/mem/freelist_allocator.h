@@ -26,7 +26,7 @@
 
 namespace panda::mem {
 
-// TODO(aemelenko): Move this constants to compile options
+// NOTE(aemelenko): Move this constants to compile options
 // Minimal size of this allocator is a max size of RunSlots allocator.
 static constexpr size_t PANDA_FREELIST_ALLOCATOR_MIN_SIZE = RunSlots<>::MaxSlotSize();
 static constexpr size_t PANDA_FREELIST_ALLOCATOR_SEGREGATED_LIST_SIZE = 16;
@@ -311,7 +311,7 @@ private:
 
     bool CanCreateNewBlockFromRemainder(MemoryBlockHeader *memory, size_t alloc_size)
     {
-        // TODO(aemelenko): Maybe add some more complex solution for this check
+        // NOTE(aemelenko): Maybe add some more complex solution for this check
         return (memory->GetSize() - alloc_size) >= (FREELIST_ALLOCATOR_MIN_SIZE + sizeof(FreeListHeader));
     }
 

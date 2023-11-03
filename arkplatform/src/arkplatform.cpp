@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +18,13 @@
 #include "include/arkplatform.h"
 
 namespace arkplatform {
-    
-void ArkPlatform::Create(const std::string& s) {
+
+void ArkPlatform::Create(const std::string &s)
+{
     constexpr static unsigned int ARK_DOMAIN = 0xD003F00;
     constexpr static auto TAG = "ArkPlatform";
     constexpr static OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, ARK_DOMAIN, TAG};
-    OHOS::HiviewDFX::HiLog::Info(LABEL, "%{public}s", "UDAV: Hello from arkplatform");
+    OHOS::HiviewDFX::HiLog::Info(LABEL, "%{public}s", "Hello from arkplatform");
 }
 
-}
+}  // namespace arkplatform

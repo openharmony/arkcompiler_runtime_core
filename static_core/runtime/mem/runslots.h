@@ -187,7 +187,7 @@ public:
     ATTRIBUTE_NO_SANITIZE_ADDRESS void IterateOverOccupiedSlots(const ObjectVisitor &object_visitor)
     {
         ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
-        // TODO(aemelenko): We can increase execution speed of this loops and do not count BitMapToSlot each time
+        // NOTE(aemelenko): We can increase execution speed of this loops and do not count BitMapToSlot each time
         for (size_t array_index = 0; array_index < BITMAP_ARRAY_SIZE; array_index++) {
             uint8_t byte = bitmap_[array_index];
             if (byte == 0x0) {

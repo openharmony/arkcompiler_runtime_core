@@ -137,8 +137,6 @@ template <class LanguageConfig>
 void StwGC<LanguageConfig>::Sweep()
 {
     GCScope<TRACE_PHASE> gc_scope(__FUNCTION__, this, GCPhase::GC_PHASE_SWEEP);
-
-    // TODO(dtrubenk): add other allocators when they will be used/implemented
     if (!marker_.IsReverseMark()) {
         LOG_DEBUG_GC << "Sweep with MarkChecker";
         SweepImpl<DIRECT_MARK>();

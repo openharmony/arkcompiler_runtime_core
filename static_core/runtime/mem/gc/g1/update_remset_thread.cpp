@@ -157,7 +157,6 @@ void UpdateRemsetThread<LanguageConfig>::FillFromThreads(PandaUnorderedSet<CardT
     ASSERT(vm_ != nullptr);
     auto *thread_manager = vm_->GetThreadManager();
     ASSERT(thread_manager != nullptr);
-    // TODO(alovkov) if !inside_gc + too many from thread -> go to next thread.
     thread_manager->EnumerateThreads([this, cards](ManagedThread *thread) {
         auto *buffer = thread->GetG1PostBarrierBuffer();
         if (buffer != nullptr) {

@@ -38,8 +38,8 @@ public:
 
     PANDA_PUBLIC_API void RecordAllocateRaw(size_t size, SpaceType type_mem);
 
-    // TODO(alovkov): call RecordFreeRaw when CodeAllocator supports deallocate
-    // TODO(bwx983476): call RecordFreeRaw when ArenaAllocator supports deallocate
+    // NOTE(aemelenko): call RecordFreeRaw when CodeAllocator supports deallocate
+    // NOTE(aemelenko): call RecordFreeRaw when ArenaAllocator supports deallocate
     PANDA_PUBLIC_API void RecordFreeRaw(size_t size, SpaceType type_mem);
 
     // getters
