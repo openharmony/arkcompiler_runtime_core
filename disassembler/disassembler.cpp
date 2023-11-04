@@ -22,6 +22,7 @@
 #include "get_language_specific_metadata.inc"
 
 namespace panda::disasm {
+static std::map<panda_file::File::EntityId, std::string> string_offset_to_name_;
 
 void Disassembler::Disassemble(const std::string &filename_in, const bool quiet, const bool skip_strings)
 {
@@ -33,7 +34,7 @@ void Disassembler::Disassemble(const std::string &filename_in, const bool quiet,
 
         record_name_to_id_.clear();
         method_name_to_id_.clear();
-
+        string_offset_to_name_.clear();
         skip_strings_ = skip_strings;
         quiet_ = quiet;
 
@@ -112,6 +113,17 @@ void Disassembler::Serialize(std::ostream &os, bool add_separators, bool print_i
 
     for (const auto &m : prog_.function_table) {
         Serialize(m.second, os, print_information);
+    }
+
+    if (add_separators) {
+        os << "# ====================\n"
+        "# STRING\n\n";
+    }
+
+    LOG(DEBUG, DISASSEMBLER) << "[serializing strings]";
+
+    for (const auto &[offset, name_value] : string_offset_to_name_) {
+        SerializeStrings(offset, name_value, os);
     }
 }
 
@@ -1420,6 +1432,11 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
     os << "}\n\n";
 }
 
+void Disassembler::SerializeStrings(const panda_file::File::EntityId &offset, const std::string &name_value, std::ostream &os) const
+{
+    os << "[offset:0x" << std::hex <<offset<< ", name_value:" << name_value<< "]" <<std::endl;
+}
+
 void Disassembler::Serialize(const pandasm::Function::CatchBlock &catch_block, std::ostream &os) const
 {
     if (catch_block.exception_record == "") {
@@ -1552,13 +1569,15 @@ std::string Disassembler::IDToString(BytecodeInstruction bc_ins, panda_file::Fil
 {
     std::stringstream name;
     const auto offset = file_->ResolveOffsetByIndex(method_id, bc_ins.GetId(idx).AsIndex());
-
+    std::string str_data = StringDataToString(file_->GetStringData(offset));
+    
     if (bc_ins.IsIdMatchFlag(idx, BytecodeInstruction::Flags::METHOD_ID)) {
         name << GetMethodSignature(offset);
     } else if (bc_ins.IsIdMatchFlag(idx, BytecodeInstruction::Flags::STRING_ID)) {
         name << '\"';
-        name << StringDataToString(file_->GetStringData(offset));
+        name << str_data;
         name << '\"';
+        string_offset_to_name_.insert(std::make_pair(offset, str_data));
     } else {
         ASSERT(bc_ins.IsIdMatchFlag(idx, BytecodeInstruction::Flags::LITERALARRAY_ID));
         pandasm::LiteralArray lit_array;
