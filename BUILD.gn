@@ -147,8 +147,7 @@ config("ark_config") {
     ]
   }
 
-  if (current_os == "android" && defined(build_cross_platform_version) &&
-      build_cross_platform_version) {
+  if (current_os == "android" && defined(is_arkui_x) && is_arkui_x) {
     defines += [ "PANDA_TARGET_ARKUI_X" ]
   }
 
