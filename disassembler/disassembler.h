@@ -27,6 +27,7 @@
 #include "field_data_accessor-inl.h"
 #include "method_data_accessor-inl.h"
 #include "literal_data_accessor-inl.h"
+#include "libpandafile/module_data_accessor-inl.h"
 #include "param_annotations_data_accessor.h"
 #include "annotation_data_accessor.h"
 #include "proto_data_accessor-inl.h"
@@ -119,6 +120,8 @@ private:
     void SerializeValues(const pandasm::LiteralArray &lit_array, T &os) const;
     std::string SerializeLiteralArray(const pandasm::LiteralArray &lit_array) const;
     void Serialize(const std::string &key, const pandasm::LiteralArray &lit_array, std::ostream &os) const;
+    void Serialize(const std::string &module_offset, const std::vector<std::string> &module_array,
+                   std::ostream &os) const;
     template <typename T>
     void SerializeLiterals(const pandasm::LiteralArray &lit_array, T &os) const;
     std::string LiteralTagToString(const panda_file::LiteralTag &tag) const;
@@ -157,13 +160,37 @@ private:
     panda::panda_file::SourceLang GetRecordLanguage(panda_file::File::EntityId class_id) const;
     void GetLiteralArrayByOffset(pandasm::LiteralArray *lit_array, panda_file::File::EntityId offset) const;
 
+    std::vector<std::string> GetModuleLiteralArray(panda_file::File::EntityId &module_id) const;
+    std::string SerializeModuleLiteralArray(const std::vector<std::string> &module_array) const;
+    std::string ModuleTagToString(panda_file::ModuleTag &tag) const;
+
     std::unique_ptr<const panda_file::File> file_;
     pandasm::Program prog_;
+
+    inline std::string GetStringByOffset(uint32_t offset) const
+    {
+        const auto sd = file_->GetStringData(panda_file::File::EntityId(offset));
+        return std::string(utf::Mutf8AsCString(sd.data));
+    }
+
+    inline bool IsValidOffset(uint32_t offset) const
+    {
+        return panda_file::File::EntityId(offset).IsValid() && offset < file_->GetHeader()->file_size;
+    }
+
+    inline std::string GetFileNameByAbsolutePath(const std::string &absolute_path) const
+    {
+        size_t pos = absolute_path.find_last_of(panda::os::file::File::GetPathDelim());
+        ASSERT(pos != std::string::npos);
+        std::string file_name = absolute_path.substr(pos + 1);
+        return file_name;
+    }
 
     panda::panda_file::SourceLang file_language_ = panda::panda_file::SourceLang::PANDA_ASSEMBLY;
 
     std::map<std::string, panda_file::File::EntityId> record_name_to_id_;
     std::map<std::string, panda_file::File::EntityId> method_name_to_id_;
+    std::map<std::string, std::vector<std::string>> modulearray_table_;
 
     ProgAnnotations prog_ann_;
 

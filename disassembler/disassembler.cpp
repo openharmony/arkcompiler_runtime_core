@@ -75,7 +75,8 @@ void Disassembler::Serialize(std::ostream &os, bool add_separators, bool print_i
     }
 
     if (file_ != nullptr) {
-        os << "# source binary: " << file_->GetFilename() << "\n\n";
+        std::string abc_file = GetFileNameByAbsolutePath(file_->GetFilename());
+        os << "# source binary: " << abc_file << "\n\n";
     }
 
     SerializeLanguage(os);
@@ -89,6 +90,10 @@ void Disassembler::Serialize(std::ostream &os, bool add_separators, bool print_i
 
     for (const auto &[key, lit_arr] : prog_.literalarray_table) {
         Serialize(key, lit_arr, os);
+    }
+
+    for (const auto &[module_offset, array_table] : modulearray_table_) {
+        Serialize(module_offset, array_table, os);
     }
 
     os << "\n";
@@ -361,7 +366,10 @@ void Disassembler::GetLiteralArrays()
     for (size_t index = 0; index < num_litarrays; index++) {
         auto id = lda.GetLiteralArrayId(index);
         if (IsModuleLiteralOffset(id)) {
-            continue;  // exclude module literals as they do not obey encoding rules of normal literals
+            std::stringstream ss;
+            ss << index << " 0x" << std::hex << id.GetOffset();
+            modulearray_table_.emplace(ss.str(), GetModuleLiteralArray(id));
+            continue;
         }
         std::stringstream ss;
         ss << index << " 0x" << std::hex << id.GetOffset();
@@ -369,6 +377,63 @@ void Disassembler::GetLiteralArrays()
         GetLiteralArray(&lit_arr, index);
         prog_.literalarray_table.emplace(ss.str(), lit_arr);
     }
+}
+
+std::string Disassembler::ModuleTagToString(panda_file::ModuleTag &tag) const
+{
+    switch (tag) {
+        case panda_file::ModuleTag::REGULAR_IMPORT:
+            return "REGULAR_IMPORT";
+        case panda_file::ModuleTag::NAMESPACE_IMPORT:
+            return "NAMESPACE_IMPORT";
+        case panda_file::ModuleTag::LOCAL_EXPORT:
+            return "LOCAL_EXPORT";
+        case panda_file::ModuleTag::INDIRECT_EXPORT:
+            return "INDIRECT_EXPORT";
+        case panda_file::ModuleTag::STAR_EXPORT:
+            return "STAR_EXPORT";
+        default: {
+            UNREACHABLE();
+            break;
+        }
+    }
+    return "";
+}
+
+std::vector<std::string> Disassembler::GetModuleLiteralArray(panda_file::File::EntityId &module_id) const
+{
+    std::vector<std::string> request_modules;
+    panda_file::ModuleDataAccessor mda(*file_, module_id);
+    const std::vector<uint32_t> &request_modules_offset = mda.getRequestModules();
+    for (size_t idx = 0; idx < request_modules_offset.size(); ++idx) {
+        request_modules.emplace_back(GetStringByOffset(request_modules_offset[idx]));
+    }
+
+    std::vector<std::string> module_literal_array;
+    mda.EnumerateModuleRecord([&](panda_file::ModuleTag tag, uint32_t export_name_offset,
+                                  uint32_t request_module_idx, uint32_t import_name_offset,
+                                  uint32_t local_name_offset) {
+        std::stringstream ss;
+        ss << "ModuleTag: " << ModuleTagToString(tag);
+        if (IsValidOffset(local_name_offset)) {
+            ss << ", local_name: " << GetStringByOffset(local_name_offset);
+        }
+        if (IsValidOffset(export_name_offset)) {
+            ss << ", export_name: " << GetStringByOffset(export_name_offset);
+        }
+        if (IsValidOffset(import_name_offset)) {
+            ss << ", import_name: " << GetStringByOffset(import_name_offset);
+        }
+        if (request_module_idx < request_modules.size()) {
+            auto request_module = request_modules[request_module_idx];
+            ASSERT(IsValidOffset(request_module));
+            ss << ", module_request: " << request_module;
+        }
+
+        module_literal_array.push_back(ss.str());
+    });
+
+    return module_literal_array;
 }
 
 void Disassembler::GetRecords()
@@ -1086,6 +1151,31 @@ void Disassembler::Serialize(const std::string &key, const pandasm::LiteralArray
     os << "\n";
 }
 
+void Disassembler::Serialize(const std::string &module_offset, const std::vector<std::string> &module_array,
+                             std::ostream &os) const
+{
+    os << module_offset << " ";
+    os << SerializeModuleLiteralArray(module_array);
+    os << "\n";
+}
+
+std::string Disassembler::SerializeModuleLiteralArray(const std::vector<std::string> &module_array) const
+{
+    if (module_array.empty()) {
+        return "";
+    }
+
+    std::stringstream ss;
+    ss << "{ ";
+    ss << module_array.size();
+    ss << " [ ";
+    for (size_t index = 0; index < module_array.size(); index++) {
+        ss << module_array[index] << "; ";
+    }
+    ss << "]}";
+    return ss.str();
+}
+
 std::string Disassembler::LiteralTagToString(const panda_file::LiteralTag &tag) const
 {
     switch (tag) {
@@ -1323,7 +1413,8 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
 
     std::stringstream ss;
     for (const auto &f : record.field_list) {
-        ss << "\t" << f.type.GetPandasmName() << " " << f.name;
+        std::string file = GetFileNameByAbsolutePath(f.name);
+        ss << "\t" << f.type.GetPandasmName() << " " << file;
         if (f.metadata->GetValue().has_value()) {
             if (f.type.GetId() == panda_file::Type::TypeId::U32) {
                 ss << " = 0x" << std::hex << f.metadata->GetValue().value().GetValue<uint32_t>();
