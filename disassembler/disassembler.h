@@ -125,6 +125,7 @@ private:
     void Serialize(const pandasm::Record &record, std::ostream &os, bool print_information = false) const;
     void SerializeFields(const pandasm::Record &record, std::ostream &os, bool print_information) const;
     void Serialize(const pandasm::Function &method, std::ostream &os, bool print_information = false) const;
+    void SerializeStrings(const panda_file::File::EntityId &offset, const std::string &name_value, std::ostream &os) const;
     void Serialize(const pandasm::Function::CatchBlock &catch_block, std::ostream &os) const;
     void Serialize(const pandasm::ItemMetadata &meta, const AnnotationList &ann_list, std::ostream &os) const;
     void SerializeLineNumberTable(const panda_file::LineNumberTable &line_number_table, std::ostream &os) const;
@@ -151,11 +152,9 @@ private:
 
     pandasm::Ins BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
                                                          panda_file::File::EntityId method_id) const;
-
     std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id, size_t idx) const;
 
     panda::panda_file::SourceLang GetRecordLanguage(panda_file::File::EntityId class_id) const;
-
     void GetLiteralArrayByOffset(pandasm::LiteralArray *lit_array, panda_file::File::EntityId offset) const;
 
     std::unique_ptr<const panda_file::File> file_;
