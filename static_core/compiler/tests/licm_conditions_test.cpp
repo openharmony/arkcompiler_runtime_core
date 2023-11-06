@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1736,6 +1736,178 @@ TEST_F(LicmConditionsTest, TestMergeChainsPhiHoisted)
         BASIC_BLOCK(28U, 5U, 3U)
         {
             INST(47U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(45U);
+        }
+
+        BASIC_BLOCK(5U, 3U)
+        {
+            INST(30U, Opcode::Add).i32().Inputs(17U, 18U);
+        }
+
+        BASIC_BLOCK(3U, 6U, 8U)
+        {
+            INST(31U, Opcode::Phi).i32().Inputs(18U, 30U);
+            INST(33U, Opcode::Add).i32().Inputs(31U, 44U);
+            INST(46U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(45U);
+        }
+
+        BASIC_BLOCK(6U, 8U)
+        {
+            INST(40U, Opcode::Sub).i32().Inputs(33U, 17U);
+        }
+
+        BASIC_BLOCK(8U, 9U)
+        {
+            INST(41U, Opcode::Phi).i32().Inputs(33U, 40U);
+            INST(43U, Opcode::Add).i32().Inputs(17U, 7U);
+        }
+
+        BASIC_BLOCK(10U, -1L)
+        {
+            INST(20U, Opcode::Return).i32().Inputs(18U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+/*
+ * Test graph:
+ * - One of the chains is an extension of the other.
+ */
+TEST_F(LicmConditionsTest, TestNoMergeChains)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        CONSTANT(3U, 6U).i64();
+        CONSTANT(4U, 5U).i64();
+        CONSTANT(5U, 100U).i64();
+        CONSTANT(6U, 0U).i64();
+        CONSTANT(7U, 1U).i64();
+        CONSTANT(34U, 2U).i64();
+
+        BASIC_BLOCK(11U, 9U)
+        {
+            INST(26U, Opcode::Compare).b().SrcType(DataType::Type::INT32).CC(CC_LE).Inputs(0U, 4U);
+            INST(28U, Opcode::Compare).b().SrcType(DataType::Type::INT32).CC(CC_LE).Inputs(1U, 3U);
+        }
+
+        BASIC_BLOCK(9U, 10U, 2U)
+        {
+            INST(17U, Opcode::Phi).i32().Inputs(6U, 43U);
+            INST(18U, Opcode::Phi).i32().Inputs(7U, 41U);
+            INST(24U, Opcode::Compare).b().SrcType(DataType::Type::INT32).CC(CC_GE).Inputs(17U, 5U);
+            INST(25U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(24U);
+        }
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(27U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(28U);
+        }
+
+        BASIC_BLOCK(4U, 3U, 5U)
+        {
+            INST(29U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(26U);
+        }
+
+        BASIC_BLOCK(5U, 3U)
+        {
+            INST(30U, Opcode::Add).i32().Inputs(17U, 18U);
+        }
+
+        BASIC_BLOCK(3U, 6U, 7U)
+        {
+            INST(31U, Opcode::Phi).i32().Inputs(18U, 18U, 30U);
+            INST(44U, Opcode::Phi).i32().Inputs(34U, 7U, 4U);
+            INST(33U, Opcode::Add).i32().Inputs(31U, 44U);
+            INST(36U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(26U);
+        }
+
+        BASIC_BLOCK(7U, 6U, 8U)
+        {
+            INST(38U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(26U);
+        }
+
+        BASIC_BLOCK(6U, 8U)
+        {
+            INST(40U, Opcode::Sub).i32().Inputs(33U, 17U);
+        }
+
+        BASIC_BLOCK(8U, 9U)
+        {
+            INST(41U, Opcode::Phi).i32().Inputs(33U, 40U);
+            INST(43U, Opcode::Add).i32().Inputs(17U, 7U);
+        }
+
+        BASIC_BLOCK(10U, -1L)
+        {
+            INST(20U, Opcode::Return).i32().Inputs(18U);
+        }
+    }
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    GetGraph()->RunPass<Cleanup>();
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        CONSTANT(3U, 6U).i64();
+        CONSTANT(4U, 5U).i64();
+        CONSTANT(5U, 100U).i64();
+        CONSTANT(6U, 0U).i64();
+        CONSTANT(7U, 1U).i64();
+        CONSTANT(34U, 2U).i64();
+
+        BASIC_BLOCK(11U, 2U, 7U)
+        {
+            INST(26U, Opcode::Compare).b().SrcType(DataType::Type::INT32).CC(CC_LE).Inputs(0U, 4U);
+            INST(28U, Opcode::Compare).b().SrcType(DataType::Type::INT32).CC(CC_LE).Inputs(1U, 3U);
+            INST(36U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(26U);
+        }
+
+        BASIC_BLOCK(7U, 2U, 27U)
+        {
+            INST(38U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(26U);
+        }
+
+        BASIC_BLOCK(27U, 2U)
+        {
+            // empty
+        }
+
+        BASIC_BLOCK(2U, 29U, 4U)
+        {
+            INST(45U, Opcode::Phi).b().Inputs(7U, 7U, 6U);
+            INST(27U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(28U);
+        }
+
+        BASIC_BLOCK(4U, 29U, 30U)
+        {
+            INST(29U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(26U);
+        }
+
+        BASIC_BLOCK(30U, 29U)
+        {
+            // empty
+        }
+
+        BASIC_BLOCK(29U, 9U)
+        {
+            INST(44U, Opcode::Phi).i32().Inputs(34U, 7U, 4U);
+            INST(47U, Opcode::Phi).b().Inputs(7U, 7U, 6U);
+        }
+
+        BASIC_BLOCK(9U, 10U, 28U)
+        {
+            INST(17U, Opcode::Phi).i32().Inputs(6U, 43U);
+            INST(18U, Opcode::Phi).i32().Inputs(7U, 41U);
+            INST(24U, Opcode::Compare).b().SrcType(DataType::Type::INT32).CC(CC_GE).Inputs(17U, 5U);
+            INST(25U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(24U);
+        }
+
+        BASIC_BLOCK(28U, 5U, 3U)
+        {
+            INST(48U, Opcode::IfImm).SrcType(DataType::Type::BOOL).CC(CC_NE).Imm(0U).Inputs(47U);
         }
 
         BASIC_BLOCK(5U, 3U)

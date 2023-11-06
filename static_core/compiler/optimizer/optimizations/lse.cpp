@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,10 +78,9 @@ public:
     {
         if (Lse::CanEliminateInstruction(inst)) {
             auto heap = *hvalue;
-            if (eliminations_.find(heap.val) != eliminations_.end()) {
+            while (eliminations_.find(heap.val) != eliminations_.end()) {
                 heap = eliminations_[heap.val];
             }
-            ASSERT(eliminations_.find(heap.val) == eliminations_.end());
             eliminations_[inst] = heap;
             COMPILER_LOG(DEBUG, LSE_OPT) << LogInst(inst) << " is eliminated because of " << LogInst(reason);
         }
@@ -125,7 +124,7 @@ public:
         /* Stores added to eliminations_ above aren't checked versus phis -> no double instruction elimination */
         UpdatePhis(inst);
 
-        auto &blockHeap = heaps_.at(GetEquivClass(inst)).first.at(inst->GetBasicBlock());
+        auto &blockHeap = heaps_[GetEquivClass(inst)].first.at(inst->GetBasicBlock());
         uint32_t encounters = 0;
         /* Erase all aliased values, because they may be overwritten */
         EraseAliasedValues(blockHeap, inst, baseObject, encounters);
@@ -175,7 +174,7 @@ public:
         UpdatePhis(inst);
 
         /* Otherwise set the value of instruction to itself and update MUST_ALIASes */
-        heaps_.at(GetEquivClass(inst)).first.at(inst->GetBasicBlock())[inst] = {inst, inst, true, false};
+        heaps_[GetEquivClass(inst)].first.at(inst->GetBasicBlock())[inst] = {inst, inst, true, false};
     }
 
     bool HasBaseObject(Inst *inst)
@@ -198,7 +197,7 @@ public:
         }
         for (auto inv : *invs) {
             for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
-                auto &blockHeap = heaps_.at(eqClass).first.at(inv->GetBasicBlock());
+                auto &blockHeap = heaps_[eqClass].first.at(inv->GetBasicBlock());
                 for (auto heapIter = blockHeap.begin(), heapLast = blockHeap.end(); heapIter != heapLast;) {
                     auto hinst = heapIter->first;
                     aliasCalls_++;
@@ -220,10 +219,10 @@ public:
     void InvalidateHeap(BasicBlock *block)
     {
         for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
-            heaps_.at(eqClass).first.at(block).clear();
+            heaps_[eqClass].first.at(block).clear();
             auto loop = block->GetLoop();
             while (!loop->IsRoot()) {
-                heaps_.at(eqClass).second.at(loop).clear();
+                heaps_[eqClass].second.at(loop).clear();
                 loop = loop->GetOuterLoop();
             }
         }
@@ -234,7 +233,7 @@ public:
     void ClearLocalValuesFromHeap(BasicBlock *block)
     {
         for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
-            auto &blockHeap = heaps_.at(eqClass).first.at(block);
+            auto &blockHeap = heaps_[eqClass].first.at(block);
 
             auto heapIt = blockHeap.begin();
             while (heapIt != blockHeap.end()) {
@@ -263,7 +262,7 @@ public:
     void SetHeapAsRead(BasicBlock *block)
     {
         for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
-            auto &bheap = heaps_.at(eqClass).first.at(block);
+            auto &bheap = heaps_[eqClass].first.at(block);
             for (auto it = bheap.begin(); it != bheap.end();) {
                 it->second.read = true;
                 it++;
@@ -271,7 +270,7 @@ public:
         }
     }
 
-    ArenaUnorderedMap<Inst *, struct Lse::HeapValue> &GetEliminations()
+    auto &GetEliminations()
     {
         return eliminations_;
     }
@@ -280,7 +279,7 @@ public:
     {
         // Now find which values are alive for each backedge. Due to MUST_ALIAS requirement,
         // there should only be one
-        auto &heap = heaps_.at(GetEquivClass(cand)).first;
+        auto &heap = heaps_[GetEquivClass(cand)].first;
         for (auto bb : loop->GetHeader()->GetPredsBlocks()) {
             if (bb == loop->GetPreHeader()) {
                 phi->AppendInput(cand->IsStore() ? InstStoredValue(cand) : cand);
@@ -368,10 +367,12 @@ public:
     }
 
     /// Add eliminations inside loops if there is no overwrites on backedges.
-    void FinalizeLoops(Graph *graph)
+    void FinalizeLoops(Graph *graph, const ArenaVector<Loop *> &rpoLoops)
     {
         for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
-            for (auto &[loop, phis] : heaps_.at(eqClass).second) {
+            for (auto loopIt = rpoLoops.rbegin(); loopIt != rpoLoops.rend(); loopIt++) {
+                auto loop = *loopIt;
+                auto &phis = heaps_[eqClass].second.at(loop);
                 COMPILER_LOG(DEBUG, LSE_OPT) << "Finalizing loop #" << loop->GetId();
                 FinalizeLoopsWithPhiCands(graph, loop, phis);
             }
@@ -452,7 +453,7 @@ private:
     /// Return a MUST_ALIASed heap entry, nullptr if not present.
     const Lse::HeapValue *GetHeapValue(Inst *inst)
     {
-        auto &blockHeap = heaps_.at(GetEquivClass(inst)).first.at(inst->GetBasicBlock());
+        auto &blockHeap = heaps_[GetEquivClass(inst)].first.at(inst->GetBasicBlock());
         for (auto &entry : blockHeap) {
             aliasCalls_++;
             if (aa_.CheckInstAlias(inst, entry.first) == MUST_ALIAS) {
@@ -468,7 +469,7 @@ private:
         Loop *loop = inst->GetBasicBlock()->GetLoop();
 
         while (!loop->IsRoot()) {
-            auto &phis = heaps_.at(GetEquivClass(inst)).second.at(loop);
+            auto &phis = heaps_[GetEquivClass(inst)].second.at(loop);
             for (auto &[mem, values] : phis) {
                 aliasCalls_++;
                 if (aa_.CheckInstAlias(inst, mem) != NO_ALIAS) {
@@ -479,8 +480,7 @@ private:
         }
     }
 
-    void EraseAliasedValues(ArenaUnorderedMap<Inst *, Lse::HeapValue> &blockHeap, Inst *inst, Inst *baseObject,
-                            uint32_t &encounters)
+    void EraseAliasedValues(Lse::BasicBlockHeap &blockHeap, Inst *inst, Inst *baseObject, uint32_t &encounters)
     {
         for (auto heapIter = blockHeap.begin(), heapLast = blockHeap.end(); heapIter != heapLast;) {
             auto hinst = heapIter->first;
@@ -501,7 +501,7 @@ private:
         }
     }
 
-    void FinalizeLoopsWithPhiCands(Graph *graph, Loop *loop, ArenaUnorderedMap<Inst *, InstVector> &phis)
+    void FinalizeLoopsWithPhiCands(Graph *graph, Loop *loop, ArenaMap<Inst *, InstVector> &phis)
     {
         InstVector instsMustAlias(graph->GetLocalAllocator()->Adapter());
         for (auto &[cand, insts] : phis) {
@@ -592,8 +592,8 @@ private:
     AliasAnalysis &aa_;
     Lse::HeapEqClasses &heaps_;
     /* Map of instructions to be deleted with values to replace them with */
-    ArenaUnorderedMap<Inst *, struct Lse::HeapValue> eliminations_;
-    ArenaUnorderedMap<Inst *, std::vector<Inst *>> shadowedStores_;
+    Lse::BasicBlockHeap eliminations_;
+    ArenaMap<Inst *, std::vector<Inst *>> shadowedStores_;
     SaveStateBridgesBuilder ssb_;
     InstVector disabledObjects_;
     uint32_t aliasCalls_ {0};
@@ -681,11 +681,15 @@ bool Lse::CanEliminateInstruction(Inst *inst)
 void Lse::InitializeHeap(BasicBlock *block, HeapEqClasses *heaps)
 {
     for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
-        auto &heap = heaps->at(eqClass).first;
-        auto &phiCands = heaps->at(eqClass).second;
+        auto &heap = (*heaps)[eqClass].first;
+        auto &phiCands = (*heaps)[eqClass].second;
         [[maybe_unused]] auto it = heap.emplace(block, GetGraph()->GetLocalAllocator()->Adapter());
         ASSERT(it.second);
         if (block->IsLoopHeader()) {
+            COMPILER_LOG(DEBUG, LSE_OPT) << "Append loop #" << block->GetLoop()->GetId();
+            if (std::find(rpoLoops_.begin(), rpoLoops_.end(), block->GetLoop()) == rpoLoops_.end()) {
+                rpoLoops_.emplace_back(block->GetLoop());
+            }
             [[maybe_unused]] auto phit = phiCands.emplace(block->GetLoop(), GetGraph()->GetLocalAllocator()->Adapter());
             ASSERT(phit.second);
         }
@@ -709,9 +713,9 @@ void Lse::MergeHeapValuesForLoop(BasicBlock *block, HeapEqClasses *heaps)
     auto preheader = loop->GetPreHeader();
 
     for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
-        auto &preheaderHeap = heaps->at(eqClass).first.at(preheader);
+        auto &preheaderHeap = (*heaps)[eqClass].first.at(preheader);
 
-        auto &blockPhis = heaps->at(eqClass).second.at(loop);
+        auto &blockPhis = (*heaps)[eqClass].second.at(loop);
         for (auto mem : preheaderHeap) {
             blockPhis.try_emplace(mem.second.origin, GetGraph()->GetLocalAllocator()->Adapter());
             COMPILER_LOG(DEBUG, LSE_OPT) << LogInst(mem.first) << " is a phi cand for BB #" << block->GetId();
@@ -724,7 +728,7 @@ size_t Lse::MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Mar
 {
     size_t aliasCalls = 0;
     for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
-        auto &heap = heaps->at(eqClass).first;
+        auto &heap = (*heaps)[eqClass].first;
         auto &blockHeap = heap.at(block);
         /* Copy a heap of one of predecessors */
         auto preds = block->GetPredsBlocks();
@@ -944,7 +948,7 @@ void Lse::DeleteInstruction(Inst *inst, Inst *value)
     }
 }
 
-void Lse::DeleteInstructions(const ArenaUnorderedMap<Inst *, struct HeapValue> &eliminated)
+void Lse::DeleteInstructions(const BasicBlockHeap &eliminated)
 {
     for (auto elim : eliminated) {
         Inst *inst = elim.first;
@@ -1026,8 +1030,7 @@ void Lse::ApplyHoistToCandidate(Loop *loop, Inst *alive)
     applied_ = true;
 }
 
-void Lse::TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps,
-                                 const ArenaUnorderedMap<Inst *, struct HeapValue> *eliminated)
+void Lse::TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps, const BasicBlockHeap *eliminated)
 {
     for (auto innerLoop : loop->GetInnerLoops()) {
         TryToHoistLoadFromLoop(innerLoop, heaps, eliminated);
@@ -1044,7 +1047,7 @@ void Lse::TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps,
     auto backBb = backBbs.begin();
     ASSERT(backBb != backBbs.end());
     for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
-        for (const auto &entry : heaps->at(eqClass).first.at(*backBb)) {
+        for (const auto &entry : (*heaps)[eqClass].first.at(*backBb)) {
             // Do not touch Stores and eliminated ones
             if (entry.first->IsLoad() && eliminated->find(entry.first) == eliminated->end()) {
                 beAlive_.insert(entry.first);
@@ -1123,7 +1126,7 @@ bool Lse::RunImpl()
     for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
         std::pair<Heap, PhiCands> heapPhi(GetGraph()->GetLocalAllocator()->Adapter(),
                                           GetGraph()->GetLocalAllocator()->Adapter());
-        heaps.emplace(eqClass, heapPhi);
+        heaps.emplace_back(heapPhi);
     }
 
     GetGraph()->RunPass<LoopAnalyzer>();
@@ -1136,7 +1139,7 @@ bool Lse::RunImpl()
     ProcessAllBBs(visitor, &heaps, phiFixupMrk);
 
     visitor.FinalizeShadowedStores();
-    visitor.FinalizeLoops(GetGraph());
+    visitor.FinalizeLoops(GetGraph(), rpoLoops_);
 
     auto &eliminated = visitor.GetEliminations();
     GetGraph()->RunPass<DominatorsTree>();

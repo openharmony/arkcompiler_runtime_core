@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,12 +96,20 @@ public:
         bool local;    // Whether this value should be only used in the BasicBlock it originated from
     };
 
-    using Heap = ArenaDoubleUnorderedMap<BasicBlock *, Inst *, struct HeapValue>;
-    using PhiCands = ArenaDoubleUnorderedMap<Loop *, Inst *, InstVector>;
-    using HeapEqClasses = ArenaUnorderedMap<int, std::pair<Heap, PhiCands>>;
+    using BasicBlockHeap = ArenaMap<Inst *, struct HeapValue>;
+    using Heap = ArenaMap<BasicBlock *, BasicBlockHeap>;
+    using LoopPhiCands = ArenaMap<Inst *, InstVector>;
+    using PhiCands = ArenaUnorderedMap<Loop *, LoopPhiCands>;
+    using HeapEqClasses = ArenaVector<std::pair<Heap, PhiCands>>;
 
     explicit Lse(Graph *graph, bool hoistLoads = true)
-        : Optimization(graph), hoistLoads_(hoistLoads), beAlive_(GetGraph()->GetLocalAllocator()->Adapter()) {};
+        : Optimization(graph),
+          hoistLoads_(hoistLoads),
+          beAlive_(GetGraph()->GetLocalAllocator()->Adapter()),
+          rpoLoops_(GetGraph()->GetLocalAllocator()->Adapter())
+    {
+        rpoLoops_.reserve(graph->GetRootLoop()->GetInnerLoops().size());
+    };
 
     NO_MOVE_SEMANTIC(Lse);
     NO_COPY_SEMANTIC(Lse);
@@ -131,17 +139,17 @@ private:
     void FixupPhisInBlock(BasicBlock *block, Marker phiFixupMrk);
     const char *GetEliminationCode(Inst *inst, Inst *origin);
     void ApplyHoistToCandidate(Loop *loop, Inst *alive);
-    void TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps,
-                                const ArenaUnorderedMap<Inst *, struct HeapValue> *eliminated);
+    void TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps, const BasicBlockHeap *eliminated);
     void ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phiFixupMrk);
     void DeleteInstruction(Inst *inst, Inst *value);
-    void DeleteInstructions(const ArenaUnorderedMap<Inst *, struct HeapValue> &eliminated);
+    void DeleteInstructions(const BasicBlockHeap &eliminated);
 
 private:
     bool applied_ {false};
     bool hoistLoads_;
     SaveStateBridgesBuilder ssb_;
     ArenaUnorderedSet<Inst *> beAlive_;
+    ArenaVector<Loop *> rpoLoops_;
 };
 
 }  // namespace ark::compiler

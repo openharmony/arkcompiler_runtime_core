@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT Do not optimize inlined throws
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-inlining-max-size=400", entry: "ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-inlining-max-insts=160", entry: "ETSGLOBAL::main"
 //! EVENT        /Compilation,MultipleCatch::__noinline__multipleCatch,.*,COMPILED/
 //! EVENT        /Inline,MultipleCatch::__noinline__multipleCatch,ETSGLOBAL::throw_exceptions,.*,STATIC,SUCCESS/
 //! METHOD       "MultipleCatch::__noinline__multipleCatch"

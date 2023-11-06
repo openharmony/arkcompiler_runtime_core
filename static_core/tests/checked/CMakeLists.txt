@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -165,6 +165,7 @@ if (PANDA_TARGET_AMD64 OR (PANDA_TARGET_ARM64 AND NOT PANDA_ENABLE_ADDRESS_SANIT
     endif()
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/aot_cha.pa AUX_FILES basics_aot.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/aot_cha_vcalls.pa AUX_FILES vcalls_aux.pa)
+    panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inline_small.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inline.pa AUX_FILES inline_external.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/verify_aot_tests/verify_aot_test.pa AUX_FILES verify_aot_tests_file1 verify_aot_tests_file2)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/zero_const_in_save_state.pa)

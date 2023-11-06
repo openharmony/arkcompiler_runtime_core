@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,23 +16,23 @@
 #
 
 #! CHECKER      Instructions limit
-#! RUN          force_jit: true, options: "--compiler-regex=Test1::main --compiler-inlining-max-insts=8", entry: "Test1::main"
+#! RUN          force_jit: true, options: "--compiler-regex=Test1::main --compiler-inlining-max-insts=8 --compiler-inlining-always-inline-bc-size=0", entry: "Test1::main"
 #! EVENT        /Inline,Test1::main,_GLOBAL::func,.*STATIC,LIMIT/
 #! EVENT_NEXT   /Inline,Test1::main,_GLOBAL::small_func,.*STATIC,SUCCESS/
 
 #! CHECKER      Instructions limit at Regular AOT
-#! RUN_PAOC     options: "--compiler-regex=Test1::main --compiler-inlining-max-insts=8"
+#! RUN_PAOC     options: "--compiler-regex=Test1::main --compiler-inlining-max-insts=8 --compiler-inlining-always-inline-bc-size=0"
 #! EVENT        /Inline,Test1::main,_GLOBAL::func,.*STATIC,LIMIT/
 #! EVENT_NEXT   /Inline,Test1::main,_GLOBAL::small_func,.*STATIC,SUCCESS/
 #! RUN          entry: "Test1::main"
 
 #! CHECKER      Instructions max size
-#! RUN          force_jit: true, options: "--compiler-regex=Test1::main --compiler-inlining-max-size=6", entry: "Test1::main"
+#! RUN          force_jit: true, options: "--compiler-regex=Test1::main --compiler-inlining-max-insts=8 --compiler-inlining-always-inline-bc-size=0", entry: "Test1::main"
 #! EVENT        /Inline,Test1::main,_GLOBAL::func,.*STATIC,LIMIT/
 #! EVENT_NEXT   /Inline,Test1::main,_GLOBAL::small_func,.*STATIC,SUCCESS/
 
 #! CHECKER      Instructions max size at Regular AOT
-#! RUN_PAOC     options: "--compiler-regex=Test1::main --compiler-inlining-max-size=6"
+#! RUN_PAOC     options: "--compiler-regex=Test1::main --compiler-inlining-max-insts=8 --compiler-inlining-always-inline-bc-size=0"
 #! EVENT        /Inline,Test1::main,_GLOBAL::func,.*STATIC,LIMIT/
 #! EVENT_NEXT   /Inline,Test1::main,_GLOBAL::small_func,.*STATIC,SUCCESS/
 #! RUN          entry: "Test1::main"
@@ -67,12 +67,12 @@
 }
 
 #! CHECKER      Inline depth limit
-#! RUN          force_jit: true, options: "--compiler-regex=Test1::main_depth --compiler-inlining-max-depth=2", entry: "Test1::main_depth"
+#! RUN          force_jit: true, options: "--compiler-regex=Test1::main_depth --compiler-inlining-max-depth=2 --compiler-inlining-recursive-calls-limit=2", entry: "Test1::main_depth"
 #! EVENTS_COUNT /Inline,Test1::main_depth,_GLOBAL::func_rec,.*STATIC,SUCCESS/, 1
 #! EVENTS_COUNT /Inline,_GLOBAL::func_rec,_GLOBAL::func_rec,.*STATIC,SUCCESS/, 1
 
 #! CHECKER      Inline depth limit at Regular AOT
-#! RUN_PAOC     options: "--compiler-regex=Test1::main_depth --compiler-inlining-max-depth=2"
+#! RUN_PAOC     options: "--compiler-regex=Test1::main_depth --compiler-inlining-max-depth=2 --compiler-inlining-recursive-calls-limit=2"
 #! EVENTS_COUNT /Inline,Test1::main_depth,_GLOBAL::func_rec,.*STATIC,SUCCESS/, 1
 #! EVENTS_COUNT /Inline,_GLOBAL::func_rec,_GLOBAL::func_rec,.*STATIC,SUCCESS/, 1
 #! RUN          entry: "Test1::main_depth"
@@ -182,39 +182,39 @@ lbl:
 
 
 #! CHECKER      Change to CallStatic by instructions limit
-#! RUN          force_jit: true, options: "--compiler-regex=Test2::main --compiler-inlining-max-insts=12", entry: "Test2::main"
+#! RUN          force_jit: true, options: "--compiler-regex=Test2::main --compiler-inlining-max-insts=12 --compiler-inlining-always-inline-bc-size=0", entry: "Test2::main"
 #! EVENT        /Inline,Test2::main,Test2::func,.*VIRTUAL,LIMIT/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::func,.*VIRTUAL,DEVIRTUALIZED/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::small_func,.*VIRTUAL,SUCCESS/
 
 #! CHECKER      Change to CallStatic by instructions limit at Regular AOT
-#! RUN_PAOC     options: "--compiler-regex=Test2::main --compiler-inlining-max-insts=12"
+#! RUN_PAOC     options: "--compiler-regex=Test2::main --compiler-inlining-max-insts=12 --compiler-inlining-always-inline-bc-size=0"
 #! EVENT        /Inline,Test2::main,Test2::func,.*VIRTUAL,LIMIT/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::func,.*VIRTUAL,DEVIRTUALIZED/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::small_func,.*VIRTUAL,SUCCESS/
 #! RUN          entry: "Test2::main"
 
 #! CHECKER      Change to CallStatic by instructions limit at LLVM AOT
-#! RUN_LLVM     options: "--compiler-regex=Test2.* --compiler-inlining-max-insts=12"
+#! RUN_LLVM     options: "--compiler-regex=Test2.* --compiler-inlining-max-insts=12 --compiler-inlining-always-inline-bc-size=0"
 #! EVENT_NEXT   /Inline,Test2::main,Test2::func,.*VIRTUAL,DEVIRTUALIZED/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::small_func,.*VIRTUAL,DEVIRTUALIZED/
 #! RUN          entry: "Test2::main"
 
 #! CHECKER      Change to CallStatic by instructions max size
-#! RUN          force_jit: true, options: "--compiler-regex=Test2::main --compiler-inlining-max-size=6", entry: "Test2::main"
+#! RUN          force_jit: true, options: "--compiler-regex=Test2::main --compiler-inlining-max-insts=8 --compiler-inlining-always-inline-bc-size=0", entry: "Test2::main"
 #! EVENT        /Inline,Test2::main,Test2::func,.*VIRTUAL,LIMIT/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::func,.*VIRTUAL,DEVIRTUALIZED/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::small_func,.*VIRTUAL,SUCCESS/
 
 #! CHECKER      Change to CallStatic by instructions size at Regular AOT
-#! RUN_PAOC     options: "--compiler-regex=Test2::main --compiler-inlining-max-size=6"
+#! RUN_PAOC     options: "--compiler-regex=Test2::main --compiler-inlining-max-insts=8 --compiler-inlining-always-inline-bc-size=0"
 #! EVENT        /Inline,Test2::main,Test2::func,.*VIRTUAL,LIMIT/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::func,.*VIRTUAL,DEVIRTUALIZED/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::small_func,.*VIRTUAL,SUCCESS/
 #! RUN          entry: "Test2::main"
 
 #! CHECKER      Change to CallStatic by instructions size at LLVM AOT
-#! RUN_LLVM     options: "--compiler-regex=Test2::main --compiler-inlining-max-size=6"
+#! RUN_LLVM     options: "--compiler-regex=Test2::main --compiler-inlining-max-insts=8 --compiler-inlining-always-inline-bc-size=0"
 #! EVENT_NEXT   /Inline,Test2::main,Test2::func,.*VIRTUAL,DEVIRTUALIZED/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::small_func,.*VIRTUAL,DEVIRTUALIZED/
 #! RUN          entry: "Test2::main"
@@ -492,7 +492,7 @@ exit:
 
 #! CHECKER      CallVirtual for external method is replaced with CallStatic
 #! RUN_PAOC     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true \
-#!                        --compiler-regex=Test4.* --compiler-inlining-max-size=0"
+#!                        --compiler-regex=Test4.* --compiler-inlining-max-insts=0 --compiler-inlining-always-inline-bc-size=0"
 #! METHOD       "Test4::func_A_complexMethod__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallVirtual.*A::complexMethod/
@@ -501,8 +501,8 @@ exit:
 
 #! CHECKER      CallVirtual for external method is not replaced with CallStatic if external inlining is disabled
 #! RUN_PAOC     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true \
-#!                        --compiler-regex=Test4.* --compiler-inlining-max-size=0 \
-#!                        --compiler-inline-external-methods=false"
+#!                        --compiler-regex=Test4.* --compiler-inlining-max-insts=0 \
+#!                        --compiler-inline-external-methods=false --compiler-inlining-always-inline-bc-size=0"
 #! METHOD       "Test4::func_A_complexMethod__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallVirtual.*A::complexMethod/

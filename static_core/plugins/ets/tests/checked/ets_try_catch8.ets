@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT optimize with nested catches
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 --compiler-inlining-max-size=400 --compiler-enable-osr=false", entry: "ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 --compiler-inlining-max-insts=160 --compiler-enable-osr=false", entry: "ETSGLOBAL::main"
 //! EVENT        /Compilation,MultipleCatch::multipleCatch,.*,COMPILED/
 //! EVENT        /Compilation,MultipleCatch::wrapper,.*,COMPILED/
 //! EVENT        /Inline,ETSGLOBAL::main,MultipleCatch::wrapper,.*,SUCCESS/

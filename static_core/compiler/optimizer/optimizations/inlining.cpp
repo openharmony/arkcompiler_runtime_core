@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,10 @@
  */
 
 #include "inlining.h"
+#include <cstddef>
 #include "compiler_logger.h"
+#include "compiler_options.h"
+#include "events_gen.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir_builder/ir_builder.h"
@@ -56,14 +59,13 @@ size_t Inlining::CalculateInstructionsCount(Graph *graph)
             continue;
         }
         for (auto inst : bb->Insts()) {
-            if (inst->IsSaveState()) {
+            if (inst->IsSaveState() || inst->IsPhi()) {
                 continue;
             }
             switch (inst->GetOpcode()) {
                 case Opcode::Return:
                 case Opcode::ReturnI:
                 case Opcode::ReturnVoid:
-                case Opcode::Phi:
                     break;
                 default:
                     count++;
@@ -73,17 +75,25 @@ size_t Inlining::CalculateInstructionsCount(Graph *graph)
     return count;
 }
 
-Inlining::Inlining(Graph *graph, uint32_t instructionsCount, uint32_t depth, uint32_t methodsInlined)
+Inlining::Inlining(Graph *graph, uint32_t instructionsCount, uint32_t methodsInlined,
+                   const ArenaVector<RuntimeInterface::MethodPtr> *inlinedStack)
     : Optimization(graph),
-      depth_(depth),
       methodsInlined_(methodsInlined),
       instructionsCount_(instructionsCount != 0 ? instructionsCount : CalculateInstructionsCount(graph)),
       instructionsLimit_(g_options.GetCompilerInliningMaxInsts()),
       returnBlocks_(graph->GetLocalAllocator()->Adapter()),
       blacklist_(graph->GetLocalAllocator()->Adapter()),
+      inlinedStack_(graph->GetLocalAllocator()->Adapter()),
       vregsCount_(graph->GetVRegsCount()),
       cha_(graph->GetRuntime()->GetCha())
 {
+    if (inlinedStack != nullptr) {
+        inlinedStack_.reserve(inlinedStack->size() + 1U);
+        inlinedStack_ = *inlinedStack;
+    } else {
+        inlinedStack_.reserve(1U);
+    }
+    inlinedStack_.push_back(graph->GetMethod());
 }
 
 bool Inlining::IsInlineCachesEnabled() const
@@ -1027,22 +1037,10 @@ bool Inlining::CheckBytecode(CallInst *callInst, const InlineContext &ctx, bool 
     return true;
 }
 
-bool Inlining::CheckInstructionLimit(CallInst *callInst, InlineContext *ctx, size_t inlinedInstsCount)
-{
-    // Don't inline if we reach the limit of instructions and method is big enough.
-    if (inlinedInstsCount > SMALL_METHOD_MAX_SIZE && (instructionsCount_ + inlinedInstsCount) >= instructionsLimit_) {
-        EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::LIMIT);
-        LOG_INLINING(DEBUG) << "Reached instructions limit: current_size=" << instructionsCount_
-                            << ", inlined_size=" << inlinedInstsCount;
-        ctx->replaceToStatic = CanReplaceWithCallStatic(callInst->GetOpcode());
-        return false;
-    }
-    return true;
-}
-
 bool Inlining::TryBuildGraph(const InlineContext &ctx, Graph *graphInl, CallInst *callInst, CallInst *polyCallInst)
 {
-    if (!graphInl->RunPass<IrBuilder>(ctx.method, polyCallInst != nullptr ? polyCallInst : callInst, depth_ + 1)) {
+    if (!graphInl->RunPass<IrBuilder>(ctx.method, polyCallInst != nullptr ? polyCallInst : callInst,
+                                      GetCurrentDepth() + 1)) {
         EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::FAIL);
         LOG_INLINING(WARNING) << "Graph building failed";
         return false;
@@ -1158,16 +1156,12 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
     }
     graphInl->RunPass<SimplifyStringBuilder>();
 
-    // Don't inline if we reach the limit of instructions and method is big enough.
     auto inlinedInstsCount = CalculateInstructionsCount(graphInl);
-    if (!CheckInstructionLimit(callInst, ctx, inlinedInstsCount)) {
-        stats->SetPbcInstNum(savedPbcInstNum);
-        return InlinedGraph();
-    }
+    LOG_INLINING(DEBUG) << "Actual insts-bc ratio: (" << inlinedInstsCount << " insts) / ("
+                        << GetGraph()->GetRuntime()->GetMethodCodeSize(ctx->method) << ") = "
+                        << (double)inlinedInstsCount / GetGraph()->GetRuntime()->GetMethodCodeSize(ctx->method);
 
-    if ((depth_ + 1) < g_options.GetCompilerInliningMaxDepth()) {
-        graphInl->RunPass<Inlining>(instructionsCount_ + inlinedInstsCount, depth_ + 1, methodsInlined_ + 1);
-    }
+    graphInl->RunPass<Inlining>(instructionsCount_ + inlinedInstsCount, methodsInlined_ + 1, &inlinedStack_);
 
     instructionsCount_ += CalculateInstructionsCount(graphInl);
 
@@ -1188,6 +1182,34 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
         return InlinedGraph();
     }
     return {graphInl, calleeCallRuntime};
+}
+
+template <bool CHECK_EXTERNAL>
+bool Inlining::CheckMethodSize(const CallInst *callInst, InlineContext *ctx)
+{
+    size_t methodSize = GetGraph()->GetRuntime()->GetMethodCodeSize(ctx->method);
+    size_t expectedInlinedInstsCount = g_options.GetCompilerInliningInstsBcRatio() * methodSize;
+    bool methodIsTooBig = (expectedInlinedInstsCount + instructionsCount_) > instructionsLimit_;
+    methodIsTooBig |= methodSize >= g_options.GetCompilerInliningMaxBcSize();
+    if (methodIsTooBig) {
+        if (methodSize <= g_options.GetCompilerInliningAlwaysInlineBcSize()) {
+            methodIsTooBig = false;
+            EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::IGNORE_LIMIT);
+            LOG_INLINING(DEBUG) << "Ignore instructions limit: ";
+        } else {
+            EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::LIMIT);
+            LOG_INLINING(DEBUG) << "Method is too big: ";
+        }
+        LOG_INLINING(DEBUG) << "instructions_count_ = " << instructionsCount_
+                            << ", expected_inlined_insts_count = " << expectedInlinedInstsCount
+                            << ", instructions_limit_ = " << instructionsLimit_
+                            << ", (method = " << GetMethodFullName(GetGraph(), ctx->method) << ")";
+    }
+
+    if (methodIsTooBig || resolveWoInline_) {
+        return CheckTooBigMethodCanBeInlined<CHECK_EXTERNAL>(callInst, ctx, methodIsTooBig);
+    }
+    return true;
 }
 
 template <bool CHECK_EXTERNAL>
@@ -1216,12 +1238,38 @@ bool Inlining::CheckTooBigMethodCanBeInlined(const CallInst *callInst, InlineCon
     return true;
 }
 
+bool Inlining::CheckDepthLimit(const CallInst *callInst, InlineContext *ctx)
+{
+    size_t recInlinedCount = std::count(inlinedStack_.begin(), inlinedStack_.end(), callInst->GetCallMethod());
+    if ((recInlinedCount >= g_options.GetCompilerInliningRecursiveCallsLimit()) ||
+        (inlinedStack_.size() >= MAX_CALL_DEPTH)) {
+        LOG_INLINING(DEBUG) << "Recursive-calls-depth limit reached, method: '"
+                            << GetMethodFullName(GetGraph(), ctx->method) << "', depth: " << recInlinedCount;
+        return false;
+    }
+    bool isDepthLimitIgnored = GetCurrentDepth() >= g_options.GetCompilerInliningMaxDepth();
+    bool isSmallMethod =
+        GetGraph()->GetRuntime()->GetMethodCodeSize(ctx->method) <= g_options.GetCompilerInliningAlwaysInlineBcSize();
+    if (isDepthLimitIgnored && !isSmallMethod) {
+        LOG_INLINING(DEBUG) << "Small-method-depth limit reached, method: '"
+                            << GetMethodFullName(GetGraph(), ctx->method)
+                            << "', size: " << GetGraph()->GetRuntime()->GetMethodCodeSize(ctx->method);
+        return false;
+    }
+    return true;
+}
+
 template <bool CHECK_EXTERNAL, bool CHECK_INTRINSICS>
 bool Inlining::CheckMethodCanBeInlined(const CallInst *callInst, InlineContext *ctx)
 {
     if (ctx->method == nullptr) {
         return false;
     }
+
+    if (!CheckDepthLimit(callInst, ctx)) {
+        return false;
+    }
+
     if constexpr (CHECK_EXTERNAL) {
         ASSERT(!GetGraph()->IsAotMode());
         if (!g_options.IsCompilerInlineExternalMethods() &&
@@ -1257,18 +1305,7 @@ bool Inlining::CheckMethodCanBeInlined(const CallInst *callInst, InlineContext *
         EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::NOINLINE);
         return false;
     }
-
-    bool methodIsTooBig =
-        GetGraph()->GetRuntime()->GetMethodCodeSize(ctx->method) >= g_options.GetCompilerInliningMaxSize();
-    if (methodIsTooBig) {
-        EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::LIMIT);
-        LOG_INLINING(DEBUG) << "Method is too big: " << GetMethodFullName(GetGraph(), ctx->method);
-    }
-
-    if (methodIsTooBig || resolveWoInline_) {
-        return CheckTooBigMethodCanBeInlined<CHECK_EXTERNAL>(callInst, ctx, methodIsTooBig);
-    }
-    return true;
+    return CheckMethodSize<CHECK_EXTERNAL>(callInst, ctx);
 }
 
 void RemoveReturnVoidInst(BasicBlock *endBlock)
@@ -1492,9 +1529,6 @@ bool Inlining::CanUseTypeInfo(ObjectTypeInfo typeInfo, RuntimeInterface::MethodP
     auto runtime = GetGraph()->GetRuntime();
     if (!typeInfo || runtime->IsInterface(typeInfo.GetClass())) {
         return false;
-    }
-    if (typeInfo.IsExact()) {
-        return true;
     }
     return runtime->IsAssignableFrom(runtime->GetClass(method), typeInfo.GetClass());
 }

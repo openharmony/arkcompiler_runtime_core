@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,13 +129,12 @@ void Pipeline::RunRegAllocAndCodeGenPass(CompilerTaskRunner<RUNNER_MODE> taskRun
 {
     auto *graph = taskRunner.GetContext().GetPipeline()->GetGraph();
     bool fatalOnErr = !g_options.IsCompilerAllowBackendFailures();
-    // Do not try to encode too large graph
-    auto instSize = graph->GetCurrentInstructionId();
-    auto instsPerByte = graph->GetEncoder()->MaxArchInstPerEncoded();
-    auto maxBitsInInst = GetInstructionSizeBits(graph->GetArch());
-    if ((instSize * instsPerByte * maxBitsInInst) > g_options.GetCompilerMaxGenCodeSize()) {
+
+    // Avoid spending too much time in RegAlloc:
+    auto estimatedSize = graph->EstimateCodeSize();
+    if (estimatedSize > g_options.GetCompilerMaxGenCodeSize()) {
         if (fatalOnErr) {
-            LOG(FATAL, COMPILER) << "RunOptimizations failed: code predicted size too big";
+            LOG(FATAL, COMPILER) << "RunOptimizations failed: predicted code size is too big (" << estimatedSize << ")";
         }
         CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(taskRunner), false);
         return;

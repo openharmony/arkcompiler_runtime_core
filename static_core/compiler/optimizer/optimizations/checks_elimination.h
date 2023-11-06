@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,10 +29,11 @@
 #include "optimizer/ir/graph_visitor.h"
 
 namespace ark::compiler {
-// parent_index->{Vector<bound_check>, max_val, min_val}
-using GroupedBoundsChecks = ArenaUnorderedMap<Inst *, std::tuple<InstVector, int64_t, int64_t>>;
+// {parent_index, Vector<bound_check>, max_val, min_val}
+using GroupedBoundsChecks = ArenaVector<std::tuple<Inst *, InstVector, int64_t, int64_t>>;
 // loop->len_array->GroupedBoundsChecks
-using NotFullyRedundantBoundsCheck = ArenaDoubleUnorderedMap<Loop *, Inst *, GroupedBoundsChecks>;
+using LoopNotFullyRedundantBoundsCheck = ArenaVector<std::pair<Inst *, GroupedBoundsChecks>>;
+using NotFullyRedundantBoundsCheck = ArenaVector<std::pair<Loop *, LoopNotFullyRedundantBoundsCheck>>;
 
 // {CountableLoopInfo; savestate; lower value; upper value; cond code for Deoptimize; head is loop exit; has pre-header
 // compare}
@@ -128,8 +129,12 @@ private:
     static Loop *GetLoopForBoundsCheck(BasicBlock *block, Inst *lenArray, Inst *index);
     void InitItemForNewIndex(GroupedBoundsChecks *place, Inst *index, Inst *inst, bool checkUpper, bool checkLower);
     void PushNewBoundsCheck(Loop *loop, Inst *lenArray, Inst *index, Inst *inst, bool checkUpper, bool checkLower);
+    void PushNewBoundsCheckAtExistingIndexes(GroupedBoundsChecks *indexes, Inst *index, Inst *inst, bool checkUpper,
+                                             bool checkLower);
     void TryRemoveDominatedNullChecks(Inst *inst, Inst *ref);
     void TryRemoveDominatedHclassCheck(Inst *inst);
+    template <Opcode OPC, bool CHECK_FULL_DOM, typename CheckInputs>
+    void TryRemoveDominatedCheck(Inst *inst, Inst *userInst, CheckInputs checkInputs);
     template <Opcode OPC, bool CHECK_FULL_DOM = false, typename CheckInputs = bool (*)(Inst *)>
     void TryRemoveDominatedChecks(
         Inst *inst, CheckInputs checkInputs = [](Inst * /*unused*/) { return true; });
@@ -152,7 +157,7 @@ private:
                                  BoundsRange upperRange, int64_t maxAdd, ConditionCode cc, bool *insertNewLenArray);
     void InsertDeoptimizationForIndexOverflow(CountableLoopInfo *countableLoopInfo, BoundsRange indexUpperRange,
                                               Inst *ss);
-    void ProcessingLoop(Loop *loop, ArenaUnorderedMap<Inst *, GroupedBoundsChecks> *lenarrIndexChecks);
+    void ProcessingLoop(Loop *loop, LoopNotFullyRedundantBoundsCheck *lenarrIndexChecks);
     void ProcessingGroupBoundsCheck(GroupedBoundsChecks *indexBoundschecks, LoopInfo loopInfo, Inst *lenArray);
     void ReplaceBoundsCheckToDeoptimizationBeforeLoop();
     void HoistLoopInvariantBoundsChecks(Inst *lenArray, GroupedBoundsChecks *indexBoundschecks, Loop *loop);

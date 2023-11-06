@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1863,8 +1863,7 @@ TEST_F(LSETest, EliminatedWithSafePoint)
         BASIC_BLOCK(2U, -1L)
         {
             INST(3U, Opcode::StoreObject).ref().Inputs(0U, 1U).TypeId(122U);
-            // bridge is not required
-            INST(5U, Opcode::SafePoint).Inputs(0U, 1U, 1U).SrcVregs({0U, 1U, VirtualRegister::BRIDGE});
+            INST(5U, Opcode::SafePoint).Inputs(0U, 1U).SrcVregs({0U, 1U});
             INST(7U, Opcode::Return).ref().Inputs(1U);
         }
     }

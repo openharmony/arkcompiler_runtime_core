@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3549,6 +3549,55 @@ TEST_F(ChecksEliminationTest, RefTypeCheck)
             INST(35U, Opcode::StoreArray).ref().Inputs(11U, 33U, 5U);
 
             INST(6U, Opcode::ReturnVoid).v0id();
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+TEST_F(ChecksEliminationTest, RefTypeCheckFirstNullCheckEliminated)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 2U).s32();
+        PARAMETER(2U, 3U).s32();
+        CONSTANT(3U, 10U);
+        BASIC_BLOCK(2U, 1U)
+        {
+            INST(4U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(5U, Opcode::NewArray).ref().Inputs(0U, 3U, 4U);
+            INST(6U, Opcode::RefTypeCheck).ref().Inputs(5U, 0U, 4U);
+            INST(7U, Opcode::StoreArray).ref().Inputs(5U, 1U, 6U);
+
+            INST(14U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(15U, Opcode::NullCheck).ref().Inputs(5U, 14U);
+            INST(16U, Opcode::RefTypeCheck).ref().Inputs(15U, 0U, 14U);
+            INST(17U, Opcode::StoreArray).ref().Inputs(5U, 2U, 16U);
+
+            INST(18U, Opcode::ReturnVoid).v0id();
+        }
+    }
+    ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 2U).s32();
+        PARAMETER(2U, 3U).s32();
+        CONSTANT(3U, 10U);
+        BASIC_BLOCK(2U, 1U)
+        {
+            INST(4U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(5U, Opcode::NewArray).ref().Inputs(0U, 3U, 4U);
+            INST(6U, Opcode::RefTypeCheck).ref().Inputs(5U, 0U, 4U);
+            INST(7U, Opcode::StoreArray).ref().Inputs(5U, 1U, 6U);
+
+            INST(14U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(15U, Opcode::NOP);
+            INST(16U, Opcode::NOP);
+            INST(17U, Opcode::StoreArray).ref().Inputs(5U, 2U, 6U);
+
+            INST(18U, Opcode::ReturnVoid).v0id();
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));

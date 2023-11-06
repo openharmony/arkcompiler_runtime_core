@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,7 @@ public:
         return it->second;
     }
 
-    const ArenaUnorderedMap<FieldPtr, StateOwner> &GetFields() const
+    const ArenaMap<FieldPtr, StateOwner> &GetFields() const
     {
         return fields_;
     }
@@ -109,7 +109,7 @@ public:
 private:
     Inst *inst_;
     StateId id_;
-    ArenaUnorderedMap<FieldPtr, StateOwner> fields_;
+    ArenaMap<FieldPtr, StateOwner> fields_;
     ArenaVector<Inst *> aliases_;
 };
 
@@ -223,7 +223,7 @@ public:
         return GetStateById(GetStateId(inst));
     }
 
-    const ArenaUnorderedMap<Inst *, StateId> &GetStates() const
+    const ArenaMap<Inst *, StateId> &GetStates() const
     {
         return states_;
     }
@@ -309,7 +309,7 @@ public:
     }
 
 private:
-    ArenaUnorderedMap<Inst *, StateId> states_;
+    ArenaMap<Inst *, StateId> states_;
     ArenaVector<VirtualState *> stateValues_;
 };
 
@@ -841,7 +841,7 @@ void EscapeAnalysis::RegisterMaterialization(MaterializationSite site, Inst *ins
 
 // Register all states' virtual fields as "should be materialized" at given site.
 bool EscapeAnalysis::RegisterFieldsMaterialization(Inst *site, VirtualState *state, BasicBlockState *blockState,
-                                                   const ArenaUnorderedMap<Inst *, VirtualState *> &states)
+                                                   const ArenaMap<Inst *, VirtualState *> &states)
 {
     bool materializedFields = false;
     for (auto &fields : state->GetFields()) {
@@ -998,7 +998,7 @@ void EscapeAnalysis::HandleMaterializationSite(Inst *inst)
     // all fields will be also registered for materialization here.
     RegisterVirtualObjectFieldsForMaterialization(inst);
 
-    ArenaUnorderedMap<Inst *, VirtualState *> &instsMap = it->second;
+    ArenaMap<Inst *, VirtualState *> &instsMap = it->second;
     ArenaVector<Inst *> pendingInsts {GetGraph()->GetLocalAllocator()->Adapter()};
     // If an alias was registered for materialization then try to find original instruction
     // and register it too.
@@ -1225,23 +1225,18 @@ bool EscapeAnalysis::ProcessLoop(BasicBlock *header, size_t depth)
     return true;
 }
 
-SaveStateInst *ScalarReplacement::CopySaveState(Inst *inst, [[maybe_unused]] Inst *except)
+SaveStateInst *ScalarReplacement::CopySaveState(Inst *inst, VirtualState *except)
 {
     auto ss = inst->CastToSaveState();
     auto copy = static_cast<SaveStateInst *>(ss->Clone(graph_));
     auto &virtInsts = saveStateLiveness_.try_emplace(copy, saveStateLiveness_.at(inst)).first->second;
+    const auto &aliases = except->GetAliases();
     for (size_t inputIdx = 0, copyIdx = 0; inputIdx < ss->GetInputsCount(); inputIdx++) {
         copy->AppendInput(inst->GetInput(inputIdx));
         copy->SetVirtualRegister(copyIdx++, ss->GetVirtualRegister(inputIdx));
 
-        if (inst->GetDataFlowInput(inputIdx) == except || inst->GetInput(inputIdx).GetInst() == except) {
-            virtInsts.SetBit(inputIdx);
-            continue;
-        }
-
-        auto it = aliases_.find(inst->GetInput(inputIdx).GetInst());
-        if (it != aliases_.end() && std::holds_alternative<Inst *>(it->second) &&
-            std::get<Inst *>(it->second) == except) {
+        if (std::find(aliases.begin(), aliases.end(), inst->GetDataFlowInput(inputIdx)) != aliases.end()) {
+            // Mark SaveState to fix later.
             virtInsts.SetBit(inputIdx);
         }
     }
@@ -1282,7 +1277,7 @@ void ScalarReplacement::MaterializeObjects()
 }
 
 void ScalarReplacement::MaterializeAtExistingSaveState(SaveStateInst *saveState,
-                                                       ArenaUnorderedMap<Inst *, VirtualState *> &state)
+                                                       ArenaMap<Inst *, VirtualState *> &state)
 {
     auto previousSaveState = saveState;
     for (auto t : state) {
@@ -1290,7 +1285,8 @@ void ScalarReplacement::MaterializeAtExistingSaveState(SaveStateInst *saveState,
             continue;
         }
         auto origAlloc = t.first;
-        auto currSs = CopySaveState(previousSaveState, origAlloc);
+        ASSERT(origAlloc == t.second->GetInst());
+        auto currSs = CopySaveState(previousSaveState, t.second);
         previousSaveState = currSs;
 
         auto newAlloc = CreateNewObject(origAlloc, currSs);
@@ -1302,7 +1298,7 @@ void ScalarReplacement::MaterializeAtExistingSaveState(SaveStateInst *saveState,
     }
 }
 
-void ScalarReplacement::MaterializeAtNewSaveState(Inst *site, ArenaUnorderedMap<Inst *, VirtualState *> &state)
+void ScalarReplacement::MaterializeAtNewSaveState(Inst *site, ArenaMap<Inst *, VirtualState *> &state)
 {
     auto block = site->GetBasicBlock();
     auto ssInsertionPoint = site;
@@ -1331,7 +1327,7 @@ void ScalarReplacement::MaterializeAtNewSaveState(Inst *site, ArenaUnorderedMap<
     }
 }
 
-void ScalarReplacement::MaterializeInEmptyBlock(BasicBlock *block, ArenaUnorderedMap<Inst *, VirtualState *> &state)
+void ScalarReplacement::MaterializeInEmptyBlock(BasicBlock *block, ArenaMap<Inst *, VirtualState *> &state)
 {
     ASSERT(block->IsEmpty());
     for (auto t : state) {
@@ -1654,7 +1650,7 @@ void ScalarReplacement::ProcessRemovalQueue()
     FixPhiInputTypes();
 }
 
-void ScalarReplacement::Apply(ArenaUnorderedSet<Inst *> &candidates)
+void ScalarReplacement::Apply(ArenaSet<Inst *> &candidates)
 {
     removeInstMarker_ = graph_->NewMarker();
     CreatePhis();
@@ -1673,7 +1669,7 @@ void ScalarReplacement::Apply(ArenaUnorderedSet<Inst *> &candidates)
 
 void ScalarReplacement::PatchSaveStates()
 {
-    ArenaVector<ArenaUnorderedSet<Inst *>> liveness {graph_->GetLocalAllocator()->Adapter()};
+    ArenaVector<ArenaSet<Inst *>> liveness {graph_->GetLocalAllocator()->Adapter()};
     for (size_t idx = 0; idx < graph_->GetVectorBlocks().size(); ++idx) {
         liveness.emplace_back(graph_->GetLocalAllocator()->Adapter());
     }
@@ -1685,8 +1681,8 @@ void ScalarReplacement::PatchSaveStates()
     }
 }
 
-void ScalarReplacement::FillLiveInsts(BasicBlock *block, ArenaUnorderedSet<Inst *> &liveIns,
-                                      ArenaVector<ArenaUnorderedSet<Inst *>> &liveness)
+void ScalarReplacement::FillLiveInsts(BasicBlock *block, ArenaSet<Inst *> &liveIns,
+                                      ArenaVector<ArenaSet<Inst *>> &liveness)
 {
     for (auto succ : block->GetSuccsBlocks()) {
         liveIns.insert(liveness[succ->GetId()].begin(), liveness[succ->GetId()].end());
@@ -1700,7 +1696,7 @@ void ScalarReplacement::FillLiveInsts(BasicBlock *block, ArenaUnorderedSet<Inst 
 }
 
 // Compute live ref-valued insturctions at each save state and insert any missing live instruction into a save state.
-void ScalarReplacement::PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<ArenaUnorderedSet<Inst *>> &liveness)
+void ScalarReplacement::PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<ArenaSet<Inst *>> &liveness)
 {
     auto &liveIns = liveness[block->GetId()];
     FillLiveInsts(block, liveIns, liveness);
@@ -1749,7 +1745,7 @@ void ScalarReplacement::PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<Ar
     }
 }
 
-void ScalarReplacement::AddLiveInputs(Inst *inst, ArenaUnorderedSet<Inst *> &liveIns)
+void ScalarReplacement::AddLiveInputs(Inst *inst, ArenaSet<Inst *> &liveIns)
 {
     for (auto &input : inst->GetInputs()) {
         auto inputInst = inst->GetDataFlowInput(input.GetInst());
@@ -1760,8 +1756,8 @@ void ScalarReplacement::AddLiveInputs(Inst *inst, ArenaUnorderedSet<Inst *> &liv
     }
 }
 
-void ScalarReplacement::PatchSaveStatesInLoop(Loop *loop, ArenaUnorderedSet<Inst *> &loopLiveIns,
-                                              ArenaVector<ArenaUnorderedSet<Inst *>> &liveness)
+void ScalarReplacement::PatchSaveStatesInLoop(Loop *loop, ArenaSet<Inst *> &loopLiveIns,
+                                              ArenaVector<ArenaSet<Inst *>> &liveness)
 {
     for (auto loopBlock : graph_->GetVectorBlocks()) {
         if (loopBlock == nullptr) {
@@ -1782,7 +1778,7 @@ void ScalarReplacement::PatchSaveStatesInLoop(Loop *loop, ArenaUnorderedSet<Inst
     }
 }
 
-void ScalarReplacement::PatchSaveState(SaveStateInst *saveState, ArenaUnorderedSet<Inst *> &liveInstructions)
+void ScalarReplacement::PatchSaveState(SaveStateInst *saveState, ArenaSet<Inst *> &liveInstructions)
 {
     for (auto inst : liveInstructions) {
         inst = Inst::GetDataFlowInput(inst);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ void ConditionChainCache::Insert(ConditionChain *chain, Inst *phiInst)
     cache_.insert({chain, phiInst});
 }
 
-static bool Equal(const ConditionChain *chain0, const ConditionChain *chain1)
+static bool Contains(const ConditionChain *chain0, const ConditionChain *chain1)
 {
     auto mps0 = chain0->GetMultiplePredecessorsSuccessor();
     auto mps1 = chain1->GetMultiplePredecessorsSuccessor();
@@ -46,6 +46,11 @@ static bool Equal(const ConditionChain *chain0, const ConditionChain *chain1)
         }
     }
     return true;
+}
+
+static bool Equal(const ConditionChain *chain0, const ConditionChain *chain1)
+{
+    return Contains(chain0, chain1) && Contains(chain1, chain0);
 }
 
 Inst *ConditionChainCache::FindPhi(const ConditionChain *chain)

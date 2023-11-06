@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -942,6 +942,18 @@ public:
     const MethodProperties &GetMethodProperties();
     void ResetParameterInfo();
     SpillFillData GetDataForNativeParam(DataType::Type type);
+
+    template <bool GRAPH_ENCODED = false>
+    size_t EstimateCodeSize()
+    {
+        if constexpr (GRAPH_ENCODED) {
+            return encoder_->BufferSize();
+        }
+        auto maxIrInstsCount = GetCurrentInstructionId();
+        auto maxArchInstsPerIrInsts = GetEncoder()->MaxArchInstPerEncoded();
+        auto maxBytesInArchInst = GetInstructionSizeBits(GetArch());
+        return maxIrInstsCount * maxArchInstsPerIrInsts * maxBytesInArchInst;
+    }
 
     EventWriter &GetEventWriter()
     {
