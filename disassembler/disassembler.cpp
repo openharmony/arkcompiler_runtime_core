@@ -402,13 +402,8 @@ std::string Disassembler::ModuleTagToString(panda_file::ModuleTag &tag) const
 
 std::vector<std::string> Disassembler::GetModuleLiteralArray(panda_file::File::EntityId &module_id) const
 {
-    std::vector<std::string> request_modules;
     panda_file::ModuleDataAccessor mda(*file_, module_id);
     const std::vector<uint32_t> &request_modules_offset = mda.getRequestModules();
-    for (size_t idx = 0; idx < request_modules_offset.size(); ++idx) {
-        request_modules.emplace_back(GetStringByOffset(request_modules_offset[idx]));
-    }
-
     std::vector<std::string> module_literal_array;
     mda.EnumerateModuleRecord([&](panda_file::ModuleTag tag, uint32_t export_name_offset,
                                   uint32_t request_module_idx, uint32_t import_name_offset,
@@ -424,12 +419,11 @@ std::vector<std::string> Disassembler::GetModuleLiteralArray(panda_file::File::E
         if (IsValidOffset(import_name_offset)) {
             ss << ", import_name: " << GetStringByOffset(import_name_offset);
         }
-        if (request_module_idx < request_modules.size()) {
-            auto request_module = request_modules[request_module_idx];
-            ASSERT(IsValidOffset(request_module));
-            ss << ", module_request: " << request_module;
+        if (request_module_idx < request_modules_offset.size()) {
+            auto request_module_offset = request_modules_offset[request_module_idx];
+            ASSERT(IsValidOffset(request_module_offset));
+            ss << ", module_request: " << GetStringByOffset(request_module_offset);
         }
-
         module_literal_array.push_back(ss.str());
     });
 
@@ -1523,7 +1517,8 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
     os << "}\n\n";
 }
 
-void Disassembler::SerializeStrings(const panda_file::File::EntityId &offset, const std::string &name_value, std::ostream &os) const
+void Disassembler::SerializeStrings(const panda_file::File::EntityId &offset, const std::string &name_value,
+                                    std::ostream &os) const
 {
     os << "[offset:0x" << std::hex <<offset<< ", name_value:" << name_value<< "]" <<std::endl;
 }

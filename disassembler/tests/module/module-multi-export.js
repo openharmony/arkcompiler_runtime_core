@@ -18,22 +18,30 @@ flags: [module]
 ---*/
 
 
-export let a = 1
-export let b = 2
-export let c = 3
-export let d = 5
-export let e = 6
-export let f = 7
-export let g = 8
+let a = 1;
+let b1 = 2;
+let b2 = 3;
+let d = 5;
+let e = 6;
 
-let x = 4
-export { x } from './module-multi-import.js'
-export * from "./module-multi-import.js"
-export { a, b, c }
-export { d as dd, e as ee }
+export { a };
+export { b1, b2 };
+
+export { c } from './module-export-file.js';
+export * from './module-export-file.js';
+
+export { d as dd, e as ee };
+
+export let f = 7;
+export let g = 8;
+export let h = 9;
+
+let i = 10;
+let j = 11;
 export class ClassB {
-    fun(d, e){ return d + e }
+    fun1(i, j) { return i + j; }
 }
+
 export function FunctionC() {
-    let h = 9
+    let l = 12;
 }

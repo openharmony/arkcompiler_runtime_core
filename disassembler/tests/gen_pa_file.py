@@ -193,8 +193,7 @@ def gen_module_and_dynamicimport_abc(args, tc, tc_dir, out_dir):
 
             # dependent output abc directory
             if "/dynamic-import/" in dependency:
-                out_dependency_abc_dir = os.path.join(args.output_dir, 'disassember_tests',
-                                                        'dynamic-import')
+                out_dependency_abc_dir = os.path.join(args.output_dir, 'disassember_tests', 'dynamic-import')
             elif "/module/" in dependency:
                 out_dependency_abc_dir = os.path.join(args.output_dir, 'disassember_tests', 'module')
 
@@ -207,15 +206,13 @@ def gen_module_and_dynamicimport_abc(args, tc, tc_dir, out_dir):
 
             # dependent output-protobin for module, dependent output-abc for dynamic-import
             out_dependency_proto_file = os.path.join(out_dependency_abc_dir, tc_name_pre,
-                                                        dependency_name_pre + '.protoBin')
-            out_dependency_aparted_abc_file = os.path.join(out_dependency_abc_dir,
-                                                            dependency_name_pre + '.abc')
+                                                     dependency_name_pre + '.protoBin')
+            out_dependency_aparted_abc_file = os.path.join(out_dependency_abc_dir, dependency_name_pre + '.abc')
 
             if "/dynamic-import/" in dependency:
                 cmd = [frontend_binary, dependency, '--output', out_dependency_aparted_abc_file]
             elif "/module/" in dependency:
-                cmd = [frontend_binary, dependency, '--outputProto',
-                        out_dependency_proto_file, '--merge-abc']
+                cmd = [frontend_binary, dependency, '--outputProto', out_dependency_proto_file, '--merge-abc']
 
             if check_compile_mode(dependency):
                 cmd.append('--module')
@@ -340,7 +337,7 @@ def cmp_pa_file(testcase, tc_dir, output_dir):
     out_tc_pa_file = os.path.join(out_abc_dir, tc_name + '.pa')
     is_out_tc_pa_file = os.path.exists(out_tc_pa_file)
 
-    target_pa_dir = os.path.join(tc_dir, 'sources')
+    target_pa_dir = os.path.join(tc_dir, 'expected')
     target_pa_file = os.path.join(target_pa_dir, tc_name + '.pa')
     is_target_pa_file = os.path.exists(target_pa_file)
 

@@ -18,4 +18,4 @@ flags: [module]
 ---*/
 
 
-import { a } from './module-export-file.js'
+import { a } from './module-export-file.js';
