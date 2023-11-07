@@ -160,6 +160,6 @@ cases:
 
     - use: |-
           let k: int[] = [];
-          if (!k) return 0;
+          if (k) return 0;
           else return j;
 

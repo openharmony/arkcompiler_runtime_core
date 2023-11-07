@@ -54,14 +54,6 @@ cases:
     - new Double(1111111111.0 as double).unboxed()
     - new Number(1e33 as number).unboxed()
 
-    - new Byte()
-    - new Short()
-    - new Int()
-    - new Long()
-    - new Float()
-    - new Double()
-    - new Number()
-
     - '" "'
     - '` `'
     - new String("abc").substring(0, 1)
@@ -72,8 +64,8 @@ cases:
     - '!false'
     - 'true'
     - '!!true'
-    - 'new Boolean(false)'
     - 'new Boolean(true)'
+    - '!(new Boolean(false))'
 
     - 42 - 21 - 20
     - 42 * (21 - 10 - 10)

@@ -388,7 +388,7 @@ static LambdaTypeCreator PrepareLambdaTypeCreator(TypeCreatorCtx *ctx)
 {
     LambdaTypeCreator lambda {ctx};
     lambda.AddParameter(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 0});
-    lambda.AddParameter(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1});
+    lambda.AddParameter(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 0});
     lambda.AddResult(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 0});
     lambda.Create();
     return lambda;

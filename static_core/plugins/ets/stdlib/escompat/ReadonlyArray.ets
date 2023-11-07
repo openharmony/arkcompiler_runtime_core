@@ -15,7 +15,7 @@
 
 package escompat;
 
-export interface ReadonlyArray<T> extends ConcatArray<T> {
+export interface ReadonlyArray<out T> extends ConcatArray<T> {
     // concat(...items: (T | ConcatArray<T>)[]): T[];
     // concat(...items: (T | ConcatArray<T>)[]): Array<T>;
     // concat(...items: ConcatArray<T>[]): T[];

@@ -423,8 +423,8 @@ export class Uint8ClampedArray
      * @returns new Uint8ClampedArray
      */
     public from(o: Object, mapFn: (e: Object) => number): Uint8ClampedArray {
-        let newF: (e: Object, index: int) => number =
-            (e: Object, index: int): number => { return mapFn(e) }
+        let newF: (e: Object, index: number) => number =
+            (e: Object, index: number): number => { return mapFn(e) }
         return this.from(o, newF)
     }
 
@@ -914,345 +914,7 @@ export class Uint8ClampedArray
     }
 
     /// === with element lambda functions ===
-
-    /**
-     * Checks that at least one element of Uint8ClampedArray satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: int, array: Uint8ClampedArray) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
-            if (fn(this.at(i), i, this)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /**
-     * Checks that at least one element of Uint8ClampedArray satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: int) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint8ClampedArray) => boolean =
-            (element: number, index: int, array: Uint8ClampedArray): boolean => { return fn(element, index) }
-        return this.some(newF)
-    }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: number, curVal: number, curIndex: int, array: Uint8ClampedArray) => number, init: number): number {
-        let acc = init
-        for (let i = 0; i < this.length; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: number, curVal: number, curIndex: int, array: Uint8ClampedArray) => number): number {
-        let acc = this.at(0)
-        for (let i = 1; i < this.length; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: int, array: Uint8ClampedArray) => number, init: number): number {
-        let acc = init
-        for (let i = this.length - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: int, array: Uint8ClampedArray) => number): number {
-        let acc: number = this.at(this.length - 1)
-        for (let i = this.length - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-    * Creates a new Uint8ClampedArray using fn(arr[i]) over all elements of current Uint8ClampedArray.
-    *
-    * @param fn a function to apply for each element of current Uint8ClampedArray
-    *
-    * @returns a new Uint8ClampedArray where for each element from current Uint8ClampedArray fn was applied
-    */
-    public map(fn: (val: number, index: int) => number): Uint8ClampedArray {
-        let resBuf = new ArrayBuffer(this.length * Uint8ClampedArray.BYTES_PER_ELEMENT)
-        let res = new Uint8ClampedArray(resBuf)
-        for (let i = 0; i < this.length; ++i) {
-            res.set(i, fn(this.at(i), i))
-        }
-        return res
-    }
-
-    /**
-     * Checks that all elements of Uint8ClampedArray satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    public every(fn: (element: number, index: int, array: Uint8ClampedArray) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
-            if (!fn(this.at(i), i, this)) {
-                return false
-            }
-        }
-        return true
-    }
-
-    /**
-     * Checks that all elements of Uint8ClampedArray satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    public every(fn: (element: number, index: int) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint8ClampedArray) => boolean =
-            (element: number, index: int, array: Uint8ClampedArray): boolean => { return fn(element, index) }
-        return this.every(newF)
-    }
-
-    /**
-     * Creates a new Uint8ClampedArray from current Uint8ClampedArray based on a condition fn.
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint8ClampedArray with elements from current Uint8ClampedArray that satisfy condition fn
-     */
-    public filter(fn: (val: number, index: int, array: Uint8ClampedArray) => boolean): Uint8ClampedArray {
-        let markers = new boolean[this.length]
-        let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
-            markers[i] = fn(this.at(i), i, this)
-            if (markers[i]) {
-                ++resLen
-            }
-        }
-        let resBuf = new ArrayBuffer(resLen * Uint8ClampedArray.BYTES_PER_ELEMENT)
-        let res = new Uint8ClampedArray(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
-            if (markers[i]) {
-                res.set(j, this.at(i))
-                ++j
-            }
-        }
-        return res
-    }
-
-    /**
-     * creates a new Uint8ClampedArray from current Uint8ClampedArray based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint8ClampedArray with elements from current Uint8ClampedArray that satisfy condition fn
-     */
-    public filter(fn: (val: number, index: int) => boolean): Uint8ClampedArray {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
-
-    /**
-     * Finds the first element in the Uint8ClampedArray that satisfies the condition
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns the first element that satisfies fn
-     * TODO: return number | undefined as in JS
-     */
-    public find(fn: (val: number, index: int, array: Uint8ClampedArray) => boolean): number {
-        for (let i = 0; i < this.length; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Uint8ClampedArray.find: not implemented if element was not found")
-    }
-
-    /**
-     * Finds the first element in the Uint8ClampedArray that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    public find(fn: (val: number, index: int) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val, index) }
-        return this.find(newF)
-    }
-
-    /**
-     * Finds an index of the first element in the Uint8ClampedArray that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    public findIndex(fn: (val: number, index: int, array: Uint8ClampedArray) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    /**
-     * Finds an index of the first element in the Uint8ClampedArray that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    public findIndex(fn: (val: number, index: int) => boolean): int {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val, index) }
-        return this.findIndex(newF)
-    }
-
-    /**
-     * Finds the last element in the Uint8ClampedArray that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number, index: int, array: Uint8ClampedArray) => boolean): number {
-        for (let i = this.length - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Uint8ClampedArray.findLast: not implemented if an element was not found")
-    }
-
-    /**
-     * Finds the last element in the Uint8ClampedArray that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number, index: int) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val, index) }
-        return this.findLast(newF)
-    }
-
-    /**
-     * Finds an index of the last element in the Uint8ClampedArray that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number, index: int, array: Uint8ClampedArray) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    /**
-     * Finds an index of the last element in the Uint8ClampedArray that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number, index: int) => boolean): int {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF)
-    }
-
-    /**
-     * Applies a function over all elements of Uint8ClampedArray
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    public forEach(fn: (val: number, index: int, array: Uint8ClampedArray) => number): void {
-        for (let i = 0; i < this.length; ++i) {
-            this.set(i, fn(this.at(i), i, this))
-        }
-        throw new Error("Uint8ClampedArray.forEach: has to return undefined, but returns void for now")
-    }
-
-    /**
-     * Applies a function over all elements of Uint8ClampedArray
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    public forEach(fn: (val: number, index: int) => number): void {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => number =
-            (val: number, index: int, array: Uint8ClampedArray): number => { return fn(val, index) }
-        this.forEach(newF)
-    }
-
-    /**
-     * Creates an Uint8ClampedArray from array-like argument
-     *
-     * @param o array-like object to initialize Uint8ClampedArray
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Uint8ClampedArray
-     */
-    public from(o: Object, mapFn: (e: Object, index: int) => number): Uint8ClampedArray {
-        throw new Error("Uint8ClampedArray.from: not implemented")
-    }
+    
     /**
      * Checks that all elements of Uint8ClampedArray satisfy the passed function
      *
@@ -1261,8 +923,8 @@ export class Uint8ClampedArray
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint8ClampedArray) => boolean =
-            (element: number, index: int, array: Uint8ClampedArray): boolean => { return fn(element as number) }
+        let newF: (element: number, index: number, array: Uint8ClampedArray) => boolean =
+            (element: number, index: number, array: Uint8ClampedArray): boolean => { return fn(element as number) }
         return this.every(newF)
     }
     /**
@@ -1273,8 +935,8 @@ export class Uint8ClampedArray
      * @returns a new Uint8ClampedArray with elements from current Uint8ClampedArray that satisfy condition fn
      */
     public filter(fn: (val: number) => boolean): Uint8ClampedArray {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
+            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val as number) }
         return this.filter(newF)
     }
 
@@ -1286,8 +948,8 @@ export class Uint8ClampedArray
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
+            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val as number) }
         return this.find(newF)
     }
 
@@ -1299,8 +961,8 @@ export class Uint8ClampedArray
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
+            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -1312,8 +974,8 @@ export class Uint8ClampedArray
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
+            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val as number) }
         return this.findLast(newF) as number
     }
 
@@ -1325,8 +987,8 @@ export class Uint8ClampedArray
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
+            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -1338,8 +1000,8 @@ export class Uint8ClampedArray
      * @returns undefined
      */
     public forEach(fn: (val: number) => number): void {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => number =
-            (val: number, index: int, array: Uint8ClampedArray): number => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint8ClampedArray) => number =
+            (val: number, index: number, array: Uint8ClampedArray): number => { return fn(val as number) }
         this.forEach(newF)
     }
 
@@ -1352,8 +1014,8 @@ export class Uint8ClampedArray
     */
     public map(fn: (val: number) => number): Uint8ClampedArray
     {
-        let newF: (val: number, index: int) => number =
-            (val: number, index: int): number => { return fn(val as number) as number }
+        let newF: (val: number, index: number) => number =
+            (val: number, index: number): number => { return fn(val as number) as number }
         return this.map(newF)
     }
 
@@ -1365,8 +1027,8 @@ export class Uint8ClampedArray
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint8ClampedArray) => boolean =
-            (element: number, index: int, array: Uint8ClampedArray): boolean => { return fn(element as number) }
+        let newF: (element: number, index: number, array: Uint8ClampedArray) => boolean =
+            (element: number, index: number, array: Uint8ClampedArray): boolean => { return fn(element as number) }
         return this.some(newF)
     }
 
@@ -1418,8 +1080,8 @@ export class Uint8ClampedArray
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint8ClampedArray) => boolean =
-            (element: number, index: int, array: Uint8ClampedArray): boolean => { return fn(element as number, index as double as number) }
+        let newF: (element: number, index: number, array: Uint8ClampedArray) => boolean =
+            (element: number, index: number, array: Uint8ClampedArray): boolean => { return fn(element as number, index as double as number) }
         return this.some(newF)
     }
 
@@ -1527,8 +1189,8 @@ export class Uint8ClampedArray
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint8ClampedArray) => boolean =
-            (element: number, index: int, array: Uint8ClampedArray): boolean => { return fn(element as number, index as double as number) }
+        let newF: (element: number, index: number, array: Uint8ClampedArray) => boolean =
+            (element: number, index: number, array: Uint8ClampedArray): boolean => { return fn(element as number, index as double as number) }
         return this.every(newF)
     }
 
@@ -1567,8 +1229,8 @@ export class Uint8ClampedArray
      * @returns a new Uint8ClampedArray with elements from current Uint8ClampedArray that satisfy condition fn
      */
     public filter(fn: (val: number, index: number) => boolean): Uint8ClampedArray {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
+            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val as number, index as double as number) }
         return this.filter(newF)
     }
 
@@ -1598,8 +1260,8 @@ export class Uint8ClampedArray
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
+            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val as number, index as double as number) }
         return this.find(newF)
     }
 
@@ -1628,8 +1290,8 @@ export class Uint8ClampedArray
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
+            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val as number, index as double as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -1658,8 +1320,8 @@ export class Uint8ClampedArray
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
+            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val as number, index as double as number) }
         return this.findLast(newF)
     }
 
@@ -1688,8 +1350,8 @@ export class Uint8ClampedArray
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => boolean =
-            (val: number, index: int, array: Uint8ClampedArray): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
+            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val as number, index as double as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -1715,8 +1377,8 @@ export class Uint8ClampedArray
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number) => number): void {
-        let newF: (val: number, index: int, array: Uint8ClampedArray) => number =
-            (val: number, index: int, array: Uint8ClampedArray): number => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint8ClampedArray) => number =
+            (val: number, index: number, array: Uint8ClampedArray): number => { return fn(val as number, index as double as number) }
         this.forEach(newF)
     }
 
@@ -2156,8 +1818,8 @@ export class Uint8Array
      * @returns new Uint8Array
      */
     public from(o: Object, mapFn: (e: Object) => number): Uint8Array {
-        let newF: (e: Object, index: int) => number =
-            (e: Object, index: int): number => { return mapFn(e) }
+        let newF: (e: Object, index: number) => number =
+            (e: Object, index: number): number => { return mapFn(e) }
         return this.from(o, newF)
     }
 
@@ -2647,345 +2309,7 @@ export class Uint8Array
     }
 
     /// === with element lambda functions ===
-
-    /**
-     * Checks that at least one element of Uint8Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: int, array: Uint8Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
-            if (fn(this.at(i), i, this)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /**
-     * Checks that at least one element of Uint8Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: int) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint8Array) => boolean =
-            (element: number, index: int, array: Uint8Array): boolean => { return fn(element, index) }
-        return this.some(newF)
-    }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: number, curVal: number, curIndex: int, array: Uint8Array) => number, init: number): number {
-        let acc = init
-        for (let i = 0; i < this.length; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: number, curVal: number, curIndex: int, array: Uint8Array) => number): number {
-        let acc = this.at(0)
-        for (let i = 1; i < this.length; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: int, array: Uint8Array) => number, init: number): number {
-        let acc = init
-        for (let i = this.length - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: int, array: Uint8Array) => number): number {
-        let acc: number = this.at(this.length - 1)
-        for (let i = this.length - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-    * Creates a new Uint8Array using fn(arr[i]) over all elements of current Uint8Array.
-    *
-    * @param fn a function to apply for each element of current Uint8Array
-    *
-    * @returns a new Uint8Array where for each element from current Uint8Array fn was applied
-    */
-    public map(fn: (val: number, index: int) => number): Uint8Array {
-        let resBuf = new ArrayBuffer(this.length * Uint8Array.BYTES_PER_ELEMENT)
-        let res = new Uint8Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
-            res.set(i, fn(this.at(i), i))
-        }
-        return res
-    }
-
-    /**
-     * Checks that all elements of Uint8Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    public every(fn: (element: number, index: int, array: Uint8Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
-            if (!fn(this.at(i), i, this)) {
-                return false
-            }
-        }
-        return true
-    }
-
-    /**
-     * Checks that all elements of Uint8Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    public every(fn: (element: number, index: int) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint8Array) => boolean =
-            (element: number, index: int, array: Uint8Array): boolean => { return fn(element, index) }
-        return this.every(newF)
-    }
-
-    /**
-     * Creates a new Uint8Array from current Uint8Array based on a condition fn.
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint8Array with elements from current Uint8Array that satisfy condition fn
-     */
-    public filter(fn: (val: number, index: int, array: Uint8Array) => boolean): Uint8Array {
-        let markers = new boolean[this.length]
-        let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
-            markers[i] = fn(this.at(i), i, this)
-            if (markers[i]) {
-                ++resLen
-            }
-        }
-        let resBuf = new ArrayBuffer(resLen * Uint8Array.BYTES_PER_ELEMENT)
-        let res = new Uint8Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
-            if (markers[i]) {
-                res.set(j, this.at(i))
-                ++j
-            }
-        }
-        return res
-    }
-
-    /**
-     * creates a new Uint8Array from current Uint8Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint8Array with elements from current Uint8Array that satisfy condition fn
-     */
-    public filter(fn: (val: number, index: int) => boolean): Uint8Array {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
-
-    /**
-     * Finds the first element in the Uint8Array that satisfies the condition
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns the first element that satisfies fn
-     * TODO: return number | undefined as in JS
-     */
-    public find(fn: (val: number, index: int, array: Uint8Array) => boolean): number {
-        for (let i = 0; i < this.length; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Uint8Array.find: not implemented if element was not found")
-    }
-
-    /**
-     * Finds the first element in the Uint8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    public find(fn: (val: number, index: int) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val, index) }
-        return this.find(newF)
-    }
-
-    /**
-     * Finds an index of the first element in the Uint8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    public findIndex(fn: (val: number, index: int, array: Uint8Array) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    /**
-     * Finds an index of the first element in the Uint8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    public findIndex(fn: (val: number, index: int) => boolean): int {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val, index) }
-        return this.findIndex(newF)
-    }
-
-    /**
-     * Finds the last element in the Uint8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number, index: int, array: Uint8Array) => boolean): number {
-        for (let i = this.length - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Uint8Array.findLast: not implemented if an element was not found")
-    }
-
-    /**
-     * Finds the last element in the Uint8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number, index: int) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
-    }
-
-    /**
-     * Finds an index of the last element in the Uint8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number, index: int, array: Uint8Array) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    /**
-     * Finds an index of the last element in the Uint8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number, index: int) => boolean): int {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF)
-    }
-
-    /**
-     * Applies a function over all elements of Uint8Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    public forEach(fn: (val: number, index: int, array: Uint8Array) => number): void {
-        for (let i = 0; i < this.length; ++i) {
-            this.set(i, fn(this.at(i), i, this))
-        }
-        throw new Error("Uint8Array.forEach: has to return undefined, but returns void for now")
-    }
-
-    /**
-     * Applies a function over all elements of Uint8Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    public forEach(fn: (val: number, index: int) => number): void {
-        let newF: (val: number, index: int, array: Uint8Array) => number =
-            (val: number, index: int, array: Uint8Array): number => { return fn(val, index) }
-        this.forEach(newF)
-    }
-
-    /**
-     * Creates an Uint8Array from array-like argument
-     *
-     * @param o array-like object to initialize Uint8Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Uint8Array
-     */
-    public from(o: Object, mapFn: (e: Object, index: int) => number): Uint8Array {
-        throw new Error("Uint8Array.from: not implemented")
-    }
+    
     /**
      * Checks that all elements of Uint8Array satisfy the passed function
      *
@@ -2994,8 +2318,8 @@ export class Uint8Array
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint8Array) => boolean =
-            (element: number, index: int, array: Uint8Array): boolean => { return fn(element as number) }
+        let newF: (element: number, index: number, array: Uint8Array) => boolean =
+            (element: number, index: number, array: Uint8Array): boolean => { return fn(element as number) }
         return this.every(newF)
     }
     /**
@@ -3006,8 +2330,8 @@ export class Uint8Array
      * @returns a new Uint8Array with elements from current Uint8Array that satisfy condition fn
      */
     public filter(fn: (val: number) => boolean): Uint8Array {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint8Array) => boolean =
+            (val: number, index: number, array: Uint8Array): boolean => { return fn(val as number) }
         return this.filter(newF)
     }
 
@@ -3019,8 +2343,8 @@ export class Uint8Array
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint8Array) => boolean =
+            (val: number, index: number, array: Uint8Array): boolean => { return fn(val as number) }
         return this.find(newF)
     }
 
@@ -3032,8 +2356,8 @@ export class Uint8Array
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint8Array) => boolean =
+            (val: number, index: number, array: Uint8Array): boolean => { return fn(val as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -3045,8 +2369,8 @@ export class Uint8Array
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint8Array) => boolean =
+            (val: number, index: number, array: Uint8Array): boolean => { return fn(val as number) }
         return this.findLast(newF) as number
     }
 
@@ -3058,8 +2382,8 @@ export class Uint8Array
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint8Array) => boolean =
+            (val: number, index: number, array: Uint8Array): boolean => { return fn(val as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -3071,8 +2395,8 @@ export class Uint8Array
      * @returns undefined
      */
     public forEach(fn: (val: number) => number): void {
-        let newF: (val: number, index: int, array: Uint8Array) => number =
-            (val: number, index: int, array: Uint8Array): number => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint8Array) => number =
+            (val: number, index: number, array: Uint8Array): number => { return fn(val as number) }
         this.forEach(newF)
     }
 
@@ -3085,8 +2409,8 @@ export class Uint8Array
     */
     public map(fn: (val: number) => number): Uint8Array
     {
-        let newF: (val: number, index: int) => number =
-            (val: number, index: int): number => { return fn(val as number) as number }
+        let newF: (val: number, index: number) => number =
+            (val: number, index: number): number => { return fn(val as number) as number }
         return this.map(newF)
     }
 
@@ -3098,8 +2422,8 @@ export class Uint8Array
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint8Array) => boolean =
-            (element: number, index: int, array: Uint8Array): boolean => { return fn(element as number) }
+        let newF: (element: number, index: number, array: Uint8Array) => boolean =
+            (element: number, index: number, array: Uint8Array): boolean => { return fn(element as number) }
         return this.some(newF)
     }
 
@@ -3151,8 +2475,8 @@ export class Uint8Array
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint8Array) => boolean =
-            (element: number, index: int, array: Uint8Array): boolean => { return fn(element as number, index as double as number) }
+        let newF: (element: number, index: number, array: Uint8Array) => boolean =
+            (element: number, index: number, array: Uint8Array): boolean => { return fn(element as number, index as double as number) }
         return this.some(newF)
     }
 
@@ -3260,8 +2584,8 @@ export class Uint8Array
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint8Array) => boolean =
-            (element: number, index: int, array: Uint8Array): boolean => { return fn(element as number, index as double as number) }
+        let newF: (element: number, index: number, array: Uint8Array) => boolean =
+            (element: number, index: number, array: Uint8Array): boolean => { return fn(element as number, index as double as number) }
         return this.every(newF)
     }
 
@@ -3300,8 +2624,8 @@ export class Uint8Array
      * @returns a new Uint8Array with elements from current Uint8Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number) => boolean): Uint8Array {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint8Array) => boolean =
+            (val: number, index: number, array: Uint8Array): boolean => { return fn(val as number, index as double as number) }
         return this.filter(newF)
     }
 
@@ -3331,8 +2655,8 @@ export class Uint8Array
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint8Array) => boolean =
+            (val: number, index: number, array: Uint8Array): boolean => { return fn(val as number, index as double as number) }
         return this.find(newF)
     }
 
@@ -3361,8 +2685,8 @@ export class Uint8Array
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint8Array) => boolean =
+            (val: number, index: number, array: Uint8Array): boolean => { return fn(val as number, index as double as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -3391,8 +2715,8 @@ export class Uint8Array
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint8Array) => boolean =
+            (val: number, index: number, array: Uint8Array): boolean => { return fn(val as number, index as double as number) }
         return this.findLast(newF)
     }
 
@@ -3421,8 +2745,8 @@ export class Uint8Array
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint8Array) => boolean =
-            (val: number, index: int, array: Uint8Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint8Array) => boolean =
+            (val: number, index: number, array: Uint8Array): boolean => { return fn(val as number, index as double as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -3448,8 +2772,8 @@ export class Uint8Array
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number) => number): void {
-        let newF: (val: number, index: int, array: Uint8Array) => number =
-            (val: number, index: int, array: Uint8Array): number => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint8Array) => number =
+            (val: number, index: number, array: Uint8Array): number => { return fn(val as number, index as double as number) }
         this.forEach(newF)
     }
 
@@ -3889,8 +3213,8 @@ export class Uint16Array
      * @returns new Uint16Array
      */
     public from(o: Object, mapFn: (e: Object) => number): Uint16Array {
-        let newF: (e: Object, index: int) => number =
-            (e: Object, index: int): number => { return mapFn(e) }
+        let newF: (e: Object, index: number) => number =
+            (e: Object, index: number): number => { return mapFn(e) }
         return this.from(o, newF)
     }
 
@@ -4380,345 +3704,7 @@ export class Uint16Array
     }
 
     /// === with element lambda functions ===
-
-    /**
-     * Checks that at least one element of Uint16Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: int, array: Uint16Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
-            if (fn(this.at(i), i, this)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /**
-     * Checks that at least one element of Uint16Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: int) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint16Array) => boolean =
-            (element: number, index: int, array: Uint16Array): boolean => { return fn(element, index) }
-        return this.some(newF)
-    }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: number, curVal: number, curIndex: int, array: Uint16Array) => number, init: number): number {
-        let acc = init
-        for (let i = 0; i < this.length; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: number, curVal: number, curIndex: int, array: Uint16Array) => number): number {
-        let acc = this.at(0)
-        for (let i = 1; i < this.length; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: int, array: Uint16Array) => number, init: number): number {
-        let acc = init
-        for (let i = this.length - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: int, array: Uint16Array) => number): number {
-        let acc: number = this.at(this.length - 1)
-        for (let i = this.length - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-    * Creates a new Uint16Array using fn(arr[i]) over all elements of current Uint16Array.
-    *
-    * @param fn a function to apply for each element of current Uint16Array
-    *
-    * @returns a new Uint16Array where for each element from current Uint16Array fn was applied
-    */
-    public map(fn: (val: number, index: int) => number): Uint16Array {
-        let resBuf = new ArrayBuffer(this.length * Uint16Array.BYTES_PER_ELEMENT)
-        let res = new Uint16Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
-            res.set(i, fn(this.at(i), i))
-        }
-        return res
-    }
-
-    /**
-     * Checks that all elements of Uint16Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    public every(fn: (element: number, index: int, array: Uint16Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
-            if (!fn(this.at(i), i, this)) {
-                return false
-            }
-        }
-        return true
-    }
-
-    /**
-     * Checks that all elements of Uint16Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    public every(fn: (element: number, index: int) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint16Array) => boolean =
-            (element: number, index: int, array: Uint16Array): boolean => { return fn(element, index) }
-        return this.every(newF)
-    }
-
-    /**
-     * Creates a new Uint16Array from current Uint16Array based on a condition fn.
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint16Array with elements from current Uint16Array that satisfy condition fn
-     */
-    public filter(fn: (val: number, index: int, array: Uint16Array) => boolean): Uint16Array {
-        let markers = new boolean[this.length]
-        let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
-            markers[i] = fn(this.at(i), i, this)
-            if (markers[i]) {
-                ++resLen
-            }
-        }
-        let resBuf = new ArrayBuffer(resLen * Uint16Array.BYTES_PER_ELEMENT)
-        let res = new Uint16Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
-            if (markers[i]) {
-                res.set(j, this.at(i))
-                ++j
-            }
-        }
-        return res
-    }
-
-    /**
-     * creates a new Uint16Array from current Uint16Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint16Array with elements from current Uint16Array that satisfy condition fn
-     */
-    public filter(fn: (val: number, index: int) => boolean): Uint16Array {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
-
-    /**
-     * Finds the first element in the Uint16Array that satisfies the condition
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns the first element that satisfies fn
-     * TODO: return number | undefined as in JS
-     */
-    public find(fn: (val: number, index: int, array: Uint16Array) => boolean): number {
-        for (let i = 0; i < this.length; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Uint16Array.find: not implemented if element was not found")
-    }
-
-    /**
-     * Finds the first element in the Uint16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    public find(fn: (val: number, index: int) => boolean): number {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val, index) }
-        return this.find(newF)
-    }
-
-    /**
-     * Finds an index of the first element in the Uint16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    public findIndex(fn: (val: number, index: int, array: Uint16Array) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    /**
-     * Finds an index of the first element in the Uint16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    public findIndex(fn: (val: number, index: int) => boolean): int {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val, index) }
-        return this.findIndex(newF)
-    }
-
-    /**
-     * Finds the last element in the Uint16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number, index: int, array: Uint16Array) => boolean): number {
-        for (let i = this.length - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Uint16Array.findLast: not implemented if an element was not found")
-    }
-
-    /**
-     * Finds the last element in the Uint16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number, index: int) => boolean): number {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
-    }
-
-    /**
-     * Finds an index of the last element in the Uint16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number, index: int, array: Uint16Array) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    /**
-     * Finds an index of the last element in the Uint16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number, index: int) => boolean): int {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF)
-    }
-
-    /**
-     * Applies a function over all elements of Uint16Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    public forEach(fn: (val: number, index: int, array: Uint16Array) => number): void {
-        for (let i = 0; i < this.length; ++i) {
-            this.set(i, fn(this.at(i), i, this))
-        }
-        throw new Error("Uint16Array.forEach: has to return undefined, but returns void for now")
-    }
-
-    /**
-     * Applies a function over all elements of Uint16Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    public forEach(fn: (val: number, index: int) => number): void {
-        let newF: (val: number, index: int, array: Uint16Array) => number =
-            (val: number, index: int, array: Uint16Array): number => { return fn(val, index) }
-        this.forEach(newF)
-    }
-
-    /**
-     * Creates an Uint16Array from array-like argument
-     *
-     * @param o array-like object to initialize Uint16Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Uint16Array
-     */
-    public from(o: Object, mapFn: (e: Object, index: int) => number): Uint16Array {
-        throw new Error("Uint16Array.from: not implemented")
-    }
+    
     /**
      * Checks that all elements of Uint16Array satisfy the passed function
      *
@@ -4727,8 +3713,8 @@ export class Uint16Array
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint16Array) => boolean =
-            (element: number, index: int, array: Uint16Array): boolean => { return fn(element as number) }
+        let newF: (element: number, index: number, array: Uint16Array) => boolean =
+            (element: number, index: number, array: Uint16Array): boolean => { return fn(element as number) }
         return this.every(newF)
     }
     /**
@@ -4739,8 +3725,8 @@ export class Uint16Array
      * @returns a new Uint16Array with elements from current Uint16Array that satisfy condition fn
      */
     public filter(fn: (val: number) => boolean): Uint16Array {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint16Array) => boolean =
+            (val: number, index: number, array: Uint16Array): boolean => { return fn(val as number) }
         return this.filter(newF)
     }
 
@@ -4752,8 +3738,8 @@ export class Uint16Array
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint16Array) => boolean =
+            (val: number, index: number, array: Uint16Array): boolean => { return fn(val as number) }
         return this.find(newF)
     }
 
@@ -4765,8 +3751,8 @@ export class Uint16Array
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint16Array) => boolean =
+            (val: number, index: number, array: Uint16Array): boolean => { return fn(val as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -4778,8 +3764,8 @@ export class Uint16Array
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint16Array) => boolean =
+            (val: number, index: number, array: Uint16Array): boolean => { return fn(val as number) }
         return this.findLast(newF) as number
     }
 
@@ -4791,8 +3777,8 @@ export class Uint16Array
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint16Array) => boolean =
+            (val: number, index: number, array: Uint16Array): boolean => { return fn(val as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -4804,8 +3790,8 @@ export class Uint16Array
      * @returns undefined
      */
     public forEach(fn: (val: number) => number): void {
-        let newF: (val: number, index: int, array: Uint16Array) => number =
-            (val: number, index: int, array: Uint16Array): number => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint16Array) => number =
+            (val: number, index: number, array: Uint16Array): number => { return fn(val as number) }
         this.forEach(newF)
     }
 
@@ -4818,8 +3804,8 @@ export class Uint16Array
     */
     public map(fn: (val: number) => number): Uint16Array
     {
-        let newF: (val: number, index: int) => number =
-            (val: number, index: int): number => { return fn(val as number) as number }
+        let newF: (val: number, index: number) => number =
+            (val: number, index: number): number => { return fn(val as number) as number }
         return this.map(newF)
     }
 
@@ -4831,8 +3817,8 @@ export class Uint16Array
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint16Array) => boolean =
-            (element: number, index: int, array: Uint16Array): boolean => { return fn(element as number) }
+        let newF: (element: number, index: number, array: Uint16Array) => boolean =
+            (element: number, index: number, array: Uint16Array): boolean => { return fn(element as number) }
         return this.some(newF)
     }
 
@@ -4884,8 +3870,8 @@ export class Uint16Array
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint16Array) => boolean =
-            (element: number, index: int, array: Uint16Array): boolean => { return fn(element as number, index as double as number) }
+        let newF: (element: number, index: number, array: Uint16Array) => boolean =
+            (element: number, index: number, array: Uint16Array): boolean => { return fn(element as number, index as double as number) }
         return this.some(newF)
     }
 
@@ -4993,8 +3979,8 @@ export class Uint16Array
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint16Array) => boolean =
-            (element: number, index: int, array: Uint16Array): boolean => { return fn(element as number, index as double as number) }
+        let newF: (element: number, index: number, array: Uint16Array) => boolean =
+            (element: number, index: number, array: Uint16Array): boolean => { return fn(element as number, index as double as number) }
         return this.every(newF)
     }
 
@@ -5033,8 +4019,8 @@ export class Uint16Array
      * @returns a new Uint16Array with elements from current Uint16Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number) => boolean): Uint16Array {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint16Array) => boolean =
+            (val: number, index: number, array: Uint16Array): boolean => { return fn(val as number, index as double as number) }
         return this.filter(newF)
     }
 
@@ -5064,8 +4050,8 @@ export class Uint16Array
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint16Array) => boolean =
+            (val: number, index: number, array: Uint16Array): boolean => { return fn(val as number, index as double as number) }
         return this.find(newF)
     }
 
@@ -5094,8 +4080,8 @@ export class Uint16Array
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint16Array) => boolean =
+            (val: number, index: number, array: Uint16Array): boolean => { return fn(val as number, index as double as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -5124,8 +4110,8 @@ export class Uint16Array
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint16Array) => boolean =
+            (val: number, index: number, array: Uint16Array): boolean => { return fn(val as number, index as double as number) }
         return this.findLast(newF)
     }
 
@@ -5154,8 +4140,8 @@ export class Uint16Array
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint16Array) => boolean =
-            (val: number, index: int, array: Uint16Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint16Array) => boolean =
+            (val: number, index: number, array: Uint16Array): boolean => { return fn(val as number, index as double as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -5181,8 +4167,8 @@ export class Uint16Array
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number) => number): void {
-        let newF: (val: number, index: int, array: Uint16Array) => number =
-            (val: number, index: int, array: Uint16Array): number => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint16Array) => number =
+            (val: number, index: number, array: Uint16Array): number => { return fn(val as number, index as double as number) }
         this.forEach(newF)
     }
 
@@ -5622,8 +4608,8 @@ export class Uint32Array
      * @returns new Uint32Array
      */
     public from(o: Object, mapFn: (e: Object) => number): Uint32Array {
-        let newF: (e: Object, index: int) => number =
-            (e: Object, index: int): number => { return mapFn(e) }
+        let newF: (e: Object, index: number) => number =
+            (e: Object, index: number): number => { return mapFn(e) }
         return this.from(o, newF)
     }
 
@@ -6113,345 +5099,7 @@ export class Uint32Array
     }
 
     /// === with element lambda functions ===
-
-    /**
-     * Checks that at least one element of Uint32Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: int, array: Uint32Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
-            if (fn(this.at(i), i, this)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /**
-     * Checks that at least one element of Uint32Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: int) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint32Array) => boolean =
-            (element: number, index: int, array: Uint32Array): boolean => { return fn(element, index) }
-        return this.some(newF)
-    }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: number, curVal: number, curIndex: int, array: Uint32Array) => number, init: number): number {
-        let acc = init
-        for (let i = 0; i < this.length; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: number, curVal: number, curIndex: int, array: Uint32Array) => number): number {
-        let acc = this.at(0)
-        for (let i = 1; i < this.length; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: int, array: Uint32Array) => number, init: number): number {
-        let acc = init
-        for (let i = this.length - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: int, array: Uint32Array) => number): number {
-        let acc: number = this.at(this.length - 1)
-        for (let i = this.length - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-    * Creates a new Uint32Array using fn(arr[i]) over all elements of current Uint32Array.
-    *
-    * @param fn a function to apply for each element of current Uint32Array
-    *
-    * @returns a new Uint32Array where for each element from current Uint32Array fn was applied
-    */
-    public map(fn: (val: number, index: int) => number): Uint32Array {
-        let resBuf = new ArrayBuffer(this.length * Uint32Array.BYTES_PER_ELEMENT)
-        let res = new Uint32Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
-            res.set(i, fn(this.at(i), i))
-        }
-        return res
-    }
-
-    /**
-     * Checks that all elements of Uint32Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    public every(fn: (element: number, index: int, array: Uint32Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
-            if (!fn(this.at(i), i, this)) {
-                return false
-            }
-        }
-        return true
-    }
-
-    /**
-     * Checks that all elements of Uint32Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    public every(fn: (element: number, index: int) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint32Array) => boolean =
-            (element: number, index: int, array: Uint32Array): boolean => { return fn(element, index) }
-        return this.every(newF)
-    }
-
-    /**
-     * Creates a new Uint32Array from current Uint32Array based on a condition fn.
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint32Array with elements from current Uint32Array that satisfy condition fn
-     */
-    public filter(fn: (val: number, index: int, array: Uint32Array) => boolean): Uint32Array {
-        let markers = new boolean[this.length]
-        let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
-            markers[i] = fn(this.at(i), i, this)
-            if (markers[i]) {
-                ++resLen
-            }
-        }
-        let resBuf = new ArrayBuffer(resLen * Uint32Array.BYTES_PER_ELEMENT)
-        let res = new Uint32Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
-            if (markers[i]) {
-                res.set(j, this.at(i))
-                ++j
-            }
-        }
-        return res
-    }
-
-    /**
-     * creates a new Uint32Array from current Uint32Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint32Array with elements from current Uint32Array that satisfy condition fn
-     */
-    public filter(fn: (val: number, index: int) => boolean): Uint32Array {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
-
-    /**
-     * Finds the first element in the Uint32Array that satisfies the condition
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns the first element that satisfies fn
-     * TODO: return number | undefined as in JS
-     */
-    public find(fn: (val: number, index: int, array: Uint32Array) => boolean): number {
-        for (let i = 0; i < this.length; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Uint32Array.find: not implemented if element was not found")
-    }
-
-    /**
-     * Finds the first element in the Uint32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    public find(fn: (val: number, index: int) => boolean): number {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val, index) }
-        return this.find(newF)
-    }
-
-    /**
-     * Finds an index of the first element in the Uint32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    public findIndex(fn: (val: number, index: int, array: Uint32Array) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    /**
-     * Finds an index of the first element in the Uint32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    public findIndex(fn: (val: number, index: int) => boolean): int {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val, index) }
-        return this.findIndex(newF)
-    }
-
-    /**
-     * Finds the last element in the Uint32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number, index: int, array: Uint32Array) => boolean): number {
-        for (let i = this.length - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Uint32Array.findLast: not implemented if an element was not found")
-    }
-
-    /**
-     * Finds the last element in the Uint32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number, index: int) => boolean): number {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
-    }
-
-    /**
-     * Finds an index of the last element in the Uint32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number, index: int, array: Uint32Array) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    /**
-     * Finds an index of the last element in the Uint32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number, index: int) => boolean): int {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF)
-    }
-
-    /**
-     * Applies a function over all elements of Uint32Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    public forEach(fn: (val: number, index: int, array: Uint32Array) => number): void {
-        for (let i = 0; i < this.length; ++i) {
-            this.set(i, fn(this.at(i), i, this))
-        }
-        throw new Error("Uint32Array.forEach: has to return undefined, but returns void for now")
-    }
-
-    /**
-     * Applies a function over all elements of Uint32Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    public forEach(fn: (val: number, index: int) => number): void {
-        let newF: (val: number, index: int, array: Uint32Array) => number =
-            (val: number, index: int, array: Uint32Array): number => { return fn(val, index) }
-        this.forEach(newF)
-    }
-
-    /**
-     * Creates an Uint32Array from array-like argument
-     *
-     * @param o array-like object to initialize Uint32Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Uint32Array
-     */
-    public from(o: Object, mapFn: (e: Object, index: int) => number): Uint32Array {
-        throw new Error("Uint32Array.from: not implemented")
-    }
+    
     /**
      * Checks that all elements of Uint32Array satisfy the passed function
      *
@@ -6460,8 +5108,8 @@ export class Uint32Array
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint32Array) => boolean =
-            (element: number, index: int, array: Uint32Array): boolean => { return fn(element as number) }
+        let newF: (element: number, index: number, array: Uint32Array) => boolean =
+            (element: number, index: number, array: Uint32Array): boolean => { return fn(element as number) }
         return this.every(newF)
     }
     /**
@@ -6472,8 +5120,8 @@ export class Uint32Array
      * @returns a new Uint32Array with elements from current Uint32Array that satisfy condition fn
      */
     public filter(fn: (val: number) => boolean): Uint32Array {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint32Array) => boolean =
+            (val: number, index: number, array: Uint32Array): boolean => { return fn(val as number) }
         return this.filter(newF)
     }
 
@@ -6485,8 +5133,8 @@ export class Uint32Array
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint32Array) => boolean =
+            (val: number, index: number, array: Uint32Array): boolean => { return fn(val as number) }
         return this.find(newF)
     }
 
@@ -6498,8 +5146,8 @@ export class Uint32Array
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint32Array) => boolean =
+            (val: number, index: number, array: Uint32Array): boolean => { return fn(val as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -6511,8 +5159,8 @@ export class Uint32Array
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint32Array) => boolean =
+            (val: number, index: number, array: Uint32Array): boolean => { return fn(val as number) }
         return this.findLast(newF) as number
     }
 
@@ -6524,8 +5172,8 @@ export class Uint32Array
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint32Array) => boolean =
+            (val: number, index: number, array: Uint32Array): boolean => { return fn(val as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -6537,8 +5185,8 @@ export class Uint32Array
      * @returns undefined
      */
     public forEach(fn: (val: number) => number): void {
-        let newF: (val: number, index: int, array: Uint32Array) => number =
-            (val: number, index: int, array: Uint32Array): number => { return fn(val as number) }
+        let newF: (val: number, index: number, array: Uint32Array) => number =
+            (val: number, index: number, array: Uint32Array): number => { return fn(val as number) }
         this.forEach(newF)
     }
 
@@ -6551,8 +5199,8 @@ export class Uint32Array
     */
     public map(fn: (val: number) => number): Uint32Array
     {
-        let newF: (val: number, index: int) => number =
-            (val: number, index: int): number => { return fn(val as number) as number }
+        let newF: (val: number, index: number) => number =
+            (val: number, index: number): number => { return fn(val as number) as number }
         return this.map(newF)
     }
 
@@ -6564,8 +5212,8 @@ export class Uint32Array
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint32Array) => boolean =
-            (element: number, index: int, array: Uint32Array): boolean => { return fn(element as number) }
+        let newF: (element: number, index: number, array: Uint32Array) => boolean =
+            (element: number, index: number, array: Uint32Array): boolean => { return fn(element as number) }
         return this.some(newF)
     }
 
@@ -6617,8 +5265,8 @@ export class Uint32Array
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint32Array) => boolean =
-            (element: number, index: int, array: Uint32Array): boolean => { return fn(element as number, index as double as number) }
+        let newF: (element: number, index: number, array: Uint32Array) => boolean =
+            (element: number, index: number, array: Uint32Array): boolean => { return fn(element as number, index as double as number) }
         return this.some(newF)
     }
 
@@ -6726,8 +5374,8 @@ export class Uint32Array
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: int, array: Uint32Array) => boolean =
-            (element: number, index: int, array: Uint32Array): boolean => { return fn(element as number, index as double as number) }
+        let newF: (element: number, index: number, array: Uint32Array) => boolean =
+            (element: number, index: number, array: Uint32Array): boolean => { return fn(element as number, index as double as number) }
         return this.every(newF)
     }
 
@@ -6766,8 +5414,8 @@ export class Uint32Array
      * @returns a new Uint32Array with elements from current Uint32Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number) => boolean): Uint32Array {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint32Array) => boolean =
+            (val: number, index: number, array: Uint32Array): boolean => { return fn(val as number, index as double as number) }
         return this.filter(newF)
     }
 
@@ -6797,8 +5445,8 @@ export class Uint32Array
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint32Array) => boolean =
+            (val: number, index: number, array: Uint32Array): boolean => { return fn(val as number, index as double as number) }
         return this.find(newF)
     }
 
@@ -6827,8 +5475,8 @@ export class Uint32Array
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint32Array) => boolean =
+            (val: number, index: number, array: Uint32Array): boolean => { return fn(val as number, index as double as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -6857,8 +5505,8 @@ export class Uint32Array
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint32Array) => boolean =
+            (val: number, index: number, array: Uint32Array): boolean => { return fn(val as number, index as double as number) }
         return this.findLast(newF)
     }
 
@@ -6887,8 +5535,8 @@ export class Uint32Array
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: int, array: Uint32Array) => boolean =
-            (val: number, index: int, array: Uint32Array): boolean => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint32Array) => boolean =
+            (val: number, index: number, array: Uint32Array): boolean => { return fn(val as number, index as double as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -6914,8 +5562,8 @@ export class Uint32Array
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number) => number): void {
-        let newF: (val: number, index: int, array: Uint32Array) => number =
-            (val: number, index: int, array: Uint32Array): number => { return fn(val as number, index as double as number) }
+        let newF: (val: number, index: number, array: Uint32Array) => number =
+            (val: number, index: number, array: Uint32Array): number => { return fn(val as number, index as double as number) }
         this.forEach(newF)
     }
 
@@ -7355,8 +6003,8 @@ export class BigUint64Array
      * @returns new BigUint64Array
      */
     public from(o: Object, mapFn: (e: Object) => BigInt): BigUint64Array {
-        let newF: (e: Object, index: int) => BigInt =
-            (e: Object, index: int): BigInt => { return mapFn(e) }
+        let newF: (e: Object, index: number) => BigInt =
+            (e: Object, index: number): BigInt => { return mapFn(e) }
         return this.from(o, newF)
     }
 
@@ -7846,345 +6494,7 @@ export class BigUint64Array
     }
 
     /// === with element lambda functions ===
-
-    /**
-     * Checks that at least one element of BigUint64Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: BigInt, index: int, array: BigUint64Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
-            if (fn(this.at(i), i, this)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /**
-     * Checks that at least one element of BigUint64Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: BigInt, index: int) => boolean): boolean {
-        let newF: (element: BigInt, index: int, array: BigUint64Array) => boolean =
-            (element: BigInt, index: int, array: BigUint64Array): boolean => { return fn(element, index) }
-        return this.some(newF)
-    }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: BigInt, curVal: BigInt, curIndex: int, array: BigUint64Array) => BigInt, init: BigInt): BigInt {
-        let acc = init
-        for (let i = 0; i < this.length; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: BigInt, curVal: BigInt, curIndex: int, array: BigUint64Array) => BigInt): BigInt {
-        let acc = this.at(0)
-        for (let i = 1; i < this.length; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: BigInt, curVal: BigInt, curIndex: int, array: BigUint64Array) => BigInt, init: BigInt): BigInt {
-        let acc = init
-        for (let i = this.length - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: BigInt, curVal: BigInt, curIndex: int, array: BigUint64Array) => BigInt): BigInt {
-        let acc: BigInt = this.at(this.length - 1)
-        for (let i = this.length - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
-
-    /**
-    * Creates a new BigUint64Array using fn(arr[i]) over all elements of current BigUint64Array.
-    *
-    * @param fn a function to apply for each element of current BigUint64Array
-    *
-    * @returns a new BigUint64Array where for each element from current BigUint64Array fn was applied
-    */
-    public map(fn: (val: BigInt, index: int) => BigInt): BigUint64Array {
-        let resBuf = new ArrayBuffer(this.length * BigUint64Array.BYTES_PER_ELEMENT)
-        let res = new BigUint64Array(resBuf)
-        for (let i = 0; i < this.length; ++i) {
-            res.set(i, fn(this.at(i), i))
-        }
-        return res
-    }
-
-    /**
-     * Checks that all elements of BigUint64Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    public every(fn: (element: BigInt, index: int, array: BigUint64Array) => boolean): boolean {
-        for (let i = 0; i < this.length; ++i) {
-            if (!fn(this.at(i), i, this)) {
-                return false
-            }
-        }
-        return true
-    }
-
-    /**
-     * Checks that all elements of BigUint64Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    public every(fn: (element: BigInt, index: int) => boolean): boolean {
-        let newF: (element: BigInt, index: int, array: BigUint64Array) => boolean =
-            (element: BigInt, index: int, array: BigUint64Array): boolean => { return fn(element, index) }
-        return this.every(newF)
-    }
-
-    /**
-     * Creates a new BigUint64Array from current BigUint64Array based on a condition fn.
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new BigUint64Array with elements from current BigUint64Array that satisfy condition fn
-     */
-    public filter(fn: (val: BigInt, index: int, array: BigUint64Array) => boolean): BigUint64Array {
-        let markers = new boolean[this.length]
-        let resLen = 0
-        for (let i = 0; i < this.length; ++i) {
-            markers[i] = fn(this.at(i), i, this)
-            if (markers[i]) {
-                ++resLen
-            }
-        }
-        let resBuf = new ArrayBuffer(resLen * BigUint64Array.BYTES_PER_ELEMENT)
-        let res = new BigUint64Array(resBuf)
-        for (let i = 0, j = 0; i < this.length; ++i) {
-            if (markers[i]) {
-                res.set(j, this.at(i))
-                ++j
-            }
-        }
-        return res
-    }
-
-    /**
-     * creates a new BigUint64Array from current BigUint64Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new BigUint64Array with elements from current BigUint64Array that satisfy condition fn
-     */
-    public filter(fn: (val: BigInt, index: int) => boolean): BigUint64Array {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
-
-    /**
-     * Finds the first element in the BigUint64Array that satisfies the condition
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns the first element that satisfies fn
-     * TODO: return BigInt | undefined as in JS
-     */
-    public find(fn: (val: BigInt, index: int, array: BigUint64Array) => boolean): BigInt {
-        for (let i = 0; i < this.length; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("BigUint64Array.find: not implemented if element was not found")
-    }
-
-    /**
-     * Finds the first element in the BigUint64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    public find(fn: (val: BigInt, index: int) => boolean): BigInt {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(val, index) }
-        return this.find(newF)
-    }
-
-    /**
-     * Finds an index of the first element in the BigUint64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    public findIndex(fn: (val: BigInt, index: int, array: BigUint64Array) => boolean): int {
-        for (let i = 0; i < this.length; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    /**
-     * Finds an index of the first element in the BigUint64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    public findIndex(fn: (val: BigInt, index: int) => boolean): int {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(val, index) }
-        return this.findIndex(newF)
-    }
-
-    /**
-     * Finds the last element in the BigUint64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: BigInt, index: int, array: BigUint64Array) => boolean): BigInt {
-        for (let i = this.length - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("BigUint64Array.findLast: not implemented if an element was not found")
-    }
-
-    /**
-     * Finds the last element in the BigUint64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: BigInt, index: int) => boolean): BigInt {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
-    }
-
-    /**
-     * Finds an index of the last element in the BigUint64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: BigInt, index: int, array: BigUint64Array) => boolean): int {
-        for (let i = this.length - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    /**
-     * Finds an index of the last element in the BigUint64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: BigInt, index: int) => boolean): int {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF)
-    }
-
-    /**
-     * Applies a function over all elements of BigUint64Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    public forEach(fn: (val: BigInt, index: int, array: BigUint64Array) => BigInt): void {
-        for (let i = 0; i < this.length; ++i) {
-            this.set(i, fn(this.at(i), i, this))
-        }
-        throw new Error("BigUint64Array.forEach: has to return undefined, but returns void for now")
-    }
-
-    /**
-     * Applies a function over all elements of BigUint64Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    public forEach(fn: (val: BigInt, index: int) => BigInt): void {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => BigInt =
-            (val: BigInt, index: int, array: BigUint64Array): BigInt => { return fn(val, index) }
-        this.forEach(newF)
-    }
-
-    /**
-     * Creates an BigUint64Array from array-like argument
-     *
-     * @param o array-like object to initialize BigUint64Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new BigUint64Array
-     */
-    public from(o: Object, mapFn: (e: Object, index: int) => BigInt): BigUint64Array {
-        throw new Error("BigUint64Array.from: not implemented")
-    }
+    
     /**
      * Checks that all elements of BigUint64Array satisfy the passed function
      *
@@ -8193,8 +6503,8 @@ export class BigUint64Array
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: BigInt) => boolean): boolean {
-        let newF: (element: BigInt, index: int, array: BigUint64Array) => boolean =
-            (element: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(element)) }
+        let newF: (element: BigInt, index: number, array: BigUint64Array) => boolean =
+            (element: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(element)) }
         return this.every(newF)
     }
     /**
@@ -8205,8 +6515,8 @@ export class BigUint64Array
      * @returns a new BigUint64Array with elements from current BigUint64Array that satisfy condition fn
      */
     public filter(fn: (val: BigInt) => boolean): BigUint64Array {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
+            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(val)) }
         return this.filter(newF)
     }
 
@@ -8218,8 +6528,8 @@ export class BigUint64Array
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: BigInt) => boolean): BigInt {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
+            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(val)) }
         return this.find(newF)
     }
 
@@ -8231,8 +6541,8 @@ export class BigUint64Array
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: BigInt) => boolean): number {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
+            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(val)) }
         return this.findIndex(newF) as double as number
     }
 
@@ -8244,8 +6554,8 @@ export class BigUint64Array
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: BigInt) => boolean): BigInt {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
+            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(val)) }
         return new BigInt(this.findLast(newF))
     }
 
@@ -8257,8 +6567,8 @@ export class BigUint64Array
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: BigInt) => boolean): number {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
+            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(val)) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -8270,8 +6580,8 @@ export class BigUint64Array
      * @returns undefined
      */
     public forEach(fn: (val: BigInt) => BigInt): void {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => BigInt =
-            (val: BigInt, index: int, array: BigUint64Array): BigInt => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number, array: BigUint64Array) => BigInt =
+            (val: BigInt, index: number, array: BigUint64Array): BigInt => { return fn(new BigInt(val)) }
         this.forEach(newF)
     }
 
@@ -8284,8 +6594,8 @@ export class BigUint64Array
     */
     public map(fn: (val: BigInt) => BigInt): BigUint64Array
     {
-        let newF: (val: BigInt, index: int) => BigInt =
-            (val: BigInt, index: int): BigInt => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number) => BigInt =
+            (val: BigInt, index: number): BigInt => { return fn(new BigInt(val)) }
         return this.map(newF)
     }
 
@@ -8297,8 +6607,8 @@ export class BigUint64Array
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: BigInt) => boolean): boolean {
-        let newF: (element: BigInt, index: int, array: BigUint64Array) => boolean =
-            (element: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(element)) }
+        let newF: (element: BigInt, index: number, array: BigUint64Array) => boolean =
+            (element: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(element)) }
         return this.some(newF)
     }
 
@@ -8350,8 +6660,8 @@ export class BigUint64Array
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: BigInt, index: number) => boolean): boolean {
-        let newF: (element: BigInt, index: int, array: BigUint64Array) => boolean =
-            (element: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(element), index as double as number) }
+        let newF: (element: BigInt, index: number, array: BigUint64Array) => boolean =
+            (element: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(element), index as double as number) }
         return this.some(newF)
     }
 
@@ -8459,8 +6769,8 @@ export class BigUint64Array
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: BigInt, index: number) => boolean): boolean {
-        let newF: (element: BigInt, index: int, array: BigUint64Array) => boolean =
-            (element: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(element), index as double as number) }
+        let newF: (element: BigInt, index: number, array: BigUint64Array) => boolean =
+            (element: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(element), index as double as number) }
         return this.every(newF)
     }
 
@@ -8499,8 +6809,8 @@ export class BigUint64Array
      * @returns a new BigUint64Array with elements from current BigUint64Array that satisfy condition fn
      */
     public filter(fn: (val: BigInt, index: number) => boolean): BigUint64Array {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(val), index as double as number) }
+        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
+            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(val), index as double as number) }
         return this.filter(newF)
     }
 
@@ -8530,8 +6840,8 @@ export class BigUint64Array
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: BigInt, index: number) => boolean): BigInt {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(val), index as double as number) }
+        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
+            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(val), index as double as number) }
         return this.find(newF)
     }
 
@@ -8560,8 +6870,8 @@ export class BigUint64Array
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: BigInt, index: number) => boolean): number {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(val), index as double as number) }
+        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
+            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(val), index as double as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -8590,8 +6900,8 @@ export class BigUint64Array
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: BigInt, index: number) => boolean): BigInt {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(val), index as double as number) }
+        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
+            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(val), index as double as number) }
         return this.findLast(newF)
     }
 
@@ -8620,8 +6930,8 @@ export class BigUint64Array
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: BigInt, index: number) => boolean): number {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => boolean =
-            (val: BigInt, index: int, array: BigUint64Array): boolean => { return fn(new BigInt(val), index as double as number) }
+        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
+            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(new BigInt(val), index as double as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -8647,8 +6957,8 @@ export class BigUint64Array
      * @returns undefined
      */
     public forEach(fn: (val: BigInt, index: number) => BigInt): void {
-        let newF: (val: BigInt, index: int, array: BigUint64Array) => BigInt =
-            (val: BigInt, index: int, array: BigUint64Array): BigInt => { return fn(new BigInt(val), index as double as number) }
+        let newF: (val: BigInt, index: number, array: BigUint64Array) => BigInt =
+            (val: BigInt, index: number, array: BigUint64Array): BigInt => { return fn(new BigInt(val), index as double as number) }
         this.forEach(newF)
     }
 

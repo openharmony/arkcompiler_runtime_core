@@ -1845,7 +1845,6 @@
 04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_7.ets
 14.semantic_rules/03.override_equivalent_signatures/pos_1.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_0.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_1.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_10.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_11.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_12.ets
@@ -1900,7 +1899,6 @@
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_4.ets
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_5.ets
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_6.ets
-03.types/08.reference_types/11.union_types/union_types_normalization/norm_7.ets
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_8.ets
 03.types/08.reference_types/11.union_types/ut_0.ets
 03.types/08.reference_types/11.union_types/ut_1.ets
@@ -2311,40 +2309,8 @@
 # end of es2panda fails
 
 # es2panda fails: panda#14299 new Int(), zero-length arrays, Long.MIN_VALUE should be truthy
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_56.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_58.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_59.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_60.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_61.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_56.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_58.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_59.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_60.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_61.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t1_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t1_58.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_56.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_58.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_59.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_60.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_61.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_56.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_58.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_59.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_60.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_61.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_56.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_58.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_59.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_60.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_61.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t1_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t1_58.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14293 Float.NaN and Double.NaN must be falsy
@@ -2353,18 +2319,6 @@
 # end of es2panda fails
 
 # es2panda fails: panda#14295 SegFault on char and enum in condition
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f1_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_50.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_50.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_50.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f1_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_50.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_50.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_26.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_35.ets
 # end of es2panda fails
 
@@ -2380,13 +2334,9 @@
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_69.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_67.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_69.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_32.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t1_64.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_32.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_32.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_32.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t1_64.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_32.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_32.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t1_64.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_32.ets
@@ -2460,39 +2410,6 @@
 # es2panda fails: panda:14542 Verification fails on a method call in a chaining operator
 07.expressions/01.chaining_operator/chop0.ets
 07.expressions/01.chaining_operator/chop1.ets
-# end of es2panda fails
-
-# es2panda fails: panda:14543 SegFault on unboxing conversion in assignment
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_16.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_17.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_18.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_19.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_20.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_21.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_16.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_17.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_18.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_19.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_20.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_21.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_16.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_17.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_18.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_19.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_20.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_21.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_16.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_17.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_18.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_19.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_20.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_21.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_16.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_17.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_18.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_19.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_20.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_21.ets
 # end of es2panda fails
 
 # es2panda fails: panda:14368 Expected CTE on casting to never
@@ -2585,15 +2502,12 @@
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_11.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_12.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_13.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_3.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_4.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_5.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_6.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_7.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_8.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_9.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_neg_4.ets
-07.expressions/13.function_call_expression/fcall_1.ets
 # end of es2panda fails
 
 # es2panda fails: panda:14383 CTE cases with the chaining operator
@@ -2690,10 +2604,6 @@
 09.classes/06.method_declarations/10.hiding_by_class_methods/hiding_instance_static_method.ets
 09.classes/06.method_declarations/11.requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.ets
 # end 15095
-# 14595
-05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_2.ets
-05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_1.ets
-# end 14595
 
 # es2panda: panda#13442 Reworking the equality expression so it aligns with the specification changes
 07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_11.ets
@@ -2708,3 +2618,55 @@
 07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_38.ets
 07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_39.ets
 # end of es2panda fails
+
+# Throwing function types
+17.experimental_features/06.native_functions_and_methods/01.native_functions/nat8.ets
+17.experimental_features/10.exceptions/01.throwing_functions/lambda.ets
+
+# Cast sequence
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_100.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_101.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_108.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_109.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_110.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_111.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_112.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_113.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_120.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_121.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_122.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_123.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_124.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_125.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_48.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_49.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_50.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_51.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_52.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_53.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_60.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_61.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_62.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_63.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_64.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_65.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_72.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_73.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_74.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_75.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_76.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_77.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_84.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_85.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_86.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_87.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_88.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_89.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_96.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_97.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_98.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_99.ets
+
+# Leftovers from bit operations on floats
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_61.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_68.ets

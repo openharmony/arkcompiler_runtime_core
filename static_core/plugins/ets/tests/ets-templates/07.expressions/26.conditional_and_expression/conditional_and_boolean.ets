@@ -24,5 +24,5 @@ function check(): Boolean {
 
 function main(): void {
   let x: Boolean = false;
-  assert(x || check());
+  assert(!(x && check()));
 }

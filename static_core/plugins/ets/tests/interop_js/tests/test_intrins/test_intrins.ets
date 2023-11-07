@@ -256,9 +256,8 @@ function test_lambda_proxy(): boolean {
     let etsfn: (x: double) => double = (x: double): double => {
         return x;
     }
-    let jsfn = JSRuntime.__createLambdaProxy(etsfn as Object);
 
-    let res = jscall.num$an(jsvars.m, ".ApplyArgs", jsfn, 123);
+    let res = jscall.num$an(jsvars.m, ".ApplyArgs", etsfn, 123);
     return res == 123;
 }
 
@@ -266,9 +265,8 @@ function test_lambda_proxy_recursive(): boolean {
     let etsfn: (x: double, y: String) => String = (x: double, y: String): String => {
         return jscall.str$ns(jsvars.m, ".StringifyArgs", x, y);
     }
-    let jsfn = JSRuntime.__createLambdaProxy(etsfn as Object);
 
-    let res = jscall.str$ans(jsvars.m, ".ApplyArgs", jsfn, 123, "foo");
+    let res = jscall.str$ans(jsvars.m, ".ApplyArgs", etsfn, 123, "foo");
     return res == "123,foo";
 }
 
@@ -285,10 +283,9 @@ function test_exception_forwarding_fromets(): boolean {
     let etsfn: (v: JSValue) => void = (v: JSValue): void => {
         throw new JSError(v);
     }
-    let jsfn = JSRuntime.__createLambdaProxy(etsfn as Object);
 
     try {
-        jscall.void$an(jsvars.m, ".ApplyArgs", jsfn, 12345.6);
+        jscall.void$an(jsvars.m, ".ApplyArgs", etsfn, 12345.6);
     } catch (e: JSError) {
         return "number:12345.6" == vstringify(e.getValue());
     }
@@ -300,10 +297,9 @@ function test_exception_forwarding_recursive(): boolean {
         jscall.void$a(jsvars.m, ".ThrowValue", v);
         throw unreachable();
     }
-    let jsfn = JSRuntime.__createLambdaProxy(etsfn as Object);
 
     try {
-        jscall.void$an(jsvars.m, ".ApplyArgs", jsfn, 123.456);
+        jscall.void$an(jsvars.m, ".ApplyArgs", etsfn, 123.456);
     } catch (e: JSError) {
         return "number:123.456" == vstringify(e.getValue());
     }
@@ -314,10 +310,9 @@ function test_core_error_forwarding(): boolean {
     let etsfn: () => void = (): void => {
         throw new Error("funny message");
     }
-    let jsfn = JSRuntime.__createLambdaProxy(etsfn as Object);
 
     try {
-        jscall.void$a(jsvars.m, ".ApplyArgs", jsfn);
+        jscall.void$a(jsvars.m, ".ApplyArgs", etsfn);
     } catch (e: Error) {
         return e.message == "funny message";
     }
@@ -349,9 +344,8 @@ function test_typecheck_etscall(): boolean {
         let etsfn: (x: String) => String = (x: String): String => {
             throw unreachable();
         }
-        let jsfn = JSRuntime.__createLambdaProxy(etsfn as Object);
 
-        jscall.num$an(jsvars.m, ".ApplyArgs", jsfn, 123);
+        jscall.num$an(jsvars.m, ".ApplyArgs", etsfn, 123);
     } catch (e: JSError) {
         return "object:TypeError: String expected" == vstringify(e.getValue());
     }

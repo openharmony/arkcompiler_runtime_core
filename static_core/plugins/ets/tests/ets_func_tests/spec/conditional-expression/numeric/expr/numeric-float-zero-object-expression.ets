@@ -22,8 +22,8 @@ tags: []
 function main() : int {
     let zeroNumber: Float = new Float(0.0 as float);
     if (zeroNumber) {
-        return 0;
-    } else {
         return 1;
+    } else {
+        return 0;
     }
 }

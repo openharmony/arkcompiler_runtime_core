@@ -57,5 +57,13 @@ cases:
     - 42 - 21 - 21
     - 42 * (21 - 11 - 10)
 
+    - new Byte()
+    - new Short()
+    - new Int()
+    - new Long()
+    - new Float()
+    - new Double()
+    - new Number()
+
+    - 'new Boolean(false)'
     - '!(new Boolean(true))'
-    - '!(new Boolean(false))'

@@ -403,17 +403,8 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         return this;
     }
 
-    /*
-    public override find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined {
-        const res = this.findIndex(predicate)
-        if (res == -1) {
-            return undefined
-        }
-        return this.$_get(res as int)
-    }
-    */
-
-    public find(predicate: (value: T, index: number, obj: Array<T>) => boolean): T | undefined {
+    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+    public /* override */ find(predicate: (value: T, index: number, obj: Array<T>) => boolean): T | undefined {
         const res = this.findIndex(predicate)
         if (res == -1) {
             return undefined
@@ -464,18 +455,8 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         return -1;
     }
 
-    /*
-    public override findIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number {
-        for (let i = 0; i < this.actualLength; i++) {
-            if (predicate(this.$_get_unsafe(i), i, this)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-    */
-
-    public findIndex(predicate: (value: T, index: number, obj: Array<T>) => boolean): number {
+    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+    public /* override */ findIndex(predicate: (value: T, index: number, obj: Array<T>) => boolean): number {
         for (let i = 0; i < this.actualLength; i++) {
             if (predicate(this.$_get_unsafe(i), i, this)) {
                 return i;
@@ -540,7 +521,6 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         return sb.toString();
     }
 
-/*
     /**
      * Creates a new `Array` object and populates
      * it with the results of calling a provided function on every element in `this` instance of `Array` class.
@@ -549,24 +529,8 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public override map<U>(fn: (value: T, index: number, arr: ReadonlyArray<T>) => U): Array<U> {
-        let res = new NullishType[this.actualLength];
-        for (let i = 0; i < this.actualLength; i++) {
-            res[i] = fn(this.$_get_unsafe(i), i, this);
-        }
-        return new Array<U>(FROM_BUFFER, res);
-    }
-*/
-
-    /**
-     * Creates a new `Array` object and populates
-     * it with the results of calling a provided function on every element in `this` instance of `Array` class.
-     *
-     * @param fn mapping function, applied to each element of an array.
-     *
-     * @returns `Array` instance, constructed from `this` and given function.
-     */
-    public map<U>(fn: (value: T, index: number, arr: Array<T>) => U): Array<U> {
+    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+    public /* override */ map<U>(fn: (value: T, index: number, arr: Array<T>) => U): Array<U> {
         let res = new NullishType[this.actualLength];
         for (let i = 0; i < this.actualLength; i++) {
             res[i] = fn(this.$_get_unsafe(i), i, this) as NullishType;
@@ -606,7 +570,6 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         return new Array<U>(FROM_BUFFER, res);
     }
 
-/*
     /**
      * Tests whether all elements in the array pass the test
      * implemented by the provided function. It returns a Boolean value.
@@ -616,26 +579,8 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public override every(fn: (v: T, k: number, arr: ReadonlyArray<T>) => boolean): boolean {
-        for (let i = 0; i < this.actualLength; i++) {
-            if (!fn(this.$_get_unsafe(i), i, this)) {
-                return false
-            }
-        }
-        return true;
-    }
-*/
-
-    /**
-     * Tests whether all elements in the array pass the test
-     * implemented by the provided function. It returns a Boolean value.
-     *
-     * @param fn function to execute for each element in the array.
-     * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
-     *
-     * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
-     */
-    public every(fn: (v: T, k: number, arr: Array<T>) => boolean): boolean {
+    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+    public /* override */ every(fn: (v: T, k: number, arr: Array<T>) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
             if (!fn(this.$_get_unsafe(i), i, this)) {
                 return false
@@ -671,14 +616,15 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public every(fn: (v: T, k: int) => boolean): boolean {
-        for (let i = 0; i < this.actualLength; i++) {
-            if (!fn(this.$_get_unsafe(i), i)) {
-                return false
-            }
-        }
-        return true;
-    }
+    // TODO: to add overloads with 'int' we need to enhance generics supports
+    // public every(fn: (v: T, k: int) => boolean): boolean {
+    //     for (let i = 0; i < this.actualLength; i++) {
+    //         if (!fn(this.$_get_unsafe(i), i)) {
+    //             return false
+    //         }
+    //     }
+    //     return true;
+    // }
 
     /**
      * Tests whether all elements in the array pass the test
@@ -723,12 +669,13 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
      */
-    public some(fn: (v: T, k: int) => boolean): boolean {
-        for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get_unsafe(i), i)) { return true }
-        }
-        return false
-    }
+    // TODO: to add overloads with 'int' we need to enhance generics supports
+    // public some(fn: (v: T, k: int) => boolean): boolean {
+    //     for (let i = 0; i < this.actualLength; i++) {
+    //         if (fn(this.$_get_unsafe(i), i)) { return true }
+    //     }
+    //     return false
+    // }
 
     /**
      * Tests whether at least one element in the array pass the test
@@ -806,7 +753,6 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
     }
 */
 
-/*
     /**
      * Constructs a new `Array` instance and populates it with
      * portion of a given array, filtered down to just the elements from the
@@ -816,21 +762,8 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
      */
-    public override filter(fn: (v: T, k: number, arr: ReadonlyArray<T>) => boolean): Array<T> {
-        return this.filter((v: T, k: number): boolean => fn(v, k, this));
-    }
-*/
-
-    /**
-     * Constructs a new `Array` instance and populates it with
-     * portion of a given array, filtered down to just the elements from the
-     * given array that pass the test implemented by the provided function.
-     *
-     * @param fn test function, applied to each element of an array.
-     *
-     * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
-     */
-    public filter(fn: (v: T, k: number, arr: Array<T>) => boolean): Array<T> {
+    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+    public /* override */ filter(fn: (v: T, k: number, arr: Array<T>) => boolean): Array<T> {
         return this.filter((v: T, k: number): boolean => fn(v, k, this));
     }
 
@@ -1415,7 +1348,6 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         return new Array<T>(FROM_BUFFER, arr)
     }
 
-/*
     /**
      * Executes a user-supplied "reducer" callback function on each element of the array,
      * in order, passing in the return value from the calculation on the preceding element.
@@ -1426,35 +1358,14 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public override reduce(fn: (a: T, b: T, index: number, arr: ReadonlyArray<T>) => T): T {
+    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+    public /* override */ reduce(fn: (a: T, b: T, index: number, arr: Array<T>) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(0)
         for(let i = 1; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
-        }
-        return acc
-    }
-*/
-
-    /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from left-to-right.
-     *
-     * @param fn reduce function
-     *
-     * @returns a result after applying fn over all elements of the Array
-     */
-    public reduce(fn: (a: T, b: T, index: number, arr: Array<T>) => T): T {
-        if (this.actualLength == 0) {
-            throw new TypeError("Reduce of empty array with no initial value")
-        }
-        let acc: T = this.$_get_unsafe(0)
-        for(let i = 1; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
+            acc = fn(acc, this.$_get_unsafe(i), i, this)
         }
         return acc
     }
@@ -1513,35 +1424,14 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public reduce(fn: (previousValue: T, currentValue: T, currentIndex: number, arr: Array<T>) => T, initialValue: T): T {
+    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+    public /* override */ reduce(fn: (previousValue: T, currentValue: T, currentIndex: number, arr: Array<T>) => T, initialValue: T): T {
         let acc: T = initialValue
         for(let i = 0; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
+            acc = fn(acc, this.$_get_unsafe(i), i, this)
         }
         return acc
     }
-
-/*
-    /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from left-to-right.
-     *
-     * @param fn reduce function
-     *
-     * @param initialValue initial value
-     *
-     * @returns a result after applying fn over all elements of the Array
-     */
-    public override reduce(fn: (previousValue: T, currentValue: T, currentIndex: number, arr: ReadonlyArray<T>) => T, initialValue: T): T {
-        let acc: T = initialValue
-        for(let i = 0; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
-        }
-        return acc
-    }
-*/
 
     /**
      * Executes a user-supplied "reducer" callback function on each element of the array,
@@ -1583,7 +1473,6 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         return acc
     }
 
-/*
     /**
      * Executes a user-supplied "reducer" callback function on each element of the array,
      * in order, passing in the return value from the calculation on the preceding element.
@@ -1594,35 +1483,14 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public override reduceRight(fn: (a: T, b: T, index: number, arr: ReadonlyArray<T>) => T): T {
-        if (this.actualLength == 0) {
-            throw new TypeError("Reduce of empty array with no initial value")
-        }
-        let acc: T = this.$_get_unsafe(this.actualLength - 1)
-        for(let i = this.actualLength - 2; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
-        }
-        return acc
-    }
-*/
-
-    /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from right-to-left.
-     *
-     * @param fn reduce function
-     *
-     * @returns a result after applying fn over all elements of the Array
-     */
+    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
     public reduceRight(fn: (a: T, b: T, index: number, arr: Array<T>) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(this.actualLength - 1)
         for(let i = this.actualLength - 2; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
+            acc = fn(acc, this.$_get_unsafe(i), i, this)
         }
         return acc
     }
@@ -1669,7 +1537,6 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         return acc
     }
 
-/*
     /**
      * Executes a user-supplied "reducer" callback function on each element of the array,
      * in order, passing in the return value from the calculation on the preceding element.
@@ -1682,31 +1549,11 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public override reduceRight(fn: (a: T, b: T, index: number, arr: ReadonlyArray<T>) => T, initVal: T): T {
+    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+    public /* override */ reduceRight(fn: (a: T, b: T, index: number, arr: Array<T>) => T, initVal: T): T {
         let acc: T = initVal
         for(let i = this.actualLength - 1; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
-        }
-        return acc
-    }
-*/
-
-    /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from right-to-left.
-     *
-     * @param fn reduce function
-     *
-     * @param initVal start value
-     *
-     * @returns a result after applying fn over all elements of the Array
-     */
-    public reduceRight(fn: (a: T, b: T, index: number, arr: Array<T>) => T, initVal: T): T {
-        let acc: T = initVal
-        for(let i = this.actualLength - 1; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
+            acc = fn(acc, this.$_get_unsafe(i), i, this)
         }
         return acc
     }
@@ -1751,25 +1598,13 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         return acc
     }
 
-/*
     /**
      * Executes a provided function once for each array element.
      *
      * @param fn to apply for each element of the Array
      */
-    public override forEach(fn: (a: T, index: number, arr: ReadonlyArray<T>) => void): void {
-        for(let i = 0; i < this.actualLength; i++) {
-            fn(this.$_get_unsafe(i), i, this)
-        }
-    }
-*/
-
-    /**
-     * Executes a provided function once for each array element.
-     *
-     * @param fn to apply for each element of the Array
-     */
-    public forEach(fn: (a: T, index: number, arr: Array<T>) => void): void {
+    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+    public /* override */ forEach(fn: (a: T, index: number, arr: Array<T>) => void): void {
         for(let i = 0; i < this.actualLength; i++) {
             fn(this.$_get_unsafe(i), i, this)
         }
@@ -1883,7 +1718,9 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      * @returns a flattened Array with respect to depth
      */
     public flat<U>(depth: number): Array<U> {
-        return this.flat<U>(depth as int)
+        let ret = new Array<U>()
+        this.flatImpl(depth as int, ret)
+        return ret;
     }
 
     /**
@@ -1897,8 +1734,23 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
     public flat<U>(depth: int): Array<U> {
         let ret = new Array<U>()
         this.flatImpl<U>(depth, ret)
-        return ret
+        return ret;
     }
+
+    // TODO: to enable overloads with 'int' we need to enhance generics supports
+    // /**
+    //  * Creates a new Array with all sub-array elements concatenated
+    //  * into it recursively up to the specified depth.
+    //  *
+    //  * @param depth
+    //  *
+    //  * @returns a flattened Array with respect to depth
+    //  */
+    // public flat(depth: int): Array<Object | null> {
+    //     let ret = new Array<Object | null>()
+    //     this.flatImpl(depth, ret)
+    //     return ret
+    // }
 
     private flatImpl<U>(depth: int, to: Array<U>) {
         throw new Error("not implemented");
@@ -1933,12 +1785,13 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @return new Array after map and than flat
      */
-    // NOTE(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
+    // TODO(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
     public flatMap<U>(fn: (v: T, k: number, arr: Array<T>) => U): Array<U> {
         let mapped: Array<U> = this.map<U>(fn)
         return mapped.flat<U>()
     }
 
+    // TODO: to enable overloads with 'int' we need to enhance generics supports
     /**
      * Applies flat and than map
      *
@@ -1946,7 +1799,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      *
      * @return new Array after map and than flat
      */
-     // NOTE(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
+    // NOTE(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
     public flatMap<U>(fn: (v: T, k: number) => U): Array<U> {
         let mapped: Array<U> = this.map<U>(fn)
         return mapped.flat<U>()

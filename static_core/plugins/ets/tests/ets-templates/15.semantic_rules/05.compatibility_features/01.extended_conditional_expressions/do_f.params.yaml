@@ -74,3 +74,12 @@ cases:
         enum Color { Red, Green, Blue }
       type: Color
       val: Color.Red
+
+    - { val: 'new Byte()', type: 'Byte' }
+    - { val: 'new Short()', type: 'Short' }
+    - { val: 'new Int()', type: 'Int' }
+    - { val: 'new Long()', type: 'Long' }
+    - { val: 'new Double(Double.NaN)', type: 'Double' }
+    - { val: 'new Float(Float.NaN)', type: 'Float' }
+
+    - { val: 'new Boolean(false)', type: 'Boolean' }

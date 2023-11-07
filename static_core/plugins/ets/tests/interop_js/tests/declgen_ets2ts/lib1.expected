@@ -47,7 +47,7 @@ export {Identity};
 exports.Identity = Identity;
 
 
-function ForEach<T extends Object>(a: T[], cb: (e: T, idx: number) => void): void { return {} as any; };
+function ForEach<T extends Object>(a: T[], cb: (p1: T, p2: number) => void): void { return {} as any; };
 (ForEach as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'ForEach');
 export {ForEach};
 exports.ForEach = ForEach;

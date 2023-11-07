@@ -451,8 +451,8 @@ export class {{N}}Array
      * @returns new {{N}}Array
      */
     public from(o: Object, mapFn: (e: Object) => {{T}}): {{N}}Array {
-        let newF: (e: Object, index: int) => {{T}} =
-            (e: Object, index: int): {{T}} => { return mapFn(e) }
+        let newF: (e: Object, index: number) => {{T}} =
+            (e: Object, index: number): {{T}} => { return mapFn(e) }
         return this.from(o, newF)
     }
 
@@ -977,7 +977,8 @@ export class {{N}}Array
     }
 
     /// === with element lambda functions ===
-    {%- for idxType, castToIdx in [('int', ''), ('number', ' as double as number')] %}
+    {# TODO: to add overloads with idxType == 'int' we need to enhance generics supports #}
+    {%- for idxType, castToIdx in [('number', ' as double as number')] %}
     {%- set skip = False %}
     {%- if idxType == 'int' %}
     {%- set elType, castToEl, castFromEl = T, '%s', '' %}
@@ -995,8 +996,8 @@ export class {{N}}Array
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: {{elType}}) => boolean): boolean {
-        let newF: (element: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (element: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'element'}}) }
+        let newF: (element: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (element: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'element'}}) }
         return this.every(newF)
     }
     /**
@@ -1007,8 +1008,8 @@ export class {{N}}Array
      * @returns a new {{N}}Array with elements from current {{N}}Array that satisfy condition fn
      */
     public filter(fn: (val: {{elType}}) => boolean): {{N}}Array {
-        let newF: (val: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (val: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}) }
+        let newF: (val: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (val: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}) }
         return this.filter(newF)
     }
 
@@ -1020,8 +1021,8 @@ export class {{N}}Array
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: {{elType}}) => boolean): {{T}} {
-        let newF: (val: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (val: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}) }
+        let newF: (val: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (val: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}) }
         return this.find(newF)
     }
 
@@ -1033,8 +1034,8 @@ export class {{N}}Array
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: {{elType}}) => boolean): number {
-        let newF: (val: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (val: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}) }
+        let newF: (val: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (val: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}) }
         return this.findIndex(newF){{castToIdx}}
     }
 
@@ -1046,8 +1047,8 @@ export class {{N}}Array
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: {{elType}}) => boolean): {{elType}} {
-        let newF: (val: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (val: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}) }
+        let newF: (val: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (val: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}) }
         return {{castToEl % 'this.findLast(newF)'}}
     }
 
@@ -1059,8 +1060,8 @@ export class {{N}}Array
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: {{elType}}) => boolean): number {
-        let newF: (val: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (val: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}) }
+        let newF: (val: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (val: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}) }
         return this.findLastIndex(newF){{castToIdx}}
     }
 
@@ -1072,8 +1073,8 @@ export class {{N}}Array
      * @returns undefined
      */
     public forEach(fn: (val: {{elType}}) => {{T}}): void {
-        let newF: (val: {{T}}, index: int, array: {{N}}Array) => {{T}} =
-            (val: {{T}}, index: int, array: {{N}}Array): {{T}} => { return fn({{castToEl % 'val'}}) }
+        let newF: (val: {{T}}, index: number, array: {{N}}Array) => {{T}} =
+            (val: {{T}}, index: number, array: {{N}}Array): {{T}} => { return fn({{castToEl % 'val'}}) }
         this.forEach(newF)
     }
 
@@ -1086,8 +1087,8 @@ export class {{N}}Array
     */
     public map(fn: (val: {{elType}}) => {{elType}}): {{N}}Array
     {
-        let newF: (val: {{T}}, index: int) => {{T}} =
-            (val: {{T}}, index: int): {{T}} => { return fn({{castToEl % 'val'}}){{castFromEl}} }
+        let newF: (val: {{T}}, index: number) => {{T}} =
+            (val: {{T}}, index: number): {{T}} => { return fn({{castToEl % 'val'}}){{castFromEl}} }
         return this.map(newF)
     }
 
@@ -1099,8 +1100,8 @@ export class {{N}}Array
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: {{elType}}) => boolean): boolean {
-        let newF: (element: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (element: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'element'}}) }
+        let newF: (element: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (element: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'element'}}) }
         return this.some(newF)
     }
 
@@ -1153,8 +1154,8 @@ export class {{N}}Array
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: {{elType}}, index: {{idxType}}) => boolean): boolean {
-        let newF: (element: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (element: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'element'}}, index{{castToIdx}}) }
+        let newF: (element: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (element: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'element'}}, index{{castToIdx}}) }
         return this.some(newF)
     }
 
@@ -1262,8 +1263,8 @@ export class {{N}}Array
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: {{elType}}, index: {{idxType}}) => boolean): boolean {
-        let newF: (element: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (element: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'element'}}, index{{castToIdx}}) }
+        let newF: (element: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (element: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'element'}}, index{{castToIdx}}) }
         return this.every(newF)
     }
 
@@ -1302,8 +1303,8 @@ export class {{N}}Array
      * @returns a new {{N}}Array with elements from current {{N}}Array that satisfy condition fn
      */
     public filter(fn: (val: {{elType}}, index: {{idxType}}) => boolean): {{N}}Array {
-        let newF: (val: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (val: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}, index{{castToIdx}}) }
+        let newF: (val: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (val: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}, index{{castToIdx}}) }
         return this.filter(newF)
     }
 
@@ -1333,8 +1334,8 @@ export class {{N}}Array
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: {{elType}}, index: {{idxType}}) => boolean): {{T}} {
-        let newF: (val: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (val: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}, index{{castToIdx}}) }
+        let newF: (val: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (val: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}, index{{castToIdx}}) }
         return this.find(newF)
     }
 
@@ -1363,8 +1364,8 @@ export class {{N}}Array
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: {{elType}}, index: {{idxType}}) => boolean): {{idxType}} {
-        let newF: (val: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (val: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}, index{{castToIdx}}) }
+        let newF: (val: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (val: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}, index{{castToIdx}}) }
         return this.findIndex(newF){{castToIdx}}
     }
 
@@ -1393,8 +1394,8 @@ export class {{N}}Array
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: {{elType}}, index: {{idxType}}) => boolean): {{T}} {
-        let newF: (val: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (val: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}, index{{castToIdx}}) }
+        let newF: (val: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (val: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}, index{{castToIdx}}) }
         return this.findLast(newF)
     }
 
@@ -1423,8 +1424,8 @@ export class {{N}}Array
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: {{elType}}, index: {{idxType}}) => boolean): {{idxType}} {
-        let newF: (val: {{T}}, index: int, array: {{N}}Array) => boolean =
-            (val: {{T}}, index: int, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}, index{{castToIdx}}) }
+        let newF: (val: {{T}}, index: number, array: {{N}}Array) => boolean =
+            (val: {{T}}, index: number, array: {{N}}Array): boolean => { return fn({{castToEl % 'val'}}, index{{castToIdx}}) }
         return this.findLastIndex(newF){{castToIdx}}
     }
 
@@ -1450,8 +1451,8 @@ export class {{N}}Array
      * @returns undefined
      */
     public forEach(fn: (val: {{elType}}, index: {{idxType}}) => {{T}}): void {
-        let newF: (val: {{T}}, index: int, array: {{N}}Array) => {{T}} =
-            (val: {{T}}, index: int, array: {{N}}Array): {{T}} => { return fn({{castToEl % 'val'}}, index{{castToIdx}}) }
+        let newF: (val: {{T}}, index: number, array: {{N}}Array) => {{T}} =
+            (val: {{T}}, index: number, array: {{N}}Array): {{T}} => { return fn({{castToEl % 'val'}}, index{{castToIdx}}) }
         this.forEach(newF)
     }
 

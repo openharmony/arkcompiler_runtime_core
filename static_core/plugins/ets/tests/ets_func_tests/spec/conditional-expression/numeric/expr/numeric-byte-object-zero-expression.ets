@@ -22,8 +22,8 @@ tags: []
 function main() : int {
     let zeroNumber: Byte = new Byte(0 as byte);
     if (zeroNumber) {
-        return 0;
-    } else {
         return 1;
+    } else {
+        return 0;
     }
 }

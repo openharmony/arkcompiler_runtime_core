@@ -258,37 +258,6 @@ uint8_t JSRuntimeInstanceOf(JSValue *object, JSValue *ctor)
     return static_cast<uint8_t>(res);
 }
 
-static JSValue *JSRuntimeCreateLambdaProxy(EtsObject *etsCallable)
-{
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    auto env = ctx->GetJSEnv();
-
-    ASSERT(etsCallable->GetClass()->GetMethod("invoke") != nullptr);
-
-    NapiScope jsHandleScope(env);
-
-    ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-    if (LIKELY(storage->HasReference(etsCallable))) {
-        ets_proxy::SharedReference *sharedRef = storage->GetReference(etsCallable);
-        ASSERT(sharedRef != nullptr);
-        return JSValue::CreateRefValue(coro, ctx, sharedRef->GetJsObject(env), napi_function);
-    }
-
-    napi_value jsFn;
-    ets_proxy::SharedReference *payloadSharedRef = storage->GetNextAlloc();
-    NAPI_CHECK_FATAL(
-        napi_create_function(env, "invoke", NAPI_AUTO_LENGTH, EtsLambdaProxyInvoke, payloadSharedRef, &jsFn));
-
-    ets_proxy::SharedReference *sharedRef = storage->CreateETSObjectRef(ctx, etsCallable, jsFn);
-    if (UNLIKELY(sharedRef == nullptr)) {
-        ASSERT(InteropCtx::SanityJSExceptionPending());
-        return nullptr;
-    }
-    ASSERT(payloadSharedRef == sharedRef);
-    return JSValue::CreateRefValue(coro, ctx, jsFn, napi_function);
-}
-
 static std::pair<std::string_view, std::string_view> ResolveModuleName(std::string_view module)
 {
     static const std::unordered_set<std::string_view> NATIVE_MODULE_LIST = {
@@ -705,7 +674,6 @@ const IntrinsicsAPI G_INTRINSICS_API = {
     JSRuntimeInstanceOf,
     JSRuntimeInitJSCallClass,
     JSRuntimeInitJSNewClass,
-    JSRuntimeCreateLambdaProxy,
     JSRuntimeLoadModule,
     JSRuntimeStrictEqual,
     CompilerGetJSNamedProperty,

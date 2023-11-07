@@ -22,8 +22,8 @@ tags: []
 function main() : int {
     let zeroNumber: Long = new Long(0);
     if (zeroNumber) {
-        return 0;
-    } else {
         return 1;
+    } else {
+        return 0;
     }
 }

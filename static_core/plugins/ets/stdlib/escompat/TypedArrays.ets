@@ -449,8 +449,8 @@ export final class Int8Array {
      * @returns new Int8Array
      */
     public from(o: Object, mapFn: (e: Object) => byte): Int8Array {
-        let newF: (e: Object, index: int) => byte =
-            (e: Object, index: int): byte => { return mapFn(e) }
+        let newF: (e: Object, index: number) => byte =
+            (e: Object, index: number): byte => { return mapFn(e) }
         return this.from(o, newF)
     }
 
@@ -965,11 +965,12 @@ export final class Int8Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: byte) => boolean): boolean {
-        let newF: (element: byte, index: int, array: Int8Array) => boolean =
-            (element: byte, index: int, array: Int8Array): boolean => { return fn(element) }
-        return this.every(newF)
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public every(fn: (element: byte) => boolean): boolean {
+    //     let newF: (element: byte, index: int, array: Int8Array) => boolean =
+    //         (element: byte, index: int, array: Int8Array): boolean => { return fn(element) }
+    //     return this.every(newF)
+    // }
     /**
      * creates a new Int8Array from current Int8Array based on a condition fn
      *
@@ -977,11 +978,12 @@ export final class Int8Array {
      *
      * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
      */
-    public filter(fn: (val: byte) => boolean): Int8Array {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
-        return this.filter(newF)
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public filter(fn: (val: byte) => boolean): Int8Array {
+    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
+    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
+    //     return this.filter(newF)
+    // }
 
     /**
      * Finds the first element in the Int8Array that satisfies the condition
@@ -990,11 +992,12 @@ export final class Int8Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: byte) => boolean): byte {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
-        return this.find(newF)
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public find(fn: (val: byte) => boolean): byte {
+    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
+    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
+    //     return this.find(newF)
+    // }
 
     /**
      * Finds an index of the first element in the Int8Array that satisfies the condition
@@ -1003,11 +1006,12 @@ export final class Int8Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: byte) => boolean): int {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
-        return this.findIndex(newF)
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public findIndex(fn: (val: byte) => boolean): int {
+    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
+    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
+    //     return this.findIndex(newF)
+    // }
 
     /**
      * Finds the last element in the Int8Array that satisfies the condition
@@ -1016,11 +1020,12 @@ export final class Int8Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: byte) => boolean): byte {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
-        return this.findLast(newF)
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public findLast(fn: (val: byte) => boolean): byte {
+    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
+    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
+    //     return this.findLast(newF)
+    // }
 
     /**
      * Finds an index of the last element in the Int8Array that satisfies the condition
@@ -1029,11 +1034,12 @@ export final class Int8Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: byte) => boolean): int {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF)
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public findLastIndex(fn: (val: byte) => boolean): int {
+    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
+    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
+    //     return this.findLastIndex(newF)
+    // }
 
     /**
      * Applies a function over all elements of Int8Array
@@ -1042,11 +1048,12 @@ export final class Int8Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: byte) => byte): void {
-        let newF: (val: byte, index: int, array: Int8Array) => byte =
-            (val: byte, index: int, array: Int8Array): byte => { return fn(val) }
-        this.forEach(newF)
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public forEach(fn: (val: byte) => byte): void {
+    //     let newF: (val: byte, index: int, array: Int8Array) => byte =
+    //         (val: byte, index: int, array: Int8Array): byte => { return fn(val) }
+    //     this.forEach(newF)
+    // }
 
    /**
     * Creates a new Int8Array using fn(arr[i]) over all elements of current Int8Array
@@ -1055,11 +1062,12 @@ export final class Int8Array {
     *
     * @returns a new Int8Array where for each element from current Int8Array fn was applied
     */
-    public map(fn: (val: byte) => byte): Int8Array {
-        let newF: (val: byte, index: int) => byte =
-            (val: byte, index: int): byte => { return fn(val) }
-        return this.map(newF)
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public map(fn: (val: byte) => byte): Int8Array {
+    //     let newF: (val: byte, index: int) => byte =
+    //         (val: byte, index: int): byte => { return fn(val) }
+    //     return this.map(newF)
+    // }
 
     /**
      * Checks that at least one element of Int8Array satisfies the passed function
@@ -1068,11 +1076,11 @@ export final class Int8Array {
      *
      * @returns true if some element satisfies fn
      */
-    public some(fn: (element: byte) => boolean): boolean {
-        let newF: (element: byte, index: int, array: Int8Array) => boolean =
-            (element: byte, index: int, array: Int8Array): boolean => { return fn(element) }
-        return this.some(newF)
-    }
+    // public some(fn: (element: byte) => boolean): boolean {
+    //     let newF: (element: byte, index: int, array: Int8Array) => boolean =
+    //         (element: byte, index: int, array: Int8Array): boolean => { return fn(element) }
+    //     return this.some(newF)
+    // }
 
     // TODO(kprokopenko): this may be not skipped
     /**
@@ -1082,22 +1090,23 @@ export final class Int8Array {
      *
      * @returns sorted Int8Array
      */
-    public sort(fn: (a: byte, b: byte) => int): Int8Array {
-        let arr: byte[] = new byte[this.length as int]
-        for (let i = 0; i < this.length as int; ++i) {
-            arr[i] = this.at(i)
-        }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: byte, b: byte) => boolean =
-                (a: byte, b: byte): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
-            for (let i = 0; i < this.length as int; ++i) {
-                this.set(i, arr[i])
-            }
-        */
-        return this;
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public sort(fn: (a: byte, b: byte) => int): Int8Array {
+    //     let arr: byte[] = new byte[this.length as int]
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         arr[i] = this.at(i)
+    //     }
+    //     // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+    //     /*
+    //         let mustPrecede: (a: byte, b: byte) => boolean =
+    //             (a: byte, b: byte): boolean => { return (fn(a, b) <= 0) }
+    //         sort(arr, mustPrecede)
+    //         for (let i = 0; i < this.length as int; ++i) {
+    //             this.set(i, arr[i])
+    //         }
+    //     */
+    //     return this;
+    // }
 
     /**
      * Checks that at least one element of Int8Array satisfies the passed function
@@ -1106,27 +1115,27 @@ export final class Int8Array {
      *
      * @returns true if some element satisfies fn
      */
-    public some(fn: (element: byte, index: int, array: Int8Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
-            if (fn(this.at(i), i, this)) {
-                return true
-            }
-        }
-        return false
-    }
+    // public some(fn: (element: byte, index: int, array: Int8Array) => boolean): boolean {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         if (fn(this.at(i), i, this)) {
+    //             return true
+    //         }
+    //     }
+    //     return false
+    // }
 
-    /**
-     * Checks that at least one element of Int8Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: byte, index: int) => boolean): boolean {
-        let newF: (element: byte, index: int, array: Int8Array) => boolean =
-            (element: byte, index: int, array: Int8Array): boolean => { return fn(element, index) }
-        return this.some(newF)
-    }
+    // /**
+    //  * Checks that at least one element of Int8Array satisfies the passed function
+    //  *
+    //  * @param fn check function
+    //  *
+    //  * @returns true if some element satisfies fn
+    //  */
+    // public some(fn: (element: byte, index: int) => boolean): boolean {
+    //     let newF: (element: byte, index: int, array: Int8Array) => boolean =
+    //         (element: byte, index: int, array: Int8Array): boolean => { return fn(element, index) }
+    //     return this.some(newF)
+    // }
 
     /**
      * Reduces data into a single value using left-to-right traversal
@@ -1137,28 +1146,29 @@ export final class Int8Array {
      *
      * @returns reduction result
      */
-    public reduce(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte, init: byte): byte {
-        let acc = init
-        for (let i = 0; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // NOTE: to enable overloads with 'byte' we need to enhance generics support
+    // public reduce(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte, init: byte): byte {
+    //     let acc = init
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte): byte {
-        let acc = this.at(0)
-        for (let i = 1; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // /**
+    //  * Reduces data into a single value using left-to-right traversal
+    //  *
+    //  * @param fn condition
+    //  *
+    //  * @returns reduction result
+    //  */
+    // public reduce(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte): byte {
+    //     let acc = this.at(0)
+    //     for (let i = 1; i < this.length as int; ++i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
      * Reduces data into a single value using right-to-left traversal
@@ -1169,28 +1179,29 @@ export final class Int8Array {
      *
      * @returns reduction result
      */
-    public reduceRight(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte, init: byte): byte {
-        let acc = init
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // NOTE: to enable overloads with 'int' we need to enhance generics support
+    // public reduceRight(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte, init: byte): byte {
+    //     let acc = init
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte): byte {
-        let acc: byte = this.at(this.length as int - 1)
-        for (let i = this.length as int - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // /**
+    //  * Reduces data into a single value using right-to-left traversal
+    //  *
+    //  * @param fn condition
+    //  *
+    //  * @returns reduction result
+    //  */
+    // public reduceRight(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte): byte {
+    //     let acc: byte = this.at(this.length as int - 1)
+    //     for (let i = this.length as int - 2; i >= 0; --i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
     * Creates a new Int8Array using fn(arr[i]) over all elements of current Int8Array.
@@ -1199,14 +1210,15 @@ export final class Int8Array {
     *
     * @returns a new Int8Array where for each element from current Int8Array fn was applied
     */
-    public map(fn: (val: byte, index: int) => byte): Int8Array {
-        let resBuf = new ArrayBuffer(this.length as int * Int8Array.BYTES_PER_ELEMENT as int)
-        let res = new Int8Array(resBuf)
-        for (let i = 0; i < this.length as int; ++i) {
-            res.set(i, fn(this.at(i), i))
-        }
-        return res
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public map(fn: (val: byte, index: int) => byte): Int8Array {
+    //     let resBuf = new ArrayBuffer(this.length as int * Int8Array.BYTES_PER_ELEMENT as int)
+    //     let res = new Int8Array(resBuf)
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         res.set(i, fn(this.at(i), i))
+    //     }
+    //     return res
+    // }
 
     /**
      * Checks that all elements of Int8Array satisfy the passed function
@@ -1215,14 +1227,15 @@ export final class Int8Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: byte, index: int, array: Int8Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
-            if (!fn(this.at(i), i, this)) {
-                return false
-            }
-        }
-        return true
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public every(fn: (element: byte, index: int, array: Int8Array) => boolean): boolean {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         if (!fn(this.at(i), i, this)) {
+    //             return false
+    //         }
+    //     }
+    //     return true
+    // }
 
     /**
      * Checks that all elements of Int8Array satisfy the passed function
@@ -1231,11 +1244,12 @@ export final class Int8Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: byte, index: int) => boolean): boolean {
-        let newF: (element: byte, index: int, array: Int8Array) => boolean =
-            (element: byte, index: int, array: Int8Array): boolean => { return fn(element, index) }
-        return this.every(newF)
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public every(fn: (element: byte, index: int) => boolean): boolean {
+    //     let newF: (element: byte, index: int, array: Int8Array) => boolean =
+    //         (element: byte, index: int, array: Int8Array): boolean => { return fn(element, index) }
+    //     return this.every(newF)
+    // }
 
     /**
      * Creates a new Int8Array from current Int8Array based on a condition fn.
@@ -1244,25 +1258,26 @@ export final class Int8Array {
      *
      * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
      */
-    public filter(fn: (val: byte, index: int, array: Int8Array) => boolean): Int8Array {
-        let markers = new boolean[this.length as int]
-        let resLen = 0
-        for (let i = 0; i < this.length as int; ++i) {
-            markers[i] = fn(this.at(i), i, this)
-            if (markers[i]) {
-                ++resLen
-            }
-        }
-        let resBuf = new ArrayBuffer(resLen * Int8Array.BYTES_PER_ELEMENT as int)
-        let res = new Int8Array(resBuf)
-        for (let i = 0, j = 0; i < this.length as int; ++i) {
-            if (markers[i]) {
-                res.set(j, this.at(i))
-                ++j
-            }
-        }
-        return res
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public filter(fn: (val: byte, index: int, array: Int8Array) => boolean): Int8Array {
+    //     let markers = new boolean[this.length as int]
+    //     let resLen = 0
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         markers[i] = fn(this.at(i), i, this)
+    //         if (markers[i]) {
+    //             ++resLen
+    //         }
+    //     }
+    //     let resBuf = new ArrayBuffer(resLen * Int8Array.BYTES_PER_ELEMENT as int)
+    //     let res = new Int8Array(resBuf)
+    //     for (let i = 0, j = 0; i < this.length as int; ++i) {
+    //         if (markers[i]) {
+    //             res.set(j, this.at(i))
+    //             ++j
+    //         }
+    //     }
+    //     return res
+    // }
 
     /**
      * creates a new Int8Array from current Int8Array based on a condition fn
@@ -1271,11 +1286,11 @@ export final class Int8Array {
      *
      * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
      */
-    public filter(fn: (val: byte, index: int) => boolean): Int8Array {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
+    // public filter(fn: (val: byte, index: int) => boolean): Int8Array {
+    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
+    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
+    //     return this.filter(newF)
+    // }
 
     /**
      * Finds the first element in the Int8Array that satisfies the condition
@@ -1285,15 +1300,16 @@ export final class Int8Array {
      * @returns the first element that satisfies fn
      * TODO: return byte | undefined as in JS
      */
-    public find(fn: (val: byte, index: int, array: Int8Array) => boolean): byte {
-        for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Int8Array.find: not implemented if element was not found")
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public find(fn: (val: byte, index: int, array: Int8Array) => boolean): byte {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return val
+    //         }
+    //     }
+    //     throw new Error("Int8Array.find: not implemented if element was not found")
+    // }
 
     /**
      * Finds the first element in the Int8Array that satisfies the condition
@@ -1302,11 +1318,12 @@ export final class Int8Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: byte, index: int) => boolean): byte {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
-        return this.find(newF)
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public find(fn: (val: byte, index: int) => boolean): byte {
+    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
+    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
+    //     return this.find(newF)
+    // }
 
     /**
      * Finds an index of the first element in the Int8Array that satisfies the condition
@@ -1315,15 +1332,16 @@ export final class Int8Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: byte, index: int, array: Int8Array) => boolean): int {
-        for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findIndex(fn: (val: byte, index: int, array: Int8Array) => boolean): int {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return i
+    //         }
+    //     }
+    //     return -1
+    // }
 
     /**
      * Finds an index of the first element in the Int8Array that satisfies the condition
@@ -1332,11 +1350,12 @@ export final class Int8Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: byte, index: int) => boolean): int {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
-        return this.findIndex(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findIndex(fn: (val: byte, index: int) => boolean): int {
+    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
+    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
+    //     return this.findIndex(newF)
+    // }
 
     /**
      * Finds the last element in the Int8Array that satisfies the condition
@@ -1345,15 +1364,16 @@ export final class Int8Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: byte, index: int, array: Int8Array) => boolean): byte {
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Int8Array.findLast: not implemented if an element was not found")
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public findLast(fn: (val: byte, index: int, array: Int8Array) => boolean): byte {
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return val
+    //         }
+    //     }
+    //     throw new Error("Int8Array.findLast: not implemented if an element was not found")
+    // }
 
     /**
      * Finds the last element in the Int8Array that satisfies the condition
@@ -1362,11 +1382,11 @@ export final class Int8Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: byte, index: int) => boolean): byte {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
-    }
+    // public findLast(fn: (val: byte, index: int) => boolean): byte {
+    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
+    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
+    //     return this.findLast(newF)
+    // }
 
     /**
      * Finds an index of the last element in the Int8Array that satisfies the condition
@@ -1375,15 +1395,16 @@ export final class Int8Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: byte, index: int, array: Int8Array) => boolean): int {
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public findLastIndex(fn: (val: byte, index: int, array: Int8Array) => boolean): int {
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return i
+    //         }
+    //     }
+    //     return -1
+    // }
 
     /**
      * Finds an index of the last element in the Int8Array that satisfies the condition
@@ -1392,11 +1413,11 @@ export final class Int8Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: byte, index: int) => boolean): int {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF)
-    }
+    // public findLastIndex(fn: (val: byte, index: int) => boolean): int {
+    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
+    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
+    //     return this.findLastIndex(newF)
+    // }
 
     /**
      * Applies a function over all elements of Int8Array
@@ -1405,12 +1426,13 @@ export final class Int8Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: byte, index: int, array: Int8Array) => byte): void {
-        for (let i = 0; i < this.length as int; ++i) {
-            this.set(i, fn(this.at(i), i, this))
-        }
-        throw new Error("Int8Array.forEach: has to return undefined, but returns void for now")
-    }
+    // TODO: to enable overloads with 'byte' we need to enhance generics support
+    // public forEach(fn: (val: byte, index: int, array: Int8Array) => byte): void {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         this.set(i, fn(this.at(i), i, this))
+    //     }
+    //     throw new Error("Int8Array.forEach: has to return undefined, but returns void for now")
+    // }
 
     /**
      * Applies a function over all elements of Int8Array
@@ -1419,11 +1441,11 @@ export final class Int8Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: byte, index: int) => byte): void {
-        let newF: (val: byte, index: int, array: Int8Array) => byte =
-            (val: byte, index: int, array: Int8Array): byte => { return fn(val, index) }
-        this.forEach(newF)
-    }
+    // public forEach(fn: (val: byte, index: int) => byte): void {
+    //     let newF: (val: byte, index: int, array: Int8Array) => byte =
+    //         (val: byte, index: int, array: Int8Array): byte => { return fn(val, index) }
+    //     this.forEach(newF)
+    // }
 
     /**
      * Creates an Int8Array from array-like argument
@@ -1434,9 +1456,11 @@ export final class Int8Array {
      *
      * @returns new Int8Array
      */
-    public from(o: Object, mapFn: (e: Object, index: int) => byte): Int8Array {
-        throw new Error("Int8Array.from: not implemented")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public from(o: Object, mapFn: (e: Object, index: int) => byte): Int8Array {
+    //     throw new Error("Int8Array.from: not implemented")
+    // }
+
     /**
      * Checks that all elements of Int8Array satisfy the passed function
      *
@@ -1445,8 +1469,8 @@ export final class Int8Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: byte, index: int, array: Int8Array) => boolean =
-            (element: byte, index: int, array: Int8Array): boolean => { return fn(element as double as number) }
+        let newF: (element: number, index: number, array: Int8Array) => boolean =
+            (element: number, index: number, array: Int8Array): boolean => { return fn(element) }
         return this.every(newF)
     }
     /**
@@ -1457,8 +1481,8 @@ export final class Int8Array {
      * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
      */
     public filter(fn: (val: number) => boolean): Int8Array {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int8Array) => boolean =
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
         return this.filter(newF)
     }
 
@@ -1470,8 +1494,8 @@ export final class Int8Array {
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number) => boolean): byte {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int8Array) => boolean =
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
         return this.find(newF)
     }
 
@@ -1483,8 +1507,8 @@ export final class Int8Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int8Array) => boolean =
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
         return this.findIndex(newF) as double as number
     }
 
@@ -1496,8 +1520,8 @@ export final class Int8Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int8Array) => boolean =
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
         return this.findLast(newF) as double as number
     }
 
@@ -1509,8 +1533,8 @@ export final class Int8Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int8Array) => boolean =
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -1522,8 +1546,8 @@ export final class Int8Array {
      * @returns undefined
      */
     public forEach(fn: (val: number) => byte): void {
-        let newF: (val: byte, index: int, array: Int8Array) => byte =
-            (val: byte, index: int, array: Int8Array): byte => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int8Array) => byte =
+            (val: number, index: number, array: Int8Array): byte => { return fn(val) }
         this.forEach(newF)
     }
 
@@ -1535,8 +1559,8 @@ export final class Int8Array {
     * @returns a new Int8Array where for each element from current Int8Array fn was applied
     */
     public map(fn: (val: number) => number): Int8Array {
-        let newF: (val: byte, index: int) => byte =
-            (val: byte, index: int): byte => { return fn(val as double as number) as double as int as byte }
+        let newF: (val: number, index: number) => number =
+            (val: number, index: number): number => { return fn(val) }
         return this.map(newF)
     }
 
@@ -1548,8 +1572,8 @@ export final class Int8Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: byte, index: int, array: Int8Array) => boolean =
-            (element: byte, index: int, array: Int8Array): boolean => { return fn(element as double as number) }
+        let newF: (element: number, index: number, array: Int8Array) => boolean =
+            (element: number, index: number, array: Int8Array): boolean => { return fn(element) }
         return this.some(newF)
     }
 
@@ -1602,8 +1626,8 @@ export final class Int8Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: byte, index: int, array: Int8Array) => boolean =
-            (element: byte, index: int, array: Int8Array): boolean => { return fn(element as double as number, index as double as number) }
+        let newF: (element: number, index: number, array: Int8Array) => boolean =
+            (element: number, index: number, array: Int8Array): boolean => { return fn(element, index as double as number) }
         return this.some(newF)
     }
 
@@ -1711,8 +1735,8 @@ export final class Int8Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: byte, index: int, array: Int8Array) => boolean =
-            (element: byte, index: int, array: Int8Array): boolean => { return fn(element as double as number, index as double as number) }
+        let newF: (element: number, index: number, array: Int8Array) => boolean =
+            (element: number, index: number, array: Int8Array): boolean => { return fn(element, index as double as number) }
         return this.every(newF)
     }
 
@@ -1751,8 +1775,8 @@ export final class Int8Array {
      * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number) => boolean): Int8Array {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int8Array) => boolean =
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as double as number) }
         return this.filter(newF)
     }
 
@@ -1782,8 +1806,8 @@ export final class Int8Array {
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number, index: number) => boolean): byte {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int8Array) => boolean =
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as double as number) }
         return this.find(newF)
     }
 
@@ -1812,8 +1836,8 @@ export final class Int8Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int8Array) => boolean =
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as double as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -1842,8 +1866,8 @@ export final class Int8Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number) => boolean): byte {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int8Array) => boolean =
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val as double as number, index as double as number) }
         return this.findLast(newF)
     }
 
@@ -1872,8 +1896,8 @@ export final class Int8Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: byte, index: int, array: Int8Array) => boolean =
-            (val: byte, index: int, array: Int8Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int8Array) => boolean =
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as double as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -1899,8 +1923,8 @@ export final class Int8Array {
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number) => byte): void {
-        let newF: (val: byte, index: int, array: Int8Array) => byte =
-            (val: byte, index: int, array: Int8Array): byte => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int8Array) => byte =
+            (val: number, index: number, array: Int8Array): byte => { return fn(val, index as double as number) }
         this.forEach(newF)
     }
 
@@ -2365,9 +2389,10 @@ export final class Int16Array {
      *
      * @returns new Int16Array
      */
+    // TODO: to enable overloads with 'int' we need to enhance generics support
     public from(o: Object, mapFn: (e: Object) => short): Int16Array {
-        let newF: (e: Object, index: int) => short =
-            (e: Object, index: int): short => { return mapFn(e) }
+        let newF: (e: Object, index: number) => short =
+            (e: Object, index: number): short => { return mapFn(e) }
         return this.from(o, newF)
     }
 
@@ -2882,11 +2907,12 @@ export final class Int16Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: short) => boolean): boolean {
-        let newF: (element: short, index: int, array: Int16Array) => boolean =
-            (element: short, index: int, array: Int16Array): boolean => { return fn(element) }
-        return this.every(newF)
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public every(fn: (element: short) => boolean): boolean {
+    //     let newF: (element: short, index: int, array: Int16Array) => boolean =
+    //         (element: short, index: int, array: Int16Array): boolean => { return fn(element) }
+    //     return this.every(newF)
+    // }
     /**
      * creates a new Int16Array from current Int16Array based on a condition fn
      *
@@ -2894,11 +2920,12 @@ export final class Int16Array {
      *
      * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
      */
-    public filter(fn: (val: short) => boolean): Int16Array {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
-        return this.filter(newF)
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public filter(fn: (val: short) => boolean): Int16Array {
+    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
+    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
+    //     return this.filter(newF)
+    // }
 
     /**
      * Finds the first element in the Int16Array that satisfies the condition
@@ -2907,11 +2934,12 @@ export final class Int16Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: short) => boolean): short {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
-        return this.find(newF)
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public find(fn: (val: short) => boolean): short {
+    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
+    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
+    //     return this.find(newF)
+    // }
 
     /**
      * Finds an index of the first element in the Int16Array that satisfies the condition
@@ -2920,11 +2948,12 @@ export final class Int16Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: short) => boolean): int {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
-        return this.findIndex(newF)
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public findIndex(fn: (val: short) => boolean): int {
+    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
+    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
+    //     return this.findIndex(newF)
+    // }
 
     /**
      * Finds the last element in the Int16Array that satisfies the condition
@@ -2933,11 +2962,12 @@ export final class Int16Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: short) => boolean): short {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
-        return this.findLast(newF)
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public findLast(fn: (val: short) => boolean): short {
+    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
+    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
+    //     return this.findLast(newF)
+    // }
 
     /**
      * Finds an index of the last element in the Int16Array that satisfies the condition
@@ -2946,11 +2976,12 @@ export final class Int16Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: short) => boolean): int {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF)
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public findLastIndex(fn: (val: short) => boolean): int {
+    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
+    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
+    //     return this.findLastIndex(newF)
+    // }
 
     /**
      * Applies a function over all elements of Int16Array
@@ -2959,11 +2990,12 @@ export final class Int16Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: short) => short): void {
-        let newF: (val: short, index: int, array: Int16Array) => short =
-            (val: short, index: int, array: Int16Array): short => { return fn(val) }
-        this.forEach(newF)
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public forEach(fn: (val: short) => short): void {
+    //     let newF: (val: short, index: int, array: Int16Array) => short =
+    //         (val: short, index: int, array: Int16Array): short => { return fn(val) }
+    //     this.forEach(newF)
+    // }
 
    /**
     * Creates a new Int16Array using fn(arr[i]) over all elements of current Int16Array
@@ -2972,11 +3004,12 @@ export final class Int16Array {
     *
     * @returns a new Int16Array where for each element from current Int16Array fn was applied
     */
-    public map(fn: (val: short) => short): Int16Array {
-        let newF: (val: short, index: int) => short =
-            (val: short, index: int): short => { return fn(val) }
-        return this.map(newF)
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public map(fn: (val: short) => short): Int16Array {
+    //     let newF: (val: short, index: int) => short =
+    //         (val: short, index: int): short => { return fn(val) }
+    //     return this.map(newF)
+    // }
 
     /**
      * Checks that at least one element of Int16Array satisfies the passed function
@@ -2985,11 +3018,12 @@ export final class Int16Array {
      *
      * @returns true if some element satisfies fn
      */
-    public some(fn: (element: short) => boolean): boolean {
-        let newF: (element: short, index: int, array: Int16Array) => boolean =
-            (element: short, index: int, array: Int16Array): boolean => { return fn(element) }
-        return this.some(newF)
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public some(fn: (element: short) => boolean): boolean {
+    //     let newF: (element: short, index: int, array: Int16Array) => boolean =
+    //         (element: short, index: int, array: Int16Array): boolean => { return fn(element) }
+    //     return this.some(newF)
+    // }
 
     // TODO(kprokopenko): this may be not skipped
     /**
@@ -2999,22 +3033,23 @@ export final class Int16Array {
      *
      * @returns sorted Int16Array
      */
-    public sort(fn: (a: short, b: short) => int): Int16Array {
-        let arr: short[] = new short[this.length as int]
-        for (let i = 0; i < this.length as int; ++i) {
-            arr[i] = this.at(i)
-        }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: short, b: short) => boolean =
-                (a: short, b: short): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
-            for (let i = 0; i < this.length as int; ++i) {
-                this.set(i, arr[i])
-            }
-        */
-        return this;
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public sort(fn: (a: short, b: short) => int): Int16Array {
+    //     let arr: short[] = new short[this.length as int]
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         arr[i] = this.at(i)
+    //     }
+    //     // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+    //     /*
+    //         let mustPrecede: (a: short, b: short) => boolean =
+    //             (a: short, b: short): boolean => { return (fn(a, b) <= 0) }
+    //         sort(arr, mustPrecede)
+    //         for (let i = 0; i < this.length as int; ++i) {
+    //             this.set(i, arr[i])
+    //         }
+    //     */
+    //     return this;
+    // }
 
     /**
      * Checks that at least one element of Int16Array satisfies the passed function
@@ -3023,14 +3058,15 @@ export final class Int16Array {
      *
      * @returns true if some element satisfies fn
      */
-    public some(fn: (element: short, index: int, array: Int16Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
-            if (fn(this.at(i), i, this)) {
-                return true
-            }
-        }
-        return false
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public some(fn: (element: short, index: int, array: Int16Array) => boolean): boolean {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         if (fn(this.at(i), i, this)) {
+    //             return true
+    //         }
+    //     }
+    //     return false
+    // }
 
     /**
      * Checks that at least one element of Int16Array satisfies the passed function
@@ -3039,11 +3075,12 @@ export final class Int16Array {
      *
      * @returns true if some element satisfies fn
      */
-    public some(fn: (element: short, index: int) => boolean): boolean {
-        let newF: (element: short, index: int, array: Int16Array) => boolean =
-            (element: short, index: int, array: Int16Array): boolean => { return fn(element, index) }
-        return this.some(newF)
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public some(fn: (element: short, index: int) => boolean): boolean {
+    //     let newF: (element: short, index: int, array: Int16Array) => boolean =
+    //         (element: short, index: int, array: Int16Array): boolean => { return fn(element, index) }
+    //     return this.some(newF)
+    // }
 
     /**
      * Reduces data into a single value using left-to-right traversal
@@ -3054,28 +3091,29 @@ export final class Int16Array {
      *
      * @returns reduction result
      */
-    public reduce(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short, init: short): short {
-        let acc = init
-        for (let i = 0; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // NOTE: to enable overloads with 'short' we need to enhance generics support
+    // public reduce(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short, init: short): short {
+    //     let acc = init
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short): short {
-        let acc = this.at(0)
-        for (let i = 1; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // /**
+    //  * Reduces data into a single value using left-to-right traversal
+    //  *
+    //  * @param fn condition
+    //  *
+    //  * @returns reduction result
+    //  */
+    // public reduce(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short): short {
+    //     let acc = this.at(0)
+    //     for (let i = 1; i < this.length as int; ++i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
      * Reduces data into a single value using right-to-left traversal
@@ -3086,28 +3124,29 @@ export final class Int16Array {
      *
      * @returns reduction result
      */
-    public reduceRight(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short, init: short): short {
-        let acc = init
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public reduceRight(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short, init: short): short {
+    //     let acc = init
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short): short {
-        let acc: short = this.at(this.length as int - 1)
-        for (let i = this.length as int - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // /**
+    //  * Reduces data into a single value using right-to-left traversal
+    //  *
+    //  * @param fn condition
+    //  *
+    //  * @returns reduction result
+    //  */
+    // public reduceRight(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short): short {
+    //     let acc: short = this.at(this.length as int - 1)
+    //     for (let i = this.length as int - 2; i >= 0; --i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
     * Creates a new Int16Array using fn(arr[i]) over all elements of current Int16Array.
@@ -3116,14 +3155,15 @@ export final class Int16Array {
     *
     * @returns a new Int16Array where for each element from current Int16Array fn was applied
     */
-    public map(fn: (val: short, index: int) => short): Int16Array {
-        let resBuf = new ArrayBuffer(this.length as int * Int16Array.BYTES_PER_ELEMENT as int)
-        let res = new Int16Array(resBuf)
-        for (let i = 0; i < this.length as int; ++i) {
-            res.set(i, fn(this.at(i), i))
-        }
-        return res
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public map(fn: (val: short, index: int) => short): Int16Array {
+    //     let resBuf = new ArrayBuffer(this.length as int * Int16Array.BYTES_PER_ELEMENT as int)
+    //     let res = new Int16Array(resBuf)
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         res.set(i, fn(this.at(i), i))
+    //     }
+    //     return res
+    // }
 
     /**
      * Checks that all elements of Int16Array satisfy the passed function
@@ -3132,14 +3172,14 @@ export final class Int16Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: short, index: int, array: Int16Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
-            if (!fn(this.at(i), i, this)) {
-                return false
-            }
-        }
-        return true
-    }
+    // public every(fn: (element: short, index: int, array: Int16Array) => boolean): boolean {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         if (!fn(this.at(i), i, this)) {
+    //             return false
+    //         }
+    //     }
+    //     return true
+    // }
 
     /**
      * Checks that all elements of Int16Array satisfy the passed function
@@ -3148,11 +3188,11 @@ export final class Int16Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: short, index: int) => boolean): boolean {
-        let newF: (element: short, index: int, array: Int16Array) => boolean =
-            (element: short, index: int, array: Int16Array): boolean => { return fn(element, index) }
-        return this.every(newF)
-    }
+    // public every(fn: (element: short, index: int) => boolean): boolean {
+    //     let newF: (element: short, index: int, array: Int16Array) => boolean =
+    //         (element: short, index: int, array: Int16Array): boolean => { return fn(element, index) }
+    //     return this.every(newF)
+    // }
 
     /**
      * Creates a new Int16Array from current Int16Array based on a condition fn.
@@ -3161,25 +3201,26 @@ export final class Int16Array {
      *
      * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
      */
-    public filter(fn: (val: short, index: int, array: Int16Array) => boolean): Int16Array {
-        let markers = new boolean[this.length as int]
-        let resLen = 0
-        for (let i = 0; i < this.length as int; ++i) {
-            markers[i] = fn(this.at(i), i, this)
-            if (markers[i]) {
-                ++resLen
-            }
-        }
-        let resBuf = new ArrayBuffer(resLen * Int16Array.BYTES_PER_ELEMENT as int)
-        let res = new Int16Array(resBuf)
-        for (let i = 0, j = 0; i < this.length as int; ++i) {
-            if (markers[i]) {
-                res.set(j, this.at(i))
-                ++j
-            }
-        }
-        return res
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public filter(fn: (val: short, index: int, array: Int16Array) => boolean): Int16Array {
+    //     let markers = new boolean[this.length as int]
+    //     let resLen = 0
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         markers[i] = fn(this.at(i), i, this)
+    //         if (markers[i]) {
+    //             ++resLen
+    //         }
+    //     }
+    //     let resBuf = new ArrayBuffer(resLen * Int16Array.BYTES_PER_ELEMENT as int)
+    //     let res = new Int16Array(resBuf)
+    //     for (let i = 0, j = 0; i < this.length as int; ++i) {
+    //         if (markers[i]) {
+    //             res.set(j, this.at(i))
+    //             ++j
+    //         }
+    //     }
+    //     return res
+    // }
 
     /**
      * creates a new Int16Array from current Int16Array based on a condition fn
@@ -3188,11 +3229,11 @@ export final class Int16Array {
      *
      * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
      */
-    public filter(fn: (val: short, index: int) => boolean): Int16Array {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
+    // public filter(fn: (val: short, index: int) => boolean): Int16Array {
+    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
+    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
+    //     return this.filter(newF)
+    // }
 
     /**
      * Finds the first element in the Int16Array that satisfies the condition
@@ -3202,15 +3243,16 @@ export final class Int16Array {
      * @returns the first element that satisfies fn
      * TODO: return short | undefined as in JS
      */
-    public find(fn: (val: short, index: int, array: Int16Array) => boolean): short {
-        for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Int16Array.find: not implemented if element was not found")
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public find(fn: (val: short, index: int, array: Int16Array) => boolean): short {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return val
+    //         }
+    //     }
+    //     throw new Error("Int16Array.find: not implemented if element was not found")
+    // }
 
     /**
      * Finds the first element in the Int16Array that satisfies the condition
@@ -3219,11 +3261,11 @@ export final class Int16Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: short, index: int) => boolean): short {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
-        return this.find(newF)
-    }
+    // public find(fn: (val: short, index: int) => boolean): short {
+    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
+    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
+    //     return this.find(newF)
+    // }
 
     /**
      * Finds an index of the first element in the Int16Array that satisfies the condition
@@ -3232,15 +3274,16 @@ export final class Int16Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: short, index: int, array: Int16Array) => boolean): int {
-        for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public findIndex(fn: (val: short, index: int, array: Int16Array) => boolean): int {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return i
+    //         }
+    //     }
+    //     return -1
+    // }
 
     /**
      * Finds an index of the first element in the Int16Array that satisfies the condition
@@ -3249,11 +3292,12 @@ export final class Int16Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: short, index: int) => boolean): int {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
-        return this.findIndex(newF)
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public findIndex(fn: (val: short, index: int) => boolean): int {
+    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
+    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
+    //     return this.findIndex(newF)
+    // }
 
     /**
      * Finds the last element in the Int16Array that satisfies the condition
@@ -3262,15 +3306,16 @@ export final class Int16Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: short, index: int, array: Int16Array) => boolean): short {
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Int16Array.findLast: not implemented if an element was not found")
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public findLast(fn: (val: short, index: int, array: Int16Array) => boolean): short {
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return val
+    //         }
+    //     }
+    //     throw new Error("Int16Array.findLast: not implemented if an element was not found")
+    // }
 
     /**
      * Finds the last element in the Int16Array that satisfies the condition
@@ -3279,11 +3324,11 @@ export final class Int16Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: short, index: int) => boolean): short {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
-    }
+    // public findLast(fn: (val: short, index: int) => boolean): short {
+    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
+    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
+    //     return this.findLast(newF)
+    // }
 
     /**
      * Finds an index of the last element in the Int16Array that satisfies the condition
@@ -3292,15 +3337,16 @@ export final class Int16Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: short, index: int, array: Int16Array) => boolean): int {
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public findLastIndex(fn: (val: short, index: int, array: Int16Array) => boolean): int {
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return i
+    //         }
+    //     }
+    //     return -1
+    // }
 
     /**
      * Finds an index of the last element in the Int16Array that satisfies the condition
@@ -3309,11 +3355,11 @@ export final class Int16Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: short, index: int) => boolean): int {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF)
-    }
+    // public findLastIndex(fn: (val: short, index: int) => boolean): int {
+    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
+    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
+    //     return this.findLastIndex(newF)
+    // }
 
     /**
      * Applies a function over all elements of Int16Array
@@ -3322,12 +3368,13 @@ export final class Int16Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: short, index: int, array: Int16Array) => short): void {
-        for (let i = 0; i < this.length as int; ++i) {
-            this.set(i, fn(this.at(i), i, this))
-        }
-        throw new Error("Int16Array.forEach: has to return undefined, but returns void for now")
-    }
+    // TODO: to enable overloads with 'short' we need to enhance generics support
+    // public forEach(fn: (val: short, index: int, array: Int16Array) => short): void {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         this.set(i, fn(this.at(i), i, this))
+    //     }
+    //     throw new Error("Int16Array.forEach: has to return undefined, but returns void for now")
+    // }
 
     /**
      * Applies a function over all elements of Int16Array
@@ -3336,11 +3383,11 @@ export final class Int16Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: short, index: int) => short): void {
-        let newF: (val: short, index: int, array: Int16Array) => short =
-            (val: short, index: int, array: Int16Array): short => { return fn(val, index) }
-        this.forEach(newF)
-    }
+    // public forEach(fn: (val: short, index: int) => short): void {
+    //     let newF: (val: short, index: int, array: Int16Array) => short =
+    //         (val: short, index: int, array: Int16Array): short => { return fn(val, index) }
+    //     this.forEach(newF)
+    // }
 
     /**
      * Creates an Int16Array from array-like argument
@@ -3351,9 +3398,11 @@ export final class Int16Array {
      *
      * @returns new Int16Array
      */
-    public from(o: Object, mapFn: (e: Object, index: int) => short): Int16Array {
-        throw new Error("Int16Array.from: not implemented")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public from(o: Object, mapFn: (e: Object, index: int) => short): Int16Array {
+    //     throw new Error("Int16Array.from: not implemented")
+    // }
+
     /**
      * Checks that all elements of Int16Array satisfy the passed function
      *
@@ -3362,8 +3411,8 @@ export final class Int16Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: short, index: int, array: Int16Array) => boolean =
-            (element: short, index: int, array: Int16Array): boolean => { return fn(element as double as number) }
+        let newF: (element: number, index: number, array: Int16Array) => boolean =
+            (element: number, index: number, array: Int16Array): boolean => { return fn(element) }
         return this.every(newF)
     }
     /**
@@ -3374,8 +3423,8 @@ export final class Int16Array {
      * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
      */
     public filter(fn: (val: number) => boolean): Int16Array {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int16Array) => boolean =
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
         return this.filter(newF)
     }
 
@@ -3387,8 +3436,8 @@ export final class Int16Array {
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number) => boolean): short {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int16Array) => boolean =
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
         return this.find(newF)
     }
 
@@ -3400,8 +3449,8 @@ export final class Int16Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int16Array) => boolean =
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
         return this.findIndex(newF) as double as number
     }
 
@@ -3413,8 +3462,8 @@ export final class Int16Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int16Array) => boolean =
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
         return this.findLast(newF) as double as number
     }
 
@@ -3426,8 +3475,8 @@ export final class Int16Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int16Array) => boolean =
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -3439,8 +3488,8 @@ export final class Int16Array {
      * @returns undefined
      */
     public forEach(fn: (val: number) => short): void {
-        let newF: (val: short, index: int, array: Int16Array) => short =
-            (val: short, index: int, array: Int16Array): short => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int16Array) => short =
+            (val: number, index: number, array: Int16Array): short => { return fn(val) }
         this.forEach(newF)
     }
 
@@ -3452,8 +3501,8 @@ export final class Int16Array {
     * @returns a new Int16Array where for each element from current Int16Array fn was applied
     */
     public map(fn: (val: number) => number): Int16Array {
-        let newF: (val: short, index: int) => short =
-            (val: short, index: int): short => { return fn(val as double as number) as double as int as short }
+        let newF: (val: number, index: number) => number =
+            (val: number, index: number): number => { return fn(val) }
         return this.map(newF)
     }
 
@@ -3465,8 +3514,8 @@ export final class Int16Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: short, index: int, array: Int16Array) => boolean =
-            (element: short, index: int, array: Int16Array): boolean => { return fn(element as double as number) }
+        let newF: (element: number, index: number, array: Int16Array) => boolean =
+            (element: number, index: number, array: Int16Array): boolean => { return fn(element) }
         return this.some(newF)
     }
 
@@ -3519,8 +3568,8 @@ export final class Int16Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: short, index: int, array: Int16Array) => boolean =
-            (element: short, index: int, array: Int16Array): boolean => { return fn(element as double as number, index as double as number) }
+        let newF: (element: number, index: number, array: Int16Array) => boolean =
+            (element: number, index: number, array: Int16Array): boolean => { return fn(element, index as double as number) }
         return this.some(newF)
     }
 
@@ -3628,8 +3677,8 @@ export final class Int16Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: short, index: int, array: Int16Array) => boolean =
-            (element: short, index: int, array: Int16Array): boolean => { return fn(element as double as number, index as double as number) }
+        let newF: (element: number, index: number, array: Int16Array) => boolean =
+            (element: number, index: number, array: Int16Array): boolean => { return fn(element, index as double as number) }
         return this.every(newF)
     }
 
@@ -3668,8 +3717,8 @@ export final class Int16Array {
      * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number) => boolean): Int16Array {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int16Array) => boolean =
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as double as number) }
         return this.filter(newF)
     }
 
@@ -3699,8 +3748,8 @@ export final class Int16Array {
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number, index: number) => boolean): short {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int16Array) => boolean =
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as double as number) }
         return this.find(newF)
     }
 
@@ -3729,8 +3778,8 @@ export final class Int16Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int16Array) => boolean =
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as double as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -3759,8 +3808,8 @@ export final class Int16Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number) => boolean): short {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int16Array) => boolean =
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val as double as number, index as double as number) }
         return this.findLast(newF)
     }
 
@@ -3789,8 +3838,8 @@ export final class Int16Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: short, index: int, array: Int16Array) => boolean =
-            (val: short, index: int, array: Int16Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int16Array) => boolean =
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as double as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -3816,8 +3865,8 @@ export final class Int16Array {
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number) => short): void {
-        let newF: (val: short, index: int, array: Int16Array) => short =
-            (val: short, index: int, array: Int16Array): short => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int16Array) => short =
+            (val: number, index: number, array: Int16Array): short => { return fn(val, index as double as number) }
         this.forEach(newF)
     }
 
@@ -4283,8 +4332,8 @@ export final class Int32Array {
      * @returns new Int32Array
      */
     public from(o: Object, mapFn: (e: Object) => int): Int32Array {
-        let newF: (e: Object, index: int) => int =
-            (e: Object, index: int): int => { return mapFn(e) }
+        let newF: (e: Object, index: number) => int =
+            (e: Object, index: number): int => { return mapFn(e) }
         return this.from(o, newF)
     }
 
@@ -4799,11 +4848,12 @@ export final class Int32Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: int) => boolean): boolean {
-        let newF: (element: int, index: int, array: Int32Array) => boolean =
-            (element: int, index: int, array: Int32Array): boolean => { return fn(element) }
-        return this.every(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public every(fn: (element: int) => boolean): boolean {
+    //     let newF: (element: int, index: int, array: Int32Array) => boolean =
+    //         (element: int, index: int, array: Int32Array): boolean => { return fn(element) }
+    //     return this.every(newF)
+    // }
     /**
      * creates a new Int32Array from current Int32Array based on a condition fn
      *
@@ -4811,11 +4861,12 @@ export final class Int32Array {
      *
      * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
      */
-    public filter(fn: (val: int) => boolean): Int32Array {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
-        return this.filter(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public filter(fn: (val: int) => boolean): Int32Array {
+    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
+    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
+    //     return this.filter(newF)
+    // }
 
     /**
      * Finds the first element in the Int32Array that satisfies the condition
@@ -4824,11 +4875,12 @@ export final class Int32Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: int) => boolean): int {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
-        return this.find(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public find(fn: (val: int) => boolean): int {
+    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
+    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
+    //     return this.find(newF)
+    // }
 
     /**
      * Finds an index of the first element in the Int32Array that satisfies the condition
@@ -4837,11 +4889,12 @@ export final class Int32Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: int) => boolean): int {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
-        return this.findIndex(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findIndex(fn: (val: int) => boolean): int {
+    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
+    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
+    //     return this.findIndex(newF)
+    // }
 
     /**
      * Finds the last element in the Int32Array that satisfies the condition
@@ -4850,11 +4903,12 @@ export final class Int32Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: int) => boolean): int {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
-        return this.findLast(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findLast(fn: (val: int) => boolean): int {
+    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
+    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
+    //     return this.findLast(newF)
+    // }
 
     /**
      * Finds an index of the last element in the Int32Array that satisfies the condition
@@ -4863,11 +4917,12 @@ export final class Int32Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: int) => boolean): int {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findLastIndex(fn: (val: int) => boolean): int {
+    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
+    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
+    //     return this.findLastIndex(newF)
+    // }
 
     /**
      * Applies a function over all elements of Int32Array
@@ -4876,11 +4931,12 @@ export final class Int32Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: int) => int): void {
-        let newF: (val: int, index: int, array: Int32Array) => int =
-            (val: int, index: int, array: Int32Array): int => { return fn(val) }
-        this.forEach(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public forEach(fn: (val: int) => int): void {
+    //     let newF: (val: int, index: int, array: Int32Array) => int =
+    //         (val: int, index: int, array: Int32Array): int => { return fn(val) }
+    //     this.forEach(newF)
+    // }
 
    /**
     * Creates a new Int32Array using fn(arr[i]) over all elements of current Int32Array
@@ -4889,11 +4945,12 @@ export final class Int32Array {
     *
     * @returns a new Int32Array where for each element from current Int32Array fn was applied
     */
-    public map(fn: (val: int) => int): Int32Array {
-        let newF: (val: int, index: int) => int =
-            (val: int, index: int): int => { return fn(val) }
-        return this.map(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public map(fn: (val: int) => int): Int32Array {
+    //     let newF: (val: int, index: int) => int =
+    //         (val: int, index: int): int => { return fn(val) }
+    //     return this.map(newF)
+    // }
 
     /**
      * Checks that at least one element of Int32Array satisfies the passed function
@@ -4902,65 +4959,66 @@ export final class Int32Array {
      *
      * @returns true if some element satisfies fn
      */
-    public some(fn: (element: int) => boolean): boolean {
-        let newF: (element: int, index: int, array: Int32Array) => boolean =
-            (element: int, index: int, array: Int32Array): boolean => { return fn(element) }
-        return this.some(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public some(fn: (element: int) => boolean): boolean {
+    //     let newF: (element: int, index: int, array: Int32Array) => boolean =
+    //         (element: int, index: int, array: Int32Array): boolean => { return fn(element) }
+    //     return this.some(newF)
+    // }
 
-    // TODO(kprokopenko): this may be not skipped
-    /**
-     * Sorts in-place
-     *
-     * @param fn comparator
-     *
-     * @returns sorted Int32Array
-     */
-    public sort(fn: (a: int, b: int) => int): Int32Array {
-        let arr: int[] = new int[this.length as int]
-        for (let i = 0; i < this.length as int; ++i) {
-            arr[i] = this.at(i)
-        }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: int, b: int) => boolean =
-                (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
-            for (let i = 0; i < this.length as int; ++i) {
-                this.set(i, arr[i])
-            }
-        */
-        return this;
-    }
+    // // TODO(kprokopenko): this may be not skipped
+    // /**
+    //  * Sorts in-place
+    //  *
+    //  * @param fn comparator
+    //  *
+    //  * @returns sorted Int32Array
+    //  */
+    // public sort(fn: (a: int, b: int) => int): Int32Array {
+    //     let arr: int[] = new int[this.length as int]
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         arr[i] = this.at(i)
+    //     }
+    //     // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+    //     /*
+    //         let mustPrecede: (a: int, b: int) => boolean =
+    //             (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
+    //         sort(arr, mustPrecede)
+    //         for (let i = 0; i < this.length as int; ++i) {
+    //             this.set(i, arr[i])
+    //         }
+    //     */
+    //     return this;
+    // }
 
-    /**
-     * Checks that at least one element of Int32Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: int, index: int, array: Int32Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
-            if (fn(this.at(i), i, this)) {
-                return true
-            }
-        }
-        return false
-    }
+    // /**
+    //  * Checks that at least one element of Int32Array satisfies the passed function
+    //  *
+    //  * @param fn check function
+    //  *
+    //  * @returns true if some element satisfies fn
+    //  */
+    // public some(fn: (element: int, index: int, array: Int32Array) => boolean): boolean {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         if (fn(this.at(i), i, this)) {
+    //             return true
+    //         }
+    //     }
+    //     return false
+    // }
 
-    /**
-     * Checks that at least one element of Int32Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: int, index: int) => boolean): boolean {
-        let newF: (element: int, index: int, array: Int32Array) => boolean =
-            (element: int, index: int, array: Int32Array): boolean => { return fn(element, index) }
-        return this.some(newF)
-    }
+    // /**
+    //  * Checks that at least one element of Int32Array satisfies the passed function
+    //  *
+    //  * @param fn check function
+    //  *
+    //  * @returns true if some element satisfies fn
+    //  */
+    // public some(fn: (element: int, index: int) => boolean): boolean {
+    //     let newF: (element: int, index: int, array: Int32Array) => boolean =
+    //         (element: int, index: int, array: Int32Array): boolean => { return fn(element, index) }
+    //     return this.some(newF)
+    // }
 
     /**
      * Reduces data into a single value using left-to-right traversal
@@ -4971,28 +5029,29 @@ export final class Int32Array {
      *
      * @returns reduction result
      */
-    public reduce(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int, init: int): int {
-        let acc = init
-        for (let i = 0; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // NOTE: to enable overloads with 'int' we need to enhance generics support
+    // public reduce(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int, init: int): int {
+    //     let acc = init
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int): int {
-        let acc = this.at(0)
-        for (let i = 1; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // /**
+    //  * Reduces data into a single value using left-to-right traversal
+    //  *
+    //  * @param fn condition
+    //  *
+    //  * @returns reduction result
+    //  */
+    // public reduce(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int): int {
+    //     let acc = this.at(0)
+    //     for (let i = 1; i < this.length as int; ++i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
      * Reduces data into a single value using right-to-left traversal
@@ -5003,28 +5062,29 @@ export final class Int32Array {
      *
      * @returns reduction result
      */
-    public reduceRight(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int, init: int): int {
-        let acc = init
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public reduceRight(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int, init: int): int {
+    //     let acc = init
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int): int {
-        let acc: int = this.at(this.length as int - 1)
-        for (let i = this.length as int - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // /**
+    //  * Reduces data into a single value using right-to-left traversal
+    //  *
+    //  * @param fn condition
+    //  *
+    //  * @returns reduction result
+    //  */
+    // public reduceRight(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int): int {
+    //     let acc: int = this.at(this.length as int - 1)
+    //     for (let i = this.length as int - 2; i >= 0; --i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
     * Creates a new Int32Array using fn(arr[i]) over all elements of current Int32Array.
@@ -5033,14 +5093,15 @@ export final class Int32Array {
     *
     * @returns a new Int32Array where for each element from current Int32Array fn was applied
     */
-    public map(fn: (val: int, index: int) => int): Int32Array {
-        let resBuf = new ArrayBuffer(this.length as int * Int32Array.BYTES_PER_ELEMENT as int)
-        let res = new Int32Array(resBuf)
-        for (let i = 0; i < this.length as int; ++i) {
-            res.set(i, fn(this.at(i), i))
-        }
-        return res
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public map(fn: (val: int, index: int) => int): Int32Array {
+    //     let resBuf = new ArrayBuffer(this.length as int * Int32Array.BYTES_PER_ELEMENT as int)
+    //     let res = new Int32Array(resBuf)
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         res.set(i, fn(this.at(i), i))
+    //     }
+    //     return res
+    // }
 
     /**
      * Checks that all elements of Int32Array satisfy the passed function
@@ -5049,14 +5110,15 @@ export final class Int32Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: int, index: int, array: Int32Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
-            if (!fn(this.at(i), i, this)) {
-                return false
-            }
-        }
-        return true
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public every(fn: (element: int, index: int, array: Int32Array) => boolean): boolean {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         if (!fn(this.at(i), i, this)) {
+    //             return false
+    //         }
+    //     }
+    //     return true
+    // }
 
     /**
      * Checks that all elements of Int32Array satisfy the passed function
@@ -5065,11 +5127,11 @@ export final class Int32Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: int, index: int) => boolean): boolean {
-        let newF: (element: int, index: int, array: Int32Array) => boolean =
-            (element: int, index: int, array: Int32Array): boolean => { return fn(element, index) }
-        return this.every(newF)
-    }
+    // public every(fn: (element: int, index: int) => boolean): boolean {
+    //     let newF: (element: int, index: int, array: Int32Array) => boolean =
+    //         (element: int, index: int, array: Int32Array): boolean => { return fn(element, index) }
+    //     return this.every(newF)
+    // }
 
     /**
      * Creates a new Int32Array from current Int32Array based on a condition fn.
@@ -5078,25 +5140,26 @@ export final class Int32Array {
      *
      * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
      */
-    public filter(fn: (val: int, index: int, array: Int32Array) => boolean): Int32Array {
-        let markers = new boolean[this.length as int]
-        let resLen = 0
-        for (let i = 0; i < this.length as int; ++i) {
-            markers[i] = fn(this.at(i), i, this)
-            if (markers[i]) {
-                ++resLen
-            }
-        }
-        let resBuf = new ArrayBuffer(resLen * Int32Array.BYTES_PER_ELEMENT as int)
-        let res = new Int32Array(resBuf)
-        for (let i = 0, j = 0; i < this.length as int; ++i) {
-            if (markers[i]) {
-                res.set(j, this.at(i))
-                ++j
-            }
-        }
-        return res
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public filter(fn: (val: int, index: int, array: Int32Array) => boolean): Int32Array {
+    //     let markers = new boolean[this.length as int]
+    //     let resLen = 0
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         markers[i] = fn(this.at(i), i, this)
+    //         if (markers[i]) {
+    //             ++resLen
+    //         }
+    //     }
+    //     let resBuf = new ArrayBuffer(resLen * Int32Array.BYTES_PER_ELEMENT as int)
+    //     let res = new Int32Array(resBuf)
+    //     for (let i = 0, j = 0; i < this.length as int; ++i) {
+    //         if (markers[i]) {
+    //             res.set(j, this.at(i))
+    //             ++j
+    //         }
+    //     }
+    //     return res
+    // }
 
     /**
      * creates a new Int32Array from current Int32Array based on a condition fn
@@ -5105,11 +5168,11 @@ export final class Int32Array {
      *
      * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
      */
-    public filter(fn: (val: int, index: int) => boolean): Int32Array {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
+    // public filter(fn: (val: int, index: int) => boolean): Int32Array {
+    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
+    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
+    //     return this.filter(newF)
+    // }
 
     /**
      * Finds the first element in the Int32Array that satisfies the condition
@@ -5119,15 +5182,16 @@ export final class Int32Array {
      * @returns the first element that satisfies fn
      * TODO: return int | undefined as in JS
      */
-    public find(fn: (val: int, index: int, array: Int32Array) => boolean): int {
-        for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Int32Array.find: not implemented if element was not found")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public find(fn: (val: int, index: int, array: Int32Array) => boolean): int {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return val
+    //         }
+    //     }
+    //     throw new Error("Int32Array.find: not implemented if element was not found")
+    // }
 
     /**
      * Finds the first element in the Int32Array that satisfies the condition
@@ -5136,11 +5200,11 @@ export final class Int32Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: int, index: int) => boolean): int {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
-        return this.find(newF)
-    }
+    // public find(fn: (val: int, index: int) => boolean): int {
+    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
+    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
+    //     return this.find(newF)
+    // }
 
     /**
      * Finds an index of the first element in the Int32Array that satisfies the condition
@@ -5149,15 +5213,16 @@ export final class Int32Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: int, index: int, array: Int32Array) => boolean): int {
-        for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findIndex(fn: (val: int, index: int, array: Int32Array) => boolean): int {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return i
+    //         }
+    //     }
+    //     return -1
+    // }
 
     /**
      * Finds an index of the first element in the Int32Array that satisfies the condition
@@ -5166,11 +5231,12 @@ export final class Int32Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: int, index: int) => boolean): int {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
-        return this.findIndex(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findIndex(fn: (val: int, index: int) => boolean): int {
+    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
+    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
+    //     return this.findIndex(newF)
+    // }
 
     /**
      * Finds the last element in the Int32Array that satisfies the condition
@@ -5179,15 +5245,16 @@ export final class Int32Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: int, index: int, array: Int32Array) => boolean): int {
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Int32Array.findLast: not implemented if an element was not found")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findLast(fn: (val: int, index: int, array: Int32Array) => boolean): int {
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return val
+    //         }
+    //     }
+    //     throw new Error("Int32Array.findLast: not implemented if an element was not found")
+    // }
 
     /**
      * Finds the last element in the Int32Array that satisfies the condition
@@ -5196,11 +5263,12 @@ export final class Int32Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: int, index: int) => boolean): int {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findLast(fn: (val: int, index: int) => boolean): int {
+    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
+    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
+    //     return this.findLast(newF)
+    // }
 
     /**
      * Finds an index of the last element in the Int32Array that satisfies the condition
@@ -5209,15 +5277,16 @@ export final class Int32Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: int, index: int, array: Int32Array) => boolean): int {
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findLastIndex(fn: (val: int, index: int, array: Int32Array) => boolean): int {
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return i
+    //         }
+    //     }
+    //     return -1
+    // }
 
     /**
      * Finds an index of the last element in the Int32Array that satisfies the condition
@@ -5226,11 +5295,11 @@ export final class Int32Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: int, index: int) => boolean): int {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF)
-    }
+    // public findLastIndex(fn: (val: int, index: int) => boolean): int {
+    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
+    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
+    //     return this.findLastIndex(newF)
+    // }
 
     /**
      * Applies a function over all elements of Int32Array
@@ -5239,12 +5308,13 @@ export final class Int32Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: int, index: int, array: Int32Array) => int): void {
-        for (let i = 0; i < this.length as int; ++i) {
-            this.set(i, fn(this.at(i), i, this))
-        }
-        throw new Error("Int32Array.forEach: has to return undefined, but returns void for now")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public forEach(fn: (val: int, index: int, array: Int32Array) => int): void {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         this.set(i, fn(this.at(i), i, this))
+    //     }
+    //     throw new Error("Int32Array.forEach: has to return undefined, but returns void for now")
+    // }
 
     /**
      * Applies a function over all elements of Int32Array
@@ -5253,11 +5323,11 @@ export final class Int32Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: int, index: int) => int): void {
-        let newF: (val: int, index: int, array: Int32Array) => int =
-            (val: int, index: int, array: Int32Array): int => { return fn(val, index) }
-        this.forEach(newF)
-    }
+    // public forEach(fn: (val: int, index: int) => int): void {
+    //     let newF: (val: int, index: int, array: Int32Array) => int =
+    //         (val: int, index: int, array: Int32Array): int => { return fn(val, index) }
+    //     this.forEach(newF)
+    // }
 
     /**
      * Creates an Int32Array from array-like argument
@@ -5268,9 +5338,11 @@ export final class Int32Array {
      *
      * @returns new Int32Array
      */
-    public from(o: Object, mapFn: (e: Object, index: int) => int): Int32Array {
-        throw new Error("Int32Array.from: not implemented")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public from(o: Object, mapFn: (e: Object, index: int) => int): Int32Array {
+    //     throw new Error("Int32Array.from: not implemented")
+    // }
+
     /**
      * Checks that all elements of Int32Array satisfy the passed function
      *
@@ -5279,8 +5351,8 @@ export final class Int32Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: int, index: int, array: Int32Array) => boolean =
-            (element: int, index: int, array: Int32Array): boolean => { return fn(element as double as number) }
+        let newF: (element: number, index: number, array: Int32Array) => boolean =
+            (element: number, index: number, array: Int32Array): boolean => { return fn(element) }
         return this.every(newF)
     }
     /**
@@ -5291,8 +5363,8 @@ export final class Int32Array {
      * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
      */
     public filter(fn: (val: number) => boolean): Int32Array {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int32Array) => boolean =
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
         return this.filter(newF)
     }
 
@@ -5304,8 +5376,8 @@ export final class Int32Array {
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number) => boolean): int {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int32Array) => boolean =
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
         return this.find(newF)
     }
 
@@ -5317,8 +5389,8 @@ export final class Int32Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int32Array) => boolean =
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
         return this.findIndex(newF) as double as number
     }
 
@@ -5330,8 +5402,8 @@ export final class Int32Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int32Array) => boolean =
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
         return this.findLast(newF) as double as number
     }
 
@@ -5343,8 +5415,8 @@ export final class Int32Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int32Array) => boolean =
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -5356,8 +5428,8 @@ export final class Int32Array {
      * @returns undefined
      */
     public forEach(fn: (val: number) => int): void {
-        let newF: (val: int, index: int, array: Int32Array) => int =
-            (val: int, index: int, array: Int32Array): int => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Int32Array) => int =
+            (val: number, index: number, array: Int32Array): int => { return fn(val) }
         this.forEach(newF)
     }
 
@@ -5369,8 +5441,8 @@ export final class Int32Array {
     * @returns a new Int32Array where for each element from current Int32Array fn was applied
     */
     public map(fn: (val: number) => number): Int32Array {
-        let newF: (val: int, index: int) => int =
-            (val: int, index: int): int => { return fn(val as double as number) as double as int as int }
+        let newF: (val: number, index: number) => number =
+            (val: number, index: number): number => { return fn(val) }
         return this.map(newF)
     }
 
@@ -5382,8 +5454,8 @@ export final class Int32Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: int, index: int, array: Int32Array) => boolean =
-            (element: int, index: int, array: Int32Array): boolean => { return fn(element as double as number) }
+        let newF: (element: number, index: number, array: Int32Array) => boolean =
+            (element: number, index: number, array: Int32Array): boolean => { return fn(element) }
         return this.some(newF)
     }
 
@@ -5436,8 +5508,8 @@ export final class Int32Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: int, index: int, array: Int32Array) => boolean =
-            (element: int, index: int, array: Int32Array): boolean => { return fn(element as double as number, index as double as number) }
+        let newF: (element: number, index: number, array: Int32Array) => boolean =
+            (element: number, index: number, array: Int32Array): boolean => { return fn(element, index as double as number) }
         return this.some(newF)
     }
 
@@ -5545,8 +5617,8 @@ export final class Int32Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: int, index: int, array: Int32Array) => boolean =
-            (element: int, index: int, array: Int32Array): boolean => { return fn(element as double as number, index as double as number) }
+        let newF: (element: number, index: number, array: Int32Array) => boolean =
+            (element: number, index: number, array: Int32Array): boolean => { return fn(element, index as double as number) }
         return this.every(newF)
     }
 
@@ -5585,8 +5657,8 @@ export final class Int32Array {
      * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number) => boolean): Int32Array {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int32Array) => boolean =
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as double as number) }
         return this.filter(newF)
     }
 
@@ -5616,8 +5688,8 @@ export final class Int32Array {
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number, index: number) => boolean): int {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int32Array) => boolean =
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as double as number) }
         return this.find(newF)
     }
 
@@ -5646,8 +5718,8 @@ export final class Int32Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int32Array) => boolean =
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as double as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -5676,8 +5748,8 @@ export final class Int32Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number) => boolean): int {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int32Array) => boolean =
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val as double as number, index as double as number) }
         return this.findLast(newF)
     }
 
@@ -5706,8 +5778,8 @@ export final class Int32Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: int, index: int, array: Int32Array) => boolean =
-            (val: int, index: int, array: Int32Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int32Array) => boolean =
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as double as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -5733,8 +5805,8 @@ export final class Int32Array {
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number) => int): void {
-        let newF: (val: int, index: int, array: Int32Array) => int =
-            (val: int, index: int, array: Int32Array): int => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Int32Array) => int =
+            (val: number, index: number, array: Int32Array): int => { return fn(val, index as double as number) }
         this.forEach(newF)
     }
 
@@ -6200,8 +6272,8 @@ export final class BigInt64Array {
      * @returns new BigInt64Array
      */
     public from(o: Object, mapFn: (e: Object) => long): BigInt64Array {
-        let newF: (e: Object, index: int) => long =
-            (e: Object, index: int): long => { return mapFn(e) }
+        let newF: (e: Object, index: number) => long =
+            (e: Object, index: number): long => { return mapFn(e) }
         return this.from(o, newF)
     }
 
@@ -6717,14 +6789,15 @@ export final class BigInt64Array {
      *
      * @returns true if some element satisfies fn
      */
-    public some(fn: (element: long, index: int, array: BigInt64Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
-            if (fn(this.at(i), i, this)) {
-                return true
-            }
-        }
-        return false
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public some(fn: (element: long, index: int, array: BigInt64Array) => boolean): boolean {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         if (fn(this.at(i), i, this)) {
+    //             return true
+    //         }
+    //     }
+    //     return false
+    // }
 
     /**
      * Checks that at least one element of BigInt64Array satisfies the passed function
@@ -6733,11 +6806,11 @@ export final class BigInt64Array {
      *
      * @returns true if some element satisfies fn
      */
-    public some(fn: (element: long, index: int) => boolean): boolean {
-        let newF: (element: long, index: int, array: BigInt64Array) => boolean =
-            (element: long, index: int, array: BigInt64Array): boolean => { return fn(element, index) }
-        return this.some(newF)
-    }
+    // public some(fn: (element: long, index: int) => boolean): boolean {
+    //     let newF: (element: long, index: int, array: BigInt64Array) => boolean =
+    //         (element: long, index: int, array: BigInt64Array): boolean => { return fn(element, index) }
+    //     return this.some(newF)
+    // }
 
     /**
      * Reduces data into a single value using left-to-right traversal
@@ -6748,13 +6821,14 @@ export final class BigInt64Array {
      *
      * @returns reduction result
      */
-    public reduce(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long, init: long): long {
-        let acc = init
-        for (let i = 0; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public reduce(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long, init: long): long {
+    //     let acc = init
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
      * Reduces data into a single value using left-to-right traversal
@@ -6763,13 +6837,13 @@ export final class BigInt64Array {
      *
      * @returns reduction result
      */
-    public reduce(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long): long {
-        let acc = this.at(0)
-        for (let i = 1; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // public reduce(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long): long {
+    //     let acc = this.at(0)
+    //     for (let i = 1; i < this.length as int; ++i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
      * Reduces data into a single value using right-to-left traversal
@@ -6780,13 +6854,14 @@ export final class BigInt64Array {
      *
      * @returns reduction result
      */
-    public reduceRight(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long, init: long): long {
-        let acc = init
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public reduceRight(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long, init: long): long {
+    //     let acc = init
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
      * Reduces data into a single value using right-to-left traversal
@@ -6795,13 +6870,13 @@ export final class BigInt64Array {
      *
      * @returns reduction result
      */
-    public reduceRight(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long): long {
-        let acc: long = this.at(this.length as int - 1)
-        for (let i = this.length as int - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // public reduceRight(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long): long {
+    //     let acc: long = this.at(this.length as int - 1)
+    //     for (let i = this.length as int - 2; i >= 0; --i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
     * Creates a new BigInt64Array using fn(arr[i]) over all elements of current BigInt64Array.
@@ -6810,14 +6885,15 @@ export final class BigInt64Array {
     *
     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
     */
-    public map(fn: (val: long, index: int) => long): BigInt64Array {
-        let resBuf = new ArrayBuffer(this.length as int * BigInt64Array.BYTES_PER_ELEMENT as int)
-        let res = new BigInt64Array(resBuf)
-        for (let i = 0; i < this.length as int; ++i) {
-            res.set(i, fn(this.at(i), i))
-        }
-        return res
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public map(fn: (val: long, index: int) => long): BigInt64Array {
+    //     let resBuf = new ArrayBuffer(this.length as int * BigInt64Array.BYTES_PER_ELEMENT as int)
+    //     let res = new BigInt64Array(resBuf)
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         res.set(i, fn(this.at(i), i))
+    //     }
+    //     return res
+    // }
 
     /**
      * Checks that all elements of BigInt64Array satisfy the passed function
@@ -6826,14 +6902,15 @@ export final class BigInt64Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: long, index: int, array: BigInt64Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
-            if (!fn(this.at(i), i, this)) {
-                return false
-            }
-        }
-        return true
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public every(fn: (element: long, index: int, array: BigInt64Array) => boolean): boolean {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         if (!fn(this.at(i), i, this)) {
+    //             return false
+    //         }
+    //     }
+    //     return true
+    // }
 
     /**
      * Checks that all elements of BigInt64Array satisfy the passed function
@@ -6842,11 +6919,11 @@ export final class BigInt64Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: long, index: int) => boolean): boolean {
-        let newF: (element: long, index: int, array: BigInt64Array) => boolean =
-            (element: long, index: int, array: BigInt64Array): boolean => { return fn(element, index) }
-        return this.every(newF)
-    }
+    // public every(fn: (element: long, index: int) => boolean): boolean {
+    //     let newF: (element: long, index: int, array: BigInt64Array) => boolean =
+    //         (element: long, index: int, array: BigInt64Array): boolean => { return fn(element, index) }
+    //     return this.every(newF)
+    // }
 
     /**
      * Creates a new BigInt64Array from current BigInt64Array based on a condition fn.
@@ -6855,25 +6932,26 @@ export final class BigInt64Array {
      *
      * @returns a new BigInt64Array with elements from current BigInt64Array that satisfy condition fn
      */
-    public filter(fn: (val: long, index: int, array: BigInt64Array) => boolean): BigInt64Array {
-        let markers = new boolean[this.length as int]
-        let resLen = 0
-        for (let i = 0; i < this.length as int; ++i) {
-            markers[i] = fn(this.at(i), i, this)
-            if (markers[i]) {
-                ++resLen
-            }
-        }
-        let resBuf = new ArrayBuffer(resLen * BigInt64Array.BYTES_PER_ELEMENT as int)
-        let res = new BigInt64Array(resBuf)
-        for (let i = 0, j = 0; i < this.length as int; ++i) {
-            if (markers[i]) {
-                res.set(j, this.at(i))
-                ++j
-            }
-        }
-        return res
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public filter(fn: (val: long, index: int, array: BigInt64Array) => boolean): BigInt64Array {
+    //     let markers = new boolean[this.length as int]
+    //     let resLen = 0
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         markers[i] = fn(this.at(i), i, this)
+    //         if (markers[i]) {
+    //             ++resLen
+    //         }
+    //     }
+    //     let resBuf = new ArrayBuffer(resLen * BigInt64Array.BYTES_PER_ELEMENT as int)
+    //     let res = new BigInt64Array(resBuf)
+    //     for (let i = 0, j = 0; i < this.length as int; ++i) {
+    //         if (markers[i]) {
+    //             res.set(j, this.at(i))
+    //             ++j
+    //         }
+    //     }
+    //     return res
+    // }
 
     /**
      * creates a new BigInt64Array from current BigInt64Array based on a condition fn
@@ -6882,11 +6960,11 @@ export final class BigInt64Array {
      *
      * @returns a new BigInt64Array with elements from current BigInt64Array that satisfy condition fn
      */
-    public filter(fn: (val: long, index: int) => boolean): BigInt64Array {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
+    // public filter(fn: (val: long, index: int) => boolean): BigInt64Array {
+    //     let newF: (val: long, index: int, array: BigInt64Array) => boolean =
+    //         (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
+    //     return this.filter(newF)
+    // }
 
     /**
      * Finds the first element in the BigInt64Array that satisfies the condition
@@ -6896,15 +6974,16 @@ export final class BigInt64Array {
      * @returns the first element that satisfies fn
      * TODO: return long | undefined as in JS
      */
-    public find(fn: (val: long, index: int, array: BigInt64Array) => boolean): long {
-        for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("BigInt64Array.find: not implemented if element was not found")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public find(fn: (val: long, index: int, array: BigInt64Array) => boolean): long {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return val
+    //         }
+    //     }
+    //     throw new Error("BigInt64Array.find: not implemented if element was not found")
+    // }
 
     /**
      * Finds the first element in the BigInt64Array that satisfies the condition
@@ -6913,11 +6992,11 @@ export final class BigInt64Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: long, index: int) => boolean): long {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
-        return this.find(newF)
-    }
+    // public find(fn: (val: long, index: int) => boolean): long {
+    //     let newF: (val: long, index: int, array: BigInt64Array) => boolean =
+    //         (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
+    //     return this.find(newF)
+    // }
 
     /**
      * Finds an index of the first element in the BigInt64Array that satisfies the condition
@@ -6926,15 +7005,16 @@ export final class BigInt64Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: long, index: int, array: BigInt64Array) => boolean): int {
-        for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findIndex(fn: (val: long, index: int, array: BigInt64Array) => boolean): int {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return i
+    //         }
+    //     }
+    //     return -1
+    // }
 
     /**
      * Finds an index of the first element in the BigInt64Array that satisfies the condition
@@ -6943,11 +7023,11 @@ export final class BigInt64Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: long, index: int) => boolean): int {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
-        return this.findIndex(newF)
-    }
+    // public findIndex(fn: (val: long, index: int) => boolean): int {
+    //     let newF: (val: long, index: int, array: BigInt64Array) => boolean =
+    //         (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
+    //     return this.findIndex(newF)
+    // }
 
     /**
      * Finds the last element in the BigInt64Array that satisfies the condition
@@ -6956,15 +7036,16 @@ export final class BigInt64Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: long, index: int, array: BigInt64Array) => boolean): long {
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("BigInt64Array.findLast: not implemented if an element was not found")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findLast(fn: (val: long, index: int, array: BigInt64Array) => boolean): long {
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return val
+    //         }
+    //     }
+    //     throw new Error("BigInt64Array.findLast: not implemented if an element was not found")
+    // }
 
     /**
      * Finds the last element in the BigInt64Array that satisfies the condition
@@ -6973,11 +7054,11 @@ export final class BigInt64Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: long, index: int) => boolean): long {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
-    }
+    // public findLast(fn: (val: long, index: int) => boolean): long {
+    //     let newF: (val: long, index: int, array: BigInt64Array) => boolean =
+    //         (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
+    //     return this.findLast(newF)
+    // }
 
     /**
      * Finds an index of the last element in the BigInt64Array that satisfies the condition
@@ -6986,15 +7067,16 @@ export final class BigInt64Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: long, index: int, array: BigInt64Array) => boolean): int {
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findLastIndex(fn: (val: long, index: int, array: BigInt64Array) => boolean): int {
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return i
+    //         }
+    //     }
+    //     return -1
+    // }
 
     /**
      * Finds an index of the last element in the BigInt64Array that satisfies the condition
@@ -7003,11 +7085,11 @@ export final class BigInt64Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: long, index: int) => boolean): int {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF)
-    }
+    // public findLastIndex(fn: (val: long, index: int) => boolean): int {
+    //     let newF: (val: long, index: int, array: BigInt64Array) => boolean =
+    //         (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
+    //     return this.findLastIndex(newF)
+    // }
 
     /**
      * Applies a function over all elements of BigInt64Array
@@ -7016,12 +7098,13 @@ export final class BigInt64Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: long, index: int, array: BigInt64Array) => long): void {
-        for (let i = 0; i < this.length as int; ++i) {
-            this.set(i, fn(this.at(i), i, this))
-        }
-        throw new Error("BigInt64Array.forEach: has to return undefined, but returns void for now")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public forEach(fn: (val: long, index: int, array: BigInt64Array) => long): void {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         this.set(i, fn(this.at(i), i, this))
+    //     }
+    //     throw new Error("BigInt64Array.forEach: has to return undefined, but returns void for now")
+    // }
 
     /**
      * Applies a function over all elements of BigInt64Array
@@ -7030,11 +7113,11 @@ export final class BigInt64Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: long, index: int) => long): void {
-        let newF: (val: long, index: int, array: BigInt64Array) => long =
-            (val: long, index: int, array: BigInt64Array): long => { return fn(val, index) }
-        this.forEach(newF)
-    }
+    // public forEach(fn: (val: long, index: int) => long): void {
+    //     let newF: (val: long, index: int, array: BigInt64Array) => long =
+    //         (val: long, index: int, array: BigInt64Array): long => { return fn(val, index) }
+    //     this.forEach(newF)
+    // }
 
     /**
      * Creates an BigInt64Array from array-like argument
@@ -7045,9 +7128,11 @@ export final class BigInt64Array {
      *
      * @returns new BigInt64Array
      */
-    public from(o: Object, mapFn: (e: Object, index: int) => long): BigInt64Array {
-        throw new Error("BigInt64Array.from: not implemented")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public from(o: Object, mapFn: (e: Object, index: int) => long): BigInt64Array {
+    //     throw new Error("BigInt64Array.from: not implemented")
+    // }
+
     /**
      * Checks that all elements of BigInt64Array satisfy the passed function
      *
@@ -7056,8 +7141,8 @@ export final class BigInt64Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: BigInt) => boolean): boolean {
-        let newF: (element: long, index: int, array: BigInt64Array) => boolean =
-            (element: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(element)) }
+        let newF: (element: BigInt, index: number, array: BigInt64Array) => boolean =
+            (element: BigInt, index: number, array: BigInt64Array): boolean => { return fn(element) }
         return this.every(newF)
     }
     /**
@@ -7068,8 +7153,8 @@ export final class BigInt64Array {
      * @returns a new BigInt64Array with elements from current BigInt64Array that satisfy condition fn
      */
     public filter(fn: (val: BigInt) => boolean): BigInt64Array {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
         return this.filter(newF)
     }
 
@@ -7081,8 +7166,8 @@ export final class BigInt64Array {
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: BigInt) => boolean): long {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
         return this.find(newF)
     }
 
@@ -7094,8 +7179,8 @@ export final class BigInt64Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: BigInt) => boolean): number {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
         return this.findIndex(newF) as double as number
     }
 
@@ -7107,8 +7192,8 @@ export final class BigInt64Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: BigInt) => boolean): BigInt {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
         return new BigInt(this.findLast(newF))
     }
 
@@ -7120,8 +7205,8 @@ export final class BigInt64Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: BigInt) => boolean): number {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -7133,8 +7218,8 @@ export final class BigInt64Array {
      * @returns undefined
      */
     public forEach(fn: (val: BigInt) => long): void {
-        let newF: (val: long, index: int, array: BigInt64Array) => long =
-            (val: long, index: int, array: BigInt64Array): long => { return fn(new BigInt(val)) }
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => long =
+            (val: BigInt, index: number, array: BigInt64Array): long => { return fn(val) }
         this.forEach(newF)
     }
 
@@ -7146,8 +7231,8 @@ export final class BigInt64Array {
     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
     */
     public map(fn: (val: BigInt) => BigInt): BigInt64Array {
-        let newF: (val: long, index: int) => long =
-            (val: long, index: int): long => { return fn(new BigInt(val)).getLong() }
+        let newF: (val: BigInt, index: number) => BigInt =
+            (val: BigInt, index: number): BigInt => { return fn(val) }
         return this.map(newF)
     }
 
@@ -7159,8 +7244,8 @@ export final class BigInt64Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: BigInt) => boolean): boolean {
-        let newF: (element: long, index: int, array: BigInt64Array) => boolean =
-            (element: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(element)) }
+        let newF: (element: BigInt, index: number, array: BigInt64Array) => boolean =
+            (element: BigInt, index: number, array: BigInt64Array): boolean => { return fn(element) }
         return this.some(newF)
     }
 
@@ -7213,8 +7298,8 @@ export final class BigInt64Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: BigInt, index: number) => boolean): boolean {
-        let newF: (element: long, index: int, array: BigInt64Array) => boolean =
-            (element: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(element), index as double as number) }
+        let newF: (element: BigInt, index: number, array: BigInt64Array) => boolean =
+            (element: BigInt, index: number, array: BigInt64Array): boolean => { return fn(element, index as double as number) }
         return this.some(newF)
     }
 
@@ -7322,8 +7407,8 @@ export final class BigInt64Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: BigInt, index: number) => boolean): boolean {
-        let newF: (element: long, index: int, array: BigInt64Array) => boolean =
-            (element: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(element), index as double as number) }
+        let newF: (element: BigInt, index: number, array: BigInt64Array) => boolean =
+            (element: BigInt, index: number, array: BigInt64Array): boolean => { return fn(element, index as double as number) }
         return this.every(newF)
     }
 
@@ -7362,8 +7447,8 @@ export final class BigInt64Array {
      * @returns a new BigInt64Array with elements from current BigInt64Array that satisfy condition fn
      */
     public filter(fn: (val: BigInt, index: number) => boolean): BigInt64Array {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(val), index as double as number) }
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as double as number) }
         return this.filter(newF)
     }
 
@@ -7393,8 +7478,8 @@ export final class BigInt64Array {
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: BigInt, index: number) => boolean): long {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(val), index as double as number) }
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as double as number) }
         return this.find(newF)
     }
 
@@ -7423,8 +7508,8 @@ export final class BigInt64Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: BigInt, index: number) => boolean): number {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(val), index as double as number) }
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as double as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -7453,8 +7538,8 @@ export final class BigInt64Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: BigInt, index: number) => boolean): long {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(val), index as double as number) }
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(new BigInt(val), index as double as number) }
         return this.findLast(newF)
     }
 
@@ -7483,8 +7568,8 @@ export final class BigInt64Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: BigInt, index: number) => boolean): number {
-        let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-            (val: long, index: int, array: BigInt64Array): boolean => { return fn(new BigInt(val), index as double as number) }
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as double as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -7510,8 +7595,8 @@ export final class BigInt64Array {
      * @returns undefined
      */
     public forEach(fn: (val: BigInt, index: number) => long): void {
-        let newF: (val: long, index: int, array: BigInt64Array) => long =
-            (val: long, index: int, array: BigInt64Array): long => { return fn(new BigInt(val), index as double as number) }
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => long =
+            (val: BigInt, index: number, array: BigInt64Array): long => { return fn(val, index as double as number) }
         this.forEach(newF)
     }
 
@@ -7977,8 +8062,8 @@ export final class Float32Array {
      * @returns new Float32Array
      */
     public from(o: Object, mapFn: (e: Object) => float): Float32Array {
-        let newF: (e: Object, index: int) => float =
-            (e: Object, index: int): float => { return mapFn(e) }
+        let newF: (e: Object, index: number) => float =
+            (e: Object, index: number): float => { return mapFn(e) }
         return this.from(o, newF)
     }
 
@@ -8493,11 +8578,12 @@ export final class Float32Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: float) => boolean): boolean {
-        let newF: (element: float, index: int, array: Float32Array) => boolean =
-            (element: float, index: int, array: Float32Array): boolean => { return fn(element) }
-        return this.every(newF)
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public every(fn: (element: float) => boolean): boolean {
+    //     let newF: (element: float, index: int, array: Float32Array) => boolean =
+    //         (element: float, index: int, array: Float32Array): boolean => { return fn(element) }
+    //     return this.every(newF)
+    // }
     /**
      * creates a new Float32Array from current Float32Array based on a condition fn
      *
@@ -8505,11 +8591,12 @@ export final class Float32Array {
      *
      * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
      */
-    public filter(fn: (val: float) => boolean): Float32Array {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
-        return this.filter(newF)
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public filter(fn: (val: float) => boolean): Float32Array {
+    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
+    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
+    //     return this.filter(newF)
+    // }
 
     /**
      * Finds the first element in the Float32Array that satisfies the condition
@@ -8518,11 +8605,12 @@ export final class Float32Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: float) => boolean): float {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
-        return this.find(newF)
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public find(fn: (val: float) => boolean): float {
+    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
+    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
+    //     return this.find(newF)
+    // }
 
     /**
      * Finds an index of the first element in the Float32Array that satisfies the condition
@@ -8531,11 +8619,12 @@ export final class Float32Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: float) => boolean): int {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
-        return this.findIndex(newF)
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public findIndex(fn: (val: float) => boolean): int {
+    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
+    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
+    //     return this.findIndex(newF)
+    // }
 
     /**
      * Finds the last element in the Float32Array that satisfies the condition
@@ -8544,11 +8633,12 @@ export final class Float32Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: float) => boolean): float {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
-        return this.findLast(newF)
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public findLast(fn: (val: float) => boolean): float {
+    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
+    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
+    //     return this.findLast(newF)
+    // }
 
     /**
      * Finds an index of the last element in the Float32Array that satisfies the condition
@@ -8557,11 +8647,12 @@ export final class Float32Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: float) => boolean): int {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF)
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public findLastIndex(fn: (val: float) => boolean): int {
+    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
+    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
+    //     return this.findLastIndex(newF)
+    // }
 
     /**
      * Applies a function over all elements of Float32Array
@@ -8570,11 +8661,12 @@ export final class Float32Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: float) => float): void {
-        let newF: (val: float, index: int, array: Float32Array) => float =
-            (val: float, index: int, array: Float32Array): float => { return fn(val) }
-        this.forEach(newF)
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public forEach(fn: (val: float) => float): void {
+    //     let newF: (val: float, index: int, array: Float32Array) => float =
+    //         (val: float, index: int, array: Float32Array): float => { return fn(val) }
+    //     this.forEach(newF)
+    // }
 
    /**
     * Creates a new Float32Array using fn(arr[i]) over all elements of current Float32Array
@@ -8583,11 +8675,12 @@ export final class Float32Array {
     *
     * @returns a new Float32Array where for each element from current Float32Array fn was applied
     */
-    public map(fn: (val: float) => float): Float32Array {
-        let newF: (val: float, index: int) => float =
-            (val: float, index: int): float => { return fn(val) }
-        return this.map(newF)
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public map(fn: (val: float) => float): Float32Array {
+    //     let newF: (val: float, index: int) => float =
+    //         (val: float, index: int): float => { return fn(val) }
+    //     return this.map(newF)
+    // }
 
     /**
      * Checks that at least one element of Float32Array satisfies the passed function
@@ -8596,11 +8689,12 @@ export final class Float32Array {
      *
      * @returns true if some element satisfies fn
      */
-    public some(fn: (element: float) => boolean): boolean {
-        let newF: (element: float, index: int, array: Float32Array) => boolean =
-            (element: float, index: int, array: Float32Array): boolean => { return fn(element) }
-        return this.some(newF)
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public some(fn: (element: float) => boolean): boolean {
+    //     let newF: (element: float, index: int, array: Float32Array) => boolean =
+    //         (element: float, index: int, array: Float32Array): boolean => { return fn(element) }
+    //     return this.some(newF)
+    // }
 
     // TODO(kprokopenko): this may be not skipped
     /**
@@ -8610,22 +8704,23 @@ export final class Float32Array {
      *
      * @returns sorted Float32Array
      */
-    public sort(fn: (a: float, b: float) => int): Float32Array {
-        let arr: float[] = new float[this.length as int]
-        for (let i = 0; i < this.length as int; ++i) {
-            arr[i] = this.at(i)
-        }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: float, b: float) => boolean =
-                (a: float, b: float): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
-            for (let i = 0; i < this.length as int; ++i) {
-                this.set(i, arr[i])
-            }
-        */
-        return this;
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public sort(fn: (a: float, b: float) => int): Float32Array {
+    //     let arr: float[] = new float[this.length as int]
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         arr[i] = this.at(i)
+    //     }
+    //     // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+    //     /*
+    //         let mustPrecede: (a: float, b: float) => boolean =
+    //             (a: float, b: float): boolean => { return (fn(a, b) <= 0) }
+    //         sort(arr, mustPrecede)
+    //         for (let i = 0; i < this.length as int; ++i) {
+    //             this.set(i, arr[i])
+    //         }
+    //     */
+    //     return this;
+    // }
 
     /**
      * Checks that at least one element of Float32Array satisfies the passed function
@@ -8634,27 +8729,27 @@ export final class Float32Array {
      *
      * @returns true if some element satisfies fn
      */
-    public some(fn: (element: float, index: int, array: Float32Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
-            if (fn(this.at(i), i, this)) {
-                return true
-            }
-        }
-        return false
-    }
+    // public some(fn: (element: float, index: int, array: Float32Array) => boolean): boolean {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         if (fn(this.at(i), i, this)) {
+    //             return true
+    //         }
+    //     }
+    //     return false
+    // }
 
-    /**
-     * Checks that at least one element of Float32Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: float, index: int) => boolean): boolean {
-        let newF: (element: float, index: int, array: Float32Array) => boolean =
-            (element: float, index: int, array: Float32Array): boolean => { return fn(element, index) }
-        return this.some(newF)
-    }
+    // /**
+    //  * Checks that at least one element of Float32Array satisfies the passed function
+    //  *
+    //  * @param fn check function
+    //  *
+    //  * @returns true if some element satisfies fn
+    //  */
+    // public some(fn: (element: float, index: int) => boolean): boolean {
+    //     let newF: (element: float, index: int, array: Float32Array) => boolean =
+    //         (element: float, index: int, array: Float32Array): boolean => { return fn(element, index) }
+    //     return this.some(newF)
+    // }
 
     /**
      * Reduces data into a single value using left-to-right traversal
@@ -8665,28 +8760,29 @@ export final class Float32Array {
      *
      * @returns reduction result
      */
-    public reduce(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float, init: float): float {
-        let acc = init
-        for (let i = 0; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // NOTE: to enable overloads with 'float' we need to enhance generics support
+    // public reduce(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float, init: float): float {
+    //     let acc = init
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float): float {
-        let acc = this.at(0)
-        for (let i = 1; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // /**
+    //  * Reduces data into a single value using left-to-right traversal
+    //  *
+    //  * @param fn condition
+    //  *
+    //  * @returns reduction result
+    //  */
+    // public reduce(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float): float {
+    //     let acc = this.at(0)
+    //     for (let i = 1; i < this.length as int; ++i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
      * Reduces data into a single value using right-to-left traversal
@@ -8697,28 +8793,29 @@ export final class Float32Array {
      *
      * @returns reduction result
      */
-    public reduceRight(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float, init: float): float {
-        let acc = init
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public reduceRight(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float, init: float): float {
+    //     let acc = init
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float): float {
-        let acc: float = this.at(this.length as int - 1)
-        for (let i = this.length as int - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // /**
+    //  * Reduces data into a single value using right-to-left traversal
+    //  *
+    //  * @param fn condition
+    //  *
+    //  * @returns reduction result
+    //  */
+    // public reduceRight(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float): float {
+    //     let acc: float = this.at(this.length as int - 1)
+    //     for (let i = this.length as int - 2; i >= 0; --i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
     * Creates a new Float32Array using fn(arr[i]) over all elements of current Float32Array.
@@ -8727,14 +8824,15 @@ export final class Float32Array {
     *
     * @returns a new Float32Array where for each element from current Float32Array fn was applied
     */
-    public map(fn: (val: float, index: int) => float): Float32Array {
-        let resBuf = new ArrayBuffer(this.length as int * Float32Array.BYTES_PER_ELEMENT as int)
-        let res = new Float32Array(resBuf)
-        for (let i = 0; i < this.length as int; ++i) {
-            res.set(i, fn(this.at(i), i))
-        }
-        return res
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public map(fn: (val: float, index: int) => float): Float32Array {
+    //     let resBuf = new ArrayBuffer(this.length as int * Float32Array.BYTES_PER_ELEMENT as int)
+    //     let res = new Float32Array(resBuf)
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         res.set(i, fn(this.at(i), i))
+    //     }
+    //     return res
+    // }
 
     /**
      * Checks that all elements of Float32Array satisfy the passed function
@@ -8743,14 +8841,15 @@ export final class Float32Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: float, index: int, array: Float32Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
-            if (!fn(this.at(i), i, this)) {
-                return false
-            }
-        }
-        return true
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public every(fn: (element: float, index: int, array: Float32Array) => boolean): boolean {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         if (!fn(this.at(i), i, this)) {
+    //             return false
+    //         }
+    //     }
+    //     return true
+    // }
 
     /**
      * Checks that all elements of Float32Array satisfy the passed function
@@ -8759,11 +8858,11 @@ export final class Float32Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: float, index: int) => boolean): boolean {
-        let newF: (element: float, index: int, array: Float32Array) => boolean =
-            (element: float, index: int, array: Float32Array): boolean => { return fn(element, index) }
-        return this.every(newF)
-    }
+    // public every(fn: (element: float, index: int) => boolean): boolean {
+    //     let newF: (element: float, index: int, array: Float32Array) => boolean =
+    //         (element: float, index: int, array: Float32Array): boolean => { return fn(element, index) }
+    //     return this.every(newF)
+    // }
 
     /**
      * Creates a new Float32Array from current Float32Array based on a condition fn.
@@ -8772,25 +8871,26 @@ export final class Float32Array {
      *
      * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
      */
-    public filter(fn: (val: float, index: int, array: Float32Array) => boolean): Float32Array {
-        let markers = new boolean[this.length as int]
-        let resLen = 0
-        for (let i = 0; i < this.length as int; ++i) {
-            markers[i] = fn(this.at(i), i, this)
-            if (markers[i]) {
-                ++resLen
-            }
-        }
-        let resBuf = new ArrayBuffer(resLen * Float32Array.BYTES_PER_ELEMENT as int)
-        let res = new Float32Array(resBuf)
-        for (let i = 0, j = 0; i < this.length as int; ++i) {
-            if (markers[i]) {
-                res.set(j, this.at(i))
-                ++j
-            }
-        }
-        return res
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public filter(fn: (val: float, index: int, array: Float32Array) => boolean): Float32Array {
+    //     let markers = new boolean[this.length as int]
+    //     let resLen = 0
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         markers[i] = fn(this.at(i), i, this)
+    //         if (markers[i]) {
+    //             ++resLen
+    //         }
+    //     }
+    //     let resBuf = new ArrayBuffer(resLen * Float32Array.BYTES_PER_ELEMENT as int)
+    //     let res = new Float32Array(resBuf)
+    //     for (let i = 0, j = 0; i < this.length as int; ++i) {
+    //         if (markers[i]) {
+    //             res.set(j, this.at(i))
+    //             ++j
+    //         }
+    //     }
+    //     return res
+    // }
 
     /**
      * creates a new Float32Array from current Float32Array based on a condition fn
@@ -8799,11 +8899,11 @@ export final class Float32Array {
      *
      * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
      */
-    public filter(fn: (val: float, index: int) => boolean): Float32Array {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
+    // public filter(fn: (val: float, index: int) => boolean): Float32Array {
+    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
+    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
+    //     return this.filter(newF)
+    // }
 
     /**
      * Finds the first element in the Float32Array that satisfies the condition
@@ -8813,15 +8913,16 @@ export final class Float32Array {
      * @returns the first element that satisfies fn
      * TODO: return float | undefined as in JS
      */
-    public find(fn: (val: float, index: int, array: Float32Array) => boolean): float {
-        for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Float32Array.find: not implemented if element was not found")
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public find(fn: (val: float, index: int, array: Float32Array) => boolean): float {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return val
+    //         }
+    //     }
+    //     throw new Error("Float32Array.find: not implemented if element was not found")
+    // }
 
     /**
      * Finds the first element in the Float32Array that satisfies the condition
@@ -8830,11 +8931,12 @@ export final class Float32Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: float, index: int) => boolean): float {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
-        return this.find(newF)
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public find(fn: (val: float, index: int) => boolean): float {
+    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
+    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
+    //     return this.find(newF)
+    // }
 
     /**
      * Finds an index of the first element in the Float32Array that satisfies the condition
@@ -8843,15 +8945,16 @@ export final class Float32Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: float, index: int, array: Float32Array) => boolean): int {
-        for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public findIndex(fn: (val: float, index: int, array: Float32Array) => boolean): int {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return i
+    //         }
+    //     }
+    //     return -1
+    // }
 
     /**
      * Finds an index of the first element in the Float32Array that satisfies the condition
@@ -8860,11 +8963,11 @@ export final class Float32Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: float, index: int) => boolean): int {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
-        return this.findIndex(newF)
-    }
+    // public findIndex(fn: (val: float, index: int) => boolean): int {
+    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
+    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
+    //     return this.findIndex(newF)
+    // }
 
     /**
      * Finds the last element in the Float32Array that satisfies the condition
@@ -8873,15 +8976,16 @@ export final class Float32Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: float, index: int, array: Float32Array) => boolean): float {
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Float32Array.findLast: not implemented if an element was not found")
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public findLast(fn: (val: float, index: int, array: Float32Array) => boolean): float {
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return val
+    //         }
+    //     }
+    //     throw new Error("Float32Array.findLast: not implemented if an element was not found")
+    // }
 
     /**
      * Finds the last element in the Float32Array that satisfies the condition
@@ -8890,11 +8994,12 @@ export final class Float32Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: float, index: int) => boolean): float {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public findLast(fn: (val: float, index: int) => boolean): float {
+    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
+    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
+    //     return this.findLast(newF)
+    // }
 
     /**
      * Finds an index of the last element in the Float32Array that satisfies the condition
@@ -8903,15 +9008,16 @@ export final class Float32Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: float, index: int, array: Float32Array) => boolean): int {
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public findLastIndex(fn: (val: float, index: int, array: Float32Array) => boolean): int {
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return i
+    //         }
+    //     }
+    //     return -1
+    // }
 
     /**
      * Finds an index of the last element in the Float32Array that satisfies the condition
@@ -8920,11 +9026,11 @@ export final class Float32Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: float, index: int) => boolean): int {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF)
-    }
+    // public findLastIndex(fn: (val: float, index: int) => boolean): int {
+    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
+    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
+    //     return this.findLastIndex(newF)
+    // }
 
     /**
      * Applies a function over all elements of Float32Array
@@ -8933,12 +9039,13 @@ export final class Float32Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: float, index: int, array: Float32Array) => float): void {
-        for (let i = 0; i < this.length as int; ++i) {
-            this.set(i, fn(this.at(i), i, this))
-        }
-        throw new Error("Float32Array.forEach: has to return undefined, but returns void for now")
-    }
+    // TODO: to enable overloads with 'float' we need to enhance generics support
+    // public forEach(fn: (val: float, index: int, array: Float32Array) => float): void {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         this.set(i, fn(this.at(i), i, this))
+    //     }
+    //     throw new Error("Float32Array.forEach: has to return undefined, but returns void for now")
+    // }
 
     /**
      * Applies a function over all elements of Float32Array
@@ -8947,11 +9054,11 @@ export final class Float32Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: float, index: int) => float): void {
-        let newF: (val: float, index: int, array: Float32Array) => float =
-            (val: float, index: int, array: Float32Array): float => { return fn(val, index) }
-        this.forEach(newF)
-    }
+    // public forEach(fn: (val: float, index: int) => float): void {
+    //     let newF: (val: float, index: int, array: Float32Array) => float =
+    //         (val: float, index: int, array: Float32Array): float => { return fn(val, index) }
+    //     this.forEach(newF)
+    // }
 
     /**
      * Creates an Float32Array from array-like argument
@@ -8962,9 +9069,11 @@ export final class Float32Array {
      *
      * @returns new Float32Array
      */
-    public from(o: Object, mapFn: (e: Object, index: int) => float): Float32Array {
-        throw new Error("Float32Array.from: not implemented")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public from(o: Object, mapFn: (e: Object, index: int) => float): Float32Array {
+    //     throw new Error("Float32Array.from: not implemented")
+    // }
+
     /**
      * Checks that all elements of Float32Array satisfy the passed function
      *
@@ -8973,8 +9082,8 @@ export final class Float32Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: float, index: int, array: Float32Array) => boolean =
-            (element: float, index: int, array: Float32Array): boolean => { return fn(element as double as number) }
+        let newF: (element: number, index: number, array: Float32Array) => boolean =
+            (element: number, index: number, array: Float32Array): boolean => { return fn(element) }
         return this.every(newF)
     }
     /**
@@ -8985,8 +9094,8 @@ export final class Float32Array {
      * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
      */
     public filter(fn: (val: number) => boolean): Float32Array {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Float32Array) => boolean =
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
         return this.filter(newF)
     }
 
@@ -8998,8 +9107,8 @@ export final class Float32Array {
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number) => boolean): float {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Float32Array) => boolean =
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
         return this.find(newF)
     }
 
@@ -9011,8 +9120,8 @@ export final class Float32Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Float32Array) => boolean =
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
         return this.findIndex(newF) as double as number
     }
 
@@ -9024,8 +9133,8 @@ export final class Float32Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Float32Array) => boolean =
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
         return this.findLast(newF) as double as number
     }
 
@@ -9037,8 +9146,8 @@ export final class Float32Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Float32Array) => boolean =
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -9050,8 +9159,8 @@ export final class Float32Array {
      * @returns undefined
      */
     public forEach(fn: (val: number) => float): void {
-        let newF: (val: float, index: int, array: Float32Array) => float =
-            (val: float, index: int, array: Float32Array): float => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Float32Array) => float =
+            (val: number, index: number, array: Float32Array): float => { return fn(val) }
         this.forEach(newF)
     }
 
@@ -9063,8 +9172,8 @@ export final class Float32Array {
     * @returns a new Float32Array where for each element from current Float32Array fn was applied
     */
     public map(fn: (val: number) => number): Float32Array {
-        let newF: (val: float, index: int) => float =
-            (val: float, index: int): float => { return fn(val as double as number) as double as int as float }
+        let newF: (val: number, index: number) => number =
+            (val: number, index: number): number => { return fn(val) }
         return this.map(newF)
     }
 
@@ -9076,8 +9185,8 @@ export final class Float32Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: float, index: int, array: Float32Array) => boolean =
-            (element: float, index: int, array: Float32Array): boolean => { return fn(element as double as number) }
+        let newF: (element: number, index: number, array: Float32Array) => boolean =
+            (element: number, index: number, array: Float32Array): boolean => { return fn(element) }
         return this.some(newF)
     }
 
@@ -9130,8 +9239,8 @@ export final class Float32Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: float, index: int, array: Float32Array) => boolean =
-            (element: float, index: int, array: Float32Array): boolean => { return fn(element as double as number, index as double as number) }
+        let newF: (element: number, index: number, array: Float32Array) => boolean =
+            (element: number, index: number, array: Float32Array): boolean => { return fn(element, index as double as number) }
         return this.some(newF)
     }
 
@@ -9239,8 +9348,8 @@ export final class Float32Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: float, index: int, array: Float32Array) => boolean =
-            (element: float, index: int, array: Float32Array): boolean => { return fn(element as double as number, index as double as number) }
+        let newF: (element: number, index: number, array: Float32Array) => boolean =
+            (element: number, index: number, array: Float32Array): boolean => { return fn(element, index as double as number) }
         return this.every(newF)
     }
 
@@ -9279,8 +9388,8 @@ export final class Float32Array {
      * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number) => boolean): Float32Array {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Float32Array) => boolean =
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as double as number) }
         return this.filter(newF)
     }
 
@@ -9310,8 +9419,8 @@ export final class Float32Array {
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number, index: number) => boolean): float {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Float32Array) => boolean =
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as double as number) }
         return this.find(newF)
     }
 
@@ -9340,8 +9449,8 @@ export final class Float32Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Float32Array) => boolean =
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as double as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -9370,8 +9479,8 @@ export final class Float32Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number) => boolean): float {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Float32Array) => boolean =
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val as double as number, index as double as number) }
         return this.findLast(newF)
     }
 
@@ -9400,8 +9509,8 @@ export final class Float32Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: float, index: int, array: Float32Array) => boolean =
-            (val: float, index: int, array: Float32Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Float32Array) => boolean =
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as double as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -9427,8 +9536,8 @@ export final class Float32Array {
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number) => float): void {
-        let newF: (val: float, index: int, array: Float32Array) => float =
-            (val: float, index: int, array: Float32Array): float => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Float32Array) => float =
+            (val: number, index: number, array: Float32Array): float => { return fn(val, index as double as number) }
         this.forEach(newF)
     }
 
@@ -9886,8 +9995,8 @@ export final class Float64Array {
      * @returns new Float64Array
      */
     public from(o: Object, mapFn: (e: Object) => double): Float64Array {
-        let newF: (e: Object, index: int) => double =
-            (e: Object, index: int): double => { return mapFn(e) }
+        let newF: (e: Object, index: number) => double =
+            (e: Object, index: number): double => { return mapFn(e) }
         return this.from(o, newF)
     }
 
@@ -10373,27 +10482,28 @@ export final class Float64Array {
      *
      * @returns true if some element satisfies fn
      */
-    public some(fn: (element: double, index: int, array: Float64Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
-            if (fn(this.at(i), i, this)) {
-                return true
-            }
-        }
-        return false
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public some(fn: (element: double, index: int, array: Float64Array) => boolean): boolean {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         if (fn(this.at(i), i, this)) {
+    //             return true
+    //         }
+    //     }
+    //     return false
+    // }
 
-    /**
-     * Checks that at least one element of Float64Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: double, index: int) => boolean): boolean {
-        let newF: (element: double, index: int, array: Float64Array) => boolean =
-            (element: double, index: int, array: Float64Array): boolean => { return fn(element, index) }
-        return this.some(newF)
-    }
+    // /**
+    //  * Checks that at least one element of Float64Array satisfies the passed function
+    //  *
+    //  * @param fn check function
+    //  *
+    //  * @returns true if some element satisfies fn
+    //  */
+    // public some(fn: (element: double, index: int) => boolean): boolean {
+    //     let newF: (element: double, index: int, array: Float64Array) => boolean =
+    //         (element: double, index: int, array: Float64Array): boolean => { return fn(element, index) }
+    //     return this.some(newF)
+    // }
 
     /**
      * Reduces data into a single value using left-to-right traversal
@@ -10404,28 +10514,29 @@ export final class Float64Array {
      *
      * @returns reduction result
      */
-    public reduce(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double, init: double): double {
-        let acc = init
-        for (let i = 0; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // NOTE: to enable overloads with 'int' we need to enhance generics support
+    // public reduce(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double, init: double): double {
+    //     let acc = init
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduce(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double): double {
-        let acc = this.at(0)
-        for (let i = 1; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // /**
+    //  * Reduces data into a single value using left-to-right traversal
+    //  *
+    //  * @param fn condition
+    //  *
+    //  * @returns reduction result
+    //  */
+    // public reduce(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double): double {
+    //     let acc = this.at(0)
+    //     for (let i = 1; i < this.length as int; ++i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
      * Reduces data into a single value using right-to-left traversal
@@ -10436,28 +10547,29 @@ export final class Float64Array {
      *
      * @returns reduction result
      */
-    public reduceRight(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double, init: double): double {
-        let acc = init
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // NOTE: to enable overloads with 'int' we need to enhance generics support
+    // public reduceRight(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double, init: double): double {
+    //     let acc = init
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    public reduceRight(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double): double {
-        let acc: double = this.at(this.length as int - 1)
-        for (let i = this.length as int - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i), i, this)
-        }
-        return acc
-    }
+    // /**
+    //  * Reduces data into a single value using right-to-left traversal
+    //  *
+    //  * @param fn condition
+    //  *
+    //  * @returns reduction result
+    //  */
+    // public reduceRight(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double): double {
+    //     let acc: double = this.at(this.length as int - 1)
+    //     for (let i = this.length as int - 2; i >= 0; --i) {
+    //         acc = fn(acc, this.at(i), i, this)
+    //     }
+    //     return acc
+    // }
 
     /**
     * Creates a new Float64Array using fn(arr[i]) over all elements of current Float64Array.
@@ -10466,14 +10578,15 @@ export final class Float64Array {
     *
     * @returns a new Float64Array where for each element from current Float64Array fn was applied
     */
-    public map(fn: (val: double, index: int) => double): Float64Array {
-        let resBuf = new ArrayBuffer(this.length as int * Float64Array.BYTES_PER_ELEMENT as int)
-        let res = new Float64Array(resBuf)
-        for (let i = 0; i < this.length as int; ++i) {
-            res.set(i, fn(this.at(i), i))
-        }
-        return res
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public map(fn: (val: double, index: int) => double): Float64Array {
+    //     let resBuf = new ArrayBuffer(this.length as int * Float64Array.BYTES_PER_ELEMENT as int)
+    //     let res = new Float64Array(resBuf)
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         res.set(i, fn(this.at(i), i))
+    //     }
+    //     return res
+    // }
 
     /**
      * Checks that all elements of Float64Array satisfy the passed function
@@ -10482,14 +10595,15 @@ export final class Float64Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: double, index: int, array: Float64Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
-            if (!fn(this.at(i), i, this)) {
-                return false
-            }
-        }
-        return true
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public every(fn: (element: double, index: int, array: Float64Array) => boolean): boolean {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         if (!fn(this.at(i), i, this)) {
+    //             return false
+    //         }
+    //     }
+    //     return true
+    // }
 
     /**
      * Checks that all elements of Float64Array satisfy the passed function
@@ -10498,11 +10612,11 @@ export final class Float64Array {
      *
      * @returns true if all elements satisfy fn
      */
-    public every(fn: (element: double, index: int) => boolean): boolean {
-        let newF: (element: double, index: int, array: Float64Array) => boolean =
-            (element: double, index: int, array: Float64Array): boolean => { return fn(element, index) }
-        return this.every(newF)
-    }
+    // public every(fn: (element: double, index: int) => boolean): boolean {
+    //     let newF: (element: double, index: int, array: Float64Array) => boolean =
+    //         (element: double, index: int, array: Float64Array): boolean => { return fn(element, index) }
+    //     return this.every(newF)
+    // }
 
     /**
      * Creates a new Float64Array from current Float64Array based on a condition fn.
@@ -10511,25 +10625,26 @@ export final class Float64Array {
      *
      * @returns a new Float64Array with elements from current Float64Array that satisfy condition fn
      */
-    public filter(fn: (val: double, index: int, array: Float64Array) => boolean): Float64Array {
-        let markers = new boolean[this.length as int]
-        let resLen = 0
-        for (let i = 0; i < this.length as int; ++i) {
-            markers[i] = fn(this.at(i), i, this)
-            if (markers[i]) {
-                ++resLen
-            }
-        }
-        let resBuf = new ArrayBuffer(resLen * Float64Array.BYTES_PER_ELEMENT as int)
-        let res = new Float64Array(resBuf)
-        for (let i = 0, j = 0; i < this.length as int; ++i) {
-            if (markers[i]) {
-                res.set(j, this.at(i))
-                ++j
-            }
-        }
-        return res
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public filter(fn: (val: double, index: int, array: Float64Array) => boolean): Float64Array {
+    //     let markers = new boolean[this.length as int]
+    //     let resLen = 0
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         markers[i] = fn(this.at(i), i, this)
+    //         if (markers[i]) {
+    //             ++resLen
+    //         }
+    //     }
+    //     let resBuf = new ArrayBuffer(resLen * Float64Array.BYTES_PER_ELEMENT as int)
+    //     let res = new Float64Array(resBuf)
+    //     for (let i = 0, j = 0; i < this.length as int; ++i) {
+    //         if (markers[i]) {
+    //             res.set(j, this.at(i))
+    //             ++j
+    //         }
+    //     }
+    //     return res
+    // }
 
     /**
      * creates a new Float64Array from current Float64Array based on a condition fn
@@ -10538,11 +10653,12 @@ export final class Float64Array {
      *
      * @returns a new Float64Array with elements from current Float64Array that satisfy condition fn
      */
-    public filter(fn: (val: double, index: int) => boolean): Float64Array {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public filter(fn: (val: double, index: int) => boolean): Float64Array {
+    //     let newF: (val: double, index: int, array: Float64Array) => boolean =
+    //         (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
+    //     return this.filter(newF)
+    // }
 
     /**
      * Finds the first element in the Float64Array that satisfies the condition
@@ -10552,15 +10668,16 @@ export final class Float64Array {
      * @returns the first element that satisfies fn
      * TODO: return double | undefined as in JS
      */
-    public find(fn: (val: double, index: int, array: Float64Array) => boolean): double {
-        for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Float64Array.find: not implemented if element was not found")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public find(fn: (val: double, index: int, array: Float64Array) => boolean): double {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return val
+    //         }
+    //     }
+    //     throw new Error("Float64Array.find: not implemented if element was not found")
+    // }
 
     /**
      * Finds the first element in the Float64Array that satisfies the condition
@@ -10569,11 +10686,11 @@ export final class Float64Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: double, index: int) => boolean): double {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
-        return this.find(newF)
-    }
+    // public find(fn: (val: double, index: int) => boolean): double {
+    //     let newF: (val: double, index: int, array: Float64Array) => boolean =
+    //         (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
+    //     return this.find(newF)
+    // }
 
     /**
      * Finds an index of the first element in the Float64Array that satisfies the condition
@@ -10582,15 +10699,16 @@ export final class Float64Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: double, index: int, array: Float64Array) => boolean): int {
-        for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findIndex(fn: (val: double, index: int, array: Float64Array) => boolean): int {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return i
+    //         }
+    //     }
+    //     return -1
+    // }
 
     /**
      * Finds an index of the first element in the Float64Array that satisfies the condition
@@ -10599,11 +10717,11 @@ export final class Float64Array {
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: double, index: int) => boolean): int {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
-        return this.findIndex(newF)
-    }
+    // public findIndex(fn: (val: double, index: int) => boolean): int {
+    //     let newF: (val: double, index: int, array: Float64Array) => boolean =
+    //         (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
+    //     return this.findIndex(newF)
+    // }
 
     /**
      * Finds the last element in the Float64Array that satisfies the condition
@@ -10612,15 +10730,16 @@ export final class Float64Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: double, index: int, array: Float64Array) => boolean): double {
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return val
-            }
-        }
-        throw new Error("Float64Array.findLast: not implemented if an element was not found")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findLast(fn: (val: double, index: int, array: Float64Array) => boolean): double {
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return val
+    //         }
+    //     }
+    //     throw new Error("Float64Array.findLast: not implemented if an element was not found")
+    // }
 
     /**
      * Finds the last element in the Float64Array that satisfies the condition
@@ -10629,11 +10748,11 @@ export final class Float64Array {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: double, index: int) => boolean): double {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
-    }
+    // public findLast(fn: (val: double, index: int) => boolean): double {
+    //     let newF: (val: double, index: int, array: Float64Array) => boolean =
+    //         (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
+    //     return this.findLast(newF)
+    // }
 
     /**
      * Finds an index of the last element in the Float64Array that satisfies the condition
@@ -10642,15 +10761,16 @@ export final class Float64Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: double, index: int, array: Float64Array) => boolean): int {
-        for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val, i, this)) {
-                return i
-            }
-        }
-        return -1
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findLastIndex(fn: (val: double, index: int, array: Float64Array) => boolean): int {
+    //     for (let i = this.length as int - 1; i >= 0; --i) {
+    //         let val = this.at(i)
+    //         if (fn(val, i, this)) {
+    //             return i
+    //         }
+    //     }
+    //     return -1
+    // }
 
     /**
      * Finds an index of the last element in the Float64Array that satisfies the condition
@@ -10659,11 +10779,12 @@ export final class Float64Array {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: double, index: int) => boolean): int {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF)
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public findLastIndex(fn: (val: double, index: int) => boolean): int {
+    //     let newF: (val: double, index: int, array: Float64Array) => boolean =
+    //         (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
+    //     return this.findLastIndex(newF)
+    // }
 
     /**
      * Applies a function over all elements of Float64Array
@@ -10672,12 +10793,13 @@ export final class Float64Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: double, index: int, array: Float64Array) => double): void {
-        for (let i = 0; i < this.length as int; ++i) {
-            this.set(i, fn(this.at(i), i, this))
-        }
-        throw new Error("Float64Array.forEach: has to return undefined, but returns void for now")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public forEach(fn: (val: double, index: int, array: Float64Array) => double): void {
+    //     for (let i = 0; i < this.length as int; ++i) {
+    //         this.set(i, fn(this.at(i), i, this))
+    //     }
+    //     throw new Error("Float64Array.forEach: has to return undefined, but returns void for now")
+    // }
 
     /**
      * Applies a function over all elements of Float64Array
@@ -10686,11 +10808,11 @@ export final class Float64Array {
      *
      * @returns undefined
      */
-    public forEach(fn: (val: double, index: int) => double): void {
-        let newF: (val: double, index: int, array: Float64Array) => double =
-            (val: double, index: int, array: Float64Array): double => { return fn(val, index) }
-        this.forEach(newF)
-    }
+    // public forEach(fn: (val: double, index: int) => double): void {
+    //     let newF: (val: double, index: int, array: Float64Array) => double =
+    //         (val: double, index: int, array: Float64Array): double => { return fn(val, index) }
+    //     this.forEach(newF)
+    // }
 
     /**
      * Creates an Float64Array from array-like argument
@@ -10701,9 +10823,11 @@ export final class Float64Array {
      *
      * @returns new Float64Array
      */
-    public from(o: Object, mapFn: (e: Object, index: int) => double): Float64Array {
-        throw new Error("Float64Array.from: not implemented")
-    }
+    // TODO: to enable overloads with 'int' we need to enhance generics support
+    // public from(o: Object, mapFn: (e: Object, index: int) => double): Float64Array {
+    //     throw new Error("Float64Array.from: not implemented")
+    // }
+
     /**
      * Checks that all elements of Float64Array satisfy the passed function
      *
@@ -10712,8 +10836,8 @@ export final class Float64Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: double, index: int, array: Float64Array) => boolean =
-            (element: double, index: int, array: Float64Array): boolean => { return fn(element as double as number) }
+        let newF: (element: number, index: number, array: Float64Array) => boolean =
+            (element: number, index: number, array: Float64Array): boolean => { return fn(element) }
         return this.every(newF)
     }
     /**
@@ -10724,8 +10848,8 @@ export final class Float64Array {
      * @returns a new Float64Array with elements from current Float64Array that satisfy condition fn
      */
     public filter(fn: (val: number) => boolean): Float64Array {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Float64Array) => boolean =
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
         return this.filter(newF)
     }
 
@@ -10737,8 +10861,8 @@ export final class Float64Array {
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number) => boolean): double {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Float64Array) => boolean =
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
         return this.find(newF)
     }
 
@@ -10750,8 +10874,8 @@ export final class Float64Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Float64Array) => boolean =
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
         return this.findIndex(newF) as double as number
     }
 
@@ -10763,8 +10887,8 @@ export final class Float64Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Float64Array) => boolean =
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
         return this.findLast(newF) as double as number
     }
 
@@ -10776,8 +10900,8 @@ export final class Float64Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Float64Array) => boolean =
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -10789,8 +10913,8 @@ export final class Float64Array {
      * @returns undefined
      */
     public forEach(fn: (val: number) => double): void {
-        let newF: (val: double, index: int, array: Float64Array) => double =
-            (val: double, index: int, array: Float64Array): double => { return fn(val as double as number) }
+        let newF: (val: number, index: number, array: Float64Array) => double =
+            (val: number, index: number, array: Float64Array): double => { return fn(val) }
         this.forEach(newF)
     }
 
@@ -10802,8 +10926,8 @@ export final class Float64Array {
     * @returns a new Float64Array where for each element from current Float64Array fn was applied
     */
     public map(fn: (val: number) => number): Float64Array {
-        let newF: (val: double, index: int) => double =
-            (val: double, index: int): double => { return fn(val as double as number) as double as int as double }
+        let newF: (val: number, index: number) => number =
+            (val: number, index: number): number => { return fn(val) }
         return this.map(newF)
     }
 
@@ -10815,8 +10939,8 @@ export final class Float64Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: double, index: int, array: Float64Array) => boolean =
-            (element: double, index: int, array: Float64Array): boolean => { return fn(element as double as number) }
+        let newF: (element: number, index: number, array: Float64Array) => boolean =
+            (element: number, index: number, array: Float64Array): boolean => { return fn(element) }
         return this.some(newF)
     }
 
@@ -10869,8 +10993,8 @@ export final class Float64Array {
      * @returns true if some element satisfies fn
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: double, index: int, array: Float64Array) => boolean =
-            (element: double, index: int, array: Float64Array): boolean => { return fn(element as double as number, index as double as number) }
+        let newF: (element: number, index: number, array: Float64Array) => boolean =
+            (element: number, index: number, array: Float64Array): boolean => { return fn(element, index as double as number) }
         return this.some(newF)
     }
 
@@ -10978,8 +11102,8 @@ export final class Float64Array {
      * @returns true if all elements satisfy fn
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: double, index: int, array: Float64Array) => boolean =
-            (element: double, index: int, array: Float64Array): boolean => { return fn(element as double as number, index as double as number) }
+        let newF: (element: number, index: number, array: Float64Array) => boolean =
+            (element: number, index: number, array: Float64Array): boolean => { return fn(element, index as double as number) }
         return this.every(newF)
     }
 
@@ -11018,8 +11142,8 @@ export final class Float64Array {
      * @returns a new Float64Array with elements from current Float64Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number) => boolean): Float64Array {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Float64Array) => boolean =
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as double as number) }
         return this.filter(newF)
     }
 
@@ -11049,8 +11173,8 @@ export final class Float64Array {
      * @returns the first element that satisfies fn
      */
     public find(fn: (val: number, index: number) => boolean): double {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Float64Array) => boolean =
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as double as number) }
         return this.find(newF)
     }
 
@@ -11079,8 +11203,8 @@ export final class Float64Array {
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Float64Array) => boolean =
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as double as number) }
         return this.findIndex(newF) as double as number
     }
 
@@ -11109,8 +11233,8 @@ export final class Float64Array {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number, index: number) => boolean): double {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Float64Array) => boolean =
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val as double as number, index as double as number) }
         return this.findLast(newF)
     }
 
@@ -11139,8 +11263,8 @@ export final class Float64Array {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: double, index: int, array: Float64Array) => boolean =
-            (val: double, index: int, array: Float64Array): boolean => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Float64Array) => boolean =
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as double as number) }
         return this.findLastIndex(newF) as double as number
     }
 
@@ -11166,8 +11290,8 @@ export final class Float64Array {
      * @returns undefined
      */
     public forEach(fn: (val: number, index: number) => double): void {
-        let newF: (val: double, index: int, array: Float64Array) => double =
-            (val: double, index: int, array: Float64Array): double => { return fn(val as double as number, index as double as number) }
+        let newF: (val: number, index: number, array: Float64Array) => double =
+            (val: number, index: number, array: Float64Array): double => { return fn(val, index as double as number) }
         this.forEach(newF)
     }
 

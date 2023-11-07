@@ -32,11 +32,14 @@ TEST_F(EtsInteropScenariosJsToEts, test_class_method_call)
     ASSERT_EQ(ret, true);
 }
 
+[[maybe_unused]] constexpr int CAN_CREATE_CLASSES_AT_RUNTIME = 0;
+#if CAN_CREATE_CLASSES_AT_RUNTIME
 TEST_F(EtsInteropScenariosJsToEts, Test_interface_method_call)
 {
     auto ret = CallEtsMethod<bool>("Test_interface_method_call");
     ASSERT_EQ(ret, true);
 }
+#endif
 
 TEST_F(EtsInteropScenariosJsToEts, Test_class_getter)
 {

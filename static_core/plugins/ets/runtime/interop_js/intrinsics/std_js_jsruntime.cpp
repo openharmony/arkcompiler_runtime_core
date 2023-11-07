@@ -97,7 +97,6 @@ static const IntrinsicsAPI S_INTRINSICS_API = {
     NotImplementedAdapter,
     NotImplementedAdapter,
     NotImplementedAdapter,
-    NotImplementedAdapter,
     // clang-format on
 };
 
@@ -230,11 +229,6 @@ uint8_t JSRuntimeInitJSCallClassIntrinsic(EtsString *clsName)
 uint8_t JSRuntimeInitJSNewClassIntrinsic(EtsString *clsName)
 {
     return S_INTRINSICS_API->JSRuntimeInitJSNewClass(clsName);
-}
-
-JSValue *JSRuntimeCreateLambdaProxyIntrinsic(EtsObject *lambda)
-{
-    return S_INTRINSICS_API->JSRuntimeCreateLambdaProxy(lambda);
 }
 
 JSValue *JSRuntimeLoadModuleIntrinsic(EtsString *module)

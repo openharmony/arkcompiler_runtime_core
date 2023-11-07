@@ -277,7 +277,7 @@ class PromiseConcurrency {
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
             let promise = promises[idx];
-            promise.then<Object>((value: Object): Object|null => {
+            promise.then<Object|null>((value: Object): Object|null => {
                 values[idx] = value;
                 ++this.resolvedCnt;
                 if (this.resolvedCnt == values.length) {
@@ -300,7 +300,7 @@ class PromiseConcurrency {
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
             let promise = promises[idx];
-            promise.then<Object>((value: Object): Object|null => {
+            promise.then<Object|null>((value: Object): Object|null => {
                 values[idx] = value;
                 ++this.resolvedCnt;
                 if (this.resolvedCnt == values.length) {
@@ -327,7 +327,7 @@ class PromiseConcurrency {
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
             let promise = promises[idx];
-            promise.then<Object>((value: Object): Object|null => {
+            promise.then<Object|null>((value: Object): Object|null => {
                 ++this.resolvedCnt;
                 if (this.resolvedCnt == 1) {
                     this.resolve(value);
@@ -352,7 +352,7 @@ class PromiseConcurrency {
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
             let promise = promises[idx];
-            promise.then<Object>((value: Object): Object|null => {
+            promise.then<Object|null>((value: Object): Object|null => {
                 this.resolve(value)
                 return null;
             }, (error: Object|null): Object|null => {

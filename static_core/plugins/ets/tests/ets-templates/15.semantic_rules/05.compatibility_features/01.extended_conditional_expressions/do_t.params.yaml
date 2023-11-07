@@ -46,32 +46,26 @@ cases:
     - { val: 'Float.MAX_VALUE', type: 'float' }
 
     - { val: 'new Byte(Byte.MIN_VALUE as byte)', type: 'Byte' }
-    - { val: 'new Byte()', type: 'Byte' }
     - { val: 'new Byte(Byte.MAX_VALUE as byte)', type: 'Byte' }
 
     - { val: 'new Short(Short.MIN_VALUE as short)', type: 'Short' }
-    - { val: 'new Short()', type: 'Short' }
     - { val: 'new Short(Short.MAX_VALUE as short)', type: 'Short' }
 
     - { val: 'new Int(Int.MIN_VALUE as int)', type: 'Int' }
-    - { val: 'new Int()', type: 'Int' }
     - { val: 'new Int(Int.MAX_VALUE as int)', type: 'Int' }
 
     - { val: 'new Long(Long.MIN_VALUE)', type: 'Long' }
-    - { val: 'new Long()', type: 'Long' }
     - { val: 'new Long(Long.MAX_VALUE)', type: 'Long' }
 
     - { val: 'new Double(Double.POSITIVE_INFINITY)', type: 'Double' }
     - { val: 'new Double(Double.NEGATIVE_INFINITY)', type: 'Double' }
     - { val: 'new Double(Double.MIN_VALUE)', type: 'Double' }
     - { val: 'new Double(Double.MAX_VALUE)', type: 'Double' }
-    - { val: 'new Double(Double.NaN)', type: 'Double' }
 
     - { val: 'new Float(Float.POSITIVE_INFINITY)', type: 'Float' }
     - { val: 'new Float(Float.NEGATIVE_INFINITY)', type: 'Float' }
     - { val: 'new Float(Float.MIN_VALUE)', type: 'Float' }
     - { val: 'new Float(Float.MAX_VALUE)', type: 'Float' }
-    - { val: 'new Float(Float.NaN)', type: 'Float' }
 
     - { val: '" "', type: 'string' }
     - { val: '` `', type: 'string' }
@@ -82,7 +76,6 @@ cases:
 
     - { val: '!false', type: 'boolean' }
     - { val: 'true', type: 'boolean' }
-    - { val: 'new Boolean(false)', type: 'Boolean' }
 
     - { val: '42 - 21 - 20', type: 'number' }
     - { val: '42 * (21 - 10 - 10)', type: 'number' }

@@ -17,8 +17,22 @@
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
 
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
+#include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
 
 namespace ark::ets::interop::js {
+
+static bool IsFunctionClass(InteropCtx *ctx, Class *klass)
+{
+    if (ctx->IsFunctionalInterface(klass)) {
+        return true;
+    }
+    for (auto *itf : klass->GetInterfaces()) {
+        if (ctx->IsFunctionalInterface(itf)) {
+            return true;
+        }
+    }
+    return false;
+}
 
 static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Class *klass)
 {
@@ -35,6 +49,11 @@ static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Cla
     if (js_proxy::JSProxy::IsProxyClass(klass)) {
         return ets_proxy::EtsClassWrapper::CreateJSRefConvertJSProxy(ctx, klass);
     }
+
+    if (IsFunctionClass(ctx, klass)) {
+        return std::make_unique<JSRefConvertFunction>(klass);
+    }
+
     return ets_proxy::EtsClassWrapper::CreateJSRefConvertEtsProxy(ctx, klass);
 }
 

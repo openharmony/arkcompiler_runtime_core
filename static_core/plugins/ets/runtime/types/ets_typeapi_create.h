@@ -222,8 +222,8 @@ public:
     void Create();
 
 private:
-    std::string name_ = "FunctionalInterface";
-    std::string fnName_ = "invoke";
+    std::string name_ = "std.core.Function";
+    std::string fnName_ = "invoke0";
     pandasm::Record rec_ {name_, SourceLanguage::ETS};
     pandasm::Function fn_ {fnName_, SourceLanguage::ETS};
     bool finished_ = false;

@@ -294,7 +294,7 @@ final class TypeCreatorCtx {
 
         const objsArray = new Object[this.objects.length as int]
         for (let i = 0; i < this.objects.length; i++) {
-            objsArray[i] = this.objects.$_get(i)
+            objsArray[i] = this.objects.$_get(i) as Object
         }
         this.checkError(TypeCreatorCtx.commit(this.ctxPtr, objsArray))
 

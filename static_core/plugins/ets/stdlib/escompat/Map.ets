@@ -215,18 +215,8 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      * @returns an array of Entries
      */
     /* override */ entries(): IterableIterator<Entry<K, V>> {
-        return this.s.mappedIterator<Entry<K, V>>((x: ListNode): Object => { return x.val as MapEntry<K, V> })
-    }
-
-    /**
-     * Applies a function over all elements of the Map
-     *
-     * @param fn to apply
-     */
-    forEach(fn: (v: V, k: K, map: Map<K, V>) => void): void {
-        iteratorForEach<Entry<K, V>>(this.entries(), (x: Entry<K, V>): void => {
-            fn(x.value, x.key, this)
-        })
+        // NOTE: (x: ListNode): Entry<K, V> => { return ... } does not parse.
+        return this.s.mappedIterator<Object>((x: ListNode): Object => { return x.val as MapEntry<K, V> }) as IterableIterator<Entry<K, V>>
     }
 
     /**
@@ -254,6 +244,7 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @param fn to apply
      */
+    // NOTE(gogabr): map should be Map instead of ReadonlyMap, but blocked by #15096
     override forEach(fn: (value: V, key: K, map: ReadonlyMap<K, V>) => void): void {
         iteratorForEach<Entry<K, V>>(this.entries(), (x: Entry<K, V>): void => {
             fn(x.value, x.key, this)

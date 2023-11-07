@@ -288,17 +288,6 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInitJSNewClassIntrinsic
     clear_flags: [ ]
 
-  - name: JSRuntimeCreateLambdaProxy
-    space: ets
-    class_name: std.interop.js.JSRuntime
-    method_name: __createLambdaProxy
-    static: true
-    signature:
-      ret: std.interop.js.JSValue
-      args: [ std.core.Object ]
-    impl: ark::ets::interop::js::intrinsics::JSRuntimeCreateLambdaProxyIntrinsic
-    clear_flags: [ ]
-
   - name: JSRuntimeLoadModule
     space: ets
     class_name: std.interop.js.JSRuntime
@@ -681,7 +670,7 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToJSValueIntrinsic
     interop_intrinsic_kind: unwrap
     clear_flags: [no_dce]
-  
+
   - name: CompilerConvertLocalToString
     space: ets
     compiler_only: true

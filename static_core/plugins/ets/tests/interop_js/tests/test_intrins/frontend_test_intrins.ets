@@ -191,9 +191,8 @@ function test_lambda_proxy(): boolean {
     let etsfn: (x: double) => double = (x: double): double => {
         return x;
     }
-    let jsfn = JSRuntime.__createLambdaProxy(etsfn as Object);
 
-    let res = ApplyArgs(jsfn, 123) as int;
+    let res = ApplyArgs(etsfn, 123) as int;
     return res == 123;
 }
 
@@ -201,9 +200,8 @@ function test_lambda_proxy_recursive(): boolean {
     let etsfn: (x: double, y: String) => String = (x: double, y: String): String => {
         return StringifyArgs(x, y) as String;
     }
-    let jsfn = JSRuntime.__createLambdaProxy(etsfn as Object);
 
-    let res = ApplyArgs(jsfn, 123, "foo") as String;
+    let res = ApplyArgs(etsfn, 123, "foo") as String;
     return res == "123,foo";
 }
 
@@ -220,10 +218,9 @@ function test_exception_forwarding_fromets(): boolean {
     let etsfn: (v: JSValue) => void = (v: JSValue): void => {
         throw new JSError(v);
     }
-    let jsfn = JSRuntime.__createLambdaProxy(etsfn as Object);
 
     try {
-        ApplyArgs(jsfn, 12345.6);
+        ApplyArgs(etsfn, 12345.6);
     } catch (e: JSError) {
         return "number:12345.6" == vstringify(e.getValue());
     }
@@ -235,10 +232,9 @@ function test_exception_forwarding_recursive(): boolean {
         ThrowValue(v);
         throw unreachable();
     }
-    let jsfn = JSRuntime.__createLambdaProxy(etsfn as Object);
 
     try {
-        ApplyArgs(jsfn, 123.456);
+        ApplyArgs(etsfn, 123.456);
     } catch (e: JSError) {
         return "number:123.456" == vstringify(e.getValue());
     }
@@ -249,10 +245,9 @@ function test_core_error_forwarding(): boolean {
     let etsfn: () => void = (): void => {
         throw new Error("funny message");
     }
-    let jsfn = JSRuntime.__createLambdaProxy(etsfn as Object);
 
     try {
-        ApplyArgs(jsfn);
+        ApplyArgs(etsfn);
     } catch (e: Error) {
         return e.message == "funny message";
     }
@@ -284,9 +279,8 @@ function test_typecheck_etscall(): boolean {
         let etsfn: (x: String) => String = (x: String): String => {
             throw unreachable();
         }
-        let jsfn = JSRuntime.__createLambdaProxy(etsfn as Object);
 
-        ApplyArgs(jsfn, 123);
+        ApplyArgs(etsfn, 123);
     } catch (e: JSError) {
         return "object:TypeError: String expected" == vstringify(e.getValue());
     }

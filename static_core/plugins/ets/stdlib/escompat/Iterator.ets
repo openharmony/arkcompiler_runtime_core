@@ -15,7 +15,7 @@
 
 package escompat;
 
-export class IteratorResult<T> {
+export class IteratorResult<out T> {
     done: boolean
     value: T | undefined
 
@@ -35,15 +35,15 @@ export class IteratorResult<T> {
     }
 }
 
-export interface Iterator<T> {
+export interface Iterator<out T> {
     next(): IteratorResult<T>;
 }
 
-export interface Iterable<T> {
+export interface Iterable<out T> {
     iterator(): Iterator<T>;
 }
 
-export interface IterableIterator<T> extends Iterator<T>, Iterable<T> {
+export interface IterableIterator<out T> extends Iterator<T>, Iterable<T> {
 }
 
 function iteratorForEach<V>(x: Iterator<V>, fn: (x: V) => void): void {

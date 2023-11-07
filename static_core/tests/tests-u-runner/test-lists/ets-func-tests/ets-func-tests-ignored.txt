@@ -738,3 +738,6 @@ spec/types/float_to_string_2.ets
 spec/types/double_to_string_1.ets
 spec/types/double_to_string_2.ets
 ### Issue 15281 end
+### BigInt64Array
+std/core/std_core_typedarrays__BigInt64Array.ets
+### BigInt64Array end
