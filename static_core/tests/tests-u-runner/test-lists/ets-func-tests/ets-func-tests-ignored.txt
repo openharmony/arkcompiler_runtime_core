@@ -199,4 +199,45 @@ spec/trailing_lambdas/trailing_stmt_06.ets
 ### Issue 14427
 spec/trailing_lambdas/trailing_stmt_07.ets
 ### End of Trailing lambda
-
+### ArkUI struct
+### Issue 14040 -> Annotations not yet implemented
+spec/struct-type/anno/test-builder-func_0.ets
+spec/struct-type/anno/test-builder-func_1.ets
+spec/struct-type/anno/test-struct-builder-param.ets
+spec/struct-type/anno/test-struct-component.ets
+spec/struct-type/anno/test-struct-entry.ets
+spec/struct-type/anno/test-struct-field-consume.ets
+spec/struct-type/anno/test-struct-field-link.ets
+spec/struct-type/anno/test-struct-field-local-storage-link.ets
+spec/struct-type/anno/test-struct-field-local-storage-prop.ets
+spec/struct-type/anno/test-struct-field-prop.ets
+spec/struct-type/anno/test-struct-field-provide.ets
+spec/struct-type/anno/test-struct-field-state.ets
+spec/struct-type/anno/test-struct-field-watch.ets
+spec/struct-type/builder/test-struct-call-conditional-in-build.ets
+spec/struct-type/builder/test-struct-call-function-in-build_2.ets
+spec/struct-type/builder/test-struct-call-function-in-build_3.ets
+spec/struct-type/builder/test-struct-call-function-in-build_0.ets
+spec/struct-type/builder/test-struct-call-function-in-build_1.ets
+spec/struct-type/builder/test-struct-call-loop-in-build_0.ets
+spec/struct-type/builder/test-struct-call-loop-in-build_1.ets
+spec/struct-type/builder/test-struct-call-loop-in-build_2.ets
+spec/struct-type/builder/test-struct-call-new-in-build.ets
+spec/struct-type/builder/test-struct-define-in-build.ets
+spec/struct-type/builder/test-struct-no-build-func.ets
+spec/struct-type/test-struct-define-constructor.ets
+spec/struct-type/test-struct-implements-interface.ets
+spec/struct-type/test-struct-invoke_0.ets
+spec/struct-type/test-struct-invoke_1.ets
+spec/struct-type/test-use-struct-as-name_2.ets
+### EOF Issue 14040
+### Negative tests
+spec/struct-type/test-class-extends-struct.ets
+spec/struct-type/test-struct-extends-class.ets
+spec/struct-type/test-struct-extends-interface.ets
+spec/struct-type/test-struct-no-constructor.ets
+spec/struct-type/test-use-struct-with-not-user-type_0.ets
+spec/struct-type/test-use-struct-with-not-user-type_1.ets
+spec/struct-type/test-use-struct-with-not-user-type_2.ets
+### EOF Negative tests
+### EOF ArkUI struct
