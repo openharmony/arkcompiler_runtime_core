@@ -209,5 +209,24 @@ spec/conditional-expression/numeric/expr/numeric-double-object-zero-expression.e
 spec/conditional-expression/numeric/expr/numeric-float-zero-object-expression.ets
 spec/conditional-expression/numeric/expr/numeric-long-zero-object-expression.ets
 spec/conditional-expression/numeric/expr/numeric-short-zero-object-expression.ets
-
+### Trailing lambda issues
+### Negative tests
+spec/trailing_lambdas/trailing_only_fn_01_n.ets
+spec/trailing_lambdas/trailing_only_fn_03_n_01.ets
+spec/trailing_lambdas/trailing_only_fn_04_n_01.ets
+spec/trailing_lambdas/trailing_lm_param_n.ets
+### Valid cases but not supported features
+spec/trailing_lambdas/trailing_only_fn_03_01.ets
+spec/trailing_lambdas/trailing_only_fn_03_03.ets
+spec/trailing_lambdas/trailing_only_fn_03_04.ets
+### Issue 14384
+spec/trailing_lambdas/trailing_only_fn_04_01.ets
+### Issue 14387
+spec/trailing_lambdas/trailing_nested_01.ets
+### Issue 14424
+spec/trailing_lambdas/trailing_stmt_05.ets
+spec/trailing_lambdas/trailing_stmt_06.ets
+### Issue 14427
+spec/trailing_lambdas/trailing_stmt_07.ets
+### End of Trailing lambda
 
