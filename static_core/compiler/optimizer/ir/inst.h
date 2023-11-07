@@ -2096,7 +2096,6 @@ public:
 
     void SetScale(uint32_t scale)
     {
-        ASSERT(scale <= MAX_SCALE);
         T::template SetField<ScaleField>(scale);
     }
 
@@ -3931,7 +3930,7 @@ protected:
 };
 
 /**
- * Immediate for SavaState:
+ * Immediate for SaveState:
  * value - constant value to be stored
  * vreg - virtual register number
  */
@@ -6703,7 +6702,7 @@ public:
 
 /// Load a pair of consecutive values from array
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadArrayPairInst : public NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>> {
+class LoadArrayPairInst : public NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>>, public ImmediateMixin {
 public:
     DECLARE_INST(LoadArrayPairInst);
     using Base = NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>>;
@@ -6736,6 +6735,7 @@ public:
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph)->CastToLoadArrayPair();
+        static_cast<LoadArrayPairInst *>(clone)->SetImm(GetImm());
 #ifndef NDEBUG
         for (size_t i = 0; i < GetDstCount(); ++i) {
             clone->SetDstReg(i, GetDstReg(i));
@@ -6761,11 +6761,13 @@ public:
     {
         return 0;
     }
+
+    bool DumpInputs(std::ostream * /* out */) const override;
 };
 
 /// Store a pair of consecutive values to array
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreArrayPairInst : public NeedBarrierMixin<FixedInputsInst<4U>> {
+class StoreArrayPairInst : public NeedBarrierMixin<FixedInputsInst<4U>>, public ImmediateMixin {
 public:
     DECLARE_INST(StoreVectorInst);
     using Base = NeedBarrierMixin<FixedInputsInst<4U>>;
@@ -6821,6 +6823,15 @@ public:
     {
         return Inst::IsBarrier() || GetNeedBarrier();
     }
+
+    Inst *Clone(const Graph *targetGraph) const override
+    {
+        auto clone = FixedInputsInst::Clone(targetGraph)->CastToStoreArrayPair();
+        static_cast<StoreArrayPairInst *>(clone)->SetImm(GetImm());
+        return clone;
+    }
+
+    bool DumpInputs(std::ostream * /* out */) const override;
 };
 
 /// Load a pair of consecutive values from array, using array index as immediate

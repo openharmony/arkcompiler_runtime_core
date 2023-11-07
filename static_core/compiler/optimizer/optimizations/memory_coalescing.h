@@ -67,6 +67,8 @@ public:
     NO_COPY_SEMANTIC(MemoryCoalescing);
     ~MemoryCoalescing() override = default;
 
+    static void RemoveAddI(Inst *inst);
+
 private:
     void ReplacePairs(ArenaVector<CoalescedPair> const &pairs);
     void ReplacePair(Inst *first, Inst *second, Inst *insertAfter);
