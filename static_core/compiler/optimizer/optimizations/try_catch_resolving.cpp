@@ -124,7 +124,7 @@ void TryCatchResolving::ConnectThrowCatch()
     for (auto thr0w : throw_insts_) {
         auto throw_block = thr0w->GetBasicBlock();
         auto throw_inst = thr0w->CastToThrow();
-        // Inlined throws generate the problem with matching calls and returns now. TODO Should be fixed.
+        // Inlined throws generate the problem with matching calls and returns now. NOTE Should be fixed.
         if (GetGraph()->GetThrowCounter(throw_block) == 0 || throw_inst->IsInlined()) {
             continue;
         }

@@ -70,7 +70,7 @@ Expected<bool, std::string> FileManager::LoadAnFile(std::string_view an_location
 PandaString FileManager::ResolveAnFilePath(std::string_view abc_path)
 {
     // check whether an aot version of this file already exist
-    // Todo(Wentao):
+    // NOTE(Wentao):
     //   1. search ark native file file base on ARCH info from runtime.
     //   2. allow searching an file out of same path of ark bytecode file.
     const PandaString &an_path_suffix = ".an";

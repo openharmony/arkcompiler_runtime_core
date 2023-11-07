@@ -156,7 +156,7 @@ public:
     template <class Callback>
     void EnumerateThreadsForDump(const Callback &cb, std::ostream &os)
     {
-        // TODO(00510180 & 00537420) can not get WriteLock() when other thread run code "while {}"
+        // NOTE(00510180 & 00537420) can not get WriteLock() when other thread run code "while {}"
         // issue #3085
         SuspendAllThreads();
         MTManagedThread *self = MTManagedThread::GetCurrent();

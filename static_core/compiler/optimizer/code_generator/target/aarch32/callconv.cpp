@@ -126,7 +126,7 @@ uint8_t Aarch32CallingConvention::PushRegs(RegMask regs, VRegMask vregs, bool is
     }
 
     if (((regs.count() + vregs.count()) & 1U) == 1) {
-        // TODO(igorban) move them to Sub(sp)
+        // NOTE(igorban) move them to Sub(sp)
         uint8_t align_reg = regdescr->GetAligmentReg(is_callee);
         GetMasm()->PushRegister(vixl::aarch32::Register(align_reg));
         ++real_offset;

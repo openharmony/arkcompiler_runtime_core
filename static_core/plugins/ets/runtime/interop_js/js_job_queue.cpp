@@ -142,7 +142,7 @@ void JsJobQueue::CreatePromiseLink(JSValue *js_promise, EtsPromise *ets_promise)
 
     mem::Reference *promise_ref = vm->GetGlobalObjectStorage()->Add(ets_promise, mem::Reference::ObjectType::GLOBAL);
 
-    // TODO(konstanting, #I67QXC): OnJsPromiseRejected
+    // NOTE(konstanting, #I67QXC): OnJsPromiseRejected
     napi_value then_callback;
     status = napi_create_function(env, nullptr, 0, OnJsPromiseResolved, promise_ref, &then_callback);
     if (status != napi_ok) {
@@ -165,7 +165,7 @@ void JsJobQueue::CreateLink(EtsObject *source, EtsObject *target)
     auto *main_t = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
     Coroutine *main_coro = Coroutine::CastFromThread(main_t);
     if (Coroutine::GetCurrent() != main_coro) {
-        // TODO(konstanting, #I67QXC): figure out if we need to ExecuteOnThisContext() for OHOS
+        // NOTE(konstanting, #I67QXC): figure out if we need to ExecuteOnThisContext() for OHOS
         main_coro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(
             &add_link_proc, EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>());
     } else {

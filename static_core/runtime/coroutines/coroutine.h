@@ -136,7 +136,7 @@ public:
     static bool ThreadIsCoroutine(Thread *thread)
     {
         ASSERT(thread != nullptr);
-        // TODO(konstanting, #I67QXC): THREAD_TYPE_TASK -> THREAD_TYPE_COROUTINE and
+        // NOTE(konstanting, #I67QXC): THREAD_TYPE_TASK -> THREAD_TYPE_COROUTINE and
         // remove the runtime/scheduler directory contents
         return thread->GetThreadType() == Thread::ThreadType::THREAD_TYPE_TASK;
     }
@@ -297,7 +297,7 @@ private:
     std::variant<std::monostate, ManagedEntrypointData, NativeEntrypointData> entrypoint_;
 
     CoroutineContext *context_ = nullptr;
-    // TODO(konstanting, #I67QXC): check if we still need this functionality
+    // NOTE(konstanting, #I67QXC): check if we still need this functionality
     bool start_suspended_ = false;
 
     // Allocator calls our protected ctor

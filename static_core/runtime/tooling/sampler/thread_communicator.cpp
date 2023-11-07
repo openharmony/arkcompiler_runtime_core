@@ -45,7 +45,7 @@ bool ThreadCommunicator::ReadSample(SampleInfo *sample) const
 
     void *buffer = reinterpret_cast<void *>(sample);
 
-    // TODO(m.strizhak): optimize by reading several samples by one call
+    // NOTE(m.strizhak): optimize by reading several samples by one call
     ssize_t syscall_result = read(listener_pipe_[PIPE_READ_ID], buffer, sizeof(SampleInfo));
     if (syscall_result == -1) {
         return false;

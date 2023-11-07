@@ -70,7 +70,7 @@ void ObjectTypePropagation::VisitLoadArray([[maybe_unused]] GraphVisitor *v, [[m
 {
     // LoadArray should be processed more carefully, because it may contain object of the derived class with own method
     // implementation. We need to check all array stores and method calls between NewArray and LoadArray.
-    // TODO(mshertennikov): Support it.
+    // NOTE(mshertennikov): Support it.
 }
 
 void ObjectTypePropagation::VisitLoadObject(GraphVisitor *v, Inst *i)

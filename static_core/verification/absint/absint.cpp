@@ -65,7 +65,7 @@ VerificationContext PrepareVerificationContext(TypeSystem *type_system, Job cons
     Type method_class_type {klass};
 
     VerificationContext verif_ctx {type_system, job, method_class_type};
-    // TODO(vdyadov): ASSERT(cflow_info corresponds method)
+    // NOTE(vdyadov): ASSERT(cflow_info corresponds method)
 
     auto &cflow_info = verif_ctx.CflowInfo();
     auto &exec_ctx = verif_ctx.ExecCtx();
@@ -283,13 +283,13 @@ VerificationStatus VerifyMethod(VerificationContext &verif_ctx)
         return worst_so_far;
     }
 
-    // TODO(vdyadov): account for dead code
+    // NOTE(vdyadov): account for dead code
     const uint8_t *dummy_entry_point;
     EntryPointType dummy_entry_type;
 
     if (exec_ctx.GetEntryPointForChecking(&dummy_entry_point, &dummy_entry_type) ==
         ExecContext::Status::NO_ENTRY_POINTS_WITH_CONTEXT) {
-        // TODO(vdyadov): log remaining entry points as unreachable
+        // NOTE(vdyadov): log remaining entry points as unreachable
         worst_so_far = std::max(worst_so_far, VerificationStatus::WARNING);
     }
 

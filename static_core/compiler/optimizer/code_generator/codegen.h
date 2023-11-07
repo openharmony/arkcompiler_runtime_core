@@ -250,7 +250,7 @@ public:
 
     /**
      * Insert tracing code to the generated code. See `Trace` method in the `runtime/entrypoints.cpp`.
-     * TODO(compiler): we should rework parameters assigning algorithm, that is duplicated here.
+     * NOTE(compiler): we should rework parameters assigning algorithm, that is duplicated here.
      * @param params parameters to be passed to the TRACE entrypoint, first parameter must be TraceId value.
      */
     template <typename... Args>

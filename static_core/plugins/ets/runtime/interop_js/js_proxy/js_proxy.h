@@ -53,8 +53,8 @@ private:
 
     EtsClass *const proxy_klass_ {};
     std::unique_ptr<Method[]> proxy_methods_ {};  // NOLINT(modernize-avoid-c-arrays)
-    // TODO(vpukhov): add flag if original class has final methods or public fields
-    // TODO(vpukhov): must ensure compat-class methods except accessors do not access its private state
+    // NOTE(vpukhov): add flag if original class has final methods or public fields
+    // NOTE(vpukhov): must ensure compat-class methods except accessors do not access its private state
 };
 
 }  // namespace panda::ets::interop::js::js_proxy

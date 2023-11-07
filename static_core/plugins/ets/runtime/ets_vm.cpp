@@ -46,7 +46,7 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
         nullptr,                                      // register_finalize_reference_func
         options.GetMaxGlobalRefSize(),                // max_global_ref_size
         options.IsGlobalReferenceSizeCheckEnabled(),  // is_global_reference_size_check_enabled
-        // TODO(konstanting, #I67QXC): implement MT_MODE_TASK in allocators and HeapOptions as is_single_thread is not
+        // NOTE(konstanting, #I67QXC): implement MT_MODE_TASK in allocators and HeapOptions as is_single_thread is not
         // enough
         false,                              // is_single_thread
         options.IsUseTlabForAllocations(),  // is_use_tlab_for_allocations
@@ -511,7 +511,7 @@ void PandaEtsVM::HandleUncaughtException()
     }
 
     // We need to call Exception::toString() method and write the result to stdout.
-    // TODO(molotkovmikhail,#I7AJKF): use NAPI to describe the exception and print the stacktrace
+    // NOTE(molotkovmikhail,#I7AJKF): use NAPI to describe the exception and print the stacktrace
     auto *method_to_execute = EtsMethod::ToRuntimeMethod(exception_ets_class->GetMethod("toString"));
     Value args(exception->GetCoreType());  // only 'this' is required as an argument
     current_coro->ClearException();        // required for Invoke()
@@ -726,7 +726,7 @@ void PandaEtsVM::FirePromiseStateChanged(EtsHandle<EtsPromise> &promise)
             // In stackful coroutine implementation (with JS mode enabled), the OnPromiseStateChanged call
             // might trigger a PandaEtsVM::AddPromiseListener call within the same thread, causing a
             // double acquire of promise_listeners_lock_ and hence an assertion failure
-            // TODO(konstanting, I67QXC): handle this situation
+            // NOTE(konstanting, I67QXC): handle this situation
             it->OnPromiseStateChanged(promise);
             auto to_remove = it++;
             promise_listeners_.erase(to_remove);

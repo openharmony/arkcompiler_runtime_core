@@ -549,7 +549,7 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
     save_profiling_info_ = options_.IsCompilerEnableJit() && options_.IsProfilesaverEnabled();
 
 #ifdef PANDA_COMPILER_ENABLE
-    // TODO(maksenov): Enable JIT for debug mode
+    // NOTE(maksenov): Enable JIT for debug mode
     is_jit_enabled_ = !this->IsDebugMode() && Runtime::GetOptions().IsCompilerEnableJit();
 #else
     is_jit_enabled_ = false;
@@ -1466,13 +1466,13 @@ void Runtime::InitNonZygoteOrPostFork(bool is_system_server, [[maybe_unused]] co
 {
     is_zygote_ = false;
 
-    // TODO(00510180): wait NativeBridge ready
+    // NOTE(00510180): wait NativeBridge ready
 
-    // TODO(00510180): wait profile ready
+    // NOTE(00510180): wait profile ready
 
-    // TODO(00510180): wait ThreadPool ready
+    // NOTE(00510180): wait ThreadPool ready
 
-    // TODO(00510180): wait ResetGcPerformanceInfo() ready
+    // NOTE(00510180): wait ResetGcPerformanceInfo() ready
 
     panda_vm_->PreStartup();
 

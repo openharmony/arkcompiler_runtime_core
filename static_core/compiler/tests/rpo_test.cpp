@@ -229,7 +229,7 @@ TEST_F(RpoTest, GraphWithCycles)
     auto l = &BB(9U);
     auto exit = GetGraph()->GetEndBlock();
 
-    // FIXME {A, B, T, D, exit} doesn't work
+    // NOTE {A, B, T, D, exit} doesn't work
     CheckSubsequence({a, b, d, l, exit});
     CheckSubsequence({a, c, e, d, l, exit});
     CheckSubsequence({a, c, e, m, l});

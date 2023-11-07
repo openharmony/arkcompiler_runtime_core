@@ -81,7 +81,7 @@ TEST_F(RegisteringNativeMethodsTest, RegisterNativesTest)
     ASSERT_EQ(env_->RegisterNatives(cls, &native_method, 0), ETS_OK);
 }
 
-// TODO(m.morozov): Add exception test when exceptions will be implemeted
+// NOTE(m.morozov): Add exception test when exceptions will be implemeted
 
 TEST_F(RegisteringNativeMethodsTest, RegisterNativesArrayTest)
 {

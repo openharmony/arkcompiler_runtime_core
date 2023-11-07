@@ -290,13 +290,13 @@ public:
         return is_initialized_;
     }
 
-    // TODO(00510180): lack NativeBridgeAction action
+    // NOTE(00510180): lack NativeBridgeAction action
     void InitNonZygoteOrPostFork(bool is_system_server, const char *isa, const std::function<void()> &init_hook = {},
                                  bool profile_system_server = false);
 
     static const char *GetVersion()
     {
-        // TODO(chenmudan): change to the correct version when we have one;
+        // NOTE(chenmudan): change to the correct version when we have one;
         return "1.0.0";
     }
 
@@ -492,7 +492,7 @@ private:
     static os::memory::Mutex mutex_;
     static taskmanager::TaskScheduler *task_scheduler_;
 
-    // TODO(dtrubenk): put all of it in the permanent space
+    // NOTE(dtrubenk): put all of it in the permanent space
     mem::InternalAllocatorPtr internal_allocator_;
     RuntimeNotificationManager *notification_manager_;
     ClassLinker *class_linker_;

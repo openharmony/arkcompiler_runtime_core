@@ -103,7 +103,7 @@ EtsByte TypeAPIGetTypeKind(EtsString *td)
             kind = static_cast<EtsByte>(EtsTypeAPIKind::LAMBDA);
         } else if (ref_type->IsUnionClass()) {
             kind = static_cast<EtsByte>(EtsTypeAPIKind::UNION);
-        } else if (ref_type->IsUndefined()) {  // TODO(shumilov-petr): think about it
+        } else if (ref_type->IsUndefined()) {  // NOTE(shumilov-petr): think about it
             kind = static_cast<EtsByte>(EtsTypeAPIKind::UNDEFINED);
         } else if (type_desc == panda::ets::panda_file_items::class_descriptors::VOID) {
             kind = static_cast<EtsByte>(EtsTypeAPIKind::VOID);
@@ -152,14 +152,14 @@ EtsByte TypeAPIGetTypeKind(EtsString *td)
 
 EtsBoolean TypeAPIIsValueType(EtsString *td)
 {
-    // TODO(shumilov-petr): Add td is valid check
+    // NOTE(shumilov-petr): Add td is valid check
     return static_cast<EtsBoolean>(
         !((static_cast<uint8_t>(TypeAPIGetTypeKind(td)) & static_cast<uint8_t>(ETS_TYPE_KIND_VALUE_MASK)) == 0));
 }
 
 EtsString *TypeAPIGetTypeName(EtsString *td)
 {
-    // TODO(shumilov-petr): Add td is valid check
+    // NOTE(shumilov-petr): Add td is valid check
     auto class_name = td->GetMutf8();
     auto type = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClass(class_name.c_str());
     return EtsClass::CreateEtsClassName(type->GetDescriptor());
@@ -167,7 +167,7 @@ EtsString *TypeAPIGetTypeName(EtsString *td)
 
 EtsInt TypeAPIGetClassAttributes(EtsString *td)
 {
-    // TODO(shumilov-petr): Add td is valid check
+    // NOTE(shumilov-petr): Add td is valid check
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
     auto type = class_linker->GetClass(td->GetMutf8().c_str());
 
@@ -180,7 +180,7 @@ EtsInt TypeAPIGetClassAttributes(EtsString *td)
 // Features
 EtsLong TypeAPIGetFieldsNum(EtsString *td)
 {
-    // TODO(shumilov-petr): Add td is valid check
+    // NOTE(shumilov-petr): Add td is valid check
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
     auto type = class_linker->GetClass(td->GetMutf8().c_str());
     return type->GetFieldsNumber();
@@ -188,7 +188,7 @@ EtsLong TypeAPIGetFieldsNum(EtsString *td)
 
 EtsLong TypeAPIGetOwnFieldsNum(EtsString *td)
 {
-    // TODO(shumilov-petr): Add td is valid check
+    // NOTE(shumilov-petr): Add td is valid check
     auto class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
     auto type = class_linker->GetClass(td->GetMutf8().c_str());
     return type->GetOwnFieldsNumber();
@@ -196,7 +196,7 @@ EtsLong TypeAPIGetOwnFieldsNum(EtsString *td)
 
 EtsTypeAPIField *CreateField(EtsField *field, EtsClass *type)
 {
-    // TODO(shumilov-petr): Add td is valid check
+    // NOTE(shumilov-petr): Add td is valid check
 
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -433,7 +433,7 @@ EtsString *TypeAPIGetInterface(EtsString *td, EtsLong i)
 
 EtsInt TypeAPIGetFunctionAttributes([[maybe_unused]] EtsString *td)
 {
-    // TODO(shumilov-petr): Not implemented
+    // NOTE(shumilov-petr): Not implemented
     return 0;
 }
 
@@ -455,14 +455,14 @@ EtsTypeAPIParameter *CreateParameter(EtsClass *type, std::string_view name)
     VMHandle<EtsString> td_handle(coroutine, td->GetCoreType());
     typeapi_parameter.GetPtr()->SetTypeDesc(td_handle.GetPtr());
 
-    // TODO(shumilov-petr): It's a temporary solution, extra type info dumping required
+    // NOTE(shumilov-petr): It's a temporary solution, extra type info dumping required
     auto pname = EtsString::CreateFromUtf8(name.data(), name.size());
     VMHandle<EtsString> pname_handle(coroutine, pname->GetCoreType());
     typeapi_parameter.GetPtr()->SetName(pname_handle.GetPtr());
 
     // Set specific attributes
     uint32_t attr = 0U;
-    // TODO(kirill-mitkin): Need to dump attributes of parameters from frontend to runtime
+    // NOTE(kirill-mitkin): Need to dump attributes of parameters from frontend to runtime
     typeapi_parameter.GetPtr()->SetAttributes(attr);
     return typeapi_parameter.GetPtr();
 }
@@ -509,7 +509,7 @@ EtsLong TypeAPIGetTypeId(EtsString *td)
 
 EtsString *TypeAPIGetArrayElementType(EtsString *td)
 {
-    // TODO(shumilov-petr): Add td is valid check
+    // NOTE(shumilov-petr): Add td is valid check
     auto arr_class = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClass(td->GetMutf8().c_str());
     return EtsString::CreateFromMUtf8(arr_class->GetComponentType()->GetDescriptor());
 }

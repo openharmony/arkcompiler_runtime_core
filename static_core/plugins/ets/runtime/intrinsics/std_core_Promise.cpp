@@ -167,7 +167,7 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
          *      STS mode:
          *          if resolved: return Promise.value
          *          if rejected: throw Promise.value
-         *      JS mode: TODO!
+         *      JS mode: NOTE!
          *          - suspend coro, create resolved JS promise and put it to the Q, on callback resume the coro
          *            and possibly throw
          *          - JQ::put(current_coro, promise)
@@ -192,10 +192,10 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
          *      STS mode:
          *          if resolved: return P.value
          *          if rejected: throw P.value
-         *      JS mode: ??? TODO
+         *      JS mode: ??? NOTE
          */
         LOG(DEBUG, COROUTINES) << "Promise::await: starting await() for a pending promise...";
-        // TODO(konstanting, #I67QXC): try to make the Promise/Event locking sequence easier for understanding
+        // NOTE(konstanting, #I67QXC): try to make the Promise/Event locking sequence easier for understanding
         e->Lock();
         promise_handle->Unlock();
         current_coro->GetCoroutineManager()->Await(e);  // will unlock the event
@@ -219,7 +219,7 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
      *      STS mode:
      *          create Event, connect it to promise
      *          CM::Await(event) // who will resolve P and P.event?
-     *      JS mode: ??? TODO
+     *      JS mode: ??? NOTE
      */
 
     return nullptr;

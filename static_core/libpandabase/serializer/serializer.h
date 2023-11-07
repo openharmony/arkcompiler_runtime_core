@@ -86,7 +86,7 @@ inline auto TypeToBuffer(const UnMap &map, /* out */ std::vector<uint8_t> &buffe
     // because clang-format-8 can't correctly detect the source code language.
     // https://bugs.llvm.org/show_bug.cgi?id=37433
     //
-    // TODO(v.cherkashin): Fix this loop when we switch to clang-format-14.
+    // NOTE(v.cherkashin): Fix this loop when we switch to clang-format-14.
     for (const auto &it : map) {
         // pack key
         auto k = TypeToBuffer(it.first, buffer);

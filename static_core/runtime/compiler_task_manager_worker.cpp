@@ -28,7 +28,7 @@ CompilerTaskManagerWorker::CompilerTaskManagerWorker(mem::InternalAllocatorPtr i
 
 void CompilerTaskManagerWorker::JoinWorker()
 {
-    //  TODO(molotkov): implement method in TaskManager to wait for tasks to finish (#13962)
+    //  NOTE(molotkov): implement method in TaskManager to wait for tasks to finish (#13962)
     os::memory::LockHolder lock(task_queue_lock_);
     compiler_worker_joined_ = true;
     while (!compiler_task_deque_.empty()) {

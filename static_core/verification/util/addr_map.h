@@ -95,7 +95,7 @@ public:
 
     bool HasCommonMarks(const AddrMap &rhs) const
     {
-        // todo: work with different addr spaces
+        // NOTE: work with different addr spaces
         ASSERT(addr_range_ == rhs.addr_range_);
         return BitVector::LazyAndThenIndicesOf<true>(bit_map_, rhs.bit_map_)().IsValid();
     }
@@ -103,7 +103,7 @@ public:
     template <typename PtrType>
     bool GetFirstCommonMark(const AddrMap &rhs, PtrType *ptr) const
     {
-        // todo: work with different addr spaces
+        // NOTE: work with different addr spaces
         ASSERT(addr_range_ == rhs.addr_range_);
         Index<size_t> idx = BitVector::LazyAndThenIndicesOf<true>(bit_map_, rhs.bit_map_)();
         if (idx.IsValid()) {
@@ -114,7 +114,7 @@ public:
         return false;
     }
 
-    // TODO(vdyadov): optimize this function, push blocks enumeration to bit vector level
+    // NOTE(vdyadov): optimize this function, push blocks enumeration to bit vector level
     //                and refactor it to work with words and ctlz like intrinsics
     template <typename PtrType, typename Callback>
     void EnumerateMarkedBlocks(Callback cb) const

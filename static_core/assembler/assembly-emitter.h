@@ -239,7 +239,7 @@ private:
                                const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
                                const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
 
-    // TODO(mgonopolsky): Refactor to introduce a single error-processing mechanism for parser and emitter
+    // NOTE(mgonopolsky): Refactor to introduce a single error-processing mechanism for parser and emitter
     // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
     PANDA_PUBLIC_API static std::string last_error_;
 };

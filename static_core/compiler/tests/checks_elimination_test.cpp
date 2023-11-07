@@ -4695,7 +4695,7 @@ TEST_F(ChecksEliminationTest, DoNotOmitNullCheck)
     ASSERT_FALSE(INS(11U).CastToIsInstance()->GetOmitNullCheck());
 }
 
-// TODO(schernykh): It's possible to remove boundschecks from this test, but BoundsAnalysis must be upgrade for it.
+// NOTE(schernykh): It's possible to remove boundschecks from this test, but BoundsAnalysis must be upgrade for it.
 TEST_F(ChecksEliminationTest, OptimizeBoundsCheckElimination)
 {
     GRAPH(GetGraph())

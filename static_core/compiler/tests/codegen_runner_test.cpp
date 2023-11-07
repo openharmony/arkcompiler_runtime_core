@@ -343,7 +343,7 @@ TEST_F(CodegenRunnerTest, ObjectParams)
     // hi-part is 1 - to do not rewrite fp, lr in arm64
     std::array<uint64_t, 4U> reg_masks {
         0U, 0xFFFFFFFFFFFFFFF0U, 0xFFFFFFFFF0FFF000U, 0xFFFFFFFFFFFFDFD6U,
-        // TODO (igorban): enable next variants:
+        // NOTE (igorban): enable next variants:
         // 0xFFFFFFFFFF000FFF,
         // 0xFFFFFFFFF000000F,
         // 0xFFFFFFFFF000202A,

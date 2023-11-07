@@ -25,7 +25,7 @@
 #include <string>
 
 namespace panda::tooling {
-// TODO(a.urakov): move to PtLangExt after the refactoring will be done
+// NOTE(a.urakov): move to PtLangExt after the refactoring will be done
 
 class InspectorExtension {
 public:

@@ -126,7 +126,7 @@ private:
 
     std::unique_ptr<js_proxy::JSProxy> jsproxy_wrapper_ {};
 
-    // TODO(vpukhov): allocate inplace to reduce memory consumption
+    // NOTE(vpukhov): allocate inplace to reduce memory consumption
     std::unique_ptr<LazyEtsMethodWrapperLink[]> ets_method_wrappers_;  // NOLINT(modernize-avoid-c-arrays)
     std::unique_ptr<EtsFieldWrapper[]> ets_field_wrappers_;            // NOLINT(modernize-avoid-c-arrays)
     uint32_t num_methods_ {};

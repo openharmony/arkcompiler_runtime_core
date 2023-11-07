@@ -88,7 +88,7 @@ static inline vixl::aarch32::Condition Convert(const Condition cc)
             return vixl::aarch32::hi;
         case Condition::HS:
             return vixl::aarch32::hs;
-        // TODO(igorban) : Remove them
+        // NOTE(igorban) : Remove them
         case Condition::MI:
             return vixl::aarch32::mi;
         case Condition::PL:
@@ -341,7 +341,7 @@ public:
 
     bool IsRegUsed(ArenaVector<Reg> vec_reg, Reg reg) override;
 
-    // TODO(igorban): implement as virtual
+    // NOTE(igorban): implement as virtual
     static bool IsTmp(Reg reg);
 
 public:

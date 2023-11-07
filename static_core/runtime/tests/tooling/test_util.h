@@ -220,7 +220,7 @@ private:
 };
 
 // Some toolchains have << overloading for std::nullptr_t
-// TODO(asoldatov): Find a better workaround, distro-specifc define seems too intrusive.
+// NOTE(asoldatov): Find a better workaround, distro-specifc define seems too intrusive.
 #if (!defined PANDA_TARGET_MOBILE) && (!defined PANDA_TARGET_LINUX_UBUNTU_20_04)
 std::ostream &operator<<(std::ostream &out, std::nullptr_t);
 #endif

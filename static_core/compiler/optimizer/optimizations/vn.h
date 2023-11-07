@@ -119,7 +119,7 @@ private:
 
     bool TryToApplyCse(Inst *inst, InstVector *equiv_insts);
 
-    // !TODO add own allocator
+    // !NOTE add own allocator
     ArenaUnorderedMap<VnObject *, InstVector, VnObjHash, VnObjEqual> map_insts_;
     SaveStateBridgesBuilder ssb_;
     uint32_t curr_vn_ {0};

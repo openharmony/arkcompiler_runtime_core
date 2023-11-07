@@ -129,7 +129,7 @@ TEST_F(CodegenTest, SimpleProgramm)
             INST(17U, Opcode::Phi).Inputs(1U, 10U).s64();  // PHI  v1
             INST(20U, Opcode::Phi).Inputs(2U, 10U).s64();  // result to return
 
-            // TODO (igorban): support CMP instr
+            // NOTE (igorban): support CMP instr
             INST(18U, Opcode::Compare).b().CC(CC_NE).Inputs(0U, 16U);
             INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(18U);
         }
@@ -1632,7 +1632,7 @@ TEST_F(CodegenTest, RegallocTwoFreeRegs)
     }
 }
 
-// TODO (igorban): Update FillSaveStates() with filling SaveState from SpillFill
+// NOTE (igorban): Update FillSaveStates() with filling SaveState from SpillFill
 TEST_F(CodegenTest, DISABLED_TwoFreeRegsAdditionSaveState)
 {
     GRAPH(GetGraph())
@@ -1755,8 +1755,8 @@ TEST_F(CodegenTest, SaveState)
     // End dump
 
     auto ret_data = GetExecModule().GetRetValue();
-    // TODO (igorban) : really need to check array changes
-    EXPECT_EQ(ret_data, 4U * 0x21U);
+    // NOTE (igorban) : really need to check array changes
+    EXPECT_EQ(ret_data, 4U * 0x21);
 
     // Clear data for next execution
     while (auto current = GetGraph()->GetFirstConstInst()) {
@@ -1922,7 +1922,7 @@ TEST_F(CodegenTest, NullCheckBoundsCheck)
     ASSERT(code_entry != nullptr && code_exit != nullptr);
     GetExecModule().SetInstructions(code_entry, code_exit);
 
-    // TODO (igorban) : fill Frame array == nullptr [THROW]
+    // NOTE (igorban) : fill Frame array == nullptr [THROW]
 
     uint64_t array[ARRAY_LEN];
     for (auto i = 0U; i < ARRAY_LEN; i++) {
@@ -1938,9 +1938,9 @@ TEST_F(CodegenTest, NullCheckBoundsCheck)
     EXPECT_EQ(GetExecModule().GetRetValue(), array[index] * 4U);
 
     /*
-   TODO (igorban) : fill Frame
-   // index < 0 [THROW]
-   */
+    NOTE (igorban) : fill Frame
+    // index < 0 [THROW]
+    */
     GetExecModule().FreeArray(param_1);
 }
 

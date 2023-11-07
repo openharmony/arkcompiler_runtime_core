@@ -121,7 +121,7 @@ void AotBuilder::FillHeader(const std::string &cmdline, const std::string &file_
 {
     aot_header_.magic = compiler::AotFile::MAGIC;
     aot_header_.version = compiler::AotFile::VERSION;
-    aot_header_.checksum = 0;  // TODO(msherstennikov)
+    aot_header_.checksum = 0;  // NOTE(msherstennikov)
     ASSERT(GetRuntime() != nullptr);
     aot_header_.environment_checksum = GetRuntime()->GetEnvironmentChecksum(arch_);
     aot_header_.arch = static_cast<uint32_t>(arch_);

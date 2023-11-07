@@ -28,7 +28,7 @@ std::pair<int8_t, int8_t> EtsSharedMemory::ReadModifyWriteI8(int32_t index, cons
     [[maybe_unused]] EtsHandleScope scope(coroutine);
     EtsHandle<EtsSharedMemory> this_handle(coroutine, this);
 
-    // TODO(egor-porsev): add LIKELY(std::try_lock) path to prevent ScopedNativeCodeThread creation if no blocking
+    // NOTE(egor-porsev): add LIKELY(std::try_lock) path to prevent ScopedNativeCodeThread creation if no blocking
     // occurs
     ScopedNativeCodeThread n(coroutine);
     os::memory::LockHolder lock(coroutine->GetPandaVM()->GetAtomicsMutex());

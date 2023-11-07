@@ -733,7 +733,7 @@ public:
     {
         size_t fail_count = 0;
         fail_count += object_allocator_->VerifyAllocator();
-        // TODO(yyang): add verify for large/humongous allocator
+        // NOTE(yyang): add verify for large/humongous allocator
         return fail_count;
     }
 
@@ -804,7 +804,7 @@ private:
 
 template <MTModeT MT_MODE = MT_MODE_MULTI>
 class ObjectAllocatorGen final : public ObjectAllocatorGenBase {
-    // TODO(dtrubenkov): create a command line argument for this
+    // NOTE(dtrubenkov): create a command line argument for this
     static constexpr size_t DEFAULT_YOUNG_TLAB_SIZE = 4_KB;  // TLAB size for young gen
 
     using YoungGenAllocator = BumpPointerAllocator<ObjectAllocConfigWithCrossingMap,
@@ -907,7 +907,7 @@ public:
     {
         size_t fail_count = 0;
         fail_count += object_allocator_->VerifyAllocator();
-        // TODO(yyang): add verify for large/humongous allocator
+        // NOTE(yyang): add verify for large/humongous allocator
         return fail_count;
     }
 

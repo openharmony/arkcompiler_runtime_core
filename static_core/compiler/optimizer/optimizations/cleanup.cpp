@@ -147,7 +147,7 @@ bool Cleanup::RunOnce(ArenaSet<BasicBlock *> *empty_blocks, ArenaSet<BasicBlock 
 
 bool Cleanup::SkipBasicBlock(BasicBlock *bb)
 {
-    // TODO (a.popov) Make empty catch-begin and try-end blocks removeable
+    // NOTE (a.popov) Make empty catch-begin and try-end blocks removeable
     return bb == nullptr || bb->IsStartBlock() || bb->IsEndBlock() || bb->IsCatchBegin() || bb->IsTryEnd();
 }
 

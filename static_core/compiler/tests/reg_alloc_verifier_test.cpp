@@ -363,7 +363,7 @@ TEST_F(RegAllocVerifierTest, CallSpillFillReordering)
 TEST_F(RegAllocVerifierTest, VerifyIndirectCall)
 {
     if (GetGraph()->GetArch() == Arch::AARCH32) {
-        // TODO (zwx1004932) Support spill/fills in entrypoints frame and enable test
+        // NOTE (zwx1004932) Support spill/fills in entrypoints frame and enable test
         GTEST_SKIP();
     }
     GetGraph()->SetMode(GraphMode::FastPath());

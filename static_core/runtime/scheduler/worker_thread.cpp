@@ -36,7 +36,7 @@ void WorkerThread::ProcessCreatedThread()
     Thread::SetCurrent(this);
     // Runtime takes ownership of the thread
     trace::ScopedTrace scoped_trace2("ThreadManager::RegisterThread");
-    // TODO(xuliang): RegisterThread
+    // NOTE(xuliang): RegisterThread
 }
 
 WorkerThread *WorkerThread::AttachThread()
@@ -49,7 +49,7 @@ WorkerThread *WorkerThread::AttachThread()
 void WorkerThread::Destroy()
 {
     ASSERT(this == WorkerThread::GetCurrent());
-    // TODO(xuliang): should be done in UnregisterExitedThread.
+    // NOTE(xuliang): should be done in UnregisterExitedThread.
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     allocator->Delete(this);
     Thread::SetCurrent(nullptr);

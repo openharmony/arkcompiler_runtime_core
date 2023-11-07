@@ -134,7 +134,7 @@ struct Ins {
 
     bool HasFlag(InstFlags flag) const
     {
-        if (opcode == Opcode::INVALID) {  // TODO(mbolshov): introduce 'label' opcode for labels
+        if (opcode == Opcode::INVALID) {  // NOTE(mbolshov): introduce 'label' opcode for labels
             return false;
         }
         return (INST_FLAGS_TABLE[static_cast<size_t>(opcode)] & flag) != 0;

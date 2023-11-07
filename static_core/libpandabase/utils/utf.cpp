@@ -50,7 +50,7 @@ namespace panda::utf {
  */
 std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t max_bytes)
 {
-    // TODO(d.kovalneko): make the function safe
+    // NOTE(d.kovalneko): make the function safe
     Span<const uint8_t> sp(data, max_bytes);
     uint8_t d0 = sp[0];
     if ((d0 & MASK1) == 0) {
@@ -259,7 +259,7 @@ size_t Mutf8Size(const uint8_t *mutf8)
 
 size_t MUtf8ToUtf16Size(const uint8_t *mutf8)
 {
-    // TODO(d.kovalenko): make it faster
+    // NOTE(d.kovalenko): make it faster
     size_t res = 0;
     while (*mutf8 != '\0') {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8);

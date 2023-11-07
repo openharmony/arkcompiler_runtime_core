@@ -76,7 +76,7 @@ TEST_F(MemLeakTest, MemLeak1MBTest)
         "");
 }
 
-// TODO(alovkov): add test for FreeInternalMemory #4618
+// NOTE(alovkov): add test for FreeInternalMemory #4618
 
 #endif  // NDEBUG
 

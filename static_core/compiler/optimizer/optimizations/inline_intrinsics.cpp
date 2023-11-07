@@ -112,7 +112,7 @@ AnyBaseType InlineIntrinsics::GetAssumedAnyType(const Inst *inst)
         }
         case Opcode::Constant: {
             if (inst->GetType() != DataType::ANY) {
-                // TODO(dkofanov): Probably, we should resolve const's type based on `inst->GetType()`:
+                // NOTE(dkofanov): Probably, we should resolve const's type based on `inst->GetType()`:
                 return AnyBaseType::UNDEFINED_TYPE;
             }
             coretypes::TaggedValue any_const(inst->CastToConstant()->GetRawValue());

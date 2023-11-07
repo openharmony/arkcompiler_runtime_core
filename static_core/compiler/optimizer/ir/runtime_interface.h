@@ -1194,7 +1194,7 @@ public:
      *                    NB: This flag is a workaround and should be deleted. Problem is that Runtime stores methods
      *                    vector in different places for different languages. But Paoc uses only place for core part,
      *                    i.e. methods in Class objects, that is wrong for some languages.
-     *                    TODO: create interface in the runtime to enumerate all methods despite of VM language.
+     *                    NOTE: create interface in the runtime to enumerate all methods despite of VM language.
      * @return profile data for the given method
      */
     virtual MethodProfile GetMethodProfile([[maybe_unused]] MethodPtr method, [[maybe_unused]] bool from_vector) const

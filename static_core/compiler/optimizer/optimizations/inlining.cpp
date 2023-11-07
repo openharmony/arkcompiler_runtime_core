@@ -188,7 +188,7 @@ void Inlining::InvalidateAnalyses()
 
 /**
  * Get next Parameter instruction.
- * TODO(msherstennikov): this is temporary solution, need to find out better approach
+ * NOTE(msherstennikov): this is temporary solution, need to find out better approach
  * @param inst current param instruction
  * @return next Parameter instruction, nullptr if there no more Parameter instructions
  */
@@ -868,7 +868,7 @@ bool Inlining::DoInlineMethod(CallInst *call_inst, InlineContext *ctx)
 
     // Split block by call instruction
     auto call_bb = call_inst->GetBasicBlock();
-    // TODO (a.popov) Support inlining to the catch blocks
+    // NOTE (a.popov) Support inlining to the catch blocks
     if (call_bb->IsCatch()) {
         return false;
     }

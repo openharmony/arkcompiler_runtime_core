@@ -73,7 +73,7 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool is_cha
 {
     PandaVM *vm = Thread::GetCurrent()->GetVM();
     ScopedSuspendAllThreadsRunning ssat(vm->GetRendezvous());
-    // TODO(msherstennikov): remove this loop and check `methods` contains frame's method in stack traversing
+    // NOTE(msherstennikov): remove this loop and check `methods` contains frame's method in stack traversing
     for (const auto &method : methods) {
 #ifdef PANDA_EVENTS_ENABLED
         size_t in_stack_count = 0;
@@ -105,7 +105,7 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool is_cha
         if (is_cha) {
             EVENT_CHA_DEOPTIMIZE(std::string(method->GetFullName()), in_stack_count);
         }
-        // TODO (Trubenkov)  clean up compiled code(See issue 1706)
+        // NOTE (Trubenkov)  clean up compiled code(See issue 1706)
         method->SetInterpreterEntryPoint();
         Thread::GetCurrent()->GetVM()->GetCompiler()->RemoveOsrCode(method);
         // If deoptimization ocure during OSR compilation, we reset status after finish the compilation

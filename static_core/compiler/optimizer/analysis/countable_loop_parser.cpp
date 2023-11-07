@@ -196,7 +196,7 @@ bool CountableLoopParser::IsInstIncOrDec(Inst *inst)
     return cnst != nullptr;
 }
 
-// TODO(a.popov) Suppot 'GetLoopExit()' method in the 'Loop' class
+// NOTE(a.popov) Suppot 'GetLoopExit()' method in the 'Loop' class
 BasicBlock *CountableLoopParser::FindLoopExitBlock()
 {
     auto outer_loop = loop_.GetOuterLoop();

@@ -96,7 +96,7 @@ public:
     explicit operator T() const
     {
         ASSERT(IsValid());
-        // todo: check that T is capable of holding valid range of value
+        // NOTE: check that T is capable of holding valid range of value
         return static_cast<T>(value_);
     }
 

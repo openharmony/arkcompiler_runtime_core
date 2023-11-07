@@ -95,7 +95,7 @@ public:
     // Current usage of the locals:
     //  [0..1] slots: internal spill slots for codegen
     //  [2..3] slots: fp and lr in osr mode
-    // TODO(msherstennikov): need to make flexible machinery to handle locals
+    // NOTE(msherstennikov): need to make flexible machinery to handle locals
     static constexpr ptrdiff_t STACK_ARGS_START = StackArgSlot::Start();
     static constexpr ptrdiff_t FRAME_START_SLOT = LrSlot::Start();
     static constexpr size_t LOCALS_START_SLOT = 5;

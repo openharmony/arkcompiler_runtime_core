@@ -1608,7 +1608,7 @@ void Aarch32Encoder::MakeLibCallWithInt64Result(Reg dst, Reg src0, Reg src1, voi
 {
     // Here I look only for this case, because src - is mapped on two regs.
     // (INT64_TYPE), and src0 can't be rewrited
-    // TODO(igorban) If src0==src1 - the result will be 1 or UB(if src0 = 0)
+    // NOTE(igorban) If src0==src1 - the result will be 1 or UB(if src0 = 0)
     // It is better to check them in optimizations
     // ASSERT(src0 != src1); - do not enable for tests
 
@@ -2908,14 +2908,14 @@ void Aarch32Encoder::PushRegisters(RegMask registers, bool is_fp)
 {
     (void)registers;
     (void)is_fp;
-    // TODO(msherstennikov): Implement
+    // NOTE(msherstennikov): Implement
 }
 
 void Aarch32Encoder::PopRegisters(RegMask registers, bool is_fp)
 {
     (void)registers;
     (void)is_fp;
-    // TODO(msherstennikov): Implement
+    // NOTE(msherstennikov): Implement
 }
 
 size_t Aarch32Encoder::DisasmInstr(std::ostream &stream, size_t pc, ssize_t code_offset) const

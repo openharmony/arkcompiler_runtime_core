@@ -80,7 +80,7 @@ EtsObject *TypeAPIMethodInvokeImplementation(EtsCoroutine *coro, EtsMethod *meth
         return EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
     }
     if (meth->GetReturnValueType() == EtsType::VOID) {
-        // TODO(kprokopenko): remove reinterpret_cast when void is synced with runtime
+        // NOTE(kprokopenko): remove reinterpret_cast when void is synced with runtime
         return reinterpret_cast<EtsObject *>(EtsVoid::GetInstance());
     }
 

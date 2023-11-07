@@ -55,7 +55,7 @@ TaskProcessor *VerifierService::GetProcessor(SourceLang lang)
         lang_data->queue.push_back(allocator_->New<TaskProcessor>(this, lang));
         lang_data->total_processors++;
     }
-    // TODO(gogabr): should we use a queue or stack discipline?
+    // NOTE(gogabr): should we use a queue or stack discipline?
     auto res = lang_data->queue.front();
     lang_data->queue.pop_front();
     return res;

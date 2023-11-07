@@ -247,7 +247,7 @@ void OptimizeMemoryBarriers::VisitNullCheck(GraphVisitor *v, Inst *inst)
     static_cast<OptimizeMemoryBarriers *>(v)->CheckInput(inst->GetInput(0).GetInst());
     auto nc = static_cast<NullCheckInst *>(inst);
     auto graph = nc->GetBasicBlock()->GetGraph();
-    // TODO (pishin) support for arm32
+    // NOTE (pishin) support for arm32
     if (graph->GetArch() == Arch::AARCH32) {
         return;
     }

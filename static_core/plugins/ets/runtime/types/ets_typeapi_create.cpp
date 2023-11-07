@@ -238,8 +238,8 @@ void LambdaTypeCreator::Create()
     // ETSBinder::FormLambdaName
     name_ += "-0";
 
-    // TODO(kprokopenko): check if this class exists, otherwise create it
-    // it is possible that GetClass will throw an exception, so todo
+    // NOTE(kprokopenko): check if this class exists, otherwise create it
+    // it is possible that GetClass will throw an exception, so use
     // auto panda_name = ClassNameToPandaName(name);
     // EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetClass(panda_name);
 

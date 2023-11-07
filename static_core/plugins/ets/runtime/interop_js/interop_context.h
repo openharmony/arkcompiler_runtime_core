@@ -217,7 +217,7 @@ public:
         return jsvalue_fqueue_register_;
     }
 
-    // TODO(vpukhov): implement in native code
+    // NOTE(vpukhov): implement in native code
     [[nodiscard]] bool PushOntoFinalizationQueue(EtsCoroutine *coro, EtsObject *obj, EtsObject *cbarg)
     {
         auto queue = Refstor()->Get(jsvalue_fqueue_ref_);
@@ -285,7 +285,7 @@ public:
         return TempArgs<T, OPT_SZ>(sz);
     }
 
-    // TODO(vpukhov): implement as flags in IFrame
+    // NOTE(vpukhov): implement as flags in IFrame
     struct InteropFrameRecord {
         void *ets_frame {};
         bool to_js {};

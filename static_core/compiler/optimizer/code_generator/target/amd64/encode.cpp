@@ -2415,7 +2415,7 @@ void Amd64Encoder::EncodeCompareAndSwap(Reg dst, Reg obj, const Reg *offset, Reg
     auto addr_reg = ArchReg(tmp2);
     Reg rax(ConvertRegNumber(asmjit::x86::rax.id()), INT64_TYPE);
 
-    /* TODO(ayodkev) this is a workaround for the failure of
+    /* NOTE(ayodkev) this is a workaround for the failure of
      * jsr166.ScheduledExecutorTest, have to figure out if there
      * is less crude way to avoid this */
     if (newval.GetId() == rax.GetId()) {

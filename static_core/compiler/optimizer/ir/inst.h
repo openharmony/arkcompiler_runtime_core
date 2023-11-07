@@ -1385,7 +1385,7 @@ public:
      * Set input instruction in specified index.
      * Old input will be removed.
      * @param index - index of input to be set
-     * @param inst - new input instruction TODO sherstennikov: currently it can be nullptr, is it correct?
+     * @param inst - new input instruction NOTE sherstennikov: currently it can be nullptr, is it correct?
      */
     void SetInput(unsigned index, Inst *inst)
     {
@@ -1677,7 +1677,7 @@ public:
 
     virtual size_t GetHashCode() const
     {
-        // TODO (Aleksandr Popov) calculate hash code
+        // NOTE (Aleksandr Popov) calculate hash code
         return 0;
     }
 

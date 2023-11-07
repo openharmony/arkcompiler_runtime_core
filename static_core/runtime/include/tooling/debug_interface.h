@@ -138,7 +138,7 @@ struct PtStepRange {
 
 // * * * * *
 // Mock API helpers
-// TODO(maksenov): cleanup
+// NOTE(maksenov): cleanup
 // * * * * *
 
 using ExceptionID = panda_file::File::EntityId;

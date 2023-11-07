@@ -239,7 +239,7 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
     };
     w_array->SetJSBuiltinMatcher(m_array);
 
-    // TODO(vpukhov): compat: obtain from class wrappers when implemented
+    // NOTE(vpukhov): compat: obtain from class wrappers when implemented
     napi_ref ctor_typeerror = std_ctor_ref(ctx, "TypeError");
     napi_ref ctor_rangeerror = std_ctor_ref(ctx, "RangeError");
     napi_ref ctor_referenceerror = std_ctor_ref(ctx, "ReferenceError");
@@ -253,7 +253,7 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
                 return not_assignable("Error");
             }
         }
-        // TODO(vpukhov): compat: remove when compat/Error is implemented
+        // NOTE(vpukhov): compat: remove when compat/Error is implemented
         return builtin_convert(helpers::TypeIdentity<JSConvertJSError>(), ctxx, env, js_value);
 
         if (check_instanceof(env, js_value, ctor_typeerror)) {
@@ -300,7 +300,7 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
         if (is_instanceof) {
             not_implemented("DataView");
         }
-        // TODO(vpukhov): Boolean, Number...
+        // NOTE(vpukhov): Boolean, Number...
         return builtin_convert(helpers::TypeIdentity<JSConvertJSValue>(), ctxx, env, js_value);
     };
 
@@ -362,7 +362,7 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_I64, JSConvertI64>(cache, linker_ext);
     RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_F64, JSConvertF64>(cache, linker_ext);
     RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_STRING, JSConvertString>(cache, linker_ext);
-    // TODO(vpukhov): jsvalue[] specialization, currently uses JSRefConvertArrayRef
+    // NOTE(vpukhov): jsvalue[] specialization, currently uses JSRefConvertArrayRef
 
     RegisterCompatConvertors(ctx);
 }

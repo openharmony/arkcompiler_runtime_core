@@ -315,7 +315,7 @@ void BasicBlock::JoinSuccessorBlock()
     succ->GetSuccsBlocks().clear();
 
     this->bit_fields_ |= succ->bit_fields_;
-    // TODO (a.popov) replace by assert
+    // NOTE (a.popov) replace by assert
     if (succ->try_id_ != INVALID_ID) {
         this->try_id_ = succ->try_id_;
     }

@@ -416,7 +416,7 @@ Monitor::State Monitor::Wait(ObjectHeader *obj, ThreadStatus status, uint64_t ti
                 monitor->recursive_counter_ = counter;
 
                 if (thread->IsInterrupted()) {
-                    // TODO(dtrubenkov): call panda::ThrowException when it will be imlemented
+                    // NOTE(dtrubenkov): call panda::ThrowException when it will be imlemented
                     result_state = State::INTERRUPTED;
                 }
 

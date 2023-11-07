@@ -311,7 +311,7 @@ TEST_F(LoopPeelingTest, SingleLoop)
     }
 
     EXPECT_TRUE(GetGraph()->RunPass<LoopPeeling>());
-    // TODO(a.popov): remove these calls, see todo in LoopPeeling pass constructor
+    // NOTE(a.popov): remove these calls, see NOTE in LoopPeeling pass constructor
     GetGraph()->RunPass<Cleanup>();
     EXPECT_TRUE(GraphComparator().Compare(GetGraph(), expected_graph));
 }
@@ -732,7 +732,7 @@ TEST_F(LoopPeelingTest, SingleBlockLoop)
     EXPECT_TRUE(GraphComparator().Compare(GetGraph(), expected_graph));
 }
 
-// TODO (apopov) Fix GraphComparator and enable test
+// NOTE (apopov) Fix GraphComparator and enable test
 TEST_F(LoopPeelingTest, DISABLED_RepeatedCloneableInputs)
 {
     GRAPH(GetGraph())

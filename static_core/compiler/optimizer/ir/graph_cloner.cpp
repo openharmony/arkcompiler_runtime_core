@@ -455,7 +455,7 @@ void GraphCloner::BuildLoopUnrollDataFlow(LoopUnrollData *unroll_data)
         }
     }
 
-    // TODO (a.popov) use temp container after if would be possible to reset local allocator
+    // NOTE (a.popov) use temp container after if would be possible to reset local allocator
     if (unroll_data->phi_replaced_inputs == nullptr) {
         unroll_data->phi_replaced_inputs = allocator_->New<PhiInputsMap>(allocator_->Adapter());
     } else {
@@ -1005,7 +1005,7 @@ void GraphCloner::UpdateCaller(Inst *inst)
 
 bool GraphCloner::IsLoopClonable(Loop *loop, size_t inst_limit)
 {
-    // TODO(schernykh) : implement case when we have inner loops
+    // NOTE(schernykh) : implement case when we have inner loops
     if (!loop->GetOuterLoop()->IsRoot() || !loop->GetInnerLoops().empty() || !IsLoopSingleBackEdgeExitPoint(loop)) {
         return false;
     }
@@ -1015,7 +1015,7 @@ bool GraphCloner::IsLoopClonable(Loop *loop, size_t inst_limit)
     ASSERT(ifimm->GetOpcode() == Opcode::IfImm);
     auto compare = ifimm->GetInput(0).GetInst();
     ASSERT(compare->GetOpcode() == Opcode::Compare);
-    // TODO(schernykh) : Implement case when compare is not before of ifimm
+    // NOTE(schernykh) : Implement case when compare is not before of ifimm
     if (ifimm->GetPrev() != compare) {
         return false;
     }

@@ -1680,7 +1680,7 @@ TEST_F(LoopUnrollTest, PredsInversedOrder)
     EXPECT_TRUE(GraphComparator().Compare(graph, expected_graph));
 }
 
-// TODO (a.popov) Fix after supporting infinite loops unrolling
+// NOTE (a.popov) Fix after supporting infinite loops unrolling
 TEST_F(LoopUnrollTest, InfiniteLoop)
 {
     auto graph = CreateEmptyGraph();

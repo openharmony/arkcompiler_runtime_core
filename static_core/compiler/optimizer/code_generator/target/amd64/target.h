@@ -63,7 +63,7 @@ static inline asmjit::x86::Condition::Code ArchCc(Condition cc, bool is_float = 
             return asmjit::x86::Condition::Code::kUnsignedGT;
         case Condition::HS:
             return asmjit::x86::Condition::Code::kUnsignedGE;
-        // TODO(igorban) : Remove them
+        // NOTE(igorban) : Remove them
         case Condition::MI:
             return asmjit::x86::Condition::Code::kNegative;
         case Condition::PL:

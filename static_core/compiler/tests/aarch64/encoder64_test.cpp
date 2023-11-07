@@ -630,7 +630,7 @@ TEST_F(Encoder64Test, MovTest)
     EXPECT_TRUE((TestMov2<int32_t, float>(this)));
     EXPECT_TRUE((TestMov2<int64_t, double>(this)));
 
-    // TODO (igorban) : add MOVI instructions
+    // NOTE (igorban) : add MOVI instructions
     // & support uint64_t mov
 }
 
@@ -1051,7 +1051,7 @@ TEST_F(Encoder64Test, LoadTest)
     EXPECT_TRUE((TestLdr<uint64_t>(this)));
     EXPECT_TRUE((TestLdr<float>(this)));
     EXPECT_TRUE((TestLdr<double>(this)));
-    // TODO(igorban) : additional test for full memory model:
+    // NOTE(igorban) : additional test for full memory model:
     // + mem(base + index<<scale + disp)
 }
 
@@ -1112,7 +1112,7 @@ TEST_F(Encoder64Test, StrTest)
     EXPECT_TRUE((TestStr<float>(this)));
     EXPECT_TRUE((TestStr<double>(this)));
 
-    // TODO(igorban) : additional test for full memory model:
+    // NOTE(igorban) : additional test for full memory model:
     // + mem(base + index<<scale + disp)
 }
 
@@ -1218,7 +1218,7 @@ TEST_F(Encoder64Test, StrzTest)
 
 bool Foo(uint32_t param1, uint32_t param2)
 {
-    // TODO(igorban): use variables
+    // NOTE(igorban): use variables
     return (param1 == param2);
 }
 

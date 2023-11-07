@@ -796,7 +796,7 @@ enum Condition {
     LS,  // less than or equal
     HI,  // greater
     HS,  // greater than or equal
-    // Special arch-dependecy TODO (igorban) Fix them
+    // Special arch-dependecy NOTE (igorban) Fix them
     MI,  // N set            Negative
     PL,  // N clear          Positive or zero
     VS,  // V set            Overflow.

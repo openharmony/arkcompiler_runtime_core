@@ -528,7 +528,7 @@ AnnotationItem *FileReader::CreateAnnotationItem(File::EntityId ann_id)
                 break;
             }
             case '@': {
-                // TODO(nsizov): support it
+                // NOTE(nsizov): support it
                 LOG(FATAL, PANDAFILE) << "MethodHandle is not supported so far";
                 break;
             }

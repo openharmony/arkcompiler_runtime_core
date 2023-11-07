@@ -270,7 +270,7 @@ DebugInfo::ErrorCode DebugInfo::ReadFromFile(const char *filename)
 #ifdef PANDA_TARGET_LINUX_UBUNTU_22_04
         dwarf_dealloc(dbg_, err, DW_DLA_ERROR);
 #else
-        // TODO(audovichenko): Libdwarf has a bug (memory leak).
+        // NOTE(audovichenko): Libdwarf has a bug (memory leak).
         // In case dwarf_init fails it allocates memory for the error and  returns it in 'err' variable.
         // But since dbg is NULL, dwarf_dealloc just returns in case of dbg == nullptr and doesn't free this memory
         // A possible solution is to use 20201201 version and call dwarf_dealloc.

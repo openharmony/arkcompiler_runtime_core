@@ -31,7 +31,7 @@ bool IsAccWriteBetween(compiler::Inst *src_inst, compiler::Inst *dst_inst)
     while (inst != dst_inst) {
         if (UNLIKELY(inst == nullptr)) {
             do {
-                // TODO(rtakacs): visit all the successors to get information about the
+                // NOTE(rtakacs): visit all the successors to get information about the
                 // accumulator usage. Only linear flow is supported right now.
                 if (block->GetSuccsBlocks().size() > 1) {
                     return true;
@@ -40,7 +40,7 @@ bool IsAccWriteBetween(compiler::Inst *src_inst, compiler::Inst *dst_inst)
                 ASSERT(block->GetSuccsBlocks().size() == 1);
                 block = block->GetSuccessor(0);
 
-                // TODO(rtakacs): only linear flow is supported right now.
+                // NOTE(rtakacs): only linear flow is supported right now.
                 if (!dst_inst->IsPhi() && block->GetPredsBlocks().size() > 1) {
                     return true;
                 }
@@ -174,7 +174,7 @@ bool RegAccAlloc::IsPhiAccReady(compiler::Inst *phi) const
 {
     ASSERT(phi->GetOpcode() == compiler::Opcode::Phi);
 
-    // TODO(rtakacs): there can be cases when the input/output of a Phi is an other Phi.
+    // NOTE(rtakacs): there can be cases when the input/output of a Phi is an other Phi.
     // These cases are not optimized for accumulator.
     for (auto input : phi->GetInputs()) {
         compiler::Inst *phi_input = input.GetInst();
@@ -257,7 +257,7 @@ bool RegAccAlloc::RunImpl()
     }
 
     // Drop the pass if the function contains unsupported opcodes
-    // TODO(rtakacs): support these opcodes.
+    // NOTE(rtakacs): support these opcodes.
     if (!GetGraph()->IsDynamicMethod()) {
         for (auto block : GetGraph()->GetBlocksRPO()) {
             for (auto inst : block->AllInsts()) {

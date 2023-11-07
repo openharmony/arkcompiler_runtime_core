@@ -94,7 +94,7 @@ void IrBuilder::SetMemoryBarrierFlag()
 
 bool IrBuilder::CheckMethodLimitations(const BytecodeInstructions &instructions, size_t vregs_count)
 {
-    // TODO(a.popov) Optimize catch-phi's memory consumption and get rid of this limitation
+    // NOTE(a.popov) Optimize catch-phi's memory consumption and get rid of this limitation
     static constexpr auto TRY_BLOCKS_LIMIT = 128U;
 
     size_t bytecode_size_limit = OPTIONS.GetCompilerMaxBytecodeSize();
@@ -153,7 +153,7 @@ bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *inst_builder, const
 
     if (bb->IsLoopHeader() && !bb->GetLoop()->IsTryCatchLoop()) {
         // Prepend SaveSateOSR as a first instruction in the loop header
-        // TODO (a.popov) Support osr-entry for loops with catch-block back-edge
+        // NOTE (a.popov) Support osr-entry for loops with catch-block back-edge
         if (GetGraph()->IsOsrMode()) {
             auto backedges = bb->GetLoop()->GetBackEdges();
             auto is_catch = [](BasicBlock *basic_block) { return basic_block->IsCatch(); };
@@ -636,7 +636,7 @@ bool IrBuilderInliningAnalysis::RunImpl()
     }
     panda_file::CodeDataAccessor cda(*panda_file, code_id.value());
 
-    // TODO(msherstennikov): Support inlining methods with try/catch
+    // NOTE(msherstennikov): Support inlining methods with try/catch
     if (cda.GetTriesSize() != 0) {
         return false;
     }

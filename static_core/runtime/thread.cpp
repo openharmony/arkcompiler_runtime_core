@@ -971,7 +971,7 @@ void ManagedThread::CleanUp()
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
     fts_.as_int = initial_thread_flag_;
     StoreStatus<DONT_CHECK_SAFEPOINT, NO_READLOCK>(ThreadStatus::CREATED);
-    // TODO(molotkovnikhail, 13159) Add cleanup of signal_stack for windows target
+    // NOTE(molotkovnikhail, 13159) Add cleanup of signal_stack for windows target
 }
 
 }  // namespace panda

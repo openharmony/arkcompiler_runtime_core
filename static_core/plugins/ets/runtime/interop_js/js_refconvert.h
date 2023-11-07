@@ -143,7 +143,7 @@ template <bool ALLOW_INIT = false>
 extern JSRefConvert *JSRefConvertCreate(InteropCtx *ctx, Class *klass);
 
 // Find or create JSRefConvert for some Class
-// TODO(vpukhov): <ALLOW_INIT = false> should never throw?
+// NOTE(vpukhov): <ALLOW_INIT = false> should never throw?
 template <bool ALLOW_INIT = false>
 inline JSRefConvert *JSRefConvertResolve(InteropCtx *ctx, Class *klass)
 {
