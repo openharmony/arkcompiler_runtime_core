@@ -12,9 +12,17 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("//arkcompiler/runtime_core/static_vm_config.gni")
 import("//build/ohos.gni")
 import("$ark_root/irtoc/irtoc.gni")
 import("$ark_root/plugins/plugins.gni")
+
+group("libarktscompiler_package") {
+  deps = []
+  if (enable_static_vm) {
+    deps += [ ":libarktscompiler_frontend_static" ]
+  }
+}
 
 config("arkcompiler_public_config") {
   include_dirs = [
@@ -251,7 +259,7 @@ ohos_shared_library("libarktscompiler") {
   subsystem_name = "$ark_subsystem_name"
 }
 
-ohos_static_library("libarktscompiler_frontend_static") {
+ohos_source_set("libarktscompiler_frontend_static") {
   sources = libarkcompiler_sources
 
   configs = libarkcompiler_configs

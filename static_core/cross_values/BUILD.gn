@@ -19,7 +19,8 @@ action("cross_values_generate") {
     arch = "AARCH32"
   } else if (current_cpu == "arm64") {
     arch = "AARCH64"
-  } else if (current_cpu == "x64") {
+  } else if (current_cpu == "amd64" || current_cpu == "x64" ||
+             current_cpu == "x86_64") {
     arch = "X86_64"
   }
 
