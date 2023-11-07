@@ -350,6 +350,7 @@ spec/undefined-type/undefined-and-array-of-class-and-undefined_10.ets
 spec/undefined-type/undefined-array-type.ets
 spec/undefined-type/undefined-union-array-type_0.ets
 spec/undefined-type/undefined-union-array-type_1.ets
+spec/undefined-type/undefined-union-array-type_2.ets
 ###### Issue 14595
 spec/undefined-type/array-push/push-undefined-to-undefined.ets
 spec/undefined-type/assign/assign-undefined-to-undefined_0.ets
