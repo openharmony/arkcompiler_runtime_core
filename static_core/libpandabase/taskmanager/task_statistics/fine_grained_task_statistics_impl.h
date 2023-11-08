@@ -43,6 +43,16 @@ class FineGrainedTaskStatisticsImpl : public TaskStatistics {
             return lv.counter_ == rv.counter_;
         }
 
+        void NoGuardedSetValue(size_t value)
+        {
+            counter_ = value;
+        }
+
+        os::memory::Mutex &GetMutex()
+        {
+            return lock_;
+        }
+
         void SetValue(size_t value)
         {
             os::memory::LockHolder lock_holder(lock_);

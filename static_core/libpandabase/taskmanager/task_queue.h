@@ -136,6 +136,25 @@ public:
         return std::make_optional(std::move(task));
     }
 
+    /**
+     * @brief Method pops several tasks to worker.
+     * @param add_task_func - Functor that will be used to add popped tasks to worker
+     * @param size - Count of tasks you want to pop. If it is greater then count of tasks that are stored in queue,
+     * method will not wait and will pop all stored tasks.
+     * @return count of task that was added to worker
+     */
+    size_t PopTasksToWorker(AddTaskToWorkerFunc add_task_func, size_t size) override
+    {
+        os::memory::LockHolder pop_lock_holder(push_pop_lock_);
+        os::memory::LockHolder task_queue_state_lock_holder(task_queue_state_lock_);
+        size = (SumSizeOfInternalQueues() < size) ? (SumSizeOfInternalQueues()) : (size);
+        for (size_t i = 0; i < size; i++) {
+            add_task_func(PopTaskFromInternalQueues());
+        }
+        finish_cond_var_.Signal();
+        return size;
+    }
+
     [[nodiscard]] PANDA_PUBLIC_API bool IsEmpty() const override
     {
         os::memory::LockHolder lock_holder(task_queue_state_lock_);
@@ -196,9 +215,9 @@ private:
             while (!AreInternalQueuesEmpty()) {
                 finish_cond_var_.Wait(&task_queue_state_lock_);
             }
-            finish_ = true;
         }
         os::memory::LockHolder push_pop_lock_holder(push_pop_lock_);
+        finish_ = true;
         push_wait_cond_var_.SignalAll();
     }
 
@@ -258,7 +277,7 @@ private:
     os::memory::Mutex subscriber_lock_;
     NewTasksCallback new_tasks_callback_ GUARDED_BY(subscriber_lock_);
 
-    bool finish_ {false};
+    bool finish_ GUARDED_BY(push_pop_lock_) {false};
 
     /**
      * foreground_task_queue_ is queue that contains task with ExecutionMode::FOREGROUND. If method PopTask() is used,

@@ -34,9 +34,6 @@ std::ostream &operator<<(std::ostream &os, TaskStatisticsImplType type)
         case TaskStatisticsImplType::FINE_GRAINED:
             os << "TaskStatisticsImplType::FINE_GRAINED";
             break;
-        case TaskStatisticsImplType::LOCK_FREE:
-            os << "TaskStatisticsImplType::LOCK_FREE";
-            break;
         case TaskStatisticsImplType::SIMPLE:
             os << "TaskStatisticsImplType::SIMPLE";
             break;
@@ -53,9 +50,6 @@ TaskStatisticsImplType TaskStatisticsImplTypeFromString(std::string_view string)
     }
     if (string == "fine-grained") {
         return TaskStatisticsImplType::FINE_GRAINED;
-    }
-    if (string == "lock-free") {
-        return TaskStatisticsImplType::LOCK_FREE;
     }
     UNREACHABLE();
 }

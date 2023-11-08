@@ -23,9 +23,9 @@
 
 namespace panda::taskmanager {
 
-class TaskScheduler;
-
 using TaskPropertiesCounterMap = std::unordered_map<TaskProperties, size_t, TaskProperties::Hash>;
+
+class TaskScheduler;
 
 class WorkerThread {
 public:
@@ -38,13 +38,13 @@ public:
      */
     using FinishedTasksCallback = std::function<void(TaskPropertiesCounterMap)>;
 
-    static constexpr size_t WORKER_QUEUE_SIZE = 10;
+    static constexpr size_t WORKER_QUEUE_SIZE = 4;
 
     explicit WorkerThread(FinishedTasksCallback callback, size_t tasks_count = WORKER_QUEUE_SIZE);
     ~WorkerThread();
 
     /**
-     * @brief Adds task in internal queues
+     * @brief Adds task in internal queues.
      * @param task - task that will be added in internal queues
      */
     void AddTask(Task &&task);

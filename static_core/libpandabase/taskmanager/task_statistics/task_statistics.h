@@ -22,7 +22,7 @@
 
 namespace panda::taskmanager {
 
-enum class TaskStatisticsImplType : uint8_t { SIMPLE, LOCK_FREE, FINE_GRAINED };
+enum class TaskStatisticsImplType : uint8_t { SIMPLE, FINE_GRAINED };
 PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, TaskStatisticsImplType type);
 
 PANDA_PUBLIC_API TaskStatisticsImplType TaskStatisticsImplTypeFromString(std::string_view string);

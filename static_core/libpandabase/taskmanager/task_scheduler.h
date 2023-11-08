@@ -16,15 +16,14 @@
 #ifndef PANDA_LIBPANDABASE_TASKMANAGER_TASK_MANAGER_H
 #define PANDA_LIBPANDABASE_TASKMANAGER_TASK_MANAGER_H
 
-#include "libpandabase/taskmanager/worker_thread.h"
 #include "libpandabase/taskmanager/task_queue.h"
 #include "libpandabase/taskmanager/task_statistics/task_statistics.h"
+#include "libpandabase/taskmanager/worker_thread.h"
 #include <vector>
 #include <map>
 #include <random>
 
 namespace panda::taskmanager {
-
 /**
  * Task Manager can register 3 queues with different type of tasks
  *  - GC queue(ECMA)
@@ -45,15 +44,18 @@ public:
         size_t threads_count, TaskStatisticsImplType task_statistics_type = TaskStatisticsImplType::SIMPLE);
 
     /**
-     * @brief Returns the pointer to TaskScheduler. If you use it before the Create or after Destroy methods, it will
-     * return nullptr.
+     * @brief Returns the pointer to TaskScheduler. If you use it before the Create or after Destroy methods, it
+     * will return nullptr.
      */
     [[nodiscard]] PANDA_PUBLIC_API static TaskScheduler *GetTaskScheduler();
 
     /// @brief Deletes the existed TaskScheduler. You should not use it if you didn't use Create before.
     PANDA_PUBLIC_API static void Destroy();
 
-    /// @brief Creates and starts workers with registered queues. After this method, you can not register new queues.
+    /**
+     * @brief Creates and starts workers with registered queues. After this method, you can not register new
+     * queues.
+     */
     PANDA_PUBLIC_API void Initialize();
 
     /**
@@ -84,8 +86,8 @@ public:
     /**
      * @brief Method Destroy and Unregister TaskQueue
      * @param queue - TaskQueueInterface* of TaskQueue.
-     * @tparam Allocator - allocator of Task that will be used to deallocate TaskQueue. Use the same allocator as you
-     * have used in TaskScheduler::CreateAndRegisterTaskQueue method.
+     * @tparam Allocator - allocator of Task that will be used to deallocate TaskQueue. Use the same allocator as
+     * you have used in TaskScheduler::CreateAndRegisterTaskQueue method.
      */
     template <class Allocator = std::allocator<Task>>
     PANDA_PUBLIC_API void UnregisterAndDestroyTaskQueue(TaskQueueInterface *queue)
@@ -100,8 +102,8 @@ public:
 
     /**
      * @brief Fills @arg worker (local queues) with tasks. It will stop if the size of the queue is equal to @arg
-     * tasks_count.  Method @return bool value that indicates worker end. If it's true, workers should finish after the
-     * execution of tasks.
+     * tasks_count.  Method @return bool value that indicates worker end. If it's true, workers should finish after
+     * the execution of tasks.
      * @param worker - pointer on worker that should be fill will tasks
      * @param tasks_count - max number of tasks for filling
      */
@@ -130,8 +132,9 @@ private:
     explicit TaskScheduler(size_t workers_count, TaskStatisticsImplType task_statistics_type);
 
     /**
-     * @brief Registers a queue that was created externally. It should be valid until all workers finish, and the queue
-     * should have a unique set of TaskType and VMType fields. You can not use this method after Initialize() method
+     * @brief Registers a queue that was created externally. It should be valid until all workers finish, and the
+     * queue should have a unique set of TaskType and VMType fields. You can not use this method after Initialize()
+     * method
      * @param queue: pointer to a valid TaskQueue.
      * @return TaskQueueId of queue that was added. If queue with same TaskType and VMType is already added, method
      * returns INVALID_TASKQUEUE_ID
@@ -145,18 +148,24 @@ private:
     [[nodiscard]] std::optional<Task> GetNextTask() REQUIRES(pop_from_task_queues_lock_);
 
     /**
-     * @brief Method puts one @arg task to @arg worker.
-     * @param worker - pointer on worker that should be fill will tasks
-     * @param task - task that will be putted in worker
+     * @brief Method selects queues for getting tasks by updating selected_queues_
+     * @param tasks_count - count of tasks to select.
      */
-    void PutTaskInWorker(WorkerThread *worker, Task &&task) REQUIRES(workers_lock_);
+    void SelectNextTasks(size_t tasks_count) REQUIRES(pop_from_task_queues_lock_);
 
     /**
-     * @brief This method @returns map from kinetic sum of non-empty queues to queues pointer
-     * in the same order as they place in task_queues_. Use this method to choose next thread
+     * @brief Method puts tasks to @arg worker. Queue and count of tasks depends on selected_queues_. After
+     * execution of the method selected_queues_ will be empty.
+     * @param worker - pointer on worker that should be fill with tasks
+     * @return count of task that was gotten by worker.
      */
-    std::map<size_t, internal::SchedulableTaskQueueInterface *> GetKineticPriorities() const
-        REQUIRES(pop_from_task_queues_lock_);
+    size_t PutTasksInWorker(WorkerThread *worker) REQUIRES(pop_from_task_queues_lock_);
+
+    /**
+     * @brief This method updates map from kinetic sum of non-empty queues to queues pointer
+     * with the same order as they place in task_queues_.
+     */
+    void UpdateKineticPriorities() REQUIRES(pop_from_task_queues_lock_);
 
     /// @brief Checks if task queues are empty
     bool AreQueuesEmpty() const;
@@ -202,7 +211,10 @@ private:
     /// task_scheduler_state_lock_ is used to check state of task
     os::memory::RecursiveMutex task_scheduler_state_lock_;
 
-    /// queues_wait_cond_var_ is used when all registered queues are empty to wait until one of them will have a task
+    /**
+     * queues_wait_cond_var_ is used when all registered queues are empty to wait until one of them will have a
+     * task
+     */
     os::memory::ConditionVariable queues_wait_cond_var_ GUARDED_BY(task_scheduler_state_lock_);
 
     /**
@@ -231,6 +243,11 @@ private:
     std::mt19937 gen_;
 
     TaskStatistics *task_statistics_;
+
+    std::map<TaskQueueId, size_t> selected_queues_ GUARDED_BY(pop_from_task_queues_lock_);
+
+    std::map<size_t, internal::SchedulableTaskQueueInterface *> kinetic_priorities_
+        GUARDED_BY(pop_from_task_queues_lock_);
 };
 
 }  // namespace panda::taskmanager

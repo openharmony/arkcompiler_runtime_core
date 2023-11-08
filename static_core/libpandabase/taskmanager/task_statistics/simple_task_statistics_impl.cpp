@@ -75,18 +75,19 @@ size_t SimpleTaskStatisticsImpl::GetCountOfTasksInSystemWithTaskProperties(TaskP
 
 void SimpleTaskStatisticsImpl::ResetAllCounters()
 {
-    for (const auto &status : ALL_TASK_STATES) {
-        for (const auto &properties : all_task_properties_) {
-            os::memory::LockHolder lock_holder(status_lock_.at(status));
-            task_properties_counter_map_[status][properties] = 0;
-        }
+    for (const auto &properties : all_task_properties_) {
+        ResetCountersWithTaskProperties(properties);
     }
 }
 
 void SimpleTaskStatisticsImpl::ResetCountersWithTaskProperties(TaskProperties properties)
 {
+    // Getting locks for every state counter with specified properties
+    std::unordered_map<TaskStatus, os::memory::LockHolder<os::memory::Mutex>> lock_holder_map;
     for (const auto &status : ALL_TASK_STATES) {
-        os::memory::LockHolder lock_holder(status_lock_.at(status));
+        lock_holder_map.emplace(status, status_lock_.at(status));
+    }
+    for (const auto &status : ALL_TASK_STATES) {
         task_properties_counter_map_[status][properties] = 0;
     }
 }

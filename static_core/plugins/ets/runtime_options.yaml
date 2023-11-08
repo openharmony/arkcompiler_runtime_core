@@ -224,6 +224,5 @@ options:
   default: simple
   possible_values:
   - simple
-  - lock-free
   - fine-grained
   description: Set type of implementation of task statistics that will be used to store information about tasks

@@ -14,7 +14,6 @@
  */
 
 #include "libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.h"
-#include "libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.h"
 #include "libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.h"
 #include <gtest/gtest.h>
 #include <thread>
@@ -37,8 +36,6 @@ public:
         switch (GetParam()) {
             case TaskStatisticsImplType::SIMPLE:
                 return &simple_task_statistics_;
-            case TaskStatisticsImplType::LOCK_FREE:
-                return &lock_free_task_statistics_;
             case TaskStatisticsImplType::FINE_GRAINED:
                 return &fine_grained_task_statistics_;
             default:
@@ -48,7 +45,6 @@ public:
 
 private:
     SimpleTaskStatisticsImpl simple_task_statistics_;
-    LockFreeTaskStatisticsImpl lock_free_task_statistics_;
     FineGrainedTaskStatisticsImpl fine_grained_task_statistics_;
 };
 
@@ -93,7 +89,6 @@ TEST_P(TaskStatisticsTest, MultithreadedUsageTest)
 }
 
 INSTANTIATE_TEST_SUITE_P(TaskStatisticsImplSet, TaskStatisticsTest,
-                         testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED,
-                                         TaskStatisticsImplType::LOCK_FREE));
+                         testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED));
 
 }  // namespace panda::taskmanager

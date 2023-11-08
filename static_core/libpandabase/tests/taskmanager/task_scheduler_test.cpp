@@ -171,34 +171,32 @@ TEST_P(TaskSchedulerTest, ForegroundQueueTest)
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     TaskQueueInterface *gc_queue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
-    TaskQueueInterface *jit_queue = tm->CreateAndRegisterTaskQueue<>(TaskType::JIT, VMType::STATIC_VM, QUEUE_PRIORITY);
 
-    // Fill queues with tasks that push their TaskType to global queue.
-    std::queue<TaskType> global_queue;
-    jit_queue->AddTask(Task::Create({TaskType::JIT, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND},
-                                    [&global_queue]() { global_queue.push(TaskType::JIT); }));
-    jit_queue->AddTask(Task::Create({TaskType::JIT, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND},
-                                    [&global_queue]() { global_queue.push(TaskType::JIT); }));
+    // Fill queues with tasks that push their TaskExecutionMode to global queue.
+    std::queue<TaskExecutionMode> global_queue;
+    gc_queue->AddTask(Task::Create({TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND},
+                                   [&global_queue]() { global_queue.push(TaskExecutionMode::BACKGROUND); }));
+    gc_queue->AddTask(Task::Create({TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND},
+                                   [&global_queue]() { global_queue.push(TaskExecutionMode::BACKGROUND); }));
     gc_queue->AddTask(Task::Create({TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::FOREGROUND},
-                                   [&global_queue]() { global_queue.push(TaskType::GC); }));
-    jit_queue->AddTask(Task::Create({TaskType::JIT, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND},
-                                    [&global_queue]() { global_queue.push(TaskType::JIT); }));
+                                   [&global_queue]() { global_queue.push(TaskExecutionMode::FOREGROUND); }));
+    gc_queue->AddTask(Task::Create({TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND},
+                                   [&global_queue]() { global_queue.push(TaskExecutionMode::BACKGROUND); }));
     // Initialize tm workers
     tm->Initialize();
     // Wait that do work
     tm->Finalize();
 
-    ASSERT_EQ(global_queue.front(), TaskType::GC) << "seed:" << GetSeed();
+    ASSERT_EQ(global_queue.front(), TaskExecutionMode::FOREGROUND) << "seed:" << GetSeed();
     global_queue.pop();
-    ASSERT_EQ(global_queue.front(), TaskType::JIT) << "seed:" << GetSeed();
+    ASSERT_EQ(global_queue.front(), TaskExecutionMode::BACKGROUND) << "seed:" << GetSeed();
     global_queue.pop();
-    ASSERT_EQ(global_queue.front(), TaskType::JIT) << "seed:" << GetSeed();
+    ASSERT_EQ(global_queue.front(), TaskExecutionMode::BACKGROUND) << "seed:" << GetSeed();
     global_queue.pop();
-    ASSERT_EQ(global_queue.front(), TaskType::JIT) << "seed:" << GetSeed();
+    ASSERT_EQ(global_queue.front(), TaskExecutionMode::BACKGROUND) << "seed:" << GetSeed();
     global_queue.pop();
     ASSERT_TRUE(global_queue.empty());
     tm->UnregisterAndDestroyTaskQueue<>(gc_queue);
-    tm->UnregisterAndDestroyTaskQueue<>(jit_queue);
     TaskScheduler::Destroy();
 }
 
@@ -485,7 +483,6 @@ TEST_P(TaskSchedulerTest, TaskSchedulerWaitForFinishAllTaskFromQueue)
 }
 
 INSTANTIATE_TEST_SUITE_P(TaskStatisticsTypeSet, TaskSchedulerTest,
-                         ::testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED,
-                                           TaskStatisticsImplType::LOCK_FREE));
+                         ::testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED));
 
 }  // namespace panda::taskmanager

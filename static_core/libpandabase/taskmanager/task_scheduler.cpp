@@ -16,7 +16,6 @@
 #include "libpandabase/taskmanager/task_scheduler.h"
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.h"
-#include "libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.h"
 #include "libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.h"
 
 namespace panda::taskmanager {
@@ -29,9 +28,6 @@ TaskScheduler::TaskScheduler(size_t workers_count, TaskStatisticsImplType task_s
     switch (task_statistics_type) {
         case TaskStatisticsImplType::FINE_GRAINED:
             task_statistics_ = new FineGrainedTaskStatisticsImpl();
-            break;
-        case TaskStatisticsImplType::LOCK_FREE:
-            task_statistics_ = new LockFreeTaskStatisticsImpl();
             break;
         case TaskStatisticsImplType::SIMPLE:
             task_statistics_ = new SimpleTaskStatisticsImpl();
@@ -96,73 +92,75 @@ bool TaskScheduler::FillWithTasks(WorkerThread *worker, size_t tasks_count)
     ASSERT(start_);
     os::memory::LockHolder worker_lock_holder(workers_lock_);
     LOG(DEBUG, RUNTIME) << "TaskScheduler: FillWithTasks";
-
-    for (size_t i = 0; i < tasks_count; i++) {
-        {
-            os::memory::LockHolder task_scheduler_lock_holder(task_scheduler_state_lock_);
-            while (AreQueuesEmpty()) {
-                /**
-                 * We exit in 2 situations:
-                 * - !is_worker_empty : if worker has tasks and queues are empty, worker will not wait.
-                 * - finish_ : when TM Finalize, Worker wake up and go finish WorkerLoop.
-                 */
-                if (!worker->IsEmpty() || finish_) {
-                    LOG(DEBUG, RUNTIME) << "TaskScheduler: FillWithTasks: return queue with" << i << "issues";
-                    return finish_;
-                }
-                queues_wait_cond_var_.Wait(&task_scheduler_state_lock_);
+    {
+        os::memory::LockHolder task_scheduler_lock_holder(task_scheduler_state_lock_);
+        while (AreQueuesEmpty()) {
+            /// We exit in situation when finish_ = true .TM Finalize, Worker wake up and go finish WorkerLoop.
+            if (finish_) {
+                LOG(DEBUG, RUNTIME) << "TaskScheduler: FillWithTasks: return queue without issues";
+                return true;
             }
+            queues_wait_cond_var_.Wait(&task_scheduler_state_lock_);
         }
-        os::memory::LockHolder pop_lock_holder(pop_from_task_queues_lock_);
-        auto task_option = GetNextTask();
-        if (!task_option.has_value()) {
-            continue;
-        }
-        PutTaskInWorker(worker, std::move(task_option.value()));
     }
-    LOG(DEBUG, RUNTIME) << "TaskScheduler: FillWithTasks: return full queue";
+    os::memory::LockHolder pop_lock_holder(pop_from_task_queues_lock_);
+    SelectNextTasks(tasks_count);
+    PutTasksInWorker(worker);
+    LOG(DEBUG, RUNTIME) << "TaskScheduler: FillWithTasks: return queue with tasks";
     return false;
 }
 
-std::optional<Task> TaskScheduler::GetNextTask()
+void TaskScheduler::SelectNextTasks(size_t tasks_count)
 {
+    LOG(DEBUG, RUNTIME) << "TaskScheduler: SelectNextTasks()";
     if (AreQueuesEmpty()) {
-        return std::nullopt;
+        return;
     }
-    LOG(DEBUG, RUNTIME) << "TaskScheduler: GetNextTask()";
-
-    auto kinetic_priorities = GetKineticPriorities();
+    UpdateKineticPriorities();
+    // Now kinetic_priorities_
     size_t kinetic_max = 0;
-    std::tie(kinetic_max, std::ignore) = *kinetic_priorities.rbegin();  // Get key of the last element in map
-
+    std::tie(kinetic_max, std::ignore) = *kinetic_priorities_.rbegin();  // Get key of the last element in map
     std::uniform_int_distribution<size_t> distribution(0U, kinetic_max - 1U);
-    size_t choice = distribution(gen_);  // Get random number in range [0, kinetic_max)
-    internal::SchedulableTaskQueueInterface *queue = nullptr;
-    std::tie(std::ignore, queue) = *kinetic_priorities.upper_bound(choice);  // Get queue of chosen element
 
-    return queue->PopTask().value();
+    for (size_t i = 0; i < tasks_count; i++) {
+        size_t choice = distribution(gen_);  // Get random number in range [0, kinetic_max)
+        internal::SchedulableTaskQueueInterface *queue = nullptr;
+        std::tie(std::ignore, queue) = *kinetic_priorities_.upper_bound(choice);  // Get queue of chosen element
+
+        TaskQueueId id(queue->GetTaskType(), queue->GetVMType());
+        selected_queues_[id]++;
+    }
 }
 
-std::map<size_t, internal::SchedulableTaskQueueInterface *> TaskScheduler::GetKineticPriorities() const
+void TaskScheduler::UpdateKineticPriorities()
 {
     ASSERT(!task_queues_.empty());  // no TaskQueues
     size_t kinetic_sum = 0;
-    std::map<size_t, internal::SchedulableTaskQueueInterface *> kinetic_priorities;
     internal::SchedulableTaskQueueInterface *queue = nullptr;
-    for (auto &traits_queue_pair : task_queues_) {
-        std::tie(std::ignore, queue) = traits_queue_pair;
+    for (const auto &id_queue_pair : task_queues_) {
+        std::tie(std::ignore, queue) = id_queue_pair;
         if (queue->IsEmpty()) {
             continue;
         }
         kinetic_sum += queue->GetPriority();
-        kinetic_priorities[kinetic_sum] = queue;
+        kinetic_priorities_[kinetic_sum] = queue;
     }
-    return kinetic_priorities;
 }
 
-void TaskScheduler::PutTaskInWorker(WorkerThread *worker, Task &&task)
+size_t TaskScheduler::PutTasksInWorker(WorkerThread *worker)
 {
-    worker->AddTask(std::move(task));
+    size_t task_count = 0;
+    for (auto [id, size] : selected_queues_) {
+        if (size == 0) {
+            continue;
+        }
+        auto add_task_func = [worker](Task &&task) { worker->AddTask(std::move(task)); };
+        size_t queue_task_count = task_queues_[id]->PopTasksToWorker(add_task_func, size);
+        task_count += queue_task_count;
+        LOG(DEBUG, RUNTIME) << "PutTasksInWorker: worker have gotten " << queue_task_count << " tasks";
+    }
+    selected_queues_.clear();
+    return task_count;
 }
 
 bool TaskScheduler::AreQueuesEmpty() const

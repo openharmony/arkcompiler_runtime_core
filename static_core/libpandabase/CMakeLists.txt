@@ -48,7 +48,6 @@ set(SOURCES
     ${PANDA_ROOT}/libpandabase/taskmanager/worker_thread.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/task_statistics.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.cpp
-    ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.cpp
     ${ARKBASE_LTO_SOURCES}
 )
@@ -425,6 +424,17 @@ panda_add_gtest(
         tests/taskmanager/task_test.cpp
         tests/taskmanager/task_scheduler_test.cpp
         tests/taskmanager/task_statistics_test.cpp
+    LIBRARIES
+        arkbase_static
+    SANITIZERS
+        ${PANDA_SANITIZERS_LIST}
+)
+
+panda_add_gtest(
+    NO_CORES
+    NAME arkbase_task_manager_gc_cases_tests
+    SOURCES
+        tests/taskmanager/task_manager_gc_corner_case_test.cpp
     LIBRARIES
         arkbase_static
     SANITIZERS
