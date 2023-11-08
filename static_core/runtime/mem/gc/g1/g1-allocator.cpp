@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,14 +88,14 @@ std::vector<MarkBitmap *> &ObjectAllocatorG1<MT_MODE>::GetYoungSpaceBitmaps()
 }
 
 template <MTModeT MT_MODE>
-TLAB *ObjectAllocatorG1<MT_MODE>::CreateNewTLAB([[maybe_unused]] ark::ManagedThread *thread)
+TLAB *ObjectAllocatorG1<MT_MODE>::CreateNewTLAB([[maybe_unused]] size_t tlabSize)
 {
     TLAB *newTlab = nullptr;
     if constexpr (MT_MODE == MT_MODE_SINGLE) {
         // For single-threaded VMs allocate a whole region for TLAB
         newTlab = objectAllocator_->CreateRegionSizeTLAB();
     } else {
-        newTlab = objectAllocator_->CreateTLAB(TLAB_SIZE);
+        newTlab = objectAllocator_->CreateTLAB(tlabSize);
     }
     if (newTlab != nullptr) {
         ASAN_UNPOISON_MEMORY_REGION(newTlab->GetStartAddr(), newTlab->GetSize());
@@ -112,7 +112,13 @@ size_t ObjectAllocatorG1<MT_MODE>::GetTLABMaxAllocSize()
         // For single-threaded VMs we can allocate objects of size up to region size in TLABs.
         return GetYoungAllocMaxSize();
     } else {
-        return PANDA_TLAB_MAX_ALLOC_SIZE;
+        // Should be equal to the initial TLAB size since
+        // 1) Such max size prevents big objects from
+        //    allocation in growing TLABs
+        // 2) Threads change their TLAB sizes independently,
+        //    so tracking optimal object size over all
+        //    threads should be avoided
+        return Runtime::GetOptions().GetInitTlabSize();
     }
 }
 
@@ -404,6 +410,11 @@ void ObjectAllocatorG1<MT_MODE>::ResetYoungAllocator()
         if (!PANDA_TRACK_TLAB_ALLOCATIONS && (thread->GetTLAB()->GetOccupiedSize() != 0)) {
             memStats->RecordAllocateObject(thread->GetTLAB()->GetOccupiedSize(), SpaceType::SPACE_TYPE_OBJECT);
         }
+        if (Runtime::GetOptions().IsAdaptiveTlabSize()) {
+            thread->GetWeightedTlabAverage()->ComputeNewSumAndResetSamples();
+        }
+        // Here we should not collect current TLAB fill statistics for adaptive size
+        // since it may not be completely filled before resetting
         thread->ClearTLAB();
         return true;
     };

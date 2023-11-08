@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -621,7 +621,7 @@ TEST_F(G1GCTest, TestMixedCollections)
     size_t bigLen2 = (garbageRate + 2) * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
     size_t smallLen = DEFAULT_REGION_SIZE / 2 + sizeof(coretypes::String);
     std::array<size_t, ARRAY_SIZE> lenthsArray {bigLen, bigLen1, bigLen2, smallLen};
-    size_t miniObjLen = PANDA_TLAB_SIZE + 1;  // To allocate not in TLAB
+    size_t miniObjLen = Runtime::GetOptions().GetInitTlabSize() + 1;  // To allocate not in TLAB
 
     Runtime *runtime = Runtime::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();

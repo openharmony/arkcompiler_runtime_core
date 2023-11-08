@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -236,6 +236,21 @@ ManagedThread::ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, P
     taggedHandleStorage_ = allocator->New<HandleStorage<TaggedType>>(allocator);
     taggedGlobalHandleStorage_ = allocator->New<GlobalHandleStorage<TaggedType>>(allocator);
     objectHeaderHandleStorage_ = allocator->New<HandleStorage<ObjectHeader *>>(allocator);
+    if (Runtime::GetOptions().IsAdaptiveTlabSize()) {
+        constexpr size_t MAX_GROW_RATIO = 2;
+        constexpr float WEIGHT = 0.5;
+        constexpr float DESIRED_FILL_FRACTION = 0.9;
+        size_t initTlabSize = Runtime::GetOptions().GetInitTlabSize();
+        size_t maxTlabSize = Runtime::GetOptions().GetMaxTlabSize();
+        if (initTlabSize < 4_KB) {
+            LOG(FATAL, RUNTIME) << "Initial TLAB size must be greater than 4Kb";
+        }
+        if (initTlabSize > maxTlabSize) {
+            LOG(FATAL, RUNTIME) << "Initial TLAB size must be less or equal to max TLAB size";
+        }
+        weightedAdaptiveTlabAverage_ = allocator->New<WeightedAdaptiveTlabAverage>(
+            initTlabSize, maxTlabSize, MAX_GROW_RATIO, WEIGHT, DESIRED_FILL_FRACTION);
+    }
 }
 
 ManagedThread::~ManagedThread()
@@ -253,6 +268,7 @@ ManagedThread::~ManagedThread()
     allocator->Delete(objectHeaderHandleStorage_);
     allocator->Delete(taggedGlobalHandleStorage_);
     allocator->Delete(taggedHandleStorage_);
+    allocator->Delete(weightedAdaptiveTlabAverage_);
     mem::InternalAllocator<>::FinalizeLocalInternalAllocator(internalLocalAllocator_,
                                                              static_cast<mem::Allocator *>(allocator));
     internalLocalAllocator_ = nullptr;
@@ -914,6 +930,7 @@ void ManagedThread::FreeInternalMemory()
     allocator->Delete(internalLocalAllocator_);
 
     allocator->Delete(ptThreadInfo_.release());
+    allocator->Delete(weightedAdaptiveTlabAverage_);
 
     taggedHandleScopes_.~PandaVector<HandleScope<coretypes::TaggedType> *>();
     allocator->Delete(taggedHandleStorage_);

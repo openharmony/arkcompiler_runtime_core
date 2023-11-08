@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -313,6 +313,11 @@ public:
     ark::panda_file::SourceLang GetThreadLang() const
     {
         return threadLang_;
+    }
+
+    WeightedAdaptiveTlabAverage *GetWeightedTlabAverage() const
+    {
+        return weightedAdaptiveTlabAverage_;
     }
 
     PANDA_PUBLIC_API LanguageContext GetLanguageContext();
@@ -881,6 +886,7 @@ private:
 
     static mem::TLAB *zeroTlab_;
     PandaVector<ObjectHeader **> localObjects_;
+    WeightedAdaptiveTlabAverage *weightedAdaptiveTlabAverage_ {nullptr};
 
     // Something like custom TLS - it is faster to access via ManagedThread than via thread_local
     InterpreterCache interpreterCache_;

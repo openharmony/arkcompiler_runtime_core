@@ -137,14 +137,15 @@ extern "C" void WriteTlabStatsEntrypoint([[maybe_unused]] void const *mem, size_
     LOG_ENTRYPOINT();
 
     LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc object in compiled code at " << mem << " size: " << size;
-    ASSERT(size <= Thread::GetCurrent()->GetVM()->GetHeapManager()->GetTLABMaxAllocSize());
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(size <= Runtime::GetOptions().GetMaxTlabSize());
     // 1. Pointer to TLAB
     // 2. Pointer to allocated memory
     // 3. size
-    [[maybe_unused]] auto tlab = reinterpret_cast<size_t>(ManagedThread::GetCurrent()->GetTLAB());
-    EVENT_TLAB_ALLOC(ManagedThread::GetCurrent()->GetId(), tlab, reinterpret_cast<size_t>(mem), size);
+    [[maybe_unused]] auto tlab = reinterpret_cast<size_t>(thread->GetTLAB());
+    EVENT_TLAB_ALLOC(thread->GetId(), tlab, reinterpret_cast<size_t>(mem), size);
     if (mem::PANDA_TRACK_TLAB_ALLOCATIONS) {
-        auto memStats = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetMemStats();
+        auto memStats = thread->GetVM()->GetHeapManager()->GetMemStats();
         if (memStats == nullptr) {
             return;
         }

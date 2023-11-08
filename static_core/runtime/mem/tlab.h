@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,6 @@ namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_TLAB_ALLOCATOR(level) LOG(level, ALLOC) << "TLAB: "
-
-static constexpr size_t PANDA_TLAB_SIZE = 4_KB;
-static constexpr size_t PANDA_TLAB_MAX_ALLOC_SIZE = PANDA_TLAB_SIZE;
 
 #ifdef NDEBUG
 static constexpr bool PANDA_TRACK_TLAB_ALLOCATIONS = false;
@@ -146,24 +143,6 @@ public:
 
     NO_MOVE_SEMANTIC(TLAB);
     NO_COPY_SEMANTIC(TLAB);
-
-    /**
-     * @brief returns maximum size which can be allocated by TLAB allocator
-     * @return
-     */
-    static constexpr size_t GetMaxSize()
-    {
-        return PANDA_TLAB_MAX_ALLOC_SIZE;
-    }
-
-    /**
-     * @brief returns default pool size which must be added to a TLAB
-     * @return
-     */
-    static constexpr size_t GetDefaultPoolSize()
-    {
-        return PANDA_TLAB_SIZE;
-    }
 
     /**
      * @brief Allocates memory with size @param size and aligned with DEFAULT_ALIGNMENT alignment
