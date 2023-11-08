@@ -182,6 +182,7 @@ private:
     }
 
     void BlockOverlappedRegisters(const LifeIntervals *current_interval);
+    void BlockIndirectCallRegisters(const LifeIntervals *current_interval);
     bool IsNonSpillableConstInterval(LifeIntervals *interval);
     void BeforeConstantIntervalSpill(LifeIntervals *interval, LifeNumber split_pos);
 

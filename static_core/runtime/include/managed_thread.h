@@ -233,6 +233,11 @@ public:
         string_class_ptr_ = p;
     }
 
+    void SetArrayU16ClassPtr(void *p)
+    {
+        array_u16_class_ptr_ = p;
+    }
+
 #ifndef NDEBUG
     bool IsRuntimeCallEnabled() const
     {
@@ -385,6 +390,10 @@ public:
     static constexpr uint32_t GetTlsStringClassPointerOffset()
     {
         return MEMBER_OFFSET(ManagedThread, string_class_ptr_);
+    }
+    static constexpr uint32_t GetTlsArrayU16ClassPointerOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, array_u16_class_ptr_);
     }
     static constexpr uint32_t GetPreBuffOffset()
     {

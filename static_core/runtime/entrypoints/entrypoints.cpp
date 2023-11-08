@@ -262,6 +262,58 @@ extern "C" coretypes::String *CreateStringFromCharsZeroOffsetEntrypoint(uint32_t
     return str;
 }
 
+extern "C" coretypes::String *SubStringFromStringEntrypoint(ObjectHeader *obj, int32_t begin, int32_t end)
+{
+    BEGIN_ENTRYPOINT();
+
+    auto vm = ManagedThread::GetCurrent()->GetVM();
+    auto indexes = coretypes::String::NormalizeSubStringIndexes(begin, end, static_cast<coretypes::String *>(obj));
+    auto substr_length = indexes.second - indexes.first;
+    auto substr = coretypes::String::FastSubString(static_cast<coretypes::String *>(obj), indexes.first, substr_length,
+                                                   vm->GetLanguageContext(), vm);
+    if (UNLIKELY(substr == nullptr)) {
+        HandlePendingException();
+        UNREACHABLE();
+    }
+    return substr;
+}
+
+extern "C" coretypes::Array *StringGetCharsEntrypoint(ObjectHeader *obj, int32_t begin, int32_t end,
+                                                      [[maybe_unused]] ObjectHeader *array_klass)
+{
+    BEGIN_ENTRYPOINT();
+
+    auto length = static_cast<coretypes::String *>(obj)->GetLength();
+    if (UNLIKELY(static_cast<uint32_t>(end) > length)) {
+        ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
+        panda::ThrowStringIndexOutOfBoundsException(end, length);
+        HandlePendingException(UnwindPolicy::SKIP_INLINED);
+        UNREACHABLE();
+    }
+    if (UNLIKELY(begin > end)) {
+        ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
+        panda::ThrowStringIndexOutOfBoundsException(begin, length);
+        HandlePendingException(UnwindPolicy::SKIP_INLINED);
+        UNREACHABLE();
+    }
+
+    if (UNLIKELY(begin < 0)) {
+        ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
+        panda::ThrowStringIndexOutOfBoundsException(begin, length);
+        HandlePendingException(UnwindPolicy::SKIP_INLINED);
+        UNREACHABLE();
+    }
+    auto vm = ManagedThread::GetCurrent()->GetVM();
+    auto array_length = end - begin;
+    auto array = coretypes::String::GetChars(static_cast<coretypes::String *>(obj), begin, array_length,
+                                             vm->GetLanguageContext());
+    if (UNLIKELY(array == nullptr)) {
+        HandlePendingException();
+        UNREACHABLE();
+    }
+    return array;
+}
+
 extern "C" coretypes::Array *ResolveLiteralArrayEntrypoint(const Method *caller, uint32_t type_id)
 {
     BEGIN_ENTRYPOINT();

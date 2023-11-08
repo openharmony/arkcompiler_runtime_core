@@ -193,7 +193,7 @@ end
 
 
 # Try to allocate String in TLAB.
-# 'new_str' either contains a pointer to a new string or null if there is no enough space in TLAB.
+# The result is either a pointer to a new string or null if there is no enough space in TLAB.
 macro(:allocate_string_tlab) do |string_klass, data_size|
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -201,6 +201,7 @@ macro(:allocate_string_tlab) do |string_klass, data_size|
     next
   end
 
+  # Add sizeof(String) and do align
   _size := AndI(AddI(data_size).Imm(Constants::STRING_CLASS_SIZE_WITH_ALIGNMENT).word).Imm(Constants::ALIGNMENT_MASK).word
   # Load pointer to the TLAB from TLS
   _tlab := LoadI(%tr).Imm(Constants::TLAB_OFFSET).ptr
@@ -209,7 +210,7 @@ macro(:allocate_string_tlab) do |string_klass, data_size|
   # Load pointer to the end address of free memory in the TLAB
   _end := LoadI(_tlab).Imm(Constants::TLAB_MEMORY_END_ADDR_OFFSET).ptr
   # Check if there is enough space
-  If(Sub(_end, _start).word, _size).LT.Unlikely.b {
+  If(Sub(_end, _start).word, _size).B.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
   if defines.DEBUG
@@ -224,6 +225,47 @@ macro(:allocate_string_tlab) do |string_klass, data_size|
   StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
   # Return a pointer to the newly allocated string
   _allocated_string := _start
+end
+
+
+# Try to allocate Array of utf16 chars in TLAB.
+# The result is either a pointer to a new array or null if there is no enough space in TLAB.
+macro(:allocate_array_of_chars_tlab) do |array_klass, char_count|
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  elements_num := And(char_count, "0x00000000ffffffff").word
+  # Account for utf16 char size
+  _size := Shl(elements_num, 1).word
+  # Add sizeof(Array) and do align
+  _size := AndI(AddI(_size).Imm(Constants::ARRAY_CLASS_SIZE_WITH_ALIGNMENT).word).Imm(Constants::ALIGNMENT_MASK).word
+  # Load pointer to the TLAB from TLS
+  _tlab := LoadI(%tr).Imm(Constants::TLAB_OFFSET).ptr
+  # Load pointer to the start address of free memory in the TLAB
+  _start := LoadI(_tlab).Imm(Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
+  # Load pointer to the end address of free memory in the TLAB
+  _end := LoadI(_tlab).Imm(Constants::TLAB_MEMORY_END_ADDR_OFFSET).ptr
+  # Check if there is enough space
+  If(Sub(_end, _start).word, _size).B.Unlikely.b {
+    Goto(:SlowPathEntrypoint)
+  }
+  if defines.DEBUG
+    call_runtime_save_all(Constants::WRITE_TLAB_STATS_NO_BRIDGE, _start, _size).void
+  end
+  if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
+    call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
+  end
+  # Store class of the object
+  StoreI(_start, array_klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  # Store array length
+  StoreI(_start, elements_num).Imm(Constants::ARRAY_LENGTH_OFFSET).word
+  # Update the TLAB state
+  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
+  # Return a pointer to the newly allocated array
+  _allocated_array := _start
 end
 
 
@@ -257,23 +299,23 @@ def GenerateCreateStringFromStringTlab(string_compression_enabled)
     src_str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
     dst_str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
     offs := Cast(0).u64
-    If(data_size, 8).GE.Likely.b {
+    If(data_size, 8).AE.Likely.b {
       stop := AndI(data_size).Imm(7).u64
     Label(:CopyLoop_8b)
       offs1 := Phi(offs, offs2).u64
       Store(dst_str_data, offs, Load(src_str_data, offs).u64).u64
       offs2 := AddI(offs1).Imm(8).u64
-      If(offs2, stop).LT.Likely.b {
+      If(offs2, stop).B.Likely.b {
         Goto(:CopyLoop_8b)
       }
     }
     offs3 := Phi(offs, offs2).u64
-    If(offs3, data_size).LT.Likely.b {
+    If(offs3, data_size).B.Likely.b {
     Label(:CopyLoop_1b)
       offs4 := Phi(offs3, offs5).u64
       Store(dst_str_data, offs4, Load(src_str_data, offs4).u8).u8
       offs5 := AddI(offs4).Imm(1).u64
-      If(offs5, data_size).LT.Likely.b {
+      If(offs5, data_size).B.Likely.b {
         Goto(:CopyLoop_1b)
       }
     }
@@ -300,7 +342,7 @@ end  # def GenerateCreateStringFromStringTlab
 scoped_macro(:is_array_of_compressable_chars) do |arr_data, char_count|
   # Check 4-chars block at once if it's possible
   n_blocks := ShrI(char_count).Imm(2).u64
-  If(n_blocks, 0).GT.Likely.b {
+  If(n_blocks, 0).A.Likely.b {
     # 0x007F is utf::UTF8_1B_MAX
     utf8_1b_max := Cast(0x007F007F007F007F).u64
     utf8_1b_max_mask := Not(utf8_1b_max).u64
@@ -319,12 +361,12 @@ scoped_macro(:is_array_of_compressable_chars) do |arr_data, char_count|
         Goto(:CanBeCompressedLoopDone)
     }
     i3 := AddI(i2).Imm(1).u64
-    If(i3, n_blocks).LT.Likely.b {
+    If(i3, n_blocks).B.Likely.b {
         Goto(:CanBeCompressedLoop_4chars)
     }
   }
   # check the rest of the chars
-  If(AndI(char_count).Imm(3).u64, 0).GT.Likely.b {
+  If(AndI(char_count).Imm(3).u64, 0).A.Likely.b {
     i4 := ShlI(n_blocks).Imm(2).u64  # number of already copied chars if any
 Label(:CanBeCompressedLoop)
     i5 := Phi(i4, i6).u64
@@ -334,7 +376,7 @@ Label(:CanBeCompressedLoop)
       Goto(:CanBeCompressedLoopDone)
     }
     i6 := AddI(i5).Imm(1).u64
-    If(i6, char_count).LT.Likely.b {
+    If(i6, char_count).B.Likely.b {
       Goto(:CanBeCompressedLoop)
     }
   }
@@ -350,37 +392,48 @@ end  # is_array_of_compressable_chars
 scoped_macro(:copy_array_of_compressable_chars_to_string) do |arr_data, str_data, char_count|
   # Array of chars contains 16-bits chars
 if Options.arch == :arm64
-  # Copy 16-byte chunks compressing them into 8-byte chunks
-  If(char_count, 8).GE.Likely.b {
-    stop := Add(arr_data, ShlI(ShrI(char_count).Imm(3).u64).Imm(4).u64).ptr
-Label(:CopyLoop_16b)
+  # Copy 32-byte chunks (if any) compressing them into 16-byte chunks
+  If(char_count, 16).AE.Likely.b {
+    stop := Add(arr_data, ShlI(ShrI(char_count).Imm(4).u64).Imm(5).u64).ptr
+Label(:CopyLoop_32b)
     arr_data1 := Phi(arr_data, arr_data2).ptr
     str_data1 := Phi(str_data, str_data2).ptr
-    Intrinsic(:COMPRESS_EIGHT_UTF16_TO_UTF8_CHARS_USING_SIMD, arr_data1, str_data1).void
-    arr_data2 := AddI(arr_data1).Imm(16).ptr
-    str_data2 := AddI(str_data1).Imm(8).ptr
+    Intrinsic(:COMPRESS_SIXTEEN_UTF16_TO_UTF8_CHARS_USING_SIMD, arr_data1, str_data1).void
+    arr_data2 := AddI(arr_data1).Imm(32).ptr
+    str_data2 := AddI(str_data1).Imm(16).ptr
     If(arr_data2, stop).LT.Likely.b {
-      Goto(:CopyLoop_16b)
+      Goto(:CopyLoop_32b)
     }
+    char_count1 := AndI(char_count).Imm(0xF).u64
   }
   arr_data3 := Phi(arr_data, arr_data2).ptr
   str_data3 := Phi(str_data, str_data2).ptr
+  char_count2 := Phi(char_count, char_count1).u64
+
+  # Copy 16-byte chunk (if any) compressing it into 8-byte chunk
+  If(char_count2, 8).AE.Likely.b {
+    Intrinsic(:COMPRESS_EIGHT_UTF16_TO_UTF8_CHARS_USING_SIMD, arr_data3, str_data3).void
+    arr_data4 := AddI(arr_data3).Imm(16).ptr
+    str_data4 := AddI(str_data3).Imm(8).ptr
+  }
+  arr_data5 := Phi(arr_data3, arr_data4).ptr
+  str_data5 := Phi(str_data3, str_data4).ptr
   # Copy 2-byte chunks compressing them into 1-byte
-  n_2b := AndI(char_count).Imm(7).u64
-  If(n_2b, 0).GT.Likely.b {
+  n_2b := AndI(char_count2).Imm(7).u64
+  If(n_2b, 0).A.Likely.b {
     j1 := Cast(0).u64
 Label(:CopyLoop_2b)
     j := Phi(j1, j2).u64
-    Store(str_data3, j, Load(arr_data3, ShlI(j).Imm(1).u64).u8).u8
+    Store(str_data5, j, Load(arr_data5, ShlI(j).Imm(1).u64).u8).u8
     j2 := AddI(j).Imm(1).u64
-    If(j2, n_2b).LT.Likely.b {
+    If(j2, n_2b).B.Likely.b {
       Goto(:CopyLoop_2b)
     }
   }
 else
   # Copy 8-byte chunks compressing them into 4-byte chunks
   n_8b := ShrI(char_count).Imm(2).u64
-  If(n_8b, 0).GT.Likely.b {
+  If(n_8b, 0).A.Likely.b {
     i1 := Cast(0).u64
 Label(:CopyLoop_8b)
     i := Phi(i1, i2).u64
@@ -389,18 +442,18 @@ Label(:CopyLoop_8b)
     chunk := Or(chunk, ShrI(chunk).Imm(16).u64).u64
     Store(str_data, ShlI(i).Imm(2).u64, Cast(chunk).u32).u32
     i2 := AddI(i).Imm(1).u64
-    If(i2, n_8b).LT.Likely.b {
+    If(i2, n_8b).B.Likely.b {
       Goto(:CopyLoop_8b)
     }
   }
   # Copy 2-byte chunks compressing them into 1-byte
-  If(AndI(char_count).Imm(3).u64, 0).GT.Likely.b {
+  If(AndI(char_count).Imm(3).u64, 0).A.Likely.b {
     j1 := ShlI(n_8b).Imm(2).u64  # number of already copied chars if any
 Label(:CopyLoop_2b)
     j := Phi(j1, j2).u64
     Store(str_data, j, Load(arr_data, ShlI(j).Imm(1).u64).u8).u8
     j2 := AddI(j).Imm(1).u64
-    If(j2, char_count).LT.Likely.b {
+    If(j2, char_count).B.Likely.b {
       Goto(:CopyLoop_2b)
     }
   }
@@ -415,28 +468,110 @@ scoped_macro(:copy_array_of_chars_to_string) do |arr_data, str_data, char_count|
   # Array of chars contains 16-bits chars
   # Copy 8-byte chunks
   n_8b := ShrI(char_count).Imm(2).u64
-  If(n_8b, 0).GT.Likely.b {
+  If(n_8b, 0).A.Likely.b {
     i1 := Cast(0).u64
 Label(:CopyLoop_8b)
     i := Phi(i1, i2).u64
     Store(str_data, ShlI(i).Imm(3).u64, Load(arr_data, ShlI(i).Imm(3).u64).u64).u64
     i2 := AddI(i).Imm(1).u64
-    If(i2, n_8b).LT.Likely.b {
+    If(i2, n_8b).B.Likely.b {
       Goto(:CopyLoop_8b)
     }
   }
   # Copy 2-byte chunks
-  If(AndI(char_count).Imm(3).u64, 0).GT.Likely.b {
+  n_2b := AndI(char_count).Imm(3).u64
+  If(n_2b, 0).A.Likely.b {
     j1 := ShlI(n_8b).Imm(2).u64  # number of already copied chars if any
 Label(:CopyLoop_2b)
     j := Phi(j1, j2).u64
     Store(str_data, ShlI(j).Imm(1).u64, Load(arr_data, ShlI(j).Imm(1).u64).u16).u16
     j2 := AddI(j).Imm(1).u64
-    If(j2, char_count).LT.Likely.b {
+    If(j2, char_count).B.Likely.b {
       Goto(:CopyLoop_2b)
     }
   }
 end  # copy_array_of_chars_to_string
+
+
+###
+# Copy bytes from src to dst
+#
+scoped_macro(:copy_bytes) do |src_data, dst_data, count|
+  n_8b := ShrI(count).Imm(3).u64
+  If(n_8b, 0).A.Likely.b {
+    i1 := Cast(0).u64
+Label(:CopyLoop_8b)
+    i := Phi(i1, i2).u64
+    Store(dst_data, ShlI(i).Imm(3).u64, Load(src_data, ShlI(i).Imm(3).u64).u64).u64
+    i2 := AddI(i).Imm(1).u64
+    If(i2, n_8b).B.Likely.b {
+      Goto(:CopyLoop_8b)
+    }
+  }
+  n_1b := AndI(count).Imm(7).u64
+  If(n_1b, 0).A.Likely.b {
+    j1 := ShlI(n_8b).Imm(3).u64  # number of already copied bytes if any
+Label(:CopyLoop_1b)
+    j := Phi(j1, j2).u64
+    Store(dst_data, j, Load(src_data, j).u8).u8
+    j2 := AddI(j).Imm(1).u64
+    If(j2, count).B.Likely.b {
+      Goto(:CopyLoop_1b)
+    }
+  }
+end  # copy_bytes
+
+
+###
+# Copy data from uncompressed string to array of utf16 chars
+#
+scoped_macro(:copy_uncompressed_string_to_array_of_chars) do |str_data, arr_data, char_count|
+  # String contains 16-bit chars
+  # Copy 8-byte chunks
+  n_8b := ShrI(char_count).Imm(2).u64
+  If(n_8b, 0).A.Likely.b {
+    i1 := Cast(0).u64
+Label(:CopyLoop_8b)
+    i := Phi(i1, i2).u64
+    i_shifted_3 := ShlI(i).Imm(3).u64
+    Store(arr_data, i_shifted_3, Load(str_data, i_shifted_3).u64).u64
+    i2 := AddI(i).Imm(1).u64
+    If(i2, n_8b).B.Likely.b {
+      Goto(:CopyLoop_8b)
+    }
+  }
+  # Copy 2-byte chunks
+  n_2b := AndI(char_count).Imm(3).u64
+  If(n_2b, 0).A.Likely.b {
+    j1 := ShlI(n_8b).Imm(2).u64  # number of already copied chars if any
+Label(:CopyLoop_2b)
+    j := Phi(j1, j2).u64
+    j_shifted_1 := ShlI(j).Imm(1).u64
+    Store(arr_data, j_shifted_1, Load(str_data, j_shifted_1).u16).u16
+    j2 := AddI(j).Imm(1).u64
+    If(j2, char_count).B.Likely.b {
+      Goto(:CopyLoop_2b)
+    }
+  }
+end  # copy_uncompressed_string_to_array_of_chars
+
+
+###
+# Copy data from compressed string to array of utf16 chars
+#
+scoped_macro(:copy_compressed_string_to_array_of_chars) do |str_data, arr_data, char_count|
+  # String contains 8-bit chars
+  If(char_count, 0).A.Likely.b {
+    i1 := Cast(0).u64
+    Label(:CopyLoop)
+    i := Phi(i1, i2).u64
+    Store(arr_data, ShlI(i).Imm(1).u64, Cast(Load(str_data, i).u8).u16).u16
+    i2 := AddI(i).Imm(1).u64
+    If(i2, char_count).B.Likely.b {
+      Goto(:CopyLoop)
+    }
+  }
+end  # copy_compressed_string_to_array_of_chars
 
 
 def GenerateCreateStringFromCharArrayTlab(string_compression_enabled)
@@ -561,4 +696,187 @@ def GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled)
     Intrinsic(:SLOW_PATH_ENTRY, char_count, char_array, string_klass).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
-end
+end  # def GenerateCreateStringFromZeroBasedCharArrayTlab
+
+
+def GenerateSubstringFromStringTlab(string_compression_enabled)
+  suffix = (string_compression_enabled ? "Compressed" : "")
+  available_regs = $panda_mask
+  function("SubStringFromStringTlab#{suffix}".to_sym,
+           params: {str: 'ref', begin_index: 'i32', end_index: 'i32'},
+           regmap: $full_regmap,
+           regalloc_set: available_regs,
+           mode: [:FastPath]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      ReturnVoid().void
+      next
+    end
+
+    # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
+    length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    if string_compression_enabled
+      length := ShrI(length_packed).Imm(1).u32
+    else
+      length := length_packed
+    end
+
+    # If begin_index < 0, then it is assumed to be equal to zero
+    If(begin_index, Cast(0).i32).LT.Unlikely.b {
+      bx1 := Cast(0).i32
+    }
+    bx2 := Phi(begin_index, bx1).u32
+    # If end_index < 0, then it is assumed to be equal to zero
+    If(end_index, Cast(0).i32).LT.Unlikely.b {
+      ex1 := Cast(0).i32
+    }
+    ex2 := Phi(end_index, ex1).u32
+    # If begin_index > str.length(), then make it equal to str.length()
+    If(bx2, length).A.Unlikely.b {
+      bx3 := length
+    }
+    bx4 := Phi(bx2, bx3).u32
+    # If end_index > str.length(), then make it equal to str.length()
+    If(ex2, length).A.Unlikely.b {
+      ex3 := length
+    }
+    ex4 := Phi(ex2, ex3).u32
+    # If begin_index > end_index, then swap them.
+    If(bx4, ex4).GT.Unlikely.b {
+      bx5 := ex4
+      ex5 := bx4
+    }
+    bx6 := Phi(bx4, bx5).u32
+    ex6 := Phi(ex4, ex5).u32
+
+    if string_compression_enabled
+      not_compressed := AndI(length_packed).Imm(1).u32
+      offset := Shl(bx6, not_compressed).u32
+    else
+      offset := ShlI(bx6).Imm(1).u32
+    end
+
+    src_str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+    src_str_data := Add(src_str_data, Cast(offset).u64).ptr
+
+    klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    char_count := Sub(ex6, bx6).u32
+
+    # Allocate a new string
+    if string_compression_enabled
+      If(not_compressed, 1).EQ.Unlikely.b {
+        compressable := is_array_of_compressable_chars(src_str_data, Cast(char_count).u64)
+        If(compressable, 1).EQ.Likely.b {
+          data_size1 := Cast(char_count).word
+        } Else {
+          data_size2 := Cast(ShlI(char_count).Imm(1).u32).word
+        }
+        data_size := Phi(data_size1, data_size2).word
+        new_str := allocate_string_tlab(klass, data_size)
+        new_str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+        If(compressable, 1).EQ.Likely.b {
+          copy_array_of_compressable_chars_to_string(src_str_data, new_str_data, Cast(char_count).u64)
+          StoreI(new_str, ShlI(char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        } Else {
+          copy_array_of_chars_to_string(src_str_data, new_str_data, Cast(char_count).u64)
+          StoreI(new_str, OrI(ShlI(char_count).Imm(1).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        }
+        StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+        # String is supposed to be a constant object, so all its data should be visible by all threads
+        Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+        Return(new_str).ptr
+      } Else {
+        # Source string is already compressed
+        new_str := allocate_string_tlab(klass, Cast(char_count).word)
+        new_str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+        copy_bytes(src_str_data, new_str_data, Cast(char_count).u64)
+        StoreI(new_str, ShlI(char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+        # String is supposed to be a constant object, so all its data should be visible by all threads
+        Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+        Return(new_str).ptr
+      }
+    else
+      data_size := Cast(ShlI(char_count).Imm(1).u32).word
+      new_str := allocate_string_tlab(klass, data_size)
+      new_str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+      copy_array_of_chars_to_string(src_str_data, new_str_data, Cast(char_count).u64)
+      StoreI(new_str, char_count).Imm(Constants::STRING_LENGTH_OFFSET).u32
+      StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+      # String is supposed to be a constant object, so all its data should be visible by all threads
+      Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+      Return(new_str).ptr
+    end
+
+  Label(:SlowPathEntrypoint)
+    entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
+    entrypoint_llvm = get_entrypoint_offset("SUB_STRING_FROM_STRING_ODD_SAVED")
+    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  }
+end  # def GenerateSubstringFromStringTlab
+
+
+def GenerateStringGetCharsTlab(string_compression_enabled)
+  suffix = (string_compression_enabled ? "Compressed" : "")
+  available_regs = $panda_mask
+  function("StringGetCharsTlab#{suffix}".to_sym,
+           params: {str: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
+           regmap: $full_regmap,
+           regalloc_set: available_regs,
+           mode: [:FastPath]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      ReturnVoid().void
+      next
+    end
+
+    If(begin_index, end_index).GT.Unlikely.b {
+      Goto(:SlowPathEntrypoint)  # Out of range
+    }
+    If(begin_index, Cast(0).i32).LT.Unlikely.b {
+      Goto(:SlowPathEntrypoint)  # Out of range
+    }
+
+    # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
+    length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
+    if string_compression_enabled
+      If(Cast(end_index).u32, ShrI(length).Imm(1).u32).A.Unlikely.b {
+        Goto(:SlowPathEntrypoint)  # Out of range
+      }
+      not_compressed := AndI(length).Imm(1).u32
+      offset := Shl(begin_index, not_compressed).u32
+    else
+      If(Cast(end_index).u32, length).A.Unlikely.b {
+        Goto(:SlowPathEntrypoint)  # Out of range
+      }
+      not_compressed := Cast(1).u32
+      offset := ShlI(begin_index).Imm(1).u32
+    end
+
+    src_str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+    src_str_data := Add(src_str_data, Cast(offset).u64).ptr
+
+    # Allocate a new array of utf16 chars
+    char_count := Sub(Cast(end_index).u32, Cast(begin_index).u32).u64
+    new_arr := allocate_array_of_chars_tlab(array_klass, Cast(char_count).word)
+    new_arr_data := Add(new_arr, Cast(Constants::ARRAY_DATA_OFFSET).u64).ptr
+    If(not_compressed, Cast(0).u32).EQ.Likely.b {
+      copy_compressed_string_to_array_of_chars(src_str_data, new_arr_data, char_count)
+    }
+    If(not_compressed, Cast(1).u32).EQ.Unlikely.b {
+      copy_uncompressed_string_to_array_of_chars(src_str_data, new_arr_data, char_count)
+    }
+    # String is supposed to be a constant object, so all its data should be visible by all threads
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    Return(new_arr).ptr
+
+  Label(:SlowPathEntrypoint)
+    entrypoint = get_entrypoint_offset("STRING_GET_CHARS_SLOW_PATH")
+    entrypoint_llvm = get_entrypoint_offset("STRING_GET_CHARS_ODD_SAVED")
+    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index, array_klass).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  }
+end  # def GenerateStringGetCharsTlab

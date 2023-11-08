@@ -391,6 +391,7 @@ public:
 
     size_t GetOffsetToConstArrayData(MethodPtr method, IdType id) const override;
 
+    ClassPtr GetArrayU16Class(MethodPtr method) const override;
     /**********************************************************************************/
     /// String information
     bool IsCompressedStringsEnabled() const override

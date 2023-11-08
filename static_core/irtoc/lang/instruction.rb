@@ -224,7 +224,7 @@ class IRInstruction
     end
 
     # Generate concise functions for creating condition code: If().CC(:CC_EQ) => If().EQ
-    [:EQ, :NE, :GE, :GT, :LE, :LT, :AE, :B].each do |x| define_method(x) do |&block|
+    [:EQ, :NE, :GE, :GT, :LE, :LT, :A, :AE, :B, :BE].each do |x| define_method(x) do |&block|
         send(:CC, "CC_#{x}".to_sym, &block)
         self
       end

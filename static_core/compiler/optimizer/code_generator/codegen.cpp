@@ -296,6 +296,9 @@ void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst
         case RuntimeInterface::IntrinsicId::INTRINSIC_COMPRESS_EIGHT_UTF16_TO_UTF8_CHARS_USING_SIMD:
             GetEncoder()->EncodeCompressEightUtf16ToUtf8CharsUsingSimd(src[FIRST_OPERAND], src[SECOND_OPERAND]);
             break;
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPRESS_SIXTEEN_UTF16_TO_UTF8_CHARS_USING_SIMD:
+            GetEncoder()->EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(src[FIRST_OPERAND], src[SECOND_OPERAND]);
+            break;
         default:
             UNREACHABLE();
             break;
@@ -4621,6 +4624,32 @@ void Codegen::CreateStringFromStringTlab(IntrinsicInst *inst, Reg dst, SRCREGS s
                                                                : EntrypointId::CREATE_STRING_FROM_STRING_TLAB;
     auto src_str = src[FIRST_OPERAND];
     CallFastPath(inst, entry_id, dst, RegMask::GetZeroMask(), src_str);
+}
+
+void Codegen::CreateStringSubstringTlab([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    auto entrypoint_id = GetRuntime()->IsCompressedStringsEnabled()
+                             ? EntrypointId::SUB_STRING_FROM_STRING_TLAB_COMPRESSED
+                             : EntrypointId::SUB_STRING_FROM_STRING_TLAB;
+    CallFastPath(inst, entrypoint_id, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
+}
+
+void Codegen::CreateStringGetCharsTlab([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    auto entrypoint_id = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_GET_CHARS_TLAB_COMPRESSED
+                                                                    : EntrypointId::STRING_GET_CHARS_TLAB;
+    auto runtime = GetGraph()->GetRuntime();
+    if (GetGraph()->IsAotMode()) {
+        ScopedTmpReg klass_reg(GetEncoder());
+        GetEncoder()->EncodeLdr(klass_reg, false,
+                                MemRef(ThreadReg(), runtime->GetArrayU16ClassPointerTlsOffset(GetArch())));
+        CallFastPath(inst, entrypoint_id, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                     klass_reg);
+    } else {
+        auto klass_imm = TypedImm(reinterpret_cast<uintptr_t>(runtime->GetArrayU16Class(GetGraph()->GetMethod())));
+        CallFastPath(inst, entrypoint_id, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                     klass_imm);
+    }
 }
 
 #include "intrinsics_codegen.inl"

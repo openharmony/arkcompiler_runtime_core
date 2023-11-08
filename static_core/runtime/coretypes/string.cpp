@@ -759,6 +759,36 @@ Array *String::ToCharArray(const LanguageContext &ctx)
     return array;
 }
 
+/* static */
+Array *String::GetChars(String *src, uint32_t start, uint32_t utf16_length, const LanguageContext &ctx)
+{
+    // allocator may trig gc and move 'src', need to hold it
+    auto thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    VMHandle<String> str(thread, src);
+    auto *klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_U16);
+    Array *array = Array::Create(klass, utf16_length);
+    if (array == nullptr) {
+        return nullptr;
+    }
+
+    if (str->IsUtf16()) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        Span<uint16_t> sp(str->GetDataUtf16() + start, utf16_length);
+        for (size_t i = 0; i < sp.size(); i++) {
+            array->Set<uint16_t>(i, sp[i]);
+        }
+    } else {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        Span<uint8_t> sp(str->GetDataMUtf8() + start, utf16_length);
+        for (size_t i = 0; i < sp.size(); i++) {
+            array->Set<uint16_t>(i, sp[i]);
+        }
+    }
+
+    return array;
+}
+
 template <class T>
 static int32_t ComputeHashForData(const T *data, size_t size)
 {

@@ -585,6 +585,11 @@ public:
     }
 
     /// Array information
+    uintptr_t GetArrayU16ClassPointerTlsOffset(Arch arch) const
+    {
+        return cross_values::GetManagedThreadArrayU16ClassPtrOffset(arch);
+    }
+
     uint32_t GetClassArraySize(Arch arch) const
     {
         return panda::cross_values::GetCoretypesArrayClassSize(arch);
@@ -608,6 +613,11 @@ public:
     virtual size_t GetOffsetToConstArrayData([[maybe_unused]] MethodPtr method, [[maybe_unused]] IdType id) const
     {
         return 0;
+    }
+
+    virtual ClassPtr GetArrayU16Class([[maybe_unused]] MethodPtr method) const
+    {
+        return nullptr;
     }
 
     // Array offsets

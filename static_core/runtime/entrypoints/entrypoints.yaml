@@ -1230,3 +1230,87 @@ entrypoints:
     - uint32_t                   # length
     - panda::ObjectHeader*       # u16 array
     - panda::ObjectHeader*       # string class pointer
+
+- name: SubStringFromStringTlab
+  entrypoint: SubStringFromStringTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void*     # resulting string
+    - void*     # src string
+    - int32_t   # begin index
+    - int32_t   # end index
+
+- name: SubStringFromStringTlabCompressed
+  entrypoint: SubStringFromStringTlabCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void*     # resulting string
+    - void*     # src string
+    - int32_t   # begin index
+    - int32_t   # end index
+
+- name: SubStringFromStringSlowPath
+  entrypoint: SubStringFromStringEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - panda::coretypes::String*  # resulting string
+    - panda::ObjectHeader*       # src string
+    - int32_t                    # begin index
+    - int32_t                    # end index
+
+- name: SubStringFromStringOddSaved
+  entrypoint: SubStringFromStringEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - panda::coretypes::String*  # resulting string
+    - panda::ObjectHeader*       # src string
+    - int32_t                    # begin index
+    - int32_t                    # end index
+
+- name: StringGetCharsTlab
+  entrypoint: StringGetCharsTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void*                 # resulting array of utf16 chars
+    - void*                 # src string
+    - int32_t               # begin index
+    - int32_t               # end index
+    - panda::ObjectHeader*  # Array u16 class pointer
+
+- name: StringGetCharsTlabCompressed
+  entrypoint: StringGetCharsTlabCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void*                 # resulting array of utf16 chars
+    - void*                 # src string
+    - int32_t               # begin index
+    - int32_t               # end index
+    - panda::ObjectHeader*  # Array u16 class pointer
+
+- name: StringGetCharsSlowPath
+  entrypoint: StringGetCharsEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - panda::coretypes::Array*   # resulting array of utf16 chars
+    - panda::ObjectHeader*       # src string
+    - int32_t                    # begin index
+    - int32_t                    # end index
+    - panda::ObjectHeader*       # Array u16 class pointer
+
+- name: StringGetCharsOddSaved
+  entrypoint: StringGetCharsEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - panda::coretypes::Array*   # resulting array of utf16 chars
+    - panda::ObjectHeader*       # src string
+    - int32_t                    # begin index
+    - int32_t                    # end index
+    - panda::ObjectHeader*       # Array u16 class pointer

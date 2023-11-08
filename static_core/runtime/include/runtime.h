@@ -466,6 +466,8 @@ private:
 
     void SetPandaPath();
 
+    void SetThreadClassPointers();
+
     bool Initialize();
 
     bool Shutdown();
