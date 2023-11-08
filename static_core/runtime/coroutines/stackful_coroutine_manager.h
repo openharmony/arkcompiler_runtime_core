@@ -41,7 +41,8 @@ public:
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
-    Coroutine *Launch(CompletionEvent *completion_event, Method *entrypoint, PandaVector<Value> &&arguments) override;
+    Coroutine *Launch(CompletionEvent *completion_event, Method *entrypoint, PandaVector<Value> &&arguments,
+                      CoroutineAffinity affinity) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -98,8 +99,10 @@ protected:
 
 private:
     StackfulCoroutineContext *CreateCoroutineContextImpl(bool need_stack);
+    StackfulCoroutineWorker *ChooseWorkerForCoroutine(CoroutineAffinity affinity);
 
-    Coroutine *LaunchImpl(CompletionEvent *completion_event, Method *entrypoint, PandaVector<Value> &&arguments);
+    Coroutine *LaunchImpl(CompletionEvent *completion_event, Method *entrypoint, PandaVector<Value> &&arguments,
+                          CoroutineAffinity affinity);
     /**
      * Tries to extract a coroutine instance from the pool for further reuse, returns nullptr in case when it is not
      * possible.

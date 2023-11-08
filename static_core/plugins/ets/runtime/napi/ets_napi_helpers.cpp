@@ -427,7 +427,7 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *current_
 
     [[maybe_unused]] EtsHandleScope scope(current_coro);
     EtsHandle<EtsPromise> promise_handle(current_coro, promise);
-    auto *coro = cm->Launch(evt, impl, std::move(args));
+    auto *coro = cm->Launch(evt, impl, std::move(args), CoroutineAffinity::SAME_WORKER);
     if (UNLIKELY(coro == nullptr)) {
         ASSERT(current_coro->HasPendingException());
         // OOM is thrown by Launch

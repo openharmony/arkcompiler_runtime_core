@@ -28,6 +28,34 @@ function log_error(m: String): void {
 
 type NullableObject = Object | null;
 
+async function async_chain_element(caller_wid: int, counter: int): Promise<int> {
+    let id_worker: int = CoroutineExtras.GetWorkerId();
+    if (caller_wid != id_worker) {
+        return 1;
+    }
+    if (counter <= 0) {
+        return 0;
+    }
+    return await async_chain_element(caller_wid, counter - 1);
+}
+
+function async_function_chain(caller_wid: int, chain_len: int): int {
+    return await async_chain_element(caller_wid, chain_len);
+}
+
+function compare_worker_ids_async(chain_len: int): int {
+    log("Testing async function chain");
+
+    let id_main: int = CoroutineExtras.GetWorkerId();
+    let result = async_function_chain(id_main, chain_len);
+    if (result == 0) {
+        log("Successfully ran the async function chain")
+    } else {
+        log("Failed to run the async function chain")
+    }
+    return result;
+}
+
 function return_worker_id(): Int {
     return CoroutineExtras.GetWorkerId();
 }
@@ -89,25 +117,31 @@ function run_batch_await(batch_size: int): int {
 }
 
 export function main(): int {
-    // Test 1. Run a coroutine and make sure that its worker ID is different from MAIN
+    // Test 1. Run an async function chain and check that all worker IDs are equal to MAIN's
+    if (compare_worker_ids_async(5) != 0) {
+        log_error("compare async function worker IDs test failed");
+        return 1;
+    }
+
+    // Test 2. Run a coroutine and make sure that its worker ID is different from MAIN
     if (compare_worker_ids() != 0) {
         log_error("compare worker IDs test failed");
         return 1;
     }
 
-    // Test 2. Run a batch of coroutines without await so they would be distributed to different workers
+    // Test 3. Run a batch of coroutines without await so they would be distributed to different workers
     if (run_batch_launch(100, 500) != 0) {
         log_error("batch launch test failed");
         return 1;
     }
 
-    // Test 3. Run a chain of several coroutines that await each other. Coroutines will run on different workers.
+    // Test 4. Run a chain of several coroutines that await each other. Coroutines will run on different workers.
     if (run_await_chain(50) != 0) {
         log_error("await chain test failed");
         return 1;
     }
 
-    // Test 4. Run coroutines on different workers and await them.
+    // Test 5. Run coroutines on different workers and await them.
     if (run_batch_await(100) != 0) {
         log_error("batch await test failed");
         return 1;

@@ -46,7 +46,7 @@ static inline bool Launch(EtsCoroutine *current_coro, Method *method, const EtsH
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promise_ref);
     promise_handle.GetPtr()->SetEventPtr(evt);
     // create the coro and put it to the ready queue
-    auto *coro = current_coro->GetCoroutineManager()->Launch(evt, method, std::move(args));
+    auto *coro = current_coro->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineAffinity::NONE);
     if (UNLIKELY(coro == nullptr)) {
         // OOM
         promise_handle.GetPtr()->SetEventPtr(nullptr);
