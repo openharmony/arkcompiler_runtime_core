@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "verify.h"
 #include "utils/pandargs.h"
 
 void PrintHelp(panda::PandArgParser &pa_parser)
@@ -21,11 +22,6 @@ void PrintHelp(panda::PandArgParser &pa_parser)
     std::cerr << "ark_disasm [options] input_file output_file" << std::endl << std::endl;
     std::cerr << "Supported options:" << std::endl << std::endl;
     std::cerr << pa_parser.GetHelpString() << std::endl;
-}
-
-bool Verify([[maybe_unused]] const std::string &input_file)
-{
-    return true;
 }
 
 bool PorcessArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::string> &input_file, int argc,

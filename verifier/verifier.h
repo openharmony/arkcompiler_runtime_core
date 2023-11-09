@@ -13,9 +13,19 @@
  * limitations under the License.
  */
 
+#ifndef VERIFIER_VERIFIER_H
+#define VERIFIER_VERIFIER_H
+
+#include <string>
 
 namespace panda::verifier {
 class Verifier {
+public:
+    Verifier() = default;
+    ~Verifier() = default;
 
+    bool Verify(const std::string &filename_in);
 };
 } // namespace name
+
+#endif
