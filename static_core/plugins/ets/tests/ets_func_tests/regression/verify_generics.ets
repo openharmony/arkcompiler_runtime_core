@@ -13,6 +13,43 @@
  * limitations under the License.
  */
 
+class X <K> {
+    bar(x: K): K {
+        return x;
+    }
+}
+
+class Y {
+    bar<K>(x: K): K {
+        return x;
+    }
+}
+
+class MyFoo <K> {
+    foo(x: Int): Int { return x; }
+}
+
+class Z <K> {
+    foo(): MyFoo<K> {
+        return new MyFoo<K>();
+    }
+}
+
+class A <K> {
+    foo<L>(): MyFoo<K> {
+        return new MyFoo<K>();
+    }
+    bar<L>(): MyFoo<L> {
+        return new MyFoo<L>();
+    }
+}
+
+class B <K> {
+    foo<L>(): MyFoo<Int> {
+        return new MyFoo<Int>();
+    }
+}
+
 function foo<T>(x: T | null): T | null {
     return x;
 }
@@ -24,4 +61,16 @@ function bar<T extends Comparable<string>>(x: T): T {
 function main(): void {
     console.println(foo<string>("123").charAt(1));
     console.println(bar<string>("456").charAt(1));
+
+    const myX = new X<string>();
+    const myY = new Y();
+    const myZ = new Z<string>();
+    const myA = new A<string>();
+    const myB = new B<string>();
+    console.println(myX.bar("456").charAt(1));
+    console.println(myY.bar<string>("456").charAt(1));
+    console.println(myZ.foo().foo(1));
+    console.println(myA.foo<string>().foo(1));
+    console.println(myA.bar<string>().foo(1));
+    console.println(myB.foo<string>().foo(1));
 }
