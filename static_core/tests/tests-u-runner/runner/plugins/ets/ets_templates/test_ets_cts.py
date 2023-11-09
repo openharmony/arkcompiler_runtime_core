@@ -64,9 +64,9 @@ class TestEtsCts(TestETS):
     def add_boot_panda_files(self, args: List[str]) -> List[str]:
         dep_files_args = []
         for arg in args:
-            name, value = arg.split('=')
-            if name == '--boot-panda-files':
+            if arg.startswith("--boot-panda-files"):
+                name, value = arg.split('=')
                 dep_files_args.append(f'{name}={":".join([value] + [dt.test_abc for dt in self.dependent_files])}')
             else:
-                dep_files_args.append(f'{name}={value}')
+                dep_files_args.append(arg)
         return dep_files_args
