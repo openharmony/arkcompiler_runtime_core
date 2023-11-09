@@ -18,7 +18,7 @@ Generics
 .. meta:
     frontend_status: Partly
 
-Class, interface, method, constructor and function are program entities
+Class, interface, method, constructor, and function are program entities
 that can be generalized in the |LANG| language. Generalization is
 parametrizing an entity by one or several types. A generalized
 entity is introduced by a *generic declaration* (also called *generic*
@@ -30,6 +30,8 @@ for brevity).
    parameterization
    generic declaration
    generic
+
+|
 
 .. _Generic Declarations:
 
@@ -64,15 +66,15 @@ specified in the instantiation are called *type arguments*.
    construct
    type argument
 
-In an *implicit* instantiation, type arguments are not specified explicitly,
-but are inferred from the context the generic is referred in.
+In an *implicit* instantiation, type arguments are not specified explicitly.
+They are inferred from the context the generic is referred in.
 Implicit instantiation is possible only for functions and methods.
 
 The result of instantiation is a *real*, non-parametrized program entity:
 class, interface, method, constructor, or function. Such entity is treated
 exactly as an ordinary class, interface, method, constructor, or function.
 
-Conceptually, a generic class, an interface, a method, a constructor or a
+Conceptually, a generic class, an interface, a method, a constructor, or a
 function defines a set of classes, interfaces, methods, constructors, or
 functions respectively (see :ref:`Generic Instantiations`).
 
@@ -88,6 +90,8 @@ functions respectively (see :ref:`Generic Instantiations`).
    constructor
    function
 
+|
+
 .. _Generic Parameters:
 
 Generic Parameters
@@ -101,7 +105,7 @@ type parameter to be *generic*. The type parameter is declared in the type
 parameter section, and can be used as an ordinary type inside a generic.
 
 Syntactically, the type parameter is an unqualified identifier.
-For the scope of type parameters see :ref:`Scopes`.
+See :ref:`Scopes` for the scope of type parameters.
 
 Each type parameter has a *constraint* (see :ref:`Type Parameter Constraint`).
 
@@ -120,6 +124,8 @@ Type parameters can also have default types (see :ref:`Type Parameter Default`).
    constraint
    default type
    type parameter
+
+|
 
 .. code-block:: abnf
 
@@ -237,8 +243,6 @@ section depends on itself.
    constraint
    compile-time error
 
-|
-
 .. code-block:: typescript
    :linenos:
 
@@ -263,7 +267,7 @@ Generic Instantiations
     frontend_status: Partly
 
 As mentioned before, a generic class, interface, or function declaration
-defines a set of corresponding non-generic entities. A generic  entity
+defines a set of corresponding non-generic entities. A generic entity
 must be *instantiated* in order to get a non-generic entity out of it.
 The instantiation is specified by providing a list of *type arguments*
 that substitute corresponding type parameters of the generic:
@@ -279,7 +283,7 @@ that substitute corresponding type parameters of the generic:
 
 *G* < *T*:sub:`1`, ``...``, *T*:sub:`n`>
 
-where <*T*:sub:`1`, ``...``, *T*:sub:`n`> is the list of type arguments
+---where <*T*:sub:`1`, ``...``, *T*:sub:`n`> is the list of type arguments
 for the generic declaration *G*.
 
 If *C*:sub:`1`, ``...``, *C*:sub:`n` is the constraint for the corresponding
@@ -349,7 +353,7 @@ However, a compile-time error occurs if a type parameter without a
 default value follows a type parameter with a default value in the
 declaration of a generic type.
 
-The examples below illustrate this for both classes and functions.
+The examples below illustrate this for both classes and functions:
 
 .. index::
    type parameter
@@ -387,7 +391,6 @@ The examples below illustrate this for both classes and functions.
     let c2 = new C2<number, string>  // equal to C2<number, string, string>
     let c3 = new C2<number, Object, number> // all 3 type arguments provided
 
-
 |
 
 .. _Type Arguments:
@@ -399,16 +402,13 @@ Type arguments can be reference types or wildcards.
 
 If a value type is specified as a type argument in the generic instantiation,
 then the boxing conversion applies to that type (see
-:ref:`Predefined Numeric Types Conversions`).
+:ref:`Primitive Types Conversions`).
 
 .. code-block:: abnf
 
     typeArguments:
-        '<' typeArgumentList? '>'
+        '<' typeArgumentList '>'
         ;
-
-A *typeArgument* denotes a raw type (see :ref:`Raw Types`) unless a
-*typeArgumentList* is provided.
 
 A compile-time error occurs if type arguments are omitted in a parametrized
 function.
@@ -423,6 +423,8 @@ function.
    raw type
    parameterized function
    compile-time error
+
+|
 
 .. code-block:: abnf
 
@@ -489,8 +491,8 @@ equivalent.
 
 A compile-time error occurs if:
 
--  A wildcard is used in a parameterization of a function;
--  A covariant wildcard is specified for a contravariant type parameter;
+-  A wildcard is used in a parameterization of a function; or
+-  A covariant wildcard is specified for a contravariant type parameter; or
 -  A contravariant wildcard is specified for a covariant type parameter.
 
 .. index::
@@ -507,10 +509,10 @@ The rules below apply to the subtyping (see :ref:`Subtyping`) of two
 non-equivalent types *A* <: *B*, and an invariant type parameter *F* in
 case of use-site variance:
 
--  *T* <out *A*> <: *T* <out *B*>
--  *T* <in *A*> :> *T* <in *B*>
--  *T* <*A*> <: *T* <out *A*>
--  *T* <*A*> <: *T* <in *A*>
+-  *T* <out *A*> <: *T* <out *B*>;
+-  *T* <in *A*> :> *T* <in *B*>;
+-  *T* <*A*> <: *T* <out *A*>;
+-  *T* <*A*> <: *T* <in *A*>.
 
 .. index::
    subtyping
@@ -521,7 +523,7 @@ Any two type arguments are considered *provably distinct* if:
 
 -  The two arguments are not of the same type, and neither is a type parameter
    nor a wildcard; or
--  One type argument is a type parameter, or a wildcard with an upper bound
+-  One type argument is a type parameter or a wildcard with an upper bound
    of *S*, the other *T* is not a type parameter and not a wildcard, and
    neither is a subtype of another (see :ref:`Subtyping`); or
 -  Each type argument is a type parameter, or wildcard with upper bounds
@@ -534,126 +536,6 @@ Any two type arguments are considered *provably distinct* if:
    subtype
    upper bound
    type argument
-
-|
-
-.. _Raw Types:
-
-Raw Types
-*********
-
-.. code-block:: abnf
-
-    rawType:
-        identifier '<' '>'
-        ;
-
-**Note**: Raw types are added below to simplify the migration from other
-languages that support this notion. Future versions of the language are
-to disallow the use of raw types.
-
-A raw type is one of the following:
-
--  The reference type formed by taking a generic type declaration’s name
-   without the accompanying type argument list.
--  An array type with a raw type element.
--  A non-*static* member type of a raw type *R* not inherited from an
-   *R*’s superclass or superinterface.
-
-.. index::
-   raw type
-   migration
-   reference type
-   generic type declaration
-   type argument
-   array type
-   raw type
-   non-static member type
-   inheritance
-   superclass
-   superinterface
-   member type
-
-Only a generic class, or interface type can be a raw type.
-
-Raw type superclasses and superinterfaces are the raw versions of respective
-superclasses and superinterfaces of any generic type instantiations.
-
-The type of a constructor (see :ref:`Constructor Declaration`), instance method
-(see :ref:`Instance Methods` for classes, :ref:`Interface Method Declarations`
-and `Default Method Declarations` for interfaces), and non-*static* field (see
-:ref:`Field Declarations`) of a raw type *C*, which is not inherited from
-respective superclasses or superinterfaces, is the raw version of its type
-in the generic declaration corresponding to *C*.
-
-The type of a *static* method or *static* field of a raw type *C*, and the type
-of a method or field in the generic declaration corresponding to *C* are the
-same.
-
-.. index::
-   generic class
-   interface type
-   raw type
-   raw type superclass
-   raw type superinterface
-   instantiation
-   superclass
-   superinterface
-   generic type
-   constructor
-   instance method
-   interface method declaration
-   default method declaration
-   interface
-   non-static field
-   field declaration
-   inheritance
-   static method
-   static field
-   generic declaration
-
-A compile-time error occurs if:
-
--  Type arguments are passed to a non-*static* type member of a raw type
-   that is not inherited from its superclasses or superinterfaces.
--  An attempt is made to use a type member of a parameterized type as a
-   raw type.
-
-.. index::
-   compile-time error
-   type argument
-   non-static type member
-   raw type
-   inheritance
-   superclass
-   superinterface
-   type member
-   parameterized type
-
-A class’ supertype can be a raw type.
-
-Member access to a class is treated as normal, while member access to a
-supertype is treated as that to a raw type. Calls to ``super`` are treated
-as method calls to raw types in the class constructor.
-
-The use of raw types is a concession for the sake of compatibility with
-legacy code, and is to be disallowed in future versions of the language.
-
-The use of a raw type always results in compile-time diagnostics in order
-to ensure that potential typing rules violations are flagged.
-
-.. index::
-   supertype
-   raw type
-   member access
-   class
-   member access
-   supertype
-   call
-   method call
-   class constructor
-   compatibility
-
 
 |
 
@@ -721,10 +603,10 @@ The type *Record<K, V>* constructs a container that maps keys (of type *K*)
 to values (of type *V*).
 
 The type *K* is restricted to ``number`` types, ``string`` types, union types
-constructed from these types, and also literals of such types.
+constructed from these types, and also literals of these types.
 
 A compile-time error occurs if any other type, or literal of any other type
-is used as this type.
+is used in place of this type.
 
 There are no restrictions on the type *V*. 
 
@@ -751,10 +633,10 @@ There are no restrictions on the type *V*.
 A special form of object literals is supported for instances of *Record*
 types (see :ref:`Object Literal of Record Type`).
 
-Accessing to ``Record<``*K*``, ``*V*``>`` values is done by the *indexing
+Access to ``Record<``*K*``, ``*V*``>`` values is done by the *indexing
 expression* like *r[index]*, where *r* is an instance of the type ``Record``,
 and *index* is the expression of the type *K*. The result of an indexing
-expression is of the type *V*.
+expression is of type *V*.
 
 .. index::
    object literal

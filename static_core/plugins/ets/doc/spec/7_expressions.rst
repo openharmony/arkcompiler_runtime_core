@@ -143,7 +143,7 @@ Chaining Operator
 *****************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The term *optional chaining operator* (*'?.'*) is used as it effectively
 covers accesses to an object's property, or calls to functions. If the object
@@ -332,7 +332,7 @@ The predefined operators throw runtime errors as follows:
 -  If the right-hand operand expression has the zero value, then integer
    division (see :ref:`Division`), or integer remainder (see :ref:`Remainder`)
    operators throw *ArithmeticError*.
--  If the boxing conversion (see :ref:`Predefined Numeric Types Conversions`)
+-  If the boxing conversion (see :ref:`Primitive Types Conversions`)
    occurs, then the assignment to an array element of a reference type (see
    :ref:`Array Literal`), method call expression (see
    :ref:`Method Call Expression`), or prefix/postfix increment/decrement (see
@@ -1352,6 +1352,20 @@ function or method.
         // array literal will be built at rutime
     }
 
+
+Note that if an array is spread while calling a function and appropriate parameter
+must be of spread array kind. Spreading array into a sequence of ordinary
+parameters is a compile-time error. 
+
+.. code-block:: typescript
+   :linenos:
+
+
+    let an_array = [1, 2]
+    bar (...an_array) // compile-time error
+    function bar (n1: number, n2: number) { ... }
+
+
 |
 
 .. _void Expression:
@@ -1492,11 +1506,11 @@ an interface.
 .. code-block:: abnf
 
     methodCallExpression:
-        objectReference '.' identifier typeArguments? (arguments | arguments? block)
+        objectReference '.' identifier typeArguments? arguments block?
         ;
 
 The syntax form which has a block associated with the method call is a special
-form called trailing lambda call and described here (see :ref:`Trailing Lambda`).
+form called trailing lambda call. It is described in detail in :ref:`Trailing Lambda`.
 
 A compile-time error occurs if *typeArguments* is present, and any of type
 arguments are wildcards (see :ref:`Type Arguments`).
@@ -1967,7 +1981,12 @@ Array Indexing Expression
 
 For an array indexing, a type of *index expression* must be of a numeric type.
 
-A numeric types conversion (see :ref:`Predefined Numeric Types Conversions`)
+if type of *index expression* is ``number`` or other floating-point type and
+its fractional part is different from 0 then it will be runtime error if such
+situation is identified during program execution and compile-time one if 
+detected during compilation.
+
+A numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on *index expression* to ensure that the resultant type is *int*.
 A compile-time error occurs otherwise.
 
@@ -1999,6 +2018,13 @@ An illustration is given in the example below:
     object.field = 777            // change the field in the array element
     console.log(objects[0].filed) // prints 666
     console.log(objects[1].filed) // prints 777
+
+    let an_array = [1, 2, 3]
+    let element = an_array [3.5] // Compile-time error
+    function foo (index: number) {
+       let element = an_array [index] 
+          // Runtime-time error if index is not integer
+    }
 
 
 .. index::
@@ -2121,11 +2147,11 @@ A *function call expression* is used to call a function (see
 .. code-block:: abnf
 
     functionCallExpression:
-        expression ('?.' | typeArguments)? (arguments| arguments? block)
+        expression ('?.' | typeArguments)? arguments block?
         ;
 
 The special syntactic form which has a block associated with the function
-call is called *trailing lambda call*. It is described in detain in
+call is called *trailing lambda call*. It is described in detail in
 :ref:`Trailing Lambda`.
 
 A compile-time error occurs if:
@@ -2634,7 +2660,7 @@ result of a postfix increment expression is a value, not a variable.
 If the evaluation of the operand expression completes normally at runtime, then:
 
 -  The value *1* is added to the value of the variable by using necessary
-   conversions (see :ref:`Predefined Numeric Types Conversions`); and
+   conversions (see :ref:`Primitive Types Conversions`); and
 -  The sum is stored back into the variable.
 
 .. index::
@@ -2707,7 +2733,7 @@ If evaluation of the operand expression completes at runtime, then:
    evaluation
 
 -  The value *1* is subtracted from the value of the variable by using
-   necessary conversions (see :ref:`Predefined Numeric Types Conversions`); and
+   necessary conversions (see :ref:`Primitive Types Conversions`); and
 -  The sum is stored back into the variable.
 
 Otherwise, the postfix decrement expression completes abruptly, and
@@ -2767,7 +2793,7 @@ If evaluation of the operand expression completes normally at runtime, then:
    conversion
 
 -  The value *1* is added to the value of the variable by using necessary
-   conversions (see :ref:`Predefined Numeric Types Conversions`); and
+   conversions (see :ref:`Primitive Types Conversions`); and
 -  The sum is stored back into the variable.
 
 Otherwise, the prefix increment expression completes abruptly, and no
@@ -2821,7 +2847,7 @@ result of a prefix decrement expression is a value, not a variable.
 If evaluation of the operand expression completes normally at runtime, then:
 
 -  The value *1* is subtracted from the value of the variable by using
-   necessary conversions (see :ref:`Predefined Numeric Types Conversions`);
+   necessary conversions (see :ref:`Primitive Types Conversions`);
    and
 -  The sum is stored back into the variable.
 
@@ -2857,10 +2883,10 @@ Unary Plus
     frontend_status: Done
 
 The type of the operand *expression* with the unary ':math:`+`' operator must
-be convertible  (see :ref:`Kinds of Conversion`) to a primitive numeric type;
+be convertible  (see :ref:`Kinds of Conversion`) to a numeric type; 
 a compile-time error occurs otherwise.
 
-The numeric types conversion (see :ref:`Predefined Numeric Types Conversions`)
+The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on the operand to ensure that the resultant type is that of the
 unary plus expression. The result of a unary plus expression is always a value,
 not a variable (even if the result of the operand expression is a variable).
@@ -2871,7 +2897,6 @@ not a variable (even if the result of the operand expression is a variable).
    expression
    unary operator
    conversion
-   primitive type
    numeric type
    compile-time error
    numeric types conversion
@@ -2895,10 +2920,10 @@ Unary Minus
     todo: let a : Double = Double.Nan; a = -a; (assertion)
 
 The type of the operand *expression* with the unary ':math:`--`' operator must
-be convertible (see :ref:`Kinds of Conversion`) to a primitive numeric type; a
-compile-time error occurs otherwise.
+be convertible (see :ref:`Kinds of Conversion`) to a numeric type;
+a compile-time error occurs otherwise.
 
-The numeric types conversion (see :ref:`Predefined Numeric Types Conversions`)
+The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on the operand to ensure that the resultant type is that of the
 unary minus expression. 
 The result of a unary minus expression is a value, not a variable (even if the
@@ -2915,7 +2940,6 @@ from the same value set as the promoted operand value.
    operand
    unary operator
    conversion
-   primitive type
    numeric type
    predefined numeric types conversion
    expression
@@ -2988,7 +3012,7 @@ The type of the operand *expression* with the unary '~' operator must be
 convertible (see :ref:`Kinds of Conversion`) to a primitive integer type; a
 compile-time error occurs otherwise.
 
-The numeric types conversion (see :ref:`Predefined Numeric Types Conversions`)
+The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on the operand to ensure that the resultant type is that of the
 unary bitwise complement expression.
 
@@ -3028,7 +3052,7 @@ The type of the operand *expression* with the unary '``!``' operator must be
 
 The unary logical complement expression’s type is *boolean*.
 
-The unboxing conversion (see :ref:`Predefined Numeric Types Conversions`) is
+The unboxing conversion (see :ref:`Primitive Types Conversions`) is
 performed on the operand at runtime if needed.
 
 The value of a unary logical complement expression is ``true`` if the
@@ -3072,10 +3096,10 @@ The operators '\*', '/', and '%' are *multiplicative operators*.
 The multiplicative operators group left-to-right.
 
 The type of each operand in a multiplicative operator must be convertible (see
-:ref:`Contexts and Conversions`) to a primitive numeric type; a compile-time
-error occurs otherwise.
+:ref:`Contexts and Conversions`) to a numeric type; a compile-time error occurs
+otherwise.
 
-The numeric types conversion (see :ref:`Predefined Numeric Types Conversions`)
+The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on both operands to ensure that the resultant type is the type of
 the multiplicative expression.
 
@@ -3087,11 +3111,9 @@ variable (even if the operand expression is a variable).
    convertibility
    context
    conversion
-   primitive type
    numeric type
    multiplicative operator
    multiplicative expression
-   primitive type
    numeric type
    value
    unary bitwise complement expression
@@ -3212,7 +3234,7 @@ left-hand and right-hand operands (*dividend* and *divisor* respectively).
 
 Integer division rounds toward *0*, i.e., the quotient of integer operands
 *n* and *d*, after a numeric types conversion on both (see
-:ref:`Predefined Numeric Types Conversions` for details), is
+:ref:`Primitive Types Conversions` for details), is
 an integer value *q* with the largest possible magnitude that
 satisfies :math:`|d\cdot{}q|\leq{}|n|`.
 
@@ -3344,7 +3366,7 @@ The remainder operator in |LANG| accepts floating-point operands (unlike in
 C and C++).
 
 The remainder operation on integer operands (for the numeric type conversion
-on both see :ref:`Predefined Numeric Types Conversions`) produces a result
+on both see :ref:`Primitive Types Conversions`) produces a result
 value, i.e., :math:`(a/b)*b+(a\%b)` equals *a*.
 
 
@@ -3476,11 +3498,11 @@ The additive operators group left-to-right.
 If either operand of the operator is '+' of type *string*, then the operation
 is a string concatenation. In all other cases, the type of each operand of the
 operator '+' must be convertible (see :ref:`Kinds of Conversion`) to a
-primitive numeric type; a compile-time error occurs otherwise.
+numeric type; a compile-time error occurs otherwise.
 
 The type of each operand of the binary operator '-' in all cases must be
-convertible (see :ref:`Kinds of Conversion`) to a primitive numeric type;
-a compile-time error occurs otherwise.
+convertible (see :ref:`Kinds of Conversion`) to a numeric type; a compile-time
+error occurs otherwise.
 
 .. index::
    additive expression
@@ -3490,7 +3512,6 @@ a compile-time error occurs otherwise.
    string concatenation
    operator
    conversion
-   primitive type
    numeric type
    compile-time error
    binary operator
@@ -3545,7 +3566,7 @@ and produces the sum of such operands.
 The binary operator '-' performs subtraction, and produces the difference of
 two numeric operands.
 
-The numeric types conversion (see :ref:`Predefined Numeric Types Conversions`)
+The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on the operands.
 
 The type of an additive expression on numeric operands is the promoted type of
@@ -3697,14 +3718,15 @@ operand in a shift operator; the right-hand operand specifies the shift distance
 
 The shift operators group left-to-right.
 
-Numeric types conversion (see :ref:`Predefined Numeric Types Conversions`)
+Numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed separately on each operand to ensure that both operands are of
 primitive integer type. Note that if the initial type of one or both operands
 is ``double`` or ``float``, then such operand or operands are truncated to
-appropriate integer type first.
+appropriate integer type first. If both operands are of type ``bigint`` then 
+shift operator is applied to bigint operands.
 
 A compile-time error occurs if either operand in a shift operator (after unary
-numeric promotion) is not a primitive integer type.
+numeric promotion) is not a primitive integer type or bigint.
 
 .. index::
    shift expression
@@ -3719,7 +3741,7 @@ numeric promotion) is not a primitive integer type.
    unary numeric promotion
    truncation
    truncated operand
-   primitive integer type
+   primitive type
 
 The shift expression type is the promoted type of the left-hand operand.
 
@@ -3822,10 +3844,10 @@ Numerical Comparison Operators <, <=, >, and >=
     frontend_status: Done
 
 The type of each operand in a numerical comparison operator must be convertible
-(see :ref:`Kinds of Conversion`) to a primitive numeric type; a compile-time
+(see :ref:`Kinds of Conversion`) to a numeric type; a compile-time
 error occurs otherwise.
 
-Numeric types conversions (see :ref:`Predefined Numeric Types Conversions`) are
+Numeric types conversions (see :ref:`Primitive Types Conversions`) are
 performed on each operand as follows:
 
 -  Signed integer comparison if the converted type of the operand is *int* or *long*.
@@ -3981,7 +4003,7 @@ compared:
    object
    reference equality operator
    entity
-   primitive type entity
+   primitive type
    boxing
    boxed version
    value equality operator
@@ -4157,7 +4179,7 @@ Value Equality Operators for Numeric Types
 .. meta:
     frontend_status: Partly
 
-The numeric types conversion (see :ref:`Predefined Numeric Types Conversions`)
+The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on the operands of a value equality operator if:
 
 -  Both are of a numeric type; or
@@ -4239,7 +4261,7 @@ The operation is a *boolean equality* if:
 The boolean equality operators are associative.
 
 If one operand is of type *Boolean*, then the unboxing conversion (see
-:ref:`Predefined Numeric Types Conversions`) must be performed.
+:ref:`Primitive Types Conversions`) must be performed.
 
 If both operands (after the unboxing conversion if required) are either
 ``true`` or ``false``, then the result of ':math:`==`' is ``true``.
@@ -4280,7 +4302,7 @@ The operation is a *character equality* if:
 The character equality operators are associative.
 
 If one operand is of the *Char* type, then the unboxing conversion
-(see :ref:`Predefined Numeric Types Conversions`) must be performed.
+(see :ref:`Primitive Types Conversions`) must be performed.
 
 If both operands (after the unboxing conversion where required) contain
 the same character code, then the result of ':math:`==`' is ``true``.
@@ -4364,12 +4386,13 @@ Integer Bitwise Operators &, ^, and |
 .. meta:
     frontend_status: Done
 
-The numeric types conversion (see :ref:`Predefined Numeric Types Conversions`)
+The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is first performed on the operands of an operator '&', '^', or '\|' if both
 such operands are of a type convertible (see :ref:`Kinds of Conversion`) to a
 primitive integer type. Note that if the initial type of one or both operands
 is ``double`` or ``float``, then that operand or operands are truncated to the
-appropriate integer type first.
+appropriate integer type first. If both operands are of type ``bigint`` then
+no conversion is required.
 
 A bitwise operator expression type is the converted type of its operands.
 
@@ -4387,7 +4410,6 @@ The resultant value of '\|' is the bitwise inclusive OR of the operand values.
    bitwise exclusive OR operand
    bitwise inclusive OR operand
    bitwise AND operand
-   primitive integer type
    primitive type
    integer type
    conversion
@@ -4404,7 +4426,7 @@ Boolean Logical Operators &, ^, and |
 
 The type of the bitwise operator expression is *boolean* if both operands of a
 '&', '^', or '\|' operator are of type *boolean* or *Boolean*. In any case,
-the unboxing conversion (see :ref:`Predefined Numeric Types Conversions`) is
+the unboxing conversion (see :ref:`Primitive Types Conversions`) is
 performed on the operands as necessary.
 
 If both operand values are ``true``, then the resultant value of '&' is ``true``.
@@ -4474,7 +4496,7 @@ Each operand of the *conditional-and* operator must be of type *boolean*, or
 
 The left-hand operand expression is first evaluated at runtime. If the result
 is of the *Boolean* type, then the unboxing conversion (see
-:ref:`Predefined Numeric Types Conversions`) is performed as follows:
+:ref:`Primitive Types Conversions`) is performed as follows:
 
 -  If the resultant value is ``false``, then the value of the *conditional-and*
    expression is ``false``, and the evaluation of the right-hand operand
@@ -4483,7 +4505,7 @@ is of the *Boolean* type, then the unboxing conversion (see
 -  If the value of the left-hand operand is ``true``, then the right-hand
    expression is evaluated. If the result of the evaluation is of type
    *Boolean*, then it is subjected to the unboxing conversion (see
-   :ref:`Predefined Numeric Types Conversions`). The resultant value is the
+   :ref:`Primitive Types Conversions`). The resultant value is the
    value of the *conditional-and* expression.
 
 .. index::
@@ -4547,7 +4569,7 @@ as follows:
 
 -  If the resultant value is ``false``, then the right-hand expression is
    evaluated. If the result of the evaluation is of type *Boolean*, then
-   the *unboxing conversion* (see :ref:`Predefined Numeric Types Conversions`)
+   the *unboxing conversion* (see :ref:`Primitive Types Conversions`)
    is performed. The resultant value is the value of the *conditional-or*
    expression.
 
@@ -5077,7 +5099,7 @@ influences its type determination at runtime:
    the rules below.
 
    Boxing or unboxing conversions are allowed for this conversion (see
-   :ref:`Predefined Numeric Types Conversions`).
+   :ref:`Primitive Types Conversions`).
 
    The remaining operand expression is not evaluated in this particular
    evaluation of the conditional expression.
@@ -5135,7 +5157,7 @@ The type of a numeric conditional expression is:
 
 -  *T* if either the second or the third operand is of the primitive
    type *T*, and the type of the other operand results from the boxing
-   conversion (see :ref:`Predefined Numeric Types Conversions`) of *T*.
+   conversion (see :ref:`Primitive Types Conversions`) of *T*.
 
 -  *short* if one operand’s type is *byte* or *Byte*, and the other’s
    *short* or *Short*.
@@ -5152,8 +5174,8 @@ The type of a numeric conditional expression is:
 
 -  In other situations, the type of the conditional expression is the promoted
    type of the second and the third operands after the binary numeric promotion
-   (see :ref:`Predefined Numeric Types Conversions`) of the operand types.
-
+   (see :ref:`Primitive Types Conversions`) of the operand types.
+ 
 .. index::
    numeric conditional expression
    primitive type

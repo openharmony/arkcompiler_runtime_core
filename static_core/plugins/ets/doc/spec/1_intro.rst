@@ -25,16 +25,17 @@ multi-paradigm programming language called |LANG|.
 Common Description
 ******************
 
-The |LANG| language combines and supports many features that have been in use in
-many well-known programming languages, and have proven useful and powerful tools.
+The |LANG| language combines and supports features that are in use in many
+well-known programming languages, where these tools have already proven
+helpful and powerful.
 
-|LANG| supports multiple programming paradigms as imperative, object-oriented,
-functional and generic approaches, and combines them safely and consistently.
+|LANG| supports imperative, object-oriented, functional, and generic
+programming paradigms, and combines  them safely and consistently.
 
 At the same time, |LANG| does not support features that allow software
-developers to write dangerous, unsafe and inefficient code. In particular,
+developers writing dangerous, unsafe, or inefficient code. In particular,
 the language uses the strong static typing principle that allows no dynamic
-type changes as object types are determined by their declarations and checked
+type changes, as object types are determined by their declarations and checked
 for semantic correctness at compile time.
 
 The following major aspects characterize the |LANG| language as a whole:
@@ -47,7 +48,7 @@ The following major aspects characterize the |LANG| language as a whole:
    implemented by classes, and virtual functions (class members) with a
    dynamically dispatched overriding mechanism. Common in many (if not
    all) modern programming languages, object orientation enables
-   powerful, flexible, safe, clear and adequate software design.
+   powerful, flexible, safe, clear, and adequate software design.
 
 .. index::
    object
@@ -60,16 +61,16 @@ The following major aspects characterize the |LANG| language as a whole:
 
 -  Modularity
 
-   The |LANG| language supports the *component programming approach* which
-   presumes that software is designed and implemented as a composition
-   of compilation units. A compilation unit in |LANG| is a standalone, independently
+   The |LANG| language supports the *component programming approach*. It
+   presumes that software is designed and implemented as a composition of
+   compilation units. A compilation unit in |LANG| is a standalone, independently
    compiled package or module that combines various programming resources (types,
-   classes, functions and so on). Package may combine several modules into one
-   logically consistent compilation unit. A module or package communicate with other
-   compilation units by exporting all or some of its resources to, or importing from
-   other units. This feature provides a high quality software development
-   process and software maintainability, supports flexible software reuse and
-   efficient version control.
+   classes, functions, and so on). A package can combine several modules into a
+   single logically consistent compilation unit. A module or a package
+   communicates with other compilation units by exporting all or some of its
+   resources to, or importing from other units. This feature provides a
+   high-quality software development process and software maintainability,
+   while supporting flexible reuse of  software, and efficient version control.
 
 .. index::
    modularity
@@ -81,14 +82,16 @@ The following major aspects characterize the |LANG| language as a whole:
    Some program entities in |LANG| can be *type-parameterized*. This means that
    an entity can represent a very high-level (abstract) concept, and
    providing more concrete information makes it specialized for a
-   particular use case. A classical illustration is the notion of a list
-   that represents the ‘idea’ of an abstract data structure. Providing
-   additional information (the type of list elements) can turn this
-   abstract notion into a concrete list.
+   particular use case.
+   
+   A classical illustration is the notion of a list that represents the
+   ‘idea’ of an abstract data structure. This abstract notion can be turned
+   into a concrete list by providing additional information (the type of
+   list elements).
 
    Supported by many programming languages, a similar feature (‘generics’
    or ‘templates’) serves as the basis of the generic programming
-   paradigm, and enables making programs and program structures more
+   paradigm. It enables making programs and program structures more
    generic and reusable.
 
 .. index::
@@ -105,36 +108,37 @@ The following major aspects characterize the |LANG| language as a whole:
 
    |LANG| provides an efficient application development solution for a wide
    range of devices. The language ecosystem is a developer-friendly, uniform
-   programming environment for a range of popular platforms (cross-platform
-   development). It can generate optimized applications capable of operating
+   programming environment for a range of popular platforms (‘cross-platform
+   development’). It can generate optimized applications capable of operating
    under the limitations of lightweight devices, or realizing the full
    potential of any specific target hardware.
 
 .. index::
    multi-targeting
-   
+
 |LANG| is designed as a part of the modern language manifold. To provide an
 efficient and safely executable code, the language takes flexibility and
 power from TypeScript and its predecessor JavaScript, and the static
 typing principle from Java and Kotlin.
 
-The |LANG|’ overall design keeps its syntax style similar to those languages,
-and some of its important constructs are almost identical to theirs on purpose.
+The overall design keeps the |LANG|’ syntax style similar to that of those
+languages, and some of its important constructs are almost identical to theirs
+on purpose.
 
 In other words, there is a significant *common subset* of features of |LANG|
-on the one hand, and of TypeScript, JavaScript, Java and Kotlin on the other.
+on the one hand, and of TypeScript, JavaScript, Java, and Kotlin on the other.
 Consequently, the |LANG|’ style and constructs are no puzzle for the TypeScript
 and Java users who can sense the meaning of most constructs of the new
 language even if not understand them completely.
 
-This stylistic and semantic similarity permits migrating the applications,
-originally written in TypeScript, Java or Kotlin, smoothly to |LANG|.
+This stylistic and semantic similarity permits migrating the applications
+originally written in TypeScript, Java, or Kotlin smoothly to |LANG|.
 
 Like its predecessors, |LANG| is a relatively high-level language. It means
 that the language provides no access to low-level machine representations.
-As a high-level language, |LANG| supports automatic storage management:
-dynamically created objects are deallocated automatically soon after they
-are no longer available, and deallocating them explicitly is not required.
+As a high-level language, |LANG| supports automatic storage management
+(dynamically created objects are deallocated automatically soon after they
+are no longer available; deallocating them explicitly is not required).
 
 |LANG| is not merely a language, but rather a comprehensive software
 development ecosystem that facilitates the creation of software solutions
@@ -159,17 +163,17 @@ Lexical and Syntactic Notation
 ******************************
 
 This section introduces the notation (known as *context-free grammar*)
-that this specification uses to define the lexical and syntactic
+used in this specification to define the lexical and syntactic
 structure of a program.
 
 .. index::
    context-free grammar
 
 The |LANG| lexical notation defines a set of productions (rules) that specify
-the structure of the elementary language parts called tokens. All tokens are
+the structure of the elementary language parts called 'tokens'. All tokens are
 defined in :ref:`Lexical Elements`. The set of tokens (identifiers, keywords,
 numbers/numeric literals, operator signs, delimiters), special characters
-(white spaces and line separators) and comments comprises the language’s
+(white spaces and line separators), and comments comprises the language’s
 *alphabet*.
 
 .. index::
@@ -204,8 +208,8 @@ describes how sequences of tokens can form syntactically correct programs.
    nonterminal
 
 Lexical and syntactic grammars are defined as a range of productions,
-each comprised of an abstract symbol (*nonterminal*) as its *left-hand
-side* and a sequence of one or more non-terminal and *terminal* symbols
+each comprised of an abstract symbol (*nonterminal*) as its left-hand
+side, and a sequence of one or more *nonterminal* and *terminal* symbols
 as its *right-hand side*. Each production includes the ':' character as
 a separator between the left-hand and the right-hand sides, and the ';'
 character as its end marker.
@@ -214,7 +218,7 @@ character as its end marker.
    lexical grammar
    syntactic grammar
    abstract symbol
-   non-terminal symbol
+   nonterminal symbol
    terminal symbol
    character
    separator
@@ -222,9 +226,9 @@ character as its end marker.
 
 Grammars draw the terminal symbols from a fixed width form. Starting from the
 :index:`goal symbol`, grammars specify the language itself, i.e., the set of
-possible sequences of terminal symbols that can result from repeatedly
-replacing any nonterminal in the sequence for a right-hand side of the
-production, to which that nonterminal is the left-hand side.
+possible sequences of terminal symbols that can result from repeatedly replacing
+any nonterminal in the left-hand-side sequence for a right-hand side of the
+production.
 
 .. index::
    goal symbol
@@ -233,14 +237,14 @@ production, to which that nonterminal is the left-hand side.
 
 Grammars can use the following additional symbols---sometimes called
 metasymbols---in the right-hand side of a grammar production along
-with terminal and non-terminal symbols:
+with terminal and nonterminal symbols:
 
 -  Vertical line '\|' to specify alternatives.
 
--  Question mark '?' to specify the optional (zero- or one-time) appearance
-   of the preceding terminal or non-terminal.
+-  Question mark '?' to specify the optional (zero- or one-time) occurrence
+   of the preceding terminal or nonterminal.
 
--  Asterisk '\*' to mark a *terminal* or *non-terminal* that can appear zero
+-  Asterisk '\*' to mark a *terminal* or *nonterminal* that can occur zero
    or more times.
 
 -  Brackets '(' and ')' to enclose any sequence of terminals and/or
@@ -250,14 +254,13 @@ with terminal and non-terminal symbols:
    terminal
    terminal symbol
    nonterminal
-   non-terminal symbol
    goal symbol
    metasymbol
    grammar production
 
 Such additional symbols specify the structuring rules for terminal and
-non-terminal sequences, but are not part of the terminal symbol sequences
-that comprise the resultant program text.
+nonterminal sequences. However, they are not part of the terminal symbol
+sequences that comprise the resultant program text.
 
 The production below is an example that specifies a list of expressions:
 
@@ -268,7 +271,7 @@ The production below is an example that specifies a list of expressions:
       ;
 
 This production introduces the following structure defined by the
-non-terminal ``expressionList``: the expression list must consist of the
+nonterminal ``expressionList``: the expression list must consist of the
 sequence of *expression*\ s separated by the ‘,’ terminal symbol. The
 sequence must have at least one *expression*, and the list is optionally
 terminated by the ‘,’ terminal symbol.
@@ -285,9 +288,9 @@ Terms and Definitions
 *********************
 
 This section contains the alphabetical list of important terms found in the
-Specification with their |LANG|-specific definitions. Such definitions are
+Specification, and their |LANG|-specific definitions. Such definitions are
 not generic and can differ significantly from the definitions of same terms
-as used in other languages, application areas or industries.
+as used in other languages, application areas, or industries.
 
 .. glossary::
    :sorted:
@@ -299,23 +302,28 @@ as used in other languages, application areas or industries.
      the order of calculation is determined by operator preferences.
 
    operator (in programming languages)
-     -- (1) token that denotes the action to be performed on a value (addition,
-     subtraction, comparisons, etc.). (2) a syntactic construct that denotes
-     an elementary calculation within an expression. Normally, an operator
-     consists of an operator sign and of one or more operands.
+     -- the term can have several meanings.
+
+     (1) token that denotes the action to be performed on a value (addition,
+     subtraction, comparisons, etc.).
+     
+     (2) a syntactic construct that denotes an elementary calculation within
+     an expression. Normally, an operator consists of an operator sign and
+     one or more operands.
 
      In unary operators that have a single operand, the operator sign can be
      placed either in front of an operand (*prefix* unary operator), or after
-     the operand (*postfix* unary operator). If two operands are available,
-     then the operator sign can be placed between two operands (*infix*
-     binary operator). A conditional operator with three operands is called
-     *ternary*.
+     the operand (*postfix* unary operator).
+
+     If both operands are available, then the operator sign can be placed
+     between the two (*infix* binary operator). A conditional operator with
+     three operands is called *ternary*.
 
      Some operators have special notations; for example, the indexing
      operator, while formally being a binary operator, has a conventional
      form like a[i].
 
-     Some languages treat operators as “syntactic sugar”---a conventional
+     Some languages treat operators as 'syntactic sugar'---a conventional
      version of a more common construct, i.e., *function call*. Therefore,
      an operator like ``a+b`` is conceptually treated as the call ``+(a,b)``,
      where the operator sign plays the role of the function name, and the
@@ -333,21 +341,21 @@ as used in other languages, application areas or industries.
      -- an argument of an operation. Syntactically, operands have the form of
      simple or qualified identifiers that refer to variables or members of
      structured objects. In turn, operands can be operators whose preferences
-     (“priorities”) are higher that the preference of the given operator.
+     ('priorities') are higher than the preference of the given operator.
 
    operation
-     -- the informal notion that means an action, or a process of operator
+     -- the informal notion that means an action or a process of operator
      evaluation.
 
    metasymbol
-     -- additional symbols '\|', '?', '\*', '(' and ')' that can be used
-     along with terminal and non-terminal symbols in the right-hand side
+     -- additional symbols '\|', '?', '\*', '(', and ')' that can be used
+     along with terminal and nonterminal symbols in the right-hand side
      of a grammar production.
 
    goal symbol
      -- sentence that consists of a single distinguished nonterminal
-     (*compilationUnit*) and describes how sequences of tokens can form
-     syntactically correct programs.
+     (*compilationUnit*). The *goal symbol* describes how sequences of
+     tokens can form syntactically correct programs.
 
    token
      -- an elementary part of a programming language: identifier, keyword,
@@ -369,8 +377,8 @@ as used in other languages, application areas or industries.
      -- representation of a certain value type.
 
    comment
-     -- a piece of text, insignificant for the syntactic grammar, added to
-     the stream in order to document and compliment the source code.
+     -- a piece of text, insignificant for the syntactic grammar, that is
+     added to the stream in order to document and compliment the source code.
 
    primitive type
       -- numeric value types, character, and boolean value types whose names
@@ -380,13 +388,13 @@ as used in other languages, application areas or industries.
      -- named type (class or interface) that has type parameters.
 
    generic
-     see *generic type*.
+     -- see *generic type*.
 
    non-generic type
      -- named type (class or interface) that has no type parameters.
 
    non-generic
-     see *non-generic type*.
+     -- see *non-generic type*.
 
    type reference
      -- references that refer to named types by specifying their type names,
@@ -394,8 +402,8 @@ as used in other languages, application areas or industries.
      parameters of the named type.
 
    nullable type 
-     -- variable declared to have the null value, or type T | null that can
-     hold values of type T and its derived types.
+     -- variable declared to have the value *null*, or `type T | null` that can
+     hold values of type *T* and its derived types.
 
    nullish value
      -- reference which is null or undefined.
@@ -417,15 +425,15 @@ as used in other languages, application areas or industries.
      introducing a named function.
 
    terminal symbol
-     -- a syntactically invariable token, i.e. a syntactic notation defined
-     directly by the invariable form of the lexical grammar that defines a
-     set of productions starting from the :term:`goal symbol`.
+     -- a syntactically invariable token (i.e., a syntactic notation defined
+     directly by an invariable form of the lexical grammar that defines a
+     set of productions starting from the :term:`goal symbol`).
 
    terminal
      -- see *terminal symbol*.
 
-   non-terminal symbol
-     -- token that is syntactically variable and is the result of successive
+   nonterminal symbol
+     -- syntactically variable token that results from the successive
      application of the production rules.
 
    context-free grammar
@@ -433,7 +441,7 @@ as used in other languages, application areas or industries.
       of only a single nonterminal symbol.
 
    nonterminal
-     -- see *non-terminal symbol*.
+     -- see *nonterminal symbol*.
 
    keyword
      -- one of the *reserved words* that have their meanings permanently
@@ -455,16 +463,16 @@ as used in other languages, application areas or industries.
 
    grammar
      -- set of rules that describe what possible sequences of terminal and
-     non-terminal symbols a programming language interepretes as correct.
+     nonterminal symbols a programming language interepretes as correct.
 
-     A grammar is a range of productions, each production comprised of an
+     Grammar is a range of productions. Each production comprises an
      abstract symbol (nonterminal) as its left-hand side, and a sequence
-     of non-terminal and terminal symbols as its right-hand side.
-     Each grammatical production has the character ‘:’ to separate its left-
+     of nonterminal and terminal symbols as its right-hand side.
+     Each production has the character ‘:’ as a separator between the left-hand
      and right-hand sides, and the character ‘;’ as the end marker.
 
    production
-     -- a sequence of terminal and non-terminal symbols that a programming
+     -- a sequence of terminal and nonterminal symbols that a programming
      language interpretes as correct.
 
    white space
@@ -510,54 +518,56 @@ as used in other languages, application areas or industries.
      handle any exception or error that is not handled by a preceding clause.
 
    overloading
-     -- situation where different imported functions, or a function(s) of
-     the current module and an imported function(s) have the same name but
+     -- situation where different imported functions, or a function of
+     the current module and an imported function have the same name but
      different signatures.
 
    shadowing
-     -- situation where a function(s) of the current module and an imported
-     function(s) have the same name and signature; shadowing causes a
-     compile-time error where function declarations are are duplicated, i.e.
+     -- situation where a function of the current module and an imported
+     function have the same name and signature. Shadowing causes a
+     compile-time error where function declarations are duplicated (i.e.,
      the name and override-equivalent signatures of an imported function are
-     the same as those of a function declared in the current compilation unit.
+     the same as those of a function declared in the current compilation unit).
 
    package level scope
       -- name that is declared on the package level, and accessible throughout
       the entire package and in other packages if exported.
 
    module level scope
-     -- name that is applicable for separate modules only, and accessible
+     -- name that is applicable for separate modules only. It is accessible
      throughout the entire module and in other packages if exported.
 
    class level scope
-     -- name declared inside a class, and accessible inside and sometimes---by
+     -- name declared inside a class. It is accessible inside and sometimes---by
      means of an access modifier, or via a derived class---outside  that class.
   
    interface level scope
-     -- name declared inside an interface, and accessible inside and outside
+     -- name declared inside an interface. It is accessible inside and outside
      that interface.
 
    enum level scope
-     -- scope of enumeration that defines a type inside a package or module,
-     and is identical to a corresponding package or module level scope. An
-     enumeration constant scope is identical to the enumeration itself.
+     -- scope of enumeration that defines a type inside a package or module.
+     Enum level scope is identical to a corresponding package or module level
+     scope. An enumeration constant scope is identical to the enumeration
+     itself.
 
    function parameter scope
-     -- scope of a type parameter name in a function declaration, that is
+     -- scope of a type parameter name in a function declaration. It is
      identical to that entire declaration.
 
    method scope
      -- scope of a name declared immediately inside the body of a method
-     (function) declaration, that is identical to the body of that method
-     (function) declaration from the place of declaration, and up to the
-     end of the body.
+     (function) declaration. Method scope is identical to the body of that
+     method (function) declaration from the place of declaration, and up to
+     the end of the body.
 
    function scope
      -- same as *method scope*.
 
    type parameter scope
-     -- name of atype parameter declared in a class or an interface, that
-     is identical to that entire declaration (except static member declarations).
+     -- name of a type parameter declared in a class or an interface. The type
+     parameter scope is identical to the entire declaration (except static
+     member declarations).
 
    static member
      -- a constant variable (variable of a primitive type, or type *String*)

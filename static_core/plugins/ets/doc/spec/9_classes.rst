@@ -1169,7 +1169,7 @@ Method Declarations
 
     classMethodDeclaration:
         methodOverloadSignature*
-        methodModifier* identifier signature block?
+        methodModifier* typeParameters? identifier signature block?
         ;
 
     methodModifier:

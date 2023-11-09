@@ -574,55 +574,24 @@ using the *export type* form. The difference between *import* and
 *import type* is that the the first form imports all top-level declarations
 which were exported while the second one imports only exported types.
 
-
-..
-  The difference between *import type* and all
-  other forms of import is that the names of types being imported cannot be used
-  witin new expressions; the initialization code of a module or a package a type
-  is imported from is not executed. There are four cases as presented in the
-  table below:
-
-..
-  +--------+-----------+------------------+
-  |        | Export    |  Export Type     |
-  +========+===========+==================+
-  | import | no limits |  no new,         |
-  |        |           |  no module init  |
-  +--------+-----------+------------------+
-  | import | no new,   |  no new,         |
-  | type   | no module |  no module init  |
-  |        | init      |                  |
-  +--------+-----------+------------------+
-
-..
-  If the keyword *type* is used in some import/export directives, then it
-  immediately changes the manner the *type* can be used. The *type* can only
-  be used as a parameter type, or as a type of some variable initialized by
-  a function or a method.
-
 .. code-block:: typescript
    :linenos:
 
     // File module.ets
     console.log ("Module initialization code")
-      // Takes care of top-level variables initizlization
 
-    export class StandardExportedClass // exported class type
+    export class Class1 {/*body*/}
 
-    class ClassForExport {}
-    export type {ClassForExport} // class exported as type only
+    class Class2 {}
+    export type {Class2} 
 
     // MainProgram.ets
 
-    import type {StandardExportedClass as IT1, ClassForExport as IT2}
-       from "./module.ets"
-    import {StandardExportedClass as GIT1, ClassForExport as GIT2}
-       from "./module.ets"
+    import {Class1} from "./module.ets"
+    import type {Class2} from "./module.ets"
 
-    let c1 = new IT1 // compile-time error: cannot create objects of type IT1
-    let c2 = new IT2 // compile-time error: cannot create objects of type IT2
-    let c3 = new GIT1 // OK, `Module initialization code` be printed
-    let c4 = new GIT2 // compile-time error: cannot create objects of type GIT2
+    let c1 = new Class1() // OK
+    let c2 = new Class2() // OK, the same
 
 
 |
@@ -973,11 +942,11 @@ Example below shows how this can be used
 
     class A {}
 
-    export type {A}  // export as type aleady declared class type
+    export type {A}  // export already declared class type
 
-    export type MyA = A // name MyA is declared and exported as type
+    export type MyA = A // name MyA is declared and exported
 
-    export type {MyA} // compile-time error as MyA was aleardy exported
+    export type {MyA} // compile-time error as MyA was already exported
 
 |
 

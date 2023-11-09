@@ -83,12 +83,12 @@ GUI Structs
 .. meta:
     frontend_status: Partly
 
-*GUI structs* are used to define program components. From the language
+*GUI structs* are used to define UI components. From the language
 perspective, a GUI struct is a restricted form of a non-primitive type
 that is designed to define GUI expressively and efficiently.
 
-Each GUI struct is required to implement its *builder*, which is a method
-responsible for visual rendering of components.
+Each GUI struct is required to implement its *builder* (i.e., a method
+responsible for the visual rendering of components).
 
 .. index::
     GUI struct
@@ -232,7 +232,7 @@ the following is not allowed:
     -  Calling a predefined builder *ForEach* for iterative rendering.
 
     -  Calling a function that does not mutate the program state (note that all
-       logging functions are therefore prohibited as they mutate the state).
+       logging functions are thus prohibited, as they mutate the state).
 
     - Using conditional *if ... else* syntax.
 
@@ -264,7 +264,8 @@ Annotations List
 @Builder Annotation
 ===================
 
-*Function-level annotation for defining a custom builder* is applicable to:
+*Function-level annotation for defining a custom builder* is applicable to
+the following:
 
 -  Methods of GUI structs to define custom builder functions inside a
    GUI struct.
@@ -338,7 +339,7 @@ between a child component *at an arbitrary nesting level*, and a parent
 component.
 
 An *@Consume*-annotated field in a child component shares the same value with
-a field in the parent component; the parent component’s source field must be
+a field in the parent component. The parent component’s source field must be
 annotated with *@Provide*.
 
 The annotation *@Consume* is applicable only to member fields of GUI structs.
@@ -366,12 +367,12 @@ The annotation *@Consume* is applicable only to member fields of GUI structs.
 @Entry Annotation
 =================
 
-*Struct-level annotation to indicate a top-most component on the page* is
+*Struct-level annotation to indicate the topmost component on the page* is
 applicable only to GUI structs.
 
 .. index::
    struct-level annotation
-   top-most component
+   topmost component
    GUI struct
 
 .. code-block:: abnf
@@ -392,7 +393,7 @@ applicable only to GUI structs.
 between a child component and a parent component.
 
 An *@Link*-annotated field in a child component shares the same value with a
-field in the parent component; the parent component’s source field must be
+field in the parent component. The parent component’s source field must be
 annotated with *@State*, *@StorageLink*, or *@Link*.
 
 The annotation *@Link* is applicable only to member fields of GUI structs.
@@ -502,7 +503,7 @@ The annotation *@ObjectLink* is applicable only to member fields of GUI structs.
 ====================
 
 *@Observed* is a class-level annotation that establishes two-way synchronization
-between instances of the *@Observed*-annotated class, and *@ObjectLink*-annotated
+between instances of an *@Observed*-annotated class, and *@ObjectLink*-annotated
 member fields of GUI structs.
 
 The annotation *@Observed* is applicable only to non-GUI classes.
@@ -527,17 +528,17 @@ The annotation *@Observed* is applicable only to non-GUI classes.
 @Prop Annotation
 ================
 
-The annotation *@Prop* has the same semantics as *@State* and only differs in
+The annotation *@Prop* has the same semantics as *@State*, and only differs in
 how the variable must be initialized and updated:
 
 -  An *@Prop*-annotated field must be initialized with a primitive or
-   a reference type value provided by its parent component; it must not be
+   a reference type value provided by its parent component. It must not be
    initialized locally.
 
 -  An *@Prop*-annotated field can be modified locally, but the change
    does not propagate back to its parent component. Whenever that data
    source changes, the *@Prop*-annotated field is updated, and any
-   locally-made changes are overwritten; hence, the sync of the value is
+   locally-made changes are overwritten. Hence, the sync of the value is
    uni-directional from the parent to the owning component.
 
 This annotation *@Prop* is applicable only to member fields of GUI structs.
@@ -687,27 +688,27 @@ structs.
 be executed when the annotated field’s value changes.
 
 The annotation *@StorageProp* is applicable only to member fields of GUI
-structs also annotated with:
+structs with the following annotations:
 
--  *@Consume*
+-  *@Consume*,
 
--  *@Link*
+-  *@Link*,
 
--  *@LocalStorageLink*
+-  *@LocalStorageLink*,
 
--  *@LocalStorageProp*
+-  *@LocalStorageProp*,
 
--  *@ObjectLink*
+-  *@ObjectLink*,
 
--  *@Prop*
+-  *@Prop*,
 
--  *@Provide*
+-  *@Provide*,
 
--  *@State*
+-  *@State*,
 
--  *@StorageLink*
+-  *@StorageLink*, and
 
--  *@StorageProp*
+-  *@StorageProp*.
 
 .. index::
     field-level annotation
@@ -725,10 +726,165 @@ structs also annotated with:
 
 |
 
-.. _Example:
+.. _Callable Types:
 
-Example
-*******
+Callable Types
+**************
+
+.. meta:
+    frontend_status: Done
+
+A type is *callable* if the name of the type can be used in a call expression.
+A call expression that uses a type's name is called a *type call expression*.
+Only class and struct types can be callable. To make a type callable, a static
+method with the name '*invoke*' or '*instantiate*' must be defined or inherited.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        static invoke() { console.log("invoked") }
+    }
+    C() // prints: invoked
+    C.invoke() // also prints: invoked
+    
+In the above example, '*C()*' is a *type call expression*. It is the short
+form of the normal method call '*C.invoke()*'. Using an explicit call is always
+valid for the methods '*invoke*' and '*instantiate*'.
+
+**Note**: Only a constructor---not the methods '*invoke*' or
+'*instantiate*'---is called in a *new expression*:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        static invoke() { console.log("invoked") }
+        constructor() { console.log("constructed") }
+    }
+    let x = new C() // constructor is called
+
+The methods '*invoke*' and '*insantiate*' are similar but have differences as
+discussed below.
+
+A :index:`compile-time error` occurs if a callable type contains both
+the '*invoke*' and '*instantiate*' methods.
+
+|
+
+.. _Callable Types with Invoke Method:
+
+Callable Types with Invoke Method
+=================================
+
+The method '*invoke*' can have an arbitrary signature. It can be
+used in a *type call expression* in either case.
+If the signature has parameters, then the call must contain corresponding
+arguments.
+
+.. code-block:: typescript
+   :linenos:
+
+    class Add {
+        static invoke(a: number, b: number): number { 
+            return a + b
+        }
+    }
+    console.log(Add(2, 2)) // prints: 4
+    
+|
+
+.. _Callable Types with Instantiate Method:
+
+Callable Types with Instantiate Method
+======================================
+
+The method '*instantiate*' can have an arbitrary signature by itself.
+If it is to be used in a *type call expression*, then its first parameter
+must be a 'factory' (i.e., it must be a *parameterless function type
+returning some class or struct type*).
+The method can have or not have other parameters, and those parameters can
+be arbitrary.
+
+In a *type call expression*, the argument corresponding to the 'factory' parameter is
+passed implicitly:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        static instantiate(factory: () => C): C { 
+            return factory()
+        }
+    }
+    let x = C() // factory is passed implicitly
+    
+    // Explicit call of 'instantiate' requires explicit 'factory':
+    let y = C.instantiate(() => { return new C()})
+
+If the method '*instantiate*' has additional parameters, then the call must
+contain corresponding arguments:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        name = ""
+        static instantiate(factory: () => C, name: string): C { 
+            let x = factory()
+            x.name = name
+            return x
+        }
+    }
+    let x = C("Bob") // factory is passed implicitly
+
+
+A :index:`compile-time error` occurs in a *type call expression* with type *T*,
+if:
+
+- *T* has no method 'invoke' or 'instantiate'; or
+- *T* has the method 'instantiate' but its first parameter is not a 'factory'.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        static instantiate(factory: string): C { 
+            return factory()
+        }
+    }
+    let x = C() // compile-time error, wrong 'instantiate' 1st parameter
+
+
+|
+
+.. _Additional Features:
+
+Additional Features
+*******************
+
+|
+
+.. _Unary operator $$:
+
+Unary operator '$$'
+===================
+
+A prefix unary operator '$$' is used to pass primitive types by reference.
+It is added to |LANG| to support the legacy ArkUI code.
+As the use of this operator is deprecated, it is to be removed in the future
+versions of the language.
+
+The operator '$$' can be followed by an identifier. The code '*$$this.a*' is
+considered to be the same as '*$$ this.a*' and '*$$(this.a)*'.
+
+
+|
+
+.. _Example of GUI Programming:
+
+Example of GUI Programming
+**************************
 
 .. code-block:: typescript
    :linenos:
@@ -907,7 +1063,7 @@ Example
                                 // delete found contact
                                 this.addrBook.contacts.splice(index, 1)
 
-                                // determin new selectedPerson
+                                // determine new selectedPerson
                                 index = (index < this.addrBook.contacts.length)
                                     ? index
                                     : index - 1

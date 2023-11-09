@@ -21,5 +21,6 @@ tags: [compile-only, negative]
 function cond(): void {}
 
 function main(): void {
-  let a = cond() ? 0 : 1;
+  let a = cond() ? 1 : 0;
+  return a;
 }

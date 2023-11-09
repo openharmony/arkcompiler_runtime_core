@@ -109,7 +109,7 @@ def get_file_list(panda_dir):
                 ".hh", ".H", ".hp", ".hxx", ".hpp", ".HPP", ".h++", ".tcc", ".inc")
     skip_dirs = ["third_party", "artifacts", "build.*"]
     file_list = []
-    for dirpath, dirnames, filenames in os.walk(panda_dir):
+    for dirpath, dirnames, filenames in os.walk(panda_dir, followlinks=True):
         dirnames[:] = [d for d in dirnames if not re.match(f"({')|('.join(skip_dirs)})" , d)]
         for fname in filenames:
             if (fname.endswith(src_exts)):

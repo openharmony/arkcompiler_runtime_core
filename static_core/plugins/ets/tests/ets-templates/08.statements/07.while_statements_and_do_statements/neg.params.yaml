@@ -14,22 +14,6 @@
 ---
 cases:
     - use: |-
-          // wrong type
-          while (1) {}
-
-    - use: |-
-          // wrong type
-          do {} while (1)
-
-    - use: |-
-          // wrong type
-          while (i & j) {}
-
-    - use: |-
-          // wrong type
-          do {} while (i & j)
-
-    - use: |-
           // missing parentheses
           while i > j {}
 

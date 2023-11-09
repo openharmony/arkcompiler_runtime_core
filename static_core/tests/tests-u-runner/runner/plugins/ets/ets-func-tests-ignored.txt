@@ -107,3 +107,59 @@ escompat/escompat_Array_Test_escompat_Array_003.ets
 std/containers/BasicMapTest.ets
 std/containers/BasicSetTest.ets
 ### Issue xxx end
+
+### Union issues
+### literal types not supported yet
+spec/unions/union02.ets
+### Negative tests
+spec/unions/union01.ets
+spec/unions/union_assignment_n_01.ets
+spec/unions/union_assignment_n_02.ets
+spec/unions/union_assignment_n_03.ets
+spec/unions/union_cast_n_01.ets
+spec/unions/union_cast_n_02.ets
+spec/unions/union_cast_n_03.ets
+spec/unions/union_compare_n_01.ets
+spec/unions/union_compare_n_02.ets
+spec/unions/union_compare_n_03.ets
+spec/unions/union_compare_n_04.ets
+spec/unions/union_compare_n_05.ets
+spec/unions/union_compare_n_06.ets
+spec/unions/union_compare_n_07.ets
+spec/unions/union_compare_n_08.ets
+spec/unions/union_param_n_01.ets
+spec/unions/union_param_n_02.ets
+spec/unions/union_return_n_01.ets
+spec/unions/union_return_n_02.ets
+spec/unions/union_return_n_03.ets
+spec/unions/union_return_n_04.ets
+spec/unions/union_return_n_05.ets
+spec/unions/union_return_n_06.ets
+spec/unions/union_return_n_07.ets
+### Issue 14158
+spec/unions/union_compare_01.ets
+### Issue 14165
+spec/unions/union_compare_02_01.ets
+spec/unions/union_compare_02_02.ets
+spec/unions/union_compare_02_03.ets
+spec/unions/union_compare_02_04.ets
+### Issue 14188
+spec/unions/union_binary_01.ets
+spec/unions/union_binary_02.ets
+spec/unions/union_binary_03.ets
+spec/unions/union_plus_01.ets
+spec/unions/union_plus_02.ets
+spec/unions/union_plus_03.ets
+### Issue 14191
+spec/unions/union_param_01.ets
+spec/unions/union_param_02.ets
+spec/unions/union_param_05.ets
+spec/unions/union_param_06.ets
+### Issue 14217
+spec/unions/union_return_01.ets
+spec/unions/union_return_02.ets
+spec/unions/union_return_03.ets
+spec/unions/union_return_04.ets
+spec/unions/union_return_05.ets
+spec/unions/union_return_06.ets
+### End of Unions

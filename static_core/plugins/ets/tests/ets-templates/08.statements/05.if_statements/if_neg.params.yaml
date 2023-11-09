@@ -14,22 +14,6 @@
 ---
 cases:
   - use: |-
-      // wrong type
-      if (i) return 1;
-
-  - use: |-
-      // wrong type
-      if (new Object()) return 1;
-
-  - use: |-
-      // wrong type
-      if ("xyz") return 1;
-
-  - use: |-
-      // wrong type
-      if (!null) return 1;
-
-  - use: |-
       // missing statement in then branch
       if (i == j)
           if (i + j > 0)

@@ -275,10 +275,10 @@ An *array creation expression* creates an object that is a new array with the
 elements of the type specified by *typeReference*.
 
 The type of each *dimensionExpression* must be convertible (see
-:ref:`Predefined Numeric Types Conversions`) to an integer type.
+:ref:`Primitive Types Conversions`) to an integer type.
 A :index:`compile-time error` occurs otherwise.
 
-A numeric conversion (see :ref:`Predefined Numeric Types Conversions`) is
+A numeric conversion (see :ref:`Primitive Types Conversions`) is
 performed on each *dimensionExpression* to ensure that the resultant type
 is *int*. A :index:`compile-time error` occurs otherwise.
 
@@ -1152,7 +1152,7 @@ Only *public* members can be accessed.
          this.member_2 // Compile-time error as member_2 is not accessible
          ...
       }                              
-      let a = new A
+      let a = new A()
       a.foo() // Ordinary class method is called
       a.bar() // Class extension function is called
 
@@ -1196,7 +1196,7 @@ extension function* requires a variable as receiver.
          this.bar() // Compile-time error as instance extension functions are not acessible
          ...
       }                              
-      let a = new A
+      let a = new A()
       a.foo() // Ordinary class method is called
       a.bar() // Class instance extension function is called
       A.goo() // Static extension function is called
@@ -1213,11 +1213,11 @@ derived class is found.
       function Base.foo () { console.log ("Base.foo is called") }
       function Derived.foo () { console.log ("Derived.foo is called") }
 
-      let b: Base = new Base
+      let b: Base = new Base()
       b.foo() // `Base.foo is called` to be printed
-         b = new Derived
+         b = new Derived()
       b.foo() // `Base.foo is called` to be printed
-      let d: Derived = new Derived
+      let d: Derived = new Derived()
       d.foo() // `Derived.foo is called` to be printed
 
 *Extension functions* can be:
@@ -1256,7 +1256,7 @@ then calls to that name are routed to the method.
           foo () { console.log ("Method A.foo is called") } 
       }
       function A.foo () { console.log ("Extension A.foo is called") }
-      let a = new A
+      let a = new A()
       a.foo() // Method is called, `Method A.foo is called` to be printed out
 
 The precedence between methods and *extension functions* can be expressed
@@ -1282,11 +1282,11 @@ than that of type extension functions.
       function Base.foo () { console.log ("Extension Base.foo is called") }
       function Derived.foo () { console.log ("Extension Derived.foo is called") }
 
-      let b: Base = new Base
+      let b: Base = new Base()
       b.foo() // `Method Base.foo is called` to be printed
-      b = new Derived
+      b = new Derived()
       b.foo() // `Method Derived.foo is called` to be printed
-      let d: Derived = new Derived
+      let d: Derived = new Derived()
       d.foo() // `Method Derived.foo is called` to be printed
 
 If an *extension function* and another top-level function have the same name
@@ -1300,7 +1300,7 @@ without a receiver as they have access to ``this``.
       class A { ... }
       function A.foo () { console.log ("Extension A.foo is called") }                              
       function foo () { console.log ("Top-level foo is called") }                              
-      let a = new A
+      let a = new A()
       a.foo() // Extension function is called, `Extension A.foo is called` to be printed out
       foo () // Top-level function is called, `Top-level foo is called` to be printed out
 
@@ -1337,23 +1337,20 @@ Syntactically, the *trailing lambda* looks as follows:
       class A {
           foo (f: ()=>void) { ... } 
       }
-      function foo (f: ()=>void) { ... }
 
-      let a = new A
+      let a = new A()
       a.foo() { console.log ("method lambda argument is activated") }
       // method foo receives last argument as an inline lambda
-
-      foo { console.log ("function lambda argument is activated") }
-      // function foo receives last argument as an inline lambda,
-      // () can be skipped as no other arguments are present
 
 The formal syntax of the *trailing lambda* is presented below:
 
 .. code-block:: abnf
 
     trailingLambdaCall: 
-        (objectReference '.' identifier typeArguments?) | (expression ('?.' | typeArguments)?)
-        arguments? block
+        ( objectReference '.' identifier typeArguments? 
+        | expression ('?.' | typeArguments)?
+        )
+        arguments block
         ;
 
 
@@ -1378,9 +1375,8 @@ argument (see :ref:`Optional Parameters`).
       class A {
           foo (p?: ()=>void) { ... } 
       }
-      function foo (p?: ()=>void) { ... }
 
-      let a = new A
+      let a = new A()
       a.foo() { console.log ("method lambda argument is activated") }
       // method foo receives last argument as an inline lambda
 
@@ -1388,11 +1384,12 @@ argument (see :ref:`Optional Parameters`).
       // method 'foo' is called with 'p' parameter set to 'undefined'
       // ';' allows to specify expliclty that '{' starts the block
 
+      function bar(f: ()=>void) { ... }
 
-      foo() { console.log ("function lambda argument is activated") }
-      // function 'foo' receives last argument as an inline lambda,
-      foo(); { console.log ("that is the block code") }
-      // function 'foo' is called with 'p' parameter set to 'undefined'
+      bar() { console.log ("function lambda argument is activated") }
+      // function 'bar' receives last argument as an inline lambda,
+      bar(); { console.log ("that is the block code") }
+      // function 'bar' is called with 'p' parameter set to 'undefined'
 
 .. index::
    trailing lambda
@@ -1411,15 +1408,15 @@ argument (see :ref:`Optional Parameters`).
      function foo (f: ()=>void) { ... }
      function bar (n: number) { ... }
 
-     foo { console.log ("function lambda argument is activated") }
+     foo() { console.log ("function lambda argument is activated") }
      // function foo receives last argument as an inline lambda,
 
-     bar (5) { console.log ("after call to bar this block is executed") }
+     bar(5) { console.log ("after call of 'bar' this block is executed") }
 
-     foo (()=>{ console.log ("function lambda argument is activated") }) 
-     { console.log ("after call to bar this block is executed") }
+     foo(() => { console.log ("function lambda argument is activated") }) 
+     { console.log ("after call of 'foo' this block is executed") }
      /* here, function foo receives lambda as an argument and a block after
-      the call is just a block niot a trailing lambda. */
+      the call is just a block, not a trailing lambda. */
 
 |
 
