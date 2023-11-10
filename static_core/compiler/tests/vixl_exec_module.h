@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_TESTS_VIXL_TEST_H_
-#define COMPILER_TESTS_VIXL_TEST_H_
+#ifndef COMPILER_TESTS_VIXL_TEST_H
+#define COMPILER_TESTS_VIXL_TEST_H
 
 #ifndef USE_VIXL_ARM64
 #error "Unsupported!"
@@ -294,4 +294,4 @@ private:
     Params params_;
 };
 }  // namespace panda::compiler
-#endif  // COMPILER_TESTS_VIXL_TEST_H_
+#endif  // COMPILER_TESTS_VIXL_TEST_H

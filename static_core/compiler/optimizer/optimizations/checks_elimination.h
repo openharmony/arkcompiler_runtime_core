@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_CHECKSELIMINATION_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_CHECKSELIMINATION_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_CHECKSELIMINATION_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_CHECKSELIMINATION_H
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/pass.h"
 
 #include "compiler_logger.h"
-#include "checks_elimination.h"
 #include "object_type_check_elimination.h"
 #include "optimizer/analysis/bounds_analysis.h"
 #include "optimizer/analysis/countable_loop_parser.h"
@@ -184,4 +183,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_CHECKSELIMINATION_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_CHECKSELIMINATION_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_H
 
 #include "compiler/optimizer/ir/basicblock.h"
 
@@ -129,4 +129,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_H

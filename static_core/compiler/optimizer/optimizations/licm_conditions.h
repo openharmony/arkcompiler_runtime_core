@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LICM_CONDITIONS_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LICM_CONDITIONS_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LICM_CONDITIONS_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LICM_CONDITIONS_H
 
 #include "optimizer/optimizations/loop_transform.h"
 #include "condition_chain_manager.h"
@@ -131,4 +131,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LICM_CONDITIONS_H

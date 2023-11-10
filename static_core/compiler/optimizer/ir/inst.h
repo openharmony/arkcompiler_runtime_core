@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_INST_H_
-#define COMPILER_OPTIMIZER_IR_INST_H_
+#ifndef COMPILER_OPTIMIZER_IR_INST_H
+#define COMPILER_OPTIMIZER_IR_INST_H
 
 #include <array>
 #include <vector>
@@ -655,6 +655,14 @@ template <typename T>
 class UserList {
     template <typename U>
     struct UserIterator {
+        // NOLINTBEGIN(readability-identifier-naming)
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = U;
+        using difference_type = std::ptrdiff_t;
+        using pointer = value_type *;
+        using reference = value_type &;
+        // NOLINTEND(readability-identifier-naming)
+
         UserIterator() = default;
         explicit UserIterator(U *u) : user_(u) {}
 
@@ -1705,6 +1713,11 @@ public:
     void Dump(std::ostream *out, bool new_line = true) const;
     virtual bool DumpInputs(std::ostream * /* out */) const;
     virtual void DumpOpcode(std::ostream * /* out */) const;
+    void DumpBytecode(std::ostream * /* out */) const;
+
+#ifdef PANDA_COMPILER_DEBUG_INFO
+    void DumpSourceLine(std::ostream * /* out */) const;
+#endif  // PANDA_COMPILER_DEBUG_INFO
 
     virtual void SetDstReg([[maybe_unused]] unsigned index, Register reg)
     {
@@ -7420,4 +7433,4 @@ OPCODE_LIST(INST_DEF)
 #undef INST_DEF
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_IR_INST_H_
+#endif  // COMPILER_OPTIMIZER_IR_INST_H

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_COUNTABLE_LOOP_PARSER_H_
-#define COMPILER_OPTIMIZER_ANALYSIS_COUNTABLE_LOOP_PARSER_H_
+#ifndef COMPILER_OPTIMIZER_ANALYSIS_COUNTABLE_LOOP_PARSER_H
+#define COMPILER_OPTIMIZER_ANALYSIS_COUNTABLE_LOOP_PARSER_H
 
 #include "optimizer/ir/inst.h"
 
@@ -57,6 +57,7 @@ private:
     bool IsConditionCodeAcceptable();
     BasicBlock *FindLoopExitBlock();
     bool CheckParsingLoopCorrectness();
+    bool TryProcessBackEdge();
 
 private:
     const Loop &loop_;
@@ -65,4 +66,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_COUNTABLE_LOOP_PARSER_H_
+#endif  // COMPILER_OPTIMIZER_ANALYSIS_COUNTABLE_LOOP_PARSER_H

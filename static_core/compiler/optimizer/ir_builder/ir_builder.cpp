@@ -405,10 +405,8 @@ void IrBuilder::ConnectBasicBlocks(const BytecodeInstructions &instructions)
             info.fallthrough = false;
             curr_bb = target_block;
         } else if (target_block != nullptr) {
-            if (catches_pc_.count(pc) == 0) {
-                if (InstNotJump(&info.prev_inst) && !info.dead_instructions) {
-                    curr_bb->AddSucc(target_block);
-                }
+            if (catches_pc_.count(pc) == 0 && InstNotJump(&info.prev_inst) && !info.dead_instructions) {
+                curr_bb->AddSucc(target_block);
             }
             curr_bb = target_block;
             info.dead_instructions = false;

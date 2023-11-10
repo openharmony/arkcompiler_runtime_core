@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_MOVE_CONSTANTS_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_MOVE_CONSTANTS_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_MOVE_CONSTANTS_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_MOVE_CONSTANTS_H
 
 #include "optimizer/pass.h"
 #include "optimizer/ir/basicblock.h"
@@ -54,4 +54,4 @@ private:
 
 }  // namespace panda::compiler
 
-#endif
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_MOVE_CONSTANTS_H

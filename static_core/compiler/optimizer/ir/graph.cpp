@@ -58,26 +58,27 @@ void Graph::RemoveUnreachableBlocks()
         if (bb == nullptr) {
             continue;
         }
-        if (!bb->IsMarked(mrk)) {
-            RemovePredecessors(bb, false);
-            RemoveSuccessors(bb);
-            if (bb->IsTryBegin()) {
-                EraseTryBeginBlock(bb);
-                // Remove try_end mark from paired bb
-                if (!bb->IsEmpty()) {
-                    GetTryBeginInst(bb)->GetTryEndBlock()->SetTryEnd(false);
-                }
-            }
-            // Clear DF:
-            for (auto inst : bb->AllInsts()) {
-                inst->RemoveInputs();
-                if (IsInstThrowable(inst)) {
-                    RemoveThrowableInst(inst);
-                }
-            }
-            COMPILER_LOG(DEBUG, CLEANUP) << "Erase unreachable block " << bb->GetId();
-            EraseBlock(bb);
+        if (bb->IsMarked(mrk)) {
+            continue;
         }
+        RemovePredecessors(bb, false);
+        RemoveSuccessors(bb);
+        if (bb->IsTryBegin()) {
+            EraseTryBeginBlock(bb);
+            // Remove try_end mark from paired bb
+            if (!bb->IsEmpty()) {
+                GetTryBeginInst(bb)->GetTryEndBlock()->SetTryEnd(false);
+            }
+        }
+        // Clear DF:
+        for (auto inst : bb->AllInsts()) {
+            inst->RemoveInputs();
+            if (IsInstThrowable(inst)) {
+                RemoveThrowableInst(inst);
+            }
+        }
+        COMPILER_LOG(DEBUG, CLEANUP) << "Erase unreachable block " << bb->GetId();
+        EraseBlock(bb);
     }
     EraseMarker(mrk);
 }

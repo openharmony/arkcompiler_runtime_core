@@ -651,7 +651,7 @@ public:
                               std::is_same_v<T, int64_t>) {
                     return std::abs(param_1);
                 }
-            /* fall-through */
+                /* fall-through */
             default:
                 ASSERT_DO(false, std::cerr << "Unsupported!" << static_cast<int>(opc) << "\n");
                 return -1L;

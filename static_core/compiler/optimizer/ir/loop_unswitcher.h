@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_LOOP_UNSWITCHER_H_
-#define COMPILER_OPTIMIZER_IR_LOOP_UNSWITCHER_H_
+#ifndef COMPILER_OPTIMIZER_IR_LOOP_UNSWITCHER_H
+#define COMPILER_OPTIMIZER_IR_LOOP_UNSWITCHER_H
 
 #include "graph_cloner.h"
 
@@ -42,4 +42,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif
+#endif  // COMPILER_OPTIMIZER_IR_LOOP_UNSWITCHER_H

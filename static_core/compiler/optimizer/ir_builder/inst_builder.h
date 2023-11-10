@@ -156,6 +156,7 @@ public:
     }
 
     void UpdateDefs();
+    bool UpdateDefsForPreds(size_t vreg, std::optional<Inst *> &value);
 
     const auto &GetCurrentDefs()
     {
@@ -350,6 +351,11 @@ private:
     template <Opcode OPCODE>
     CallInst *BuildCallInst(RuntimeInterface::MethodPtr method, uint32_t method_id, size_t pc, Inst **resolver,
                             uint32_t class_id);
+    template <Opcode OPCODE>
+    CallInst *BuildCallStaticInst(RuntimeInterface::MethodPtr method, uint32_t method_id, size_t pc, Inst **resolver,
+                                  [[maybe_unused]] uint32_t class_id);
+    template <Opcode OPCODE>
+    CallInst *BuildCallVirtualInst(RuntimeInterface::MethodPtr method, uint32_t method_id, size_t pc, Inst **resolver);
     void BuildInitClassInstForCallStatic(RuntimeInterface::MethodPtr method, uint32_t class_id, size_t pc,
                                          Inst *save_state);
     template <typename T>
@@ -385,9 +391,13 @@ private:
     void BuildNewArray(const BytecodeInstruction *bc_inst);
     void BuildNewObject(const BytecodeInstruction *bc_inst);
     void BuildLoadConstArray(const BytecodeInstruction *bc_inst);
+    void BuildLoadConstStringArray(const BytecodeInstruction *bc_inst);
     template <typename T>
     void BuildUnfoldLoadConstArray(const BytecodeInstruction *bc_inst, DataType::Type type,
                                    const pandasm::LiteralArray &lit_array);
+    template <typename T>
+    void BuildUnfoldLoadConstStringArray(const BytecodeInstruction *bc_inst, DataType::Type type,
+                                         const pandasm::LiteralArray &lit_array, NewArrayInst *array_inst);
     void BuildInitString(const BytecodeInstruction *bc_inst);
     void BuildInitObject(const BytecodeInstruction *bc_inst, bool is_range);
     CallInst *BuildCallStaticForInitObject(const BytecodeInstruction *bc_inst, uint32_t method_id, Inst **resolver);

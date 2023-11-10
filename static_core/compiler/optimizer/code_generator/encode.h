@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_ENCODE_H_
-#define COMPILER_OPTIMIZER_CODEGEN_ENCODE_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_ENCODE_H
+#define COMPILER_OPTIMIZER_CODEGEN_ENCODE_H
 
 /*
     Hi-level interface for encoding
@@ -1299,4 +1299,4 @@ public:
 
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_CODEGEN_ENCODE_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_ENCODE_H

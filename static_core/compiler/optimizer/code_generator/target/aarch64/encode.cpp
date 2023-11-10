@@ -2626,33 +2626,8 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
 }
 
 template <bool IS_STORE>
-void Aarch64Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
+void Aarch64Encoder::LoadStoreRegistersMainLoop(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
 {
-    if (registers.none()) {
-        return;
-    }
-
-    int32_t max_offset = (slot + helpers::ToSigned(registers.GetMaxRegister())) * DOUBLE_WORD_SIZE_BYTES;
-    int32_t min_offset = (slot + helpers::ToSigned(registers.GetMinRegister())) * DOUBLE_WORD_SIZE_BYTES;
-
-    ScopedTmpRegLazy tmp_reg(this, true);
-    // Construct single add for big offset
-    if (!vixl::aarch64::Assembler::IsImmLSPair(min_offset, vixl::aarch64::kXRegSizeInBytesLog2) ||
-        !vixl::aarch64::Assembler::IsImmLSPair(max_offset, vixl::aarch64::kXRegSizeInBytesLog2)) {
-        tmp_reg.AcquireWithLr();
-        auto lr_reg = VixlReg(tmp_reg);
-        ssize_t sp_offset = slot * DOUBLE_WORD_SIZE_BYTES;
-        if (vixl::aarch64::Assembler::IsImmAddSub(sp_offset)) {
-            GetMasm()->Add(lr_reg, VixlReg(base), VixlImm(sp_offset));
-        } else {
-            GetMasm()->Mov(lr_reg, VixlImm(sp_offset));
-            GetMasm()->Add(lr_reg, VixlReg(base), lr_reg);
-        }
-        // Adjust new values for slot and base register
-        slot = 0;
-        base = tmp_reg;
-    }
-
     auto base_reg = VixlReg(base);
     bool has_mask = mask.any();
     int32_t index = has_mask ? static_cast<int32_t>(mask.GetMinRegister()) : 0;
@@ -2709,6 +2684,37 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t s
             GetMasm()->Ldr(last_reg, MemOperand(base_reg, (slot + last_index - 1) * DOUBLE_WORD_SIZE_BYTES));
         }
     }
+}
+
+template <bool IS_STORE>
+void Aarch64Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
+{
+    if (registers.none()) {
+        return;
+    }
+
+    int32_t max_offset = (slot + helpers::ToSigned(registers.GetMaxRegister())) * DOUBLE_WORD_SIZE_BYTES;
+    int32_t min_offset = (slot + helpers::ToSigned(registers.GetMinRegister())) * DOUBLE_WORD_SIZE_BYTES;
+
+    ScopedTmpRegLazy tmp_reg(this, true);
+    // Construct single add for big offset
+    if (!vixl::aarch64::Assembler::IsImmLSPair(min_offset, vixl::aarch64::kXRegSizeInBytesLog2) ||
+        !vixl::aarch64::Assembler::IsImmLSPair(max_offset, vixl::aarch64::kXRegSizeInBytesLog2)) {
+        tmp_reg.AcquireWithLr();
+        auto lr_reg = VixlReg(tmp_reg);
+        ssize_t sp_offset = slot * DOUBLE_WORD_SIZE_BYTES;
+        if (vixl::aarch64::Assembler::IsImmAddSub(sp_offset)) {
+            GetMasm()->Add(lr_reg, VixlReg(base), VixlImm(sp_offset));
+        } else {
+            GetMasm()->Mov(lr_reg, VixlImm(sp_offset));
+            GetMasm()->Add(lr_reg, VixlReg(base), lr_reg);
+        }
+        // Adjust new values for slot and base register
+        slot = 0;
+        base = tmp_reg;
+    }
+
+    LoadStoreRegistersMainLoop<IS_STORE>(registers, is_fp, slot, base, mask);
 }
 
 template <bool IS_STORE>

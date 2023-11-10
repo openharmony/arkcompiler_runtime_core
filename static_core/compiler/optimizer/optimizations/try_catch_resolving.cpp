@@ -64,18 +64,22 @@ bool TryCatchResolving::RunImpl()
     return true;
 }
 
+BasicBlock *TryCatchResolving::FindCatchBeginBlock(BasicBlock *bb)
+{
+    for (auto pred : bb->GetPredsBlocks()) {
+        if (pred->IsCatchBegin()) {
+            return pred;
+        }
+    }
+    return nullptr;
+}
+
 void TryCatchResolving::CollectCandidates()
 {
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         if (bb->IsCatch() && !(bb->IsCatchBegin() || bb->IsCatchEnd() || bb->IsTryBegin() || bb->IsTryEnd())) {
             catch_blocks_.emplace(bb->GetGuestPc(), bb);
-            BasicBlock *cbl_pred = nullptr;
-            for (auto pred : bb->GetPredsBlocks()) {
-                if (pred->IsCatchBegin()) {
-                    cbl_pred = pred;
-                    break;
-                }
-            }
+            BasicBlock *cbl_pred = FindCatchBeginBlock(bb);
             if (cbl_pred != nullptr) {
                 cbl_pred->RemoveSucc(bb);
                 bb->RemovePred(cbl_pred);

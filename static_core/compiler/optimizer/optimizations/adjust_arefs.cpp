@@ -51,11 +51,12 @@ bool AdjustRefs::RunImpl()
         }
 
         for (auto inst : bb->Insts()) {
-            if (IsRefAdjustable(inst)) {
-                auto def = inst->GetInput(0).GetInst();
-                if (!def->SetMarker(def_marker)) {
-                    defs_.push_back(def);
-                }
+            if (!IsRefAdjustable(inst)) {
+                continue;
+            }
+            auto def = inst->GetInput(0).GetInst();
+            if (!def->SetMarker(def_marker)) {
+                defs_.push_back(def);
             }
         }
     }

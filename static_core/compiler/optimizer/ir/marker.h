@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_MARKER_H_
-#define COMPILER_OPTIMIZER_IR_MARKER_H_
+#ifndef COMPILER_OPTIMIZER_IR_MARKER_H
+#define COMPILER_OPTIMIZER_IR_MARKER_H
 
 #include <array>
 #include <bitset>
@@ -129,4 +129,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_IR_MARKER_H_
+#endif  // COMPILER_OPTIMIZER_IR_MARKER_H

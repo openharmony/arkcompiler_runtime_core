@@ -322,22 +322,23 @@ Inst *FindIfImmDominatesCondition(Inst *dom_compare, Inst *target_compare)
 std::optional<bool> BranchElimination::GetConditionResult(Inst *condition)
 {
     ConditionOps ops {condition->GetInput(0).GetInst(), condition->GetInput(1).GetInst()};
-    if (same_input_compares_.count(ops) > 0) {
-        auto instructions = same_input_compares_.at(ops);
-        ASSERT(!instructions.empty());
-        for (auto dom_cond : instructions) {
-            // Find dom_cond's if_imm, that dominates target condition
-            auto if_imm = FindIfImmDominatesCondition(dom_cond, condition);
-            if (if_imm == nullptr) {
-                continue;
-            }
-            if (BlockIsReachedFromOnlySuccessor(condition->GetBasicBlock(), if_imm->GetBasicBlock())) {
-                if (auto result = TryResolveResult(condition, dom_cond, if_imm->CastToIfImm())) {
-                    COMPILER_LOG(DEBUG, BRANCH_ELIM)
-                        << "Equal compare instructions were found. Dominant id = " << dom_cond->GetId()
-                        << ", dominated id = " << condition->GetId();
-                    return result;
-                }
+    if (same_input_compares_.count(ops) <= 0) {
+        return std::nullopt;
+    }
+    auto instructions = same_input_compares_.at(ops);
+    ASSERT(!instructions.empty());
+    for (auto dom_cond : instructions) {
+        // Find dom_cond's if_imm, that dominates target condition
+        auto if_imm = FindIfImmDominatesCondition(dom_cond, condition);
+        if (if_imm == nullptr) {
+            continue;
+        }
+        if (BlockIsReachedFromOnlySuccessor(condition->GetBasicBlock(), if_imm->GetBasicBlock())) {
+            if (auto result = TryResolveResult(condition, dom_cond, if_imm->CastToIfImm())) {
+                COMPILER_LOG(DEBUG, BRANCH_ELIM)
+                    << "Equal compare instructions were found. Dominant id = " << dom_cond->GetId()
+                    << ", dominated id = " << condition->GetId();
+                return result;
             }
         }
     }

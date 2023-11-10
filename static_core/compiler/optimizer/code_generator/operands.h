@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_CODEGEN_OPERANDS_H_
-#define COMPILER_OPTIMIZER_CODEGEN_OPERANDS_H_
+#ifndef COMPILER_OPTIMIZER_CODEGEN_OPERANDS_H
+#define COMPILER_OPTIMIZER_CODEGEN_OPERANDS_H
 
 /*
 Arch-feature definitions
@@ -846,4 +846,4 @@ private:
 };
 
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_CODEGEN_REGISTERS_H_
+#endif  // COMPILER_OPTIMIZER_CODEGEN_REGISTERS_H

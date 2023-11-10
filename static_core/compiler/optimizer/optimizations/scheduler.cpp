@@ -191,6 +191,22 @@ void Scheduler::ProcessMemory(Inst *inst, uint32_t *prio, Inst *last_barrier)
     }
 }
 
+void Scheduler::ProcessSpecialBoundsCheckI(Inst *inst, uint32_t *prio, Inst *last_barrier)
+{
+    auto value = inst->CastToBoundsCheckI()->GetImm();
+    // Remove loads with same immediate. No easy way to check arrays are same.
+    for (auto load : loads_) {
+        if (load->GetOpcode() == Opcode::LoadArrayPairI) {
+            auto imm = load->CastToLoadArrayPairI()->GetImm();
+            if (imm == value || imm + 1 == value) {
+                AddDep(prio, inst, load, 1U, last_barrier);
+            }
+        } else if (load->GetOpcode() == Opcode::LoadArrayI && load->CastToLoadArrayI()->GetImm() == value) {
+            AddDep(prio, inst, load, 1U, last_barrier);
+        }
+    }
+}
+
 // CanThrow or SaveState can't be rearranged, and stores can't be moved over them
 void Scheduler::ProcessSpecial(Inst *inst, uint32_t *prio, Inst *last_barrier)
 {
@@ -223,18 +239,7 @@ void Scheduler::ProcessSpecial(Inst *inst, uint32_t *prio, Inst *last_barrier)
     }
     // We have to "restore" BoundsCheckI -> LoadArrayI dependency
     if (inst->GetOpcode() == Opcode::BoundsCheckI) {
-        auto value = inst->CastToBoundsCheckI()->GetImm();
-        // Remove loads with same immediate. No easy way to check arrays are same.
-        for (auto load : loads_) {
-            if (load->GetOpcode() == Opcode::LoadArrayPairI) {
-                auto imm = load->CastToLoadArrayPairI()->GetImm();
-                if (imm == value || imm + 1 == value) {
-                    AddDep(prio, inst, load, 1U, last_barrier);
-                }
-            } else if (load->GetOpcode() == Opcode::LoadArrayI && load->CastToLoadArrayI()->GetImm() == value) {
-                AddDep(prio, inst, load, 1U, last_barrier);
-            }
-        }
+        ProcessSpecialBoundsCheckI(inst, prio, last_barrier);
     }
     special_.push_back(inst);
 }

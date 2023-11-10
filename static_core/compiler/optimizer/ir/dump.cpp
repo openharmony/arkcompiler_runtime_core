@@ -1001,6 +1001,29 @@ bool IntrinsicInst::DumpInputs(std::ostream *out) const
     return Inst::DumpInputs(out);
 }
 
+void Inst::DumpBytecode(std::ostream *out) const
+{
+    if (pc_ != INVALID_PC) {
+        auto graph = GetBasicBlock()->GetGraph();
+        auto byte_code = graph->GetRuntime()->GetBytecodeString(graph->GetMethod(), pc_);
+        if (!byte_code.empty()) {
+            (*out) << byte_code << '\n';
+        }
+    }
+}
+
+#ifdef PANDA_COMPILER_DEBUG_INFO
+void Inst::DumpSourceLine(std::ostream *out) const
+{
+    auto current_method = GetCurrentMethod();
+    auto pc = GetPc();
+    if (current_method != nullptr && pc != INVALID_PC) {
+        auto line = GetBasicBlock()->GetGraph()->GetRuntime()->GetLineNumberAndSourceFile(current_method, pc);
+        (*out) << " (" << line << " )";
+    }
+}
+#endif  // PANDA_COMPILER_DEBUG_INFO
+
 void Inst::Dump(std::ostream *out, bool new_line) const
 {
     if (OPTIONS.IsCompilerDumpCompact() && IsSaveState()) {
@@ -1041,25 +1064,14 @@ void Inst::Dump(std::ostream *out, bool new_line) const
     }
 #ifdef PANDA_COMPILER_DEBUG_INFO
     if (OPTIONS.IsCompilerDumpSourceLine()) {
-        auto current_method = GetCurrentMethod();
-        auto pc = GetPc();
-        if (current_method != nullptr && pc != INVALID_PC) {
-            auto line = GetBasicBlock()->GetGraph()->GetRuntime()->GetLineNumberAndSourceFile(current_method, pc);
-            (*out) << " (" << line << " )";
-        }
+        DumpSourceLine(out);
     }
 #endif
     if (new_line) {
         (*out) << '\n';
     }
     if (OPTIONS.IsCompilerDumpBytecode()) {
-        if (pc_ != INVALID_PC) {
-            auto graph = GetBasicBlock()->GetGraph();
-            auto byte_code = graph->GetRuntime()->GetBytecodeString(graph->GetMethod(), pc_);
-            if (!byte_code.empty()) {
-                (*out) << byte_code << '\n';
-            }
-        }
+        DumpBytecode(out);
     }
     if (GetOpcode() == Opcode::Parameter) {
         auto spill_fill = static_cast<const ParameterInst *>(this)->GetLocationData();

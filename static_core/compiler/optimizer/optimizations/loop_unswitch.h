@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNSWITCH_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNSWITCH_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNSWITCH_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNSWITCH_H
 
 #include "optimizer/optimizations/loop_transform.h"
 #include "compiler_options.h"
@@ -52,4 +52,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNSWITCH_H

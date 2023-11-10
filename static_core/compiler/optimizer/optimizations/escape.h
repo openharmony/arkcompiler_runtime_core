@@ -386,6 +386,8 @@ private:
     void PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<ArenaUnorderedSet<Inst *>> &liveness);
     void PatchSaveStatesInLoop(Loop *loop, ArenaUnorderedSet<Inst *> &loop_live_ins,
                                ArenaVector<ArenaUnorderedSet<Inst *>> &liveness);
+    void FillLiveInsts(BasicBlock *block, ArenaUnorderedSet<Inst *> &live_ins,
+                       ArenaVector<ArenaUnorderedSet<Inst *>> &liveness);
     void PatchSaveState(SaveStateInst *save_state, ArenaUnorderedSet<Inst *> &live_instructions);
     void AddLiveInputs(Inst *inst, ArenaUnorderedSet<Inst *> &live_ins);
     CallInst *FindCallerInst(BasicBlock *target, Inst *start = nullptr);

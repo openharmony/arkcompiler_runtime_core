@@ -157,28 +157,30 @@ bool Cleanup::CheckSpecialTriangle(BasicBlock *bb)
     auto succ = bb->GetSuccessor(0);
     size_t i = 0;
     for (auto pred : bb->GetPredsBlocks()) {
-        if (pred->GetSuccessor(0) == succ ||
-            (pred->GetSuccsBlocks().size() == MAX_SUCCS_NUM && pred->GetSuccessor(1) == succ)) {
-            // Checking all Phis
-            for (auto phi : succ->PhiInsts()) {
-                size_t index_bb = phi->CastToPhi()->GetPredBlockIndex(bb);
-                size_t index_pred = phi->CastToPhi()->GetPredBlockIndex(pred);
-                ASSERT(index_bb != index_pred);
-
-                auto inst_pred = phi->GetInput(index_pred).GetInst();
-                auto inst_bb = phi->GetInput(index_bb).GetInst();
-                // If phi input is in 'bb', check input of that phi instead
-                if (inst_bb->GetBasicBlock() == bb) {
-                    ASSERT(inst_bb->IsPhi());
-                    inst_bb = inst_bb->CastToPhi()->GetInput(i).GetInst();
-                }
-                if (inst_bb != inst_pred) {
-                    return true;
-                }
-            }
-            // Would fully remove 'straight' pred->succ edge, and second one would stay after 'bb' removal
-            saved_preds_.push_back(pred);
+        if (pred->GetSuccessor(0) != succ &&
+            (pred->GetSuccsBlocks().size() != MAX_SUCCS_NUM || pred->GetSuccessor(1) != succ)) {
+            ++i;
+            continue;
         }
+        // Checking all Phis
+        for (auto phi : succ->PhiInsts()) {
+            size_t index_bb = phi->CastToPhi()->GetPredBlockIndex(bb);
+            size_t index_pred = phi->CastToPhi()->GetPredBlockIndex(pred);
+            ASSERT(index_bb != index_pred);
+
+            auto inst_pred = phi->GetInput(index_pred).GetInst();
+            auto inst_bb = phi->GetInput(index_bb).GetInst();
+            // If phi input is in 'bb', check input of that phi instead
+            if (inst_bb->GetBasicBlock() == bb) {
+                ASSERT(inst_bb->IsPhi());
+                inst_bb = inst_bb->CastToPhi()->GetInput(i).GetInst();
+            }
+            if (inst_bb != inst_pred) {
+                return true;
+            }
+        }
+        // Would fully remove 'straight' pred->succ edge, and second one would stay after 'bb' removal
+        saved_preds_.push_back(pred);
         i++;
     }
     return false;
@@ -307,13 +309,8 @@ void Cleanup::MarkLiveRec(Marker live_mrk, Inst *inst)
 }
 
 template <bool LIGHT_MODE>
-bool Cleanup::Dce(Marker dead_mrk, ArenaSet<BasicBlock *> *new_empty_blocks)
+void Cleanup::MarkLiveInstructions(Marker dead_mrk, Marker live_mrk)
 {
-    bool modified = false;
-    auto marker_holder = MarkerHolder(GetGraph());
-    auto live_mrk = marker_holder.GetMarker();
-
-    // Mark live instructions
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->AllInsts()) {
             if constexpr (LIGHT_MODE) {
@@ -330,6 +327,16 @@ bool Cleanup::Dce(Marker dead_mrk, ArenaSet<BasicBlock *> *new_empty_blocks)
             }
         }
     }
+}
+
+template <bool LIGHT_MODE>
+bool Cleanup::Dce(Marker dead_mrk, ArenaSet<BasicBlock *> *new_empty_blocks)
+{
+    bool modified = false;
+    auto marker_holder = MarkerHolder(GetGraph());
+    auto live_mrk = marker_holder.GetMarker();
+    MarkLiveInstructions<LIGHT_MODE>(dead_mrk, live_mrk);
+
     // Remove non-live instructions
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->AllInstsSafe()) {
@@ -441,12 +448,13 @@ void Cleanup::Marking(Marker dead_mrk, Marker mrk, Marker live_mrk)
             }
             LiveUserSearchRec(input, mrk, live_mrk, dead_mrk);
             for (auto temp : temp_) {
-                if (temp->IsMarked(mrk)) {
-                    ASSERT(!temp->IsMarked(live_mrk) && !temp->IsMarked(dead_mrk));
-                    inst->ResetMarker(mrk);
-                    inst->SetMarker(dead_mrk);
-                    dead_.push_back(inst);
+                if (!temp->IsMarked(mrk)) {
+                    continue;
                 }
+                ASSERT(!temp->IsMarked(live_mrk) && !temp->IsMarked(dead_mrk));
+                inst->ResetMarker(mrk);
+                inst->SetMarker(dead_mrk);
+                dead_.push_back(inst);
             }
             temp_.clear();
         }

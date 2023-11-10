@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/basicblock.h"
@@ -138,4 +138,4 @@ protected:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H_
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H

@@ -41,16 +41,16 @@ void MonitorAnalysis::MarkedMonitorRec(BasicBlock *bb, int32_t num_monitors)
             if (inst->CastToMonitor()->IsEntry()) {
                 bb->SetMonitorEntryBlock(true);
                 ++num_monitors;
-            } else {
-                ASSERT(inst->CastToMonitor()->IsExit());
-                if (num_monitors <= 0) {
-                    COMPILER_LOG(DEBUG, MONITOR_ANALYSIS) << "There is MonitorExit without MonitorEntry";
-                    incorrect_monitors_ = true;
-                    return;
-                }
-                bb->SetMonitorExitBlock(true);
-                --num_monitors;
+                continue;
             }
+            ASSERT(inst->CastToMonitor()->IsExit());
+            if (num_monitors <= 0) {
+                COMPILER_LOG(DEBUG, MONITOR_ANALYSIS) << "There is MonitorExit without MonitorEntry";
+                incorrect_monitors_ = true;
+                return;
+            }
+            bb->SetMonitorExitBlock(true);
+            --num_monitors;
         }
     }
     entered_monitors_count_->at(bb->GetId()) = num_monitors;

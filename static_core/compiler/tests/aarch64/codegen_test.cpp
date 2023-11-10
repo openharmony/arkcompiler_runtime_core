@@ -317,6 +317,22 @@ public:
         EXPECT_EQ(visitor.GetAccessedPairVRegisters() & TEST_REGS, RegMask {0xF});
     }
 
+    void FormSpillFillInst(SpillFillInst *sf_inst, int alignment_offset)
+    {
+        sf_inst->AddSpill(0, 0 + alignment_offset, DataType::Type::INT64);
+        sf_inst->AddSpill(1, 1 + alignment_offset, DataType::Type::INT64);
+        sf_inst->AddSpill(2, 2 + alignment_offset, DataType::Type::INT64);
+        sf_inst->AddSpill(0, 3 + alignment_offset, DataType::Type::FLOAT64);
+        sf_inst->AddSpill(1, 4 + alignment_offset, DataType::Type::FLOAT64);
+        sf_inst->AddSpill(2, 5 + alignment_offset, DataType::Type::FLOAT64);
+        sf_inst->AddFill(6 + alignment_offset, 3, DataType::Type::INT64);
+        sf_inst->AddFill(7 + alignment_offset, 4, DataType::Type::INT64);
+        sf_inst->AddFill(8 + alignment_offset, 5, DataType::Type::INT64);
+        sf_inst->AddFill(9 + alignment_offset, 3, DataType::Type::FLOAT64);
+        sf_inst->AddFill(10 + alignment_offset, 4, DataType::Type::FLOAT64);
+        sf_inst->AddFill(11 + alignment_offset, 5, DataType::Type::FLOAT64);
+    }
+
     void CheckSpillFillCoalescingForOddRegsNumber(bool aligned)
     {
         GRAPH(GetGraph())
@@ -331,18 +347,7 @@ public:
         int alignment_offset = aligned ? 1 : 0;
 
         auto sf_inst = INS(0).CastToSpillFill();
-        sf_inst->AddSpill(0, 0 + alignment_offset, DataType::Type::INT64);
-        sf_inst->AddSpill(1, 1 + alignment_offset, DataType::Type::INT64);
-        sf_inst->AddSpill(2, 2 + alignment_offset, DataType::Type::INT64);
-        sf_inst->AddSpill(0, 3 + alignment_offset, DataType::Type::FLOAT64);
-        sf_inst->AddSpill(1, 4 + alignment_offset, DataType::Type::FLOAT64);
-        sf_inst->AddSpill(2, 5 + alignment_offset, DataType::Type::FLOAT64);
-        sf_inst->AddFill(6 + alignment_offset, 3, DataType::Type::INT64);
-        sf_inst->AddFill(7 + alignment_offset, 4, DataType::Type::INT64);
-        sf_inst->AddFill(8 + alignment_offset, 5, DataType::Type::INT64);
-        sf_inst->AddFill(9 + alignment_offset, 3, DataType::Type::FLOAT64);
-        sf_inst->AddFill(10 + alignment_offset, 4, DataType::Type::FLOAT64);
-        sf_inst->AddFill(11 + alignment_offset, 5, DataType::Type::FLOAT64);
+        FormSpillFillInst(sf_inst, alignment_offset);
 
         SetNumArgs(0);
         SetNumVirtRegs(0);

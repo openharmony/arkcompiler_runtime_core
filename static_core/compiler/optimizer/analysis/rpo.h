@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_ANALYSIS_RPO_H_
-#define COMPILER_OPTIMIZER_ANALYSIS_RPO_H_
+#ifndef COMPILER_OPTIMIZER_ANALYSIS_RPO_H
+#define COMPILER_OPTIMIZER_ANALYSIS_RPO_H
 
 #include "utils/arena_containers.h"
 #include "optimizer/ir/marker.h"
@@ -91,4 +91,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_OPTIMIZER_ANALYSIS_RPO_H_
+#endif  // COMPILER_OPTIMIZER_ANALYSIS_RPO_H

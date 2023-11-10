@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_IR_GRAPH_H_
-#define COMPILER_OPTIMIZER_IR_GRAPH_H_
+#ifndef COMPILER_OPTIMIZER_IR_GRAPH_H
+#define COMPILER_OPTIMIZER_IR_GRAPH_H
 
 #include "aot_data.h"
 #include "compiler_events_gen.h"
@@ -1364,4 +1364,4 @@ void MarkLoopExits(const Graph *graph, Marker marker);
 void RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rm_pred);
 std::string GetMethodFullName(const Graph *graph, RuntimeInterface::MethodPtr method);
 }  // namespace panda::compiler
-#endif  // COMPILER_OPTIMIZER_IR_GRAPH_H_
+#endif  // COMPILER_OPTIMIZER_IR_GRAPH_H

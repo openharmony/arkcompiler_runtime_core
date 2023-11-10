@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_TESTS_UNIT_TEST_H_
-#define COMPILER_TESTS_UNIT_TEST_H_
+#ifndef COMPILER_TESTS_UNIT_TEST_H
+#define COMPILER_TESTS_UNIT_TEST_H
 
 #include "macros.h"
 #include "optimizer/ir/ir_constructor.h"
@@ -459,4 +459,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif  // COMPILER_TESTS_UNIT_TEST_H_
+#endif  // COMPILER_TESTS_UNIT_TEST_H

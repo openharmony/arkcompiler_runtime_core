@@ -125,6 +125,7 @@ public:
     void DumpLifeIntervals(const char *pass_name);
     void InitialDumpVisualizerGraph();
     void DumpVisualizerGraph(const char *pass_name);
+    void RunPassChecker(Pass *pass, bool result, bool is_codegen);
 
     Graph *GetGraph()
     {

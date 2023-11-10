@@ -81,6 +81,7 @@ private:
     bool CompileJit(CompilingContext *ctx);
     bool CompileOsr(CompilingContext *ctx);
     bool CompileAot(CompilingContext *ctx);
+    bool FinalizeCompileAot(CompilingContext *ctx, [[maybe_unused]] uintptr_t code_address);
     void PrintError(const std::string &error);
     void PrintUsage(const panda::PandArgParser &pa_parser);
     bool IsMethodInList(const std::string &method_full_name);
@@ -88,6 +89,7 @@ private:
     static std::string GetFileLocation(const panda_file::File &pfile_ref, std::string location);
     static bool CompareBootFiles(std::string filename, std::string paoc_location);
     bool LoadPandaFiles();
+    bool TryCreateGraph(CompilingContext *ctx);
     void BuildClassHashTable(const panda_file::File &pfile_ref);
     std::string GetFilePath(std::string file_name);
 

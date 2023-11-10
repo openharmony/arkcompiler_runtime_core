@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_MANAGER_H_
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_MANAGER_H_
+#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_MANAGER_H
+#define COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_MANAGER_H
 
 #include "compiler/optimizer/ir/graph.h"
 #include "compiler/optimizer/ir/basicblock.h"
@@ -41,4 +41,4 @@ private:
 };
 }  // namespace panda::compiler
 
-#endif
+#endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_MANAGER_H

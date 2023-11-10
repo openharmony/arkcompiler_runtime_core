@@ -2790,34 +2790,12 @@ bool Aarch32Encoder::CanEncodeImmLogical(uint64_t imm, uint32_t size)
 using vixl::aarch32::MemOperand;
 
 template <bool IS_STORE>
-void Aarch32Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
+void Aarch32Encoder::LoadStoreRegistersMainLoop(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
 {
-    if (registers.none()) {
-        return;
-    }
-
-    vixl::aarch32::Register base_reg = VixlReg(base);
-    int32_t max_offset = (slot + helpers::ToSigned(registers.GetMaxRegister())) * WORD_SIZE_BYTES;
-
-    ScopedTmpRegU32 tmp_reg(this);
-    auto tmp = VixlReg(tmp_reg);
-    // Construct single add for big offset
-    if (is_fp) {
-        if ((max_offset < -VMEM_OFFSET) || (max_offset > VMEM_OFFSET)) {
-            GetMasm()->Add(tmp, base_reg, VixlImm(slot * WORD_SIZE_BYTES));
-            slot = 0;
-            base_reg = tmp;
-        }
-    } else {
-        if ((max_offset < -MEM_BIG_OFFSET) || (max_offset > MEM_BIG_OFFSET)) {
-            GetMasm()->Add(tmp, base_reg, VixlImm(slot * WORD_SIZE_BYTES));
-            slot = 0;
-            base_reg = tmp;
-        }
-    }
     bool has_mask = mask.any();
     int32_t index = has_mask ? static_cast<int32_t>(mask.GetMinRegister()) : 0;
     slot -= index;
+    vixl::aarch32::Register base_reg = VixlReg(base);
     for (size_t i = index; i < registers.size(); i++) {
         if (has_mask) {
             if (!mask.test(i)) {
@@ -2849,6 +2827,35 @@ void Aarch32Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t s
             }
         }
     }
+}
+
+template <bool IS_STORE>
+void Aarch32Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
+{
+    if (registers.none()) {
+        return;
+    }
+
+    vixl::aarch32::Register base_reg = VixlReg(base);
+    int32_t max_offset = (slot + helpers::ToSigned(registers.GetMaxRegister())) * WORD_SIZE_BYTES;
+
+    ScopedTmpRegU32 tmp_reg(this);
+    auto tmp = VixlReg(tmp_reg);
+    // Construct single add for big offset
+    if (is_fp) {
+        if ((max_offset < -VMEM_OFFSET) || (max_offset > VMEM_OFFSET)) {
+            GetMasm()->Add(tmp, base_reg, VixlImm(slot * WORD_SIZE_BYTES));
+            slot = 0;
+            base_reg = tmp;
+        }
+    } else {
+        if ((max_offset < -MEM_BIG_OFFSET) || (max_offset > MEM_BIG_OFFSET)) {
+            GetMasm()->Add(tmp, base_reg, VixlImm(slot * WORD_SIZE_BYTES));
+            slot = 0;
+            base_reg = tmp;
+        }
+    }
+    LoadStoreRegistersMainLoop<IS_STORE>(registers, is_fp, slot, base, mask);
 }
 
 template <bool IS_STORE>
