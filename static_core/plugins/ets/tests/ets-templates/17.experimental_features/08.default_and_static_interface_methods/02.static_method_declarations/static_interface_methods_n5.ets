@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,16 +15,16 @@ limitations under the License.
 
 /*---
 desc: >-
-    Multi-line string literals that can include embedded expressions
-    are called Template literals.
-    A template literal with embedded expression is a template string.
-tags: [compile-only, negative]
+    A compile-time error occurs if the header or body of a static method
+    of an interface contains the name of any surrounding declaration's
+    type parameter.
+tags: [negative, compile-only]
 ---*/
 
-function main() {
-  // expression cannot be evaluated
-  let t1 = `template ${a}
-      literal
-      example
-      `
+interface I<T> {
+    static undef2Null(p: T|undefined|null): T|null {  // CTE: 'T' cannot be used here
+        return p === undefined ? null : p
+    }
 }
+
+function main(): void {}

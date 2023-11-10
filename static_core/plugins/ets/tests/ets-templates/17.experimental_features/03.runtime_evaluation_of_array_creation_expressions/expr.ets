@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,13 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{%- for c in cases %}
 /*---
-desc: Static interface methods should have a body
-tags: [negative, compile-only]
+desc: >-
+    The dimension expressions are evaluated. The evaluation is performed left-to-right;
+    if any expression evaluation completes abruptly, then the expressions to the right
+    of it are not evaluated.
+ark_options: ['--heap-size-limit=33554432', '--init-heap-size-limit=33554432']
+timeout: 60
 ---*/
 
-interface Vehicle {
-  static getHorsePower(rpm: int, torque: int): int
-}
+{{c.defs}}
 
-function main(): void {}
+function main(): int {
+    {{c.use|indent}}
+}
+{%- endfor %}

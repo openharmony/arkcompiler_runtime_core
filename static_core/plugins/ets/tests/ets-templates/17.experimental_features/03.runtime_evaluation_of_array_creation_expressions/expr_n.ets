@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,18 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{%- for c in cases %}
 /*---
 desc: >-
-    Multi-line string literals that can include embedded expressions
-    are called Template literals.
-    A template literal with embedded expression is a template string.
-tags: [compile-only, negative]
+    The type of each dimensionExpression must be convertible (see Primitive Types Conversions)
+    to an integer type. A compile-time error occurs otherwise.
+tags: [negative, compile-only]
 ---*/
 
+{{c.defs}}
+
 function main() {
-  // expression cannot be evaluated
-  let t1 = `template ${a}
-      literal
-      example
-      `
+    {{c.use|indent}}
 }
+{%- endfor %}

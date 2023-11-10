@@ -14,35 +14,23 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Static field declaration.
-assert: If a field is declared static, there exists exactly one incarnation of the field, no matter how many instances of the class may eventually be created. A static field, sometimes called a class variable, is incarnated when the class is initialized.
+desc: Static interface methods
 ---*/
 
-class A {
-  public static x: int = 0;
+interface Vehicle {
+    static getHorsePower(rpm: int, torque: int): int {
+        return (rpm * torque) / 5252;
+    }
 
-  public getX() : int {
-    return A.x;
-  }
+    private static getHorsePower1(rpm: int, torque: int): int {
+        return (rpm * torque) / 5252;
+    }
 
-  public addX() : void {
-    A.x = A.x + 1;
-  }
+    static private getHorsePower2(rpm: int, torque: int): int {
+        return (rpm * torque) / 5252;
+    }
 }
 
 function main(): void {
-  A.x = 0;  // reset due to jit mode warmup
-
-  let i1: A = new A();
-  let i2: A = new A();
-
-  assert A.x == 0;
-
-  i2.addX();
-
-  assert i1.getX() == 1;
-
-  A.x = A.x + 5;
-
-  assert i2.getX() == 6;
+    assert Vehicle.getHorsePower(2, 2626) == 1
 }

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,16 +15,14 @@ limitations under the License.
 
 /*---
 desc: >-
-    Multi-line string literals that can include embedded expressions
-    are called Template literals.
-    A template literal with embedded expression is a template string.
+    A compile-time error occurs if a field modifier is used more than once in a field declaration.
 tags: [compile-only, negative]
 ---*/
 
+class A {
+    static static x: int = 42  // CTE: dup modifier
+}
+
 function main() {
-  // expression cannot be evaluated
-  let t1 = `template ${a}
-      literal
-      example
-      `
+    assert A.x == 42
 }

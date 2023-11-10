@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,40 +14,20 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Static field declaration.
-assert: Instance is created for every instance variable declared in that class or any of its superclasses.
+desc: A default method can be explicitly declared private in an interface body.
 ---*/
+interface Vehicle {
+    private getHorsePower3(rpm: int, torque: int): int {
+        return (rpm * torque) / 5252;
+    }
 
-class A {
-  public static x: int;
+    getPwrIndex(torque: int): int {
+        return this.getHorsePower3(5252, torque);
+    }
 }
 
-class B extends A {
-  public static y: int;
-
-  public static getX(): int {
-    return A.x;
-  }
-
-  public static setX(value: int): void {
-    A.x = value;
-  }
-}
+class Car implements Vehicle {}
 
 function main(): void {
-  B.y = 10;
-  B.setX(5);
-
-  assert A.x == 5;
-
-  assert B.getX() == 5;
-  assert B.y == 10;
-
-  B.y++;
-  A.x++;
-
-  assert A.x == 6;
-
-  assert B.getX() == 6;
-  assert B.y == 11;
+    assert new Car().getPwrIndex(1) == 1
 }

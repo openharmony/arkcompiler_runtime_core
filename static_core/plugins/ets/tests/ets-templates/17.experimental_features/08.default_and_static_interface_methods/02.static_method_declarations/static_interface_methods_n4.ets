@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,19 +14,19 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Private interface methods.
-assert: A default method in an interface body may explicitly be declared private.
-tags: [compile-only, negative]
+desc: >-
+    A compile-time error occurs if the header or body of a static method
+    of an interface contains the name of any surrounding declaration's
+    type parameter.
+tags: [negative, compile-only]
 ---*/
 
-interface Vehicle {
-  private getHorsePower(rpm: int, torque: int): int {
-    return (rpm * torque) / 5;
-  }
+interface I<T> {
+    static getElem(p: T[]): T {  // CTE: cannot use 'T' in static methods
+        return p[0]
+    }
 }
 
-class A implements Vehicle {
-  public bar(): int {
-    return this.getHorsePower(100, 2);
-  }
-}
+class A<T> implements I<T> {}
+
+function main(): void {}

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,17 +14,24 @@ limitations under the License.
 ---*/
 
 /*---
-desc: >-
-    Multi-line string literals that can include embedded expressions
-    are called Template literals.
-    A template literal with embedded expression is a template string.
-tags: [compile-only, negative]
+desc: A default method can be explicitly declared private in an interface body.
 ---*/
+interface Vehicle {
+    private getHorsePower3(rpm: int, torque: int): int {
+        return (rpm * torque) / 5252;
+    }
 
-function main() {
-  // expression cannot be evaluated
-  let t1 = `template ${a}
-      literal
-      example
-      `
+    getPwrIndex(torque: int): int {
+        return this.getHorsePower3(5252, torque);
+    }
+}
+
+class Car implements Vehicle {
+    private getHorsePower3(rpm: int, torque: int): int {
+        return (rpm * torque) / 2626;
+    }
+}
+
+function main(): void {
+    assert new Car().getPwrIndex(1) == 2
 }

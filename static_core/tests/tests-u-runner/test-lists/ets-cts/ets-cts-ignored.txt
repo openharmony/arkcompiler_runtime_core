@@ -1,3 +1,52 @@
+# es2panda fails: panda#14417 Escaping in string interpolation expressions
+02.lexical_elements/09.literals/06.template_literals/templ_01.ets
+07.expressions/30.string_interpolation_expressions/siexp_7.ets
+07.expressions/30.string_interpolation_expressions/siexp_8.ets
+07.expressions/30.string_interpolation_expressions/siexp_9.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14423 Boxed floating values are different from the same unboxed
+07.expressions/30.string_interpolation_expressions/siexp_1.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14425 In ArkTS Infinity and NaN values formatted differently from TypeScript
+07.expressions/30.string_interpolation_expressions/siexp_2.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14436 CTE expected on type variable in static method
+17.experimental_features/08.default_and_static_interface_methods/02.static_method_declarations/static_interface_methods_n4.ets
+# end of es2panda fails
+
+# es2panda fails: panda, cannot convert to int
+17.experimental_features/02.array_creation_expressions/expr_2.ets
+17.experimental_features/02.array_creation_expressions/expr_3.ets
+17.experimental_features/02.array_creation_expressions/expr_4.ets
+17.experimental_features/02.array_creation_expressions/expr_5.ets
+17.experimental_features/02.array_creation_expressions/expr_6.ets
+17.experimental_features/02.array_creation_expressions/expr_7.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14451 Array with reference type elements is not initialized
+17.experimental_features/02.array_creation_expressions/expr_n_12.ets
+17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_6.ets
+17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_7.ets
+17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_8.ets
+17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_9.ets
+17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_n_0.ets
+17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_n_1.ets
+17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_n_2.ets
+17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_15.ets
+# end of es2panda fails
+
+# es2panda fails: panda Not implemented
+17.experimental_features/02.array_creation_expressions/expr_n_10.ets
+17.experimental_features/02.array_creation_expressions/expr_n_11.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14507 Cannot call static interface method using type alias
+17.experimental_features/08.default_and_static_interface_methods/02.static_method_declarations/static_interface_methods3.ets
+# end of es2panda fails
+
 03.types/01.predefined_types/class_types_declaration_2.ets
 03.types/01.predefined_types/class_value_types_declaration_4.ets
 03.types/01.predefined_types/class_value_types_declaration_5.ets
@@ -430,9 +479,9 @@
 10.interfaces/04.interface_members/member_type_declaration_1.ets
 10.interfaces/04.interface_members/member_type_declaration_2.ets
 10.interfaces/04.interface_members/multiple_member_inheritance.ets
-10.interfaces/06.interface_method_declarations/07.inheriting_methods_with_override_equivalent_signatures/inheritance_multiple_default_methods.ets
-10.interfaces/06.interface_method_declarations/07.inheriting_methods_with_override_equivalent_signatures/override_multiple_default_methods.ets
-10.interfaces/06.interface_method_declarations/04.inheritance_and_overriding/inheritance_static_method.ets
+10.interfaces/06.interface_method_declarations/05.inheriting_methods_with_override_equivalent_signatures/inheritance_multiple_default_methods.ets
+10.interfaces/06.interface_method_declarations/05.inheriting_methods_with_override_equivalent_signatures/override_multiple_default_methods.ets
+10.interfaces/06.interface_method_declarations/02.inheritance_and_overriding/inheritance_static_method.ets
 13.modules_and_compilation_units/03.import_declarations/import_0.ets
 13.modules_and_compilation_units/03.import_declarations/import_1.ets
 13.modules_and_compilation_units/03.import_declarations/import_2.ets
@@ -1652,10 +1701,6 @@
 02.lexical_elements/09.literals/08.undefined_literal/undef_literal.ets
 02.lexical_elements/09.literals/08.undefined_literal/undef_literal1.ets
 02.lexical_elements/09.literals/08.undefined_literal/undef_literal3.ets
-02.lexical_elements/09.literals/06.template_literals/templ_01.ets
-02.lexical_elements/09.literals/06.template_literals/templ_n01.ets
-02.lexical_elements/09.literals/06.template_literals/templ_n02.ets
-02.lexical_elements/09.literals/06.template_literals/templ_n03.ets
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_0.ets
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_1.ets
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_10.ets
@@ -1721,6 +1766,7 @@
 07.expressions/29.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_3.ets
 07.expressions/29.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_4.ets
 07.expressions/29.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_5.ets
+07.expressions/30.string_interpolation_expressions/siexp_3.ets
 08.statements/14.throw_statements/throw_neg2.ets
 08.statements/15.try_statements/01.catch_clauses/catch3.ets
 08.statements/15.try_statements/03.try_statement_execution/exec_2.ets
@@ -1824,8 +1870,9 @@
 04.names_declarations_and_scopes/01.names/qualified_name_11.ets
 # end of es2panda fails
 
-# es2panda fails: panda#12853
-10.interfaces/06.interface_method_declarations/02.default_method_declarations/private_interface_methods.ets
+# es2panda fails: panda#12853 es2panda fails on private interface method
+17.experimental_features/08.default_and_static_interface_methods/01.default_method_declarations/private_interface_methods1.ets
+17.experimental_features/08.default_and_static_interface_methods/01.default_method_declarations/private_interface_methods2.ets
 # end of es2panda fails
 
 # es2panda fails: panda#12623
@@ -2036,4 +2083,10 @@
 10.interfaces/05.interface_properties/interface_property_declaration.ets
 10.interfaces/05.interface_properties/readonly_simple_form_0.ets
 10.interfaces/05.interface_properties/simple_form.ets
+# end of es2panda fails
+
+# es2panda fails: panda#14563 Verifier failure on unboxing in array dimension expression
+17.experimental_features/02.array_creation_expressions/expr_1.ets
+17.experimental_features/02.array_creation_expressions/expr_11.ets
+17.experimental_features/02.array_creation_expressions/expr_9.ets
 # end of es2panda fails

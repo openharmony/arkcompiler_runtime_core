@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,17 +14,12 @@ limitations under the License.
 ---*/
 
 /*---
-desc: >-
-    Multi-line string literals that can include embedded expressions
-    are called Template literals.
-    A template literal with embedded expression is a template string.
-tags: [compile-only, negative]
+desc: Static interface methods should have a body
+tags: [negative, compile-only]
 ---*/
 
-function main() {
-  // expression cannot be evaluated
-  let t1 = `template ${a}
-      literal
-      example
-      `
+interface Vehicle {
+    static getHorsePower(rpm: int, torque: int): int  // CTE: no body
 }
+
+function main(): void {}

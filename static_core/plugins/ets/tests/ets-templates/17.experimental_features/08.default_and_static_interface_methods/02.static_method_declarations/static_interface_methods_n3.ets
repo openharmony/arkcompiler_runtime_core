@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,16 +15,21 @@ limitations under the License.
 
 /*---
 desc: >-
-    Multi-line string literals that can include embedded expressions
-    are called Template literals.
-    A template literal with embedded expression is a template string.
-tags: [compile-only, negative]
+    A compile-time error occurs if the body of a static method attempts
+    to use the keywords this or super to refer to the current or a supertype object.
+tags: [negative, compile-only]
 ---*/
 
-function main() {
-  // expression cannot be evaluated
-  let t1 = `template ${a}
-      literal
-      example
-      `
+interface Movable {
+    static twice(p: int): int {
+        return p * 2
+    }
 }
+
+interface Vehicle extends Movable {
+    static getHorsePower(rpm: int, torque: int): int {
+        return super.twice(rpm * torque) / 10;   // CTE: 'super' is not allowed here
+    }
+}
+
+function main(): void {}
