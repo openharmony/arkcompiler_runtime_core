@@ -128,7 +128,8 @@ private:
     void Serialize(const pandasm::Record &record, std::ostream &os, bool print_information = false) const;
     void SerializeFields(const pandasm::Record &record, std::ostream &os, bool print_information) const;
     void Serialize(const pandasm::Function &method, std::ostream &os, bool print_information = false) const;
-    void SerializeStrings(const panda_file::File::EntityId &offset, const std::string &name_value, std::ostream &os) const;
+    void SerializeStrings(const panda_file::File::EntityId &offset, const std::string &name_value,
+                          std::ostream &os) const;
     void Serialize(const pandasm::Function::CatchBlock &catch_block, std::ostream &os) const;
     void Serialize(const pandasm::ItemMetadata &meta, const AnnotationList &ann_list, std::ostream &os) const;
     void SerializeLineNumberTable(const panda_file::LineNumberTable &line_number_table, std::ostream &os) const;

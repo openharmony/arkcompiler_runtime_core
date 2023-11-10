@@ -18,16 +18,21 @@ flags: [module]
 ---*/
 
 
-import { a } from './module-multi-export.s'
-import { b, c } from './module-multi-export.s'
-import './module-multi-export.s'
-import * as ns from './module-multi-export.s'
-import { foo as foo1 } from './module-multi-export.s'
-import d from './module-multi-export.s'
-import e, * as n from './module-multi-export.s'
-import { f , g as num } from './module-multi-export.s'
+import { a } from './module-multi-export.js';
+import { b1, b2 } from './module-multi-export.js';
+import { c } from './module-multi-export.js';
+
+import dd from './module-multi-export.js';
+
+import ee, * as n from './module-multi-export.js';
+import * as ns from './module-multi-export.js';
+
+import { f as ff } from './module-multi-export.js';
+import { g , h as hh } from './module-multi-export.js';
+
+import './module-multi-export.js';
 
 class ClassA {
-    fun(a, b){ return a + b }
-    str = "test";
+    fun(a, b) { return a + b; }
+    str = 'test';
 }

@@ -18,6 +18,6 @@ flags: [module]
 ---*/
 
 
-import { a } from './module-indirect-export.js'
-import { b } from './module-start-export.js'
-import { c } from './module-local-export.js'
+import { a } from './module-indirect-export.js';
+import { b } from './module-start-export.js';
+import { c } from './module-local-export.js';

@@ -18,6 +18,6 @@ flags: [module]
 ---*/
 
 
-let b = 2
+let b = 2;
 
-export * from './module-import-file.js'
+export * from './module-import-file.js';

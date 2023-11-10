@@ -18,4 +18,4 @@ flags: [module]
 ---*/
 
 
-export let c = 3
+export let c = 3;

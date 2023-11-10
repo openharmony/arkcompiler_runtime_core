@@ -14,4 +14,4 @@
  */
 
 
-import('./script-export.js')
+import('./script-export.js');
