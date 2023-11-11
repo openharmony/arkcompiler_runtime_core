@@ -24,8 +24,8 @@ public:
     Verifier() = default;
     ~Verifier() = default;
 
-    bool Verify(const std::string &filename_in);
+    bool VerifyChecksum(const std::string &filename);
 };
-} // namespace name
+} // namespace panda::verifier
 
 #endif
