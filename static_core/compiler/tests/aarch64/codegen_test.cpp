@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -454,7 +454,8 @@ public:
         ASSERT_TRUE(setup_frame ? GetGraph()->RunPass<Codegen>() : GetGraph()->RunPass<CodegenNative>());
         ASSERT_TRUE(GetGraph()->GetCode().Size() == expected_asm.size() * vixl::aarch64::kInstructionSize);
         auto code_entry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
-        auto code_exit = code_entry + GetGraph()->GetCode().Size();  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto code_exit = code_entry + GetGraph()->GetCode().Size();
         size_t code_items = (code_exit - code_entry) / vixl::aarch64::kInstructionSize;
         ASSERT_TRUE(code_items == expected_asm.size());
 
@@ -545,7 +546,8 @@ public:
         ASSERT_TRUE(setup_frame ? GetGraph()->RunPass<Codegen>() : GetGraph()->RunPass<CodegenNative>());
         ASSERT_TRUE(GetGraph()->GetCode().Size() == expected_asm.size() * vixl::aarch64::kInstructionSize);
         auto code_entry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
-        auto code_exit = code_entry + GetGraph()->GetCode().Size();  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto code_exit = code_entry + GetGraph()->GetCode().Size();
         size_t code_items = (code_exit - code_entry) / vixl::aarch64::kInstructionSize;
         ASSERT_TRUE(code_items == expected_asm.size());
 

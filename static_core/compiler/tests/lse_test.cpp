@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -521,7 +521,7 @@ TEST_F(LSETest, LoopElimination)
             INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(30U, 7U);
             INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
         }
-        // for (v10 = 0, v10 < lenarr(v3), ++v10)
+        // For (v10 = 0, v10 < lenarr(v3), ++v10)
         //     v11 += v3[v10]
         BASIC_BLOCK(4U, 3U, 4U)
         {
@@ -557,7 +557,7 @@ TEST_F(LSETest, LoopElimination)
             INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(30U, 7U);
             INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
         }
-        // for (v10 = 0, v10 < lenarr(v3), ++v10)
+        // For (v10 = 0, v10 < lenarr(v3), ++v10)
         //     v11 += v3[v10]
         BASIC_BLOCK(4U, 3U, 4U)
         {
@@ -598,7 +598,7 @@ TEST_F(LSETest, LoopBranches)
             INST(48U, Opcode::Compare).b().CC(CC_GE).Inputs(7U, 6U);
             INST(49U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(48U);
         }
-        // for (v11 = 0, v11 < lenarr(v3), ++v11)
+        // For (v11 = 0, v11 < lenarr(v3), ++v11)
         BASIC_BLOCK(4U, 5U, 6U)
         {
             INST(11U, Opcode::Phi).s32().Inputs({{2U, 7U}, {7U, 46U}});
@@ -607,7 +607,7 @@ TEST_F(LSETest, LoopBranches)
             INST(23U, Opcode::Compare).b().CC(CC_EQ).Inputs(22U, 7U);
             INST(24U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(23U);
         }
-        //     if (v11 % 2 == 1)
+        //     If (v11 % 2 == 1)
         //          v44 = v3[v11]
         BASIC_BLOCK(6U, 7U)
         {
@@ -651,7 +651,7 @@ TEST_F(LSETest, LoopBranches)
             INST(48U, Opcode::Compare).b().CC(CC_GE).Inputs(7U, 6U);
             INST(49U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(48U);
         }
-        // for (v11 = 0, v11 < lenarr(v3), ++v11)
+        // For (v11 = 0, v11 < lenarr(v3), ++v11)
         BASIC_BLOCK(4U, 5U, 6U)
         {
             INST(11U, Opcode::Phi).s32().Inputs({{2U, 7U}, {7U, 46U}});
@@ -660,7 +660,7 @@ TEST_F(LSETest, LoopBranches)
             INST(23U, Opcode::Compare).b().CC(CC_EQ).Inputs(22U, 7U);
             INST(24U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(23U);
         }
-        //     if (v11 % 2 == 1)
+        //     If (v11 % 2 == 1)
         //          v44 = v3[v11]
         BASIC_BLOCK(6U, 7U)
         {
@@ -708,7 +708,7 @@ TEST_F(LSETest, NestedLoopElimination)
             INST(7U, Opcode::LoadObject).ref().Inputs(0U).TypeId(195U);
             INST(10U, Opcode::LenArray).s32().Inputs(7U);
         }
-        // for (v14 = 0, v14 < lenarr(v7), v14++)
+        // For (v14 = 0, v14 < lenarr(v7), v14++)
         BASIC_BLOCK(8U, 3U, 4U)
         {
             INST(14U, Opcode::Phi).s32().Inputs({{2U, 11U}, {5U, 63U}});
@@ -725,7 +725,7 @@ TEST_F(LSETest, NestedLoopElimination)
             INST(66U, Opcode::Compare).b().CC(CC_GE).Inputs(65U, 11U);
             INST(67U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(66U);
         }
-        //     for (v35 = 0, v35 < lenarr(v25), v35++)
+        //     For (v35 = 0, v35 < lenarr(v25), v35++)
         //         v32 += (v7[v14] * v25[v35])
         BASIC_BLOCK(6U, 5U, 6U)
         {
@@ -765,7 +765,7 @@ TEST_F(LSETest, NestedLoopElimination)
             INST(7U, Opcode::LoadObject).ref().Inputs(0U).TypeId(195U);
             INST(10U, Opcode::LenArray).s32().Inputs(7U);
         }
-        // for (v14 = 0, v14 < lenarr(v7), v14++)
+        // For (v14 = 0, v14 < lenarr(v7), v14++)
         BASIC_BLOCK(8U, 3U, 4U)
         {
             INST(14U, Opcode::Phi).s32().Inputs({{2U, 11U}, {5U, 63U}});
@@ -782,7 +782,7 @@ TEST_F(LSETest, NestedLoopElimination)
             INST(66U, Opcode::Compare).b().CC(CC_GE).Inputs(65U, 11U);
             INST(67U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(66U);
         }
-        //     for (v35 = 0, v35 < lenarr(v25), v35++)
+        //     For (v35 = 0, v35 < lenarr(v25), v35++)
         //         v32 += (v7[v14] * v25[v35])
         BASIC_BLOCK(6U, 5U, 6U)
         {
@@ -827,7 +827,7 @@ TEST_F(LSETest, LoopWithMayAliases)
             INST(45U, Opcode::Compare).b().CC(CC_GE).Inputs(1U, 9U);
             INST(46U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(45U);
         }
-        // for (v12 = 0, v12 < lenarr(v0[0]), v12++)
+        // For (v12 = 0, v12 < lenarr(v0[0]), v12++)
         //     v13 += v0[0][0] + v0[1][0]
         BASIC_BLOCK(4U, 3U, 4U)
         {
@@ -862,7 +862,7 @@ TEST_F(LSETest, LoopWithMayAliases)
             INST(45U, Opcode::Compare).b().CC(CC_GE).Inputs(1U, 9U);
             INST(46U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(45U);
         }
-        // for (v12 = 0, v12 < lenarr(v0[0]), v12++)
+        // For (v12 = 0, v12 < lenarr(v0[0]), v12++)
         //     v13 += v0[0][0] + v0[1][0]
         BASIC_BLOCK(4U, 3U, 4U)
         {
@@ -903,7 +903,7 @@ TEST_F(LSETest, CombinedWithLoop)
             INST(45U, Opcode::Compare).b().CC(CC_GE).Inputs(1U, 9U);
             INST(46U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(45U);
         }
-        // for (v12 = 0, v12 < lenarr(v0[0]), v12++)
+        // For (v12 = 0, v12 < lenarr(v0[0]), v12++)
         //     v13 += v0[0][0] + v0[0][0]
         BASIC_BLOCK(4U, 3U, 4U)
         {
@@ -938,7 +938,7 @@ TEST_F(LSETest, CombinedWithLoop)
             INST(45U, Opcode::Compare).b().CC(CC_GE).Inputs(1U, 9U);
             INST(46U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(45U);
         }
-        // for (v12 = 0, v12 < lenarr(v0[0]), v12++)
+        // For (v12 = 0, v12 < lenarr(v0[0]), v12++)
         //     v13 += v0[0][0] + v0[0][0]
         BASIC_BLOCK(4U, 3U, 4U)
         {
@@ -1237,7 +1237,7 @@ TEST_F(LSETest, LoopWithOverwrite)
             INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(30U, 7U);
             INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
         }
-        // for (v10 = 0, v10 < lenarr(v3), v10++)
+        // For (v10 = 0, v10 < lenarr(v3), v10++)
         //     v3 = v3[v10]
         BASIC_BLOCK(4U, 3U, 4U)
         {
@@ -1273,7 +1273,7 @@ TEST_F(LSETest, LoopWithOverwrite)
             INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(30U, 7U);
             INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
         }
-        // for (v10 = 0, v10 < lenarr(v3), v10++)
+        // For (v10 = 0, v10 < lenarr(v3), v10++)
         //     v3 = v3[v10]
         BASIC_BLOCK(4U, 3U, 4U)
         {
@@ -2300,7 +2300,7 @@ TEST_F(LSETest, InnerOverwrite)
             INST(4U, Opcode::LoadObject).ref().Inputs(0U).TypeId(194U);
             INST(7U, Opcode::LenArray).s32().Inputs(4U);
         }
-        // for (v11 = 0, v11 < lenarr(v4), v11++)
+        // For (v11 = 0, v11 < lenarr(v4), v11++)
         BASIC_BLOCK(8U, 3U, 4U)
         {
             INST(11U, Opcode::Phi).s32().Inputs({{2U, 8U}, {5U, 63U}});
@@ -2316,7 +2316,7 @@ TEST_F(LSETest, InnerOverwrite)
             INST(66U, Opcode::Compare).b().CC(CC_GE).Inputs(65U, 8U);
             INST(67U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(66U);
         }
-        //     for (v28 = 0, v28 < lenarr(v1), v28++)
+        //     For (v28 = 0, v28 < lenarr(v1), v28++)
         //         v4 = v28[v4[v11]]
         BASIC_BLOCK(6U, 5U, 6U)
         {
@@ -2363,7 +2363,7 @@ TEST_F(LSETest, OuterOverwrite)
             INST(4U, Opcode::LoadObject).ref().Inputs(0U).TypeId(194U);
             INST(7U, Opcode::LenArray).s32().Inputs(4U);
         }
-        // for (v11 = 0, v11 < lenarr(v4), v11++)
+        // For (v11 = 0, v11 < lenarr(v4), v11++)
         BASIC_BLOCK(8U, 3U, 4U)
         {
             INST(11U, Opcode::Phi).s32().Inputs({{2U, 8U}, {5U, 55U}});
@@ -2378,7 +2378,7 @@ TEST_F(LSETest, OuterOverwrite)
             INST(58U, Opcode::Compare).b().CC(CC_GE).Inputs(57U, 8U);
             INST(59U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(58U);
         }
-        //     for (v28 = 0, v28 < lenarr(v4), v28++)
+        //     For (v28 = 0, v28 < lenarr(v4), v28++)
         //         v12 += v4[v28]
         BASIC_BLOCK(6U, 5U, 6U)
         {
@@ -2417,7 +2417,7 @@ TEST_F(LSETest, OuterOverwrite)
             INST(4U, Opcode::LoadObject).ref().Inputs(0U).TypeId(194U);
             INST(7U, Opcode::LenArray).s32().Inputs(4U);
         }
-        // for (v11 = 0, v11 < lenarr(v4), v11++)
+        // For (v11 = 0, v11 < lenarr(v4), v11++)
         BASIC_BLOCK(8U, 3U, 4U)
         {
             INST(11U, Opcode::Phi).s32().Inputs({{2U, 8U}, {5U, 55U}});
@@ -2433,7 +2433,7 @@ TEST_F(LSETest, OuterOverwrite)
             INST(58U, Opcode::Compare).b().CC(CC_GE).Inputs(57U, 8U);
             INST(59U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(58U);
         }
-        //     for (v28 = 0, v28 < lenarr(v4), v28++)
+        //     For (v28 = 0, v28 < lenarr(v4), v28++)
         //         v12 += v4[v28]
         BASIC_BLOCK(6U, 5U, 6U)
         {
@@ -2481,7 +2481,7 @@ TEST_F(LSETest, PhiCandOverCall)
             INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(30U, 7U);
             INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
         }
-        // for (v10 = 0, v10 < lenarr(v3), ++v10)
+        // For (v10 = 0, v10 < lenarr(v3), ++v10)
         //     v11 += v3[v10]
         BASIC_BLOCK(4U, 3U, 4U)
         {

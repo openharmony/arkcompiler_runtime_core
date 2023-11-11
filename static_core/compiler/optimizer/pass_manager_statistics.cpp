@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,8 +54,9 @@ void PassManagerStatistics::PrintStatistics() const
     for (const auto& stat : pass_stat_list_) {
         auto indent = stat.run_depth * OFFSET_STAT;
         space_buf[indent] = 0;
-        out << std::setw(OFFSET_ID) << std::right << index << space_buf << " " << std::left << std::setw(OFFSET_PASS_NAME - indent)
-            << stat.pass_name << ": " << std::right << std::setw(OFFSET_DEFAULT) << stat.mem_used_ir << std::setw(OFFSET_DEFAULT)
+        out << std::setw(OFFSET_ID) << std::right << index << space_buf << " "
+            << std::left << std::setw(OFFSET_PASS_NAME - indent) << stat.pass_name << ": "
+            << std::right << std::setw(OFFSET_DEFAULT) << stat.mem_used_ir << std::setw(OFFSET_DEFAULT)
             << stat.mem_used_local << std::setw(OFFSET_DEFAULT) << stat.time_us << std::endl;
         space_buf[indent] = ' ';
         index++;

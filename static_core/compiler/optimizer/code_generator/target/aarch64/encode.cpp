@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2428,7 +2428,7 @@ bool Aarch64Encoder::CanEncodeImmLogical(uint64_t imm, uint32_t size)
 #ifndef NDEBUG
     if (size < DOUBLE_WORD_SIZE) {
         // Test if the highest part is consistent:
-        ASSERT((imm >> size == 0) || ((~imm) >> size == 0));
+        ASSERT(((imm >> size) == 0) || (((~imm) >> size) == 0));
     }
 #endif  // NDEBUG
     return vixl::aarch64::Assembler::IsImmLogical(imm, size);
@@ -2673,31 +2673,29 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t s
         if (!has_mask) {
             index++;
         }
-        if (last_id != -1) {
-            auto reg =
-                CPURegister(id, vixl::aarch64::kXRegSize, is_fp ? CPURegister::kVRegister : CPURegister::kRegister);
-            auto last_reg = CPURegister(last_id, vixl::aarch64::kXRegSize,
-                                        is_fp ? CPURegister::kVRegister : CPURegister::kRegister);
-            if (!has_mask || last_id + 1 == id) {
-                static constexpr ssize_t OFFSET = 2;
-                if constexpr (IS_STORE) {  // NOLINT
-                    GetMasm()->Stp(last_reg, reg,
-                                   MemOperand(base_reg, (slot + index - OFFSET) * DOUBLE_WORD_SIZE_BYTES));
-                } else {  // NOLINT
-                    GetMasm()->Ldp(last_reg, reg,
-                                   MemOperand(base_reg, (slot + index - OFFSET) * DOUBLE_WORD_SIZE_BYTES));
-                }
-                last_id = -1;
-            } else {
-                if constexpr (IS_STORE) {  // NOLINT
-                    GetMasm()->Str(last_reg, MemOperand(base_reg, (slot + last_index - 1) * DOUBLE_WORD_SIZE_BYTES));
-                } else {  // NOLINT
-                    GetMasm()->Ldr(last_reg, MemOperand(base_reg, (slot + last_index - 1) * DOUBLE_WORD_SIZE_BYTES));
-                }
-                last_id = id;
-                last_index = index;
+        if (last_id == -1) {
+            last_id = id;
+            last_index = index;
+            continue;
+        }
+
+        auto reg = CPURegister(id, vixl::aarch64::kXRegSize, is_fp ? CPURegister::kVRegister : CPURegister::kRegister);
+        auto last_reg =
+            CPURegister(last_id, vixl::aarch64::kXRegSize, is_fp ? CPURegister::kVRegister : CPURegister::kRegister);
+        if (!has_mask || last_id + 1 == id) {
+            static constexpr ssize_t OFFSET = 2;
+            if constexpr (IS_STORE) {  // NOLINT
+                GetMasm()->Stp(last_reg, reg, MemOperand(base_reg, (slot + index - OFFSET) * DOUBLE_WORD_SIZE_BYTES));
+            } else {  // NOLINT
+                GetMasm()->Ldp(last_reg, reg, MemOperand(base_reg, (slot + index - OFFSET) * DOUBLE_WORD_SIZE_BYTES));
             }
+            last_id = -1;
         } else {
+            if constexpr (IS_STORE) {  // NOLINT
+                GetMasm()->Str(last_reg, MemOperand(base_reg, (slot + last_index - 1) * DOUBLE_WORD_SIZE_BYTES));
+            } else {  // NOLINT
+                GetMasm()->Ldr(last_reg, MemOperand(base_reg, (slot + last_index - 1) * DOUBLE_WORD_SIZE_BYTES));
+            }
             last_id = id;
             last_index = index;
         }

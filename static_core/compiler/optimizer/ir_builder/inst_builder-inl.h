@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1330,7 +1330,6 @@ void InstBuilder::BuildInitObject(const BytecodeInstruction *bc_inst, bool is_ra
 {
     auto method_id = GetRuntime()->ResolveMethodIndex(GetMethod(), bc_inst->GetId(0).AsIndex());
     auto type_id = GetRuntime()->GetClassIdForMethod(GetMethod(), method_id);
-
     if (GetRuntime()->IsArrayClass(GetMethod(), type_id)) {
         if (GetGraph()->IsBytecodeOptimizer()) {
             BuildInitObjectMultiDimensionalArray(bc_inst, is_range);
@@ -1514,7 +1513,6 @@ void InstBuilder::BuildCastToAnyNumber(const BytecodeInstruction *bc_inst)
 {
     auto input = GetDefinitionAcc();
     auto type = input->GetType();
-
     if (input->IsConst() && !DataType::IsFloatType(type)) {
         auto const_insn = input->CastToConstant();
         if (const_insn->GetType() == DataType::INT64) {

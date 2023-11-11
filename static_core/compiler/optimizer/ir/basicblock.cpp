@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -295,10 +295,9 @@ void BasicBlock::JoinSuccessorBlock()
             if (loop->HasBackEdge(succ)) {
                 loop->ReplaceBackEdge(succ, this);
             }
-            if (auto outer_loop = loop->GetOuterLoop()) {
-                if (outer_loop->HasBackEdge(succ)) {
-                    outer_loop->ReplaceBackEdge(succ, this);
-                }
+            auto outer_loop = loop->GetOuterLoop();
+            if (outer_loop != nullptr && outer_loop->HasBackEdge(succ)) {
+                outer_loop->ReplaceBackEdge(succ, this);
             }
 
             for (auto inner_loop : loop->GetInnerLoops()) {
@@ -496,7 +495,6 @@ void BasicBlock::GenerateSelects(const SavedIfInfo *if_info)
 
         auto inst1 = phi->GetInput(index1).GetInst();
         auto inst2 = phi->GetInput(index2).GetInst();
-
         if (inst1 == inst2) {
             // No select needed
             if (other->GetPredsBlocks().size() > TWO) {

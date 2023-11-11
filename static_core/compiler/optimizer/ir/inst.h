@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -303,7 +303,7 @@ enum Flags : uint32_t {
 
 inline constexpr uintptr_t GetFlagsMask(Opcode opcode)
 {
-#define INST_DEF(OPCODE, BASE, FLAGS) FLAGS,  // NOLINT(cppcoreguidelines-macro-usage)
+#define INST_DEF(OPCODE, BASE, FLAGS) (FLAGS),  // NOLINT(cppcoreguidelines-macro-usage)
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
     constexpr std::array<uintptr_t, static_cast<int>(Opcode::NUM_OPCODES)> INST_FLAGS_TABLE = {OPCODE_LIST(INST_DEF)};
 #undef INST_DEF
@@ -2239,7 +2239,7 @@ private:
 template <typename T>
 class ConditionMixin : public T {
 public:
-    enum class Prediction { NONE, LIKELY, UNLIKELY, SIZE = UNLIKELY };
+    enum class Prediction { NONE = 0, LIKELY, UNLIKELY, SIZE = UNLIKELY };
 
     using T::T;
     explicit ConditionMixin(ConditionCode cc)

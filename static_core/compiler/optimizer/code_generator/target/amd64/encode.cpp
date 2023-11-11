@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1556,7 +1556,6 @@ void Amd64Encoder::EncodeOr(Reg dst, Reg src, Imm imm)
 {
     ASSERT(dst.IsScalar());
     auto imm_val = ImmToUnsignedInt(imm);
-
     if (ImmFitsSize(imm_val, dst.GetSize())) {
         EncodeMov(dst, src);
         GetMasm()->or_(ArchReg(dst), imm_val);
@@ -1576,7 +1575,6 @@ void Amd64Encoder::EncodeXor(Reg dst, Reg src, Imm imm)
 {
     ASSERT(dst.IsScalar());
     auto imm_val = ImmToUnsignedInt(imm);
-
     if (ImmFitsSize(imm_val, dst.GetSize())) {
         EncodeMov(dst, src);
         GetMasm()->xor_(ArchReg(dst), imm_val);
@@ -2229,7 +2227,7 @@ bool Amd64Encoder::CanEncodeImmLogical(uint64_t imm, uint32_t size)
 #ifndef NDEBUG
     if (size < DOUBLE_WORD_SIZE) {
         // Test if the highest part is consistent:
-        ASSERT((imm >> size == 0) || ((~imm) >> size == 0));
+        ASSERT(((imm >> size) == 0) || (((~imm) >> size) == 0));
     }
 #endif  // NDEBUG
     return ImmFitsSize(imm, size);

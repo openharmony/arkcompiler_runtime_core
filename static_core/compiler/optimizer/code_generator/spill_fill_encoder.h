@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,7 @@ private:
     size_t EncodeRegisterToX(const SpillFillData &sf, const SpillFillData *next, int consecutive_ops_hint = 0);
     size_t EncodeStackToX(const SpillFillData &sf, const SpillFillData *next, int consecutive_ops_hint = 0);
     static bool AreConsecutiveOps(const SpillFillData &pred, const SpillFillData &succ);
+    void EncodeImmWithCorrectType(DataType::Type sf_type, MemRef dst_mem, ConstantInst *const_inst);
 
     SpillFillInst *inst_;
     Graph *graph_;

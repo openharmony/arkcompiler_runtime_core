@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,23 +29,24 @@
 
 // ---- Below extended ASSERT and ASSERT_DO for GraphChecker ----
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_DO_EXT(cond, func) ASSERT_DO(cond, func; PrintFailedMethodAndPass();)
+#define ASSERT_DO_EXT(cond, func) ASSERT_DO((cond), func; PrintFailedMethodAndPass();)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_DO_EXT_VISITOR(cond, func) ASSERT_DO(cond, func; PrintFailedMethodAndPassVisitor(v);)
+#define ASSERT_DO_EXT_VISITOR(cond, func) ASSERT_DO((cond), func; PrintFailedMethodAndPassVisitor(v);)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_EXT(cond) ASSERT_DO_EXT(cond, )
+#define ASSERT_EXT(cond) ASSERT_DO_EXT((cond), )
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_EXT_VISITOR(cond) ASSERT_DO_EXT_VISITOR(cond, )
+#define ASSERT_EXT_VISITOR(cond) ASSERT_DO_EXT_VISITOR((cond), )
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_EXT_PRINT(cond, message) ASSERT_DO(cond, std::cerr << message << std::endl; PrintFailedMethodAndPass();)
+#define ASSERT_EXT_PRINT(cond, message) \
+    ASSERT_DO((cond), std::cerr << message << std::endl; PrintFailedMethodAndPass();)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_EXT_PRINT_VISITOR(cond, message) \
-    ASSERT_DO(cond, std::cerr << message << std::endl; PrintFailedMethodAndPassVisitor(v);)
+    ASSERT_DO((cond), std::cerr << message << std::endl; PrintFailedMethodAndPassVisitor(v);)
 // --------------------------------------------------------------
 
 namespace panda::compiler {

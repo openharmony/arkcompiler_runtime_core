@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@
 namespace panda::compiler {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define PEEPHOLE_IS_APPLIED(visitor, inst) visitor->SetIsApplied(inst, true, __FILE__, __LINE__)
+#define PEEPHOLE_IS_APPLIED(visitor, inst) (visitor)->SetIsApplied((inst), true, __FILE__, __LINE__)
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class Peepholes : public Optimization, public GraphVisitor {
@@ -64,7 +64,9 @@ public:
     static void VisitAbs([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitNot([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitAdd([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static void VisitAddFinalize([[maybe_unused]] GraphVisitor *v, Inst *inst, Inst *input0, Inst *input1);
     static void VisitSub([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static void VisitSubFinalize([[maybe_unused]] GraphVisitor *v, Inst *inst, Inst *input0, Inst *input1);
     static void VisitMulOneConst([[maybe_unused]] GraphVisitor *v, Inst *inst, Inst *input0, Inst *input1);
     static void VisitMul([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitDiv([[maybe_unused]] GraphVisitor *v, Inst *inst);
@@ -81,6 +83,9 @@ public:
     static void VisitCompare([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitIf(GraphVisitor *v, Inst *inst);
     static void VisitCast([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static void VisitCastCase1([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static void VisitCastCase2([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static void VisitCastCase3([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitLenArray(GraphVisitor *v, Inst *inst);
     static void VisitPhi([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitSqrt([[maybe_unused]] GraphVisitor *v, Inst *inst);
@@ -158,6 +163,8 @@ private:
     void TryRemoveOverflowCheck(Inst *inst);
     static bool TrySimplifyCompareAndZero(Inst *inst, bool *is_osr_blocked);
     static bool TrySimplifyCompareAnyType(Inst *inst);
+    static bool TrySimplifyCompareAnyTypeCase1(Inst *inst, Inst *input0, Inst *input1);
+    static bool TrySimplifyCompareAnyTypeCase2(Inst *inst, Inst *input0, Inst *input1);
     static bool TrySimplifyCompareLenArrayWithZero(Inst *inst);
     // Try to combine constants when arithmetic operations with constants are repeated
     template <typename T>

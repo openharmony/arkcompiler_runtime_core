@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,10 +40,10 @@ static inline Expected<const uint8_t *, std::string> LoadSymbol(const panda::os:
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOAD_AOT_SYMBOL(name)                                           \
-    auto name = LoadSymbol(handle, #name);                              \
-    if (!name) {                                                        \
-        return Unexpected("Cannot load name section: " + name.Error()); \
+#define LOAD_AOT_SYMBOL(name)                                             \
+    auto name = LoadSymbol(handle, (#name));                              \
+    if (!(name)) {                                                        \
+        return Unexpected("Cannot load name section: " + (name).Error()); \
     }
 
 Expected<std::unique_ptr<AotFile>, std::string> AotFile::Open(const std::string &file_name, uint32_t gc_type,

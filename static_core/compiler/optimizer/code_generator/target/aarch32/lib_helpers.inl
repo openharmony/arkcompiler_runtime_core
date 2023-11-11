@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,6 +49,7 @@ struct DivLSResult {
 // NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
 DivLUResult __aeabi_uldivmod(uint64_t numerator, uint64_t denominator)
 {
+    ASSERT(denominator != 0);
     DivLUResult res {0, 0};
     res.quotient = numerator / denominator;
     res.remainder = numerator % denominator;
@@ -57,6 +58,7 @@ DivLUResult __aeabi_uldivmod(uint64_t numerator, uint64_t denominator)
 // NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
 DivLSResult __aeabi_ldivmod(int64_t numerator, int64_t denominator)
 {
+    ASSERT(denominator != 0);
     DivLSResult res {0, 0};
     res.quotient = numerator / denominator;
     res.remainder = numerator % denominator;
@@ -76,6 +78,7 @@ struct DivSResult {
 // NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
 DivUResult __aeabi_uidivmod(uint32_t numerator, uint32_t denominator)
 {
+    ASSERT(denominator != 0);
     DivUResult res {0, 0};
     res.quotient = numerator / denominator;
     res.remainder = numerator % denominator;
@@ -84,6 +87,7 @@ DivUResult __aeabi_uidivmod(uint32_t numerator, uint32_t denominator)
 // NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
 DivSResult __aeabi_idivmod(int32_t numerator, int32_t denominator)
 {
+    ASSERT(denominator != 0);
     DivSResult res {0, 0};
     res.quotient = numerator / denominator;
     res.remainder = numerator % denominator;

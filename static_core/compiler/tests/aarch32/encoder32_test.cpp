@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,6 +99,8 @@ static T RandomGen()
                     return panda::bit_cast<double, uint64_t>(gen & MASK_DENORMAL_DOUBLE);
                 }
             }
+            default:
+                break;
         }
 
         // Uniform distribution floating value
@@ -456,7 +458,6 @@ bool TestNeg(Encoder32Test *test)
         // Second type-dependency
         T tmp = RandomGen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp, -tmp)) {
@@ -466,7 +467,6 @@ bool TestNeg(Encoder32Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, nan)) {
             return false;
         }
@@ -509,9 +509,7 @@ bool TestNot(Encoder32Test *test)
     for (uint64_t i = 0; i < ITERATION; ++i) {
         // Second type-dependency
         T tmp = RandomGen<T>();
-
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp, ~tmp)) {  // NOLINT(hicpp-signed-bitwise)
@@ -559,7 +557,6 @@ bool TestMov(Encoder32Test *test)
         // Second type-dependency
         T tmp = RandomGen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp, tmp)) {
@@ -569,7 +566,6 @@ bool TestMov(Encoder32Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, nan)) {
             return false;
         }
@@ -606,7 +602,6 @@ bool TestMov2(Encoder32Test *test)
         Src src = RandomGen<Src>();
         Dst dst = bit_cast<Dst>(src);
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<Src, Dst>(src, dst)) {
@@ -617,7 +612,6 @@ bool TestMov2(Encoder32Test *test)
     if constexpr (std::is_floating_point_v<Src>) {
         Src nan = std::numeric_limits<Src>::quiet_NaN();
         Dst dst_nan = bit_cast<Dst>(nan);
-
         if (!test->CallCode<Src, Dst>(nan, dst_nan)) {
             return false;
         }
@@ -1151,7 +1145,6 @@ bool TestAbs(Encoder32Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, nan)) {
             return false;
         }
@@ -1207,7 +1200,6 @@ bool TestSqrt(Encoder32Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, nan)) {
             return false;
         }
@@ -1252,7 +1244,6 @@ bool TestAdd(Encoder32Test *test)
         T tmp1 = RandomGen<T>();
         T tmp2 = RandomGen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp2, tmp1 + tmp2)) {
@@ -1262,7 +1253,6 @@ bool TestAdd(Encoder32Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
             return false;
         }
@@ -1319,7 +1309,6 @@ bool TestAddImm(Encoder32Test *test)
         // Second type-dependency
         T tmp1 = RandomGen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp1 + param2)) {
@@ -1367,7 +1356,6 @@ bool TestSub(Encoder32Test *test)
         T tmp1 = RandomGen<T>();
         T tmp2 = RandomGen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp2, tmp1 - tmp2)) {
@@ -1377,7 +1365,6 @@ bool TestSub(Encoder32Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
             return false;
         }
@@ -1439,7 +1426,6 @@ bool TestSubImm(Encoder32Test *test)
         // Second type-dependency
         T tmp1 = RandomGen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp1 - param2)) {
@@ -1490,7 +1476,6 @@ bool TestMul(Encoder32Test *test)
         T tmp1 = RandomGen<T>();
         T tmp2 = RandomGen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp2, tmp1 * tmp2)) {
@@ -1500,7 +1485,6 @@ bool TestMul(Encoder32Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
             return false;
         }
@@ -1579,7 +1563,6 @@ bool TestMin(Encoder32Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
             return false;
         }
@@ -1662,7 +1645,6 @@ bool TestMax(Encoder32Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
             return false;
         }
@@ -1914,7 +1896,6 @@ bool TestAnd(Encoder32Test *test)
         T tmp1 = RandomGen<T>();
         T tmp2 = RandomGen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp2, tmp1 & tmp2)) {
@@ -1962,7 +1943,6 @@ bool TestOr(Encoder32Test *test)
         T tmp1 = RandomGen<T>();
         T tmp2 = RandomGen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp2, tmp1 | tmp2)) {
@@ -2010,7 +1990,6 @@ bool TestXor(Encoder32Test *test)
         T tmp1 = RandomGen<T>();
         T tmp2 = RandomGen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp2, tmp1 ^ tmp2)) {
@@ -2252,7 +2231,6 @@ bool TestFcmp(Encoder32Test *test, bool is_fcmpg)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T, int32_t>(nan, 5.0, is_fcmpg ? 1 : -1)) {
             return false;
         }
@@ -2489,11 +2467,7 @@ bool TestCast(Encoder32Test *test)
             auto float_max_int = static_cast<Src>(max_int);
 
             if (src > float_min_int) {
-                if (src < float_max_int) {
-                    dst = static_cast<Dst>(src);
-                } else {
-                    dst = max_int;
-                }
+                dst = src < float_max_int ? static_cast<Dst>(src) : max_int;
             } else if (std::isnan(src)) {
                 dst = 0;
             } else {
@@ -2690,7 +2664,6 @@ bool TestDiv(Encoder32Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
             return false;
         }
@@ -2723,6 +2696,55 @@ TEST_F(Encoder32Test, DivTest)
     EXPECT_TRUE(TestDiv<uint64_t>(this));
     EXPECT_TRUE(TestDiv<float>(this));
     EXPECT_TRUE(TestDiv<double>(this));
+}
+
+template <typename T>
+bool TestModMainLoop(Encoder32Test *test)
+{
+    // Main test loop:
+    for (uint64_t i = 0; i < ITERATION; ++i) {
+        // Second type-dependency
+        T tmp1 = RandomGen<T>();
+        T tmp2 = RandomGen<T>();
+        if (tmp2 == 0) {
+            tmp2 += 1;
+        }
+        // Main check - compare parameter and
+        // return value
+        if constexpr (std::is_same<float, T>::value) {
+            if (!test->CallCode<T>(tmp1, tmp2, fmodf(tmp1, tmp2))) {
+                return false;
+            }
+        } else if constexpr (std::is_same<double, T>::value) {
+            if (!test->CallCode<T>(tmp1, tmp2, fmod(tmp1, tmp2))) {
+                return false;
+            }
+        } else {
+            if (!test->CallCode<T>(tmp1, tmp2, static_cast<T>(tmp1 % tmp2))) {
+                return false;
+            }
+        }
+    }
+
+    if constexpr (std::is_floating_point_v<T>) {
+        T nan = std::numeric_limits<T>::quiet_NaN();
+        if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
+            return false;
+        }
+        if (!test->CallCode<T>(RandomGen<T>(), nan, nan)) {
+            return false;
+        }
+        if (!test->CallCode<T>(0.0, 0.0, nan)) {
+            return false;
+        }
+        if (!test->CallCode<T>(std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity(), nan)) {
+            return false;
+        }
+        if (!test->CallCode<T>(-std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity(), nan)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 template <typename T>
@@ -2760,52 +2782,7 @@ bool TestMod(Encoder32Test *test)
     // Change this for enable print disasm
     test->Dump(false);
 
-    // Main test loop:
-    for (uint64_t i = 0; i < ITERATION; ++i) {
-        // Second type-dependency
-        T tmp1 = RandomGen<T>();
-        T tmp2 = RandomGen<T>();
-        if (tmp2 == 0) {
-            tmp2 += 1;
-        }
-        // Main check - compare parameter and
-        // return value
-        if constexpr (std::is_same<float, T>::value) {
-            if (!test->CallCode<T>(tmp1, tmp2, fmodf(tmp1, tmp2))) {
-                return false;
-            }
-        } else if constexpr (std::is_same<double, T>::value) {
-            if (!test->CallCode<T>(tmp1, tmp2, fmod(tmp1, tmp2))) {
-                return false;
-            }
-        } else {
-            if (!test->CallCode<T>(tmp1, tmp2, static_cast<T>(tmp1 % tmp2))) {
-                return false;
-            }
-        }
-    }
-
-    if constexpr (std::is_floating_point_v<T>) {
-        T nan = std::numeric_limits<T>::quiet_NaN();
-
-        if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
-            return false;
-        }
-        if (!test->CallCode<T>(RandomGen<T>(), nan, nan)) {
-            return false;
-        }
-        if (!test->CallCode<T>(0.0, 0.0, nan)) {
-            return false;
-        }
-        if (!test->CallCode<T>(std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity(), nan)) {
-            return false;
-        }
-        if (!test->CallCode<T>(-std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity(), nan)) {
-            return false;
-        }
-    }
-
-    return true;
+    return TestModMainLoop<T>(test);
 }
 
 TEST_F(Encoder32Test, ModTest)
@@ -2830,13 +2807,54 @@ TEST_F(Encoder32Test, ModTest)
 // TEST_F(Encoder32Test, MemCopyzTest) {
 //  EncodeMemCopyz(MemRef mem_from, MemRef mem_to, size_t size)
 
+// int32_t uint64_t int32_t  int64_t         int32_t int32_t
+//   r0    r2+r3   stack0  stack2(align)   stack4
+using FunctionPtr = uint64_t (*)(uint32_t, uint64_t, int32_t, int64_t, int32_t, int32_t);
+
+template <int ID, typename T>
+bool TestParamMainLoop(FunctionPtr func)
+{
+    for (uint64_t i = 0; i < ITERATION; ++i) {
+        // Second type-dependency
+        auto param_0 = RandomGen<uint32_t>();
+        auto param_1 = RandomGen<uint64_t>();
+        auto param_2 = RandomGen<int32_t>();
+        auto param_3 = RandomGen<int64_t>();
+        auto param_4 = RandomGen<int32_t>();
+        auto param_5 = RandomGen<int32_t>();
+
+        // Main check - compare parameter and
+        // return value
+        const T curr_result = func(param_0, param_1, param_2, param_3, param_4, param_5);
+        T result;
+        if constexpr (ID == 0) {
+            result = param_0;
+        }
+        if constexpr (ID == 1) {
+            result = param_1;
+        }
+        if constexpr (ID == 2) {
+            result = param_2;
+        }
+        if constexpr (ID == 3) {
+            result = param_3;
+        }
+        if constexpr (ID == 4) {
+            result = param_4;
+        }
+        if constexpr (ID == 5) {
+            result = param_5;
+        }
+        if (curr_result != result) {
+            return false;
+        };
+    }
+    return true;
+}
+
 template <int ID, typename T>
 bool TestParam(Encoder32Test *test)
 {
-    // int32_t uint64_t int32_t  int64_t         int32_t int32_t
-    //   r0    r2+r3   stack0  stack2(align)   stack4
-    using FunctPtr = uint64_t (*)(uint32_t, uint64_t, int32_t, int64_t, int32_t, int32_t);
-
     bool is_signed = std::is_signed<T>::value;
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
@@ -2883,45 +2901,9 @@ bool TestParam(Encoder32Test *test)
     auto size = test->GetCallconv()->GetCodeSize();
     void *offset = (static_cast<uint8_t *>(test->GetCallconv()->GetCodeEntry()));
     void *ptr = test->GetCodeAllocator()->AllocateCode(size, offset);
-    auto func = reinterpret_cast<FunctPtr>(ptr);
+    auto func = reinterpret_cast<FunctionPtr>(ptr);
 
-    // Main test loop:
-    for (uint64_t i = 0; i < ITERATION; ++i) {
-        // Second type-dependency
-        auto param_0 = RandomGen<uint32_t>();
-        auto param_1 = RandomGen<uint64_t>();
-        auto param_2 = RandomGen<int32_t>();
-        auto param_3 = RandomGen<int64_t>();
-        auto param_4 = RandomGen<int32_t>();
-        auto param_5 = RandomGen<int32_t>();
-
-        // Main check - compare parameter and
-        // return value
-        const T curr_result = func(param_0, param_1, param_2, param_3, param_4, param_5);
-        T result;
-        if constexpr (ID == 0) {
-            result = param_0;
-        }
-        if constexpr (ID == 1) {
-            result = param_1;
-        }
-        if constexpr (ID == 2) {
-            result = param_2;
-        }
-        if constexpr (ID == 3) {
-            result = param_3;
-        }
-        if constexpr (ID == 4) {
-            result = param_4;
-        }
-        if constexpr (ID == 5) {
-            result = param_5;
-        }
-        if (curr_result != result) {
-            return false;
-        };
-    }
-    return true;
+    return TestParamMainLoop<ID, T>(func);
 }
 
 TEST_F(Encoder32Test, ReadParams)

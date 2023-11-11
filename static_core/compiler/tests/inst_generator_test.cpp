@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -279,7 +279,7 @@ public:
                     return;
                 }
             default:
-                ASSERT_DO(0U, std::cerr << (int)opc << "\n");
+                ASSERT_DO(0U, std::cerr << static_cast<int>(opc) << "\n");
         }
     }
 
@@ -384,8 +384,8 @@ public:
                 auto calc_data = DoLogic<ParamType>(opc, param_1, param_2, param_3, shift_type,
                                                     DataType::GetTypeSize(type, graph->GetArch()));
                 if (calc_data != ret_data) {
-                    std::cout << "  data " << ret_data << " sizeof type  " << (uint64_t)(sizeof(ParamType) * 8U)
-                              << " \n";
+                    std::cout << "  data " << ret_data << " sizeof type  "
+                              << static_cast<uint64_t>(sizeof(ParamType) * 8U) << " \n";
                     std::cout << std::hex << "parameter_1 = " << param_1 << " parameter_2 = " << param_2
                               << "parameter_3 = " << param_3 << "\n";
                     inst->Dump(&std::cerr);
@@ -462,15 +462,15 @@ public:
                 if (calc_data != ret_data) {
                     if constexpr (std::is_same_v<ResultType, double> || std::is_same_v<ParamType, double>) {
                         std::cout << std::hex << " in parameter = " << param_1 << "\n";
-                        std::cout << std::hex << "parameter_1 = " << (double)param_1 << "\n";
+                        std::cout << std::hex << "parameter_1 = " << static_cast<double>(param_1) << "\n";
                     }
 
 #ifndef NDEBUG
                     std::cout << " cast from " << DataType::ToString(VixlExecModule::GetType<ParamType>()) << " to "
                               << DataType::ToString(VixlExecModule::GetType<ResultType>()) << "\n";
 #endif
-                    std::cout << "  data " << ret_data << " sizeof type  " << (uint64_t)(sizeof(ParamType) * 8U)
-                              << " \n";
+                    std::cout << "  data " << ret_data << " sizeof type  "
+                              << static_cast<uint64_t>(sizeof(ParamType) * 8U) << " \n";
                     inst->Dump(&std::cerr);
                     exec_module_.SetDump(true);
                     exec_module_.SetParameter(0U, param_1);
@@ -487,19 +487,20 @@ public:
     {
         switch (shift_type) {
             case ShiftType::LSL:
-                return (uint64_t)value << scale;
+                return static_cast<uint64_t>(value) << scale;
             case ShiftType::ROR:
-                return ((uint64_t)value >> scale) | (value << (type_size - scale));  // NOLINT(hicpp-signed-bitwise)
+                return (static_cast<uint64_t>(value) >> scale) |
+                       (value << (type_size - scale));  // NOLINT(hicpp-signed-bitwise)
             case ShiftType::LSR:
                 if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) {
-                    return ((uint32_t)value) >> (uint32_t)scale;
+                    return static_cast<uint32_t>(value) >> static_cast<uint32_t>(scale);
                 }
                 if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) {
-                    return ((uint64_t)value) >> scale;
+                    return static_cast<uint64_t>(value) >> scale;
                 }
             /* fall-through */
             case ShiftType::ASR:
-                return (int64_t)value >> scale;  // NOLINT(hicpp-signed-bitwise)
+                return static_cast<int64_t>(value) >> scale;  // NOLINT(hicpp-signed-bitwise)
             default:
                 UNREACHABLE();
         }
@@ -652,7 +653,7 @@ public:
                 }
             /* fall-through */
             default:
-                ASSERT_DO(false, std::cerr << "Unsupported!" << (int)opc << "\n");
+                ASSERT_DO(false, std::cerr << "Unsupported!" << static_cast<int>(opc) << "\n");
                 return -1L;
         }
     }
