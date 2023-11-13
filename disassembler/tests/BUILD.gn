@@ -19,7 +19,6 @@ disasm_test_configs = [
   "$ark_root:ark_config",
   "$ark_root/libpandabase:arkbase_public_config",
   "$ark_root/libpandafile:arkfile_public_config",
-#  "$ark_root/disassembler:arkdisassembler_public_config",
   sdk_libc_secshared_config,
 ]
 
@@ -29,7 +28,14 @@ disasm_test_deps = [
   "$ark_root/disassembler:arkdisassembler",
 ]
 
-disasm_test_js_files = [ "disasm_column_numbers", ]
+disasm_test_js_files = [
+  "disasm_column_numbers1",
+  "disasm_column_numbers2",
+  "disasm_column_numbers3",
+  "disasm_column_numbers4",
+  "disasm_column_numbers5",
+  "disasm_column_numbers6",
+]
 
 test_js_path = "//arkcompiler/runtime_core/disassembler/tests/js/"
 
@@ -37,10 +43,12 @@ foreach(file, disasm_test_js_files) {
   es2abc_gen_abc("gen_${file}_abc") {
     test_js = "${test_js_path}${file}.js"
     test_abc = "$target_out_dir/${file}.abc"
-
     src_js = rebase_path(test_js)
     dst_file = rebase_path(test_abc)
-
+    extra_args = [
+      "--debug",
+      "--module",
+    ]
     in_puts = [ test_js ]
     out_puts = [ test_abc ]
   }
@@ -70,10 +78,5 @@ host_unittest_action("DisasmTest") {
 
 group("host_unittest") {
   testonly = true
-  print("-----------------------------------------test------------------------------------------------------")
   deps = [ ":DisasmTestAction" ]
-  print("target_gen_dir: $target_gen_dir")
-  print("target_out_dir: $target_out_dir")
-  print("----------------------------------------disassember-test------------------------------------------------------")
 }
-
