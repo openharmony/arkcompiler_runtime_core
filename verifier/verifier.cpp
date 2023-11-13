@@ -15,21 +15,28 @@
 
 #include "verifier.h"
 
+#include "zlib.h"
+
 #include "file.h"
 
 namespace panda::verifier {
 
-bool Verifier::Verify(const std::string &filename_in)
+bool Verifier::VerifyChecksum(const std::string &filename)
 {
     std::unique_ptr<const panda_file::File> file;
-    auto file_to_verify = panda_file::File::Open(filename_in);
+    auto file_to_verify = panda_file::File::Open(filename);
     file.swap(file_to_verify);
 
     if (file == nullptr) {
         return false;
     }
 
-    return true;
+    uint32_t file_chksum = file->GetHeader()->checksum;
+
+    uint32_t abc_offset = 12U; // the offset of file content after checksum
+    ASSERT(file->GetHeader()->file_size > abc_offset);
+    uint32_t cal_chksum = adler32(1, file->GetBase() + abc_offset, file->GetHeader()->file_size - abc_offset);
+    return file_chksum == cal_chksum;
 }
 
 } // namespace panda::verifier

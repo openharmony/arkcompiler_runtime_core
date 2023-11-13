@@ -52,6 +52,7 @@ group("ark_host_linux_tools_packages") {
       "$ark_root/libpandabase:libarkbase(${host_toolchain})",
       "$ark_root/libpandafile:libarkfile(${host_toolchain})",
       "$ark_root/libziparchive:libarkziparchive(${host_toolchain})",
+      "$ark_root/verifier:ark_verifier(${host_toolchain})",
     ]
   }
   foreach(plugin, enabled_plugins) {
@@ -314,6 +315,7 @@ if (!ark_standalone_build) {
       "$ark_root/libpandafile/tests:host_unittest",
       "$ark_root/libziparchive/tests:host_unittest",
       "$ark_root/platforms/tests:host_unittest",
+      "$ark_root/verifier/tests:host_unittest",
     ]
   }
 

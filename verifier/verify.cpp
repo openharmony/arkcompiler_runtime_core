@@ -14,44 +14,15 @@
  */
 
 #include "verify.h"
-#include "utils/pandargs.h"
 
-void PrintHelp(panda::PandArgParser &pa_parser)
-{
-    std::cerr << "Usage:" << std::endl;
-    std::cerr << "ark_disasm [options] input_file output_file" << std::endl << std::endl;
-    std::cerr << "Supported options:" << std::endl << std::endl;
-    std::cerr << pa_parser.GetHelpString() << std::endl;
-}
+#include "verifier.h"
 
-bool PorcessArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::string> &input_file, int argc,
-                 const char **argv)
+bool Verify(const std::string &input_file)
 {
-    if (!pa_parser.Parse(argc, argv)) {
-        PrintHelp(pa_parser);
-        return false;
+    panda::verifier::Verifier vf {};
+    if (vf.VerifyChecksum(input_file)) {
+        return true;
     }
 
-    if (input_file.GetValue().empty()) {
-        PrintHelp(pa_parser);
-        return false;
-    }
-
-    return true;
-}
-
-int main(int argc, const char **argv)
-{
-    panda::PandArg<bool> help("help", false, "Print this message and exit");
-    panda::PandArg<std::string> input_file("input_file", "", "Path to the abc file");
-
-    panda::PandArgParser pa_parser;
-    pa_parser.Add(&help);
-    pa_parser.Add(&input_file);
-
-    if (!PorcessArgs(pa_parser, input_file, argc, argv)) {
-        return 1;
-    }
-
-    return Verify(input_file.GetValue()) ? 0 : 1;
+    return false;
 }
