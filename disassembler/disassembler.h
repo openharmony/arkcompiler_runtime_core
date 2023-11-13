@@ -133,6 +133,8 @@ private:
     void Serialize(const pandasm::Function::CatchBlock &catch_block, std::ostream &os) const;
     void Serialize(const pandasm::ItemMetadata &meta, const AnnotationList &ann_list, std::ostream &os) const;
     void SerializeLineNumberTable(const panda_file::LineNumberTable &line_number_table, std::ostream &os) const;
+    void SerializeColumnNumberTable(const panda_file::ColumnNumberTable &column_number_table,
+                                    std::ostream &os) const;
     void SerializeLocalVariableTable(const panda_file::LocalVariableTable &local_variable_table,
                                      const pandasm::Function &method, std::ostream &os) const;
     bool IsModuleLiteralOffset(const panda_file::File::EntityId &id) const;
