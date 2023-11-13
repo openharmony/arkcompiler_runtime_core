@@ -602,6 +602,25 @@ void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
     });
 }
 
+template <bool REF_CAN_BE_NULL>
+void PandaEtsVM::UpdateMovedVmRef(Value &ref)
+{
+    ASSERT(ref.IsReference());
+    ObjectHeader *arg = ref.GetAs<ObjectHeader *>();
+    if constexpr (REF_CAN_BE_NULL) {
+        if (arg == nullptr) {
+            return;
+        }
+    } else {
+        ASSERT(arg != nullptr);
+    }
+    if (arg->IsForwarded()) {
+        ObjectHeader *forward_address = mem::GetForwardAddress(arg);
+        ref = Value(forward_address);
+        LOG(DEBUG, GC) << "Forward root object: " << arg << " -> " << forward_address;
+    }
+}
+
 void PandaEtsVM::UpdateVmRefs()
 {
     GetThreadManager()->EnumerateThreads([](ManagedThread *thread) {
@@ -625,23 +644,12 @@ void PandaEtsVM::UpdateVmRefs()
             ++it;  // skip return type
             if (!entrypoint->IsStatic()) {
                 // handle 'this' argument
-                ASSERT(arguments[arg_idx].IsReference());
-                ObjectHeader *arg = arguments[arg_idx].GetAs<ObjectHeader *>();
-                ASSERT(arg != nullptr);
-                ObjectHeader *forward_address = mem::GetForwardAddress(arg);
-                arguments[arg_idx] = Value(forward_address);
-                LOG(DEBUG, GC) << "Forward root object: " << arg << " -> " << forward_address;
+                UpdateMovedVmRef<false>(arguments[arg_idx]);
                 ++arg_idx;
             }
             while (it != panda_file::ShortyIterator()) {
                 if ((*it).GetId() == panda_file::Type::TypeId::REFERENCE) {
-                    ASSERT(arguments[arg_idx].IsReference());
-                    ObjectHeader *arg = arguments[arg_idx].GetAs<ObjectHeader *>();
-                    if (arg != nullptr && arg->IsForwarded()) {
-                        ObjectHeader *forward_address = mem::GetForwardAddress(arg);
-                        arguments[arg_idx] = Value(forward_address);
-                        LOG(DEBUG, GC) << "Forward root object: " << arg << " -> " << forward_address;
-                    }
+                    UpdateMovedVmRef<true>(arguments[arg_idx]);
                 }
                 ++it;
                 ++arg_idx;

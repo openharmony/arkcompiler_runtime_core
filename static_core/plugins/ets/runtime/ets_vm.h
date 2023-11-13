@@ -314,6 +314,14 @@ protected:
     void HandleUncaughtException() override;
 
 private:
+    /**
+     * @brief Update a VM root that has been moved by GC.
+     * @param ref a reference to update, should hold an ObjectHeader pointer
+     * @tparam REF_CAN_BE_NULL true iff it is legal for @param ref to hold a null pointer
+     */
+    template <bool REF_CAN_BE_NULL>
+    static void UpdateMovedVmRef(Value &ref);
+
     void InitializeRandomEngine()
     {
         ASSERT(!random_engine_);
