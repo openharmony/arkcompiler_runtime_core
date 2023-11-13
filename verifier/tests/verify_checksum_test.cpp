@@ -36,9 +36,9 @@ public:
 
 HWTEST_F(VerifierTest, verifier_test_001, TestSize.Level1)
 {
-    std::string file_name = GRAPH_TEST_ABC_DIR "test_checksum.abc";
-    panda::verifier::Verifier ver;
-    EXPECT_TRUE(ver.VerifyChecksum(file_name));
+    const std::string file_name = GRAPH_TEST_ABC_DIR "test_checksum.abc";
+    panda::verifier::Verifier ver {file_name};
+    EXPECT_TRUE(ver.VerifyChecksum());
 }
 
 /**
@@ -49,9 +49,11 @@ HWTEST_F(VerifierTest, verifier_test_001, TestSize.Level1)
 */
 HWTEST_F(VerifierTest, verifier_test_002, TestSize.Level1)
 {
-    std::string file_name = GRAPH_TEST_ABC_DIR "test_checksum.abc";
-    panda::verifier::Verifier ver;
-    EXPECT_TRUE(ver.VerifyChecksum(file_name));
+    const std::string file_name = GRAPH_TEST_ABC_DIR "test_checksum.abc";
+    {
+        panda::verifier::Verifier ver {file_name};
+        EXPECT_TRUE(ver.VerifyChecksum());
+    }
     std::vector<uint8_t> bytes = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x11};
 	
     constexpr char const *mode = "wbe";
@@ -68,26 +70,31 @@ HWTEST_F(VerifierTest, verifier_test_002, TestSize.Level1)
     fp = nullptr;
     EXPECT_TRUE(size == bytes.size());
 
-    EXPECT_FALSE(ver.VerifyChecksum(file_name));
+    {
+        panda::verifier::Verifier ver {file_name};
+        EXPECT_FALSE(ver.VerifyChecksum());
+    }
 }
 
 
 /**
-* @tc.name: verifier_test_002
+* @tc.name: verifier_test_003
 * @tc.desc: Verify the modified checksum bitwidth abc file checksum value function.
 * @tc.type: FUNC
 * @tc.require: file path and name
 */
 HWTEST_F(VerifierTest, verifier_test_003, TestSize.Level1)
 {
-    std::string file_name = GRAPH_TEST_ABC_DIR "test_checksum_bit.abc";
-    panda::verifier::Verifier ver;
-    EXPECT_TRUE(ver.VerifyChecksum(file_name));
+    const std::string file_name = GRAPH_TEST_ABC_DIR "test_checksum_bit.abc";
+    {
+        panda::verifier::Verifier ver {file_name};
+        EXPECT_TRUE(ver.VerifyChecksum());
+    }
     std::vector<uint8_t> bytes = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
 
     FILE *fp = fopen(file_name.c_str(), "wbe");
     if (fp == nullptr) {
-        LOG(ERROR, VERIFIER) << file_name << ",open fail";
+        LOG(ERROR, VERIFIER) << file_name << ", open failed";
     }
     EXPECT_TRUE(fp != nullptr);
 
@@ -99,7 +106,10 @@ HWTEST_F(VerifierTest, verifier_test_003, TestSize.Level1)
     fp = nullptr;
     EXPECT_TRUE(size == bytes.size());
 
-    EXPECT_FALSE(ver.VerifyChecksum(file_name));
+    {
+        panda::verifier::Verifier ver {file_name};
+        EXPECT_FALSE(ver.VerifyChecksum());
+    }
 }
 
 };
