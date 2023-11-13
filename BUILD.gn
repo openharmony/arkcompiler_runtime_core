@@ -323,19 +323,3 @@ if (!ark_standalone_build) {
     deps = [ "$ark_root/compiler/tests:host_unittest" ]
   }
 }
-
-group("arkcompiler_host_linux_tools_packages") {
-   deps = []
-   if (host_os != "mac") {
-     deps += [
-       "$ark_root/assembler:ark_asm(${host_toolchain})",
-       "$ark_root/disassembler:ark_disasm(${host_toolchain})",
-       "$ark_root/libpandabase:libarkbase(${host_toolchain})",
-       "$ark_root/libpandafile:libarkfile(${host_toolchain})",
-       "$ark_root/libziparchive:libarkziparchive(${host_toolchain})",
-     ]
-   }
-   foreach(plugin, enabled_plugins) {
-     deps += [ "$ark_root/plugins/$plugin:arkcompiler_host_linux_tools_packa    ges" ]   
-   }
-}

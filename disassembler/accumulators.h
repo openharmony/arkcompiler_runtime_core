@@ -36,8 +36,6 @@ struct MethodInfo {
     panda_file::ColumnNumberTable column_number_table;
 
     panda_file::LocalVariableTable local_variable_table;
-
-    panda_file::ColumnNumberTable column_number_table;
 };
 
 struct RecordInfo {
