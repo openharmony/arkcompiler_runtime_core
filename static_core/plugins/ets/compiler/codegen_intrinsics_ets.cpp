@@ -26,4 +26,15 @@ void Codegen::CreateMathRoundAway([[maybe_unused]] IntrinsicInst *inst, Reg dst,
 {
     GetEncoder()->EncodeRoundAway(dst, src[0]);
 }
+
+void Codegen::EtsLdundefined([[maybe_unused]] IntrinsicInst *inst, Reg dst, [[maybe_unused]] SRCREGS src)
+{
+    if (GetGraph()->IsJitOrOsrMode()) {
+        GetEncoder()->EncodeMov(dst, Imm(GetRuntime()->GetUndefinedObject()));
+    } else {
+        auto ref = MemRef(ThreadReg(), cross_values::GetEtsCoroutineUndefinedObjectOffset(GetArch()));
+        GetEncoder()->EncodeLdr(dst, false, ref);
+    }
+}
+
 }  // namespace panda::compiler

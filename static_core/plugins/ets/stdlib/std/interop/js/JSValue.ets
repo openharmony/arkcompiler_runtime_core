@@ -19,3 +19,6 @@ export final class JSValue {
     private __internal_field_0: long;
     private __internal_field_1: long;
 }
+
+// NOTE: vpukhov. decide what to do with nullish JSValues
+export type JSValueN = JSValue | null | undefined;

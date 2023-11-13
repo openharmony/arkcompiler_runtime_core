@@ -185,6 +185,9 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressed_string_enabled)
     InitializeArrayClassRoot(ClassRoot::ARRAY_STRING, ClassRoot::STRING,
                              utf::Mutf8AsCString(lang_ctx_.GetStringArrayClassDescriptor()));
 
+    if (!CacheClass(&void_class_, VOID.data())) {
+        return false;
+    }
     if (!CacheClass(&box_boolean_class_, BOX_BOOLEAN.data())) {
         return false;
     }

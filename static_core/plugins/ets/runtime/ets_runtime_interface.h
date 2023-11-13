@@ -29,6 +29,7 @@ public:
     {
         return panda::cross_values::GetEtsCoroutinePromiseClassOffset(arch);
     }
+    uint64_t GetUndefinedObject() const override;
     InteropCallKind GetInteropCallKind(MethodPtr method_ptr) const override;
     char *GetFuncPropName(MethodPtr method_ptr, uint32_t str_id) const override;
     uint64_t GetFuncPropNameOffset(MethodPtr method_ptr, uint32_t str_id) const override;

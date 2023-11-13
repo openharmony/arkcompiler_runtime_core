@@ -106,8 +106,8 @@ function testFields() {
 
     // TODO(ivagin): enable when supported by runtime #12808
     if (false) {
-        fields.nullableString_ = undefined;
-        AssertEq(fields.nullableString_, undefined);
+        fields.nullableString_ = null;
+        AssertEq(fields.nullableString_, null);
     }
 }
 

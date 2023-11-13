@@ -53,6 +53,7 @@ void EtsCoroutine::Initialize()
     // Main EtsCoroutine is Initialized before class linker and promise_class_ptr_ will be set after creating the class
     if (HasManagedEntrypoint()) {
         promise_class_ptr_ = GetPandaVM()->GetClassLinker()->GetPromiseClass()->GetRuntimeClass();
+        undefined_obj_ = GetPandaVM()->GetUndefinedObject();
     }
     ASSERT(promise_class_ptr_ != nullptr || !HasManagedEntrypoint());
 

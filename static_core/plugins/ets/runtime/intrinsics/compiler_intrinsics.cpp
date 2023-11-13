@@ -347,4 +347,9 @@ extern "C" void CompilerEtsStObjByNameObj(panda::Method *method, int32_t id, uin
     CompilerEtsStObjByNameRef(method, id, pc, obj, store_value);
 }
 
+extern "C" panda::ObjectHeader *CompilerEtsLdundefined()
+{
+    return panda::ets::EtsCoroutine::GetCurrent()->GetUndefinedObject();
+}
+
 }  // namespace panda::ets::intrinsics

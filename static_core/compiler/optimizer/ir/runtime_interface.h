@@ -552,6 +552,10 @@ public:
     {
         return 0;
     }
+    virtual uint64_t GetUndefinedObject() const
+    {
+        return 0;
+    }
     virtual ::panda::mem::BarrierType GetPreType() const
     {
         return ::panda::mem::BarrierType::PRE_WRB_NONE;

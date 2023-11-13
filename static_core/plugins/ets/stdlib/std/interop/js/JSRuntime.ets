@@ -315,7 +315,7 @@ export final class JSRuntime {
     private static createFinalizationQueue(): FinalizationQueue {
         assert JSRuntime.finQueue == null;
         JSRuntime.finQueue = new FinalizationQueue((obj: Object): void => { JSRuntime.finalizationQueueCallback(obj); });
-        return JSRuntime.finQueue;
+        return JSRuntime.finQueue!;
     }
 
     public static __initJSCallClass(name: String): boolean {
@@ -338,5 +338,5 @@ export final class JSRuntime {
         throw new Error(msg);
     }
 
-    private static finQueue: FinalizationQueue;
+    private static finQueue: FinalizationQueue | null = null;
 }

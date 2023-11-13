@@ -170,3 +170,57 @@ groups:
         format: [pref_op_v_8_id_32]
         prefix: ets
         intrinsic_name: INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_OBJ
+
+  - title: Load 'undefined' reference into accumulator
+    description: >
+      Load 'undefined' reference into accumulator.
+    verification:
+      - acc_type
+    exceptions:
+      - x_none
+    pseudo: |
+      acc = undefined_object
+    namespace: ets
+    instructions:
+      - sig: ets.ldundefined
+        prefix: ets
+        acc: out:ref
+        format: [pref_op_none]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_LDUNDEFINED
+
+  - title: Move 'undefined' reference into a register
+    description: >
+      Move 'undefined' reference into a register.
+    verification:
+      - none
+    exceptions:
+      - x_none
+    pseudo: |
+      vd = undefined_object
+    namespace: ets
+    instructions:
+      - sig: ets.movundefined v:out:ref
+        prefix: ets
+        acc: none
+        format: [pref_op_v_8]
+
+  - title: Check if accumulator value is 'undefined'
+    description: >
+      Check if accumulator value is 'undefined'.
+    verification:
+      - v1_object
+      - acc_type
+    exceptions:
+      - x_none
+    pseudo: |
+      if acc == undefined_object then
+        acc = 1
+      else
+        acc = 0
+      end
+    namespace: ets
+    instructions:
+      - sig: ets.isundefined
+        prefix: ets
+        acc: inout:ref->i32
+        format: [pref_op_none]

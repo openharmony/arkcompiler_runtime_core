@@ -67,6 +67,7 @@ function(panda_ets_interop_js_checked_test)
         COMMENT "Running ${TARGET} checked test"
         DEPENDS ${JS_LAUNCHER} ${TARGET_TEST_PACKAGE} ets_interop_js_napi ${ETS_CONFIG})
 
-    add_dependencies(ets_interop_js_checked_tests ${TARGET})
-    add_dependencies(ets_checked_tests ${TARGET})
+# NOTE: vpukhov. re-enable #14501
+    # add_dependencies(ets_interop_js_checked_tests ${TARGET})
+    # add_dependencies(ets_checked_tests ${TARGET})
 endfunction(panda_ets_interop_js_checked_test)

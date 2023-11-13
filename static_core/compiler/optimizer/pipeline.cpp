@@ -208,9 +208,8 @@ bool Pipeline::RunOptimizations()
     /* to be removed once generic loop unrolling is implemented */
     ASSERT(graph->IsUnrollComplete());
 
-    if (graph->RunPass<Peepholes>()) {
-        graph->RunPass<BranchElimination>();
-    }
+    graph->RunPass<Peepholes>();
+    graph->RunPass<BranchElimination>();
     graph->RunPass<BalanceExpressions>();
     graph->RunPass<ValNum>();
     if (graph->IsAotMode()) {

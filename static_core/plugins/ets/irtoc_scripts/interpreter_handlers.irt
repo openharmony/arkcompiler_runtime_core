@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+include_relative '../../plugins/ets/irtoc_scripts/common.irt'
+
 ['static', 'virt'].each do |dispatch|
   ['short', 'long', 'range'].each do |flavor|
     macro(:"handle_ets_launch_#{dispatch}_#{flavor}") do |v, id|
@@ -24,4 +26,16 @@
       }
     end
   end
+end
+
+macro(:handle_ets_ldundefined) do
+  set_acc_object(ets_undefined).ref
+end
+
+macro(:handle_ets_movundefined) do |vd|
+  set_object(vd, ets_undefined).ref
+end
+
+macro(:handle_ets_isundefined) do
+  set_acc_primitive(btou32(Compare(acc.ref, ets_undefined).b))
 end

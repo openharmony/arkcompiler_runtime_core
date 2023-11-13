@@ -230,6 +230,8 @@ public:
 
     PANDA_PUBLIC_API ObjectHeader *GetOOMErrorObject() override;
 
+    PANDA_PUBLIC_API ObjectHeader *GetUndefinedObject();
+
     compiler::RuntimeInterface *GetCompilerRuntimeInterface() const override
     {
         return runtime_iface_;
@@ -355,6 +357,7 @@ private:
     CoroutineManager *coroutine_manager_ {nullptr};
     mem::Reference *oom_obj_ref_ {nullptr};
     compiler::RuntimeInterface *runtime_iface_ {nullptr};
+    mem::Reference *undefined_obj_ref_ {nullptr};
     NativeLibraryProvider native_library_provider_;
     os::memory::Mutex finalization_queue_lock_;
     PandaList<EtsObject *> registered_finalization_queue_instances_ GUARDED_BY(finalization_queue_lock_);

@@ -159,10 +159,10 @@ cases:
           foo()
 
     - decl: |-
-          // check that argument with null-default can be assigned a not null value
+          // check that argument with undefined-default can be assigned a not undefined value
           type f = (p: number) => number[]
           function foo(a?: f) {
-              assert a === null
+              assert a === undefined
               a = (t: number): number[] => { return [t]; }
               let x = a(42.0)
               assert x instanceof number[] && x[0] == 42.0
@@ -170,44 +170,44 @@ cases:
       call: foo()
 
     - decl: |-
-          // check that argument with null-default optional can be assigned a null value
+          // check that argument with undefined-default optional can be assigned an undefined value
           type f = (p: number) => number[]
           function foo(a?: f) {
               let x = a(42.0)
               assert x instanceof number[] && x[0] == 42.0
-              a = null
-              assert a === null
+              a = undefined
+              assert a === undefined
           }
       call: |-
           foo((t: number): number[] => { return [t]; })
 
     - decl: |-
-          // check that argument with null-default optional can be assigned a null value
+          // check that argument with undefined-default optional can be assigned an undefined value
           function foo(s?: string) {
               assert s == 'abc'
-              s = null
-              assert s === null
+              s = undefined
+              assert s === undefined
           }
       call: foo('abc')
 
     - decl: |-
-          // check nullable type with null-default optional
-          function foo(s?: string|null): string|null {
+          // check nullable type with undefined-default optional
+          function foo(s?: string|null): string|null|undefined {
               return s === null ? 'null' : s
           }
       call: |-
           assert foo('') == ''
           assert foo('abc') == 'abc'
-          assert foo() == 'null'
+          assert foo() == undefined
           assert foo(null) == 'null'
 
     # mixed optionality
     - decl: |-
           function foo(a: string, b: string = 'an', c?: string, d: string = 'ing'): string {
-              return a + b + (c === null ? 'null' : c) + d
+              return a + b + (c === undefined ? 'undefined' : c!) + d
           }
       call: |-
-          assert foo('') == 'annulling'
+          assert foo('') == 'anundefineding'
           assert foo('c', 'lean', '') == 'cleaning'
           assert foo('ark', ' ', 'compile', 'r') == 'ark compiler'
           // TODO: function call with empty placeholders for optional parameters are not supported yet
@@ -230,9 +230,9 @@ cases:
           assert foo(2, 1, true) == false
 
     - decl: |-
-          function foo(e?: string): string | null {
+          function foo(e?: string): string | undefined {
               return e
           }
       call: |-
-          assert foo() == null
+          assert foo() == undefined
           assert foo('test') == 'test'

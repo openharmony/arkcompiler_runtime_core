@@ -1159,7 +1159,7 @@ export final class MethodCreator {
         ctx.checkError(TypeCreatorCtx.methodAddAccessMod(fptr, this.accessMod.get()))
         for (let a = 0; a < this.params.length(); a++) {
             const par = this.params.at(a)
-            let name = par.name == null ? '' + a : par.name
+            let name = par.name ?? '' + a;
             ctx.checkError(TypeCreatorCtx.methodAddParam(fptr, par.typ.getTypeDescriptor(), name, par.attrs.get()))
         }
         ctx.checkError(TypeCreatorCtx.methodAddResult(fptr, this.result.getTypeDescriptor()))

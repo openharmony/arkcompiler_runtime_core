@@ -143,6 +143,11 @@ bool IsClassClass(Class const *klass)
     return klass->IsClassClass();
 }
 
+bool IsObjectClass(Class const *klass)
+{
+    return klass->IsObjectClass();
+}
+
 struct ClassSubtypingFuns {
     ClassSubtypingCheckFun is_builtin_supertype_of_class;
     ClassSubtypingCheckFun is_class_supertype_of_builtin;
@@ -173,7 +178,7 @@ std::array<ClassSubtypingFuns, Builtin::LAST> class_subtyping_funs {
     /* primitive */ ClassSubtypingFuns {nullptr, nullptr},
     /* reference */ ClassSubtypingFuns {AlwaysTrue, nullptr},
     /* null_reference */ ClassSubtypingFuns {nullptr, AlwaysTrue},
-    /* object */ ClassSubtypingFuns {AlwaysTrue, nullptr},
+    /* object */ ClassSubtypingFuns {AlwaysTrue, IsObjectClass},
     /* type_class */ ClassSubtypingFuns {IsClassClass, nullptr},
     /* array */ ClassSubtypingFuns {IsClassArray, nullptr},
     /* bot */ ClassSubtypingFuns {nullptr, AlwaysTrue}};
