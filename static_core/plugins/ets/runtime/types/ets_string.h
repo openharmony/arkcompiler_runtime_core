@@ -236,7 +236,7 @@ public:
             size_t len = utf::Utf16ToMUtf8Size(GetDataUtf16(), GetUtf16Length()) - 1;
             buf->reserve(len);
             utf::ConvertRegionUtf16ToMUtf8(GetDataUtf16(), buf->data(), GetUtf16Length(), len, 0);
-            return {utf::Mutf8AsCString(buf->data()), buf->size()};
+            return {utf::Mutf8AsCString(buf->data()), len};
         }
         return {utf::Mutf8AsCString(GetDataMUtf8()), static_cast<size_t>(GetLength())};
     }

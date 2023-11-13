@@ -52,10 +52,9 @@ function reflectGetClass(): int {
     result += (Reflect.get(p, "y") as Number == 20) ? 0 : 1
     result += (Reflect.get(p, "z") as Number == 30) ? 0 : 1
 
-    // TODO(shumilov-petr): Replace `null` into `undefined`
     // TODO(kirill-mitkin): Investigate problem with setting static field, failed on heap_verifier 'ETS arm64 FastVerify JIT g1-gc opt 2 with repeats [func-tests]'
-    // result += (Reflect.get(p, "axisnum") == null) ? 0 : 1
-    result += (Reflect.get(p, "qwerty") == null) ? 0 : 1
+    // result += (Reflect.get(p, "axisnum") == undefined) ? 0 : 1
+    result += (Reflect.get(p, "qwerty") == undefined) ? 0 : 1
     result += (Reflect.get(p, 1) == null) ? 0 : 1
 
     return result
@@ -78,10 +77,9 @@ function reflectGetArray(): int {
     result += (Reflect.get(arr, "length") as Number == 3) ? 0 : 1
     result += (Reflect.get(brr, "length") as Number == 4) ? 0 : 1
 
-    // TODO(shumilov-petr): Replace `null` into `undefined`
-    result += (Reflect.get(arr, "qwerty") == null) ? 0 : 1
-    result += (Reflect.get(arr, 10) == null) ? 0 : 1
-    result += (Reflect.get(brr, 4) == null) ? 0 : 1
+    result += (Reflect.get(arr, "qwerty") == undefined) ? 0 : 1
+    result += (Reflect.get(arr, 10) == undefined) ? 0 : 1
+    result += (Reflect.get(brr, 4) == undefined) ? 0 : 1
 
     return result
 }
@@ -97,8 +95,7 @@ function reflectGetLambda(): int {
     result += (Reflect.get(lambda, "length") as Number == 1) ? 0 : 1
     result += (Reflect.get(lambda, "name") == "") ? 0 : 1
 
-    // TODO(shumilov-petr): Replace `null` into `undefined`
-    result += (Reflect.get(lambda, "qwerty") == null) ? 0 : 1
+    result += (Reflect.get(lambda, "qwerty") == undefined) ? 0 : 1
 
     return result
 }

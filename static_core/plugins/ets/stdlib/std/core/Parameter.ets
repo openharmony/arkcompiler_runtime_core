@@ -46,7 +46,7 @@ export final class Parameter extends Object {
         return this.getName() + ": " + this.getType().toString()
     }
 
-    public override equals(oth: Object|null): boolean {
+    public override equals(oth: NullishType): boolean {
         return oth instanceof Parameter &&
                 this.td == (oth as Parameter).td &&
                 this.name == (oth as Parameter).name &&

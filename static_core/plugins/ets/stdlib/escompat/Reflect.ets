@@ -28,8 +28,7 @@ export class Reflect {
     *
     * @returns the value of the field
     */
-    // TODO(shumilov-petr): Make result type `Object | undefined` when `undefined` will be available
-    public static get(target: Object, key: string): Object | null {
+    public static get(target: Object, key: string): Object | undefined {
         if (target instanceof Char ||
             target instanceof Boolean ||
             target instanceof Byte ||
@@ -42,13 +41,11 @@ export class Reflect {
             throw new Error("`target` argument of Reflect.get must have fields")
         }
         if (!Reflect.has(target, key)) {
-            // TODO(shumilov-petr): Replace `null` into `undefined`
-            // return undefined
-            return null
+            return undefined
         }
         let t = Type.of(target)
         if (t instanceof ClassType) {
-            return (Value.of(target) as ClassValue).getFieldByName(key).getData()
+            return (Value.of(target) as ClassValue).getFieldByName(key).getData()!
         } else if (t instanceof ArrayType) {
             if (key == "length") {
                 return new Number((Value.of(target) as ArrayValue).getLength())
@@ -69,9 +66,7 @@ export class Reflect {
             // TODO(shumilov-petr): Not implemented
             throw new Error("Not implemented")
         }
-        // TODO(shumilov-petr): Replace `null` into `undefined`
-        // return undefined
-        return null
+        return undefined
     }
 
     /**
@@ -83,8 +78,7 @@ export class Reflect {
     *
     * @returns the value of the element
     */
-    // TODO(shumilov-petr): Make result type `Object | undefined` when `undefined` will be available
-    public static get(target: Object, index: number): Object | null {
+    public static get(target: Object, index: number): Object | undefined {
         if (target instanceof Char ||
             target instanceof Boolean ||
             target instanceof Byte ||
@@ -97,14 +91,12 @@ export class Reflect {
             throw new Error("`target` argument of Reflect.get must be indexed")
         }
         if (!Reflect.has(target, index)) {
-            // TODO(shumilov-petr): Replace `null` into `undefined`
-            // return undefined
-            return null
+            return undefined
         }
         let t = Type.of(target)
         if (t instanceof ArrayType) {
             let av = Value.of(target) as ArrayValue
-            return av.getElement(index as long).getData()
+            return av.getElement(index as long).getData()!
         } else if (t instanceof EnumType) {
             // TODO(shumilov-petr): Not implemented
             throw new Error("Not implemented")
@@ -115,9 +107,7 @@ export class Reflect {
             // TODO(shumilov-petr): Not implemented
             throw new Error("Not implemented")
         }
-        // TODO(shumilov-petr): Replace `null` into `undefined`
-        // return undefined
-        return null
+        return undefined
     }
 
     /**

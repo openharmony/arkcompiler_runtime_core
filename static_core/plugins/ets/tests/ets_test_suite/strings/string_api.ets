@@ -15,7 +15,7 @@
 
 function main(): void {
     let str1: String = new String();
-    assert str1.length() == 0: "String is not empty";
+    assert str1.length == 0: "String is not empty";
     assert str1.isEmpty(): "String is not empty";
 
     let chars: char[] = [c'a', c'B', c'C', c'd', c'e', c'g', c'X', c'Y', c'z'];
@@ -31,7 +31,7 @@ function main(): void {
     assert str3.contentEquals(cb): "contentEquals is wrong";
 
     str3 = "hello";
-    assert str3.length() == 5: "Length of the string must be 5";
+    assert str3.length == 5: "Length of the string must be 5";
     assert str3.compareTo("hello") == 0: "Strings must be equal";
     assert str3.compareTo("tello") == -12:
             "Result of comparing must be -12, but got " + StringBuilder.toString(str3.compareTo("tello"));
@@ -49,7 +49,7 @@ function main(): void {
     assert chars[4] == c'o': "Fifth letter must be `o`";
 
     str2 = "bytesStr";
-    let byteChars: byte[] = str2.getBytes(0, str2.length());
+    let byteChars: byte[] = str2.getBytes(0, str2.length as int);
     assert byteChars[0] == 98: "First byte must be 98";
     assert byteChars[1] == 121: "Second byte must be 121";
     assert byteChars[2] == 116: "Third byte must be 116";

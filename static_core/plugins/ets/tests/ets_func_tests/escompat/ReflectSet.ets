@@ -68,7 +68,6 @@ function reflectSetClass(): int {
     result += (Reflect.get(p, "y") as Number == 50) ? 0 : 1
     result += (Reflect.get(p, "z") as Number == 60) ? 0 : 1
 
-    // TODO(shumilov-petr): Replace `null` into `undefined`
     // TODO(kirill-mitkin): Investigate problem with setting static field, failed on heap_verifier 'ETS arm64 FastVerify JIT g1-gc opt 2 with repeats [func-tests]'
     // result += (Reflect.set(p, "axisnum", 10 as number) == false) ? 0 : 1
     result += (Reflect.set(p, "x", "string") == false) ? 0 : 1
@@ -90,7 +89,6 @@ function reflectSetArray(): int {
     result += (Reflect.get(arr, 1) as Number == 50) ? 0 : 1
     result += (Reflect.get(arr, 2) as Number == 60) ? 0 : 1
 
-    // TODO(shumilov-petr): Replace `null` into `undefined`
     result += (Reflect.set(arr, 100, 10 as number) == false) ? 0 : 1
     result += (Reflect.set(arr, 0, "string") == false) ? 0 : 1
 

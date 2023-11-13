@@ -62,8 +62,8 @@ function equals(lhs: char[], rhs: char[]): boolean
 
 function main(): int {
 
-    for (let i: int = 0; i <= golden.length(); ++i) {
-        let arr: char[] = golden.getChars(i, golden.length());
+    for (let i: int = 0; i <= golden.getLength(); ++i) {
+        let arr: char[] = golden.getChars(i, golden.getLength());
         if (equals(arr, table1[i])) {
             ++hits;
         }
@@ -76,7 +76,7 @@ function main(): int {
 
     try {
         // end > length
-        let arr: char[] = golden.getChars(1, golden.length() + 1);
+        let arr: char[] = golden.getChars(1, golden.getLength() + 1);
     } catch (e: StringIndexOutOfBoundsException) {
         ++hits;
         if (DUMP) {

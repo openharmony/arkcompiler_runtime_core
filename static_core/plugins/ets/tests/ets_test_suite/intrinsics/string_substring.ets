@@ -16,7 +16,7 @@
 const DUMP: boolean = false;
 const HITS_EXPECTED: int = 40;
 let golden: String = new String("abc\u03a3\u03a8\u03a90123456789!");
-let str_len_plus_1: int = golden.length() + 1;
+let str_len_plus_1: int = golden.getLength() + 1;
 let hits: int = 0;
 
 let string_table1: String[] = [
@@ -64,15 +64,15 @@ let string_table2: String[] = [
 
 function main(): int {
 
-    for (let i: int = 0; i <= golden.length(); ++i) {
-        let subs: String = golden.substring(i, golden.length());
+    for (let i: int = 0; i <= golden.getLength(); ++i) {
+        let subs: String = golden.substring(i, golden.getLength());
         assert i < string_table1.length;
         if (subs == string_table1[i]) {
             ++hits;
         }
         if (DUMP) console.println(subs);
     }
-    for (let i: int = 0; i <= golden.length(); ++i) {
+    for (let i: int = 0; i <= golden.getLength(); ++i) {
         assert i < string_table2.length;
         let subs: String = golden.substring(0, i);
         if (subs == string_table2[i]) {
@@ -81,7 +81,7 @@ function main(): int {
         if (DUMP) console.println(subs);
     }
 
-    assert golden.length() < str_len_plus_1;
+    assert golden.getLength() < str_len_plus_1;
     // If begin_index < 0, then it is assumed to be equal to zero.
     if (golden.substring(-1, 1) == "a") {
         ++hits;

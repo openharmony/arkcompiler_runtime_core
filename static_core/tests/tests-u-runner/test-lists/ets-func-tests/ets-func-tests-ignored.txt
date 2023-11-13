@@ -88,13 +88,6 @@ std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_short_ar
 regression/12581_box_type_array_Long_array.ets
 ### Issue 12581
 regression/12581_custom_class_Engine_array.ets
-### Issue 12562
-std/core/std_core_string_String_italics.ets
-std/core/std_core_string_String_normalize.ets
-std/core/std_core_string_String_toLocaleLowerCase.ets
-std/core/std_core_string_String_toLocaleLowerCase_string.ets
-std/core/std_core_string_String_toLocaleUpperCase_string.ets
-std/core/std_core_string_String_toWellFormed.ets
 ### Issue 12562 end
 ### Issue 12849
 escompat/escompat_Array_single_Test_escompat_Array.ets

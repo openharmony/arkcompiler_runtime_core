@@ -52,9 +52,9 @@ function superMax<T extends Comparable<T>>(items: Item<T>[]): T | null {
 
 function getNumber(param: Margin): int {
     if (param instanceof string) {
-        return (param as string).length()
+        return (param as string).length as int
     }
-    return (param as number)
+    return (param as number) as int
 }
 
 function compareMargin(left: Margin, right: Margin): int {

@@ -131,7 +131,7 @@ function encodeURIImpl(uri: string, ok: boolean[]): string {
     assert ok.length == 128
     let ret = new StringBuilder()
     let i = 0
-    while (i < uri.length()) {
+    while (i < uri.getLength()) {
         let d: int
         try {
             d = uri.codePointAt(i)
@@ -217,7 +217,7 @@ export function encodeURIComponent(uriComponent: string): string {
  */
 export function escape(str: string): string {
     let ret = new StringBuilder()
-    for (let i = 0; i < str.length(); i++) {
+    for (let i = 0; i < str.getLength(); i++) {
         const d = str.charAt(i)
         const c = (d as int) & 0xffff
         assert c >= 0
@@ -255,7 +255,7 @@ function encodedURIHexAt(str: string, i: int): int {
 
 function unescapeImpl(str: string, push: (ret: StringBuilder, unit: int) => void): string {
     let ret = new StringBuilder();
-    for (let i = 0; i < str.length(); i++) {
+    for (let i = 0; i < str.getLength(); i++) {
         const d = str.charAt(i)
         if (d != c'%') {
             ret.append(d)
@@ -325,14 +325,14 @@ function unescapeImpl(str: string, push: (ret: StringBuilder, unit: int) => void
  */
 export function unescape(str: string): string {
     let ret = new StringBuilder();
-    for (let i = 0; i < str.length(); i++) {
+    for (let i = 0; i < str.getLength(); i++) {
         const d = str.charAt(i)
         if (d != c'%') {
             ret.append(d)
             continue
         }
         let unit: int = 0
-        if (i + 5 < str.length() && str.charAt(i + 1) == c'u') {
+        if (i + 5 < str.getLength() && str.charAt(i + 1) == c'u') {
             try {
                 unit = unhex(str.charAt(i + 2)) << 12 | unhex(str.charAt(i + 3)) << 8 | unhex(str.charAt(i + 4)) << 4 | unhex(str.charAt(i + 5))
             } catch (e) {
@@ -343,7 +343,7 @@ export function unescape(str: string): string {
             i += 5
             continue
         }
-        if (i + 2 < str.length()) {
+        if (i + 2 < str.getLength()) {
             try {
                 unit = unhex(str.charAt(i + 1)) << 4 | unhex(str.charAt(i + 2))
             } catch (e) {

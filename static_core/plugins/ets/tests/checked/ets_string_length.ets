@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-//! CHECKER JIT IR Builder inlining String.length()
+//! CHECKER JIT IR Builder inlining String.getLength()
 //! RUN     force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
 //! METHOD  "ETSGLOBAL::main"
 //! PASS_AFTER "IrBuilder"
@@ -27,7 +27,7 @@
 //! INST_NEXT  /ShrI/
 //! INST_NEXT  /IfImm EQ i32/
 
-//! CHECKER AOT IR Builder inlining String.length()
+//! CHECKER AOT IR Builder inlining String.getLength()
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC   options: "--compiler-regex='.*main.*'"
 //! METHOD  "ETSGLOBAL::main"
@@ -55,17 +55,17 @@ function nullString(): String | null {
 
 function main(): int {
     let s = newString();
-    if (s.length() != 5) {
+    if (s.getLength() != 5) {
         return 1;
     }
     let s1 = emptyString();
-    if (s1.length() != 0) {
+    if (s1.getLength() != 0) {
         return 2;
     }
     let s2 = nullString();
     try {
-        // The program must fall into the catch block as s2.length() throws the NullPointerException.
-        if (s2.length() == 0) {
+        // The program must fall into the catch block as s2.getLength() throws the NullPointerException.
+        if (s2.getLength() == 0) {
             return 3;
         }
         return 4;

@@ -34,7 +34,7 @@ final class Runtime {
      *
      * @returns true if Objects are equal
      */
-    public native equals(o1: Object | null, o2: Object | null): boolean;
+    public native equals(o1: NullishType, o2: NullishType): boolean;
 }
 
 export const runtime = new Runtime();

@@ -50,8 +50,8 @@ function main(): int {
     let test = new Testee();
     let result: int = 0;
 
-    let l1: StringToInt = (str: String) => { return str.length() }
-    result = test.callLambda(l1, l1, (str: String) => { return str.length() }, null as StringToInt);
+    let l1: StringToInt = (str: String) => { return str.length as int }
+    result = test.callLambda(l1, l1, (str: String) => { return str.length as int }, null as StringToInt);
     if(result != 15) return 1;
 
     return 0;

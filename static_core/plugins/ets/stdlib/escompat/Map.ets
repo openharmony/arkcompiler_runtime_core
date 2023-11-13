@@ -91,7 +91,7 @@ class MapEntry<K, V> extends Entry<K, V> {
         super(key, value)
     }
 
-    override equals(o: Object | null): boolean {
+    override equals(o: NullishType): boolean {
         if (o instanceof MapEntry) {
             return this.key.equals((o as MapEntry<K, V>).key)
         }

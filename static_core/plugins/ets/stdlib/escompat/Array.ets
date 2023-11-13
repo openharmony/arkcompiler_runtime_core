@@ -60,7 +60,7 @@ class ArrayValuesIterator<T> implements IterableIterator<T> {
  * Represents JS API-compatible Array
  */
 export final class Array<T> implements ReadonlyArray<T> {
-    private buffer: (Object | null)[]
+    private buffer: NullishType[]
     private actualLength: int
 
     /* override */ get length(): number {
@@ -1413,7 +1413,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns `true` if `other` is `Array` instance, both `this` and `other` have
      * same `length()` and all elements are `equals()`, `false` otherwise.
      */
-    public override equals(other: Object|null): boolean {
+    public override equals(other: NullishType): boolean {
         if (!(other instanceof Array)) {
             return false;
         }
