@@ -18,13 +18,33 @@
 
 #include <string>
 
+#include <bytecode_instruction-inl.h>
+#include "file.h"
+
 namespace panda::verifier {
 class Verifier {
 public:
-    Verifier() = default;
+    Verifier(const std::string &filename);
     ~Verifier() = default;
 
-    bool VerifyChecksum(const std::string &filename);
+    bool Verify();
+    bool VerifyChecksum();
+    bool VerifyConstantPool();
+
+private:
+    void GetMethodIds();
+    void GetLiteralIds();
+    bool CheckConstantPool();
+    bool VerifyMethodId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
+    bool VerifyLiteralId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
+    bool VerifyStringId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
+    bool CheckConstantPoolInfo(const panda_file::File::EntityId &method_id);
+
+    std::unique_ptr<const panda_file::File> file_;
+    std::vector<panda_file::File::EntityId> method_ids_;
+    std::vector<uint32_t> literal_ids_;
+
+    static constexpr uint32_t FILE_CONTENT_OFFSET = 12U;
 };
 } // namespace panda::verifier
 

@@ -19,10 +19,6 @@
 
 bool Verify(const std::string &input_file)
 {
-    panda::verifier::Verifier vf {};
-    if (vf.VerifyChecksum(input_file)) {
-        return true;
-    }
-
-    return false;
+    panda::verifier::Verifier vf {input_file};
+    return vf.Verify();
 }
