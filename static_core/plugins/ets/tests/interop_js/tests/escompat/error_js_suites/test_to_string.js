@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "ets_interop_js_gtest.h"
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-namespace panda::ets::interop::js::testing {
+const etsMod = getTestModule('escompat_test');
+const CreateEtsSample = etsMod.getFunction('Error_CreateEtsSample');
+const TestJSToString = etsMod.getFunction('Error_TestJSToString');
 
-class JSExtendEtsTest : public EtsInteropTest {};
-
-TEST_F(JSExtendEtsTest, js_proxy)
-{
-    ASSERT_EQ(true, RunJsTestSuite("js_extend_ets.js"));
+{ // Test JS Error
+  TestJSToString(new Error('message'));
 }
 
-}  // namespace panda::ets::interop::js::testing
+{ // Test ETS Error
+  let v = CreateEtsSample();
+  ASSERT_TRUE(v.toString().includes(v.message.toString()));
+}

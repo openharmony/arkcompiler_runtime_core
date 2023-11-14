@@ -18,11 +18,23 @@
 
 namespace panda::ets::interop::js::testing {
 
-class JSExtendEtsTest : public EtsInteropTest {};
-
-TEST_F(JSExtendEtsTest, js_proxy)
+class ESCompatErrorTest : public EtsInteropTest {};
+TEST_F(ESCompatErrorTest, compat_error)
 {
-    ASSERT_EQ(true, RunJsTestSuite("js_extend_ets.js"));
+    // NOTE (vpukhov): compat accessors
+    ASSERT_EQ(true, RunJsTestSuite("compat_error.js"));
+}
+
+TEST_F(ESCompatErrorTest, compat_error_with_cause)
+{
+    // NOTE (oignatenko) uncomment code in Error_TestJSSampleWithCause after interop will be supported in this direction
+    ASSERT_EQ(true, RunJsTestSuite("error_js_suites/test_cause.js"));
+}
+
+TEST_F(ESCompatErrorTest, compat_error_to_string)
+{
+    // NOTE (oignatenko) uncomment code in Error_TestJSSampleWithCause after interop will be supported in this direction
+    ASSERT_EQ(true, RunJsTestSuite("error_js_suites/test_to_string.js"));
 }
 
 }  // namespace panda::ets::interop::js::testing

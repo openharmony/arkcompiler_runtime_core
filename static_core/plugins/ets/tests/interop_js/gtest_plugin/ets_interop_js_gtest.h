@@ -57,9 +57,9 @@ public:
         return DoRunJsScriptByPath<R>(js_env_, path);
     }
 
-    [[nodiscard]] bool RunJsTestSute(const std::string &path)
+    [[nodiscard]] bool RunJsTestSuite(const std::string &path)
     {
-        return DoRunJsTestSute(js_env_, path);
+        return DoRunJsTestSuite(js_env_, path);
     }
 
     template <typename R, typename... Args>
@@ -84,7 +84,7 @@ public:
     }
 
 private:
-    [[nodiscard]] bool DoRunJsTestSute(napi_env env, const std::string &path)
+    [[nodiscard]] bool DoRunJsTestSuite(napi_env env, const std::string &path)
     {
         std::string full_path = interop_js_test_path_ + "/" + path;
         std::string test_souce_code = ReadFile(full_path);

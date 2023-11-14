@@ -13,16 +13,23 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "ets_interop_js_gtest.h"
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-namespace panda::ets::interop::js::testing {
+const etsMod = getTestModule('escompat_test');
+const CreateEtsSampleWithCause = etsMod.getFunction('Error_CreateEtsSampleWithCause');
+const TestJSWithCause = etsMod.getFunction('Error_TestJSWithCause');
 
-class JSExtendEtsTest : public EtsInteropTest {};
-
-TEST_F(JSExtendEtsTest, js_proxy)
-{
-    ASSERT_EQ(true, RunJsTestSuite("js_extend_ets.js"));
+{ // Test JS Error
+  TestJSWithCause(new Error('message', 'cause'));
 }
 
-}  // namespace panda::ets::interop::js::testing
+{ // Test ETS Error
+  let v = CreateEtsSampleWithCause();
+  ASSERT_TRUE(v instanceof Error);
+
+  ASSERT_EQ(String(v.message), 'message');
+
+  ASSERT_EQ(String(v.cause), 'cause');
+
+  ASSERT_TRUE(String(v.stack).includes('CreateEtsSampleWithCause'));
+}

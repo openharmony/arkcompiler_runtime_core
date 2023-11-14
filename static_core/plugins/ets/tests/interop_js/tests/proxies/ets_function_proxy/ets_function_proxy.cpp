@@ -22,7 +22,7 @@ class EtsFunctionProxyTest : public EtsInteropTest {};
 
 TEST_F(EtsFunctionProxyTest, ets_function_proxy)
 {
-    ASSERT_EQ(true, RunJsTestSute("ets_function_proxy.js"));
+    ASSERT_EQ(true, RunJsTestSuite("ets_function_proxy.js"));
 }
 
 }  // namespace panda::ets::interop::js::testing
