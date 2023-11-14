@@ -79,6 +79,9 @@ public:
 
     inline Method *GetMethodFromCache(File::EntityId id) const
     {
+        // Emulator target doesn't support atomic operations with 128bit structures like MethodCachePair.
+        // Compiler __atomic_load call which is not implemented in emulator target.
+#ifndef PANDA_TARGET_EMULATOR
         uint32_t index = GetMethodIndex(id);
         auto *pair_ptr =
             reinterpret_cast<std::atomic<MethodCachePair> *>(reinterpret_cast<uintptr_t>(&(method_cache_[index])));
@@ -88,11 +91,15 @@ public:
         if (pair.id == id) {
             return pair.ptr;
         }
+#endif
         return nullptr;
     }
 
     inline void SetMethodCache(File::EntityId id, Method *method)
     {
+        // Emulator target doesn't support atomic operations with 128bit structures like MethodCachePair.
+        // Compiler __atomic_load call which is not implemented in emulator target.
+#ifndef PANDA_TARGET_EMULATOR
         MethodCachePair pair;
         pair.id = id;
         pair.ptr = method;
@@ -102,10 +109,14 @@ public:
         TSAN_ANNOTATE_HAPPENS_BEFORE(pair_ptr);
         // Atomic with release order reason: fixes a data race with method_cache_
         pair_ptr->store(pair, std::memory_order_release);
+#endif
     }
 
     inline Field *GetFieldFromCache(File::EntityId id) const
     {
+        // Emulator target doesn't support atomic operations with 128bit structures like FieldCachePair.
+        // Compiler __atomic_load call which is not implemented in emulator target.
+#ifndef PANDA_TARGET_EMULATOR
         uint32_t index = GetFieldIndex(id);
         auto *pair_ptr =
             reinterpret_cast<std::atomic<FieldCachePair> *>(reinterpret_cast<uintptr_t>(&(field_cache_[index])));
@@ -115,11 +126,15 @@ public:
         if (pair.id == id) {
             return pair.ptr;
         }
+#endif
         return nullptr;
     }
 
     inline void SetFieldCache(File::EntityId id, Field *field)
     {
+        // Emulator target doesn't support atomic operations with 128bit structures like FieldCachePair.
+        // Compiler __atomic_load call which is not implemented in emulator target.
+#ifndef PANDA_TARGET_EMULATOR
         uint32_t index = GetFieldIndex(id);
         auto *pair_ptr =
             reinterpret_cast<std::atomic<FieldCachePair> *>(reinterpret_cast<uintptr_t>(&(field_cache_[index])));
@@ -129,10 +144,14 @@ public:
         TSAN_ANNOTATE_HAPPENS_BEFORE(pair_ptr);
         // Atomic with release order reason: fixes a data race with field_cache_
         pair_ptr->store(pair, std::memory_order_release);
+#endif
     }
 
     inline Class *GetClassFromCache(File::EntityId id) const
     {
+        // Emulator target doesn't support atomic operations with 128bit structures like ClassCachePair.
+        // Compiler __atomic_load call which is not implemented in emulator target.
+#ifndef PANDA_TARGET_EMULATOR
         uint32_t index = GetClassIndex(id);
         auto *pair_ptr =
             reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(class_cache_[index])));
@@ -142,11 +161,15 @@ public:
         if (pair.id == id) {
             return pair.ptr;
         }
+#endif
         return nullptr;
     }
 
     inline void SetClassCache(File::EntityId id, Class *clazz)
     {
+        // Emulator target doesn't support atomic operations with 128bit structures like ClassCachePair.
+        // Compiler __atomic_load call which is not implemented in emulator target.
+#ifndef PANDA_TARGET_EMULATOR
         ClassCachePair pair;
         pair.id = id;
         pair.ptr = clazz;
@@ -156,6 +179,7 @@ public:
         TSAN_ANNOTATE_HAPPENS_BEFORE(pair_ptr);
         // Atomic with release order reason: fixes a data race with class_cache_
         pair_ptr->store(pair, std::memory_order_release);
+#endif
     }
 
     inline void Clear()
