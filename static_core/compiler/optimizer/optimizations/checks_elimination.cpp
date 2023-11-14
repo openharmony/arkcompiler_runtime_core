@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -777,14 +777,13 @@ Inst *ChecksElimination::FindOptimalSaveStateForHoist(Inst *inst, Inst **optimal
         bool inputs_are_dominate = true;
         for (size_t i = 0; i < inst->GetInputsCount() - 1; ++i) {
             auto input = inst->GetInput(i).GetInst();
-            if (input->IsDominate(insert_after)) {
-                continue;
-            }
-            if (insert_after->GetBasicBlock() == input->GetBasicBlock()) {
-                insert_after = input;
-            } else {
-                inputs_are_dominate = false;
-                break;
+            if (!input->IsDominate(insert_after)) {
+                if (insert_after->GetBasicBlock() == input->GetBasicBlock()) {
+                    insert_after = input;
+                } else {
+                    inputs_are_dominate = false;
+                    break;
+                }
             }
         }
 
@@ -1054,7 +1053,7 @@ bool ChecksElimination::TryInsertDeoptimization(LoopInfo loop_info, Inst *len_ar
             InsertBoundsCheckDeoptimization(cc, result_len_array, max_add, upper, ss, insert_deopt_after, opcode);
         } else if (lower_range.IsConst() && lower_range.GetLeft() == 0 && countable_loop_info.normalized_cc == CC_LT &&
                    result_len_array == upper && max_add == static_cast<int64_t>(const_step) - 1) {
-            // For (int i = 0; i < len; i += x) process(a[i], ..., a[i + x - 1])
+            // for (int i = 0; i < len; i += x) process(a[i], ..., a[i + x - 1])
             // deoptimize if len % x != 0
             auto zero_const = GetGraph()->FindOrCreateConstant(0);
             InsertBoundsCheckDeoptimization(ConditionCode::CC_NE, result_len_array, const_step, zero_const, ss,

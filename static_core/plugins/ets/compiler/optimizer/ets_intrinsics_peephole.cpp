@@ -27,6 +27,7 @@ bool Peepholes::PeepholeStringEquals([[maybe_unused]] GraphVisitor *v, Intrinsic
 
     auto input0 = intrinsic->GetInput(0).GetInst();
     auto input1 = intrinsic->GetInput(1).GetInst();
+
     if (input0->IsNullPtr() || input1->IsNullPtr()) {
         auto bb = intrinsic->GetBasicBlock();
         auto graph = bb->GetGraph();

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,7 +94,7 @@ void CodeInfoBuilder::EndStackMap()
 
 void CodeInfoBuilder::DumpCurrentStackMap(std::ostream &stream) const
 {
-    stream << "Stackmap #" << (stack_maps_.GetRowsCount() - 1) << ": npc=0x" << std::hex
+    stream << "Stackmap #" << stack_maps_.GetRowsCount() - 1 << ": npc=0x" << std::hex
            << StackMap::UnpackAddress(current_stack_map_[StackMap::COLUMN_NATIVE_PC], arch_) << ", bpc=0x" << std::hex
            << current_stack_map_[StackMap::COLUMN_BYTECODE_PC];
     if (current_stack_map_[StackMap::COLUMN_INLINE_INFO_INDEX] != StackMap::NO_VALUE) {

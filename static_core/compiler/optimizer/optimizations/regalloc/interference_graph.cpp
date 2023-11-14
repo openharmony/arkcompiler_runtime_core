@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,6 +124,7 @@ ArenaVector<unsigned> InterferenceGraph::LexBFS() const
         auto it = std::stable_partition(out.begin() + pos, out.begin() + prev_end,
                                         [id, &out, this](unsigned val) { return HasEdge(id, out[val]); });
         auto pivot = static_cast<unsigned>(std::distance(out.begin(), it));
+
         // Split group if needed
         if (pivot > pos && pivot != prev_end) {
             boundary_stack.push_back(pivot);

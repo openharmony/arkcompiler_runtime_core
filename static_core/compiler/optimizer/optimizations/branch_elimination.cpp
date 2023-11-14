@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -215,6 +215,7 @@ void BranchElimination::EliminateBranch(BasicBlock *if_block, BasicBlock *elimin
         return pred != if_block && !eliminated_block->IsDominate(pred);
     });
     bool dominates_all_preds = (it == preds.cend());
+
     if (preds.size() > 1 && !dominates_all_preds) {
         RemovePredecessorUpdateDF(eliminated_block, if_block);
         if_block->RemoveSucc(eliminated_block);
@@ -350,6 +351,7 @@ std::optional<bool> BranchElimination::GetCompareAnyTypeResult(IfImmInst *if_imm
     auto compare_any = if_imm->GetInput(0).GetInst()->CastToCompareAnyType();
     Inst *input = compare_any->GetInput(0).GetInst();
     const auto it = same_input_compare_any_type_.find(input);
+
     if (it == same_input_compare_any_type_.end()) {
         return std::nullopt;
     }

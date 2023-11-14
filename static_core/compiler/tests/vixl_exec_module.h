@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,27 +43,27 @@ T CutValue(uint64_t data, DataType::Type type)
             ASSERT(false);
             return -1;
         case (DataType::BOOL):
-            return static_cast<T>((static_cast<bool>(data)));
+            return (T)((bool)(data));
         case (DataType::UINT8):
-            return static_cast<T>((static_cast<uint8_t>(data)));
+            return (T)((uint8_t)(data));
         case (DataType::INT8):
-            return static_cast<T>((static_cast<int8_t>(data)));
+            return (T)((int8_t)(data));
         case (DataType::UINT16):
-            return static_cast<T>((static_cast<uint16_t>(data)));
+            return (T)((uint16_t)(data));
         case (DataType::INT16):
-            return static_cast<T>((static_cast<int16_t>(data)));
+            return (T)((int16_t)(data));
         case (DataType::UINT32):
-            return static_cast<T>((static_cast<uint32_t>(data)));
+            return (T)((uint32_t)(data));
         case (DataType::INT32):
-            return static_cast<T>((static_cast<int32_t>(data)));
+            return (T)((int32_t)(data));
         case (DataType::UINT64):
-            return static_cast<T>((static_cast<uint64_t>(data)));
+            return (T)((uint64_t)(data));
         case (DataType::INT64):
-            return static_cast<T>((static_cast<int64_t>(data)));
+            return (T)((int64_t)(data));
         case (DataType::FLOAT32):
-            return static_cast<T>((static_cast<float>(data)));
+            return (T)((float)(data));
         case (DataType::FLOAT64):
-            return static_cast<T>((static_cast<double>(data)));
+            return (T)((double)(data));
     }
     return 0;
 }

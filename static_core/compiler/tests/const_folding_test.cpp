@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,6 +84,7 @@ public:
             inst = graph->FindConstant(DataType::INT64, dst);
         } else if (dst_type == DataType::FLOAT32) {
             inst = graph->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(dst));
+
         } else if (dst_type == DataType::FLOAT64) {
             inst = graph->FindConstant(DataType::FLOAT64, bit_cast<uint64_t, double>(dst));
         }
@@ -201,7 +202,7 @@ TEST_F(ConstFoldingTest, NegFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, static_cast<float>(12U));
+        CONSTANT(0U, (float)12U);
         BASIC_BLOCK(2U, 1U)
         {
             INST(1U, Opcode::Neg).f32().Inputs(0U);
@@ -278,7 +279,7 @@ TEST_F(ConstFoldingTest, AbsFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(-12.0));
+        CONSTANT(0U, (float)-12.0);
         BASIC_BLOCK(2U, 1U)
         {
             INST(1U, Opcode::Abs).f32().Inputs(0U);
@@ -396,8 +397,8 @@ TEST_F(ConstFoldingTest, AddInt8Test)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<uint8_t>(0xffffffffU));
-        CONSTANT(1U, static_cast<uint8_t>(1U));
+        CONSTANT(0U, (uint8_t)0xffffffffU);
+        CONSTANT(1U, (uint8_t)1U);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Add).u8().Inputs(0U, 1U);
@@ -437,8 +438,8 @@ TEST_F(ConstFoldingTest, AddFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(-2.0));
+        CONSTANT(0U, (float)3.0);
+        CONSTANT(1U, (float)-2.0);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Add).f32().Inputs(0U, 1U);
@@ -559,8 +560,8 @@ TEST_F(ConstFoldingTest, SubFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(2.0));
+        CONSTANT(0U, (float)3.0);
+        CONSTANT(1U, (float)2.0);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Sub).f32().Inputs(0U, 1U);
@@ -694,8 +695,8 @@ TEST_F(ConstFoldingTest, MulFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(2.0));
+        CONSTANT(0U, (float)3.0);
+        CONSTANT(1U, (float)2.0);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Mul).f32().Inputs(0U, 1U);
@@ -898,8 +899,8 @@ TEST_F(ConstFoldingTest, DivFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(2.0));
+        CONSTANT(0U, (float)3.0);
+        CONSTANT(1U, (float)2.0);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Div).f32().Inputs(0U, 1U);
@@ -958,8 +959,8 @@ TEST_F(ConstFoldingTest, MinFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(2.0));
+        CONSTANT(0U, (float)3.0);
+        CONSTANT(1U, (float)2.0);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Min).f32().Inputs(0U, 1U);
@@ -1112,8 +1113,8 @@ TEST_F(ConstFoldingTest, MaxFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(2.0));
+        CONSTANT(0U, (float)3.0);
+        CONSTANT(1U, (float)2.0);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Max).f32().Inputs(0U, 1U);
@@ -2647,8 +2648,8 @@ TEST_F(ConstFoldingTest, MulFloatZeroTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(0.0));
+        CONSTANT(0U, (float)3.0);
+        CONSTANT(1U, (float)0.0);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Mul).f32().Inputs(0U, 1U);

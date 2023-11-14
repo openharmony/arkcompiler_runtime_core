@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,6 +144,7 @@ public:
         return 0;
     }
 
+    /**********************************************************************************/
     /// Binary file information
     virtual BinaryFilePtr GetBinaryFileForMethod([[maybe_unused]] MethodPtr method) const
     {
@@ -156,6 +157,7 @@ public:
         return cross_values::GetFileBaseOffset(arch);
     }
 
+    /**********************************************************************************/
     /// Method information
     virtual MethodPtr GetMethodById([[maybe_unused]] MethodPtr parent_method, [[maybe_unused]] MethodId id) const
     {
@@ -515,6 +517,7 @@ public:
         return 0;
     }
 
+    /**********************************************************************************/
     /// Exec state information
     size_t GetTlsFrameKindOffset(Arch arch) const
     {
@@ -579,6 +582,7 @@ public:
         return 0;
     }
 
+    /**********************************************************************************/
     /// Array information
     uint32_t GetClassArraySize(Arch arch) const
     {
@@ -615,6 +619,7 @@ public:
         return panda::cross_values::GetCoretypesArrayLengthOffset(arch);
     }
 
+    /**********************************************************************************/
     /// String information
     virtual bool IsCompressedStringsEnabled() const
     {
@@ -650,6 +655,7 @@ public:
         return cross_values::GetManagedThreadStringClassPtrOffset(arch);
     }
 
+    /**********************************************************************************/
     /// managed Thread object information
 
     uint32_t GetThreadObjectOffset(Arch arch) const
@@ -657,6 +663,7 @@ public:
         return panda::cross_values::GetManagedThreadObjectOffset(arch);
     }
 
+    /**********************************************************************************/
     /// TLAB information
 
     virtual size_t GetTLABMaxSize() const
@@ -692,6 +699,7 @@ public:
         return panda::cross_values::GetTlabMemoryEndAddrOffset(arch);
     }
 
+    /**********************************************************************************/
     /// Object information
     virtual ClassPtr GetClass([[maybe_unused]] MethodPtr method, [[maybe_unused]] IdType id) const
     {
@@ -781,6 +789,7 @@ public:
         return StringCtorType::UNKNOWN;
     }
 
+    /**********************************************************************************/
     /// Class information
 
     // Returns Class Id for Field.
@@ -869,6 +878,7 @@ public:
         return panda::cross_values::GetClassMethodsOffset(arch);
     }
 
+    /**********************************************************************************/
     /// Field information
 
     /**
@@ -1012,6 +1022,7 @@ public:
         return 0;
     }
 
+    /**********************************************************************************/
     /// Type information
     virtual ClassPtr ResolveType([[maybe_unused]] MethodPtr method, [[maybe_unused]] size_t unused) const
     {
@@ -1048,6 +1059,7 @@ public:
         return 0;
     }
 
+    /**********************************************************************************/
     /// Entrypoints
 #include "compiler_interface_extensions.inl.h"
 #include <intrinsics_enum.inl>
@@ -1114,6 +1126,7 @@ public:
         UNREACHABLE();
     }
 
+    /**********************************************************************************/
     /// Dynamic object information
 
     virtual uint32_t GetFunctionTargetOffset([[maybe_unused]] Arch arch) const
@@ -1172,6 +1185,7 @@ public:
         return 0;
     }
 
+    /**********************************************************************************/
     /**
      * Check if GC can be triggered during call.
      * This is possible when method A calling method B and waiting while B is compiling.
@@ -1181,6 +1195,7 @@ public:
         return false;
     }
 
+    /**********************************************************************************/
     /// Bytecode profiling
     using BytecodeProfile = uintptr_t;
     using MethodProfile = profiling::ProfileType;

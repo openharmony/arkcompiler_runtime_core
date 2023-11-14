@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,6 +104,7 @@ bool Cleanup::RunOnce(ArenaSet<BasicBlock *> *empty_blocks, ArenaSet<BasicBlock 
     bool modified = false;
     auto marker_holder = MarkerHolder(GetGraph());
     auto dead_mrk = marker_holder.GetMarker();
+
     // Check all basic blocks in "old" list
     for (auto bb : *empty_blocks) {
         // In some tricky cases block may be already deleted in previous iteration

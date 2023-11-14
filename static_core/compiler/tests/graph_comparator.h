@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,8 +70,17 @@ public:
                           block2->AllInsts().end(), inst_cmp);
     }
 
-    bool InstInitialCompare(Inst *inst1, Inst *inst2)
+    // NOLINTNEXTLINE(readability-function-size)
+    bool Compare(Inst *inst1, Inst *inst2)
     {
+        if (auto it = inst_compare_map_.insert({inst1, inst2}); !it.second) {
+            if (inst2 == it.first->second) {
+                return true;
+            }
+            inst_compare_map_.erase(inst1);
+            return false;
+        }
+
         if (inst1->GetOpcode() != inst2->GetOpcode() || inst1->GetType() != inst2->GetType() ||
             inst1->GetInputsCount() != inst2->GetInputsCount()) {
             inst_compare_map_.erase(inst1);
@@ -110,8 +119,6 @@ public:
                 }
             }
         }
-        return true;
-    }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage
 #define CAST(Opc) CastTo##Opc()
@@ -121,9 +128,6 @@ public:
         inst_compare_map_.erase(inst1);                                                                  \
         return false;                                                                                    \
     }
-
-    bool InstPropertiesCompare(Inst *inst1, Inst *inst2)
-    {
         CHECK(Cast, GetOperandsType)
         CHECK(Cmp, GetOperandsType)
 
@@ -160,11 +164,6 @@ public:
         CHECK(OrI, GetImm)
         CHECK(XorI, GetImm)
 
-        return true;
-    }
-
-    bool InstAdditionalPropertiesCompare(Inst *inst1, Inst *inst2)
-    {
         CHECK(LoadArray, GetNeedBarrier)
         CHECK(LoadArrayPair, GetNeedBarrier)
         CHECK(StoreArray, GetNeedBarrier)
@@ -225,70 +224,8 @@ public:
         // CHECK(IsInstance, GetTypeId)
         // CHECK(LoadString, GetTypeId)
         // CHECK(LoadType, GetTypeId)
-
-        return true;
-    }
 #undef CHECK
 #undef CAST
-
-    bool InstSaveStateCompare(Inst *inst1, Inst *inst2)
-    {
-        auto *sv_st1 = static_cast<SaveStateInst *>(inst1);
-        auto *sv_st2 = static_cast<SaveStateInst *>(inst2);
-        if (sv_st1->GetImmediatesCount() != sv_st2->GetImmediatesCount()) {
-            inst_compare_map_.erase(inst1);
-            return false;
-        }
-
-        std::vector<VirtualRegister::ValueType> regs1;
-        std::vector<VirtualRegister::ValueType> regs2;
-        regs1.reserve(sv_st1->GetInputsCount());
-        regs2.reserve(sv_st2->GetInputsCount());
-        for (size_t i {0}; i < sv_st1->GetInputsCount(); ++i) {
-            regs1.emplace_back(sv_st1->GetVirtualRegister(i).Value());
-            regs2.emplace_back(sv_st2->GetVirtualRegister(i).Value());
-        }
-        std::sort(regs1.begin(), regs1.end());
-        std::sort(regs2.begin(), regs2.end());
-        if (regs1 != regs2) {
-            inst_compare_map_.erase(inst1);
-            return false;
-        }
-        if (sv_st1->GetImmediatesCount() != 0) {
-            auto eq_lambda = [](SaveStateImm i1, SaveStateImm i2) {
-                return i1.value == i2.value && i1.vreg == i2.vreg && i1.vreg_type == i2.vreg_type && i1.type == i2.type;
-            };
-            if (!std::equal(sv_st1->GetImmediates()->begin(), sv_st1->GetImmediates()->end(),
-                            sv_st2->GetImmediates()->begin(), eq_lambda)) {
-                inst_compare_map_.erase(inst1);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    bool Compare(Inst *inst1, Inst *inst2)
-    {
-        if (auto it = inst_compare_map_.insert({inst1, inst2}); !it.second) {
-            if (inst2 == it.first->second) {
-                return true;
-            }
-            inst_compare_map_.erase(inst1);
-            return false;
-        }
-
-        if (!InstInitialCompare(inst1, inst2)) {
-            return false;
-        }
-
-        if (!InstPropertiesCompare(inst1, inst2)) {
-            return false;
-        }
-
-        if (!InstAdditionalPropertiesCompare(inst1, inst2)) {
-            return false;
-        }
-
         if (inst1->GetOpcode() == Opcode::Constant) {
             auto c1 = inst1->CastToConstant();
             auto c2 = inst2->CastToConstant();
@@ -322,7 +259,38 @@ public:
             }
         }
         if (inst1->IsSaveState()) {
-            return InstSaveStateCompare(inst1, inst2);
+            auto *sv_st1 = static_cast<SaveStateInst *>(inst1);
+            auto *sv_st2 = static_cast<SaveStateInst *>(inst2);
+            if (sv_st1->GetImmediatesCount() != sv_st2->GetImmediatesCount()) {
+                inst_compare_map_.erase(inst1);
+                return false;
+            }
+
+            std::vector<VirtualRegister::ValueType> regs1;
+            std::vector<VirtualRegister::ValueType> regs2;
+            regs1.reserve(sv_st1->GetInputsCount());
+            regs2.reserve(sv_st2->GetInputsCount());
+            for (size_t i {0}; i < sv_st1->GetInputsCount(); ++i) {
+                regs1.emplace_back(sv_st1->GetVirtualRegister(i).Value());
+                regs2.emplace_back(sv_st2->GetVirtualRegister(i).Value());
+            }
+            std::sort(regs1.begin(), regs1.end());
+            std::sort(regs2.begin(), regs2.end());
+            if (regs1 != regs2) {
+                inst_compare_map_.erase(inst1);
+                return false;
+            }
+            if (sv_st1->GetImmediatesCount() != 0) {
+                auto eq_lambda = [](SaveStateImm i1, SaveStateImm i2) {
+                    return i1.value == i2.value && i1.vreg == i2.vreg && i1.vreg_type == i2.vreg_type &&
+                           i1.type == i2.type;
+                };
+                if (!std::equal(sv_st1->GetImmediates()->begin(), sv_st1->GetImmediates()->end(),
+                                sv_st2->GetImmediates()->begin(), eq_lambda)) {
+                    inst_compare_map_.erase(inst1);
+                    return false;
+                }
+            }
         }
         return true;
     }

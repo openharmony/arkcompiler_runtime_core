@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -230,6 +230,7 @@ void AdjustRefs::InsertMem(Inst *org, Inst *base, Inst *index, uint8_t scale)
 // to
 //   5.ptr AddI v1, 0x10 + (0xN << 3) -> v6
 //   6.i64 Load v5, v2 -> ....
+//
 void AdjustRefs::ProcessIndex(Inst *mem)
 {
     Inst *index = mem->GetInput(1).GetInst();

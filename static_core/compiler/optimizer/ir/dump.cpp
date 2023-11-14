@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -420,8 +420,8 @@ void AnyTypeCheckInst::DumpOpcode(std::ostream *out) const
     ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
     ArenaString any_base_type(AnyTypeTypeToString(GetAnyType()), adapter);
     (*out) << std::setw(INDENT_OPCODE)
-           << (opcode + space + any_base_type + (IsIntegerWasSeen() ? " i" : "") + (IsSpecialWasSeen() ? " s" : "") +
-               (IsTypeWasProfiled() ? " p" : "") + space);
+           << opcode + space + any_base_type + (IsIntegerWasSeen() ? " i" : "") + (IsSpecialWasSeen() ? " s" : "") +
+                  (IsTypeWasProfiled() ? " p" : "") + space;
 }
 
 void HclassCheckInst::DumpOpcode(std::ostream *out) const
@@ -563,8 +563,8 @@ void CastInst::DumpOpcode(std::ostream *out) const
     const auto &adapter = GetBasicBlock()->GetGraph()->GetLocalAllocator()->Adapter();
     ArenaString space(" ", adapter);
     (*out) << std::setw(INDENT_OPCODE)
-           << (ArenaString(GetOpcodeString(GetOpcode()), adapter) + space +
-               ArenaString(DataType::ToString(GetOperandsType()), adapter));
+           << ArenaString(GetOpcodeString(GetOpcode()), adapter) + space +
+                  ArenaString(DataType::ToString(GetOperandsType()), adapter);
 }
 
 void NewObjectInst::DumpOpcode(std::ostream *out) const

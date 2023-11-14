@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2014,7 +2014,7 @@ TEST_F(CodegenTest, ResolveParamSequence)
             auto dst = result[j].first;
             for (uint8_t k = j + 1U; k < reg_size; ++k) {
                 if (result[k].second == dst && result[k].second != tmp_reg) {
-                    std::cerr << " first = " << result[k].first << " tmp = " << (reg_size + 5U) << "\n";
+                    std::cerr << " first = " << result[k].first << " tmp = " << reg_size + 5U << "\n";
                     std::cerr << " Before:\n";
                     for (auto &it : orig_vector) {
                         std::cerr << " " << (size_t)it.first << "<-" << (size_t)it.second << "\n";

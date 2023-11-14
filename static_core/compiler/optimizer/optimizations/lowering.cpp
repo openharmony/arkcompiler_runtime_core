@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -641,6 +641,7 @@ void Lowering::LowerMulDivMod(Inst *inst)
 {
     ASSERT(inst->GetOpcode() == OPCODE);
     auto graph = inst->GetBasicBlock()->GetGraph();
+
     if (graph->IsInstThrowable(inst)) {
         return;
     }
@@ -840,6 +841,7 @@ Inst *Lowering::LowerBinaryOperationWithShiftedOperand(Inst *inst)
     InstructionsCapture<2U> insts {};
     InstructionsCapture<3U> inv_insts {};
     constexpr auto FLAGS = IS_COMMUTATIVE ? Flags::COMMUTATIVE : Flags::NONE;
+    // constexpr auto OPCODE = OPCODE;  // NOLINT(readability-magic-numbers)
 
     // We're expecting that at this point all "shift by immediate" patterns were replaced with ShlI/ShrI/AShrI
     // clang-format off
@@ -886,6 +888,7 @@ void Lowering::LowerUnaryOperationWithShiftedOperand(Inst *inst)
 {
     OperandsCapture<1> operands {};
     InstructionsCapture<2U> insts {};
+    // constexpr auto OPCODE = OPCODE;  // NOLINT(readability-magic-numbers)
     // We're expecting that at this point all "shift by immediate" patterns were replaced with ShlI/ShrI/AShrI
     // clang-format off
     using Matcher = AnyOf<UnaryOp<OPCODE, SHLI<SRC0>>,

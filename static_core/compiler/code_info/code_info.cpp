@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ void CodeInfo::Dump(std::ostream &stream, const StackMap &stack_map, Arch arch) 
     stream << "Stackmap #" << stack_map.GetRow() << ": npc=0x" << std::hex << stack_map.GetNativePcUnpacked(arch)
            << ", bpc=0x" << std::hex << stack_map.GetBytecodePc();
     if (stack_map.HasInlineInfoIndex()) {
-        stream << ", inline_depth=" << (GetInlineDepth(stack_map) + 1);
+        stream << ", inline_depth=" << GetInlineDepth(stack_map) + 1;
     }
     if (stack_map.HasRootsRegMaskIndex() || stack_map.HasRootsStackMaskIndex()) {
         stream << ", roots=[";

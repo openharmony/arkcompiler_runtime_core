@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1159,6 +1159,7 @@ TEST_F(IfMergingTest, ConstantPhiLoopBackEdge)
  *      \----[3]  [exit]
  *
  * Transform to:
+ *
  * [0] -> [3] -> [exit]
  *
  */
@@ -1213,6 +1214,7 @@ TEST_F(IfMergingTest, ConstantPhiUnrollLoop)
  *      \----[3]  [exit]
  *
  * Transform to:
+ *
  *           [0]
  *            |
  *            v
@@ -1274,6 +1276,7 @@ TEST_F(IfMergingTest, ConstantPhiRemoveLoopExit)
  *      \----[3]  [exit]
  *
  * Transform to:
+ *
  * [0] -> [2] -> [exit]
  *
  */
@@ -1326,6 +1329,7 @@ TEST_F(IfMergingTest, ConstantPhiRemoveLoop)
  *      \-----/  [exit]
  *
  * Transform to:
+ *
  * [0] -> [2] -> [exit]
  *
  */
@@ -1376,6 +1380,7 @@ TEST_F(IfMergingTest, ConstantPhiRemoveEmptyLoop)
  *      \-----/  [exit]
  *
  * Could be transformed to:
+ *
  * [0] -> [2] -> [2] -> [exit]
  *
  * but basic block 2 would be duplicated. Not applied

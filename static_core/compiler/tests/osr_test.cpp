@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -208,7 +208,7 @@ TEST_F(OsrTest, OsrAfterIFrameRestoreAccAfterVoid)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
 
     ScopeEvents scope_events;
-    runner.Run(OSR_AFTER_IFRAME_RESTORE_ACC_AFTER_VOID, static_cast<ssize_t>(0U));
+    runner.Run(OSR_AFTER_IFRAME_RESTORE_ACC_AFTER_VOID, (ssize_t)0U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osr_events = events->Select<events::EventsMemory::OsrEntryEvent>();
     ASSERT_EQ(osr_events.size(), 1U);

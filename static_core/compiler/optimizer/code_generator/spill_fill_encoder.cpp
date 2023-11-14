@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -156,29 +156,6 @@ void SpillFillEncoder::EncodeSpillFill()
     }
 }
 
-void SpillFillEncoder::EncodeImmWithCorrectType(DataType::Type sf_type, MemRef dst_mem, ConstantInst *const_inst)
-{
-    ASSERT(DataType::IsTypeNumeric(sf_type));
-    switch (sf_type) {
-        case DataType::Type::FLOAT32: {
-            auto imm = const_inst->GetFloatValue();
-            encoder_->EncodeSti(imm, dst_mem);
-            break;
-        }
-        case DataType::Type::FLOAT64: {
-            auto imm = const_inst->GetDoubleValue();
-            encoder_->EncodeSti(imm, dst_mem);
-            break;
-        }
-        default: {
-            auto imm = const_inst->GetRawValue();
-            auto store_size = Codegen::ConvertDataType(sf_type, codegen_->GetArch()).GetSize() / BYTE_SIZE;
-            encoder_->EncodeSti(imm, store_size, dst_mem);
-            break;
-        }
-    }
-}
-
 size_t SpillFillEncoder::EncodeImmToX(const SpillFillData &sf)
 {
     auto const_inst = graph_->GetSpilledConstant(sf.SrcValue());
@@ -215,7 +192,25 @@ size_t SpillFillEncoder::EncodeImmToX(const SpillFillData &sf)
     ASSERT(sf.GetDst().IsAnyStack());  // imm -> stack
     auto dst_mem = codegen_->GetMemRefForSlot(sf.GetDst());
     auto sf_type = sf.GetCommonType();
-    EncodeImmWithCorrectType(sf_type, dst_mem, const_inst);
+    ASSERT(DataType::IsTypeNumeric(sf_type));
+    switch (sf_type) {
+        case DataType::Type::FLOAT32: {
+            auto imm = const_inst->GetFloatValue();
+            encoder_->EncodeSti(imm, dst_mem);
+            break;
+        }
+        case DataType::Type::FLOAT64: {
+            auto imm = const_inst->GetDoubleValue();
+            encoder_->EncodeSti(imm, dst_mem);
+            break;
+        }
+        default: {
+            auto imm = const_inst->GetRawValue();
+            auto store_size = Codegen::ConvertDataType(sf_type, codegen_->GetArch()).GetSize() / BYTE_SIZE;
+            encoder_->EncodeSti(imm, store_size, dst_mem);
+            break;
+        }
+    }
     return 1U;
 }
 

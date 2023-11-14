@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -858,6 +858,7 @@ void BoundsAnalysis::VisitIfImm(GraphVisitor *v, Inst *inst)
     }
     auto op0 = compare->GetInput(0).GetInst();
     auto op1 = compare->GetInput(1).GetInst();
+
     if ((DataType::GetCommonType(op0->GetType()) != DataType::INT64 && op0->GetType() != DataType::REFERENCE) ||
         (DataType::GetCommonType(op1->GetType()) != DataType::INT64 && op1->GetType() != DataType::REFERENCE)) {
         return;

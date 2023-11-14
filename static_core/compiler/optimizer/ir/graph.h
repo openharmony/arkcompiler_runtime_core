@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,16 +55,6 @@ enum AliasType : uint8_t;
 class GraphMode {
 public:
     explicit GraphMode(uint32_t value) : value_(value) {}
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DECLARE_GRAPH_MODE_MODIFIERS(name) \
-    void Set##name(bool v)                 \
-    {                                      \
-        Flag##name ::Set(v, &value_);      \
-    }                                      \
-    bool Is##name() const                  \
-    {                                      \
-        return Flag##name ::Get(value_);   \
-    }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DECLARE_GRAPH_MODE(name)                    \
@@ -72,7 +62,14 @@ public:
     {                                               \
         return GraphMode(Flag##name ::Encode(set)); \
     }                                               \
-    DECLARE_GRAPH_MODE_MODIFIERS(name)
+    void Set##name(bool v)                          \
+    {                                               \
+        Flag##name ::Set(v, &value_);               \
+    }                                               \
+    bool Is##name() const                           \
+    {                                               \
+        return Flag##name ::Get(value_);            \
+    }
 
     DECLARE_GRAPH_MODE(Osr);
     // The graph is used in BytecodeOptimizer mode
@@ -93,7 +90,6 @@ public:
     DECLARE_GRAPH_MODE(InterpreterEntry);
 
 #undef DECLARE_GRAPH_MODE
-#undef DECLARE_GRAPH_MODE_MODIFIERS
 
     bool SupportManagedCode() const
     {
@@ -949,11 +945,11 @@ public:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define INST_DEF(OPCODE, BASE, ...)                                      \
             case Opcode::OPCODE: {                                       \
-                auto inst = Inst::New<BASE>(allocator_, Opcode::OPCODE); \
+                auto inst = Inst::New<BASE>(allocator_, Opcode::OPCODE);  \
                 inst->SetId(instr_current_id_++);                        \
                 return inst;                                             \
-            }
-            OPCODE_LIST(INST_DEF)
+                }
+                OPCODE_LIST(INST_DEF)
 
 #undef INST_DEF
             default:

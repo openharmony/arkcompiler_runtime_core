@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -239,6 +239,7 @@ TEST_F(LoopAnalyzerTest, LoopAnalyzer)
  *                                [exit]
  *
  * After loop pre-header insertion:
+ *
  *                                 [entry]
  *                                    |
  *                                    v
@@ -343,28 +344,7 @@ TEST_F(LoopAnalyzerTest, PreheaderInsert)
  *                                 [6]----->[1]
  *
  * After loop pre-headers insertion:
- *                                 [0]
- *                                  |
- *                                  v
- *                             [pre-header]
- *                                  |
- *                                  v
- *                                 [2]<------\
- *                                  |        |
- *                                  v        |
- *                                 [3]-------/
- *                                  |
- *                                  v
- *                             [pre-header]
- *                                  |
- *                                  v
- *                                 [4]<------\
- *                                  |        |
- *                                  v        |
- *                                 [5]-------/
- *                                  |
- *                                  V
- *                                 [6]----->[1]
+ *
  */
 TEST_F(LoopAnalyzerTest, PreheaderInsert2)
 {
@@ -632,7 +612,8 @@ TEST_F(LoopAnalyzerTest, InfiniteLoop)
 /**
  * Test checks the ASSERTION fail issue fix in a Loop::AppendBlock.
  *
- * Original program:
+ * Original progam:
+ *
  *   .function u1 main(){
  *       ldai 0
  *       jltz loop1
@@ -645,6 +626,7 @@ TEST_F(LoopAnalyzerTest, InfiniteLoop)
  *   }
  *
  * Graph dump:
+ *
  *   BB 5
  *   prop: start
  *   succs: [bb 0]
@@ -668,6 +650,7 @@ TEST_F(LoopAnalyzerTest, InfiniteLoop)
  *   prop: end
  *
  * Test Graph:
+ *
  *      [5-start]
  *          |
  *         [0] --> [2]

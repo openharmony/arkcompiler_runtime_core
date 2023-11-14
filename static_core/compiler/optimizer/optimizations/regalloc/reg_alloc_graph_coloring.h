@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,6 @@ protected:
 
 private:
     void InitWorkingRanges(WorkingRanges *general_ranges, WorkingRanges *fp_ranges);
-    void FillPhysicalNodes(InterferenceGraph *ig, WorkingRanges *ranges, ArenaVector<ColorNode *> &physical_nodes);
     void BuildIG(InterferenceGraph *ig, WorkingRanges *ranges, bool remat_constants = false);
     IndexVector PrecolorIG(InterferenceGraph *ig);
     IndexVector PrecolorIG(InterferenceGraph *ig, const RegisterMap &map);

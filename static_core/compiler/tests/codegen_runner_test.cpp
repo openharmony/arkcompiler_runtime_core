@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,6 +109,8 @@ static constexpr auto CODEGEN_OBJECT_PARAMS_SOURCE = R"(
 #          +0x2000000000000
 # Result  0xAAA000000000000
 # Result  0xAAA00000AAA0AAA
+
+
 
 .function i64 foo(Value a0, Value a1, Value a2, Value a3, Value a4, Value a5) {
     ldai.64 0
@@ -316,6 +318,8 @@ success_label:
     ldai 123
     return.64
 }
+
+
 
 )";
 

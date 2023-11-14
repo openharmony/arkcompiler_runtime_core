@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,33 +101,18 @@ public:
     ~CallConvMode() = default;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DECLARE_CALLCONV_MODE_MODIFIERS(name) \
-    void Set##name(bool v)                    \
-    {                                         \
-        Flag##name ::Set(v, &value_);         \
-    }                                         \
-    bool Is##name() const                     \
-    {                                         \
-        return Flag##name ::Get(value_);      \
-    }
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DECLARE_CALLCONV_MODE(name)                    \
     static CallConvMode name(bool set = true)          \
     {                                                  \
         return CallConvMode(Flag##name ::Encode(set)); \
     }                                                  \
-    DECLARE_CALLCONV_MODE_MODIFIERS(name)
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DECLARE_CALLCONV_MODE_MODIFIERS(name) \
-    void Set##name(bool v)                    \
-    {                                         \
-        Flag##name ::Set(v, &value_);         \
-    }                                         \
-    bool Is##name() const                     \
-    {                                         \
-        return Flag##name ::Get(value_);      \
+    void Set##name(bool v)                             \
+    {                                                  \
+        Flag##name ::Set(v, &value_);                  \
+    }                                                  \
+    bool Is##name() const                              \
+    {                                                  \
+        return Flag##name ::Get(value_);               \
     }
 
     // Panda ABI convention (native - otherwise)
@@ -140,7 +125,6 @@ public:
     DECLARE_CALLCONV_MODE(OptIrtoc);
 
 #undef DECLARE_CALLCONV_MODE
-#undef DECLARE_CALLCONV_MODIFIERS
 
 private:
     using FlagPanda = BitField<bool, 0, 1>;

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -335,16 +335,13 @@ public:
                 GetEncoder()->EncodeMov(dst_reg, ret_reg);
             }
         }
-        CallEntrypointFinalize(live_regs, params_mask, inst);
-    }
 
-    void CallEntrypointFinalize(RegMask &live_regs, RegMask &params_mask, Inst *inst)
-    {
         LoadCallerRegisters(live_regs, VRegMask(), true);
 
         if (!inst->HasImplicitRuntimeCall()) {
             return;
         }
+        ASSERT(!GetRuntime()->IsEntrypointNoreturn(id));
         for (auto i = 0U; i < params_mask.size(); i++) {
             if (params_mask.test(i)) {
                 inst->GetSaveState()->GetRootsRegsMask().reset(i);
@@ -505,7 +502,6 @@ public:
 
     // Initialization internal variables
     void Initialize();
-    bool Finalize();
 
     const Disassembly *GetDisasm() const
     {
