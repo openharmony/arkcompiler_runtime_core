@@ -599,7 +599,7 @@ bool Paoc::Compile(Class *klass, const panda_file::File &pfile_ref)
         if (error_occurred && !ShouldIgnoreFailures()) {
             return;
         }
-        // TODO(pishin, msherstennikov): revisit
+        // NOTE(pishin, msherstennikov): revisit
         // Method (or the whole class?) may already have a definition in another file,
         // in this case it should not be added into AOT file.
         Method &method = method_data_accessor.IsStatic() ? methods[smethod_idx++] : methods[vmethod_idx++];

@@ -157,7 +157,7 @@ bool Pipeline::RunOptimizations()
     // following: we inline the method that has user X within a loop, then peepholes optimize datflow and def of
     // the X become another instruction within inlined method, but SaveStateOsr didn't take it into account, thus,
     // we don't restore value of this new definition.
-    // TODO(msherstennikov): find way to inline in OSR mode
+    // NOTE(msherstennikov): find way to inline in OSR mode
     if (!graph->IsOsrMode()) {
         graph->RunPass<Inlining>();
     }

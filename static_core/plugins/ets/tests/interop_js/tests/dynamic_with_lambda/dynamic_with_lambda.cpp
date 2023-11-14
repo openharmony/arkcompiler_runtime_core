@@ -56,7 +56,7 @@ TEST_F(EtsInteropJsDynamicWithLambda, TestLambdaJSValueCache)
     ASSERT_EQ(ret, 25);
 }
 
-// TODO(itrubachev) this test can be enabled after fixing TODO in checker::Type *TSAsExpression::Check in es2panda
+// NOTE(itrubachev) this test can be enabled after fixing NOTE in checker::Type *TSAsExpression::Check in es2panda
 TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValueCastCallAsArgument)
 {
     auto ret = CallEtsMethod<uint32_t>("TestLambdaJSValueCastCallAsArgument");

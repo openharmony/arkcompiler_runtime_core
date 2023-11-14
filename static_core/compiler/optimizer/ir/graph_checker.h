@@ -308,7 +308,7 @@ private:
     {
         // Overflow instruction are used only in dynamic methods.
         // But ASSERT wasn't added because the instructions checks in codegen_test.cpp with default method
-        // TODO(pishin) add an ASSERT after add assembly tests tests and remove the test from codegen_test.cpp
+        // NOTE(pishin) add an ASSERT after add assembly tests tests and remove the test from codegen_test.cpp
         [[maybe_unused]] auto cc = inst->GetCc();
         ASSERT_DO((cc == CC_EQ || cc == CC_NE), (std::cerr << "overflow instruction are used only CC_EQ or CC_NE"));
         CheckBinaryOperationTypes(inst, true);

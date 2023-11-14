@@ -1166,7 +1166,7 @@ TEST_F(SplitResolverTest, SplitAfterLastInstruction)
     ASSERT_TRUE(GraphComparator().Compare(initial_graph, expected_graph));
 }
 
-// TODO (a.popov) Merge equal spill-fills
+// NOTE (a.popov) Merge equal spill-fills
 TEST_F(SplitResolverTest, MultipleEndBlockMoves)
 {
     auto initial_graph = CreateEmptyGraph();

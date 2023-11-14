@@ -160,7 +160,7 @@ typedef const struct ETS_NativeInterface *EtsEnv;
 // clang-format off
 // Interface Function Table
 struct ETS_NativeInterface {
-    // TODO(a.urakov): solve the "Array" naming problem
+    // NOTE(a.urakov): solve the "Array" naming problem
     ets_int (*GetVersion)(EtsEnv *env);
     // ets_class (*DefineClass)(EtsEnv *env, const char *name, ets_object loader, const ets_byte *buf, ets_size bufLen);
     ets_class (*FindClass)(EtsEnv *env, const char *name);

@@ -419,7 +419,7 @@ public:
             down_cast<typename ElfBuilder<ARCH, IS_JIT_MODE>::ElfAddr>(elf_data) + CodeInfo::GetCodeOffset(ARCH);
 
         // Some dark magic there. Here we patch the address of JIT code in frame debug info entry.
-        // TODO (asidorov): rework to more readable code
+        // NOTE (asidorov): rework to more readable code
         uint8_t *cie_addr_8 {static_cast<uint8_t *>(frame_section_.GetData())};
         uint32_t *cie_addr_32 {reinterpret_cast<uint32_t *>(cie_addr_8)};
         uint32_t cie_length {*cie_addr_32 + static_cast<uint32_t>(sizeof(uint32_t))};

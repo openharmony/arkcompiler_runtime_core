@@ -86,7 +86,7 @@ TEST_F(IrBuilderTest, PeepholesTryBlockNoInstBetween)
     EXPECT_TRUE(GetGraph()->RunPass<BytecodeOptPeepholes>());
 }
 
-// TODO(aromanov): enable
+// NOTE(aromanov): enable
 TEST_F(CommonTest, DISABLED_NoNullCheck)
 {
     RuntimeInterfaceMock runtime(0);
@@ -130,7 +130,7 @@ TEST_F(CommonTest, DISABLED_NoNullCheck)
     EXPECT_TRUE(GraphComparator().Compare(graph, after));
 }
 
-// TODO(aromanov): enable
+// NOTE(aromanov): enable
 TEST_F(CommonTest, DISABLED_NotRelatedNullCheck)
 {
     RuntimeInterfaceMock runtime(1);
@@ -185,7 +185,7 @@ TEST_F(CommonTest, CallStaticOtherBasicBlock)
     EXPECT_FALSE(graph->RunPass<BytecodeOptPeepholes>());
 }
 
-// TODO(aromanov): enable
+// NOTE(aromanov): enable
 TEST_F(CommonTest, DISABLED_NoSaveStateNullCheckAfterNewObject)
 {
     RuntimeInterfaceMock runtime(0);

@@ -166,7 +166,7 @@ TEST_F(RegAllocLinearScanTest, ARM64Regs)
 }
 
 /**
- * TODO(a.popov) Support test-case
+ * NOTE(a.popov) Support test-case
  *
  * The way to allocate registers in this test is to spill onе of the source registers on the stack:
  * A -> r1

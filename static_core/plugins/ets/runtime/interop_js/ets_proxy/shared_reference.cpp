@@ -57,7 +57,7 @@ bool SharedReference::InitJSObject(InteropCtx *ctx, EtsObject *ets_object, napi_
 
     LocalObjectHandle<EtsObject> handle(coro, ets_object);  // object may have no strong refs, so create one
     handle->SetHash(ref_idx);
-    // TODO(vpukhov): reuse weakref from finalizationqueue
+    // NOTE(vpukhov): reuse weakref from finalizationqueue
     ets_ref_ = ctx->Refstor()->Add(ets_object->GetCoreType(), mem::Reference::ObjectType::WEAK);
 
     auto box_long = EtsBoxPrimitive<EtsLong>::Create(EtsCoroutine::GetCurrent(), ToUintPtr(this));
@@ -69,7 +69,7 @@ bool SharedReference::InitJSObject(InteropCtx *ctx, EtsObject *ets_object, napi_
     return true;
 }
 
-// TODO(vpukhov): Circular interop references
+// NOTE(vpukhov): Circular interop references
 //                Present solution is dummy and consists of two strong refs
 bool SharedReference::InitHybridObject(InteropCtx *ctx, EtsObject *ets_object, napi_value js_object, uint32_t ref_idx)
 {

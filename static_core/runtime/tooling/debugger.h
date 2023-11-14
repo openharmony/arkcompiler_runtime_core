@@ -465,7 +465,7 @@ private:
     mutable os::memory::RWLock rwlock_;
     PandaUnorderedSet<PtLocation, HashLocation> breakpoints_ GUARDED_BY(rwlock_);
     PandaList<PropertyWatch> property_watches_ GUARDED_BY(rwlock_);
-    // TODO(m.strizhak): research how to rework VM start to avoid atomic
+    // NOTE(m.strizhak): research how to rework VM start to avoid atomic
     std::atomic_bool vm_started_ {false};
 
     NO_COPY_SEMANTIC(Debugger);

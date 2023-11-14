@@ -75,7 +75,7 @@ static inline vixl::aarch64::Condition Convert(const Condition cc)
             return vixl::aarch64::Condition::hi;
         case Condition::HS:
             return vixl::aarch64::Condition::hs;
-        // TODO(igorban) : Remove them
+        // NOTE(igorban) : Remove them
         case Condition::MI:
             return vixl::aarch64::Condition::mi;
         case Condition::PL:
@@ -356,7 +356,7 @@ public:
     uint8_t GetAlignmentVreg(bool is_callee)
     {
         auto allignment_vreg = is_callee ? allignment_vreg_callee_ : allignment_vreg_caller_;
-        // !TODO Ishin Pavel fix if allignment_vreg == UNDEF_VREG
+        // !NOTE Ishin Pavel fix if allignment_vreg == UNDEF_VREG
         ASSERT(allignment_vreg != UNDEF_VREG);
 
         return allignment_vreg;

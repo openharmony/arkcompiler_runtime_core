@@ -4319,7 +4319,7 @@ TEST_F(IrBuilderTest, Initobj)
 // Enable after supporting MultiArray in panda assembly
 TEST_F(IrBuilderTest, DISABLED_MultiArray)
 {
-    // TODO(pishin): fix ctor before enabling
+    // NOTE(pishin): fix ctor before enabling
     auto source = R"(
     .record __I <external>
     .function ___I _init__i32_i32_(i32 a0, i32 a1) <ctor, external>

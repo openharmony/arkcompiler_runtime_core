@@ -1988,13 +1988,13 @@ NO_UB_SANITIZE static ets_string NewStringUTF(EtsEnv *env, const char *bytes)
 {
     ETS_NAPI_DEBUG_TRACE(env);
 
-    // TODO(m.morozov): check if this right solution
+    // NOTE(m.morozov): check if this right solution
     if (bytes == nullptr) {
         return nullptr;
     }
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
-    // TODO(m.morozov): check after mutf8 vs utf8 decision
+    // NOTE(m.morozov): check after mutf8 vs utf8 decision
     auto internal_string = EtsString::CreateFromMUtf8(bytes);
     if (internal_string == nullptr) {
         s.ThrowNewException(EtsNapiException::OUT_OF_MEMORY, "Could not allocate memory for string");
@@ -2009,8 +2009,8 @@ NO_UB_SANITIZE static ets_size GetStringUTFLength(EtsEnv *env, ets_string string
     ETS_NAPI_ABORT_IF_NULL(string);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     auto internal_string = s.ToInternalType(string);
-    // TODO(m.morozov): ensure that place for \0 is included
-    // TODO(m.morozov): check after mutf8 vs utf8 decision
+    // NOTE(m.morozov): ensure that place for \0 is included
+    // NOTE(m.morozov): check after mutf8 vs utf8 decision
     return internal_string->GetMUtf8Length() - 1;
 }
 
@@ -2023,14 +2023,14 @@ NO_UB_SANITIZE static const char *GetStringUTFChars(EtsEnv *env, ets_string stri
     }
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     auto internal_string = s.ToInternalType(string);
-    // TODO(m.morozov): check after mutf8 vs utf8 decision
+    // NOTE(m.morozov): check after mutf8 vs utf8 decision
     size_t len = internal_string->GetMUtf8Length();
     void *buf = EtsAlloc(len);
     if (buf == nullptr) {
         LOG(ERROR, ETS_NAPI) << __func__ << ": cannot copy string";
         return nullptr;
     }
-    // TODO(m.morozov): check after mutf8 vs utf8 decision
+    // NOTE(m.morozov): check after mutf8 vs utf8 decision
     internal_string->CopyDataMUtf8(buf, len, true);
     return static_cast<char *>(buf);
 }
@@ -2052,7 +2052,7 @@ NO_UB_SANITIZE static ets_size GetArrayLength(EtsEnv *env, ets_array array)
     return static_cast<ets_size>(internal_array->GetLength());
 }
 
-// TODO(kropacheva): change name after conflicts resolved
+// NOTE(kropacheva): change name after conflicts resolved
 NO_UB_SANITIZE static ets_objectArray NewObjectsArray(EtsEnv *env, ets_size length, ets_class element_class,
                                                       ets_object initial_element)
 {
@@ -2475,7 +2475,7 @@ NO_UB_SANITIZE static void GetStringUTFRegion(EtsEnv *env, ets_string str, ets_s
         s.ThrowNewException(EtsNapiException::STRING_INDEX_OUT_OF_BOUNDS, ss.str().c_str());
         return;
     }
-    // TODO(m.morozov): check after mutf8 vs utf8 decision
+    // NOTE(m.morozov): check after mutf8 vs utf8 decision
     internal_string->CopyDataRegionMUtf8(buf, start, len, internal_string->GetMUtf8Length());
 }
 

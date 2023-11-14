@@ -312,7 +312,7 @@ Type ArkHotreloadBase::FlagsChangesCheck(ClassContainment *h_cls)
     Class *tmp_class = h_cls->tmp_class;
     Class *runtime_class = h_cls->loaded_class;
 
-    // TODO(m.strizhak) research that maybe there are flags that can be changed keeping normal type
+    // NOTE(m.strizhak) research that maybe there are flags that can be changed keeping normal type
     if (tmp_class->GetFlags() != runtime_class->GetFlags()) {
         h_cls->f_changes |= ChangesFlags::F_ACCESS_FLAGS;
         return Type::STRUCTURAL;

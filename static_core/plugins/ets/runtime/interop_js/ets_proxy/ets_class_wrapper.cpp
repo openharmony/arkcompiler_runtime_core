@@ -295,7 +295,7 @@ std::pair<std::vector<Field *>, std::vector<Method *>> EtsClassWrapper::Calculat
         return wclass->HasBuiltin() || wclass->base_wrapper_->HasBuiltin();
 #else
         (void)wclass;
-        return true;  // TODO(vpukhov): some napi implementations add explicit receiver checks in call handler,
+        return true;  // NOTE(vpukhov): some napi implementations add explicit receiver checks in call handler,
                       // thus method inheritance via prototype chain wont work
 #endif
     };
@@ -433,12 +433,12 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     auto [fields, methods] = _this->CalculateProperties(overloads);
     auto js_props = _this->BuildJSProperties({fields.data(), fields.size()}, {methods.data(), methods.size()});
 
-    // TODO(vpukhov): restore no-public-fields check when escompat adopt accessors
+    // NOTE(vpukhov): restore no-public-fields check when escompat adopt accessors
     if (_this->HasBuiltin() && !fields.empty()) {
         // ctx->Fatal(std::string("built-in class ") + ets_class->GetDescriptor() + " has field properties");
         INTEROP_LOG(ERROR) << "built-in class " << ets_class->GetDescriptor() << " has field properties";
     }
-    // TODO(vpukhov): forbid "true" ets-field overriding in js-derived class, as it cannot be proxied back
+    // NOTE(vpukhov): forbid "true" ets-field overriding in js-derived class, as it cannot be proxied back
     //                simple solution: ban JSProxy if !fields.empty()
     _this->jsproxy_wrapper_ = js_proxy::JSProxy::Create(ets_class, {methods.data(), methods.size()});
 
@@ -496,7 +496,7 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
         return nullptr;
     }
 
-    // TODO(ivagin): JS constructor is not required to return 'this', but ArkUI NAPI requires it
+    // NOTE(ivagin): JS constructor is not required to return 'this', but ArkUI NAPI requires it
     return js_this;
 }
 

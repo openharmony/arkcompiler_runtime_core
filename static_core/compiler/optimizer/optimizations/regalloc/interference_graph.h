@@ -196,7 +196,7 @@ private:
 
 using NodeVector = ArenaVector<ColorNode>;
 
-// TODO (Evgeny.Erokhin): In Appel's book described usage of 2 structures in parallel to hold interference:
+// NOTE (Evgeny.Erokhin): In Appel's book described usage of 2 structures in parallel to hold interference:
 // one is for random checks (here is a matrix) and lists on adjacency for sequental access. It's worth to add!
 class InterferenceGraph {
 public:

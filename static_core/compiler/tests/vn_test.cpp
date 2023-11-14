@@ -1157,7 +1157,7 @@ TEST_F(VNTest, BridgeCreator)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_after));
 }
 
-// TODO(schernykh): ????
+// NOTE(schernykh): ????
 TEST_F(VNTest, DISABLED_BridgeCreatorExceptionInstNotApplied)
 {
     GRAPH(GetGraph())

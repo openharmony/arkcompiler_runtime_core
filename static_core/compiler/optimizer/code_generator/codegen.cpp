@@ -67,7 +67,7 @@ class OsrEntryStub {
                     }
                     break;
                 }
-                // TODO (ekudriashov): UnresolvedLoadAndInitClass
+                // NOTE (ekudriashov): UnresolvedLoadAndInitClass
                 default:
                     break;
             }
@@ -1393,7 +1393,7 @@ void Codegen::IntfInlineCachePass(ResolveVirtualInst *resolver, Reg method_reg, 
     // -----------------------------------------------
     auto aot_data = GetGraph()->GetAotData();
     uint64_t intf_inline_cache_index = aot_data->GetIntfInlineCacheIndex();
-    // TODO(liyiming): do LoadMethod in irtoc to reduce use tmp reg
+    // NOTE(liyiming): do LoadMethod in irtoc to reduce use tmp reg
     if (obj_reg.GetId() != tmp_reg.GetId()) {
         auto reg_tmp_64 = tmp_reg.As(INT64_TYPE);
         uint64_t offset =
@@ -2891,7 +2891,7 @@ void Codegen::VisitNewArray(Inst *inst)
     auto encoder = GetEncoder();
 
     auto max_tlab_size = runtime->GetTLABMaxSize();
-    // TODO(msherstennikov): support NewArray fast path for arm32
+    // NOTE(msherstennikov): support NewArray fast path for arm32
     if (max_tlab_size == 0 || GetArch() == Arch::AARCH32) {
         CallRuntime(inst, EntrypointId::CREATE_ARRAY, dst, RegMask::GetZeroMask(), src_class, src_size);
         if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
@@ -3942,7 +3942,7 @@ void EncodeVisitor::VisitStoreResolvedObjectFieldStatic(GraphVisitor *visitor, I
 void EncodeVisitor::VisitNewObject(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    // TODO(msherstennikov): use irtoced entrypoint once spill-fills will be supported for entrypoints mode.
+    // NOTE(msherstennikov): use irtoced entrypoint once spill-fills will be supported for entrypoints mode.
     if (enc->cg_->GetArch() == Arch::AARCH32) {
         enc->GetCodegen()->CreateNewObjCallOld(inst->CastToNewObject());
     } else {
@@ -5347,7 +5347,7 @@ void EncodeVisitor::VisitCastValueToAnyType(GraphVisitor *visitor, Inst *inst)
     auto enc = static_cast<EncodeVisitor *>(visitor);
     const auto *cvai = inst->CastToCastValueToAnyType();
 
-    /* // TODO(vpukhov): AnyConst
+    /* // NOTE(vpukhov): AnyConst
     if (cvai->GetInputType(0) == DataType::Type::ANY) {
         enc->GetEncoder()->EncodeAbort();
         UNREACHABLE();

@@ -360,7 +360,7 @@ private:
     PandaList<EtsObject *> registered_finalization_queue_instances_ GUARDED_BY(finalization_queue_lock_);
     PandaUniquePtr<JobQueue> job_queue_;
     os::memory::Mutex promise_listeners_lock_;
-    // TODO(audovichenko) Should be refactored #12030
+    // NOTE(audovichenko) Should be refactored #12030
     PandaList<PromiseListenerInfo> promise_listeners_ GUARDED_BY(promise_listeners_lock_);
     // optional for lazy initialization
     std::optional<std::mt19937> random_engine_;

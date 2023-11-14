@@ -93,7 +93,7 @@ protected:
             }
             for (auto block : loop->GetBlocks()) {
                 if constexpr (EXIT_POINT == LoopExitPoint::LOOP_EXIT_HEADER) {
-                    // TODO (a.popov) Support infinite loops unrolling
+                    // NOTE (a.popov) Support infinite loops unrolling
                     if (!block->IsMarked(marker) && block->IsLoopHeader()) {
                         COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
                             << "Loop without exit-point from loop-header isn't visited, id = " << loop->GetId();

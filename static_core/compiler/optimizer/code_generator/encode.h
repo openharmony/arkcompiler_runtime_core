@@ -50,7 +50,7 @@ public:
     explicit LabelHolder(Encoder *enc) : enc_ {enc} {};
     virtual ~LabelHolder() = default;
 
-    // TODO (igorban) : hide all this methods in CallConv
+    // NOTE (igorban) : hide all this methods in CallConv
     virtual void CreateLabels(LabelId size) = 0;
     virtual LabelId CreateLabel() = 0;
     virtual LabelId Size() = 0;

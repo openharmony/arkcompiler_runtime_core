@@ -647,9 +647,9 @@ SpillFillData Graph::GetDataForNativeParam(DataType::Type type)
     (void)type;
     return {};
 #else
-    // TODO(pishin) change to ASSERT
+    // NOTE(pishin) change to ASSERT
     if (param_info_ == nullptr) {
-        // TODO(pishin) enable after fixing arch in tests - UNREACHABLE()
+        // NOTE(pishin) enable after fixing arch in tests - UNREACHABLE()
         return {};
     }
 

@@ -34,7 +34,7 @@ Design decisions:
    after implementing sparse vectors - rebase on them (taking into consideration immutability, see immer)
 */
 
-// TODO(vdyadov): correct handling of values origins during LUB operation
+// NOTE(vdyadov): correct handling of values origins during LUB operation
 
 class RegContext {
 public:
@@ -216,7 +216,7 @@ public:
 private:
     ShiftedVector<1, AbstractTypedValue> regs_;
 
-    // TODO(vdyadov): After introducing sparse bit-vectors, change ConflictingRegs_ type.
+    // NOTE(vdyadov): After introducing sparse bit-vectors, change ConflictingRegs_ type.
     PandaUnorderedSet<int> conflicting_regs_;
 
     friend RegContext RcUnion(RegContext const *lhs, RegContext const *rhs, TypeSystem * /* tsys */);

@@ -56,7 +56,7 @@ TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
 
     class_ = compute(lang_ctx_.GetClassClassDescriptor());
     object_ = compute(lang_ctx_.GetObjectClassDescriptor());
-    // Throwable is not given to us as descriptor for some reason. TODO(gogabr): correct this.
+    // Throwable is not given to us as descriptor for some reason. NOTE(gogabr): correct this.
     auto throwable_class_name = lang_ctx_.GetVerificationTypeThrowable();
     if (throwable_class_name != nullptr) {
         auto throwable_descr_str = ClassNameToDescriptorString(throwable_class_name);
@@ -84,7 +84,7 @@ Type TypeSystem::DescriptorToType(uint8_t const *descr)
 
 void TypeSystem::ExtendBySupers(PandaUnorderedSet<Type> *set, Class const *klass)
 {
-    // TODO(gogabr): do we need to cache intermediate results? Measure!
+    // NOTE(gogabr): do we need to cache intermediate results? Measure!
     Type new_tp = Type {klass};
     if (set->count(new_tp) > 0) {
         return;

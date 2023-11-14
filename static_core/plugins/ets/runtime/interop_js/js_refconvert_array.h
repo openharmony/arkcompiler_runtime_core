@@ -99,7 +99,7 @@ public:
             return nullptr;
         }
 
-        // TODO(vpukhov): elide handles for primitive arrays
+        // NOTE(vpukhov): elide handles for primitive arrays
         LocalObjectHandle<coretypes::Array> ets_arr(coro, coretypes::Array::Create(klass_, len));
         NapiScope js_handle_scope(env);
 

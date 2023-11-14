@@ -245,17 +245,17 @@ void GraphChecker::PrintFailedMethodAndPassVisitor(GraphVisitor *v)
 
 void GraphChecker::CheckInputType(Inst *inst) const
 {
-    // TODO(mbolshov): Fix types for LiveOut in irtoc
+    // NOTE(mbolshov): Fix types for LiveOut in irtoc
     if (inst->GetOpcode() == Opcode::LiveOut) {
         return;
     }
-    // TODO(dkofanov): Fix get input type for call insts
+    // NOTE(dkofanov): Fix get input type for call insts
     if (inst->IsCall()) {
         return;
     }
     for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
         [[maybe_unused]] auto input = inst->GetInput(i).GetInst();
-        // TODO(mbolshov): Fix types for LiveIn in irtoc
+        // NOTE(mbolshov): Fix types for LiveIn in irtoc
         if (input->GetOpcode() == Opcode::LiveIn) {
             continue;
         }
@@ -385,7 +385,7 @@ void GraphChecker::CheckCallReturnInlined()
                 ASSERT_EXT_PRINT(inst->NoDest(), "Inlined call should have NO_DST flag");
                 inlined_calles.push(inst);
             } else if (inst->GetOpcode() == Opcode::ReturnInlined) {
-                // TODO(Sergey Chernykh) fix checker
+                // NOTE(Sergey Chernykh) fix checker
                 if (block->IsEndWithThrowOrDeoptimize()) {
                     continue;
                 }
@@ -1857,7 +1857,7 @@ void GraphChecker::VisitBoundsCheck([[maybe_unused]] GraphVisitor *v, Inst *inst
     for (int i = 0; i < 1; i++) {
         [[maybe_unused]] auto op = inst->GetInputs()[i].GetInst();
         [[maybe_unused]] auto op_type = op->GetType();
-        // TODO(pishin): actually type should be INT32, but predecessor may be Call instruction with type u16, u8
+        // NOTE(pishin): actually type should be INT32, but predecessor may be Call instruction with type u16, u8
         // e.t.c
         ASSERT_DO_EXT_VISITOR(
             (op->IsConst() && op_type == DataType::INT64) ||
@@ -2338,7 +2338,7 @@ void GraphChecker::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[m
     auto input_type = inst->GetInputType(0);
     auto output_type = AnyBaseTypeToDataType(inst->CastToCastValueToAnyType()->GetAnyType());
 
-    // ASSERT_DO_EXT(input_type != DataType::ANY, // TODO(vpukhov): AnyConst
+    // ASSERT_DO_EXT(input_type != DataType::ANY, // NOTE(vpukhov): AnyConst
     //          (std::cerr << "CastValueToAnyType cannot accept inputs of ANY type:\n", inst->Dump(&std::cerr)));
 
     if (input_inst->IsConst() && (input_type == DataType::Type::INT64 || input_type == DataType::Type::INT32)) {

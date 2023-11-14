@@ -18,7 +18,7 @@
 
 #include "runtime/include/tooling/debug_interface.h"
 
-// TODO(maksenov): remove this file after refactoring js_runtime
+// NOTE(maksenov): remove this file after refactoring js_runtime
 namespace panda {
 class Method;
 }  // namespace panda

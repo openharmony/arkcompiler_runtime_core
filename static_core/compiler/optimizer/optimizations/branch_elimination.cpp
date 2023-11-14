@@ -220,7 +220,7 @@ void BranchElimination::EliminateBranch(BasicBlock *if_block, BasicBlock *elimin
         if_block->RemoveSucc(eliminated_block);
         if_block->RemoveInst(if_block->GetLastInst());
         GetGraph()->GetAnalysis<Rpo>().SetValid(true);
-        // TODO (a.popov) DominatorsTree could be restored inplace
+        // NOTE (a.popov) DominatorsTree could be restored inplace
         GetGraph()->RunPass<DominatorsTree>();
     } else {
         eliminated_block->SetMarker(rm_block_marker_);
@@ -303,7 +303,7 @@ bool BlockIsReachedFromOnlySuccessor(BasicBlock *target_block, BasicBlock *domin
 }
 
 /**
- * TODO (a.popov) Here can be supported more complex case:
+ * NOTE (a.popov) Here can be supported more complex case:
  * when `dom_compare` has 2 or more `if_imm` users and `target_compare` is reachable from the same successors of these
  * if_imms
  */

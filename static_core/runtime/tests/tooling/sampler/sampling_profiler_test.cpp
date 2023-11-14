@@ -678,7 +678,7 @@ TEST_F(SamplerTest, WriteModuleEventTest)
     auto pf = panda_file::OpenPandaFileOrZip(pandafile);
     Runtime::GetCurrent()->GetClassLinker()->AddPandaFile(std::move(pf));
 
-    // TODO(mmorozov, skurnevich)
+    // NOTE(mmorozov, skurnevich)
     // this test may fail if the loaded module managed to dump into the trace
     // ASSERT_EQ(ExtractLoadedPFSize(sp), 1);
 

@@ -21,7 +21,7 @@
 
 namespace panda::ets::test {
 
-// TODO(a.urakov): move initialization to a common internal objects testing base class
+// NOTE(a.urakov): move initialization to a common internal objects testing base class
 class EtsMethodSignatureTest : public testing::Test {
 public:
     EtsMethodSignatureTest()

@@ -37,7 +37,7 @@ static bool IsValidStack([[maybe_unused]] const ManagedThread *thread)
 {
     // #3649 CFrame::Initialize fires an ASSERT fail.
     // The issue is that ManagedStack is not always in a consistent state.
-    // TODO(bulasevich): implement ManagedStack state check before the printout. For now, disable the output.
+    // NOTE(bulasevich): implement ManagedStack state check before the printout. For now, disable the output.
     return false;
 }
 
@@ -96,7 +96,7 @@ bool SignalManager::SignalActionHandler(int sig, siginfo_t *info, void *context)
 bool SignalManager::InOatCode([[maybe_unused]] const siginfo_t *siginfo, [[maybe_unused]] const void *context,
                               [[maybe_unused]] bool check_bytecode_pc) const
 {
-    // TODO(00510180) leak judge GetMethodAndReturnPcAndSp
+    // NOTE(00510180) leak judge GetMethodAndReturnPcAndSp
     return true;
 }
 

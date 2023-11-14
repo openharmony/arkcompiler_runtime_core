@@ -59,15 +59,15 @@
  *     - ParseInstruction method: to add a new instruction alias analysis works for
  *     - AliasAnalysis class: to add a visitor for a new instruction that should be analyzed
  *
- * TODO(Evgenii Kudriashov): Prior to walking the graph in steps 5 and 6, We
+ * NOTE(Evgenii Kudriashov): Prior to walking the graph in steps 5 and 6, We
  * need to perform static cycle elimination on the constraint graph, as well as
  * off-line variable substitution.
  *
- * TODO(Evgenii Kudriashov): To add flow-sensitivity the "Flow-sensitive
+ * NOTE(Evgenii Kudriashov): To add flow-sensitivity the "Flow-sensitive
  * pointer analysis for millions of lines of code" by Ben Hardekopf and Calvin
  * Lin may be considered.
  *
- * TODO(Evgenii Kudriashov): After implementing VRP and SCEV the "Loop-Oriented
+ * NOTE(Evgenii Kudriashov): After implementing VRP and SCEV the "Loop-Oriented
  * Array- and Field-Sensitive Pointer Analysis for Automatic SIMD
  * Vectorization" by Yulei Sui, Xiaokang Fan, Hao Zhou, and Jingling Xue may be
  * considered to add advanced analysis of array indices.
@@ -1410,7 +1410,7 @@ void AliasAnalysis::VisitDefault([[maybe_unused]] Inst *inst)
         // No passes that check class references aliasing
         case Opcode::GetInstanceClass:
         case Opcode::LoadImmediate:
-        // TODO(ekudriashov): Probably should be added
+        // NOTE(ekudriashov): Probably should be added
         case Opcode::Monitor:
         // Mitigated by using GetDataFlowInput
         case Opcode::NullCheck:
@@ -1421,7 +1421,7 @@ void AliasAnalysis::VisitDefault([[maybe_unused]] Inst *inst)
         // Irrelevant for analysis
         case Opcode::Return:
         case Opcode::ReturnI:
-        // TODO(compiler team): support Load, Store
+        // NOTE(compiler team): support Load, Store
         case Opcode::Load:
         case Opcode::LoadI:
         case Opcode::Store:

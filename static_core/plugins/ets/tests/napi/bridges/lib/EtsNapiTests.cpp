@@ -1315,7 +1315,7 @@ extern "C" ETS_EXPORT void ETS_EtsNapiTests_checkString([[maybe_unused]] EtsEnv 
     assert(ret == "UTF_STRING@#$");
 }
 
-// TODO(a.kropacheva): enable tests when SEGV catch will be implemented
+// NOTE(a.kropacheva): enable tests when SEGV catch will be implemented
 /*
 static int *illgalpointer = nullptr;
 

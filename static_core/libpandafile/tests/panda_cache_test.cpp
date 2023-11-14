@@ -57,7 +57,7 @@ TEST(PandaCache, TestFieldCache)
     PandaCache cache;
     // NOLINTNEXTLINE(readability-magic-numbers)
     EntityId id1(100);
-    // TODO(yxr) : make sure no conflicts
+    // NOTE(yxr) : make sure no conflicts
     EntityId new_id1(id1.GetOffset() << 2U);
     ASSERT_EQ(cache.GetFieldFromCache(new_id1), nullptr);
 
@@ -67,7 +67,7 @@ TEST(PandaCache, TestFieldCache)
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     EntityId id2(10000);
-    // TODO(yxr) : make sure no conflicts
+    // NOTE(yxr) : make sure no conflicts
     EntityId new_id2(id2.GetOffset() << 2U);
     auto *field2 = reinterpret_cast<Field *>(GetNewMockPointer());
     cache.SetFieldCache(new_id2, field2);
@@ -168,7 +168,7 @@ public:
 protected:
     ElementMock *GetElement(EntityId id) override
     {
-        // TODO(yxr) : make sure no conflicts
+        // NOTE(yxr) : make sure no conflicts
         // CacheOps.RunReader expect no conflicts
         EntityId new_id(id.GetOffset() << 2U);
         Field *f = cache_->GetFieldFromCache(new_id);
@@ -180,7 +180,7 @@ protected:
 
     void SetElement(EntityId id, ElementMock *m) override
     {
-        // TODO(yxr) : make sure no conflicts
+        // NOTE(yxr) : make sure no conflicts
         // CacheOps.RunReader expect no conflicts
         EntityId new_id(id.GetOffset() << 2U);
         auto *f = reinterpret_cast<Field *>(m);
@@ -258,7 +258,7 @@ void CleanFieldMocks(const PandaCache *cache)
 {
     for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
         EntityId id(i);
-        // TODO(yxr) : make sure no conflicts
+        // NOTE(yxr) : make sure no conflicts
         EntityId new_id(id.GetOffset() << 2U);
         auto *m = reinterpret_cast<ElementMock *>(cache->GetFieldFromCache(new_id));
         delete m;

@@ -36,7 +36,7 @@
 #include "runtime/handle_scope-inl.h"
 
 namespace panda::tooling {
-// TODO(maksenov): remove PtProperty class
+// NOTE(maksenov): remove PtProperty class
 static PtProperty FieldToPtProperty(Field *field)
 {
     return PtProperty(field);
@@ -501,7 +501,7 @@ std::optional<Error> Debugger::NotifyFramePop(PtThread thread, uint32_t depth) c
     ManagedThread *managed_thread = thread.GetManagedThread();
     ASSERT(managed_thread != nullptr);
 
-    /* TODO: (cmd) the second NotifyFramePop is error. use one debugger instance to resolve this.
+    /* NOTE: (cmd) the second NotifyFramePop is error. use one debugger instance to resolve this.
     if (!mt_managed_thread->IsUserSuspended()) {
         return Error(Error::Type::THREAD_NOT_SUSPENDED,
                      std::string("Thread ") + std::to_string(thread.GetId()) + " is not suspended");

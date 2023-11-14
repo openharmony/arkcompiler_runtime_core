@@ -133,7 +133,7 @@ public:
 
     bool ClearData()
     {
-        // TODO(dkx): check we are not in RO mode
+        // NOTE(dkx): check we are not in RO mode
 
         // SetLength
         {

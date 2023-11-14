@@ -126,7 +126,7 @@ void StackfulCoroutineManager::AddToRegistry(Coroutine *co)
     os::memory::LockHolder lock(coro_list_lock_);
     auto *main_co = GetMainThread();
     if (main_co != nullptr) {
-        // TODO(konstanting, #I67QXC): we should get this callback from GC instead of copying from the main thread
+        // NOTE(konstanting, #I67QXC): we should get this callback from GC instead of copying from the main thread
         co->SetPreWrbEntrypoint(main_co->GetPreWrbEntrypoint());
     }
     coroutines_.insert(co);
@@ -307,7 +307,7 @@ void StackfulCoroutineManager::ResumeAllThreads()
 bool StackfulCoroutineManager::IsRunningThreadExist()
 {
     UNREACHABLE();
-    // TODO(konstanting): correct implementation. Which coroutine do we consider running?
+    // NOTE(konstanting): correct implementation. Which coroutine do we consider running?
     return false;
 }
 
@@ -393,12 +393,12 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
             GetCurrentWorker()->WaitForEvent(program_completion_event_);
             LOG(DEBUG, COROUTINES)
                 << "StackfulCoroutineManager::MainCoroutineCompleted(): possibly spurious wakeup from wait...";
-            // TODO(konstanting, #I67QXC): test for the spurious wakeup
+            // NOTE(konstanting, #I67QXC): test for the spurious wakeup
             program_completion_lock_.Lock();
         }
     }
 
-    // TODO(konstanting, #I67QXC): correct state transitions for MAIN
+    // NOTE(konstanting, #I67QXC): correct state transitions for MAIN
     GetCurrentContext()->MainThreadFinished();
     GetCurrentContext()->EnterAwaitLoop();
 
@@ -409,7 +409,7 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
             worker->SetActive(false);
         }
         while (active_workers_count_ > 1) {  // 1 is for MAIN
-            // TODO(konstanting, #I67QXC): need timed wait?..
+            // NOTE(konstanting, #I67QXC): need timed wait?..
             workers_shutdown_cv_.Wait(&workers_lock_);
         }
     }

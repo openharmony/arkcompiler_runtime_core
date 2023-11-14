@@ -183,7 +183,7 @@ TEST_F(AotTest, PaocLocation)
 TEST_F(AotTest, BuildAndLoad)
 {
     if (RUNTIME_ARCH == Arch::AARCH32) {
-        // TODO(msherstennikov): for some reason dlopen cannot open aot file in qemu-arm
+        // NOTE(msherstennikov): for some reason dlopen cannot open aot file in qemu-arm
         return;
     }
     uint32_t tid = os::thread::GetCurrentThreadId();
@@ -527,7 +527,7 @@ TEST_F(AotTest, FileManagerLoadAbc)
 TEST_F(AotTest, FileManagerLoadAn)
 {
     if (RUNTIME_ARCH == Arch::AARCH32) {
-        // TODO(msherstennikov): for some reason dlopen cannot open aot file in qemu-arm
+        // NOTE(msherstennikov): for some reason dlopen cannot open aot file in qemu-arm
         return;
     }
     uint32_t tid = os::thread::GetCurrentThreadId();

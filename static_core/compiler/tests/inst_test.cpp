@@ -119,7 +119,7 @@ TEST_F(InstTest, Dataflow)
     ASSERT_EQ(static_cast<PhiInst &>(INS(6U)).GetPhiInput(&BB(5U)), &INS(0U));
     GraphChecker(GetGraph()).Check();
 
-    // TODO(A.Popov): refactor RemovePredsBlocks
+    // NOTE(A.Popov): refactor RemovePredsBlocks
     // 2. Remove basic block #4, phi should be fixed properly
     // INS(5).RemoveInputs()
     // INS(5).GetBasicBlock()->EraseInst(&INS(5))

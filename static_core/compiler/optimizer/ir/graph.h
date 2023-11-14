@@ -1260,13 +1260,13 @@ private:
     ArenaVector<bool> *used_regs_ {nullptr};
     ArenaVector<bool> *used_vregs_ {nullptr};
 
-    // TODO (a.popov) Replace by ArenaMap from throwable_inst* to try_inst*
+    // NOTE (a.popov) Replace by ArenaMap from throwable_inst* to try_inst*
     ArenaMap<const Inst *, ArenaVector<BasicBlock *>> throwable_insts_;
 
     RegMask arch_used_regs_ {0};
 
     mutable size_t instr_current_id_ {0};
-    // first constant instruction in graph !TODO rewrite it to hash-map
+    // first constant instruction in graph !NOTE rewrite it to hash-map
     ConstantInst *first_const_inst_ {nullptr};
     Inst *nullptr_inst_ {nullptr};
     RuntimeInterface *runtime_ {nullptr};

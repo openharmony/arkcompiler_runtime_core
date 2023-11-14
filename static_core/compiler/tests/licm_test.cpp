@@ -147,7 +147,7 @@ TEST_F(LicmTest, OneLoop)
 }
 
 /*
- * TODO (a.popov) Improve Licm to support this test with updated DF: `INST(19, Opcode::Phi).u64().Inputs(1, 18)`
+ * NOTE (a.popov) Improve Licm to support this test with updated DF: `INST(19, Opcode::Phi).u64().Inputs(1, 18)`
  *
  * Test Graph:
  *              [0]

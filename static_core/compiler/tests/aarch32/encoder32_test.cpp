@@ -633,7 +633,7 @@ TEST_F(Encoder32Test, MovTest)
     EXPECT_TRUE((TestMov2<double, int64_t>(this)));
     EXPECT_TRUE((TestMov2<int32_t, float>(this)));
     EXPECT_TRUE((TestMov2<int64_t, double>(this)));
-    // TODO (igorban) : add MOVI instructions
+    // NOTE (igorban) : add MOVI instructions
     // & support uint64_t mov
 }
 
@@ -949,7 +949,7 @@ TEST_F(Encoder32Test, LoadTest)
     EXPECT_TRUE((TestLdr<float>(this)));
     EXPECT_TRUE((TestLdr<double>(this)));
 
-    // TODO(igorban) : additional test for full memory model:
+    // NOTE(igorban) : additional test for full memory model:
     //                 + mem(base + index<<scale + disp)
 }
 
@@ -1031,7 +1031,7 @@ TEST_F(Encoder32Test, StrTest)
     EXPECT_TRUE((TestStr<float>(this)));
     EXPECT_TRUE((TestStr<double>(this)));
 
-    // TODO(igorban) : additional test for full memory model:
+    // NOTE(igorban) : additional test for full memory model:
     //                 + mem(base + index<<scale + disp)
 }
 
@@ -1049,7 +1049,7 @@ TEST_F(Encoder32Test, StrTest)
 
 bool Foo(uint32_t param1, uint32_t param2)
 {
-    // TODO(igorban): use variables
+    // NOTE(igorban): use variables
     return (param1 == param2);
 }
 
@@ -1158,7 +1158,7 @@ TEST_F(Encoder32Test, AbsTest)
     EXPECT_TRUE(TestAbs<int8_t>(this));
     EXPECT_TRUE(TestAbs<int16_t>(this));
     EXPECT_TRUE(TestAbs<int32_t>(this));
-    // TODO (asidorov, igorban) the test failed in release mode
+    // NOTE (asidorov, igorban) the test failed in release mode
     // TestAbs<int64_t>
     EXPECT_TRUE(TestAbs<float>(this));
     EXPECT_TRUE(TestAbs<double>(this));
@@ -1439,7 +1439,7 @@ TEST_F(Encoder32Test, SubImmTest)
 {
     EXPECT_TRUE(TestSubImm<int8_t>(this));
     EXPECT_TRUE(TestSubImm<int16_t>(this));
-    // TODO (asidorov, igorban) the test failed in release mode
+    // NOTE (asidorov, igorban) the test failed in release mode
     // TestSubImm<int32_t>
     EXPECT_TRUE(TestSubImm<int64_t>(this));
     // TestSubImm<float>

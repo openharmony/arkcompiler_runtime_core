@@ -695,7 +695,7 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveVirtualCallAotEntrypoint(const M
 
 #if defined(PANDA_TARGET_ARM64)
     // In arm64, use interface inlineCache
-    // TODO(liyiming): will support x86_64 in future
+    // NOTE(liyiming): will support x86_64 in future
     // issue #7018
     auto method_head = obj_klass->GetRawFirstMethodAddr();
     if (cache_addr == 0 || method_head == nullptr) {
@@ -1332,7 +1332,7 @@ extern "C" void UpdateBranchTaken([[maybe_unused]] Method *method, Frame *frame,
                                   ProfilingData *prof_data_irtoc)
 {
     // Add a second prof_data loading because without it THREAD_SANITIZER crashes
-    // TODO(aantipina): investigate and delete the second loading (issue I6DTAA)
+    // NOTE(aantipina): investigate and delete the second loading (issue I6DTAA)
     [[maybe_unused]] ProfilingData *prof_data = method->GetProfilingDataWithoutCheck();
     prof_data_irtoc->UpdateBranchTaken(pc - frame->GetInstruction());
 }
@@ -1341,7 +1341,7 @@ extern "C" void UpdateBranchUntaken([[maybe_unused]] Method *method, Frame *fram
                                     ProfilingData *prof_data_irtoc)
 {
     // Add a second prof_data loading because without it THREAD_SANITIZER crashes
-    // TODO(aantipina): investigate and delete the second loading
+    // NOTE(aantipina): investigate and delete the second loading
     [[maybe_unused]] ProfilingData *prof_data = method->GetProfilingDataWithoutCheck();
     prof_data_irtoc->UpdateBranchNotTaken(pc - frame->GetInstruction());
 }

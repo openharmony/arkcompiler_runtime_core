@@ -45,7 +45,7 @@ Design decision:
 
 class TypeSystem {
 public:
-    // TODO(vdyadov): change Id to hash from filename_id and entity id
+    // NOTE(vdyadov): change Id to hash from filename_id and entity id
     using TypeId = panda_file::Type::TypeId;
 
     explicit TypeSystem(VerifierService *service, panda_file::SourceLang lang = panda_file::SourceLang::PANDA_ASSEMBLY);

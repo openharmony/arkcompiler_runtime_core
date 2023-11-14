@@ -46,7 +46,7 @@ template <>
 class ObjectLockConfig<MT_MODE_TASK> {
 public:
     /**
-     * TODO(konstanting):
+     * NOTE(konstanting):
      * For the sake of simplicity we use a global mutex-like lock for synchronization. We imply that there will be no
      * coroutine switch during the class initialization and that assumption includes static constructor bodies too.
      * With a global lock, coroutine switch during a class initialiation sequence will possibly lead to deadlocks and
@@ -91,7 +91,7 @@ public:
         {
             // GCC 8 and below has a strange bug: it reports a false syntax error in case
             // when [[maybe_unused]] is set for the first constructor argument.
-            // TODO(konstanting): revert to [[maybe_unused]] when we do not use GCC<=8
+            // NOTE(konstanting): revert to [[maybe_unused]] when we do not use GCC<=8
             UNUSED_VAR(tm);
         }
     };

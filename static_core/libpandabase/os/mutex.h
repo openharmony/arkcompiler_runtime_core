@@ -61,7 +61,7 @@ public:
 
     PANDA_PUBLIC_API void Unlock() RELEASE();
 
-    // TODO(mwx851039): Extract common part as an interface.
+    // NOTE(mwx851039): Extract common part as an interface.
     static bool DoNotCheckOnTerminationLoop()
     {
         return no_check_for_deadlock_;

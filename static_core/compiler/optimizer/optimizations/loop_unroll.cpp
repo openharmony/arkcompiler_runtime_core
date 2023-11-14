@@ -59,7 +59,7 @@ bool ConditionOverFlowImpl(const CountableLoopInfo &loop_info, uint32_t unroll_f
     return (type_max - static_cast<T>(imm_value)) < test_value;
 }
 
-/// TODO(a.popov) Create pre-header compare if it doesn't exist
+/// NOTE(a.popov) Create pre-header compare if it doesn't exist
 
 bool ConditionOverFlow(const CountableLoopInfo &loop_info, uint32_t unroll_factor)
 {

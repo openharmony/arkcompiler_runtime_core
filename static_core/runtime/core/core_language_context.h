@@ -220,7 +220,7 @@ public:
 
     bool IsCallableObject([[maybe_unused]] ObjectHeader *obj) const override
     {
-        // TODO(yaojian) : return value according to CoreLanguageContext
+        // NOTE(yaojian) : return value according to CoreLanguageContext
         return false;
     }
 
@@ -231,13 +231,13 @@ public:
 
     const uint8_t *GetReferenceErrorDescriptor() const override
     {
-        // TODO(yaojian) : return value according to CoreLanguageContext
+        // NOTE(yaojian) : return value according to CoreLanguageContext
         return nullptr;
     }
 
     const uint8_t *GetTypedErrorDescriptor() const override
     {
-        // TODO(yaojian) : return value according to CoreLanguageContext
+        // NOTE(yaojian) : return value according to CoreLanguageContext
         return nullptr;
     }
 

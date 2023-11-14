@@ -457,7 +457,7 @@ public:
         return GetReturnFpRegId() == GetFpParamRegId(0U);
     }
 
-    // TODO(msherstennikov): Take into account register size
+    // NOTE(msherstennikov): Take into account register size
     std::string GetRegName(size_t reg, bool is_fp) const
     {
         switch (arch_) {

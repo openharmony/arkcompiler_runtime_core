@@ -106,7 +106,7 @@ public:
         ASSERT(HasValue());
         return std::get<T>(v_);
     }
-    // TODO(aemelenko): Delete next line when the issue 388 is resolved
+    // NOTE(aemelenko): Delete next line when the issue 388 is resolved
     // NOLINTNEXTLINE(bugprone-exception-escape)
     T &Value() &noexcept(ExpectedConfig::RELEASE)
     {

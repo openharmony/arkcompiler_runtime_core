@@ -85,7 +85,7 @@ void ClassHierarchyAnalysis::SetHasSingleImplementation(Method *method, bool sin
 
 void ClassHierarchyAnalysis::UpdateMethod(Method *method)
 {
-    // TODO(msherstennikov): Currently panda is allowed to execute abstract method, thus we cannot propagate single
+    // NOTE(msherstennikov): Currently panda is allowed to execute abstract method, thus we cannot propagate single
     // implementation property of the non-abstract method to the all overriden abstract methods.
     SetHasSingleImplementation(method, !method->IsAbstract());
 }

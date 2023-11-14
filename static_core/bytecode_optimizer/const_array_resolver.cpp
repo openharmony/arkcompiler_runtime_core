@@ -201,7 +201,7 @@ bool ConstArrayResolver::FindConstantArrays()
                 continue;
             }
 
-            // TODO(aantipina): add the ability to save multidimensional arrays
+            // NOTE(aantipina): add the ability to save multidimensional arrays
             if (IsMultidimensionalArray(new_array_inst)) {
                 if (IsSameBB(inst, new_array_inst)) {
                     inst = new_array_inst->GetPrev();

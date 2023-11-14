@@ -107,7 +107,7 @@ struct ArchTraits<Arch::X86> {
     static constexpr size_t CALLER_FP_REG_MASK = 0x00000000;
     static constexpr size_t CALLEE_REG_MASK = 0x00000001;
     static constexpr size_t CALLEE_FP_REG_MASK =
-        0x00000001;  // TODO(msherstennikov): fill once x86 codegen is supported
+        0x00000001;  // NOTE(msherstennikov): fill once x86 codegen is supported
     static constexpr bool SUPPORT_OSR = false;
     static constexpr bool SUPPORT_DEOPTIMIZATION = false;
     static constexpr const char *ISA_NAME = "x86";
@@ -305,7 +305,7 @@ static constexpr Arch RUNTIME_ARCH = Arch::NONE;
 template <class String = std::string>
 std::enable_if_t<is_stringable_v<String>, Arch> GetArchFromString(const String &str)
 {
-    // TODO(msherstennikov): implement using macro if "aarch64", "aarch32" and so on would be a proper choice
+    // NOTE(msherstennikov): implement using macro if "aarch64", "aarch32" and so on would be a proper choice
     if (str == "arm64") {
         return Arch::AARCH64;
     }

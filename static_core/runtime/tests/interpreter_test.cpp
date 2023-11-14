@@ -2705,7 +2705,7 @@ CompilerInterface::ReturnReason EntryPoint(CompilerInterface::ExecState *state)
     return CompilerInterface::ReturnReason::RET_OK;
 }
 
-// TODO (Baladurin, Udovichenko) change for new interop
+// NOTE (Baladurin, Udovichenko) change for new interop
 TEST_F(InterpreterTest, DISABLED_TestCallNative)
 {
     size_t vreg_num = 10;

@@ -39,7 +39,7 @@ public:
     template <typename... Args>
     inline auto RunPandaFile(Args... args) const
     {
-        // TODO(mgonopolskiy): add an ability to specifty env to the Exec function
+        // NOTE(mgonopolskiy): add an ability to specifty env to the Exec function
         setenv(ASAN_OPTIONS.data(), ASAN_NO_LEAKS.data(), OVERWRITE);
         auto res = os::exec::Exec(GetPanda().c_str(), args...);
         unsetenv(ASAN_OPTIONS.data());

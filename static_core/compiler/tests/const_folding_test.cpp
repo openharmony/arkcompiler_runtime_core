@@ -2890,7 +2890,7 @@ TEST_F(ConstFoldingTest, CastTest)
     CastTest(FLT_MAX, static_cast<double>(FLT_MAX), DataType::FLOAT64);
     CastTest(FLT_MIN, static_cast<double>(FLT_MIN), DataType::FLOAT64);
 
-    // TODO (schernykh) : ub test? - convert from double_max to float
+    // NOTE (schernykh) : ub test? - convert from double_max to float
     // DBL_MAX, static_cast<float>(DBL_MAX), DataType::FLOAT32
     CastTest(DBL_MIN, static_cast<float>(DBL_MIN), DataType::FLOAT32);
 

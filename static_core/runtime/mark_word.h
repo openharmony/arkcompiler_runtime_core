@@ -284,7 +284,7 @@ public:
                 // We should distinguish between Unlocked and Lightweight Lock states:
                 return ((Value() & UNLOCKED_STATE_MASK_IN_PLACE) == 0U) ? STATE_UNLOCKED : STATE_LIGHT_LOCKED;
             default:
-                // TODO(aemelenko): Make it more user-friendly
+                // NOTE(aemelenko): Make it more user-friendly
                 LOG(DEBUG, RUNTIME) << "Undefined object state";
                 return STATE_GC;
         }

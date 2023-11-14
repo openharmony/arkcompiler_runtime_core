@@ -82,7 +82,7 @@ Method *StackWalker::GetMethod()
     }
     auto &cframe = GetCFrame();
     if (!cframe.IsNative()) {
-        // TODO(m.strizhak): replace this condition with assert after fixing JIT trampolines for sampler
+        // NOTE(m.strizhak): replace this condition with assert after fixing JIT trampolines for sampler
         if (!stackmap_.IsValid()) {
             return nullptr;
         }
@@ -116,7 +116,7 @@ StackWalker::CFrameType StackWalker::CreateCFrame(SlotType *ptr, uintptr_t npc, 
                                                   CalleeStorage *prev_callees)
 {
     CFrameType cframe(ptr);
-    // TODO(m.strizhak): replace this condition with assert after fixing JIT trampolines for sampler
+    // NOTE(m.strizhak): replace this condition with assert after fixing JIT trampolines for sampler
     if (cframe.GetMethod() == nullptr) {
         return cframe;
     }
@@ -285,7 +285,7 @@ StackWalker::CalleeRegsBuffer &StackWalker::GetCalleeRegsForDeoptimize()
 interpreter::VRegister StackWalker::GetVRegValue(size_t vreg_num)
 {
     if (IsCFrame()) {
-        // TODO(msherstennikov): we need to cache vregs_list within single cframe
+        // NOTE(msherstennikov): we need to cache vregs_list within single cframe
         auto vregs_list = code_info_.GetVRegList(stackmap_, inline_depth_,
                                                  mem::InternalAllocator<>::GetInternalAllocatorFromRuntime());
         ASSERT(vregs_list[vreg_num].GetIndex() == vreg_num);

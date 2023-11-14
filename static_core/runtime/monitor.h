@@ -68,7 +68,7 @@ private:
     T *head_ {nullptr};
 };
 
-// TODO(aWX851037): open questions for implementation:
+// NOTE(aWX851037): open questions for implementation:
 // 1. Should we reset the state to unlocked from heavyweight lock?
 // Potential benefit: less memory consumption and usage of lightweight locks
 // Potential drawback: infrustructure to detect, when the monitor is not acquired by any thread and time for repeated

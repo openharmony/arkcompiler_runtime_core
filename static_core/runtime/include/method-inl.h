@@ -253,7 +253,7 @@ void Method::InvokeEntry(ManagedThread *thread, Frame *current_frame, Frame *fra
         // 2. If caller is compiled method, then we got here from entrypoint. But currently compiler creates
         //    boundary frame with pseudo LR value, that doesn't point to the instruction after call, thereby
         //    OSR will fail. It can be fixed by addresses patching, currently codegen hasn't such machinery.
-        // TODO(msherstennikov): fix issue
+        // NOTE(msherstennikov): fix issue
         frame->DisableOsr();
         Runtime::GetCurrent()->GetNotificationManager()->MethodEntryEvent(thread, this);
         InvokeHelper::InterpreterExecute(thread, pc, frame);
@@ -409,7 +409,7 @@ ValueT Method::InvokeImpl(ManagedThread *thread, uint32_t num_actual_args, Value
 
     // Currently, proxy methods should always be invoked in the interpreter. This constraint should be relaxed once
     // we support same frame layout for interpreter and compiled methods.
-    // TODO(msherstennikov): remove `proxy_call`
+    // NOTE(msherstennikov): remove `proxy_call`
     bool run_interpreter = !HasCompiledCode() || proxy_call;
     ASSERT(!(proxy_call && IsNative()));
     if (!run_interpreter) {
@@ -597,7 +597,7 @@ void Method::EnumerateExceptionHandlers(Callback callback) const
         if (type_idx != panda_file::INVALID_INDEX) {
             Runtime *runtime = Runtime::GetCurrent();
             auto type_id = GetClass()->ResolveClassIndex(type_idx);
-            // todo: remove next code, after solving #1220 '[Runtime] Proposal for class descriptors in panda files'
+            // NOTE: remove next code, after solving #1220 '[Runtime] Proposal for class descriptors in panda files'
             //       and clean up of ClassLinker API
             // cut
             LanguageContext ctx = runtime->GetLanguageContext(*this);

@@ -311,7 +311,7 @@ void RegEncoder::InsertSpills()
             }
 
             VisitInstruction(inst);
-            // TODO(aantipina): Enable assert here for GetStatus() as soon code generation is fully supported
+            // NOTE(aantipina): Enable assert here for GetStatus() as soon code generation is fully supported
         }
     }
 }
@@ -327,7 +327,7 @@ void RegEncoder::CalculateNumNeededTemps()
             }
 
             VisitInstruction(inst);
-            // TODO(aantipina): Enable here for GetStatus() as soon code generation is fully supported
+            // NOTE(aantipina): Enable here for GetStatus() as soon code generation is fully supported
         }
     }
 
@@ -470,7 +470,7 @@ void RegEncoder::InsertSpillsForInst(compiler::Inst *inst)
 
     compiler::Register temp = 0;
     for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-        // TODO(mbolshov): make a better solution to skip instructions, that are not relevant to bytecode_opt
+        // NOTE(mbolshov): make a better solution to skip instructions, that are not relevant to bytecode_opt
         if (inst->GetInput(i).GetInst()->GetOpcode() == Opcode::LoadAndInitClass) {
             continue;
         }
@@ -544,7 +544,7 @@ void RegEncoder::CalculateNumNeededTempsForInst(compiler::Inst *inst)
         }
     } else {
         for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-            // TODO(mbolshov): make a better solution to skip instructions, that are not relevant to bytecode_opt
+            // NOTE(mbolshov): make a better solution to skip instructions, that are not relevant to bytecode_opt
             if (inst->GetInput(i).GetInst()->GetOpcode() == Opcode::LoadAndInitClass) {
                 continue;
             }
@@ -580,7 +580,7 @@ void RegEncoder::Check4Width(compiler::Inst *inst)
 
 void RegEncoder::Check8Width([[maybe_unused]] compiler::Inst *inst)
 {
-    // TODO(aantipina): implement after it became possible to use register numbers more than 256 (#2697)
+    // NOTE(aantipina): implement after it became possible to use register numbers more than 256 (#2697)
 }
 
 void RegEncoder::VisitCallStatic(GraphVisitor *visitor, Inst *inst)

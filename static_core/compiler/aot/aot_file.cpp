@@ -24,7 +24,7 @@
 
 // In some targets, runtime library is not linked, so linker will fail while searching CallStaticPltResolver symbol.
 // To solve this issue, we define this function as weak.
-// TODO(msherstennikov): find a better way instead of weak function, e.g. make aot_manager library static.
+// NOTE(msherstennikov): find a better way instead of weak function, e.g. make aot_manager library static.
 extern "C" void CallStaticPltResolver([[maybe_unused]] void *slot) __attribute__((weak));
 extern "C" void CallStaticPltResolver([[maybe_unused]] void *slot) {}
 
@@ -197,7 +197,7 @@ const MethodHeader *AotClass::FindMethodHeader(size_t index) const
 
 BitVectorSpan AotClass::GetBitmap() const
 {
-    // TODO(msherstennikov): remove const_cast once BitVector support constant storage
+    // NOTE(msherstennikov): remove const_cast once BitVector support constant storage
     auto bitmap_base = const_cast<uint32_t *>(reinterpret_cast<const uint32_t *>(aot_file_->GetMethodsBitmap()));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     return BitVectorSpan(bitmap_base + header_->methods_bitmap_offset, header_->methods_bitmap_size);

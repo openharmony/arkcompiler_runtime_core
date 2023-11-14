@@ -197,7 +197,7 @@ void PandaCoreVM::HandleReferences(const GCTask &task, const mem::GC::ReferenceC
     gc->ProcessReferences(gc->GetGCPhase(), task, pred);
 }
 
-// TODO(alovkov): call ReferenceQueue.add method with cleared references
+// NOTE(alovkov): call ReferenceQueue.add method with cleared references
 void PandaCoreVM::HandleEnqueueReferences()
 {
     LOG(DEBUG, REF_PROC) << "Start HandleEnqueueReferences";

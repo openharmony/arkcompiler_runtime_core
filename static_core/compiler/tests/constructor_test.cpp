@@ -54,7 +54,7 @@ public:
 #endif
 #ifdef PANDA_COMPILER_TARGET_X86
         encoder = Encoder::Create(GetAllocator(), Arch::X86, false);
-        // TODO! Enable when will supported
+        // NOTE! Enable when will supported
         if (encoder != nullptr) {
             encoder->~Encoder();
         }
@@ -94,7 +94,7 @@ TEST_F(ConstructorTest, BackendSupport)
     ASSERT_FALSE(BackendSupport(Arch::AARCH64));
 #endif
 #ifdef PANDA_COMPILER_TARGET_X86
-    // TODO! Enable when will supported
+    // NOTE! Enable when will supported
 #endif
 #ifdef PANDA_COMPILER_TARGET_X86_64
     ASSERT_TRUE(BackendSupport(Arch::X86_64));
@@ -131,7 +131,7 @@ TEST_F(ConstructorTest, Encoder)
 
     encoder = Encoder::Create(GetAllocator(), Arch::X86, false);
 #ifdef PANDA_COMPILER_TARGET_X86
-    // TODO! Enable when will supported
+    // NOTE! Enable when will supported
     if (encoder != nullptr) {
         encoder->~Encoder();
     }
@@ -175,7 +175,7 @@ TEST_F(ConstructorTest, RegistersDescription)
 
     regfile = RegistersDescription::Create(GetAllocator(), Arch::X86);
 #ifdef PANDA_COMPILER_TARGET_X86
-    // TODO! Enable when will supported
+    // NOTE! Enable when will supported
 #else
     ASSERT_EQ(regfile, nullptr);
 #endif
@@ -216,7 +216,7 @@ TEST_F(ConstructorTest, CallingConvention)
 
     callconv = CallingConvention::Create(GetAllocator(), encoder, regfile, Arch::X86);
 #ifdef PANDA_COMPILER_TARGET_X86
-    // TODO! Enable when will supported
+    // NOTE! Enable when will supported
 #else
     ASSERT_EQ(callconv, nullptr);
 #endif

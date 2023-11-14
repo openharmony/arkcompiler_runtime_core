@@ -29,7 +29,7 @@ Licm::Licm(Graph *graph, uint32_t hoist_limit)
 {
 }
 
-// TODO (a.popov) Use `LoopTransform` base class similarly `LoopUnroll`, `LoopPeeling`
+// NOTE (a.popov) Use `LoopTransform` base class similarly `LoopUnroll`, `LoopPeeling`
 bool Licm::RunImpl()
 {
     if (!GetGraph()->GetAnalysis<LoopAnalyzer>().IsValid()) {

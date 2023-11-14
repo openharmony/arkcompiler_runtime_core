@@ -278,7 +278,7 @@ EtsString *TypeAPITypeCreatorCtxGetTypeDescFromPointer(EtsLong nptr)
 EtsString *TypeAPITypeCreatorCtxMethodAddParam(EtsLong method_ptr, EtsString *param_td,
                                                [[maybe_unused]] EtsString *name, [[maybe_unused]] EtsInt attrs)
 {
-    // TODO(kprokopenko): dump meta info
+    // NOTE(kprokopenko): dump meta info
     auto m = PtrFromLong<PandasmMethodCreator>(method_ptr);
     auto type = GetPandasmTypeFromDescriptor(m->Ctx(), param_td->GetMutf8());
     m->AddParameter(std::move(type));
@@ -337,7 +337,7 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromMethod(EtsLong method_ptr, EtsS
 
     auto parent_method_class_name = GetPandasmTypeFromDescriptor(m->Ctx(), meth->GetClass()->GetDescriptor());
 
-    // TODO(kprokopenko): implement type checking
+    // NOTE(kprokopenko): implement type checking
 
     auto parent_method = CreateCopiedMethod(ctx, parent_method_class_name.GetName() + ".", meth);
     parent_method.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
@@ -524,14 +524,14 @@ EtsString *TypeAPITypeCreatorCtxMethodAddResult(EtsLong method_ptr, EtsString *d
 EtsLong TypeAPITypeCreatorCtxLambdaTypeCreate(EtsLong ctx_ptr, [[maybe_unused]] EtsInt attrs)
 {
     auto ctx = PtrFromLong<TypeCreatorCtx>(ctx_ptr);
-    // TODO(kprokopenko): add attributes
+    // NOTE(kprokopenko): add attributes
     auto fn = ctx->Alloc<LambdaTypeCreator>(ctx);
     return PtrToLong(fn);
 }
 
 EtsString *TypeAPITypeCreatorCtxLambdaTypeAddParam(EtsLong ft_ptr, EtsString *td, [[maybe_unused]] EtsInt attrs)
 {
-    // TODO(kprokopenko): dump meta info
+    // NOTE(kprokopenko): dump meta info
     auto creator = PtrFromLong<LambdaTypeCreator>(ft_ptr);
     creator->AddParameter(GetPandasmTypeFromDescriptor(creator->GetCtx(), td->GetMutf8()));
     return ErrorFromCtx(creator->GetCtx());

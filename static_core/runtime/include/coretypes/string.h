@@ -32,7 +32,7 @@ class String : public ObjectHeader {
 public:
     static String *Cast(ObjectHeader *object)
     {
-        // TODO(linxiang) to do assert
+        // NOTE(linxiang) to do assert
         return static_cast<String *>(object);
     }
 
@@ -318,7 +318,7 @@ private:
      * str1 should have the same length as mutf16_data.
      * Converts mutf8_data to mutf16 and compare it with given mutf16_data.
      */
-    // TODO(alovkov): move to utils/utf.h without allocation a temporary buffer
+    // NOTE(alovkov): move to utils/utf.h without allocation a temporary buffer
     static bool IsMutf8EqualsUtf16(const uint8_t *utf8_data, uint32_t utf8_data_length, const uint16_t *utf16_data,
                                    uint32_t utf16_data_length);
 

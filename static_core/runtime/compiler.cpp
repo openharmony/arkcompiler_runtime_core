@@ -656,7 +656,7 @@ panda::mem::BarrierOperand PandaRuntimeInterface::GetBarrierOperand(panda::mem::
 
 uint32_t PandaRuntimeInterface::GetFunctionTargetOffset([[maybe_unused]] Arch arch) const
 {
-    // TODO(wengchangcheng): return offset of method in JSFunction
+    // NOTE(wengchangcheng): return offset of method in JSFunction
     return 0;
 }
 
@@ -765,7 +765,7 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecode_offset, bool osr
                 return false;
             }
             auto thread = MTManagedThread::GetCurrent();
-            // TODO(asoldatov): Remove this workaround for invoking compiler from ECMA VM
+            // NOTE(asoldatov): Remove this workaround for invoking compiler from ECMA VM
             if (thread != nullptr) {
                 static constexpr uint64_t SLEEP_MS = 10;
                 thread->TimedWait(ThreadStatus::IS_COMPILER_WAITING, SLEEP_MS, 0);

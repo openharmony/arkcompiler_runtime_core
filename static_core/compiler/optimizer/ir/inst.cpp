@@ -269,7 +269,7 @@ bool CastInst::IsDynamicCast() const
     {                                  \
         v->VisitInst(this);            \
     }
-// TODO(msherstennikov): There must be another way to generate this list
+// NOTE(msherstennikov): There must be another way to generate this list
 OPCODE_CLASS_LIST(DEFINE_INST)
 #undef DEFINE_INST
 

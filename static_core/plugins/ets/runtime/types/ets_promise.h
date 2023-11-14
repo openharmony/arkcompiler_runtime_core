@@ -173,11 +173,11 @@ public:
             case MarkWord::STATE_LIGHT_LOCKED:
             case MarkWord::STATE_HEAVY_LOCKED:
                 // should wait until unlock...
-                // TODO(konstanting, #I67QXC): check tid and decide what to do in case when locked by current tid
+                // NOTE(konstanting, #I67QXC): check tid and decide what to do in case when locked by current tid
                 mw_expected = mw_expected.DecodeFromUnlocked();
                 break;
             case MarkWord::STATE_HASHED:
-                // TODO(konstanting, #I67QXC): should save the hash
+                // NOTE(konstanting, #I67QXC): should save the hash
                 LOG(FATAL, COROUTINES)
                     << "Cannot lock a hashed Promise object! This functionality is not implemented yet.";
                 break;
@@ -204,8 +204,8 @@ public:
     void Unlock()
     {
         // precondition: is locked AND if the event pointer is set then the event is locked
-        // TODO(konstanting, #I67QXC): find a way to add an ASSERT for (the event is locked)
-        // TODO(konstanting, #I67QXC): should load the hash once we support the hashed state in Lock()
+        // NOTE(konstanting, #I67QXC): find a way to add an ASSERT for (the event is locked)
+        // NOTE(konstanting, #I67QXC): should load the hash once we support the hashed state in Lock()
         auto mw = AtomicGetMark();
         ASSERT(mw.GetState() == MarkWord::STATE_LIGHT_LOCKED);
         auto new_mw = mw.DecodeFromUnlocked();

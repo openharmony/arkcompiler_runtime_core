@@ -20,7 +20,7 @@
 
 namespace panda::scheduler {
 
-// TODO(xuliang): task id
+// NOTE(xuliang): task id
 Task::Task(PandaVM *vm, ObjectHeader *obj)
     : ManagedThread(-1, Runtime::GetCurrent()->GetInternalAllocator(), vm, Thread::ThreadType::THREAD_TYPE_TASK)
 {
@@ -38,13 +38,13 @@ Task *Task::Create(PandaVM *vm, ObjectHeader *obj)
 void Task::Initialize()
 {
     trace::ScopedTrace scoped_trace2("ThreadManager::RegisterThread");
-    // TODO(xuliang): RegisterThread
+    // NOTE(xuliang): RegisterThread
 }
 
 void Task::Destroy()
 {
     ASSERT(this == Task::GetCurrent());
-    // TODO(xuliang): should be done in UnregisterExitedThread.
+    // NOTE(xuliang): should be done in UnregisterExitedThread.
     GetVM()->GetGC()->OnThreadTerminate(this, mem::BuffersKeepingFlag::DELETE);
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     auto wt = worker_thread_;

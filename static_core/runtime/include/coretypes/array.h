@@ -51,7 +51,7 @@ public:
 
     static Array *Cast(ObjectHeader *object)
     {
-        // TODO(linxiang) to do assert
+        // NOTE(linxiang) to do assert
         return reinterpret_cast<Array *>(object);
     }
 
