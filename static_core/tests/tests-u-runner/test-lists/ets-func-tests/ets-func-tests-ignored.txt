@@ -306,3 +306,10 @@ spec/lambda/compareBooleanWithTrue.ets
 spec/lambda/incorrectAsyncLambdaReturnValue.ets
 spec/lambda/incorrectVariableDeclaration.ets
 ### lambda issues end
+
+### Start never issues
+### Issue 14472
+spec/never_type/useWithLambdaAndUnion.ets
+### Negative test
+spec/never_type/neverTypeInheritance.ets
+### End never issues
